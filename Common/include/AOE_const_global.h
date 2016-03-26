@@ -1,0 +1,46 @@
+#include <tchar.h>
+#include <string>
+
+#pragma once
+
+enum AOE_FILE_VERSION {
+	AOE_INVALID_FILE = 0,
+	AOE_VERSION_1_0B,
+	AOE_VERSION_1_0C,
+	AOE_VERSION_UPATCH_BETA,
+	AOE_VERSION_UPATCH_1_1_HD,
+	AOE_VERSION_COUNT
+};
+const static std::wstring AOEFileVersionLabel[AOE_VERSION_COUNT] = { _T("Invalid"), _T("1.0b"), _T("1.0c"), _T("UPatch Beta"), _T("UPatch 1.1HD") };
+#define GET_AOE_FILE_VERSION_LABEL(n) AOEFileVersionLabel[n]
+
+
+const static wchar_t *AOE_EXE_NAME = _T("EmpiresX.exe");
+
+// Registry keys
+const static wchar_t *AOE_REG_PATH_INSTALLDIR_32 = _T("SOFTWARE\\Microsoft\\Games\\Age of Empires\\1.00");
+const static wchar_t *AOE_REG_PATH_INSTALLDIR_64 = _T("SOFTWARE\\Wow6432Node\\Microsoft\\Games\\Age of Empires\\1.00");
+const static wchar_t *AOE_REG_KEY_INSTALLDIR = _T("InstallationDirectory");
+const static wchar_t *DDRAW_COMPATIBILITY_REG_PATH = _T("SOFTWARE\\Microsoft\\DirectDraw\\Compatibility");
+
+// File sizes
+const static long EXE_FILE_SIZE_10B = 1513984;
+const static long EXE_FILE_SIZE_10C = 1503232;
+const static long EXE_FILE_SIZE_UPATCH_BETA = 1511424;
+const static long EXE_FILE_SIZE_UPATCH_1_1_HD = 1515520;
+
+// EXE Magic number
+const static size_t EXE_MAGIC_NUMBER_SIZE = 2;
+const static unsigned char EXE_MAGIC_NUMBER[EXE_MAGIC_NUMBER_SIZE] = { 0x4d, 0x5a };
+
+// Binary sequence: EXE version
+const static size_t EXE_VERSION_CHECK_10B_OFFSET = 0x1716e2;
+const static size_t EXE_VERSION_CHECK_10B_SIZE = 18;
+const static unsigned char EXE_VERSION_CHECK_10B[EXE_VERSION_CHECK_10B_SIZE] = { // ascii 4.2.0901
+	0x30, 0x00, 0x34, 0x00, 0x2E, 0x00, 0x32, 0x00, 0x2E, 0x00, 0x30, 0x00, 0x39, 0x00, 0x30, 0x00, 0x31, 0x00
+};
+const static size_t EXE_VERSION_CHECK_10C_OFFSET = 0x16ece6;
+const static size_t EXE_VERSION_CHECK_10C_SIZE = 18;
+const static unsigned char EXE_VERSION_CHECK_10C[EXE_VERSION_CHECK_10C_SIZE] = { // ascii 1.6.1115
+	0x30, 0x00, 0x31, 0x00, 0x2E, 0x00, 0x36, 0x00, 0x2E, 0x00, 0x31, 0x00, 0x31, 0x00, 0x31, 0x00, 0x35, 0x00
+};

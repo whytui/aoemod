@@ -1,0 +1,15 @@
+Stupid Visual Studio does not provide an interface for editing user-defined macros.
+- Open each .vcxproj file
+- Search for <PropertyGroup Label="UserMacros"> tag
+- (Add) Set the correct path in following user-defined macros:
+
+<PropertyGroup Label="UserMacros">
+  <AOE_include>D:\Dév\CPP\AOE\Common\include</AOE_include>
+  <AOE_lib>D:\Dév\CPP\AOE\Common\lib</AOE_lib>
+  <AOE_res>D:\Dév\CPP\AOE\Common\res</AOE_res>
+  <wxw_include>D:\Dév\CPP\wxwidgets\include</wxw_include>
+  <wxw_include_msvc>D:\Dév\CPP\wxwidgets\include\msvc</wxw_include_msvc>
+  <wxw_lib>D:\Dév\CPP\wxwidgets\lib\vc_lib</wxw_lib>
+</PropertyGroup>
+
+AOE solution should not require any other manual manipulation to work correctly.

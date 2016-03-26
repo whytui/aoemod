@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- Warning: tags are case-sensitive -->
+<customROR>
+	<alertOnMissingFeatures enable="1"/>
+	
+	<!-- General -->
+	<!-- Bool 0/1 to hide/show customROR options entry in game menu -->
+	<showCustomRORMenu enable="1"/>
+	<!-- Bool 0/1 to show custom population information in "F11" text -->
+	<showCustomPopInfo enable="1"/>
+	<!-- Use improved game speeds. Factor is a multiplicative factor (>1). -->
+	<improvedGameSpeeds name="enable" value="1"/>
+	<improvedGameSpeeds name="factor" value="1.25"/>
+	<allyExplorationIsAlwaysShared enable="0"/><!-- NOT applied to scenario/campaigns -->
+	
+	<!-- Set collectRORDebugLogs=2 to collect all ROR debug logs, 1 to filter, 0 (default) not to collect them -->
+	<collectRORDebugLogs value="1"/>
+	<!-- If enabled (recommended), a popup will automatically show up when an error occurs, including trigger debug errors. 
+	Please disable this only if you're getting a lot of (abnormal) messages and report to developer. -->
+	<showCustomRORNotifications enable="1"/>
+	
+	<!-- To fix timer bug on modern (fast) computers. Use value=0 to disable. -->
+	<gameTimerSlowDownFactor value="5"/>
+	<!-- Set a non-zero value to enable automatic calculation for gameTimerSlowDownFactor during game.
+	Automatic calculation will override gameTimerSlowDownFactor value from this file. -->
+	<gameTimerSlowDownAutoFix enable="1"/>
+	
+	<!-- Custom conversion resistance values (float). Standard units resistance is 1 -->
+	<conversionResistance name="warElephants" value="1.25"/><!-- game default=1-->
+	<conversionResistance name="warElephants_Persian" value="1.15"/><!-- game default=1 -->
+	<conversionResistance name="Macedonian" value="4"/><!-- game default=4 -->
+	<conversionResistance name="priests" value="2"/><!-- game default=2 -->
+	<conversionResistance name="chariots" value="8"/><!-- game default=8 -->
+	<conversionResistance name="boats" value="2"/><!-- game default=2 -->
+
+	<!-- Map -->
+	<map name="randomMapRelicsCount" value="5"/>
+	<map name="randomMapRuinsCount" value="5"/>
+	<!-- Set to 0 to disable all map generation elevation options -->
+	<map name="useCustomElevationComputation" enable="1"/>
+	<!-- elevatedTerrainAmountMultiplyFactor: mapTypeId=map type index (0=small islands), 0 <= mapTypeId <= 9
+	value=float: multiply factor for "elevated terrain amount". Default value=1 for all map types. -->
+	<map name="elevatedTerrainAmountMultiplyFactor" mapTypeId="0" value="0.2"/><!--small islands: /5 -->
+	<map name="elevatedTerrainAmountMultiplyFactor" mapTypeId="7" value="0.02"/><!--hills: /50 -->
+
+	<!-- Scenario editor -->
+	<!-- showHiddenTerrain: set to 1 to display hidden terrains in scenario editor terrains list -->
+	<editor name="showHiddenTerrain" enable="1"></editor>
+	<!-- showHiddenUnits: 0=normal, 1=show hidden units except some annoying ones (wrong house, wrong barracks, etc)
+		2=display ALL "hidden" units in scenario editor -->
+	<editor name="showHiddenUnits" value="1"></editor>
+	<!-- UseCustomMapDimensions: set to 1 to allow using user-defined map sizes in scenario editor -->
+	<editor name="UseCustomMapDimensions" enable="1"></editor>
+
+	<!-- AI -->
+	<!-- Set to nonzero to enable AI improvements (an int value: in the future, we might define several improvement levels) -->
+	<improveAI value="1"/>
+	
+	<!-- tacticalAI.updateDelay replaces SNScalingFrequency but it is expressed in seconds, not minutes. An integer value. -->
+	<tacticalAI name="updateDelay" value="30"/>
+	<!-- tacticalAI.minPopulationBeforeOptionalItems is the population AI has to reach before triggering optional items (only added when player is strong enough).
+	Due to strategy item skips + parallelism, you should set a higher value than the REAL one you want (add around 8 ?).
+	For example, if you want AI to have 22 units before triggering optionals, set this value to 30 (this is an approximation)
+	Low values may lead to issues in tech order/requirements. It won't block AI but is not good for it. -->
+	<tacticalAI name="minPopulationBeforeOptionalItems" value="30"/>
+	<!-- Maximum number of farms to add dynamically in strategy in deathMatch games -->
+	<tacticalAI name="maxFarmsInDeathMatch" value="3"/>
+	
+	<!-- Manage Panic mode (dynamic defence units) -->
+	<!-- Integer value=seconds between 2 checks -->
+	<panicMode name="delay" value="15"/>
+	<!-- Integer value=Maximum dynamic units to insert. High values may block normal AI units from being trained, including villagers ! -->
+	<panicMode name="maxUnitCount" value="8"/>
+	
+	<!-- fixLogisticsNoHouseBug: set a non-zero value to fix logistics bug:
+	Prevent AI from training infantry units when population headroom=0 -->
+	<fixLogisticsNoHouseBug enable="1"/>
+	<!-- Dynamically assigns (visible) tree graphics to the tree that is not visible (DATID=393) -->
+	<fixInvisibleTree enable="1"/>
+	<!-- Fix specific treatment when human player sees a unit (fix bugs for artefacts) -->
+	<fixHumanPlayer_specific_seeUnit enable="1"/>
+	
+	<!-- Dislike values: amounts to add to dislike values against a player under certain conditions -->
+	<!-- Interval in seconds between every computation of dislike values -->
+	<dislikeValues name="dislikeComputeInterval" value="10"/>
+	<!-- dislikeAllArtefacts: if a player has all relics/ruins or a standing wonder. Value 0-99 -->
+	<dislikeValues name="dislikeAllArtefacts" value="5"/>
+	<!-- dislikeAllArtefacts: Dislike amount to add against a player that is human-controlled. Value 0-99 -->
+	<dislikeValues name="dislikeHuman" value="2"/>
+	
+	<!-- City plan -->
+	<!-- all.enhanceLikeValues: set to 0 to disable city plan enhancements, 1 or other values to activate it (recommended) -->
+	<cityPlan building="all" name="enhanceLikeValues" enable="1"></cityPlan>
+	<!-- You can use float for City plan DISTANCES -->
+	<!-- house distances from...: avoid too high values because AI won't find any place to build then ;)
+	<!-- house.distanceFromTownCenter: ROR default=3. Higher values (like ~7) are better. -->
+	<!-- <cityPlan building="house" name="distanceFromTownCenter" value="3"></cityPlan> -->
+	<!-- house.distanceFromStorageBuildings: ROR default=3.
+	Higher values (like ~5) are better, but not too much because it may cause bad calculations. -->
+	<!-- <cityPlan building="house" name="distanceFromStorageBuildings" value="3"></cityPlan> -->
+	<!-- house.distanceFromOtherBuildings: ROR default=3. Leaving 3 seems fine. -->
+	<!-- <cityPlan building="house" name="distanceFromOtherBuildings" value="3"></cityPlan> -->
+	<!-- granary.berryBushUnitWeight (integer): ROR default=128 (not recommended).
+	Cumulated weights cap at 255 so you better use something like 30, 40, etc, so calculated weights will be more relevant
+	Strongly recommended: 10<x<80. A suggestion: 32 (0x20) -->
+	<cityPlan building="granary" name="berryBushUnitWeight" value="32"></cityPlan>
+	
+	<!-- Human interface/shortcuts -->
+	<!-- callIdleNearbyArmies: set to 0 to disable F9 key in game screen, 1 or other values to enable.
+	It will make move your IDLE military units to screen position when pressed. -->
+	<gameKey name="callIdleNearbyArmies" enable="1"></gameKey>
+	<!-- callIdleNearbyArmies_distance: maximum distance to "call" units in callIdleNearbyArmies feature (F9 key) -->
+	<gameKey name="callIdleNearbyArmies_distance" value="25"></gameKey>
+	<!-- useNumPadUnitShortcuts: set to 0 to use game default: numpad keys are inactive. Otherwise, 0-9 numpad keys are additional unit shortcuts.
+	Note: just like '0' shortcut in original game, shortcut number will not appear under unit when selected due to SLP limitation -->
+	<gameKey name="useNumPadUnitShortcuts" enable="1"></gameKey>
+	
+	<!-- Turn ON/OFF auto rebuild farms feature. -->
+	<autoRebuildFarms enable="1" maxFarms="4" minWood="200" maxFood="2000"></autoRebuildFarms>
+	
+	<!-- AutoMoveToLocation: Right-click from a building to define where new units should walk. 0=disable, 1=enable. -->
+	<unitSpawn name="autoMoveToLocation" enable="1"></unitSpawn>
+	<!-- AutoMoveToLocation: Right-click from a building to define a target for new units. 0=disable, 1=enable. -->
+	<unitSpawn name="autoTarget" enable="1"></unitSpawn>
+	<!-- autoRepairTC: spawned villagers will automatically repair their parent TC if it is damaged. 0=disable, 1=enable. -->
+	<unitSpawn name="autoRepairTC" enable="1"></unitSpawn>
+	
+	<!-- Shortcut: For each spawn unit for which datid=xx, auto-assign shortcut=x. 
+	If onlyOneUnit is set (<>0), the shortcut is assigned only if still unused (no unit already has this shortcut)
+	Each shortcut number can be used only for 1 unitid (datid). See AGE3 to get unit DATIDs.
+	Always use non-upgraded unit's DATID (example: use cavalry's id, not Cataphract ; for villager, use 83 and not 293)
+	-->
+	<unitSpawn name="shortcut" shortcut="9" datid="83" onlyOneUnit="1"></unitSpawn>
+	<unitSpawn name="shortcut" shortcut="8" datid="83" onlyOneUnit="1"></unitSpawn>
+	<unitSpawn name="shortcut" shortcut="7" datid="83" onlyOneUnit="1"></unitSpawn>
+	<unitSpawn name="shortcut" shortcut="6" datid="83" onlyOneUnit="1"></unitSpawn>
+	<unitSpawn name="shortcut" shortcut="5" datid="83" onlyOneUnit="1"></unitSpawn>
+	<unitSpawn name="shortcut" shortcut="3" datid="125" onlyOneUnit="1"></unitSpawn>
+	<!-- When a unit spawns, the first matching shortcut is assigned to it
+	If shortcuts.reverseOrder=0, customROR will first try to assign shortcut 1, then 2, etc.
+	Otherwise it starts with 9, then 8, etc.
+	It only has an impact if you define several shortcut numbers for the same unit DATID and onlyOneUnit="1"
+	 -->
+	<unitSpawn name="shortcuts" reverseOrder="1"></unitSpawn>
+</customROR>

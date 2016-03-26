@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}</ProjectGuid>
+    <RootNamespace>Common</RootNamespace>
+    <ProjectName>AOE_Common</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros">
+    <AOE_include>D:\Dév\CPP\AOE\Common\include</AOE_include>
+    <AOE_lib>D:\Dév\CPP\AOE\Common\lib</AOE_lib>
+    <AOE_res>D:\Dév\CPP\AOE\Common\res</AOE_res>
+    <wxw_include>D:\Dév\CPP\wxwidgets\include</wxw_include>
+    <wxw_include_msvc>D:\Dév\CPP\wxwidgets\include\msvc</wxw_include_msvc>
+    <wxw_lib>D:\Dév\CPP\wxwidgets\lib\vc_lib</wxw_lib>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(AOE_lib)\</OutDir>
+    <TargetName>$(ProjectName)_d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(AOE_lib)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(AOE_include)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(AOE_include)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="include\AOE_const_functional.h" />
+    <ClInclude Include="include\AOE_const_global.h" />
+    <ClInclude Include="include\AOE_const_internal.h" />
+    <ClInclude Include="include\AOE_const_language.h" />
+    <ClInclude Include="include\AOE_offsets_10c.h" />
+    <ClInclude Include="include\customResolution.h" />
+    <ClInclude Include="include\mystrings.h" />
+    <ClInclude Include="include\pointers.h" />
+    <ClInclude Include="include\ROR_API_assert.h" />
+    <ClInclude Include="include\ROR_API_pub.h" />
+    <ClInclude Include="include\ROR_commands.h" />
+    <ClInclude Include="include\ROR_structures.h" />
+    <ClInclude Include="include\ROR_struct_debugging.h" />
+    <ClInclude Include="include\ROR_struct_export.h" />
+    <ClInclude Include="include\ROR_struct_export_remote.h" />
+    <ClInclude Include="include\triggerDefinition.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\ROR_struct_debugging.cpp" />
+    <ClCompile Include="src\ROR_struct_export.cpp" />
+    <ClCompile Include="src\triggerDefinition.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\AoEX.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CustomizeAOE", "CustomizeAOE\CustomizeAOE.vcxproj", "{DE98F891-CF3F-4499-8BA8-338FD601B12F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B} = {AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "customROR", "CustomROR\customROR.vcxproj", "{49FBBF1D-616F-4541-A3E4-241726119EF9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B} = {AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ROR_API", "ROR_API\ROR_API.vcxproj", "{4AED9C3D-68F9-4837-802E-11D4A836B3CE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTestAOE", "Test\UnitTestAOE.vcxproj", "{187B1609-5737-4233-8A4D-C725009E590D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AOE_Common", "Common\AOE_Common.vcxproj", "{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE98F891-CF3F-4499-8BA8-338FD601B12F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DE98F891-CF3F-4499-8BA8-338FD601B12F}.Debug|Win32.Build.0 = Debug|Win32
+		{DE98F891-CF3F-4499-8BA8-338FD601B12F}.Release|Win32.ActiveCfg = Release|Win32
+		{DE98F891-CF3F-4499-8BA8-338FD601B12F}.Release|Win32.Build.0 = Release|Win32
+		{49FBBF1D-616F-4541-A3E4-241726119EF9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{49FBBF1D-616F-4541-A3E4-241726119EF9}.Debug|Win32.Build.0 = Debug|Win32
+		{49FBBF1D-616F-4541-A3E4-241726119EF9}.Release|Win32.ActiveCfg = Release|Win32
+		{49FBBF1D-616F-4541-A3E4-241726119EF9}.Release|Win32.Build.0 = Release|Win32
+		{4AED9C3D-68F9-4837-802E-11D4A836B3CE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4AED9C3D-68F9-4837-802E-11D4A836B3CE}.Debug|Win32.Build.0 = Debug|Win32
+		{4AED9C3D-68F9-4837-802E-11D4A836B3CE}.Release|Win32.ActiveCfg = Release|Win32
+		{4AED9C3D-68F9-4837-802E-11D4A836B3CE}.Release|Win32.Build.0 = Release|Win32
+		{187B1609-5737-4233-8A4D-C725009E590D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{187B1609-5737-4233-8A4D-C725009E590D}.Debug|Win32.Build.0 = Debug|Win32
+		{187B1609-5737-4233-8A4D-C725009E590D}.Release|Win32.ActiveCfg = Release|Win32
+		{187B1609-5737-4233-8A4D-C725009E590D}.Release|Win32.Build.0 = Release|Win32
+		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}.Debug|Win32.Build.0 = Debug|Win32
+		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}.Release|Win32.ActiveCfg = Release|Win32
+		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
