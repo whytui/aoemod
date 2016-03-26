@@ -1588,7 +1588,7 @@ namespace ROR_STRUCTURES_10C
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // [pointer+i] = diplomacy value: 0=ally,1=neutral, 3=enemy
 		char unknown_088;
 		char unknown_089[3]; // unused ?
-		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES diplomacyVSPlayers[9]; // Diplomacy against gaia(p0), p1, p2... 1=self, 2=allied, 3=neutral, 4=enemy
+		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES diplomacyVSPlayers[9]; // +8C. Diplomacy against gaia(p0), p1, p2... 1=self, 2=allied, 3=neutral, 4=enemy. Long ints (4bytes each)
 		// 0xB0
 		long int unknown_0B0[9]; // B0: bool (dword) per playerId, related to visibility/exploration ?
 		short int unknown_0D4; // +D4. some mask for exploration. In fact, +D4 and D6 are 1 field (dword)
@@ -1852,7 +1852,7 @@ namespace ROR_STRUCTURES_10C
 		// 0x9A0
 		unsigned long int isCampaign; // get in 41B720
 		unsigned long int isSavedGame;
-		unsigned long int hasSteroidsCheatCode;
+		unsigned long int hasSteroidsCheatCode; // set in 50CA2B. Can be cancelled !!!
 		unsigned long int has_CD; //see 4169D7
 		// 0x9B0
 		unsigned long int chosenPlayerIndex[9]; // Num player ??? index in 0-8 (including gaia)

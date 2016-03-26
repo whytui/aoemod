@@ -88,6 +88,72 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(COMMAND_MAKE_OBJECT) >= 0x14, "COMMAND_START_RESEARCH size (variable)");
 
+	// Type 0x67. Size = 0x10. Common to several "subtypes"
+	struct COMMAND_67_BASE {
+		char cmdId;
+		INTERNAL_COMMAND67_SUBTYPE subTypeId; // +1.
+		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING; }
+	};
+	static_assert(sizeof(COMMAND_67_BASE) == 0x2, "COMMAND_67_BASE size");
+	
+	// Type 67, subtype 0. Change diplomacy. Create = 04E9890.
+	struct COMMAND_CHANGE_DIPLOMACY : COMMAND_67_BASE {
+		short int actorPlayerId; // +2
+		short int targetPlayerId; // +4
+		short int unknown_6;
+		float floatDiplomacyStance; // +8. New diplomacy stance value as a float
+		short int diplomacyStance; // +C
+		short int unused_E;
+		bool IsCmdIdValid() {
+			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING &&
+				this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_CHANGE_DIPLOMACY;
+		}
+	};
+	static_assert(sizeof(COMMAND_CHANGE_DIPLOMACY) == 0x10, "COMMAND_CHANGE_DIPLOMACY size");
+
+	// Type 67, subtype 1. Change game speed. Create = 04E98F0.
+	struct COMMAND_CHANGE_GAME_SPEED : COMMAND_67_BASE {
+		short int unused_2; // +2
+		short int unused_4; // +4
+		short int unused_6;
+		float newSpeed; // +8.
+		short int unused_C; // +C
+		short int unused_E;
+		bool IsCmdIdValid() {
+			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING && this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_CHANGE_GAME_SPEED;
+		}
+	};
+	static_assert(sizeof(COMMAND_CHANGE_GAME_SPEED) == 0x10, "COMMAND_CHANGE_GAME_SPEED size");
+
+	// Type 67, subtype 5. Change diplomacy. Create = 04E9840.
+	struct COMMAND_SET_ALLY_VICTORY : COMMAND_67_BASE {
+		short int actorPlayerId; // +2
+		short int allyVictoryFlag; // +4. 0=OFF, 1=ON for ally victory
+		short int unknown_6;
+		float unused_8; // +8. Set to 0.
+		short int unknown_C; // +C
+		short int unused_E;
+		bool IsCmdIdValid() {
+			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING && this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_SET_ALLY_VICTORY;
+		}
+	};
+	static_assert(sizeof(COMMAND_SET_ALLY_VICTORY) == 0x10, "COMMAND_SET_ALLY_VICTORY size");
+
+	// Type 67, subtype 6. Change diplomacy. Create = 04E9840.
+	struct COMMAND_CHEAT : COMMAND_67_BASE {
+		short int actorPlayerId; // +2
+		short int cheatInternalId; // +4. Identifies the cheat to apply.
+		short int unused_6;
+		float unused_8;
+		short int unused_C; // +C
+		short int unused_E;
+		bool IsCmdIdValid() {
+			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING && this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_CHEAT;
+		}
+	};
+	static_assert(sizeof(COMMAND_CHEAT) == 0x10, "COMMAND_CHEAT size");
+
+
 	// Type 0x6D. Size = 0x8 + actorCount*4. Create=0x4E9A60, 0x4E9AE0
 	struct COMMAND_SET_TRADE_SHIP_RESOURCE {
 		char cmdId;

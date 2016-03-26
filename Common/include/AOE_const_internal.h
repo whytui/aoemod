@@ -289,11 +289,64 @@ namespace AOE_CONST_INTERNAL
 		CST_ICI_TRIGGER_TRAIN_UNIT = 0x64, // unsure, when AI triggers a train unit action ? + some cheats?
 		CST_ICI_RESEARCH = 0x65,
 		CST_ICI_BUILD = 0x66,
-		CST_ICI_MAKE_CHEAT = 0x67, // Includes cheats, game speed change
+		CST_ICI_CHANGE_SETTING = 0x67, // Includes cheats, game speed change, diplomacy change
 		CST_ICI_KILL_UNIT = 0x6A,
 		CST_ICI_SET_TRADE_RESOURCE_TYPE = 0x6D, // Set resource to trade in a trade ship.
 		CST_ICI_QUEUE_UNQUEUE_UNIT = 0x77, // Only for human-called "train unit" ? Include right-click to unqueue.
 		CST_ICI_ADD_SCORE_ELEM = (char)0xFF // A special one...
+	};
+	enum INTERNAL_COMMAND67_SUBTYPE : char {
+		CST_IC67_CHANGE_DIPLOMACY = 0,
+		CST_IC67_CHANGE_GAME_SPEED = 1,
+		CST_IC67_UNKNOWN_2 = 2,
+		CST_IC67_UNKNOWN_4 = 4,
+		CST_IC67_SET_ALLY_VICTORY = 5,
+		CST_IC67_CHEAT = 6,
+		CST_IC67_UNKNOWN_7 = 7,
+		CST_IC67_SYNC_ERROR = 8 // Save game to syncerr?.gam (!) and quit game + sync error message. Saved game seems NOT to be playable
+	};
+
+	enum INTERNAL_CHEAT_ID : short int {
+		CST_CHT_PHOTON_MAN = 0x0, // unit 274 = nuke trooper
+		CST_CHT_E_MC2_TROOPER = 0x1, // unit 248 = nuke trooper (e=mc2 trooper)
+		CST_CHT_JACK_BE_NIMBLE = 0x2, // catapult projectile. Tech 127
+		CST_CHT_BIG_BERTHA = 0x3, // tech 128
+		CST_CHT_FLYING_DUTCHMAN = 0x4, // tech 129
+		CST_CHT_IMPROVED_LIONS = 0x5, // tech 130 (unused)
+		CST_CHT_VILLAGER_NUKE_TROOPER = 0x6, // tech 131 (unused)
+		CST_CHT_CHARIOT_ARCHER_CHEAT = 0x7, // tech 132
+		CST_CHT_HOYO_HOYO = 0x8, // tech 133
+		CST_CHT_LAZER_TOWER = 0x9, // tech 134 (no actual cheat to run this ?)
+		CST_CHT_DARK_RAIN = 0xA, // tech 135
+		CST_CHT_DARK_RIDER = 0xB, // tech 136
+		CST_CHT_MEDUSA = 0xC, // tech 137 (medusa)
+		CST_CHT_ICBM = 0xD, // tech 138 (ballista range)
+		CST_CHT_STORMBILLY = 0xE, // unit 386 = zug209
+		CST_CHT_SAINT_FRANCIS = 0xF, // unit 0x18A
+		CST_CHT_BIG_MOMMA = 0x10, // unit 0x18D
+		CST_CHT_BABY_PREZ = 0x11, // create unit 398
+		CST_CHT_KING_ANIMALS = 0x12, // => apply tech 216
+		CST_CHT_KING_ARTHUR = 0x13, // birds = dragons
+		CST_CHT_FOOD = 0x14, // add 1000 resource0
+		CST_CHT_COINAGE = 0x15, // add 1000 resource3
+		CST_CHT_QUARRY = 0x16, // add 1000 resource2
+		CST_CHT_WOODSTOCK = 0x17, // add 1000 resource1
+		CST_CHT_STEROIDS = 0x18, // Can be cancelled if called again !
+		CST_CHT_DIEDIEDIE = 0x64, // Kill all enemy players' units
+		CST_CHT_KILLME = 0x65, // Kill all my units. what was the cheat for that ?
+		CST_CHT_HOME_RUN = 0x66, // Make me win :)
+		CST_CHT_RESIGN = 0x67, // Abandon :(
+		CST_CHT_KILL1 = 0xC9,
+		CST_CHT_KILL2 = 0xCA,
+		CST_CHT_KILL3 = 0xCB,
+		CST_CHT_KILL4 = 0xCC,
+		CST_CHT_KILL5 = 0xCD,
+		CST_CHT_KILL6 = 0xCE,
+		CST_CHT_KILL7 = 0xCF,
+		CST_CHT_KILL9 = 0xD0, // actually, kills player #8
+		CST_CHT_BIGDADDY = 0xDC,
+		CST_CHT_REVEAL_MAP = 0xE6,
+		CST_CHT_NO_FOG = 0xE7
 	};
 
 	// For activity.task IDs
