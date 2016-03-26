@@ -88,7 +88,7 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(COMMAND_MAKE_OBJECT) >= 0x14, "COMMAND_START_RESEARCH size (variable)");
 
-	// Type 0x67. Size = 0x10. Common to several "subtypes"
+	// Type 0x67. Size = 0x10. Common to several "subtypes". Those commands are executed in 4E8EB0.
 	struct COMMAND_67_BASE {
 		char cmdId;
 		INTERNAL_COMMAND67_SUBTYPE subTypeId; // +1.
@@ -125,6 +125,34 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(COMMAND_CHANGE_GAME_SPEED) == 0x10, "COMMAND_CHANGE_GAME_SPEED size");
 
+	// Type 67, subtype 2. Add resource. Unused in ROR ?
+	struct COMMAND_ADD_RESOURCE : COMMAND_67_BASE {
+		short int actorPlayerId; // +2
+		short int resourceId; // +4
+		short int unused_6;
+		float resourceAmount; // +8. Amount to add
+		short int unused_C; // +C
+		short int unused_E;
+		bool IsCmdIdValid() {
+			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING && this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_ADD_RESOURCE;
+		}
+	};
+	static_assert(sizeof(COMMAND_ADD_RESOURCE) == 0x10, "COMMAND_ADD_RESOURCE size");
+
+	// Type 67, subtype 4. Set steroids mode ON/OFF. Unused in ROR ?
+	struct COMMAND_SET_STEROIDS_MODE : COMMAND_67_BASE {
+		short int steroidsModeFlag; // +2. 0 or 1.
+		short int unused_4; // +4
+		short int unused_6;
+		float resourceAmount; // +8. Amount to add
+		short int unused_C; // +C
+		short int unused_E;
+		bool IsCmdIdValid() {
+			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING && this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_SET_STEROIDS_MODE;
+		}
+	};
+	static_assert(sizeof(COMMAND_SET_STEROIDS_MODE) == 0x10, "COMMAND_SET_STEROIDS_MODE size");
+
 	// Type 67, subtype 5. Change diplomacy. Create = 04E9840.
 	struct COMMAND_SET_ALLY_VICTORY : COMMAND_67_BASE {
 		short int actorPlayerId; // +2
@@ -152,6 +180,34 @@ namespace ROR_STRUCTURES_10C
 		}
 	};
 	static_assert(sizeof(COMMAND_CHEAT) == 0x10, "COMMAND_CHEAT size");
+
+	// Type 67, subtype 7. Apply writing tech (shared exploration). Unused in ROR ?
+	struct COMMAND_APPLY_WRITING : COMMAND_67_BASE {
+		short int playerId; // +2. Player ID on which apply the technology 113 (writing).
+		short int unused_4; // +4
+		short int unused_6;
+		float unused_8; // +8
+		short int unused_C; // +C
+		short int unused_E;
+		bool IsCmdIdValid() {
+			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING && this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_APPLY_WRITING_TECH;
+		}
+	};
+	static_assert(sizeof(COMMAND_APPLY_WRITING) == 0x10, "COMMAND_APPLY_WRITING size");
+
+	// Type 67, subtype 8. Sync errors for network games. Not sure this command is really used ?
+	struct COMMAND_SYNC_ERROR : COMMAND_67_BASE {
+		short int unused_2; // +2.
+		short int unused_4; // +4
+		short int unused_6;
+		float unused_8; // +8
+		short int unused_C; // +C
+		short int unused_E;
+		bool IsCmdIdValid() {
+			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING && this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_APPLY_WRITING_TECH;
+		}
+	};
+	static_assert(sizeof(COMMAND_SYNC_ERROR) == 0x10, "COMMAND_SYNC_ERROR size");
 
 
 	// Type 0x6D. Size = 0x8 + actorCount*4. Create=0x4E9A60, 0x4E9AE0

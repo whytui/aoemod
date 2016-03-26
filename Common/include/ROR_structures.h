@@ -1852,7 +1852,7 @@ namespace ROR_STRUCTURES_10C
 		// 0x9A0
 		unsigned long int isCampaign; // get in 41B720
 		unsigned long int isSavedGame;
-		unsigned long int hasSteroidsCheatCode; // set in 50CA2B. Can be cancelled !!!
+		unsigned long int hasSteroidsCheatCode; // +9A8. set in 50CA2B, 4E90B6. Can be cancelled !!!
 		unsigned long int has_CD; //see 4169D7
 		// 0x9B0
 		unsigned long int chosenPlayerIndex[9]; // Num player ??? index in 0-8 (including gaia)

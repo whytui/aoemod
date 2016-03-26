@@ -298,11 +298,11 @@ namespace AOE_CONST_INTERNAL
 	enum INTERNAL_COMMAND67_SUBTYPE : char {
 		CST_IC67_CHANGE_DIPLOMACY = 0,
 		CST_IC67_CHANGE_GAME_SPEED = 1,
-		CST_IC67_UNKNOWN_2 = 2,
-		CST_IC67_UNKNOWN_4 = 4,
+		CST_IC67_ADD_RESOURCE = 2,
+		CST_IC67_SET_STEROIDS_MODE = 4,
 		CST_IC67_SET_ALLY_VICTORY = 5,
 		CST_IC67_CHEAT = 6,
-		CST_IC67_UNKNOWN_7 = 7,
+		CST_IC67_APPLY_WRITING_TECH = 7,
 		CST_IC67_SYNC_ERROR = 8 // Save game to syncerr?.gam (!) and quit game + sync error message. Saved game seems NOT to be playable
 	};
 
