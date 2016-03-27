@@ -28,7 +28,7 @@ namespace CR_TRIGGERS {
 		TRIGGER_PARAM_DEF(KW_MESSAGE, TPT_STRING, "message", "A free message, that cannot contain chariot return"),
 		TRIGGER_PARAM_DEF(KW_ACTION_PLAYER_ID, TPT_INTEGER, "action_player_id"), // "actor" player (the one directly involved in trigger action)
 		TRIGGER_PARAM_DEF(KW_ACTION_TARGET_PLAYER_ID, TPT_INTEGER, "target_player_id"), // "secondary" player for actions like diplomacy change.
-		TRIGGER_PARAM_DEF(KW_DIPLOMACY_VALUE, TPT_INTEGER, "dipl_value"), // To define
+		TRIGGER_PARAM_DEF(KW_DIPLOMACY_VALUE, TPT_INTEGER, "dipl_value", "Diplomacy can be 0=ally, 1=neutral, 3=enemy. Other values are invalid."), // Corresponds to "diplomacy stances" internal enum
 		TRIGGER_PARAM_DEF(KW_RESOURCE_ID, TPT_INTEGER, "resource_id", "You can refer to AGE3 about resource IDs, for example in civilizations tab"),
 		TRIGGER_PARAM_DEF(KW_RESOURCE_VALUE, TPT_FLOAT, "resource_value"),
 		TRIGGER_PARAM_DEF(KW_ACTION_UNIT_ID, TPT_INTEGER, "action_unit_id", "A unit instance ID. This is NOT AGE3 unitID"),
@@ -65,7 +65,8 @@ namespace CR_TRIGGERS {
 		TRIGGER_PARAM_DEF(KW_VISIBLE_IN_FOG, TPT_INTEGER, "visible_in_fog", "0/1 value to determine if other players can see such units through fog"),
 		TRIGGER_PARAM_DEF(KW_OWNER_PLAYER_ID, TPT_INTEGER, "owner_player_id", "A playerId 0-8 that will take ownership of a unit."),
 		TRIGGER_PARAM_DEF(KW_ACTION_TARGET_UNIT_ID, TPT_INTEGER, "action_target_unit_id", "A unit instance ID that will be the target of an action. This is NOT AGE3 unitID"),
-		TRIGGER_PARAM_DEF(KW_ENABLE, TPT_INTEGER, "enable", "Set to 1 to enable, 0 to disable")
+		TRIGGER_PARAM_DEF(KW_ENABLE, TPT_INTEGER, "enable", "Set to 1 to enable, 0 to disable"),
+		TRIGGER_PARAM_DEF(KW_MUTUAL, TPT_INTEGER, "mutual", "If true, the action is done in both ways (mutual) between actor and target. Set to 1 to enable, 0 to disable")
 	};
 
 
@@ -88,7 +89,7 @@ namespace CR_TRIGGERS {
 		TRIGGER_ACTION_DEF(TRIGGER_ACTION_TYPES::TYPE_NONE, "none", std::vector<TRIGGER_KWID_PARAMS>({}), "Invalid action"),
 		TRIGGER_ACTION_DEF(TYPE_WRITE_CHAT, "write_chat", std::vector<TRIGGER_KWID_PARAMS>({ KW_MESSAGE }), "Displays normal chat message. \nYou can have spaces in the message but no chariot return"),
 		TRIGGER_ACTION_DEF(TYPE_WRITE_CENTERED_MESSAGE, "write_center_chat", std::vector<TRIGGER_KWID_PARAMS>({ KW_MESSAGE }), "Displays a chat message in red color at the center-bottom of the screen.\nDisappears if clicked anywhere"),
-		TRIGGER_ACTION_DEF(TYPE_DIPL_CHANGE, "dipl_change", std::vector<TRIGGER_KWID_PARAMS>({}), "Diplomacy change - Not yet implemented"),
+		TRIGGER_ACTION_DEF(TYPE_DIPL_CHANGE, "dipl_change", std::vector<TRIGGER_KWID_PARAMS>({ KW_ACTION_PLAYER_ID, KW_ACTION_TARGET_PLAYER_ID, KW_DIPLOMACY_VALUE, KW_MUTUAL }), "Diplomacy change. Use the \"mutual\" keyword to update both player's diplomacy."),
 		TRIGGER_ACTION_DEF(TYPE_ADD_RESOURCE, "add_resource", std::vector<TRIGGER_KWID_PARAMS>({ KW_ACTION_PLAYER_ID, KW_RESOURCE_ID, KW_RESOURCE_VALUE }), "Add an amount of selected resource to selected player, for example 100 food"),
 		TRIGGER_ACTION_DEF(TYPE_SET_RESOURCE, "set_resource", std::vector<TRIGGER_KWID_PARAMS>({ KW_ACTION_PLAYER_ID, KW_RESOURCE_ID, KW_RESOURCE_VALUE }), "Sets an amount of selected resource to selected player, for example 100 food. \nUnlike add_resource this SETS and does NOT add to your stockpile"),
 		TRIGGER_ACTION_DEF(TYPE_ENABLE_RESEARCH, "enable_research", std::vector<TRIGGER_KWID_PARAMS>({ KW_ACTION_PLAYER_ID, KW_ACTION_RESEARCH_ID }), "Enables a research for selected player, for example Watch Tower at the Granary"),

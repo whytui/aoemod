@@ -155,19 +155,30 @@ bool crTrigger::IsValid() const {
 			traceMessageHandler.WriteMessage(missingKeywordMsg);
 			return false;
 		}
-		// Not apply tech allows joker for playerid
+		// Note apply tech allows joker for playerid
 		if (!IsPlayerIdValidForTriggerParam(this->GetParameterValue(KW_ACTION_PLAYER_ID, -2))) {
 			missingKeywordMsg += GetTriggerParamKeyword(KW_ACTION_PLAYER_ID);
 			traceMessageHandler.WriteMessage(missingKeywordMsg);
 			return false;
 		}
 	}
-	if (this->triggerActionType == TRIGGER_ACTION_TYPES::TYPE_DIPL_CHANGE) { // TO DO
+	if (this->triggerActionType == TRIGGER_ACTION_TYPES::TYPE_DIPL_CHANGE) {
 		if (this->GetParameterValue(KW_DIPLOMACY_VALUE, -1) < 0) {
 			missingKeywordMsg += GetTriggerParamKeyword(KW_DIPLOMACY_VALUE);
 			traceMessageHandler.WriteMessage(missingKeywordMsg);
 			return false;
 		}
+		if (!IsPlayerIdValidForTriggerParam_noJoker(this->GetParameterValue(KW_ACTION_PLAYER_ID, -2))) {
+			missingKeywordMsg += GetTriggerParamKeyword(KW_ACTION_PLAYER_ID);
+			traceMessageHandler.WriteMessage(missingKeywordMsg);
+			return false;
+		}
+		if (!IsPlayerIdValidForTriggerParam_noJoker(this->GetParameterValue(KW_ACTION_TARGET_PLAYER_ID, -2))) {
+			missingKeywordMsg += GetTriggerParamKeyword(KW_ACTION_TARGET_PLAYER_ID);
+			traceMessageHandler.WriteMessage(missingKeywordMsg);
+			return false;
+		}
+		// KW_MUTUAL is optional.
 	}
 	if (this->triggerActionType == TRIGGER_ACTION_TYPES::TYPE_DISABLE_TRIGGER) {
 		if (!this->IsParameterDefined(KW_TARGET_TRIGGER_NAME)) {

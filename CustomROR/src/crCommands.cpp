@@ -4828,7 +4828,19 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_DIPL_CHANGE) {
-		CallWriteText("This trigger is not implemented yet");
+		actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -1);
+		long int targetPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_TARGET_PLAYER_ID, -1);
+		long int diplomacyValue = trigger->GetParameterValue(CR_TRIGGERS::KW_DIPLOMACY_VALUE, -1);
+		long int isMutual = trigger->GetParameterValue(CR_TRIGGERS::KW_MUTUAL, 0); // default = false (0)
+		if ((actionPlayerId >= global->playerTotalCount) || (actionPlayerId < 0)) { return; }
+		if ((targetPlayerId >= global->playerTotalCount) || (targetPlayerId < 0)) { return; }
+		if (actionPlayerId == targetPlayerId) { return; }
+		if ((diplomacyValue < 0) || (diplomacyValue > 3)) { return; }
+		if (diplomacyValue == 2) { diplomacyValue = 3; } // 2 is unused, let's use it as "enemy" like 3.
+		CreateCmd_ChangeDiplomacy((short int)actionPlayerId, (short int)targetPlayerId, (PLAYER_DIPLOMACY_STANCES)diplomacyValue);
+		if (isMutual) {
+			CreateCmd_ChangeDiplomacy((short int)targetPlayerId, (short int)actionPlayerId, (PLAYER_DIPLOMACY_STANCES)diplomacyValue);
+		}
 	}
 
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_DISABLE_TRIGGER) {
