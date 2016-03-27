@@ -211,6 +211,18 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(COMMAND_SYNC_ERROR) == 0x10, "COMMAND_SYNC_ERROR size");
 
+	// Type 6C. Pay tribute. Size=0xC. Create=04E9A10, execute=04E91B0
+	struct COMMAND_PAY_TRIBUTE {
+		char cmdId; // 0x6C
+		char actorPlayerId; // +1
+		char targetPlayerId; // +2
+		char resourceId; // Cf RESOURCE_TYPES, but on 1 byte
+		float amount; // +4. Raw tribute amount (NOT counting tax)
+		float tributeTaxProportion; // +8. Tax to pay on tribute, e.g. 0.25 (25% tax, default for non-palmyra players). Cf resource 46 (tribute inefficiency)
+		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_PAY_TRIBUTE; }
+	};
+	static_assert(sizeof(COMMAND_PAY_TRIBUTE) == 0xC, "COMMAND_PAY_TRIBUTE size");
+
 
 	// Type 0x6D. Size = 0x8 + actorCount*4. Create=0x4E9A60, 0x4E9AE0
 	struct COMMAND_SET_TRADE_SHIP_RESOURCE {

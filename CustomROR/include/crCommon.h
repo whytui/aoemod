@@ -465,6 +465,9 @@ bool CreateCmd_AddResource(short int playerId, short int resourceId, float value
 // Create a "ROR" command struct (set steroids mode ON/OFF). Returns false if failed.
 bool CreateCmd_SetSteroids(bool enable);
 
+// Create a "ROR" command struct (pay tribute). Returns false if failed.
+bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_CONST_FUNC::RESOURCE_TYPES resourceType, float amount, float tributeInefficiency);
+
 
 // ---------- Other
 

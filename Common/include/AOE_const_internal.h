@@ -192,6 +192,7 @@ namespace AOE_CONST_INTERNAL
 		CST_GET_FARM_DEPLETED = 0x7E, // Sound 0x10
 		CST_GET_UNIT_ATTACKED = 0x201,
 		CST_GET_MOVEMENT_FINISHED = 0x202, // unsure
+		CST_GET_TRIBUTE_RECEIVED = 0x20A,
 		CST_GET_SEE_UNIT = 0x20D
 	};
 
@@ -291,6 +292,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ICI_BUILD = 0x66,
 		CST_ICI_CHANGE_SETTING = 0x67, // Includes cheats, game speed change, diplomacy change
 		CST_ICI_KILL_UNIT = 0x6A,
+		CST_ICI_PAY_TRIBUTE = 0x6C,
 		CST_ICI_SET_TRADE_RESOURCE_TYPE = 0x6D, // Set resource to trade in a trade ship.
 		CST_ICI_QUEUE_UNQUEUE_UNIT = 0x77, // Only for human-called "train unit" ? Include right-click to unqueue.
 		CST_ICI_ADD_SCORE_ELEM = (char)0xFF // A special one...

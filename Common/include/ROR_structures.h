@@ -2259,7 +2259,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int likeTable[10]; // +11C. like values against all players. Why is there a "player9" value ?
 		//unsigned long int unknown_140;
 		// 0x144
-		char isEnemy[10]; // 0 or 1. Why is there a "player9" value ? Confirm it is "isEnemy" (or isNeutral?)
+		char isAlly[10]; // 0 or 1. Why is there a "player9" value ? Confirm it is "isEnemy" (or isNeutral or isAlly?)
 		short int unused;
 		// 0x150: end
 	};
@@ -2523,14 +2523,16 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_11C_tributeIsNOTPersistent; // REALLY unsure.
 		// 0x120
 		unsigned long int unknown_120;
-		unsigned long int hasDiplomacyInitBeenDone; // 0/1 flag. Waits 10 seconds (0x2710=10000ms) before this init. cf 4C783F. 
+		unsigned long int hasDiplomacyInitBeenDone; // 0/1 flag. Waits 10 seconds (0x2710=10000ms) before this init. cf 4C783F.
+		unsigned long int requiredTributeToChangeDiplomacy;
+		long int receivedTributeFromPlayer[9]; // +12C. Total tribute received from a player (no distinction on resource type). See 4C83B5
 	};
 
 
 	// Size = 0x24
 	class STRUCT_INF_AI_UNIT_LIST_ELEM {
 	public:
-		long int unitId; // -1 means free (empty) slot
+		long int unitId; // -1 means free (empty) slot. Bug in 4C41BD ?
 		short int unitDATID; // +04
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitClass; // +06 - short int
 		char posY; // +08
@@ -2695,12 +2697,12 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_UNIT *targetUnit;
 		unsigned long int unknown_014;
 		long int targetUnitId; // +18
-		unsigned long int unknown_unitId; // +1C
+		unsigned long int unknown_unitId; // +1C. A secondary target ?
 		// 0x20
 		float targetUnitPositionY;
 		float targetUnitPositionX;
 		float targetUnitPositionZ;
-		float unsure_resourceValue; // Related to reload time and next execution ? For farms, it is "remaining food" (to be added to unit.resValue).
+		float unsure_resourceValue; // For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
 		// 0x30
 		STRUCT_DEF_UNIT_COMMAND *command; // To confirm
 		STRUCT_UNIT_ACTION_INFO *actionInfo; // Link with unit/"actionLink"/action

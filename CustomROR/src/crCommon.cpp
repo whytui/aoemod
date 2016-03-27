@@ -1891,6 +1891,21 @@ bool CreateCmd_SetSteroids(bool enable) {
 }
 
 
+// Create a "ROR" command struct (pay tribute). Returns false if failed.
+bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_CONST_FUNC::RESOURCE_TYPES resourceType, float amount, float tributeInefficiency) {
+	const long int structSize = sizeof(ROR_STRUCTURES_10C::COMMAND_PAY_TRIBUTE);
+	ROR_STRUCTURES_10C::COMMAND_PAY_TRIBUTE *cmd = (ROR_STRUCTURES_10C::COMMAND_PAY_TRIBUTE *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_PAY_TRIBUTE;
+	assert(cmd->IsCmdIdValid());
+	cmd->actorPlayerId = (char)actorPlayerId;
+	cmd->targetPlayerId = (char)targetPlayerId;
+	cmd->resourceId = (char)resourceType;
+	cmd->amount = amount;
+	cmd->tributeTaxProportion = tributeInefficiency;
+	return AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
 // Writes text representing available tech tree (available technologies that have not been researched yet)
 std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return ""; }
