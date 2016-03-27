@@ -886,10 +886,21 @@ ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(ROR_STRUCTURES_10C::ST
 // Calls ROR's method to change a unit's action so it will move to supplied unit/position
 // target can be NULL (only position will matter)
 // unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
-// This is NOT compatible with MP (causes sync issue) ? We can't create actions like this, must use commands (I think).
-#pragma message("Modify to use command and be MP-compatible")
+// Compatible with MP, but in MP unit will not defend itself if attacked.
 void MoveUnitToTargetOrPosition(ROR_STRUCTURES_10C::STRUCT_UNIT *unitToMove, ROR_STRUCTURES_10C::STRUCT_UNIT *target, float posX, float posY) {
 	if (!unitToMove) { return; }
+
+	if (IsMultiplayer()) {
+		// Manage MP games : use a command (but unit will not defend itself if attacked)
+		if (!unitToMove || !unitToMove->IsCheckSumValid()) {
+			return;
+		}
+		long int targetId = -1;
+		if (target && target->IsCheckSumValid()) { targetId = target->unitInstanceId; }
+		CreateCmd_RightClick(unitToMove->unitInstanceId, targetId, posX, posY);
+		return;
+	}
+
 	// unit.createMoveToAction(targetUnitStruct,pos,pos,arg4) does NOT support if action info struct does not exist.
 	if (!unitToMove->ptrActionInformation) { return; }
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = unitToMove->ptrStructPlayer;
@@ -897,7 +908,7 @@ void MoveUnitToTargetOrPosition(ROR_STRUCTURES_10C::STRUCT_UNIT *unitToMove, ROR
 	_asm {
 		MOV ECX, unitToMove
 		MOV EAX, 0x405DB0 // unit.createMoveToAction(targetUnitStruct,pos,pos,arg4)
-		PUSH 0 // arg4, 0 in game call when using mouse click, so we do the same
+		PUSH 0 // posZ?, 0 in game call when using mouse click, so we do the same
 		PUSH posX
 		PUSH posY
 		PUSH target
@@ -1748,7 +1759,7 @@ bool CreateCmd_RightClick(ROR_STRUCTURES_10C::STRUCT_UNIT **actorUnitsList, long
 		// See 0x42B7ED...
 		cmd->fogVisibilityMask = 0; // TO DO
 		cmd->explorationVisibilityMask = 0; // TO DO
-		cmd->unknown_12 = 0; // TO DO
+		cmd->sharedExploration = 0; // TO DO
 		cmd->unknown_13 = 0; // TO DO
 		cmd->unknown_14 = 0; // TO DO
 	}

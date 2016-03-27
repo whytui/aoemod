@@ -12,10 +12,12 @@ using namespace AOE_CONST_INTERNAL;
 * Sometimes AI triggers some commands too (task units...)
 * "commands" seem to be created by client and executed by game host (same machine on SP, but only 1 host in MP)
 * Which could explain why MP games are extremely laggy (lag between click and actual action).
+*
+* Very useful for debugging: 0x4E83E0 = commandsInfo.executeCommand(ptrCommand)
 */
 namespace ROR_STRUCTURES_10C
 {
-	// Type 0x00. Size = 0x1C + actorCount*4. Create = 0x42B730
+	// Type 0x00. Size = 0x1C + actorCount*4. Create = 0x42B730. Execute=0x42A280
 	// Actual effect depends on unit def commands, target unit type...
 	struct COMMAND_RIGHT_CLICK {
 		char cmdId;
@@ -27,12 +29,12 @@ namespace ROR_STRUCTURES_10C
 		// 0x10
 		char humanPlayerId; // +10. Only used in MP, useful if 2 human players manage the same game player.
 		char targetVisibleInFog; // +11. Used in both SP and MP ?
-		char unknown_12; // = sharedExploration ? Only in MP games.
+		char sharedExploration; // +12. sharedExploration ? Only in MP games.
 		char unknown_13; // Init =0 in 42B800. Only in MP games.
 		long int unknown_14; // related to fogMask & explorationMask ? Only in MP games.
 		// unknown_18: STRUCT_MAP_VISIBILITY_INFO (4 bytes) = fogVisibilityMask + explorationVisibilityMask. Filled from 7D205C array.
-		short int fogVisibilityMask;
-		short int explorationVisibilityMask;
+		short int fogVisibilityMask; // +18
+		short int explorationVisibilityMask; // +1A
 
 		long int actorIdList[1]; // +1C.
 		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_RIGHT_CLICK; }

@@ -4750,6 +4750,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 	long int actionResourceId = -1;
 	float actionResourceValue = 0;
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_SET_RESOURCE) {
+		// Not MP-compatible (to confirm)
 		actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -1);
 		actionResourceId = trigger->GetParameterValue(CR_TRIGGERS::KW_RESOURCE_ID, -1);
 		actionResourceValue = trigger->GetParameterValue(CR_TRIGGERS::KW_RESOURCE_VALUE, 0.0);
@@ -4762,6 +4763,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_ADD_RESOURCE) {
+		// Not MP-compatible (to confirm)
 		actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -1);
 		actionResourceId = trigger->GetParameterValue(CR_TRIGGERS::KW_RESOURCE_ID, -1);
 		actionResourceValue = trigger->GetParameterValue(CR_TRIGGERS::KW_RESOURCE_VALUE, 0.0);
@@ -4778,6 +4780,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		(trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_ENABLE_RESEARCH) ||
 		(trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_APPLY_RESEARCH)
 		) {
+		// Not MP-compatible (to confirm)
 		actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -1);
 		long int actionResearchId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_RESEARCH_ID, -1);
 		// This feature is not available for invalid players, nor for gaia player.
@@ -4808,6 +4811,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_APPLY_TECH) {
+		// Not MP-compatible (to confirm)
 		actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -1);
 		long int actionTechId = trigger->GetParameterValue(CR_TRIGGERS::KW_TECHNOLOGY_ID, -1);
 		if ((actionPlayerId >= global->playerTotalCount) || (actionTechId < 0)) { return; }
@@ -4854,6 +4858,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_SET_TERRAIN) {
+		// Not MP-compatible (to confirm)
 		long int minPosX, minPosY, maxPosX, maxPosY, elevationLevel, terrainId;
 		minPosX = trigger->GetParameterValue(CR_TRIGGERS::KW_MIN_POS_X, -1);
 		minPosY = trigger->GetParameterValue(CR_TRIGGERS::KW_MIN_POS_Y, -1);
@@ -4887,6 +4892,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_MODIFY_UNIT) {
+		// Not MP-compatible (to confirm)
 		long int actionUnitId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_ID, -1);
 		if (actionUnitId < 0) { return; }
 		float unitHP_add = trigger->GetParameterValue(CR_TRIGGERS::KW_ADD_HP, (float)0);
@@ -4934,6 +4940,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 
 	// Spawn a unit
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_ADD_UNIT_INSTANCE) {
+		// Not MP-compatible (to confirm)
 		actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -2);
 		long int actionUnitDefId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_DEF_ID, -1);
 		float posX = trigger->GetParameterValue(CR_TRIGGERS::KW_POS_X, (float)-1);
@@ -5059,6 +5066,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 
 	// Move a unit
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_SET_UNIT_DESTINATION) {
+		// Not MP-compatible (to confirm)
 		long int actionUnitId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_ID, -1);
 		float posX = trigger->GetParameterValue(CR_TRIGGERS::KW_POS_X, (float)-1);
 		float posY = trigger->GetParameterValue(CR_TRIGGERS::KW_POS_Y, (float)-1);
@@ -5073,6 +5081,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 
 	// Make gaia units human-capturable (or not)
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_SET_GAIA_CAPTURABLE) {
+		// Not MP-compatible (to confirm)
 		int valueToSet = trigger->GetParameterValue(CR_TRIGGERS::KW_ENABLE, -1);
 		if ((valueToSet < 0) || (valueToSet > 1)) { // only 0 and 1 are accepted
 			return;
