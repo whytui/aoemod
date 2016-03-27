@@ -420,8 +420,11 @@ void AOE_callNotifyEvent(long int eventId, long int playerId, void *variant_arg3
 // allArgs indices are 1-15 (do NOT use 0). Warning, some arguments type are NOT long int (there are floats).
 long int callFindPathForUnit(long int allArgs[15 + 1]);
 
-// Set "shared exploration" flag for a given player to true or false.
-void SetPlayerSharedExploration(long int playerId, bool enable);
+// Set "shared exploration" flag for a given player to true or false. Do not use this with MP game (not sure if it causes sync error)
+void SetPlayerSharedExploration_hard(long int playerId, bool enable);
+
+// Set "shared exploration" flag for a given player to true or false. This version should be compatible with MP games (uses ROR command system)
+void SetPlayerSharedExploration_safe(long int playerId);
 
 // Set status for an element in infAI "construction history" array.
 void AOE_InfAIBuildHistory_setStatus(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, long int posX, long int posY, long int unitDefId,
@@ -443,6 +446,24 @@ bool CreateCmd_RightClick(ROR_STRUCTURES_10C::STRUCT_UNIT **actorUnitsList, long
 
 // Create a "ROR" command struct (build). Returns false if failed.
 bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY);
+
+// Create a "ROR" command struct (change diplomacy). Returns false if failed.
+bool CreateCmd_ChangeDiplomacy(short int playerId, short int targetPlayerId, PLAYER_DIPLOMACY_STANCES diplomacyStance);
+
+// Create a "ROR" command struct (set ally victory flag). Returns false if failed.
+bool CreateCmd_SetAllyVictory(short int playerId, bool enable);
+
+// Create a "ROR" command struct (give writing - set shared exploration). Returns false if failed.
+bool CreateCmd_SetSharedExploration(short int playerId);
+
+// Create a "ROR" command struct (change game speed). Returns false if failed.
+bool CreateCmd_ChangeGameSpeed(float newSpeed);
+
+// Create a "ROR" command struct (add a resource amount to a player). Returns false if failed.
+bool CreateCmd_AddResource(short int playerId, short int resourceId, float value);
+
+// Create a "ROR" command struct (set steroids mode ON/OFF). Returns false if failed.
+bool CreateCmd_SetSteroids(bool enable);
 
 
 // ---------- Other

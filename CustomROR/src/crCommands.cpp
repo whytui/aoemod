@@ -858,7 +858,7 @@ void CustomRORCommand::OnGameStart() {
 		if (this->crInfo->configInfo.allyExplorationIsAlwaysShared &&
 			!settings->isMultiplayer && global && global->IsCheckSumValid()) {
 			for (int i = 1; i < global->playerTotalCount; i++) {
-				SetPlayerSharedExploration(i, true);
+				SetPlayerSharedExploration_safe(i);
 				//ApplyResearchForPlayer(player, CST_RSID_WRITING);
 				// Could disable the research ?
 			}

@@ -102,7 +102,7 @@ namespace ROR_STRUCTURES_10C
 		short int targetPlayerId; // +4
 		short int unknown_6;
 		float floatDiplomacyStance; // +8. New diplomacy stance value as a float
-		short int diplomacyStance; // +C
+		short int diplomacyStance; // +C. Cf PLAYER_DIPLOMACY_STANCES (but on 2 bytes here)
 		short int unused_E;
 		bool IsCmdIdValid() {
 			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING &&
@@ -142,10 +142,10 @@ namespace ROR_STRUCTURES_10C
 	// Type 67, subtype 4. Set steroids mode ON/OFF. Unused in ROR ?
 	struct COMMAND_SET_STEROIDS_MODE : COMMAND_67_BASE {
 		short int steroidsModeFlag; // +2. 0 or 1.
-		short int unused_4; // +4
+		short int unused_4;
 		short int unused_6;
-		float resourceAmount; // +8. Amount to add
-		short int unused_C; // +C
+		float unused_8;
+		short int unused_C;
 		short int unused_E;
 		bool IsCmdIdValid() {
 			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING && this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_SET_STEROIDS_MODE;

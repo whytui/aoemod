@@ -1610,7 +1610,8 @@ long int callFindPathForUnit(long int allArgs[15 + 1]) {
 
 
 // Set "shared exploration" flag for a given player to true or false.
-void SetPlayerSharedExploration(long int playerId, bool enable) {
+// Old version: Not compatible with MP games (to verify)
+void SetPlayerSharedExploration_hard(long int playerId, bool enable) {
 	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) {
 		return;
@@ -1627,6 +1628,12 @@ void SetPlayerSharedExploration(long int playerId, bool enable) {
 		MOV EAX, 0x520C60
 		CALL EAX
 	}
+}
+
+
+// Set "shared exploration" flag for a given player to true or false. This version should be compatible with MP games (uses ROR command system)
+void SetPlayerSharedExploration_safe(long int playerId) {
+	CreateCmd_SetSharedExploration((short int)playerId);
 }
 
 
@@ -1770,6 +1777,107 @@ bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float po
 	return AddCommandToGameCmdQueue(cmd, structSize);
 }
 
+
+// Create a "ROR" command struct (change diplomacy). Returns false if failed.
+bool CreateCmd_ChangeDiplomacy(short int playerId, short int targetPlayerId, PLAYER_DIPLOMACY_STANCES diplomacyStance) {
+	const long int structSize = sizeof(ROR_STRUCTURES_10C::COMMAND_CHANGE_DIPLOMACY);
+	ROR_STRUCTURES_10C::COMMAND_CHANGE_DIPLOMACY *cmd = (ROR_STRUCTURES_10C::COMMAND_CHANGE_DIPLOMACY *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING;
+	cmd->subTypeId = AOE_CONST_INTERNAL::INTERNAL_COMMAND67_SUBTYPE::CST_IC67_CHANGE_DIPLOMACY;
+	assert(cmd->IsCmdIdValid());
+	cmd->actorPlayerId = playerId;
+	cmd->targetPlayerId = targetPlayerId;
+	cmd->diplomacyStance = (short int)diplomacyStance;
+	cmd->floatDiplomacyStance = (float)diplomacyStance;
+	cmd->unknown_6 = 0;
+	cmd->unused_E = 0;
+	return AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
+// Create a "ROR" command struct (set ally victory flag). Returns false if failed.
+bool CreateCmd_SetAllyVictory(short int playerId, bool enable) {
+	const long int structSize = sizeof(ROR_STRUCTURES_10C::COMMAND_SET_ALLY_VICTORY);
+	ROR_STRUCTURES_10C::COMMAND_SET_ALLY_VICTORY *cmd = (ROR_STRUCTURES_10C::COMMAND_SET_ALLY_VICTORY *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING;
+	cmd->subTypeId = AOE_CONST_INTERNAL::INTERNAL_COMMAND67_SUBTYPE::CST_IC67_SET_ALLY_VICTORY;
+	assert(cmd->IsCmdIdValid());
+	cmd->actorPlayerId = playerId;
+	cmd->allyVictoryFlag = (short int)enable;
+	cmd->unknown_6 = 0;
+	cmd->unused_8 = 0;
+	cmd->unknown_C = 0;
+	cmd->unused_E = 0;
+	return AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
+// Create a "ROR" command struct (give writing - set shared exploration). Returns false if failed.
+bool CreateCmd_SetSharedExploration(short int playerId) {
+	const long int structSize = sizeof(ROR_STRUCTURES_10C::COMMAND_APPLY_WRITING);
+	ROR_STRUCTURES_10C::COMMAND_APPLY_WRITING *cmd = (ROR_STRUCTURES_10C::COMMAND_APPLY_WRITING *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING;
+	cmd->subTypeId = AOE_CONST_INTERNAL::INTERNAL_COMMAND67_SUBTYPE::CST_IC67_APPLY_WRITING_TECH;
+	assert(cmd->IsCmdIdValid());
+	cmd->playerId = playerId;
+	cmd->unused_4 = 0;
+	cmd->unused_6 = 0;
+	cmd->unused_8 = 0;
+	cmd->unused_C = 0;
+	cmd->unused_E = 0;
+	return AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
+// Create a "ROR" command struct (change game speed). Returns false if failed.
+bool CreateCmd_ChangeGameSpeed(float newSpeed) {
+	const long int structSize = sizeof(ROR_STRUCTURES_10C::COMMAND_CHANGE_GAME_SPEED);
+	ROR_STRUCTURES_10C::COMMAND_CHANGE_GAME_SPEED *cmd = (ROR_STRUCTURES_10C::COMMAND_CHANGE_GAME_SPEED *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING;
+	cmd->subTypeId = AOE_CONST_INTERNAL::INTERNAL_COMMAND67_SUBTYPE::CST_IC67_CHANGE_GAME_SPEED;
+	assert(cmd->IsCmdIdValid());
+	cmd->newSpeed = newSpeed;
+	cmd->unused_2 = 0;
+	cmd->unused_4 = 0;
+	cmd->unused_6 = 0;
+	cmd->unused_C = 0;
+	cmd->unused_E = 0;
+	return AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
+// Create a "ROR" command struct (add a resource amount to a player). Returns false if failed.
+bool CreateCmd_AddResource(short int playerId, short int resourceId, float value) {
+	const long int structSize = sizeof(ROR_STRUCTURES_10C::COMMAND_ADD_RESOURCE);
+	ROR_STRUCTURES_10C::COMMAND_ADD_RESOURCE *cmd = (ROR_STRUCTURES_10C::COMMAND_ADD_RESOURCE *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING;
+	cmd->subTypeId = AOE_CONST_INTERNAL::INTERNAL_COMMAND67_SUBTYPE::CST_IC67_ADD_RESOURCE;
+	assert(cmd->IsCmdIdValid());
+	cmd->actorPlayerId = playerId;
+	cmd->resourceId = resourceId;
+	cmd->resourceAmount = value;
+	cmd->unused_6 = 0;
+	cmd->unused_C = 0;
+	cmd->unused_E = 0;
+	return AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
+// Create a "ROR" command struct (set ally victory flag). Returns false if failed.
+bool CreateCmd_SetSteroids(bool enable) {
+	const long int structSize = sizeof(ROR_STRUCTURES_10C::COMMAND_SET_STEROIDS_MODE);
+	ROR_STRUCTURES_10C::COMMAND_SET_STEROIDS_MODE *cmd = (ROR_STRUCTURES_10C::COMMAND_SET_STEROIDS_MODE *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING;
+	cmd->subTypeId = AOE_CONST_INTERNAL::INTERNAL_COMMAND67_SUBTYPE::CST_IC67_SET_STEROIDS_MODE;
+	assert(cmd->IsCmdIdValid());
+	cmd->steroidsModeFlag = (short int)enable;
+	cmd->unused_4 = 0;
+	cmd->unused_6 = 0;
+	cmd->unused_8 = 0;
+	cmd->unused_C = 0;
+	cmd->unused_E = 0;
+	return AddCommandToGameCmdQueue(cmd, structSize);
+}
 
 
 // Writes text representing available tech tree (available technologies that have not been researched yet)
