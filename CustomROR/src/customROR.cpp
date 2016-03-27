@@ -257,6 +257,12 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004FAA36:
 		this->WriteF11PopInfoText(REG_values);
 		break;
+	case 0x004C41BB:
+		this->FixGetUnitStructInTargetSelectionLoop(REG_values);
+		break;
+	case 0x0041498B:
+		this->FixUnitIdBugStuckAttackNoTarget(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -2887,6 +2893,41 @@ void CustomRORInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
 	long int currentPop = GetIntValueFromRORStack(REG_values, 0xC); // arg4
 	long int houseMaxPop = GetIntValueFromRORStack(REG_values, 0x10); // arg5
 	this->crCommand.WriteF11PopInfoText(f11panel, bufferToWrite, format, localizedText, currentPop, houseMaxPop);
+}
+
+// From 004C41B3
+// Change return address to 0x4C41C2 when unitId is invalid (-1) to force ignoring it.
+// Indeed, the GetUnitPtr(-1) call might find a unit (eg a doppleganger)
+void CustomRORInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_values) {
+	ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = (ROR_STRUCTURES_10C::STRUCT_INF_AI *)REG_values->ESI_val;
+	long int currentLoopOffset = REG_values->EDI_val;
+	long int currentUnitId = REG_values->ECX_val;
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	if (currentUnitId == -1) {
+		REG_values->EAX_val = NULL; // simulates that the GetUnitPtr(...) did not found a valid unit
+		ChangeReturnAddress(REG_values, 0x4C41C2);
+		return;
+	}
+	REG_values->ECX_val = (unsigned long int) infAI->ptrMainAI; // Required for call 0x40BAB0
+	REG_values->EAX_val = currentUnitId; // ROR modified PUSHes EAX, not ECX.
+}
+
+
+// From 00414980
+// Change return address to 0x414991 when unitId is invalid (-1) to force ignoring it.
+// Indeed, the GetUnitPtr(-1) call might find a unit (eg a doppleganger)
+// This method fixes the case when some unit (let's say an archer) keeps shooting at nothing, at a specific position on the map.
+void CustomRORInstance::FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values) {
+	ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity = (ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
+	ror_api_assert(REG_values, activity && isAValidRORChecksum(activity->checksum));
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	REG_values->EAX_val = activity->targetUnitId;
+	REG_values->ECX_val = REG_values->ESI_val;
+	if (activity->targetUnitId == -1) {
+		REG_values->EAX_val = NULL; // simulates that the GetUnitPtr(...) did not found a valid unit
+		ChangeReturnAddress(REG_values, 0x414991);
+		return;
+	}
 }
 
 

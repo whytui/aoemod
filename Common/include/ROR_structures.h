@@ -2838,7 +2838,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_02C; // A distance?. 0x64 in 4DA4C9.
 		// 0x30
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
-		long int targetUnitId;
+		long int targetUnitId; // +34
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // Target AI type (3=building...)
 		float posY;
 		// 0x40

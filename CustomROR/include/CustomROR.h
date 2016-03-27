@@ -111,6 +111,8 @@ public:
 	void ShowUnitShortcutNumbers(REG_BACKUP *REG_values);
 	void InitPlayersCivInScenarioEditor(REG_BACKUP *REG_values);
 	void WriteF11PopInfoText(REG_BACKUP *REG_values);
+	void FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_values);
+	void FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values);
 
 	// Map generation
 	void ManageRelicsCount(REG_BACKUP *REG_values);

@@ -270,6 +270,16 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 		fprintf_s(f, strNotEnabled);
 		result = false;
 	}
+	fprintf_s(f, "\nFeature: Fix select unit in AI list...");
+	if (!IsRORAPICallEnabled(0x004C41BB)) {
+		fprintf_s(f, strNotEnabled);
+		result = false;
+	}
+	fprintf_s(f, "\nFeature: Fix unit id in activity target...");
+	if (!IsRORAPICallEnabled(0x0041498B)) {
+		fprintf_s(f, strNotEnabled);
+		result = false;
+	}
 	// MAP
 	fprintf_s(f, "\nFeature: Generated map elevation customization...");
 	if (!IsRORAPICallEnabled(0x00472C2F)) {
