@@ -280,6 +280,21 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 		fprintf_s(f, strNotEnabled);
 		result = false;
 	}
+	fprintf_s(f, "\nFeature: Fix unit id when setting activity target...");
+	if (!IsRORAPICallEnabled(0x00412F34)) {
+		fprintf_s(f, strNotEnabled);
+		result = false;
+	}
+	fprintf_s(f, "\nFeature: Fix unit id when reading activity target (case200)...");
+	if (!IsRORAPICallEnabled(0x04E64BD)) {
+		fprintf_s(f, strNotEnabled);
+		result = false;
+	}
+	fprintf_s(f, "\nFeature: Fix unit id when reading activity target (case1F4)...");
+	if (!IsRORAPICallEnabled(0x004E479B)) {
+		fprintf_s(f, strNotEnabled);
+		result = false;
+	}
 	// MAP
 	fprintf_s(f, "\nFeature: Generated map elevation customization...");
 	if (!IsRORAPICallEnabled(0x00472C2F)) {

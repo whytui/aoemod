@@ -12,6 +12,7 @@
 #include <mystrings.h>
 #include <ROR_commands.h>
 
+#include "AOE_memory.h"
 #include "UI_utilities.h"
 #include "crConfig.h"
 #include "civilizationInfo.h"
@@ -87,6 +88,7 @@ public:
 
 	// UI Variables : CustomROR yes/no dialog
 	unsigned long int *customYesNoDialogVar;  // customROR's dialog struct. NULL means dialog does not exist.
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *customGameMenuOptionsBtnVar;
 private:
 	// "OK" button of customROR's game popup. NULL means popup does not exist. See HasOpenedCustomGamePopup.
 	// It is CRUCIAL that this variable is always correctly set (reset).
@@ -191,7 +193,9 @@ ROR_STRUCTURES_10C::STRUCT_PLAYER *GetControlledPlayerStruct_Settings();
 // returns NULL if incorrect player id
 ROR_STRUCTURES_10C::STRUCT_PLAYER *GetPlayerStruct(long int playerId);
 
-// Useful to get structure from a unit id
+// Useful to get structure from a unit id. May return NULL !
+// Only works for creatable (unitId >= 0). This is just a choice to avoid writing same bugs as ROR
+// (some functions use -1 as <No unit> but get an irrevant unit struct then because -1 is not tested before calling getUnitStruct(...))
 ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitStruct(long int unitId);
 
 // Returns a unit definition if valid, NULL otherwise.
@@ -313,16 +317,6 @@ bool TriggerTextContainsENDTagAtBeginning(char *triggerText);
 
 /* ----------- "ACTIVE" methods ------------- */
 
-// Allocates memory using ROR's method. Please use this, not malloc or new(). (not sure but it seems ROR fails freeing otherwise ?)
-void *AOEAlloc(long int sizeInBytes);
-// Allocates memory using ROR's method. Please use this, not malloc or new(). (not sure but it seems ROR fails freeing otherwise ?)
-void *AOEAllocZeroMemory(long int number, long int elemSizeInBytes);
-// Free memory using ROR's method
-void AOEFree(void *ptr);
-
-// Calls AOE's class destructor and also sets the variable (ptrObj) to NULL.
-// ASSERTS that the provided pointer is non-NULL (so don't call this with NULL)
-void CallAOEDestructor(unsigned long int **ptrObj);
 
 // Remove all AI-controlled flags for currently controlled player (cf game settings structure).
 // Only for single player games.

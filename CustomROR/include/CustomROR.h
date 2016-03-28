@@ -113,6 +113,9 @@ public:
 	void WriteF11PopInfoText(REG_BACKUP *REG_values);
 	void FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_values);
 	void FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values);
+	void SetActivityTargetUnitIdBug(REG_BACKUP *REG_values);
+	void FixActivityTargetUnitIdBug_case200(REG_BACKUP *REG_values);
+	void FixActivityTargetUnitIdBug_case1F4(REG_BACKUP *REG_values);
 
 	// Map generation
 	void ManageRelicsCount(REG_BACKUP *REG_values);

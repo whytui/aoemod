@@ -69,13 +69,19 @@ static void ChangeReturnAddress(REG_BACKUP *REG_values, unsigned long int newRet
 	*addr = newReturnAddress; // Change return address in (original code's) stack
 }
 
-// Useful to get a value from stack (sort of MOV ..., DS:[ESP+offset])
+// Useful to get a value from ROR stack (sort of MOV ..., DS:[ESP+offset])
 static unsigned long int GetIntValueFromRORStack(REG_BACKUP *REG_values, long int offset) {
 	unsigned long int *addr = (unsigned long int *) (REG_values->ESP_val + offset);
 	return *addr;
 }
-// Useful to get a value from stack (sort of MOV ..., DS:[ESP+offset])
+// Useful to get a value from ROR stack (sort of MOV ..., DS:[ESP+offset])
 static float GetFloatValueFromRORStack(REG_BACKUP *REG_values, long int offset) {
 	float *addr = (float *) (REG_values->ESP_val + offset);
 	return *addr;
+}
+
+// Useful to set a value to ROR stack (sort of MOV ..., DS:[ESP+offset])
+static void SetIntValueToRORStack(REG_BACKUP *REG_values, long int offset, long int value) {
+	unsigned long int *addr = (unsigned long int *) (REG_values->ESP_val + offset);
+	*addr = value;
 }

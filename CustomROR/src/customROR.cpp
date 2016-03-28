@@ -263,6 +263,15 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x0041498B:
 		this->FixUnitIdBugStuckAttackNoTarget(REG_values);
 		break;
+	case 0x00412F34:
+		this->SetActivityTargetUnitIdBug(REG_values);
+		break;
+	case 0x004E64BD:
+		this->FixActivityTargetUnitIdBug_case200(REG_values);
+		break;
+	case 0x004E479B:
+		this->FixActivityTargetUnitIdBug_case1F4(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -2071,6 +2080,7 @@ void CustomRORInstance::ManageAttackActionChange(REG_BACKUP *REG_values) {
 // From 00411D58 (activity.setAttackUnit(unitId, force)). For military units + villagers (but not villagers against tree/animals)
 // For compatibility with original code, if EBP != 0 then change return address to 0x411D64 (equivalent to the JNZ we overwrote).
 // It is possible to overwrite arg1 in stack to force another unitId (ESP+014) (ROR method code has not read it yet).
+// Warning: unitId in stack (ESP+014) should NOT be -1 (game bug). If this occurs, force change return address to 0x411DC7 (return 0 in ROR code)
 void CustomRORInstance::ManageAttackActivityChange1(REG_BACKUP *REG_values) {
 	long int arg_flag = REG_values->EBP_val;
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -2082,11 +2092,16 @@ void CustomRORInstance::ManageAttackActivityChange1(REG_BACKUP *REG_values) {
 	}
 	ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity = (ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *)REG_values->ECX_val;
 	long int *arg_targetUnitId = (long int*)(REG_values->ESP_val + 0x14); // Get arg1 (pointer, we may want to update it)
+
 	// Custom Treatments.
-	if (*arg_targetUnitId == -1) { return; } // Let normal code manage this...
-	
-	if (!this->crCommand.ShouldChangeTarget(activity, *arg_targetUnitId)) {
+	if ((*arg_targetUnitId != -1) && !this->crCommand.ShouldChangeTarget(activity, *arg_targetUnitId)) {
 		*arg_targetUnitId = activity->targetUnitId; // Force current target to keep it (do not change target).
+	}
+	if (*arg_targetUnitId == -1) {
+		// This case is not correctly managed by the game. It searches unit -1 (sometimes finds a doppleganger which is irrelevant).
+		// Force "return false" in ROR method
+		ChangeReturnAddress(REG_values, 0x411DC7);
+		return;
 	}
 }
 
@@ -2358,8 +2373,11 @@ void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 	}
 	
 	// Limit to single player, causes crash on multi.
+	assert(this->crInfo.customGameMenuOptionsBtnVar == NULL);
 	if (myEAX && this->crInfo.configInfo.showCustomRORMenu && !IsMultiplayer()) {
-		myEAX = AOE_AddButton((ROR_STRUCTURES_10C::STRUCT_ANY_UI*)myESI, (ROR_STRUCTURES_10C::STRUCT_UI_BUTTON**)&unusedReference, LANG_ID_OPTIONS, 0xD0, myEBP, 0xAC, 0x1E,
+		myEAX = AOE_AddButton((ROR_STRUCTURES_10C::STRUCT_ANY_UI*)myESI,
+			(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON**)&this->crInfo.customGameMenuOptionsBtnVar, 
+			LANG_ID_OPTIONS, 0xD0, myEBP, 0xAC, 0x1E,
 			AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	}
 	REG_values->EDI_val = myEDI; // Important for navigating with arrows in menu.
@@ -2367,12 +2385,23 @@ void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 }
 
 
+// From 0x0043424D
 // Manage onclick on our custom button in menu.
 // Opens a custom popup (created like game's option menu)
 void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	long int myEAX = REG_values->EAX_val;
 	long int myESP = REG_values->ESP_val;
 	ROR_STRUCTURES_10C::STRUCT_ANY_UI *previousPopup = (ROR_STRUCTURES_10C::STRUCT_ANY_UI *)REG_values->ESI_val;
+
+	if (this->crInfo.configInfo.showCustomRORMenu) {
+		// Before returning, make sure we always "free" the "custom options" button (from game menu).
+		// Add it to our "garbage collector" so that it is freed later.
+		if (this->crInfo.customGameMenuOptionsBtnVar) {
+			this->crInfo.AddObjectInPopupContentList(this->crInfo.customGameMenuOptionsBtnVar);
+			this->crInfo.customGameMenuOptionsBtnVar = NULL;
+		}
+	}
+
 	if (myEAX == 5) { return; } // Corresponds to original code (click on original options menu)
 
 	ChangeReturnAddress(REG_values, 0x004342AF); // Corresponds to the JNZ we removed in original code
@@ -2385,6 +2414,7 @@ void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	if (!this->crMainInterface.CreateGameCustomRorOptionsPopup(previousPopup)) {
 		ChangeReturnAddress(REG_values, 0x004342A7);
 	}
+	ChangeReturnAddress(REG_values, 0x004342A7);//TEST
 }
 
 
@@ -2929,6 +2959,68 @@ void CustomRORInstance::FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values) 
 		return;
 	}
 }
+
+
+// From 00412F2C
+void CustomRORInstance::SetActivityTargetUnitIdBug(REG_BACKUP *REG_values) {
+	ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity = (ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
+	ROR_STRUCTURES_10C::STRUCT_UNIT *actorUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT *)REG_values->EAX_val;
+	long int unitIdToSearch = GetIntValueFromRORStack(REG_values, 0);
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	if (unitIdToSearch == -1) {
+		REG_values->EAX_val = NULL;
+	} else {
+		REG_values->EAX_val = (unsigned long int) GetUnitStruct(unitIdToSearch);
+	}
+}
+
+
+// From 004E64B2. May change return address to 0x4E64C7
+void CustomRORInstance::FixActivityTargetUnitIdBug_case200(REG_BACKUP *REG_values) {
+	ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity = (ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
+	ROR_STRUCTURES_10C::STRUCT_UNIT *actorUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT *)REG_values->EAX_val;
+	ror_api_assert(REG_values, actorUnit && actorUnit->IsCheckSumValid());
+	ror_api_assert(REG_values, activity && isAValidRORChecksum(activity->checksum));
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	long int targetUnitId = activity->targetUnitId;
+	// Compatibility treatments
+	REG_values->EDX_val = targetUnitId;
+	REG_values->EAX_val = (unsigned long int)actorUnit->ptrStructPlayer;
+	if (targetUnitId == -1) {
+		// Here is the fix
+		REG_values->EAX_val = 0; // Unit not found
+		ChangeReturnAddress(REG_values, 0x4E64C7); // jump AFTER the call to get unit struct
+	}
+}
+
+
+// From 004E4796.
+// Get unit struct for "param" unitId and activity->targetUnitId to respectively EDI and EAX.
+// FIX: if unitId is -1, the unit pointer must be NULL.
+void CustomRORInstance::FixActivityTargetUnitIdBug_case1F4(REG_BACKUP *REG_values) {
+	ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity = (ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
+	ror_api_assert(REG_values, activity && isAValidRORChecksum(activity->checksum));
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	long int *pUnitId = (long int*)REG_values->EBX_val;
+	ror_api_assert(REG_values, pUnitId != NULL);
+	long int unitIdFromStack = GetIntValueFromRORStack(REG_values, 0);
+	ror_api_assert(REG_values, *pUnitId == unitIdFromStack);
+	ROR_STRUCTURES_10C::STRUCT_UNIT *paramUnit = NULL;
+	ROR_STRUCTURES_10C::STRUCT_UNIT *activityTargetUnit = NULL;
+	if (unitIdFromStack != -1) {
+		// FIXED First "get unit struct" (0x4E4796)
+		paramUnit = GetUnitStruct(unitIdFromStack);
+	}
+	if (activity->targetUnitId != -1) {
+		// FIXED Second "get unit struct" (0x4E47A7)
+		activityTargetUnit = GetUnitStruct(activity->targetUnitId);
+	}
+	// Update registry with correct values (NULL if IDs are -1)
+	REG_values->EDI_val = (unsigned long int)paramUnit;
+	REG_values->EAX_val = (unsigned long int)activityTargetUnit;
+	SetIntValueToRORStack(REG_values, 0x20, (unsigned long int)paramUnit); // cf MOV DWORD PTR SS:[ESP+20],EDI
+}
+
 
 
 //#pragma warning(pop)

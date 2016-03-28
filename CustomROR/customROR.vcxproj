@@ -99,6 +99,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\tinyxml\tinystr.h" />
     <ClInclude Include="..\..\tinyxml\tinyxml.h" />
+    <ClInclude Include="include\AOE_memory.h" />
     <ClInclude Include="include\civilizationInfo.h" />
     <ClInclude Include="include\crCommands.h" />
     <ClInclude Include="include\crCommon.h" />

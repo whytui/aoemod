@@ -5,6 +5,7 @@
 #include <AOE_const_internal.h>
 #include <ROR_structures.h>
 #include <assert.h>
+#include "AOE_memory.h"
 
 
 /*
@@ -111,137 +112,6 @@ static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(ROR_STRUCTUR
 		CALL EDX //UIObj.createPopupAndFocus(arg1, parentUI, hSize, vSize, dlgName?, arg6, arg7)?
 	}
 	return newObj;
-}
-
-
-// Create a popup (from Options original model) and returns the new UI object's address as an unsigned long int
-// This must be called when menu is opened
-static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateCustomOptionsPopupFromMenu(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent) {
-	if (!parent) { return NULL; }
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *newPtr = NULL;
-	_asm {
-		// Copied from 0x43424D
-		MOV EDI, parent
-		MOV ESI, EDI // Now ESI is game UI (parent)
-		PUSH 0x557270 // screen name
-		MOV ECX, 0x5830E8
-		MOV EAX, 0x00451DF0
-		CALL EAX
-		PUSH 0
-		PUSH 0x5571F8
-		MOV ECX, 0x5830E8
-		MOV EAX, 0x0451BE0 // hide menu
-		CALL EAX
-		PUSH 0x564
-		MOV EAX, 0x0052601D // alloc
-		CALL EAX
-		ADD ESP, 4 // for push 0x564
-		TEST EAX, EAX
-		JE failed
-		// Now see 0x4300D0
-		MOV ECX, EAX // Now ECX is the popup object (parent for other new objects)
-		PUSH EBX
-		PUSH ESI
-		PUSH EDI
-		MOV ESI,ECX // Now and for all the code below ESI is the popup object (parent for other new objects)
-		PUSH 0x00557204
-		MOV EAX, 0x00460730 // UIObj.genericUIConstructor(ScreenName) ?
-		CALL EAX
-		MOV EAX, 0
-		LEA EDX,DWORD PTR DS:[ESI+0x498]
-		LEA EBX,DWORD PTR DS:[ESI+0x494]
-		XOR ECX,ECX
-		MOV DWORD PTR DS:[ESI+0x490],EAX
-		MOV DWORD PTR DS:[ESI],0x005436E0
-		MOV DWORD PTR DS:[EBX],0
-		MOV DWORD PTR DS:[EDX],ECX
-		LEA EAX,DWORD PTR DS:[ESI+0x4A8]
-		PUSH 1
-		MOV DWORD PTR DS:[EDX+4],ECX
-		MOV DWORD PTR DS:[EDX+8],ECX
-		MOV DWORD PTR DS:[EDX+0x0C],ECX
-		MOV DWORD PTR DS:[EAX],ECX
-		XOR EDX,EDX
-		MOV DWORD PTR DS:[EAX+4],ECX
-		MOV DWORD PTR DS:[EAX+8],ECX
-		LEA EAX,DWORD PTR DS:[ESI+0x4B4]
-		MOV DWORD PTR DS:[ESI+0x4B4],EDX
-		MOV DWORD PTR DS:[EAX+4],EDX
-		MOV DWORD PTR DS:[EAX+8],EDX
-		LEA EAX,DWORD PTR DS:[ESI+0x4C4]
-		MOV DWORD PTR DS:[ESI+0x4C0],EDX
-		MOV DWORD PTR DS:[EAX],ECX
-		MOV DWORD PTR DS:[EAX+4],ECX
-		MOV DWORD PTR DS:[EAX+8],ECX
-		LEA EAX,DWORD PTR DS:[ESI+0x4D4]
-		MOV DWORD PTR DS:[ESI+0x4D0],EDX
-		MOV DWORD PTR DS:[EAX],EDX
-		MOV DWORD PTR DS:[EAX+4],EDX
-		MOV DWORD PTR DS:[EAX+8],EDX
-		LEA EAX,DWORD PTR DS:[ESI+0x4E4]
-		MOV DWORD PTR DS:[ESI+0x4E0],EDX
-		MOV DWORD PTR DS:[EAX],ECX
-		MOV DWORD PTR DS:[EAX+4],ECX
-		MOV DWORD PTR DS:[EAX+8],ECX
-		MOV DWORD PTR DS:[EAX+0x0C],ECX
-		LEA EAX,DWORD PTR DS:[ESI+0x4F4]
-		MOV DWORD PTR DS:[ESI+0x4F4],EDX
-		MOV DWORD PTR DS:[EAX+4],EDX
-		MOV DWORD PTR DS:[EAX+8],EDX
-		LEA EAX,DWORD PTR DS:[ESI+0x500]
-		MOV DWORD PTR DS:[ESI+0x500],ECX
-		MOV DWORD PTR DS:[EAX+4],ECX
-		MOV DWORD PTR DS:[EAX+8],ECX
-		LEA EAX,DWORD PTR DS:[ESI+0x50C]
-		MOV DWORD PTR DS:[ESI+0x50C],EDX
-		MOV DWORD PTR DS:[EAX+4],EDX
-		LEA EAX,DWORD PTR DS:[ESI+0x514]
-		MOV DWORD PTR DS:[ESI+0x514],ECX
-		MOV DWORD PTR DS:[EAX+4],ECX
-		MOV DWORD PTR DS:[EAX+8],ECX
-		LEA EAX,DWORD PTR DS:[ESI+0x520]
-		MOV DWORD PTR DS:[ESI+0x520],EDX
-		MOV DWORD PTR DS:[EAX+4],EDX
-		LEA EAX,DWORD PTR DS:[ESI+0x528]
-		MOV DWORD PTR DS:[ESI+0x528],ECX
-		MOV DWORD PTR DS:[EAX+4],ECX
-		MOV DWORD PTR DS:[EAX+8],ECX
-		MOV DWORD PTR DS:[EAX+0x0C],ECX
-		LEA EAX,DWORD PTR DS:[ESI+0x538]
-		MOV ECX,EDI // ECX is (again) the popup (parent) object
-		MOV DWORD PTR DS:[EAX],EDX
-		MOV DWORD PTR DS:[EAX+4],EDX
-		MOV DWORD PTR DS:[EAX+8],EDX
-		MOV DWORD PTR DS:[ESI+0x544],EDX
-		MOV DWORD PTR DS:[ESI+0x548],EDX
-		MOV EAX, 0x00455D00
-		CALL EAX
-		PUSH EAX
-		MOV ECX,EDI
-		MOV EAX, 0x00455CF0
-		CALL EAX
-		PUSH EAX
-		PUSH 0x186
-		PUSH 0x258
-		PUSH EDI
-		MOV ECX,EDI
-		MOV EAX, 0x00454260
-		CALL EAX
-		PUSH EAX
-		MOV ECX, ESI
-		MOV EAX, 0x004607A0 // UIObj.createPopupAndFocus(arg1, parentUI, hSize, vSize, dlgName?, arg6, arg7)?
-		CALL EAX
-		TEST EAX,EAX
-		JE failed
-
-		MOV newPtr, ESI
-		POP EDI
-		POP ESI
-		POP EBX
-	}
-	return newPtr;
-failed:
-	return 0;
 }
 
 
@@ -561,6 +431,7 @@ static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_GetScreenFromName(const char *scre
 }
 
 
+// Calls 0x451BE0
 static void AOE_RefreshScreen(const char *screenName, unsigned long int arg2) {
 	_asm {
 		PUSH arg2
@@ -572,7 +443,8 @@ static void AOE_RefreshScreen(const char *screenName, unsigned long int arg2) {
 	}
 }
 
-// ROR code first calls RefreshScreen on the parent and then CloseScreenAndDestroy.
+// (cf 0x451DF0)
+// ROR code first (not always, sometimes after?) calls RefreshScreen on the parent and then CloseScreenAndDestroy.
 static void AOE_CloseScreenAndDestroy(const char *screenName) {
 	_asm {
 		MOV EDX, screenName
@@ -629,3 +501,114 @@ static void AOE_RefreshUIObject(ROR_STRUCTURES_10C::STRUCT_ANY_UI *object) {
 	}
 }
 
+
+// Create a popup (from Options original model) and returns the new UI object's address as an unsigned long int
+// This must be called when menu is opened
+static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateCustomOptionsPopupFromMenu(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent) {
+	if (!parent) { return NULL; }
+
+	// Analog to 0x43424D
+	AOE_CloseScreenAndDestroy("Menu Dialog");
+	AOE_RefreshScreen("Game Screen", 0);
+	ROR_STRUCTURES_10C::STRUCT_ANY_UI *newPtr = (ROR_STRUCTURES_10C::STRUCT_ANY_UI *)AOEAlloc(0x564);
+	if (!newPtr) { return NULL; }
+
+	_asm {
+		// see 0x4300D0
+		MOV ECX, newPtr // Now ECX is the new popup object (parent for other new objects)
+		MOV ESI, ECX // Now and for all the code below ESI is the popup object (parent for other new objects)
+		PUSH 0x00557204
+		MOV EAX, 0x00460730 // UIObj.genericUIConstructor(ScreenName) ?
+		CALL EAX
+		MOV EAX, 0
+		LEA EDX,DWORD PTR DS:[ESI+0x498]
+		LEA EBX,DWORD PTR DS:[ESI+0x494]
+		XOR ECX,ECX
+		MOV DWORD PTR DS:[ESI+0x490],EAX
+		MOV DWORD PTR DS:[ESI],0x005436E0
+		MOV DWORD PTR DS:[EBX],0
+		MOV DWORD PTR DS:[EDX],ECX
+		LEA EAX,DWORD PTR DS:[ESI+0x4A8]
+		PUSH 1
+		MOV DWORD PTR DS:[EDX+4],ECX
+		MOV DWORD PTR DS:[EDX+8],ECX
+		MOV DWORD PTR DS:[EDX+0x0C],ECX
+		MOV DWORD PTR DS:[EAX],ECX
+		XOR EDX,EDX
+		MOV DWORD PTR DS:[EAX+4],ECX
+		MOV DWORD PTR DS:[EAX+8],ECX
+		LEA EAX,DWORD PTR DS:[ESI+0x4B4]
+		MOV DWORD PTR DS:[ESI+0x4B4],EDX
+		MOV DWORD PTR DS:[EAX+4],EDX
+		MOV DWORD PTR DS:[EAX+8],EDX
+		LEA EAX,DWORD PTR DS:[ESI+0x4C4]
+		MOV DWORD PTR DS:[ESI+0x4C0],EDX
+		MOV DWORD PTR DS:[EAX],ECX
+		MOV DWORD PTR DS:[EAX+4],ECX
+		MOV DWORD PTR DS:[EAX+8],ECX
+		LEA EAX,DWORD PTR DS:[ESI+0x4D4]
+		MOV DWORD PTR DS:[ESI+0x4D0],EDX
+		MOV DWORD PTR DS:[EAX],EDX
+		MOV DWORD PTR DS:[EAX+4],EDX
+		MOV DWORD PTR DS:[EAX+8],EDX
+		LEA EAX,DWORD PTR DS:[ESI+0x4E4]
+		MOV DWORD PTR DS:[ESI+0x4E0],EDX
+		MOV DWORD PTR DS:[EAX],ECX
+		MOV DWORD PTR DS:[EAX+4],ECX
+		MOV DWORD PTR DS:[EAX+8],ECX
+		MOV DWORD PTR DS:[EAX+0x0C],ECX
+		LEA EAX,DWORD PTR DS:[ESI+0x4F4]
+		MOV DWORD PTR DS:[ESI+0x4F4],EDX
+		MOV DWORD PTR DS:[EAX+4],EDX
+		MOV DWORD PTR DS:[EAX+8],EDX
+		LEA EAX,DWORD PTR DS:[ESI+0x500]
+		MOV DWORD PTR DS:[ESI+0x500],ECX
+		MOV DWORD PTR DS:[EAX+4],ECX
+		MOV DWORD PTR DS:[EAX+8],ECX
+		LEA EAX,DWORD PTR DS:[ESI+0x50C]
+		MOV DWORD PTR DS:[ESI+0x50C],EDX
+		MOV DWORD PTR DS:[EAX+4],EDX
+		LEA EAX,DWORD PTR DS:[ESI+0x514]
+		MOV DWORD PTR DS:[ESI+0x514],ECX
+		MOV DWORD PTR DS:[EAX+4],ECX
+		MOV DWORD PTR DS:[EAX+8],ECX
+		LEA EAX,DWORD PTR DS:[ESI+0x520]
+		MOV DWORD PTR DS:[ESI+0x520],EDX
+		MOV DWORD PTR DS:[EAX+4],EDX
+		LEA EAX,DWORD PTR DS:[ESI+0x528]
+		MOV DWORD PTR DS:[ESI+0x528],ECX
+		MOV DWORD PTR DS:[EAX+4],ECX
+		MOV DWORD PTR DS:[EAX+8],ECX
+		MOV DWORD PTR DS:[EAX+0x0C],ECX
+		LEA EAX,DWORD PTR DS:[ESI+0x538]
+		MOV EDI, parent // test
+		MOV ECX,EDI // ECX is (again) the popup (parent) object
+		MOV DWORD PTR DS:[EAX],EDX
+		MOV DWORD PTR DS:[EAX+4],EDX
+		MOV DWORD PTR DS:[EAX+8],EDX
+		MOV DWORD PTR DS:[ESI+0x544],EDX
+		MOV DWORD PTR DS:[ESI+0x548],EDX
+		MOV EAX, 0x00455D00
+		CALL EAX
+		PUSH EAX
+		MOV ECX,EDI
+		MOV EAX, 0x00455CF0
+		CALL EAX
+		PUSH EAX
+		PUSH 0x186
+		PUSH 0x258
+		PUSH EDI
+		MOV ECX,EDI
+		MOV EAX, 0x00454260
+		CALL EAX
+		PUSH EAX
+		MOV ECX, ESI
+		MOV EAX, 0x004607A0 // UIObj.createPopupAndFocus(arg1, parentUI, hSize, vSize, dlgName?, arg6, arg7)?
+		CALL EAX
+		TEST EAX,EAX
+		JE failed
+	}
+	return newPtr;
+failed:
+	return 0;
+}
