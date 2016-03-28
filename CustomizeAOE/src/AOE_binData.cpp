@@ -74,7 +74,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_VEG_windowedMode_10c 21
 #define COUNT_selectedUnits_10c 84
 #define COUNT_obsoletes_10c 22
-#define COUNT_ROR_API_10c 90
+#define COUNT_ROR_API_10c 91
 #define COUNT_manageAI_10c 13
 
 
@@ -4465,6 +4465,16 @@ void AOE_binData::InitROR_API() {
 		FM_ON
 		);
 
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		FixKillXUnknownPlayerCrash,
+		"Fix kill* cheat code crash when player does not exist.",
+		0x0010CB64,
+		(0x0F, 0x85, 0x05, 0x01, 0x00, 0x00, 0x8B, 0x46, 0x40, 0x8B, 0x0C, 0xB8, 0x8B, 0x51, 0x28), // default=no
+		(0x0F, 0x85, 0x05, 0x01, 0x00, 0x00, 0xE8, 0x05, 0xCA, 0xF0, 0xFF, 0x90, 0x8B, 0x51, 0x28),
+		FM_OFF,
+		FM_ON
+		);
+	
 
 	//optional
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),

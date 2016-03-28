@@ -272,6 +272,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004E479B:
 		this->FixActivityTargetUnitIdBug_case1F4(REG_values);
 		break;
+	case 0x0050CB6F:
+		this->FixKillXCrashOnUnknownPlayer(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -2354,7 +2357,6 @@ void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 	long int myEDI = REG_values->EDI_val;
 	long int myEBP = REG_values->EBP_val;
 	long int myEAX = 1;
-	unsigned long int *unusedReference;
 	unsigned long int **pOptionsBtn;
 	_asm {
 		MOV ESI, myESI
@@ -3019,6 +3021,25 @@ void CustomRORInstance::FixActivityTargetUnitIdBug_case1F4(REG_BACKUP *REG_value
 	REG_values->EDI_val = (unsigned long int)paramUnit;
 	REG_values->EAX_val = (unsigned long int)activityTargetUnit;
 	SetIntValueToRORStack(REG_values, 0x20, (unsigned long int)paramUnit); // cf MOV DWORD PTR SS:[ESP+20],EDI
+}
+
+
+// From 0050CB64.
+// kill* cheat codes crash when player does not exist. This changes return address when player is invalid to force return.
+void CustomRORInstance::FixKillXCrashOnUnknownPlayer(REG_BACKUP *REG_values) {
+	long int playerIdToKill = REG_values->EDI_val;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = (ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *)REG_values->ESI_val;
+	ror_api_assert(REG_values, global && global->IsCheckSumValid());
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	if ((playerIdToKill < 1) || (playerIdToKill >= global->playerTotalCount)) {
+		// Invalid player : needs a fix
+		ChangeReturnAddress(REG_values, 0x50CB76);
+		REG_values->ESI_val = 0; // This will make game EXE jump and exit method properly.
+		traceMessageHandler.WriteMessage("kill* cheat code was used with an invalid player. CustomROR prevented the game from crashing.");
+		return;
+	}
+	// Normal case: just get player structure (like original overwritten code)
+	REG_values->ECX_val = (unsigned long int)global->ptrPlayerStructPtrTable[playerIdToKill]; // THIS instruction is not secured in game EXE.
 }
 
 

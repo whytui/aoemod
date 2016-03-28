@@ -57,6 +57,7 @@ Units behavior (AI)
  - Improve/customize units choice/behaviour when an enemy tower is in AI's town. Dramatic AI improvement, especially for villagers.
 
 UI and Shortcuts:
+- Farms can be automatically rebuilt (see configuration + custom options menu in game)
 - Add 10 shortcut numbers 11-20 using numpad (original game uses 1-10 with main keyboard numeric keys). Custom numbers are not displayed (like 0) due to SLP limitation.
 - Improved game speed change with +/- buttons. Choose the speed change factor (default 1.25) in XML config or in-game customROR menu.
 - Press F9 to call nearby idle military units (they will move to screen position).
@@ -100,6 +101,8 @@ Fixes:
 - Fix discoveries count bug (AI players get a wrong discovery findings count and may win the game too early).
 - Fix artefacts capture bug: human player no longer capture artefacts faster than AI (occurs the first time an artefact is seen).
 - Fix gaia player (0) alert sound.
+- Fix many bugs with units behaviour, like AI units attacking an empty location on the map for no reason.
+- Fix kill* game crash when used with an invalid player
 
 Chat commands:
 - Type "t" or "time" in chat box to display system time (as a chat message)

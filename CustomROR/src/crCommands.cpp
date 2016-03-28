@@ -295,6 +295,11 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 		fprintf_s(f, strNotEnabled);
 		result = false;
 	}
+	fprintf_s(f, "\nFeature: Fix game crash when using kill* cheat code on a non-existing player...");
+	if (!IsRORAPICallEnabled(0x0050CB6F)) {
+		fprintf_s(f, strNotEnabled);
+		result = false;
+	}
 	// MAP
 	fprintf_s(f, "\nFeature: Generated map elevation customization...");
 	if (!IsRORAPICallEnabled(0x00472C2F)) {
