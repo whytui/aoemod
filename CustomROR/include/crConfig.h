@@ -46,6 +46,7 @@ public:
 	bool editor_allowUnitOverlapping;
 	bool fixHumanPlayer_specificSeeUnit;
 	bool allyExplorationIsAlwaysShared;
+	bool noDockInMostlyLandMaps;
 	// Technical
 	long int gameTimerSlowDownFactor;
 	bool gameTimerSlowDownAutoFix;

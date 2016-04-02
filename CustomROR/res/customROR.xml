@@ -42,6 +42,8 @@
 	value=float: multiply factor for "elevated terrain amount". Default value=1 for all map types. -->
 	<map name="elevatedTerrainAmountMultiplyFactor" mapTypeId="0" value="0.2"/><!--small islands: /5 -->
 	<map name="elevatedTerrainAmountMultiplyFactor" mapTypeId="7" value="0.02"/><!--hills: /50 -->
+	<!-- Fair no-water maps: disable dock in "mostly-land" maps where AI does NOT build docks. This makes such maps more fair in SP games. -->
+	<map name="noDockInMostlyLandMaps" enable="1"></map>
 
 	<!-- Scenario editor -->
 	<!-- showHiddenTerrain: set to 1 to display hidden terrains in scenario editor terrains list -->

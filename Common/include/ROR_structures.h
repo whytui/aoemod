@@ -1850,10 +1850,10 @@ namespace ROR_STRUCTURES_10C
 		char teamNumbers[0x08]; // player 1-8 (array offset in 0-7). Values: 1=noTeam, >1=teamId.
 		char unknown_99C;
 		// 0x9A0
-		unsigned long int isCampaign; // get in 41B720, set in 41BA50
-		unsigned long int isSavedGame; // +9A4. set in 41BA60
-		unsigned long int hasSteroidsCheatCode; // +9A8. set in 50CA2B, 4E90B6. Can be cancelled !!!
-		unsigned long int has_CD; //see 4169D7
+		long int isCampaign; // get in 41B720, set in 41BA50
+		long int isSavedGame; // +9A4. set in 41BA60
+		long int hasSteroidsCheatCode; // +9A8. set in 50CA2B, 4E90B6. Can be cancelled !!!
+		long int has_CD; //see 4169D7
 		// 0x9B0
 		unsigned long int chosenPlayerIndex[9]; // Num player ??? index in 0-8 (including gaia)
 		// to 9D4...
@@ -1878,7 +1878,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_A58[0xA7C - 0xA58];
 		unsigned long int mapSizeChoice; // +A7C
 		// 0xA80
-		unsigned long int mapTypeChoice; // 0=small islands, 1=large islands... See empires.dat
+		AOE_CONST_FUNC::MAP_TYPE_INDEX mapTypeChoice; // 0=small islands, 1=large islands... See empires.dat
 		unsigned long int unknownA84; // +A84. set in 505340. Default=1. Unused in SP RM ?
 		unsigned long int unknownA88; // +A88. set in 505360. Default=1. Unused in SP RM ?
 		unsigned long int victoryConditionChoice; // 0=standard, 1=conquest, 7=time limit, 8=score

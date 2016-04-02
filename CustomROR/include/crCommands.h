@@ -257,6 +257,8 @@ public:
 	// Warning: this event occurs before the farm unit is actually "killed"
 	void OnFarmDepleted(long int farmUnitId);
 
+	void DisableWaterUnitsIfNeeded();
+
 	// ----------------------------------
 	// City plan
 

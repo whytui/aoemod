@@ -20,6 +20,7 @@ CustomRORConfig::CustomRORConfig() {
 	this->useImprovedGameSpeeds = false;
 	this->showLogsInReverseOrder = true;
 	this->showCustomRORNotifications = true; // Recommended
+	this->noDockInMostlyLandMaps = false; // Default: dock is always available.
 	this->collectRORDebugLogs = 0; // Game default (sort of): do not intercept not-implemented debug log calls.
 	this->improvedGameSpeedFactor = 1.25;
 	this->conversionResistance_Boats = 2;
@@ -228,6 +229,9 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 					callResult = elem->QueryFloatAttribute("value", &floatValue);
 					if (callResult == TIXML_SUCCESS) { this->mapGenerationCustomElevationFactor[intValue] = floatValue; }
 				}
+			}
+			if (categoryName == "noDockInMostlyLandMaps") {
+				this->noDockInMostlyLandMaps = XML_GetBoolElement(elem, "enable");
 			}
 		}
 		// Scenario editor

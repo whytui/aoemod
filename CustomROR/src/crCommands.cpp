@@ -539,6 +539,7 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	for (int mapType = 0; mapType < 10; mapType++) {
 		fprintf_s(f, "map gen. elevation factor  mapType=%ld value=%f\n", mapType, this->crInfo->configInfo.mapGenerationCustomElevationFactor[mapType]);
 	}
+	fprintf_s(f, "disable dock in mostly-land maps:          %ld\n", this->crInfo->configInfo.noDockInMostlyLandMaps ? 1: 0);
 	// Scenario Editor
 	fprintf_s(f, "showHiddenTerrainInEditor:                 %d\n", this->crInfo->configInfo.showHiddenTerrainsInEditor ? 1 : 0);
 	fprintf_s(f, "showHiddenUnitsInEditor:                   %ld\n", this->crInfo->configInfo.showHiddenUnitsInEditor);
@@ -606,7 +607,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 			subCmd += 8;
 			int newType = atoi(subCmd);
 			if (newType) {
-				gameSettings->mapTypeChoice = newType;
+				gameSettings->mapTypeChoice = (AOE_CONST_FUNC::MAP_TYPE_INDEX) newType;
 				sprintf_s(outputBuffer, "Map type=%d", newType);
 			}
 			return true;
@@ -839,6 +840,8 @@ void CustomRORCommand::OnGameStart() {
 
 	// Check AI initialization for loaded games (fix a saved game bug)
 	this->FixGameStartAIInitForPlayers();
+
+	this->DisableWaterUnitsIfNeeded();
 
 	// Fix fire galley icon on post-iron age start games (research done notification - for trireme - is NOT triggered in such case !)
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -4199,6 +4202,28 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 		f->posX = farm->positionX;
 		f->posY = farm->positionY;
 		f->gameTime = (player->ptrGlobalStruct != NULL) ? player->ptrGlobalStruct->currentGameTime : 0;
+	}
+}
+
+
+void CustomRORCommand::DisableWaterUnitsIfNeeded() {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings != NULL);
+	assert(settings->IsCheckSumValid());
+	if (!settings) { return; } // Should never happen
+	if (settings->isCampaign || settings->isScenario || settings->isSavedGame || settings->isMultiplayer) { return; }
+
+	if (!IsDockRelevantForMap(settings->mapTypeChoice)) {
+		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+		if (!global || !global->IsCheckSumValid() || !global->ptrPlayerStructPtrTable) { return; }
+		for (int i = 1; i < global->playerTotalCount; i++) {
+			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
+			if (player && player->IsCheckSumValid() && (player->structDefUnitArraySize > CST_UNITID_DOCK) &&
+				player->ptrStructDefUnitTable && player->ptrStructDefUnitTable[CST_UNITID_DOCK]) {
+				traceMessageHandler.WriteMessageNoNotification(std::string("Disabled dock for player #") + std::to_string(i));
+				player->ptrStructDefUnitTable[CST_UNITID_DOCK]->availableForPlayer = 0;
+			}
+		}
 	}
 }
 
