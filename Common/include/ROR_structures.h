@@ -1836,22 +1836,22 @@ namespace ROR_STRUCTURES_10C
 		// 0x980
 		char mapSizeY;
 		char unknown_981; // Related to map size. Always 8 ? Max player # ?
-		char enableCheatMode;
+		char enableCheatMode; // +982. Set in 41BAE0
 		char unknown_983; // path finding for MP ? 0-2 default/medium/high ?
 		char unknown_984; // Something to do with screen width and height??
-		char revealMap; // 0x985
-		char noFog;
-		char unknown_987; // default 1 ?
-		char playerCount;
+		char revealMap; // 0x985. Set in 41BB00
+		char noFog; // 0x986. Set in 41BB10
+		char unknown_987; // default 1 ? Set in 41BB20
+		char playerCount; // +988.
 		char unknown_989; // can set speed > 16 ?
 		char playerGameVersion[0x08]; // 0-127 ; 0="", 1="1.0", 2="1.0a", etc (array offset in 0-7)
 		char unknown_992;
-		char difficultyLevel; // +993. 0=hardest, 1=hard, 2, 3, 4=easiest
+		char difficultyLevel; // +993. 0=hardest, 1=hard, 2, 3, 4=easiest. Set in 41BBC0
 		char teamNumbers[0x08]; // player 1-8 (array offset in 0-7). Values: 1=noTeam, >1=teamId.
 		char unknown_99C;
 		// 0x9A0
-		unsigned long int isCampaign; // get in 41B720
-		unsigned long int isSavedGame;
+		unsigned long int isCampaign; // get in 41B720, set in 41BA50
+		unsigned long int isSavedGame; // +9A4. set in 41BA60
 		unsigned long int hasSteroidsCheatCode; // +9A8. set in 50CA2B, 4E90B6. Can be cancelled !!!
 		unsigned long int has_CD; //see 4169D7
 		// 0x9B0
@@ -1864,7 +1864,7 @@ namespace ROR_STRUCTURES_10C
 		// 0xA00
 		char unknown_A00[0x0C];
 		float unknown_A0C;
-		char difficultyLevelChoice; // +A10. confirm type
+		char difficultyLevelChoice; // +A10. Get in 41C190. Copied into +993
 		char unknown_A11;
 		char unknown_A12;
 		char unknown_A13;
@@ -1879,8 +1879,8 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int mapSizeChoice; // +A7C
 		// 0xA80
 		unsigned long int mapTypeChoice; // 0=small islands, 1=large islands... See empires.dat
-		unsigned long int unknownA84;
-		unsigned long int unknownA88;
+		unsigned long int unknownA84; // +A84. set in 505340. Default=1. Unused in SP RM ?
+		unsigned long int unknownA88; // +A88. set in 505360. Default=1. Unused in SP RM ?
 		unsigned long int victoryConditionChoice; // 0=standard, 1=conquest, 7=time limit, 8=score
 		// 0xA90
 		unsigned long int victoryConditionChoice_parameter; // or float ?
@@ -1897,18 +1897,18 @@ namespace ROR_STRUCTURES_10C
 		char playerNameCivDLLID_Offset[8]; // per player. 4400+x=language_dll_id of a civ (player) name.
 		// 0xAD5
 		char unknown_AD5;
-		char unknown_AD6;
-		char unknown_AD7;
-		char fixedPositions;
-		char allTechs;
+		char unknown_AD6; // +AD6. Set in 505520.
+		char unknown_AD7; // +AD7. Set in 505530.
+		char fixedPositions; // +AD8. Set in 505540
+		char allTechs; // +AD9. Set in 505550
 		char unknown_ADA;
 		char unknown_ADB;
-		unsigned long int initialResourcesChoice; // +ADC. 0=default, 3=large
+		unsigned long int initialResourcesChoice; // +ADC. 0=default, 3=large. Set in 505560.
 		// 0xAE0
-		AOE_CONST_INTERNAL::GAME_INITIAL_AGES initialAgeChoice; // 0=default, 1=nomad, 2=stone, 3=tool 4=bronze, 5=iron, 6=post-iron
-		char unknown_AE4;
-		char isDeathMatch;
-		char maxPopulation;
+		AOE_CONST_INTERNAL::GAME_INITIAL_AGES initialAgeChoice; // 0=default, 1=nomad, 2=stone, 3=tool 4=bronze, 5=iron, 6=post-iron. Set in 505570
+		char unknown_AE4; // +AE4. Set in 505580
+		char isDeathMatch; // +AE5. Set in 505590
+		char maxPopulation; // +AE6. Set in 5055A0
 		char unknown_AE7[0x09];
 		// 0xAF0
 		char unknown_AF0[0xC20 - 0xAF0];
@@ -1925,7 +1925,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_C58[0x106C - 0xC58];
 		char debugString[0x1190 - 0x106C]; // Unknown_ size
 		// 0x1190
-		char isInitMPScreen; // ??? to confirm
+		char isInitMPScreen; // +1190. Set in 5055B0. ??? to confirm. is MP game ?
 		char unknown_1191;
 		char unknown_1192;
 		char unknown_1193;

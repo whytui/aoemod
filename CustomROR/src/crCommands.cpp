@@ -862,7 +862,7 @@ void CustomRORCommand::OnGameStart() {
 
 	// Special trigger: disable units for house, villager, fishing ship, trade ship (exceptions that don't work because of techs that do several things)
 	// For farm, see notify event method (managed on market construction notification).
-	this->ManageDisableUnitsForExceptions();
+	this->ManageTriggerDisableUnitsForExceptions();
 
 	long int **p = (long int **)AOE_OFFSETS_10C::ADDR_VAR_ACTIVE_UI_STRUCT;
 	if ((*p) && (**p != 0x0054679C)) {
@@ -4605,7 +4605,7 @@ void CustomRORCommand::OnGameInitDisableResearchesEvent(ROR_STRUCTURES_10C::STRU
 
 // Manage disable (via trigger) units for villager, house, fishing ship, trade ship
 // This method should be called at game start, after "initial" technologies have been applied, so we can override some (and force to disable again some units)
-void CustomRORCommand::ManageDisableUnitsForExceptions() {
+void CustomRORCommand::ManageTriggerDisableUnitsForExceptions() {
 	for (int playerId = 0; playerId < 9; playerId++) {
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (player) {

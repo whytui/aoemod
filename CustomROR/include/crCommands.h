@@ -296,7 +296,7 @@ public:
 
 	// Manage disable (via trigger) units for villager, house, fishing ship, trade ship, farms
 	// This method should be called at game start, after "initial" technologies have been applied, so we can override some (and force to disable again some units)
-	void ManageDisableUnitsForExceptions();
+	void ManageTriggerDisableUnitsForExceptions();
 	// Manage disable (via trigger) units for farms
 	// Farm is enabled by market construction, which may occur both "ingame" or at game loading (if a market exists, or if starting at bronze).
 	void ManageDisableUnitsForFarms(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);

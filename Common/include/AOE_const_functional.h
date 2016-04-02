@@ -115,14 +115,23 @@ namespace AOE_CONST_FUNC
 		MTI_SMALL_ISLANDS = 0,
 		MTI_LARGE_ISLANDS = 1,
 		MTI_COASTAL = 2,
-		MTI_INLAND = 3,
+		MTI_INLAND = 3, // "continental" in french !!!
 		MTI_HIGHLAND = 4,
-		MTI_CONTINENTAL = 5,
+		MTI_CONTINENTAL = 5, // "continent" in french !!!
 		MTI_MEDITERRANEAN = 6,
 		MTI_HILLS = 7,
-		MTI_NARROWS = 8,
+		MTI_NARROWS = 8, // "Passages"
 		MTI_HIDDEN_MAP_TYPE = 9,
 		MTI_MAP_TYPES_COUNT = 10
+	};
+
+	enum MAP_WATER_TYPE {
+		MWT_UNKNOWN_MAP = -1,
+		MWT_ALL_WATER_MAP = 0, // Only for small islands.
+		MWT_MOSTLY_WATER_MAP = 1, // Only for large islands
+		MWT_LAND_AND_WATER_MAP = 2, // Most common case. AI DOES build dock/boats here.
+		MWT_MOSTLY_LAND_MAP = 3, // AI builds no dock/boats in such maps, but there would be enough water to (might be limited to a corner of the map though)
+		MWT_ALL_LAND_MAP = 4 // No water at all or just rivers, AI builds no dock/boats here.
 	};
 
 	// ------------------------------------------------------------------
@@ -1399,4 +1408,28 @@ namespace AOE_CONST_FUNC
 			(dat_id == CST_UNITID_STABLE) ||
 			(dat_id == CST_UNITID_TEMPLE) ;
 	}
+
+	// Provides water proportion (map water type) for each map type
+	static const MAP_WATER_TYPE GetMapWaterType(MAP_TYPE_INDEX mti) {
+		switch (mti) {
+		case MTI_SMALL_ISLANDS:
+			return MWT_ALL_WATER_MAP;
+		case MTI_LARGE_ISLANDS:
+			return MWT_MOSTLY_WATER_MAP;
+		case MTI_COASTAL: // mediterranean/coastal/narrow are managed together in game code (eg 4F3966...)
+		case MTI_MEDITERRANEAN: // Check me
+		case MTI_NARROWS: // Check me
+		case MTI_CONTINENTAL: // Check me. According to empires.dat, it is very similar to narrows
+			return MWT_LAND_AND_WATER_MAP;
+		case MTI_INLAND:
+			return MWT_MOSTLY_LAND_MAP;
+		case MTI_HIGHLAND:
+		case MTI_HILLS:
+			return MWT_ALL_LAND_MAP;
+		case MTI_HIDDEN_MAP_TYPE:
+		default:
+			return MWT_UNKNOWN_MAP;
+		}
+	}
+
 }

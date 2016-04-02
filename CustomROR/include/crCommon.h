@@ -208,6 +208,9 @@ ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT
 // Returns true if current game is multiplayer, false otherwise (including error cases)
 bool IsMultiplayer();
 
+// Returns true for maps where AI does build a dock and boats. Warning: for unknown map type (custom), this returns true.
+bool IsDockRelevantForMap(MAP_TYPE_INDEX mti);
+
 // Return the matching score element
 // Warning: May return NULL.
 ROR_STRUCTURES_10C::STRUCT_SCORE_ELEM *FindScoreElement(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId);

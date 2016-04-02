@@ -731,6 +731,13 @@ bool IsMultiplayer() {
 }
 
 
+// Returns true for maps where AI does build a dock and boats. Warning: for unknown map type (custom), this returns true.
+bool IsDockRelevantForMap(MAP_TYPE_INDEX mti) {
+	MAP_WATER_TYPE m = GetMapWaterType(mti);
+	return (m != MAP_WATER_TYPE::MWT_ALL_LAND_MAP) && (m != MAP_WATER_TYPE::MWT_MOSTLY_LAND_MAP);
+}
+
+
 // Return the matching score element
 // Warning: May return NULL.
 ROR_STRUCTURES_10C::STRUCT_SCORE_ELEM *FindScoreElement(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId) {
