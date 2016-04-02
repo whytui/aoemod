@@ -141,6 +141,8 @@ public:
 	// Use this to force values for "current custom popup". PLEASE AVOID using it !
 	// Returns true if successful. Fails if a popup is already open.
 	bool ForceSetCurrentGamePopup(ROR_STRUCTURES_10C::STRUCT_ANY_UI *customGamePopup, ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnOK, ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnCancel);
+	// To be called when game menu is closed to free custom button
+	void ForceClearCustomMenuObjects();
 
 	// Closes currently opened custom popup window in game screen.
 	void CloseCustomGamePopup();

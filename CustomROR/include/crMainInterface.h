@@ -80,4 +80,7 @@ public:
 
 	// Open a popup with CustomROR (debug) messages
 	bool OpenTraceMessagePopup();
+
+	// Use this to properly free custom button from options menu. This should (always) be called when ingame menu is closed.
+	void FreeInGameCustomOptionsButton();
 };

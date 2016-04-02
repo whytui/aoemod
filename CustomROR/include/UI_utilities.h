@@ -20,6 +20,7 @@ enum AOE_FONTS : long int {
 
 
 static const char scenarioEditorScreenName[] = "Scenario Editor Screen";
+static const char menuDialogScreenName[] = "Menu Dialog";
 
 
 // The AOE_Addxxx functions create a UI object and store the new object's pointer in ptrObjToCreate parameter

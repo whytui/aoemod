@@ -2357,7 +2357,7 @@ void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 	long int myEDI = REG_values->EDI_val;
 	long int myEBP = REG_values->EBP_val;
 	long int myEAX = 1;
-	unsigned long int **pOptionsBtn;
+	unsigned long int **pOptionsBtn; // init in asm code below
 	_asm {
 		MOV ESI, myESI
 		MOV EDI, myEDI
@@ -2388,6 +2388,7 @@ void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 
 
 // From 0x0043424D
+// WARNING: this is NOT called when those buttons are clicked: quit game, load, save, help
 // Manage onclick on our custom button in menu.
 // Opens a custom popup (created like game's option menu)
 void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
@@ -2397,14 +2398,15 @@ void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 
 	if (this->crInfo.configInfo.showCustomRORMenu) {
 		// Before returning, make sure we always "free" the "custom options" button (from game menu).
-		// Add it to our "garbage collector" so that it is freed later.
-		if (this->crInfo.customGameMenuOptionsBtnVar) {
-			this->crInfo.AddObjectInPopupContentList(this->crInfo.customGameMenuOptionsBtnVar);
-			this->crInfo.customGameMenuOptionsBtnVar = NULL;
+		this->crMainInterface.FreeInGameCustomOptionsButton();
+		// If it is another button than "custom options", we can free custom options button.
+		// Otherwise, custom popup will manage this (we already added the button in objects to free).
+		if (myEAX != AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS) {
+			this->crInfo.ForceClearCustomMenuObjects();
 		}
 	}
 
-	if (myEAX == 5) { return; } // Corresponds to original code (click on original options menu)
+	if (myEAX == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_OPTIONS) { return; } // Corresponds to original code (click on original options menu)
 
 	ChangeReturnAddress(REG_values, 0x004342AF); // Corresponds to the JNZ we removed in original code
 
@@ -2413,10 +2415,8 @@ void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	if (!this->crInfo.configInfo.showCustomRORMenu) { return; } // In theory this should be useless because we shouldn't come here if it is disabled
 
 	// Now manage the case when the clicked button is our custom button...
-	if (!this->crMainInterface.CreateGameCustomRorOptionsPopup(previousPopup)) {
-		ChangeReturnAddress(REG_values, 0x004342A7);
-	}
-	ChangeReturnAddress(REG_values, 0x004342A7);//TEST
+	this->crMainInterface.CreateGameCustomRorOptionsPopup(previousPopup);
+	ChangeReturnAddress(REG_values, 0x004342A7);
 }
 
 

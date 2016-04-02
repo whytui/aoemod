@@ -191,7 +191,7 @@ ROR_STRUCTURES_10C::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int h
 	if (hasCancelBtn) {
 		AOE_AddButton(this->customGamePopupVar, &this->customGamePopupCancelBtnVar, LANG_ID_CANCEL, btnhPos + btnHSize + 0x20, btnvPos, btnHSize, 0x1E);
 	}
-	assert(objectsToFree.empty()); // there shouldn't be remaining components from a previous popup.
+	assert(this->objectsToFree.empty()); // there shouldn't be remaining components from a previous popup.
 
 	return this->customGamePopupVar;
 }
@@ -259,6 +259,12 @@ bool CustomRORInfo::ForceSetCurrentGamePopup(ROR_STRUCTURES_10C::STRUCT_ANY_UI *
 	this->customGamePopupButtonVar = btnOK;
 	this->customGamePopupCancelBtnVar = btnCancel;
 	return true;
+}
+
+
+// To be called when game menu is closed to free custom button
+void CustomRORInfo::ForceClearCustomMenuObjects() {
+	this->FreePopupAddedObjects();
 }
 
 

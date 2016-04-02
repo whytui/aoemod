@@ -176,6 +176,10 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X posX=%f posY=%f status=%d\n",
 						selectedUnit->unitInstanceId, selectedUnit->unitInstanceId, selectedUnit->positionX, selectedUnit->positionY, selectedUnit->unitStatus);
 					posInBuf = posInBuf + strlen(posInBuf);
+					if (selectedUnit->ptrStructDefUnit) {
+						sprintf_s(posInBuf, 200, "unitDefId=%d / %d", selectedUnit->ptrStructDefUnit->DAT_ID1, selectedUnit->ptrStructDefUnit->DAT_ID2);
+						posInBuf = posInBuf + strlen(posInBuf);
+					}
 				}
 			}
 			// TO DO write buffer
@@ -223,16 +227,21 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 					actionTargetUnitId = ainfo->ptrActionLink->actionStruct->targetUnitId;
 					addraction = (unsigned long int)ainfo->ptrActionLink->actionStruct;
 				}
+				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = selectedUnit->GetUnitDefBase();
 				ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *unitActivity = selectedUnit->currentActivity;
+				assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
+				if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return false; }
 				if (unitActivity) {
-					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X posX=%f posY=%f \nActivity=0x%08X - Activity+30=0x%X +28=0x%X\n" \
+					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X DATID=%d/%d  posX=%f posY=%f\nActivity=0x%08X - Activity+30=0x%X +28=0x%X\n" \
 						"target=%ld\nAction=%08X ActionTargetUnitId=%ld\n",
-						selectedUnit->unitInstanceId, selectedUnit->unitInstanceId, selectedUnit->positionX, selectedUnit->positionY,
+						selectedUnit->unitInstanceId, selectedUnit->unitInstanceId, unitDefBase->DAT_ID1, unitDefBase->DAT_ID2, 
+						selectedUnit->positionX, selectedUnit->positionY,
 						(long int)unitActivity, unitActivity->currentActionId, unitActivity->internalId_whenAttacked, unitActivity->targetUnitId,
 						addraction, actionTargetUnitId);
 				} else {
-					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X posX=%f posY=%f \nActivityChecksum=None\nnActionTargetUnitId=%ld\n",
-						selectedUnit->unitInstanceId, selectedUnit->unitInstanceId, selectedUnit->positionX, selectedUnit->positionY, actionTargetUnitId);
+					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X DATID=%d/%d  posX=%f posY=%f \nActivityChecksum=None\nnActionTargetUnitId=%ld\n",
+						selectedUnit->unitInstanceId, selectedUnit->unitInstanceId, unitDefBase->DAT_ID1, unitDefBase->DAT_ID2,
+						selectedUnit->positionX, selectedUnit->positionY, actionTargetUnitId);
 				}
 				posInBuf = posInBuf + strlen(posInBuf);
 			}
@@ -441,15 +450,47 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 		}
 	}
 
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+
+	// Scenario editor
 	ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
-	if ((se != NULL) && GetGameSettingsPtr() && (GetGameSettingsPtr()->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
+	if ((se != NULL) && settings && (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
 		// Manage (overload) scenario editor buttons
 		if (obj == se->map_btn_generateMap) {
 			return this->ScenarioEditor_callMyGenerateMapIfRelevant();
 		}
 	}
 
+	// Game menu
+	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MENU *menu = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MENU *)AOE_GetScreenFromName(menuDialogScreenName);
+	if (menu && menu->IsCheckSumValid() && settings && (obj->ptrParentObject == menu)) {
+		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *objAsButton = (ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *)objAddress;
+		if (objAsButton->IsCheckSumValid()) {
+			// True for buttons that do not trigger a call to ManageOptionButtonClickInMenu
+			bool btnEventNotCaughtByRORMenuBtnEvent = (objAsButton->unsure_buttonId == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_SAVE) ||
+				(objAsButton->unsure_buttonId == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_LOAD) ||
+				(objAsButton->unsure_buttonId == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_QUIT) ||
+				(objAsButton->unsure_buttonId == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_HELP);
+			if (btnEventNotCaughtByRORMenuBtnEvent) {
+				this->FreeInGameCustomOptionsButton(); // Free custom button if needed, for buttons not handled in ManageOptionButtonClickInMenu.
+				this->crCommand->crInfo->ForceClearCustomMenuObjects(); // Here we CAN already free custom button because it's not in use (current event is about another button)
+			}
+		}
+	}
+
 	return false; // Normal case: let game handle event normally.
+}
+
+
+// Use this to properly free custom button from options menu. This should (always) be called when ingame menu is closed.
+void CustomRORMainInterface::FreeInGameCustomOptionsButton() {
+	if (this->crCommand->crInfo->configInfo.showCustomRORMenu) {
+		// Add "custom options" button (from game menu) to our "garbage collector" so that it is freed later.
+		if (this->crCommand->crInfo->customGameMenuOptionsBtnVar) {
+			this->crCommand->crInfo->AddObjectInPopupContentList(this->crCommand->crInfo->customGameMenuOptionsBtnVar);
+			this->crCommand->crInfo->customGameMenuOptionsBtnVar = NULL;
+		}
+	}
 }
 
 
