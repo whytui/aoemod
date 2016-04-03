@@ -774,7 +774,7 @@ ROR_STRUCTURES_10C::STRUCT_SCORE_ELEM *FindScoreElement(ROR_STRUCTURES_10C::STRU
 // High word: bit mask per player for "explored"
 // Low word: bit mask per player for "fog visibility"
 // Lower bit is player 0 (gaia), 2nd=player1, etc
-unsigned long int GetMapVisibilityInfo(long int posX, long int posY) {
+ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int posX, long int posY) {
 	unsigned long int **pMapInfo = (unsigned long int **)AOE_OFFSETS_10C::ADDR_MAP_VISIBILITY_INFO;
 	assert(pMapInfo != NULL);
 	assert(posX >= 0);
@@ -785,23 +785,48 @@ unsigned long int GetMapVisibilityInfo(long int posX, long int posY) {
 	unsigned long int *pMapInfoX = pMapInfo[posX];
 	assert(pMapInfoX != NULL);
 	if (pMapInfoX == NULL) { return 0; }
-	unsigned long result = pMapInfoX[posY];
+	ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *result = (ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO*) &pMapInfoX[posY];
 	return result;
 }
 
 
-// Returns true if the player can see (no fog) a location on the map
+#pragma message("HasLocationNoFogForPlayer: Check new method has no regression and remove this")
+// Returns true if the player can see (no fog) a location on the map - old method
 bool HasLocationNoFogForPlayer(unsigned long int playerId, long int posX, long int posY) {
 	assert(playerId >= 0);
 	assert(playerId < 9);
 	assert(posX >= 0);
 	assert(posY >= 0);
-	unsigned long int mapValue = GetMapVisibilityInfo(posX, posY);
+	unsigned long int mapValue = (unsigned long int)GetMapVisibilityInfo(posX, posY);
 	mapValue = mapValue & 0x0000FFFF; // To keep only "fog visibility"
 	unsigned long int mask = 1 << playerId;
 	mapValue = mapValue & mask;
 	return mapValue != 0;
 }
+
+
+bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY) {
+	assert(playerId >= 0);
+	assert(playerId < 9);
+	assert(posX >= 0);
+	assert(posY >= 0);
+	assert(posX < 256); // TO DO: get exact map size
+	assert(posY < 256); // TO DO: get exact map size
+	ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *v = (ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
+	return v->isFogVisibleForPlayer(playerId);
+}
+
+bool IsExploredForPlayer(long int playerId, long int posX, long int posY) {
+	assert(playerId >= 0);
+	assert(playerId < 9);
+	assert(posX >= 0);
+	assert(posY >= 0);
+	assert(posX < 256); // TO DO: get exact map size
+	assert(posY < 256); // TO DO: get exact map size
+	ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *v = (ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
+	return v->isExploredForPlayer(playerId);
+}
+
 
 
 // Returns true if a unit is idle
@@ -1603,6 +1628,57 @@ void SetPlayerSharedExploration_hard(long int playerId, bool enable) {
 // Set "shared exploration" flag for a given player to true or false. This version should be compatible with MP games (uses ROR command system)
 void SetPlayerSharedExploration_safe(long int playerId) {
 	CreateCmd_SetSharedExploration((short int)playerId);
+}
+
+
+// Analog to init (in constructor), cf 0x4BA401.
+void ResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) {
+	if (!elem) { return; }
+	elem->unitId = -1;
+	elem->unitDATID = -1;
+	elem->unitClass = (AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES) - 1;
+	elem->posX = 0;
+	elem->posY = 0;
+	elem->posZ = 0;
+	elem->playerId = 0;
+	elem->HP = 0;
+	elem->unknown_10 = 0;
+	elem->unknown_14 = 0;
+	elem->attack = 0;
+	elem->reloadTime1 = 0;
+	elem->maxRange = 0;
+}
+
+
+// Change unit owner in InfAI unitListElem according to unit visibility
+// Return true if updated.
+bool UpdateUnitOwnerInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit,
+	long int newPlayerId) {
+	if (!infAI || !infAI->IsCheckSumValid()) { return false; }
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
+	if (newPlayerId < 0) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefinition();
+	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return false; }
+	bool isVisible = false;
+	if (unitDefBase->visibleInFog) {
+		isVisible = IsExploredForPlayer(infAI->commonAIObject.playerId, (long int)unit->positionX, (long int)unit->positionY);
+	} else {
+		isVisible = IsFogVisibleForPlayer(infAI->commonAIObject.playerId, (long int)unit->positionX, (long int)unit->positionY);
+	}
+	// Search for unit in infAI unit elem list
+	long int size = infAI->unitElemListSize;
+	for (long int i = 0; i < size; i++) {
+		ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[i];
+		if (curElem->unitId == unit->unitInstanceId) {
+			if (isVisible) {
+				curElem->playerId = (char)newPlayerId;
+				return true;
+			} else {
+				return false; // Not visible=no update. Exploring should do the update.
+			}
+		}
+	}
+	return false;
 }
 
 

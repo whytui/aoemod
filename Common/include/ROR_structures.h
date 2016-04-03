@@ -2291,18 +2291,21 @@ namespace ROR_STRUCTURES_10C
 		long int XMapSize;
 		unsigned long int unknown_10C;
 		// 0x110
-		unsigned long int unitElemListSize; // Total allocated size of unitElemList (the array can contain some "-1")
+		unsigned long int unitElemListSize; // +110. Total allocated size of unitElemList (the array can contain some "-1")
 		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units from me AND enemy? players (not gaia): artefacts+creatable+targetableGatherable?
+		//STRUCT_AI_UNIT_LIST_INFO unitListA; // +118
 		long int *ptrUnitListA; // Both gaia and "my" units ? Same units as unitElemList ? (but only ids?)
 		long int unitElemListElemCount; // +11C. Number of actual values in the array (+118). Array total size can be larger.
 		// 0x120
 		unsigned long int unknown_120;
 		long int unitListA_count;
+		//STRUCT_AI_UNIT_LIST_INFO unitListB; // +128
 		long int *ptrUnitListB; // Contains both "my" and enemy units. Not gaia?
 		unsigned long int unknown_12C;
 		// 0x130
 		unsigned long int unknown_130;
 		long int unitListB_count;
+		//STRUCT_AI_UNIT_LIST_INFO unitListC; // +138
 		unsigned long int notsure_ptrUnitListC;
 		unsigned long int unknown_13C;
 		// 0x140
@@ -2539,7 +2542,9 @@ namespace ROR_STRUCTURES_10C
 		char posX;
 		char posZ;
 		char playerId; // 0x0B
-		float HP; // unit health points
+		//float HP; // +C. unit health points
+		short int HP; // +C. unit health points
+		short int unused_0E;
 		// 0x10
 		long int unknown_10; // an int used in target rating evaluation, multiplied with //SNTargetEvaluationAttackAttempts in 4C0852
 		char unknown_14;

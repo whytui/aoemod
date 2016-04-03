@@ -264,14 +264,17 @@ bool IsTechResearched(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int resea
 AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);
 
 
-// Returns the map visibility mask for given location
+// Returns the map visibility mask for given location - old method
 // High word: bit mask per player for "explored"
 // Low word: bit mask per player for "fog visibility"
 // Lower bit is player 0 (gaia), 2nd=player1, etc
-unsigned long int GetMapVisibilityInfo(long int xPos, long int yPos);
+ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int xPos, long int yPos);
 
-// Returns true if the player can see (no fog) a location
+// Returns true if the player can see (no fog) a location - old method
 bool HasLocationNoFogForPlayer(unsigned long int playerId, long int posX, long int posY);
+
+bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY);
+bool IsExploredForPlayer(long int playerId, long int posX, long int posY);
 
 // Returns true if a unit is idle
 bool IsUnitIdle(ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
@@ -425,12 +428,20 @@ void SetPlayerSharedExploration_hard(long int playerId, bool enable);
 // Set "shared exploration" flag for a given player to true or false. This version should be compatible with MP games (uses ROR command system)
 void SetPlayerSharedExploration_safe(long int playerId);
 
+// Analog to init (in constructor), cf 0x4BA401.
+void ResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
+
+// Change unit owner in InfAI unitListElem according to unit visibility.
+// Return true if updated.
+bool UpdateUnitOwnerInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit, long int newPlayerId);
+
 // Set status for an element in infAI "construction history" array.
 void AOE_InfAIBuildHistory_setStatus(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, long int posX, long int posY, long int unitDefId,
 	AOE_CONST_INTERNAL::INFAI_BLD_HISTORY_STATUS status);
 
 // Remove a building from arrays for a player
 void AOE_playerBldHeader_RemoveBldFromArrays(ROR_STRUCTURES_10C::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
+
 
 // -- Commands
 

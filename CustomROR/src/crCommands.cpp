@@ -2718,6 +2718,7 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(ROR_STRUCTURES_10C::STRUCT_UNIT *
 
 
 // Change a unit's owner, for example like a conversion.
+// Capturing an artefact does NOT call this.
 // I don't see any other possible event than CST_ATI_CONVERT. Use CST_GET_INVALID to trigger NO notification.
 bool CustomRORCommand::ChangeUnitOwner(ROR_STRUCTURES_10C::STRUCT_UNIT *targetUnit, ROR_STRUCTURES_10C::STRUCT_PLAYER *actorPlayer, 
 	AOE_CONST_INTERNAL::GAME_EVENT_TYPES notifyEvent) {
@@ -2779,6 +2780,25 @@ void CustomRORCommand::OnPlayerAddUnitCustomTreatments(ROR_STRUCTURES_10C::STRUC
 			unit->ptrStructPlayer = oldUnitPlayer; // Restore player (for conversion, it will be updated a bit later)
 		}
 	}
+
+	// Update unit owner in players' unit list if it is visible to them (useful for conversion / unit capture)
+	// This is very important for artefacts. Probably useful for other units (avoid having wrong playerId in list), but impacts are to be analyzed.
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid()) { return; }
+	long int playerTotalCount = global->playerTotalCount;
+	if ((global->gameRunStatus == 0) && (global->currentGameTime > 0) && (!isTempUnit && !isNotCreatable) &&
+		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING)) {
+		for (int curPlayerId = 1; curPlayerId < playerTotalCount; curPlayerId++) {
+			ROR_STRUCTURES_10C::STRUCT_PLAYER *curPlayer = GetPlayerStruct(curPlayerId);
+			ROR_STRUCTURES_10C::STRUCT_AI *curAI = curPlayer->ptrAIStruct;
+			if (curAI && curAI->IsCheckSumValid() && curAI->structInfAI.IsCheckSumValid()) {
+				UpdateUnitOwnerInfAIUnitListElem(&curAI->structInfAI, (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE*)unit, player->playerId);
+			}
+		}
+	}
+
 }
 
 
@@ -2791,9 +2811,33 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 	if (!player->IsCheckSumValid() || !unit->IsCheckSumValid()) { return; }
 
 	// Gather information
-	bool isBuilding = (unit->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING); // Warning: using unit->unitType is risky (not always correct?)
+	assert(unit->ptrStructPlayer != NULL);
+	if (!unit->ptrStructPlayer) { return; }
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefBase();
+	assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
+	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return; }
+	bool isBuilding = (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING); // Warning: using unit->unitType is risky (not always correct?)
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
+
+	if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
+		ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
+		assert(infAI->IsCheckSumValid());
+		long int size = infAI->unitElemListSize;
+		for (long int i = 0; i < size; i++) {
+			ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[i];
+			// I lost one of my units ? update infAI list !
+			if ((curElem->playerId == player->playerId) && (curElem->unitId == unit->unitInstanceId)) {
+				if (unitDefBase->unitAIType == TribeAIGroupArtefact) {
+					// Artefact don't die, just get captured. BUT we don't know who just captured it (will be updated afterwards)
+					// The Add unit treatment (for other player) will update this information (again), so in fact it is not really useful to set playerId to 0.
+					curElem->playerId = 0;
+				} else {
+					ResetInfAIUnitListElem(curElem);
+				}
+			}
+		}
+	}
 
 	if (!isNotCreatable && !isTempUnit) {
 		// We have a creatable unit
@@ -3025,7 +3069,8 @@ bool CustomRORCommand::ShouldChangeTarget(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVI
 	distanceX = (oldTargetUnit->positionX - myPosX);
 	distanceY = (oldTargetUnit->positionY - myPosY);
 	float squareDistanceOldTarget = (distanceX * distanceX) + (distanceY * distanceY);
-	bool isOldTargetVisible = HasLocationNoFogForPlayer(actorPlayer->playerId, (int)oldTargetUnit->positionX, (int)oldTargetUnit->positionY);
+#pragma message("TO DO: use new method and check no-regression")
+	bool isOldTargetVisible = HasLocationNoFogForPlayer(actorPlayer->playerId, (long int)oldTargetUnit->positionX, (long int)oldTargetUnit->positionY);
 	// The value to test distances, taking into account unit range.
 	float squareVeryCloseTestDistance = (actorUnitDef->maxRange + distanceToConsiderVeryClose);
 	squareVeryCloseTestDistance = squareVeryCloseTestDistance * squareVeryCloseTestDistance;
