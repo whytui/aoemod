@@ -190,6 +190,7 @@ namespace AOE_CONST_INTERNAL
 		CST_GET_ADD_REMOVE_IN_TRAIN_QUEUE = 0x7C,
 		CST_GET_NOT_ENOUGH_RESOURCES = 0x7D, // need houses, food/wood or maxPop reached (to build or train, NOT for repair)
 		CST_GET_FARM_DEPLETED = 0x7E, // Sound 0x10
+		CST_GET_UNKNOWN_1F9 = 0x1F9, // see 0x4F3531
 		CST_GET_UNIT_ATTACKED = 0x201,
 		CST_GET_MOVEMENT_FINISHED = 0x202, // unsure
 		CST_GET_TRIBUTE_RECEIVED = 0x20A,

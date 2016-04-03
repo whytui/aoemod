@@ -2294,7 +2294,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unitElemListSize; // Total allocated size of unitElemList (the array can contain some "-1")
 		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units from me AND enemy? players (not gaia): artefacts+creatable+targetableGatherable?
 		long int *ptrUnitListA; // Both gaia and "my" units ? Same units as unitElemList ? (but only ids?)
-		long int unitElemListElemCount; // Number of actual values in the array. Array total size can be larger.
+		long int unitElemListElemCount; // +11C. Number of actual values in the array (+118). Array total size can be larger.
 		// 0x120
 		unsigned long int unknown_120;
 		long int unitListA_count;

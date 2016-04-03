@@ -76,7 +76,12 @@ public:
 	// Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 	void ReadIfManageAIIsOn();
 
+	// Execute a command from custom options window
+	// Returns true if the provided command is valid (and executed)
+	// After the call, output points to a char* string containing command's output, if any.
+	// Do NOT free output variable, it uses an internal buffer.
 	bool ExecuteCommand(char *command, char **output);
+	void HandleChatCommand(char *command);
 
 	void ShowF11_zone();
 

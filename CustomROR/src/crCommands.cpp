@@ -578,7 +578,7 @@ void CustomRORCommand::ReadIfManageAIIsOn() {
 
 
 
-
+// Execute a command from custom options window
 // Returns true if the provided command is valid (and executed)
 // After the call, output points to a char* string containing command's output, if any.
 // Do NOT free output variable, it uses an internal buffer.
@@ -732,6 +732,128 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 fail:
 #endif
 	return false;
+}
+
+
+void CustomRORCommand::HandleChatCommand(char *command) {
+	if (strcmp(command, "hi") == 0) {
+		CallWriteText("Hello world !");
+	}
+	if (strcmp(command, "seed") == 0) {
+		this->PrintMapSeed();
+	}
+	if ((strcmp(command, "t") == 0) || (strcmp(command, "time") == 0)) {
+		this->PrintDateTime();
+	}
+	if ((strcmp(command, "ai") == 0) || (strcmp(command, "AI") == 0)) {
+		this->RestoreAllAIFlags();
+		CallWriteText("AI flags have been recomputed");
+	}
+	if ((strcmp(command, "allai") == 0) || (strcmp(command, "allAI") == 0)) {
+		this->SetAllAIFlags();
+		CallWriteText("All players are now computer-managed.");
+	}
+	if (strcmp(command, "dump") == 0) {
+		this->DumpDebugInfoToFile();
+	}
+	if (strcmp(command, "about") == 0) {
+		char buf[30];
+		sprintf_s(buf, "CustomROR %s\n", VER_FILE_VERSION_STR);
+		CallWriteText(buf);
+	}
+	if (strcmp(command, "timer stats") == 0) {
+		this->DisplayTimerStats();
+	}
+
+#ifdef _DEBUG
+	// p0 to p8: quick player change + set AI flags automatically
+	if ((*command == 'p') && (*(command + 1) >= '0') && (*(command + 1) < '9')) {
+		int playerId = *(command + 1) - '0';
+		this->ChangeControlledPlayer(playerId, true);
+	}
+#endif
+
+#ifdef _DEBUG
+	// TEST temp
+	if (strcmp(command, "a") == 0) {
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(2);
+		if (!player || !player->ptrAIStruct) { return; }
+		ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
+		ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
+		assert(tacAI->IsCheckSumValid());
+		long int playerId = player->playerId;
+		long int playerIdWithAllArtefacts = 1;
+		_asm {
+			MOV ECX, tacAI
+			PUSH 0
+			PUSH 0
+			PUSH 0
+			PUSH 0x72 // all relics
+			PUSH playerId
+			PUSH playerIdWithAllArtefacts // Not really required, it seems
+			MOV EAX, 0x4D7880
+			CALL EAX
+		}
+	}
+
+	// TEST strategy
+	if (strcmp(command, "strat") == 0) {
+		ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scinfo = GetGameGlobalStructPtr()->scenarioInformation;
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+
+		_asm {
+			MOV ECX, player
+			MOV EDX, 0x004F2160
+			PUSH -1
+			CALL EDX
+		}
+
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player1 = GetPlayerStruct(1);
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player2 = GetPlayerStruct(2);
+		player->ptrScoreInformation;
+		player1->ptrScoreInformation;
+		player2->ptrScoreInformation;
+		player->ptrResourceValues;
+		player1->ptrResourceValues;
+		player2->ptrResourceValues;
+		ROR_STRUCTURES_10C::STRUCT_SCORE_ELEM *scoreElem1 = FindScoreElement(player1, AOE_CONST_FUNC::SCORE_CATEGORIES::CST_SC_ECONOMY, AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_CIVILIAN_POPULATION);
+		ROR_STRUCTURES_10C::STRUCT_SCORE_ELEM *scoreElem2 = FindScoreElement(player2, AOE_CONST_FUNC::SCORE_CATEGORIES::CST_SC_ECONOMY, AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_CIVILIAN_POPULATION);
+		float a1 = scoreElem1->value;
+		float a2 = scoreElem2->value;
+		int x = player->AIControlMode;
+	}
+#endif
+
+	// TEST conversion
+	if (strcmp(command, "conversion") == 0) {
+		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = *pGlobalStruct;
+		assert(global != NULL);
+		for (int i = 1; i < global->playerTotalCount; i++) {
+			int FOR_attempt = this->crInfo->activeConversionAttemptsCount[i];
+			int FOR_success = this->crInfo->activeConversionSuccessfulAttemptsCount[i];
+			float FOR_pct = FOR_attempt == 0 ? 0 : ((float)FOR_success) / ((float)FOR_attempt);
+			int AGAINST_attempt = this->crInfo->passiveConversionAttemptsCount[i];
+			int AGAINST_success = this->crInfo->passiveConversionSuccessfulAttemptsCount[i];
+			float AGAINST_pct = AGAINST_attempt == 0 ? 0 : ((float)AGAINST_success) / ((float)AGAINST_attempt);
+			char buffer[200];
+			sprintf_s(buffer, "Conversions FOR p%d: %d/%d = %f%%   AGAINST p%d: %d/%d = %f%%.",
+				i, FOR_success, FOR_attempt, FOR_pct * 100,
+				i, AGAINST_success, AGAINST_attempt, AGAINST_pct * 100);
+			CallWriteText(buffer);
+
+			FILE *f;
+			int res = fopen_s(&f, "F:\\AOEDebug2.txt", "a+"); // overwrite if already existing
+			if (!res) {
+				sprintf_s(buffer, "Conversions FOR p%d: %d/%d = %f   AGAINST p%d: %d/%d = %f.",
+					i, FOR_success, FOR_attempt, FOR_pct * 100,
+					i, AGAINST_success, AGAINST_attempt, AGAINST_pct * 100);
+				fprintf_s(f, buffer);
+				fprintf_s(f, "\n");
+				fclose(f);
+			}
+
+		}
+	}
 }
 
 
