@@ -41,6 +41,7 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(COMMAND_RIGHT_CLICK) >= 0x1C, "COMMAND_RIGHT_CLICK size");
 
+
 	// Type 0x64. Size = 0x10 ? Create=0x4E9490, 0x4E94E0
 	// NOT enqueue. Mainly used by AI. + some cheats use it ?
 	// For human interaction, see COMMAND_QUEUE_UNIT
@@ -57,6 +58,35 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(COMMAND_TRIGGER_TRAIN_UNIT) == 0x10, "COMMAND_TRIGGER_TRAIN_UNIT size");
 
 
+	// Type 0xA. Size = 0x28. Create=42BCF0. Execute=0042B120
+	// For AI (only) ?
+	struct COMMAND_TASK_UNIT {
+		char cmdId;
+		char playerId_1;
+		char playerId_2; // +2. Maybe for MP games with 2 human players for 1 "game" player ?
+		char unknown_03; // unused?
+		long int actorUnitId; // +4.
+		short int activityId; // +8, a word. Cf ACTIVITY_TASK_IDS (but on 2 bytes;).
+		char unknown_0A; // +A. =arg13 in 42BCF0
+		char unknown_0B; // +B. Unused ?
+		long int targetUnitId; // DWORD.
+		// 0x10
+		char unknown_10; // 1 byte. =arg6 in 42BCF0
+		char unknown_11[3]; // unused ?
+		float posY;
+		float posX; // +18.
+		float posZ; // +1C.
+		// 0x20
+		float maxDistance;
+		char unknown_24; // 1 byte. =arg11 in 42BCF0
+		char unknown_25; // 1 byte. =arg12 in 42BCF0
+		char unused_26[2];
+
+		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_TASK_UNIT; }
+	};
+	static_assert(sizeof(COMMAND_TASK_UNIT) == 0x28, "COMMAND_TASK_UNIT size");
+
+
 	// Type 0x65. Size = 0x10
 	struct COMMAND_START_RESEARCH {
 		char cmdId;
@@ -69,6 +99,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_RESEARCH; }
 	};
 	static_assert(sizeof(COMMAND_START_RESEARCH) == 0x10, "COMMAND_START_RESEARCH size");
+
 
 	// Type 0x66. Size = 0x14 + 4*actorCount. Create=0x4E95D0, 0x4E9680
 	// Build a new construction
@@ -90,6 +121,7 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(COMMAND_MAKE_OBJECT) >= 0x14, "COMMAND_START_RESEARCH size (variable)");
 
+
 	// Type 0x67. Size = 0x10. Common to several "subtypes". Those commands are executed in 4E8EB0.
 	struct COMMAND_67_BASE {
 		char cmdId;
@@ -98,6 +130,7 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(COMMAND_67_BASE) == 0x2, "COMMAND_67_BASE size");
 	
+
 	// Type 67, subtype 0. Change diplomacy. Create = 04E9890.
 	struct COMMAND_CHANGE_DIPLOMACY : COMMAND_67_BASE {
 		short int actorPlayerId; // +2
@@ -210,6 +243,7 @@ namespace ROR_STRUCTURES_10C
 		}
 	};
 	static_assert(sizeof(COMMAND_SYNC_ERROR) == 0x10, "COMMAND_SYNC_ERROR size");
+
 
 	// Type 6C. Pay tribute. Size=0xC. Create=04E9A10, execute=04E91B0
 	struct COMMAND_PAY_TRIBUTE {

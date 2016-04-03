@@ -243,7 +243,7 @@ namespace AOE_CONST_INTERNAL
 
 	// For "action" structures. There are NOT values for "command" structures
 	enum INTERNAL_ACTION_ID : short int {
-		CST_IAI_MOVE_1 = 1, // unsure
+		CST_IAI_MOVE_1 = 1, // unsure. Used to capture relics
 		CST_IAI_FOLLOW = 2, // TO CONFIRM (AGE3)
 		CST_IAI_GARRISON = 3, // Enter
 		CST_IAI_EXPLORE_04 = 4, // TO CONFIRM
@@ -286,7 +286,7 @@ namespace AOE_CONST_INTERNAL
 	enum INTERNAL_COMMAND_ID : char {
 		CST_ICI_RIGHT_CLICK = 0, // Some kind of joker: for right-click: will guess command according to unit def interaction, target, etc
 		CST_ICI_ADD_RESOURCE = 0x05, // Only used for AI "personality resource bonus" ?
-		CST_ICI_TASK_UNIT = 0x0A,
+		CST_ICI_TASK_UNIT = 0x0A, // Task from existing activity ?
 		CST_ICI_TRIGGER_TRAIN_UNIT = 0x64, // unsure, when AI triggers a train unit action ? + some cheats?
 		CST_ICI_RESEARCH = 0x65,
 		CST_ICI_BUILD = 0x66,
@@ -354,13 +354,15 @@ namespace AOE_CONST_INTERNAL
 	// For activity.task IDs
 	enum ACTIVITY_TASK_IDS : long int {
 		CST_ATI_ATTACK = 0x258,
+		CST_ATI_DEFEND_OR_CAPTURE = 0x259, // unsure, but it is used to capture relics
 		CST_ATI_BUILD = 0x25A,
 		CST_ATI_HEAL = 0x25B,
 		CST_ATI_CONVERT = 0x25C,
 		CST_ATI_EXPLORE = 0x25D,
 		CST_ATI_GATHER_NOATTACK = 0x261, // Forager, farmer, miners
-		CST_ATI_MOVE = 0x262,
+		CST_ATI_MOVE = 0x262, // Eg: used to capture relic
 		CST_ATI_GATHER_ATTACK = 0x265, // woodcutter, hunter, fisherman (gatherer that have an "attack" phase - not really true for fish, but anyway !)
+		CST_ATI_UNKNOWN_266 = 0x266, // regroup in unit group ??? Related to SNAttackGroupGatherSpacing in 4CD551?
 		CST_ATI_GO_TO_TRANSPORT = 0x269, // Unsure
 		CST_ATI_REPAIR = 0x26A,
 		CST_ATI_HUMAN_TRAIN_UNIT = 0x26B, // only when triggered by human ?
@@ -369,6 +371,7 @@ namespace AOE_CONST_INTERNAL
 		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
 		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targetted farm
 		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC,
+		CST_ATI_UNKNOWN_2BD = 0x2BD, // Used when moving to capture relic or defend unit ? See 4DB9F0=tacAI.captureArtefact?(myUnitId, targetUnitId)
 		CST_ATI_UNKNOWN_2BE = 0x2BE,
 		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ??
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
@@ -413,26 +416,26 @@ namespace AOE_CONST_INTERNAL
 	};
 
 	enum UNIT_GROUP_TASK_IDS : long int {
-		CST_UGT_UNKNOWN_00 = 0,
-		CST_UGT_UNKNOWN_01 = 1,
+		CST_UGT_UNKNOWN_00 = 0, // stop ? 0x4CD349
+		CST_UGT_UNKNOWN_01 = 1, // stop ? 0x4CD349
 		CST_UGT_UNKNOWN_02_ATTACK = 2,
 		CST_UGT_RETREAT = 3, // 4CD640
 		CST_UGT_DEFEND_UNIT = 4, // 4CE309
-		CST_UGT_UNKNOWN_05 = 5, // "add up HP" ?
-		CST_UGT_UNKNOWN_06 = 6, // "add up HP" ?
+		CST_UGT_UNKNOWN_05 = 5, // "add up HPs of my units" ?
+		CST_UGT_UNKNOWN_06 = 6, // "add up HPs of my units" ?
 		CST_UGT_EXTERMINATE = 7, // 4CD7A9
 		CST_UGT_EXPLORE = 8, // 4CD977
-		CST_UGT_UNKNOWN_09 = 9, // 4CD425
+		CST_UGT_UNKNOWN_09 = 9, // 4CD425. Regroup ? Uses SNAttackGroupGatherSpacing
 		CST_UGT_GO_FISHING = 0x0A, // 4CE4AB
 		CST_UGT_TRADE = 0x0B, // 4CE651
-		CST_UGT_UNKNOWN_0C = 0x0C, // "add up HP" ?
+		CST_UGT_UNKNOWN_0C = 0x0C, // "add up HPs of my units" ?
 		CST_UGT_UNUSED_0D = 0x0D, // SEEMS to be unused (invalid)
-		CST_UGT_UNKNOWN_0E = 0x0E, // 4CD425
+		CST_UGT_UNKNOWN_0E = 0x0E, // 4CD425. Regroup ?
 		CST_UGT_UNUSED_0F = 0x0F, // SEEMS to be unused (invalid)
 		CST_UGT_UNUSED_10 = 0x10, // SEEMS to be unused (invalid)
 		CST_UGT_UNUSED_11 = 0x11, // SEEMS to be unused (invalid)
 		CST_UGT_UNUSED_12 = 0x12, // SEEMS to be unused (invalid)
-		CST_UGT_UNKNOWN_13 = 0x13, // "add up HP" ?
+		CST_UGT_UNKNOWN_13 = 0x13, // "add up HPs of my units" ?
 		CST_UGT_ATTACK_ROUNDUP_TARGET = 0x14,
 		CST_UGT_UNKNOWN_15_ATTACK = 15
 	};
@@ -448,7 +451,7 @@ namespace AOE_CONST_INTERNAL
 		CST_AUT_FILL_SOLDIER_GROUPS = 6, // "Fill SolGroups"
 		CST_AUT_TASK_IDLE_SOLDIER = 7, // "Task IdleSol"
 		CST_AUT_TASK_ACTIVE_SOLDIER = 8, // "Task ActSol"
-		CST_AUT_PLAYTASKING = 9, // "Playtasking" - WTF ???
+		CST_AUT_PLAYTASKING = 9, // "Playtasking" - WTF ??? special attacks?
 		CST_AUT_TASK_UNGRP_SOLDIER = 10, // "TaskUngrpSol"
 		CST_AUT_RESEARCH = 11, // "Research"
 		CST_AUT_TRAIN = 12, // "Train"

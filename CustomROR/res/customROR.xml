@@ -94,7 +94,7 @@
 	<!-- all.enhanceLikeValues: set to 0 to disable city plan enhancements, 1 or other values to activate it (recommended) -->
 	<cityPlan building="all" name="enhanceLikeValues" enable="1"></cityPlan>
 	<!-- You can use float for City plan DISTANCES -->
-	<!-- house distances from...: avoid too high values because AI won't find any place to build then ;)
+	<!-- house distances from...: avoid too high values because AI won't find any place to build then ;) -->
 	<!-- house.distanceFromTownCenter: ROR default=3. Higher values (like ~7) are better. -->
 	<!-- <cityPlan building="house" name="distanceFromTownCenter" value="3"></cityPlan> -->
 	<!-- house.distanceFromStorageBuildings: ROR default=3.

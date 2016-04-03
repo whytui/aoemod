@@ -2105,25 +2105,25 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_UNIT_GROUP_ELEM *previous;
 		unsigned long int unitGroupId; // A unique ID
 		// 0x10
-		unsigned long int unknown_010; // resetOrg ?
+		unsigned long int unknown_resetOrg; // +10. resetOrg ?
 		AOE_CONST_INTERNAL::UNIT_GROUP_TYPES unitGroupType; // +14. internal id: 64,65,66,67,6A,6B,6C,6D(=artefacts?)
 		long int taskSubTypeId;
 		long int myUnitsIdArray[0x28]; // +1C. 40 elements, can be non-consecutive (ignore -1 values).
 		// 0xBC
-		long int myUnitsHPArray[0x28]; // +BC. 40 elements.
+		long int myUnitsHPArray[0x28]; // +BC. 40 elements. Also used as myUnitsIdArray+0xA0.
 		long int unitCount; // +15C. Must correspond to valid unitIds count in unitIdArray. Warning: 4CCC90 method requires LucTieuPhung's fix to avoid breaking this assertion.
 		// 0x160
 		unsigned long int unitMaximumCount; // Unsure
-		unsigned long int commanderUnitId; // group leader
-		unsigned long int unknown_168; // an index for array ?
-		unsigned long int unknown_16C;
+		unsigned long int commanderUnitId; // +164. group leader
+		unsigned long int totalGroupHP; // or "old" value ?
+		unsigned long int unsure_previousUnitCount; // +16C. Set from +15Cs
 		// 0x170
 		float unknown_170;
 		float unknown_174;
 		float unknown_178;
 		unsigned long int unknown_17C; // unknown type
 		// 0x180
-		AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS currentTask; // TaskId, see 4CD339. Values in 0-15
+		AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS currentTask; // TaskId, see 4CD339. Values in 0-0x15
 		long int targetUnitId; // including defended unit case ?
 		long int targetDAT_ID;
 		float targetPosY;
@@ -2154,7 +2154,7 @@ namespace ROR_STRUCTURES_10C
 		short int unknown_1D6; // check type (2 bytes ?)
 		// 1D8
 		char unknown_1D8[0x2C8 - 0x1D8];
-		char unknown_2C8;
+		char unknown_2C8; // A counter ? 0x4CD42F
 		char unknown_2C9;
 		char unknown_2CA; // ?
 		char unknown_2CB; // ?
@@ -2844,8 +2844,8 @@ namespace ROR_STRUCTURES_10C
 		// 0x40
 		float posX;
 		float posZ;
-		float unknown_048; // Confirm type
-		unsigned long int unknown_04C;
+		float maxDistance; // +48.
+		unsigned long int unitIdToDefend; // +4C. Unit ID to capture or defend ?
 		// 0x50
 		unsigned long int previous_whenAttackedInternalId; // +50. Backup for +28
 		long int previousActionId; // Backup for currentActionId. set in 40F6D0 method, 411D00

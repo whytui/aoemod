@@ -67,7 +67,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_options_10b 13
 #define COUNT_options_10c 61
 #define COUNT_techFixes_10b 5
-#define COUNT_techFixes_10c 33
+#define COUNT_techFixes_10c 35
 #define COUNT_resolution_10b 52
 #define COUNT_resolution_10c 76
 #define COUNT_windowedMode_10c 3
@@ -1973,6 +1973,26 @@ void AOE_binData::InitTechFixes_10c() {
 		0x94234,
 		(0x83, 0xFF, 0x20, 0x7C, 0xD3), // default=no
 		(0x83, 0xFF, 0x20, 0x7E, 0xD3),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->techFixes_10c.GetBinSeqDefinition(i),
+		FixAICaptureArtefactDistance_check,
+		"Fix distance in movement check for AI to capture artefact.",
+		0xD8819,
+		(0x6A, 0x00, 0x68, 0x00, 0x00, 0x00, 0x40, 0x51), // default=no
+		(0x6A, 0x00, 0x68, 0x00, 0x00, 0x80, 0x3F, 0x51),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->techFixes_10c.GetBinSeqDefinition(i),
+		FixAICaptureArtefactDistance_execution,
+		"Fix distance in AI capture artefact activity.",
+		0xD88A3,
+		(0x6A, 0x64, 0x68, 0x00, 0x00, 0x00, 0x40, 0x8B, 0x11), // default=no
+		(0x6A, 0x64, 0x68, 0x00, 0x00, 0x80, 0x3F, 0x8B, 0x11),
 		FM_OFF,
 		FM_ON
 		);
