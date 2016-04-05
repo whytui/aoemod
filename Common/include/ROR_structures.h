@@ -1229,31 +1229,30 @@ namespace ROR_STRUCTURES_10C
 		long int playerIsActive[0x10]; // +194C. 1 if player is active. Often referred to as +18CC+80.
 		long int *unknown_198C; // +198C. ptr to struct size=0x20, constructor 45AF60. TO DO.
 		long int startingResources[0x10][4]; // +1990. WARNING: resource order = gold/wood/food/stone here !!!
-		// 0x1A90
+		// 0x1A90 - probably a sub-structure of size=0x3160 (last 4 bytes are unused) for victory conditions settings.
+		// Those generalVictory_* are only relevant if generalVictory_mainCondition==4 (custom)
 		long int generalVictory_conquest; // 1 = Standard, Conquest, Score, Time Limit, Custom if Conquest is enabled. ; 0=others
-		long int generalVictory_ruinsCount;
-		long int generalVictory_relicsCount;
-		long int generalVictory_discoveriesCount;
+		long int generalVictory_ruinsCount; // Number of ruins to collect to win the game (for all players)
+		long int generalVictory_relicsCount; // Number of relics to collect to win the game (for all players)
+		long int generalVictory_discoveriesCount; // Number of discoveries to find to win the game (for all players)
 		// 0x1AA0
-		long int generalVictory_explorationAmount;
-		long int generalVictory_wondersAmount; // unsure?
+		long int generalVictory_explorationAmount; // % of exploration to reach to win the game (for all players)
+		long int generalVictory_goldAmount; // Amount of gold to collect to win the game (for all players)
 		char unknown_1AA8_individual_victory_conditions[0x10][0x2D0]; // Internal structure to define
 		long int diplomacySettings[0x10][0x10]; // +47A8. Refers to PLAYER_DIPLOMACY_STANCES but as DWORDs. 0=allied,1=neutral,3=enemy.
 		long int hasAlliedVictory[0x10]; // 0x4BA8. 1=option is checked for that player
-		unsigned long int unknown_4BE8; // about victory conditions ?
-		unsigned long int unknown_4BEC;
+		long int requireAll; // 0="at least one", 1="all". Applies to relics, ruins, discoveries ?
+		unsigned long int unknown_4BEC; // Unused, it seems.
 		// 0x4BF0
 		unsigned long int unknown_4BF0;
 		long int disableTechnologyFlags[0x10][AOE_CONST_INTERNAL::SC_ED_DISABLE_TECHNOLOGY_INDICES::CST_DTI_COUNT]; // +4BF4. Total Size =0x500 bytes. Used in 0x507E50=scenarioInfo.applyDisabledResearches(player)
-		//char unknown_4FF4[0x50F4 - 0x4FF4]; // related to disableTechnologyFlags. Init AND serialize are common (same rep stos)
-		// TO DO: disableTechnologyFlags and unknown_4FF4 are only 1 same field !!
 		long int enableLengthenCombatMode; // +50F4. A flag 0/1. If 1, lengthen combat mode is ON (most units get *3 HP, it is technology 0x64)
 		long int unknown_50F8; // +50F8 ? Unused ?
 		long int fullTechTree; // +50FC
 		// 0x5100
 		long int startingAge[0x10]; // 1=Tool, 4=post iron. Warning, this does not correspond to CST_AGE_TOOL, etc
 		// 0x5140
-		long int generalVictory_mainCondition; // 0=Standard, 1=Conquest, 2=Score, 3=Time Limit, 4=Custom
+		AOE_CONST_INTERNAL::GENERAL_VICTORY_CONDITION generalVictory_mainCondition; // 0=Standard, 1=Conquest, 2=Score, 3=Time Limit, 4=Custom
 		long int generalVictory_scoreAmount; // Default 900
 		long int generalVictory_timeAmount; // Default 9000 "years"
 

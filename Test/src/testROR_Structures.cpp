@@ -52,7 +52,7 @@ static bool test_ror_structures() {
 	ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO scinfo;
 	assert(sizeof(scinfo) == 0x514C);
 	trs_assert(&scinfo, 0x1990, &scinfo.startingResources);
-	trs_assert(&scinfo, 0x1AA4, &scinfo.generalVictory_wondersAmount);
+	trs_assert(&scinfo, 0x1AA4, &scinfo.generalVictory_goldAmount);
 	trs_assert(&scinfo, 0x4BA8, &scinfo.hasAlliedVictory);
 	trs_assert(&scinfo, 0x4BF4, &scinfo.disableTechnologyFlags);
 	trs_assert(&scinfo, 0x5148, &scinfo.generalVictory_timeAmount);

@@ -404,6 +404,14 @@ namespace AOE_CONST_INTERNAL
 		CST_DTI_COUNT = 0x14
 	};
 
+	// General victory condition choice
+	enum GENERAL_VICTORY_CONDITION : long int {
+		GVC_STANDARD = 0,
+		GVC_CONQUEST = 1,
+		GVC_SCORE = 2,
+		GVC_TIME_LIMIT = 3,
+		GVC_CUSTOM = 4
+	};
 
 	enum UNIT_GROUP_TYPES : long int {
 		CST_UGT_UNKNOWN_64 = 0x64,
