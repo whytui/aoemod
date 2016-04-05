@@ -393,6 +393,7 @@ void EditorScenarioInfoPopup::_ResetPointers() {
 	this->btnPER = NULL;
 	this->btnTerrainEdit = NULL;
 	this->btnTriggers = NULL;
+	this->btnVictoryCondition = NULL;
 	this->edtPlayerId = NULL;
 	this->lblTitle = NULL;
 	this->chkAllowUnitOverlapping = NULL;
@@ -432,24 +433,30 @@ void EditorScenarioInfoPopup::SetVarToUpdate_lengthenCombatMode(long int *varToU
 }
 
 void EditorScenarioInfoPopup::_AddPopupContent() {
-	long int btnhPos = (hSize - 0xAC) / 2; // x position for buttons
+	const long int btSize = 0xAC;
+	long int btnTotalSpace = hSize - (btSize * 2);
+	long int btnSimpleSpace = btnTotalSpace / 3; // btn count + 1 more space on the right
+	long int btnhPos1 = btnSimpleSpace; // x position for buttons
+	long int btnhPos2 = btSize + btnSimpleSpace * 2; // x position for buttons
 	this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_NONE;
 	this->playerId = -1;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
-	AOE_AddLabel(popup, &this->lblTitle, "Custom editor menu", btnhPos - 5, 10, 190, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	AOE_AddLabel(popup, &this->lblTitle, "Custom editor menu", btnhPos1 - 5, 10, 190, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	this->AddObjectInContentList(this->lblTitle);
-	AOE_AddLabel(popup, &unused, "PlayerId :", btnhPos, 40, 0x60, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	AOE_AddLabel(popup, &unused, "PlayerId :", btnhPos1, 40, 0x60, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	this->AddObjectInContentList(unused);
-	AOE_AddTextBox(popup, &this->edtPlayerId, "2", 1, btnhPos + 0xAC - 0x22, 42, 0x22, 20, false, false, true);
+	AOE_AddTextBox(popup, &this->edtPlayerId, "2", 1, btnhPos1 + btSize - 0x22, 42, 0x22, 20, false, false, true);
 	this->AddObjectInContentList(this->edtPlayerId);
-	AOE_AddButton(popup, &this->btnAI, LANG_ID_STRATEGY, btnhPos, 80, 0xAC, 30, 0);
+	AOE_AddButton(popup, &this->btnAI, LANG_ID_STRATEGY, btnhPos1, 80, btSize, 30, 0);
 	this->AddObjectInContentList(this->btnAI);
-	AOE_AddButton(popup, &this->btnPER, LANG_ID_PERSONALITY, btnhPos, 120, 0xAC, 30, 0);
+	AOE_AddButton(popup, &this->btnPER, LANG_ID_PERSONALITY, btnhPos1, 120, btSize, 30, 0);
 	this->AddObjectInContentList(this->btnPER);
-	AOE_AddButton(popup, &this->btnTriggers, "Triggers", btnhPos, 160, 0xAC, 30, 0);
+	AOE_AddButton(popup, &this->btnTriggers, "Triggers", btnhPos1, 160, btSize, 30, 0);
 	this->AddObjectInContentList(this->btnTriggers);
-	AOE_AddButton(popup, &this->btnTerrainEdit, "Terrain edit", btnhPos, 200, 0xAC, 30, 0);
+	AOE_AddButton(popup, &this->btnTerrainEdit, "Terrain edit", btnhPos1, 200, btSize, 30, 0);
 	this->AddObjectInContentList(this->btnTerrainEdit);
+	AOE_AddButton(popup, &this->btnVictoryCondition, "Victory conditions", btnhPos2, 80, btSize, 30, 0);
+	this->AddObjectInContentList(this->btnVictoryCondition);
 	long int chkSize = 30;
 	long int hSpace = 15;
 	long int lblhSize = 160;
@@ -509,6 +516,10 @@ bool EditorScenarioInfoPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON
 	}
 	if (sender == this->btnTerrainEdit) {
 		this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_TERRAIN_EDIT;
+		doCloseCustomPopup = true;
+	}
+	if (sender == this->btnVictoryCondition) {
+		this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_VICTORY_CONDITION;
 		doCloseCustomPopup = true;
 	}
 	if (sender == this->chkAllowUnitOverlapping) {
@@ -593,6 +604,17 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 		this->nextPopup = nextPopup;
 		break;
 	}
+	case SC_INFO_POPUP_TO_OPEN::PTO_VICTORY_CONDITION:
+	{
+		InputBox_int<long int> *nextPopup = new InputBox_int<long int>();
+		nextPopup->SetCRCommand(this->crCommand);
+		nextPopup->OpenPopup(450, 200, true);
+		nextPopup->AddPopupContent("Gold victory condition", 
+			"If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select \"custom\" in general victory conditions tab.",
+			settings->ptrGlobalStruct->scenarioInformation->generalVictory_goldAmount, 0, 999999, &settings->ptrGlobalStruct->scenarioInformation->generalVictory_goldAmount, false);
+		this->nextPopup = nextPopup;
+		break;
+	}
 	default:
 		break;
 	}
@@ -623,7 +645,9 @@ void SimpleEditTextPopup::AddPopupContent(char *title, const char *initialValue,
 	int labelPosX = ((this->hSize - labelSizeX) / 2) + 1;
 	if (labelPosX < 1) { labelPosX = 1; }
 	AOE_AddLabel(popup, &this->lblTitle, title, labelPosX, 10, labelSizeX, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddObjectInContentList(this->lblTitle);
 	AOE_AddTextBox(popup, &this->edtText, initialValue, maxLength, 10, 30, this->hSize - 20, this->vSize - 80, readOnly, true, false);
+	this->AddObjectInContentList(this->edtText);
 }
 
 
@@ -645,6 +669,46 @@ void SimpleEditTextPopup::OnBeforeClose(bool isCancel) {
 		}
 	}
 }
+
+
+InputBox::InputBox() {
+	this->_ResetPointers();
+}
+
+
+void InputBox::_ResetPointers() {
+	this->edtInput = NULL;
+	this->lblTitle = NULL;
+	this->edtDescription = NULL;
+}
+
+void InputBox::OnBeforeClose(bool isCancel) {}
+
+
+
+// This class needs parameters to create content. Call this after calling OpenPopup().
+void InputBox::AddPopupContent(char *title, char *desc, const char *initialInputValue, long int maxLength, bool readOnly) {
+	this->readOnly = readOnly;
+	if (maxLength < 1) {
+		maxLength = 0x8000 - 2;
+	}
+	this->maxLength = maxLength;
+	int labelSizeX = strlen(title) * 12;
+	int labelPosX = ((this->hSize - labelSizeX) / 2) + 1;
+	if (labelPosX < 1) { labelPosX = 1; }
+	int textSizeY = this->vSize - (24*2) - 56;
+	if (textSizeY < 1) { textSizeY = 10; }
+	AOE_AddLabel(popup, &this->lblTitle, title, labelPosX, 10, labelSizeX, 28, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddObjectInContentList(this->lblTitle);
+	if (*desc != 0) {
+		AOE_AddTextBox(popup, &this->edtDescription, desc, 10000, 20, 40, this->hSize - 40, textSizeY, true, true, false);
+		this->AddObjectInContentList(this->edtDescription);
+	}
+	AOE_AddTextBox(popup, &this->edtInput, initialInputValue, maxLength, 60, textSizeY + 44, this->hSize - 120, 20, readOnly, true, false);
+	this->AddObjectInContentList(this->edtInput);
+}
+
+
 
 
 EditMapSizeXYPopup::EditMapSizeXYPopup() {

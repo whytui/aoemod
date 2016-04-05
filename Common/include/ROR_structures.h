@@ -1237,10 +1237,10 @@ namespace ROR_STRUCTURES_10C
 		long int generalVictory_discoveriesCount; // Number of discoveries to find to win the game (for all players)
 		// 0x1AA0
 		long int generalVictory_explorationAmount; // % of exploration to reach to win the game (for all players)
-		long int generalVictory_goldAmount; // Amount of gold to collect to win the game (for all players)
+		long int generalVictory_goldAmount; // Amount of gold to collect to win the game (for all players). Hidden in scenario editor (value is never modified by editor).
 		char unknown_1AA8_individual_victory_conditions[0x10][0x2D0]; // Internal structure to define
 		long int diplomacySettings[0x10][0x10]; // +47A8. Refers to PLAYER_DIPLOMACY_STANCES but as DWORDs. 0=allied,1=neutral,3=enemy.
-		long int hasAlliedVictory[0x10]; // 0x4BA8. 1=option is checked for that player
+		long int hasAlliedVictory[0x10]; // +4BA8. 1=option is checked for that player
 		long int requireAll; // 0="at least one", 1="all". Applies to relics, ruins, discoveries ?
 		unsigned long int unknown_4BEC; // Unused, it seems.
 		// 0x4BF0
