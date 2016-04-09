@@ -776,24 +776,14 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 #ifdef _DEBUG
 	// TEST temp
 	if (strcmp(command, "a") == 0) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(2);
+		long int playerId = 1;
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
 		ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
 		assert(tacAI->IsCheckSumValid());
-		long int playerId = player->playerId;
-		long int playerIdWithAllArtefacts = 1;
-		_asm {
-			MOV ECX, tacAI
-			PUSH 0
-			PUSH 0
-			PUSH 0
-			PUSH 0x72 // all relics
-			PUSH playerId
-			PUSH playerIdWithAllArtefacts // Not really required, it seems
-			MOV EAX, 0x4D7880
-			CALL EAX
-		}
+		float posX, posY;
+		bool ok = GetGamePositionUnderMouse(&posX, &posY);
 	}
 
 	// TEST strategy
@@ -3069,8 +3059,7 @@ bool CustomRORCommand::ShouldChangeTarget(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVI
 	distanceX = (oldTargetUnit->positionX - myPosX);
 	distanceY = (oldTargetUnit->positionY - myPosY);
 	float squareDistanceOldTarget = (distanceX * distanceX) + (distanceY * distanceY);
-#pragma message("TO DO: use new method and check no-regression")
-	bool isOldTargetVisible = HasLocationNoFogForPlayer(actorPlayer->playerId, (long int)oldTargetUnit->positionX, (long int)oldTargetUnit->positionY);
+	bool isOldTargetVisible = IsFogVisibleForPlayer(actorPlayer->playerId, (long int)oldTargetUnit->positionX, (long int)oldTargetUnit->positionY);
 	// The value to test distances, taking into account unit range.
 	float squareVeryCloseTestDistance = (actorUnitDef->maxRange + distanceToConsiderVeryClose);
 	squareVeryCloseTestDistance = squareVeryCloseTestDistance * squareVeryCloseTestDistance;
@@ -4301,10 +4290,10 @@ void CustomRORCommand::WriteF11PopInfoText(ROR_STRUCTURES_10C::STRUCT_UI_F11_POP
 	long int boatVillCount = -1;
 	// Try to get actual villager count (including fishing ships, etc...)
 	if (player && player->IsCheckSumValid()) {
-		villCount = GetPlayerUnitCount(player, -1, TribeAIGroupCivilian, 2);
-		boatVillCount = GetPlayerUnitCount(player, -1, TribeAIGroupFishingBoat, 2) +
-			GetPlayerUnitCount(player, -1, TribeAIGroupTradeBoat, 2) +
-			GetPlayerUnitCount(player, -1, TribeAIGroupTransportBoat, 2);
+		villCount = GetPlayerUnitCount(player, -1, TribeAIGroupCivilian, 2, 2);
+		boatVillCount = GetPlayerUnitCount(player, -1, TribeAIGroupFishingBoat, 2, 2) +
+			GetPlayerUnitCount(player, -1, TribeAIGroupTradeBoat, 2, 2) +
+			GetPlayerUnitCount(player, -1, TribeAIGroupTransportBoat, 2, 2);
 		//villCount = (long int)player->GetResourceValue(CST_RES_ORDER_CIVILIAN_POPULATION); // DONT DO THIS because resource is NOT always up to date
 	}
 	std::string res = localizedText;
@@ -4341,7 +4330,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_FOOD) > this->crInfo->configInfo.autoRebuildFarms_maxFood) { return; }
 	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_WOOD) < this->crInfo->configInfo.autoRebuildFarms_minWood) { return; }
 	// Remark : currentFarmCount includes current farm (that is going to be deleted)
-	long int currentFarmCount = GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 2);
+	long int currentFarmCount = GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2); // Include being-built farms
 	if (currentFarmCount > this->crInfo->configInfo.autoRebuildFarms_maxFarms) { return; }
 
 	ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING *farmerUnit = NULL;

@@ -416,6 +416,18 @@ static bool AOE_listbox_addItem(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *obj, long
 }
 
 
+// Return current screen, using 0x5830E8 structure info
+static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_GetCurrentScreen() {
+	ROR_STRUCTURES_10C::STRUCT_ANY_UI *res = NULL;
+	_asm {
+		MOV ECX, 0x5830E8
+		MOV EAX, DS:[ECX+0xC]
+		MOV res, EAX
+	}
+	return res;
+}
+
+
 // Returns a pointer to a UI object that matches screenName.
 // Can return NULL if no matching screen was found
 static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_GetScreenFromName(const char *screenName) {
@@ -613,3 +625,24 @@ static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateCustomOptionsPopupFromMenu(R
 failed:
 	return 0;
 }
+
+
+static long int AOE_GetGamePosFromMousePos(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone,
+	ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_POSITION_INFO *pPosInfo, long int mousePosX, long int mousePosY) {
+	if (!gameZone || !pPosInfo || !gameZone->IsCheckSumValid()) { return 0; }
+	const unsigned long int callAddr = 0x511430;
+	long int res;
+	_asm {
+		MOV ECX, gameZone;
+		PUSH 0;
+		PUSH pPosInfo;
+		PUSH mousePosY;
+		PUSH mousePosX;
+		PUSH 0;
+		PUSH 0x28;
+		CALL callAddr;
+		MOV res, EAX;
+	}
+	return res;
+}
+

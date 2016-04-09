@@ -790,21 +790,6 @@ ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int po
 }
 
 
-#pragma message("HasLocationNoFogForPlayer: Check new method has no regression and remove this")
-// Returns true if the player can see (no fog) a location on the map - old method
-bool HasLocationNoFogForPlayer(unsigned long int playerId, long int posX, long int posY) {
-	assert(playerId >= 0);
-	assert(playerId < 9);
-	assert(posX >= 0);
-	assert(posY >= 0);
-	unsigned long int mapValue = (unsigned long int)GetMapVisibilityInfo(posX, posY);
-	mapValue = mapValue & 0x0000FFFF; // To keep only "fog visibility"
-	unsigned long int mask = 1 << playerId;
-	mapValue = mapValue & mask;
-	return mapValue != 0;
-}
-
-
 bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY) {
 	assert(playerId >= 0);
 	assert(playerId < 9);
@@ -812,6 +797,7 @@ bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY) {
 	assert(posY >= 0);
 	assert(posX < 256); // TO DO: get exact map size
 	assert(posY < 256); // TO DO: get exact map size
+	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255) || (playerId < 0) || (playerId > 8)) { return false; }
 	ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *v = (ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
 	return v->isFogVisibleForPlayer(playerId);
 }
@@ -823,6 +809,7 @@ bool IsExploredForPlayer(long int playerId, long int posX, long int posY) {
 	assert(posY >= 0);
 	assert(posX < 256); // TO DO: get exact map size
 	assert(posY < 256); // TO DO: get exact map size
+	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255) || (playerId < 0) || (playerId > 8)) { return false; }
 	ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *v = (ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
 	return v->isExploredForPlayer(playerId);
 }
@@ -1118,7 +1105,7 @@ ROR_STRUCTURES_10C::STRUCT_UNIT *FindUnitWithShortcutNumberForPlayer(ROR_STRUCTU
 // Get number of matching units (for a unitDef ID) for given player. Restricted to "creatable" units
 // -1 are jokers for DAT_ID, unitAIType, unitStatus
 long int GetPlayerUnitCount(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID,
-	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType, char unitStatus) {
+	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType, char minUnitStatus, char maxUnitStatus) {
 	assert(player != NULL);
 	ROR_STRUCTURES_10C::STRUCT_PER_TYPE_UNIT_LIST_LINK *units = player->ptrCreatableUnitsListLink;
 	assert(units != NULL);
@@ -1135,7 +1122,8 @@ long int GetPlayerUnitCount(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int
 		if (currentUnit && currentUnit->IsCheckSumValid() && unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 			bool ok_DATID = (DAT_ID == -1) || (currentUnit->ptrStructDefUnit->DAT_ID1 == DAT_ID);
 			bool ok_AIType = (unitAIType == TribeAINone) || (unitDef->unitAIType == unitAIType);
-			bool ok_status = (unitStatus == -1) || (currentUnit->unitStatus == unitStatus);
+			bool ok_status = (minUnitStatus == -1) || (currentUnit->unitStatus >= minUnitStatus) &&
+				(maxUnitStatus == -1) || (currentUnit->unitStatus <= maxUnitStatus);
 			if (ok_DATID && ok_AIType && ok_status) {
 				result++;
 			}
@@ -1175,6 +1163,88 @@ AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(RO
 		MOV res, EAX
 	}
 	return res;
+}
+
+
+// If UIObj is null, use current "global" screen positions.
+ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition(ROR_STRUCTURES_10C::STRUCT_ANY_UI *UIObj) {
+	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
+	result.posX = -1;
+	result.posY = -1;
+	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = UIObj;
+	if (!currentUI) {
+		currentUI = AOE_GetCurrentScreen();
+	}
+	assert(currentUI);
+	if (!currentUI) { return result; }
+	POINT pt;
+	GetCursorPos(&pt);
+	ScreenToClient((HWND)currentUI->GetHWnd(), &pt); // Returns false if failed
+	pt.x += currentUI->unknown_08C_minPosX;
+	pt.y += currentUI->unknown_090_minPosY;
+	result.posX = pt.x;
+	result.posY = pt.y;
+	return result;
+}
+
+
+// Get "game" coordinates under mouse position. Returns true if successful. Updates posX/posY.
+bool GetGamePositionUnderMouse(float *posX, float *posY) {
+	*posX = -1;
+	*posY = -1;
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
+	assert(currentUI);
+	if (!settings || !currentUI) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *)currentUI;
+	ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditorMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)currentUI;
+	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone = NULL;
+	if (gameMainUI->IsCheckSumValid()) {
+		assert((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
+			(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME));
+		gameZone = gameMainUI->gamePlayUIZone;
+	}
+	if (scEditorMainUI->IsCheckSumValid()) {
+		assert(gameZone == NULL);
+		assert(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
+		gameZone = scEditorMainUI->gamePlayUIZone;
+	}
+	if (!gameZone || !gameZone->IsCheckSumValid()) { return false; }
+	if (!settings) { return false; }
+	if ((settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) &&
+		(settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) &&
+		(settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME)) {
+		return false;
+	}
+	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO mousePos = GetMousePosition(gameZone);
+
+	// Analog to 0x5145D1
+	if (mousePos.posX < gameZone->unknown_08C_minPosX) { return false; }
+	if (mousePos.posX > gameZone->unknown_094_maxPosX) { return false; }
+	if (mousePos.posY < gameZone->unknown_090_minPosY) { return false; }
+	if (mousePos.posY > gameZone->unknown_098_maxPosY) { return false; }
+	long int relativeMousePosX = mousePos.posX - gameZone->unknown_08C_minPosX;
+	long int relativeMousePosY = mousePos.posY - gameZone->unknown_090_minPosY;
+
+	ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_POSITION_INFO gamePos;
+	long int unknown_res = AOE_GetGamePosFromMousePos(gameZone, &gamePos, relativeMousePosX, relativeMousePosY);
+	if (unknown_res > 0) { // really not sure of this. Often 0x33 ?
+		*posX = gamePos.posX;
+		*posY = gamePos.posY;
+	}
+
+	return (unknown_res > 0);
+}
+
+// Returns "game" coordinates under mouse position.
+ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo() {
+	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
+	float x, y;
+	GetGamePositionUnderMouse(&x, &y);
+	result.posX = (long int)x;
+	result.posY = (long int)y;
+	return result;
 }
 
 

@@ -11,6 +11,8 @@
 #include <triggerDefinition.h>
 #include <mystrings.h>
 #include <ROR_commands.h>
+#include <Windows.h>
+#include <WinUser.h> // get mouse pos
 
 #include "AOE_memory.h"
 #include "UI_utilities.h"
@@ -270,8 +272,6 @@ AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(ROR_STRUCTURES_10C::STRUCT_P
 // Lower bit is player 0 (gaia), 2nd=player1, etc
 ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int xPos, long int yPos);
 
-// Returns true if the player can see (no fog) a location - old method
-bool HasLocationNoFogForPlayer(unsigned long int playerId, long int posX, long int posY);
 
 bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY);
 bool IsExploredForPlayer(long int playerId, long int posX, long int posY);
@@ -290,6 +290,15 @@ AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(RO
 // GetDamage(unitDef attacker, unitDef defender) returns long int
 // Call 0043FF10
 
+// Get current mouse position, relative to UIObj
+// If UIObj is null, use current "global" screen relative positions.
+ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition(ROR_STRUCTURES_10C::STRUCT_ANY_UI *UIObj);
+
+// Returns "game" coordinates under mouse position (rounded to int).
+ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo();
+// Get "game" coordinates under mouse position. Returns true if successful. Updates posX/posY.
+bool GetGamePositionUnderMouse(float *posX, float *posY);
+
 // Get unit at (mouse) position
 // Warning, this impacts the global variables in 0x7D1CF8
 ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, bool allowTempUnits);
@@ -307,7 +316,7 @@ ROR_STRUCTURES_10C::STRUCT_UNIT *FindUnitWithShortcutNumberForPlayer(ROR_STRUCTU
 // Get number of matching units (for a unitDef ID) for given player. Restricted to "creatable" units
 // -1 are jokers for DAT_ID, unitAIType, unitStatus
 long int GetPlayerUnitCount(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, 
-	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType, char unitStatus);
+	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType, char minUnitStatus, char maxUnitStatus);
 
 // Returns a pointer to trigger data
 char *GetTriggerDataPtr(ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo);

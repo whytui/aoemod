@@ -128,6 +128,7 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_TEMP_MAP_POSITION_INFO;
 
 	// UI components
+	class STRUCT_UI_OBJ_UNKNOWN_INFO;
 	class STRUCT_ANY_UI; // parent class
 	class STRUCT_UI_LIST_ITEM;
 	class STRUCT_UI_BUTTON;
@@ -1913,13 +1914,13 @@ namespace ROR_STRUCTURES_10C
 		char unknown_AF0[0xC20 - 0xAF0];
 		// 0xC20
 		unsigned long int unknown_C20;
-		ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *ptrGameUIStruct;
-		long int lastEventPositionsY[5]; // Used when pressing HOME key
+		ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *ptrGameUIStruct; // +C24
+		long int lastEventPositionsY[5]; // +C28. Used when pressing HOME key
 		// 0xC3C
 		long int lastEventPositionsX[5]; // Used when pressing HOME key
 		// 0xC50
 		long int lastEventIndex; // -1=no "last event". Or a 0-4 value
-		long int lastEventIndex_unknown_C54; // -1=no "last event". Or a 0-4 value
+		long int lastAccessedEventIndex; // -1=no "last event". Or a 0-4 value. To remember which index was used in last "home key" press.
 		// 0xC58
 		char unknown_C58[0x106C - 0xC58];
 		char debugString[0x1190 - 0x106C]; // Unknown_ size
@@ -4056,6 +4057,15 @@ namespace ROR_STRUCTURES_10C
 	};
 
 
+	class STRUCT_UI_OBJ_UNKNOWN_INFO {
+	public:
+		unsigned long int unknown_00; // A pointer
+		long int hWnd;
+		unsigned long int unknown_08;
+		unsigned long int unknown_0C; // A pointer
+		// 0x10
+	};
+
 	// A shortcut to be used with UI objects when exact type is unknown. Also used as parent class for UI objects.
 	// Size=0xF4 for this class, but all child classes are larger !
 	// Constructor: 004523F0 for "screen" objects, 00452580 for components ?
@@ -4073,8 +4083,8 @@ namespace ROR_STRUCTURES_10C
 		long int sizeY;
 		char *screenName;
 		// 0x20
-		unsigned long int unknown_020; // pointer. +04=hWnd +13C=evtStatus?? +1F6=objectIndex,+F4+objectIndex*4=ButtonId +17C=hObject?
-		long int minPosX; // +24. Min X position for this UI object
+		STRUCT_UI_OBJ_UNKNOWN_INFO *unknown_020; // pointer. +04=hWnd +13C=evtStatus?? +1F6=objectIndex,+F4+objectIndex*4=ButtonId +17C=hObject?
+		long int minPosX; // +24. Min X position for this UI object. +24=a pRect object (4 position dwords)
 		long int minPosY; // +28
 		long int maxPosX; // +2C
 		// 0x30
@@ -4106,11 +4116,11 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_080; // Related to "!readonly" ??? But it is NOT "enabled"
 		unsigned long int unknown_084; // type ?
 		unsigned long int unknown_088;
-		unsigned long int unknown_08C; // MinPosX ? similar to +24 ?
+		long int unknown_08C_minPosX; // MinPosX ? similar to +24 ?
 		// 0x90
-		unsigned long int unknown_090; // minPosY ? similar to +28 ?
-		unsigned long int unknown_094; // maxPosX ? similar to +2C
-		unsigned long int unknown_098; // maxPosY ? similar to +30
+		long int unknown_090_minPosY; // minPosY ? similar to +28 ? Example 0x14 (size of top banner, with resources, current age, menu)
+		long int unknown_094_maxPosX; // maxPosX ? similar to +2C
+		long int unknown_098_maxPosY; // maxPosY ? similar to +30
 		unsigned long int unknown_09C; // similar to +24, +8C ?
 		// 0xA0
 		unsigned long int unknown_0A0; // similar to +28, +90 ?
@@ -4148,6 +4158,11 @@ namespace ROR_STRUCTURES_10C
 		// 0xF4 and after: different according to 2 main child (intermediate) classes: UI components and UI screens ?
 		// Screens: F4, F8 are dwords (some X/Y size/pos). classes Size = 0x478/0x490 ? See 454B60/460730
 		// Components: F4 is 2 words...?
+
+		long int GetHWnd() {
+			if (!this->unknown_020) { return 0; }
+			return this->unknown_020->hWnd;
+		}
 	};
 
 
@@ -4434,8 +4449,33 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_GAME_GLOBAL *globalStruct; // +FC
 		// 0x100
 		STRUCT_PLAYER *controlledPlayer;
-		STRUCT_GAME_MAP_INFO *globalGameMapInfo; // To confirm
-		char unknown_108[0x334 - 0x108];
+		STRUCT_GAME_MAP_INFO *globalGameMapInfo; // +104. To confirm
+		short int unknown_108; // some value for Y
+		short int unknown_10A;
+		short int unknown_10C;
+		short int unknown_10E; // some value for X
+		unsigned long int unknown_110;
+		short int unknown_114;
+		short int unknown_116;
+		short int unknown_118;
+		short int unknown_11A;
+		short int unknown_11C; //?
+		short int unknown_11E; //?
+		short int unknown_120;
+		short int unknown_122_screenGamePosY_word; // +122. From player.screenPosY
+		short int unknown_124_screenGamePosX_word; // +124. From player.screenPosX
+		short int unknown_126;
+		short int unknown_128;
+		short int unknown_12A;
+		short int unknown_12C;
+		short int unknown_12E;
+		char unknown_130[0x138 - 0x130];
+		float screenGamePosY; // +138.
+		float screenGamePosX; // +13C.
+		char unknown_140;
+		char unknown_141[3];
+
+		char unknown_144[0x334 - 0x144];
 		// +304, 318, 31C, 320: dwords related to mouse pos?
 
 		unsigned long int unknown_334_ptr; // Ptr to obj size=0x70, ccor=516110. +5C=array size 4*(maxTypeId+1) of ptrs to obj. obj:+4=next,+8=unitId,+30/32/34/36=min/maxPosXY? +C,+20=ptrGraphicsShp?
@@ -4447,6 +4487,7 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00546688) || (this->checksum == 0x0054A840); }
 	};
+
 
 	// Size ?
 	// Constructor ?
