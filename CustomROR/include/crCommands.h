@@ -146,7 +146,7 @@ public:
 	// Returns how many units where told to move.
 	// If maxDistance > 0, only units at a maximum distance of maxDistance are told to move.
 	// Returns <0 if there is an error
-	int MoveIdleMilitaryUnitsToScreenPosition(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, float maxDistance = 0);
+	int MoveIdleMilitaryUnitsToMousePosition(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, float maxDistance = 0);
 
 	// Searches all idle units in a specified range (see config) and order them to come at screen location
 	// Requires ManageAI !

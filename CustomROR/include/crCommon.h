@@ -294,12 +294,15 @@ AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(RO
 // If UIObj is null, use current "global" screen relative positions.
 ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition(ROR_STRUCTURES_10C::STRUCT_ANY_UI *UIObj);
 
-// Returns "game" coordinates under mouse position (rounded to int).
-ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo();
 // Get "game" coordinates under mouse position. Returns true if successful. Updates posX/posY.
+// If position is not valid, posX/posY are set to -1.
 bool GetGamePositionUnderMouse(float *posX, float *posY);
 
-// Get unit at (mouse) position
+// Returns "game" coordinates under mouse position (rounded to int).
+// If position is not valid, posX/posY are set to -1.
+ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo();
+
+// Get unit at (mouse) position, using AOE methods.
 // Warning, this impacts the global variables in 0x7D1CF8
 ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, bool allowTempUnits);
 

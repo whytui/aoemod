@@ -2506,14 +2506,16 @@ float CustomRORCommand::GetConversionResistance(char civId, short int unitClass)
 
 // Returns how many units were told to move.
 // Returns <0 if there is an error
-int CustomRORCommand::MoveIdleMilitaryUnitsToScreenPosition(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, float maxDistance) {
+int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, float maxDistance) {
 	if (!player) { return -1; }
 	ROR_STRUCTURES_10C::STRUCT_AI *ai = player->GetAIStruct();
 	if (!ai || !ai->allMyUnits.unitIdArray) { return -1; }
 	if (ai->structTacAI.militaryUnits.usedElements == 0) { return 0; }
 
-	float posY = player->screenPositionY;
-	float posX = player->screenPositionX;
+	float posY;
+	float posX;
+	if (!GetGamePositionUnderMouse(&posX, &posY)) { return 0; }
+	if ((posX < 0) || (posY < 0)) { return 0; }
 	int result = 0;
 
 	long int unitCount = ai->allMyUnits.usedElements;
@@ -2567,7 +2569,7 @@ void CustomRORCommand::CallNearbyIdleMilitaryUnits() {
 	ROR_STRUCTURES_10C::STRUCT_PLAYER **playerTable = globalStruct->GetPlayerStructPtrTable();
 	if (!playerTable || !playerTable[playerId]) { return; }
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = playerTable[playerId];
-	this->MoveIdleMilitaryUnitsToScreenPosition(player, (float) this->crInfo->configInfo.distanceToCallNearbyIdleMilitaryUnits);
+	this->MoveIdleMilitaryUnitsToMousePosition(player, (float) this->crInfo->configInfo.distanceToCallNearbyIdleMilitaryUnits);
 }
 
 

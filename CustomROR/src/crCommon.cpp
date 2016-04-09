@@ -1189,6 +1189,7 @@ ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition(ROR_STRUCTURES_10C::ST
 
 
 // Get "game" coordinates under mouse position. Returns true if successful. Updates posX/posY.
+// If position is not valid, posX/posY are set to -1.
 bool GetGamePositionUnderMouse(float *posX, float *posY) {
 	*posX = -1;
 	*posY = -1;
@@ -1237,7 +1238,8 @@ bool GetGamePositionUnderMouse(float *posX, float *posY) {
 	return (unknown_res > 0);
 }
 
-// Returns "game" coordinates under mouse position.
+// Returns "game" coordinates under mouse position (rounded to int).
+// If position is not valid, posX/posY are set to -1.
 ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo() {
 	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
 	float x, y;
@@ -1248,7 +1250,7 @@ ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo() {
 }
 
 
-// Get unit at (mouse) position
+// Get unit at (mouse) position, using AOE methods.
 // Warning, this impacts the global variables in 0x7D1CF8
 ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, bool allowTempUnits) {
 	if ((mousePosX < 0) || (mousePosY < 0)) { return NULL; }
