@@ -2812,8 +2812,8 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 
-	// Update AI struct unit lists that are never updated by ROR
-	if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() && (unit->unitInstanceId >= 0)) {
+	// Update AI struct unit lists that are never updated by ROR (we choose to do this only if AI improvement is enabled).
+	if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() && (unit->unitInstanceId >= 0) && this->IsImproveAIEnabled(player->playerId)) {
 		ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
 		assert(infAI->IsCheckSumValid());
 		// unitElemList (infAI)
@@ -2840,6 +2840,15 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 		}
 		if ((unitDefBase->unitAIType == TribeAIGroupArtefact) || (unitDefBase->unitAIType == TribeAIGroupFlag)) {
 			infAI->artefactsAndFlags.Remove(unit->unitInstanceId);
+		}
+		// Hardcoded list of units: cf 0x4C1730 = infAI.AddUnitToDefend(unitStruct)
+		if ((unitDefBase->DAT_ID1 == CST_UNITID_FORUM) || (unitDefBase->DAT_ID1 == CST_UNITID_DOCK) ||
+			(unitDefBase->DAT_ID1 == CST_UNITID_RELIC) ||
+			(unitDefBase->DAT_ID1 == CST_UNITID_RUIN) || (unitDefBase->DAT_ID1 == CST_UNITID_RUIN2) ||
+			(unitDefBase->unitAIType == TribeAIGroupStoneMine) || (unitDefBase->unitAIType == TribeAIGroupGoldMine) ||
+			(unitDefBase->unitAIType == TribeAIGroupBerryBush)) {
+			// Note: gaia elements to defend are never removed when deleted (depleted)... (because not belonging to the same player !)
+			infAI->elementsToDefend.Remove(unit->unitInstanceId);
 		}
 	}
 

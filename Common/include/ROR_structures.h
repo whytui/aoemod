@@ -2355,7 +2355,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_AI_UNIT_LIST_INFO creatableAndGatherableUnits; // +118. units that can be created by players + resources (gazelle but not other animals) + artefacts
 		STRUCT_AI_UNIT_LIST_INFO playerCreatableUnits; // +128. All player-creatable units (villager, military, buildings...). NOT resources.
 		STRUCT_AI_UNIT_LIST_INFO artefactsAndFlags; // +138. Store the found flags/artefacts.
-		STRUCT_AI_UNIT_LIST_INFO elementsToDefend; // +148. Can be TC, dock, relic, ruin. Also mines+bushes? Related to SNxxxDefendPriority
+		STRUCT_AI_UNIT_LIST_INFO elementsToDefend; // +148. Can be TC, dock, relic, ruin, mines+bushes. Related to SNxxxDefendPriority
 		STRUCT_TEMP_MAP_BUILD_LIKE_INFOS buildMapLikeInfo; // +158. Size to check
 		// Remove unit from allMyUnits & buildingUnits: 0x4BF440.
 		STRUCT_AI_UNIT_LIST_INFO allMyUnits; // +180. To confirm.
@@ -2571,9 +2571,9 @@ namespace ROR_STRUCTURES_10C
 		long int unitId; // -1 means free (empty) slot. Bug in 4C41BD ?
 		short int unitDATID; // +04
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitClass; // +06 - short int
-		char posY; // +08
-		char posX;
-		char posZ;
+		unsigned char posY; // +08
+		unsigned char posX;
+		unsigned char posZ;
 		char playerId; // 0x0B
 		//float HP; // +C. unit health points
 		short int HP; // +C. unit health points

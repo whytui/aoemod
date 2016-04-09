@@ -228,8 +228,13 @@ namespace AOE_CONST_FUNC
 	const short int CST_UNITID_BARRACKS_2_UPGRADE = 132; // Barracks2. base is 12
 	const short int CST_UNITID_DOCK_2_UPGRADE = 133; // base is 45
 	const short int CST_UNITID_HOUSE_2_UPGRADE = 154; // house1. base is 70
-	const static int CST_UNITID_VILLAGER2 = 293; // A synonym for MAN2
-	const static int CST_UNITID_MAN2 = 293;
+	const short int CST_UNITID_VILLAGER2 = 293; // A synonym for MAN2
+	const short int CST_UNITID_MAN2 = 293;
+
+	// Special
+	const short int CST_UNITID_RELIC = 0x9F; // 159.
+	const short int CST_UNITID_RUIN = 0x9E; // 158.
+	const short int CST_UNITID_RUIN2 = 0xA3; // 163. The unused (but supported) ruins
 
 	// Research IDs from empires.dat
 	const short int CST_RSID_STONE_AGE = 100;
