@@ -576,6 +576,41 @@ bool ApplyCostIfPossible(float costTable[], float resourceTable[]) {
 }
 
 
+// Returns true if unit class corresponds to one of
+// - Artefact/flag
+// - Gatherable unit (mine, tree, gazelle - but not other animals, bushes...)
+// - Units that can be created by players: buildings, living units
+bool IsClassArtefactOrGatherableOrCreatable(GLOBAL_UNIT_AI_TYPES unitClass) {
+	ROR_STRUCTURES_10C::STRUCT_INF_AI fakeInfAI; // unused, ROR method must be static (not using members)
+	const unsigned long int addr = 0x4BE100;
+	long int res;
+	long int dword_unitClass = unitClass;
+	_asm {
+		LEA ECX, fakeInfAI;
+		PUSH dword_unitClass;
+		CALL addr;
+		MOV res, EAX;
+	}
+	return (res != 0);
+}
+
+
+// Returns true if unit class corresponds to units that can be created by players: buildings, living units
+bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass) {
+	ROR_STRUCTURES_10C::STRUCT_INF_AI fakeInfAI; // unused, ROR method must be static (not using members)
+	const unsigned long int addr = 0x4BE140;
+	long int res;
+	long int dword_unitClass = unitClass;
+	_asm {
+		LEA ECX, fakeInfAI;
+		PUSH dword_unitClass;
+		CALL addr;
+		MOV res, EAX;
+	}
+	return (res != 0);
+}
+
+
 bool GetUnitCost(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, float costTable[]) {
 	if ((DAT_ID < 0) || (DAT_ID > CST_UNIT_NAMES_MAX_ID)) { return false; }
 	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *defUnit = player->ptrStructDefUnitTable[DAT_ID];

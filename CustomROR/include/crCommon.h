@@ -236,6 +236,14 @@ int GetUnitWeight(short int DAT_ID);
 // You have to make sure DAT_ID1 is not out of bounds. It depends on empires.dat so it can't be checked with a hardcoded value.
 short int GetDAT_ID2(ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **defUnitTable, short int DAT_ID1);
 
+// Returns true if unit class corresponds to one of
+// - Artefact/flag
+// - Gatherable unit (mine, tree, gazelle - but not other animals, bushes...)
+// - Units that can be created by players: buildings, living units
+bool IsClassArtefactOrGatherableOrCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
+
+// Returns true if unit class corresponds to units that can be created by players: buildings, living units
+bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
 
 // Returns true if the cost could be correctly computed.
 // Returns false if not. costTable content may have been modified though.

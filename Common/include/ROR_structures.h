@@ -175,12 +175,51 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_POSITION_INFO) == 8, "STRUCT_POSITION_INFO size");
 
 	// Used in AI structures to keep lists of unit IDs. Size=0x10
+	// All methods suppose that usedElemCount==arraySize (no empty slot)
+	// 0x4C6880 = unitElemList.containsUnitId(pUnitId)
+	// 0x4E3AF0 = unitElemList.Remove(unitId) 
+	// 0x414FC0 = unitListInfo.reallocArray(newSize). Not supposed to be used to remove elements.
+	// 0x4C68C0 = unitElemList.AddUnitId(unitId)
 	class STRUCT_AI_UNIT_LIST_INFO {
 	public:
-		long int *unitIdArray; // Pointer to array of unitIDs
+		long int *unitIdArray; // Pointer to array of unitIDs. NULL when size==0
 		long int usedElements; // +4. Number of elements in array that are actually used
 		long int maxElementCount; // +8. Max or desired value ?
 		long int arraySize; // +C. Number of allocated elements in array
+
+		bool ContainsUnitId(long int unitId) {
+			const unsigned long int addr = 0x4C6880;
+			long int res;
+			_asm {
+				MOV ECX, this;
+				PUSH unitId;
+				CALL addr;
+				MOV res, EAX;
+			}
+			return (res != 0);
+		}
+		bool Remove(long int unitId) {
+			const unsigned long int addr = 0x4E3AF0;
+			long int res;
+			_asm {
+				MOV ECX, this;
+				PUSH unitId;
+				CALL addr;
+				MOV res, EAX;
+			}
+			return (res != 0);
+		}
+		bool Add(long int unitId) { // returns true if elem was added.
+			const unsigned long int addr = 0x4C68C0;
+			long int res;
+			_asm {
+				MOV ECX, this;
+				PUSH unitId;
+				CALL addr;
+				MOV res, EAX;
+			}
+			return (res != 0);
+		}
 	};
 	static_assert(sizeof(STRUCT_AI_UNIT_LIST_INFO) == 0x10, "STRUCT_LIST_OF_UNITID size");
 
@@ -2311,22 +2350,14 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_10C;
 		// 0x110
 		long int unitElemListSize; // +110. Total allocated size of unitElemList (the array can contain some "-1")
-		// Unit lists : see 0x4BDD10
-		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units from me AND enemy? players (not gaia): artefacts+creatable ?
-		//STRUCT_AI_UNIT_LIST_INFO unitListA; // +118. Both gaia, and players units (me+others) ? Similar to unitElemList, but only ids.
-		long int *ptrUnitListA; // Stores unitId for players (me+others) and gatherable units (trees, gazelle but not other animals...)
-		long int unitListAElemCount; // +11C. Number of actual values in the array (+118). Array total size can be larger.
-		// 0x120
-		unsigned long int unknown_120;
-		long int unitListA_count; // array size (allocated)
+		// Unit lists : see 0x4BDD10. In those 4 unit lists, elements are never cleaned/removed !
+		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units that can be created by players + resources + artefacts
+		STRUCT_AI_UNIT_LIST_INFO creatableAndGatherableUnits; // +118. units that can be created by players + resources (gazelle but not other animals) + artefacts
 		STRUCT_AI_UNIT_LIST_INFO playerCreatableUnits; // +128. All player-creatable units (villager, military, buildings...). NOT resources.
 		STRUCT_AI_UNIT_LIST_INFO artefactsAndFlags; // +138. Store the found flags/artefacts.
-		unsigned long int unknown_148; // another unitId array ?
-		unsigned long int unknown_14C;
-		// 0x150
-		unsigned long int unknown_150;
-		unsigned long int unknown_154;
+		STRUCT_AI_UNIT_LIST_INFO elementsToDefend; // +148. Can be TC, dock, relic, ruin. Also mines+bushes? Related to SNxxxDefendPriority
 		STRUCT_TEMP_MAP_BUILD_LIKE_INFOS buildMapLikeInfo; // +158. Size to check
+		// Remove unit from allMyUnits & buildingUnits: 0x4BF440.
 		STRUCT_AI_UNIT_LIST_INFO allMyUnits; // +180. To confirm.
 		STRUCT_AI_UNIT_LIST_INFO buildingUnits; // +190
 		// 0x1A0
@@ -2566,13 +2597,7 @@ namespace ROR_STRUCTURES_10C
 		// 0xF0
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *ptrStructPlayer;
 
-		STRUCT_AI_UNIT_LIST_INFO allMyUnits; // +F4.
-		/*long int *ptrAllMyUnitsArray; // +F4. Ptr to table of all my units' IDs. The list can contain <=unitIds ! Check values before you use them and check unitId are still valid.
-		unsigned long int unknown_0F8_u_F4_count; // ptrAllMyUnitsArray element count ?
-		unsigned long int unknown_0FC;
-		// 0x100
-		unsigned long int unknown_100_u_F4_count; // ptrAllMyUnitsArray element count ?
-		*/
+		STRUCT_AI_UNIT_LIST_INFO allMyUnits; // +F4. Can contain empty elements ? Remove in 40B950.
 		STRUCT_BUILD_AI structBuildAI; // +0x104
 		STRUCT_CON_AI structConAI; // +0x6C4 ; city plan
 		STRUCT_DIPLOMACY_AI structDiplAI; // +0x9DC

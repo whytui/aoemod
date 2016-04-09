@@ -260,7 +260,7 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += "\nUnit Lists...\n+114: count = ";
 		s += std::to_string(ai->structInfAI.unitElemListSize); // unitElemListSize (array size)
 		s += "\nListA count = ";
-		s += std::to_string(ai->structInfAI.unitListA_count);
+		s += std::to_string(ai->structInfAI.creatableAndGatherableUnits.usedElements);
 		s += "\nListB count = ";
 		s += std::to_string(ai->structInfAI.playerCreatableUnits.usedElements);
 		s += "\nListC count = ";
@@ -271,7 +271,7 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += std::to_string(ai->structInfAI.buildingUnits.arraySize);
 
 		s += "\n\nList A= ";
-		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.ptrUnitListA, ai->structInfAI.unitListA_count);
+		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.creatableAndGatherableUnits.unitIdArray, ai->structInfAI.creatableAndGatherableUnits.usedElements);
 		s += "\n\nList B= ";
 		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.playerCreatableUnits.unitIdArray, ai->structInfAI.playerCreatableUnits.usedElements);
 		s += "\n\nBuildings= ";

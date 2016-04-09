@@ -664,11 +664,10 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 					(currentPlayer->GetAIStruct() != NULL)) {
 					ROR_STRUCTURES_10C::STRUCT_AI *ai = currentPlayer->GetAIStruct();
 					ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = &ai->structInfAI;
-					//infAI->unitElemListSize
-					for (long index = 0; index < infAI->unitListA_count; index++) {
-						long int unitId = infAI->ptrUnitListA[index];
+					for (long index = 0; index < infAI->creatableAndGatherableUnits.arraySize; index++) {
+						long int unitId = infAI->creatableAndGatherableUnits.unitIdArray[index];
 						if (unitId == selectedUnit->unitInstanceId) {
-							infAI->ptrUnitListA[index] = 0;
+							infAI->creatableAndGatherableUnits.unitIdArray[index] = 0;
 						}
 					}
 					for (long index = 0; index < infAI->playerCreatableUnits.usedElements; index++) {
@@ -2813,9 +2812,11 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 
-	if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
+	// Update AI struct unit lists that are never updated by ROR
+	if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() && (unit->unitInstanceId >= 0)) {
 		ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
 		assert(infAI->IsCheckSumValid());
+		// unitElemList (infAI)
 		long int size = infAI->unitElemListSize;
 		for (long int i = 0; i < size; i++) {
 			ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[i];
@@ -2829,6 +2830,16 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 					ResetInfAIUnitListElem(curElem);
 				}
 			}
+		}
+		// Manage the 3 STRUCT_AI_UNIT_LIST_INFO from infAI in which elements are not removed by ROR
+		if (IsClassArtefactOrGatherableOrCreatable(unitDefBase->unitAIType)) {
+			infAI->creatableAndGatherableUnits.Remove(unit->unitInstanceId);
+		}
+		if (IsClassPlayerCreatable(unitDefBase->unitAIType)) {
+			infAI->playerCreatableUnits.Remove(unit->unitInstanceId);
+		}
+		if ((unitDefBase->unitAIType == TribeAIGroupArtefact) || (unitDefBase->unitAIType == TribeAIGroupFlag)) {
+			infAI->artefactsAndFlags.Remove(unit->unitInstanceId);
 		}
 	}
 
@@ -4391,6 +4402,7 @@ void CustomRORCommand::DisableWaterUnitsIfNeeded() {
 // This is called quite often (only if improve AI is enabled in customrOR configuration)
 void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem) {
 	if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem) { return; }
+	if (IsMultiplayer()) { return; }
 
 	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(currentUnitListElem->unitId);
 	// Custom treatment: clean obsolete units
