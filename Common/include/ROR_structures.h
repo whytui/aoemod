@@ -19,6 +19,7 @@ namespace ROR_STRUCTURES_10C
 	// Pre-declarations
 	class STRUCT_PATH_FINDING_UNKNOWN_POS_INFO;
 	class STRUCT_AI_UNIT_LIST_INFO;
+	class STRUCT_SPOTTED_RESOURCE_INFO;
 	class STRUCT_POSITION_INFO;
 	class STRUCT_MP_COMMUNICATION; // Visible at global level
 	class STRUCT_UNKNOWN_GAME_TIME;
@@ -173,6 +174,7 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(STRUCT_POSITION_INFO) == 8, "STRUCT_POSITION_INFO size");
 
+	// Used in AI structures to keep lists of unit IDs. Size=0x10
 	class STRUCT_AI_UNIT_LIST_INFO {
 	public:
 		long int *unitIdArray; // Pointer to array of unitIDs
@@ -181,6 +183,23 @@ namespace ROR_STRUCTURES_10C
 		long int arraySize; // +C. Number of allocated elements in array
 	};
 	static_assert(sizeof(STRUCT_AI_UNIT_LIST_INFO) == 0x10, "STRUCT_LIST_OF_UNITID size");
+
+	// Size=0x14. Used in InfAI structure.
+	class STRUCT_SPOTTED_RESOURCE_INFO {
+	public:
+		long int gatherableUnitId;
+		char posY;
+		char posX;
+		char unknown_06;
+		char unknown_07;
+		long int estimatedTotalTripLength; // +8. round trip estimated distance, including an arbitrary +10 value for detour (formula = distance*2 +10)
+		char unknown_0C;
+		char unknown_0D;
+		char distanceToStorageBuilding; // +E. Actual direct distance between resource unit and its closest storage building.
+		char resourceType; // +F. Always 0-3 (food wood stone gold).
+		long int storageBuildingUnitID; // +10. UnitID of the closest storage building.
+	};
+	static_assert(sizeof(STRUCT_SPOTTED_RESOURCE_INFO) == 0x14, "STRUCT_SPOTTED_RESOURCE_INFO size");
 
 	// Size=6. Included in unit definition struct (*3)
 	class STRUCT_COST {
@@ -2291,41 +2310,24 @@ namespace ROR_STRUCTURES_10C
 		long int XMapSize;
 		unsigned long int unknown_10C;
 		// 0x110
-		unsigned long int unitElemListSize; // +110. Total allocated size of unitElemList (the array can contain some "-1")
-		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units from me AND enemy? players (not gaia): artefacts+creatable+targetableGatherable?
-		//STRUCT_AI_UNIT_LIST_INFO unitListA; // +118
-		long int *ptrUnitListA; // Both gaia and "my" units ? Same units as unitElemList ? (but only ids?)
-		long int unitElemListElemCount; // +11C. Number of actual values in the array (+118). Array total size can be larger.
+		long int unitElemListSize; // +110. Total allocated size of unitElemList (the array can contain some "-1")
+		// Unit lists : see 0x4BDD10
+		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units from me AND enemy? players (not gaia): artefacts+creatable ?
+		//STRUCT_AI_UNIT_LIST_INFO unitListA; // +118. Both gaia, and players units (me+others) ? Similar to unitElemList, but only ids.
+		long int *ptrUnitListA; // Stores unitId for players (me+others) and gatherable units (trees, gazelle but not other animals...)
+		long int unitListAElemCount; // +11C. Number of actual values in the array (+118). Array total size can be larger.
 		// 0x120
 		unsigned long int unknown_120;
-		long int unitListA_count;
-		//STRUCT_AI_UNIT_LIST_INFO unitListB; // +128
-		long int *ptrUnitListB; // Contains both "my" and enemy units. Not gaia?
-		unsigned long int unknown_12C;
-		// 0x130
-		unsigned long int unknown_130;
-		long int unitListB_count;
-		//STRUCT_AI_UNIT_LIST_INFO unitListC; // +138
-		unsigned long int notsure_ptrUnitListC;
-		unsigned long int unknown_13C;
-		// 0x140
-		unsigned long int unknown_140;
-		long int notsure_unitListC_count;
-		unsigned long int unknown_148;
+		long int unitListA_count; // array size (allocated)
+		STRUCT_AI_UNIT_LIST_INFO playerCreatableUnits; // +128. All player-creatable units (villager, military, buildings...). NOT resources.
+		STRUCT_AI_UNIT_LIST_INFO artefactsAndFlags; // +138. Store the found flags/artefacts.
+		unsigned long int unknown_148; // another unitId array ?
 		unsigned long int unknown_14C;
 		// 0x150
 		unsigned long int unknown_150;
 		unsigned long int unknown_154;
 		STRUCT_TEMP_MAP_BUILD_LIKE_INFOS buildMapLikeInfo; // +158. Size to check
-		//unsigned long int unknown_158_cheksum; // C8 43 54 00. +4/8=arraySizeYX. +C/10=somedistanceYX. +18=array[posX][pos] of bytes. MapIsExplored=Value>=0?
-		//char unknown_15C[0x190 - 0x15C];
-		//char unknown_180[0x190 - 0x180];
 		STRUCT_AI_UNIT_LIST_INFO allMyUnits; // +180. To confirm.
-		// 0x190
-		/*long int *ptrBuildingsUnitIds; // 190. To confirm.
-		long int buildingsListCount_194;
-		unsigned long int unknown_198;
-		long int buildingsListCount_19C;*/
 		STRUCT_AI_UNIT_LIST_INFO buildingUnits; // +190
 		// 0x1A0
 		char unknown_1A0[0x1F0 - 0x1A0];
@@ -2342,27 +2344,24 @@ namespace ROR_STRUCTURES_10C
 		char unknown_204[0x40C - 0x204];
 		char unknown_40C[0x4D0 - 0x40C]; // 40C + x*4 = counter? arraySize=?
 		// 0x4D0
-		// A pointer to an array (elemsize=0x14) for each basic resource type (0->3). Related to +540, +550
-		// Elems: +0=dword=UnitId,+4/5=bytes=posYX +6=byte +8=dword +C=byte(0/1/F),+D=byte. See 4BC83F
-		// The list of gatherable units I found and "remember" ?
-		unsigned long int spottedGatherableUnitsByResourceType[4];
-		long int spottedGatherableUnitsCountByResourceType[4]; // Number of elements in +4D0+i array ? (i=resource type). Related to +540, +550
-		unsigned long int unknown_4F0[4]; // Related to spottedGatherableUnitsByResourceType. arraySizes ?
+		STRUCT_SPOTTED_RESOURCE_INFO *spottedGatherableUnitsByResourceTypeArrays[4]; // +4D0. Stores explored resources, their position and (closest) storage building
+		long int spottedGatherableUnitsCountByResourceType[4]; // +4E0. Number of elements in +4D0+i array ? (i=resource type). Related to +540, +550
+		long int spottedGatherableUnitsByResourceTypeArraySizes[4]; // +4F0. 4 Array sizes (allocated sizes ?)
 		// 0x500
 		unsigned long int unknown_500[4];
 		unsigned long int unknown_510[4];
 		unsigned long int unknown_520[4];
 		unsigned long int unknown_530[4];
 		// 0x540
-		long int current_forageDropSiteDistance; // not sure.
-		long int current_woodDropSiteDistance; // not sure.
-		long int current_stoneDropSiteDistance; // not sure.
-		long int current_goldDropSiteDistance; // not sure.
+		long int bestForageDropSiteDistance; // +540. Best distance from forage/farm to storage (granary or TC)
+		long int bestWoodDropSiteDistance; // +544. Best distance from tree to storage (SP or TC)
+		long int bestStoneDropSiteDistance; // +548. Best distance from stone mine to storage (SP or TC)
+		long int bestGoldDropSiteDistance; // +54C. Best distance from gold mine to storage (SP or TC)
 		// 0x550
-		long int unknown_550; // target unitId for food ?
-		long int unknown_554; // target unitId for wood ?
-		long int unknown_558; // target unitId for stone ?
-		long int unknown_55C; // target unitId for gold ?
+		long int bestForageUnitId; // closest target unitId for food (farms & forage only, not hunting)
+		long int bestWoodUnitId; // +554. closest target unitId for wood
+		long int bestStoneUnitId; // +558. closest target unitId for stone
+		long int bestGoldUnitId; // +55C. closest target unitId for gold
 		// 0x560
 		long int foundForestTiles;
 		char unknown_564[0xFF64 - 0x564];
@@ -2532,7 +2531,10 @@ namespace ROR_STRUCTURES_10C
 	};
 
 
-	// Size = 0x24
+	// Size = 0x24. Update_Add=0x4BD750/0x4BD7E0
+	// Organized as a (big, initially 0x1F4 elements) array in infAI structure
+	// Empty slots are re-used when adding an entry.
+	// In standard games, entries are NEVER reset !!!! which leads to some very bad behavior (for example, to evaluate if panic mode is needed)
 	class STRUCT_INF_AI_UNIT_LIST_ELEM {
 	public:
 		long int unitId; // -1 means free (empty) slot. Bug in 4C41BD ?

@@ -2827,21 +2827,30 @@ void CustomRORInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
 	this->crCommand.WriteF11PopInfoText(f11panel, bufferToWrite, format, localizedText, currentPop, houseMaxPop);
 }
 
-// From 004C41B3
+// From 004C41B3 (in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID))
 // Change return address to 0x4C41C2 when unitId is invalid (-1) to force ignoring it.
 // Indeed, the GetUnitPtr(-1) call might find a unit (eg a doppleganger)
 void CustomRORInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_values) {
 	ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = (ROR_STRUCTURES_10C::STRUCT_INF_AI *)REG_values->ESI_val;
 	long int currentLoopOffset = REG_values->EDI_val;
 	long int currentUnitId = REG_values->ECX_val;
+	long int loopIndex = GetIntValueFromRORStack(REG_values, 0x10);
+	ror_api_assert(REG_values, currentLoopOffset == loopIndex*0x24);
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	if (currentUnitId == -1) {
+	if (currentUnitId == -1) { // This corresponds to bugged case in standard game.
 		REG_values->EAX_val = NULL; // simulates that the GetUnitPtr(...) did not found a valid unit
 		ChangeReturnAddress(REG_values, 0x4C41C2);
 		return;
 	}
 	REG_values->ECX_val = (unsigned long int) infAI->ptrMainAI; // Required for call 0x40BAB0
-	REG_values->EAX_val = currentUnitId; // ROR modified PUSHes EAX, not ECX.
+	REG_values->EAX_val = currentUnitId; // modified ROR code PUSHes EAX, not ECX.
+
+	if ((currentUnitId >= 0) && this->crCommand.IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
+		ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *unitListElemBase = infAI->unitElemList;
+		if (!unitListElemBase || (loopIndex >= infAI->unitElemListSize)) { return; }
+		ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem = &unitListElemBase[loopIndex];
+		this->crCommand.OnFindEnemyUnitIdWithinRangeLoop(infAI, currentUnitListElem);
+	}
 }
 
 

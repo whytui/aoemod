@@ -671,10 +671,10 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 							infAI->ptrUnitListA[index] = 0;
 						}
 					}
-					for (long index = 0; index < infAI->unitListB_count; index++) {
-						long int unitId = infAI->ptrUnitListB[index];
+					for (long index = 0; index < infAI->playerCreatableUnits.usedElements; index++) {
+						long int unitId = infAI->playerCreatableUnits.unitIdArray[index];
 						if (unitId == selectedUnit->unitInstanceId) {
-							infAI->ptrUnitListB[index] = 0;
+							infAI->playerCreatableUnits.unitIdArray[index] = 0;
 						}
 					}
 				}
@@ -1037,7 +1037,7 @@ void CustomRORCommand::InitMyGameInfo() {
 }
 
 
-// Use this API to get "do we improve AI" information
+// Use this API to get "do we improve AI" information. This takes care of customROR configuration + possible custom rules.
 // So we can add custom rules for debugging
 bool CustomRORCommand::IsImproveAIEnabled(int playerId) {
 #ifdef _DEBUG
@@ -1806,6 +1806,7 @@ void CustomRORCommand::ManagePanicMode(ROR_STRUCTURES_10C::STRUCT_AI *mainAI, lo
 	long int unitListBase = (long int)infAI->unitElemList;
 	assert((unitListElementCount == 0) || (infAI->unitElemList != NULL));
 	// Collect info about ATTACKER's units in my town. Note: the unit list we use may not be up to date depending on "my" exploration and what happened to involved units
+	// In standard game, infAI->unitElemList contains many obsolete information (never cleaned up !). This is improved in customROR.
 	for (int i = 0; i < unitListElementCount; i++) {
 		char *unitElementNumPlayer = (char *)(unitListBase + i * 0x24 + 0x0B);
 
@@ -4381,6 +4382,24 @@ void CustomRORCommand::DisableWaterUnitsIfNeeded() {
 				traceMessageHandler.WriteMessageNoNotification(std::string("Disabled dock for player #") + std::to_string(i));
 				player->ptrStructDefUnitTable[CST_UNITID_DOCK]->availableForPlayer = 0;
 			}
+		}
+	}
+}
+
+
+// Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
+// This is called quite often (only if improve AI is enabled in customrOR configuration)
+void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem) {
+	if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem) { return; }
+
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(currentUnitListElem->unitId);
+	// Custom treatment: clean obsolete units
+	if (IsFogVisibleForPlayer(infAI->commonAIObject.playerId, currentUnitListElem->posX, currentUnitListElem->posY)) {
+		// Clean entry if: (we are in the case when "unit list" position is visible, so we can update it without cheating !)
+		// - unit no longer exist
+		// - unit moved to a position which is NO LONGER visible to me
+		if (!unitBase || (!IsFogVisibleForPlayer(infAI->commonAIObject.playerId, (long int)unitBase->positionX, (long int)unitBase->positionY))) {
+			ResetInfAIUnitListElem(currentUnitListElem);
 		}
 	}
 }

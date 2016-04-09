@@ -1731,6 +1731,7 @@ bool UpdateUnitOwnerInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, 
 	if (newPlayerId < 0) { return false; }
 	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefinition();
 	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return false; }
+	if (unit->unitInstanceId < 0) { return false; } // Ignore temp units.
 	bool isVisible = false;
 	if (unitDefBase->visibleInFog) {
 		isVisible = IsExploredForPlayer(infAI->commonAIObject.playerId, (long int)unit->positionX, (long int)unit->positionY);

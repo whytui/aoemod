@@ -105,6 +105,8 @@ public:
 	// Initialize internal game-specific variables (to call on each game start/load)
 	void InitMyGameInfo();
 
+	// Use this API to get "do we improve AI" information. This takes care of customROR configuration + possible custom rules.
+	// So we can add custom rules for debugging
 	bool IsImproveAIEnabled(int playerId);
 
 	// Disable AI flags for human players, based on game initial settings (to be used at game startup)
@@ -263,6 +265,9 @@ public:
 	void OnFarmDepleted(long int farmUnitId);
 
 	void DisableWaterUnitsIfNeeded();
+
+	// Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
+	void OnFindEnemyUnitIdWithinRangeLoop(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem);
 
 	// ----------------------------------
 	// City plan

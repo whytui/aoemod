@@ -220,51 +220,51 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		long int offset = ((long)&rd->playersAI[playerId].structInfAI - (long)&rd->playersAI[playerId]);
 		s += GetHexStringAddress(((long int)rd->players[playerId].ptrAIStruct) + offset);
 		s += " - dropSiteDistances forage/wood/stone/gold = ";
-		s += std::to_string(ai->structInfAI.current_forageDropSiteDistance);
+		s += std::to_string(ai->structInfAI.bestForageDropSiteDistance);
 		s += " ";
-		s += std::to_string(ai->structInfAI.current_woodDropSiteDistance);
+		s += std::to_string(ai->structInfAI.bestWoodDropSiteDistance);
 		s += " ";
-		s += std::to_string(ai->structInfAI.current_stoneDropSiteDistance);
+		s += std::to_string(ai->structInfAI.bestStoneDropSiteDistance);
 		s += " ";
-		s += std::to_string(ai->structInfAI.current_goldDropSiteDistance);
+		s += std::to_string(ai->structInfAI.bestGoldDropSiteDistance);
 		s += "\ntargets = ";
-		s += std::to_string(ai->structInfAI.unknown_550);
-		if (ai->structInfAI.unknown_550 >= 0) {
+		s += std::to_string(ai->structInfAI.bestForageUnitId);
+		if (ai->structInfAI.bestForageUnitId >= 0) {
 			s += "(";
-			s += rd->GetUnitName(ai->structInfAI.unknown_550);
+			s += rd->GetUnitName(ai->structInfAI.bestForageUnitId);
 			s += ")";
 		}
 		s += " ";
-		s += std::to_string(ai->structInfAI.unknown_554);
-		if (ai->structInfAI.unknown_554 >= 0) {
+		s += std::to_string(ai->structInfAI.bestWoodUnitId);
+		if (ai->structInfAI.bestWoodUnitId >= 0) {
 			s += "(";
-			s += rd->GetUnitName(ai->structInfAI.unknown_554);
+			s += rd->GetUnitName(ai->structInfAI.bestWoodUnitId);
 			s += ")";
 		}
 		s += " ";
-		s += std::to_string(ai->structInfAI.unknown_558);
-		if (ai->structInfAI.unknown_558 >= 0) {
+		s += std::to_string(ai->structInfAI.bestStoneUnitId);
+		if (ai->structInfAI.bestStoneUnitId >= 0) {
 			s += "(";
-			s += rd->GetUnitName(ai->structInfAI.unknown_558);
+			s += rd->GetUnitName(ai->structInfAI.bestStoneUnitId);
 			s += ")";
 		}
 		s += " ";
-		s += std::to_string(ai->structInfAI.unknown_55C);
-		if (ai->structInfAI.unknown_55C >= 0) {
+		s += std::to_string(ai->structInfAI.bestGoldUnitId);
+		if (ai->structInfAI.bestGoldUnitId >= 0) {
 			s += "(";
-			s += rd->GetUnitName(ai->structInfAI.unknown_55C);
+			s += rd->GetUnitName(ai->structInfAI.bestGoldUnitId);
 			s += ")";
 		}
 		s += "\nForestTiles = ";
 		s += std::to_string(ai->structInfAI.foundForestTiles);
 		s += "\nUnit Lists...\n+114: count = ";
-		s += std::to_string(ai->structInfAI.unitElemListElemCount); // unitElemListSize (array size)
+		s += std::to_string(ai->structInfAI.unitElemListSize); // unitElemListSize (array size)
 		s += "\nListA count = ";
 		s += std::to_string(ai->structInfAI.unitListA_count);
 		s += "\nListB count = ";
-		s += std::to_string(ai->structInfAI.unitListB_count);
+		s += std::to_string(ai->structInfAI.playerCreatableUnits.usedElements);
 		s += "\nListC count = ";
-		s += std::to_string(ai->structInfAI.notsure_unitListC_count);
+		s += std::to_string(ai->structInfAI.artefactsAndFlags.usedElements);
 		s += "\nBuildings list, count = ";
 		s += std::to_string(ai->structInfAI.buildingUnits.usedElements);
 		s += ";";
@@ -273,7 +273,7 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += "\n\nList A= ";
 		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.ptrUnitListA, ai->structInfAI.unitListA_count);
 		s += "\n\nList B= ";
-		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.ptrUnitListB, ai->structInfAI.unitListB_count);
+		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.playerCreatableUnits.unitIdArray, ai->structInfAI.playerCreatableUnits.usedElements);
 		s += "\n\nBuildings= ";
 		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.buildingUnits.unitIdArray, ai->structInfAI.buildingUnits.usedElements);
 		s += "\n";
