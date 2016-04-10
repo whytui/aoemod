@@ -455,7 +455,15 @@ bool ResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *el
 
 // Update an element in infAI.unitElemList if the unit is visible.
 // Reset the element otherwise.
+// If the element is reset, it is ALSO REMOVED from infAI lists.
+// Return true if the element was updated/reset.
 bool UpdateOrResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
+
+// Remove a unitId from infAI "info" lists (creatable, gatherable, "defendable", artefact units).
+// This does NOT manage "all my units" and "my buildings" lists. This does NOT manage unitElemList neither.
+// DATID and unitAIType (unitClass) are used for optimisation. You can provide -1 if you don't have the information.
+// Returns false if failed.
+bool RemoveFromInfAIInfoList(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, long int unitId, short int DATID, AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType);
 
 // Find a unitElem in infAI list, returns NULL if not found.
 ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, long int unitId);

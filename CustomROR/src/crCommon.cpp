@@ -1761,6 +1761,7 @@ bool ResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *el
 
 // Update an element in infAI.unitElemList if the unit is visible.
 // Reset the element otherwise.
+// If the element is reset, it is ALSO REMOVED from infAI lists.
 // Return true if the element was updated/reset.
 bool UpdateOrResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) {
 	if (!infAI || !infAI->IsCheckSumValid() || !elem) { return false; }
@@ -1802,11 +1803,44 @@ bool UpdateOrResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, RO
 			//elem->attack = unitDef50->displayedAttack;
 		}
 		return true;
-	} else {
-		// Reset the element, I don't see it anymore.
+	} else { // No longer visible
+		// First remove from infAI lists, if needed. (do it while elem has not been reset... yet)
+		RemoveFromInfAIInfoList(infAI, elem->unitId, elem->unitDATID, elem->unitClass);
+
+		// Reset the element
 		return ResetInfAIUnitListElem(elem);
 	}
 	return false;
+}
+
+
+// Remove a unitId from infAI "info" lists (creatable, gatherable, "defendable", artefact units).
+// This does NOT manage "all my units" and "my buildings" lists. This does NOT manage unitElemList neither.
+// DATID and unitAIType (unitClass) are used for optimisation. You can provide -1 if you don't have the information.
+// Returns false if failed.
+bool RemoveFromInfAIInfoList(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, long int unitId, short int DATID, AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType) {
+	if (!infAI || !infAI->IsCheckSumValid() || (unitId < 0)) { return false; }
+
+	if ((unitAIType == -1) || IsClassArtefactOrGatherableOrCreatable(unitAIType)) {
+		infAI->creatableAndGatherableUnits.Remove(unitId);
+	}
+	if ((unitAIType == -1) || IsClassPlayerCreatable(unitAIType)) {
+		infAI->playerCreatableUnits.Remove(unitId);
+	}
+	if ((unitAIType == -1) || (unitAIType == TribeAIGroupArtefact) || (unitAIType == TribeAIGroupFlag)) {
+		infAI->artefactsAndFlags.Remove(unitId);
+	}
+	// Hardcoded list of units: cf 0x4C1730 = infAI.AddUnitToDefend(unitStruct)
+	if ((DATID == -1) || (unitAIType == -1) ||
+		(DATID == CST_UNITID_FORUM) || (DATID == CST_UNITID_DOCK) ||
+		(DATID == CST_UNITID_RELIC) ||
+		(DATID == CST_UNITID_RUIN) || (DATID == CST_UNITID_RUIN2) ||
+		(unitAIType == TribeAIGroupStoneMine) || (unitAIType == TribeAIGroupGoldMine) ||
+		(unitAIType == TribeAIGroupBerryBush)) {
+		// Note: gaia elements to defend are never removed when deleted (depleted)... (because not belonging to the same player !)
+		infAI->elementsToDefend.Remove(unitId);
+	}
+	return true;
 }
 
 

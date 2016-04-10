@@ -2826,44 +2826,19 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 	bool isBuilding = (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING); // Warning: using unit->unitType is risky (not always correct?)
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
+	bool isInGame = (settings->currentUIStatus == AOE_CONST_INTERNAL::GSUS_PLAYING) || (settings->currentUIStatus == AOE_CONST_INTERNAL::GSUS_GAME_OVER_BUT_STILL_IN_GAME);
 
 	// Update AI struct unit lists that are never updated by ROR (we choose to do this only if AI improvement is enabled).
-	if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() && (unit->unitInstanceId >= 0) && this->IsImproveAIEnabled(player->playerId)) {
+	if (isInGame && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() && (unit->unitInstanceId >= 0) && this->IsImproveAIEnabled(player->playerId)) {
 		ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
 		assert(infAI->IsCheckSumValid());
-		// unitElemList (infAI)
+		// Update infAI lists (those that are not updated by ROR)
 		long int size = infAI->unitElemListSize;
 		for (long int i = 0; i < size; i++) {
 			ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[i];
-			// I lost one of my units ? update infAI list !
-			if ((curElem->playerId == player->playerId) && (curElem->unitId == unit->unitInstanceId)) {
-				if (unitDefBase->unitAIType == TribeAIGroupArtefact) {
-					// Artefact don't die, just get captured. BUT we don't know who just captured it (will be updated afterwards)
-					// The Add unit treatment (for other player) will update this information (again), so in fact it is not really useful to set playerId to 0.
-					curElem->playerId = 0;
-				} else {
-					ResetInfAIUnitListElem(curElem);
-				}
+			if (curElem->unitId == unit->unitInstanceId) {
+				UpdateOrResetInfAIUnitListElem(infAI, curElem);
 			}
-		}
-		// Manage the 3 STRUCT_AI_UNIT_LIST_INFO from infAI in which elements are not removed by ROR
-		if (IsClassArtefactOrGatherableOrCreatable(unitDefBase->unitAIType)) {
-			infAI->creatableAndGatherableUnits.Remove(unit->unitInstanceId);
-		}
-		if (IsClassPlayerCreatable(unitDefBase->unitAIType)) {
-			infAI->playerCreatableUnits.Remove(unit->unitInstanceId);
-		}
-		if ((unitDefBase->unitAIType == TribeAIGroupArtefact) || (unitDefBase->unitAIType == TribeAIGroupFlag)) {
-			infAI->artefactsAndFlags.Remove(unit->unitInstanceId);
-		}
-		// Hardcoded list of units: cf 0x4C1730 = infAI.AddUnitToDefend(unitStruct)
-		if ((unitDefBase->DAT_ID1 == CST_UNITID_FORUM) || (unitDefBase->DAT_ID1 == CST_UNITID_DOCK) ||
-			(unitDefBase->DAT_ID1 == CST_UNITID_RELIC) ||
-			(unitDefBase->DAT_ID1 == CST_UNITID_RUIN) || (unitDefBase->DAT_ID1 == CST_UNITID_RUIN2) ||
-			(unitDefBase->unitAIType == TribeAIGroupStoneMine) || (unitDefBase->unitAIType == TribeAIGroupGoldMine) ||
-			(unitDefBase->unitAIType == TribeAIGroupBerryBush)) {
-			// Note: gaia elements to defend are never removed when deleted (depleted)... (because not belonging to the same player !)
-			infAI->elementsToDefend.Remove(unit->unitInstanceId);
 		}
 	}
 
@@ -2899,7 +2874,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 	}
 
 	// Auto rebuild farms
-	if (unit && unit->IsCheckSumValid() && isBuilding && this->crInfo->configInfo.enableAutoRebuildFarms) {
+	if (isInGame && unit && unit->IsCheckSumValid() && isBuilding && this->crInfo->configInfo.enableAutoRebuildFarms) {
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefBase();
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
 			this->crInfo->myGameObjects.FlushObsoleteFarmInfo(player->ptrGlobalStruct->currentGameTime);
@@ -2913,7 +2888,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 	}
 
 	// Triggers
-	if (unit && unit->IsCheckSumValid() && !isTempUnit && (settings->currentUIStatus == AOE_CONST_INTERNAL::GSUS_PLAYING) &&
+	if (isInGame && unit && unit->IsCheckSumValid() && !isTempUnit &&
 		!settings->isMultiplayer && (unit->unitInstanceId >= 0)) {
 		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
 		evtInfo.unitId = unit->unitInstanceId;
