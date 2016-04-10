@@ -448,8 +448,17 @@ void SetPlayerSharedExploration_hard(long int playerId, bool enable);
 // Set "shared exploration" flag for a given player to true or false. This version should be compatible with MP games (uses ROR command system)
 void SetPlayerSharedExploration_safe(long int playerId);
 
-// Analog to init (in constructor), cf 0x4BA401.
-void ResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
+// Reset an element in infAI.unitElemList. The slot will be re-used later by ROR. cf 0x4BA401.
+// Return true if the element was updated.
+// Return true if the element was updated/reset.
+bool ResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
+
+// Update an element in infAI.unitElemList if the unit is visible.
+// Reset the element otherwise.
+bool UpdateOrResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
+
+// Find a unitElem in infAI list, returns NULL if not found.
+ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, long int unitId);
 
 // Change unit owner in InfAI unitListElem according to unit visibility.
 // Return true if updated.

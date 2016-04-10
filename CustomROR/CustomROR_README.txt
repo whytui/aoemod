@@ -55,6 +55,7 @@ Units behavior (AI)
  - AI units no longer hesitate between several targets (including 2-priest trick).
  - Fix stuck priests (enemy tower is in AI's town, unfinished enemy buildings, hesitations when attacked while converting, etc).
  - Improve/customize units choice/behaviour when an enemy tower is in AI's town. Dramatic AI improvement, especially for villagers.
+ - Fix stuck unit groups that try to attack their own units ! (they do nothing because they can't attack their target)
 
 UI and Shortcuts:
 - Farms can be automatically rebuilt (see configuration + custom options menu in game)

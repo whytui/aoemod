@@ -2706,6 +2706,21 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(ROR_STRUCTURES_10C::STRUCT_UNIT *
 	assert(buildAI_actor != NULL);
 	if (buildAI_actor == NULL) { return; }
 	UpdateStrategyWithExistingUnit(buildAI_actor, targetUnit);
+
+	// Update all players' infAI.unitElemList because it would contain an erroneous playerId, and this would never be fixed/updated
+	// This leads to incorrect behaviours (unit groups stuck because they try to attack their own units...)
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = actorPlayer->ptrGlobalStruct;
+	assert(global && global->IsCheckSumValid());
+	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *loopPlayer = GetPlayerStruct(loopPlayerId);
+		if (loopPlayer && loopPlayer->IsCheckSumValid() && loopPlayer->ptrAIStruct && loopPlayer->ptrAIStruct->IsCheckSumValid() &&
+			this->IsImproveAIEnabled(loopPlayerId)) {
+			ROR_STRUCTURES_10C::STRUCT_INF_AI *loopInfAI = &loopPlayer->ptrAIStruct->structInfAI;
+			assert(loopInfAI->IsCheckSumValid());
+			// Fix (or remove) unit from list for each player. We MUST NOT let a bad playerId be stored in unit elem list.
+			UpdateOrResetInfAIUnitListElem(loopInfAI, FindInfAIUnitElemInList(loopInfAI, targetUnit->unitInstanceId));
+		}
+	}
 }
 
 
@@ -4214,9 +4229,24 @@ void CustomRORCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextP
 	size_t length = msgInitial.length();
 	while (pos != std::string::npos) {
 		additionalArgsCount++;
-		if ((pos < length) && (msgInitial[pos + 1]) == 'f') {
-			floatArgsCount++; // %f means 2 DWORDS in stack instead of 1.
+		char firstLetter = '\0';
+		size_t posToFindLetter = pos+1;
+		while ((posToFindLetter < length) && (firstLetter == '\0')) {
+			char c = msgInitial[posToFindLetter];
+			if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) {
+				firstLetter = c;
+			}
+			if ((firstLetter == 'l') && (posToFindLetter + 1 < length) && (msgInitial[posToFindLetter + 1] == 'f')) {
+				firstLetter = 'f'; // F***ing %lf
+			}
+			posToFindLetter++;
 		}
+		if (firstLetter == 'f') {
+			floatArgsCount++; // %f (or %7.1f, etc) means 2 DWORDS in stack instead of 1.
+		}
+		/*if ((pos < length) && (msgInitial[pos + 1]) == 'f') {
+			floatArgsCount++; // %f means 2 DWORDS in stack instead of 1.
+		}*/
 		pos = msgInitial.find('%', pos + 1);
 	}
 	long int totalStackDwords = additionalArgsCount + floatArgsCount; // takes into account the fact that float are indeed double (2 dwords, not 1)
@@ -4420,13 +4450,39 @@ void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(ROR_STRUCTURES_10C::STRU
 	if (IsMultiplayer()) { return; }
 
 	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(currentUnitListElem->unitId);
+	bool elementWasReset = false;
 	// Custom treatment: clean obsolete units
+	// If element "memorized" position is visible...
 	if (IsFogVisibleForPlayer(infAI->commonAIObject.playerId, currentUnitListElem->posX, currentUnitListElem->posY)) {
 		// Clean entry if: (we are in the case when "unit list" position is visible, so we can update it without cheating !)
 		// - unit no longer exist
 		// - unit moved to a position which is NO LONGER visible to me
-		if (!unitBase || (!IsFogVisibleForPlayer(infAI->commonAIObject.playerId, (long int)unitBase->positionX, (long int)unitBase->positionY))) {
-			ResetInfAIUnitListElem(currentUnitListElem);
+		if (!unitBase || !unitBase->ptrStructPlayer ||
+			(!IsFogVisibleForPlayer(infAI->commonAIObject.playerId, (long int)unitBase->positionX, (long int)unitBase->positionY))) {
+			if (this->crInfo->configInfo.collectRORDebugLogs == 2) {
+				int noLongerExists = (unitBase == NULL) ? 1 : 0;
+				std::string s = "Removed unit #";
+				s += std::to_string(currentUnitListElem->unitId);
+				s += " from unitElemList (p#";
+				s += std::to_string(infAI->commonAIObject.playerId);
+				s += "), wasDead=";
+				s += std::to_string(noLongerExists);
+				traceMessageHandler.WriteMessageNoNotification(s.c_str());
+			}
+			elementWasReset = ResetInfAIUnitListElem(currentUnitListElem);
+		}
+	}
+	if (!elementWasReset && unitBase && unitBase->ptrStructPlayer && (unitBase->ptrStructPlayer->playerId != currentUnitListElem->playerId)) {
+		// If unit owner player does not match element's playerId (unit has been captured/converted) => important to fix, causes bad behaviors.
+		if (UpdateOrResetInfAIUnitListElem(infAI, currentUnitListElem)) {
+			if (this->crInfo->configInfo.collectRORDebugLogs >= 2) {
+				std::string s = "Updated unit #";
+				s += std::to_string(currentUnitListElem->unitId);
+				s += " owner from unitElemList (p#";
+				s += std::to_string(infAI->commonAIObject.playerId);
+				s += ")";
+				traceMessageHandler.WriteMessage(s.c_str());
+			}
 		}
 	}
 }

@@ -94,6 +94,7 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_PLANNED_RESOURCE_NEEDS;
 	class STRUCT_CON_AI_CONSTRUCTION;
 	class STRUCT_INF_AI_BUILDS_HISTORY;
+	class STRUCT_TAC_AI_TARGET_INFO;
 
 	// Action / Activity
 	class STRUCT_ACTION_BASE;
@@ -2154,6 +2155,27 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_INF_AI_BUILDS_HISTORY) == 0x8, "STRUCT_INF_AI_BUILDS_HISTORY size");
 
 
+	// Included in tacAI structure. Size=0x2C.
+	class STRUCT_TAC_AI_TARGET_INFO {
+	public:
+		long int targetUnitId;
+		float targetEvaluation; // +04. According to SNTargetEvaluationxxx numbers
+		long int unknown_08;
+		long int infAIUnitElemListIndex; // +C. Index of matching element in infAI.unitListElem.
+		// 0x10
+		long int unknown_10;
+		long int unknown_14;
+		char unknown_18; // default 0. is building ? ignore speed? ? Really unsure. See 4C0ABC
+		char unused_19[3];
+		long int unknown_1C;
+		// 0x20
+		long int unknown_20;
+		long int unknown_24;
+		long int unknown_28; // A flag, default 1 ?
+	};
+	static_assert(sizeof(STRUCT_TAC_AI_TARGET_INFO) == 0x2C, "STRUCT_TAC_AI_TARGET_INFO size");
+
+
 	// Size = 0x330
 	// Organized as a loop chained list. See TacAI (first elem is included in TacAI).
 	class STRUCT_UNIT_GROUP_ELEM {
@@ -2216,9 +2238,10 @@ namespace ROR_STRUCTURES_10C
 		char unknown_2C9;
 		char unknown_2CA; // ?
 		char unknown_2CB; // ?
-		unsigned long int unknown_2CC; // ?
-		unsigned long int unknown_2D0[20]; // unknown type ; total size 0x50 bytes (0x14*4)
-		char unknown_320[0x328 - 0x320];
+		unsigned long int targetUnitIdArrayUsedElemCount; // +2CC. Index of first UNused element in targetUnitIdArray (=> values 0-14). See 0x4CEBB6
+		unsigned long int targetUnitIdArray[20]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4)
+		long int targetPlayerId; // +320. Related to targetUnitIdArray unit's playerId (last inserted? All the same player?)
+		long int unknown_324; // a dword, but containing a 1-byte value. Bool, maybe.
 		long int unknown_328_gameTime; // Last tasking time, consistent with global+4.
 		unsigned long int unknown_gameTime_ms; // +0x32C. To confirm
 		// End (0x330)
@@ -2475,7 +2498,7 @@ namespace ROR_STRUCTURES_10C
 		// 0xD20
 		unsigned long int buildFrequencyCounter; // incremented until it reaches SNBuildFrequency
 		unsigned long int timeSinceLastAttackResponse_seconds; // To confirm. Compared to SNAttackResponseSeparationTime. See 4E0BC0.
-		unsigned long int unknown_D28_ptrTargetInfo; // ptr X. [X]=ptr Y. [Y]=playerIdTarget? SEEMS TO BE WHAT DEFINES WHO TO ATTACK?
+		unsigned long int unknown_D28_ptrTargetInfo; //ptr to playerIdTarget? SEEMS TO BE WHAT DEFINES WHO TO ATTACK?
 		unsigned long int unknown_D2C;
 		// 0xD30
 		unsigned long int unknown_D30;
@@ -2520,9 +2543,8 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int lastCoopSharAttackTime_ms; // A game time value in milliseconds.
 		unsigned long int unknown_FA4; // flag ? about exploration ?
 		unsigned long int unknown_FA8;
-		unsigned long int unknown_FAC; // base of an array ??
-		char unknown_FB0[0xFD8 - 0xFB0];
-		long int attacksByPlayerCount[9]; // number of times this player attacked me ?
+		STRUCT_TAC_AI_TARGET_INFO targetInfo; // +FAC.
+		long int attacksByPlayerCount[9]; // +FD8. number of times this player attacked me ?
 		long int lastUAms; // +FFC. "LastUAms" (UpdateAI). Time spent in last updateAI execution
 		long int averageUpdateAITime_ms; // +1000. Updated each time unknown_1004_time_counter reaches 20 and is reset. "Average UAms" ?
 		long int calcAverageUpdateAITime_counter; // Maximum value = 20 = 0x14

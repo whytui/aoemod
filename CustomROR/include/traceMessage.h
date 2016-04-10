@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <ctime>
 
-#define TRACEMESSAGE_BUFFER_COUNT 80
+#define TRACEMESSAGE_BUFFER_COUNT 150
 
 class TraceMessage {
 public:

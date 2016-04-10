@@ -1738,9 +1738,10 @@ void SetPlayerSharedExploration_safe(long int playerId) {
 }
 
 
-// Analog to init (in constructor), cf 0x4BA401.
-void ResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) {
-	if (!elem) { return; }
+// Reset an element in infAI.unitElemList. The slot will be re-used later by ROR. cf 0x4BA401.
+// Return true if the element was updated.
+bool ResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) {
+	if (!elem) { return false; }
 	elem->unitId = -1;
 	elem->unitDATID = -1;
 	elem->unitClass = (AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES) - 1;
@@ -1754,6 +1755,70 @@ void ResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *el
 	elem->attack = 0;
 	elem->reloadTime1 = 0;
 	elem->maxRange = 0;
+	return true;
+}
+
+
+// Update an element in infAI.unitElemList if the unit is visible.
+// Reset the element otherwise.
+// Return true if the element was updated/reset.
+bool UpdateOrResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) {
+	if (!infAI || !infAI->IsCheckSumValid() || !elem) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(elem->unitId);
+	assert((unitBase == NULL) || (unitBase->IsCheckSumValidForAUnitClass()));
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = NULL;
+	long int actorPlayerId = infAI->commonAIObject.playerId;
+	long int unitPlayerId = -1;
+	if (unitBase) {
+		unitDefBase = unitBase->GetUnitDefinition();
+		assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
+		if (unitBase->ptrStructPlayer && unitBase->ptrStructPlayer->IsCheckSumValid()) {
+			unitPlayerId = unitBase->ptrStructPlayer->playerId;
+		}
+	}
+	bool unitItVisible = false;
+	if (unitBase && unitDefBase) {
+		if (unitDefBase->visibleInFog) {
+			// The unit still exists, and is visible through fog: only remove it from the list if its position is not EXPLORED.
+			unitItVisible = IsExploredForPlayer(actorPlayerId, (long int)unitBase->positionX, (long int)unitBase->positionY);
+		} else {
+			// Standard case, check fog visibility.
+			unitItVisible = IsFogVisibleForPlayer(actorPlayerId, (long int)unitBase->positionX, (long int)unitBase->positionY);
+		}
+	}
+	if (unitItVisible) {
+		// Update the element because I can see it (no cheating)
+		elem->playerId = (char)unitPlayerId; // the most important update
+		if (unitBase) { // should always be true here
+			elem->posX = (unsigned char)unitBase->positionX;
+			elem->posY = (unsigned char)unitBase->positionY;
+			elem->HP = (short)unitBase->remainingHitPoints;
+		}
+		if (unitDefBase && unitDefBase->DerivesFromType50()) {
+			// By the way... This part is not really necessary.
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *unitDef50 = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)unitDefBase;
+			elem->maxRange = unitDef50->maxRange;
+			elem->reloadTime1 = unitDef50->reloadTime1;
+			//elem->attack = unitDef50->displayedAttack;
+		}
+		return true;
+	} else {
+		// Reset the element, I don't see it anymore.
+		return ResetInfAIUnitListElem(elem);
+	}
+	return false;
+}
+
+
+// Find a unitElem in infAI list, returns NULL if not found.
+ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, long int unitId) {
+	if (!infAI || !infAI->IsCheckSumValid() || (unitId < 0)) { return NULL; }
+	for (int i = 0; i < infAI->unitElemListSize; i++) {
+		if (infAI->unitElemList[i].unitId == unitId) {
+			return &infAI->unitElemList[i];
+		}
+	}
+	return NULL;
 }
 
 
