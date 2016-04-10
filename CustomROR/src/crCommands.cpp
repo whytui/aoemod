@@ -4206,15 +4206,21 @@ void CustomRORCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextP
 		}
 	}
 
+	// Count the number of arguments %... to guess the stack size to be provided to our call to sprintf.
+	// Note: all args are DWORDS (4 bytes) except float (because they are double(=QWORD=8 bytes), actually)
 	size_t pos = msgInitial.find('%');
 	int additionalArgsCount = 0;
+	int floatArgsCount = 0;
+	size_t length = msgInitial.length();
 	while (pos != std::string::npos) {
 		additionalArgsCount++;
+		if ((pos < length) && (msgInitial[pos + 1]) == 'f') {
+			floatArgsCount++; // %f means 2 DWORDS in stack instead of 1.
+		}
 		pos = msgInitial.find('%', pos + 1);
 	}
-	// We don't know parameters size, most are 4-bytes (pointers for %s, ints), some might be double (8 bytes). Let's take 8 bytes per param.
-	// Reading too much stack values will not hurt. Reading not enough would make the program crash because of invalid parameters in printf execution.
-	long int argsSizeInBytes = additionalArgsCount * 8;
+	long int totalStackDwords = additionalArgsCount + floatArgsCount; // takes into account the fact that float are indeed double (2 dwords, not 1)
+	long int argsSizeInBytes = totalStackDwords * 4;
 	char buf[200];
 	int bufsize = sizeof(buf);
 	// No choice, we NEED to execute a printf ourselves because of dynamic number/type of arguments
@@ -4225,14 +4231,14 @@ void CustomRORCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextP
 		MOV ECX, ESP // Beginning position of allocated space in stack for arguments (dest)
 		XOR EDI, EDI // =0
 	begin_loop:
-		CMP EDI, additionalArgsCount
-		JG end_loop
+		CMP EDI, totalStackDwords
+		JGE end_loop
 		MOV EAX, DS:[ESI]
 		MOV DS:[ECX], EAX
 		ADD ECX, 4
 		ADD ESI, 4
 		INC EDI
-		CMP EDI, additionalArgsCount
+		CMP EDI, totalStackDwords
 		JLE begin_loop
 	end_loop:
 		// Call printf
