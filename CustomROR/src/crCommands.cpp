@@ -1587,6 +1587,12 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(ROR_STRUCTURES_10C::STRUCT_T
 	// Easy difficulty levels / MP games: default behavior too
 	if (settings->isMultiplayer || (settings->difficultyLevel >= 3)) { return false; } // use default
 
+	assert(stratElem->elementType == TAIUnitClass::AIUCBuilding);
+	long int villagerTotalCount = tacAI->allVillagers.usedElements;
+	if (villagerTotalCount <= 0) {
+		return true; // No villager: don't build, of course ! (yes, ROR tries to start construction without villagers ;)
+	}
+
 	ROR_STRUCTURES_10C::STRUCT_AI *ai = tacAI->ptrMainAI;
 	if (!ai || !ai->IsCheckSumValid()) { return false; } // error: use default
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = ai->ptrStructPlayer;
@@ -1674,7 +1680,6 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(ROR_STRUCTURES_10C::STRUCT_T
 			}
 		}
 		long int allowedExtraConstructionCount = 0;
-		long int villagerTotalCount = tacAI->allVillagers.usedElements;
 		// Is total number of construction (including new potential one) too large ?
 		if (villagerTotalCount + allowedExtraConstructionCount < unfinishedBuildings) {
 #ifdef _DEBUG
