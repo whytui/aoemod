@@ -67,6 +67,7 @@ UI and Shortcuts:
 - A new button in game menu opens CustomROR options UI.
 - Show "remaining" available technologies (from you civ's tech tree) from CustomROR options UI (tech tree button).
 - Automatically show "F11" information at game startup.
+- "F11" information zone displays enhanced population information (including number of vilagers)
 - Display a chat message at game startup to say the plugin is active.
 - Press CTRL-F1 to display trace/debug messages (useful for triggers...)
 
@@ -83,6 +84,7 @@ Scenario Editor:
 - All terrains are available in editor (putting non-standard terrain does not refresh immediatly, but it works).
 - All units are visible in editor (can be turned off in CustomROR configuration file)
 - In scenario editor, F10 opens the menu.
+- Fixed scenario editor so that it uses correct building set for each player (if you change a civilization, you need to save and reload the scenario)
 - Edit unit popup (can edit unit status): press F1 to switch to "select" mode, F2 to edit selected unit.
 - Show a number on selected units to indicate units that have a custom status (changed with F2 popup).
 - Enhanced scenario editor options (triggers, get AI/PER files, edit terrain, ...): press F3
