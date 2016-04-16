@@ -101,16 +101,11 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	}
 	// F2 in editor: edit selected unit
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F2) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
-		// TO DO: make sure menu is not open ?
 		this->OpenCustomEditorEditUnitPopup();
 	}
 	// F3 in editor: scenario information
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F3) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
-		// TO DO: make sure menu is not open ?
-		//ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN m;
-		//m.focusedComponent
 		this->OpenCustomEditorScenarioInfoPopup();
-		
 	}
 
 	// CTRL-F1 : display messages
@@ -158,7 +153,6 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		int techToShowCount = 0;
 		static char buffer[1024] = "\0";
 		char *posInBuf = buffer;
-		//ROR_STRUCTURES_10C::STRUCT_UNIT *unit = NULL;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = NULL;
 		ROR_STRUCTURES_10C::STRUCT_UNIT *selectedUnit = NULL;
 		if (global) {
@@ -311,8 +305,6 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		}
 
 
-		// To use a popup
-		//if (this->OpenCustomGamePopup(500, 320, CUSTOM_GAME_POPUP_TYPES::CGPT_UNKNOWN) != NULL) {
 		if (this->OpenCustomGamePopup<CustomPopup>(520, 460, false)) {
 			unsigned long int *unused;
 			AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (ROR_STRUCTURES_10C::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 400, 160);
