@@ -61,7 +61,7 @@ UI and Shortcuts:
 - Farms can be automatically rebuilt (see configuration + custom options menu in game)
 - Add 10 shortcut numbers 11-20 using numpad (original game uses 1-10 with main keyboard numeric keys). Custom numbers are not displayed (like 0) due to SLP limitation.
 - Improved game speed change with +/- buttons. Choose the speed change factor (default 1.25) in XML config or in-game customROR menu.
-- Press F9 to call nearby idle military units (they will move to screen position).
+- Press F9 to call nearby idle military units (they will move to mouse position).
 - Automatically assign shortcut numbers to spawned units (to configure in customROR.xml file).
 - Select a building and right-click to a location so that trained units will automatically spawn there (right-click on building itself to cancel).
 - A new button in game menu opens CustomROR options UI.
@@ -77,6 +77,7 @@ Gameplay:
 - Change conversion resistances, like 1.25 for war elephants instead of 1 (customizable in config file).
 - Correctly sets AI control at game startup when using the "ManageAI" feature (allows AI to control your "old" player when changing with gaia cheat code).
 - Customize Map generation elevation "amount" (hardcoded in standard game)
+- Disable dock in maps where AI does NOT build docks, for fair SP games. You can turn this ON/OFF in customROR.xml file.
 
 Scenario Editor:
 - All terrains are available in editor (putting non-standard terrain does not refresh immediatly, but it works).
