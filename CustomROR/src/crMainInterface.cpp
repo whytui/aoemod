@@ -216,12 +216,15 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			if (selectedUnit) {
 				long int actionTargetUnitId = -1;
 				unsigned long int addraction = -1;
-				ROR_STRUCTURES_10C::STRUCT_UNIT_ACTION_INFO *ainfo = selectedUnit->ptrActionInformation;
+				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = selectedUnit->GetUnitDefBase();
+				ROR_STRUCTURES_10C::STRUCT_UNIT_ACTION_INFO *ainfo = NULL;
+				if ((unitDefBase->unitType >= GLOBAL_UNIT_TYPES::GUT_TYPE50) && (unitDefBase->unitType <= GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
+					ainfo = selectedUnit->ptrActionInformation;
+				}
 				if (ainfo && (ainfo->ptrActionLink) && (ainfo->ptrActionLink->actionStruct)) {
 					actionTargetUnitId = ainfo->ptrActionLink->actionStruct->targetUnitId;
 					addraction = (unsigned long int)ainfo->ptrActionLink->actionStruct;
 				}
-				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = selectedUnit->GetUnitDefBase();
 				ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *unitActivity = selectedUnit->currentActivity;
 				assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
 				if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return false; }

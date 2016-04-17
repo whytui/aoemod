@@ -1334,8 +1334,8 @@ namespace ROR_STRUCTURES_10C
 	};
 
 
-	// Size = 0x124 - F8 A4 54 00
-	// Constructor 0x509AE0
+	// Size = 0x124 - F8 A4 54 00. Parent=54 A9 54 00
+	// Constructor 0x509AE0 (parent 51B140)
 	class STRUCT_GAME_GLOBAL {
 	public:
 		unsigned long int checksum;
@@ -1437,7 +1437,7 @@ namespace ROR_STRUCTURES_10C
 			if ((playerId < 0) || (playerId >= this->playerTotalCount) || (playerId >= 9)) { return NULL; }
 			return this->ptrPlayerStructPtrTable[playerId];
 		}
-		bool IsCheckSumValid() { return this->checksum == 0x0054A4F8; }
+		bool IsCheckSumValid() { return (this->checksum == 0x0054A4F8) || (this->checksum == 0x0054A954); }
 	};
 
 
@@ -2176,16 +2176,17 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_TAC_AI_TARGET_INFO) == 0x2C, "STRUCT_TAC_AI_TARGET_INFO size");
 
 
-	// Size = 0x330
+	// Size = 0x330. Constructor()=0x4CC630
+	// tacAI.createGroup(useSequence)=0x4E0400 ; tacAI.removeUnitGroup(unitGroupId)=0x4E04B0
 	// Organized as a loop chained list. See TacAI (first elem is included in TacAI).
 	class STRUCT_UNIT_GROUP_ELEM {
 	public:
 		unsigned long int checksum; // E0 8C 54 00
 		STRUCT_UNIT_GROUP_ELEM *next;
 		STRUCT_UNIT_GROUP_ELEM *previous;
-		unsigned long int unitGroupId; // A unique ID
+		long int unitGroupId; // A unique ID
 		// 0x10
-		unsigned long int unknown_resetOrg; // +10. resetOrg ?
+		long int unknown_resetOrg; // +10. resetOrg ?
 		AOE_CONST_INTERNAL::UNIT_GROUP_TYPES unitGroupType; // +14. internal id: 64,65,66,67,6A,6B,6C,6D(=artefacts?)
 		long int taskSubTypeId;
 		long int myUnitsIdArray[0x28]; // +1C. 40 elements, can be non-consecutive (ignore -1 values).
@@ -2193,33 +2194,33 @@ namespace ROR_STRUCTURES_10C
 		long int myUnitsHPArray[0x28]; // +BC. 40 elements. Also used as myUnitsIdArray+0xA0.
 		long int unitCount; // +15C. Must correspond to valid unitIds count in unitIdArray. Warning: 4CCC90 method requires LucTieuPhung's fix to avoid breaking this assertion.
 		// 0x160
-		unsigned long int unitMaximumCount; // Unsure
-		unsigned long int commanderUnitId; // +164. group leader
-		unsigned long int totalGroupHP; // or "old" value ?
-		unsigned long int unsure_previousUnitCount; // +16C. Set from +15Cs
+		long int unitMaximumCount; // Unsure
+		long int commanderUnitId; // +164. group leader
+		long int totalGroupHP; // +168. or "old" value ? Not always updated: can be quite wrong !
+		long int unsure_previousUnitCount; // +16C. Set from +15Cs
 		// 0x170
-		float unknown_170;
-		float unknown_174;
-		float unknown_178;
+		float unknown_170_posY;
+		float unknown_174_posX;
+		float unknown_178_posZ;
 		unsigned long int unknown_17C; // unknown type
 		// 0x180
 		AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS currentTask; // TaskId, see 4CD339. Values in 0-0x15
-		long int targetUnitId; // including defended unit case ?
+		long int targetUnitId; // +184. including defended unit case ?
 		long int targetDAT_ID;
 		float targetPosY;
 		// 0x190
 		float targetPosX;
 		float unknown_194;
-		unsigned long int unknown_198; // unknown type
-		float posY;
+		unsigned long int unknown_198; // seems int. DWORD?
+		float posY; // not sure what this is exactly, NOT group "supposed" position ?
 		// 0x1A0
 		float posX;
 		float posZ;
-		unsigned long int unknown_1A8; // unknown type
-		float unknown_1AC;
+		long int unknown_1A8;
+		float unknown_1AC_posY;
 		// 0x1B0
-		float unknown_1B0;
-		float unknown_1B4;
+		float unknown_1B0_posX;
+		float unknown_1B4_posZ;
 		unsigned long int unknown_1B8;
 		unsigned long int unknown_1BC;
 		// 0x1C0
@@ -2228,7 +2229,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_1C8;
 		unsigned long int unknown_1CC;
 		// 0x1D0
-		unsigned long int attackPlayId; // attackId that is being played. -1=Non-Play-based attack
+		long int attackPlayId; // attackId that is being played. -1=Non-Play-based attack
 		char unknown_1D4;
 		char unknown_1D5;
 		short int unknown_1D6; // check type (2 bytes ?)
@@ -2238,8 +2239,8 @@ namespace ROR_STRUCTURES_10C
 		char unknown_2C9;
 		char unknown_2CA; // ?
 		char unknown_2CB; // ?
-		unsigned long int targetUnitIdArrayUsedElemCount; // +2CC. Index of first UNused element in targetUnitIdArray (=> values 0-14). See 0x4CEBB6
-		unsigned long int targetUnitIdArray[20]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4)
+		long int targetUnitIdArrayUsedElemCount; // +2CC. Index of first UNused element in targetUnitIdArray (=> values 0-14). See 0x4CEBB6
+		long int targetUnitIdArray[20]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4)
 		long int targetPlayerId; // +320. Related to targetUnitIdArray unit's playerId (last inserted? All the same player?)
 		long int unknown_324; // a dword, but containing a 1-byte value. Bool, maybe.
 		long int unknown_328_gameTime; // Last tasking time, consistent with global+4.
@@ -2292,7 +2293,7 @@ namespace ROR_STRUCTURES_10C
 		char nextBuildName[0x101]; // +4A7: text (desired build unit name?)
 		long int currentIDInStrategy; // +5A8. Corresponds to stratelem.counter, not "index". counter 2 might NOT be 3rd element due to inserted elems.
 		char unknown_5AC[0x5BC - 0x5AC];
-		STRUCT_AI *mainAI; // +5BC
+		STRUCT_AI *mainAI; // +5BC. Set in 0x4B76E0.
 		// 0x5C0: end
 		bool IsCheckSumValid() { return this->checksum == 0x00548ACC; }
 	};
@@ -2332,7 +2333,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int checksum;
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1003
 		// 0xF0
-		unsigned long int ptrMainAI;
+		unsigned long int ptrMainAI; // +F0.
 		// 0xF4
 		unsigned long int dislikeTable[10]; // +F4. dislike values against all players. Why is there a "player9" value ?
 		//unsigned long int unknown_118;
@@ -2448,10 +2449,13 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_AI *ptrMainAI;
 		unsigned long int unknown_0F4;
 		char tempPerFile[0x100]; // +F8
-		char unknown_1F8[0x268 - 0x1F8];
-		//char structPersonality[0x390];
-		unsigned long int structPersonalityChecksum; // 9C 8C 54 00
-		long int SNNumber[0xE3]; // only used in init phases ?
+		char unknown_1F8[0x234 - 0x1F8];
+		long int unknown_counter; // Updated each time strategy AI is run ? (in fact, always reset to 0)
+		STRUCT_AI_UNIT_LIST_INFO unknown_238; // List of SN numbers (index) ? For debugging ?
+		STRUCT_AI_UNIT_LIST_INFO unknown_248; // List of SN numbers (index) ? For debugging ?
+		STRUCT_AI_UNIT_LIST_INFO unknown_258; // List of SN numbers (index) ? For debugging ?
+		unsigned long int structPersonalityChecksum; // +268. 9C 8C 54 00
+		long int SNNumber[0xE3]; // +26C. only used in init phases ?
 		// 0x5F8: end
 	};
 
@@ -2488,7 +2492,7 @@ namespace ROR_STRUCTURES_10C
 		long int nonExplorerVillagersCount; // +9D0. Counts all villagers BUT explorers
 		ROR_STRUCTURES_10C::STRUCT_UNIT_GROUP_ELEM fakeFirstUnitGroupElem; // +9D4. Organized as a circular list (each elem is a group) ? This one = "fake" elem (like in strategy)
 		unsigned long int seqUnitGroupId; // +D04. Is = next group's ID.
-		unsigned long int unitGroupsCount; // +D08
+		unsigned long int unitGroupsCount; // +D08. This does NOT count fakeFirstUnitGroupElem (so it CAN be 0).
 		unsigned long int unknown_D0C; // a Value in milliseconds (cmp to global+4)
 		// 0xD10
 		unsigned long int unknown_D10;
@@ -2508,12 +2512,7 @@ namespace ROR_STRUCTURES_10C
 		// 0xD40
 		unsigned long int unknown_D40;
 		unsigned long int unknown_D44;
-		STRUCT_AI_UNIT_LIST_INFO unknownUnits_D48; // +D48. military units that belong to me? Idle ones ? No group ?
-		/*unsigned long int unknown_D48; // Array of UnitIDs. ??? military units that belong to me? Idle ones ? No group ?
-		unsigned long int unknown_D4C_elemCount_D48; // element count in unknown_D48??
-		// 0xD50
-		unsigned long int unknown_D50;
-		unsigned long int unknown_D54; // Total array size for unknown_D48 ???*/
+		STRUCT_AI_UNIT_LIST_INFO IdleOrInRangeMilitaryUnits; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960
 		STRUCT_AI_UNIT_LIST_INFO unknownUnits_D58; // TC + villagers ? + others? Builders ?
 		unsigned long int gathererCount_actual[4]; // +D68. Index IS resource ID.
 		long int gathererCount_desired[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT]; // +D78. Villager count we want to assign to each type of resource (4). Index IS resource Type ID
@@ -2889,7 +2888,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_020; // Seen only 0x0A. Size of +20 array ??
 		long int *unknown_024_ptrArray; // TO DO. ElemSize = 0x18. dwords +0,4=unitId +8,+10=internalId?
 		unsigned long int internalId_whenAttacked; // internalId. If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64
-		unsigned long int unknown_02C; // A distance?. 0x64 in 4DA4C9.
+		unsigned long int unknown_02C; // A distance?. 0x64 in 4DA4C9. Distance to TC ?
 		// 0x30
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
 		long int targetUnitId; // +34

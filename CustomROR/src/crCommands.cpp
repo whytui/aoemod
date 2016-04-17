@@ -2849,7 +2849,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 
 	if (!isNotCreatable && !isTempUnit) {
 		// We have a creatable unit
-		if (isBuilding && (unit->unitStatus == 2)) { // status=2 means it is a conversion
+		if (isBuilding && (unit->unitStatus == 2)) { // status=2 means it is a conversion (or gaia unit captured)
 			// Remove building from player buildings list (bug in original game), this is done in unit destructor but NOT at unit conversion
 			// Note that because of this call, the remove operation is done twice (will be done again in destructor). But the 2nd time, it will just do nothing.
 			ROR_STRUCTURES_10C::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader = player->ptrBuildingsListHeader;
@@ -2857,7 +2857,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 		}
 
 		// Fix constructions history array
-		if (isBuilding && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() &&
+		if (isInGame && isBuilding && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() &&
 			// Not fixed in easiest... But as it is a technical fix, we apply it even if "improve AI" is not enabled.
 			// Note that it has a strong (positive) impact on AI farming + the fact that granary/SP construction is no longer blocked for no valid reason
 			settings->difficultyLevel < 4) {
@@ -2873,6 +2873,39 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 					// This could also fix the bad farms placement after some game time (because "existing" farms apply a negative likee value on nearby tiles) ? To verify
 					// Moreover, it allows the array data to be valid !
 					AOE_InfAIBuildHistory_setStatus(infAI, posX, posY, unitDef->DAT_ID1, AOE_CONST_INTERNAL::INFAI_BLD_HISTORY_STATUS::CST_BHS_REMOVED);
+				}
+			}
+		}
+
+		// If unit is dying: clean AI "unitId" lists: it is useless for lists that only store unit IDs to keep non-existing unitIDs.
+		// This allows to avoid getting very large UnitID arrays (especially creatableAndGatherableUnits that can contain thousand of elements without this optimization)
+		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		assert(global && global->IsCheckSumValid());
+		if (isInGame && global && global->IsCheckSumValid() && (unit->unitStatus > 2)) {
+			// For all valid players, remove unitId from AI lists...
+			for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+				ROR_STRUCTURES_10C::STRUCT_PLAYER *loopPlayer = GetPlayerStruct(loopPlayerId);
+				if (loopPlayer && loopPlayer->IsCheckSumValid() && loopPlayer->ptrAIStruct && (loopPlayer->aliveStatus == 0) &&
+					loopPlayer->ptrAIStruct->IsCheckSumValid() && IsImproveAIEnabled(loopPlayerId)) {
+					ROR_STRUCTURES_10C::STRUCT_INF_AI *loopInfAI = &loopPlayer->ptrAIStruct->structInfAI;
+					assert(loopInfAI->IsCheckSumValid());
+					if (IsClassArtefactOrGatherableOrCreatable(unitDefBase->unitAIType)) {
+						loopInfAI->creatableAndGatherableUnits.Remove(unit->unitInstanceId);
+					}
+					if (IsClassPlayerCreatable(unitDefBase->unitAIType)) {
+						loopInfAI->playerCreatableUnits.Remove(unit->unitInstanceId);
+					}
+					if ((unitDefBase->DAT_ID1 == CST_UNITID_FORUM) || 
+						(unitDefBase->DAT_ID1 == CST_UNITID_DOCK) ||
+						(unitDefBase->DAT_ID1 == CST_UNITID_RELIC) ||
+						(unitDefBase->DAT_ID1 == CST_UNITID_RUIN) ||
+						(unitDefBase->DAT_ID1 == CST_UNITID_RUIN2) ||
+						(unitDefBase->unitAIType == TribeAIGroupStoneMine) ||
+						(unitDefBase->unitAIType == TribeAIGroupGoldMine) ||
+						(unitDefBase->unitAIType == TribeAIGroupBerryBush)
+					) {
+						loopInfAI->elementsToDefend.Remove(unit->unitInstanceId);
+					}
 				}
 			}
 		}
@@ -4424,7 +4457,7 @@ void CustomRORCommand::DisableWaterUnitsIfNeeded() {
 
 
 // Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
-// This is called quite often (only if improve AI is enabled in customrOR configuration)
+// This is called quite often (only if improve AI is enabled in customROR configuration)
 void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem) {
 	if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem) { return; }
 	if (IsMultiplayer()) { return; }

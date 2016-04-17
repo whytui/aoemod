@@ -413,11 +413,15 @@ namespace AOE_CONST_INTERNAL
 		GVC_CUSTOM = 4
 	};
 
+	// See 4DF84C
 	enum UNIT_GROUP_TYPES : long int {
-		CST_UGT_UNKNOWN_64 = 0x64,
-		CST_UGT_UNKNOWN_65 = 0x65,
-		CST_UGT_UNKNOWN_66 = 0x66,
-		CST_UGT_UNKNOWN_67 = 0x67,
+		CST_UGT_LAND_ATTACK = 0x64, // Related to SNMaximumAttackGroupSize
+		CST_UGT_LAND_DEFEND = 0x65, // Related to SNMaximumDefendGroupSize
+		CST_UGT_LAND_EXPLORE = 0x66, // Related to SNMaximumExploreGroupSize
+		CST_UGT_BOAT_ATTACK = 0x67, // Related to SNMaximumBoatAttackGroupSize
+		CST_UGT_BOAT_DEFEND = 0x68, // Related to SNMaximumBoatDefendGroupSize
+		CST_UGT_BOAT_EXPLORE = 0x69, // Related to SNMaximumBoatExploreGroupSize
+		// Next ones : trade/fish/transport escorts ? Just a supposition
 		CST_UGT_UNKNOWN_6A = 0x6A,
 		CST_UGT_UNKNOWN_6B = 0x6B,
 		CST_UGT_UNKNOWN_6C = 0x6C,
@@ -426,7 +430,7 @@ namespace AOE_CONST_INTERNAL
 
 	enum UNIT_GROUP_TASK_IDS : long int {
 		CST_UGT_UNKNOWN_00 = 0, // stop ? 0x4CD349
-		CST_UGT_UNKNOWN_01 = 1, // stop ? 0x4CD349
+		CST_UGT_UNKNOWN_01 = 1, // Idle ? Set in 4CD110. Default=1 (0 in constructor, but 1 after init)
 		CST_UGT_UNKNOWN_02_ATTACK = 2,
 		CST_UGT_RETREAT = 3, // 4CD640
 		CST_UGT_DEFEND_UNIT = 4, // 4CE309

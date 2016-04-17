@@ -138,5 +138,54 @@ namespace ROR_STRUCTURES_10C {
 		return res;
 	}
 
+
+	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_GROUP_ELEM *obj, unsigned long int RORAddress) {
+		std::string res = "id=";
+		res += std::to_string(obj->unitGroupId);
+		res += " type=";
+		res += std::to_string(obj->unitGroupType);
+		res += " currentTask=";
+		res += std::to_string(obj->currentTask);
+		res += " taskSubTypeId=";
+		res += std::to_string(obj->taskSubTypeId);
+		res += "\n\tcommanderUnitId=";
+		res += std::to_string(obj->commanderUnitId);
+		res += " unitCount=";
+		res += std::to_string(obj->unitCount);
+		res += " totalGroupHP=";
+		res += std::to_string(obj->totalGroupHP);
+		res += "\n\tposX=";
+		res += std::to_string(obj->posX);
+		res += " posY=";
+		res += std::to_string(obj->posY);
+		res += " - 1B0_posX=";
+		res += std::to_string(obj->unknown_1B0_posX);
+		res += " 1AC_posY=";
+		res += std::to_string(obj->unknown_1AC_posY);
+		res += "\n\ttargetPlayerId=";
+		res += std::to_string(obj->targetPlayerId);
+		res += " targetUnitId=";
+		res += std::to_string(obj->targetUnitId);
+		res += " targetDAT_ID=";
+		res += std::to_string(obj->targetDAT_ID);
+		res += " targetPosX=";
+		res += std::to_string(obj->targetPosX);
+		res += " targetPosY=";
+		res += std::to_string(obj->targetPosY);
+		res += " attackPlayId=";
+		res += std::to_string(obj->attackPlayId);
+		res += " targetCount=";
+		res += std::to_string(obj->targetUnitIdArrayUsedElemCount);
+		res += "\n\tunknown_198=";
+		res += std::to_string(obj->unknown_198);
+		res += " unknown_1A8=";
+		res += std::to_string(obj->unknown_1A8);
+		res += " unknown_1B8=";
+		res += std::to_string(obj->unknown_1B8);
+		res += " unknown_1BC=";
+		res += std::to_string(obj->unknown_1BC);
+		return res;
+	}
+
 }
 

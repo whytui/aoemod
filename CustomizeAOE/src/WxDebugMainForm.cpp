@@ -53,7 +53,7 @@ void WxDebugMainForm::ConstructorInit() {
 	wxString playerIDs[9] = { _T("0"), _T("1"), _T("2"), _T("3"), _T("4"), _T("5"), _T("6"), _T("7"), _T("8"), };
 	this->lblPlayerId = new wxStaticText(this, wxID_ANY, _T("Player Id"));
 	this->edtPlayerId = new wxComboBox(this, wxID_ANY, _T("0"), wxDefaultPosition, wxDefaultSize, 9, playerIDs);
-	this->edtPlayerId->SetSelection(0);
+	this->edtPlayerId->SetSelection(2);
 	this->lblSubId = new wxStaticText(this, wxID_ANY, _T("Object Id"));
 	this->edtSubId = new wxTextCtrl(this, wxID_ANY, _T("0"), wxDefaultPosition, wxDefaultSize, 0);
 	this->edtOutputInfo = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
@@ -219,6 +219,9 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		std::string s = "InfAI - ";
 		long int offset = ((long)&rd->playersAI[playerId].structInfAI - (long)&rd->playersAI[playerId]);
 		s += GetHexStringAddress(((long int)rd->players[playerId].ptrAIStruct) + offset);
+		s += " TacAI=";
+		offset = ((long)&rd->playersAI[playerId].structTacAI - (long)&rd->playersAI[playerId]);
+		s += GetHexStringAddress(((long int)rd->players[playerId].ptrAIStruct) + offset);
 		s += " - dropSiteDistances forage/wood/stone/gold = ";
 		s += std::to_string(ai->structInfAI.bestForageDropSiteDistance);
 		s += " ";
@@ -259,20 +262,20 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += std::to_string(ai->structInfAI.foundForestTiles);
 		s += "\nUnit Lists...\n+114: count = ";
 		s += std::to_string(ai->structInfAI.unitElemListSize); // unitElemListSize (array size)
-		s += "\nListA count = ";
+		s += "\nCreatableGatherable count = ";
 		s += std::to_string(ai->structInfAI.creatableAndGatherableUnits.usedElements);
-		s += "\nListB count = ";
+		s += "\nPlayerCreatable count = ";
 		s += std::to_string(ai->structInfAI.playerCreatableUnits.usedElements);
-		s += "\nListC count = ";
+		s += "\nArtefactsFlags	 count = ";
 		s += std::to_string(ai->structInfAI.artefactsAndFlags.usedElements);
+		s += "\nElementsToDefend	 count = ";
+		s += std::to_string(ai->structInfAI.elementsToDefend.usedElements);
 		s += "\nBuildings list, count = ";
 		s += std::to_string(ai->structInfAI.buildingUnits.usedElements);
-		s += ";";
-		s += std::to_string(ai->structInfAI.buildingUnits.arraySize);
 
-		s += "\n\nList A= ";
+		s += "\n\nCreatableGatherable= ";
 		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.creatableAndGatherableUnits.unitIdArray, ai->structInfAI.creatableAndGatherableUnits.usedElements);
-		s += "\n\nList B= ";
+		s += "\n\nPlayerCreatable= ";
 		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.playerCreatableUnits.unitIdArray, ai->structInfAI.playerCreatableUnits.usedElements);
 		s += "\n\nBuildings= ";
 		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.buildingUnits.unitIdArray, ai->structInfAI.buildingUnits.usedElements);
@@ -325,6 +328,27 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += std::to_string(ai->structTacAI.unknown_D60_villagerCount);
 		s += " D64=";
 		s += std::to_string(ai->structTacAI.unknown_D64_villagerCount);*/
+
+		s += "\n\nUnit groups: count=";
+		s += std::to_string(ai->structTacAI.unitGroupsCount);
+		int ugCount = ai->structTacAI.unitGroupsCount;
+		int currentUgIndex = 0;
+		ROR_STRUCTURES_10C::STRUCT_UNIT_GROUP_ELEM currentGroup;
+		unsigned long int ugoffset = ((long)&rd->playersAI[playerId].structTacAI.fakeFirstUnitGroupElem - (long)&rd->playersAI[playerId]);
+		unsigned long int fakeFirstGroupRORAddress = ((long int)rd->players[playerId].ptrAIStruct) + ugoffset;
+		ROR_STRUCTURES_10C::GetObjectFromRORData(rd->handleROR, fakeFirstGroupRORAddress, &currentGroup, 0);
+		unsigned long int currentGrpAddr = (unsigned long int)currentGroup.next;
+		s += " first real grp=";
+		s += GetHexStringAddress(currentGrpAddr);
+		while ((currentUgIndex < ugCount) && (currentGrpAddr != fakeFirstGroupRORAddress)) {
+			s += "\n * ";
+			ROR_STRUCTURES_10C::GetObjectFromRORData(rd->handleROR, currentGrpAddr, &currentGroup, 0);
+			s += rd->ExportHostedRORObject<ROR_STRUCTURES_10C::STRUCT_UNIT_GROUP_ELEM>(&currentGroup, ((long int)rd->players[playerId].ptrAIStruct) + ugoffset);
+			currentUgIndex++;
+			currentGrpAddr = (unsigned long int)currentGroup.next;
+		}
+		s += "\n";
+
 
 		s += "\nTO DO...\n";
 
