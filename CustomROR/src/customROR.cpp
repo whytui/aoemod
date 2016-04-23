@@ -2551,7 +2551,8 @@ void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 	ROR_STRUCTURES_10C::STRUCT_UNIT *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT *)REG_values->EDI_val;
 	ror_api_assert(REG_values, unit != NULL);
 	
-	char desiredStatus = *((char*)REG_values->ESP_val + 0x24); // get arg5 (byte)
+	char iDesiredStatus = *((char*)REG_values->ESP_val + 0x24); // get arg5 (byte)
+	AOE_CONST_INTERNAL::UNIT_STATUS desiredStatus = (AOE_CONST_INTERNAL::UNIT_STATUS)iDesiredStatus;
 
 	// Custom code
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -2560,17 +2561,17 @@ void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 	// In real game, we must NOT do such updates because unit would have an invalid state (it is more complex than just changing unitStatus field)
 	if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
 		// Editor only: use shortcut numbers to provide visual custom information (see unit with custom status)
-		if (desiredStatus < 2) {
+		if (desiredStatus < AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY) {
 			unit->shortcutNumber = 1;
 		}
-		if (desiredStatus > 2) {
+		if (desiredStatus > AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY) {
 			unit->shortcutNumber = 3;
 		}
 
 		// For editor only: buildings with a status >2 are not displayed correctly (because game's code tests "status==2").
 		// In this very precise case, force the call that was not done (because of the CMP BL,2 condition).
 		// This needs to be done BEFORE we change unit.unitStatus (the call needs status to be =0).
-		if ((desiredStatus > 2) && (unit->ptrStructDefUnit->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
+		if ((desiredStatus > AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY) && (unit->ptrStructDefUnit->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 			float f = 10000;
 			_asm {
 				PUSH f

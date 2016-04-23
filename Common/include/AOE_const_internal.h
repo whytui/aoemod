@@ -242,6 +242,24 @@ namespace AOE_CONST_INTERNAL
 		CST_IMUT_COUNT = 0x0B // If this is wrong and you fix it, please fix also infAI struct definition
 	};
 
+	enum UNIT_STATUS : char {
+		CST_US_NOT_BUILT = 0, // Relevant for buildings
+		CST_US_UNKNOWN_1 = 1,
+		CST_US_READY = 2, // Initial status for living units, normal status for buildings (once built)/living units
+		// In terms of gameplay, statuses >2 are dead/dying units, but can be used for resources/technical units...
+		// Units with status>2 have no action, no longer count in player resources, etc.
+		CST_US_UNKNOWN_3 = 3, // used to trigger unit death (intermediate status ?)
+		CST_US_BERRY_BUSH = 3,
+		CST_US_CUT_TREE = 3, // A tree that is ready to be gathered
+		CST_US_DYING_ANIMATION = 4, // Relevant for living units (including animals)
+		CST_US_UNKNOWN_5 = 5, // frequent for smoke units ?
+		CST_US_MINES = 5, // Gold mine, stone mine
+		CST_US_GATHERABLE_ANIMAL, // Animal dead bodys that still provide meat.
+		CST_US_UNKNOWN_6 = 6, // not used for living units. Not used at all ?
+		CST_US_UNKNOWN_7 = 7, // Death, unit no longer produces "visibility". Unit is no longer displayed at all ?
+		CST_US_TO_DESTROY = 8 // Unit structure plays no role, just waiting to be destroyed/freed ?
+	};
+
 	// For "action" structures. There are NOT values for "command" structures
 	enum INTERNAL_ACTION_ID : short int {
 		CST_IAI_MOVE_1 = 1, // unsure. Used to capture relics

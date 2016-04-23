@@ -212,6 +212,9 @@ ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT
 // Returns true if current game is multiplayer, false otherwise (including error cases)
 bool IsMultiplayer();
 
+// Returns true if the game is currently running
+bool IsGameRunning();
+
 // Returns true for maps where AI does build a dock and boats. Warning: for unknown map type (custom), this returns true.
 bool IsDockRelevantForMap(MAP_TYPE_INDEX mti);
 

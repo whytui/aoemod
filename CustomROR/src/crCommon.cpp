@@ -772,6 +772,25 @@ bool IsMultiplayer() {
 }
 
 
+// Returns true if the game is currently running
+bool IsGameRunning() {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) {
+		return false;
+	}
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid()) {
+		return false;
+	}
+	if (global->gameRunStatus != 0) {
+		return false;
+	}
+	// If conditions above are true, current UI status should be in-game
+	assert(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING);
+	return (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING);
+}
+
+
 // Returns true for maps where AI does build a dock and boats. Warning: for unknown map type (custom), this returns true.
 bool IsDockRelevantForMap(MAP_TYPE_INDEX mti) {
 	MAP_WATER_TYPE m = GetMapWaterType(mti);

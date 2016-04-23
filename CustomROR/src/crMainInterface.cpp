@@ -207,7 +207,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 		}
 		ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameScreen = GetGameSettingsPtr()->ptrGameUIStruct;
-		if (GetGameSettingsPtr()->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) {
+		if (IsGameRunning()) {
 			// During Game
 
 			selectedUnit = gameScreen->panelSelectedUnit;
@@ -229,16 +229,16 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
 				if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return false; }
 				if (unitActivity) {
-					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X DATID=%d/%d  posX=%f posY=%f\nActivity=0x%08X - Activity+30=0x%X +28=0x%X\n" \
+					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X DATID=%d/%d  posX=%f posY=%f  status=%d\nActivity=0x%08X - Activity+30=0x%X +28=0x%X\n" \
 						"target=%ld\nAction=%08X ActionTargetUnitId=%ld\n",
 						selectedUnit->unitInstanceId, selectedUnit->unitInstanceId, unitDefBase->DAT_ID1, unitDefBase->DAT_ID2, 
-						selectedUnit->positionX, selectedUnit->positionY,
+						selectedUnit->positionX, selectedUnit->positionY, selectedUnit->unitStatus,
 						(long int)unitActivity, unitActivity->currentActionId, unitActivity->internalId_whenAttacked, unitActivity->targetUnitId,
 						addraction, actionTargetUnitId);
 				} else {
-					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X DATID=%d/%d  posX=%f posY=%f \nActivityChecksum=None\nnActionTargetUnitId=%ld\n",
+					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X DATID=%d/%d  posX=%f posY=%f  status=%d\nActivityChecksum=None\nnActionTargetUnitId=%ld\n",
 						selectedUnit->unitInstanceId, selectedUnit->unitInstanceId, unitDefBase->DAT_ID1, unitDefBase->DAT_ID2,
-						selectedUnit->positionX, selectedUnit->positionY, actionTargetUnitId);
+						selectedUnit->positionX, selectedUnit->positionY, selectedUnit->unitStatus, actionTargetUnitId);
 				}
 				posInBuf = posInBuf + strlen(posInBuf);
 			}
@@ -308,9 +308,9 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		}
 
 
-		if (this->OpenCustomGamePopup<CustomPopup>(520, 460, false)) {
+		if (this->OpenCustomGamePopup<CustomPopup>(580, 460, false)) {
 			unsigned long int *unused;
-			AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (ROR_STRUCTURES_10C::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 400, 160);
+			AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (ROR_STRUCTURES_10C::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
 			if (!sTechTreeInfo.empty() && (techToShowCount > 0)) {
 				AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (ROR_STRUCTURES_10C::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
 				AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (ROR_STRUCTURES_10C::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount+1));

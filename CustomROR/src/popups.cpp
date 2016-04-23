@@ -358,15 +358,15 @@ void EditorEditUnitInfoPopup::OnBeforeClose(bool isCancel) {
 	// Note: setting shortcutNumber can show the unit's status, but only works for player #1. See 4A78D9: disable jmp to allow always displaying shortcut
 	if (this->chkbox_s0 && this->chkbox_s2 && this->chkbox_s4) {
 		if (this->chkbox_s0 && (this->chkbox_s0->checked)) {
-			this->unit->unitStatus = 0;
+			this->unit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_NOT_BUILT;
 			this->unit->shortcutNumber = 1;
 		}
 		if (this->chkbox_s2 && (this->chkbox_s2->checked)) {
-			this->unit->unitStatus = 2;
+			this->unit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY;
 			this->unit->shortcutNumber = 0;
 		}
 		if (this->chkbox_s4 && (this->chkbox_s4->checked)) {
-			this->unit->unitStatus = 4;
+			this->unit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_DYING_ANIMATION;
 			this->unit->shortcutNumber = 3;
 		}
 	}
