@@ -2162,8 +2162,8 @@ void AOE_binData::InitOptions_10c() {
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN29_MinimumPeaceLikeLevel,
-		"Sets the level at which computer players must like another player before allying with that player.\
+		OBSOLETE_InitSN29_MinimumPeaceLikeLevel,
+		"[OBSOLETE] Sets the level at which computer players must like another player before allying with that player.\
 Must be >= 0 and <= 100.\
 Default = 85.",
 		822758,
@@ -2173,8 +2173,8 @@ Default = 85.",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN41_AttackGroupGatherSpacing,
-		"Controls the relative proximity (to the group gather point) that grouped units must be in before the group is considered gathered. Must be >= 1.\
+		OBSOLETE_InitSN41_AttackGroupGatherSpacing,
+		"[OBSOLETE] Controls the relative proximity (to the group gather point) that grouped units must be in before the group is considered gathered. Must be >= 1.\
 Default = 04",
 		822841,
 		(0xc7, 0x80, 0xA8, 0, 0, 0, 4, 0, 0, 0),
@@ -2183,8 +2183,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN161_RequiredFirstBuilding,
-		"Set value for 161-SNRequiredFirstBuilding SN Number (init2)",
+		OBSOLETE_InitSN161_RequiredFirstBuilding,
+		"[OBSOLETE] Set value for 161-SNRequiredFirstBuilding SN Number (init2)",
 		1002086,
 		(0x6A, 0x04, 0x68, 0xA1, 00, 00, 00),
 		SVT_INT_1B,
@@ -2192,8 +2192,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		SN181_ForceNOTUpgradeToToolAgeASAP,
-		"This option allow you to force PER calculator to set 181-ForceUpgradeToToolAgeASAP to NO (0) when it wants to set it to 1.",
+		OBSOLETE_SN181_ForceNOTUpgradeToToolAgeASAP,
+		"[OBSOLETE] This option allow you to force PER calculator to set 181-ForceUpgradeToToolAgeASAP to NO (0) when it wants to set it to 1.",
 		1003649,
 		(0x7D, 0x04, 0x6A, 0x01),
 		(0x7D, 0x04, 0x6A, 0x00),
@@ -2202,8 +2202,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		SN181_ForceUpgradeToToolAgeASAP,
-		"This option allow you to force PER calculator to set 181-ForceUpgradeToToolAgeASAP to YES (1) when it wants to set it to 0.",
+		OBSOLETE_SN181_ForceUpgradeToToolAgeASAP,
+		"[OBSOLETE] This option allow you to force PER calculator to set 181-ForceUpgradeToToolAgeASAP to YES (1) when it wants to set it to 0.",
 		1003653,
 		(0xEB, 0x02, 0x6A, 0x00),
 		(0xEB, 0x02, 0x6A, 0x01),
@@ -2212,8 +2212,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		SN182_ForceNOTUpgradeToBronzeAgeASAP,
-		"This option allow you to force PER calculator to set 182-ForceUpgradeToBronzeAgeASAP to NO (0) when it wants to set it to 1.",
+		OBSOLETE_SN182_ForceNOTUpgradeToBronzeAgeASAP,
+		"[OBSOLETE] This option allow you to force PER calculator to set 182-ForceUpgradeToBronzeAgeASAP to NO (0) when it wants to set it to 1.",
 		1003695,
 		(0x7D, 0x04, 0x6A, 0x01),
 		(0x7D, 0x04, 0x6A, 0x00),
@@ -2222,8 +2222,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		SN182_ForceUpgradeToBronzeAgeASAP,
-		"This option allow you to force PER calculator to set 182-ForceUpgradeToBronzeAgeASAP to YES (1) when it wants to set it to 0.",
+		OBSOLETE_SN182_ForceUpgradeToBronzeAgeASAP,
+		"[OBSOLETE] This option allow you to force PER calculator to set 182-ForceUpgradeToBronzeAgeASAP to YES (1) when it wants to set it to 0.",
 		1003699,
 		(0xEB, 0x02, 0x6A, 0x00),
 		(0xEB, 0x02, 0x6A, 0x01),
@@ -2232,8 +2232,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN188_SNAttackWinningPlayer,
-		"Sets if computer player prefers attacking human player",
+		OBSOLETE_InitSN188_SNAttackWinningPlayer,
+		"[OBSOLETE] Sets if computer player prefers attacking human player",
 		823871,
 		(0x89, 0x90, 0xF4, 0x02, 0x00, 0x00), // default=yes
 		(0x89, 0x88, 0xF4, 0x02, 0x00, 0x00),
@@ -2242,8 +2242,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN194_CoopShareInformation,
-		"Sets if computer players can chat and share information",
+		OBSOLETE_InitSN194_CoopShareInformation,
+		"[OBSOLETE] Sets if computer players can chat and share information",
 		823925,
 		(0x89, 0x90, 0x0C, 0x03, 0x00, 0x00), // default=yes
 		(0x89, 0x88, 0x0C, 0x03, 0x00, 0x00),
@@ -2252,8 +2252,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN201_TrackPlayerHistory,
-		"Sets if computer player prefers attacking human players than computer mates",
+		OBSOLETE_InitSN201_TrackPlayerHistory,
+		"[OBSOLETE] Sets if computer player prefers attacking human players than computer mates",
 		997813,
 		(0x6A, 0x01, 0x68, 0xC9, 0x00, 0x00, 0x00), // default=yes
 		(0x6A, 0x00, 0x68, 0xC9, 0x00, 0x00, 0x00),
@@ -2262,8 +2262,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN208_AutoBuildDocks,
-		"208-AutoBuildDocks PER number customization for RM/DM.",
+		OBSOLETE_InitSN208_AutoBuildDocks,
+		"[OBSOLETE] 208-AutoBuildDocks PER number customization for RM/DM.",
 		1002736,
 		(0x6A, 0x01, 0x68, 0xD0, 0x00, 0x00, 0x00), // default=yes
 		(0x6A, 0x00, 0x68, 0xD0, 0x00, 0x00, 0x00),
@@ -2272,8 +2272,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN209_AutoBuildFishingBoats,
-		"209-AutoBuildFishingBoats PER number customization for RM/DM.",
+		OBSOLETE_InitSN209_AutoBuildFishingBoats,
+		"[OBSOLETE] 209-AutoBuildFishingBoats PER number customization for RM/DM.",
 		1002760,
 		(0x6A, 0x01, 0x68, 0xD1, 0x00, 0x00, 0x00), // default=yes
 		(0x6A, 0x00, 0x68, 0xD1, 0x00, 0x00, 0x00),
@@ -2282,8 +2282,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN210_AutoBuildTransports,
-		"210-AutoBuildTransports PER number customization for RM/DM.",
+		OBSOLETE_InitSN210_AutoBuildTransports,
+		"[OBSOLETE] 210-AutoBuildTransports PER number customization for RM/DM.",
 		1002784,
 		(0x6A, 0x01, 0x68, 0xD2, 0x00, 0x00, 0x00), // default=yes
 		(0x6A, 0x00, 0x68, 0xD2, 0x00, 0x00, 0x00),
@@ -2292,8 +2292,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN215_AllowDiplomacyChangeOnAllyAttack,
-		"215-AllowDiplomacyChangeOnAllyAttack PER number is initialized to Yes for RM/DM.",
+		OBSOLETE_InitSN215_AllowDiplomacyChangeOnAllyAttack,
+		"[OBSOLETE] 215-AllowDiplomacyChangeOnAllyAttack PER number is initialized to Yes for RM/DM.",
 		824059,
 		(0x89, 0x90, 0x60, 0x03, 0x00, 0x00), // default=yes
 		(0x89, 0x88, 0x60, 0x03, 0x00, 0x00),
@@ -2302,8 +2302,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitSN223_AutoBuildWarships,
-		"223-AutoBuildWarships PER number customization for RM/DM.",
+		OBSOLETE_InitSN223_AutoBuildWarships,
+		"[OBSOLETE] 223-AutoBuildWarships PER number customization for RM/DM.",
 		1002808,
 		(0x6A, 0x01, 0x68, 0xDF, 0x00, 0x00, 0x00), // default=yes
 		(0x6A, 0x00, 0x68, 0xDF, 0x00, 0x00, 0x00),
@@ -2312,8 +2312,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		LVL5_BONUS_AMOUNT,
-		"Change hardest level computer resources bonus.",
+		OBSOLETE_LVL5_BONUS_AMOUNT,
+		"[OBSOLETE] Change hardest level computer resources bonus.",
 		0xf4edd,
 		(0xb8, 0xd0, 0x07, 00, 00),
 		SVT_INT_4B,
@@ -2321,8 +2321,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		lvl5DisableGoldBonus,
-		"Disable level 5 (hardest) bonus for Gold.",
+		OBSOLETE_lvl5DisableGoldBonus,
+		"[OBSOLETE] Disable level 5 (hardest) bonus for Gold.",
 		0xF4EE2,
 		(0x8B, 0xF0), // default=no
 		(0x90, 0x90),
@@ -2331,8 +2331,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		lvl5DisableStoneBonus,
-		"Disable level 5 (hardest) bonus for Stone.",
+		OBSOLETE_lvl5DisableStoneBonus,
+		"[OBSOLETE] Disable level 5 (hardest) bonus for Stone.",
 		1003236,
 		(0x8B, 0xF8), // default=no
 		(0x90, 0x90),
@@ -2341,8 +2341,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		lvl5DisableWoodBonus,
-		"Disable level 5 (hardest) bonus for Wood.",
+		OBSOLETE_lvl5DisableWoodBonus,
+		"[OBSOLETE] Disable level 5 (hardest) bonus for Wood.",
 		1003238,
 		(0x8B, 0xE8), // default=no
 		(0x90, 0x90),
@@ -2391,7 +2391,7 @@ Default = 04",
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
 		disable_dislike_human_player,
-		"Fairly manage computer player's like/dislike values computing (do not hate human players).",
+		"Fairly manage computer player's like/dislike values computing (do not hate human players).\nAlso, enemy won't change diplomacy when attacked unless you really are enemy.",
 		883471,
 		(0x8B, 0x01, 0x52, 0x0F, 0x85, 0xCD, 0x00, 0x00, 0x00), // default=no
 		(0x8B, 0x01, 0x52, 0xE9, 0xCE, 0x00, 0x00, 0x00, 0x90),
@@ -2404,8 +2404,8 @@ Default = 04",
 	//disable_human_tracking_3
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		FixAI_initialDiplomacy,
-		"If this option is set, default diplomacy is enemy, not neutral. Prevents 'all-computers-allied' games.",
+		OBSOLETE_FixAI_initialDiplomacy,
+		"[OBSOLETE] If this option is set, default diplomacy is enemy, not neutral. Prevents 'all-computers-allied' games.",
 		1168585,
 		(0x8B, 0x4E, 0x40, 0x6A, 0x01, 0x50), // default=no
 		(0x8B, 0x4E, 0x40, 0x6A, 0x03, 0x50),
@@ -2607,8 +2607,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		DeathMatchInitialFoodWood,
-		"Set a value (float) for the initial amount of food / wood in deathmatch games.",
+		OBSOLETE_DeathMatchInitialFoodWood,
+		"[OBSOLETE] Set a value (float) for the initial amount of food / wood in deathmatch games.",
 		0x10BA60, //1096288,
 		(0xBE, 0x00, 0x40, 0x9C, 0x46),
 		SVT_FLOAT_4B,
@@ -2616,8 +2616,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		DeathMatchInitialGold,
-		"Set a value (float) for the initial amount of gold in deathmatch games.",
+		OBSOLETE_DeathMatchInitialGold,
+		"[OBSOLETE] Set a value (float) for the initial amount of gold in deathmatch games.",
 		0x10BA65, //1096293,
 		(0xBA, 0x00, 0x40, 0x1C, 0x46),
 		SVT_FLOAT_4B,
@@ -2625,8 +2625,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		DeathMatchInitialStone,
-		"Set a value (float) for the initial amount of stone in deathmatch games.",
+		OBSOLETE_DeathMatchInitialStone,
+		"[OBSOLETE] Set a value (float) for the initial amount of stone in deathmatch games.",
 		0x10BA6A, //1096298,
 		(0xB9, 0x00, 0x40, 0x9C, 0x45),
 		SVT_FLOAT_4B,
@@ -2634,8 +2634,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		InitialResources_High_FoodWood,
-		"Set a value (float) for the initial amount of food / wood in random games with HIGH resources.",
+		OBSOLETE_InitialResources_High_FoodWood,
+		"[OBSOLETE] Set a value (float) for the initial amount of food / wood in random games with HIGH resources.",
 		0x10B908, //1095944,
 		(0xBA, 0x00, 0x00, 0x7A, 0x44),
 		SVT_FLOAT_4B,
@@ -2643,8 +2643,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		InitialResources_High_Stone,
-		"Set a value (float) for the initial amount of stone in random games with HIGH resources.",
+		OBSOLETE_InitialResources_High_Stone,
+		"[OBSOLETE] Set a value (float) for the initial amount of stone in random games with HIGH resources.",
 		1095949,
 		(0xB9, 0x00, 0x80, 0x3B, 0x44),
 		SVT_FLOAT_4B,
@@ -2652,8 +2652,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitialResources_High_Gold_as_Stone,
-		"If you enable this option, all players will start games with the same initial gold amount as initial stone amount instead of 0 gold (for HIGH initial resources).",
+		OBSOLETE_InitialResources_High_Gold_as_Stone,
+		"[OBSOLETE] If you enable this option, all players will start games with the same initial gold amount as initial stone amount instead of 0 gold (for HIGH initial resources).",
 		1095992,
 		(0x89, 0x7E, 0x0C, 0x8B, 0x75, 0x40), // default=no
 		(0x89, 0x4E, 0x0C, 0x8B, 0x75, 0x40),
@@ -2662,8 +2662,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		InitialResources_Medium_FoodWood,
-		"Set a value (float) for the initial amount of food / wood in random games with MEDIUM resources.",
+		OBSOLETE_InitialResources_Medium_FoodWood,
+		"[OBSOLETE] Set a value (float) for the initial amount of food / wood in random games with MEDIUM resources.",
 		1096040,
 		(0xBA, 0x00, 0x00, 0xFA, 0x43),
 		SVT_FLOAT_4B,
@@ -2671,8 +2671,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		InitialResources_Medium_Stone,
-		"Set a value (float) for the initial amount of stone in random games with MEDIUM resources.",
+		OBSOLETE_InitialResources_Medium_Stone,
+		"[OBSOLETE] Set a value (float) for the initial amount of stone in random games with MEDIUM resources.",
 		1096033,
 		(0xB9, 0x00, 0x00, 0x7A, 0x43),
 		SVT_FLOAT_4B,
@@ -2680,8 +2680,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitialResources_Medium_Gold_as_Stone,
-		"If you enable this option, all players will start games with the same initial gold amount as initial stone amount instead of 0 gold (for MEDIUM initial resources).",
+		OBSOLETE_InitialResources_Medium_Gold_as_Stone,
+		"[OBSOLETE] If you enable this option, all players will start games with the same initial gold amount as initial stone amount instead of 0 gold (for MEDIUM initial resources).",
 		1096081,
 		(0x89, 0x7E, 0x0C, 0x8B, 0x75, 0x40), // default=no
 		(0x89, 0x4E, 0x0C, 0x8B, 0x75, 0x40),
@@ -2690,8 +2690,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		InitialResources_Low_FoodWood,
-		"Set a value (float) for the initial amount of food / wood in random games with LOW resources.",
+		OBSOLETE_InitialResources_Low_FoodWood,
+		"[OBSOLETE] Set a value (float) for the initial amount of food / wood in random games with LOW resources.",
 		1096115,
 		(0xBA, 0x00, 0x00, 0x48, 0x43),
 		SVT_FLOAT_4B,
@@ -2699,8 +2699,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
-		InitialResources_Low_Stone,
-		"Set a value (float) for the initial amount of stone in random games with LOW resources.",
+		OBSOLETE_InitialResources_Low_Stone,
+		"[OBSOLETE] Set a value (float) for the initial amount of stone in random games with LOW resources.",
 		1096120,
 		(0xB9, 0x00, 0x00, 0xC8, 0x42),
 		SVT_FLOAT_4B,
@@ -2708,8 +2708,8 @@ Default = 04",
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
-		InitialResources_Low_Gold_as_Stone,
-		"If you enable this option, all players will start games with the same initial gold amount as initial stone amount instead of 0 gold.",
+		OBSOLETE_InitialResources_Low_Gold_as_Stone,
+		"[OBSOLETE] If you enable this option, all players will start games with the same initial gold amount as initial stone amount instead of 0 gold.",
 		1096163,
 		(0x89, 0x7E, 0x0C, 0x8B, 0x75, 0x40), // default=no
 		(0x89, 0x4E, 0x0C, 0x8B, 0x75, 0x40),

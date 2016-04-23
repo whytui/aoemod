@@ -488,6 +488,53 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", this->crInfo->configInfo.fixHumanPlayer_specificSeeUnit ? 1 : 0);
 	// General - related to game
 	fprintf_s(f, "allyExplorationIsAlwaysShared:             %d\n", this->crInfo->configInfo.allyExplorationIsAlwaysShared ? 1 : 0);
+	// Random games settings
+	fprintf_s(f, "noNeutralInitialDiplomacy:                 %d\n", this->crInfo->configInfo.noNeutralInitialDiplomacy ? 1 : 0);
+	fprintf_s(f, "[RM] initial food (default/small/med/large) : %ld/%ld/%ld/%ld\n",
+		this->crInfo->configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_FOOD]);
+	fprintf_s(f, "[RM] initial wood (default/small/med/large) : %ld/%ld/%ld/%ld\n",
+		this->crInfo->configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_WOOD]);
+	fprintf_s(f, "[RM] initial stone (default/small/med/large): %ld/%ld/%ld/%ld\n",
+		this->crInfo->configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_STONE]);
+	fprintf_s(f, "[RM] initial gold (default/small/med/large) : %ld/%ld/%ld/%ld\n",
+		this->crInfo->configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
+		this->crInfo->configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+	fprintf_s(f, "[DM] initial resources (food/wood/stone/gold): %ld/%ld/%ld/%ld\n",
+		this->crInfo->configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		this->crInfo->configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		this->crInfo->configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		this->crInfo->configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+	fprintf_s(f, "[RM] initialBonus for AI (food/wood/stone/gold): %ld/%ld/%ld/%ld\n",
+		this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+	fprintf_s(f, "[DM] initialBonus for AI (food/wood/stone/gold): %ld/%ld/%ld/%ld\n",
+		this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+	for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
+		if (this->crInfo->configInfo.defaultPerNumbers_RM_isSet[i]) {
+			fprintf_s(f, "[RM] Force PER number #%ld to %ld\n", i, this->crInfo->configInfo.defaultPerNumbers_RM[i]);
+		}
+	}
+	for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
+		if (this->crInfo->configInfo.defaultPerNumbers_DM_isSet[i]) {
+			fprintf_s(f, "[DM] Force PER number #%ld to %ld\n", i, this->crInfo->configInfo.defaultPerNumbers_DM[i]);
+		}
+	}
 	// Human interface / shortcuts
 	fprintf_s(f, "useNumPadUnitShortcuts:                    %d\n", this->crInfo->configInfo.enableAdditionalNumpadShortcuts ? 1 : 0);
 	fprintf_s(f, "enableCallNearbyIdleMilitaryUnits:         %d\n", this->crInfo->configInfo.enableCallNearbyIdleMilitaryUnits ? 1 : 0);
@@ -499,7 +546,6 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	for (int shortcutId = 1; shortcutId < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS; shortcutId++) {
 		UnitSpawnShortcutInfo *sinfo = &this->crInfo->configInfo.unitShortcutsInformation[shortcutId];
 		if (sinfo->DAT_ID >= 0) {
-
 			fprintf_s(f, "unitSpawn shortcut %d: unit=%03d onlyOneUnit=%d (%.12s)\n", shortcutId, sinfo->DAT_ID, sinfo->onlyOneUnit ? 1 : 0,
 				GetUnitName(sinfo->DAT_ID));
 		}
@@ -934,6 +980,9 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 void CustomRORCommand::OnNewGame(bool isSavedGame) {
 	// Resets internal variables.
 	this->InitMyGameInfo();
+
+	// Manage game settings customization
+	this->ApplyCustomizationOnRandomGameSettings();
 }
 
 
@@ -958,7 +1007,7 @@ void CustomRORCommand::OnGameStart() {
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	if (!settings) { return; } // Should never happen
-	if (settings->initialAgeChoice == 6) { // Post-iron age startup
+	if (settings->initialAgeChoice == AOE_CONST_INTERNAL::GAME_INITIAL_AGES::GIA_POST_IRON) { // Post-iron age startup
 		for (int playerId = 1; playerId < 9; playerId++) {
 			this->MoveFireGalleyIconIfNeeded(playerId);
 		}
@@ -970,6 +1019,9 @@ void CustomRORCommand::OnGameStart() {
 		// Fix gaia attack sound
 		gaia->SetResourceValue(CST_RES_ORDER_ATTACK_ALERT_SOUND_ID, 10);
 	}
+
+	// Manage game settings customization
+	this->ApplyCustomizationOnRandomGameStart();
 
 	// Triggers
 	this->ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_GAME_START);
@@ -1008,6 +1060,137 @@ void CustomRORCommand::OnGameStart() {
 			}
 		}
 	}
+}
+
+
+// Does all custom stuff on random maps / deathmatches before game start : changes on game settings (map type/size, etc)
+// Does NOT apply to scenario/campaign/load saved game.
+// Warning: most game structures are not available yet ! It is recommended to only work with STRUCT_GAME_SETTINGS, nothing else.
+// Return false if failed.
+bool CustomRORCommand::ApplyCustomizationOnRandomGameSettings() {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	if (settings->isCampaign || settings->isSavedGame || settings->isScenario) {
+		return false;
+	}
+
+	return true;
+}
+
+
+// Set a SN number value in both strategy AI and tac AI.
+void CustomRORCommand::SetSNNumberInStrategyAndTacAI(ROR_STRUCTURES_10C::STRUCT_AI *ai, AOE_CONST_FUNC::SN_NUMBERS snNumber, long int value) {
+	if (!ai || !ai->IsCheckSumValid()) { return; }
+	assert((snNumber >= 0) && (snNumber <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER));
+	if ((snNumber < 0) || (snNumber > AOE_CONST_FUNC::CST_LAST_SN_NUMBER)) { return; }
+	ai->structStrategyAI.SNNumber[snNumber] = value;
+	ai->structTacAI.SNNumber[snNumber] = value;
+}
+
+
+// Does all custom stuff on random maps / deathmatches at game start : custom personnality values, strategy, initial resources, etc.
+// These are changes that are applied when game is loaded (do not interfere here with settings like map size, etc)
+// Does NOT apply to scenario/campaign/load saved game.
+// Return false if failed.
+bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid()) { return false; }
+	// Check game type
+	if (settings->isCampaign || settings->isSavedGame || settings->isScenario) {
+		return false;
+	}
+#pragma message("Customization on random game start: MP not supported")
+	if (settings->isMultiplayer) {
+		return false;
+	}
+	bool isDM = (settings->isDeathMatch != 0);
+
+	// Initial resources : read from config & apply to game
+	long int initialResources[4] = { 200, 200, 150, 0 };
+	if (isDM) {
+		for (int i = 0; i < 4; i++) {
+			initialResources[i] = this->crInfo->configInfo.initialResources_DM[i];
+		}
+	} else {
+		int choice = settings->initialResourcesChoice;
+		if ((choice < 0) || (choice > 3)) { choice = 0; } // Make sure we have a valid choice 0-3
+		for (int i = 0; i < 4; i++) {
+			initialResources[i] = this->crInfo->configInfo.initialResourcesByChoice_RM[choice][i];
+		}
+	}
+	for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		for (int rt = 0; rt < 4; rt++) {
+			player->SetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES) rt, (float)initialResources[rt]);
+		}
+	}
+
+	// SN Numbers
+	for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		if (player && player->IsCheckSumValid() && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
+			ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
+			// Remark: "disable_dislike_human_player" change make that AI players don't change diplomacy when attacked unless you really are enemy.
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNAllowDiplomacyChangeOnAllyAttack, 0); // a crucial one !
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNMinimumPeaceLikeLevel, 85);
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNAttackGroupGatherSpacing, 4);
+			this->SetSNNumberInStrategyAndTacAI(ai, SNRequiredFirstBuilding, isDM ? 0 : 4);
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNUpgradeToToolAgeASAP, 1);
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNUpgradeToBronzeAgeASAP, 0);
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNUpgradeToIronAgeASAP, 0);
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNAttackWinningPlayer, 1);
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNCoopShareInformation, 1);
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNTrackPlayerHistory, 1); // Anyway, it doesnt seem to be fully implemented.
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNAutoBuildDocks, 1);
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNAutoBuildFishingBoats, 1);
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNAutoBuildTransports, 1);
+			//this->SetSNNumberInStrategyAndTacAI(ai, SNAutoBuildWarships, 1);
+			
+			if (settings->difficultyLevelChoice == 0) {
+				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialFood,
+					isDM ? this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD] :
+					this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_FOOD]);
+				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialWood,
+					isDM ? this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD] :
+					this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_WOOD]);
+				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialStone,
+					isDM ? this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE] :
+					this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_STONE]);
+				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialGold,
+					isDM ? this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD] :
+					this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+			}
+		}
+	}
+
+	// Initial diplomacy (default=enemy, not neutral) - only if enabled in config
+	if (this->crInfo->configInfo.noNeutralInitialDiplomacy) {
+		for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
+			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+			if (player && player->IsCheckSumValid()) {
+				if (settings->teamNumbers[playerId - 1] == 1) { // Note: teamNumber 1 means "no team"
+					// No team: set default diplomacy (game default is neutral, can be set to enemy to avoid all players being against human)
+					assert(player->ptrDiplomacyStances != NULL);
+					for (int otherPlayerId = 1; otherPlayerId <= settings->playerCount; otherPlayerId++) {
+						if ((otherPlayerId != playerId) && player->ptrDiplomacyStances) {
+							player->ptrDiplomacyStances[otherPlayerId] = AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY;
+							player->diplomacyVSPlayers[otherPlayerId] = AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY;
+							if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
+								// It's crucial to update AI structure (remove the "is neutral" status), otherwise AI might update diplomacy back to neutral
+								player->ptrAIStruct->structDiplAI.isNeutral[otherPlayerId] = 0;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return true;
 }
 
 
@@ -1276,6 +1459,7 @@ void CustomRORCommand::ManageTacAIUpdate(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 	// Only for the FIRST tactical update (last one's time is 0): one-shot initializations
 	if (tacAI->lastTacticalUpdateTime <= 0) {
 		if (applyAIFix) {
+#pragma message("Remove the SN number updates as we can now configure it in customROR.xml")
 			// Limit farm number
 			if (gameSettings->isDeathMatch) {
 				if (tacAI->SNNumber[SN_NUMBERS::SNMaxFarms] > this->crInfo->configInfo.maxFarmsInDeathMatch) {
@@ -2849,7 +3033,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 
 	if (!isNotCreatable && !isTempUnit) {
 		// We have a creatable unit
-		if (isBuilding && (unit->unitStatus == 2)) { // status=2 means it is a conversion (or gaia unit captured)
+		if (isBuilding && (unit->unitStatus == AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY)) { // status=2 means it is a conversion (or gaia unit captured)
 			// Remove building from player buildings list (bug in original game), this is done in unit destructor but NOT at unit conversion
 			// Note that because of this call, the remove operation is done twice (will be done again in destructor). But the 2nd time, it will just do nothing.
 			ROR_STRUCTURES_10C::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader = player->ptrBuildingsListHeader;

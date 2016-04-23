@@ -6,6 +6,8 @@
 
 #include <AOE_const_language.h>
 #include <ROR_struct_export.h>
+#include <AOE_SN_numbers.h>
+#include <AOE_empires_dat.h>
 #include "Version.h"
 #include "crCommon.h"
 #include "UI_utilities.h"
@@ -97,6 +99,21 @@ public:
 	// Warning: for scenarios, if there is an introduction screen, this method is called at that moment
 	// (game might not be displayed yet)
 	void OnGameStart();
+
+	// Does all custom stuff on random maps / deathmatches before game start : changes on game settings (map type/size, etc)
+	// Does NOT apply to scenario/campaign/load saved game.
+	// Warning: most game structures are not available yet ! It is recommended to only work with STRUCT_GAME_SETTINGS, nothing else.
+	// Return false if failed.
+	bool ApplyCustomizationOnRandomGameSettings();
+
+	// Does all custom stuff on random maps / deathmatches at game start : custom personnality values, strategy, etc.
+	// These are changes that are applied when game is loaded (do not interfere here with settings like map size, etc)
+	// Does NOT apply to scenario/campaign/load saved game.
+	// Return false if failed.
+	bool ApplyCustomizationOnRandomGameStart();
+
+	// Set a SN number value in both strategy AI and tac AI.
+	void SetSNNumberInStrategyAndTacAI(ROR_STRUCTURES_10C::STRUCT_AI *ai, AOE_CONST_FUNC::SN_NUMBERS snNumber, long int value);
 
 	// This is called while scenarioInfo structure is read from a file
 	// Scenario texts (including players strategies) havealready been read, but not other information, be careful.

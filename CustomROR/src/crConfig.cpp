@@ -74,6 +74,14 @@ CustomRORConfig::CustomRORConfig() {
 	this->autoRebuildFarms_maxFarms = 4;
 	this->autoRebuildFarms_maxFood = 3000;
 	this->autoRebuildFarms_minWood = 200;
+	this->noNeutralInitialDiplomacy = false; // Game default.
+	this->InitializeDefaultResourceValues();
+	for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
+		this->defaultPerNumbers_RM_isSet[i] = false;
+		this->defaultPerNumbers_DM_isSet[i] = false;
+		this->defaultPerNumbers_RM[i] = -1;
+		this->defaultPerNumbers_DM[i] = -1;
+	}
 
 	// Map generation
 	this->randomMapRelicsCount = 5;
@@ -93,6 +101,39 @@ CustomRORConfig::~CustomRORConfig() {
 			allCivInfo[i] = NULL;
 		}
 	}
+}
+
+
+void CustomRORConfig::InitializeDefaultResourceValues() {
+	for (int i = 0; i < 4; i++) {
+		this->initialResourceHardestAIBonus_DM[i] = 2000; // Game default
+		this->initialResourceHardestAIBonus_RM[i] = 2000; // (stupid) Game default
+	}
+	// Deathmatch (no choice in game settings, only 1 possible config)
+	this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = 20000;
+	this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = 20000;
+	this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = 5000;
+	this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = 10000;
+	// Random map configurations:
+	for (int i = 0; i < 4; i++) {
+		this->initialResourcesByChoice_RM[i][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = 0; // Gold is always 0 in default game settings.
+	}
+	// RM - Default
+	this->initialResourcesByChoice_RM[0][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = 200;
+	this->initialResourcesByChoice_RM[0][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = 200;
+	this->initialResourcesByChoice_RM[0][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = 150;
+	// RM - small
+	this->initialResourcesByChoice_RM[1][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = 200;
+	this->initialResourcesByChoice_RM[1][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = 200;
+	this->initialResourcesByChoice_RM[1][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = 100;
+	// RM - medium
+	this->initialResourcesByChoice_RM[2][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = 500;
+	this->initialResourcesByChoice_RM[2][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = 500;
+	this->initialResourcesByChoice_RM[2][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = 250;
+	// RM - large
+	this->initialResourcesByChoice_RM[3][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = 1000;
+	this->initialResourcesByChoice_RM[3][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = 1000;
+	this->initialResourcesByChoice_RM[3][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = 750;
 }
 
 
@@ -179,6 +220,124 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "allyExplorationIsAlwaysShared") {
 			this->allyExplorationIsAlwaysShared = XML_GetBoolElement(elem, "enable");
 		}
+
+		// Random games settings
+		if (elemName == "noNeutralDiplomacy") {
+			this->noNeutralInitialDiplomacy = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "initialResources") {
+			categoryName = elem->Attribute("gameType");
+			int RMChoice = -1;
+			if (categoryName == "RM") {
+				callResult = elem->QueryIntAttribute("choice", &intValue);
+				if (callResult == TIXML_SUCCESS) { RMChoice = intValue; }
+			}
+			if (categoryName == "DM") {
+				RMChoice = 0;
+			}
+			if (RMChoice > 3) {
+				RMChoice = -1; // Preserve from invalid choices (correct are 0-3 = default/small/medium/large)
+			}
+			// Here RMChoice>=0 only if we have a valid config
+			if (RMChoice >= 0) {
+				callResult = elem->QueryIntAttribute("food", &intValue);
+				if (callResult == TIXML_SUCCESS) {
+					if (categoryName == "RM") {
+						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
+					}
+					if (categoryName == "DM") {
+						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
+					}
+				}
+				callResult = elem->QueryIntAttribute("wood", &intValue);
+				if (callResult == TIXML_SUCCESS) {
+					if (categoryName == "RM") {
+						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
+					}
+					if (categoryName == "DM") {
+						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
+					}
+				}
+				callResult = elem->QueryIntAttribute("stone", &intValue);
+				if (callResult == TIXML_SUCCESS) {
+					if (categoryName == "RM") {
+						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
+					}
+					if (categoryName == "DM") {
+						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
+					}
+				}
+				callResult = elem->QueryIntAttribute("gold", &intValue);
+				if (callResult == TIXML_SUCCESS) {
+					if (categoryName == "RM") {
+						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
+					}
+					if (categoryName == "DM") {
+						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
+					}
+				}
+			}
+		}
+		if (elemName == "per_number") {
+			categoryName = elem->Attribute("gameType");
+			int snNumber = -1;
+			int snValue = -1;
+			callResult = elem->QueryIntAttribute("sn", &intValue);
+			if (callResult == TIXML_SUCCESS) { snNumber = intValue; }
+			callResult = elem->QueryIntAttribute("value", &intValue);
+			if (callResult == TIXML_SUCCESS) { snValue = intValue; }
+			if ((snNumber >= AOE_CONST_FUNC::CST_FIRST_SN_NUMBER) && (snNumber <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER) &&
+				(categoryName == "RM")) {
+				this->defaultPerNumbers_RM[snNumber] = snValue;
+				this->defaultPerNumbers_RM_isSet[snNumber] = true;
+			}
+			if ((snNumber >= AOE_CONST_FUNC::CST_FIRST_SN_NUMBER) && (snNumber <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER) &&
+				(categoryName == "DM")) {
+				this->defaultPerNumbers_DM[snNumber] = snValue;
+				this->defaultPerNumbers_DM_isSet[snNumber] = true;
+			}
+		}
+
+		if (elemName == "initialResourceAIBonus") {
+			categoryName = elem->Attribute("gameType");
+			callResult = elem->QueryIntAttribute("food", &intValue);
+			if (callResult == TIXML_SUCCESS) {
+				if (categoryName == "RM") {
+					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
+				}
+				if (categoryName == "DM") {
+					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
+				}
+			}
+			callResult = elem->QueryIntAttribute("wood", &intValue);
+			if (callResult == TIXML_SUCCESS) {
+				if (categoryName == "RM") {
+					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
+				}
+				if (categoryName == "DM") {
+					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
+				}
+			}
+			callResult = elem->QueryIntAttribute("stone", &intValue);
+			if (callResult == TIXML_SUCCESS) {
+				if (categoryName == "RM") {
+					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
+				}
+				if (categoryName == "DM") {
+					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
+				}
+			}
+			callResult = elem->QueryIntAttribute("gold", &intValue);
+			if (callResult == TIXML_SUCCESS) {
+				if (categoryName == "RM") {
+					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
+				}
+				if (categoryName == "DM") {
+					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
+				}
+			}
+		}
+
 		// TO DO ? this->hideWelcomeMessage
 		// Conversion resistance values
 		if (elemName == "conversionResistance") {

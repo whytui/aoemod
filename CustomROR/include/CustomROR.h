@@ -9,6 +9,7 @@
 #include <ROR_structures.h>
 #include <ROR_API_assert.h>
 #include <customResolution.h>
+#include <AOE_empires_dat.h>
 
 #include <Windows.h> // for messagebox
 #include "crCommon.h"

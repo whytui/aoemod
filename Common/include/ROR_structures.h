@@ -3,6 +3,7 @@
 
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
+#include <AOE_empires_dat.h>
 
 
 // Note: as we never allocate/create unit structures ourselves, there is no problem going out of bounds as long as ROR EXE allocated enough values !
@@ -1329,6 +1330,7 @@ namespace ROR_STRUCTURES_10C
 		long int currentCommandSize; // unsure
 		// 0x10
 		long int timestamp; // Value from timeGetTime
+		unsigned long int *unknown_14; // Ptr to struct similar to [580DA8]
 
 		bool IsCheckSumValid() { return this->checksum == 0x00549904; }
 	};
@@ -1644,7 +1646,7 @@ namespace ROR_STRUCTURES_10C
 		char aliveStatus; //0=alive, 1=win 2=lost.
 		char unknown_081; // 1 for resigned/disconnected ? 45BBE3
 		short int unknown_082; // unused ?
-		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // [pointer+i] = diplomacy value: 0=ally,1=neutral, 3=enemy
+		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // +84. [pointer+iPlayerId] = diplomacy value: 0=ally,1=neutral, 3=enemy
 		char unknown_088;
 		char unknown_089[3]; // unused ?
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES diplomacyVSPlayers[9]; // +8C. Diplomacy against gaia(p0), p1, p2... 1=self, 2=allied, 3=neutral, 4=enemy. Long ints (4bytes each)
@@ -1896,7 +1898,7 @@ namespace ROR_STRUCTURES_10C
 		char mapSizeY;
 		char unknown_981; // Related to map size. Always 8 ? Max player # ?
 		char enableCheatMode; // +982. Set in 41BAE0
-		char unknown_983; // path finding for MP ? 0-2 default/medium/high ?
+		char unknown_983; // +983. path finding for MP ? 0-2 default/medium/high ?
 		char unknown_984; // Something to do with screen width and height??
 		char revealMap; // 0x985. Set in 41BB00
 		char noFog; // 0x986. Set in 41BB10
@@ -1927,7 +1929,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_A11;
 		char unknown_A12;
 		char unknown_A13;
-		char exploration; // 0xA14 (path finding value = 0-2)
+		char pathFindingChoice; // 0xA14 (path finding value = 0-2)
 		char playerIsInactive[0x09]; // Index is a "playerIndex" (cf +9B0), not playerID. 1 for player that lost/resigned..., 0 if alive
 		char unknown_A1E;
 		char unknown_A1F;
@@ -1967,7 +1969,7 @@ namespace ROR_STRUCTURES_10C
 		AOE_CONST_INTERNAL::GAME_INITIAL_AGES initialAgeChoice; // 0=default, 1=nomad, 2=stone, 3=tool 4=bronze, 5=iron, 6=post-iron. Set in 505570
 		char unknown_AE4; // +AE4. Set in 505580
 		char isDeathMatch; // +AE5. Set in 505590
-		char maxPopulation; // +AE6. Set in 5055A0
+		char maxPopulation; // +AE6. For MP games. Set in 5055A0, Get in 5054F0.
 		char unknown_AE7[0x09];
 		// 0xAF0
 		char unknown_AF0[0xC20 - 0xAF0];
@@ -2341,7 +2343,8 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int likeTable[10]; // +11C. like values against all players. Why is there a "player9" value ?
 		//unsigned long int unknown_140;
 		// 0x144
-		char isAlly[10]; // 0 or 1. Why is there a "player9" value ? Confirm it is "isEnemy" (or isNeutral or isAlly?)
+		char isNeutral[9]; // 0 or 1. To confirm
+		char unused_14D;
 		short int unused;
 		// 0x150: end
 	};
@@ -4684,8 +4687,8 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_IN_GAME_MAIN; }
 	};
 
-	// Size = 0x560
-	// The screen before starting game to choose map type, etc
+	// Size = 0x560. 10 78 54 00. Parent=9C 57 54 00 then BC 4B 54 00.
+	// The screen before starting game to choose map type, etc ("advanced" options like map size, etc).
 	// Constructor:0x49BF40
 #define CHECKSUM_UI_GAME_SETTINGS 0x00547810
 	class STRUCT_UI_GAME_SETTINGS : public STRUCT_ANY_UI {

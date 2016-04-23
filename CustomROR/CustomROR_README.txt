@@ -71,7 +71,10 @@ UI and Shortcuts:
 - Display a chat message at game startup to say the plugin is active.
 - Press CTRL-F1 to display trace/debug messages (useful for triggers...)
 
-Gameplay:
+Gameplay & configuration:
+- Use customROR.xml to configure (for RM/DM) initial resource values, initial resource bonus for AI
+- Use customROR.xml to force certain PER numbers in DM and/or RM. Example: set SNAllowDiplomacyChangeOnAllyAttack to 0 to avoid unfortunate diplomacy changes.
+- Enable/Disable (customROR.xml) neutral initial diplomacy stance: this prevents computer players to become all allied against human player.
 - Enable/disable shared exploration (writing tech) at game start (to configure in customROR.xml file).
 - Ability to customize number of relics/ruins in random games/deathmatch.
 - Automatically computes AI's "dislike" values against each player. A player with all relics/ruins/wonder will have more chances to be taken as target.

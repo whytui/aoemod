@@ -4,6 +4,8 @@
 #include "../../../tinyxml/tinyxml.h"
 #include <string>
 #include <AOE_const_functional.h>
+#include <AOE_SN_numbers.h>
+#include <AOE_empires_dat.h>
 #include "civilizationInfo.h"
 
 using namespace std;
@@ -53,6 +55,17 @@ public:
 	long int collectRORDebugLogs; // 0=no, 1=yes, filtered, 2=yes, all
 	bool showLogsInReverseOrder; // No input parameter for this (init in constructor only)
 	bool showCustomRORNotifications; // Use this to disable customROR message notifications (not recommended)
+
+	// Random Games settings
+	bool noNeutralInitialDiplomacy; // If true, initial diplomacy for no-team players will be enemy, not neutral. AI won't become all allied against human.
+	long int initialResourcesByChoice_RM[4][4]; // First index=user choice (default/small/medium/large), Second index=resource type.
+	long int initialResources_DM[4]; // Initial resources in deathmatch
+	long int initialResourceHardestAIBonus_RM[4]; // Initial bonus for AI players in hardest in random games
+	long int initialResourceHardestAIBonus_DM[4]; // Initial bonus for AI players in hardest in deathmatches
+	long int defaultPerNumbers_RM[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1];
+	bool defaultPerNumbers_RM_isSet[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1]; // set to true to indicate when corresponding defaultPerNumbers_RM value is relevant
+	long int defaultPerNumbers_DM[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1];
+	bool defaultPerNumbers_DM_isSet[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1]; // set to true to indicate when corresponding defaultPerNumbers_DM value is relevant
 
 	// Conversion resistance
 	float conversionResistance_Macedonian;
@@ -142,7 +155,7 @@ public:
 
 private:
 	CivilizationInfo *allCivInfo[CST_MAX_TOTAL_CIV_COUNT];
-
+	void InitializeDefaultResourceValues();
 };
 
 // Get a bool value from a XML element and an attribute name.
