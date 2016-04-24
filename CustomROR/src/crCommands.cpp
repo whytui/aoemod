@@ -2849,7 +2849,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 
 
 // Fixes missing treatments when a unit changes owner (eg. unit conversion)
-// This should be called before the actual unit owner change process is called.
+// This is called BEFORE the actual unit owner change process is called. (this is called at the very beginning of unit conversion process)
 // targetUnit is the "victim" (unit that changes owner), actorPlayer is the new owner (player)
 // Technical note: in ROR, unit.changeOwner(newplayer) is [EDX+0x44] call.
 void CustomRORCommand::OnUnitChangeOwner_fixes(ROR_STRUCTURES_10C::STRUCT_UNIT *targetUnit, ROR_STRUCTURES_10C::STRUCT_PLAYER *actorPlayer) {
@@ -2999,6 +2999,7 @@ void CustomRORCommand::OnPlayerAddUnitCustomTreatments(ROR_STRUCTURES_10C::STRUC
 
 
 // Custom Fixes/features on player.removeUnit calls.
+// Note: player.RemoveUnit is called BY unit.destructor.
 // Here unit status can be 2 (if conversion), 7 (quitting editor?), 8 (in-game dying unit) ? +maybe other values
 // Warning: this method is called in many situations, game might NOT be running.
 void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable) {

@@ -1393,7 +1393,7 @@ namespace ROR_STRUCTURES_10C
 		// +0x80
 		unsigned long int unknown_080; // list of unit data??
 		float timerInterval;
-		STRUCT_UNIT **ptrUnitPointersList; // pointer to Array of unit struct pointers
+		STRUCT_UNIT **ptrUnitPointersList; // +88. pointer to Array of unit struct pointers
 		unsigned long int unknown_08C;
 		// +0x90
 		long int unitPointersListSize; // Size of the ptrUnitPointersList Array
@@ -3145,7 +3145,7 @@ namespace ROR_STRUCTURES_10C
 		short int DAT_ID2; // "Upgraded unit" id from empires.dat. Ex=heavy cavalry
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType; // +14. "Class". TribeAIGroupXXX - 3=building, 18=priest...
 		char *ptrStandingGraphics; // starts with SLP name.
-		unsigned long int ptrUnknownGraphic_01C;
+		unsigned long int ptrUnknownGraphic_01C_dying; // +1C
 		// 0x20
 		unsigned long int ptrUnknownGraphic_020;
 		short int deathMode;
@@ -3460,7 +3460,7 @@ namespace ROR_STRUCTURES_10C
 		short int DAT_ID2; // "Upgraded unit" id from empires.dat. Ex=heavy cavalry
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType; // +14. "Class". TribeAIGroupXXX - 3=building, 18=priest...
 		char *ptrStandingGraphics; // starts with SLP name.
-		unsigned long int ptrUnknownGraphic_01C;
+		unsigned long int ptrUnknownGraphic_01C_dying; // +1C
 		// 0x20
 		unsigned long int ptrUnknownGraphic_020;
 		short int deathMode;
@@ -3891,7 +3891,7 @@ namespace ROR_STRUCTURES_10C
 	// 0C 82 54 00 = living (type70). Size=0x1C0 (constructor=0x04AE2D0) - Derives from type50
 	class STRUCT_UNIT_LIVING : public STRUCT_UNIT_TYPE50 {
 	public:
-		char unknown_1BC; // byte
+		char hasDedicatedUnitDef; // +1BC. If true, this->unitDef is a "temporary" copy created when unit was converted, which means it must be freed when unit dies (or changes, for villager mode). See 4AE435 for delete.
 		char unknown_1BD;
 		short int unknown_1BE;
 
@@ -4072,7 +4072,7 @@ namespace ROR_STRUCTURES_10C
 		float unknown_1B4; // Time to next xxx?
 		char stillToBeDiscoveredByHuman; // 1 for gaia units that have not been discovered yet (for gaia units capture system ?)
 		char unknown_1B9[3]; // ?
-		char unknown_1BC; // byte
+		char hasDedicatedUnitDef; // Set to 1 when converted. Means unitDef must be freed when unit dies/changes unitDef. See 4AE435 for delete.
 		char unknown_1BD;
 		short int unknown_1BE;
 		// 0x1C0 - Only buildings have those members

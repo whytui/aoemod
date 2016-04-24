@@ -443,7 +443,7 @@ namespace AOE_CONST_INTERNAL
 		CST_UGT_UNKNOWN_6A = 0x6A,
 		CST_UGT_UNKNOWN_6B = 0x6B,
 		CST_UGT_UNKNOWN_6C = 0x6C,
-		CST_UGT_ARTEFACT = 0x6D
+		CST_UGT_ARTEFACT = 0x6D // Seen with target=own TC.
 	};
 
 	enum UNIT_GROUP_TASK_IDS : long int {

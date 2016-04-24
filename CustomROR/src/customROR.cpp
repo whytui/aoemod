@@ -505,7 +505,7 @@ void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 }
 
 
-// 0x04B2578
+// 0x04B2578 = address when randomness decided a conversion is successful = beginning of actual unit conversion process.
 void CustomRORInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
 	// Do overwritten instructions
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -618,7 +618,7 @@ void CustomRORInstance::MapGen_applyElevation(REG_BACKUP *REG_values) {
 
 
 // 0x0045E8D7
-// This is called from player.RemoveUnit method
+// This is called from player.RemoveUnit method. Note: player.RemoveUnit is called BY unit.destructor.
 // Warning: this method is called in many situations, game might NOT be running.
 void CustomRORInstance::ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values) {
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = (ROR_STRUCTURES_10C::STRUCT_PLAYER *)REG_values->ECX_val;
@@ -641,34 +641,6 @@ void CustomRORInstance::ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values) {
 	}
 
 	this->crCommand.OnPlayerRemoveUnit(player, unit, isTempUnit != 0, isNotCreatable != 0);
-	return;
-
-	// Now custom treatments
-	if (!isNotCreatable && !isTempUnit) {
-		// We have a creatable unit
-		ror_api_assert(REG_values, unit != NULL);
-		if (unit && unit->IsCheckSumValid() && (unit->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) && (unit->unitStatus == 2)) {
-			// Remove building from player buildings list (bug in original game), this is done in unit destructor but NOT at unit conversion
-			// Note that because of this call, the remove operation is done twice (will be done again in destructor). But the 2nd time, it will just do nothing.
-			ROR_STRUCTURES_10C::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader = player->ptrBuildingsListHeader;
-			_asm {
-				MOV ECX, buildingsHeader
-				MOV EDX, unit
-				PUSH EDX
-				MOV EAX, 0x00436980 // playerUnitsHeader.removeBuildingFromArrays(ptrUnit)
-				CALL EAX
-			}
-		}
-	}
-
-	// Triggers
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (unit && unit->IsCheckSumValid() && !isTempUnit && (settings->currentUIStatus == AOE_CONST_INTERNAL::GSUS_PLAYING) &&
-		!settings->isMultiplayer && (unit->unitInstanceId >= 0)) {
-		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
-		evtInfo.unitId = unit->unitInstanceId;
-		this->crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_UNIT_LOSS, evtInfo);
-	}
 }
 
 
