@@ -670,6 +670,24 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		}
 	}
 
+	// Useful for debugging too: select from unitId
+	if (!_strnicmp(command, "select=", 7) && (command[7] >= '0') && (command[7] <= '9')) {
+		char *sUnitId = command + 7;
+		short int id = atoi(sUnitId);
+		if ((id == 0) && (*sUnitId != '0')) { id = -1; }
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = GetUnitStruct(id);
+		AOE_clearSelectedUnits(player);
+		if (unit && unit->IsCheckSumValid()) {
+			AOE_selectUnit(player, unit, true);
+			char *name = "?";
+			if (unit->ptrStructDefUnit && unit->ptrStructDefUnit->IsCheckSumValid()) {
+				name = unit->ptrStructDefUnit->ptrUnitName;
+			}
+			std::string s = std::string("selected ") + std::string(name);
+			sprintf_s(outputBuffer, s.c_str());
+		}
+	}
 
 	// A good nice trick : add any unit at any (explored) location using scenario editor feature... in game !
 	// Type addXXX where XXX is a unitDefId.
@@ -921,6 +939,7 @@ void CustomRORCommand::ShowF11_zone() {
 
 
 // This is called just after empires.dat is loaded.
+// Warning: changes here are applied on civ definitions are done once and for all, and impact all games.
 void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global);
@@ -955,20 +974,30 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 			}
 		}
 	}
-	// Assign graphics to the invisible tree
+
+	// Assign graphics to the invisible tree.
+	// Note that adding this at game start does not work, it's too late.
 	if (this->crInfo->configInfo.fixInvisibleTree) {
 		for (int civid = 0; civid < global->civCount; civid++) {
 			ROR_STRUCTURES_10C::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civid];
 			if (civDef && civDef->IsCheckSumValid()) {
 				if (civDef->civUnitDefCount > 393) {
 					// add condition SLP=799 ?
-					ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDefDest = civDef->GetUnitDef(393);
+					ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDefDest = civDef->GetUnitDef(393); // this tree has graphics with invalid SLP (799)
 					ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDefSrc = civDef->GetUnitDef(391);
 					if (unitDefDest && unitDefSrc && unitDefDest->IsCheckSumValid() && unitDefSrc->IsCheckSumValid()) {
 						unitDefDest->ptrStandingGraphics = unitDefSrc->ptrStandingGraphics;
 					}
 				}
 			}
+		}
+	}
+
+	// Fix gaia attack alert sound once and for all (can be applied on all games, including MP/Scenario, doesn't affect anything).
+	if (global->civCount > 0) {
+		ROR_STRUCTURES_10C::STRUCT_DEF_CIVILIZATION *civDefGaia = global->civilizationDefinitions[0];
+		if (civDefGaia->civResourcesCount > CST_RES_ORDER_ATTACK_ALERT_SOUND_ID) {
+			civDefGaia->SetResourceValue(CST_RES_ORDER_ATTACK_ALERT_SOUND_ID, 10);
 		}
 	}
 }
@@ -1011,13 +1040,6 @@ void CustomRORCommand::OnGameStart() {
 		for (int playerId = 1; playerId < 9; playerId++) {
 			this->MoveFireGalleyIconIfNeeded(playerId);
 		}
-	}
-
-	// Could be done in "after empires.dat loading" ?
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *gaia = GetPlayerStruct(0);
-	if (gaia && gaia->IsCheckSumValid()) {
-		// Fix gaia attack sound
-		gaia->SetResourceValue(CST_RES_ORDER_ATTACK_ALERT_SOUND_ID, 10);
 	}
 
 	// Manage game settings customization

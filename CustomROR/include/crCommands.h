@@ -88,6 +88,7 @@ public:
 	void ShowF11_zone();
 
 	// This is called just after empires.dat is loaded.
+	// Warning: changes here are applied on civ definitions are done once and for all, and impact all games.
 	void OnAfterLoadEmpires_DAT();
 
 	// Called when launching a new game. Game info has NOT been loaded yet. Global structure already exists, but be careful with its data...

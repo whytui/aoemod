@@ -3042,6 +3042,14 @@ namespace ROR_STRUCTURES_10C
 			if ((DAT_ID < 0) || (DAT_ID >= this->civUnitDefCount)) { return false; }
 			return (this->ptrUnitDefArray[DAT_ID] != NULL); // real pointer or "1" (temp value while reading empires.dat) will both return true
 		}
+		float GetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES resourceIndex) {
+			if ((resourceIndex < 0) || (resourceIndex > AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_ALL_RELICS)) { return -1; }
+			return this->ptrResourceValues[resourceIndex];
+		}
+		void SetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES resourceIndex, float value) {
+			if ((resourceIndex < 0) || (resourceIndex > AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_ALL_RELICS)) { return; }
+			this->ptrResourceValues[resourceIndex] = value;
+		}
 	};
 
 

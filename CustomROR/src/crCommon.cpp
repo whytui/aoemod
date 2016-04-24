@@ -1663,6 +1663,36 @@ void AOE_callNotifyEvent(long int eventId, long int playerId, void *variant_arg3
 }
 
 
+void AOE_clearSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+	if (!player || !player->IsCheckSumValid()) {
+		return;
+	}
+	_asm {
+		MOV ECX, player;
+		MOV EDX, 0x0045DCB0; // player.ClearSelectedUnits
+		CALL EDX;
+	}
+}
+
+// select: if true, add unit to selection. If false, remove from selection.
+bool AOE_selectUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT *unit, bool select) {
+	if (!player || !player->IsCheckSumValid() || !unit || !unit->IsCheckSumValid()) {
+		return false;
+	}
+	long int arg2 = select ? 1 : 0;
+	long int result = 0;
+	_asm {
+		MOV ECX, player;
+		PUSH arg2;
+		PUSH unit;
+		MOV EDX, 0x0045DC10; // player.selectUnit(pUnit, bool)
+		CALL EDX;
+		MOV result, EAX;
+	}
+	return (result != 0);
+}
+
+
 // Calls AOE's path finding method.
 // allArgs indices are 1-15 (do NOT use 0). Warning, allArgs[6] is a float, not an int.
 // Arguments (1-15) are:

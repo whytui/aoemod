@@ -441,6 +441,10 @@ void AOE_callNotifyEvent(long int eventId, long int playerId, long int variant_a
 // Call AOE's Notify event method. Warning, the parameters can have different types. Here pointers here so there is no undesired cast !
 void AOE_callNotifyEvent(long int eventId, long int playerId, void *variant_arg3, void *variant_arg4, void *variant_arg5);
 
+void AOE_clearSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+// select: if true, add unit to selection. If false, remove from selection.
+bool AOE_selectUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT *unit, bool select);
+
 // Calls AOE's path finding method.
 // allArgs indices are 1-15 (do NOT use 0). Warning, some arguments type are NOT long int (there are floats).
 long int callFindPathForUnit(long int allArgs[15 + 1]);
