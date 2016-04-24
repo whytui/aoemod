@@ -519,6 +519,34 @@ bool CreateCmd_SetSteroids(bool enable);
 bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_CONST_FUNC::RESOURCE_TYPES resourceType, float amount, float tributeInefficiency);
 
 
+// ---------- Unit def
+
+// A constructor for unitDef (building) that copies an existing one.
+//ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *CopyUnitDefToNew(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *existingUnitDef);
+
+// A constructor for unitDef that copies an existing one.
+template<typename UnitDef> static UnitDef *CopyUnitDefToNew(UnitDef *existingUnitDef) {
+	if (!existingUnitDef || !existingUnitDef->IsCheckSumValid()) {
+		return NULL;
+	}
+	UnitDef *newUnitDef = (UnitDef *)AOEAlloc(sizeof(UnitDef));
+	if (!newUnitDef) {
+		return newUnitDef;
+	}
+	unsigned long int addr = existingUnitDef->GetCopyConstructorAddress();
+	if (!addr) {
+		return NULL;
+	}
+	_asm {
+		MOV ECX, newUnitDef;
+		PUSH 1;
+		PUSH existingUnitDef;
+		CALL addr
+	}
+	return newUnitDef;
+}
+
+
 // ---------- Other
 
 // Writes text representing available tech tree (available technologies that have not been researched yet)

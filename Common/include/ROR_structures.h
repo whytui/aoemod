@@ -3179,7 +3179,7 @@ namespace ROR_STRUCTURES_10C
 		// 0x60
 		float editorRadius2; // for X axis
 		char hillMode; // 0=no restriction, 2 for buildings ?
-		char visibleInFog; // +65. Boolean: 0/1
+		char visibleInFog; // +65. Can be 0,1, 3 ("inverted visibility" in AGE3, but not exact. smoke has 3).
 		short int terrainRestriction;
 		char flyMode;
 		char unknown_069;
@@ -3250,6 +3250,7 @@ namespace ROR_STRUCTURES_10C
 		bool DerivesFromLiving() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_LIVING_UNIT) || (this->unitType == (char)AOE_CONST_FUNC::GUT_BUILDING); }
 		// Returns true if the unit definition is type50 or one of its child classes (projectile, living/building).
 		bool DerivesFromType50() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_TYPE50) || (this->unitType == (char)AOE_CONST_FUNC::GUT_PROJECTILE) || (this->DerivesFromLiving()); }
+		unsigned long int GetCopyConstructorAddress() { return 0x440FF0; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_BASE) == 0xB8, "STRUCT_UNITDEF_BASE size");
 
@@ -3259,18 +3260,19 @@ namespace ROR_STRUCTURES_10C
 		float speed; // 0xB8
 		bool IsCheckSumValid() const { return (this->checksum == 0x0054440C); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_FLAGS); }
+		unsigned long int GetCopyConstructorAddress() { return 0x43E930; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_FLAG) == 0xBC, "STRUCT_UNITDEF_FLAG size");
 
-	// 84 44 54 00 = Doppleganger - size ?
+	// 84 44 54 00 = Doppleganger - size 0xBC. Constructor(createCopy)=0x4402C0
 	class STRUCT_UNITDEF_DOPPLEGANGER : public STRUCT_UNITDEF_FLAG {
 	public:
-		// 0xBC
-		
+		// 0xBC - no additional fields ?
 		bool IsCheckSumValid() const { return (this->checksum == 0x00544484); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_DOPPLEGANGER); }
+		unsigned long int GetCopyConstructorAddress() { return 0x43EC40; } // Address of AOE method to create a copy.
 	};
-	//static_assert(sizeof(STRUCT_UNITDEF_DOPPLEGANGER) == 0xB8, "STRUCT_UNITDEF_DOPPLEGANGER size");
+	static_assert(sizeof(STRUCT_UNITDEF_DOPPLEGANGER) == 0xBC, "STRUCT_UNITDEF_DOPPLEGANGER size");
 
 	// FC 44 54 00 = Dead/fish (type30) - size=0xD8 - Constructor 0x440990
 	class STRUCT_UNITDEF_DEAD_FISH : public STRUCT_UNITDEF_FLAG {
@@ -3293,6 +3295,7 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x005444FC); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_DEAD_UNITS); }
+		unsigned long int GetCopyConstructorAddress() { return 0x440910; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_DEAD_FISH) == 0xD8, "STRUCT_UNITDEF_DEAD_FISH size");
 
@@ -3321,6 +3324,7 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x005443CC); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BIRD); }
+		unsigned long int GetCopyConstructorAddress() { return 0x43E010; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_BIRD) == 0xFC, "STRUCT_UNITDEF_BIRD size");
 
@@ -3366,6 +3370,7 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00544444); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TYPE50); }
+		unsigned long int GetCopyConstructorAddress() { return 0x43ED90; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_TYPE50) == 0x148, "STRUCT_UNITDEF_TYPE50 size");
 
@@ -3380,6 +3385,7 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x005444C0); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_PROJECTILE); }
+		unsigned long int GetCopyConstructorAddress() { return 0x440350; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_PROJECTILE) == 0x154, "STRUCT_UNITDEF_PROJECTILE size");
 
@@ -3397,6 +3403,7 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00549970); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT); }
+		unsigned long int GetCopyConstructorAddress() { return 0x4ECA10; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_LIVING) == 0x164, "STRUCT_UNITDEF_LIVING size");
 
@@ -3421,6 +3428,7 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00549930); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING); }
+		unsigned long int GetCopyConstructorAddress() { return 0x4EC100; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_BUILDING) == 0x17C, "STRUCT_UNITDEF_BUILDING size");
 
@@ -3429,6 +3437,7 @@ namespace ROR_STRUCTURES_10C
 	public:
 		bool IsCheckSumValid() const { return (this->checksum == 0x005499BC); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TREE); }
+		unsigned long int GetCopyConstructorAddress() { return 0x4ED220; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_TREE) == 0xB8, "STRUCT_UNITDEF_TREE size");
 

@@ -251,7 +251,7 @@ bool crTrigger::IsValid() const {
 		requiresAllActionKeywords = false;
 	}
 	if (this->triggerActionType == TRIGGER_ACTION_TYPES::TYPE_ADD_UNIT_DEF) {
-		// Check only key values: identify the unit to duplicate and give it a new name.
+		// Check only key values: unit id to modify
 		if (!IsPlayerIdValidForTriggerParam_noJoker(this->GetParameterValue(KW_ACTION_PLAYER_ID, -2))) {
 			missingKeywordMsg += GetTriggerParamKeyword(KW_ACTION_PLAYER_ID);
 			traceMessageHandler.WriteMessage(missingKeywordMsg);
@@ -259,6 +259,16 @@ bool crTrigger::IsValid() const {
 		}
 		if (this->GetParameterValue(KW_FROM_UNIT_DEF_ID, -1) < 0) {
 			missingKeywordMsg += GetTriggerParamKeyword(KW_FROM_UNIT_DEF_ID);
+			traceMessageHandler.WriteMessage(missingKeywordMsg);
+			return false;
+		}
+		// No check on other values. They all are optional.
+		requiresAllActionKeywords = false;
+	}
+	if (this->triggerActionType == TRIGGER_ACTION_TYPES::TYPE_MAKE_UNIQUE) {
+		// Check only key values: identify the unit to modify and give it a new name.
+		if (!this->IsParameterDefined(KW_ACTION_UNIT_ID)) {
+			missingKeywordMsg += GetTriggerParamKeyword(KW_ACTION_UNIT_ID);
 			traceMessageHandler.WriteMessage(missingKeywordMsg);
 			return false;
 		}

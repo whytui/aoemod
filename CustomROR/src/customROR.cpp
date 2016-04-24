@@ -2531,6 +2531,7 @@ void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 	if (!settings || !unit->IsCheckSumValid() || !unit->ptrStructDefUnit) { return; }
 	// Only modify behaviour in editor.
 	// In real game, we must NOT do such updates because unit would have an invalid state (it is more complex than just changing unitStatus field)
+
 	if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
 		// Editor only: use shortcut numbers to provide visual custom information (see unit with custom status)
 		if (desiredStatus < AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY) {

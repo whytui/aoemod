@@ -52,6 +52,7 @@ namespace CR_TRIGGERS {
 		TYPE_MODIFY_UNIT, // Change some unit properties (HP...)
 		TYPE_ADD_UNIT_INSTANCE,
 		TYPE_ADD_UNIT_DEF,
+		TYPE_MAKE_UNIQUE, // Make a unit unique, with (possibly) custom name, attributes...
 		TYPE_SET_UNIT_TARGET,
 		TYPE_SET_UNIT_DESTINATION,
 		TYPE_SET_GAIA_CAPTURABLE, // Make gaia units capturable (or not)

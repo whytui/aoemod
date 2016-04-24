@@ -2937,6 +2937,7 @@ bool CustomRORCommand::ChangeUnitOwner(ROR_STRUCTURES_10C::STRUCT_UNIT *targetUn
 
 
 // Custom Fixes/features on player.addUnit calls.
+// Note for conversion : unit is currently (temporarily) unavailable in global->GetUnitStruct(unitId) !
 void CustomRORCommand::OnPlayerAddUnitCustomTreatments(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable) {
 	if (!unit || !unit->IsCheckSumValid()) { return; }
 	if (!player || !player->IsCheckSumValid()) { return; }
@@ -2994,7 +2995,6 @@ void CustomRORCommand::OnPlayerAddUnitCustomTreatments(ROR_STRUCTURES_10C::STRUC
 			}
 		}
 	}
-
 }
 
 
@@ -3884,6 +3884,9 @@ void CustomRORCommand::MoveFireGalleyIconIfNeeded(short int playerId) {
 // It is not recommended to call this too much ! It would add a lot of unit definition and would impact seriously game performance.
 // The maximum number of DAT_ID we allow here is 0x7FFF (to take no risk regarding signed short int values)
 // The method supports all unit (def) types
+// Warning: there might be issues when such units are converted (bug in destructor in AOE, a unitDef for a given DATID should exist for all civs ?)
+// Maybe it's better not to use it for living/buildings units (because of conversion)
+// Note: see also AOE unitDef constructors that copy an existing one, e.g. 4ED1B0 for living (type 70).
 short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int srcDAT_ID, char *name) {
 	if (!player) { return -1; }
 
@@ -3921,6 +3924,11 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C:
 	assert(srcDef != NULL);
 	if (srcDef == NULL) { return -1; }
 	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *srcDef_base = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)srcDef;
+	if ((srcDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) || (srcDef->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT)) {
+		traceMessageHandler.WriteMessage("WARNING: adding unitdef for living/buildings is disabled due to conversion bug.");
+		// To solve the limitation, a solution could be to add it for all players !
+		return -1;
+	}
 
 	long int objectSize = 0;
 	bool hasAttacksAndArmors = srcDef_base->DerivesFromType50();
@@ -5469,7 +5477,117 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if (actionUnitDefId >= player->structDefUnitArraySize) { return; }
 		ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[actionUnitDefId];
 		if (!unitDef || !unitDef->IsCheckSumValid()) { return; }
-		/*ROR_STRUCTURES_10C::STRUCT_UNIT *unit = */CheckAndCreateUnit(player, unitDef, posX, posY, false, true, true);
+		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = CheckAndCreateUnit(player, unitDef, posX, posY, false, true, true);
+	}
+
+	// Make unique (create dedicated unit definition)
+	// Only supported for living units and buildings.
+	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_MAKE_UNIQUE) {
+		// Not MP-compatible (to confirm)
+		long int actionUnitId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_ID, -1);
+		if (actionUnitId < 0) { return; }
+		char *newUnitName = trigger->GetParameterValue(CR_TRIGGERS::KW_UNIT_NAME, "");
+		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(actionUnitId);
+		if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) { return; }
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+		if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return; }
+		// Only living units & buildings are allowed
+		if (!unitDefBase->DerivesFromLiving()) {
+			traceMessageHandler.WriteMessage("ERROR: 'Make unique' triggers only support living units and buildings.");
+			return;
+		}
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)unitDefBase;
+		if (!unitDefLiving || !unitDefLiving->IsCheckSumValidForAUnitClass()) { return; }
+
+		ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING *unitLiving = (ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING *)unitBase;
+		if (!unitLiving || !unitLiving->IsCheckSumValidForAUnitClass()) { return; }
+
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefToFree = NULL; // Only used for units that have a temporary unitDef (converted units)
+		if (unitLiving->hasDedicatedUnitDef) {
+			unitDefToFree = unitDefBase; // previous unitDef was (also) a temporary one. We will free it.
+		}
+
+		// Save HP % before modification to preserve it (example: if maxHP changes from 20 to 40, if old unit had 10/20 HP, new one should have 20/40 !)
+		float HPProportion = unitLiving->remainingHitPoints / ((float)unitDefLiving->totalHitPoints);
+
+		// Create the new (temporary) unit definition.
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *newUnitDefBuilding = NULL;
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *newUnitDefLiving = NULL;
+		if (unitLiving->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) {
+			// Our unit is a building
+			//unitDefBuilding = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)unitDefBase;
+			assert(((ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)unitDefBase)->IsCheckSumValid());
+			newUnitDefBuilding = CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)unitDefBase);
+			newUnitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING*)newUnitDefBuilding;
+		} else {
+			// We actually have a living unit
+			newUnitDefLiving = CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)unitDefBase);
+		}
+
+		// Here newUnitDefLiving is ALWAYS our new unitDef (cast as living=parent class if needed)
+		// newUnitDefBuilding is only non-NULL if our unit is actually a building. It can be used if we modify building-specific attributes.
+
+		// Apply supplied properties to new unit def.
+		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_TOTAL_HP)) {
+			newUnitDefLiving->totalHitPoints = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_TOTAL_HP, 1);
+			// Fix actual Hit points
+			unitLiving->remainingHitPoints = newUnitDefLiving->totalHitPoints * HPProportion;
+		}
+		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_RANGE)) {
+			float suppliedRange = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_RANGE, -1);
+			if (suppliedRange >= 0) {
+				newUnitDefLiving->lineOfSight = suppliedRange;
+				float upgradeRelatedRange = newUnitDefLiving->maxRange - newUnitDefLiving->displayedRange;
+				if (upgradeRelatedRange < 0) { upgradeRelatedRange = 0; }
+				newUnitDefLiving->displayedRange = suppliedRange - upgradeRelatedRange; // the figure before "+". For a "7+1" range, this corresponds to 7.
+				newUnitDefLiving->maxRange = suppliedRange; // Total range. For a "7+1" range, this corresponds to 8.
+			}
+		}
+
+		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_SPEED)) {
+			newUnitDefLiving->speed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_SPEED, newUnitDefLiving->speed);
+		}
+		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_ROTATION_SPEED)) {
+			newUnitDefLiving->rotationSpeed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_ROTATION_SPEED, newUnitDefLiving->rotationSpeed);
+		}
+		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_WORK_RATE)) {
+			newUnitDefLiving->workRate = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_WORK_RATE, newUnitDefLiving->workRate);
+		}
+		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_ACCURACY_PERCENT)) {
+			newUnitDefLiving->accuracyPercent = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_ACCURACY_PERCENT, (long int)newUnitDefLiving->accuracyPercent);
+		}
+		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_DISPLAYED_ARMOR)) {
+			newUnitDefLiving->displayedArmor = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_DISPLAYED_ARMOR, (long int)newUnitDefLiving->displayedArmor);
+		}
+		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_DISPLAYED_ATTACK)) {
+			newUnitDefLiving->displayedAttack = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_DISPLAYED_ATTACK, (long int)newUnitDefLiving->displayedAttack);
+		}
+		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_VISIBLE_IN_FOG)) {
+			newUnitDefLiving->visibleInFog = (char)trigger->GetParameterValue(CR_TRIGGERS::KW_VISIBLE_IN_FOG, (long int)newUnitDefLiving->visibleInFog);
+			if (newUnitDefLiving->visibleInFog != 0) {
+				newUnitDefLiving->visibleInFog = 1; // just in case.
+			}
+		}
+
+		// Now associate new unit definition to our unit
+		unitLiving->ptrStructDefUnit = (ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *)newUnitDefLiving;
+		unitLiving->hasDedicatedUnitDef = 1; // don't forget to set this flag so that ROR correctly frees everything later.
+		// Force use provided name (if provided)
+		if (*newUnitName != 0) {
+			if (newUnitDefLiving->ptrUnitName) {
+				AOEFree(newUnitDefLiving->ptrUnitName);
+			}
+			char *newAllocatedName = (char *)AOEAlloc(0x30);
+			strcpy_s(newAllocatedName, 0x30, newUnitName);
+			newUnitDefLiving->ptrUnitName = newAllocatedName;
+			newUnitDefLiving->languageDLLID_Name = 0;
+			newUnitDefLiving->languageDLLID_Creation = 0;
+		}
+
+		// Free previous unitdef if unit already had hasDedicatedUnitDef==1
+		if (unitDefToFree) {
+			AOEFree(unitDefToFree);
+		}
 	}
 
 	// A big one: create unit def (actually, duplicate + customize)
@@ -5494,6 +5612,13 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *newUnitDef_base = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE*) player->ptrStructDefUnitTable[newUnitDefId];
 		assert(newUnitDef_base && newUnitDef_base->IsCheckSumValidForAUnitClass());
 		if (!newUnitDef_base || !newUnitDef_base->IsCheckSumValidForAUnitClass()) { return; }
+
+		if (newUnitDef_base->DerivesFromLiving()) {
+			// TO DO: we CAN support it, but for ALL unit types we should add the new unitDef to ALL players so that unitDefId always keep synchronized.
+			traceMessageHandler.WriteMessage("ERROR: 'add_unit_def' triggers do not support living units and buildings.");
+			return;
+		}
+
 		// We manipulate here objects from different possible classes. Make sure we work on members that DO exist in our object instance !
 		bool isType50OrChild = newUnitDef_base->DerivesFromType50();
 		bool isFlagOrChild = newUnitDef_base->DerivesFromFlag();
