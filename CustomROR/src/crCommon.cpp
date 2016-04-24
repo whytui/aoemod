@@ -1987,7 +1987,9 @@ bool CreateCmd_RightClick(ROR_STRUCTURES_10C::STRUCT_UNIT **actorUnitsList, long
 	if (!global || !global->IsCheckSumValid()) {
 		return false;
 	}
-	const long int structSize = 0x20; // 0x1C + 4*1 (1 actor unit)
+	assert(actorUnitsCount > 0);
+	if (actorUnitsCount <= 0) { return false; }
+	const long int structSize = 0x1C + (4 * actorUnitsCount);
 	ROR_STRUCTURES_10C::COMMAND_RIGHT_CLICK *cmd = (ROR_STRUCTURES_10C::COMMAND_RIGHT_CLICK *)AOEAllocZeroMemory(1, structSize);
 	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_RIGHT_CLICK;
 	assert(cmd->IsCmdIdValid());
