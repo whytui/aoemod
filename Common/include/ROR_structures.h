@@ -825,9 +825,11 @@ namespace ROR_STRUCTURES_10C
 			if (posY_low >= this->mapArraySizeY) { posY_low = mapArraySizeY - 1; }
 			if (posY_high >= this->mapArraySizeY) { posY_high = mapArraySizeY - 1; }
 			unsigned char *currentRow = this->ptrRowsPtr[posX];
+			if (posY_low >= mapArraySizeY - 1) { return true; }
 			if ((currentRow[posY_low] == CST_MAP_BUILD_LIKE_DISABLED) || (currentRow[posY_low + 1] == CST_MAP_BUILD_LIKE_DISABLED)) {
 				return true;
 			}
+			if (posY_high <= 0) { return true; }
 			if ((currentRow[posY_high] == CST_MAP_BUILD_LIKE_DISABLED) || (currentRow[posY_high - 1] == CST_MAP_BUILD_LIKE_DISABLED)) {
 				return true;
 			}
@@ -847,8 +849,10 @@ namespace ROR_STRUCTURES_10C
 			if (posX_high >= this->mapArraySizeX) { posX_high = mapArraySizeX - 1; }
 			unsigned char *currentRow = this->ptrRowsPtr[posX_low];
 			if (this->ptrRowsPtr[posX_low][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
+			if (posX_low >= mapArraySizeX - 1) { return true; }
 			if (this->ptrRowsPtr[posX_low + 1][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
 			if (this->ptrRowsPtr[posX_high][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
+			if (posX_high <= 0) { return true; }
 			if (this->ptrRowsPtr[posX_high - 1][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
 			return false;
 		}
