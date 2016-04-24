@@ -5592,86 +5592,136 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 
 	// A big one: create unit def (actually, duplicate + customize)
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_ADD_UNIT_DEF) {
-		actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -1);
+		//actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -1);
 		long int sourceUnitDefId = trigger->GetParameterValue(CR_TRIGGERS::KW_FROM_UNIT_DEF_ID, -2);
 		char *newUnitName = trigger->GetParameterValue(CR_TRIGGERS::KW_UNIT_NAME, "");
-		if ((sourceUnitDefId < 0) || (actionPlayerId < 0) || (actionPlayerId >= global->playerTotalCount)) {
-			return;
-		}
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
-		if (!player || !player->IsCheckSumValid()) { return; }
-		if (sourceUnitDefId >= player->structDefUnitArraySize) { return; }
-		ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *sourceUnitDef = player->ptrStructDefUnitTable[sourceUnitDefId];
-		if (!sourceUnitDef || !sourceUnitDef->IsCheckSumValid()) { return; }
-
-		// OK let's go, create new unitDef:
-		short int newUnitDefId = this->DuplicateUnitDefinitionForPlayer(player, (short int)sourceUnitDefId, newUnitName);
-		if (newUnitDefId < 0) { return; } // Failed
-
-		ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *newUnitDef = player->ptrStructDefUnitTable[newUnitDefId];
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *newUnitDef_base = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE*) player->ptrStructDefUnitTable[newUnitDefId];
-		assert(newUnitDef_base && newUnitDef_base->IsCheckSumValidForAUnitClass());
-		if (!newUnitDef_base || !newUnitDef_base->IsCheckSumValidForAUnitClass()) { return; }
-
-		if (newUnitDef_base->DerivesFromLiving()) {
-			// TO DO: we CAN support it, but for ALL unit types we should add the new unitDef to ALL players so that unitDefId always keep synchronized.
-			traceMessageHandler.WriteMessage("ERROR: 'add_unit_def' triggers do not support living units and buildings.");
+		if ((sourceUnitDefId < 0) /*|| (actionPlayerId < 0) || (actionPlayerId >= global->playerTotalCount)*/) {
 			return;
 		}
 
-		// We manipulate here objects from different possible classes. Make sure we work on members that DO exist in our object instance !
-		bool isType50OrChild = newUnitDef_base->DerivesFromType50();
-		bool isFlagOrChild = newUnitDef_base->DerivesFromFlag();
-		bool isDeadFishOrChild = newUnitDef_base->DerivesFromDead_fish();
-		bool isBirdOrChild = newUnitDef_base->DerivesFromBird();
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *newUnitDef_flag = NULL;
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH *newUnitDef_dead_fish = NULL;
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *newUnitDef_bird = NULL;
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *newUnitDef_type50 = NULL;
-		if (isFlagOrChild) { newUnitDef_flag = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *)newUnitDef_base; }
-		if (isDeadFishOrChild) { newUnitDef_dead_fish = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH *)newUnitDef_base; }
-		if (isBirdOrChild) { newUnitDef_bird = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *)newUnitDef_base; }
-		if (isType50OrChild) { newUnitDef_type50 = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)newUnitDef_base; }
-
-		// Apply supplied properties to new unit def.
-		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_TOTAL_HP)) {
-			newUnitDef_base->totalHitPoints = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_TOTAL_HP, 1);
-		}
-		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_RANGE)) {
-			float suppliedRange = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_RANGE, -1);
-			if (suppliedRange >= 0) {
-				newUnitDef_base->lineOfSight = suppliedRange;
-				if (isType50OrChild && newUnitDef_type50) {
-					float upgradeRelatedRange = newUnitDef_type50->maxRange - newUnitDef_type50->displayedRange;
-					if (upgradeRelatedRange < 0) { upgradeRelatedRange = 0; }
-					newUnitDef_type50->displayedRange = suppliedRange - upgradeRelatedRange; // the figure before "+". For a "7+1" range, this corresponds to 7.
-					newUnitDef_type50->maxRange = suppliedRange; // Total range. For a "7+1" range, this corresponds to 8.
+		// A first loop to run checks
+		int commonArraySize = -1;
+		for (int loopPlayerId = 0; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(loopPlayerId);
+			if (!player || !player->IsCheckSumValid()) { return; }
+			// Make sure that for all players source UnitDefId exists
+			if (sourceUnitDefId >= player->structDefUnitArraySize) { return; }
+			// Make sure source unitDef exists for all players (remember: it can exist and be disabled, like gaia units for other civs)
+			ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *sourceUnitDef = player->ptrStructDefUnitTable[sourceUnitDefId];
+			if (!sourceUnitDef || !sourceUnitDef->IsCheckSumValid()) { return; }
+			// Make sure maximum unitDefId is the same for ally players (synchronized)
+			if (commonArraySize == -1) {
+				commonArraySize = player->structDefUnitArraySize; // first loop: initialize.
+			} else {
+				// after first loop: make sure we always get the same value
+				if (player->structDefUnitArraySize != commonArraySize) {
+					traceMessageHandler.WriteMessage("Player unit definitions are not synchronized for all players, cannot add.");
+					return;
 				}
 			}
 		}
-		
-		if (isFlagOrChild && newUnitDef_flag && (trigger->IsParameterDefined(CR_TRIGGERS::KW_SPEED))) {
-			newUnitDef_flag->speed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_SPEED, newUnitDef_flag->speed);
+		assert(commonArraySize >= 0);
+		if (commonArraySize < 0) {
+			traceMessageHandler.WriteMessage("ERROR: commonArraySize<0. How is this possible ?");
+			return;
 		}
-		if (isDeadFishOrChild && newUnitDef_dead_fish && (trigger->IsParameterDefined(CR_TRIGGERS::KW_ROTATION_SPEED))) {
-			newUnitDef_dead_fish->rotationSpeed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_ROTATION_SPEED, newUnitDef_dead_fish->rotationSpeed);
-		}
-		if (isBirdOrChild && newUnitDef_bird && (trigger->IsParameterDefined(CR_TRIGGERS::KW_WORK_RATE))) {
-			newUnitDef_bird->workRate = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_WORK_RATE, newUnitDef_bird->workRate);
-		}
-		if (isType50OrChild && newUnitDef_type50 && (trigger->IsParameterDefined(CR_TRIGGERS::KW_ACCURACY_PERCENT))) {
-			newUnitDef_type50->accuracyPercent = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_ACCURACY_PERCENT, (long int)newUnitDef_type50->accuracyPercent);
-		}
-		if (isType50OrChild && newUnitDef_type50 && (trigger->IsParameterDefined(CR_TRIGGERS::KW_DISPLAYED_ARMOR))) {
-			newUnitDef_type50->displayedArmor = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_DISPLAYED_ARMOR, (long int)newUnitDef_type50->displayedArmor);
-		}
-		if (isType50OrChild && newUnitDef_type50 && (trigger->IsParameterDefined(CR_TRIGGERS::KW_DISPLAYED_ATTACK))) {
-			newUnitDef_type50->displayedAttack = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_DISPLAYED_ATTACK, (long int)newUnitDef_type50->displayedAttack);
-		}
-		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_VISIBLE_IN_FOG)) {
-			newUnitDef_base->visibleInFog = (char)trigger->GetParameterValue(CR_TRIGGERS::KW_VISIBLE_IN_FOG, (long int)newUnitDef_base->visibleInFog);
-			if (newUnitDef_base->visibleInFog != 0) {
-				newUnitDef_base->visibleInFog = 1; // just in case.
+		int newUnitDefId = commonArraySize;
+
+		// A second loop to do the job
+		for (int loopPlayerId = 0; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(loopPlayerId);
+			assert(player && player->IsCheckSumValid()); // should not happen, already checked
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *sourceUnitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE*) player->ptrStructDefUnitTable[sourceUnitDefId];
+			assert(sourceUnitDefBase && sourceUnitDefBase->IsCheckSumValidForAUnitClass()); // should not happen, already checked
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *newUnitDefBase = CopyUnitDefToNewUsingGoodClass(sourceUnitDefBase);
+			if (!newUnitDefBase) {
+				traceMessageHandler.WriteMessage("ERROR: Failed to copy unit definition");
+				return;
+			}
+			assert(newUnitDefId == player->structDefUnitArraySize); // Note: structDefUnitArraySize has not been updated yet
+			assert(newUnitDefBase && newUnitDefBase->IsCheckSumValidForAUnitClass());
+			assert(newUnitDefBase->unitType == sourceUnitDefBase->unitType);
+			// Add in player unit definition table
+			short int tmpAddedUnitDefId = AddUnitDefToPlayer(player, newUnitDefBase);
+			assert(newUnitDefId == player->structDefUnitArraySize - 1); // Note: structDefUnitArraySize has been updated now
+			if (tmpAddedUnitDefId == -1) {
+				assert(false);
+				traceMessageHandler.WriteMessage("An error occurred while adding new unit definition");
+				return;
+			}
+			if (newUnitDefId != tmpAddedUnitDefId) {
+				assert(false);
+				traceMessageHandler.WriteMessage("Inconsistent unitDefID while adding new unit definition");
+				return;
+			}
+
+			// Force use provided name (if provided)
+			if (*newUnitName != 0) {
+				if (newUnitDefBase->ptrUnitName) {
+					AOEFree(newUnitDefBase->ptrUnitName);
+				}
+				char *newAllocatedName = (char *)AOEAlloc(0x30);
+				strcpy_s(newAllocatedName, 0x30, newUnitName);
+				newUnitDefBase->ptrUnitName = newAllocatedName;
+				newUnitDefBase->languageDLLID_Name = 0;
+				newUnitDefBase->languageDLLID_Creation = 0;
+			}
+
+			// Apply custom modifications from trigger data
+			// We manipulate here objects from different possible classes. Make sure we work on members that DO exist in our object instance !
+			bool isType50OrChild = newUnitDefBase->DerivesFromType50();
+			bool isFlagOrChild = newUnitDefBase->DerivesFromFlag();
+			bool isDeadFishOrChild = newUnitDefBase->DerivesFromDead_fish();
+			bool isBirdOrChild = newUnitDefBase->DerivesFromBird();
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *newUnitDef_flag = NULL;
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH *newUnitDef_dead_fish = NULL;
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *newUnitDef_bird = NULL;
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *newUnitDef_type50 = NULL;
+			if (isFlagOrChild) { newUnitDef_flag = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *)newUnitDefBase; }
+			if (isDeadFishOrChild) { newUnitDef_dead_fish = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH *)newUnitDefBase; }
+			if (isBirdOrChild) { newUnitDef_bird = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *)newUnitDefBase; }
+			if (isType50OrChild) { newUnitDef_type50 = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)newUnitDefBase; }
+
+			// Apply supplied properties to new unit def.
+			if (trigger->IsParameterDefined(CR_TRIGGERS::KW_TOTAL_HP)) {
+				newUnitDefBase->totalHitPoints = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_TOTAL_HP, 1);
+			}
+			if (trigger->IsParameterDefined(CR_TRIGGERS::KW_RANGE)) {
+				float suppliedRange = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_RANGE, -1);
+				if (suppliedRange >= 0) {
+					newUnitDefBase->lineOfSight = suppliedRange;
+					if (isType50OrChild && newUnitDef_type50) {
+						float upgradeRelatedRange = newUnitDef_type50->maxRange - newUnitDef_type50->displayedRange;
+						if (upgradeRelatedRange < 0) { upgradeRelatedRange = 0; }
+						newUnitDef_type50->displayedRange = suppliedRange - upgradeRelatedRange; // the figure before "+". For a "7+1" range, this corresponds to 7.
+						newUnitDef_type50->maxRange = suppliedRange; // Total range. For a "7+1" range, this corresponds to 8.
+					}
+				}
+			}
+
+			if (isFlagOrChild && newUnitDef_flag && (trigger->IsParameterDefined(CR_TRIGGERS::KW_SPEED))) {
+				newUnitDef_flag->speed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_SPEED, newUnitDef_flag->speed);
+			}
+			if (isDeadFishOrChild && newUnitDef_dead_fish && (trigger->IsParameterDefined(CR_TRIGGERS::KW_ROTATION_SPEED))) {
+				newUnitDef_dead_fish->rotationSpeed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_ROTATION_SPEED, newUnitDef_dead_fish->rotationSpeed);
+			}
+			if (isBirdOrChild && newUnitDef_bird && (trigger->IsParameterDefined(CR_TRIGGERS::KW_WORK_RATE))) {
+				newUnitDef_bird->workRate = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_WORK_RATE, newUnitDef_bird->workRate);
+			}
+			if (isType50OrChild && newUnitDef_type50 && (trigger->IsParameterDefined(CR_TRIGGERS::KW_ACCURACY_PERCENT))) {
+				newUnitDef_type50->accuracyPercent = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_ACCURACY_PERCENT, (long int)newUnitDef_type50->accuracyPercent);
+			}
+			if (isType50OrChild && newUnitDef_type50 && (trigger->IsParameterDefined(CR_TRIGGERS::KW_DISPLAYED_ARMOR))) {
+				newUnitDef_type50->displayedArmor = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_DISPLAYED_ARMOR, (long int)newUnitDef_type50->displayedArmor);
+			}
+			if (isType50OrChild && newUnitDef_type50 && (trigger->IsParameterDefined(CR_TRIGGERS::KW_DISPLAYED_ATTACK))) {
+				newUnitDef_type50->displayedAttack = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_DISPLAYED_ATTACK, (long int)newUnitDef_type50->displayedAttack);
+			}
+			if (trigger->IsParameterDefined(CR_TRIGGERS::KW_VISIBLE_IN_FOG)) {
+				newUnitDefBase->visibleInFog = (char)trigger->GetParameterValue(CR_TRIGGERS::KW_VISIBLE_IN_FOG, (long int)newUnitDefBase->visibleInFog);
+				if (newUnitDefBase->visibleInFog != 0) {
+					newUnitDefBase->visibleInFog = 1; // just in case.
+				}
 			}
 		}
 
@@ -5679,8 +5729,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		CR_TRIGGERS::crTrigger *currentTrg = this->crInfo->triggerSet->IteratorFirst();
 		while (currentTrg) {
 			// Search for enabled triggers for same player, that want to spawn a unit...
-			if (currentTrg->enabled && (currentTrg->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_ADD_UNIT_INSTANCE) &&
-				currentTrg->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -2) == actionPlayerId) {
+			if (currentTrg->enabled && (currentTrg->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_ADD_UNIT_INSTANCE)) {
 				// Find if the spawn unit action uses "unit_name" as reference
 				char *otherTrgUnitName = currentTrg->GetParameterValue(CR_TRIGGERS::KW_UNIT_NAME, "");
 				if (strcmp(newUnitName, otherTrgUnitName) == 0) {

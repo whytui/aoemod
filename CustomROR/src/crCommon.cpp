@@ -2168,6 +2168,83 @@ bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_C
 }
 
 
+// Create a new unitDef, copied for provided one, using actual derived class.
+// Returns a STRUCT_UNITDEF_BASE, but it can be any derived class (living, building, etc)
+ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *CopyUnitDefToNewUsingGoodClass(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *existingUnitDef) {
+	if (!existingUnitDef || !existingUnitDef->IsCheckSumValidForAUnitClass()) {
+		return NULL;
+	}
+	switch (existingUnitDef->unitType) {
+	case GLOBAL_UNIT_TYPES::GUT_BIRD:
+		return CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD*)existingUnitDef);
+		break;
+	case GLOBAL_UNIT_TYPES::GUT_BUILDING:
+		return CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*)existingUnitDef);
+		break;
+	case GLOBAL_UNIT_TYPES::GUT_DEAD_UNITS:
+		return CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH*)existingUnitDef);
+		break;
+	case GLOBAL_UNIT_TYPES::GUT_DOPPLEGANGER:
+		return CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_DOPPLEGANGER>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_DOPPLEGANGER*)existingUnitDef);
+		break;
+	case GLOBAL_UNIT_TYPES::GUT_EYE_CANDY:
+		return CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE*)existingUnitDef);
+		break;
+	case GLOBAL_UNIT_TYPES::GUT_FLAGS:
+		return CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG*)existingUnitDef);
+		break;
+	case GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT:
+		return CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING*)existingUnitDef);
+		break;
+	case GLOBAL_UNIT_TYPES::GUT_PROJECTILE:
+		return CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE*)existingUnitDef);
+		break;
+	case GLOBAL_UNIT_TYPES::GUT_TREE:
+		return CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_TREE>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_TREE*)existingUnitDef);
+		break;
+	case GLOBAL_UNIT_TYPES::GUT_TYPE50:
+		return CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50*)existingUnitDef);
+		break;
+	default:
+		traceMessageHandler.WriteMessage("Unhandled unit definition class.");
+		return NULL;
+	}
+}
+
+
+// Extends a player's unitDef table to add a new one (unitDef).
+// unitDef's DAT_ID1 and DAT_ID2 are modified with new ID.
+// Returns -1 on failure, new unitDefId on success.
+short int AddUnitDefToPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef) {
+	if (!player || !player->IsCheckSumValid() || !unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
+		return -1;
+	}
+
+	short int nbDef = player->structDefUnitArraySize + 1; // new number of unit definitions
+	short int newDATID = player->structDefUnitArraySize;
+	long int newSizeInBytes = nbDef * 4;
+	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **oldArray = player->ptrStructDefUnitTable;
+	// Run some checks
+	assert(oldArray != NULL);
+	if (oldArray == NULL) { return -1; }
+	assert(0 <= newDATID);
+
+	// Create new array
+	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **newArray = (ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **)AOEAlloc(newSizeInBytes);
+	if (newArray == NULL) { return -1; } // nothing allocated: return an error
+
+	// Copy old array into new (for all existing unitDefs => copy pointers)
+	memcpy(newArray, oldArray, newSizeInBytes);
+	AOEFree(oldArray); // old array is freed, we replace it by new (larger) one
+	player->ptrStructDefUnitTable = newArray;
+	player->structDefUnitArraySize = nbDef;
+	player->ptrStructDefUnitTable[newDATID] = (ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *)unitDef;
+	unitDef->DAT_ID1 = newDATID;
+	unitDef->DAT_ID2 = newDATID;
+	return newDATID;
+}
+
+
 // Writes text representing available tech tree (available technologies that have not been researched yet)
 std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return ""; }

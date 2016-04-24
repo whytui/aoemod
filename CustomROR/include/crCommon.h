@@ -521,8 +521,14 @@ bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_C
 
 // ---------- Unit def
 
-// A constructor for unitDef (building) that copies an existing one.
-//ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *CopyUnitDefToNew(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *existingUnitDef);
+// Create a new unitDef, copied for provided one, using actual derived class.
+// Returns a STRUCT_UNITDEF_BASE, but it can be any derived class (living, building, etc)
+ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *CopyUnitDefToNewUsingGoodClass(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *existingUnitDef);
+
+// Extends a player's unitDef table to add a new one (unitDef).
+// unitDef's DAT_ID1 and DAT_ID2 are modified with new ID.
+// Returns -1 on failure, new unitDefId on success.
+short int AddUnitDefToPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef);
 
 // A constructor for unitDef that copies an existing one.
 template<typename UnitDef> static UnitDef *CopyUnitDefToNew(UnitDef *existingUnitDef) {
