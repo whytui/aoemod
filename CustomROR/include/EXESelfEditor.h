@@ -5,6 +5,6 @@
 #include <AOE_offsets_10c.h>
 
 
-
 void WriteInMyMemory(unsigned long int address, char *buffer, int size);
+void WriteInMyMemory(unsigned long int address, unsigned char *buffer, int size);
 

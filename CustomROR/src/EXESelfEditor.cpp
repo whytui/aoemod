@@ -17,3 +17,7 @@ void WriteInMyMemory(unsigned long int address, char *buffer, int size) {
 	CloseHandle(hndl);
 }
 
+
+void WriteInMyMemory(unsigned long int address, unsigned char *buffer, int size) {
+	 WriteInMyMemory(address, (char*)buffer, size);
+}
