@@ -2,7 +2,7 @@
 #include <stdio.h>
 //#include <string>
 //#include <tchar.h>
-#include "BinarySeqDefinition.h"
+#include "../../AOE_DataPatcher/include/BinarySeqDefinition.h"
 
 #pragma once
 

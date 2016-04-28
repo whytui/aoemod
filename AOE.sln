@@ -6,18 +6,28 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CustomizeAOE", "CustomizeAOE\CustomizeAOE.vcxproj", "{DE98F891-CF3F-4499-8BA8-338FD601B12F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B} = {AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}
+		{06EE8482-2165-4F7B-A14A-A430664201E7} = {06EE8482-2165-4F7B-A14A-A430664201E7}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "customROR", "CustomROR\customROR.vcxproj", "{49FBBF1D-616F-4541-A3E4-241726119EF9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B} = {AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}
+		{06EE8482-2165-4F7B-A14A-A430664201E7} = {06EE8482-2165-4F7B-A14A-A430664201E7}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ROR_API", "ROR_API\ROR_API.vcxproj", "{4AED9C3D-68F9-4837-802E-11D4A836B3CE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B} = {AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTestAOE", "Test\UnitTestAOE.vcxproj", "{187B1609-5737-4233-8A4D-C725009E590D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AOE_Common", "Common\AOE_Common.vcxproj", "{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AOE_DataPatcher", "AOE_DataPatcher\AOE_DataPatcher.vcxproj", "{06EE8482-2165-4F7B-A14A-A430664201E7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B} = {AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +55,10 @@ Global
 		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}.Debug|Win32.Build.0 = Debug|Win32
 		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}.Release|Win32.ActiveCfg = Release|Win32
 		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}.Release|Win32.Build.0 = Release|Win32
+		{06EE8482-2165-4F7B-A14A-A430664201E7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{06EE8482-2165-4F7B-A14A-A430664201E7}.Debug|Win32.Build.0 = Debug|Win32
+		{06EE8482-2165-4F7B-A14A-A430664201E7}.Release|Win32.ActiveCfg = Release|Win32
+		{06EE8482-2165-4F7B-A14A-A430664201E7}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

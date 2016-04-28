@@ -11,9 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}</ProjectGuid>
-    <RootNamespace>Common</RootNamespace>
-    <ProjectName>AOE_Common</ProjectName>
+    <ProjectGuid>{06EE8482-2165-4F7B-A14A-A430664201E7}</ProjectGuid>
+    <RootNamespace>AOE_DataPatcher</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -52,6 +51,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(AOE_lib)\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -86,32 +86,12 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\AOE_const_functional.h" />
-    <ClInclude Include="include\AOE_const_global.h" />
-    <ClInclude Include="include\AOE_const_internal.h" />
-    <ClInclude Include="include\AOE_const_language.h" />
-    <ClInclude Include="include\AOE_empires_dat.h" />
-    <ClInclude Include="include\AOE_offsets_10c.h" />
-    <ClInclude Include="include\AOE_SN_numbers.h" />
-    <ClInclude Include="include\customResolution.h" />
-    <ClInclude Include="include\mystrings.h" />
-    <ClInclude Include="include\pointers.h" />
-    <ClInclude Include="include\ROR_API_assert.h" />
-    <ClInclude Include="include\ROR_API_pub.h" />
-    <ClInclude Include="include\ROR_commands.h" />
-    <ClInclude Include="include\ROR_structures.h" />
-    <ClInclude Include="include\ROR_struct_debugging.h" />
-    <ClInclude Include="include\ROR_struct_export.h" />
-    <ClInclude Include="include\ROR_struct_export_remote.h" />
-    <ClInclude Include="include\triggerDefinition.h" />
+    <ClInclude Include="include\AOE_binData.h" />
+    <ClInclude Include="include\BinarySeqDefinition.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ROR_struct_debugging.cpp" />
-    <ClCompile Include="src\ROR_struct_export.cpp" />
-    <ClCompile Include="src\triggerDefinition.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\AoEX.ico" />
+    <ClCompile Include="src\AOE_binData.cpp" />
+    <ClCompile Include="src\BinarySeqDefinition.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

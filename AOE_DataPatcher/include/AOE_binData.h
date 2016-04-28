@@ -1,7 +1,7 @@
+#pragma once
 #include "AOE_const_global.h"
 #include "BinarySeqDefinition.h"
 
-#pragma once
 
 // Always use consecutive values for iterators
 // Example: for (BINSEQ_CATEGORIES category = BINSEQ_CATEGORIES(BC_NONE + 1); category < BC_COUNT; category = BINSEQ_CATEGORIES(category + 1)) {...}

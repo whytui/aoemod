@@ -15,6 +15,9 @@
 #include "crTriggerSet.h"
 #include "strategy.h"
 
+#include "EXESelfEditor.h"
+#include "crPatcher.h"
+
 #pragma once
 
 #define CRCMD_TEXT_BUFFER_SIZE 256

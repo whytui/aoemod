@@ -3,7 +3,7 @@
 #include "Version.h"
 #include "mystrings.h"
 #include "EmpiresX_API.h"
-#include "AOE_binData.h"
+#include "../../AOE_DataPatcher/include/AOE_binData.h"
 #include "UI_infoObjects.h"
 
 #pragma warning(push)

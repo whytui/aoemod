@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AOE_binData.h"
+#include "../../AOE_DataPatcher/include/AOE_binData.h"
 #include "EmpiresX_API.h"
 
 #pragma warning(push)

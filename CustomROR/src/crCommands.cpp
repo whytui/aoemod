@@ -708,67 +708,19 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 #ifdef _DEBUG
 
 	// BETA - TEST
-	if (!_strnicmp(command, "free", 5)) {
+	if (!_strnicmp(command, "test", 5)) {
 		assert(gameSettings != NULL);
 		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = gameSettings->ptrGlobalStruct;
 		//short int humanPlayerId = global->humanPlayerId;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 		assert(humanPlayer != NULL);
-		if (humanPlayer->selectedUnitCount > 0) {
-			ROR_STRUCTURES_10C::STRUCT_UNIT **selectedUnits = this->crInfo->GetRelevantSelectedUnitsPointer(humanPlayer);
-			assert(selectedUnits != NULL);
-			ROR_STRUCTURES_10C::STRUCT_UNIT *selectedUnit = selectedUnits[0];
-
-			ROR_STRUCTURES_10C::STRUCT_PLAYER **playersArray = global->GetPlayerStructPtrTable();
-			assert(playersArray != NULL);
-			for (int iPlayerId = 1; iPlayerId < global->playerTotalCount; iPlayerId++) {
-				ROR_STRUCTURES_10C::STRUCT_PLAYER *currentPlayer = playersArray[iPlayerId];
-				assert(currentPlayer != NULL);
-				if (currentPlayer->isComputerControlled && currentPlayer->IsAIActive(this->crInfo->hasManageAIFeatureON) &&
-					(currentPlayer->GetAIStruct() != NULL)) {
-					ROR_STRUCTURES_10C::STRUCT_AI *ai = currentPlayer->GetAIStruct();
-					ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = &ai->structInfAI;
-					for (long index = 0; index < infAI->creatableAndGatherableUnits.arraySize; index++) {
-						long int unitId = infAI->creatableAndGatherableUnits.unitIdArray[index];
-						if (unitId == selectedUnit->unitInstanceId) {
-							infAI->creatableAndGatherableUnits.unitIdArray[index] = 0;
-						}
-					}
-					for (long index = 0; index < infAI->playerCreatableUnits.usedElements; index++) {
-						long int unitId = infAI->playerCreatableUnits.unitIdArray[index];
-						if (unitId == selectedUnit->unitInstanceId) {
-							infAI->playerCreatableUnits.unitIdArray[index] = 0;
-						}
-					}
-				}
-
-			}
-		}
+		char bufasm[] = {1,2,3, 4};
+		//WriteInMyMemory(0x45df32, bufasm, 4);
 	}
 
 	char *c = "Game Settings Screen";
 	//char *c = "MP Setup Screen";
 	long int testvar;
-	if (!_strnicmp(command, "new", 4)) {
-		float x, y;
-		unsigned long int res = 0;
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *p = GetControlledPlayerStruct_Settings();
-		_asm {
-			MOV ECX, gameSettings
-			MOV EAX, 0x419B70
-			CALL EAX
-			MOV p, EAX
-		}
-		x = p->screenPositionX;
-		y = p->screenPositionY;
-		ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *def = p->ptrStructDefUnitTable[CST_UNITID_FORAGER];
-		res = GetErrorForUnitCreationAtLocation(p, def, y, x, false, true, false, true, true);
-		sprintf_s(outputBuffer, "Placement Error=%d", res);
-		if (!res) {
-			res = (unsigned long int) CreateUnit(p, CST_UNITID_EXPLORER, y, x, 0);
-		}
-	}
-
 	if (!_strnicmp(command, "test2", 6)) {
 		_asm {
 			// To show Game Settings Screen (need to catch onclick on ok/cancel to avoid crash and do custom code) - TO DO

@@ -4,8 +4,8 @@
 #include <string>
 #include <assert.h>
 #include <AOE_offsets_10c.h>
-#include "../../CustomizeAOE/include/AOE_binData.h"
-#include "../../CustomizeAOE/include/BinarySeqDefinition.h"
+#include "../../AOE_DataPatcher/include/AOE_binData.h"
+#include "../../AOE_DataPatcher/include/BinarySeqDefinition.h"
 #include "EXESelfEditor.h"
 
 /*

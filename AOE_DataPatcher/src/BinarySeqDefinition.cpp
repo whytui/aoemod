@@ -1,4 +1,4 @@
-#include "BinarySeqDefinition.h"
+#include "../include/BinarySeqDefinition.h"
 
 
 BinarySeqDefinition::BinarySeqDefinition()

@@ -3,7 +3,7 @@
 #include <string>
 #include "AOE_const_global.h"
 #include "FileEditor.h"
-#include "AOE_binData.h"
+#include "../../AOE_DataPatcher/include/AOE_binData.h"
 
 #pragma once
 

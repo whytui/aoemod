@@ -1,4 +1,4 @@
-#include "AOE_binData.h"
+#include "../include/AOE_binData.h"
 
 // "Children" macros to increment our internal counter (i)
 #define NEXT_INITSEQ_2_NOVAR(binSeqDef, name, desc, offset, seq0, seq1, fmeaning0, fmeaning1) INITSEQ_2_NOVAR(binSeqDef, name, desc, offset, seq0, seq1, fmeaning0, fmeaning1); i++;
