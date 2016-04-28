@@ -1097,6 +1097,8 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameSettings() {
 		return false;
 	}
 
+	// Do custom stuff on "settings" here...
+
 	return true;
 }
 
@@ -1121,7 +1123,8 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
 	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid()) { return false; }
-	// Check game type
+	
+	// Check game type : allow only random map & deathmatch
 	if (settings->isCampaign || settings->isSavedGame || settings->isScenario) {
 		return false;
 	}
@@ -1156,22 +1159,26 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (player && player->IsCheckSumValid() && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
 			ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
-			// Remark: "disable_dislike_human_player" change make that AI players don't change diplomacy when attacked unless you really are enemy.
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNAllowDiplomacyChangeOnAllyAttack, 0); // a crucial one !
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNMinimumPeaceLikeLevel, 85);
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNAttackGroupGatherSpacing, 4);
-			this->SetSNNumberInStrategyAndTacAI(ai, SNRequiredFirstBuilding, isDM ? 0 : 4);
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNUpgradeToToolAgeASAP, 1);
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNUpgradeToBronzeAgeASAP, 0);
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNUpgradeToIronAgeASAP, 0);
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNAttackWinningPlayer, 1);
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNCoopShareInformation, 1);
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNTrackPlayerHistory, 1); // Anyway, it doesnt seem to be fully implemented.
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNAutoBuildDocks, 1);
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNAutoBuildFishingBoats, 1);
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNAutoBuildTransports, 1);
-			//this->SetSNNumberInStrategyAndTacAI(ai, SNAutoBuildWarships, 1);
 			
+			if (isDM) {
+				// Deathmatch
+				for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
+					if (this->crInfo->configInfo.defaultPerNumbers_DM_isSet[i]) {
+						this->SetSNNumberInStrategyAndTacAI(ai, (AOE_CONST_FUNC::SN_NUMBERS)i,
+							this->crInfo->configInfo.defaultPerNumbers_DM[i]);
+					}
+				}
+			} else {
+				// Random map
+				for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
+					if (this->crInfo->configInfo.defaultPerNumbers_RM_isSet[i]) {
+						this->SetSNNumberInStrategyAndTacAI(ai, (AOE_CONST_FUNC::SN_NUMBERS)i,
+							this->crInfo->configInfo.defaultPerNumbers_RM[i]);
+					}
+				}
+			}
+
+			// Manage the 4 "hardest difficulty" SN numbers
 			if (settings->difficultyLevelChoice == 0) {
 				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialFood,
 					isDM ? this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD] :
@@ -1185,6 +1192,12 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialGold,
 					isDM ? this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD] :
 					this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+			} else {
+				// Not hardest : disable the bonus for AI
+				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialFood, 0);
+				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialWood, 0);
+				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialStone, 0);
+				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialGold, 0);
 			}
 		}
 	}

@@ -156,18 +156,20 @@
 	choice=2 corresponds to Medium
 	choice=3 corresponds to Large
 	-->
-	<initialResources gameType="RM" choice="0" food="200" wood="200" stone="200" gold="0"></initialResources><!--"default": default 200/200/150/0-->
+	<initialResources gameType="RM" choice="0" food="200" wood="200" stone="150" gold="0"></initialResources><!--"default": default 200/200/150/0-->
 	<initialResources gameType="RM" choice="1" food="200" wood="200" stone="100" gold="0"></initialResources><!--small: default 200/200/100/0-->
 	<initialResources gameType="RM" choice="2" food="500" wood="500" stone="250" gold="0"></initialResources><!--medium: default 500/500/250/0-->
 	<initialResources gameType="RM" choice="3" food="1000" wood="1000" stone="750" gold="0"></initialResources><!--large: default 1000/1000/750/0-->
 	<initialResources gameType="DM" food="20000" wood="20000" stone="5000" gold="10000"></initialResources><!--deathmatch: default 20000/20000/5000/10000-->
 	<!-- InitialResourceAIBonus: additional resource amount for AI players in hardest difficulty.
 	GameType=DM (deathmatch) or RM (random map). -->
-	<initialResourceAIBonus gameType="RM" food="200" wood="200" stone="200" gold="200"></initialResourceAIBonus>
-	<initialResourceAIBonus gameType="DM" food="2000" wood="2000" stone="2000" gold="2000"></initialResourceAIBonus>
+	<initialResourceAIBonus gameType="RM" food="200" wood="200" stone="150" gold="250"></initialResourceAIBonus>
+	<initialResourceAIBonus gameType="DM" food="2000" wood="2000" stone="500" gold="2000"></initialResourceAIBonus>
 	<!-- per_number: force some values for SN numbers to random maps/deathmatches 
 	Warning: do not force too many values unless you are sure of its impact on the game.
 	Some values are computed dynamically at game init and will be lost if you force them ! -->
+	<!--<per_number gameType="RM" sn="215" value="0"></per_number>--><!--SNAllowDiplomacyChangeOnAllyAttack=0 to prevent unfortunate diplomacy changes-->
+	<!--<per_number gameType="DM" sn="215" value="0"></per_number>--><!--SNAllowDiplomacyChangeOnAllyAttack=0 to prevent unfortunate diplomacy changes-->
 	<per_number gameType="RM" sn="161" value="4"></per_number><!--SNRequiredFirstBuilding=4 in random map: build SP/granary first-->
 	<per_number gameType="DM" sn="161" value="0"></per_number><!--SNRequiredFirstBuilding=0 in random map: build quickly-->
 	<per_number gameType="DM" sn="220" value="3"></per_number><!--SNMaxFarms in deathmatch. Overwritten by maxFarmsInDeathMatch parameter-->
