@@ -64,6 +64,8 @@ bool FileEditor::CheckBufferConsistency(const unsigned char *buf, long offsetBeg
 }
 
 
+// Returns true if the sequence matches the file content.
+// If the sequence contains a variable, its value is allowed to differ from file content's variable value
 bool FileEditor::CheckSeqConsistency(BinarySeqDefinition *seq, int seqIndex) {
 	if (!seq->IsValid()) { return false; }
 	if (seq->GetVarType(seqIndex) == SVT_NO_VARIABLE) {
@@ -82,16 +84,6 @@ bool FileEditor::CheckSeqConsistency(BinarySeqDefinition *seq, int seqIndex) {
 }
 
 
-int FileEditor::CheckSeqConsistency(BinarySeqDefinition *seq) {
-	if (!seq->IsValid()) { return -1; }
-
-	for (int i = 0; i < seq->GetTotalSeqCount(); i++) {
-		if (CheckSeqConsistency(seq, i)) { return i; }
-	}
-	return -1;
-}
-
-
 int FileEditor::ReadBuffer(long fileOffset, void *destBuf, long size) {
 	fseek(this->workingFile, fileOffset, 0);
 	size_t readBytes = fread_s((void *)destBuf, size, 1, size, this->workingFile);
@@ -104,18 +96,17 @@ int FileEditor::WriteBuffer(long fileOffset, void *srcBuf, long size) {
 	return writtenBytes;
 }
 
-// See also WriteFromSequenceUsingValue
-int FileEditor::WriteFromSequence(BinarySeqDefinition *seq, int seqIndex) {
-	if (!seq->IsValid()) {
-		printf("The sequence is invalid");
-		return 0;
-	}
-	try {
-		return this->WriteBuffer(seq->GetSeqOffset(), seq->GetSequence(seqIndex), seq->GetSeqSize());
-	}
-	catch (...) { // TO DO : replace with something like InvalidSequenceIndexException ?
-		printf("The sequence or its index is invalid");
-		return 0;
-	}
+
+int FileEditor::ReadSeqVariable(BinarySeqDefinition *seq, int seqIndex, void *destBuf) {
+	size_t readBytes = this->ReadBuffer(seq->GetSeqOffset() + seq->GetVarRelativeOffset(seqIndex), destBuf, seq->GetVarSize(seqIndex));
+	return readBytes;
 }
 
+int FileEditor::WriteSeqVariable(BinarySeqDefinition *seq, int seqIndex, void *destBuf) {
+	size_t writtenBytes = this->WriteBuffer(seq->GetSeqOffset() + seq->GetVarRelativeOffset(seqIndex), destBuf, seq->GetVarSize(seqIndex));
+	return writtenBytes;
+}
+
+int FileEditor::WriteFromSequenceNoCheck(BinarySeqDefinition *seq, int seqIndex) {
+	return this->WriteBuffer(seq->GetSeqOffset(), seq->GetSequence(seqIndex), seq->GetSeqSize());
+}

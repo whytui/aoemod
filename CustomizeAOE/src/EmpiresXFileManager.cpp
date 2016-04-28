@@ -106,7 +106,7 @@ bool EmpiresXFileManager::CheckVersionBinarySequence() {
 	}
 
 	FileEditor *fe = new FileEditor(this->gameFile);
-	int res = fe->CheckSeqConsistency(versionSeq);
+	int res = fe->CheckSeqDefConsistency(versionSeq);
 	delete fe;
 	fe = NULL;
 	delete versionSeq;
@@ -263,7 +263,7 @@ int EmpiresXFileManager::GetFileSelection(BINSEQ_CATEGORIES category, int seqDef
 	}
 	BinarySeqDefSet *sds = this->gameDataDefinitions.GetSeqDefSet(this->GetFileVersion(), category);
 	FileEditor *fe = new FileEditor(this->gameFile);
-	int res = fe->CheckSeqConsistency(sds->GetBinSeqDefinition(seqDefIndex));
+	int res = fe->CheckSeqDefConsistency(sds->GetBinSeqDefinition(seqDefIndex));
 	delete fe;
 	fe = NULL;
 	return res;

@@ -88,10 +88,12 @@
   <ItemGroup>
     <ClInclude Include="include\AOE_binData.h" />
     <ClInclude Include="include\BinarySeqDefinition.h" />
+    <ClInclude Include="include\GenericDataEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AOE_binData.cpp" />
     <ClCompile Include="src\BinarySeqDefinition.cpp" />
+    <ClCompile Include="src\GenericDataEditor.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
