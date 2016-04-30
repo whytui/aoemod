@@ -111,6 +111,7 @@
     <ClInclude Include="include\crGameObjects.h" />
     <ClInclude Include="include\crMainInterface.h" />
     <ClInclude Include="include\crPatcher.h" />
+    <ClInclude Include="include\RORProcessEditor.h" />
     <ClInclude Include="include\crTrigger.h" />
     <ClInclude Include="include\crTriggerSet.h" />
     <ClInclude Include="include\CustomROR.h" />
@@ -140,6 +141,7 @@
     <ClCompile Include="src\EXESelfEditor.cpp" />
     <ClCompile Include="src\popups.cpp" />
     <ClCompile Include="src\interface.cpp" />
+    <ClCompile Include="src\RORProcessEditor.cpp" />
     <ClCompile Include="src\strategy.cpp" />
     <ClCompile Include="src\traceMessages.cpp" />
   </ItemGroup>

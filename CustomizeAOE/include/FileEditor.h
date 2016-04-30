@@ -34,7 +34,7 @@ public:
 
 	// Returns true if the sequence matches the file content.
 	// If the sequence contains a variable, its value is allowed to differ from file content's variable value
-	bool CheckSeqConsistency(BinarySeqDefinition *seq, int seqIndex);
+	bool CheckSeqConsistency(BinarySeqDefinition *seq, int seqIndex) override;
 
 
 	// Reads "size" bytes from file to buffer
@@ -49,12 +49,12 @@ public:
 	int WriteBuffer(long fileOffset, void *srcBuf, long size);
 
 
-	int ReadSeqVariable(BinarySeqDefinition *seq, int seqIndex, void *destBuf);
+	int ReadSeqVariable(BinarySeqDefinition *seq, int seqIndex, void *destBuf) override;
 
-	int WriteSeqVariable(BinarySeqDefinition *seq, int seqIndex, void *destBuf);
+	int WriteSeqVariable(BinarySeqDefinition *seq, int seqIndex, void *destBuf) override;
 
 protected:
-	int WriteFromSequenceNoCheck(BinarySeqDefinition *seq, int seqIndex);
+	int WriteFromSequenceNoCheck(BinarySeqDefinition *seq, int seqIndex) override;
 
 
 private:

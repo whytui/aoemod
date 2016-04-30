@@ -14,7 +14,7 @@ public:
 	// Returns true if the sequence matches the file content.
 	// If the sequence contains a variable, its value is allowed to differ from file content's variable value
 	virtual bool CheckSeqConsistency(BinarySeqDefinition *seq, int seqIndex) {
-		return false; // To be overriden by child classes
+		return false; // Force to be overriden by child classes
 	}
 
 

@@ -1,23 +1,25 @@
 #include "../include/EXESelfEditor.h"
 
 
-void WriteInMyMemory(unsigned long int address, char *buffer, int size) {
-	if (address == 0) { return; }
-	if (buffer == NULL) { return; }
-	if (size <= 0) { return; }
+// Returns true if successful.
+bool WriteInMyMemory(unsigned long int address, char *buffer, int size) {
+	if (address == 0) { return false; }
+	if (buffer == NULL) { return false; }
+	if (size <= 0) { return false; }
 
 	long int test = 0;
 	DWORD processId = GetCurrentProcessId();
-	if (processId == 0) { return; }
+	if (processId == 0) { return false; }
 	//HANDLE hndl = OpenProcess(PROCESS_ALL_ACCESS, false, processId);
 	HANDLE hndl = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_WRITE, false, processId);
 	SIZE_T sizeWritten;
 	BOOL success = WriteProcessMemory(hndl, (LPVOID)address, buffer, size, &sizeWritten);
 	DWORD e = GetLastError();
 	CloseHandle(hndl);
+	return (success != 0);
 }
 
-
-void WriteInMyMemory(unsigned long int address, unsigned char *buffer, int size) {
-	 WriteInMyMemory(address, (char*)buffer, size);
+// Returns true if successful.
+bool WriteInMyMemory(unsigned long int address, unsigned char *buffer, int size) {
+	 return WriteInMyMemory(address, (char*)buffer, size);
 }

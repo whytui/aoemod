@@ -716,7 +716,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		assert(humanPlayer != NULL);
 		char bufasm[] = {1,2,3, 4};
 		//WriteInMyMemory(0x45df32, bufasm, 4);
-		toto();
+		patcherExample();
 	}
 
 	char *c = "Game Settings Screen";
