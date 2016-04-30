@@ -6,6 +6,9 @@
 
 using namespace std;
 
+// ROR buildings always have "round" positions with a 0.5 precision (example 15.5 but never 15.45)
+// So this threshold system should not be necessary.
+#define REBUILD_FARMS_POSITION_THRESHOLD 0.25
 
 
 class UnitCustomInfo {
@@ -24,11 +27,12 @@ class FarmRebuildInfo {
 public:
 	FarmRebuildInfo();
 	long int playerId;
-	long int farmUnitId;
-	long int villagerUnitId;
+	long int villagerUnitId; // The villager we will use to trigger rebuild operation.
 	float posX;
 	float posY;
-	long int gameTime; // Insertion game time in ms, used to remove obsolete entries
+	long int gameTime; // Last update game time in ms
+	bool forceRebuild;
+	bool forceNotRebuild;
 };
 
 
@@ -52,18 +56,14 @@ public:
 	// Returns true if an element was found (and removed)
 	bool RemoveUnitCustomInfo(long int unitId);
 
-	// Removes obsolete farm info elements (insertion game time is old)
-	void FlushObsoleteFarmInfo(long int currentGameTime);
-	// Returns a FarmRebuildInfo pointer to matching element for given unitId.
+	// Returns a FarmRebuildInfo pointer to matching element for given position
 	// Returns NULL if not found.
-	// Asserts unitId > 0
-	FarmRebuildInfo *FindFarmRebuildInfo(long int farmUnitId);
-	// Returns (and adds if not existing) a FarmRebuildInfo pointer to matching element for given unitId.
-	// Asserts unitId > 0
-	FarmRebuildInfo *FindOrAddFarmRebuildInfo(long int farmUnitId);
+	FarmRebuildInfo *FindFarmRebuildInfo(float posX, float posY);
+	// Returns (and adds if not existing) a FarmRebuildInfo pointer for given position.
+	FarmRebuildInfo *FindOrAddFarmRebuildInfo(float posX, float posY);
 	// Remove a FarmRebuildInfo element from list
 	// Returns true if an element was found (and removed)
-	bool RemoveFarmRebuildInfo(long int farmUnitId);
+	bool RemoveFarmRebuildInfo(float posX, float posY);
 
 private:
 	vector<UnitCustomInfo*> unitCustomInfoList;

@@ -580,27 +580,10 @@ bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup(ROR_STRUCTURES_10C::S
 	if (!unit || !unit->IsCheckSumValid()) {
 		return false;
 	}
-	/*ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
-	if (!controlledPlayer || !controlledPlayer->IsCheckSumValid()) {
-		return false;
-	}
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefBase();
-	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
-		return false;
-	}
-	if (!unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid()) {
-		return false;
-	}
-	short int unitPlayerId = unit->ptrStructPlayer->playerId;
-	bool unitIsMine = (unitPlayerId == controlledPlayer->playerId);
-
-	if (unit->unitInstanceId < 0) {
-		return false; // Exclude temp units
-	}
-	*/
 	InGameUnitPropertiesPopup *popup = this->OpenCustomGamePopup<InGameUnitPropertiesPopup>(600, 500, true);
+	if (popup == NULL) { return false; }
 	popup->AddPopupContent(unit->unitInstanceId);
-	return (popup != NULL);
+	return true;
 }
 
 

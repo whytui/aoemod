@@ -1786,7 +1786,7 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 		}
 		if (i == 0x0F) { DLL_ID = 0x2809; } // Stupid inversion between palmyra and macedonia
 		if (i == 0x10) { DLL_ID = 0x2808; } // Stupid inversion between palmyra and macedonia
-		AddEntryInComboUsingDLLID(ptrCombo, i, DLL_ID);
+		AOE_AddEntryInComboUsingDLLID(ptrCombo, i, DLL_ID);
 	}
 
 	// Do we already have a global struct ? If Yes, check civ number in empires.dat (if not matching our config, it may crash)
@@ -1812,15 +1812,15 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	for (int civid = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civid <= this->crInfo.configInfo.civCount; civid++) {
 		CivilizationInfo *civInfo = this->crInfo.configInfo.GetCivInfo(civid);
 		if (civInfo) {
-			AddEntryInCombo(ptrCombo, civid, civInfo->GetCivName().c_str());
+			AOE_AddEntryInCombo(ptrCombo, civid, civInfo->GetCivName().c_str());
 		} else {
-			AddEntryInCombo(ptrCombo, civid, "Custom civilization");
+			AOE_AddEntryInCombo(ptrCombo, civid, "Custom civilization");
 		}
 	}
 	
 
 	// Add random entry
-	AddEntryInComboUsingDLLID(ptrCombo, this->crInfo.configInfo.civCount + 1, 0x280A);
+	AOE_AddEntryInComboUsingDLLID(ptrCombo, this->crInfo.configInfo.civCount + 1, 0x280A);
 }
 
 
@@ -1843,7 +1843,7 @@ void CustomRORInstance::ManageCivsInEditorCombo(REG_BACKUP *REG_values) {
 			}
 			if (i == 0x0F) { DLL_ID = 0x2809; } // Stupid inversion between palmyra and macedonia
 			if (i == 0x10) { DLL_ID = 0x2808; } // Stupid inversion between palmyra and macedonia
-			AddEntryInComboUsingDLLID(ptrCombo, 0, DLL_ID);
+			AOE_AddEntryInComboUsingDLLID(ptrCombo, 0, DLL_ID);
 		}
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
@@ -1851,9 +1851,9 @@ void CustomRORInstance::ManageCivsInEditorCombo(REG_BACKUP *REG_values) {
 	for (int civId = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civId <= this->crInfo.configInfo.civCount; civId++) {
 		CivilizationInfo *civInfo = this->crInfo.configInfo.GetCivInfo(civId);
 		if (civInfo) {
-			AddEntryInCombo(ptrCombo, 0, civInfo->GetCivName().c_str());
+			AOE_AddEntryInCombo(ptrCombo, 0, civInfo->GetCivName().c_str());
 		} else {
-			AddEntryInCombo(ptrCombo, 0, "Custom civilization");
+			AOE_AddEntryInCombo(ptrCombo, 0, "Custom civilization");
 		}
 	}
 

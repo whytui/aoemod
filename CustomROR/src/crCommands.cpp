@@ -3087,14 +3087,19 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 	// Auto rebuild farms
 	if (isInGame && unit && unit->IsCheckSumValid() && isBuilding && this->crInfo->configInfo.enableAutoRebuildFarms) {
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefBase();
+		// If this is a farm, and if I have "farm rebuild info" for this position (not in "not rebuild" mode), then trigger a rebuild.
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
-			this->crInfo->myGameObjects.FlushObsoleteFarmInfo(player->ptrGlobalStruct->currentGameTime);
-			FarmRebuildInfo *fInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->unitInstanceId);
-			if (fInfo && (fInfo->playerId == player->playerId) && IsUnitAvailableForPlayer(CST_UNITID_FARM, player)) {
+			FarmRebuildInfo *fInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
+			if (fInfo && (fInfo->playerId == player->playerId) && !fInfo->forceNotRebuild &&
+				(fInfo->villagerUnitId >= 0) && IsUnitAvailableForPlayer(CST_UNITID_FARM, player)) {
 				// As long as we use a game command, it is compatible with multiplayer.
 				CreateCmd_Build(fInfo->villagerUnitId, CST_UNITID_FARM, fInfo->posX, fInfo->posY);
+				fInfo->villagerUnitId = -1;
 			}
-			this->crInfo->myGameObjects.RemoveFarmRebuildInfo(unit->unitInstanceId);
+			if (fInfo && !fInfo->forceNotRebuild && !fInfo->forceRebuild) {
+				// Remove farm rebuild info when it was added automatically (none of the force rebuild/not rebuild are set)
+				this->crInfo->myGameObjects.RemoveFarmRebuildInfo(unit->positionX, unit->positionY);
+			}
 		}
 	}
 
@@ -4575,6 +4580,11 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	if (!player || !player->IsCheckSumValid()) { return; }
 	if (player != GetControlledPlayerStruct_Settings()) { return; } // Only for human-controlled player
 	if (!player->ptrCreatableUnitsListLink || !player->ptrCreatableUnitsListLink->IsCheckSumValid()) { return; }
+	if (!IsGameRunning()) {
+		assert(false);
+		traceMessageHandler.WriteMessage("OnFarmDepleted called but game not running");
+		return;
+	}
 
 	// Is feature enabled ?
 	if (!this->crInfo->configInfo.enableAutoRebuildFarms) { return; }
@@ -4584,7 +4594,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_WOOD) < this->crInfo->configInfo.autoRebuildFarms_minWood) { return; }
 	// Remark : currentFarmCount includes current farm (that is going to be deleted)
 	long int currentFarmCount = GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2); // Include being-built farms
-	if (currentFarmCount > this->crInfo->configInfo.autoRebuildFarms_maxFarms) { return; }
+	bool farmCountConditionIsOK = (currentFarmCount < this->crInfo->configInfo.autoRebuildFarms_maxFarms);
 
 	ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING *farmerUnit = NULL;
 	// Search for the farmer that was working on this farm (first -arbitrary- one if there are many)
@@ -4604,12 +4614,19 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 		curElem = curElem->previousElement;
 	}
 	if (farmerUnit) {
-		// Add info in an internal list to trigger construction of a new farm when "this" one is actually removed.
-		FarmRebuildInfo *f = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(farmUnitId);
+		if (!farmCountConditionIsOK) {
+			FarmRebuildInfo *ftmp = this->crInfo->myGameObjects.FindFarmRebuildInfo(farm->positionX, farm->positionY);
+			if (ftmp && ftmp->forceRebuild) {
+				farmCountConditionIsOK = true; // "Force rebuild" flag is stronger than farm number limitation.
+			}
+		}
+
+		// Add/Update farm rebuild info to trigger construction of a new farm when "this" one is actually removed.
+		FarmRebuildInfo *f = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(farm->positionX, farm->positionY);
 		f->villagerUnitId = farmerUnit->unitInstanceId;
 		f->playerId = player->playerId;
-		f->posX = farm->positionX;
-		f->posY = farm->positionY;
+		f->posX = farm->positionX; // Only useful if just added (otherwise, unchanged)
+		f->posY = farm->positionY; // Only useful if just added (otherwise, unchanged)
 		f->gameTime = (player->ptrGlobalStruct != NULL) ? player->ptrGlobalStruct->currentGameTime : 0;
 	}
 }

@@ -4294,6 +4294,7 @@ namespace ROR_STRUCTURES_10C
 
 	// Size = 0x1A0  // F8 53 54 00
 	// Constructor = 0x464A50 (also 00456F20?). Parent class is label (90 5A 54 00).
+	// See also STRUCT_UI_COMBOBOX (that contains a listbox)
 #define CHECKSUM_UI_LISTBOX 0x005453F8
 	class STRUCT_UI_LISTBOX : public STRUCT_ANY_UI {
 	public:

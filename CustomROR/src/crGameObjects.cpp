@@ -11,12 +11,13 @@ UnitCustomInfo::UnitCustomInfo() {
 
 
 FarmRebuildInfo::FarmRebuildInfo() {
-	this->farmUnitId = -1;
 	this->villagerUnitId = -1;
 	this->gameTime = 0;
 	this->playerId = -1;
 	this->posX = -1;
 	this->posY = -1;
+	this->forceNotRebuild = false;
+	this->forceRebuild = false;
 }
 
 
@@ -97,58 +98,43 @@ bool CrGameObjects::RemoveUnitCustomInfo(long int unitId) {
 }
 
 
-// Removes obsolete farm info elements (insertion game time is old)
-void CrGameObjects::FlushObsoleteFarmInfo(long int currentGameTime) {
-	const long int delay_ms = 3000;
-	auto it = std::remove_if(this->farmRebuildInfoList.begin(), this->farmRebuildInfoList.end(),
-		[currentGameTime, delay_ms](FarmRebuildInfo *f) { return f->gameTime > (currentGameTime + delay_ms); }
-	);
-	this->farmRebuildInfoList.erase(it, this->farmRebuildInfoList.end());
-}
-
-
-// Returns a FarmRebuildInfo pointer to matching element for given unitId.
+// Returns a FarmRebuildInfo pointer to matching element for given position
 // Returns NULL if not found.
-// Asserts unitId > 0
-FarmRebuildInfo *CrGameObjects::FindFarmRebuildInfo(long int farmUnitId) {
-	assert(farmUnitId >= 0);
+FarmRebuildInfo *CrGameObjects::FindFarmRebuildInfo(float posX, float posY) {
+	assert(posX >= 0);
+	assert(posY >= 0);
 	auto it = std::find_if(this->farmRebuildInfoList.begin(), this->farmRebuildInfoList.end(),
-		[farmUnitId](FarmRebuildInfo *f) { return f->farmUnitId == farmUnitId; }
+		[posX, posY](FarmRebuildInfo *f) {
+			return (abs(f->posX - posX) <= REBUILD_FARMS_POSITION_THRESHOLD) && (abs(f->posY - posY) <= REBUILD_FARMS_POSITION_THRESHOLD);
+		}
 	);
-
 	if (it != this->farmRebuildInfoList.end()) {
 		return *it;
 	}
-	return NULL;
+	return NULL; // not found
 }
 
-
-// Returns (and adds if not existing) a FarmRebuildInfo pointer to matching element for given unitId.
-// Asserts unitId > 0
-FarmRebuildInfo *CrGameObjects::FindOrAddFarmRebuildInfo(long int farmUnitId) {
-	assert(farmUnitId >= 0);
-	auto it = std::find_if(this->farmRebuildInfoList.begin(), this->farmRebuildInfoList.end(),
-		[farmUnitId](FarmRebuildInfo *f) {return f->farmUnitId == farmUnitId; }
-	);
-
-	if (it != this->farmRebuildInfoList.end()) {
-		return *it; // it did not reach end: element was found...
-	}
-	// If not found, add it.
-	FarmRebuildInfo *newElem = new FarmRebuildInfo(); // Inits all values to NULL / -1...
-	newElem->farmUnitId = farmUnitId;
-	this->farmRebuildInfoList.push_back(newElem);
-	return newElem;
+// Returns (and adds if not existing) a FarmRebuildInfo pointer for given position.
+FarmRebuildInfo *CrGameObjects::FindOrAddFarmRebuildInfo(float posX, float posY) {
+	FarmRebuildInfo *elem = this->FindFarmRebuildInfo(posX, posY);
+	if (elem != NULL) { return elem; }
+	elem = new FarmRebuildInfo(); // Inits all values to NULL / -1...
+	elem->posX = posX;
+	elem->posY = posY;
+	this->farmRebuildInfoList.push_back(elem);
+	return elem;
 }
-
 
 // Remove a FarmRebuildInfo element from list
 // Returns true if an element was found (and removed)
-bool CrGameObjects::RemoveFarmRebuildInfo(long int farmUnitId) {
+bool CrGameObjects::RemoveFarmRebuildInfo(float posX, float posY) {
 	auto it = std::remove_if(this->farmRebuildInfoList.begin(), this->farmRebuildInfoList.end(),
-		[farmUnitId](FarmRebuildInfo *f) { return f->farmUnitId == farmUnitId; }
+		[posX, posY](FarmRebuildInfo *f) {
+			return (abs(f->posX - posX) <= REBUILD_FARMS_POSITION_THRESHOLD) && (abs(f->posY - posY) <= REBUILD_FARMS_POSITION_THRESHOLD);
+		}
 	);
 	bool found = (it != this->farmRebuildInfoList.end());
 	this->farmRebuildInfoList.erase(it, this->farmRebuildInfoList.end());
 	return found;
 }
+

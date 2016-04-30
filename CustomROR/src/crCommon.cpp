@@ -201,6 +201,9 @@ ROR_STRUCTURES_10C::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int h
 // The method is protected against duplicates, you can safely call it more than once.
 // Returns true if obj has actually been added to list.
 bool CustomRORInfo::AddObjectInPopupContentList(ROR_STRUCTURES_10C::STRUCT_ANY_UI *obj) {
+	if (obj == NULL) {
+		return false;
+	}
 	for (std::vector<ROR_STRUCTURES_10C::STRUCT_ANY_UI *>::iterator it = this->objectsToFree.begin(); it != this->objectsToFree.end(); it++) {
 		ROR_STRUCTURES_10C::STRUCT_ANY_UI *o = *it;
 		if (o == obj) {
@@ -1350,12 +1353,28 @@ float GetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit
 	if (!farmUnit->ptrStructDefUnit || !farmUnit->ptrStructDefUnit) { return 0; }
 	if (farmUnit->ptrStructDefUnit->DAT_ID1 != CST_UNITID_FARM) { return 0; }
 	// Farms are quite special. Their "resource value" increases slowly, like docks' trade value.
-	// This system prevents from gathering faster when assigning >1 villager. (other limitation: each farmer also has a maximum work rate!)
-	// Action contains the remaining "unlocked" (not available yet) amount.
+	// This system prevents from gathering faster when assigning >1 villager. (other limitation: each farmer also has a maximum work rate !)
+	// Action contains the remaining "locked" (not available yet) amount.
 	// Unit resource value contains available amount (immediatly gatherable amount).
 	ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *action = GetUnitAction((ROR_STRUCTURES_10C::STRUCT_UNIT*)farmUnit);
 	if (!action) { return 0; }
 	return action->unsure_resourceValue + farmUnit->resourceValue;
+}
+
+// Modifies the total remaining food amount for a farm ("immediatly available" + "action-remaining").
+bool SetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit, float newAmount) {
+	if (!farmUnit || !farmUnit->IsCheckSumValid()) { return false; }
+	if (farmUnit->resourceTypeId != RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE) { return false; }
+	if (!farmUnit->ptrStructDefUnit || !farmUnit->ptrStructDefUnit) { return false; }
+	if (farmUnit->ptrStructDefUnit->DAT_ID1 != CST_UNITID_FARM) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *action = GetUnitAction((ROR_STRUCTURES_10C::STRUCT_UNIT*)farmUnit);
+	if (!action) { return false; }
+	action->unsure_resourceValue = newAmount - farmUnit->resourceValue;
+	if (action->unsure_resourceValue < 0) {
+		action->unsure_resourceValue = 0;
+		farmUnit->resourceValue = newAmount;
+	}
+	return true;
 }
 
 

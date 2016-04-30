@@ -398,6 +398,9 @@ void InGameUnitPropertiesPopup::_ResetPointers() {
 	this->lblFarmAutoRebuild = NULL;
 	this->edtBuildingTechs = NULL;
 	this->lblBuildingTechsMessage = NULL;
+	this->chkForceRebuildFarm = NULL;
+	this->chkForceNotRebuildFarm = NULL;
+	this->chkRebuildFarmNone = NULL;
 }
 
 // Create popup content for unit properties
@@ -415,6 +418,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		return;
 	}
 	this->unitId = unitId; // Store it once we checked it is valid.
+	bool isMyUnit = (controlledPlayer == unitPlayer);
 
 	const long int btnSize = 0xAC;
 	const long int lblTitleHSize = 160;
@@ -469,19 +473,13 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 	}
 	// Farm auto-rebuild
-	std::string farmInfo = "";
-	if (unitDefBase->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FARM) {
-		// TO DO : firt change farm rebuild system : based on position, not unit id.
-		/*FarmRebuildInfo *farmBldInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unitId);
-		if (farmBldInfo) {
-			farmBldInfo->
-		}*/
-	}
+	std::string farmInfo = "Auto rebuild this farm when depleted:";
+	FarmRebuildInfo *farmBldInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
 
 	// Building : future potential techs/units
 	std::string buildingTechAndUnitInfo = "";
 	long int techToShowCount = 0;
-	if (unitPlayer && (controlledPlayer == unitPlayer) && (unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
+	if (unitPlayer && isMyUnit && (unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 		char nameBuffer[50];
 		short int researchCount = unitPlayer->ptrResearchesStruct->researchCount;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *rs = unitPlayer->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
@@ -514,18 +512,49 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		this->AddObjectInContentList(this->btnResetAutoMove);
 	}
 	// Auto rebuild farm
-	if (!farmInfo.empty()) {
+	if (isMyUnit && (unitDefBase->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FARM)) {
 		AOE_AddLabel(popup, &this->lblFarmAutoRebuild, (char*)farmInfo.c_str(), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 		this->AddObjectInContentList(this->lblFarmAutoRebuild);
+
+		ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unusedLabel;
+		AOE_AddCheckBox(popup, &this->chkRebuildFarmNone, 330, 100 - 4, 24, 24);
+		AOE_AddCheckBox(popup, &this->chkForceRebuildFarm, 430, 100 - 4, 24, 24);
+		AOE_AddCheckBox(popup, &this->chkForceNotRebuildFarm, 530, 100 - 4, 24, 24);
+		this->AddObjectInContentList(this->chkForceRebuildFarm);
+		this->AddObjectInContentList(this->chkForceNotRebuildFarm);
+		AOE_AddLabel(popup, &unusedLabel, "default", 270, 100, 50, 20);
+		this->AddObjectInContentList(this->chkForceNotRebuildFarm);
+		AOE_AddLabel(popup, &unusedLabel, "Always", 370, 100, 50, 20);
+		this->AddObjectInContentList(unusedLabel);
+		AOE_AddLabel(popup, &unusedLabel, "Never", 470, 100, 50, 20);
+		this->AddObjectInContentList(unusedLabel);
+
+		FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
+		if (!fri) {
+			AOE_CheckBox_SetChecked(this->chkRebuildFarmNone, true);
+		} else {
+			if (fri->forceNotRebuild) {
+				AOE_CheckBox_SetChecked(this->chkForceNotRebuildFarm, true);
+			} else {
+				if (fri->forceRebuild) {
+					AOE_CheckBox_SetChecked(this->chkForceRebuildFarm, true);
+				} else {
+					AOE_CheckBox_SetChecked(this->chkRebuildFarmNone, true);
+				}
+			}
+		}
 	}
+
+
 	// Military : guard location ?
 	// Military : do not attack villagers ? (&buildings?)
+
 	// Building : future potential techs/units
 	if (!buildingTechAndUnitInfo.empty() && (techToShowCount > 0)) {
 		AOE_AddLabel(popup, &this->lblBuildingTechsMessage, "Future technologies, not available yet:", 30, 120, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 		this->AddObjectInContentList(this->lblBuildingTechsMessage);
 
-		AOE_AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, 140, 300, 12 + techToShowCount*14, true, true);
+		AOE_AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, 140, 450, 12 + techToShowCount*14, true, true);
 		this->AddObjectInContentList(this->edtBuildingTechs);
 	}
 }
@@ -539,10 +568,60 @@ bool InGameUnitPropertiesPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTT
 		AOE_ShowUIObject(this->lblChildUnitsAutoMove, false);
 		return true;
 	}
+	if (sender == this->chkForceNotRebuildFarm) {
+		AOE_CheckBox_SetChecked(this->chkRebuildFarmNone, false);
+		AOE_CheckBox_SetChecked(this->chkForceRebuildFarm, false);
+	}
+	if (sender == this->chkForceRebuildFarm) {
+		AOE_CheckBox_SetChecked(this->chkRebuildFarmNone, false);
+		AOE_CheckBox_SetChecked(this->chkForceNotRebuildFarm, false);
+	}
+	if (sender == this->chkRebuildFarmNone) {
+		AOE_CheckBox_SetChecked(this->chkForceRebuildFarm, false);
+		AOE_CheckBox_SetChecked(this->chkForceNotRebuildFarm, false);
+	}
 	return false; // Not one of our buttons; let ROR code be executed normally
 }
 
-void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {}
+void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
+	if (isCancel) {
+		return;
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNIT *unit = GetUnitStruct(this->unitId); // Might be NULL
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *unitPlayer = NULL;
+	if (unit && unit->IsCheckSumValid()) {
+		unitPlayer = unit->ptrStructPlayer;
+	}
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
+	bool isMyUnit = (controlledPlayer == unitPlayer);
+
+	float posX = -1;
+	float posY = -1;
+	if (unit && unit->IsCheckSumValid()) {
+		posX = unit->positionX;
+		posY = unit->positionY;
+	}
+	if (isMyUnit && this->chkRebuildFarmNone && this->chkRebuildFarmNone->checked) {
+		this->crInfo->myGameObjects.RemoveFarmRebuildInfo(posX, posY);
+	}
+	if (isMyUnit && this->chkForceNotRebuildFarm && this->chkForceNotRebuildFarm->checked) {
+		FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(posX, posY);
+		fri->forceNotRebuild = true;
+		fri->forceRebuild = false;
+		fri->playerId = controlledPlayer->playerId;
+		fri->villagerUnitId = -1;
+		fri->gameTime = controlledPlayer->ptrGlobalStruct ? controlledPlayer->ptrGlobalStruct->currentGameTime : 0;
+	}
+	if (isMyUnit && this->chkForceRebuildFarm && this->chkForceRebuildFarm->checked) {
+		FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(posX, posY);
+		fri->forceNotRebuild = false;
+		fri->forceRebuild = true;
+		fri->playerId = controlledPlayer->playerId;
+		fri->villagerUnitId = -1;
+		fri->gameTime = controlledPlayer->ptrGlobalStruct ? controlledPlayer->ptrGlobalStruct->currentGameTime : 0;
+	}
+}
+
 void InGameUnitPropertiesPopup::OnAfterClose(bool isCancel) {}
 
 
@@ -1062,8 +1141,8 @@ void GenNewTriggerPopup::_AddPopupContent() {
 	bool success = AOE_AddComboBox(popup, &this->cbxActionType, 20, 40, 80, 80, 80, 80, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	this->AddObjectInContentList(this->cbxActionType);
 	// TO DO : fix Global_OnButtonClick in crMainitf
-	AddEntryInCombo(this->cbxActionType, 0, "test1");
-	AddEntryInCombo(this->cbxActionType, 1, "test2");
+	AOE_AddEntryInCombo(this->cbxActionType, 0, "test1");
+	AOE_AddEntryInCombo(this->cbxActionType, 1, "test2");
 	AOE_AddTextBox(popup, &this->edtTriggerText, "0", 3, 140, 40, 80, 20, false, false, true);
 	this->AddObjectInContentList(this->edtTriggerText);
 	//AOE_AddLabel(popup, &unused, bufText, 10, 190, 350, 20, AOE_FONT_STANDARD_TEXT);

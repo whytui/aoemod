@@ -291,7 +291,7 @@ static void AOE_CheckBox_SetChecked(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *checkB
 // ptrCombo = address of ROR combobox object
 // entryId = id to affect to new entry in combobox (generally=index of the entry)
 // DLLID = ID in language(x).dll of string to use for entry.
-static void AddEntryInComboUsingDLLID(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrCombo, long int entryId, long int DLLID) {
+static void AOE_AddEntryInComboUsingDLLID(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrCombo, long int entryId, long int DLLID) {
 	assert(ptrCombo != NULL);
 	if (!ptrCombo) { return; }
 	_asm {
@@ -306,6 +306,7 @@ static void AddEntryInComboUsingDLLID(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrComb
 
 // Creates an empty combobox. Use AddEntryInCombo aftewards.
 // TO DO: this is unfinished
+// Unstable and not correctly supported !
 static bool AOE_AddComboBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 	ROR_STRUCTURES_10C::STRUCT_UI_COMBOBOX **ptrObjToCreate,
 	long int posX, long int posY, long int listSizeX, long int listSizeY, long int lblSizeX, long int lblSizeY, AOE_FONTS fontId) {
@@ -330,7 +331,7 @@ static bool AOE_AddComboBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 }
 
 
-static void AddEntryInCombo(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrCombo, long int entryId, const char *text) {
+static void AOE_AddEntryInCombo(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrCombo, long int entryId, const char *text) {
 	assert(ptrCombo != NULL);
 	if (!ptrCombo) { return; }
 	_asm {
