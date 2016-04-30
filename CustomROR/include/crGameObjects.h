@@ -12,7 +12,7 @@ class UnitCustomInfo {
 public:
 	UnitCustomInfo();
 
-	long int unitId; // the building (parent unit)
+	long int unitId; // the unit custom information are about
 	float spawnUnitMoveToPosX;
 	float spawnUnitMoveToPosY;
 	long int spawnTargetUnitId;

@@ -90,6 +90,11 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		}
 	}
 
+	// F2 in game: unit properties
+	if ((isInGame) && (!isMenuOpen) && (pressedKey == VK_F2)) {
+		this->OpenInGameUnitPropertiesPopup();
+	}
+
 	// ESC (1B) - close custom dialog if opened
 	if ((isInEditor || isInGame) && ((pressedKey == VK_ESCAPE) /*|| (pressedKey == VK_RETURN)*/) && (this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
 		this->CloseCustomGamePopup(true);
@@ -539,6 +544,63 @@ bool CustomRORMainInterface::OpenTraceMessagePopup() {
 	return this->OpenCustomLargeTextEditPopup(title,
 		(char*)traceMessageHandler.GetAllMessages(reverseOrder).c_str(),
 		0, NULL, false /* NOT read only so that scrollbar is active*/, false);
+}
+
+
+// Open the relevant "view/edit unit" popup for currently selected unit.
+// Returns true if successful.
+bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup() {
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
+	if (!humanPlayer || !humanPlayer->IsCheckSumValid()) {
+		return false;
+	}
+	if (humanPlayer->selectedUnitCount <= 0) {
+		return false;
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNIT **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(humanPlayer);
+	assert(selectedUnits != NULL);
+	ROR_STRUCTURES_10C::STRUCT_UNIT *selectedUnit = selectedUnits[0];
+	if (!selectedUnit || !selectedUnit->IsCheckSumValid()) {
+		return false;
+	}
+	if (!this->OpenInGameUnitPropertiesPopup(selectedUnit)) {
+		return false;
+	}
+	
+	if (!IsMultiplayer()) {
+		SetGamePause(true);
+	}
+	return true;
+}
+
+
+// Open the relevant "view/edit unit" popup for provided unit.
+// Returns true if successful.
+bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup(ROR_STRUCTURES_10C::STRUCT_UNIT *unit) {
+	if (!unit || !unit->IsCheckSumValid()) {
+		return false;
+	}
+	/*ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
+	if (!controlledPlayer || !controlledPlayer->IsCheckSumValid()) {
+		return false;
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefBase();
+	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	if (!unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid()) {
+		return false;
+	}
+	short int unitPlayerId = unit->ptrStructPlayer->playerId;
+	bool unitIsMine = (unitPlayerId == controlledPlayer->playerId);
+
+	if (unit->unitInstanceId < 0) {
+		return false; // Exclude temp units
+	}
+	*/
+	InGameUnitPropertiesPopup *popup = this->OpenCustomGamePopup<InGameUnitPropertiesPopup>(600, 500, true);
+	popup->AddPopupContent(unit->unitInstanceId);
+	return (popup != NULL);
 }
 
 

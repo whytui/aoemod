@@ -383,6 +383,171 @@ void EditorEditUnitInfoPopup::OnAfterClose(bool isCancel) {
 }
 
 
+// In-game unit properties popup
+
+InGameUnitPropertiesPopup::InGameUnitPropertiesPopup() {
+	this->_ResetPointers();
+}
+
+void InGameUnitPropertiesPopup::_ResetPointers() {
+	this->unitId = -1;
+	this->lblMainInfos = NULL;
+	this->lblTitle = NULL;
+	this->lblChildUnitsAutoMove = NULL;
+	this->btnResetAutoMove = NULL;
+	this->lblFarmAutoRebuild = NULL;
+	this->edtBuildingTechs = NULL;
+	this->lblBuildingTechsMessage = NULL;
+}
+
+// Create popup content for unit properties
+void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
+	if (this->IsClosed() || (this->popup == NULL) || (unitId < 0)) { return; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global) { return; }
+	ROR_STRUCTURES_10C::STRUCT_UNIT *unit = GetUnitStruct(unitId);
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *unitPlayer = unit->ptrStructPlayer;
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefBase();
+	if (!unit || !unit->IsCheckSumValid() || !unitPlayer || !unitPlayer->IsCheckSumValid() ||
+		!controlledPlayer || !controlledPlayer->IsCheckSumValid() ||
+		!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
+		return;
+	}
+	this->unitId = unitId; // Store it once we checked it is valid.
+
+	const long int btnSize = 0xAC;
+	const long int lblTitleHSize = 160;
+	const long int lblMainInfoHSize = 400;
+	std::string mainInfos = "Unit ";
+#ifdef _DEBUG
+	mainInfos += "id=";
+	mainInfos += std::to_string(unitId);
+	mainInfos += " ";
+#endif
+	mainInfos += "\"";
+	mainInfos += unitDefBase->ptrUnitName;
+	mainInfos += "\" (";
+	mainInfos += unitPlayer->playerName_length16max;
+	mainInfos += "). Shortcut=";
+	// Shortcut / group info
+	if ((unit->shortcutNumber == 0) || (unit->shortcutNumber > 10)) {
+		mainInfos += "none";
+	} else {
+		char displayNumber = unit->shortcutNumber;
+		if (displayNumber == -11) {
+			displayNumber = 20;
+		}
+		if ((displayNumber < 0) && (displayNumber >= -11)) {
+			displayNumber = displayNumber + 21; // for custom shortcut numbers (numpad, stored values are -11 to -2)
+		}
+		if (displayNumber > 0) {
+			mainInfos += std::to_string(displayNumber);
+		} else {
+			mainInfos += "invalid";
+		}
+	}
+	if (unit->shortcutNumber > 10) {
+		mainInfos += " [part of a group]";
+	}
+	// Automove infos
+	std::string autoMoveInfo = "";
+	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unitId);
+	if (unitInfo) {
+		if (unitInfo->spawnTargetUnitId >= 0) {
+			autoMoveInfo += "[Building] Child units auto-target=";
+			autoMoveInfo += std::to_string(unitInfo->spawnTargetUnitId);
+		} else {
+			char buf[10];
+			autoMoveInfo += "[Building] Child units auto-move to (";
+			sprintf_s(buf, "%.2f", unitInfo->spawnUnitMoveToPosX);
+			autoMoveInfo += buf;
+			autoMoveInfo += ", ";
+			sprintf_s(buf, "%.2f", unitInfo->spawnUnitMoveToPosY);
+			autoMoveInfo += buf;
+			autoMoveInfo += ")";
+		}
+	}
+	// Farm auto-rebuild
+	std::string farmInfo = "";
+	if (unitDefBase->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FARM) {
+		// TO DO : firt change farm rebuild system : based on position, not unit id.
+		/*FarmRebuildInfo *farmBldInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unitId);
+		if (farmBldInfo) {
+			farmBldInfo->
+		}*/
+	}
+
+	// Building : future potential techs/units
+	std::string buildingTechAndUnitInfo = "";
+	long int techToShowCount = 0;
+	if (unitPlayer && (controlledPlayer == unitPlayer) && (unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
+		char nameBuffer[50];
+		short int researchCount = unitPlayer->ptrResearchesStruct->researchCount;
+		ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *rs = unitPlayer->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
+		for (int rid = 0; rid < researchCount; rid++) {
+			if (rs[rid].currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) {
+				if (unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchLocation == unitDefBase->DAT_ID1) {
+					techToShowCount++;
+					if (techToShowCount > 0) { buildingTechAndUnitInfo += "\n"; }
+					buildingTechAndUnitInfo += "techId ";
+					buildingTechAndUnitInfo += std::to_string(unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].technologyId);
+					buildingTechAndUnitInfo += " = ";
+					*nameBuffer = 0; // Reset string
+					GetLanguageDllText(unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].languageDLLName, nameBuffer, sizeof(nameBuffer) - 1,
+						unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchName);
+					buildingTechAndUnitInfo += nameBuffer;
+				}
+			}
+		}
+	}
+
+	AOE_AddLabel(popup, &this->lblTitle, "Unit properties", (hSize - lblTitleHSize)/2, 10, lblTitleHSize, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddObjectInContentList(this->lblTitle);
+	AOE_AddLabel(popup, &this->lblMainInfos, (char*)mainInfos.c_str(), (hSize - lblMainInfoHSize) / 2, 60, lblMainInfoHSize, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddObjectInContentList(this->lblMainInfos);
+	// Note: auto-move and farm info have same Y position because they can't be displayed simultaneously.
+	if (!autoMoveInfo.empty()) {
+		AOE_AddLabel(popup, &this->lblChildUnitsAutoMove, (char*)autoMoveInfo.c_str(), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddObjectInContentList(this->lblChildUnitsAutoMove);
+		AOE_AddButton(popup, &this->btnResetAutoMove, "Disable auto-move", 340, 100, btnSize, 22, 0);
+		this->AddObjectInContentList(this->btnResetAutoMove);
+	}
+	// Auto rebuild farm
+	if (!farmInfo.empty()) {
+		AOE_AddLabel(popup, &this->lblFarmAutoRebuild, (char*)farmInfo.c_str(), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddObjectInContentList(this->lblFarmAutoRebuild);
+	}
+	// Military : guard location ?
+	// Military : do not attack villagers ? (&buildings?)
+	// Building : future potential techs/units
+	if (!buildingTechAndUnitInfo.empty() && (techToShowCount > 0)) {
+		AOE_AddLabel(popup, &this->lblBuildingTechsMessage, "Future technologies, not available yet:", 30, 120, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddObjectInContentList(this->lblBuildingTechsMessage);
+
+		AOE_AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, 140, 300, 12 + techToShowCount*14, true, true);
+		this->AddObjectInContentList(this->edtBuildingTechs);
+	}
+}
+
+// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+bool InGameUnitPropertiesPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) {
+	if (sender == this->btnResetAutoMove) {
+		this->crInfo->myGameObjects.RemoveUnitCustomInfo(this->unitId);
+		// Auto-move has been reset, hide label and button.
+		AOE_ShowUIObject(this->btnResetAutoMove, false);
+		AOE_ShowUIObject(this->lblChildUnitsAutoMove, false);
+		return true;
+	}
+	return false; // Not one of our buttons; let ROR code be executed normally
+}
+
+void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {}
+void InGameUnitPropertiesPopup::OnAfterClose(bool isCancel) {}
+
+
+// Scenario editor main custom popup
+
 EditorScenarioInfoPopup::EditorScenarioInfoPopup() {
 	this->_ResetPointers();
 	this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_NONE;
@@ -433,11 +598,11 @@ void EditorScenarioInfoPopup::SetVarToUpdate_lengthenCombatMode(long int *varToU
 }
 
 void EditorScenarioInfoPopup::_AddPopupContent() {
-	const long int btSize = 0xAC;
-	long int btnTotalSpace = hSize - (btSize * 2);
+	const long int btnSize = 0xAC;
+	long int btnTotalSpace = hSize - (btnSize * 2);
 	long int btnSimpleSpace = btnTotalSpace / 3; // btn count + 1 more space on the right
 	long int btnhPos1 = btnSimpleSpace; // x position for buttons
-	long int btnhPos2 = btSize + btnSimpleSpace * 2; // x position for buttons
+	long int btnhPos2 = btnSize + btnSimpleSpace * 2; // x position for buttons
 	this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_NONE;
 	this->playerId = -1;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
@@ -445,17 +610,17 @@ void EditorScenarioInfoPopup::_AddPopupContent() {
 	this->AddObjectInContentList(this->lblTitle);
 	AOE_AddLabel(popup, &unused, "PlayerId :", btnhPos1, 40, 0x60, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	this->AddObjectInContentList(unused);
-	AOE_AddTextBox(popup, &this->edtPlayerId, "2", 1, btnhPos1 + btSize - 0x22, 42, 0x22, 20, false, false, true);
+	AOE_AddTextBox(popup, &this->edtPlayerId, "2", 1, btnhPos1 + btnSize - 0x22, 42, 0x22, 20, false, false, true);
 	this->AddObjectInContentList(this->edtPlayerId);
-	AOE_AddButton(popup, &this->btnAI, LANG_ID_STRATEGY, btnhPos1, 80, btSize, 30, 0);
+	AOE_AddButton(popup, &this->btnAI, LANG_ID_STRATEGY, btnhPos1, 80, btnSize, 30, 0);
 	this->AddObjectInContentList(this->btnAI);
-	AOE_AddButton(popup, &this->btnPER, LANG_ID_PERSONALITY, btnhPos1, 120, btSize, 30, 0);
+	AOE_AddButton(popup, &this->btnPER, LANG_ID_PERSONALITY, btnhPos1, 120, btnSize, 30, 0);
 	this->AddObjectInContentList(this->btnPER);
-	AOE_AddButton(popup, &this->btnTriggers, "Triggers", btnhPos1, 160, btSize, 30, 0);
+	AOE_AddButton(popup, &this->btnTriggers, "Triggers", btnhPos1, 160, btnSize, 30, 0);
 	this->AddObjectInContentList(this->btnTriggers);
-	AOE_AddButton(popup, &this->btnTerrainEdit, "Terrain edit", btnhPos1, 200, btSize, 30, 0);
+	AOE_AddButton(popup, &this->btnTerrainEdit, "Terrain edit", btnhPos1, 200, btnSize, 30, 0);
 	this->AddObjectInContentList(this->btnTerrainEdit);
-	AOE_AddButton(popup, &this->btnVictoryCondition, "Victory conditions", btnhPos2, 80, btSize, 30, 0);
+	AOE_AddButton(popup, &this->btnVictoryCondition, "Victory conditions", btnhPos2, 80, btnSize, 30, 0);
 	this->AddObjectInContentList(this->btnVictoryCondition);
 	long int chkSize = 30;
 	long int hSpace = 15;

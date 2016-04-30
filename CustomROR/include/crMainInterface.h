@@ -81,6 +81,13 @@ public:
 	// Open a popup with CustomROR (debug) messages
 	bool OpenTraceMessagePopup();
 
+	// Open the relevant "view/edit unit" popup for currently selected unit.
+	// Returns true if successful.
+	bool OpenInGameUnitPropertiesPopup();
+	// Open the relevant "view/edit unit" popup for provided unit.
+	// Returns true if successful.
+	bool OpenInGameUnitPropertiesPopup(ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
+
 	// Use this to properly free custom button from options menu. This should (always) be called when ingame menu is closed.
 	void FreeInGameCustomOptionsButton();
 };

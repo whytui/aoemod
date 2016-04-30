@@ -132,6 +132,30 @@ private:
 };
 
 
+class InGameUnitPropertiesPopup : public CustomPopup {
+public:
+	InGameUnitPropertiesPopup();
+	void _ResetPointers() override;
+	// This class needs parameters to create content. Call this after calling OpenPopup().
+	void AddPopupContent(long int unitId);
+	//void _AddPopupContent() override;
+	void OnBeforeClose(bool isCancel) override;
+	void OnAfterClose(bool isCancel) override;
+	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+	bool OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) override;
+private:
+	long int unitId; // Warning: Storing pointer would be dangerous if game executions continues (MP ?): unit could be destroyed in the meanwhile.
+	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblTitle;
+	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblMainInfos;
+	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblChildUnitsAutoMove;
+	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblFarmAutoRebuild;
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnResetAutoMove;
+	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblBuildingTechsMessage;
+	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtBuildingTechs;
+};
+
+
+
 enum SC_INFO_POPUP_TO_OPEN { PTO_NONE = 0, PTO_TRIGGER, PTO_AI, PTO_PER, PTO_TERRAIN_EDIT, PTO_VICTORY_CONDITION, PTO_COUNT };
 
 class EditorScenarioInfoPopup : public CustomPopup {

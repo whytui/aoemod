@@ -202,6 +202,9 @@ static ROR_STRUCTURES_10C::STRUCT_UI_LABEL *AOE_AddLabel(ROR_STRUCTURES_10C::STR
 }
 
 
+// Create a textbox using ROR methods.
+// If maxTextLength==0, it is replaced by initialText's length.
+// Note: The font used seems to be 14 pixels high (?)
 static ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *AOE_AddTextBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize, 
@@ -211,6 +214,9 @@ static ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *AOE_AddTextBox(ROR_STRUCTURES_10C:
 	long int inputType = 0;
 	if (multiline) { inputType = 7; }
 	if (onlyNumbers) { inputType = 3; }
+	if (maxTextLength <= 0) {
+		maxTextLength = strlen(initialText);
+	}
 	if (maxTextLength >= 0x8000 - 2) { maxTextLength = 0x8000 - 2; } // AOE does not support longer textarea length (will not be work correctly)
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *result;
 	_asm {
