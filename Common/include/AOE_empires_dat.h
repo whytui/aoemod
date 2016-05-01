@@ -1237,6 +1237,7 @@ namespace AOE_CONST_FUNC {
 			(dat_id == CST_UNITID_BALLISTA_TOWER);
 	}
 
+	// Returns true if a building can train units (hardcoded list)
 	static bool DoesBuildingTrainUnits(unsigned short int dat_id) {
 		return (dat_id == CST_UNITID_ACADEMY) ||
 			(dat_id == CST_UNITID_BARRACKS) ||

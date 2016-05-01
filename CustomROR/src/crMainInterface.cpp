@@ -688,8 +688,8 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURE
 	for (unsigned long int index = 0; index < unitCount; index++) {
 		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = selectedUnits[index];
 		if (unit && unit->IsCheckSumValid() && (unit->ptrStructPlayer == controlledPlayer)) {
-			hasSelectedBuildings = hasSelectedBuildings || unit->unitType == GUT_BUILDING;
-			hasSelectedLivings = hasSelectedLivings || unit->unitType == GUT_LIVING_UNIT;
+			hasSelectedBuildings = hasSelectedBuildings || (unit->unitType == GUT_BUILDING);
+			hasSelectedLivings = hasSelectedLivings || (unit->unitType == GUT_LIVING_UNIT);
 		}
 	}
 
@@ -720,8 +720,13 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURE
 						if (!global || !global->IsCheckSumValid()) { return false; }
 
 						ROR_STRUCTURES_10C::STRUCT_UNIT *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, false);
-						if (unitUnderMouse) {
-							targetUnitId = unitUnderMouse->unitInstanceId;
+						if (unitUnderMouse && unitUnderMouse->IsCheckSumValid()) {
+							ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->GetUnitDefBase();
+							if (unitDefUnderMouse && unitDefUnderMouse->IsCheckSumValidForAUnitClass() &&
+								(unitDefUnderMouse->interactionMode >= AOE_CONST_FUNC::INTERACTION_MODES::CST_IM_RESOURCES)
+								) {
+								targetUnitId = unitUnderMouse->unitInstanceId;
+							}
 						}
 
 						// Add to list (or update) to set new units target position/unit

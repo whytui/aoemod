@@ -161,4 +161,11 @@ namespace AOE_CONST_FUNC
 		TDE_RESEARCH_TIME_MODIFIER = 103
 	};
 
+	enum INTERACTION_MODES : char {
+		CST_IM_NONE = 0, // Unable to select, move, attack. Eye candy, dead units, projectiles...
+		CST_IM_CAPTURE_ONLY = 1, // Unable to select, move, attack, but can capture (used in 162, 330: flags)
+		CST_IM_RESOURCES = 2, // Can select, only villagers can target (+ military unit for animals...). Animals, trees, fish, mines, bushes.
+		CST_IM_BUILDINGS = 3, // Can select, attack, unable to move. Buildings and ruins.
+		CST_IM_LIVING_UNITS = 4 // Can select, attack, move. All living units/boats + some towers. NOT including animals.
+	};
 }

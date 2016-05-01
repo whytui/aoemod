@@ -459,8 +459,19 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unitId);
 	if (unitInfo) {
 		if (unitInfo->spawnTargetUnitId >= 0) {
+			ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *targetUnitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(unitInfo->spawnTargetUnitId);
+			char *targetName = NULL;
+			if (targetUnitBase && targetUnitBase->IsCheckSumValidForAUnitClass() &&
+				targetUnitBase->ptrStructDefUnit && targetUnitBase->ptrStructDefUnit->IsCheckSumValid()) {
+				targetName = targetUnitBase->ptrStructDefUnit->ptrUnitName;
+			}
 			autoMoveInfo += "[Building] Child units auto-target=";
 			autoMoveInfo += std::to_string(unitInfo->spawnTargetUnitId);
+			if (targetName) {
+				autoMoveInfo += " (";
+				autoMoveInfo += targetName;
+				autoMoveInfo += ")";
+			}
 		} else {
 			char buf[10];
 			autoMoveInfo += "[Building] Child units auto-move to (";

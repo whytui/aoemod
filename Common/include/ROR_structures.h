@@ -3211,8 +3211,8 @@ namespace ROR_STRUCTURES_10C
 		char resourceStorageEnableMode_3;
 		char blastArmorLevel;
 		char triggerType; // same as class ? TribeAIGroupCivilian = 4, etc?
-		char interactionMode; // +8D
-		char minimapMode;
+		AOE_CONST_FUNC::INTERACTION_MODES interactionMode; // +8D. 1-byte.
+		char minimapMode; // +8E.
 		char commandAttribute;
 		// 0x90
 		char minimapColor;
@@ -3535,8 +3535,8 @@ namespace ROR_STRUCTURES_10C
 		char resourceStorageEnableMode_3;
 		char blastArmorLevel;
 		char triggerType; // See age3 (sub type). 2=building, 3=civilian, 4=military, 5=priest
-		char interactionMode; // +8D. A value in 0-4 or 5 ? + a special value 0x40=64 ?
-		char minimapMode;
+		AOE_CONST_FUNC::INTERACTION_MODES interactionMode; // +8D. 1-byte.
+		char minimapMode; // +8E.
 		char commandAttribute;
 		// 0x90
 		char minimapColor;
