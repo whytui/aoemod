@@ -160,6 +160,9 @@ public:
 	// When adding components, it is not necessary to store component pointers unless we need them to catch events (buttonClick) or get values (input objects)
 	ROR_STRUCTURES_10C::STRUCT_ANY_UI *GetCustomGamePopup();
 
+	// Get main (first) selected unit, or NULL if none is selected.
+	ROR_STRUCTURES_10C::STRUCT_UNIT *GetMainSelectedUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+
 	// Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
 	ROR_STRUCTURES_10C::STRUCT_UNIT **GetRelevantSelectedUnitsPointer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
@@ -208,6 +211,9 @@ ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *GetUnitDefStruct(ROR_STRUCTURES_10C::STRUCT
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
 ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
+
+// Return NULL if one of the objects is NULL/missing
+ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId);
 
 // Returns true if current game is multiplayer, false otherwise (including error cases)
 bool IsMultiplayer();
@@ -558,6 +564,27 @@ template<typename UnitDef> static UnitDef *CopyUnitDefToNew(UnitDef *existingUni
 	}
 	return newUnitDef;
 }
+
+
+// Returns the icon id relevant for provided UI command id, if found.
+// Returns -1 if not found.
+long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId);
+
+// Add a command button in unit-commands zone (under game zone).
+// UICmdId must be related to units (attack, etc)
+// DATID can be a unitDefId (train), researchId (do_research)...
+bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
+	long int DATID, bool isDisabled);
+
+// Returns true if the button is visible. Use this overload for performance if you already have STRUCT_UI_IN_GAME_MAIN pointer.
+// Returns false if the button is hidden, or if an error occurs.
+bool IsInGameUnitCommandButtonVisible(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int buttonIndex);
+// Returns true if the button is visible
+// Returns false if the button is hidden, or if an error occurs.
+bool IsInGameUnitCommandButtonVisible(long int buttonIndex);
+
+// To be used with button IDs from unit defintion/researches to get a buttonIndex for game main UI structure (command buttons)
+long int EmpiresDatButtonIdToInternalButtonIndex(char DATButtonId);
 
 
 // ---------- Other

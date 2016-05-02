@@ -168,4 +168,19 @@ namespace AOE_CONST_FUNC
 		CST_IM_BUILDINGS = 3, // Can select, attack, unable to move. Buildings and ruins.
 		CST_IM_LIVING_UNITS = 4 // Can select, attack, move. All living units/boats + some towers. NOT including animals.
 	};
+
+	enum COMMAND_ATTRIBUTES : char {
+		CST_CA_NONE = 0, // Eye candy, dead units, projectiles, flags...
+		CST_CA_GATHERABLE_TARGETS = 1, // Animals, trees, fish, mines, bushes.
+		CST_CA_BUILDINGS = 2, // All buildings, including towers
+		CST_CA_VILLAGERS = 3,
+		CST_CA_MILITARY_UNITS = 4, // Water and land military units
+		CST_CA_TRADE_UNITS = 5, // Trade ships only
+		CST_CA_PRIESTS = 6,
+		CST_CA_TRANSPORTS = 7, // Transport boats
+		CST_CA_ARTEFACTS = 8, // Relics and ruins
+		CST_CA_FISHING_SHIPS = 9,
+		CST_CA_UNUSED_10 = 10, // Defined in aGE3, but unused in AOE/ROR
+		CST_CA_UNUSED_11 = 11 // Defined in aGE3, but unused in AOE/ROR
+	};
 }

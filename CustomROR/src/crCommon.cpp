@@ -312,6 +312,17 @@ ROR_STRUCTURES_10C::STRUCT_ANY_UI *CustomRORInfo::GetCustomGamePopup() {
 }
 
 
+// Get main (first) selected unit, or NULL if none is selected.
+ROR_STRUCTURES_10C::STRUCT_UNIT *CustomRORInfo::GetMainSelectedUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+	assert(player != NULL);
+	if (!player) { return NULL; }
+	ROR_STRUCTURES_10C::STRUCT_UNIT **selectedUnits = this->GetRelevantSelectedUnitsPointer(player);
+	if (!selectedUnits) {
+		return NULL;
+	}
+	return *selectedUnits; // not sure it always corresponds to selected unit in bottom left panel ?
+}
+
 // Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
 // Please use this instead of playerStruct->selectedStructUnitTable
 ROR_STRUCTURES_10C::STRUCT_UNIT **CustomRORInfo::GetRelevantSelectedUnitsPointer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
@@ -768,6 +779,19 @@ ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT
 }
 
 
+// Return NULL if one of the objects is NULL/missing
+ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId) {
+	if (!player || !player->IsCheckSumValid() || (researchId < 0)) {
+		return NULL;
+	}
+	ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *ri = player->ptrResearchesStruct;
+	if (!ri || (researchId >= ri->researchCount)) {
+		return false;
+	}
+	return &ri->ptrResearchDefInfo->researchDefArray[researchId];
+}
+
+
 bool IsMultiplayer() {
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = (ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *)AOE_OFFSETS_10C::ADDR_VAR_GAME_SETTINGS_STRUCT;
 	if (settings == NULL) { return false; }
@@ -788,8 +812,7 @@ bool IsGameRunning() {
 	if (global->gameRunStatus != 0) {
 		return false;
 	}
-	// If conditions above are true, current UI status should be in-game
-	assert(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING);
+
 	return (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING);
 }
 
@@ -2292,6 +2315,181 @@ short int AddUnitDefToPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRU
 	unitDef->DAT_ID2 = newDATID;
 	return newDATID;
 }
+
+
+// Returns the icon id relevant for provided UI command id, if found.
+// Returns -1 if not found. (WARNING: check this case in caller, -1 is not an acceptable value)
+long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId) {
+	// Note : icon 6 in actions is a nice flag but is unused.
+	switch (UICmdId) {
+	case AOE_CONST_INTERNAL::CST_IUC_WORK:
+		return -1; // does not have an icon ?
+	case AOE_CONST_INTERNAL::CST_IUC_MOVE:
+		return 1; // Just a supposition as it is not implemented ! (actually, from early versions then removed, probably)
+	case AOE_CONST_INTERNAL::CST_IUC_BUILD:
+		return 2; // cf 482598, 483273
+	case AOE_CONST_INTERNAL::CST_IUC_EXCHANGE:
+		return -1; // unused/not implemented?
+	case AOE_CONST_INTERNAL::CST_IUC_STOP:
+		return 3; // hand icon
+	case AOE_CONST_INTERNAL::CST_IUC_CANCEL_SELECTION:
+		return 0x0A;
+	case AOE_CONST_INTERNAL::CST_IUC_UNLOAD_TRANSPORT:
+		return 5;
+	case AOE_CONST_INTERNAL::CST_IUC_REGROUP:
+		return 7;
+	case AOE_CONST_INTERNAL::CST_IUC_UNGROUP:
+		return 8;
+	case AOE_CONST_INTERNAL::CST_IUC_FORMATION:
+		break;
+	case AOE_CONST_INTERNAL::CST_IUC_CANCEL_OR_BACK:
+		return 0xA; // To confirm it is a constant. Cf 482526.
+	case AOE_CONST_INTERNAL::CST_IUC_NEXT_PAGE:
+		return 0xB; // To confirm it is a constant. Cf 4824F9.
+	case AOE_CONST_INTERNAL::CST_IUC_CHAT:
+		break;
+	case AOE_CONST_INTERNAL::CST_IUC_DIPLOMACY:
+		break;
+	case AOE_CONST_INTERNAL::CST_IUC_MENU:
+		break;
+	case AOE_CONST_INTERNAL::CST_IUC_TRADE_WITH:
+		break;
+	case AOE_CONST_INTERNAL::CST_IUC_CANCEL_BUILD:
+		return 3; // cf 0x482C30
+	case AOE_CONST_INTERNAL::CST_IUC_SHOW_HELP:
+		break;
+	case AOE_CONST_INTERNAL::CST_IUC_HOLD_POSITION:
+		return 4; // cf 4827AD
+	case AOE_CONST_INTERNAL::CST_IUC_ATTACK_POSITION:
+		return 0xC; // cf 4827DD
+	case AOE_CONST_INTERNAL::CST_IUC_SHOW_SCORES:
+		break;
+	case AOE_CONST_INTERNAL::CST_IUC_TRADE_FOOD_FOR_GOLD:
+		return 0x57; // cf 482AB7
+	case AOE_CONST_INTERNAL::CST_IUC_TRADE_WOOD_FOR_GOLD:
+		return 0x56;
+	case AOE_CONST_INTERNAL::CST_IUC_TRADE_STONE_FOR_GOLD:
+		return 0x58;
+	case AOE_CONST_INTERNAL::CST_IUC_HEAL:
+		return 0x0D; // cf 4828E9
+	case AOE_CONST_INTERNAL::CST_IUC_CONVERT:
+		return 0x0E;
+	case AOE_CONST_INTERNAL::CST_IUC_ATTACK:
+		break;
+	case AOE_CONST_INTERNAL::CST_IUC_REPAIR:
+		return 0;
+	case AOE_CONST_INTERNAL::CST_IUC_ADD_TO_QUEUE:
+		break;
+	case AOE_CONST_INTERNAL::CST_IUC_DROP_FROM_QUEUE:
+		break;
+	case AOE_CONST_INTERNAL::CST_IUC_DO_RESEARCH:
+	case AOE_CONST_INTERNAL::CST_IUC_DO_TRAIN:
+	case AOE_CONST_INTERNAL::CST_IUC_DO_BUILD:
+		// Those ones do not have a specific icon id, it depends on unit/research...
+	default:
+		break;
+	}
+	return -1; // unknown or not applicable
+}
+
+// Returns true if the button is visible. Use this overload for performance if you already have STRUCT_UI_IN_GAME_MAIN pointer.
+// Returns false if the button is hidden, or if an error occurs.
+bool IsInGameUnitCommandButtonVisible(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int buttonIndex) {
+	assert(gameMainUI && gameMainUI->IsCheckSumValid());
+	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
+		return false;
+	}
+	if ((buttonIndex < 0) || (buttonIndex >= 12)) {
+		assert(false); // Should never happen
+		return false;
+	}
+	return (gameMainUI->unitCommandButtons[buttonIndex] != NULL) &&
+		(gameMainUI->unitCommandButtons[buttonIndex]->visible != 0);
+}
+// Returns true if the button is visible
+// Returns false if the button is hidden, or if an error occurs.
+bool IsInGameUnitCommandButtonVisible(long int buttonIndex) {
+	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *inGameMain = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
+	if (!inGameMain || !inGameMain->IsCheckSumValid() || !inGameMain->visible) {
+		return false;
+	}
+	if (inGameMain != (void*)AOE_GetCurrentScreen()) {
+		return false;
+	}
+	return IsInGameUnitCommandButtonVisible(inGameMain, buttonIndex);
+}
+
+// To be used with button IDs from unit defintion/researches to get a buttonIndex for game main UI structure (command buttons)
+long int EmpiresDatButtonIdToInternalButtonIndex(char DATButtonId) {
+	if (DATButtonId < 0) { return -1; } // Invalid.
+	if (DATButtonId <= 5) {
+		return DATButtonId - 1; // Source 1-5 = index 0-4
+	}
+	if (DATButtonId <= 10) {
+		return DATButtonId; // Source 6-10 = index 6-10
+	}
+	if (DATButtonId <= 15) {
+		return DATButtonId - 11; // Source 11-15 = index 0-4
+	}
+	if (DATButtonId <= 20) {
+		return DATButtonId - 10; // Source 16-20 = index 6-10
+	}
+	return -1;
+}
+
+
+// Add a command button in unit-commands zone (under game zone).
+// UICmdId must be related to units (attack, etc)
+// DATID can be a unitDefId (train), researchId (do_research)...
+bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
+	long int DATID, bool isDisabled) {
+	if (buttonIndex < 0) {
+		return false;
+	}
+	if (!IsGameRunning()) {
+		return false;
+	}
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+	if (!player || !player->IsCheckSumValid()) { return false; }
+	long int iconId = GuessIconIdFromUICommandId(UICmdId);
+	long int helpDllId = 0;
+	long int creationDllId = 0;
+	long int hotkeyDllId = 0;
+	char *argName = NULL;
+	char *argDescription = NULL;
+	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(player, (short int)DATID);
+		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
+			return false;
+		}
+		helpDllId = unitDef->languageDLLHelp;
+		creationDllId = unitDef->languageDLLID_Creation;
+		creationDllId = creationDllId + 100000; // cf 48248B
+		hotkeyDllId = unitDef->languageDLLHotKeyText;
+		iconId = unitDef->iconId;
+		//AOE_LoadStringLanguage(unitDef->languageDLLID_Name, bufferName, 30); // leave name/desc NULL ?
+	}
+	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) {
+		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef = GetResearchDef(player, (short int)DATID);
+		if (researchDef == NULL) { return false; }
+		iconId = researchDef->iconId;
+		creationDllId = researchDef->languageDLLCreation;
+		helpDllId = researchDef->languageDLLHelp;
+		// For researches, we need to write and provide name/description. Cf 0x483109
+		// TODO argName, argDescription
+	}
+	// Manage build too ?
+	// TODO : for many commands, we need to set name/description ?
+	if (iconId < 0) {
+		iconId = 0;
+	}
+	
+	return AOE_InGameAddCommandButton(player, buttonIndex, iconId, UICmdId, DATID,
+		helpDllId, creationDllId, hotkeyDllId,
+		argName, argDescription, isDisabled);
+}
+
+
 
 
 // Writes text representing available tech tree (available technologies that have not been researched yet)

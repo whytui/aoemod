@@ -290,6 +290,9 @@ public:
 	// Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
 	void OnFindEnemyUnitIdWithinRangeLoop(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem);
 
+	// Called at the end of showUnitCommandButtons
+	void AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI);
+
 	// ----------------------------------
 	// City plan
 

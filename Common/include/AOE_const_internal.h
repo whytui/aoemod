@@ -108,33 +108,34 @@ namespace AOE_CONST_INTERNAL
 	};
 
 	enum INGAME_UI_COMMAND_ID : long int { // TO DO check type
-		//CST_IUC_OK = 1,
-		//CST_IUC_CANCEL = 2,
-		CST_IUC_BUILD_UNSURE = 3,
-		//CST_IUC_NO = 4, // cancel selection ?
-		CST_IUC_RETRY = 5,
-		CST_IUC_CANCEL_2 = 6,
-		CST_IUC_ABANDON = 7,
-		CST_IUC_ERROR = 8,
-		CST_IUC_UNKNOWN_09 = 9,
-		CST_IUC_FORMATION = 0x0A,
-		CST_IUC_CANCEL_SELECT = 0x0B,
-		CST_IUC_NEXT = 0x0C,
+		CST_IUC_WORK = 1, // And this works ! Hotkey=W. No suitable icon though :(
+		CST_IUC_MOVE = 2, // And this works ! Hotkey=M. And even has a suitable icon (id=1)
+		CST_IUC_BUILD = 3,
+		CST_IUC_EXCHANGE = 4, // WTF !! unused / no effect ?
+		CST_IUC_STOP = 5, // iconId=3 (hand)
+		CST_IUC_CANCEL_SELECTION = 6, // icon = 0xA. Unselect unit
+		CST_IUC_UNLOAD_TRANSPORT = 7, // icon 5
+		CST_IUC_REGROUP = 8, // icon 7. cf 48260A.
+		CST_IUC_UNGROUP = 9, // cf icon 8(slp 50721). Ungroup
+		CST_IUC_FORMATION = 0x0A, // what is this?
+		CST_IUC_CANCEL_OR_BACK = 0x0B, // ESC key to cancel command or sub-menu(build, repair...)). icon 0x0A (always?)
+		CST_IUC_NEXT_PAGE = 0x0C, // in build menu
 		CST_IUC_CHAT = 0x0D,
 		CST_IUC_DIPLOMACY = 0x0E,
-		CST_IUC_MENU = 0x0F,
+		CST_IUC_MENU = 0x0F, // Actually opens the menu
 		CST_IUC_TRADE_WITH = 0x10,
-		CST_IUC_DO_RESEARCH = 0x11,
+		CST_IUC_DO_RESEARCH = 0x11, // see 0x483184
 		CST_IUC_DO_TRAIN = 0x12,
 		CST_IUC_DO_BUILD = 0x13,
-		CST_IUC_CANCEL_BUILD = 0x14,
-		CST_IUC_HELP = 0x15,
-		CST_IUC_HOLD_POSITION = 0x16, // DLL id 4122
-		CST_IUC_ATTACK_POSITION = 0x17,
+		CST_IUC_CANCEL_BUILD = 0x14, // (click to cancel pending action). Icon 3.
+		CST_IUC_SHOW_HELP = 0x15,
+		CST_IUC_HOLD_POSITION = 0x16,
+		CST_IUC_ATTACK_POSITION = 0x17, // icon 0x0C
+		CST_IUC_SHOW_SCORES = 0x18, // 47DCF9.
 		CST_IUC_TRADE_FOOD_FOR_GOLD = 0x19,
 		CST_IUC_TRADE_WOOD_FOR_GOLD = 0x1A,
 		CST_IUC_TRADE_STONE_FOR_GOLD = 0x1B,
-		CST_IUC_HEAL = 0x1C,
+		CST_IUC_HEAL = 0x1C, // icon 0xD
 		CST_IUC_CONVERT = 0x1D,
 		CST_IUC_ATTACK = 0x1E,
 		CST_IUC_REPAIR = 0x1F,

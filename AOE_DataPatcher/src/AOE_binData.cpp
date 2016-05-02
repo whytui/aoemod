@@ -72,9 +72,9 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_resolution_10c 76
 #define COUNT_windowedMode_10c 3
 #define COUNT_VEG_windowedMode_10c 21
-#define COUNT_selectedUnits_10c 84
+#define COUNT_selectedUnits_10c 85
 #define COUNT_obsoletes_10c 22
-#define COUNT_ROR_API_10c 91
+#define COUNT_ROR_API_10c 92
 #define COUNT_manageAI_10c 13
 
 
@@ -2979,8 +2979,8 @@ void AOE_binData::InitSelectedUnits() {
 
 	NEXT_INITSEQ_1_VAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
 		MaxNumber16,
-		"Maximum number of selected units (press on tab)",
-		0x85953,
+		"Maximum number of selected units (related to display of buttons bar)",
+		0x8298A,
 		(0x66, 0x83, 0xF9, 0x19),
 		SVT_INT_1B,
 		3
@@ -2989,7 +2989,7 @@ void AOE_binData::InitSelectedUnits() {
 	NEXT_INITSEQ_1_VAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
 		MaxNumber17,
 		"Maximum number of selected units (press on tab)",
-		0x85990,
+		0x85953,
 		(0x66, 0x83, 0xF9, 0x19),
 		SVT_INT_1B,
 		3
@@ -2997,6 +2997,15 @@ void AOE_binData::InitSelectedUnits() {
 
 	NEXT_INITSEQ_1_VAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
 		MaxNumber18,
+		"Maximum number of selected units (press on tab)",
+		0x85990,
+		(0x66, 0x83, 0xF9, 0x19),
+		SVT_INT_1B,
+		3
+		);
+
+	NEXT_INITSEQ_1_VAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
+		MaxNumber19,
 		"Maximum number of selected units",
 		0x859F5,
 		(0x83, 0xC6, 0x04, 0x83, 0xFF, 0x19, 0x7C, 0xCE),
@@ -4494,7 +4503,17 @@ void AOE_binData::InitROR_API() {
 		FM_OFF,
 		FM_ON
 		);
-	
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		ShowUnitCommandButtonsEnd,
+		"Entry point after OnShowUnitCommandButtons.",
+		0x0083489,
+		(0x8B, 0xCE, 0xE8, 0x10, 0x00, 0x00, 0x00, 0x5F), // default=no
+		(0x8B, 0xCE, 0xE8, 0xE4, 0x60, 0xF9, 0xFF, 0x5F),
+		FM_OFF,
+		FM_ON
+		);
+
 
 	//optional
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),

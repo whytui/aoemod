@@ -9,7 +9,7 @@
 
 
 /*
- * This file provides useful methods to deal with AOE UI objects.
+ * This file provides useful (raw) methods to deal with AOE UI objects.
  * Most of them directly call ROR's methods and are a practical encapsulation to avoid using assembler in our code.
 */
 
@@ -21,6 +21,7 @@ enum AOE_FONTS : long int {
 
 static const char scenarioEditorScreenName[] = "Scenario Editor Screen";
 static const char menuDialogScreenName[] = "Menu Dialog";
+static const char gameScreenName[] = "Game Screen";
 
 
 // The AOE_Addxxx functions create a UI object and store the new object's pointer in ptrObjToCreate parameter
@@ -653,3 +654,74 @@ static long int AOE_GetGamePosFromMousePos(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING
 	return res;
 }
 
+
+// Return true if successful. Only works if current screen is game screen !
+// Adds a button in unit-commands panel (bottom, beside select unit info).
+// player is used to find correct color.
+// ButtonIndex is 0-5 (first row), 6-11 (2nd row), 5 and 11 are special (next, cancel).
+// All DLLID can be 0. Name and description can be NULL.
+// IconId and DATID are related to the type of action, be careful to provide consistent values.
+// DATId can be 0 if not relevant.
+static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int buttonIndex, long int iconId,
+	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId, long int DATID,
+	long int helpDllId, long int creationDllId, long int shortcutDllId, char *name, char *description, bool isDisabled) {
+	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *inGameMain = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
+	if (!inGameMain || !inGameMain->IsCheckSumValid() || !inGameMain->visible) {
+		return false;
+	}
+	if (inGameMain != (void*)AOE_GetCurrentScreen()) {
+		return false;
+	}
+
+	assert(player && player->IsCheckSumValid());
+	if (!player || !player->IsCheckSumValid()) {
+		return false;
+	}
+	unsigned long int unknown_colorPtr = player->ptrPlayerColorStruct + 0x28;
+
+	const unsigned long int calladdr = 0x483760;
+	unsigned long int iconsSLP = inGameMain->iconsForUnitCommands; // Default (correct in most cases)
+	// Guess automatically in which SLP we should search the icon.
+	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
+		iconsSLP = inGameMain->iconsForTrainUnits;
+	}
+	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_BUILD) {
+		assert(player->tileSet >= 0);
+		assert(player->tileSet <= 4);
+		int tileSet = player->tileSet;
+		if ((tileSet < 0) || (tileSet > 4)) { tileSet = 0; } // in theory, this is not necessary.
+		iconsSLP = inGameMain->iconsForBuildings[player->tileSet];
+	}
+	if ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) ||
+		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_TRADE_FOOD_FOR_GOLD) || 
+		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_TRADE_STONE_FOR_GOLD) || 
+		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_TRADE_WOOD_FOR_GOLD)) {
+		iconsSLP = inGameMain->iconsForResearches;
+	}
+	if ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_BUILD) ||
+		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_OR_BACK) || 
+		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_SELECTION) || 
+		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE)) {
+		iconsSLP = inGameMain->unknown_4AC_icons;
+	}
+
+	long int long_UICmdId = (long int)UICmdId;
+	long int long_isDisabled = isDisabled;
+	_asm {
+		PUSH long_isDisabled;
+		PUSH description;
+		PUSH name;
+		PUSH unknown_colorPtr;
+		PUSH shortcutDllId; // shortcut DLLID
+		PUSH creationDllId;
+		PUSH helpDllId; // help dll id
+		PUSH DATID; // DATID
+		PUSH long_UICmdId;
+		PUSH iconId; // iconid
+		PUSH buttonIndex; // button index
+		PUSH iconsSLP;
+		MOV ECX, inGameMain;
+		CALL calladdr;
+	}
+	return true;
+}

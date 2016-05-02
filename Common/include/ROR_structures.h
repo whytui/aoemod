@@ -139,6 +139,7 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_ANY_UI; // parent class
 	class STRUCT_UI_LIST_ITEM;
 	class STRUCT_UI_BUTTON;
+	class STRUCT_UI_SLP_BUTTON;
 	class STRUCT_UI_TEXTBOX;
 	class STRUCT_UI_LISTBOX;
 	class STRUCT_UI_COMBOBOX;
@@ -148,6 +149,7 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_UI_DIAMOND_MAP;
 	class STRUCT_UI_IN_GAME_TEXT_ZONE;
 	class STRUCT_UI_PLAYING_ZONE; // Also used in editor !
+	class STRUCT_UI_UNIT_INFO_ZONE;
 	class STRUCT_UI_SCENARIO_EDITOR_MAIN; // "Scenario Editor Screen"
 	class STRUCT_UI_SCENARIO_EDITOR_MENU;
 	class STRUCT_UI_F11_POP_PANEL;
@@ -1646,7 +1648,7 @@ namespace ROR_STRUCTURES_10C
 		char unused_04F;
 		// 0x50
 		float *ptrResourceValues; // To get a resource value: player->ptrResourceValues[CST_RES_ORDER_xxx])
-		char unknown_054; // civ tileset ???
+		char tileSet; // +54. Civilization tileset, 5 max.
 		char unknown_055_unused[3];
 		STRUCT_PLAYER_UNKNOWN_58_AND_6C unknown_058;
 		STRUCT_PLAYER_UNKNOWN_58_AND_6C unknown_06C;
@@ -1671,7 +1673,7 @@ namespace ROR_STRUCTURES_10C
 		char hasAlliedVictory;
 		AOE_CONST_FUNC::CIVILIZATIONS civilizationId; // +109. 1 byte (char)
 		short int unknown_10A; // unused ?
-		unsigned long int ptrPlayerColorStruct; // quite unknown. +26=color(word)?
+		unsigned long int ptrPlayerColorStruct; // quite unknown. +26=color(word)? +28=sub_struct
 		// 0x110
 		short int techTreeId;
 		short int unknown_112;
@@ -2703,17 +2705,15 @@ namespace ROR_STRUCTURES_10C
 		short int technologyId;
 		short int researchType; // 1=dock, 2=granary,etc (see AGE3 tooltip)
 		short int iconId; // 24
-		char button; // 26
+		char buttonId; // 26. 1-5 for first row, 6-10 for second row, 11-15 and 16-20 for 2nd page (2 rows)
 		char unknown_27;
 		short int researchLocation; // 28
 		short int languageDLLName;
 		short int languageDLLDescription; // 2C
 		unsigned short int unknown_2E; // "pointer3" ??
 		// 0x30
-		short int popupConverter;
-		short int unknown_32; // always 1 ?
-		short int helpConverter;
-		short int unknown_36; // always 2 ?
+		long int languageDLLCreation;
+		long int languageDLLHelp;
 		unsigned short int unknown_38;
 		unsigned short int unknown_3A;
 		//end
@@ -2743,7 +2743,7 @@ namespace ROR_STRUCTURES_10C
 		short int researchCount;
 		short int unknown_06; // unused ?
 		STRUCT_RESEARCH_DEF_INFO *ptrResearchDefInfo;
-		STRUCT_PLAYER *ptrPlayer; // Back pointer to player.
+		STRUCT_PLAYER *ptrPlayer; // +C. Back pointer to player.
 	};
 
 
@@ -3213,7 +3213,7 @@ namespace ROR_STRUCTURES_10C
 		char triggerType; // same as class ? TribeAIGroupCivilian = 4, etc?
 		AOE_CONST_FUNC::INTERACTION_MODES interactionMode; // +8D. 1-byte.
 		char minimapMode; // +8E.
-		char commandAttribute;
+		AOE_CONST_FUNC::COMMAND_ATTRIBUTES commandAttribute; // +8F.
 		// 0x90
 		char minimapColor;
 		char attackMode;
@@ -3427,7 +3427,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int ptrConstructionGraphic; // Graphics while building is under construction
 		char unknown_16C;
 		char unknown_16D;
-		char unknown_16E_constructionStep;
+		char constructionStep; // +16E. constructionStep or "angle" ?
 		char unknown_16F;
 		// 0x170
 		char unknown_170;
@@ -3537,7 +3537,7 @@ namespace ROR_STRUCTURES_10C
 		char triggerType; // See age3 (sub type). 2=building, 3=civilian, 4=military, 5=priest
 		AOE_CONST_FUNC::INTERACTION_MODES interactionMode; // +8D. 1-byte.
 		char minimapMode; // +8E.
-		char commandAttribute;
+		AOE_CONST_FUNC::COMMAND_ATTRIBUTES commandAttribute; // +8F.
 		// 0x90
 		char minimapColor;
 		char attackMode;
@@ -3795,7 +3795,7 @@ namespace ROR_STRUCTURES_10C
 	public:
 		unsigned long int unknown_08C;
 		// 0x90
-		unsigned long int unknown_90_color; // ptr to struct 0C 32 54 00 (+4=colorName)
+		unsigned long int unknown_90_color; // ptr to struct 0C 32 54 00 (+4=colorName). +28=sub-struct
 		char unknown_94[0xA4 - 0x94];
 		unsigned long int unknown_A4; // bool ?
 		char unknown_A8; // value 1-3 ?
@@ -3937,7 +3937,7 @@ namespace ROR_STRUCTURES_10C
 		short int unknown_1D2; // see 004ADE3C, 4AE1C3. Values -1, 4 ?
 		float constructionProgress;
 		unsigned long int unknown_1D8; // Build item, for buildings ??
-		char unknown_1DC; // Consistent with player+0x54
+		char unknown_1DC; // Consistent with player+0x54. An index for ?
 		char unknown_1DD; // value = 0 or 100 ? Switched when construction ends?
 		short int unknown_1DE;
 		// 0x1E0
@@ -4220,8 +4220,8 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_0DC;
 		// 0xE0
 		unsigned long int unknown_0E0;
-		unsigned long int unknown_0E4;
-		unsigned long int unknown_0E8;
+		long int helpDllId; // +E4. Dll string Id for help (or tooltip?) ?
+		long int winHelpDataDllId; // +E8. a DllID, used when clicking on help/(object)/details = data for winHelp call.
 		char unknown_0EC;
 		char unknown_0ED;
 		char unknown_0EE;
@@ -4245,26 +4245,72 @@ namespace ROR_STRUCTURES_10C
 	// Size 0x2B8. Also for checkboxes.
 	// Can be created in 0x0456240
 #define CHECKSUM_UI_BUTTON 0x00544E30
+#define CHECKSUM_UI_SLP_BUTTON 0x00549CAC
 	class STRUCT_UI_BUTTON : public STRUCT_ANY_UI {
-	public: // 30 4E 54 00 (a child class is AC 9C 54 00(size=0x3D4), rarely used. 16 are created in game screen ?)
+	public: // 30 4E 54 00 (a child class is AC 9C 54 00(size=0x3D4), rarely used. 16 are created in game screen=unit-commands)
 		long int unsure_buttonId; // +F4
 		long int unknown_0F8;
 		STRUCT_ANY_UI *unknown_0FC; // +FC. Contains the selectedIndex in +100 ?
-		char unknown_100[0x1F6 - 0x100];
-		// +148: sound button.wav info? (always 0 except when playing sound ?)
+		char unknown_100[0x118 - 0x100];
+		long int unknown_118[9];
+		unsigned long int unknown_13C;
+		unsigned long int unknown_140;
+		unsigned long int unknown_144;
+		unsigned long int unknown_148; // +148: sound button.wav info? (always 0 except when playing sound ?)
+		unsigned long int unknown_14C[9]; // Pointers, but not UI structs ?
+		short int unknown_170[9]; // +170. Default -1.
+		char unknown_182[0x198 - 0x182];
+		unsigned long int unknown_198[9];
+		unsigned long int unknown_1BC[9];
+		char unknown_1E0[0x1F6 - 0x1E0];
 		short int checked; // +1F6. To update value, see AOE_CheckBox_SetChecked
 		unsigned long int unknown_1F8;
 		STRUCT_ANY_UI **unknown_1FC; // ptr array groupedObjects ? really unsure
 		// 0x200
 		short int unknown_200; // groupedObjectCount ? really unsure (like radiobuttons?)
-		char unknown_202[0x2B0 - 0x202];
-		long int readOnly; // 45F3A0 to modify ?
+		char unknown_202[0x208 - 0x202];
+		unsigned long int unknown_208[9]; // +208. default 0x00FFFFFF
+		unsigned long int unknown_22C[9];
+		long int unknown_250[9]; // +250. default 0xFFFF
+		unsigned long int unknown_274[9];
+		unsigned long int unknown_298;
+		unsigned long int unknown_29C;
+		unsigned long int unknown_2A0;
+		char unknown_2A4;
+		char unknown_2A5;
+		char unknown_2A6;
+		char unknown_2A7;
+		char unknown_2A8;
+		char unknown_2A9;
+		char unknown_2AA_unused; // +2AA : unused ?
+		char unknown_2AB_unused; // +2AB : unused ?
+		char unknown_2AD_unused[4]; // +2AC unsure
+		long int readOnly; // +2B0. 45F3A0 to modify ?
+		long int unknown_2B4; // +2B4. 4606D0 = setter ?
 
 		bool IsChecked() { return this->checked != 0; }
 		bool IsCheckSumValid() {
-			return (this->checksum == 0x00549CAC) || (this->checksum == CHECKSUM_UI_BUTTON);
+			return (this->checksum == CHECKSUM_UI_SLP_BUTTON) || (this->checksum == CHECKSUM_UI_BUTTON);
 		}
 	};
+	static_assert(sizeof(STRUCT_UI_BUTTON) == 0x2B8, "STRUCT_UI_BUTTON size");
+
+	// Size 0x3D4. Constructor=0x4F7420
+	class STRUCT_UI_SLP_BUTTON : public STRUCT_UI_BUTTON {
+		// Starts at +2B8
+		unsigned long int unknown_2B8;
+		unsigned long int unknown_2BC;
+		// 0x2C0
+		char unknown_2C0; // Values 0, 3 .. ?
+		char unknown_2C1[3];
+		char unknown_2C4[0x2D0 - 0x2C4];
+		char contextHelpText[0x100]; // +2D0.
+		long int unknown_3D0; // see 483785
+		bool IsCheckSumValid() {
+			return (this->checksum == CHECKSUM_UI_SLP_BUTTON);
+		}
+	};
+	static_assert(sizeof(STRUCT_UI_SLP_BUTTON) == 0x3D4, "STRUCT_UI_SLP_BUTTON size");
 
 
 	// Size ?
@@ -4484,7 +4530,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_DIAMOND_MAP; }
 	};
 
-	// Size ?
+	// Size 0x380. Constructor=0x465730
 	// class for chat text lines (1 for each chat line), yellow/orange centered in-game error messages
 	class STRUCT_UI_IN_GAME_TEXT_ZONE : public STRUCT_ANY_UI {
 	public:
@@ -4563,6 +4609,19 @@ namespace ROR_STRUCTURES_10C
 		long int unknown_340_unitId; // Target ? Selected ? Under mouse ?
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00546688) || (this->checksum == 0x0054A840); }
+	};
+
+
+	// Size ?
+	// Constructor ?
+#define CHECKSUM_UI_UNIT_INFO_ZONE 0x00549E7C
+	class STRUCT_UI_UNIT_INFO_ZONE : public STRUCT_ANY_UI {
+	public:
+		char unknown_0F4[0x110 - 0x0F4];
+		STRUCT_PLAYER *controlledPlayer; // +110.
+		STRUCT_UNIT_BASE *unitToDisplay; // +114.
+
+		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_UNIT_INFO_ZONE; }
 	};
 
 
@@ -4678,26 +4737,42 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_UI_F11_POP_PANEL) == 0x164, "STRUCT_UI_F11_POP_PANEL size");
 
 
-	// Size ?
-	// Constructor ?
+	// Size 0x7C8
+	// Constructor 0x47D440
 	// This is the parent UI object of in-game screen.
 	// Pointed by 005830F4
 #define CHECKSUM_UI_IN_GAME_MAIN 0x0054679C
-	class STRUCT_UI_IN_GAME_MAIN : public STRUCT_ANY_UI { // "GameScreen"
+	class STRUCT_UI_IN_GAME_MAIN : public STRUCT_ANY_UI { // "Game Screen"
 	public:
 		long int hWnd; // TO CONFIRM
-		char unknown_0F8[0x4B8 - 0x0F8];
+		char unknown_0F8[0x48C - 0x0F8];
+		unsigned long int iconsForUnitCommands; // +48C. Pointer to SLP data... Cf SLP 50721
+		unsigned long int iconsForResearches; // +490. Pointer to SLP data... Cf SLP 50729
+		unsigned long int iconsForTrainUnits; // +494. Pointer to SLP data... Cf SLP 50730.
+		unsigned long int iconsForBuildings[5]; // +498 + tileset*4. It seems there is no free slot for more tilesets.
+		unsigned long int unknown_4AC_icons; // +4AC. Used in 48250F. Includes the "cancel" icon, id=10. SLP 50725 ?
+		unsigned long int unknown_4B0;
+		unsigned long int unknown_4B4;
 		STRUCT_UI_PLAYING_ZONE *gamePlayUIZone; // +4B8. 88 66 54 00.
 		STRUCT_UI_DIAMOND_MAP *diamondMap; // +4BC. ptr to F4 A3 54 00.
 		// 0x4C0
-		char unknown_4C0[0x540 - 0x4C0];
+		unsigned long int unknown_4C0;
+		unsigned long int unknown_4C4;
+		STRUCT_UI_SLP_BUTTON *unitCommandButtons[12]; // +4C8. 2 rows of 6 slpButtons for command buttons in bottom center zone.
+		STRUCT_UI_SLP_BUTTON *btnChat; // +4F8. Also referred as commandButtons[0xC]. Not visible in SP games.
+		STRUCT_UI_SLP_BUTTON *btnDiplomacy; // +4FC. Also referred as commandButtons[0xD]
+		STRUCT_UI_SLP_BUTTON *btnMenu; // +500. Also referred as commandButtons[0xE]
+		STRUCT_UI_SLP_BUTTON *btnHelp; // +504. Also referred as commandButtons[0xF]
+		STRUCT_UI_SLP_BUTTON *btnShowScores; // +508. Also referred as commandButtons[0x10]
+		char unknown_50C[0x518 - 0x50C];
+		STRUCT_ANY_UI *unknown_518[10]; // cf 47F753
 		STRUCT_UI_F11_POP_PANEL *populationInfoPanel; // 0x540. F11 "pop : x/y" zone ?
 		STRUCT_UI_IN_GAME_TEXT_ZONE *ingameErrorTextZone; // 0x544
 		char unknown_548[0x55C - 0x548];
 		STRUCT_UI_IN_GAME_TEXT_ZONE *ingameChatTextZone[8]; // 0x55C ; check count !
 		STRUCT_ANY_UI *unknown_57C; // 50 5D 54 00
 		char unknown_580[0x5C8 - 0x580];
-		STRUCT_UNIT *panelSelectedUnit; // 0x5C8
+		STRUCT_UNIT *panelSelectedUnit; // 0x5C8. Pointer to unit selected in unit info zone.
 		char unknown_5CC[0x5E0 - 0x5CC];
 		// 0x5E0
 		short int panelButtonNumber; // Total number of button in current panel status (button bar)
@@ -4712,6 +4787,8 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_IN_GAME_MAIN; }
 	};
+	static_assert(sizeof(STRUCT_UI_IN_GAME_MAIN) == 0x7C8, "STRUCT_UI_IN_GAME_MAIN size");
+
 
 	// Size = 0x560. 10 78 54 00. Parent=9C 57 54 00 then BC 4B 54 00.
 	// The screen before starting game to choose map type, etc ("advanced" options like map size, etc).

@@ -18,6 +18,7 @@ CustomRORCommand::~CustomRORCommand() {
 }
 
 
+#pragma message("Replace with direct access to memory / using aoe bin data ")
 bool CustomRORCommand::CheckEnabledFeatures() {
 	char strNotEnabled[] = " NOT ENABLED !";
 	FILE *f;
@@ -297,6 +298,11 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	}
 	fprintf_s(f, "\nFeature: Fix game crash when using kill* cheat code on a non-existing player...");
 	if (!IsRORAPICallEnabled(0x0050CB6F)) {
+		fprintf_s(f, strNotEnabled);
+		result = false;
+	}
+	fprintf_s(f, "\nFeature: Entry point after OnShowUnitCommandButtons...");
+	if (!IsRORAPICallEnabled(0x00483490)) {
 		fprintf_s(f, strNotEnabled);
 		result = false;
 	}
@@ -800,6 +806,8 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		assert(tacAI->IsCheckSumValid());
 		float posX, posY;
 		bool ok = GetGamePositionUnderMouse(&posX, &posY);
+
+		AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_WORK, 83, false);
 	}
 
 	// TEST strategy
@@ -4697,6 +4705,109 @@ void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(ROR_STRUCTURES_10C::STRU
 		}
 	}
 }
+
+
+// Called at the end of showUnitCommandButtons
+void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
+	assert(gameMainUI && gameMainUI->IsCheckSumValid());
+	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
+		return;
+	}
+	if (gameMainUI->unknown_7C4_panelSelectedUnitId < 0) {
+		return;
+	}
+
+#pragma message("AfterShowUnitCommandButtons: Add config here to enable/disable")
+
+	// Collect info
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+	if (!player || !player->IsCheckSumValid()) {
+		return;
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *) this->crInfo->GetMainSelectedUnit(player);
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructDefUnit || !unit->GetUnitDefinition()->IsCheckSumValidForAUnitClass()) {
+		return;
+	}
+	if (unit->unitStatus != 2) {
+		return;
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefinition();
+	bool isBuilding = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING);
+	bool isLiving = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT);
+	// TO DO: use unitDef->command attribute ?
+	if (!isLiving && !isBuilding) {
+		return;
+	}
+	if (isLiving) { return; } // Nothing implemented yet for this case.
+	// TO DO: building already training/researching: what do we do ?
+
+	bool buttonIsVisible[12];
+	long int bestElemTotalCost[12];
+	long int bestElemDATID[12];
+	bool bestElemIsResearch[12];
+	for (int i = 0; i < 12; i++) {
+		buttonIsVisible[i] = IsInGameUnitCommandButtonVisible(gameMainUI, i);
+		bestElemTotalCost[i] = -1;
+		bestElemDATID[i] = -1;
+		bestElemIsResearch[i] = false;
+	}
+
+	// Add custom buttons
+	// TODO : manage both units and researches
+	//GetResearchStatus(player, CST_RSID_SIEGE_CRAFT) == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID
+	ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *playerResInfo = player->ptrResearchesStruct;
+	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF_INFO *resDefInfo = NULL;
+	if (playerResInfo) {
+		resDefInfo = playerResInfo->ptrResearchDefInfo;
+	}
+	if (playerResInfo && resDefInfo) {
+		for (int researchId = 0; (researchId < playerResInfo->researchCount) && (researchId < resDefInfo->researchCount); researchId++) {
+			ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *status = &playerResInfo->researchStatusesArray[researchId];
+			int rawButtonId = resDefInfo->researchDefArray[researchId].buttonId;
+			long int buttonIndex = EmpiresDatButtonIdToInternalButtonIndex(rawButtonId);
+			// rawButtonId=0 for non-visible researches, we get buttonIndex=-1 in this case. Exclude it.
+			if ((buttonIndex > -1) && (!buttonIsVisible[buttonIndex]) &&
+				(status->currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT)) {
+				// Sorting strategy:
+				// We suppose higher cost=further research, so lower cost should be first (next) available research.
+				long int thisCost = 0;
+				if (resDefInfo->researchDefArray[researchId].costUsed1) {
+					thisCost += resDefInfo->researchDefArray[researchId].costAmount1;
+				}
+				if (resDefInfo->researchDefArray[researchId].costUsed2) {
+					thisCost += resDefInfo->researchDefArray[researchId].costAmount2;
+				}
+				if (resDefInfo->researchDefArray[researchId].costUsed3) {
+					thisCost += resDefInfo->researchDefArray[researchId].costAmount3;
+				}
+				bool costIsBetter = (bestElemTotalCost[buttonIndex] == -1) || (thisCost < bestElemTotalCost[buttonIndex]);
+				// TO DO : exclude non-visible researches (only_requirement=age ou age+building?)
+				if (costIsBetter &&
+					(resDefInfo->researchDefArray[researchId].researchLocation == unitDef->DAT_ID1) &&
+					(resDefInfo->researchDefArray[researchId].researchTime > 0)
+					) {
+					bestElemDATID[buttonIndex] = researchId;
+					bestElemIsResearch[buttonIndex] = true;
+					bestElemTotalCost[buttonIndex] = thisCost;
+				}
+			}
+		}
+	}
+
+	// TO DO train units
+
+
+	for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
+		if (bestElemDATID[buttonIndex] != -1) {
+			if (bestElemIsResearch[buttonIndex]) {
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true);
+			} else {
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], true);
+			}
+		}
+	}
+}
+
 
 
 // Computes (existing) building influence zone for farm placement map like values computation.

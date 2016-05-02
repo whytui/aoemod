@@ -275,6 +275,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x0050CB6F:
 		this->FixKillXCrashOnUnknownPlayer(REG_values);
 		break;
+	case 0x00483490:
+		this->EntryPointOnAfterShowUnitCommandButtons(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -2923,6 +2926,24 @@ void CustomRORInstance::FixKillXCrashOnUnknownPlayer(REG_BACKUP *REG_values) {
 	}
 	// Normal case: just get player structure (like original overwritten code)
 	REG_values->ECX_val = (unsigned long int)global->ptrPlayerStructPtrTable[playerIdToKill]; // THIS instruction is not secured in game EXE.
+}
+
+
+// From 00483489. end of ShowUnitComandButtons (in-game screen)
+void CustomRORInstance::EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_values) {
+	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->ESI_val);
+	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *)REG_values->ECX_val;
+	ror_api_assert(REG_values, gameMainUI && gameMainUI->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		const unsigned long int addr = 0x4834A0;
+		_asm {
+			MOV ECX, gameMainUI;
+			CALL addr;
+		}
+	}
+	// Custom treatments:
+	this->crCommand.AfterShowUnitCommandButtons(gameMainUI);
 }
 
 
