@@ -74,7 +74,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_VEG_windowedMode_10c 21
 #define COUNT_selectedUnits_10c 85
 #define COUNT_obsoletes_10c 22
-#define COUNT_ROR_API_10c 92
+#define COUNT_ROR_API_10c 94
 #define COUNT_manageAI_10c 13
 
 
@@ -4510,6 +4510,26 @@ void AOE_binData::InitROR_API() {
 		0x0083489,
 		(0x8B, 0xCE, 0xE8, 0x10, 0x00, 0x00, 0x00, 0x5F), // default=no
 		(0x8B, 0xCE, 0xE8, 0xE4, 0x60, 0xF9, 0xFF, 0x5F),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		HandleGameCommandButtonsClick,
+		"Entry point on gameCommandButtonsClick events.",
+		0x08140D,
+		(0xC2, 0x10, 0x00, 0xA1, 0x3C, 0x87, 0x55, 0x00, 0x53), // default=no
+		(0xC2, 0x10, 0x00, 0xE8, 0x5F, 0x81, 0xF9, 0xFF, 0x53),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		GetButtonInternalIndexFromDatBtnId,
+		"Overload GetButtonInternalIndexFromDatBtnId method to handle more than 2 pages.",
+		0x08370F,
+		(0x90, 0x8B, 0x44, 0x24, 0x04, 0x3C, 0x01, 0x72, 0x0D, 0x3C, 0x05), // default=no
+		(0x90, 0xE8, 0x5F, 0x5E, 0xF9, 0xFF, 0xC2, 0x04, 0x00, 0x3C, 0x05),
 		FM_OFF,
 		FM_ON
 		);

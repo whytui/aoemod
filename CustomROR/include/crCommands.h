@@ -296,6 +296,12 @@ public:
 	// Called at the end of showUnitCommandButtons
 	void AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI);
 
+	// Called when a game UI command button is clicked.
+	// Returns true if event has been handled and must NOT be handle by ROR standard code.
+	// Returns false by default (most cases) !
+	bool OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
+		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue);
+
 	// ----------------------------------
 	// City plan
 

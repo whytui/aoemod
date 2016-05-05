@@ -68,3 +68,13 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 // Returns true if current strategy status allows triggering a wonder construction
 bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai);
+
+// Find a strategy element for a specific actor building (instance)id. (strategy element must be in progress)
+// This is only possible thanks to custom treatments that set unitInstanceId to actor unitId while training/researching is in progress.
+// Unicity is not guaranteed (first found is returned), however it is not supposed to happen much.
+// actorUnitId must be >=0
+// Returns NULL if not found.
+ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetStrategyElementForActorBuilding(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int actorUnitId);
+
+// Resets a strategy element status (in progress, active)
+void ResetStrategyElementStatus(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem);

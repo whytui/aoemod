@@ -278,6 +278,12 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x00483490:
 		this->EntryPointOnAfterShowUnitCommandButtons(REG_values);
 		break;
+	case 0x00481415:
+		this->EntryPointOnGameCommandButtonClick(REG_values);
+		break;
+	case 0x00483715:
+		this->ROR_GetButtonInternalIndexFromDatBtnId(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -2944,6 +2950,42 @@ void CustomRORInstance::EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_
 	}
 	// Custom treatments:
 	this->crCommand.AfterShowUnitCommandButtons(gameMainUI);
+}
+
+
+// From 00481410 - UIGameMain.DoButtonAction(commandId, infoValue, arg3)
+// Forcing return address to 0x4815BE allows to skip ROR treatments (this button click will be ignored by ROR)
+void CustomRORInstance::EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_values) {
+	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *)REG_values->ECX_val;
+	ror_api_assert(REG_values, gameMainUI && gameMainUI->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->EAX_val = *(long int *)AOE_OFFSETS_10C::ADDR_GAME_ACTIONS_ALLOWED;
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+	bool forceIgnoreThisEvent = false; // Modify this flag if you wish.
+	long int arg1 = GetIntValueFromRORStack(REG_values, 4);
+	long int arg2 = GetIntValueFromRORStack(REG_values, 8);
+	long int arg3 = GetIntValueFromRORStack(REG_values, 0x0C);
+
+	// Do custom treatments here
+	forceIgnoreThisEvent = this->crCommand.OnGameCommandButtonClick(gameMainUI, (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)arg1, arg2);
+
+	// Do not modify below.
+	if (forceIgnoreThisEvent) {
+		ChangeReturnAddress(REG_values, 0x4815BE);
+	}
+}
+
+
+// From 0x483710. Fix the transformation of empires.dat button IDs to internal indexes to support more than 1 page
+void CustomRORInstance::ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_values) {
+	long int rawButtonId = GetIntValueFromRORStack(REG_values, 4);
+	long int result = GetButtonInternalIndexFromDatBtnId((char)rawButtonId);
+	if (result < 0) {
+		result = 0; // Make sure always to return a valid buttonId in ROR code ! 0 is default value in original method.
+	}
+	REG_values->EAX_val = result;
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
 }
 
 

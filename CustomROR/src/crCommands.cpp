@@ -306,6 +306,16 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 		fprintf_s(f, strNotEnabled);
 		result = false;
 	}
+	fprintf_s(f, "\nFeature: EntryPoint on unit command buttons actions...");
+	if (!IsRORAPICallEnabled(0x000481415)) {
+		fprintf_s(f, strNotEnabled);
+		result = false;
+	}
+	fprintf_s(f, "\nFeature: EntryPoint on GetButtonInternalIndexFromDatBtnId...");
+	if (!IsRORAPICallEnabled(0x0483715)) {
+		fprintf_s(f, strNotEnabled);
+		result = false;
+	}
 	// MAP
 	fprintf_s(f, "\nFeature: Generated map elevation customization...");
 	if (!IsRORAPICallEnabled(0x00472C2F)) {
@@ -722,7 +732,19 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		assert(humanPlayer != NULL);
 		char bufasm[] = {1,2,3, 4};
 		//WriteInMyMemory(0x45df32, bufasm, 4);
-		patcherExample();
+		//patcherExample();
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 62);
+		if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass()) {
+			unitDefLiving->availableForPlayer = 1;
+			unitDefLiving->trainButton = 13;
+			unitDefLiving->trainLocation = 109;
+		}
+		unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 227);
+		if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass()) {
+			unitDefLiving->availableForPlayer = 1;
+			unitDefLiving->trainButton = 27;
+			unitDefLiving->trainLocation = 109;
+		}
 	}
 
 	char *c = "Game Settings Screen";
@@ -4713,7 +4735,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
 		return;
 	}
-	if (gameMainUI->unknown_7C4_panelSelectedUnitId < 0) {
+	if (gameMainUI->panelSelectedUnit == NULL) {
 		return;
 	}
 	if (!IsGameRunning()) {
@@ -4728,10 +4750,11 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		return;
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *) this->crInfo->GetMainSelectedUnit(player);
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructDefUnit || !unit->GetUnitDefinition()->IsCheckSumValidForAUnitClass()) {
 		return;
 	}
+	if (player != unit->ptrStructPlayer) { return; }
 	if (unit->unitStatus != 2) {
 		return;
 	}
@@ -4747,18 +4770,8 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	// A bigger restriction for now ! Nothing implemented yet for this case.
 	if (isLiving) { return; }
 	
-	// TO DO: manage isBusy for living unit ? (not required as long as we don't customize buttons for living units...)
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *unitAsBuilding = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *)unit;
-	bool isBusy = false;
-	if (unitAsBuilding && unitAsBuilding->IsCheckSumValid()) {
-		isBusy = (unitAsBuilding->isCurrentlyTrainingUnit != 0);
-	}
-	ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *currentAction = GetUnitAction(unit);
-	if (currentAction != NULL) {
-		isBusy = true;
-	}
-
 	bool buttonIsVisible[12]; // Is button visible after standard buttons display.
+	bool currentButtonDoesNotBelongToThisPage[12];
 	long int bestElemTotalCost[12];
 	long int bestElemDATID[12];
 	bool bestElemIsResearch[12];
@@ -4769,12 +4782,65 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		bestElemDATID[i] = -1;
 		bestElemIsResearch[i] = false;
 		bestElemLangNameId[i] = -1;
+		currentButtonDoesNotBelongToThisPage[i] = false;
 	}
 	long int currentActionDATID = -1;
 	bool currentActionIsResearch = false;
 	long int currentActionButtonIndex = -1;
 	short int currentActionLangNameId = -1;
 	std::list<long int> activableUnitDefIDs = GetActivableUnitDefIDs(player); // A list of unitDef IDs that can be enabled thanks to (available) researches.
+	// To support >1 page
+	long int minButtonId = gameMainUI->panelButtonIdPageOffset;
+	long int minButtonIdNextPage = gameMainUI->panelButtonIdPageOffset + 10 + 1; // 10=pageSize, +1 for next button after "this" last !
+	long int maxFoundButtonId = -1;
+
+	// TO DO: manage isBusy for living unit ? (not required as long as we don't customize buttons for living units...)
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *unitAsBuilding = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *)unit;
+	bool isBusy = false;
+	if (unitAsBuilding && unitAsBuilding->IsCheckSumValid()) {
+		isBusy = (unitAsBuilding->isCurrentlyTrainingUnit != 0);
+	}
+	ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *currentAction = GetUnitAction(unit);
+	// For buildings, currentAction is Non-NULL when researching tech, when AI-triggered "train unit", but NULL for human-triggered "train unit"
+	ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_OBJECT *currentActionAsMakeObject = (ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_OBJECT *)currentAction;
+	if (currentAction != NULL) {
+		isBusy = true;
+		if (currentActionAsMakeObject && currentActionAsMakeObject->IsCheckSumValid()) {
+			// This only handles AI-triggered MakeObject, not human-triggered.
+			currentActionDATID = currentActionAsMakeObject->targetUnitDAT_ID;
+			currentActionIsResearch = false;
+		}
+		// For research : currentActionDATID will be set in loop below...
+	}
+	if ((unitAsBuilding->isCurrentlyTrainingUnit) && (unitAsBuilding->ptrHumanTrainQueueInformation != NULL)) {
+		// This only handles human-triggered MakeObject (not AI-triggered).
+		currentActionDATID = unitAsBuilding->ptrHumanTrainQueueInformation->DATID;
+		currentActionIsResearch = false;
+	}
+
+
+	// Handle more than 1 page : ROR code doesn't, so we have to hide the buttons it added if current page is not 1st one.
+	// For the moment, just collect info.
+	for (int currentBtnId = 0; currentBtnId < 12; currentBtnId++) {
+		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID curBtnCmdId = (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)gameMainUI->unitCommandButtons[currentBtnId]->commandIDs[0];
+		if (curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *tmpUnitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)
+				GetUnitDefStruct(player, (short int)gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0]);
+
+			if (tmpUnitDef && tmpUnitDef->IsCheckSumValidForAUnitClass() && tmpUnitDef->IsTypeValid() &&
+				((tmpUnitDef->trainButton >= minButtonIdNextPage) || (tmpUnitDef->trainButton < minButtonId))) {
+				currentButtonDoesNotBelongToThisPage[currentBtnId] = true;
+			}
+		}
+		if (curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) {
+			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *tmpResearchDef = GetResearchDef(player, 
+				(short int)gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0]);
+			if (tmpResearchDef && ((tmpResearchDef->buttonId >= minButtonIdNextPage) || (tmpResearchDef->buttonId < minButtonId))) {
+				currentButtonDoesNotBelongToThisPage[currentBtnId] = true;
+			}
+		}
+	}
+
 
 	// Add custom buttons
 
@@ -4788,7 +4854,14 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		for (int researchId = 0; (researchId < playerResInfo->researchCount) && (researchId < resDefInfo->researchCount); researchId++) {
 			ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *status = &playerResInfo->researchStatusesArray[researchId];
 			int rawButtonId = resDefInfo->researchDefArray[researchId].buttonId;
-			long int buttonIndex = EmpiresDatButtonIdToInternalButtonIndex(rawButtonId);
+			if ((resDefInfo->researchDefArray[researchId].researchLocation == unitDef->DAT_ID1) &&
+				(rawButtonId > maxFoundButtonId)) {
+				maxFoundButtonId = rawButtonId;
+			}
+			long int buttonIndex = -1;
+			if ((rawButtonId >= minButtonId) && (rawButtonId < minButtonIdNextPage)) {
+				buttonIndex = GetButtonInternalIndexFromDatBtnId(rawButtonId);
+			}
 			assert(buttonIndex <= 12); // But can be -1
 			// rawButtonId=0 for non-visible researches, we get buttonIndex=-1 in this case. Exclude it.
 			bool researchIsAvailable = (status->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE);
@@ -4799,7 +4872,8 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 				currentActionLangNameId = resDefInfo->researchDefArray[researchId].languageDLLName;
 				currentActionIsResearch = true;
 			}
-			if ((buttonIndex > -1) && (!buttonIsVisible[buttonIndex]) &&
+			if ((buttonIndex > -1) && 
+				((!buttonIsVisible[buttonIndex]) || (currentButtonDoesNotBelongToThisPage[buttonIndex])) &&
 				(	(status->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) || 
 					(researchIsAvailable && isBusy)
 				)
@@ -4839,9 +4913,16 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 				(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)player->ptrStructDefUnitTable[loopUnitDefId];
 			if (loopUnitDef && loopUnitDef->IsCheckSumValid() && loopUnitDef->IsTypeValid()) { // Only for living units
 				int rawButtonId = loopUnitDef->trainButton;
-				long int buttonIndex = EmpiresDatButtonIdToInternalButtonIndex(rawButtonId);
+				if ((loopUnitDef->trainLocation == unitDef->DAT_ID1) && (rawButtonId > maxFoundButtonId)) {
+					maxFoundButtonId = rawButtonId;
+				}
+				long int buttonIndex = -1;
+				if ((rawButtonId >= minButtonId) && (rawButtonId < minButtonIdNextPage)) {
+					buttonIndex = GetButtonInternalIndexFromDatBtnId(rawButtonId);
+				}
 				assert(buttonIndex <= 12); // But can be -1
-				if ((buttonIndex >= 0) && (buttonIndex <= 12) && (!buttonIsVisible[buttonIndex]) &&
+				if ((buttonIndex >= 0) && (buttonIndex <= 12) &&
+					((!buttonIsVisible[buttonIndex]) || (currentButtonDoesNotBelongToThisPage[buttonIndex])) &&
 					(loopUnitDef->trainLocation == unitDef->DAT_ID1)) {
 					long int thisCost = 0;
 					if (loopUnitDef->costs[0].costUsed) {
@@ -4886,9 +4967,34 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 			}
 		}
 	}
-	
-	char nameBuffer[200];
 
+	// Hide buttons added by ROR and that do not belong to current page
+	for (int currentBtnId = 0; currentBtnId < 12; currentBtnId++) {
+		if (currentButtonDoesNotBelongToThisPage[currentBtnId]) {
+			bool forceShowAnyway = false;
+			// There is only 1 exception : currently-being trained unit should always be displayed
+			if (isBuilding && (currentActionDATID > -1)) {
+				AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID curBtnCmdId = (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)gameMainUI->unitCommandButtons[currentBtnId]->commandIDs[0];
+				long int btnDATID = gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0];
+				if ((curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) &&
+					!currentActionIsResearch && (btnDATID == currentActionDATID) ) {
+					forceShowAnyway = true;
+				}
+				if ((curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) &&
+					currentActionIsResearch && (btnDATID == currentActionDATID) ) {
+					forceShowAnyway = true;
+				}
+			}
+			if (!forceShowAnyway) {
+				AOE_ShowUIObject(gameMainUI->unitCommandButtons[currentBtnId], false);
+				gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0] = -1;
+				gameMainUI->unitCommandButtons[currentBtnId]->commandIDs[0] = 0;
+			}
+		}
+	}
+	
+	// Now display our custom buttons (... on free slots)
+	char nameBuffer[200];
 	for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
 		std::string elementInfo;
 		if (bestElemDATID[buttonIndex] != -1) {
@@ -4929,17 +5035,87 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 
 	// When controlled player is an AI player, AI-triggered "make objects" (train unit) can't be stopped. Fix it.
 	// Note: for human player-triggered "train unit", a STOP button is already visible (command=STOP), leave it unchanged.
-#pragma message("Need fix for strategy to use STOP on AI makeobject action")
 	// WARNING: clicking on STOP for AI-triggered "train unit" does not update strategy and units will never be trained again ! Needs a fix !
 	const int buttonIdForStop = 6;
 	if (isBuilding && (currentAction != NULL) && (currentAction->actionTypeID == INTERNAL_ACTION_ID::CST_IAI_MAKE_OBJECT) &&
 		(gameMainUI->unitCommandButtons[buttonIdForStop]->commandIDs[0] != (long int)INGAME_UI_COMMAND_ID::CST_IUC_STOP)) {
 		GetLanguageDllText(LANG_ID_STOP_CURRENT_ACTION, nameBuffer, sizeof(nameBuffer), "Stop current action");
-		AddInGameCommandButton(buttonIdForStop, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, 
-			true // TO DO : when strategy issue is fixed, allow this (set disabled=false)
-			, nameBuffer);
+		AddInGameCommandButton(buttonIdForStop, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, nameBuffer);
+	}
+
+	// Show Next page button (not if busy, because we already have current action there)
+	bool hasNextPage = (maxFoundButtonId >= minButtonIdNextPage); // has more buttons (Next actually goes to next page, NOT to first one)
+	if (!isBusy && (hasNextPage || (minButtonId > 0))) {
+		// There are buttons to display on next page: show button
+		AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE, 0, false, NULL);
+		// We store the information "this is not last page" in button's infoValue.
+		gameMainUI->unitCommandButtons[5]->buttonInfoValue[0] = hasNextPage;
 	}
 }
+
+
+// Called when a game UI command button is clicked.
+// Returns true if event has been handled and must NOT be handle by ROR standard code.
+// Returns false by default (most cases) !
+bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
+	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue) {
+
+#pragma message("Use custom buttons config 'enabled/disabled' here")
+
+	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
+		return false;
+	}
+	if (!IsGameRunning()) {
+		return false;
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = NULL;
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = NULL;
+	if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValid()) {
+		unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
+		if (unitBase && unitBase->IsCheckSumValidForAUnitClass()) {
+			player = unitBase->ptrStructPlayer;
+		}
+	}
+	// No additional actions when viewing a unit that is not mine !
+	if (!unitBase || !player || !player ->IsCheckSumValid() || (player != GetControlledPlayerStruct_Settings())) {
+		return false;
+	}
+
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_STOP) {
+		// Fix strategy when AI is enabled and some action is interrupted by human player
+		if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValid()) {
+			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *stratElem = GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
+			ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
+		}
+	}
+
+	// Handle next page. Note: in ROR, see 485140 (for villager build menu only)
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE) {
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+		if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
+			return false;
+		}
+		// Do not customize villagers... at this point
+		if (IsVillager(unitDefBase->DAT_ID1)) {
+			return false;
+		}
+		bool hasNextPage = (gameMainUI->unitCommandButtons[5]->buttonInfoValue[0] != 0); // this custom info is stored when button is added in AfterShowUnitCommandButtons
+		if (hasNextPage) { // has a next page: increment button offset by 10.
+			gameMainUI->panelButtonIdPageOffset += 10;
+		} else { // No next page = go back to first page
+			gameMainUI->panelButtonIdPageOffset = 0;
+		}
+		const unsigned long int addrShowUnitCommands = 0x4822A0;
+		_asm {
+			MOV ECX, gameMainUI;
+			CALL addrShowUnitCommands;
+		}
+		return true; // Do not execute normal code for NEXT PAGE
+	}
+
+	return false;
+}
+
 
 
 

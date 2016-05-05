@@ -2477,29 +2477,27 @@ bool IsInGameUnitCommandButtonVisible(long int buttonIndex) {
 }
 
 // To be used with button IDs from unit defintion/researches to get a buttonIndex for game main UI structure (command buttons)
-// WARNING: returns -1 if DATButtonId is -1 or invalid.
-long int EmpiresDatButtonIdToInternalButtonIndex(char DATButtonId) {
-	if (DATButtonId < 0) { return -1; } // Invalid.
-	if (DATButtonId <= 5) {
-		return DATButtonId - 1; // Source 1-5 = index 0-4
+// WARNING: returns -1 if DATButtonId is 0 or negative (invalid)
+// Valid results are 0-4 or 6-10.
+// See also 0x483710 (only works for 2 pages)
+long int GetButtonInternalIndexFromDatBtnId(char DATButtonId) {
+	if (DATButtonId <= 0) { return -1; } // Invalid (including 0).
+	long int tmp = DATButtonId % 10; // 1-5 is same as 11-15 / 21-25, etc. 6-10 = same as 16-20, etc
+	if (tmp <= 5) {
+		return tmp - 1; // Source 1-5 = index 0-4
 	}
-	if (DATButtonId <= 10) {
-		return DATButtonId; // Source 6-10 = index 6-10
+	if (tmp <= 10) {
+		return tmp; // Source 6-10 = index 6-10
 	}
-	if (DATButtonId <= 15) {
-		return DATButtonId - 11; // Source 11-15 = index 0-4
-	}
-	if (DATButtonId <= 20) {
-		return DATButtonId - 10; // Source 16-20 = index 6-10
-	}
-	return -1;
+	return -1; // Should never happen !
 }
 
 
 // Add a command button in unit-commands zone (under game zone).
 // buttonIndex: 0-4 = first row, 6-10=second row, 5 and 11 are "special" right buttons (11=unselect/cancel, generally)
-// UICmdId must be related to units (attack, etc)
-// DATID can be a unitDefId (train), researchId (do_research)...
+// DATID can be a unitDefId (train), researchId (do_research)... Set it to 0 when not relevant.
+// isDisabled : set it to true to get a read only button (no possible click)
+// creationText can be left NULL to display a text using unit/research/etc's LanguageDLLID.
 // Technically, this just updates the button (no button object is created).
 bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
 	long int DATID, bool isDisabled, const char *creationText) {
@@ -2516,6 +2514,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	long int creationDllId = 0;
 	long int hotkeyDllId = 0;
 	char pName[200];
+	pName[0] = 0;
 
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(player, (short int)DATID);
@@ -2527,7 +2526,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		creationDllId = creationDllId + 100000; // cf 48248B
 		hotkeyDllId = unitDef->languageDLLHotKeyText;
 		iconId = unitDef->iconId;
-		//AOE_LoadStringLanguage(unitDef->languageDLLID_Name, bufferName, 30); // leave name/desc NULL ?
+		GetLanguageDllText(unitDef->languageDLLID_Name, pName, sizeof(pName), "");
 	}
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) {
 		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef = GetResearchDef(player, (short int)DATID);
@@ -2535,9 +2534,15 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		iconId = researchDef->iconId;
 		creationDllId = researchDef->languageDLLCreation;
 		helpDllId = researchDef->languageDLLHelp;
-		GetLanguageDllText(researchDef->languageDLLName, pName, 200, researchDef->researchName);
+		GetLanguageDllText(researchDef->languageDLLName, pName, sizeof(pName), researchDef->researchName);
 	}
-	// Manage build too ?
+	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE) { // cf 0x4824FF
+		creationDllId = -1;
+		helpDllId = LANG_ID_NEXT_PAGE;
+		GetLanguageDllText(LANG_ID_NEXT_PAGE, pName, sizeof(pName), "Next page");
+	}
+
+	// Manage do_build too ?
 	// TODO : for many commands, we need to set name/description ?
 	if (iconId < 0) {
 		traceMessageHandler.WriteMessageNoNotification("No icon for command button, using 0");

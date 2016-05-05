@@ -24,6 +24,7 @@ namespace ROR_STRUCTURES_10C
 	// Pre-declarations
 	class STRUCT_PATH_FINDING_UNKNOWN_POS_INFO;
 	class STRUCT_AI_UNIT_LIST_INFO;
+	class STRUCT_HUMAN_TRAIN_QUEUE_INFO;
 	class STRUCT_SPOTTED_RESOURCE_INFO;
 	class STRUCT_POSITION_INFO;
 	class STRUCT_MP_COMMUNICATION; // Visible at global level
@@ -231,6 +232,13 @@ namespace ROR_STRUCTURES_10C
 		}
 	};
 	static_assert(sizeof(STRUCT_AI_UNIT_LIST_INFO) == 0x10, "STRUCT_LIST_OF_UNITID size");
+
+	// Size=4
+	class STRUCT_HUMAN_TRAIN_QUEUE_INFO {
+	public:
+		short int DATID; // Only relevant when unitCount > 0
+		short int unitCount;
+	};
 
 	// Size=0x14. Used in InfAI structure.
 	class STRUCT_SPOTTED_RESOURCE_INFO {
@@ -1859,7 +1867,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_1AC; // related to registry ?
 		// 0x1B0
 		AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentUIStatus; // 0=loading,2=inMenu,4=playing,7=editor
-		AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES mouseActionType; // Set this during game, you'll be able to edit the map !! userSelected* fields
+		AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES mouseActionType; // +1B4. Set this during game, you'll be able to edit the map !! userSelected* fields
 		long int unknown_1B8; // Values 1,6,... ? SubMouseActionType ? Used when mouseActionType=6 (villager build menu) or in editor. Seen 1=editor_moveUnit?, 3, 4. Unsure !
 		long int unknown_1BC;
 		// 0x1C0
@@ -2020,9 +2028,6 @@ namespace ROR_STRUCTURES_10C
 	public:
 		unsigned long int checksum; // 3C 2A 54 00
 		long int unitDAT_ID; // Identifies the unit definition or research. "type" term found in 408891
-		// Identifies the unit itself. -1 if N/A. In standard game, it is only valued for "alive" units. 
-		// With customROR, we also value it for in-progress buildings => in-construction building already has its ID, use it
-		// With customROR, we also value it for in-progress living units => store actor's unitID. This way, if building is destroyed, we can cancel its strategy element (otherwise it remains stuck forever)
 		long int unitInstanceId; // gID term found in 408891.
 		long int counter; // Just an internal ID to identify this strategy element in player's strategy list. "uID" term found in 408891.
 		// 0x10
@@ -2047,6 +2052,9 @@ namespace ROR_STRUCTURES_10C
 		long int aliveCount; // Unit count that are currently alive for this element. Can only be 0 or 1.
 		long int buildAttempts; // Used in ROR internal calculations. "bldAtt"
 		long int actor; // a unitId, or value for setGatherPercentage
+		// Identifies the unit itself. -1 if N/A. In standard game, it is only valued for "alive" units. 
+		// With customROR, we also value it for in-progress buildings => in-construction building already has its ID, use it
+		// With customROR, we also value it for in-progress living units => store actor's unitID. This way, if building is destroyed, we can cancel its strategy element (otherwise it remains stuck forever)
 		// 0x90
 		unsigned long int unknown_090;
 		unsigned long int unknown_094;
@@ -3409,7 +3417,8 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_COST costs[3]; // +148, 3*6 bytes (3 words each)
 		short int trainTime; // +15A.
 		short int trainLocation; // (for buildings it is builder=0x76)
-		short int trainButton; // To confirm: char or short int
+		char trainButton; // +15E.
+		char unknown_15F; // +15F. Unused ?
 		// 0x160
 		short int displayerPierceArmor;
 		short int unknown_162;
@@ -3634,8 +3643,8 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_COST costs[3]; // +148, 3*6 bytes (3 words each)
 		short int trainTime; // +15A.
 		short int trainLocation; // (for buildings it is builder=0x76)
-		char trainButton; // To confirm: char or short int
-		char unknown_15F; // unused or trainButton is short int?
+		char trainButton; // +15E.
+		char unknown_15F; // unused ?
 		// 0x160
 		short int displayerPierceArmor;
 		short int unknown_162;
@@ -3927,7 +3936,8 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_UNIT_BUILDING : public STRUCT_UNIT_LIVING {
 	public:
 		// 0x1C0
-		unsigned long int ptrHumanTrainQueueInformation; // [+00]=Word=unit_DAT_ID, [+02]=trainQueueCount, if 0 then DATID has no meaning.
+		//short int *ptrHumanTrainQueueInformation; // [+00]=Word=unit_DAT_ID, [+02]=trainQueueCount, if 0 then DATID has no meaning.
+		STRUCT_HUMAN_TRAIN_QUEUE_INFO *ptrHumanTrainQueueInformation; // +1C0. Only relevant for human-triggered "train unit".
 		short int unknown_1C4; // Max number of different units in queue ? Unused because always 1 ?
 		short int isCurrentlyTrainingUnit; // +1C6. Warning: it is 1 only when TRAINING a unit that was "human-asked" ? This flag does NOT mean "busy" !
 		unsigned long int unknown_1C8;
@@ -4775,7 +4785,8 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int iconsForTrainUnits; // +494. Pointer to SLP data... Cf SLP 50730.
 		unsigned long int iconsForBuildings[5]; // +498 + tileset*4. It seems there is no free slot for more tilesets.
 		unsigned long int unknown_4AC_icons; // +4AC. Used in 48250F. Includes the "cancel" icon, id=10. SLP 50725 ?
-		unsigned long int unknown_4B0;
+		short int unknown_4B0_iconId; // +4B0. Icon id for Next page button ?
+		short int unknown_4B2_iconId; // +4B2. Icon id for unselect button ?
 		unsigned long int unknown_4B4;
 		STRUCT_UI_PLAYING_ZONE *gamePlayUIZone; // +4B8. 88 66 54 00.
 		STRUCT_UI_DIAMOND_MAP *diamondMap; // +4BC. ptr to F4 A3 54 00.
@@ -4804,8 +4815,8 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_5DC;
 		// 0x5E0
 		short int panelDisplayedButtonCount; // Total number of displayed buttons in button bar (unit commands)
-		short int panelCurrentButtonPage; // +5E2. Current buttons page id in button bar
-		short int unknown_5E4; // +5E4. Related to buttons / current page ?
+		short int panelButtonIdPageOffset; // +5E2. 0=first page, 10=second page. No other possibility in standard game.
+		short int panelLastButtonId; // +5E4. Maximum button id for last page.
 		short int unknown_5E6; // unused ?
 		char unknown_5E8[0x724 - 0x5E8]; // includes unused fields ?
 		long int currentChatTextLine;

@@ -33,6 +33,7 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7D205C;
 	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x580DA8;
 	static const unsigned long int *UNKNOWN_ARRAY_6A18C0 = (unsigned long int *)0x6A18C0; // Size = 0x100 elements = 0x400 bytes
+	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55873C;
 
 	// Game executable interface procedure address (ROR_API call)
 	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x419574;

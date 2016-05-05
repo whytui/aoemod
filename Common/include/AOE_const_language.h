@@ -16,3 +16,4 @@ const static unsigned long int LANG_ID_OPTIONS = 10017; // Just "options"
 const static unsigned long int LANG_ID_AI_FILENAME_BASE = 26928; // 26928+i = filename for predefined stratgy #i. Total count 0x83=131. EXE uses index 158000+i, why ?
 const static unsigned long int LANG_ID_AI_FILENAME_LAST_VALID = 27058; // Last valid AI filename
 const static unsigned long int LANG_ID_STOP_CURRENT_ACTION = 0x1D4DD;
+const static unsigned long int LANG_ID_NEXT_PAGE = 0x1D4D7;

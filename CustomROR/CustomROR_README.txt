@@ -70,6 +70,7 @@ UI and Shortcuts:
 - "F11" information zone displays enhanced population information (including number of vilagers)
 - Display a chat message at game startup to say the plugin is active.
 - Press CTRL-F1 to display trace/debug messages (useful for triggers...)
+- Support more than 1 page for buttons (similar to villager build list)
 
 Gameplay & configuration:
 - Use customROR.xml to configure (for RM/DM) initial resource values, initial resource bonus for AI

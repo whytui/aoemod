@@ -119,6 +119,8 @@ public:
 	void FixActivityTargetUnitIdBug_case1F4(REG_BACKUP *REG_values);
 	void FixKillXCrashOnUnknownPlayer(REG_BACKUP *REG_values);
 	void EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_values);
+	void EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_values);
+	void ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_values);
 
 	// Map generation
 	void ManageRelicsCount(REG_BACKUP *REG_values);

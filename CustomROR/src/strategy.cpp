@@ -682,3 +682,42 @@ bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 
 	return true; // Success: let's build a wonder !
 }
+
+
+// Find a strategy element for a specific actor building (instance)id. (strategy element must be in progress)
+// This is only possible thanks to custom treatments that set unitInstanceId to actor unitId while training/researching is in progress.
+// Unicity is not guaranteed (first found is returned), however it is not supposed to happen much.
+// actorUnitId must be >=0
+// Returns NULL if not found.
+ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetStrategyElementForActorBuilding(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int actorUnitId) {
+	if (!player || !player->IsCheckSumValid() || (actorUnitId < 0)) {
+		return NULL;
+	}
+	ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
+	if (!ai || !ai->IsCheckSumValid()) {
+		return NULL;
+	}
+	ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI = &ai->structBuildAI;
+	if (!buildAI->IsCheckSumValid()) {
+		return NULL;
+	}
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &ai->structBuildAI.fakeFirstStrategyElement;
+	assert(fakeFirstElem->IsCheckSumValid());
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = fakeFirstElem->next;
+	while (curElem && (curElem != fakeFirstElem)) {
+		if ((curElem->inProgressCount == 1) && (curElem->unitInstanceId == actorUnitId)) {
+			return curElem;
+		}
+		curElem = curElem->next;
+	}
+	return NULL;
+}
+
+// Resets a strategy element status (in progress, active)
+void ResetStrategyElementStatus(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem) {
+	if (!elem || !elem->IsCheckSumValid()) { return; }
+	elem->aliveCount = 0;
+	elem->unitInstanceId = -1;
+	elem->inProgressCount = 0;
+}
+

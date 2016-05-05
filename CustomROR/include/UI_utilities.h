@@ -658,10 +658,12 @@ static long int AOE_GetGamePosFromMousePos(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING
 // Return true if successful. Only works if current screen is game screen !
 // Adds a button in unit-commands panel (bottom, beside select unit info).
 // player is used to find correct color.
-// ButtonIndex is 0-5 (first row), 6-11 (2nd row), 5 and 11 are special (next, cancel).
-// All DLLID can be 0. Name and description can be NULL.
+// ButtonIndex is 0-5 (first row), 6-11 (2nd row), 5 and 11 are special (on the right, eg. next, cancel).
+// helpDllId can be 0 ? creationDllId can be -1. 
+// Name can be left NULL. Don't know exactly when this is being used (in help popup ?)
+// If description == NULL, then creationDllId will be used for displayed context text.
 // IconId and DATID are related to the type of action, be careful to provide consistent values.
-// DATId can be 0 if not relevant.
+// You can set DATId to 0 if not relevant.
 static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int buttonIndex, long int iconId,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId, long int DATID,
 	long int helpDllId, long int creationDllId, long int shortcutDllId, const char *name, const char *description, bool isDisabled) {
@@ -677,15 +679,17 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 	if (!player || !player->IsCheckSumValid()) {
 		return false;
 	}
-	unsigned long int unknown_colorPtr = player->ptrPlayerColorStruct + 0x28;
+	unsigned long int unknown_colorPtr = NULL;
 
 	const unsigned long int calladdr = 0x483760;
 	unsigned long int iconsSLP = inGameMain->iconsForUnitCommands; // Default (correct in most cases)
 	// Guess automatically in which SLP we should search the icon.
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
+		unknown_colorPtr = player->ptrPlayerColorStruct + 0x28;
 		iconsSLP = inGameMain->iconsForTrainUnits;
 	}
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_BUILD) {
+		unknown_colorPtr = player->ptrPlayerColorStruct + 0x28;
 		assert(player->tileSet >= 0);
 		assert(player->tileSet <= 4);
 		int tileSet = player->tileSet;
@@ -697,6 +701,7 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_TRADE_STONE_FOR_GOLD) || 
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_TRADE_WOOD_FOR_GOLD)) {
 		iconsSLP = inGameMain->iconsForResearches;
+		unknown_colorPtr = player->ptrPlayerColorStruct + 0x28;
 	}
 	if ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_BUILD) ||
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_OR_BACK) || 

@@ -65,6 +65,7 @@ namespace AOE_CONST_INTERNAL
 		CST_MAT_EDITOR_SET_UNIT_LOCATION = 8,
 		CST_MAT_SET_TERRAIN_TYPE = 9,
 		CST_MAT_SET_ALTITUDE = 0x0A,
+		CST_MAT_UNKNOWN_0E = 0x0E,
 		CST_MAT_EDITOR_MOVE_UNIT = 0x0F,
 		CST_MAT_EDITOR_SELECT_TARGET_UNIT = 0x10, // For victory conditions
 		// 0x10 : selects unit then restored to 0 ?
@@ -107,11 +108,12 @@ namespace AOE_CONST_INTERNAL
 		CST_ICE_NOT_ENOUGH_SPACE_TO_CREATE_UNIT = 0x3E8
 	};
 
+	// IDs for unit-command buttons under game zone. See 481445 switch for execution.
 	enum INGAME_UI_COMMAND_ID : long int {
 		CST_IUC_WORK = 1, // And this works ! Hotkey=W. No suitable icon though :(
 		CST_IUC_MOVE = 2, // And this works ! Hotkey=M. And even has a suitable icon (id=1)
 		CST_IUC_BUILD = 3,
-		CST_IUC_EXCHANGE = 4, // WTF !! unused / no effect ?
+		CST_IUC_EXCHANGE = 4, // WTF !! unused (no effect).
 		CST_IUC_STOP = 5, // iconId=3 (hand)
 		CST_IUC_CANCEL_SELECTION = 6, // icon = 0xA. Unselect unit
 		CST_IUC_UNLOAD_TRANSPORT = 7, // icon 5
@@ -119,7 +121,7 @@ namespace AOE_CONST_INTERNAL
 		CST_IUC_UNGROUP = 9, // cf icon 8(slp 50721). Ungroup
 		CST_IUC_FORMATION = 0x0A, // what is this?
 		CST_IUC_CANCEL_OR_BACK = 0x0B, // ESC key to cancel command or sub-menu(build, repair...)). icon 0x0A (always?)
-		CST_IUC_NEXT_PAGE = 0x0C, // in build menu
+		CST_IUC_NEXT_PAGE = 0x0C, // in build menu. Effect in 0x485140.
 		CST_IUC_CHAT = 0x0D,
 		CST_IUC_DIPLOMACY = 0x0E,
 		CST_IUC_MENU = 0x0F, // Actually opens the menu
