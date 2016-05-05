@@ -664,7 +664,7 @@ static long int AOE_GetGamePosFromMousePos(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING
 // DATId can be 0 if not relevant.
 static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int buttonIndex, long int iconId,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId, long int DATID,
-	long int helpDllId, long int creationDllId, long int shortcutDllId, char *name, char *description, bool isDisabled) {
+	long int helpDllId, long int creationDllId, long int shortcutDllId, const char *name, const char *description, bool isDisabled) {
 	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *inGameMain = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
 	if (!inGameMain || !inGameMain->IsCheckSumValid() || !inGameMain->visible) {
 		return false;
@@ -711,10 +711,10 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 		PUSH long_isDisabled;
 		PUSH description;
 		PUSH name;
-		PUSH unknown_colorPtr;
-		PUSH shortcutDllId; // shortcut DLLID
-		PUSH creationDllId;
-		PUSH helpDllId; // help dll id
+		PUSH unknown_colorPtr; // arg9
+		PUSH shortcutDllId; // shortcut DLLID (hotkey)
+		PUSH creationDllId; // arg7 = creation text (or hotkey text)
+		PUSH helpDllId; // help dll id (language DLL creation + 100000)
 		PUSH DATID; // DATID
 		PUSH long_UICmdId;
 		PUSH iconId; // iconid

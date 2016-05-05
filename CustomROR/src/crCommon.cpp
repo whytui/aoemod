@@ -712,6 +712,52 @@ AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(ROR_STRUCTURES_10C::STRUCT_P
 }
 
 
+// Return a list of all unitDefIds that are/can be enabled in player's tech tree.
+std::list<long int> GetActivableUnitDefIDs(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+	std::list<long int> result;
+	if (!player || !player->IsCheckSumValid() || !player->ptrGlobalStruct || !player->ptrGlobalStruct->IsCheckSumValid()) {
+		return result;
+	}
+	ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *playerResInfo = player->ptrResearchesStruct;
+	if (!playerResInfo) {
+		return result;
+	}
+	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF_INFO *resDefInfo = playerResInfo->ptrResearchDefInfo;
+	if (!resDefInfo) {
+		return result;
+	}
+	ROR_STRUCTURES_10C::STRUCT_TECH_DEF_INFO *techDefInfo = player->ptrGlobalStruct->technologiesInfo;
+	if (!techDefInfo || !techDefInfo->IsCheckSumValid()) {
+		return result;
+	}
+	long int techCount = techDefInfo->technologyCount;
+	if (playerResInfo && resDefInfo && techDefInfo) {
+		for (int researchId = 0; (researchId < playerResInfo->researchCount) && (researchId < resDefInfo->researchCount); researchId++) {
+			ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *status = &playerResInfo->researchStatusesArray[researchId];
+			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef = &resDefInfo->researchDefArray[researchId];
+			if (researchDef && status && (status->currentStatus > AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED)) {
+				int techId = researchDef->technologyId;
+				if ((techId >= 0) && (techId < techCount)) {
+					ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techdef = &techDefInfo->ptrTechDefArray[techId];
+					for (int effectId = 0; effectId < techdef->effectCount; effectId++) {
+						if ((techdef->ptrEffects[effectId].effectType == TDE_ENABLE_DISABLE_UNIT) &&
+							(techdef->ptrEffects[effectId].effectClass)) { // effectClass is "Mode" for "enable disable unit"
+							short int unitDefIdToAdd = techdef->ptrEffects[effectId].effectUnit;
+							auto it = std::find_if(result.begin(), result.end(),
+								[unitDefIdToAdd](long int tmpUnitDefId) { return (tmpUnitDefId == unitDefIdToAdd); });
+							if (it == result.end()) { // Not found: add
+								result.push_back(unitDefIdToAdd);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return result;
+}
+
+
 // Returns true if the research is present in tech tree but not researched yet (nor being researched)
 bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id) {
 	AOE_CONST_FUNC::RESEARCH_STATUSES status = GetResearchStatus(player, research_id);
@@ -766,6 +812,7 @@ ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *GetUnitDefStruct(ROR_STRUCTURES_10C::STRUCT
 
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
+// WARNING: this overload is risky (does not check actual unit structure type / might access wrong pointers !)
 ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT_UNIT *unit) {
 	if (!unit || (unit->ptrActionInformation == NULL) || (unit->ptrActionInformation->ptrActionLink == NULL)) {
 		return NULL;
@@ -776,6 +823,16 @@ ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT
 		return NULL;
 	}
 	return unit->ptrActionInformation->ptrActionLink->actionStruct;
+}
+
+// Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
+// Return NULL if one of the objects is NULL/missing
+// Please use THIS overload.
+ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit) {
+	if (!unit->DerivesFromBird()) {
+		return NULL;
+	}
+	return GetUnitAction((ROR_STRUCTURES_10C::STRUCT_UNIT*)unit);
 }
 
 
@@ -2420,6 +2477,7 @@ bool IsInGameUnitCommandButtonVisible(long int buttonIndex) {
 }
 
 // To be used with button IDs from unit defintion/researches to get a buttonIndex for game main UI structure (command buttons)
+// WARNING: returns -1 if DATButtonId is -1 or invalid.
 long int EmpiresDatButtonIdToInternalButtonIndex(char DATButtonId) {
 	if (DATButtonId < 0) { return -1; } // Invalid.
 	if (DATButtonId <= 5) {
@@ -2439,10 +2497,12 @@ long int EmpiresDatButtonIdToInternalButtonIndex(char DATButtonId) {
 
 
 // Add a command button in unit-commands zone (under game zone).
+// buttonIndex: 0-4 = first row, 6-10=second row, 5 and 11 are "special" right buttons (11=unselect/cancel, generally)
 // UICmdId must be related to units (attack, etc)
 // DATID can be a unitDefId (train), researchId (do_research)...
+// Technically, this just updates the button (no button object is created).
 bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
-	long int DATID, bool isDisabled) {
+	long int DATID, bool isDisabled, const char *creationText) {
 	if (buttonIndex < 0) {
 		return false;
 	}
@@ -2455,8 +2515,8 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	long int helpDllId = 0;
 	long int creationDllId = 0;
 	long int hotkeyDllId = 0;
-	char *argName = NULL;
-	char *argDescription = NULL;
+	char pName[200];
+
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(player, (short int)DATID);
 		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
@@ -2475,18 +2535,24 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		iconId = researchDef->iconId;
 		creationDllId = researchDef->languageDLLCreation;
 		helpDllId = researchDef->languageDLLHelp;
-		// For researches, we need to write and provide name/description. Cf 0x483109
-		// TODO argName, argDescription
+		GetLanguageDllText(researchDef->languageDLLName, pName, 200, researchDef->researchName);
 	}
 	// Manage build too ?
 	// TODO : for many commands, we need to set name/description ?
 	if (iconId < 0) {
+		traceMessageHandler.WriteMessageNoNotification("No icon for command button, using 0");
 		iconId = 0;
 	}
 	
+	if (!IsInGameUnitCommandButtonVisible(buttonIndex)) { // If this button was not used
+		ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *inGameMain = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
+		if (inGameMain && inGameMain->IsCheckSumValid()) {
+			inGameMain->panelDisplayedButtonCount++; // Update number of used buttons. Not sure it has any impact
+		}
+	}
 	return AOE_InGameAddCommandButton(player, buttonIndex, iconId, UICmdId, DATID,
 		helpDllId, creationDllId, hotkeyDllId,
-		argName, argDescription, isDisabled);
+		pName, creationText, isDisabled);
 }
 
 

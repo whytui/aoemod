@@ -2,6 +2,8 @@
 #include <Windows.h>
 #include <time.h>
 #include <vector>
+#include <list>
+#include <algorithm>
 #include <mystrings.h>
 
 #include <AOE_const_language.h>
@@ -21,7 +23,8 @@
 #pragma once
 
 #define CRCMD_TEXT_BUFFER_SIZE 256
-
+#define CST_FIRE_GALLEY_ORIGINAL_BUTTONID 5
+#define CST_FIRE_GALLEY_CUSTOM_BUTTONID 9
 
 
 // TEMPORARY

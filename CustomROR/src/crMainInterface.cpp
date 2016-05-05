@@ -467,10 +467,10 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *objAsButton = (ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsButton->IsCheckSumValid()) {
 			// True for buttons that do not trigger a call to ManageOptionButtonClickInMenu
-			bool btnEventNotCaughtByRORMenuBtnEvent = (objAsButton->unsure_buttonId == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_SAVE) ||
-				(objAsButton->unsure_buttonId == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_LOAD) ||
-				(objAsButton->unsure_buttonId == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_QUIT) ||
-				(objAsButton->unsure_buttonId == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_HELP);
+			bool btnEventNotCaughtByRORMenuBtnEvent = (objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_SAVE) ||
+				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_LOAD) ||
+				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_QUIT) ||
+				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_HELP);
 			if (btnEventNotCaughtByRORMenuBtnEvent) {
 				this->FreeInGameCustomOptionsButton(); // Free custom button if needed, for buttons not handled in ManageOptionButtonClickInMenu.
 				this->crCommand->crInfo->ForceClearCustomMenuObjects(); // Here we CAN already free custom button because it's not in use (current event is about another button)

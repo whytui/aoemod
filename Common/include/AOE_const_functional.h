@@ -180,7 +180,7 @@ namespace AOE_CONST_FUNC
 		CST_CA_TRANSPORTS = 7, // Transport boats
 		CST_CA_ARTEFACTS = 8, // Relics and ruins
 		CST_CA_FISHING_SHIPS = 9,
-		CST_CA_UNUSED_10 = 10, // Defined in aGE3, but unused in AOE/ROR
-		CST_CA_UNUSED_11 = 11 // Defined in aGE3, but unused in AOE/ROR
+		CST_CA_UNUSED_10 = 10, // Defined in AGE3, but unused in AOE/ROR
+		CST_CA_UNUSED_11 = 11 // Defined in AGE3, but unused in AOE/ROR
 	};
 }

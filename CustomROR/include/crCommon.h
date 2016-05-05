@@ -2,6 +2,7 @@
 #pragma once
 
 #include <assert.h>
+#include <list>
 #include <algorithm>
 #include <ROR_API_pub.h>
 #include <ROR_structures.h>
@@ -210,7 +211,12 @@ ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *GetUnitDefStruct(ROR_STRUCTURES_10C::STRUCT
 
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
+// WARNING: this overload is risky (does not check actual unit structure type / might access wrong pointers !)
 ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
+// Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
+// Return NULL if one of the objects is NULL/missing
+// Please use THIS overload.
+ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit);
 
 // Return NULL if one of the objects is NULL/missing
 ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId);
@@ -282,6 +288,8 @@ bool IsTechResearched(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int resea
 // Returns current status of a research for given player.
 AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);
 
+// Return a list of all unitDefIds that are/can be enabled in player's tech tree.
+std::list<long int> GetActivableUnitDefIDs(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 // Returns the map visibility mask for given location - old method
 // High word: bit mask per player for "explored"
@@ -571,10 +579,12 @@ template<typename UnitDef> static UnitDef *CopyUnitDefToNew(UnitDef *existingUni
 long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId);
 
 // Add a command button in unit-commands zone (under game zone).
+// buttonIndex: 0-4 = first row, 6-10=second row, 5 and 11 are "special" right buttons (11=unselect/cancel, generally)
 // UICmdId must be related to units (attack, etc)
 // DATID can be a unitDefId (train), researchId (do_research)...
+// Technically, this just updates the button (no button object is created).
 bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
-	long int DATID, bool isDisabled);
+	long int DATID, bool isDisabled, const char *creationText);
 
 // Returns true if the button is visible. Use this overload for performance if you already have STRUCT_UI_IN_GAME_MAIN pointer.
 // Returns false if the button is hidden, or if an error occurs.
@@ -584,6 +594,7 @@ bool IsInGameUnitCommandButtonVisible(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN
 bool IsInGameUnitCommandButtonVisible(long int buttonIndex);
 
 // To be used with button IDs from unit defintion/researches to get a buttonIndex for game main UI structure (command buttons)
+// WARNING: returns -1 if DATButtonId is -1 or invalid.
 long int EmpiresDatButtonIdToInternalButtonIndex(char DATButtonId);
 
 

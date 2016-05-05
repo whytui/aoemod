@@ -807,7 +807,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		float posX, posY;
 		bool ok = GetGamePositionUnderMouse(&posX, &posY);
 
-		AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_WORK, 83, false);
+		AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_WORK, 83, false, "eee");
 	}
 
 	// TEST strategy
@@ -3860,9 +3860,9 @@ void CustomRORCommand::MoveFireGalleyIconIfNeeded(ROR_STRUCTURES_10C::STRUCT_PLA
 			(triremeStatus != AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED)) {
 			// Trireme is researched: research button location is now free to use
 			if (triremeStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID) {
-				unitDef->trainButton = 9; // Fire galley uses trireme's tech button now it won't appear again.
+				unitDef->trainButton = CST_FIRE_GALLEY_CUSTOM_BUTTONID; // Fire galley uses trireme's tech button now it won't appear again.
 			} else {
-				unitDef->trainButton = 5; // Use standard location (same as trireme) until trireme is available too.
+				unitDef->trainButton = CST_FIRE_GALLEY_ORIGINAL_BUTTONID; // Use standard location (same as trireme) until trireme is available too.
 			}
 		}
 	}
@@ -4716,6 +4716,9 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	if (gameMainUI->unknown_7C4_panelSelectedUnitId < 0) {
 		return;
 	}
+	if (!IsGameRunning()) {
+		return;
+	}
 
 #pragma message("AfterShowUnitCommandButtons: Add config here to enable/disable")
 
@@ -4724,6 +4727,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	if (!player || !player->IsCheckSumValid()) {
 		return;
 	}
+
 	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *) this->crInfo->GetMainSelectedUnit(player);
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructDefUnit || !unit->GetUnitDefinition()->IsCheckSumValidForAUnitClass()) {
 		return;
@@ -4734,27 +4738,47 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefinition();
 	bool isBuilding = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING);
 	bool isLiving = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT);
-	// TO DO: use unitDef->command attribute ?
+	if (unitDef->commandAttribute == COMMAND_ATTRIBUTES::CST_CA_NONE) { return; } // Corresponds to unselectable, like eye candy
+
+	// Current limitation
 	if (!isLiving && !isBuilding) {
 		return;
 	}
-	if (isLiving) { return; } // Nothing implemented yet for this case.
-	// TO DO: building already training/researching: what do we do ?
+	// A bigger restriction for now ! Nothing implemented yet for this case.
+	if (isLiving) { return; }
+	
+	// TO DO: manage isBusy for living unit ? (not required as long as we don't customize buttons for living units...)
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *unitAsBuilding = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *)unit;
+	bool isBusy = false;
+	if (unitAsBuilding && unitAsBuilding->IsCheckSumValid()) {
+		isBusy = (unitAsBuilding->isCurrentlyTrainingUnit != 0);
+	}
+	ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *currentAction = GetUnitAction(unit);
+	if (currentAction != NULL) {
+		isBusy = true;
+	}
 
-	bool buttonIsVisible[12];
+	bool buttonIsVisible[12]; // Is button visible after standard buttons display.
 	long int bestElemTotalCost[12];
 	long int bestElemDATID[12];
 	bool bestElemIsResearch[12];
+	short int bestElemLangNameId[12];
 	for (int i = 0; i < 12; i++) {
 		buttonIsVisible[i] = IsInGameUnitCommandButtonVisible(gameMainUI, i);
 		bestElemTotalCost[i] = -1;
 		bestElemDATID[i] = -1;
 		bestElemIsResearch[i] = false;
+		bestElemLangNameId[i] = -1;
 	}
+	long int currentActionDATID = -1;
+	bool currentActionIsResearch = false;
+	long int currentActionButtonIndex = -1;
+	short int currentActionLangNameId = -1;
+	std::list<long int> activableUnitDefIDs = GetActivableUnitDefIDs(player); // A list of unitDef IDs that can be enabled thanks to (available) researches.
 
 	// Add custom buttons
-	// TODO : manage both units and researches
-	//GetResearchStatus(player, CST_RSID_SIEGE_CRAFT) == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID
+
+	// RESEARCHES
 	ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *playerResInfo = player->ptrResearchesStruct;
 	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF_INFO *resDefInfo = NULL;
 	if (playerResInfo) {
@@ -4765,9 +4789,21 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 			ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *status = &playerResInfo->researchStatusesArray[researchId];
 			int rawButtonId = resDefInfo->researchDefArray[researchId].buttonId;
 			long int buttonIndex = EmpiresDatButtonIdToInternalButtonIndex(rawButtonId);
+			assert(buttonIndex <= 12); // But can be -1
 			// rawButtonId=0 for non-visible researches, we get buttonIndex=-1 in this case. Exclude it.
+			bool researchIsAvailable = (status->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE);
+			if ((status->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_BEING_RESEARCHED) &&
+				(resDefInfo->researchDefArray[researchId].researchLocation == unitDef->DAT_ID1)) {
+				currentActionDATID = researchId;
+				currentActionButtonIndex = buttonIndex;
+				currentActionLangNameId = resDefInfo->researchDefArray[researchId].languageDLLName;
+				currentActionIsResearch = true;
+			}
 			if ((buttonIndex > -1) && (!buttonIsVisible[buttonIndex]) &&
-				(status->currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT)) {
+				(	(status->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) || 
+					(researchIsAvailable && isBusy)
+				)
+				) {
 				// Sorting strategy:
 				// We suppose higher cost=further research, so lower cost should be first (next) available research.
 				long int thisCost = 0;
@@ -4781,30 +4817,127 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 					thisCost += resDefInfo->researchDefArray[researchId].costAmount3;
 				}
 				bool costIsBetter = (bestElemTotalCost[buttonIndex] == -1) || (thisCost < bestElemTotalCost[buttonIndex]);
+				
 				// TO DO : exclude non-visible researches (only_requirement=age ou age+building?)
-				if (costIsBetter &&
+				if (((isBusy && researchIsAvailable) || costIsBetter) && // When we choose to show available researches, they have best priority.
 					(resDefInfo->researchDefArray[researchId].researchLocation == unitDef->DAT_ID1) &&
 					(resDefInfo->researchDefArray[researchId].researchTime > 0)
 					) {
 					bestElemDATID[buttonIndex] = researchId;
 					bestElemIsResearch[buttonIndex] = true;
 					bestElemTotalCost[buttonIndex] = thisCost;
+					bestElemLangNameId[buttonIndex] = resDefInfo->researchDefArray[researchId].languageDLLName;
 				}
 			}
 		}
 	}
 
-	// TO DO train units
+	// TRAIN UNITS
+	if (player->ptrStructDefUnitTable) {
+		for (int loopUnitDefId = 0; loopUnitDefId < player->structDefUnitArraySize; loopUnitDefId++) {
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *loopUnitDef = 
+				(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)player->ptrStructDefUnitTable[loopUnitDefId];
+			if (loopUnitDef && loopUnitDef->IsCheckSumValid() && loopUnitDef->IsTypeValid()) { // Only for living units
+				int rawButtonId = loopUnitDef->trainButton;
+				long int buttonIndex = EmpiresDatButtonIdToInternalButtonIndex(rawButtonId);
+				assert(buttonIndex <= 12); // But can be -1
+				if ((buttonIndex >= 0) && (buttonIndex <= 12) && (!buttonIsVisible[buttonIndex]) &&
+					(loopUnitDef->trainLocation == unitDef->DAT_ID1)) {
+					long int thisCost = 0;
+					if (loopUnitDef->costs[0].costUsed) {
+						thisCost += loopUnitDef->costs[0].costAmount;
+					}
+					if (loopUnitDef->costs[1].costUsed) {
+						thisCost += loopUnitDef->costs[1].costAmount;
+					}
+					if (loopUnitDef->costs[2].costUsed) {
+						thisCost += loopUnitDef->costs[2].costAmount;
+					}
+					bool preferThisUnit = false;
+					bool costIsBetter = (bestElemTotalCost[buttonIndex] == -1) || (thisCost < bestElemTotalCost[buttonIndex]);
+					if (loopUnitDef->availableForPlayer) { preferThisUnit = true; } // if unit is currently available, it has best priority !
+					if (costIsBetter && !loopUnitDef->availableForPlayer) { preferThisUnit = true; }
+					if (preferThisUnit && (!bestElemIsResearch) && (bestElemDATID[buttonIndex] >= 0)) { // only if we already selected a valid DATID (unit, ont research)
+						ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *previousUnit = 
+							(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)player->ptrStructDefUnitTable[bestElemDATID[buttonIndex]];
+						// Cancel "prefer" if new one is stronger (stronger = less priority, because further in tech tree)
+						if ((previousUnit->totalHitPoints < loopUnitDef->totalHitPoints) || // Use only attributes that ALWAYS increase ! Not speed (risky)
+							(previousUnit->displayedAttack < loopUnitDef->displayedAttack)
+							) {
+							preferThisUnit = false; // "new" unit seems stronger, keep previous one.
+						}
+					}
+					bool unitAvailableInTechTree = (loopUnitDef->availableForPlayer != 0);
+					if (!loopUnitDef->availableForPlayer) {
+						auto it = std::find_if(activableUnitDefIDs.begin(), activableUnitDefIDs.end(),
+							[loopUnitDefId](long int tmpUnitDefId) { return (tmpUnitDefId == loopUnitDefId); });
+						if (it != activableUnitDefIDs.end()) { // Found: this unit CAN be enabled in tech tree.
+							unitAvailableInTechTree = true;
+						}
+					}
 
-
-	for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
-		if (bestElemDATID[buttonIndex] != -1) {
-			if (bestElemIsResearch[buttonIndex]) {
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true);
-			} else {
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], true);
+					if (preferThisUnit && unitAvailableInTechTree) {
+						bestElemDATID[buttonIndex] = loopUnitDefId;
+						bestElemIsResearch[buttonIndex] = false;
+						bestElemTotalCost[buttonIndex] = thisCost;
+						bestElemLangNameId[buttonIndex] = loopUnitDef->languageDLLID_Name;
+					}
+				}
 			}
 		}
+	}
+	
+	char nameBuffer[200];
+
+	for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
+		std::string elementInfo;
+		if (bestElemDATID[buttonIndex] != -1) {
+			GetLanguageDllText(bestElemLangNameId[buttonIndex], nameBuffer, sizeof(nameBuffer), "");
+			if (bestElemIsResearch[buttonIndex]) {
+				// Note: see also 0x483109
+				elementInfo = "Can't be researched right now: ";
+				elementInfo += nameBuffer;
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true, elementInfo.c_str());
+				ROR_STRUCTURES_10C::STRUCT_UI_SLP_BUTTON *sb = gameMainUI->unitCommandButtons[buttonIndex];
+				sb->unknown_2C4;
+				sb->helpDllId = sb->helpDllId;
+				sb->winHelpDataDllId;
+				sb->buttonInfoValue;
+			} else {
+				elementInfo = "Can't be trained right now: ";
+				elementInfo += nameBuffer;
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], true, elementInfo.c_str());
+			}
+		}
+	}
+
+	// If top-right button is free, show current action
+	const int buttonIdForInProgress = 5;
+	if ((currentActionDATID != -1) && !IsInGameUnitCommandButtonVisible(buttonIdForInProgress)) {
+		GetLanguageDllText(currentActionLangNameId, nameBuffer, sizeof(nameBuffer), "");
+		std::string inProgressInfo;
+		if (currentActionIsResearch) {
+			inProgressInfo = "Being researched: ";
+			inProgressInfo += nameBuffer;
+			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, currentActionDATID, true, inProgressInfo.c_str());
+		} else {
+			inProgressInfo = "Being trained: ";
+			inProgressInfo += nameBuffer;
+			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, currentActionDATID, true, inProgressInfo.c_str());
+		}
+	}
+
+	// When controlled player is an AI player, AI-triggered "make objects" (train unit) can't be stopped. Fix it.
+	// Note: for human player-triggered "train unit", a STOP button is already visible (command=STOP), leave it unchanged.
+#pragma message("Need fix for strategy to use STOP on AI makeobject action")
+	// WARNING: clicking on STOP for AI-triggered "train unit" does not update strategy and units will never be trained again ! Needs a fix !
+	const int buttonIdForStop = 6;
+	if (isBuilding && (currentAction != NULL) && (currentAction->actionTypeID == INTERNAL_ACTION_ID::CST_IAI_MAKE_OBJECT) &&
+		(gameMainUI->unitCommandButtons[buttonIdForStop]->commandIDs[0] != (long int)INGAME_UI_COMMAND_ID::CST_IUC_STOP)) {
+		GetLanguageDllText(LANG_ID_STOP_CURRENT_ACTION, nameBuffer, sizeof(nameBuffer), "Stop current action");
+		AddInGameCommandButton(buttonIdForStop, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, 
+			true // TO DO : when strategy issue is fixed, allow this (set disabled=false)
+			, nameBuffer);
 	}
 }
 

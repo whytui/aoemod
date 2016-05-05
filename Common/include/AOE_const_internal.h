@@ -107,7 +107,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ICE_NOT_ENOUGH_SPACE_TO_CREATE_UNIT = 0x3E8
 	};
 
-	enum INGAME_UI_COMMAND_ID : long int { // TO DO check type
+	enum INGAME_UI_COMMAND_ID : long int {
 		CST_IUC_WORK = 1, // And this works ! Hotkey=W. No suitable icon though :(
 		CST_IUC_MOVE = 2, // And this works ! Hotkey=M. And even has a suitable icon (id=1)
 		CST_IUC_BUILD = 3,

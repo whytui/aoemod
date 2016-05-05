@@ -149,6 +149,7 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_UI_DIAMOND_MAP;
 	class STRUCT_UI_IN_GAME_TEXT_ZONE;
 	class STRUCT_UI_PLAYING_ZONE; // Also used in editor !
+	class STRUCT_UI_UNIT_BUTTON_INFO;
 	class STRUCT_UI_UNIT_INFO_ZONE;
 	class STRUCT_UI_SCENARIO_EDITOR_MAIN; // "Scenario Editor Screen"
 	class STRUCT_UI_SCENARIO_EDITOR_MENU;
@@ -2713,7 +2714,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned short int unknown_2E; // "pointer3" ??
 		// 0x30
 		long int languageDLLCreation;
-		long int languageDLLHelp;
+		long int languageDLLHelp; // +34
 		unsigned short int unknown_38;
 		unsigned short int unknown_3A;
 		//end
@@ -3181,7 +3182,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_04F; // unused ?
 		// 0x50
 		short int unknown_050; // unknown1 in AGE3
-		char availableForPlayer; // according to tree+researches (+requires enable in empires.dat?)
+		char availableForPlayer; // +52. according to tree+researches (+requires enable in empires.dat?). 1="can be trained". 0 does not prevent from having one (scenario, conversion)
 		char unknown_053;
 		short int placementBypassTerrain1;
 		short int placementBypassTerrain2;
@@ -3505,7 +3506,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_04F; // unused ?
 		// 0x50
 		short int unknown_050; // unknown1 in AGE3
-		char availableForPlayer; // according to tree+researches (+requires enable in empires.dat?)
+		char availableForPlayer; // +52. according to tree+researches (+requires enable in empires.dat?). 1="can be trained". 0 does not prevent from having one (scenario, conversion)
 		char unknown_053;
 		short int placementBypassTerrain1;
 		short int placementBypassTerrain2;
@@ -3515,7 +3516,7 @@ namespace ROR_STRUCTURES_10C
 		// 0x60
 		float editorRadius2; // for X axis
 		char hillMode; // 0=no restriction, 2 for buildings ?
-		char visibleInFog; // 0/1/2/3/4 ?
+		char visibleInFog; // +65. Can be 0,1, 3 ("inverted visibility" in AGE3, but not exact. smoke has 3).
 		short int terrainRestriction;
 		char flyMode;
 		char unknown_069;
@@ -4248,20 +4249,17 @@ namespace ROR_STRUCTURES_10C
 #define CHECKSUM_UI_SLP_BUTTON 0x00549CAC
 	class STRUCT_UI_BUTTON : public STRUCT_ANY_UI {
 	public: // 30 4E 54 00 (a child class is AC 9C 54 00(size=0x3D4), rarely used. 16 are created in game screen=unit-commands)
-		long int unsure_buttonId; // +F4
-		long int unknown_0F8;
-		STRUCT_ANY_UI *unknown_0FC; // +FC. Contains the selectedIndex in +100 ?
-		char unknown_100[0x118 - 0x100];
-		long int unknown_118[9];
+		long int commandIDs[9]; // +F4. Only index 0 is really used ?? Various types (enums) (GAME_SCREEN_BUTTON_IDS, INGAME_UI_COMMAND_ID, etc)
+		long int buttonInfoValue[9]; // +118. For example, a DATID.
 		unsigned long int unknown_13C;
 		unsigned long int unknown_140;
 		unsigned long int unknown_144;
-		unsigned long int unknown_148; // +148: sound button.wav info? (always 0 except when playing sound ?)
-		unsigned long int unknown_14C[9]; // Pointers, but not UI structs ?
+		unsigned long int* unknown_148_wav; // +148: sound button.wav info? (always 0 except when playing sound ?)
+		unsigned long int* unknown_14C[9]; // Pointers, but not UI structs ?
 		short int unknown_170[9]; // +170. Default -1.
 		char unknown_182[0x198 - 0x182];
-		unsigned long int unknown_198[9];
-		unsigned long int unknown_1BC[9];
+		char* unknown_198[9];
+		char* unknown_1BC[9];
 		char unknown_1E0[0x1F6 - 0x1E0];
 		short int checked; // +1F6. To update value, see AOE_CheckBox_SetChecked
 		unsigned long int unknown_1F8;
@@ -4297,13 +4295,16 @@ namespace ROR_STRUCTURES_10C
 
 	// Size 0x3D4. Constructor=0x4F7420
 	class STRUCT_UI_SLP_BUTTON : public STRUCT_UI_BUTTON {
+	public:
 		// Starts at +2B8
 		unsigned long int unknown_2B8;
 		unsigned long int unknown_2BC;
 		// 0x2C0
 		char unknown_2C0; // Values 0, 3 .. ?
 		char unknown_2C1[3];
-		char unknown_2C4[0x2D0 - 0x2C4];
+		unsigned long int *unknown_2C4;
+		unsigned long int *unknown_2C8;
+		unsigned long int unknown_2CC;
 		char contextHelpText[0x100]; // +2D0.
 		long int unknown_3D0; // see 483785
 		bool IsCheckSumValid() {
@@ -4612,6 +4613,29 @@ namespace ROR_STRUCTURES_10C
 	};
 
 
+	// Size=0x28. No constructor (this is a temporary struct). See init in 4F0EEC for example.
+	class STRUCT_UI_UNIT_BUTTON_INFO {
+	public:
+		char *name;
+		short int DATID; // +4. Can be unitDefId, researchId
+		short int iconId; // +6.
+		short int costType1; // +8. A resourceId
+		short int unused_0A;
+		float costAmount1; // +C
+		// 0x10
+		short int costType2; // +10. A resourceId
+		short int unused_12;
+		float costAmount2; // +14
+		short int costType3; // +18. A resourceId
+		short int unused_1A;
+		float costAmount3; // +1C
+		// 0x20
+		long int languageDllHelp; // +20. Id for language(x).dll
+		long int languageDllHotkeyText; // +24. Id of hotkey for language(x).dll
+	};
+	static_assert(sizeof(STRUCT_UI_UNIT_BUTTON_INFO) == 0x28, "STRUCT_UI_UNIT_BUTTON_INFO size");
+
+
 	// Size ?
 	// Constructor ?
 #define CHECKSUM_UI_UNIT_INFO_ZONE 0x00549E7C
@@ -4773,11 +4797,17 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_ANY_UI *unknown_57C; // 50 5D 54 00
 		char unknown_580[0x5C8 - 0x580];
 		STRUCT_UNIT *panelSelectedUnit; // 0x5C8. Pointer to unit selected in unit info zone.
-		char unknown_5CC[0x5E0 - 0x5CC];
+		char unknown_5CC[0x5D0 - 0x5CC];
+		STRUCT_UI_UNIT_BUTTON_INFO *tmpUnitBtnCommandsInfo_researches; // +5D0. Pointer to array[]. Only for researches ! Used in internal treatments when showing buttons.
+		STRUCT_UI_UNIT_BUTTON_INFO *tmpUnitBtnCommandsInfo_units; // +5D4. Pointer to array[]. Only for train units ! Used in internal treatments when showing buttons.
+		unsigned long int unknown_5D8;
+		unsigned long int unknown_5DC;
 		// 0x5E0
-		short int panelButtonNumber; // Total number of button in current panel status (button bar)
-		short int panelCurrentButtonPage; // Current buttons page id in button bar
-		char unknown_5E4[0x724 - 0x5E4];
+		short int panelDisplayedButtonCount; // Total number of displayed buttons in button bar (unit commands)
+		short int panelCurrentButtonPage; // +5E2. Current buttons page id in button bar
+		short int unknown_5E4; // +5E4. Related to buttons / current page ?
+		short int unknown_5E6; // unused ?
+		char unknown_5E8[0x724 - 0x5E8]; // includes unused fields ?
 		long int currentChatTextLine;
 		char unknown_728[0x734 - 0x728];
 		long int unknown_debugText_strlen; // +734
