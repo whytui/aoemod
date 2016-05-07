@@ -111,6 +111,7 @@ Fixes:
 - Fix gaia player (0) alert sound.
 - Fix many bugs with units behaviour, like AI units attacking an empty location on the map for no reason.
 - Fix kill* game crash when used with an invalid player
+- Fix random game crash when using civilizations without a tech tree.
 
 Chat commands:
 - Type "t" or "time" in chat box to display system time (as a chat message)
