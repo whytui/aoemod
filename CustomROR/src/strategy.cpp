@@ -273,7 +273,7 @@ bool AddUnitInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int po
 // Inserts before 'nextElem' strategy element. Consecutive inserts order is preserved if we insert before the same element.
 // If you want to insert researches in strategy, use this overload.
 bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElem, long int retrains, long int actor,
-	long int unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, char *name) {
+	long int unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const char *name) {
 	assert(buildAI && buildAI->IsCheckSumValid());
 	assert(player && player->IsCheckSumValid());
 	if (!buildAI || !buildAI->IsCheckSumValid() || !player || !player->IsCheckSumValid()) { return false; }
@@ -355,7 +355,7 @@ bool MoveStrategyElement_after(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR
 }
 
 
-// If elem_shouldBeAfter if NOT after elem_shouldBeBefore, then move elem_shouldBeAfter just after elem_shouldBeBefore.
+// If elem_shouldBeAfter is NOT after elem_shouldBeBefore, then move elem_shouldBeAfter just after elem_shouldBeBefore.
 // Note: only elem_shouldBeAfter (3rd argument) can be MOVED by this method.
 // Use this to fix dependency issues, a correct call example is elem_shouldBeBefore=barracks, elem_shouldBeAfter=clubman
 // Return true if an element has been moved, false otherwise
@@ -433,9 +433,7 @@ bool MoveStrategyElement_after_ifWrongOrder(ROR_STRUCTURES_10C::STRUCT_BUILD_AI 
 }
 
 
-// Add units if maximum population is >50
-// TO test. BUGS !!! on écrit en dehors de strongerUnits ?
-// TO DO : why AI doesnt build my houses ?
+// Add units to fit maximum population (especially if >50)
 void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	if (!player || !player->ptrAIStruct) { return; }
 	assert(player->GetAIStruct() != NULL);
@@ -445,11 +443,11 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	assert(fakeFirstStratElem != NULL);
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemToInsertBefore = fakeFirstStratElem;
 	if (fakeFirstStratElem->previous == NULL) { return; }
+	// If strategy last element is a wonder, insert before it.
 	if ((fakeFirstStratElem->previous->unitDAT_ID == CST_UNITID_WONDER) && (fakeFirstStratElem->previous->elementType == AIUCBuilding)) {
 		elemToInsertBefore = fakeFirstStratElem->previous;
 	}
 	if (fakeFirstStratElem == NULL) { return; } // Just a security
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstStratElem->previous;
 	int currentPopulation = 0; // Does not count limited-retrains units
 	int strongUnitCount = 0; // Number of different military unit (DATID) we found in strategy. Only keep the strongest.
 #define STRONG_UNIT_TYPE_COUNT 4
@@ -457,16 +455,55 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	for (int i = 0; i < STRONG_UNIT_TYPE_COUNT; i++) {
 		strongerUnits[i] = -1;
 	}
-	float *resources = (float *)player->ptrResourceValues;
-	if (!resources) { return; }
-	float maxPopulation = resources[CST_RES_ORDER_POULATION_LIMIT];
+	int maxPopulation = (int) player->GetResourceValue(CST_RES_ORDER_POULATION_LIMIT);
+
+	// MIN_ENDING_TOWER_COUNT_TO_FORCE_INSERT = number of consecutive "ending" towers in strategy above which we force inserting unit BEFORE those towers.
+#define MIN_ENDING_TOWER_COUNT_TO_FORCE_INSERT 4
+	// For strategies that have a lot of towers in end of strategy (deathmatch...), keep the first one of the ending tower series.
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstStratElem->previous;
+	bool noTowerFoundYet = true;
+	long int consecutiveTowerCount = 0;
+	bool canExitLoop = false;
+	while (currentStratElem && (currentStratElem != fakeFirstStratElem) && !canExitLoop) {
+		if (IsTower((unsigned short int)currentStratElem->unitDAT_ID)) {
+			noTowerFoundYet = false;
+			consecutiveTowerCount++;
+		} else {
+			if (!noTowerFoundYet) {
+				// We already found towers, but this element isn't : series of ending towers is finished.
+				canExitLoop = true;
+			}
+		}
+		if (!canExitLoop) { // do not change current element when exiting loop.
+			currentStratElem = currentStratElem->previous;
+		}
+	}
+	if (consecutiveTowerCount > MIN_ENDING_TOWER_COUNT_TO_FORCE_INSERT) {
+		assert(currentStratElem != NULL);
+		if (currentStratElem == NULL) { return; } // ERROR !
+		elemToInsertBefore = currentStratElem->next;
+		// Leave some towers before our added units
+		for (int i = 0; i < MIN_ENDING_TOWER_COUNT_TO_FORCE_INSERT - 1; i++) {
+			elemToInsertBefore = elemToInsertBefore->next;
+		}
+	}
+
+	// Go back some strategy elements to get a position where add an "anticipated" house: 
+	// This helps strategy not being stuck (with some extra population housage).
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemToMoveFirstAddedHouse = elemToInsertBefore;
+	int counterToMoveFirstAddedHouse = 0;
+	while (elemToMoveFirstAddedHouse && elemToMoveFirstAddedHouse->previous && (counterToMoveFirstAddedHouse < 4) &&
+		(elemToMoveFirstAddedHouse->previous != fakeFirstStratElem)) {
+		counterToMoveFirstAddedHouse++;
+		elemToMoveFirstAddedHouse = elemToMoveFirstAddedHouse->previous;
+	}
 
 	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **defUnitTable = player->ptrStructDefUnitTable;
 
 	// Do only 1 (reverse) loop on strategy and collect all necessary information.
 	// We suppose that a reverse loop will find first the strongest (military) units !
+	currentStratElem = fakeFirstStratElem->previous;
 	while (currentStratElem && currentStratElem != fakeFirstStratElem) {
-		//assert(currentStratElem != NULL);
 		if ((currentStratElem->elementType == AIUCLivingUnit) && (currentStratElem->retrains == -1)) {
 			currentPopulation++;
 			if ((currentStratElem->unitDAT_ID != CST_UNITID_MAN) &&
@@ -480,27 +517,47 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 				short int index = 0;
 				// Search if we already know this DATID in our table
 				while ((matchingStrongUnit == -1) && (index < STRONG_UNIT_TYPE_COUNT)) {
+					assert(index < STRONG_UNIT_TYPE_COUNT);
 					if (strongerUnits[index] == currentStratElem->unitDAT_ID) {
 						matchingStrongUnit = index;
 					}
 					index++;
 				}
-				// Add if not already collected
-				if (matchingStrongUnit == -1) {
+				// Add if not already collected...
+				// And if table is not already full (this will ignore last met unit types, that's why the loop is reverse).
+				if ((matchingStrongUnit == -1) && (strongUnitCount < STRONG_UNIT_TYPE_COUNT)) {
+					assert(strongUnitCount < STRONG_UNIT_TYPE_COUNT);
 					strongerUnits[strongUnitCount++] = currentStratElem->unitDAT_ID;
 				}
-
 			}
 		}
 		currentStratElem = currentStratElem->previous;
 	}
 
-	int populationToAdd = ((int)maxPopulation) - currentPopulation;
+	int populationToAdd = maxPopulation - currentPopulation;
+	assert(elemToInsertBefore != NULL);
+	std::string msg = "Adapt p#";
+	msg += std::to_string(player->playerId);
+	msg += " to max population: insertion start point uID=";
+	msg += std::to_string(elemToInsertBefore->previous ? elemToInsertBefore->previous->counter : elemToInsertBefore->counter);
+	msg += ". Adding ";
+	msg += std::to_string(populationToAdd);
+	msg += " units.";
+	traceMessageHandler.WriteMessageNoNotification(msg);
+
+	if (GetCustomRorMaxPopulationBeginStratElem(buildAI) == NULL) {
+		// Add a fake element so we can find where is starting point of "added elements" in further calls / other methods.
+		AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, -1, AIUCTech,
+			39 /*storage pit, always (immediately) researched = no impact*/, player, CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN);
+		elemToInsertBefore->previous->aliveCount = 1; // Make sure it does not impact AI.
+		elemToInsertBefore->previous->retrains = 1; // Make sure it does not impact AI.
+	}
 
 	if (populationToAdd <= 0) { return; }
 	if (strongUnitCount <= 0) { return; }
 	if (strongUnitCount == 1) {
 		for (int i = 0; i < populationToAdd; i++) {
+			traceMessageHandler.WriteMessageNoNotification("There is only 1 unit type to add in strategy.");
 			short int DAT_ID = strongerUnits[0];
 			char buf[30];
 			ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *defUnit = defUnitTable[DAT_ID];
@@ -509,6 +566,7 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 			strcpy_s(buf, GetUnitName(DAT_ID));
 			AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, defUnit->trainLocation,
 				AIUCLivingUnit, DAT_ID, player, buf);
+			return;
 		}
 	}
 	// What should we actually add in strategy ?
@@ -523,20 +581,26 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	// Note: we keep at least Top 2 unit types, strongUnitCount >= 2 here.
 
 	// Calculate numbers of each unit type to add. Iterate an create a little more than 1/x (first units in array will be created more than next ones)
-	// Adding 1 or 2 extra units is not a problem.
+	// Adding 1 or 2 extra units in strategy is not a problem.
 	int thisUnitCountToAdd[STRONG_UNIT_TYPE_COUNT];
+	for (int index = 0; index < STRONG_UNIT_TYPE_COUNT; index++) {
+		assert(index < STRONG_UNIT_TYPE_COUNT);
+		thisUnitCountToAdd[index] = 0;
+	}
 	int totalCountIWillAdd = 0;
 	for (int index = 0; index < strongUnitCount; index++) {
-		// Warning: working with ints here
+		assert(index < STRONG_UNIT_TYPE_COUNT);
 		thisUnitCountToAdd[index] = ((populationToAdd - totalCountIWillAdd) * ((100 / (strongUnitCount - index)) + 10)) / 100 + 1;
 		totalCountIWillAdd += thisUnitCountToAdd[index];
 	}
 
 	// alternately add all units
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *lastAddedHouse = NULL;
 	int currentIndex = 0;
 	int countToNextHouse = 0;
 	while (totalCountIWillAdd > 0) {
 		int loopCount = 0;
+		assert(currentIndex < STRONG_UNIT_TYPE_COUNT);
 		while ((thisUnitCountToAdd[currentIndex] <= 0) && (loopCount < strongUnitCount)) {
 			currentIndex++;
 			if (currentIndex >= strongUnitCount) { currentIndex = 0; }
@@ -548,8 +612,9 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 			// Add a house every 4 units
 			if (countToNextHouse <= 0) {
 				AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, -1,
-					AIUCBuilding, CST_UNITID_HOUSE, player, "House1");
+					AIUCBuilding, CST_UNITID_HOUSE, player, "House_customROR");
 				countToNextHouse = 4;
+				lastAddedHouse = elemToInsertBefore->previous;
 			}
 			// Add unit
 			short int DAT_ID = strongerUnits[currentIndex];
@@ -561,13 +626,17 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 			AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, defUnit->trainLocation,
 				AIUCLivingUnit, DAT_ID, player, buf);
 
+			assert(currentIndex < STRONG_UNIT_TYPE_COUNT);
 			thisUnitCountToAdd[currentIndex]--;
 			totalCountIWillAdd--;
 			countToNextHouse--;
+			currentIndex++;
+			if (currentIndex >= strongUnitCount) { currentIndex = 0; }
 		}
 	}
 
-	// TO DO : move some houses (last ones) a bit BEFORE because AI is stuck because of extra units ?
+	MoveStrategyElement_after(buildAI, lastAddedHouse, elemToMoveFirstAddedHouse->previous);
+
 	// TO DO: add buildings to train...
 	// TO DO keep room for automatically added boats ? (when current pop < 50 in initial strat)
 	// Add some villies ?
@@ -592,7 +661,8 @@ bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 	}
 
 	// Loop on strategy elements to see if there are missing "prerequisites" (in fact, we want almost all strategy elements to be done to build a wonder)
-	while ((currentElem != fakeFirstElem) && (currentElem != NULL)) {
+	while ((currentElem != fakeFirstElem) && (currentElem != NULL) && 
+		(!IsCustomRorPopulationBeginStratElem(currentElem))) { // Ignore elements that are located AFTER customROR-added elements (to fit max population)
 		if (currentElem->unitDAT_ID == CST_UNITID_WONDER) {
 			return true; // reached wonder element, ignore next ones (if any)
 		}
@@ -719,5 +789,30 @@ void ResetStrategyElementStatus(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *ele
 	elem->aliveCount = 0;
 	elem->unitInstanceId = -1;
 	elem->inProgressCount = 0;
+}
+
+
+// Returns true if the strategy element is the fake one added by customROR when it updated strategy to adapt to maximum population.
+bool IsCustomRorPopulationBeginStratElem(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *stratElem) {
+	return (stratElem->elementType == TAIUnitClass::AIUCTech) &&
+		(strcmp(stratElem->unitName, CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN) == 0);
+}
+
+
+// Returns the fake strategy element added by customROR when it updated strategy to adapt to maximum population.
+// Returns NULL if not found.
+ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetCustomRorMaxPopulationBeginStratElem(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
+	if (!buildAI || !buildAI->IsCheckSumValid()) {
+		return NULL;
+	}
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &buildAI->fakeFirstStrategyElement;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = fakeFirstElem->next;
+	while (curElem && (curElem != fakeFirstElem)) {
+		if (IsCustomRorPopulationBeginStratElem(curElem)) {
+			return curElem;
+		}
+		curElem = curElem->next;
+	}
+	return NULL;
 }
 

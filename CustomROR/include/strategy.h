@@ -13,6 +13,7 @@
 
 using namespace AOE_CONST_FUNC;
 
+const char CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN[] = "CustomRORMaxPopulation";
 
 // This fixes dynamically added houses, boats + boat techs, docks, setgatherpercentage
 void FixAutoBuildStrategyElements(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
@@ -40,7 +41,7 @@ bool AddUnitInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int po
 // Custom method to insert a line in strategy. This tries to be a bit faster and avoids "unit" Name bug for researches
 // Inserts before 'nextElem' strategy element. Consecutive inserts order is preserved if we insert before the same element.
 // If you want to insert researches in strategy, use this overload.
-bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElem, long int retrains, long int actor, long int unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, char *name);
+bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElem, long int retrains, long int actor, long int unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const char *name);
 
 // Use it to move a strategy element to any other location in strategy list.
 // afterThisElem if the element after which we move elemToMove
@@ -78,3 +79,10 @@ ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetStrategyElementForActorBuilding(
 
 // Resets a strategy element status (in progress, active)
 void ResetStrategyElementStatus(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem);
+
+// Returns true if the strategy element is the fake one added by customROR when it updated strategy to adapt to maximum population.
+bool IsCustomRorPopulationBeginStratElem(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *stratElem);
+
+// Returns the fake strategy element added by customROR when it updated strategy to adapt to maximum population.
+// Returns NULL if not found.
+ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetCustomRorMaxPopulationBeginStratElem(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);

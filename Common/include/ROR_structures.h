@@ -1684,9 +1684,9 @@ namespace ROR_STRUCTURES_10C
 		short int unknown_10A; // unused ?
 		unsigned long int ptrPlayerColorStruct; // quite unknown. +26=color(word)? +28=sub_struct
 		// 0x110
-		short int techTreeId;
+		short int techTreeId; // 45BA12 : DWORD !
 		short int unknown_112;
-		unsigned long int unknown_114_ptr; // set in 0x4F1EF8. Related to +58 ?
+		unsigned long int unknown_114_ptr; // set in 0x4F1EF8. Related to +58 ? Size=0x14. Constructor=516DA0.
 		float screenPositionY; // axis southwest-northeast like /
 		float screenPositionX; // axis northwest-southeast like \   [origin is left corner - max(X,Y) is right corner]
 		// 0x120

@@ -139,7 +139,6 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "dislike computation interval:              %ld\n", this->crInfo->configInfo.dislikeComputeInterval);
 	fprintf_s(f, "dislike value - all artefacts/wonder:      %ld\n", this->crInfo->configInfo.dislike_allArtefacts);
 	fprintf_s(f, "dislike value - human player:              %ld\n", this->crInfo->configInfo.dislike_humanPlayer);
-	fprintf_s(f, "maxFarmsInDeathMatch:                      %d\n", this->crInfo->configInfo.maxFarmsInDeathMatch);
 	fprintf_s(f, "fixLogisticsNoHouseBug:                    %d\n", this->crInfo->configInfo.fixLogisticsNoHouseBug ? 1: 0);
 	// City plan
 	fprintf_s(f, "cityPlanLikeValuesEnhancement:             %d\n", this->crInfo->configInfo.cityPlanLikeValuesEnhancement ? 1 : 0);
@@ -221,7 +220,8 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		if (!_strnicmp(subCmd, "maptype=", 8)) {
 			subCmd += 8;
 			int newType = atoi(subCmd);
-			if (newType) {
+			if ((newType >= 0) && (newType < AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT) &&
+				((*subCmd == '0') || newType > 0)) {
 				gameSettings->mapTypeChoice = (AOE_CONST_FUNC::MAP_TYPE_INDEX) newType;
 				sprintf_s(outputBuffer, "Map type=%d", newType);
 			}
@@ -1061,23 +1061,7 @@ void CustomRORCommand::ManageTacAIUpdate(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 	// Only for the FIRST tactical update (last one's time is 0): one-shot initializations
 	if (tacAI->lastTacticalUpdateTime <= 0) {
 		if (applyAIFix) {
-#pragma message("Remove the SN number updates as we can now configure it in customROR.xml")
-			// Limit farm number
-			if (gameSettings->isDeathMatch) {
-				if (tacAI->SNNumber[SN_NUMBERS::SNMaxFarms] > this->crInfo->configInfo.maxFarmsInDeathMatch) {
-					tacAI->SNNumber[SN_NUMBERS::SNMaxFarms] = this->crInfo->configInfo.maxFarmsInDeathMatch;
-					std::string msg = "Fixed farms number to ";
-					msg += to_string(this->crInfo->configInfo.maxFarmsInDeathMatch);
-					msg += " for player ";
-					msg += to_string(numPlayer);
-					traceMessageHandler.WriteMessageNoNotification(msg);
-				}
-				// Don't wait for granary / storage pit for start building strategy elements in deathmatch (nor a minimal exploration %)
-				tacAI->SNNumber[SN_NUMBERS::SNRequiredFirstBuilding] = 0; // 0=No restriction. VERY useful in deathmatch.
-				tacAI->SNNumber[SN_NUMBERS::SNInitialExplorationRequired] = 1; // I think game default is 2... This change is not needed?
-			}
-			// TO DO:
-			//AdaptStrategyToMaxPopulation(player); // Does not work properly
+			AdaptStrategyToMaxPopulation(player);
 		}
 	}
 
@@ -1133,6 +1117,7 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *lastNonTowerElement = fakeFirstStratElem;
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *goodDevelopmentPointElement = NULL; // Represents the location in strategy where we can assume player is strong enough to insert optional researches. Be careful, AI can skip a certain number of items (10 according to SN numbers)
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *stratElem_bronzeAge = NULL;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *customRorMaxPopBegin = GetCustomRorMaxPopulationBeginStratElem(buildAI);
 	float *resources = (float *)player->ptrResourceValues;
 
 	// Do only 1 loop on strategy and collect all necessary information.
@@ -1141,7 +1126,9 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 		// Save some useful elements/information as we're passing on it
 		if ((!elemMainForum) && (currentStratElem->unitDAT_ID == CST_UNITID_FORUM)) { elemMainForum = currentStratElem; }
 		if (currentStratElem->counter == 1) { foundCounter_one = true; }
-		if ((currentStratElem->unitDAT_ID != CST_UNITID_WATCH_TOWER) || (currentStratElem->elementType != AIUCBuilding)) { lastNonTowerElement = currentStratElem; }
+		if ((currentStratElem->unitDAT_ID != CST_UNITID_WATCH_TOWER) || (currentStratElem->elementType != AIUCBuilding)) {
+			lastNonTowerElement = currentStratElem;
+		}
 		if ((currentStratElem->elementType == AIUCLivingUnit) && (currentStratElem->retrains == -1)) {
 			currentPopulation++;
 			// minPopulationBeforeBuildOptionalItems+1 : take next one and insert BEFORE (inserting BEFORE an given element preserves insert order consistency. After reverses all).
@@ -1237,9 +1224,11 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 	if (goodDevelopmentPointElement) {
 		optionalsLocation = goodDevelopmentPointElement;
 	} else {
-		if (wonder) { optionalsLocation = wonder; }
+		if (customRorMaxPopBegin) { optionalsLocation = customRorMaxPopBegin; }
 		else {
-			optionalsLocation = lastNonTowerElement; // fakeFirstStratElem->previous if it could not be set during loop, so it's never NULL.
+			if (wonder) { optionalsLocation = wonder; } else {
+				optionalsLocation = lastNonTowerElement; // fakeFirstStratElem->previous if it could not be set during loop, so it's never NULL.
+			}
 		}
 	}
 

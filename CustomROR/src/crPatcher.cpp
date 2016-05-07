@@ -29,7 +29,13 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 					//int seqIndexCount = seqDef->GetTotalSeqCount();
 					int seqIndexON = seqDef->GetSeqIndexFromFuncMeaning(FUNC_MEANING::FM_ON);
 					if (seqIndexON >= 0) {
-						if (!pe.CheckSeqConsistency(seqDef, seqIndexON)) {
+						int matchingSeqIndex = pe.CheckSeqDefConsistency(seqDef);
+						//if (!pe.CheckSeqConsistency(seqDef, seqIndexON)) {
+						if (matchingSeqIndex == seqIndexON) {
+							fprintf_s(logFile, "...%s... Installed !\n", seqDefName.c_str());
+						}
+						if ((matchingSeqIndex != seqIndexON) && (matchingSeqIndex >= 0)) {
+							// Note: this can be provoked by breakpoints set by debugging programs.
 							fprintf_s(logFile, "%sFeature is not installed: %s\n",
 								isOptionalSequence ? "[INFO] " : "[WARNING] ", seqDefName.c_str());
 							int writtenBytes = 0;
@@ -40,8 +46,10 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 							if (!isOptionalSequence && (writtenBytes <= 0)) {
 								hasMissingSequences = true; // Set to true (unless it is optional or it has been fixed on the fly).
 							}
-						} else {
-							fprintf_s(logFile, "...%s... Installed !\n", seqDefName.c_str());
+						}
+						if (matchingSeqIndex < 0) {
+							fprintf_s(logFile, "[ERROR] %s is inconsistent or an error occurred while reading memory.\n", seqDefName.c_str());
+							hasMissingSequences = true;
 						}
 					} else {
 						if (logFile) {

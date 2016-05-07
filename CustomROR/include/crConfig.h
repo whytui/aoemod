@@ -79,7 +79,6 @@ public:
 	// AI
 	long int improveAILevel;
 	long int tacticalAIUpdateDelay;
-	long int maxFarmsInDeathMatch;
 	// Panic mode options
 	long int panicModeDelay; // seconds between 2 runs of panic mode algorithm
 	long int maxPanicUnitsCountToAddInStrategy;
@@ -136,7 +135,6 @@ public:
 	const long int MAXVALUE_improveAILevel = 1; // Update this if more levels are added
 	const long int MINVALUE_tacticalAIUpdateDelay = 15;
 	const long int MINVALUE_minPopulationBeforeBuildOptionalItems = 5;
-	const long int MINVALUE_maxFarmsInDeathMatch = 1;
 	const long int MINVALUE_panicModeDelay = 5;
 	const long int MINVALUE_maxPanicUnitsCountToAddInStrategy = 0;
 	const long int MINVALUE_dislikeComputeInterval = 3;

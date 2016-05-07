@@ -35,7 +35,6 @@ CustomRORConfig::CustomRORConfig() {
 	this->panicModeDelay = 20;
 	this->maxPanicUnitsCountToAddInStrategy = 7;
 	this->minPopulationBeforeBuildOptionalItems = 35;
-	this->maxFarmsInDeathMatch = 3;
 	this->dislikeComputeInterval = 15;
 	this->dislike_allArtefacts = 5;
 	this->dislike_humanPlayer = 1;
@@ -432,10 +431,6 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 				callResult = elem->QueryIntAttribute("value", &intValue);
 				if (callResult == TIXML_SUCCESS) { this->tacticalAIUpdateDelay = intValue; }
 			}
-			if (categoryName == "maxFarmsInDeathMatch") {
-				callResult = elem->QueryIntAttribute("value", &intValue);
-				if (callResult == TIXML_SUCCESS) { this->maxFarmsInDeathMatch = intValue; }
-			}
 		}
 		// Dislike
 		if (elemName == "dislikeValues") {
@@ -572,8 +567,6 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 	if (this->panicModeDelay < this->MINVALUE_panicModeDelay) { this->panicModeDelay = this->MINVALUE_panicModeDelay; }
 	if (this->maxPanicUnitsCountToAddInStrategy < this->MINVALUE_maxPanicUnitsCountToAddInStrategy) { this->maxPanicUnitsCountToAddInStrategy = this->MINVALUE_maxPanicUnitsCountToAddInStrategy; }
 	if (this->minPopulationBeforeBuildOptionalItems < this->MINVALUE_minPopulationBeforeBuildOptionalItems) { this->minPopulationBeforeBuildOptionalItems = this->MINVALUE_minPopulationBeforeBuildOptionalItems; }
-	if (this->maxFarmsInDeathMatch < this->MINVALUE_maxFarmsInDeathMatch) { this->maxFarmsInDeathMatch = this->MINVALUE_maxFarmsInDeathMatch; }
-	if (this->autoRebuildFarms_maxFarms < this->MINVALUE_maxFarmsInDeathMatch) { this->autoRebuildFarms_maxFarms = this->MINVALUE_maxFarmsInDeathMatch; }
 	if (this->autoRebuildFarms_maxFood < this->MINVALUE_resourceAmount) { this->autoRebuildFarms_maxFood = this->MINVALUE_resourceAmount; }
 	if (this->autoRebuildFarms_minWood < this->MINVALUE_resourceAmount) { this->autoRebuildFarms_minWood = this->MINVALUE_resourceAmount; }
 	if ((this->dislikeComputeInterval != 0) && (this->dislikeComputeInterval < this->MINVALUE_dislikeComputeInterval)) { this->dislikeComputeInterval = this->MINVALUE_dislikeComputeInterval; }

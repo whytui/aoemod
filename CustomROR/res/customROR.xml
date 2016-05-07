@@ -70,8 +70,6 @@
 	For example, if you want AI to have 22 units before triggering optionals, set this value to 30 (this is an approximation)
 	Low values may lead to issues in tech order/requirements. It won't block AI but is not good for it. -->
 	<tacticalAI name="minPopulationBeforeOptionalItems" value="30"/>
-	<!-- Maximum number of farms to add dynamically in strategy in deathMatch games -->
-	<tacticalAI name="maxFarmsInDeathMatch" value="3"/>
 	
 	<!-- Manage Panic mode (dynamic defence units) -->
 	<!-- Integer value=seconds between 2 checks -->
@@ -177,7 +175,7 @@
 	<!--<per_number gameType="DM" sn="215" value="0"></per_number>--><!--SNAllowDiplomacyChangeOnAllyAttack=0 to prevent unfortunate diplomacy changes-->
 	<per_number gameType="RM" sn="161" value="4"></per_number><!--SNRequiredFirstBuilding=4 in random map: build SP/granary first-->
 	<per_number gameType="DM" sn="161" value="0"></per_number><!--SNRequiredFirstBuilding=0 in random map: build quickly-->
-	<per_number gameType="DM" sn="220" value="3"></per_number><!--SNMaxFarms in deathmatch. Overwritten by maxFarmsInDeathMatch parameter-->
+	<per_number gameType="DM" sn="220" value="3"></per_number><!--SNMaxFarms in deathmatch. -->
 	<per_number gameType="DM" sn="167" value="1"></per_number><!--SNInitialExplorationRequired in deathmatch. For faster town building-->
 	<per_number gameType="RM" sn="186" value="0"></per_number><!--SNCoopDemandTributeInterval: to disable tributes between AI players-->
 	<per_number gameType="DM" sn="186" value="0"></per_number><!--SNCoopDemandTributeInterval: to disable tributes between AI players-->
