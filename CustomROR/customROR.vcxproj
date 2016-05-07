@@ -134,6 +134,7 @@
     <ClCompile Include="src\crConfig.cpp" />
     <ClCompile Include="src\crGameObjects.cpp" />
     <ClCompile Include="src\crMainInterface.cpp" />
+    <ClCompile Include="src\crPatcher.cpp" />
     <ClCompile Include="src\crTrigger.cpp" />
     <ClCompile Include="src\crTriggerSet.cpp" />
     <ClCompile Include="src\customROR.cpp" />

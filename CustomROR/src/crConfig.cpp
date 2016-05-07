@@ -11,6 +11,7 @@ UnitSpawnShortcutInfo::UnitSpawnShortcutInfo() {
 // Constructor
 CustomRORConfig::CustomRORConfig() {
 	// Hardcoded initialization. If values are provided in config XML file, it will overload this.
+	this->autoFixMissingFeatures = false;
 	this->couldNotReadXMLConfig = false;
 	this->couldNotReadCivXMLConfig = false;
 	this->showAlertOnMissingFeature = true;
@@ -178,6 +179,9 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		string categoryName;
 		if (elemName == "alertOnMissingFeatures") {
 			this->showAlertOnMissingFeature = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "autoFixMissingFeatures") {
+			this->autoFixMissingFeatures = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "showCustomRORMenu") {
 			this->showCustomRORMenu = XML_GetBoolElement(elem, "enable");

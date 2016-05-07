@@ -2,6 +2,7 @@
 <!-- Warning: tags are case-sensitive -->
 <customROR>
 	<alertOnMissingFeatures enable="1"/>
+	<autoFixMissingFeatures enable="1"/><!-- If 1, ROR_API features that are not installed are automaticalled added on the fly -->
 	
 	<!-- General -->
 	<!-- Bool 0/1 to hide/show customROR options entry in game menu -->

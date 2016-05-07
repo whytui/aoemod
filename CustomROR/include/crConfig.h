@@ -51,6 +51,7 @@ public:
 	bool noDockInMostlyLandMaps;
 	bool useImprovedButtonBar;
 	// Technical
+	bool autoFixMissingFeatures;
 	long int gameTimerSlowDownFactor;
 	bool gameTimerSlowDownAutoFix;
 	long int collectRORDebugLogs; // 0=no, 1=yes, filtered, 2=yes, all
