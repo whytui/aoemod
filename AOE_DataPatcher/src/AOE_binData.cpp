@@ -74,7 +74,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_VEG_windowedMode_10c 21
 #define COUNT_selectedUnits_10c 85
 #define COUNT_obsoletes_10c 22
-#define COUNT_ROR_API_10c 94
+#define COUNT_ROR_API_10c 95
 #define COUNT_manageAI_10c 13
 
 
@@ -4530,6 +4530,16 @@ void AOE_binData::InitROR_API() {
 		0x08370F,
 		(0x90, 0x8B, 0x44, 0x24, 0x04, 0x3C, 0x01, 0x72, 0x0D, 0x3C, 0x05), // default=no
 		(0x90, 0xE8, 0x5F, 0x5E, 0xF9, 0xFF, 0xC2, 0x04, 0x00, 0x3C, 0x05),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		FixPlayerNoTechTree_applyTech,
+		"Fix method that applies technology for players with no tech tree (all techs).",
+		0x0EBB10,
+		(0x51, 0x0F, 0xBF, 0x44, 0x24, 0x08, 0x8B, 0x51, 0x08, 0x56), // default=no
+		(0x51, 0xE8, 0x5E, 0xDA, 0xF2, 0xFF, 0x8B, 0x51, 0x08, 0x56),
 		FM_OFF,
 		FM_ON
 		);

@@ -316,6 +316,11 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 		fprintf_s(f, strNotEnabled);
 		result = false;
 	}
+	fprintf_s(f, "\nFeature: FixPlayerNoTechTree_applyTech...");
+	if (!IsRORAPICallEnabled(0x04EBB16)) {
+		fprintf_s(f, strNotEnabled);
+		result = false;
+	}
 	// MAP
 	fprintf_s(f, "\nFeature: Generated map elevation customization...");
 	if (!IsRORAPICallEnabled(0x00472C2F)) {
@@ -744,6 +749,15 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 			unitDefLiving->availableForPlayer = 1;
 			unitDefLiving->trainButton = 27;
 			unitDefLiving->trainLocation = 109;
+		}
+		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *rdef = GetResearchDef(humanPlayer, 116);
+		if (rdef) {
+			rdef->buttonId = 12;
+			rdef->iconId = 4;
+			rdef->researchLocation = 109;
+			rdef->researchType = 12;
+			rdef->languageDLLCreation = 8078;
+			rdef->researchTime = 1;
 		}
 	}
 
@@ -4788,6 +4802,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	bool currentActionIsResearch = false;
 	long int currentActionButtonIndex = -1;
 	short int currentActionLangNameId = -1;
+	char *currentActionName = NULL; // useful when currentActionLangNameId is invalid.
 	std::list<long int> activableUnitDefIDs = GetActivableUnitDefIDs(player); // A list of unitDef IDs that can be enabled thanks to (available) researches.
 	// To support >1 page
 	long int minButtonId = gameMainUI->panelButtonIdPageOffset;
@@ -4816,6 +4831,18 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		// This only handles human-triggered MakeObject (not AI-triggered).
 		currentActionDATID = unitAsBuilding->ptrHumanTrainQueueInformation->DATID;
 		currentActionIsResearch = false;
+	}
+	// Get names for current action unit (when training a unit). For research, it will be valued in next loop.
+	if ((currentActionDATID != -1) && (!currentActionIsResearch)) {
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *curActionUnitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(player, (short int)currentActionDATID);
+		if (curActionUnitDefBase && curActionUnitDefBase->IsCheckSumValidForAUnitClass()) {
+			if (currentActionName == NULL) {
+				currentActionName = curActionUnitDefBase->ptrUnitName;
+			}
+			if (currentActionLangNameId == -1) {
+				currentActionLangNameId = curActionUnitDefBase->languageDLLID_Name;
+			}
+		}
 	}
 
 
@@ -4870,6 +4897,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 				currentActionDATID = researchId;
 				currentActionButtonIndex = buttonIndex;
 				currentActionLangNameId = resDefInfo->researchDefArray[researchId].languageDLLName;
+				currentActionName = resDefInfo->researchDefArray[researchId].researchName;
 				currentActionIsResearch = true;
 			}
 			if ((buttonIndex > -1) && 
@@ -4895,7 +4923,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 				// TO DO : exclude non-visible researches (only_requirement=age ou age+building?)
 				if (((isBusy && researchIsAvailable) || costIsBetter) && // When we choose to show available researches, they have best priority.
 					(resDefInfo->researchDefArray[researchId].researchLocation == unitDef->DAT_ID1) &&
-					(resDefInfo->researchDefArray[researchId].researchTime > 0)
+					((resDefInfo->researchDefArray[researchId].researchTime > 0) || researchIsAvailable) // Hide unavailable immediate researches
 					) {
 					bestElemDATID[buttonIndex] = researchId;
 					bestElemIsResearch[buttonIndex] = true;
@@ -4993,6 +5021,23 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		}
 	}
 	
+	// Force text refresh on ROR-added buttons on page 2+ (not well supported natively, no text is displayed)
+	if (minButtonId > 0) {
+		for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
+			ROR_STRUCTURES_10C::STRUCT_UI_SLP_BUTTON *sb = gameMainUI->unitCommandButtons[buttonIndex];
+			if (buttonIsVisible[buttonIndex]) {
+				long int correctButtonInfoValue = sb->buttonInfoValue[0];
+				long int correctButtonCmdId = sb->commandIDs[0];
+				if (correctButtonCmdId > 0) {
+					bool disabled = (sb->readOnly != 0);
+					sb->buttonInfoValue[0] = -1; // To force refresh
+					AddInGameCommandButton(buttonIndex, (INGAME_UI_COMMAND_ID)correctButtonCmdId, correctButtonInfoValue,
+						disabled, NULL);
+				}
+			}
+		}
+	}
+
 	// Now display our custom buttons (... on free slots)
 	char nameBuffer[200];
 	for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
@@ -5000,19 +5045,14 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		if (bestElemDATID[buttonIndex] != -1) {
 			GetLanguageDllText(bestElemLangNameId[buttonIndex], nameBuffer, sizeof(nameBuffer), "");
 			if (bestElemIsResearch[buttonIndex]) {
-				// Note: see also 0x483109
-				elementInfo = "Can't be researched right now: ";
-				elementInfo += nameBuffer;
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true, elementInfo.c_str());
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/);
 				ROR_STRUCTURES_10C::STRUCT_UI_SLP_BUTTON *sb = gameMainUI->unitCommandButtons[buttonIndex];
 				sb->unknown_2C4;
 				sb->helpDllId = sb->helpDllId;
 				sb->winHelpDataDllId;
 				sb->buttonInfoValue;
 			} else {
-				elementInfo = "Can't be trained right now: ";
-				elementInfo += nameBuffer;
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], true, elementInfo.c_str());
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/);
 			}
 		}
 	}
@@ -5021,6 +5061,9 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	const int buttonIdForInProgress = 5;
 	if ((currentActionDATID != -1) && !IsInGameUnitCommandButtonVisible(buttonIdForInProgress)) {
 		GetLanguageDllText(currentActionLangNameId, nameBuffer, sizeof(nameBuffer), "");
+		if ((nameBuffer[0] == 0) && (currentActionName != NULL)) {
+			strcpy_s(nameBuffer, currentActionName);
+		}
 		std::string inProgressInfo;
 		if (currentActionIsResearch) {
 			inProgressInfo = "Being researched: ";

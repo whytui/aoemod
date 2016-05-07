@@ -284,6 +284,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x00483715:
 		this->ROR_GetButtonInternalIndexFromDatBtnId(REG_values);
 		break;
+	case 0x004EBB16:
+		this->FixPlayerNoTechTree_applyTech(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -2986,6 +2989,19 @@ void CustomRORInstance::ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_v
 	}
 	REG_values->EAX_val = result;
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
+}
+
+
+// From 0x4EBB10. add missing check on techId (check it is >=0)
+void CustomRORInstance::FixPlayerNoTechTree_applyTech(REG_BACKUP *REG_values) {
+	long int techId = GetIntValueFromRORStack(REG_values, 8); // Get arg1
+	ROR_STRUCTURES_10C::STRUCT_TECH_DEF_INFO *tdi = (ROR_STRUCTURES_10C::STRUCT_TECH_DEF_INFO *)REG_values->ECX_val;
+	ror_api_assert(REG_values, tdi && tdi->IsCheckSumValid());
+	if (techId < 0) {
+		techId = tdi->technologyCount; // this will force detection of invalid techid.
+	}
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	REG_values->EAX_val = techId; // MOVSX EAX,WORD PTR SS:[ESP+8] in 0x4EBB11.
 }
 
 

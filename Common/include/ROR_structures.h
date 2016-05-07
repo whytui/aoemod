@@ -3702,8 +3702,8 @@ namespace ROR_STRUCTURES_10C
 		short int unknown_02E; // for graphics ?
 		// 0x30
 		float remainingHitPoints;
-		char currentGraphicsDamageIndex; // According to remaining HP ?
-		char orientation; // Also used as building step (<25%, <50%, <75%, >75%)
+		char currentGraphicsDamageIndex; // +34. According to remaining HP ?
+		char orientation; // +35. Also used as building step (<25%, <50%, <75%, >75%)
 		char mouseSelectionStatus; // +36. 1=selected, 2=right-click-target
 		char shortcutNumber; // 0-10, 10+=regrouped units ; 0=none, 10=0x0A="0" key.
 		float positionY; // (+38) bottom-left to upper-right

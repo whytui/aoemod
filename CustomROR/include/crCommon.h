@@ -573,6 +573,18 @@ template<typename UnitDef> static UnitDef *CopyUnitDefToNew(UnitDef *existingUni
 	return newUnitDef;
 }
 
+// Get a localized string using ROR method.
+// Returns true on success.
+bool AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES category, long int commandId, long int subParam, char *buffer, long int bufferSize);
+
+// Generate full creation text for a button (research, train) with costs and everything.
+// buffer size must be at least 0x200.
+// unitButtonInfo is allowed to be NULL.
+// Cost info come from unitButtonInfo.
+// elemLanguageCreationDllId is unit (or research) creationDllId (it includes shortcut key, if any)
+void AOE_GetUIButtonCreationText(char *buffer, ROR_STRUCTURES_10C::STRUCT_UI_UNIT_BUTTON_INFO *unitButtonInfo,
+	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCmdId, long int elemLanguageCreationDllId);
+
 
 // Returns the icon id relevant for provided UI command id, if found.
 // Returns -1 if not found.

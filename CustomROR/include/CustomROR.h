@@ -121,6 +121,7 @@ public:
 	void EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_values);
 	void EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_values);
 	void ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_values);
+	void FixPlayerNoTechTree_applyTech(REG_BACKUP *REG_values);
 
 	// Map generation
 	void ManageRelicsCount(REG_BACKUP *REG_values);

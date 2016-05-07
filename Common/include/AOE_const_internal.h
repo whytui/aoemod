@@ -82,7 +82,7 @@ namespace AOE_CONST_INTERNAL
 		CST_MAT_SELECT_UNKNOWN_69 = 0x69 // Some sub-action (in-game)
 	};
 
-	enum INTERNAL_MAIN_CATEGORIES : long int { // TO DO check type
+	enum INTERNAL_MAIN_CATEGORIES : long int {
 		CST_IMC_ERRORS = 1,
 		CST_IMC_RESOURCE_NAMES = 0x64,
 		CST_IMC_AGE_NAMES = 0x65,

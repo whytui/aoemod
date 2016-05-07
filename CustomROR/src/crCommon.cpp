@@ -2374,6 +2374,54 @@ short int AddUnitDefToPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRU
 }
 
 
+// Get a localized string using ROR method.
+// Returns true on success.
+bool AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES category, long int commandId, long int subParam, char *buffer, long int bufferSize) {
+	if (!buffer || (bufferSize <= 0)) {
+		return false;
+	}
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) {
+		return false;
+	}
+	long int result = 0;
+	const unsigned long int addr = 0x4FF580;
+	_asm {
+		PUSH bufferSize;
+		PUSH buffer;
+		PUSH subParam;
+		PUSH commandId;
+		PUSH category;
+		MOV ECX, settings;
+		CALL addr;
+		MOV result, EAX;
+	}
+	return (result != 0);
+}
+
+
+// Generate full creation text for a button (research, train) with costs and everything.
+// buffer size must be at least 0x200.
+// unitButtonInfo is allowed to be NULL.
+// Cost info come from unitButtonInfo.
+// elemLanguageCreationDllId is unit (or research) creationDllId (it includes shortcut key, if any)
+void AOE_GetUIButtonCreationText(char *buffer, ROR_STRUCTURES_10C::STRUCT_UI_UNIT_BUTTON_INFO *unitButtonInfo,
+	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCmdId, long int elemLanguageCreationDllId) {
+	if (!buffer) {
+		return;
+	}
+	buffer[0] = 0;
+	unsigned long int addr = 0x4834F0;
+	_asm {
+		PUSH elemLanguageCreationDllId;
+		PUSH uiCmdId;
+		PUSH unitButtonInfo;
+		PUSH buffer;
+		CALL addr;
+	}
+}
+
+
 // Returns the icon id relevant for provided UI command id, if found.
 // Returns -1 if not found. (WARNING: check this case in caller, -1 is not an acceptable value)
 long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId) {
@@ -2476,13 +2524,15 @@ bool IsInGameUnitCommandButtonVisible(long int buttonIndex) {
 	return IsInGameUnitCommandButtonVisible(inGameMain, buttonIndex);
 }
 
+
+
 // To be used with button IDs from unit defintion/researches to get a buttonIndex for game main UI structure (command buttons)
 // WARNING: returns -1 if DATButtonId is 0 or negative (invalid)
 // Valid results are 0-4 or 6-10.
 // See also 0x483710 (only works for 2 pages)
 long int GetButtonInternalIndexFromDatBtnId(char DATButtonId) {
 	if (DATButtonId <= 0) { return -1; } // Invalid (including 0).
-	long int tmp = DATButtonId % 10; // 1-5 is same as 11-15 / 21-25, etc. 6-10 = same as 16-20, etc
+	long int tmp = ((DATButtonId - 1) % 10) + 1; // 1-5 is same as 11-15 / 21-25, etc. 6-10 = same as 16-20, etc
 	if (tmp <= 5) {
 		return tmp - 1; // Source 1-5 = index 0-4
 	}
@@ -2497,7 +2547,7 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId) {
 // buttonIndex: 0-4 = first row, 6-10=second row, 5 and 11 are "special" right buttons (11=unselect/cancel, generally)
 // DATID can be a unitDefId (train), researchId (do_research)... Set it to 0 when not relevant.
 // isDisabled : set it to true to get a read only button (no possible click)
-// creationText can be left NULL to display a text using unit/research/etc's LanguageDLLID.
+// If creationText is NULL, a text is generated automatically. You can use "" to force empty text.
 // Technically, this just updates the button (no button object is created).
 bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
 	long int DATID, bool isDisabled, const char *creationText) {
@@ -2509,32 +2559,89 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	}
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 	if (!player || !player->IsCheckSumValid()) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *inGameMain = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
+	if (!inGameMain || !inGameMain->IsCheckSumValid()) { return false; }
 	long int iconId = GuessIconIdFromUICommandId(UICmdId);
 	long int helpDllId = 0;
 	long int creationDllId = 0;
+	long int creationDllId_original = 0; // unchanged creationDllId (without the +100000, for units)
 	long int hotkeyDllId = 0;
 	char pName[200];
+	char disabledPrefix[50];
+	char creationTextBuffer[0x200];
 	pName[0] = 0;
+	creationTextBuffer[0] = 0;
+	disabledPrefix[0] = 0;
+	std::string creationTextIfMissing = "";
+	ROR_STRUCTURES_10C::STRUCT_UI_UNIT_BUTTON_INFO btnInfoForMissingText;
+	btnInfoForMissingText.DATID = -1; // not required here
+	btnInfoForMissingText.iconId = 0; // not required here
+	btnInfoForMissingText.languageDllHotkeyText = -1; // not required here
+	btnInfoForMissingText.name = ""; // not required here
+
+	if (creationText == NULL) {
+		if (isDisabled) {
+			if (UICmdId == INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) {
+				strcpy_s(disabledPrefix, "Can't be researched right now: ");
+			} else if (UICmdId == INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
+				strcpy_s(disabledPrefix, "Can't be trained right now: ");
+			} else {
+				//strcpy_s(disabledPrefix, "Disabled: ");
+			}
+		} else {
+			AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES::CST_IMC_UI_COMMANDS, UICmdId, 0, creationTextBuffer, sizeof(creationTextBuffer));
+		}
+		creationTextIfMissing = creationTextBuffer + std::string(" ");
+	}
 
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(player, (short int)DATID);
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)GetUnitDefStruct(player, (short int)DATID);
 		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 			return false;
 		}
 		helpDllId = unitDef->languageDLLHelp;
-		creationDllId = unitDef->languageDLLID_Creation;
-		creationDllId = creationDllId + 100000; // cf 48248B
+		creationDllId_original = unitDef->languageDLLID_Creation;
+		creationDllId = creationDllId_original + 100000; // cf 48248B
 		hotkeyDllId = unitDef->languageDLLHotKeyText;
 		iconId = unitDef->iconId;
 		GetLanguageDllText(unitDef->languageDLLID_Name, pName, sizeof(pName), "");
+		if (creationText == NULL) {
+			btnInfoForMissingText.languageDllHelp = helpDllId;
+			btnInfoForMissingText.costAmount1 = unitDef->costs[0].costAmount;
+			btnInfoForMissingText.costAmount2 = unitDef->costs[1].costAmount;
+			btnInfoForMissingText.costAmount3 = unitDef->costs[2].costAmount;
+			btnInfoForMissingText.costType1 = unitDef->costs[0].costType;
+			btnInfoForMissingText.costType2 = unitDef->costs[1].costType;
+			btnInfoForMissingText.costType3 = unitDef->costs[2].costType;
+		}
 	}
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) {
 		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef = GetResearchDef(player, (short int)DATID);
 		if (researchDef == NULL) { return false; }
 		iconId = researchDef->iconId;
-		creationDllId = researchDef->languageDLLCreation;
+		creationDllId_original = researchDef->languageDLLCreation;
+		creationDllId = creationDllId_original;
 		helpDllId = researchDef->languageDLLHelp;
 		GetLanguageDllText(researchDef->languageDLLName, pName, sizeof(pName), researchDef->researchName);
+		btnInfoForMissingText.languageDllHelp = helpDllId;
+		btnInfoForMissingText.costAmount1 = researchDef->costAmount1;
+		btnInfoForMissingText.costAmount2 = researchDef->costAmount2;
+		btnInfoForMissingText.costAmount3 = researchDef->costAmount3;
+		btnInfoForMissingText.costType1 = researchDef->costType1;
+		btnInfoForMissingText.costType2 = researchDef->costType2;
+		btnInfoForMissingText.costType3 = researchDef->costType3;
+	}
+	// Train or research: if no text is available, try to build one
+	if ((creationText == NULL) && ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) ||
+		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH))) {
+		// Note: some units have bad creationDllId, like some heroes.
+		AOE_GetUIButtonCreationText(creationTextBuffer, &btnInfoForMissingText, UICmdId, creationDllId_original);
+		creationTextIfMissing = disabledPrefix;
+		if (creationTextBuffer[0] == 0) {
+			creationTextIfMissing += pName; // Rock'n'roll build a custom string as dllId is invalid/missing
+		} else {
+			creationTextIfMissing += creationTextBuffer; // this is standard behaviour
+		}
 	}
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE) { // cf 0x4824FF
 		creationDllId = -1;
@@ -2550,14 +2657,12 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	}
 	
 	if (!IsInGameUnitCommandButtonVisible(buttonIndex)) { // If this button was not used
-		ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *inGameMain = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
-		if (inGameMain && inGameMain->IsCheckSumValid()) {
-			inGameMain->panelDisplayedButtonCount++; // Update number of used buttons. Not sure it has any impact
-		}
+		inGameMain->panelDisplayedButtonCount++; // Update number of used buttons. Not sure it has any impact
 	}
+	const char *creationTextToUse = (creationText == NULL) ? creationTextIfMissing.c_str() : creationText;
 	return AOE_InGameAddCommandButton(player, buttonIndex, iconId, UICmdId, DATID,
 		helpDllId, creationDllId, hotkeyDllId,
-		pName, creationText, isDisabled);
+		pName, creationTextToUse, isDisabled);
 }
 
 
