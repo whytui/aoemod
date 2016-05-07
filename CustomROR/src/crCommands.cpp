@@ -242,14 +242,14 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		if (!_strnicmp(subCmd, "maxpop=", 7)) {
 			subCmd += 7;
 			int newMaxPop = atoi(subCmd);
-			if ((*subCmd == '0' && (*(subCmd + 1) == 0)) || (newMaxPop && (newMaxPop < 9))) {
+			if ((newMaxPop > 0) && (newMaxPop <= 255)) {
 				if (SetMaxPopulationGetterInSPGames(newMaxPop)) {
 					ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 					if (global && global->IsCheckSumValid() && global->ptrPlayerStructPtrTable) {
 						for (int i = 0; i < global->playerTotalCount; i++) {
 							ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
 							if (player && player->IsCheckSumValid()) {
-								player->SetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POULATION_LIMIT, newMaxPop);
+								player->SetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POULATION_LIMIT, (float) newMaxPop);
 							}
 						}
 					}
