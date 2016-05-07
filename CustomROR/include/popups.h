@@ -54,6 +54,32 @@ protected:
 	virtual void OnAfterClose(bool isCancel) { };
 	// Use it to list all UI objects (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
 	inline void AddObjectInContentList(ROR_STRUCTURES_10C::STRUCT_ANY_UI *obj);
+
+	// API to add UI components and add them automatically in "objects to free" list.
+	bool AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+		ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, char *label,
+		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
+		AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+
+	bool AddTextBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+		ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
+		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
+		bool readOnly = false, bool multiline = false, bool onlyNumbers = false, unsigned long int font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+
+	bool AddCheckBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate,
+		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize);
+
+	bool AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, char *caption,
+		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
+		long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+
+	bool AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
+		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
+		long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+
 private:
 	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnOK;
 	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnCancel;

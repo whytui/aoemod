@@ -118,7 +118,7 @@ static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(ROR_STRUCTUR
 
 
 // Note: basic size (eg OK button) is 0x?? / 0x1E
-static unsigned long int AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+static bool AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
@@ -141,12 +141,12 @@ static unsigned long int AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent
 		CALL EAX
 		MOV result, EAX
 	}
-	return result;
+	return result != 0;
 }
 
 
 // Note: basic size (eg OK button) is 0x?? / 0x1E
-static unsigned long int AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+static bool AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, char *caption,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
@@ -169,19 +169,19 @@ static unsigned long int AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent
 		CALL DS:[EAX+0xF0] // addbutton (using text)
 		MOV result, EAX
 	}
-	return result;
+	return result != 0;
 }
 
 
 
 // For fonts, see AOE_FONTS enum
-static ROR_STRUCTURES_10C::STRUCT_UI_LABEL *AOE_AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+static bool AOE_AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, char *label,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT
 ) {
 	if (parent == NULL) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *result;
+	long int result;
 	_asm {
 		MOV ECX, parent
 		PUSH 0 // arg11
@@ -199,14 +199,14 @@ static ROR_STRUCTURES_10C::STRUCT_UI_LABEL *AOE_AddLabel(ROR_STRUCTURES_10C::STR
 		CALL[EDX + 0x104] // or 0x456530
 		MOV result, EAX
 	}
-	return result;
+	return result != 0;
 }
 
 
 // Create a textbox using ROR methods.
 // If maxTextLength==0, it is replaced by initialText's length.
 // Note: The font used seems to be 14 pixels high (?)
-static ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *AOE_AddTextBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+static bool AOE_AddTextBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize, 
 	bool readOnly = false, bool multiline = false, bool onlyNumbers = false, unsigned long int font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
@@ -219,7 +219,7 @@ static ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *AOE_AddTextBox(ROR_STRUCTURES_10C:
 		maxTextLength = strlen(initialText);
 	}
 	if (maxTextLength >= 0x8000 - 2) { maxTextLength = 0x8000 - 2; } // AOE does not support longer textarea length (will not be work correctly)
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *result;
+	long int result;
 	_asm {
 		MOV ECX, parent
 		PUSH 0
@@ -241,23 +241,23 @@ static ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *AOE_AddTextBox(ROR_STRUCTURES_10C:
 	}
 	if (!readOnly && result) {
 		_asm {
-		// Make writeable
-		MOV EAX, ptrObjToCreate
-		MOV EAX, DS:[EAX]
-		MOV DS:[EAX+0x074], 1
+			// Make writeable
+			MOV EAX, ptrObjToCreate
+			MOV EAX, DS:[EAX]
+			MOV DS:[EAX+0x074], 1
 		}
 	}
-	return result;
+	return result != 0;
 }
 
 
 // Create a "AOE" checkbox (same type as buttons)
 // You need to create a label if you want some text aside the checkbox
-static ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *AOE_AddCheckBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+static bool AOE_AddCheckBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
 	if (!parent) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *result;
+	long int result;
 	_asm {
 		MOV ECX, parent
 		PUSH 0 // arg8
@@ -272,7 +272,7 @@ static ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *AOE_AddCheckBox(ROR_STRUCTURES_10C:
 		CALL EAX
 		MOV result, EAX
 	}
-	return result;
+	return result != 0;
 }
 
 

@@ -227,7 +227,7 @@ void CustomRORInfo::FreePopupAddedObjects() {
 		curObj->ptrParentObject = NULL; // do not try to free other related objects, just this one ! Remove link. Otherwise some objects would be destroyed more than once => crash
 		assert(isAValidRORChecksum(curObj->checksum)); // if failed, this means the object had already been freed, and memory been re-used for something else
 		if (static_cast<ROR_STRUCTURES_10C::STRUCT_UI_BUTTON*>(curObj) != NULL) {
-			// buttons might be event's sender, do not free them now... TO DO !!!!
+			// buttons might be event's sender, do not free them now... Our garbage system will manage them correctly.
 			this->garbageComponentsToFree.push_back(curObj);
 		} else {
 			CallAOEDestructor((unsigned long **)&curObj);
@@ -247,7 +247,7 @@ void CustomRORInfo::FreeGarbagePopupComponents() {
 		if (isAValidRORChecksum(curObj->checksum)) {
 			CallAOEDestructor((unsigned long **)&curObj);
 		} else {
-			traceMessageHandler.WriteMessageNoNotification("Invalid checksum !");
+			traceMessageHandler.WriteMessageNoNotification("FreeGarbagePopupComponents: Invalid checksum !");
 		}
 	}
 	this->garbageComponentsToFree.clear();

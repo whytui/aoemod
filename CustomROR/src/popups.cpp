@@ -36,6 +36,69 @@ void CustomPopup::AddObjectInContentList(ROR_STRUCTURES_10C::STRUCT_ANY_UI *obj)
 }
 
 
+// API to add UI components and add them automatically in "objects to free" list.
+bool CustomPopup::AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+	ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, char *label,
+	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
+	AOE_FONTS font) {
+	bool res;
+	res = AOE_AddLabel(parent, ptrObjToCreate, label, hPos, vPos, hSize, vSize, font);
+	if (res && ptrObjToCreate) {
+		this->AddObjectInContentList(*ptrObjToCreate);
+	}
+	return res;
+}
+
+bool CustomPopup::AddTextBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
+	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
+	bool readOnly, bool multiline, bool onlyNumbers, unsigned long int font) {
+		bool res;
+		res = AOE_AddTextBox(parent, ptrObjToCreate, initialText, maxTextLength, hPos, vPos, hSize, vSize, 
+			readOnly, multiline, onlyNumbers, font);
+		if (res && ptrObjToCreate) {
+			this->AddObjectInContentList(*ptrObjToCreate);
+		}
+		return res;
+}
+
+bool CustomPopup::AddCheckBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate,
+	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
+	bool res;
+	res = AOE_AddCheckBox(parent, ptrObjToCreate, hPos, vPos, hSize, vSize);
+	if (res && ptrObjToCreate) {
+		this->AddObjectInContentList(*ptrObjToCreate);
+	}
+	return res;
+}
+
+bool CustomPopup::AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, char *caption,
+	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
+	long int buttonId, AOE_FONTS font) {
+	bool res;
+	res = AOE_AddButton(parent, ptrObjToCreate, caption, hPos, vPos, hSize, vSize, buttonId, font);
+	if (res && ptrObjToCreate) {
+		this->AddObjectInContentList(*ptrObjToCreate);
+	}
+	return res;
+}
+
+bool CustomPopup::AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
+	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
+	long int buttonId, AOE_FONTS font) {
+	bool res;
+	res = AOE_AddButton(parent, ptrObjToCreate, DLL_STRING_ID, hPos, vPos, hSize, vSize, buttonId, font);
+	if (res && ptrObjToCreate) {
+		this->AddObjectInContentList(*ptrObjToCreate);
+	}
+	return res;
+}
+
+
+
 // Call this to open a new popup (=>this)
 ROR_STRUCTURES_10C::STRUCT_ANY_UI *CustomPopup::OpenPopup(long int hSize, long int vSize, bool withCancelBtn) {
 	if (!this->crInfo) { return NULL; }
@@ -112,48 +175,31 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 
 
 	//this->customGamePopupButtonVar
-	AOE_AddLabel(this->popup, &this->customOptionHeaderLabelVar, "CustomROR Options", 0xD0, 0x0A, 0x100, 0x1E, AOE_FONTS::AOE_FONT_BIG_LABEL); // Title
-	this->AddObjectInContentList(this->customOptionHeaderLabelVar);
+	this->AddLabel(this->popup, &this->customOptionHeaderLabelVar, "CustomROR Options", 0xD0, 0x0A, 0x100, 0x1E, AOE_FONTS::AOE_FONT_BIG_LABEL); // Title
 	
 	// human dislike penalty
-	AOE_AddTextBox(this->popup, &this->customOptionHumanPenaltyTextVar, customOptionHumanPenaltyTextBuffer, 2, 0x120, 0x34, 0x30, 0x16, false, false);
-	this->AddObjectInContentList(this->customOptionHumanPenaltyTextVar);
-	AOE_AddLabel(this->popup, &this->customOptionHumanPenaltyLabelVar, txtHumanPenalty, 0x10, 0x30, 0x100, 0x1E);
-	this->AddObjectInContentList(this->customOptionHumanPenaltyLabelVar);
+	this->AddTextBox(this->popup, &this->customOptionHumanPenaltyTextVar, customOptionHumanPenaltyTextBuffer, 2, 0x120, 0x34, 0x30, 0x16, false, false);
+	this->AddLabel(this->popup, &this->customOptionHumanPenaltyLabelVar, txtHumanPenalty, 0x10, 0x30, 0x100, 0x1E);
 	// Game speeds config
-	AOE_AddTextBox(this->popup, &this->customOptionGameSpeedTextVar, customOptionGameSpeedFactorTextBuffer, 4, 0x120, 0x4C, 0x30, 0x16, false, false);
-	this->AddObjectInContentList(this->customOptionGameSpeedTextVar);
-	AOE_AddLabel(this->popup, &this->customOptionGameSpeedLabelVar, txtGameSpeedFactor, 0x10, 0x48, 0x100, 0x1E);
-	this->AddObjectInContentList(this->customOptionGameSpeedLabelVar);
+	this->AddTextBox(this->popup, &this->customOptionGameSpeedTextVar, customOptionGameSpeedFactorTextBuffer, 4, 0x120, 0x4C, 0x30, 0x16, false, false);
+	this->AddLabel(this->popup, &this->customOptionGameSpeedLabelVar, txtGameSpeedFactor, 0x10, 0x48, 0x100, 0x1E);
 	// Farms autorebuild
-	AOE_AddLabel(this->popup, &this->lblAutoRebuildFarms, txtAutoRebuildFarms, 0x10, 0x64, 0x100, 0x1E);
-	this->AddObjectInContentList(this->lblAutoRebuildFarms);
-	AOE_AddCheckBox(this->popup, &this->chkAutoRebuildFarms, 0x120, 0x64, 0x1E, 0x1E);
-	this->AddObjectInContentList(this->chkAutoRebuildFarms);
+	this->AddLabel(this->popup, &this->lblAutoRebuildFarms, txtAutoRebuildFarms, 0x10, 0x64, 0x100, 0x1E);
+	this->AddCheckBox(this->popup, &this->chkAutoRebuildFarms, 0x120, 0x64, 0x1E, 0x1E);
 	AOE_CheckBox_SetChecked(this->chkAutoRebuildFarms, this->crInfo->configInfo.enableAutoRebuildFarms);
-	AOE_AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFood, txtAutoRebuildFarmsMaxFood, 0x10, 0x80, 0x100, 0x1E);
-	this->AddObjectInContentList(this->lblAutoRebuildFarmsMaxFood);
-	AOE_AddLabel(this->popup, &this->lblAutoRebuildFarmsMinWood, txtAutoRebuildFarmsMinWood, 0x10, 0x98, 0x100, 0x1E);
-	this->AddObjectInContentList(this->lblAutoRebuildFarmsMinWood);
-	AOE_AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFarms, txtAutoRebuildFarmsMaxNumber, 0x10, 0xB0, 0x100, 0x1E);
-	this->AddObjectInContentList(this->lblAutoRebuildFarmsMaxFarms);
-	AOE_AddTextBox(this->popup, &this->edtAutoRebuildFarmsMaxFood, maxFoodTextBuffer, 5, 0x120, 0x84, 0x34, 0x16, false, false);
-	this->AddObjectInContentList(this->edtAutoRebuildFarmsMaxFood);
-	AOE_AddTextBox(this->popup, &this->edtAutoRebuildFarmsMinWood, minWoodTextBuffer, 5, 0x120, 0x9C, 0x34, 0x16, false, false);
-	this->AddObjectInContentList(this->edtAutoRebuildFarmsMinWood);
-	AOE_AddTextBox(this->popup, &this->edtAutoRebuildFarmsMaxFarms, maxFarmsTextBuffer, 2, 0x120, 0xB4, 0x34, 0x16, false, false);
-	this->AddObjectInContentList(this->edtAutoRebuildFarmsMaxFarms);
-
+	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFood, txtAutoRebuildFarmsMaxFood, 0x10, 0x80, 0x100, 0x1E);
+	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMinWood, txtAutoRebuildFarmsMinWood, 0x10, 0x98, 0x100, 0x1E);
+	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFarms, txtAutoRebuildFarmsMaxNumber, 0x10, 0xB0, 0x100, 0x1E);
+	this->AddTextBox(this->popup, &this->edtAutoRebuildFarmsMaxFood, maxFoodTextBuffer, 5, 0x120, 0x84, 0x34, 0x16, false, false);
+	this->AddTextBox(this->popup, &this->edtAutoRebuildFarmsMinWood, minWoodTextBuffer, 5, 0x120, 0x9C, 0x34, 0x16, false, false);
+	this->AddTextBox(this->popup, &this->edtAutoRebuildFarmsMaxFarms, maxFarmsTextBuffer, 2, 0x120, 0xB4, 0x34, 0x16, false, false);
+	
 	// Free text zone
-	AOE_AddLabel(this->popup, &this->customOptionFreeTextLabelVar, "Other commands (enter to validate)", 0x10, 0x120, 0x100, 0x1E);
-	this->AddObjectInContentList(this->customOptionFreeTextLabelVar);
-	AOE_AddTextBox(this->popup, &this->customOptionFreeTextVar, "", 100, 0x100, 0x120, 0xB0, 0x16, false, false);
-	this->AddObjectInContentList(this->customOptionFreeTextVar);
-	AOE_AddTextBox(this->popup, &this->customOptionFreeTextAnswerVar, "", 100, 0x1C0, 0x120, 0x80, 0x16, true, false);
-	this->AddObjectInContentList(this->customOptionFreeTextAnswerVar);
-
-	AOE_AddButton(this->popup, &this->btnTechTreeInfo, "Tech tree info", 0x170, 0x34, 0xAC, 0x1E);
-	this->AddObjectInContentList(this->btnTechTreeInfo);
+	this->AddLabel(this->popup, &this->customOptionFreeTextLabelVar, "Other commands (enter to validate)", 0x10, 0x120, 0x100, 0x1E);
+	this->AddTextBox(this->popup, &this->customOptionFreeTextVar, "", 100, 0x100, 0x120, 0xB0, 0x16, false, false);
+	this->AddTextBox(this->popup, &this->customOptionFreeTextAnswerVar, "", 100, 0x1C0, 0x120, 0x80, 0x16, true, false);
+	
+	this->AddButton(this->popup, &this->btnTechTreeInfo, "Tech tree info", 0x170, 0x34, 0xAC, 0x1E);
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
@@ -269,8 +315,7 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	if (!unitDef) { return; }
 	this->unit = unit;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblUnusedPtr = NULL;
-	AOE_AddLabel(this->popup, &lblUnusedPtr, "Edit a unit", 200, 10, 120, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
-	this->AddObjectInContentList(lblUnusedPtr);
+	this->AddLabel(this->popup, &lblUnusedPtr, "Edit a unit", 200, 10, 120, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	char *name = "";
 	short int DATID = -1;
 	if (unitDef->ptrUnitName) {
@@ -279,9 +324,8 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	}
 	char buffer[200];
 	sprintf_s(buffer, "Unit ID = %ld - name=%s (DATID=%d). Pos(x,y)=%.1f, %.1f", unit->unitInstanceId, name, DATID, unit->positionX, unit->positionY);
-	AOE_AddLabel(this->popup, &lblUnusedPtr, buffer, 50, 50, 400, 24, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(lblUnusedPtr);
-
+	this->AddLabel(this->popup, &lblUnusedPtr, buffer, 50, 50, 400, 24, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	
 	char initial[] = "Initial";
 	char to_build[] = "Not built";
 	char gatherable[] = "Gatherable";
@@ -302,18 +346,12 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 		labelText4 = gatherable;
 	}
 
-	AOE_AddLabel(this->popup, &this->lbl_s0, labelText0, 160, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(this->lbl_s0);
-	AOE_AddLabel(this->popup, &this->lbl_s2, "Normal", 230, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(this->lbl_s2);
-	AOE_AddLabel(this->popup, &this->lbl_s4, labelText4, 300, 80, 70, 24, AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(this->lbl_s4);
-	AOE_AddCheckBox(this->popup, &this->chkbox_s0, 170, 110, 24, 24);
-	this->AddObjectInContentList(this->chkbox_s0);
-	AOE_AddCheckBox(this->popup, &this->chkbox_s2, 240, 110, 24, 24);
-	this->AddObjectInContentList(this->chkbox_s2);
-	AOE_AddCheckBox(this->popup, &this->chkbox_s4, 310, 110, 24, 24);
-	this->AddObjectInContentList(this->chkbox_s4);
+	this->AddLabel(this->popup, &this->lbl_s0, labelText0, 160, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(this->popup, &this->lbl_s2, "Normal", 230, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(this->popup, &this->lbl_s4, labelText4, 300, 80, 70, 24, AOE_FONT_STANDARD_TEXT);
+	this->AddCheckBox(this->popup, &this->chkbox_s0, 170, 110, 24, 24);
+	this->AddCheckBox(this->popup, &this->chkbox_s2, 240, 110, 24, 24);
+	this->AddCheckBox(this->popup, &this->chkbox_s4, 310, 110, 24, 24);
 	// Check current status' box
 	switch (unit->unitStatus) {
 	case 0:
@@ -511,35 +549,25 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 	}
 
-	AOE_AddLabel(popup, &this->lblTitle, "Unit properties", (hSize - lblTitleHSize)/2, 10, lblTitleHSize, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
-	this->AddObjectInContentList(this->lblTitle);
-	AOE_AddLabel(popup, &this->lblMainInfos, (char*)mainInfos.c_str(), (hSize - lblMainInfoHSize) / 2, 60, lblMainInfoHSize, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(this->lblMainInfos);
+	this->AddLabel(popup, &this->lblTitle, "Unit properties", (hSize - lblTitleHSize) / 2, 10, lblTitleHSize, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddLabel(popup, &this->lblMainInfos, (char*)mainInfos.c_str(), (hSize - lblMainInfoHSize) / 2, 60, lblMainInfoHSize, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	// Note: auto-move and farm info have same Y position because they can't be displayed simultaneously.
 	if (!autoMoveInfo.empty()) {
-		AOE_AddLabel(popup, &this->lblChildUnitsAutoMove, (char*)autoMoveInfo.c_str(), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddObjectInContentList(this->lblChildUnitsAutoMove);
-		AOE_AddButton(popup, &this->btnResetAutoMove, "Disable auto-move", 340, 100, btnSize, 22, 0);
-		this->AddObjectInContentList(this->btnResetAutoMove);
+		this->AddLabel(popup, &this->lblChildUnitsAutoMove, (char*)autoMoveInfo.c_str(), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddButton(popup, &this->btnResetAutoMove, "Disable auto-move", 340, 100, btnSize, 22, 0);
 	}
 	// Auto rebuild farm
 	if (isMyUnit && (unitDefBase->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FARM)) {
-		AOE_AddLabel(popup, &this->lblFarmAutoRebuild, (char*)farmInfo.c_str(), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddObjectInContentList(this->lblFarmAutoRebuild);
-
+		this->AddLabel(popup, &this->lblFarmAutoRebuild, (char*)farmInfo.c_str(), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		
 		ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unusedLabel;
-		AOE_AddCheckBox(popup, &this->chkRebuildFarmNone, 330, 100 - 4, 24, 24);
-		AOE_AddCheckBox(popup, &this->chkForceRebuildFarm, 430, 100 - 4, 24, 24);
-		AOE_AddCheckBox(popup, &this->chkForceNotRebuildFarm, 530, 100 - 4, 24, 24);
-		this->AddObjectInContentList(this->chkForceRebuildFarm);
-		this->AddObjectInContentList(this->chkForceNotRebuildFarm);
-		AOE_AddLabel(popup, &unusedLabel, "default", 270, 100, 50, 20);
-		this->AddObjectInContentList(this->chkForceNotRebuildFarm);
-		AOE_AddLabel(popup, &unusedLabel, "Always", 370, 100, 50, 20);
-		this->AddObjectInContentList(unusedLabel);
-		AOE_AddLabel(popup, &unusedLabel, "Never", 470, 100, 50, 20);
-		this->AddObjectInContentList(unusedLabel);
-
+		this->AddCheckBox(popup, &this->chkRebuildFarmNone, 330, 100 - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkForceRebuildFarm, 430, 100 - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkForceNotRebuildFarm, 530, 100 - 4, 24, 24);
+		this->AddLabel(popup, &unusedLabel, "default", 270, 100, 50, 20);
+		this->AddLabel(popup, &unusedLabel, "Always", 370, 100, 50, 20);
+		this->AddLabel(popup, &unusedLabel, "Never", 470, 100, 50, 20);
+		
 		FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
 		if (!fri) {
 			AOE_CheckBox_SetChecked(this->chkRebuildFarmNone, true);
@@ -562,11 +590,9 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 
 	// Building : future potential techs/units
 	if (!buildingTechAndUnitInfo.empty() && (techToShowCount > 0)) {
-		AOE_AddLabel(popup, &this->lblBuildingTechsMessage, "Future technologies, not available yet:", 30, 120, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddObjectInContentList(this->lblBuildingTechsMessage);
-
-		AOE_AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, 140, 450, 12 + techToShowCount*14, true, true);
-		this->AddObjectInContentList(this->edtBuildingTechs);
+		this->AddLabel(popup, &this->lblBuildingTechsMessage, "Future technologies, not available yet:", 30, 120, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		
+		this->AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, 140, 450, 12 + techToShowCount * 14, true, true);
 	}
 }
 
@@ -696,44 +722,28 @@ void EditorScenarioInfoPopup::_AddPopupContent() {
 	this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_NONE;
 	this->playerId = -1;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
-	AOE_AddLabel(popup, &this->lblTitle, "Custom editor menu", btnhPos1 - 5, 10, 190, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
-	this->AddObjectInContentList(this->lblTitle);
-	AOE_AddLabel(popup, &unused, "PlayerId :", btnhPos1, 40, 0x60, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
-	AOE_AddTextBox(popup, &this->edtPlayerId, "2", 1, btnhPos1 + btnSize - 0x22, 42, 0x22, 20, false, false, true);
-	this->AddObjectInContentList(this->edtPlayerId);
-	AOE_AddButton(popup, &this->btnAI, LANG_ID_STRATEGY, btnhPos1, 80, btnSize, 30, 0);
-	this->AddObjectInContentList(this->btnAI);
-	AOE_AddButton(popup, &this->btnPER, LANG_ID_PERSONALITY, btnhPos1, 120, btnSize, 30, 0);
-	this->AddObjectInContentList(this->btnPER);
-	AOE_AddButton(popup, &this->btnTriggers, "Triggers", btnhPos1, 160, btnSize, 30, 0);
-	this->AddObjectInContentList(this->btnTriggers);
-	AOE_AddButton(popup, &this->btnTerrainEdit, "Terrain edit", btnhPos1, 200, btnSize, 30, 0);
-	this->AddObjectInContentList(this->btnTerrainEdit);
-	AOE_AddButton(popup, &this->btnVictoryCondition, "Victory conditions", btnhPos2, 80, btnSize, 30, 0);
-	this->AddObjectInContentList(this->btnVictoryCondition);
+	this->AddLabel(popup, &this->lblTitle, "Custom editor menu", btnhPos1 - 5, 10, 190, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddLabel(popup, &unused, "PlayerId :", btnhPos1, 40, 0x60, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddTextBox(popup, &this->edtPlayerId, "2", 1, btnhPos1 + btnSize - 0x22, 42, 0x22, 20, false, false, true);
+	this->AddButton(popup, &this->btnAI, LANG_ID_STRATEGY, btnhPos1, 80, btnSize, 30, 0);
+	this->AddButton(popup, &this->btnPER, LANG_ID_PERSONALITY, btnhPos1, 120, btnSize, 30, 0);
+	this->AddButton(popup, &this->btnTriggers, "Triggers", btnhPos1, 160, btnSize, 30, 0);
+	this->AddButton(popup, &this->btnTerrainEdit, "Terrain edit", btnhPos1, 200, btnSize, 30, 0);
+	this->AddButton(popup, &this->btnVictoryCondition, "Victory conditions", btnhPos2, 80, btnSize, 30, 0);
 	long int chkSize = 30;
 	long int hSpace = 15;
 	long int lblhSize = 160;
 	long int lblhPos = hSpace;
 	long int lblhPosCol2 = (hSize - lblhSize - chkSize - hSpace * 2); // x position for checkboxes col2
-	AOE_AddLabel(popup, &unused, "Allow unit overlapping", lblhPos, 240, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
-	AOE_AddCheckBox(popup, &this->chkAllowUnitOverlapping, lblhPos + lblhSize + hSpace, 240, chkSize, chkSize);
-	this->AddObjectInContentList(this->chkAllowUnitOverlapping);
-	AOE_AddLabel(popup, &unused, "Allow buildings on elevation", lblhPos, 280, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
-	AOE_AddCheckBox(popup, &this->chkDisableHillModeCheck, lblhPos + lblhSize + hSpace, 280, chkSize, chkSize);
-	this->AddObjectInContentList(this->chkDisableHillModeCheck);
-	AOE_AddLabel(popup, &unused, "Disable terrain restrictions", lblhPos, 320, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
-	AOE_AddCheckBox(popup, &this->chkDisableTerrainRestrictions, lblhPos + lblhSize + hSpace, 320, chkSize, chkSize);
-	this->AddObjectInContentList(this->chkDisableTerrainRestrictions);
+	this->AddLabel(popup, &unused, "Allow unit overlapping", lblhPos, 240, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddCheckBox(popup, &this->chkAllowUnitOverlapping, lblhPos + lblhSize + hSpace, 240, chkSize, chkSize);
+	this->AddLabel(popup, &unused, "Allow buildings on elevation", lblhPos, 280, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddCheckBox(popup, &this->chkDisableHillModeCheck, lblhPos + lblhSize + hSpace, 280, chkSize, chkSize);
+	this->AddLabel(popup, &unused, "Disable terrain restrictions", lblhPos, 320, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddCheckBox(popup, &this->chkDisableTerrainRestrictions, lblhPos + lblhSize + hSpace, 320, chkSize, chkSize);
 	// Checkboxes column 2
-	AOE_AddLabel(popup, &unused, "Lengthen combat mode", lblhPosCol2, 240, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
-	AOE_AddCheckBox(popup, &this->chkLengthenCombatMode, lblhPosCol2 + lblhSize + hSpace, 240, chkSize, chkSize);
-	this->AddObjectInContentList(this->chkLengthenCombatMode);
+	this->AddLabel(popup, &unused, "Lengthen combat mode", lblhPosCol2, 240, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddCheckBox(popup, &this->chkLengthenCombatMode, lblhPosCol2 + lblhSize + hSpace, 240, chkSize, chkSize);
 }
 
 
@@ -899,10 +909,8 @@ void SimpleEditTextPopup::AddPopupContent(char *title, const char *initialValue,
 	int labelSizeX = strlen(title) * 12;
 	int labelPosX = ((this->hSize - labelSizeX) / 2) + 1;
 	if (labelPosX < 1) { labelPosX = 1; }
-	AOE_AddLabel(popup, &this->lblTitle, title, labelPosX, 10, labelSizeX, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
-	this->AddObjectInContentList(this->lblTitle);
-	AOE_AddTextBox(popup, &this->edtText, initialValue, maxLength, 10, 30, this->hSize - 20, this->vSize - 80, readOnly, true, false);
-	this->AddObjectInContentList(this->edtText);
+	this->AddLabel(popup, &this->lblTitle, title, labelPosX, 10, labelSizeX, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddTextBox(popup, &this->edtText, initialValue, maxLength, 10, 30, this->hSize - 20, this->vSize - 80, readOnly, true, false);
 }
 
 
@@ -953,14 +961,11 @@ void InputBox::AddPopupContent(char *title, char *desc, const char *initialInput
 	if (labelPosX < 1) { labelPosX = 1; }
 	int textSizeY = this->vSize - (24*2) - 56;
 	if (textSizeY < 1) { textSizeY = 10; }
-	AOE_AddLabel(popup, &this->lblTitle, title, labelPosX, 10, labelSizeX, 28, AOE_FONTS::AOE_FONT_BIG_LABEL);
-	this->AddObjectInContentList(this->lblTitle);
+	this->AddLabel(popup, &this->lblTitle, title, labelPosX, 10, labelSizeX, 28, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	if (*desc != 0) {
-		AOE_AddTextBox(popup, &this->edtDescription, desc, 10000, 20, 40, this->hSize - 40, textSizeY, true, true, false);
-		this->AddObjectInContentList(this->edtDescription);
+		this->AddTextBox(popup, &this->edtDescription, desc, 10000, 20, 40, this->hSize - 40, textSizeY, true, true, false);
 	}
-	AOE_AddTextBox(popup, &this->edtInput, initialInputValue, maxLength, 60, textSizeY + 44, this->hSize - 120, 20, readOnly, true, false);
-	this->AddObjectInContentList(this->edtInput);
+	this->AddTextBox(popup, &this->edtInput, initialInputValue, maxLength, 60, textSizeY + 44, this->hSize - 120, 20, readOnly, true, false);
 }
 
 
@@ -999,12 +1004,9 @@ void EditMapSizeXYPopup::_AddPopupContent() {
 	char bufY[5];
 	sprintf_s(bufX, "%ld", this->sizeX);
 	sprintf_s(bufY, "%ld", this->sizeY);
-	AOE_AddLabel(popup, &unused, "Please type X and Y map size", 30, 5, 280, 20, AOE_FONT_BIG_LABEL);
-	this->AddObjectInContentList(unused);
-	AOE_AddTextBox(popup, &this->edtSizeX, bufX, 3, 120, 40, 80, 20, false, false, true);
-	this->AddObjectInContentList(this->edtSizeX);
-	AOE_AddTextBox(popup, &this->edtSizeY, bufY, 3, 120, 60, 80, 20, false, false, true);
-	this->AddObjectInContentList(this->edtSizeY);
+	this->AddLabel(popup, &unused, "Please type X and Y map size", 30, 5, 280, 20, AOE_FONT_BIG_LABEL);
+	this->AddTextBox(popup, &this->edtSizeX, bufX, 3, 120, 40, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtSizeY, bufY, 3, 120, 60, 80, 20, false, false, true);
 }
 
 
@@ -1056,32 +1058,19 @@ void EditTerrainPopup::_AddPopupContent() {
 	// Popup is open. Add components
 	long int btnhPos = (hSize - 130) / 2;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
-	AOE_AddLabel(popup, &unused, "Edit terrain", btnhPos, 5, 130, 20, AOE_FONT_BIG_LABEL);
-	this->AddObjectInContentList(unused);
-	AOE_AddLabel(popup, &unused, "Pos X (min/max)", 10, 40, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
-	AOE_AddLabel(popup, &unused, "Pos Y (min/max)", 10, 70, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
-	AOE_AddLabel(popup, &unused, "Terrain Id (0-31)", 10, 100, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
-	AOE_AddLabel(popup, &unused, "Elevation (0-7)", 10, 130, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
-	AOE_AddLabel(popup, &unused, "Tip: leave terrain/elevation empty to preserve current values.", 10, 160, 350, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
-	AOE_AddTextBox(popup, &this->edtMinPosX, "0", 3, 140, 40, 80, 20, false, false, true);
-	this->AddObjectInContentList(this->edtMinPosX);
-	AOE_AddTextBox(popup, &this->edtMinPosY, "0", 3, 140, 70, 80, 20, false, false, true);
-	this->AddObjectInContentList(this->edtMinPosY);
-	AOE_AddTextBox(popup, &this->edtMaxPosX, "0", 3, 240, 40, 80, 20, false, false, true);
-	this->AddObjectInContentList(this->edtMaxPosX);
-	AOE_AddTextBox(popup, &this->edtMaxPosY, "0", 3, 240, 70, 80, 20, false, false, true);
-	this->AddObjectInContentList(this->edtMaxPosY);
-	AOE_AddTextBox(popup, &this->edtTerrainId, "", 2, 140, 100, 80, 20, false, false, true);
-	this->AddObjectInContentList(this->edtTerrainId);
-	AOE_AddTextBox(popup, &this->edtElevation, "", 1, 140, 130, 80, 20, false, false, true);
-	this->AddObjectInContentList(this->edtElevation);
-	AOE_AddLabel(popup, &unused, bufText, 10, 190, 350, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddObjectInContentList(unused);
+	this->AddLabel(popup, &unused, "Edit terrain", btnhPos, 5, 130, 20, AOE_FONT_BIG_LABEL);
+	this->AddLabel(popup, &unused, "Pos X (min/max)", 10, 40, 120, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, "Pos Y (min/max)", 10, 70, 120, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, "Terrain Id (0-31)", 10, 100, 120, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, "Elevation (0-7)", 10, 130, 120, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, "Tip: leave terrain/elevation empty to preserve current values.", 10, 160, 350, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddTextBox(popup, &this->edtMinPosX, "0", 3, 140, 40, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtMinPosY, "0", 3, 140, 70, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtMaxPosX, "0", 3, 240, 40, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtMaxPosY, "0", 3, 240, 70, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtTerrainId, "", 2, 140, 100, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtElevation, "", 1, 140, 130, 80, 20, false, false, true);
+	this->AddLabel(popup, &unused, bufText, 10, 190, 350, 20, AOE_FONT_STANDARD_TEXT);
 }
 
 
@@ -1154,8 +1143,7 @@ void GenNewTriggerPopup::_AddPopupContent() {
 	// TO DO : fix Global_OnButtonClick in crMainitf
 	AOE_AddEntryInCombo(this->cbxActionType, 0, "test1");
 	AOE_AddEntryInCombo(this->cbxActionType, 1, "test2");
-	AOE_AddTextBox(popup, &this->edtTriggerText, "0", 3, 140, 40, 80, 20, false, false, true);
-	this->AddObjectInContentList(this->edtTriggerText);
-	//AOE_AddLabel(popup, &unused, bufText, 10, 190, 350, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddTextBox(popup, &this->edtTriggerText, "0", 3, 140, 40, 80, 20, false, false, true);
+	//this->AddLabel(popup, &unused, bufText, 10, 190, 350, 20, AOE_FONT_STANDARD_TEXT);
 }
 
