@@ -237,6 +237,27 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 			}
 			return true;
 		}
+
+		// Change maximum population value for this game (and next ones)
+		if (!_strnicmp(subCmd, "maxpop=", 7)) {
+			subCmd += 7;
+			int newMaxPop = atoi(subCmd);
+			if ((*subCmd == '0' && (*(subCmd + 1) == 0)) || (newMaxPop && (newMaxPop < 9))) {
+				if (SetMaxPopulationGetterInSPGames(newMaxPop)) {
+					ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+					if (global && global->IsCheckSumValid() && global->ptrPlayerStructPtrTable) {
+						for (int i = 0; i < global->playerTotalCount; i++) {
+							ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
+							if (player && player->IsCheckSumValid()) {
+								player->SetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POULATION_LIMIT, newMaxPop);
+							}
+						}
+					}
+					sprintf_s(outputBuffer, "Max population=%d", newMaxPop);
+				}
+			}
+			return true;
+		}
 	}
 
 	// Useful for debugging too: select from unitId
@@ -307,6 +328,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 			rdef->languageDLLCreation = 8078;
 			rdef->researchTime = 1;
 		}
+		SetMaxPopulationGetterInSPGames(10);
 	}
 
 	char *c = "Game Settings Screen";

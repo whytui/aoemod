@@ -181,8 +181,6 @@ public:
 
 	BinarySeqDefinition(long size, int totalSequencesCount, long seqOffset);
 
-	BinarySeqDefinition(long size, int totalSequencesCount, long seqOffset, long seqVarRelativeOffset, SEQ_VAR_TYPES seqVarType);
-
 	~BinarySeqDefinition();
 
 	// Call this after using the default constructor (with no argument) or the object will be unuseable.
@@ -190,7 +188,6 @@ public:
 	// Calling Init(0, 0) completely resets the object (that will required a new Init(...)).
 	void Init(long size, int totalSequencesCount);
 	void Init(long size, int totalSequencesCount, long seqOffset);
-	void Init(long size, int totalSequencesCount, long seqOffset, long seqVarRelativeOffset, SEQ_VAR_TYPES seqVarType);
 
 
 	std::wstring DumpSeqBuffer(int seqIndex, const std::wstring &separator = _T(" "));
@@ -246,7 +243,7 @@ private:
 	int totalSeqCount; // Number of possible sequences (including default sequence + custom ones). Must remain consistent with seqBufferListallocation
 	unsigned char **seqBufferList; // Array (dynamically allocated) of binary sequences
 
-	void ConstructorInit(long size, int totalSequencesCount, long seqOffset, long seqVarRelativeOffset, SEQ_VAR_TYPES seqVarType);
+	void ConstructorInit(long size, int totalSequencesCount, long seqOffset);
 	void AllocateSeqBuffers();
 	void FreeSeqBuffers();
 	bool IsSeqIndexValid(int seqIndex);

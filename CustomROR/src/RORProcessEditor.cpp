@@ -12,7 +12,7 @@ bool RORProcessEditor::CheckMemoryConsistency(BinarySeqDefinition *seq, int seqI
 	unsigned long int currentOffset = relativeOffset;
 	unsigned char *sequenceBeginAddr = (unsigned char *)AOE_FileOffsetToExeAddr(seq->GetSeqOffset());
 	unsigned char *sequenceDefBuffer = seq->GetSequence(seqIndex);
-	while (currentOffset < size) {
+	while (currentOffset < (unsigned long) size) {
 		if (sequenceDefBuffer[currentOffset] != sequenceBeginAddr[currentOffset]) {
 			return false;
 		}

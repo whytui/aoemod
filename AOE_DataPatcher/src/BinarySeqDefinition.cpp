@@ -8,20 +8,16 @@ BinarySeqDefinition::BinarySeqDefinition()
 
 
 BinarySeqDefinition::BinarySeqDefinition(long size, int totalSequencesCount) {
-	ConstructorInit(size, totalSequencesCount, -1, -1, SVT_NO_VARIABLE);
+	ConstructorInit(size, totalSequencesCount, -1);
 }
 
 
 BinarySeqDefinition::BinarySeqDefinition(long size, int totalSequencesCount, long seqOffset) {
-	ConstructorInit(size, totalSequencesCount, seqOffset, -1, SVT_NO_VARIABLE);
-}
-
-BinarySeqDefinition::BinarySeqDefinition(long size, int totalSequencesCount, long seqOffset, long seqVarRelativeOffset, SEQ_VAR_TYPES seqVarType) {
-	ConstructorInit(size, totalSequencesCount, seqOffset, seqVarRelativeOffset, seqVarType);
+	ConstructorInit(size, totalSequencesCount, seqOffset);
 }
 
 
-void BinarySeqDefinition::ConstructorInit(long size, int totalSequencesCount, long seqOffset, long seqVarRelativeOffset, SEQ_VAR_TYPES seqVarType) {
+void BinarySeqDefinition::ConstructorInit(long size, int totalSequencesCount, long seqOffset) {
 	if ((size < 1) || (totalSequencesCount < 1)) {
 		throw std::exception("Bad parameters. Both size and total sequences count should be > 0");
 	}
@@ -53,20 +49,15 @@ void BinarySeqDefinition::Init(long size, int totalSequencesCount) {
 		return;
 	}
 	if ((this->totalSeqCount) || (this->seqBufferList) ) { throw std::exception("Init cannot be called if the object is already initialised with a non-null size/sequence count"); }
-	this->ConstructorInit(size, totalSequencesCount, -1, -1, SVT_NO_VARIABLE);
+	this->ConstructorInit(size, totalSequencesCount, -1);
 }
 
 
 void BinarySeqDefinition::Init(long size, int totalSequencesCount, long seqOffset) {
 	if ((this->totalSeqCount) || (this->seqBufferList)) { throw std::exception("Init cannot be called if the object is already initialised with a non-null size/sequence count"); }
-	this->ConstructorInit(size, totalSequencesCount, seqOffset, -1, SVT_NO_VARIABLE);
+	this->ConstructorInit(size, totalSequencesCount, seqOffset);
 }
 
-
-void BinarySeqDefinition::Init(long size, int totalSequencesCount, long seqOffset, long seqVarRelativeOffset, SEQ_VAR_TYPES seqVarType) {
-	if ((this->totalSeqCount) || (this->seqBufferList)) { throw std::exception("Init cannot be called if the object is already initialised with a non-null size/sequence count"); }
-	this->ConstructorInit(size, totalSequencesCount, seqOffset, seqVarRelativeOffset, seqVarType);
-}
 
 
 BinarySeqDefinition::~BinarySeqDefinition()

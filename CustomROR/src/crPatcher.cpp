@@ -2,7 +2,7 @@
 
 bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 	try {
-		RORProcessEditor e;
+		RORProcessEditor pe;
 		aoeBinData.SetCurrentVersion(AOE_FILE_VERSION::AOE_VERSION_1_0C);
 		BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(AOE_FILE_VERSION::AOE_VERSION_1_0C, BINSEQ_CATEGORIES::BC_ROR_API);
 		if (!seqDefSet) {
@@ -29,13 +29,13 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 					//int seqIndexCount = seqDef->GetTotalSeqCount();
 					int seqIndexON = seqDef->GetSeqIndexFromFuncMeaning(FUNC_MEANING::FM_ON);
 					if (seqIndexON >= 0) {
-						if (!e.CheckSeqConsistency(seqDef, seqIndexON)) {
+						if (!pe.CheckSeqConsistency(seqDef, seqIndexON)) {
 							fprintf_s(logFile, "%sFeature is not installed: %s\n",
 								isOptionalSequence ? "[INFO] " : "[WARNING] ", seqDefName.c_str());
 							int writtenBytes = 0;
 							if (!isOptionalSequence) {
 								fprintf_s(logFile, "Force installation of %s\n", seqDefName.c_str());
-								writtenBytes = e.WriteFromSequence(seqDef, seqIndexON); // Force install missing sequence
+								writtenBytes = pe.WriteFromSequence(seqDef, seqIndexON); // Force install missing sequence
 							}
 							if (!isOptionalSequence && (writtenBytes <= 0)) {
 								hasMissingSequences = true; // Set to true (unless it is optional or it has been fixed on the fly).
@@ -60,3 +60,25 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 	}
 }
 
+
+// Returns true if successful
+// This only modifies the getter function.
+// If you wish to change in-game maximum population, you'll probably have to modify all player "max pop" resource.
+bool SetMaxPopulationGetterInSPGames(long int newMaxPopulationValue) {
+	try {
+		if ((newMaxPopulationValue < 0) || (newMaxPopulationValue > 255)) { return false; }
+		char updateValue = (char)newMaxPopulationValue;
+		RORProcessEditor pe;
+		unsigned char bufferSeq[] = { 0xB0, 0x32, 0x5E, 0xC3 };
+		BinarySeqDefinition b = BinarySeqDefinition(sizeof(bufferSeq), 1, 0x105504);
+		b.SetVarRelativeOffset(0, 1);
+		b.SetVarType(0, SEQ_VAR_TYPES::SVT_INT_1B);
+		b.WriteSequence(0, bufferSeq);
+		pe.WriteFromSequenceUsingValue(&b, 0, &updateValue);
+		return true;
+	}
+	catch (std::exception e) {
+		traceMessageHandler.WriteMessage(e.what());
+		return false;
+	}
+}
