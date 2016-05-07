@@ -2995,6 +2995,7 @@ void CustomRORInstance::ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_v
 // From 0x4EBB10. add missing check on techId (check it is >=0)
 void CustomRORInstance::FixPlayerNoTechTree_applyTech(REG_BACKUP *REG_values) {
 	long int techId = GetIntValueFromRORStack(REG_values, 8); // Get arg1
+	techId = techId & 0xFFFF; // Because arg1 is a WORD ! (short int)
 	ROR_STRUCTURES_10C::STRUCT_TECH_DEF_INFO *tdi = (ROR_STRUCTURES_10C::STRUCT_TECH_DEF_INFO *)REG_values->ECX_val;
 	ror_api_assert(REG_values, tdi && tdi->IsCheckSumValid());
 	if (techId < 0) {
