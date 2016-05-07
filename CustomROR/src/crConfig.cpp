@@ -47,6 +47,7 @@ CustomRORConfig::CustomRORConfig() {
 	for (int i = 0; i < 256; i++) {
 		allCivInfo[i] = NULL;
 	}
+	this->useImprovedButtonBar = false; // Game default
 	this->enableCallNearbyIdleMilitaryUnits = true;
 	this->distanceToCallNearbyIdleMilitaryUnits = 25;
 	this->gameTimerSlowDownFactor = 5;
@@ -219,6 +220,9 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		if (elemName == "allyExplorationIsAlwaysShared") {
 			this->allyExplorationIsAlwaysShared = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "improvedButtonBar") {
+			this->useImprovedButtonBar = XML_GetBoolElement(elem, "enable");
 		}
 
 		// Random games settings

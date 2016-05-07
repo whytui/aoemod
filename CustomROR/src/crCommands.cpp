@@ -507,6 +507,7 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "gameTimerSlowDownFactor:                   %d\n", this->crInfo->configInfo.gameTimerSlowDownFactor);
 	fprintf_s(f, "fixInvisibleTree:                          %d\n", this->crInfo->configInfo.fixInvisibleTree ? 1 : 0);
 	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", this->crInfo->configInfo.fixHumanPlayer_specificSeeUnit ? 1 : 0);
+	fprintf_s(f, "useImprovedButtonBar:                      %d\n", this->crInfo->configInfo.useImprovedButtonBar ? 1 : 0);
 	// General - related to game
 	fprintf_s(f, "allyExplorationIsAlwaysShared:             %d\n", this->crInfo->configInfo.allyExplorationIsAlwaysShared ? 1 : 0);
 	// Random games settings
@@ -4756,7 +4757,9 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		return;
 	}
 
-#pragma message("AfterShowUnitCommandButtons: Add config here to enable/disable")
+	if (!this->crInfo->configInfo.useImprovedButtonBar) {
+		return;
+	}
 
 	// Collect info
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
@@ -5103,7 +5106,9 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue) {
 
-#pragma message("Use custom buttons config 'enabled/disabled' here")
+	if (!this->crInfo->configInfo.useImprovedButtonBar) {
+		return false;
+	}
 
 	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
 		return false;

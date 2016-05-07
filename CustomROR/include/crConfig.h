@@ -49,6 +49,7 @@ public:
 	bool fixHumanPlayer_specificSeeUnit;
 	bool allyExplorationIsAlwaysShared;
 	bool noDockInMostlyLandMaps;
+	bool useImprovedButtonBar;
 	// Technical
 	long int gameTimerSlowDownFactor;
 	bool gameTimerSlowDownAutoFix;
