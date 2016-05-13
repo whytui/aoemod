@@ -1222,7 +1222,8 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
 	assert(player != NULL);
 
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemMainForum = NULL;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemMainTownCenter = NULL; // Main town center
+	int townCentersCount = 0; // Total number of town centers.
 	bool foundCounter_one = false; // set to true if we passed the "counter=1" element. Allow us to identify "panic units" from normal strategy units
 	int currentPopulation = 0; // Does not count limited-retrains units
 
@@ -1250,7 +1251,12 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 	while (currentStratElem && currentStratElem != fakeFirstStratElem) {
 		assert(currentStratElem != NULL);
 		// Save some useful elements/information as we're passing on it
-		if ((!elemMainForum) && (currentStratElem->unitDAT_ID == CST_UNITID_FORUM)) { elemMainForum = currentStratElem; }
+		if (currentStratElem->unitDAT_ID == CST_UNITID_FORUM) {
+			townCentersCount++;
+			if (!elemMainTownCenter) {
+				elemMainTownCenter = currentStratElem;
+			}
+		}
 		if (currentStratElem->counter == 1) { foundCounter_one = true; }
 		if ((currentStratElem->unitDAT_ID != CST_UNITID_WATCH_TOWER) || (currentStratElem->elementType != AIUCBuilding)) {
 			lastNonTowerElement = currentStratElem;
@@ -1465,6 +1471,11 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 		(((numberOfAddedResearches < 2) && isStrong) || isVeryRich)) {
 		AddUnitInStrategy_before(buildAI, optionalsLocation, -1, CST_UNITID_MARKET, AIUCTech, CST_RSID_DOMESTICATION, player, "customROR-Domestication");
 		numberOfAddedResearches++;
+	}
+	// Add a secondary town center when there is only one. It's a good security.
+	if ((townCentersCount == 1) && (settings->difficultyLevel <= 1)) { // Hard/hardest only
+		AddUnitInStrategy_before(buildAI, optionalsLocation, -1, -1, AIUCBuilding, CST_UNITID_FORUM, player, "customROR-BackupTC");
+		townCentersCount++;
 	}
 }
 
