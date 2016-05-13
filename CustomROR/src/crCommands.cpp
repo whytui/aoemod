@@ -4546,6 +4546,10 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 			// This handles ALL MakeTech actions (both AI or human triggered)
 			currentActionDATID = currentActionAsMakeObject->targetUnitDAT_ID;
 			currentActionIsResearch = true;
+			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(player, currentActionAsMakeObject->targetUnitDAT_ID);
+			if (resDef) {
+				currentActionLangNameId = resDef->languageDLLName;
+			}
 		}
 
 	}
@@ -4554,7 +4558,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		currentActionDATID = unitAsBuilding->ptrHumanTrainQueueInformation->DATID;
 		currentActionIsResearch = false;
 	}
-	// Get names for current action unit (when training a unit). For research, it will be valued in next loop.
+	// Get names for current action unit (when training a unit).
 	if ((currentActionDATID != -1) && (!currentActionIsResearch)) {
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *curActionUnitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(player, (short int)currentActionDATID);
 		if (curActionUnitDefBase && curActionUnitDefBase->IsCheckSumValidForAUnitClass()) {
