@@ -412,10 +412,10 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
 		ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
 		assert(tacAI->IsCheckSumValid());
-		float posX, posY;
-		bool ok = GetGamePositionUnderMouse(&posX, &posY);
-
-		AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_WORK, 83, false, "eee");
+		//float posX, posY;
+		//bool ok = GetGamePositionUnderMouse(&posX, &posY);
+		//AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_WORK, 83, false, "eee");
+		//SetFarmCurrentTotalFood((ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING*) (player->custom_selectedUnits[0]), 1);
 	}
 
 	// TEST strategy
@@ -4361,13 +4361,15 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 			}
 		}
 
-		// Add/Update farm rebuild info to trigger construction of a new farm when "this" one is actually removed.
-		FarmRebuildInfo *f = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(farm->positionX, farm->positionY);
-		f->villagerUnitId = farmerUnit->unitInstanceId;
-		f->playerId = player->playerId;
-		f->posX = farm->positionX; // Only useful if just added (otherwise, unchanged)
-		f->posY = farm->positionY; // Only useful if just added (otherwise, unchanged)
-		f->gameTime = (player->ptrGlobalStruct != NULL) ? player->ptrGlobalStruct->currentGameTime : 0;
+		if (farmCountConditionIsOK) {
+			// Add/Update farm rebuild info to trigger construction of a new farm when "this" one is actually removed.
+			FarmRebuildInfo *f = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(farm->positionX, farm->positionY);
+			f->villagerUnitId = farmerUnit->unitInstanceId;
+			f->playerId = player->playerId;
+			f->posX = farm->positionX; // Only useful if just added (otherwise, unchanged)
+			f->posY = farm->positionY; // Only useful if just added (otherwise, unchanged)
+			f->gameTime = (player->ptrGlobalStruct != NULL) ? player->ptrGlobalStruct->currentGameTime : 0;
+		}
 	}
 }
 

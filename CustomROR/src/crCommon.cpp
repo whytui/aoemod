@@ -1465,7 +1465,7 @@ float GetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit
 	return action->unsure_resourceValue + farmUnit->resourceValue;
 }
 
-// Modifies the total remaining food amount for a farm ("immediatly available" + "action-remaining").
+// Modifies the total remaining food amount for a farm ("immediately available" + "action-remaining").
 bool SetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit, float newAmount) {
 	if (!farmUnit || !farmUnit->IsCheckSumValid()) { return false; }
 	if (farmUnit->resourceTypeId != RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE) { return false; }

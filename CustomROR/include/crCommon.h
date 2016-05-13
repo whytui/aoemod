@@ -339,7 +339,7 @@ ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long
 // Returns 0 in error cases (please check it is actually a farm !)
 float GetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit);
 
-// Modifies the total remaining food amount for a farm ("immediatly available" + "action-remaining").
+// Modifies the total remaining food amount for a farm ("immediately available" + "action-remaining").
 bool SetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit, float newAmount);
 
 long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
