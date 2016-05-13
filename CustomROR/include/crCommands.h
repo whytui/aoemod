@@ -74,8 +74,18 @@ public:
 	~CustomRORCommand();
 
 	CustomRORInfo *crInfo;
+
+private:
 	const float distanceToConsiderVeryClose = 1.0; // Distance (added to range) under which a target is considered "within range". Please leave this > 0.
 
+	// UpdatedValue: if <0, it is ignored
+	void UpdateWorkRateWithMessage(short int DATID, float updatedValue);
+
+	// Update a technology that increases work rate: change value used to increase.
+	// UpdatedValue: if <0, it is ignored
+	void UpdateTechAddWorkRateWithMessage(short int techId, short int unitDefId, float updatedValue);
+
+public:
 	// Returns true if all features for customROR are enabled in game executable code.
 	bool CheckEnabledFeatures();
 
@@ -288,7 +298,11 @@ public:
 	// Warning: this event occurs before the farm unit is actually "killed"
 	void OnFarmDepleted(long int farmUnitId);
 
+	// Disable dock for all players on maps where AI does NOT builds docks.
 	void DisableWaterUnitsIfNeeded();
+
+	// Disable all walls for current game.
+	void DisableWalls();
 
 	// Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
 	void OnFindEnemyUnitIdWithinRangeLoop(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem);

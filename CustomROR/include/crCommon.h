@@ -264,11 +264,15 @@ bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
 // Returns false if not. costTable content may have been modified though.
 bool GetUnitCost(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, float costTable[]);
 
-// Get a text from languagex.dll or language.dll, using ROR method.
+// Get a text from languagex.dll or language.dll, using ROR method. See also GetLanguageDllText.
 void AOE_LoadStringLanguage(long int stringID, char *buffer, long int bufferSize);
 
 // Get a text from languagex.dll or language.dll. If not found, uses defaultText.
 void GetLanguageDllText(long int stringID, char *buffer, long int bufferSize, char *defaultText);
+
+// Get a technology name from languagex.dll or language.dll.
+// Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
+std::string GetTechnologyLocalizedName(short int techId);
 
 // Common function for panic mode unit searching.
 // Returns true if it is possible to train the unit. In such case, cost is decreased from remainingResources and actorCounter is decreased too.

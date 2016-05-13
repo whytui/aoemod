@@ -264,10 +264,14 @@ namespace AOE_CONST_FUNC {
 	const short int CST_UNITID_STORAGE_PIT = 0x67; //103
 	const short int CST_UNITID_WONDER = 0x114; //276
 
+	// Towers & Walls
 	const short int CST_UNITID_WATCH_TOWER = 0x4F; //79
 	const short int CST_UNITID_SENTRY_TOWER = 0xC7; //199
 	const short int CST_UNITID_GUARD_TOWER = 0x45; //69
 	const short int CST_UNITID_BALLISTA_TOWER = 0x116; //278
+	const short int CST_UNITID_SMALL_WALL = 72;
+	const short int CST_UNITID_MEDIUM_WALL = 117;
+	const short int CST_UNITID_FORTIFICATION = 155;
 
 	// "Wrong" buildings+men (updates), not to be used directly
 	const short int CST_UNITID_TC_2_UPGRADE = 71; // Town_Center2. base is 109
@@ -341,10 +345,14 @@ namespace AOE_CONST_FUNC {
 	const short int CST_RSID_WRITING = 114; // Share exploration
 	// Research IDs: shadow researches
 	const short int CST_RSID_MARKET_FARM = 26; // Enable farms
-
+	// Walls
+	const short int CST_RSID_SMALL_WALL = 11; // Wall #1
+	const short int CST_RSID_MEDIUM_WALL = 13; // Wall #2
+	const short int CST_RSID_FORTIFICATION = 14; // Wall #3
 
 	// Technology IDs (cf AGE3)
 	enum TECHNOLOGIES : short int {
+		// Tech trees
 		CST_TCH_TECH_TREE_ASSYRIAN = 81,
 		CST_TCH_TECH_TREE_BABYLONIAN = 82,
 		CST_TCH_TECH_TREE_EGYPTIAN = 83,
@@ -361,7 +369,14 @@ namespace AOE_CONST_FUNC {
 		CST_TCH_TECH_TREE_MACEDONIAN = 206,
 		CST_TCH_TECH_TREE_PALMYRA = 207,
 		CST_TCH_TECH_TREE_ROMAN = 208,
-		CST_TCH_TECH_TREE_ALL_TECHS = 210
+		CST_TCH_TECH_TREE_ALL_TECHS = 210,
+		// Other
+		CST_TCH_ARTISANSHIP = 32, // Bronze age (2nd  tech for wood cutting/range)
+		CST_TCH_WOODWORKING = 106, // FR: menuiserie (tool age - 1st tech for wood cutting/range)
+		CST_TCH_GOLD_MINING = 107,
+		CST_TCH_STONE_MINING = 108,
+		CST_TCH_CRAFTSMANSHIP = 109, // FR: artisanat évolué (iron age - 3rd tech for wood cutting/range)
+		CST_TCH_SIEGECRAFT = 110
 	};
 
 

@@ -48,7 +48,6 @@ public:
 	bool editor_allowUnitOverlapping;
 	bool fixHumanPlayer_specificSeeUnit;
 	bool allyExplorationIsAlwaysShared;
-	bool noDockInMostlyLandMaps;
 	bool useImprovedButtonBar;
 	// Technical
 	bool autoFixMissingFeatures;
@@ -68,6 +67,11 @@ public:
 	bool defaultPerNumbers_RM_isSet[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1]; // set to true to indicate when corresponding defaultPerNumbers_RM value is relevant
 	long int defaultPerNumbers_DM[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1];
 	bool defaultPerNumbers_DM_isSet[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1]; // set to true to indicate when corresponding defaultPerNumbers_DM value is relevant
+
+	// Related to empires.dat loaded data
+	bool fixVillagerWorkRates;
+	bool noWalls;
+	bool noDockInMostlyLandMaps;
 
 	// Conversion resistance
 	float conversionResistance_Macedonian;

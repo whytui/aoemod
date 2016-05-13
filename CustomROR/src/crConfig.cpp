@@ -21,9 +21,11 @@ CustomRORConfig::CustomRORConfig() {
 	this->useImprovedGameSpeeds = false;
 	this->showLogsInReverseOrder = true;
 	this->showCustomRORNotifications = true; // Recommended
-	this->noDockInMostlyLandMaps = false; // Default: dock is always available.
 	this->collectRORDebugLogs = 0; // Game default (sort of): do not intercept not-implemented debug log calls.
 	this->improvedGameSpeedFactor = 1.25;
+	this->noDockInMostlyLandMaps = false; // Default: dock is always available.
+	this->fixVillagerWorkRates = false; // Default: keep empires.dat values
+	this->noWalls = false; // Default
 	this->conversionResistance_Boats = 2;
 	this->conversionResistance_Chariots = 8;
 	this->conversionResistance_Macedonian = 4;
@@ -227,10 +229,16 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "improvedButtonBar") {
 			this->useImprovedButtonBar = XML_GetBoolElement(elem, "enable");
 		}
+		if (elemName == "fixVillagerWorkRates") {
+			this->fixVillagerWorkRates = XML_GetBoolElement(elem, "enable");
+		}
 
 		// Random games settings
 		if (elemName == "noNeutralDiplomacy") {
 			this->noNeutralInitialDiplomacy = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "noWalls") {
+			this->noWalls = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "initialResources") {
 			categoryName = elem->Attribute("gameType");

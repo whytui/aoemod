@@ -592,7 +592,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	if (!buildingTechAndUnitInfo.empty() && (techToShowCount > 0)) {
 		this->AddLabel(popup, &this->lblBuildingTechsMessage, "Future technologies, not available yet:", 30, 120, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 		
-		this->AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, 140, 450, 12 + techToShowCount * 14, true, true);
+		this->AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, 140, 450, 20 + techToShowCount * 14, true, true);
 	}
 }
 

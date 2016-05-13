@@ -59,6 +59,7 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "allyExplorationIsAlwaysShared:             %d\n", this->crInfo->configInfo.allyExplorationIsAlwaysShared ? 1 : 0);
 	// Random games settings
 	fprintf_s(f, "noNeutralInitialDiplomacy:                 %d\n", this->crInfo->configInfo.noNeutralInitialDiplomacy ? 1 : 0);
+	fprintf_s(f, "noWalls:                                   %d\n", this->crInfo->configInfo.noWalls ? 1 : 0);
 	fprintf_s(f, "[RM] initial food (default/small/med/large) : %ld/%ld/%ld/%ld\n",
 		this->crInfo->configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
 		this->crInfo->configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
@@ -140,6 +141,7 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "dislike value - all artefacts/wonder:      %ld\n", this->crInfo->configInfo.dislike_allArtefacts);
 	fprintf_s(f, "dislike value - human player:              %ld\n", this->crInfo->configInfo.dislike_humanPlayer);
 	fprintf_s(f, "fixLogisticsNoHouseBug:                    %d\n", this->crInfo->configInfo.fixLogisticsNoHouseBug ? 1: 0);
+	fprintf_s(f, "fixVillagerWorkRates:                      %d\n", this->crInfo->configInfo.fixVillagerWorkRates ? 1 : 0);
 	// City plan
 	fprintf_s(f, "cityPlanLikeValuesEnhancement:             %d\n", this->crInfo->configInfo.cityPlanLikeValuesEnhancement ? 1 : 0);
 	//fprintf_s(f, "cityPlanHouseDistanceFromTownCenter:       %f\n", this->crInfo->configInfo.cityPlanHouseDistanceFromTownCenter);
@@ -505,6 +507,66 @@ void CustomRORCommand::ShowF11_zone() {
 }
 
 
+// UpdatedValue: if <0, it is ignored
+void CustomRORCommand::UpdateWorkRateWithMessage(short int DATID, float updatedValue) {
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) {
+		return;
+	}
+	bool firstOne = true;
+	for (int civId = 0; civId < global->civCount; civId++) {
+		ROR_STRUCTURES_10C::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civId];
+		if (civDef && civDef->IsCheckSumValid()) {
+			ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = civDef->GetUnitDef(DATID);
+			char msgBuffer[100];
+			if (unitDef && unitDef->IsCheckSumValid()) {
+				if (firstOne) { // Message only once
+					if (updatedValue < 0) {
+						sprintf_s(msgBuffer, "%s (%d): work rate=%f", unitDef->ptrUnitName, unitDef->DAT_ID1, unitDef->workRate);
+					} else {
+						sprintf_s(msgBuffer, "%s (%d): work rate=%f updated to %f", unitDef->ptrUnitName, unitDef->DAT_ID1, unitDef->workRate, updatedValue);
+					}
+					traceMessageHandler.WriteMessageNoNotification(msgBuffer);
+					firstOne = false;
+				}
+				if (updatedValue >= 0) {
+					unitDef->workRate = updatedValue;
+				}
+			}
+		}
+	}
+}
+
+
+// Update a technology that increases work rate: change value used to increase.
+// UpdatedValue: if <0, it is ignored
+void CustomRORCommand::UpdateTechAddWorkRateWithMessage(short int techId, short int unitDefId, float updatedValue) {
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) {
+		return;
+	}
+	ROR_STRUCTURES_10C::STRUCT_TECH_DEF_INFO *techInfo = global->technologiesInfo;
+	if (techInfo && techInfo->IsCheckSumValid() && techInfo->technologyCount >= 111) {
+		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = &techInfo->ptrTechDefArray[techId];
+		for (int i = 0; i < techDef->effectCount; i++) {
+			if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) &&
+				(techDef->ptrEffects[i].effectUnit == unitDefId) &&
+				(techDef->ptrEffects[i].effectAttribute == 13) // working rate
+				) {
+				char msgBuffer[100];
+				if (updatedValue < 0) {
+					sprintf_s(msgBuffer, "%s (%d): work rate=%f", GetTechnologyLocalizedName(techId).c_str(), techId, techDef->ptrEffects[i].effectValue);
+				} else {
+					sprintf_s(msgBuffer, "%s (%d): work rate=%f updated to %f", GetTechnologyLocalizedName(techId).c_str(), techId, techDef->ptrEffects[i].effectValue, updatedValue);
+				}
+				traceMessageHandler.WriteMessageNoNotification(msgBuffer);
+				techDef->ptrEffects[i].effectValue = updatedValue;
+			}
+		}
+	}
+}
+
+
 // This is called just after empires.dat is loaded.
 // Warning: changes here are applied on civ definitions are done once and for all, and impact all games.
 void CustomRORCommand::OnAfterLoadEmpires_DAT() {
@@ -565,6 +627,66 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 		ROR_STRUCTURES_10C::STRUCT_DEF_CIVILIZATION *civDefGaia = global->civilizationDefinitions[0];
 		if (civDefGaia->civResourcesCount > CST_RES_ORDER_ATTACK_ALERT_SOUND_ID) {
 			civDefGaia->SetResourceValue(CST_RES_ORDER_ATTACK_ALERT_SOUND_ID, 10);
+		}
+	}
+
+	// Fix villager work rates
+	if (this->crInfo->configInfo.fixVillagerWorkRates && (global->civCount > 1)) {
+		traceMessageHandler.WriteMessageNoNotification("Fixing villager work rates");
+		this->UpdateWorkRateWithMessage(CST_UNITID_VILLAGER, -1); // Original=1
+		this->UpdateWorkRateWithMessage(CST_UNITID_VILLAGER2, -1); // Original=1
+		this->UpdateWorkRateWithMessage(CST_UNITID_BUILDER, -1); // Original=1
+		this->UpdateWorkRateWithMessage(CST_UNITID_FISHERMAN, (float)0.45); // ROR original is 0.6
+		this->UpdateWorkRateWithMessage(CST_UNITID_FORAGER, -1); // Original=0.45
+		this->UpdateWorkRateWithMessage(CST_UNITID_HUNTER, -1); // Original=0.45
+		this->UpdateWorkRateWithMessage(CST_UNITID_LUMBERJACK, -1); // Original=0.55
+		this->UpdateWorkRateWithMessage(CST_UNITID_MINERSTONE, -1); // Original=0.45
+		this->UpdateWorkRateWithMessage(CST_UNITID_EXPLORER, -1); // Original=1
+		this->UpdateWorkRateWithMessage(CST_UNITID_REPAIRMAN, -1); // Original=0.4
+		this->UpdateWorkRateWithMessage(CST_UNITID_MINERGOLD, -1); // Original=0.45
+		this->UpdateWorkRateWithMessage(CST_UNITID_FARMER, -1); // Original=0.45
+		// Note for upgrades (techs): if using another value than 0.15, also fix egypt/baby tech trees ! (+palmyra, see below)
+		// Mining: could use +0.09 (would be +20%) ?
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_STONE_MINING, CST_UNITID_MINERSTONE, (float)0.15); // +33% instead of +67% (was +0.3 / 0.45 initial)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_GOLD_MINING, CST_UNITID_MINERGOLD, (float)0.15); // +33% instead of +67% (was +0.3 / 0.45 initial)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_SIEGECRAFT, CST_UNITID_MINERSTONE, (float)0.15); // +33% instead of +67% (was +0.3 / 0.45 initial). 2nd tech for stone mining (iron age)
+		// Wood cutting work rate improvements :
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_WOODWORKING, CST_UNITID_LUMBERJACK, (float)0.11); // +20% instead of +36% (+0.3 / 0.55 initial)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_ARTISANSHIP, CST_UNITID_LUMBERJACK, (float)0.11); // +20% instead of +36% (+0.3 / 0.55 initial)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_CRAFTSMANSHIP, CST_UNITID_LUMBERJACK, (float)0.11); // +20% instead of +36% (+0.3 / 0.55 initial)
+		// Palmyra tech tree: adjust villager work rate bonuses
+		ROR_STRUCTURES_10C::STRUCT_TECH_DEF_INFO *techDefInfo = global->technologiesInfo;
+		if (techDefInfo && techDefInfo->IsCheckSumValid() && (techDefInfo->technologyCount > CST_TCH_TECH_TREE_PALMYRA)) {
+			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = &techDefInfo->ptrTechDefArray[CST_TCH_TECH_TREE_PALMYRA];
+			for (int i = 0; i < techDef->effectCount; i++) {
+				if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) &&
+					(techDef->ptrEffects[i].effectAttribute == 13) && // work rate
+					// For villagers OR farm (refer to palmyra tech tree !)
+					((IsVillager(techDef->ptrEffects[i].effectUnit) || (techDef->ptrEffects[i].effectUnit == CST_UNITID_FARM)) &&
+					(techDef->ptrEffects[i].effectValue > 0.15))
+					) {
+					float newValue = (float)0.15; // enough, even better than tech bonuses. Original = 0.20 for all gatherer types
+					std::string msg = "Palmyra tech tree: gathering bonus changed from ";
+					msg += std::to_string(techDef->ptrEffects[i].effectValue);
+					msg += " to ";
+					msg += std::to_string(newValue);
+					msg += " for ";
+					ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = NULL;
+					if (global->civCount > 1) { // Use an arbitrary civ, just to get unit name.
+						unitDef = global->civilizationDefinitions[1]->GetUnitDef(techDef->ptrEffects[i].effectUnit);
+					}
+					if (unitDef && unitDef->IsCheckSumValid()) {
+						char tmpbuf[80];
+						GetLanguageDllText(unitDef->languageDLLID_Name, tmpbuf, sizeof(tmpbuf), unitDef->ptrUnitName);
+						msg += tmpbuf;
+					} else {
+						msg += "unitDefId=";
+						msg += std::to_string(techDef->ptrEffects[i].effectUnit);
+					}
+					traceMessageHandler.WriteMessageNoNotification(msg);
+					techDef->ptrEffects[i].effectValue = newValue;
+				}
+			}
 		}
 	}
 }
@@ -700,6 +822,10 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 		return false;
 	}
 	bool isDM = (settings->isDeathMatch != 0);
+
+	if (this->crInfo->configInfo.noWalls) {
+		this->DisableWalls();
+	}
 
 	// Initial resources : read from config & apply to game
 	long int initialResources[4] = { 200, 200, 150, 0 };
@@ -4235,7 +4361,9 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 }
 
 
+// Disable dock for all players on maps where AI does NOT builds docks.
 void CustomRORCommand::DisableWaterUnitsIfNeeded() {
+	if (!this->crInfo->configInfo.noDockInMostlyLandMaps) { return; }
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	assert(settings->IsCheckSumValid());
@@ -4252,6 +4380,31 @@ void CustomRORCommand::DisableWaterUnitsIfNeeded() {
 				traceMessageHandler.WriteMessageNoNotification(std::string("Disabled dock for player #") + std::to_string(i));
 				player->ptrStructDefUnitTable[CST_UNITID_DOCK]->availableForPlayer = 0;
 			}
+		}
+	}
+}
+
+// Disable all walls for current game.
+void CustomRORCommand::DisableWalls() {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings != NULL);
+	assert(settings->IsCheckSumValid());
+	if (!settings) { return; } // Should never happen
+	if (settings->isCampaign || settings->isScenario || settings->isSavedGame || settings->isMultiplayer) { return; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid() || !global->ptrPlayerStructPtrTable) { return; }
+	traceMessageHandler.WriteMessageNoNotification(std::string("Disable walls for all players"));
+	for (int i = 1; i < global->playerTotalCount; i++) {
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
+		if (player && player->IsCheckSumValid())
+		{
+			if ((player->structDefUnitArraySize > CST_UNITID_SMALL_WALL) &&
+				player->ptrStructDefUnitTable && player->ptrStructDefUnitTable[CST_UNITID_SMALL_WALL]) {
+				player->ptrStructDefUnitTable[CST_UNITID_SMALL_WALL]->availableForPlayer = 0;
+			}
+			AOE_enableResearch(player, CST_RSID_SMALL_WALL, false);
+			AOE_enableResearch(player, CST_RSID_MEDIUM_WALL, false);
+			AOE_enableResearch(player, CST_RSID_FORTIFICATION, false);
 		}
 	}
 }
@@ -4379,14 +4532,22 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *currentAction = GetUnitAction(unit);
 	// For buildings, currentAction is Non-NULL when researching tech, when AI-triggered "train unit", but NULL for human-triggered "train unit"
 	ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_OBJECT *currentActionAsMakeObject = (ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_OBJECT *)currentAction;
+	ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_TECH *currentActionAsMakeTech = (ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_TECH *)currentAction;
 	if (currentAction != NULL) {
 		isBusy = true;
-		if (currentActionAsMakeObject && currentActionAsMakeObject->IsCheckSumValid()) {
-			// This only handles AI-triggered MakeObject, not human-triggered.
+		if (currentActionAsMakeObject && currentActionAsMakeObject->IsCheckSumValid() &&
+			(currentActionAsMakeObject->actionTypeID == currentActionAsMakeObject->GetExpectedInternalActionId())) {
+			// This only handles AI-triggered MakeObject, not human-triggered (see below).
 			currentActionDATID = currentActionAsMakeObject->targetUnitDAT_ID;
 			currentActionIsResearch = false;
 		}
-		// For research : currentActionDATID will be set in loop below...
+		if (currentActionAsMakeTech && currentActionAsMakeTech->IsCheckSumValid() &&
+			(currentActionAsMakeTech->actionTypeID == currentActionAsMakeTech->GetExpectedInternalActionId())) {
+			// This handles ALL MakeTech actions (both AI or human triggered)
+			currentActionDATID = currentActionAsMakeObject->targetUnitDAT_ID;
+			currentActionIsResearch = true;
+		}
+
 	}
 	if ((unitAsBuilding->isCurrentlyTrainingUnit) && (unitAsBuilding->ptrHumanTrainQueueInformation != NULL)) {
 		// This only handles human-triggered MakeObject (not AI-triggered).
@@ -4453,14 +4614,6 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 			assert(buttonIndex <= 12); // But can be -1
 			// rawButtonId=0 for non-visible researches, we get buttonIndex=-1 in this case. Exclude it.
 			bool researchIsAvailable = (status->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE);
-			if ((status->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_BEING_RESEARCHED) &&
-				(resDefInfo->researchDefArray[researchId].researchLocation == unitDef->DAT_ID1)) {
-				currentActionDATID = researchId;
-				currentActionButtonIndex = buttonIndex;
-				currentActionLangNameId = resDefInfo->researchDefArray[researchId].languageDLLName;
-				currentActionName = resDefInfo->researchDefArray[researchId].researchName;
-				currentActionIsResearch = true;
-			}
 			if ((buttonIndex > -1) && 
 				((!buttonIsVisible[buttonIndex]) || (currentButtonDoesNotBelongToThisPage[buttonIndex])) &&
 				(	(status->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) || 

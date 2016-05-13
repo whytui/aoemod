@@ -535,12 +535,13 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	}
 
 	int populationToAdd = maxPopulation - currentPopulation;
+	if (populationToAdd <= 0) { return; }
 	assert(elemToInsertBefore != NULL);
 	std::string msg = "Adapt p#";
 	msg += std::to_string(player->playerId);
 	msg += " to max population: insertion start point uID=";
 	msg += std::to_string(elemToInsertBefore->previous ? elemToInsertBefore->previous->counter : elemToInsertBefore->counter);
-	msg += ". Adding ";
+	msg += ". Estimated number of units to add: ";
 	msg += std::to_string(populationToAdd);
 	msg += " units.";
 	traceMessageHandler.WriteMessageNoNotification(msg);
@@ -553,7 +554,6 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 		elemToInsertBefore->previous->retrains = 1; // Make sure it does not impact AI.
 	}
 
-	if (populationToAdd <= 0) { return; }
 	if (strongUnitCount <= 0) { return; }
 	if (strongUnitCount == 1) {
 		for (int i = 0; i < populationToAdd; i++) {

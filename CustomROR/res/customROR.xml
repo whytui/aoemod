@@ -4,7 +4,7 @@
 	<alertOnMissingFeatures enable="1"/>
 	<autoFixMissingFeatures enable="1"/><!-- If 1, ROR_API features that are not installed are automaticalled added on the fly -->
 	
-	<!-- General -->
+	<!-- *** General -->
 	<!-- Bool 0/1 to hide/show customROR options entry in game menu -->
 	<showCustomRORMenu enable="1"/>
 	<!-- Bool 0/1 to show custom population information in "F11" text -->
@@ -38,7 +38,11 @@
 	<conversionResistance name="chariots" value="8"/><!-- game default=8 -->
 	<conversionResistance name="boats" value="2"/><!-- game default=2 -->
 
-	<!-- Map -->
+	<!-- *** EMPIRES.DAT related -->
+	<!-- fixVillagerWorkRates : if enabled, automatically fix erroneous work rate values for villagers in empires.dat-loaded data -->
+	<fixVillagerWorkRates enable="1"/>
+	
+	<!-- *** Map -->
 	<map name="randomMapRelicsCount" value="5"/>
 	<map name="randomMapRuinsCount" value="5"/>
 	<!-- Set to 0 to disable all map generation elevation options -->
@@ -50,7 +54,7 @@
 	<!-- Fair no-water maps: disable dock in "mostly-land" maps where AI does NOT build docks. This makes such maps more fair in SP games. -->
 	<map name="noDockInMostlyLandMaps" enable="1"></map>
 
-	<!-- Scenario editor -->
+	<!-- *** Scenario editor -->
 	<!-- showHiddenTerrain: set to 1 to display hidden terrains in scenario editor terrains list -->
 	<editor name="showHiddenTerrain" enable="1"></editor>
 	<!-- showHiddenUnits: 0=normal, 1=show hidden units except some annoying ones (wrong house, wrong barracks, etc)
@@ -59,7 +63,7 @@
 	<!-- UseCustomMapDimensions: set to 1 to allow using user-defined map sizes in scenario editor -->
 	<editor name="UseCustomMapDimensions" enable="1"></editor>
 
-	<!-- AI -->
+	<!-- *** AI -->
 	<!-- Set to nonzero to enable AI improvements (an int value: in the future, we might define several improvement levels) -->
 	<improveAI value="1"/>
 	
@@ -71,7 +75,7 @@
 	Low values may lead to issues in tech order/requirements. It won't block AI but is not good for it. -->
 	<tacticalAI name="minPopulationBeforeOptionalItems" value="30"/>
 	
-	<!-- Manage Panic mode (dynamic defence units) -->
+	<!-- *** Manage Panic mode (dynamic defence units) -->
 	<!-- Integer value=seconds between 2 checks -->
 	<panicMode name="delay" value="15"/>
 	<!-- Integer value=Maximum dynamic units to insert. High values may block normal AI units from being trained, including villagers ! -->
@@ -85,7 +89,7 @@
 	<!-- Fix specific treatment when human player sees a unit (fix bugs for artefacts) -->
 	<fixHumanPlayer_specific_seeUnit enable="1"/>
 	
-	<!-- Dislike values: amounts to add to dislike values against a player under certain conditions -->
+	<!-- *** Dislike values: amounts to add to dislike values against a player under certain conditions -->
 	<!-- Interval in seconds between every computation of dislike values -->
 	<dislikeValues name="dislikeComputeInterval" value="10"/>
 	<!-- dislikeAllArtefacts: if a player has all relics/ruins or a standing wonder. Value 0-99 -->
@@ -93,7 +97,7 @@
 	<!-- dislikeAllArtefacts: Dislike amount to add against a player that is human-controlled. Value 0-99 -->
 	<dislikeValues name="dislikeHuman" value="2"/>
 	
-	<!-- City plan -->
+	<!-- *** City plan -->
 	<!-- all.enhanceLikeValues: set to 0 to disable city plan enhancements, 1 or other values to activate it (recommended) -->
 	<cityPlan building="all" name="enhanceLikeValues" enable="1"></cityPlan>
 	<!-- You can use float for City plan DISTANCES -->
@@ -110,7 +114,7 @@
 	Strongly recommended: 10<x<80. A suggestion: 32 (0x20) -->
 	<cityPlan building="granary" name="berryBushUnitWeight" value="32"></cityPlan>
 	
-	<!-- Human interface/shortcuts -->
+	<!-- *** Human interface/shortcuts -->
 	<!-- callIdleNearbyArmies: set to 0 to disable F9 key in game screen, 1 or other values to enable.
 	It will make move your IDLE military units to screen position when pressed. -->
 	<gameKey name="callIdleNearbyArmies" enable="1"></gameKey>
@@ -148,10 +152,12 @@
 	 -->
 	<unitSpawn name="shortcuts" reverseOrder="1"></unitSpawn>
 
-  <!-- Random games settings -->
+  <!-- *** Random games settings -->
   <!-- NoNeutralDiplomacy: if enabled, all no-team players start with enemy diplomacies.
 	AI players won't all become allied against human. Game default=0. -->
 	<noNeutralDiplomacy enable="0"></noNeutralDiplomacy>
+	<!-- Set noWalls to enable=1 to disable all walls in DM /RM games -->
+	<noWalls enable="0"/>
 	<!-- initialResources defines the amount of available resource at game start
 	GameType=DM (deathmatch) or RM (random map), choice (for RM only) corresponds to the "resources" user choice in game settings
 	choice=0 corresponds to Default

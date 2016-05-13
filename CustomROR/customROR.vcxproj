@@ -150,7 +150,9 @@
     <Text Include="CustomROR_README.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="res\customROR.xml" />
+    <Xml Include="res\customROR.xml">
+      <SubType>Designer</SubType>
+    </Xml>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1435,7 +1435,7 @@ namespace ROR_STRUCTURES_10C
 		long int currentlyManagedAIPlayer; // +FC. A player id. "currentUpdateComputerPlayer"
 		// +0x100
 		unsigned long int unknown_100_difficultyLevel; // NOT always diff. level. See in game settings struct.
-		STRUCT_RESEARCH_DEF_INFO *unknown_104;
+		STRUCT_RESEARCH_DEF_INFO *researchDefInfo; // +104.
 		unsigned long int unknown_108;
 		unsigned long int relicsCount;
 		// +0x110
@@ -2670,7 +2670,8 @@ namespace ROR_STRUCTURES_10C
 	// Size = 0x2C
 	class STRUCT_TECH_DEF {
 	public:
-		char unknown_00[0x24]; // Is this used ?
+		char unknown_00[2]; // Is this used ?
+		char techName[0x22]; // +02. Almost never valued ?
 		short int effectCount; // +24
 		short int unknown_26; // probably unused
 		STRUCT_TECH_DEF_EFFECT *ptrEffects; // +28. Array of effects. Count = effectCount.
@@ -2842,6 +2843,19 @@ namespace ROR_STRUCTURES_10C
 		AOE_CONST_INTERNAL::INTERNAL_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_MAKE_OBJECT; }
 	};
 
+	// Size 0x48
+	// Constructor 0x4B60B0
+	class STRUCT_ACTION_MAKE_TECH : public STRUCT_ACTION_BASE {
+	public:
+		//unsigned long int checksum; // 90 89 54 00 ?
+		// 0x40
+		short int researchID;
+		short int unknown_42; // Unused... probably
+		long int strategyElementCounter; // +44
+
+		bool IsCheckSumValid() { return this->checksum == 0x00548990; }
+		AOE_CONST_INTERNAL::INTERNAL_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_MAKE_TECH; }
+	};
 
 	// Size = 0x44. checksum=88 87 54 00
 	// Expected commandType = 0x6C (discovery)
