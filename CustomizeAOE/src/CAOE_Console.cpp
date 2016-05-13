@@ -95,6 +95,7 @@ void CAOE_Console::ShowCommands() {
 	wprintf_s(_T("api [on|off]      : turns on/off ROR API required EXE changes\n"));
 	wprintf_s(_T("set               : set a specific option (see names with <dump names>).\n"));
 	wprintf_s(_T("install customror : copy ROR_API and customROR files to AOE installation folder.\n"));
+	// Note: copy itf drs is for use with customROR (copies into itf_custom.drs and preserves interfac.drs files)
 	wprintf_s(_T("copy itf drs      : copy custom interfac.drs files to AOE installation folder (for custom resolutions).\n"));
 	wprintf_s(_T("install color fix : patch windows registry to fix directdraw color bug.\n"));
 }

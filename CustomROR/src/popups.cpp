@@ -584,7 +584,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 	}
 
-
+#pragma message("TODO more features in unit popup")
 	// Military : guard location ?
 	// Military : do not attack villagers ? (&buildings?)
 

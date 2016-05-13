@@ -4549,6 +4549,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(player, currentActionAsMakeObject->targetUnitDAT_ID);
 			if (resDef) {
 				currentActionLangNameId = resDef->languageDLLName;
+				currentActionName = resDef->researchName;
 			}
 		}
 
