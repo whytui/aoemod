@@ -2469,7 +2469,7 @@ void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 
 
 // 0x00501980
-// In game code, this method has treatments for events 7E(?) 7C(trainQueue) 7D(missing house) 64 (researchDone) 66,69 (spawn/build complete)
+// In game code, this method has treatments for events 7E(farm depleted) 7C(trainQueue) 7D(missing house) 64 (researchDone) 66,69 (spawn/build complete)
 // 68,6B,1-3(errors) 4-6 (player lost/disconnect...) 7 (tribute) 8 (dipl change) 6C 6D 6E(wonders) 72-75(relics/ruins events) 76-7B (convert events).
 void CustomRORInstance::OnGameSettingsNotifyEvent(REG_BACKUP *REG_values) {
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = (ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *)REG_values->ECX_val;

@@ -294,7 +294,7 @@ namespace AOE_CONST_INTERNAL
 		CST_IAI_ARTIFACT_UNKNOWN = 0x6B, // Get auto-converted
 		CST_IAI_DISCOVERY_ARTIFACT = 0x6C,
 		CST_IAI_RETREAT_TO_SHOOTING_RANGE = 0x6D,
-		CST_IAI_HUNT =0x6E,
+		CST_IAI_GATHER_WITH_ATTACK =0x6E, // Hunt, cut wood, fish
 		CST_IAI_TRADE = 0x6F,
 		CST_IAI_GENERATE_WONDER_VICTORY = 120, // AGE3?
 		CST_IAI_DESELECT_WHEN_TASKED = 121, // AGE3?
@@ -305,8 +305,21 @@ namespace AOE_CONST_INTERNAL
 		CST_IAI_SHEAR = 149 // AGE3???
 	};
 
+	// Unsure / to debug
+	enum ACTION_STATUS : char {
+		CST_AS_UNKNOWN_01 = 1, // Executing action ?? 40544D
+		CST_AS_UNKNOWN_03 = 3, // Can start moving to action location (temporary state) ? 40547F
+		CST_AS_UNKNOWN_04 = 4, // Moving to action location ?
+		CST_AS_UNKNOWN_06 = 6, // attack in progress ?
+		CST_AS_UNKNOWN_07 = 7, // related to attack in progress ?
+		CST_AS_UNKNOWN_0C = 0x0C,
+		CST_AS_UNKNOWN_0D = 0x0D, // Set when unit can't move (speed==0) ?? 405472
+		CST_AS_UNKNOWN_0E = 0x0E
+	};
+
 	enum INTERNAL_COMMAND_ID : char {
 		CST_ICI_RIGHT_CLICK = 0, // Some kind of joker: for right-click: will guess command according to unit def interaction, target, etc
+		CST_ICI_UNKNOWN_01 = 1, // 1 : gather ??
 		CST_ICI_ADD_RESOURCE = 0x05, // Only used for AI "personality resource bonus" ?
 		CST_ICI_TASK_UNIT = 0x0A, // Task from existing activity ?
 		CST_ICI_TRIGGER_TRAIN_UNIT = 0x64, // unsure, when AI triggers a train unit action ? + some cheats?
@@ -375,6 +388,7 @@ namespace AOE_CONST_INTERNAL
 
 	// For activity.task IDs
 	enum ACTIVITY_TASK_IDS : long int {
+		CST_ATI_NONE = -1, // Used a lot in game code
 		CST_ATI_ATTACK = 0x258,
 		CST_ATI_DEFEND_OR_CAPTURE = 0x259, // unsure, but it is used to capture relics
 		CST_ATI_BUILD = 0x25A,
@@ -382,9 +396,10 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_CONVERT = 0x25C,
 		CST_ATI_EXPLORE = 0x25D,
 		CST_ATI_GATHER_NOATTACK = 0x261, // Forager, farmer, miners
-		CST_ATI_MOVE = 0x262, // Eg: used to capture relic
+		CST_ATI_MOVE = 0x262, // Eg: used to capture relic. More specific than just move ?
 		CST_ATI_GATHER_ATTACK = 0x265, // woodcutter, hunter, fisherman (gatherer that have an "attack" phase - not really true for fish, but anyway !)
 		CST_ATI_UNKNOWN_266 = 0x266, // regroup in unit group ??? Related to SNAttackGroupGatherSpacing in 4CD551?
+		CST_ATI_UNKNOWN_268 = 0x268, // some movement ?
 		CST_ATI_GO_TO_TRANSPORT = 0x269, // Unsure
 		CST_ATI_REPAIR = 0x26A,
 		CST_ATI_HUMAN_TRAIN_UNIT = 0x26B, // only when triggered by human ?
@@ -392,13 +407,13 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNLOAD = 0x26D, // unsure. Includes move+unload. Such unit can't be used as actor in strategy element.
 		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
 		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targetted farm
-		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC,
+		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // 
 		CST_ATI_UNKNOWN_2BD = 0x2BD, // Used when moving to capture relic or defend unit ? See 4DB9F0=tacAI.captureArtefact?(myUnitId, targetUnitId)
 		CST_ATI_UNKNOWN_2BE = 0x2BE,
 		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ??
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
 		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF...
-		CST_ATI_UNKNOWN_2C9 = 0x2C9,
+		CST_ATI_UNKNOWN_2C9 = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
 		CST_ATI_UNKNOWN_2D9 = 0x2D9,
 	};
 

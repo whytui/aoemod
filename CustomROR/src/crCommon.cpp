@@ -1046,7 +1046,7 @@ void MoveUnitToTargetOrPosition(ROR_STRUCTURES_10C::STRUCT_UNIT *unitToMove, ROR
 		CALL EAX
 	}
 	if (unitToMove->currentActivity) {
-		unitToMove->currentActivity->internalId_whenAttacked = -1; // force to defend itself when attacked.
+		unitToMove->currentActivity->internalId_whenAttacked = CST_ATI_NONE; // (-1) force to defend itself when attacked.
 	}
 }
 

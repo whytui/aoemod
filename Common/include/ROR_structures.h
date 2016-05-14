@@ -1633,7 +1633,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_01C;
 		// 0x20
 		short int unknown_020;
-		short int structDefUnitArraySize; // Number of elements in ptrStructDefUnitTable array = number of "unit definitions" for this player.
+		short int structDefUnitArraySize; // +22. Number of elements in ptrStructDefUnitTable array = number of "unit definitions" for this player.
 		STRUCT_DEF_UNIT **ptrStructDefUnitTable; // ptr to Array containing pointers to all player unitDefs (index=DATID). They can be NULL (not available/invalid). See also structDefUnitArraySize.
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrCreatableUnitsListLink; // Only building/living + smoke, dead units...?
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrNonCreatableUnitsListLink; // Others than building/living ?
@@ -2765,7 +2765,7 @@ namespace ROR_STRUCTURES_10C
 		AOE_CONST_INTERNAL::INTERNAL_ACTION_ID actionTypeID;
 		short int unknown_006;
 		STRUCT_UNIT *actor;
-		char unknown_00C; // status ? values 1-D ? TO DO See structAction.txt
+		AOE_CONST_INTERNAL::ACTION_STATUS actionStatus; // +0xC (byte)
 		char unused[3];
 		// 0x10
 		STRUCT_UNIT *targetUnit;
@@ -2778,10 +2778,10 @@ namespace ROR_STRUCTURES_10C
 		float targetUnitPositionZ;
 		float unsure_resourceValue; // For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
 		// 0x30
-		STRUCT_DEF_UNIT_COMMAND *command; // To confirm
-		STRUCT_UNIT_ACTION_INFO *actionInfo; // Link with unit/"actionLink"/action
+		STRUCT_DEF_UNIT_COMMAND *command; // +30. Not always used, nullable. For gatherer, it is always set.
+		STRUCT_UNIT_ACTION_INFO *requiredActionInfo; // +34. SubAction ? Link with unit/"actionLink"/action. Allows chaining actions ! This is NOT unit->actionInfo !
 		unsigned long int pGraphics; // ptr to graphics structure, consistent with unit+10 ? w_lumber, etc
-		char unknown_3C; // Flag 0/1 ?
+		char unknown_3C; // Flag 0/1, about graphics (about need to refresh graphics ?)
 		char unknown_3D[3]; // Unused. Probably.
 		// 0x40: not in BASE class ; it has different type/role according to child classes. (seen float, word...)
 	};
@@ -2793,8 +2793,10 @@ namespace ROR_STRUCTURES_10C
 		// 0x40
 		float maxDistanceFromTarget; // The maximum distance from target where we accept to stop movement ?
 	};
+	static_assert(sizeof(STRUCT_ACTION_MOVE) == 0x44, "STRUCT_ACTION_MOVE size");
 
 	// Size 0x5C
+	// Constructor 0x401150 = actionAttack.construct(pUnitActor, pUnitTarget, arg3/4/5, blastRadius, minRange, projectileUnit)
 	class STRUCT_ACTION_ATTACK : public STRUCT_ACTION_BASE { // F8 23 54 00
 	public:
 		// 0x40
@@ -2805,14 +2807,17 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_48;
 		float unknown_4C; // max distance from target I can attack from ?
 		// 0x50
-		unsigned long int unknown_50;
-		unsigned long int unknown_54;
-		unsigned short int unknown_58;
+		long int unknown_50; // Dword
+		short int unknown_54;
+		short int unknown_56;
+		char unknown_58;
+		char unknown_59; // +59. Init=1 in 4011F1 or 0 in 4011F7
 		char unknown_5A; // a counter (decremented...)?
 		char unknown_5B;
 		bool IsCheckSumValid() { return this->checksum == 0x005423F8; }
 		AOE_CONST_INTERNAL::INTERNAL_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_ATTACK_9; } // really unsure :(
 	};
+	static_assert(sizeof(STRUCT_ACTION_ATTACK) == 0x5C, "STRUCT_ACTION_ATTACK size");
 
 	// Size 0x48
 	// Constructor = 4B1CB0
@@ -2861,8 +2866,18 @@ namespace ROR_STRUCTURES_10C
 	// Expected commandType = 0x6C (discovery)
 	class STRUCT_ACTION_DISCOVERY_ARTEFACT : public STRUCT_ACTION_BASE {
 	public:
-		char *discoveredByPlayerTable; // Pointer to array of n bytes (depending on total player count).
+		char *discoveredByPlayerTable; // +44. Pointer to array of n bytes (depending on total player count).
 		bool IsCheckSumValid() { return (this->checksum == 0x00548788); }
+	};
+
+	// Size = 0x44. checksum=48 88 54 00.
+	// Constructor=0x4B32C0 = actionGatherWithAttack.constructor(actor, defendCmd, targetUnit)
+	// (+34) action->actionInfo has a next action=attack tree (or animal) until it is ready to be gathered ?
+#define CHECKSUM_ACTION_GATHER_WITH_ATTACK 0x00548848
+	class STRUCT_ACTION_GATHER_WITH_ATTACK : public STRUCT_ACTION_BASE {
+	public:
+		long int targetUnitDefId; // +40. Set as a dword in 4B3334
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_GATHER_WITH_ATTACK); }
 	};
 
 
@@ -2876,12 +2891,11 @@ namespace ROR_STRUCTURES_10C
 	};
 
 
-	// Not very well known
+	// Not very well known. Size = 8 ?
 	class STRUCT_ACTION_LINK {
 	public:
-		STRUCT_ACTION_BASE *actionStruct; // Pointer to an action struct (various types possible)
-		STRUCT_ACTION_BASE *previousActionStruct; // Pointer to an action struct (various types possible). Use case: Action to restore at move end. (or NEXT action ?)
-		// +8 = next ??
+		STRUCT_ACTION_BASE *actionStruct; // +0. Pointer to an action struct (various types possible) = current action.
+		STRUCT_ACTION_LINK *nextActionLink; // +4. Use case: Action to restore at move end.
 	};
 
 
@@ -2908,7 +2922,8 @@ namespace ROR_STRUCTURES_10C
 	public:
 		// Known checksums: 
 		// 1C 90 54 00 (predator animals?), 7C 8D 54 00 (gazelle?), 3C 8F 54 00 (elephant), 04 98 54 00 (buildings?), 
-		// FC 90 54 00 (villager?), DC 91 54 00 (priest), 64 95 54 00 (military?), 24 97 54 00 (towers?), 44 96 54 00
+		// FC 90 54 00 (villager?gatherer?), DC 91 54 00 (priest), 64 95 54 00 (military?), 24 97 54 00 (towers?), 44 96 54 00
+		// 5C 8E 54 00 (dead alligator?)
 		unsigned long int checksum;
 		STRUCT_UNIT *ptrUnit;
 		unsigned long int unknown_008;
@@ -2916,17 +2931,17 @@ namespace ROR_STRUCTURES_10C
 		// 0x10
 		long int targetsInfoArrayUsedElements; // Number of "used" elements in array.
 		unsigned long int targetsInfoArrayTotalSize; // Allocated elements
-		STRUCT_UNIT_ACTIVITY_TARGET_ELEM *targetsInfoArray; // +18. Potential targets ?
+		STRUCT_UNIT_ACTIVITY_TARGET_ELEM *targetsInfoArray; // +18. Potential/previous? targets. THIS is used to get back to work after being attacked !
 		unsigned long int unknown_01C; // elems in +24 array
 		// 0x20
 		unsigned long int unknown_020; // Seen only 0x0A. Size of +20 array ??
-		long int *unknown_024_ptrArray; // TO DO. ElemSize = 0x18. dwords +0,4=unitId +8,+10=internalId?
-		unsigned long int internalId_whenAttacked; // internalId. If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64
+		long int *unknown_024_ptrArray; // TO DO. ElemSize = 0x18. dwords +0=unitId(actor or target) +4=unitIdActor +8=ACTIVITY_TASK_IDS, +10=targetUnitId?
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // internalId. If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64
 		unsigned long int unknown_02C; // A distance?. 0x64 in 4DA4C9. Distance to TC ?
 		// 0x30
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
 		long int targetUnitId; // +34
-		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // Target AI type (3=building...)
+		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // +38. Target AI type (3=building...)
 		float posY;
 		// 0x40
 		float posX;
@@ -2936,13 +2951,10 @@ namespace ROR_STRUCTURES_10C
 		// 0x50
 		unsigned long int previous_whenAttackedInternalId; // +50. Backup for +28
 		long int previousActionId; // Backup for currentActionId. set in 40F6D0 method, 411D00
-		long int previousTargetUnitId; // +58
+		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES previousTargetUnitId; // +58. Previous target class
 		long int previousTargetUnitType; // +5C
 		// 0x60
-		unsigned long int *unknown_060; // ptr, size= x*4 + 4 ??
-		unsigned long int unknown_064; // Number of elements in +60?
-		unsigned long int unknown_068;
-		unsigned long int unknown_06C;
+		STRUCT_AI_UNIT_LIST_INFO * unknown_060_unitIdList_targets; // +60. Warning, arraySize can be >usedElemCount here.
 		// 0x70
 		float unknown_070_posY;
 		float unknown_074_posX;
@@ -3011,10 +3023,14 @@ namespace ROR_STRUCTURES_10C
 	};
 
 	// Accessed via unit+0x184 pointer or from action itself
-	// Size = 0x0C
+	// Size = 0x0C.
+	// Warning: there are 2 usages ("from unit" or "from action"
+	// Example: action cut tree has an action.actionLink = "attack tree" (before it can be gathered)
+	// 
+	// When a gatherer is attacked, unit.actionInfo.RemoveAllActions? is called => action.actionInfo.removeAllActions
 	class STRUCT_UNIT_ACTION_INFO {
 	public:
-		unsigned long int checksum; // A8 88 54 00 or 00 26 54 00
+		unsigned long int checksum; // A8 88 54 00 (from unit) or 00 26 54 00 (from action)
 		STRUCT_UNIT *ptrUnit;
 		STRUCT_ACTION_LINK *ptrActionLink;
 
@@ -3139,7 +3155,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_11;
 		char unknown_12;
 		char unknown_13;
-		short int resourceTypeIn;
+		short int resourceTypeIn; // +0x14.
 		short int resourceProductivityMultiplier;
 		short int resourceTypeOut;
 		short int resource;
@@ -3155,11 +3171,11 @@ namespace ROR_STRUCTURES_10C
 		// 0x30
 		short int unknown_30;
 		short int unknown_32;
-		unsigned long int ptrUnknownGraphic_34;
+		unsigned long int ptrUnknownGraphic_34; // graphics NOT carrying resource
 		unsigned long int ptrProceedingGraphic;
 		unsigned long int ptrUnknownGraphic_3C;
 		// 0x40
-		unsigned long int ptrUnknownGraphic_40;
+		unsigned long int ptrUnknownGraphic_40; // graphics carrying resource ?
 		unsigned long int unknown_44;
 		unsigned long int unknown_48;
 		// END of structure
@@ -3601,7 +3617,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_0D4; // unknown16 in AGE3
 		char unknown_0D5[3];
 		STRUCT_DEF_UNIT_COMMAND_HEADER *ptrUnitCommandHeader; // +D8
-		short int whenBeingSeenCommandIndex; // +DC. For artefacts, discoveries but also animals
+		short int whenBeingSeenCommandIndex; // +DC. For artefacts, discoveries but also animals (works with creatable too)
 		short int unknown_0DE;
 		// 0xE0
 		float searchRadius;
