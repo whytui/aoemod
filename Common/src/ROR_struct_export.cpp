@@ -7,6 +7,7 @@ namespace ROR_STRUCTURES_10C {
 	}
 
 	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_GAME_SETTINGS *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
 		std::string res = "";
 		res += "COMM: ";
 		res += this->ExportStruct(obj->MPCommunicationStruct, sizeof(ROR_STRUCTURES_10C::STRUCT_MP_COMMUNICATION));
@@ -14,6 +15,7 @@ namespace ROR_STRUCTURES_10C {
 	}
 
 	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_GAME_GLOBAL *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
 		std::string res = "TotalPlayerCount=";
 		res += std::to_string(obj->playerTotalCount);
 		res += ", time=";
@@ -24,6 +26,7 @@ namespace ROR_STRUCTURES_10C {
 	}
 
 	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_MP_COMMUNICATION *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
 		std::string res = "Player (1-8) types =";
 		assert(obj->maximumPlayerCount == 8);
 		for (int i = 1; i < 9; i++) {
@@ -34,6 +37,7 @@ namespace ROR_STRUCTURES_10C {
 	}
 
 	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_PLAYER *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
 		std::string res = "Player ";
 		res += std::to_string(obj->playerId);
 		res += " addr= ";
@@ -70,8 +74,41 @@ namespace ROR_STRUCTURES_10C {
 		res += std::to_string(obj->unknown_078_unitInstanceId);
 		res += "\nDefinition: ";
 		res += this->ExportStruct(obj->ptrStructDefUnit);
+		if (obj->DerivesFromBird()) {
+			res += this->ExportStruct<STRUCT_UNIT_BIRD>((STRUCT_UNIT_BIRD*)RORAddress);
+		}
 		return res;
 	}
+	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_BIRD *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
+		std::string res;
+		if (obj->ptrActionInformation) {
+			res += "\nactionInfo: ";
+			res += this->ExportStruct(obj->ptrActionInformation);
+		}
+		if (obj->DerivesFromLiving()) {
+			res += this->ExportStruct<STRUCT_UNIT_LIVING>((STRUCT_UNIT_LIVING*)RORAddress);
+		}
+		return res;
+	}
+	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_LIVING *obj, unsigned long int RORAddress) {
+		STRUCT_UNIT_BUILDING *bld = (STRUCT_UNIT_BUILDING*)obj;
+		std::string res;
+		if (bld->IsTypeValid()) {
+			res += this->ExportStruct<STRUCT_UNIT_BUILDING>((STRUCT_UNIT_BUILDING*)RORAddress);
+		}
+		return res;
+	}
+	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_BUILDING *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
+		std::string res;
+		if (obj->trainUnitActionInfo) {
+			res += "\nbldActionInfo: ";
+			res += this->ExportStruct(obj->trainUnitActionInfo);
+		}
+		return res;
+	}
+
 	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT *obj, unsigned long int RORAddress) {
 		return this->ExportStruct_internal((STRUCT_UNIT_BASE*)obj, RORAddress);
 	}
@@ -80,6 +117,7 @@ namespace ROR_STRUCTURES_10C {
 		return this->ExportStruct_internal((STRUCT_UNITDEF_BASE*)obj, RORAddress);
 	}
 	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNITDEF_BASE *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
 		std::string res = "DATID1=";
 		res += std::to_string(obj->DAT_ID1);
 		res += " DATID2=";
@@ -110,6 +148,7 @@ namespace ROR_STRUCTURES_10C {
 	}
 
 	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNITDEF_TYPE50 *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
 		std::string res = "\nArmor=";
 		res += std::to_string(obj->displayedArmor);
 		res += this->ExportArrayOfStruct(obj->ptrArmorsList, obj->armorsCount);
@@ -131,6 +170,7 @@ namespace ROR_STRUCTURES_10C {
 
 
 	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_ARMOR_OR_ATTACK *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
 		std::string res = "cl=";
 		res += std::to_string(obj->classId);
 		res += " amount=";
@@ -184,6 +224,46 @@ namespace ROR_STRUCTURES_10C {
 		res += std::to_string(obj->unknown_1B8);
 		res += " unknown_1BC=";
 		res += std::to_string(obj->unknown_1BC);
+		return res;
+	}
+
+
+	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_ACTION_BASE *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
+		std::string res = "actionType=";
+		res += std::to_string(obj->actionTypeID);
+		res += ", status=";
+		res += std::to_string(obj->actionStatus);
+		res += ", actor=";
+		res += GetHexStringAddress((unsigned long int)obj->actor);
+		res += ", target=";
+		res += std::to_string(obj->targetUnitId);
+		if (obj->requiredActionInfo != NULL) {
+			res += " requiredActionInfo=";
+			res += ExportStruct(obj->requiredActionInfo);
+		}
+		return res;
+	}
+
+	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_ACTION_INFO *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
+		if (!obj->ptrActionLink) {
+			return "No actionLink";
+		}
+		return this->ExportStruct(obj->ptrActionLink);
+	}
+
+	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_ACTION_LINK *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
+		std::string res;
+		if (obj->actionStruct) {
+			res = "Action: ";
+			res += this->ExportStruct(obj->actionStruct);
+		}
+		if (obj->nextActionLink) {
+			res += "\nHasNext=> ";
+			res += this->ExportStruct(obj->nextActionLink);
+		}
 		return res;
 	}
 

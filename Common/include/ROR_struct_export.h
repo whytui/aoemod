@@ -3,6 +3,7 @@
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
 #include <ROR_structures.h>
+#include <mystrings.h>
 #include <assert.h>
 #include <string>
 
@@ -85,7 +86,8 @@ namespace ROR_STRUCTURES_10C
 		}
 
 	protected:
-		// Get a (temporary?) object that actually contains all relevant object data (accessible in THIS context/process)
+		// Get a (temporary - if remote) object that actually contains all relevant object data (accessible in THIS context/process)
+		// Do not call directly. Call CleanTempObject once you're finished with object.
 		virtual void *GetTempObject(void *obj, size_t objSize) {
 			// In base implementation we directly use provided object
 			return obj;
@@ -102,12 +104,18 @@ namespace ROR_STRUCTURES_10C
 		std::string ExportStruct_internal(STRUCT_MP_COMMUNICATION *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_PLAYER *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_BASE *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_UNIT_BIRD *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_UNIT_LIVING *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_UNIT_BUILDING *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNITDEF_BASE *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNITDEF_TYPE50 *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_DEF_UNIT *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_ARMOR_OR_ATTACK *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_GROUP_ELEM *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_ACTION_BASE *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_UNIT_ACTION_INFO *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_ACTION_LINK *obj, unsigned long int RORAddress);
 	};
 
 

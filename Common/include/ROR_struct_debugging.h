@@ -17,8 +17,6 @@
 
 namespace ROR_STRUCTURES_10C
 {
-	std::string GetHexStringAddress(unsigned long int address);
-
 	long int GuessRORStructureSize(void *pData);
 	char *GuessRORStructure(void *pData);
 

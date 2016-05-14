@@ -1013,7 +1013,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_09D0[8];
 		char unknown_09F0[0x1000 - 0x9F0];
 		// 0x1000
-		// +10E0= a playerId for MP ?
+		// +10E0= a playerId for MP ? "localControlPlayerId ?"
 		char unknown_1000[0x1100 - 0x1000];
 		// +1179= byte
 		char unknown_1100[0x12A0 - 0x1100];
@@ -1663,7 +1663,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_PLAYER_UNKNOWN_58_AND_6C unknown_06C;
 		// 0x80
 		char aliveStatus; //0=alive, 1=win 2=lost.
-		char unknown_081; // 1 for resigned/disconnected ? 45BBE3
+		char isInactive; // +81. 1 for resigned/disconnected ? 45BBE3
 		short int unknown_082; // unused ?
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // +84. [pointer+iPlayerId] = diplomacy value: 0=ally,1=neutral, 3=enemy
 		char unknown_088;
@@ -1861,7 +1861,7 @@ namespace ROR_STRUCTURES_10C
 		char musicFilename[0x184 - 0x80]; // Chack this...
 		long int musicIsLooping; // +184
 		long int musicSeekPos; // Resume from minimized window
-		STRUCT_MP_COMMUNICATION *MPCommunicationStruct;
+		STRUCT_MP_COMMUNICATION *MPCommunicationStruct; // +18C
 		// 0x190
 		char unknown_190[0x1AC - 0x190];
 		unsigned long int unknown_1AC; // related to registry ?
@@ -1935,7 +1935,7 @@ namespace ROR_STRUCTURES_10C
 		long int hasSteroidsCheatCode; // +9A8. set in 50CA2B, 4E90B6. Can be cancelled !!!
 		long int has_CD; //see 4169D7
 		// 0x9B0
-		unsigned long int chosenPlayerIndex[9]; // Num player ??? index in 0-8 (including gaia)
+		unsigned long int chosenPlayerIndex[9]; // index in 0-8 (playerId, including gaia)
 		// to 9D4...
 		unsigned long int unknown_9D4;
 		unsigned long int unknown_9D8[9]; // ???
@@ -1949,7 +1949,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_A12;
 		char unknown_A13;
 		char pathFindingChoice; // 0xA14 (path finding value = 0-2)
-		char playerIsInactive[0x09]; // Index is a "playerIndex" (cf +9B0), not playerID. 1 for player that lost/resigned..., 0 if alive
+		char playerIsInactive[0x09]; // +A15. Index is a "playerIndex"(???Wrong?) (cf +9B0), not playerID. 1 for player that lost/resigned..., 0 if alive
 		char unknown_A1E;
 		char unknown_A1F;
 		// 0xA20
@@ -3024,10 +3024,10 @@ namespace ROR_STRUCTURES_10C
 
 	// Accessed via unit+0x184 pointer or from action itself
 	// Size = 0x0C.
-	// Warning: there are 2 usages ("from unit" or "from action"
+	// Warning: there are 2 usages ("from unit" or "from action")
 	// Example: action cut tree has an action.actionLink = "attack tree" (before it can be gathered)
-	// 
-	// When a gatherer is attacked, unit.actionInfo.RemoveAllActions? is called => action.actionInfo.removeAllActions
+	// Chain example: action hunt elephant => subaction attack elephant => subaction move (close enough) to elephant
+	// Note: actions & action chains do NOT handle "resume working" after being attacked, see activity.targetsArray.
 	class STRUCT_UNIT_ACTION_INFO {
 	public:
 		unsigned long int checksum; // A8 88 54 00 (from unit) or 00 26 54 00 (from action)
@@ -3188,7 +3188,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int checksum;
 		char unitType; // +04. $46=70=Living unit, 80=building... On 4 bytes... Sometimes these values are 2-bytes, be careful
 		char unused_003[3];
-		char *ptrUnitName;
+		char *ptrUnitName; // +08. Max length = 0x10 (16), including ending \0. If length == 16, you may need to add the ending \0.
 		short int languageDLLID_Name; // If =0, then "ptrUnitName" string will be displayed instead (useful for custom units whose name does not exist in language.dll).
 		short int languageDLLID_Creation;
 		// 0x10
@@ -3513,7 +3513,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int checksum;
 		char unitType; // +04. $46=70=Living unit, 80=building... On 4 bytes... Sometimes these values are 2-bytes, be careful
 		char unused_003[3];
-		char *ptrUnitName;
+		char *ptrUnitName; // +08. Max length=0x10 (16), including ending \0. If length==16, you may need to add the ending \0.
 		short int languageDLLID_Name; // If =0, then "ptrUnitName" string will be displayed instead (useful for custom units whose name does not exist in language.dll).
 		short int languageDLLID_Creation;
 		// 0x10
@@ -3971,7 +3971,7 @@ namespace ROR_STRUCTURES_10C
 		short int unknown_1C4; // Max number of different units in queue ? Unused because always 1 ?
 		short int isCurrentlyTrainingUnit; // +1C6. Warning: it is 1 only when TRAINING a unit that was "human-asked" ? This flag does NOT mean "busy" !
 		unsigned long int unknown_1C8;
-		STRUCT_UNIT_ACTION_INFO *unknown_1CC; // ptr to action info (A8 88 54 00) , similar to +0x184. What is this exactly ?
+		STRUCT_UNIT_ACTION_INFO *trainUnitActionInfo; // +1CC. Only for makeobject actions (not research).
 		// 0x1D0
 		char unknownClickCounter; // Increments when I click to train/enqueu a unit or cancel it. (if I cancel 3 queued units, it decreases by 3)
 		char unknown_1D1;
@@ -4142,7 +4142,7 @@ namespace ROR_STRUCTURES_10C
 		short int unknown_1C4; // Max number of different units in queue ? Unused because always 1 ?
 		short int isCurrentlyTrainingUnit; // +1C6. Warning: it is 1 only when TRAINING a unit that was "human-asked" ? This flag does NOT mean "busy" !
 		unsigned long int unknown_1C8;
-		STRUCT_UNIT_ACTION_INFO *unknown_1CC; // ptr to action info (A8 88 54 00) , similar to +0x184. What is this exactly ?
+		STRUCT_UNIT_ACTION_INFO *trainUnitActionInfo; // +1CC. Only for makeobject actions (not research).
 		// 0x1D0
 		char unknownClickCounter; // Increments when I click to train/enqueue a unit or cancel it. (if I cancel 3 queued units, it decreases by 3)
 		char unknown_1D1;

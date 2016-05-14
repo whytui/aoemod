@@ -265,7 +265,7 @@ namespace AOE_CONST_INTERNAL
 
 	// For "action" structures. There are NOT values for "command" structures
 	enum INTERNAL_ACTION_ID : short int {
-		CST_IAI_MOVE_1 = 1, // unsure. Used to capture relics
+		CST_IAI_MOVE_1 = 1, // Used as sub-action to move to target ? Used to capture relics
 		CST_IAI_FOLLOW = 2, // TO CONFIRM (AGE3)
 		CST_IAI_GARRISON = 3, // Enter
 		CST_IAI_EXPLORE_04 = 4, // TO CONFIRM
@@ -283,7 +283,7 @@ namespace AOE_CONST_INTERNAL
 		CST_IAI_UNKNOWN_MAKE = 21, // AGE3 ?
 		CST_IAI_UNKNOWN_FOR_BIRD = 0x28, // fly ?
 		CST_IAI_CHEAT_SPAWN_UNIT = 0x64, // bigdaddy, etc
-		CST_IAI_BUILD = 0x65, // WRONG? =research
+		CST_IAI_BUILD = 0x65, // For villagers (builders)
 		CST_IAI_MAKE_OBJECT = 0x66,
 		CST_IAI_TRAIN = 0x66, // =MakeObject
 		CST_IAI_MAKE_TECH = 0x67, // Apply a technology, including cheats and game speed change !
@@ -294,7 +294,7 @@ namespace AOE_CONST_INTERNAL
 		CST_IAI_ARTIFACT_UNKNOWN = 0x6B, // Get auto-converted
 		CST_IAI_DISCOVERY_ARTIFACT = 0x6C,
 		CST_IAI_RETREAT_TO_SHOOTING_RANGE = 0x6D,
-		CST_IAI_GATHER_WITH_ATTACK =0x6E, // Hunt, cut wood, fish
+		CST_IAI_GATHER_WITH_ATTACK = 0x6E, // (110) Hunt, cut wood, fish
 		CST_IAI_TRADE = 0x6F,
 		CST_IAI_GENERATE_WONDER_VICTORY = 120, // AGE3?
 		CST_IAI_DESELECT_WHEN_TASKED = 121, // AGE3?
@@ -308,20 +308,26 @@ namespace AOE_CONST_INTERNAL
 	// Unsure / to debug
 	enum ACTION_STATUS : char {
 		CST_AS_UNKNOWN_01 = 1, // Executing action ?? 40544D
+		CST_AS_UNKNOWN_02 = 2, // Seen when moving was finished? (idle)
 		CST_AS_UNKNOWN_03 = 3, // Can start moving to action location (temporary state) ? 40547F
 		CST_AS_UNKNOWN_04 = 4, // Moving to action location ?
-		CST_AS_UNKNOWN_06 = 6, // attack in progress ?
-		CST_AS_UNKNOWN_07 = 7, // related to attack in progress ?
-		CST_AS_UNKNOWN_0C = 0x0C,
+		CST_AS_UNKNOWN_06 = 6, // "start" in progress ? (analog to 3?)
+		CST_AS_UNKNOWN_07 = 7, // in progress ? (analog to 4?). For both attack, build, etc
+		CST_AS_UNKNOWN_0B = 0x0B, // Seen when moving to bird location (after killing it)
+		CST_AS_UNKNOWN_0C = 0x0C, // waiting for requirement ? Really unsure
 		CST_AS_UNKNOWN_0D = 0x0D, // Set when unit can't move (speed==0) ?? 405472
-		CST_AS_UNKNOWN_0E = 0x0E
+		CST_AS_UNKNOWN_0E = 0x0E,
+		CST_AS_UNKNOWN_0F = 0x0F // Seen while moving (just moving)
 	};
 
 	enum INTERNAL_COMMAND_ID : char {
 		CST_ICI_RIGHT_CLICK = 0, // Some kind of joker: for right-click: will guess command according to unit def interaction, target, etc
-		CST_ICI_UNKNOWN_01 = 1, // 1 : gather ??
+		CST_ICI_STOP_ACTION = 1, // This command is concerned by farm bug in 1.0b version (resets food). 1.0c "Hack" fix is in 0x42A75B.
+		CST_ICI_UNKNOWN_02_TASK = 2, // task ? task from idle ? see 42A780
 		CST_ICI_ADD_RESOURCE = 0x05, // Only used for AI "personality resource bonus" ?
 		CST_ICI_TASK_UNIT = 0x0A, // Task from existing activity ?
+		CST_ICI_RESIGN = 0x0B, // Only for MP games when clicking resign in menu. See exec=42B290
+		CST_ICI_HOLD_POSITION = 0x11, // To confirm
 		CST_ICI_TRIGGER_TRAIN_UNIT = 0x64, // unsure, when AI triggers a train unit action ? + some cheats?
 		CST_ICI_RESEARCH = 0x65,
 		CST_ICI_BUILD = 0x66,
@@ -414,7 +420,8 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
 		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF...
 		CST_ATI_UNKNOWN_2C9 = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
-		CST_ATI_UNKNOWN_2D9 = 0x2D9,
+		CST_ATI_UNKNOWN_2D5 = 0x2D5, // Could be hold position ?
+		CST_ATI_UNKNOWN_2D9 = 0x2D9
 	};
 
 
