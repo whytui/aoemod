@@ -3188,7 +3188,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int checksum;
 		char unitType; // +04. $46=70=Living unit, 80=building... On 4 bytes... Sometimes these values are 2-bytes, be careful
 		char unused_003[3];
-		char *ptrUnitName; // +08. Max length = 0x10 (16), including ending \0. If length == 16, you may need to add the ending \0.
+		char *ptrUnitName; // +08.
 		short int languageDLLID_Name; // If =0, then "ptrUnitName" string will be displayed instead (useful for custom units whose name does not exist in language.dll).
 		short int languageDLLID_Creation;
 		// 0x10
@@ -3513,7 +3513,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int checksum;
 		char unitType; // +04. $46=70=Living unit, 80=building... On 4 bytes... Sometimes these values are 2-bytes, be careful
 		char unused_003[3];
-		char *ptrUnitName; // +08. Max length=0x10 (16), including ending \0. If length==16, you may need to add the ending \0.
+		char *ptrUnitName; // +08.
 		short int languageDLLID_Name; // If =0, then "ptrUnitName" string will be displayed instead (useful for custom units whose name does not exist in language.dll).
 		short int languageDLLID_Creation;
 		// 0x10

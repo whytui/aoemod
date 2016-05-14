@@ -123,7 +123,9 @@ namespace ROR_STRUCTURES_10C {
 		res += " DATID2=";
 		res += std::to_string(obj->DAT_ID2);
 		res += " - Name=";
-		res += this->ExportStruct(obj->ptrUnitName, 16);
+#pragma message("ExportStruct_internal: Fix this invalid size")
+		res += this->GetZeroTerminatedStringFromRORData((unsigned long int)obj->ptrUnitName);
+		//res += this->ExportStruct(obj->ptrUnitName, 16);
 		res += " - Type=";
 		res += std::to_string(obj->unitType);
 		res += " - AIType=";
