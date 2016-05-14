@@ -2936,7 +2936,7 @@ namespace ROR_STRUCTURES_10C
 		// 0x20
 		unsigned long int unknown_020; // Seen only 0x0A. Size of +20 array ??
 		long int *unknown_024_ptrArray; // TO DO. ElemSize = 0x18. dwords +0=unitId(actor or target) +4=unitIdActor +8=ACTIVITY_TASK_IDS, +10=targetUnitId?
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // internalId. If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64
 		unsigned long int unknown_02C; // A distance?. 0x64 in 4DA4C9. Distance to TC ?
 		// 0x30
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.

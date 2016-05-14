@@ -401,7 +401,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_HEAL = 0x25B,
 		CST_ATI_CONVERT = 0x25C,
 		CST_ATI_EXPLORE = 0x25D,
-		CST_ATI_GATHER_NOATTACK = 0x261, // Forager, farmer, miners
+		CST_ATI_GATHER_NOATTACK = 0x261, // Forager, farmer, miners (gathering that doesn't have an "attack" phase.
 		CST_ATI_MOVE = 0x262, // Eg: used to capture relic. More specific than just move ?
 		CST_ATI_GATHER_ATTACK = 0x265, // woodcutter, hunter, fisherman (gatherer that have an "attack" phase - not really true for fish, but anyway !)
 		CST_ATI_UNKNOWN_266 = 0x266, // regroup in unit group ??? Related to SNAttackGroupGatherSpacing in 4CD551?
@@ -420,7 +420,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
 		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF...
 		CST_ATI_UNKNOWN_2C9 = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
-		CST_ATI_UNKNOWN_2D5 = 0x2D5, // Could be hold position ?
+		CST_ATI_HOLD_POSITION = 0x2D5, // Do not auto-attack. See 4E6740 for cats (don't search for target), 413F89 for other units (cancel attack if not at range?)
 		CST_ATI_UNKNOWN_2D9 = 0x2D9
 	};
 
