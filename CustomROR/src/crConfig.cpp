@@ -85,6 +85,9 @@ CustomRORConfig::CustomRORConfig() {
 		this->defaultPerNumbers_RM[i] = -1;
 		this->defaultPerNumbers_DM[i] = -1;
 	}
+	this->useEnhancedRulesForAutoAttackTargetSelection = false; // Game default
+	this->autoAttackOptionForBlastMeleeUnits = AAP_DEFAULT; // Game default
+	this->autoAttackOptionForBlastRangedUnits = AAP_DEFAULT; // Game default
 
 	// Map generation
 	this->randomMapRelicsCount = 5;
@@ -144,12 +147,40 @@ void CustomRORConfig::InitializeDefaultResourceValues() {
 // If attribute is not found, returns false.
 // If attribute value is "0" or "false", returns false.
 // All other values = return true.
-bool XML_GetBoolElement(TiXmlElement *elem, const char *attributeName) {
+bool CustomRORConfig::XML_GetBoolElement(TiXmlElement *elem, const char *attributeName) {
 	if (!elem) { return false; }
 	const char *attr = elem->Attribute(attributeName);
 	if (!attr) { return false; }
 	return (strcmp(attr, "0") != 0) && (strcmp(attr, "false") != 0);
 }
+
+// Returns matching attribute value, if found, or "" if not found.
+const char * CustomRORConfig::XML_GetAttributeValue(TiXmlElement *elem, const char *attributeName) {
+	if (!elem) { return ""; }
+	const char *attr = elem->Attribute(attributeName);
+	if (!attr) { return ""; }
+	return attr;
+}
+
+AUTO_ATTACK_POLICIES CustomRORConfig::GetAutoAttackPolicyFromText(const char *text) {
+	if (strcmp(text, "ignoreAll") == 0) {
+		return AAP_IGNORE_ALL;
+	}
+	if (strcmp(text, "ignoreVillagers") == 0) {
+		return AAP_IGNORE_VILLAGERS;
+	}
+	if (strcmp(text, "ignoreVillagersAndBuildings") == 0) {
+		return AAP_IGNORE_VILLAGERS_AND_BLDINGS;
+	}
+	if (strcmp(text, "ignoreBuildings") == 0) {
+		return AAP_IGNORE_BUILDINGS;
+	}
+	/*if (strcmp(text, "normal") == 0) {
+		return AAP_DEFAULT;
+	}*/
+	return AAP_DEFAULT;
+}
+
 
 
 // Get setup from XML file to this object variables.
@@ -191,7 +222,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 			this->showCustomPopInfo = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "improvedGameSpeeds") {
-			categoryName = elem->Attribute("name");
+			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "enable") {
 				this->useImprovedGameSpeeds = XML_GetBoolElement(elem, "value");
 			}
@@ -241,7 +272,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 			this->noWalls = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "initialResources") {
-			categoryName = elem->Attribute("gameType");
+			categoryName = this->XML_GetAttributeValue(elem, "gameType");
 			int RMChoice = -1;
 			if (categoryName == "RM") {
 				callResult = elem->QueryIntAttribute("choice", &intValue);
@@ -294,7 +325,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 			}
 		}
 		if (elemName == "per_number") {
-			categoryName = elem->Attribute("gameType");
+			categoryName = this->XML_GetAttributeValue(elem, "gameType");
 			int snNumber = -1;
 			int snValue = -1;
 			callResult = elem->QueryIntAttribute("sn", &intValue);
@@ -314,7 +345,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 
 		if (elemName == "initialResourceAIBonus") {
-			categoryName = elem->Attribute("gameType");
+			categoryName = this->XML_GetAttributeValue(elem, "gameType");
 			callResult = elem->QueryIntAttribute("food", &intValue);
 			if (callResult == TIXML_SUCCESS) {
 				if (categoryName == "RM") {
@@ -356,7 +387,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		// TO DO ? this->hideWelcomeMessage
 		// Conversion resistance values
 		if (elemName == "conversionResistance") {
-			categoryName = elem->Attribute("name");
+			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "warElephants") {
 				callResult = elem->QueryFloatAttribute("value", &floatValue);
 				if (callResult == TIXML_SUCCESS) { this->conversionResistance_WarElephants = floatValue; }
@@ -384,7 +415,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		// Map options
 		if (elemName == "map") {
-			categoryName = elem->Attribute("name");
+			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "randomMapRelicsCount") {
 				callResult = elem->QueryIntAttribute("value", &intValue);
 				if (callResult == TIXML_SUCCESS) { this->randomMapRelicsCount = intValue; }
@@ -410,7 +441,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		// Scenario editor
 		if (elemName == "editor") {
-			categoryName = elem->Attribute("name");
+			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "showHiddenTerrain") {
 				this->showHiddenTerrainsInEditor = XML_GetBoolElement(elem, "enable");
 			}
@@ -430,7 +461,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		// Tactical AI options
 		if (elemName == "tacticalAI") {
-			categoryName = elem->Attribute("name");
+			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "updateDelay") {
 				callResult = elem->QueryIntAttribute("value", &intValue);
 				if (callResult == TIXML_SUCCESS) { this->tacticalAIUpdateDelay = intValue; }
@@ -442,7 +473,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		// Dislike
 		if (elemName == "dislikeValues") {
-			categoryName = elem->Attribute("name");
+			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "dislikeComputeInterval") {
 				callResult = elem->QueryIntAttribute("value", &intValue);
 				if (callResult == TIXML_SUCCESS) { this->dislikeComputeInterval = intValue; }
@@ -458,7 +489,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		// Panic mode options
 		if (elemName == "panicMode") {
-			categoryName = elem->Attribute("name");
+			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "delay") {
 				callResult = elem->QueryIntAttribute("value", &intValue);
 				if (callResult == TIXML_SUCCESS) { this->panicModeDelay = intValue; }
@@ -470,8 +501,8 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		// City plan options
 		if (elemName == "cityPlan") {
-			std::string buildingName = elem->Attribute("building");
-			categoryName = elem->Attribute("name");
+			std::string buildingName = this->XML_GetAttributeValue(elem, "building");
+			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (buildingName == "all") {
 				if (categoryName == "enhanceLikeValues") {
 					this->cityPlanLikeValuesEnhancement = XML_GetBoolElement(elem, "enable");
@@ -500,7 +531,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 
 		if (elemName == "gameKey") {
-			categoryName = elem->Attribute("name");
+			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "callIdleNearbyArmies") {
 				this->enableCallNearbyIdleMilitaryUnits = XML_GetBoolElement(elem, "enable");
 			}
@@ -524,7 +555,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 
 		if (elemName == "unitSpawn") {
-			categoryName = elem->Attribute("name");
+			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "autoMoveToLocation") {
 				this->enableSpawnUnitsMoveToLocation = XML_GetBoolElement(elem, "enable");
 			}
@@ -550,6 +581,26 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 					}
 					this->unitShortcutsInformation[shortcutNumber].onlyOneUnit = XML_GetBoolElement(elem, "onlyOneUnit");
 				}
+			}
+		}
+		// Options for "idle units auto-attack" target selection enhancement
+		if (elemName == "autoAttackUnits") {
+			categoryName = this->XML_GetAttributeValue(elem, "name");
+			if (categoryName == "useCustomRules") {
+				// Parameter to enable the global feature.
+				this->useEnhancedRulesForAutoAttackTargetSelection = XML_GetBoolElement(elem, "enable");
+			}
+
+			std::string unitType = this->XML_GetAttributeValue(elem, "unitType");
+			if (unitType == "rangedWithBlastDamage") {
+				// Parameter to enable the global feature.
+				this->autoAttackOptionForBlastRangedUnits =
+					this->GetAutoAttackPolicyFromText(this->XML_GetAttributeValue(elem, "attackPolicy"));
+			}
+			if (unitType == "meleeWithBlastDamage") {
+				// Parameter to enable the global feature.
+				this->autoAttackOptionForBlastMeleeUnits =
+					this->GetAutoAttackPolicyFromText(this->XML_GetAttributeValue(elem, "attackPolicy"));
 			}
 		}
 
@@ -648,31 +699,31 @@ bool CustomRORConfig::ReadCivXMLConfigFile(char *fileName) {
 				while (subElem) {
 					string subElemName = subElem->Value();
 					if (subElemName == "civ_name") {
-						this->allCivInfo[civId]->SetCivName(subElem->Attribute("value"));
+						this->allCivInfo[civId]->SetCivName(this->XML_GetAttributeValue(subElem, "value"));
 					}
 					if (subElemName == "deathmatch_aifile") {
-						this->allCivInfo[civId]->deathmatch_AI_file = subElem->Attribute("value");
+						this->allCivInfo[civId]->deathmatch_AI_file = this->XML_GetAttributeValue(subElem, "value");
 					}
 					if (subElemName == "deathmatch_aifile_water") {
-						this->allCivInfo[civId]->deathmatch_water_AI_file = subElem->Attribute("value");
+						this->allCivInfo[civId]->deathmatch_water_AI_file = this->XML_GetAttributeValue(subElem, "value");
 					}
 					if (subElemName == "rm_aifile") {
 						mapCategory = subElem->Attribute("mapCategory");
 						if (mapCategory == "no_water") {
-							this->allCivInfo[civId]->RM_AI_file_no_water = subElem->Attribute("value");
+							this->allCivInfo[civId]->RM_AI_file_no_water = this->XML_GetAttributeValue(subElem, "value");
 						}
 						if (mapCategory == "some_water") {
-							this->allCivInfo[civId]->RM_AI_file_some_water = subElem->Attribute("value");
+							this->allCivInfo[civId]->RM_AI_file_some_water = this->XML_GetAttributeValue(subElem, "value");
 						}
 						if (mapCategory == "much_water") {
-							this->allCivInfo[civId]->RM_AI_file_much_water = subElem->Attribute("value");
+							this->allCivInfo[civId]->RM_AI_file_much_water = this->XML_GetAttributeValue(subElem, "value");
 						}
 					}
 					if (subElemName == "player_name") {
 						int index = 0;
 						callResult = subElem->QueryIntAttribute("index", &intValue);
 						if (callResult == TIXML_SUCCESS) { index = intValue; }
-						this->allCivInfo[civId]->SetPlayerName(index, subElem->Attribute("value"));
+						this->allCivInfo[civId]->SetPlayerName(index, this->XML_GetAttributeValue(subElem, "value"));
 					}
 					subElem = subElem->NextSiblingElement();
 				}

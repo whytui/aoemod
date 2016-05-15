@@ -287,6 +287,10 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004EBB16:
 		this->FixPlayerNoTechTree_applyTech(REG_values);
 		break;
+	case 0x410E3C:
+	case 0x411257:
+		this->EntryPointAutoSearchTargetUnit(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -2452,7 +2456,7 @@ void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 		actionStruct = (ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_OBJECT *) (myESP[0]);
 	}	
 	if (actionStruct) {
-		if (!actionStruct->IsCheckSumValid() || (actionStruct->actionTypeID != AOE_CONST_FUNC::ACTION_ID::CST_ACTION_ID_MAKE_OBJECT)) {
+		if (!actionStruct->IsCheckSumValid() || (actionStruct->actionTypeID != AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_MAKE_OBJECT)) {
 			actionStruct = NULL; // The value we read is not an "MakeObject" actionstruct, ignore it.
 		}
 	}
@@ -3003,6 +3007,73 @@ void CustomRORInstance::FixPlayerNoTechTree_applyTech(REG_BACKUP *REG_values) {
 	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	REG_values->EAX_val = techId; // MOVSX EAX,WORD PTR SS:[ESP+8] in 0x4EBB11.
+}
+
+
+// From 00410E31 / 0041124C : auto search target unit method.
+void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
+	bool isFirstLoop = true;
+	unsigned long int returnAddress_ignoreThisTarget = 0;
+	unsigned long int returnAddress_thisTargetIsAcceptable = 0;
+	unsigned long int returnAddress_applyStandardRules_arg1IsFalse = 0;
+	// Some setup according to source call
+	switch (REG_values->return_address) {
+	case 0x410E3C:
+		isFirstLoop = true;
+		returnAddress_ignoreThisTarget = 0x410F7E;
+		returnAddress_thisTargetIsAcceptable = 0x410E97;
+		returnAddress_applyStandardRules_arg1IsFalse = 0x410E47;
+		break;
+	case 0x411257:
+		isFirstLoop = false;
+		returnAddress_ignoreThisTarget = 0x41147C;
+		returnAddress_thisTargetIsAcceptable = 0x4112B2;
+		returnAddress_applyStandardRules_arg1IsFalse = 0x411262;
+		break;
+	default:
+		traceMessageHandler.WriteMessage("Invalid source call address in EntryPointAutoSearchTargetUnit");
+		return;
+	}
+	long int arg1 = GetIntValueFromRORStack(REG_values, 0x48);
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->EAX_val = arg1; // Not really necessary, but cleaner.
+		if (arg1 == 0) {
+			// Default behaviour: if arg1 is false, jump (cf JE in original code 410E3D and 411258)
+			ChangeReturnAddress(REG_values, returnAddress_applyStandardRules_arg1IsFalse);
+			// In our custom treatments, we can change return address again and override this if we want
+		}
+	}
+
+	// Return here if we don't want custom rules. We will get standard behaviour.
+	// Standard behaviour is: ignore buildings with HP=1 for catapults, ignore walls unless arg1==1 and current target IS a wall too.
+	if (this->crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection) {
+		return;
+	}
+
+	// Custom treatments. Apply custom rules to ignore/accept target unit (overloads standard rules for catapults and walls)
+
+	ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity = (ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *potentialTargetUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)REG_values->EDI_val;
+	ror_api_assert(REG_values, activity && isAValidRORChecksum(activity->checksum));
+	ror_api_assert(REG_values, potentialTargetUnit && potentialTargetUnit->IsCheckSumValidForAUnitClass());
+	if (potentialTargetUnit && potentialTargetUnit->IsCheckSumValidForAUnitClass()) {
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = potentialTargetUnit->GetUnitDefinition();
+		if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass()) {
+			if (unitDefBase->unitAIType == TribeAIGroupWall) {
+				return; // Potential target is a wall: use standard checks/behaviour.
+			}
+		}
+	}
+	bool ignoreThisTarget = this->crCommand.AutoSearchTargetShouldIgnoreUnit(activity, potentialTargetUnit);
+
+
+	// Do not modify below.
+	if (ignoreThisTarget) {
+		ChangeReturnAddress(REG_values, returnAddress_ignoreThisTarget);
+	} else {
+		ChangeReturnAddress(REG_values, returnAddress_thisTargetIsAcceptable);
+	}
 }
 
 

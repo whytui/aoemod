@@ -267,18 +267,18 @@ namespace AOE_CONST_INTERNAL
 	enum INTERNAL_ACTION_ID : short int {
 		CST_IAI_MOVE_1 = 1, // Used as sub-action to move to target ? Used to capture relics
 		CST_IAI_FOLLOW = 2, // TO CONFIRM (AGE3)
-		CST_IAI_GARRISON = 3, // Enter
+		CST_IAI_GARRISON_ENTER = 3, // Enter
 		CST_IAI_EXPLORE_04 = 4, // TO CONFIRM
-		CST_IAI_GATHER_05 = 5, // ability to gather/rebuild 1. Includes farming, ...
-		CST_IAI_UNKNOWN_06 = 6, // Natural wonders cheat??? attack or flee from (seen) unit ?
-		CST_IAI_ATTACK_7 = 7, // unsure
+		CST_IAI_GATHER_NO_ATTACK = 5, // Gathering with NO attack phase. Excludes fishing !
+		CST_IAI_UNKNOWN_06 = 6, // Natural wonders cheat??? attack or flee from (seen) unit ? Animal ability ?
+		CST_IAI_UNKNOWN_7 = 7, // Attack ?? unsure
 		CST_IAI_SHOOT = 8, // TO CONFIRM
 		CST_IAI_ATTACK_9 = 9,
 		CST_IAI_FLY = 0x0A, // TO CONFIRM
-		CST_IAI_SCARE_HUNT = 0x0B, // TO CONFIRM
+		CST_IAI_SCARE_HUNT = 0x0B, // TO CONFIRM.
 		CST_IAI_TRANSPORT = 0x0C, // OR UNLOAD ???
-		CST_IAI_GUARD = 0x0D, // TO CONFIRM
-		CST_IAI_EXPLORE_UNSURE_1E = 0x1E,
+		CST_IAI_GUARD = 0x0D, // TO CONFIRM or auto-attack ?
+		CST_IAI_EXPLORE_UNSURE_1E = 0x1E, // unsure... see also 4 ?
 		CST_IAI_UNKNOWN_ESCAPE = 20, // ? AGE3 ?
 		CST_IAI_UNKNOWN_MAKE = 21, // AGE3 ?
 		CST_IAI_UNKNOWN_FOR_BIRD = 0x28, // fly ?
@@ -291,16 +291,17 @@ namespace AOE_CONST_INTERNAL
 		CST_IAI_CONVERT = 0x68,
 		CST_IAI_HEAL = 0x69,
 		CST_IAI_REPAIR = 0x6A,
-		CST_IAI_ARTIFACT_UNKNOWN = 0x6B, // Get auto-converted
-		CST_IAI_DISCOVERY_ARTIFACT = 0x6C,
+		CST_IAI_ARTIFACT_CAPTURE = 0x6B, // Get auto-converted = "Be discovered". To confirm / get precisions
+		CST_IAI_DISCOVERY_CAPTURE = 0x6C, // Be discovered for discovery (NOT relics/ruins)
 		CST_IAI_RETREAT_TO_SHOOTING_RANGE = 0x6D,
-		CST_IAI_GATHER_WITH_ATTACK = 0x6E, // (110) Hunt, cut wood, fish
+		CST_IAI_GATHER_WITH_ATTACK = 0x6E, // (110) Hunt, cut wood, fish. Gather activities with an attack phase (includes fishing !)
 		CST_IAI_TRADE = 0x6F,
 		CST_IAI_GENERATE_WONDER_VICTORY = 120, // AGE3?
 		CST_IAI_DESELECT_WHEN_TASKED = 121, // AGE3?
 		CST_IAI_LOOT = 122, // AGE3?
 		CST_IAI_HOUSING = 123, // AGE3?
 		CST_IAI_UNPACK_ATTACK = 125, // AGE3?
+		CST_IAI_UNKNOWN_131 = 131, //?
 		CST_IAI_PICKUP_UNIT = 132, // AGE3???
 		CST_IAI_SHEAR = 149 // AGE3???
 	};
@@ -414,7 +415,7 @@ namespace AOE_CONST_INTERNAL
 		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
 		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targetted farm
 		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // 
-		CST_ATI_UNKNOWN_2BD = 0x2BD, // Used when moving to capture relic or defend unit ? See 4DB9F0=tacAI.captureArtefact?(myUnitId, targetUnitId)
+		CST_ATI_UNKNOWN_2BD = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.captureArtefact?(myUnitId, targetUnitId)
 		CST_ATI_UNKNOWN_2BE = 0x2BE,
 		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ??
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??

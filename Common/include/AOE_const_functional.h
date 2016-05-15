@@ -100,51 +100,7 @@ namespace AOE_CONST_FUNC
 		CST_RESEARCH_STATUS_DONE_OR_INVALID = 3 // The research has been researched or is invalid. It has no more role/interaction (effect is active)
 	};
 
-	// Internal Action Ids
-	enum ACTION_ID : short int {
-		CST_ACTION_ID_MOVE_UNKNOWN_01 = 1,
-		CST_ACTION_ID_MOVE_UNKNOWN_02 = 2,
-		CST_ACTION_ID_GARRISON_ENTER = 3,
-		CST_ACTION_ID_MOVE = 4,
-		CST_ACTION_ID_GATHER_STANDARD = 5, // gather/deposit to building for simple tasks (all but woodcutting and hunting)
-		CST_ACTION_ID_UNKNOWN_06_ANIMAL_ABILITY = 6,
-		CST_ACTION_ID_ATTACK_UNKNOWN_07 = 7,
-		CST_ACTION_ID_ATTACK_UNKNOWN_09 = 9,
-		CST_ACTION_ID_UNKNOWN_0A = 0x0A, // A8 7D 54 00 ? Fly ?
-		CST_ACTION_ID_UNKNOWN_0B_PREDATOR_ABILITY = 0x0B,
-		CST_ACTION_ID_TRANSPORT_UNLOAD = 0x0C,
-		CST_ACTION_ID_AUTO_ATTACK = 0x0D, // =13
-		CST_ACTION_ID_BE_FARMED12 = 0x012,
-		CST_ACTION_ID_BE_FARMED13 = 0x013,
-		CST_ACTION_ID_BE_FARMED14 = 0x014,
-		CST_ACTION_ID_BE_FARMED15 = 0x015,
-		CST_ACTION_ID_UNKNOWN_19 = 0x19, // BC 41 54 00
-		CST_ACTION_ID_EXPLORE = 0x1E, // ?
-		CST_ACTION_ID_BIRD_FLY = 0x28, // 48 27 54 00
-		CST_ACTION_ID_UNKNOWN_32 = 0x32,
-		CST_ACTION_ID_UNKNOWN_3C = 0x3C, // E8 45 54 00. Related to missile arrow ?
-		CST_ACTION_ID_CHEAT_SPAWN_UNIT = 0x64,
-		CST_ACTION_ID_BUILD = 0x65, // size 0x40
-		CST_ACTION_ID_MAKE_OBJECT = 0x66, // Train unit
-		CST_ACTION_ID_MAKE_TECH = 0x67, // Research a tech/age
-		CST_ACTION_ID_CONVERT = 0x68, // 1C 87 45 00
-		CST_ACTION_ID_HEAL = 0x69,
-		CST_ACTION_ID_REPAIR = 0x6A,
-		CST_ACTION_ID_ARTEFACT_UNKNOWN_6B = 0x6B, // "Be discovered" ?
-		CST_ACTION_ID_ARTEFACT_DISCOVERY = 0x6C, // Be discovered for discovery (NOT relics/ruins)
-		CST_ACTION_ID_TYPE109 = 0x6D, // The "famous" one from AGE3.
-		CST_ACTION_ID_GATHER_COMPLEX = 0x6E, // Includes only hunting and cut wood (gathering that requires 2 stages)
-		CST_ACTION_ID_TRADE = 0x6F,
-		CST_ACTION_ID_GENERATE_WONDER_VICTORY = 120,
-		// Taken from AGE3. Unsure
-		CST_ACTION_ID_DESELECT_WHEN_TASKED = 121,
-		CST_ACTION_ID_LOOT = 122, //?
-		CST_ACTION_ID_UNPACK_AND_ATTACK = 125, // ?
-		CST_ACTION_ID_UNKNOWN_131 = 131, //?
-		CST_ACTION_ID_PICKUP_UNIT = 132, //?
-		CST_ACTION_ID_KIDNAP_UNIT = 135, //?
-		CST_ACTION_ID_DEPOSIT_UNIT = 136 //?
-	};
+	// Internal Action Ids. See INTERNAL_ACTION_ID in AOE_const_internal.
 	
 
 	enum TECH_DEF_EFFECTS : char {
@@ -182,5 +138,17 @@ namespace AOE_CONST_FUNC
 		CST_CA_FISHING_SHIPS = 9,
 		CST_CA_UNUSED_10 = 10, // Defined in AGE3, but unused in AOE/ROR
 		CST_CA_UNUSED_11 = 11 // Defined in AGE3, but unused in AOE/ROR
+	};
+
+	// Note on blast levels: default should be 3, not 0.
+	// Uing 0 for the most damaging case is a bad choice from game developers ! 0 should have been for TARGET_ONLY.
+	// A lot of units have 0, 3 would be more appropriate.
+	enum BLAST_LEVELS : char {
+		// For many units (buildings, etc), but also boats ! No effect if blast radius is 0 though.
+		// 0 damages trees, animals, and make mines/fish disappear !
+		CST_BL_DAMAGE_RESOURCES = 0,
+		CST_BL_DAMAGE_TREES = 1, // Heavy cats, Juggernaught...
+		CST_BL_DAMAGE_NEARBY_UNITS = 2, // stone thrower, catapult
+		CST_BL_DAMAGE_TARGET_ONLY = 3 // For most units !
 	};
 }

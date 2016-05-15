@@ -316,6 +316,12 @@ public:
 	bool OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue);
 
+	// Custom treatment to decide if a potential target unit should be ignored
+	// Overload standard rules for catapults(ignores building if HP=1) and "target=wall" cases.
+	// Default result=false (on error cases)
+	bool AutoSearchTargetShouldIgnoreUnit(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity,
+		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *potentialTargetUnit);
+
 	// ----------------------------------
 	// City plan
 

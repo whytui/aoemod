@@ -28,6 +28,7 @@ Strategy (AI):
 - Fix stuck AI bug #3: strategy when a building that is currently training a unit is destroyed (computer player will no longer get stuck).
 - Fix stuck AI bug #4: when entering "panic mode", too much irrelevant units are added on top of strategy and AI gets stuck.
 - Dramatically improve defence AI: train relevant units according to attacking units and accoding to player's available units.
+- Automatically adapt AI strategy to maximum population
 - Improved tactical AI updates:
  - Fix conversion & strategy: When enemy units are converted, strategy is updated to avoid training/building them twice.
  - Disable irrelevant limited-retrain units (like clubmen) when starting at iron age or post-iron.
@@ -73,6 +74,7 @@ UI and Shortcuts:
 - Support more than 1 page for buttons (similar to villager build list)
 
 Gameplay & configuration:
+- Enhanced/configurable "Auto-attack nearby units" behaviour for military units (some kind of enhanced "hold position" feature). For example, you can prevent your catapults from attacking villagers !
 - Use customROR.xml to configure (for RM/DM) initial resource values, initial resource bonus for AI
 - Use customROR.xml to force certain PER numbers in DM and/or RM. Example: set SNAllowDiplomacyChangeOnAllyAttack to 0 to avoid unfortunate diplomacy changes.
 - Enable/Disable (customROR.xml) neutral initial diplomacy stance: this prevents computer players to become all allied against human player.

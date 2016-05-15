@@ -129,7 +129,8 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_MAP_GENERATION_INFO;
 	class STRUCT_GAME_MAP_TILE_INFO;
 	class STRUCT_GAME_MAP_INFO; // TODO: Confirm exact role
-	class STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYERELEM;
+	class STRUCT_NEARBY_UNIT_INFO;
+	class STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYER_NEARBY_UNITS_INFO;
 	class STRUCT_UNKNOWN_MAP_INFO_7D2058;
 	class STRUCT_UNKNOWN_MAP_DATA_F04C;
 	class STRUCT_TEMP_MAP_BUILD_LIKE_INFOS;
@@ -639,23 +640,32 @@ namespace ROR_STRUCTURES_10C
 		}
 	};
 
+	// Size=8. Used in temporary treatments, for example auto-attack unit when idle...
+	class STRUCT_NEARBY_UNIT_INFO {
+	public:
+		long int unitId; // +0
+		char distance; // +4. Unsure. Not always valued ?
+		char playerId; // +5
+		char posY; // +6
+		char posX; // +7
+	};
+	static_assert(sizeof(STRUCT_NEARBY_UNIT_INFO) == 0x8, "STRUCT_NEARBY_UNIT_INFO size");
 
 	// Size = 8
-	// Contains information about targets ? unsure
-	class STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYERELEM {
+	// Contains information about nearby units for temp treatments.
+	// Each player has its own object
+	class STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYER_NEARBY_UNITS_INFO {
 	public:
-		// pointer to an array of 0x20*8 bytes. TO DO.
-		// +4=distance +5=byte=playerId, +6=byte=posY, +7=posX
-		char *unknown_00;
-		short int arraySize;
-		short int numberUsed; // REALLY unsure
+		STRUCT_NEARBY_UNIT_INFO *nearbyUnitInfoArray;
+		short int arraySize; // +4
+		short int numberUsed; // +6
 	};
 
 	// Referenced in global variable 0x7D2058 and also from STRUCT_GAME_MAP_INFO+8DCC
 	// Size = 0x24. Constructor = 0x516800
 	class STRUCT_UNKNOWN_MAP_INFO_7D2058 {
 	public:
-		STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYERELEM **unknown_00; // Array[playerId] => pointer to array of STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYERELEM
+		STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYER_NEARBY_UNITS_INFO **unknown_00; // Array[playerId] => pointer to array of STRUCT_UNKNOWN_MAP_INFO_7D2058_UNITINFOELEM
 		char *unknown_04; // Array size = 0x800 bytes.
 		char *unknown_08; // Array size = 0x800 bytes.
 		char *unknown_0C; // Array size = 0x800 bytes.
@@ -2925,7 +2935,7 @@ namespace ROR_STRUCTURES_10C
 		// FC 90 54 00 (villager?gatherer?), DC 91 54 00 (priest), 64 95 54 00 (military?), 24 97 54 00 (towers?), 44 96 54 00
 		// 5C 8E 54 00 (dead alligator?)
 		unsigned long int checksum;
-		STRUCT_UNIT *ptrUnit;
+		STRUCT_UNIT *ptrUnit; // +4. actor unit.
 		unsigned long int unknown_008;
 		unsigned long int unknown_00C;
 		// 0x10
@@ -3012,8 +3022,8 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_11C;
 		// 0x120
 		float unknown_120; // confirm type
-		unsigned long int unknown_124; // ptr to array of ints? Size=2C??
-		unsigned long int unknown_128; // number of elements in +124.
+		long int *playerNearbyUnitsInfoIndexes; // +124. ptr to array of indexes to reference (nearby) units in PLAYER_NEARBY_UNITS_INFO object
+		long int playerNearbyUnitsInfoIndexesArraySize; // +128. number of elements in +124.
 		unsigned long int unknown_12C;
 		// 0x130
 		char unknown_130; // A flag ? 410C00
@@ -3144,7 +3154,7 @@ namespace ROR_STRUCTURES_10C
 		short int unitCommandId;
 		char unknown_04;
 		char unknown_05;
-		AOE_CONST_FUNC::ACTION_ID commandType; // +6
+		AOE_CONST_INTERNAL::INTERNAL_ACTION_ID commandType; // +6
 		short int classId;
 		short int unitId; // a DATID, generally -1
 		char selectionEnabler;
@@ -3396,8 +3406,8 @@ namespace ROR_STRUCTURES_10C
 		short int unknown_110;
 		short int unknown_112;
 		float maxRange; // Total range (8 if 7+1 is displayed). displayed range is the number before the "+" (7 in the example).
-		float blastRadius;
-		char blastLevel;
+		float blastRadius; // +118. Distance blast damage applies.
+		AOE_CONST_FUNC::BLAST_LEVELS blastLevel; // +11C. PLEASE always check if blastRadius>0. A lot of units have "wrongly" blastLevel=0
 		char unknown_11D;
 		char unknown_11E;
 		char unknown_11F;

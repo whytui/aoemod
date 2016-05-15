@@ -123,6 +123,9 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "autoRebuildFarms_maxFarms:                 %ld\n", this->crInfo->configInfo.autoRebuildFarms_maxFarms);
 	fprintf_s(f, "autoRebuildFarms_maxFood:                  %ld\n", this->crInfo->configInfo.autoRebuildFarms_maxFood);
 	fprintf_s(f, "autoRebuildFarms_minWood:                  %ld\n", this->crInfo->configInfo.autoRebuildFarms_minWood);
+	fprintf_s(f, "useEnhancedRulesForAutoAttack:             %ld\n", this->crInfo->configInfo.useEnhancedRulesForAutoAttackTargetSelection ? 1 : 0);
+	fprintf_s(f, "autoAttackOptionForMeleeUnits:             %ld\n", this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits);
+	fprintf_s(f, "autoAttackOptionForRangedUnits:            %ld\n", this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits);
 
 	// Conversion
 	fprintf_s(f, "conversionResistance_Boats:                %f\n", this->crInfo->configInfo.conversionResistance_Boats);
@@ -309,11 +312,15 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		char bufasm[] = {1,2,3, 4};
 		//WriteInMyMemory(0x45df32, bufasm, 4);
 		//patcherExample();
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 62);
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving =
+			//(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 62);
+			(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, CST_UNITID_SHORT_SWORDSMAN);
 		if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass()) {
 			unitDefLiving->availableForPlayer = 1;
 			unitDefLiving->trainButton = 13;
 			unitDefLiving->trainLocation = 109;
+			//unitDefLiving->blastLevel = AOE_CONST_FUNC::BLAST_LEVELS::CST_BL_DAMAGE_RESOURCES;
+			//unitDefLiving->blastRadius = 5;
 		}
 		unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 227);
 		if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass()) {
@@ -555,9 +562,9 @@ void CustomRORCommand::UpdateTechAddWorkRateWithMessage(short int techId, short 
 				) {
 				char msgBuffer[100];
 				if (updatedValue < 0) {
-					sprintf_s(msgBuffer, "%s (%d): work rate=%f", GetTechnologyLocalizedName(techId).c_str(), techId, techDef->ptrEffects[i].effectValue);
+					sprintf_s(msgBuffer, "%s (%d): tech work rate add.=%f", GetTechnologyLocalizedName(techId).c_str(), techId, techDef->ptrEffects[i].effectValue);
 				} else {
-					sprintf_s(msgBuffer, "%s (%d): work rate=%f updated to %f", GetTechnologyLocalizedName(techId).c_str(), techId, techDef->ptrEffects[i].effectValue, updatedValue);
+					sprintf_s(msgBuffer, "%s (%d): tech work rate add.=%f updated to %f", GetTechnologyLocalizedName(techId).c_str(), techId, techDef->ptrEffects[i].effectValue, updatedValue);
 				}
 				traceMessageHandler.WriteMessageNoNotification(msgBuffer);
 				techDef->ptrEffects[i].effectValue = updatedValue;
@@ -3198,13 +3205,13 @@ bool CustomRORCommand::ShouldChangeTarget(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVI
 		actionTargetUnitAction = (ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *)oldTargetUnit->ptrActionInformation->ptrActionLink->actionStruct;
 	}
 	bool newTargetAttacksMe = newTargetUnitAction && (
-		(newTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_ATTACK_7) ||
+		(newTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_UNKNOWN_7) ||
 		(newTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_ATTACK_9) ||
 		(newTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_CONVERT)
 		) &&
 		(newTargetUnitAction->targetUnit == actorUnit);
 	bool actionTargetAttacksMe = actionTargetUnitAction && (
-		(actionTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_ATTACK_7) ||
+		(actionTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_UNKNOWN_7) ||
 		(actionTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_ATTACK_9) ||
 		(actionTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_CONVERT)
 		) &&
@@ -4344,7 +4351,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 			curElem->unit->ptrStructDefUnit->IsCheckSumValid() && (curElem->unit->ptrStructDefUnit->DAT_ID1 == CST_UNITID_FARMER)) {
 			ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *curUnitAction = GetUnitAction(curElem->unit);
 			// There is 1 special case when farmer's resourceType is NOT berryBush: when AI player repairs a farm (bug: villager type is farmer instead of repairman)
-			if (curUnitAction && (curUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_GATHER_05)) {
+			if (curUnitAction && (curUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
 				if (curUnitAction->targetUnitId == farmUnitId) {
 					assert(curElem->unit->resourceTypeId == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE);
 					farmerUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *)curElem->unit;
@@ -4888,6 +4895,65 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 			CALL addrShowUnitCommands;
 		}
 		return true; // Do not execute normal code for NEXT PAGE
+	}
+
+	return false;
+}
+
+
+// Custom treatment to decide if a potential target unit should be ignored
+// Overload standard rules for catapults(ignores building if HP=1) and "target=wall" cases.
+// Default result=false (on error cases)
+bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity,
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *potentialTargetUnit) {
+	assert(this->crInfo->configInfo.useEnhancedRulesForAutoAttackTargetSelection); // should have been checked before calling this
+	if (!activity || !potentialTargetUnit || !potentialTargetUnit->IsCheckSumValidForAUnitClass()) {
+		return false; // error case
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *targetUnitDefBase = potentialTargetUnit->GetUnitDefinition();
+	if (!targetUnitDefBase || !targetUnitDefBase->IsCheckSumValidForAUnitClass()) {
+		return false; // error case
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *actorUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *)activity->ptrUnit;
+	if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass()) {
+		return false; // We expect ACTOR unit to derive from type50 ! (should be living or building)
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)actorUnit->GetUnitDefinition();
+	if (!actorUnitDef || !actorUnitDef->IsCheckSumValidForAUnitClass()) {
+		return false; // We expect ACTOR unit to derive from type50 ! (should be living or building)
+	}
+	
+	bool canHurtOtherUnits = (actorUnitDef->blastLevel != AOE_CONST_FUNC::BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) &&
+		(actorUnitDef->blastRadius > 0);
+	bool isMelee = (actorUnitDef->maxRange == 0);
+	bool isCatapult = canHurtOtherUnits && (actorUnitDef->unitAIType == TribeAIGroupSiegeWeapon);
+	// Note: catapult trireme, juggernaught, cleopatra are warships (22), not TribeAIGroupSiegeWeapon.
+
+	bool applyWeirdRuleOnCatsWith1HPBuilding = true; // True if we want the same (weird) rule as original ROR code on catapults and buildings with HP=1
+	if (applyWeirdRuleOnCatsWith1HPBuilding && isCatapult && (potentialTargetUnit->remainingHitPoints <= 1)) {
+		return true; // Ignore unit. Not sure why there is that check !
+	}
+
+	if (targetUnitDefBase->unitAIType == TribeAIGroupWall) {
+		return true; // Ignore walls
+	}
+
+	// Custom rules
+	AUTO_ATTACK_POLICIES policy = isMelee ? this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits :
+		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits;
+	bool targetIsVillager = IsVillager_includingShips(targetUnitDefBase->DAT_ID1);
+	bool targetIsNonTowerBuilding = (targetUnitDefBase->unitAIType == TribeAIGroupBuilding) && (!IsTower(targetUnitDefBase->DAT_ID1));
+
+	bool policyTellsToIgnore = (policy == AAP_IGNORE_ALL) ||
+		((policy == AAP_IGNORE_BUILDINGS) && (targetIsNonTowerBuilding)) ||
+		((policy == AAP_IGNORE_VILLAGERS) && (targetIsVillager)) ||
+		((policy == AAP_IGNORE_VILLAGERS_AND_BLDINGS) && (targetIsVillager || targetIsNonTowerBuilding));
+
+	
+	// TO DO: ability to define rules at unit level to overload global setting.
+
+	if (canHurtOtherUnits && policyTellsToIgnore) {
+		return true;
 	}
 
 	return false;

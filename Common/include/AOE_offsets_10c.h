@@ -29,6 +29,8 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0x5830F4; // redundant - to remove
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x0055CA5C;
 	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x7C04A0;
+	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2024;
+	static const unsigned long int ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2038; // array of ptr to arrays of STRUCT_NEARBY_UNIT_INFO
 	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x7D2058;
 	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7D205C;
 	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x580DA8;

@@ -27,6 +27,14 @@ public:
 };
 
 
+enum AUTO_ATTACK_POLICIES {
+	AAP_DEFAULT = 1,
+	AAP_IGNORE_VILLAGERS, // auto-attack every unit except villagers (including non-war ships)
+	AAP_IGNORE_BUILDINGS, // auto-attack every unit except non-tower buildings
+	AAP_IGNORE_VILLAGERS_AND_BLDINGS, // auto-attack every unit except villagers, non-tower buildings
+	AAP_IGNORE_ALL // never auto-attack any unit
+};
+
 // This class manages all information read from CustomROR configuration files.
 class CustomRORConfig {
 public:
@@ -48,7 +56,6 @@ public:
 	bool editor_allowUnitOverlapping;
 	bool fixHumanPlayer_specificSeeUnit;
 	bool allyExplorationIsAlwaysShared;
-	bool useImprovedButtonBar;
 	// Technical
 	bool autoFixMissingFeatures;
 	long int gameTimerSlowDownFactor;
@@ -122,10 +129,22 @@ public:
 	long int autoRebuildFarms_maxFarms; // Maximum number of farms that can be reached with "auto construction" of farms
 	long int autoRebuildFarms_maxFood; // Maximum amount of food we allow before automatically rebuilding a farm.
 	long int autoRebuildFarms_minWood; // Minimum amount of wood we require before automatically rebuilding a farm.
+	bool useImprovedButtonBar;
+	bool useEnhancedRulesForAutoAttackTargetSelection;
+	AUTO_ATTACK_POLICIES autoAttackOptionForBlastMeleeUnits;
+	AUTO_ATTACK_POLICIES autoAttackOptionForBlastRangedUnits;
 
 	// Methods
 	// Read CustomROR main configuration XML file
 	bool ReadXMLConfigFile(char *fileName);
+	// Get a bool value from a XML element and an attribute name.
+	// If attribute is not found, returns false.
+	// If attribute value is "0" or "false", returns false.
+	// All other values = return true.
+	bool XML_GetBoolElement(TiXmlElement *elem, const char *attributeName);
+	// Returns matching attribute value, if found, or empty string if not found.
+	const char * XML_GetAttributeValue(TiXmlElement *elem, const char *attributeName);
+	AUTO_ATTACK_POLICIES GetAutoAttackPolicyFromText(const char *text);
 	// Read civilizations info XML file
 	bool ReadCivXMLConfigFile(char *fileName);
 	CivilizationInfo *GetCivInfo(int civId);

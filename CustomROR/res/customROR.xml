@@ -134,6 +134,20 @@
 	<!-- autoRepairTC: spawned villagers will automatically repair their parent TC if it is damaged. 0=disable, 1=enable. -->
 	<unitSpawn name="autoRepairTC" enable="1"></unitSpawn>
 	
+	<!-- Idle military units automatic target selection (autoAttackUnits) -->
+	<!-- autoAttackUnits.useCustomRules: enable this to allow use of custom rules (looks like some enhanced "hold position" feature) -->
+	<autoAttackUnits name="useCustomRules" enable="1"/>
+	<!-- autoAttackUnits.unitType=rangedWithBlastDamage or meleeWithBlastDamage.
+	attackPolicy can be set to
+	- "normal" (default: attack all units),
+	- "ignoreAll" (never auto-attack any enemy unit, except to defend itself)
+	- "ignoreVillagers" (never auto-attack villagers, but attack other units),
+	- "ignoreVillagersAndBuildings" (like in neutral diplomacy !)
+	- "ignoreBuildings" (never auto-attack buildings, but attack everything else, including towers)
+	-->
+	<autoAttackUnits unitType="rangedWithBlastDamage" attackPolicy="ignoreVillagers" />
+	<autoAttackUnits unitType="meleeWithBlastDamage" attackPolicy="normal" />
+	
 	<!-- Shortcut: For each spawn unit for which datid=xx, auto-assign shortcut=x. 
 	If onlyOneUnit is set (<>0), the shortcut is assigned only if still unused (no unit already has this shortcut)
 	Each shortcut number can be used only for 1 unitid (datid). See AGE3 to get unit DATIDs.
