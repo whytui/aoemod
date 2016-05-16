@@ -124,8 +124,17 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "autoRebuildFarms_maxFood:                  %ld\n", this->crInfo->configInfo.autoRebuildFarms_maxFood);
 	fprintf_s(f, "autoRebuildFarms_minWood:                  %ld\n", this->crInfo->configInfo.autoRebuildFarms_minWood);
 	fprintf_s(f, "useEnhancedRulesForAutoAttack:             %ld\n", this->crInfo->configInfo.useEnhancedRulesForAutoAttackTargetSelection ? 1 : 0);
-	fprintf_s(f, "autoAttackOptionForMeleeUnits:             %ld\n", this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits);
-	fprintf_s(f, "autoAttackOptionForRangedUnits:            %ld\n", this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits);
+	fprintf_s(f, "autoAttackPolicy vs towers/military/buildings/villagers/walls\n");
+	fprintf_s(f, "- For Melee Units:  %d/%d/%d/%d/%d\n", this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackTowers,
+		this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackMilitary, 
+		this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackNonTowerBuildings, 
+		this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackVillagers, 
+		this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackWalls);
+	fprintf_s(f, "- For Ranged Units: %d/%d/%d/%d/%d\n", this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits.attackTowers,
+		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits.attackMilitary,
+		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits.attackNonTowerBuildings,
+		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits.attackVillagers,
+		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits.attackWalls);
 
 	// Conversion
 	fprintf_s(f, "conversionResistance_Boats:                %f\n", this->crInfo->configInfo.conversionResistance_Boats);
@@ -4959,9 +4968,6 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(ROR_STRUCTURES_10C::STRU
 		(!policy->attackTowers && targetIsTower) ||
 		(!policy->attackMilitary && targetIsMilitary) ||
 		(!policy->attackWalls && targetIsWall);
-
-	
-	// TO DO: ability to define rules at unit level to overload global setting.
 
 	if ((canHurtOtherUnits || hasRuleAtUnitLevel) && policyTellsToIgnore) {
 		return true;
