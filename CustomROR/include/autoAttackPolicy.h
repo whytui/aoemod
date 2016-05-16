@@ -1,12 +1,30 @@
 
 #pragma once
 
-enum AUTO_ATTACK_POLICIES {
-	AAP_NOT_SET = 0,
-	AAP_DEFAULT, // auto-attack everything but walls
-	AAP_IGNORE_VILLAGERS, // auto-attack every unit except villagers (including non-war ships)
-	AAP_IGNORE_BUILDINGS, // auto-attack every unit except non-tower buildings
-	AAP_IGNORE_VILLAGERS_AND_BLDINGS, // auto-attack every unit except villagers, non-tower buildings
-	AAP_IGNORE_ALL // never auto-attack any unit
-};
 
+class AutoAttackPolicy {
+public:
+	AutoAttackPolicy()  {
+		this->SetDefaultValues();
+	}
+	AutoAttackPolicy(bool attackVillagers, bool attackMilitary, bool attackTowers, bool attackNonTowerBuildings, bool attackWalls) {
+		this->attackMilitary = attackMilitary;
+		this->attackNonTowerBuildings = attackNonTowerBuildings;
+		this->attackTowers = attackTowers;
+		this->attackVillagers = attackVillagers;
+		this->attackWalls = attackWalls;
+	}
+	bool attackVillagers;
+	bool attackMilitary; // All military units except towers
+	bool attackTowers; // Towers are non-moving units with attack ability (some towers are living units, not buildings !)
+	bool attackNonTowerBuildings; // All buildings but towers and walls
+	bool attackWalls;
+
+	void SetDefaultValues() {
+		attackMilitary = true;
+		attackNonTowerBuildings = true;
+		attackTowers = true;
+		attackVillagers = true;
+		attackWalls = false;
+	}
+};

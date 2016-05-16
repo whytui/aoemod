@@ -4929,34 +4929,36 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(ROR_STRUCTURES_10C::STRU
 	bool isMelee = (actorUnitDef->maxRange == 0);
 	bool isCatapult = canHurtOtherUnits && (actorUnitDef->unitAIType == TribeAIGroupSiegeWeapon);
 	// Note: catapult trireme, juggernaught, cleopatra are warships (22), not TribeAIGroupSiegeWeapon.
+	bool targetIsWall = (targetUnitDefBase->unitAIType == TribeAIGroupWall);
+	bool targetIsTower = IsTower(targetUnitDefBase);
+	bool targetIsMilitary = IsNonTowerMilitaryUnit(targetUnitDefBase->unitAIType);
 
 	bool applyWeirdRuleOnCatsWith1HPBuilding = true; // True if we want the same (weird) rule as original ROR code on catapults and buildings with HP=1
 	if (applyWeirdRuleOnCatsWith1HPBuilding && isCatapult && (potentialTargetUnit->remainingHitPoints <= 1)) {
 		return true; // Ignore unit. Not sure why there is that check !
 	}
 
-	if (targetUnitDefBase->unitAIType == TribeAIGroupWall) {
-		return true; // Ignore walls
-	}
 
 	// Custom rules
 	bool hasRuleAtUnitLevel = false;
-	AUTO_ATTACK_POLICIES policy = isMelee ? this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits :
-		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits;
+	AutoAttackPolicy *policy = isMelee ? &this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits :
+		&this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits;
 	// If there is a config at unit level, use it instead of global parameter.
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
-	if (unitInfo && (unitInfo->autoAttackPolicy != AAP_NOT_SET)) {
-		policy = unitInfo->autoAttackPolicy;
+	if (unitInfo && unitInfo->autoAttackPolicyIsSet) {
+		policy = &unitInfo->autoAttackPolicy;
 		hasRuleAtUnitLevel = true;
 	}
 
 	bool targetIsVillager = IsVillager_includingShips(targetUnitDefBase->DAT_ID1);
 	bool targetIsNonTowerBuilding = (targetUnitDefBase->unitAIType == TribeAIGroupBuilding) && (!IsTower(targetUnitDefBase->DAT_ID1));
 
-	bool policyTellsToIgnore = (policy == AAP_IGNORE_ALL) ||
-		((policy == AAP_IGNORE_BUILDINGS) && (targetIsNonTowerBuilding)) ||
-		((policy == AAP_IGNORE_VILLAGERS) && (targetIsVillager)) ||
-		((policy == AAP_IGNORE_VILLAGERS_AND_BLDINGS) && (targetIsVillager || targetIsNonTowerBuilding));
+	bool policyTellsToIgnore =
+		(!policy->attackVillagers && targetIsVillager) ||
+		(!policy->attackNonTowerBuildings && targetIsNonTowerBuilding) ||
+		(!policy->attackTowers && targetIsTower) ||
+		(!policy->attackMilitary && targetIsMilitary) ||
+		(!policy->attackWalls && targetIsWall);
 
 	
 	// TO DO: ability to define rules at unit level to overload global setting.

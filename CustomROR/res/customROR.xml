@@ -138,15 +138,17 @@
 	<!-- autoAttackUnits.useCustomRules: enable this to allow use of custom rules (looks like some enhanced "hold position" feature) -->
 	<autoAttackUnits name="useCustomRules" enable="1"/>
 	<!-- autoAttackUnits.unitType=rangedWithBlastDamage or meleeWithBlastDamage.
-	attackPolicy can be set to
-	- "normal" (default: attack all units),
-	- "ignoreAll" (never auto-attack any enemy unit, except to defend itself)
-	- "ignoreVillagers" (never auto-attack villagers, but attack other units),
-	- "ignoreVillagersAndBuildings" (like in neutral diplomacy !)
-	- "ignoreBuildings" (never auto-attack buildings, but attack everything else, including towers)
+	Set 0 (do not auto-attack) or 1 (auto-attack, default value for most categories) to these attributes:
+	- villagers
+	- military (includes all military units except towers)
+	- towers
+	- nontowerbuildings (includes all building units except towers and walls)
+	- walls (default value is 0)
 	-->
-	<autoAttackUnits unitType="rangedWithBlastDamage" attackPolicy="ignoreVillagers" />
-	<autoAttackUnits unitType="meleeWithBlastDamage" attackPolicy="normal" />
+	<autoAttackUnits unitType="rangedWithBlastDamage"
+		villagers="1" military="1" towers="1" nontowerbuildings="1" walls="0"/>
+	<autoAttackUnits unitType="meleeWithBlastDamage"
+		villagers="1" military="1" towers="1" nontowerbuildings="1" walls="0"/>
 	
 	<!-- Shortcut: For each spawn unit for which datid=xx, auto-assign shortcut=x. 
 	If onlyOneUnit is set (<>0), the shortcut is assigned only if still unused (no unit already has this shortcut)

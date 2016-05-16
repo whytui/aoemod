@@ -86,8 +86,8 @@ CustomRORConfig::CustomRORConfig() {
 		this->defaultPerNumbers_DM[i] = -1;
 	}
 	this->useEnhancedRulesForAutoAttackTargetSelection = false; // Game default
-	this->autoAttackOptionForBlastMeleeUnits = AAP_DEFAULT; // Game default
-	this->autoAttackOptionForBlastRangedUnits = AAP_DEFAULT; // Game default
+	//this->autoAttackOptionForBlastMeleeUnits : constructor is Game default
+	//this->autoAttackOptionForBlastRangedUnits ; constructor is Game default
 
 	// Map generation
 	this->randomMapRelicsCount = 5;
@@ -162,23 +162,14 @@ const char * CustomRORConfig::XML_GetAttributeValue(TiXmlElement *elem, const ch
 	return attr;
 }
 
-AUTO_ATTACK_POLICIES CustomRORConfig::GetAutoAttackPolicyFromText(const char *text) {
-	if (strcmp(text, "ignoreAll") == 0) {
-		return AAP_IGNORE_ALL;
-	}
-	if (strcmp(text, "ignoreVillagers") == 0) {
-		return AAP_IGNORE_VILLAGERS;
-	}
-	if (strcmp(text, "ignoreVillagersAndBuildings") == 0) {
-		return AAP_IGNORE_VILLAGERS_AND_BLDINGS;
-	}
-	if (strcmp(text, "ignoreBuildings") == 0) {
-		return AAP_IGNORE_BUILDINGS;
-	}
-	/*if (strcmp(text, "normal") == 0) {
-		return AAP_DEFAULT;
-	}*/
-	return AAP_DEFAULT;
+void CustomRORConfig::SetAutoAttackPolicyFromAttributes(AutoAttackPolicy *aap, TiXmlElement *elem) {
+	if (!aap || !elem) { return; }
+	const char *attr = elem->Attribute("villagers");
+	aap->attackVillagers = (this->XML_GetBoolElement(elem, "villagers"));
+	aap->attackMilitary = (this->XML_GetBoolElement(elem, "military"));
+	aap->attackNonTowerBuildings = (this->XML_GetBoolElement(elem, "nontowerbuildings"));
+	aap->attackTowers = (this->XML_GetBoolElement(elem, "towers"));
+	aap->attackWalls = (this->XML_GetBoolElement(elem, "walls"));
 }
 
 
@@ -592,15 +583,15 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 			}
 
 			std::string unitType = this->XML_GetAttributeValue(elem, "unitType");
+			AutoAttackPolicy *aap = NULL;
 			if (unitType == "rangedWithBlastDamage") {
-				// Parameter to enable the global feature.
-				this->autoAttackOptionForBlastRangedUnits =
-					this->GetAutoAttackPolicyFromText(this->XML_GetAttributeValue(elem, "attackPolicy"));
+				aap = &this->autoAttackOptionForBlastRangedUnits;
 			}
 			if (unitType == "meleeWithBlastDamage") {
-				// Parameter to enable the global feature.
-				this->autoAttackOptionForBlastMeleeUnits =
-					this->GetAutoAttackPolicyFromText(this->XML_GetAttributeValue(elem, "attackPolicy"));
+				aap = &this->autoAttackOptionForBlastMeleeUnits;
+			}
+			if (aap) {
+				this->SetAutoAttackPolicyFromAttributes(aap, elem);
 			}
 		}
 

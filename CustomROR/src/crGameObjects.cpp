@@ -7,7 +7,8 @@ UnitCustomInfo::UnitCustomInfo() {
 	this->spawnUnitMoveToPosX = -1;
 	this->spawnUnitMoveToPosY = -1;
 	this->spawnTargetUnitId = -1;
-	this->autoAttackPolicy = AAP_NOT_SET;
+	this->autoAttackPolicyIsSet = false;
+	//autoAttackPolicy : default constructor will initialize it correctly.
 }
 
 // Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)
@@ -18,7 +19,7 @@ bool UnitCustomInfo::CanBeRemoved() {
 		return false;
 	}
 	// Is auto attack policy set to a custom value ?
-	if (this->autoAttackPolicy != AAP_NOT_SET) {
+	if (!this->autoAttackPolicyIsSet) {
 		return false;
 	}
 	// We checked all values, and none is set to a "useful" value.

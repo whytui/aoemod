@@ -440,7 +440,11 @@ void InGameUnitPropertiesPopup::_ResetPointers() {
 	this->chkForceNotRebuildFarm = NULL;
 	this->chkRebuildFarmNone = NULL;
 	this->lblAutoAttackUnits = NULL;
-	this->chkAutoAttackUnits = NULL;
+	this->chkAutoAttackBuildings = NULL;
+	this->chkAutoAttackMilitary = NULL;
+	this->chkAutoAttackTowers = NULL;
+	this->chkAutoAttackVillagers = NULL;
+	this->chkAutoAttackWalls = NULL;
 }
 
 // Create popup content for unit properties
@@ -595,23 +599,39 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	// Military : guard location ?
 	if (isMilitary) {
 		bool canHurtOtherUnits = (unitDef50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (unitDef50->blastRadius > 0);
-		this->AddLabel(popup, &this->lblAutoAttackUnits, "Auto attack units", 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddCheckBox(popup, &this->chkAutoAttackUnits, 330, 100 - 4, 24, 24);
-		AUTO_ATTACK_POLICIES aap = AAP_NOT_SET;
+		this->AddLabel(popup, &this->lblAutoAttackUnits, "Auto attack units:", 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackTowers, "Towers", 180, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackMilitary, "Military", 250, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackBuildings, "Buildings", 320, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackVillagers, "Villagers", 390, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackWalls, "Walls", 460, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+
+		this->AddCheckBox(popup, &this->chkAutoAttackTowers, 195, 130 - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkAutoAttackMilitary, 265, 130 - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkAutoAttackBuildings, 335, 130 - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkAutoAttackVillagers, 405, 130 - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkAutoAttackWalls, 475, 130 - 4, 24, 24);
+		const AutoAttackPolicy *aap = NULL;
 		if (canHurtOtherUnits) {
 			if (isRangedUnit) {
-				aap = this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits;
+				aap = &this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits;
 			} else {
-				aap = this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits;
+				aap = &this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits;
 			}
 		}
 		// If there is a config at unit level, take it instead of global parameter.
-		if (unitInfo && (unitInfo->autoAttackPolicy != AAP_NOT_SET)) {
-			aap = unitInfo->autoAttackPolicy;
+		if (unitInfo && (unitInfo->autoAttackPolicyIsSet)) {
+			aap = &unitInfo->autoAttackPolicy;
 		}
-		if ((aap == AAP_DEFAULT) || (aap == AAP_NOT_SET)) {
-			AOE_CheckBox_SetChecked(this->chkAutoAttackUnits, true);
+		if (!aap) {
+			// No unit-specific config, and unit does not fit user config (not a blast attack unit)
+			aap = &this->crInfo->configInfo.autoAttackOptionDefaultValues;
 		}
+		AOE_CheckBox_SetChecked(this->chkAutoAttackTowers, aap->attackTowers);
+		AOE_CheckBox_SetChecked(this->chkAutoAttackMilitary, aap->attackMilitary);
+		AOE_CheckBox_SetChecked(this->chkAutoAttackBuildings, aap->attackNonTowerBuildings);
+		AOE_CheckBox_SetChecked(this->chkAutoAttackVillagers, aap->attackVillagers);
+		AOE_CheckBox_SetChecked(this->chkAutoAttackWalls, aap->attackWalls);
 	}
 
 	// Building : future potential techs/units
@@ -646,9 +666,6 @@ bool InGameUnitPropertiesPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTT
 	if (sender == this->chkRebuildFarmNone) {
 		AOE_CheckBox_SetChecked(this->chkForceRebuildFarm, false);
 		AOE_CheckBox_SetChecked(this->chkForceNotRebuildFarm, false);
-	}
-	if (sender == this->chkAutoAttackUnits) {
-		// Uncheck others
 	}
 	return false; // Not one of our buttons; let ROR code be executed normally
 }
@@ -691,16 +708,17 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		fri->villagerUnitId = -1;
 		fri->gameTime = controlledPlayer->ptrGlobalStruct ? controlledPlayer->ptrGlobalStruct->currentGameTime : 0;
 	}
-	if (isMyUnit && this->chkAutoAttackUnits) {
-		bool checked = (bool)this->chkAutoAttackUnits->checked;
+	if (isMyUnit && this->chkAutoAttackMilitary && this->chkAutoAttackBuildings && 
+		this->chkAutoAttackTowers && this->chkAutoAttackVillagers && this->chkAutoAttackWalls) {
 		// Force create info object if not existing
 		unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(this->unitId);
 		assert(unitInfo != NULL); // Was just added if not already existing
-		if (checked) {
-			unitInfo->autoAttackPolicy = AAP_DEFAULT;
-		} else {
-			unitInfo->autoAttackPolicy = AAP_IGNORE_ALL;
-		}
+		unitInfo->autoAttackPolicy.attackTowers = (this->chkAutoAttackTowers->checked != 0);
+		unitInfo->autoAttackPolicy.attackMilitary = (this->chkAutoAttackMilitary->checked != 0);
+		unitInfo->autoAttackPolicy.attackNonTowerBuildings = (this->chkAutoAttackBuildings->checked != 0);
+		unitInfo->autoAttackPolicy.attackVillagers = (this->chkAutoAttackVillagers->checked != 0);
+		unitInfo->autoAttackPolicy.attackWalls = (this->chkAutoAttackWalls->checked != 0);
+		unitInfo->autoAttackPolicyIsSet = true;
 	}
 }
 

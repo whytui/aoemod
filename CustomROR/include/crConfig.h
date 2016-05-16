@@ -125,8 +125,9 @@ public:
 	long int autoRebuildFarms_minWood; // Minimum amount of wood we require before automatically rebuilding a farm.
 	bool useImprovedButtonBar;
 	bool useEnhancedRulesForAutoAttackTargetSelection;
-	AUTO_ATTACK_POLICIES autoAttackOptionForBlastMeleeUnits;
-	AUTO_ATTACK_POLICIES autoAttackOptionForBlastRangedUnits;
+	AutoAttackPolicy autoAttackOptionForBlastMeleeUnits;
+	AutoAttackPolicy autoAttackOptionForBlastRangedUnits;
+	const AutoAttackPolicy autoAttackOptionDefaultValues = AutoAttackPolicy(true, true, true, true, false);
 
 	// Methods
 	// Read CustomROR main configuration XML file
@@ -138,7 +139,7 @@ public:
 	bool XML_GetBoolElement(TiXmlElement *elem, const char *attributeName);
 	// Returns matching attribute value, if found, or empty string if not found.
 	const char * XML_GetAttributeValue(TiXmlElement *elem, const char *attributeName);
-	AUTO_ATTACK_POLICIES GetAutoAttackPolicyFromText(const char *text);
+	void SetAutoAttackPolicyFromAttributes(AutoAttackPolicy *aap, TiXmlElement *elem);
 	// Read civilizations info XML file
 	bool ReadCivXMLConfigFile(char *fileName);
 	CivilizationInfo *GetCivInfo(int civId);
