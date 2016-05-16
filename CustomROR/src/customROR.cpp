@@ -3047,7 +3047,7 @@ void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 
 	// Return here if we don't want custom rules. We will get standard behaviour.
 	// Standard behaviour is: ignore buildings with HP=1 for catapults, ignore walls unless arg1==1 and current target IS a wall too.
-	if (this->crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection) {
+	if (!this->crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection) {
 		return;
 	}
 

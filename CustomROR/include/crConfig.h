@@ -7,6 +7,7 @@
 #include <AOE_SN_numbers.h>
 #include <AOE_empires_dat.h>
 #include "civilizationInfo.h"
+#include "autoAttackPolicy.h"
 
 using namespace std;
 
@@ -27,13 +28,6 @@ public:
 };
 
 
-enum AUTO_ATTACK_POLICIES {
-	AAP_DEFAULT = 1,
-	AAP_IGNORE_VILLAGERS, // auto-attack every unit except villagers (including non-war ships)
-	AAP_IGNORE_BUILDINGS, // auto-attack every unit except non-tower buildings
-	AAP_IGNORE_VILLAGERS_AND_BLDINGS, // auto-attack every unit except villagers, non-tower buildings
-	AAP_IGNORE_ALL // never auto-attack any unit
-};
 
 // This class manages all information read from CustomROR configuration files.
 class CustomRORConfig {

@@ -707,7 +707,10 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURE
 
 					// If the player clicked ON the building itself, cancel auto-move.
 					if ((abs(posInfos.posX - unit->positionX) < 2) && (abs(posInfos.posY - unit->positionY) < 2)) {
-						if (this->crCommand->crInfo->myGameObjects.RemoveUnitCustomInfo(unit->unitInstanceId)) {
+						UnitCustomInfo *u = this->crCommand->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+						if (u) {
+							u->ResetSpawnAutoTargetInfo();
+							this->crCommand->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(unit->unitInstanceId);
 							CallWriteText("Disabled auto-move for new units for selected building");
 						}
 					} else {

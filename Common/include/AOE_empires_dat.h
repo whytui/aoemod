@@ -1244,8 +1244,9 @@ namespace AOE_CONST_FUNC {
 
 	// GetUnitTypeLabel
 
-	// Returns true if a unit is a tower
-	static bool IsTower(unsigned short int dat_id) {
+	// Returns true if a unit is a tower (hardcoded list)
+	// See also IsTower overload in crCommon.h.
+	static bool IsTower(short int dat_id) {
 		return (dat_id == CST_UNITID_WATCH_TOWER) ||
 			(dat_id == CST_UNITID_SENTRY_TOWER) ||
 			(dat_id == CST_UNITID_GUARD_TOWER) ||
@@ -1253,7 +1254,7 @@ namespace AOE_CONST_FUNC {
 	}
 
 	// Returns true if a building can train units (hardcoded list)
-	static bool DoesBuildingTrainUnits(unsigned short int dat_id) {
+	static bool DoesBuildingTrainUnits(short int dat_id) {
 		return (dat_id == CST_UNITID_ACADEMY) ||
 			(dat_id == CST_UNITID_BARRACKS) ||
 			(dat_id == CST_UNITID_DOCK) ||
@@ -1262,6 +1263,31 @@ namespace AOE_CONST_FUNC {
 			(dat_id == CST_UNITID_SIEGE_WORKSHOP) ||
 			(dat_id == CST_UNITID_STABLE) ||
 			(dat_id == CST_UNITID_TEMPLE);
+	}
+
+	// Returns true if unit is a military unit, EXCLUDONG towers. See also IsTower(unitDefId) function.
+	static bool IsNonTowerMilitaryUnit(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES aiType) {
+		switch (aiType) {
+		case TribeAIGroupArcher:
+		case TribeAIGroupChariot:
+		case TribeAIGroupChariotArcher:
+		case TribeAIGroupElephantArcher:
+		case TribeAIGroupElephantRider:
+		case TribeAIGroupFootSoldier:
+		case TribeAIGroupHeavyFootSoldier:
+		case TribeAIGroupHeavyMountedSoldier:
+		case TribeAIGroupHorse:
+		case TribeAIGroupHorseArcher:
+		case TribeAIGroupMountedSoldier:
+		case TribeAIGroupPhalanx:
+		case TribeAIGroupPriest:
+		case TribeAIGroupSiegeWeapon:
+		case TribeAIGroupSlinger:
+		case TribeAIGroupWarBoat:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 

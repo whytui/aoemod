@@ -218,6 +218,10 @@ ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT
 // Please use THIS overload.
 ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit);
 
+// Returns true if unit definition is a tower (using unit type and the fact it has attacks or not)
+// See also IsTower(datid) in AOE_empires_dat.h, which uses a hardcoded list.
+bool IsTower(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef);
+
 // Return NULL if one of the objects is NULL/missing
 ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId);
 

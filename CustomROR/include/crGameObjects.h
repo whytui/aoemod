@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <assert.h>
+#include "autoAttackPolicy.h"
 
 using namespace std;
 
@@ -15,10 +16,15 @@ class UnitCustomInfo {
 public:
 	UnitCustomInfo();
 
-	long int unitId; // the unit custom information are about
+	long int unitId; // the unit custom informations are about
 	float spawnUnitMoveToPosX;
 	float spawnUnitMoveToPosY;
 	long int spawnTargetUnitId;
+	AUTO_ATTACK_POLICIES autoAttackPolicy;
+
+	// Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)
+	bool CanBeRemoved();
+	void ResetSpawnAutoTargetInfo();
 };
 
 
@@ -55,6 +61,9 @@ public:
 	// Remove custom information for a specific unit
 	// Returns true if an element was found (and removed)
 	bool RemoveUnitCustomInfo(long int unitId);
+	// Remove custom information for a specific unit, ONLY if it contains no relevant value (all parameters are not applicable/default)
+	// Returns true if an element was removed
+	bool RemoveUnitCustomInfoIfEmpty(long int unitId);
 
 	// Returns a FarmRebuildInfo pointer to matching element for given position
 	// Returns NULL if not found.

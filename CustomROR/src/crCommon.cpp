@@ -860,6 +860,22 @@ ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT
 }
 
 
+// Returns true if unit definition is a tower (using unit type and the fact it has attacks or not)
+// See also IsTower(datid) in AOE_empires_dat.h, which uses a hardcoded list.
+bool IsTower(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef) {
+	if (!unitDef->DerivesFromType50()) {
+		return false;
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *unitDef50 = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)unitDef;
+	if (!unitDef50->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	// A tower is generally a building with attack, BUT be careful, some towers are defined as living units with speed=0
+	// We try to use the most generic criteria: speed=0 & attack>0.
+	return (unitDef50->speed == 0) && (unitDef50->attacksCount > 0);
+}
+
+
 // Return NULL if one of the objects is NULL/missing
 ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId) {
 	if (!player || !player->IsCheckSumValid() || (researchId < 0)) {
@@ -874,6 +890,7 @@ ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(ROR_STRUCTURES_10C::STRU
 
 
 bool IsMultiplayer() {
+#pragma message("TODO: bugs in IsMultiplayer when running MP and then SP games")
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = (ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *)AOE_OFFSETS_10C::ADDR_VAR_GAME_SETTINGS_STRUCT;
 	if (settings == NULL) { return false; }
 	return (settings->isMultiplayer != 0);

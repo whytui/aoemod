@@ -7,6 +7,28 @@ UnitCustomInfo::UnitCustomInfo() {
 	this->spawnUnitMoveToPosX = -1;
 	this->spawnUnitMoveToPosY = -1;
 	this->spawnTargetUnitId = -1;
+	this->autoAttackPolicy = AAP_NOT_SET;
+}
+
+// Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)
+bool UnitCustomInfo::CanBeRemoved() {
+	if (this->unitId < 0) { return true; } // invalid unit id = can remove
+	// Is the spawn auto target/auto move defined ?
+	if ((this->spawnTargetUnitId >= 0) || (this->spawnUnitMoveToPosX >= 0) || (this->spawnUnitMoveToPosY >= 0)) {
+		return false;
+	}
+	// Is auto attack policy set to a custom value ?
+	if (this->autoAttackPolicy != AAP_NOT_SET) {
+		return false;
+	}
+	// We checked all values, and none is set to a "useful" value.
+	return true;
+}
+
+void UnitCustomInfo::ResetSpawnAutoTargetInfo() {
+	this->spawnUnitMoveToPosX = -1;
+	this->spawnUnitMoveToPosY = -1;
+	this->spawnTargetUnitId = -1;
 }
 
 
@@ -95,6 +117,17 @@ bool CrGameObjects::RemoveUnitCustomInfo(long int unitId) {
 	bool found = (it != this->unitCustomInfoList.end());
 	this->unitCustomInfoList.erase(it, this->unitCustomInfoList.end());
 	return found;
+}
+
+// Remove custom information for a specific unit, ONLY if it contains no relevant value (all parameters are not applicable/default)
+// Returns true if an element was removed
+bool CrGameObjects::RemoveUnitCustomInfoIfEmpty(long int unitId) {
+	UnitCustomInfo *u = this->FindUnitCustomInfo(unitId);
+	if (!u) { return false; }
+	if (u->CanBeRemoved()) {
+		return this->RemoveUnitCustomInfo(unitId);
+	}
+	return false;
 }
 
 

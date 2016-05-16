@@ -2559,8 +2559,9 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 				}
 			}
 		} else {
-			if (parentInfo) { // double-check ;)
-				this->crInfo->myGameObjects.RemoveUnitCustomInfo(parentInfo->spawnTargetUnitId);
+			if (parentInfo) { // double-check ;)  Here target no longer exists: remove auto-target
+				parentInfo->ResetSpawnAutoTargetInfo();
+				this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(parentInfo->spawnTargetUnitId);
 			}
 		}
 	}
@@ -4939,8 +4940,16 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(ROR_STRUCTURES_10C::STRU
 	}
 
 	// Custom rules
+	bool hasRuleAtUnitLevel = false;
 	AUTO_ATTACK_POLICIES policy = isMelee ? this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits :
 		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits;
+	// If there is a config at unit level, use it instead of global parameter.
+	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+	if (unitInfo && (unitInfo->autoAttackPolicy != AAP_NOT_SET)) {
+		policy = unitInfo->autoAttackPolicy;
+		hasRuleAtUnitLevel = true;
+	}
+
 	bool targetIsVillager = IsVillager_includingShips(targetUnitDefBase->DAT_ID1);
 	bool targetIsNonTowerBuilding = (targetUnitDefBase->unitAIType == TribeAIGroupBuilding) && (!IsTower(targetUnitDefBase->DAT_ID1));
 
@@ -4952,7 +4961,7 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(ROR_STRUCTURES_10C::STRU
 	
 	// TO DO: ability to define rules at unit level to overload global setting.
 
-	if (canHurtOtherUnits && policyTellsToIgnore) {
+	if ((canHurtOtherUnits || hasRuleAtUnitLevel) && policyTellsToIgnore) {
 		return true;
 	}
 

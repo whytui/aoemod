@@ -439,6 +439,8 @@ void InGameUnitPropertiesPopup::_ResetPointers() {
 	this->chkForceRebuildFarm = NULL;
 	this->chkForceNotRebuildFarm = NULL;
 	this->chkRebuildFarmNone = NULL;
+	this->lblAutoAttackUnits = NULL;
+	this->chkAutoAttackUnits = NULL;
 }
 
 // Create popup content for unit properties
@@ -457,6 +459,10 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	}
 	this->unitId = unitId; // Store it once we checked it is valid.
 	bool isMyUnit = (controlledPlayer == unitPlayer);
+	bool isTower = IsTower(unitDefBase);
+	bool isMilitary = isTower || IsNonTowerMilitaryUnit(unitDefBase->unitAIType);
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *unitDef50 = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)unitDefBase;
+	bool isRangedUnit = (unitDef50->IsCheckSumValidForAUnitClass() && (unitDef50->maxRange > 0));
 
 	const long int btnSize = 0xAC;
 	const long int lblTitleHSize = 160;
@@ -495,7 +501,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	// Automove infos
 	std::string autoMoveInfo = "";
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unitId);
-	if (unitInfo) {
+	if (unitInfo && (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 		if (unitInfo->spawnTargetUnitId >= 0) {
 			ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *targetUnitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(unitInfo->spawnTargetUnitId);
 			char *targetName = NULL;
@@ -510,7 +516,8 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 				autoMoveInfo += targetName;
 				autoMoveInfo += ")";
 			}
-		} else {
+		}
+		if ((unitInfo->spawnUnitMoveToPosX >= 0) && (unitInfo->spawnUnitMoveToPosY >= 0)) {
 			char buf[10];
 			autoMoveInfo += "[Building] Child units auto-move to (";
 			sprintf_s(buf, "%.2f", unitInfo->spawnUnitMoveToPosX);
@@ -586,7 +593,26 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 
 #pragma message("TODO more features in unit popup")
 	// Military : guard location ?
-	// Military : do not attack villagers ? (&buildings?)
+	if (isMilitary) {
+		bool canHurtOtherUnits = (unitDef50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (unitDef50->blastRadius > 0);
+		this->AddLabel(popup, &this->lblAutoAttackUnits, "Auto attack units", 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(popup, &this->chkAutoAttackUnits, 330, 100 - 4, 24, 24);
+		AUTO_ATTACK_POLICIES aap = AAP_NOT_SET;
+		if (canHurtOtherUnits) {
+			if (isRangedUnit) {
+				aap = this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits;
+			} else {
+				aap = this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits;
+			}
+		}
+		// If there is a config at unit level, take it instead of global parameter.
+		if (unitInfo && (unitInfo->autoAttackPolicy != AAP_NOT_SET)) {
+			aap = unitInfo->autoAttackPolicy;
+		}
+		if ((aap == AAP_DEFAULT) || (aap == AAP_NOT_SET)) {
+			AOE_CheckBox_SetChecked(this->chkAutoAttackUnits, true);
+		}
+	}
 
 	// Building : future potential techs/units
 	if (!buildingTechAndUnitInfo.empty() && (techToShowCount > 0)) {
@@ -599,7 +625,11 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool InGameUnitPropertiesPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnResetAutoMove) {
-		this->crInfo->myGameObjects.RemoveUnitCustomInfo(this->unitId);
+		UnitCustomInfo *u = this->crInfo->myGameObjects.FindUnitCustomInfo(this->unitId);
+		if (u) {
+			u->ResetSpawnAutoTargetInfo();
+			this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(this->unitId);
+		}
 		// Auto-move has been reset, hide label and button.
 		AOE_ShowUIObject(this->btnResetAutoMove, false);
 		AOE_ShowUIObject(this->lblChildUnitsAutoMove, false);
@@ -617,6 +647,9 @@ bool InGameUnitPropertiesPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTT
 		AOE_CheckBox_SetChecked(this->chkForceRebuildFarm, false);
 		AOE_CheckBox_SetChecked(this->chkForceNotRebuildFarm, false);
 	}
+	if (sender == this->chkAutoAttackUnits) {
+		// Uncheck others
+	}
 	return false; // Not one of our buttons; let ROR code be executed normally
 }
 
@@ -631,6 +664,7 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	}
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
 	bool isMyUnit = (controlledPlayer == unitPlayer);
+	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(this->unitId);
 
 	float posX = -1;
 	float posY = -1;
@@ -656,6 +690,17 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		fri->playerId = controlledPlayer->playerId;
 		fri->villagerUnitId = -1;
 		fri->gameTime = controlledPlayer->ptrGlobalStruct ? controlledPlayer->ptrGlobalStruct->currentGameTime : 0;
+	}
+	if (isMyUnit && this->chkAutoAttackUnits) {
+		bool checked = (bool)this->chkAutoAttackUnits->checked;
+		// Force create info object if not existing
+		unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(this->unitId);
+		assert(unitInfo != NULL); // Was just added if not already existing
+		if (checked) {
+			unitInfo->autoAttackPolicy = AAP_DEFAULT;
+		} else {
+			unitInfo->autoAttackPolicy = AAP_IGNORE_ALL;
+		}
 	}
 }
 
