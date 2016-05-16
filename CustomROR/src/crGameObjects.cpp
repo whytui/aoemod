@@ -41,7 +41,7 @@ void CrGameObjects::FreeAllUnitCustomInfoList() {
 	std::for_each(this->unitCustomInfoList.begin(), this->unitCustomInfoList.end(),
 		[](UnitCustomInfo *i) { delete i; }
 	);
-	this->farmRebuildInfoList.clear();
+	this->unitCustomInfoList.clear();
 }
 
 void CrGameObjects::FreeAllFarmRebuildInfoList() {
