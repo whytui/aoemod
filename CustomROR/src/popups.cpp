@@ -708,7 +708,8 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		fri->villagerUnitId = -1;
 		fri->gameTime = controlledPlayer->ptrGlobalStruct ? controlledPlayer->ptrGlobalStruct->currentGameTime : 0;
 	}
-	if (isMyUnit && this->chkAutoAttackMilitary && this->chkAutoAttackBuildings && 
+	bool updateAutoAttackInfo = false;
+	if (isMyUnit && this->chkAutoAttackMilitary && this->chkAutoAttackBuildings &&
 		this->chkAutoAttackTowers && this->chkAutoAttackVillagers && this->chkAutoAttackWalls) {
 		// Force create info object if not existing
 		unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(this->unitId);
@@ -719,6 +720,11 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		unitInfo->autoAttackPolicy.attackVillagers = (this->chkAutoAttackVillagers->checked != 0);
 		unitInfo->autoAttackPolicy.attackWalls = (this->chkAutoAttackWalls->checked != 0);
 		unitInfo->autoAttackPolicyIsSet = true;
+		updateAutoAttackInfo = true;
+	}
+	// Apply changes on all selected units
+	if (updateAutoAttackInfo && isMyUnit && unitInfo && unitInfo->autoAttackPolicyIsSet) {
+		this->crInfo->ApplyAutoAttackPolicyToPlayerSelectedUnits(controlledPlayer, unitInfo->autoAttackPolicy);
 	}
 }
 

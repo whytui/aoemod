@@ -4948,17 +4948,20 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 	}
 
 	// Custom buttons
+	bool updateAutoAttackInfo = false;
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS) {
 		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackVillagers = false;
 		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
+		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS) {
 		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
 		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
+		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK) {
 		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
@@ -4968,6 +4971,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 		unitInfo->autoAttackPolicy.attackVillagers = false;
 		unitInfo->autoAttackPolicy.attackTowers = false;
 		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
+		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK) {
 		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
@@ -4975,6 +4979,14 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 		unitInfo->autoAttackPolicy.SetDefaultValues();
 		this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
 		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
+		updateAutoAttackInfo = true;
+	}
+	// Apply changes on ALL compatible selected units
+	if (updateAutoAttackInfo) {
+		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
+		assert(unitInfo != NULL); // Was just added
+		if (!unitInfo) { return false; } // this is an error case
+		this->crInfo->ApplyAutoAttackPolicyToPlayerSelectedUnits(player, unitInfo->autoAttackPolicy);
 	}
 
 	return false;

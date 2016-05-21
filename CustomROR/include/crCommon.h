@@ -115,6 +115,9 @@ public:
 	// Resets and fills the list of researchID to disable for a player from a comma-separated list.
 	void FillResearchesToDisableFromString(long int playerId, const char *text);
 
+	// Applies an "auto-attack policy" on all player's selected units (only for owned units !)
+	void ApplyAutoAttackPolicyToPlayerSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const AutoAttackPolicy &autoAttackPolicy);
+
 	// Returns true if a custom game popup is opened (only for popups, not dialogs !)
 	bool HasOpenedCustomGamePopup();
 	// Returns true if a custom dialog is opened (only for dialogs, not popups !)
@@ -166,6 +169,7 @@ public:
 
 	// Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
 	ROR_STRUCTURES_10C::STRUCT_UNIT **GetRelevantSelectedUnitsPointer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **GetRelevantSelectedUnitsBasePointer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 	// Fast-computes the integer distance for X and Y delta values (sqrt(X^2 + Y^2) as an integer).
 	// Returns -1 if invalid (diffX and diffY values are capped at CST_INT_DISTANCE_VALUES_MAX_COORDINATE)

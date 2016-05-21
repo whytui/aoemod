@@ -142,6 +142,24 @@ void CustomRORInfo::FillResearchesToDisableFromString(long int playerId, const c
 	this->FillIDVectorFromString(this->researchesToDisable[playerId], playerId, text);
 }
 
+// Applies an "auto-attack policy" on all player's selected units (only for owned units !)
+void CustomRORInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const AutoAttackPolicy &autoAttackPolicy) {
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **selectedUnits = this->GetRelevantSelectedUnitsBasePointer(player);
+	assert(selectedUnits != NULL);
+	for (int i = 0; i < player->selectedUnitCount; i++) {
+		if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() &&
+			(selectedUnits[i]->ptrStructPlayer == player)) { // Make sure selected unit is mine !
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *currentUnitDefBase = selectedUnits[i]->GetUnitDefinition();
+			if (IsTower(currentUnitDefBase->DAT_ID1) || IsNonTowerMilitaryUnit(currentUnitDefBase->unitAIType)) {
+				UnitCustomInfo *currentUnitInfo = this->myGameObjects.FindOrAddUnitCustomInfo(selectedUnits[i]->unitInstanceId);
+				currentUnitInfo->autoAttackPolicyIsSet = true;
+				currentUnitInfo->autoAttackPolicy = autoAttackPolicy; // Copy all config from supplied policy
+			}
+		}
+	}
+}
+
+
 // Returns true if a CUSTOM game popup is opened (only for popups, not dialogs !)
 bool CustomRORInfo::HasOpenedCustomGamePopup() {
 	return (this->customGamePopupButtonVar != NULL);
@@ -336,6 +354,9 @@ ROR_STRUCTURES_10C::STRUCT_UNIT **CustomRORInfo::GetRelevantSelectedUnitsPointer
 	}
 	assert(selectedUnits != NULL);
 	return selectedUnits;
+}
+ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **CustomRORInfo::GetRelevantSelectedUnitsBasePointer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+	return (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **)this->GetRelevantSelectedUnitsPointer(player);
 }
 
 

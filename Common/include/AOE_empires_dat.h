@@ -1265,7 +1265,7 @@ namespace AOE_CONST_FUNC {
 			(dat_id == CST_UNITID_TEMPLE);
 	}
 
-	// Returns true if unit is a military unit, EXCLUDONG towers. See also IsTower(unitDefId) function.
+	// Returns true if unit is a military unit, EXCLUDING towers. See also IsTower(unitDefId) function.
 	static bool IsNonTowerMilitaryUnit(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES aiType) {
 		switch (aiType) {
 		case TribeAIGroupArcher:
