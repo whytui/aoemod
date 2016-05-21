@@ -141,7 +141,7 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_ANY_UI; // parent class
 	class STRUCT_UI_LIST_ITEM;
 	class STRUCT_UI_BUTTON;
-	class STRUCT_UI_SLP_BUTTON;
+	class STRUCT_UI_BUTTON_WITH_NUMBER;
 	class STRUCT_UI_TEXTBOX;
 	class STRUCT_UI_LISTBOX;
 	class STRUCT_UI_COMBOBOX;
@@ -4296,7 +4296,7 @@ namespace ROR_STRUCTURES_10C
 	// Size 0x2B8. Also for checkboxes.
 	// Can be created in 0x0456240
 #define CHECKSUM_UI_BUTTON 0x00544E30
-#define CHECKSUM_UI_SLP_BUTTON 0x00549CAC
+#define CHECKSUM_UI_BUTTON_WITH_NUMBER 0x00549CAC
 	class STRUCT_UI_BUTTON : public STRUCT_ANY_UI {
 	public: // 30 4E 54 00 (a child class is AC 9C 54 00(size=0x3D4), rarely used. 16 are created in game screen=unit-commands)
 		long int commandIDs[9]; // +F4. Only index 0 is really used ?? Various types (enums) (GAME_SCREEN_BUTTON_IDS, INGAME_UI_COMMAND_ID, etc)
@@ -4338,17 +4338,17 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsChecked() { return this->checked != 0; }
 		bool IsCheckSumValid() {
-			return (this->checksum == CHECKSUM_UI_SLP_BUTTON) || (this->checksum == CHECKSUM_UI_BUTTON);
+			return (this->checksum == CHECKSUM_UI_BUTTON_WITH_NUMBER) || (this->checksum == CHECKSUM_UI_BUTTON);
 		}
 	};
 	static_assert(sizeof(STRUCT_UI_BUTTON) == 0x2B8, "STRUCT_UI_BUTTON size");
 
 	// Size 0x3D4. Constructor=0x4F7420
-	class STRUCT_UI_SLP_BUTTON : public STRUCT_UI_BUTTON {
+	class STRUCT_UI_BUTTON_WITH_NUMBER : public STRUCT_UI_BUTTON {
 	public:
 		// Starts at +2B8
-		unsigned long int unknown_2B8;
-		unsigned long int unknown_2BC;
+		long int showNumber; // +2B8. If true, numberToDisplay will be displayed. Set in 0x4F72B0. Call refresh after changing it.
+		long int numberToDisplay; // +2BC. The number to show on button icon, like queued item count. Call refresh after changing it.
 		// 0x2C0
 		char unknown_2C0; // Values 0, 3 .. ?
 		char unknown_2C1[3];
@@ -4358,10 +4358,10 @@ namespace ROR_STRUCTURES_10C
 		char contextHelpText[0x100]; // +2D0.
 		long int unknown_3D0; // see 483785
 		bool IsCheckSumValid() {
-			return (this->checksum == CHECKSUM_UI_SLP_BUTTON);
+			return (this->checksum == CHECKSUM_UI_BUTTON_WITH_NUMBER);
 		}
 	};
-	static_assert(sizeof(STRUCT_UI_SLP_BUTTON) == 0x3D4, "STRUCT_UI_SLP_BUTTON size");
+	static_assert(sizeof(STRUCT_UI_BUTTON_WITH_NUMBER) == 0x3D4, "STRUCT_UI_SLP_BUTTON size");
 
 
 	// Size ?
@@ -4833,12 +4833,12 @@ namespace ROR_STRUCTURES_10C
 		// 0x4C0
 		unsigned long int unknown_4C0;
 		unsigned long int unknown_4C4;
-		STRUCT_UI_SLP_BUTTON *unitCommandButtons[12]; // +4C8. 2 rows of 6 slpButtons for command buttons in bottom center zone.
-		STRUCT_UI_SLP_BUTTON *btnChat; // +4F8. Also referred as commandButtons[0xC]. Not visible in SP games.
-		STRUCT_UI_SLP_BUTTON *btnDiplomacy; // +4FC. Also referred as commandButtons[0xD]
-		STRUCT_UI_SLP_BUTTON *btnMenu; // +500. Also referred as commandButtons[0xE]
-		STRUCT_UI_SLP_BUTTON *btnHelp; // +504. Also referred as commandButtons[0xF]
-		STRUCT_UI_SLP_BUTTON *btnShowScores; // +508. Also referred as commandButtons[0x10]
+		STRUCT_UI_BUTTON_WITH_NUMBER *unitCommandButtons[12]; // +4C8. 2 rows of 6 slpButtons for command buttons in bottom center zone.
+		STRUCT_UI_BUTTON_WITH_NUMBER *btnChat; // +4F8. Also referred as commandButtons[0xC]. Not visible in SP games.
+		STRUCT_UI_BUTTON_WITH_NUMBER *btnDiplomacy; // +4FC. Also referred as commandButtons[0xD]
+		STRUCT_UI_BUTTON_WITH_NUMBER *btnMenu; // +500. Also referred as commandButtons[0xE]
+		STRUCT_UI_BUTTON_WITH_NUMBER *btnHelp; // +504. Also referred as commandButtons[0xF]
+		STRUCT_UI_BUTTON_WITH_NUMBER *btnShowScores; // +508. Also referred as commandButtons[0x10]
 		char unknown_50C[0x518 - 0x50C];
 		STRUCT_ANY_UI *unknown_518[10]; // cf 47F753
 		STRUCT_UI_F11_POP_PANEL *populationInfoPanel; // 0x540. F11 "pop : x/y" zone ?

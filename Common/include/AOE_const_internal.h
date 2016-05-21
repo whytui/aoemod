@@ -142,7 +142,13 @@ namespace AOE_CONST_INTERNAL
 		CST_IUC_ATTACK = 0x1E,
 		CST_IUC_REPAIR = 0x1F,
 		CST_IUC_ADD_TO_QUEUE = 0x20,
-		CST_IUC_DROP_FROM_QUEUE = 0x21
+		CST_IUC_DROP_FROM_QUEUE = 0x21,
+		// From here: custom IDs (not supported in standard code)
+		CST_IUC_CROR_DONT_ATTACK_VILLAGERS = 100, // Do not auto-attack villagers
+		CST_IUC_CROR_DONT_ATTACK_BUILDINGS, // Do not auto-attack non-tower buildings
+		CST_IUC_CROR_NO_AUTO_ATTACK, // Do not auto-attack any unit
+		CST_IUC_CROR_RESET_AUTO_ATTACK // Restore auto-attack behaviour
+
 	};
 
 	enum GAME_EVENT_SOUNDS : long int {

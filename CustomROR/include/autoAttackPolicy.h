@@ -27,4 +27,13 @@ public:
 		attackVillagers = true;
 		attackWalls = false;
 	}
+
+	// Returns true if other AutoAttackPolicy has the same settings
+	bool Equals(const AutoAttackPolicy &other) const {
+		return (other.attackMilitary == this->attackMilitary) &&
+			(other.attackNonTowerBuildings == this->attackNonTowerBuildings) &&
+			(other.attackTowers == this->attackTowers) &&
+			(other.attackVillagers == this->attackVillagers) &&
+			(other.attackWalls == this->attackWalls);
+	}
 };

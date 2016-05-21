@@ -2532,6 +2532,14 @@ long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UIC
 	case AOE_CONST_INTERNAL::CST_IUC_DO_TRAIN:
 	case AOE_CONST_INTERNAL::CST_IUC_DO_BUILD:
 		// Those ones do not have a specific icon id, it depends on unit/research...
+	case AOE_CONST_INTERNAL::CST_IUC_CROR_DONT_ATTACK_VILLAGERS:
+		return 9; // Temporary (empty)
+	case AOE_CONST_INTERNAL::CST_IUC_CROR_DONT_ATTACK_BUILDINGS:
+		return 9; // Temporary (empty)
+	case AOE_CONST_INTERNAL::CST_IUC_CROR_NO_AUTO_ATTACK:
+		return 9; // Temporary (empty)
+	case AOE_CONST_INTERNAL::CST_IUC_CROR_RESET_AUTO_ATTACK:
+		return 9; // Temporary (empty)
 	default:
 		break;
 	}

@@ -25,6 +25,10 @@
 #define CRCMD_TEXT_BUFFER_SIZE 256
 #define CST_FIRE_GALLEY_ORIGINAL_BUTTONID 5
 #define CST_FIRE_GALLEY_CUSTOM_BUTTONID 9
+#define CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS 6
+#define CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS 7
+#define CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED 8
+#define CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT 9
 
 
 // TEMPORARY
@@ -315,6 +319,9 @@ public:
 	// Returns false by default (most cases) !
 	bool OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue);
+
+	// Refresh status for custom auto-attack policy buttons
+	void RefreshCustomAutoAttackButtons(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI, const AutoAttackPolicy *attackPolicy);
 
 	// Custom treatment to decide if a potential target unit should be ignored
 	// Overload standard rules for catapults(ignores building if HP=1) and "target=wall" cases.

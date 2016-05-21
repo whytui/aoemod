@@ -4525,8 +4525,20 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	if (!isLiving && !isBuilding) {
 		return;
 	}
-	// A bigger restriction for now ! Nothing implemented yet for this case.
-	if (isLiving) { return; }
+	// For living units
+	if (isLiving) {
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)unitDef;
+		if ((unitDefLiving->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDefLiving->blastRadius > 0)) {
+			UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically");
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false, "Click to prevent unit from attacking buildings automatically");
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, "Click to prevent unit from attacking other units automatically");
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false, "Click to restore normal auto-attack behaviour");
+			const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &this->crInfo->configInfo.autoAttackOptionDefaultValues;
+			this->RefreshCustomAutoAttackButtons(gameMainUI, aap);
+		}
+		return;
+	}
 	
 	bool buttonIsVisible[12]; // Is button visible after standard buttons display.
 	bool currentButtonDoesNotBelongToThisPage[12];
@@ -4626,7 +4638,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	}
 
 
-	// Add custom buttons
+	// Add custom buttons : not-yet available units/techs
 
 	// RESEARCHES
 	ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *playerResInfo = player->ptrResearchesStruct;
@@ -4773,7 +4785,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	// Force text refresh on ROR-added buttons on page 2+ (not well supported natively, no text is displayed)
 	if (minButtonId > 0) {
 		for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
-			ROR_STRUCTURES_10C::STRUCT_UI_SLP_BUTTON *sb = gameMainUI->unitCommandButtons[buttonIndex];
+			ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
 			if (buttonIsVisible[buttonIndex]) {
 				long int correctButtonInfoValue = sb->buttonInfoValue[0];
 				long int correctButtonCmdId = sb->commandIDs[0];
@@ -4795,7 +4807,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 			GetLanguageDllText(bestElemLangNameId[buttonIndex], nameBuffer, sizeof(nameBuffer), "");
 			if (bestElemIsResearch[buttonIndex]) {
 				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/);
-				ROR_STRUCTURES_10C::STRUCT_UI_SLP_BUTTON *sb = gameMainUI->unitCommandButtons[buttonIndex];
+				ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
 				sb->unknown_2C4;
 				sb->helpDllId = sb->helpDllId;
 				sb->winHelpDataDllId;
@@ -4806,7 +4818,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		}
 	}
 
-	// If top-right button is free, show current action
+	// Add custom buttons : if top-right button is free, show current action
 	const int buttonIdForInProgress = 5;
 	if ((currentActionDATID != -1) && !IsInGameUnitCommandButtonVisible(buttonIdForInProgress)) {
 		GetLanguageDllText(currentActionLangNameId, nameBuffer, sizeof(nameBuffer), "");
@@ -4843,6 +4855,34 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		// We store the information "this is not last page" in button's infoValue.
 		gameMainUI->unitCommandButtons[5]->buttonInfoValue[0] = hasNextPage;
 	}
+}
+
+
+// Refresh status for custom auto-attack policy buttons
+void CustomRORCommand::RefreshCustomAutoAttackButtons(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
+	const AutoAttackPolicy *attackPolicy) {
+	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
+		return;
+	}
+	if (!attackPolicy) {
+		attackPolicy = &this->crInfo->configInfo.autoAttackOptionDefaultValues;
+	}
+	int value = attackPolicy->attackVillagers ? 0 : 1;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]->showNumber = value;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]->numberToDisplay = value;
+	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]);
+	value = attackPolicy->attackNonTowerBuildings ? 0 : 1;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS]->showNumber = value;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS]->numberToDisplay = value;
+	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS]);
+	value = (!attackPolicy->attackMilitary && !attackPolicy->attackNonTowerBuildings && !attackPolicy->attackTowers && !attackPolicy->attackVillagers);
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]->showNumber = value;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]->numberToDisplay = value;
+	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]);
+	value = (attackPolicy->Equals(this->crInfo->configInfo.autoAttackOptionDefaultValues)) ? 1 : 0;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]->showNumber = value;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]->numberToDisplay = value;
+	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]);
 }
 
 
@@ -4905,6 +4945,36 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 			CALL addrShowUnitCommands;
 		}
 		return true; // Do not execute normal code for NEXT PAGE
+	}
+
+	// Custom buttons
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS) {
+		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		unitInfo->autoAttackPolicyIsSet = true;
+		unitInfo->autoAttackPolicy.attackVillagers = false;
+		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
+	}
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS) {
+		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		unitInfo->autoAttackPolicyIsSet = true;
+		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
+		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
+	}
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK) {
+		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		unitInfo->autoAttackPolicyIsSet = true;
+		unitInfo->autoAttackPolicy.attackMilitary = false;
+		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
+		unitInfo->autoAttackPolicy.attackVillagers = false;
+		unitInfo->autoAttackPolicy.attackTowers = false;
+		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
+	}
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK) {
+		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		unitInfo->autoAttackPolicyIsSet = false;
+		unitInfo->autoAttackPolicy.SetDefaultValues();
+		this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
+		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
 	}
 
 	return false;
