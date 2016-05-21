@@ -682,7 +682,6 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
 	bool isMyUnit = (controlledPlayer == unitPlayer);
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(this->unitId);
-	AutoAttackPolicy flagsToApply = { true, true, true, true, true }; // All flags are relevant in popup.
 	float posX = -1;
 	float posY = -1;
 	if (unit && unit->IsCheckSumValid()) {
@@ -692,23 +691,25 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	if (isMyUnit && this->chkRebuildFarmNone && this->chkRebuildFarmNone->checked) {
 		this->crInfo->myGameObjects.RemoveFarmRebuildInfo(posX, posY);
 	}
-	if (isMyUnit && this->chkForceNotRebuildFarm && this->chkForceNotRebuildFarm->checked) {
-		FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(posX, posY);
-		fri->forceNotRebuild = true;
-		fri->forceRebuild = false;
-		fri->playerId = controlledPlayer->playerId;
-		fri->villagerUnitId = -1;
-		fri->gameTime = controlledPlayer->ptrGlobalStruct ? controlledPlayer->ptrGlobalStruct->currentGameTime : 0;
+	if (isMyUnit && this->chkForceNotRebuildFarm && this->chkForceRebuildFarm &&
+		(this->chkForceNotRebuildFarm->checked || this->chkForceRebuildFarm->checked)) {
+		bool actionIsRebuild = (this->chkForceRebuildFarm->checked != 0); // If false, then it is force NOT rebuild.
+		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **selectedUnits = this->crInfo->GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+		for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
+			if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() &&
+				(selectedUnits[i]->ptrStructPlayer == controlledPlayer)) {
+				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *curUnitDefBase = selectedUnits[i]->GetUnitDefinition();
+				if (curUnitDefBase && curUnitDefBase->IsCheckSumValidForAUnitClass() && (curUnitDefBase->DAT_ID1 == CST_UNITID_FARM)) {
+					FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(selectedUnits[i]->positionX, selectedUnits[i]->positionY);
+					fri->forceNotRebuild = !actionIsRebuild;
+					fri->forceRebuild = actionIsRebuild;
+					fri->playerId = controlledPlayer->playerId;
+					fri->villagerUnitId = -1;
+					fri->gameTime = controlledPlayer->ptrGlobalStruct ? controlledPlayer->ptrGlobalStruct->currentGameTime : 0;
+				}
+			}
+		}
 	}
-	if (isMyUnit && this->chkForceRebuildFarm && this->chkForceRebuildFarm->checked) {
-		FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(posX, posY);
-		fri->forceNotRebuild = false;
-		fri->forceRebuild = true;
-		fri->playerId = controlledPlayer->playerId;
-		fri->villagerUnitId = -1;
-		fri->gameTime = controlledPlayer->ptrGlobalStruct ? controlledPlayer->ptrGlobalStruct->currentGameTime : 0;
-	}
-	bool updateAutoAttackInfo = false;
 	if (isMyUnit && this->chkAutoAttackMilitary && this->chkAutoAttackBuildings &&
 		this->chkAutoAttackTowers && this->chkAutoAttackVillagers && this->chkAutoAttackWalls) {
 		// Force create info object if not existing
@@ -720,10 +721,8 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		unitInfo->autoAttackPolicy.attackVillagers = (this->chkAutoAttackVillagers->checked != 0);
 		unitInfo->autoAttackPolicy.attackWalls = (this->chkAutoAttackWalls->checked != 0);
 		unitInfo->autoAttackPolicyIsSet = true;
-		updateAutoAttackInfo = true;
-	}
-	// Apply changes on all selected units
-	if (updateAutoAttackInfo && isMyUnit && unitInfo && unitInfo->autoAttackPolicyIsSet) {
+		// Apply changes on all selected units
+		AutoAttackPolicy flagsToApply = { true, true, true, true, true }; // All flags are relevant in popup.
 		this->crInfo->ApplyAutoAttackPolicyToPlayerSelectedUnits(controlledPlayer, unitInfo->autoAttackPolicy, flagsToApply);
 	}
 }
