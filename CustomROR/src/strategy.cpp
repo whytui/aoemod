@@ -816,3 +816,77 @@ ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetCustomRorMaxPopulationBeginStrat
 	return NULL;
 }
 
+// Dumps strategy to text format, for debugging.
+std::string ExportStrategyToText(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
+	std::string result = "";
+	if (!buildAI || !buildAI->IsCheckSumValid()) {
+		return NULL;
+	}
+	const char *newline = "\r\n"; // \r is required to display correctly in ROR editable text components
+	char buffer[200];
+	result = "Strategy for ";
+	result += buildAI->commonAIObject.playerName;
+	result += " (#";
+	result += std::to_string(buildAI->commonAIObject.playerId);
+	result += ") : ";
+	result += buildAI->strategyFileName;
+	result += newline;
+	result += "Counter Ctgry DAT_ID Name                           Actor Unitid InProgress Alive Attempts #created Retrains"
+#ifdef _DEBUG
+	" ptr"
+#endif
+		;
+	result += newline;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &buildAI->fakeFirstStrategyElement;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstElem->next;
+	while (currentStratElem && (currentStratElem != fakeFirstElem)) {
+		char category = ' ';
+		switch (currentStratElem->elementType) {
+		case TAIUnitClass::AIUCBuilding:
+			if (currentStratElem->retrains > 0) {
+				category = 'A';
+			} else {
+				category = 'B';
+			}
+			break;
+		case TAIUnitClass::AIUCTech:
+			category = 'R';
+			break;
+		case TAIUnitClass::AIUCCritical:
+			category = 'C';
+			break;
+		case TAIUnitClass::AIUCLivingUnit:
+			if (currentStratElem->retrains > 0) {
+				category = 'T';
+			} else {
+				category = 'U';
+			}
+			break;
+		case TAIUnitClass::AIUCEnableAttack:
+			category = 'E';
+			break;
+		case TAIUnitClass::AIUCLoadNewStrategy:
+			category = 'L';
+			break;
+		case TAIUnitClass::AIUCStrategyCmd:
+			category = 'G';
+			break;
+		default:
+			break;
+		}
+		sprintf_s(buffer, "%03ld     %1c     %-3ld    %-30s %-3ld   %-6ld %-2ld         %-2ld    %-4ld     %-4ld     %-3ld"
+#ifdef _DEBUG
+			"      0x%08lX"
+#endif
+			"%s",
+			currentStratElem->counter, category, currentStratElem->unitDAT_ID,
+			currentStratElem->unitName, currentStratElem->actor, currentStratElem->unitInstanceId, currentStratElem->inProgressCount,
+			currentStratElem->aliveCount, currentStratElem->buildAttempts, currentStratElem->totalCount, currentStratElem->retrains, (long int)currentStratElem,
+			newline
+			);
+		result += buffer;
+		currentStratElem = currentStratElem->next;
+	}
+	return result;
+}
+

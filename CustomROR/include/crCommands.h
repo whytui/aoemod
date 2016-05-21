@@ -346,7 +346,7 @@ public:
 	// Opens a custom dialog message (based on CloseProgramDialog)
 	// Return true if OK, false if failed
 	// Fails if another custom dialog is already open
-	bool OpenCustomDialogMessage(char *dialogText, long int hSize, long int vSize);
+	bool OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize);
 
 	// Closes currently opened custom dialog message.
 	// Returns -1 if an error occurred, including "no custom dialog is opened".

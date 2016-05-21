@@ -309,6 +309,23 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		}
 	}
 
+	if (!_strnicmp(command, "strat", 5)) {
+		command += 5;
+		int playerId = atoi(command);
+		if ((playerId == 0) && (*command != '0')) { playerId = -1; }
+		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		if (global && global->IsCheckSumValid() && (playerId > 0) && (playerId < global->playerTotalCount)) {
+			player = GetPlayerStruct(playerId);
+		}
+		if (player && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
+			std::string s = ExportStrategyToText(&player->ptrAIStruct->structBuildAI);
+			traceMessageHandler.WriteMessage(s);
+			//this->OpenCustomDialogMessage(s.c_str(), 700, 550);
+			sprintf_s(outputBuffer, "Close this window to see strategy.");
+		}
+		return true;
+	}
 #ifdef _DEBUG
 
 	// BETA - TEST
@@ -5296,7 +5313,7 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(ROR_STRUCTURES_10C::ST
 // Opens a custom dialog message (based on CloseProgramDialog) and pauses game execution (if running)
 // Return true if OK, false if failed - Fails if another custom dialog (or quit game dialog) is already open
 // Pauses the game if running (only if a dialog is successfully opened)
-bool CustomRORCommand::OpenCustomDialogMessage(char *dialogText, long int hSize, long int vSize) {
+bool CustomRORCommand::OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize) {
 	if (this->crInfo->customYesNoDialogVar) { return false; } // Already an opened custom dialog
 
 	ROR_STRUCTURES_10C::STRUCT_ANY_UI *customDialogPtr = AOE_GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);

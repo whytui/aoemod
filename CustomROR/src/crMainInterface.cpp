@@ -419,6 +419,10 @@ void CustomRORMainInterface::CloseCustomGamePopup(bool isCancel) {
 		CustomPopup *next = this->currentCustomPopup->nextPopup;
 		delete this->currentCustomPopup;
 		this->currentCustomPopup = next; // Generally NULL unless closing the popup triggered a new one.
+
+		if ((next == NULL) && traceMessageHandler.HasUnreadMessages()) {
+			this->OpenTraceMessagePopup();
+		}
 	}
 }
 

@@ -86,3 +86,7 @@ bool IsCustomRorPopulationBeginStratElem(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELE
 // Returns the fake strategy element added by customROR when it updated strategy to adapt to maximum population.
 // Returns NULL if not found.
 ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetCustomRorMaxPopulationBeginStratElem(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
+
+// Dumps strategy to text format, for debugging.
+std::string ExportStrategyToText(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
+

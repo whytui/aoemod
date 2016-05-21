@@ -15,13 +15,13 @@ namespace AOE_CONST_FUNC
 	// Values for TAIUnitClass (strategy elements class)
 	enum TAIUnitClass : long int {
 		AIUCNone = -1, // For internal usage
-		AIUCBuilding = 0,
-		AIUCTech = 1,
-		AIUCLivingUnit = 2,
-		AIUCLoadNewStrategy = 3, // See 4D1E8D. Supported but undocumented and unused !
+		AIUCBuilding = 0, // "B" (build, unlimited) or "A" (limited retrains)
+		AIUCTech = 1, // "R" (research)
+		AIUCLivingUnit = 2, // "T" (train with limited retrains) or "U" (train, unlimited)
+		AIUCLoadNewStrategy = 3, // "L". See 4D1E8D. Supported but undocumented and unused !
 		AIUCCritical = 4, // "C" techs (critical: do not skip, AI MUST first do this before looking after)
-		AIUCEnableAttack = 5, // Unused but supported ! When "executed", this strategy element sets enableAttack=true in AI (AI will start attacking other players)
-		AIUCStrategyCmd = 6 // Dynamically added items for setGatherPercentage commands
+		AIUCEnableAttack = 5, // "E". Unused but supported ! When "executed", this strategy element sets enableAttack=true in AI (AI will start attacking other players)
+		AIUCStrategyCmd = 6 // "G" (set Gather %). Dynamically added items for setGatherPercentage commands
 	};
 
 

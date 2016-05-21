@@ -31,7 +31,7 @@ static const char gameScreenName[] = "Game Screen";
 // Return pointer (address) to new object.
 // Compatible with scenario editor screen and in-game screen
 // Note that settings->currentUIStatus is unchanged when showing such dialog message.
-static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateDialogPopup(char *text, long int hSize, long int vSize) {
+static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, long int hSize, long int vSize) {
 	char *dlgName = (char *)AOE_CONST_INTERNAL::customDialogScreenName;
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *(ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS **) AOE_OFFSETS_10C::ADDR_VAR_GAME_SETTINGS_STRUCT; // GetGameSettingsPtr();
 	if (settings == NULL) { return 0; }
