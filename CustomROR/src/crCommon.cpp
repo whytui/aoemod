@@ -143,7 +143,15 @@ void CustomRORInfo::FillResearchesToDisableFromString(long int playerId, const c
 }
 
 // Applies an "auto-attack policy" on all player's selected units (only for owned units !)
-void CustomRORInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const AutoAttackPolicy &autoAttackPolicy) {
+// flagsToApply is used to determine which flags have to be updated using values from autoAttackPolicyValues.
+// If flagsToApply.xxx is true, then update unit's auto_attack_policy.xxx to "autoAttackPolicyValues.xxx" value.
+void CustomRORInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player,
+	const AutoAttackPolicy &autoAttackPolicyValues, const AutoAttackPolicy &flagsToApply) {
+	if (!flagsToApply.attackMilitary &&
+		!flagsToApply.attackNonTowerBuildings &&
+		!flagsToApply.attackTowers &&
+		!flagsToApply.attackVillagers &&
+		!flagsToApply.attackWalls) { return; }
 	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **selectedUnits = this->GetRelevantSelectedUnitsBasePointer(player);
 	assert(selectedUnits != NULL);
 	for (int i = 0; i < player->selectedUnitCount; i++) {
@@ -153,7 +161,21 @@ void CustomRORInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(ROR_STRUCTURES_10
 			if (IsTower(currentUnitDefBase->DAT_ID1) || IsNonTowerMilitaryUnit(currentUnitDefBase->unitAIType)) {
 				UnitCustomInfo *currentUnitInfo = this->myGameObjects.FindOrAddUnitCustomInfo(selectedUnits[i]->unitInstanceId);
 				currentUnitInfo->autoAttackPolicyIsSet = true;
-				currentUnitInfo->autoAttackPolicy = autoAttackPolicy; // Copy all config from supplied policy
+				if (flagsToApply.attackMilitary) {
+					currentUnitInfo->autoAttackPolicy.attackMilitary = autoAttackPolicyValues.attackMilitary;
+				}
+				if (flagsToApply.attackNonTowerBuildings) {
+					currentUnitInfo->autoAttackPolicy.attackNonTowerBuildings = autoAttackPolicyValues.attackNonTowerBuildings;
+				}
+				if (flagsToApply.attackTowers) {
+					currentUnitInfo->autoAttackPolicy.attackTowers = autoAttackPolicyValues.attackTowers;
+				}
+				if (flagsToApply.attackVillagers) {
+					currentUnitInfo->autoAttackPolicy.attackVillagers = autoAttackPolicyValues.attackVillagers;
+				}
+				if (flagsToApply.attackWalls) {
+					currentUnitInfo->autoAttackPolicy.attackWalls = autoAttackPolicyValues.attackWalls;
+				}
 			}
 		}
 	}

@@ -4949,10 +4949,12 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 
 	// Custom buttons
 	bool updateAutoAttackInfo = false;
+	AutoAttackPolicy flagsToApply = { false, false, false, false, false };
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS) {
 		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackVillagers = false;
+		flagsToApply.attackVillagers = true; // this flag has been updated
 		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
 		updateAutoAttackInfo = true;
 	}
@@ -4960,6 +4962,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
+		flagsToApply.attackNonTowerBuildings = true; // this flag has been updated
 		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
 		updateAutoAttackInfo = true;
 	}
@@ -4970,6 +4973,10 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
 		unitInfo->autoAttackPolicy.attackVillagers = false;
 		unitInfo->autoAttackPolicy.attackTowers = false;
+		flagsToApply.attackMilitary = true; // this flag has been updated
+		flagsToApply.attackNonTowerBuildings = true; // this flag has been updated
+		flagsToApply.attackVillagers = true; // this flag has been updated
+		flagsToApply.attackTowers = true; // this flag has been updated
 		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
 		updateAutoAttackInfo = true;
 	}
@@ -4977,6 +4984,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = false;
 		unitInfo->autoAttackPolicy.SetDefaultValues();
+		flagsToApply.SetAllValues(true); // All flags have been updated.
 		this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
 		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
 		updateAutoAttackInfo = true;
@@ -4986,7 +4994,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
 		assert(unitInfo != NULL); // Was just added
 		if (!unitInfo) { return false; } // this is an error case
-		this->crInfo->ApplyAutoAttackPolicyToPlayerSelectedUnits(player, unitInfo->autoAttackPolicy);
+		this->crInfo->ApplyAutoAttackPolicyToPlayerSelectedUnits(player, unitInfo->autoAttackPolicy, flagsToApply);
 	}
 
 	return false;

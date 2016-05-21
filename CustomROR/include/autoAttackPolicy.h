@@ -28,6 +28,15 @@ public:
 		attackWalls = false;
 	}
 
+	// Set all flags to true or false according to parameter.
+	void SetAllValues(bool value) {
+		attackMilitary = value;
+		attackNonTowerBuildings = value;
+		attackTowers = value;
+		attackVillagers = value;
+		attackWalls = value;
+	}
+
 	// Returns true if other AutoAttackPolicy has the same settings
 	bool Equals(const AutoAttackPolicy &other) const {
 		return (other.attackMilitary == this->attackMilitary) &&

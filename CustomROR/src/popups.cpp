@@ -682,7 +682,7 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
 	bool isMyUnit = (controlledPlayer == unitPlayer);
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(this->unitId);
-
+	AutoAttackPolicy flagsToApply = { true, true, true, true, true }; // All flags are relevant in popup.
 	float posX = -1;
 	float posY = -1;
 	if (unit && unit->IsCheckSumValid()) {
@@ -724,7 +724,7 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	}
 	// Apply changes on all selected units
 	if (updateAutoAttackInfo && isMyUnit && unitInfo && unitInfo->autoAttackPolicyIsSet) {
-		this->crInfo->ApplyAutoAttackPolicyToPlayerSelectedUnits(controlledPlayer, unitInfo->autoAttackPolicy);
+		this->crInfo->ApplyAutoAttackPolicyToPlayerSelectedUnits(controlledPlayer, unitInfo->autoAttackPolicy, flagsToApply);
 	}
 }
 

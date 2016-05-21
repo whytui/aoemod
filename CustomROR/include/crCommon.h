@@ -116,7 +116,10 @@ public:
 	void FillResearchesToDisableFromString(long int playerId, const char *text);
 
 	// Applies an "auto-attack policy" on all player's selected units (only for owned units !)
-	void ApplyAutoAttackPolicyToPlayerSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const AutoAttackPolicy &autoAttackPolicy);
+	// flagsToApply is used to determine which flags have to be updated using values from autoAttackPolicyValues.
+	// If flagsToApply.xxx is true, then update unit's auto_attack_policy.xxx to "autoAttackPolicyValues.xxx" value.
+	void ApplyAutoAttackPolicyToPlayerSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, 
+		const AutoAttackPolicy &autoAttackPolicyValues, const AutoAttackPolicy &flagsToApply);
 
 	// Returns true if a custom game popup is opened (only for popups, not dialogs !)
 	bool HasOpenedCustomGamePopup();
