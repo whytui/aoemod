@@ -16,7 +16,7 @@
 #include "crTrigger.h"
 #include "crTriggerSet.h"
 #include "strategy.h"
-
+#include "interface.h"
 #include "EXESelfEditor.h"
 #include "crPatcher.h"
 

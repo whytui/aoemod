@@ -203,7 +203,7 @@ bool CustomRORInfo::HasOpenedCustomDialog() {
 ROR_STRUCTURES_10C::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn) {
 	if (this->HasOpenedCustomGamePopup()) { return false; }
 	if ((hSize < 0xB0) || (vSize < 30)) { return false; }
-	if (!pGameSettingsStruct) { return false; }
+	if (!ROR_gameSettings) { return false; }
 
 	if ((GetGameSettingsPtr()->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) &&
 		(GetGameSettingsPtr()->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING)) {
@@ -394,8 +394,8 @@ ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **CustomRORInfo::GetRelevantSelectedUnitsBa
 // Returns a pointer to global game struct
 // Warning: can sometimes return NULL when called very early (when the game has just been run)
 ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr() {
-	if (*pGlobalStruct) { return *pGlobalStruct; } // Easier way: global variable is valued.
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *pGameSettingsStruct; // Otherwise, find it in game settings
+	if (*ROR_gameGlobal) { return *ROR_gameGlobal; } // Easier way: global variable is valued.
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings; // Otherwise, find it in game settings
 	assert(settings != NULL);
 	if (!settings) { return NULL; }
 	return settings->ptrGlobalStruct;
@@ -403,8 +403,8 @@ ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr() {
 
 
 ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS* GetGameSettingsPtr() {
-	assert(*pGameSettingsStruct != NULL);
-	return *pGameSettingsStruct;
+	assert(*ROR_gameSettings != NULL);
+	return *ROR_gameSettings;
 }
 
 
@@ -2156,6 +2156,7 @@ void AOE_playerBldHeader_RemoveBldFromArrays(ROR_STRUCTURES_10C::STRUCT_PLAYER_B
 }
 
 
+
 // commandStruct must have been allocated with a "AOE" alloc method like AOEAlloc(...)
 // It is freed by game code, don't use it / free it afterwards !
 // Returns false if failed
@@ -2576,13 +2577,13 @@ long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UIC
 	case AOE_CONST_INTERNAL::CST_IUC_DO_BUILD:
 		// Those ones do not have a specific icon id, it depends on unit/research...
 	case AOE_CONST_INTERNAL::CST_IUC_CROR_DONT_ATTACK_VILLAGERS:
-		return 9; // Temporary (empty)
+		return CST_CUSTOMROR_ICON_ID_DONT_ATTACK_VILLAGERS;
 	case AOE_CONST_INTERNAL::CST_IUC_CROR_DONT_ATTACK_BUILDINGS:
-		return 9; // Temporary (empty)
+		return CST_CUSTOMROR_ICON_ID_DONT_ATTACK_BUILDINGS;
 	case AOE_CONST_INTERNAL::CST_IUC_CROR_NO_AUTO_ATTACK:
-		return 9; // Temporary (empty)
+		return CST_CUSTOMROR_ICON_ID_DONT_AUTO_ATTACK;
 	case AOE_CONST_INTERNAL::CST_IUC_CROR_RESET_AUTO_ATTACK:
-		return 9; // Temporary (empty)
+		return CST_CUSTOMROR_ICON_ID_RESTORE_AUTO_ATTACK;
 	default:
 		break;
 	}
@@ -2639,10 +2640,11 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId) {
 // buttonIndex: 0-4 = first row, 6-10=second row, 5 and 11 are "special" right buttons (11=unselect/cancel, generally)
 // DATID can be a unitDefId (train), researchId (do_research)... Set it to 0 when not relevant.
 // isDisabled : set it to true to get a read only button (no possible click)
-// If creationText is NULL, a text is generated automatically. You can use "" to force empty text.
+// creationText can be left NULL to display a text using unit/research/etc's LanguageDLLID.
+// iconSlpInfo can be left NULL unless we want to use specific SLP resource for icon.
 // Technically, this just updates the button (no button object is created).
 bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
-	long int DATID, bool isDisabled, const char *creationText) {
+	long int DATID, bool isDisabled, const char *creationText, ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconSlpInfo) {
 	if (buttonIndex < 0) {
 		return false;
 	}
@@ -2754,7 +2756,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	const char *creationTextToUse = (creationText == NULL) ? creationTextIfMissing.c_str() : creationText;
 	return AOE_InGameAddCommandButton(player, buttonIndex, iconId, UICmdId, DATID,
 		helpDllId, creationDllId, hotkeyDllId,
-		pName, creationTextToUse, isDisabled);
+		pName, creationTextToUse, isDisabled, iconSlpInfo);
 }
 
 

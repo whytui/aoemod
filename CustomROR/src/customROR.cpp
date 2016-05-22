@@ -311,6 +311,7 @@ void CustomRORInstance::TemporaryEntryPoints(REG_BACKUP *REG_values) {
 
 
 // Initializations done only once, at startup.
+// ROR UI has not been initialized yet, DRS files are not loaded, etc.
 void CustomRORInstance::OneShotInit() {
 	traceMessageHandler.WriteMessageNoNotification("Debug message system initialized.");
 	this->crInfo.configInfo.ReadXMLConfigFile("customROR.xml");
@@ -326,9 +327,21 @@ void CustomRORInstance::OneShotInit() {
 		}
 		traceMessageHandler.WriteMessageNoNotification("WARNING: Some features are not enabled in game executable. See CustomROR.log file.");
 	}
+	// Manage interfac.drs file to use
 	ChangeItfDRS_file();
+	// Collect information about EXE version
 	this->crCommand.ReadIfCustomSelectedUnitsMemoryZoneIsUsed();
 	this->crCommand.ReadIfManageAIIsOn();
+
+	// Prepare custom DRS data
+	if (this->crInfo.configInfo.useImprovedButtonBar) {
+		AOE_AddDrsFile(CST_CUSTOMROR_DRS_FILENAME, CST_CUSTOMROR_FOLDER);
+		if (this->crInfo.configInfo.showAlertOnMissingFeature && !FindDrsLinkForFile(CST_CUSTOMROR_DRS_FILENAME)) {
+			MessageBoxA(0, "ERROR : Could not find customROR.drs or it is invalid.", "CustomROR", MB_ICONWARNING);
+		}
+		// Initialize global variable so we can retrieve our button icons when needed
+		InitSlpInfoFromDrs(&this->crInfo.customRorIcons, CST_CUSTOMROR_CMD_ICONS_SLP_ID);
+	}
 }
 
 
@@ -403,7 +416,7 @@ void CustomRORInstance::InitBeforeGameStart(REG_BACKUP *REG_values, bool isSaved
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		if (!isSavedGame) {
-			REG_values->ECX_val = (long int)*pGameSettingsStruct; // MOV ECX,DWORD PTR DS:[<gameSettings>]
+			REG_values->ECX_val = (long int)*ROR_gameSettings; // MOV ECX,DWORD PTR DS:[<gameSettings>]
 		} else {
 			REG_values->ECX_val = *(long int*)(REG_values->EBP_val + 0x3F4); //MOV ECX,DWORD PTR SS:[EBP+3F4]
 		}
@@ -525,7 +538,7 @@ void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 void CustomRORInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
 	// Do overwritten instructions
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
-		REG_values->EBX_val = (long int) (*pGameSettingsStruct);
+		REG_values->EBX_val = (long int)(*ROR_gameSettings);
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
@@ -883,7 +896,7 @@ void CustomRORInstance::AfterAddDynamicStratElems(REG_BACKUP *REG_values) {
 // From 0051E0DC. Called just before starting to actually save a game to a gmx file.
 void CustomRORInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
-		REG_values->ECX_val = (long int)*pGameSettingsStruct;
+		REG_values->ECX_val = (long int)*ROR_gameSettings;
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 	char *filename = (char*)REG_values->EAX_val;
@@ -1806,7 +1819,7 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	}
 
 	// Do we already have a global struct ? If Yes, check civ number in empires.dat (if not matching our config, it may crash)
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *pGlobalStruct;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
 	if (globalStruct != NULL) {
 		if (globalStruct->civCount < this->crInfo.configInfo.civCount) {
 			// This situation is quite bad. empires.dat contains less civs than XML config.
@@ -2462,7 +2475,7 @@ void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 	}
 
 	// Get information about UI status: is this editor, game loading, playing... ?
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *pGameSettingsStruct;
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
 	ror_api_assert(REG_values, settings != NULL);
 	ror_api_assert(REG_values, settings->IsCheckSumValid());
 	AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentStatus = settings->currentUIStatus;

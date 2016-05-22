@@ -216,7 +216,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 	outputBuffer[0] = 0;
 
 	if (!*command) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *gameSettings = *pGameSettingsStruct;
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *gameSettings = *ROR_gameSettings;
 
 	if (!_strnicmp(command, PREFIX_SET, sizeof(PREFIX_SET))) {
 		// This is a "set ___=___" command.
@@ -354,16 +354,6 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 			unitDefLiving->trainButton = 27;
 			unitDefLiving->trainLocation = 109;
 		}
-		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *rdef = GetResearchDef(humanPlayer, 116);
-		if (rdef) {
-			rdef->buttonId = 12;
-			rdef->iconId = 4;
-			rdef->researchLocation = 109;
-			rdef->researchType = 12;
-			rdef->languageDLLCreation = 8078;
-			rdef->researchTime = 1;
-		}
-		SetMaxPopulationGetterInSPGames(10);
 	}
 
 	char *c = "Game Settings Screen";
@@ -481,7 +471,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 
 	// TEST conversion
 	if (strcmp(command, "conversion") == 0) {
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = *pGlobalStruct;
+		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = *ROR_gameGlobal;
 		assert(global != NULL);
 		for (int i = 1; i < global->playerTotalCount; i++) {
 			int FOR_attempt = this->crInfo->activeConversionAttemptsCount[i];
@@ -973,7 +963,7 @@ void CustomRORCommand::InitScenarioInfoTextData(ROR_STRUCTURES_10C::STRUCT_SCENA
 void CustomRORCommand::InitMyGameInfo() {
 	this->crInfo->ResetVariables();
 	// Prevent 0% speed at game startup (occurs because of rounding in registry saved value)
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = *pGlobalStruct;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = *ROR_gameGlobal;
 	if (global && global->IsCheckSumValid() && (global->gameSpeed == 0)) {
 		global->gameSpeed = 1;
 	}
@@ -2346,8 +2336,8 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 	std::string objToString = "";
 
 	fprintf_s(f, "AOE Debug information\n\n");
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *pGlobalStruct;
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settingsStruct = *pGameSettingsStruct;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settingsStruct = *ROR_gameSettings;
 	fprintf_s(f, "Global struct = 0x%08lX - %d players (including gaia)\n", (long int)globalStruct, globalStruct->playerTotalCount);
 	fprintf_s(f, "Game settings = 0x%08lX - Map seed=%d - Deathmatch=%d\n", (long int)settingsStruct, settingsStruct->actualMapSeed, settingsStruct->isDeathMatch);
 	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
@@ -2511,7 +2501,7 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(ROR_STRUCTURES_10C::S
 // Requires ManageAI !
 // Disabled in MP games.
 void CustomRORCommand::CallNearbyIdleMilitaryUnits() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *pGlobalStruct;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
 	short int playerId = globalStruct->humanPlayerId;
 	if ((playerId < 0) || (playerId > 8)) { return; }
 
@@ -2537,7 +2527,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	}
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = unit->ptrStructPlayer;
 	assert(player != NULL);
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *pGlobalStruct;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
 	assert(globalStruct != NULL);
 	// Does spawned unit belong to currently human-controlled player ?
 	if (player->playerId != globalStruct->humanPlayerId) {
@@ -4547,10 +4537,14 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)unitDef;
 		if ((unitDefLiving->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDefLiving->blastRadius > 0)) {
 			UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
-			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically");
-			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false, "Click to prevent unit from attacking buildings automatically");
-			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, "Click to prevent unit from attacking other units automatically");
-			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false, "Click to restore normal auto-attack behaviour");
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically",
+				&this->crInfo->customRorIcons);
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false, "Click to prevent unit from attacking buildings automatically",
+				&this->crInfo->customRorIcons);
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, "Click to prevent unit from attacking other units automatically",
+				&this->crInfo->customRorIcons);
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false, "Click to restore normal auto-attack behaviour",
+				&this->crInfo->customRorIcons);
 			const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &this->crInfo->configInfo.autoAttackOptionDefaultValues;
 			this->RefreshCustomAutoAttackButtons(gameMainUI, aap);
 		}
@@ -4810,7 +4804,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 					bool disabled = (sb->readOnly != 0);
 					sb->buttonInfoValue[0] = -1; // To force refresh
 					AddInGameCommandButton(buttonIndex, (INGAME_UI_COMMAND_ID)correctButtonCmdId, correctButtonInfoValue,
-						disabled, NULL);
+						disabled, NULL, NULL);
 				}
 			}
 		}
@@ -4823,14 +4817,14 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		if (bestElemDATID[buttonIndex] != -1) {
 			GetLanguageDllText(bestElemLangNameId[buttonIndex], nameBuffer, sizeof(nameBuffer), "");
 			if (bestElemIsResearch[buttonIndex]) {
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/);
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/, NULL);
 				ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
 				sb->unknown_2C4;
 				sb->helpDllId = sb->helpDllId;
 				sb->winHelpDataDllId;
 				sb->buttonInfoValue;
 			} else {
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/);
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/, NULL);
 			}
 		}
 	}
@@ -4846,11 +4840,11 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		if (currentActionIsResearch) {
 			inProgressInfo = "Being researched: ";
 			inProgressInfo += nameBuffer;
-			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, currentActionDATID, true, inProgressInfo.c_str());
+			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, currentActionDATID, true, inProgressInfo.c_str(), NULL);
 		} else {
 			inProgressInfo = "Being trained: ";
 			inProgressInfo += nameBuffer;
-			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, currentActionDATID, true, inProgressInfo.c_str());
+			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, currentActionDATID, true, inProgressInfo.c_str(), NULL);
 		}
 	}
 
@@ -4861,14 +4855,14 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	if (isBuilding && (currentAction != NULL) && (currentAction->actionTypeID == INTERNAL_ACTION_ID::CST_IAI_MAKE_OBJECT) &&
 		(gameMainUI->unitCommandButtons[buttonIdForStop]->commandIDs[0] != (long int)INGAME_UI_COMMAND_ID::CST_IUC_STOP)) {
 		GetLanguageDllText(LANG_ID_STOP_CURRENT_ACTION, nameBuffer, sizeof(nameBuffer), "Stop current action");
-		AddInGameCommandButton(buttonIdForStop, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, nameBuffer);
+		AddInGameCommandButton(buttonIdForStop, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, nameBuffer, NULL);
 	}
 
 	// Show Next page button (not if busy, because we already have current action there)
 	bool hasNextPage = (maxFoundButtonId >= minButtonIdNextPage); // has more buttons (Next actually goes to next page, NOT to first one)
 	if (!isBusy && (hasNextPage || (minButtonId > 0))) {
 		// There are buttons to display on next page: show button
-		AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE, 0, false, NULL);
+		AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE, 0, false, NULL, NULL);
 		// We store the information "this is not last page" in button's infoValue.
 		gameMainUI->unitCommandButtons[5]->buttonInfoValue[0] = hasNextPage;
 	}
@@ -5189,11 +5183,11 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(ROR_STRUCTURES_10C::ST
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = ai->ptrStructPlayer;
 	assert(player != NULL);
 	assert(player->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *pGlobalStruct;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
 	assert(globalStruct != NULL);
 	assert(globalStruct->IsCheckSumValid());
 
-	ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *mapInfosStruct = pTempMapBuildLikeInfos;
+	ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *mapInfosStruct = ROR_pTempMapBuildLikeInfos;
 	assert(mapInfosStruct != NULL);
 	assert(mapInfosStruct->IsCheckSumValid());
 

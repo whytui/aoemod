@@ -4,6 +4,7 @@
 #include <AOE_offsets_10c.h>
 #include <AOE_const_internal.h>
 #include <ROR_structures.h>
+#include <ROR_structures_drs.h>
 #include <assert.h>
 #include "AOE_memory.h"
 
@@ -666,7 +667,8 @@ static long int AOE_GetGamePosFromMousePos(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING
 // You can set DATId to 0 if not relevant.
 static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int buttonIndex, long int iconId,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId, long int DATID,
-	long int helpDllId, long int creationDllId, long int shortcutDllId, const char *name, const char *description, bool isDisabled) {
+	long int helpDllId, long int creationDllId, long int shortcutDllId, const char *name, const char *description,
+	bool isDisabled, ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconSlpInfo) {
 	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *inGameMain = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
 	if (!inGameMain || !inGameMain->IsCheckSumValid() || !inGameMain->visible) {
 		return false;
@@ -682,7 +684,11 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 	unsigned long int unknown_colorPtr = NULL;
 
 	const unsigned long int calladdr = 0x483760;
-	unsigned long int iconsSLP = inGameMain->iconsForUnitCommands; // Default (correct in most cases)
+	ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconsSLP = iconSlpInfo;
+	if ((iconSlpInfo == NULL) || (iconSlpInfo->slpSize == 0)) {
+		iconsSLP = inGameMain->iconsForUnitCommands; // Default (for most cases)
+	}
+	
 	// Guess automatically in which SLP we should search the icon.
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
 		unknown_colorPtr = player->ptrPlayerColorStruct + 0x28;
@@ -708,6 +714,12 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_SELECTION) || 
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE)) {
 		iconsSLP = inGameMain->unknown_4AC_icons;
+	}
+
+	// Try to check iconId is valid in SLP : otherwise, the whole game display will encounter serious issues !
+	assert(iconId < iconsSLP->slpFileHeader->shapeCount);
+	if (iconId >= iconsSLP->slpFileHeader->shapeCount) {
+		return false;
 	}
 
 	long int long_UICmdId = (long int)UICmdId;

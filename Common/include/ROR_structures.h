@@ -4,6 +4,7 @@
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
 #include <AOE_empires_dat.h>
+#include <ROR_structures_drs.h>
 
 
 // Note: as we never allocate/create unit structures ourselves, there is no problem going out of bounds as long as ROR EXE allocated enough values !
@@ -20,6 +21,7 @@
 namespace ROR_STRUCTURES_10C
 {
 	typedef char char_array_128[0x80];
+
 
 	// Pre-declarations
 	class STRUCT_PATH_FINDING_UNKNOWN_POS_INFO;
@@ -1276,6 +1278,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_3F4;
 	};
 	static_assert(sizeof(STRUCT_MAIN_MUSIC) == 0x3F8, "STRUCT_MAIN_MUSIC Size");
+
 
 	// Size = 0x514C. Constructor=0x0506900
 	// Warning: all arrays[0x10] are indexed by playerId-1, which means tribeNames[0] is player1's name.
@@ -4361,7 +4364,7 @@ namespace ROR_STRUCTURES_10C
 			return (this->checksum == CHECKSUM_UI_BUTTON_WITH_NUMBER);
 		}
 	};
-	static_assert(sizeof(STRUCT_UI_BUTTON_WITH_NUMBER) == 0x3D4, "STRUCT_UI_SLP_BUTTON size");
+	static_assert(sizeof(STRUCT_UI_BUTTON_WITH_NUMBER) == 0x3D4, "STRUCT_UI_BUTTON_WITH_NUMBER size");
 
 
 	// Size ?
@@ -4820,11 +4823,11 @@ namespace ROR_STRUCTURES_10C
 	public:
 		long int hWnd; // TO CONFIRM
 		char unknown_0F8[0x48C - 0x0F8];
-		unsigned long int iconsForUnitCommands; // +48C. Pointer to SLP data... Cf SLP 50721
-		unsigned long int iconsForResearches; // +490. Pointer to SLP data... Cf SLP 50729
-		unsigned long int iconsForTrainUnits; // +494. Pointer to SLP data... Cf SLP 50730.
-		unsigned long int iconsForBuildings[5]; // +498 + tileset*4. It seems there is no free slot for more tilesets.
-		unsigned long int unknown_4AC_icons; // +4AC. Used in 48250F. Includes the "cancel" icon, id=10. SLP 50725 ?
+		STRUCT_SLP_INFO *iconsForUnitCommands; // +48C. Pointer to SLP data... Cf SLP 50721
+		STRUCT_SLP_INFO *iconsForResearches; // +490. Pointer to SLP data... Cf SLP 50729
+		STRUCT_SLP_INFO *iconsForTrainUnits; // +494. Pointer to SLP data... Cf SLP 50730.
+		STRUCT_SLP_INFO *iconsForBuildings[5]; // +498 + tileset*4. It seems there is no free slot for more tilesets.
+		STRUCT_SLP_INFO *unknown_4AC_icons; // +4AC. Used in 48250F. Includes the "cancel" icon, id=10. SLP 50725 ?
 		short int unknown_4B0_iconId; // +4B0. Icon id for Next page button ?
 		short int unknown_4B2_iconId; // +4B2. Icon id for unselect button ?
 		unsigned long int unknown_4B4;

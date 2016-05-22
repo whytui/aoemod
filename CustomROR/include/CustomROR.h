@@ -19,6 +19,7 @@
 #include "UI_utilities.h"
 #include "interface.h"
 #include "EXESelfEditor.h"
+#include "drsHandler.h"
 
 
 /* This class is the interface object between game code (through ROR_API call) and CustomROR plugin code.

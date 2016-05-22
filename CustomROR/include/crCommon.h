@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <ROR_API_pub.h>
 #include <ROR_structures.h>
+#include <ROR_structures_drs.h>
 #include <AOE_offsets_10c.h>
 #include <AOE_const_internal.h>
 #include <AOE_const_language.h>
@@ -14,6 +15,7 @@
 #include <ROR_commands.h>
 #include <Windows.h>
 #include <WinUser.h> // get mouse pos
+#include <ROR_global_variables.h>
 
 #include "AOE_memory.h"
 #include "UI_utilities.h"
@@ -23,7 +25,7 @@
 #include "crTriggerSet.h"
 #include "traceMessage.h"
 #include "crGameObjects.h"
-
+#include "interface.h" // SLP/icon ids...
 
 // Defines common objects/variables/methods for CustomROR
 // Methods in this file are simple primitives that don't depend on customROR configuration. They generally are calls to existing game methods.
@@ -33,12 +35,8 @@
 static_assert((UNUSED_PLID_FOR_TRIGGERS >= 0) && (UNUSED_PLID_FOR_TRIGGERS < 16), "Bad player ID for UNUSED_PLID_FOR_TRIGGERS");
 
 using namespace AOE_CONST_FUNC;
+using namespace ROR_STRUCTURES_10C;
 
-// Some useful game variables
-static ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL** pGlobalStruct = (ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL **) AOE_OFFSETS_10C::ADDR_VAR_GAME_GLOBAL_STRUCT;
-static ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS** pGameSettingsStruct = (ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS **) AOE_OFFSETS_10C::ADDR_VAR_GAME_SETTINGS_STRUCT;
-static ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS* pTempMapBuildLikeInfos = (ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *) AOE_OFFSETS_10C::ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS;
-static void *pCurrentUIObject = (void *)AOE_OFFSETS_10C::ADDR_VAR_CURRENT_UI_OBJECT;
 
 // Constants
 //static const long int customOptionMenuID = 0x20;
@@ -78,6 +76,8 @@ public:
 	// To know which civ player names are already used when choosing names. Values: -1=unused, >=0=used by player #i
 	// Warning: playerName index are from 0 to 8 here instead of 1 to 9 ! Be careful.
 	char nameIndexIsUsedByPlayer[CST_MAX_TOTAL_CIV_COUNT][CST_MAX_NUMBER_OF_PLAYER_NAMES_PER_CIV];
+	// Own DRS objects
+	STRUCT_SLP_INFO customRorIcons;
 
 	// Triggers
 	CR_TRIGGERS::crTriggerSet *triggerSet; // all information about custom triggers.
@@ -519,6 +519,7 @@ void AOE_InfAIBuildHistory_setStatus(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, l
 void AOE_playerBldHeader_RemoveBldFromArrays(ROR_STRUCTURES_10C::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
 
 
+
 // -- Commands
 
 // commandStruct must have been allocated with a "AOE" alloc method like AOEAlloc(...)
@@ -610,9 +611,10 @@ long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UIC
 // DATID can be a unitDefId (train), researchId (do_research)... Set it to 0 when not relevant.
 // isDisabled : set it to true to get a read only button (no possible click)
 // creationText can be left NULL to display a text using unit/research/etc's LanguageDLLID.
+// iconSlpInfo can be left NULL unless we want to use specific SLP resource for icon.
 // Technically, this just updates the button (no button object is created).
 bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
-	long int DATID, bool isDisabled, const char *creationText);
+	long int DATID, bool isDisabled, const char *creationText, ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconSlpInfo);
 
 // Returns true if the button is visible. Use this overload for performance if you already have STRUCT_UI_IN_GAME_MAIN pointer.
 // Returns false if the button is hidden, or if an error occurs.

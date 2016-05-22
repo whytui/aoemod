@@ -94,11 +94,13 @@
     <ClInclude Include="include\AOE_offsets_10c.h" />
     <ClInclude Include="include\AOE_SN_numbers.h" />
     <ClInclude Include="include\customResolution.h" />
+    <ClInclude Include="include\ROR_structures_drs.h" />
     <ClInclude Include="include\mystrings.h" />
     <ClInclude Include="include\pointers.h" />
     <ClInclude Include="include\ROR_API_assert.h" />
     <ClInclude Include="include\ROR_API_pub.h" />
     <ClInclude Include="include\ROR_commands.h" />
+    <ClInclude Include="include\ROR_global_variables.h" />
     <ClInclude Include="include\ROR_structures.h" />
     <ClInclude Include="include\ROR_struct_debugging.h" />
     <ClInclude Include="include\ROR_struct_export.h" />

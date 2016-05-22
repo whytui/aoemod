@@ -112,6 +112,7 @@
     <ClInclude Include="include\crGameObjects.h" />
     <ClInclude Include="include\crMainInterface.h" />
     <ClInclude Include="include\crPatcher.h" />
+    <ClInclude Include="include\drsHandler.h" />
     <ClInclude Include="include\RORProcessEditor.h" />
     <ClInclude Include="include\crTrigger.h" />
     <ClInclude Include="include\crTriggerSet.h" />
@@ -140,6 +141,7 @@
     <ClCompile Include="src\crTriggerSet.cpp" />
     <ClCompile Include="src\customROR.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\drsHandler.cpp" />
     <ClCompile Include="src\EXESelfEditor.cpp" />
     <ClCompile Include="src\popups.cpp" />
     <ClCompile Include="src\interface.cpp" />
