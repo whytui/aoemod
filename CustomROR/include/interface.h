@@ -30,6 +30,15 @@ static const long int CST_CUSTOMROR_ICON_ID_DONT_ATTACK_BUILDINGS = 1;
 static const long int CST_CUSTOMROR_ICON_ID_DONT_AUTO_ATTACK = 3;
 static const long int CST_CUSTOMROR_ICON_ID_RESTORE_AUTO_ATTACK = 2;
 
+// "DAT" button IDs (1-5 first row, 6-10 second row, etc)
+#define CST_FIRE_GALLEY_ORIGINAL_BUTTONDATID 5
+#define CST_FIRE_GALLEY_CUSTOM_BUTTONDATID 9
+// Internal button IDs (0-5 = first row, 6-11 = second row)
+#define CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS 3
+#define CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS 4
+#define CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED 9
+#define CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT 10
+
 
 // Manage Resolution
 void ChangeItfDRS_file(); // Change interfac.drs filename to manage custom resolutions

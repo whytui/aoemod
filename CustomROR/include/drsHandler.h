@@ -37,4 +37,6 @@ namespace ROR_STRUCTURES_10C {
 	// Returns a SLP file header object that corresponds to a slpID (object ID in one of the used DRS files)
 	ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER *GetSlpFromDrsFiles(long int slpId);
 
+	// Returns true if an object index (iconId, for example) is valid (exists) in a SLP file (SLP info object)
+	bool IsObjectIndexValidInSlp(ROR_STRUCTURES_10C::STRUCT_SLP_INFO *slpInfo, long int objectIndex);
 }

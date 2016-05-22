@@ -3616,9 +3616,9 @@ void CustomRORCommand::MoveFireGalleyIconIfNeeded(ROR_STRUCTURES_10C::STRUCT_PLA
 			(triremeStatus != AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED)) {
 			// Trireme is researched: research button location is now free to use
 			if (triremeStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID) {
-				unitDef->trainButton = CST_FIRE_GALLEY_CUSTOM_BUTTONID; // Fire galley uses trireme's tech button now it won't appear again.
+				unitDef->trainButton = CST_FIRE_GALLEY_CUSTOM_BUTTONDATID; // Fire galley uses trireme's tech button now it won't appear again.
 			} else {
-				unitDef->trainButton = CST_FIRE_GALLEY_ORIGINAL_BUTTONID; // Use standard location (same as trireme) until trireme is available too.
+				unitDef->trainButton = CST_FIRE_GALLEY_ORIGINAL_BUTTONDATID; // Use standard location (same as trireme) until trireme is available too.
 			}
 		}
 	}

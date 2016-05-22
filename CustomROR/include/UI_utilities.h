@@ -7,6 +7,7 @@
 #include <ROR_structures_drs.h>
 #include <assert.h>
 #include "AOE_memory.h"
+#include "drsHandler.h"
 
 
 /*
@@ -716,9 +717,9 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 		iconsSLP = inGameMain->unknown_4AC_icons;
 	}
 
-	// Try to check iconId is valid in SLP : otherwise, the whole game display will encounter serious issues !
-	assert(iconId < iconsSLP->slpFileHeader->shapeCount);
-	if (iconId >= iconsSLP->slpFileHeader->shapeCount) {
+	// Check that iconId is valid in SLP : otherwise, the whole game display will encounter serious issues !
+	if (!IsObjectIndexValidInSlp(iconsSLP, iconId)) {
+		assert(!"iconId does not exist in this SLP file. Maybe a DRS file is missing.");
 		return false;
 	}
 

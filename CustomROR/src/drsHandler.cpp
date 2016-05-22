@@ -127,4 +127,12 @@ namespace ROR_STRUCTURES_10C {
 		return res;
 	}
 
+	// Returns true if an object index (iconId, for example) is valid (exists) in a SLP file (SLP info object)
+	bool IsObjectIndexValidInSlp(ROR_STRUCTURES_10C::STRUCT_SLP_INFO *slpInfo, long int objectIndex) {
+		if (!slpInfo || (objectIndex < 0) || !slpInfo->slpFileHeader) {
+			return false;
+		}
+		return (objectIndex < slpInfo->slpFileHeader->shapeCount);
+	}
+
 }
