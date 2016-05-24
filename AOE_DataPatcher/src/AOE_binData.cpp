@@ -3407,7 +3407,7 @@ void AOE_binData::InitSelectedUnits() {
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
 		BufferOffset40,
 		"Update buffer offest (technical) - research a technology",
-		0xF1200, //987648,
+		0x85AAF,
 		(0x8B, 0x80, 0x34, 0x01, 0x00, 0x00), // default=no
 		(0x8B, 0x80, 0x5C, 0x08, 0x00, 0x00),
 		FM_OFF,
