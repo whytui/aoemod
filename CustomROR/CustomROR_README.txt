@@ -62,6 +62,7 @@ UI and Shortcuts:
 - Farms can be automatically rebuilt (see configuration + custom options menu in game)
 - Add 10 shortcut numbers 11-20 using numpad (original game uses 1-10 with main keyboard numeric keys). Custom numbers are not displayed (like 0) due to SLP limitation.
 - Improved game speed change with +/- buttons. Choose the speed change factor (default 1.25) in XML config or in-game customROR menu.
+- Press ":" (FR keyboard) or "," (US) to select next idle military unit.
 - Press F9 to call nearby idle military units (they will move to mouse position).
 - Automatically assign shortcut numbers to spawned units (to configure in customROR.xml file).
 - Select a building and right-click to a location so that trained units will automatically spawn there (right-click on building itself to cancel).

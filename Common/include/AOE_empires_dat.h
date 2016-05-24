@@ -88,7 +88,7 @@ namespace AOE_CONST_FUNC {
 		TribeAIGroupOther_Dead_Projectile = 11, // 0xB
 		TribeAIGroupTerrain = 14, // 0x0E
 		TribeAIGroupTreeStump = 16, // 0x10
-		TribeAIGroupTradeCart = 19, // 0x13
+		TribeAIGroupTradeCart = 19, // 0x13. It is a villager type (seen in 0x485ADD).
 		TribeAIGroupFlag = 30,
 		TribeAIGroupCliff = 34, // 0x22
 		TribeAIGroupBird = 38,

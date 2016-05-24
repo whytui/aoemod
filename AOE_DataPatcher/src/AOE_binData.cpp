@@ -72,7 +72,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_resolution_10c 76
 #define COUNT_windowedMode_10c 3
 #define COUNT_VEG_windowedMode_10c 21
-#define COUNT_selectedUnits_10c 85
+#define COUNT_selectedUnits_10c 86
 #define COUNT_obsoletes_10c 22
 #define COUNT_ROR_API_10c 97
 #define COUNT_manageAI_10c 13
@@ -3403,21 +3403,22 @@ void AOE_binData::InitSelectedUnits() {
 		FM_ON
 		);
 
-	// For the action: research a technology
+	// When pressing period key (select next idle villager)
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
 		BufferOffset40,
 		"Update buffer offest (technical) - research a technology",
-		987648,
-		(0x8B, 0x81, 0x34, 0x01, 0x00, 0x00), // default=no
-		(0x8B, 0x81, 0x5C, 0x08, 0x00, 0x00),
+		0xF1200, //987648,
+		(0x8B, 0x80, 0x34, 0x01, 0x00, 0x00), // default=no
+		(0x8B, 0x80, 0x5C, 0x08, 0x00, 0x00),
 		FM_OFF,
 		FM_ON
 		);
 
+	// For the action: research a technology
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
 		BufferOffset41,
-		"Update buffer offest (technical)",
-		987712,
+		"Update buffer offest (technical) - research a technology",
+		0xF1200, //987648,
 		(0x8B, 0x81, 0x34, 0x01, 0x00, 0x00), // default=no
 		(0x8B, 0x81, 0x5C, 0x08, 0x00, 0x00),
 		FM_OFF,
@@ -3427,6 +3428,16 @@ void AOE_binData::InitSelectedUnits() {
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
 		BufferOffset42,
 		"Update buffer offest (technical)",
+		987712,
+		(0x8B, 0x81, 0x34, 0x01, 0x00, 0x00), // default=no
+		(0x8B, 0x81, 0x5C, 0x08, 0x00, 0x00),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
+		BufferOffset43,
+		"Update buffer offest (technical)",
 		1010928,
 		(0x8D, 0x91, 0x38, 0x01, 0x00, 0x00), // default=no
 		(0x8D, 0x91, 0x60, 0x08, 0x00, 0x00),
@@ -3435,7 +3446,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset43,
+		BufferOffset44,
 		"Update buffer offest (technical)",
 		1017598,
 		(0x8B, 0x80, 0x34, 0x01, 0x00, 0x00), // default=no
@@ -3445,7 +3456,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset44,
+		BufferOffset45,
 		"Update buffer offest (technical)",
 		1022530,
 		(0x8B, 0x88, 0x34, 0x01, 0x00, 0x00), // default=no
@@ -3455,7 +3466,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset45,
+		BufferOffset46,
 		"Update buffer offest (technical)",
 		1022550,
 		(0x8B, 0x90, 0x34, 0x01, 0x00, 0x00), // default=no
@@ -3465,7 +3476,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset46,
+		BufferOffset47,
 		"Update buffer offest (find if a selected unit has projectile+blast)",
 		0x8275B,
 		(0x8B, 0x84, 0x87, 0x38, 0x01, 0x00, 0x00), // default=no
@@ -3475,7 +3486,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset47,
+		BufferOffset48,
 		"Update buffer offest (press on TAB)",
 		0x8592D,
 		(0x8B, 0x84, 0x86, 0x38, 0x01, 0x00, 0x00), // default=no
@@ -3485,7 +3496,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset48,
+		BufferOffset49,
 		"Update buffer offest (press on TAB)",
 		0x85938,
 		(0x3B, 0x86, 0x34, 0x01, 0x00, 0x00), // default=no
@@ -3495,7 +3506,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset49,
+		BufferOffset50,
 		"Update buffer offest (press on TAB)",
 		0x8595E,
 		(0x8B, 0xBC, 0x8E, 0x38, 0x01, 0x00, 0x00), // default=no
@@ -3505,7 +3516,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset50,
+		BufferOffset51,
 		"Update buffer offest (press on TAB)",
 		0x85973,
 		(0x8B, 0x84, 0x86, 0x38, 0x01, 0x00, 0x00), // default=no
@@ -3515,7 +3526,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset51,
+		BufferOffset52,
 		"Update buffer offest (press on TAB)",
 		0x8597E,
 		(0x3B, 0x86, 0x34, 0x01, 0x00, 0x00), // default=no
@@ -3525,7 +3536,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset52,
+		BufferOffset53,
 		"Update buffer offest (press on TAB)",
 		0x8599A,
 		(0x89, 0xBE, 0x34, 0x01, 0x00, 0x00), // default=no
@@ -3535,7 +3546,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset53,
+		BufferOffset54,
 		"Update buffer offest (technical). Display icon for transport.",
 		0x82973,
 		(0x8B, 0x84, 0x87, 0x38, 0x01, 0x00, 0x00), // default=no
@@ -3545,7 +3556,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset54,
+		BufferOffset55,
 		"Update buffer offest (technical). Onclick mouseAction 12.",
 		0x118F0C,
 		(0x8B, 0x88, 0x34, 0x01, 0x00, 0x00), // default=no
@@ -3555,7 +3566,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset55,
+		BufferOffset56,
 		"Update buffer offest (technical). Onclick to set cliffs/terrain/altitude.",
 		0x119103,
 		(0x8B, 0x90, 0x34, 0x01, 0x00, 0x00), // default=no
@@ -3565,7 +3576,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset56,
+		BufferOffset57,
 		"Update buffer offest (technical). Onclick mouseAction 2,3,11.",
 		0x119164,
 		(0x8B, 0x81, 0x34, 0x01, 0x00, 0x00), // default=no
@@ -3575,7 +3586,7 @@ void AOE_binData::InitSelectedUnits() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
-		BufferOffset57,
+		BufferOffset58,
 		"Update buffer offest (technical). Onclick mouseAction F.",
 		0x1191B9,
 		(0x8B, 0x82, 0x34, 0x01, 0x00, 0x00), // default=no

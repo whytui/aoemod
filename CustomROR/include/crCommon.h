@@ -518,6 +518,9 @@ void AOE_InfAIBuildHistory_setStatus(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, l
 // Remove a building from arrays for a player
 void AOE_playerBldHeader_RemoveBldFromArrays(ROR_STRUCTURES_10C::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
 
+// Clear player selection then select provided unit.
+// If centerScreen is true, player's screen will be centered to unit.
+void SelectOneUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase, bool centerScreen);
 
 
 // -- Commands

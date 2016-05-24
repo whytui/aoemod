@@ -2513,6 +2513,66 @@ void CustomRORCommand::CallNearbyIdleMilitaryUnits() {
 }
 
 
+// Select next idle military unit for current player
+void CustomRORCommand::SelectNextIdleMilitaryUnit() {
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
+	short int playerId = globalStruct->humanPlayerId;
+	if ((playerId < 0) || (playerId > 8)) { return; }
+
+	ROR_STRUCTURES_10C::STRUCT_PLAYER **playerTable = globalStruct->GetPlayerStructPtrTable();
+	if (!playerTable || !playerTable[playerId]) { return; }
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = playerTable[playerId];
+	if (!player || !player->ptrCreatableUnitsListLink || (player->ptrCreatableUnitsListLink->listElemCount <= 0)) {
+		return;
+	}
+	assert(player->ptrCreatableUnitsListLink->IsCheckSumValid());
+
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **selectedUnits = this->crInfo->GetRelevantSelectedUnitsBasePointer(player);
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *mainSelectedUnit = NULL;
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *firstIgnoredUnit = NULL; // in case seelcted unit = last from list, keep in memory first one to loop back
+	if (selectedUnits) {
+		mainSelectedUnit = selectedUnits[0];
+	}
+	bool ignoreUntilSelectedUnitIsMet = false;
+	if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass()) {
+		ignoreUntilSelectedUnitIsMet = true;
+	}
+
+	ROR_STRUCTURES_10C::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *currentUnitElem = player->ptrCreatableUnitsListLink->lastListElement;
+	while (currentUnitElem) {
+		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)currentUnitElem->unit;
+		if (unitBase && unitBase->IsCheckSumValidForAUnitClass() && unitBase->ptrStructDefUnit && unitBase->ptrStructDefUnit->IsCheckSumValid()) {
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+			char result;
+			if ((unitBase->transporterUnit == NULL) && IsNonTowerMilitaryUnit(unitDefBase->unitAIType)) { // Excludes towers
+				_asm {
+					MOV ECX, unitBase;
+					MOV EDX, DS:[ECX];
+					CALL DS:[EDX + 0x210]; // unit.IsIdle() (this just test action status : not expensive)
+					MOV result, AL
+				}
+				if (result) {
+					if (!ignoreUntilSelectedUnitIsMet) {
+						SelectOneUnit(player, unitBase, true);
+						return;
+					}
+					if (firstIgnoredUnit == NULL) {
+						firstIgnoredUnit = unitBase;
+					}
+				}
+			}
+			if (unitBase == mainSelectedUnit) {
+				ignoreUntilSelectedUnitIsMet = false;
+			}
+		}
+		currentUnitElem = currentUnitElem->previousElement;
+	}
+	if (firstIgnoredUnit) {
+		SelectOneUnit(player, firstIgnoredUnit, true);
+	}
+}
+
+
 // Main method to manage "OnCreate" event for living units.
 // This event occurs after the constructor has finished its execution.
 // This event is triggered for all living units (type=70), not others.

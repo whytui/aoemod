@@ -214,7 +214,7 @@ static bool test_ror_structures() {
 	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN uiigm;
 	trs_assert(&uiigm, 0x55C, &uiigm.ingameChatTextZone);
 	trs_assert(&uiigm, 0x5E0, &uiigm.panelDisplayedButtonCount);
-	trs_assert(&uiigm, 0x7C4, &uiigm.unknown_7C4_panelSelectedUnitId);
+	trs_assert(&uiigm, 0x7C4, &uiigm.panelSelectedUnitId);
 
 	ROR_STRUCTURES_10C::STRUCT_UI_POPUP_DIALOG uidialog;
 	assert(sizeof(uidialog) == 0x4A4);

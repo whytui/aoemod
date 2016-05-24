@@ -81,6 +81,10 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		}
 	}
 
+	// ":"(FR) or ", (US) in game: select next idle military unit
+	if ((isInGame) && (!isMenuOpen) && (pressedKey == VK_OEM_2)) {
+		this->crCommand->SelectNextIdleMilitaryUnit();
+	}
 
 	// F9 in game: bring idle military units to current location (screen position).
 	// Requires ManageAI !

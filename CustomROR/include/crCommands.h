@@ -186,6 +186,9 @@ public:
 	// Requires ManageAI !
 	void CallNearbyIdleMilitaryUnits();
 
+	// Select next idle military unit for current player
+	void SelectNextIdleMilitaryUnit();
+
 	// Main method to manage "OnCreate" event for unit.
 	// This event occurs after the unit is created and added in player/global structs/lists.
 	// This event is triggered for ALL units (creatable or not, projectile, smoke, trees...)

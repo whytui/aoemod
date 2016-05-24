@@ -77,7 +77,7 @@ namespace AOE_CONST_INTERNAL
 		CST_MAT_CLICK_ZONE_TO_ATTACK = 0x64,
 		CST_MAT_SELECT_CONVERT_TARGET = 0x65,
 		CST_MAT_SELECT_HEAL_TARGET = 0x66,
-		CST_MAT_SELECT_UNKNOWN_67 = 0x67, // Some sub-action (in-game)
+		CST_MAT_SELECT_UNKNOWN_67 = 0x67, // Some sub-action (in-game) = select unit to attack ?
 		CST_MAT_SELECT_REPAIR_TARGET = 0x68,
 		CST_MAT_SELECT_UNKNOWN_69 = 0x69 // Some sub-action (in-game)
 	};
@@ -314,16 +314,16 @@ namespace AOE_CONST_INTERNAL
 
 	// Unsure / to debug
 	enum ACTION_STATUS : char {
-		CST_AS_UNKNOWN_01 = 1, // Executing action ?? 40544D
+		CST_AS_UNKNOWN_01 = 1, // ?? 40544D. Considered as idle (0x40662A)
 		CST_AS_UNKNOWN_02 = 2, // Seen when moving was finished? (idle)
-		CST_AS_UNKNOWN_03 = 3, // Can start moving to action location (temporary state) ? 40547F
+		CST_AS_UNKNOWN_03 = 3, // Can start moving to action location (temporary state) ? 40547F. Considered idle !
 		CST_AS_UNKNOWN_04 = 4, // Moving to action location ?
 		CST_AS_UNKNOWN_06 = 6, // "start" in progress ? (analog to 3?)
 		CST_AS_UNKNOWN_07 = 7, // in progress ? (analog to 4?). For both attack, build, etc
 		CST_AS_UNKNOWN_0B = 0x0B, // Seen when moving to bird location (after killing it)
 		CST_AS_UNKNOWN_0C = 0x0C, // waiting for requirement ? Really unsure
-		CST_AS_UNKNOWN_0D = 0x0D, // Set when unit can't move (speed==0) ?? 405472
-		CST_AS_UNKNOWN_0E = 0x0E,
+		CST_AS_UNKNOWN_0D = 0x0D, // Set when unit can't move (speed==0) ?? 405472. This status is an Idle status.
+		CST_AS_UNKNOWN_0E = 0x0E, // ? Considered idle.
 		CST_AS_UNKNOWN_0F = 0x0F // Seen while moving (just moving)
 	};
 

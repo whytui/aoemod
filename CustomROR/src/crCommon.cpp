@@ -2156,6 +2156,30 @@ void AOE_playerBldHeader_RemoveBldFromArrays(ROR_STRUCTURES_10C::STRUCT_PLAYER_B
 }
 
 
+// Clear player selection then select provided unit.
+// If centerScreen is true, player's screen will be centered to unit.
+void SelectOneUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase, bool centerScreen) {
+	if (!IsGameRunning()) { return; }
+	if (!player || !player->IsCheckSumValid()) {
+		return;
+	}
+	AOE_clearSelectedUnits(player);
+	AOE_selectUnit(player, (ROR_STRUCTURES_10C::STRUCT_UNIT*) unitBase, true);
+	if (centerScreen) {
+		player->screenPositionX = unitBase->positionX;
+		player->screenPositionY = unitBase->positionY;
+		player->unknown_122_posX = unitBase->positionX;
+		player->unknown_120_posY = unitBase->positionY;
+	}
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid() || !settings->ptrGameUIStruct ||
+		!settings->ptrGameUIStruct->IsCheckSumValid() || !settings->ptrGameUIStruct->gamePlayUIZone ||
+		!settings->ptrGameUIStruct->gamePlayUIZone->IsCheckSumValid()) {
+		return;
+	}
+	AOE_RefreshUIObject(settings->ptrGameUIStruct->gamePlayUIZone);
+}
+
 
 // commandStruct must have been allocated with a "AOE" alloc method like AOEAlloc(...)
 // It is freed by game code, don't use it / free it afterwards !

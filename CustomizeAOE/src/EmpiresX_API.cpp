@@ -273,7 +273,7 @@ bool EmpiresX_API::SetMaxSelectedUnits(unsigned char number) {
 		}
 
 		// BufferOffset sequences: no variable, just select seq 1
-		for (int i = 1; i <= 57; i++) {
+		for (int i = 1; i <= 58; i++) {
 			seqDefName = _T("BufferOffset") + to_wstring(i);
 			this->aoeManager.SetUserSelection(BC_SELECTED_UNITS, seqDefName, 1);
 		}

@@ -1704,7 +1704,7 @@ namespace ROR_STRUCTURES_10C
 		float screenPositionX; // axis northwest-southeast like \   [origin is left corner - max(X,Y) is right corner]
 		// 0x120
 		short int unknown_120_posY; // screen pos ?
-		short int unknown_122_posY; // screen pos ?
+		short int unknown_122_posX; // screen pos ?
 		unsigned long int unknown_124;
 		unsigned long int unknown_128; // split ; +0x129=?
 		unsigned long int unknown_12C;
@@ -4849,7 +4849,9 @@ namespace ROR_STRUCTURES_10C
 		char unknown_548[0x55C - 0x548];
 		STRUCT_UI_IN_GAME_TEXT_ZONE *ingameChatTextZone[8]; // 0x55C ; check count !
 		STRUCT_ANY_UI *unknown_57C; // 50 5D 54 00
-		char unknown_580[0x5C8 - 0x580];
+		char unknown_580[0x5B4 - 0x580];
+		STRUCT_GAME_GLOBAL *gameGlobal; // +5B4.
+		char unknown_5B8[0x5C8 - 0x5B8];
 		STRUCT_UNIT *panelSelectedUnit; // 0x5C8. Pointer to unit selected in unit info zone.
 		char unknown_5CC[0x5D0 - 0x5CC];
 		STRUCT_UI_UNIT_BUTTON_INFO *tmpUnitBtnCommandsInfo_researches; // +5D0. Pointer to array[]. Only for researches ! Used in internal treatments when showing buttons.
@@ -4866,8 +4868,22 @@ namespace ROR_STRUCTURES_10C
 		char unknown_728[0x734 - 0x728];
 		long int unknown_debugText_strlen; // +734
 		char unknown_debugText[0x34];
-		char unknown_75C[0x7C4 - 0x76C];
-		long int unknown_7C4_panelSelectedUnitId;
+		char shortcutKeySelectTownCenter[4]; // +76C. = 'H' = select TC and center screen.
+		char shortcutKeyunused_villagerWork[4]; // +770. = 0 (unused) = Work, for a villager.
+		char shortcutKeyMove[4]; // +774. = 'M'. Key to tell a unit to move.
+		char shortcutKeyUnused_attack[4]; // +778. = 0 (unused) = Attack a unit (click to select target)
+		char shortcutKeyUngroupUnits[4]; // +77C. = 'D' = ungroup units
+		char shortcutKeyA_780[4]; // +780. = 'A'. Unused ?
+		char shortcutKeyN[4]; // +784. = 'N'
+		char shortcutKeyC[4]; // +788. = 'C'
+		char shortcutKeyP[4]; // +78C. = 'P'
+		char shortcutKeyA_790[4]; // +790. = 'A'
+		char shortcutKeyS[4]; // +794. = 'S'
+		char shortcutKeyE[4]; // +798. = 'E'
+		char shortcutKeyT[4]; // +79C. = 'T'
+		char shortcutKeyI[4]; // +7A0. = 'I'
+		char unknown_7A4[0x7C4 - 0x7A4];
+		long int panelSelectedUnitId; // +7C4. Selected unit ID (in unit details zone)
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_IN_GAME_MAIN; }
 	};
