@@ -248,7 +248,7 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x044E02F:
 		this->GathererPathFindingReturnToDeposit(REG_values); // Applicable for both 2 calls
 		break;
-	case 0x04A78DA:
+	case 0x004A78C8:
 		this->ShowUnitShortcutNumbers(REG_values);
 		break;
 	case 0x00494C7F:
@@ -341,6 +341,7 @@ void CustomRORInstance::OneShotInit() {
 		}
 		// Initialize global variable so we can retrieve our button icons when needed
 		InitSlpInfoFromDrs(&this->crInfo.customRorIcons, CST_CUSTOMROR_CMD_ICONS_SLP_ID);
+		InitSlpInfoFromDrs(&this->crInfo.customRorUnitShortcuts, CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
 	}
 }
 
@@ -2708,23 +2709,101 @@ void CustomRORInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_value
 }
 
 
-// From 004A78D5 : in display unit method, where shortcut numbers are managed.
-// Change return address to 0x04A792C NOT to display shortcut number (default when playerId <> controlledPlayerId)
+// From 004A78C0 : in display unit method, where shortcut numbers are managed.
+// - JUMP to 4A792C (default) = do NOT show shortcut (managed in ROR modified code = no need to change return address)
+// - JUMP to 4A78DB = show standard shortcut(only for 1 - 9; will crash otherwise)
+// To show custom shortcut, do the CALL 516390 in customROR then JUMP to 4A792C.
 void CustomRORInstance::ShowUnitShortcutNumbers(REG_BACKUP *REG_values) {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = (ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *) REG_values->ECX_val;
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = (ROR_STRUCTURES_10C::STRUCT_PLAYER *) REG_values->EAX_val;
-	ror_api_assert(REG_values,  global && global->IsCheckSumValid());
-	ror_api_assert(REG_values, player && player->IsCheckSumValid());
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	ror_api_assert(REG_values, settings && settings->IsCheckSumValid());
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)REG_values->EBP_val;
+	ror_api_assert(REG_values, global && global->IsCheckSumValid());
+	ror_api_assert(REG_values, unitBase && unitBase->IsCheckSumValidForAUnitClass());
+	if (!global || !global->IsCheckSumValid() || !unitBase || !unitBase->IsCheckSumValidForAUnitClass()) {
+		return;
+	}
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = unitBase->ptrStructPlayer;
+	ror_api_assert(REG_values, player && player->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return; }
+	char shortcutInternalValue = unitBase->shortcutNumber;
+	bool shortcutIsCompatibleWithStandardGame = (shortcutInternalValue > 0) && (shortcutInternalValue < 10); // Only 1-9 are supported in original code
+	const unsigned long int RA_showStandardShortcut = 0x4A78DB; // Return address for "standard shortcut" code.
+	const unsigned long int RA_showCustomShortcut = 0x4A78F5; // Return address for "custom shortcut" code.
+
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
-		return; // Always show shortcut numbers in editor.
+	// Always show shortcut numbers in editor.
+	if (shortcutIsCompatibleWithStandardGame && (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
+		ChangeReturnAddress(REG_values, RA_showStandardShortcut);
+		return;
 	}
 	// Default behaviour : do NOT display shortcut from other players
 	if (global->humanPlayerId != player->playerId) {
-		ChangeReturnAddress(REG_values, 0x04A792C);
+		return;
+	}
+	// Valid situation (unit is mine, display shortcut) : custom code to display custom shortcuts (other than 1-9)
+	
+	// Standard shortcuts = standard behaviour
+	if (shortcutIsCompatibleWithStandardGame) {
+		ChangeReturnAddress(REG_values, RA_showStandardShortcut);
+		return;
+	}
+
+	if (!IsValidInternalShortcutNumber(shortcutInternalValue)) {
+		return; // Do not display unit group ID (not a shortcut)
+	}
+
+	// Here: unit has a custom shortcut OR shortcut 10 (not displayed in standard game)
+
+	if (this->crInfo.customRorIcons.slpSize <= 0) {
+		return; // Error case: missing SLP data
+	}
+
+	char shortcutDisplayValue = GetShortcutDisplayValueFromInternalValue(shortcutInternalValue); // should be 10-20
+	assert((shortcutDisplayValue >= 10) && (shortcutDisplayValue <= 20));
+	if ((shortcutDisplayValue < 10) || (shortcutDisplayValue > 20)) {
+		return;
+	}
+	// slpFileIndex = SLP file index, index starting at 1.
+	long int slpFileIndex = (shortcutDisplayValue - 10) + // get a "index" 0-10 instead of a value 10-20
+		CST_CUSTOMROR_SLP_INDEX_FOR_UNIT_SHORTCUT_10; // Add offset to position on "shortcut 10" index in SLP file
+	long int slpArrayIndex = slpFileIndex - 1; // Index starting at 0 in binary array
+
+	if ((slpFileIndex < 0) || (slpFileIndex > CST_CUSTOMROR_MAX_SLP_INDEX_FOR_UNIT_SHORTCUTS)) {
+		std::string msg = "ERROR: tried to use a wrong Slp.itemIndex: ";
+		msg += std::to_string(slpFileIndex);
+		traceMessageHandler.WriteMessage(msg);
+		return;
+	}
+
+	ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER *slpHeader = this->crInfo.customRorUnitShortcuts.slpFileHeader;
+	//slpHeader = settings->ptrInfosSLP[0]->slpFileHeader; // TEMP TEST
+	// slpFrameHeaderBase = first array element (in slp frame headers array)
+	ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *slpFrameHeaderBase = (ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *)
+		(slpHeader + 1); // Dirty, but works because structs have same size (done like this in ROR code)
+	ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *slpFrameHeader = slpFrameHeaderBase + slpArrayIndex; // Move to correct frame in array
+	long int stack20 = GetIntValueFromRORStack(REG_values, 0x20);
+	stack20 = stack20 & 0xFFFF; // It is a word (MOVSX)
+	stack20 -= 8;
+	long int stack1C = GetIntValueFromRORStack(REG_values, 0x1C);
+	stack1C = stack1C & 0xFFFF; // It is a word (MOVSX)
+	stack1C -= 6;
+	long int stack10 = GetIntValueFromRORStack(REG_values, 0x10);
+	unsigned long int showSlp = 0x516390;
+	_asm {
+		MOV ECX, DWORD PTR DS:[0x7C0444];
+		PUSH ECX; // ds:[7C0444]
+		PUSH 0x1E; // arg9
+		PUSH 0;
+		PUSH 0;
+		PUSH 0; // arg6
+		PUSH stack20; // EDX
+		PUSH stack1C; // ECX
+		PUSH stack10; // arg3
+		PUSH slpFrameHeader; // arg2
+		PUSH slpHeader;
+		MOV ECX, DWORD PTR DS:[0x7C0460];
+		CALL showSlp;
 	}
 }
 

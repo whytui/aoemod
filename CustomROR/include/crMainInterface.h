@@ -2,6 +2,7 @@
 #include "crCommands.h"
 #include "popups.h"
 #include "traceMessage.h"
+#include "unitShortcuts.h"
 
 /* This class manages main interactions between ROR (via CustomRORInstance class) and customROR commands
  * Especially, UI events are managed here as our UI objects need to access CustomRORCommand object.

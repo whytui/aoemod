@@ -59,8 +59,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 	// Handle more Units shortcuts using numpad keys 0-9
 	if ((isInGame) && (!isMenuOpen) && (pressedKey >= VK_NUMPAD0) && (pressedKey <= VK_NUMPAD9)) {
-		long int shortcutNumber = (pressedKey - VK_NUMPAD0); // 0-9
-		shortcutNumber = shortcutNumber - 11; // Use values [-11,-2]. Do not use those: -1=<joker for groups>. 0=<no shortcut>. 1-10=<standard shortcuts>. 11-127=<group_ids>
+		long int shortcutNumber = GetShortcutInternalValueFromKey(pressedKey);
 		if (CTRL) {
 			AssignShortcutToSelectedUnits(GetControlledPlayerStruct_Settings(), shortcutNumber);
 		} else {

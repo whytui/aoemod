@@ -158,6 +158,7 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_UI_SCENARIO_EDITOR_MAIN; // "Scenario Editor Screen"
 	class STRUCT_UI_SCENARIO_EDITOR_MENU;
 	class STRUCT_UI_F11_POP_PANEL;
+	class STRUCT_UI_IN_GAME_UNIT_INFO_ZONE;
 	class STRUCT_UI_IN_GAME_MAIN; // "GameScreen"
 	class STRUCT_UI_IN_GAME_SUB1;
 	class STRUCT_UI_IN_GAME_MENU;
@@ -1856,7 +1857,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_03C;
 		// 0x40
 		char unknown_040[0x1C];
-		unsigned long int ptrInfosMoveTo_SLP; // Pointer to information about moveTo.slp graphics. Size=0x20, starts with 3 pointers.
+		STRUCT_SLP_INFO **ptrInfosSLP; // Pointer to array slpInfo, size=3 ? index 0=shortcut numbers
 		// 0x60
 		STRUCT_MAIN_SOUND *pSoundStruct; // Size 69C, see 41894B. Generally =NULL, only set while being used.
 		STRUCT_MAIN_MUSIC *pMusicStruct; // Size 3F8, see 418B14. Generally =NULL, only set while being used.
@@ -2967,7 +2968,7 @@ namespace ROR_STRUCTURES_10C
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES previousTargetUnitId; // +58. Previous target class
 		long int previousTargetUnitType; // +5C
 		// 0x60
-		STRUCT_AI_UNIT_LIST_INFO * unknown_060_unitIdList_targets; // +60. Warning, arraySize can be >usedElemCount here.
+		STRUCT_AI_UNIT_LIST_INFO unknown_060_unitIdList_targets; // +60. Warning, arraySize can be >usedElemCount here.
 		// 0x70
 		float unknown_070_posY;
 		float unknown_074_posX;
@@ -3737,8 +3738,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_01C; // ptr. +5=byte
 		// 0x20
 		STRUCT_UNIT *transporterUnit; // Transport boat the unit is in
-		short int unknown_024; // Or pointer to garrisoned units ? (+4 list, +8 nb)?
-		short int unknown_026;
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *unknown_024; // +24.
 		short int unknown_028;
 		short int unknown_02A; // for graphics ?
 		short int unknown_02C; // for graphics ?
@@ -3747,7 +3747,7 @@ namespace ROR_STRUCTURES_10C
 		float remainingHitPoints;
 		char currentGraphicsDamageIndex; // +34. According to remaining HP ?
 		char orientation; // +35. Also used as building step (<25%, <50%, <75%, >75%)
-		char mouseSelectionStatus; // +36. 1=selected, 2=right-click-target
+		char mouseSelectionStatus; // +36. 1=selected, 2=right-click-target. Is it a Mask, not an enum !
 		char shortcutNumber; // 0-10, 10+=regrouped units ; 0=none, 10=0x0A="0" key.
 		float positionY; // (+38) bottom-left to upper-right
 		float positionX; // (+3C) top-left to bottom-right
@@ -3788,6 +3788,7 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00547DA8); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_EYE_CANDY); }
+		// Returns true if checksum is valid for this class OR a child class
 		bool IsCheckSumValidForAUnitClass() {
 			return (this->checksum == 0x00547DA8) || // eye candy
 				(this->checksum == 0x00542E14) || // Flag
@@ -4046,8 +4047,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_01C; // ptr. +5=byte
 		// 0x20
 		STRUCT_UNIT *transporterUnit; // Transport boat the unit is in
-		short int unknown_024; // Or pointer to garrisoned units ? (+4 list, +8 nb)?
-		short int unknown_026;
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *unknown_024; // List of ??
 		short int unknown_028;
 		short int unknown_02A;
 		short int unknown_02C;
@@ -4056,7 +4056,7 @@ namespace ROR_STRUCTURES_10C
 		float remainingHitPoints;
 		char currentGraphicsAge; // 0=stone/tool, 1=bronze, 2=iron
 		char orientation; // Also used as building step (<25%, <50%, <75%, >75%)
-		char mouseSelectionStatus; // +36. 1=selected, 2=right-click-target
+		char mouseSelectionStatus; // +36. 1=selected, 2=right-click-target. Is it a Mask, not an enum !
 		char shortcutNumber; // 0-10, 10+=regrouped units ; 0=none, 10=0x0A="0" key.
 		float positionY; // (+38) bottom-left to upper-right
 		float positionX; // (+3C) top-left to bottom-right
@@ -4198,7 +4198,7 @@ namespace ROR_STRUCTURES_10C
 
 	// A shortcut to be used with UI objects when exact type is unknown. Also used as parent class for UI objects.
 	// Size=0xF4 for this class, but all child classes are larger !
-	// Constructor: 004523F0 for "screen" objects, 00452580 for components ?
+	// Constructor: 004523F0 for "screen" objects, 00452580 for components
 	// In general, you should not modify these members directly. You are supposed to use methods (few are implemented in this solution).
 	// D8 4A 54 00 for this base (parent) class ??
 	class STRUCT_ANY_UI {
@@ -4814,6 +4814,71 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_UI_F11_POP_PANEL) == 0x164, "STRUCT_UI_F11_POP_PANEL size");
 
 
+#define CHECKSUM_UI_IN_GAME_UNIT_INFO_ZONE 0x00549E7C
+	// Size=0x214. Constructor=0x4F83D0 = unitInfoZone.constructor(arg1, mainGameUI, arg3, arg4, arg5, iconsForTrainUnit, iconsForBuildings, controlledPlayer)
+	// Unsure
+	class STRUCT_UI_IN_GAME_UNIT_INFO_ZONE : public STRUCT_ANY_UI {
+	public:
+		unsigned long int unknown_0F4; // +F4 : font info. (=fontObj+0)
+		unsigned long int unknown_0F8; // +F8 : font info. (=fontObj+4)
+		unsigned long int unknown_0FC; // +FC : font info. (=fontObj+8)
+		STRUCT_SLP_INFO *healthSlp; // +100. Health.shp, slpId=0xC639
+		STRUCT_SLP_INFO *itemIconSlp; // +104. itemicon.shp, slpid=0xC62B
+		STRUCT_SLP_INFO *iconsForTrainUnits; // +108. Check type (STRUCT_SLP_INFO ok, but is pointer ok ?)
+		STRUCT_SLP_INFO **iconsForBuildings; // +10C. ArraySize=5 (tilesets)? Check type (STRUCT_SLP_INFO ok, but is pointer ok ?)
+		unsigned long int unknown_110;
+		STRUCT_UNIT_BASE *currentUnit; // +114
+		long int unknown_118;
+		long int unknown_11C; // Init = 0x1F4.
+		char unknown_120; // +120. 0,1, 2 (enum ?)
+		char unknown_121[3]; // unused?
+		STRUCT_UNITDEF_BASE *currentUnitDef; // +124. Unit definition of selected unit
+		unsigned long int unknown_128;
+		short int currentUnitResourceTypeId; // +12C
+		short int unknown_12E;
+		float currentUnitResourceAmount; // +130
+		char unknown_134;
+		char unknown_135[3]; // unused?
+		char unknown_138[0x13C - 0x138];
+		unsigned long int *unknown_13C; // +13C. Pointer to ? First garrisoned unit ?
+		short int garrisonedUnitCount; // +140. To confirm
+		short int unknown_142;
+		unsigned long int unknown_144;
+		unsigned long int unknown_148;
+		float currentUnitHP; // +14C
+		short int displayedArmor; // +150. To confirm
+		short int displayedAttack; // +152. To confirm
+		short int unknown_154;
+		short int unknown_156;
+		unsigned long int unknown_158;
+		unsigned long int unknown_15C;
+		short int unknown_160;
+		short int unknown_162;
+		short int unknown_164;
+		char unknown_166;
+		char unknown_167; // unused ?
+		char unknown_168[0x1C8 - 0x168];
+		short int unknown_1C8;
+		char unknown_1CA;
+		char unknown_1CB; // unused ?
+		long int unknown_1CC;
+		float currentUnitLineOfSight; // +1D0
+		long int unknown_1D4;
+		long int unknown_1D8;
+		char currentUnitShortcutNumber; // +1DC
+		char unknown_1DD[3];
+		STRUCT_PLAYER *currentUnitPlayer; // +1E0.
+		unsigned long int unknown_1E4;
+		char currentUnitHasAnAction; // +1E8
+		char unknown_1E9[3];
+		STRUCT_SLP_INFO *unknown_1EC_SLP[9]; // +1EC.
+		long int unknown_210; // +210
+
+		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_IN_GAME_UNIT_INFO_ZONE; }
+	};
+	static_assert(sizeof(STRUCT_UI_IN_GAME_UNIT_INFO_ZONE) == 0x214, "STRUCT_UI_IN_GAME_UNIT_INFO_ZONE size");
+
+
 	// Size 0x7C8
 	// Constructor 0x47D440
 	// This is the parent UI object of in-game screen.
@@ -4834,7 +4899,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_UI_PLAYING_ZONE *gamePlayUIZone; // +4B8. 88 66 54 00.
 		STRUCT_UI_DIAMOND_MAP *diamondMap; // +4BC. ptr to F4 A3 54 00.
 		// 0x4C0
-		unsigned long int unknown_4C0;
+		unsigned long int unknown_4C0; // Struct size=0x118, constructor=4F7C00. 98 9D 54 00
 		unsigned long int unknown_4C4;
 		STRUCT_UI_BUTTON_WITH_NUMBER *unitCommandButtons[12]; // +4C8. 2 rows of 6 slpButtons for command buttons in bottom center zone.
 		STRUCT_UI_BUTTON_WITH_NUMBER *btnChat; // +4F8. Also referred as commandButtons[0xC]. Not visible in SP games.

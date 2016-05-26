@@ -1629,7 +1629,9 @@ ROR_STRUCTURES_10C::STRUCT_UNIT *CheckAndCreateUnit(ROR_STRUCTURES_10C::STRUCT_P
 
 // Will has the same effect as "CTRL-0" or "CTRL-1" etc: assigns a shortcut number to units (and removes this shortcut from old units that had it)
 // Do not use numbers > 10 (0x0A), they are used for groups. You can use negative values.
-// Other numbers than 1-9 will never be displayed as SLP file contains only 1-9 images.
+// shortcutNumber must be an "internal" shortcut number ([-11;-2], 0 or [1-10] for shortcuts). This is not checked here.
+// shortcutNumber>10 values correspond to groups.
+// Other numbers than 1-9 will never be displayed as SLP file contains only 1-9 images (unless using custom DRS/SLPs)
 // Returns 1 on success.
 long int AssignShortcutToSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int shortcutNumber) {
 	if (!player) { return 0; }
@@ -1650,6 +1652,8 @@ long int AssignShortcutToSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 }
 
 // Selects units that have a given shortcut number.
+// shortcutNumber must be an "internal" shortcut number ([-11;-2], 0 or [1-10] for shortcuts). This is not checked here.
+// shortcutNumber>10 values correspond to groups.
 // Returns 1 on success.
 long int SelectUnitsUsingShortcut(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int shortcutNumber, bool addToSelection) {
 	if (!player) { return 0; }
@@ -2168,8 +2172,8 @@ void SelectOneUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C
 	if (centerScreen) {
 		player->screenPositionX = unitBase->positionX;
 		player->screenPositionY = unitBase->positionY;
-		player->unknown_122_posX = unitBase->positionX;
-		player->unknown_120_posY = unitBase->positionY;
+		player->unknown_122_posX = (short int)unitBase->positionX;
+		player->unknown_120_posY = (short int)unitBase->positionY;
 	}
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid() || !settings->ptrGameUIStruct ||

@@ -123,6 +123,7 @@
     <ClInclude Include="include\strategy.h" />
     <ClInclude Include="include\traceMessage.h" />
     <ClInclude Include="include\UI_utilities.h" />
+    <ClInclude Include="include\unitShortcuts.h" />
     <ClInclude Include="include\Version.h" />
   </ItemGroup>
   <ItemGroup>

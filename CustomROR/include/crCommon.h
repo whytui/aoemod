@@ -78,6 +78,7 @@ public:
 	char nameIndexIsUsedByPlayer[CST_MAX_TOTAL_CIV_COUNT][CST_MAX_NUMBER_OF_PLAYER_NAMES_PER_CIV];
 	// Own DRS objects
 	STRUCT_SLP_INFO customRorIcons;
+	STRUCT_SLP_INFO customRorUnitShortcuts;
 
 	// Triggers
 	CR_TRIGGERS::crTriggerSet *triggerSet; // all information about custom triggers.

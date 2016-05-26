@@ -63,7 +63,7 @@ namespace ROR_STRUCTURES_10C {
 	};
 	static_assert(sizeof(STRUCT_DRS_FILE_LINK) == 0x114, "STRUCT_DRS_FILE_LINK size");
 
-	// Header size=0x20, total size=? not constant ?
+	// Header size=0x20
 	class STRUCT_SLP_FILE_HEADER {
 	public:
 		char version[4];
@@ -73,6 +73,20 @@ namespace ROR_STRUCTURES_10C {
 		// char fileData[1] // Unknown size
 	};
 	static_assert(sizeof(STRUCT_SLP_FILE_HEADER) == 0x20, "STRUCT_SLP_FILE_HEADER size"); // to remove if fileData is uncommented
+
+
+	// Slp frame header, Size=0x20. An array of this is located just after STRUCT_SLP_FILE_HEADER in file.
+	class STRUCT_SLP_FRAME_HEADER {
+	public:
+		long int unknown_00_offset;
+		long int unknown_04_offset;
+		long int unknown_08;
+		long int unknown_0C;
+		long int xSize;
+		long int ySize;
+		long int unknown_18;
+		long int unknown_1C;
+	};
 
 	// Size = 0x20. Constructor = 0x49F5F0
 	class STRUCT_SLP_INFO {
@@ -85,7 +99,7 @@ namespace ROR_STRUCTURES_10C {
 		unsigned long int unknown_10;
 		unsigned long int unknown_14;
 		STRUCT_SLP_FILE_HEADER *slpFileHeader; // +18. Use this one when +00 is NULL.
-		unsigned long int *slpFileData; // +1C. Ptr to actual SLP data, after header (STRUCT_SLP_FILE+0x20)
+		STRUCT_SLP_FRAME_HEADER *slpFileData; // +1C. Pointer to an array of SLP frame header.
 	};
 	static_assert(sizeof(STRUCT_SLP_INFO) == 0x20, "STRUCT_SLP_INFO size");
 

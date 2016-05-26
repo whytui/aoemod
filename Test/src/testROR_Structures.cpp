@@ -146,6 +146,8 @@ static bool test_ror_structures() {
 	assert(sizeof(rd) == 0x3C);	
 
 	ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY uay;
+	trs_assert(&uay, 0x60, &uay.unknown_060_unitIdList_targets);
+	trs_assert(&uay, 0x74, &uay.unknown_074_posX);
 	trs_assert(&uay, 0x114, &uay.currentPosX);
 	ROR_STRUCTURES_10C::STRUCT_UNIT u;
 	trs_assert(&u, 0x90, &u.unknown_090);
@@ -235,6 +237,9 @@ static bool test_ror_structures() {
 	//assert(sizeof(scEditorUI) == );
 	trs_assert(&scEditorUI, 0x500, &scEditorUI.btnMenu);
 	trs_assert(&scEditorUI, 0x664, &scEditorUI.unitListElementCount);
+
+	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE uiunitinfozone;
+	trs_assert(&uiunitinfozone, 0x1E0, &uiunitinfozone.currentUnitPlayer);
 
 #endif
 	return true;
