@@ -17,7 +17,18 @@
 
 enum AOE_FONTS : long int {
 	AOE_FONT_BIG_LABEL = 0,
-	AOE_FONT_STANDARD_TEXT = 0x0B
+	AOE_FONT_VERY_BIG_LABEL_1 = 1,
+	AOE_FONT_BIG_HEIGHT_2 = 2,
+	AOE_FONT_BIG_HEIGHT_3 = 3,
+	AOE_FONT_BIG_LABEL_4 = 4,
+	AOE_FONT_BIG_HEIGHT_5 = 5,
+	AOE_FONT_SMALL_TEXT_6 = 6, // Small text. Used in About popup.
+	AOE_FONT_SMALL_TEXT_7 = 7, // Small text. Used in About popup.
+	AOE_FONT_STANDARD_STRIKETHROUGH = 8, // Standrd font with strikethrough formatting
+	AOE_FONT_VERY_SMALL = 9, // Smaller than standard font
+	AOE_FONT_SMALL_TEXT_10 = 10, // Small text.
+	AOE_FONT_STANDARD_TEXT = 11 // Standard font, mostly used. (0x0B)
+	// 12+ invalids ?
 };
 
 
