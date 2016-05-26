@@ -19,6 +19,7 @@
 #include "interface.h"
 #include "EXESelfEditor.h"
 #include "crPatcher.h"
+#include "unitShortcuts.h"
 
 #pragma once
 
@@ -325,6 +326,12 @@ public:
 	// Default result=false (on error cases)
 	bool AutoSearchTargetShouldIgnoreUnit(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity,
 		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *potentialTargetUnit);
+
+	// Manages the display of a unit shortcut for non-standard shortcuts.
+	// Returns true if we want to let standard game code execute the shortcut display operation. (default false)
+	bool DisplayCustomUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase,
+		long int posX, long int posY, long int unknown_arg3);
+
 
 	// ----------------------------------
 	// City plan

@@ -743,3 +743,25 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 	}
 	return true;
 }
+
+
+// Display shortcut number below unit in game zone. Can be used to display other SLP bitmaps !
+static void DisplayUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER *slpHeader,
+	ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *slpFrameHeader, long int posX, long int posY, long int unknown_arg3) {
+	unsigned long int showSlp = 0x516390;
+	_asm {
+		MOV ECX, DWORD PTR DS:[0x7C0444];
+		PUSH ECX; // ds:[7C0444]
+		PUSH 0x1E; // arg9 = zindex level (sort of)
+		PUSH 0;
+		PUSH 0;
+		PUSH 0; // arg6
+		PUSH posY; // arg5 = posY
+		PUSH posX; // arg4 = posX
+		PUSH unknown_arg3; // arg3
+		PUSH slpFrameHeader; // arg2
+		PUSH slpHeader; // arg1
+		MOV ECX, DWORD PTR DS:[0x7C0460];
+		CALL showSlp;
+	}
+}

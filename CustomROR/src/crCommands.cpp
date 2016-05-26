@@ -5138,6 +5138,81 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(ROR_STRUCTURES_10C::STRU
 }
 
 
+// Manages the display of a unit shortcut for non-standard shortcuts.
+// Returns true if we want to let standard game code execute the shortcut display operation. (default false)
+bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase,
+	long int posX, long int posY, long int unknown_arg3) {
+	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = unitBase->ptrStructPlayer;
+	assert(player && player->IsCheckSumValid() && global && global->IsCheckSumValid());
+	if (!player || !player->IsCheckSumValid()) { return false; }
+	if (!global || !global->IsCheckSumValid()) { return false; }
+
+	char shortcutInternalValue = unitBase->shortcutNumber;
+	bool shortcutIsCompatibleWithStandardGame = (shortcutInternalValue > 0) && (shortcutInternalValue < 10); // Only 1-9 are supported in original code
+	// Always show shortcut numbers in editor.
+	if (shortcutIsCompatibleWithStandardGame && (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
+		return true;
+	}
+	// Default behaviour : do NOT display shortcut from other players
+	if (global->humanPlayerId != player->playerId) {
+		return false;
+	}
+	// Valid situation (unit is mine = display the shortcut) : custom code to display custom shortcuts (other than 1-9)
+
+	// Standard shortcuts = standard behaviour
+	if (shortcutIsCompatibleWithStandardGame) {
+		return true;
+	}
+
+	if (!IsValidInternalShortcutNumber(shortcutInternalValue) && (shortcutInternalValue <= 10)) {
+		return false; // shortcutNumber is NOT a shortcut NOR a group ID : do not display anything (exit)
+	}
+
+	// Here: unit has a custom shortcut OR shortcut 10 (not displayed in standard game)
+
+	if (this->crInfo->customRorIcons.slpSize <= 0) {
+		return false; // Error case: missing SLP data
+	}
+
+	long int slpFileIndex = 0; // slpFileIndex = SLP file index, index starting at 1.
+	long int slpArrayIndex = 0; // Index starting at 0 in binary array
+	if (IsValidInternalShortcutNumber(shortcutInternalValue)) {
+		char shortcutDisplayValue = GetShortcutDisplayValueFromInternalValue(shortcutInternalValue); // should be 10-20
+		assert((shortcutDisplayValue >= 10) && (shortcutDisplayValue <= 20));
+		if ((shortcutDisplayValue < 10) || (shortcutDisplayValue > 20)) {
+			return false;
+		}
+		slpFileIndex = (shortcutDisplayValue - 10) + // get a "index" 0-10 instead of a value 10-20
+			CST_CUSTOMROR_SLP_INDEX_FOR_UNIT_SHORTCUT_10; // Add offset to position on "shortcut 10" index in SLP file
+	} else {
+		slpFileIndex = CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT; // shortcut corresponds to a unit group, not a shortcut
+	}
+	slpArrayIndex = slpFileIndex - 1;
+	if ((slpFileIndex < 0) || (slpFileIndex > CST_CUSTOMROR_MAX_SLP_INDEX_IN_UNIT_SHORTCUTS_FILE) ||
+		((slpFileIndex > CST_CUSTOMROR_MAX_SLP_INDEX_FOR_UNIT_SHORTCUTS) && (slpFileIndex != CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT))
+		) {
+		std::string msg = "ERROR: tried to use a wrong Slp.itemIndex: ";
+		msg += std::to_string(slpFileIndex);
+		traceMessageHandler.WriteMessage(msg);
+		return false;
+	}
+
+	ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER *slpHeader = this->crInfo->customRorUnitShortcuts.slpFileHeader;
+	// slpFrameHeaderBase = first array element (in slp frame headers array)
+	ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *slpFrameHeaderBase = (ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *)
+		(slpHeader + 1); // Dirty, but works because structs have same size (done like this in ROR code)
+	ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *slpFrameHeader = slpFrameHeaderBase + slpArrayIndex; // Move to correct frame in array
+
+	DisplayUnitShortcutSymbol(slpHeader, slpFrameHeader, posX - 9, posY - 8, unknown_arg3);
+	return false;
+}
 
 
 // Computes (existing) building influence zone for farm placement map like values computation.
