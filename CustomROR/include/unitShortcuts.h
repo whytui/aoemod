@@ -27,11 +27,8 @@ static char GetShortcutDisplayValueFromInternalValue(char shortcutValue) {
 	if (shortcutValue < -11) {
 		return 0;
 	}
-	if (shortcutValue == -11) {
-		return 20; // As "0" represents "shortcut=10", numpad "0" represents "shortcut=20".
-	}
 	// Here: shortcutValue is in [-11;-2] = custom shortcuts
-	return shortcutValue + 21; // returns a shortcut ID in [11-20]
+	return shortcutValue + 22; // returns a shortcut ID in [11-20]
 }
 
 // Converts a shortcut number (1-20) into the internal value to store in unit.shortcutNumber field.
@@ -43,10 +40,7 @@ static char GetShortcutInternalValueFromDisplayValue(char shortcutNumber) {
 	if (shortcutNumber <= 10) {
 		return shortcutNumber; // [1;10] : return as is
 	}
-	if (shortcutNumber == 20) {
-		return -11;
-	}
-	return shortcutNumber - 21; // Other values : shortcuts [11;19] => values [-10;-2]
+	return shortcutNumber - 22; // Other values : shortcuts [11;20] => values [-11;-2]
 }
 
 
