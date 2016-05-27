@@ -20,6 +20,7 @@ Features:
 * Triggers system (see separate documentation)
 * Add up to 255 civilizations (total) + configure AI, names... (see customROR_civs.xml)
 * Most AI improvements (see below) are NOT applied in easy/easiest difficulty levels.
+* Load additional DRS files at ROR startup to use custom graphics/icons/sounds...
 
 Strategy (AI):
 - Fix AI when loading saved games: some information is lost in standard game, especially if you save a game in the very first seconds.
