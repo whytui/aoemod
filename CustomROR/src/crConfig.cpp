@@ -206,6 +206,26 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "autoFixMissingFeatures") {
 			this->autoFixMissingFeatures = XML_GetBoolElement(elem, "enable");
 		}
+		if (elemName == "drsFile") {
+			std::string folder = this->XML_GetAttributeValue(elem, "folder");
+			std::string filename = this->XML_GetAttributeValue(elem, "filename");
+			// Add without duplicate (add valids only)
+			DrsFileToLoad *drs = new DrsFileToLoad(folder, filename);
+			bool addedInList = false;
+			if (drs->IsValid()) {
+				auto it = std::find_if(this->customDrsFilesList.begin(), this->customDrsFilesList.end(),
+					[drs](DrsFileToLoad *elem) { return *elem == *drs; }
+				);
+				if (it == this->customDrsFilesList.end()) {
+					// Not found = not already in the list
+					this->customDrsFilesList.push_back(drs);
+					addedInList = true;
+				}
+			}
+			if (!addedInList) {
+				delete drs;
+			}
+		}
 		if (elemName == "showCustomRORMenu") {
 			this->showCustomRORMenu = XML_GetBoolElement(elem, "enable");
 		}

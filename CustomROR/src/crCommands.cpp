@@ -205,6 +205,24 @@ void CustomRORCommand::ReadIfManageAIIsOn() {
 }
 
 
+// Load custom DRS files
+void CustomRORCommand::LoadCustomDrsFiles() {
+	for each (DrsFileToLoad *drs in this->crInfo->configInfo.customDrsFilesList)
+	{
+		AOE_AddDrsFile(drs->filename.c_str(), drs->folder.c_str());
+	}
+
+	// Prepare custom DRS data
+	if (this->crInfo->configInfo.useImprovedButtonBar) {
+		if (this->crInfo->configInfo.showAlertOnMissingFeature && !FindDrsLinkForFile(CST_CUSTOMROR_DRS_FILENAME)) {
+			MessageBoxA(0, "ERROR : Could not find customROR.drs or it is invalid.", "CustomROR", MB_ICONWARNING);
+		}
+		// Initialize global variable so we can retrieve our button icons when needed
+		InitSlpInfoFromDrs(&this->crInfo->customRorIcons, CST_CUSTOMROR_CMD_ICONS_SLP_ID);
+		InitSlpInfoFromDrs(&this->crInfo->customRorUnitShortcuts, CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
+	}
+}
+
 
 // Execute a command from custom options window
 // Returns true if the provided command is valid (and executed)

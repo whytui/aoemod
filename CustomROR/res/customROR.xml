@@ -4,6 +4,10 @@
 	<alertOnMissingFeatures enable="1"/>
 	<autoFixMissingFeatures enable="1"/><!-- If 1, ROR_API features that are not installed are automaticalled added on the fly -->
 	
+	<!-- *** Graphics -->
+	<!-- drsFile : you can add 0, 1 or n "drsFile" tags. folder=folder name under AOE root directory. filename=DRS file name.-->
+	<drsFile folder="customROR" filename="customROR.drs"/>
+	
 	<!-- *** General -->
 	<!-- Bool 0/1 to hide/show customROR options entry in game menu -->
 	<showCustomRORMenu enable="1"/>

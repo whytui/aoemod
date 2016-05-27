@@ -3,6 +3,8 @@
 
 #include "../../../tinyxml/tinyxml.h"
 #include <string>
+#include <list>
+#include <algorithm>
 #include <AOE_const_functional.h>
 #include <AOE_SN_numbers.h>
 #include <AOE_empires_dat.h>
@@ -27,6 +29,35 @@ public:
 	bool onlyOneUnit;
 };
 
+// Represents information about a DRS file to load at startup.
+class DrsFileToLoad {
+public:
+	DrsFileToLoad(std::string folder, std::string filename) {
+		this->folder = folder;
+		this->filename = filename;
+		if (this->folder.length() > 0) {
+			if (this->folder[this->folder.length() - 1] != '\\') {
+				this->folder += '\\';
+			}
+		}
+	}
+	inline bool operator == (const DrsFileToLoad &drs) const
+	{
+		return ((drs.filename == this->filename) &&
+			(drs.folder == this->folder));
+	}
+	bool IsValid() {
+		auto it = std::find_if(this->filename.begin(), this->filename.end(),
+			[](char c) {return c == '\\'; }
+		);
+		if (it != this->filename.end()) {
+			return false; // string contains "\\"
+		}
+		return !this->filename.empty();
+	}
+	std::string folder;
+	std::string filename;
+};
 
 
 // This class manages all information read from CustomROR configuration files.
@@ -57,6 +88,7 @@ public:
 	long int collectRORDebugLogs; // 0=no, 1=yes, filtered, 2=yes, all
 	bool showLogsInReverseOrder; // No input parameter for this (init in constructor only)
 	bool showCustomRORNotifications; // Use this to disable customROR message notifications (not recommended)
+	std::list<DrsFileToLoad*> customDrsFilesList; // List of DRS files to load at startup.
 
 	// Random Games settings
 	bool noNeutralInitialDiplomacy; // If true, initial diplomacy for no-team players will be enemy, not neutral. AI won't become all allied against human.

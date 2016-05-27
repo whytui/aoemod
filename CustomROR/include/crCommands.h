@@ -93,6 +93,9 @@ public:
 	// Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 	void ReadIfManageAIIsOn();
 
+	// Load custom DRS files
+	void LoadCustomDrsFiles();
+
 	// Execute a command from custom options window
 	// Returns true if the provided command is valid (and executed)
 	// After the call, output points to a char* string containing command's output, if any.
