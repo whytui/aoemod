@@ -297,6 +297,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x411257:
 		this->EntryPointAutoSearchTargetUnit(REG_values);
 		break;
+	case 0x4F8D92:
+		this->EntryPointOnBuildingInfoDisplay(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3125,6 +3128,20 @@ void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 	} else {
 		ChangeReturnAddress(REG_values, returnAddress_thisTargetIsAcceptable);
 	}
+}
+
+
+// From 004F8D87
+void CustomRORInstance::EntryPointOnBuildingInfoDisplay(REG_BACKUP *REG_values) {
+	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE *unitInfoZone = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE *)REG_values->EBP_val;
+	ror_api_assert(REG_values, unitInfoZone && unitInfoZone->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->ESI_val++;
+	}
+	// Custom code
+	// This updates REG_values->ESI_val if necessary.
+	this->crCommand.DisplayCustomBuildingAttributesInUnitInfo(unitInfoZone, REG_values->ESI_val);
 }
 
 

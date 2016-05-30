@@ -154,7 +154,6 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_UI_IN_GAME_TEXT_ZONE;
 	class STRUCT_UI_PLAYING_ZONE; // Also used in editor !
 	class STRUCT_UI_UNIT_BUTTON_INFO;
-	class STRUCT_UI_UNIT_INFO_ZONE;
 	class STRUCT_UI_SCENARIO_EDITOR_MAIN; // "Scenario Editor Screen"
 	class STRUCT_UI_SCENARIO_EDITOR_MENU;
 	class STRUCT_UI_F11_POP_PANEL;
@@ -3651,7 +3650,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_0FB;
 		unsigned long int ptrAttackGraphic;
 		// 0x100
-		char unsure_defaultArmor; // Used when there is no armor in ptrArmorsList?
+		char unsure_defaultArmor; // Used when there is no armor in ptrArmorsList? For display ?
 		char unknown_101; // default attack ???
 		short int armorsCount;
 		STRUCT_ARMOR_OR_ATTACK *ptrArmorsList; // ElemSize=0x04. +0=class,+2=amount
@@ -4691,19 +4690,6 @@ namespace ROR_STRUCTURES_10C
 
 	// Size ?
 	// Constructor ?
-#define CHECKSUM_UI_UNIT_INFO_ZONE 0x00549E7C
-	class STRUCT_UI_UNIT_INFO_ZONE : public STRUCT_ANY_UI {
-	public:
-		char unknown_0F4[0x110 - 0x0F4];
-		STRUCT_PLAYER *controlledPlayer; // +110.
-		STRUCT_UNIT_BASE *unitToDisplay; // +114.
-
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_UNIT_INFO_ZONE; }
-	};
-
-
-	// Size ?
-	// Constructor ?
 	// This is the parent UI object of in-game screen.
 #define CHECKSUM_UI_SCENARIO_EDITOR_MAIN 0x00547360
 	class STRUCT_UI_SCENARIO_EDITOR_MAIN : public STRUCT_ANY_UI { // 60 73 54 00
@@ -4816,7 +4802,7 @@ namespace ROR_STRUCTURES_10C
 
 #define CHECKSUM_UI_IN_GAME_UNIT_INFO_ZONE 0x00549E7C
 	// Size=0x214. Constructor=0x4F83D0 = unitInfoZone.constructor(arg1, mainGameUI, arg3, arg4, arg5, iconsForTrainUnit, iconsForBuildings, controlledPlayer)
-	// Unsure
+	// Methods: 0x4F9970=unitInfoZone.refreshIfNeeded(), 0x4F8740=UnitInfoZone.showInfos(self?, mainGameZone?)
 	class STRUCT_UI_IN_GAME_UNIT_INFO_ZONE : public STRUCT_ANY_UI {
 	public:
 		unsigned long int unknown_0F4; // +F4 : font info. (=fontObj+0)
@@ -4826,7 +4812,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_SLP_INFO *itemIconSlp; // +104. itemicon.shp, slpid=0xC62B
 		STRUCT_SLP_INFO *iconsForTrainUnits; // +108. Check type (STRUCT_SLP_INFO ok, but is pointer ok ?)
 		STRUCT_SLP_INFO **iconsForBuildings; // +10C. ArraySize=5 (tilesets)? Check type (STRUCT_SLP_INFO ok, but is pointer ok ?)
-		unsigned long int unknown_110;
+		STRUCT_PLAYER *controlledPlayer; // +110.
 		STRUCT_UNIT_BASE *currentUnit; // +114
 		long int unknown_118;
 		long int unknown_11C; // Init = 0x1F4.
@@ -4846,12 +4832,12 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_144;
 		unsigned long int unknown_148;
 		float currentUnitHP; // +14C
-		short int displayedArmor; // +150. To confirm
-		short int displayedAttack; // +152. To confirm
-		short int unknown_154;
-		short int unknown_156;
-		unsigned long int unknown_158;
-		unsigned long int unknown_15C;
+		short int displayedMeleeArmorValue; // +150. Only used to know if refresh is needed, not used for actual display.
+		short int displayedPierceArmorValue; // +152. Only used to know if refresh is needed, not used for actual display.
+		short int displayedAttack; // +154.  Only used to know if refresh is needed, not used for actual display.
+		short int unknown_156; // +156. unused ?
+		long int maxRange; // +158. The TOTAL unit range. Only used to know if refresh is needed, not used for actual display.
+		float reloadTime1; // +15C. 
 		short int unknown_160;
 		short int unknown_162;
 		short int unknown_164;

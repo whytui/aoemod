@@ -2163,6 +2163,32 @@ void SelectOneUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C
 }
 
 
+// Add a line with an attribute icon/value in game unit info zone (bottom left)
+// If a line is added, lineIndex is incremented.
+void UnitInfoZoneAddAttributeLine(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE *unitInfoZone,
+	long int iconId, long int displayType, long int displayedValue, long int totalValue, long int &lineIndex) {
+	if (!unitInfoZone || !unitInfoZone->IsCheckSumValid()) {
+		return;
+	}
+	if (iconId < 0) { return; } // and zero ?
+	// Make sure we use correct stack data
+	totalValue = totalValue & 0xFFFF;
+	displayedValue = displayedValue & 0xFFFF;
+	long int line = lineIndex; // PUSH lineIndex would not push the VALUE !
+	_asm {
+		PUSH totalValue;
+		PUSH displayedValue;
+		PUSH displayType;
+		PUSH iconId;
+		PUSH line;
+		MOV ECX, unitInfoZone;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX + 0xE4]; // Add info line
+	}
+	lineIndex++;
+}
+
+
 // commandStruct must have been allocated with a "AOE" alloc method like AOEAlloc(...)
 // It is freed by game code, don't use it / free it afterwards !
 // Returns false if failed

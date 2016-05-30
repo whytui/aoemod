@@ -5218,6 +5218,48 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUC
 }
 
 
+// Adds custom attributes (armor) in buildings' unit info zone.
+// currentLine is incremented if lines are added.
+void CustomRORCommand::DisplayCustomBuildingAttributesInUnitInfo(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine) {
+	if (!unitInfoZone || !unitInfoZone->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *unit50 = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *)unitInfoZone->currentUnit;
+	if (!unit50 || !unit50->IsCheckSumValidForAUnitClass()) {
+		return; // Should not occur, this method is called during processing of buildings
+	}
+	// Show pierce if non-zero value
+	short int pierceTotalValue = 0;
+	short int pierceDisplayedValue = 0;
+	short int meleeTotalValue = 0;
+	short int meleeDisplayedValue = 0;
+	long int iconIdMeleeArmor = 8; // melee armor icon in SLP
+	long int iconIdPierce = 10; // pierce armor icon in SLP
+	_asm {
+		MOV ECX, unit50;
+		LEA EAX, pierceDisplayedValue;
+		LEA EDX, pierceTotalValue;
+		PUSH EAX;
+		PUSH EDX;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX + 0x248]; // Get pierce armor
+		MOV ECX, unit50;
+		LEA EAX, meleeDisplayedValue;
+		LEA EDX, meleeTotalValue;
+		PUSH EAX;
+		PUSH EDX;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX + 0x230]; // Get melee armor
+	}
+	if (meleeTotalValue > 0) {
+		// Note: line is incremented in the method if a line is added.
+		UnitInfoZoneAddAttributeLine(unitInfoZone, iconIdMeleeArmor, 1, meleeDisplayedValue, meleeTotalValue, currentLine);
+	}
+	if (pierceTotalValue > 0) {
+		// Note: line is incremented in the method if a line is added.
+		UnitInfoZoneAddAttributeLine(unitInfoZone, iconIdPierce, 1, pierceDisplayedValue, pierceTotalValue, currentLine);
+	}
+}
+
+
 // Computes (existing) building influence zone for farm placement map like values computation.
 // existingBuilding must be a building (current building from loop, to take into account in map like values)
 // Updates existingBldInfluenceZone with the influence distance we want to use for provided building (positions near building will be preferred)

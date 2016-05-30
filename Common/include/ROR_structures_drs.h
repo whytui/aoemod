@@ -89,6 +89,7 @@ namespace ROR_STRUCTURES_10C {
 	};
 
 	// Size = 0x20. Constructor = 0x49F5F0
+	// 0x49FA90=slpInfo.GetShapeCount() : info taken from slpFileHeader
 	class STRUCT_SLP_INFO {
 	public:
 		STRUCT_SLP_FILE_HEADER *slpData_00; // +0. Set to NULL after init ? A temp value ?

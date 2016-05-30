@@ -87,6 +87,7 @@ Gameplay & configuration:
 - Correctly sets AI control at game startup when using the "ManageAI" feature (allows AI to control your "old" player when changing with gaia cheat code).
 - Customize Map generation elevation "amount" (hardcoded in standard game)
 - Disable dock in maps where AI does NOT build docks, for fair SP games. You can turn this ON/OFF in customROR.xml file.
+- Disable impossible researches. For example, yamato's armored elephants: War elephants are no longer changed into armored elephant in post-iron age scenarios.
 
 Scenario Editor:
 - All terrains are available in editor (putting non-standard terrain does not refresh immediatly, but it works).
@@ -116,6 +117,7 @@ Fixes:
 - Fix many bugs with units behaviour, like AI units attacking an empty location on the map for no reason.
 - Fix kill* game crash when used with an invalid player
 - Fix random game crash when using civilizations without a tech tree.
+- Fix tech tree bug in iron/post-iron scenarios. Civ bonus were not applied on upgraded unit (minoan composite bowmen, choson legion).
 
 Chat commands:
 - Type "t" or "time" in chat box to display system time (as a chat message)
@@ -140,6 +142,6 @@ Troubleshooting:
 - If the game process does not have necessary rights, the log file might be located in C:\Users\<username>\AppData\Local\VirtualStore\Program Files (x86)\Jeux\Age of Empires
 - Make sure the "ROR_API.conf" file contains the lines 'wndmode.dll' (if you use windowed mode) and 'customROR.dll' (without the quotes and without extra characters on the same line)
 - Never declare more civilizations in customROR_civs.xml than there really exist in empires.dat. ROR_API will force civilization to Egyptian if you select a civilization that is not found in empires.dat.
-- If you install CustomROR on a UPatch HD1.1 installation, you may need to empty the file gamex/up.ini to have windowed mode work correctly. Default file values from UPatch installation seems to be incorrect.
+- If you install CustomROR on a UPatch HD1.1 installation, you may need to empty the file gamex/up.ini to have windowed mode work correctly. Default file values from UPatch installation seem to be incorrect.
 - If you install CustomROR on a directory game that already had CustomROR, config files will not be overwritten.
 	To get latest features, you should really get CustomROR.xml content from the provided example (in ZIP archive file). Same for CustomROR_civs.xml.

@@ -520,6 +520,11 @@ void AOE_playerBldHeader_RemoveBldFromArrays(ROR_STRUCTURES_10C::STRUCT_PLAYER_B
 // If centerScreen is true, player's screen will be centered to unit.
 void SelectOneUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase, bool centerScreen);
 
+// Add a line with an attribute icon/value in game unit info zone (bottom left)
+// If a line is added, lineIndex is incremented.
+void UnitInfoZoneAddAttributeLine(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE *unitInfoZone,
+	long int iconId, long int displayType, long int displayedValue, long int totalValue, long int &lineIndex);
+
 
 // -- Commands
 
