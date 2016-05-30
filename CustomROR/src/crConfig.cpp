@@ -73,6 +73,7 @@ CustomRORConfig::CustomRORConfig() {
 	this->fixLogisticsNoHouseBug = false;
 	this->fixHumanPlayer_specificSeeUnit = false;
 	this->allyExplorationIsAlwaysShared = false; // Game default
+	this->singlePlayerMaxPopulation = 50; // Game default
 	this->enableAutoRebuildFarms = false;
 	this->autoRebuildFarms_maxFarms = 4;
 	this->autoRebuildFarms_maxFood = 3000;
@@ -267,6 +268,10 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		if (elemName == "allyExplorationIsAlwaysShared") {
 			this->allyExplorationIsAlwaysShared = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "populationLimit") {
+			callResult = elem->QueryIntAttribute("value", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->singlePlayerMaxPopulation = intValue; }
 		}
 		if (elemName == "improvedButtonBar") {
 			this->useImprovedButtonBar = XML_GetBoolElement(elem, "enable");
@@ -660,6 +665,8 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 	if (this->cityPlanBerryBushWeightForGranary > this->MAXVALUE_cityPlanBerryBushWeightForGranary) { this->cityPlanBerryBushWeightForGranary = this->MAXVALUE_cityPlanBerryBushWeightForGranary; }
 	if (this->distanceToCallNearbyIdleMilitaryUnits < this->MINVALUE_distanceToCallNearbyIdleMilitaryUnits) { this->distanceToCallNearbyIdleMilitaryUnits = this->MINVALUE_distanceToCallNearbyIdleMilitaryUnits; }
 	if (this->distanceToCallNearbyIdleMilitaryUnits > this->MAXVALUE_distanceToCallNearbyIdleMilitaryUnits) { this->distanceToCallNearbyIdleMilitaryUnits = this->MAXVALUE_distanceToCallNearbyIdleMilitaryUnits; }
+	if (this->singlePlayerMaxPopulation < this->MINVALUE_maxPopulation) { this->singlePlayerMaxPopulation = this->MINVALUE_maxPopulation; }
+	if (this->singlePlayerMaxPopulation > this->MAXVALUE_maxPopulation) { this->singlePlayerMaxPopulation = this->MAXVALUE_maxPopulation; }
 
 	return true;
 }

@@ -338,13 +338,7 @@ void CustomRORInstance::OneShotInit() {
 	}
 	// Manage interfac.drs file to use
 	ChangeItfDRS_file();
-	// Collect information about EXE version
-	this->crCommand.ReadIfCustomSelectedUnitsMemoryZoneIsUsed();
-	this->crCommand.ReadIfManageAIIsOn();
-	this->crCommand.ReadOtherSequencesStatus();
-
-	// Prepare custom DRS data
-	this->crCommand.LoadCustomDrsFiles();
+	this->crCommand.OneShotInit();
 }
 
 

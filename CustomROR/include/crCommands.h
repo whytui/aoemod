@@ -89,6 +89,9 @@ public:
 	// Returns true if all features for customROR are enabled in game executable code.
 	bool CheckEnabledFeatures();
 
+	// Initialization that only takes place once, at executable startup.
+	void OneShotInit();
+
 	// Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 	void ReadIfCustomSelectedUnitsMemoryZoneIsUsed();
 	// Reads game executable to determine if player struct is extended to use custom memory zone to host selected units

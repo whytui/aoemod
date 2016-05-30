@@ -17,6 +17,7 @@
 	<improvedGameSpeeds name="enable" value="1"/>
 	<improvedGameSpeeds name="factor" value="1.25"/>
 	<allyExplorationIsAlwaysShared enable="0"/><!-- NOT applied to scenario/campaigns -->
+	<populationLimit value="50"/> <!-- Maximum population for single player games. -->
 	
 	<!-- improvedButtonBar: Bool 0/1 to use enhanced button bar (show future researches/unit available in tech tree, 
 	Handle more than 1 page of buttons... -->

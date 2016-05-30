@@ -182,6 +182,21 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 }
 
 
+// Initialization that only takes place once, at executable startup.
+void CustomRORCommand::OneShotInit() {
+	// Collect information about EXE version
+	this->ReadIfCustomSelectedUnitsMemoryZoneIsUsed();
+	this->ReadIfManageAIIsOn();
+	this->ReadOtherSequencesStatus();
+
+	// Prepare custom DRS data
+	this->LoadCustomDrsFiles();
+
+	// Update "population limit getter" according to configuration
+	SetMaxPopulationGetterInSPGames(this->crInfo->configInfo.singlePlayerMaxPopulation);
+}
+
+
 // Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 void CustomRORCommand::ReadIfCustomSelectedUnitsMemoryZoneIsUsed() {
 	this->crInfo->hasCustomSelectedUnitsMemory = false;

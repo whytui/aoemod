@@ -81,6 +81,7 @@ public:
 	bool editor_allowUnitOverlapping;
 	bool fixHumanPlayer_specificSeeUnit;
 	bool allyExplorationIsAlwaysShared;
+	long int singlePlayerMaxPopulation;
 	// Technical
 	bool autoFixMissingFeatures;
 	long int gameTimerSlowDownFactor;
@@ -202,6 +203,8 @@ public:
 	const long int MINVALUE_distanceToCallNearbyIdleMilitaryUnits = 0;
 	const long int MAXVALUE_distanceToCallNearbyIdleMilitaryUnits = 254;
 	const long int MINVALUE_resourceAmount = 0;
+	const long int MINVALUE_maxPopulation = 0;
+	const long int MAXVALUE_maxPopulation = 255;
 
 private:
 	CivilizationInfo *allCivInfo[CST_MAX_TOTAL_CIV_COUNT];
