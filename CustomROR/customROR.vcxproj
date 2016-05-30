@@ -113,6 +113,8 @@
     <ClInclude Include="include\crMainInterface.h" />
     <ClInclude Include="include\crPatcher.h" />
     <ClInclude Include="include\drsHandler.h" />
+    <ClInclude Include="include\language.h" />
+    <ClInclude Include="include\researches.h" />
     <ClInclude Include="include\RORProcessEditor.h" />
     <ClInclude Include="include\crTrigger.h" />
     <ClInclude Include="include\crTriggerSet.h" />
@@ -146,6 +148,7 @@
     <ClCompile Include="src\EXESelfEditor.cpp" />
     <ClCompile Include="src\popups.cpp" />
     <ClCompile Include="src\interface.cpp" />
+    <ClCompile Include="src\researches.cpp" />
     <ClCompile Include="src\RORProcessEditor.cpp" />
     <ClCompile Include="src\strategy.cpp" />
     <ClCompile Include="src\traceMessages.cpp" />

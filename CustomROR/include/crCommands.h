@@ -20,6 +20,7 @@
 #include "EXESelfEditor.h"
 #include "crPatcher.h"
 #include "unitShortcuts.h"
+#include "researches.h"
 
 #pragma once
 
@@ -93,6 +94,9 @@ public:
 	// Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 	void ReadIfManageAIIsOn();
 
+	// Reads game executable to determine if various sequences are installed or not
+	void ReadOtherSequencesStatus();
+
 	// Load custom DRS files
 	void LoadCustomDrsFiles();
 
@@ -118,6 +122,14 @@ public:
 	// Warning: for scenarios, if there is an introduction screen, this method is called at that moment
 	// (game might not be displayed yet)
 	void OnGameStart();
+
+	// This is called for each player at game initialization, after applying tech trees and starting age.
+	// This is called for all game types (SP / MP, RM/DM/scenario) but NOT for load game.
+	void OnGameInitAfterApplyingTechTrees(long int playerId);
+
+	// Apply starting age to a player (only for scenarios)
+	void ApplyScenarioSpecificPlayerStartingAge(long int playerId);
+
 
 	// Does all custom stuff on random maps / deathmatches before game start : changes on game settings (map type/size, etc)
 	// Does NOT apply to scenario/campaign/load saved game.
@@ -371,6 +383,7 @@ public:
 	void ManageTriggersOnGameNotifyEvent(long int eventId, short int playerId, long int arg3, long int arg4, long int arg5);
 
 	// Entry point to make custom treatments at "disable research" init at game start (for scenarios)
+	// This is only executed for scenarios, not DM/RM !
 	void OnGameInitDisableResearchesEvent(ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *playerResearchInfo);
 
 	// Manage disable (via trigger) units for villager, house, fishing ship, trade ship, farms

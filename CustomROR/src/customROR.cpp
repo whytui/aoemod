@@ -202,6 +202,12 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x00507F7A:
 		this->OnGameInitDisableResearchesEvent(REG_values);
 		break;
+	case 0x0050BB35:
+		this->OnGameInitAfterSetInitialAge(REG_values);
+		break;
+	case 0x00507FCB:
+		this->OnScenarioInitPlayerBadInitialAgeApplication(REG_values);
+		break;
 	case 0x0045E8D7:
 		this->ManageOnPlayerRemoveUnit(REG_values);
 		break;
@@ -332,6 +338,7 @@ void CustomRORInstance::OneShotInit() {
 	// Collect information about EXE version
 	this->crCommand.ReadIfCustomSelectedUnitsMemoryZoneIsUsed();
 	this->crCommand.ReadIfManageAIIsOn();
+	this->crCommand.ReadOtherSequencesStatus();
 
 	// Prepare custom DRS data
 	this->crCommand.LoadCustomDrsFiles();
@@ -2502,6 +2509,7 @@ void CustomRORInstance::OnGameSettingsNotifyEvent(REG_BACKUP *REG_values) {
 
 
 // From 0x0507F75 (scenarioInfo.applyDisabledResearches(player))
+// This is only executed for scenarios, not DM/RM !
 void CustomRORInstance::OnGameInitDisableResearchesEvent(REG_BACKUP *REG_values) {
 	ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *playerResearchInfo = (ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *)REG_values->ECX_val;
 	ror_api_assert(REG_values, playerResearchInfo != NULL);
@@ -2518,6 +2526,40 @@ void CustomRORInstance::OnGameInitDisableResearchesEvent(REG_BACKUP *REG_values)
 		MOV ECX, playerResearchInfo
 		CALL updateResearchStatuses
 	}
+}
+
+
+// From 00507FC5
+// This is called in scenarioInfo.applyDisabledResearches(player) method.
+void CustomRORInstance::OnScenarioInitPlayerBadInitialAgeApplication(REG_BACKUP *REG_values) {
+	// There is nothing to do for compatibility
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	// Custom treatment is to disable call to player.applyStartingAge. This is done by overriding it by a call to ROR_API.
+	//long int playerStartingAge = REG_values->EAX_val;
+}
+
+
+// From 0050BB2A
+// This is called in global.newGameInit method, after settings "golbal" initial age.
+// This is called before settings various player resources / and score information.
+// We use it to fix scenario player-specific starting age (technology tree has already been applied, here) in scenario.
+// It can be used as an entry point too.
+// Please note this is call for ALL game types (NOT for load game though)
+void CustomRORInstance::OnGameInitAfterSetInitialAge(REG_BACKUP *REG_values) {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	ror_api_assert(REG_values, settings && settings->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->ECX_val = (unsigned long int) settings;
+	}
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = (ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *) REG_values->EBP_val;
+	ror_api_assert(REG_values, global && global->IsCheckSumValid());
+	long int playerTotalCount = global->playerTotalCount;
+	long int currentPlayerId = REG_values->ESI_val;
+	ror_api_assert(REG_values, currentPlayerId >= 0);
+	ror_api_assert(REG_values, currentPlayerId < playerTotalCount);
+	// Custom treatments
+	this->crCommand.OnGameInitAfterApplyingTechTrees(currentPlayerId);
 }
 
 

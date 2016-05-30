@@ -1335,7 +1335,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_1AA8_individual_victory_conditions[0x10][0x2D0]; // Internal structure to define
 		long int diplomacySettings[0x10][0x10]; // +47A8. Refers to PLAYER_DIPLOMACY_STANCES but as DWORDs. 0=allied,1=neutral,3=enemy.
 		long int hasAlliedVictory[0x10]; // +4BA8. 1=option is checked for that player
-		long int requireAll; // 0="at least one", 1="all". Applies to relics, ruins, discoveries ?
+		long int artefactsRequireAll; // +4BE8. 0="at least one", 1="all". Applies to relics, ruins, discoveries ?
 		unsigned long int unknown_4BEC; // Unused, it seems.
 		// 0x4BF0
 		unsigned long int unknown_4BF0;
@@ -1344,7 +1344,7 @@ namespace ROR_STRUCTURES_10C
 		long int unknown_50F8; // +50F8 ? Unused ?
 		long int fullTechTree; // +50FC
 		// 0x5100
-		long int startingAge[0x10]; // 1=Tool, 4=post iron. Warning, this does not correspond to CST_AGE_TOOL, etc
+		long int playersStartingAge[0x10]; // 1=Tool, 4=post iron. Warning, this does not correspond to CST_AGE_TOOL, etc. Index is playerId-1.
 		// 0x5140
 		AOE_CONST_INTERNAL::GENERAL_VICTORY_CONDITION generalVictory_mainCondition; // 0=Standard, 1=Conquest, 2=Score, 3=Time Limit, 4=Custom
 		long int generalVictory_scoreAmount; // Default 900
@@ -1653,7 +1653,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrNonCreatableUnitsListLink; // Others than building/living ?
 		// 0x30
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrTempUnitsListLink; // ptr to list of temporary units (with <0 id)
-		STRUCT_SCORE_HEADER *ptrScoreInformation;
+		STRUCT_SCORE_HEADER *ptrScoreInformation; // +34. 
 		STRUCT_PLAYER_MAP_INFO *myMapInfo;
 		STRUCT_GAME_GLOBAL *ptrGlobalStruct;
 		// 0x40

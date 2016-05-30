@@ -205,6 +205,12 @@ void CustomRORCommand::ReadIfManageAIIsOn() {
 }
 
 
+// Reads game executable to determine if various sequences are installed or not
+void CustomRORCommand::ReadOtherSequencesStatus() {
+	this->crInfo->hasRemovePlayerInitialAgeInScenarioInit = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
+}
+
+
 // Load custom DRS files
 void CustomRORCommand::LoadCustomDrsFiles() {
 	for each (DrsFileToLoad *drs in this->crInfo->configInfo.customDrsFilesList)
@@ -461,29 +467,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 
 	// TEST strategy
 	if (strcmp(command, "strat") == 0) {
-		ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scinfo = GetGameGlobalStructPtr()->scenarioInformation;
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 
-		_asm {
-			MOV ECX, player
-			MOV EDX, 0x004F2160
-			PUSH -1
-			CALL EDX
-		}
-
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player1 = GetPlayerStruct(1);
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player2 = GetPlayerStruct(2);
-		player->ptrScoreInformation;
-		player1->ptrScoreInformation;
-		player2->ptrScoreInformation;
-		player->ptrResourceValues;
-		player1->ptrResourceValues;
-		player2->ptrResourceValues;
-		ROR_STRUCTURES_10C::STRUCT_SCORE_ELEM *scoreElem1 = FindScoreElement(player1, AOE_CONST_FUNC::SCORE_CATEGORIES::CST_SC_ECONOMY, AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_CIVILIAN_POPULATION);
-		ROR_STRUCTURES_10C::STRUCT_SCORE_ELEM *scoreElem2 = FindScoreElement(player2, AOE_CONST_FUNC::SCORE_CATEGORIES::CST_SC_ECONOMY, AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_CIVILIAN_POPULATION);
-		float a1 = scoreElem1->value;
-		float a2 = scoreElem2->value;
-		int x = player->AIControlMode;
 	}
 #endif
 
@@ -692,6 +676,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_GOLD_MINING, CST_UNITID_MINERGOLD, (float)0.15); // +33% instead of +67% (was +0.3 / 0.45 initial)
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_SIEGECRAFT, CST_UNITID_MINERSTONE, (float)0.15); // +33% instead of +67% (was +0.3 / 0.45 initial). 2nd tech for stone mining (iron age)
 		// Wood cutting work rate improvements :
+		// WARNING: there is a hardcoded addition of -0.15 (decrease, actually) to phoenician to compensate too big bonus on lumberjack ! See 0x50B883.
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_WOODWORKING, CST_UNITID_LUMBERJACK, (float)0.11); // +20% instead of +36% (+0.3 / 0.55 initial)
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_ARTISANSHIP, CST_UNITID_LUMBERJACK, (float)0.11); // +20% instead of +36% (+0.3 / 0.55 initial)
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_CRAFTSMANSHIP, CST_UNITID_LUMBERJACK, (float)0.11); // +20% instead of +36% (+0.3 / 0.55 initial)
@@ -5603,12 +5588,14 @@ void CustomRORCommand::ManageTriggersOnGameNotifyEvent(long int eventId, short i
 
 
 // Entry point to make custom treatments at "disable research" init at game start (for scenarios)
+// This is only executed for scenarios, not DM/RM !
 void CustomRORCommand::OnGameInitDisableResearchesEvent(ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *playerResearchInfo) {
 	assert(playerResearchInfo != NULL);
 	if (!playerResearchInfo) { return; }
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = playerResearchInfo->ptrPlayer;
 	assert(player && player->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid()) { return; }
+	// Note: get global structure from player, because global variable might not be set yet.
 	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->GetGlobalStruct();
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return; }
@@ -5630,6 +5617,67 @@ void CustomRORCommand::OnGameInitDisableResearchesEvent(ROR_STRUCTURES_10C::STRU
 		short int researchId = *it;
 		AOE_enableResearch(player, researchId, false);
 	}
+}
+
+
+// This is called for each player at game initialization, after applying tech trees and starting age.
+// Resources and score info have not been initialized yet.
+// This is called for all game types (SP / MP, RM/DM/scenario) but NOT for load game.
+void CustomRORCommand::OnGameInitAfterApplyingTechTrees(long int playerId) {
+	this->ApplyScenarioSpecificPlayerStartingAge(playerId);
+
+	// For current player, disable the researches that can never be available
+	DisablePlayerImpossibleResearches(GetPlayerStruct(playerId));
+}
+
+
+// Apply starting age to a player (only for scenarios). Player's specific starting age is read in STRUCT_SCENARIO_INFO
+void CustomRORCommand::ApplyScenarioSpecificPlayerStartingAge(long int playerId) {
+	if (!this->crInfo->hasRemovePlayerInitialAgeInScenarioInit) {
+		return;
+	}
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	assert(global && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+	assert(player && player->IsCheckSumValid());
+	if (!player || !player->IsCheckSumValid()) { return; }
+
+	if (settings->isScenario != 0) {
+		ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo = global->scenarioInformation;
+		assert(scInfo && scInfo->IsCheckSumValid());
+		long int startingAge = scInfo->playersStartingAge[playerId - 1]; // Warning: index is playerId - 1
+		assert(player && player->IsCheckSumValid());
+		if (player && player->IsCheckSumValid()) {
+			const long int addr = 0x4F18A0;
+			long int argAgeRef = 0;
+			switch (startingAge) {
+			case 1:
+				argAgeRef = 0x19; // corresponds to tool age
+				break;
+			case 2:
+				argAgeRef = 0x17; // corresponds to bronze age
+				break;
+			case 3:
+				argAgeRef = 0x18; // corresponds to iron age
+				break;
+			case 4:
+				argAgeRef = 1; // corresponds to post iron
+				break;
+			}
+			if (startingAge > 0) {
+				_asm {
+					MOV ECX, player;
+					PUSH argAgeRef;
+					CALL addr // player.applyStartingAgeToResearches?(researchIdResourceId)
+				}
+			}
+		}
+	}
+
 }
 
 

@@ -21,3 +21,5 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix);
 // This only modifies the getter function.
 // If you wish to change in-game maximum population, you'll probably have to modify all player "max pop" resource.
 bool SetMaxPopulationGetterInSPGames(long int newMaxPopulationValue);
+
+bool IsBinaryChangeOn(BINSEQ_CATEGORIES binCategory, std::string sequenceName);

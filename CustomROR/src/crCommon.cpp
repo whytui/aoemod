@@ -8,6 +8,7 @@ CustomRORInfo::CustomRORInfo() {
 	this->hasFixForBuildingStratElemUnitId = false;
 	this->hasCustomSelectedUnitsMemory = false;
 	this->hasManageAIFeatureON = false;
+	this->hasRemovePlayerInitialAgeInScenarioInit = false;
 	this->ResetVariables();
 
 	for (int x = 0; x <= CST_INT_DISTANCE_VALUES_MAX_COORDINATE; x++) {
@@ -686,29 +687,6 @@ bool GetUnitCost(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, fl
 		costTable[defUnit->costs[2].costType] = (float)defUnit->costs[2].costAmount;
 	}
 	return true;
-}
-
-
-// Get a text from languagex.dll or language.dll, using ROR method. See also GetLanguageDllText
-void AOE_LoadStringLanguage(long int stringID, char *buffer, long int bufferSize) {
-	_asm {
-		PUSH bufferSize
-		PUSH buffer
-		PUSH stringID
-		MOV EAX, 0x004FF530
-		CALL EAX
-	}
-}
-
-
-// Get a text from languagex.dll or language.dll. If not found, uses defaultText.
-void GetLanguageDllText(long int stringID, char *buffer, long int bufferSize, char *defaultText) {
-	*buffer = 0;
-	if (stringID < 100) { return; } // First valid string is 101
-	AOE_LoadStringLanguage(stringID, buffer, bufferSize);
-	if (*buffer == 0) {
-		strcpy_s(buffer, bufferSize, defaultText);
-	}
 }
 
 

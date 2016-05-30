@@ -93,6 +93,8 @@ public:
 	void OnLivingUnitCreation(REG_BACKUP *REG_values);
 	void OnGameSettingsNotifyEvent(REG_BACKUP *REG_values);
 	void OnGameInitDisableResearchesEvent(REG_BACKUP *REG_values);
+	void OnScenarioInitPlayerBadInitialAgeApplication(REG_BACKUP *REG_values);
+	void OnGameInitAfterSetInitialAge(REG_BACKUP *REG_values);
 	void OnTextBoxKeyPress(REG_BACKUP *REG_values);
 	void PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values);
 	void CheckPopulationCostWithLogistics(REG_BACKUP *REG_values);

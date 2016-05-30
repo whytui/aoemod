@@ -90,3 +90,26 @@ bool SetMaxPopulationGetterInSPGames(long int newMaxPopulationValue) {
 		return false;
 	}
 }
+
+
+bool IsBinaryChangeOn(BINSEQ_CATEGORIES binCategory, std::string sequenceName) {
+	try {
+		RORProcessEditor pe;
+		aoeBinData.SetCurrentVersion(AOE_FILE_VERSION::AOE_VERSION_1_0C);
+		BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(AOE_FILE_VERSION::AOE_VERSION_1_0C, BINSEQ_CATEGORIES::BC_ROR_API);
+		if (!seqDefSet) {
+			return true;
+		}
+		int seqDefIndex = seqDefSet->FindSeqDefinitionIndex(widen(sequenceName)); // throws if not found
+		BinarySeqDefinition *binSeq = seqDefSet->GetBinSeqDefinition(seqDefIndex);
+		if (!binSeq) { return false; }
+		int searchedSelectionIndex = binSeq->GetSeqIndexFromFuncMeaning(FUNC_MEANING::FM_ON);
+		int foundSelectionIndex = pe.CheckSeqDefConsistency(binSeq);
+		return (foundSelectionIndex == searchedSelectionIndex);
+
+	}
+	catch (std::exception e) {
+		traceMessageHandler.WriteMessage(e.what());
+		return false;
+	}
+}
