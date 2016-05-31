@@ -4323,8 +4323,8 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_22C[9];
 		long int unknown_250[9]; // +250. default 0xFFFF
 		unsigned long int unknown_274[9];
-		unsigned long int unknown_298;
-		unsigned long int unknown_29C;
+		long int hotkey; // +298. Ascii code of hotkey: 65='A', etc.
+		long int unknown_29C; // +29C. Related to hotkey ? Not sure.
 		unsigned long int unknown_2A0;
 		char unknown_2A4;
 		char unknown_2A5;

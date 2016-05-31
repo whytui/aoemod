@@ -2675,8 +2675,10 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId) {
 // creationText can be left NULL to display a text using unit/research/etc's LanguageDLLID.
 // iconSlpInfo can be left NULL unless we want to use specific SLP resource for icon.
 // Technically, this just updates the button (no button object is created).
+// Refresh may NOT be performed if underlying info (command id, DATID) are unchanged, which may lead to wrong updates
 bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
-	long int DATID, bool isDisabled, const char *creationText, ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconSlpInfo) {
+	long int DATID, bool isDisabled, const char *creationText, ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconSlpInfo,
+	bool forceUpdate) {
 	if (buttonIndex < 0) {
 		return false;
 	}
@@ -2728,7 +2730,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		helpDllId = unitDef->languageDLLHelp;
 		creationDllId_original = unitDef->languageDLLID_Creation;
 		creationDllId = creationDllId_original + 100000; // cf 48248B
-		hotkeyDllId = unitDef->languageDLLHotKeyText;
+		hotkeyDllId = unitDef->hotKey;
 		iconId = unitDef->iconId;
 		GetLanguageDllText(unitDef->languageDLLID_Name, pName, sizeof(pName), "");
 		if (creationText == NULL) {
@@ -2786,6 +2788,12 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		inGameMain->panelDisplayedButtonCount++; // Update number of used buttons. Not sure it has any impact
 	}
 	const char *creationTextToUse = (creationText == NULL) ? creationTextIfMissing.c_str() : creationText;
+	if (forceUpdate) { // Dirty trick to force refresh
+		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *button = inGameMain->unitCommandButtons[buttonIndex];
+		button->buttonInfoValue[0] = -1;
+		button->commandIDs[0] = -1;
+		button->hotkey = hotkeyDllId;
+	}
 	return AOE_InGameAddCommandButton(player, buttonIndex, iconId, UICmdId, DATID,
 		helpDllId, creationDllId, hotkeyDllId,
 		pName, creationTextToUse, isDisabled, iconSlpInfo);

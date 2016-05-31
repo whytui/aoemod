@@ -4616,13 +4616,13 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		if ((unitDefLiving->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDefLiving->blastRadius > 0)) {
 			UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically",
-				&this->crInfo->customRorIcons);
+				&this->crInfo->customRorIcons, true);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false, "Click to prevent unit from attacking buildings automatically",
-				&this->crInfo->customRorIcons);
+				&this->crInfo->customRorIcons, false);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, "Click to prevent unit from attacking other units automatically",
-				&this->crInfo->customRorIcons);
+				&this->crInfo->customRorIcons, false);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false, "Click to restore normal auto-attack behaviour",
-				&this->crInfo->customRorIcons);
+				&this->crInfo->customRorIcons, false);
 			const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &this->crInfo->configInfo.autoAttackOptionDefaultValues;
 			this->RefreshCustomAutoAttackButtons(gameMainUI, aap);
 		}
@@ -4630,6 +4630,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	}
 	
 	bool buttonIsVisible[12]; // Is button visible after standard buttons display.
+	bool forceRefresh[12]; // Used to force refresh of buttons : text or read-only status can be wrong when switching between 2 similar units that have different current actions.
 	bool currentButtonDoesNotBelongToThisPage[12];
 	long int bestElemTotalCost[12];
 	long int bestElemDATID[12];
@@ -4642,6 +4643,8 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		bestElemIsResearch[i] = false;
 		bestElemLangNameId[i] = -1;
 		currentButtonDoesNotBelongToThisPage[i] = false;
+		forceRefresh[i] = (buttonIsVisible[i]); // Always force refresh for "already displayed" buttons (useful when previous selection had a greyed out button, and new selection has same button - not disabled.
+		// TODO: it would be better to force refresh another way to gain performance. But we would need to do this BEFORE buttons are updated (_Before_ShowUnitCommandButtons)
 	}
 	long int currentActionDATID = -1;
 	bool currentActionIsResearch = false;
@@ -4871,19 +4874,20 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		}
 	}
 	
-	// Force text refresh on ROR-added buttons on page 2+ (not well supported natively, no text is displayed)
 	if (minButtonId > 0) {
 		for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
-			ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
-			if (buttonIsVisible[buttonIndex]) {
-				long int correctButtonInfoValue = sb->buttonInfoValue[0];
-				long int correctButtonCmdId = sb->commandIDs[0];
-				if (correctButtonCmdId > 0) {
-					bool disabled = (sb->readOnly != 0);
-					sb->buttonInfoValue[0] = -1; // To force refresh
-					AddInGameCommandButton(buttonIndex, (INGAME_UI_COMMAND_ID)correctButtonCmdId, correctButtonInfoValue,
-						disabled, NULL, NULL);
-				}
+			forceRefresh[buttonIndex] = true; // Force text refresh on ROR-added buttons on page 2+ (not well supported natively, no text is displayed)
+		}
+	}
+	for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
+		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
+		if (buttonIsVisible[buttonIndex] && forceRefresh[buttonIndex]) {
+			long int correctButtonInfoValue = sb->buttonInfoValue[0];
+			long int correctButtonCmdId = sb->commandIDs[0];
+			if (correctButtonCmdId > 0) {
+				bool disabled = (sb->readOnly != 0);
+				AddInGameCommandButton(buttonIndex, (INGAME_UI_COMMAND_ID)correctButtonCmdId, correctButtonInfoValue,
+					disabled, NULL, NULL, true);
 			}
 		}
 	}
@@ -4895,14 +4899,14 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		if (bestElemDATID[buttonIndex] != -1) {
 			GetLanguageDllText(bestElemLangNameId[buttonIndex], nameBuffer, sizeof(nameBuffer), "");
 			if (bestElemIsResearch[buttonIndex]) {
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/, NULL);
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/, NULL, true);
 				ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
 				sb->unknown_2C4;
 				sb->helpDllId = sb->helpDllId;
 				sb->winHelpDataDllId;
 				sb->buttonInfoValue;
 			} else {
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/, NULL);
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/, NULL, true);
 			}
 		}
 	}
@@ -4918,11 +4922,11 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		if (currentActionIsResearch) {
 			inProgressInfo = "Being researched: ";
 			inProgressInfo += nameBuffer;
-			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, currentActionDATID, true, inProgressInfo.c_str(), NULL);
+			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, currentActionDATID, true, inProgressInfo.c_str(), NULL, true);
 		} else {
 			inProgressInfo = "Being trained: ";
 			inProgressInfo += nameBuffer;
-			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, currentActionDATID, true, inProgressInfo.c_str(), NULL);
+			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, currentActionDATID, true, inProgressInfo.c_str(), NULL, true);
 		}
 	}
 
@@ -4933,14 +4937,14 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	if (isBuilding && (currentAction != NULL) && (currentAction->actionTypeID == INTERNAL_ACTION_ID::CST_IAI_MAKE_OBJECT) &&
 		(gameMainUI->unitCommandButtons[buttonIdForStop]->commandIDs[0] != (long int)INGAME_UI_COMMAND_ID::CST_IUC_STOP)) {
 		GetLanguageDllText(LANG_ID_STOP_CURRENT_ACTION, nameBuffer, sizeof(nameBuffer), "Stop current action");
-		AddInGameCommandButton(buttonIdForStop, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, nameBuffer, NULL);
+		AddInGameCommandButton(buttonIdForStop, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, nameBuffer, NULL, true);
 	}
 
 	// Show Next page button (not if busy, because we already have current action there)
 	bool hasNextPage = (maxFoundButtonId >= minButtonIdNextPage); // has more buttons (Next actually goes to next page, NOT to first one)
 	if (!isBusy && (hasNextPage || (minButtonId > 0))) {
 		// There are buttons to display on next page: show button
-		AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE, 0, false, NULL, NULL);
+		AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE, 0, false, NULL, NULL, true);
 		// We store the information "this is not last page" in button's infoValue.
 		gameMainUI->unitCommandButtons[5]->buttonInfoValue[0] = hasNextPage;
 	}

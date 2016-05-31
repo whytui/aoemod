@@ -132,7 +132,7 @@ Other commands (in customROR options menu)
 - Type "set seed=XXX" to modify game map seed (RM and DM). This will only have an impact if you restart the game.
 - Type "set maptype=XXX" to set map type. This will only have an impact if you restart the game. Ex: set maptype=0 for small islands (refer to AGE3).
 - Type "set control=X" to set the player you want to play. It will automatically enable/disable AI control for your old/new player.
-- Type "set maxpop=XXX" to set a new maximum population value (0-255). Impact both current and new games. Not persistent if you exit Age of Empires.
+- Type "set maxpop=XXX" to set a new maximum population value (0-255). Impact both current and new games. Not persistent if you exit Age of Empires. See also configuration file.
 - Debug: Type "strat" or "stratX" where X is a player id to view a player's strategy.
 
 Troubleshooting:

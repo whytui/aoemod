@@ -619,8 +619,10 @@ long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UIC
 // creationText can be left NULL to display a text using unit/research/etc's LanguageDLLID.
 // iconSlpInfo can be left NULL unless we want to use specific SLP resource for icon.
 // Technically, this just updates the button (no button object is created).
+// Refresh may NOT be performed if underlying info (command id, DATID) are unchanged, which may lead to wrong updates
 bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
-	long int DATID, bool isDisabled, const char *creationText, ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconSlpInfo);
+	long int DATID, bool isDisabled, const char *creationText, ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconSlpInfo,
+	bool forceUpdate);
 
 // Returns true if the button is visible. Use this overload for performance if you already have STRUCT_UI_IN_GAME_MAIN pointer.
 // Returns false if the button is hidden, or if an error occurs.
