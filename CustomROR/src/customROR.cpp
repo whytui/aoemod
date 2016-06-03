@@ -193,7 +193,7 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 		this->GetInGameCustomCivName(REG_values);
 		break;
 	case 0x0050A574: // Both have almost same custom code and behaviour (we can still use returnAddress to distinguish the 2 cases)
-	case 0x0050A5C3: // Both have almost same custom code and behaviour (we can still use returnAddress to distinguish the 2 cases)
+	case 0x0050A5B9: // Both have almost same custom code and behaviour (we can still use returnAddress to distinguish the 2 cases)
 		this->CheckPlayerCreationAtGameStartup(REG_values);
 		break;
 	case 0x00501985:
@@ -1915,9 +1915,9 @@ void CustomRORInstance::GetInGameCustomCivName(REG_BACKUP *REG_values) {
 }
 
 
-// From 0x50A56F
+// From 0x50A56F and 0x50A5B2
 void CustomRORInstance::CheckPlayerCreationAtGameStartup(REG_BACKUP *REG_values) {
-	bool isHumanPlayer = (REG_values->return_address == 0x0050A5C3);
+	bool isHumanPlayer = (REG_values->return_address == 0x0050A5B9);
 	unsigned long int myESI = REG_values->ESI_val;
 	unsigned long int myEBX = REG_values->EBX_val;
 	unsigned long int myEDX = REG_values->EDX_val;
@@ -1929,8 +1929,7 @@ void CustomRORInstance::CheckPlayerCreationAtGameStartup(REG_BACKUP *REG_values)
 
 	// Fix for multiplayer games. Never create AI struct for human players to avoid sync errors.
 	if (isHumanPlayer && IsMultiplayer()) {
-		long int *p = (long int *)(REG_values->ESP_val);
-		*p = 0; // Force isComputerPlayer = 0
+		ChangeReturnAddress(REG_values, 0x50A576);
 	}
 }
 

@@ -145,3 +145,11 @@ Troubleshooting:
 - If you install CustomROR on a UPatch HD1.1 installation, you may need to empty the file gamex/up.ini to have windowed mode work correctly. Default file values from UPatch installation seem to be incorrect.
 - If you install CustomROR on a directory game that already had CustomROR, config files will not be overwritten.
 	To get latest features, you should really get CustomROR.xml content from the provided example (in ZIP archive file). Same for CustomROR_civs.xml.
+
+CustomROR on Linux:
+Before running CustomizeAOE/CustomROR on linux using wine, some configuration is needed.
+Install and run winetricks
+Select the default wineprefix
+Install a windows DLL or component
+- msxml3 (to confirm)
+- vcrun2013

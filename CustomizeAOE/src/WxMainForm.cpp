@@ -241,7 +241,7 @@ void WxMainForm::FixDDrawColorBug() {
 // This automatically installs CustomROR : copies files from user-provided source dir and patches EXE file.
 void WxMainForm::InstallCustomROR() {
 	// Open UI for user choices
-	WxInstallCustomROR *wInstallCROR = new WxInstallCustomROR(this, _T("Select installation files for customROR"), wxSize(800, 550),
+	WxInstallCustomROR *wInstallCROR = new WxInstallCustomROR(this, _T("Select installation files for customROR"), wxSize(800, 580),
 		this->e_api->GetFileName());
 	int result = wInstallCROR->ShowModal();
 	std::wstring srcDirName = wInstallCROR->pathToResourceFiles;

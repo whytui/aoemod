@@ -61,6 +61,7 @@ void WxInstallCustomROR::ConstructorInit(std::wstring EXEFileName) {
 	this->edtCustomROR_DLL_FilePath = new wxTextCtrl(this, ICR_Components_IDs::ID_ICR_EDIT_CUSTOMROR_DLL_PATH, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtCustomROR_XML_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtCustomROR_civs_XML_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	this->edtCustomROR_DRS_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtROR_API_DLL_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtROR_API_conf_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtWndMode_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
@@ -78,6 +79,8 @@ void WxInstallCustomROR::ConstructorInit(std::wstring EXEFileName) {
 	this->grdResourceFiles->Add(this->edtCustomROR_XML_FilePath, 1, wxEXPAND);
 	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for customROR_civs.xml")), 1, wxEXPAND);
 	this->grdResourceFiles->Add(this->edtCustomROR_civs_XML_FilePath, 1, wxEXPAND);
+	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for customROR.drs")), 1, wxEXPAND);
+	this->grdResourceFiles->Add(this->edtCustomROR_DRS_FilePath, 1, wxEXPAND);
 	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for ROR_API.dll")), 1, wxEXPAND);
 	this->grdResourceFiles->Add(this->edtROR_API_DLL_FilePath, 1, wxEXPAND);
 	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for ROR_API.conf")), 1, wxEXPAND);
@@ -162,6 +165,7 @@ void WxInstallCustomROR::OnSelectCustomROR_DLL(wxCommandEvent& event) {
 	this->edtCustomROR_DLL_FilePath->SetValue(openFileDialog.GetPath());
 	this->edtCustomROR_XML_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR.xml"));
 	this->edtCustomROR_civs_XML_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR_civs.xml"));
+	this->edtCustomROR_DRS_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR.drs"));
 	this->edtROR_API_DLL_FilePath->SetValue(this->pathToResourceFiles + _T("\\ROR_API.dll"));
 	this->edtROR_API_conf_FilePath->SetValue(this->pathToResourceFiles + _T("\\ROR_API.conf"));
 	this->edtWndMode_FilePath->SetValue(this->pathToResourceFiles + _T("\\wndmode.dll"));
@@ -170,6 +174,7 @@ void WxInstallCustomROR::OnSelectCustomROR_DLL(wxCommandEvent& event) {
 	allFilesOK = this->CheckTextCtrlPath(edtCustomROR_DLL_FilePath);
 	allFilesOK = this->CheckTextCtrlPath(edtCustomROR_XML_FilePath) && allFilesOK;
 	allFilesOK = this->CheckTextCtrlPath(edtCustomROR_civs_XML_FilePath) && allFilesOK;
+	allFilesOK = this->CheckTextCtrlPath(edtCustomROR_DRS_FilePath) && allFilesOK;
 	allFilesOK = this->CheckTextCtrlPath(edtROR_API_DLL_FilePath) && allFilesOK;
 	allFilesOK = this->CheckTextCtrlPath(edtROR_API_conf_FilePath) && allFilesOK;
 	allFilesOK = this->CheckTextCtrlPath(edtWndMode_FilePath) && allFilesOK;

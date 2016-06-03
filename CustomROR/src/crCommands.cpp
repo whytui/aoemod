@@ -714,7 +714,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 					msg += " for ";
 					ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = NULL;
 					if (global->civCount > 1) { // Use an arbitrary civ, just to get unit name.
-						unitDef = global->civilizationDefinitions[1]->GetUnitDef(techDef->ptrEffects[i].effectUnit);
+						unitDef = global->civilizationDefinitions[0]->GetUnitDef(techDef->ptrEffects[i].effectUnit);
 					}
 					if (unitDef && unitDef->IsCheckSumValid()) {
 						char tmpbuf[80];

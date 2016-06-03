@@ -845,9 +845,6 @@ bool EmpiresX_API::SetBasicCustomROROptions() {
 // Returns true if everything is OK
 bool EmpiresX_API::SetOtherCustomROROptions() {
 	bool result = true;
-	result = result && this->SetOptionSelection(_T("InitSN215_AllowDiplomacyChangeOnAllyAttack"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("InitSN215_AllowDiplomacyChangeOnAllyAttack"), FM_OFF));
-	result = result && this->SetOptionSelectionWithInt4(_T("LVL5_BONUS_AMOUNT"), 0, 200);
-	result = result && this->SetOptionSelection(_T("lvl5DisableStoneBonus"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("lvl5DisableStoneBonus"), FM_ON));
 	result = result && this->SetOptionSelection(_T("disable_dislike_human_player"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("disable_dislike_human_player"), FM_ON));
 	result = result && this->SetOptionSelection(_T("gaiaX_cheat_code1"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("gaiaX_cheat_code1"), FM_ON));
 	result = result && this->SetOptionSelection(_T("gaiaX_cheat_code2"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("gaiaX_cheat_code2"), FM_ON));
@@ -855,7 +852,6 @@ bool EmpiresX_API::SetOtherCustomROROptions() {
 	//result = result && this->SetOptionSelection(_T("FULL_Computer_player_1"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("FULL_Computer_player_1"), FM_ON));
 	result = result && this->SetOptionSelection(_T("PostIronAge_Item"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("PostIronAge_Item"), FM_ON));
 	result = result && this->SetOptionSelection(_T("PostIronAge_Setup"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("PostIronAge_Setup"), FM_ON));
-	result = result && this->SetOptionSelection(_T("FixAI_initialDiplomacy"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("FixAI_initialDiplomacy"), FM_ON)); // 0=default=no
 	result = result && this->SetOptionSelection(_T("AdditionalMapType"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("AdditionalMapType"), FM_ON)); // default=no
 	result = result && this->SetOptionSelectionWithInt4(_T("AdditionalMapTypeChangeLabel"), 0, 9286); // default value=10610
 	result = result && this->SetOptionSelection(_T("AdditionalMapType_FixLabelS"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("AdditionalMapType_FixLabelS"), FM_ON)); // default=no

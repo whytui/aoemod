@@ -35,6 +35,7 @@ private:
 	wxTextCtrl *edtCustomROR_DLL_FilePath;
 	wxTextCtrl *edtCustomROR_XML_FilePath;
 	wxTextCtrl *edtCustomROR_civs_XML_FilePath;
+	wxTextCtrl *edtCustomROR_DRS_FilePath;
 	wxTextCtrl *edtROR_API_DLL_FilePath;
 	wxTextCtrl *edtROR_API_conf_FilePath;
 	wxTextCtrl *edtWndMode_FilePath;
