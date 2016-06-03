@@ -21,7 +21,7 @@
 	
 	<!-- improvedButtonBar: Bool 0/1 to use enhanced button bar (show future researches/unit available in tech tree, 
 	Handle more than 1 page of buttons... -->
-	<improvedButtonBar enable="0"/>
+	<improvedButtonBar enable="1"/>
 	
 	<!-- Set collectRORDebugLogs=2 to collect all ROR debug logs, 1 to filter, 0 (default) not to collect them -->
 	<collectRORDebugLogs value="1"/>
@@ -57,7 +57,7 @@
 	<map name="elevatedTerrainAmountMultiplyFactor" mapTypeId="0" value="0.2"/><!--small islands: /5 -->
 	<map name="elevatedTerrainAmountMultiplyFactor" mapTypeId="7" value="0.02"/><!--hills: /50 -->
 	<!-- Fair no-water maps: disable dock in "mostly-land" maps where AI does NOT build docks. This makes such maps more fair in SP games. -->
-	<map name="noDockInMostlyLandMaps" enable="1"></map>
+	<map name="noDockInMostlyLandMaps" enable="0"></map>
 
 	<!-- *** Scenario editor -->
 	<!-- showHiddenTerrain: set to 1 to display hidden terrains in scenario editor terrains list -->
@@ -173,10 +173,10 @@
 	 -->
 	<unitSpawn name="shortcuts" reverseOrder="1"></unitSpawn>
 
-  <!-- *** Random games settings -->
-  <!-- NoNeutralDiplomacy: if enabled, all no-team players start with enemy diplomacies.
+	<!-- *** Random games settings -->
+	<!-- NoNeutralDiplomacy: if enabled, all no-team players start with enemy diplomacies.
 	AI players won't all become allied against human. Game default=0. -->
-	<noNeutralDiplomacy enable="0"></noNeutralDiplomacy>
+	<noNeutralDiplomacy enable="1"></noNeutralDiplomacy>
 	<!-- Set noWalls to enable=1 to disable all walls in DM /RM games -->
 	<noWalls enable="0"/>
 	<!-- initialResources defines the amount of available resource at game start
@@ -202,7 +202,7 @@
 	<!--<per_number gameType="DM" sn="215" value="0"></per_number>--><!--SNAllowDiplomacyChangeOnAllyAttack=0 to prevent unfortunate diplomacy changes-->
 	<per_number gameType="RM" sn="161" value="4"></per_number><!--SNRequiredFirstBuilding=4 in random map: build SP/granary first-->
 	<per_number gameType="DM" sn="161" value="0"></per_number><!--SNRequiredFirstBuilding=0 in random map: build quickly-->
-	<per_number gameType="DM" sn="220" value="3"></per_number><!--SNMaxFarms in deathmatch. -->
+	<per_number gameType="DM" sn="220" value="3"></per_number><!--SNMaxFarms in deathmatch. Overwritten by maxFarmsInDeathMatch parameter-->
 	<per_number gameType="DM" sn="167" value="1"></per_number><!--SNInitialExplorationRequired in deathmatch. For faster town building-->
 	<per_number gameType="RM" sn="186" value="0"></per_number><!--SNCoopDemandTributeInterval: to disable tributes between AI players-->
 	<per_number gameType="DM" sn="186" value="0"></per_number><!--SNCoopDemandTributeInterval: to disable tributes between AI players-->
