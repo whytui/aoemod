@@ -4313,7 +4313,7 @@ namespace ROR_STRUCTURES_10C
 		char* unknown_198[9];
 		char* unknown_1BC[9];
 		char unknown_1E0[0x1F6 - 0x1E0];
-		short int checked; // +1F6. To update value, see AOE_CheckBox_SetChecked
+		short int checked; // +1F6. To update value, see AOE_CheckBox_SetChecked. Index for commandIDs and buttonInfoValue
 		unsigned long int unknown_1F8;
 		STRUCT_ANY_UI **unknown_1FC; // ptr array groupedObjects ? really unsure
 		// 0x200

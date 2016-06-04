@@ -734,6 +734,9 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 		return false;
 	}
 
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *btn = inGameMain->unitCommandButtons[buttonIndex];
+	bool showNumber = (btn->showNumber != 0);
+
 	long int long_UICmdId = (long int)UICmdId;
 	long int long_isDisabled = isDisabled;
 	_asm {
@@ -752,6 +755,20 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 		MOV ECX, inGameMain;
 		CALL calladdr;
 	}
+	if (btn && btn->IsCheckSumValid() && (btn->numberToDisplay > 0) && showNumber) {
+		const unsigned long int enableShowBtnCount = 0x4F7BC0;
+		const unsigned long int setBtnCount = 0x4F7BE0;
+		long int count = btn->numberToDisplay;
+		_asm {
+			PUSH 1;
+			MOV ECX, btn;
+			CALL enableShowBtnCount;
+			PUSH count;
+			MOV ECX, btn;
+			CALL setBtnCount;
+		}
+	}
+
 	return true;
 }
 
