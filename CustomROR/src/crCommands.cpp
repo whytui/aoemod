@@ -374,9 +374,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		//short int humanPlayerId = global->humanPlayerId;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 		assert(humanPlayer != NULL);
-		char bufasm[] = {1,2,3, 4};
-		//WriteInMyMemory(0x45df32, bufasm, 4);
-		//patcherExample();
+
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving =
 			//(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 62);
 			(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, CST_UNITID_SHORT_SWORDSMAN);
@@ -471,6 +469,8 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		long int playerId = 1;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
+		FindResearchesThatAffectUnit(player, 75, true);
+
 		ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
 		ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
 		assert(tacAI->IsCheckSumValid());
@@ -4338,7 +4338,8 @@ void CustomRORCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextP
 		ADD ESP, EAX
 	}
 
-	std::string msgFinal = std::string(buf);
+	std::string msgFinal = "[AOE] "; // So we can distinguish game's messages and ours.
+	msgFinal += std::string(buf);
 	// Do not trigger notifications for ROR executable logs.
 	traceMessageHandler.WriteMessageNoNotification(msgFinal);
 }

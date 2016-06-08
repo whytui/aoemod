@@ -690,29 +690,6 @@ bool GetUnitCost(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, fl
 }
 
 
-// Get a technology name from languagex.dll or language.dll.
-// Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
-std::string GetTechnologyLocalizedName(short int techId) {
-	if (techId < 0) {
-		return NULL;
-	}
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
-		return NULL;
-	}
-	for (int i = 0; i < global->researchDefInfo->researchCount; i ++) {
-		if (global->researchDefInfo->researchDefArray[i].technologyId == techId) {
-			std::string res;
-			char buffer[100];
-			buffer[0] = 0;
-			GetLanguageDllText(global->researchDefInfo->researchDefArray[i].languageDLLName, buffer, sizeof(buffer),
-				global->researchDefInfo->researchDefArray[i].researchName);
-			return std::string(buffer);
-		}
-	}
-	return NULL;
-}
-
 
 // Common function for panic mode unit searching.
 // Returns true if it is possible to train the unit. In such case, cost is decreased from remainingResources and actorCounter is decreased too.

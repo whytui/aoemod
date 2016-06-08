@@ -154,7 +154,9 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_TEMPLE_COUNT = 52,
 		CST_RES_ORDER_TRIBUTE_SENT = 53,
 		CST_RES_ORDER_ALL_RUINS = 54,
-		CST_RES_ORDER_ALL_RELICS = 55
+		CST_RES_ORDER_ALL_RELICS = 55,
+		CST_RES_ORDER_HEALING = 56, // Affect priests healing rate, see tech 211 (medecine)
+		CST_RES_ORDER_PRIEST_SACRIFICE = 57 // If 1, you can delete (sacrifice) priest while converting to make conversion successful. See tech 212.
 	};
 
 
@@ -195,6 +197,21 @@ namespace AOE_CONST_FUNC {
 		CST_AC_CAVALRY_ON_INFANTRY = 9, // on clubmen/short sword + upgrades, NOT on slingers, hoplites...
 		CST_AC_VILLAGER_SIEGECRAFT = 10, // Siegecraft effect: villagers bonus against towers/walls
 		CST_AC_LION = 11, // Lion attack on gazelle, villagers...
+	};
+
+
+	enum TECH_DEF_EFFECTS : char {
+		TDE_INVALID = -1,
+		TDE_ATTRIBUTE_MODIFIER_SET = 0,
+		TDE_RESOURCE_MODIFIER_ADD = 1, // add value
+		TDE_ENABLE_DISABLE_UNIT = 2,
+		TDE_UPGRADE_UNIT = 3,
+		TDE_ATTRIBUTE_MODIFIER_ADD = 4, // add value
+		TDE_ATTRIBUTE_MODIFIER_MULT = 5, // multiply by a value
+		TDE_RESOURCE_MODIFIER_MULT = 6, // multiply by a value
+		TDE_RESEARCH_COST_MODIFIER = 101,
+		TDE_DISABLE_RESEARCH = 102,
+		TDE_RESEARCH_TIME_MODIFIER = 103
 	};
 
 
@@ -391,7 +408,10 @@ namespace AOE_CONST_FUNC {
 		CST_TCH_GOLD_MINING = 107,
 		CST_TCH_STONE_MINING = 108,
 		CST_TCH_CRAFTSMANSHIP = 109, // FR: artisanat évolué (iron age - 3rd tech for wood cutting/range)
-		CST_TCH_SIEGECRAFT = 110
+		CST_TCH_SIEGECRAFT = 110,
+		CST_TCH_MEDECINE = 211,
+		CST_TCH_JIHAD = 23,
+		CST_TCH_MARTYRDOM = 212 // Enables priest sacrifice to convert immediately
 	};
 
 

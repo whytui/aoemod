@@ -103,20 +103,6 @@ namespace AOE_CONST_FUNC
 	// Internal Action Ids. See INTERNAL_ACTION_ID in AOE_const_internal.
 	
 
-	enum TECH_DEF_EFFECTS : char {
-		TDE_INVALID = -1,
-		TDE_ATTRIBUTE_MODIFIER_SET = 0,
-		TDE_RESOURCE_MODIFIER_ADD = 1, // add value
-		TDE_ENABLE_DISABLE_UNIT = 2,
-		TDE_UPGRADE_UNIT = 3,
-		TDE_ATTRIBUTE_MODIFIER_ADD = 4, // add value
-		TDE_ATTRIBUTE_MODIFIER_MULT = 5, // multiply by a value
-		TDE_RESOURCE_MODIFIER_MULT = 6, // multiply by a value
-		TDE_RESEARCH_COST_MODIFIER = 101,
-		TDE_DISABLE_RESEARCH = 102,
-		TDE_RESEARCH_TIME_MODIFIER = 103
-	};
-
 	enum INTERACTION_MODES : char {
 		CST_IM_NONE = 0, // Unable to select, move, attack. Eye candy, dead units, projectiles...
 		CST_IM_CAPTURE_ONLY = 1, // Unable to select, move, attack, but can capture (used in 162, 330: flags)

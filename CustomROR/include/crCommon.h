@@ -27,6 +27,7 @@
 #include "crGameObjects.h"
 #include "interface.h" // SLP/icon ids...
 #include "language.h"
+#include "researches.h"
 
 // Defines common objects/variables/methods for CustomROR
 // Methods in this file are simple primitives that don't depend on customROR configuration. They generally are calls to existing game methods.
@@ -278,10 +279,6 @@ bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
 // Returns false if not. costTable content may have been modified though.
 bool GetUnitCost(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, float costTable[]);
 
-
-// Get a technology name from languagex.dll or language.dll.
-// Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
-std::string GetTechnologyLocalizedName(short int techId);
 
 // Common function for panic mode unit searching.
 // Returns true if it is possible to train the unit. In such case, cost is decreased from remainingResources and actorCounter is decreased too.

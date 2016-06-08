@@ -138,3 +138,97 @@ int DisableImpossibleResearches() {
 	}
 	return result;
 }
+
+
+// Returns true if technology has at least one effect on provided unit definition.
+bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) {
+	if (!techDef || !unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		// Does this affect affect units ?
+		if (techEffect && (
+			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
+			//(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) || // ?
+			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) ||
+			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
+			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT)
+			)) {
+			// Does it affect "THIS" unit ?
+			if (techEffect->effectUnit == unitDef->DAT_ID1) { return true; }
+			if (techEffect->effectClass == unitDef->unitAIType) { return true; }
+		}
+	}
+	return false;
+}
+
+
+// Finds all (non disabled) researches that affect a unit (definition)
+// If ignoreUndesirableTechs==true, techs from LST_TECHS_TO_IGNORE are ignored (jihad, etc)
+// Returns a list of research IDs.
+std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long int unitDefId, bool ignoreUndesirableTechs) {
+	std::vector<short int> result;
+	if (!player || !player->IsCheckSumValid() || (player->structDefUnitArraySize < unitDefId)) { return result; }
+	STRUCT_UNITDEF_BASE *unitDefBase = (STRUCT_UNITDEF_BASE *)player->ptrStructDefUnitTable[unitDefId];
+	STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid() || !global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid()) { return result; }
+	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return result; }
+
+	STRUCT_PLAYER_RESEARCH_INFO *rinfo = player->ptrResearchesStruct;
+	if (!rinfo) { return result; }
+	int resCount = rinfo->researchCount;
+	STRUCT_PLAYER_RESEARCH_STATUS *statuses = rinfo->researchStatusesArray;
+	STRUCT_RESEARCH_DEF_INFO *resInfoArray = rinfo->ptrResearchDefInfo;
+	if (!resInfoArray) { return result; }
+	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
+
+	for (int researchId = 0; researchId < resCount; researchId++) {
+		if ((statuses[researchId].currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) &&
+			(resDefArray[researchId].researchName != NULL)) { // to filter out "New research" (invalid researches have no name)
+			bool added = false;
+			short int techId = resDefArray[researchId].technologyId;
+			if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount) &&
+				(global->technologiesInfo->ptrTechDefArray[techId].effectCount > 0)) {
+				// We have a valid technology id. Add to result if it affects our unit.
+				if (!added && DoesTechAffectUnit(&global->technologiesInfo->ptrTechDefArray[techId], unitDefBase)) {
+					result.push_back(researchId);
+					added = true;
+					std::string msg = std::to_string(techId);
+					msg += "-";
+					msg += GetTechnologyLocalizedName(techId);
+					traceMessageHandler.WriteMessageNoNotification(msg);
+				}
+			}
+		}
+	}
+	return result;
+}
+
+
+// Get a technology name from languagex.dll or language.dll.
+// Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
+std::string GetTechnologyLocalizedName(short int techId) {
+	if (techId < 0) {
+		return NULL;
+	}
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	assert(settings != NULL);
+	if (!settings) { return NULL; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
+		return NULL;
+	}
+	for (int i = 0; i < global->researchDefInfo->researchCount; i++) {
+		if (global->researchDefInfo->researchDefArray[i].technologyId == techId) {
+			std::string res;
+			char buffer[100];
+			buffer[0] = 0;
+			GetLanguageDllText(global->researchDefInfo->researchDefArray[i].languageDLLName, buffer, sizeof(buffer),
+				global->researchDefInfo->researchDefArray[i].researchName);
+			return std::string(buffer);
+		}
+	}
+	return NULL;
+}

@@ -1648,7 +1648,7 @@ namespace ROR_STRUCTURES_10C
 		short int unknown_020;
 		short int structDefUnitArraySize; // +22. Number of elements in ptrStructDefUnitTable array = number of "unit definitions" for this player.
 		STRUCT_DEF_UNIT **ptrStructDefUnitTable; // ptr to Array containing pointers to all player unitDefs (index=DATID). They can be NULL (not available/invalid). See also structDefUnitArraySize.
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrCreatableUnitsListLink; // Only building/living + smoke, dead units...?
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrCreatableUnitsListLink; // +28. Only building/living + smoke, dead units...?
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrNonCreatableUnitsListLink; // Others than building/living ?
 		// 0x30
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrTempUnitsListLink; // ptr to list of temporary units (with <0 id)
@@ -2673,10 +2673,10 @@ namespace ROR_STRUCTURES_10C
 	public:
 		AOE_CONST_FUNC::TECH_DEF_EFFECTS effectType; // 1 byte.
 		char unused_01;
-		short int effectUnit; // 02. Unit or Resource or...
-		short int effectClass; // 04. Class or ToUnit or Mode or...
-		short int effectAttribute; // 06
-		float effectValue; // 08
+		short int effectUnit; // +02. Unit ID or Resource ID or...
+		short int effectClass; // +04. Class or ToUnit or Mode or...
+		short int effectAttribute; // +06
+		float effectValue; // +08
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");
 
