@@ -907,75 +907,92 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 							}
 						}
 					}
-					
 					// Add best item in strategy...
-					if (bestElemBuildingDatId > -1) {
-						// Add a building (for shadow building research)
-						ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(bestElemBuildingDatId);
-						if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass()) {
-							if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, bestElemBuildingDatId) == -1) {
-								addedItems++;
-								strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, unitDefBase->ptrUnitName);
-								AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, -1 /*villager*/,
-									TAIUnitClass::AIUCBuilding, bestElemBuildingDatId, player, nameBuffer);
-							}
-						}
-					} else {
-						// Add a real research
-						ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *reqResearch = player->GetResearchDef(bestResearchId);
-						if (reqResearch && (reqResearch->researchLocation > -1) && (reqResearch->buttonId > 0)) {
-							if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, bestResearchId) == -1) {
-								strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, reqResearch->researchName);
-								addedItems++;
-								AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, reqResearch->researchLocation,
-									TAIUnitClass::AIUCTech, bestResearchId, player, nameBuffer);
-							}
-						} else {
-							traceMessageHandler.WriteMessage("Error, trying to add in strategy an invalid research");
-						}
-					}
+					addedItems += AddStrategyElementForResearch(player, elemToInsert, bestResearchId);
+					// TODO manage dependencies of added elements (both if building or normal, because optionals are not handled by GetValidOrderedResearchesListWithDependencies) ?
 					missingRequiredResearchCount--;
 					optionalResearches.erase(bestResearchId);
 				}
-
-			} else {
-				if ((resDef->researchLocation == -1) || (resDef->buttonId == 0)) {
-					// Shadow research (automatically researched): do not add in strategy
-					// However, it may correspond to a required building (temple for fanaticism..)
-					ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = FindBuildingDefThatEnablesResearch(player, researchId);
-					if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
-						// Make sure this building is built in strategy
-						if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) == -1) {
-							strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, unitDefBuilding->ptrUnitName);
-							addedItems++;
-							AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, -1 /*villager*/,
-								TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1, player, nameBuffer);
-						}
-					}
-				} else {
-					// Standard research
-					ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)player->GetUnitDefBase(resDef->researchLocation);
-					if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
-						// Add "action" building if there is none in strategy
-						if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) == -1) {
-							strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, unitDefBuilding->ptrUnitName);
-							addedItems++;
-							AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, -1 /*villager*/,
-								TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1, player, nameBuffer);
-						}
-					}
-
-					if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) {
-						strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, resDef->researchName);
-						addedItems++;
-						AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, resDef->researchLocation,
-							TAIUnitClass::AIUCTech, researchId, player, nameBuffer);
-					}
-				}
+			} else { // this research has no optionals (all requirements are necessary)
+				addedItems += AddStrategyElementForResearch(player, elemToInsert, researchId);
+				// TODO manage dependencies of added elements (if building) ?
 			}
 		}
 	}
 	return addedItems;
+}
+
+
+// Inserts a new strategy element before nextElement. New strategy element corresponds to resDef (not always a research: can be a building !)
+// [WRONG: handles building for standard research] This does not manage any dependency, just adds strategy elements that directly correspond.
+// Returns the number of added elements just before nextElement.
+int AddStrategyElementForResearch(ROR_STRUCTURES_10C::STRUCT_PLAYER *player,
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElement, short int researchId) {
+	if (!player || !player->IsCheckSumValid()) { return 0; }
+	if (!player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) { return 0; }
+	ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
+	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = player->GetResearchDef(researchId);
+	if (!nextElement || !nextElement->IsCheckSumValid() || !resDef) { return 0; }
+	int addedElementsCount = 0;
+	char nameBuffer[0x50]; // stratelem.name size is 0x40
+	char namePrefix[] = "CustomROR_";
+	strcpy_s(nameBuffer, namePrefix);
+
+	if ((resDef->researchLocation == -1) || (resDef->buttonId == 0)) {
+		// Shadow research (automatically researched): do not add in strategy
+		// However, it may directly correspond to a required building (temple for fanaticism...)
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = FindBuildingDefThatEnablesResearch(player, researchId);
+		if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
+			// Make sure this building is built in strategy
+			if (AddStrategyElementForBuildingIfNotExisting(player, nextElement, unitDefBuilding)) {
+				addedElementsCount++;
+			}
+		}
+	} else {
+#pragma message("This (add building part) should not be done here (not managing requirements)? Move & fix method comments")
+		// Standard "player-triggered" research (has a train location & a button)
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)player->GetUnitDefBase(resDef->researchLocation);
+		if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
+			// Add "action" building if there is none in strategy
+			if (AddStrategyElementForBuildingIfNotExisting(player, nextElement, unitDefBuilding)) {
+				addedElementsCount++;
+			}
+		}
+
+		// Add the research itself
+		if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) {
+			strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, resDef->researchName);
+			if (AddUnitInStrategy_before(&ai->structBuildAI, nextElement, -1, resDef->researchLocation,
+				TAIUnitClass::AIUCTech, researchId, player, nameBuffer)) {
+				addedElementsCount++;
+			}
+		}
+	}
+	return addedElementsCount;
+}
+
+
+// Adds a strategy element (building) only if there are none already.
+// Returns true if an element was added.
+bool AddStrategyElementForBuildingIfNotExisting(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElement,
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding) {
+	char nameBuffer[0x50]; // stratelem.name size is 0x40
+	char namePrefix[] = "CustomROR_";
+	strcpy_s(nameBuffer, namePrefix);
+	if (player && player->IsCheckSumValid() && nextElement && nextElement->IsCheckSumValid() &&
+		unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
+		ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
+		if (!ai || !ai->IsCheckSumValid()) { return false; }
+		// Add "action" building if there is none in strategy
+		if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) == -1) {
+			strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, unitDefBuilding->ptrUnitName);
+			if (AddUnitInStrategy_before(&ai->structBuildAI, nextElement, -1, -1 /*villager*/,
+				TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1, player, nameBuffer)) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 

@@ -85,6 +85,16 @@ bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai);
 // Returns the number of inserted researches in strategy
 int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int unitDefId);
 
+// Inserts a new strategy element before nextElement. New strategy element corresponds to resDef (not always a research: can be a building !)
+// [WRONG: handles building for standard research] This does not manage any dependency, just adds strategy elements that directly correspond.
+// Returns the number of added elements just before nextElement.
+int AddStrategyElementForResearch(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElement, short int researchId);
+
+// Adds a strategy element (building) only if there are none already.
+// Returns true if an element was added.
+bool AddStrategyElementForBuildingIfNotExisting(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElement, 
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding);
+
 // Find a strategy element for a specific actor building (instance)id. (strategy element must be in progress)
 // This is only possible thanks to custom treatments that set unitInstanceId to actor unitId while training/researching is in progress.
 // Unicity is not guaranteed (first found is returned), however it is not supposed to happen much.
