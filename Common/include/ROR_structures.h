@@ -1769,6 +1769,10 @@ namespace ROR_STRUCTURES_10C
 			this->ptrResourceValues[resourceIndex] = value;
 		}
 		void SetCustomAIFlag(char value) { this->unused_customAIFlag = value; } // Sets customROR's AI flag.
+		STRUCT_UNITDEF_BASE *GetUnitDefBase(short int unitDefId) const {
+			if ((unitDefId < 0) || (unitDefId >= this->structDefUnitArraySize)) { return NULL; }
+			return (STRUCT_UNITDEF_BASE *)this->ptrStructDefUnitTable[unitDefId];
+		}
 	};
 
 

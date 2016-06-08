@@ -850,14 +850,26 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 						// Make sure this building is built in strategy
 						if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) == -1) {
 							strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, unitDefBuilding->ptrUnitName);
+							addedItems++;
 							AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, -1 /*villager*/,
 								TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1, player, nameBuffer);
 						}
 					}
 				} else {
 					// Standard research
-					strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, resDef->researchName);
+					ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)player->GetUnitDefBase(resDef->researchLocation);
+					if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
+						// Add "action" building if there is none in strategy
+						if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) == -1) {
+							strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, unitDefBuilding->ptrUnitName);
+							addedItems++;
+							AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, -1 /*villager*/,
+								TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1, player, nameBuffer);
+						}
+					}
+
 					if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) {
+						strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, resDef->researchName);
 						addedItems++;
 						AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, resDef->researchLocation,
 							TAIUnitClass::AIUCTech, researchId, player, nameBuffer);
