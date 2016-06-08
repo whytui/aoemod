@@ -28,6 +28,12 @@ CST_TCH_JIHAD, CST_TCH_MARTYRDOM };
 // Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
 std::string GetTechnologyLocalizedName(short int techId);
 
+// Get a research name from languagex.dll or language.dll. Or internal name if no localization was found.
+std::string GetResearchLocalizedName(short int researchId);
+
+// Returns true if the research has more required researches than "minimum required researches count" (all requirements are not mandatory)
+bool ResearchHasOptionalRequirements(STRUCT_RESEARCH_DEF *resDef);
+
 
 // Disable all impossible researches for all players.
 // An impossible research is a research that is waiting for requirements, including ones that can never be satisfied.
@@ -48,6 +54,13 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 
 // Returns an ordered list of research IDs that allow researching input researches (researchesList) with all dependencies
 // Returned collection includes all dependencies, including "shadow" researches (no location).
+// Warning: dependency with choices (optional requirements, e.g. research74="A01, B01, F01, I01 ->Tool Age" are returned
+// ... BUT underlying requirements are NOT analyzed (as we can't choose which requirements should be used / ignored)
+// The caller MUST handle such researches (tip: use ResearchHasOptionalRequirements(...) to identify them)
 // All research IDs in returned collection are available in tech tree. Impossible research IDs from researchesList are NOT in returned collection.
 std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAYER *player, std::vector<short int> researchesList);
 
+// Returns a unit (building) definition that enables provided research ID.
+// For example, for research 17, it will return temple's definition because temple's unitDef.initiatesResearch == 17.
+// Returns NULL if not found.
+ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(STRUCT_PLAYER *player, short int researchId);

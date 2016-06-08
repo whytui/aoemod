@@ -19,7 +19,6 @@ std::string GetTechnologyLocalizedName(short int techId) {
 	}
 	for (int i = 0; i < global->researchDefInfo->researchCount; i++) {
 		if (global->researchDefInfo->researchDefArray[i].technologyId == techId) {
-			std::string res;
 			char buffer[100];
 			buffer[0] = 0;
 			GetLanguageDllText(global->researchDefInfo->researchDefArray[i].languageDLLName, buffer, sizeof(buffer),
@@ -30,6 +29,42 @@ std::string GetTechnologyLocalizedName(short int techId) {
 	std::string name = "techid-";
 	name += std::to_string(techId);
 	return name;
+}
+
+
+// Get a research name from languagex.dll or language.dll. Or internal name if no localization was found.
+std::string GetResearchLocalizedName(short int researchId) {
+	if (researchId < 0) {
+		return "invalid-research";
+	}
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	assert(settings != NULL);
+	if (!settings) { return ""; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
+		return "";
+	}
+	if (researchId >= global->researchDefInfo->researchCount) {
+		return "invalid-research";
+	}
+	char buffer[100];
+	buffer[0] = 0;
+	GetLanguageDllText(global->researchDefInfo->researchDefArray[researchId].languageDLLName, buffer, sizeof(buffer),
+		global->researchDefInfo->researchDefArray[researchId].researchName);
+	return std::string(buffer);
+}
+
+
+// Returns true if the research has more required researches than "minimum required researches count" (all requirements are not mandatory)
+bool ResearchHasOptionalRequirements(STRUCT_RESEARCH_DEF *resDef) {
+	if (!resDef) { return false; }
+	int actualCount = 0;
+	for (int i = 0; i < 4; i++) {
+		if (resDef->requiredResearchId[i] > -1) {
+			actualCount++;
+		}
+	}
+	return (actualCount > resDef->minRequiredResearchesCount);
 }
 
 
@@ -161,14 +196,22 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) 
 		// Does this affect affect units ?
 		if (techEffect && (
 			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
-			//(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) || // ?
-			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) ||
 			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
 			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT)
 			)) {
-			// Does it affect "THIS" unit ?
 			if (techEffect->effectUnit == unitDef->DAT_ID1) { return true; }
 			if (techEffect->effectClass == unitDef->unitAIType) { return true; }
+		}
+		if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (techEffect->effectClass == 1)) {
+			if (techEffect->effectUnit == unitDef->DAT_ID1) {
+				return true;
+			}
+		}
+		if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT)) {
+			// Upgrade unit : effectClass field is "TO" unit
+			if ((techEffect->effectUnit == unitDef->DAT_ID1) || (techEffect->effectClass == unitDef->DAT_ID1)) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -219,8 +262,10 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 
 // Returns an ordered list of research IDs that allow researching input researches (researchesList) with all dependencies
 // Returned collection includes all dependencies, including "shadow" researches (no location).
+// Warning: dependency with choices (optional requirements, e.g. research74="A01, B01, F01, I01 ->Tool Age" are returned
+// ... BUT underlying requirements are NOT analyzed (as we can't choose which requirements should be used / ignored)
+// The caller MUST handle such researches (tip: use ResearchHasOptionalRequirements(...) to identify them)
 // All research IDs in returned collection are available in tech tree. Impossible research IDs from researchesList are NOT in returned collection.
-#pragma message("shadow res. with min < totalRequiredResearch not correctly handled (will always build a dock !)")
 std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAYER *player, std::vector<short int> researchesList) {
 	std::vector<short int> allValidResearchesToReturn;
 	//std::set<short int> allValidResearchesToReturn;
@@ -247,8 +292,11 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 		for each (short int researchId in requiredResearches)
 		{
 			STRUCT_RESEARCH_DEF *resDef = &resDefArray[researchId];
-			for (int i = 0; i < resDef->minRequiredResearchesCount; i++) {
-				elementsToAdd.insert(resDef->requiredResearchId[i]);
+			for (int i = 0; i < 4; i++) {
+				if (!ResearchHasOptionalRequirements(resDef) && (resDef->requiredResearchId[i] > -1)) {
+					// Don't add optional requirements (we can't guess which ones should be actually added)
+					elementsToAdd.insert(resDef->requiredResearchId[i]);
+				}
 			}
 		}
 		// Do not insert into requiredResearches while looping in it !
@@ -281,22 +329,32 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 			case RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT:
 				// If all requirements are OK, then it's ok. Otherwise, wait for a next loop (some dependencies may evolve).
 				bool requirementsAreOk;
+				// Compiler bug: can't initialize vars in declaration in a case ! (lol)
 				requirementsAreOk = true;
-				for (int i = 0; i < resDef->minRequiredResearchesCount; i++) {
-					short int requiredResearchId = resDef->requiredResearchId[i];
-					bool requiredResearchIsAvailable = (statuses[curResId].currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE) ||
-						(statuses[curResId].currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_BEING_RESEARCHED) ||
-						(statuses[curResId].currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID) ||
-						// Shadow intermediate researches (no location) are always considered OK here
-						// They can be Market+Bronze Age->Temple, {2 bronze bld}->Iron Age, etc
-						(resDef->researchLocation == -1);
-					// If requirement is NOT currently available and NOT in our "OK list", then the dependency can't be satisfied (for now)
-					if (!requiredResearchIsAvailable && 
-						
-						(std::count(allValidResearchesToReturn.begin(), allValidResearchesToReturn.end(), requiredResearchId) == 0)) {
-						
-						//(allValidResearchesToReturn.count(requiredResearchId) == 0)) {
-						requirementsAreOk = false;
+				if (ResearchHasOptionalRequirements(resDef)) {
+					// When a research with "choices" is met, do not go further and consider it OK
+					// Such researches are shadow technologies for buildings/ages. 
+					// The caller *MUST* check their requirements, we don't have enough context here (when minReq=2 and we have 4 requirements, which ones should we choose ?)
+					requirementsAreOk = true;
+				} else {
+					for (int i = 0; i < 4; i++) {
+						short int requiredResearchId = resDef->requiredResearchId[i];
+						if (requiredResearchId > -1) {
+							bool requiredResearchIsAvailable = (statuses[requiredResearchId].currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE) ||
+								(statuses[requiredResearchId].currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_BEING_RESEARCHED) ||
+								(statuses[requiredResearchId].currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID) ||
+								// Shadow intermediate researches (no location) are always considered OK here
+								// They can be Market+Bronze Age->Temple, {2 bronze bld}->Iron Age, etc
+								(resDef->researchLocation == -1);
+							// If requirement is NOT currently available and NOT in our "OK list", then the dependency can't be satisfied (for now)
+							if (!requiredResearchIsAvailable &&
+
+								(std::count(allValidResearchesToReturn.begin(), allValidResearchesToReturn.end(), requiredResearchId) == 0)) {
+
+								//(allValidResearchesToReturn.count(requiredResearchId) == 0)) {
+								requirementsAreOk = false;
+							}
+						}
 					}
 				}
 				if (requirementsAreOk) {
@@ -336,5 +394,23 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 		traceMessageHandler.WriteMessageNoNotification(msg);
 	}
 	return allValidResearchesToReturn;
+}
+
+
+// Returns a unit (building) definition that enables provided research ID.
+// For example, for research 17, it will return temple's definition because temple's unitDef.initiatesResearch == 17.
+// Returns NULL if not found.
+ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(STRUCT_PLAYER *player, short int researchId) {
+	if (!player || !player->IsCheckSumValid() || researchId < 0) { return NULL; }
+	
+	for (int unitDefId = 0; unitDefId < player->structDefUnitArraySize; unitDefId++) {
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*)player->ptrStructDefUnitTable[unitDefId];
+		if (unitDefBuilding && unitDefBuilding->IsCheckSumValid() && unitDefBuilding->IsTypeValid()) {
+			if (unitDefBuilding->initiatesResearch == researchId) {
+				return unitDefBuilding;
+			}
+		}
+	}
+	return NULL;
 }
 

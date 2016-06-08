@@ -470,7 +470,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		
-		AddResearchesInStrategyForUnit(player->ptrAIStruct, 77);
+		AddResearchesInStrategyForUnit(player->ptrAIStruct, 282);
 
 		std::vector<short int> v;
 		v.push_back(64);

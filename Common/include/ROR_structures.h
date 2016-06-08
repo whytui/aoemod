@@ -2674,9 +2674,9 @@ namespace ROR_STRUCTURES_10C
 		AOE_CONST_FUNC::TECH_DEF_EFFECTS effectType; // 1 byte.
 		char unused_01;
 		short int effectUnit; // +02. Unit ID or Resource ID or...
-		short int effectClass; // +04. Class or ToUnit or Mode or...
+		short int effectClass; // +04. Class or ToUnit (upgrade unit) or Mode (for enable unit) or...
 		short int effectAttribute; // +06
-		float effectValue; // +08
+		float effectValue; // +08. Sometimes unused (enable unit, upgrade unit, etc)
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");
 

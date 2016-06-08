@@ -796,7 +796,9 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return 0;}
 	std::vector<short int> researchesForUnit = FindResearchesThatAffectUnit(player, unitDefId, true);
 	std::vector<short int> allResearchesForUnit = GetValidOrderedResearchesListWithDependencies(player, researchesForUnit);
-	std::set<short int> researchesWithoutLocation;
+	// Important note: for "shadow" researches with optional requirements (buildings for ages, etc), requirements are not analyzed yet.
+	// We'll have to manage them ourselves.
+	/*std::set<short int> researchesWithoutLocation;
 	for each (short int researchId in allResearchesForUnit)
 	{
 		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
@@ -808,7 +810,7 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 	{
 		auto it = remove_if(allResearchesForUnit.begin(), allResearchesForUnit.end(), [researchId](short int i) {return i == researchId; });
 		allResearchesForUnit.erase(it, allResearchesForUnit.end());
-	}
+	}*/
 	
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElement = &ai->structBuildAI.fakeFirstStrategyElement;
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentElem = fakeFirstElement->previous;
@@ -826,20 +828,41 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 	// elemToInsert = position to insert at stategy end OR just before wonder, if any.
 
 	int addedItems = 0;
-	// TODO: manage tech order (dependencies)
-	// TODO: manage requirements (fanaticism for legion, etc)
-	for each (short int researchId in researchesForUnit)
+	// allResearchesForUnit is ordered by dependency, so we're adding the requirements first and strategy order is OK.
+	// However inserted elements are not optimized for development speed and there is no priority other than dependencies.
+	for each (short int researchId in allResearchesForUnit)
 	{
 		if ((researchId >= 0) && (researchId < player->ptrResearchesStruct->ptrResearchDefInfo->researchCount)) {
 			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
-			char nameBuffer[0x50]; // stratelem.name size is 0x40
-			char namePrefix[] = "CustomROR_";
-			strcpy_s(nameBuffer, namePrefix);
-			strcpy_s(nameBuffer + sizeof(namePrefix) -1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, resDef->researchName);
-			if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) {
-				addedItems++;
-				AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, resDef->researchLocation,
-					TAIUnitClass::AIUCTech, researchId, player, nameBuffer);
+
+			if (ResearchHasOptionalRequirements(resDef)) {
+				// Handle optional requirements. This DOES have importance. eg. in DM, yamato build a temple just to go iron !
+				// TODO
+			} else {
+				char nameBuffer[0x50]; // stratelem.name size is 0x40
+				char namePrefix[] = "CustomROR_";
+				strcpy_s(nameBuffer, namePrefix);
+				if ((resDef->researchLocation == -1) || (resDef->buttonId == 0)) {
+					// Shadow research (automatically researched): do not add in strategy
+					// However, it may correspond to a required building (temple for fanaticism..)
+					ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = FindBuildingDefThatEnablesResearch(player, researchId);
+					if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
+						// Make sure this building is built in strategy
+						if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) == -1) {
+							strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, unitDefBuilding->ptrUnitName);
+							AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, -1 /*villager*/,
+								TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1, player, nameBuffer);
+						}
+					}
+				} else {
+					// Standard research
+					strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, resDef->researchName);
+					if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) {
+						addedItems++;
+						AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, resDef->researchLocation,
+							TAIUnitClass::AIUCTech, researchId, player, nameBuffer);
+					}
+				}
 			}
 		}
 	}
