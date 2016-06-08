@@ -24,6 +24,13 @@ namespace ROR_STRUCTURES_10C
 
 
 	// Pre-declarations
+	class STRUCT_TECH_DEF_EFFECT;
+	class STRUCT_TECH_DEF;
+	class STRUCT_TECH_DEF_INFO;
+	class STRUCT_RESEARCH_DEF;
+	class STRUCT_RESEARCH_DEF_INFO;
+	class STRUCT_PLAYER_RESEARCH_STATUS;
+	class STRUCT_PLAYER_RESEARCH_INFO;
 	class STRUCT_PATH_FINDING_UNKNOWN_POS_INFO;
 	class STRUCT_AI_UNIT_LIST_INFO;
 	class STRUCT_HUMAN_TRAIN_QUEUE_INFO;
@@ -78,13 +85,6 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_UNIT_LIVING;
 	class STRUCT_UNIT_BUILDING;
 	class STRUCT_UNIT_TREE;
-	class STRUCT_TECH_DEF_EFFECT;
-	class STRUCT_TECH_DEF;
-	class STRUCT_TECH_DEF_INFO;
-	class STRUCT_RESEARCH_DEF;
-	class STRUCT_RESEARCH_DEF_INFO;
-	class STRUCT_PLAYER_RESEARCH_STATUS;
-	class STRUCT_PLAYER_RESEARCH_INFO;
 
 	// AI
 	class STRUCT_AI;
@@ -1003,6 +1003,104 @@ namespace ROR_STRUCTURES_10C
 
 
 
+	// Size =  0x0C
+	class STRUCT_TECH_DEF_EFFECT {
+	public:
+		AOE_CONST_FUNC::TECH_DEF_EFFECTS effectType; // 1 byte.
+		char unused_01;
+		short int effectUnit; // +02. Unit ID or Resource ID or...
+		short int effectClass; // +04. Class or ToUnit (upgrade unit) or Mode (for enable unit) or...
+		short int effectAttribute; // +06
+		float effectValue; // +08. Sometimes unused (enable unit, upgrade unit, etc)
+	};
+	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");
+
+	// Size = 0x2C
+	class STRUCT_TECH_DEF {
+	public:
+		char unknown_00[2]; // Is this used ?
+		char techName[0x22]; // +02. Almost never valued ?
+		short int effectCount; // +24
+		short int unknown_26; // probably unused
+		STRUCT_TECH_DEF_EFFECT *ptrEffects; // +28. Array of effects. Count = effectCount.
+	};
+	static_assert(sizeof(STRUCT_TECH_DEF) == 0x2C, "STRUCT_TECH_DEF size");
+
+
+	// Size = 0x0C, alloc in 0x50A1CB
+	class STRUCT_TECH_DEF_INFO {
+	public:
+		unsigned long int checksum; // 20 99 54 00
+		STRUCT_TECH_DEF *ptrTechDefArray; // unsure
+		long int technologyCount;
+
+		bool IsCheckSumValid() { return this->checksum == 0x00549920; }
+	};
+	static_assert(sizeof(STRUCT_TECH_DEF_INFO) == 0x0C, "STRUCT_TECH_DEF_INFO size");
+
+	// size = 0x3C
+	class STRUCT_RESEARCH_DEF {
+	public:
+		char *researchName;
+		short int requiredResearchId[4]; // +04. 4 possible research IDs (required researches)
+		short int minRequiredResearchesCount; // +0C. Min number of "requiredResearchId" that need to be satisfied to enable this research. NOT number of used elements in array !
+		short int costType1;
+		// 0x10
+		short int costType2;
+		short int costType3;
+		short int costAmount1; // +14
+		short int costAmount2;
+		short int costAmount3; // +18
+		char costUsed1;
+		char costUsed2;
+		char costUsed3; // +1C
+		char unused1D0;
+		short int researchTime; // 1E
+		// 0x20
+		short int technologyId;
+		short int researchType; // 1=dock, 2=granary,etc (see AGE3 tooltip)
+		short int iconId; // 24
+		char buttonId; // 26. 1-5 for first row, 6-10 for second row, 11-15 and 16-20 for 2nd page (2 rows)
+		char unknown_27;
+		short int researchLocation; // 28
+		short int languageDLLName;
+		short int languageDLLDescription; // 2C
+		unsigned short int unknown_2E; // "pointer3" ??
+		// 0x30
+		long int languageDLLCreation;
+		long int languageDLLHelp; // +34
+		unsigned short int unknown_38;
+		unsigned short int unknown_3A;
+		//end
+	};
+
+	// Size = 0x0C. Constructor=0x4E9C60
+	class STRUCT_RESEARCH_DEF_INFO {
+	public:
+		STRUCT_RESEARCH_DEF *researchDefArray;
+		short int researchCount;
+		short int unknown_06; // unused ?
+		STRUCT_GAME_GLOBAL *ptrGlobalStruct;
+	};
+
+	// Size = 08
+	class STRUCT_PLAYER_RESEARCH_STATUS {
+	public:
+		float researchingTime; // if >= researchDef.researchTime, then it's completed ! This is not =, but >=
+		AOE_CONST_FUNC::RESEARCH_STATUSES currentStatus; // 2-bytes.
+		short int unknown_06; // unused (probably ;)
+	};
+
+	// Size=0x10. Constructor=4EA91C
+	class STRUCT_PLAYER_RESEARCH_INFO {
+	public:
+		STRUCT_PLAYER_RESEARCH_STATUS *researchStatusesArray;
+		short int researchCount;
+		short int unknown_06; // unused ?
+		STRUCT_RESEARCH_DEF_INFO *ptrResearchDefInfo;
+		STRUCT_PLAYER *ptrPlayer; // +C. Back pointer to player.
+	};
+
 
 	// This structure does not have a checksum. It is referenced by 0x580DA8
 	// It is probably this structure that collects all 'common' information to be multiplayer-compatible (player names, etc).
@@ -1772,6 +1870,16 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_UNITDEF_BASE *GetUnitDefBase(short int unitDefId) const {
 			if ((unitDefId < 0) || (unitDefId >= this->structDefUnitArraySize)) { return NULL; }
 			return (STRUCT_UNITDEF_BASE *)this->ptrStructDefUnitTable[unitDefId];
+		}
+		STRUCT_RESEARCH_DEF *GetResearchDef(short int researchId) {
+			if (!this->ptrResearchesStruct || !this->ptrResearchesStruct->ptrResearchDefInfo || !this->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray) {return NULL; }
+			if ((researchId < 0) || (researchId >= this->ptrResearchesStruct->researchCount)) { return NULL; }
+			return &this->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
+		}
+		STRUCT_PLAYER_RESEARCH_STATUS *GetResearchStatus(short int researchId) {
+			if (!this->ptrResearchesStruct || !this->ptrResearchesStruct->researchStatusesArray) { return NULL; }
+			if ((researchId < 0) || (researchId >= this->ptrResearchesStruct->researchCount)) { return NULL; }
+			return &this->ptrResearchesStruct->researchStatusesArray[researchId];
 		}
 	};
 
@@ -2669,105 +2777,6 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_TRADE_AI structTradeAI; // +0x12478
 
 		bool IsCheckSumValid() { return this->checksum == 0x00548BF0; }
-	};
-
-
-	// Size =  0x0C
-	class STRUCT_TECH_DEF_EFFECT {
-	public:
-		AOE_CONST_FUNC::TECH_DEF_EFFECTS effectType; // 1 byte.
-		char unused_01;
-		short int effectUnit; // +02. Unit ID or Resource ID or...
-		short int effectClass; // +04. Class or ToUnit (upgrade unit) or Mode (for enable unit) or...
-		short int effectAttribute; // +06
-		float effectValue; // +08. Sometimes unused (enable unit, upgrade unit, etc)
-	};
-	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");
-
-	// Size = 0x2C
-	class STRUCT_TECH_DEF {
-	public:
-		char unknown_00[2]; // Is this used ?
-		char techName[0x22]; // +02. Almost never valued ?
-		short int effectCount; // +24
-		short int unknown_26; // probably unused
-		STRUCT_TECH_DEF_EFFECT *ptrEffects; // +28. Array of effects. Count = effectCount.
-	};
-	static_assert(sizeof(STRUCT_TECH_DEF) == 0x2C, "STRUCT_TECH_DEF size");
-
-
-	// Size = 0x0C, alloc in 0x50A1CB
-	class STRUCT_TECH_DEF_INFO {
-	public:
-		unsigned long int checksum; // 20 99 54 00
-		STRUCT_TECH_DEF *ptrTechDefArray; // unsure
-		long int technologyCount;
-
-		bool IsCheckSumValid() { return this->checksum == 0x00549920; }
-	};
-	static_assert(sizeof(STRUCT_TECH_DEF_INFO) == 0x0C, "STRUCT_TECH_DEF_INFO size");
-
-	// size = 0x3C
-	class STRUCT_RESEARCH_DEF {
-	public:
-		char *researchName;
-		short int requiredResearchId[4]; // +04. 4 possible research IDs (required researches)
-		short int minRequiredResearchesCount; // +0C. Min number of "requiredResearchId" that need to be satisfied to enable this research. NOT number of used elements in array !
-		short int costType1;
-		// 0x10
-		short int costType2;
-		short int costType3;
-		short int costAmount1; // +14
-		short int costAmount2;
-		short int costAmount3; // +18
-		char costUsed1;
-		char costUsed2;
-		char costUsed3; // +1C
-		char unused1D0;
-		short int researchTime; // 1E
-		// 0x20
-		short int technologyId;
-		short int researchType; // 1=dock, 2=granary,etc (see AGE3 tooltip)
-		short int iconId; // 24
-		char buttonId; // 26. 1-5 for first row, 6-10 for second row, 11-15 and 16-20 for 2nd page (2 rows)
-		char unknown_27;
-		short int researchLocation; // 28
-		short int languageDLLName;
-		short int languageDLLDescription; // 2C
-		unsigned short int unknown_2E; // "pointer3" ??
-		// 0x30
-		long int languageDLLCreation;
-		long int languageDLLHelp; // +34
-		unsigned short int unknown_38;
-		unsigned short int unknown_3A;
-		//end
-	};
-
-	// Size = 0x0C. Constructor=0x4E9C60
-	class STRUCT_RESEARCH_DEF_INFO {
-	public:
-		STRUCT_RESEARCH_DEF *researchDefArray;
-		short int researchCount;
-		short int unknown_06; // unused ?
-		STRUCT_GAME_GLOBAL *ptrGlobalStruct;
-	};
-
-	// Size = 08
-	class STRUCT_PLAYER_RESEARCH_STATUS {
-	public:
-		float researchingTime; // if >= researchDef.researchTime, then it's completed ! This is not =, but >=
-		AOE_CONST_FUNC::RESEARCH_STATUSES currentStatus; // 2-bytes.
-		short int unknown_06; // unused (probably ;)
-	};
-
-	// Size=0x10. Constructor=4EA91C
-	class STRUCT_PLAYER_RESEARCH_INFO {
-	public:
-		STRUCT_PLAYER_RESEARCH_STATUS *researchStatusesArray;
-		short int researchCount;
-		short int unknown_06; // unused ?
-		STRUCT_RESEARCH_DEF_INFO *ptrResearchDefInfo;
-		STRUCT_PLAYER *ptrPlayer; // +C. Back pointer to player.
 	};
 
 

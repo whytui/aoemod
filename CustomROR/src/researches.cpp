@@ -344,10 +344,7 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 								(resDef->researchLocation == -1);
 							// If requirement is NOT currently available and NOT in our "OK list", then the dependency can't be satisfied (for now)
 							if (!requiredResearchIsAvailable &&
-
 								(std::count(allValidResearchesToReturn.begin(), allValidResearchesToReturn.end(), requiredResearchId) == 0)) {
-
-								//(allValidResearchesToReturn.count(requiredResearchId) == 0)) {
 								requirementsAreOk = false;
 							}
 						}

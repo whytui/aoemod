@@ -470,7 +470,8 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		
-		AddResearchesInStrategyForUnit(player->ptrAIStruct, 282);
+		//AddResearchesInStrategyForUnit(player->ptrAIStruct, 282);
+		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_ARMORED_ELEPHANT);
 
 		std::vector<short int> v;
 		v.push_back(64);

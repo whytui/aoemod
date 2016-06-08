@@ -734,43 +734,43 @@ bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 				}
 			}
 
-			// Rules for buildings
-			if (currentElem->elementType == AIUCBuilding) {
-				// Explicitely require ALL houses / TC to be fully built.
-				if ((currentElem->unitDAT_ID == CST_UNITID_HOUSE) || (currentElem->unitDAT_ID == CST_UNITID_FORUM)) {
-					return false;
-				}
+// Rules for buildings
+if (currentElem->elementType == AIUCBuilding) {
+	// Explicitely require ALL houses / TC to be fully built.
+	if ((currentElem->unitDAT_ID == CST_UNITID_HOUSE) || (currentElem->unitDAT_ID == CST_UNITID_FORUM)) {
+		return false;
+	}
 
-				// We allow some "useless" buildings NOT to be built: farms, gov siege, market
-				bool isUnnecessaryBld = (currentElem->unitDAT_ID != CST_UNITID_FARM) ||
-					// SP / granary are dynamically added: there might be several of them, but we don't need them to build a wonder
-					(currentElem->unitDAT_ID != CST_UNITID_GRANARY) ||
-					(currentElem->unitDAT_ID != CST_UNITID_STORAGE_PIT) ||
-					(currentElem->unitDAT_ID != CST_UNITID_DOCK) || // Can be added dynamically, don't take the risk to block wonder for this.
-					(currentElem->unitDAT_ID != CST_UNITID_GOVERNMENT_SIEGE) ||
-					(currentElem->unitDAT_ID != CST_UNITID_MARKET);
-				if (!isUnnecessaryBld) {
-					// Add other criteria ?
-					return false; // A "necessary" building is missing
-				}
-			}
+	// We allow some "useless" buildings NOT to be built: farms, gov siege, market
+	bool isUnnecessaryBld = (currentElem->unitDAT_ID != CST_UNITID_FARM) ||
+		// SP / granary are dynamically added: there might be several of them, but we don't need them to build a wonder
+		(currentElem->unitDAT_ID != CST_UNITID_GRANARY) ||
+		(currentElem->unitDAT_ID != CST_UNITID_STORAGE_PIT) ||
+		(currentElem->unitDAT_ID != CST_UNITID_DOCK) || // Can be added dynamically, don't take the risk to block wonder for this.
+		(currentElem->unitDAT_ID != CST_UNITID_GOVERNMENT_SIEGE) ||
+		(currentElem->unitDAT_ID != CST_UNITID_MARKET);
+	if (!isUnnecessaryBld) {
+		// Add other criteria ?
+		return false; // A "necessary" building is missing
+	}
+}
 
-			// Rules for living units - only if there is room for new units.
-			// If no more headroom because of missing houses, "building" rules will ensure we return false
-			// If no more headroom because we reached population max, don't block wonder construction for this.
-			if ((currentElem->elementType == AIUCLivingUnit) && (populationHeadroom > 0)) {
-				bool isVillager = IsVillager_includingShips((unsigned short)currentElem->unitDAT_ID);
-				if (isVillager) {
-					missingVillagers++;
-					if (missingVillagers > 4) { // we tolerate some villagers to be spawned afterwards, but not too many
-						return false;
-					}
-				}
-				// Military unit: tolerate if in progress, but not if it has not been started yet.
-				if (!isVillager && (currentElem->inProgressCount == 0)) {
-					return false;
-				}
-			}
+// Rules for living units - only if there is room for new units.
+// If no more headroom because of missing houses, "building" rules will ensure we return false
+// If no more headroom because we reached population max, don't block wonder construction for this.
+if ((currentElem->elementType == AIUCLivingUnit) && (populationHeadroom > 0)) {
+	bool isVillager = IsVillager_includingShips((unsigned short)currentElem->unitDAT_ID);
+	if (isVillager) {
+		missingVillagers++;
+		if (missingVillagers > 4) { // we tolerate some villagers to be spawned afterwards, but not too many
+			return false;
+		}
+	}
+	// Military unit: tolerate if in progress, but not if it has not been started yet.
+	if (!isVillager && (currentElem->inProgressCount == 0)) {
+		return false;
+	}
+}
 		}
 
 		currentElem = currentElem->next;
@@ -793,12 +793,12 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 		!player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray) {
 		return 0;
 	}
-	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return 0;}
+	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return 0; }
 	std::vector<short int> researchesForUnit = FindResearchesThatAffectUnit(player, unitDefId, true);
 	std::vector<short int> allResearchesForUnit = GetValidOrderedResearchesListWithDependencies(player, researchesForUnit);
 	// Important note: for "shadow" researches with optional requirements (buildings for ages, etc), requirements are not analyzed yet.
 	// We'll have to manage them ourselves.
-	
+
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElement = &ai->structBuildAI.fakeFirstStrategyElement;
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentElem = fakeFirstElement->previous;
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemToInsert = NULL;
@@ -821,14 +821,124 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 	{
 		if ((researchId >= 0) && (researchId < player->ptrResearchesStruct->ptrResearchDefInfo->researchCount)) {
 			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
+			char nameBuffer[0x50]; // stratelem.name size is 0x40
+			char namePrefix[] = "CustomROR_";
+			strcpy_s(nameBuffer, namePrefix);
 
 			if (ResearchHasOptionalRequirements(resDef)) {
 				// Handle optional requirements. This DOES have importance. eg. in DM, yamato build a temple just to go iron !
-				// TODO
+				std::set<short int> optionalResearches;
+				int actualRequiredResearchCount = 0; // total number of required researches (other than -1)
+				int requiredResearchAlreadyInStrategy = 0; // number of "optionals" that are already present in strategy
+				// Collect information on requirements
+				for (int i = 0; i < 4; i++) {
+					if (resDef->requiredResearchId[i] != -1) {
+						actualRequiredResearchCount++;
+						if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, resDef->requiredResearchId[i]) == -1) {
+							optionalResearches.insert(resDef->requiredResearchId[i]);
+						} else {
+							if (std::count(allResearchesForUnit.begin(), allResearchesForUnit.end(), resDef->requiredResearchId[i]) > 0) {
+								// Not in strategy yet, but will be added soon. We have a dependency issue here :-/
+								// This case should not occur if dependencies are correct.
+								traceMessageHandler.WriteMessage("Warning: a research dependency issue has been found");
+							} else {
+								requiredResearchAlreadyInStrategy++;
+							}
+						}
+					}
+				}
+				int missingRequiredResearchCount = resDef->minRequiredResearchesCount - requiredResearchAlreadyInStrategy;
+				while (missingRequiredResearchCount > 0) {
+					// Find the best element in optionalResearches to add in strategy
+					// Criteria: available in tech tree, cost, ...? temple=good, dock=bad
+					short int bestResearchId = -1;
+					bool bestElemIsWaitingRequirement = true;
+					float bestElemTotalCost = 999999;
+					int bestElemBuildingBonus = 1;
+					short int bestElemBuildingDatId = -1; // Only for "building shadow" researches : in strategy, add building, not research.
+					for each (short int reqResearchId in optionalResearches)
+					{
+						// unitDefBuilding = the building corresponding to shadow research, NULL if this is not a "building shadow" research.
+						ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = FindBuildingDefThatEnablesResearch(player, reqResearchId);
+						ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *reqResearch = player->GetResearchDef(reqResearchId);
+						ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *reqResearchStatus = player->GetResearchStatus(reqResearchId);
+						float currentTotalCost = (float)(reqResearch->costUsed1 ? reqResearch->costAmount1 : 0);
+						currentTotalCost += (float)(reqResearch->costUsed2 ? reqResearch->costAmount2 : 0);
+						currentTotalCost += (float)(reqResearch->costUsed3 ? reqResearch->costAmount3 : 0);
+						int currentBuildingBonus = 1;
+						if (unitDefBuilding && unitDefBuilding->IsTypeValid()) {
+							// For "building shadow" research, the research itself has no meaning. Cost is building's
+							currentTotalCost = (float)(unitDefBuilding->costs[0].costUsed ? unitDefBuilding->costs[0].costAmount : 0);
+							currentTotalCost += (float)(unitDefBuilding->costs[1].costUsed ? unitDefBuilding->costs[1].costAmount : 0);
+							currentTotalCost += (float)(unitDefBuilding->costs[2].costUsed ? unitDefBuilding->costs[2].costAmount : 0);
+							if (unitDefBuilding->DAT_ID1 == CST_UNITID_TEMPLE) {
+								currentBuildingBonus = 2;
+							}
+							if (unitDefBuilding->DAT_ID1 == CST_UNITID_DOCK) {
+								currentBuildingBonus = 0;
+							}
+						}
+						if ((reqResearch != NULL) && (reqResearchStatus->currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED)) {
+							bool currentIsBetter = false;
+							if (bestResearchId == -1) {
+								currentIsBetter = true;
+							} else {
+								// Need to compare "best" and "current one"
+								if (!currentIsBetter && (bestElemBuildingBonus < currentBuildingBonus)) {
+									currentIsBetter = true; // Allows adding a temple rather something else, or adding anything rather than a dock (if useful, it would already be in strategy)
+								}
+								if (!currentIsBetter && (bestElemIsWaitingRequirement && (reqResearchStatus->currentStatus > RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT))) {
+									currentIsBetter = true; // if a research is already available while the other is not yet: prefer (could avoid requirement issues)
+								}
+								if (!currentIsBetter && (bestElemTotalCost > currentTotalCost)) {
+									currentIsBetter = true; // Pick the cheaper one
+								}
+								// Add criteria: building with potential useful units for panic mode ? (chariots?)
+							}
+							if (currentIsBetter) {
+								bestResearchId = reqResearchId;
+								bestElemIsWaitingRequirement = (reqResearchStatus->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT);
+								bestElemTotalCost = currentTotalCost;
+								bestElemBuildingBonus = currentBuildingBonus;
+								bestElemBuildingDatId = -1;
+								if (unitDefBuilding && unitDefBuilding->IsTypeValid()) {
+									bestElemBuildingDatId = unitDefBuilding->DAT_ID1;
+								}
+							}
+						}
+					}
+					
+					// Add best item in strategy...
+					if (bestElemBuildingDatId > -1) {
+						// Add a building (for shadow building research)
+						ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(bestElemBuildingDatId);
+						if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass()) {
+							if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, bestElemBuildingDatId) == -1) {
+								addedItems++;
+								strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, unitDefBase->ptrUnitName);
+								AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, -1 /*villager*/,
+									TAIUnitClass::AIUCBuilding, bestElemBuildingDatId, player, nameBuffer);
+							}
+						}
+					} else {
+						// Add a real research
+						ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *reqResearch = player->GetResearchDef(bestResearchId);
+						if (reqResearch && (reqResearch->researchLocation > -1) && (reqResearch->buttonId > 0)) {
+							if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, bestResearchId) == -1) {
+								strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, reqResearch->researchName);
+								addedItems++;
+								AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, reqResearch->researchLocation,
+									TAIUnitClass::AIUCTech, bestResearchId, player, nameBuffer);
+							}
+						} else {
+							traceMessageHandler.WriteMessage("Error, trying to add in strategy an invalid research");
+						}
+					}
+					missingRequiredResearchCount--;
+					optionalResearches.erase(bestResearchId);
+				}
+
 			} else {
-				char nameBuffer[0x50]; // stratelem.name size is 0x40
-				char namePrefix[] = "CustomROR_";
-				strcpy_s(nameBuffer, namePrefix);
 				if ((resDef->researchLocation == -1) || (resDef->buttonId == 0)) {
 					// Shadow research (automatically researched): do not add in strategy
 					// However, it may correspond to a required building (temple for fanaticism..)
