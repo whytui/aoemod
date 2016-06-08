@@ -687,14 +687,18 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 		this->UpdateWorkRateWithMessage(CST_UNITID_FARMER, -1); // Original=0.45
 		// Note for upgrades (techs): if using another value than 0.15, also fix egypt/baby tech trees ! (+palmyra, see below)
 		// Mining: could use +0.09 (would be +20%) ?
-		this->UpdateTechAddWorkRateWithMessage(CST_TCH_STONE_MINING, CST_UNITID_MINERSTONE, (float)0.15); // +33% instead of +67% (was +0.3 / 0.45 initial)
-		this->UpdateTechAddWorkRateWithMessage(CST_TCH_GOLD_MINING, CST_UNITID_MINERGOLD, (float)0.15); // +33% instead of +67% (was +0.3 / 0.45 initial)
-		this->UpdateTechAddWorkRateWithMessage(CST_TCH_SIEGECRAFT, CST_UNITID_MINERSTONE, (float)0.15); // +33% instead of +67% (was +0.3 / 0.45 initial). 2nd tech for stone mining (iron age)
+		const float miningBonus = (float)0.15;
+		const float lumberjackBonus = (float)0.11;
+		const float palmyraWorkRateBonus = (float)0.15; // enough, even better than tech bonuses. Original = 0.20 for all gatherer types
+		// TODO: bonus % is not the same for all villager types (most have 0.45 work rate, lumberjack 0.55, etc)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_STONE_MINING, CST_UNITID_MINERSTONE, miningBonus); // +33% instead of +67% (was +0.3 / 0.45 initial)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_GOLD_MINING, CST_UNITID_MINERGOLD, miningBonus); // +33% instead of +67% (was +0.3 / 0.45 initial)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_SIEGECRAFT, CST_UNITID_MINERSTONE, miningBonus); // +33% instead of +67% (was +0.3 / 0.45 initial). 2nd tech for stone mining (iron age)
 		// Wood cutting work rate improvements :
 		// WARNING: there is a hardcoded addition of -0.15 (decrease, actually) to phoenician to compensate too big bonus on lumberjack ! See 0x50B883.
-		this->UpdateTechAddWorkRateWithMessage(CST_TCH_WOODWORKING, CST_UNITID_LUMBERJACK, (float)0.11); // +20% instead of +36% (+0.3 / 0.55 initial)
-		this->UpdateTechAddWorkRateWithMessage(CST_TCH_ARTISANSHIP, CST_UNITID_LUMBERJACK, (float)0.11); // +20% instead of +36% (+0.3 / 0.55 initial)
-		this->UpdateTechAddWorkRateWithMessage(CST_TCH_CRAFTSMANSHIP, CST_UNITID_LUMBERJACK, (float)0.11); // +20% instead of +36% (+0.3 / 0.55 initial)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_WOODWORKING, CST_UNITID_LUMBERJACK, lumberjackBonus); // +20% instead of +36% (+0.2 / 0.55 initial)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_ARTISANSHIP, CST_UNITID_LUMBERJACK, lumberjackBonus); // +20% instead of +36% (+0.2 / 0.55 initial)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_CRAFTSMANSHIP, CST_UNITID_LUMBERJACK, lumberjackBonus); // +20% instead of +36% (+0.2 / 0.55 initial)
 		// Palmyra tech tree: adjust villager work rate bonuses
 		ROR_STRUCTURES_10C::STRUCT_TECH_DEF_INFO *techDefInfo = global->technologiesInfo;
 		if (techDefInfo && techDefInfo->IsCheckSumValid() && (techDefInfo->technologyCount > CST_TCH_TECH_TREE_PALMYRA)) {
@@ -704,9 +708,9 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 					(techDef->ptrEffects[i].effectAttribute == 13) && // work rate
 					// For villagers OR farm (refer to palmyra tech tree !)
 					((IsVillager(techDef->ptrEffects[i].effectUnit) || (techDef->ptrEffects[i].effectUnit == CST_UNITID_FARM)) &&
-					(techDef->ptrEffects[i].effectValue > 0.15))
+					(techDef->ptrEffects[i].effectValue > palmyraWorkRateBonus))
 					) {
-					float newValue = (float)0.15; // enough, even better than tech bonuses. Original = 0.20 for all gatherer types
+					float newValue = palmyraWorkRateBonus;
 					std::string msg = "Palmyra tech tree: gathering bonus changed from ";
 					msg += std::to_string(techDef->ptrEffects[i].effectValue);
 					msg += " to ";

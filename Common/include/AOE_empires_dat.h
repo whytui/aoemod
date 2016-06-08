@@ -182,6 +182,21 @@ namespace AOE_CONST_FUNC {
 		MWT_ALL_LAND_MAP = 4 // No water at all or just rivers, AI builds no dock/boats here.
 	};
 
+	// http://agecommunity.wikia.com/wiki/Attack_Data
+	// For both attack and armor types.
+	enum ATTACK_CLASS {
+		CST_AC_BALLISTA_ON_BUILDINGS = 0,
+		CST_AC_SLINGER_ON_ARCHERS = 1, // And on towers/walls too
+		CST_AC_BASE_PIERCE = 3, // Common archers attack class
+		CST_AC_BASE_MELEE = 4, // The most common attack type
+		CST_AC_CATAPULTS_ON_BUILDINGS = 6,
+		CST_AC_CHARIOTS_ON_PRIESTS = 7,
+		CST_AC_CAMEL_ON_CAVALRY = 8, // And on chariots too
+		CST_AC_CAVALRY_ON_INFANTRY = 9, // on clubmen/short sword + upgrades, NOT on slingers, hoplites...
+		CST_AC_VILLAGER_SIEGECRAFT = 10, // Siegecraft effect: villagers bonus against towers/walls
+		CST_AC_LION = 11, // Lion attack on gazelle, villagers...
+	};
+
 
 	// ------------------------------------------------------------------
 	// Unit ids : Villagers
