@@ -798,19 +798,6 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 	std::vector<short int> allResearchesForUnit = GetValidOrderedResearchesListWithDependencies(player, researchesForUnit);
 	// Important note: for "shadow" researches with optional requirements (buildings for ages, etc), requirements are not analyzed yet.
 	// We'll have to manage them ourselves.
-	/*std::set<short int> researchesWithoutLocation;
-	for each (short int researchId in allResearchesForUnit)
-	{
-		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
-		if (resDef->researchLocation < 0) {
-			researchesWithoutLocation.insert(researchId); // Shadow researches (some may correspond to required buildings, take care not to ignore them)
-		}
-	}
-	for each (short int researchId in researchesWithoutLocation)
-	{
-		auto it = remove_if(allResearchesForUnit.begin(), allResearchesForUnit.end(), [researchId](short int i) {return i == researchId; });
-		allResearchesForUnit.erase(it, allResearchesForUnit.end());
-	}*/
 	
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElement = &ai->structBuildAI.fakeFirstStrategyElement;
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentElem = fakeFirstElement->previous;

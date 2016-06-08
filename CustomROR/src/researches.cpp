@@ -248,10 +248,6 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 				if (!added && DoesTechAffectUnit(&global->technologiesInfo->ptrTechDefArray[techId], unitDefBase)) {
 					result.push_back(researchId);
 					added = true;
-					std::string msg = std::to_string(techId);
-					msg += "-";
-					msg += GetTechnologyLocalizedName(techId);
-					traceMessageHandler.WriteMessageNoNotification(msg);
 				}
 			}
 		}
