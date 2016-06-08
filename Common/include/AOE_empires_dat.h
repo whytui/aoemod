@@ -404,6 +404,10 @@ namespace AOE_CONST_FUNC {
 		CST_TCH_TECH_TREE_ALL_TECHS = 210,
 		// Other
 		CST_TCH_ARTISANSHIP = 32, // Bronze age (2nd  tech for wood cutting/range)
+		CST_TCH_STONE_AGE = 94,
+		CST_TCH_TOOL_AGE = 95,
+		CST_TCH_BRONZE_AGE = 96,
+		CST_TCH_IRON_AGE = 97,
 		CST_TCH_WOODWORKING = 106, // FR: menuiserie (tool age - 1st tech for wood cutting/range)
 		CST_TCH_GOLD_MINING = 107,
 		CST_TCH_STONE_MINING = 108,

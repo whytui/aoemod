@@ -466,10 +466,16 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 #ifdef _DEBUG
 	// TEST temp
 	if (strcmp(command, "a") == 0) {
-		long int playerId = 1;
+		long int playerId = 2;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
-		FindResearchesThatAffectUnit(player, 75, true);
+		
+		AddResearchesInStrategyForUnit(player->ptrAIStruct, 77);
+
+		std::vector<short int> v;
+		v.push_back(64);
+		v.push_back(77);
+		//GetValidOrderedResearchesListWithDependencies(player, v);
 
 		ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
 		ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
@@ -1184,7 +1190,7 @@ bool CustomRORCommand::FindIfGameStartStrategyInitHasBeenDone(ROR_STRUCTURES_10C
 	if (!player) { return true; }
 	ROR_STRUCTURES_10C::STRUCT_AI *mainAI = player->GetAIStruct();
 	if (!mainAI) { return true; }
-	if (HasElementInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_HOUSE) < 0) {
+	if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_HOUSE) < 0) {
 		// Our current criterion is "no house = not initialized". Can we do better ?
 		return false;
 	}

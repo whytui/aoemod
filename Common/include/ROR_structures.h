@@ -2707,21 +2707,18 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_RESEARCH_DEF {
 	public:
 		char *researchName;
-		short int requiredResearchId1; // 04
-		short int requiredResearchId2; // 06
-		short int requiredResearchId3; // 08
-		short int requiredResearchId4; // 0A
-		short int minRequiredResearches; // 0C
+		short int requiredResearchId[4]; // +04. 4 possible research IDs (required researches)
+		short int minRequiredResearchesCount; // +0C. Min number of "requiredResearchId" that need to be satisfied to enable this research. NOT number of used elements in array !
 		short int costType1;
 		// 0x10
 		short int costType2;
 		short int costType3;
-		short int costAmount1; // 14
+		short int costAmount1; // +14
 		short int costAmount2;
-		short int costAmount3; //18
+		short int costAmount3; // +18
 		char costUsed1;
 		char costUsed2;
-		char costUsed3; // 1C
+		char costUsed3; // +1C
 		char unused1D0;
 		short int researchTime; // 1E
 		// 0x20

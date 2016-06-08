@@ -1,6 +1,35 @@
 #include "../include/strategy.h"
 
 
+
+// Returns true if the research is present in tech tree but not researched yet (nor being researched)
+bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id) {
+	AOE_CONST_FUNC::RESEARCH_STATUSES status = GetResearchStatus(player, research_id);
+	return (status == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) ||
+		(status == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE);
+}
+
+
+// Returns 1st element position (>=0) if (at least) 1 matching element exists in strategy. -1=no such element
+long int FindElementPosInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID) {
+	if (!player) { return -1; }
+	ROR_STRUCTURES_10C::STRUCT_AI *mainAI = player->GetAIStruct();
+	if (!mainAI) { return -1; }
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeStratElem = &mainAI->structBuildAI.fakeFirstStrategyElement;
+	assert(fakeStratElem != NULL); // How could it be ?
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeStratElem->next;
+	while ((currentStratElem != NULL) && (currentStratElem != fakeStratElem)) {
+		if ((currentStratElem->elementType == elementType) && (currentStratElem->unitDAT_ID == DAT_ID)) {
+			return currentStratElem->counter;
+		}
+		currentStratElem = currentStratElem->next;
+	}
+	return -1;
+}
+
+
+
+
 // This fixes dynamically added houses, boats + boat techs, docks, setgatherpercentage
 void FixAutoBuildStrategyElements(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 	if (!buildAI) { return; }
@@ -751,6 +780,70 @@ bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 	// and add them before building a wonder (return false if something was added) ??
 
 	return true; // Success: let's build a wonder !
+}
+
+
+// Adds in strategy all available researches that improve provided unit
+// Returns the number of inserted researches in strategy
+int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int unitDefId) {
+	if (!ai || !ai->IsCheckSumValid()) { return 0; }
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = ai->ptrStructPlayer;
+	if (!player || !player->IsCheckSumValid()) { return 0; }
+	if (!player->ptrResearchesStruct || !player->ptrResearchesStruct->ptrResearchDefInfo ||
+		!player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray) {
+		return 0;
+	}
+	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return 0;}
+	std::vector<short int> researchesForUnit = FindResearchesThatAffectUnit(player, unitDefId, true);
+	std::vector<short int> allResearchesForUnit = GetValidOrderedResearchesListWithDependencies(player, researchesForUnit);
+	std::set<short int> researchesWithoutLocation;
+	for each (short int researchId in allResearchesForUnit)
+	{
+		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
+		if (resDef->researchLocation < 0) {
+			researchesWithoutLocation.insert(researchId); // Shadow researches (some may correspond to required buildings, take care not to ignore them)
+		}
+	}
+	for each (short int researchId in researchesWithoutLocation)
+	{
+		auto it = remove_if(allResearchesForUnit.begin(), allResearchesForUnit.end(), [researchId](short int i) {return i == researchId; });
+		allResearchesForUnit.erase(it, allResearchesForUnit.end());
+	}
+	
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElement = &ai->structBuildAI.fakeFirstStrategyElement;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentElem = fakeFirstElement->previous;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemToInsert = NULL;
+	// Search for wonder, if any
+	while (currentElem && (currentElem != fakeFirstElement) && !elemToInsert) {
+		if ((currentElem->unitDAT_ID == CST_UNITID_WONDER) && (currentElem->elementType == AOE_CONST_FUNC::AIUCBuilding)) {
+			elemToInsert = currentElem;
+		}
+		currentElem = currentElem->previous; // reverse loop because wonder is generally at the end !
+	}
+	if (!elemToInsert) {
+		elemToInsert = fakeFirstElement;
+	}
+	// elemToInsert = position to insert at stategy end OR just before wonder, if any.
+
+	int addedItems = 0;
+	// TODO: manage tech order (dependencies)
+	// TODO: manage requirements (fanaticism for legion, etc)
+	for each (short int researchId in researchesForUnit)
+	{
+		if ((researchId >= 0) && (researchId < player->ptrResearchesStruct->ptrResearchDefInfo->researchCount)) {
+			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
+			char nameBuffer[0x50]; // stratelem.name size is 0x40
+			char namePrefix[] = "CustomROR_";
+			strcpy_s(nameBuffer, namePrefix);
+			strcpy_s(nameBuffer + sizeof(namePrefix) -1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, resDef->researchName);
+			if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) {
+				addedItems++;
+				AddUnitInStrategy_before(&ai->structBuildAI, elemToInsert, -1, resDef->researchLocation,
+					TAIUnitClass::AIUCTech, researchId, player, nameBuffer);
+			}
+		}
+	}
+	return addedItems;
 }
 
 

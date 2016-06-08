@@ -5,6 +5,7 @@
 #include <ROR_structures.h>
 #include <AOE_const_functional.h>
 #include "crCommon.h"
+#include "researches.h"
 
 /*
 * This file contains primitives to deal with (AI) strategy.
@@ -14,6 +15,16 @@
 using namespace AOE_CONST_FUNC;
 
 const char CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN[] = "CustomRORMaxPopulation";
+
+
+
+// Returns true if the research is present in tech tree but not researched yet (nor being researched)
+bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);
+
+// Returns 1st element position (>=0) if (at least) 1 matching element exists in strategy. -1=no such element
+long int FindElementPosInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID);
+
+
 
 // This fixes dynamically added houses, boats + boat techs, docks, setgatherpercentage
 void FixAutoBuildStrategyElements(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
@@ -69,6 +80,10 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 // Returns true if current strategy status allows triggering a wonder construction
 bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai);
+
+// Adds in strategy all available researches that improve provided unit
+// Returns the number of inserted researches in strategy
+int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int unitDefId);
 
 // Find a strategy element for a specific actor building (instance)id. (strategy element must be in progress)
 // This is only possible thanks to custom treatments that set unitInstanceId to actor unitId while training/researching is in progress.

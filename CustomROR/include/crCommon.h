@@ -286,12 +286,6 @@ bool GetUnitCost(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, fl
 bool PrepareUnitToAddIfPossible(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int unitId_toAdd, short int unitId_actor,
 	long int *actorCounter, short int *lastCostDAT_ID, float remainingResources[], float tempCost[]);
 
-// Returns true if the research is present in tech tree but not researched yet (nor being researched)
-bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);
-
-// Returns 1st element position (>=0) if (at least) 1 matching element exists in strategy. -1=no such element
-long int HasElementInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int elementType, short int DAT_ID);
-
 
 // Returns true if a research has been researched for a given player
 bool IsTechResearched(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);

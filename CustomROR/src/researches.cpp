@@ -4,6 +4,35 @@ using namespace ROR_STRUCTURES_10C;
 using namespace AOE_CONST_FUNC;
 
 
+// Get a technology name from languagex.dll or language.dll.
+// Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
+std::string GetTechnologyLocalizedName(short int techId) {
+	if (techId < 0) {
+		return "invalid-tech";
+	}
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	assert(settings != NULL);
+	if (!settings) { return ""; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
+		return "";
+	}
+	for (int i = 0; i < global->researchDefInfo->researchCount; i++) {
+		if (global->researchDefInfo->researchDefArray[i].technologyId == techId) {
+			std::string res;
+			char buffer[100];
+			buffer[0] = 0;
+			GetLanguageDllText(global->researchDefInfo->researchDefArray[i].languageDLLName, buffer, sizeof(buffer),
+				global->researchDefInfo->researchDefArray[i].researchName);
+			return std::string(buffer);
+		}
+	}
+	std::string name = "techid-";
+	name += std::to_string(techId);
+	return name;
+}
+
+
 // Disable all impossible researches for a specific player.
 // An impossible research is a research that is waiting for requirements, including ones that can never be satisfied.
 // Example in original game: irrigation for persian, armored elephant for yamato, etc.
@@ -51,43 +80,24 @@ int DisablePlayerImpossibleResearches(STRUCT_PLAYER *player) {
 	while ((remainingUnknownCount > 0) && (remainingUnknownCount != previousRemainingCount)) {
 		for each (int curResId in potentialResearches) {
 			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &resDefArray[curResId];
-			int minRequiredResearches = resDef->minRequiredResearches;
+			int minRequiredResearchesCount = resDef->minRequiredResearchesCount;
 			int reqResOK = 0;
 			int reqResImpossible = 0;
 
-			if ((resDef->requiredResearchId1 == -1) ||
-				(std::count(disabledResearches.begin(), disabledResearches.end(), resDef->requiredResearchId1) > 0)) {
-				reqResImpossible++;
+			for (int i = 0; i < 4; i++) {
+				if ((resDef->requiredResearchId[i] == -1) ||
+					(std::count(disabledResearches.begin(), disabledResearches.end(), resDef->requiredResearchId[i]) > 0)) {
+					reqResImpossible++;
+				}
+				if (std::count(availableResearches.begin(), availableResearches.end(), resDef->requiredResearchId[i]) > 0) {
+					reqResOK++;
+				}
 			}
-			if ((resDef->requiredResearchId2 == -1) ||
-				(std::count(disabledResearches.begin(), disabledResearches.end(), resDef->requiredResearchId2) > 0)) {
-				reqResImpossible++;
-			}
-			if ((resDef->requiredResearchId3 == -1) ||
-				(std::count(disabledResearches.begin(), disabledResearches.end(), resDef->requiredResearchId3) > 0)) {
-				reqResImpossible++;
-			}
-			if ((resDef->requiredResearchId4 == -1) ||
-				(std::count(disabledResearches.begin(), disabledResearches.end(), resDef->requiredResearchId4) > 0)) {
-				reqResImpossible++;
-			}
-			if (std::count(availableResearches.begin(), availableResearches.end(), resDef->requiredResearchId1) > 0) {
-				reqResOK++;
-			}
-			if (std::count(availableResearches.begin(), availableResearches.end(), resDef->requiredResearchId2) > 0) {
-				reqResOK++;
-			}
-			if (std::count(availableResearches.begin(), availableResearches.end(), resDef->requiredResearchId3) > 0) {
-				reqResOK++;
-			}
-			if (std::count(availableResearches.begin(), availableResearches.end(), resDef->requiredResearchId4) > 0) {
-				reqResOK++;
-			}
-			if (reqResOK >= minRequiredResearches) {
+			if (reqResOK >= minRequiredResearchesCount) {
 				availableResearches.push_back(curResId);
 				potentialToRemove.push_back(curResId);
 			}
-			if (4 - reqResImpossible < minRequiredResearches) {
+			if (4 - reqResImpossible < minRequiredResearchesCount) {
 				// We found an impossible research (some requirements can't be obtained)
 				disabledResearches.push_back(curResId);
 				potentialToRemove.push_back(curResId);
@@ -207,28 +217,124 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 }
 
 
-// Get a technology name from languagex.dll or language.dll.
-// Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
-std::string GetTechnologyLocalizedName(short int techId) {
-	if (techId < 0) {
-		return NULL;
+// Returns an ordered list of research IDs that allow researching input researches (researchesList) with all dependencies
+// Returned collection includes all dependencies, including "shadow" researches (no location).
+// All research IDs in returned collection are available in tech tree. Impossible research IDs from researchesList are NOT in returned collection.
+#pragma message("shadow res. with min < totalRequiredResearch not correctly handled (will always build a dock !)")
+std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAYER *player, std::vector<short int> researchesList) {
+	std::vector<short int> allValidResearchesToReturn;
+	//std::set<short int> allValidResearchesToReturn;
+	if (!player || !player->IsCheckSumValid()) { return allValidResearchesToReturn; }
+	STRUCT_PLAYER_RESEARCH_INFO *rinfo = player->ptrResearchesStruct;
+	if (!rinfo) { return allValidResearchesToReturn; }
+	int resCount = rinfo->researchCount;
+	STRUCT_PLAYER_RESEARCH_STATUS *statuses = rinfo->researchStatusesArray;
+	STRUCT_RESEARCH_DEF_INFO *resInfoArray = rinfo->ptrResearchDefInfo;
+	if (!resInfoArray) { return allValidResearchesToReturn; }
+	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
+
+	std::set<short int> requiredResearches; // Set of research IDs that are required (including input list)
+	for each (short int researchId in researchesList) {
+		requiredResearches.insert(researchId);
 	}
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
-	assert(settings != NULL);
-	if (!settings) { return NULL; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
-	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
-		return NULL;
-	}
-	for (int i = 0; i < global->researchDefInfo->researchCount; i++) {
-		if (global->researchDefInfo->researchDefArray[i].technologyId == techId) {
-			std::string res;
-			char buffer[100];
-			buffer[0] = 0;
-			GetLanguageDllText(global->researchDefInfo->researchDefArray[i].languageDLLName, buffer, sizeof(buffer),
-				global->researchDefInfo->researchDefArray[i].researchName);
-			return std::string(buffer);
+
+	// First collect all required researches (input list + dependencies), recursively (for dependencies)
+	int previousCount = 0;
+	int currentCount = requiredResearches.size();
+	while (previousCount < currentCount) {
+		std::set<short int> elementsToAdd;
+		// Collect required reseaches (=>elementsToAdd) for all researches in list (requiredResearches)
+		for each (short int researchId in requiredResearches)
+		{
+			STRUCT_RESEARCH_DEF *resDef = &resDefArray[researchId];
+			for (int i = 0; i < resDef->minRequiredResearchesCount; i++) {
+				elementsToAdd.insert(resDef->requiredResearchId[i]);
+			}
 		}
+		// Do not insert into requiredResearches while looping in it !
+		for each (short int curResId in elementsToAdd) {
+			requiredResearches.insert(curResId); // will not insert duplicates
+		}
+		elementsToAdd.clear();
+		previousCount = currentCount;
+		currentCount = requiredResearches.size();
 	}
-	return NULL;
+
+	// Move available researches to "ok" list until requiredResearches is empty (or we're stuck)
+
+	int remainingRequirementsCount = requiredResearches.size();
+	int previousRemainingCount = 9999;
+	std::set<short int> requiredElementsToRemove;
+	//std::set<short int> impossibleResearches;
+
+	while ((remainingRequirementsCount > 0) && (remainingRequirementsCount != previousRemainingCount)) {
+		for each (short int curResId in requiredResearches) {
+			STRUCT_RESEARCH_DEF *resDef = &resDefArray[curResId];
+			switch (statuses[curResId].currentStatus) {
+			case RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE:
+			case RESEARCH_STATUSES::CST_RESEARCH_STATUS_BEING_RESEARCHED:
+			case RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID:
+				// This research is OK for tech tree
+				requiredElementsToRemove.insert(curResId);
+				allValidResearchesToReturn.push_back(curResId);
+				break;
+			case RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT:
+				// If all requirements are OK, then it's ok. Otherwise, wait for a next loop (some dependencies may evolve).
+				bool requirementsAreOk;
+				requirementsAreOk = true;
+				for (int i = 0; i < resDef->minRequiredResearchesCount; i++) {
+					short int requiredResearchId = resDef->requiredResearchId[i];
+					bool requiredResearchIsAvailable = (statuses[curResId].currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE) ||
+						(statuses[curResId].currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_BEING_RESEARCHED) ||
+						(statuses[curResId].currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID) ||
+						// Shadow intermediate researches (no location) are always considered OK here
+						// They can be Market+Bronze Age->Temple, {2 bronze bld}->Iron Age, etc
+						(resDef->researchLocation == -1);
+					// If requirement is NOT currently available and NOT in our "OK list", then the dependency can't be satisfied (for now)
+					if (!requiredResearchIsAvailable && 
+						
+						(std::count(allValidResearchesToReturn.begin(), allValidResearchesToReturn.end(), requiredResearchId) == 0)) {
+						
+						//(allValidResearchesToReturn.count(requiredResearchId) == 0)) {
+						requirementsAreOk = false;
+					}
+				}
+				if (requirementsAreOk) {
+					requiredElementsToRemove.insert(curResId);
+					allValidResearchesToReturn.push_back(curResId);
+				}
+				break;
+			case RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED:
+				//impossibleResearches.insert(curResId); // Unused / should not happen if tech tree is consistent ?
+				break;
+			default:
+				break;
+			}
+		}
+
+		// Do not do the remove IN the loop ! Do it once iterations are finished
+		for each (short int curResId in requiredElementsToRemove)
+		{
+			requiredResearches.erase(curResId);
+		}
+		requiredElementsToRemove.clear(); // reset temp loop buffer
+		previousRemainingCount = remainingRequirementsCount;
+		remainingRequirementsCount = requiredResearches.size();
+	}
+
+	if (remainingRequirementsCount > 0) {
+		std::string msg = "[Build research requirements tree] some researches are not available: ";
+		bool first = true;
+		for each (short int researchId in requiredResearches)
+		{
+			if (!first) {
+				msg += ", ";
+			}
+			first = false;
+			msg += std::to_string(researchId);
+		}
+		traceMessageHandler.WriteMessageNoNotification(msg);
+	}
+	return allValidResearchesToReturn;
 }
+

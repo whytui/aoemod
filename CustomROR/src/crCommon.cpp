@@ -780,32 +780,6 @@ std::list<long int> GetActivableUnitDefIDs(ROR_STRUCTURES_10C::STRUCT_PLAYER *pl
 }
 
 
-// Returns true if the research is present in tech tree but not researched yet (nor being researched)
-bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id) {
-	AOE_CONST_FUNC::RESEARCH_STATUSES status = GetResearchStatus(player, research_id);
-	return (status == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) ||
-		(status == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE);
-}
-
-
-// Returns 1st element position (>=0) if (at least) 1 matching element exists in strategy. -1=no such element
-long int HasElementInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int elementType, short int DAT_ID) {
-	if (!player) { return -1; }
-	ROR_STRUCTURES_10C::STRUCT_AI *mainAI = player->GetAIStruct();
-	if (!mainAI) { return -1; }
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeStratElem = &mainAI->structBuildAI.fakeFirstStrategyElement;
-	assert(fakeStratElem != NULL); // How could it be ?
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeStratElem->next;
-	while ((currentStratElem != NULL) && (currentStratElem != fakeStratElem)) {
-		if ((currentStratElem->elementType == elementType) && (currentStratElem->unitDAT_ID == DAT_ID)) {
-			return currentStratElem->counter;
-		}
-		currentStratElem = currentStratElem->next;
-	}
-	return -1;
-}
-
-
 // Useful to get structure from a unit id. May return NULL !
 // Only works for creatable (unitId >= 0). This is just a choice to avoid writing same bugs as ROR
 // (some functions use -1 as <No unit> but get an irrevant unit struct then because -1 is not tested before calling getUnitStruct(...))

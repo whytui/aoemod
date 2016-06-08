@@ -816,16 +816,16 @@ void CustomRORInstance::FixAutoBuildWarships_addStratElem(REG_BACKUP *REG_values
 		}
 		// Try first the best starting location to add warships
 		if (minPosition < 0) { // If possible, wait market has been built (so that farms are unlocked first)
-			minPosition = HasElementInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCBuilding, CST_UNITID_MARKET);
+			minPosition = FindElementPosInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCBuilding, CST_UNITID_MARKET);
 		}
 		if (minPosition < 0) { // Try tool age...
-			minPosition = HasElementInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCCritical, CST_AGE_TOOL);
+			minPosition = FindElementPosInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCCritical, CST_AGE_TOOL);
 		}
 		if (minPosition < 0) { // Try tool age (if non-critical)
-			minPosition = HasElementInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCTech, CST_AGE_TOOL);
+			minPosition = FindElementPosInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCTech, CST_AGE_TOOL);
 		}
 		if (minPosition < 0) { // Dock... ?
-			minPosition = HasElementInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCBuilding, CST_UNITID_DOCK);
+			minPosition = FindElementPosInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCBuilding, CST_UNITID_DOCK);
 		}
 
 		// If local variables are consistent, change start / end positions to add warships AND distance between them in strategy.
