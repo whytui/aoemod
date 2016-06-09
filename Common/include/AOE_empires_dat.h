@@ -203,7 +203,7 @@ namespace AOE_CONST_FUNC {
 	enum TECH_DEF_EFFECTS : char {
 		TDE_INVALID = -1,
 		TDE_ATTRIBUTE_MODIFIER_SET = 0,
-		TDE_RESOURCE_MODIFIER_ADD = 1, // add value
+		TDE_RESOURCE_MODIFIER_ADD_SET = 1, // add or set value (according to "mode" = effectClass field)
 		TDE_ENABLE_DISABLE_UNIT = 2,
 		TDE_UPGRADE_UNIT = 3,
 		TDE_ATTRIBUTE_MODIFIER_ADD = 4, // add value
@@ -1282,6 +1282,22 @@ namespace AOE_CONST_FUNC {
 	}
 
 	// GetUnitTypeLabel
+
+
+	// Returns the valid "DATID1" value to use for buildings.
+	// For most units, returns the same value as provided.
+	// For "building upgrades" IDs, returns the correct "base" ID that must be used for strategy, to get correct unitDef structure from ID, etc.
+	static short int GetBaseBuildingUnitId(short int dat_id) {
+		if (dat_id == CST_UNITID_STABLE_2_UPGRADE) { return CST_UNITID_STABLE; }
+		if (dat_id == CST_UNITID_TC_2_UPGRADE) { return CST_UNITID_FORUM; }
+		if (dat_id == CST_UNITID_STORAGE_PIT_2_UPGRADE) { return CST_UNITID_STORAGE_PIT; }
+		if (dat_id == CST_UNITID_MARKET_2_UPGRADE) { return CST_UNITID_MARKET; }
+		if (dat_id == CST_UNITID_BARRACKS_2_UPGRADE) { return CST_UNITID_BARRACKS; }
+		if (dat_id == CST_UNITID_DOCK_2_UPGRADE) { return CST_UNITID_DOCK; }
+		if (dat_id == CST_UNITID_HOUSE_2_UPGRADE) { return CST_UNITID_HOUSE; }
+		//if (dat_id == CST_UNITID_VILLAGER2) { return CST_UNITID_MAN; }
+		return dat_id;
+	}
 
 	// Returns true if a unit is a tower (hardcoded list)
 	// See also IsTower overload in crCommon.h.

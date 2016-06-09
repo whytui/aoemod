@@ -48,9 +48,16 @@ int DisablePlayerImpossibleResearches(STRUCT_PLAYER *player);
 // Returns true if technology has at least one effect on provided unit definition.
 bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef);
 
+// Returns true if technology enables provided unit.
+bool DoesTechEnableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId);
+
+
 // Finds all (non disabled) researches that affect a unit (definition)
 // If ignoreUndesirableTechs==true, techs from LST_TECHS_TO_IGNORE are ignored (jihad, etc)
 std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long int unitDefId, bool ignoreUndesirableTechs);
+
+// Returns the (non disabled) research ID that enables a unit. Returns -1 if not found.
+short int FindResearchThatEnableUnit(STRUCT_PLAYER *player, short int unitDefId);
 
 // Returns an ordered list of research IDs that allow researching input researches (researchesList) with all dependencies
 // Returned collection includes all dependencies, including "shadow" researches (no location).

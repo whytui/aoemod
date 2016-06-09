@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <math.h>
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
 #include <AOE_empires_dat.h>
@@ -1009,9 +1010,55 @@ namespace ROR_STRUCTURES_10C
 		AOE_CONST_FUNC::TECH_DEF_EFFECTS effectType; // 1 byte.
 		char unused_01;
 		short int effectUnit; // +02. Unit ID or Resource ID or...
-		short int effectClass; // +04. Class or ToUnit (upgrade unit) or Mode (for enable unit) or...
+		short int effectClass; // +04. Class or ToUnit (upgrade unit) or Mode (for enable unit, resource modifier) or...
 		short int effectAttribute; // +06
-		float effectValue; // +08. Sometimes unused (enable unit, upgrade unit, etc)
+		float effectValue; // +08. Sometimes unused (enable unit, upgrade unit, etc). Sometimes includes 2 info using modulo !
+
+		float GetValue() const {
+			// Attribute modifier (set/add/mult) on armor or attack: exception (need to apply a modulo on value)
+			if (((this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
+				(this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
+				(this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT)) &&
+				( (this->effectAttribute == 8) || (this->effectAttribute == 9))) { // armor&attack attributes: 2 info stored in the float...
+				return fmodf(this->effectValue, 256); // Holy WTF !!!
+				//AOE_CONST_FUNC::ATTACK_CLASS attackClass = (AOE_CONST_FUNC::ATTACK_CLASS)(this->effectValue / 256);
+			}
+			// ALL other cases: just use float value as is.
+			return this->effectValue;
+		}
+		// Returns true if tech effect has a valid and "effective" effect (not disabled, not adding 0, etc)
+		bool HasValidEffect() const {
+			switch (this->effectType) {
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_INVALID:
+				return false;
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET:
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH:
+				return true;
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET:
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESEARCH_COST_MODIFIER:
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESEARCH_TIME_MODIFIER:
+				if (this->effectClass == 0) { // mode 0 = set
+					return true;
+				} else { // mode 1 = add
+					return (this->GetValue() != 0);
+				}
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT:
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT:
+				return (this->effectUnit >= 0);
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD:
+				return (this->GetValue() != 0);
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT:
+			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT:
+				return (this->GetValue() != 1);
+			}
+			return true;
+		}
+		bool IsEnableUnit(short int unitDefId) const {
+			return (this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (this->effectClass == 1) && (this->effectUnit == unitDefId);
+		}
+		bool IsDisableUnit(short int unitDefId) const {
+			return (this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (this->effectClass == 0) && (this->effectUnit == unitDefId);
+		}
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");
 
@@ -1034,7 +1081,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_TECH_DEF *ptrTechDefArray; // unsure
 		long int technologyCount;
 
-		bool IsCheckSumValid() { return this->checksum == 0x00549920; }
+		bool IsCheckSumValid() const { return this->checksum == 0x00549920; }
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_INFO) == 0x0C, "STRUCT_TECH_DEF_INFO size");
 

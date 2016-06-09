@@ -15,6 +15,9 @@ long int FindElementPosInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE
 	if (!player) { return -1; }
 	ROR_STRUCTURES_10C::STRUCT_AI *mainAI = player->GetAIStruct();
 	if (!mainAI) { return -1; }
+	if (elementType == AIUCBuilding) {
+		DAT_ID = GetBaseBuildingUnitId(DAT_ID); // do NOT use "DATID2" values in strategy
+	}
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeStratElem = &mainAI->structBuildAI.fakeFirstStrategyElement;
 	assert(fakeStratElem != NULL); // How could it be ?
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeStratElem->next;
@@ -279,6 +282,10 @@ bool AddUnitInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int po
 	assert(buildAI && buildAI->IsCheckSumValid());
 	assert(player && player->IsCheckSumValid());
 	if (!buildAI || !buildAI->IsCheckSumValid() || !player || !player->IsCheckSumValid()) { return false; }
+	if (unitType == AIUCBuilding) {
+		unitDATID = GetBaseBuildingUnitId((short int)unitDATID); // Make sure NOT to use an invalid building ID (do NOT use upgraded unit IDs)
+		// We could do the same for living units ?
+	}
 	long int result;
 	_asm {
 		MOV ECX, buildAI // Required to call method
@@ -309,6 +316,10 @@ bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem = (ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *)AOEAlloc(0xB0);
 	if (!elem) {
 		return false;
+	}
+	if (unitType == AIUCBuilding) {
+		unitDATID = GetBaseBuildingUnitId((short int)unitDATID); // Make sure NOT to use an invalid building ID (do NOT use upgraded unit IDs)
+		// We could do the same for living units ?
 	}
 	long int counter = buildAI->strategyElementSequence;
 
@@ -785,7 +796,10 @@ if ((currentElem->elementType == AIUCLivingUnit) && (populationHeadroom > 0)) {
 
 // Adds in strategy all available researches that improve provided unit
 // Returns the number of inserted researches in strategy
-int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int unitDefId) {
+// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
+// nextElement: if non-NULL, newly-added strategy elements will be inserted BEFORE nextElement. Otherwise, insertion point will be computed automatically.
+int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int unitDefId, bool allUpgrades,
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElement) {
 	if (!ai || !ai->IsCheckSumValid()) { return 0; }
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = ai->ptrStructPlayer;
 	if (!player || !player->IsCheckSumValid()) { return 0; }
@@ -793,16 +807,24 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 		!player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray) {
 		return 0;
 	}
+	if (nextElement && !nextElement->IsCheckSumValid()) { nextElement = NULL; }
 	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return 0; }
-	std::vector<short int> researchesForUnit = FindResearchesThatAffectUnit(player, unitDefId, true);
+	std::vector<short int> researchesForUnit;
+	if (allUpgrades) {
+		researchesForUnit = FindResearchesThatAffectUnit(player, unitDefId, true);
+	} else {
+		short int researchId = FindResearchThatEnableUnit(player, unitDefId);
+		if (researchId == -1) { return 0; }
+		researchesForUnit.push_back(researchId);
+	}
 	std::vector<short int> allResearchesForUnit = GetValidOrderedResearchesListWithDependencies(player, researchesForUnit);
 	// Important note: for "shadow" researches with optional requirements (buildings for ages, etc), requirements are not analyzed yet.
 	// We'll have to manage them ourselves.
 
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElement = &ai->structBuildAI.fakeFirstStrategyElement;
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentElem = fakeFirstElement->previous;
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemToInsert = NULL;
-	// Search for wonder, if any
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemToInsert = nextElement;
+	// Search for wonder, if any (NOT executed if nextElement is supplied)
 	while (currentElem && (currentElem != fakeFirstElement) && !elemToInsert) {
 		if ((currentElem->unitDAT_ID == CST_UNITID_WONDER) && (currentElem->elementType == AOE_CONST_FUNC::AIUCBuilding)) {
 			elemToInsert = currentElem;
@@ -944,8 +966,10 @@ int AddStrategyElementForResearch(ROR_STRUCTURES_10C::STRUCT_PLAYER *player,
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = FindBuildingDefThatEnablesResearch(player, researchId);
 		if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
 			// Make sure this building is built in strategy
+			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *previousElement = nextElement->previous;
 			if (AddStrategyElementForBuildingIfNotExisting(player, nextElement, unitDefBuilding)) {
 				addedElementsCount++;
+				addedElementsCount += AddResearchesInStrategyForUnit(ai, unitDefBuilding->DAT_ID1, false, previousElement->next);
 			}
 		}
 	} else {
@@ -954,8 +978,10 @@ int AddStrategyElementForResearch(ROR_STRUCTURES_10C::STRUCT_PLAYER *player,
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)player->GetUnitDefBase(resDef->researchLocation);
 		if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
 			// Add "action" building if there is none in strategy
+			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *previousElement = nextElement->previous;
 			if (AddStrategyElementForBuildingIfNotExisting(player, nextElement, unitDefBuilding)) {
 				addedElementsCount++;
+				addedElementsCount += AddResearchesInStrategyForUnit(ai, unitDefBuilding->DAT_ID1, false, previousElement->next);
 			}
 		}
 

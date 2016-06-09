@@ -465,13 +465,19 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 
 #ifdef _DEBUG
 	// TEST temp
+	if (strcmp(command, "b") == 0) {
+		long int playerId = 2;
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		if (!player || !player->ptrAIStruct) { return; }
+		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_ARMORED_ELEPHANT, false, NULL);
+	}
 	if (strcmp(command, "a") == 0) {
 		long int playerId = 2;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		
 		//AddResearchesInStrategyForUnit(player->ptrAIStruct, 282);
-		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_ARMORED_ELEPHANT);
+		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_ARMORED_ELEPHANT, true, NULL);
 
 		std::vector<short int> v;
 		v.push_back(64);

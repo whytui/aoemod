@@ -1680,7 +1680,7 @@ bool DisableUnitForPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int DA
 		for (int effectId = 0; effectId < techDefInfo->ptrTechDefArray[i].effectCount; effectId++) {
 			assert(techDefInfo->ptrTechDefArray[i].ptrEffects != NULL); // should never happen because effectCount would be 0
 			// Count number of effects for this tech, excluding the "increase researches count" thing.
-			if ((techDefInfo->ptrTechDefArray[i].ptrEffects[effectId].effectType != AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD) || // resource modifier
+			if ((techDefInfo->ptrTechDefArray[i].ptrEffects[effectId].effectType != AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) || // resource modifier
 				(techDefInfo->ptrTechDefArray[i].ptrEffects[effectId].effectUnit != RESOURCE_TYPES::CST_RES_ORDER_TECHNOLOGIES)
 				) {
 				effectsCount++;

@@ -190,11 +190,10 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) 
 	if (!techDef || !unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
-
 	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
 		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
 		// Does this affect affect units ?
-		if (techEffect && (
+		if (techEffect && (techEffect->HasValidEffect()) && (
 			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
 			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
 			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT)
@@ -202,14 +201,56 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) 
 			if (techEffect->effectUnit == unitDef->DAT_ID1) { return true; }
 			if (techEffect->effectClass == unitDef->unitAIType) { return true; }
 		}
-		if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (techEffect->effectClass == 1)) {
-			if (techEffect->effectUnit == unitDef->DAT_ID1) {
-				return true;
-			}
+		if (techEffect->IsEnableUnit(unitDef->DAT_ID1)) {
+			return true;
 		}
 		if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT)) {
 			// Upgrade unit : effectClass field is "TO" unit
 			if ((techEffect->effectUnit == unitDef->DAT_ID1) || (techEffect->effectClass == unitDef->DAT_ID1)) {
+				return true;
+			}
+		}
+		// Very special cases: some resources can improve units: priest/building conversion, etc
+		if (unitDef->unitAIType == TribeAIGroupPriest) {
+			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) && (
+				(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_BUILDING) ||
+				(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_PRIEST) ||
+				(techEffect->effectUnit == CST_RES_ORDER_FAITH_RECHARGING_RATE) ||
+				(techEffect->effectUnit == CST_RES_ORDER_HEALING) // (medecine tech)
+				// (techEffect->effectUnit == CST_RES_ORDER_PRIEST_SACRIFICE) // AI will never use it. Ignore it.
+			)) {
+				return true; // Priest & building/priest conversion + faith recharging rate
+			}
+		}
+		if (IsVillager(unitDef->DAT_ID1)) { // excluding boats
+			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) ||
+				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT)) {
+				if (techEffect->effectUnit == CST_RES_ORDER_GOLD_MINING_PODUCTIVITY) { return true; } // Villagers: mining productivity
+			}
+		}
+		if (unitDef->DAT_ID1 == CST_UNITID_FARM) {
+			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) ||
+				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT)) {
+				if (techEffect->effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT) { return true; } // Farms : farm amount
+			}
+		}
+	}
+	return false;
+}
+
+
+// Returns true if technology enables provided unit (including upgrade TO provided unit, if provided unit is an upgrade).
+bool DoesTechEnableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId) {
+	if (!techDef || (unitDefId < 0)) { // -1 CAN'T be a joket here !
+		return false;
+	}
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect) {
+			// Enable unit
+			if (techEffect->IsEnableUnit(unitDefId)) { return true; }
+			// Upgrade some unit to THIS unit
+			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) && (techEffect->effectClass == unitDefId)) {
 				return true;
 			}
 		}
@@ -256,6 +297,32 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 }
 
 
+// Returns the (non disabled) research ID that enables a unit. Returns -1 if not found.
+short int FindResearchThatEnableUnit(STRUCT_PLAYER *player, short int unitDefId) {
+	if (!player || !player->IsCheckSumValid() || !player->ptrGlobalStruct || !player->ptrGlobalStruct->IsCheckSumValid() ||
+		!player->ptrGlobalStruct->technologiesInfo || !player->ptrGlobalStruct->technologiesInfo->IsCheckSumValid() ||
+		!player->ptrGlobalStruct->technologiesInfo->ptrTechDefArray) {
+		return -1;
+	}
+	STRUCT_PLAYER_RESEARCH_INFO *rinfo = player->ptrResearchesStruct;
+	if (!rinfo) { return -1; }
+	int resCount = rinfo->researchCount;
+	STRUCT_PLAYER_RESEARCH_STATUS *statuses = rinfo->researchStatusesArray;
+	STRUCT_RESEARCH_DEF_INFO *resInfoArray = rinfo->ptrResearchDefInfo;
+	if (!resInfoArray || !statuses) { return -1; }
+	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
+	for (int researchId = 0; researchId < resCount; researchId++) {
+		if (statuses[researchId].currentStatus > RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) {
+			short int techId = resDefArray[researchId].technologyId;
+			if (DoesTechEnableUnit(&player->ptrGlobalStruct->technologiesInfo->ptrTechDefArray[techId], unitDefId)) {
+				return researchId;
+			}
+		}
+	}
+	return -1;
+}
+
+
 // Returns an ordered list of research IDs that allow researching input researches (researchesList) with all dependencies
 // Returned collection includes all dependencies, including "shadow" researches (no location).
 // Warning: dependency with choices (optional requirements, e.g. research74="A01, B01, F01, I01 ->Tool Age" are returned
@@ -264,14 +331,13 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 // All research IDs in returned collection are available in tech tree. Impossible research IDs from researchesList are NOT in returned collection.
 std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAYER *player, std::vector<short int> researchesList) {
 	std::vector<short int> allValidResearchesToReturn;
-	//std::set<short int> allValidResearchesToReturn;
 	if (!player || !player->IsCheckSumValid()) { return allValidResearchesToReturn; }
 	STRUCT_PLAYER_RESEARCH_INFO *rinfo = player->ptrResearchesStruct;
 	if (!rinfo) { return allValidResearchesToReturn; }
 	int resCount = rinfo->researchCount;
 	STRUCT_PLAYER_RESEARCH_STATUS *statuses = rinfo->researchStatusesArray;
 	STRUCT_RESEARCH_DEF_INFO *resInfoArray = rinfo->ptrResearchDefInfo;
-	if (!resInfoArray) { return allValidResearchesToReturn; }
+	if (!resInfoArray || !statuses) { return allValidResearchesToReturn; }
 	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
 
 	std::set<short int> requiredResearches; // Set of research IDs that are required (including input list)

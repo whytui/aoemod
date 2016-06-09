@@ -83,7 +83,9 @@ bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai);
 
 // Adds in strategy all available researches that improve provided unit
 // Returns the number of inserted researches in strategy
-int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int unitDefId);
+// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
+// nextElement: if non-NULL, newly-added strategy elements will be inserted BEFORE nextElement. Otherwise, insertion point will be computed automatically.
+int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int unitDefId, bool allUpgrades, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElement);
 
 // Inserts a new strategy element before nextElement. New strategy element corresponds to resDef (not always a research: can be a building !)
 // [WRONG: handles building for standard research] This does not manage any dependency, just adds strategy elements that directly correspond.
