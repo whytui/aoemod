@@ -890,9 +890,9 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 						int currentBuildingBonus = 1;
 						if (unitDefBuilding && unitDefBuilding->IsTypeValid()) {
 							// For "building shadow" research, the research itself has no meaning. Cost is building's
-							currentTotalCost = (float)(unitDefBuilding->costs[0].costUsed ? unitDefBuilding->costs[0].costAmount : 0);
-							currentTotalCost += (float)(unitDefBuilding->costs[1].costUsed ? unitDefBuilding->costs[1].costAmount : 0);
-							currentTotalCost += (float)(unitDefBuilding->costs[2].costUsed ? unitDefBuilding->costs[2].costAmount : 0);
+							currentTotalCost = (float)(unitDefBuilding->costs[0].costPaid ? unitDefBuilding->costs[0].costAmount : 0);
+							currentTotalCost += (float)(unitDefBuilding->costs[1].costPaid ? unitDefBuilding->costs[1].costAmount : 0);
+							currentTotalCost += (float)(unitDefBuilding->costs[2].costPaid ? unitDefBuilding->costs[2].costAmount : 0);
 							if (unitDefBuilding->DAT_ID1 == CST_UNITID_TEMPLE) {
 								currentBuildingBonus = 2;
 							}

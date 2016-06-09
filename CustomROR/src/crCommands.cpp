@@ -604,7 +604,7 @@ void CustomRORCommand::UpdateTechAddWorkRateWithMessage(short int techId, short 
 		for (int i = 0; i < techDef->effectCount; i++) {
 			if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) &&
 				(techDef->ptrEffects[i].effectUnit == unitDefId) &&
-				(techDef->ptrEffects[i].effectAttribute == 13) // working rate
+				(techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_WORK_RATE) // working rate
 				) {
 				char msgBuffer[100];
 				if (updatedValue < 0) {
@@ -718,7 +718,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = &techDefInfo->ptrTechDefArray[CST_TCH_TECH_TREE_PALMYRA];
 			for (int i = 0; i < techDef->effectCount; i++) {
 				if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) &&
-					(techDef->ptrEffects[i].effectAttribute == 13) && // work rate
+					(techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_WORK_RATE) && // work rate
 					// For villagers OR farm (refer to palmyra tech tree !)
 					((IsVillager(techDef->ptrEffects[i].effectUnit) || (techDef->ptrEffects[i].effectUnit == CST_UNITID_FARM)) &&
 					(techDef->ptrEffects[i].effectValue > palmyraWorkRateBonus))
@@ -1616,7 +1616,7 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(ROR_STRUCTURES_10C::STRUCT_T
 		if (!unitDef || !unitDef->IsCheckSumValid()) { return true; } // Unit definition does not exist !
 		ROR_STRUCTURES_10C::STRUCT_COST *costs = unitDef->costs;
 		for (int i = 0; i < 3; i++) {
-			if (costs[i].costUsed && (costs[i].costType >= 0) &&
+			if (costs[i].costPaid && (costs[i].costType >= 0) &&
 				(costs[i].costType < RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT)) {
 				// (valid) cost used: substract amount from my resources. We only car about food/wood/stone/gold here.
 				myVirtualResources[costs[i].costType] -= (float)costs[i].costAmount;
@@ -4597,11 +4597,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	if (gameMainUI->panelSelectedUnit == NULL) {
 		return;
 	}
-	if (!IsGameRunning()) {
-		return;
-	}
-
-	if (!this->crInfo->configInfo.useImprovedButtonBar) {
+	if (!IsGameRunning() || !this->crInfo->configInfo.useImprovedButtonBar) {
 		return;
 	}
 
@@ -4824,13 +4820,13 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 					((!buttonIsVisible[buttonIndex]) || (currentButtonDoesNotBelongToThisPage[buttonIndex])) &&
 					(loopUnitDef->trainLocation == unitDef->DAT_ID1)) {
 					long int thisCost = 0;
-					if (loopUnitDef->costs[0].costUsed) {
+					if (loopUnitDef->costs[0].costPaid) {
 						thisCost += loopUnitDef->costs[0].costAmount;
 					}
-					if (loopUnitDef->costs[1].costUsed) {
+					if (loopUnitDef->costs[1].costPaid) {
 						thisCost += loopUnitDef->costs[1].costAmount;
 					}
-					if (loopUnitDef->costs[2].costUsed) {
+					if (loopUnitDef->costs[2].costPaid) {
 						thisCost += loopUnitDef->costs[2].costAmount;
 					}
 					bool preferThisUnit = false;

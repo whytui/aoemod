@@ -214,6 +214,39 @@ namespace AOE_CONST_FUNC {
 		TDE_RESEARCH_TIME_MODIFIER = 103
 	};
 
+	/* Attributes for technology effects
+	 * Methods to apply "Add attribute" effects on unitDef: [EDX+C] 0x442370(base), 0x43ED00(flag), 0x440EC0(deadfish), 0x43E7B0(bird), 0x43FA60(type50), 0x4ED010(living). Not for 7,17,18,19,...101?
+	 * Methods to apply "Add attribute" effects on unit: [EDX+4C] 0x4AA050(living) (only HP, LOS, other info are only in unitDef)
+	 * Methods to apply "Multiply attribute" effects on unitDef: [EDX+10] 0x442420(base) 0x43ED30(flag) 0x440EF0(deadfish) 0x43E7E0(bird) 0x43FC40(type50), 0x4ED060(living) => 0 1 2 3 4 5 6 A B C D E F 10 12 64 (8,9=nothing)
+	 * Methods to apply "Multiply attribute" effects on unit: [EDX+50] 0x4AA0E0(bld)
+	 * Methods to apply "Set attribute" effects on unitDef: [EDX+8] 0x4422D0(base) 0x43ECD0(flag) 0x440E90(deadfish) 0x43E780(bird) 0x43F920(type50) 0x4ECF20(living) 0x4EC580(bld) 1 2 3 4 5 6 8 9 A B C D E F 10 12 17 64 65
+	*/
+	enum TECH_UNIT_ATTRIBUTES : short int {
+		TUA_NONE = -1,
+		TUA_HP = 0, // Health points
+		TUA_LOS = 1, // Line of sight
+		TUA_GARRISON_CAPACITY = 2,
+		TUA_SIZE_RADIUS1 = 3,
+		TUA_SIZE_RADIUS2 = 4,
+		TUA_SPEED = 5,
+		TUA_ROTATION_SPEED = 6,
+		TUA_UNKNOWN_07 = 7, // seems to be unused.
+		TUA_ARMOR = 8, // Warning: value contains 2 informations
+		TUA_ATTACK = 9, // Warning: value contains 2 informations
+		TUA_ATTACK_RELOAD_TIME = 10, // reload time 1
+		TUA_ACCURACY_PERCENT = 11,
+		TUA_RANGE = 12, // Updates maxRange
+		TUA_WORK_RATE = 13,
+		TUA_RESOURCE_CAPACITY = 14, // Amount of resource a unit can "own"
+		TUA_DEFAULT_ARMOR = 15,
+		TUA_PROJECTILE_UNIT = 16, // Set a new projectileUnitId
+		TUA_ANGLE = 17, // graphic angle (changes displayed standing graphic frame?)
+		TUA_TERRAIN_RESTRICTION_FOR_DAMAGE = 18,
+		TUA_INTELLIGENT_PROJECTILE = 19, // Applies on PROJECTILES unitDef, not archers/towers/etc !
+		TUA_ADD_COST_AMOUNT = 100, // Add a value to unit cost. Impacts ALL "used" costs.
+		TUA_POPULATION_COST = 101 // population a unit "counts". 1 for most units, (total)0.5 for infantry with logistics. Can only SET (no add/mult)
+	};
+
 
 	// ------------------------------------------------------------------
 	// Unit ids : Villagers

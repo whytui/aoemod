@@ -1,6 +1,14 @@
 
 #pragma once
 
+
+/*
+* This file contains empiresX.exe structures definition
+* Please read README.txt first.
+* Reading/using information from this file implies sharing with the community
+* ALL your findings about AOE/ROR structures
+* Please share knowledge for better modding experience !
+*/
 namespace ROR_STRUCTURES_10C {
 
 	class STRUCT_DRS_TABLE;

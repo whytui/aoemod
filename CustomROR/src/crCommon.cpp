@@ -674,15 +674,15 @@ bool GetUnitCost(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, fl
 	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *defUnit = player->ptrStructDefUnitTable[DAT_ID];
 	if (!defUnit) { return false; }
 	for (int i = 0; i < 4; i++) { costTable[i] = 0; }
-	if (defUnit->costs[0].costUsed) {
+	if (defUnit->costs[0].costPaid) {
 		if (defUnit->costs[0].costType > MAX_RESOURCE_TYPE_ID) { return false; }
 		costTable[defUnit->costs[0].costType] = (float)defUnit->costs[0].costAmount;
 	}
-	if (defUnit->costs[1].costUsed) {
+	if (defUnit->costs[1].costPaid) {
 		if (defUnit->costs[1].costType > MAX_RESOURCE_TYPE_ID) { return false; }
 		costTable[defUnit->costs[1].costType] = (float)defUnit->costs[1].costAmount;
 	}
-	if (defUnit->costs[2].costUsed) {
+	if (defUnit->costs[2].costPaid) {
 		if (defUnit->costs[2].costType > MAX_RESOURCE_TYPE_ID) { return false; }
 		costTable[defUnit->costs[2].costType] = (float)defUnit->costs[2].costAmount;
 	}
