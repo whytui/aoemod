@@ -931,13 +931,11 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 					}
 					// Add best item in strategy...
 					addedItems += AddStrategyElementForResearch(player, elemToInsert, bestResearchId);
-					// TODO manage dependencies of added elements (both if building or normal, because optionals are not handled by GetValidOrderedResearchesListWithDependencies) ?
 					missingRequiredResearchCount--;
 					optionalResearches.erase(bestResearchId);
 				}
 			} else { // this research has no optionals (all requirements are necessary)
 				addedItems += AddStrategyElementForResearch(player, elemToInsert, researchId);
-				// TODO manage dependencies of added elements (if building) ?
 			}
 		}
 	}
@@ -945,8 +943,8 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 }
 
 
-// Inserts a new strategy element before nextElement. New strategy element corresponds to resDef (not always a research: can be a building !)
-// [WRONG: handles building for standard research] This does not manage any dependency, just adds strategy elements that directly correspond.
+// Inserts one or many new strategy elements before nextElement.
+// New strategy elements corresponds to resDef (not always a research: can be a building !) + requirements
 // Returns the number of added elements just before nextElement.
 int AddStrategyElementForResearch(ROR_STRUCTURES_10C::STRUCT_PLAYER *player,
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElement, short int researchId) {
@@ -973,7 +971,6 @@ int AddStrategyElementForResearch(ROR_STRUCTURES_10C::STRUCT_PLAYER *player,
 			}
 		}
 	} else {
-#pragma message("This (add building part) should not be done here (not managing requirements)? Move & fix method comments")
 		// Standard "player-triggered" research (has a train location & a button)
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)player->GetUnitDefBase(resDef->researchLocation);
 		if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
@@ -999,16 +996,28 @@ int AddStrategyElementForResearch(ROR_STRUCTURES_10C::STRUCT_PLAYER *player,
 
 
 // Adds a strategy element (building) only if there are none already.
+// Does not perform adding for buildings that are automatically build in AI (regarding player's PERsonality)
 // Returns true if an element was added.
 bool AddStrategyElementForBuildingIfNotExisting(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElement,
 	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding) {
 	char nameBuffer[0x50]; // stratelem.name size is 0x40
 	char namePrefix[] = "CustomROR_";
 	strcpy_s(nameBuffer, namePrefix);
+
 	if (player && player->IsCheckSumValid() && nextElement && nextElement->IsCheckSumValid() &&
 		unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
 		ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
 		if (!ai || !ai->IsCheckSumValid()) { return false; }
+
+		short int unitDefId = GetBaseBuildingUnitId(unitDefBuilding->DAT_ID1);
+		// "auto-build" buildings (if enabled in personality): don't add, it should be done automatically by AI... Later.
+		if ((unitDefId == CST_UNITID_HOUSE) && (ai->structTacAI.SNNumber[AOE_CONST_FUNC::SNAutoBuildHouses] > 0)) { return false; }
+		if ((unitDefId == CST_UNITID_STORAGE_PIT) && (ai->structTacAI.SNNumber[AOE_CONST_FUNC::SNAutoBuildDropsites] > 0)) { return false; }
+		if ((unitDefId == CST_UNITID_GRANARY) && (ai->structTacAI.SNNumber[AOE_CONST_FUNC::SNAutoBuildDropsites] > 0)) { return false; }
+		if ((unitDefId == CST_UNITID_FARM) && (ai->structTacAI.SNNumber[AOE_CONST_FUNC::SNAutoBuildFarms] > 0)) { return false; }
+		if ((unitDefId == CST_UNITID_DOCK) && (ai->structTacAI.SNNumber[AOE_CONST_FUNC::SNAutoBuildDocks] > 0)) { return false; }
+		// Do something special for TC ?
+
 		// Add "action" building if there is none in strategy
 		if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) == -1) {
 			strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, unitDefBuilding->ptrUnitName);

@@ -314,7 +314,7 @@ short int FindResearchThatEnableUnit(STRUCT_PLAYER *player, short int unitDefId)
 	for (int researchId = 0; researchId < resCount; researchId++) {
 		if (statuses[researchId].currentStatus > RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) {
 			short int techId = resDefArray[researchId].technologyId;
-			if (DoesTechEnableUnit(&player->ptrGlobalStruct->technologiesInfo->ptrTechDefArray[techId], unitDefId)) {
+			if ((techId >= 0) && DoesTechEnableUnit(&player->ptrGlobalStruct->technologiesInfo->ptrTechDefArray[techId], unitDefId)) {
 				return researchId;
 			}
 		}

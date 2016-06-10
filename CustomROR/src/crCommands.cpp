@@ -469,15 +469,15 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		long int playerId = 2;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
-		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_ARMORED_ELEPHANT, false, NULL);
+		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_LEGION, false, NULL);
 	}
 	if (strcmp(command, "a") == 0) {
 		long int playerId = 2;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		
-		//AddResearchesInStrategyForUnit(player->ptrAIStruct, 282);
-		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_ARMORED_ELEPHANT, true, NULL);
+		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_LEGION, true, NULL);
+		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_ARMORED_ELEPHANT, true, NULL);
 
 		std::vector<short int> v;
 		v.push_back(64);
