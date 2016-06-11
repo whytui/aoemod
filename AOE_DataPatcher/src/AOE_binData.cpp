@@ -74,7 +74,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_VEG_windowedMode_10c 21
 #define COUNT_selectedUnits_10c 86
 #define COUNT_obsoletes_10c 24
-#define COUNT_ROR_API_10c 101
+#define COUNT_ROR_API_10c 102
 #define COUNT_manageAI_10c 13
 
 
@@ -4611,6 +4611,16 @@ void AOE_binData::InitROR_API() {
 		0xF8D87,
 		(0xFF, 0x92, 0xE4, 0x00, 0x00, 0x00, 0xBE, 0x01, 0x00, 0x00, 0x00, 0x8B, 0x17), // default=no
 		(0xFF, 0x92, 0xE4, 0x00, 0x00, 0x00, 0xE8, 0xE2, 0x07, 0xF2, 0xFF, 0x8B, 0x17),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		OverloadGetLocalizedText,
+		"Adds support for custom text localization.",
+		0xFF52F,
+		(0x90, 0xA1, 0x34, 0x06, 0x7C, 0x00, 0x53), // default=no
+		(0x90, 0xE8, 0x3F, 0xA0, 0xF1, 0xFF, 0x53),
 		FM_OFF,
 		FM_ON
 		);

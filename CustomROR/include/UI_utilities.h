@@ -160,7 +160,7 @@ static bool AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 
 // Note: basic size (eg OK button) is 0x?? / 0x1E
 static bool AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, char *caption,
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
 	if (!parent) { return false; }
@@ -189,7 +189,7 @@ static bool AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 
 // For fonts, see AOE_FONTS enum
 static bool AOE_AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, char *label,
+	ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT
 ) {

@@ -20,6 +20,7 @@
 #include "interface.h"
 #include "EXESelfEditor.h"
 #include "drsHandler.h"
+#include "crLocalization.h"
 
 
 /* This class is the interface object between game code (through ROR_API call) and CustomROR plugin code.
@@ -128,6 +129,7 @@ public:
 	void FixPlayerNoTechTree_applyTech(REG_BACKUP *REG_values);
 	void EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values);
 	void EntryPointOnBuildingInfoDisplay(REG_BACKUP *REG_values);
+	void EntryPointOnGetLocalizedString(REG_BACKUP *REG_values);
 
 	// Map generation
 	void ManageRelicsCount(REG_BACKUP *REG_values);

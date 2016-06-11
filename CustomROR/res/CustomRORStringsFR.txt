@@ -1,0 +1,159 @@
+// Localized strings
+[42000] CustomROR title
+CustomROR
+
+// *** Technical ***
+[42001]
+Debug message system initialized.
+[42002]
+WARNING: Some features are not enabled in game executable. See CustomROR.log file.
+[42003]
+ERROR: there are more civs in customROR_civs.xml than in empires.dat. This may cause game crashes !
+[42004] // Can't write to file
+ERROR: cannot write to
+[42005] // Can't read XML configuration file
+Warning: configuration could not be read from XML file (missing or incorrect file).
+[42006] // Can't read civilizations XML configuration file
+customROR_civs.xml could not be read (missing or incorrect file). This is not an error unless you want to use custom civilizations
+[42007]
+Running checks on active features in game executable.
+[42008] // Welcome message part 1
+Bienvenue, le plugin CustomROR
+[42009] // Welcome message part 2
+est actif.
+
+// *** CustomROR Options popup ***
+[42020] // CustomROR options popup title
+Options de CustomROR
+[42021] // Tech tree info button
+Arbre technologies
+[42028] // Tech tree popup title
+Technologies pouvant encore être développées
+[42029] // Mention for unavailable tech (but present in tech tree)
+pas encore disponible
+[42022] // 
+Autres commandes (puis entrée)
+[42030]
+Facteur d'antipathie contre les joueurs humains
+[42031]
+Facteur pour change la vitesse du jeu*100 (125 pour 1.25)
+[42032]
+Reconstruire les fermes auto.
+[42033]
+Nb max. de fermes simultanées
+[42034]
+Max. nourriture pour reconstruction des fermes
+[42035]
+Min de bois pour reconstruction des fermes
+
+
+[42023] // Custom civilization without name in game settings combobox
+Autre civilisation
+
+[42024] // Custom buttons
+Recherche en cours:
+[42025] // Custom buttons
+Unité en cours:
+[42026] // AI flags recomputed
+Les flags d'IA ont été recalculés.
+[42027] // AI flags all set
+Tous les joueurs sont désormais gérés par l'IA.
+
+// *** Unit properties ***
+[42036] // Unit properties: Initial
+Initial
+[42037] // Unit properties: Not built
+En construction
+[42038] // Unit properties: Gatherable
+Exploitable
+[42039] // Unit properties: Dying
+Mourant
+[42040] // Unit properties title
+Editer une unité
+[42041] // Unit properties: normal status
+Normal
+[42042] // Unit properties: "Unit" term
+Unité
+[42043] // Unit properties: "Shortcut" term
+Raccourci
+[42044] // "none" term
+aucun
+[42045] // "invalid" term
+invalide
+[42046] // Part of group
+membre d'un groupe
+[42047] // Building
+Bâtiment
+[42048] // Children units auto move to
+Les unités formées vont automatiquement vers
+[42049] // Auto rebuild this farm when depleted
+Reconstruire cette ferme si vide
+[42050] // Technology ID abbreviation
+techId
+[42051] // Unit properties title (ingame)
+Propriétés de l'unité
+[42052] // Disable auto move
+Désactiver auto-mouvement
+[42053]
+Par défaut
+[42054]
+Toujours
+[42055]
+Jamais
+[42056]
+Auto attaquer les unités:
+[42057]
+Tours
+[42058]
+Militaires
+[42059]
+Bâtiments
+[42060]
+Villageois
+[42061]
+Murailles
+[42062]
+Future technologies, pas encore disponibles:
+
+// *** Scenario editor ***
+[42063]
+Custom editor menu
+[42064]
+PlayerId
+[42065]
+Triggers
+[42066]
+Editer le terrain
+[42067]
+Conditions de victoire
+[42068]
+Autoriser enchevêtrement unités
+[42069]
+Autoriser les bâtiments sur le relief
+[42070]
+Désactiver les restrictions de terrain
+[42071]
+Lengthen combat mode
+[42072]
+Editer les triggers
+[42073]
+Voir stratégie (lecture seule)
+[42074]
+Voir personnalité (lecture seule)
+[42075]
+Condition de victoire sur l'or
+[42076]
+Pour activer une condition de victoire sur la quantité d'or, saisissez une valeur non nulle.\nVous devez aussi choisir "personnalisé" dans les conditions de victoire générale.
+[42077]
+Entrez la taille X/Y de la carte SVP
+[42078]
+Pos X (min/max)
+[42079]
+Pos Y (min/max)
+[42080]
+Id de terrain (0-31)
+[42081]
+Altitude (0-7)
+[42082]
+Astuce: laissez les champs terrain/altitude vides pour préserver les valeurs actuelles.
+

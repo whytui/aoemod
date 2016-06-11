@@ -110,6 +110,7 @@
     <ClInclude Include="include\crCommon.h" />
     <ClInclude Include="include\crConfig.h" />
     <ClInclude Include="include\crGameObjects.h" />
+    <ClInclude Include="include\crLocalization.h" />
     <ClInclude Include="include\crMainInterface.h" />
     <ClInclude Include="include\crPatcher.h" />
     <ClInclude Include="include\drsHandler.h" />
@@ -138,6 +139,7 @@
     <ClCompile Include="src\crCommon.cpp" />
     <ClCompile Include="src\crConfig.cpp" />
     <ClCompile Include="src\crGameObjects.cpp" />
+    <ClCompile Include="src\crLocalization.cpp" />
     <ClCompile Include="src\crMainInterface.cpp" />
     <ClCompile Include="src\crPatcher.cpp" />
     <ClCompile Include="src\crTrigger.cpp" />
@@ -155,6 +157,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="CustomROR_README.txt" />
+    <Text Include="res\CustomRORStrings.txt" />
+    <Text Include="res\CustomRORStringsFR.txt" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="res\customROR.xml">

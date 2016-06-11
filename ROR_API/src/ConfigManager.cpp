@@ -39,10 +39,10 @@ int ConfigManager::ReadConfigFromFile() {
 			bool ignore_line;
 			int len;
 			for (len = 0; bufferRead[len] != 0; len++);
-			if (bufferRead[len - 3] == 'D') { bufferRead[len - 3] = 'd'; }
-			if (bufferRead[len - 2] == 'L') { bufferRead[len - 2] = 'l'; }
-			if (bufferRead[len - 1] == 'L') { bufferRead[len - 1] = 'l'; }
-			ignore_line = ((bufferRead[0] == '#') || (bufferRead[len - 3] != 'd') || (bufferRead[len - 2] != 'l') || (bufferRead[len - 1] != 'l'));
+			if ((len >= 3) && (bufferRead[len - 3] == 'D')) { bufferRead[len - 3] = 'd'; }
+			if ((len >= 2) && (bufferRead[len - 2] == 'L')) { bufferRead[len - 2] = 'l'; }
+			if ((len >= 1) && (bufferRead[len - 1] == 'L')) { bufferRead[len - 1] = 'l'; }
+			ignore_line = ((len < 3) || (bufferRead[0] == '#') || (bufferRead[len - 3] != 'd') || (bufferRead[len - 2] != 'l') || (bufferRead[len - 1] != 'l'));
 			if (!ignore_line) {
 				// Add dll to list
 				this->DLL_names_current->AddAfter(bufferRead, len);

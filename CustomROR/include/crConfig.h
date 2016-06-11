@@ -90,6 +90,7 @@ public:
 	bool showLogsInReverseOrder; // No input parameter for this (init in constructor only)
 	bool showCustomRORNotifications; // Use this to disable customROR message notifications (not recommended)
 	std::list<DrsFileToLoad*> customDrsFilesList; // List of DRS files to load at startup.
+	std::list<std::string> customStringsFilesList; // List of files containing custom localized strings.
 
 	// Random Games settings
 	bool noNeutralInitialDiplomacy; // If true, initial diplomacy for no-team players will be enemy, not neutral. AI won't become all allied against human.

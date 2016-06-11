@@ -303,6 +303,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x4F8D92:
 		this->EntryPointOnBuildingInfoDisplay(REG_values);
 		break;
+	case 0x004FF535:
+		this->EntryPointOnGetLocalizedString(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -325,7 +328,7 @@ void CustomRORInstance::TemporaryEntryPoints(REG_BACKUP *REG_values) {
 // Initializations done only once, at startup.
 // ROR UI has not been initialized yet, DRS files are not loaded, etc.
 void CustomRORInstance::OneShotInit() {
-	traceMessageHandler.WriteMessageNoNotification("Debug message system initialized.");
+	traceMessageHandler.WriteMessageNoNotification(localizationHandler.GetTranslation(CRLANG_ID_DEBUG_INIT, "Debug message system initialized."));
 	this->crInfo.configInfo.ReadXMLConfigFile("customROR.xml");
 	this->crInfo.configInfo.ReadCivXMLConfigFile("customROR_civs.xml");
 	this->crCommand.crInfo = &this->crInfo;
@@ -334,10 +337,11 @@ void CustomRORInstance::OneShotInit() {
 
 	// Note: CheckEnabledFeatures writes to log file
 	if (!this->crCommand.CheckEnabledFeatures()) {
+		const char *msg = localizationHandler.GetTranslation(CRLANG_ID_WARN_MISSING_FEATURE, "WARNING: Some features are not enabled in game executable. See CustomROR.log file.");
 		if (this->crInfo.configInfo.showAlertOnMissingFeature) {
-			MessageBoxA(0, "WARNING: Some features are not enabled in game executable. See CustomROR.log file.", "ROR API", MB_ICONWARNING);
+			MessageBoxA(0, msg, "ROR API", MB_ICONWARNING);
 		}
-		traceMessageHandler.WriteMessageNoNotification("WARNING: Some features are not enabled in game executable. See CustomROR.log file.");
+		traceMessageHandler.WriteMessageNoNotification(msg);
 	}
 	// Manage interfac.drs file to use
 	ChangeItfDRS_file();
@@ -1444,10 +1448,10 @@ void CustomRORInstance::ManageChangeGameSpeed(REG_BACKUP *REG_values) {
 	if (!this->crInfo.configInfo.useImprovedGameSpeeds) {
 		// Reimplement standard algorithm (use only 1.0, 1.5, 2.0 hardcoded values)
 		if (*bool_increaseSpeed) {
-			*gameSpeed = *gameSpeed + (float) 0.5;
+			*gameSpeed = *gameSpeed + 0.5f;
 			if (*gameSpeed > 2) { *gameSpeed = 2; }
 		} else {
-			*gameSpeed = *gameSpeed - (float) 0.5;
+			*gameSpeed = *gameSpeed - 0.5f;
 			if (*gameSpeed < 1) { *gameSpeed = 1; }
 		}
 		return;
@@ -1826,12 +1830,14 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 			// We can only detect this when global struct already exists.
 			// On first time we run a game, settings are displayed BEFORE the global struct is created (and before empires.dat is loaded)
 			this->crInfo.configInfo.civCount = globalStruct->civCount;
-			traceMessageHandler.WriteMessage("ERROR: there are more civs in customROR_civs.xml than in empires.dat. This may cause game crashes !");
+			const char *msg = localizationHandler.GetTranslation(CRLANG_ID_MISSING_CIVS_IN_EMPIRES_DAT, "ERROR: there are more civs in customROR_civs.xml than in empires.dat. This may cause game crashes !");
+			traceMessageHandler.WriteMessage(msg);
 			FILE *fileLog = NULL;
 			int logFileRes;
 			logFileRes = fopen_s(&fileLog, "CustomROR.log", "a+"); // appends (do not overwrite)
 			if (logFileRes == 0) {
-				fprintf_s(fileLog, "ERROR: there are more civs in customROR_civs.xml than in empires.dat. This may cause game crashes !\n");
+				fprintf_s(fileLog, msg);
+				fprintf_s(fileLog, "\n");
 			}
 			fclose(fileLog);
 		}
@@ -1843,7 +1849,7 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 		if (civInfo) {
 			AOE_AddEntryInCombo(ptrCombo, civid, civInfo->GetCivName().c_str());
 		} else {
-			AOE_AddEntryInCombo(ptrCombo, civid, "Custom civilization");
+			AOE_AddEntryInCombo(ptrCombo, civid, localizationHandler.GetTranslation(CRLANG_ID_DEFAULT_CIV_NAME, "Custom civilization"));
 		}
 	}
 	
@@ -1882,7 +1888,7 @@ void CustomRORInstance::ManageCivsInEditorCombo(REG_BACKUP *REG_values) {
 		if (civInfo) {
 			AOE_AddEntryInCombo(ptrCombo, 0, civInfo->GetCivName().c_str());
 		} else {
-			AOE_AddEntryInCombo(ptrCombo, 0, "Custom civilization");
+			AOE_AddEntryInCombo(ptrCombo, 0, localizationHandler.GetTranslation(CRLANG_ID_DEFAULT_CIV_NAME, "Custom civilization"));
 		}
 	}
 
@@ -2276,10 +2282,14 @@ void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 	
 	// Limit to single player, causes crash on multi.
 	assert(this->crInfo.customGameMenuOptionsBtnVar == NULL);
+	long int dllIdToUse = LANG_ID_OPTIONS;
+	if (localizationHandler.StringExists(CRLANG_ID_CUSTOMROR)) {
+		dllIdToUse = CRLANG_ID_CUSTOMROR;
+	}
 	if (myEAX && this->crInfo.configInfo.showCustomRORMenu && !IsMultiplayer()) {
 		myEAX = AOE_AddButton((ROR_STRUCTURES_10C::STRUCT_ANY_UI*)myESI,
 			(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON**)&this->crInfo.customGameMenuOptionsBtnVar, 
-			LANG_ID_OPTIONS, 0xD0, myEBP, 0xAC, 0x1E,
+			dllIdToUse, 0xD0, myEBP, 0xAC, 0x1E,
 			AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	}
 	REG_values->EDI_val = myEDI; // Important for navigating with arrows in menu.
@@ -2539,7 +2549,7 @@ void CustomRORInstance::OnScenarioInitPlayerBadInitialAgeApplication(REG_BACKUP 
 
 
 // From 0050BB2A
-// This is called in global.newGameInit method, after settings "golbal" initial age.
+// This is called in global.newGameInit method, after settings "global" initial age.
 // This is called before settings various player resources / and score information.
 // We use it to fix scenario player-specific starting age (technology tree has already been applied, here) in scenario.
 // It can be used as an entry point too.
@@ -2655,7 +2665,7 @@ void CustomRORInstance::RORDebugLogHandler(REG_BACKUP *REG_values) {
 	}
 
 	if (*(char*)textStackAddress == 0) {
-		assert("Bad argument");
+		//assert(false && "Bad argument"); // ?
 		return;
 	}
 
@@ -3172,6 +3182,26 @@ void CustomRORInstance::EntryPointOnBuildingInfoDisplay(REG_BACKUP *REG_values) 
 	this->crCommand.DisplayCustomBuildingAttributesInUnitInfo(unitInfoZone, REG_values->ESI_val);
 }
 
+
+// From 004FF530 = GetLanguageDllString(stringId, buffer, size)
+void CustomRORInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		unsigned long int *p = (unsigned long int *)0x7C0634;
+		REG_values->EAX_val = *p;
+	}
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	bool useCustomLocalization = true;
+	if (useCustomLocalization) {
+		long int stringDllId = GetIntValueFromRORStack(REG_values, 4);
+		char *buffer = (char*)GetIntValueFromRORStack(REG_values, 8);
+		long int bufferSize = GetIntValueFromRORStack(REG_values, 0x0C);
+		buffer[bufferSize - 1] = 0; // Just in case.
+		bool successfullyFoundString = this->crCommand.GetLocalizedString(stringDllId, buffer, bufferSize);
+		if (successfullyFoundString) {
+			ChangeReturnAddress(REG_values, 0x4FF563); // Prevent ROR from searching in language(x).dll
+		}
+	}
+}
 
 
 //#pragma warning(pop)

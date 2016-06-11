@@ -21,6 +21,7 @@
 #include "crPatcher.h"
 #include "unitShortcuts.h"
 #include "researches.h"
+#include "crLocalization.h"
 
 #pragma once
 
@@ -99,6 +100,9 @@ public:
 
 	// Reads game executable to determine if various sequences are installed or not
 	void ReadOtherSequencesStatus();
+
+	// Load custom strings files
+	void LoadCustomLocalizationFiles();
 
 	// Load custom DRS files
 	void LoadCustomDrsFiles();
@@ -353,6 +357,10 @@ public:
 	// Adds custom attributes (armor) in buildings' unit info zone.
 	// currentLine is incremented if lines are added.
 	void DisplayCustomBuildingAttributesInUnitInfo(ROR_STRUCTURES_10C::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine);
+
+	// Get a localized string to overload ROR's string localization system (language(x).dll)
+	// Returns true if a (custom) localized string has been written into buffer.
+	bool GetLocalizedString(long int stringId, char *buffer, long int bufferSize);
 
 
 	// ----------------------------------

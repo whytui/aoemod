@@ -23,19 +23,24 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	FILE *f;
 	int res = fopen_s(&f, "CustomROR.log", "w+"); // overwrite if already existing
 	if (res) {
-		traceMessageHandler.WriteMessage("ERROR: cannot write to CustomROR.log");
+		std::string msg = std::string(localizationHandler.GetTranslation(CRLANG_ID_CANT_WRITE_FILE, "ERROR: cannot write to"));
+		msg += " ";
+		msg += "CustomROR.log";
+		traceMessageHandler.WriteMessage(msg);
 		return false;
 	}
 	fprintf_s(f, "CustomROR %s\n", VER_FILE_VERSION_STR);
 	if (this->crInfo->configInfo.couldNotReadXMLConfig) {
-		fprintf_s(f, "Warning: configuration could not be read from XML file (missing or incorrect file).\n\n");
+		fprintf_s(f, localizationHandler.GetTranslation(CRLANG_ID_CANT_READ_XML_CONFIG, "Warning: configuration could not be read from XML file (missing or incorrect file)."));
+		fprintf_s(f, "\n\n");
 	}
 	if (this->crInfo->configInfo.couldNotReadCivXMLConfig) {
-		fprintf_s(f, "customROR_civs.xml could not be read (missing or incorrect file). This is not an error unless you want to use custom civilizations.\n\n");
+		fprintf_s(f, localizationHandler.GetTranslation(CRLANG_ID_CANT_READ_CIV_XML_CONFIG, "customROR_civs.xml could not be read (missing or incorrect file). This is not an error unless you want to use custom civilizations."));
+		fprintf_s(f, "\n\n");
 	}
 
-	fprintf_s(f, "Running checks on active features in game executable.\n");
-	fprintf_s(f, "This detects if some features from this version of CustomROR will not work because you need to enable them with \"CustomizeAOE\".\n");
+	fprintf_s(f, localizationHandler.GetTranslation(CRLANG_ID_RUN_EXE_CONFIG_CHECKS, "Running checks on active features in game executable."));
+	fprintf_s(f, "\nThis detects if some features from this version of CustomROR will not work because you need to enable them with \"CustomizeAOE\".\n");
 	
 	// Analyze EXE memory and check all necessary ROR_API calls are enabled.
 	bool RORAPIFullyInstalled = CheckRorApiSequencesAreInstalled(f, this->crInfo->configInfo.autoFixMissingFeatures);
@@ -189,6 +194,9 @@ void CustomRORCommand::OneShotInit() {
 	this->ReadIfManageAIIsOn();
 	this->ReadOtherSequencesStatus();
 
+	// Load/Prepare localization strings
+	this->LoadCustomLocalizationFiles();
+
 	// Prepare custom DRS data
 	this->LoadCustomDrsFiles();
 
@@ -225,6 +233,19 @@ void CustomRORCommand::ReadOtherSequencesStatus() {
 	this->crInfo->hasRemovePlayerInitialAgeInScenarioInit = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
 }
 
+// Load custom strings files
+void CustomRORCommand::LoadCustomLocalizationFiles() {
+	for each (std::string filename in this->crInfo->configInfo.customStringsFilesList) {
+		std::string msg;
+		if (!localizationHandler.LoadTranslationsFromFile(filename)) {
+			msg = "Failed to load strings from ";
+		} else {
+			msg = "Successfully loaded strings from ";
+		}
+		msg += filename;
+		traceMessageHandler.WriteMessageNoNotification(msg);
+	}
+}
 
 // Load custom DRS files
 void CustomRORCommand::LoadCustomDrsFiles() {
@@ -437,19 +458,20 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 	}
 	if ((strcmp(command, "ai") == 0) || (strcmp(command, "AI") == 0)) {
 		this->RestoreAllAIFlags();
-		CallWriteText("AI flags have been recomputed");
+		CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_RECOMPUTED, "AI flags have been recomputed"));
 	}
 	if ((strcmp(command, "allai") == 0) || (strcmp(command, "allAI") == 0)) {
 		this->SetAllAIFlags();
-		CallWriteText("All players are now computer-managed.");
+		CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_ALL_SET, "All players are now computer-managed."));
 	}
 	if (strcmp(command, "dump") == 0) {
 		this->DumpDebugInfoToFile();
 	}
 	if (strcmp(command, "about") == 0) {
-		char buf[30];
-		sprintf_s(buf, "CustomROR %s\n", VER_FILE_VERSION_STR);
-		CallWriteText(buf);
+		std::string s = localizationHandler.GetTranslation(CRLANG_ID_CUSTOMROR, "CustomROR");
+		s += " ";
+		s += VER_FILE_VERSION_STR;
+		CallWriteText(s.c_str());
 	}
 	if (strcmp(command, "timer stats") == 0) {
 		this->DisplayTimerStats();
@@ -700,9 +722,9 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 		this->UpdateWorkRateWithMessage(CST_UNITID_FARMER, -1); // Original=0.45
 		// Note for upgrades (techs): if using another value than 0.15, also fix egypt/baby tech trees ! (+palmyra, see below)
 		// Mining: could use +0.09 (would be +20%) ?
-		const float miningBonus = (float)0.15;
-		const float lumberjackBonus = (float)0.11;
-		const float palmyraWorkRateBonus = (float)0.15; // enough, even better than tech bonuses. Original = 0.20 for all gatherer types
+		const float miningBonus = 0.15f;
+		const float lumberjackBonus = 0.11f;
+		const float palmyraWorkRateBonus = 0.15f; // enough, even better than tech bonuses. Original = 0.20 for all gatherer types
 		// TODO: bonus % is not the same for all villager types (most have 0.45 work rate, lumberjack 0.55, etc)
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_STONE_MINING, CST_UNITID_MINERSTONE, miningBonus); // +33% instead of +67% (was +0.3 / 0.45 initial)
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_GOLD_MINING, CST_UNITID_MINERGOLD, miningBonus); // +33% instead of +67% (was +0.3 / 0.45 initial)
@@ -807,8 +829,12 @@ void CustomRORCommand::OnGameStart() {
 
 	// REQUIRES game UI to be active
 	if (!this->crInfo->configInfo.hideWelcomeMessage && !settings->isMultiplayer) {
-		CallWriteText("Welcome. CustomROR " VER_FILE_VERSION_STR " plugin is active.");
-		CallWriteText("See log file to check active features (custom conversion resistance...)");
+		std::string msg = localizationHandler.GetTranslation(CRLANG_ID_WELCOME1, "Welcome. CustomROR");
+		msg += " "; 
+		msg += VER_FILE_VERSION_STR;
+		msg += " ";
+		msg += localizationHandler.GetTranslation(CRLANG_ID_WELCOME2, "plugin is active.");
+		CallWriteText(msg.c_str());
 	}
 
 	// Show automatically "F11" information at game startup
@@ -4934,11 +4960,13 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		}
 		std::string inProgressInfo;
 		if (currentActionIsResearch) {
-			inProgressInfo = "Being researched: ";
+			inProgressInfo = localizationHandler.GetTranslation(CRLANG_ID_BEING_RESEARCHED, "Being researched:");
+			inProgressInfo += " ";
 			inProgressInfo += nameBuffer;
 			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, currentActionDATID, true, inProgressInfo.c_str(), NULL, true);
 		} else {
-			inProgressInfo = "Being trained: ";
+			inProgressInfo = localizationHandler.GetTranslation(CRLANG_ID_BEING_TRAINED, "Being trained:");
+			inProgressInfo += " ";
 			inProgressInfo += nameBuffer;
 			AddInGameCommandButton(buttonIdForInProgress, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, currentActionDATID, true, inProgressInfo.c_str(), NULL, true);
 		}
@@ -5290,6 +5318,14 @@ void CustomRORCommand::DisplayCustomBuildingAttributesInUnitInfo(ROR_STRUCTURES_
 		// Note: line is incremented in the method if a line is added.
 		UnitInfoZoneAddAttributeLine(unitInfoZone, iconIdPierce, 1, pierceDisplayedValue, pierceTotalValue, currentLine);
 	}
+}
+
+
+// Get a localized string to overload ROR's string localization system (language(x).dll)
+// Returns true if a (custom) localized string has been written into buffer.
+bool CustomRORCommand::GetLocalizedString(long int stringId, char *buffer, long int bufferSize) {
+	if (!buffer) { return false; }
+	return localizationHandler.ReadTranslation((short int)stringId, buffer, bufferSize);
 }
 
 

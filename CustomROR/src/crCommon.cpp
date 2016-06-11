@@ -2792,7 +2792,9 @@ std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) 
 						currentBldText += nameBuffer;
 						if (isAutomaticTech) { currentBldText += ")"; }
 						if (rs[rid].currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) {
-							currentBldText += " (not available yet)";
+							currentBldText += " (";
+							currentBldText += localizationHandler.GetTranslation(CRLANG_ID_NOT_AVAILABLE_YET, "not available yet");
+							currentBldText += " )";
 						}
 					}
 				}

@@ -6,6 +6,8 @@
 #include <mystrings.h>
 #include "crCommon.h"
 #include "crCommands.h"
+#include "crLocalization.h"
+#include "AOE_const_language.h"
 
 
 // Base class to implement custom popups.
@@ -57,7 +59,7 @@ protected:
 
 	// API to add UI components and add them automatically in "objects to free" list.
 	bool AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-		ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, char *label,
+		ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
@@ -71,7 +73,7 @@ protected:
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize);
 
 	bool AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, char *caption,
+		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
@@ -238,7 +240,7 @@ public:
 	SimpleEditTextPopup();
 	void _ResetPointers() override;
 	// This class needs parameters to create content. Call this after calling OpenPopup().
-	void AddPopupContent(char *title, const char *initialValue, long int maxLength, char *outputBuffer, bool readOnly);
+	void AddPopupContent(const char *title, const char *initialValue, long int maxLength, char *outputBuffer, bool readOnly);
 	void OnBeforeClose(bool isCancel) override;
 	bool isForTriggers;
 private:
@@ -255,7 +257,7 @@ public:
 	InputBox();
 	void _ResetPointers() override;
 	// This class needs parameters to create content. Call this after calling OpenPopup().
-	void AddPopupContent(char *title, char *desc, const char *initialInputValue, long int maxLength, bool readOnly);
+	void AddPopupContent(const char *title, const char *desc, const char *initialInputValue, long int maxLength, bool readOnly);
 	void OnBeforeClose(bool isCancel) override;
 protected:
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtInput;
@@ -277,7 +279,7 @@ public:
 		this->forcedMaxLength = 0;
 	}
 	// This class needs parameters to create content. Call this after calling OpenPopup().
-	void AddPopupContent(char *title, char *text, inttype initialValue, inttype minValue, inttype maxValue, inttype *outputBuffer, bool readOnly) {
+	void AddPopupContent(const char *title, const char *text, inttype initialValue, inttype minValue, inttype maxValue, inttype *outputBuffer, bool readOnly) {
 		this->bufferToWrite = outputBuffer;
 		long int maxLength = 0;
 		std::string sFoo;

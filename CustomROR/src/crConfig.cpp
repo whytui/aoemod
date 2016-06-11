@@ -227,6 +227,18 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 				delete drs;
 			}
 		}
+		if (elemName == "languageTxtFile") {
+			std::string filename = this->XML_GetAttributeValue(elem, "filename");
+			if (!filename.empty()) {
+				auto it = std::find_if(this->customStringsFilesList.begin(), this->customStringsFilesList.end(),
+					[filename](std::string elem) { return elem == filename; }
+				);
+				if (it == this->customStringsFilesList.end()) {
+					// Not found = not already in the list
+					this->customStringsFilesList.push_back(filename);
+				}
+			}
+		}
 		if (elemName == "showCustomRORMenu") {
 			this->showCustomRORMenu = XML_GetBoolElement(elem, "enable");
 		}

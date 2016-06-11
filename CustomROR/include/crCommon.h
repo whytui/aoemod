@@ -28,6 +28,8 @@
 #include "interface.h" // SLP/icon ids...
 #include "language.h"
 #include "researches.h"
+#include "crLocalization.h"
+
 
 // Defines common objects/variables/methods for CustomROR
 // Methods in this file are simple primitives that don't depend on customROR configuration. They generally are calls to existing game methods.

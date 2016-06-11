@@ -38,7 +38,7 @@ void CustomPopup::AddObjectInContentList(ROR_STRUCTURES_10C::STRUCT_ANY_UI *obj)
 
 // API to add UI components and add them automatically in "objects to free" list.
 bool CustomPopup::AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, char *label,
+	ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	AOE_FONTS font) {
 	bool res;
@@ -74,7 +74,7 @@ bool CustomPopup::AddCheckBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 }
 
 bool CustomPopup::AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, char *caption,
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId, AOE_FONTS font) {
 	bool res;
@@ -175,31 +175,32 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 
 
 	//this->customGamePopupButtonVar
-	this->AddLabel(this->popup, &this->customOptionHeaderLabelVar, "CustomROR Options", 0xD0, 0x0A, 0x100, 0x1E, AOE_FONTS::AOE_FONT_BIG_LABEL); // Title
+	this->AddLabel(this->popup, &this->customOptionHeaderLabelVar, 
+		localizationHandler.GetTranslation(CRLANG_ID_CUSTOMROR_OPTIONS_POPUP_TITLE, "CustomROR Options"), 0xD0, 0x0A, 0x100, 0x1E, AOE_FONTS::AOE_FONT_BIG_LABEL); // Title
 	
 	// human dislike penalty
 	this->AddTextBox(this->popup, &this->customOptionHumanPenaltyTextVar, customOptionHumanPenaltyTextBuffer, 2, 0x120, 0x34, 0x30, 0x16, false, false);
-	this->AddLabel(this->popup, &this->customOptionHumanPenaltyLabelVar, txtHumanPenalty, 0x10, 0x30, 0x100, 0x1E);
+	this->AddLabel(this->popup, &this->customOptionHumanPenaltyLabelVar, localizationHandler.GetTranslation(CRLANG_ID_DISLIKE_PENALTY, txtHumanPenalty), 0x10, 0x30, 0x100, 0x1E);
 	// Game speeds config
 	this->AddTextBox(this->popup, &this->customOptionGameSpeedTextVar, customOptionGameSpeedFactorTextBuffer, 4, 0x120, 0x4C, 0x30, 0x16, false, false);
-	this->AddLabel(this->popup, &this->customOptionGameSpeedLabelVar, txtGameSpeedFactor, 0x10, 0x48, 0x100, 0x1E);
+	this->AddLabel(this->popup, &this->customOptionGameSpeedLabelVar, localizationHandler.GetTranslation(CRLANG_ID_GAME_SPEED_CHANGE_FACTOR, txtGameSpeedFactor), 0x10, 0x48, 0x100, 0x1E);
 	// Farms autorebuild
-	this->AddLabel(this->popup, &this->lblAutoRebuildFarms, txtAutoRebuildFarms, 0x10, 0x64, 0x100, 0x1E);
+	this->AddLabel(this->popup, &this->lblAutoRebuildFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS, txtAutoRebuildFarms), 0x10, 0x64, 0x100, 0x1E);
 	this->AddCheckBox(this->popup, &this->chkAutoRebuildFarms, 0x120, 0x64, 0x1E, 0x1E);
 	AOE_CheckBox_SetChecked(this->chkAutoRebuildFarms, this->crInfo->configInfo.enableAutoRebuildFarms);
-	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFood, txtAutoRebuildFarmsMaxFood, 0x10, 0x80, 0x100, 0x1E);
-	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMinWood, txtAutoRebuildFarmsMinWood, 0x10, 0x98, 0x100, 0x1E);
-	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFarms, txtAutoRebuildFarmsMaxNumber, 0x10, 0xB0, 0x100, 0x1E);
+	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_FOOD, txtAutoRebuildFarmsMaxFood), 0x10, 0x80, 0x100, 0x1E);
+	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMinWood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MIN_WOOD, txtAutoRebuildFarmsMinWood), 0x10, 0x98, 0x100, 0x1E);
+	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_NUMBER, txtAutoRebuildFarmsMaxNumber), 0x10, 0xB0, 0x100, 0x1E);
 	this->AddTextBox(this->popup, &this->edtAutoRebuildFarmsMaxFood, maxFoodTextBuffer, 5, 0x120, 0x84, 0x34, 0x16, false, false);
 	this->AddTextBox(this->popup, &this->edtAutoRebuildFarmsMinWood, minWoodTextBuffer, 5, 0x120, 0x9C, 0x34, 0x16, false, false);
 	this->AddTextBox(this->popup, &this->edtAutoRebuildFarmsMaxFarms, maxFarmsTextBuffer, 2, 0x120, 0xB4, 0x34, 0x16, false, false);
 	
 	// Free text zone
-	this->AddLabel(this->popup, &this->customOptionFreeTextLabelVar, "Other commands (enter to validate)", 0x10, 0x120, 0x100, 0x1E);
+	this->AddLabel(this->popup, &this->customOptionFreeTextLabelVar, localizationHandler.GetTranslation(CRLANG_ID_OTHER_COMMANDS_LABEL, "Other commands (enter to validate)"), 0x10, 0x120, 0x100, 0x1E);
 	this->AddTextBox(this->popup, &this->customOptionFreeTextVar, "", 100, 0x100, 0x120, 0xB0, 0x16, false, false);
 	this->AddTextBox(this->popup, &this->customOptionFreeTextAnswerVar, "", 100, 0x1C0, 0x120, 0x80, 0x16, true, false);
 	
-	this->AddButton(this->popup, &this->btnTechTreeInfo, "Tech tree info", 0x170, 0x34, 0xAC, 0x1E);
+	this->AddButton(this->popup, &this->btnTechTreeInfo, localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE, "Tech tree info"), 0x170, 0x34, 0xAC, 0x1E);
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
@@ -258,7 +259,7 @@ void InGameCustomRorOptionsPopup::OnAfterClose(bool isCancel) {
 		SimpleEditTextPopup *tmpNextPopup = new SimpleEditTextPopup();
 		tmpNextPopup->SetCRCommand(this->crCommand);
 		tmpNextPopup->OpenPopup(700, 580, false);
-		tmpNextPopup->AddPopupContent("Technology tree that can still be researched", 
+		tmpNextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE_CAN_BE_RESEARCHED_TITLE, "Technology tree that can still be researched"),
 			GetRemainingTechTreeText(humanPlayer).c_str(), 10000, NULL, false);
 		this->nextPopup = tmpNextPopup;
 	}
@@ -315,7 +316,7 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	if (!unitDef) { return; }
 	this->unit = unit;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblUnusedPtr = NULL;
-	this->AddLabel(this->popup, &lblUnusedPtr, "Edit a unit", 200, 10, 120, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddLabel(this->popup, &lblUnusedPtr, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TITLE, "Edit a unit"), 200, 10, 120, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	char *name = "";
 	short int DATID = -1;
 	if (unitDef->ptrUnitName) {
@@ -326,16 +327,12 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	sprintf_s(buffer, "Unit ID = %ld - name=%s (DATID=%d). Pos(x,y)=%.1f, %.1f", unit->unitInstanceId, name, DATID, unit->positionX, unit->positionY);
 	this->AddLabel(this->popup, &lblUnusedPtr, buffer, 50, 50, 400, 24, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	
-	char initial[] = "Initial";
-	char to_build[] = "Not built";
-	char gatherable[] = "Gatherable";
-	char dying[] = "Dying";
-	char *labelText0 = initial;
-	char *labelText4 = dying;
+	const char *labelText0 = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_INITIAL, "Initial");
+	const char *labelText4 = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DYING, "Dying");
 	bool disableInitial = true;
 
 	if (unit->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING) {
-		labelText0 = to_build;
+		labelText0 = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NOTBUILT, "Not built");
 		disableInitial = false;
 	}
 	// Warning: do NOT use unit->unitType, it is not correctly valued in editor !!!
@@ -343,11 +340,11 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 		(unitDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupPreyAnimal) ||
 		(unitDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupPredatorAnimal)
 		) {
-		labelText4 = gatherable;
+		labelText4 = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_GATHERABLE, "Gatherable");
 	}
 
 	this->AddLabel(this->popup, &this->lbl_s0, labelText0, 160, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(this->popup, &this->lbl_s2, "Normal", 230, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(this->popup, &this->lbl_s2, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NORMAL_STATUS, "Normal"), 230, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
 	this->AddLabel(this->popup, &this->lbl_s4, labelText4, 300, 80, 70, 24, AOE_FONT_STANDARD_TEXT);
 	this->AddCheckBox(this->popup, &this->chkbox_s0, 170, 110, 24, 24);
 	this->AddCheckBox(this->popup, &this->chkbox_s2, 240, 110, 24, 24);
@@ -471,7 +468,8 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	const long int btnSize = 0xAC;
 	const long int lblTitleHSize = 160;
 	const long int lblMainInfoHSize = 400;
-	std::string mainInfos = "Unit ";
+	std::string mainInfos = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_UNIT_TERM, "Unit");
+	mainInfos += " ";
 #ifdef _DEBUG
 	mainInfos += "id=";
 	mainInfos += std::to_string(unitId);
@@ -481,10 +479,12 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	mainInfos += unitDefBase->ptrUnitName;
 	mainInfos += "\" (";
 	mainInfos += unitPlayer->playerName_length16max;
-	mainInfos += "). Shortcut=";
+	mainInfos += "). ";
+	mainInfos += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_SHORTCUT_TERM, "Shortcut");
+	mainInfos += "=";
 	// Shortcut / group info
 	if ((unit->shortcutNumber == 0) || (unit->shortcutNumber > 10)) {
-		mainInfos += "none";
+		mainInfos += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NONE_TERM, "none");
 	} else {
 		char displayNumber = unit->shortcutNumber;
 		if (displayNumber == -11) {
@@ -496,11 +496,13 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		if (displayNumber > 0) {
 			mainInfos += std::to_string(displayNumber);
 		} else {
-			mainInfos += "invalid";
+			mainInfos += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_INVALID_TERM, "invalid");
 		}
 	}
 	if (unit->shortcutNumber > 10) {
-		mainInfos += " [part of a group]";
+		mainInfos += " [";
+		mainInfos += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_PART_OF_GROUP, "part of a group");
+		mainInfos += "]";
 	}
 	// Automove infos
 	std::string autoMoveInfo = "";
@@ -513,7 +515,9 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 				targetUnitBase->ptrStructDefUnit && targetUnitBase->ptrStructDefUnit->IsCheckSumValid()) {
 				targetName = targetUnitBase->ptrStructDefUnit->ptrUnitName;
 			}
-			autoMoveInfo += "[Building] Child units auto-target=";
+			autoMoveInfo += "[";
+			autoMoveInfo += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_BUILDING, "Building");
+			autoMoveInfo += "] Child units auto-target=";
 			autoMoveInfo += std::to_string(unitInfo->spawnTargetUnitId);
 			if (targetName) {
 				autoMoveInfo += " (";
@@ -523,7 +527,11 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 		if ((unitInfo->spawnUnitMoveToPosX >= 0) && (unitInfo->spawnUnitMoveToPosY >= 0)) {
 			char buf[10];
-			autoMoveInfo += "[Building] Child units auto-move to (";
+			autoMoveInfo += "[";
+			autoMoveInfo += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_BUILDING, "Building");
+			autoMoveInfo += "] ";
+			autoMoveInfo += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_CHILDREN_UNITS_AUTOMOVE_TO, "Child units auto-move to");
+			autoMoveInfo += " (";
 			sprintf_s(buf, "%.2f", unitInfo->spawnUnitMoveToPosX);
 			autoMoveInfo += buf;
 			autoMoveInfo += ", ";
@@ -533,7 +541,8 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 	}
 	// Farm auto-rebuild
-	std::string farmInfo = "Auto rebuild this farm when depleted:";
+	std::string farmInfo = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_AUTO_REBUILD_THIS_FARM_WHEN_DEPLETED, "Auto rebuild this farm when depleted");
+	farmInfo += ":";
 	FarmRebuildInfo *farmBldInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
 
 	// Building : future potential techs/units
@@ -548,7 +557,8 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 				if (unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchLocation == unitDefBase->DAT_ID1) {
 					techToShowCount++;
 					if (techToShowCount > 0) { buildingTechAndUnitInfo += "\n"; }
-					buildingTechAndUnitInfo += "techId ";
+					buildingTechAndUnitInfo += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TECHID_ABBREV, "techId");
+					buildingTechAndUnitInfo += " ";
 					buildingTechAndUnitInfo += std::to_string(unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].technologyId);
 					buildingTechAndUnitInfo += " = ";
 					*nameBuffer = 0; // Reset string
@@ -560,12 +570,12 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 	}
 
-	this->AddLabel(popup, &this->lblTitle, "Unit properties", (hSize - lblTitleHSize) / 2, 10, lblTitleHSize, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddLabel(popup, &this->lblTitle, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_INGAME_TITLE, "Unit properties"), (hSize - lblTitleHSize) / 2, 10, lblTitleHSize, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	this->AddLabel(popup, &this->lblMainInfos, (char*)mainInfos.c_str(), (hSize - lblMainInfoHSize) / 2, 60, lblMainInfoHSize, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	// Note: auto-move and farm info have same Y position because they can't be displayed simultaneously.
 	if (!autoMoveInfo.empty()) {
 		this->AddLabel(popup, &this->lblChildUnitsAutoMove, (char*)autoMoveInfo.c_str(), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddButton(popup, &this->btnResetAutoMove, "Disable auto-move", 340, 100, btnSize, 22, 0);
+		this->AddButton(popup, &this->btnResetAutoMove, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DISABLE_AUTO_MOVE, "Disable auto-move"), 340, 100, btnSize, 22, 0);
 	}
 	// Auto rebuild farm
 	if (isMyUnit && (unitDefBase->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FARM)) {
@@ -575,9 +585,9 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		this->AddCheckBox(popup, &this->chkRebuildFarmNone, 330, 100 - 4, 24, 24);
 		this->AddCheckBox(popup, &this->chkForceRebuildFarm, 430, 100 - 4, 24, 24);
 		this->AddCheckBox(popup, &this->chkForceNotRebuildFarm, 530, 100 - 4, 24, 24);
-		this->AddLabel(popup, &unusedLabel, "default", 270, 100, 50, 20);
-		this->AddLabel(popup, &unusedLabel, "Always", 370, 100, 50, 20);
-		this->AddLabel(popup, &unusedLabel, "Never", 470, 100, 50, 20);
+		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DEFAULT, "Default"), 270, 100, 50, 20);
+		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_ALWAYS, "Always"), 370, 100, 50, 20);
+		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NEVER, "Never"), 470, 100, 50, 20);
 		
 		FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
 		if (!fri) {
@@ -599,12 +609,12 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	// Military : guard location ?
 	if (isMilitary) {
 		bool canHurtOtherUnits = (unitDef50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (unitDef50->blastRadius > 0);
-		this->AddLabel(popup, &this->lblAutoAttackUnits, "Auto attack units:", 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackTowers, "Towers", 180, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackMilitary, "Military", 250, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackBuildings, "Buildings", 320, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackVillagers, "Villagers", 390, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackWalls, "Walls", 460, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackUnits, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_AUTO_ATTACK_UNITS, "Auto attack units:"), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackTowers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TOWERS, "Towers"), 180, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackMilitary, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_MILITARY, "Military"), 250, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackBuildings, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_BUILDINGS, "Buildings"), 320, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackVillagers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_VILLAGERS, "Villagers"), 390, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackWalls, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_WALLS, "Walls"), 460, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
 		this->AddCheckBox(popup, &this->chkAutoAttackTowers, 195, 130 - 4, 24, 24);
 		this->AddCheckBox(popup, &this->chkAutoAttackMilitary, 265, 130 - 4, 24, 24);
@@ -636,7 +646,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 
 	// Building : future potential techs/units
 	if (!buildingTechAndUnitInfo.empty() && (techToShowCount > 0)) {
-		this->AddLabel(popup, &this->lblBuildingTechsMessage, "Future technologies, not available yet:", 30, 120, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblBuildingTechsMessage, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_FUTURE_UNAVAILABLE_TECHS, "Future technologies, not available yet:"), 30, 120, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 		
 		this->AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, 140, 450, 20 + techToShowCount * 14, true, true);
 	}
@@ -790,27 +800,27 @@ void EditorScenarioInfoPopup::_AddPopupContent() {
 	this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_NONE;
 	this->playerId = -1;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
-	this->AddLabel(popup, &this->lblTitle, "Custom editor menu", btnhPos1 - 5, 10, 190, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
-	this->AddLabel(popup, &unused, "PlayerId :", btnhPos1, 40, 0x60, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &this->lblTitle, localizationHandler.GetTranslation(CRLANG_IDCUSTOM_EDITOR_MENU, "Custom editor menu"), btnhPos1 - 5, 10, 190, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_IDPLAYER_ID, "PlayerId :"), btnhPos1, 40, 0x60, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	this->AddTextBox(popup, &this->edtPlayerId, "2", 1, btnhPos1 + btnSize - 0x22, 42, 0x22, 20, false, false, true);
 	this->AddButton(popup, &this->btnAI, LANG_ID_STRATEGY, btnhPos1, 80, btnSize, 30, 0);
 	this->AddButton(popup, &this->btnPER, LANG_ID_PERSONALITY, btnhPos1, 120, btnSize, 30, 0);
-	this->AddButton(popup, &this->btnTriggers, "Triggers", btnhPos1, 160, btnSize, 30, 0);
-	this->AddButton(popup, &this->btnTerrainEdit, "Terrain edit", btnhPos1, 200, btnSize, 30, 0);
-	this->AddButton(popup, &this->btnVictoryCondition, "Victory conditions", btnhPos2, 80, btnSize, 30, 0);
+	this->AddButton(popup, &this->btnTriggers, localizationHandler.GetTranslation(CRLANG_IDTRIGGERS, "Triggers"), btnhPos1, 160, btnSize, 30, 0);
+	this->AddButton(popup, &this->btnTerrainEdit, localizationHandler.GetTranslation(CRLANG_IDTERRAIN_EDIT, "Terrain edit"), btnhPos1, 200, btnSize, 30, 0);
+	this->AddButton(popup, &this->btnVictoryCondition, localizationHandler.GetTranslation(CRLANG_IDVICTORY_CONDITIONS, "Victory conditions"), btnhPos2, 80, btnSize, 30, 0);
 	long int chkSize = 30;
 	long int hSpace = 15;
 	long int lblhSize = 160;
 	long int lblhPos = hSpace;
 	long int lblhPosCol2 = (hSize - lblhSize - chkSize - hSpace * 2); // x position for checkboxes col2
-	this->AddLabel(popup, &unused, "Allow unit overlapping", lblhPos, 240, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_IDUNIT_OVERLAPPING, "Allow unit overlapping"), lblhPos, 240, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	this->AddCheckBox(popup, &this->chkAllowUnitOverlapping, lblhPos + lblhSize + hSpace, 240, chkSize, chkSize);
-	this->AddLabel(popup, &unused, "Allow buildings on elevation", lblhPos, 280, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_IDBUILD_ON_ELEVATION, "Allow buildings on elevation"), lblhPos, 280, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	this->AddCheckBox(popup, &this->chkDisableHillModeCheck, lblhPos + lblhSize + hSpace, 280, chkSize, chkSize);
-	this->AddLabel(popup, &unused, "Disable terrain restrictions", lblhPos, 320, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_IDDISABLE_TERRAIN_RESTRICTION, "Disable terrain restrictions"), lblhPos, 320, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	this->AddCheckBox(popup, &this->chkDisableTerrainRestrictions, lblhPos + lblhSize + hSpace, 320, chkSize, chkSize);
 	// Checkboxes column 2
-	this->AddLabel(popup, &unused, "Lengthen combat mode", lblhPosCol2, 240, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_IDLENGTHEN_COMBAT_MODE, "Lengthen combat mode"), lblhPosCol2, 240, lblhSize, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	this->AddCheckBox(popup, &this->chkLengthenCombatMode, lblhPosCol2 + lblhSize + hSpace, 240, chkSize, chkSize);
 }
 
@@ -900,7 +910,7 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup();
 			nextPopup->SetCRCommand(this->crCommand);
 			nextPopup->OpenPopup(700, 580, true);
-			nextPopup->AddPopupContent("Edit triggers", GetTriggerDataPtr(sc_info), 0, NULL, false);
+			nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_EDIT_TRIGGERS, "Edit triggers"), GetTriggerDataPtr(sc_info), 0, NULL, false);
 			nextPopup->isForTriggers = true;
 			this->nextPopup = nextPopup;
 		}
@@ -912,7 +922,7 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup();
 			nextPopup->SetCRCommand(this->crCommand);
 			nextPopup->OpenPopup(700, 580, false);
-			nextPopup->AddPopupContent("Get Strategy (read only)", settings->ptrGlobalStruct->scenarioInformation->strategyFileContent[this->playerId - 1],
+			nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_GET_STRATEGY, "Get Strategy (read only)"), settings->ptrGlobalStruct->scenarioInformation->strategyFileContent[this->playerId - 1],
 				settings->ptrGlobalStruct->scenarioInformation->strategyFileSize[this->playerId - 1], NULL, false);
 			this->nextPopup = nextPopup;
 		}
@@ -924,7 +934,7 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup();
 			nextPopup->SetCRCommand(this->crCommand);
 			nextPopup->OpenPopup(700, 580, false);
-			nextPopup->AddPopupContent("Get Personality (read only)", settings->ptrGlobalStruct->scenarioInformation->personalityFileContent[this->playerId - 1],
+			nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_GET_PERSONALITY, "Get Personality (read only)"), settings->ptrGlobalStruct->scenarioInformation->personalityFileContent[this->playerId - 1],
 				settings->ptrGlobalStruct->scenarioInformation->personalityFileSize[this->playerId - 1], NULL, false);
 			this->nextPopup = nextPopup;
 		}
@@ -942,8 +952,8 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 		InputBox_int<long int> *nextPopup = new InputBox_int<long int>();
 		nextPopup->SetCRCommand(this->crCommand);
 		nextPopup->OpenPopup(450, 200, true);
-		nextPopup->AddPopupContent("Gold victory condition", 
-			"If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select \"custom\" in general victory conditions tab.",
+		nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_GOLD_VICT_CONDITION, "Gold victory condition"),
+			localizationHandler.GetTranslation(CRLANG_ID_GOLD_VICT_CONDITION_DETAILS, "If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select \"custom\" in general victory conditions tab."),
 			settings->ptrGlobalStruct->scenarioInformation->generalVictory_goldAmount, 0, 999999, &settings->ptrGlobalStruct->scenarioInformation->generalVictory_goldAmount, false);
 		this->nextPopup = nextPopup;
 		break;
@@ -968,7 +978,7 @@ void SimpleEditTextPopup::_ResetPointers() {
 
 
 // This class needs parameters to create content. Call this after calling OpenPopup().
-void SimpleEditTextPopup::AddPopupContent(char *title, const char *initialValue, long int maxLength, char *outputBuffer, bool readOnly) {
+void SimpleEditTextPopup::AddPopupContent(const char *title, const char *initialValue, long int maxLength, char *outputBuffer, bool readOnly) {
 	this->bufferToWrite = outputBuffer;
 	if (maxLength < 1) {
 		maxLength = 0x8000 - 2;
@@ -1018,7 +1028,7 @@ void InputBox::OnBeforeClose(bool isCancel) {}
 
 
 // This class needs parameters to create content. Call this after calling OpenPopup().
-void InputBox::AddPopupContent(char *title, char *desc, const char *initialInputValue, long int maxLength, bool readOnly) {
+void InputBox::AddPopupContent(const char *title, const char *desc, const char *initialInputValue, long int maxLength, bool readOnly) {
 	this->readOnly = readOnly;
 	if (maxLength < 1) {
 		maxLength = 0x8000 - 2;
@@ -1072,7 +1082,7 @@ void EditMapSizeXYPopup::_AddPopupContent() {
 	char bufY[5];
 	sprintf_s(bufX, "%ld", this->sizeX);
 	sprintf_s(bufY, "%ld", this->sizeY);
-	this->AddLabel(popup, &unused, "Please type X and Y map size", 30, 5, 280, 20, AOE_FONT_BIG_LABEL);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TYPE_X_Y_MAP_SIZE, "Please type X and Y map size"), 30, 5, 280, 20, AOE_FONT_BIG_LABEL);
 	this->AddTextBox(popup, &this->edtSizeX, bufX, 3, 120, 40, 80, 20, false, false, true);
 	this->AddTextBox(popup, &this->edtSizeY, bufY, 3, 120, 60, 80, 20, false, false, true);
 }
@@ -1126,12 +1136,12 @@ void EditTerrainPopup::_AddPopupContent() {
 	// Popup is open. Add components
 	long int btnhPos = (hSize - 130) / 2;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
-	this->AddLabel(popup, &unused, "Edit terrain", btnhPos, 5, 130, 20, AOE_FONT_BIG_LABEL);
-	this->AddLabel(popup, &unused, "Pos X (min/max)", 10, 40, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(popup, &unused, "Pos Y (min/max)", 10, 70, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(popup, &unused, "Terrain Id (0-31)", 10, 100, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(popup, &unused, "Elevation (0-7)", 10, 130, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(popup, &unused, "Tip: leave terrain/elevation empty to preserve current values.", 10, 160, 350, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_IDTERRAIN_EDIT, "Edit terrain"), btnhPos, 5, 130, 20, AOE_FONT_BIG_LABEL);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_POSX_MINMAX, "Pos X (min/max)"), 10, 40, 120, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_POSY_MINMAX, "Pos Y (min/max)"), 10, 70, 120, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TERRAINID, "Terrain Id (0-31)"), 10, 100, 120, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_ELEVATION, "Elevation (0-7)"), 10, 130, 120, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TIP_TERRAIN_LEAVE_EMPTY, "Tip: leave terrain/elevation empty to preserve current values."), 10, 160, 350, 20, AOE_FONT_STANDARD_TEXT);
 	this->AddTextBox(popup, &this->edtMinPosX, "0", 3, 140, 40, 80, 20, false, false, true);
 	this->AddTextBox(popup, &this->edtMinPosY, "0", 3, 140, 70, 80, 20, false, false, true);
 	this->AddTextBox(popup, &this->edtMaxPosX, "0", 3, 240, 40, 80, 20, false, false, true);
