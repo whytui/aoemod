@@ -777,7 +777,7 @@ void CustomRORInstance::AfterAddElementInStrategy(REG_BACKUP *REG_values) {
 	long int retrains = args[5];
 	long int positionCounter = args[6];
 	// Try to update strategy if there is an "unreferenced" existing unit that match newly-added element
-	UpdateStrategyWithUnreferencedExistingUnits(buildAI, unitDATID, TAIUnitClass::AIUCNone); // AIUCNone: joker
+	UpdateStrategyWithUnreferencedExistingUnits(buildAI, unitDATID, TAIUnitClass::AIUCNone, positionCounter); // AIUCNone: joker
 
 	// Granary / SP that are inserted at very beginning of strategy: move it after first house.
 	if (((unitDATID == CST_UNITID_GRANARY) || (unitDATID == CST_UNITID_STORAGE_PIT)) && (positionCounter < 2)) {
@@ -2854,7 +2854,7 @@ void CustomRORInstance::InitPlayersCivInScenarioEditor(REG_BACKUP *REG_values) {
 }
 
 
-// From 0x4978AF
+// From 0x4978AF. The ROR-added code to support roman tileset in icons in editor does not work at all. Fix it.
 void CustomRORInstance::FixUnsupportedRomanTileSetInEditorIcons(REG_BACKUP *REG_values) {
 	bool useStandardBehavior = false;
 	if (REG_values->fixesForGameEXECompatibilityAreDone) {

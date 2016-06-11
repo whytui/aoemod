@@ -131,15 +131,16 @@ void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_PLAY
 	ROR_STRUCTURES_10C::STRUCT_AI *mainAI = player->GetAIStruct();
 	if (!mainAI) { return; }
 	// Call generic method
-	UpdateStrategyWithUnreferencedExistingUnits(&mainAI->structBuildAI, -1, TAIUnitClass::AIUCNone);
+	UpdateStrategyWithUnreferencedExistingUnits(&mainAI->structBuildAI, -1, TAIUnitClass::AIUCNone, -1);
 }
 
 
 // Update strategy to add existing units so AI won't train/build it again. Check will only be run on matching strategy elements.
 // This overload is a bit faster because it filters unit types.
-// You can use DAT_ID=-1 and elemType=AIUCNone as jokers (to apply on all strategy elements)
+// You can use DAT_ID=-1 and elemType=AIUCNone and stratElemId=-1 as jokers (to apply on all strategy elements)
 // We consider it is a technical fix, so it is always done, even if AI improvement is disabled.
-void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int DAT_ID, TAIUnitClass elemType) {
+void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int DAT_ID,
+	TAIUnitClass elemType, long int stratElemId) {
 	if ((elemType != TAIUnitClass::AIUCNone) && (elemType != TAIUnitClass::AIUCBuilding) && (elemType != TAIUnitClass::AIUCLivingUnit)) { return; } // only relevant for creatable
 	if (!buildAI) { return; }
 
@@ -177,6 +178,7 @@ void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_BUIL
 	while ((currentElem != NULL) && (currentElem != fakeStratElem)) {
 		// Performance: We only take care of strategy elements that match provided criteria
 		if (((currentElem->elementType == elemType) || (elemType == AIUCNone)) &&
+			((currentElem->counter == stratElemId) || (stratElemId == -1)) &&
 			((currentElem->unitDAT_ID == DAT_ID) || (DAT_ID == -1))) {
 			std::vector<ROR_STRUCTURES_10C::STRUCT_UNIT*>::iterator it = notInStrategyUnitsList.begin();
 			while (it != notInStrategyUnitsList.end()) {
@@ -288,17 +290,17 @@ bool AddUnitInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int po
 	}
 	long int result;
 	_asm {
-		MOV ECX, buildAI // Required to call method
-			PUSH positionToInsert
-			PUSH retrains
-			PUSH actor
-			PUSH unitType
-			PUSH DWORD PTR 1 // nb to create
-			PUSH unitDATID
-			push player
-			MOV EAX, 0x00408D90
-			CALL EAX
-			MOV result, EAX
+		MOV ECX, buildAI; // Required to call method
+		PUSH positionToInsert;
+		PUSH retrains;
+		PUSH actor;
+		PUSH unitType;
+		PUSH DWORD PTR 1; // nb to create
+		PUSH unitDATID;
+		push player;
+		MOV EAX, 0x00408D90;
+		CALL EAX;
+		MOV result, EAX;
 	}
 	// Warning: update name afterward for researches because it adds a stupid unit name (even if unitDATID is a researchId)
 	return (result != 0);
@@ -352,6 +354,8 @@ bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_
 	nextElem->previous = elem;
 	elem->previous = previousElem;
 	elem->next = nextElem;
+	// Try to find an existing unit (not already linked to another strategy element) for added strategy element
+	//UpdateStrategyWithUnreferencedExistingUnits(buildAI, unitDATID, AIUCNone, elem->counter);
 	return true;
 }
 
@@ -701,7 +705,7 @@ bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 	}
 
 	// Loop on strategy elements to see if there are missing "prerequisites" (in fact, we want almost all strategy elements to be done to build a wonder)
-	while ((currentElem != fakeFirstElem) && (currentElem != NULL) && 
+	while ((currentElem != fakeFirstElem) && (currentElem != NULL) &&
 		(!IsCustomRorPopulationBeginStratElem(currentElem))) { // Ignore elements that are located AFTER customROR-added elements (to fit max population)
 		if (currentElem->unitDAT_ID == CST_UNITID_WONDER) {
 			return true; // reached wonder element, ignore next ones (if any)
@@ -745,43 +749,43 @@ bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 				}
 			}
 
-// Rules for buildings
-if (currentElem->elementType == AIUCBuilding) {
-	// Explicitely require ALL houses / TC to be fully built.
-	if ((currentElem->unitDAT_ID == CST_UNITID_HOUSE) || (currentElem->unitDAT_ID == CST_UNITID_FORUM)) {
-		return false;
-	}
+			// Rules for buildings
+			if (currentElem->elementType == AIUCBuilding) {
+				// Explicitely require ALL houses / TC to be fully built.
+				if ((currentElem->unitDAT_ID == CST_UNITID_HOUSE) || (currentElem->unitDAT_ID == CST_UNITID_FORUM)) {
+					return false;
+				}
 
-	// We allow some "useless" buildings NOT to be built: farms, gov siege, market
-	bool isUnnecessaryBld = (currentElem->unitDAT_ID != CST_UNITID_FARM) ||
-		// SP / granary are dynamically added: there might be several of them, but we don't need them to build a wonder
-		(currentElem->unitDAT_ID != CST_UNITID_GRANARY) ||
-		(currentElem->unitDAT_ID != CST_UNITID_STORAGE_PIT) ||
-		(currentElem->unitDAT_ID != CST_UNITID_DOCK) || // Can be added dynamically, don't take the risk to block wonder for this.
-		(currentElem->unitDAT_ID != CST_UNITID_GOVERNMENT_SIEGE) ||
-		(currentElem->unitDAT_ID != CST_UNITID_MARKET);
-	if (!isUnnecessaryBld) {
-		// Add other criteria ?
-		return false; // A "necessary" building is missing
-	}
-}
+				// We allow some "useless" buildings NOT to be built: farms, gov siege, market
+				bool isUnnecessaryBld = (currentElem->unitDAT_ID != CST_UNITID_FARM) ||
+					// SP / granary are dynamically added: there might be several of them, but we don't need them to build a wonder
+					(currentElem->unitDAT_ID != CST_UNITID_GRANARY) ||
+					(currentElem->unitDAT_ID != CST_UNITID_STORAGE_PIT) ||
+					(currentElem->unitDAT_ID != CST_UNITID_DOCK) || // Can be added dynamically, don't take the risk to block wonder for this.
+					(currentElem->unitDAT_ID != CST_UNITID_GOVERNMENT_SIEGE) ||
+					(currentElem->unitDAT_ID != CST_UNITID_MARKET);
+				if (!isUnnecessaryBld) {
+					// Add other criteria ?
+					return false; // A "necessary" building is missing
+				}
+			}
 
-// Rules for living units - only if there is room for new units.
-// If no more headroom because of missing houses, "building" rules will ensure we return false
-// If no more headroom because we reached population max, don't block wonder construction for this.
-if ((currentElem->elementType == AIUCLivingUnit) && (populationHeadroom > 0)) {
-	bool isVillager = IsVillager_includingShips((unsigned short)currentElem->unitDAT_ID);
-	if (isVillager) {
-		missingVillagers++;
-		if (missingVillagers > 4) { // we tolerate some villagers to be spawned afterwards, but not too many
-			return false;
-		}
-	}
-	// Military unit: tolerate if in progress, but not if it has not been started yet.
-	if (!isVillager && (currentElem->inProgressCount == 0)) {
-		return false;
-	}
-}
+			// Rules for living units - only if there is room for new units.
+			// If no more headroom because of missing houses, "building" rules will ensure we return false
+			// If no more headroom because we reached population max, don't block wonder construction for this.
+			if ((currentElem->elementType == AIUCLivingUnit) && (populationHeadroom > 0)) {
+				bool isVillager = IsVillager_includingShips((unsigned short)currentElem->unitDAT_ID);
+				if (isVillager) {
+					missingVillagers++;
+					if (missingVillagers > 4) { // we tolerate some villagers to be spawned afterwards, but not too many
+						return false;
+					}
+				}
+				// Military unit: tolerate if in progress, but not if it has not been started yet.
+				if (!isVillager && (currentElem->inProgressCount == 0)) {
+					return false;
+				}
+			}
 		}
 
 		currentElem = currentElem->next;
