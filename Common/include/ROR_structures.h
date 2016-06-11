@@ -155,7 +155,8 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_UI_SCENARIO_EDITOR_MAIN; // "Scenario Editor Screen"
 	class STRUCT_UI_SCENARIO_EDITOR_MENU;
 	class STRUCT_UI_F11_POP_PANEL;
-	class STRUCT_UI_IN_GAME_UNIT_INFO_ZONE;
+	class STRUCT_UI_UNIT_INFO_ZONE;
+	class STRUCT_UI_EDITOR_UNIT_INFO_ZONE;
 	class STRUCT_UI_IN_GAME_MAIN; // "GameScreen"
 	class STRUCT_UI_IN_GAME_SUB1;
 	class STRUCT_UI_IN_GAME_MENU;
@@ -1694,7 +1695,7 @@ namespace ROR_STRUCTURES_10C
 		char unused_04F;
 		// 0x50
 		float *ptrResourceValues; // To get a resource value: player->ptrResourceValues[CST_RES_ORDER_xxx])
-		char tileSet; // +54. Civilization tileset, 5 max.
+		char tileSet; // +54. Civilization tileset, 5 max (0-4). 4 is ROR's added tileset.
 		char unknown_055_unused[3];
 		STRUCT_PLAYER_UNKNOWN_58_AND_6C unknown_058;
 		STRUCT_PLAYER_UNKNOWN_58_AND_6C unknown_06C;
@@ -1919,7 +1920,7 @@ namespace ROR_STRUCTURES_10C
 		// 0x1B0
 		AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentUIStatus; // 0=loading,2=inMenu,4=playing,7=editor
 		AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES mouseActionType; // +1B4. Set this during game, you'll be able to edit the map !! userSelected* fields
-		long int unknown_1B8; // Values 1,6,... ? SubMouseActionType ? Used when mouseActionType=6 (villager build menu) or in editor. Seen 1=editor_moveUnit?, 3, 4. Unsure !
+		long int unknown_1B8; // Values 1,4,6,... ? SubMouseActionType ? Used when mouseActionType=6 (villager build menu) or in editor. Seen 1=editor_moveUnit?, 3, 4(editor_putunit?). Unsure !
 		long int unknown_1BC;
 		// 0x1C0
 		char unknown_1C0[0x10];
@@ -1937,10 +1938,10 @@ namespace ROR_STRUCTURES_10C
 		char unknown_3F3; // unused ?
 		STRUCT_GAME_GLOBAL *ptrGlobalStruct; // +3F4
 		unsigned long int unknown_3F8;
-		short int userSelectedDATID; // +3FC: the unitDefID that user selected in "units" tab.
-		short int userSelectedTerrainId; // Can be changed in editor/terrain tab
+		short int editorUserSelectedUnitDefId; // +3FC: the unitDefID that user selected in "units" tab.
+		short int editorUserSelectedTerrainId; // Can be changed in editor/terrain tab
 		// 0x400
-		short int userSelectedAltitude; // in editor/terrain tab
+		short int editorUserSelectedAltitude; // in editor/terrain tab
 		short int editorTerrainPencilSize; // in editor/terrain tab
 		char debugString_404[0x508 - 0x404]; // "Avg view time"...
 		long int unknown_508;
@@ -3416,7 +3417,7 @@ namespace ROR_STRUCTURES_10C
 	public:
 		unsigned long int ptrUnknownSound_164;
 		unsigned long int ptrConstructionGraphic; // Graphics while building is under construction
-		char unknown_16C;
+		char multiplePlacement; // +16C. IsWall? for building placement (put several at once) ?
 		char unknown_16D;
 		char angle; // +16E. constructionStep (for unfinished) or "angle" (different standing graphic frame?)
 		char unknown_16F;
@@ -4626,8 +4627,7 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_UI_UNIT_BUTTON_INFO) == 0x28, "STRUCT_UI_UNIT_BUTTON_INFO size");
 
 
-	// Size ?
-	// Constructor ?
+	// Size 0x948. Constructor 0x48FC40
 	// This is the parent UI object of in-game screen.
 #define CHECKSUM_UI_SCENARIO_EDITOR_MAIN 0x00547360
 	class STRUCT_UI_SCENARIO_EDITOR_MAIN : public STRUCT_ANY_UI { // 60 73 54 00
@@ -4635,13 +4635,15 @@ namespace ROR_STRUCTURES_10C
 		long int hWnd; // TO CONFIRM
 		char unknown_0F8[0x4A8 - 0x0F8];
 		long int currentMapGenerationChoice; // +4A8. 1=empty, 2=random, 3=from seed
-		unsigned long int unknown_04AC;
+		long int unknown_04AC; // default 2
 		unsigned long int unknown_04B0;
 		unsigned long int unknown_04B4;
-		long int selectedPlayerId; // +4B8. Unsure
+		long int selectedPlayerId; // +4B8. Default 1
 		unsigned long int unknown_04BC;
 		// 0x4C0
-		unsigned long int unknown_04C0;
+		char unknown_04C0; // default 0
+		char unknown_04C1; // default 0
+		short int unknown_04C2; // unused??
 		unsigned long int unknown_04C4;
 		STRUCT_UI_PLAYING_ZONE *gamePlayUIZone; // +4C8. 88 66 54 00.
 		STRUCT_UI_DIAMOND_MAP *diamondMap; // +4CC. ptr to 3C A7 54 00.
@@ -4697,15 +4699,16 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_UI_LABEL *pl_lbl_playerCount;
 		STRUCT_UI_COMBOBOX *pl_cbb_selectedPlayer; // +5B4. In Players tab, current player selection.
 		STRUCT_UI_COMBOBOX *pl_cbb_playerCount; // +5B8. Number of players combobox.
-		STRUCT_ANY_UI *unknown_5BC[(0x644 - 0x5BC) / 4]; // TO DO
-		unsigned long int unknown_644; // +644
-		unsigned long int unknown_648;
-		unsigned long int unknown_64C;
-		unsigned long int unknown_650;
-		unsigned long int unknown_654;
-		unsigned long int unknown_658;
-		unsigned long int unknown_65C;
-		unsigned long int unknown_660;
+		STRUCT_ANY_UI *unknown_5BC[(0x640 - 0x5BC) / 4]; // TO DO
+		unsigned long int unknown_640; // +640 healthSlp ?
+		unsigned long int unknown_644; // +644 itemiconSLP ?
+		STRUCT_SLP_INFO *iconsForUnits; // +648.
+		STRUCT_SLP_INFO *iconsForBuildingsTileSet0; // +64C.
+		STRUCT_SLP_INFO *iconsForBuildingsTileSet1; // +650.
+		STRUCT_SLP_INFO *iconsForBuildingsTileSet2; // +654.
+		STRUCT_SLP_INFO *iconsForBuildingsTileSet3; // +658.
+		STRUCT_SLP_INFO *iconsForBuildingsTileSet4; // +65C. Not well supported ?
+		STRUCT_UI_EDITOR_UNIT_INFO_ZONE *selectedUnitInfoZone; // +660.
 		long int unitListElementCount; // +664
 		STRUCT_UI_BUTTON *gv_btn_custom_exploration; // +668
 		STRUCT_UI_BUTTON *gv_btn_custom_ruins; // +66C
@@ -4713,10 +4716,17 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_UI_BUTTON *gv_btn_custom_discoveries; // +674
 		STRUCT_ANY_UI *unknown_678[(0x928 - 0x678) / 4]; // TO DO
 		STRUCT_GAME_GLOBAL *global; // +928
-		// ...
+		long int unknown_92C; // Default 200
+		long int unknown_930_timeGetTimeValue; // +930. TimeGetTime result value
+		long int unknown_934; // Default 1000
+		long int unknown_938_timeGetTimeValue; // +938. TimeGetTime result value
+		unsigned long int unknown_93C;
+		unsigned long int unknown_940;
+		unsigned long int unknown_944;
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MAIN; }
 	};
+	static_assert(sizeof(STRUCT_UI_SCENARIO_EDITOR_MAIN) == 0x948, "STRUCT_UI_SCENARIO_EDITOR_MAIN size");
 
 
 	// Size=0x164. Constructor=0x4FA150?
@@ -4738,10 +4748,11 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_UI_F11_POP_PANEL) == 0x164, "STRUCT_UI_F11_POP_PANEL size");
 
 
-#define CHECKSUM_UI_IN_GAME_UNIT_INFO_ZONE 0x00549E7C
+#define CHECKSUM_UI_UNIT_INFO_ZONE 0x00549E7C
+#define CHECKSUM_UI_IN_GAME_UNIT_INFO_ZONE 0x00547CC0
 	// Size=0x214. Constructor=0x4F83D0 = unitInfoZone.constructor(arg1, mainGameUI, arg3, arg4, arg5, iconsForTrainUnit, iconsForBuildings, controlledPlayer)
 	// Methods: 0x4F9970=unitInfoZone.refreshIfNeeded(), 0x4F8740=UnitInfoZone.showInfos(self?, mainGameZone?)
-	class STRUCT_UI_IN_GAME_UNIT_INFO_ZONE : public STRUCT_ANY_UI {
+	class STRUCT_UI_UNIT_INFO_ZONE : public STRUCT_ANY_UI {
 	public:
 		unsigned long int unknown_0F4; // +F4 : font info. (=fontObj+0)
 		unsigned long int unknown_0F8; // +F8 : font info. (=fontObj+4)
@@ -4798,9 +4809,19 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_SLP_INFO *unknown_1EC_SLP[9]; // +1EC.
 		long int unknown_210; // +210
 
+		bool IsCheckSumValid() { return
+			(this->checksum == CHECKSUM_UI_UNIT_INFO_ZONE) || (this->checksum == CHECKSUM_UI_IN_GAME_UNIT_INFO_ZONE);
+		}
+	};
+	static_assert(sizeof(STRUCT_UI_UNIT_INFO_ZONE) == 0x214, "STRUCT_UI_UNIT_INFO_ZONE size");
+
+	// Size 0x21C Constructor 0x4A42A0
+	class STRUCT_UI_EDITOR_UNIT_INFO_ZONE : public STRUCT_UI_UNIT_INFO_ZONE {
+		long int currentUnitDefId; // +214
+		long int currentTileSet; // +218. 0-4.
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_IN_GAME_UNIT_INFO_ZONE; }
 	};
-	static_assert(sizeof(STRUCT_UI_IN_GAME_UNIT_INFO_ZONE) == 0x214, "STRUCT_UI_IN_GAME_UNIT_INFO_ZONE size");
+	static_assert(sizeof(STRUCT_UI_EDITOR_UNIT_INFO_ZONE) == 0x21C, "STRUCT_UI_EDITOR_UNIT_INFO_ZONE size");
 
 
 	// Size 0x7C8
@@ -4815,7 +4836,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_SLP_INFO *iconsForUnitCommands; // +48C. Pointer to SLP data... Cf SLP 50721
 		STRUCT_SLP_INFO *iconsForResearches; // +490. Pointer to SLP data... Cf SLP 50729
 		STRUCT_SLP_INFO *iconsForTrainUnits; // +494. Pointer to SLP data... Cf SLP 50730.
-		STRUCT_SLP_INFO *iconsForBuildings[5]; // +498 + tileset*4. It seems there is no free slot for more tilesets.
+		STRUCT_SLP_INFO *iconsForBuildings[5]; // +498 + tileset*4. There is no free slot for more tilesets. SLPId= C610+i except tileset4=>CF0D.
 		STRUCT_SLP_INFO *unknown_4AC_icons; // +4AC. Used in 48250F. Includes the "cancel" icon, id=10. SLP 50725 ?
 		short int unknown_4B0_iconId; // +4B0. Icon id for Next page button ?
 		short int unknown_4B2_iconId; // +4B2. Icon id for unselect button ?

@@ -40,9 +40,9 @@ namespace ROR_STRUCTURES_10C {
 
 	// Runs constructor on a STRUCT_SLP_INFO object so it refers to a specific SLP.
 	// This makes SLP bitmaps available for further treatments.
-	void InitSlpInfoFromDrs(ROR_STRUCTURES_10C::STRUCT_SLP_INFO *slpInfo, long int slpId) {
+	void InitSlpInfoFromDrs(ROR_STRUCTURES_10C::STRUCT_SLP_INFO *slpInfo, long int slpId, char *shpName) {
 		unsigned long int callAddr = 0x49F5F0; // constructor for STRUCT_SLP_INFO
-		char *shpName = ""; // unused when slpId is supplied
+		//char *shpName = ""; // unused when slpId is supplied
 		_asm {
 			PUSH slpId;
 			PUSH shpName;
@@ -50,7 +50,6 @@ namespace ROR_STRUCTURES_10C {
 			CALL callAddr;
 		}
 	}
-
 
 
 	// Loads / add a DRS file to internal data so its content (slp, wav, etc) is available like any other resources.

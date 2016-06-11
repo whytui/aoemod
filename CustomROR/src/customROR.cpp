@@ -260,6 +260,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x00494C7F:
 		this->InitPlayersCivInScenarioEditor(REG_values);
 		break;
+	case 0x004978B6:
+		this->FixUnsupportedRomanTileSetInEditorIcons(REG_values);
+		break;
 	case 0x004FAA36:
 		this->WriteF11PopInfoText(REG_values);
 		break;
@@ -2851,6 +2854,38 @@ void CustomRORInstance::InitPlayersCivInScenarioEditor(REG_BACKUP *REG_values) {
 }
 
 
+// From 0x4978AF
+void CustomRORInstance::FixUnsupportedRomanTileSetInEditorIcons(REG_BACKUP *REG_values) {
+	bool useStandardBehavior = false;
+	if (REG_values->fixesForGameEXECompatibilityAreDone) {
+		return;
+	}
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	if (useStandardBehavior) {
+		REG_values->EDI_val = 1; // This is exactly what original code does.
+		return;
+	}
+	// Custom code
+	ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditorUI = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN*)REG_values->ESI_val;
+	ror_api_assert(REG_values, scEditorUI && scEditorUI->IsCheckSumValid());
+	ror_api_assert(REG_values, REG_values->EBX_val == 4);
+	ror_api_assert(REG_values, REG_values->EDI_val == 4);
+	// Overload icon loading for roman tileset because ROR code is total crap (does not load the correct SLP, does not update the correct pointer in editor structure.
+	char shpName[] = "btnbldg4.shp";
+	ROR_STRUCTURES_10C::STRUCT_SLP_INFO *slpInfo = (ROR_STRUCTURES_10C::STRUCT_SLP_INFO *)AOEAlloc(0x20);
+	if (slpInfo) {
+		SetIntValueToRORStack(REG_values, 0x1D4, 1); // set local var = 1 (step for exception manager?)
+		SetIntValueToRORStack(REG_values, 0x10, (unsigned long int)slpInfo); // save pointer (although it seems to be unused)
+		long int slpId = CST_BLD_ICONS_ROMAN_TILESET_SLP_ID;
+		InitSlpInfoFromDrs(slpInfo, slpId, shpName);
+		REG_values->EAX_val = (unsigned long int)slpInfo;
+	} else {
+		REG_values->EAX_val = 0;
+	}
+	ChangeReturnAddress(REG_values, 0x497900); // After call to slpinfo constructor in ROR code...
+}
+
+
 // From 004FAA30
 void CustomRORInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
 	ROR_STRUCTURES_10C::STRUCT_UI_F11_POP_PANEL *f11panel = (ROR_STRUCTURES_10C::STRUCT_UI_F11_POP_PANEL *)REG_values->ESI_val;
@@ -3126,7 +3161,7 @@ void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 
 // From 004F8D87
 void CustomRORInstance::EntryPointOnBuildingInfoDisplay(REG_BACKUP *REG_values) {
-	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE *unitInfoZone = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE *)REG_values->EBP_val;
+	ROR_STRUCTURES_10C::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone = (ROR_STRUCTURES_10C::STRUCT_UI_UNIT_INFO_ZONE *)REG_values->EBP_val;
 	ror_api_assert(REG_values, unitInfoZone && unitInfoZone->IsCheckSumValid());
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;

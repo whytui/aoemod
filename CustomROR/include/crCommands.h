@@ -352,7 +352,7 @@ public:
 
 	// Adds custom attributes (armor) in buildings' unit info zone.
 	// currentLine is incremented if lines are added.
-	void DisplayCustomBuildingAttributesInUnitInfo(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine);
+	void DisplayCustomBuildingAttributesInUnitInfo(ROR_STRUCTURES_10C::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine);
 
 
 	// ----------------------------------

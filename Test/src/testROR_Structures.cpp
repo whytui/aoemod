@@ -238,7 +238,7 @@ static bool test_ror_structures() {
 	trs_assert(&scEditorUI, 0x500, &scEditorUI.btnMenu);
 	trs_assert(&scEditorUI, 0x664, &scEditorUI.unitListElementCount);
 
-	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE uiunitinfozone;
+	ROR_STRUCTURES_10C::STRUCT_UI_UNIT_INFO_ZONE uiunitinfozone;
 	trs_assert(&uiunitinfozone, 0x1E0, &uiunitinfozone.currentUnitPlayer);
 
 #endif

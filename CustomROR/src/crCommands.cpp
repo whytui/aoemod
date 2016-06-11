@@ -343,7 +343,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = GetUnitDefStruct(player, id);
 		if (player && player->IsCheckSumValid() && unitDef && unitDef->IsCheckSumValid() && gameSettings->isSinglePlayer) {
 			gameSettings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_EDITOR_SET_UNIT_LOCATION;
-			gameSettings->userSelectedDATID = id;
+			gameSettings->editorUserSelectedUnitDefId = id;
 			sprintf_s(outputBuffer, "Add %s. Right-click to quit add mode.", unitDef->ptrUnitName);
 		}
 	}
@@ -5253,7 +5253,7 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUC
 
 // Adds custom attributes (armor) in buildings' unit info zone.
 // currentLine is incremented if lines are added.
-void CustomRORCommand::DisplayCustomBuildingAttributesInUnitInfo(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine) {
+void CustomRORCommand::DisplayCustomBuildingAttributesInUnitInfo(ROR_STRUCTURES_10C::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine) {
 	if (!unitInfoZone || !unitInfoZone->IsCheckSumValid()) { return; }
 	ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *unit50 = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *)unitInfoZone->currentUnit;
 	if (!unit50 || !unit50->IsCheckSumValidForAUnitClass()) {
