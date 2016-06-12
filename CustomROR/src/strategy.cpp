@@ -845,7 +845,10 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 	// However inserted elements are not optimized for development speed and there is no priority other than dependencies.
 	for each (short int researchId in allResearchesForUnit)
 	{
-		if ((researchId >= 0) && (researchId < player->ptrResearchesStruct->ptrResearchDefInfo->researchCount)) {
+		STRUCT_PLAYER_RESEARCH_STATUS *status = player->GetResearchStatus(researchId);
+		if ((researchId >= 0) &&
+			(status != NULL) && (status->currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID) && // If already done, no need to add in strategy !
+			(researchId < player->ptrResearchesStruct->ptrResearchDefInfo->researchCount)) {
 			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
 			char nameBuffer[0x50]; // stratelem.name size is 0x40
 			char namePrefix[] = "CustomROR_";

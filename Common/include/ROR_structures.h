@@ -1803,6 +1803,7 @@ namespace ROR_STRUCTURES_10C
 			if ((researchId < 0) || (researchId >= this->ptrResearchesStruct->researchCount)) { return NULL; }
 			return &this->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
 		}
+		// Securely get research status for research id. Returns NULL if input is invalid.
 		STRUCT_PLAYER_RESEARCH_STATUS *GetResearchStatus(short int researchId) {
 			if (!this->ptrResearchesStruct || !this->ptrResearchesStruct->researchStatusesArray) { return NULL; }
 			if ((researchId < 0) || (researchId >= this->ptrResearchesStruct->researchCount)) { return NULL; }
