@@ -1,4 +1,6 @@
-// Localized strings
+// Localized strings for CustomROR plugin
+// English
+
 [42000] CustomROR title
 CustomROR
 

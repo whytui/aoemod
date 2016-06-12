@@ -43,7 +43,6 @@ using namespace ROR_STRUCTURES_10C;
 
 
 // Constants
-//static const long int customOptionMenuID = 0x20;
 static char *txtHumanPenalty = "Dislike penalty for human player";
 static char *txtGameSpeedFactor = "Game speed change factor*100 (125 for 1.25)";
 static char *txtAutoRebuildFarms = "Auto. rebuild farms";

@@ -21,6 +21,7 @@ Features:
 * Add up to 255 civilizations (total) + configure AI, names... (see customROR_civs.xml)
 * Most AI improvements (see below) are NOT applied in easy/easiest difficulty levels.
 * Load additional DRS files at ROR startup to use custom graphics/icons/sounds...
+* Load custom localization strings in text format to add (or override existing) strings from language(x).dll
 
 Strategy (AI):
 - Fix AI when loading saved games: some information is lost in standard game, especially if you save a game in the very first seconds.

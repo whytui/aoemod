@@ -7,7 +7,13 @@
 	<!-- *** Graphics -->
 	<!-- drsFile : you can add 0, 1 or n "drsFile" tags. folder=folder name under AOE root directory. filename=DRS file name.-->
 	<drsFile folder="customROR" filename="customROR.drs"/>
-	
+
+	<!-- *** Localization - language -->
+	<!-- languageTxtFile you can add 0, 1 or n tags. filename=relative path+filename of txt file containing localized strings to use in game 
+	String from such text files have priority on languagex.dll and language.dll files : you can add strings or modify existing ones.
+	-->
+	<languageTxtFile filename="CustomROR\CustomRORStrings.txt"/>
+
 	<!-- *** General -->
 	<!-- Bool 0/1 to hide/show customROR options entry in game menu -->
 	<showCustomRORMenu enable="1"/>

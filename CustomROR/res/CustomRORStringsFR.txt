@@ -1,4 +1,7 @@
-// Localized strings
+// Localized strings for CustomROR plugin
+// French
+// Screens are developed for english language, some label may not display well in other languages (if strings are too long)
+
 [42000] CustomROR title
 CustomROR
 
