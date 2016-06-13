@@ -448,7 +448,8 @@ namespace AOE_CONST_FUNC {
 		CST_TCH_SIEGECRAFT = 110,
 		CST_TCH_MEDECINE = 211,
 		CST_TCH_JIHAD = 23,
-		CST_TCH_MARTYRDOM = 212 // Enables priest sacrifice to convert immediately
+		CST_TCH_MARTYRDOM = 212, // Enables priest sacrifice to convert immediately
+		CST_TCH_BALLISTA_TOWER = 102
 	};
 
 
@@ -1299,7 +1300,8 @@ namespace AOE_CONST_FUNC {
 			(dat_id == CST_UNITID_FARMER)
 			);
 	}
-
+	// Returns true if the DAT_ID is a villager unit type
+	// Returns true too for fishing ships/trade ships
 	static bool IsVillager_includingShips(unsigned short int dat_id) {
 		return IsVillager(dat_id) ||
 			(dat_id == CST_UNITID_FISHING_BOAT) ||

@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <string.h>
 #include <vector>
+#include <set>
 #include <ROR_structures.h>
 #include <AOE_const_functional.h>
 #include "crCommon.h"
@@ -23,8 +24,6 @@ bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, sh
 
 // Returns 1st element position (>=0) if (at least) 1 matching element exists in strategy. -1=no such element
 long int FindElementPosInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID);
-
-
 
 // This fixes dynamically added houses, boats + boat techs, docks, setgatherpercentage
 void FixAutoBuildStrategyElements(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
@@ -81,6 +80,9 @@ bool MoveStrategyElement_after_ifWrongOrder(ROR_STRUCTURES_10C::STRUCT_BUILD_AI 
 
 // Add units if maximum population is >50
 void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+
+// Add relevant researches to strategy for current strategy's military units
+void AddUsefulMilitaryTechsToStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 // Returns true if current strategy status allows triggering a wonder construction
 bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai);

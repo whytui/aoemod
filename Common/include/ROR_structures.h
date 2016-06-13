@@ -1979,7 +1979,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_989; // can set speed > 16 ?
 		char playerGameVersion[0x08]; // 0-127 ; 0="", 1="1.0", 2="1.0a", etc (array offset in 0-7)
 		char unknown_992;
-		char difficultyLevel; // +993. 0=hardest, 1=hard, 2, 3, 4=easiest. Set in 41BBC0
+		AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL difficultyLevel; // +993. 0=hardest, 1=hard, 2, 3, 4=easiest. Set in 41BBC0
 		char teamNumbers[0x08]; // player 1-8 (array offset in 0-7). Values: 1=noTeam, >1=teamId.
 		char unknown_99C;
 		// 0x9A0

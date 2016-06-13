@@ -491,14 +491,15 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		long int playerId = 2;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
-		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_LEGION, false, NULL);
+		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, false, NULL);
 	}
 	if (strcmp(command, "a") == 0) {
 		long int playerId = 2;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		
-		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_LEGION, true, NULL);
+		AddUsefulMilitaryTechsToStrategy(player);
+		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, true, NULL);
 		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_ARMORED_ELEPHANT, true, NULL);
 
 		std::vector<short int> v;
@@ -1271,6 +1272,10 @@ void CustomRORCommand::ManageTacAIUpdate(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 	// Only for the FIRST tactical update (last one's time is 0): one-shot initializations
 	if (tacAI->lastTacticalUpdateTime <= 0) {
 		if (applyAIFix) {
+			if (gameSettings->difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD) {
+				// Search for techs that can be added to strategy and would improve my military units
+				AddUsefulMilitaryTechsToStrategy(player);
+			}
 			AdaptStrategyToMaxPopulation(player);
 		}
 	}
@@ -1293,7 +1298,7 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 	if (!this->IsImproveAIEnabled(buildAI->commonAIObject.playerId)) { return; }
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	bool difficultyIsEasy = (settings->difficultyLevel >= 3); // True for easy / easiest
+	bool difficultyIsEasy = (settings->difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY); // True for easy / easiest
 	if (difficultyIsEasy) { return; } // Do not improve strategy in easy levels.
 
 	assert(buildAI != NULL);
@@ -1557,7 +1562,7 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 		numberOfAddedResearches++;
 	}
 	// Add a secondary town center when there is only one. It's a good security.
-	if ((townCentersCount == 1) && (settings->difficultyLevel <= 1)) { // Hard/hardest only
+	if ((townCentersCount == 1) && (settings->difficultyLevel <= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_HARD)) { // Hard/hardest only
 		AddUnitInStrategy_before(buildAI, optionalsLocation, -1, -1, AIUCBuilding, CST_UNITID_FORUM, player, "customROR-BackupTC");
 		townCentersCount++;
 	}
@@ -1581,7 +1586,7 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(ROR_STRUCTURES_10C::STRUCT_T
 	}
 
 	// Easy difficulty levels / MP games: default behavior too
-	if (settings->isMultiplayer || (settings->difficultyLevel >= 3)) { return false; } // use default
+	if (settings->isMultiplayer || (settings->difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY)) { return false; } // use default
 
 	assert(stratElem->elementType == TAIUnitClass::AIUCBuilding);
 	long int villagerTotalCount = tacAI->allVillagers.usedElements;
@@ -1614,7 +1619,7 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(ROR_STRUCTURES_10C::STRUCT_T
 		myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_GOLD] = (float)-tacAI->SNNumber[SN_NUMBERS::SNMinimumGold];
 		// Apply some hardcoded minimum requirements (for hard levels - excludes "medium")
 		// Do not use hardcoded values for campaign / scenario : as we're using SN numbers, if the scenario if correctly designed, it will still work normally.
-		if ((settings->difficultyLevel < 2) && (!settings->isCampaign) && (!settings->isScenario)) {
+		if ((settings->difficultyLevel < AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_MEDIUM) && (!settings->isCampaign) && (!settings->isScenario)) {
 			// I know that wonders don't require food, be let's remain generic... 
 			// Moreover, that can prevent from starting a wonder when food is very low, which is a healthy restriction.
 			if (myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_FOOD] > -300) {
@@ -2918,7 +2923,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 		if (isInGame && isBuilding && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() &&
 			// Not fixed in easiest... But as it is a technical fix, we apply it even if "improve AI" is not enabled.
 			// Note that it has a strong (positive) impact on AI farming + the fact that granary/SP construction is no longer blocked for no valid reason
-			settings->difficultyLevel < 4) {
+			settings->difficultyLevel < AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASIEST) {
 			ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
 			assert(infAI->IsCheckSumValid());
 			if ((infAI->buildHistoryArray != NULL) && (infAI->buildHistoryArraySize > 0)) {
@@ -3146,7 +3151,7 @@ bool CustomRORCommand::ShouldChangeTarget(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVI
 		return true; // AI improvement is disabled: let ROR original code do its normal behavior.
 	}
 	// Do not improve in easy levels
-	if (GetGameSettingsPtr() && (GetGameSettingsPtr()->difficultyLevel >= 3)) { return true; }
+	if (GetGameSettingsPtr() && (GetGameSettingsPtr()->difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY)) { return true; }
 
 	// A target is mine or allied
 	if (actorUnit->ptrStructPlayer->ptrDiplomacyStances[oldTargetUnit->ptrStructPlayer->playerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY) {
@@ -5364,12 +5369,12 @@ void CustomRORCommand::FixCityPlanFarmPlacement(ROR_STRUCTURES_10C::STRUCT_UNIT_
 	}
 
 	// Improved farming is so good for AI we must apply this carefully, according to AI level, so AI doesn't get too strong in easy levels.
-	if (difficultyLevel >= 3) {
+	if (difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY) {
 		return; // Easy (3) and easiest (4): use default behavior (exit and use defaults)
 	}
 
 	// Medium difficulty : just exclude some buildings (hard to find a compromise between no fix at all and very important fix)
-	if (difficultyLevel == 2) {
+	if (difficultyLevel == AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_MEDIUM) {
 		// Do not add "like" value near storage pit because it disturbs other gatherers
 		// Do not add "like" value near towers because they almost always are far from TC
 		if ((unitDef_base->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_STORAGE_PIT) ||

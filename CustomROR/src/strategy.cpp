@@ -1,5 +1,66 @@
 #include "../include/strategy.h"
 
+struct StrategyUnitInfo {
+	StrategyUnitInfo(short int unitDefId) {
+		this->unitDefId = unitDefId;
+		this->countWithUnlimitedRetrains = 0;
+		this->countWithLimitedRetrains = 0;
+		this->totalCount = 0;
+	}
+	short int unitDefId;
+	int countWithUnlimitedRetrains;
+	int countWithLimitedRetrains;
+	int totalCount;
+};
+
+class StrategyUnitsInfo {
+public:
+	~StrategyUnitsInfo() {
+		for each (StrategyUnitInfo *unitInfo in this->unitsInfo)
+		{
+			delete unitInfo;
+		}
+		this->unitsInfo.clear();
+	}
+	StrategyUnitInfo *AddUnitInfo(short int unitDefId) {
+		StrategyUnitInfo *unitInfo = new StrategyUnitInfo(unitDefId);
+		this->unitsInfo.push_back(unitInfo);
+		return unitInfo;
+	}
+	StrategyUnitInfo *GetUnitInfo(short int unitDefId) {
+		for each (StrategyUnitInfo *unitInfo in this->unitsInfo)
+		{
+			if (unitInfo->unitDefId == unitDefId) { return unitInfo; }
+		}
+		return NULL;
+	}
+	StrategyUnitInfo *GetOrAddUnitInfo(short int unitDefId) {
+		StrategyUnitInfo *u = GetUnitInfo(unitDefId);
+		if (u) { return u; }
+		return this->AddUnitInfo(unitDefId);
+	}
+	// collectMilitaryUnits: if true, collect only military units, otherwise, collect only villager units
+	void CollectUnitInfosFromStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, bool collectMilitaryUnits) {
+		if (!buildAI || !buildAI->IsCheckSumValid()) { return; }
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &buildAI->fakeFirstStrategyElement;
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentElem = fakeFirstElem->next;
+		while (currentElem && (currentElem != fakeFirstElem)) {
+			bool isVillager = IsVillager_includingShips((unsigned short int)currentElem->unitDAT_ID);
+			if ((currentElem->elementType == AIUCLivingUnit) &&
+				((isVillager && !collectMilitaryUnits) || (!isVillager && collectMilitaryUnits))) {
+				StrategyUnitInfo *uInfo = this->GetOrAddUnitInfo((short int)currentElem->unitDAT_ID);
+				uInfo->totalCount++;
+				if (currentElem->retrains == -1) {
+					uInfo->countWithUnlimitedRetrains++;
+				} else {
+					uInfo->countWithLimitedRetrains++;
+				}
+			}
+			currentElem = currentElem->next;
+		}
+	}
+	std::vector<StrategyUnitInfo*> unitsInfo;
+};
 
 
 // Returns true if the research is present in tech tree but not researched yet (nor being researched)
@@ -11,6 +72,7 @@ bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, sh
 
 
 // Returns 1st element position (>=0) if (at least) 1 matching element exists in strategy. -1=no such element
+// WARNING: AIUCTech and AIUCCritical are 2 different filter values ! Searching for researches won't find tool age/bronze/etc !
 long int FindElementPosInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID) {
 	if (!player) { return -1; }
 	ROR_STRUCTURES_10C::STRUCT_AI *mainAI = player->GetAIStruct();
@@ -29,8 +91,6 @@ long int FindElementPosInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE
 	}
 	return -1;
 }
-
-
 
 
 // This fixes dynamically added houses, boats + boat techs, docks, setgatherpercentage
@@ -687,6 +747,36 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 }
 
 
+void AddUsefulMilitaryTechsToStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) {
+		return;
+	}
+	ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI = &player->ptrAIStruct->structBuildAI;
+	StrategyUnitsInfo unitsInfoObj;
+	unitsInfoObj.CollectUnitInfosFromStrategy(buildAI, true);
+	
+	for each (StrategyUnitInfo *unitInfo in unitsInfoObj.unitsInfo)
+	{
+		if (unitInfo->countWithUnlimitedRetrains > 4) {
+			int addedCount = AddResearchesInStrategyForUnit(player->ptrAIStruct, unitInfo->unitDefId, true, NULL);
+			if (addedCount > 0) {
+				std::string msg = "Added ";
+				msg += std::to_string(addedCount);
+				msg += " researches/requirements to improve ";
+				msg += player->playerName_length16max;
+				msg += "'s strategy (target=";
+				msg += std::to_string(unitInfo->unitDefId);
+				msg += ")";
+#ifdef _DEBUG
+				traceMessageHandler.WriteMessage(msg);
+#else
+				traceMessageHandler.WriteMessageNoNotification(msg);
+#endif
+			}
+		}
+	}
+}
+
 // Returns true if current strategy status allows triggering a wonder construction
 bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 	if (!ai || !ai->IsCheckSumValid()) { return false; }
@@ -856,23 +946,35 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 
 			if (ResearchHasOptionalRequirements(resDef)) {
 				// Handle optional requirements. This DOES have importance. eg. in DM, yamato build a temple just to go iron !
-				std::set<short int> optionalResearches;
+				std::set<short int> optionalResearches; // List of researches we *can* add to satisfy the requirements
 				int actualRequiredResearchCount = 0; // total number of required researches (other than -1)
 				int requiredResearchAlreadyInStrategy = 0; // number of "optionals" that are already present in strategy
 				// Collect information on requirements
 				for (int i = 0; i < 4; i++) {
 					if (resDef->requiredResearchId[i] != -1) {
 						actualRequiredResearchCount++;
-						if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, resDef->requiredResearchId[i]) == -1) {
+						ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = FindBuildingDefThatEnablesResearch(player, resDef->requiredResearchId[i]);
+						bool foundElementInStrategy = false;
+						if (unitDefBuilding) {
+							assert(unitDefBuilding->IsCheckSumValid());
+							if (unitDefBuilding->IsCheckSumValid()) {
+								foundElementInStrategy = (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) != -1);
+							}
+						} else {
+							foundElementInStrategy = (FindElementPosInStrategy(player, TAIUnitClass::AIUCTech, resDef->requiredResearchId[i]) != -1) ||
+								(FindElementPosInStrategy(player, TAIUnitClass::AIUCCritical, resDef->requiredResearchId[i]) != -1);
+						}
+
+						if (!foundElementInStrategy) {
 							optionalResearches.insert(resDef->requiredResearchId[i]);
 						} else {
 							if (std::count(allResearchesForUnit.begin(), allResearchesForUnit.end(), resDef->requiredResearchId[i]) > 0) {
 								// Not in strategy yet, but will be added soon. We have a dependency issue here :-/
 								// This case should not occur if dependencies are correct.
-								traceMessageHandler.WriteMessage("Warning: a research dependency issue has been found");
-							} else {
-								requiredResearchAlreadyInStrategy++;
+								//traceMessageHandler.WriteMessage("Warning: a research dependency issue has been found");
+								// But this actually occurs because of "optional" dependencies (like this one) => they are not treated in good order
 							}
+							requiredResearchAlreadyInStrategy++;
 						}
 					}
 				}
@@ -990,7 +1092,8 @@ int AddStrategyElementForResearch(ROR_STRUCTURES_10C::STRUCT_PLAYER *player,
 		}
 
 		// Add the research itself
-		if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) {
+		if ((FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) &&
+			(FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, researchId) == -1)){
 			strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, resDef->researchName);
 			if (AddUnitInStrategy_before(&ai->structBuildAI, nextElement, -1, resDef->researchLocation,
 				TAIUnitClass::AIUCTech, researchId, player, nameBuffer)) {
