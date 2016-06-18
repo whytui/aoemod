@@ -2703,7 +2703,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 		} else {
 			if (parentInfo) { // double-check ;)  Here target no longer exists: remove auto-target
 				parentInfo->ResetSpawnAutoTargetInfo();
-				this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(parentInfo->spawnTargetUnitId);
+				this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(parentInfo->unitId);
 			}
 		}
 	}
@@ -4705,8 +4705,31 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	// TO DO: manage isBusy for living unit ? (not required as long as we don't customize buttons for living units...)
 	ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *unitAsBuilding = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *)unit;
 	bool isBusy = false;
+	// Fix queue numbers (otherwise, previous selected building's numbers will still display - are are irrelevant here)
+	int buttonWithQueueNumber = -1;
+	int queueNumberToDisplay = 0;
 	if (unitAsBuilding && unitAsBuilding->IsCheckSumValid()) {
 		isBusy = (unitAsBuilding->isCurrentlyTrainingUnit != 0);
+		queueNumberToDisplay = unitAsBuilding->ptrHumanTrainQueueInformation->unitCount;
+		if (unitAsBuilding->ptrHumanTrainQueueInformation && (queueNumberToDisplay > 0)) {
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *queuedUnitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) player->GetUnitDefBase(unitAsBuilding->ptrHumanTrainQueueInformation->DATID);
+			if (queuedUnitDefBase && queuedUnitDefBase->IsCheckSumValidForAUnitClass()) {
+				buttonWithQueueNumber = GetButtonInternalIndexFromDatBtnId(queuedUnitDefBase->trainButton);
+			}
+		}
+	}
+	for (int currentBtnId = 0; currentBtnId < 12; currentBtnId++) {
+		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *curBtn = gameMainUI->unitCommandButtons[currentBtnId];
+		if (curBtn && curBtn->IsCheckSumValid()) {
+			if (currentBtnId == buttonWithQueueNumber) {
+				curBtn->showNumber = 1;
+				curBtn->numberToDisplay = queueNumberToDisplay;
+			} else {
+				curBtn->showNumber = 0;
+				curBtn->numberToDisplay = 0;
+			}
+		}
+
 	}
 	ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *currentAction = GetUnitAction(unit);
 	// For buildings, currentAction is Non-NULL when researching tech, when AI-triggered "train unit", but NULL for human-triggered "train unit"
