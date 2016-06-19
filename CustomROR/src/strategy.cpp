@@ -747,6 +747,7 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 }
 
 
+// Add relevant researches to strategy for current strategy's military units
 void AddUsefulMilitaryTechsToStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) {
 		return;
@@ -757,8 +758,14 @@ void AddUsefulMilitaryTechsToStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player)
 	
 	for each (StrategyUnitInfo *unitInfo in unitsInfoObj.unitsInfo)
 	{
+		bool notAllTechs = false;
 		if (unitInfo->countWithUnlimitedRetrains > 4) {
-			int addedCount = AddResearchesInStrategyForUnit(player->ptrAIStruct, unitInfo->unitDefId, true, NULL);
+			// Dirty trick until better algorithms are written: dont add all upgrades to intermediate specialized units (camels, slinger)
+			notAllTechs = ((unitInfo->unitDefId == CST_UNITID_CAMEL) || (unitInfo->unitDefId == CST_UNITID_SLINGER));
+			// Dirty trick until better algorithms are written: dont add all upgrades to weak units (not necessary as we already protect thanks to "retrains" number in strategy)
+#pragma message("Temporary: does not support custom units - TODO: remove call to GetUnitWeight")
+			notAllTechs = notAllTechs || (GetUnitWeight(unitInfo->unitDefId) < 20);
+			int addedCount = AddResearchesInStrategyForUnit(player->ptrAIStruct, unitInfo->unitDefId, !notAllTechs, NULL);
 			if (addedCount > 0) {
 				std::string msg = "Added ";
 				msg += std::to_string(addedCount);

@@ -500,6 +500,9 @@ short int GetDAT_ID2(ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **defUnitTable, short i
 }
 
 
+// Returns a weight for a military unit. Scale is totally subjective ! Just a tool for algorithms...
+// Super units have a high weight.
+// Weak unit have a low weight
 int GetUnitWeight(short int DAT_ID) {
 	switch (DAT_ID) {
 		// Super units

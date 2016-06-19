@@ -4710,11 +4710,13 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	int queueNumberToDisplay = 0;
 	if (unitAsBuilding && unitAsBuilding->IsCheckSumValid()) {
 		isBusy = (unitAsBuilding->isCurrentlyTrainingUnit != 0);
-		queueNumberToDisplay = unitAsBuilding->ptrHumanTrainQueueInformation->unitCount;
-		if (unitAsBuilding->ptrHumanTrainQueueInformation && (queueNumberToDisplay > 0)) {
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *queuedUnitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) player->GetUnitDefBase(unitAsBuilding->ptrHumanTrainQueueInformation->DATID);
-			if (queuedUnitDefBase && queuedUnitDefBase->IsCheckSumValidForAUnitClass()) {
-				buttonWithQueueNumber = GetButtonInternalIndexFromDatBtnId(queuedUnitDefBase->trainButton);
+		if (unitAsBuilding->ptrHumanTrainQueueInformation) {
+			queueNumberToDisplay = unitAsBuilding->ptrHumanTrainQueueInformation->unitCount;
+			if (queueNumberToDisplay > 0) {
+				ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *queuedUnitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) player->GetUnitDefBase(unitAsBuilding->ptrHumanTrainQueueInformation->DATID);
+				if (queuedUnitDefBase && queuedUnitDefBase->IsCheckSumValidForAUnitClass()) {
+					buttonWithQueueNumber = GetButtonInternalIndexFromDatBtnId(queuedUnitDefBase->trainButton);
+				}
 			}
 		}
 	}
