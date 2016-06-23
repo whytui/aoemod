@@ -54,7 +54,8 @@ private:
 	void InitData();
 	void InitResolution_b();
 	void InitResolution_c();
-	void InitWindowedMode();
+	void InitWindowedMode_b();
+	void InitWindowedMode_c();
 	void InitTechFixes_10b();
 	void InitTechFixes_10c();
 	void InitOptions_10b();
