@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <gameVersion.h>
+
 /* 
  * This file contains various offsets/values that are specific to 1.0c ROR executable
 */
@@ -39,7 +41,15 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7BFAC4; // type= STRUCT_DRS_FILE_LINK*
 
 	// Game executable interface procedure address (ROR_API call)
+#if GAMEVERSION == GAMEVERSIONID_ROR10b
+	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x419C43;
+	static const unsigned long int AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS = 0x419C5B;
+#endif
+#if GAMEVERSION == GAMEVERSIONID_ROR10c
 	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x419574;
+	static const unsigned long int AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS = 0x443713;
+#endif
+
 };
 
 

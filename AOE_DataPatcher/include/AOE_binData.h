@@ -61,7 +61,8 @@ private:
 	void InitOptions_10c();
 	void InitSelectedUnits();
 	void InitObsoletes();
-	void InitROR_API();
+	void InitROR_API_10b();
+	void InitROR_API_10c();
 	void InitManageAI();
 };
 

@@ -94,6 +94,7 @@
     <ClInclude Include="include\AOE_offsets_10c.h" />
     <ClInclude Include="include\AOE_SN_numbers.h" />
     <ClInclude Include="include\customResolution.h" />
+    <ClInclude Include="include\gameVersion.h" />
     <ClInclude Include="include\ROR_structures_drs.h" />
     <ClInclude Include="include\mystrings.h" />
     <ClInclude Include="include\pointers.h" />

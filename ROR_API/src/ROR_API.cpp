@@ -95,12 +95,13 @@ extern "C"
 // In particular, currentREG_values->return_address let you know what portion of code just called the API.
 // WARNING: if you modify currentREG_values values, this will impact the original process. DO NOT do it unless you have a good reason.
 void DispatchToCustomCode() {
-	if ((REG_values[global_conf.currentCalls - 1].return_address < 0x401000) || (REG_values[global_conf.currentCalls - 1].return_address > 0x536FFF)) {
+	if ((REG_values[global_conf.currentCalls - 1].return_address < AOE_OFFSETS_10C::ADDR_EXE_MIN) ||
+		(REG_values[global_conf.currentCalls - 1].return_address > AOE_OFFSETS_10C::ADDR_EXE_MAX)) {
 		return; // invalid address. Bad calling information - bad call stack.
 	}
 
 	switch (currentREG_values[global_conf.currentCalls - 1]->return_address) {
-	case 0x443713:
+	case AOE_OFFSETS_10C::AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS:
 		MakeInits();
 		break;
 	default:

@@ -1,4 +1,6 @@
 #pragma once
+#include <gameVersion.h>
+#include <AOE_offsets_10c.h>
 #include "ROR_API_pub.h"
 #include "../include/ConfigManager.h"
 
@@ -15,4 +17,3 @@ REG_BACKUP *currentREG_values[MAX_AUTHORIZED_RECURSIVE_CALLS];
 void _DispatchToCustomCode_internal(char *ptrCaller1, long int stackEAX, char *ptrCaller2);
 void MakeInits();
 void DispatchToCustomCode();
-
