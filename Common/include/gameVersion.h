@@ -16,7 +16,7 @@ This file allows to define with which game version CustomROR will be compatible.
 #define GAMEVERSIONID_ROR10c 11
 
 
-// *** Choose game version to support ***
+// *** Choose game version to support (see numeric constants above) ***
 #define GAMEVERSION GAMEVERSIONID_ROR10b
 
 
