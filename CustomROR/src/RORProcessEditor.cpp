@@ -48,9 +48,10 @@ int RORProcessEditor::ReadSeqVariable(BinarySeqDefinition *seq, int seqIndex, vo
 	}
 	unsigned char *addr = (unsigned char *)AOE_FileOffsetToExeAddr(seq->GetSeqOffset());
 	// For read operations, we can access memory normally (even TEXT memory zone).
-	errno_t err = memcpy_s(destBuf, seq->GetVarSize(seqIndex), addr + seq->GetVarRelativeOffset(seqIndex), 1);
+	int size = seq->GetVarSize(seqIndex);
+	errno_t err = memcpy_s(destBuf, size, addr + seq->GetVarRelativeOffset(seqIndex), size);
 	if (!err) {
-		return seq->GetVarSize(seqIndex);
+		return size;
 	}
 	return 0;
 }

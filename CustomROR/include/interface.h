@@ -6,7 +6,7 @@
 #include <Windows.h>
 #include <AOE_offsets_10c.h>
 #include <customResolution.h>
-
+#include "crPatcher.h"
 
 static const char *CST_CUSTOMROR_DRS_FILENAME = "customROR.drs";
 static const char *CST_CUSTOMROR_FOLDER = "customROR\\";

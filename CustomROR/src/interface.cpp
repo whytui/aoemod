@@ -15,28 +15,17 @@ void ChangeItfDRS_file() {
 
 	// Check if a custom resolution is enabled in game executable
 	DWORD processId = GetCurrentProcessId();
-	char bufXVar[5], bufYVar[5];
+	long int x, y = 0;
 	if (processId == 0) {
 		go_on = false;
 	} else {
-#pragma message("TODO: use GetBinaryChangeVarValue ?")
-		// We can't read our own process' constants memory. Connect through Windows API !
-		HANDLE hndl = OpenProcess(PROCESS_VM_READ, false, processId);
-		SIZE_T sizeRead;
-		BOOL readProcessSuccess = ReadProcessMemory(hndl, (void *)0x4166F6, bufXVar, 2, &sizeRead);
-		go_on = (readProcessSuccess != 0);
-		if (go_on) {
-			readProcessSuccess = ReadProcessMemory(hndl, (void *)0x416758, bufYVar, 2, &sizeRead);
-			go_on = (readProcessSuccess != 0);
-		}
-		CloseHandle(hndl);
+		x = GetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_RESOLUTION, "HSize1", 0);
+		y = GetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_RESOLUTION, "VSize1", 0);
 	}
 	if (!go_on && hasLog) {
 		fprintf_s(fileLog, "Could not check if game uses a custom resolution. Game will use interfac.drs file.\n");
 	}
 	if (go_on) {
-		short int x = *(short int *)bufXVar;
-		short int y = *(short int *)bufYVar;
 		go_on = ((x != 0x400) || (y != 0x300)); // 1024*768 is default (max) resolution
 		if (!go_on && hasLog) {
 			fprintf_s(fileLog, "The game is configured for standard resolution and will use interfac.drs file.\n");
