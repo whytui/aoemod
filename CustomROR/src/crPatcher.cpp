@@ -3,8 +3,8 @@
 bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 	try {
 		RORProcessEditor pe;
-		aoeBinData.SetCurrentVersion(AOE_FILE_VERSION::AOE_VERSION_1_0C);
-		BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(AOE_FILE_VERSION::AOE_VERSION_1_0C, BINSEQ_CATEGORIES::BC_ROR_API);
+		aoeBinData.SetCurrentVersion(GetBuildVersion());
+		BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(GetBuildVersion(), BINSEQ_CATEGORIES::BC_ROR_API);
 		if (!seqDefSet) {
 			return true;
 		}
@@ -95,10 +95,10 @@ bool SetMaxPopulationGetterInSPGames(long int newMaxPopulationValue) {
 bool IsBinaryChangeOn(BINSEQ_CATEGORIES binCategory, std::string sequenceName) {
 	try {
 		RORProcessEditor pe;
-		aoeBinData.SetCurrentVersion(AOE_FILE_VERSION::AOE_VERSION_1_0C);
-		BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(AOE_FILE_VERSION::AOE_VERSION_1_0C, BINSEQ_CATEGORIES::BC_ROR_API);
+		aoeBinData.SetCurrentVersion(GetBuildVersion());
+		BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(GetBuildVersion(), binCategory);
 		if (!seqDefSet) {
-			return true;
+			return false;
 		}
 		int seqDefIndex = seqDefSet->FindSeqDefinitionIndex(widen(sequenceName)); // throws if not found
 		BinarySeqDefinition *binSeq = seqDefSet->GetBinSeqDefinition(seqDefIndex);
@@ -111,5 +111,40 @@ bool IsBinaryChangeOn(BINSEQ_CATEGORIES binCategory, std::string sequenceName) {
 	catch (std::exception e) {
 		traceMessageHandler.WriteMessage(e.what());
 		return false;
+	}
+}
+
+long int GetBinaryChangeVarValue(BINSEQ_CATEGORIES binCategory, std::string sequenceName, int seqIndex) {
+	try {
+		RORProcessEditor pe;
+		aoeBinData.SetCurrentVersion(GetBuildVersion());
+		BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(GetBuildVersion(), binCategory);
+		if (!seqDefSet) {
+			return 0;
+		}
+		int seqDefIndex = seqDefSet->FindSeqDefinitionIndex(widen(sequenceName)); // throws if not found
+		BinarySeqDefinition *binSeq = seqDefSet->GetBinSeqDefinition(seqDefIndex);
+		if (!binSeq) { return 0; }
+
+		switch (binSeq->GetVarSize(seqIndex)) {
+		case 1:
+			char c;
+			pe.GetVarValue(binSeq, seqIndex, &c);
+			return (long int)c;
+		case 2:
+			short int si;
+			pe.GetVarValue(binSeq, seqIndex, &si);
+			return (long int)si;
+		case 4:
+			long int li;
+			pe.GetVarValue(binSeq, seqIndex, &li);
+			return li;
+		default:
+			return 0;
+		}
+	}
+	catch (std::exception e) {
+		traceMessageHandler.WriteMessage(e.what());
+		return 0;
 	}
 }

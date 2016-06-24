@@ -19,7 +19,8 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	}
 
 	switch (REG_values->return_address) {
-	case 0x443713:
+	//case 0x443713:
+	case AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS:
 		// Inits
 		this->OneShotInit();
 		break;

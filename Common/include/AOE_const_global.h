@@ -1,19 +1,10 @@
 #include <tchar.h>
 #include <string>
+#include <gameVersion.h>
 
 #pragma once
 
-enum AOE_FILE_VERSION {
-	AOE_INVALID_FILE = 0,
-	AOE_VERSION_AOE1_0A, // AOE first release
-	AOE_VERSION_AOE1_0B, // AOE version delivered with ROR extension
-	AOE_VERSION_AOE1_0C, // AOE with patch 1.0c
-	AOE_VERSION_1_0B, // ROR first release
-	AOE_VERSION_1_0C, // ROR with patch 1.0c
-	AOE_VERSION_UPATCH_BETA, // ROR
-	AOE_VERSION_UPATCH_1_1_HD, // ROR
-	AOE_VERSION_COUNT
-};
+
 const static std::wstring AOEFileVersionLabel[AOE_VERSION_COUNT] = { _T("Invalid"), _T("AOE1.0a"), _T("AOE1.0b"), _T("AOE1.0c"),
 _T("1.0b"), _T("1.0c"), _T("UPatch Beta"), _T("UPatch 1.1HD") };
 #define GET_AOE_FILE_VERSION_LABEL(n) AOEFileVersionLabel[n]

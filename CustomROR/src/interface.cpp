@@ -19,6 +19,7 @@ void ChangeItfDRS_file() {
 	if (processId == 0) {
 		go_on = false;
 	} else {
+#pragma message("TODO: use GetBinaryChangeVarValue ?")
 		// We can't read our own process' constants memory. Connect through Windows API !
 		HANDLE hndl = OpenProcess(PROCESS_VM_READ, false, processId);
 		SIZE_T sizeRead;

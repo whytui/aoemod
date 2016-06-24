@@ -72,8 +72,8 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A6858;
 #endif
 #ifdef GAMEVERSION_ROR10c
-	static const unsigned long int ADDR_EXE= 0x1000;
-	//static const unsigned long int ADDR_EXE_CODE_MAX = ;
+	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
+	//static const unsigned long int ADDR_FILE_EXE_MAX = ;
 	static const unsigned long int ADDR_EXE_MIN = 0x401000;
 	static const unsigned long int ADDR_EXE_MAX = 0x536FFF;
 	static const unsigned long int ADDR_THIS_CODE_MIN = 0x537000;
@@ -107,6 +107,14 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7BFAC4; // type= STRUCT_DRS_FILE_LINK*
 
 	// Game executable interface procedure address (ROR_API call)
+#ifdef GAMEVERSION_AOE10b
+	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x4E9003;
+	static const unsigned long int AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS = 0x4E901B; // to verify
+#endif
+#ifdef GAMEVERSION_AOE10c
+	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x00419241;
+	static const unsigned long int AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS = 0x00419259; // to verify
+#endif
 #ifdef GAMEVERSION_ROR10b
 	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x419C43;
 	static const unsigned long int AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS = 0x419C5B;
@@ -129,27 +137,26 @@ static bool isAValidRORChecksum(unsigned long int checksum){
 // Returns 0 if offset is invalid.
 static unsigned long int AOE_FileOffsetToExeAddr(unsigned long int fileOffset) {
 	if (fileOffset < AOE_OFFSETS_10C::ADDR_FILE_EXE_MIN) { return 0; }
-	unsigned long int result = fileOffset;
 #if defined(GAMEVERSION_AOE10b) || defined(GAMEVERSION_ROR10b)
 	if (fileOffset < AOE_OFFSETS_10C::ADDR_FILE_EXE_MAX) {
-		result += 0x400c00;
+		return fileOffset + 0x400c00;
 	}
 	if (fileOffset < (AOE_OFFSETS_10C::ADDR_THIS_CODE_MAX - 0x401a00)) {
-		result += 0x401a00;
+		return fileOffset + 0x401a00;
 	}
 	if (fileOffset < (AOE_OFFSETS_10C::ADDR_RDATA_MAX - 0x401E00)) {
-		result += 0x401E00;
+		return fileOffset + 0x401E00;
 	}
 	if (fileOffset < (AOE_OFFSETS_10C::ADDR_DATA_MAX - 0x402600)) {
-		result += 0x402600;
+		return fileOffset + 0x402600;
 	}
 #endif
 #if defined(GAMEVERSION_AOE10c) || defined(GAMEVERSION_ROR10c)
 	if (fileOffset < (AOE_OFFSETS_10C::ADDR_DATA_MAX - 0x400000)) {
-		result += 0x400000;
+		return fileOffset + 0x400000;
 	}
 #endif
-	return result;
+	return 0;
 }
 
 // Returns 0 if address is invalid.
@@ -158,7 +165,7 @@ static unsigned long int AOE_ExeAddrToFileOffset(unsigned long int ExeAddr) {
 	if ((ExeAddr < AOE_OFFSETS_10C::ADDR_EXE_MIN) || (ExeAddr > AOE_OFFSETS_10C::ADDR_EXE_MAX)) {
 		return 0;
 	}
-#ifdef GAMEVERSION_ROR10b
+#if defined(GAMEVERSION_AOE10b) || defined(GAMEVERSION_ROR10b)
 	return ExeAddr - 0x400C00;
 #endif
 #if defined(GAMEVERSION_AOE10c) || defined(GAMEVERSION_ROR10c)

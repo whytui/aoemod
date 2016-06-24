@@ -207,24 +207,13 @@ void CustomRORCommand::OneShotInit() {
 
 // Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 void CustomRORCommand::ReadIfCustomSelectedUnitsMemoryZoneIsUsed() {
-	this->crInfo->hasCustomSelectedUnitsMemory = false;
-	char *gameMemPtr = (char *)0x0050A3D4;
-	char alloc1[] = { 0x68, 0x5C, 0x08, 0x00, 0x00 };
-	if (memcmp(gameMemPtr, alloc1, sizeof(alloc1))) { // memcmp ==0 means different from standard => using custom memory zone for selected units
-		this->crInfo->hasCustomSelectedUnitsMemory = true;
-	}
 	// TO DO: check all sequences ?
+	this->crInfo->hasCustomSelectedUnitsMemory = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_SELECTED_UNITS, "InitBuffer1");
 }
 
 // Reads game executable to determine if ManageAI is installed (does game use player->unused_customAIFlag ?)
 void CustomRORCommand::ReadIfManageAIIsOn() {
-	this->crInfo->hasManageAIFeatureON = false;
-	char *gameMemPtr = (char *)0x004EFBF3;
-	unsigned char Init_is_computer_for_AI_1[] = { 0x8A, 0x44, 0x24, 0x38, 0x57 };
-	if (memcmp(gameMemPtr, Init_is_computer_for_AI_1, sizeof(Init_is_computer_for_AI_1))) { // memcmp ==0 means different from standard => using custom feature
-		this->crInfo->hasManageAIFeatureON = true;
-	}
-	// TO DO: check all sequences ?
+	this->crInfo->hasManageAIFeatureON = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_MANAGE_AI, "Init_is_computer_for_AI_1");
 }
 
 

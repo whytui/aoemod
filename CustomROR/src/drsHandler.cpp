@@ -56,6 +56,9 @@ namespace ROR_STRUCTURES_10C {
 	// Filename is the DRS file name with extension. Example "graphics.drs"
 	// folder is relative path from AOE root directory. Example "data2\". If non-empty, it must end with "\" !!!
 	void AOE_AddDrsFile(const char *filename, const char *folder) {
+#ifndef GAMEVERSION_ROR10c
+		return; // not implemented yet in other versions
+#endif
 		if (!filename) { return; }
 		const char *tribe = "tribe";
 		const unsigned long int callAddress = 0x46AFC0;

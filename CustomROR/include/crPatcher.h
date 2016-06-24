@@ -23,3 +23,5 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix);
 bool SetMaxPopulationGetterInSPGames(long int newMaxPopulationValue);
 
 bool IsBinaryChangeOn(BINSEQ_CATEGORIES binCategory, std::string sequenceName);
+
+long int GetBinaryChangeVarValue(BINSEQ_CATEGORIES binCategory, std::string sequenceName);

@@ -2917,7 +2917,7 @@ void AOE_binData::InitSelectedUnits() {
 	NEXT_INITSEQ_1_VAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
 		Alloc1,
 		"Specific memory allocation.",
-		1090516,
+		1090516, // 0x10A3D4
 		(0x68, 0x5C, 0x08, 0x00, 0x00),
 		SVT_INT_4B,
 		1
