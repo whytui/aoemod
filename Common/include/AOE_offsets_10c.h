@@ -10,13 +10,31 @@ namespace AOE_OFFSETS_10C
 {
 	// Some useful raw addresses
 #ifdef GAMEVERSION_10b
+	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
+	static const unsigned long int ADDR_FILE_EXE_MAX = 0x13A5FF;
 	static const unsigned long int ADDR_EXE_MIN = 0x401000;
 	static const unsigned long int ADDR_EXE_MAX = 0x53BFFF;
+	static const unsigned long int ADDR_THIS_CODE_MIN = 0x53C000;
+	static const unsigned long int ADDR_THIS_CODE_MAX = 0x546C00;
+	static const unsigned long int ADDR_RDATA_MIN = 0x547000;
+	static const unsigned long int ADDR_RDATA_MAX = 0x557FFF;
+	static const unsigned long int ADDR_DATA_MIN = 0x557000; // game global variables
+	static const unsigned long int ADDR_DATA_MAX = 0x7D9FFF; // game global variables
+	static const unsigned long int ADDR_THIS_DAT_MIN = 0x7DC000;
+	static const unsigned long int ADDR_THIS_DAT_MAX = 0x7DCFFF;
+	static const unsigned long int ADDR_INF32_DAT_MIN = 0x7DD000;
+	static const unsigned long int ADDR_INF32_DAT_MAX = 0x7E7FFF;
+	static const unsigned long int ADDR_RESOURCES_MIN = 0x7E8000;
+	static const unsigned long int ADDR_RESOURCES_MAX = 0x7E8FFF;
+	static const unsigned long int ADDR_CHECKSUM_MIN = 0x00547000;
+	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054FF60; // unsure
+	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A6858;
 #endif
 #ifdef GAMEVERSION_10c
+	static const unsigned long int ADDR_EXE= 0x1000;
+	//static const unsigned long int ADDR_EXE_CODE_MAX = ;
 	static const unsigned long int ADDR_EXE_MIN = 0x401000;
 	static const unsigned long int ADDR_EXE_MAX = 0x536FFF;
-#endif
 	static const unsigned long int ADDR_THIS_CODE_MIN = 0x537000;
 	static const unsigned long int ADDR_THIS_CODE_MAX = 0x541FFF;
 	static const unsigned long int ADDR_RDATA_MIN = 0x542000;
@@ -32,6 +50,7 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_CHECKSUM_MIN = 0x005423F0;
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054AA60;
 	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A1808;
+#endif
 	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x580E38;
 	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0x005830F4;
 	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0x5830F4; // redundant - to remove
@@ -68,17 +87,43 @@ static bool isAValidRORChecksum(unsigned long int checksum){
 
 // Returns 0 if offset is invalid.
 static unsigned long int AOE_FileOffsetToExeAddr(unsigned long int fileOffset) {
-	if ((fileOffset <= 0) || (fileOffset + 0x400000 > AOE_OFFSETS_10C::ADDR_DATA_MAX)) {
-		return 0;
+	if (fileOffset < AOE_OFFSETS_10C::ADDR_FILE_EXE_MIN) { return 0; }
+	unsigned long int result = fileOffset;
+#ifdef GAMEVERSION_10b
+	// TODO: test
+	if (fileOffset < AOE_OFFSETS_10C::ADDR_FILE_EXE_MAX) {
+		result += 0x400c00;
 	}
-	return fileOffset + 0x400000;
+	if (fileOffset < (AOE_OFFSETS_10C::ADDR_THIS_CODE_MAX - 0x401a00)) {
+		result += 0x401a00;
+	}
+	if (fileOffset < (AOE_OFFSETS_10C::ADDR_RDATA_MAX - 0x401E00)) {
+		result += 0x401E00;
+	}
+	if (fileOffset < (AOE_OFFSETS_10C::ADDR_DATA_MAX - 0x402600)) {
+		result += 0x402600;
+	}
+#endif
+#ifdef GAMEVERSION_10c
+	if (fileOffset < (AOE_OFFSETS_10C::ADDR_DATA_MAX - 0x400000)) {
+		result += 0x400000;
+	}
+#endif
+	return result;
 }
 
 // Returns 0 if address is invalid.
 static unsigned long int AOE_ExeAddrToFileOffset(unsigned long int ExeAddr) {
+	// TODO: only supports text (not THIS_COD, .rdata, .data)
 	if ((ExeAddr < AOE_OFFSETS_10C::ADDR_EXE_MIN) || (ExeAddr > AOE_OFFSETS_10C::ADDR_EXE_MAX)) {
 		return 0;
 	}
+#ifdef GAMEVERSION_10b
+	return ExeAddr - 0x400C00;
+#endif
+#ifdef GAMEVERSION_10c
 	return ExeAddr - 0x400000;
+#endif
+	return 0;
 }
 
