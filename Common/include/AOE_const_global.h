@@ -5,13 +5,16 @@
 
 enum AOE_FILE_VERSION {
 	AOE_INVALID_FILE = 0,
-	AOE_VERSION_1_0B,
-	AOE_VERSION_1_0C,
-	AOE_VERSION_UPATCH_BETA,
-	AOE_VERSION_UPATCH_1_1_HD,
+	AOE_VERSION_AOE1_0A, // AOE first release
+	AOE_VERSION_AOE1_0B, // AOE version delivered with ROR extension
+	AOE_VERSION_AOE1_0C, // AOE with patch 1.0c
+	AOE_VERSION_1_0B, // ROR first release
+	AOE_VERSION_1_0C, // ROR with patch 1.0c
+	AOE_VERSION_UPATCH_BETA, // ROR
+	AOE_VERSION_UPATCH_1_1_HD, // ROR
 	AOE_VERSION_COUNT
 };
-const static std::wstring AOEFileVersionLabel[AOE_VERSION_COUNT] = { _T("Invalid"), _T("1.0b"), _T("1.0c"), _T("UPatch Beta"), _T("UPatch 1.1HD") };
+const static std::wstring AOEFileVersionLabel[AOE_VERSION_COUNT] = { _T("Invalid"), _T("AOE1.0b"), _T("AOE1.0c"), _T("1.0b"), _T("1.0c"), _T("UPatch Beta"), _T("UPatch 1.1HD") };
 #define GET_AOE_FILE_VERSION_LABEL(n) AOEFileVersionLabel[n]
 
 
@@ -24,6 +27,9 @@ const static wchar_t *AOE_REG_KEY_INSTALLDIR = _T("InstallationDirectory");
 const static wchar_t *DDRAW_COMPATIBILITY_REG_PATH = _T("SOFTWARE\\Microsoft\\DirectDraw\\Compatibility");
 
 // File sizes
+const static long EXE_FILE_SIZE_AOE10A = 1622016; // 0.9.12.1215
+const static long EXE_FILE_SIZE_AOE10B = 1622016; // 0.9.13.490 : same size, but different version !
+const static long EXE_FILE_SIZE_AOE10C = 1470464;
 const static long EXE_FILE_SIZE_10B = 1513984;
 const static long EXE_FILE_SIZE_10C = 1503232;
 const static long EXE_FILE_SIZE_UPATCH_BETA = 1511424;
@@ -34,6 +40,22 @@ const static size_t EXE_MAGIC_NUMBER_SIZE = 2;
 const static unsigned char EXE_MAGIC_NUMBER[EXE_MAGIC_NUMBER_SIZE] = { 0x4d, 0x5a };
 
 // Binary sequence: EXE version
+const static size_t EXE_VERSION_CHECK_AOE10A_OFFSET = 0x164008;
+const static size_t EXE_VERSION_CHECK_AOE10A_SIZE = 13;
+const static unsigned char EXE_VERSION_CHECK_AOE10A[EXE_VERSION_CHECK_AOE10A_SIZE] = { // ascii 00.09.12.1215.
+	0x30, 0x30, 0x2E, 0x30, 0x39, 0x2E, 0x31, 0x32, 0x2E, 0x31, 0x32, 0x31, 0x35
+};
+const static size_t EXE_VERSION_CHECK_AOE10B_OFFSET = 0x1673F0;
+const static size_t EXE_VERSION_CHECK_AOE10B_SIZE = 13;
+const static unsigned char EXE_VERSION_CHECK_AOE10B[EXE_VERSION_CHECK_AOE10B_SIZE] = { // ascii 00.09.13.0409. Shouldn't it be 490 instead of 409 ?
+	0x30, 0x30, 0x2E, 0x30, 0x39, 0x2E, 0x31, 0x33, 0x2E, 0x30, 0x34, 0x30, 0x39
+};
+const static size_t EXE_VERSION_CHECK_AOE10C_OFFSET = 0x15103C;
+const static size_t EXE_VERSION_CHECK_AOE10C_SIZE = 13;
+const static unsigned char EXE_VERSION_CHECK_AOE10C[EXE_VERSION_CHECK_AOE10C_SIZE] = { // ascii 00.09.13.0409 (same version number, but different offset, they forgot updating this?)
+	0x30, 0x30, 0x2E, 0x30, 0x39, 0x2E, 0x31, 0x33, 0x2E, 0x30, 0x34, 0x30, 0x39
+};
+
 const static size_t EXE_VERSION_CHECK_10B_OFFSET = 0x1716e2;
 const static size_t EXE_VERSION_CHECK_10B_SIZE = 18;
 const static unsigned char EXE_VERSION_CHECK_10B[EXE_VERSION_CHECK_10B_SIZE] = { // ascii 4.2.0901

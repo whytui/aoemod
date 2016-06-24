@@ -27,12 +27,16 @@ public:
 
 	BinarySeqDefSet resolution_10b;
 	BinarySeqDefSet resolution_10c;
+	BinarySeqDefSet windowedMode_AOE10b;
+	BinarySeqDefSet windowedMode_AOE10c;
 	BinarySeqDefSet windowedMode_10b;
 	BinarySeqDefSet VEG_windowedMode_10b;
 	BinarySeqDefSet windowedMode_10c;
 	BinarySeqDefSet VEG_windowedMode_10c;
 	BinarySeqDefSet techFixes_10b;
 	BinarySeqDefSet techFixes_10c;
+	BinarySeqDefSet ROR_API_AOE10b;
+	BinarySeqDefSet ROR_API_AOE10c;
 	BinarySeqDefSet ROR_API_10b;
 	BinarySeqDefSet ROR_API_10c;
 	BinarySeqDefSet options_10b;
@@ -54,6 +58,8 @@ private:
 	void InitData();
 	void InitResolution_b();
 	void InitResolution_c();
+	void InitWindowedMode_AOEb();
+	void InitWindowedMode_AOEc();
 	void InitWindowedMode_b();
 	void InitWindowedMode_c();
 	void InitTechFixes_10b();
@@ -62,6 +68,8 @@ private:
 	void InitOptions_10c();
 	void InitSelectedUnits();
 	void InitObsoletes();
+	void InitROR_API_AOE10b();
+	void InitROR_API_AOE10c();
 	void InitROR_API_10b();
 	void InitROR_API_10c();
 	void InitManageAI();

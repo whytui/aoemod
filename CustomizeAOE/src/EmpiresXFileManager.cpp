@@ -89,6 +89,18 @@ bool EmpiresXFileManager::CheckVersionBinarySequence() {
 
 	BinarySeqDefinition *versionSeq;
 	switch (this->gameFileVersion) {
+	case AOE_VERSION_AOE1_0A:
+		versionSeq = new BinarySeqDefinition(EXE_VERSION_CHECK_AOE10A_SIZE, 1, EXE_VERSION_CHECK_AOE10A_OFFSET);
+		versionSeq->WriteSequence(0, EXE_VERSION_CHECK_AOE10A);
+		break;
+	case AOE_VERSION_AOE1_0B:
+		versionSeq = new BinarySeqDefinition(EXE_VERSION_CHECK_AOE10B_SIZE, 1, EXE_VERSION_CHECK_AOE10B_OFFSET);
+		versionSeq->WriteSequence(0, EXE_VERSION_CHECK_AOE10B);
+		break;
+	case AOE_VERSION_AOE1_0C:
+		versionSeq = new BinarySeqDefinition(EXE_VERSION_CHECK_AOE10C_SIZE, 1, EXE_VERSION_CHECK_AOE10C_OFFSET);
+		versionSeq->WriteSequence(0, EXE_VERSION_CHECK_AOE10C);
+		break;
 	case AOE_VERSION_1_0B:
 		versionSeq = new BinarySeqDefinition(EXE_VERSION_CHECK_10B_SIZE, 1, EXE_VERSION_CHECK_10B_OFFSET);
 		versionSeq->WriteSequence(0, EXE_VERSION_CHECK_10B);
@@ -124,6 +136,18 @@ bool EmpiresXFileManager::CheckVersionBinarySequence() {
 // This will update gameFileVersion variable
 bool EmpiresXFileManager::FindGameVersion() {
 	switch (this->GetFileSize()) {
+	//case EXE_FILE_SIZE_AOE10A:
+	case EXE_FILE_SIZE_AOE10B:
+		// Special: AOE 1.0a and 1.0b have the same size.
+		this->gameFileVersion = AOE_VERSION_AOE1_0A;
+		if (this->CheckVersionBinarySequence()) {
+			return true;
+		}
+		this->gameFileVersion = AOE_VERSION_AOE1_0B;
+		break;
+	case EXE_FILE_SIZE_AOE10C:
+		this->gameFileVersion = AOE_VERSION_AOE1_0C;
+		break;
 	case EXE_FILE_SIZE_10B:
 		this->gameFileVersion = AOE_VERSION_1_0B;
 		break;

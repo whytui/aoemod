@@ -7,6 +7,7 @@
 #include <AOE_empires_dat.h>
 #include <ROR_structures_drs.h>
 #include <ROR_structures_techs.h>
+#include <gameVersion.h>
 
 
 // Note: as we never allocate/create unit structures ourselves, there is no problem going out of bounds as long as ROR EXE allocated enough values !
@@ -1880,7 +1881,24 @@ namespace ROR_STRUCTURES_10C
 		// 1130 : avi\ 
 	};
 
-	// Size = 0x1254
+#ifdef GAMEVERSION_AOE10c
+#define CHECKSUM_GAME_SETTINGS1 0x005509D8
+#define CHECKSUM_GAME_SETTINGS2 0x00553B78 // parent class
+#endif
+#ifdef GAMEVERSION_AOE10c
+#define CHECKSUM_GAME_SETTINGS1 0x0054301C
+#define CHECKSUM_GAME_SETTINGS2 0x0053C0A4 // parent class
+#endif
+#ifdef GAMEVERSION_ROR10b
+#define CHECKSUM_GAME_SETTINGS1 0x0054F6E0
+#define CHECKSUM_GAME_SETTINGS2 0x00547DE8 // parent class
+#endif
+#ifdef GAMEVERSION_ROR10c
+#define CHECKSUM_GAME_SETTINGS1 0x0054A264
+#define CHECKSUM_GAME_SETTINGS2 0x005430B4 // parent class
+#endif
+	// Size = 0x11A0 (AOE1.0b&c). Constructor 0x4F91C0 (empires.exe)
+	// Size = 0x1254. Constructor 0x5004C0(1.0b), ?(1.0c)
 	class STRUCT_GAME_SETTINGS {
 	public:
 		unsigned long int checksum;
@@ -2050,10 +2068,10 @@ namespace ROR_STRUCTURES_10C
 		ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *ptrGameUIStruct; // +C24
 		long int lastEventPositionsY[5]; // +C28. Used when pressing HOME key
 		// 0xC3C
-		long int lastEventPositionsX[5]; // Used when pressing HOME key
+		long int lastEventPositionsX[5]; // +C3C. Used when pressing HOME key
 		// 0xC50
-		long int lastEventIndex; // -1=no "last event". Or a 0-4 value
-		long int lastAccessedEventIndex; // -1=no "last event". Or a 0-4 value. To remember which index was used in last "home key" press.
+		long int lastEventIndex; // +C50. -1=no "last event". Or a 0-4 value
+		long int lastAccessedEventIndex; // +C54. -1=no "last event". Or a 0-4 value. To remember which index was used in last "home key" press.
 		// 0xC58
 		char unknown_C58[0x106C - 0xC58];
 		char debugString[0x1190 - 0x106C]; // Unknown_ size
@@ -2067,14 +2085,16 @@ namespace ROR_STRUCTURES_10C
 		char unknown_1196;
 		char unknown_1197;
 		char civPlayerNameIsUsed[0x08*0x0A]; // +1198. 8=number of players, 0x0A=number of names (0=unused, 1-9=used)
-
-		// And so on...
+		char unknown_11E8[0x1254 - 0x11E8];
 
 		bool IsCheckSumValid() {
-			return (this->checksum == 0x0054A264) || (this->checksum == 0x005430B4);
+			return (this->checksum == CHECKSUM_GAME_SETTINGS1) || (this->checksum == CHECKSUM_GAME_SETTINGS2);
 		}
 	};
-	//static_assert(sizeof(STRUCT_GAME_SETTINGS) == 0x1254, "STRUCT_GAME_SETTINGS size");
+	//GAMEVERSION_AOE10c : size 0x11A0
+#if defined(GAMEVERSION_ROR10b) || defined(GAMEVERSION_ROR10c)
+	static_assert(sizeof(STRUCT_GAME_SETTINGS) == 0x1254, "STRUCT_GAME_SETTINGS size");
+#endif
 
 	// Size=0xB0 - Constructor = ?
 	class STRUCT_STRATEGY_ELEMENT {

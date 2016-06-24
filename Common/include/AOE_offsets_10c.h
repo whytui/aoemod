@@ -9,7 +9,48 @@
 namespace AOE_OFFSETS_10C
 {
 	// Some useful raw addresses
-#ifdef GAMEVERSION_10b
+#ifdef GAMEVERSION_AOE10a
+	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
+#endif
+#ifdef GAMEVERSION_AOE10b
+	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
+	static const unsigned long int ADDR_FILE_EXE_MAX = 0x1411FF;
+	static const unsigned long int ADDR_EXE_MIN = 0x401000;
+	static const unsigned long int ADDR_EXE_MAX = 0x541FFF;
+	static const unsigned long int ADDR_THIS_CODE_MIN = 0x542000;
+	static const unsigned long int ADDR_THIS_CODE_MAX = 0x54CFFF;
+	static const unsigned long int ADDR_RDATA_MIN = 0x54D000;
+	static const unsigned long int ADDR_RDATA_MAX = 0x55EFFF;
+	static const unsigned long int ADDR_DATA_MIN = 0x55F000; // game global variables
+	static const unsigned long int ADDR_DATA_MAX = 0x7E0FFF; // game global variables
+	//0x7E1000 : imports (.idata) size 0x2000
+	static const unsigned long int ADDR_THIS_DAT_MIN = 0x7E3000;
+	static const unsigned long int ADDR_THIS_DAT_MAX = 0x7E3FFF;
+	static const unsigned long int ADDR_INF32_DAT_MIN = 0x7E4000;
+	static const unsigned long int ADDR_INF32_DAT_MAX = 0x7EEFFF;
+	static const unsigned long int ADDR_RESOURCES_MIN = 0x7EF000;
+	static const unsigned long int ADDR_RESOURCES_MAX = 0x7EFFFF;
+	// 0x7F0000 : .reloc
+#endif
+#ifdef GAMEVERSION_AOE10c
+	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
+	static const unsigned long int ADDR_FILE_EXE_MAX = 0x130000;
+	static const unsigned long int ADDR_EXE_MIN = 0x401000;
+	static const unsigned long int ADDR_EXE_MAX = 0x52FFFF;
+	static const unsigned long int ADDR_THIS_CODE_MIN = 0x530000;
+	static const unsigned long int ADDR_THIS_CODE_MAX = 0x53AFFF;
+	static const unsigned long int ADDR_RDATA_MIN = 0x53B000;
+	static const unsigned long int ADDR_RDATA_MAX = 0x54CFFF;
+	static const unsigned long int ADDR_DATA_MIN = 0x54D000; // game global variables
+	static const unsigned long int ADDR_DATA_MAX = 0x7D9FFF; // game global variables
+	static const unsigned long int ADDR_THIS_DAT_MIN = 0x7CE000;
+	static const unsigned long int ADDR_THIS_DAT_MAX = 0x7CEFFF;
+	static const unsigned long int ADDR_INF32_DAT_MIN = 0x7CF000;
+	static const unsigned long int ADDR_INF32_DAT_MAX = 0x7D9FFF;
+	static const unsigned long int ADDR_RESOURCES_MIN = 0x7DA000;
+	static const unsigned long int ADDR_RESOURCES_MAX = 0x7DAFFF;
+#endif
+#ifdef GAMEVERSION_ROR10b
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
 	static const unsigned long int ADDR_FILE_EXE_MAX = 0x13A5FF;
 	static const unsigned long int ADDR_EXE_MIN = 0x401000;
@@ -30,7 +71,7 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054FF60; // unsure
 	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A6858;
 #endif
-#ifdef GAMEVERSION_10c
+#ifdef GAMEVERSION_ROR10c
 	static const unsigned long int ADDR_EXE= 0x1000;
 	//static const unsigned long int ADDR_EXE_CODE_MAX = ;
 	static const unsigned long int ADDR_EXE_MIN = 0x401000;
@@ -66,11 +107,11 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7BFAC4; // type= STRUCT_DRS_FILE_LINK*
 
 	// Game executable interface procedure address (ROR_API call)
-#ifdef GAMEVERSION_10b
+#ifdef GAMEVERSION_ROR10b
 	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x419C43;
 	static const unsigned long int AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS = 0x419C5B;
 #endif
-#ifdef GAMEVERSION_10c
+#ifdef GAMEVERSION_ROR10c
 	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x419574;
 	static const unsigned long int AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS = 0x443713;
 #endif
@@ -89,8 +130,7 @@ static bool isAValidRORChecksum(unsigned long int checksum){
 static unsigned long int AOE_FileOffsetToExeAddr(unsigned long int fileOffset) {
 	if (fileOffset < AOE_OFFSETS_10C::ADDR_FILE_EXE_MIN) { return 0; }
 	unsigned long int result = fileOffset;
-#ifdef GAMEVERSION_10b
-	// TODO: test
+#if defined(GAMEVERSION_AOE10b) || defined(GAMEVERSION_ROR10b)
 	if (fileOffset < AOE_OFFSETS_10C::ADDR_FILE_EXE_MAX) {
 		result += 0x400c00;
 	}
@@ -104,7 +144,7 @@ static unsigned long int AOE_FileOffsetToExeAddr(unsigned long int fileOffset) {
 		result += 0x402600;
 	}
 #endif
-#ifdef GAMEVERSION_10c
+#if defined(GAMEVERSION_AOE10c) || defined(GAMEVERSION_ROR10c)
 	if (fileOffset < (AOE_OFFSETS_10C::ADDR_DATA_MAX - 0x400000)) {
 		result += 0x400000;
 	}
@@ -118,10 +158,10 @@ static unsigned long int AOE_ExeAddrToFileOffset(unsigned long int ExeAddr) {
 	if ((ExeAddr < AOE_OFFSETS_10C::ADDR_EXE_MIN) || (ExeAddr > AOE_OFFSETS_10C::ADDR_EXE_MAX)) {
 		return 0;
 	}
-#ifdef GAMEVERSION_10b
+#ifdef GAMEVERSION_ROR10b
 	return ExeAddr - 0x400C00;
 #endif
-#ifdef GAMEVERSION_10c
+#if defined(GAMEVERSION_AOE10c) || defined(GAMEVERSION_ROR10c)
 	return ExeAddr - 0x400000;
 #endif
 	return 0;
