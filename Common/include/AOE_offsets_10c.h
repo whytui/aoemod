@@ -9,8 +9,14 @@
 namespace AOE_OFFSETS_10C
 {
 	// Some useful raw addresses
+#ifdef GAMEVERSION_10b
+	static const unsigned long int ADDR_EXE_MIN = 0x401000;
+	static const unsigned long int ADDR_EXE_MAX = 0x53BFFF;
+#endif
+#ifdef GAMEVERSION_10c
 	static const unsigned long int ADDR_EXE_MIN = 0x401000;
 	static const unsigned long int ADDR_EXE_MAX = 0x536FFF;
+#endif
 	static const unsigned long int ADDR_THIS_CODE_MIN = 0x537000;
 	static const unsigned long int ADDR_THIS_CODE_MAX = 0x541FFF;
 	static const unsigned long int ADDR_RDATA_MIN = 0x542000;

@@ -6,6 +6,9 @@
 // See methods below (under the ---- line).
 
 
+static bool _ror_api_init_done = false;
+
+
 // Intermediate method to secure the stack and fix local ESP variable value.
 // ptrCaller1 = return address of our custom API method in RoR code : do not use
 // stackEAX   = "original" EAX value that has been pushed (between the 2 calls) before using it for calling this API.
@@ -100,12 +103,9 @@ void DispatchToCustomCode() {
 		return; // invalid address. Bad calling information - bad call stack.
 	}
 
-	switch (currentREG_values[global_conf.currentCalls - 1]->return_address) {
-	case AOE_OFFSETS_10C::AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS:
+	if (!_ror_api_init_done) {
 		MakeInits();
-		break;
-	default:
-		break;
+		_ror_api_init_done = true;
 	}
 
 	for (int index = 0; index < global_conf.modulesCount; index++) {
