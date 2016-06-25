@@ -38,6 +38,8 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0;
 	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0; // redundant - to remove
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x564FB4;
+	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x7DDF84;
+	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0; // does not exist in this version
 #endif
 #ifdef GAMEVERSION_AOE10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -58,11 +60,13 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_RESOURCES_MAX = 0x7DAFFF;
 	static const unsigned long int ADDR_CHECKSUM_MIN = 0x53B3F8; // unsure
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x5437F8; // unsure
-	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = ;
+	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0;
 	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0;
 	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0;
 	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0; // redundant - to remove
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x556020;
+	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x579714;
+	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0; // does not exist in this version
 #endif
 #ifdef GAMEVERSION_ROR10b
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
@@ -88,6 +92,8 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0;
 	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0; // redundant - to remove
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x55FA5C;
+	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x585DDC;
+	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0x7C56A0;
 #endif
 #ifdef GAMEVERSION_ROR10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -113,6 +119,8 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0x005830F4;
 	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0x5830F4; // redundant - to remove
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x0055CA5C;
+	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x580D8C;
+	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0x7C0634;
 #endif
 	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x7C04A0;
 	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2024;

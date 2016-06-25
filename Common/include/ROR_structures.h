@@ -1914,7 +1914,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_03C;
 		// 0x40
 		char unknown_040[0x1C];
-		STRUCT_SLP_INFO **ptrInfosSLP; // Pointer to array slpInfo, size=3 ? index 0=shortcut numbers
+		STRUCT_SLP_INFO **ptrInfosSLP; // +5C. Pointer to array slpInfo, size=3 ? index 0=shortcut numbers
 		// 0x60
 		STRUCT_MAIN_SOUND *pSoundStruct; // Size 69C, see 41894B. Generally =NULL, only set while being used.
 		STRUCT_MAIN_MUSIC *pMusicStruct; // Size 3F8, see 418B14. Generally =NULL, only set while being used.

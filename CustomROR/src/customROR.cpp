@@ -304,7 +304,18 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x4F8D92:
 		this->EntryPointOnBuildingInfoDisplay(REG_values);
 		break;
+#ifdef GAMEVERSION_AOE10b
+	case 0x4E6D5C:
+#endif
+#ifdef GAMEVERSION_AOE10c
+	case 0x417209:
+#endif
+#ifdef GAMEVERSION_ROR10b
+	case 0x501AB5:
+#endif
+#ifdef GAMEVERSION_ROR10c
 	case 0x004FF535:
+#endif
 		this->EntryPointOnGetLocalizedString(REG_values);
 		break;
 	default:
@@ -3186,20 +3197,47 @@ void CustomRORInstance::EntryPointOnBuildingInfoDisplay(REG_BACKUP *REG_values) 
 
 // From 004FF530 = GetLanguageDllString(stringId, buffer, size)
 void CustomRORInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
+	unsigned long int *p = (unsigned long int *) ((ADDR_VAR_HINST_LANGUAGEX_DLL != 0) ? ADDR_VAR_HINST_LANGUAGEX_DLL : ADDR_VAR_HINST_LANGUAGE_DLL);
+#ifdef GAMEVERSION_AOE10b
+	unsigned long int returnAddress = 0x4E6D7D; // different code here (don't skip the 3 POP)
+#endif
+#ifdef GAMEVERSION_AOE10c
+	unsigned long int returnAddress = 0x41722D;
+#endif
+#ifdef GAMEVERSION_ROR10b
+	unsigned long int returnAddress = 0x501AE3;
+#endif
+#ifdef GAMEVERSION_ROR10c
+	unsigned long int returnAddress = 0x4FF563;
+#endif
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
-		unsigned long int *p = (unsigned long int *)0x7C0634;
+#if defined(GAMEVERSION_AOE10c)
+		REG_values->ECX_val = *p;
+#endif
+#if defined(GAMEVERSION_ROR10b) || defined(GAMEVERSION_ROR10c)
 		REG_values->EAX_val = *p;
+#endif
+#ifdef GAMEVERSION_AOE10b // different code in this version
+		REG_values->EDI_val = GetIntValueFromRORStack(REG_values, 0x18);
+		REG_values->EAX_val = GetIntValueFromRORStack(REG_values, 0x10);
+#endif
 	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	bool useCustomLocalization = true;
 	if (useCustomLocalization) {
+#ifdef GAMEVERSION_AOE10b // different code in this version
+		long int stringDllId = REG_values->EAX_val;
+		char *buffer = (char*)REG_values->ESI_val;
+		long int bufferSize =REG_values->EDI_val;
+#else
 		long int stringDllId = GetIntValueFromRORStack(REG_values, 4);
 		char *buffer = (char*)GetIntValueFromRORStack(REG_values, 8);
 		long int bufferSize = GetIntValueFromRORStack(REG_values, 0x0C);
+#endif
 		buffer[bufferSize - 1] = 0; // Just in case.
 		bool successfullyFoundString = this->crCommand.GetLocalizedString(stringDllId, buffer, bufferSize);
 		if (successfullyFoundString) {
-			ChangeReturnAddress(REG_values, 0x4FF563); // Prevent ROR from searching in language(x).dll
+			ChangeReturnAddress(REG_values, returnAddress); // (RETN 0x0C instruction) Prevent ROR from searching in language(x).dll
 		}
 	}
 }

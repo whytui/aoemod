@@ -91,9 +91,9 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_VEG_windowedMode_10c 21
 #define COUNT_selectedUnits_10c 86
 #define COUNT_obsoletes_10c 24
-#define COUNT_ROR_API_AOE10b 4
-#define COUNT_ROR_API_AOE10c 4
-#define COUNT_ROR_API_10b 4
+#define COUNT_ROR_API_AOE10b 5
+#define COUNT_ROR_API_AOE10c 5
+#define COUNT_ROR_API_10b 5
 #define COUNT_ROR_API_10c 102
 #define COUNT_manageAI_10c 13
 
@@ -3808,6 +3808,16 @@ void AOE_binData::InitROR_API_AOE10b() {
 
 	// Non-critical changes :
 
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOE10b.GetBinSeqDefinition(i),
+		OverloadGetLocalizedText,
+		"Adds support for custom text localization.",
+		0xE6156,
+		(0x57, 0x8B, 0x7C, 0x24, 0x18, 0x8B, 0x44, 0x24, 0x10, 0x57), // default=no
+		(0x57, 0xE8, 0xA7, 0x22, 0x00, 0x00, 0x90, 0x90, 0x90, 0x57),
+		FM_OFF,
+		FM_ON
+		);
+
 
 	if (i != COUNT_ROR_API_AOE10b) {
 		throw AOE_binDataSetupException("Binary setup error for ROR_API_AOE10b. Bad element count.");
@@ -3863,7 +3873,15 @@ void AOE_binData::InitROR_API_AOE10c() {
 		);
 
 	// Non-critical changes :
-
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOE10c.GetBinSeqDefinition(i),
+		OverloadGetLocalizedText,
+		"Adds support for custom text localization.",
+		0x17200,
+		(0x8B, 0x44, 0x24, 0x04, 0x8B, 0x0D, 0x14, 0x97, 0x57, 0x00, 0x56), // default=no
+		(0x8B, 0x44, 0x24, 0x04, 0xE8, 0x38, 0x20, 0x00, 0x00, 0x90, 0x56),
+		FM_OFF,
+		FM_ON
+		);
 
 	if (i != COUNT_ROR_API_AOE10c) {
 		throw AOE_binDataSetupException("Binary setup error for ROR_API_AOE10c. Bad element count.");
@@ -3919,6 +3937,15 @@ void AOE_binData::InitROR_API_10b() {
 		);
 
 	// Non-critical changes :
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10b.GetBinSeqDefinition(i),
+		OverloadGetLocalizedText,
+		"Adds support for custom text localization.",
+		0x100EAF,
+		(0x90, 0xA1, 0xA0, 0x56, 0x7C, 0x00, 0x53), // default=no
+		(0x90, 0xE8, 0x8E, 0x81, 0xF1, 0xFF, 0x53),
+		FM_OFF,
+		FM_ON
+		);
 
 
 	if (i != COUNT_ROR_API_10b) {
