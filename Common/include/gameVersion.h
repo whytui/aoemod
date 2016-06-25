@@ -4,20 +4,21 @@
 This file allows to define with which game version CustomROR will be compatible.
 */
 
+// Note: game version IDs must remain consecutive, starting at 1.
 
 #define GAMEVERSIONID_AOE10a 1 // First official release
 #define GAMEVERSIONID_AOE10b 2 // Delivered with ROR extension
 #define GAMEVERSIONID_AOE10c 3 // With patch 1.0c
 
 // For ROR 1.0b version (the one delivered with ROR extension)
-#define GAMEVERSIONID_ROR10b 10
+#define GAMEVERSIONID_ROR10b 4
 
 // For ROR 1.0c version (patch 1.0c)
-#define GAMEVERSIONID_ROR10c 11
+#define GAMEVERSIONID_ROR10c 5
 
 // Other
-#define GAMEVERSIONID_UPATCH_BETA 20
-#define GAMEVERSIONID_UPATCH_1_1_HD 21
+#define GAMEVERSIONID_UPATCH_BETA 6
+#define GAMEVERSIONID_UPATCH_1_1_HD 7
 
 // List of supported (recognized) versions
 // If updated, please update AOEFileVersionLabel in AOE_const_global.h too

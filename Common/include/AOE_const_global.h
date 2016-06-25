@@ -6,7 +6,7 @@
 
 
 const static std::wstring AOEFileVersionLabel[AOE_VERSION_COUNT] = { _T("Invalid"), _T("AOE1.0a"), _T("AOE1.0b"), _T("AOE1.0c"),
-_T("1.0b"), _T("1.0c"), _T("UPatch Beta"), _T("UPatch 1.1HD") };
+_T("ROR1.0b"), _T("ROR1.0c"), _T("UPatch Beta"), _T("UPatch 1.1HD") };
 #define GET_AOE_FILE_VERSION_LABEL(n) AOEFileVersionLabel[n]
 
 

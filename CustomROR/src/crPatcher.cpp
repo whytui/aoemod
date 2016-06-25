@@ -78,12 +78,28 @@ bool SetMaxPopulationGetterInSPGames(long int newMaxPopulationValue) {
 		char updateValue = (char)newMaxPopulationValue;
 		RORProcessEditor pe;
 		unsigned char bufferSeq[] = { 0xB0, 0x32, 0x5E, 0xC3 };
-		BinarySeqDefinition b = BinarySeqDefinition(sizeof(bufferSeq), 1, 0x105504);
+		unsigned long int getMaxPopMethodAddr =
+#ifdef GAMEVERSION_AOE10b
+			AOE_ExeAddrToFileOffset(0x492DA4);
+#endif
+#ifdef GAMEVERSION_AOE10c
+			AOE_ExeAddrToFileOffset(0x4FFF14);
+#endif
+#ifdef GAMEVERSION_ROR10b
+			AOE_ExeAddrToFileOffset(0x507B84);
+#endif
+#ifdef GAMEVERSION_ROR10c
+			0x105504;
+#endif
+		BinarySeqDefinition b = BinarySeqDefinition(sizeof(bufferSeq), 1, getMaxPopMethodAddr);
 		b.SetVarRelativeOffset(0, 1);
 		b.SetVarType(0, SEQ_VAR_TYPES::SVT_INT_1B);
 		b.WriteSequence(0, bufferSeq);
-		pe.WriteFromSequenceUsingValue(&b, 0, &updateValue);
-		return true;
+		if (!pe.CheckSeqConsistency(&b, 0)) {
+			traceMessageHandler.WriteMessage("Inconsistent memory data, cannot update maximum population value.");
+		}
+		int res = pe.WriteFromSequenceUsingValue(&b, 0, &updateValue);
+		return (res > 0);
 	}
 	catch (std::exception e) {
 		traceMessageHandler.WriteMessage(e.what());

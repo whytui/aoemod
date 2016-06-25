@@ -1881,7 +1881,7 @@ namespace ROR_STRUCTURES_10C
 		// 1130 : avi\ 
 	};
 
-#ifdef GAMEVERSION_AOE10c
+#ifdef GAMEVERSION_AOE10b
 #define CHECKSUM_GAME_SETTINGS1 0x005509D8
 #define CHECKSUM_GAME_SETTINGS2 0x00553B78 // parent class
 #endif
@@ -2059,7 +2059,7 @@ namespace ROR_STRUCTURES_10C
 		AOE_CONST_INTERNAL::GAME_INITIAL_AGES initialAgeChoice; // 0=default, 1=nomad, 2=stone, 3=tool 4=bronze, 5=iron, 6=post-iron. Set in 505570
 		char unknown_AE4; // +AE4. Set in 505580
 		char isDeathMatch; // +AE5. Set in 505590
-		char maxPopulation; // +AE6. For MP games. Set in 5055A0, Get in 5054F0.
+		char maxPopulation; // +AE6. For MP games. Set in 5055A0, Get in 5054F0. [+A9E in aoe10b]
 		char unknown_AE7[0x09];
 		// 0xAF0
 		char unknown_AF0[0xC20 - 0xAF0];

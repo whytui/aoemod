@@ -31,6 +31,13 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_RESOURCES_MIN = 0x7EF000;
 	static const unsigned long int ADDR_RESOURCES_MAX = 0x7EFFFF;
 	// 0x7F0000 : .reloc
+	static const unsigned long int ADDR_CHECKSUM_MIN = 0x54D0B8;
+	static const unsigned long int ADDR_CHECKSUM_MAX = 0x555D18;
+	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0;
+	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0;
+	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0;
+	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0; // redundant - to remove
+	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x564FB4;
 #endif
 #ifdef GAMEVERSION_AOE10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -49,6 +56,13 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_INF32_DAT_MAX = 0x7D9FFF;
 	static const unsigned long int ADDR_RESOURCES_MIN = 0x7DA000;
 	static const unsigned long int ADDR_RESOURCES_MAX = 0x7DAFFF;
+	static const unsigned long int ADDR_CHECKSUM_MIN = 0x53B3F8; // unsure
+	static const unsigned long int ADDR_CHECKSUM_MAX = 0x5437F8; // unsure
+	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = ;
+	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0;
+	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0;
+	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0; // redundant - to remove
+	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x556020;
 #endif
 #ifdef GAMEVERSION_ROR10b
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
@@ -70,6 +84,10 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_CHECKSUM_MIN = 0x00547000;
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054FF60; // unsure
 	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A6858;
+	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0;
+	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0;
+	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0; // redundant - to remove
+	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x55FA5C;
 #endif
 #ifdef GAMEVERSION_ROR10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -91,11 +109,11 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_CHECKSUM_MIN = 0x005423F0;
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054AA60;
 	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A1808;
-#endif
 	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x580E38;
 	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0x005830F4;
 	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0x5830F4; // redundant - to remove
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x0055CA5C;
+#endif
 	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x7C04A0;
 	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2024;
 	static const unsigned long int ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2038; // array of ptr to arrays of STRUCT_NEARBY_UNIT_INFO
