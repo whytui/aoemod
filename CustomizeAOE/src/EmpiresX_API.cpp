@@ -337,6 +337,7 @@ bool EmpiresX_API::SetROR_API(bool activate) {
 		this->aoeManager.SetUserSelection(BC_ROR_API, _T("ROR_API_DLL_initialization"), choice);
 		this->aoeManager.SetUserSelection(BC_ROR_API, _T("ROR_API_DLL_API_methods"), choice);
 		this->aoeManager.SetUserSelection(BC_ROR_API, _T("ROR_API_VarDataUpdate"), choice);
+		this->aoeManager.SetUserSelection(BC_ROR_API, _T("ROR_API_CDCheck_stub"), choice);
 	}
 	catch (std::exception &e) {
 		printf("ERROR: %s\n", e.what());
@@ -357,8 +358,8 @@ bool EmpiresX_API::SetAllROR_API_optionals(bool activate) {
 			int choice = activate ? 1 : 0;
 			std::wstring seqDefName;
 			seqDefName = this->aoeManager.GetSequenceDefName(BC_ROR_API, seqDefIndex);
-			if ((seqDefName != _T("DLL_initialization")) && (seqDefName != _T("ROR_API_DLL_API_methods")) &&
-				(seqDefName != _T("ROR_API_VarDataUpdate"))) {
+			if ((seqDefName != _T("ROR_API_DLL_initialization")) && (seqDefName != _T("ROR_API_DLL_API_methods")) &&
+				(seqDefName != _T("ROR_API_VarDataUpdate")) && (seqDefName != _T("ROR_API_CDCheck_stub"))) {
 				this->aoeManager.SetUserSelection(BC_ROR_API, seqDefIndex, choice);
 			}
 		}
@@ -768,7 +769,7 @@ int EmpiresX_API::WriteChangesToFile_internal(BINSEQ_CATEGORIES category) {
 bool EmpiresX_API::SetSuggestedOptions() {
 	bool result;
 	result = this->SetROR_API(true);
-	result = result && this->SetAllROR_API_optionals(true);
+	//result = result && this->SetAllROR_API_optionals(true); // Do not install optionals, customROR can install them dynamically
 	result = result && 	this->SetMaxSelectedUnits(100);
 	result = result && this->SetWindowedMode(true);
 	result = result && this->SetResolution(1920, 1200, true);
@@ -831,7 +832,7 @@ bool EmpiresX_API::SetSuggestedOptions() {
 bool EmpiresX_API::SetBasicCustomROROptions() {
 	bool result = true;
 	result = this->SetROR_API(true);
-	result = result && this->SetAllROR_API_optionals(true);
+	//result = result && this->SetAllROR_API_optionals(true); // Do not install optionals, customROR can install them dynamically
 	result = result && this->SetMaxSelectedUnits(100);
 	result = result && this->SetWindowedMode(true);
 	//result = result && this->SetResolution(1920, 1200, true);

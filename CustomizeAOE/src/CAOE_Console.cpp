@@ -137,7 +137,7 @@ bool CAOE_Console::ExecuteCommand(std::wstring cmd) {
 	}
 	if (cmd == _T("api on")) {
 		this->e_api.SetROR_API(true);
-		if (!this->e_api.SetAllROR_API_optionals(true)) { this->hasError = true; }
+		//if (!this->e_api.SetAllROR_API_optionals(true)) { this->hasError = true; } // Do not install optionals, customROR can install them dynamically
 		wprintf(_T("Warning: if you enable windowed mode in ROR_API, you must also activate the changes here or the game will crash.\n"));
 		return true;
 	}

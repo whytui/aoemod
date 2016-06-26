@@ -763,7 +763,7 @@ void WxEditFile::OnEnableFeatureClick(wxCommandEvent& event) {
 		this->e_api->SetManageAI(enable);
 		break;
 	case BC_ROR_API:
-		this->e_api->SetAllROR_API_optionals(enable);
+		//this->e_api->SetAllROR_API_optionals(enable); // Do not install optionals, customROR can install them dynamically
 		this->e_api->SetROR_API(enable);
 		if (enable) {
 			// Checks on prerequisites
@@ -772,7 +772,7 @@ void WxEditFile::OnEnableFeatureClick(wxCommandEvent& event) {
 		break;
 	case BC_WINDOWED_MODE:
 		// Windowed mode requires ROR_API.
-		this->e_api->SetAllROR_API_optionals(enable);
+		//this->e_api->SetAllROR_API_optionals(enable); // Do not install optionals, customROR can install them dynamically
 		this->e_api->SetROR_API(enable);
 		this->e_api->SetWindowedMode(enable);
 		this->DoROR_API_checks();
