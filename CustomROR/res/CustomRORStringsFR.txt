@@ -116,7 +116,11 @@ Villageois
 [42061]
 Murailles
 [42062]
-Future technologies, pas encore disponibles:
+Futures technos, pas encore disponibles:
+[42083] // Unit properties: list of special attacks
+Bonus contre
+[42084] // Unit properties: list of special armors
+Malus contre
 
 // *** Scenario editor ***
 [42063]

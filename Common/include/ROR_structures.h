@@ -173,7 +173,7 @@ namespace ROR_STRUCTURES_10C
 
 
 	struct STRUCT_ARMOR_OR_ATTACK {
-		short int classId; // "class" is reserved !
+		AOE_CONST_FUNC::ATTACK_CLASS classId; // "class" is reserved !
 		short int amount;
 	};
 	static_assert(sizeof(STRUCT_ARMOR_OR_ATTACK) == 4, "STRUCT_ARMOR_OR_ATTACK size");
@@ -3765,7 +3765,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_EYE_CANDY); }
 		// Returns true if checksum is valid for this class OR a child class
 		bool IsCheckSumValidForAUnitClass() {
-			return (this->checksum == 0x00547DA8) || // eye candy
+			return (this->checksum == 0x00547DA8) || // eye candy (including cliffs...)
 				(this->checksum == 0x00542E14) || // Flag
 				(this->checksum == 0x005441BC) || // Doppleganger
 				(this->checksum == 0x00544838) || // Dead/fish (destroyable?)

@@ -418,6 +418,7 @@ void EditorEditUnitInfoPopup::OnAfterClose(bool isCancel) {
 }
 
 
+
 // In-game unit properties popup
 
 InGameUnitPropertiesPopup::InGameUnitPropertiesPopup() {
@@ -442,6 +443,7 @@ void InGameUnitPropertiesPopup::_ResetPointers() {
 	this->chkAutoAttackTowers = NULL;
 	this->chkAutoAttackVillagers = NULL;
 	this->chkAutoAttackWalls = NULL;
+	this->edtStrengthWeakness = NULL;
 }
 
 // Create popup content for unit properties
@@ -449,22 +451,24 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	if (this->IsClosed() || (this->popup == NULL) || (unitId < 0)) { return; }
 	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
-	ROR_STRUCTURES_10C::STRUCT_UNIT *unit = GetUnitStruct(unitId);
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *unitPlayer = unit->ptrStructPlayer;
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *) GetUnitStruct(unitId);
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *unitPlayer = unitBase->ptrStructPlayer;
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefBase();
-	if (!unit || !unit->IsCheckSumValid() || !unitPlayer || !unitPlayer->IsCheckSumValid() ||
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass() || !unitPlayer || !unitPlayer->IsCheckSumValid() ||
 		!controlledPlayer || !controlledPlayer->IsCheckSumValid() ||
 		!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
 		return;
 	}
 	this->unitId = unitId; // Store it once we checked it is valid.
-	bool isMyUnit = (controlledPlayer == unitPlayer);
-	bool isTower = IsTower(unitDefBase);
-	bool isMilitary = isTower || IsNonTowerMilitaryUnit(unitDefBase->unitAIType);
 	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *unitDef50 = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)unitDefBase;
-	bool isRangedUnit = (unitDef50->IsCheckSumValidForAUnitClass() && (unitDef50->maxRange > 0));
+	bool isValidType50 = unitDef50->DerivesFromType50();
+	bool isMyUnit = (controlledPlayer == unitPlayer);
+	bool isTower = isValidType50 && IsTower(unitDefBase);
+	bool isMilitary = isValidType50 && (isTower || IsNonTowerMilitaryUnit(unitDefBase->unitAIType));
+	bool isRangedUnit = (isValidType50 && (unitDef50->maxRange > 0));
 
+	long int currentYPos = 10;
 	const long int btnSize = 0xAC;
 	const long int lblTitleHSize = 160;
 	const long int lblMainInfoHSize = 400;
@@ -483,10 +487,10 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	mainInfos += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_SHORTCUT_TERM, "Shortcut");
 	mainInfos += "=";
 	// Shortcut / group info
-	if ((unit->shortcutNumber == 0) || (unit->shortcutNumber > 10)) {
+	if ((unitBase->shortcutNumber == 0) || (unitBase->shortcutNumber > 10)) {
 		mainInfos += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NONE_TERM, "none");
 	} else {
-		char displayNumber = unit->shortcutNumber;
+		char displayNumber = unitBase->shortcutNumber;
 		if (displayNumber == -11) {
 			displayNumber = 20;
 		}
@@ -499,7 +503,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 			mainInfos += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_INVALID_TERM, "invalid");
 		}
 	}
-	if (unit->shortcutNumber > 10) {
+	if (unitBase->shortcutNumber > 10) {
 		mainInfos += " [";
 		mainInfos += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_PART_OF_GROUP, "part of a group");
 		mainInfos += "]";
@@ -543,7 +547,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	// Farm auto-rebuild
 	std::string farmInfo = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_AUTO_REBUILD_THIS_FARM_WHEN_DEPLETED, "Auto rebuild this farm when depleted");
 	farmInfo += ":";
-	FarmRebuildInfo *farmBldInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
+	FarmRebuildInfo *farmBldInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unitBase->positionX, unitBase->positionY);
 
 	// Building : future potential techs/units
 	std::string buildingTechAndUnitInfo = "";
@@ -570,26 +574,30 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 	}
 
-	this->AddLabel(popup, &this->lblTitle, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_INGAME_TITLE, "Unit properties"), (hSize - lblTitleHSize) / 2, 10, lblTitleHSize, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
-	this->AddLabel(popup, &this->lblMainInfos, (char*)mainInfos.c_str(), (hSize - lblMainInfoHSize) / 2, 60, lblMainInfoHSize, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &this->lblTitle, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_INGAME_TITLE, "Unit properties"), (hSize - lblTitleHSize) / 2, currentYPos, lblTitleHSize, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	currentYPos += 50;
+	this->AddLabel(popup, &this->lblMainInfos, (char*)mainInfos.c_str(), (hSize - lblMainInfoHSize) / 2, currentYPos, lblMainInfoHSize, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	currentYPos += 40;
 	// Note: auto-move and farm info have same Y position because they can't be displayed simultaneously.
 	if (!autoMoveInfo.empty()) {
-		this->AddLabel(popup, &this->lblChildUnitsAutoMove, (char*)autoMoveInfo.c_str(), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddButton(popup, &this->btnResetAutoMove, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DISABLE_AUTO_MOVE, "Disable auto-move"), 340, 100, btnSize, 22, 0);
+		this->AddLabel(popup, &this->lblChildUnitsAutoMove, (char*)autoMoveInfo.c_str(), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddButton(popup, &this->btnResetAutoMove, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DISABLE_AUTO_MOVE, "Disable auto-move"), 340, currentYPos, btnSize, 22, 0);
+		currentYPos += 30;
 	}
 	// Auto rebuild farm
 	if (isMyUnit && (unitDefBase->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FARM)) {
-		this->AddLabel(popup, &this->lblFarmAutoRebuild, (char*)farmInfo.c_str(), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblFarmAutoRebuild, (char*)farmInfo.c_str(), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 		
 		ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unusedLabel;
-		this->AddCheckBox(popup, &this->chkRebuildFarmNone, 330, 100 - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkForceRebuildFarm, 430, 100 - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkForceNotRebuildFarm, 530, 100 - 4, 24, 24);
-		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DEFAULT, "Default"), 270, 100, 50, 20);
-		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_ALWAYS, "Always"), 370, 100, 50, 20);
-		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NEVER, "Never"), 470, 100, 50, 20);
-		
-		FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
+		this->AddCheckBox(popup, &this->chkRebuildFarmNone, 330, currentYPos - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkForceRebuildFarm, 430, currentYPos - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkForceNotRebuildFarm, 530, currentYPos - 4, 24, 24);
+		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DEFAULT, "Default"), 270, currentYPos, 50, 20);
+		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_ALWAYS, "Always"), 370, currentYPos, 50, 20);
+		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NEVER, "Never"), 470, currentYPos, 50, 20);
+		currentYPos += 20;
+
+		FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindFarmRebuildInfo(unitBase->positionX, unitBase->positionY);
 		if (!fri) {
 			AOE_CheckBox_SetChecked(this->chkRebuildFarmNone, true);
 		} else {
@@ -609,18 +617,19 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	// Military : guard location ?
 	if (isMilitary) {
 		bool canHurtOtherUnits = (unitDef50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (unitDef50->blastRadius > 0);
-		this->AddLabel(popup, &this->lblAutoAttackUnits, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_AUTO_ATTACK_UNITS, "Auto attack units:"), 30, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackTowers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TOWERS, "Towers"), 180, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackMilitary, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_MILITARY, "Military"), 250, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackBuildings, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_BUILDINGS, "Buildings"), 320, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackVillagers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_VILLAGERS, "Villagers"), 390, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackWalls, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_WALLS, "Walls"), 460, 100, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-
-		this->AddCheckBox(popup, &this->chkAutoAttackTowers, 195, 130 - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkAutoAttackMilitary, 265, 130 - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkAutoAttackBuildings, 335, 130 - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkAutoAttackVillagers, 405, 130 - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkAutoAttackWalls, 475, 130 - 4, 24, 24);
+		this->AddLabel(popup, &this->lblAutoAttackUnits, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_AUTO_ATTACK_UNITS, "Auto attack units:"), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackTowers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TOWERS, "Towers"), 180, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackMilitary, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_MILITARY, "Military"), 250, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackBuildings, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_BUILDINGS, "Buildings"), 320, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackVillagers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_VILLAGERS, "Villagers"), 390, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(popup, &this->lblAutoAttackWalls, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_WALLS, "Walls"), 460, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		currentYPos += 30;
+		this->AddCheckBox(popup, &this->chkAutoAttackTowers, 195, currentYPos - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkAutoAttackMilitary, 265, currentYPos - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkAutoAttackBuildings, 335, currentYPos - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkAutoAttackVillagers, 405, currentYPos - 4, 24, 24);
+		this->AddCheckBox(popup, &this->chkAutoAttackWalls, 475, currentYPos - 4, 24, 24);
+		currentYPos += 30;
 		const AutoAttackPolicy *aap = NULL;
 		if (canHurtOtherUnits) {
 			if (isRangedUnit) {
@@ -644,12 +653,57 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		AOE_CheckBox_SetChecked(this->chkAutoAttackWalls, aap->attackWalls);
 	}
 
+	// Special attacks and armors (unit bonus/malus)
+	std::string attackStrengths = "";
+	std::string armorWeaknesses = "";
+	if (isValidType50) {
+		for (int i = 0; i < unitDef50->attacksCount; i++) {
+			if (!IsStandardAttack(unitDef50->ptrAttacksList[i].classId) && (unitDef50->ptrAttacksList[i].amount >= 0)) {
+				const char *attackName = GetAttackClassName(unitDef50->ptrAttacksList[i].classId);
+				attackStrengths += attackName;
+				// Do not display "bonus" attack amounts, they generally are 0 (a malus is set on armors instead)
+				//attackStrengths += "=";
+				//attackStrengths += std::to_string(unitDef50->ptrAttacksList[i].amount);
+				attackStrengths += " ; ";
+			}
+		}
+		for (int i = 0; i < unitDef50->armorsCount; i++) {
+			if (!IsStandardAttack(unitDef50->ptrArmorsList[i].classId)) {
+				const char *attackName = GetAttackClassName(unitDef50->ptrArmorsList[i].classId);
+				armorWeaknesses += attackName;
+				armorWeaknesses += "=";
+				armorWeaknesses += std::to_string(unitDef50->ptrArmorsList[i].amount);
+				armorWeaknesses += " ; ";
+			}
+		}
+		std::string wholeText = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_ATTACK_BONUSES_FOR, "Attack bonuses for");
+		wholeText += std::string(": ");
+		if (attackStrengths.empty()) {
+			wholeText += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NONE_TERM, "none");
+		} else {
+			wholeText += attackStrengths;
+		}
+		wholeText += std::string("\r\n");
+		wholeText += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_ARMOR_WEAKNESSES, "Armor weaknesses");
+		wholeText += std::string(": "); std::string(": ");
+		if (armorWeaknesses.empty()) {
+			wholeText += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NONE_TERM, "none");
+		} else {
+			wholeText += armorWeaknesses;
+		}
+		this->AddTextBox(popup, &this->edtStrengthWeakness, wholeText.c_str(), 0, 30, currentYPos, 450, 36, true, true, false, AOE_FONTS::AOE_FONT_SMALL_TEXT_10);
+		currentYPos += 40;
+	}
+
+
 	// Building : future potential techs/units
 	if (!buildingTechAndUnitInfo.empty() && (techToShowCount > 0)) {
-		this->AddLabel(popup, &this->lblBuildingTechsMessage, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_FUTURE_UNAVAILABLE_TECHS, "Future technologies, not available yet:"), 30, 120, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		
-		this->AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, 140, 450, 20 + techToShowCount * 14, true, true);
+		this->AddLabel(popup, &this->lblBuildingTechsMessage, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_FUTURE_UNAVAILABLE_TECHS, "Future technologies, not available yet:"), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		currentYPos += 20;
+		this->AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, currentYPos, 450, 20 + techToShowCount * 14, true, true);
+		currentYPos += 20 + techToShowCount * 14 + 20;
 	}
+
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
@@ -679,6 +733,7 @@ bool InGameUnitPropertiesPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTT
 	}
 	return false; // Not one of our buttons; let ROR code be executed normally
 }
+
 
 void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	if (isCancel) {

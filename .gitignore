@@ -5,3 +5,4 @@
 Debug/*
 Release/*
 *.vcxproj.filters
+.~lock.*

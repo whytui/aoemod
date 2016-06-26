@@ -115,6 +115,10 @@ Villagers
 Walls
 [42062]
 Future technologies, not available yet:
+[42083] // Unit properties: list of special attacks
+Attack bonuses for
+[42084] // Unit properties: list of special armors
+Armor weaknesses
 
 // *** Scenario editor ***
 [42063]

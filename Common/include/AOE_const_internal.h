@@ -35,6 +35,7 @@ namespace AOE_CONST_INTERNAL
 		CST_PDV_ENEMY = 4
 	};
 
+	// For game settings
 	enum GAME_INITIAL_AGES : long int {
 		GIA_DEFAULT = 0,
 		GIA_NOMAD = 1,

@@ -186,7 +186,7 @@ namespace AOE_CONST_FUNC {
 
 	// http://agecommunity.wikia.com/wiki/Attack_Data
 	// For both attack and armor types.
-	enum ATTACK_CLASS {
+	enum ATTACK_CLASS: short int {
 		CST_AC_BALLISTA_ON_BUILDINGS = 0,
 		CST_AC_SLINGER_ON_ARCHERS = 1, // And on towers/walls too
 		CST_AC_BASE_PIERCE = 3, // Common archers attack class
@@ -196,9 +196,20 @@ namespace AOE_CONST_FUNC {
 		CST_AC_CAMEL_ON_CAVALRY = 8, // And on chariots too
 		CST_AC_CAVALRY_ON_INFANTRY = 9, // on clubmen/short sword + upgrades, NOT on slingers, hoplites...
 		CST_AC_VILLAGER_SIEGECRAFT = 10, // Siegecraft effect: villagers bonus against towers/walls
-		CST_AC_LION = 11, // Lion attack on gazelle, villagers...
+		CST_AC_AGGRESSIVE_ANIMAL = 12, // Animal attacks (lion/lion king + alligator king). Only gazelles have armor against this.
+		CST_AC_COUNT
 	};
 
+	static const char *attackClassNames[] = { "BallistaVsBuildings", "ArchersWeakness", "", "Pierce", "Melee", "" /*5*/,
+		"CatapultsVsBuildings", "PriestWeakness", "CavalryWeakness", "InfantryWeakness", "Siegecraft", "", "AnimalAttack"};
+	// Returns true if attack class is a standard one (like base melee/piercee + "standard" siege weapons attacks), false if it represents some bonus/malus
+	static bool IsStandardAttack(ATTACK_CLASS a) {
+		return (a == CST_AC_BASE_PIERCE) || (a == CST_AC_BASE_MELEE) || (a == CST_AC_BALLISTA_ON_BUILDINGS) || (a == CST_AC_CATAPULTS_ON_BUILDINGS);
+	}
+	static const char * GetAttackClassName(ATTACK_CLASS a) {
+		if ((a < 0) || (a >= CST_AC_COUNT)) { return ""; }
+		return attackClassNames[a];
+	}
 
 	enum TECH_DEF_EFFECTS : char {
 		TDE_INVALID = -1,
