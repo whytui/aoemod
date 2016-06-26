@@ -4226,7 +4226,7 @@ void CustomRORCommand::CustomScenarioEditorUICreation(ROR_STRUCTURES_10C::STRUCT
 		scEditor->map_cbb_mapSize && scEditor->map_cbb_mapSize->IsCheckSumValid() &&
 		scEditor->map_cbb_mapSize->underlyingListBox && scEditor->map_cbb_mapSize->underlyingListBox->IsCheckSumValid()) {
 		AOE_listbox_addItem(scEditor->map_cbb_mapSize->underlyingListBox, 
-			scEditor->map_cbb_mapSize->underlyingListBox->itemCount, "Custom", 0);
+			scEditor->map_cbb_mapSize->underlyingListBox->itemCount, localizationHandler.GetTranslation(CRLANG_ID_CUSTOM, "Custom"), 0);
 	}
 }
 

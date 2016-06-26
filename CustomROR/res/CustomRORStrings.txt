@@ -24,6 +24,9 @@ Welcome. CustomROR
 [42009] // Welcome message part 2
 plugin is active.
 
+[42085] // "Custom"
+Custom
+
 // *** CustomROR Options popup ***
 [42020] // CustomROR options popup title
 CustomROR Options

@@ -421,7 +421,7 @@ static void AOE_comboBox_clear(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *comboBox) 
 
 
 // Adds an item at position for a listbox / combobox
-static bool AOE_listbox_addItem(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *obj, long int position, char *text, long int optionalId) {
+static bool AOE_listbox_addItem(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *obj, long int position, const char *text, long int optionalId) {
 	if (!obj) { return false; }
 	long int res;
 	_asm {

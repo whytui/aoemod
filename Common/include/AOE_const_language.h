@@ -103,3 +103,5 @@ const static unsigned long int CRLANG_ID_POSY_MINMAX = 42079;
 const static unsigned long int CRLANG_ID_TERRAINID = 42080;
 const static unsigned long int CRLANG_ID_ELEVATION = 42081;
 const static unsigned long int CRLANG_ID_TIP_TERRAIN_LEAVE_EMPTY = 42082;
+
+const static unsigned long int CRLANG_ID_CUSTOM = 42085;
