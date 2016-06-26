@@ -39,6 +39,13 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x7DDF84;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0; // does not exist in this version
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x562760; // type= STRUCT_DRS_FILE_LINK*
+	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x580E30;
+	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x7DDFA4;
+	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x580E80; // cf 0x4515E0
+	static const unsigned long int ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x580E98; // array of ptr to arrays of STRUCT_NEARBY_UNIT_INFO
+	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x565C18;
+	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x56CFF8;
+	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x5620A4;
 #endif
 #ifdef GAMEVERSION_AOE10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -65,6 +72,13 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x579714;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0; // does not exist in this version
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7B9784; // type= STRUCT_DRS_FILE_LINK*
+	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x7BA160;
+	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x579734;
+	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7CBCDC;
+	static const unsigned long int ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7CBCF0; // array of ptr to arrays of STRUCT_NEARBY_UNIT_INFO
+	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x7CBD10;
+	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7CBD14;
+	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x551F20;
 #endif
 #ifdef GAMEVERSION_ROR10b
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
@@ -92,6 +106,13 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x585DDC;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0x7C56A0;
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7C4B24; // type= STRUCT_DRS_FILE_LINK*
+	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x7C5508;
+	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x585DF8;
+	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D7088;
+	static const unsigned long int ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D70A0; // array of ptr to arrays of STRUCT_NEARBY_UNIT_INFO
+	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x7D70C0;
+	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7D70C8;
+	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55B734;
 #endif
 #ifdef GAMEVERSION_ROR10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -119,15 +140,15 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x580D8C;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0x7C0634;
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7BFAC4; // type= STRUCT_DRS_FILE_LINK*
-#endif
 	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x7C04A0;
+	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x580DA8;
 	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2024;
 	static const unsigned long int ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2038; // array of ptr to arrays of STRUCT_NEARBY_UNIT_INFO
 	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x7D2058;
 	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7D205C;
-	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x580DA8;
-	static const unsigned long int *UNKNOWN_ARRAY_6A18C0 = (unsigned long int *)0x6A18C0; // Size = 0x100 elements = 0x400 bytes
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55873C;
+#endif
+	static const unsigned long int *UNKNOWN_ARRAY_6A18C0 = (unsigned long int *)0x6A18C0; // Size = 0x100 elements = 0x400 bytes
 	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = ADDR_VAR_UNKNOWN_UI_MAIN_INFO + 0x0C; // part of a bigger struct, +C
 	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = ADDR_VAR_UNKNOWN_UI_MAIN_INFO + 0x0C; // part of a bigger struct, +C
 
