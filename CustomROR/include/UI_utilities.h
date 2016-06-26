@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <AOE_offsets_10c.h>
+#include <AOE_offsets.h>
 #include <AOE_const_internal.h>
 #include <ROR_structures.h>
 #include <ROR_structures_drs.h>

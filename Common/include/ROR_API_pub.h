@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include <AOE_offsets_10c.h>
+#include <AOE_offsets.h>
 
 // This structure describes the register context when ROR_API was called from game code.
 typedef struct{

@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <Windows.h>
-#include <AOE_offsets_10c.h>
+#include <AOE_offsets.h>
 
 
 // Returns true if successful.

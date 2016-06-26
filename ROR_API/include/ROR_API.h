@@ -1,6 +1,6 @@
 #pragma once
 #include <gameVersion.h>
-#include <AOE_offsets_10c.h>
+#include <AOE_offsets.h>
 #include "ROR_API_pub.h"
 #include "../include/ConfigManager.h"
 

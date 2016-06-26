@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <assert.h>
-#include <AOE_offsets_10c.h>
+#include <AOE_offsets.h>
 #include <mystrings.h>
 #include "../../AOE_DataPatcher/include/AOE_binData.h"
 #include "../../AOE_DataPatcher/include/BinarySeqDefinition.h"

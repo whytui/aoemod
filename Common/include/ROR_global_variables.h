@@ -3,7 +3,7 @@
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
 #include <ROR_structures.h>
-#include <AOE_offsets_10c.h>
+#include <AOE_offsets.h>
 
 using namespace AOE_OFFSETS;
 

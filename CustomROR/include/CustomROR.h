@@ -5,7 +5,7 @@
 #include <ROR_API_pub.h>
 #include <AOE_const_functional.h>
 #include <AOE_const_language.h>
-#include <AOE_offsets_10c.h>
+#include <AOE_offsets.h>
 #include <ROR_structures.h>
 #include <ROR_API_assert.h>
 #include <customResolution.h>

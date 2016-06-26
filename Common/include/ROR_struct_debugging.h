@@ -6,7 +6,7 @@
 #include <yvals.h> // for __STRINGIZE
 #include <Windows.h>
 #include <WinUser.h>
-#include <AOE_offsets_10c.h>
+#include <AOE_offsets.h>
 #include <assert.h>
 #include <string>
 #include <ROR_struct_export.h>

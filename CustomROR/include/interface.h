@@ -4,7 +4,7 @@
 #include <yvals.h> // _STRINGIZE
 #include <list>
 #include <Windows.h>
-#include <AOE_offsets_10c.h>
+#include <AOE_offsets.h>
 #include <customResolution.h>
 #include "crPatcher.h"
 
