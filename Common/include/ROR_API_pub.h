@@ -48,7 +48,7 @@ static char API_PROC_NAME[] = "DispatchToCustomCode";
 // Useful to check which ROR_API options have been enabled in empiresX.exe
 // Warning: gameAddress is the (supposed) return address of ROR_API call, not the address of customized code
 static bool IsRORAPICallEnabled(unsigned long int gameReturnAddress) {
-	if ((gameReturnAddress < AOE_OFFSETS_10C::ADDR_EXE_MIN + 5) || (gameReturnAddress > AOE_OFFSETS_10C::ADDR_EXE_MAX)) {
+	if ((gameReturnAddress < AOE_OFFSETS::ADDR_EXE_MIN + 5) || (gameReturnAddress > AOE_OFFSETS::ADDR_EXE_MAX)) {
 		return false; // invalid address
 	}
 	// Now accessing gameAddress-pointed values is secure as we're sure it is in game "TEXT" memory zone.
@@ -58,7 +58,7 @@ static bool IsRORAPICallEnabled(unsigned long int gameReturnAddress) {
 	// Use signed values (callOffset may be negative, it is a relative offset between calling address=EIP and called address).
 	long int signedGameAddress = (long int)gameReturnAddress;
 	long int callOffset = *(unsigned long *)(gameReturnAddress - 4); // We checked that gameAddress is in correct range, so it is a valid pointer value.
-	return signedGameAddress + callOffset == AOE_OFFSETS_10C::ROR_API_GAME_PROC_ADDR;
+	return signedGameAddress + callOffset == AOE_OFFSETS::ROR_API_GAME_PROC_ADDR;
 }
 
 // Modifies return address.

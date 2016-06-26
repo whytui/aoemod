@@ -409,7 +409,7 @@ ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS* GetGameSettingsPtr() {
 
 
 ROR_STRUCTURES_10C::STRUCT_ANY_UI *GetCurrentUIStruct() {
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI **p = (ROR_STRUCTURES_10C::STRUCT_ANY_UI **)AOE_OFFSETS_10C::ADDR_VAR_ACTIVE_UI_STRUCT;
+	ROR_STRUCTURES_10C::STRUCT_ANY_UI **p = (ROR_STRUCTURES_10C::STRUCT_ANY_UI **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
 	assert(*p != NULL);
 	return *p;
 }
@@ -865,7 +865,7 @@ ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(ROR_STRUCTURES_10C::STRU
 
 bool IsMultiplayer() {
 #pragma message("TODO: bugs in IsMultiplayer when running MP and then SP games")
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = (ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *)AOE_OFFSETS_10C::ADDR_VAR_GAME_SETTINGS_STRUCT;
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = (ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *)AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT;
 	if (settings == NULL) { return false; }
 	return (settings->isMultiplayer != 0);
 }
@@ -927,7 +927,7 @@ ROR_STRUCTURES_10C::STRUCT_SCORE_ELEM *FindScoreElement(ROR_STRUCTURES_10C::STRU
 // Low word: bit mask per player for "fog visibility"
 // Lower bit is player 0 (gaia), 2nd=player1, etc
 ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int posX, long int posY) {
-	unsigned long int **pMapInfo = (unsigned long int **)AOE_OFFSETS_10C::ADDR_MAP_VISIBILITY_INFO;
+	unsigned long int **pMapInfo = (unsigned long int **)AOE_OFFSETS::ADDR_MAP_VISIBILITY_INFO;
 	assert(pMapInfo != NULL);
 	assert(posX >= 0);
 	assert(posY >= 0);

@@ -4,7 +4,7 @@
 // This method makes necessary checks to know if it is relevant to modify interfac.drs filename to use our custom one
 // If the game uses a custom resolution and if they are available, makes so ROR will use custom interfac.drs files (see CST_INTERFAC_DRS_CUSTOM_FILE_NAME)
 void ChangeItfDRS_file() {
-	char *interfac_drs_name = (char *)AOE_OFFSETS_10C::ADDR_VAR_INTERFAC_DRS_NAME;
+	char *interfac_drs_name = (char *)AOE_OFFSETS::ADDR_VAR_INTERFAC_DRS_NAME;
 	long int interfac_drs_name_size = 0x0F;
 	bool go_on = true;
 	FILE *fileTest = NULL;

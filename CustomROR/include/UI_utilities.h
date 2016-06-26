@@ -46,10 +46,10 @@ static const char gameScreenName[] = "Game Screen";
 // Note that settings->currentUIStatus is unchanged when showing such dialog message.
 static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, long int hSize, long int vSize) {
 	char *dlgName = (char *)AOE_CONST_INTERNAL::customDialogScreenName;
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *(ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS **) AOE_OFFSETS_10C::ADDR_VAR_GAME_SETTINGS_STRUCT; // GetGameSettingsPtr();
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *(ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS **) AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT; // GetGameSettingsPtr();
 	if (settings == NULL) { return 0; }
 	unsigned long int fct = 0;
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = *(ROR_STRUCTURES_10C::STRUCT_ANY_UI **) AOE_OFFSETS_10C::ADDR_VAR_CURRENT_UI_OBJECT;
+	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = *(ROR_STRUCTURES_10C::STRUCT_ANY_UI **) AOE_OFFSETS::ADDR_VAR_CURRENT_UI_OBJECT;
 	if (currentUI == NULL) { return NULL; }
 	// Get correct call values according to active screen
 	if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) {

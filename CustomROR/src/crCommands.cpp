@@ -547,7 +547,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 void CustomRORCommand::ShowF11_zone() {
 	// Show automatically "F11" information at game startup
 	_asm {
-		MOV EAX, AOE_OFFSETS_10C::ADDR_VAR_GAME_SETTINGS_STRUCT
+		MOV EAX, AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT
 		MOV EAX, DS:[EAX]
 		MOV ESI, DS:[EAX+0xC24] // struct 9C 67 54 00 (game screen) //settings->ptrGameUIStruct;
 		// This code is directly inspired from 0x480D4F (press on F11)
@@ -811,7 +811,7 @@ void CustomRORCommand::OnGameStart() {
 	// For farm, see notify event method (managed on market construction notification).
 	this->ManageTriggerDisableUnitsForExceptions();
 
-	long int **p = (long int **)AOE_OFFSETS_10C::ADDR_VAR_ACTIVE_UI_STRUCT;
+	long int **p = (long int **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
 	if ((*p) && (**p != 0x0054679C)) {
 		// This is NOT game screen, do not try to interact with it !
 		return;
@@ -1039,7 +1039,7 @@ void CustomRORCommand::DisableAIFlagsForHuman() {
 
 	bool isSinglePlayer = !IsMultiplayer();
 
-	ROR_STRUCTURES_10C::STRUCT_MP_COMMUNICATION *unknownStruct = *(ROR_STRUCTURES_10C::STRUCT_MP_COMMUNICATION **)AOE_OFFSETS_10C::ADDR_MP_COMM_STRUCT;
+	ROR_STRUCTURES_10C::STRUCT_MP_COMMUNICATION *unknownStruct = *(ROR_STRUCTURES_10C::STRUCT_MP_COMMUNICATION **)AOE_OFFSETS::ADDR_MP_COMM_STRUCT;
 	assert(unknownStruct != NULL);
 	int aValidAIPlayer = -1;
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
@@ -2368,7 +2368,7 @@ void CustomRORCommand::PrintDateTime() {
 
 
 void CustomRORCommand::PrintMapSeed() {
-	long int *addr = (long int *)AOE_OFFSETS_10C::ADDR_VAR_GAME_SETTINGS_STRUCT;
+	long int *addr = (long int *)AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT;
 	unsigned long int *mapSeed = (unsigned long int *) ((*addr) + 0x34);
 	char text[50];
 	sprintf_s(text, 50, "Map seed=%d.", *mapSeed);
@@ -2822,7 +2822,7 @@ void CustomRORCommand::OnPlayerAddUnitCustomTreatments(ROR_STRUCTURES_10C::STRUC
 
 			long int posX = (long int)unit->positionX;
 			long int posY = (long int)unit->positionY;
-			unsigned long int **ppMapInfo = (unsigned long int **)AOE_OFFSETS_10C::ADDR_MAP_VISIBILITY_INFO;
+			unsigned long int **ppMapInfo = (unsigned long int **)AOE_OFFSETS::ADDR_MAP_VISIBILITY_INFO;
 			unsigned long int *pMapInfoX = ppMapInfo[posX];
 			unsigned long int *pMapInfo = &pMapInfoX[posY];
 

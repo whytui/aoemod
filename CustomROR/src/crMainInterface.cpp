@@ -23,7 +23,7 @@ CustomRORMainInterface::~CustomRORMainInterface() {
 // Manage key press in game screen and editor.
 // Returns true if event has been handled AND we don't want original code to try to handle it.
 bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool CTRL, bool SHIFT, bool ALT) {
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI **pCurrentUI = (ROR_STRUCTURES_10C::STRUCT_ANY_UI **)AOE_OFFSETS_10C::ADDR_VAR_ACTIVE_UI_STRUCT;
+	ROR_STRUCTURES_10C::STRUCT_ANY_UI **pCurrentUI = (ROR_STRUCTURES_10C::STRUCT_ANY_UI **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
 	assert(pCurrentUI != NULL);
 	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = *pCurrentUI;
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -126,7 +126,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 #ifdef _DEBUG
 	// TEST - F7 - debug only
 	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F7)) {
-		unsigned long int *marray = (unsigned long int *)AOE_OFFSETS_10C::UNKNOWN_ARRAY_6A18C0;
+		unsigned long int *marray = (unsigned long int *)AOE_OFFSETS::UNKNOWN_ARRAY_6A18C0;
 		ROR_STRUCTURES_10C::STRUCT_UNKNOWN_MAP_DATA_F04C *md1 = (ROR_STRUCTURES_10C::STRUCT_UNKNOWN_MAP_DATA_F04C *) 0x583BC8;
 		ROR_STRUCTURES_10C::STRUCT_UNKNOWN_MAP_DATA_F04C *md2 = (ROR_STRUCTURES_10C::STRUCT_UNKNOWN_MAP_DATA_F04C *) 0x6A1CC0;
 		char txt[1000];

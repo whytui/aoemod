@@ -319,7 +319,7 @@ namespace ROR_STRUCTURES_10C {
 			ZeroMemory(&this->gameSettings, sizeof(this->gameSettings)); 
 			return false;
 		}
-		if (!GetObjectFromRORData(this->handleROR, AOE_OFFSETS_10C::ADDR_VAR_GAME_SETTINGS_STRUCT, &this->gameSettingsAddr)) {
+		if (!GetObjectFromRORData(this->handleROR, AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT, &this->gameSettingsAddr)) {
 			this->gameSettingsAddr = 0;
 			return false;
 		}
@@ -360,7 +360,7 @@ namespace ROR_STRUCTURES_10C {
 			ZeroMemory(&this->mapVisibilityInfoRows, sizeof(this->mapVisibilityInfoRows));
 			return false;
 		}
-		if (!GetObjectFromRORData(this->handleROR, AOE_OFFSETS_10C::ADDR_MAP_VISIBILITY_INFO, &this->mapVisibilityInfoRows)) {
+		if (!GetObjectFromRORData(this->handleROR, AOE_OFFSETS::ADDR_MAP_VISIBILITY_INFO, &this->mapVisibilityInfoRows)) {
 			return false;
 		}
 		// Now get all data (columns)
@@ -382,7 +382,7 @@ namespace ROR_STRUCTURES_10C {
 			ZeroMemory(&this->tempMapBuildLikeInfo, sizeof(this->tempMapBuildLikeInfo));
 			return false;
 		}
-		if (!GetObjectFromRORData(this->handleROR, AOE_OFFSETS_10C::ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS, &this->tempMapBuildLikeInfo)) {
+		if (!GetObjectFromRORData(this->handleROR, AOE_OFFSETS::ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS, &this->tempMapBuildLikeInfo)) {
 			return false;
 		}
 		return this->tempMapBuildLikeInfo.IsCheckSumValid();
@@ -394,7 +394,7 @@ namespace ROR_STRUCTURES_10C {
 			return false;
 		}
 		unsigned long int p = NULL;
-		if (!GetObjectFromRORData(this->handleROR, AOE_OFFSETS_10C::ADDR_VAR_CURRENT_UI_OBJECT, &p)) {
+		if (!GetObjectFromRORData(this->handleROR, AOE_OFFSETS::ADDR_VAR_CURRENT_UI_OBJECT, &p)) {
 			return false;
 		}
 		if (!GetObjectFromRORData(this->handleROR, p, &this->currentUIStruct)) {

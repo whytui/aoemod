@@ -10,7 +10,7 @@ CustomRORInstance::CustomRORInstance() {}
 
 void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	assert(REG_values != NULL);
-	if ((REG_values->return_address < AOE_OFFSETS_10C::ADDR_EXE_MIN) || (REG_values->return_address > AOE_OFFSETS_10C::ADDR_EXE_MAX)) {
+	if ((REG_values->return_address < AOE_OFFSETS::ADDR_EXE_MIN) || (REG_values->return_address > AOE_OFFSETS::ADDR_EXE_MAX)) {
 		std::string msg = "Received a ROR_API call with invalid address (";
 		msg += GetHexStringAddress(REG_values->return_address);
 		msg += "). Skipping.";
@@ -1307,7 +1307,7 @@ void CustomRORInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
 	REG_values->EAX_val = myEAX;
 	REG_values->EDI_val = myEDI;
 
-	unsigned long int **ptrCurrentUI = (unsigned long int **) AOE_OFFSETS_10C::ADDR_VAR_ACTIVE_UI_STRUCT;
+	unsigned long int **ptrCurrentUI = (unsigned long int **) AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
 	assert(ptrCurrentUI != NULL); // it's a constant, it can't be NULL !
 	if (!*ptrCurrentUI) { return; } // Check ROR's variable value is not NULL, or exit in that case (not an error from this code's point of view).
 
@@ -2654,7 +2654,7 @@ void CustomRORInstance::RORDebugLogHandler(REG_BACKUP *REG_values) {
 
 	unsigned long int returnAddress = *(unsigned long int*)REG_values->ESP_val;
 
-	if ((returnAddress < AOE_OFFSETS_10C::ADDR_EXE_MIN + 5) || (returnAddress > AOE_OFFSETS_10C::ADDR_EXE_MAX)) {
+	if ((returnAddress < AOE_OFFSETS::ADDR_EXE_MIN + 5) || (returnAddress > AOE_OFFSETS::ADDR_EXE_MAX)) {
 		return; // invalid address
 	}
 	// Verify that ROR EXE caller is NOT a class call (NOT like CALL DS:[xxx+yyy]).
@@ -3070,7 +3070,7 @@ void CustomRORInstance::EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_value
 	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *)REG_values->ECX_val;
 	ror_api_assert(REG_values, gameMainUI && gameMainUI->IsCheckSumValid());
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
-		REG_values->EAX_val = *(long int *)AOE_OFFSETS_10C::ADDR_GAME_ACTIONS_ALLOWED;
+		REG_values->EAX_val = *(long int *)AOE_OFFSETS::ADDR_GAME_ACTIONS_ALLOWED;
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 	bool forceIgnoreThisEvent = false; // Modify this flag if you wish.

@@ -16,7 +16,7 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 			if (seqDef) {
 				std::string seqDefName = narrow(seqDef->GetSeqName());
 				unsigned long int addr = AOE_FileOffsetToExeAddr((unsigned long int)seqDef->GetSeqOffset());
-				if (addr >= AOE_OFFSETS_10C::ADDR_DATA_MIN) {
+				if (addr >= AOE_OFFSETS::ADDR_DATA_MIN) {
 					// Do not check/try to fix sequences in DATA section (may be modified during normal execution)
 					fprintf_s(logFile, "This sequence will not be checked: %s\n", seqDefName.c_str());
 				} else {

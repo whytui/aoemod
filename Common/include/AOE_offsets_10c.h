@@ -6,7 +6,7 @@
 /* 
  * This file contains various offsets/values that are specific to each AOE/ROR executable
 */
-namespace AOE_OFFSETS_10C
+namespace AOE_OFFSETS
 {
 	// Some useful raw addresses
 #ifdef GAMEVERSION_AOE10a
@@ -206,29 +206,29 @@ namespace AOE_OFFSETS_10C
 // Useful function to control checksums on unknown structs
 static bool isAValidRORChecksum(unsigned long int checksum){
 	// Not completely certain of the interval, but seems quite good.
-	return (checksum >= AOE_OFFSETS_10C::ADDR_CHECKSUM_MIN) && (checksum < AOE_OFFSETS_10C::ADDR_CHECKSUM_MAX) &&
+	return (checksum >= AOE_OFFSETS::ADDR_CHECKSUM_MIN) && (checksum < AOE_OFFSETS::ADDR_CHECKSUM_MAX) &&
 		((checksum & 0x3) == 0); // 2 lower bits are 0 means it's a multiple of 4. (checksums values are dword-aligned values).
 }
 
 // Returns 0 if offset is invalid.
 static unsigned long int AOE_FileOffsetToExeAddr(unsigned long int fileOffset) {
-	if (fileOffset < AOE_OFFSETS_10C::ADDR_FILE_EXE_MIN) { return 0; }
+	if (fileOffset < AOE_OFFSETS::ADDR_FILE_EXE_MIN) { return 0; }
 #if defined(GAMEVERSION_AOE10b) || defined(GAMEVERSION_ROR10b)
-	if (fileOffset < AOE_OFFSETS_10C::ADDR_FILE_EXE_MAX) {
+	if (fileOffset < AOE_OFFSETS::ADDR_FILE_EXE_MAX) {
 		return fileOffset + 0x400c00;
 	}
-	if (fileOffset < (AOE_OFFSETS_10C::ADDR_THIS_CODE_MAX - 0x401a00)) {
+	if (fileOffset < (AOE_OFFSETS::ADDR_THIS_CODE_MAX - 0x401a00)) {
 		return fileOffset + 0x401a00;
 	}
-	if (fileOffset < (AOE_OFFSETS_10C::ADDR_RDATA_MAX - 0x401E00)) {
+	if (fileOffset < (AOE_OFFSETS::ADDR_RDATA_MAX - 0x401E00)) {
 		return fileOffset + 0x401E00;
 	}
-	if (fileOffset < (AOE_OFFSETS_10C::ADDR_DATA_MAX - 0x402600)) {
+	if (fileOffset < (AOE_OFFSETS::ADDR_DATA_MAX - 0x402600)) {
 		return fileOffset + 0x402600;
 	}
 #endif
 #if defined(GAMEVERSION_AOE10c) || defined(GAMEVERSION_ROR10c)
-	if (fileOffset < (AOE_OFFSETS_10C::ADDR_DATA_MAX - 0x400000)) {
+	if (fileOffset < (AOE_OFFSETS::ADDR_DATA_MAX - 0x400000)) {
 		return fileOffset + 0x400000;
 	}
 #endif
@@ -238,7 +238,7 @@ static unsigned long int AOE_FileOffsetToExeAddr(unsigned long int fileOffset) {
 // Returns 0 if address is invalid.
 static unsigned long int AOE_ExeAddrToFileOffset(unsigned long int ExeAddr) {
 	// TODO: only supports text (not THIS_COD, .rdata, .data)
-	if ((ExeAddr < AOE_OFFSETS_10C::ADDR_EXE_MIN) || (ExeAddr > AOE_OFFSETS_10C::ADDR_EXE_MAX)) {
+	if ((ExeAddr < AOE_OFFSETS::ADDR_EXE_MIN) || (ExeAddr > AOE_OFFSETS::ADDR_EXE_MAX)) {
 		return 0;
 	}
 #if defined(GAMEVERSION_AOE10b) || defined(GAMEVERSION_ROR10b)
