@@ -4,7 +4,7 @@
 #include <gameVersion.h>
 
 /* 
- * This file contains various offsets/values that are specific to 1.0c ROR executable
+ * This file contains various offsets/values that are specific to each AOE/ROR executable
 */
 namespace AOE_OFFSETS_10C
 {
@@ -40,6 +40,7 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x564FB4;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x7DDF84;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0; // does not exist in this version
+	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x562760; // type= STRUCT_DRS_FILE_LINK*
 #endif
 #ifdef GAMEVERSION_AOE10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -67,6 +68,7 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x556020;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x579714;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0; // does not exist in this version
+	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7B9784; // type= STRUCT_DRS_FILE_LINK*
 #endif
 #ifdef GAMEVERSION_ROR10b
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
@@ -94,6 +96,7 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x55FA5C;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x585DDC;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0x7C56A0;
+	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7C4B24; // type= STRUCT_DRS_FILE_LINK*
 #endif
 #ifdef GAMEVERSION_ROR10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -121,6 +124,7 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x0055CA5C;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x580D8C;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0x7C0634;
+	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7BFAC4; // type= STRUCT_DRS_FILE_LINK*
 #endif
 	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x7C04A0;
 	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2024;
@@ -130,7 +134,6 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x580DA8;
 	static const unsigned long int *UNKNOWN_ARRAY_6A18C0 = (unsigned long int *)0x6A18C0; // Size = 0x100 elements = 0x400 bytes
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55873C;
-	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7BFAC4; // type= STRUCT_DRS_FILE_LINK*
 
 	// Game executable interface procedure address (ROR_API call)
 #ifdef GAMEVERSION_AOE10b
@@ -149,6 +152,36 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x419574;
 	static const unsigned long int AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS = 0x443713;
 #endif
+
+
+
+
+
+
+	/***** Game methods Call addresses *****/
+
+
+#ifdef GAMEVERSION_AOE10b
+	static const unsigned long int EXEADDR_AddDrsFile = 0x45D020;
+	static const unsigned long int EXEADDR_SlpInfo_ctor = 0x46B800;
+#endif
+#ifdef GAMEVERSION_AOE10c
+	static const unsigned long int EXEADDR_AddDrsFile = 0x46C430;
+	static const unsigned long int EXEADDR_SlpInfo_ctor = 0x49E830;
+#endif
+#ifdef GAMEVERSION_ROR10b
+	static const unsigned long int EXEADDR_AddDrsFile = 0x46C190;
+	static const unsigned long int EXEADDR_SlpInfo_ctor = 0x4A0B80;
+#endif
+#ifdef GAMEVERSION_ROR10c
+	static const unsigned long int EXEADDR_AddDrsFile = 0x46AFC0;
+	static const unsigned long int EXEADDR_SlpInfo_ctor = 0x49F5F0;
+#endif
+
+
+
+
+
 
 };
 

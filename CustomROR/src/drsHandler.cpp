@@ -41,26 +41,13 @@ namespace ROR_STRUCTURES_10C {
 	// Runs constructor on a STRUCT_SLP_INFO object so it refers to a specific SLP.
 	// This makes SLP bitmaps available for further treatments.
 	void InitSlpInfoFromDrs(ROR_STRUCTURES_10C::STRUCT_SLP_INFO *slpInfo, long int slpId, char *shpName) {
-		unsigned long int callAddr = 0;
-#ifdef GAMEVERSION_AOE10b
-		callAddr = 0x46B800; // constructor for STRUCT_SLP_INFO
-#endif
-#ifdef GAMEVERSION_AOE10c
-		callAddr = 0x49E830; // constructor for STRUCT_SLP_INFO
-#endif
-#ifdef GAMEVERSION_ROR10b
-		callAddr = 0x4A0B80; // constructor for STRUCT_SLP_INFO
-#endif
-#ifdef GAMEVERSION_ROR10c
-		callAddr = 0x49F5F0; // constructor for STRUCT_SLP_INFO
-#endif
-		if (!callAddr) { return; }
+		if (!EXEADDR_SlpInfo_ctor) { return; }
 		//char *shpName = ""; // unused when slpId is supplied
 		_asm {
 			PUSH slpId;
 			PUSH shpName;
 			MOV ECX, slpInfo;
-			CALL callAddr;
+			CALL EXEADDR_SlpInfo_ctor;
 		}
 	}
 
@@ -69,22 +56,9 @@ namespace ROR_STRUCTURES_10C {
 	// Filename is the DRS file name with extension. Example "graphics.drs"
 	// folder is relative path from AOE root directory. Example "data2\". If non-empty, it must end with "\" !!!
 	void AOE_AddDrsFile(const char *filename, const char *folder) {
-		const unsigned long int callAddress =
-#ifdef GAMEVERSION_AOE10b
-		0x45D020;
-#endif
-#ifdef GAMEVERSION_AOE10c
-		0x46C430;
-#endif
-#ifdef GAMEVERSION_ROR10b
-		0x46C190;
-#endif
-#ifdef GAMEVERSION_ROR10c
-		0x46AFC0;
-#endif
+		const unsigned long int callAddress = EXEADDR_AddDrsFile;
 		if (!filename) { return; }
 		const char *tribe = "tribe";
-		
 		_asm {
 			PUSH 0; // Not sure what exactly it means, 1 for sounds.drs. If 1, drsLink+0 is no valued and AOE_GetDrsObjectInfos won't work.
 			PUSH folder;

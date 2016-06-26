@@ -54,7 +54,7 @@ enum AOE_FILE_VERSION {
 
 
 // Returns the game version that corresponds to current build version
-static const AOE_FILE_VERSION GetBuildVersion() {
+static const inline AOE_FILE_VERSION GetBuildVersion() {
 	return (AOE_FILE_VERSION)GAMEVERSION;
 }
 
