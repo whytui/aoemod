@@ -1835,7 +1835,7 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	}
 
 	// Do we already have a global struct ? If Yes, check civ number in empires.dat (if not matching our config, it may crash)
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	if (globalStruct != NULL) {
 		if (globalStruct->civCount < this->crInfo.configInfo.civCount) {
 			// This situation is quite bad. empires.dat contains less civs than XML config.

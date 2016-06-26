@@ -172,7 +172,9 @@ int DisablePlayerImpossibleResearches(STRUCT_PLAYER *player) {
 // An impossible research is a research that is waiting for requirements, including ones that can never be satisfied.
 // Example in original game: irrigation for persian, armored elephant for yamato, etc.
 int DisableImpossibleResearches() {
-	STRUCT_GAME_GLOBAL *global = *ROR_gameGlobal;
+	STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	if (!settings || !settings->IsCheckSumValid()) { return 0; }
+	STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !global->ptrPlayerStructPtrTable) {
 		return 0;
 	}

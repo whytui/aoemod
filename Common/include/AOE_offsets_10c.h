@@ -33,10 +33,8 @@ namespace AOE_OFFSETS_10C
 	// 0x7F0000 : .reloc
 	static const unsigned long int ADDR_CHECKSUM_MIN = 0x54D0B8;
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x555D18;
-	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0;
-	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0;
-	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0;
-	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0; // redundant - to remove
+	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x5681D8;
+	static const unsigned long int ADDR_VAR_UNKNOWN_UI_MAIN_INFO = 0x56D5F8; // some included struct
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x564FB4;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x7DDF84;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0; // does not exist in this version
@@ -61,10 +59,8 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_RESOURCES_MAX = 0x7DAFFF;
 	static const unsigned long int ADDR_CHECKSUM_MIN = 0x53B3F8; // unsure
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x5437F8; // unsure
-	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0;
-	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0;
-	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0;
-	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0; // redundant - to remove
+	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x5797BC;
+	static const unsigned long int ADDR_VAR_UNKNOWN_UI_MAIN_INFO = 0x57CDB0; // some included struct
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x556020;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x579714;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0; // does not exist in this version
@@ -89,10 +85,9 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_RESOURCES_MAX = 0x7E8FFF;
 	static const unsigned long int ADDR_CHECKSUM_MIN = 0x00547000;
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054FF60; // unsure
-	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A6858;
-	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0;
-	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0;
-	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0; // redundant - to remove
+	//static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A6858; // Do not use it
+	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x585E88;
+	static const unsigned long int ADDR_VAR_UNKNOWN_UI_MAIN_INFO = 0x588138; // some included struct
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x55FA5C;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x585DDC;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0x7C56A0;
@@ -117,10 +112,9 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_RESOURCES_MAX = 0x7E1FFF;
 	static const unsigned long int ADDR_CHECKSUM_MIN = 0x005423F0;
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054AA60;
-	static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A1808;
+	//static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A1808; // Do not use it
 	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x580E38;
-	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = 0x005830F4;
-	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = 0x5830F4; // redundant - to remove
+	static const unsigned long int ADDR_VAR_UNKNOWN_UI_MAIN_INFO = 0x005830E8; // some included struct
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x0055CA5C;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x580D8C;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0x7C0634;
@@ -134,6 +128,8 @@ namespace AOE_OFFSETS_10C
 	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x580DA8;
 	static const unsigned long int *UNKNOWN_ARRAY_6A18C0 = (unsigned long int *)0x6A18C0; // Size = 0x100 elements = 0x400 bytes
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55873C;
+	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = ADDR_VAR_UNKNOWN_UI_MAIN_INFO + 0x0C; // part of a bigger struct, +C
+	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = ADDR_VAR_UNKNOWN_UI_MAIN_INFO + 0x0C; // part of a bigger struct, +C
 
 	// Game executable interface procedure address (ROR_API call)
 #ifdef GAMEVERSION_AOE10b

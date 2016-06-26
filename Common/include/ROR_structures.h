@@ -728,7 +728,7 @@ namespace ROR_STRUCTURES_10C
 		long int unknown_11DC38_counter; // a counter
 		unsigned long int uknown_11DC3C_ptr; // ptr to F4 99 54 00
 		// 0x11DC40
-		STRUCT_GAME_GLOBAL *globalStruct;
+		STRUCT_GAME_GLOBAL *globalStruct; // +11DC40: in old debugging times, was used as a global var to "game global", was not exactly the case.
 		STRUCT_UNIT *currentUnit; // 11DC44.
 		unsigned long int unknown_11DC48;
 		long int destinationUnitId; // +11DC4C.
@@ -1394,6 +1394,22 @@ namespace ROR_STRUCTURES_10C
 	};
 
 
+#ifdef GAMEVERSION_AOE10b
+#define CHECKSUM_GAME_GLOBAL1 0x00554A58
+#define CHECKSUM_GAME_GLOBAL2 0x00553230
+#endif
+#ifdef GAMEVERSION_AOE10c
+#define CHECKSUM_GAME_GLOBAL1 0x005432AC
+#define CHECKSUM_GAME_GLOBAL2 0x005436FC
+#endif
+#ifdef GAMEVERSION_ROR10b // cf 0x50C250
+#define CHECKSUM_GAME_GLOBAL1 0x0054F990
+#define CHECKSUM_GAME_GLOBAL2 0x0054FE58
+#endif
+#ifdef GAMEVERSION_ROR10c
+#define CHECKSUM_GAME_GLOBAL1 0x0054A4F8
+#define CHECKSUM_GAME_GLOBAL2 0x0054A954
+#endif
 	// Size = 0x124 - F8 A4 54 00. Parent=54 A9 54 00
 	// Constructor 0x509AE0 (parent 51B140)
 	class STRUCT_GAME_GLOBAL {
@@ -1497,7 +1513,7 @@ namespace ROR_STRUCTURES_10C
 			if ((playerId < 0) || (playerId >= this->playerTotalCount) || (playerId >= 9)) { return NULL; }
 			return this->ptrPlayerStructPtrTable[playerId];
 		}
-		bool IsCheckSumValid() { return (this->checksum == 0x0054A4F8) || (this->checksum == 0x0054A954); }
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_GAME_GLOBAL1) || (this->checksum == CHECKSUM_GAME_GLOBAL2); }
 	};
 
 

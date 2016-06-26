@@ -513,7 +513,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 
 	// TEST conversion
 	if (strcmp(command, "conversion") == 0) {
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = *ROR_gameGlobal;
+		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		assert(global != NULL);
 		for (int i = 1; i < global->playerTotalCount; i++) {
 			int FOR_attempt = this->crInfo->activeConversionAttemptsCount[i];
@@ -1014,7 +1014,7 @@ void CustomRORCommand::InitScenarioInfoTextData(ROR_STRUCTURES_10C::STRUCT_SCENA
 void CustomRORCommand::InitMyGameInfo() {
 	this->crInfo->ResetVariables();
 	// Prevent 0% speed at game startup (occurs because of rounding in registry saved value)
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = *ROR_gameGlobal;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid() && (global->gameSpeed == 0)) {
 		global->gameSpeed = 1;
 	}
@@ -2391,7 +2391,7 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 	std::string objToString = "";
 
 	fprintf_s(f, "AOE Debug information\n\n");
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settingsStruct = *ROR_gameSettings;
 	fprintf_s(f, "Global struct = 0x%08lX - %d players (including gaia)\n", (long int)globalStruct, globalStruct->playerTotalCount);
 	fprintf_s(f, "Game settings = 0x%08lX - Map seed=%d - Deathmatch=%d\n", (long int)settingsStruct, settingsStruct->actualMapSeed, settingsStruct->isDeathMatch);
@@ -2556,7 +2556,7 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(ROR_STRUCTURES_10C::S
 // Requires ManageAI !
 // Disabled in MP games.
 void CustomRORCommand::CallNearbyIdleMilitaryUnits() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	short int playerId = globalStruct->humanPlayerId;
 	if ((playerId < 0) || (playerId > 8)) { return; }
 
@@ -2570,7 +2570,7 @@ void CustomRORCommand::CallNearbyIdleMilitaryUnits() {
 
 // Select next idle military unit for current player
 void CustomRORCommand::SelectNextIdleMilitaryUnit() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	short int playerId = globalStruct->humanPlayerId;
 	if ((playerId < 0) || (playerId > 8)) { return; }
 
@@ -2642,7 +2642,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	}
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = unit->ptrStructPlayer;
 	assert(player != NULL);
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	assert(globalStruct != NULL);
 	// Does spawned unit belong to currently human-controlled player ?
 	if (player->playerId != globalStruct->humanPlayerId) {
@@ -5451,7 +5451,7 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(ROR_STRUCTURES_10C::ST
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = ai->ptrStructPlayer;
 	assert(player != NULL);
 	assert(player->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = *ROR_gameGlobal;
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	assert(globalStruct != NULL);
 	assert(globalStruct->IsCheckSumValid());
 

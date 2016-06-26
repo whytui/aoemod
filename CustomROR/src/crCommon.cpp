@@ -395,7 +395,6 @@ ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **CustomRORInfo::GetRelevantSelectedUnitsBa
 // Returns a pointer to global game struct
 // Warning: can sometimes return NULL when called very early (when the game has just been run)
 ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr() {
-	if (*ROR_gameGlobal) { return *ROR_gameGlobal; } // Easier way: global variable is valued.
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings; // Otherwise, find it in game settings
 	assert(settings != NULL);
 	if (!settings) { return NULL; }
