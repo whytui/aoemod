@@ -21,8 +21,8 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 					fprintf_s(logFile, "This sequence will not be checked: %s\n", seqDefName.c_str());
 				} else {
 					// Some sequences are not mandatory, do not raise an error for them.
-					bool isOptionalSequence = (seqDefName == "Optional_ManageGameTimerSkip") ||
-						(seqDefName == "Optional_GameTimerSkipStats") ||
+					bool isOptionalSequence = /*(seqDefName == "Optional_ManageGameTimerSkip") ||
+						(seqDefName == "Optional_GameTimerSkipStats") ||*/
 						(seqDefName == "GetAOEDebugLogs") ||
 						(seqDefName == "ROR_writeDebugLog");
 

@@ -2251,14 +2251,15 @@ void CustomRORInstance::CollectTimerStats(REG_BACKUP *REG_values) {
 	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *g = (ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *) REG_values->ESI_val;
 	ror_api_assert(REG_values, g && g->IsCheckSumValid());
 
+	long int interval_ms = REG_values->EAX_val;
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
-		REG_values->EAX_val = REG_values->EAX_val + REG_values->EDI_val;
+		REG_values->EAX_val = REG_values->EDI_val + interval_ms;
 		g->currentGameTime = REG_values->EAX_val;
 	}
 	
 	if (this->crInfo.CollectedTimerIntervalsIndex >= CST_TIMER_STATS_ARRAY_SIZE) { this->crInfo.CollectedTimerIntervalsIndex = 0; }
-	this->crInfo.CollectedTimerIntervals_ms[this->crInfo.CollectedTimerIntervalsIndex++] = REG_values->EAX_val;
+	this->crInfo.CollectedTimerIntervals_ms[this->crInfo.CollectedTimerIntervalsIndex++] = interval_ms;
 
 	// Auto compute slow down factor if option is enabled and only once every CST_TIMER_STATS_ARRAY_SIZE
 	if (this->crInfo.configInfo.gameTimerSlowDownAutoFix && (this->crInfo.CollectedTimerIntervalsIndex == CST_TIMER_STATS_ARRAY_SIZE)) {

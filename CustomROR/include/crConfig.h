@@ -16,7 +16,7 @@ using namespace std;
 // Defines the maximum acceptable interval in milliseconds under which gameTimerSlowDownFactor doesn't need to be decreased
 #define CST_TIMER_INTERVAL_TOO_SLOW 80
 // Defines the minimum acceptable interval in milliseconds under which gameTimerSlowDownFactor needs to be increased
-#define CST_TIMER_INTERVAL_TOO_FAST 3
+#define CST_TIMER_INTERVAL_TOO_FAST 4
 #define CST_MAXIMUM_SLOW_DOWN_FACTOR 50
 
 #define CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS 10 // counts 0 that is unused (used for "no shortcut" in fact)
