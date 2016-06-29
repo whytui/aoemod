@@ -3250,8 +3250,7 @@ void CustomRORInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 // From 004ADB91. Normal code tests if number of queue items is > 0. If so, current queue is cancelled before adding a new item in queue.
 void CustomRORInstance::AllowMultiUnitTypeInQueue(REG_BACKUP *REG_values) {
 	short int elemCount = (REG_values->EAX_val & 0xFFFF); // AX / it is a word
-#pragma message("AllowMultiUnitTypeInQueue: TODO: use config here")
-	bool forceKeepCurrentQueue = false; // Game default = false
+	bool forceKeepCurrentQueue = this->crInfo.configInfo.allowMultiQueueing; // Game default = false
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		if (elemCount <= 0) {

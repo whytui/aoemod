@@ -366,6 +366,8 @@ bool SetTriggerDataSize(ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo, long i
 // Returns true if provided trigger text contains the END tag before any trigger information.
 bool TriggerTextContainsENDTagAtBeginning(char *triggerText);
 
+// Returns the number of queued units for a given DATID.
+long int GetTotalQueueNumberForUnit(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *bld, short int unitDefId);
 
 
 /* ----------- "ACTIVE" methods ------------- */

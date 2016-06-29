@@ -28,6 +28,8 @@
 	<!-- improvedButtonBar: Bool 0/1 to use enhanced button bar (show future researches/unit available in tech tree, 
 	Handle more than 1 page of buttons... -->
 	<improvedButtonBar enable="1"/>
+	<!-- allowMultiQueue: Bool 0/1 to allow queueing different units in buildings -->
+	<allowMultiQueue enable="1"/>
 	
 	<!-- Set collectRORDebugLogs=2 to collect all ROR debug logs, 1 to filter, 0 (default) not to collect them -->
 	<collectRORDebugLogs value="1"/>

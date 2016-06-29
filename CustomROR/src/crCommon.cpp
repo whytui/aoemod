@@ -1526,6 +1526,20 @@ bool TriggerTextContainsENDTagAtBeginning(char *triggerText) {
 }
 
 
+// Returns the number of queued units for a given DATID.
+long int GetTotalQueueNumberForUnit(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *bld, short int unitDefId) {
+	if (!bld || !bld->IsTypeValid() || !bld->ptrHumanTrainQueueInformation) { return 0; }
+	if (unitDefId < 0) { return 0; }
+	long int result = 0;
+	for (int index = 0; index < bld->trainUnitQueueCurrentElemCount; index++) {
+		if ((bld->ptrHumanTrainQueueInformation[index].DATID == unitDefId) && (bld->ptrHumanTrainQueueInformation[index].unitCount >= 0)) {
+			result += bld->ptrHumanTrainQueueInformation[index].unitCount;
+		}
+	}
+	return result;
+}
+
+
 // Creates a unit at provided location. Does NOT make checks on location, please first make sure GetErrorForUnitCreationAtLocation returns 0.
 // Please use CheckAndCreateUnit instead (unless you explicitely do NOT want to check target location)
 // You can use 0 as posZ value.

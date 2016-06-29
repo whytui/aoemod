@@ -19,6 +19,7 @@ CustomRORConfig::CustomRORConfig() {
 	this->showCustomRORMenu = false;
 	this->showCustomPopInfo = false;
 	this->useImprovedGameSpeeds = false;
+	this->allowMultiQueueing = false; // Game default
 	this->showLogsInReverseOrder = true;
 	this->showCustomRORNotifications = true; // Recommended
 	this->collectRORDebugLogs = 0; // Game default (sort of): do not intercept not-implemented debug log calls.
@@ -254,6 +255,9 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 				callResult = elem->QueryFloatAttribute("value", &floatValue);
 				if (callResult == TIXML_SUCCESS) { improvedGameSpeedFactor = floatValue; }
 			}
+		}
+		if (elemName == "allowMultiQueue") {
+			this->allowMultiQueueing = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "collectRORDebugLogs") {
 			callResult = elem->QueryIntAttribute("value", &intValue);

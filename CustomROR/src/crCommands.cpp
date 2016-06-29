@@ -60,6 +60,7 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "fixInvisibleTree:                          %d\n", this->crInfo->configInfo.fixInvisibleTree ? 1 : 0);
 	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", this->crInfo->configInfo.fixHumanPlayer_specificSeeUnit ? 1 : 0);
 	fprintf_s(f, "useImprovedButtonBar:                      %d\n", this->crInfo->configInfo.useImprovedButtonBar ? 1 : 0);
+	fprintf_s(f, "allowMultiQueueing:                        %d\n", this->crInfo->configInfo.allowMultiQueueing ? 1 : 0);
 	// General - related to game
 	fprintf_s(f, "allyExplorationIsAlwaysShared:             %d\n", this->crInfo->configInfo.allyExplorationIsAlwaysShared ? 1 : 0);
 	// Random games settings
@@ -4682,6 +4683,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		return;
 	}
 	
+	bool multiQueueing = this->crInfo->configInfo.allowMultiQueueing; // If true, a building can have >1 unit "def" in queue.
 	bool buttonIsVisible[12]; // Is button visible after standard buttons display.
 	bool forceRefresh[12]; // Used to force refresh of buttons : text or read-only status can be wrong when switching between 2 similar units that have different current actions.
 	bool currentButtonDoesNotBelongToThisPage[12];
@@ -4713,7 +4715,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	// TO DO: manage isBusy for living unit ? (not required as long as we don't customize buttons for living units...)
 	ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *unitAsBuilding = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *)unit;
 	bool isBusy = false;
-	// Fix queue numbers (otherwise, previous selected building's numbers will still display - are are irrelevant here)
+	// Fix queue numbers (otherwise, previous selected building's numbers will still display - and are irrelevant here)
 	int buttonWithQueueNumber = -1;
 	int queueNumberToDisplay = 0;
 	if (unitAsBuilding && unitAsBuilding->IsCheckSumValid()) {
@@ -4731,12 +4733,12 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	for (int currentBtnId = 0; currentBtnId < 12; currentBtnId++) {
 		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *curBtn = gameMainUI->unitCommandButtons[currentBtnId];
 		if (curBtn && curBtn->IsCheckSumValid()) {
-			if (currentBtnId == buttonWithQueueNumber) {
-				curBtn->showNumber = 1;
-				curBtn->numberToDisplay = queueNumberToDisplay;
-			} else {
-				curBtn->showNumber = 0;
-				curBtn->numberToDisplay = 0;
+			if ((curBtn->commandIDs[0] == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_ADD_TO_QUEUE) ||
+				(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN)) {
+				long int n = GetTotalQueueNumberForUnit(unitAsBuilding, (short int)curBtn->buttonInfoValue[0]);
+				curBtn->showNumber = (n > 0) ? 1 : 0;
+				curBtn->numberToDisplay = n;
+				forceRefresh[currentBtnId] = true;
 			}
 		}
 
@@ -4958,6 +4960,11 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		}
 	}
 	for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
+		if (!bestElemIsResearch[buttonIndex] && multiQueueing) {
+			forceRefresh[buttonIndex] = true; // Force text refresh all "train unit" buttons when multi queueing is enabled, to show correct queue number/enabled status
+		}
+	}
+	for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
 		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
 		if (buttonIsVisible[buttonIndex] && forceRefresh[buttonIndex]) {
 			long int correctButtonInfoValue = sb->buttonInfoValue[0];
@@ -4984,7 +4991,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 				sb->winHelpDataDllId;
 				sb->buttonInfoValue;
 			} else {
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/, NULL, true);
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], !multiQueueing, NULL /*elementInfo.c_str()*/, NULL, true);
 			}
 		}
 	}
