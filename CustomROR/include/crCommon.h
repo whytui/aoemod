@@ -630,8 +630,6 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId);
 
 // ---------- Other
 
-// Writes text representing available tech tree (available technologies that have not been researched yet)
-std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 // Add some text in trace file for important issues we want to know about.
 void AddTraceToFile(char *text);

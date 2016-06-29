@@ -8,8 +8,10 @@
 #include <ROR_structures.h>
 #include <ROR_global_variables.h>
 #include <AOE_const_functional.h>
+#include <AOE_const_language.h>
 #include "traceMessage.h"
 #include "language.h"
+#include "crLocalization.h"
 
 using namespace ROR_STRUCTURES_10C;
 using namespace AOE_CONST_FUNC;
@@ -73,3 +75,6 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 // For example, for research 17, it will return temple's definition because temple's unitDef.initiatesResearch == 17.
 // Returns NULL if not found.
 ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(STRUCT_PLAYER *player, short int researchId);
+
+// Writes text representing available tech tree (available technologies that have not been researched yet)
+std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
