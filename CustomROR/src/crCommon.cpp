@@ -2758,6 +2758,9 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 // Writes text representing available tech tree (available technologies that have not been researched yet)
 std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return ""; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid() || !global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid() ||
+		!global->technologiesInfo->ptrTechDefArray) { return ""; }
 	std::string result;
 	std::string currentBldText;
 	bool currentBldHasTechs;
@@ -2771,27 +2774,63 @@ std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) 
 			(unitDef->interactionMode == 3/*exclude towers*/) && (unitDef->triggerType == 2)) {
 			currentBldText = "\r\n";
 			char nameBuffer[50];
+			char nameBufferBackup[50];
 			GetLanguageDllText(unitDef->languageDLLID_Name, nameBuffer, sizeof(nameBuffer), unitDef->ptrUnitName);
 			currentBldText += std::string(nameBuffer) + std::string(": ");
 
 			short int researchCount = player->ptrResearchesStruct->researchCount;
 			ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *rs = player->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
 			for (int rid = 0; rid < researchCount; rid++) {
-				//if (rs[rid].currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) {
-				if ((rs[rid].currentStatus >= AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) && 
+				*nameBuffer = 0; // Reset string for next usage
+				if ((rs[rid].currentStatus >= AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) &&
 					(rs[rid].currentStatus < AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID)) {
-					if ((player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchLocation == unitDef->DAT_ID1) && 
-						(player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].languageDLLName > 0) /*exclude invalids like research 29*/) {
+
+#pragma message("TODO: this only supports 1 enable unit per tech. should create a method to to the write in currentBldText stuff and call it once per unit")
+					short int fixedResearchLocation = player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchLocation;
+					if (fixedResearchLocation < 0) {
+						// Some research, like slinger, camel, are missing researchLocation (-1). We can try to retrieve it from technology/enabledUnit=>trainlocation
+						short int techId = player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].technologyId;
+						if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
+							ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = &global->technologiesInfo->ptrTechDefArray[techId];
+							short int enabledUnitDefID = -1;
+							if (techDef) {
+								// Find if this tech enables some unit
+								for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+									STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+									if (techEffect && techEffect->HasValidEffect()) {
+										// Enable unit
+										if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (techEffect->effectClass == 1)) {
+											enabledUnitDefID = techEffect->effectUnit;
+										}
+										// Upgrade *to* some unit
+										if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) {
+											enabledUnitDefID = techEffect->UpgradeUnitGetTargetUnit();
+										}
+									}
+								}
+							}
+							if (enabledUnitDefID >= 0) {
+								ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *enabledUnitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(player, enabledUnitDefID);
+								if (enabledUnitDefBase && enabledUnitDefBase->IsCheckSumValidForAUnitClass() && enabledUnitDefBase->DerivesFromLiving()) {
+									ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *t = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)enabledUnitDefBase;
+									fixedResearchLocation = t->trainLocation;
+									// Get unit name. Might be used if research does not have a name
+									GetLanguageDllText(t->languageDLLID_Name, nameBufferBackup, sizeof(nameBufferBackup), t->ptrUnitName);
+								}
+							}
+						}
+					}
+					
+					if ((fixedResearchLocation == unitDef->DAT_ID1)) {
 						currentBldHasTechs = true;
 						bool isAutomaticTech = (player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchTime <= 0);
 						currentBldText += "\r\ntechId ";
 						currentBldText += std::to_string(player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].technologyId);
 						currentBldText += " = ";
-						*nameBuffer = 0; // Reset string
 						GetLanguageDllText(player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].languageDLLName, nameBuffer, sizeof(nameBuffer) - 1,
 							player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchName);
 						if (isAutomaticTech) { currentBldText += "("; }
-						currentBldText += nameBuffer;
+						currentBldText += ((nameBuffer[0] == 0) ? nameBufferBackup: nameBuffer);
 						if (isAutomaticTech) { currentBldText += ")"; }
 						if (rs[rid].currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) {
 							currentBldText += " (";

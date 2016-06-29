@@ -66,6 +66,11 @@ namespace ROR_STRUCTURES_10C {
 		bool IsDisableUnit(short int unitDefId) const {
 			return (this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (this->effectClass == 0) && (this->effectUnit == unitDefId);
 		}
+		// Return target unit ("TO") for "upgrade unit" effects. Returns -1 if invalid (not an upgrade unit effect)
+		short int UpgradeUnitGetTargetUnit() const {
+			if (this->effectType != AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) { return -1; }
+			return this->effectClass;
+		}
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");
 
