@@ -2682,7 +2682,18 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 		parentInfo && (parentInfo->spawnTargetUnitId >= 0)) {
 		ROR_STRUCTURES_10C::STRUCT_UNIT *target = GetUnitStruct(parentInfo->spawnTargetUnitId);
 		// Note: target may not exist (anymore)
-		if (target && target->IsCheckSumValid()) {
+		bool canInteractWithTarget = target && target->IsCheckSumValid();
+		if (canInteractWithTarget) {
+			ROR_STRUCTURES_10C::STRUCT_UNIT_FLAG *targetUnitFlag = (ROR_STRUCTURES_10C::STRUCT_UNIT_FLAG*)target;
+			if (targetUnitFlag->DerivesFromFlag()) {
+				ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *targetUnitDefFlag = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *)targetUnitFlag->GetUnitDefinition();
+				// For units that can move, check fog visibility
+				if (targetUnitDefFlag->speed > 0) {
+					canInteractWithTarget = canInteractWithTarget && IsFogVisibleForPlayer(player->playerId, (long)target->positionX, (long)target->positionY);
+				}
+			}
+		}
+		if (canInteractWithTarget) {
 			if (unitDef->ptrUnitCommandHeader) {
 				if (GetUnitDefCommandForTarget(unit, target, true) != NULL) {
 					TellUnitToInteractWithTarget(unit, target);

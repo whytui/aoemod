@@ -147,6 +147,9 @@ Troubleshooting:
 - If you install CustomROR on a directory game that already had CustomROR, config files will not be overwritten.
 	To get latest features, you should really get CustomROR.xml content from the provided example (in ZIP archive file). Same for CustomROR_civs.xml.
 
+CustomROR on other AOE versions:
+The fully supported version is ROR 1.0a. However, some features are supported in AOE1.0b, AOE1.0c, ROR1.0b too. ROR_API 1.0.1.0 is required.
+
 CustomROR on Linux:
 Before running CustomizeAOE/CustomROR on linux using wine, some configuration is needed.
 Install and run winetricks

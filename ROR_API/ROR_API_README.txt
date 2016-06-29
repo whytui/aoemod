@@ -32,7 +32,7 @@ To install only ROR_API (without customROR):
 ROR_API is compatible with windowed mode.
 To use windowed mode in RoR:
 - Get wndmode.dll (for example: http://aoe.heavengames.com/dl-php/showfile.php?fileid=2527)
-- Add wndmode.dll to ROR_API.conf
+- Add a line "wndmode.dll" to ROR_API.conf (no other character on the line, not even spaces)
 - Use CustomizeAOE to enable the "windowed mode" options (this will fix several mouse issues in windowed mode)
 
 
@@ -41,7 +41,7 @@ To use windowed mode in RoR:
 **********************
 
 - Requires to install CustomROR with CustomizeAOE
-- Add customROR.dll to ROR_API.conf if it is not already there.
+- Add "customROR.dll" to ROR_API.conf if it is not already there.
 - Run a game, you should see a chat message from CustomROR.
 See the CustomROR_README.txt file for details about features.
 
@@ -55,7 +55,7 @@ Compile your own DLL using the provided file ROR_API_pub.h and create a method D
 See ROR_API_pub.h for more details.
 
 How do I call my plug-in DLL from RoR ?
-Just add a "CALL 00419574" instruction where you want in EXE file.
+Just add a "CALL 0x419574" instruction where you want in EXE file.
 The return address will be useful to write your DispatchToCustomCode method.
 
 
