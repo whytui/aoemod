@@ -318,6 +318,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 #endif
 		this->EntryPointOnGetLocalizedString(REG_values);
 		break;
+	case 0x004ADB99:
+		this->AllowMultiUnitTypeInQueue(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3240,6 +3243,19 @@ void CustomRORInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 		if (successfullyFoundString) {
 			ChangeReturnAddress(REG_values, returnAddress); // (RETN 0x0C instruction) Prevent ROR from searching in language(x).dll
 		}
+	}
+}
+
+
+// From 004ADB91. Normal code tests if number of queue items is > 0. If so, current queue is cancelled before adding a new item in queue.
+void CustomRORInstance::AllowMultiUnitTypeInQueue(REG_BACKUP *REG_values) {
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+	bool forceKeepCurrentQueue = true; // Game default = false
+
+	if (forceKeepCurrentQueue) {
+		ChangeReturnAddress(REG_values, 0x04ADBB6); // preserve queue
 	}
 }
 

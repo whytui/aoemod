@@ -130,6 +130,7 @@ public:
 	void EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values);
 	void EntryPointOnBuildingInfoDisplay(REG_BACKUP *REG_values);
 	void EntryPointOnGetLocalizedString(REG_BACKUP *REG_values);
+	void AllowMultiUnitTypeInQueue(REG_BACKUP *REG_values);
 
 	// Map generation
 	void ManageRelicsCount(REG_BACKUP *REG_values);

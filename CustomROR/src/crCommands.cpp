@@ -487,7 +487,15 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		
-		AddUsefulMilitaryTechsToStrategy(player);
+		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)FindUnitWithShortcutNumberForPlayer(player, 1);
+		if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) { return; }
+		if (unitBase->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING) { return; }
+		ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *bld = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING*)unitBase;
+		if (!bld->ptrHumanTrainQueueInformation) { return; }
+		bld->unknown_1C4 = 2;
+		bld->ptrHumanTrainQueueInformation[1].unitCount = 2;
+		bld->ptrHumanTrainQueueInformation[1].DATID = 83;
+		//AddUsefulMilitaryTechsToStrategy(player);
 		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, true, NULL);
 		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_ARMORED_ELEPHANT, true, NULL);
 
@@ -4709,7 +4717,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	int buttonWithQueueNumber = -1;
 	int queueNumberToDisplay = 0;
 	if (unitAsBuilding && unitAsBuilding->IsCheckSumValid()) {
-		isBusy = (unitAsBuilding->isCurrentlyTrainingUnit != 0);
+		isBusy = (unitAsBuilding->trainUnitQueueCurrentElemCount > 0);
 		if (unitAsBuilding->ptrHumanTrainQueueInformation) {
 			queueNumberToDisplay = unitAsBuilding->ptrHumanTrainQueueInformation->unitCount;
 			if (queueNumberToDisplay > 0) {
@@ -4758,7 +4766,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		}
 
 	}
-	if ((unitAsBuilding->isCurrentlyTrainingUnit) && (unitAsBuilding->ptrHumanTrainQueueInformation != NULL)) {
+	if ((unitAsBuilding->trainUnitQueueCurrentElemCount > 0) && (unitAsBuilding->ptrHumanTrainQueueInformation != NULL)) {
 		// This only handles human-triggered MakeObject (not AI-triggered).
 		currentActionDATID = unitAsBuilding->ptrHumanTrainQueueInformation->DATID;
 		currentActionIsResearch = false;

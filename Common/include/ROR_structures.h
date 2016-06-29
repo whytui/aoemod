@@ -3957,12 +3957,12 @@ namespace ROR_STRUCTURES_10C
 		// 0x1C0
 		//short int *ptrHumanTrainQueueInformation; // [+00]=Word=unit_DAT_ID, [+02]=trainQueueCount, if 0 then DATID has no meaning.
 		STRUCT_HUMAN_TRAIN_QUEUE_INFO *ptrHumanTrainQueueInformation; // +1C0. Only relevant for human-triggered "train unit".
-		short int unknown_1C4; // Max number of different units in queue ? Unused because always 1 ?
-		short int isCurrentlyTrainingUnit; // +1C6. Warning: it is 1 only when TRAINING a unit that was "human-asked" ? This flag does NOT mean "busy" !
+		short int unknown_1C4; // Max number of different units in queue ?
+		short int trainUnitQueueCurrentElemCount; // +1C6. Number of different queued unit types. Warning: it is >=1 only when TRAINING a unit that was "human-asked" ? This flag does NOT mean "busy" !
 		unsigned long int unknown_1C8;
 		STRUCT_UNIT_ACTION_INFO *trainUnitActionInfo; // +1CC. Only for makeobject actions (not research).
 		// 0x1D0
-		char unknownClickCounter; // Increments when I click to train/enqueu a unit or cancel it. (if I cancel 3 queued units, it decreases by 3)
+		char queueActionsCounter; // Increments when I click to train/enqueue a unit or cancel it. (if I cancel 3 queued units, it decreases by 3)
 		char unknown_1D1;
 		short int unknown_1D2; // see 004ADE3C, 4AE1C3. Values -1, 4 ?
 		float constructionProgress;

@@ -476,7 +476,7 @@ ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(
 }
 
 
-// Writes a string representing tech tree information for a given research
+// [private] Writes a string representing tech tree information for a given research
 // defaultResearchName = name to write for research, if none can be found automatically
 std::string GetResearchTechTreeLine(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId, 
 	const char *defaultResearchName) {
@@ -502,7 +502,7 @@ std::string GetResearchTechTreeLine(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, s
 	return result;
 }
 
-// Get a string representing all (future) available tech tree for building
+// [private] Get a string representing all (future) available tech tree for building
 // (researches and units that can become available in given building)
 std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bldDef) {
 	// Invalid (technical reasons)
