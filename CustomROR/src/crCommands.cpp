@@ -4690,6 +4690,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	long int bestElemTotalCost[12];
 	long int bestElemDATID[12];
 	bool bestElemIsResearch[12];
+	bool bestElemIsAvailable[12]; // Used to disable items (visible, but not clickable)
 	short int bestElemLangNameId[12];
 	for (int i = 0; i < 12; i++) {
 		buttonIsVisible[i] = IsInGameUnitCommandButtonVisible(gameMainUI, i);
@@ -4698,6 +4699,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		bestElemIsResearch[i] = false;
 		bestElemLangNameId[i] = -1;
 		currentButtonDoesNotBelongToThisPage[i] = false;
+		bestElemIsAvailable[i] = false;
 		forceRefresh[i] = (buttonIsVisible[i]); // Always force refresh for "already displayed" buttons (useful when previous selection had a greyed out button, and new selection has same button - not disabled.
 		// TODO: it would be better to force refresh another way to gain performance. But we would need to do this BEFORE buttons are updated (_Before_ShowUnitCommandButtons)
 	}
@@ -4853,7 +4855,6 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 				}
 				bool costIsBetter = (bestElemTotalCost[buttonIndex] == -1) || (thisCost < bestElemTotalCost[buttonIndex]);
 				
-				// TO DO : exclude non-visible researches (only_requirement=age ou age+building?)
 				if (((isBusy && researchIsAvailable) || costIsBetter) && // When we choose to show available researches, they have best priority.
 					(resDefInfo->researchDefArray[researchId].researchLocation == unitDef->DAT_ID1) &&
 					((resDefInfo->researchDefArray[researchId].researchTime > 0) || researchIsAvailable) // Hide unavailable immediate researches
@@ -4862,6 +4863,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 					bestElemIsResearch[buttonIndex] = true;
 					bestElemTotalCost[buttonIndex] = thisCost;
 					bestElemLangNameId[buttonIndex] = resDefInfo->researchDefArray[researchId].languageDLLName;
+					bestElemIsAvailable[buttonIndex] = researchIsAvailable;
 				}
 			}
 		}
@@ -4923,6 +4925,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 						bestElemIsResearch[buttonIndex] = false;
 						bestElemTotalCost[buttonIndex] = thisCost;
 						bestElemLangNameId[buttonIndex] = loopUnitDef->languageDLLID_Name;
+						bestElemIsAvailable[buttonIndex] = (loopUnitDef->availableForPlayer != 0);
 					}
 				}
 			}
@@ -4984,14 +4987,15 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		if (bestElemDATID[buttonIndex] != -1) {
 			GetLanguageDllText(bestElemLangNameId[buttonIndex], nameBuffer, sizeof(nameBuffer), "");
 			if (bestElemIsResearch[buttonIndex]) {
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], true, NULL /*elementInfo.c_str()*/, NULL, true);
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], !bestElemIsAvailable[buttonIndex], NULL /*elementInfo.c_str()*/, NULL, true);
 				ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
 				sb->unknown_2C4;
 				sb->helpDllId = sb->helpDllId;
 				sb->winHelpDataDllId;
 				sb->buttonInfoValue;
 			} else {
-				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex], !multiQueueing, NULL /*elementInfo.c_str()*/, NULL, true);
+				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN, bestElemDATID[buttonIndex],
+					!bestElemIsAvailable[buttonIndex] || !multiQueueing, NULL /*elementInfo.c_str()*/, NULL, true);
 			}
 		}
 	}

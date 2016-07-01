@@ -75,6 +75,7 @@ UI and Shortcuts:
 - Display a chat message at game startup to say the plugin is active.
 - Press CTRL-F1 to display trace/debug messages (useful for triggers...)
 - Support more than 1 page for buttons (similar to villager build list)
+- Allow queueing any number of any units at once (even different units). Queue order is preserved.
 
 Gameplay & configuration:
 - Enhanced/configurable "Auto-attack nearby units" behaviour for military units (some kind of enhanced "hold position" feature). For example, you can prevent your catapults from attacking villagers !
