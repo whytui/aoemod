@@ -195,6 +195,7 @@ private:
 	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkAutoAttackBuildings;
 	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkAutoAttackWalls;
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtStrengthWeakness;
+	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblConversionResistance;
 };
 
 

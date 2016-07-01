@@ -124,6 +124,8 @@ Futures technos, pas encore disponibles:
 Bonus contre
 [42084] // Unit properties: list of special armors
 Malus contre
+[42086] // Unit properties: conversion resistance
+Resistance vs conversion
 
 // *** Scenario editor ***
 [42063]

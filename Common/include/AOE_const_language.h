@@ -81,6 +81,7 @@ const static unsigned long int CRLANG_ID_UNITPROP_WALLS = 42061;
 const static unsigned long int CRLANG_ID_UNITPROP_FUTURE_UNAVAILABLE_TECHS = 42062;
 const static unsigned long int CRLANG_ID_UNITPROP_ATTACK_BONUSES_FOR = 42083;
 const static unsigned long int CRLANG_ID_UNITPROP_ARMOR_WEAKNESSES = 42084;
+const static unsigned long int CRLANG_ID_UNITPROP_CONVERSION_RESISTANCE = 42086;
 // Scenario editor
 const static unsigned long int CRLANG_IDCUSTOM_EDITOR_MENU = 42063;
 const static unsigned long int CRLANG_IDPLAYER_ID = 42064;

@@ -122,6 +122,8 @@ Future technologies, not available yet:
 Attack bonuses for
 [42084] // Unit properties: list of special armors
 Armor weaknesses
+[42086] // Unit properties: conversion resistance
+Conversion resistance
 
 // *** Scenario editor ***
 [42063]
