@@ -4863,7 +4863,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 					bestElemIsResearch[buttonIndex] = true;
 					bestElemTotalCost[buttonIndex] = thisCost;
 					bestElemLangNameId[buttonIndex] = resDefInfo->researchDefArray[researchId].languageDLLName;
-					bestElemIsAvailable[buttonIndex] = researchIsAvailable;
+					bestElemIsAvailable[buttonIndex] = researchIsAvailable && !isBusy;
 				}
 			}
 		}
