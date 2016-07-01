@@ -4494,7 +4494,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_WOOD) < this->crInfo->configInfo.autoRebuildFarms_minWood) { return; }
 	// Remark : currentFarmCount includes current farm (that is going to be deleted)
 	long int currentFarmCount = GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2); // Include being-built farms
-	bool farmCountConditionIsOK = (currentFarmCount < this->crInfo->configInfo.autoRebuildFarms_maxFarms);
+	bool farmCountConditionIsOK = (currentFarmCount <= this->crInfo->configInfo.autoRebuildFarms_maxFarms);
 
 	ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING *farmerUnit = NULL;
 	// Search for the farmer that was working on this farm (first -arbitrary- one if there are many)
