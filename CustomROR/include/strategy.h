@@ -62,7 +62,7 @@ private:
 bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);
 
 // Returns 1st element position (>=0) if (at least) 1 matching element exists in strategy. -1=no such element
-long int FindElementPosInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID);
+long int FindElementInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID);
 
 // This fixes dynamically added houses, boats + boat techs, docks, setgatherpercentage
 void FixAutoBuildStrategyElements(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
@@ -123,9 +123,9 @@ bool MoveStrategyElement_after_ifWrongOrder(ROR_STRUCTURES_10C::STRUCT_BUILD_AI 
 // Return true if memory was successfully freed.
 bool RemoveStrategyElement(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem);
 
-// Remove all strategy element counter from unit actions/internal information.
-// Used when strategy is reset, and counter reset to 0, so that obsolete counters do not interact with new strategy elements.
-void RemoveAllReferencesToStratElemCounter(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+// Remove all strategy element IDs from unit actions/internal information.
+// Used when strategy is reset, and sequence(elem count) reset to 0, so that obsolete IDs do not interact with new strategy elements.
+void RemoveAllReferencesToStratElemIDs(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 // Remove all strategy elements from buildAI except fake first element
 // See also 0x4091C0: this ROR method free all elements, set sequence(=count) to 0, set fake's next&previous to itself.

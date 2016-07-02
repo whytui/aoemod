@@ -2118,7 +2118,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int checksum; // 3C 2A 54 00
 		long int unitDAT_ID; // Identifies the unit definition or research. "type" term found in 408891
 		long int unitInstanceId; // gID term found in 408891.
-		long int counter; // Just an internal ID to identify this strategy element in player's strategy list. "uID" term found in 408891.
+		long int elemId; // Just an internal ID to identify this strategy element in player's strategy list. "uID" term found in 408891.
 		// 0x10
 		char unitName[0x40]; // 0x3F + \0 maximum
 		// 0x50
@@ -2395,13 +2395,13 @@ namespace ROR_STRUCTURES_10C
 		// 0xF0: 1st strategy element
 		STRUCT_STRATEGY_ELEMENT fakeFirstStrategyElement; // The first strategy element (empty)
 		// 0x1A0
-		long int strategyElementSequence; // = number of strategy elements (NOT counting fake first elem)
+		long int strategyElementCount; // = number of strategy elements (NOT counting fake first elem) = ID for the next element to add
 		char strategyFileName[0x40]; // +1A4. Size: unsure
 		char unknown_1E4[0x2A5 - 0x1E4];
 		char lastBuildName[0x101]; // +2A5: text
 		char currentBuildName[0x101]; // +3A6: text (desired build unit name?)
 		char nextBuildName[0x101]; // +4A7: text (desired build unit name?)
-		long int currentIDInStrategy; // +5A8. Corresponds to stratelem.counter, not "index". counter 2 might NOT be 3rd element due to inserted elems.
+		long int currentIDInStrategy; // +5A8. Corresponds to stratelem.elemId, not "index". ID 2 might NOT be 3rd element due to inserted elems.
 		STRUCT_AI_UNIT_LIST_INFO autoInsertedBuildingDATIDs; // +5AC. Actually, IDs are DATID, not unit instance IDs. Automatically added buildings ?
 		STRUCT_AI *mainAI; // +5BC. Set in 0x4B76E0.
 		// 0x5C0: end
@@ -2827,7 +2827,7 @@ namespace ROR_STRUCTURES_10C
 		short int targetUnitDAT_ID; // being trained unit dat_id
 		short int unknown_042;
 		unsigned long int unknown_044; // maybe 2 shorts or even bytes ?
-		long int stratElemCounter; // +48. value from command +0x0C ?
+		long int strategyElementId; // +48. value from command +0x0C ?
 		char unknown_04C;
 		char unknown_04D[3]; // unused ?
 
@@ -2843,7 +2843,7 @@ namespace ROR_STRUCTURES_10C
 		// 0x40
 		short int researchID;
 		short int unknown_42; // Unused... probably
-		long int strategyElementCounter; // +44
+		long int strategyElementId; // +44
 
 		bool IsCheckSumValid() { return this->checksum == 0x00548990; }
 		AOE_CONST_INTERNAL::INTERNAL_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_MAKE_TECH; }
@@ -3966,7 +3966,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_1D1;
 		short int unknown_1D2; // see 004ADE3C, 4AE1C3. Values -1, 4 ?
 		float constructionProgress;
-		long int strategyElementCounter; // +1D8. Strategy element counter (building's) : used to update strategy element when construction ends.
+		long int strategyElementId; // +1D8. Strategy element ID (building's) : used to update strategy element when construction ends.
 		char unknown_1DC; // Consistent with player+0x54. An index for ?
 		char unknown_1DD; // value = 0 or 100 ? Switched when construction ends?
 		short int unknown_1DE;

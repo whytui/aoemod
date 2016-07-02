@@ -1223,7 +1223,7 @@ bool CustomRORCommand::FindIfGameStartStrategyInitHasBeenDone(ROR_STRUCTURES_10C
 	if (!player) { return true; }
 	ROR_STRUCTURES_10C::STRUCT_AI *mainAI = player->GetAIStruct();
 	if (!mainAI) { return true; }
-	if (FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_HOUSE) < 0) {
+	if (FindElementInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_HOUSE) < 0) {
 		// Our current criterion is "no house = not initialized". Can we do better ?
 		return false;
 	}
@@ -1345,7 +1345,7 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 				elemMainTownCenter = currentStratElem;
 			}
 		}
-		if (currentStratElem->counter == 1) { foundCounter_one = true; }
+		if (currentStratElem->elemId == 1) { foundCounter_one = true; }
 		if ((currentStratElem->unitDAT_ID != CST_UNITID_WATCH_TOWER) || (currentStratElem->elementType != AIUCBuilding)) {
 			lastNonTowerElement = currentStratElem;
 		}
@@ -2446,7 +2446,7 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstStratElem = &ai->structBuildAI.fakeFirstStrategyElement;
 			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstStratElem->next;
 			while (currentStratElem && (currentStratElem != fakeFirstStratElem)) {
-				fprintf_s(f, "%03ld     %1ld     %-3ld    %-30s %-3ld   %-6ld %-2ld         %-2ld    %-4ld     %-4ld     %-3ld      0x%08lX\n", currentStratElem->counter, currentStratElem->elementType, currentStratElem->unitDAT_ID,
+				fprintf_s(f, "%03ld     %1ld     %-3ld    %-30s %-3ld   %-6ld %-2ld         %-2ld    %-4ld     %-4ld     %-3ld      0x%08lX\n", currentStratElem->elemId, currentStratElem->elementType, currentStratElem->unitDAT_ID,
 					currentStratElem->unitName, currentStratElem->actor, currentStratElem->unitInstanceId, currentStratElem->inProgressCount,
 					currentStratElem->aliveCount, currentStratElem->buildAttempts, currentStratElem->totalCount, currentStratElem->retrains, (long int)currentStratElem
 					);

@@ -71,9 +71,9 @@ bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, sh
 }
 
 
-// Returns 1st element position (>=0) if (at least) 1 matching element exists in strategy. -1=no such element
+// Returns the first element's ID that matches criteria. -1=no such element
 // WARNING: AIUCTech and AIUCCritical are 2 different filter values ! Searching for researches won't find tool age/bronze/etc !
-long int FindElementPosInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID) {
+long int FindElementInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID) {
 	if (!player) { return -1; }
 	ROR_STRUCTURES_10C::STRUCT_AI *mainAI = player->GetAIStruct();
 	if (!mainAI) { return -1; }
@@ -85,7 +85,7 @@ long int FindElementPosInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeStratElem->next;
 	while ((currentStratElem != NULL) && (currentStratElem != fakeStratElem)) {
 		if ((currentStratElem->elementType == elementType) && (currentStratElem->unitDAT_ID == DAT_ID)) {
-			return currentStratElem->counter;
+			return currentStratElem->elemId;
 		}
 		currentStratElem = currentStratElem->next;
 	}
@@ -238,7 +238,7 @@ void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_BUIL
 	while ((currentElem != NULL) && (currentElem != fakeStratElem)) {
 		// Performance: We only take care of strategy elements that match provided criteria
 		if (((currentElem->elementType == elemType) || (elemType == AIUCNone)) &&
-			((currentElem->counter == stratElemId) || (stratElemId == -1)) &&
+			((currentElem->elemId == stratElemId) || (stratElemId == -1)) &&
 			((currentElem->unitDAT_ID == DAT_ID) || (DAT_ID == -1))) {
 			std::vector<ROR_STRUCTURES_10C::STRUCT_UNIT*>::iterator it = notInStrategyUnitsList.begin();
 			while (it != notInStrategyUnitsList.end()) {
@@ -384,7 +384,7 @@ bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_
 		unitDATID = GetBaseBuildingUnitId((short int)unitDATID); // Make sure NOT to use an invalid building ID (do NOT use upgraded unit IDs)
 		// We could do the same for living units ?
 	}
-	long int counter = buildAI->strategyElementSequence;
+	long int newElementId = buildAI->strategyElementCount;
 
 	_asm {
 		PUSH 0 // arg14 - for +9C
@@ -398,7 +398,7 @@ bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_
 		PUSH actor // arg6 = actor
 		PUSH 0 // arg5 - for +7C
 		PUSH DWORD PTR 1 // arg4 - for +78 - always 1 ?
-		PUSH counter // arg3 = counter
+		PUSH newElementId // arg3 = ID to use
 		PUSH unitDATID // arg2
 		PUSH unitType // arg1
 		MOV ECX, elem
@@ -406,7 +406,7 @@ bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_
 		CALL EAX
 		// returns EAX= ptr new strat elem
 	}
-	buildAI->strategyElementSequence++; // To increment after having been used.
+	buildAI->strategyElementCount++; // We just added one
 	// Other inits
 	elem->retrains = retrains;
 	// Actually insert new element into chained list.
@@ -416,7 +416,7 @@ bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_
 	elem->previous = previousElem;
 	elem->next = nextElem;
 	// Try to find an existing unit (not already linked to another strategy element) for added strategy element
-	//UpdateStrategyWithUnreferencedExistingUnits(buildAI, unitDATID, AIUCNone, elem->counter);
+	//UpdateStrategyWithUnreferencedExistingUnits(buildAI, unitDATID, AIUCNone, elem->elemId);
 	return true;
 }
 
@@ -560,9 +560,9 @@ bool RemoveStrategyElement(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem) {
 	return true;
 }
 
-// Remove all strategy element counter from unit actions/internal information.
-// Used when strategy is reset, and counter reset to 0, so that obsolete counters do not interact with new strategy elements.
-void RemoveAllReferencesToStratElemCounter(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+// Remove all strategy element IDs from unit actions/internal information.
+// Used when strategy is reset, and sequence(elem count) reset to 0, so that obsolete IDs do not interact with new strategy elements.
+void RemoveAllReferencesToStratElemIDs(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	assert(player && player->IsCheckSumValid() && player->ptrCreatableUnitsListLink && player->ptrCreatableUnitsListLink->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid() || !player->ptrCreatableUnitsListLink || !player->ptrCreatableUnitsListLink->IsCheckSumValid()) { return; }
 	
@@ -572,15 +572,15 @@ void RemoveAllReferencesToStratElemCounter(ROR_STRUCTURES_10C::STRUCT_PLAYER *pl
 	while ((i < elemCount) && curElem) {
 		STRUCT_UNIT_BUILDING *bld = (STRUCT_UNIT_BUILDING *)curElem->unit;
 		if (bld && bld->IsTypeValid()) {
-			bld->strategyElementCounter = -1;
+			bld->strategyElementId = -1;
 			STRUCT_ACTION_BASE *actionBase = GetUnitAction(bld);
 			STRUCT_ACTION_MAKE_OBJECT *actionTrain = (STRUCT_ACTION_MAKE_OBJECT *)actionBase;
 			if (actionTrain && actionTrain->IsCheckSumValid()) {
-				actionTrain->stratElemCounter = -1;
+				actionTrain->strategyElementId = -1;
 			}
 			STRUCT_ACTION_MAKE_TECH *actionMakeTech = (STRUCT_ACTION_MAKE_TECH *)actionBase;
 			if (actionMakeTech && actionMakeTech->IsCheckSumValid()) {
-				actionMakeTech->strategyElementCounter = -1;
+				actionMakeTech->strategyElementId = -1;
 			}
 			bld->ptrActionInformation;
 			bld->trainUnitActionInfo;
@@ -600,7 +600,7 @@ void ClearStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 		success = RemoveStrategyElement(curElem);
 		curElem = buildAI->fakeFirstStrategyElement.next;
 	}
-	buildAI->strategyElementSequence = 0; // Warning: running actions refer to "old" sequence ID, when completed, wrong stratElem will be marked as done !
+	buildAI->strategyElementCount = 0; // Warning: running actions refer to "old" sequence ID, when completed, wrong stratElem will be marked as done !
 	buildAI->currentIDInStrategy = 0;
 	buildAI->lastBuildName[0] = 0;
 	buildAI->currentBuildName[0] = 0;
@@ -617,7 +617,7 @@ void ClearStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 	}
 	// buildAI->mainAI->structTradeAI.needGameStartAIInit : do NOT reset because it would add again resource bonus...
 	// Dynamic strategy element insertion won't be triggered again.
-	RemoveAllReferencesToStratElemCounter(buildAI->mainAI->ptrStructPlayer);
+	RemoveAllReferencesToStratElemIDs(buildAI->mainAI->ptrStructPlayer);
 }
 
 // Add units to fit maximum population (especially if >50)
@@ -678,10 +678,10 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	// Go back some strategy elements to get a position where add an "anticipated" house: 
 	// This helps strategy not being stuck (with some extra population housage).
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemToMoveFirstAddedHouse = elemToInsertBefore;
-	int counterToMoveFirstAddedHouse = 0;
-	while (elemToMoveFirstAddedHouse && elemToMoveFirstAddedHouse->previous && (counterToMoveFirstAddedHouse < 4) &&
+	int elemIdToMoveFirstAddedHouse = 0;
+	while (elemToMoveFirstAddedHouse && elemToMoveFirstAddedHouse->previous && (elemIdToMoveFirstAddedHouse < 4) &&
 		(elemToMoveFirstAddedHouse->previous != fakeFirstStratElem)) {
-		counterToMoveFirstAddedHouse++;
+		elemIdToMoveFirstAddedHouse++;
 		elemToMoveFirstAddedHouse = elemToMoveFirstAddedHouse->previous;
 	}
 
@@ -727,7 +727,7 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	std::string msg = "Adapt p#";
 	msg += std::to_string(player->playerId);
 	msg += " to max population: insertion start point uID=";
-	msg += std::to_string(elemToInsertBefore->previous ? elemToInsertBefore->previous->counter : elemToInsertBefore->counter);
+	msg += std::to_string(elemToInsertBefore->previous ? elemToInsertBefore->previous->elemId : elemToInsertBefore->elemId);
 	msg += ". Estimated number of units to add: ";
 	msg += std::to_string(populationToAdd);
 	msg += " units.";
@@ -1044,11 +1044,11 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 						if (unitDefBuilding) {
 							assert(unitDefBuilding->IsCheckSumValid());
 							if (unitDefBuilding->IsCheckSumValid()) {
-								foundElementInStrategy = (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) != -1);
+								foundElementInStrategy = (FindElementInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) != -1);
 							}
 						} else {
-							foundElementInStrategy = (FindElementPosInStrategy(player, TAIUnitClass::AIUCTech, resDef->requiredResearchId[i]) != -1) ||
-								(FindElementPosInStrategy(player, TAIUnitClass::AIUCCritical, resDef->requiredResearchId[i]) != -1);
+							foundElementInStrategy = (FindElementInStrategy(player, TAIUnitClass::AIUCTech, resDef->requiredResearchId[i]) != -1) ||
+								(FindElementInStrategy(player, TAIUnitClass::AIUCCritical, resDef->requiredResearchId[i]) != -1);
 						}
 
 						if (!foundElementInStrategy) {
@@ -1178,8 +1178,8 @@ int AddStrategyElementForResearch(ROR_STRUCTURES_10C::STRUCT_PLAYER *player,
 		}
 
 		// Add the research itself
-		if ((FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) &&
-			(FindElementPosInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, researchId) == -1)){
+		if ((FindElementInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) &&
+			(FindElementInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, researchId) == -1)) {
 			strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, resDef->researchName);
 			if (AddUnitInStrategy_before(&ai->structBuildAI, nextElement, -1, resDef->researchLocation,
 				TAIUnitClass::AIUCTech, researchId, player, nameBuffer)) {
@@ -1215,7 +1215,7 @@ bool AddStrategyElementForBuildingIfNotExisting(ROR_STRUCTURES_10C::STRUCT_PLAYE
 		// Do something special for TC ?
 
 		// Add "action" building if there is none in strategy
-		if (FindElementPosInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) == -1) {
+		if (FindElementInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) == -1) {
 			strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, unitDefBuilding->ptrUnitName);
 			if (AddUnitInStrategy_before(&ai->structBuildAI, nextElement, -1, -1 /*villager*/,
 				TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1, player, nameBuffer)) {
@@ -1304,7 +1304,7 @@ std::string ExportStrategyToText(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 	result += ") : ";
 	result += buildAI->strategyFileName;
 	result += newline;
-	result += "Counter Ctgry DAT_ID Name                           Actor Unitid InProgress Alive Attempts #created Retrains"
+	result += "elemId Ctgry DAT_ID Name                           Actor Unitid InProgress Alive Attempts #created Retrains"
 #ifdef _DEBUG
 	" ptr"
 #endif
@@ -1352,7 +1352,7 @@ std::string ExportStrategyToText(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 			"      0x%08lX"
 #endif
 			"%s",
-			currentStratElem->counter, category, currentStratElem->unitDAT_ID,
+			currentStratElem->elemId, category, currentStratElem->unitDAT_ID,
 			currentStratElem->unitName, currentStratElem->actor, currentStratElem->unitInstanceId, currentStratElem->inProgressCount,
 			currentStratElem->aliveCount, currentStratElem->buildAttempts, currentStratElem->totalCount, currentStratElem->retrains, (long int)currentStratElem,
 			newline
