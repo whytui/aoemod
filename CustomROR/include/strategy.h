@@ -18,6 +18,45 @@ using namespace AOE_CONST_FUNC;
 const char CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN[] = "CustomRORMaxPopulation";
 
 
+class StrategyGenerationInfo {
+public:
+	StrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+		this->civId = -1;
+		this->fishingShipsCount_alwaysRetrain = 0;
+		this->fishingShipsCount_limitedRetrains = 0;
+		this->maxPopulation = 50;
+		this->tradeShipsCount = 0;
+		this->transportShipsCount = 0;
+		this->villagerCount_alwaysRetrain = 0;
+		this->villagerCount_limitedRetrains = 0;
+		this->SetPlayerAndAIStructs(player);
+	}
+	const ROR_STRUCTURES_10C::STRUCT_PLAYER *player;
+	const ROR_STRUCTURES_10C::STRUCT_AI *ai; // automatically set from player (SetPlayerAndAIStructs)
+	const ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI; // automatically set from player (SetPlayerAndAIStructs)
+	short int civId;
+	bool isWaterMap;
+	long int maxPopulation;
+	long int villagerCount_alwaysRetrain;
+	long int villagerCount_limitedRetrains;
+	long int fishingShipsCount_alwaysRetrain;
+	long int fishingShipsCount_limitedRetrains;
+	long int tradeShipsCount;
+	long int transportShipsCount;
+
+private:
+	void SetPlayerAndAIStructs(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+		this->ai = NULL;
+		this->buildAI = NULL;
+		this->player = player;
+		if (!player || !player->IsCheckSumValid()) { return; }
+		this->civId = player->civilizationId;
+		this->ai = player->ptrAIStruct;
+		if (!this->ai || !this->ai->IsCheckSumValid()) { return; }
+		this->buildAI = &this->ai->structBuildAI;
+	}
+};
+
 
 // Returns true if the research is present in tech tree but not researched yet (nor being researched)
 bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);

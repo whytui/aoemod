@@ -1427,6 +1427,10 @@ void CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 	CreateBasicStrategyElements(buildAI);
 
 
+	// WARNING : take care if map is naval (=> villager count, land military units count + all non-war boats thing)
+	// + max pop criterion
+
+
 	if (buildAI->mainAI->structTradeAI.needGameStartAIInit) {
 		// Warning: automatic element insertions WILL be triggered
 	} else {
