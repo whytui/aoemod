@@ -481,7 +481,8 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		long int playerId = 2;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
-		AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, false, NULL);
+		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, false, NULL);
+		CreateStrategyFromScratch(&player->ptrAIStruct->structBuildAI);
 	}
 	if (strcmp(command, "a") == 0) {
 		long int playerId = 2;
@@ -1488,7 +1489,7 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 		//this->MoveStrategyElement_after_ifWrongOrder(buildAI, market, optionalsLocation->previous);
 	}
 	if (!foundArchitecture && /*canGoToBronzeAge &&*/ bronzeAgeResearched && (isVeryRich || isStrong) && IsResearchRelevantForStrategy(player, CST_RSID_ARCHITECTURE)) {
-		AddUnitInStrategy_before(buildAI, optionalsLocation, -1, CST_UNITID_GOVERNMENT_SIEGE, AIUCTech, CST_RSID_ARCHITECTURE, player, "customROR-Architecture");
+		AddUnitInStrategy_before(buildAI, optionalsLocation, -1, CST_UNITID_GOVERNMENT_CENTER, AIUCTech, CST_RSID_ARCHITECTURE, player, "customROR-Architecture");
 		numberOfAddedResearches++;
 		//this->MoveStrategyElement_after_ifWrongOrder(buildAI, gov_siege, optionalsLocation->previous);
 	}
@@ -1520,7 +1521,7 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 			AOE_CONST_FUNC::RESEARCH_STATUSES rs = GetResearchStatus(player, CST_RSID_BALLISTICS);
 			if ((rs == RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) ||
 				(rs == RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE)) {
-				AddUnitInStrategy_before(buildAI, optionalsLocation, -1, CST_UNITID_GOVERNMENT_SIEGE, AIUCTech, CST_RSID_BALLISTICS, player, "customROR-Ballistics");
+				AddUnitInStrategy_before(buildAI, optionalsLocation, -1, CST_UNITID_GOVERNMENT_CENTER, AIUCTech, CST_RSID_BALLISTICS, player, "customROR-Ballistics");
 				numberOfAddedResearches++;
 			}
 			if (rs == RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) { canAdd = false; }

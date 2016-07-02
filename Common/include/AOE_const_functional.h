@@ -18,7 +18,7 @@ namespace AOE_CONST_FUNC
 		AIUCBuilding = 0, // "B" (build, unlimited) or "A" (limited retrains)
 		AIUCTech = 1, // "R" (research)
 		AIUCLivingUnit = 2, // "T" (train with limited retrains) or "U" (train, unlimited)
-		AIUCLoadNewStrategy = 3, // "L". See 4D1E8D. Supported but undocumented and unused !
+		AIUCLoadNewStrategy = 3, // "L". See 4D1E8D and 4B76F0. Supported but undocumented and unused !
 		AIUCCritical = 4, // "C" techs (critical: do not skip, AI MUST first do this before looking after)
 		AIUCEnableAttack = 5, // "E". Unused but supported ! When "executed", this strategy element sets enableAttack=true in AI (AI will start attacking other players)
 		AIUCStrategyCmd = 6 // "G" (set Gather %). Dynamically added items for setGatherPercentage commands

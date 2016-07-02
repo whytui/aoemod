@@ -50,12 +50,14 @@ bool UpdateStrategyWithExistingUnit(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI
 // Consecutive inserts after a same element are reversed (of course) !
 // If you call this to add a research (type 1 or 4), you need to update the unit name afterwards because ROR method is bugged.
 // DO NOT use it to insert researches, please use AddUnitInStrategy_before
-bool AddUnitInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int positionToInsert, long int retrains, long int actor, long int unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+bool AddUnitInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int positionToInsert, long int retrains, long int actor, 
+	AOE_CONST_FUNC::TAIUnitClass unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 // Custom method to insert a line in strategy. This tries to be a bit faster and avoids "unit" Name bug for researches
 // Inserts before 'nextElem' strategy element. Consecutive inserts order is preserved if we insert before the same element.
 // If you want to insert researches in strategy, use this overload.
-bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElem, long int retrains, long int actor, long int unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const char *name);
+bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElem, 
+	long int retrains, long int actor, AOE_CONST_FUNC::TAIUnitClass unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const char *name);
 
 // Use it to move a strategy element to any other location in strategy list.
 // afterThisElem if the element after which we move elemToMove
@@ -77,6 +79,19 @@ bool MoveStrategyElement_after_ifWrongOrder(ROR_STRUCTURES_10C::STRUCT_BUILD_AI 
 	TAIUnitClass elemType_shouldBeBefore,
 	long int DATID_shouldBeAfter,
 	TAIUnitClass elemType_shouldBeAfter);
+
+// Remove (and free) a strategy element from strategy chained list
+// Return true if memory was successfully freed.
+bool RemoveStrategyElement(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem);
+
+// Remove all strategy element counter from unit actions/internal information.
+// Used when strategy is reset, and counter reset to 0, so that obsolete counters do not interact with new strategy elements.
+void RemoveAllReferencesToStratElemCounter(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+
+// Remove all strategy elements from buildAI except fake first element
+// See also 0x4091C0: this ROR method free all elements, set sequence(=count) to 0, set fake's next&previous to itself.
+// This does NOT reset the flags that will allow re-triggering dynamic strategy elements insertion. You'll have to manage it manually.
+void ClearStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
 
 // Add units if maximum population is >50
 void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
@@ -124,3 +139,5 @@ ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetCustomRorMaxPopulationBeginStrat
 // Dumps strategy to text format, for debugging.
 std::string ExportStrategyToText(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
 
+// Create a brand new dynamic strategy for player.
+void CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);

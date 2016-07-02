@@ -340,7 +340,8 @@ bool UpdateStrategyWithExistingUnit(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI
 // Consecutive inserts after a same element are reversed (of course) !
 // If you call this to add a research (type 1 or 4), you need to update the unit name afterwards because ROR method is bugged.
 // DO NOT use it to insert researches, please use AddUnitInStrategy_before
-bool AddUnitInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int positionToInsert, long int retrains, long int actor, long int unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+bool AddUnitInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int positionToInsert, long int retrains, long int actor, 
+	AOE_CONST_FUNC::TAIUnitClass unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	assert(buildAI && buildAI->IsCheckSumValid());
 	assert(player && player->IsCheckSumValid());
 	if (!buildAI || !buildAI->IsCheckSumValid() || !player || !player->IsCheckSumValid()) { return false; }
@@ -371,7 +372,7 @@ bool AddUnitInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int po
 // Inserts before 'nextElem' strategy element. Consecutive inserts order is preserved if we insert before the same element.
 // If you want to insert researches in strategy, use this overload.
 bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElem, long int retrains, long int actor,
-	long int unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const char *name) {
+	AOE_CONST_FUNC::TAIUnitClass unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const char *name) {
 	assert(buildAI && buildAI->IsCheckSumValid());
 	assert(player && player->IsCheckSumValid());
 	if (!buildAI || !buildAI->IsCheckSumValid() || !player || !player->IsCheckSumValid()) { return false; }
@@ -536,6 +537,88 @@ bool MoveStrategyElement_after_ifWrongOrder(ROR_STRUCTURES_10C::STRUCT_BUILD_AI 
 	return false;
 }
 
+// Remove (and free) a strategy element from strategy chained list
+// Return true if memory was successfully freed.
+bool RemoveStrategyElement(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem) {
+	if (!elem || !elem->IsCheckSumValid()) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *next = NULL;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *previous = NULL;
+	if (elem->next && (elem->next != elem)) {
+		next = elem->next;
+	}
+	if (elem->previous && (elem->previous != elem)) {
+		previous = elem->previous;
+	}
+	if (!previous || !next) {
+		// Do not delete the fake first element (or a strategy element
+		traceMessageHandler.WriteMessage("Error: cannot delete a strategy element unattached to a valid strategy chain");
+		return false;
+	}
+	previous->next = next;
+	next->previous = previous;
+	AOEFree(elem);
+	return true;
+}
+
+// Remove all strategy element counter from unit actions/internal information.
+// Used when strategy is reset, and counter reset to 0, so that obsolete counters do not interact with new strategy elements.
+void RemoveAllReferencesToStratElemCounter(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+	assert(player && player->IsCheckSumValid() && player->ptrCreatableUnitsListLink && player->ptrCreatableUnitsListLink->IsCheckSumValid());
+	if (!player || !player->IsCheckSumValid() || !player->ptrCreatableUnitsListLink || !player->ptrCreatableUnitsListLink->IsCheckSumValid()) { return; }
+	
+	int elemCount = player->ptrCreatableUnitsListLink->listElemCount;
+	int i = 0;
+	STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *curElem = player->ptrCreatableUnitsListLink->lastListElement;
+	while ((i < elemCount) && curElem) {
+		STRUCT_UNIT_BUILDING *bld = (STRUCT_UNIT_BUILDING *)curElem->unit;
+		if (bld && bld->IsTypeValid()) {
+			bld->strategyElementCounter = -1;
+			STRUCT_ACTION_BASE *actionBase = GetUnitAction(bld);
+			STRUCT_ACTION_MAKE_OBJECT *actionTrain = (STRUCT_ACTION_MAKE_OBJECT *)actionBase;
+			if (actionTrain && actionTrain->IsCheckSumValid()) {
+				actionTrain->stratElemCounter = -1;
+			}
+			STRUCT_ACTION_MAKE_TECH *actionMakeTech = (STRUCT_ACTION_MAKE_TECH *)actionBase;
+			if (actionMakeTech && actionMakeTech->IsCheckSumValid()) {
+				actionMakeTech->strategyElementCounter = -1;
+			}
+			bld->ptrActionInformation;
+			bld->trainUnitActionInfo;
+		}
+		curElem = curElem->previousElement;
+	}
+}
+
+// Remove all strategy elements from buildAI except fake first element
+// See also 0x4091C0: this ROR method free all elements, set sequence(=count) to 0, set fake's next&previous to itself.
+// This does NOT reset the flags that will allow re-triggering dynamic strategy elements insertion. You'll have to manage it manually.
+void ClearStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
+	if (!buildAI || !buildAI->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = buildAI->fakeFirstStrategyElement.next;
+	bool success = true;
+	while (curElem && success && (curElem != &buildAI->fakeFirstStrategyElement)) {
+		success = RemoveStrategyElement(curElem);
+		curElem = buildAI->fakeFirstStrategyElement.next;
+	}
+	buildAI->strategyElementSequence = 0; // Warning: running actions refer to "old" sequence ID, when completed, wrong stratElem will be marked as done !
+	buildAI->currentIDInStrategy = 0;
+	buildAI->lastBuildName[0] = 0;
+	buildAI->currentBuildName[0] = 0;
+	buildAI->nextBuildName[0] = 0;
+
+	assert(buildAI->mainAI && buildAI->mainAI->IsCheckSumValid());
+	if (!buildAI->mainAI || !buildAI->mainAI->IsCheckSumValid()) { return; }
+	buildAI->mainAI->structTacAI.constructionToTrigger.strategyElement = NULL;
+	buildAI->mainAI->structTacAI.constructionToTrigger.infoIsValid = 0;
+	//buildAI->mainAI->structConAI.tempFakeConstructionInfo1 and 2 : is there something to do there ?
+	if (buildAI->mainAI->structTacAI.SNNumber[SNAutoBuildDropsites]) {
+		buildAI->mainAI->structTacAI.storagePitAddedToStrategy = 0;
+		buildAI->mainAI->structTacAI.granaryAddedToStrategy = 0;
+	}
+	// buildAI->mainAI->structTradeAI.needGameStartAIInit : do NOT reset because it would add again resource bonus...
+	// Dynamic strategy element insertion won't be triggered again.
+	RemoveAllReferencesToStratElemCounter(buildAI->mainAI->ptrStructPlayer);
+}
 
 // Add units to fit maximum population (especially if >50)
 void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
@@ -653,7 +736,7 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	if (GetCustomRorMaxPopulationBeginStratElem(buildAI) == NULL) {
 		// Add a fake element so we can find where is starting point of "added elements" in further calls / other methods.
 		AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, -1, AIUCTech,
-			39 /*storage pit, always (immediately) researched = no impact*/, player, CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN);
+			CST_RSID_STORAGE_PIT/*storage pit, always (immediately) researched = no impact*/, player, CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN);
 		elemToInsertBefore->previous->aliveCount = 1; // Make sure it does not impact AI.
 		elemToInsertBefore->previous->retrains = 1; // Make sure it does not impact AI.
 	}
@@ -774,11 +857,7 @@ void AddUsefulMilitaryTechsToStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player)
 				msg += "'s strategy (target=";
 				msg += std::to_string(unitInfo->unitDefId);
 				msg += ")";
-#ifdef _DEBUG
-				traceMessageHandler.WriteMessage(msg);
-#else
 				traceMessageHandler.WriteMessageNoNotification(msg);
-#endif
 			}
 		}
 	}
@@ -859,7 +938,7 @@ bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 					(currentElem->unitDAT_ID != CST_UNITID_GRANARY) ||
 					(currentElem->unitDAT_ID != CST_UNITID_STORAGE_PIT) ||
 					(currentElem->unitDAT_ID != CST_UNITID_DOCK) || // Can be added dynamically, don't take the risk to block wonder for this.
-					(currentElem->unitDAT_ID != CST_UNITID_GOVERNMENT_SIEGE) ||
+					(currentElem->unitDAT_ID != CST_UNITID_GOVERNMENT_CENTER) ||
 					(currentElem->unitDAT_ID != CST_UNITID_MARKET);
 				if (!isUnnecessaryBld) {
 					// Add other criteria ?
@@ -1284,3 +1363,73 @@ std::string ExportStrategyToText(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 	return result;
 }
 
+// Create all base strategy elements (ages + buildings=barracks,market,govSiege + wheel if available)
+// Does not add villagers
+void CreateBasicStrategyElements(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
+	if (!buildAI || !buildAI->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(buildAI->commonAIObject.playerId);
+	if (!player || !player->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &buildAI->fakeFirstStrategyElement;
+	
+	// Adding before "fake first" will add in last position in strategy.
+	// Add Town Center
+	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_FORUM, player, "TownCenter");
+	// Barracks are always needed
+	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_BARRACKS, player, "Barracks");
+	// Tool Age
+	if (!IsResearchRelevantForStrategy(player, CST_RSID_TOOL_AGE)) {
+		string msg = "This civ seems NOT to have tool age. Player #";
+		msg += to_string(buildAI->commonAIObject.playerId);
+		msg += " : ";
+		msg += buildAI->commonAIObject.playerName;
+		traceMessageHandler.WriteMessageNoNotification(msg);
+		return;
+	}
+	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_TOOL_AGE, player, "*Tool Age*");
+	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_MARKET, player, "Market");
+	// Bronze Age
+	if (!IsResearchRelevantForStrategy(player, CST_RSID_BRONZE_AGE)) {
+		string msg = "This civ seems NOT to have bronze age. Player #";
+		msg += to_string(buildAI->commonAIObject.playerId);
+		msg += " : ";
+		msg += buildAI->commonAIObject.playerName;
+		traceMessageHandler.WriteMessageNoNotification(msg);
+		return;
+	}
+	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_BRONZE_AGE, player, "*Bronze Age*");
+	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_GOVERNMENT_CENTER, player, "Government center");
+	if (IsResearchRelevantForStrategy(player, CST_RSID_WHEEL)) { // requires research status to be set
+		AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_MARKET, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, CST_RSID_WHEEL, player, "Wheel");
+	}
+	// Iron Age
+	if (!IsResearchRelevantForStrategy(player, CST_RSID_IRON_AGE)) {
+		string msg = "This civ seems NOT to have iron age. Player #";
+		msg += to_string(buildAI->commonAIObject.playerId);
+		msg += " : ";
+		msg += buildAI->commonAIObject.playerName;
+		traceMessageHandler.WriteMessageNoNotification(msg);
+		return;
+	}
+	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_IRON_AGE, player, "*Iron Age*");
+}
+
+// Create a brand new dynamic strategy for player.
+void CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
+	if (!buildAI || !buildAI->IsCheckSumValid() || !buildAI->mainAI || !buildAI->mainAI->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(buildAI->commonAIObject.playerId);
+	if (!player || !player->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid()) { return; }
+	// Clear previous strategy
+	ClearStrategy(buildAI);
+	strcpy_s(buildAI->strategyFileName, 0x3F, "Dynamic CustomROR strategy");
+	// Initialize strategy with ages (no villager yet)
+	CreateBasicStrategyElements(buildAI);
+
+
+	if (buildAI->mainAI->structTradeAI.needGameStartAIInit) {
+		// Warning: automatic element insertions WILL be triggered
+	} else {
+		// TODO : trigger dynamic element insertions ?
+	}
+}

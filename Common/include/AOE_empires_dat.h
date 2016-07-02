@@ -335,7 +335,7 @@ namespace AOE_CONST_FUNC {
 	const short int CST_UNITID_FARM = 0x32; //50
 	const short int CST_UNITID_GRANARY = 0x44; // 68
 	const short int CST_UNITID_HOUSE = 0x46; //70
-	const short int CST_UNITID_GOVERNMENT_SIEGE = 0x52; //82
+	const short int CST_UNITID_GOVERNMENT_CENTER = 0x52; //82
 	const short int CST_UNITID_MARKET = 0x54; //84
 	const short int CST_UNITID_STORAGE_PIT = 0x67; //103
 	const short int CST_UNITID_WONDER = 0x114; //276
@@ -421,6 +421,7 @@ namespace AOE_CONST_FUNC {
 	const short int CST_RSID_WRITING = 114; // Share exploration
 	// Research IDs: shadow researches
 	const short int CST_RSID_MARKET_FARM = 26; // Enable farms
+	const short int CST_RSID_STORAGE_PIT = 39; // Enable storage pit
 	// Walls
 	const short int CST_RSID_SMALL_WALL = 11; // Wall #1
 	const short int CST_RSID_MEDIUM_WALL = 13; // Wall #2
