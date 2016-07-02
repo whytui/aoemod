@@ -2740,7 +2740,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_TAC_AI structTacAI; // +0x1146C
 		STRUCT_TRADE_AI structTradeAI; // +0x12478
 
-		bool IsCheckSumValid() { return this->checksum == 0x00548BF0; }
+		bool IsCheckSumValid() const { return this->checksum == 0x00548BF0; }
 	};
 
 
