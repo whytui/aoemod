@@ -3,10 +3,12 @@
 #include <string.h>
 #include <vector>
 #include <set>
+#include <memory>
 #include <ROR_structures.h>
 #include <AOE_const_functional.h>
 #include "crCommon.h"
 #include "researches.h"
+#include "randomizer.h"
 
 /*
 * This file contains primitives to deal with (AI) strategy.
@@ -18,6 +20,7 @@ using namespace AOE_CONST_FUNC;
 const char CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN[] = "CustomRORMaxPopulation";
 
 
+// This class collects useful information for strategy generation
 class StrategyGenerationInfo {
 public:
 	StrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
@@ -29,7 +32,7 @@ public:
 		this->transportShipsCount = 0;
 		this->villagerCount_alwaysRetrain = 0;
 		this->villagerCount_limitedRetrains = 0;
-		this->SetPlayerAndAIStructs(player);
+		this->SetPlayerInfo(player);
 	}
 	const ROR_STRUCTURES_10C::STRUCT_PLAYER *player;
 	const ROR_STRUCTURES_10C::STRUCT_AI *ai; // automatically set from player (SetPlayerAndAIStructs)
@@ -45,7 +48,7 @@ public:
 	long int transportShipsCount;
 
 private:
-	void SetPlayerAndAIStructs(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+	void SetPlayerInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 		this->ai = NULL;
 		this->buildAI = NULL;
 		this->player = player;
@@ -180,3 +183,5 @@ std::string ExportStrategyToText(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
 
 // Create a brand new dynamic strategy for player.
 void CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
+
+std::shared_ptr<StrategyGenerationInfo> GetStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);

@@ -11,9 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\testRandomizer.h" />
     <ClInclude Include="include\testROR_Structures.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\testRandomizer.cpp" />
     <ClCompile Include="src\testROR_Structures.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

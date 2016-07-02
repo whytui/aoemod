@@ -253,6 +253,7 @@ int _tmain(int argc, _TCHAR *argv[]) {
 	return 0; // Test must be run in debug mode.
 #endif
 	test_ror_structures();
+	test_randomizer();
 	MessageBox(NULL, _T("End"), _T("Unit test"), MB_ICONINFORMATION);
 	return 0;
 }

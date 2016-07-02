@@ -1437,3 +1437,34 @@ void CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 		// TODO : trigger dynamic element insertions ?
 	}
 }
+
+
+std::shared_ptr<StrategyGenerationInfo> GetStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+	if (!player || !player->IsCheckSumValid()) { return NULL; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return NULL; }
+	std::shared_ptr<StrategyGenerationInfo> shrPtr(make_shared<StrategyGenerationInfo>(player));
+	StrategyGenerationInfo *genInfo = shrPtr.get();
+	genInfo->maxPopulation = settings->maxPopulation;
+	genInfo->isWaterMap = IsDockRelevantForMap(settings->mapTypeChoice);
+
+	// *** Compute unit numbers ***
+	// Land maps: fixed villagers count around 14-20  ; retrains around 6-10  ; total 18-28
+	// Water maps: fixed villagers count around 10-16  ; retrain around 5-9  ; total 16-24 . original AI: often 10+6 or 14+6
+	const long int maxTotalVillagers = genInfo->isWaterMap ? 22 : 26;
+	const long int minFixedVillagers = genInfo->isWaterMap ? 10 : 14;
+	const long int minLimitedRetrainsVillagers = genInfo->isWaterMap ? 5 : 6;
+	assert(minFixedVillagers + minLimitedRetrainsVillagers < maxTotalVillagers);
+	const long int maxFixedVillagersRandomPart = 6; // random interval size
+	const long int maxLimitedRetrainsVillagersRandomPart = genInfo->isWaterMap ? 4 : 6; // random interval size
+
+	int randomValue = randomizer.GetRandomValue_normal_moderate(12, 17);
+	/*int total = 0;
+	int count = 0;
+	//for (int i = 0; i < 10000; i++) {randomValue2 = randomizer.GetRandomValue_normal_moderate(12, 17); count++; total += randomValue2;}
+	//for (int i = 0; i < 10000; i++) { randomValue2 = randomizer.GetRandomValue_normal_moreFlat(12, 17); count++; total += randomValue2; }
+	for (int i = 0; i < 10000; i++) { randomValue2 = randomizer.GetRandomValue(12, 17); count++; total += randomValue2; }
+	float result = ((float)total) / ((float)count);*/
+
+	return shrPtr;
+}

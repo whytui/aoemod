@@ -115,6 +115,7 @@
     <ClInclude Include="include\crPatcher.h" />
     <ClInclude Include="include\drsHandler.h" />
     <ClInclude Include="include\language.h" />
+    <ClInclude Include="include\randomizer.h" />
     <ClInclude Include="include\researches.h" />
     <ClInclude Include="include\RORProcessEditor.h" />
     <ClInclude Include="include\crTrigger.h" />
