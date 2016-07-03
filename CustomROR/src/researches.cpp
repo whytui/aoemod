@@ -213,9 +213,11 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) 
 				return true;
 			}
 		}
+		bool isResourceModifier = ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) ||
+			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT));
 		// Very special cases: some resources can improve units: priest/building conversion, etc
 		if (unitDef->unitAIType == TribeAIGroupPriest) {
-			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) && (
+			if (isResourceModifier && (
 				(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_BUILDING) ||
 				(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_PRIEST) ||
 				(techEffect->effectUnit == CST_RES_ORDER_FAITH_RECHARGING_RATE) ||
@@ -226,14 +228,12 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) 
 			}
 		}
 		if (IsVillager(unitDef->DAT_ID1)) { // excluding boats
-			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) ||
-				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT)) {
+			if (isResourceModifier) {
 				if (techEffect->effectUnit == CST_RES_ORDER_GOLD_MINING_PODUCTIVITY) { return true; } // Villagers: mining productivity
 			}
 		}
 		if (unitDef->DAT_ID1 == CST_UNITID_FARM) {
-			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) ||
-				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT)) {
+			if (isResourceModifier) {
 				if (techEffect->effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT) { return true; } // Farms : farm amount
 			}
 		}
