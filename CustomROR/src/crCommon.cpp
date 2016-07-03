@@ -1212,7 +1212,8 @@ ROR_STRUCTURES_10C::STRUCT_DEF_UNIT_COMMAND *GetUnitDefCommandForTarget(ROR_STRU
 }
 
 
-// Returns <> 0 if a unit is available for a given player. Returns the unit def pointer.
+// Returns <> 0 if a unit is (currently) available for a given player. Returns the unit def pointer.
+// Does not consider potential researches that could enable the unit afterwards.
 // Warning: this only works for non-upgraded unit def IDs. OK for clubman, not for axeman (because axeman's DATID1 is clubman's DATID).
 long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	long int addrStructPlayer = (long int)player;

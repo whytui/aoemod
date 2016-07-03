@@ -993,7 +993,7 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 	if (allUpgrades) {
 		researchesForUnit = FindResearchesThatAffectUnit(player, unitDefId, true);
 	} else {
-		short int researchId = FindResearchThatEnableUnit(player, unitDefId);
+		short int researchId = FindResearchThatEnableUnit(player, unitDefId, 0);
 		if (researchId == -1) { return 0; }
 		researchesForUnit.push_back(researchId);
 	}
@@ -1439,6 +1439,194 @@ void CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 }
 
 
+// Fills unitInfos with all available military units from tech tree.
+// Towers are ignored (not added to list). Boats are ignored on non-water maps.
+// *** Make sure to delete all PotentialUnitInfo from list when you're finished with the list ***
+void CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, std::list<PotentialUnitInfo*> &unitInfos) {
+	if (!player || !player->IsCheckSumValid() || !player->ptrStructDefUnitTable || !player->ptrResearchesStruct) { return; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	bool isWaterMap = IsDockRelevantForMap(settings->mapTypeChoice);
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid()) { return; }
+	if (!global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid()) { return; }
+	// Retrieve player tech tree
+	assert(player->techTreeId < global->technologiesInfo->technologyCount);
+	STRUCT_TECH_DEF *techDefTechTree = NULL;
+	if (player->techTreeId >= 0) { // a player *might* not have a tech tree.
+		techDefTechTree = &global->technologiesInfo->ptrTechDefArray[player->techTreeId];
+		if (techDefTechTree->effectCount <= 0) { techDefTechTree = NULL; }
+	}
+
+	// Store list of available research (not disabled in tech tree) to avoid having to recompute it more than once
+	std::list<short int> allAvailableResearches;
+	std::list<short int> allDisabledResearches; // analog: full list of tech tree-disable researches
+	for (int curRsId = 0; curRsId < player->ptrResearchesStruct->researchCount; curRsId++) {
+		STRUCT_RESEARCH_DEF *curResDef = player->GetResearchDef(curRsId);
+		bool researchIsDisabled = false;
+		for (int i = 0; (techDefTechTree != NULL) && (i < techDefTechTree->effectCount) && !researchIsDisabled; i++) {
+			if ((techDefTechTree->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH) &&
+				(techDefTechTree->ptrEffects[i].GetValue() == curRsId)) {
+				researchIsDisabled = true;
+			}
+		}
+		if (researchIsDisabled) {
+			allDisabledResearches.push_back(curRsId);
+		} else {
+			allAvailableResearches.push_back(curRsId);
+		}
+	}
+
+	for (int curUnitDefID = 0; curUnitDefID < player->structDefUnitArraySize; curUnitDefID++) {
+		STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(curUnitDefID);
+		bool validUnit = (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
+		validUnit = validUnit && unitDefBase->DerivesFromLiving();
+		validUnit = validUnit && IsNonTowerMilitaryUnit(unitDefBase->unitAIType);
+		STRUCT_UNITDEF_LIVING *unitDefLiving = (STRUCT_UNITDEF_LIVING *)unitDefBase;
+		assert(!validUnit || unitDefLiving->IsCheckSumValid());
+		validUnit = validUnit && (unitDefLiving->towerMode == 0) && (unitDefLiving->speed > 0) &&
+			(unitDefLiving->trainButton > 0) && (unitDefLiving->trainLocation >= 0); // both exclude some heroes/cheats/non-standard units, but not all of them
+		
+		
+		bool availableForPlayer = validUnit && (unitDefLiving->availableForPlayer != 0); // Warning: this excludes units that are enabled by researches
+		short int researchIdThatEnablesUnit = -1; // Store the researchId that enables current unit... If any
+		
+		// Search for a research (available in my tech tree) that enables unit
+		if (!availableForPlayer && validUnit) {
+			short int enableUnitResearchId = FindResearchThatEnableUnit(player, unitDefBase->DAT_ID1, 0);
+			while ((enableUnitResearchId >= 0) && !availableForPlayer) {
+				STRUCT_RESEARCH_DEF *enableUnitResearchDef = player->GetResearchDef(enableUnitResearchId);
+
+				if (enableUnitResearchDef && (enableUnitResearchDef->technologyId >= 0) && (enableUnitResearchDef->technologyId < global->technologiesInfo->technologyCount)) {
+					// Is this research disabled by my tech tree ?
+					auto it = std::find_if(allDisabledResearches.begin(), allDisabledResearches.end(),
+						[enableUnitResearchId](short int availableResId) { return enableUnitResearchId == availableResId; }
+					);
+					bool researchIsDisabled = (it != allDisabledResearches.end()); // If found, then the research IS disabled
+					STRUCT_TECH_DEF *enableUnitTechDef = &global->technologiesInfo->ptrTechDefArray[enableUnitResearchDef->technologyId];
+					if (enableUnitTechDef && !researchIsDisabled) { // if research object is found AND available in my tech tree (not disabled)
+						for (int i = 0; i < enableUnitTechDef->effectCount; i++) {
+							if (enableUnitTechDef->ptrEffects[i].IsEnableUnit(unitDefBase->DAT_ID1)) {
+								availableForPlayer = true;
+								researchIdThatEnablesUnit = enableUnitResearchId;
+							}
+						}
+					}
+				}
+				// Several researches might enable a same unit (for example if tech trees enable some units). Not standard, but possible.
+				enableUnitResearchId = FindResearchThatEnableUnit(player, unitDefBase->DAT_ID1, enableUnitResearchId + 1); // Search next
+			}
+		}
+		validUnit = validUnit && availableForPlayer;
+
+		bool techTreeAffectsCurrentUnit = (techDefTechTree != NULL) && DoesTechAffectUnit(techDefTechTree, unitDefBase);
+		bool currentUnitHasTechTreeBonus = false;
+		if (validUnit && techTreeAffectsCurrentUnit) {
+			for (int i = 0; i < techDefTechTree->effectCount; i++) {
+				if (techDefTechTree->ptrEffects[i].IsDisableUnit(unitDefBase->DAT_ID1)) {
+					validUnit = false;
+				}
+				if (validUnit && techDefTechTree->ptrEffects[i].HasValidEffect()) {
+					// We consider valid effects in tech tree (that are NOT disable unit) are always positive effects
+					// What could we do otherwise ? Ignore the unit ? Add flag in PotentialUnitInfo ?
+					currentUnitHasTechTreeBonus = true;
+				}
+			}
+		}
+		if (validUnit) {
+			PotentialUnitInfo *unitInfo = new PotentialUnitInfo();
+			unitInfo->unitDefId = unitDefLiving->DAT_ID1;
+			unitInfo->hitPoints = unitDefLiving->totalHitPoints;
+			unitInfo->range = unitDefLiving->maxRange;
+			unitInfo->isMelee = (unitInfo->range < 2);
+			unitInfo->speed = unitDefLiving->speed; // // updated below if some researches update the speed value
+			unitInfo->unitAIType = unitDefLiving->unitAIType;
+			unitInfo->hasCivBonus = currentUnitHasTechTreeBonus;
+			unitInfo->enabledByResearchId = researchIdThatEnablesUnit;
+			unitInfo->unitName = unitDefLiving->ptrUnitName;
+			unitInfo->hasUnavailableUpgrade = false;
+			unitInfo->displayedAttack = unitDefLiving->displayedAttack;
+			unitInfo->availableRelatedResearchesCount = 0; // updated below
+			unitInfo->unavailableRelatedResearchesCount = 0; // updated below
+			if (unitDefLiving->blastRadius > 0) {
+				unitInfo->displayedAttack = (unitInfo->displayedAttack * 115) / 100; // Give a "fake" attack bonus for units with blast damage (15% ?)
+			}
+			// Collect research info for this unit (available/unavailable, unit upgrades info, speed updates).
+			for each (short int curResearchId in allDisabledResearches)
+			{
+				STRUCT_RESEARCH_DEF *curResearchDef = player->GetResearchDef(curResearchId);
+				short int techId = -1;
+				STRUCT_TECH_DEF *techDef = NULL;
+				if (curResearchDef) {
+					techId = curResearchDef->technologyId;
+					if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
+						techDef = &global->technologiesInfo->ptrTechDefArray[techId];
+					}
+				}
+				if (techDef && techDef->ptrEffects) {
+					if (DoesTechAffectUnit(techDef, unitDefLiving)) {
+						unitInfo->unavailableRelatedResearchesCount++;
+						for (int i = 0; i < techDef->effectCount; i++) {
+							short int upgradeTargetUnitDefId = techDef->ptrEffects[i].UpgradeUnitGetTargetUnit();
+							if ((upgradeTargetUnitDefId >= 0) && (techDef->ptrEffects[i].effectUnit == unitDefLiving->DAT_ID1)) {
+								// We found an upgrade for our unit (... which is disabled by tech tree)
+								unitInfo->hasUnavailableUpgrade = true;
+							}
+						}
+					}
+				}
+			}
+			for each (short int curResearchId in allAvailableResearches)
+			{
+				STRUCT_RESEARCH_DEF *curResearchDef = player->GetResearchDef(curResearchId);
+				short int techId = -1;
+				STRUCT_TECH_DEF *techDef = NULL;
+				if (curResearchDef) {
+					techId = curResearchDef->technologyId;
+					if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
+						techDef = &global->technologiesInfo->ptrTechDefArray[techId];
+					}
+				}
+				if (techDef && techDef->ptrEffects) {
+					if (DoesTechAffectUnit(techDef, unitDefLiving)) {
+						unitInfo->availableRelatedResearchesCount++;
+						for (int i = 0; i < techDef->effectCount; i++) {
+							short int upgradeTargetUnitDefId = techDef->ptrEffects[i].UpgradeUnitGetTargetUnit();
+							if ((upgradeTargetUnitDefId >= 0) && (techDef->ptrEffects[i].effectUnit == unitDefLiving->DAT_ID1)) {
+								// We found an upgrade for our unit
+								unitInfo->upgradesUnitDefId.push_back(upgradeTargetUnitDefId);
+							}
+							if (upgradeTargetUnitDefId == unitDefLiving->DAT_ID1) {
+								// We found the base unit of our unit (our unit is an upgrade for some other unit)
+								unitInfo->baseUnitDefId = techDef->ptrEffects[i].effectUnit;
+							}
+							bool isAttrModifier = ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
+								(techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
+								(techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT));
+							bool affectsMe = ((techDef->ptrEffects[i].effectUnit == unitDefLiving->DAT_ID1) ||
+								(techDef->ptrEffects[i].effectClass == unitDefLiving->unitAIType));
+							if (isAttrModifier && affectsMe && (techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_SPEED)) {
+								float value = techDef->ptrEffects[i].GetValue();
+								if (techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) {
+									unitInfo->speed += value;
+								}
+								if (techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) {
+									unitInfo->speed = value;
+								}
+								if (techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT) {
+									unitInfo->speed = unitInfo->speed * value;
+								}
+							}
+						}
+					}
+				}
+			}
+			// Save unit infos in list
+			unitInfos.push_back(unitInfo);
+		}
+	}
+}
+
 std::shared_ptr<StrategyGenerationInfo> GetStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return NULL; }
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -1458,13 +1646,29 @@ std::shared_ptr<StrategyGenerationInfo> GetStrategyGenerationInfo(ROR_STRUCTURES
 	const long int maxFixedVillagersRandomPart = 6; // random interval size
 	const long int maxLimitedRetrainsVillagersRandomPart = genInfo->isWaterMap ? 4 : 6; // random interval size
 
-	int randomValue = randomizer.GetRandomValue_normal_moderate(12, 17);
-	/*int total = 0;
-	int count = 0;
-	//for (int i = 0; i < 10000; i++) {randomValue2 = randomizer.GetRandomValue_normal_moderate(12, 17); count++; total += randomValue2;}
-	//for (int i = 0; i < 10000; i++) { randomValue2 = randomizer.GetRandomValue_normal_moreFlat(12, 17); count++; total += randomValue2; }
-	for (int i = 0; i < 10000; i++) { randomValue2 = randomizer.GetRandomValue(12, 17); count++; total += randomValue2; }
-	float result = ((float)total) / ((float)count);*/
+	int fixedVillagerCount = randomizer.GetRandomValue_normal_moderate(minFixedVillagers, minFixedVillagers + maxFixedVillagersRandomPart);
+	int limitedRetrainsVillagerCount = randomizer.GetRandomValue_normal_moderate(minLimitedRetrainsVillagers, minLimitedRetrainsVillagers + maxLimitedRetrainsVillagersRandomPart);
+	if (fixedVillagerCount + limitedRetrainsVillagerCount > maxTotalVillagers) { limitedRetrainsVillagerCount = maxTotalVillagers; }
 
+	genInfo->villagerCount_alwaysRetrain = fixedVillagerCount;
+	genInfo->villagerCount_limitedRetrains = limitedRetrainsVillagerCount;
+	// TODO: more villagers if max population > 50 ?
+
+	// Boats : TODO
+	if (genInfo->isWaterMap) {
+
+	}
+
+	// Select the military units to train
+	std::list<PotentialUnitInfo*> potentialUnits;
+
+	CollectPotentialUnitsInfo(player, potentialUnits);
+
+
+	// Free allocated items
+	for each (PotentialUnitInfo *unitInfo in potentialUnits)
+	{
+		delete unitInfo;
+	}
 	return shrPtr;
 }

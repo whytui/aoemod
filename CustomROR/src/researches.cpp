@@ -188,6 +188,7 @@ int DisableImpossibleResearches() {
 
 
 // Returns true if technology has at least one effect on provided unit definition.
+// Effect can be negative too.
 bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) {
 	if (!techDef || !unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 		return false;
@@ -243,7 +244,7 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) 
 
 // Returns true if technology enables provided unit (including upgrade TO provided unit, if provided unit is an upgrade).
 bool DoesTechEnableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId) {
-	if (!techDef || (unitDefId < 0)) { // -1 CAN'T be a joket here !
+	if (!techDef || (unitDefId < 0)) { // -1 CAN'T be a joker here !
 		return false;
 	}
 	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
@@ -299,13 +300,15 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 }
 
 
-// Returns the (non disabled) research ID that enables a unit. Returns -1 if not found.
-short int FindResearchThatEnableUnit(STRUCT_PLAYER *player, short int unitDefId) {
+// Returns the first (non disabled) research ID found that enables a unit. Returns -1 if not found.
+// startAtResearchId : -1=ignored (joker). If >=0, than the search will start at this index and ignore previous researches.
+short int FindResearchThatEnableUnit(STRUCT_PLAYER *player, short int unitDefId, short int startAtResearchId) {
 	if (!player || !player->IsCheckSumValid() || !player->ptrGlobalStruct || !player->ptrGlobalStruct->IsCheckSumValid() ||
 		!player->ptrGlobalStruct->technologiesInfo || !player->ptrGlobalStruct->technologiesInfo->IsCheckSumValid() ||
 		!player->ptrGlobalStruct->technologiesInfo->ptrTechDefArray) {
 		return -1;
 	}
+	if (startAtResearchId < 0) { startAtResearchId = 0; }
 	STRUCT_PLAYER_RESEARCH_INFO *rinfo = player->ptrResearchesStruct;
 	if (!rinfo) { return -1; }
 	int resCount = rinfo->researchCount;
@@ -313,7 +316,7 @@ short int FindResearchThatEnableUnit(STRUCT_PLAYER *player, short int unitDefId)
 	STRUCT_RESEARCH_DEF_INFO *resInfoArray = rinfo->ptrResearchDefInfo;
 	if (!resInfoArray || !statuses) { return -1; }
 	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
-	for (int researchId = 0; researchId < resCount; researchId++) {
+	for (int researchId = startAtResearchId; researchId < resCount; researchId++) {
 		if (statuses[researchId].currentStatus > RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) {
 			short int techId = resDefArray[researchId].technologyId;
 			if ((techId >= 0) && DoesTechEnableUnit(&player->ptrGlobalStruct->technologiesInfo->ptrTechDefArray[techId], unitDefId)) {

@@ -343,6 +343,9 @@ float GetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit
 // Modifies the total remaining food amount for a farm ("immediately available" + "action-remaining").
 bool SetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit, float newAmount);
 
+// Returns <> 0 if a unit is (currently) available for a given player. Returns the unit def pointer.
+// Does not consider potential researches that could enable the unit afterwards.
+// Warning: this only works for non-upgraded unit def IDs. OK for clubman, not for axeman (because axeman's DATID1 is clubman's DATID).
 long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 // Searches (at least) a unit with provided shortcut number for given player.

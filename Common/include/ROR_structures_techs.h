@@ -1,6 +1,8 @@
 
 #pragma once
 
+using namespace AOE_CONST_FUNC;
+
 /*
 * This file contains empiresX.exe structures definition
 * Please read README.txt first.
@@ -14,7 +16,7 @@ namespace ROR_STRUCTURES_10C {
 	// Size =  0x0C
 	class STRUCT_TECH_DEF_EFFECT {
 	public:
-		AOE_CONST_FUNC::TECH_DEF_EFFECTS effectType; // 1 byte.
+		TECH_DEF_EFFECTS effectType; // 1 byte.
 		char unused_01;
 		short int effectUnit; // +02. Unit ID or Resource ID or...
 		short int effectClass; // +04. Class or ToUnit (upgrade unit) or Mode (for enable unit, resource modifier) or...
@@ -23,10 +25,10 @@ namespace ROR_STRUCTURES_10C {
 
 		float GetValue() const {
 			// Attribute modifier (set/add/mult) on armor or attack: exception (need to apply a modulo on value)
-			if (((this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
-				(this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
-				(this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT)) &&
-				((this->effectAttribute == 8) || (this->effectAttribute == 9))) { // armor&attack attributes: 2 info stored in the float...
+			if (((this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
+				(this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
+				(this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT)) &&
+				((this->effectAttribute == (short)TECH_UNIT_ATTRIBUTES::TUA_ARMOR) || (this->effectAttribute == (short)TECH_UNIT_ATTRIBUTES::TUA_ATTACK))) { // armor&attack (8,9) attributes: 2 info stored in the float...
 				return fmodf(this->effectValue, 256); // Holy WTF !!!
 				//AOE_CONST_FUNC::ATTACK_CLASS attackClass = (AOE_CONST_FUNC::ATTACK_CLASS)(this->effectValue / 256);
 			}
@@ -36,39 +38,39 @@ namespace ROR_STRUCTURES_10C {
 		// Returns true if tech effect has a valid and "effective" effect (not disabled, not adding 0, etc)
 		bool HasValidEffect() const {
 			switch (this->effectType) {
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_INVALID:
+			case TECH_DEF_EFFECTS::TDE_INVALID:
 				return false;
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET:
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH:
+			case TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET:
+			case TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH:
 				return true;
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET:
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESEARCH_COST_MODIFIER:
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESEARCH_TIME_MODIFIER:
+			case TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET:
+			case TECH_DEF_EFFECTS::TDE_RESEARCH_COST_MODIFIER:
+			case TECH_DEF_EFFECTS::TDE_RESEARCH_TIME_MODIFIER:
 				if (this->effectClass == 0) { // mode 0 = set
 					return true;
 				} else { // mode 1 = add
 					return (this->GetValue() != 0);
 				}
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT:
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT:
+			case TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT:
+			case TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT:
 				return (this->effectUnit >= 0);
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD:
+			case TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD:
 				return (this->GetValue() != 0);
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT:
-			case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT:
+			case TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT:
+			case TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT:
 				return (this->GetValue() != 1);
 			}
 			return true;
 		}
 		bool IsEnableUnit(short int unitDefId) const {
-			return (this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (this->effectClass == 1) && (this->effectUnit == unitDefId);
+			return (this->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (this->effectClass == 1) && (this->effectUnit == unitDefId);
 		}
 		bool IsDisableUnit(short int unitDefId) const {
-			return (this->effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (this->effectClass == 0) && (this->effectUnit == unitDefId);
+			return (this->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (this->effectClass == 0) && (this->effectUnit == unitDefId);
 		}
 		// Return target unit ("TO") for "upgrade unit" effects. Returns -1 if invalid (not an upgrade unit effect)
 		short int UpgradeUnitGetTargetUnit() const {
-			if (this->effectType != AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) { return -1; }
+			if (this->effectType != TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) { return -1; }
 			return this->effectClass;
 		}
 	};

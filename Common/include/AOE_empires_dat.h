@@ -57,7 +57,8 @@ namespace AOE_CONST_FUNC {
 		TribeAIGroupSiegeWeapon = 13, // 0x0D
 		TribeAIGroupPriest = 18, // 0x12
 		TribeAIGroupFishingBoat = 21, // 0x15
-		TribeAIGroupHeavyMountedSoldier = 23, // 0x17
+		//TribeAIGroupHeavyMountedSoldier = 23, // 0x17 - name from rules.rps, not very exact/explicit (only chariot archer has it)
+		TribeAIGroupChariotArcher = 23, // 0x17. Only chariot archer
 		TribeAIGroupElephantRider = 24, // 0x18. war elephant + armored elephant ?
 		TribeAIGroupHeavyFootSoldier = 25, // 0x19 - Hero_Archimedes, Hero-Tiberius, Hero-Perseus, Hero-Xerxes, Hero_Jason
 		TribeAIGroupElephantArcher = 26, // 0x1A
@@ -68,7 +69,7 @@ namespace AOE_CONST_FUNC {
 		TribeAIGroupWall = 27,  // 0x1B
 		// Added from AGE3 information
 		TribeAIGroupArtefact = 1, // ruins/artefacts
-		TribeAIGroupChariotArcher = 17, // 0x11
+		TribeAIGroupUnused = 17, // 0x11. TODO : mistake ?
 		TribeAIGroupChariot = 35, // 0x23
 		TribeAIGroupHorseArcher = 36, // 0x24
 		TribeAIGroupSlinger = 39, // 0x27
@@ -221,7 +222,7 @@ namespace AOE_CONST_FUNC {
 		TDE_ATTRIBUTE_MODIFIER_MULT = 5, // multiply by a value
 		TDE_RESOURCE_MODIFIER_MULT = 6, // multiply by a value
 		TDE_RESEARCH_COST_MODIFIER = 101,
-		TDE_DISABLE_RESEARCH = 102,
+		TDE_DISABLE_RESEARCH = 102, // "value" contains researchId (as float), other fields unused.
 		TDE_RESEARCH_TIME_MODIFIER = 103
 	};
 
@@ -1377,7 +1378,7 @@ namespace AOE_CONST_FUNC {
 		case TribeAIGroupElephantRider:
 		case TribeAIGroupFootSoldier:
 		case TribeAIGroupHeavyFootSoldier:
-		case TribeAIGroupHeavyMountedSoldier:
+		//case TribeAIGroupHeavyMountedSoldier:
 		case TribeAIGroupHorse:
 		case TribeAIGroupHorseArcher:
 		case TribeAIGroupMountedSoldier:
@@ -1387,7 +1388,18 @@ namespace AOE_CONST_FUNC {
 		case TribeAIGroupSlinger:
 		case TribeAIGroupWarBoat:
 			return true;
-		default:
+		case TribeAIGroupArtefact:
+		case TribeAINone:
+		case TribeAIGroupBuilding:
+		case TribeAIGroupCivilian:
+		case TribeAIGroupFishingBoat:
+		case TribeAIGroupTradeBoat:
+		case TribeAIGroupTransportBoat:
+		case TribeAIGroupOther_Dead_Projectile:
+		case TribeAIGroupTradeCart:
+		case TribeAIGroupBird:
+		case TribeAIGroupUnused_Tower:
+		default: // still many others
 			return false;
 		}
 	}

@@ -3439,7 +3439,7 @@ namespace ROR_STRUCTURES_10C
 		char trainButton; // +15E.
 		char unknown_15F; // +15F. Unused ?
 		// 0x160
-		short int displayerPierceArmor;
+		short int displayedPierceArmor;
 		short int unknown_162;
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00549970); }
