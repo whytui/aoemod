@@ -151,5 +151,7 @@ private:
 	void ComputeScoresVsPriests(PotentialUnitInfo *unitInfo, int damageScore);
 	// Compute score fields for towers in unitInfo object.
 	void ComputeScoresVsTower(PotentialUnitInfo *unitInfo);
+
+	void SelectStrategyUnits();
 };
 

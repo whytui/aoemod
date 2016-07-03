@@ -1,68 +1,5 @@
 #include "../include/StrategyBuilder.h"
 
-struct StrategyUnitInfo {
-	StrategyUnitInfo(short int unitDefId) {
-		this->unitDefId = unitDefId;
-		this->countWithUnlimitedRetrains = 0;
-		this->countWithLimitedRetrains = 0;
-		this->totalCount = 0;
-	}
-	short int unitDefId;
-	int countWithUnlimitedRetrains;
-	int countWithLimitedRetrains;
-	int totalCount;
-};
-
-class StrategyUnitsInfo {
-public:
-	~StrategyUnitsInfo() {
-		for each (StrategyUnitInfo *unitInfo in this->unitsInfo)
-		{
-			delete unitInfo;
-		}
-		this->unitsInfo.clear();
-	}
-	StrategyUnitInfo *AddUnitInfo(short int unitDefId) {
-		StrategyUnitInfo *unitInfo = new StrategyUnitInfo(unitDefId);
-		this->unitsInfo.push_back(unitInfo);
-		return unitInfo;
-	}
-	StrategyUnitInfo *GetUnitInfo(short int unitDefId) {
-		for each (StrategyUnitInfo *unitInfo in this->unitsInfo)
-		{
-			if (unitInfo->unitDefId == unitDefId) { return unitInfo; }
-		}
-		return NULL;
-	}
-	StrategyUnitInfo *GetOrAddUnitInfo(short int unitDefId) {
-		StrategyUnitInfo *u = GetUnitInfo(unitDefId);
-		if (u) { return u; }
-		return this->AddUnitInfo(unitDefId);
-	}
-	// collectMilitaryUnits: if true, collect only military units, otherwise, collect only villager units
-	void CollectUnitInfosFromStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, bool collectMilitaryUnits) {
-		if (!buildAI || !buildAI->IsCheckSumValid()) { return; }
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &buildAI->fakeFirstStrategyElement;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentElem = fakeFirstElem->next;
-		while (currentElem && (currentElem != fakeFirstElem)) {
-			bool isVillager = IsVillager_includingShips((unsigned short int)currentElem->unitDAT_ID);
-			if ((currentElem->elementType == AIUCLivingUnit) &&
-				((isVillager && !collectMilitaryUnits) || (!isVillager && collectMilitaryUnits))) {
-				StrategyUnitInfo *uInfo = this->GetOrAddUnitInfo((short int)currentElem->unitDAT_ID);
-				uInfo->totalCount++;
-				if (currentElem->retrains == -1) {
-					uInfo->countWithUnlimitedRetrains++;
-				} else {
-					uInfo->countWithLimitedRetrains++;
-				}
-			}
-			currentElem = currentElem->next;
-		}
-	}
-	std::vector<StrategyUnitInfo*> unitsInfo;
-};
-
-
 
 // Create all base strategy elements (ages + buildings=barracks,market,govSiege + wheel if available)
 // Does not add villagers
@@ -454,7 +391,7 @@ std::shared_ptr<StrategyGenerationInfo> StrategyBuilder::GetStrategyGenerationIn
 
 	this->CollectPotentialUnitsInfo(player);
 	this->ComputeScoresForPotentialUnits();
-
+	this->SelectStrategyUnits();
 
 
 	return shrPtr;
@@ -898,3 +835,8 @@ void StrategyBuilder::ComputeScoresVsTower(PotentialUnitInfo *unitInfo) {
 		break;
 	}
 }
+
+void StrategyBuilder::SelectStrategyUnits() {
+
+}
+
