@@ -193,7 +193,7 @@ namespace AOE_CONST_FUNC {
 		CST_AC_BASE_PIERCE = 3, // Common archers attack class
 		CST_AC_BASE_MELEE = 4, // The most common attack type
 		CST_AC_CATAPULTS_ON_BUILDINGS = 6,
-		CST_AC_CHARIOTS_ON_PRIESTS = 7,
+		CST_AC_CHARIOTS_ON_PRIESTS = 7, // Attack class for additional damage on priests
 		CST_AC_CAMEL_ON_CAVALRY = 8, // And on chariots too
 		CST_AC_CAVALRY_ON_INFANTRY = 9, // on clubmen/short sword + upgrades, NOT on slingers, hoplites...
 		CST_AC_VILLAGER_SIEGECRAFT = 10, // Siegecraft effect: villagers bonus against towers/walls

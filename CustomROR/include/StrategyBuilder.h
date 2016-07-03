@@ -61,8 +61,10 @@ private:
 class PotentialUnitInfo {
 public:
 	PotentialUnitInfo() {
+		this->upgradedUnitDefLiving = NULL;
 		this->unitDefId = -1;
 		this->enabledByResearchId = -1;
+		this->strongestUpgradeUnitDefId = -1;
 		this->hasUnavailableUpgrade = false;
 		this->hasCivBonus = false;
 		this->hitPoints = 0;
@@ -75,10 +77,14 @@ public:
 		this->availableRelatedResearchesCount = 0;
 		this->ageResearchId = -1;
 		this->conversionResistance = 1; // Default value
+		this->totalResourceCost = 0;
+		this->costsGold = false;
 	}
-	short int unitDefId;
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
+	short int unitDefId; // DATID1 (base unit ID = without upgrades)
 	short int baseUnitDefId; // non-upgraded unit that can be upgraded to "this" one, if any.
 	std::list<short int> upgradesUnitDefId; // List of all available unitDefId this unit can be upgraded to
+	short int strongestUpgradeUnitDefId; // Unit definition ID of best available upgraded unit
 	short int enabledByResearchId; // research ID that enables the unit, if any. -1 if no such research (unit is always available)
 	bool hasUnavailableUpgrade; // Some unit upgrade are unavailable in my tech tree (which means I'm missing super unit, or at least full upgraded unit)
 	long int unavailableRelatedResearchesCount;
@@ -93,6 +99,18 @@ public:
 	char *unitName; // For debug
 	bool hasCivBonus;
 	float conversionResistance;
+	long int totalResourceCost;
+	bool costsGold;
+	// Scores
+	int strengthVsPriests;
+	int strengthVsSiege;
+	int strengthVsFastRanged;
+	int strengthVsMelee;
+	int strengthVsTowers;
+	int weaknessVsPriests; // Negative value means good resistance
+	int weaknessVsSiege; // Negative value means good resistance
+	int weaknessVsFastRanged; // Negative value means good resistance
+	int weaknessVsMelee; // Negative value means good resistance
 };
 
 
@@ -100,21 +118,38 @@ class StrategyBuilder {
 public:
 	StrategyBuilder(CustomRORInfo *crInfo) {
 		this->crInfo = crInfo;
+		this->player = NULL;
+	}
+	~StrategyBuilder() {
+		this->FreePotentialElementsList();
 	}
 	CustomRORInfo *crInfo;
 
 	// Create a brand new dynamic strategy for player.
 	void CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
 
-	// Fills unitInfos with all available military units from tech tree.
-	// Towers are ignored (not added to list). Boats are ignored on non-water maps.
-	// *** Make sure to delete all PotentialUnitInfo from list when you're finished with the list ***
-	void CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, std::list<PotentialUnitInfo*> &unitInfos);
-
 	std::shared_ptr<StrategyGenerationInfo> GetStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 
 private:
+	std::list<PotentialUnitInfo*> potentialUnitsList;
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player;
+
 	void CreateBasicStrategyElements(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
+
+	// Clears potential units list and free each underlying PotentialUnitInfo object.
+	void FreePotentialElementsList();
+
+	// Fills unitInfos with all available military units from tech tree.
+	// Towers are ignored (not added to list). Boats are ignored on non-water maps.
+	// *** Make sure to delete all PotentialUnitInfo from list when you're finished with the list ***
+	void CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+
+	// Compute all score fields for all units in potential units list.
+	void ComputeScoresForPotentialUnits();
+	// Compute score fields for priests in unitInfo object.
+	void ComputeScoresVsPriests(PotentialUnitInfo *unitInfo, int damageScore);
+	// Compute score fields for towers in unitInfo object.
+	void ComputeScoresVsTower(PotentialUnitInfo *unitInfo);
 };
 
