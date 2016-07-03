@@ -482,8 +482,10 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, false, NULL);
-		GetStrategyGenerationInfo(player);
-		CreateStrategyFromScratch(&player->ptrAIStruct->structBuildAI);
+		StrategyBuilder *sb = new StrategyBuilder(this->crInfo);
+		sb->GetStrategyGenerationInfo(player);
+		sb->CreateStrategyFromScratch(&player->ptrAIStruct->structBuildAI);
+		delete sb;
 	}
 	if (strcmp(command, "a") == 0) {
 		long int playerId = 2;
@@ -2472,41 +2474,6 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 
 	fclose(f);
 #endif
-}
-
-
-// Procedure to calculate conversion resistance for a giver unit from a given civ.
-// This replaces game's algorithm.
-float CustomRORCommand::GetConversionResistance(char civId, short int unitClass) {
-	// Standard resistances (original game)
-	// Macedonian
-	if (civId == CST_CIVID_MACEDONIAN) {
-		return this->crInfo->configInfo.conversionResistance_Macedonian;
-	}
-	// Special unit classes
-	if (
-		(unitClass == 21) || // TribeAIGroupFishingBoat
-		(unitClass == 2) || // trade boat
-		(unitClass == 20) || // TribeAIGroupTransportBoat
-		(unitClass == 22)) // TribeAIGroupWarBoat
-	{
-		return this->crInfo->configInfo.conversionResistance_Boats;
-	}
-	if (unitClass == 18) { // TribeAIGroupPriest
-		return this->crInfo->configInfo.conversionResistance_Priests;
-	}
-	if (
-		(unitClass == 35) || // Chariot
-		(unitClass == 23) // Chariot archer
-		) {
-		return this->crInfo->configInfo.conversionResistance_Chariots;
-	}
-
-	// Custom resistances (only for single player games)
-	if ((!IsMultiplayer()) && (unitClass == 24)) { // War elephant, armored elephant, including Hannibal
-		return (civId == CST_CIVID_PERSIAN) ? this->crInfo->configInfo.conversionResistance_WarElephants_Persian : this->crInfo->configInfo.conversionResistance_WarElephants;
-	}
-	return 1;
 }
 
 

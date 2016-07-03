@@ -537,7 +537,7 @@ void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *actorPlayer = actor->ptrStructPlayer;
 	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *targetUnitDef = target->ptrStructDefUnit;
 	// Compute resistance
-	float resistance = this->crCommand.GetConversionResistance(targetPlayer->civilizationId, targetUnitDef->unitAIType);
+	float resistance = this->crInfo.GetConversionResistance(targetPlayer->civilizationId, targetUnitDef->unitAIType);
 
 	// Save computed resistance to dedicated stack record
 	_asm {

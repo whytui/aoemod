@@ -59,7 +59,7 @@ namespace AOE_CONST_FUNC {
 		TribeAIGroupFishingBoat = 21, // 0x15
 		//TribeAIGroupHeavyMountedSoldier = 23, // 0x17 - name from rules.rps, not very exact/explicit (only chariot archer has it)
 		TribeAIGroupChariotArcher = 23, // 0x17. Only chariot archer
-		TribeAIGroupElephantRider = 24, // 0x18. war elephant + armored elephant ?
+		TribeAIGroupElephantRider = 24, // 0x18. war elephant + armored elephant, including hannibal
 		TribeAIGroupHeavyFootSoldier = 25, // 0x19 - Hero_Archimedes, Hero-Tiberius, Hero-Perseus, Hero-Xerxes, Hero_Jason
 		TribeAIGroupElephantArcher = 26, // 0x1A
 		TribeAIGroupPhalanx = 28, // 0x1C

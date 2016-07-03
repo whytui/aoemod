@@ -22,6 +22,7 @@
 #include "unitShortcuts.h"
 #include "researches.h"
 #include "crLocalization.h"
+#include "StrategyBuilder.h"
 
 #pragma once
 
@@ -196,9 +197,6 @@ public:
 	void PrintMapSeed();
 	// Dumps useful information for debugging.
 	void DumpDebugInfoToFile();
-
-	// Compute conversion resistance
-	float GetConversionResistance(char civId, short int unitClass);
 
 	// Returns how many units where told to move.
 	// If maxDistance > 0, only units at a maximum distance of maxDistance are told to move.

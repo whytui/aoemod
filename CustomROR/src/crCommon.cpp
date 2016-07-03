@@ -143,6 +143,42 @@ void CustomRORInfo::FillResearchesToDisableFromString(long int playerId, const c
 	this->FillIDVectorFromString(this->researchesToDisable[playerId], playerId, text);
 }
 
+
+// Function to calculate conversion resistance for a giver unit from a given civ.
+// This replaces game's algorithm.
+float CustomRORInfo::GetConversionResistance(char civId, short int unitClass) {
+	// Standard resistances (original game)
+	// Macedonian
+	if (civId == CST_CIVID_MACEDONIAN) {
+		return this->configInfo.conversionResistance_Macedonian;
+	}
+	// Special unit classes
+	if (
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat) || // TribeAIGroupFishingBoat
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat) || // trade boat
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTransportBoat) || // TribeAIGroupTransportBoat
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupWarBoat)) // TribeAIGroupWarBoat including fire galley, juggernaught
+	{
+		return this->configInfo.conversionResistance_Boats;
+	}
+	if (unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) { // TribeAIGroupPriest
+		return this->configInfo.conversionResistance_Priests;
+	}
+	if (
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot) || // Chariot
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher) // Chariot archer
+		) {
+		return this->configInfo.conversionResistance_Chariots;
+	}
+
+	// Custom resistances (only for single player games)
+	if ((!IsMultiplayer()) && (unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider)) { // War elephant, armored elephant, including Hannibal
+		return (civId == CST_CIVID_PERSIAN) ? this->configInfo.conversionResistance_WarElephants_Persian : this->configInfo.conversionResistance_WarElephants;
+	}
+	return 1; // Default value
+}
+
+
 // Applies an "auto-attack policy" on all player's selected units (only for owned units !)
 // flagsToApply is used to determine which flags have to be updated using values from autoAttackPolicyValues.
 // If flagsToApply.xxx is true, then update unit's auto_attack_policy.xxx to "autoAttackPolicyValues.xxx" value.

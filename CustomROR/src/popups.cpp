@@ -698,7 +698,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 
 	// Conversion resistance : only for living/building (other units can't be converted)
 	if (unitBase->ptrStructPlayer && unitBase->ptrStructPlayer->IsCheckSumValid() && unitBase->DerivesFromLiving()) {
-		float conversionResistance = this->crCommand->GetConversionResistance(unitBase->ptrStructPlayer->civilizationId, unitDefBase->unitAIType);
+		float conversionResistance = this->crInfo->GetConversionResistance(unitBase->ptrStructPlayer->civilizationId, unitDefBase->unitAIType);
 		std::string convResistText = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_CONVERSION_RESISTANCE, "Conversion resistance");
 		convResistText += "=";
 		convResistText += std::to_string(conversionResistance);

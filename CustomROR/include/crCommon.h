@@ -120,6 +120,9 @@ public:
 	// Resets and fills the list of researchID to disable for a player from a comma-separated list.
 	void FillResearchesToDisableFromString(long int playerId, const char *text);
 
+	// Compute conversion resistance
+	float GetConversionResistance(char civId, short int unitClass);
+
 	// Applies an "auto-attack policy" on all player's selected units (only for owned units !)
 	// flagsToApply is used to determine which flags have to be updated using values from autoAttackPolicyValues.
 	// If flagsToApply.xxx is true, then update unit's auto_attack_policy.xxx to "autoAttackPolicyValues.xxx" value.
