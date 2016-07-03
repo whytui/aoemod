@@ -84,11 +84,11 @@ namespace AOE_CONST_FUNC
 	const static int CST_PLAYER_IS_ALIVE = 0;
 	const static int CST_PLAYER_HAS_LOST = 2;
 
-	// Ages 1=stone 2=tool 3=bronze 4=iron
-	const static int CST_AGE_STONE = 1;
+	// Ages 1=stone 2=tool 3=bronze 4=iron - where is this used ? do an enum instead
+	/*const static int CST_AGE_STONE = 1;
 	const static int CST_AGE_TOOL = 2;
 	const static int CST_AGE_BRONZE = 3;
-	const static int CST_AGE_IRON = 4;
+	const static int CST_AGE_IRON = 4;*/
 
 
 	// Researches status (EXE internal values)

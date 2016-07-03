@@ -78,6 +78,7 @@ public:
 		this->unitAIType = GLOBAL_UNIT_AI_TYPES::TribeAINone;
 		this->unavailableRelatedResearchesCount = 0;
 		this->availableRelatedResearchesCount = 0;
+		this->ageResearchId = -1;
 	}
 	short int unitDefId;
 	short int baseUnitDefId; // non-upgraded unit that can be upgraded to "this" one, if any.
@@ -86,14 +87,15 @@ public:
 	bool hasUnavailableUpgrade; // Some unit upgrade are unavailable in my tech tree (which means I'm missing super unit, or at least full upgraded unit)
 	long int unavailableRelatedResearchesCount;
 	long int availableRelatedResearchesCount;
+	short int ageResearchId; // ResearchId of the age (stone/tool/bronze/iron) where the unit can be enabled first. -1=always available
 	float speed;
 	float range;
 	bool isMelee; // Might be simpler that manipulating range everywhere... We consider range<2 means melee (normally, range=0 for melee, but beware exceptions like fire galley)
 	short int hitPoints;
 	short int displayedAttack; // displayedAttack from unitDef is reliable (always matches default attack without bonuses, never 0 for units with an attack)
 	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType;
-	bool hasCivBonus;
 	char *unitName; // For debug
+	bool hasCivBonus;
 };
 
 

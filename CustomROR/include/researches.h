@@ -38,6 +38,9 @@ std::string GetResearchLocalizedName(short int researchId);
 // Returns true if the research has more required researches than "minimum required researches count" (all requirements are not mandatory)
 bool ResearchHasOptionalRequirements(STRUCT_RESEARCH_DEF *resDef);
 
+// Returns the researchId of an age (stone/tool/bronze/iron) if found in one of the 4 research's requirements. NOT recursive.
+// Returns -1 if not found, a value in [CST_RSID_STONE_AGE, CST_RSID_IRON_AGE] if found.
+short int GetAgeResearchFromDirectRequirement(STRUCT_RESEARCH_DEF *researchDef);
 
 // Disable all impossible researches for all players.
 // An impossible research is a research that is waiting for requirements, including ones that can never be satisfied.

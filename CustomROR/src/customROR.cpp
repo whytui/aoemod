@@ -841,10 +841,10 @@ void CustomRORInstance::FixAutoBuildWarships_addStratElem(REG_BACKUP *REG_values
 			minPosition = FindElementInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCBuilding, CST_UNITID_MARKET);
 		}
 		if (minPosition < 0) { // Try tool age...
-			minPosition = FindElementInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCCritical, CST_AGE_TOOL);
+			minPosition = FindElementInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCCritical, CST_RSID_TOOL_AGE);
 		}
 		if (minPosition < 0) { // Try tool age (if non-critical)
-			minPosition = FindElementInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCTech, CST_AGE_TOOL);
+			minPosition = FindElementInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCTech, CST_RSID_TOOL_AGE);
 		}
 		if (minPosition < 0) { // Dock... ?
 			minPosition = FindElementInStrategy(buildAI->mainAI->ptrStructPlayer, AOE_CONST_FUNC::AIUCBuilding, CST_UNITID_DOCK);

@@ -67,6 +67,18 @@ bool ResearchHasOptionalRequirements(STRUCT_RESEARCH_DEF *resDef) {
 	return (actualCount > resDef->minRequiredResearchesCount);
 }
 
+// Returns the researchId of an age (stone/tool/bronze/iron) if found in one of the 4 research's requirements. NOT recursive.
+// Returns -1 if not found, a value in [CST_RSID_STONE_AGE, CST_RSID_IRON_AGE] if found.
+short int GetAgeResearchFromDirectRequirement(STRUCT_RESEARCH_DEF *researchDef) {
+	for (int iReq = 0; iReq < 4; iReq++) {
+		// Age researches are consecutive. Republic age w ould be next one (104) if enabled
+		if ((researchDef->requiredResearchId[iReq] >= CST_RSID_STONE_AGE) &&
+			(researchDef->requiredResearchId[iReq] <= CST_RSID_IRON_AGE)) {
+			return researchDef->requiredResearchId[iReq];
+		}
+	}
+	return -1;
+}
 
 // Disable all impossible researches for a specific player.
 // An impossible research is a research that is waiting for requirements, including ones that can never be satisfied.

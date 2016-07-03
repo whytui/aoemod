@@ -1490,6 +1490,7 @@ void CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, std::l
 		
 		bool availableForPlayer = validUnit && (unitDefLiving->availableForPlayer != 0); // Warning: this excludes units that are enabled by researches
 		short int researchIdThatEnablesUnit = -1; // Store the researchId that enables current unit... If any
+		short int ageResearchIdThatEnablesUnit = -1; // Age (identified by research id) where unit can become available
 		
 		// Search for a research (available in my tech tree) that enables unit
 		if (!availableForPlayer && validUnit) {
@@ -1509,6 +1510,14 @@ void CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, std::l
 							if (enableUnitTechDef->ptrEffects[i].IsEnableUnit(unitDefBase->DAT_ID1)) {
 								availableForPlayer = true;
 								researchIdThatEnablesUnit = enableUnitResearchId;
+								// By the way, find which age is required. If we're lucky, it's a direct requirement in research
+								ageResearchIdThatEnablesUnit = GetAgeResearchFromDirectRequirement(enableUnitResearchDef);
+								// If we're unlucky, requirement is missing in empires.dat (example: priest). Find train location (ex:temple)'s required age from research that enabled is
+								if ((ageResearchIdThatEnablesUnit < 0) && (unitDefLiving->trainLocation >= 0)) {
+									short int bldEnabler = FindResearchThatEnableUnit(player, unitDefLiving->trainLocation, 0);
+									STRUCT_RESEARCH_DEF *bldEnablerResearchDef = player->GetResearchDef(bldEnabler);
+									ageResearchIdThatEnablesUnit = GetAgeResearchFromDirectRequirement(bldEnablerResearchDef);
+								}
 							}
 						}
 					}
@@ -1543,6 +1552,7 @@ void CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, std::l
 			unitInfo->unitAIType = unitDefLiving->unitAIType;
 			unitInfo->hasCivBonus = currentUnitHasTechTreeBonus;
 			unitInfo->enabledByResearchId = researchIdThatEnablesUnit;
+			unitInfo->ageResearchId = ageResearchIdThatEnablesUnit;
 			unitInfo->unitName = unitDefLiving->ptrUnitName;
 			unitInfo->hasUnavailableUpgrade = false;
 			unitInfo->displayedAttack = unitDefLiving->displayedAttack;
