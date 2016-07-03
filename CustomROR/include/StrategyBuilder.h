@@ -63,6 +63,7 @@ public:
 	PotentialUnitInfo() {
 		this->upgradedUnitDefLiving = NULL;
 		this->unitDefId = -1;
+		this->baseUnitDefId = -1;
 		this->enabledByResearchId = -1;
 		this->strongestUpgradeUnitDefId = -1;
 		this->hasUnavailableUpgrade = false;
@@ -79,6 +80,9 @@ public:
 		this->conversionResistance = 1; // Default value
 		this->totalResourceCost = 0;
 		this->costsGold = false;
+		this->isSuperUnit = false;
+		this->damageScore = 0;
+		this->globalScore = 0;
 	}
 	ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
 	short int unitDefId; // DATID1 (base unit ID = without upgrades)
@@ -101,6 +105,8 @@ public:
 	float conversionResistance;
 	long int totalResourceCost;
 	bool costsGold;
+	bool isSuperUnit;
+	int damageScore; // An index 1-4 indicating unit attack. 1 is weak, 4 is strong.
 	// Scores
 	int strengthVsPriests;
 	int strengthVsSiege;
@@ -111,6 +117,7 @@ public:
 	int weaknessVsSiege; // Negative value means good resistance
 	int weaknessVsFastRanged; // Negative value means good resistance
 	int weaknessVsMelee; // Negative value means good resistance
+	int globalScore;
 };
 
 
@@ -148,10 +155,11 @@ private:
 	// Compute all score fields for all units in potential units list.
 	void ComputeScoresForPotentialUnits();
 	// Compute score fields for priests in unitInfo object.
-	void ComputeScoresVsPriests(PotentialUnitInfo *unitInfo, int damageScore);
+	void ComputeScoresVsPriests(PotentialUnitInfo *unitInfo);
 	// Compute score fields for towers in unitInfo object.
 	void ComputeScoresVsTower(PotentialUnitInfo *unitInfo);
 
+	// Select which units are to be added in strategy, based on potentialUnitsList
 	void SelectStrategyUnits();
 };
 

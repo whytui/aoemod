@@ -208,6 +208,11 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 							if ((upgradeTargetUnitDefId >= 0) && (techDef->ptrEffects[i].effectUnit == unitDefLiving->DAT_ID1)) {
 								// We found an upgrade for our unit
 								unitInfo->upgradesUnitDefId.push_back(upgradeTargetUnitDefId);
+								int totalCost = 0;
+								if (curResearchDef->costUsed1) { totalCost += curResearchDef->costAmount1; }
+								if (curResearchDef->costUsed2) { totalCost += curResearchDef->costAmount2; }
+								if (curResearchDef->costUsed3) { totalCost += curResearchDef->costAmount3; }
+								if (totalCost >= 1000) { unitInfo->isSuperUnit = true; } // Is there any better criteria ? not sure
 							}
 							if (upgradeTargetUnitDefId == unitDefLiving->DAT_ID1) {
 								// We found the base unit of our unit (our unit is an upgrade for some other unit)
@@ -464,9 +469,10 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 				damageScore = 3; // medium for basic priests
 			}
 		}
+		unitInfo->damageScore = (int)damageScore;
 
 		// Compute priest-related values
-		this->ComputeScoresVsPriests(unitInfo, (int)damageScore);
+		this->ComputeScoresVsPriests(unitInfo);
 
 		// Compute towers-relative values
 		this->ComputeScoresVsTower(unitInfo);
@@ -677,19 +683,19 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 				unitInfo->strengthVsMelee += 10;
 			}
 		}
+		if (unitInfo->strengthVsMelee > 100) { unitInfo->strengthVsMelee = 100; }
 	} // end loop on units
 }
 
 
 // Compute score fields for priests in unitInfo object.
-void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo, int damageScore) {
+void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 	unitInfo->weaknessVsPriests = 0;
 	unitInfo->strengthVsPriests = 20; // Default base strength value
 	if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) {
 		// availableRelatedResearchesProportion is a % value (0-100)
 		int availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount);
 		int scoreForPriestResearches = (availableRelatedResearchesProportion < 80) ? 30 : 70;
-		// TODO: test monotheism ?
 		// Well-developed priests are good against priests (at least, allows converting back my units OR converting enemy units)
 		unitInfo->strengthVsPriests = scoreForPriestResearches;
 		unitInfo->weaknessVsPriests = 100 - scoreForPriestResearches;
@@ -780,8 +786,26 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo, int da
 			}
 		}
 	}
+	if (unitInfo->hitPoints > 80) {
+		unitInfo->strengthVsPriests -= 5;
+		if (unitInfo->hitPoints > 120) {
+			unitInfo->strengthVsPriests -= 5;
+			if (unitInfo->hitPoints > 180) {
+				unitInfo->strengthVsPriests -= 10;
+			}
+		}
+	}
+	if (unitInfo->upgradedUnitDefLiving && (unitInfo->upgradedUnitDefLiving->displayedArmor > 0)) {
+		// in fact, few units have armors (not counting storage pit upgrades). So, fex units match this:
+		if (unitInfo->upgradedUnitDefLiving->displayedArmor >= 3) {
+			unitInfo->strengthVsPriests -= 10;
+		}
+		if (unitInfo->upgradedUnitDefLiving->displayedArmor == 2) {
+			unitInfo->strengthVsPriests -= 5;
+		}
+	}
 	
-	switch (damageScore) {
+	switch (unitInfo->damageScore) {
 	case 1:
 		unitInfo->strengthVsPriests -= 15;
 	case 2:
@@ -836,7 +860,83 @@ void StrategyBuilder::ComputeScoresVsTower(PotentialUnitInfo *unitInfo) {
 	}
 }
 
+// Select which units are to be added in strategy, based on potentialUnitsList
 void StrategyBuilder::SelectStrategyUnits() {
+	int selectedUnitCount = 0;
+	std::list<PotentialUnitInfo*> selectedUnits;
+	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
+	{
+		if (unitInfo->damageScore == 2) {
+			unitInfo->globalScore = 30;
+		}
+		if (unitInfo->damageScore == 3) {
+			unitInfo->globalScore = 55;
+		}
+		if (unitInfo->damageScore == 4) {
+			unitInfo->globalScore = 75;
+		}
+		if (unitInfo->isSuperUnit) {
+			unitInfo->globalScore = 90;
+		}
+		if (unitInfo->hasCivBonus) {
+			unitInfo->globalScore += 25; // note: we can go > 100 at this point, not an issue
+		}
+		if (unitInfo->hasUnavailableUpgrade) {
+			unitInfo->globalScore = (unitInfo->globalScore * 85) / 100; // -15% if unit upgrades are missing
+		}
+		int numberOfAvailableUpgrades = unitInfo->upgradesUnitDefId.size();
+		// TODO: example: assyrian cat is super unit (all unit upgrades) but missing 2 techs/5 => not selected
+		int proportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount);
+		// Reduce proportion impact:
+		int missingTechProportionWeight = 70; // Importance (a % value) of missing techs.
+		if (unitInfo->isSuperUnit) {
+			missingTechProportionWeight = 50;
+		}
+		int invertedProportion = (100 - proportion);
+		invertedProportion = (invertedProportion * (100 - missingTechProportionWeight)) / 100; // *50% or 30% (so, 50% or 70% on proportion itself)
+		proportion = 100 - invertedProportion;
+		unitInfo->globalScore = (unitInfo->globalScore * proportion) / 100; // Apply directly proportion (a % of available techs) to score
+		if (!unitInfo->costsGold) {
+			unitInfo->globalScore = (unitInfo->globalScore * 110) / 100; // +10% if no gold is required
+		}
+		int diff = 3; // best availability (if no age specified, unit is available from stone age)
+		if ((unitInfo->ageResearchId >= CST_RSID_STONE_AGE) && (unitInfo->ageResearchId <= CST_RSID_IRON_AGE)) {
+			diff = CST_RSID_IRON_AGE - unitInfo->ageResearchId; // 0-3
+		}
+		unitInfo->globalScore = (unitInfo->globalScore * (100+diff*2)) / 100; // Add up to 6% bonus for early availability
+		if (unitInfo->globalScore < 0) { unitInfo->globalScore = 0; }
+		if (unitInfo->globalScore > 100) { unitInfo->globalScore = 100; }
 
+		// Add a random part
+		const int randomImpact = 30; // max + or - % value change from random part.
+		int random = randomizer.GetRandomValue_normal_moreFlat(0, randomImpact * 2);
+		random = random + 100 - randomImpact; // in [100-randomImpact, 100+randomImpact] (used with a multiplication, it gives a resulting randomImpact% adjustment + or -)
+		unitInfo->globalScore = (unitInfo->globalScore * random) / 100;
+
+		if (unitInfo->globalScore > 100) { unitInfo->globalScore = 100; }
+
+		if (unitInfo->globalScore >= 45) {
+			selectedUnitCount++;
+			selectedUnits.push_back(unitInfo);
+		}
+	}
+	int totalScoreVsPriests = 0;
+	int totalScoreVsSiege = 0;
+	int totalScoreVsTower = 0;
+	int totalScoreVsMelee = 0;
+	int totalScoreVsFastRanged = 0;
+	for each (PotentialUnitInfo *unitInfo in selectedUnits)
+	{
+		totalScoreVsPriests += unitInfo->strengthVsPriests;
+		totalScoreVsFastRanged += unitInfo->strengthVsFastRanged;
+		totalScoreVsTower += unitInfo->strengthVsTowers;
+		totalScoreVsMelee += unitInfo->strengthVsMelee;
+		totalScoreVsSiege += unitInfo->strengthVsSiege;
+	}
+	// If some category has few points, try to give priority to the unit that has the most points there...
+
+	// Consider adding units with special bonus like camel/chariot if it helps for a specific need
+
+	// Take care of early ages : add archers, axemen, slingers or scout (according to already available techs). TODO later (not in this method) ?
 }
 
