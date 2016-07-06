@@ -82,6 +82,7 @@ namespace STRATEGY {
 			this->strongestUpgradeUnitDefId = -1;
 			this->hasUnavailableUpgrade = false;
 			this->hasCivBonus = false;
+			this->hasSpecificAttackBonus = false;
 			this->hitPoints = 0;
 			this->range = 0;
 			this->isMelee = false;
@@ -122,6 +123,7 @@ namespace STRATEGY {
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType;
 		char *unitName; // For debug
 		bool hasCivBonus;
+		bool hasSpecificAttackBonus; // true if unit has some special specific bonus, like camel, slinger, chariot
 		float conversionResistance;
 		long int totalResourceCost;
 		bool costsGold;
@@ -205,4 +207,7 @@ namespace STRATEGY {
 		int AddUnitIntoToSelection(PotentialUnitInfo *unitInfo);
 	};
 
+
+	// Returns true if the two classes are equals or very similar (infantry with phalanx, archer classes...)
+	static bool AreSimilarClasses(GLOBAL_UNIT_AI_TYPES class1, GLOBAL_UNIT_AI_TYPES class2);
 }

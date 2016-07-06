@@ -361,6 +361,18 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 					}
 				}
 			}
+			// Has special bonus ?
+			if (unitInfo->upgradedUnitDefLiving && unitInfo->upgradedUnitDefLiving->ptrAttacksList) {
+				for (int i = 0; i < unitInfo->upgradedUnitDefLiving->attacksCount; i++) {
+					if ((unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CAMEL_ON_CAVALRY) ||
+						(unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_SLINGER_ON_ARCHERS) ||
+						(unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CAVALRY_ON_INFANTRY) ||
+						(unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CHARIOTS_ON_PRIESTS)
+						) {
+						unitInfo->hasSpecificAttackBonus = true;
+					}
+				}
+			}
 			// Save unit infos in list
 			this->potentialUnitsList.push_back(unitInfo);
 		}
@@ -1002,68 +1014,50 @@ void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> s
 	}
 	
 	// Bonus about costs repartition
-#pragma message("convert costs to a % (sum=100) THEN do comparisons")
 	if (!noData && !waterUnit) { // ignore water units: not relevant (all cost wood, sometimes gold, but this is not a criterion)
+		const int USED_RESOURCE_TYPES = 3;
 		for each (PotentialUnitInfo *unitInfo in selectedUnits)
 		{
 			if ((unitInfo->isBoat == waterUnit) && ((!unitInfo->isSelected))) {
 				int cumulatedWeightedCosts[4];
+				int unitWeightedCosts[4];
+				int totalCumulatedCost = 0;
+				int totalUnitCost = 0;
 				for (int i = 0; i < 4; i++) {
 					cumulatedWeightedCosts[i] = GetWeightedCostValue(this->totalTrainUnitCosts[i], (RESOURCE_TYPES)i);
-				}
-				int costsOrder_current[4] = { 0, 0, 0, 0 };
-				int costsOrder_unit[4] = { 0, 0, 0, 0 };
-				int diffWithMostUsed_current[4] = { 0, 0, 0, 0 };
-				int diffWithMostUsed_withUnit[4] = { 0, 0, 0, 0 };
-				// Sort *weighted* costs for both unit and "current total unit costs"
-				SortResourceTypes(cumulatedWeightedCosts, costsOrder_current);
-				SortResourceTypes(unitInfo->trainCosts, costsOrder_unit);
-
-				int mostUsedResType_current = costsOrder_current[3];
-				int mostUsedResType_unit = costsOrder_unit[3];
-
-				int biggestDiff1_current = 0;
-				int biggestDiff2_current = 0;
-				int biggestDiff1_withUnit = 0;
-				int biggestDiff2_withUnit = 0;
-				for (int iResourceType = 0; iResourceType < 4; iResourceType++) {
-					diffWithMostUsed_current[iResourceType] = cumulatedWeightedCosts[mostUsedResType_current] - cumulatedWeightedCosts[iResourceType];
-					//diffWithMostUsed_unit[iResourceType] = unitInfo->trainCosts[mostUsedResType_unit] - unitInfo->trainCosts[iResourceType];
-					diffWithMostUsed_withUnit[iResourceType] = cumulatedWeightedCosts[mostUsedResType_current] + unitInfo->trainCosts[mostUsedResType_current] - unitInfo->trainCosts[iResourceType];
-					
-					if (iResourceType != RESOURCE_TYPES::CST_RES_ORDER_STONE) { // ignore stone, not used much for units
-						if (biggestDiff1_current == 0) {
-							if (diffWithMostUsed_current[iResourceType] > biggestDiff1_current) {
-								biggestDiff1_current = diffWithMostUsed_current[iResourceType];
-							}
-						} else {
-							if (diffWithMostUsed_current[iResourceType] > biggestDiff2_current) {
-								biggestDiff2_current = diffWithMostUsed_current[iResourceType];
-							}
-						}
-						if (biggestDiff1_withUnit == 0) {
-							if (diffWithMostUsed_withUnit[iResourceType] > biggestDiff1_withUnit) {
-								biggestDiff1_withUnit = diffWithMostUsed_withUnit[iResourceType];
-							}
-						} else {
-							if (diffWithMostUsed_withUnit[iResourceType] > biggestDiff2_withUnit) {
-								biggestDiff2_withUnit = diffWithMostUsed_withUnit[iResourceType];
-							}
-						}
+					unitWeightedCosts[i] = GetWeightedCostValue(unitInfo->trainCosts[i], (RESOURCE_TYPES)i);
+					if (i != RESOURCE_TYPES::CST_RES_ORDER_STONE) {
+						// Ignore stone costs as almost no units use it (only slinger in standard game): would lead to wrong calculations
+						totalCumulatedCost += cumulatedWeightedCosts[i];
+						totalUnitCost += unitWeightedCosts[i];
 					}
 				}
-				int evolution1 = biggestDiff1_current - biggestDiff1_withUnit; // >0 is good (value "after" is less = diff decreased)
-				int evolution2 = biggestDiff2_current - biggestDiff2_withUnit; // >0 is good.
-				int score = evolution1 * 2 + evolution2; // factor = 3 (same factor below for % value)
-				score = (score * 100) / (unitInfo->trainCosts[mostUsedResType_unit] * 3); // get a % value, can be <0 (max evolution value is highest unit cost)
-				score = score / 2; // [-50;50]
-				score = score + 50; // A REAL % value, always positive.
-				if ((evolution1 > evolution2) && (evolution2 > 0)) {
-					score = (score * 120) / 100; // +20% bonus if biggest diff received more (positive) evolution
+				for (int i = 0; i < 4; i++) {
+					if (i != RESOURCE_TYPES::CST_RES_ORDER_STONE) {
+						cumulatedWeightedCosts[i] = (cumulatedWeightedCosts[i] * 100) / totalCumulatedCost;
+						unitWeightedCosts[i] = (unitWeightedCosts[i] * 100) / totalUnitCost;
+					}
 				}
-				if (score > 100) { score = 100; }
-				if (score < 0) { score = 0; }
-				unitInfo->bonusForUsedResourceTypes = score;
+				// Now cumulatedWeightedCosts and unitWeightedCosts are percentage (sum for all resources ~=100)
+				int diffToMedian = 0; // difference (%) to median for cumulated costs (unit+current total) for each resource type
+				for (int i = 0; i < 4; i++) {
+					if (i != RESOURCE_TYPES::CST_RES_ORDER_STONE) {
+						const int medianValue = 100 / USED_RESOURCE_TYPES;
+						int cumulated2Values = cumulatedWeightedCosts[i] + unitWeightedCosts[i]; // 0-200
+						int diffToMedianForThisResource = (cumulated2Values - (medianValue * 2)) / 2; // Result is 0-100
+						if (diffToMedianForThisResource < 0) { diffToMedianForThisResource = -diffToMedianForThisResource; } // Always positive (absolute value)
+						diffToMedian += diffToMedianForThisResource;
+					}
+				}
+				int highestPossibleDiffToMedian = (min(100 - (100 / USED_RESOURCE_TYPES), (100 / USED_RESOURCE_TYPES)) * 4) / 3; // Worst case: 100/0/0 makes 67+33+33 diffs
+
+				diffToMedian = diffToMedian / USED_RESOURCE_TYPES; // Get a % value. Higher value = bad score (bad resource repartition)
+				int adjustedPercentage = (diffToMedian * 100) / highestPossibleDiffToMedian;
+				int scoreForResourceRepartition = 100 - adjustedPercentage; // High value = bonus
+
+				if (scoreForResourceRepartition > 100) { scoreForResourceRepartition = 100; }
+				if (scoreForResourceRepartition < 0) { scoreForResourceRepartition = 0; }
+				unitInfo->bonusForUsedResourceTypes = scoreForResourceRepartition;
 			}
 		}
 	} else {
@@ -1107,6 +1101,23 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 				long int strengthFactor = ((unitInfo->bonusForRareStrength * rareStrengthImpact) / 100) + 100; // Get a value between 100% and 130% (if rareStrengthImpact=30) => for multiplication
 				long int resourceFactor = ((unitInfo->bonusForUsedResourceTypes * resourceRepartitionImpact) / 100) + 100; // Get a value between 100% and 130% (if rareStrengthImpact=30) => for multiplication
 				long int newRandomFactor = ((randomizer.GetRandomPercentageValue() * newRandomImpact) / 100) + 100; // Full random but low impact => 100%-108% multiplication
+				// Avoid redundant units (eg. phalanx+legion)
+				for each (PotentialUnitInfo *refUnitInfo in this->actuallySelectedUnits)
+				{
+					if (AreSimilarClasses(refUnitInfo->unitAIType, unitInfo->unitAIType)) {
+						// Default: Big penalty (-25%) when a similar unit has already been added to strategy
+						int percentageToApply = 75;
+						if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon) {
+							 // Lighter penalty for siege weapons because they are quite compatible (can be combined efficiently)
+							percentageToApply = 90;
+						}
+						if (unitInfo->hasCivBonus || unitInfo->hasSpecificAttackBonus) {
+							percentageToApply += 5; // Reduce (a bit) penalty for units that have some special bonus
+						}
+						if (percentageToApply > 100) { percentageToApply = 100; }
+						currentScore = (currentScore * percentageToApply) / 100;
+					}
+				}
 				currentScore = currentScore * strengthFactor * resourceFactor * newRandomFactor / 1000000;
 
 				if (bestScore < currentScore) {
@@ -1143,6 +1154,8 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 			statisfiedWithCurrentSelection = true;
 		}
 	}
+
+	// add "bonus" units to fill weaknesses, ex stone thrower vs towers, camel vs cavalry...
 }
 
 
@@ -1230,5 +1243,67 @@ int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
 		}
 	}
 	return this->actuallySelectedUnits.size();
+}
+
+
+// Returns true if the two classes are equals or very similar (infantry with phalanx, archer classes...)
+static bool STRATEGY::AreSimilarClasses(GLOBAL_UNIT_AI_TYPES class1, GLOBAL_UNIT_AI_TYPES class2) {
+	if (class1 == class2) { return true; }
+	int id1 = 0;
+	switch (class1) {
+		// Archer types
+	case AOE_CONST_FUNC::TribeAIGroupArcher:
+	case AOE_CONST_FUNC::TribeAIGroupChariotArcher:
+	case AOE_CONST_FUNC::TribeAIGroupElephantArcher:
+	case AOE_CONST_FUNC::TribeAIGroupHorseArcher:
+		id1 = 1;
+		break;
+		// slow/middle-speed infantry
+	case AOE_CONST_FUNC::TribeAIGroupFootSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupHeavyFootSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupPhalanx:
+	case AOE_CONST_FUNC::TribeAIGroupElephantRider:
+		id1 = 2;
+		break;
+		// Cavalry (fast melee)
+	case AOE_CONST_FUNC::TribeAIGroupMountedSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupChariot:
+		id1 = 3;
+		break;
+		// Other types : can't be regouped
+	case AOE_CONST_FUNC::TribeAIGroupSiegeWeapon:
+	case AOE_CONST_FUNC::TribeAIGroupPriest:
+	case AOE_CONST_FUNC::TribeAIGroupWarBoat:
+	case AOE_CONST_FUNC::TribeAIGroupSlinger:
+	default:
+		return false;
+	}
+	switch (class2) {
+		// Archer types
+	case AOE_CONST_FUNC::TribeAIGroupArcher:
+	case AOE_CONST_FUNC::TribeAIGroupChariotArcher:
+	case AOE_CONST_FUNC::TribeAIGroupElephantArcher:
+	case AOE_CONST_FUNC::TribeAIGroupHorseArcher:
+		return (id1 == 1);
+		break;
+		// slow/middle-speed infantry
+	case AOE_CONST_FUNC::TribeAIGroupFootSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupHeavyFootSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupPhalanx:
+	case AOE_CONST_FUNC::TribeAIGroupElephantRider:
+		return (id1 == 2);
+		break;
+		// Cavalry (fast melee)
+	case AOE_CONST_FUNC::TribeAIGroupMountedSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupChariot:
+		return (id1 == 3);
+		break;
+	case AOE_CONST_FUNC::TribeAIGroupSiegeWeapon:
+	case AOE_CONST_FUNC::TribeAIGroupPriest:
+	case AOE_CONST_FUNC::TribeAIGroupWarBoat:
+	case AOE_CONST_FUNC::TribeAIGroupSlinger:
+	default:
+		return false;
+	}
 }
 

@@ -49,10 +49,10 @@ namespace AOE_CONST_FUNC {
 	// Unit (type) numbers - From rules.rps - corresponds to "class" in AGE3
 	enum GLOBAL_UNIT_AI_TYPES : short int {
 		TribeAINone = -1, // use as a joker in some methods
-		TribeAIGroupArcher = 0,
+		TribeAIGroupArcher = 0, // bowman + improved/composite
 		TribeAIGroupBuilding = 3,
 		TribeAIGroupCivilian = 4, // All villager excluding boats !
-		TribeAIGroupFootSoldier = 6,
+		TribeAIGroupFootSoldier = 6, // Barracks infantry
 		TribeAIGroupMountedSoldier = 12, // 0xC ; cavalry
 		TribeAIGroupSiegeWeapon = 13, // 0x0D
 		TribeAIGroupPriest = 18, // 0x12
@@ -70,7 +70,7 @@ namespace AOE_CONST_FUNC {
 		// Added from AGE3 information
 		TribeAIGroupArtefact = 1, // ruins/artefacts
 		TribeAIGroupUnused = 17, // 0x11. TODO : mistake ?
-		TribeAIGroupChariot = 35, // 0x23
+		TribeAIGroupChariot = 35, // 0x23. Chariot/scythe (excluding chariot archer)
 		TribeAIGroupHorseArcher = 36, // 0x24
 		TribeAIGroupSlinger = 39, // 0x27
 		TribeAIGroupUnused_Farm = 49, // 0x31 UNUSED ? Farms are buildings (3) !
