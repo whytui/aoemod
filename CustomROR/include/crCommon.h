@@ -283,6 +283,8 @@ bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
 // Returns false if not. costTable content may have been modified though.
 bool GetUnitCost(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, float costTable[]);
 
+// Fill resourceTypesOrder with ordered resource types: lower value in resourceAmounts = first position in (out) resourceTypesOrder
+void SortResourceTypes(const int resourceAmounts[], int resourceTypesOrder[]);
 
 // Common function for panic mode unit searching.
 // Returns true if it is possible to train the unit. In such case, cost is decreased from remainingResources and actorCounter is decreased too.

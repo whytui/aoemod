@@ -1,5 +1,7 @@
 #include "../include/StrategyBuilder.h"
 
+using namespace STRATEGY;
+
 
 // Create all base strategy elements (ages + buildings=barracks,market,govSiege + wheel if available)
 // Does not add villagers
@@ -188,6 +190,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 			unitInfo->unavailableRelatedResearchesCount = 0; // updated below
 			unitInfo->upgradedUnitDefLiving = unitDefLiving; // Default: base unit. We'll update this later if necessary
 			unitInfo->unitDefId = unitDefLiving->DAT_ID1;
+			unitInfo->isBoat = IsWaterUnit(unitDefLiving->unitAIType);
 
 			// (just) Get list of (available) upgraded units + base unit
 			for each (short int curResearchId in allAvailableResearches)
@@ -280,7 +283,12 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 					if (unitDefLiving->costs[i].costType == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD) {
 						unitInfo->costsGold = true;
 					}
+					unitInfo->trainCosts[unitDefLiving->costs[i].costType] = unitDefLiving->costs[i].costAmount;
 				}
+			}
+			unitInfo->weightedCost = 0;
+			for (int i = 0; i < 4; i++) {
+				unitInfo->weightedCost += GetWeightedCostValue(unitInfo->trainCosts[i], (RESOURCE_TYPES)i);
 			}
 
 			// Collect research info for this unit (available/unavailable, unit upgrades info, speed updates).
@@ -415,14 +423,10 @@ void StrategyBuilder::FreePotentialElementsList() {
 void StrategyBuilder::ComputeScoresForPotentialUnits() {
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
 	{
-		unitInfo->strengthVsMelee = 0;
-		unitInfo->strengthVsFastRanged = 0;
-		unitInfo->strengthVsPriests = 0;
-		unitInfo->strengthVsSiege = 0;
-		unitInfo->weaknessVsMelee = 0;
-		unitInfo->weaknessVsFastRanged = 0;
-		unitInfo->weaknessVsPriests = 0;
-		unitInfo->weaknessVsSiege = 0;
+		for (int i = 0; i < MC_COUNT; i++) {
+			unitInfo->strengthVs[i] = 0;
+			unitInfo->weaknessVs[i] = 0;
+		}
 		
 		// availableRelatedResearchesProportion is a % value (0-100)
 		int availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount);
@@ -477,10 +481,10 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 		// Compute towers-relative values
 		this->ComputeScoresVsTower(unitInfo);
 		if (damageScore <= 1) {
-			unitInfo->strengthVsTowers = (unitInfo->strengthVsTowers * 33) / 100;
+			unitInfo->strengthVs[MC_TOWER] = (unitInfo->strengthVs[MC_TOWER] * 33) / 100;
 		}
 		if (damageScore == 2) {
-			unitInfo->strengthVsTowers = (unitInfo->strengthVsTowers * 66) / 100;
+			unitInfo->strengthVs[MC_TOWER] = (unitInfo->strengthVs[MC_TOWER] * 66) / 100;
 		}
 
 		// Compute siege-related values
@@ -495,7 +499,7 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 				if (unitInfo->hasUnavailableUpgrade || (availableRelatedResearchesProportion <= 80)) {
 					// Moreover, unit is not fully upgraded
 					baseValue = baseValue * 0.5f; // Reduced bonus
-					unitInfo->weaknessVsSiege += 10;
+					unitInfo->weaknessVs[MC_SIEGE] += 10;
 				} else {
 					// Well upgraded unit: not so bad. Do not apply a bonus nor a malus
 				}
@@ -505,7 +509,7 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 				if (unitInfo->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) {
 					baseValue = baseValue * 0.33f; // archers : attack not efficient vs siege
 				}
-				unitInfo->weaknessVsSiege += 25; // archers/priests : weak vs siege (easily killed)
+				unitInfo->weaknessVs[MC_SIEGE] += 25; // archers/priests : weak vs siege (easily killed)
 			} else {
 				// Melee : credit for blast damage !
 				if (unitInfo->upgradedUnitDefLiving->blastRadius >= 0.8) {
@@ -530,56 +534,56 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 		if (baseValue > 100.0f) { baseValue = 100.0f; }
 		if (baseValue < 0.0f) { baseValue = 0.0f; }
 
-		unitInfo->strengthVsSiege += (int)baseValue;
+		unitInfo->strengthVs[MC_SIEGE] += (int)baseValue;
 		if (speedHitPointsFactor < 40) {
-			unitInfo->weaknessVsSiege += 10;
+			unitInfo->weaknessVs[MC_SIEGE] += 10;
 			if (speedHitPointsFactor < 20) {
-				unitInfo->weaknessVsSiege += 10;
+				unitInfo->weaknessVs[MC_SIEGE] += 10;
 			}
 		}
 
 		// Compute values vs fast ranged units (like chariot/cavalry archer)
-		unitInfo->strengthVsFastRanged = 10;
-		unitInfo->weaknessVsFastRanged = 10;
+		unitInfo->strengthVs[MC_FAST_RANGED] = 10;
+		unitInfo->weaknessVs[MC_FAST_RANGED] = 10;
 		switch (unitInfo->unitAIType) {
 		case GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher:
-			unitInfo->strengthVsFastRanged = 100;
-			unitInfo->weaknessVsFastRanged = 10;
+			unitInfo->strengthVs[MC_FAST_RANGED] = 100;
+			unitInfo->weaknessVs[MC_FAST_RANGED] = 10;
 			break;
 		case GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher:
 		case GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher:
 		case GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher:
-			unitInfo->strengthVsFastRanged = 40;
-			unitInfo->weaknessVsFastRanged = 40;
+			unitInfo->strengthVs[MC_FAST_RANGED] = 35;
+			unitInfo->weaknessVs[MC_FAST_RANGED] = 40;
 			break;
 		case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon:
-			unitInfo->strengthVsFastRanged = 30;
-			unitInfo->weaknessVsFastRanged = 10;
+			unitInfo->strengthVs[MC_FAST_RANGED] = 40;
+			unitInfo->weaknessVs[MC_FAST_RANGED] = 10;
 			break;
 		case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger:
-			unitInfo->strengthVsFastRanged = 90;
-			unitInfo->weaknessVsFastRanged = 5;
+			unitInfo->strengthVs[MC_FAST_RANGED] = 80;
+			unitInfo->weaknessVs[MC_FAST_RANGED] = 5;
 			break;
 		case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest:
-			unitInfo->strengthVsFastRanged = 5;
-			unitInfo->weaknessVsFastRanged = 95;
+			unitInfo->strengthVs[MC_FAST_RANGED] = 5;
+			unitInfo->weaknessVs[MC_FAST_RANGED] = 95;
 			break;
 		default:
 			break;
 		}
 		if (unitInfo->isMelee) {
-			unitInfo->strengthVsFastRanged = 40; // default for units faster than normal, but not really fast
-			unitInfo->weaknessVsFastRanged = 40; // default for units faster than normal, but not really fast
+			unitInfo->strengthVs[MC_FAST_RANGED] = 40; // default for units faster than normal, but not really fast
+			unitInfo->weaknessVs[MC_FAST_RANGED] = 40; // default for units faster than normal, but not really fast
 			if (unitInfo->speed < 1.4) {
-				unitInfo->strengthVsFastRanged = 20;
+				unitInfo->strengthVs[MC_FAST_RANGED] = 20;
 				if (unitInfo->speed < 1.1) {
-					unitInfo->strengthVsFastRanged -= 10;
+					unitInfo->strengthVs[MC_FAST_RANGED] -= 10;
 				}
-				unitInfo->weaknessVsFastRanged = 80;
+				unitInfo->weaknessVs[MC_FAST_RANGED] = 80;
 			}
 			if (unitInfo->speed >= 2) {
-				unitInfo->strengthVsFastRanged = 80;
-				unitInfo->weaknessVsFastRanged = 10;
+				unitInfo->strengthVs[MC_FAST_RANGED] = 80;
+				unitInfo->weaknessVs[MC_FAST_RANGED] = 10;
 			}
 		}
 		// Take into account attack bonuses vs mounted archers OR vs archers
@@ -587,81 +591,81 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 			for (int i = 0; i < unitInfo->upgradedUnitDefLiving->attacksCount; i++) {
 				if ((unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CAMEL_ON_CAVALRY) ||
 					(unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_SLINGER_ON_ARCHERS)) {
-					unitInfo->strengthVsFastRanged += 30;
+					unitInfo->strengthVs[MC_FAST_RANGED] += 30;
 				}
 			}
 		}
 		if (damageScore <= 1) {
-			unitInfo->strengthVsFastRanged = (unitInfo->strengthVsFastRanged * 20) / 100;
+			unitInfo->strengthVs[MC_FAST_RANGED] = (unitInfo->strengthVs[MC_FAST_RANGED] * 20) / 100;
 		}
 		if (damageScore == 2) {
-			unitInfo->strengthVsFastRanged = (unitInfo->strengthVsFastRanged * 66) / 100;
+			unitInfo->strengthVs[MC_FAST_RANGED] = (unitInfo->strengthVs[MC_FAST_RANGED] * 66) / 100;
 		}
 		if (unitInfo->totalResourceCost <= 90) {
-			unitInfo->strengthVsFastRanged = (unitInfo->strengthVsFastRanged * 110) / 100;
+			unitInfo->strengthVs[MC_FAST_RANGED] = (unitInfo->strengthVs[MC_FAST_RANGED] * 110) / 100;
 			if (unitInfo->totalResourceCost <= 50) {
-				unitInfo->strengthVsFastRanged = (unitInfo->strengthVsFastRanged * 125) / 100;
+				unitInfo->strengthVs[MC_FAST_RANGED] = (unitInfo->strengthVs[MC_FAST_RANGED] * 125) / 100;
 			}
 		}
-		if (unitInfo->strengthVsFastRanged > 100) { unitInfo->strengthVsFastRanged = 100; }
+		if (unitInfo->strengthVs[MC_FAST_RANGED] > 100) { unitInfo->strengthVs[MC_FAST_RANGED] = 100; }
 
 
 		// Compute values vs melee units
-		unitInfo->strengthVsMelee = 0;
-		unitInfo->weaknessVsMelee = 0;
+		unitInfo->strengthVs[MC_MELEE] = 0;
+		unitInfo->weaknessVs[MC_MELEE] = 0;
 		if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) {
-			unitInfo->strengthVsMelee = 30;
-			unitInfo->weaknessVsMelee = 20;
+			unitInfo->strengthVs[MC_MELEE] = 30;
+			unitInfo->weaknessVs[MC_MELEE] = 20;
 			if (availableRelatedResearchesProportion >= 80) {
-				unitInfo->strengthVsMelee += 20;
+				unitInfo->strengthVs[MC_MELEE] += 20;
 			}
 		} else {
 			if (unitInfo->isMelee) {
-				unitInfo->strengthVsMelee = 50;
-				unitInfo->weaknessVsMelee = 10;
+				unitInfo->strengthVs[MC_MELEE] = 50;
+				unitInfo->weaknessVs[MC_MELEE] = 10;
 				if ((unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier) ||
 					(unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot)){
 					// Cavalry, camel, scout + chariot&scythe
-					unitInfo->strengthVsMelee -= 10;
-					unitInfo->weaknessVsMelee += 20; // Speed is no use in melee vs melee, it just means the cost paid for speed is useless and waste
+					unitInfo->strengthVs[MC_MELEE] -= 10;
+					unitInfo->weaknessVs[MC_MELEE] += 20; // Speed is no use in melee vs melee, it just means the cost paid for speed is useless and waste
 				}
 				if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier) {
 					// clubman + swordsman families. Quite adapted, can train a lot of them (low cost).
-					unitInfo->strengthVsMelee += 15;
+					unitInfo->strengthVs[MC_MELEE] += 15;
 				}
 				if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx) {
 					// Hoplite + upgrades
-					unitInfo->strengthVsMelee += 50; // Hoplites are excellent in melee combat
+					unitInfo->strengthVs[MC_MELEE] += 50; // Hoplites are excellent in melee combat
 				}
 				if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider) {
 					// War elephants (NOT archer)
-					unitInfo->strengthVsMelee += 20; // war elephants "like" melee combat, especially due to their blast damage.
+					unitInfo->strengthVs[MC_MELEE] += 20; // war elephants "like" melee combat, especially due to their blast damage.
 				}
 			} else {
 				// Ranged (non-priest)
 				switch (unitInfo->unitAIType) {
 				case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger:
-					unitInfo->strengthVsMelee = 0;
-					unitInfo->weaknessVsMelee = 100;
+					unitInfo->strengthVs[MC_MELEE] = 0;
+					unitInfo->weaknessVs[MC_MELEE] = 100;
 					break;
 				case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon:
-					unitInfo->strengthVsMelee = 20;
-					unitInfo->weaknessVsMelee = 10;
+					unitInfo->strengthVs[MC_MELEE] = 5; // base value (not counting upgrades, etc, see below)
+					unitInfo->weaknessVs[MC_MELEE] = 10;
 					if (!unitInfo->hasUnavailableUpgrade) {
-						unitInfo->strengthVsMelee += 10;
+						unitInfo->strengthVs[MC_MELEE] += 10;
 					} else {
-						unitInfo->weaknessVsMelee += 15; // siege weapons with few upgrades are easy targets for melee units
+						unitInfo->weaknessVs[MC_MELEE] += 15; // siege weapons with few upgrades are easy targets for melee units
 					}
 					if (availableRelatedResearchesProportion >= 80) {
-						unitInfo->strengthVsMelee += 10;
+						unitInfo->strengthVs[MC_MELEE] += 10;
 					} else {
-						unitInfo->weaknessVsMelee += 15; // siege weapons with few upgrades are easy targets for melee units
+						unitInfo->weaknessVs[MC_MELEE] += 15; // siege weapons with few upgrades are easy targets for melee units
 					}
 					break;
 				default:
 					// Standard archer types
-					unitInfo->strengthVsMelee = 40;
-					unitInfo->weaknessVsMelee = 10;
+					unitInfo->strengthVs[MC_MELEE] = 40;
+					unitInfo->weaknessVs[MC_MELEE] = 10;
 					break;
 				}
 			}
@@ -669,55 +673,55 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 			if (unitInfo->upgradedUnitDefLiving && unitInfo->upgradedUnitDefLiving->ptrAttacksList) {
 				for (int i = 0; i < unitInfo->upgradedUnitDefLiving->attacksCount; i++) {
 					if (unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CAVALRY_ON_INFANTRY) {
-						unitInfo->strengthVsMelee += 10; // Note: The attack bonus only applies to barracks infantry, so don't add too much strength
+						unitInfo->strengthVs[MC_MELEE] += 10; // Note: The attack bonus only applies to barracks infantry, so don't add too much strength
 					}
 					if (unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CAMEL_ON_CAVALRY) {
-						unitInfo->weaknessVsMelee += 10; // Camels are good vs cavalry, but weak against all other melee units
+						unitInfo->weaknessVs[MC_MELEE] += 10; // Camels are good vs cavalry, but weak against all other melee units
 					}
 				}
 			}
 			if (damageScore <= 2) {
-				unitInfo->strengthVsMelee -= 30;
+				unitInfo->strengthVs[MC_MELEE] -= 30;
 			}
 			if (damageScore == 4) {
-				unitInfo->strengthVsMelee += 10;
+				unitInfo->strengthVs[MC_MELEE] += 10;
 			}
 		}
-		if (unitInfo->strengthVsMelee > 100) { unitInfo->strengthVsMelee = 100; }
+		if (unitInfo->strengthVs[MC_MELEE] > 100) { unitInfo->strengthVs[MC_MELEE] = 100; }
 	} // end loop on units
 }
 
 
 // Compute score fields for priests in unitInfo object.
 void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
-	unitInfo->weaknessVsPriests = 0;
-	unitInfo->strengthVsPriests = 20; // Default base strength value
+	unitInfo->weaknessVs[MC_PRIEST] = 0;
+	unitInfo->strengthVs[MC_PRIEST] = 20; // Default base strength value
 	if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) {
 		// availableRelatedResearchesProportion is a % value (0-100)
 		int availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount);
 		int scoreForPriestResearches = (availableRelatedResearchesProportion < 80) ? 30 : 70;
 		// Well-developed priests are good against priests (at least, allows converting back my units OR converting enemy units)
-		unitInfo->strengthVsPriests = scoreForPriestResearches;
-		unitInfo->weaknessVsPriests = 100 - scoreForPriestResearches;
+		unitInfo->strengthVs[MC_PRIEST] = scoreForPriestResearches;
+		unitInfo->weaknessVs[MC_PRIEST] = 100 - scoreForPriestResearches;
 		return;
 	}
 
 	// Conversion resistances: both a defensive & offensive criteria
 	if (unitInfo->conversionResistance < 1) { // Easier to convert (does not exist in standard game)
-		unitInfo->weaknessVsPriests += 20;
-		unitInfo->strengthVsPriests -= 20;
+		unitInfo->weaknessVs[MC_PRIEST] += 20;
+		unitInfo->strengthVs[MC_PRIEST] -= 20;
 	}
 	if (unitInfo->conversionResistance > 4) {
-		unitInfo->weaknessVsPriests -= 100; // Very hard to convert - almost insensitive to conversion !
-		unitInfo->strengthVsPriests += 100;
+		unitInfo->weaknessVs[MC_PRIEST] -= 100; // Very hard to convert - almost insensitive to conversion !
+		unitInfo->strengthVs[MC_PRIEST] += 100;
 	}
 	if ((unitInfo->conversionResistance > 2) && (unitInfo->conversionResistance <= 4)) {
-		unitInfo->weaknessVsPriests -= 40; // Hard to convert
-		unitInfo->strengthVsPriests += 40;
+		unitInfo->weaknessVs[MC_PRIEST] -= 40; // Hard to convert
+		unitInfo->strengthVs[MC_PRIEST] += 40;
 	}
 	if ((unitInfo->conversionResistance > 1) && (unitInfo->conversionResistance <= 2)) {
-		unitInfo->weaknessVsPriests -= 20; // A bit hard to convert
-		unitInfo->strengthVsPriests += 20;
+		unitInfo->weaknessVs[MC_PRIEST] -= 20; // A bit hard to convert
+		unitInfo->strengthVs[MC_PRIEST] += 20;
 	}
 	// Slow units are weak against priests
 	// Note on standard speeds: 0.8-0.9 slow (siege, elephants, base hopite&priests), 1.1-1.2 normal(villagers, infantry,archers), 2 fast
@@ -735,17 +739,17 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 	// Costly units are a weakness against priests (especially elephants, but not only)
 	if (unitInfo->totalResourceCost > 160) {
 		basePenaltyValue *= 3;
-		unitInfo->strengthVsPriests -= 10;
+		unitInfo->strengthVs[MC_PRIEST] -= 10;
 	}
 	if ((unitInfo->totalResourceCost > 100) && (unitInfo->totalResourceCost <= 160)) {
 		basePenaltyValue = basePenaltyValue * 2;
 	}
 	if ((unitInfo->totalResourceCost > 50) && (unitInfo->totalResourceCost <= 100)) {
 		basePenaltyValue = (basePenaltyValue * 150) / 100;
-		unitInfo->strengthVsPriests += 10;
+		unitInfo->strengthVs[MC_PRIEST] += 10;
 	}
 	if ((unitInfo->totalResourceCost <= 50)) {
-		unitInfo->strengthVsPriests += 15; // low cost = attack in higher numbers
+		unitInfo->strengthVs[MC_PRIEST] += 15; // low cost = attack in higher numbers
 	}
 	if (unitInfo->costsGold) {
 		basePenaltyValue = (basePenaltyValue * 125) / 100; // Slightly heavier penalty if costs gold. Eg swordsmen vs clubmen, cavalry vs scouts
@@ -755,117 +759,129 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 	}
 	if (basePenaltyValue > 100) { basePenaltyValue = 100; }
 
-	unitInfo->weaknessVsPriests += basePenaltyValue;
+	unitInfo->weaknessVs[MC_PRIEST] += basePenaltyValue;
 
 	// Strength vs priests
 	if (!unitInfo->isMelee && (unitInfo->speed >= 1) && (unitInfo->range > 6)) {
-		unitInfo->strengthVsPriests += 10; // Range units are slightly better vs priests than melee
+		unitInfo->strengthVs[MC_PRIEST] += 10; // Range units are slightly better vs priests than melee
 	} else {
 		if (unitInfo->range >= 10) { // siege weapons, actually (archers have 7 max, we don't count range upgrades here)
-			unitInfo->strengthVsPriests += 20;
+			unitInfo->strengthVs[MC_PRIEST] += 20;
 		}
 	}
 	if (unitInfo->isMelee && (unitInfo->speed >= 1.0f)) {
-		unitInfo->strengthVsPriests += 15;
+		unitInfo->strengthVs[MC_PRIEST] += 15;
 		if (unitInfo->isMelee && (unitInfo->speed >= 1.5f)) {
-			unitInfo->strengthVsPriests += 20; // even more for fast units
+			unitInfo->strengthVs[MC_PRIEST] += 20; // even more for fast units
 		}
 	} else {
-		unitInfo->strengthVsPriests -= 5;
+		unitInfo->strengthVs[MC_PRIEST] -= 5;
 	}
 	if (unitInfo->displayedAttack >= 25) {
-		unitInfo->strengthVsPriests += 5; // Can "one-shot" priests (not upgraded)
+		unitInfo->strengthVs[MC_PRIEST] += 5; // Can "one-shot" priests (not upgraded)
 		if (unitInfo->displayedAttack >= 50) {
-			unitInfo->strengthVsPriests += 10; // Can "one-shot" priests (upgraded). Total +10 (+ranged unit bonus, possibly)
+			unitInfo->strengthVs[MC_PRIEST] += 10; // Can "one-shot" priests (upgraded). Total +10 (+ranged unit bonus, possibly)
 		}
 	}
 	if (unitInfo->upgradedUnitDefLiving && unitInfo->upgradedUnitDefLiving->IsCheckSumValid()) {
 		for (int i = 0; i < unitInfo->upgradedUnitDefLiving->attacksCount; i++) {
 			if (unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CHARIOTS_ON_PRIESTS) {
-				unitInfo->strengthVsPriests += 50;
+				unitInfo->strengthVs[MC_PRIEST] += 50;
 			}
 		}
 	}
 	if (unitInfo->hitPoints > 80) {
-		unitInfo->strengthVsPriests -= 5;
+		unitInfo->strengthVs[MC_PRIEST] -= 5;
 		if (unitInfo->hitPoints > 120) {
-			unitInfo->strengthVsPriests -= 5;
+			unitInfo->strengthVs[MC_PRIEST] -= 5;
 			if (unitInfo->hitPoints > 180) {
-				unitInfo->strengthVsPriests -= 10;
+				unitInfo->strengthVs[MC_PRIEST] -= 10;
 			}
 		}
 	}
 	if (unitInfo->upgradedUnitDefLiving && (unitInfo->upgradedUnitDefLiving->displayedArmor > 0)) {
 		// in fact, few units have armors (not counting storage pit upgrades). So, fex units match this:
 		if (unitInfo->upgradedUnitDefLiving->displayedArmor >= 3) {
-			unitInfo->strengthVsPriests -= 10;
+			unitInfo->strengthVs[MC_PRIEST] -= 10;
 		}
 		if (unitInfo->upgradedUnitDefLiving->displayedArmor == 2) {
-			unitInfo->strengthVsPriests -= 5;
+			unitInfo->strengthVs[MC_PRIEST] -= 5;
 		}
 	}
 	
 	switch (unitInfo->damageScore) {
 	case 1:
-		unitInfo->strengthVsPriests -= 15;
+		unitInfo->strengthVs[MC_PRIEST] -= 15;
 	case 2:
-		unitInfo->strengthVsPriests -= 5;
+		unitInfo->strengthVs[MC_PRIEST] -= 5;
 	case 4:
-		unitInfo->strengthVsPriests += 10;
+		unitInfo->strengthVs[MC_PRIEST] += 10;
 	default:
 		break;
 	}
-	if (unitInfo->strengthVsPriests > 100) { unitInfo->strengthVsPriests = 100; }
+	if (unitInfo->strengthVs[MC_PRIEST] > 100) { unitInfo->strengthVs[MC_PRIEST] = 100; }
 }
 
 // Compute score fields for towers in unitInfo object.
 void StrategyBuilder::ComputeScoresVsTower(PotentialUnitInfo *unitInfo) {
-	unitInfo->strengthVsTowers = 0;
+	unitInfo->strengthVs[MC_TOWER] = 0;
 	int proportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount);
 	switch (unitInfo->unitAIType) {
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon:
-		unitInfo->strengthVsTowers += 60;
+		unitInfo->strengthVs[MC_TOWER] += 60;
 		if (!unitInfo->hasUnavailableUpgrade) {
-			unitInfo->strengthVsTowers += 20;
+			unitInfo->strengthVs[MC_TOWER] += 20;
 		}
 		if (proportion >= 80) {
-			unitInfo->strengthVsTowers += 15;
+			unitInfo->strengthVs[MC_TOWER] += 15;
 		}
 		break;
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher:
-		unitInfo->strengthVsTowers += 5;
+		unitInfo->strengthVs[MC_TOWER] += 5;
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher:
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher:
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher:
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest:
-		unitInfo->strengthVsTowers += 1;
+		unitInfo->strengthVs[MC_TOWER] += 1;
 		break;
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger:
-		unitInfo->strengthVsTowers += 30; // cool in tool/bronze, weak later
+		unitInfo->strengthVs[MC_TOWER] += 30; // cool in tool/bronze, weak later
 		break;
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx:
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupHeavyFootSoldier: // Heroes only ?!
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider:
-		unitInfo->strengthVsTowers += 20; // cumulate with below melee classes
+		unitInfo->strengthVs[MC_TOWER] += 20; // cumulate with below melee classes
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier:
-		unitInfo->strengthVsTowers += 30; // cumulate with below melee classes
+		unitInfo->strengthVs[MC_TOWER] += 30; // cumulate with below melee classes
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier:
-		unitInfo->strengthVsTowers += 10; // cumulate with below melee classes
+		unitInfo->strengthVs[MC_TOWER] += 10; // cumulate with below melee classes
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot:
-		unitInfo->strengthVsTowers += 30;
+		unitInfo->strengthVs[MC_TOWER] += 30;
 		break;
 	default:
-		unitInfo->strengthVsTowers += 10; // Default
+		unitInfo->strengthVs[MC_TOWER] += 10; // Default
 		break;
 	}
 }
 
-// Select which units are to be added in strategy, based on potentialUnitsList
-void StrategyBuilder::SelectStrategyUnits() {
-	int selectedUnitCount = 0;
-	std::list<PotentialUnitInfo*> selectedUnits;
+// Compute global scores using many criteria (unit cost, damage, civ bonus, super unit, (un/)available techs...), using a random part.
+// Does not compare units/unit scores to each other at this point (all scores are independent)
+void StrategyBuilder::ComputeGlobalScores() {
+	int highestWeightedCost = 0;
+	// Inits
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
 	{
+		if (!unitInfo->isBoat) {
+			if (unitInfo->weightedCost > highestWeightedCost) { highestWeightedCost = unitInfo->weightedCost; }
+		}
+	}
+	// First computation of "global" scores
+	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
+	{
+		if (unitInfo->isBoat) {
+			continue;
+		}
+		unitInfo->globalScore = 0;
 		if (unitInfo->damageScore == 2) {
 			unitInfo->globalScore = 30;
 		}
@@ -903,7 +919,14 @@ void StrategyBuilder::SelectStrategyUnits() {
 		if ((unitInfo->ageResearchId >= CST_RSID_STONE_AGE) && (unitInfo->ageResearchId <= CST_RSID_IRON_AGE)) {
 			diff = CST_RSID_IRON_AGE - unitInfo->ageResearchId; // 0-3
 		}
-		unitInfo->globalScore = (unitInfo->globalScore * (100+diff*2)) / 100; // Add up to 6% bonus for early availability
+		unitInfo->globalScore = (unitInfo->globalScore * (100 + diff * 2)) / 100; // Add up to 6% bonus for early availability
+
+		// Adjust (a bit) according to costs: cheaper units are less strong (lower score), this is a bit unfair. Ex legion underestimated, heavy cats overestimated.
+		int costProportion = (unitInfo->weightedCost * 100) / highestWeightedCost; // 0 to 100 value representing 1 unit cost.
+		costProportion = costProportion / 10; // we limit "cost" impact to maximum 10% of global score. low value=low cost=better score
+		costProportion = 100 - costProportion; // Get values in 90%-100% interval, where 100% is the better score. Very approximate due to int type, but the whole thing IS approximate.
+		unitInfo->globalScore = unitInfo->globalScore * costProportion / 100;
+
 		if (unitInfo->globalScore < 0) { unitInfo->globalScore = 0; }
 		if (unitInfo->globalScore > 100) { unitInfo->globalScore = 100; }
 
@@ -914,29 +937,298 @@ void StrategyBuilder::SelectStrategyUnits() {
 		unitInfo->globalScore = (unitInfo->globalScore * random) / 100;
 
 		if (unitInfo->globalScore > 100) { unitInfo->globalScore = 100; }
-
-		if (unitInfo->globalScore >= 45) {
-			selectedUnitCount++;
-			selectedUnits.push_back(unitInfo);
-		}
 	}
-	int totalScoreVsPriests = 0;
-	int totalScoreVsSiege = 0;
-	int totalScoreVsTower = 0;
-	int totalScoreVsMelee = 0;
-	int totalScoreVsFastRanged = 0;
+}
+
+
+// Recompute unit info bonuses that depend on comparison with other units
+#pragma message("No very relevant for boats, do a specific method ?")
+void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit) {
+	int totalStrengthVs[MC_COUNT];
+	int tempStrengthVs[MC_COUNT];
+	for (int i = 0; i < MC_COUNT; i++) { totalStrengthVs[i] = 0; tempStrengthVs[i] = 0; }
 	for each (PotentialUnitInfo *unitInfo in selectedUnits)
 	{
-		totalScoreVsPriests += unitInfo->strengthVsPriests;
-		totalScoreVsFastRanged += unitInfo->strengthVsFastRanged;
-		totalScoreVsTower += unitInfo->strengthVsTowers;
-		totalScoreVsMelee += unitInfo->strengthVsMelee;
-		totalScoreVsSiege += unitInfo->strengthVsSiege;
+		if (unitInfo->isBoat == waterUnit) { // Do NOT exclude already selected units here
+			totalStrengthVs[MC_PRIEST] += unitInfo->strengthVs[MC_PRIEST];
+			totalStrengthVs[MC_FAST_RANGED] += unitInfo->strengthVs[MC_FAST_RANGED];
+			totalStrengthVs[MC_TOWER] += unitInfo->strengthVs[MC_TOWER];
+			totalStrengthVs[MC_MELEE] += unitInfo->strengthVs[MC_MELEE];
+			totalStrengthVs[MC_SIEGE] += unitInfo->strengthVs[MC_SIEGE];
+		}
 	}
+	for (int i = 0; i < MC_COUNT; i++) { tempStrengthVs[i] = totalStrengthVs[i]; }
+
 	// If some category has few points, try to give priority to the unit that has the most points there...
+	int categoriesWeaknessOrder[MC_COUNT];
+	for (int i = 0; i < MC_COUNT; i++) { categoriesWeaknessOrder[i] = MC_NONE; }
+
+	for (int i = 0; i < MC_COUNT; i++) {
+		int lowestValue = 999999;
+		int currentLowestCategory = i;
+		for (int j = 0; j < MC_COUNT; j++) {
+			if ((tempStrengthVs[j] < tempStrengthVs[i])) {
+				lowestValue = tempStrengthVs[j];
+				currentLowestCategory = j;
+			}
+		}
+		// Found the lowest value among [i;MC_COUNT-1] categories
+		categoriesWeaknessOrder[i] = currentLowestCategory; // Set i'th element and never touch it again.
+		tempStrengthVs[currentLowestCategory] = 999999; // Force not using it anymore
+	}
+
+	// Give bonus to units that are good against units that bother me (I don't have many units good against such units)
+	int bonus = 100;
+	int weaknessIndex = 0;
+	for each (PotentialUnitInfo *unitInfo in selectedUnits)
+	{
+		if (unitInfo->isBoat == waterUnit) { // do not exclude already selected units here
+			if (categoriesWeaknessOrder[weaknessIndex] == MC_NONE) { weaknessIndex++; } // should not happen as NONE is -1 value.
+			int currentCategory = categoriesWeaknessOrder[weaknessIndex];
+			int meanStrengthValue = (totalStrengthVs[currentCategory] / MC_COUNT);
+			if (unitInfo->strengthVs[currentCategory] > meanStrengthValue) {
+				// This unit has a quite good strength against a military category that troubles me (I don't have many good units against it)
+				unitInfo->bonusForRareStrength = bonus;
+				bonus -= 30;
+				weaknessIndex++; // same thing on next critical weakness
+			}
+			if (bonus <= 0) { break; }
+		}
+	}
+
+	bool noData = true;
+	for (int i = 0; i < 4; i++) {
+		if (this->totalTrainUnitCosts[i] != 0) { noData = false; }
+	}
+	
+	// Bonus about costs repartition
+#pragma message("convert costs to a % (sum=100) THEN do comparisons")
+	if (!noData && !waterUnit) { // ignore water units: not relevant (all cost wood, sometimes gold, but this is not a criterion)
+		for each (PotentialUnitInfo *unitInfo in selectedUnits)
+		{
+			if ((unitInfo->isBoat == waterUnit) && ((!unitInfo->isSelected))) {
+				int cumulatedWeightedCosts[4];
+				for (int i = 0; i < 4; i++) {
+					cumulatedWeightedCosts[i] = GetWeightedCostValue(this->totalTrainUnitCosts[i], (RESOURCE_TYPES)i);
+				}
+				int costsOrder_current[4] = { 0, 0, 0, 0 };
+				int costsOrder_unit[4] = { 0, 0, 0, 0 };
+				int diffWithMostUsed_current[4] = { 0, 0, 0, 0 };
+				int diffWithMostUsed_withUnit[4] = { 0, 0, 0, 0 };
+				// Sort *weighted* costs for both unit and "current total unit costs"
+				SortResourceTypes(cumulatedWeightedCosts, costsOrder_current);
+				SortResourceTypes(unitInfo->trainCosts, costsOrder_unit);
+
+				int mostUsedResType_current = costsOrder_current[3];
+				int mostUsedResType_unit = costsOrder_unit[3];
+
+				int biggestDiff1_current = 0;
+				int biggestDiff2_current = 0;
+				int biggestDiff1_withUnit = 0;
+				int biggestDiff2_withUnit = 0;
+				for (int iResourceType = 0; iResourceType < 4; iResourceType++) {
+					diffWithMostUsed_current[iResourceType] = cumulatedWeightedCosts[mostUsedResType_current] - cumulatedWeightedCosts[iResourceType];
+					//diffWithMostUsed_unit[iResourceType] = unitInfo->trainCosts[mostUsedResType_unit] - unitInfo->trainCosts[iResourceType];
+					diffWithMostUsed_withUnit[iResourceType] = cumulatedWeightedCosts[mostUsedResType_current] + unitInfo->trainCosts[mostUsedResType_current] - unitInfo->trainCosts[iResourceType];
+					
+					if (iResourceType != RESOURCE_TYPES::CST_RES_ORDER_STONE) { // ignore stone, not used much for units
+						if (biggestDiff1_current == 0) {
+							if (diffWithMostUsed_current[iResourceType] > biggestDiff1_current) {
+								biggestDiff1_current = diffWithMostUsed_current[iResourceType];
+							}
+						} else {
+							if (diffWithMostUsed_current[iResourceType] > biggestDiff2_current) {
+								biggestDiff2_current = diffWithMostUsed_current[iResourceType];
+							}
+						}
+						if (biggestDiff1_withUnit == 0) {
+							if (diffWithMostUsed_withUnit[iResourceType] > biggestDiff1_withUnit) {
+								biggestDiff1_withUnit = diffWithMostUsed_withUnit[iResourceType];
+							}
+						} else {
+							if (diffWithMostUsed_withUnit[iResourceType] > biggestDiff2_withUnit) {
+								biggestDiff2_withUnit = diffWithMostUsed_withUnit[iResourceType];
+							}
+						}
+					}
+				}
+				int evolution1 = biggestDiff1_current - biggestDiff1_withUnit; // >0 is good (value "after" is less = diff decreased)
+				int evolution2 = biggestDiff2_current - biggestDiff2_withUnit; // >0 is good.
+				int score = evolution1 * 2 + evolution2; // factor = 3 (same factor below for % value)
+				score = (score * 100) / (unitInfo->trainCosts[mostUsedResType_unit] * 3); // get a % value, can be <0 (max evolution value is highest unit cost)
+				score = score / 2; // [-50;50]
+				score = score + 50; // A REAL % value, always positive.
+				if ((evolution1 > evolution2) && (evolution2 > 0)) {
+					score = (score * 120) / 100; // +20% bonus if biggest diff received more (positive) evolution
+				}
+				if (score > 100) { score = 100; }
+				if (score < 0) { score = 0; }
+				unitInfo->bonusForUsedResourceTypes = score;
+			}
+		}
+	} else {
+		for each (PotentialUnitInfo *unitInfo in selectedUnits)
+		{
+			if ((unitInfo->isBoat == waterUnit) && (!unitInfo->isSelected)) {
+				for (int i = 0; i < 4; i++) {
+					unitInfo->bonusForUsedResourceTypes = 50; // default
+				}
+			}
+		}
+	}
+	
+	// TODO: something to avoid selecting 2 similar units ? (should already - a bit - be done thanks to strengths thing)
+
+}
+
+
+void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUnitInfo*> preSelectedUnits, bool waterUnits) {
+	int currentUnitCount = this->actuallySelectedUnits.size();
+	
+	bool statisfiedWithCurrentSelection = false;
+	int currentTotalStrengths[MC_COUNT];
+	int currentCumulatedStrength;
+	int categoriesCountWithLowStrength;
+
+	while (!statisfiedWithCurrentSelection && (currentUnitCount < 3)) {
+		currentCumulatedStrength = 0;
+		categoriesCountWithLowStrength = 0;
+		this->RecomputeComparisonBonuses(preSelectedUnits, waterUnits);
+
+		long int bestScore = 0;
+		PotentialUnitInfo *bestUnit = NULL;
+		const long int rareStrengthImpact = 30;
+		const long int resourceRepartitionImpact = 15;
+		const long int newRandomImpact = 8;
+		for each (PotentialUnitInfo *unitInfo in preSelectedUnits)
+		{
+			if ((!unitInfo->isSelected) && (unitInfo->isBoat == waterUnits)) {
+				long int currentScore = unitInfo->globalScore;
+				long int strengthFactor = ((unitInfo->bonusForRareStrength * rareStrengthImpact) / 100) + 100; // Get a value between 100% and 130% (if rareStrengthImpact=30) => for multiplication
+				long int resourceFactor = ((unitInfo->bonusForUsedResourceTypes * resourceRepartitionImpact) / 100) + 100; // Get a value between 100% and 130% (if rareStrengthImpact=30) => for multiplication
+				long int newRandomFactor = ((randomizer.GetRandomPercentageValue() * newRandomImpact) / 100) + 100; // Full random but low impact => 100%-108% multiplication
+				currentScore = currentScore * strengthFactor * resourceFactor * newRandomFactor / 1000000;
+
+				if (bestScore < currentScore) {
+					bestScore = currentScore;
+					bestUnit = unitInfo;
+				}
+			}
+		}
+		if (bestUnit != NULL) {
+			currentUnitCount = this->AddUnitIntoToSelection(bestUnit);
+		} else {
+			// What can we do here ?
+			break;
+		}
+
+		// Decide if we want to continue adding units in strategy. Most standard strategy have 2, 3 or maybe 4 units (not counting boats)
+		for (int i = 0; i < MC_COUNT; i++) {
+			currentTotalStrengths[i] = 0;
+			for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+			{
+				currentTotalStrengths[i] += unitInfo->strengthVs[i]; // total strength for this military category
+			}
+			currentCumulatedStrength += currentTotalStrengths[i]; // the very total strength amount
+			if (currentTotalStrengths[i] < 30) {
+				categoriesCountWithLowStrength++;
+			}
+		}
+
+		// Test weaknesses and check there is no "too high" weaknesses (ex: elephant+cavalry is enough to break loop here)
+
+		const int minStrengthValueOnAllCategoriesToStop = 120; // Takes at least 2 units to be satisfied, probably more
+		if ((categoriesCountWithLowStrength < 1) || (this->actuallySelectedUnits.size() > 4) ||
+			(currentCumulatedStrength > (minStrengthValueOnAllCategoriesToStop * MC_COUNT))) { // Mean-strength for all categories > minStrengthValueOnAllCategoriesToStop
+			statisfiedWithCurrentSelection = true;
+		}
+	}
+}
+
+
+// Select which units are to be added in strategy, based on potentialUnitsList
+// Requires that this->potentialUnitsList has already been filled
+void StrategyBuilder::SelectStrategyUnitsForCategory(bool waterUnits) {
+	std::list<PotentialUnitInfo*> preSelectedUnits;
+
+	// First selection based on "global" scores = Fill preSelectedUnits
+	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
+	{
+		if (unitInfo->isBoat == waterUnits) {
+			if (unitInfo->globalScore >= 45) {
+				preSelectedUnits.push_back(unitInfo);
+			}
+		}
+	}
+
+	int totalStrengthVs[MC_COUNT];
+	for (int i = 0; i < MC_COUNT; i++) { totalStrengthVs[i] = 0; }
+	for each (PotentialUnitInfo *unitInfo in preSelectedUnits)
+	{
+		if (unitInfo->isBoat == waterUnits) {
+			totalStrengthVs[MC_PRIEST] += unitInfo->strengthVs[MC_PRIEST];
+			totalStrengthVs[MC_FAST_RANGED] += unitInfo->strengthVs[MC_FAST_RANGED];
+			totalStrengthVs[MC_TOWER] += unitInfo->strengthVs[MC_TOWER];
+			totalStrengthVs[MC_MELEE] += unitInfo->strengthVs[MC_MELEE];
+			totalStrengthVs[MC_SIEGE] += unitInfo->strengthVs[MC_SIEGE];
+		}
+	}
+	
+
+	int bestScore = 0;
+	PotentialUnitInfo *bestUnit = NULL;
+	// If no unit is already selected, do not use the cost criteria. Just pick best unit according to global score.
+	if (this->actuallySelectedUnits.size() == 0) {
+		for each (PotentialUnitInfo *unitInfo in preSelectedUnits)
+		{
+			if (!unitInfo->isSelected && (unitInfo->isBoat == waterUnits) && (bestScore < unitInfo->globalScore)) {
+				bestScore = unitInfo->globalScore;
+				bestUnit = unitInfo;
+			}
+		}
+		if (bestUnit != NULL) {
+			this->AddUnitIntoToSelection(bestUnit);
+		} else {
+			assert(false && "Could not select any military unit for strategy");
+			traceMessageHandler.WriteMessage("ERROR: Could not select any military unit for strategy");
+			return;
+		}
+	}
+
+	this->SelectStrategyUnitsFromPreSelection(preSelectedUnits, waterUnits);
 
 	// Consider adding units with special bonus like camel/chariot if it helps for a specific need
 
 	// Take care of early ages : add archers, axemen, slingers or scout (according to already available techs). TODO later (not in this method) ?
+}
+
+// Select which units are to be added in strategy, based on potentialUnitsList
+void StrategyBuilder::SelectStrategyUnits() {
+	// Compute individual global scores (no comparison between units). Done once and for all
+	this->ComputeGlobalScores();
+	
+	if (false) { // if water map : TODO
+		// Select boats with 1st priority
+		this->SelectStrategyUnitsForCategory(true);
+	}
+	// Then land units : according to need for boats (or not), wood-costly units might be preferred or not.
+	this->SelectStrategyUnitsForCategory(false);
+}
+
+
+// Add a unit to selection and updates some internal variables accordingly
+// Return total unit count in selection
+int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
+	unitInfo->isSelected = true;
+	actuallySelectedUnits.push_back(unitInfo);
+	for (int i = 0; i < 4; i++) {
+		this->totalTrainUnitCosts[i] += unitInfo->trainCosts[i];
+		if (unitInfo->isBoat) {
+			this->selectedWaterUnitsCount++;
+		} else {
+			this->selectedLandUnitsCount++;
+		}
+	}
+	return this->actuallySelectedUnits.size();
 }
 

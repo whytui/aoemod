@@ -482,7 +482,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, false, NULL);
-		StrategyBuilder *sb = new StrategyBuilder(this->crInfo);
+		STRATEGY::StrategyBuilder *sb = new STRATEGY::StrategyBuilder(this->crInfo);
 		sb->GetStrategyGenerationInfo(player);
 		sb->CreateStrategyFromScratch(&player->ptrAIStruct->structBuildAI);
 		delete sb;

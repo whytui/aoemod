@@ -1404,6 +1404,19 @@ namespace AOE_CONST_FUNC {
 		}
 	}
 
+	// Returns true if provided unit class corresponds to a water unit. Returns false for land units.
+	static const bool IsWaterUnit(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES aiType) {
+		switch (aiType) {
+		case TribeAIGroupWarBoat:
+		case TribeAIGroupFishingBoat:
+		case TribeAIGroupTradeBoat:
+		case TribeAIGroupTransportBoat:
+			return true;
+		default:
+			return false;
+		}
+	}
+
 
 	// Provides water proportion (map water type) for each map type
 	static const MAP_WATER_TYPE GetMapWaterType(MAP_TYPE_INDEX mti) {
@@ -1425,6 +1438,21 @@ namespace AOE_CONST_FUNC {
 		case MTI_HIDDEN_MAP_TYPE:
 		default:
 			return MWT_UNKNOWN_MAP;
+		}
+	}
+
+	// A very subjective weighted evaluation of costs. Don't know where to put it. Implicitely it is linked to DAT info and game behaviour.
+	static int GetWeightedCostValue(long int rawCostValue, RESOURCE_TYPES resourceType) {
+		switch (resourceType) {
+		case RESOURCE_TYPES::CST_RES_ORDER_STONE:
+			return (rawCostValue * 150) / 100; // Stone : 150% (?)
+		case RESOURCE_TYPES::CST_RES_ORDER_GOLD:
+			return (rawCostValue * 200) / 100; // Gold: 200% (?)
+		case RESOURCE_TYPES::CST_RES_ORDER_WOOD:
+			return (rawCostValue * 115) / 100; // Wood: 115% (?)
+		case RESOURCE_TYPES::CST_RES_ORDER_FOOD:
+		default:
+			return rawCostValue;
 		}
 	}
 

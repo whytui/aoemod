@@ -728,6 +728,27 @@ bool GetUnitCost(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, fl
 }
 
 
+// Fill resourceTypesOrder with ordered resource types: lower value in resourceAmounts = first position in (out) resourceTypesOrder
+void SortResourceTypes(const int resourceAmounts[], int resourceTypesOrder[]) {
+	int costsOrder_current[4] = { 0, 0, 0, 0 };
+	bool valueUsed[4] = { false, false, false, false };
+	for (int orderedArrayIndex = 0; orderedArrayIndex < 4; orderedArrayIndex++) {
+		int lowestCost;
+		bool noValue = true;
+		int currentSelection;
+		for (int i = 0; i < 4; i++) {
+			if (!valueUsed[i] && (noValue || (resourceAmounts[i] < lowestCost))) {
+				lowestCost = resourceAmounts[i];
+				currentSelection = i;
+				noValue = false;
+			}
+		}
+		resourceTypesOrder[orderedArrayIndex] = currentSelection;
+		valueUsed[currentSelection] = true;
+	}
+}
+
+
 
 // Common function for panic mode unit searching.
 // Returns true if it is possible to train the unit. In such case, cost is decreased from remainingResources and actorCounter is decreased too.
