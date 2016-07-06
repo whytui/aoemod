@@ -1083,6 +1083,7 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 	int currentTotalStrengths[MC_COUNT];
 	int currentCumulatedStrength;
 	int categoriesCountWithLowStrength;
+	MILITARY_CATEGORY currentWorstStrengthIndex = MC_NONE; // Category that has the lowest strength value
 
 	while (!statisfiedWithCurrentSelection && (currentUnitCount < 3)) {
 		currentCumulatedStrength = 0;
@@ -1134,6 +1135,8 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 		}
 
 		// Decide if we want to continue adding units in strategy. Most standard strategy have 2, 3 or maybe 4 units (not counting boats)
+		int currentWorstStrengthValue = 9999999;
+		currentWorstStrengthIndex = (MILITARY_CATEGORY)0;
 		for (int i = 0; i < MC_COUNT; i++) {
 			currentTotalStrengths[i] = 0;
 			for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
@@ -1143,6 +1146,10 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 			currentCumulatedStrength += currentTotalStrengths[i]; // the very total strength amount
 			if (currentTotalStrengths[i] < 30) {
 				categoriesCountWithLowStrength++;
+			}
+			if (currentTotalStrengths[i] < currentWorstStrengthValue) {
+				currentWorstStrengthIndex = (MILITARY_CATEGORY)i;
+				currentWorstStrengthValue = currentTotalStrengths[i];
 			}
 		}
 
@@ -1156,13 +1163,34 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 	}
 
 	// add "bonus" units to fill weaknesses, ex stone thrower vs towers, camel vs cavalry...
+	MILITARY_CATEGORY firstAddedCategory = MC_NONE;
+	for (int step = 1; step <= 2; step++) {
+		int mediumStrength = currentCumulatedStrength / MC_COUNT;
+		int worstStrength = currentTotalStrengths[currentWorstStrengthIndex];
+		int proportion = (worstStrength * 100) / mediumStrength;
+		if (!waterUnits) { // Not implemented for boats. Actually, not relevant.
+			if ((proportion < 50) && (this->selectedLandUnitsCount < 4)) {
+				this->AddOptionalUnitAgainstWeakness(currentWorstStrengthIndex, waterUnits);
+				//this->RecomputeComparisonBonuses(...)
+			}
+		}
+		// Compute next (different) weakness category
+		int currentWorstStrengthValue = 9999999;
+		currentWorstStrengthIndex = (MILITARY_CATEGORY)0;
+		for (int i = 0; i < MC_COUNT; i++) {
+			if ( (i != firstAddedCategory) && (currentTotalStrengths[i] < currentWorstStrengthValue)) {
+				currentWorstStrengthIndex = (MILITARY_CATEGORY)i;
+				currentWorstStrengthValue = currentTotalStrengths[i];
+			}
+		}
+	}
 }
 
 
 // Select which units are to be added in strategy, based on potentialUnitsList
 // Requires that this->potentialUnitsList has already been filled
 void StrategyBuilder::SelectStrategyUnitsForCategory(bool waterUnits) {
-	std::list<PotentialUnitInfo*> preSelectedUnits;
+	std::list<PotentialUnitInfo*> preSelectedUnits; // PotentialUnitInfo pointers are "shortcuts", do not free them here
 
 	// First selection based on "global" scores = Fill preSelectedUnits
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
@@ -1234,15 +1262,79 @@ void StrategyBuilder::SelectStrategyUnits() {
 int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
 	unitInfo->isSelected = true;
 	actuallySelectedUnits.push_back(unitInfo);
+	if (unitInfo->isBoat) {
+		this->selectedWaterUnitsCount++;
+	} else {
+		this->selectedLandUnitsCount++;
+	}
 	for (int i = 0; i < 4; i++) {
 		this->totalTrainUnitCosts[i] += unitInfo->trainCosts[i];
-		if (unitInfo->isBoat) {
-			this->selectedWaterUnitsCount++;
-		} else {
-			this->selectedLandUnitsCount++;
-		}
 	}
 	return this->actuallySelectedUnits.size();
+}
+
+// Search for a unit that can be added to strategy as "optional" (without full upgrades) to fight a detected weakness.
+// waterUnits: if true, manage water units only. If false, manage land units only
+void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessCategory, bool waterUnits) {
+	int bestScore = 0;
+	PotentialUnitInfo *bestUnit = NULL;
+	
+	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
+	{
+		// Ignore already selected units (and those NOT matching the land/water parameter)
+		if (!unitInfo->isSelected && (unitInfo->isBoat == waterUnits)) {
+			int tmpScore = unitInfo->strengthVs[weaknessCategory];
+			// Some hardcoded (but still generic) rules
+			if ((weaknessCategory == MILITARY_CATEGORY::MC_TOWER) && (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon)) {
+				if (unitInfo->upgradedUnitDefLiving->blastRadius > 0) {
+					tmpScore = (tmpScore * 115) / 100; // catapult-like siege
+				} else {
+					tmpScore = (tmpScore * 105) / 100; // ballista-like siege vs towers
+				}
+			}
+#pragma message("Should recompute scores using BASE units (without costly upgrades)")
+			// Important: units may have a low score (<10) and % couldnt apply well: check this
+			// TODO take care of relative cost ! Create a dedicated method GetRelativeCostScore with existing code above (in another method)
+			// Units available without cost (or low research cost)
+			bool lowCostActivation = false;
+			if (unitInfo->enabledByResearchId == -1) {
+				lowCostActivation = true;
+			} else {
+				ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(this->player, unitInfo->enabledByResearchId);
+				if (resDef) {
+					int totalCost = 0;
+					if (resDef->costUsed1) { totalCost += resDef->costAmount1; }
+					if (resDef->costUsed2) { totalCost += resDef->costAmount2; }
+					if (resDef->costUsed3) { totalCost += resDef->costAmount3; }
+					if (totalCost <= 180) {
+						lowCostActivation = true;
+					}
+				}
+			}
+			if (lowCostActivation) {
+				tmpScore = (tmpScore * 110) / 100; // no or low research cost = +10%
+			}
+			if (unitInfo->isSuperUnit) {
+				// Expensive (upgraded) units are less relevant here and won't be researched for optional unit. 
+				// Penalty also stands for the fact that, if we select it, unit will be weaker than its computer score (because of missing upgrades)
+				tmpScore = (tmpScore * 90) / 100;
+			}
+			if (!unitInfo->costsGold) {
+				tmpScore = (tmpScore * 105) / 100; // gold-free units are cool complement units
+			}
+			if ((unitInfo->ageResearchId == -1) || (unitInfo->ageResearchId <= CST_RSID_BRONZE_AGE)) {
+				tmpScore = (tmpScore * 105) / 100; // early availability: +5%
+			}
+			if (tmpScore > bestScore) {
+				bestScore = tmpScore;
+				bestUnit = unitInfo;
+			}
+		}
+	}
+	if (bestUnit != NULL) {
+		this->AddUnitIntoToSelection(bestUnit);
+		bestUnit->isOptionalUnit = true;
+	}
 }
 
 

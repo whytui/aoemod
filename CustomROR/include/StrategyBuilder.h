@@ -103,6 +103,7 @@ namespace STRATEGY {
 			this->bonusForRareStrength = 0;
 			this->bonusForUsedResourceTypes = 0;
 			this->isSelected = false;
+			this->isOptionalUnit = false;
 		}
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
 		short int unitDefId; // DATID1 (base unit ID = without upgrades)
@@ -138,6 +139,7 @@ namespace STRATEGY {
 		int bonusForRareStrength; // 0-100
 		int bonusForUsedResourceTypes; // 0-100
 		bool isSelected;
+		bool isOptionalUnit; // True for "retrains" units and/or units added specifically against a weakness (ex: chariot vs priest is strategy has elephants). Such units don't need full upgrades
 	};
 
 	// Class that handles the selection of military units for strategy creation.
@@ -205,6 +207,10 @@ namespace STRATEGY {
 		// Add a unit to selection and updates some internal variables accordingly
 		// Return total unit count in selection
 		int AddUnitIntoToSelection(PotentialUnitInfo *unitInfo);
+
+		// Search for a unit that can be added to strategy as "optional" (without full upgrades) to fight a detected weakness.
+		// waterUnits: if true, manage water units only. If false, manage land units only
+		void AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessCategory, bool waterUnits);
 	};
 
 
