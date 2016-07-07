@@ -161,6 +161,8 @@ namespace STRATEGY {
 		}
 		CustomRORInfo *crInfo;
 
+		int GetRandomFactor() { return randomPercentFactor; }
+		void SetRandomFactor(int value) { if ((value >= 0) && (value <= 100)) { randomPercentFactor = value; } }
 		// Create a brand new dynamic strategy for player.
 		void CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
 
@@ -168,6 +170,7 @@ namespace STRATEGY {
 
 
 	private:
+		static int randomPercentFactor;
 		std::list<PotentialUnitInfo*> potentialUnitsList; // All eligible military units, collected from tech tree and player's unitDef array
 		std::list<PotentialUnitInfo*> actuallySelectedUnits; // *The* selection of units that will actually be added to strategy
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player;

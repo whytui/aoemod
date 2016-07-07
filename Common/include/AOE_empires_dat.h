@@ -93,7 +93,8 @@ namespace AOE_CONST_FUNC {
 		TribeAIGroupFlag = 30,
 		TribeAIGroupCliff = 34, // 0x22
 		TribeAIGroupBird = 38,
-		TribeAIGroupHorse = 61
+		TribeAIGroupHorse = 61,
+		TribeAIGroupDomesticatedAnimal = 29 // Lion_trained (unit 60)
 		//37=smoke? (dolphin??)
 	};
 

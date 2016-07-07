@@ -201,6 +201,7 @@ int DisableImpossibleResearches() {
 
 // Returns true if technology has at least one effect on provided unit definition.
 // Effect can be negative too.
+// Priest sacrifice tech is IGNORED here.
 bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) {
 	if (!techDef || !unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 		return false;

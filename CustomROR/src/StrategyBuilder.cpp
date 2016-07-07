@@ -2,6 +2,9 @@
 
 using namespace STRATEGY;
 
+// Set default value for random factor (a %)
+int StrategyBuilder::randomPercentFactor = 30;
+
 
 // Create all base strategy elements (ages + buildings=barracks,market,govSiege + wheel if available)
 // Does not add villagers
@@ -401,12 +404,12 @@ std::shared_ptr<StrategyGenerationInfo> StrategyBuilder::GetStrategyGenerationIn
 	genInfo->villagerCount_limitedRetrains = limitedRetrainsVillagerCount;
 	// TODO: more villagers if max population > 50 ?
 
-	// Boats : TODO
+	// "civilian" Boats : TODO
 	if (genInfo->isWaterMap) {
 
 	}
 
-	// Select the military units to train
+	// Select the military units to train (including ships)
 
 	this->CollectPotentialUnitsInfo(player);
 	this->ComputeScoresForPotentialUnits();
@@ -620,7 +623,7 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 		unitInfo->strengthVs[MC_MELEE] = 0;
 		unitInfo->weaknessVs[MC_MELEE] = 0;
 		if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) {
-			unitInfo->strengthVs[MC_MELEE] = 30;
+			unitInfo->strengthVs[MC_MELEE] = 45;
 			unitInfo->weaknessVs[MC_MELEE] = 20;
 			if (availableRelatedResearchesProportion >= 80) {
 				unitInfo->strengthVs[MC_MELEE] += 20;
@@ -938,9 +941,8 @@ void StrategyBuilder::ComputeGlobalScores() {
 		if (unitInfo->globalScore > 100) { unitInfo->globalScore = 100; }
 
 		// Add a random part
-		const int randomImpact = 30; // max + or - % value change from random part.
-		int random = randomizer.GetRandomValue_normal_moreFlat(0, randomImpact * 2);
-		random = random + 100 - randomImpact; // in [100-randomImpact, 100+randomImpact] (used with a multiplication, it gives a resulting randomImpact% adjustment + or -)
+		int random = randomizer.GetRandomValue_normal_moreFlat(0, randomPercentFactor * 2);
+		random = random + 100 - randomPercentFactor; // in [100-randomImpact, 100+randomImpact] (used with a multiplication, it gives a resulting randomImpact% adjustment + or -)
 		unitInfo->globalScore = (unitInfo->globalScore * random) / 100;
 
 		if (unitInfo->globalScore > 100) { unitInfo->globalScore = 100; }
@@ -1086,7 +1088,7 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 		PotentialUnitInfo *bestUnit = NULL;
 		const long int rareStrengthImpact = 30;
 		const long int resourceRepartitionImpact = 15;
-		const long int newRandomImpact = 8;
+		long int newRandomImpact = (randomPercentFactor * 100) / 25; // 25% of randomPercentFactor setting
 		for each (PotentialUnitInfo *unitInfo in preSelectedUnits)
 		{
 			if ((!unitInfo->isSelected) && (unitInfo->isBoat == waterUnits)) {
@@ -1104,7 +1106,12 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 							 // Lighter penalty for siege weapons because they are quite compatible (can be combined efficiently)
 							percentageToApply = 90;
 						}
-						if (unitInfo->hasCivBonus || unitInfo->hasSpecificAttackBonus) {
+						if (unitInfo->hasCivBonus) {
+							percentageToApply += 5; // Reduce (a bit) penalty for units that have some civ bonus
+						}
+						if (unitInfo->hasSpecificAttackBonus) {
+							// Does attack bonus concern a category against which I need more strength ?
+#pragma message("TODO attack bonus: compare to selected units abilities / weaknesses ?")
 							percentageToApply += 5; // Reduce (a bit) penalty for units that have some special bonus
 						}
 						if (percentageToApply > 100) { percentageToApply = 100; }
@@ -1231,7 +1238,7 @@ void StrategyBuilder::SelectStrategyUnitsForLandOrWater(bool waterUnits) {
 	this->SelectStrategyUnitsFromPreSelection(preSelectedUnits, waterUnits);
 
 	// Consider adding units with special bonus like camel/chariot if it helps for a specific need
-
+#pragma message("TODO early ages")
 	// Take care of early ages : add archers, axemen, slingers or scout (according to already available techs). TODO later (not in this method) ?
 }
 
