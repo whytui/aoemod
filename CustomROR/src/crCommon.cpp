@@ -908,7 +908,7 @@ bool IsTower(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef) {
 
 
 // Return NULL if one of the objects is NULL/missing
-ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId) {
+ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(const ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId) {
 	if (!player || !player->IsCheckSumValid() || (researchId < 0)) {
 		return NULL;
 	}

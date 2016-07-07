@@ -6,80 +6,39 @@ using namespace STRATEGY;
 int StrategyBuilder::randomPercentFactor = 30;
 
 
-// Create all base strategy elements (ages + buildings=barracks,market,govSiege + wheel if available)
-// Does not add villagers
-void StrategyBuilder::CreateBasicStrategyElements(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
-	if (!buildAI || !buildAI->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(buildAI->commonAIObject.playerId);
-	if (!player || !player->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &buildAI->fakeFirstStrategyElement;
-	
-	// Adding before "fake first" will add in last position in strategy.
-	// Add Town Center
-	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_FORUM, player, "TownCenter");
-	// Barracks are always needed
-	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_BARRACKS, player, "Barracks");
-	// Tool Age
-	if (!IsResearchRelevantForStrategy(player, CST_RSID_TOOL_AGE)) {
-		string msg = "This civ seems NOT to have tool age. Player #";
-		msg += to_string(buildAI->commonAIObject.playerId);
-		msg += " : ";
-		msg += buildAI->commonAIObject.playerName;
-		traceMessageHandler.WriteMessageNoNotification(msg);
-		return;
+
+/*** General methods ***/
+
+
+
+// Clears potential units list and free each underlying PotentialUnitInfo object.
+void StrategyBuilder::FreePotentialElementsList() {
+	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
+	{
+		delete unitInfo;
 	}
-	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_TOOL_AGE, player, "*Tool Age*");
-	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_MARKET, player, "Market");
-	// Bronze Age
-	if (!IsResearchRelevantForStrategy(player, CST_RSID_BRONZE_AGE)) {
-		string msg = "This civ seems NOT to have bronze age. Player #";
-		msg += to_string(buildAI->commonAIObject.playerId);
-		msg += " : ";
-		msg += buildAI->commonAIObject.playerName;
-		traceMessageHandler.WriteMessageNoNotification(msg);
-		return;
-	}
-	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_BRONZE_AGE, player, "*Bronze Age*");
-	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_GOVERNMENT_CENTER, player, "Government center");
-	if (IsResearchRelevantForStrategy(player, CST_RSID_WHEEL)) { // requires research status to be set
-		AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_MARKET, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, CST_RSID_WHEEL, player, "Wheel");
-	}
-	// Iron Age
-	if (!IsResearchRelevantForStrategy(player, CST_RSID_IRON_AGE)) {
-		string msg = "This civ seems NOT to have iron age. Player #";
-		msg += to_string(buildAI->commonAIObject.playerId);
-		msg += " : ";
-		msg += buildAI->commonAIObject.playerName;
-		traceMessageHandler.WriteMessageNoNotification(msg);
-		return;
-	}
-	AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_IRON_AGE, player, "*Iron Age*");
+	this->potentialUnitsList.clear();
 }
 
-// Create a brand new dynamic strategy for player.
-void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
-	if (!buildAI || !buildAI->IsCheckSumValid() || !buildAI->mainAI || !buildAI->mainAI->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(buildAI->commonAIObject.playerId);
-	if (!player || !player->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
-	if (!global || !global->IsCheckSumValid()) { return; }
-	// Clear previous strategy
-	ClearStrategy(buildAI);
-	strcpy_s(buildAI->strategyFileName, 0x3F, "Dynamic CustomROR strategy");
-	// Initialize strategy with ages (no villager yet)
-	this->CreateBasicStrategyElements(buildAI);
 
-
-	// WARNING : take care if map is naval (=> villager count, land military units count + all non-war boats thing)
-	// + max pop criterion
-
-
-	if (buildAI->mainAI->structTradeAI.needGameStartAIInit) {
-		// Warning: automatic element insertions WILL be triggered
+// Add a unit to selection and updates some internal variables accordingly
+// Return total unit count in selection
+int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
+	unitInfo->isSelected = true;
+	actuallySelectedUnits.push_back(unitInfo);
+	if (unitInfo->isBoat) {
+		this->selectedWaterUnitsCount++;
 	} else {
-		// TODO : trigger dynamic element insertions ?
+		this->selectedLandUnitsCount++;
 	}
+	for (int i = 0; i < 4; i++) {
+		this->totalTrainUnitCosts[i] += unitInfo->trainCosts[i];
+	}
+	return this->actuallySelectedUnits.size();
 }
+
+
+/*** Units selection methods ***/
 
 
 // Fills unitInfos with all available military units from tech tree.
@@ -130,12 +89,12 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 		assert(!validUnit || unitDefLiving->IsCheckSumValid());
 		validUnit = validUnit && (unitDefLiving->towerMode == 0) && (unitDefLiving->speed > 0) &&
 			(unitDefLiving->trainButton > 0) && (unitDefLiving->trainLocation >= 0); // both exclude some heroes/cheats/non-standard units, but not all of them
-		
-		
+
+
 		bool availableForPlayer = validUnit && (unitDefLiving->availableForPlayer != 0); // Warning: this excludes units that are enabled by researches
 		short int researchIdThatEnablesUnit = -1; // Store the researchId that enables current unit... If any
 		short int ageResearchIdThatEnablesUnit = -1; // Age (identified by research id) where unit can become available
-		
+
 		// Search for a research (available in my tech tree) that enables unit
 		if (!availableForPlayer && validUnit) {
 			short int enableUnitResearchId = FindResearchThatEnableUnit(player, unitDefBase->DAT_ID1, 0);
@@ -377,57 +336,6 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 }
 
 
-std::shared_ptr<StrategyGenerationInfo> StrategyBuilder::GetStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
-	if (!player || !player->IsCheckSumValid()) { return NULL; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || !settings->IsCheckSumValid()) { return NULL; }
-	std::shared_ptr<StrategyGenerationInfo> shrPtr(make_shared<StrategyGenerationInfo>(player));
-	StrategyGenerationInfo *genInfo = shrPtr.get();
-	genInfo->maxPopulation = settings->maxPopulation;
-	genInfo->isWaterMap = IsDockRelevantForMap(settings->mapTypeChoice);
-
-	// *** Compute unit numbers ***
-	// Land maps: fixed villagers count around 14-20  ; retrains around 6-10  ; total 18-28
-	// Water maps: fixed villagers count around 10-16  ; retrain around 5-9  ; total 16-24 . original AI: often 10+6 or 14+6
-	const long int maxTotalVillagers = genInfo->isWaterMap ? 22 : 26;
-	const long int minFixedVillagers = genInfo->isWaterMap ? 10 : 14;
-	const long int minLimitedRetrainsVillagers = genInfo->isWaterMap ? 5 : 6;
-	assert(minFixedVillagers + minLimitedRetrainsVillagers < maxTotalVillagers);
-	const long int maxFixedVillagersRandomPart = 6; // random interval size
-	const long int maxLimitedRetrainsVillagersRandomPart = genInfo->isWaterMap ? 4 : 6; // random interval size
-
-	int fixedVillagerCount = randomizer.GetRandomValue_normal_moderate(minFixedVillagers, minFixedVillagers + maxFixedVillagersRandomPart);
-	int limitedRetrainsVillagerCount = randomizer.GetRandomValue_normal_moderate(minLimitedRetrainsVillagers, minLimitedRetrainsVillagers + maxLimitedRetrainsVillagersRandomPart);
-	if (fixedVillagerCount + limitedRetrainsVillagerCount > maxTotalVillagers) { limitedRetrainsVillagerCount = maxTotalVillagers; }
-
-	genInfo->villagerCount_alwaysRetrain = fixedVillagerCount;
-	genInfo->villagerCount_limitedRetrains = limitedRetrainsVillagerCount;
-	// TODO: more villagers if max population > 50 ?
-
-	// "civilian" Boats : TODO
-	if (genInfo->isWaterMap) {
-
-	}
-
-	// Select the military units to train (including ships)
-
-	this->CollectPotentialUnitsInfo(player);
-	this->ComputeScoresForPotentialUnits();
-	this->SelectStrategyUnits();
-
-
-	return shrPtr;
-}
-
-// Clears potential units list and free each underlying PotentialUnitInfo object.
-void StrategyBuilder::FreePotentialElementsList() {
-	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
-	{
-		delete unitInfo;
-	}
-	this->potentialUnitsList.clear();
-}
-
 // Compute all score fields for all units in potential units list.
 void StrategyBuilder::ComputeScoresForPotentialUnits() {
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
@@ -436,7 +344,7 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 			unitInfo->strengthVs[i] = 0;
 			unitInfo->weaknessVs[i] = 0;
 		}
-		
+
 		// availableRelatedResearchesProportion is a % value (0-100)
 		int availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount);
 		// A combination of speed and hit points
@@ -633,7 +541,7 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 				unitInfo->strengthVs[MC_MELEE] = 50;
 				unitInfo->weaknessVs[MC_MELEE] = 10;
 				if ((unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier) ||
-					(unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot)){
+					(unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot)) {
 					// Cavalry, camel, scout + chariot&scythe
 					unitInfo->strengthVs[MC_MELEE] -= 10;
 					unitInfo->weaknessVs[MC_MELEE] += 20; // Speed is no use in melee vs melee, it just means the cost paid for speed is useless and waste
@@ -699,7 +607,6 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 		if (unitInfo->strengthVs[MC_MELEE] > 100) { unitInfo->strengthVs[MC_MELEE] = 100; }
 	} // end loop on units
 }
-
 
 // Compute score fields for priests in unitInfo object.
 void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
@@ -818,7 +725,7 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 			unitInfo->strengthVs[MC_PRIEST] -= 5;
 		}
 	}
-	
+
 	switch (unitInfo->damageScore) {
 	case 1:
 		unitInfo->strengthVs[MC_PRIEST] -= 15;
@@ -873,6 +780,7 @@ void StrategyBuilder::ComputeScoresVsTower(PotentialUnitInfo *unitInfo) {
 		break;
 	}
 }
+
 
 // Compute global scores using many criteria (unit cost, damage, civ bonus, super unit, (un/)available techs...), using a random part.
 // Does not compare units/unit scores to each other at this point (all scores are independent)
@@ -1069,10 +977,11 @@ void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> s
 	}
 }
 
-
+// Make the selection of units to add to strategy based on a pre-selection list.
+// waterUnits : true=deal with water units only, false=deal with land units only
 void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUnitInfo*> preSelectedUnits, bool waterUnits) {
 	int currentUnitCount = this->actuallySelectedUnits.size();
-	
+
 	bool statisfiedWithCurrentSelection = false;
 	int currentTotalStrengths[MC_COUNT];
 	int currentCumulatedStrength;
@@ -1103,7 +1012,7 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 						// Default: Big penalty (-25%) when a similar unit has already been added to strategy
 						int percentageToApply = 75;
 						if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon) {
-							 // Lighter penalty for siege weapons because they are quite compatible (can be combined efficiently)
+							// Lighter penalty for siege weapons because they are quite compatible (can be combined efficiently)
 							percentageToApply = 90;
 						}
 						if (unitInfo->hasCivBonus) {
@@ -1177,7 +1086,7 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 		int currentWorstStrengthValue = 9999999;
 		currentWorstStrengthIndex = (MILITARY_CATEGORY)0;
 		for (int i = 0; i < MC_COUNT; i++) {
-			if ( (i != firstAddedCategory) && (currentTotalStrengths[i] < currentWorstStrengthValue)) {
+			if ((i != firstAddedCategory) && (currentTotalStrengths[i] < currentWorstStrengthValue)) {
 				currentWorstStrengthIndex = (MILITARY_CATEGORY)i;
 				currentWorstStrengthValue = currentTotalStrengths[i];
 			}
@@ -1213,7 +1122,7 @@ void StrategyBuilder::SelectStrategyUnitsForLandOrWater(bool waterUnits) {
 			totalStrengthVs[MC_SIEGE] += unitInfo->strengthVs[MC_SIEGE];
 		}
 	}
-	
+
 
 	int bestScore = 0;
 	PotentialUnitInfo *bestUnit = NULL;
@@ -1242,65 +1151,12 @@ void StrategyBuilder::SelectStrategyUnitsForLandOrWater(bool waterUnits) {
 	// Take care of early ages : add archers, axemen, slingers or scout (according to already available techs). TODO later (not in this method) ?
 }
 
-// Select which units are to be added in strategy, based on potentialUnitsList
-void StrategyBuilder::SelectStrategyUnits() {
-	// Compute individual global scores (no comparison between units). Done once and for all
-	this->ComputeGlobalScores();
-	
-	if (false) { // if water map : TODO
-		// Select boats with 1st priority
-		this->SelectStrategyUnitsForLandOrWater(true);
-	}
-	// Then land units : according to need for boats (or not), wood-costly units might be preferred or not.
-	this->SelectStrategyUnitsForLandOrWater(false);
-
-	// Debug log
-#ifdef _DEBUG
-	traceMessageHandler.WriteMessage("Strategy decision:");
-	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits) {
-		std::string msg = "Unit id=";
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unit = NULL;
-		if (unitInfo->isOptionalUnit) {
-			msg += std::to_string(unitInfo->unitDefId);
-			unit = unitInfo->baseUnitDefLiving;
-		} else {
-			msg += std::to_string(unitInfo->strongestUpgradeUnitDefId);
-			unit = unitInfo->upgradedUnitDefLiving;
-		}
-		msg += std::string(" (") + GetLanguageDllText(unit->languageDLLID_Name) + std::string(")");
-		if (unitInfo->isOptionalUnit) {
-			msg += " : OPTIONAL";
-		}
-		msg += " - score=";
-		msg += std::to_string(unitInfo->globalScore);
-		traceMessageHandler.WriteMessageNoNotification(msg);
-	}
-#endif
-}
-
-
-// Add a unit to selection and updates some internal variables accordingly
-// Return total unit count in selection
-int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
-	unitInfo->isSelected = true;
-	actuallySelectedUnits.push_back(unitInfo);
-	if (unitInfo->isBoat) {
-		this->selectedWaterUnitsCount++;
-	} else {
-		this->selectedLandUnitsCount++;
-	}
-	for (int i = 0; i < 4; i++) {
-		this->totalTrainUnitCosts[i] += unitInfo->trainCosts[i];
-	}
-	return this->actuallySelectedUnits.size();
-}
-
 // Search for a unit that can be added to strategy as "optional" (without full upgrades) to fight a detected weakness.
 // waterUnits: if true, manage water units only. If false, manage land units only
 void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessCategory, bool waterUnits) {
 	int bestScore = 0;
 	PotentialUnitInfo *bestUnit = NULL;
-	
+
 	// Recompute strengths, for *base* units (not counting upgrades here)
 	this->RecomputeComparisonBonuses(this->potentialUnitsList, waterUnits, false);
 
@@ -1308,7 +1164,7 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 	{
 		// Ignore already selected units (and those NOT matching the land/water parameter)
 		if (!unitInfo->isSelected && (unitInfo->isBoat == waterUnits)) {
-			
+
 			// Recompute costs bonus according to current selected units
 			unitInfo->bonusForUsedResourceTypes = this->GetCostScoreRegardingCurrentSelection(unitInfo);
 			int tmpScore = unitInfo->strengthVs[weaknessCategory];
@@ -1364,6 +1220,267 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 		bestUnit->isOptionalUnit = true;
 	}
 }
+
+// Select which units are to be added in strategy, based on potentialUnitsList
+void StrategyBuilder::SelectStrategyUnits() {
+	// Compute individual global scores (no comparison between units). Done once and for all
+	this->ComputeGlobalScores();
+
+	if (false) { // if water map : TODO
+		// Select boats with 1st priority
+		this->SelectStrategyUnitsForLandOrWater(true);
+	}
+	// Then land units : according to need for boats (or not), wood-costly units might be preferred or not.
+	this->SelectStrategyUnitsForLandOrWater(false);
+
+	// Debug log
+#ifdef _DEBUG
+	traceMessageHandler.WriteMessage("Strategy decision:");
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits) {
+		std::string msg = "Unit id=";
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unit = NULL;
+		if (unitInfo->isOptionalUnit) {
+			msg += std::to_string(unitInfo->unitDefId);
+			unit = unitInfo->baseUnitDefLiving;
+		} else {
+			msg += std::to_string(unitInfo->strongestUpgradeUnitDefId);
+			unit = unitInfo->upgradedUnitDefLiving;
+		}
+		msg += std::string(" (") + GetLanguageDllText(unit->languageDLLID_Name) + std::string(")");
+		if (unitInfo->isOptionalUnit) {
+			msg += " : OPTIONAL";
+		}
+		msg += " - score=";
+		msg += std::to_string(unitInfo->globalScore);
+		traceMessageHandler.WriteMessageNoNotification(msg);
+	}
+#endif
+}
+
+
+
+/*** Strategy writing methods ***/
+
+
+// Get the very global information about strategy generation (number of villagers, etc
+void StrategyBuilder::CollectGlobalStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+	if (!player || !player->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	this->maxPopulation = settings->maxPopulation;
+	this->isWaterMap = IsDockRelevantForMap(settings->mapTypeChoice);
+
+	// *** Compute unit numbers ***
+	// Land maps: fixed villagers count around 14-20  ; retrains around 6-10  ; total 18-28
+	// Water maps: fixed villagers count around 10-16  ; retrain around 5-9  ; total 16-24 . original AI: often 10+6 or 14+6
+	const long int minTotalVillagers = this->isWaterMap ? 12 : 14; // Max villager count     = 22 (water) or 26 (land)
+	const long int maxTotalVillagers = this->isWaterMap ? 22 : 26; // Max villager count     = 22 (water) or 26 (land)
+	const long int minFixedVillagers = this->isWaterMap ? 10 : 14; // Min fixed vill count   = 10 (water) or 14 (land)
+	const long int minLimitedRetrainsVillagers = this->isWaterMap ? 3 : 4; // min "retrains" = 3  (water) or  4 (land)
+	assert(minFixedVillagers + minLimitedRetrainsVillagers < maxTotalVillagers);
+	const long int maxFixedVillagersRandomPart = 6; // random interval size
+	const long int maxLimitedRetrainsVillagersRandomPart = this->isWaterMap ? 4 : 6; // random interval size
+
+	int fixedVillagerCount = randomizer.GetRandomValue_normal_moderate(minFixedVillagers, minFixedVillagers + maxFixedVillagersRandomPart);
+	int limitedRetrainsVillagerCount = randomizer.GetRandomValue_normal_moderate(minLimitedRetrainsVillagers, minLimitedRetrainsVillagers + maxLimitedRetrainsVillagersRandomPart);
+	if (fixedVillagerCount + limitedRetrainsVillagerCount > maxTotalVillagers) { limitedRetrainsVillagerCount = maxTotalVillagers; }
+
+	this->villagerCount_alwaysRetrain = fixedVillagerCount;
+	this->villagerCount_limitedRetrains = limitedRetrainsVillagerCount;
+	// TODO: more villagers if max population > 50 ?
+
+	// "civilian" Boats : TODO
+	if (this->isWaterMap) {
+
+	}
+
+	// Select the military units to train (including ships)
+
+	this->CollectPotentialUnitsInfo(player);
+	this->ComputeScoresForPotentialUnits();
+	this->SelectStrategyUnits();
+
+}
+
+
+// Create all base strategy elements (ages + buildings=barracks,market,govSiege + wheel if available)
+// Does not add villagers
+#pragma message("TODO: add only ages + TC here and rename proc")
+void StrategyBuilder::CreateBasicStrategyElements() {
+	if (!this->buildAI || !this->buildAI->IsCheckSumValid()) { return; }
+	if (!player || !player->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
+	
+	// Adding before "fake first" will add in last position in strategy.
+	// Add Town Center
+	if (AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_FORUM, this->player, "TownCenter")) {
+		this->seTownCenter = fakeFirstElem->previous;
+	}
+	
+	// Barracks are always needed
+#pragma message("TO DO remove hardcoded barracks, requiredBuildingsshould do the job")
+	AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_BARRACKS, this->player, "Barracks");
+	// Tool Age
+	if (!IsResearchRelevantForStrategy(player, CST_RSID_TOOL_AGE)) {
+		string msg = "This civ seems NOT to have tool age. Player #";
+		msg += to_string(this->buildAI->commonAIObject.playerId);
+		msg += " : ";
+		msg += this->buildAI->commonAIObject.playerName;
+		traceMessageHandler.WriteMessageNoNotification(msg);
+		return;
+	}
+	if (AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_TOOL_AGE, player, "*Tool Age*")) {
+		this->seToolAge = fakeFirstElem->previous;
+	}
+	AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_MARKET, this->player, "Market");
+	// Bronze Age
+	if (!IsResearchRelevantForStrategy(this->player, CST_RSID_BRONZE_AGE)) {
+		string msg = "This civ seems NOT to have bronze age. Player #";
+		msg += to_string(this->buildAI->commonAIObject.playerId);
+		msg += " : ";
+		msg += this->buildAI->commonAIObject.playerName;
+		traceMessageHandler.WriteMessageNoNotification(msg);
+		return;
+	}
+	if (AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_BRONZE_AGE, this->player, "*Bronze Age*")) {
+		this->seBronzeAge = fakeFirstElem->previous;
+	}
+	// TODO check gov center is available ?
+	AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_GOVERNMENT_CENTER, this->player, "Government center");
+	if (IsResearchRelevantForStrategy(player, CST_RSID_WHEEL)) { // requires research status to be set
+		if (AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, CST_UNITID_MARKET, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, CST_RSID_WHEEL, this->player, "Wheel")) {
+			this->seWheel = fakeFirstElem->previous;
+		}
+	}
+	// Iron Age
+	if (!IsResearchRelevantForStrategy(this->player, CST_RSID_IRON_AGE)) {
+		string msg = "This civ seems NOT to have iron age. Player #";
+		msg += to_string(buildAI->commonAIObject.playerId);
+		msg += " : ";
+		msg += buildAI->commonAIObject.playerName;
+		traceMessageHandler.WriteMessageNoNotification(msg);
+		return;
+	}
+	if (AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_IRON_AGE, player, "*Iron Age*")) {
+		this->seIronAge = fakeFirstElem->previous;
+	}
+}
+
+// Create villager strategy elements, including fishing ships
+void StrategyBuilder::CreateVillagerStrategyElements() {
+	if (!this->buildAI || !this->buildAI->IsCheckSumValid()) { return; }
+	if (!player || !player->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
+	int totalVillagersCount = this->villagerCount_alwaysRetrain + this->villagerCount_limitedRetrains;
+	assert(this->villagerCount_alwaysRetrain + this->villagerCount_limitedRetrains > 0);
+
+#pragma message("TODO: boats")
+#pragma message("TODO: add a random part in repartition")
+	int currentCount_fixed = 0;
+	int currentCount_retrains = 0;
+
+	// *** Stone age *** : 11+2 (land), 9+3 (water)
+	int stoneAgeVillagerCount_fixed = 11;
+	int stoneAgeVillagerCount_retrains = 2;
+	if (this->villagerCount_alwaysRetrain < 15) {
+		stoneAgeVillagerCount_fixed = 9;
+		stoneAgeVillagerCount_retrains = 3;
+	}
+	if (stoneAgeVillagerCount_retrains >= this->villagerCount_limitedRetrains) {
+		stoneAgeVillagerCount_retrains = this->villagerCount_limitedRetrains;
+	}
+	for (int i = 0; i < stoneAgeVillagerCount_fixed; i++) {
+		AddUnitInStrategy_before(this->buildAI, this->seToolAge, -1, CST_UNITID_FORUM, TAIUnitClass::AIUCLivingUnit, CST_UNITID_VILLAGER, player, "Man");
+		currentCount_fixed++;
+	}
+	for (int i = 0; i < stoneAgeVillagerCount_retrains; i++) {
+		AddUnitInStrategy_before(this->buildAI, this->seToolAge, 2, CST_UNITID_FORUM, TAIUnitClass::AIUCLivingUnit, CST_UNITID_VILLAGER, player, "Man");
+		currentCount_retrains++;
+	}
+	assert(currentCount_fixed == stoneAgeVillagerCount_fixed);
+	assert(currentCount_retrains == stoneAgeVillagerCount_retrains);
+	// *** Tool age ***
+	// Total to add: half of remaining villagers, including all "fixed" ones (or almost)
+	int totalToolAgeVillagers = totalVillagersCount - currentCount_fixed - currentCount_retrains;
+	assert(totalToolAgeVillagers >= 0);
+	totalToolAgeVillagers = (totalToolAgeVillagers + 1) / 2;
+	if (totalToolAgeVillagers + currentCount_fixed + currentCount_retrains > totalVillagersCount) {
+		totalToolAgeVillagers = totalVillagersCount;
+	}
+	// Now get repartition (fixed / retrains)
+	int toolAgeVillagerCount_fixed = totalToolAgeVillagers;
+	if (toolAgeVillagerCount_fixed + currentCount_fixed > this->villagerCount_alwaysRetrain) {
+		toolAgeVillagerCount_fixed = this->villagerCount_alwaysRetrain - currentCount_fixed;
+	}
+	assert(toolAgeVillagerCount_fixed >= 0);
+	int toolAgeVillagerCount_retrains = totalToolAgeVillagers - toolAgeVillagerCount_fixed;
+	assert(toolAgeVillagerCount_retrains >= 0);
+	if (toolAgeVillagerCount_retrains + currentCount_retrains > this->villagerCount_limitedRetrains) {
+		assert(false && "this should not happen due to previous computations");
+		toolAgeVillagerCount_retrains = this->villagerCount_limitedRetrains - currentCount_retrains;
+	}
+	for (int i = 0; i < toolAgeVillagerCount_fixed; i++) {
+		AddUnitInStrategy_before(this->buildAI, this->seBronzeAge, -1, CST_UNITID_FORUM, TAIUnitClass::AIUCLivingUnit, CST_UNITID_VILLAGER, player, "Man");
+		currentCount_fixed++;
+	}
+	for (int i = 0; i < toolAgeVillagerCount_retrains; i++) {
+		AddUnitInStrategy_before(this->buildAI, this->seBronzeAge, 2, CST_UNITID_FORUM, TAIUnitClass::AIUCLivingUnit, CST_UNITID_VILLAGER, player, "Man");
+		currentCount_retrains++;
+	}
+
+	// *** Bronze age *** : add all remaining villagers
+	int bronzeAgeFixedCount = (this->villagerCount_alwaysRetrain - currentCount_fixed);
+	for (int i = 0; i < bronzeAgeFixedCount; i++) {
+		AddUnitInStrategy_before(this->buildAI, this->seIronAge, -1, CST_UNITID_FORUM, TAIUnitClass::AIUCLivingUnit, CST_UNITID_VILLAGER, player, "Man");
+		currentCount_fixed++;
+	}
+	int bronzeAgeRetrainsCount = (this->villagerCount_limitedRetrains - currentCount_retrains);
+	for (int i = 0; i < bronzeAgeRetrainsCount; i++) {
+		// Only 1 retrain for bronze age limited retrains villagers
+		AddUnitInStrategy_before(this->buildAI, this->seIronAge, 1, CST_UNITID_FORUM, TAIUnitClass::AIUCLivingUnit, CST_UNITID_VILLAGER, player, "Man");
+		currentCount_retrains++;
+	}
+	assert(currentCount_fixed == this->villagerCount_alwaysRetrain);
+	assert(currentCount_retrains == this->villagerCount_limitedRetrains);
+}
+
+
+
+// Create a brand new dynamic strategy for player.
+void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
+	if (!buildAI || !buildAI->IsCheckSumValid() || !buildAI->mainAI || !buildAI->mainAI->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(buildAI->commonAIObject.playerId);
+	if (!player || !player->IsCheckSumValid()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid()) { return; }
+	// Clear previous strategy
+	ClearStrategy(buildAI);
+	strcpy_s(buildAI->strategyFileName, 0x3F, "Dynamic CustomROR strategy");
+
+	// WARNING : take care if map is naval (=> villager count, land military units count + all non-war boats thing)
+	// + max pop criterion
+	this->CollectGlobalStrategyGenerationInfo(player);
+
+	// Initialize strategy with TC + ages (no villager yet)
+	this->CreateBasicStrategyElements();
+	// Add villagers
+	this->CreateVillagerStrategyElements();
+
+	// Select researches to add in strategy
+	// TODO
+
+	// Add (and organize) items to strategy
+
+	if (buildAI->mainAI->structTradeAI.needGameStartAIInit) {
+		// Warning: automatic element insertions WILL be triggered
+	} else {
+		// TODO : trigger dynamic element insertions ?
+	}
+}
+
+
+
+
 
 
 // Returns true if the two classes are equals or very similar (infantry with phalanx, archer classes...)

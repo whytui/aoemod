@@ -238,7 +238,7 @@ ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT
 bool IsTower(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef);
 
 // Return NULL if one of the objects is NULL/missing
-ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId);
+ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(const ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId);
 
 // Returns true if current game is multiplayer, false otherwise (including error cases)
 bool IsMultiplayer();

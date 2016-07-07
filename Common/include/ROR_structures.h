@@ -1783,14 +1783,14 @@ namespace ROR_STRUCTURES_10C
 		// See GetRelevantSelectedUnitsPointer(...)
 		STRUCT_UNIT *custom_selectedUnits[CST_RS_MAX_SUPPORTED_SELECTED_UNITS]; // ONLY USE THIS if "selected units" feature is installed or you will access bad memory. See GetRelevantSelectedUnitsPointer (in commands)
 
-		STRUCT_GAME_GLOBAL * GetGlobalStruct() {
+		STRUCT_GAME_GLOBAL *GetGlobalStruct() const {
 			return (STRUCT_GAME_GLOBAL*) this->ptrGlobalStruct;
 		}
 		// Obsolete getter
-		STRUCT_AI * GetAIStruct() {
+		STRUCT_AI * GetAIStruct() const {
 			return (STRUCT_AI*) this->ptrAIStruct;
 		}
-		bool IsCheckSumValid() {
+		bool IsCheckSumValid() const {
 			return (this->checksum == 0x00549B80) || (this->checksum == 0x00549A44) ||
 				(this->checksum == 0x00544D18); // parent class checksum
 		}
@@ -1801,7 +1801,7 @@ namespace ROR_STRUCTURES_10C
 			}
 			return (this->AIControlMode == 3);
 		}
-		char GetCustomAIFlag() { return this->unused_customAIFlag; } // please use IsAIActive instead unless you have a good reason.
+		char GetCustomAIFlag() const { return this->unused_customAIFlag; } // please use IsAIActive instead unless you have a good reason.
 		float GetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES resourceIndex) {
 			if ((resourceIndex < 0) || (resourceIndex > AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_ALL_RELICS)) { return -1; }
 			return this->ptrResourceValues[resourceIndex];
@@ -1815,13 +1815,13 @@ namespace ROR_STRUCTURES_10C
 			if ((unitDefId < 0) || (unitDefId >= this->structDefUnitArraySize)) { return NULL; }
 			return (STRUCT_UNITDEF_BASE *)this->ptrStructDefUnitTable[unitDefId];
 		}
-		STRUCT_RESEARCH_DEF *GetResearchDef(short int researchId) {
+		STRUCT_RESEARCH_DEF *GetResearchDef(short int researchId) const {
 			if (!this->ptrResearchesStruct || !this->ptrResearchesStruct->ptrResearchDefInfo || !this->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray) {return NULL; }
 			if ((researchId < 0) || (researchId >= this->ptrResearchesStruct->researchCount)) { return NULL; }
 			return &this->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
 		}
 		// Securely get research status for research id. Returns NULL if input is invalid.
-		STRUCT_PLAYER_RESEARCH_STATUS *GetResearchStatus(short int researchId) {
+		STRUCT_PLAYER_RESEARCH_STATUS *GetResearchStatus(short int researchId) const {
 			if (!this->ptrResearchesStruct || !this->ptrResearchesStruct->researchStatusesArray) { return NULL; }
 			if ((researchId < 0) || (researchId >= this->ptrResearchesStruct->researchCount)) { return NULL; }
 			return &this->ptrResearchesStruct->researchStatusesArray[researchId];
@@ -2405,7 +2405,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_AI_UNIT_LIST_INFO autoInsertedBuildingDATIDs; // +5AC. Actually, IDs are DATID, not unit instance IDs. Automatically added buildings ?
 		STRUCT_AI *mainAI; // +5BC. Set in 0x4B76E0.
 		// 0x5C0: end
-		bool IsCheckSumValid() { return this->checksum == 0x00548ACC; }
+		bool IsCheckSumValid() const { return this->checksum == 0x00548ACC; }
 	};
 	static_assert(sizeof(STRUCT_BUILD_AI) == 0x5C0, "STRUCT_BUILD_AI Size");
 
