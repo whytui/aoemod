@@ -75,6 +75,7 @@ namespace STRATEGY {
 	class PotentialUnitInfo {
 	public:
 		PotentialUnitInfo() {
+			this->baseUnitDefLiving = NULL;
 			this->upgradedUnitDefLiving = NULL;
 			this->unitDefId = -1;
 			this->baseUnitDefId = -1;
@@ -86,7 +87,8 @@ namespace STRATEGY {
 			this->hitPoints = 0;
 			this->range = 0;
 			this->isMelee = false;
-			this->speed = 0;
+			this->speedBase = 0;
+			this->speedUpgraded = 0;
 			this->displayedAttack = 0;
 			this->unitAIType = GLOBAL_UNIT_AI_TYPES::TribeAINone;
 			this->unavailableRelatedResearchesCount = 0;
@@ -105,6 +107,7 @@ namespace STRATEGY {
 			this->isSelected = false;
 			this->isOptionalUnit = false;
 		}
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *baseUnitDefLiving; // (DATID1) Unit definition of base unit, without upgrade
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
 		short int unitDefId; // DATID1 (base unit ID = without upgrades)
 		short int baseUnitDefId; // non-upgraded unit that can be upgraded to "this" one, if any.
@@ -116,7 +119,8 @@ namespace STRATEGY {
 		long int availableRelatedResearchesCount;
 		short int ageResearchId; // ResearchId of the age (stone/tool/bronze/iron) where the unit can be enabled first. -1=always available
 		bool isBoat; // true for water units, false for land units
-		float speed;
+		float speedBase;
+		float speedUpgraded;
 		float range;
 		bool isMelee; // Might be simpler that manipulating range everywhere... We consider range<2 means melee (normally, range=0 for melee, but beware exceptions like fire galley)
 		short int hitPoints;
@@ -192,14 +196,18 @@ namespace STRATEGY {
 		// Does not compare units/unit scores to each other at this point (all scores are independent)
 		void ComputeGlobalScores();
 
-		// Recompute unit info bonuses that depend on comparison with other units
-		void RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit);
+		// Recompute unit Info's score for costs, according to currently (actually) selected units.
+		int GetCostScoreRegardingCurrentSelection(PotentialUnitInfo *unitInfo);
+
+		// Get unit info's score for costs, according to currently (actually) selected units.
+		// upgradedUnit: if true, consider upgraded unit. if false, consider base unit
+		void RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit);
 
 		void SelectStrategyUnitsFromPreSelection(std::list<PotentialUnitInfo*> preSelectedUnits, bool waterUnits);
 
 		// Select which units are to be added in strategy, based on potentialUnitsList
 		// Requires that this->potentialUnitsList has already been filled
-		void SelectStrategyUnitsForCategory(bool waterUnits);
+		void SelectStrategyUnitsForLandOrWater(bool waterUnits);
 
 		// Select which units are to be added in strategy, based on potentialUnitsList
 		void SelectStrategyUnits();

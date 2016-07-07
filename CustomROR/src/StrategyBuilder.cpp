@@ -188,6 +188,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 			unitInfo->hasUnavailableUpgrade = false; // updated below
 			unitInfo->availableRelatedResearchesCount = 0; // updated below
 			unitInfo->unavailableRelatedResearchesCount = 0; // updated below
+			unitInfo->baseUnitDefLiving = unitDefLiving;
 			unitInfo->upgradedUnitDefLiving = unitDefLiving; // Default: base unit. We'll update this later if necessary
 			unitInfo->unitDefId = unitDefLiving->DAT_ID1;
 			unitInfo->isBoat = IsWaterUnit(unitDefLiving->unitAIType);
@@ -262,7 +263,8 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 			unitInfo->hitPoints = bestUpgradedUnit->totalHitPoints;
 			unitInfo->range = bestUpgradedUnit->maxRange;
 			unitInfo->isMelee = (unitInfo->range < 2);
-			unitInfo->speed = bestUpgradedUnit->speed; // // updated below if some researches update the speed value
+			unitInfo->speedBase = unitInfo->baseUnitDefLiving->speed; // base speed value
+			unitInfo->speedUpgraded = bestUpgradedUnit->speed; // updated speed value
 			unitInfo->unitAIType = bestUpgradedUnit->unitAIType;
 			unitInfo->hasCivBonus = currentUnitHasTechTreeBonus;
 			unitInfo->enabledByResearchId = researchIdThatEnablesUnit;
@@ -274,7 +276,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 			}
 			unitInfo->conversionResistance = this->crInfo->GetConversionResistance(player->civilizationId, bestUpgradedUnit->unitAIType);
 
-			// Analysze costs
+			// Analyze costs
 			for (int i = 0; i < 3; i++) {
 				if ((unitDefLiving->costs[i].costType >= AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD) &&
 					(unitDefLiving->costs[i].costType <= AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD) &&
@@ -316,6 +318,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 					}
 				}
 			}
+			// Collect some info on techs that improve the unit (speed...)
 			for each (short int curResearchId in allAvailableResearches)
 			{
 				STRUCT_RESEARCH_DEF *curResearchDef = player->GetResearchDef(curResearchId);
@@ -331,15 +334,6 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 					if (DoesTechAffectUnit(techDef, unitDefLiving)) {
 						unitInfo->availableRelatedResearchesCount++;
 						for (int i = 0; i < techDef->effectCount; i++) {
-							/*short int upgradeTargetUnitDefId = techDef->ptrEffects[i].UpgradeUnitGetTargetUnit();
-							if ((upgradeTargetUnitDefId >= 0) && (techDef->ptrEffects[i].effectUnit == unitDefLiving->DAT_ID1)) {
-								// We found an upgrade for our unit
-								unitInfo->upgradesUnitDefId.push_back(upgradeTargetUnitDefId);
-							}
-							if (upgradeTargetUnitDefId == unitDefLiving->DAT_ID1) {
-								// We found the base unit of our unit (our unit is an upgrade for some other unit)
-								unitInfo->baseUnitDefId = techDef->ptrEffects[i].effectUnit;
-							}*/
 							bool isAttrModifier = ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
 								(techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
 								(techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT));
@@ -348,13 +342,13 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 							if (isAttrModifier && affectsMe && (techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_SPEED)) {
 								float value = techDef->ptrEffects[i].GetValue();
 								if (techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) {
-									unitInfo->speed += value;
+									unitInfo->speedUpgraded += value;
 								}
 								if (techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) {
-									unitInfo->speed = value;
+									unitInfo->speedUpgraded = value;
 								}
 								if (techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT) {
-									unitInfo->speed = unitInfo->speed * value;
+									unitInfo->speedUpgraded = unitInfo->speedUpgraded * value;
 								}
 							}
 						}
@@ -443,7 +437,7 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 		// availableRelatedResearchesProportion is a % value (0-100)
 		int availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount);
 		// A combination of speed and hit points
-		float adjustedSpeed = unitInfo->speed - 0.4f;
+		float adjustedSpeed = unitInfo->speedUpgraded - 0.4f;
 		if (adjustedSpeed < 0.4) { adjustedSpeed = 0.4f; } // This gives more importance to speed (more penalty for slow units): lower difference between speed values = more difference after multiplication
 		float speedHitPointsFactor = adjustedSpeed * (float)unitInfo->hitPoints;
 		// Examples: elephant=(0.4*600)=240. legion=(0.8*160)=128, axe=(.8*50)=40, cataphract=(1.6*180)=288, scythe=(1.6*137)=219. heavy_cat=(150*0.4)=60
@@ -586,14 +580,14 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 		if (unitInfo->isMelee) {
 			unitInfo->strengthVs[MC_FAST_RANGED] = 40; // default for units faster than normal, but not really fast
 			unitInfo->weaknessVs[MC_FAST_RANGED] = 40; // default for units faster than normal, but not really fast
-			if (unitInfo->speed < 1.4) {
+			if (unitInfo->speedUpgraded < 1.4) {
 				unitInfo->strengthVs[MC_FAST_RANGED] = 20;
-				if (unitInfo->speed < 1.1) {
+				if (unitInfo->speedUpgraded < 1.1) {
 					unitInfo->strengthVs[MC_FAST_RANGED] -= 10;
 				}
 				unitInfo->weaknessVs[MC_FAST_RANGED] = 80;
 			}
-			if (unitInfo->speed >= 2) {
+			if (unitInfo->speedUpgraded >= 2) {
 				unitInfo->strengthVs[MC_FAST_RANGED] = 80;
 				unitInfo->weaknessVs[MC_FAST_RANGED] = 10;
 			}
@@ -717,6 +711,7 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 		unitInfo->weaknessVs[MC_PRIEST] = 100 - scoreForPriestResearches;
 		return;
 	}
+	float unitSpeed = unitInfo->speedUpgraded; // upgradedUnit ? unitInfo->speedUpgraded : unitInfo->speedBase;
 
 	// Conversion resistances: both a defensive & offensive criteria
 	if (unitInfo->conversionResistance < 1) { // Easier to convert (does not exist in standard game)
@@ -739,13 +734,13 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 	// Note on standard speeds: 0.8-0.9 slow (siege, elephants, base hopite&priests), 1.1-1.2 normal(villagers, infantry,archers), 2 fast
 	// Boats: 1.35-1.4, 1.75, 2, 2.5(upgraded trade ship). War ships are all in 1.35-1.75
 	int basePenaltyValue = 10;
-	if (unitInfo->speed < 1) {
+	if (unitSpeed < 1) {
 		basePenaltyValue = 20;
 	}
-	if ((unitInfo->speed >= 1.0f) && (unitInfo->speed < 1.5f)) {
+	if ((unitSpeed >= 1.0f) && (unitSpeed < 1.5f)) {
 		basePenaltyValue = 10;
 	}
-	if (unitInfo->speed >= 1.5f) {
+	if (unitSpeed >= 1.5f) {
 		basePenaltyValue = 2; // Fast units: can defend correctly against priests.
 	}
 	// Costly units are a weakness against priests (especially elephants, but not only)
@@ -774,16 +769,16 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 	unitInfo->weaknessVs[MC_PRIEST] += basePenaltyValue;
 
 	// Strength vs priests
-	if (!unitInfo->isMelee && (unitInfo->speed >= 1) && (unitInfo->range > 6)) {
+	if (!unitInfo->isMelee && (unitSpeed >= 1) && (unitInfo->range > 6)) {
 		unitInfo->strengthVs[MC_PRIEST] += 10; // Range units are slightly better vs priests than melee
 	} else {
 		if (unitInfo->range >= 10) { // siege weapons, actually (archers have 7 max, we don't count range upgrades here)
 			unitInfo->strengthVs[MC_PRIEST] += 20;
 		}
 	}
-	if (unitInfo->isMelee && (unitInfo->speed >= 1.0f)) {
+	if (unitInfo->isMelee && (unitSpeed >= 1.0f)) {
 		unitInfo->strengthVs[MC_PRIEST] += 15;
-		if (unitInfo->isMelee && (unitInfo->speed >= 1.5f)) {
+		if (unitInfo->isMelee && (unitSpeed >= 1.5f)) {
 			unitInfo->strengthVs[MC_PRIEST] += 20; // even more for fast units
 		}
 	} else {
@@ -953,9 +948,64 @@ void StrategyBuilder::ComputeGlobalScores() {
 }
 
 
+// Get unit info's score for costs, according to currently (actually) selected units.
+int StrategyBuilder::GetCostScoreRegardingCurrentSelection(PotentialUnitInfo *unitInfo) {
+	assert(!unitInfo->isSelected);
+	bool noData = true;
+	for (int i = 0; i < 4; i++) {
+		if (this->totalTrainUnitCosts[i] != 0) { noData = false; }
+	}
+	if (noData) {
+		return 50; // same value for all units when no unit is actually selected
+	}
+
+	const int USED_RESOURCE_TYPES = 3;
+	int cumulatedWeightedCosts[4];
+	int unitWeightedCosts[4];
+	int totalCumulatedCost = 0;
+	int totalUnitCost = 0;
+	for (int i = 0; i < 4; i++) {
+		cumulatedWeightedCosts[i] = GetWeightedCostValue(this->totalTrainUnitCosts[i], (RESOURCE_TYPES)i);
+		unitWeightedCosts[i] = GetWeightedCostValue(unitInfo->trainCosts[i], (RESOURCE_TYPES)i);
+		if (i != RESOURCE_TYPES::CST_RES_ORDER_STONE) {
+			// Ignore stone costs as almost no units use it (only slinger in standard game): would lead to wrong calculations
+			totalCumulatedCost += cumulatedWeightedCosts[i];
+			totalUnitCost += unitWeightedCosts[i];
+		}
+	}
+	for (int i = 0; i < 4; i++) {
+		if (i != RESOURCE_TYPES::CST_RES_ORDER_STONE) {
+			cumulatedWeightedCosts[i] = (cumulatedWeightedCosts[i] * 100) / totalCumulatedCost;
+			unitWeightedCosts[i] = (unitWeightedCosts[i] * 100) / totalUnitCost;
+		}
+	}
+	// Now cumulatedWeightedCosts and unitWeightedCosts are percentage (sum for all resources ~=100)
+	int diffToMedian = 0; // difference (%) to median for cumulated costs (unit+current total) for each resource type
+	for (int i = 0; i < 4; i++) {
+		if (i != RESOURCE_TYPES::CST_RES_ORDER_STONE) {
+			const int medianValue = 100 / USED_RESOURCE_TYPES;
+			int cumulated2Values = cumulatedWeightedCosts[i] + unitWeightedCosts[i]; // 0-200
+			int diffToMedianForThisResource = (cumulated2Values - (medianValue * 2)) / 2; // Result is 0-100
+			if (diffToMedianForThisResource < 0) { diffToMedianForThisResource = -diffToMedianForThisResource; } // Always positive (absolute value)
+			diffToMedian += diffToMedianForThisResource;
+		}
+	}
+	int highestPossibleDiffToMedian = (min(100 - (100 / USED_RESOURCE_TYPES), (100 / USED_RESOURCE_TYPES)) * 4) / 3; // Worst case: 100/0/0 makes 67+33+33 diffs
+
+	diffToMedian = diffToMedian / USED_RESOURCE_TYPES; // Get a % value. Higher value = bad score (bad resource repartition)
+	int adjustedPercentage = (diffToMedian * 100) / highestPossibleDiffToMedian;
+	int scoreForResourceRepartition = 100 - adjustedPercentage; // High value = bonus
+
+	if (scoreForResourceRepartition > 100) { scoreForResourceRepartition = 100; }
+	if (scoreForResourceRepartition < 0) { scoreForResourceRepartition = 0; }
+	return scoreForResourceRepartition;
+}
+
+
 // Recompute unit info bonuses that depend on comparison with other units
+// upgradedUnit: if true, consider upgraded unit. if false, consider base unit
 #pragma message("No very relevant for boats, do a specific method ?")
-void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit) {
+void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit) {
 	int totalStrengthVs[MC_COUNT];
 	int tempStrengthVs[MC_COUNT];
 	for (int i = 0; i < MC_COUNT; i++) { totalStrengthVs[i] = 0; tempStrengthVs[i] = 0; }
@@ -997,7 +1047,7 @@ void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> s
 		if (unitInfo->isBoat == waterUnit) { // do not exclude already selected units here
 			if (categoriesWeaknessOrder[weaknessIndex] == MC_NONE) { weaknessIndex++; } // should not happen as NONE is -1 value.
 			int currentCategory = categoriesWeaknessOrder[weaknessIndex];
-			int meanStrengthValue = (totalStrengthVs[currentCategory] / MC_COUNT);
+			int meanStrengthValue = (totalStrengthVs[currentCategory] / selectedUnits.size()); // medium strength Vs this category among all selected units from provided list
 			if (unitInfo->strengthVs[currentCategory] > meanStrengthValue) {
 				// This unit has a quite good strength against a military category that troubles me (I don't have many good units against it)
 				unitInfo->bonusForRareStrength = bonus;
@@ -1008,71 +1058,13 @@ void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> s
 		}
 	}
 
-	bool noData = true;
-	for (int i = 0; i < 4; i++) {
-		if (this->totalTrainUnitCosts[i] != 0) { noData = false; }
-	}
-	
 	// Bonus about costs repartition
-	if (!noData && !waterUnit) { // ignore water units: not relevant (all cost wood, sometimes gold, but this is not a criterion)
-		const int USED_RESOURCE_TYPES = 3;
-		for each (PotentialUnitInfo *unitInfo in selectedUnits)
-		{
-			if ((unitInfo->isBoat == waterUnit) && ((!unitInfo->isSelected))) {
-				int cumulatedWeightedCosts[4];
-				int unitWeightedCosts[4];
-				int totalCumulatedCost = 0;
-				int totalUnitCost = 0;
-				for (int i = 0; i < 4; i++) {
-					cumulatedWeightedCosts[i] = GetWeightedCostValue(this->totalTrainUnitCosts[i], (RESOURCE_TYPES)i);
-					unitWeightedCosts[i] = GetWeightedCostValue(unitInfo->trainCosts[i], (RESOURCE_TYPES)i);
-					if (i != RESOURCE_TYPES::CST_RES_ORDER_STONE) {
-						// Ignore stone costs as almost no units use it (only slinger in standard game): would lead to wrong calculations
-						totalCumulatedCost += cumulatedWeightedCosts[i];
-						totalUnitCost += unitWeightedCosts[i];
-					}
-				}
-				for (int i = 0; i < 4; i++) {
-					if (i != RESOURCE_TYPES::CST_RES_ORDER_STONE) {
-						cumulatedWeightedCosts[i] = (cumulatedWeightedCosts[i] * 100) / totalCumulatedCost;
-						unitWeightedCosts[i] = (unitWeightedCosts[i] * 100) / totalUnitCost;
-					}
-				}
-				// Now cumulatedWeightedCosts and unitWeightedCosts are percentage (sum for all resources ~=100)
-				int diffToMedian = 0; // difference (%) to median for cumulated costs (unit+current total) for each resource type
-				for (int i = 0; i < 4; i++) {
-					if (i != RESOURCE_TYPES::CST_RES_ORDER_STONE) {
-						const int medianValue = 100 / USED_RESOURCE_TYPES;
-						int cumulated2Values = cumulatedWeightedCosts[i] + unitWeightedCosts[i]; // 0-200
-						int diffToMedianForThisResource = (cumulated2Values - (medianValue * 2)) / 2; // Result is 0-100
-						if (diffToMedianForThisResource < 0) { diffToMedianForThisResource = -diffToMedianForThisResource; } // Always positive (absolute value)
-						diffToMedian += diffToMedianForThisResource;
-					}
-				}
-				int highestPossibleDiffToMedian = (min(100 - (100 / USED_RESOURCE_TYPES), (100 / USED_RESOURCE_TYPES)) * 4) / 3; // Worst case: 100/0/0 makes 67+33+33 diffs
-
-				diffToMedian = diffToMedian / USED_RESOURCE_TYPES; // Get a % value. Higher value = bad score (bad resource repartition)
-				int adjustedPercentage = (diffToMedian * 100) / highestPossibleDiffToMedian;
-				int scoreForResourceRepartition = 100 - adjustedPercentage; // High value = bonus
-
-				if (scoreForResourceRepartition > 100) { scoreForResourceRepartition = 100; }
-				if (scoreForResourceRepartition < 0) { scoreForResourceRepartition = 0; }
-				unitInfo->bonusForUsedResourceTypes = scoreForResourceRepartition;
-			}
-		}
-	} else {
-		for each (PotentialUnitInfo *unitInfo in selectedUnits)
-		{
-			if ((unitInfo->isBoat == waterUnit) && (!unitInfo->isSelected)) {
-				for (int i = 0; i < 4; i++) {
-					unitInfo->bonusForUsedResourceTypes = 50; // default
-				}
-			}
+	for each (PotentialUnitInfo *unitInfo in selectedUnits)
+	{
+		if (!unitInfo->isSelected) {
+			unitInfo->bonusForUsedResourceTypes = this->GetCostScoreRegardingCurrentSelection(unitInfo);
 		}
 	}
-	
-	// TODO: something to avoid selecting 2 similar units ? (should already - a bit - be done thanks to strengths thing)
-
 }
 
 
@@ -1088,7 +1080,7 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 	while (!statisfiedWithCurrentSelection && (currentUnitCount < 3)) {
 		currentCumulatedStrength = 0;
 		categoriesCountWithLowStrength = 0;
-		this->RecomputeComparisonBonuses(preSelectedUnits, waterUnits);
+		this->RecomputeComparisonBonuses(preSelectedUnits, waterUnits, true);
 
 		long int bestScore = 0;
 		PotentialUnitInfo *bestUnit = NULL;
@@ -1189,7 +1181,7 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 
 // Select which units are to be added in strategy, based on potentialUnitsList
 // Requires that this->potentialUnitsList has already been filled
-void StrategyBuilder::SelectStrategyUnitsForCategory(bool waterUnits) {
+void StrategyBuilder::SelectStrategyUnitsForLandOrWater(bool waterUnits) {
 	std::list<PotentialUnitInfo*> preSelectedUnits; // PotentialUnitInfo pointers are "shortcuts", do not free them here
 
 	// First selection based on "global" scores = Fill preSelectedUnits
@@ -1250,10 +1242,33 @@ void StrategyBuilder::SelectStrategyUnits() {
 	
 	if (false) { // if water map : TODO
 		// Select boats with 1st priority
-		this->SelectStrategyUnitsForCategory(true);
+		this->SelectStrategyUnitsForLandOrWater(true);
 	}
 	// Then land units : according to need for boats (or not), wood-costly units might be preferred or not.
-	this->SelectStrategyUnitsForCategory(false);
+	this->SelectStrategyUnitsForLandOrWater(false);
+
+	// Debug log
+#ifdef _DEBUG
+	traceMessageHandler.WriteMessage("Strategy decision:");
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits) {
+		std::string msg = "Unit id=";
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unit = NULL;
+		if (unitInfo->isOptionalUnit) {
+			msg += std::to_string(unitInfo->unitDefId);
+			unit = unitInfo->baseUnitDefLiving;
+		} else {
+			msg += std::to_string(unitInfo->strongestUpgradeUnitDefId);
+			unit = unitInfo->upgradedUnitDefLiving;
+		}
+		msg += std::string(" (") + GetLanguageDllText(unit->languageDLLID_Name) + std::string(")");
+		if (unitInfo->isOptionalUnit) {
+			msg += " : OPTIONAL";
+		}
+		msg += " - score=";
+		msg += std::to_string(unitInfo->globalScore);
+		traceMessageHandler.WriteMessageNoNotification(msg);
+	}
+#endif
 }
 
 
@@ -1279,10 +1294,16 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 	int bestScore = 0;
 	PotentialUnitInfo *bestUnit = NULL;
 	
+	// Recompute strengths, for *base* units (not counting upgrades here)
+	this->RecomputeComparisonBonuses(this->potentialUnitsList, waterUnits, false);
+
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
 	{
 		// Ignore already selected units (and those NOT matching the land/water parameter)
 		if (!unitInfo->isSelected && (unitInfo->isBoat == waterUnits)) {
+			
+			// Recompute costs bonus according to current selected units
+			unitInfo->bonusForUsedResourceTypes = this->GetCostScoreRegardingCurrentSelection(unitInfo);
 			int tmpScore = unitInfo->strengthVs[weaknessCategory];
 			// Some hardcoded (but still generic) rules
 			if ((weaknessCategory == MILITARY_CATEGORY::MC_TOWER) && (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon)) {

@@ -1282,6 +1282,8 @@ namespace AOE_CONST_FUNC {
 
 	// ----------------------------------------------------------------------------------------------
 	// Common functional methods
+
+	// Get (hardcoded) name for a specific unit ID. Only for standard IDs !
 	static const char *GetUnitName(unsigned short int dat_id) {
 		if ((dat_id < CST_UNIT_NAMES_MIN_ID) || (dat_id > CST_UNIT_NAMES_MAX_ID)) {
 			return CST_UNIT_NAME_NONE;
