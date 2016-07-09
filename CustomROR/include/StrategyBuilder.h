@@ -289,12 +289,15 @@ namespace STRATEGY {
 		PotentialResearchInfo *GetResearchInfo(short int researchId);
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
 		PotentialResearchInfo *GetResearchInfo(ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef);
+		// Add building to potential buildings list and initializes underlying info.
+		// Returns true if actually added
+		bool AddPotentialResearchInfoToList(short int researchId);
 
 		// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
 		PotentialBuildingInfo *GetBuildingInfo(short int unitDefId);
 		// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
 		PotentialBuildingInfo *GetBuildingInfo(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef);
-		// Add building to potential buildings list and initilizes underlying info.
+		// Add building to potential buildings list and initializes underlying info.
 		// Returns true if actually added
 		bool AddPotentialBuildingInfoToList(short int unitDefId);
 		bool AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef);

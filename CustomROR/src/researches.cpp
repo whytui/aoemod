@@ -512,13 +512,23 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 // Returns a unit (building) definition that enables provided research ID.
 // For example, for research 17, it will return temple's definition because temple's unitDef.initiatesResearch == 17.
 // Returns NULL if not found.
+// Warning: result is not unique. Eg. Both barracks (12,132) initiate research 62. This method tries to return the base unit ID (not upgraded one)
 ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(STRUCT_PLAYER *player, short int researchId) {
 	if (!player || !player->IsCheckSumValid() || researchId < 0) { return NULL; }
-	
 	for (int unitDefId = 0; unitDefId < player->structDefUnitArraySize; unitDefId++) {
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*)player->ptrStructDefUnitTable[unitDefId];
 		if (unitDefBuilding && unitDefBuilding->IsCheckSumValid() && unitDefBuilding->IsTypeValid()) {
 			if (unitDefBuilding->initiatesResearch == researchId) {
+				short int baseBldId = GetBaseBuildingUnitId(unitDefBuilding->DAT_ID1);
+				if (baseBldId != unitDefBuilding->DAT_ID1) {
+					// It seems current unit is an "upgraded" unit. Before returning, try "base" unit because this result would be more relevant
+					if ((baseBldId >= 0) && (baseBldId < player->structDefUnitArraySize)) {
+						ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING* baseBld = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*)player->ptrStructDefUnitTable[baseBldId];
+						if (baseBld && baseBld->IsCheckSumValid() && baseBld->IsTypeValid() && (baseBld->initiatesResearch == researchId)) {
+							return baseBld;
+						}
+					}
+				}
 				return unitDefBuilding;
 			}
 		}

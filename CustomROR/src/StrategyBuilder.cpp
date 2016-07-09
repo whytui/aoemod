@@ -111,6 +111,7 @@ int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_S
 			GetResearchLocalizedName(resInfo->researchId).c_str());
 		res++;
 	}
+#pragma message("TODO: For research initiated by building, add building here if not in list ?")
 	resInfo->isInStrategy = true;
 	return res;
 }
@@ -128,6 +129,44 @@ PotentialResearchInfo *StrategyBuilder::GetResearchInfo(ROR_STRUCTURES_10C::STRU
 		if (curResInfo->researchDef == resDef) { return curResInfo; }
 	}
 	return NULL;
+}
+// Add building to potential buildings list and initializes underlying info.
+// Returns true if actually added
+bool StrategyBuilder::AddPotentialResearchInfoToList(short int researchId) {
+	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(researchId);
+	if (!resDef) { return false; }
+	PotentialResearchInfo *resInfo = this->GetResearchInfo(resDef);
+	if (resInfo != NULL) {
+		return false;
+	}
+	resInfo = new PotentialResearchInfo();
+	resInfo->researchDef = resDef;
+	resInfo->researchId = researchId;
+	resInfo->hasOptionalRequirements = ResearchHasOptionalRequirements(resDef);
+	resInfo->directRequirementsAreSatisfied = !resInfo->hasOptionalRequirements;
+	potentialResearchesList.push_back(resInfo);
+
+	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(resDef->technologyId);
+	resInfo->techDef = techDef;
+	// Copy & handle requirements in member fields
+	int currentSlotId = 0;
+	for (int i = 0; i < 4; i++) {
+		short int curReqResId = resDef->requiredResearchId[i];
+		if (curReqResId >= 0) {
+			resInfo->missingRequiredResearches[currentSlotId] = curReqResId;
+			currentSlotId++;
+			resInfo->researchesThatMustBePutBeforeMe.insert(curReqResId);
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *tmpUnitDef = FindBuildingDefThatEnablesResearch(this->player, curReqResId);
+			if (tmpUnitDef && tmpUnitDef->IsCheckSumValidForAUnitClass()) {
+				resInfo->unitsThatMustBePutBeforeMe.insert(tmpUnitDef->DAT_ID1);
+				if (resInfo->directRequirementsAreSatisfied) {
+					// We "validated" this research, but we have to make sure requirements are satisfied => those from "building's initiate research" aren't yet.
+					this->AddPotentialBuildingInfoToList(tmpUnitDef->DAT_ID1);
+				}
+			}
+		}
+	}
+	return true;
 }
 
 // Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
@@ -157,19 +196,35 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(short int unitDefId) {
 bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef) {
 	if (!unitDef || !unitDef->IsTypeValid()) { return false; }
 	PotentialBuildingInfo *bldInfo = this->GetBuildingInfo(unitDef->DAT_ID1);
-	if (bldInfo == NULL) {
-		bldInfo = new PotentialBuildingInfo();
-		bldInfo->unitDef = unitDef;
-		bldInfo->unitDefId = unitDef->DAT_ID1;
-		bldInfo->enabledByResearchId = FindResearchThatEnableUnit(this->player, unitDef->DAT_ID1, 0);
-		if (bldInfo->enabledByResearchId >= 0) {
-			bldInfo->enabledInAge = GetAgeResearchFromDirectRequirement(player->GetResearchDef(bldInfo->enabledByResearchId));
-		} else {
-			bldInfo->enabledInAge = -1;
-		}
-		// What if age comes from a recursive requirement ? TODO
+	if (bldInfo != NULL) {
+		return false;
+	}
+	bldInfo = new PotentialBuildingInfo();
+	bldInfo->unitDef = unitDef;
+	bldInfo->unitDefId = unitDef->DAT_ID1;
+	bldInfo->enabledByResearchId = FindResearchThatEnableUnit(this->player, unitDef->DAT_ID1, 0);
+	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *parentResDef = player->GetResearchDef(bldInfo->enabledByResearchId);
+	if (parentResDef && (bldInfo->enabledByResearchId >= 0)) {
+		bldInfo->enabledInAge = GetAgeResearchFromDirectRequirement(parentResDef);
+	} else {
+		bldInfo->enabledInAge = -1;
 	}
 	bool added = (this->potentialBuildingsList.insert(bldInfo).second);
+
+	// What if age comes from a recursive requirement ? TODO
+
+	// TODO: building's requirements ! This solution is dirty, we get recursive calls (within loops on lists !) To refactor a better way
+	PotentialResearchInfo *parentResInfo = this->GetResearchInfo(parentResDef);
+	if (!parentResInfo) {
+		// This is a bit heavy, but required
+		/*this->AddPotentialResearchInfoToList(bldInfo->enabledByResearchId);
+		parentResInfo = this->GetResearchInfo(bldInfo->enabledByResearchId);
+		if (parentResInfo) {
+			parentResInfo->forceUse = true;
+		}
+		this->UpdateRequiredBuildingsFromValidatedResearches();
+		this->UpdateMissingResearchRequirements();*/
+	}
 	return added;
 }
 
@@ -1884,6 +1939,7 @@ int StrategyBuilder::CreateBuildingsStrategyElements() {
 			if (AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding,
 				bldInfo->unitDefId, this->player, bldInfo->unitDef->ptrUnitName)) {
 				counter++;
+				bldInfo->addedInStrategyCount++;
 			}
 		}
 	}
@@ -1963,6 +2019,36 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	}
 
 	// If game is running, search matching units for strategy elements ?
+
+
+	// Ending check
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		if (!resInfo->isInStrategy && resInfo->researchDef && (resInfo->researchDef->researchLocation >= 0)) {
+			this->log += "Warning: Not added: research=";
+			this->log += GetResearchLocalizedName(resInfo->researchId);
+			this->log += newline;
+		}
+	}
+	for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
+	{
+		if (bldInfo->addedInStrategyCount == 0) {
+			this->log += "Warning: Not added: building=";
+			this->log += bldInfo->unitDef->ptrUnitName;
+			this->log += newline;
+		}
+	}
+	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
+	{
+		if (unitInfo->isSelected && (unitInfo->firstStratElem == NULL)) {
+			this->log += "Warning: Not added: unit=";
+			this->log += unitInfo->unitName;
+			this->log += newline;
+		}
+	}
+#ifdef _DEBUG
+	traceMessageHandler.WriteMessage(this->log);
+#endif
 }
 
 
@@ -2012,32 +2098,18 @@ int StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpg
 		if (resDef) {
 			PotentialResearchInfo *resInfo = this->GetResearchInfo(resDefId);
 			if (resInfo == NULL) {
-				resInfo = new PotentialResearchInfo();
-				resInfo->researchDef = resDef;
-				resInfo->researchId = resDefId;
-				resInfo->hasOptionalRequirements = ResearchHasOptionalRequirements(resDef);
-				resInfo->directRequirementsAreSatisfied = !resInfo->hasOptionalRequirements;
-				potentialResearchesList.push_back(resInfo);
-				addedElements++;
-				ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(resDef->technologyId);
-				resInfo->techDef = techDef;
-				// Requirements
-				int currentSlotId = 0;
-				for (int i = 0; i < 4; i++) {
-					short int curReqResId = resDef->requiredResearchId[i];
-					if (curReqResId >= 0) {
-						resInfo->missingRequiredResearches[currentSlotId] = curReqResId;
-						currentSlotId++;
-						resInfo->researchesThatMustBePutBeforeMe.insert(curReqResId);
-						ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *tmpUnitDef = FindBuildingDefThatEnablesResearch(this->player, curReqResId);
-						if (tmpUnitDef && tmpUnitDef->IsCheckSumValidForAUnitClass()) {
-							resInfo->unitsThatMustBePutBeforeMe.insert(tmpUnitDef->DAT_ID1);
-						}
-					}
+				if (AddPotentialResearchInfoToList(resDefId)) {
+					addedElements++;
+					resInfo = this->GetResearchInfo(resDefId);
 				}
-				//resInfo->researchesThatMustBePutBeforeMe.insert();
 			}
-			resInfo->impactedUnitDefIds.push_back(unitDefId);
+			if (resInfo) {
+				resInfo->impactedUnitDefIds.push_back(unitDefId);
+			} else {
+				this->log += "ERROR: research info was not added for resId=";
+				this->log += std::to_string(resDefId);
+				this->log += newline;
+			}
 		}
 	}
 	return addedElements;
@@ -2052,7 +2124,7 @@ int StrategyBuilder::UpdateRequiredBuildingsFromValidatedResearches() {
 	{
 		if (resInfo->forceUse && resInfo->researchDef && (resInfo->researchDef->researchLocation >= 0) &&
 			(!IsDisabledInTechTree(this->player->playerId, resInfo->researchDef->researchLocation))) {
-			// insert only adds if not already in list
+			// This only adds if not already in list
 			if (this->AddPotentialBuildingInfoToList(resInfo->researchDef->researchLocation)) {
 				addedElements++;
 			}
