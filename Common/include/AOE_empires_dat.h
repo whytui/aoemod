@@ -110,7 +110,7 @@ namespace AOE_CONST_FUNC {
 		// Other resources
 		CST_RES_ORDER_POPULATION_HEADROOM = 4,
 		CST_RES_BASIC_RESOURCE_COUNT = 4, // many locations use these 4 resources, including AI structures. Put after pop headroom for practical debugging display.
-		CST_RES_ORDER_POPULATION_CAP = 5, // TO CONFIRM ?? or conversion range???
+		CST_RES_ORDER_UNKNOWN_05 = 5, // ?
 		CST_RES_ORDER_CURRENT_AGE = 6, // TO CONFIRM
 		CST_RES_ORDER_RELICS = 7, // TO CONFIRM,
 		CST_RES_ORDER_GAME_TIME = 9, // in seconds WRONG ? Housage ?

@@ -23,7 +23,8 @@ const char CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN[] = "CustomRORMaxPopulation
 // Returns true if the research is present in tech tree but not researched yet (nor being researched)
 bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);
 
-// Returns 1st element position (>=0) if (at least) 1 matching element exists in strategy. -1=no such element
+// Returns the first element's ID that matches criteria. -1=no such element
+// WARNING: AIUCTech and AIUCCritical are 2 different filter values ! Searching for researches won't find tool age/bronze/etc !
 long int FindElementInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID);
 
 // This fixes dynamically added houses, boats + boat techs, docks, setgatherpercentage

@@ -93,10 +93,14 @@ namespace ROR_STRUCTURES_10C {
 	class STRUCT_TECH_DEF_INFO {
 	public:
 		unsigned long int checksum; // 20 99 54 00
-		STRUCT_TECH_DEF *ptrTechDefArray; // unsure
+		STRUCT_TECH_DEF *ptrTechDefArray;
 		long int technologyCount;
 
 		bool IsCheckSumValid() const { return this->checksum == 0x00549920; }
+		STRUCT_TECH_DEF *GetTechDef(short int techDefId) const {
+			if ((techDefId < 0) || (techDefId >= this->technologyCount)) { return NULL; }
+			return &this->ptrTechDefArray[techDefId];
+		}
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_INFO) == 0x0C, "STRUCT_TECH_DEF_INFO size");
 

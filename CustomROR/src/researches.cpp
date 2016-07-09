@@ -70,6 +70,7 @@ bool ResearchHasOptionalRequirements(STRUCT_RESEARCH_DEF *resDef) {
 // Returns the researchId of an age (stone/tool/bronze/iron) if found in one of the 4 research's requirements. NOT recursive.
 // Returns -1 if not found, a value in [CST_RSID_STONE_AGE, CST_RSID_IRON_AGE] if found.
 short int GetAgeResearchFromDirectRequirement(STRUCT_RESEARCH_DEF *researchDef) {
+	if (researchDef == NULL) { return -1; }
 	for (int iReq = 0; iReq < 4; iReq++) {
 		// Age researches are consecutive. Republic age w ould be next one (104) if enabled
 		if ((researchDef->requiredResearchId[iReq] >= CST_RSID_STONE_AGE) &&
@@ -272,6 +273,40 @@ bool DoesTechEnableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId) {
 		}
 	}
 	return false;
+}
+
+// Returns true if technology disables provided unit (generally, tech tree effects).
+bool DoesTechDisableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId) {
+	if (!techDef || (unitDefId < 0)) { // -1 CAN'T be a joker here !
+		return false;
+	}
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect) {
+			// Enable unit
+			if (techEffect->IsDisableUnit(unitDefId)) { return true; }
+		}
+	}
+	return false;
+}
+
+
+// Returns true if a unit (DATID) is disabled by player's tech tree
+bool IsDisabledInTechTree(short int playerId, short int unitDefId) {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	assert(settings != NULL);
+	if (!settings) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
+		return false;
+	}
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
+	if (!player || !player->IsCheckSumValid()) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(player->techTreeId);
+	if (!techDef) {
+		return false;
+	}
+	return DoesTechDisableUnit(techDef, unitDefId);
 }
 
 

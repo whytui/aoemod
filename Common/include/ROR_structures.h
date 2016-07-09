@@ -1504,16 +1504,21 @@ namespace ROR_STRUCTURES_10C
 		// 0x120
 		long int unknown_120;		
 
-		ROR_STRUCTURES_10C::STRUCT_PLAYER ** GetPlayerStructPtrTable(){
+		ROR_STRUCTURES_10C::STRUCT_PLAYER ** GetPlayerStructPtrTable() const{
 			return (ROR_STRUCTURES_10C::STRUCT_PLAYER **) this->ptrPlayerStructPtrTable;
 		}
-
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *GetPlayerStruct(int playerId) {
+		// Returns player structure corresponding to supplied ID. Returns NULL if not found
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *GetPlayerStruct(int playerId) const {
 			if (!this->IsCheckSumValid()) { return NULL; }
 			if ((playerId < 0) || (playerId >= this->playerTotalCount) || (playerId >= 9)) { return NULL; }
 			return this->ptrPlayerStructPtrTable[playerId];
 		}
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_GAME_GLOBAL1) || (this->checksum == CHECKSUM_GAME_GLOBAL2); }
+		// Get a technology definition, or NULL if not found
+		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *GetTechDef(short int techDefId) const {
+			if (!this->technologiesInfo || !this->technologiesInfo->IsCheckSumValid()) { return NULL; }
+			return this->technologiesInfo->GetTechDef(techDefId);
+		}
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_GAME_GLOBAL1) || (this->checksum == CHECKSUM_GAME_GLOBAL2); }
 	};
 
 

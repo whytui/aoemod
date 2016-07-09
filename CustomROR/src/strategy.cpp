@@ -1026,9 +1026,6 @@ int AddResearchesInStrategyForUnit(ROR_STRUCTURES_10C::STRUCT_AI *ai, short int 
 			(status != NULL) && (status->currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID) && // If already done, no need to add in strategy !
 			(researchId < player->ptrResearchesStruct->ptrResearchDefInfo->researchCount)) {
 			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
-			char nameBuffer[0x50]; // stratelem.name size is 0x40
-			char namePrefix[] = "CustomROR_";
-			strcpy_s(nameBuffer, namePrefix);
 
 			if (ResearchHasOptionalRequirements(resDef)) {
 				// Handle optional requirements. This DOES have importance. eg. in DM, yamato build a temple just to go iron !

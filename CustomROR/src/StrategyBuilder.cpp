@@ -5,6 +5,70 @@ using namespace STRATEGY;
 // Set default value for random factor (a %)
 int StrategyBuilder::randomPercentFactor = 30;
 
+const char *newline = "\r\n";
+
+
+// Returns true if the two classes are equals or very similar (infantry with phalanx, archer classes...)
+static bool STRATEGY::AreSimilarClasses(GLOBAL_UNIT_AI_TYPES class1, GLOBAL_UNIT_AI_TYPES class2) {
+	if (class1 == class2) { return true; }
+	int id1 = 0;
+	switch (class1) {
+		// Archer types
+	case AOE_CONST_FUNC::TribeAIGroupArcher:
+	case AOE_CONST_FUNC::TribeAIGroupChariotArcher:
+	case AOE_CONST_FUNC::TribeAIGroupElephantArcher:
+	case AOE_CONST_FUNC::TribeAIGroupHorseArcher:
+		id1 = 1;
+		break;
+		// slow/middle-speed infantry
+	case AOE_CONST_FUNC::TribeAIGroupFootSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupHeavyFootSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupPhalanx:
+	case AOE_CONST_FUNC::TribeAIGroupElephantRider:
+		id1 = 2;
+		break;
+		// Cavalry (fast melee)
+	case AOE_CONST_FUNC::TribeAIGroupMountedSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupChariot:
+		id1 = 3;
+		break;
+		// Other types : can't be regouped
+	case AOE_CONST_FUNC::TribeAIGroupSiegeWeapon:
+	case AOE_CONST_FUNC::TribeAIGroupPriest:
+	case AOE_CONST_FUNC::TribeAIGroupWarBoat:
+	case AOE_CONST_FUNC::TribeAIGroupSlinger:
+	default:
+		return false;
+	}
+	switch (class2) {
+		// Archer types
+	case AOE_CONST_FUNC::TribeAIGroupArcher:
+	case AOE_CONST_FUNC::TribeAIGroupChariotArcher:
+	case AOE_CONST_FUNC::TribeAIGroupElephantArcher:
+	case AOE_CONST_FUNC::TribeAIGroupHorseArcher:
+		return (id1 == 1);
+		break;
+		// slow/middle-speed infantry
+	case AOE_CONST_FUNC::TribeAIGroupFootSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupHeavyFootSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupPhalanx:
+	case AOE_CONST_FUNC::TribeAIGroupElephantRider:
+		return (id1 == 2);
+		break;
+		// Cavalry (fast melee)
+	case AOE_CONST_FUNC::TribeAIGroupMountedSoldier:
+	case AOE_CONST_FUNC::TribeAIGroupChariot:
+		return (id1 == 3);
+		break;
+	case AOE_CONST_FUNC::TribeAIGroupSiegeWeapon:
+	case AOE_CONST_FUNC::TribeAIGroupPriest:
+	case AOE_CONST_FUNC::TribeAIGroupWarBoat:
+	case AOE_CONST_FUNC::TribeAIGroupSlinger:
+	default:
+		return false;
+	}
+}
+
 
 
 /*** General methods ***/
@@ -36,6 +100,115 @@ int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
 	}
 	return this->actuallySelectedUnits.size();
 }
+
+// Add a research to strategy just before supplied insertion point.
+// Returns actual number of element that were added
+int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
+	if (resInfo->isInStrategy) { return 0; }
+	int res = 0;
+	if (resInfo->researchDef->researchLocation >= 0) { // shadow research without a location must not be actually added to strategy
+		AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, resInfo->researchDef->researchLocation, TAIUnitClass::AIUCTech, resInfo->researchId, player,
+			GetResearchLocalizedName(resInfo->researchId).c_str());
+		res++;
+	}
+	resInfo->isInStrategy = true;
+	return res;
+}
+
+// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
+PotentialResearchInfo *StrategyBuilder::GetResearchInfo(short int researchId) {
+	for each (PotentialResearchInfo *curResInfo in this->potentialResearchesList) {
+		if (curResInfo->researchId == researchId) { return curResInfo; }
+	}
+	return NULL;
+}
+// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
+PotentialResearchInfo *StrategyBuilder::GetResearchInfo(ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef) {
+	for each (PotentialResearchInfo *curResInfo in this->potentialResearchesList) {
+		if (curResInfo->researchDef == resDef) { return curResInfo; }
+	}
+	return NULL;
+}
+
+// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
+PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(short int unitDefId) {
+	for each (PotentialBuildingInfo *curBldInfo in this->potentialBuildingsList) {
+		if (curBldInfo->unitDefId == unitDefId) { return curBldInfo; }
+	}
+	return NULL;
+}
+// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
+PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef) {
+	for each (PotentialBuildingInfo *curBldInfo in this->potentialBuildingsList) {
+		if (curBldInfo->unitDef == unitDef) { return curBldInfo; }
+	}
+	return NULL;
+}
+// Add building to potential buildings list and initilizes underlying info.
+// Returns true if actually added
+bool StrategyBuilder::AddPotentialBuildingInfoToList(short int unitDefId) {
+	if (unitDefId < 0) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)player->GetUnitDefBase(unitDefId);
+	if (unitDef && unitDef->IsTypeValid()) {
+		return AddPotentialBuildingInfoToList(unitDef);
+	}
+	return false;
+}
+bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef) {
+	if (!unitDef || !unitDef->IsTypeValid()) { return false; }
+	PotentialBuildingInfo *bldInfo = this->GetBuildingInfo(unitDef->DAT_ID1);
+	if (bldInfo == NULL) {
+		bldInfo = new PotentialBuildingInfo();
+		bldInfo->unitDef = unitDef;
+		bldInfo->unitDefId = unitDef->DAT_ID1;
+		bldInfo->enabledByResearchId = FindResearchThatEnableUnit(this->player, unitDef->DAT_ID1, 0);
+		if (bldInfo->enabledByResearchId >= 0) {
+			bldInfo->enabledInAge = GetAgeResearchFromDirectRequirement(player->GetResearchDef(bldInfo->enabledByResearchId));
+		} else {
+			bldInfo->enabledInAge = -1;
+		}
+		// What if age comes from a recursive requirement ? TODO
+	}
+	bool added = (this->potentialBuildingsList.insert(bldInfo).second);
+	return added;
+}
+
+// Updates this->mustBeBeforeThisElem and this->mustBeAfterThisElem according to known dependencies on other unit/researches
+void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
+	if (!buildAI) { return; }
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirst = &buildAI->fakeFirstStrategyElement;
+	this->mustBeBeforeThisElem = NULL;
+	this->mustBeAfterThisElem = NULL;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = buildAI->fakeFirstStrategyElement.next;
+	while (curElem && (curElem != fakeFirst) && (this->mustBeBeforeThisElem == NULL)) {
+		if (this->mustBeBeforeThisElem == NULL) {
+			// "mustBeBeforeThisElem" is the first encountered item that match a "xxxThatMustBePutAfterMe" item
+			bool foundInList = false;
+			if ((curElem->elementType == TAIUnitClass::AIUCBuilding) || (curElem->elementType == TAIUnitClass::AIUCLivingUnit)) {
+				foundInList = this->unitsThatMustBePutAfterMe.find((short int)curElem->unitDAT_ID) != this->unitsThatMustBePutAfterMe.end();
+			}
+			if ((curElem->elementType == TAIUnitClass::AIUCTech) || (curElem->elementType == TAIUnitClass::AIUCCritical)) {
+				foundInList = this->researchesThatMustBePutAfterMe.find((short int)curElem->unitDAT_ID) != this->researchesThatMustBePutAfterMe.end();
+			}
+			if (foundInList) {
+				this->mustBeBeforeThisElem = curElem;
+			}
+		}
+		// "mustBeAfterThisElem" is the last encountered item that match a "before me" item. Once mustBeBeforeThisElem is found, we should NOT find any more of these.
+		bool foundInList = false;
+		if ((curElem->elementType == TAIUnitClass::AIUCBuilding) || (curElem->elementType == TAIUnitClass::AIUCLivingUnit)) {
+			foundInList = this->unitsThatMustBePutBeforeMe.find((short int)curElem->unitDAT_ID) != this->unitsThatMustBePutBeforeMe.end();
+		}
+		if ((curElem->elementType == TAIUnitClass::AIUCTech) || (curElem->elementType == TAIUnitClass::AIUCCritical)) {
+			foundInList = this->researchesThatMustBePutBeforeMe.find((short int)curElem->unitDAT_ID) != this->researchesThatMustBePutBeforeMe.end();
+		}
+		if (foundInList) {
+			this->mustBeAfterThisElem = curElem;
+		}
+		curElem = curElem->next;
+	}
+}
+
 
 
 /*** Units selection methods ***/
@@ -1303,10 +1476,9 @@ void StrategyBuilder::CollectGlobalStrategyGenerationInfo(ROR_STRUCTURES_10C::ST
 }
 
 
-// Create all base strategy elements (ages + buildings=barracks,market,govSiege + wheel if available)
-// Does not add villagers
-#pragma message("TODO: add only ages + TC here and rename proc")
-void StrategyBuilder::CreateBasicStrategyElements() {
+// Creates base strategy elements (ages + initial Town center)
+// Does not add villagers or any other item
+void StrategyBuilder::CreateTCAndAgesStrategyElements() {
 	if (!this->buildAI || !this->buildAI->IsCheckSumValid()) { return; }
 	if (!player || !player->IsCheckSumValid()) { return; }
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
@@ -1318,8 +1490,6 @@ void StrategyBuilder::CreateBasicStrategyElements() {
 	}
 	
 	// Barracks are always needed
-#pragma message("TO DO remove hardcoded barracks, requiredBuildingsshould do the job")
-	AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_BARRACKS, this->player, "Barracks");
 	// Tool Age
 	if (!IsResearchRelevantForStrategy(player, CST_RSID_TOOL_AGE)) {
 		string msg = "This civ seems NOT to have tool age. Player #";
@@ -1332,7 +1502,6 @@ void StrategyBuilder::CreateBasicStrategyElements() {
 	if (AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_TOOL_AGE, player, "*Tool Age*")) {
 		this->seToolAge = fakeFirstElem->previous;
 	}
-	AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_MARKET, this->player, "Market");
 	// Bronze Age
 	if (!IsResearchRelevantForStrategy(this->player, CST_RSID_BRONZE_AGE)) {
 		string msg = "This civ seems NOT to have bronze age. Player #";
@@ -1344,13 +1513,6 @@ void StrategyBuilder::CreateBasicStrategyElements() {
 	}
 	if (AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_BRONZE_AGE, this->player, "*Bronze Age*")) {
 		this->seBronzeAge = fakeFirstElem->previous;
-	}
-	// TODO check gov center is available ?
-	AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_GOVERNMENT_CENTER, this->player, "Government center");
-	if (IsResearchRelevantForStrategy(player, CST_RSID_WHEEL)) { // requires research status to be set
-		if (AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, CST_UNITID_MARKET, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, CST_RSID_WHEEL, this->player, "Wheel")) {
-			this->seWheel = fakeFirstElem->previous;
-		}
 	}
 	// Iron Age
 	if (!IsResearchRelevantForStrategy(this->player, CST_RSID_IRON_AGE)) {
@@ -1442,9 +1604,291 @@ void StrategyBuilder::CreateVillagerStrategyElements() {
 	}
 	assert(currentCount_fixed == this->villagerCount_alwaysRetrain);
 	assert(currentCount_retrains == this->villagerCount_limitedRetrains);
+
+	// Random part for retrains : switch retrains/not_retrains between tool and bronze villagers (random one, not necessarily last one)
 }
 
 
+// Create main military units strategy elements
+void StrategyBuilder::CreateMainMilitaryUnitsElements() {
+	int optionalsCount = 0;
+	int mainUnitsCount = 0;
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+	{
+		if (unitInfo->isOptionalUnit) {
+			optionalsCount++;
+		} else {
+			mainUnitsCount++;
+		}
+		unitInfo->scoreForUnitCount = 0;
+	}
+	// Max 8 total "potential units"
+	float maxPotentialUnitsNumber = 8;
+	if (optionalsCount == 1) { maxPotentialUnitsNumber = 5; }
+	if (optionalsCount == 0) { maxPotentialUnitsNumber = 0; }
+	float maxOptionalsProportion = 8 * 100 / (float)this->maxPopulation; // a % value = max % accepted so we stay below 8 units
+
+	// Work on unit repartition (number of each type)
+	int totalUnitCount = optionalsCount + mainUnitsCount;
+	if (totalTrainUnitCosts <= 0) { return; }
+	float mainUnitsProportion = 85;
+	if (100 - mainUnitsProportion > maxOptionalsProportion) {
+		mainUnitsProportion = 100 - maxOptionalsProportion;
+	}
+	int remainingPopulation = this->maxPopulation - this->villagerCount_alwaysRetrain - fishingShipsCount_alwaysRetrain; // TODO: count other boats
+	if (optionalsCount == 0) {
+		mainUnitsProportion = 100;
+	}
+	float proportionForOneMainUnit = mainUnitsProportion / mainUnitsCount; // Basic repartition %
+	float currentTotalPercentages = 0;
+	// Loop: apply changes to proportions according to unit classes
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+	{
+		if (!unitInfo->isOptionalUnit) {
+			switch (unitInfo->baseUnitDefLiving->unitAIType) {
+			case TribeAIGroupChariot:
+			case TribeAIGroupElephantRider:
+			case TribeAIGroupFootSoldier:
+			case TribeAIGroupHeavyFootSoldier:
+			case TribeAIGroupPhalanx:
+			case TribeAIGroupMountedSoldier:
+			case TribeAIGroupArcher:
+			case TribeAIGroupChariotArcher:
+			case TribeAIGroupElephantArcher:
+			case TribeAIGroupHorseArcher:
+				unitInfo->scoreForUnitCount = proportionForOneMainUnit * 1.15f; // bonus for melee and base archer unit count (need more numbers)
+				break;
+			//case TribeAIGroupPriest:
+			//case TribeAIGroupSiegeWeapon:
+			//case TribeAIGroupSlinger:
+			//case TribeAIGroupWarBoat:
+			default:
+				unitInfo->scoreForUnitCount = proportionForOneMainUnit;
+				break;
+			}
+			currentTotalPercentages += unitInfo->scoreForUnitCount; // due to bonuses, total will be != 100%
+		}
+	}
+	// Adjust % if sum is no longer matching mainUnitsProportion
+	float percentageDiff = mainUnitsProportion - currentTotalPercentages; // can be negative (if we assigned too much % points)
+	float adjustmentPerUnit = percentageDiff / mainUnitsCount;
+	// Apply adjustment to get a correct sum of percentages + calculate desired count
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+	{
+		if (!unitInfo->isOptionalUnit) {
+			unitInfo->scoreForUnitCount += adjustmentPerUnit;
+			if (unitInfo->scoreForUnitCount < 0) { unitInfo->scoreForUnitCount = 0; } // Should never happen
+			if (unitInfo->scoreForUnitCount > 100) { unitInfo->scoreForUnitCount = 100; } // Should never happen
+		}
+		if (!unitInfo->isOptionalUnit) {
+			unitInfo->desiredCount = ((unitInfo->scoreForUnitCount * remainingPopulation) / 100);
+		} else {
+			unitInfo->desiredCount = ((100 - mainUnitsProportion) * remainingPopulation / 100);
+		}
+		unitInfo->desiredCount = unitInfo->desiredCount;
+		this->log += "Desired count for ";
+		this->log += unitInfo->unitName;
+		this->log += "=";
+		this->log += std::to_string(unitInfo->desiredCount);
+		this->log += newline;
+	}
+
+	// For the moment, insert all in iron age
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = &this->buildAI->fakeFirstStrategyElement;
+
+	// Fill orderedUnitsToAdd list with ordered units (1 by 1)
+	std::list<PotentialUnitInfo*> orderedUnitsToAdd;
+	bool found = true;
+	while (found) {
+		PotentialUnitInfo *currentBest = NULL;
+		float lowestProportion = 100;
+		for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+		{
+			float p = 100 * unitInfo->addedCount / unitInfo->desiredCount; // both are "int" value, but use float for % precision
+			if ((unitInfo->isOptionalUnit) && (p < 100)) {
+				p = p / 2; // Force optional units to be trained more at the beginning (there are less of them)
+			}
+			if (p < lowestProportion) {
+				lowestProportion = p;
+				currentBest = unitInfo;
+			}
+		}
+		found = (currentBest != NULL);
+		if (found) {
+			orderedUnitsToAdd.push_back(currentBest);
+			currentBest->addedCount++;
+		}
+	}
+	// Use orderedUnitsToAdd to add elements in strategy in optimized order (with unit repartition)
+	for each (PotentialUnitInfo *unitInfo in orderedUnitsToAdd)
+	{
+		AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, unitInfo->baseUnitDefLiving->trainLocation, TAIUnitClass::AIUCLivingUnit, unitInfo->unitDefId, player,
+			(unitInfo->baseUnitDefLiving != NULL) ? unitInfo->baseUnitDefLiving->ptrUnitName : unitInfo->unitName);
+		// Note: unitInfo->addedCount has already been incremented
+		if (unitInfo->firstStratElem == NULL) {
+			unitInfo->firstStratElem = insertionPoint->previous; // First inserted will be first in strategy (insertion order is normal - not reversed)
+		}
+	}
+	orderedUnitsToAdd.clear();
+
+#pragma message("TODO: unfinished")
+	// TODO: we inserted everything after iron age.
+	// If units are available before, move some... and test if temp units are needed if only a part of units was moved?
+
+	// TODO: insert early age units (slinger, club/axemen, archers, scouts) if necessary
+}
+
+
+// Add strategy elements for required researches for "main units"
+void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
+	// First of all, place unit-activating researches just before 1st occurrence of target unit.
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+	{
+		short int resId = unitInfo->enabledByResearchId;
+		PotentialResearchInfo *resInfo = this->GetResearchInfo(resId);
+		if (resInfo && !resInfo->isInStrategy && resInfo->forceUse) {
+			resInfo->unitsThatMustBePutAfterMe.insert(unitInfo->unitDefId); // just for the record...
+			assert(unitInfo->firstStratElem != NULL);
+			if (unitInfo->firstStratElem != NULL) {
+				this->AddResearchToStrategy(resInfo, unitInfo->firstStratElem);
+			}
+		}
+	}
+	// Handle the researches that are NECESSARY (for base unit, do not consider upgrades here) before others
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+	{
+		//std::vector<short int> requiredResearches = FindResearchesThatAffectUnit(this->player, unitInfo->unitDefId, true); // Note: base unit only. Eg. short sw., not legion => not fanaticism
+		std::vector<short int> tmpResIdAsVector;
+		tmpResIdAsVector.push_back(unitInfo->enabledByResearchId);
+		std::vector<short int> requiredResearches = GetValidOrderedResearchesListWithDependencies(this->player, tmpResIdAsVector);
+		// Copy to unitInfo's set once and for all... And apply some filtering
+		for each (short int resId in requiredResearches)
+		{
+			STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(resId);
+			if (resDef && (resId != CST_RSID_STONE_AGE) && (resId != CST_RSID_TOOL_AGE) && 
+				(resId != CST_RSID_BRONZE_AGE) && (resId != CST_RSID_IRON_AGE) /*&& (resId != 104) for republic age*/) {
+				if (resDef->researchLocation >= 0) { // ignore shadow techs : not to be put in strategy, and we won't get too many dependencies
+					unitInfo->requiredResearchesForBaseUnit.insert(resId);
+				}
+			}
+		}
+		for each (short int reqResId in requiredResearches)
+		{
+			for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+			{
+				if (resInfo->researchId == reqResId) {
+					// Found current requirement in my "potential researches" list. Update its position constraints
+					if (unitInfo->enabledByResearchId >= 0) {
+						resInfo->researchesThatMustBePutAfterMe.insert(unitInfo->enabledByResearchId);
+						resInfo->unitsThatMustBePutAfterMe.insert(unitInfo->unitDefId);
+					}
+				}
+			}
+		}
+	}
+	// Add researches to strategy (only the necessary ones)
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+	{
+		for each (short int resId in unitInfo->requiredResearchesForBaseUnit)
+		{
+			// Get matching PotentialResearchInfo object
+			for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+			{
+				if ((resInfo->researchId == resId) && (!resInfo->isInStrategy) && (resInfo->forceUse) && resInfo->researchDef) {
+					resInfo->ComputeStratElemPositionConstraints(this->buildAI); // update dependencies on strategy elements
+					// Add to strategy at correct location
+					ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
+					if (resInfo->mustBeAfterThisElem != NULL) {
+						insertionPoint = resInfo->mustBeAfterThisElem->next;
+					}
+					int usefulness = resInfo->impactedUnitDefIds.size();
+					if (usefulness <= 1) {
+						insertionPoint = resInfo->mustBeBeforeThisElem;
+					}
+					if ((usefulness >= 2) && (usefulness <= 3)) {
+						int elemCountInAllowedInterval = 0;
+						ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = resInfo->mustBeAfterThisElem->next;
+						while (curElem && (curElem != &buildAI->fakeFirstStrategyElement) && (curElem != resInfo->mustBeBeforeThisElem)) {
+							elemCountInAllowedInterval++;
+							curElem = curElem->next;
+						}
+						if (elemCountInAllowedInterval > 2) {
+							// put in medium position
+							for (int i = 0; i < (elemCountInAllowedInterval/2); i++) {
+								insertionPoint = insertionPoint->next;
+							}
+						}
+					}
+					// Other (useful for many units = high priority tech): insert as early as possible in strategy
+					this->AddResearchToStrategy(resInfo, insertionPoint);
+				}
+			}
+		}
+	}
+}
+
+
+// Add remaining (missing) buildings to strategy
+// Always add in "parent" age strategy zone.
+int StrategyBuilder::CreateBuildingsStrategyElements() {
+	int counter = 0;
+	for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
+	{
+		if (!bldInfo->unitDef || !bldInfo->unitDef->IsCheckSumValidForAUnitClass() || !bldInfo->unitDef->IsTypeValid()) { continue; }
+		// Some buildings with hardcoded behaviour
+		if (bldInfo->unitDefId == CST_UNITID_FORUM) {
+			// TODO : handle 2nd (backup) TC !
+			if (bldInfo->addedInStrategyCount == 0) {
+				bldInfo->addedInStrategyCount = 1;
+			}
+			continue;
+		}
+		if ((bldInfo->unitDefId == CST_UNITID_GRANARY) || (bldInfo->unitDefId == CST_UNITID_STORAGE_PIT)) {
+			if (this->ai->structTacAI.SNNumber[SNAutoBuildDropsites] > 0) {
+				continue;
+			}
+		}
+		if (!this->isWaterMap && (bldInfo->unitDefId == CST_UNITID_DOCK)) {
+			this->log += "Warning: do not add dock in strategy as this is not a water map";
+		}
+
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = this->buildAI->fakeFirstStrategyElement.next;
+		switch (bldInfo->enabledInAge) {
+		case CST_RSID_TOOL_AGE:
+			curElem = this->seToolAge->next;
+			break;
+		case CST_RSID_BRONZE_AGE:
+			curElem = this->seBronzeAge->next;
+			break;
+		case CST_RSID_IRON_AGE:
+			curElem = this->seIronAge->next;
+			break;
+		case CST_RSID_STONE_AGE:
+		default:
+			break;
+		}
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = NULL;
+		while (curElem && (curElem != fakeFirstElem) && (insertionPoint == NULL)) {
+			bool isResearch = (curElem->elementType == TAIUnitClass::AIUCTech) || (curElem->elementType == TAIUnitClass::AIUCCritical);
+			bool actorFieldIsRelevant = isResearch || (curElem->elementType == TAIUnitClass::AIUCLivingUnit) || (curElem->elementType == TAIUnitClass::AIUCBuilding);
+			if (actorFieldIsRelevant && (curElem->actor == bldInfo->unitDefId)) {
+				insertionPoint = curElem;
+			}
+			if (isResearch && (curElem->unitDAT_ID >= CST_RSID_STONE_AGE) && (curElem->unitDAT_ID <= CST_RSID_IRON_AGE)) { // + 104 for republic age
+				insertionPoint = curElem; // stop when reaching an age upgrade element. Building must be constructed in its "own" age
+			}
+			curElem = curElem->next;
+		}
+		if (insertionPoint) {
+			if (AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding,
+				bldInfo->unitDefId, this->player, bldInfo->unitDef->ptrUnitName)) {
+				counter++;
+			}
+		}
+	}
+	return counter;
+}
 
 // Create a brand new dynamic strategy for player.
 void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
@@ -1457,90 +1901,296 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	ClearStrategy(buildAI);
 	strcpy_s(buildAI->strategyFileName, 0x3F, "Dynamic CustomROR strategy");
 
+	this->log += "Start Strategy creation for p#";
+	this->log += std::to_string(player->playerId);
+	this->log += " = ";
+	this->log += player->playerName_length16max;
+	this->log += newline;
+
 	// WARNING : take care if map is naval (=> villager count, land military units count + all non-war boats thing)
 	// + max pop criterion
 	this->CollectGlobalStrategyGenerationInfo(player);
 
 	// Initialize strategy with TC + ages (no villager yet)
-	this->CreateBasicStrategyElements();
+	this->CreateTCAndAgesStrategyElements();
 	// Add villagers
 	this->CreateVillagerStrategyElements();
 
 	// Select researches to add in strategy
-	// TODO
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+	{
+		this->CollectResearchInfoForUnit(unitInfo->unitDefId, !unitInfo->isOptionalUnit);
+	}
+	this->CollectResearchInfoForUnit(CST_UNITID_VILLAGER, false);
+	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false);
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		resInfo->forceUse = true; // all researches above are "validated" / "necessary"
+	}
+	this->UpdateRequiredBuildingsFromValidatedResearches();
+	this->UpdateMissingResearchRequirements();
+
+	// TODO: Handle optional units here (may add some buildings)
+	// ...
+
+	this->AddMissingBuildings();
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		if (!resInfo->directRequirementsAreSatisfied) {
+			std::string msg = std::string("WARNING: some requirements are not satisfied/") + GetResearchLocalizedName(resInfo->researchId);
+			traceMessageHandler.WriteMessage(msg);
+			this->log += msg;
+		}
+	}
 
 	// Add (and organize) items to strategy
+	this->CreateMainMilitaryUnitsElements();
+	// Add military units requirements (only necessary techs)
+	this->CreateMilitaryRequiredResearchesStrategyElements();
+
+	// Finalize exact list of trained units => add units
+	// Choose additional (cheap & useful) researches for "retrains" units - optional
+	// Choose additional (cheap & useful) researches for villagers/economy
+	// Add optional researches
+	// Add buildings (use existing stratelemts.location to determine dependencies)
+	this->CreateBuildingsStrategyElements();
+	// TODO
 
 	if (buildAI->mainAI->structTradeAI.needGameStartAIInit) {
 		// Warning: automatic element insertions WILL be triggered
 	} else {
-		// TODO : trigger dynamic element insertions ?
+		// TODO : trigger dynamic element insertions ? Houses, (boats?), setGather%... farms?
 	}
+
+	// If game is running, search matching units for strategy elements ?
 }
 
 
-
-
-
-
-// Returns true if the two classes are equals or very similar (infantry with phalanx, archer classes...)
-static bool STRATEGY::AreSimilarClasses(GLOBAL_UNIT_AI_TYPES class1, GLOBAL_UNIT_AI_TYPES class2) {
-	if (class1 == class2) { return true; }
-	int id1 = 0;
-	switch (class1) {
-		// Archer types
-	case AOE_CONST_FUNC::TribeAIGroupArcher:
-	case AOE_CONST_FUNC::TribeAIGroupChariotArcher:
-	case AOE_CONST_FUNC::TribeAIGroupElephantArcher:
-	case AOE_CONST_FUNC::TribeAIGroupHorseArcher:
-		id1 = 1;
-		break;
-		// slow/middle-speed infantry
-	case AOE_CONST_FUNC::TribeAIGroupFootSoldier:
-	case AOE_CONST_FUNC::TribeAIGroupHeavyFootSoldier:
-	case AOE_CONST_FUNC::TribeAIGroupPhalanx:
-	case AOE_CONST_FUNC::TribeAIGroupElephantRider:
-		id1 = 2;
-		break;
-		// Cavalry (fast melee)
-	case AOE_CONST_FUNC::TribeAIGroupMountedSoldier:
-	case AOE_CONST_FUNC::TribeAIGroupChariot:
-		id1 = 3;
-		break;
-		// Other types : can't be regouped
-	case AOE_CONST_FUNC::TribeAIGroupSiegeWeapon:
-	case AOE_CONST_FUNC::TribeAIGroupPriest:
-	case AOE_CONST_FUNC::TribeAIGroupWarBoat:
-	case AOE_CONST_FUNC::TribeAIGroupSlinger:
-	default:
-		return false;
+// Searches researches that impact a specific unit and add them to internal list of potential researches.
+// Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.
+// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
+// Returns the number of actually added elements to list (some might already be in list before)
+int StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpgrades) {
+	if (!ai || !ai->IsCheckSumValid()) { return 0; }
+	if (!player || !player->IsCheckSumValid()) { return 0; }
+	if (!player->ptrResearchesStruct || !player->ptrResearchesStruct->ptrResearchDefInfo ||
+		!player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray) {
+		return 0;
 	}
-	switch (class2) {
-		// Archer types
-	case AOE_CONST_FUNC::TribeAIGroupArcher:
-	case AOE_CONST_FUNC::TribeAIGroupChariotArcher:
-	case AOE_CONST_FUNC::TribeAIGroupElephantArcher:
-	case AOE_CONST_FUNC::TribeAIGroupHorseArcher:
-		return (id1 == 1);
-		break;
-		// slow/middle-speed infantry
-	case AOE_CONST_FUNC::TribeAIGroupFootSoldier:
-	case AOE_CONST_FUNC::TribeAIGroupHeavyFootSoldier:
-	case AOE_CONST_FUNC::TribeAIGroupPhalanx:
-	case AOE_CONST_FUNC::TribeAIGroupElephantRider:
-		return (id1 == 2);
-		break;
-		// Cavalry (fast melee)
-	case AOE_CONST_FUNC::TribeAIGroupMountedSoldier:
-	case AOE_CONST_FUNC::TribeAIGroupChariot:
-		return (id1 == 3);
-		break;
-	case AOE_CONST_FUNC::TribeAIGroupSiegeWeapon:
-	case AOE_CONST_FUNC::TribeAIGroupPriest:
-	case AOE_CONST_FUNC::TribeAIGroupWarBoat:
-	case AOE_CONST_FUNC::TribeAIGroupSlinger:
-	default:
-		return false;
+	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return 0; }
+	std::vector<short int> researchesForUnit;
+	if (allUpgrades) {
+		researchesForUnit = FindResearchesThatAffectUnit(player, unitDefId, true);
+	} else {
+		short int researchId = FindResearchThatEnableUnit(player, unitDefId, 0);
+		if (researchId == -1) { return 0; }
+		researchesForUnit.push_back(researchId);
+	}
+	// Consider unit's train location too !
+#pragma message("TODO: Add this missing part in original method in strategy.cpp")
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(unitDefId);
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)unitDefBase;
+	if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass() && unitDefLiving->DerivesFromLiving()) {
+		short int trainLocation = unitDefLiving->trainLocation;
+		if (trainLocation == CST_UNITID_BUILDER) { trainLocation = -1; }
+		if (trainLocation >= 0) {
+			short int researchId = FindResearchThatEnableUnit(player, trainLocation, 0);
+			if (researchId == -1) { return 0; }
+			researchesForUnit.push_back(researchId);
+		}
+	}
+
+	std::vector<short int> allResearchesForUnit = GetValidOrderedResearchesListWithDependencies(player, researchesForUnit);
+	// Important note: for "shadow" researches with optional requirements (buildings for ages, etc), requirements are not analyzed yet.
+	// We'll have to manage them ourselves.
+	// Let's sort them out
+
+	int addedElements = 0;
+	for each (short int resDefId in allResearchesForUnit)
+	{
+		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(player, resDefId);
+		if (resDef) {
+			PotentialResearchInfo *resInfo = this->GetResearchInfo(resDefId);
+			if (resInfo == NULL) {
+				resInfo = new PotentialResearchInfo();
+				resInfo->researchDef = resDef;
+				resInfo->researchId = resDefId;
+				resInfo->hasOptionalRequirements = ResearchHasOptionalRequirements(resDef);
+				resInfo->directRequirementsAreSatisfied = !resInfo->hasOptionalRequirements;
+				potentialResearchesList.push_back(resInfo);
+				addedElements++;
+				ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(resDef->technologyId);
+				resInfo->techDef = techDef;
+				// Requirements
+				int currentSlotId = 0;
+				for (int i = 0; i < 4; i++) {
+					short int curReqResId = resDef->requiredResearchId[i];
+					if (curReqResId >= 0) {
+						resInfo->missingRequiredResearches[currentSlotId] = curReqResId;
+						currentSlotId++;
+						resInfo->researchesThatMustBePutBeforeMe.insert(curReqResId);
+						ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *tmpUnitDef = FindBuildingDefThatEnablesResearch(this->player, curReqResId);
+						if (tmpUnitDef && tmpUnitDef->IsCheckSumValidForAUnitClass()) {
+							resInfo->unitsThatMustBePutBeforeMe.insert(tmpUnitDef->DAT_ID1);
+						}
+					}
+				}
+				//resInfo->researchesThatMustBePutBeforeMe.insert();
+			}
+			resInfo->impactedUnitDefIds.push_back(unitDefId);
+		}
+	}
+	return addedElements;
+}
+
+
+// Adds all necessary buildings for "validated" researches to buildings ID list.
+// Returns number of building IDs added to internal list
+int StrategyBuilder::UpdateRequiredBuildingsFromValidatedResearches() {
+	int addedElements = 0;
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		if (resInfo->forceUse && resInfo->researchDef && (resInfo->researchDef->researchLocation >= 0) &&
+			(!IsDisabledInTechTree(this->player->playerId, resInfo->researchDef->researchLocation))) {
+			// insert only adds if not already in list
+			if (this->AddPotentialBuildingInfoToList(resInfo->researchDef->researchLocation)) {
+				addedElements++;
+			}
+		}
+	}
+	return addedElements;
+}
+
+// Update all researches requirement statuses and set directRequirementsAreSatisfied if OK.
+// Takes into account "confirmed" researches from list and also buildings ("initiates research").
+void StrategyBuilder::UpdateMissingResearchRequirements() {
+	assert(player);
+	if (!player) { return; }
+	// Update using building's "initiate research" field (for buildings that actually ARE in my list)
+	for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
+	{
+		if (bldInfo->unitDef && bldInfo->unitDef->IsCheckSumValid()) {
+			if (bldInfo->unitDef->initiatesResearch >= 0) {
+				for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+				{
+					for (int currentSlotId = 0; currentSlotId < 4; currentSlotId++) {
+						if (resInfo->missingRequiredResearches[currentSlotId] >= 0) {
+							if (resInfo->missingRequiredResearches[currentSlotId] == bldInfo->unitDef->initiatesResearch) {
+								resInfo->missingRequiredResearches[currentSlotId] = -1; // This is now satisfied.
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Update research dependencies with other researches
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList) {
+		//if (!resInfo->directRequirementsAreSatisfied) {
+		for (int i = 0; i < 4; i++) {
+			if (resInfo->missingRequiredResearches[i] >= 0) {
+				for each (PotentialResearchInfo *confirmedResearch in this->potentialResearchesList) {
+					if (confirmedResearch->forceUse) {
+						if (resInfo->missingRequiredResearches[i] == confirmedResearch->researchId) {
+							resInfo->missingRequiredResearches[i] = -1; // requirement is satisfied
+						}
+					}
+				}
+			}
+		}
+		//}
+	}
+
+	// Test if researches have remaining "missing" requirements. If not, update status
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList) {
+		this->UpdatePotentialResearchStatusFromMissingRequirements(resInfo);
 	}
 }
 
+// Set resInfo->directRequirementsAreSatisfied=true and resInfo->missingRequiredResearches[...]=-1 if (minimum) requirements are satisfied
+void StrategyBuilder::UpdatePotentialResearchStatusFromMissingRequirements(PotentialResearchInfo *resInfo) {
+	assert(resInfo->researchDef != NULL);
+	if (resInfo->researchDef == NULL) { return; } // Should never happen
+	int satisfiedCount = 0;
+	for (int i = 0; i < 4; i++) {
+		if ((resInfo->researchDef->requiredResearchId[i] >= 0) && (resInfo->missingRequiredResearches[i] == -1)) {
+			satisfiedCount++;
+		}
+	}
+	if (satisfiedCount >= resInfo->researchDef->minRequiredResearchesCount) {
+		resInfo->directRequirementsAreSatisfied = true;
+		for (int i = 0; i < 4; i++) {
+			resInfo->missingRequiredResearches[i] = -1; // ignore the remaining (unnecessary) requirements
+		}
+	}
+}
+
+// Add missing buildings - if any - that block some research requirements
+void StrategyBuilder::AddMissingBuildings() {
+	assert(this->global && this->player);
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		std::list<ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*> missingBuildingsDef;
+		missingBuildingsDef.clear();
+		if (!resInfo->directRequirementsAreSatisfied) {
+			for (int i = 0; i < 4; i++) {
+				if (resInfo->missingRequiredResearches[i] >= 0) {
+					ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bldDef = FindBuildingDefThatEnablesResearch(this->player, resInfo->missingRequiredResearches[i]);
+					if (bldDef && bldDef->IsCheckSumValid()) {
+						bool found = false;
+						// We found a building that satisfies a requirement. Is this building (already) in my list
+						// (if member info had been recomputed, it should not happen here because resInfo->missingRequiredResearches[i] would be -1)
+						for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
+						{
+							if (bldInfo->unitDefId == bldDef->DAT_ID1) {
+								found = true;
+							}
+						}
+						if (!found) {
+							missingBuildingsDef.push_back(bldDef);
+						}
+					}
+				}
+			}
+
+			// We got a list of buildings that satisfy missing requirements. Pick some until it is ok
+			bool useTemple = false;
+			for each (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bldDef in missingBuildingsDef)
+			{
+				// This loop is here to give priority to temple, if relevant
+				if (bldDef->DAT_ID1 == CST_UNITID_TEMPLE) {
+					useTemple = true;
+				}
+			}
+			if (useTemple) {
+				auto it = std::remove_if(missingBuildingsDef.begin(), missingBuildingsDef.end(),
+					[](ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bldDef) { return bldDef->DAT_ID1 == CST_UNITID_TEMPLE; }
+				);
+				missingBuildingsDef.erase(it, missingBuildingsDef.end());
+			}
+
+			int loopCount = 0;
+			while (!resInfo->directRequirementsAreSatisfied && (loopCount < 4) && (useTemple || !missingBuildingsDef.empty())) {
+				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bldDef = NULL;
+				if (useTemple) {
+					bldDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)this->player->GetUnitDefBase(CST_UNITID_TEMPLE);
+					useTemple = false;
+				} else {
+					bldDef = missingBuildingsDef.front();
+					missingBuildingsDef.pop_front(); // remove the item we just read
+				}
+				if (!IsDisabledInTechTree(this->player->playerId, bldDef->DAT_ID1)) {
+					this->AddPotentialBuildingInfoToList(bldDef);
+					for (int i = 0; i < 4; i++) {
+						if (resInfo->missingRequiredResearches[i] == bldDef->initiatesResearch) {
+							resInfo->missingRequiredResearches[i] = -1; // Update requirement as we just satisfied it.
+						}
+					}
+					this->UpdatePotentialResearchStatusFromMissingRequirements(resInfo); // maybe it's ok now.
+				}
+				loopCount++;
+			}
+		}
+	}
+}

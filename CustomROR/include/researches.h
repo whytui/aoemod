@@ -60,6 +60,12 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef);
 // Returns true if technology enables provided unit.
 bool DoesTechEnableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId);
 
+// Returns true if technology disables provided unit (generally, tech tree effects).
+bool DoesTechDisableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId);
+
+// Returns true if a unit (DATID) is disabled by player's tech tree
+bool IsDisabledInTechTree(short int playerId, short int unitDefId);
+
 
 // Finds all (non disabled) researches that affect a unit (definition)
 // If ignoreUndesirableTechs==true, techs from LST_TECHS_TO_IGNORE are ignored (jihad, etc)
@@ -84,3 +90,4 @@ ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(
 
 // Writes text representing available tech tree (available technologies that have not been researched yet)
 std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+

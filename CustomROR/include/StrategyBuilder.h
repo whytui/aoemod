@@ -29,6 +29,7 @@ namespace STRATEGY {
 
 
 	// Represents 1 unit ("definition") that can potentially be selected to be added to strategy.
+	// Used for military units (not buildings, not villagers, not towers)
 	class PotentialUnitInfo {
 	public:
 		PotentialUnitInfo() {
@@ -63,11 +64,14 @@ namespace STRATEGY {
 			this->bonusForUsedResourceTypes = 0;
 			this->isSelected = false;
 			this->isOptionalUnit = false;
+			this->desiredCount = 0;
+			this->addedCount = 0;
+			this->firstStratElem = NULL;
 		}
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *baseUnitDefLiving; // (DATID1) Unit definition of base unit, without upgrade
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
 		short int unitDefId; // DATID1 (base unit ID = without upgrades)
-		short int baseUnitDefId; // non-upgraded unit that can be upgraded to "this" one, if any.
+		short int baseUnitDefId; // non-upgraded unit that can be upgraded to "this" one, if any. -1 in most cases. PLEASE use unitDefId instead.
 		std::list<short int> upgradesUnitDefId; // List of all available unitDefId this unit can be upgraded to
 		short int strongestUpgradeUnitDefId; // Unit definition ID of best available upgraded unit
 		short int enabledByResearchId; // research ID that enables the unit, if any. -1 if no such research (unit is always available)
@@ -75,6 +79,7 @@ namespace STRATEGY {
 		long int unavailableRelatedResearchesCount;
 		long int availableRelatedResearchesCount;
 		short int ageResearchId; // ResearchId of the age (stone/tool/bronze/iron) where the unit can be enabled first. -1=always available
+		std::set<short int> requiredResearchesForBaseUnit;
 		bool isBoat; // true for water units, false for land units
 		float speedBase;
 		float speedUpgraded;
@@ -101,18 +106,59 @@ namespace STRATEGY {
 		int bonusForUsedResourceTypes; // 0-100
 		bool isSelected;
 		bool isOptionalUnit; // True for "retrains" units and/or units added specifically against a weakness (ex: chariot vs priest is strategy has elephants). Such units don't need full upgrades
+		float desiredCount;
+		float addedCount;
+		float scoreForUnitCount; // Used in temporary treatments to compute number of units to add in strategy
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstStratElem; // First strategy element that trains such a unit
 	};
 
 	class PotentialResearchInfo {
 	public:
+		PotentialResearchInfo() {
+			this->researchId = -1;
+			this->researchDef = NULL;
+			this->techDef = NULL;
+			this->forceUse = false;
+			this->hasOptionalRequirements = false;
+			this->directRequirementsAreSatisfied; // True when enough direct requirements are satisfied to "enable" the research.
+			for (int i = 0; i < 4; i++) { missingRequiredResearches[i] = -1; }
+			this->isInStrategy = false;
+			this->mustBeAfterThisElem = NULL;
+			this->mustBeBeforeThisElem = NULL;
+		}
 		short int researchId;
 		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef;
+		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef;
+		bool hasOptionalRequirements;
+		bool directRequirementsAreSatisfied;
+		short int missingRequiredResearches[4]; // -1 = empty slot. Other value = a required research ID that is not satisfied yet
 		bool forceUse; // If true, add the research to strategy in all circumstances
-		int impactedUnitsCount; // Number of units that have benefits from the research, including villagers, towers.
-		std::list<short int> researchesThatMustBePutBeforeMe;
-		std::list<short int> researchesThatMustBePutAfterMe;
-		std::list<short int> unitsThatMustBePutBeforeMe;
-		std::list<short int> unitsThatMustBePutAfterMe;
+		std::set<short int> researchesThatMustBePutBeforeMe;
+		std::set<short int> researchesThatMustBePutAfterMe;
+		std::set<short int> unitsThatMustBePutBeforeMe;
+		std::set<short int> unitsThatMustBePutAfterMe;
+		std::list<short int> impactedUnitDefIds; // Units that have benefits from the research, including villagers, towers.
+		bool isInStrategy;
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem;
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeBeforeThisElem;
+
+		void ComputeStratElemPositionConstraints(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
+	};
+
+	class PotentialBuildingInfo {
+	public:
+		PotentialBuildingInfo() {
+			this->unitDef = NULL;
+			this->unitDefId = -1;
+			this->enabledByResearchId = -1;
+			this->enabledInAge = -1; // ResearchId of age where the building becomes available
+			this->addedInStrategyCount = 0;
+		}
+		short int unitDefId;
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef;
+		short int enabledByResearchId;
+		short int enabledInAge;
+		int addedInStrategyCount;
 	};
 
 	// Class that handles the selection of military units for strategy creation.
@@ -123,6 +169,7 @@ namespace STRATEGY {
 			this->ai = NULL;
 			this->buildAI = NULL;
 			this->player = NULL;
+			this->global = NULL;
 			this->selectedLandUnitsCount = 0;
 			this->selectedWaterUnitsCount = 0;
 			for (int i = 0; i < 4; i++) { this->totalTrainUnitCosts[i] = 0; }
@@ -150,14 +197,39 @@ namespace STRATEGY {
 
 		int GetRandomFactor() { return randomPercentFactor; }
 		void SetRandomFactor(int value) { if ((value >= 0) && (value <= 100)) { randomPercentFactor = value; } }
+
+		const std::string GetLog() const { return this->log; }
+
 		// Create a brand new dynamic strategy for player.
 		void CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
 
+		// Searches researches that impact a specific unit and add them to internal list of potential researches.
+		// Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.
+		// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
+		// Returns the number of actually added elements to list (some might already be in list before)
+		int CollectResearchInfoForUnit(short int unitDefId, bool allUpgrades);
+
+		// Adds all necessary buildings for "validated" researches to buildings ID list.
+		// Returns number of building IDs added to internal list
+		int UpdateRequiredBuildingsFromValidatedResearches();
+
+		// Update all researches requirement statuses and set directRequirementsAreSatisfied if OK.
+		// Takes into account "confirmed" researches from list and also buildings ("initiates research").
+		void UpdateMissingResearchRequirements();
+
+		// Set resInfo->directRequirementsAreSatisfied=true and resInfo->missingRequiredResearches[...]=-1 if (minimum) requirements are satisfied
+		void UpdatePotentialResearchStatusFromMissingRequirements(PotentialResearchInfo *resInfo);
+
+		// Add missing buildings - if any - that block some research requirements
+		void AddMissingBuildings();
+
 	private:
+		std::string log;
 		static int randomPercentFactor;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player;
 		ROR_STRUCTURES_10C::STRUCT_AI *ai; // automatically set from player (SetPlayerAndAIStructs)
 		ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI; // automatically set from player (SetPlayerAndAIStructs)
+		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global;
 		short int civId;
 		bool isWaterMap;
 		long int maxPopulation;
@@ -175,6 +247,8 @@ namespace STRATEGY {
 		int totalTrainUnitCosts[4];
 		// Variables for researches handling
 		std::list<PotentialResearchInfo*> potentialResearchesList;
+		std::set<PotentialBuildingInfo*> potentialBuildingsList; // Info about needed buildings (units)
+		std::set<short int> requiredBuildingsId; // List of required DATID of buildings (units)
 		// Strategy itself
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seTownCenter;
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seToolAge;
@@ -183,7 +257,6 @@ namespace STRATEGY {
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seMarket;
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seGovCenter;
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seWheel; // May be null
-		std::list<short int> requiredBuildings; // List of required DATID of buildings (units)
 
 		/*** General methods ***/
 		// Initialize player-related information (for constructor)
@@ -196,6 +269,9 @@ namespace STRATEGY {
 			this->ai = player->ptrAIStruct;
 			if (!this->ai || !this->ai->IsCheckSumValid()) { return; }
 			this->buildAI = &this->ai->structBuildAI;
+			this->global = player->ptrGlobalStruct;
+			if (this->global && !this->global->IsCheckSumValid()) { this->global = NULL; }
+			this->maxPopulation = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POULATION_LIMIT);
 		}
 
 		// Clears potential units list and free each underlying PotentialUnitInfo object.
@@ -204,6 +280,24 @@ namespace STRATEGY {
 		// Add a unit to selection and updates some internal variables accordingly
 		// Return total unit count in selection
 		int AddUnitIntoToSelection(PotentialUnitInfo *unitInfo);
+
+		// Add a research to strategy just before supplied insertion point.
+		// Returns actual number of element that were added
+		int AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint);
+
+		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
+		PotentialResearchInfo *GetResearchInfo(short int researchId);
+		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
+		PotentialResearchInfo *GetResearchInfo(ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef);
+
+		// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
+		PotentialBuildingInfo *GetBuildingInfo(short int unitDefId);
+		// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
+		PotentialBuildingInfo *GetBuildingInfo(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef);
+		// Add building to potential buildings list and initilizes underlying info.
+		// Returns true if actually added
+		bool AddPotentialBuildingInfoToList(short int unitDefId);
+		bool AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef);
 
 
 		/*** Units selection methods ***/
@@ -252,12 +346,22 @@ namespace STRATEGY {
 		// Get the very global information about strategy generation (number of villagers, etc
 		void CollectGlobalStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
-		// Create all base strategy elements (ages + buildings=barracks,market,govSiege + wheel if available)
-		// Does not add villagers
-		void CreateBasicStrategyElements();
+		// Creates base strategy elements (ages + initial Town center)
+		// Does not add villagers or any other item
+		void CreateTCAndAgesStrategyElements();
 
 		// Create villager strategy elements, including fishing ships
 		void CreateVillagerStrategyElements();
+
+		// Create main military units strategy elements
+		void CreateMainMilitaryUnitsElements();
+
+		// Add strategy elements for required researches for "main units"
+		void CreateMilitaryRequiredResearchesStrategyElements();
+
+		// Add remaining (missing) buildings to strategy. Returns number of added buildings
+		// Always add in "parent" age strategy zone.
+		int CreateBuildingsStrategyElements();
 	};
 
 
