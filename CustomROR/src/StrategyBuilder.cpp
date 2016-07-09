@@ -212,19 +212,6 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_
 	bool added = (this->potentialBuildingsList.insert(bldInfo).second);
 
 	// What if age comes from a recursive requirement ? TODO
-
-	// TODO: building's requirements ! This solution is dirty, we get recursive calls (within loops on lists !) To refactor a better way
-	PotentialResearchInfo *parentResInfo = this->GetResearchInfo(parentResDef);
-	if (!parentResInfo) {
-		// This is a bit heavy, but required
-		/*this->AddPotentialResearchInfoToList(bldInfo->enabledByResearchId);
-		parentResInfo = this->GetResearchInfo(bldInfo->enabledByResearchId);
-		if (parentResInfo) {
-			parentResInfo->forceUse = true;
-		}
-		this->UpdateRequiredBuildingsFromValidatedResearches();
-		this->UpdateMissingResearchRequirements();*/
-	}
 	return added;
 }
 
@@ -1490,7 +1477,7 @@ void StrategyBuilder::SelectStrategyUnits() {
 /*** Strategy writing methods ***/
 
 
-// Get the very global information about strategy generation (number of villagers, etc
+// Get the very global information about strategy generation (number of villagers, etc)
 void StrategyBuilder::CollectGlobalStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return; }
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -1812,7 +1799,6 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 	// Handle the researches that are NECESSARY (for base unit, do not consider upgrades here) before others
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 	{
-		//std::vector<short int> requiredResearches = FindResearchesThatAffectUnit(this->player, unitInfo->unitDefId, true); // Note: base unit only. Eg. short sw., not legion => not fanaticism
 		std::vector<short int> tmpResIdAsVector;
 		tmpResIdAsVector.push_back(unitInfo->enabledByResearchId);
 		std::vector<short int> requiredResearches = GetValidOrderedResearchesListWithDependencies(this->player, tmpResIdAsVector);
@@ -1986,6 +1972,8 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	this->UpdateRequiredBuildingsFromValidatedResearches();
 	this->UpdateMissingResearchRequirements();
 
+	// TODO: set force to optional units requirements
+
 	// TODO: Handle optional units here (may add some buildings)
 	// ...
 
@@ -2020,6 +2008,7 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 
 	// If game is running, search matching units for strategy elements ?
 
+	// TODO : more buildings for main units
 
 	// Ending check
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
@@ -2122,11 +2111,21 @@ int StrategyBuilder::UpdateRequiredBuildingsFromValidatedResearches() {
 	int addedElements = 0;
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
-		if (resInfo->forceUse && resInfo->researchDef && (resInfo->researchDef->researchLocation >= 0) &&
-			(!IsDisabledInTechTree(this->player->playerId, resInfo->researchDef->researchLocation))) {
-			// This only adds if not already in list
-			if (this->AddPotentialBuildingInfoToList(resInfo->researchDef->researchLocation)) {
-				addedElements++;
+		if (resInfo->forceUse && resInfo->researchDef) {
+			// Research's location
+			if ((resInfo->researchDef->researchLocation >= 0) &&
+				(!IsDisabledInTechTree(this->player->playerId, resInfo->researchDef->researchLocation))) {
+				// This only adds if not already in list
+				if (this->AddPotentialBuildingInfoToList(resInfo->researchDef->researchLocation)) {
+					addedElements++;
+				}
+			}
+			// Building that enables research
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *parentBld = FindBuildingDefThatEnablesResearch(this->player, resInfo->researchId);
+			if (parentBld) {
+				if (this->AddPotentialBuildingInfoToList(parentBld->DAT_ID1)) {
+					addedElements++;
+				}
 			}
 		}
 	}

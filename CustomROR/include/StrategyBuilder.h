@@ -248,7 +248,6 @@ namespace STRATEGY {
 		// Variables for researches handling
 		std::list<PotentialResearchInfo*> potentialResearchesList;
 		std::set<PotentialBuildingInfo*> potentialBuildingsList; // Info about needed buildings (units)
-		std::set<short int> requiredBuildingsId; // List of required DATID of buildings (units)
 		// Strategy itself
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seTownCenter;
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seToolAge;
@@ -346,7 +345,7 @@ namespace STRATEGY {
 
 		/*** Strategy writing methods ***/
 
-		// Get the very global information about strategy generation (number of villagers, etc
+		// Get the very global information about strategy generation (number of villagers, etc)
 		void CollectGlobalStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 		// Creates base strategy elements (ages + initial Town center)
