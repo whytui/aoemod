@@ -1928,14 +1928,15 @@ void StrategyBuilder::CreateVillagerStrategyElements() {
 
 // Create early ages military units strategy elements (limited retrains units)
 void StrategyBuilder::CreateEarlyMilitaryUnitsElements() {
-	for (short int currentAge = CST_RSID_STONE_AGE; currentAge < CST_RSID_IRON_AGE; currentAge++) {
+	// Stone age and tool are considered same here.
+	for (short int currentAge = CST_RSID_TOOL_AGE; currentAge < CST_RSID_IRON_AGE; currentAge++) {
 		std::set<PotentialUnitInfo*> unitsListForThisAge;
 		unitsListForThisAge.clear();
 		// Get different units to add
 		for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
 		{
 			short int unitAge = unitInfo->ageResearchId;
-			if (unitAge == -1) { unitAge = CST_RSID_STONE_AGE; }
+			if (unitAge <= CST_RSID_TOOL_AGE) { unitAge = CST_RSID_TOOL_AGE; }
 			// Some conditions may be redundant...
 			if (unitInfo->isSelected && (unitAge == currentAge) && (unitInfo->isOptionalUnit) && (unitInfo->addedCount == 0) &&
 				(unitInfo->earlyAgeUnit)) {
@@ -1978,6 +1979,7 @@ void StrategyBuilder::CreateEarlyMilitaryUnitsElements() {
 		}
 		// Use orderedUnitsToAdd to add elements in strategy in optimized order (with unit repartition)
 		int loopCount = 0;
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *beforeInsertionPoint = insertionPoint->previous;
 		for each (PotentialUnitInfo *unitInfo in orderedUnitsToAdd)
 		{
 			long int retrains = 2;
@@ -1988,13 +1990,14 @@ void StrategyBuilder::CreateEarlyMilitaryUnitsElements() {
 			loopCount++;
 			if (loopCount == 4) {
 				// Move insertion point earlier so all units are not onsecutive
-				int movementCount = 0;
-				ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = insertionPoint;
+				int movementCount = 0; // = number of elements to reach "minInsertionPoint", backwards movement
+				ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = beforeInsertionPoint->next; // should be 1st inserted element
 				while ((movementCount < 100) && curElem && (curElem->previous != minInsertionPoint)) {
 					curElem = curElem->previous;
 					movementCount++;
 				}
 				if ((movementCount < 100) && (movementCount > 2)) {
+					insertionPoint = beforeInsertionPoint->next;
 					for (int i = 0; i < (movementCount / 2); i++) {
 						insertionPoint = insertionPoint->previous;
 					}
