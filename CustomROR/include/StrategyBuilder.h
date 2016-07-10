@@ -62,10 +62,13 @@ namespace STRATEGY {
 			this->weightedCost = 0;
 			this->bonusForRareStrength = 0;
 			this->bonusForUsedResourceTypes = 0;
+			this->bonusForTechsSimilarity = 0;
 			this->isSelected = false;
 			this->isOptionalUnit = false;
+			this->forceLimitedRetrains = false;
 			this->desiredCount = 0;
 			this->addedCount = 0;
+			this->scoreForEarlyAge = 0;
 			this->firstStratElem = NULL;
 		}
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *baseUnitDefLiving; // (DATID1) Unit definition of base unit, without upgrade
@@ -104,11 +107,14 @@ namespace STRATEGY {
 		int globalScore;
 		int bonusForRareStrength; // 0-100
 		int bonusForUsedResourceTypes; // 0-100
+		int bonusForTechsSimilarity; // 0-100
 		bool isSelected;
 		bool isOptionalUnit; // True for "retrains" units and/or units added specifically against a weakness (ex: chariot vs priest is strategy has elephants). Such units don't need full upgrades
+		bool forceLimitedRetrains;
 		float desiredCount;
 		float addedCount;
 		float scoreForUnitCount; // Used in temporary treatments to compute number of units to add in strategy
+		float scoreForEarlyAge; // A temporary score for early age unit choices
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstStratElem; // First strategy element that trains such a unit
 	};
 
@@ -207,6 +213,7 @@ namespace STRATEGY {
 		// Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.
 		// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
 		// Returns the number of actually added elements to list (some might already be in list before)
+		// You may need to call UpdateRequiredBuildingsFromValidatedResearches, UpdateMissingResearchRequirements and AddMissingBuildings() afterwards
 		int CollectResearchInfoForUnit(short int unitDefId, bool allUpgrades);
 
 		// Adds all necessary buildings for "validated" researches to buildings ID list.
@@ -215,6 +222,7 @@ namespace STRATEGY {
 
 		// Update all researches requirement statuses and set directRequirementsAreSatisfied if OK.
 		// Takes into account "confirmed" researches from list and also buildings ("initiates research").
+		// This does not add anything to our lists.
 		void UpdateMissingResearchRequirements();
 
 		// Set resInfo->directRequirementsAreSatisfied=true and resInfo->missingRequiredResearches[...]=-1 if (minimum) requirements are satisfied
@@ -323,9 +331,11 @@ namespace STRATEGY {
 		// Recompute unit Info's score for costs, according to currently (actually) selected units.
 		int GetCostScoreRegardingCurrentSelection(PotentialUnitInfo *unitInfo);
 
-		// Get unit info's score for costs, according to currently (actually) selected units.
+		// Recompute unit info bonuses that depend on comparison with other units: rare strengths, balanced cost
+		// Does not recompute unit strengths (but computes it using the correct strength values)
 		// upgradedUnit: if true, consider upgraded unit. if false, consider base unit
 		void RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit);
+		void RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit, short int maxAgeResearchId);
 
 		// Make the selection of units to add to strategy based on a pre-selection list.
 		// waterUnits : true=deal with water units only, false=deal with land units only
@@ -341,6 +351,14 @@ namespace STRATEGY {
 
 		// Select which units are to be added in strategy, based on potentialUnitsList
 		void SelectStrategyUnits();
+
+		// age = age to take care (ignore units that are only available in later ages)
+		// hasAlreadyUnits = true if provided age already has some military units
+		// Returns number of added units (0/1)
+		int AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlreadyUnits);
+
+		// Add some military to selection, to fille gaps in strategy in early ages (if any)
+		void AddMilitaryUnitsForEarlyAges();
 
 
 		/*** Strategy writing methods ***/
@@ -367,6 +385,13 @@ namespace STRATEGY {
 	};
 
 
-	// Returns true if the two classes are equals or very similar (infantry with phalanx, archer classes...)
+	// Returns true if the two classes are equals or very similar
+	// Infantry - phalanx - war elephant
+	// Cavalry (includes camel) - chariot
+	// All archers together
 	static bool AreSimilarClasses(GLOBAL_UNIT_AI_TYPES class1, GLOBAL_UNIT_AI_TYPES class2);
+
+	// Updates provided bools to true/false according to the 2 classes. true=the classes use comme techs for this domain.
+	static void ShareCommonTechs(GLOBAL_UNIT_AI_TYPES class1, GLOBAL_UNIT_AI_TYPES class2, bool &attack, bool &defense, bool &hitPoints);
+
 }
