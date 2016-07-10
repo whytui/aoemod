@@ -65,7 +65,7 @@ namespace STRATEGY {
 			this->bonusForTechsSimilarity = 0;
 			this->isSelected = false;
 			this->isOptionalUnit = false;
-			this->forceLimitedRetrains = false;
+			this->earlyAgeUnit = false;
 			this->desiredCount = 0;
 			this->addedCount = 0;
 			this->scoreForEarlyAge = 0;
@@ -110,7 +110,7 @@ namespace STRATEGY {
 		int bonusForTechsSimilarity; // 0-100
 		bool isSelected;
 		bool isOptionalUnit; // True for "retrains" units and/or units added specifically against a weakness (ex: chariot vs priest is strategy has elephants). Such units don't need full upgrades
-		bool forceLimitedRetrains;
+		bool earlyAgeUnit; // If true, this unit is just for early ages. It is NOT a main unit (not even optional from main choice) and must have limited retrains.
 		float desiredCount;
 		float addedCount;
 		float scoreForUnitCount; // Used in temporary treatments to compute number of units to add in strategy
@@ -249,7 +249,7 @@ namespace STRATEGY {
 		long int transportShipsCount;
 		// Variables for units handling
 		std::list<PotentialUnitInfo*> potentialUnitsList; // All eligible military units, collected from tech tree and player's unitDef array
-		std::list<PotentialUnitInfo*> actuallySelectedUnits; // *The* selection of units that will actually be added to strategy
+		std::list<PotentialUnitInfo*> actuallySelectedUnits; // *The* selection of units that will actually be added to strategy, including "temporary" units (limited retrains)
 		int selectedLandUnitsCount;
 		int selectedWaterUnitsCount;
 		int totalTrainUnitCosts[4];
@@ -372,6 +372,9 @@ namespace STRATEGY {
 
 		// Create villager strategy elements, including fishing ships
 		void CreateVillagerStrategyElements();
+
+		// Create early ages military units strategy elements (limited retrains units)
+		void CreateEarlyMilitaryUnitsElements();
 
 		// Create main military units strategy elements
 		void CreateMainMilitaryUnitsElements();

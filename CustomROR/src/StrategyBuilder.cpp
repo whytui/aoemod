@@ -1559,7 +1559,7 @@ tmpScore = (tmpScore * 90) / 100;
 	if (bestUnit != NULL) {
 		this->AddUnitIntoToSelection(bestUnit);
 		bestUnit->isOptionalUnit = true;
-		bestUnit->forceLimitedRetrains = false;
+		bestUnit->earlyAgeUnit = false;
 	}
 }
 
@@ -1686,13 +1686,13 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 	}
 	if (bestUnit != NULL) {
 		bestUnit->isOptionalUnit = true;
-		bestUnit->forceLimitedRetrains = true;
+		bestUnit->earlyAgeUnit = true;
 		this->AddUnitIntoToSelection(bestUnit);
 		this->log += "Early age unit selection: ";
 		this->log += bestUnit->unitName;
 		this->log += newline;
 		int addedStuff = this->CollectResearchInfoForUnit(bestUnit->unitDefId, false); // Add requirements for this unit (only requirements)
-		return 1; // TODO : return unitInfo instead ?
+		return 1; // return unitInfo instead ?
 	}
 	return 0;
 }
@@ -1926,6 +1926,98 @@ void StrategyBuilder::CreateVillagerStrategyElements() {
 	// Random part for retrains : switch retrains/not_retrains between tool and bronze villagers (random one, not necessarily last one)
 }
 
+// Create early ages military units strategy elements (limited retrains units)
+void StrategyBuilder::CreateEarlyMilitaryUnitsElements() {
+	for (short int currentAge = CST_RSID_STONE_AGE; currentAge < CST_RSID_IRON_AGE; currentAge++) {
+		std::set<PotentialUnitInfo*> unitsListForThisAge;
+		unitsListForThisAge.clear();
+		// Get different units to add
+		for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
+		{
+			short int unitAge = unitInfo->ageResearchId;
+			if (unitAge == -1) { unitAge = CST_RSID_STONE_AGE; }
+			// Some conditions may be redundant...
+			if (unitInfo->isSelected && (unitAge == currentAge) && (unitInfo->isOptionalUnit) && (unitInfo->addedCount == 0) &&
+				(unitInfo->earlyAgeUnit)) {
+				unitsListForThisAge.insert(unitInfo);
+			}
+		}
+		// Prepare number to add (using random factor)
+		int totalUnitCount = 6;
+		int remainingUnitToAdd = totalUnitCount;
+		// TODO random factor & determine min/max
+#pragma message("TODO: add random/decision factor here") // +take into account costs ? (scout is expensive, etc).. not sure
+		// Prepare ordered list (with repartition)
+		std::list<PotentialUnitInfo*> orderedUnitsToAdd;
+		orderedUnitsToAdd.clear();
+		while ((remainingUnitToAdd > 0) && (unitsListForThisAge.size() > 0)) {
+			for each (PotentialUnitInfo *unitInfo in unitsListForThisAge)
+			{
+				orderedUnitsToAdd.push_back(unitInfo);
+				remainingUnitToAdd--;
+			}
+		}
+		// Find insertion point
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = &this->buildAI->fakeFirstStrategyElement; // insert just before this
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *minInsertionPoint = NULL; // do not insert before this.
+		switch (currentAge) {
+		case CST_RSID_STONE_AGE:
+		case CST_RSID_TOOL_AGE:
+			insertionPoint = this->seBronzeAge;
+			minInsertionPoint = this->seToolAge;
+			break;
+		case CST_RSID_BRONZE_AGE:
+			insertionPoint = this->seIronAge;
+			minInsertionPoint = this->seBronzeAge;
+			break;
+		case CST_RSID_IRON_AGE:
+			minInsertionPoint = this->seIronAge;
+			break;
+		default:
+			break;
+		}
+		// Use orderedUnitsToAdd to add elements in strategy in optimized order (with unit repartition)
+		int loopCount = 0;
+		for each (PotentialUnitInfo *unitInfo in orderedUnitsToAdd)
+		{
+			long int retrains = 2;
+			assert(unitInfo->earlyAgeUnit);
+			AddUnitInStrategy_before(this->buildAI, insertionPoint, retrains, unitInfo->baseUnitDefLiving->trainLocation, TAIUnitClass::AIUCLivingUnit, unitInfo->unitDefId, player,
+				(unitInfo->baseUnitDefLiving != NULL) ? unitInfo->baseUnitDefLiving->ptrUnitName : unitInfo->unitName);
+			unitInfo->addedCount++;
+			loopCount++;
+			if (loopCount == 4) {
+				// Move insertion point earlier so all units are not onsecutive
+				int movementCount = 0;
+				ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = insertionPoint;
+				while ((movementCount < 100) && curElem && (curElem->previous != minInsertionPoint)) {
+					curElem = curElem->previous;
+					movementCount++;
+				}
+				if ((movementCount < 100) && (movementCount > 2)) {
+					for (int i = 0; i < (movementCount / 2); i++) {
+						insertionPoint = insertionPoint->previous;
+					}
+				}
+			}
+		}
+		// Compute unitInfo->firstStratElem
+		for each (PotentialUnitInfo *unitInfo in orderedUnitsToAdd)
+		{
+			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = this->buildAI->fakeFirstStrategyElement.next;
+			bool found = false;
+			while (curElem && (curElem != &this->buildAI->fakeFirstStrategyElement) && !found) {
+				if ((curElem->unitDAT_ID == unitInfo->unitDefId) && (curElem->elementType == TAIUnitClass::AIUCLivingUnit)) {
+					found = true;
+					unitInfo->firstStratElem = curElem;
+				}
+				curElem = curElem->next;
+			}
+		}
+		orderedUnitsToAdd.clear();
+	}
+}
+
 
 // Create main military units strategy elements
 void StrategyBuilder::CreateMainMilitaryUnitsElements() {
@@ -1933,12 +2025,14 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 	int mainUnitsCount = 0;
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 	{
-		if (unitInfo->isOptionalUnit) {
-			optionalsCount++;
-		} else {
-			mainUnitsCount++;
+		if (!unitInfo->earlyAgeUnit) {
+			if (unitInfo->isOptionalUnit) {
+				optionalsCount++;
+			} else {
+				mainUnitsCount++;
+			}
+			unitInfo->scoreForUnitCount = 0;
 		}
-		unitInfo->scoreForUnitCount = 0;
 	}
 	// Max 8 total "potential units"
 	float maxPotentialUnitsNumber = 8;
@@ -1962,7 +2056,7 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 	// Loop: apply changes to proportions according to unit classes
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 	{
-		if (!unitInfo->isOptionalUnit) {
+		if (!unitInfo->isOptionalUnit && !unitInfo->earlyAgeUnit) {
 			switch (unitInfo->baseUnitDefLiving->unitAIType) {
 			case TribeAIGroupChariot:
 			case TribeAIGroupElephantRider:
@@ -1993,22 +2087,24 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 	// Apply adjustment to get a correct sum of percentages + calculate desired count
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 	{
-		if (!unitInfo->isOptionalUnit) {
-			unitInfo->scoreForUnitCount += adjustmentPerUnit;
-			if (unitInfo->scoreForUnitCount < 0) { unitInfo->scoreForUnitCount = 0; } // Should never happen
-			if (unitInfo->scoreForUnitCount > 100) { unitInfo->scoreForUnitCount = 100; } // Should never happen
+		if (!unitInfo->earlyAgeUnit) {
+			if (!unitInfo->isOptionalUnit) {
+				unitInfo->scoreForUnitCount += adjustmentPerUnit;
+				if (unitInfo->scoreForUnitCount < 0) { unitInfo->scoreForUnitCount = 0; } // Should never happen
+				if (unitInfo->scoreForUnitCount > 100) { unitInfo->scoreForUnitCount = 100; } // Should never happen
+			}
+			if (!unitInfo->isOptionalUnit) {
+				unitInfo->desiredCount = ((unitInfo->scoreForUnitCount * remainingPopulation) / 100);
+			} else {
+				unitInfo->desiredCount = ((100 - mainUnitsProportion) * remainingPopulation / 100);
+			}
+			unitInfo->desiredCount = unitInfo->desiredCount;
+			this->log += "Desired count for ";
+			this->log += unitInfo->unitName;
+			this->log += "=";
+			this->log += std::to_string(unitInfo->desiredCount);
+			this->log += newline;
 		}
-		if (!unitInfo->isOptionalUnit) {
-			unitInfo->desiredCount = ((unitInfo->scoreForUnitCount * remainingPopulation) / 100);
-		} else {
-			unitInfo->desiredCount = ((100 - mainUnitsProportion) * remainingPopulation / 100);
-		}
-		unitInfo->desiredCount = unitInfo->desiredCount;
-		this->log += "Desired count for ";
-		this->log += unitInfo->unitName;
-		this->log += "=";
-		this->log += std::to_string(unitInfo->desiredCount);
-		this->log += newline;
 	}
 
 	// For the moment, insert all in iron age
@@ -2022,13 +2118,15 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 		float lowestProportion = 100;
 		for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 		{
-			float p = 100 * unitInfo->addedCount / unitInfo->desiredCount; // both are "int" value, but use float for % precision
-			if ((unitInfo->isOptionalUnit) && (p < 100)) {
-				p = p / 2; // Force optional units to be trained more at the beginning (there are less of them)
-			}
-			if (p < lowestProportion) {
-				lowestProportion = p;
-				currentBest = unitInfo;
+			if (!unitInfo->earlyAgeUnit) {
+				float p = 100 * unitInfo->addedCount / unitInfo->desiredCount; // both are "int" value, but use float for % precision
+				if ((unitInfo->isOptionalUnit) && (p < 100)) {
+					p = p / 2; // Force optional units to be trained more at the beginning (there are less of them)
+				}
+				if (p < lowestProportion) {
+					lowestProportion = p;
+					currentBest = unitInfo;
+				}
 			}
 		}
 		found = (currentBest != NULL);
@@ -2041,7 +2139,7 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 	for each (PotentialUnitInfo *unitInfo in orderedUnitsToAdd)
 	{
 		long int retrains = -1;
-		if (unitInfo->forceLimitedRetrains) { retrains = 2; }
+		if (unitInfo->earlyAgeUnit) { retrains = 2; } // should not happen here
 		AddUnitInStrategy_before(this->buildAI, insertionPoint, retrains, unitInfo->baseUnitDefLiving->trainLocation, TAIUnitClass::AIUCLivingUnit, unitInfo->unitDefId, player,
 			(unitInfo->baseUnitDefLiving != NULL) ? unitInfo->baseUnitDefLiving->ptrUnitName : unitInfo->unitName);
 		// Note: unitInfo->addedCount has already been incremented
@@ -2054,8 +2152,6 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 #pragma message("TODO: unfinished")
 	// TODO: we inserted everything after iron age.
 	// If units are available before, move some... and test if temp units are needed if only a part of units was moved?
-
-	// TODO: insert early age units (slinger, club/axemen, archers, scouts) if necessary
 }
 
 // Add strategy elements for required researches for "main units"
@@ -2263,8 +2359,6 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 
 	// TODO: set force to optional units requirements
 
-	// TODO: Handle optional units here (may add some buildings)
-
 	this->AddMissingBuildings();
 	// Check on requirements
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
@@ -2279,7 +2373,7 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	// Add (and organize) items to strategy
 	this->CreateMainMilitaryUnitsElements();
 	// Add optional military units (early age)
-	// TODO - see CreateMainMilitaryUnitsElements too (same TODO comment there)
+	this->CreateEarlyMilitaryUnitsElements();
 	// Add military units requirements (only necessary techs)
 	this->CreateMilitaryRequiredResearchesStrategyElements();
 
