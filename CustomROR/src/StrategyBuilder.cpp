@@ -82,6 +82,16 @@ void StrategyBuilder::FreePotentialElementsList() {
 		delete unitInfo;
 	}
 	this->potentialUnitsList.clear();
+	for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
+	{
+		delete bldInfo;
+	}
+	this->potentialBuildingsList.clear();
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		delete resInfo;
+	}
+	this->potentialBuildingsList.clear();
 }
 
 
