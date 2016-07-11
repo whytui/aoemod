@@ -396,6 +396,9 @@ namespace STRATEGY {
 		// Add strategy elements for required researches for "main units"
 		void CreateMilitaryRequiredResearchesStrategyElements();
 
+		// Add strategy elements other than "main units" required researches.
+		void CreateOtherResearchesStrategyElements();
+
 		// Add remaining (missing) buildings to strategy. Returns number of added buildings
 		// Always add in "parent" age strategy zone.
 		int CreateBuildingsStrategyElements();

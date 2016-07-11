@@ -2436,6 +2436,11 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 			//}
 		}
 	}
+}
+
+
+// Add strategy elements other than "main units" required researches.
+void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 	// Add also researches with a specific location (forcePlaceForFirstImpactedUnit)
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
@@ -2447,6 +2452,50 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 			}
 		}
 	}
+
+	// Other researches
+	// TEST - TODO: this is quite random and not much tested... Just a try.
+	int addedResearches = 0;
+	int loopCount = 0;
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		if (resInfo->forceUse && !resInfo->isInStrategy) {
+			loopCount++;
+			bool requirementsAreReady = true;
+			for each (short int reqResId in resInfo->researchesThatMustBePutBeforeMe)
+			{
+				PotentialResearchInfo *reqResInfo = this->GetResearchInfo(reqResId);
+				if (reqResInfo) {
+					requirementsAreReady = requirementsAreReady && (reqResInfo->isInStrategy || (reqResInfo->researchDef && reqResInfo->researchDef->researchLocation < 0));
+				}
+			}
+			if (requirementsAreReady) {
+				resInfo->ComputeStratElemPositionConstraints(this->buildAI); // update dependencies on strategy elements
+				// Add to strategy at correct location
+				ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
+				if (resInfo->mustBeAfterThisElem != NULL) {
+					insertionPoint = resInfo->mustBeAfterThisElem->next;
+				}
+				int moveFurther = randomizer.GetRandomValue(1, 24);
+				while (insertionPoint && insertionPoint->next && (moveFurther > 0)) {
+					if (insertionPoint->elemId == -1) { break; } // Reached empty element (end of strategy)
+					if (insertionPoint == resInfo->mustBeBeforeThisElem) { break; } //  Ensure dependencies are respected
+					insertionPoint = insertionPoint->next;
+					moveFurther--;
+				}
+				if (insertionPoint) {
+					this->AddResearchToStrategy(resInfo, insertionPoint);
+					addedResearches++;
+				}
+			}
+		}
+	}
+	// TODO: loop on previous block until we're making no more progress (or remaining=0) ?
+	this->log += std::to_string(addedResearches);
+	this->log += "/";
+	this->log += std::to_string(loopCount);
+	this->log += " researches added";
+	this->log += newline;
 }
 
 
@@ -2545,7 +2594,7 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 		this->CollectResearchInfoForUnit(unitInfo->unitDefId, !unitInfo->isOptionalUnit);
 	}
 	this->CollectResearchInfoForUnit(CST_UNITID_VILLAGER, false);
-	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false);
+	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false); // TODO: tower upgrades except ballista
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		resInfo->forceUse = true; // all researches above are "validated" / "necessary"
@@ -2579,6 +2628,8 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 
 	// Add military units requirements (only necessary techs)
 	this->CreateMilitaryRequiredResearchesStrategyElements();
+	// Add other researches
+	this->CreateOtherResearchesStrategyElements();
 
 	// Add researches to strategy
 	// Add buildings to strategy
