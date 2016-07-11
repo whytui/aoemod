@@ -63,6 +63,23 @@ public:
 };
 
 
+// Returns the element between elem1 and elem2 that comes first in strategy
+// Returns NULL if not found (elem1 & elem2 do not belong to buildAI's strategy)
+ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetFirstElementOf(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI,
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem1, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem2) {
+	if (!buildAI || !buildAI->IsCheckSumValid() || !elem1 || !elem2 || !elem1->IsCheckSumValid() || !elem2->IsCheckSumValid()) {
+		return NULL;
+	}
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirst = &buildAI->fakeFirstStrategyElement;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = fakeFirst->next;
+	while (curElem && (curElem != fakeFirst)) {
+		if (curElem == elem1) { return elem1; }
+		if (curElem == elem2) { return elem2; }
+		curElem = curElem->next;
+	}
+	return NULL;
+}
+
 // Returns true if the research is present in tech tree but not researched yet (nor being researched)
 bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id) {
 	AOE_CONST_FUNC::RESEARCH_STATUSES status = GetResearchStatus(player, research_id);
@@ -90,6 +107,23 @@ long int FindElementInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CO
 		currentStratElem = currentStratElem->next;
 	}
 	return -1;
+}
+
+
+// Returns the first element's ID that matches criteria AFTER searchFrom (not included in search). Will stop if an empty or start item is encountered
+// Returns NULL if no such element
+// WARNING: AIUCTech and AIUCCritical are 2 different filter values ! Searching for researches won't find tool age/bronze/etc !
+ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *FindFirstElementInStrategy(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *searchFrom, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID) {
+	if (!searchFrom || !searchFrom->IsCheckSumValid()) { return NULL; }
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = searchFrom->next;
+	while (curElem && (curElem != searchFrom)) {
+		if ((curElem->elemId == -1) && (curElem->unitDAT_ID == -1)) { return NULL; } // Reached end of strategy (empty element)
+		if ((curElem->elementType == elementType) && (curElem->unitDAT_ID == DAT_ID)) {
+			return curElem;
+		}
+		curElem = curElem->next;
+	}
+	return NULL;
 }
 
 

@@ -135,7 +135,7 @@ int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
 	return this->actuallySelectedUnits.size();
 }
 
-// Add a research to strategy just before supplied insertion point.
+// Add a research to strategy just before supplied insertion point. Updates "isInStrategy" field.
 // Returns actual number of element that were added
 int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
 	if (resInfo->isInStrategy) { return 0; }
@@ -179,6 +179,10 @@ bool StrategyBuilder::AddPotentialResearchInfoToList(short int researchId) {
 	resInfo->hasOptionalRequirements = ResearchHasOptionalRequirements(resDef);
 	resInfo->directRequirementsAreSatisfied = !resInfo->hasOptionalRequirements;
 	potentialResearchesList.push_back(resInfo);
+	resInfo->totalCosts = 0;
+	if (resDef->costUsed1 > 0) { resInfo->totalCosts += resDef->costAmount1; }
+	if (resDef->costUsed2 > 0) { resInfo->totalCosts += resDef->costAmount2; }
+	if (resDef->costUsed3 > 0) { resInfo->totalCosts += resDef->costAmount3; }
 
 	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(resDef->technologyId);
 	resInfo->techDef = techDef;
@@ -198,6 +202,15 @@ bool StrategyBuilder::AddPotentialResearchInfoToList(short int researchId) {
 					this->AddPotentialBuildingInfoToList(tmpUnitDef->DAT_ID1);
 				}
 			}
+		}
+	}
+	// Search for required age
+	resInfo->requiredAge = FindResearchRequiredAge(this->player, resInfo->researchId);
+	// Ages are added to strategy at the very beginning of the process, so we can already retrieve "my age" strategy element
+	if (resInfo->requiredAge > 0) {
+		resInfo->requiredAgeResearch = FindFirstElementInStrategy(&this->buildAI->fakeFirstStrategyElement, AIUCCritical, resInfo->requiredAge);
+		if (resInfo->requiredAgeResearch == NULL) {
+			resInfo->requiredAgeResearch = FindFirstElementInStrategy(&this->buildAI->fakeFirstStrategyElement, AIUCTech, resInfo->requiredAge);
 		}
 	}
 	return true;
@@ -249,12 +262,66 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_
 	return added;
 }
 
+
 // Updates this->mustBeBeforeThisElem and this->mustBeAfterThisElem according to known dependencies on other unit/researches
+// Previous values of mustBeBeforeThisElem  and mustBeAfterThisElem are reset (lost)
 void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 	if (!buildAI) { return; }
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirst = &buildAI->fakeFirstStrategyElement;
 	this->mustBeBeforeThisElem = NULL;
 	this->mustBeAfterThisElem = NULL;
+
+	if (this->forcePlaceForFirstImpactedUnit) {
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
+		assert(player && player->IsCheckSumValid());
+		if (!player || !player->IsCheckSumValid()) { return; }
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *bestFirstElem = NULL;
+		// Find the first impacted unit in strategy
+		for each (short int unitDefId in this->impactedUnitDefIds)
+		{
+			STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(unitDefId);
+			TAIUnitClass unitClass = TAIUnitClass::AIUCNone;
+			if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass() && unitDefBase->DerivesFromLiving()) {
+				if (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) {
+					unitClass = TAIUnitClass::AIUCBuilding;
+				}
+				if (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT) {
+					unitClass = TAIUnitClass::AIUCLivingUnit;
+				}
+			}
+			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstElemThisUnit = FindFirstElementInStrategy(fakeFirst, unitClass, unitDefId);
+			if (firstElemThisUnit && firstElemThisUnit->IsCheckSumValid()) {
+				if ((bestFirstElem == NULL) || GetFirstElementOf(buildAI, bestFirstElem, firstElemThisUnit) == firstElemThisUnit) {
+					bestFirstElem = firstElemThisUnit;
+				}
+			}
+		}
+		if (bestFirstElem != NULL) {
+			// Do not insert right here. Let AI train some units before starting upgrades.
+			int elemCount = 0;
+			int maxElemCount = randomizer.GetRandomValue_normal_moreFlat(2, 7); // Do not add further than x "elems" away from base calculated point
+			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = bestFirstElem;
+			while (curElem && (elemCount < maxElemCount)) { // Just move a bit further
+				if (curElem->elementType == TAIUnitClass::AIUCCritical) { elemCount = maxElemCount; } // Force "don't go further" / probably an age upgrade
+				elemCount++;
+				curElem = curElem->next;
+			}
+			// We could check research is not too early compared to its age...
+			if (this->requiredAgeResearch) {
+				if (GetFirstElementOf(buildAI, curElem, this->requiredAgeResearch) == this->requiredAgeResearch) {
+					// Required age research IS before insertion point, which is good :)
+					if (curElem) {
+						this->mustBeBeforeThisElem = curElem->next;
+						this->mustBeAfterThisElem = curElem->previous;
+						return; // Position has been determined, no need to run the treatments below.
+					}
+				} else {
+					assert(false && "Insertion point is prior to required age, this should never happen !");
+				}
+			}
+		}
+	}
+
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = buildAI->fakeFirstStrategyElement.next;
 	while (curElem && (curElem != fakeFirst) && (this->mustBeBeforeThisElem == NULL)) {
 		if (this->mustBeBeforeThisElem == NULL) {
@@ -1748,6 +1815,100 @@ void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 	}
 }
 
+// Selects optional researches to add to strategy
+// All villagers and military units must have already been added to strategy.
+void StrategyBuilder::ChooseOptionalResearches() {
+
+	std::list<PotentialUnitInfo*> unitsThatNeedMoreAttack;
+	//int moreAttack_unitCount = 0;
+	// Special: selected melee units with low attack (like scouts, clubmen)
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+	{
+		if (unitInfo->isMelee && (unitInfo->baseUnitDefLiving->displayedAttack <= 4)) {
+			// Set force use (first) attack bonus research OR use upgrade (like axe)
+			unitsThatNeedMoreAttack.push_back(unitInfo);
+			//moreAttack_unitCount += (int)unitInfo->addedCount;
+		}
+	}
+	// First check in researches that are ALREADY validated if some already improves this unit...
+	std::set<PotentialResearchInfo*> moreAttackResearches;
+	// Loop on all known researches (validated AND optional) to collect info on the ones that might be interesting here
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		if (resInfo->researchDef && (resInfo->researchDef->researchLocation >= 0)) { // small optim: exclude shadow researches
+			for each (short int impactedUnitDefId in resInfo->impactedUnitDefIds)
+			{
+				for each (PotentialUnitInfo *unitInfo in unitsThatNeedMoreAttack) {
+					// Ignore stone age : no research. Moreover, it makes some criteria fail (clubmen's age would be considered anterior to any research's age)
+					short int unitInfoAge = unitInfo->ageResearchId;
+					if (unitInfoAge < CST_RSID_TOOL_AGE) { unitInfoAge = CST_RSID_TOOL_AGE; }
+					if ((impactedUnitDefId == unitInfo->unitDefId) &&
+						(resInfo->requiredAge <= unitInfoAge) && // Filter on "available in unit's age"
+						(resInfo->totalCosts <= 130)) { // Important: filter on cheap researches
+						bool relevantResearch = false;
+						for (int i = 0; ((i < resInfo->techDef->effectCount) && !relevantResearch); i++) {
+							// Modifier attack for some units, including "current" unit. (A research that modifies attack amount is always positive)
+							if (resInfo->techDef->ptrEffects[i].HasValidEffect() &&
+								resInfo->techDef->ptrEffects[i].IsAttributeModifier() &&
+								(resInfo->techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_ATTACK) &&
+								((resInfo->techDef->ptrEffects[i].effectUnit == unitInfo->unitDefId) || (resInfo->techDef->ptrEffects[i].effectClass == unitInfo->unitAIType))
+								) {
+								relevantResearch = true;
+							}
+							// Upgrade "current unit" to another one
+							if ((resInfo->techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) &&
+								(resInfo->techDef->ptrEffects[i].effectUnit == unitInfo->unitDefId)
+								) {
+								relevantResearch = true;
+							}
+						}
+						if (relevantResearch) {
+							moreAttackResearches.insert(resInfo);
+							if (resInfo->forceUse) {
+								// We can already mark this research for early "placement": it is already "validated", and useful for early units.
+								// This does NOT add researches to strategy, only moves them to an "earlier" location
+								resInfo->forcePlaceForFirstImpactedUnit = true; // Research placement in strategy will put this near first related unit.
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	// In collected techs, is there any one that serves more than 1 unit ?
+
+
+	// Add techs related to unitsThatNeedMoreAttack, but first consider total number of impacted unit *instances* (dont add if only 3 units in strategy !)
+	if (unitsThatNeedMoreAttack.size() > 4) { // TODO: ouch hardcoded value. +Add a random part ?
+		for each (PotentialUnitInfo *unitInfo in unitsThatNeedMoreAttack) {
+			for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+			{
+				if (DoesTechAffectUnit(resInfo->techDef, unitInfo->baseUnitDefLiving)) {
+					// does it upgrade unit or add attack ?
+				}
+				// TODO
+			}
+		}
+		
+	}
+
+
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		// Loop on researches we do not plan (yet) to include in strategy = optional researches
+		if (!resInfo->isInStrategy && !resInfo->forceUse) {
+			int impactedUnitsCount = resInfo->impactedUnitDefIds.size();
+			// Costs ?
+			// low-cost techs that improve >1 unit type: add (tool age storage pit techs...)
+			// Weighted cost <= 150? + available soon enough
+			// Age availability ?
+
+			// Special cases
+			
+		}
+	}
+}
+
 
 
 /*** Strategy writing methods ***/
@@ -1944,10 +2105,9 @@ void StrategyBuilder::CreateEarlyMilitaryUnitsElements() {
 			}
 		}
 		// Prepare number to add (using random factor)
-		int totalUnitCount = 6;
+		int totalUnitCount = randomizer.GetRandomValue_normal_moderate(2, 9); // in most cases, should be around 5-6
 		int remainingUnitToAdd = totalUnitCount;
-		// TODO random factor & determine min/max
-#pragma message("TODO: add random/decision factor here") // +take into account costs ? (scout is expensive, etc).. not sure
+		// TODO take into account costs ? (scout is expensive, etc).. not sure
 		// Prepare ordered list (with repartition)
 		std::list<PotentialUnitInfo*> orderedUnitsToAdd;
 		orderedUnitsToAdd.clear();
@@ -2252,6 +2412,16 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 			//}
 		}
 	}
+	// Add also researches with a specific location (forcePlaceForFirstImpactedUnit)
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		if (resInfo->forcePlaceForFirstImpactedUnit && !resInfo->isInStrategy) {
+			resInfo->ComputeStratElemPositionConstraints(this->buildAI);
+			if (resInfo->mustBeAfterThisElem != NULL) {
+				this->AddResearchToStrategy(resInfo, resInfo->mustBeAfterThisElem->next);
+			}
+		}
+	}
 }
 
 
@@ -2377,20 +2547,22 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	this->CreateMainMilitaryUnitsElements();
 	// Add optional military units (early age)
 	this->CreateEarlyMilitaryUnitsElements();
-	// Add military units requirements (only necessary techs)
-	this->CreateMilitaryRequiredResearchesStrategyElements();
 
 	// Choose additional (cheap & useful) researches for "retrains" units - optional
 	// Choose additional (cheap & useful) researches for villagers/economy
-	// Add optional researches
-	// Add buildings (use existing stratelemts.location to determine dependencies)
+	this->ChooseOptionalResearches();
+
+	// Add military units requirements (only necessary techs)
+	this->CreateMilitaryRequiredResearchesStrategyElements();
+
+	// Add researches to strategy
+	// Add buildings to strategy
 	this->CreateBuildingsStrategyElements();
-	// TODO
 
 	if (buildAI->mainAI->structTradeAI.needGameStartAIInit) {
 		// Warning: automatic element insertions WILL be triggered
 	} else {
-		// TODO : trigger dynamic element insertions ? Houses, (boats?), setGather%... farms?
+		// TODO : trigger dynamic element insertions ? Houses, (dock+boats?), setGather%... farms?
 	}
 
 	// If game is running, search matching units for strategy elements ?
@@ -2481,14 +2653,27 @@ int StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpg
 				}
 			}
 			if (resInfo) {
-				resInfo->impactedUnitDefIds.push_back(unitDefId);
+				resInfo->impactedUnitDefIds.insert(unitDefId);
 			} else {
+				assert(false && "ERROR: research info was not added for resId=");
 				this->log += "ERROR: research info was not added for resId=";
 				this->log += std::to_string(resDefId);
 				this->log += newline;
 			}
 		}
 	}
+	if (!allUpgrades) {
+		// Get All related researches, even optional ones (NOT for adding)
+		std::vector<short int> allResearchesImpactingUnit = FindResearchesThatAffectUnit(player, unitDefId, true); // Get ALL related researches...
+		for each (short int resDefId in allResearchesImpactingUnit)
+		{
+			PotentialResearchInfo *resInfo = this->GetResearchInfo(resDefId);
+			if (resInfo) {
+				resInfo->impactedUnitDefIds.insert(unitDefId); // just add reference to this unit if research already exists in list. Don't add anything here.
+			}
+		}
+	}
+	
 	return addedElements;
 }
 

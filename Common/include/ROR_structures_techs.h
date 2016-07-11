@@ -68,6 +68,10 @@ namespace ROR_STRUCTURES_10C {
 		bool IsDisableUnit(short int unitDefId) const {
 			return (this->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (this->effectClass == 0) && (this->effectUnit == unitDefId);
 		}
+		// Returns true if effect is an attribute modifier (set/multiply or add)
+		bool IsAttributeModifier() const {
+			return (this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) || (this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) || (this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT);
+		}
 		// Return target unit ("TO") for "upgrade unit" effects. Returns -1 if invalid (not an upgrade unit effect)
 		short int UpgradeUnitGetTargetUnit() const {
 			if (this->effectType != TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) { return -1; }

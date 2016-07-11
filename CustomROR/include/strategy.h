@@ -19,6 +19,10 @@ using namespace AOE_CONST_FUNC;
 
 const char CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN[] = "CustomRORMaxPopulation";
 
+// Returns the element between elem1 and elem2 that comes first in strategy
+// Returns NULL if not found (elem1 & elem2 do not belong to buildAI's strategy)
+ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetFirstElementOf(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI,
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem1, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elem2);
 
 // Returns true if the research is present in tech tree but not researched yet (nor being researched)
 bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);
@@ -26,6 +30,11 @@ bool IsResearchRelevantForStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, sh
 // Returns the first element's ID that matches criteria. -1=no such element
 // WARNING: AIUCTech and AIUCCritical are 2 different filter values ! Searching for researches won't find tool age/bronze/etc !
 long int FindElementInStrategy(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID);
+
+// Returns the first element's ID that matches criteria AFTER searchFrom (not included in search). Will stop if an empty or start item is encountered
+// Returns NULL if no such element
+// WARNING: AIUCTech and AIUCCritical are 2 different filter values ! Searching for researches won't find tool age/bronze/etc !
+ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *FindFirstElementInStrategy(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *searchFrom, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID);
 
 // This fixes dynamically added houses, boats + boat techs, docks, setgatherpercentage
 void FixAutoBuildStrategyElements(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);

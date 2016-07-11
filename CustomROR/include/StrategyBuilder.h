@@ -89,7 +89,7 @@ namespace STRATEGY {
 		float range;
 		bool isMelee; // Might be simpler that manipulating range everywhere... We consider range<2 means melee (normally, range=0 for melee, but beware exceptions like fire galley)
 		short int hitPoints;
-		short int displayedAttack; // displayedAttack from unitDef is reliable (always matches default attack without bonuses, never 0 for units with an attack)
+		short int displayedAttack; // displayedAttack from unitDef is reliable (always matches default attack without bonuses, never 0 for units with an attack). displayedAttack=number before the "+" (constant even after upgrade)
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType;
 		char *unitName; // For debug
 		bool hasCivBonus;
@@ -123,6 +123,7 @@ namespace STRATEGY {
 		PotentialResearchInfo() {
 			this->researchId = -1;
 			this->researchDef = NULL;
+			this->requiredAge = -1;
 			this->techDef = NULL;
 			this->forceUse = false;
 			this->hasOptionalRequirements = false;
@@ -131,8 +132,12 @@ namespace STRATEGY {
 			this->isInStrategy = false;
 			this->mustBeAfterThisElem = NULL;
 			this->mustBeBeforeThisElem = NULL;
+			this->requiredAgeResearch = NULL;
+			this->totalCosts = 0;
+			this->forcePlaceForFirstImpactedUnit = false;
 		}
 		short int researchId;
+		short int requiredAge;
 		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef;
 		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef;
 		bool hasOptionalRequirements;
@@ -143,11 +148,16 @@ namespace STRATEGY {
 		std::set<short int> researchesThatMustBePutAfterMe;
 		std::set<short int> unitsThatMustBePutBeforeMe;
 		std::set<short int> unitsThatMustBePutAfterMe;
-		std::list<short int> impactedUnitDefIds; // Units that have benefits from the research, including villagers, towers.
+		std::set<short int> impactedUnitDefIds; // Units that have benefits from the research, including villagers, towers.
+		bool forcePlaceForFirstImpactedUnit; // If true, research will be put close to the first impacted unit "train" elements. Default=false. If set, other constraints may be ignored.
 		bool isInStrategy;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeBeforeThisElem;
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeBeforeThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *requiredAgeResearch; // Age research strategy element of my required age.
+		int totalCosts; // Sum of all raw costs (not weighted)
 
+		// Updates this->mustBeBeforeThisElem and this->mustBeAfterThisElem according to known dependencies on other unit/researches
+		// Previous values of mustBeBeforeThisElem  and mustBeAfterThisElem are reset (lost)
 		void ComputeStratElemPositionConstraints(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
 	};
 
@@ -288,7 +298,7 @@ namespace STRATEGY {
 		// Return total unit count in selection
 		int AddUnitIntoToSelection(PotentialUnitInfo *unitInfo);
 
-		// Add a research to strategy just before supplied insertion point.
+		// Add a research to strategy just before supplied insertion point. Updates "isInStrategy" field.
 		// Returns actual number of element that were added
 		int AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint);
 
@@ -360,6 +370,9 @@ namespace STRATEGY {
 		// Add some military to selection, to fille gaps in strategy in early ages (if any)
 		void AddMilitaryUnitsForEarlyAges();
 
+		// Selects optional researches to add to strategy
+		// All villagers and military units must have already been added to strategy.
+		void ChooseOptionalResearches();
 
 		/*** Strategy writing methods ***/
 

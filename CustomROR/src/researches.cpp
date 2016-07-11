@@ -69,17 +69,70 @@ bool ResearchHasOptionalRequirements(STRUCT_RESEARCH_DEF *resDef) {
 
 // Returns the researchId of an age (stone/tool/bronze/iron) if found in one of the 4 research's requirements. NOT recursive.
 // Returns -1 if not found, a value in [CST_RSID_STONE_AGE, CST_RSID_IRON_AGE] if found.
+#pragma message("Remove this, see FindResearchRequiredAge")
 short int GetAgeResearchFromDirectRequirement(STRUCT_RESEARCH_DEF *researchDef) {
 	if (researchDef == NULL) { return -1; }
 	for (int iReq = 0; iReq < 4; iReq++) {
 		// Age researches are consecutive. Republic age w ould be next one (104) if enabled
 		if ((researchDef->requiredResearchId[iReq] >= CST_RSID_STONE_AGE) &&
 			(researchDef->requiredResearchId[iReq] <= CST_RSID_IRON_AGE)) {
-			return researchDef->requiredResearchId[iReq];
+			return researchDef->requiredResearchId[iReq]; // does not support more than 1 age in dependencies (ok, it is stupid)
 		}
 	}
 	return -1;
 }
+
+
+// Returns the age research id of research's required age, from direct dependencies or recursively, if necessary.
+// Returns -1 if there is no required age (always available)
+short int FindResearchRequiredAge(STRUCT_PLAYER *player, short int researchId) {
+	if (!player || !player->IsCheckSumValid()) { return -1; }
+	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef = player->GetResearchDef(researchId);
+	if (!researchDef) { return -1; }
+	// First try in direct requirements
+	short int currentResult = -1;
+	int requirementsActualCount = 0;
+	for (int i = 0; i < 4; i++) {
+		if ((researchDef->requiredResearchId[i] >= CST_RSID_STONE_AGE) &&
+			(researchDef->requiredResearchId[i] <= CST_RSID_IRON_AGE) && // +104 for republic age
+			(researchDef->requiredResearchId[i] >= currentResult)) {
+			currentResult = researchDef->requiredResearchId[i]; // if a research has dependencies on 2 ages, take most advanced one.
+		}
+		if (researchDef->requiredResearchId[i] >= 0) {
+			requirementsActualCount++;
+		}
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bld = FindBuildingDefThatEnablesResearch(player, researchId);
+	if (bld && bld->IsCheckSumValidForAUnitClass()) {
+		short int bldEnablerResearchId = FindResearchThatEnableUnit(player, bld->DAT_ID1, 0);
+		if (bldEnablerResearchId >= 0) {
+			// Recursive call on research that enables the building
+			short int tmpRes = FindResearchRequiredAge(player, bldEnablerResearchId);
+			if (tmpRes > currentResult) {
+				currentResult = tmpRes;
+			}
+		}
+	}
+	if (currentResult > -1) { return currentResult; }
+
+	if (requirementsActualCount <= 0) { return currentResult; } // No requirements for recursion
+	// Here we need to search in requirements, recursively.
+	// We explore all requirements, even "optional" ones (min required count < actual requirements)
+	for (int i = 0; i < 4; i++) {
+		if (researchDef->requiredResearchId[i] >= 0) {
+			assert(researchDef->requiredResearchId[i] != researchId);
+			if (researchDef->requiredResearchId[i] != researchId) { // Prevents infinite recursion
+				// There is still an infinite recursion risk if several researches loop (cyclic requirements)
+				short int thisResult = FindResearchRequiredAge(player, researchDef->requiredResearchId[i]);
+				if (thisResult > currentResult) {
+					currentResult = thisResult; // take most advanced age, if more than one is found
+				}
+			}
+		}
+	}
+	return currentResult;
+}
+
 
 // Disable all impossible researches for a specific player.
 // An impossible research is a research that is waiting for requirements, including ones that can never be satisfied.

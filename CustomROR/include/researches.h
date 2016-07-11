@@ -67,6 +67,11 @@ bool DoesTechDisableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId);
 bool IsDisabledInTechTree(short int playerId, short int unitDefId);
 
 
+// Returns the age research id of research's required age, from direct dependencies or recursively, if necessary.
+// Returns -1 if there is no required age (always available)
+short int FindResearchRequiredAge(STRUCT_PLAYER *player, short int researchId);
+
+
 // Finds all (non disabled) researches that affect a unit (definition)
 // If ignoreUndesirableTechs==true, techs from LST_TECHS_TO_IGNORE are ignored (jihad, etc)
 std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long int unitDefId, bool ignoreUndesirableTechs);
