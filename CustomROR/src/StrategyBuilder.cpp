@@ -1820,25 +1820,25 @@ void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 void StrategyBuilder::ChooseOptionalResearches() {
 
 	std::list<PotentialUnitInfo*> unitsThatNeedMoreAttack;
-	//int moreAttack_unitCount = 0;
 	// Special: selected melee units with low attack (like scouts, clubmen)
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 	{
 		if (unitInfo->isMelee && (unitInfo->baseUnitDefLiving->displayedAttack <= 4)) {
 			// Set force use (first) attack bonus research OR use upgrade (like axe)
 			unitsThatNeedMoreAttack.push_back(unitInfo);
-			//moreAttack_unitCount += (int)unitInfo->addedCount;
 		}
 	}
 	// First check in researches that are ALREADY validated if some already improves this unit...
-	std::set<PotentialResearchInfo*> moreAttackResearches;
+	std::set<PotentialResearchInfo*> moreAttackResearches; // researches improving early-age units that ARE available at the proper age.
 	// Loop on all known researches (validated AND optional) to collect info on the ones that might be interesting here
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
+		resInfo->unitInstanceScoreForOptionalResearch = 0;
 		if (resInfo->researchDef && (resInfo->researchDef->researchLocation >= 0)) { // small optim: exclude shadow researches
 			for each (short int impactedUnitDefId in resInfo->impactedUnitDefIds)
 			{
 				for each (PotentialUnitInfo *unitInfo in unitsThatNeedMoreAttack) {
+					resInfo->unitInstanceScoreForOptionalResearch += (int)unitInfo->addedCount;
 					// Ignore stone age : no research. Moreover, it makes some criteria fail (clubmen's age would be considered anterior to any research's age)
 					short int unitInfoAge = unitInfo->ageResearchId;
 					if (unitInfoAge < CST_RSID_TOOL_AGE) { unitInfoAge = CST_RSID_TOOL_AGE; }
@@ -1876,35 +1876,59 @@ void StrategyBuilder::ChooseOptionalResearches() {
 		}
 	}
 	// In collected techs, is there any one that serves more than 1 unit ?
+	for each (PotentialResearchInfo *resInfo in moreAttackResearches)
+	{
+		int impactedUnitsCount = resInfo->impactedUnitDefIds.size();
+		if ((impactedUnitsCount > 1) && (!resInfo->isInStrategy && (!resInfo->forcePlaceForFirstImpactedUnit))) {
+			resInfo->forcePlaceForFirstImpactedUnit = true;
+		}
+		int unitInstanceCountThatTriggersAddResearch = randomizer.GetRandomValue_normal_moderate(3, 8);
+		// If enough unit "instances" are trained, 
+		if (resInfo->unitInstanceScoreForOptionalResearch >= unitInstanceCountThatTriggersAddResearch) {
+			resInfo->forcePlaceForFirstImpactedUnit = true;
+		}
+	}
 
-
-	// Add techs related to unitsThatNeedMoreAttack, but first consider total number of impacted unit *instances* (dont add if only 3 units in strategy !)
-	if (unitsThatNeedMoreAttack.size() > 4) { // TODO: ouch hardcoded value. +Add a random part ?
-		for each (PotentialUnitInfo *unitInfo in unitsThatNeedMoreAttack) {
-			for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	// Recompute unit scores for ALL (selected) units (not restricted to early units)
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		resInfo->unitInstanceScoreForOptionalResearch = 0;
+		for each (short int impactedUnitDefId in resInfo->impactedUnitDefIds) {
+			for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 			{
-				if (DoesTechAffectUnit(resInfo->techDef, unitInfo->baseUnitDefLiving)) {
-					// does it upgrade unit or add attack ?
+				if (unitInfo->unitDefId == impactedUnitDefId) {
+					resInfo->unitInstanceScoreForOptionalResearch += (int)unitInfo->addedCount;
 				}
-				// TODO
+			}
+#pragma message("Villagers: we should add all related villager datids in researches->impactedUnitDefIds when adding research info. This way it would even be visible for early units see above")
+			/*if (impactedUnitDefId == CST_UNITID_VILLAGER) {
+				resInfo->unitInstanceScoreForOptionalResearch += this->villagerCount_alwaysRetrain;
+				}
+				*/
+		}
+		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resInfo->researchDef->technologyId);
+		for (int i = 0; (techDef != NULL) && (i < techDef->effectCount); i++) {
+			if (techDef->ptrEffects[i].IsAttributeModifier()) {
+				if ((techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) &&
+					(techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_HP)) {
+					resInfo->unitInstanceScoreForOptionalResearch += 15; // Add HP to all buildings (the only attribute that really improves buildings)
+				}
 			}
 		}
-		
 	}
 
 
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		// Loop on researches we do not plan (yet) to include in strategy = optional researches
-		if (!resInfo->isInStrategy && !resInfo->forceUse) {
+		if (!resInfo->isInStrategy && !resInfo->forceUse && !resInfo->forcePlaceForFirstImpactedUnit) {
 			int impactedUnitsCount = resInfo->impactedUnitDefIds.size();
 			// Costs ?
 			// low-cost techs that improve >1 unit type: add (tool age storage pit techs...)
-			// Weighted cost <= 150? + available soon enough
-			// Age availability ?
+			// check Age availability ?
 
 			// Special cases
-			
+			// TODO !!!!
 		}
 	}
 }
@@ -2416,6 +2440,7 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		if (resInfo->forcePlaceForFirstImpactedUnit && !resInfo->isInStrategy) {
+			// If research has already been placed, move it ? should not be necessary because ComputeStratElemPositionConstraints should have taken this into account ?
 			resInfo->ComputeStratElemPositionConstraints(this->buildAI);
 			if (resInfo->mustBeAfterThisElem != NULL) {
 				this->AddResearchToStrategy(resInfo, resInfo->mustBeAfterThisElem->next);

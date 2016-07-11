@@ -149,6 +149,7 @@ namespace STRATEGY {
 		std::set<short int> unitsThatMustBePutBeforeMe;
 		std::set<short int> unitsThatMustBePutAfterMe;
 		std::set<short int> impactedUnitDefIds; // Units that have benefits from the research, including villagers, towers.
+		int unitInstanceScoreForOptionalResearch; // internal value for optional researches computing
 		bool forcePlaceForFirstImpactedUnit; // If true, research will be put close to the first impacted unit "train" elements. Default=false. If set, other constraints may be ignored.
 		bool isInStrategy;
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
