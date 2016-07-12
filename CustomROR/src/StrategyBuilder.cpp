@@ -140,12 +140,15 @@ int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
 int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
 	if (resInfo->isInStrategy) { return 0; }
 	int res = 0;
-	if (resInfo->researchDef->researchLocation >= 0) { // shadow research without a location must not be actually added to strategy
-		AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, resInfo->researchDef->researchLocation, TAIUnitClass::AIUCTech, resInfo->researchId, player,
-			GetResearchLocalizedName(resInfo->researchId).c_str());
-		res++;
+	bool forceNotInsert = (resInfo->researchId >= CST_RSID_STONE_AGE) && (resInfo->researchId <= CST_RSID_IRON_AGE); // +104 for republic age
+	// Do not insert ages as they are added in dedicated method.
+	if (!forceNotInsert) {
+		if (resInfo->researchDef->researchLocation >= 0) { // shadow research without a location must not be actually added to strategy
+			AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, resInfo->researchDef->researchLocation, TAIUnitClass::AIUCTech, resInfo->researchId, player,
+				GetResearchLocalizedName(resInfo->researchId).c_str());
+			res++;
+		}
 	}
-#pragma message("TODO: For research initiated by building, add building here if not in list ?")
 	resInfo->isInStrategy = true;
 	return res;
 }
@@ -255,6 +258,11 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_
 		bldInfo->enabledInAge = GetAgeResearchFromDirectRequirement(parentResDef);
 	} else {
 		bldInfo->enabledInAge = -1;
+	}
+	// Is it a high-priority building ?
+#pragma message("TODO remove hardcoded check and test: initiate research=farm")
+	if (unitDef->DAT_ID1 == CST_UNITID_MARKET) {
+		bldInfo->highPriority = true;
 	}
 	bool added = (this->potentialBuildingsList.insert(bldInfo).second);
 
@@ -931,8 +939,8 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 	if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) {
 		// availableRelatedResearchesProportion is a % value (0-100)
 		int availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount);
-		int scoreForPriestResearches = (availableRelatedResearchesProportion < 80) ? 30 : 70;
-		// Well-developed priests are good against priests (at least, allows converting back my units OR converting enemy units)
+		int scoreForPriestResearches = (availableRelatedResearchesProportion < 80) ? 35 : 95;
+		// Well-developed priests are good against priests (at least, allows converting back my units OR converting enemy units - the goal is not necessarily to convert enemy priests)
 		unitInfo->strengthVs[MC_PRIEST] = scoreForPriestResearches;
 		unitInfo->weaknessVs[MC_PRIEST] = 100 - scoreForPriestResearches;
 		return;
@@ -1864,7 +1872,7 @@ void StrategyBuilder::ChooseOptionalResearches() {
 						}
 						if (relevantResearch) {
 							moreAttackResearches.insert(resInfo);
-							if (resInfo->forceUse) {
+							if (resInfo->markedForAdd) {
 								// We can already mark this research for early "placement": it is already "validated", and useful for early units.
 								// This does NOT add researches to strategy, only moves them to an "earlier" location
 								resInfo->forcePlaceForFirstImpactedUnit = true; // Research placement in strategy will put this near first related unit.
@@ -1921,7 +1929,7 @@ void StrategyBuilder::ChooseOptionalResearches() {
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		// Loop on researches we do not plan (yet) to include in strategy = optional researches
-		if (!resInfo->isInStrategy && !resInfo->forceUse && !resInfo->forcePlaceForFirstImpactedUnit) {
+		if (!resInfo->isInStrategy && !resInfo->markedForAdd && !resInfo->forcePlaceForFirstImpactedUnit) {
 			int impactedUnitsCount = resInfo->impactedUnitDefIds.size();
 			// Costs ?
 			// low-cost techs that improve >1 unit type: add (tool age storage pit techs...)
@@ -2348,7 +2356,7 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 	{
 		short int resId = unitInfo->enabledByResearchId;
 		PotentialResearchInfo *resInfo = this->GetResearchInfo(resId);
-		if (resInfo && !resInfo->isInStrategy && resInfo->forceUse) {
+		if (resInfo && !resInfo->isInStrategy && resInfo->markedForAdd) {
 			resInfo->unitsThatMustBePutAfterMe.insert(unitInfo->unitDefId); // just for the record...
 			assert(unitInfo->firstStratElem != NULL);
 			if (unitInfo->firstStratElem != NULL) {
@@ -2405,7 +2413,7 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 
 			//for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 			//{
-			if (resInfo && (resInfo->researchId == resId) && (!resInfo->isInStrategy) && (resInfo->forceUse) && resInfo->researchDef) {
+			if (resInfo && (resInfo->researchId == resId) && (!resInfo->isInStrategy) && (resInfo->markedForAdd) && resInfo->researchDef) {
 					resInfo->ComputeStratElemPositionConstraints(this->buildAI); // update dependencies on strategy elements
 					// Add to strategy at correct location
 					ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
@@ -2454,47 +2462,57 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 	}
 
 	// Other researches
-	// TEST - TODO: this is quite random and not much tested... Just a try.
-	int addedResearches = 0;
-	int loopCount = 0;
+	int totalResearchesToUse = 0; // Get total count of (remaining) researches to add
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
-		if (resInfo->forceUse && !resInfo->isInStrategy) {
-			loopCount++;
-			bool requirementsAreReady = true;
-			for each (short int reqResId in resInfo->researchesThatMustBePutBeforeMe)
-			{
-				PotentialResearchInfo *reqResInfo = this->GetResearchInfo(reqResId);
-				if (reqResInfo) {
-					requirementsAreReady = requirementsAreReady && (reqResInfo->isInStrategy || (reqResInfo->researchDef && reqResInfo->researchDef->researchLocation < 0));
+		if (resInfo->markedForAdd && !resInfo->isInStrategy) {
+			totalResearchesToUse++;
+		}
+	}
+	// TEST - TODO: this is quite random and not much tested... Just a try.
+	int totalAddedResearches = 0;
+	int addedResearchesThisLoop = 1;
+	while (addedResearchesThisLoop > 0) {
+		addedResearchesThisLoop = 0;
+		for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+		{
+			if (resInfo->markedForAdd && !resInfo->isInStrategy) {
+				bool requirementsAreReady = true;
+				for each (short int reqResId in resInfo->researchesThatMustBePutBeforeMe)
+				{
+					PotentialResearchInfo *reqResInfo = this->GetResearchInfo(reqResId);
+					if (reqResInfo) {
+						requirementsAreReady = requirementsAreReady && (reqResInfo->isInStrategy || (reqResInfo->researchDef && reqResInfo->researchDef->researchLocation < 0));
+					}
 				}
-			}
-			if (requirementsAreReady) {
-				resInfo->ComputeStratElemPositionConstraints(this->buildAI); // update dependencies on strategy elements
-				// Add to strategy at correct location
-				ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
-				if (resInfo->mustBeAfterThisElem != NULL) {
-					insertionPoint = resInfo->mustBeAfterThisElem->next;
-				}
-				int moveFurther = randomizer.GetRandomValue(1, 24);
-				while (insertionPoint && insertionPoint->next && (moveFurther > 0)) {
-					if (insertionPoint->elemId == -1) { break; } // Reached empty element (end of strategy)
-					if (insertionPoint == resInfo->mustBeBeforeThisElem) { break; } //  Ensure dependencies are respected
-					insertionPoint = insertionPoint->next;
-					moveFurther--;
-				}
-				if (insertionPoint) {
-					this->AddResearchToStrategy(resInfo, insertionPoint);
-					addedResearches++;
+				if (requirementsAreReady) {
+					resInfo->ComputeStratElemPositionConstraints(this->buildAI); // update dependencies on strategy elements
+					// Add to strategy at correct location
+					ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
+					if (resInfo->mustBeAfterThisElem != NULL) {
+						insertionPoint = resInfo->mustBeAfterThisElem->next;
+					}
+					int moveFurther = randomizer.GetRandomValue(1, 24);
+					while (insertionPoint && insertionPoint->next && (moveFurther > 0)) {
+						if (insertionPoint->elemId == -1) { break; } // Reached empty element (end of strategy)
+						if (insertionPoint == resInfo->mustBeBeforeThisElem) { break; } //  Ensure dependencies are respected
+						insertionPoint = insertionPoint->next;
+						moveFurther--;
+					}
+					if (insertionPoint) {
+						this->AddResearchToStrategy(resInfo, insertionPoint);
+						addedResearchesThisLoop++;
+					}
 				}
 			}
 		}
+		totalAddedResearches += addedResearchesThisLoop;
 	}
 	// TODO: loop on previous block until we're making no more progress (or remaining=0) ?
-	this->log += std::to_string(addedResearches);
+	this->log += std::to_string(totalAddedResearches);
 	this->log += "/";
-	this->log += std::to_string(loopCount);
-	this->log += " researches added";
+	this->log += std::to_string(totalResearchesToUse);
+	this->log += " non-critical researches added";
 	this->log += newline;
 }
 
@@ -2506,6 +2524,7 @@ int StrategyBuilder::CreateBuildingsStrategyElements() {
 	for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
 	{
 		if (!bldInfo->unitDef || !bldInfo->unitDef->IsCheckSumValidForAUnitClass() || !bldInfo->unitDef->IsTypeValid()) { continue; }
+#pragma message("Hardcoded stuff here. Add market specific case here too ?")
 		// Some buildings with hardcoded behaviour
 		if (bldInfo->unitDefId == CST_UNITID_FORUM) {
 			// TODO : handle 2nd (backup) TC !
@@ -2524,22 +2543,27 @@ int StrategyBuilder::CreateBuildingsStrategyElements() {
 		}
 
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = this->buildAI->fakeFirstStrategyElement.next;
-		switch (bldInfo->enabledInAge) {
-		case CST_RSID_TOOL_AGE:
-			curElem = this->seToolAge->next;
-			break;
-		case CST_RSID_BRONZE_AGE:
-			curElem = this->seBronzeAge->next;
-			break;
-		case CST_RSID_IRON_AGE:
-			curElem = this->seIronAge->next;
-			break;
-		case CST_RSID_STONE_AGE:
-		default:
-			break;
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = this->GetAgeStrategyElement(bldInfo->enabledInAge);
+		if (!curElem) {
+			curElem = &this->buildAI->fakeFirstStrategyElement;
 		}
+		curElem = curElem->next;
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = NULL;
+		if (bldInfo->highPriority) {
+			bldInfo->highPriority = false; // High priority is only for first placed building of this kind
+			insertionPoint = curElem; // insertionPoint being set here, next loop will be ignored in this case
+			// Just allow some villagers to be trained
+			int allowedVillagers = 2;
+			while (allowedVillagers > 0) {
+				if ((insertionPoint->elementType == TAIUnitClass::AIUCLivingUnit) && (insertionPoint->unitDAT_ID == CST_UNITID_MAN)) {
+					insertionPoint = insertionPoint->next;
+				} else {
+					allowedVillagers = 0; // Stop and insert here
+				}
+				allowedVillagers--;
+			}
+		}
+		// Add a building just before the first location in strategy where it is needed - works for most dependencies except some, like market (to enable farms)
 		while (curElem && (curElem != fakeFirstElem) && (insertionPoint == NULL)) {
 			bool isResearch = (curElem->elementType == TAIUnitClass::AIUCTech) || (curElem->elementType == TAIUnitClass::AIUCCritical);
 			bool actorFieldIsRelevant = isResearch || (curElem->elementType == TAIUnitClass::AIUCLivingUnit) || (curElem->elementType == TAIUnitClass::AIUCBuilding);
@@ -2597,7 +2621,7 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false); // TODO: tower upgrades except ballista
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
-		resInfo->forceUse = true; // all researches above are "validated" / "necessary"
+		resInfo->markedForAdd = true; // all researches above are "validated" / "necessary"
 	}
 	// Finalize exact list of trained units => add units
 	this->AddMilitaryUnitsForEarlyAges();
@@ -2760,7 +2784,7 @@ int StrategyBuilder::UpdateRequiredBuildingsFromValidatedResearches() {
 	int addedElements = 0;
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
-		if (resInfo->forceUse && resInfo->researchDef) {
+		if (resInfo->markedForAdd && resInfo->researchDef) {
 			// Research's location
 			if ((resInfo->researchDef->researchLocation >= 0) &&
 				(!IsDisabledInTechTree(this->player->playerId, resInfo->researchDef->researchLocation))) {
@@ -2812,7 +2836,7 @@ void StrategyBuilder::UpdateMissingResearchRequirements() {
 		for (int i = 0; i < 4; i++) {
 			if (resInfo->missingRequiredResearches[i] >= 0) {
 				for each (PotentialResearchInfo *confirmedResearch in this->potentialResearchesList) {
-					if (confirmedResearch->forceUse) {
+					if (confirmedResearch->markedForAdd) {
 						if (resInfo->missingRequiredResearches[i] == confirmedResearch->researchId) {
 							resInfo->missingRequiredResearches[i] = -1; // requirement is satisfied
 						}
@@ -2915,3 +2939,22 @@ void StrategyBuilder::AddMissingBuildings() {
 		}
 	}
 }
+
+// Get the strategy element that correspond to an Age Id. researchId must correspond to an age upgrade !
+// For stone age, returns the "fake" first strategy element (beginning of strategy)
+// For other researches, returns NULL
+ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *StrategyBuilder::GetAgeStrategyElement(short int researchId) {
+	switch (researchId) {
+	case CST_RSID_STONE_AGE:
+		return &this->buildAI->fakeFirstStrategyElement;
+	case CST_RSID_TOOL_AGE:
+		return this->seToolAge;
+	case CST_RSID_BRONZE_AGE:
+		return this->seBronzeAge;
+	case CST_RSID_IRON_AGE:
+		return this->seIronAge;
+	default:
+		return NULL;
+	}
+}
+

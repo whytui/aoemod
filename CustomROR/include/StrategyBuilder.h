@@ -125,7 +125,7 @@ namespace STRATEGY {
 			this->researchDef = NULL;
 			this->requiredAge = -1;
 			this->techDef = NULL;
-			this->forceUse = false;
+			this->markedForAdd = false;
 			this->hasOptionalRequirements = false;
 			this->directRequirementsAreSatisfied; // True when enough direct requirements are satisfied to "enable" the research.
 			for (int i = 0; i < 4; i++) { missingRequiredResearches[i] = -1; }
@@ -137,13 +137,13 @@ namespace STRATEGY {
 			this->forcePlaceForFirstImpactedUnit = false;
 		}
 		short int researchId;
-		short int requiredAge;
+		short int requiredAge; // The age research that is required (direct or indirect requirement). -1 means no age requirement.
 		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef;
 		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef;
 		bool hasOptionalRequirements;
 		bool directRequirementsAreSatisfied;
 		short int missingRequiredResearches[4]; // -1 = empty slot. Other value = a required research ID that is not satisfied yet
-		bool forceUse; // If true, add the research to strategy in all circumstances
+		bool markedForAdd; // If true, the research has to be added to strategy (or HAS been added, see isInStrategy)
 		std::set<short int> researchesThatMustBePutBeforeMe;
 		std::set<short int> researchesThatMustBePutAfterMe;
 		std::set<short int> unitsThatMustBePutBeforeMe;
@@ -151,7 +151,7 @@ namespace STRATEGY {
 		std::set<short int> impactedUnitDefIds; // Units that have benefits from the research, including villagers, towers.
 		int unitInstanceScoreForOptionalResearch; // internal value for optional researches computing
 		bool forcePlaceForFirstImpactedUnit; // If true, research will be put close to the first impacted unit "train" elements. Default=false. If set, other constraints may be ignored.
-		bool isInStrategy;
+		bool isInStrategy; // Set to true once it has been added to strategy
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeBeforeThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *requiredAgeResearch; // Age research strategy element of my required age.
@@ -170,12 +170,14 @@ namespace STRATEGY {
 			this->enabledByResearchId = -1;
 			this->enabledInAge = -1; // ResearchId of age where the building becomes available
 			this->addedInStrategyCount = 0;
+			this->highPriority = false;
 		}
 		short int unitDefId;
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef;
 		short int enabledByResearchId;
 		short int enabledInAge;
 		int addedInStrategyCount;
+		bool highPriority; // If true, start construction of (first) this building ASAP. E.g. market (to enable farming)
 	};
 
 	// Class that handles the selection of military units for strategy creation.
@@ -241,6 +243,11 @@ namespace STRATEGY {
 
 		// Add missing buildings - if any - that block some research requirements
 		void AddMissingBuildings();
+
+		// Get the strategy element that correspond to an Age Id. researchId must correspond to an age upgrade !
+		// For stone age, returns the "fake" first strategy element (beginning of strategy)
+		// For other researches, returns NULL
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetAgeStrategyElement(short int researchId);
 
 	private:
 		std::string log;
