@@ -170,13 +170,17 @@ namespace STRATEGY {
 			this->enabledByResearchId = -1;
 			this->enabledInAge = -1; // ResearchId of age where the building becomes available
 			this->addedInStrategyCount = 0;
+			this->desiredCount = 0;
 			this->highPriority = false;
+			this->firstAddedInStrategy = NULL;
 		}
 		short int unitDefId;
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef;
 		short int enabledByResearchId;
 		short int enabledInAge;
 		int addedInStrategyCount;
+		int desiredCount;
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstAddedInStrategy; // The first of such buildings that was put in strategy
 		bool highPriority; // If true, start construction of (first) this building ASAP. E.g. market (to enable farming)
 	};
 
@@ -310,6 +314,10 @@ namespace STRATEGY {
 		// Returns actual number of element that were added
 		int AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint);
 
+		// Add a building to strategy just before supplied insertion point. Updates underlying fields (added count...)
+		// Returns actual number of element that were added
+		int AddBuildingToStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint);
+
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
 		PotentialResearchInfo *GetResearchInfo(short int researchId);
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
@@ -406,9 +414,12 @@ namespace STRATEGY {
 		// Add strategy elements other than "main units" required researches.
 		void CreateOtherResearchesStrategyElements();
 
-		// Add remaining (missing) buildings to strategy. Returns number of added buildings
+		// Add the first building of each building kind to strategy. Returns number of added buildings
+		// Does not add an additional building if there is already one in strategy
 		// Always add in "parent" age strategy zone.
-		int CreateBuildingsStrategyElements();
+		int CreateFirstBuildingsStrategyElements();
+		// Create secondary (optional) occurrences of buildings. E.g. 2nd TC, or additional military buildings to train army faster and do researches while another building is training units
+		int CreateSecondaryBuildingStrategyElements();
 	};
 
 

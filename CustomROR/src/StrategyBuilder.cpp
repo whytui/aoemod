@@ -153,6 +153,33 @@ int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_S
 	return res;
 }
 
+// Add a building to strategy just before supplied insertion point. Updates underlying fields (added count...)
+// Returns actual number of element that were added
+int StrategyBuilder::AddBuildingToStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
+	assert(bldInfo->desiredCount > bldInfo->addedInStrategyCount);
+	assert(insertionPoint != NULL);
+	assert((bldInfo->unitDef != NULL) && (bldInfo->unitDefId >= 0));
+	int res = 0;
+	if ((bldInfo->unitDef == NULL) || (bldInfo->unitDefId < 0) || (insertionPoint == NULL)) { return res; }
+	if (bldInfo->desiredCount <= bldInfo->addedInStrategyCount) { return res; }
+	if (AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding,
+		bldInfo->unitDefId, this->player, bldInfo->unitDef->ptrUnitName)) {
+		res++;
+		// Update building info underlying fields
+		bldInfo->addedInStrategyCount++;
+		if (bldInfo->firstAddedInStrategy == NULL) {
+			bldInfo->firstAddedInStrategy = insertionPoint->previous; // save link to strategy element
+		}
+		if ((this->seMarket == NULL) && (bldInfo->unitDefId == CST_UNITID_MARKET)) {
+			this->seMarket = insertionPoint->previous;
+		}
+		if ((this->seGovCenter == NULL) && (bldInfo->unitDefId == CST_UNITID_GOVERNMENT_CENTER)) {
+			this->seGovCenter = insertionPoint->previous;
+		}
+	}
+	return res;
+}
+
 // Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
 PotentialResearchInfo *StrategyBuilder::GetResearchInfo(short int researchId) {
 	for each (PotentialResearchInfo *curResInfo in this->potentialResearchesList) {
@@ -253,6 +280,7 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_
 	bldInfo->unitDef = unitDef;
 	bldInfo->unitDefId = unitDef->DAT_ID1;
 	bldInfo->enabledByResearchId = FindResearchThatEnableUnit(this->player, unitDef->DAT_ID1, 0);
+	bldInfo->desiredCount = 1;
 	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *parentResDef = player->GetResearchDef(bldInfo->enabledByResearchId);
 	if (parentResDef && (bldInfo->enabledByResearchId >= 0)) {
 		bldInfo->enabledInAge = GetAgeResearchFromDirectRequirement(parentResDef);
@@ -260,9 +288,19 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_
 		bldInfo->enabledInAge = -1;
 	}
 	// Is it a high-priority building ?
-#pragma message("TODO remove hardcoded check and test: initiate research=farm")
-	if (unitDef->DAT_ID1 == CST_UNITID_MARKET) {
-		bldInfo->highPriority = true;
+	if (unitDef->initiatesResearch >= 0) {
+		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(unitDef->initiatesResearch);
+		if (resDef && (resDef->technologyId >= 0)) {
+			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(resDef->technologyId);
+			if (techDef) {
+				if (DoesTechEnableUnit(techDef, CST_UNITID_FARM)) {
+					bldInfo->highPriority = true; // The building that enables farming (market in standard game) must be built ASAP.
+				}
+			}
+		}
+	}
+	if (unitDef->DAT_ID1 == CST_UNITID_FORUM) {
+		bldInfo->addedInStrategyCount = 1; // A TC is added automatically at strategy initialization, with age researches
 	}
 	bool added = (this->potentialBuildingsList.insert(bldInfo).second);
 
@@ -2517,22 +2555,16 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 }
 
 
-// Add remaining (missing) buildings to strategy
+// Add the first building of each building kind to strategy. Returns number of added buildings
+// Does not add an additional building if there is already one in strategy
 // Always add in "parent" age strategy zone.
-int StrategyBuilder::CreateBuildingsStrategyElements() {
+int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 	int counter = 0;
 	for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
 	{
-		if (!bldInfo->unitDef || !bldInfo->unitDef->IsCheckSumValidForAUnitClass() || !bldInfo->unitDef->IsTypeValid()) { continue; }
-#pragma message("Hardcoded stuff here. Add market specific case here too ?")
+		if (!bldInfo->unitDef || !bldInfo->unitDef->IsCheckSumValidForAUnitClass() || !bldInfo->unitDef->IsTypeValid() ||
+			(bldInfo->addedInStrategyCount > 0)) { continue; }
 		// Some buildings with hardcoded behaviour
-		if (bldInfo->unitDefId == CST_UNITID_FORUM) {
-			// TODO : handle 2nd (backup) TC !
-			if (bldInfo->addedInStrategyCount == 0) {
-				bldInfo->addedInStrategyCount = 1;
-			}
-			continue;
-		}
 		if ((bldInfo->unitDefId == CST_UNITID_GRANARY) || (bldInfo->unitDefId == CST_UNITID_STORAGE_PIT)) {
 			if (this->ai->structTacAI.SNNumber[SNAutoBuildDropsites] > 0) {
 				continue;
@@ -2576,15 +2608,45 @@ int StrategyBuilder::CreateBuildingsStrategyElements() {
 			curElem = curElem->next;
 		}
 		if (insertionPoint) {
-			if (AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding,
-				bldInfo->unitDefId, this->player, bldInfo->unitDef->ptrUnitName)) {
-				counter++;
-				bldInfo->addedInStrategyCount++;
-			}
+			counter += AddBuildingToStrategy(bldInfo, insertionPoint);
 		}
 	}
 	return counter;
 }
+
+// Create secondary (optional) occurrences of buildings. E.g. 2nd TC, or additional military buildings to train army faster and do researches while another building is training units
+int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
+	// TODO
+
+	// Backup TC: add after all "required" buildings and after gov center (not allowed before) & after iron age too
+	PotentialBuildingInfo *tcInfo = this->GetBuildingInfo(CST_UNITID_FORUM);
+	if (tcInfo && (tcInfo->addedInStrategyCount <= 1) && (tcInfo->desiredCount > 1)) {
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = this->seIronAge;
+		if (GetFirstElementOf(this->buildAI, curElem, this->seGovCenter) == curElem) {
+			curElem = this->seGovCenter; // Now curElem is the latest of the 2 elements in strategy
+		}
+		for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
+		{
+			if (bldInfo->addedInStrategyCount > 0) {
+				if (GetFirstElementOf(this->buildAI, curElem, bldInfo->firstAddedInStrategy) == curElem) {
+					curElem = bldInfo->firstAddedInStrategy; // curElem was the earlier elem : change
+				}
+			}
+		}
+		// Move forward - with a random part
+		int moveCount = randomizer.GetRandomValue_normal_moreFlat(5, 20);
+		while (curElem && (curElem != &this->buildAI->fakeFirstStrategyElement) && (moveCount > 0)) {
+			curElem = curElem->next;
+			moveCount--;
+		}
+		if (curElem) {
+			AddBuildingToStrategy(tcInfo, curElem);
+		}
+	}
+
+	return 0;
+}
+
 
 // Create a brand new dynamic strategy for player.
 void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
@@ -2617,16 +2679,27 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	{
 		this->CollectResearchInfoForUnit(unitInfo->unitDefId, !unitInfo->isOptionalUnit);
 	}
-	this->CollectResearchInfoForUnit(CST_UNITID_VILLAGER, false);
-	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false); // TODO: tower upgrades except ballista
+	// Mark for add: all researches added previously are "validated" / "necessary"
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
-		resInfo->markedForAdd = true; // all researches above are "validated" / "necessary"
+		resInfo->markedForAdd = true;
 	}
+
+	// Some "hardcoded" stuff (related to game basic behaviour)
+#pragma message("villagers: do not work, you try on every villager id (use class&villager mode + farms amount")
+	this->CollectResearchInfoForUnit(CST_UNITID_VILLAGER, false); // Get optional researches for economy (NOT marked for add at this point)
+	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false); // TODO: tower upgrades except ballista
+	this->AddPotentialBuildingInfoToList(CST_UNITID_MARKET); // Market is always needed
+
 	// Finalize exact list of trained units => add units
 	this->AddMilitaryUnitsForEarlyAges();
 	this->UpdateRequiredBuildingsFromValidatedResearches();
 	this->UpdateMissingResearchRequirements();
+	// Add backup TC in internal info
+	PotentialBuildingInfo *tcInfo = this->GetBuildingInfo(CST_UNITID_FORUM);
+	if (tcInfo && (tcInfo->desiredCount == 1)) {
+		tcInfo->desiredCount++;  // Add a backup TC
+	}
 
 	// TODO: set force to optional units requirements
 
@@ -2656,8 +2729,9 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	this->CreateOtherResearchesStrategyElements();
 
 	// Add researches to strategy
-	// Add buildings to strategy
-	this->CreateBuildingsStrategyElements();
+	// Add buildings to strategy (first building of each kind)
+	this->CreateFirstBuildingsStrategyElements();
+	this->CreateSecondaryBuildingStrategyElements();
 
 	if (buildAI->mainAI->structTradeAI.needGameStartAIInit) {
 		// Warning: automatic element insertions WILL be triggered
