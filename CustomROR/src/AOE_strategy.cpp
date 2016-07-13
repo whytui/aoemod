@@ -1,4 +1,4 @@
-#include "../include/strategy.h"
+#include "../include/AOE_strategy.h"
 
 struct StrategyUnitInfo {
 	StrategyUnitInfo(short int unitDefId) {

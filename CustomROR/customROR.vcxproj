@@ -124,8 +124,10 @@
     <ClInclude Include="include\EXESelfEditor.h" />
     <ClInclude Include="include\popups.h" />
     <ClInclude Include="include\interface.h" />
-    <ClInclude Include="include\strategy.h" />
+    <ClInclude Include="include\AOE_strategy.h" />
     <ClInclude Include="include\StrategyBuilder.h" />
+    <ClInclude Include="include\StrategyBuilderCommon.h" />
+    <ClInclude Include="include\StrategyPotentialElemInfo.h" />
     <ClInclude Include="include\traceMessage.h" />
     <ClInclude Include="include\UI_utilities.h" />
     <ClInclude Include="include\unitShortcuts.h" />
@@ -154,8 +156,10 @@
     <ClCompile Include="src\interface.cpp" />
     <ClCompile Include="src\researches.cpp" />
     <ClCompile Include="src\RORProcessEditor.cpp" />
-    <ClCompile Include="src\strategy.cpp" />
+    <ClCompile Include="src\AOE_strategy.cpp" />
     <ClCompile Include="src\StrategyBuilder.cpp" />
+    <ClCompile Include="src\StrategyBuilderCommon.cpp" />
+    <ClCompile Include="src\StrategyPotentialElemInfo.cpp" />
     <ClCompile Include="src\traceMessages.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,6 @@
 
 #pragma once
+#include <tchar.h> // _T()
 
 /*
  * This file contains public functional values that generally correspond to empires.dat data.

@@ -15,7 +15,7 @@
 #include "UI_utilities.h"
 #include "crTrigger.h"
 #include "crTriggerSet.h"
-#include "strategy.h"
+#include "AOE_strategy.h"
 #include "interface.h"
 #include "EXESelfEditor.h"
 #include "crPatcher.h"
