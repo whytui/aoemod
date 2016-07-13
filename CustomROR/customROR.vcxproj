@@ -171,6 +171,7 @@
     <Xml Include="res\customROR.xml">
       <SubType>Designer</SubType>
     </Xml>
+    <Xml Include="res\customROR_civs.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

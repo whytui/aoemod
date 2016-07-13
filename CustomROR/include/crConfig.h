@@ -118,6 +118,8 @@ public:
 	// AI
 	long int improveAILevel;
 	long int tacticalAIUpdateDelay;
+	bool generateStrategyForRM;
+	bool generateStrategyForDM;
 	// Panic mode options
 	long int panicModeDelay; // seconds between 2 runs of panic mode algorithm
 	long int maxPanicUnitsCountToAddInStrategy;

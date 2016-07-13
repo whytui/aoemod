@@ -57,7 +57,7 @@ namespace STRATEGY {
 		const std::string GetLog() const { return this->log; }
 
 		// Create a brand new dynamic strategy for player.
-		void CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
+		void CreateStrategyFromScratch();
 
 		// Searches researches that impact a specific unit and add them to internal list of potential researches.
 		// Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.

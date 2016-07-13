@@ -110,7 +110,7 @@ namespace AOE_CONST_FUNC {
 		SNSkipAges = 113,
 		SNNumberBuildAttemptsBeforeSkip = 114,
 		SNMaxSkipsPerAttempt = 115,
-		UNKNOWN116_SNTrainingRebuilds = 116, // Not sure
+		SN_UNKNOWN116_SNTrainingRebuilds = 116, // Not sure
 		SNFoodGathererPercentage = 117,
 		SNGoldGathererPercentage = 118,
 		SNStoneGathererPercentage = 119,
@@ -173,7 +173,7 @@ namespace AOE_CONST_FUNC {
 		SNSpecificBuildItemTime = 176,
 		SNUnskippableItemType = 177,
 		SNAttackDiplomacyImpact = 178,
-		ExplorationRequiredBeforeExplorerCountReduction = 179,
+		SNExplorationRequiredBeforeExplorerCountReduction = 179,
 		SNAutoBuildHouses = 180,
 		SNUpgradeToToolAgeASAP = 181,
 		SNUpgradeToBronzeAgeASAP = 182,
@@ -198,8 +198,8 @@ namespace AOE_CONST_FUNC {
 		SNMinimumDropsiteBuffer = 202,
 		SNUseByTypeMaxGathering = 203,
 		SNMinimumElephantHuntGroupSize = 204,
-		SNAutoBuildDropsites = 205,
-		SNAutoBuildFarms = 206,
+		SNAutoBuildDropsites = 205, // If set, AI player will automatically add storage pits and granaries to its strategy (recommended in random games)
+		SNAutoBuildFarms = 206, // Warning, in RM, you still need to include farms in AI file. SNAutoBuildFarms only triggers farm construction in late game time (need to find out how this works)
 		SNAutoBuildTowers = 207,
 		SNAutoBuildDocks = 208,
 		SNAutoBuildFishingBoats = 209,
@@ -218,6 +218,6 @@ namespace AOE_CONST_FUNC {
 		SNMaxTowers = 222,
 		SNAutoBuildWarships = 223,
 		SNDesiredNumberWarships = 224,
-		UNKNOWN225 // Last valid SN number ?
+		SN_UNKNOWN225 // Last valid SN number ?
 	};
 }

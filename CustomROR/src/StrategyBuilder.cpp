@@ -2540,7 +2540,9 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 			(bldInfo->addedInStrategyCount > 0)) { continue; }
 		// Some buildings with hardcoded behaviour
 		if ((bldInfo->unitDefId == CST_UNITID_GRANARY) || (bldInfo->unitDefId == CST_UNITID_STORAGE_PIT)) {
-			if (this->ai->structTacAI.SNNumber[SNAutoBuildDropsites] > 0) {
+			// Read SN number from strategy AI because it is valued and correct even "before" game start. TacAI's SN number are copied later.
+			if (this->ai->structStrategyAI.SNNumber[SNAutoBuildDropsites] > 0) {
+				bldInfo->addedInStrategyCount++; // Anticipate the one that will be added at game start after a few seconds
 				continue;
 			}
 		}
@@ -2623,20 +2625,18 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 
 
 // Create a brand new dynamic strategy for player.
-void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
-	if (!buildAI || !buildAI->IsCheckSumValid() || !buildAI->mainAI || !buildAI->mainAI->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(buildAI->commonAIObject.playerId);
-	if (!player || !player->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
-	if (!global || !global->IsCheckSumValid()) { return; }
+void StrategyBuilder::CreateStrategyFromScratch() {
+	if (!this->buildAI || !this->buildAI->IsCheckSumValid() || !this->buildAI->mainAI || !this->buildAI->mainAI->IsCheckSumValid()) { return; }
+	if (!this->player || !this->player->IsCheckSumValid()) { return; }
+	if (!this->global || !this->global->IsCheckSumValid()) { return; }
 	// Clear previous strategy
-	ClearStrategy(buildAI);
-	strcpy_s(buildAI->strategyFileName, 0x3F, "Dynamic CustomROR strategy");
+	ClearStrategy(this->buildAI);
+	strcpy_s(this->buildAI->strategyFileName, 0x3F, "Dynamic CustomROR strategy");
 
 	this->log += "Start Strategy creation for p#";
-	this->log += std::to_string(player->playerId);
+	this->log += std::to_string(this->player->playerId);
 	this->log += " = ";
-	this->log += player->playerName_length16max;
+	this->log += this->player->playerName_length16max;
 	this->log += newline;
 
 	// WARNING : take care if map is naval (=> villager count, land military units count + all non-war boats thing)

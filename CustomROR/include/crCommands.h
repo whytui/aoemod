@@ -181,6 +181,9 @@ public:
 	// This fixes nextStrategyAIExecutionCounter flag for all players (useful for loaded games)
 	void FixGameStartAIInitForPlayers();
 
+	// Returns true if AI file selection was overriden (do NOT let normal code be executed), false to let normal code be executed
+	bool ManageAIFileSelectionForPlayer(char civilizationId, char *aiFileBuffer);
+
 	// Process event when (human) player sees a unit. This is where gaia units are captured by human player.
 	// Return true if the unit must NOT be captured
 	bool HumanSpecific_onCapturableUnitSeen(ROR_STRUCTURES_10C::STRUCT_UNIT *beingSeenUnit, ROR_STRUCTURES_10C::STRUCT_PLAYER *actorPlayer);

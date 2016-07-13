@@ -1762,55 +1762,14 @@ void CustomRORInstance::ManageAIFileSelectionForPlayer(REG_BACKUP *REG_values) {
 		return; // customize ROR code will JMP to end of "player.chooseAIFileName" function
 	}
 	
-	// Standard civ: continue "player.chooseAIFileName" function normally
-	if ((p->civilizationId > 0) && (p->civilizationId <= CIVILIZATIONS::CST_CIVID_STANDARD_MAX)) {
-		ChangeReturnAddress(REG_values, 0x004F36F8);
-		return;
-	}
-
 	// Custom civ
 	char **stackPtr = (char **) (REG_values->ESP_val + 0x320); // 0x318 for sub esp and 8 for the 2 PUSH (cf ROR code).
 	char *buffer1 = stackPtr[1];
 	char *buffer2 = stackPtr[2];
 
 	strcpy_s(buffer2, 22, "RandomGameSpecialized");
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
-	ror_api_assert(REG_values, gameSettings != NULL);
-	CivilizationInfo *civ = this->crInfo.configInfo.GetCivInfo(p->civilizationId);
-	if (gameSettings->isDeathMatch) {
-		if (civ) {
-			strcpy_s(buffer1, 255, civ->deathmatch_AI_file.c_str());
-			return;
-		}
-	}
-
-	// RM or scenario (for players that don't have a strategy).
-	if (civ) {
-		switch (gameSettings->mapTypeChoice) {
-		case 0:
-		case 1:
-			strcpy_s(buffer1, 255, civ->RM_AI_file_much_water.c_str());
-			break;
-		case 4:
-		case 7:
-			strcpy_s(buffer1, 255, civ->RM_AI_file_no_water.c_str());
-			break;
-		default:
-			strcpy_s(buffer1, 255, civ->RM_AI_file_some_water.c_str());
-		}
-	}
-
-	// Crucial check: The game freezes if we choose an invalid file, because it will call this again and again.
-	FILE *f;
-	char bufFileName[512];
-	sprintf_s(bufFileName, "%s\\%s", gameSettings->gameDirFullPath, buffer1);
-	errno_t e = fopen_s(&f, bufFileName, "r"); // e == 0 if success
-	if (e) {
-		std::string msg = std::string("Error: Could not find file: ") + bufFileName;
-		traceMessageHandler.WriteMessage(msg);
-		*buffer1 = 0; // clear filename because it's invalid.
-	} else {
-		fclose(f);
+	if (!this->crCommand.ManageAIFileSelectionForPlayer(p->civilizationId, buffer1)) {
+		ChangeReturnAddress(REG_values, 0x004F36F8); // continue "player.chooseAIFileName" function normally
 	}
 
 	// Return to normal address (leave REG_values->return_address unchanged).

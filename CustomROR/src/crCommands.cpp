@@ -484,7 +484,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, false, NULL);
 		STRATEGY::StrategyBuilder *sb = new STRATEGY::StrategyBuilder(this->crInfo, player);
 		//sb->GetStrategyGenerationInfo(player);
-		sb->CreateStrategyFromScratch(&player->ptrAIStruct->structBuildAI);
+		sb->CreateStrategyFromScratch();
 		delete sb;
 	}
 	if (strcmp(command, "a") == 0) {
@@ -814,7 +814,7 @@ void CustomRORCommand::OnGameStart() {
 		}
 	}
 
-	// Manage game settings customization
+	// Manage game settings customization for new random games
 	this->ApplyCustomizationOnRandomGameStart();
 
 	// Triggers
@@ -889,7 +889,7 @@ void CustomRORCommand::SetSNNumberInStrategyAndTacAI(ROR_STRUCTURES_10C::STRUCT_
 }
 
 
-// Does all custom stuff on random maps / deathmatches at game start : custom personnality values, strategy, initial resources, etc.
+// Does all custom stuff on random maps / deathmatches at game start : custom personality values, strategy, initial resources, etc.
 // These are changes that are applied when game is loaded (do not interfere here with settings like map size, etc)
 // Does NOT apply to scenario/campaign/load saved game.
 // Return false if failed.
@@ -1000,6 +1000,22 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 							}
 						}
 					}
+				}
+			}
+		}
+	}
+
+	// Strategy
+	if ((!settings->isDeathMatch && this->crInfo->configInfo.generateStrategyForRM) ||
+		(settings->isDeathMatch && this->crInfo->configInfo.generateStrategyForDM)) {
+		if (settings->isDeathMatch) {
+			traceMessageHandler.WriteMessage("Strategy generation for deathmatch games is not supported yet");
+		} else {
+			for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
+				ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+				if (player && player->IsCheckSumValid()) {
+					STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(this->crInfo, player);
+					sb.CreateStrategyFromScratch();
 				}
 			}
 		}
@@ -1183,6 +1199,57 @@ void CustomRORCommand::FixGameStartAIInitForPlayers() {
 			// if we want AI not to rebuild already existing houses (+docks, boats...)
 		}
 	}
+}
+
+
+// Returns true if AI file selection was overriden (do NOT let normal code be executed), false to let normal code be executed
+bool CustomRORCommand::ManageAIFileSelectionForPlayer(char civilizationId, char *aiFileBuffer) {
+	// Standard civ: continue "player.chooseAIFileName" function normally
+	if ((civilizationId > 0) && (civilizationId <= CIVILIZATIONS::CST_CIVID_STANDARD_MAX)) {
+		return false;
+	}
+	assert(aiFileBuffer != NULL);
+	if (!aiFileBuffer) { return false; }
+
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
+	assert(gameSettings != NULL);
+	CivilizationInfo *civ = this->crInfo->configInfo.GetCivInfo(civilizationId);
+	if (gameSettings->isDeathMatch) {
+		if (civ) {
+			strcpy_s(aiFileBuffer, 255, civ->deathmatch_AI_file.c_str());
+			return true;
+		}
+	}
+
+	// RM or scenario (for players that don't have a strategy).
+	if (civ) {
+		switch (gameSettings->mapTypeChoice) {
+		case 0:
+		case 1:
+			strcpy_s(aiFileBuffer, 255, civ->RM_AI_file_much_water.c_str());
+			break;
+		case 4:
+		case 7:
+			strcpy_s(aiFileBuffer, 255, civ->RM_AI_file_no_water.c_str());
+			break;
+		default:
+			strcpy_s(aiFileBuffer, 255, civ->RM_AI_file_some_water.c_str());
+		}
+	}
+
+	// Crucial check: The game freezes if we choose an invalid file, because it will call this again and again.
+	FILE *f;
+	char bufFileName[512];
+	sprintf_s(bufFileName, "%s\\%s", gameSettings->gameDirFullPath, aiFileBuffer);
+	errno_t e = fopen_s(&f, bufFileName, "r"); // e == 0 if success
+	if (e) {
+		std::string msg = std::string("Error: Could not find file: ") + bufFileName;
+		traceMessageHandler.WriteMessage(msg);
+		*aiFileBuffer = 0; // clear filename because it's invalid.
+	} else {
+		fclose(f);
+	}
+	return true;
 }
 
 

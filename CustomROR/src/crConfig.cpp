@@ -90,6 +90,8 @@ CustomRORConfig::CustomRORConfig() {
 	this->useEnhancedRulesForAutoAttackTargetSelection = false; // Game default
 	//this->autoAttackOptionForBlastMeleeUnits : constructor is Game default
 	//this->autoAttackOptionForBlastRangedUnits ; constructor is Game default
+	this->generateStrategyForRM = false; // Game default
+	this->generateStrategyForDM = false; // Game default
 
 	// Map generation
 	this->randomMapRelicsCount = 5;
@@ -490,6 +492,19 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "improveAI") {
 			callResult = elem->QueryIntAttribute("value", &intValue);
 			if (callResult == TIXML_SUCCESS) { this->improveAILevel = intValue; }
+		}
+		// AI : generate strategy
+		if (elemName == "strategyAI") {
+			categoryName = this->XML_GetAttributeValue(elem, "name");
+			if (categoryName == "generateAutomaticStrategy") {
+				std::string gameType = this->XML_GetAttributeValue(elem, "gameType");
+				if (gameType == "RM") {
+					this->generateStrategyForRM = this->XML_GetBoolElement(elem, "enable");
+				}
+				if (gameType == "DM") {
+					this->generateStrategyForDM = this->XML_GetBoolElement(elem, "enable");
+				}
+			}
 		}
 		// Tactical AI options
 		if (elemName == "tacticalAI") {

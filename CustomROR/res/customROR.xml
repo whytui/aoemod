@@ -88,6 +88,13 @@
 	Low values may lead to issues in tech order/requirements. It won't block AI but is not good for it. -->
 	<tacticalAI name="minPopulationBeforeOptionalItems" value="30"/>
 	
+	<!-- strategyAI.generateAutomaticStrategy : if enable=0, use game AI files (default) or AI files specified in customROR_civs.xml
+	If enable=1, customROR will generate a *random* strategies for each player, taking into account their tech trees/strengths. customROR_civs.xml AI file names will be ignored.
+	CustomROR can only generate strategies for random games (random map/deathmatch), not scenario/campaign
+	-->
+	<strategyAI name="generateAutomaticStrategy" gameType="RM" enable="0"/><!-- Ramdom map -->
+	<strategyAI name="generateAutomaticStrategy" gameType="DM" enable="0"/><!-- Deathmatch: Not supported yet... -->
+	
 	<!-- *** Manage Panic mode (dynamic defence units) -->
 	<!-- Integer value=seconds between 2 checks -->
 	<panicMode name="delay" value="15"/>
@@ -188,7 +195,7 @@
 	<!-- Set noWalls to enable=1 to disable all walls in DM /RM games -->
 	<noWalls enable="0"/>
 	<!-- initialResources defines the amount of available resource at game start
-	GameType=DM (deathmatch) or RM (random map), choice (for RM only) corresponds to the "resources" user choice in game settings
+	gameType=DM (deathmatch) or RM (random map), choice (for RM only) corresponds to the "resources" user choice in game settings
 	choice=0 corresponds to Default
 	choice=1 corresponds to Small (hidden by default)
 	choice=2 corresponds to Medium
@@ -200,7 +207,7 @@
 	<initialResources gameType="RM" choice="3" food="1000" wood="1000" stone="750" gold="0"></initialResources><!--large: default 1000/1000/750/0-->
 	<initialResources gameType="DM" food="20000" wood="20000" stone="5000" gold="10000"></initialResources><!--deathmatch: default 20000/20000/5000/10000-->
 	<!-- InitialResourceAIBonus: additional resource amount for AI players in hardest difficulty.
-	GameType=DM (deathmatch) or RM (random map). -->
+	gameType=DM (deathmatch) or RM (random map). -->
 	<initialResourceAIBonus gameType="RM" food="200" wood="200" stone="150" gold="250"></initialResourceAIBonus>
 	<initialResourceAIBonus gameType="DM" food="2000" wood="2000" stone="500" gold="2000"></initialResourceAIBonus>
 	<!-- per_number: force some values for SN numbers to random maps/deathmatches 
