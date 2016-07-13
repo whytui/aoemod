@@ -2679,6 +2679,9 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	{
 		this->CollectResearchInfoForUnit(unitInfo->unitDefId, !unitInfo->isOptionalUnit);
 	}
+	// Make sure farm requirements are met
+	short int enableFarmResearchId = FindResearchThatEnableUnit(this->player, CST_UNITID_FARM, 0);
+	this->AddPotentialResearchInfoToList(enableFarmResearchId);
 	// Mark for add: all researches added previously are "validated" / "necessary"
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
@@ -2686,10 +2689,9 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	}
 
 	// Some "hardcoded" stuff (related to game basic behaviour)
-#pragma message("villagers: do not work, you try on every villager id (use class&villager mode + farms amount")
+#pragma message("villagers: does not work, you try on every villager id (use class&villager mode + farms amount")
 	this->CollectResearchInfoForUnit(CST_UNITID_VILLAGER, false); // Get optional researches for economy (NOT marked for add at this point)
 	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false); // TODO: tower upgrades except ballista
-	this->AddPotentialBuildingInfoToList(CST_UNITID_MARKET); // Market is always needed
 
 	// Finalize exact list of trained units => add units
 	this->AddMilitaryUnitsForEarlyAges();
@@ -2701,8 +2703,7 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 		tcInfo->desiredCount++;  // Add a backup TC
 	}
 
-	// TODO: set force to optional units requirements
-
+	// If required buildings have not been added to strategy yet, do it now...
 	this->AddMissingBuildings();
 	// Check on requirements
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
@@ -2714,9 +2715,9 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 		}
 	}
 
-	// Add (and organize) items to strategy
+	// Add (and organize) items to strategy : military units (main ones)
 	this->CreateMainMilitaryUnitsElements();
-	// Add optional military units (early age)
+	// Add optional military units (early ages units)
 	this->CreateEarlyMilitaryUnitsElements();
 
 	// Choose additional (cheap & useful) researches for "retrains" units - optional
