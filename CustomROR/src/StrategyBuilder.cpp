@@ -33,6 +33,25 @@ void StrategyBuilder::FreePotentialElementsList() {
 }
 
 
+// Get the strategy element that correspond to an Age Id. researchId must correspond to an age upgrade !
+// For stone age, returns the "fake" first strategy element (beginning of strategy)
+// For other researches, returns NULL
+ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *StrategyBuilder::GetAgeStrategyElement(short int researchId) {
+	switch (researchId) {
+	case CST_RSID_STONE_AGE:
+		return &this->buildAI->fakeFirstStrategyElement;
+	case CST_RSID_TOOL_AGE:
+		return this->seToolAge;
+	case CST_RSID_BRONZE_AGE:
+		return this->seBronzeAge;
+	case CST_RSID_IRON_AGE:
+		return this->seIronAge;
+	default:
+		return NULL;
+	}
+}
+
+
 // Add a unit to selection and updates some internal variables accordingly
 // Return total unit count in selection
 int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
@@ -112,7 +131,18 @@ PotentialResearchInfo *StrategyBuilder::GetResearchInfo(ROR_STRUCTURES_10C::STRU
 // Returns true if actually added
 bool StrategyBuilder::AddPotentialResearchInfoToList(short int researchId) {
 	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(researchId);
-	if (!resDef) { return false; }
+	if (!resDef || !this->global || !this->player) { return false; }
+	// Check availability (tech tree)
+	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techTreeDef = this->global->GetTechDef(this->player->techTreeId);
+	if (techTreeDef) {
+		if (DoesTechDisableResearch(techTreeDef, researchId)) {
+			this->log += "Trying to add a disabled research to potential researches list (";
+			this->log += std::to_string(researchId);
+			this->log += ") => ignored";
+			this->log += newline;
+			return false; // not available = do not add
+		}
+	}
 	PotentialResearchInfo *resInfo = this->GetResearchInfo(resDef);
 	if (resInfo != NULL) {
 		return false;
@@ -231,57 +261,7 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_1
 	this->mustBeBeforeThisElem = NULL;
 	this->mustBeAfterThisElem = NULL;
 
-	if (this->forcePlaceForFirstImpactedUnit) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
-		assert(player && player->IsCheckSumValid());
-		if (!player || !player->IsCheckSumValid()) { return; }
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *bestFirstElem = NULL;
-		// Find the first impacted unit in strategy
-		for each (short int unitDefId in this->impactedUnitDefIds)
-		{
-			STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(unitDefId);
-			TAIUnitClass unitClass = TAIUnitClass::AIUCNone;
-			if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass() && unitDefBase->DerivesFromLiving()) {
-				if (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) {
-					unitClass = TAIUnitClass::AIUCBuilding;
-				}
-				if (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT) {
-					unitClass = TAIUnitClass::AIUCLivingUnit;
-				}
-			}
-			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstElemThisUnit = FindFirstElementInStrategy(fakeFirst, unitClass, unitDefId);
-			if (firstElemThisUnit && firstElemThisUnit->IsCheckSumValid()) {
-				if ((bestFirstElem == NULL) || GetFirstElementOf(buildAI, bestFirstElem, firstElemThisUnit) == firstElemThisUnit) {
-					bestFirstElem = firstElemThisUnit;
-				}
-			}
-		}
-		if (bestFirstElem != NULL) {
-			// Do not insert right here. Let AI train some units before starting upgrades.
-			int elemCount = 0;
-			int maxElemCount = randomizer.GetRandomValue_normal_moreFlat(2, 7); // Do not add further than x "elems" away from base calculated point
-			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = bestFirstElem;
-			while (curElem && (elemCount < maxElemCount)) { // Just move a bit further
-				if (curElem->elementType == TAIUnitClass::AIUCCritical) { elemCount = maxElemCount; } // Force "don't go further" / probably an age upgrade
-				elemCount++;
-				curElem = curElem->next;
-			}
-			// We could check research is not too early compared to its age...
-			if (this->requiredAgeResearch) {
-				if (GetFirstElementOf(buildAI, curElem, this->requiredAgeResearch) == this->requiredAgeResearch) {
-					// Required age research IS before insertion point, which is good :)
-					if (curElem) {
-						this->mustBeBeforeThisElem = curElem->next;
-						this->mustBeAfterThisElem = curElem->previous;
-						return; // Position has been determined, no need to run the treatments below.
-					}
-				} else {
-					assert(false && "Insertion point is prior to required age, this should never happen !");
-				}
-			}
-		}
-	}
-
+	// Standard calculation of mustBeAfterThisElem and mustBeBeforeThisElem
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = buildAI->fakeFirstStrategyElement.next;
 	while (curElem && (curElem != fakeFirst) && (this->mustBeBeforeThisElem == NULL)) {
 		if (this->mustBeBeforeThisElem == NULL) {
@@ -309,6 +289,67 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_1
 			this->mustBeAfterThisElem = curElem;
 		}
 		curElem = curElem->next;
+	}
+
+	// Special cases: override mustBeBeforeThisElem and mustBeAfterThisElem values
+	if (this->forcePlaceForFirstImpactedUnit || this->forcePutAsEarlyAsPossible) {
+		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
+		assert(player && player->IsCheckSumValid());
+		if (!player || !player->IsCheckSumValid()) { return; }
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *bestFirstElem = this->mustBeAfterThisElem; // use previous calculations for initial position
+		if (bestFirstElem) {
+			bestFirstElem = bestFirstElem->next;
+		}
+		int maxValueForMaxElemCount = 7;
+		if (this->forcePutAsEarlyAsPossible) {
+			maxValueForMaxElemCount = 5; // Reduce random part (do not put tech too far from calculated point)
+		}
+		if (this->forcePlaceForFirstImpactedUnit) {
+			// Find the first impacted unit in strategy
+			for each (short int unitDefId in this->impactedUnitDefIds)
+			{
+				STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(unitDefId);
+				TAIUnitClass unitClass = TAIUnitClass::AIUCNone;
+				if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass() && unitDefBase->DerivesFromLiving()) {
+					if (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) {
+						unitClass = TAIUnitClass::AIUCBuilding;
+					}
+					if (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT) {
+						unitClass = TAIUnitClass::AIUCLivingUnit;
+					}
+				}
+				ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstElemThisUnit = FindFirstElementInStrategy(fakeFirst, unitClass, unitDefId);
+				if (firstElemThisUnit && firstElemThisUnit->IsCheckSumValid()) {
+					if ((bestFirstElem == NULL) || GetFirstElementOf(buildAI, bestFirstElem, firstElemThisUnit) == firstElemThisUnit) {
+						bestFirstElem = firstElemThisUnit;
+					}
+				}
+			}
+		}
+		if (bestFirstElem != NULL) {
+			// Do not insert right here. Let AI train some units before starting upgrades.
+			int elemCount = 0;
+			int maxElemCount = randomizer.GetRandomValue_normal_moreFlat(2, maxValueForMaxElemCount); // Do not add further than x "elems" away from base calculated point
+			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = bestFirstElem;
+			while (curElem && (elemCount < maxElemCount)) { // Just move a bit further
+				if (curElem->elementType == TAIUnitClass::AIUCCritical) { elemCount = maxElemCount; } // Force "don't go further" / probably an age upgrade
+				elemCount++;
+				curElem = curElem->next;
+			}
+			// We could check research is not too early compared to its age...
+			if (this->requiredAgeResearch) {
+				if (GetFirstElementOf(buildAI, curElem, this->requiredAgeResearch) == this->requiredAgeResearch) {
+					// Required age research IS before insertion point, which is good :)
+					if (curElem) {
+						this->mustBeBeforeThisElem = curElem->next;
+						this->mustBeAfterThisElem = curElem->previous;
+						return; // Position has been determined, no need to run the treatments below.
+					}
+				} else {
+					assert(false && "Insertion point is prior to required age, this should never happen !");
+				}
+			}
+		}
 	}
 }
 
@@ -1894,6 +1935,25 @@ void StrategyBuilder::ChooseOptionalResearches() {
 }
 
 
+// Adds non-military researches that should always be included, for example wheel - if available in tech tree.
+void StrategyBuilder::AddMandatoryNonMilitaryResearches() {
+	// Always add wheel (if available in tech tree - checked in AddPotentialResearchInfoToList)
+	this->AddPotentialResearchInfoToList(CST_RSID_WHEEL); // Note: it may have already been added by some dependency
+	PotentialResearchInfo *resInfo = this->GetResearchInfo(CST_RSID_WHEEL);
+	if (resInfo) {
+		// Force wheel to be developed before next age (if there IS a next age)
+		if (resInfo->requiredAge < CST_RSID_IRON_AGE) {
+			resInfo->researchesThatMustBePutAfterMe.insert(resInfo->requiredAge + 1);
+		}
+		resInfo->forcePutAsEarlyAsPossible = true;
+	}
+
+	// Make sure farm requirements are met
+	short int enableFarmResearchId = FindResearchThatEnableUnit(this->player, CST_UNITID_FARM, 0);
+	this->AddPotentialResearchInfoToList(enableFarmResearchId);
+}
+
+
 
 /*** Strategy writing methods ***/
 
@@ -2404,7 +2464,7 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 	// Add also researches with a specific location (forcePlaceForFirstImpactedUnit)
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
-		if (resInfo->forcePlaceForFirstImpactedUnit && !resInfo->isInStrategy) {
+		if ((resInfo->forcePlaceForFirstImpactedUnit || resInfo->forcePutAsEarlyAsPossible) && !resInfo->isInStrategy) {
 			// If research has already been placed, move it ? should not be necessary because ComputeStratElemPositionConstraints should have taken this into account ?
 			resInfo->ComputeStratElemPositionConstraints(this->buildAI);
 			if (resInfo->mustBeAfterThisElem != NULL) {
@@ -2530,8 +2590,6 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 
 // Create secondary (optional) occurrences of buildings. E.g. 2nd TC, or additional military buildings to train army faster and do researches while another building is training units
 int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
-	// TODO
-
 	// Backup TC: add after all "required" buildings and after gov center (not allowed before) & after iron age too
 	PotentialBuildingInfo *tcInfo = this->GetBuildingInfo(CST_UNITID_FORUM);
 	if (tcInfo && (tcInfo->addedInStrategyCount <= 1) && (tcInfo->desiredCount > 1)) {
@@ -2558,6 +2616,8 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 		}
 	}
 
+	// TODO : other buildings
+#pragma message("TODO : add other secondary buildings for 'main' units")
 	return 0;
 }
 
@@ -2593,9 +2653,7 @@ void StrategyBuilder::CreateStrategyFromScratch(ROR_STRUCTURES_10C::STRUCT_BUILD
 	{
 		this->CollectResearchInfoForUnit(unitInfo->unitDefId, !unitInfo->isOptionalUnit);
 	}
-	// Make sure farm requirements are met
-	short int enableFarmResearchId = FindResearchThatEnableUnit(this->player, CST_UNITID_FARM, 0);
-	this->AddPotentialResearchInfoToList(enableFarmResearchId);
+	this->AddMandatoryNonMilitaryResearches();
 	// Mark for add: all researches added previously are "validated" / "necessary"
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
@@ -2776,7 +2834,7 @@ int StrategyBuilder::UpdateRequiredBuildingsFromValidatedResearches() {
 		if (resInfo->markedForAdd && resInfo->researchDef) {
 			// Research's location
 			if ((resInfo->researchDef->researchLocation >= 0) &&
-				(!IsDisabledInTechTree(this->player->playerId, resInfo->researchDef->researchLocation))) {
+				(!IsUnitDisabledInTechTree(this->player->playerId, resInfo->researchDef->researchLocation))) {
 				// This only adds if not already in list
 				if (this->AddPotentialBuildingInfoToList(resInfo->researchDef->researchLocation)) {
 					addedElements++;
@@ -2914,7 +2972,7 @@ void StrategyBuilder::AddMissingBuildings() {
 					bldDef = missingBuildingsDef.front();
 					missingBuildingsDef.pop_front(); // remove the item we just read
 				}
-				if (!IsDisabledInTechTree(this->player->playerId, bldDef->DAT_ID1)) {
+				if (!IsUnitDisabledInTechTree(this->player->playerId, bldDef->DAT_ID1)) {
 					this->AddPotentialBuildingInfoToList(bldDef);
 					for (int i = 0; i < 4; i++) {
 						if (resInfo->missingRequiredResearches[i] == bldDef->initiatesResearch) {
@@ -2928,22 +2986,3 @@ void StrategyBuilder::AddMissingBuildings() {
 		}
 	}
 }
-
-// Get the strategy element that correspond to an Age Id. researchId must correspond to an age upgrade !
-// For stone age, returns the "fake" first strategy element (beginning of strategy)
-// For other researches, returns NULL
-ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *StrategyBuilder::GetAgeStrategyElement(short int researchId) {
-	switch (researchId) {
-	case CST_RSID_STONE_AGE:
-		return &this->buildAI->fakeFirstStrategyElement;
-	case CST_RSID_TOOL_AGE:
-		return this->seToolAge;
-	case CST_RSID_BRONZE_AGE:
-		return this->seBronzeAge;
-	case CST_RSID_IRON_AGE:
-		return this->seIronAge;
-	default:
-		return NULL;
-	}
-}
-

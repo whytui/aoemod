@@ -58,6 +58,7 @@ PotentialResearchInfo::PotentialResearchInfo() {
 	this->requiredAgeResearch = NULL;
 	this->totalCosts = 0;
 	this->forcePlaceForFirstImpactedUnit = false;
+	this->forcePutAsEarlyAsPossible = false;
 }
 
 PotentialBuildingInfo::PotentialBuildingInfo() {

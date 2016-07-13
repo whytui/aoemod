@@ -68,6 +68,9 @@ namespace ROR_STRUCTURES_10C {
 		bool IsDisableUnit(short int unitDefId) const {
 			return (this->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (this->effectClass == 0) && (this->effectUnit == unitDefId);
 		}
+		bool IsDisableResearch(short int researchId) const {
+			return (this->effectType == TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH) && ((int)this->effectValue == researchId);
+		}
 		// Returns true if effect is an attribute modifier (set/multiply or add)
 		bool IsAttributeModifier() const {
 			return (this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) || (this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) || (this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT);

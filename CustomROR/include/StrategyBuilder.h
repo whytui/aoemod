@@ -223,6 +223,9 @@ namespace STRATEGY {
 		// All villagers and military units must have already been added to strategy.
 		void ChooseOptionalResearches();
 
+		// Adds non-military researches that should always be included, for example wheel - if available in tech tree.
+		void AddMandatoryNonMilitaryResearches();
+
 		/*** Strategy writing methods ***/
 
 		// Get the very global information about strategy generation (number of villagers, etc)

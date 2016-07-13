@@ -63,8 +63,14 @@ bool DoesTechEnableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId);
 // Returns true if technology disables provided unit (generally, tech tree effects).
 bool DoesTechDisableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId);
 
+// Returns true if technology disables provided research (generally, tech tree effects).
+bool DoesTechDisableResearch(STRUCT_TECH_DEF *techDef, short int researchId);
+
 // Returns true if a unit (DATID) is disabled by player's tech tree
-bool IsDisabledInTechTree(short int playerId, short int unitDefId);
+bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId);
+
+// Returns true if a research (research ID) is disabled by player's tech tree
+bool IsResearchDisabledInTechTree(short int playerId, short int researchId);
 
 
 // Returns the age research id of research's required age, from direct dependencies or recursively, if necessary.

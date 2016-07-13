@@ -335,17 +335,27 @@ bool DoesTechDisableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId) {
 	}
 	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
 		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
-		if (techEffect) {
-			// Enable unit
-			if (techEffect->IsDisableUnit(unitDefId)) { return true; }
-		}
+		if (techEffect->IsDisableUnit(unitDefId)) { return true; }
+	}
+	return false;
+}
+
+
+// Returns true if technology disables provided research (generally, tech tree effects).
+bool DoesTechDisableResearch(STRUCT_TECH_DEF *techDef, short int researchId) {
+	if (!techDef || (researchId < 0)) { // -1 CAN'T be a joker here !
+		return false;
+	}
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect->IsDisableResearch(researchId)) { return true; }
 	}
 	return false;
 }
 
 
 // Returns true if a unit (DATID) is disabled by player's tech tree
-bool IsDisabledInTechTree(short int playerId, short int unitDefId) {
+bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId) {
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
 	assert(settings != NULL);
 	if (!settings) { return false; }
@@ -360,6 +370,25 @@ bool IsDisabledInTechTree(short int playerId, short int unitDefId) {
 		return false;
 	}
 	return DoesTechDisableUnit(techDef, unitDefId);
+}
+
+
+// Returns true if a research (research ID) is disabled by player's tech tree
+bool IsResearchDisabledInTechTree(short int playerId, short int researchId) {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	assert(settings != NULL);
+	if (!settings) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
+		return false;
+	}
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
+	if (!player || !player->IsCheckSumValid()) { return false; }
+	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(player->techTreeId);
+	if (!techDef) {
+		return false;
+	}
+	return DoesTechDisableResearch(techDef, researchId);
 }
 
 
