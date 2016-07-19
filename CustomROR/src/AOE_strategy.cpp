@@ -455,6 +455,41 @@ bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_
 }
 
 
+// Create several strategy elements between (after) intervalStart and and Nth element after intervalStart (N=intervalLength)
+// The new elements are inserted with a "flat" repartition between start point and end point
+// elemCountToInsert = number of strategy elements to create
+// Returns number of actually inserted elements
+int AddStrategyElements(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *intervalStart, int intervalLength, int elemCountToInsert,
+	long int retrains, long int actor, AOE_CONST_FUNC::TAIUnitClass unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const char *name) {
+	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid() ||
+		!player->ptrAIStruct->structBuildAI.IsCheckSumValid()) { return 0; }
+	if (!intervalStart || (intervalLength <= 0)) { return 0; }
+	float step = ((float)intervalLength) / ((float)elemCountToInsert);
+	float curPos = 1;
+	float previousPos = 1;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = intervalStart->next;
+	int insertedCount = 0;
+	while (insertedCount < elemCountToInsert) {
+		curPos += step;
+		int movement = (int)(curPos - previousPos);
+		while (movement > 0) {
+			if (!curElem || (curElem->elemId < 0)) {
+				return insertedCount; // Error : reached end of strategy
+			}
+			curElem = curElem->next;
+			movement--;
+		}
+		previousPos = curPos;
+		// Insert an element at current position
+		if (!AddUnitInStrategy_before(&player->ptrAIStruct->structBuildAI, curElem, retrains, actor, unitType, unitDATID, player, name)) {
+			return insertedCount; // failed
+		}
+		insertedCount++;
+	}
+	return insertedCount;
+}
+
+
 // Use it to move a strategy element to any other location in strategy list.
 // afterThisElem if the element after which we move elemToMove
 bool MoveStrategyElement_after(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemToMove,

@@ -70,6 +70,13 @@ bool AddUnitInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int po
 bool AddUnitInStrategy_before(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextElem, 
 	long int retrains, long int actor, AOE_CONST_FUNC::TAIUnitClass unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const char *name);
 
+// Create several strategy elements between (after) intervalStart and and Nth element after intervalStart (N=intervalLength)
+// The new elements are inserted with a "flat" repartition between start point and end point
+// elemCountToInsert = number of strategy elements to create
+// Returns number of actually inserted elements
+int AddStrategyElements(ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *intervalStart, int intervalLength, int elemCountToInsert,
+	long int retrains, long int actor, AOE_CONST_FUNC::TAIUnitClass unitType, long int unitDATID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player, const char *name);
+
 // Use it to move a strategy element to any other location in strategy list.
 // afterThisElem if the element after which we move elemToMove
 bool MoveStrategyElement_after(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemToMove,

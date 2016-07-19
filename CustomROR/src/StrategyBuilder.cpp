@@ -1949,8 +1949,13 @@ void StrategyBuilder::AddMandatoryNonMilitaryResearches() {
 	}
 
 	// Make sure farm requirements are met
-	short int enableFarmResearchId = FindResearchThatEnableUnit(this->player, CST_UNITID_FARM, 0);
-	this->AddPotentialResearchInfoToList(enableFarmResearchId);
+	this->CollectResearchInfoForUnit(CST_UNITID_FARM, false); // Will add market...
+	this->AddPotentialBuildingInfoToList(CST_UNITID_FARM); // Add if not already present
+	PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
+	if (farmInfo) {
+		farmInfo->desiredCount = 5; // TODO
+		farmInfo->highPriority = true;
+	}
 }
 
 
@@ -2546,6 +2551,9 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 				continue;
 			}
 		}
+		if (bldInfo->unitDefId == CST_UNITID_FARM) {
+			continue; // Do not insert farms here. We need all standard buildings to be added first (so farm requirements are detected correctly)
+		}
 		if (!this->isWaterMap && (bldInfo->unitDefId == CST_UNITID_DOCK)) {
 			this->log += "Warning: do not add dock in strategy as this is not a water map";
 		}
@@ -2590,6 +2598,36 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 	return counter;
 }
 
+
+// Add strategy elements for farms
+void StrategyBuilder::CreateFarmStrategyElements() {
+	// Farms : force (most) before bronze
+	PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
+	if (!farmInfo || (farmInfo->desiredCount <= 0)) { return; }
+
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *myAgeElem = this->GetAgeStrategyElement(farmInfo->enabledInAge);
+	if (myAgeElem == NULL) {
+		myAgeElem = this->seToolAge;
+	}
+	int stratElemCountInAge = 0;
+	bool foundNextAge = false;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextAgeElem = myAgeElem->next;
+	while (nextAgeElem && (nextAgeElem != &this->buildAI->fakeFirstStrategyElement) && !foundNextAge) {
+		foundNextAge = ((nextAgeElem->elementType == TAIUnitClass::AIUCCritical) || (nextAgeElem->elementType == TAIUnitClass::AIUCTech)) &&
+			(nextAgeElem->unitDAT_ID >= CST_RSID_STONE_AGE) && (nextAgeElem->unitDAT_ID <= CST_RSID_IRON_AGE); // +104 for republic age
+		if (!foundNextAge) {
+			stratElemCountInAge++;
+			nextAgeElem = nextAgeElem->next;
+		}
+	}
+	if (!foundNextAge && (stratElemCountInAge > 25)) { stratElemCountInAge = 25; } // Case: farm is enabled in iron (not a standard case)
+
+	// Add farms in current age, with flat repartition
+	AddStrategyElements(myAgeElem, stratElemCountInAge, farmInfo->desiredCount, -1, -1, TAIUnitClass::AIUCBuilding, CST_UNITID_FARM,
+		this->player, "Farm");
+}
+
+
 // Create secondary (optional) occurrences of buildings. E.g. 2nd TC, or additional military buildings to train army faster and do researches while another building is training units
 int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 	// Backup TC: add after all "required" buildings and after gov center (not allowed before) & after iron age too
@@ -2617,6 +2655,8 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 			AddBuildingToStrategy(tcInfo, curElem);
 		}
 	}
+
+	this->CreateFarmStrategyElements();
 
 	// TODO : other buildings
 #pragma message("TODO : add other secondary buildings for 'main' units")
@@ -2662,8 +2702,8 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 
 	// Some "hardcoded" stuff (related to game basic behaviour)
 #pragma message("villagers: does not work, you try on every villager id (use class&villager mode + farms amount")
-	this->CollectResearchInfoForUnit(CST_UNITID_VILLAGER, false); // Get optional researches for economy (NOT marked for add at this point)
-	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false); // TODO: tower upgrades except ballista
+	//this->CollectResearchInfoForUnit(CST_UNITID_VILLAGER, false); // Get optional researches for economy (NOT marked for add at this point)
+	//this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false); // TODO: tower upgrades except ballista
 
 	// Finalize exact list of trained units => add units
 	this->AddMilitaryUnitsForEarlyAges();

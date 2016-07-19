@@ -250,6 +250,9 @@ namespace STRATEGY {
 		// Add strategy elements other than "main units" required researches.
 		void CreateOtherResearchesStrategyElements();
 
+		// Add strategy elements for farms
+		void CreateFarmStrategyElements();
+
 		// Add the first building of each building kind to strategy. Returns number of added buildings
 		// Does not add an additional building if there is already one in strategy
 		// Always add in "parent" age strategy zone.
