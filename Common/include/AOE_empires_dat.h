@@ -219,7 +219,7 @@ namespace AOE_CONST_FUNC {
 		TDE_ATTRIBUTE_MODIFIER_SET = 0,
 		TDE_RESOURCE_MODIFIER_ADD_SET = 1, // add or set value (according to "mode" = effectClass field)
 		TDE_ENABLE_DISABLE_UNIT = 2,
-		TDE_UPGRADE_UNIT = 3,
+		TDE_UPGRADE_UNIT = 3, // "source" unit = effectUnit, "target" (upgraded) unit = effectClass
 		TDE_ATTRIBUTE_MODIFIER_ADD = 4, // add value
 		TDE_ATTRIBUTE_MODIFIER_MULT = 5, // multiply by a value
 		TDE_RESOURCE_MODIFIER_MULT = 6, // multiply by a value
@@ -256,7 +256,7 @@ namespace AOE_CONST_FUNC {
 		TUA_PROJECTILE_UNIT = 16, // Set a new projectileUnitId
 		TUA_ANGLE = 17, // graphic angle (changes displayed standing graphic frame?)
 		TUA_TERRAIN_RESTRICTION_FOR_DAMAGE = 18,
-		TUA_INTELLIGENT_PROJECTILE = 19, // Applies on PROJECTILES unitDef, not archers/towers/etc !
+		TUA_INTELLIGENT_PROJECTILE = 19, // Applies on PROJECTILES unitDef, not archers/towers/etc ! 0 = false, 1 = true (better... generally)
 		TUA_ADD_COST_AMOUNT = 100, // Add a value to unit cost. Impacts ALL "used" costs.
 		TUA_POPULATION_COST = 101 // population a unit "counts". 1 for most units, (total)0.5 for infantry with logistics. Can only SET (no add/mult)
 	};

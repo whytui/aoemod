@@ -416,6 +416,8 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 		}
 	}
 
+	AOE_TECHNOLOGIES::TechFilterExcludeTechsWithDrawbacks filter;
+
 	for (int curUnitDefID = 0; curUnitDefID < player->structDefUnitArraySize; curUnitDefID++) {
 		STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(curUnitDefID);
 		bool validUnit = (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
@@ -467,7 +469,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 		}
 		validUnit = validUnit && availableForPlayer;
 
-		bool techTreeAffectsCurrentUnit = (techDefTechTree != NULL) && DoesTechAffectUnit(techDefTechTree, unitDefBase);
+		bool techTreeAffectsCurrentUnit = (techDefTechTree != NULL) && DoesTechAffectUnit(techDefTechTree, unitDefBase, &filter);
 		bool currentUnitHasTechTreeBonus = false;
 		if (validUnit && techTreeAffectsCurrentUnit) {
 			for (int i = 0; i < techDefTechTree->effectCount; i++) {
@@ -504,7 +506,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 					}
 				}
 				if (techDef && techDef->ptrEffects) {
-					if (DoesTechAffectUnit(techDef, unitDefLiving)) {
+					if (DoesTechAffectUnit(techDef, unitDefLiving, &filter)) {
 						for (int i = 0; i < techDef->effectCount; i++) {
 							short int upgradeTargetUnitDefId = techDef->ptrEffects[i].UpgradeUnitGetTargetUnit();
 							if ((upgradeTargetUnitDefId >= 0) && (techDef->ptrEffects[i].effectUnit == unitDefLiving->DAT_ID1)) {
@@ -604,7 +606,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 					}
 				}
 				if (techDef && techDef->ptrEffects) {
-					if (DoesTechAffectUnit(techDef, unitDefLiving)) {
+					if (DoesTechAffectUnit(techDef, unitDefLiving, &filter)) {
 						unitInfo->unavailableRelatedResearchesCount++;
 						for (int i = 0; i < techDef->effectCount; i++) {
 							short int upgradeTargetUnitDefId = techDef->ptrEffects[i].UpgradeUnitGetTargetUnit();
@@ -629,7 +631,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 					}
 				}
 				if (techDef && techDef->ptrEffects) {
-					if (DoesTechAffectUnit(techDef, unitDefLiving)) {
+					if (DoesTechAffectUnit(techDef, unitDefLiving, &filter)) {
 						unitInfo->availableRelatedResearchesCount++;
 						for (int i = 0; i < techDef->effectCount; i++) {
 							bool isAttrModifier = ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||

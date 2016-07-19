@@ -20,7 +20,7 @@ namespace ROR_STRUCTURES_10C {
 		char unused_01;
 		short int effectUnit; // +02. Unit ID or Resource ID or...
 		short int effectClass; // +04. Class or ToUnit (upgrade unit) or Mode (for enable unit, resource modifier) or...
-		short int effectAttribute; // +06
+		short int effectAttribute; // +06. see TECH_UNIT_ATTRIBUTES (not always this enum but always 2 bytes)
 		float effectValue; // +08. Sometimes unused (enable unit, upgrade unit, etc). Sometimes includes 2 info using modulo !
 
 		float GetValue() const {
@@ -147,4 +147,40 @@ namespace ROR_STRUCTURES_10C {
 		//end
 	};
 
+
+	// Returns <0 if this attribute's values are reverse (lower value are better/stronger)
+	// Returns >0 if this attribute's values are standard (higher = better)
+	// Returns 0 if not applicable (values represent a IDs or something else...)
+	static int AttributeValueHasPositiveEffect(TECH_UNIT_ATTRIBUTES attribute) {
+		switch (attribute) {
+		case AOE_CONST_FUNC::TUA_HP:
+		case AOE_CONST_FUNC::TUA_LOS:
+		case AOE_CONST_FUNC::TUA_GARRISON_CAPACITY:
+		case AOE_CONST_FUNC::TUA_SPEED:
+		case AOE_CONST_FUNC::TUA_ARMOR:
+		case AOE_CONST_FUNC::TUA_ATTACK:
+		case AOE_CONST_FUNC::TUA_ACCURACY_PERCENT:
+		case AOE_CONST_FUNC::TUA_RANGE:
+		case AOE_CONST_FUNC::TUA_WORK_RATE:
+		case AOE_CONST_FUNC::TUA_RESOURCE_CAPACITY:
+		case AOE_CONST_FUNC::TUA_DEFAULT_ARMOR:
+		case AOE_CONST_FUNC::TUA_INTELLIGENT_PROJECTILE: // 1 is better than 0 (not completely true for slow projectiles ?)
+			return 1;
+		case AOE_CONST_FUNC::TUA_ATTACK_RELOAD_TIME: // Longer reload time = shoots less
+		case AOE_CONST_FUNC::TUA_SIZE_RADIUS1: // Bigger = not an advantage (generally)
+		case AOE_CONST_FUNC::TUA_SIZE_RADIUS2: // Bigger = not an advantage (generally)
+		case AOE_CONST_FUNC::TUA_ROTATION_SPEED: // most units have 0. other values are worst (bigdaddy): have more difficulties to move (turn)
+		case AOE_CONST_FUNC::TUA_POPULATION_COST: // For logistics: decreasing the cost is better
+		case AOE_CONST_FUNC::TUA_ADD_COST_AMOUNT:
+			return -1;
+		// Not relevant for those ones :
+		case AOE_CONST_FUNC::TUA_UNKNOWN_07:
+		case AOE_CONST_FUNC::TUA_PROJECTILE_UNIT:
+		case AOE_CONST_FUNC::TUA_ANGLE:
+		case AOE_CONST_FUNC::TUA_TERRAIN_RESTRICTION_FOR_DAMAGE:
+		case AOE_CONST_FUNC::TUA_NONE:
+		default:
+			return 0;
+		}
+	}
 }

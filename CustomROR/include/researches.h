@@ -12,6 +12,7 @@
 #include "traceMessage.h"
 #include "language.h"
 #include "crLocalization.h"
+#include "TechnologyFilter.h"
 
 using namespace ROR_STRUCTURES_10C;
 using namespace AOE_CONST_FUNC;
@@ -55,7 +56,7 @@ int DisablePlayerImpossibleResearches(STRUCT_PLAYER *player);
 // Returns true if technology has at least one effect on provided unit definition.
 // Effect can be negative too.
 // Priest sacrifice tech is IGNORED here.
-bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef);
+bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, const AOE_TECHNOLOGIES::TechnologyFilterBase *filter);
 
 // Returns "destination" unit ID if technology upgrades provided unit definition ID into another unit
 // Returns -1 if technology does NOT upgrade provided unit to another unit

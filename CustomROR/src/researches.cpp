@@ -256,52 +256,54 @@ int DisableImpossibleResearches() {
 // Returns true if technology has at least one effect on provided unit definition.
 // Effect can be negative too.
 // Priest sacrifice tech is IGNORED here.
-bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) {
+bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, const AOE_TECHNOLOGIES::TechnologyFilterBase *filter) {
 	if (!techDef || !unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
 	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
 		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
-		// Does this affect affect units ?
-		if (techEffect && (techEffect->HasValidEffect()) && (
-			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
-			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
-			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT)
-			)) {
-			if (techEffect->effectUnit == unitDef->DAT_ID1) { return true; }
-			if (techEffect->effectClass == unitDef->unitAIType) { return true; }
-		}
-		if (techEffect->IsEnableUnit(unitDef->DAT_ID1)) {
-			return true;
-		}
-		if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT)) {
-			// Upgrade unit : effectClass field is "TO" unit
-			if ((techEffect->effectUnit == unitDef->DAT_ID1) || (techEffect->effectClass == unitDef->DAT_ID1)) {
+		if (!filter || !filter->IgnoreEffect(techEffect)) {
+			// Does this affect affect units ?
+			if (techEffect && (techEffect->HasValidEffect()) && (
+				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
+				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
+				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT)
+				)) {
+				if (techEffect->effectUnit == unitDef->DAT_ID1) { return true; }
+				if (techEffect->effectClass == unitDef->unitAIType) { return true; }
+			}
+			if (techEffect->IsEnableUnit(unitDef->DAT_ID1)) {
 				return true;
 			}
-		}
-		bool isResourceModifier = ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) ||
-			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT));
-		// Very special cases: some resources can improve units: priest/building conversion, etc
-		if (unitDef->unitAIType == TribeAIGroupPriest) {
-			if (isResourceModifier && (
-				(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_BUILDING) ||
-				(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_PRIEST) ||
-				(techEffect->effectUnit == CST_RES_ORDER_FAITH_RECHARGING_RATE) ||
-				(techEffect->effectUnit == CST_RES_ORDER_HEALING) // (medecine tech)
-				// (techEffect->effectUnit == CST_RES_ORDER_PRIEST_SACRIFICE) // AI will never use it. Ignore it.
-			)) {
-				return true; // Priest & building/priest conversion + faith recharging rate
+			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT)) {
+				// Upgrade unit : effectClass field is "TO" unit
+				if ((techEffect->effectUnit == unitDef->DAT_ID1) || (techEffect->effectClass == unitDef->DAT_ID1)) {
+					return true;
+				}
 			}
-		}
-		if (IsVillager(unitDef->DAT_ID1)) { // excluding boats
-			if (isResourceModifier) {
-				if (techEffect->effectUnit == CST_RES_ORDER_GOLD_MINING_PODUCTIVITY) { return true; } // Villagers: mining productivity
+			bool isResourceModifier = ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) ||
+				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT));
+			// Very special cases: some resources can improve units: priest/building conversion, etc
+			if (unitDef->unitAIType == TribeAIGroupPriest) {
+				if (isResourceModifier && (
+					(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_BUILDING) ||
+					(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_PRIEST) ||
+					(techEffect->effectUnit == CST_RES_ORDER_FAITH_RECHARGING_RATE) ||
+					(techEffect->effectUnit == CST_RES_ORDER_HEALING) // (medecine tech)
+					// (techEffect->effectUnit == CST_RES_ORDER_PRIEST_SACRIFICE) // AI will never use it. Ignore it.
+					)) {
+					return true; // Priest & building/priest conversion + faith recharging rate
+				}
 			}
-		}
-		if (unitDef->DAT_ID1 == CST_UNITID_FARM) {
-			if (isResourceModifier) {
-				if (techEffect->effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT) { return true; } // Farms : farm amount
+			if (IsVillager(unitDef->DAT_ID1)) { // excluding boats
+				if (isResourceModifier) {
+					if (techEffect->effectUnit == CST_RES_ORDER_GOLD_MINING_PODUCTIVITY) { return true; } // Villagers: mining productivity
+				}
+			}
+			if (unitDef->DAT_ID1 == CST_UNITID_FARM) {
+				if (isResourceModifier) {
+					if (techEffect->effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT) { return true; } // Farms : farm amount
+				}
 			}
 		}
 	}
@@ -411,7 +413,7 @@ bool IsResearchDisabledInTechTree(short int playerId, short int researchId) {
 
 
 // Finds all (non disabled) researches that affect a unit (definition)
-// If ignoreUndesirableTechs==true, techs from LST_TECHS_TO_IGNORE are ignored (jihad, etc)
+// If ignoreUndesirableTechs==true, techs with drawbacks are ignored (jihad, etc)
 // Returns a list of research IDs.
 std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long int unitDefId, bool ignoreUndesirableTechs) {
 	std::vector<short int> result;
@@ -437,7 +439,13 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 			if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount) &&
 				(global->technologiesInfo->ptrTechDefArray[techId].effectCount > 0)) {
 				// We have a valid technology id. Add to result if it affects our unit.
-				if (!added && DoesTechAffectUnit(&global->technologiesInfo->ptrTechDefArray[techId], unitDefBase)) {
+				AOE_TECHNOLOGIES::TechnologyFilterBase emptyFilter;
+				AOE_TECHNOLOGIES::TechnologyFilterBase *filter = &emptyFilter;
+				AOE_TECHNOLOGIES::TechFilterExcludeTechsWithDrawbacks filterDrawbacks;
+				if (ignoreUndesirableTechs) {
+					filter = &filterDrawbacks;
+				}
+				if (!added && DoesTechAffectUnit(&global->technologiesInfo->ptrTechDefArray[techId], unitDefBase, filter)) {
 					result.push_back(researchId);
 					added = true;
 				}
