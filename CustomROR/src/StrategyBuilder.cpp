@@ -1946,7 +1946,20 @@ void StrategyBuilder::ChooseOptionalResearches() {
 				if (techDef->ptrEffects[i].IsAttributeModifier()) {
 					if ((techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) &&
 						(techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_HP)) {
-						resInfo->unitInstanceScoreForOptionalResearch += 30; // Add HP to all buildings (the only attribute that really improves buildings)
+						if (this->settings && this->settings->IsCheckSumValid()) {
+							// Add HP to all buildings (the only attribute that really improves buildings)
+							int valueToAdd = 20; // easy levels: will probably not be enough to add architecture
+							if (this->settings->difficultyLevel == 2) {
+								valueToAdd = randomizer.GetRandomValue_normal_moderate(10, 60); // will sometimes do...
+							}
+							if (this->settings->difficultyLevel == 1) {
+								valueToAdd = randomizer.GetRandomValue_normal_moderate(35, 75); // will generally do...
+							}
+							if (this->settings->difficultyLevel == 0) {
+								valueToAdd = randomizer.GetRandomValue_normal_moderate(45, 70); // random part, but almost always enough to actually add architecture
+							}
+							resInfo->unitInstanceScoreForOptionalResearch += valueToAdd;
+						}
 					}
 					if (techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_SPEED) {
 						// Make sure this tech effect applies on "my" units
@@ -1990,18 +2003,22 @@ void StrategyBuilder::ChooseOptionalResearches() {
 		}
 	}
 
+	// Choose some optional researches with a good score...
+	// TODO
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		// Loop on researches we do not plan (yet) to include in strategy = optional researches
 		if (!resInfo->isInStrategy && !resInfo->markedForAdd && !resInfo->forcePlaceForFirstImpactedUnit &&
 			resInfo->researchDef && (resInfo->researchDef->researchLocation > -1)) {
 			int impactedUnitsCount = resInfo->impactedUnitDefIds.size();
-			// Score: random, cossts, ...
+			// Score: random, costs, ...
 			// low-cost techs that improve >1 unit type: add (tool age storage pit techs...)
 			// check Age availability ?
+			// Handle dependencies (for similar techs)
 
 			// Special cases
 			// TODO !!!!
+			// Farm amount improvement (cost vs % of additional food amount)
 		}
 	}
 }
@@ -2043,7 +2060,6 @@ void StrategyBuilder::AddTowerResearches() {
 	watchTowerInfo->forcePutAsEarlyAsPossible = true;
 	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false);
 
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *watchTower = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)this->player->GetUnitDefBase(CST_UNITID_WATCH_TOWER);
 	if (!watchTower || !watchTower->IsCheckSumValidForAUnitClass() || !watchTower->DerivesFromType50()) { return; }
 	ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *projectileDefInitial = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(watchTower->projectileUnitId);
@@ -2076,7 +2092,7 @@ void StrategyBuilder::AddTowerResearches() {
 		}
 		if (isUpgradeUnit && !newProjectileIsMuchSlower && !newReloadTimeIsMuchSlower) {
 			PotentialResearchInfo *resInfo = this->AddPotentialResearchInfoToList(researchId);
-			if (resInfo && settings && settings->IsCheckSumValid() && (settings->difficultyLevel < 2) &&
+			if (resInfo && this->settings && this->settings->IsCheckSumValid() && (this->settings->difficultyLevel < 2) &&
 				this->IsResearchInTechTree(resInfo->researchId)) { // this check is not necessary: if not available, it won't be in allResearchesForUnit
 				resInfo->forcePutAsEarlyAsPossible = true; // Force tower upgrades to be researched quickly
 			}

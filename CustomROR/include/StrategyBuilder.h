@@ -93,6 +93,7 @@ namespace STRATEGY {
 		ROR_STRUCTURES_10C::STRUCT_AI *ai; // automatically set from player (SetPlayerAndAIStructs)
 		ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI; // automatically set from player (SetPlayerAndAIStructs)
 		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global;
+		ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings;
 		short int civId;
 		bool isWaterMap;
 		long int maxPopulation;
@@ -134,6 +135,9 @@ namespace STRATEGY {
 			this->global = player->ptrGlobalStruct;
 			if (this->global && !this->global->IsCheckSumValid()) { this->global = NULL; }
 			this->maxPopulation = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POULATION_LIMIT);
+			this->settings = GetGameSettingsPtr();
+			if (this->settings && !this->settings->IsCheckSumValid()) { this->settings = NULL; }
+			assert(settings != NULL);
 		}
 
 		// Clears potential units list and free each underlying PotentialUnitInfo object.
