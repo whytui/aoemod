@@ -86,6 +86,7 @@ int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_S
 	return res;
 }
 
+
 // Add a building to strategy just before supplied insertion point. Updates underlying fields (added count...)
 // Returns actual number of element that were added
 int StrategyBuilder::AddBuildingToStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
@@ -98,19 +99,27 @@ int StrategyBuilder::AddBuildingToStrategy(PotentialBuildingInfo *bldInfo, ROR_S
 	if (AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, -1, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding,
 		bldInfo->unitDefId, this->player, bldInfo->unitDef->ptrUnitName)) {
 		res++;
-		// Update building info underlying fields
-		bldInfo->addedInStrategyCount++;
-		if (bldInfo->firstAddedInStrategy == NULL) {
-			bldInfo->firstAddedInStrategy = insertionPoint->previous; // save link to strategy element
-		}
-		if ((this->seMarket == NULL) && (bldInfo->unitDefId == CST_UNITID_MARKET)) {
-			this->seMarket = insertionPoint->previous;
-		}
-		if ((this->seGovCenter == NULL) && (bldInfo->unitDefId == CST_UNITID_GOVERNMENT_CENTER)) {
-			this->seGovCenter = insertionPoint->previous;
-		}
+		this->UpdateBuildingInfoAfterAddInStrategy(bldInfo, insertionPoint->previous);
 	}
 	return res;
+}
+
+// Update a building information object when 1 building has been added to strategy
+void StrategyBuilder::UpdateBuildingInfoAfterAddInStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *newElem) {
+	// Update building info underlying fields
+	bldInfo->addedInStrategyCount++;
+	if (bldInfo->firstAddedInStrategy == NULL) {
+		if (newElem == NULL) {
+			newElem = FindFirstElementInStrategy(&this->buildAI->fakeFirstStrategyElement, TAIUnitClass::AIUCBuilding, bldInfo->unitDefId);
+		}
+		bldInfo->firstAddedInStrategy = newElem; // save link to strategy element
+	}
+	if ((this->seMarket == NULL) && (bldInfo->unitDefId == CST_UNITID_MARKET)) {
+		this->seMarket = newElem;
+	}
+	if ((this->seGovCenter == NULL) && (bldInfo->unitDefId == CST_UNITID_GOVERNMENT_CENTER)) {
+		this->seGovCenter = newElem;
+	}
 }
 
 // Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
@@ -2582,14 +2591,14 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 		// Add a building just before the first location in strategy where it is needed - works for most dependencies except some, like market (to enable farms)
 		while (curElem && (curElem != fakeFirstElem) && (insertionPoint == NULL)) {
 			bool isResearch = (curElem->elementType == TAIUnitClass::AIUCTech) || (curElem->elementType == TAIUnitClass::AIUCCritical);
-			bool actorFieldIsRelevant = isResearch || (curElem->elementType == TAIUnitClass::AIUCLivingUnit) || (curElem->elementType == TAIUnitClass::AIUCBuilding);
-			if (actorFieldIsRelevant && (curElem->actor == bldInfo->unitDefId)) {
-				insertionPoint = curElem;
-			}
-			if (isResearch && (curElem->unitDAT_ID >= CST_RSID_STONE_AGE) && (curElem->unitDAT_ID <= CST_RSID_IRON_AGE)) { // + 104 for republic age
-				insertionPoint = curElem; // stop when reaching an age upgrade element. Building must be constructed in its "own" age
-			}
-			curElem = curElem->next;
+bool actorFieldIsRelevant = isResearch || (curElem->elementType == TAIUnitClass::AIUCLivingUnit) || (curElem->elementType == TAIUnitClass::AIUCBuilding);
+if (actorFieldIsRelevant && (curElem->actor == bldInfo->unitDefId)) {
+	insertionPoint = curElem;
+}
+if (isResearch && (curElem->unitDAT_ID >= CST_RSID_STONE_AGE) && (curElem->unitDAT_ID <= CST_RSID_IRON_AGE)) { // + 104 for republic age
+	insertionPoint = curElem; // stop when reaching an age upgrade element. Building must be constructed in its "own" age
+}
+curElem = curElem->next;
 		}
 		if (insertionPoint) {
 			counter += AddBuildingToStrategy(bldInfo, insertionPoint);
@@ -2623,8 +2632,14 @@ void StrategyBuilder::CreateFarmStrategyElements() {
 	if (!foundNextAge && (stratElemCountInAge > 25)) { stratElemCountInAge = 25; } // Case: farm is enabled in iron (not a standard case)
 
 	// Add farms in current age, with flat repartition
-	AddStrategyElements(myAgeElem, stratElemCountInAge, farmInfo->desiredCount, -1, -1, TAIUnitClass::AIUCBuilding, CST_UNITID_FARM,
+	int addedCount = AddStrategyElements(myAgeElem, stratElemCountInAge, farmInfo->desiredCount, -1, -1, TAIUnitClass::AIUCBuilding, CST_UNITID_FARM,
 		this->player, "Farm");
+	for (int i = 0; i < addedCount; i++) {
+		this->UpdateBuildingInfoAfterAddInStrategy(farmInfo, NULL);
+		if (farmInfo->firstAddedInStrategy == NULL) {
+
+		}
+	}
 }
 
 
@@ -2656,10 +2671,59 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 		}
 	}
 
+	// Farms
 	this->CreateFarmStrategyElements();
 
-	// TODO : other buildings
+	// "Military" buildings
 #pragma message("TODO : add other secondary buildings for 'main' units")
+	std::set<PotentialBuildingInfo*> bldList; // buildings that need to be built more than once
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+	{
+		if (unitInfo->baseUnitDefLiving && unitInfo->isSelected && !unitInfo->isOptionalUnit &&
+			((unitInfo->addedCount > 7) || (unitInfo->isSuperUnit))) {
+			short int bldId = unitInfo->baseUnitDefLiving->trainLocation;
+			PotentialBuildingInfo *bldInfo = this->GetBuildingInfo(bldId);
+			if (bldInfo) {
+				assert(bldInfo->desiredCount > 0);
+				bldList.insert(bldInfo); // add without duplicate
+				bldInfo->unitsToBeTrained += (int)unitInfo->desiredCount;
+			}
+		}
+	}
+	for each (PotentialBuildingInfo *bldInfo in bldList) {
+		int unitsPerBuilding = randomizer.GetRandomValue_normal_moderate(6, 10); // with a small random part here
+		bldInfo->desiredCount = bldInfo->unitsToBeTrained / unitsPerBuilding;
+		if (bldInfo->desiredCount < 2) { bldInfo->desiredCount = 2; }
+		if (bldInfo->desiredCount > 5) { bldInfo->desiredCount = 5; }
+		this->log += "Add more buildings for ";
+		if (bldInfo->unitDef) {
+			this->log += bldInfo->unitDef->ptrUnitName;
+		}
+		this->log += ",  total=";
+		this->log += std::to_string(bldInfo->desiredCount);
+		this->log += " (";
+		this->log += std::to_string(bldInfo->unitsToBeTrained);
+		this->log += " units)";
+		this->log += newline;
+		assert(bldInfo->firstAddedInStrategy != NULL);
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = bldInfo->firstAddedInStrategy;
+		if (curElem) {
+			int usageOfThisBuildingCount = 0;
+			while (curElem && (bldInfo->addedInStrategyCount < bldInfo->desiredCount) &&
+				(curElem != &this->buildAI->fakeFirstStrategyElement) && (curElem->elemId >= 0)) {
+				if ((curElem->actor == bldInfo->unitDefId) && (curElem->retrains == -1) &&
+					((curElem->elementType == TAIUnitClass::AIUCLivingUnit) || (curElem->elementType == TAIUnitClass::AIUCTech))) {
+					usageOfThisBuildingCount++;
+				}
+				if (usageOfThisBuildingCount == unitsPerBuilding) {
+					usageOfThisBuildingCount = 0; // reset
+					this->AddBuildingToStrategy(bldInfo, curElem);
+				}
+				curElem = curElem->next;
+			}
+		}
+	}
+
 	return 0;
 }
 

@@ -151,6 +151,9 @@ namespace STRATEGY {
 		// Returns actual number of element that were added
 		int AddBuildingToStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint);
 
+		// Update a building information object when 1 building has been added to strategy
+		void UpdateBuildingInfoAfterAddInStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *newElem);
+
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
 		PotentialResearchInfo *GetResearchInfo(short int researchId);
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.

@@ -70,5 +70,6 @@ PotentialBuildingInfo::PotentialBuildingInfo() {
 	this->desiredCount = 0;
 	this->highPriority = false;
 	this->firstAddedInStrategy = NULL;
+	this->unitsToBeTrained = 0;
 }
 

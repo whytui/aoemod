@@ -103,6 +103,7 @@ namespace STRATEGY {
 		int desiredCount;
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstAddedInStrategy; // The first of such buildings that was put in strategy
 		bool highPriority; // If true, start construction of (first) this building ASAP. E.g. market (to enable farming)
+		int unitsToBeTrained; // Number of (always retrainable) units that are trained in such buildings
 	};
 	
 }
