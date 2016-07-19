@@ -85,6 +85,7 @@ namespace STRATEGY {
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeBeforeThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *requiredAgeResearch; // Age research strategy element of my required age.
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *actualStrategyElement;
 		int totalCosts; // Sum of all raw costs (not weighted)
 
 		// Updates this->mustBeBeforeThisElem and this->mustBeAfterThisElem according to known dependencies on other unit/researches

@@ -229,6 +229,9 @@ namespace STRATEGY {
 		// All villagers and military units must have already been added to strategy.
 		void ChooseOptionalResearches();
 
+		// Add tower upgrades to internal objects (and mark them as priority items)
+		// Does not add upgrades that slow projectiles down (ballista tower)
+		// Only adds unit upgrades (sentry, watch tower) + "enable unit" (watch tower) researches, not others researches.
 		void AddTowerResearches();
 
 		// Adds non-military researches that should always be included, for example wheel - if available in tech tree.
@@ -260,6 +263,9 @@ namespace STRATEGY {
 
 		// Add strategy elements for farms
 		void CreateFarmStrategyElements();
+
+		// Add strategy elements for towers (buildings - not researches)
+		void CreateTowerBuildingsStrategyElements();
 
 		// Add the first building of each building kind to strategy. Returns number of added buildings
 		// Does not add an additional building if there is already one in strategy

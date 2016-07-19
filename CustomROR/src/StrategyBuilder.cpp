@@ -71,7 +71,8 @@ int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
 // Add a research to strategy just before supplied insertion point. Updates "isInStrategy" field.
 // Returns actual number of element that were added
 int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
-	if (resInfo->isInStrategy) { return 0; }
+	assert(insertionPoint);
+	if (resInfo->isInStrategy || !insertionPoint) { return 0; }
 	int res = 0;
 	bool forceNotInsert = (resInfo->researchId >= CST_RSID_STONE_AGE) && (resInfo->researchId <= CST_RSID_IRON_AGE); // +104 for republic age
 	// Do not insert ages as they are added in dedicated method.
@@ -80,6 +81,7 @@ int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_S
 			AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, resInfo->researchDef->researchLocation, TAIUnitClass::AIUCTech, resInfo->researchId, player,
 				GetResearchLocalizedName(resInfo->researchId).c_str());
 			res++;
+			resInfo->actualStrategyElement = insertionPoint->previous;
 		}
 	}
 	resInfo->isInStrategy = true;
@@ -1952,6 +1954,9 @@ void StrategyBuilder::ChooseOptionalResearches() {
 }
 
 
+// Add tower upgrades to internal objects (and mark them as priority items)
+// Does not add upgrades that slow projectiles down (ballista tower)
+// Only adds unit upgrades (sentry, watch tower) + "enable unit" (watch tower) researches, not others researches.
 void StrategyBuilder::AddTowerResearches() {
 	short int enableWatchTower = FindResearchThatEnableUnit(this->player, CST_UNITID_WATCH_TOWER, -1);
 	if ((enableWatchTower < 0) || !this->IsResearchInTechTree(enableWatchTower)) {
@@ -2701,12 +2706,85 @@ void StrategyBuilder::CreateFarmStrategyElements() {
 		this->player, "Farm");
 	for (int i = 0; i < addedCount; i++) {
 		this->UpdateBuildingInfoAfterAddInStrategy(farmInfo, NULL);
-		if (farmInfo->firstAddedInStrategy == NULL) {
-
-		}
 	}
 }
 
+// Add strategy elements for towers (buildings - not researches)
+void StrategyBuilder::CreateTowerBuildingsStrategyElements() {
+	this->AddPotentialBuildingInfoToList(CST_UNITID_WATCH_TOWER);
+	PotentialBuildingInfo *towerInfo = this->GetBuildingInfo(CST_UNITID_WATCH_TOWER);
+	if (!towerInfo) { return; }
+	// TODO : compute number of towers (use a random part)
+	// Do not set too many towers (more can be added dynamically during game)
+	towerInfo->desiredCount = 8;
+	
+	short startAge = towerInfo->enabledInAge;
+	if (startAge < CST_RSID_TOOL_AGE) {
+		startAge = CST_RSID_TOOL_AGE;
+	}
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *myAgeElem = this->GetAgeStrategyElement(startAge);
+	if (myAgeElem == NULL) {
+		myAgeElem = this->seToolAge;
+	}
+
+	while (myAgeElem && (myAgeElem->unitDAT_ID <= CST_RSID_IRON_AGE) && (towerInfo->addedInStrategyCount < towerInfo->desiredCount) &&
+		((myAgeElem->elementType == TAIUnitClass::AIUCCritical) || (myAgeElem->elementType == TAIUnitClass::AIUCTech))) {
+		int desiredCountInThisAge = towerInfo->desiredCount - towerInfo->addedInStrategyCount;
+		switch (myAgeElem->unitDAT_ID) {
+		// +case 104 for republic age
+		case CST_RSID_IRON_AGE:
+			break;
+		case CST_RSID_BRONZE_AGE:
+			if (desiredCountInThisAge > 4) {
+				desiredCountInThisAge = 4; // Max 4 towers in bronze age
+			}
+			break;
+		default: // tool/stone
+			if (desiredCountInThisAge > 2) {
+				desiredCountInThisAge = 2; // Max 2 towers in tool age
+			}
+			break;
+		}
+
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem = myAgeElem;
+		if (towerInfo->firstAddedInStrategy) {
+			if (GetFirstElementOf(this->buildAI, towerInfo->firstAddedInStrategy, mustBeAfterThisElem) == mustBeAfterThisElem) {
+				mustBeAfterThisElem = towerInfo->firstAddedInStrategy; // mustBeAfterThisElem is the "latest" element
+			}
+		}
+		PotentialResearchInfo *enableResearchInfo = this->GetResearchInfo(towerInfo->enabledByResearchId);
+		if (enableResearchInfo->actualStrategyElement) {
+			if (GetFirstElementOf(this->buildAI, enableResearchInfo->actualStrategyElement, mustBeAfterThisElem) == mustBeAfterThisElem) {
+				mustBeAfterThisElem = enableResearchInfo->actualStrategyElement; // mustBeAfterThisElem is the "latest" element
+			}
+		}
+
+		int stratElemUntilNextAge = 0;
+		bool foundNextAge = false;
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextAgeElem = mustBeAfterThisElem->next;
+		while (nextAgeElem && (nextAgeElem != &this->buildAI->fakeFirstStrategyElement) && !foundNextAge) {
+			foundNextAge = ((nextAgeElem->elementType == TAIUnitClass::AIUCCritical) || (nextAgeElem->elementType == TAIUnitClass::AIUCTech)) &&
+				(nextAgeElem->unitDAT_ID >= CST_RSID_STONE_AGE) && (nextAgeElem->unitDAT_ID <= CST_RSID_IRON_AGE); // +104 for republic age
+			if (!foundNextAge) {
+				stratElemUntilNextAge++;
+				nextAgeElem = nextAgeElem->next;
+			}
+		}
+		// Add 2 towers to current age
+		int addedCountInThisAge = AddStrategyElements(mustBeAfterThisElem, stratElemUntilNextAge, desiredCountInThisAge, -1, -1,
+			TAIUnitClass::AIUCBuilding, CST_UNITID_WATCH_TOWER, this->player, "Tower");
+		for (int i = 0; i < addedCountInThisAge; i++) {
+			this->UpdateBuildingInfoAfterAddInStrategy(towerInfo, NULL);
+		}
+		// Move to next age
+		short int nextAge = (short int)myAgeElem->unitDAT_ID + 1;
+		if (nextAge > CST_RSID_IRON_AGE) {
+			myAgeElem = NULL; // Will exit loop
+		} else {
+			myAgeElem = this->GetAgeStrategyElement(nextAge);
+		}
+	}
+}
 
 // Create secondary (optional) occurrences of buildings. E.g. 2nd TC, or additional military buildings to train army faster and do researches while another building is training units
 int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
@@ -2732,7 +2810,7 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 			moveCount--;
 		}
 		if (curElem) {
-			AddBuildingToStrategy(tcInfo, curElem);
+			this->AddBuildingToStrategy(tcInfo, curElem);
 		}
 	}
 
@@ -2874,6 +2952,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	// Add buildings to strategy (first building of each kind)
 	this->CreateFirstBuildingsStrategyElements();
 	this->CreateSecondaryBuildingStrategyElements();
+	this->CreateTowerBuildingsStrategyElements();
 
 	if (buildAI->mainAI->structTradeAI.needGameStartAIInit) {
 		// Warning: automatic element insertions WILL be triggered
