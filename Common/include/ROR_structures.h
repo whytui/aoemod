@@ -3915,7 +3915,14 @@ namespace ROR_STRUCTURES_10C
 	public:
 		unsigned long int unknown_18C_table; // table of 8 (ptr) elements "Y". Y+0=unitID,Y+5=numPlayerOwner,Y+6=byte(pos?),Y+7=byte(pos?)???
 		// 0x190
-		char unknown_190[0x1B0 - 0x190];
+		unsigned long int unknown_190;
+		unsigned long int *unknown_194; // pointer to unit ID (myself ?)
+		unsigned long int unknown_198;
+		unsigned long int unknown_19C;
+		unsigned long int unknown_1A0;
+		unsigned long int unknown_1A4;
+		unsigned long int unknown_1A8;
+		unsigned long int unknown_1AC;
 		// 0x1B0
 		STRUCT_MAP_VISIBILITY_INFO unknownVisibility_1B0; // Same "nature" object as +0x1E4. A mask for map visibility (visible for ...)?
 		float unknown_1B4; // Time to next xxx?

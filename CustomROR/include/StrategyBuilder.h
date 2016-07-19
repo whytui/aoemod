@@ -159,8 +159,8 @@ namespace STRATEGY {
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
 		PotentialResearchInfo *GetResearchInfo(ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef);
 		// Add building to potential buildings list and initializes underlying info.
-		// Returns true if actually added
-		bool AddPotentialResearchInfoToList(short int researchId);
+		// Returns NULL if not added, or pointer to object if successful
+		PotentialResearchInfo *AddPotentialResearchInfoToList(short int researchId);
 
 		// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
 		PotentialBuildingInfo *GetBuildingInfo(short int unitDefId);
@@ -170,6 +170,9 @@ namespace STRATEGY {
 		// Returns true if actually added
 		bool AddPotentialBuildingInfoToList(short int unitDefId);
 		bool AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef);
+
+		// Returns true if a research is available in tech tree
+		bool IsResearchInTechTree(short int researchId);
 
 
 		/*** Units selection methods ***/
@@ -225,6 +228,8 @@ namespace STRATEGY {
 		// Selects optional researches to add to strategy
 		// All villagers and military units must have already been added to strategy.
 		void ChooseOptionalResearches();
+
+		void AddTowerResearches();
 
 		// Adds non-military researches that should always be included, for example wheel - if available in tech tree.
 		void AddMandatoryNonMilitaryResearches();

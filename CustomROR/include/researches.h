@@ -57,6 +57,10 @@ int DisablePlayerImpossibleResearches(STRUCT_PLAYER *player);
 // Priest sacrifice tech is IGNORED here.
 bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef);
 
+// Returns "destination" unit ID if technology upgrades provided unit definition ID into another unit
+// Returns -1 if technology does NOT upgrade provided unit to another unit
+short int DoesTechUpgradeUnit(STRUCT_TECH_DEF *techDef, short int unitDefId);
+
 // Returns true if technology enables provided unit.
 bool DoesTechEnableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId);
 

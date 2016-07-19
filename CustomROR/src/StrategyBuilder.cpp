@@ -137,24 +137,21 @@ PotentialResearchInfo *StrategyBuilder::GetResearchInfo(ROR_STRUCTURES_10C::STRU
 	return NULL;
 }
 // Add building to potential buildings list and initializes underlying info.
-// Returns true if actually added
-bool StrategyBuilder::AddPotentialResearchInfoToList(short int researchId) {
+// Returns NULL if not added, or pointer to object if successful
+PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int researchId) {
 	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(researchId);
-	if (!resDef || !this->global || !this->player) { return false; }
+	if (!resDef || !this->global || !this->player) { return NULL; }
 	// Check availability (tech tree)
-	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techTreeDef = this->global->GetTechDef(this->player->techTreeId);
-	if (techTreeDef) {
-		if (DoesTechDisableResearch(techTreeDef, researchId)) {
-			this->log += "Trying to add a disabled research to potential researches list (";
-			this->log += std::to_string(researchId);
-			this->log += ") => ignored";
-			this->log += newline;
-			return false; // not available = do not add
-		}
+	if (!this->IsResearchInTechTree(researchId)) {
+		this->log += "Trying to add a disabled research to potential researches list (";
+		this->log += std::to_string(researchId);
+		this->log += ") => ignored";
+		this->log += newline;
+		return NULL; // not available = do not add
 	}
 	PotentialResearchInfo *resInfo = this->GetResearchInfo(resDef);
 	if (resInfo != NULL) {
-		return false;
+		return NULL;
 	}
 	resInfo = new PotentialResearchInfo();
 	resInfo->researchDef = resDef;
@@ -196,7 +193,7 @@ bool StrategyBuilder::AddPotentialResearchInfoToList(short int researchId) {
 			resInfo->requiredAgeResearch = FindFirstElementInStrategy(&this->buildAI->fakeFirstStrategyElement, AIUCTech, resInfo->requiredAge);
 		}
 	}
-	return true;
+	return resInfo;
 }
 
 // Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
@@ -261,6 +258,17 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_
 	return added;
 }
 
+
+// Returns true if a research is available in tech tree
+bool StrategyBuilder::IsResearchInTechTree(short int researchId) {
+	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techTreeDef = this->global->GetTechDef(this->player->techTreeId);
+	if (techTreeDef) {
+		if (DoesTechDisableResearch(techTreeDef, researchId)) {
+			return false; // not available because disabled by tech tree
+		}
+	}
+	return true; // Default
+}
 
 // Updates this->mustBeBeforeThisElem and this->mustBeAfterThisElem according to known dependencies on other unit/researches
 // Previous values of mustBeBeforeThisElem  and mustBeAfterThisElem are reset (lost)
@@ -1944,6 +1952,57 @@ void StrategyBuilder::ChooseOptionalResearches() {
 }
 
 
+void StrategyBuilder::AddTowerResearches() {
+	short int enableWatchTower = FindResearchThatEnableUnit(this->player, CST_UNITID_WATCH_TOWER, -1);
+	if ((enableWatchTower < 0) || !this->IsResearchInTechTree(enableWatchTower)) {
+		return;
+	}
+	PotentialResearchInfo *watchTowerInfo = this->AddPotentialResearchInfoToList(CST_RSID_WATCH_TOWER);
+	watchTowerInfo->forcePutAsEarlyAsPossible = true;
+	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false);
+
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *watchTower = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)this->player->GetUnitDefBase(CST_UNITID_WATCH_TOWER);
+	if (!watchTower || !watchTower->IsCheckSumValidForAUnitClass() || !watchTower->DerivesFromType50()) { return; }
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *projectileDefInitial = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(watchTower->projectileUnitId);
+
+	std::vector<short int> allResearchesForUnit = FindResearchesThatAffectUnit(player, CST_UNITID_WATCH_TOWER, true);
+	// Add the available upgrades (except ballista tower), ignore other techs
+	for each (short int researchId in allResearchesForUnit)
+	{
+		bool newProjectileIsMuchSlower = false;
+		bool newReloadTimeIsMuchSlower = false;
+		bool isUpgradeUnit = false;
+		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(researchId);
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *destBld = NULL;
+		if (resDef && (resDef->technologyId >= 0) && (resDef->researchLocation >= 0)) {
+			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resDef->technologyId);
+			if (techDef) {
+				short int destUnitId = DoesTechUpgradeUnit(techDef, CST_UNITID_WATCH_TOWER);
+				destBld = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)this->player->GetUnitDefBase(destUnitId);
+				isUpgradeUnit = (destUnitId > -1) && (destBld != NULL);
+			}
+		}
+		if (destBld && destBld->IsCheckSumValidForAUnitClass() && destBld->DerivesFromType50()) {
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *projectileDefAfter = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(destBld->projectileUnitId);
+			if (projectileDefAfter && projectileDefAfter->IsCheckSumValid()) {
+				float speedAfter = projectileDefAfter->speed;
+				float speedInitial = projectileDefInitial->speed;
+				newProjectileIsMuchSlower = (speedAfter < speedInitial * 0.9);
+				newReloadTimeIsMuchSlower = (destBld->reloadTime1 > watchTower->reloadTime1 * 1.1); // Warning: high reload time is BAD !
+			}
+		}
+		if (isUpgradeUnit && !newProjectileIsMuchSlower && !newReloadTimeIsMuchSlower) {
+			PotentialResearchInfo *resInfo = this->AddPotentialResearchInfoToList(researchId);
+			if (resInfo && settings && settings->IsCheckSumValid() && (settings->difficultyLevel < 2) &&
+				this->IsResearchInTechTree(resInfo->researchId)) { // this check is not necessary: if not available, it won't be in allResearchesForUnit
+				resInfo->forcePutAsEarlyAsPossible = true; // Force tower upgrades to be researched quickly
+			}
+		}
+	}
+}
+
+
 // Adds non-military researches that should always be included, for example wheel - if available in tech tree.
 void StrategyBuilder::AddMandatoryNonMilitaryResearches() {
 	// Always add wheel (if available in tech tree - checked in AddPotentialResearchInfoToList)
@@ -2555,7 +2614,9 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 	for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
 	{
 		if (!bldInfo->unitDef || !bldInfo->unitDef->IsCheckSumValidForAUnitClass() || !bldInfo->unitDef->IsTypeValid() ||
-			(bldInfo->addedInStrategyCount > 0)) { continue; }
+			(bldInfo->addedInStrategyCount > 0)) {
+			continue;
+		}
 		// Some buildings with hardcoded behaviour
 		if ((bldInfo->unitDefId == CST_UNITID_GRANARY) || (bldInfo->unitDefId == CST_UNITID_STORAGE_PIT)) {
 			// Read SN number from strategy AI because it is valued and correct even "before" game start. TacAI's SN number are copied later.
@@ -2595,14 +2656,14 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 		// Add a building just before the first location in strategy where it is needed - works for most dependencies except some, like market (to enable farms)
 		while (curElem && (curElem != fakeFirstElem) && (insertionPoint == NULL)) {
 			bool isResearch = (curElem->elementType == TAIUnitClass::AIUCTech) || (curElem->elementType == TAIUnitClass::AIUCCritical);
-bool actorFieldIsRelevant = isResearch || (curElem->elementType == TAIUnitClass::AIUCLivingUnit) || (curElem->elementType == TAIUnitClass::AIUCBuilding);
-if (actorFieldIsRelevant && (curElem->actor == bldInfo->unitDefId)) {
-	insertionPoint = curElem;
-}
-if (isResearch && (curElem->unitDAT_ID >= CST_RSID_STONE_AGE) && (curElem->unitDAT_ID <= CST_RSID_IRON_AGE)) { // + 104 for republic age
-	insertionPoint = curElem; // stop when reaching an age upgrade element. Building must be constructed in its "own" age
-}
-curElem = curElem->next;
+			bool actorFieldIsRelevant = isResearch || (curElem->elementType == TAIUnitClass::AIUCLivingUnit) || (curElem->elementType == TAIUnitClass::AIUCBuilding);
+			if (actorFieldIsRelevant && (curElem->actor == bldInfo->unitDefId)) {
+				insertionPoint = curElem;
+			}
+			if (isResearch && (curElem->unitDAT_ID >= CST_RSID_STONE_AGE) && (curElem->unitDAT_ID <= CST_RSID_IRON_AGE)) { // + 104 for republic age
+				insertionPoint = curElem; // stop when reaching an age upgrade element. Building must be constructed in its "own" age
+			}
+			curElem = curElem->next;
 		}
 		if (insertionPoint) {
 			counter += AddBuildingToStrategy(bldInfo, insertionPoint);
@@ -2760,6 +2821,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	{
 		this->CollectResearchInfoForUnit(unitInfo->unitDefId, !unitInfo->isOptionalUnit);
 	}
+	this->AddTowerResearches();
 	this->AddMandatoryNonMilitaryResearches();
 	// Mark for add: all researches added previously are "validated" / "necessary"
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)

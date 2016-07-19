@@ -493,6 +493,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		if (!player || !player->ptrAIStruct) { return; }
 		
 		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)FindUnitWithShortcutNumberForPlayer(player, 1);
+		ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *type50 = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *)unitBase;
 		if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) { return; }
 		if (unitBase->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING) { return; }
 		ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *bld = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING*)unitBase;

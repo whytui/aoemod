@@ -308,6 +308,24 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef) 
 	return false;
 }
 
+// Returns "destination" unit ID if technology upgrades provided unit definition ID into another unit
+// Returns -1 if technology does NOT upgrade provided unit to another unit
+short int DoesTechUpgradeUnit(STRUCT_TECH_DEF *techDef, short int unitDefId) {
+	if (!techDef || (unitDefId < 0)) { // -1 CAN'T be a joker here !
+		return -1;
+	}
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect) {
+			// Upgrade THIS unit to another unit
+			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) && (techEffect->effectUnit == unitDefId)) {
+				return techEffect->effectClass;
+			}
+		}
+	}
+	return -1;
+}
+
 
 // Returns true if technology enables provided unit (including upgrade TO provided unit, if provided unit is an upgrade).
 bool DoesTechEnableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId) {
@@ -319,7 +337,7 @@ bool DoesTechEnableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId) {
 		if (techEffect) {
 			// Enable unit
 			if (techEffect->IsEnableUnit(unitDefId)) { return true; }
-			// Upgrade some unit to THIS unit
+			// Upgrade some unit TO THIS unit
 			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) && (techEffect->effectClass == unitDefId)) {
 				return true;
 			}
