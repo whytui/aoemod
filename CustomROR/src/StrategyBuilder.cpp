@@ -1836,6 +1836,7 @@ void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 
 // Selects optional researches to add to strategy
 // All villagers and military units must have already been added to strategy.
+// This method only updates flags, does not actually add anything to strategy
 void StrategyBuilder::ChooseOptionalResearches() {
 
 	std::list<PotentialUnitInfo*> unitsThatNeedMoreAttack;
@@ -1908,41 +1909,94 @@ void StrategyBuilder::ChooseOptionalResearches() {
 		}
 	}
 
-	// Recompute unit scores for ALL (selected) units (not restricted to early units)
+	// Recompute unit scores on remaining researches, counting ALL (selected) units (not restricted to early units)
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		resInfo->unitInstanceScoreForOptionalResearch = 0;
-		for each (short int impactedUnitDefId in resInfo->impactedUnitDefIds) {
-			for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
-			{
-				if (unitInfo->unitDefId == impactedUnitDefId) {
-					resInfo->unitInstanceScoreForOptionalResearch += (int)unitInfo->addedCount;
+		// Filter: exclude research already added/marked for add, shadow researches, etc
+		if (resInfo->researchDef && (resInfo->researchDef->researchLocation > -1) && !resInfo->isInStrategy && !resInfo->markedForAdd) {
+			for each (short int impactedUnitDefId in resInfo->impactedUnitDefIds) {
+				for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+				{
+					if (unitInfo->unitDefId == impactedUnitDefId) {
+						resInfo->unitInstanceScoreForOptionalResearch += (int)unitInfo->addedCount;
+					}
+				}
+				// Units that are not in "actuallySelectedUnits": villagers, farms...
+				if (impactedUnitDefId == CST_UNITID_VILLAGER) {
+					resInfo->unitInstanceScoreForOptionalResearch += this->villagerCount_alwaysRetrain;
+				}
+				if (impactedUnitDefId == CST_UNITID_FARM) {
+					PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
+					if (farmInfo) {
+						resInfo->unitInstanceScoreForOptionalResearch += farmInfo->desiredCount;
+					}
 				}
 			}
-#pragma message("Villagers: we should add all related villager datids in researches->impactedUnitDefIds when adding research info. This way it would even be visible for early units see above")
-			/*if (impactedUnitDefId == CST_UNITID_VILLAGER) {
-				resInfo->unitInstanceScoreForOptionalResearch += this->villagerCount_alwaysRetrain;
+			// Transform into a % value
+			resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 100) / this->maxPopulation;
+			if (resInfo->unitInstanceScoreForOptionalResearch > 100) {
+				resInfo->unitInstanceScoreForOptionalResearch = 100;
+			}
+			if (resInfo->unitInstanceScoreForOptionalResearch < 0) {
+				resInfo->unitInstanceScoreForOptionalResearch = 0;
+			}
+			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resInfo->researchDef->technologyId);
+			for (int i = 0; (techDef != NULL) && (i < techDef->effectCount); i++) {
+				if (techDef->ptrEffects[i].IsAttributeModifier()) {
+					if ((techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) &&
+						(techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_HP)) {
+						resInfo->unitInstanceScoreForOptionalResearch += 30; // Add HP to all buildings (the only attribute that really improves buildings)
+					}
+					if (techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_SPEED) {
+						// Make sure this tech effect applies on "my" units
+						AOE_TECHNOLOGIES::TechFilterExcludeTechsWithDrawbacks filter; // Used to exclude technologies like jihad, martyrdom...
+						if (!filter.IgnoreEffect(&techDef->ptrEffects[i])) {
+							bool affectsVillagers = (techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian);
+							bool affectsMyUnits = false;
+							// Try on "selected" units
+							for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+							{
+								if (techDef->ptrEffects[i].effectUnit == unitInfo->unitDefId) {
+									affectsMyUnits = true;
+									break;
+								}
+							}
+							if (affectsMyUnits) {
+								resInfo->unitInstanceScoreForOptionalResearch += 20; // Increasing units speed is always precious
+							}
+							if (affectsVillagers) {
+								resInfo->unitInstanceScoreForOptionalResearch += 80; // Increasing villagers speed is always relevant (except jihad, beware !) => wheel, if not already added
+							}
+						}
+					}
 				}
-				*/
-		}
-		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resInfo->researchDef->technologyId);
-		for (int i = 0; (techDef != NULL) && (i < techDef->effectCount); i++) {
-			if (techDef->ptrEffects[i].IsAttributeModifier()) {
-				if ((techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) &&
-					(techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_HP)) {
-					resInfo->unitInstanceScoreForOptionalResearch += 15; // Add HP to all buildings (the only attribute that really improves buildings)
-				}
+			}
+			if (resInfo->unitInstanceScoreForOptionalResearch > 100) {
+				resInfo->unitInstanceScoreForOptionalResearch = 100;
+			}
+			if (resInfo->unitInstanceScoreForOptionalResearch < 0) {
+				resInfo->unitInstanceScoreForOptionalResearch = 0;
 			}
 		}
 	}
 
+	// Mark researches that have an excellent score
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList) {
+		if (!resInfo->isInStrategy && !resInfo->markedForAdd && !resInfo->forcePlaceForFirstImpactedUnit && 
+			resInfo->researchDef && (resInfo->researchDef->researchLocation > -1) &&
+			(resInfo->unitInstanceScoreForOptionalResearch > 85)) {
+			resInfo->forcePutAsEarlyAsPossible = true;
+		}
+	}
 
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		// Loop on researches we do not plan (yet) to include in strategy = optional researches
-		if (!resInfo->isInStrategy && !resInfo->markedForAdd && !resInfo->forcePlaceForFirstImpactedUnit) {
+		if (!resInfo->isInStrategy && !resInfo->markedForAdd && !resInfo->forcePlaceForFirstImpactedUnit &&
+			resInfo->researchDef && (resInfo->researchDef->researchLocation > -1)) {
 			int impactedUnitsCount = resInfo->impactedUnitDefIds.size();
-			// Costs ?
+			// Score: random, cossts, ...
 			// low-cost techs that improve >1 unit type: add (tool age storage pit techs...)
 			// check Age availability ?
 
@@ -2033,16 +2087,7 @@ void StrategyBuilder::AddTowerResearches() {
 
 // Adds non-military researches that should always be included, for example wheel - if available in tech tree.
 void StrategyBuilder::AddMandatoryNonMilitaryResearches() {
-	// Always add wheel (if available in tech tree - checked in AddPotentialResearchInfoToList)
-	this->AddPotentialResearchInfoToList(CST_RSID_WHEEL); // Note: it may have already been added by some dependency
-	PotentialResearchInfo *resInfo = this->GetResearchInfo(CST_RSID_WHEEL);
-	if (resInfo) {
-		// Force wheel to be developed before next age (if there IS a next age)
-		if (resInfo->requiredAge < CST_RSID_IRON_AGE) {
-			resInfo->researchesThatMustBePutAfterMe.insert(resInfo->requiredAge + 1);
-		}
-		resInfo->forcePutAsEarlyAsPossible = true;
-	}
+	// Always add wheel => now done automatically in optional researches part
 
 	// Make sure farm requirements are met
 	this->CollectResearchInfoForUnit(CST_UNITID_FARM, false); // Will add market...
@@ -2930,10 +2975,8 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 		resInfo->markedForAdd = true;
 	}
 
-	// Some "hardcoded" stuff (related to game basic behaviour)
-#pragma message("villagers: does not work, to try on every villager id (use class&villager mode + farms amount)")
-	//this->CollectResearchInfoForUnit(CST_UNITID_VILLAGER, false); // Get optional researches for economy (NOT marked for add at this point)
-	this->AddResearchesForEconomy(); // Get optional researches for economy (NOT marked for add at this point)
+	// Get optional researches for economy (NOT marked for add at this point)
+	this->AddResearchesForEconomy();
 	
 	// Finalize exact list of trained units => add units
 	this->AddMilitaryUnitsForEarlyAges();

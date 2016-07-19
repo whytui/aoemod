@@ -227,6 +227,7 @@ namespace STRATEGY {
 
 		// Selects optional researches to add to strategy
 		// All villagers and military units must have already been added to strategy.
+		// This method only updates flags, does not actually add anything to strategy
 		void ChooseOptionalResearches();
 
 		// Add researches for villagers/economy (does not mark them for add : optional researches)
