@@ -2542,7 +2542,7 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 
 // Add strategy elements other than "main units" required researches.
 void StrategyBuilder::CreateOtherResearchesStrategyElements() {
-	// Add also researches with a specific location (forcePlaceForFirstImpactedUnit)
+	// First add researches with a specific location (forcePlaceForFirstImpactedUnit)
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		if ((resInfo->forcePlaceForFirstImpactedUnit || resInfo->forcePutAsEarlyAsPossible) && !resInfo->isInStrategy) {
@@ -2563,6 +2563,7 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 		}
 	}
 	// TEST - TODO: this is quite random and not much tested... Just a try.
+	// TODO: set an order for insertion, use priorities...
 	int totalAddedResearches = 0;
 	int addedResearchesThisLoop = 1;
 	while (addedResearchesThisLoop > 0) {
@@ -2601,11 +2602,10 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 		}
 		totalAddedResearches += addedResearchesThisLoop;
 	}
-	// TODO: loop on previous block until we're making no more progress (or remaining=0) ?
 	this->log += std::to_string(totalAddedResearches);
 	this->log += "/";
 	this->log += std::to_string(totalResearchesToUse);
-	this->log += " non-critical researches added";
+	this->log += " identified non-critical researches added";
 	this->log += newline;
 }
 
@@ -2898,7 +2898,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	{
 		this->CollectResearchInfoForUnit(unitInfo->unitDefId, !unitInfo->isOptionalUnit);
 	}
-	this->AddTowerResearches();
+	this->AddTowerResearches(); // Do not use standard algorithm for towers (because of ballista tower specificity)
 	this->AddMandatoryNonMilitaryResearches();
 	// Mark for add: all researches added previously are "validated" / "necessary"
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
@@ -2907,10 +2907,10 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	}
 
 	// Some "hardcoded" stuff (related to game basic behaviour)
-#pragma message("villagers: does not work, you try on every villager id (use class&villager mode + farms amount")
+#pragma message("villagers: does not work, to try on every villager id (use class&villager mode + farms amount")
 	//this->CollectResearchInfoForUnit(CST_UNITID_VILLAGER, false); // Get optional researches for economy (NOT marked for add at this point)
-	//this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false); // TODO: tower upgrades except ballista
-
+	//this->AddTechsForEconomy();
+	
 	// Finalize exact list of trained units => add units
 	this->AddMilitaryUnitsForEarlyAges();
 	this->UpdateRequiredBuildingsFromValidatedResearches();
