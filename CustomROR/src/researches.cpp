@@ -289,8 +289,8 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, 
 					(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_BUILDING) ||
 					(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_PRIEST) ||
 					(techEffect->effectUnit == CST_RES_ORDER_FAITH_RECHARGING_RATE) ||
-					(techEffect->effectUnit == CST_RES_ORDER_HEALING) // (medecine tech)
-					// (techEffect->effectUnit == CST_RES_ORDER_PRIEST_SACRIFICE) // AI will never use it. Ignore it.
+					(techEffect->effectUnit == CST_RES_ORDER_HEALING) || // (medecine tech)
+					(techEffect->effectUnit == CST_RES_ORDER_PRIEST_SACRIFICE) // AI will never use it. It can be ignored using filter.
 					)) {
 					return true; // Priest & building/priest conversion + faith recharging rate
 				}

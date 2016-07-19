@@ -416,8 +416,9 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 		}
 	}
 
-	AOE_TECHNOLOGIES::TechFilterExcludeTechsWithDrawbacks filter;
-
+	// Filter for tech tree effects analysis: ignore techs with drawbacks, techs "not used" by AI, effects that do not provide a real specific advantage for current unit (macedonian's LOS)
+	AOE_TECHNOLOGIES::TechFilterExcludeDrawbacksAndDistributedEffects filter;
+	
 	for (int curUnitDefID = 0; curUnitDefID < player->structDefUnitArraySize; curUnitDefID++) {
 		STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(curUnitDefID);
 		bool validUnit = (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
@@ -476,12 +477,8 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 				if (techDefTechTree->ptrEffects[i].IsDisableUnit(unitDefBase->DAT_ID1)) {
 					validUnit = false;
 				}
-				if (validUnit && techDefTechTree->ptrEffects[i].HasValidEffect()) {
-					// We consider valid effects in tech tree (that are NOT disable unit) are always positive effects
-					// What could we do otherwise ? Ignore the unit ? Add flag in PotentialUnitInfo ?
-					currentUnitHasTechTreeBonus = true;
-				}
 			}
+			currentUnitHasTechTreeBonus = validUnit; // If there is no effect "disable unit", consider it is a positive effect
 		}
 		if (validUnit) {
 			PotentialUnitInfo *unitInfo = new PotentialUnitInfo();

@@ -96,7 +96,7 @@ namespace AOE_TECHNOLOGIES {
 	// Filter all effects that corresponds to features/behaviours that AI doesn't use/know about (martyrdom...)
 	// Filter all effects that have drawbacks
 	// Filter all effects that are "light" and that impact all/a lot of units (LOS for macedonian)
-	class TechFilterExcludeDrawbacksAndistributedEffects : public TechFilterExcludeNotAISupported {
+	class TechFilterExcludeDrawbacksAndDistributedEffects : public TechFilterExcludeNotAISupported {
 	public:
 		bool IgnoreEffect(STRUCT_TECH_DEF_EFFECT *techEffect) const override {
 			if (__super::IgnoreEffect(techEffect)) { return true; }
