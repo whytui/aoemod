@@ -2026,9 +2026,8 @@ void StrategyBuilder::CreateTCAndAgesStrategyElements() {
 		this->seTownCenter = fakeFirstElem->previous;
 	}
 	
-	// Barracks are always needed
 	// Tool Age
-	if (!IsResearchRelevantForStrategy(player, CST_RSID_TOOL_AGE)) {
+	if ((GetResearchStatus(player, CST_RSID_TOOL_AGE) == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED)) {
 		string msg = "This civ seems NOT to have tool age. Player #";
 		msg += to_string(this->buildAI->commonAIObject.playerId);
 		msg += " : ";
@@ -2040,7 +2039,7 @@ void StrategyBuilder::CreateTCAndAgesStrategyElements() {
 		this->seToolAge = fakeFirstElem->previous;
 	}
 	// Bronze Age
-	if (!IsResearchRelevantForStrategy(this->player, CST_RSID_BRONZE_AGE)) {
+	if ((GetResearchStatus(player, CST_RSID_BRONZE_AGE) == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED)) {
 		string msg = "This civ seems NOT to have bronze age. Player #";
 		msg += to_string(this->buildAI->commonAIObject.playerId);
 		msg += " : ";
@@ -2052,7 +2051,7 @@ void StrategyBuilder::CreateTCAndAgesStrategyElements() {
 		this->seBronzeAge = fakeFirstElem->previous;
 	}
 	// Iron Age
-	if (!IsResearchRelevantForStrategy(this->player, CST_RSID_IRON_AGE)) {
+	if ((GetResearchStatus(player, CST_RSID_IRON_AGE) == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED)) {
 		string msg = "This civ seems NOT to have iron age. Player #";
 		msg += to_string(buildAI->commonAIObject.playerId);
 		msg += " : ";
@@ -2069,6 +2068,11 @@ void StrategyBuilder::CreateTCAndAgesStrategyElements() {
 void StrategyBuilder::CreateVillagerStrategyElements() {
 	if (!this->buildAI || !this->buildAI->IsCheckSumValid()) { return; }
 	if (!player || !player->IsCheckSumValid()) { return; }
+	assert(this->seToolAge != NULL);
+	assert(this->seBronzeAge != NULL);
+	assert(this->seIronAge != NULL);
+	if (!this->seToolAge || !this->seBronzeAge || !this->seIronAge) { return; }
+
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
 	int totalVillagersCount = this->villagerCount_alwaysRetrain + this->villagerCount_limitedRetrains;
 	assert(this->villagerCount_alwaysRetrain + this->villagerCount_limitedRetrains > 0);
@@ -2675,7 +2679,6 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 	this->CreateFarmStrategyElements();
 
 	// "Military" buildings
-#pragma message("TODO : add other secondary buildings for 'main' units")
 	std::set<PotentialBuildingInfo*> bldList; // buildings that need to be built more than once
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 	{
@@ -2817,8 +2820,6 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	}
 
 	// If game is running, search matching units for strategy elements ?
-
-	// TODO : more buildings for main units
 
 	// Ending check
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
