@@ -1953,6 +1953,30 @@ void StrategyBuilder::ChooseOptionalResearches() {
 }
 
 
+// Add researches for villagers/economy (does not mark them for add : optional researches)
+void StrategyBuilder::AddResearchesForEconomy() {
+	for (int unitDefId = 0; unitDefId < this->player->structDefUnitArraySize; unitDefId++) {
+		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = this->player->GetUnitDefBase(unitDefId);
+		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromBird()) {
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *unitDefBird = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *)unitDef;
+			if (unitDefBird->villagerMode && (unitDefBird->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian)) {
+				this->CollectResearchInfoForUnit(unitDefId, true);
+			}
+			if (unitDefId == CST_UNITID_FARM) {
+				this->CollectResearchInfoForUnit(unitDefId, true); // already done previously but withOUT all upgrades
+			}
+			if (this->isWaterMap) {
+				if ((unitDefBird->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat) || 
+					(unitDefBird->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTransportBoat)) {
+					// Trade boat...
+					this->CollectResearchInfoForUnit(unitDefId, true);
+				}
+			}
+		}
+	}
+}
+
+
 // Add tower upgrades to internal objects (and mark them as priority items)
 // Does not add upgrades that slow projectiles down (ballista tower)
 // Only adds unit upgrades (sentry, watch tower) + "enable unit" (watch tower) researches, not others researches.
@@ -2907,9 +2931,9 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	}
 
 	// Some "hardcoded" stuff (related to game basic behaviour)
-#pragma message("villagers: does not work, to try on every villager id (use class&villager mode + farms amount")
+#pragma message("villagers: does not work, to try on every villager id (use class&villager mode + farms amount)")
 	//this->CollectResearchInfoForUnit(CST_UNITID_VILLAGER, false); // Get optional researches for economy (NOT marked for add at this point)
-	//this->AddTechsForEconomy();
+	this->AddResearchesForEconomy(); // Get optional researches for economy (NOT marked for add at this point)
 	
 	// Finalize exact list of trained units => add units
 	this->AddMilitaryUnitsForEarlyAges();
@@ -3045,7 +3069,11 @@ int StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpg
 				}
 			}
 			if (resInfo) {
-				resInfo->impactedUnitDefIds.insert(unitDefId);
+				short int idToAdd = unitDefId;
+				if (unitDefBase->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian) {
+					idToAdd = CST_UNITID_VILLAGER; // villagers: always add (only) base villager unitDefId to avoid counting villagers more than once
+				}
+				resInfo->impactedUnitDefIds.insert(idToAdd);
 			} else {
 				assert(false && "ERROR: research info was not added for resId=");
 				this->log += "ERROR: research info was not added for resId=";
@@ -3061,7 +3089,11 @@ int StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpg
 		{
 			PotentialResearchInfo *resInfo = this->GetResearchInfo(resDefId);
 			if (resInfo) {
-				resInfo->impactedUnitDefIds.insert(unitDefId); // just add reference to this unit if research already exists in list. Don't add anything here.
+				short int idToAdd = unitDefId;
+				if (unitDefBase->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian) {
+					idToAdd = CST_UNITID_VILLAGER; // villagers: always add (only) base villager unitDefId to avoid counting villagers more than once
+				}
+				resInfo->impactedUnitDefIds.insert(idToAdd); // just add reference to this unit if research already exists in list. Don't add anything here.
 			}
 		}
 	}

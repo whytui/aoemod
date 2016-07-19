@@ -72,10 +72,10 @@ namespace AOE_TECHNOLOGIES {
 		bool IgnoreEffect(STRUCT_TECH_DEF_EFFECT *techEffect) const override {
 			if (__super::IgnoreEffect(techEffect)) { return true; }
 			// Ignore jihad
-			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) &&
-				(techEffect->effectValue < 0) && 
-				(AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) < 0)) {
-				return true;
+			if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) {
+				bool positiveEffect = ((techEffect->effectValue < 0) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) < 0)) ||
+					((techEffect->effectValue > 0) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) > 0));
+				return !positiveEffect;
 			}
 			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT) &&
 				(techEffect->effectValue < 1) &&

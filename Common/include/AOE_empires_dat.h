@@ -1301,6 +1301,7 @@ namespace AOE_CONST_FUNC {
 
 	// Returns true if the DAT_ID is a villager unit type
 	// DOES NOT return true for fishing ships/trade ships
+	// Hardcoded list ! Please use class=4 instead
 	static bool IsVillager(unsigned short int dat_id) {
 		return (
 			(dat_id == CST_UNITID_MAN) ||

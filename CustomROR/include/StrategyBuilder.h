@@ -229,6 +229,9 @@ namespace STRATEGY {
 		// All villagers and military units must have already been added to strategy.
 		void ChooseOptionalResearches();
 
+		// Add researches for villagers/economy (does not mark them for add : optional researches)
+		void AddResearchesForEconomy();
+
 		// Add tower upgrades to internal objects (and mark them as priority items)
 		// Does not add upgrades that slow projectiles down (ballista tower)
 		// Only adds unit upgrades (sentry, watch tower) + "enable unit" (watch tower) researches, not others researches.

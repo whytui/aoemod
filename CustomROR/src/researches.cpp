@@ -262,48 +262,52 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, 
 	}
 	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
 		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
-		if (!filter || !filter->IgnoreEffect(techEffect)) {
-			// Does this affect affect units ?
-			if (techEffect && (techEffect->HasValidEffect()) && (
-				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
-				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
-				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT)
-				)) {
-				if (techEffect->effectUnit == unitDef->DAT_ID1) { return true; }
-				if (techEffect->effectClass == unitDef->unitAIType) { return true; }
-			}
-			if (techEffect->IsEnableUnit(unitDef->DAT_ID1)) {
+		if (filter && filter->IgnoreEffect(techEffect)) {
+			return false; // If technology contains 1 effect "to ignore", ignore the whole thing (example: jihad contains both "good" and undesirable effects)
+		}
+	}
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		// Does this affect affect units ?
+		if (techEffect && (techEffect->HasValidEffect()) && (
+			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
+			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
+			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT)
+			)) {
+			if (techEffect->effectUnit == unitDef->DAT_ID1) { return true; }
+			if (techEffect->effectClass == unitDef->unitAIType) { return true; }
+		}
+		if (techEffect->IsEnableUnit(unitDef->DAT_ID1)) {
+			return true;
+		}
+		if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT)) {
+			// Upgrade unit : effectClass field is "TO" unit
+			if ((techEffect->effectUnit == unitDef->DAT_ID1) || (techEffect->effectClass == unitDef->DAT_ID1)) {
 				return true;
 			}
-			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT)) {
-				// Upgrade unit : effectClass field is "TO" unit
-				if ((techEffect->effectUnit == unitDef->DAT_ID1) || (techEffect->effectClass == unitDef->DAT_ID1)) {
-					return true;
-				}
+		}
+		bool isResourceModifier = ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) ||
+			(techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT));
+		// Very special cases: some resources can improve units: priest/building conversion, etc
+		if (unitDef->unitAIType == TribeAIGroupPriest) {
+			if (isResourceModifier && (
+				(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_BUILDING) ||
+				(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_PRIEST) ||
+				(techEffect->effectUnit == CST_RES_ORDER_FAITH_RECHARGING_RATE) ||
+				(techEffect->effectUnit == CST_RES_ORDER_HEALING) || // (medecine tech)
+				(techEffect->effectUnit == CST_RES_ORDER_PRIEST_SACRIFICE) // AI will never use it. It can be ignored using filter.
+				)) {
+				return true; // Priest & building/priest conversion + faith recharging rate
 			}
-			bool isResourceModifier = ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) ||
-				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT));
-			// Very special cases: some resources can improve units: priest/building conversion, etc
-			if (unitDef->unitAIType == TribeAIGroupPriest) {
-				if (isResourceModifier && (
-					(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_BUILDING) ||
-					(techEffect->effectUnit == CST_RES_ORDER_CAN_CONVERT_PRIEST) ||
-					(techEffect->effectUnit == CST_RES_ORDER_FAITH_RECHARGING_RATE) ||
-					(techEffect->effectUnit == CST_RES_ORDER_HEALING) || // (medecine tech)
-					(techEffect->effectUnit == CST_RES_ORDER_PRIEST_SACRIFICE) // AI will never use it. It can be ignored using filter.
-					)) {
-					return true; // Priest & building/priest conversion + faith recharging rate
-				}
+		}
+		if (IsVillager(unitDef->DAT_ID1)) { // excluding boats
+			if (isResourceModifier) {
+				if (techEffect->effectUnit == CST_RES_ORDER_GOLD_MINING_PODUCTIVITY) { return true; } // Villagers: mining productivity
 			}
-			if (IsVillager(unitDef->DAT_ID1)) { // excluding boats
-				if (isResourceModifier) {
-					if (techEffect->effectUnit == CST_RES_ORDER_GOLD_MINING_PODUCTIVITY) { return true; } // Villagers: mining productivity
-				}
-			}
-			if (unitDef->DAT_ID1 == CST_UNITID_FARM) {
-				if (isResourceModifier) {
-					if (techEffect->effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT) { return true; } // Farms : farm amount
-				}
+		}
+		if (unitDef->DAT_ID1 == CST_UNITID_FARM) {
+			if (isResourceModifier) {
+				if (techEffect->effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT) { return true; } // Farms : farm amount
 			}
 		}
 	}
