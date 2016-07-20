@@ -1920,7 +1920,7 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 	return 0;
 }
 
-// Add some military to selection, to fille gaps in strategy in early ages (if any)
+// Add some military to selection, to fill gaps in strategy in early ages (if any)
 void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 	int strengths[4][MC_COUNT]; // First index=age 0-3
 	// Note: ignore stone age, priority is to go Tool (and not much military at this age)

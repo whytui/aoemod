@@ -15,9 +15,10 @@ namespace STRATEGY {
 	class PotentialUnitInfo {
 	public:
 		PotentialUnitInfo();
+		short int unitDefId; // DATID1 (base unit ID = without upgrades)
+		char *unitName; // For debug
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *baseUnitDefLiving; // (DATID1) Unit definition of base unit, without upgrade
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
-		short int unitDefId; // DATID1 (base unit ID = without upgrades)
 		short int baseUnitDefId; // non-upgraded unit that can be upgraded to "this" one, if any. -1 in most cases. PLEASE use unitDefId instead.
 		std::list<short int> upgradesUnitDefId; // List of all available unitDefId this unit can be upgraded to
 		short int strongestUpgradeUnitDefId; // Unit definition ID of best available upgraded unit
@@ -35,7 +36,6 @@ namespace STRATEGY {
 		short int hitPoints;
 		short int displayedAttack; // displayedAttack from unitDef is reliable (always matches default attack without bonuses, never 0 for units with an attack). displayedAttack=number before the "+" (constant even after upgrade)
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType;
-		char *unitName; // For debug
 		bool hasCivBonus;
 		bool hasSpecificAttackBonus; // true if unit has some special specific bonus, like camel, slinger, chariot
 		float conversionResistance;
