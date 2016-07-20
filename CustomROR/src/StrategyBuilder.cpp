@@ -1999,7 +1999,29 @@ void StrategyBuilder::ChooseOptionalResearches() {
 		if (!resInfo->isInStrategy && !resInfo->markedForAdd && !resInfo->forcePlaceForFirstImpactedUnit && 
 			resInfo->researchDef && (resInfo->researchDef->researchLocation > -1) &&
 			(resInfo->unitInstanceScoreForOptionalResearch > 85)) {
-			resInfo->forcePutAsEarlyAsPossible = true;
+			bool hasVillager = false;
+			bool hasNonVillager = false;
+			for each (short int unitDefId in resInfo->impactedUnitDefIds)
+			{
+				if (unitDefId == CST_UNITID_VILLAGER) {
+					hasVillager = true;
+				} else {
+					hasNonVillager = true;
+				}
+			}
+			if (resInfo->unitInstanceScoreForOptionalResearch < 95) {
+				resInfo->markedForAdd = true; // Add without priority
+			} else {
+				if (hasVillager) {
+					resInfo->forcePutAsEarlyAsPossible = true;
+				} else {
+					if (hasNonVillager) {
+						resInfo->forcePlaceForFirstImpactedUnit = true;
+					} else {
+						assert(false && "Research should have impacted units");
+					}
+				}
+			}
 		}
 	}
 
