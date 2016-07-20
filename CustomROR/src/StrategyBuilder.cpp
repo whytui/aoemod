@@ -681,7 +681,10 @@ void StrategyBuilder::ComputeScoresForPotentialUnits() {
 		}
 
 		// availableRelatedResearchesProportion is a % value (0-100)
-		int availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount);
+		int availableRelatedResearchesProportion = 100;
+		if (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount != 0) {
+			availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount);
+		}
 		// A combination of speed and hit points
 		float adjustedSpeed = unitInfo->speedUpgraded - 0.4f;
 		if (adjustedSpeed < 0.4) { adjustedSpeed = 0.4f; } // This gives more importance to speed (more penalty for slow units): lower difference between speed values = more difference after multiplication
@@ -1077,7 +1080,10 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 // Compute score fields for towers in unitInfo object.
 void StrategyBuilder::ComputeScoresVsTower(PotentialUnitInfo *unitInfo) {
 	unitInfo->strengthVs[MC_TOWER] = 0;
-	int proportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount);
+	int proportion = 100;
+	if (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount != 0) {
+		proportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount);
+	}
 	switch (unitInfo->unitAIType) {
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon:
 		unitInfo->strengthVs[MC_TOWER] += 60;
@@ -1155,7 +1161,10 @@ void StrategyBuilder::ComputeGlobalScores() {
 		}
 		int numberOfAvailableUpgrades = unitInfo->upgradesUnitDefId.size();
 		// TODO: example: assyrian cat is super unit (all unit upgrades) but missing 2 techs/5 => not selected
-		int proportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount);
+		int proportion = 100;
+		if (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount != 0) {
+			proportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount);
+		}
 		// Reduce proportion impact:
 		int missingTechProportionWeight = 70; // Importance (a % value) of missing techs.
 		if (unitInfo->isSuperUnit) {
@@ -1404,6 +1413,124 @@ void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> s
 }
 
 
+// Compute unitInstanceScoreForOptionalResearch for remaining (not selected) optional researches
+void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
+	std::list<PotentialResearchInfo*> remainingResearches; // This list is a shortcut to all remaining optional researches (filtering other ones)
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		resInfo->unitInstanceScoreForOptionalResearch = 0;
+		// Filter: exclude research already added/marked for add, shadow researches, etc
+		if (resInfo->researchDef && (resInfo->researchDef->researchLocation > -1) && !resInfo->isInStrategy && !resInfo->markedForAdd) {
+			for each (short int impactedUnitDefId in resInfo->impactedUnitDefIds) {
+				for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+				{
+					if (unitInfo->unitDefId == impactedUnitDefId) {
+						resInfo->unitInstanceScoreForOptionalResearch += (int)unitInfo->addedCount;
+					}
+				}
+				// Units that are not in "actuallySelectedUnits": villagers, farms...
+				if (impactedUnitDefId == CST_UNITID_VILLAGER) {
+					resInfo->unitInstanceScoreForOptionalResearch += this->villagerCount_alwaysRetrain;
+				}
+				if (impactedUnitDefId == CST_UNITID_FARM) {
+					PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
+					if (farmInfo) {
+						resInfo->unitInstanceScoreForOptionalResearch += farmInfo->desiredCount;
+					}
+				}
+			}
+			// Transform into a % value
+			resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 100) / this->maxPopulation;
+			if (resInfo->unitInstanceScoreForOptionalResearch > 100) {
+				resInfo->unitInstanceScoreForOptionalResearch = 100;
+			}
+			if (resInfo->unitInstanceScoreForOptionalResearch < 0) {
+				resInfo->unitInstanceScoreForOptionalResearch = 0;
+			}
+			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resInfo->researchDef->technologyId);
+			for (int i = 0; (techDef != NULL) && (i < techDef->effectCount); i++) {
+				if (techDef->ptrEffects[i].IsAttributeModifier()) {
+					if ((techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) &&
+						(techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_HP)) {
+						if (this->settings && this->settings->IsCheckSumValid()) {
+							// Add HP to all buildings (the only attribute that really improves buildings)
+							int valueToAdd = 20; // easy levels: will probably not be enough to add architecture
+							if (this->settings->difficultyLevel == 2) {
+								valueToAdd = randomizer.GetRandomValue_normal_moderate(10, 60); // will sometimes do...
+							}
+							if (this->settings->difficultyLevel == 1) {
+								valueToAdd = randomizer.GetRandomValue_normal_moderate(35, 75); // will generally do...
+							}
+							if (this->settings->difficultyLevel == 0) {
+								valueToAdd = randomizer.GetRandomValue_normal_moderate(45, 70); // random part, but almost always enough to actually add architecture
+							}
+							resInfo->unitInstanceScoreForOptionalResearch += valueToAdd;
+						}
+					}
+					if (techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_SPEED) {
+						// Make sure this tech effect applies on "my" units
+						AOE_TECHNOLOGIES::TechFilterExcludeTechsWithDrawbacks filter; // Used to exclude technologies like jihad, martyrdom...
+						if (!filter.IgnoreEffect(&techDef->ptrEffects[i])) {
+							bool affectsVillagers = (techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian);
+							bool affectsMyUnits = false;
+							// Try on "selected" units
+							for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+							{
+								if (techDef->ptrEffects[i].effectUnit == unitInfo->unitDefId) {
+									affectsMyUnits = true;
+									break;
+								}
+							}
+							if (affectsMyUnits) {
+								resInfo->unitInstanceScoreForOptionalResearch += 20; // Increasing units speed is always precious
+							}
+							if (affectsVillagers) {
+								resInfo->unitInstanceScoreForOptionalResearch += 80; // Increasing villagers speed is always relevant (except jihad, beware !) => wheel, if not already added
+							}
+						}
+					}
+					if ((techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_RANGE) &&
+						(techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon)) {
+						resInfo->unitInstanceScoreForOptionalResearch += 30; // Adding range to siege units is very useful
+					}
+				}
+			}
+			// Fill remainingResearches for further use
+			remainingResearches.push_back(resInfo);
+		}
+		if (resInfo->unitInstanceScoreForOptionalResearch > 100) {
+			resInfo->unitInstanceScoreForOptionalResearch = 100;
+		}
+		if (resInfo->unitInstanceScoreForOptionalResearch < 0) {
+			resInfo->unitInstanceScoreForOptionalResearch = 0;
+		}
+	}
+
+	// Take care of dependencies (loop on *filtered* list)
+	const int penaltyForDependency = 5;
+	for each (PotentialResearchInfo *currentResInfo in remainingResearches)
+	{
+		for each (PotentialResearchInfo *requiredResInfo in remainingResearches)
+		{
+			for each (short int researchId in currentResInfo->researchesThatMustBePutBeforeMe)
+			{
+				if (researchId == requiredResInfo->researchId) {
+					if (currentResInfo->unitInstanceScoreForOptionalResearch > requiredResInfo->unitInstanceScoreForOptionalResearch - penaltyForDependency) {
+						currentResInfo->unitInstanceScoreForOptionalResearch = requiredResInfo->unitInstanceScoreForOptionalResearch - penaltyForDependency;
+					}
+				}
+			}
+		}
+		if (currentResInfo->unitInstanceScoreForOptionalResearch > 100) {
+			currentResInfo->unitInstanceScoreForOptionalResearch = 100;
+		}
+		if (currentResInfo->unitInstanceScoreForOptionalResearch < 0) {
+			currentResInfo->unitInstanceScoreForOptionalResearch = 0;
+		}
+	}
+}
+
+
 // Make the selection of units to add to strategy based on a pre-selection list.
 // waterUnits : true=deal with water units only, false=deal with land units only
 void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUnitInfo*> preSelectedUnits, bool waterUnits) {
@@ -1502,7 +1629,10 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 	for (int step = 1; step <= 2; step++) {
 		int mediumStrength = currentCumulatedStrength / MC_COUNT;
 		int worstStrength = currentTotalStrengths[currentWorstStrengthIndex];
-		int proportion = (worstStrength * 100) / mediumStrength;
+		int proportion = 50;
+		if (mediumStrength != 0) {
+			proportion = (worstStrength * 100) / mediumStrength;
+		}
 		if (!waterUnits) { // Not implemented for boats. Actually, not relevant.
 			if ((proportion < 50) && (this->selectedLandUnitsCount < 4)) {
 				this->AddOptionalUnitAgainstWeakness(currentWorstStrengthIndex, waterUnits);
@@ -1777,7 +1907,14 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 		this->log += "Early age unit selection: ";
 		this->log += bestUnit->unitName;
 		this->log += newline;
-		int addedStuff = this->CollectResearchInfoForUnit(bestUnit->unitDefId, false); // Add requirements for this unit (only requirements)
+		std::list<short int> addedStuff = this->CollectResearchInfoForUnit(bestUnit->unitDefId, false); // Add requirements for this unit (only requirements)
+		for each (short int addedResearchId in addedStuff)
+		{
+			PotentialResearchInfo *resInfo = this->GetResearchInfo(addedResearchId);
+			if (resInfo) {
+				resInfo->markedForAdd = true;
+			}
+		}
 		return 1; // return unitInfo instead ?
 	}
 	return 0;
@@ -1910,89 +2047,7 @@ void StrategyBuilder::ChooseOptionalResearches() {
 	}
 
 	// Recompute unit scores on remaining researches, counting ALL (selected) units (not restricted to early units)
-	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
-	{
-		resInfo->unitInstanceScoreForOptionalResearch = 0;
-		// Filter: exclude research already added/marked for add, shadow researches, etc
-		if (resInfo->researchDef && (resInfo->researchDef->researchLocation > -1) && !resInfo->isInStrategy && !resInfo->markedForAdd) {
-			for each (short int impactedUnitDefId in resInfo->impactedUnitDefIds) {
-				for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
-				{
-					if (unitInfo->unitDefId == impactedUnitDefId) {
-						resInfo->unitInstanceScoreForOptionalResearch += (int)unitInfo->addedCount;
-					}
-				}
-				// Units that are not in "actuallySelectedUnits": villagers, farms...
-				if (impactedUnitDefId == CST_UNITID_VILLAGER) {
-					resInfo->unitInstanceScoreForOptionalResearch += this->villagerCount_alwaysRetrain;
-				}
-				if (impactedUnitDefId == CST_UNITID_FARM) {
-					PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
-					if (farmInfo) {
-						resInfo->unitInstanceScoreForOptionalResearch += farmInfo->desiredCount;
-					}
-				}
-			}
-			// Transform into a % value
-			resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 100) / this->maxPopulation;
-			if (resInfo->unitInstanceScoreForOptionalResearch > 100) {
-				resInfo->unitInstanceScoreForOptionalResearch = 100;
-			}
-			if (resInfo->unitInstanceScoreForOptionalResearch < 0) {
-				resInfo->unitInstanceScoreForOptionalResearch = 0;
-			}
-			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resInfo->researchDef->technologyId);
-			for (int i = 0; (techDef != NULL) && (i < techDef->effectCount); i++) {
-				if (techDef->ptrEffects[i].IsAttributeModifier()) {
-					if ((techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) &&
-						(techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_HP)) {
-						if (this->settings && this->settings->IsCheckSumValid()) {
-							// Add HP to all buildings (the only attribute that really improves buildings)
-							int valueToAdd = 20; // easy levels: will probably not be enough to add architecture
-							if (this->settings->difficultyLevel == 2) {
-								valueToAdd = randomizer.GetRandomValue_normal_moderate(10, 60); // will sometimes do...
-							}
-							if (this->settings->difficultyLevel == 1) {
-								valueToAdd = randomizer.GetRandomValue_normal_moderate(35, 75); // will generally do...
-							}
-							if (this->settings->difficultyLevel == 0) {
-								valueToAdd = randomizer.GetRandomValue_normal_moderate(45, 70); // random part, but almost always enough to actually add architecture
-							}
-							resInfo->unitInstanceScoreForOptionalResearch += valueToAdd;
-						}
-					}
-					if (techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_SPEED) {
-						// Make sure this tech effect applies on "my" units
-						AOE_TECHNOLOGIES::TechFilterExcludeTechsWithDrawbacks filter; // Used to exclude technologies like jihad, martyrdom...
-						if (!filter.IgnoreEffect(&techDef->ptrEffects[i])) {
-							bool affectsVillagers = (techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian);
-							bool affectsMyUnits = false;
-							// Try on "selected" units
-							for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
-							{
-								if (techDef->ptrEffects[i].effectUnit == unitInfo->unitDefId) {
-									affectsMyUnits = true;
-									break;
-								}
-							}
-							if (affectsMyUnits) {
-								resInfo->unitInstanceScoreForOptionalResearch += 20; // Increasing units speed is always precious
-							}
-							if (affectsVillagers) {
-								resInfo->unitInstanceScoreForOptionalResearch += 80; // Increasing villagers speed is always relevant (except jihad, beware !) => wheel, if not already added
-							}
-						}
-					}
-				}
-			}
-			if (resInfo->unitInstanceScoreForOptionalResearch > 100) {
-				resInfo->unitInstanceScoreForOptionalResearch = 100;
-			}
-			if (resInfo->unitInstanceScoreForOptionalResearch < 0) {
-				resInfo->unitInstanceScoreForOptionalResearch = 0;
-			}
-		}
-	}
+	this->ComputeScoresForRemainingOptionalResearches();
 
 	// Mark researches that have an excellent score
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList) {
@@ -3100,22 +3155,23 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 // Searches researches that impact a specific unit and add them to internal list of potential researches.
 // Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.
 // allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
-// Returns the number of actually added elements to list (some might already be in list before)
+// Returns a list of research IDs that were actually added to list (some others might already have been in list before)
 // You may need to call UpdateRequiredBuildingsFromValidatedResearches, UpdateMissingResearchRequirements and AddMissingBuildings() afterwards
-int StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpgrades) {
-	if (!ai || !ai->IsCheckSumValid()) { return 0; }
-	if (!player || !player->IsCheckSumValid()) { return 0; }
+std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpgrades) {
+	std::list<short int> result;
+	if (!ai || !ai->IsCheckSumValid()) { return result; }
+	if (!player || !player->IsCheckSumValid()) { return result; }
 	if (!player->ptrResearchesStruct || !player->ptrResearchesStruct->ptrResearchDefInfo ||
 		!player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray) {
-		return 0;
+		return result;
 	}
-	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return 0; }
+	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return result; }
 	std::vector<short int> researchesForUnit;
 	if (allUpgrades) {
 		researchesForUnit = FindResearchesThatAffectUnit(player, unitDefId, true);
 	} else {
 		short int researchId = FindResearchThatEnableUnit(player, unitDefId, 0);
-		if (researchId == -1) { return 0; }
+		if (researchId == -1) { return result; }
 		researchesForUnit.push_back(researchId);
 	}
 	// Consider unit's train location too !
@@ -3127,7 +3183,7 @@ int StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpg
 		if (trainLocation == CST_UNITID_BUILDER) { trainLocation = -1; }
 		if (trainLocation >= 0) {
 			short int researchId = FindResearchThatEnableUnit(player, trainLocation, 0);
-			if (researchId == -1) { return 0; }
+			if (researchId == -1) { return result; }
 			researchesForUnit.push_back(researchId);
 		}
 	}
@@ -3137,7 +3193,6 @@ int StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpg
 	// We'll have to manage them ourselves.
 	// Let's sort them out
 
-	int addedElements = 0;
 	for each (short int resDefId in allResearchesForUnit)
 	{
 		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(player, resDefId);
@@ -3145,7 +3200,7 @@ int StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpg
 			PotentialResearchInfo *resInfo = this->GetResearchInfo(resDefId);
 			if (resInfo == NULL) {
 				if (AddPotentialResearchInfoToList(resDefId)) {
-					addedElements++;
+					result.push_back(resDefId);
 					resInfo = this->GetResearchInfo(resDefId);
 				}
 			}
@@ -3179,7 +3234,7 @@ int StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpg
 		}
 	}
 	
-	return addedElements;
+	return result;
 }
 
 

@@ -62,9 +62,9 @@ namespace STRATEGY {
 		// Searches researches that impact a specific unit and add them to internal list of potential researches.
 		// Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.
 		// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
-		// Returns the number of actually added elements to list (some might already be in list before)
+		// Returns a list of research IDs that were actually added to list (some others might already have been in list before)
 		// You may need to call UpdateRequiredBuildingsFromValidatedResearches, UpdateMissingResearchRequirements and AddMissingBuildings() afterwards
-		int CollectResearchInfoForUnit(short int unitDefId, bool allUpgrades);
+		std::list<short int> CollectResearchInfoForUnit(short int unitDefId, bool allUpgrades);
 
 		// Adds all necessary buildings for "validated" researches to buildings ID list.
 		// Returns number of building IDs added to internal list
@@ -205,6 +205,9 @@ namespace STRATEGY {
 		// upgradedUnit: if true, consider upgraded unit. if false, consider base unit
 		void RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit);
 		void RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit, short int maxAgeResearchId);
+
+		// Compute unitInstanceScoreForOptionalResearch for remaining (not selected) optional researches
+		void ComputeScoresForRemainingOptionalResearches();
 
 		// Make the selection of units to add to strategy based on a pre-selection list.
 		// waterUnits : true=deal with water units only, false=deal with land units only

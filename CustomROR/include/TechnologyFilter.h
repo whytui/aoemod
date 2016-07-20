@@ -36,7 +36,12 @@ namespace AOE_TECHNOLOGIES {
 		}
 
 		// Returns true if an effect should be ignored
-		virtual bool IgnoreEffect(STRUCT_TECH_DEF_EFFECT *techEffect) const { return false; }
+		virtual bool IgnoreEffect(STRUCT_TECH_DEF_EFFECT *techEffect) const {
+			if (IsResourceModifier(techEffect) && (techEffect->effectUnit == CST_RES_ORDER_TECHNOLOGIES)) {
+				return true; // Ignore the "add 1 to technologies count" effect
+			}
+			return false;
+		}
 	};
 
 	class TechFilterNoTechTreeNoAge : public TechnologyFilterBase {
