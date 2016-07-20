@@ -72,8 +72,10 @@ int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
 // Returns actual number of element that were added
 int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
 	assert(insertionPoint);
-	if (resInfo->isInStrategy || !insertionPoint) { return 0; }
+	assert(resInfo->researchDef != NULL);
+	if (resInfo->isInStrategy || !insertionPoint || !resInfo->researchDef) { return 0; }
 	int res = 0;
+	// TODO : use technology filter (tech tree/ages)
 	bool forceNotInsert = (resInfo->researchId >= CST_RSID_STONE_AGE) && (resInfo->researchId <= CST_RSID_IRON_AGE); // +104 for republic age
 	// Do not insert ages as they are added in dedicated method.
 	if (!forceNotInsert) {
@@ -193,6 +195,14 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 		resInfo->requiredAgeResearch = FindFirstElementInStrategy(&this->buildAI->fakeFirstStrategyElement, AIUCCritical, resInfo->requiredAge);
 		if (resInfo->requiredAgeResearch == NULL) {
 			resInfo->requiredAgeResearch = FindFirstElementInStrategy(&this->buildAI->fakeFirstStrategyElement, AIUCTech, resInfo->requiredAge);
+		}
+	}
+	// Update list of impacted units
+	AOE_TECHNOLOGIES::TechFilterExcludeTechsWithDrawbacks filter;
+	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
+	{
+		if (DoesTechAffectUnit(this->global->GetTechDef(resInfo->researchDef->technologyId), unitInfo->baseUnitDefLiving, &filter)) {
+			resInfo->impactedUnitDefIds.insert(unitInfo->unitDefId);
 		}
 	}
 	return resInfo;
@@ -1533,7 +1543,7 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 				}
 				if (AOE_TECHNOLOGIES::TechnologyFilterBase::IsResourceModifier(&techDef->ptrEffects[i])) {
 					if (techDef->ptrEffects[i].effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT) {
-						resInfo->unitInstanceScoreForOptionalResearch += 25; // Farming is the base of economy
+						resInfo->unitInstanceScoreForOptionalResearch += 20; // Farming is the base of economy
 						float currentProduction = this->player->GetResourceValue(CST_RES_ORDER_FARM_FOOD_AMOUNT);
 						// Take civ farming bonus into account : NO: already taken into account in my resources !
 						/*float civFarmBonus = this->GetFarmProductionBonusForTech(this->player->techTreeId, currentProduction);
@@ -1545,22 +1555,60 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 						float bonusFactor = 1; // a "percentage" to apply but in 0-1 (in fact, >1 because used as a multiplier)
 						if (currentProduction > 0) {
 							bonusFactor = techDef->ptrEffects[i].effectValue / currentProduction;
+							float additionalFactor = 1;
 							if (bonusFactor > 0.15f) {
-								bonusFactor -= 0.15f;
-								bonusFactor *= 2; // Give more weight to the part above 15%
-								bonusFactor += 0.15f;
+								additionalFactor += 0.5f; // Give more weight to the part above 15%
+								if (bonusFactor > 0.25f) {
+									additionalFactor += 0.5f; // Give more weight to the part above 25%
+								}
 							}
+							bonusFactor *= additionalFactor;
 							bonusFactor += 1; // use as a multiplier (15%=0.15 becomes 115%=1.15)
 						}
+						// Malus for late availability
+						switch (resInfo->requiredAge) {
+						case CST_RSID_IRON_AGE:
+							bonusFactor *= 0.85f;
+							resInfo->forcePutAsEarlyAsPossible = true;
+							break;
+						case CST_RSID_BRONZE_AGE:
+							bonusFactor *= 0.95f;
+							resInfo->researchesThatMustBePutAfterMe.insert(CST_RSID_IRON_AGE); // If selected, try to insert it early enough (so that more farms take advantage of it)
+							break;
+						case CST_RSID_TOOL_AGE:
+						case CST_RSID_STONE_AGE:
+						case -1:
+							resInfo->researchesThatMustBePutAfterMe.insert(CST_RSID_BRONZE_AGE); // If selected, try to insert it early enough (so that more farms take advantage of it)
+							break;
+						}
 						float newScoreWithBonusFactor = ((float)resInfo->unitInstanceScoreForOptionalResearch * (bonusFactor));
+						// Randomly decrease score (for more aggressive strategies)
+						newScoreWithBonusFactor *= ((float)randomizer.GetRandomValue_normal_moderate(90, 100)) / 100;
 						resInfo->unitInstanceScoreForOptionalResearch = (int)newScoreWithBonusFactor;
 					}
 				}
 			}
+			// Costs...
+			if (resInfo->totalCosts <= 120) {
+				// Very low costs: +15% bonus
+				resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 115) / 100;
+			} else {
+				if (resInfo->totalCosts > 220) {
+					if (resInfo->totalCosts <= 350) {
+						// High costs: -10%
+						resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 90) / 100;
+					} else {
+						// Very high costs: -20%
+						resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 80) / 100;
+					}
+				}
+				// Medium: keep bonus as is (+00%)
+			}
+
 			// Apply a random factor
 			const int randomImpact = 15;
 			int randomFactor = randomizer.GetRandomValue_normal_moreFlat(100 - randomImpact, 100 + randomImpact);
-			resInfo->unitInstanceScoreForOptionalResearch = resInfo->unitInstanceScoreForOptionalResearch * randomFactor;
+			resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * randomFactor) / 100;
 			// Fill remainingResearches for further use
 			remainingResearches.push_back(resInfo);
 		}
@@ -1573,7 +1621,7 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 	}
 
 	// Take care of dependencies (loop on *filtered* list)
-	const int penaltyForDependency = 5;
+	const int penaltyForDependency = 8;
 	for each (PotentialResearchInfo *currentResInfo in remainingResearches)
 	{
 		for each (PotentialResearchInfo *requiredResInfo in remainingResearches)
@@ -2115,11 +2163,17 @@ void StrategyBuilder::ChooseOptionalResearches() {
 	// Recompute unit scores on remaining researches, counting ALL (selected) units (not restricted to early units)
 	this->ComputeScoresForRemainingOptionalResearches();
 
-	// Mark for add the researches that have an excellent score
+	std::list<PotentialResearchInfo*> remainingOptionalResearches; // A shortcut to (filtered) remaining researches
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList) {
-		if (!resInfo->isInStrategy && !resInfo->markedForAdd && !resInfo->forcePlaceForFirstImpactedUnit && 
-			resInfo->researchDef && (resInfo->researchDef->researchLocation > -1) &&
-			(resInfo->unitInstanceScoreForOptionalResearch > 85)) {
+		if (!resInfo->isInStrategy && !resInfo->markedForAdd && !resInfo->forcePlaceForFirstImpactedUnit &&
+			resInfo->researchDef && (resInfo->researchDef->researchLocation > -1)) {
+			remainingOptionalResearches.push_back(resInfo);
+		}
+	}
+
+	// Mark for add the researches that have an excellent score
+	for each (PotentialResearchInfo *resInfo in remainingOptionalResearches) {
+		if (resInfo->unitInstanceScoreForOptionalResearch > 85) {
 			bool hasVillager = false;
 			bool hasNonVillager = false;
 			for each (short int unitDefId in resInfo->impactedUnitDefIds)
@@ -2143,26 +2197,65 @@ void StrategyBuilder::ChooseOptionalResearches() {
 					}
 				}
 			}
+			this->log += "Optional research was selected: ";
+			this->log += GetResearchLocalizedName(resInfo->researchId);
+			this->log += " with score=";
+			this->log += std::to_string(resInfo->unitInstanceScoreForOptionalResearch);
+			this->log += newline;
 		}
 	}
+	// Update "remaining" list (remove "marked for add/force" ones)
+	auto it = remove_if(remainingOptionalResearches.begin(), remainingOptionalResearches.end(),
+		[](PotentialResearchInfo *resInfo) {
+		return resInfo->isInStrategy || resInfo->markedForAdd || resInfo->forcePlaceForFirstImpactedUnit || resInfo->forcePutAsEarlyAsPossible;
+	});
+	remainingOptionalResearches.erase(it, remainingOptionalResearches.end());
 
 	// Choose some optional researches with a good score...
-	// TODO
-	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	if (remainingOptionalResearches.empty()) { return; }
+	int totalScore = 0;
+	int maxScore = 0;
+	int minScore = 100;
+	for each (PotentialResearchInfo *resInfo in remainingOptionalResearches)
 	{
-		// Loop on researches we do not plan (yet) to include in strategy = optional researches
-		if (!resInfo->isInStrategy && !resInfo->markedForAdd && !resInfo->forcePlaceForFirstImpactedUnit &&
-			resInfo->researchDef && (resInfo->researchDef->researchLocation > -1)) {
-			int impactedUnitsCount = resInfo->impactedUnitDefIds.size();
-			// Score: random, costs, ...
-			// low-cost techs that improve >1 unit type: add (tool age storage pit techs...)
-			// check Age availability ?
-			// Handle dependencies (for similar techs)
-
-			// Special cases
-			// TODO !!!!
-			// Farm amount improvement (cost vs % of additional food amount)
+		totalScore += resInfo->unitInstanceScoreForOptionalResearch;
+		if (resInfo->unitInstanceScoreForOptionalResearch < minScore) {
+			minScore = resInfo->unitInstanceScoreForOptionalResearch;
 		}
+		if (resInfo->unitInstanceScoreForOptionalResearch > maxScore) {
+			maxScore = resInfo->unitInstanceScoreForOptionalResearch;
+		}
+	}
+	int medianScore = totalScore / remainingOptionalResearches.size();
+	assert(maxScore >= medianScore);
+	assert(minScore <= medianScore);
+	int smallestDiff = min(maxScore - medianScore, medianScore - minScore);
+	if (smallestDiff < 0) { return; } // Error case
+	int adjustedMedianScore = randomizer.GetRandomValue_normal_moderate(medianScore - (smallestDiff / 2), medianScore + smallestDiff);
+	for each (PotentialResearchInfo *resInfo in remainingOptionalResearches)
+	{
+		if (resInfo->unitInstanceScoreForOptionalResearch > adjustedMedianScore) {
+			resInfo->markedForAdd = true;
+			this->log += "Optional research was selected: ";
+			this->log += GetResearchLocalizedName(resInfo->researchId);
+			this->log += " with score=";
+			this->log += std::to_string(resInfo->unitInstanceScoreForOptionalResearch);
+			this->log += newline;
+		}
+	}
+	// Update "remaining" list (remove "marked for add/force" ones)
+	it = remove_if(remainingOptionalResearches.begin(), remainingOptionalResearches.end(),
+		[](PotentialResearchInfo *resInfo) {
+		return resInfo->isInStrategy || resInfo->markedForAdd || resInfo->forcePlaceForFirstImpactedUnit || resInfo->forcePutAsEarlyAsPossible;
+	});
+	remainingOptionalResearches.erase(it, remainingOptionalResearches.end());
+	for each (PotentialResearchInfo *resInfo in remainingOptionalResearches)
+	{
+		this->log += "Optional research was ignored: ";
+		this->log += GetResearchLocalizedName(resInfo->researchId);
+		this->log += " with score=";
+		this->log += std::to_string(resInfo->unitInstanceScoreForOptionalResearch);
+		this->log += newline;
 	}
 }
 
@@ -2239,6 +2332,11 @@ void StrategyBuilder::AddTowerResearches() {
 				this->IsResearchInTechTree(resInfo->researchId)) { // this check is not necessary: if not available, it won't be in allResearchesForUnit
 				resInfo->forcePutAsEarlyAsPossible = true; // Force tower upgrades to be researched quickly
 			}
+		}
+		// For researches that already exist in our list, mark the fact it impacts towers
+		PotentialResearchInfo *resInfo = this->GetResearchInfo(researchId);
+		if (resInfo) {
+			resInfo->impactedUnitDefIds.insert(CST_UNITID_WATCH_TOWER);
 		}
 	}
 }
