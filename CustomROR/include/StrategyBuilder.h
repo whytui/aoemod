@@ -159,17 +159,17 @@ namespace STRATEGY {
 		void UpdateBuildingInfoAfterAddInStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *newElem);
 
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
-		PotentialResearchInfo *GetResearchInfo(short int researchId);
+		PotentialResearchInfo *GetResearchInfo(short int researchId) const;
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
-		PotentialResearchInfo *GetResearchInfo(ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef);
+		PotentialResearchInfo *GetResearchInfo(ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef) const;
 		// Add building to potential buildings list and initializes underlying info.
 		// Returns NULL if not added, or pointer to object if successful
 		PotentialResearchInfo *AddPotentialResearchInfoToList(short int researchId);
 
 		// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
-		PotentialBuildingInfo *GetBuildingInfo(short int unitDefId);
+		PotentialBuildingInfo *GetBuildingInfo(short int unitDefId) const;
 		// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
-		PotentialBuildingInfo *GetBuildingInfo(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef);
+		PotentialBuildingInfo *GetBuildingInfo(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef) const;
 		// Add building to potential buildings list and initializes underlying info.
 		// Returns true if actually added
 		bool AddPotentialBuildingInfoToList(short int unitDefId);
@@ -205,6 +205,13 @@ namespace STRATEGY {
 		// upgradedUnit: if true, consider upgraded unit. if false, consider base unit
 		void RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit);
 		void RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit, short int maxAgeResearchId);
+
+		// Get the additional farm production amount for a research and underlying required researches
+		float GetFarmProductionBonusRecursive(PotentialResearchInfo *resInfo, float supposedCurrentProduction) const;
+		// Get the additional farm production amount for a research (not recursive)
+		float GetFarmProductionBonus(short int researchId, float supposedCurrentProduction) const;
+		// Get the additional farm production amount for a technology (not recursive)
+		float GetFarmProductionBonusForTech(short int techId, float supposedCurrentProduction) const;
 
 		// Compute unitInstanceScoreForOptionalResearch for remaining (not selected) optional researches
 		void ComputeScoresForRemainingOptionalResearches();

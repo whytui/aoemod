@@ -35,11 +35,12 @@ namespace AOE_TECHNOLOGIES {
 				(techEffect->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT);
 		}
 
-		// Returns true if an effect should be ignored
+		// Returns true if an effect should be ignored (typically, effect with no real impact)
 		virtual bool IgnoreEffect(STRUCT_TECH_DEF_EFFECT *techEffect) const {
-			if (IsResourceModifier(techEffect) && (techEffect->effectUnit == CST_RES_ORDER_TECHNOLOGIES)) {
-				return true; // Ignore the "add 1 to technologies count" effect
-			}
+			return (IsResourceModifier(techEffect) && (techEffect->effectUnit == CST_RES_ORDER_TECHNOLOGIES)); // Ignore the "add 1 to technologies count" effect
+		}
+		// Returns true if an effect should have the whole tech be ignored (effect with potential drawback, or that make the whole technology be irrelevant according to some specific criteria)
+		virtual bool IgnoreWholeTech(STRUCT_TECH_DEF_EFFECT *techEffect) const {
 			return false;
 		}
 	};
@@ -50,6 +51,15 @@ namespace AOE_TECHNOLOGIES {
 			if (__super::IgnoreEffect(techEffect)) { return true; }
 			/*for (int i = 0; i < CST_TCH_TECH_TREE_COUNT; i++) {
 				if (techEffect->)
+			}*/
+			if (IsResourceModifier(techEffect) && (techEffect->effectUnit == RESOURCE_TYPES::CST_RES_ORDER_CURRENT_AGE)) {
+				return true;
+			}
+		}
+		bool IgnoreWholeTech(STRUCT_TECH_DEF_EFFECT *techEffect) const override {
+			if (__super::IgnoreWholeTech(techEffect)) { return true; }
+			/*for (int i = 0; i < CST_TCH_TECH_TREE_COUNT; i++) {
+			if (techEffect->)
 			}*/
 			if (IsResourceModifier(techEffect) && (techEffect->effectUnit == RESOURCE_TYPES::CST_RES_ORDER_CURRENT_AGE)) {
 				return true;
@@ -68,6 +78,14 @@ namespace AOE_TECHNOLOGIES {
 			}
 			return false;
 		}
+		bool IgnoreWholeTech(STRUCT_TECH_DEF_EFFECT *techEffect) const override {
+			if (__super::IgnoreWholeTech(techEffect)) { return true; }
+			// Ignore martyrdom
+			if (IsResourceModifier(techEffect) && (techEffect->effectUnit == CST_RES_ORDER_PRIEST_SACRIFICE)) {
+				return true;
+			}
+			return false;
+		}
 	};
 
 	// Filter all effects that corresponds to features/behaviours that AI doesn't use/know about (martyrdom...)
@@ -76,6 +94,14 @@ namespace AOE_TECHNOLOGIES {
 	public:
 		bool IgnoreEffect(STRUCT_TECH_DEF_EFFECT *techEffect) const override {
 			if (__super::IgnoreEffect(techEffect)) { return true; }
+			return this->InternalIgnoreTech(techEffect);
+		}
+		bool IgnoreWholeTech(STRUCT_TECH_DEF_EFFECT *techEffect) const override {
+			if (__super::IgnoreWholeTech(techEffect)) { return true; }
+			return this->InternalIgnoreTech(techEffect);
+		}
+	private:
+		bool InternalIgnoreTech(STRUCT_TECH_DEF_EFFECT *techEffect) const {
 			// Ignore jihad
 			if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) {
 				bool positiveEffect = ((techEffect->effectValue < 0) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) < 0)) ||
@@ -89,7 +115,7 @@ namespace AOE_TECHNOLOGIES {
 			}
 			// TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET : no way to know, depends on initial (previous) value
 			// Ballista tower:
-			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) && 
+			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) &&
 				(techEffect->effectClass == CST_UNITID_BALLISTA_TOWER)) {
 				return true; // TODO: remove hardcoded criterion
 			}
@@ -109,6 +135,10 @@ namespace AOE_TECHNOLOGIES {
 				// TODO: this criterion is not really good. Temporary trick for macedonian tech tree
 				return true; // Ignore effects on LOS. The actually useful effects are the ones that improve range !
 			}
+			return false;
+		}
+		bool IgnoreWholeTech(STRUCT_TECH_DEF_EFFECT *techEffect) const override {
+			if (__super::IgnoreWholeTech(techEffect)) { return true; }
 			return false;
 		}
 		// TODO : ignore tech def, not at effect level (need parent techdef)

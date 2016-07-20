@@ -125,14 +125,14 @@ void StrategyBuilder::UpdateBuildingInfoAfterAddInStrategy(PotentialBuildingInfo
 }
 
 // Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
-PotentialResearchInfo *StrategyBuilder::GetResearchInfo(short int researchId) {
+PotentialResearchInfo *StrategyBuilder::GetResearchInfo(short int researchId) const {
 	for each (PotentialResearchInfo *curResInfo in this->potentialResearchesList) {
 		if (curResInfo->researchId == researchId) { return curResInfo; }
 	}
 	return NULL;
 }
 // Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
-PotentialResearchInfo *StrategyBuilder::GetResearchInfo(ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef) {
+PotentialResearchInfo *StrategyBuilder::GetResearchInfo(ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef) const {
 	for each (PotentialResearchInfo *curResInfo in this->potentialResearchesList) {
 		if (curResInfo->researchDef == resDef) { return curResInfo; }
 	}
@@ -199,14 +199,14 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 }
 
 // Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
-PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(short int unitDefId) {
+PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(short int unitDefId) const {
 	for each (PotentialBuildingInfo *curBldInfo in this->potentialBuildingsList) {
 		if (curBldInfo->unitDefId == unitDefId) { return curBldInfo; }
 	}
 	return NULL;
 }
 // Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
-PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef) {
+PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef) const {
 	for each (PotentialBuildingInfo *curBldInfo in this->potentialBuildingsList) {
 		if (curBldInfo->unitDef == unitDef) { return curBldInfo; }
 	}
@@ -1412,6 +1412,43 @@ void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> s
 	}
 }
 
+// Get the additional farm production amount for a research and underlying required researches
+float StrategyBuilder::GetFarmProductionBonusRecursive(PotentialResearchInfo *resInfo, float supposedCurrentProduction) const {
+	if (resInfo == NULL) { return 0; }
+	float currentProduction = supposedCurrentProduction;
+	for each (short int reqResId in resInfo->researchesThatMustBePutBeforeMe)
+	{
+		PotentialResearchInfo *reqResInfo = this->GetResearchInfo(reqResId);
+		if (reqResInfo) {
+			currentProduction += this->GetFarmProductionBonusRecursive(reqResInfo, currentProduction); // Underlying dependencies
+			currentProduction += this->GetFarmProductionBonus(reqResInfo->researchId, currentProduction); // this required research farm bonus
+		}
+	}
+	return currentProduction - supposedCurrentProduction;
+}
+// Get the additional farm production amount for a research (not recursive)
+float StrategyBuilder::GetFarmProductionBonus(short int researchId, float supposedCurrentProduction) const {
+	if (researchId < 0) { return 0; }
+	PotentialResearchInfo *resInfo = this->GetResearchInfo(researchId);
+	if (resInfo == NULL) { return 0; }
+	return this->GetFarmProductionBonusForTech(resInfo->researchDef->technologyId, supposedCurrentProduction);
+}
+// Get the additional farm production amount for a technology (not recursive)
+float StrategyBuilder::GetFarmProductionBonusForTech(short int techId, float supposedCurrentProduction) const {
+	if (techId < 0) { return 0; }
+	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(techId);
+	for (int i = 0; (techDef != NULL) && (i < techDef->effectCount); i++) {
+		if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) &&
+			(techDef->ptrEffects[i].effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT)) {
+			return techDef->ptrEffects[i].effectValue;
+		}
+		if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT) &&
+			(techDef->ptrEffects[i].effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT)) {
+			return supposedCurrentProduction - (supposedCurrentProduction * techDef->ptrEffects[i].effectValue);
+		}
+	}
+	return 0;
+}
 
 // Compute unitInstanceScoreForOptionalResearch for remaining (not selected) optional researches
 void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
@@ -1485,7 +1522,7 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 								resInfo->unitInstanceScoreForOptionalResearch += 20; // Increasing units speed is always precious
 							}
 							if (affectsVillagers) {
-								resInfo->unitInstanceScoreForOptionalResearch += 80; // Increasing villagers speed is always relevant (except jihad, beware !) => wheel, if not already added
+								resInfo->unitInstanceScoreForOptionalResearch += 90; // Increasing villagers speed is always relevant (except jihad, beware !) => wheel, if not already added
 							}
 						}
 					}
@@ -1494,7 +1531,36 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 						resInfo->unitInstanceScoreForOptionalResearch += 30; // Adding range to siege units is very useful
 					}
 				}
+				if (AOE_TECHNOLOGIES::TechnologyFilterBase::IsResourceModifier(&techDef->ptrEffects[i])) {
+					if (techDef->ptrEffects[i].effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT) {
+						resInfo->unitInstanceScoreForOptionalResearch += 25; // Farming is the base of economy
+						float currentProduction = this->player->GetResourceValue(CST_RES_ORDER_FARM_FOOD_AMOUNT);
+						// Take civ farming bonus into account : NO: already taken into account in my resources !
+						/*float civFarmBonus = this->GetFarmProductionBonusForTech(this->player->techTreeId, currentProduction);
+						if (civFarmBonus != 0) {
+							currentProduction += civFarmBonus;
+						}*/
+						// Count previous farm production upgrades
+						currentProduction += this->GetFarmProductionBonusRecursive(resInfo, currentProduction);
+						float bonusFactor = 1; // a "percentage" to apply but in 0-1 (in fact, >1 because used as a multiplier)
+						if (currentProduction > 0) {
+							bonusFactor = techDef->ptrEffects[i].effectValue / currentProduction;
+							if (bonusFactor > 0.15f) {
+								bonusFactor -= 0.15f;
+								bonusFactor *= 2; // Give more weight to the part above 15%
+								bonusFactor += 0.15f;
+							}
+							bonusFactor += 1; // use as a multiplier (15%=0.15 becomes 115%=1.15)
+						}
+						float newScoreWithBonusFactor = ((float)resInfo->unitInstanceScoreForOptionalResearch * (bonusFactor));
+						resInfo->unitInstanceScoreForOptionalResearch = (int)newScoreWithBonusFactor;
+					}
+				}
 			}
+			// Apply a random factor
+			const int randomImpact = 15;
+			int randomFactor = randomizer.GetRandomValue_normal_moreFlat(100 - randomImpact, 100 + randomImpact);
+			resInfo->unitInstanceScoreForOptionalResearch = resInfo->unitInstanceScoreForOptionalResearch * randomFactor;
 			// Fill remainingResearches for further use
 			remainingResearches.push_back(resInfo);
 		}
@@ -2049,7 +2115,7 @@ void StrategyBuilder::ChooseOptionalResearches() {
 	// Recompute unit scores on remaining researches, counting ALL (selected) units (not restricted to early units)
 	this->ComputeScoresForRemainingOptionalResearches();
 
-	// Mark researches that have an excellent score
+	// Mark for add the researches that have an excellent score
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList) {
 		if (!resInfo->isInStrategy && !resInfo->markedForAdd && !resInfo->forcePlaceForFirstImpactedUnit && 
 			resInfo->researchDef && (resInfo->researchDef->researchLocation > -1) &&

@@ -262,7 +262,7 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, 
 	}
 	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
 		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
-		if (filter && filter->IgnoreEffect(techEffect)) {
+		if (filter && filter->IgnoreWholeTech(techEffect)) {
 			return false; // If technology contains 1 effect "to ignore", ignore the whole thing (example: jihad contains both "good" and undesirable effects)
 		}
 	}
