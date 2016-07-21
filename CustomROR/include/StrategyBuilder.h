@@ -122,7 +122,7 @@ namespace STRATEGY {
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seWheel; // May be null
 
 		/*** General methods ***/
-		// Initialize player-related information (for constructor)
+		// Initialize player-related information (for constructor). Please set this->crInfo first.
 		void SetPlayerInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 			this->ai = NULL;
 			this->buildAI = NULL;
@@ -134,10 +134,15 @@ namespace STRATEGY {
 			this->buildAI = &this->ai->structBuildAI;
 			this->global = player->ptrGlobalStruct;
 			if (this->global && !this->global->IsCheckSumValid()) { this->global = NULL; }
-			this->maxPopulation = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POPULATION_LIMIT);
 			this->settings = GetGameSettingsPtr();
 			if (this->settings && !this->settings->IsCheckSumValid()) { this->settings = NULL; }
 			assert(settings != NULL);
+			this->maxPopulation = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POPULATION_LIMIT);
+			// Set max population from config. Not necessary if resources have already been valued (which is the case with current implementation)
+			assert(this->crInfo != NULL);
+			if (this->crInfo && this->settings && (this->settings->isSinglePlayer)) {
+				this->maxPopulation = this->crInfo->configInfo.singlePlayerMaxPopulation;
+			}
 		}
 
 		// Clears potential units list and free each underlying PotentialUnitInfo object.
