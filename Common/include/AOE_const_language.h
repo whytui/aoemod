@@ -18,7 +18,11 @@ const static unsigned long int LANG_ID_AI_FILENAME_LAST_VALID = 27058; // Last v
 const static unsigned long int LANG_ID_STOP_CURRENT_ACTION = 0x1D4DD;
 const static unsigned long int LANG_ID_NEXT_PAGE = 0x1D4D7;
 
+
+// *******************************************************
 // Custom strings
+// *******************************************************
+
 const static unsigned long int CRLANG_ID_CUSTOMROR = 42000;
 const static unsigned long int CRLANG_ID_DEBUG_INIT = 42001;
 const static unsigned long int CRLANG_ID_WARN_MISSING_FEATURE = 42002;
@@ -50,6 +54,8 @@ const static unsigned long int CRLANG_ID_BEING_TRAINED = 42025;
 
 const static unsigned long int CRLANG_ID_AI_FLAGS_RECOMPUTED = 42026;
 const static unsigned long int CRLANG_ID_AI_FLAGS_ALL_SET = 42027;
+const static unsigned long int CRLANG_ID_CANT_TRAIN = 42087;
+const static unsigned long int CRLANG_ID_CANT_RESEARCH = 42088;
 
 // Unit properties
 const static unsigned long int CRLANG_ID_UNITPROP_INITIAL = 42036;

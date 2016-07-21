@@ -64,6 +64,10 @@ Unité en cours:
 Les flags d'IA ont été recalculés.
 [42027] // AI flags all set
 Tous les joueurs sont désormais gérés par l'IA.
+[42087] // Can't train at this point
+Indisponible: 
+[42088] // Can't do research at this point
+Indisponible: 
 
 // *** Unit properties ***
 [42036] // Unit properties: Initial

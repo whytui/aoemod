@@ -62,6 +62,10 @@ Being trained:
 AI flags have been recomputed
 [42027] // AI flags all set
 All players are now computer-managed.
+[42087] // Can't train at this point
+Can't be trained right now: 
+[42088] // Can't do research at this point
+Can't be researched right now: 
 
 // *** Unit properties ***
 [42036] // Unit properties: Initial

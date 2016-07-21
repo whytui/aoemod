@@ -2735,16 +2735,17 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	if (creationText == NULL) {
 		if (isDisabled) {
 			if (UICmdId == INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) {
-				strcpy_s(disabledPrefix, "Can't be researched right now: ");
+				strcpy_s(disabledPrefix, localizationHandler.GetTranslation(CRLANG_ID_CANT_RESEARCH, "Can't be researched right now: "));
 			} else if (UICmdId == INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
-				strcpy_s(disabledPrefix, "Can't be trained right now: ");
+				strcpy_s(disabledPrefix, localizationHandler.GetTranslation(CRLANG_ID_CANT_TRAIN, "Can't be trained right now: "));
 			} else {
 				//strcpy_s(disabledPrefix, "Disabled: ");
 			}
 		} else {
 			AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES::CST_IMC_UI_COMMANDS, UICmdId, 0, creationTextBuffer, sizeof(creationTextBuffer));
 		}
-		creationTextIfMissing = creationTextBuffer + std::string(" ");
+		creationTextIfMissing = std::string(creationTextBuffer) + std::string(" ");
+		creationTextBuffer[0] = 0; // reset buffer
 	}
 
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
@@ -2776,6 +2777,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		creationDllId = creationDllId_original;
 		helpDllId = researchDef->languageDLLHelp;
 		GetLanguageDllText(researchDef->languageDLLName, pName, sizeof(pName), researchDef->researchName);
+		GetLanguageDllText(researchDef->languageDLLDescription, creationTextBuffer, sizeof(creationTextBuffer), researchDef->researchName);
 		btnInfoForMissingText.languageDllHelp = helpDllId;
 		btnInfoForMissingText.costAmount1 = researchDef->costAmount1;
 		btnInfoForMissingText.costAmount2 = researchDef->costAmount2;
@@ -2783,12 +2785,15 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		btnInfoForMissingText.costType1 = researchDef->costType1;
 		btnInfoForMissingText.costType2 = researchDef->costType2;
 		btnInfoForMissingText.costType3 = researchDef->costType3;
+#pragma message("TODO: missing costs for researches")
 	}
 	// Train or research: if no text is available, try to build one
 	if ((creationText == NULL) && ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) ||
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH))) {
 		// Note: some units have bad creationDllId, like some heroes.
-		AOE_GetUIButtonCreationText(creationTextBuffer, &btnInfoForMissingText, UICmdId, creationDllId_original);
+		if (creationTextBuffer[0] == 0) {
+			AOE_GetUIButtonCreationText(creationTextBuffer, &btnInfoForMissingText, UICmdId, creationDllId_original);
+		}
 		creationTextIfMissing = disabledPrefix;
 		if (creationTextBuffer[0] == 0) {
 			creationTextIfMissing += pName; // Rock'n'roll build a custom string as dllId is invalid/missing
