@@ -1907,7 +1907,7 @@ void StrategyBuilder::SelectStrategyUnits() {
 
 	// Debug log
 #ifdef _DEBUG
-	traceMessageHandler.WriteMessage("Strategy decision:");
+	traceMessageHandler.WriteMessageNoNotification("Strategy decision:");
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits) {
 		std::string msg = "Unit id=";
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unit = NULL;
@@ -3311,7 +3311,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 		}
 	}
 #ifdef _DEBUG
-	traceMessageHandler.WriteMessage(this->log);
+	traceMessageHandler.WriteMessageNoNotification(this->log);
 #endif
 }
 

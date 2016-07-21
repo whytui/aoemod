@@ -313,7 +313,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 						for (int i = 0; i < global->playerTotalCount; i++) {
 							ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
 							if (player && player->IsCheckSumValid()) {
-								player->SetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POULATION_LIMIT, (float) newMaxPop);
+								player->SetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POPULATION_LIMIT, (float)newMaxPop);
 							}
 						}
 					}

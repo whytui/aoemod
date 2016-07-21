@@ -134,7 +134,7 @@ namespace STRATEGY {
 			this->buildAI = &this->ai->structBuildAI;
 			this->global = player->ptrGlobalStruct;
 			if (this->global && !this->global->IsCheckSumValid()) { this->global = NULL; }
-			this->maxPopulation = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POULATION_LIMIT);
+			this->maxPopulation = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POPULATION_LIMIT);
 			this->settings = GetGameSettingsPtr();
 			if (this->settings && !this->settings->IsCheckSumValid()) { this->settings = NULL; }
 			assert(settings != NULL);

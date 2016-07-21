@@ -711,7 +711,7 @@ void AdaptStrategyToMaxPopulation(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	for (int i = 0; i < STRONG_UNIT_TYPE_COUNT; i++) {
 		strongerUnits[i] = -1;
 	}
-	int maxPopulation = (int) player->GetResourceValue(CST_RES_ORDER_POULATION_LIMIT);
+	int maxPopulation = (int)player->GetResourceValue(CST_RES_ORDER_POPULATION_LIMIT);
 
 	// MIN_ENDING_TOWER_COUNT_TO_FORCE_INSERT = number of consecutive "ending" towers in strategy above which we force inserting unit BEFORE those towers.
 #define MIN_ENDING_TOWER_COUNT_TO_FORCE_INSERT 4
@@ -944,7 +944,7 @@ bool IsStrategyCompleteForWonder(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentElem = fakeFirstElem->next;
 	long int missingVillagers = 0;
 	long int populationHeadroom = (long int)player->GetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_POPULATION_HEADROOM);
-	long int remainingPopToMaximum = (long int)(player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POULATION_LIMIT) - player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CURRENT_POPULATION));
+	long int remainingPopToMaximum = (long int)(player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POPULATION_LIMIT) - player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CURRENT_POPULATION));
 	if (remainingPopToMaximum < populationHeadroom) {
 		populationHeadroom = remainingPopToMaximum; // reached or almost reached maximum population
 	}
