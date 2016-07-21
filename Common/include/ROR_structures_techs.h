@@ -137,7 +137,7 @@ namespace ROR_STRUCTURES_10C {
 		char unknown_27;
 		short int researchLocation; // 28
 		short int languageDLLName;
-		short int languageDLLDescription; // 2C
+		short int languageDLLDescription; // 2C. Description of research (with effect details like "+1 for xxx", etc)
 		unsigned short int unknown_2E; // "pointer3" ??
 		// 0x30
 		long int languageDLLCreation;

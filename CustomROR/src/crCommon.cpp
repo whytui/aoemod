@@ -2773,11 +2773,10 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef = GetResearchDef(player, (short int)DATID);
 		if (researchDef == NULL) { return false; }
 		iconId = researchDef->iconId;
-		creationDllId_original = researchDef->languageDLLCreation;
+		creationDllId_original = researchDef->languageDLLDescription; // languageDLLCreation;
 		creationDllId = creationDllId_original;
 		helpDllId = researchDef->languageDLLHelp;
 		GetLanguageDllText(researchDef->languageDLLName, pName, sizeof(pName), researchDef->researchName);
-		GetLanguageDllText(researchDef->languageDLLDescription, creationTextBuffer, sizeof(creationTextBuffer), researchDef->researchName);
 		btnInfoForMissingText.languageDllHelp = helpDllId;
 		btnInfoForMissingText.costAmount1 = researchDef->costAmount1;
 		btnInfoForMissingText.costAmount2 = researchDef->costAmount2;
@@ -2791,9 +2790,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	if ((creationText == NULL) && ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) ||
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH))) {
 		// Note: some units have bad creationDllId, like some heroes.
-		if (creationTextBuffer[0] == 0) {
-			AOE_GetUIButtonCreationText(creationTextBuffer, &btnInfoForMissingText, UICmdId, creationDllId_original);
-		}
+		AOE_GetUIButtonCreationText(creationTextBuffer, &btnInfoForMissingText, UICmdId, creationDllId_original);
 		creationTextIfMissing = disabledPrefix;
 		if (creationTextBuffer[0] == 0) {
 			creationTextIfMissing += pName; // Rock'n'roll build a custom string as dllId is invalid/missing
