@@ -4,6 +4,7 @@
 #include <tchar.h>
 #include <vector>
 #include <AOE_const_global.h>
+#include <basicFilesHandling.h>
 //#include <Shlobj.h> // CSIDL_MYDOCUMENTS
 #include "AOE_const_global.h"
 
@@ -29,13 +30,7 @@ public:
 protected:
 	bool m_isFileValid;
 	std::wstring m_fileName;
-	//bool CheckFileExistence(std::wstring fileName);
 };
 
+// Returns an empty string if dialog is canceled
 std::wstring openfilename(WCHAR *filter = _T("All Files (*.*)\0*.*\0"), HWND owner = NULL, WCHAR *title = _T("Select file"));
-bool CheckFileExistence(const std::wstring &fileName);
-
-bool DirectoryExists(const char* dirName);
-bool DirectoryExists(const std::wstring &dirName);
-
-std::vector<std::wstring> GetFileListFromFolder(const std::wstring &folder);

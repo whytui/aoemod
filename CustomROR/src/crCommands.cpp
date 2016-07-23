@@ -202,9 +202,6 @@ void CustomRORCommand::OneShotInit() {
 	// Manage interfac.drs file to use
 	ChangeItfDRS_file();
 
-	// Set empires.dat file to use
-
-
 	// Prepare custom DRS data
 	this->LoadCustomDrsFiles();
 
@@ -265,12 +262,23 @@ void CustomRORCommand::LoadCustomDrsFiles() {
 
 // Get custom empires.dat filename (with relative path)
 const char *CustomRORCommand::GetCustomEmpiresDatRelativeFileName(ROR_STRUCTURES_10C::STRUCT_COMMAND_LINE_INFO *cmdLineInfo) {
-	if (this->crInfo->configInfo.customEmpiresDatRelativePath.empty()) { // TODO use dedicated/correct config
-		// Standard behaviour : use game's string
-		return cmdLineInfo->relativePath_empires_dat;
-	} else {
-		return this->crInfo->configInfo.customEmpiresDatRelativePath.c_str();
+	if (!this->crInfo->configInfo.customEmpiresDatRelativePath.empty()) { // TODO use dedicated/correct config
+		const char *filename = this->crInfo->configInfo.customEmpiresDatRelativePath.c_str();
+		if (CheckFileExistence(filename)) {
+			return filename;
+		}
+		else {
+			std::string msg = localizationHandler.GetTranslation(CRLANG_ID_ERROR_COULDNT_FIND, "ERROR : Could not find");
+			msg += " ";
+			msg += filename;
+			msg += " ";
+			msg += localizationHandler.GetTranslation(CRLANG_ID_ERROR_EMPIRES_DAT_USED_INSTEAD, "file. data2\\empires.dat will be used instead.");
+			MessageBoxA(0, msg.c_str(), "CustomROR", MB_ICONWARNING);
+		}
 	}
+
+	// Standard behaviour : use game's string
+	return cmdLineInfo->relativePath_empires_dat;
 }
 
 
@@ -1257,16 +1265,12 @@ bool CustomRORCommand::ManageAIFileSelectionForPlayer(char civilizationId, char 
 	}
 
 	// Crucial check: The game freezes if we choose an invalid file, because it will call this again and again.
-	FILE *f;
 	char bufFileName[512];
 	sprintf_s(bufFileName, "%s\\%s", gameSettings->gameDirFullPath, aiFileBuffer);
-	errno_t e = fopen_s(&f, bufFileName, "r"); // e == 0 if success
-	if (e) {
+	if (!CheckFileExistence(bufFileName)) {
 		std::string msg = std::string("Error: Could not find file: ") + bufFileName;
 		traceMessageHandler.WriteMessage(msg);
 		*aiFileBuffer = 0; // clear filename because it's invalid.
-	} else {
-		fclose(f);
 	}
 	return true;
 }

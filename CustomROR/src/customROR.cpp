@@ -233,7 +233,18 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004F16BB:
 		this->CheckPopulationCostWithLogistics(REG_values);
 		break;
+#ifdef GAMEVERSION_AOE10b
+	case 0x0048EC06:
+#endif
+#ifdef GAMEVERSION_AOE10c
+	case 0x004FC076:
+#endif
+#ifdef GAMEVERSION_ROR10b
+	case 0x00503746:
+#endif
+#ifdef GAMEVERSION_ROR10c
 	case 0x00501216:
+#endif
 		this->OnBeforeLoadEmpires_DAT(REG_values);
 		break;
 	case 0x0051C903:
@@ -1533,7 +1544,12 @@ void CustomRORInstance::ManageDefeatedAIPlayerTacAIUpdate(REG_BACKUP *REG_values
 void CustomRORInstance::OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values) {
 	ROR_STRUCTURES_10C::STRUCT_COMMAND_LINE_INFO *cmdLineInfo = (ROR_STRUCTURES_10C::STRUCT_COMMAND_LINE_INFO *)REG_values->ECX_val;
 	const char *empiresDatRelativeFileName = this->crCommand.GetCustomEmpiresDatRelativeFileName(cmdLineInfo);
-	REG_values->ECX_val = (unsigned long int) empiresDatRelativeFileName;
+#ifdef GAMEVERSION_AOE10b
+	REG_values->EAX_val = 
+#else
+	REG_values->ECX_val =
+#endif
+		(unsigned long int) empiresDatRelativeFileName;
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 }
 

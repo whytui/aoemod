@@ -23,6 +23,7 @@
 #include "researches.h"
 #include "crLocalization.h"
 #include "StrategyBuilder.h"
+#include "basicFilesHandling.h"
 
 #pragma once
 

@@ -37,6 +37,9 @@ const static unsigned long int CRLANG_ID_CANT_READ_CIV_XML_CONFIG = 42006;
 const static unsigned long int CRLANG_ID_RUN_EXE_CONFIG_CHECKS = 42007;
 const static unsigned long int CRLANG_ID_WELCOME1 = 42008;
 const static unsigned long int CRLANG_ID_WELCOME2 = 42009;
+const static unsigned long int CRLANG_ID_CUSTOM = 42085;
+const static unsigned long int CRLANG_ID_ERROR_COULDNT_FIND = 42089;
+const static unsigned long int CRLANG_ID_ERROR_EMPIRES_DAT_USED_INSTEAD = 42090;
 
 // CustomRor options
 const static unsigned long int CRLANG_ID_CUSTOMROR_OPTIONS_POPUP_TITLE = 42020;
@@ -114,5 +117,3 @@ const static unsigned long int CRLANG_ID_POSY_MINMAX = 42079;
 const static unsigned long int CRLANG_ID_TERRAINID = 42080;
 const static unsigned long int CRLANG_ID_ELEVATION = 42081;
 const static unsigned long int CRLANG_ID_TIP_TERRAIN_LEAVE_EMPTY = 42082;
-
-const static unsigned long int CRLANG_ID_CUSTOM = 42085;

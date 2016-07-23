@@ -36,7 +36,7 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x5681D8;
 	static const unsigned long int ADDR_VAR_UNKNOWN_UI_MAIN_INFO = 0x56D5F8; // some included struct
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x564FB4;
-	static const unsigned long int ADDR_VAR_EMPIRES_DAT_PATH = ; // data2\empires.dat
+	//static const unsigned long int ADDR_VAR_EMPIRES_DAT_PATH = ; // data2\empires.dat
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x7DDF84;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0; // does not exist in this version
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x562760; // type= STRUCT_DRS_FILE_LINK*
@@ -70,7 +70,7 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x5797BC;
 	static const unsigned long int ADDR_VAR_UNKNOWN_UI_MAIN_INFO = 0x57CDB0; // some included struct
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x556020;
-	static const unsigned long int ADDR_VAR_EMPIRES_DAT_PATH = ; // data2\empires.dat
+	//static const unsigned long int ADDR_VAR_EMPIRES_DAT_PATH = ; // data2\empires.dat
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x579714;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0; // does not exist in this version
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7B9784; // type= STRUCT_DRS_FILE_LINK*
@@ -105,7 +105,7 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x585E88;
 	static const unsigned long int ADDR_VAR_UNKNOWN_UI_MAIN_INFO = 0x588138; // some included struct
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x55FA5C;
-	static const unsigned long int ADDR_VAR_EMPIRES_DAT_PATH = ; // data2\empires.dat
+	//static const unsigned long int ADDR_VAR_EMPIRES_DAT_PATH = ; // data2\empires.dat
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x585DDC;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0x7C56A0;
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7C4B24; // type= STRUCT_DRS_FILE_LINK*

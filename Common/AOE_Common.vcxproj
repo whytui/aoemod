@@ -93,6 +93,7 @@
     <ClInclude Include="include\AOE_empires_dat.h" />
     <ClInclude Include="include\AOE_offsets.h" />
     <ClInclude Include="include\AOE_SN_numbers.h" />
+    <ClInclude Include="include\basicFilesHandling.h" />
     <ClInclude Include="include\customResolution.h" />
     <ClInclude Include="include\gameVersion.h" />
     <ClInclude Include="include\ROR_structures_drs.h" />
@@ -110,6 +111,7 @@
     <ClInclude Include="include\triggerDefinition.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\basicFilesHandling.cpp" />
     <ClCompile Include="src\ROR_struct_debugging.cpp" />
     <ClCompile Include="src\ROR_struct_export.cpp" />
     <ClCompile Include="src\triggerDefinition.cpp" />
