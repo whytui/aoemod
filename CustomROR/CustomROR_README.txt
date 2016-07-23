@@ -5,10 +5,11 @@ Installation
 - Get latest CustomizeAOE version from http://aoe.heavengames.com/dl-php/showfile.php?fileid=2464
 - Run CustomizeAOE and click Menu>File>Install CustomROR.
 - Select C:\temp\customROR\CustomROR.dll and C:\your_aoe_install_dir\EmpiresX.exe (the game file you want to patch).
-  (note: you can copy-paste EmpiresX.exe to EmpiresX2.exe and patch this file to keep EmpiresX.exe unchanged)
+  (note: you can copy-paste EmpiresX.exe to EmpiresX2.exe and patch this copy to keep EmpiresX.exe unchanged)
 
 Notes:
 - Several options can be configured in customROR.xml, like conversion resistances.
+- Select a different empires.dat file to use in customROR.xml.
 - Custom civilizations can be configured in customROR_civs.xml.
 => Edit XML files with a text editor (with syntax coloration if possible, for example Notepad++)
 - Use CustomizeAOE to change other options if you want. Ths installation process should already have patched CustomROR-required options (including ROR_API).
@@ -20,10 +21,12 @@ Features:
 * Triggers system (see separate documentation)
 * Add up to 255 civilizations (total) + configure AI, names... (see customROR_civs.xml)
 * Most AI improvements (see below) are NOT applied in easy/easiest difficulty levels.
+* Choose any file path for empires.dat (you can select another one than data2\empires.dat)
 * Load additional DRS files at ROR startup to use custom graphics/icons/sounds...
 * Load custom localization strings in text format to add (or override existing) strings from language(x).dll
 
 Strategy (AI):
+- Dynamic strategy generation that can adapt to any custom empires.dat version (mod) !
 - Fix AI when loading saved games: some information is lost in standard game, especially if you save a game in the very first seconds.
 - Fix stuck AI bug #1: missing unitId in computer players strategy for unfinished buildings.
 - Fix stuck AI bug #2: strategy when an unfinished building is destroyed (computer player will no longer get stuck).
@@ -149,7 +152,7 @@ Troubleshooting:
 	To get latest features, you should really get CustomROR.xml content from the provided example (in ZIP archive file). Same for CustomROR_civs.xml.
 
 CustomROR on other AOE versions:
-The fully supported version is ROR 1.0a. However, some features are supported in AOE1.0b, AOE1.0c, ROR1.0b too. ROR_API 1.0.1.0 is required.
+The fully supported version is ROR 1.0a. However, some features are supported in AOE1.0b, AOE1.0c, ROR1.0b too. ROR_API 1.0.1.0 or above is required.
 
 CustomROR on Linux:
 Before running CustomizeAOE/CustomROR on linux using wine, some configuration is needed.
