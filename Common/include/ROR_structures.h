@@ -170,6 +170,7 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_UI_CAMPAIGN_EDITOR;
 	class STRUCT_UI_DIAM_MAP; // diam_map in game comments
 	class STRUCT_UI_JOIN_SCREEN;
+	class STRUCT_UI_WELCOME_MAIN_SCREEN;
 
 
 	struct STRUCT_ARMOR_OR_ATTACK {
@@ -5239,6 +5240,21 @@ namespace ROR_STRUCTURES_10C
 	public:
 		// unknown...
 		bool IsCheckSumValid() { return this->checksum == 0x00546208; }
+	};
+
+	// Size = . Constructor = . F8 69 54 00
+	// OnKeyPress = 0x486C10
+	class STRUCT_UI_WELCOME_MAIN_SCREEN : public STRUCT_ANY_UI {
+	public:
+		// unknown...
+		bool IsCheckSumValid() { return this->checksum == 0x005469F8; }
+	};
+
+	// Size = 0x8B8. Constructor = 0x47C510. 68 64 54 00
+	class STRUCT_UI_CREDITS_SCREEN : public STRUCT_ANY_UI {
+	public:
+		// unknown...
+		bool IsCheckSumValid() { return this->checksum == 0x00546468; }
 	};
 
 	// Size 0x14 ?

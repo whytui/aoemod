@@ -91,9 +91,9 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_VEG_windowedMode_10c 21
 #define COUNT_selectedUnits_10c 86
 #define COUNT_obsoletes_10c 24
-#define COUNT_ROR_API_AOE10b 5
-#define COUNT_ROR_API_AOE10c 5
-#define COUNT_ROR_API_10b 5
+#define COUNT_ROR_API_AOE10b 6
+#define COUNT_ROR_API_AOE10c 6
+#define COUNT_ROR_API_10b 6
 #define COUNT_ROR_API_10c 104
 #define COUNT_manageAI_10c 13
 
@@ -3818,6 +3818,16 @@ void AOE_binData::InitROR_API_AOE10b() {
 		FM_ON
 		);
 
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOE10b.GetBinSeqDefinition(i),
+		SetEmpiresDatFileName,
+		"Ability to use custom empires.dat path/filename.",
+		0x8DFFE,
+		(0x8B, 0x46, 0x0C, 0x05, 0xF8, 0x01, 0x00, 0x00, 0x50), // default=no
+		(0x8B, 0x46, 0x0C, 0xE8, 0xFD, 0xA3, 0x05, 0x00, 0x50),
+		FM_OFF,
+		FM_ON
+		);
+
 
 	if (i != COUNT_ROR_API_AOE10b) {
 		throw AOE_binDataSetupException("Binary setup error for ROR_API_AOE10b. Bad element count.");
@@ -3883,6 +3893,17 @@ void AOE_binData::InitROR_API_AOE10c() {
 		FM_ON
 		);
 
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOE10c.GetBinSeqDefinition(i),
+		SetEmpiresDatFileName,
+		"Ability to use custom empires.dat path/filename.",
+		0xFC06E,
+		(0x8B, 0x4E, 0x0C, 0x81, 0xC1, 0xF8, 0x01, 0x00, 0x00, 0x51), // default=no
+		(0x8B, 0x4E, 0x0C, 0xE8, 0xCB, 0xD1, 0xF1, 0xFF, 0x90, 0x51),
+		FM_OFF,
+		FM_ON
+		);
+
+
 	if (i != COUNT_ROR_API_AOE10c) {
 		throw AOE_binDataSetupException("Binary setup error for ROR_API_AOE10c. Bad element count.");
 	}
@@ -3943,6 +3964,16 @@ void AOE_binData::InitROR_API_10b() {
 		0x100EAF,
 		(0x90, 0xA1, 0xA0, 0x56, 0x7C, 0x00, 0x53), // default=no
 		(0x90, 0xE8, 0x8E, 0x81, 0xF1, 0xFF, 0x53),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10b.GetBinSeqDefinition(i),
+		SetEmpiresDatFileName,
+		"Ability to use custom empires.dat path/filename.",
+		0x102B3E,
+		(0x8B, 0x4E, 0x0C, 0x81, 0xC1, 0xF8, 0x01, 0x00, 0x00, 0x51), // default=no
+		(0x8B, 0x4E, 0x0C, 0xE8, 0xFD, 0x64, 0xF1, 0xFF, 0x90, 0x51),
 		FM_OFF,
 		FM_ON
 		);
