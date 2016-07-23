@@ -2784,7 +2784,6 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		btnInfoForMissingText.costType1 = researchDef->costType1;
 		btnInfoForMissingText.costType2 = researchDef->costType2;
 		btnInfoForMissingText.costType3 = researchDef->costType3;
-#pragma message("TODO: missing costs for researches")
 	}
 	// Train or research: if no text is available, try to build one
 	if ((creationText == NULL) && ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) ||

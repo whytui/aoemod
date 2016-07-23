@@ -210,6 +210,9 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "autoFixMissingFeatures") {
 			this->autoFixMissingFeatures = XML_GetBoolElement(elem, "enable");
 		}
+		if (elemName == "empiresDat") {
+			this->customEmpiresDatRelativePath = this->XML_GetAttributeValue(elem, "filename");
+		}
 		if (elemName == "drsFile") {
 			std::string folder = this->XML_GetAttributeValue(elem, "folder");
 			std::string filename = this->XML_GetAttributeValue(elem, "filename");

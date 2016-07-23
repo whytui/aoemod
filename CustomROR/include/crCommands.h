@@ -108,6 +108,9 @@ public:
 	// Load custom DRS files
 	void LoadCustomDrsFiles();
 
+	// Get custom empires.dat filename (with relative path)
+	const char *GetCustomEmpiresDatRelativeFileName(ROR_STRUCTURES_10C::STRUCT_COMMAND_LINE_INFO *cmdLineInfo);
+
 	// Execute a command from custom options window
 	// Returns true if the provided command is valid (and executed)
 	// After the call, output points to a char* string containing command's output, if any.

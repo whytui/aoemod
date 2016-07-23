@@ -233,6 +233,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004F16BB:
 		this->CheckPopulationCostWithLogistics(REG_values);
 		break;
+	case 0x00501216:
+		this->OnBeforeLoadEmpires_DAT(REG_values);
+		break;
 	case 0x0051C903:
 		this->OnAfterLoadEmpires_DAT(REG_values);
 		break;
@@ -358,8 +361,8 @@ void CustomRORInstance::OneShotInit() {
 		}
 		traceMessageHandler.WriteMessageNoNotification(msg);
 	}
-	// Manage interfac.drs file to use
-	ChangeItfDRS_file();
+	
+	// Custom treatments for initialization
 	this->crCommand.OneShotInit();
 }
 
@@ -1524,6 +1527,14 @@ void CustomRORInstance::ManageDefeatedAIPlayerTacAIUpdate(REG_BACKUP *REG_values
 	if (player->aliveStatus != 0) {
 		ChangeReturnAddress(REG_values, 0x04D24E8);
 	}
+}
+
+// This is called just before calling empires.dat loading ([global]+0xB0), called from 0x501211.
+void CustomRORInstance::OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values) {
+	ROR_STRUCTURES_10C::STRUCT_COMMAND_LINE_INFO *cmdLineInfo = (ROR_STRUCTURES_10C::STRUCT_COMMAND_LINE_INFO *)REG_values->ECX_val;
+	const char *empiresDatRelativeFileName = this->crCommand.GetCustomEmpiresDatRelativeFileName(cmdLineInfo);
+	REG_values->ECX_val = (unsigned long int) empiresDatRelativeFileName;
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
 }
 
 

@@ -106,6 +106,7 @@ public:
 	void FixBuildingStratElemUnitID(REG_BACKUP *REG_values);
 	void OverloadIsStratElemUnitAlive_ResetElement(REG_BACKUP *REG_values);
 	//void DisableWeakUnitsFromStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
+	void OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values);
 	void OnAfterLoadEmpires_DAT(REG_BACKUP *REG_values);
 	void EditorCheckForUnitPlacement(REG_BACKUP *REG_values);
 	void HumanSpecific_onCapturableUnitSeen(REG_BACKUP *REG_values);

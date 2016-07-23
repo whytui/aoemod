@@ -3,6 +3,9 @@
 <customROR>
 	<alertOnMissingFeatures enable="1"/>
 	<autoFixMissingFeatures enable="1"/><!-- If 1, ROR_API features that are not installed are automaticalled added on the fly -->
+
+	<!-- Empires.dat file: set *relative* path to empires.dat file to use. Leave empty to use default (data2\empires.dat) -->
+	<empiresDat filename="data2\empires.dat"/>
 	
 	<!-- *** Graphics -->
 	<!-- drsFile : you can add 0, 1 or n "drsFile" tags. folder=folder name under AOE root directory. filename=DRS file name.-->
@@ -92,7 +95,7 @@
 	If enable=1, customROR will generate a *random* strategies for each player, taking into account their tech trees/strengths. customROR_civs.xml AI file names will be ignored.
 	CustomROR can only generate strategies for random games (random map/deathmatch), not scenario/campaign
 	-->
-	<strategyAI name="generateAutomaticStrategy" gameType="RM" enable="0"/><!-- Ramdom map -->
+	<strategyAI name="generateAutomaticStrategy" gameType="RM" enable="0"/><!-- Random map -->
 	<strategyAI name="generateAutomaticStrategy" gameType="DM" enable="0"/><!-- Deathmatch: Not supported yet... -->
 	
 	<!-- *** Manage Panic mode (dynamic defence units) -->

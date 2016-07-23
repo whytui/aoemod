@@ -50,6 +50,7 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "hideWelcomeMessage:                        %d\n", this->crInfo->configInfo.hideWelcomeMessage ? 1 : 0);
 	fprintf_s(f, "showAlertOnMissingFeature:                 %d\n", this->crInfo->configInfo.showAlertOnMissingFeature ? 1 : 0);
 	fprintf_s(f, "autoFixMissingFeatures:                    %d\n", this->crInfo->configInfo.autoFixMissingFeatures ? 1 : 0);
+	fprintf_s(f, "empires.dat relative path to use:          %s\n", this->crInfo->configInfo.customEmpiresDatRelativePath.c_str());
 	fprintf_s(f, "showCustomRORMenu:                         %d\n", this->crInfo->configInfo.showCustomRORMenu ? 1 : 0);
 	fprintf_s(f, "showCustomPopulationInfo:                  %d\n", this->crInfo->configInfo.showCustomPopInfo ? 1 : 0);
 	fprintf_s(f, "useImprovedGameSpeeds:                     %d\n", this->crInfo->configInfo.useImprovedGameSpeeds ? 1 : 0);
@@ -198,6 +199,12 @@ void CustomRORCommand::OneShotInit() {
 	// Load/Prepare localization strings
 	this->LoadCustomLocalizationFiles();
 
+	// Manage interfac.drs file to use
+	ChangeItfDRS_file();
+
+	// Set empires.dat file to use
+
+
 	// Prepare custom DRS data
 	this->LoadCustomDrsFiles();
 
@@ -252,6 +259,17 @@ void CustomRORCommand::LoadCustomDrsFiles() {
 		// Initialize global variable so we can retrieve our button icons when needed
 		InitSlpInfoFromDrs(&this->crInfo->customRorIcons, CST_CUSTOMROR_CMD_ICONS_SLP_ID);
 		InitSlpInfoFromDrs(&this->crInfo->customRorUnitShortcuts, CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
+	}
+}
+
+
+// Get custom empires.dat filename (with relative path)
+const char *CustomRORCommand::GetCustomEmpiresDatRelativeFileName(ROR_STRUCTURES_10C::STRUCT_COMMAND_LINE_INFO *cmdLineInfo) {
+	if (this->crInfo->configInfo.customEmpiresDatRelativePath.empty()) { // TODO use dedicated/correct config
+		// Standard behaviour : use game's string
+		return cmdLineInfo->relativePath_empires_dat;
+	} else {
+		return this->crInfo->configInfo.customEmpiresDatRelativePath.c_str();
 	}
 }
 

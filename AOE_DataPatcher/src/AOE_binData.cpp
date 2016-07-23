@@ -94,7 +94,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 5
 #define COUNT_ROR_API_AOE10c 5
 #define COUNT_ROR_API_10b 5
-#define COUNT_ROR_API_10c 103
+#define COUNT_ROR_API_10c 104
 #define COUNT_manageAI_10c 13
 
 
@@ -4972,6 +4972,16 @@ void AOE_binData::InitROR_API_10c() {
 		0xFF52F,
 		(0x90, 0xA1, 0x34, 0x06, 0x7C, 0x00, 0x53), // default=no
 		(0x90, 0xE8, 0x3F, 0xA0, 0xF1, 0xFF, 0x53),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		SetEmpiresDatFileName,
+		"Ability to use custom empires.dat path/filename.",
+		0x10120E,
+		(0x8B, 0x4E, 0x0C, 0x81, 0xC1, 0xF8, 0x01, 0x00, 0x00, 0x51), // default=no
+		(0x8B, 0x4E, 0x0C, 0xE8, 0x5E, 0x83, 0xF1, 0xFF, 0x90, 0x51),
 		FM_OFF,
 		FM_ON
 		);

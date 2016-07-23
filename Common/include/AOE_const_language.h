@@ -5,6 +5,10 @@
 
 // This file contains DLL IDs for texts that are used in game or custom treatments
 
+// *******************************************************
+// Standard strings
+// *******************************************************
+
 const static unsigned long int LANG_ID_OK = 0xFA1;
 const static unsigned long int LANG_ID_CANCEL = 0xFA2;
 const static unsigned long int LANG_ID_PLAYERX_BASE = 10340; // LANG_ID_PLAYERX_BASE + 1-8 = player1-player8
