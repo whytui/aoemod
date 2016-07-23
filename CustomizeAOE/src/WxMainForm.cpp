@@ -284,7 +284,7 @@ void WxMainForm::InstallCustomROR() {
 	}
 	resultPatch = this->FileOpen(true);
 	if (resultPatch && (this->e_api->GetFileVersion().compare(_T("1.0c")))) {
-		if (wxMessageBox(_T("This is not a standard Rise of Rome version. Do you want to try to install customROR anyway ?"),
+		if (wxMessageBox(_T("This is not 1.0c Rise of Rome version. Do you want to try to install customROR anyway ?"),
 			_T("Install customROR"), wxICON_WARNING | wxYES_NO) == wxNO) {
 			this->txtLog->AppendText(_T("Wrong or unsupported version.\n"));
 			resultPatch = false;

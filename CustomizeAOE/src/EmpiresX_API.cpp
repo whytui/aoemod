@@ -833,7 +833,9 @@ bool EmpiresX_API::SetBasicCustomROROptions() {
 	bool result = true;
 	result = this->SetROR_API(true);
 	//result = result && this->SetAllROR_API_optionals(true); // Do not install optionals, customROR can install them dynamically
-	result = result && this->SetMaxSelectedUnits(100);
+	if (this->GetAOEManager()->GetFileVersion() == AOE_FILE_VERSION::AOE_VERSION_1_0C) {
+		result = result && this->SetMaxSelectedUnits(100); // only available in 1.0c version
+	}
 	result = result && this->SetWindowedMode(true);
 	//result = result && this->SetResolution(1920, 1200, true);
 	//result = result && this->SetManageAI(true);
@@ -846,22 +848,27 @@ bool EmpiresX_API::SetBasicCustomROROptions() {
 // Returns true if everything is OK
 bool EmpiresX_API::SetOtherCustomROROptions() {
 	bool result = true;
-	result = result && this->SetOptionSelection(_T("disable_dislike_human_player"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("disable_dislike_human_player"), FM_ON));
-	result = result && this->SetOptionSelection(_T("gaiaX_cheat_code1"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("gaiaX_cheat_code1"), FM_ON));
-	result = result && this->SetOptionSelection(_T("gaiaX_cheat_code2"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("gaiaX_cheat_code2"), FM_ON));
-	result = result && this->SetOptionSelection(_T("gaiaX_cheat_code3"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("gaiaX_cheat_code3"), FM_ON));
-	//result = result && this->SetOptionSelection(_T("FULL_Computer_player_1"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("FULL_Computer_player_1"), FM_ON));
-	result = result && this->SetOptionSelection(_T("PostIronAge_Item"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("PostIronAge_Item"), FM_ON));
-	result = result && this->SetOptionSelection(_T("PostIronAge_Setup"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("PostIronAge_Setup"), FM_ON));
-	result = result && this->SetOptionSelection(_T("AdditionalMapType"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("AdditionalMapType"), FM_ON)); // default=no
-	result = result && this->SetOptionSelectionWithInt4(_T("AdditionalMapTypeChangeLabel"), 0, 9286); // default value=10610
-	result = result && this->SetOptionSelection(_T("AdditionalMapType_FixLabelS"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("AdditionalMapType_FixLabelS"), FM_ON)); // default=no
-	result = result && this->SetOptionSelectionWithInt4(_T("AdditionalMapType_FixLabelS_ChangeLabel"), 0, 9286); // default value=10610
-	result = result && this->SetOptionSelection(_T("AdditionalMapType_FixLabelInstr"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("AdditionalMapType_FixLabelInstr"), FM_ON)); // default=no
-	result = result && this->SetOptionSelectionWithInt4(_T("AdditionalMapType_FixLabelInstr_ChangeLabel"), 0, 9286); //default value=10610
-	result = result && this->SetOptionSelection(_T("SE_AdditionalMapType"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("SE_AdditionalMapType"), FM_ON)); // default=no
-	result = result && this->SetOptionSelectionWithInt4(_T("SE_AdditionalMapTypeChangeLabel"), 0, 9286); //default value=10610
-	result = result && this->SetOptionSelection(_T("AdditionalResourcesChoice"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("AdditionalResourcesChoice"), FM_ON)); // default=no
+	try {
+		result = result && this->SetOptionSelection(_T("disable_dislike_human_player"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("disable_dislike_human_player"), FM_ON));
+		result = result && this->SetOptionSelection(_T("gaiaX_cheat_code1"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("gaiaX_cheat_code1"), FM_ON));
+		result = result && this->SetOptionSelection(_T("gaiaX_cheat_code2"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("gaiaX_cheat_code2"), FM_ON));
+		result = result && this->SetOptionSelection(_T("gaiaX_cheat_code3"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("gaiaX_cheat_code3"), FM_ON));
+		//result = result && this->SetOptionSelection(_T("FULL_Computer_player_1"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("FULL_Computer_player_1"), FM_ON));
+		result = result && this->SetOptionSelection(_T("PostIronAge_Item"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("PostIronAge_Item"), FM_ON));
+		result = result && this->SetOptionSelection(_T("PostIronAge_Setup"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("PostIronAge_Setup"), FM_ON));
+		result = result && this->SetOptionSelection(_T("AdditionalMapType"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("AdditionalMapType"), FM_ON)); // default=no
+		result = result && this->SetOptionSelectionWithInt4(_T("AdditionalMapTypeChangeLabel"), 0, 9286); // default value=10610
+		result = result && this->SetOptionSelection(_T("AdditionalMapType_FixLabelS"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("AdditionalMapType_FixLabelS"), FM_ON)); // default=no
+		result = result && this->SetOptionSelectionWithInt4(_T("AdditionalMapType_FixLabelS_ChangeLabel"), 0, 9286); // default value=10610
+		result = result && this->SetOptionSelection(_T("AdditionalMapType_FixLabelInstr"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("AdditionalMapType_FixLabelInstr"), FM_ON)); // default=no
+		result = result && this->SetOptionSelectionWithInt4(_T("AdditionalMapType_FixLabelInstr_ChangeLabel"), 0, 9286); //default value=10610
+		result = result && this->SetOptionSelection(_T("SE_AdditionalMapType"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("SE_AdditionalMapType"), FM_ON)); // default=no
+		result = result && this->SetOptionSelectionWithInt4(_T("SE_AdditionalMapTypeChangeLabel"), 0, 9286); //default value=10610
+		result = result && this->SetOptionSelection(_T("AdditionalResourcesChoice"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("AdditionalResourcesChoice"), FM_ON)); // default=no
+	}
+	catch (std::exception) {
+		return false; // May occur on missing setup (if trying to patch an unsupported version)
+	}
 	return true;
 }
 

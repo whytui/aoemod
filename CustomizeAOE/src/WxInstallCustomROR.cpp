@@ -165,7 +165,7 @@ void WxInstallCustomROR::OnSelectCustomROR_DLL(wxCommandEvent& event) {
 	this->edtCustomROR_DLL_FilePath->SetValue(openFileDialog.GetPath());
 	this->edtCustomROR_XML_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR.xml"));
 	this->edtCustomROR_civs_XML_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR_civs.xml"));
-	this->edtCustomROR_DRS_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR.drs"));
+	this->edtCustomROR_DRS_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR\\CustomROR.drs"));
 	this->edtROR_API_DLL_FilePath->SetValue(this->pathToResourceFiles + _T("\\ROR_API.dll"));
 	this->edtROR_API_conf_FilePath->SetValue(this->pathToResourceFiles + _T("\\ROR_API.conf"));
 	this->edtWndMode_FilePath->SetValue(this->pathToResourceFiles + _T("\\wndmode.dll"));

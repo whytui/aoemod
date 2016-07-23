@@ -43,7 +43,7 @@ enum AOE_FILE_VERSION {
 
 // ********************************************************************
 // *** Choose game version to support (see numeric constants above) ***
-#define GAMEVERSION GAMEVERSIONID_AOE10c
+#define GAMEVERSION GAMEVERSIONID_ROR10c
 // ********************************************************************
 
 
