@@ -507,11 +507,17 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		long int playerId = 2;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
+		STRUCT_AI_UNIT_LIST_INFO *l = &player->ptrAIStruct->structInfAI.unknown_0F0;
+		int c = l->usedElements;
+		for (int i = 0; i < c; i++) {
+			int id = l->unitIdArray[i];
+			if (id == -1) { id = -2; }
+		}
 		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, false, NULL);
-		STRATEGY::StrategyBuilder *sb = new STRATEGY::StrategyBuilder(this->crInfo, player);
+		/*STRATEGY::StrategyBuilder *sb = new STRATEGY::StrategyBuilder(this->crInfo, player);
 		//sb->GetStrategyGenerationInfo(player);
 		sb->CreateStrategyFromScratch();
-		delete sb;
+		delete sb;*/
 	}
 	if (strcmp(command, "a") == 0) {
 		long int playerId = 2;

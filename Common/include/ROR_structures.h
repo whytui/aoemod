@@ -2396,7 +2396,8 @@ namespace ROR_STRUCTURES_10C
 	};
 
 
-	// Size 0x5C0
+	// Size 0x5C0 - Constructor 0x4B7650
+	// Checksums: CC 8A 54 00 (normal), parents=40 2A 54 00
 	class STRUCT_BUILD_AI {
 	public:
 		unsigned long int checksum;
@@ -2419,7 +2420,8 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_BUILD_AI) == 0x5C0, "STRUCT_BUILD_AI Size");
 
 
-	// size 0x318
+	// size 0x318 - constructor 0x4B9660.
+	// Checksums 18 8B 54 00, parents=98 2A 54 00
 	// Construction AI
 	class STRUCT_CON_AI {
 	public:
@@ -2446,7 +2448,8 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_CON_AI) == 0x318, "STRUCT_CON_AI size");
 
 
-	// size 0x150
+	// size 0x150 - constructor=0x40A780
+	// Checksums : F4 2A 54 00, parents=04 2C 54 00
 	class STRUCT_DIPLOMACY_AI {
 	public:
 		unsigned long int checksum;
@@ -2464,10 +2467,12 @@ namespace ROR_STRUCTURES_10C
 		char unused_14D;
 		short int unused;
 		// 0x150: end
+		bool IsCheckSumValid() { return this->checksum == 0x00542AF4; }
 	};
 	static_assert(sizeof(STRUCT_DIPLOMACY_AI) == 0x150, "STRUCT_DIPLOMACY_AI size");
 
-	// size 0x1C0
+	// size 0x1C0 - constructor=0x40AFC0. (mainAI+0xB2C)
+	// Checksums : 34 2B 54 00, parents=04 2C 54 00
 	class STRUCT_EMOTIONAL_AI {
 	public:
 		unsigned long int checksum;
@@ -2476,17 +2481,19 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_AI *mainAI;
 		long int attitudeValues[6]; // +F4
 		char attitudeNames[6][0x1E];
+		bool IsCheckSumValid() { return this->checksum == 0x00542B34; }
 	};
 	static_assert(sizeof(STRUCT_EMOTIONAL_AI) == 0x1C0, "STRUCT_EMOTIONAL_AI size");
 
 
-	// size 0x10090. Offset is AI+0xCEC
+	// size 0x10090 - constructor=0x4BA1C0. Offset is AI+0xCEC
+	// Checksums : 74 8B 54 00, parents=04 2C 54 00, 74 2B 54 00
 	class STRUCT_INF_AI {
 	public:
 		unsigned long int checksum;
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1005
 		// 0xF0
-		STRUCT_AI_UNIT_LIST_INFO unknown_0F0; // related to farmers ??? All farmers ? 0x4DB4E2.
+		STRUCT_AI_UNIT_LIST_INFO unknown_0F0; // Unused ?? See 0x4DB4E2.
 		// 0x100
 		STRUCT_AI *ptrMainAI;
 		long int YMapSize;
@@ -2549,7 +2556,7 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_INF_AI) == 0x10090, "STRUCT_INF_AI size");
 
 
-	// size 0xF8
+	// size 0xF8 - constructor=0x4C8B50
 	class STRUCT_RESOURCE_AI {
 	public:
 		unsigned long int checksum;
@@ -2560,7 +2567,7 @@ namespace ROR_STRUCTURES_10C
 	};
 
 
-	// size 0x5F8
+	// size 0x5F8 - constructor=0x4CB030
 	class STRUCT_STRATEGY_AI {
 	public:
 		unsigned long int checksum;
@@ -2581,7 +2588,7 @@ namespace ROR_STRUCTURES_10C
 
 
 	// Tactical AI. Lots of things are managed here !
-	// size 0x100C. Corresponds to MainAI+0x1146C
+	// size 0x100C - Constructor=0x4CEBE0. Corresponds to MainAI+0x1146C
 	class STRUCT_TAC_AI {
 	public:
 		unsigned long int checksum;
@@ -2673,7 +2680,7 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(STRUCT_TAC_AI) == 0x100C, "STRUCT_TAC_AI size");
 
-	// Size ?
+	// Size 0x150 - constructor=0x40ED50
 	class STRUCT_TRADE_AI {
 	public:
 		unsigned long int checksum;
@@ -2700,8 +2707,9 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int hasDiplomacyInitBeenDone; // 0/1 flag. Waits 10 seconds (0x2710=10000ms) before this init. cf 4C783F.
 		unsigned long int requiredTributeToChangeDiplomacy;
 		long int receivedTributeFromPlayer[9]; // +12C. Total tribute received from a player (no distinction on resource type). See 4C83B5
+		bool IsCheckSumValid() { return this->checksum == 0x00542CD0; }
 	};
-
+	static_assert(sizeof(STRUCT_TRADE_AI) == 0x150, "STRUCT_TRADE_AI size");
 
 	// Size = 0x24. Update_Add=0x4BD750/0x4BD7E0
 	// Organized as a (big, initially 0x1F4 elements) array in infAI structure
@@ -2730,7 +2738,8 @@ namespace ROR_STRUCTURES_10C
 		float maxRange;
 	};
 
-	// The main AI object
+	// The main AI object. Total size = 0x125C8. Constructor = 0x4C6960.
+	// Checksums: F0 8B 54 00 (normal) + parents 04 2C 54 00, B0 2B 54 00
 	class STRUCT_AI {
 	public:
 		unsigned long int checksum;
@@ -2742,7 +2751,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_BUILD_AI structBuildAI; // +0x104
 		STRUCT_CON_AI structConAI; // +0x6C4 ; city plan
 		STRUCT_DIPLOMACY_AI structDiplAI; // +0x9DC
-		STRUCT_EMOTIONAL_AI structEmotionalAI;
+		STRUCT_EMOTIONAL_AI structEmotionalAI; // +0xB2C
 		STRUCT_INF_AI structInfAI; // +0xCEC
 		STRUCT_RESOURCE_AI structResourceAI; // +0x10D7C
 		STRUCT_STRATEGY_AI structStrategyAI; // +0x10E74
