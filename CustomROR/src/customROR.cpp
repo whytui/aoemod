@@ -799,23 +799,23 @@ void CustomRORInstance::AfterAddElementInStrategy(REG_BACKUP *REG_values) {
 
 	// Get arguments + run checks
 	ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI = (ROR_STRUCTURES_10C::STRUCT_BUILD_AI *) REG_values->EBP_val;
+	// posToAdd (EDI) is the element after which the method adds elements.
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *posToAdd = (ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *)REG_values->EDI_val;
 	assert(buildAI != NULL);
 	assert(buildAI->IsCheckSumValid());
+	assert(posToAdd != NULL);
+	assert(posToAdd->IsCheckSumValid());
 	if (!buildAI || !buildAI->IsCheckSumValid()) { return; }
+	if (!posToAdd || !posToAdd->IsCheckSumValid()) { return; }
 	long int *args = (long int *)(REG_values->ESP_val + 0x64);
 	// WARNING: do not use arg1, it is invalid because it is overwritten to be used as a local var by ROR method.
 	long int unitDATID = args[2];
 	long int nbToCreate = args[3]; // Yes, this method can create several at once, be careful
 	long int actorDATID = args[4]; // check if it is correct or overwritten in method?
 	long int retrains = args[5];
-	long int positionCounter = args[6];
-	// Try to update strategy if there is an "unreferenced" existing unit that match newly-added element
-	UpdateStrategyWithUnreferencedExistingUnits(buildAI, unitDATID, TAIUnitClass::AIUCNone, positionCounter); // AIUCNone: joker
-
-	// Granary / SP that are inserted at very beginning of strategy: move it after first house.
-	if (((unitDATID == CST_UNITID_GRANARY) || (unitDATID == CST_UNITID_STORAGE_PIT)) && (positionCounter < 2)) {
-		MoveStrategyElement_after_ifWrongOrder(buildAI, CST_UNITID_HOUSE, TAIUnitClass::AIUCBuilding, unitDATID, TAIUnitClass::AIUCNone);
-	}
+	long int positionCounter = args[6]; // position in strategy list, NOT elemId !
+	
+	this->crCommand.AfterAddElementInStrategy(buildAI, posToAdd, nbToCreate);
 }
 
 

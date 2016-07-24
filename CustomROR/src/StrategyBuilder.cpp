@@ -2951,6 +2951,8 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 		if ((bldInfo->unitDefId == CST_UNITID_GRANARY) || (bldInfo->unitDefId == CST_UNITID_STORAGE_PIT)) {
 			// Read SN number from strategy AI because it is valued and correct even "before" game start. TacAI's SN number are copied later.
 			if (this->ai->structStrategyAI.SNNumber[SNAutoBuildDropsites] > 0) {
+				//this->ai->structTacAI.granaryAddedToStrategy
+				//this->ai->structTacAI.storagePitAddedToStrategy
 				bldInfo->addedInStrategyCount++; // Anticipate the one that will be added at game start after a few seconds
 				continue;
 			}

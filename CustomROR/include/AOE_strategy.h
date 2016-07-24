@@ -47,10 +47,9 @@ void MarkResearchAsDoneInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, 
 void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 // Update strategy to add existing units so AI won't train/build it again. Check will only be run on matching strategy elements.
 // This overload is a bit faster because it filters unit types.
-// You can use DAT_ID=-1 and elemType=AIUCNone and stratElemId=-1 as jokers (to apply on all strategy elements)
+// You can use DAT_ID=-1 and elemType=AIUCNone as jokers (to apply on all strategy elements)
 // We consider it is a technical fix, so it is always done, even if AI improvement is disabled.
-void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int DAT_ID,
-	TAIUnitClass elemType, long int stratElemId);
+void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int DAT_ID, TAIUnitClass elemType);
 
 // Tries to add an existing unit to player's strategy (cf buildAI pointer)
 // Returns true if a matching (not in progress/done) strategy element has been found and updated (set to done + associate with unitId)

@@ -225,16 +225,15 @@ void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_PLAY
 	ROR_STRUCTURES_10C::STRUCT_AI *mainAI = player->GetAIStruct();
 	if (!mainAI) { return; }
 	// Call generic method
-	UpdateStrategyWithUnreferencedExistingUnits(&mainAI->structBuildAI, -1, TAIUnitClass::AIUCNone, -1);
+	UpdateStrategyWithUnreferencedExistingUnits(&mainAI->structBuildAI, -1, TAIUnitClass::AIUCNone);
 }
 
 
 // Update strategy to add existing units so AI won't train/build it again. Check will only be run on matching strategy elements.
 // This overload is a bit faster because it filters unit types.
-// You can use DAT_ID=-1 and elemType=AIUCNone and stratElemId=-1 as jokers (to apply on all strategy elements)
+// You can use DAT_ID=-1 and elemType=AIUCNone as jokers (to apply on all strategy elements)
 // We consider it is a technical fix, so it is always done, even if AI improvement is disabled.
-void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int DAT_ID,
-	TAIUnitClass elemType, long int stratElemId) {
+void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, long int DAT_ID, TAIUnitClass elemType) {
 	if ((elemType != TAIUnitClass::AIUCNone) && (elemType != TAIUnitClass::AIUCBuilding) && (elemType != TAIUnitClass::AIUCLivingUnit)) { return; } // only relevant for creatable
 	if (!buildAI) { return; }
 
@@ -272,7 +271,6 @@ void UpdateStrategyWithUnreferencedExistingUnits(ROR_STRUCTURES_10C::STRUCT_BUIL
 	while ((currentElem != NULL) && (currentElem != fakeStratElem)) {
 		// Performance: We only take care of strategy elements that match provided criteria
 		if (((currentElem->elementType == elemType) || (elemType == AIUCNone)) &&
-			((currentElem->elemId == stratElemId) || (stratElemId == -1)) &&
 			((currentElem->unitDAT_ID == DAT_ID) || (DAT_ID == -1))) {
 			std::vector<ROR_STRUCTURES_10C::STRUCT_UNIT*>::iterator it = notInStrategyUnitsList.begin();
 			while (it != notInStrategyUnitsList.end()) {

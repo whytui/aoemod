@@ -268,6 +268,9 @@ public:
 	// It is not recommended to call this too much ! It would add a lot of unit definition and would impact seriously game performance.
 	short int DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int srcDAT_ID, char *name);
 
+	// Entry point aftre a strategy element has been added in buildAI
+	void AfterAddElementInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *posToAdd,
+		int countAdded);
 
 	// Analyze strategy and fixes what's necessary. Called every <crInfo.configInfo.tacticalAIUpdateDelay> seconds.
 	void AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);

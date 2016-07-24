@@ -2199,7 +2199,7 @@ namespace ROR_STRUCTURES_10C
 		long int unitId; // Villager unit id
 		long int resourceType; // 0-3
 		long int maxResourceAmount; // resourceAmount is compared to resourceAmount to known is gathering is "finished" (needs to deposit)
-		long int resourceAmount; // TO CONFIRM. (compared to +08)
+		long int resourceAmount; // +0C. Gathered amount at this point (compared to +08)
 		// 0x10
 		long int targetUnitId; // building to build, gazelle to hunt, etc
 		unsigned long int timeGetTimeValue; // Last evaluation system time in milliseconds. Task changes are evaluated if > 5 seconds ?
@@ -2486,7 +2486,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int checksum;
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1005
 		// 0xF0
-		char unknown_0F0[0x100 - 0XF0];
+		STRUCT_AI_UNIT_LIST_INFO unknown_0F0; // related to farmers ??? All farmers ? 0x4DB4E2.
 		// 0x100
 		STRUCT_AI *ptrMainAI;
 		long int YMapSize;
@@ -2660,7 +2660,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_F9C;
 		// 0xFA0
 		unsigned long int lastCoopSharAttackTime_ms; // A game time value in milliseconds.
-		unsigned long int unknown_FA4; // flag ? about exploration ?
+		unsigned long int unknown_FA4; // flag ? about exploration ? Used in gatherer affectation methods
 		unsigned long int unknown_FA8;
 		STRUCT_TAC_AI_TARGET_INFO targetInfo; // +FAC.
 		long int attacksByPlayerCount[9]; // +FD8. number of times this player attacked me ?

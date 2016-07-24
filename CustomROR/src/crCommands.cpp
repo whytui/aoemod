@@ -1384,6 +1384,36 @@ void CustomRORCommand::ManageTacAIUpdate(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 }
 
 
+// Entry point aftre a strategy element has been added in buildAI
+void CustomRORCommand::AfterAddElementInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, 
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *posToAdd, int countAdded) {
+	assert(posToAdd != NULL);
+	assert(posToAdd->IsCheckSumValid());
+	if (!posToAdd || !posToAdd->IsCheckSumValid()) { return; }
+
+	int insertionPos = 0;
+	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = buildAI->fakeFirstStrategyElement.next;
+	while (curElem && (curElem != &buildAI->fakeFirstStrategyElement) && (curElem != posToAdd) ) {
+		insertionPos++;
+		curElem = curElem->next;
+	}
+	// Here curElem is == posToAdd (if found)
+
+	for (int i = 0; i < countAdded; i++) {
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *newElem = curElem->next;
+		// Try to update strategy if there is an "unreferenced" existing unit that match newly-added element
+		UpdateStrategyWithUnreferencedExistingUnits(buildAI, newElem->unitDAT_ID, newElem->elementType);
+
+		// Granary / SP that are inserted at very beginning of strategy: move it after first house.
+		if (((newElem->unitDAT_ID == CST_UNITID_GRANARY) || (newElem->unitDAT_ID == CST_UNITID_STORAGE_PIT)) && (insertionPos < 2)) {
+			// Warning: this may move strategy element !
+			MoveStrategyElement_after_ifWrongOrder(buildAI, CST_UNITID_HOUSE, TAIUnitClass::AIUCBuilding, newElem->unitDAT_ID, TAIUnitClass::AIUCNone);
+		}
+		curElem = curElem->next; // We are sure curElem did not move, use this (newElem may have been moved forward in strategy)
+	}
+}
+
+
 // Analyze strategy and fixes what's necessary. Called every <crInfo.configInfo.tacticalAIUpdateDelay> seconds.
 void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 	// Exit if AI improvement is not enabled.
