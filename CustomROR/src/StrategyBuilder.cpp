@@ -2366,7 +2366,10 @@ void StrategyBuilder::CollectGlobalStrategyGenerationInfo(ROR_STRUCTURES_10C::ST
 	if (!player || !player->IsCheckSumValid()) { return; }
 	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
-	this->maxPopulation = settings->maxPopulation;
+	this->maxPopulation = this->crInfo->configInfo.singlePlayerMaxPopulation;
+	if (this->maxPopulation <= 0) {
+		this->maxPopulation = settings->maxPopulation;
+	}
 	this->isWaterMap = IsDockRelevantForMap(settings->mapTypeChoice);
 
 	// *** Compute unit numbers ***
@@ -2712,7 +2715,9 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 			} else {
 				unitInfo->desiredCount = ((100 - mainUnitsProportion) * remainingPopulation / 100);
 			}
-			unitInfo->desiredCount = unitInfo->desiredCount;
+			if (unitInfo->desiredCount < 0) {
+				unitInfo->desiredCount = 0;
+			}
 			this->log += "Desired count for ";
 			this->log += unitInfo->unitName;
 			this->log += "=";
@@ -2732,7 +2737,7 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 		float lowestProportion = 100;
 		for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 		{
-			if (!unitInfo->earlyAgeUnit) {
+			if (!unitInfo->earlyAgeUnit && (unitInfo->desiredCount > 0)) {
 				float p = 100 * unitInfo->addedCount / unitInfo->desiredCount; // both are "int" value, but use float for % precision
 				if ((unitInfo->isOptionalUnit) && (p < 100)) {
 					p = p / 2; // Force optional units to be trained more at the beginning (there are less of them)
