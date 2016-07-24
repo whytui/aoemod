@@ -1227,7 +1227,7 @@ void CustomRORCommand::FixGameStartAIInitForPlayers() {
 		if ((player->GetAIStruct() != NULL) && !this->FindIfGameStartStrategyInitHasBeenDone(player)) {
 			// It seems we found a player that has not had his "game start AI init", including addition of dynamic strategy elements.
 			// Force the flag to trigger it now (in fact, init will be triggered when AI control is enabled).
-			player->GetAIStruct()->structTradeAI.needGameStartAIInit = 1;
+			player->GetAIStruct()->needGameStartAIInit = 1;
 			// Note: when strategy elements are added to strategy, we'll need to run UpdateStrategyWithUnreferencedExistingUnits
 			// if we want AI not to rebuild already existing houses (+docks, boats...)
 		}

@@ -2680,36 +2680,16 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(STRUCT_TAC_AI) == 0x100C, "STRUCT_TAC_AI size");
 
-	// Size 0x150 - constructor=0x40ED50
+	// Size 0xF4 - constructor=0x40ED50
 	class STRUCT_TRADE_AI {
 	public:
 		unsigned long int checksum;
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1010
 		// 0xF0
 		STRUCT_AI *ptrMainAI;
-		STRUCT_PLAYER *player; // +F4 : pointer to player structure
-		// +F8. 1 until game start AI init has been done. Includes log like values, add dynamic strategy, resource AI bonus, tribute info init
-		// Bug: this information is NOT saved in savegame files (whereas hasDiplomacyInitBeenDone is). When loading a game, it is set to 0 even if init has never been run.
-		long int needGameStartAIInit;
-		unsigned long int unknown_0FC;
-		// 0x100
-		long int nextStrategyAIExecutionCounter; // Increased, when = 0x14=20 then reset and execute strategy AI. WTF is this flag doing in tradeAI ?
-		unsigned long int unknown_104; // A milliseconds time value ? Related to diplomacy management ?
-		unsigned long int unknown_108; // A milliseconds time value ?
-		unsigned long int unknown_10C; // A milliseconds time value ? Related to tributes ??
-		// 0x110
-		unsigned long int tributeChatFrequency; // Including randomness. Calculated from SNTributeChatFrequency and SNTributeChatRandomness
-		unsigned long int unknown_114;
-		unsigned long int unknown_118;
-		unsigned long int unknown_11C_tributeIsNOTPersistent; // REALLY unsure.
-		// 0x120
-		unsigned long int unknown_120;
-		unsigned long int hasDiplomacyInitBeenDone; // 0/1 flag. Waits 10 seconds (0x2710=10000ms) before this init. cf 4C783F.
-		unsigned long int requiredTributeToChangeDiplomacy;
-		long int receivedTributeFromPlayer[9]; // +12C. Total tribute received from a player (no distinction on resource type). See 4C83B5
 		bool IsCheckSumValid() { return this->checksum == 0x00542CD0; }
 	};
-	static_assert(sizeof(STRUCT_TRADE_AI) == 0x150, "STRUCT_TRADE_AI size");
+	static_assert(sizeof(STRUCT_TRADE_AI) == 0xF4, "STRUCT_TRADE_AI size");
 
 	// Size = 0x24. Update_Add=0x4BD750/0x4BD7E0
 	// Organized as a (big, initially 0x1F4 elements) array in infAI structure
@@ -2757,6 +2737,26 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_STRATEGY_AI structStrategyAI; // +0x10E74
 		STRUCT_TAC_AI structTacAI; // +0x1146C
 		STRUCT_TRADE_AI structTradeAI; // +0x12478
+
+		STRUCT_PLAYER *player; // +1256C. +F4 : pointer to player structure
+		// +F8. 1 until game start AI init has been done. Includes log like values, add dynamic strategy, resource AI bonus, tribute info init
+		// Bug: this information is NOT saved in savegame files (whereas hasDiplomacyInitBeenDone is). When loading a game, it is set to 0 even if init has never been run.
+		long int needGameStartAIInit; // +12570
+		unsigned long int unknown_12574;
+		long int nextStrategyAIExecutionCounter; // +12578. Increased, when = 0x14=20 then reset and execute strategy AI. WTF is this flag doing in tradeAI ?
+		unsigned long int unknown_1257C; // A milliseconds time value ? Related to diplomacy management ?
+		unsigned long int unknown_12580; // +12580. A milliseconds time value ?
+		unsigned long int unknown_12584; // +12584. A milliseconds time value ? Related to tributes ??
+		unsigned long int tributeChatFrequency; // +12588. Including randomness. Calculated from SNTributeChatFrequency and SNTributeChatRandomness
+		unsigned long int unknown_1258C;
+		// 0x12590
+		unsigned long int unknown_12590;
+		unsigned long int unknown_12594_tributeIsNOTPersistent; // REALLY unsure.
+		unsigned long int unknown_12598;
+		unsigned long int hasDiplomacyInitBeenDone; // +1259C. 0/1 flag. Waits 10 seconds (0x2710=10000ms) before this init. cf 4C783F.
+		unsigned long int requiredTributeToChangeDiplomacy; // +125A0
+		long int receivedTributeFromPlayer[9]; // +125A4. Total tribute received from a player (no distinction on resource type). See 4C83B5
+
 
 		bool IsCheckSumValid() const { return this->checksum == 0x00548BF0; }
 	};

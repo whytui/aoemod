@@ -3279,7 +3279,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	this->CreateSecondaryBuildingStrategyElements();
 	this->CreateTowerBuildingsStrategyElements();
 
-	if (buildAI->mainAI->structTradeAI.needGameStartAIInit) {
+	if (buildAI->mainAI->needGameStartAIInit) {
 		// Warning: automatic element insertions WILL be triggered
 	} else {
 		// TODO : trigger dynamic element insertions ? Houses, (dock+boats?), setGather%... farms?

@@ -107,7 +107,9 @@ static bool test_ror_structures() {
 	trs_assert(&ai, 0x1146C + 0x51C, &ai.structTacAI.gatherersTasks);
 	trs_assert(&ai, 0x1146C + 0xF94, &ai.structTacAI.lastPanicModeTime);
 	trs_assert(&ai, 0x12478, &ai.structTradeAI);
-	trs_assert(&ai, 0x1259C, &ai.structTradeAI.hasDiplomacyInitBeenDone);
+	trs_assert(&ai.structTradeAI, 0xF0, &ai.structTradeAI.ptrMainAI);
+	trs_assert(&ai, 0x12568, &ai.structTradeAI.ptrMainAI);
+	trs_assert(&ai, 0x1256C, &ai.player);
 
 	ROR_STRUCTURES_10C::STRUCT_PATH_FINDING_INTERMEDIATE_STEP pstep;
 	assert(sizeof(pstep) == 0x10);
