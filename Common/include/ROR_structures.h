@@ -2738,12 +2738,12 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_TAC_AI structTacAI; // +0x1146C
 		STRUCT_TRADE_AI structTradeAI; // +0x12478
 
-		STRUCT_PLAYER *player; // +1256C. +F4 : pointer to player structure
-		// +F8. 1 until game start AI init has been done. Includes log like values, add dynamic strategy, resource AI bonus, tribute info init
+		STRUCT_PLAYER *player; // +1256C. Pointer to player structure
+		// +12570. =1 until game start AI init has been done. Includes log like values, add dynamic strategy, resource AI bonus, tribute info init
 		// Bug: this information is NOT saved in savegame files (whereas hasDiplomacyInitBeenDone is). When loading a game, it is set to 0 even if init has never been run.
 		long int needGameStartAIInit; // +12570
 		unsigned long int unknown_12574;
-		long int nextStrategyAIExecutionCounter; // +12578. Increased, when = 0x14=20 then reset and execute strategy AI. WTF is this flag doing in tradeAI ?
+		long int nextStrategyAIExecutionCounter; // +12578. Increased, when = 0x14=20 then reset and execute strategy AI.
 		unsigned long int unknown_1257C; // A milliseconds time value ? Related to diplomacy management ?
 		unsigned long int unknown_12580; // +12580. A milliseconds time value ?
 		unsigned long int unknown_12584; // +12584. A milliseconds time value ? Related to tributes ??
