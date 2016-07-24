@@ -75,31 +75,13 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 bool SetMaxPopulationGetterInSPGames(long int newMaxPopulationValue) {
 	try {
 		if ((newMaxPopulationValue < 0) || (newMaxPopulationValue > 255)) { return false; }
-		char updateValue = (char)newMaxPopulationValue;
-		RORProcessEditor pe;
-		unsigned char bufferSeq[] = { 0xB0, 0x32, 0x5E, 0xC3 };
-		unsigned long int getMaxPopMethodAddr =
-#ifdef GAMEVERSION_AOE10b
-			AOE_ExeAddrToFileOffset(0x492DA4);
-#endif
-#ifdef GAMEVERSION_AOE10c
-			AOE_ExeAddrToFileOffset(0x4FFF14);
-#endif
-#ifdef GAMEVERSION_ROR10b
-			AOE_ExeAddrToFileOffset(0x507B84);
-#endif
-#ifdef GAMEVERSION_ROR10c
-			0x105504;
-#endif
-		BinarySeqDefinition b = BinarySeqDefinition(sizeof(bufferSeq), 1, getMaxPopMethodAddr);
-		b.SetVarRelativeOffset(0, 1);
-		b.SetVarType(0, SEQ_VAR_TYPES::SVT_INT_1B);
-		b.WriteSequence(0, bufferSeq);
-		if (!pe.CheckSeqConsistency(&b, 0)) {
-			traceMessageHandler.WriteMessage("Inconsistent memory data, cannot update maximum population value.");
+		bool success;
+		success = SetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_OPTIONS, "SetSinglePlayerMaxPop", 0, newMaxPopulationValue);
+		success = success && SetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_OPTIONS, "SetAIHousesMaxPop", 0, newMaxPopulationValue);
+		if (!success) {
+			traceMessageHandler.WriteMessage("An error occurred while setting up custom population limit");
 		}
-		int res = pe.WriteFromSequenceUsingValue(&b, 0, &updateValue);
-		return (res > 0);
+		return success;
 	}
 	catch (std::exception e) {
 		traceMessageHandler.WriteMessage(e.what());
@@ -162,5 +144,43 @@ long int GetBinaryChangeVarValue(BINSEQ_CATEGORIES binCategory, std::string sequ
 	catch (std::exception e) {
 		traceMessageHandler.WriteMessage(e.what());
 		return 0;
+	}
+}
+
+
+bool SetBinaryChangeVarValue(BINSEQ_CATEGORIES binCategory, std::string sequenceName, int seqIndex, long int value) {
+	try {
+		RORProcessEditor pe;
+		aoeBinData.SetCurrentVersion(GetBuildVersion());
+		BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(GetBuildVersion(), binCategory);
+		if (!seqDefSet) {
+			return false;
+		}
+		int seqDefIndex = seqDefSet->FindSeqDefinitionIndex(widen(sequenceName)); // throws if not found
+		BinarySeqDefinition *binSeq = seqDefSet->GetBinSeqDefinition(seqDefIndex);
+		if (!binSeq) { return false; }
+
+		switch (binSeq->GetVarSize(seqIndex)) {
+		case 1:
+			char c;
+			c = (char)value;
+			pe.SetVarValue(binSeq, seqIndex, &c);
+			return true;
+		case 2:
+			short int si;
+			si = (short int)value;
+			pe.SetVarValue(binSeq, seqIndex, &si);
+			return true;
+		case 4:
+			//long int li;
+			pe.SetVarValue(binSeq, seqIndex, &value);
+			return true;
+		default:
+			return false;
+		}
+	}
+	catch (std::exception e) {
+		traceMessageHandler.WriteMessage(e.what());
+		return false;
 	}
 }

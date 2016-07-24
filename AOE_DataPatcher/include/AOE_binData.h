@@ -39,6 +39,8 @@ public:
 	BinarySeqDefSet ROR_API_AOE10c;
 	BinarySeqDefSet ROR_API_10b;
 	BinarySeqDefSet ROR_API_10c;
+	BinarySeqDefSet options_AOE10b;
+	BinarySeqDefSet options_AOE10c;
 	BinarySeqDefSet options_10b;
 	BinarySeqDefSet options_10c;
 	BinarySeqDefSet selectedUnits_10b;
@@ -64,6 +66,8 @@ private:
 	void InitWindowedMode_c();
 	void InitTechFixes_10b();
 	void InitTechFixes_10c();
+	void InitOptions_AOE10b();
+	void InitOptions_AOE10c();
 	void InitOptions_10b();
 	void InitOptions_10c();
 	void InitSelectedUnits();

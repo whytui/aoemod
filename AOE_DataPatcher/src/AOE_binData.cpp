@@ -30,6 +30,7 @@ BinarySeqDefSet *AOE_binData::GetSeqDefSet(AOE_FILE_VERSION version, BINSEQ_CATE
 		case BC_NONE: return NULL;
 		case BC_WINDOWED_MODE: return &this->windowedMode_AOE10b;
 		case BC_ROR_API: return &this->ROR_API_AOE10b;
+		case BC_OPTIONS: return &this->options_AOE10b;
 		default: return NULL;
 		}
 	case AOE_VERSION_AOE1_0C:
@@ -37,6 +38,7 @@ BinarySeqDefSet *AOE_binData::GetSeqDefSet(AOE_FILE_VERSION version, BINSEQ_CATE
 		case BC_NONE: return NULL;
 		case BC_WINDOWED_MODE: return &this->windowedMode_AOE10c;
 		case BC_ROR_API: return &this->ROR_API_AOE10c;
+		case BC_OPTIONS: return &this->options_AOE10c;
 		default: return NULL;
 		}
 	case AOE_VERSION_1_0B:
@@ -78,7 +80,9 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 }
 
 // Binseq sets number of elements. Use the macro for run-time checks
-#define COUNT_options_10b 13
+#define COUNT_options_AOE10b 2
+#define COUNT_options_AOE10c 2
+#define COUNT_options_10b 15
 #define COUNT_options_10c 61
 #define COUNT_techFixes_10b 5
 #define COUNT_techFixes_10c 35
@@ -100,6 +104,8 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 
 // Throws exceptions if configuration is not OK
 void AOE_binData::InitData() {
+	this->options_AOE10b.SetCount(COUNT_options_AOE10b);
+	this->options_AOE10c.SetCount(COUNT_options_AOE10c);
 	this->options_10b.SetCount(COUNT_options_10b);
 	this->options_10c.SetCount(COUNT_options_10c);
 	this->techFixes_10b.SetCount(COUNT_techFixes_10b);
@@ -130,6 +136,8 @@ void AOE_binData::InitData() {
 	this->InitWindowedMode_c();
 	this->InitTechFixes_10b();
 	this->InitTechFixes_10c();
+	this->InitOptions_AOE10b();
+	this->InitOptions_AOE10c();
 	this->InitOptions_10b();
 	this->InitOptions_10c();
 	this->InitSelectedUnits();
@@ -2163,6 +2171,64 @@ void AOE_binData::InitTechFixes_10c() {
 	// + 2 doppleganger fixes (not necessary)
 }
 
+void AOE_binData::InitOptions_AOE10b() {
+	int i = 0;
+
+	NEXT_INITSEQ_1_VAR(this->options_AOE10b.GetBinSeqDefinition(i),
+		SetSinglePlayerMaxPop,
+		"Set the maximum population number for ALL players in single player games.",
+		0x921A2,
+		(0x5E, 0xC3, 0xB0, 0x32, 0x5E, 0xC3),
+		SVT_INT_1B,
+		3
+		);
+
+	NEXT_INITSEQ_1_VAR(this->options_AOE10b.GetBinSeqDefinition(i),
+		SetAIHousesMaxPop,
+		"Set the maximum population value that will be used to compute AI's auto-build houses functionality.",
+		0x100AB8,
+		(0xE8, 0xA3, 0xD0, 0xF7, 0xFF, 0x83, 0xC0, 0x32, 0x3B, 0xC6),
+		SVT_INT_1B,
+		7
+		);
+
+	if (i != COUNT_options_AOE10b) {
+		throw AOE_binDataSetupException("Binary setup error for options_AOE10c. Bad element count.");
+	}
+#ifdef _DEBUG
+	printf("options=%d\n", i);
+#endif
+}
+
+void AOE_binData::InitOptions_AOE10c() {
+	int i = 0;
+
+	NEXT_INITSEQ_1_VAR(this->options_AOE10c.GetBinSeqDefinition(i),
+		SetSinglePlayerMaxPop,
+		"Set the maximum population number for ALL players in single player games.",
+		0xFFF12,
+		(0x5E, 0xC3, 0xB0, 0x32, 0x5E, 0xC3),
+		SVT_INT_1B,
+		3
+		);
+
+	NEXT_INITSEQ_1_VAR(this->options_AOE10c.GetBinSeqDefinition(i),
+		SetAIHousesMaxPop,
+		"Set the maximum population value that will be used to compute AI's auto-build houses functionality.",
+		0xB5CC4,
+		(0xE8, 0xE7, 0xF8, 0x01, 0x00, 0x83, 0xC0, 0x32, 0x3B, 0xD8),
+		SVT_INT_1B,
+		7
+		);
+
+	if (i != COUNT_options_AOE10c) {
+		throw AOE_binDataSetupException("Binary setup error for options_AOE10c. Bad element count.");
+	}
+#ifdef _DEBUG
+	printf("options=%d\n", i);
+#endif
+}
+
 void AOE_binData::InitOptions_10b() {
 	int i = 0;
 
@@ -2294,7 +2360,24 @@ void AOE_binData::InitOptions_10b() {
 		FM_OFF,
 		FM_ON
 		);
-	// Here: i=13
+
+	NEXT_INITSEQ_1_VAR(this->options_10b.GetBinSeqDefinition(i),
+		SetSinglePlayerMaxPop,
+		"Set the maximum population number for ALL players in single player games.",
+		0x106F82,
+		(0x5E, 0xC3, 0xB0, 0x32, 0x5E, 0xC3),
+		SVT_INT_1B,
+		3
+		);
+
+	NEXT_INITSEQ_1_VAR(this->options_10b.GetBinSeqDefinition(i),
+		SetAIHousesMaxPop,
+		"Set the maximum population value that will be used to compute AI's auto-build houses functionality.",
+		0xB8C32,
+		(0xE8, 0xD9, 0xFD, 0x01, 0x00, 0x83, 0xC0, 0x32, 0x3B, 0xD8),
+		SVT_INT_1B,
+		7
+		);
 	// TO DO: continue with remaining setup
 
 	if (i != COUNT_options_10b) {
