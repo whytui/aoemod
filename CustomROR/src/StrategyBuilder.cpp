@@ -2344,14 +2344,20 @@ void StrategyBuilder::AddTowerResearches() {
 
 // Adds non-military researches that should always be included, for example wheel - if available in tech tree.
 void StrategyBuilder::AddMandatoryNonMilitaryResearches() {
-	// Always add wheel => now done automatically in optional researches part
+	// Always add wheel => now done automatically (and NOT hardcoded !) in optional researches part
 
 	// Make sure farm requirements are met
 	this->CollectResearchInfoForUnit(CST_UNITID_FARM, false); // Will add market...
 	this->AddPotentialBuildingInfoToList(CST_UNITID_FARM); // Add if not already present
 	PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
+	// Set desired number of farms
+	bool normalOrEasy = (this->settings->difficultyLevel >= 2);
 	if (farmInfo) {
-		farmInfo->desiredCount = 5; // TODO
+		if (this->isWaterMap) {
+			farmInfo->desiredCount = normalOrEasy ? 4 : 5;
+		} else {
+			farmInfo->desiredCount = normalOrEasy ? 5 : 7;
+		}
 		farmInfo->highPriority = true;
 	}
 }
@@ -3012,7 +3018,6 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 
 // Add strategy elements for farms
 void StrategyBuilder::CreateFarmStrategyElements() {
-	// Farms : force (most) before bronze
 	PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
 	if (!farmInfo || (farmInfo->desiredCount <= 0)) { return; }
 
@@ -3038,6 +3043,12 @@ void StrategyBuilder::CreateFarmStrategyElements() {
 		this->player, "Farm");
 	for (int i = 0; i < addedCount; i++) {
 		this->UpdateBuildingInfoAfterAddInStrategy(farmInfo, NULL);
+	}
+	if (randomizer.GetRandomPercentageValue() <= 50) {
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstFarm = FindFirstElementInStrategy(myAgeElem, TAIUnitClass::AIUCBuilding, farmInfo->unitDefId);
+		if (firstFarm && firstFarm->IsCheckSumValid()) {
+			firstFarm->retrains = 6; // Limited retrains to get (a bit) less farms in late game
+		}
 	}
 }
 

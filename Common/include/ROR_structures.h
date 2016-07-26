@@ -2741,7 +2741,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_PLAYER *player; // +1256C. Pointer to player structure
 		// +12570. =1 until game start AI init has been done. Includes log like values, add dynamic strategy, resource AI bonus, tribute info init
 		// Bug: this information is NOT saved in savegame files (whereas hasDiplomacyInitBeenDone is). When loading a game, it is set to 0 even if init has never been run.
-		long int needGameStartAIInit; // +12570
+		long int needGameStartAIInit;
 		unsigned long int unknown_12574;
 		long int nextStrategyAIExecutionCounter; // +12578. Increased, when = 0x14=20 then reset and execute strategy AI.
 		unsigned long int unknown_1257C; // A milliseconds time value ? Related to diplomacy management ?
