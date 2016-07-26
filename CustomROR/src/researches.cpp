@@ -316,7 +316,7 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, 
 
 // Returns "destination" unit ID if technology upgrades provided unit definition ID into another unit
 // Returns -1 if technology does NOT upgrade provided unit to another unit
-short int DoesTechUpgradeUnit(STRUCT_TECH_DEF *techDef, short int unitDefId) {
+short int GetNewUnitIdIfTechUpgradesUnit(STRUCT_TECH_DEF *techDef, short int unitDefId) {
 	if (!techDef || (unitDefId < 0)) { // -1 CAN'T be a joker here !
 		return -1;
 	}

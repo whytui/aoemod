@@ -81,6 +81,7 @@ namespace STRATEGY {
 		int unitInstanceScoreForOptionalResearch; // internal value for optional researches computing
 		bool forcePlaceForFirstImpactedUnit; // If true, research will be put near first involved unit. Default=false. If set, other constraints may be ignored. Used in combination with mustBeAfterThisElem.
 		bool forcePutAsEarlyAsPossible; // If true, research will be put as early as possible in strategy (just after its requirements). Default=false. If set, other constraints may be ignored. Used in combination with mustBeAfterThisElem.
+		bool forcePutAfterOtherResearches; // If true, research will be put after all researches that impact "my" impacted units
 		bool isInStrategy; // Set to true once it has been added to strategy
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeBeforeThisElem; // Do not modify outside of ComputeStratElemPositionConstraints

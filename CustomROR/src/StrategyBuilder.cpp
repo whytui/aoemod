@@ -205,6 +205,19 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 			resInfo->impactedUnitDefIds.insert(unitInfo->unitDefId);
 		}
 	}
+	// Special treatments
+	if (resInfo->techDef) {
+		for (int i = 0; i < resInfo->techDef->effectCount; i++) {
+			if (resInfo->techDef->ptrEffects[i].IsAttributeModifier() &&
+				(resInfo->techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_POPULATION_COST)) {
+				// Logistics (standard game): in random games, set lowest priority
+				if (!this->settings->isDeathMatch) {
+					resInfo->forcePutAfterOtherResearches = true;
+				}
+			}
+		}
+	}
+
 	return resInfo;
 }
 
@@ -286,6 +299,8 @@ bool StrategyBuilder::IsResearchInTechTree(short int researchId) {
 // Previous values of mustBeBeforeThisElem  and mustBeAfterThisElem are reset (lost)
 void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
 	if (!buildAI) { return; }
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
+	if (!player) { return; }
 	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirst = &buildAI->fakeFirstStrategyElement;
 	this->mustBeBeforeThisElem = NULL;
 	this->mustBeAfterThisElem = NULL;
@@ -322,7 +337,6 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_1
 
 	// Special cases: override mustBeBeforeThisElem and mustBeAfterThisElem values
 	if (this->forcePlaceForFirstImpactedUnit || this->forcePutAsEarlyAsPossible) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
 		assert(player && player->IsCheckSumValid());
 		if (!player || !player->IsCheckSumValid()) { return; }
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *bestFirstElem = this->mustBeAfterThisElem; // use previous calculations for initial position
@@ -378,6 +392,36 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_1
 					assert(false && "Insertion point is prior to required age, this should never happen !");
 				}
 			}
+		}
+	}
+	if (this->forcePutAfterOtherResearches) {
+		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = this->mustBeBeforeThisElem;
+		if (!curElem) {
+			curElem = buildAI->fakeFirstStrategyElement.previous;
+		}
+		bool foundStratElem = false;
+		while (curElem && !foundStratElem && (curElem != &buildAI->fakeFirstStrategyElement) &&
+			(curElem != this->mustBeAfterThisElem)) {
+			if ((curElem->elementType == TAIUnitClass::AIUCTech) || (curElem->elementType == TAIUnitClass::AIUCCritical)) {
+				short int resDefId = (short int)curElem->unitDAT_ID;
+				ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = player->GetResearchDef(resDefId);
+				if (resDef) {
+					ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = player->ptrGlobalStruct->GetTechDef(resDef->technologyId);
+					if (techDef) {
+						static AOE_TECHNOLOGIES::TechnologyFilterBase filter;
+						for each (short int unitDefId in this->impactedUnitDefIds)
+						{
+							ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = player->GetUnitDefBase(unitDefId);
+							foundStratElem = foundStratElem || DoesTechAffectUnit(techDef, unitDef, &filter);
+						}
+					}
+				}
+			}	
+			curElem = curElem->previous;
+		}
+		if (foundStratElem) {
+			curElem = curElem->next;
+			this->mustBeAfterThisElem = curElem;
 		}
 	}
 }
@@ -1536,6 +1580,12 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 							}
 						}
 					}
+					if (techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_POPULATION_COST) {
+						// Set low priority to logistics in RM (standard game)
+						if (!this->settings->isDeathMatch) {
+							resInfo->unitInstanceScoreForOptionalResearch -= 10;
+						}
+					}
 					if ((techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_RANGE) &&
 						(techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon)) {
 						resInfo->unitInstanceScoreForOptionalResearch += 30; // Adding range to siege units is very useful
@@ -2312,7 +2362,7 @@ void StrategyBuilder::AddTowerResearches() {
 		if (resDef && (resDef->technologyId >= 0) && (resDef->researchLocation >= 0)) {
 			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resDef->technologyId);
 			if (techDef) {
-				short int destUnitId = DoesTechUpgradeUnit(techDef, CST_UNITID_WATCH_TOWER);
+				short int destUnitId = GetNewUnitIdIfTechUpgradesUnit(techDef, CST_UNITID_WATCH_TOWER);
 				destBld = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)this->player->GetUnitDefBase(destUnitId);
 				isUpgradeUnit = (destUnitId > -1) && (destBld != NULL);
 			}
@@ -2891,6 +2941,70 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 		}
 	}
 
+	// Add "unit upgrade" researches whose cost is quite low, compared to unit itself
+	// => add as early as possible
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList) {
+		if (resInfo->markedForAdd && !resInfo->isInStrategy && (resInfo->researchDef->researchLocation >= 0) && resInfo->techDef &&
+			!resInfo->forcePutAfterOtherResearches) {
+			// Do not handle "affects units" here, because it may add many "cheap" researches, which is bad (example: temple techs)
+			// bool researchUpgradesUnits = false;
+			int maxUnitCost = 0; // Theoritically, only 1 unit is concerned by unit upgrade here !...
+			for each (short int unitDefId in resInfo->impactedUnitDefIds) {
+				AOE_TECHNOLOGIES::TechFilterExcludeDrawbacksAndDistributedEffects filter;
+				if (GetNewUnitIdIfTechUpgradesUnit(resInfo->techDef, unitDefId) >= 0) {
+					ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)this->player->GetUnitDefBase(unitDefId);
+					if (unitDef && unitDef->DerivesFromLiving()) {
+						int totalUnitCost = 0;
+						for (int i = 0; i < 3; i++) {
+							if (unitDef->costs[i].costPaid) {
+								totalUnitCost += unitDef->costs[i].costAmount;
+							}
+						}
+						if (totalUnitCost > maxUnitCost) {
+							maxUnitCost = totalUnitCost;
+						}
+					}
+				}
+			}
+			int costForComparison = maxUnitCost * 4;
+			if (resInfo->totalCosts <= costForComparison) {
+				// Place this research as early as possible
+				//resInfo->forcePutAsEarlyAsPossible = true; // for the record...
+				resInfo->ComputeStratElemPositionConstraints(this->buildAI);
+				if (resInfo->mustBeAfterThisElem && resInfo->mustBeAfterThisElem->next) {
+					// Put the research after some impacted units
+					ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = curElem = resInfo->mustBeAfterThisElem->next;
+					int count = 1;
+					const int unitCountBeforeResearch = 3;
+					int unitCountBeforeResearchWithRandom = unitCountBeforeResearch + randomizer.GetRandomValue_normal_moderate(-4, 4);
+					if (unitCountBeforeResearchWithRandom < 0) { unitCountBeforeResearchWithRandom = -unitCountBeforeResearchWithRandom; } // absolute value (positive)
+					while (curElem && (curElem != &this->buildAI->fakeFirstStrategyElement) && (count < unitCountBeforeResearchWithRandom)) {
+						if (curElem->elementType == TAIUnitClass::AIUCLivingUnit) {
+							auto it = std::find_if(resInfo->impactedUnitDefIds.begin(), resInfo->impactedUnitDefIds.end(),
+								[curElem](short int curId) { return curId == curElem->unitDAT_ID; }
+							);
+							if (it != resInfo->impactedUnitDefIds.end()) {
+								count++;
+							}
+						}
+						curElem = curElem->next;
+					}
+					this->AddResearchToStrategy(resInfo, curElem);
+					this->log += GetResearchLocalizedName(resInfo->researchId);
+					this->log += " has been placed using higher priority because of its low (relative) cost. id=";
+					this->log += std::to_string(resInfo->researchId);
+					this->log += newline;
+				}
+			}
+		}
+	}
+
+	// Add researches that improve units, where research cost is low compared to unit itself
+	// LIMITATION: only if 1 or 2 researches. Avoid adding if too many of such researches (cf temple techs)
+	// Need to get list of impacted units (for global list of such researches?) and make a decision...
+	// => add quite early
+	// TODO
+
 	// Other researches
 	int totalResearchesToUse = 0; // Get total count of (remaining) researches to add
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
@@ -2901,6 +3015,7 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 	}
 	// TEST - TODO: this is quite random and not much tested... Just a try.
 	// TODO: set an order for insertion, use priorities...
+	// TODO: exclude resInfo->forcePutAfterOtherResearches entries and do a dedicated loop afterwards ?
 	int totalAddedResearches = 0;
 	int addedResearchesThisLoop = 1;
 	while (addedResearchesThisLoop > 0) {

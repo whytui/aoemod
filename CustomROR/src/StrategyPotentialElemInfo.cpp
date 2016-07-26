@@ -59,6 +59,7 @@ PotentialResearchInfo::PotentialResearchInfo() {
 	this->totalCosts = 0;
 	this->forcePlaceForFirstImpactedUnit = false;
 	this->forcePutAsEarlyAsPossible = false;
+	this->forcePutAfterOtherResearches = false;
 	this->actualStrategyElement = NULL;
 }
 
