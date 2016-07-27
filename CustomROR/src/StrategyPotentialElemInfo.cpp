@@ -29,6 +29,7 @@ PotentialUnitInfo::PotentialUnitInfo() {
 	this->isSuperUnit = false;
 	this->damageScore = 0;
 	this->globalScore = 0;
+	this->globalScoreEarlyAge = 0;
 	for (int i = 0; i < 4; i++) { this->trainCosts[i] = 0; }
 	this->weightedCost = 0;
 	this->bonusForRareStrength = 0;

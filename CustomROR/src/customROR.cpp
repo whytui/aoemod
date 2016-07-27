@@ -291,7 +291,7 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 		this->SetActivityTargetUnitIdBug(REG_values);
 		break;
 	case 0x004E64BD:
-		this->FixActivityTargetUnitIdBug_case200(REG_values);
+		this->FixActivityTargetUnitIdBug_retreatAfterShooting(REG_values);
 		break;
 	case 0x004E479B:
 		this->FixActivityTargetUnitIdBug_case1F4(REG_values);
@@ -2971,7 +2971,8 @@ void CustomRORInstance::SetActivityTargetUnitIdBug(REG_BACKUP *REG_values) {
 
 
 // From 004E64B2. May change return address to 0x4E64C7
-void CustomRORInstance::FixActivityTargetUnitIdBug_case200(REG_BACKUP *REG_values) {
+// Method = retreat after shooting.
+void CustomRORInstance::FixActivityTargetUnitIdBug_retreatAfterShooting(REG_BACKUP *REG_values) {
 	ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity = (ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
 	ROR_STRUCTURES_10C::STRUCT_UNIT *actorUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT *)REG_values->EAX_val;
 	ror_api_assert(REG_values, actorUnit && actorUnit->IsCheckSumValid());
@@ -2984,7 +2985,13 @@ void CustomRORInstance::FixActivityTargetUnitIdBug_case200(REG_BACKUP *REG_value
 	if (targetUnitId == -1) {
 		// Here is the fix
 		REG_values->EAX_val = 0; // Unit not found
-		ChangeReturnAddress(REG_values, 0x4E64C7); // jump AFTER the call to get unit struct
+		ChangeReturnAddress(REG_values, 0x4E64C7); // jump AFTER the call that get unit struct. The next test will see NULL value and exit method.
+		return; // No target = no need to continue with custom treatments
+	}
+	// Custom treatments
+	if (!this->crCommand.ShouldRetreatAfterShooting(activity)) {
+		REG_values->EAX_val = 0; // Unit not found
+		ChangeReturnAddress(REG_values, 0x4E64C7); // jump AFTER the call that get unit struct. The next test will see NULL value and exit method.
 	}
 }
 

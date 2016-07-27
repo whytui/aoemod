@@ -112,7 +112,9 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_ACTION_MAKE_OBJECT;
 	class STRUCT_ACTION_DISCOVERY_ARTEFACT;
 	class STRUCT_ACTION_PRODUCE_FARM_FOOD;
+	class STRUCT_ACTION_PROJECTILE;
 	class STRUCT_UNIT_ACTIVITY_TARGET_ELEM;
+	class STRUCT_UNIT_ACTIVITY_QUEUE;
 	class STRUCT_UNIT_ACTIVITY;
 	class STRUCT_UNIT_ACTION_INFO;
 
@@ -187,6 +189,31 @@ namespace ROR_STRUCTURES_10C
 		long int posX;
 	};
 	static_assert(sizeof(STRUCT_POSITION_INFO) == 8, "STRUCT_POSITION_INFO size");
+
+#pragma pack(push, 1) // Prevent compiler from aligning on dwords (or other alignment)
+	// Size = 1 byte. This is a shortcut to avoid duplicating bit operations everywhere
+	class TERRAIN_BYTE {
+	public:
+		char terrainData;
+		char GetTerrainId() const {
+			return this->terrainData & 0x1F;
+		}
+		bool SetTerrainId(char value) { // To properly update terrain, there are more complex treatments to do than this
+			if ((value < 0) || (value > 31)) { return false; }
+			this->terrainData = (this->terrainData & 0xE0) | value; // preserve altitude
+			return true;
+		}
+		char GetAltitude() const {
+			return (this->terrainData & 0xE0) >> 5;
+		}
+		bool SetAltitude(char value) { // To update altitude, there are more complex treatments to do
+			if ((value < 0) || (value > 7)) { return false; }
+			this->terrainData = (this->terrainData & 0x1F) | (value << 5); // preserve terrainId
+			return true;
+		}
+	};
+	static_assert(sizeof(TERRAIN_BYTE) == 1, "TERRAIN_BYTE size");
+#pragma pack(pop)
 
 	// Used in AI structures to keep lists of unit IDs. Size=0x10
 	// All methods suppose that usedElemCount==arraySize (no empty slot)
@@ -554,7 +581,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_02;
 		char unknown_03;
 		char elevationGraphicsIndex; // To retrieve elevation graphics in terrain's table - 0 means it is flat ?
-		char terrainData; // +5: elevation/terrainID. 3 high bits (0x80/0x40/0x20) represent altitude 0-7. 5 low bits represent terrainId 0-31
+		TERRAIN_BYTE terrainData; // +5: elevation/terrainID. 3 high bits (0x80/0x40/0x20) represent altitude 0-7. 5 low bits represent terrainId 0-31
 		char unknown_06; // Seen AND EAX, 0x0F on this
 		char unknown_07;
 		char unknown_08;
@@ -567,23 +594,8 @@ namespace ROR_STRUCTURES_10C
 		char unknown_0F;
 		// 0x10
 		STRUCT_UNIT **unitsOnThisTile; // Array of units occupying this tile. The list ends with a NULL pointer.
-		unsigned long int unknown_14; // For elevation ?
-		char GetTerrainId() {
-			return this->terrainData & 0x1F;
-		}
-		bool SetTerrainId(char value) { // To update terrain, there are more complex treatments to do
-			if ((value < 0) || (value > 31)) { return false; }
-			this->terrainData = (this->terrainData & 0xE0) | value; // preserve altitude
-			return true;
-		}
-		char GetAltitude() {
-			return (this->terrainData & 0xE0) >> 5;
-		}
-		bool SetAltitude(char value) { // To update altitude, there are more complex treatments to do
-			if ((value < 0) || (value > 7)) { return false; }
-			this->terrainData = (this->terrainData & 0x1F) | (value << 5); // preserve terrainId
-			return true;
-		}
+		short int unknown_14; // For elevation ? "IDs" ? see 0x18,0x23 in 4B05DB for proj impacts
+		short int unknown_16; // unsure
 	};
 
 	// Size = 0xB5F8 to confirm
@@ -1446,7 +1458,7 @@ namespace ROR_STRUCTURES_10C
 		// +0x50
 		unsigned short int terrainRestrictionCount; // Size for ptrTerrainRestrictionArray array
 		unsigned short int nbOfTerrainPerTerrainRestriction; // +52. How many terrain for each terrain restriction (common for all)
-		float **ptrTerrainRestrictionArray; // +54. Array of pointers to terrain restriction info (if an array of float=0/1). TO DO Check ptr type.
+		float **ptrTerrainRestrictionArray; // +54. Array of pointers to terrain restriction info (if an array of float=0/1). Example 426951. ptrTerrainRestrictionArray[terrainRestriction][terrainId]=float : 0=inaccessible, othervalue=accessible=damagefactor
 		STRUCT_GAME_COMMANDS_INFO *commandsInfo; // +58. 04 99 54 00.
 		STRUCT_SCENARIO_INFO *scenarioInformation; // +5C.
 		// +0x60
@@ -1518,6 +1530,13 @@ namespace ROR_STRUCTURES_10C
 		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *GetTechDef(short int techDefId) const {
 			if (!this->technologiesInfo || !this->technologiesInfo->IsCheckSumValid()) { return NULL; }
 			return this->technologiesInfo->GetTechDef(techDefId);
+		}
+		// Returns the array of (float) values for demanded terrain restriction.
+		// 0 = not accessible, >0 means accessible and is the value for armor damage multiplier
+		// Returns NULL if restriction is invalid
+		float *GetTerrainRestrictionValues(TERRAIN_RESTRICTION restriction) const {
+			if ((restriction >= this->terrainRestrictionCount) || (restriction < 0)) { return NULL; }
+			return this->ptrTerrainRestrictionArray[restriction];
 		}
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_GAME_GLOBAL1) || (this->checksum == CHECKSUM_GAME_GLOBAL2); }
 	};
@@ -2774,7 +2793,7 @@ namespace ROR_STRUCTURES_10C
 		char unused[3];
 		// 0x10
 		STRUCT_UNIT *targetUnit;
-		unsigned long int unknown_014;
+		unsigned long int unknown_014; // actor unit pointer ???
 		long int targetUnitId; // +18
 		unsigned long int unknown_unitId; // +1C. A secondary target ?
 		// 0x20
@@ -2815,7 +2834,7 @@ namespace ROR_STRUCTURES_10C
 		long int unknown_50; // Dword
 		short int unknown_54;
 		short int unknown_56;
-		char unknown_58;
+		char unknown_58; // set to 0 after attack effect is applied? 401FB7
 		char unknown_59; // +59. Init=1 in 4011F1 or 0 in 4011F7
 		char unknown_5A; // a counter (decremented...)?
 		char unknown_5B;
@@ -2904,6 +2923,16 @@ namespace ROR_STRUCTURES_10C
 	};
 
 
+	// Size = 0x54 - Constructor=0x404990
+	// Projectiles' actions (move until target or trajectory end is reached)
+#define CHECKSUM_ACTION_PROJECTILE 0x0054267C
+	class STRUCT_ACTION_PROJECTILE : STRUCT_ACTION_BASE {
+	public:
+		char unknown_40[0x54 - 0x40];
+		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_PROJECTILE; }
+	};
+	static_assert(sizeof(STRUCT_ACTION_PROJECTILE) == 0x54, "STRUCT_ACTION_PROJECTILE size");
+
 	// Not very well known. A "potential" target for a unit ? See 414B00
 	// Size = 0x24.
 	class STRUCT_UNIT_ACTIVITY_TARGET_ELEM {
@@ -2921,8 +2950,21 @@ namespace ROR_STRUCTURES_10C
 		float maxRange; // Actor's maximum range.
 	};
 
+	// Size = 0x18. No dedicated constructor? See 0x414D90 for init/adding to array.
+	class STRUCT_UNIT_ACTIVITY_QUEUE {
+	public:
+		long int targetUnitId; // 
+		long int actorUnitId; // +4. My unit id ?
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS activityId; // +8. Queued activity ID
+		long int genericParam4; // +C. Can be different things ? Seen targetUnitId...
+		long int genericParam5; // +10. Seen currentHP value.
+		long int genericParam6; // +14. Seen unitDefMaxHP value (int).
+	};
+	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_QUEUE) == 0x18, "STRUCT_UNIT_ACTIVITY_QUEUE size");
+
 	// Not very well known. Accessed via unit+0x74 pointer (+70? too)
 	// Size=0x134??? May depend on sub-class
+	// [EDX+0xCC]=activity.dequeue(activityQueue) ?
 	class STRUCT_UNIT_ACTIVITY {
 	public:
 		// Known checksums: 
@@ -2940,7 +2982,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_01C; // elems in +24 array
 		// 0x20
 		unsigned long int unknown_020; // Seen only 0x0A. Size of +20 array ??
-		long int *unknown_024_ptrArray; // TO DO. ElemSize = 0x18. dwords +0=unitId(actor or target) +4=unitIdActor +8=ACTIVITY_TASK_IDS, +10=targetUnitId?
+		STRUCT_UNIT_ACTIVITY_QUEUE *nextActivitiesQueue_unsure; // TO DO. ElemSize = 0x18. See 414D90
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64
 		unsigned long int unknown_02C; // A distance?. 0x64 in 4DA4C9. Distance to TC ?
 		// 0x30
@@ -3390,15 +3432,15 @@ namespace ROR_STRUCTURES_10C
 	public:
 		unsigned long int ptrAttackGraphic;
 		// 0x100
-		char unsure_defaultArmor; // Used when there is no armor in ptrArmorsList?
+		char defaultArmor; // Used when there is no armor in ptrArmorsList?
 		char unknown_101; // default attack ???
 		short int armorsCount;
-		STRUCT_ARMOR_OR_ATTACK *ptrArmorsList; // ElemSize=0x04. +0=class,+2=amount
-		short int attacksCount;
+		STRUCT_ARMOR_OR_ATTACK *ptrArmorsList; // +104. ElemSize=0x04. +0=class,+2=amount
+		short int attacksCount; // +108
 		short int unknown_10A;
-		STRUCT_ARMOR_OR_ATTACK *ptrAttacksList; // ElemSize=0x04. +0=class,+2=amount
+		STRUCT_ARMOR_OR_ATTACK *ptrAttacksList; // +10C. ElemSize=0x04. +0=class,+2=amount
 		// 0x110
-		short int unknown_110;
+		TERRAIN_RESTRICTION armorTerrainRestriction; // Provide a multiplier for each terrain
 		short int unknown_112;
 		float maxRange; // Total range (8 if 7+1 is displayed). displayed range is the number before the "+" (7 in the example).
 		float blastRadius; // +118. Distance blast damage applies.
@@ -3408,7 +3450,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_11F;
 		// 0x120
 		float reloadTime1;
-		short int projectileUnitId;
+		short int projectileUnitId; // +124. Can be used to determine if a military unit is melee (<0) or ranged (>=0)
 		short int accuracyPercent;
 		char towerMode;
 		char unknown_129;
@@ -3434,16 +3476,18 @@ namespace ROR_STRUCTURES_10C
 	// C0 44 54 00 = Projectile (type60) - size=0x154 - Constructor 0x4403D0
 	class STRUCT_UNITDEF_PROJECTILE : public STRUCT_UNITDEF_TYPE50 {
 	public:
-		char unknown_148; // unsure
+		PROJECTILE_TRAJECTORY_TYPE trajectoryType; // +148. Type of trajectory. Almost all projectiles have default one. Note: if graphics do not hit target, shooting fails.
 		char intelligentProjectile; // +149.
-		short int unknown_14A; // unsure
-		unsigned long int unknown_14C;
-		// 0x150
-		unsigned long int unknown_150;
+		char penetrationMode; // +14A. If 1, projectile does not stop on target but continues (no impact and misses). Could be used (only) for units with blast damage ?
+		char unknown_14B; // +14B. Unknown, but seems used ?
+		char unknown_14C; // +14C. Unknown, but seems used ?
+		char unknown_14D[3]; // Unused.
+		// 0x150: Projectile movement arc. <=0.1 for standard projectiles (including ballista bolts), 0.25 for slinger stones, >=0.5 for catapult stones (0.4. boat cats)
+		float projectileArc; // 0+ value. Does NOT affect "time till impact". Only unit speed does. More than 10 may have the projectile go too high for screen (then come back though)
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x005444C0); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_PROJECTILE); }
-		unsigned long int GetCopyConstructorAddress() { return 0x440350; } // Address of AOE method to create a copy.
+		unsigned long int GetCopyConstructorAddress() { return 0x440350; } // Address of AOE method to create a copy. CopyFrom=0x4404C0
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_PROJECTILE) == 0x154, "STRUCT_UNITDEF_PROJECTILE size");
 
@@ -3655,7 +3699,7 @@ namespace ROR_STRUCTURES_10C
 		short int unknown_110_terrainRestrictionForDamage; // cf tech attribute 18. 0x43FBE1
 		short int unknown_112;
 		float maxRange; // Total range (8 if 7+1 is displayed). displayed range is the number before the "+" (7 in the example).
-		float blastRadius;
+		float blastRadius; // +118
 		char blastLevel;
 		char unknown_11D;
 		char unknown_11E;
@@ -3728,7 +3772,7 @@ namespace ROR_STRUCTURES_10C
 		char *pCurrentGraphics; // Pointer to a structure about graphics...
 		unsigned long int unknown_014;
 		unsigned long int unknown_018; // ptr to struct 00 30 54 00 - size=0x0C Related to graphics
-		unsigned long int unknown_01C; // ptr. +5=byte
+		STRUCT_GAME_MAP_TILE_INFO *myTile; // +1C. To confirm. +5=byte=altitude&terrain bits, see TERRAIN_BYTE class
 		// 0x20
 		STRUCT_UNIT *transporterUnit; // Transport boat the unit is in
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *unknown_024; // +24.
@@ -3862,7 +3906,9 @@ namespace ROR_STRUCTURES_10C
 		// 0x90
 		float unknown_090; // Used for movement computation ?
 		float unknown_094; // Used for movement computation ?
-		char unknown_098[0xA4 - 0x98];
+		unsigned long int unknown_098;
+		float unknown_09C; // unit orientation angle ?
+		unsigned long int unknown_0A0;
 		STRUCT_UNIT_MOVEMENT_INFO movementInfo; // +A4. Movement info / path finding.
 		STRUCT_UNIT_MOVEMENT_INFO temp_AI_movementInfo; // +D8. Only used in AI treatments(?) to make checks before assigning tasks ? Used when unknown_154_tempFlag_calculatingPath=1
 		float orientationAngle; // +10C. Angle [0, 2*PI[. 0=heading to northEast (increasing Y)

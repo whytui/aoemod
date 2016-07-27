@@ -467,6 +467,32 @@ namespace AOE_CONST_FUNC {
 		CST_TCH_BALLISTA_TOWER = 102
 	};
 
+	enum PROJECTILE_TRAJECTORY_TYPE : char {
+		CST_PTT_DEFAULT = 0, // Normal arrow, bolt or stone trajectory
+		CST_PTT_FALL_DOWN = 1, // Does not move forward, just falls down from start position (like lightning for st francis).
+		CST_PTT_FALL_DOWN2 = 2, // Supported but unused (redundant with 1). Same behaviour as 1. See 0x404CC0.
+		CST_PTT_TELEPORT = 3 // Projectile instantly hits enemy units
+	};
+
+	enum PROJECTILE_PENETRATION_MODE : char {
+		CST_PPM_STOP_ON_MY_TARGET = 0, // Default: projectile stops when hitting *the* target, the shot is effective at this moment. Other units are all ignored (no contact/hit).
+		CST_PPM_CONTINUE_THROUGH = 1, // Projectile does NOT hit target but goes through, and only stops when its trajectory ends (reaches the ground). Always misses target, may only work with blast damage ?
+		CST_PPM_STOP_ON_ANY_UNIT = 2 // Projectile stops on the first encountered unit, even trees. However, own units can't be hit directly
+	};
+
+	enum TERRAIN_RESTRICTION : short int {
+		CST_TR_UNKNOWN_00 = 0, // projectiles, flags, dead units
+		CST_TR_DOMESTICATED_ANIMALS = 1, // Only lion_trained !!!
+		CST_TR_UNKNOWN_02 = 2, // unused ?
+		CST_TR_BOATS = 3,
+		CST_TR_BUILDINGS = 4, // All buildings, including towers, but NOT dock, farms...
+		CST_TR_UNKNOWN_05 = 5, // unused ?
+		CST_TR_DOCK = 6, // Specific for dock (water with land nearby)
+		CST_TR_LAND_LIVING_UNITS = 7,
+		CST_TR_UNKNOWN_08 = 8, // unused ?
+		CST_TR_FARM = 9, // Specific for farms
+		CST_TR_WALLS = 10
+	};
 
 	// Unit names (this list has been directly generated from in-game data)
 	const static int CST_UNIT_NAMES_MIN_ID = 0;

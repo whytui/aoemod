@@ -188,9 +188,9 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scinfo = global->scenarioInformation;
 			ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *gmapinfo = global->gameMapInfo;
 			ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO *tile = gmapinfo->GetTileInfo(1, 1);
-			int a = tile->GetTerrainId();
-			bool b = tile->SetAltitude(3);
-			bool c = tile->SetTerrainId(4);
+			int a = tile->terrainData.GetTerrainId();
+			bool b = tile->terrainData.SetAltitude(3);
+			bool c = tile->terrainData.SetTerrainId(4);
 			a = a + 1;
 
 			ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);

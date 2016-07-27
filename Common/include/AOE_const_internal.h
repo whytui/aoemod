@@ -287,7 +287,7 @@ namespace AOE_CONST_INTERNAL
 		CST_IAI_GATHER_NO_ATTACK = 5, // Gathering with NO attack phase. Excludes fishing !
 		CST_IAI_UNKNOWN_06 = 6, // Natural wonders cheat??? attack or flee from (seen) unit ? Animal ability ?
 		CST_IAI_UNKNOWN_7 = 7, // Attack ?? unsure
-		CST_IAI_SHOOT = 8, // TO CONFIRM
+		CST_IAI_SHOOT = 8, // TO CONFIRM. "projectile movement" ? 7C 26 54 00
 		CST_IAI_ATTACK_9 = 9,
 		CST_IAI_FLY = 0x0A, // TO CONFIRM
 		CST_IAI_SCARE_HUNT = 0x0B, // TO CONFIRM.
@@ -411,6 +411,10 @@ namespace AOE_CONST_INTERNAL
 	// For activity.task IDs
 	enum ACTIVITY_TASK_IDS : long int {
 		CST_ATI_NONE = -1, // Used a lot in game code
+		CST_ATI_UNKNOWN_1FA = 0x1FA,
+		CST_ATI_UNKNOWN_1FB = 0x1FB, // 410999
+		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
+		CST_ATI_ESCAPE_PROJECTILE = 0x20F, // when someone shoots at me ? "escape attack"? 4E62F3
 		CST_ATI_ATTACK = 0x258,
 		CST_ATI_DEFEND_OR_CAPTURE = 0x259, // unsure, but it is used to capture relics
 		CST_ATI_BUILD = 0x25A,

@@ -48,7 +48,8 @@ namespace STRATEGY {
 		// Scores
 		int strengthVs[MC_COUNT];
 		int weaknessVs[MC_COUNT]; // Negative values mean good resistance
-		int globalScore;
+		int globalScore; // A global score for unit using its strengths (including upgrades)
+		int globalScoreEarlyAge; // A global score for unit using its strengths, without upgrades
 		int bonusForRareStrength; // 0-100
 		int bonusForUsedResourceTypes; // 0-100
 		int bonusForTechsSimilarity; // 0-100

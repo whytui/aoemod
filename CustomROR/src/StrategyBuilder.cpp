@@ -754,9 +754,12 @@ void StrategyBuilder::ComputeStrengthsForPotentialUnits() {
 			if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider) {
 				attackPoints -= 4; // To compensate the fact it receives no attack upgrade from storage pit techs.
 			}
+			if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon) {
+				attackPoints = attackPoints / 4; // Siege units have disproportional attack, try an adjustment here
+			}
 		}
 		if (attackPoints < 1) { attackPoints = 1; }
-		float damageScore = 0; // A value 1-4 representing unit attack score. 4 is good, 1 is bad.
+		int damageScore = 0; // A value 1-4 representing unit attack score. 4 is good, 1 is bad.
 		if (attackPoints < 4) {
 			damageScore = 1; // Very weak: melee<6, archers<4
 		}
@@ -782,7 +785,7 @@ void StrategyBuilder::ComputeStrengthsForPotentialUnits() {
 				damageScore = 3; // medium for basic priests
 			}
 		}
-		unitInfo->damageScore = (int)damageScore;
+		unitInfo->damageScore = damageScore;
 
 		// Compute priest-related values
 		this->ComputeScoresVsPriests(unitInfo);
@@ -1195,14 +1198,21 @@ void StrategyBuilder::ComputeGlobalScores() {
 			continue;
 		}
 		unitInfo->globalScore = 0;
+		unitInfo->globalScoreEarlyAge = 0;
+		if (unitInfo->damageScore == 1) {
+			unitInfo->globalScoreEarlyAge = 20;
+		}
 		if (unitInfo->damageScore == 2) {
 			unitInfo->globalScore = 30;
+			unitInfo->globalScoreEarlyAge = 50;
 		}
 		if (unitInfo->damageScore == 3) {
 			unitInfo->globalScore = 55;
+			unitInfo->globalScoreEarlyAge = 70;
 		}
 		if (unitInfo->damageScore == 4) {
 			unitInfo->globalScore = 75;
+			unitInfo->globalScoreEarlyAge = 90;
 		}
 		if (unitInfo->isSuperUnit) {
 			unitInfo->globalScore = 90;
@@ -1236,6 +1246,20 @@ void StrategyBuilder::ComputeGlobalScores() {
 			diff = CST_RSID_IRON_AGE - unitInfo->ageResearchId; // 0-3
 		}
 		unitInfo->globalScore = (unitInfo->globalScore * (100 + diff * 2)) / 100; // Add up to 6% bonus for early availability
+
+		// Range units (siege): decrease score for slow/inefficient projectiles (catapults !)
+		if (unitInfo->baseUnitDefLiving && (unitInfo->baseUnitDefLiving->projectileUnitId >= 0)) {
+			// Use projectile arc > 0.1? 0.4-0.5 cats, 0.25 slinger
+			// Use proj speed: 2.7 cats 4.5 bolts 6=spear(villager), 8=archers arrows...
+			// Use accuracy % (unit)
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *proj = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(unitInfo->baseUnitDefLiving->projectileUnitId);
+			int p = proj->accuracyPercent; // TEST tmp to remove
+			char *name1 = unitInfo->baseUnitDefLiving->ptrUnitName;
+			char *name2 = proj->ptrUnitName;
+			float parc = proj->projectileArc;
+			int x = proj->unknown_14C;
+			int accuracy = unitInfo->baseUnitDefLiving->accuracyPercent;
+		}
 
 		// Adjust (a bit) according to costs: cheaper units are less strong (lower score), this is a bit unfair. Ex legion underestimated, heavy cats overestimated.
 		int costProportion = (unitInfo->weightedCost * 100) / highestWeightedCost; // 0 to 100 value representing 1 unit cost.

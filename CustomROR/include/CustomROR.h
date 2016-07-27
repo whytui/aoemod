@@ -121,7 +121,7 @@ public:
 	void FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_values);
 	void FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values);
 	void SetActivityTargetUnitIdBug(REG_BACKUP *REG_values);
-	void FixActivityTargetUnitIdBug_case200(REG_BACKUP *REG_values);
+	void FixActivityTargetUnitIdBug_retreatAfterShooting(REG_BACKUP *REG_values);
 	void FixActivityTargetUnitIdBug_case1F4(REG_BACKUP *REG_values);
 	void FixKillXCrashOnUnknownPlayer(REG_BACKUP *REG_values);
 	void EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_values);

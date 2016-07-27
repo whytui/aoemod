@@ -5473,6 +5473,33 @@ bool CustomRORCommand::GetLocalizedString(long int stringId, char *buffer, long 
 }
 
 
+// Returns false if we should prevent unit from moving back (to maxrange) after shooting. Default result=true
+bool CustomRORCommand::ShouldRetreatAfterShooting(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity) {
+	assert(activity);
+	if (!activity || !activity->ptrUnit) { return true; }
+	ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *actorUnitType50 = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50*)activity->ptrUnit;
+	if (!actorUnitType50 || !actorUnitType50->IsCheckSumValidForAUnitClass() || !actorUnitType50->DerivesFromType50()) { return true; }
+	if (!actorUnitType50->ptrStructPlayer || !actorUnitType50->ptrStructPlayer->IsCheckSumValid()) { return true; }
+	// This feature is an AI improvement. Do it only if config says so.
+	if (!this->IsImproveAIEnabled(actorUnitType50->ptrStructPlayer->playerId)) {
+		return true;
+	}
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)actorUnitType50->GetUnitDefinition();
+	if (!actorUnitDef || !actorUnitDef->IsCheckSumValidForAUnitClass() || !actorUnitDef->DerivesFromType50()) { return true; }
+	if (!actorUnitDef->DerivesFromType50()) { return true; }
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *targetUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(activity->targetUnitId);
+	if (!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) { return true; }
+	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *targetUnitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)targetUnit->GetUnitDefinition();
+	if (targetUnitDef->DerivesFromType50()) {
+		if ((targetUnitDef->projectileUnitId >= 0) && (targetUnitDef->maxRange > actorUnitDef->maxRange)) {
+			// Force NOT retreat after shooting, because enemy has a better range than me !
+			return false;
+		}
+	}
+	return true; // Default behaviour
+}
+
+
 // Computes (existing) building influence zone for farm placement map like values computation.
 // existingBuilding must be a building (current building from loop, to take into account in map like values)
 // Updates existingBldInfluenceZone with the influence distance we want to use for provided building (positions near building will be preferred)
@@ -6247,8 +6274,8 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 				ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO *tile = gameMapInfo->GetTileInfo(x, y);
 				if (tile) {
 					// Note: tile's "Set" methods are both secure (check the value is in bounds)
-					if (elevationLevel >= 0) { tile->SetAltitude((char)elevationLevel); } // TO DO: this does not work well in-game + side effects
-					if (terrainId >= 0) { tile->SetTerrainId((char)terrainId); } // Does not update minimap, does not refresh map immediatly
+					if (elevationLevel >= 0) { tile->terrainData.SetAltitude((char)elevationLevel); } // TO DO: this does not work well in-game + side effects
+					if (terrainId >= 0) { tile->terrainData.SetTerrainId((char)terrainId); } // Does not update minimap, does not refresh map immediatly
 				}
 			}
 		}

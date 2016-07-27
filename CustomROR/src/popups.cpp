@@ -1255,8 +1255,8 @@ void EditTerrainPopup::OnBeforeClose(bool isCancel) {
 		for (int y = minY; y <= maxY; y++) {
 			ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO *tile = mapInfo->GetTileInfo(x, y);
 			if (tile) {
-				if (!elevationEmpty) { tile->SetAltitude(elevation); } // checks elevation is 0-7
-				if (!terrainEmpty) { tile->SetTerrainId(terrainId); } // checks terrainId is 0-31
+				if (!elevationEmpty) { tile->terrainData.SetAltitude(elevation); } // checks elevation is 0-7
+				if (!terrainEmpty) { tile->terrainData.SetTerrainId(terrainId); } // checks terrainId is 0-31
 			}
 		}
 	}

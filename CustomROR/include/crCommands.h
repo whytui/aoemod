@@ -370,6 +370,8 @@ public:
 	// Returns true if a (custom) localized string has been written into buffer.
 	bool GetLocalizedString(long int stringId, char *buffer, long int bufferSize);
 
+	// Returns false if we should prevent unit from moving back (to maxrange) after shooting. Default result=true
+	bool ShouldRetreatAfterShooting(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity);
 
 	// ----------------------------------
 	// City plan
