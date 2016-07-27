@@ -644,9 +644,6 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId);
 // Add some text in trace file for important issues we want to know about.
 void AddTraceToFile(char *text);
 
-// Overwrites file if existing.
-void WriteToFile(const char *text, char *filename);
-
 // To customize for debug purpose...
 void DebugDumpAllUnits();
 

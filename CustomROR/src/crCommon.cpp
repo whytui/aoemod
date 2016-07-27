@@ -2840,18 +2840,6 @@ void AddTraceToFile(char *text) {
 }
 
 
-// Overwrites file if existing.
-void WriteToFile(const char *text, char *filename) {
-	FILE *f;
-	int res = fopen_s(&f, filename, "w"); // Overwrite existing file
-	if (res) {
-		return;
-	}
-	fwrite(text, strlen(text), sizeof(char), f);
-	fclose(f);
-}
-
-
 // To customize for debug purpose...
 void DebugDumpAllUnits() {
 #ifndef _DEBUG

@@ -60,3 +60,19 @@ std::vector<std::wstring> GetFileListFromFolder(const std::wstring &folder)
 	}
 	return names;
 }
+
+// Writes text to file. if append=true, append, otherwise overwrite existing file
+// Returns true if successful
+bool WriteToFile(const std::string &text, const std::string &filename, bool append) {
+	FILE *file = NULL;
+	char *openMode = append ? "ab" : "wb"; // open in binary mode to avoid modifying newline chars
+	errno_t err = fopen_s(&file, filename.c_str(), openMode);
+	if (err) {
+		return false;
+	}
+	fwrite(text.c_str(), text.length(), sizeof(char), file);
+	//fprintf_s(file, text.c_str());
+	fclose(file);
+	return true;
+}
+

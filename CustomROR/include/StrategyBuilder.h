@@ -6,6 +6,7 @@
 #include <memory>
 #include <ROR_structures.h>
 #include <AOE_const_functional.h>
+#include <basicFilesHandling.h>
 #include "crCommon.h"
 #include "researches.h"
 #include "randomizer.h"
@@ -48,6 +49,15 @@ namespace STRATEGY {
 		}
 		~StrategyBuilder() {
 			this->FreePotentialElementsList();
+#ifdef _DEBUG
+			std::string filename = "D:\\Dév\\CPP\\AOE\\Debug\\crstrategy";
+			if (this->player) {
+				filename += std::to_string(this->player->playerId);
+			}
+			filename += ".log";
+			WriteToFile(this->log, filename, false);
+			//WriteToFile("coucou\r\ntoto\nriri", filename, false);
+#endif
 		}
 		CustomRORInfo *crInfo;
 
