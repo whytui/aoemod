@@ -725,8 +725,8 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 }
 
 
-// Compute all score fields for all units in potential units list.
-void StrategyBuilder::ComputeScoresForPotentialUnits() {
+// Compute all strength/weakness fields for all units in potential units list.
+void StrategyBuilder::ComputeStrengthsForPotentialUnits() {
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
 	{
 		for (int i = 0; i < MC_COUNT; i++) {
@@ -1310,89 +1310,13 @@ int StrategyBuilder::GetCostScoreRegardingCurrentSelection(PotentialUnitInfo *un
 }
 
 
-// Recompute unit info bonuses that depend on comparison with other units
-// Does not recompute unit strengths !
-// upgradedUnit: if true, consider upgraded unit. if false, consider base unit
-#pragma message("Remove this overload")
-void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit) {
-	int totalStrengthVsWithSelected[MC_COUNT];
-	int totalStrengthVsWithoutSelected[MC_COUNT];
-	int numberWithoutSelected = 0; // unit count that are NOT selected
-	int tempStrengthVs[MC_COUNT];
-	for (int i = 0; i < MC_COUNT; i++) { totalStrengthVsWithSelected[i] = 0; totalStrengthVsWithoutSelected[i] = 0; tempStrengthVs[i] = 0; }
-	// Compute total strength per category
-	for each (PotentialUnitInfo *unitInfo in selectedUnits)
-	{
-		if (unitInfo->isBoat == waterUnit) {
-			totalStrengthVsWithSelected[MC_PRIEST] += unitInfo->strengthVs[MC_PRIEST];
-			totalStrengthVsWithSelected[MC_FAST_RANGED] += unitInfo->strengthVs[MC_FAST_RANGED];
-			totalStrengthVsWithSelected[MC_TOWER] += unitInfo->strengthVs[MC_TOWER];
-			totalStrengthVsWithSelected[MC_MELEE] += unitInfo->strengthVs[MC_MELEE];
-			totalStrengthVsWithSelected[MC_SIEGE] += unitInfo->strengthVs[MC_SIEGE];
-			if (!unitInfo->isSelected) {
-				numberWithoutSelected++;
-				totalStrengthVsWithoutSelected[MC_PRIEST] += unitInfo->strengthVs[MC_PRIEST];
-				totalStrengthVsWithoutSelected[MC_FAST_RANGED] += unitInfo->strengthVs[MC_FAST_RANGED];
-				totalStrengthVsWithoutSelected[MC_TOWER] += unitInfo->strengthVs[MC_TOWER];
-				totalStrengthVsWithoutSelected[MC_MELEE] += unitInfo->strengthVs[MC_MELEE];
-				totalStrengthVsWithoutSelected[MC_SIEGE] += unitInfo->strengthVs[MC_SIEGE];
-			}
-		}
-	}
-	for (int i = 0; i < MC_COUNT; i++) { tempStrengthVs[i] = totalStrengthVsWithSelected[i]; }
-
-	// If some category has few points, try to give priority to the unit that has the most points there...
-	int categoriesWeaknessOrder[MC_COUNT];
-	for (int i = 0; i < MC_COUNT; i++) { categoriesWeaknessOrder[i] = MC_NONE; }
-	// Sort strength by increasing value
-	for (int i = 0; i < MC_COUNT; i++) {
-		int lowestValue = 999999;
-		int currentLowestCategory = i;
-		for (int j = 0; j < MC_COUNT; j++) {
-			if ((tempStrengthVs[j] < tempStrengthVs[i])) {
-				lowestValue = tempStrengthVs[j];
-				currentLowestCategory = j;
-			}
-		}
-		// Found the lowest value among [i;MC_COUNT-1] categories
-		categoriesWeaknessOrder[i] = currentLowestCategory; // Set i'th element and never touch it again.
-		tempStrengthVs[currentLowestCategory] = 999999; // Force not using it anymore
-	}
-
-	// Give bonus to units that are good against units that bother me (I don't have many units good against such units)
-	int bonus = 100;
-	int weaknessIndex = 0;
-	for each (PotentialUnitInfo *unitInfo in selectedUnits)
-	{
-		if ((unitInfo->isBoat == waterUnit) && (!unitInfo->isSelected)) {
-			if (categoriesWeaknessOrder[weaknessIndex] == MC_NONE) { weaknessIndex++; } // should not happen as NONE is -1 value.
-			int currentCategory = categoriesWeaknessOrder[weaknessIndex];
-			//int meanStrengthValue = (totalStrengthVsWithSelected[currentCategory] / selectedUnits.size()); // medium strength Vs this category among all selected units from provided list
-			int meanStrengthValue = (totalStrengthVsWithoutSelected[currentCategory] / numberWithoutSelected); // medium strength Vs this category among all selected units from provided list
-			if (unitInfo->strengthVs[currentCategory] > meanStrengthValue) {
-				// This unit has a quite good strength against a military category that troubles me (I don't have many good units against it)
-				unitInfo->bonusForRareStrength = bonus;
-				bonus -= 30;
-				weaknessIndex++; // same thing on next critical weakness
-			}
-			if (bonus <= 0) { break; }
-		}
-	}
-
-	// Bonus about costs repartition
-	for each (PotentialUnitInfo *unitInfo in selectedUnits)
-	{
-		if (!unitInfo->isSelected) {
-			unitInfo->bonusForUsedResourceTypes = this->GetCostScoreRegardingCurrentSelection(unitInfo);
-		}
-	}
-}
-
 // Recompute unit info bonuses that depend on comparison with other units: rare strengths, balanced cost
 // Does not recompute unit strengths (but computes it using the correct strength values)
+// Does not recompute global score
 // upgradedUnit: if true, consider upgraded unit. if false, consider base unit
 #pragma message("No very relevant for boats, do a specific method ?")
-void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit, short int maxAgeResearchId) {
+void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit,
+	short int maxAgeResearchId) {
 	int totalStrengthVsWithSelected[MC_COUNT];
 	int totalStrengthVsWithoutSelected[MC_COUNT];
 	int numberWithoutSelected = 0; // unit count that are NOT selected
@@ -1709,7 +1633,7 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 	while (!statisfiedWithCurrentSelection && (currentUnitCount < 3)) {
 		currentCumulatedStrength = 0;
 		categoriesCountWithLowStrength = 0;
-		this->RecomputeComparisonBonuses(preSelectedUnits, waterUnits, true);
+		this->RecomputeComparisonBonuses(preSelectedUnits, waterUnits, true, CST_RSID_IRON_AGE);
 
 		long int bestScore = 0;
 		PotentialUnitInfo *bestUnit = NULL;
@@ -1881,7 +1805,7 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 	PotentialUnitInfo *bestUnit = NULL;
 
 	// Recompute strengths, for *base* units (not counting upgrades here)
-	this->RecomputeComparisonBonuses(this->potentialUnitsList, waterUnits, false);
+	this->RecomputeComparisonBonuses(this->potentialUnitsList, waterUnits, false, CST_RSID_IRON_AGE);
 
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
 	{
@@ -1982,6 +1906,24 @@ void StrategyBuilder::SelectStrategyUnits() {
 		this->log += msg;
 		this->log += newline;
 	}
+	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
+		if (!unitInfo->isSelected) {
+			std::string msg = "[Not selected] Unit id=";
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unit = NULL;
+			if (unitInfo->isOptionalUnit) {
+				msg += std::to_string(unitInfo->unitDefId);
+				unit = unitInfo->baseUnitDefLiving;
+			} else {
+				msg += std::to_string(unitInfo->strongestUpgradeUnitDefId);
+				unit = unitInfo->upgradedUnitDefLiving;
+			}
+			msg += std::string(" (") + GetLanguageDllText(unit->languageDLLID_Name) + std::string(")");
+			msg += " - score=";
+			msg += std::to_string(unitInfo->globalScore);
+			this->log += msg;
+			this->log += newline;
+		}
+	}
 #endif
 }
 
@@ -1991,9 +1933,9 @@ void StrategyBuilder::SelectStrategyUnits() {
 int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlreadyUnits) {
 	// Recalculate bonus for rare strength taking into account specific limitation on age.
 	this->RecomputeComparisonBonuses(this->potentialUnitsList, false, false, age);
-	// Compute bonusForTechsSimilarity
 	std::set<AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES> selectedUnitsClassesAfterThisAge; // list of "main units" AI types, without duplicate
 	std::set<AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES> selectedUnitsClassesInThisAge; // list of "main units" AI types, without duplicate
+	// Just collect lists of units in/after this age
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits) {
 		if (unitInfo->ageResearchId > age) {
 			selectedUnitsClassesAfterThisAge.insert(unitInfo->unitAIType);
@@ -2001,6 +1943,7 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 			selectedUnitsClassesInThisAge.insert(unitInfo->unitAIType);
 		}
 	}
+	// Compute bonusForTechsSimilarity
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
 		if (!unitInfo->isSelected && !unitInfo->isBoat && (unitInfo->ageResearchId <= age)) {
 			unitInfo->bonusForTechsSimilarity = 0; // reset
@@ -2010,14 +1953,14 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 					unitInfo->bonusForTechsSimilarity += 30;
 				}
 				bool attack, defense, hitPoints;
-				ShareCommonTechs(unitInfo->unitAIType, refAIType, attack, defense, hitPoints);
+				ShareCommonTechs(unitInfo->unitAIType, refAIType, attack, defense, hitPoints); // collect info...
 				int tmpScore = (attack ? 1 : 0) + (defense ? 1 : 0) + (hitPoints ? 1 : 0);
 				if (tmpScore > 2) { tmpScore = 2; }
 				unitInfo->bonusForTechsSimilarity += tmpScore * 15;
 			}
 			for each (AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES refAIType in selectedUnitsClassesInThisAge)
 			{
-				// Do not pick units with similar classes with existing ones : here simimlarity is a (big) flaw
+				// Do not pick units with similar classes with existing ones : here similarity is a (big) flaw
 				if (AreSimilarClasses(unitInfo->unitAIType, refAIType)) {
 					unitInfo->bonusForTechsSimilarity = -100; // Make we don't pick similar units for early ages. No use
 				}
@@ -2032,6 +1975,7 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 					nullCost = true;
 				}
 			}
+			// TODO: unit has upgrades in "its" age ? If yes, it is a drawback (it means: needs additional cost OR is not so strong ?)
 			if (!nullCost) {
 				unitInfo->bonusForTechsSimilarity = (unitInfo->bonusForTechsSimilarity * 85) / 100; // -15% if research has a cost
 			}
@@ -2044,11 +1988,16 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 		}
 	}
 
+	// TODO: recompute global scores or use another score field, because scores calculated in (post)iron age are not relevant in early ages
+	// TODO : recompute global score WITHOUT all upgrades
+
 	if (!hasAlreadyUnits) {
 		// Choose a unit that has both combination of: global score, similarity with main units
 		for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
 			if (!unitInfo->isBoat && !unitInfo->isSelected && (unitInfo->ageResearchId <= age)) {
-				unitInfo->scoreForEarlyAge = ((float)unitInfo->globalScore) * (100 + unitInfo->bonusForTechsSimilarity) / 100;
+				float globalScoreNonZero = (float)(unitInfo->globalScore);
+				if (globalScoreNonZero <= 0) { globalScoreNonZero = 0; }
+				unitInfo->scoreForEarlyAge = (globalScoreNonZero * (100 + unitInfo->bonusForTechsSimilarity)) / 100;
 			}
 		}
 	} else {
@@ -2076,6 +2025,8 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 		this->AddUnitIntoToSelection(bestUnit);
 		this->log += "Early age unit selection: ";
 		this->log += bestUnit->unitName;
+		this->log += " earlyscore=";
+		this->log += std::to_string((int)bestUnit->scoreForEarlyAge);
 		this->log += newline;
 		std::list<short int> addedStuff = this->CollectResearchInfoForUnit(bestUnit->unitDefId, false); // Add requirements for this unit (only requirements)
 		for each (short int addedResearchId in addedStuff)
@@ -2137,6 +2088,16 @@ void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 		// Try to add a second unit when there were none at beginning.
 		if (totalStrengthForCurrentAge < 10) {
 			this->AddOneMilitaryUnitForEarlyAge(currentAge, true);
+		}
+		for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
+		{
+			if (!unitInfo->isSelected && (unitInfo->ageResearchId <= currentAge)) {
+				this->log += "Early age not-selected unit: ";
+				this->log += unitInfo->unitName;
+				this->log += " earlyscore=";
+				this->log += std::to_string((int)unitInfo->scoreForEarlyAge);
+				this->log += newline;
+			}
 		}
 	}
 }
@@ -2461,7 +2422,7 @@ void StrategyBuilder::CollectGlobalStrategyGenerationInfo(ROR_STRUCTURES_10C::ST
 	// Select the military units to train (including ships)
 
 	this->CollectPotentialUnitsInfo(player);
-	this->ComputeScoresForPotentialUnits();
+	this->ComputeStrengthsForPotentialUnits();
 	this->SelectStrategyUnits();
 
 }

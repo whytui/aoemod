@@ -203,8 +203,8 @@ namespace STRATEGY {
 		// *** Make sure to delete all PotentialUnitInfo from list when you're finished with the list ***
 		void CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
-		// Compute all score fields for all units in potential units list.
-		void ComputeScoresForPotentialUnits();
+		// Compute all strength/weakness fields for all units in potential units list.
+		void ComputeStrengthsForPotentialUnits();
 		// Compute score fields for priests in unitInfo object.
 		void ComputeScoresVsPriests(PotentialUnitInfo *unitInfo);
 		// Compute score fields for towers in unitInfo object.
@@ -220,7 +220,6 @@ namespace STRATEGY {
 		// Recompute unit info bonuses that depend on comparison with other units: rare strengths, balanced cost
 		// Does not recompute unit strengths (but computes it using the correct strength values)
 		// upgradedUnit: if true, consider upgraded unit. if false, consider base unit
-		void RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit);
 		void RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit, short int maxAgeResearchId);
 
 		// Get the additional farm production amount for a research and underlying required researches
