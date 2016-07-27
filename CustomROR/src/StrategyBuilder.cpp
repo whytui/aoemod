@@ -1861,6 +1861,8 @@ void StrategyBuilder::SelectStrategyUnitsForLandOrWater(bool waterUnits) {
 		} else {
 			assert(false && "Could not select any military unit for strategy");
 			traceMessageHandler.WriteMessage("ERROR: Could not select any military unit for strategy");
+			this->log += "ERROR: Could not select any military unit for strategy";
+			this->log += newline;
 			return;
 		}
 	}
@@ -1958,6 +1960,8 @@ void StrategyBuilder::SelectStrategyUnits() {
 	// Debug log
 #ifdef _DEBUG
 	traceMessageHandler.WriteMessageNoNotification("Strategy decision:");
+	this->log += "Strategy decision:";
+	this->log += newline;
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits) {
 		std::string msg = "Unit id=";
 		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unit = NULL;
@@ -1975,6 +1979,8 @@ void StrategyBuilder::SelectStrategyUnits() {
 		msg += " - score=";
 		msg += std::to_string(unitInfo->globalScore);
 		traceMessageHandler.WriteMessageNoNotification(msg);
+		this->log += msg;
+		this->log += newline;
 	}
 #endif
 }
@@ -2481,6 +2487,8 @@ void StrategyBuilder::CreateTCAndAgesStrategyElements() {
 		msg += " : ";
 		msg += this->buildAI->commonAIObject.playerName;
 		traceMessageHandler.WriteMessageNoNotification(msg);
+		this->log += msg;
+		this->log += newline;
 		return;
 	}
 	if (AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_TOOL_AGE, player, "*Tool Age*")) {
@@ -2493,6 +2501,8 @@ void StrategyBuilder::CreateTCAndAgesStrategyElements() {
 		msg += " : ";
 		msg += this->buildAI->commonAIObject.playerName;
 		traceMessageHandler.WriteMessageNoNotification(msg);
+		this->log += msg;
+		this->log += newline;
 		return;
 	}
 	if (AddUnitInStrategy_before(buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_BRONZE_AGE, this->player, "*Bronze Age*")) {
@@ -2505,6 +2515,8 @@ void StrategyBuilder::CreateTCAndAgesStrategyElements() {
 		msg += " : ";
 		msg += buildAI->commonAIObject.playerName;
 		traceMessageHandler.WriteMessageNoNotification(msg);
+		this->log += msg;
+		this->log += newline;
 		return;
 	}
 	if (AddUnitInStrategy_before(this->buildAI, fakeFirstElem, -1, CST_UNITID_FORUM, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, CST_RSID_IRON_AGE, player, "*Iron Age*")) {
@@ -3299,7 +3311,7 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 		if (bldInfo->unitDef) {
 			this->log += bldInfo->unitDef->ptrUnitName;
 		}
-		this->log += ",  total=";
+		this->log += ", total=";
 		this->log += std::to_string(bldInfo->desiredCount);
 		this->log += " (";
 		this->log += std::to_string(bldInfo->unitsToBeTrained);
@@ -3387,6 +3399,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 			std::string msg = std::string("WARNING: some requirements are not satisfied/") + GetResearchLocalizedName(resInfo->researchId);
 			traceMessageHandler.WriteMessage(msg);
 			this->log += msg;
+			this->log += newline;
 		}
 	}
 
@@ -3444,7 +3457,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 		}
 	}
 #ifdef _DEBUG
-	traceMessageHandler.WriteMessageNoNotification(this->log);
+	//traceMessageHandler.WriteMessageNoNotification(this->log);
 #endif
 }
 

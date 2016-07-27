@@ -55,7 +55,9 @@ namespace STRATEGY {
 				filename += std::to_string(this->player->playerId);
 			}
 			filename += ".log";
-			WriteToFile(this->log, filename, false);
+			if (WriteToFile(this->log, filename, false)) {
+				traceMessageHandler.WriteMessageNoNotification(std::string("Strategy: find logs in ") + filename);
+			}
 			//WriteToFile("coucou\r\ntoto\nriri", filename, false);
 #endif
 		}
