@@ -76,3 +76,18 @@ bool WriteToFile(const std::string &text, const std::string &filename, bool appe
 	return true;
 }
 
+// Writes text to file. if append=true, append, otherwise overwrite existing file
+// Might be slower than overload with std::string becaues of strlen.
+// Returns true if successful
+bool WriteToFile(const char *text, const char *filename, bool append) {
+	FILE *file = NULL;
+	char *openMode = append ? "ab" : "wb"; // open in binary mode to avoid modifying newline chars
+	errno_t err = fopen_s(&file, filename, openMode);
+	if (err) {
+		return false;
+	}
+	fwrite(text, strlen(text), sizeof(char), file);
+	fclose(file);
+	return true;
+}
+

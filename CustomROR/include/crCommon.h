@@ -16,6 +16,7 @@
 #include <Windows.h>
 #include <WinUser.h> // get mouse pos
 #include <ROR_global_variables.h>
+#include <basicFilesHandling.h>
 
 #include "AOE_memory.h"
 #include "UI_utilities.h"
@@ -640,9 +641,6 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId);
 
 // ---------- Other
 
-
-// Add some text in trace file for important issues we want to know about.
-void AddTraceToFile(const char *filename, const char *text);
 
 // To customize for debug purpose...
 void DebugDumpAllUnits();

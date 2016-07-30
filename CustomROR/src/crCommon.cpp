@@ -2826,20 +2826,6 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 }
 
 
-
-// Add some text in trace file for important issues we want to know about.
-// See also traceMessageHandler object for tracing.
-void AddTraceToFile(const char *filename, const char *text) {
-	FILE *f;
-	int res = fopen_s(&f, filename, "a"); // append / do not overwrite
-	if (res) {
-		return;
-	}
-	fwrite(text, strlen(text), sizeof(char), f);
-	fclose(f);
-}
-
-
 // To customize for debug purpose...
 void DebugDumpAllUnits() {
 #ifndef _DEBUG
@@ -2860,7 +2846,7 @@ void DebugDumpAllUnits() {
 			sprintf_s(buf, "unit %ld\tType=%ld\tDATID=%ld\t1B8=%s\tname=%s\t%d\t%d\t%d\t%d\n", unit->unitInstanceId, unit->unitType,
 				unit->ptrStructDefUnit->DAT_ID1, buf2, unit->ptrStructDefUnit->ptrUnitName,
 				unit->unitStatus, unit->isNotCreatable, unit->isDoppleGanger, unit->unknown_04B);
-			AddTraceToFile("D:\\AOEUnits.txt", buf);
+			WriteToFile(buf, "D:\\AOEUnits.txt", true);
 		}
 	}
 }
@@ -2899,7 +2885,7 @@ char *DumpPosToTextBuffer(ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *
 }
 
 #ifdef _DEBUG
-bool debugSerialization = true;
+bool debugSerialization = false;
 // Write deserialization data into a buffer, then to a log file.
 // This affects greatly performance !!! Debug only.
 void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char *buffer, long int bufferSize) {
@@ -2909,7 +2895,7 @@ void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char 
 		// Flush
 		if (writtenLines > 0) {
 			writtenLines = 0;
-			AddTraceToFile(serializationLogFilename, test.c_str());
+			WriteToFile(test, serializationLogFilename, true);
 			test.clear();
 		}
 		return;
@@ -2971,7 +2957,7 @@ void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char 
 	writtenLines++;
 	if (writtenLines >= 500) {
 		writtenLines = 0;
-		AddTraceToFile(serializationLogFilename, test.c_str());
+		WriteToFile(test, serializationLogFilename, true);
 		test.clear();
 	}
 }
