@@ -748,14 +748,21 @@ void StrategyBuilder::ComputeStrengthsForPotentialUnits() {
 		if (speedHitPointsFactor < 30.0f) { speedHitPointsFactor = 30.0f; }
 		speedHitPointsFactor = speedHitPointsFactor / 3; // get a % value 1-100
 
+		bool hasInefficientProjectile = false;
+		if (IsRangedUnit(unitInfo->upgradedUnitDefLiving)) {
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *projectile = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)
+				this->player->GetUnitDefBase(unitInfo->upgradedUnitDefLiving->projectileUnitId);
+			if (projectile) {
+				if (GetProjectileType(projectile) == UNIT_PROJECTILE_TYPE::UPT_CATAPULT_STONE) {
+					hasInefficientProjectile = true;
+				}
+			}
+		}
 		float attackPoints = unitInfo->displayedAttack;
 		if (unitInfo->isMelee) {
 			attackPoints -= 2; // Melee may hardly catch their targets, targets have armors, etc. +This allow to consider lower attack value is 3.
 			if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider) {
 				attackPoints -= 4; // To compensate the fact it receives no attack upgrade from storage pit techs.
-			}
-			if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon) {
-				attackPoints = attackPoints / 4; // Siege units have disproportional attack, try an adjustment here
 			}
 		}
 		if (attackPoints < 1) { attackPoints = 1; }
@@ -883,6 +890,10 @@ void StrategyBuilder::ComputeStrengthsForPotentialUnits() {
 		default:
 			break;
 		}
+		if (hasInefficientProjectile) {
+			unitInfo->strengthVs[MC_FAST_RANGED] -= 5;
+			unitInfo->weaknessVs[MC_FAST_RANGED] += 5;
+		}
 		if (unitInfo->isMelee) {
 			unitInfo->strengthVs[MC_FAST_RANGED] = 40; // default for units faster than normal, but not really fast
 			unitInfo->weaknessVs[MC_FAST_RANGED] = 40; // default for units faster than normal, but not really fast
@@ -980,6 +991,10 @@ void StrategyBuilder::ComputeStrengthsForPotentialUnits() {
 					unitInfo->weaknessVs[MC_MELEE] = 10;
 					break;
 				}
+			}
+			if (hasInefficientProjectile) {
+				unitInfo->strengthVs[MC_MELEE] -= 15;
+				unitInfo->weaknessVs[MC_MELEE] += 15;
 			}
 			// Here: all but priests
 			if (unitInfo->upgradedUnitDefLiving && unitInfo->upgradedUnitDefLiving->ptrAttacksList) {
@@ -1118,7 +1133,7 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 		}
 	}
 	if (unitInfo->upgradedUnitDefLiving && (unitInfo->upgradedUnitDefLiving->displayedArmor > 0)) {
-		// in fact, few units have armors (not counting storage pit upgrades). So, fex units match this:
+		// in fact, few units have armors (not counting storage pit upgrades). So, few units match this:
 		if (unitInfo->upgradedUnitDefLiving->displayedArmor >= 3) {
 			unitInfo->strengthVs[MC_PRIEST] -= 10;
 		}
@@ -1222,12 +1237,15 @@ void StrategyBuilder::ComputeGlobalScores() {
 		}
 		if (unitInfo->isSuperUnit) {
 			unitInfo->globalScore = 90;
+			// Early age: no impact
 		}
 		if (unitInfo->hasCivBonus) {
 			unitInfo->globalScore += 25; // note: we can go > 100 at this point, not an issue
+			unitInfo->globalScoreEarlyAge += 35; // even more useful in early ages
 		}
 		if (unitInfo->hasUnavailableUpgrade) {
 			unitInfo->globalScore = (unitInfo->globalScore * 85) / 100; // -15% if unit upgrades are missing
+			// Early age: no impact
 		}
 		int numberOfAvailableUpgrades = unitInfo->upgradesUnitDefId.size();
 		// TODO: example: assyrian cat is super unit (all unit upgrades) but missing 2 techs/5 => not selected
@@ -1254,17 +1272,17 @@ void StrategyBuilder::ComputeGlobalScores() {
 		unitInfo->globalScore = (unitInfo->globalScore * (100 + diff * 2)) / 100; // Add up to 6% bonus for early availability
 
 		// Range units (siege): decrease score for slow/inefficient projectiles (catapults !)
-		if (unitInfo->baseUnitDefLiving && (unitInfo->baseUnitDefLiving->projectileUnitId >= 0)) {
-			// Use projectile arc > 0.1? 0.4-0.5 cats, 0.25 slinger
-			// Use proj speed: 2.7 cats 4.5 bolts 6=spear(villager), 8=archers arrows+slinger
-			// Use accuracy % (unit)
+		if (unitInfo->baseUnitDefLiving && (IsRangedUnit(unitInfo->baseUnitDefLiving))) {
 			ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *proj = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(unitInfo->baseUnitDefLiving->projectileUnitId);
 			UNIT_PROJECTILE_TYPE pType = GetProjectileType(proj);
-			int p = proj->accuracyPercent; // TEST tmp to remove
-			char *name1 = unitInfo->baseUnitDefLiving->ptrUnitName;
-			char *name2 = proj->ptrUnitName;
-			float parc = proj->projectileArc;
-			int accuracy = unitInfo->baseUnitDefLiving->accuracyPercent;
+			if (pType == UNIT_PROJECTILE_TYPE::UPT_CATAPULT_STONE) {
+				unitInfo->globalScore = (unitInfo->globalScore * 90 / 100);
+				unitInfo->globalScoreEarlyAge = (unitInfo->globalScoreEarlyAge * 80 / 100);
+			}
+			if (unitInfo->baseUnitDefLiving->accuracyPercent < 100) { // not in standard game
+				unitInfo->globalScore = (unitInfo->globalScore * 90 / 100);
+				unitInfo->globalScoreEarlyAge = (unitInfo->globalScoreEarlyAge * 90 / 100);
+			}
 		}
 
 		// Adjust (a bit) according to costs: cheaper units are less strong (lower score), this is a bit unfair. Ex legion underestimated, heavy cats overestimated.
@@ -1272,9 +1290,12 @@ void StrategyBuilder::ComputeGlobalScores() {
 		costProportion = costProportion / 10; // we limit "cost" impact to maximum 10% of global score. low value=low cost=better score
 		costProportion = 100 - costProportion; // Get values in 90%-100% interval, where 100% is the better score. Very approximate due to int type, but the whole thing IS approximate.
 		unitInfo->globalScore = unitInfo->globalScore * costProportion / 100;
+		unitInfo->globalScoreEarlyAge = unitInfo->globalScoreEarlyAge * costProportion / 100;
 
 		if (unitInfo->globalScore < 0) { unitInfo->globalScore = 0; }
 		if (unitInfo->globalScore > 100) { unitInfo->globalScore = 100; }
+		if (unitInfo->globalScoreEarlyAge < 0) { unitInfo->globalScoreEarlyAge = 0; }
+		if (unitInfo->globalScoreEarlyAge > 100) { unitInfo->globalScoreEarlyAge = 100; }
 
 		// Add a random part
 		int random = randomizer.GetRandomValue_normal_moreFlat(0, randomPercentFactor * 2);
@@ -1282,6 +1303,12 @@ void StrategyBuilder::ComputeGlobalScores() {
 		unitInfo->globalScore = (unitInfo->globalScore * random) / 100;
 
 		if (unitInfo->globalScore > 100) { unitInfo->globalScore = 100; }
+
+		random = randomizer.GetRandomValue_normal_moreFlat(0, randomPercentFactor * 2);
+		random = random + 100 - randomPercentFactor; // in [100-randomImpact, 100+randomImpact] (used with a multiplication, it gives a resulting randomImpact% adjustment + or -)
+		unitInfo->globalScoreEarlyAge = (unitInfo->globalScoreEarlyAge * random) / 100;
+
+		if (unitInfo->globalScoreEarlyAge > 100) { unitInfo->globalScoreEarlyAge = 100; }
 	}
 }
 
@@ -1416,6 +1443,35 @@ void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> s
 	{
 		if ((!unitInfo->isSelected) && (unitInfo->ageResearchId <= maxAgeResearchId)) {
 			unitInfo->bonusForUsedResourceTypes = this->GetCostScoreRegardingCurrentSelection(unitInfo);
+		}
+	}
+	if (maxAgeResearchId == CST_RSID_TOOL_AGE) {
+		// Allow only 1 melee and 1 range (max) in tool age (reset scores to prevent adding such units)
+		bool hasMeleeInTool = false;
+		bool hasRangedInTool = false;
+		for each (PotentialUnitInfo *unitInfo in selectedUnits)
+		{
+			if (unitInfo->isSelected && (unitInfo->ageResearchId <= CST_RSID_TOOL_AGE)) {
+				if (unitInfo->isMelee) {
+					hasMeleeInTool = true;
+				} else {
+					hasRangedInTool = true;
+				}
+			}
+		}
+		if (hasMeleeInTool || hasRangedInTool) {
+			for each (PotentialUnitInfo *unitInfo in selectedUnits) {
+				if ((!unitInfo->isSelected) && (unitInfo->ageResearchId <= maxAgeResearchId)) {
+					if (hasMeleeInTool && unitInfo->isMelee) {
+						unitInfo->bonusForRareStrength = 0;
+						unitInfo->bonusForUsedResourceTypes = 0;
+						unitInfo->globalScoreEarlyAge = 0;
+						this->log += "Disabled unit because of tool age similarity: ";
+						this->log += localizationHandler.GetTranslation(unitInfo->baseUnitDefLiving->languageDLLID_Name, unitInfo->unitName);
+						this->log += newline;
+					}
+				}
+			}
 		}
 	}
 }
@@ -1880,9 +1936,9 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 				tmpScore = (tmpScore * 110) / 100; // no or low research cost = +10%
 			}
 			if (unitInfo->isSuperUnit) {
-// Expensive (upgraded) units are less relevant here and won't be researched for optional unit. 
-// Penalty also stands for the fact that, if we select it, unit will be weaker than its computer score (because of missing upgrades)
-tmpScore = (tmpScore * 90) / 100;
+				// Expensive (upgraded) units are less relevant here and won't be researched for optional unit. 
+				// Penalty also stands for the fact that, if we select it, unit will be weaker than its computer score (because of missing upgrades)
+				tmpScore = (tmpScore * 90) / 100;
 			}
 			if (!unitInfo->costsGold) {
 				tmpScore = (tmpScore * 105) / 100; // gold-free units are cool complement units
@@ -1954,6 +2010,8 @@ void StrategyBuilder::SelectStrategyUnits() {
 			msg += std::string(" (") + GetLanguageDllText(unit->languageDLLID_Name) + std::string(")");
 			msg += " - score=";
 			msg += std::to_string(unitInfo->globalScore);
+			msg += ", early=";
+			msg += std::to_string(unitInfo->globalScoreEarlyAge);
 			this->log += msg;
 			this->log += newline;
 		}
@@ -2019,17 +2077,29 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 			}
 			if (unitInfo->bonusForTechsSimilarity > 100) { unitInfo->bonusForTechsSimilarity = 100; }
 			if (unitInfo->bonusForTechsSimilarity < 0) { unitInfo->bonusForTechsSimilarity = 0; }
+			unitInfo->bonusForTechsSimilarity = unitInfo->bonusForTechsSimilarity / 5; // max 20% impact on global score
 		}
 	}
 
-	// TODO: recompute global scores or use another score field, because scores calculated in (post)iron age are not relevant in early ages
-	// TODO : recompute global score WITHOUT all upgrades
+	// Choose a unit that has both combination of: global score, similarity with main units
+	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
+		if (!unitInfo->isBoat && !unitInfo->isSelected && (unitInfo->ageResearchId <= age)) {
+			float globalScoreNonZero = (float)(unitInfo->globalScoreEarlyAge);
+			if (globalScoreNonZero <= 0) { globalScoreNonZero = 0; }
+			unitInfo->scoreForEarlyAge = (globalScoreNonZero * (100 + unitInfo->bonusForTechsSimilarity)) / 100;
+			if (hasAlreadyUnits) {
+				float rareStrengthFactor = ((float)unitInfo->bonusForRareStrength);
+				rareStrengthFactor = rareStrengthFactor / 5; // Max 20% impact
+				unitInfo->scoreForEarlyAge = unitInfo->scoreForEarlyAge * (100 +rareStrengthFactor) / 100;
+			}
+		}
+	}
 
 	if (!hasAlreadyUnits) {
 		// Choose a unit that has both combination of: global score, similarity with main units
 		for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
 			if (!unitInfo->isBoat && !unitInfo->isSelected && (unitInfo->ageResearchId <= age)) {
-				float globalScoreNonZero = (float)(unitInfo->globalScore);
+				float globalScoreNonZero = (float)(unitInfo->globalScoreEarlyAge);
 				if (globalScoreNonZero <= 0) { globalScoreNonZero = 0; }
 				unitInfo->scoreForEarlyAge = (globalScoreNonZero * (100 + unitInfo->bonusForTechsSimilarity)) / 100;
 			}
