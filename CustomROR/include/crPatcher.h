@@ -28,3 +28,6 @@ long int GetBinaryChangeVarValue(BINSEQ_CATEGORIES binCategory, std::string sequ
 
 bool SetBinaryChangeVarValue(BINSEQ_CATEGORIES binCategory, std::string sequenceName, int seqIndex, long int value);
 
+#ifdef _DEBUG
+bool SetDeserializationDebugChange(bool enable);
+#endif

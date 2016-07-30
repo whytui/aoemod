@@ -3443,7 +3443,7 @@ namespace ROR_STRUCTURES_10C
 		TERRAIN_RESTRICTION armorTerrainRestriction; // Provide a multiplier for each terrain
 		short int unknown_112;
 		float maxRange; // Total range (8 if 7+1 is displayed). displayed range is the number before the "+" (7 in the example).
-		float blastRadius; // +118. Distance blast damage applies.
+		float blastRadius; // +118. Distance blast damage applies. 0 means there is no blast damage.
 		AOE_CONST_FUNC::BLAST_LEVELS blastLevel; // +11C. PLEASE always check if blastRadius>0. A lot of units have "wrongly" blastLevel=0
 		char unknown_11D;
 		char unknown_11E;
@@ -3468,7 +3468,8 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00544444); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TYPE50); }
-		unsigned long int GetCopyConstructorAddress() { return 0x43ED90; } // Address of AOE method to create a copy.
+		inline unsigned long int GetCopyConstructorAddress() const { return 0x43ED90; } // Address of AOE method to create a copy.
+		inline bool HasBlastDamage() const { return (this->blastRadius > 0); }
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_TYPE50) == 0x148, "STRUCT_UNITDEF_TYPE50 size");
 
@@ -3479,11 +3480,11 @@ namespace ROR_STRUCTURES_10C
 		PROJECTILE_TRAJECTORY_TYPE trajectoryType; // +148. Type of trajectory. Almost all projectiles have default one. Note: if graphics do not hit target, shooting fails.
 		char intelligentProjectile; // +149.
 		char penetrationMode; // +14A. If 1, projectile does not stop on target but continues (no impact and misses). Could be used (only) for units with blast damage ?
-		char unknown_14B; // +14B. Unknown, but seems used ?
-		char unknown_14C; // +14C. Unknown, but seems used ?
+		char unknown_14B; // +14B. Unknown, but it is actually a field in structure.
+		char unknown_14C; // +14C. Unknown, but it is actually a field in structure.
 		char unknown_14D[3]; // Unused.
 		// 0x150: Projectile movement arc. <=0.1 for standard projectiles (including ballista bolts), 0.25 for slinger stones, >=0.5 for catapult stones (0.4. boat cats)
-		float projectileArc; // 0+ value. Does NOT affect "time till impact". Only unit speed does. More than 10 may have the projectile go too high for screen (then come back though)
+		float projectileArc; // a 0+ value. Does NOT affect "time till impact". Only unit speed does. More than 10 may have the projectile go too high for screen (then come back though)
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x005444C0); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_PROJECTILE); }

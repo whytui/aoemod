@@ -151,6 +151,11 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x7D2058;
 	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7D205C;
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55873C;
+	static const long int *AOE_CURRENT_OFFSET_IN_FILE_DESERIALIZATION = (long int *)0x7BFAD8; // Pointer to the variable that containt offset of current position in file
+	static const unsigned char **AOE_TEMP_SERIALIZATION_BUFFER = (const unsigned char **)0x7BFADC;
+	static const unsigned char **AOE_CURRENT_POSITION_IN_FILE_DESERIALIZATION = (const unsigned char **)0x7BFAE8; // Pointer to current position in file content buffer
+	static const long int *AOE_CURRENTLY_OPENED_FILE_SIZE = (long int *)0x7BFAEC;
+	static const unsigned char *AOE_CURRENTLY_OPENED_FILE_BUFFER = (const unsigned char*)0x7BFAF0;
 #endif
 	static const unsigned long int *UNKNOWN_ARRAY_6A18C0 = (unsigned long int *)0x6A18C0; // Size = 0x100 elements = 0x400 bytes
 	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = ADDR_VAR_UNKNOWN_UI_MAIN_INFO + 0x0C; // part of a bigger struct, +C

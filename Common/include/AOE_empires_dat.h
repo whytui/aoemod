@@ -481,12 +481,12 @@ namespace AOE_CONST_FUNC {
 	};
 
 	enum TERRAIN_RESTRICTION : short int {
-		CST_TR_UNKNOWN_00 = 0, // projectiles, flags, dead units
+		CST_TR_FLYING = 0, // projectiles, flags, dead units
 		CST_TR_DOMESTICATED_ANIMALS = 1, // Only lion_trained !!!
-		CST_TR_UNKNOWN_02 = 2, // unused ?
+		CST_TR_UNKNOWN_BEACH = 2,
 		CST_TR_BOATS = 3,
 		CST_TR_BUILDINGS = 4, // All buildings, including towers, but NOT dock, farms...
-		CST_TR_UNKNOWN_05 = 5, // unused ?
+		CST_TR_ALL_INACCESSIBLE = 5, // unused ?
 		CST_TR_DOCK = 6, // Specific for dock (water with land nearby)
 		CST_TR_LAND_LIVING_UNITS = 7,
 		CST_TR_UNKNOWN_08 = 8, // unused ?

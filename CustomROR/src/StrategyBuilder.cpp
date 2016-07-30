@@ -622,7 +622,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 			unitInfo->ageResearchId = ageResearchIdThatEnablesUnit;
 			unitInfo->unitName = bestUpgradedUnit->ptrUnitName;
 			unitInfo->displayedAttack = bestUpgradedUnit->displayedAttack;
-			if (bestUpgradedUnit->blastRadius > 0) {
+			if (bestUpgradedUnit->HasBlastDamage()) {
 				unitInfo->displayedAttack = (unitInfo->displayedAttack * 115) / 100; // Give a "fake" attack bonus for units with blast damage (15% ?)
 			}
 			unitInfo->conversionResistance = this->crInfo->GetConversionResistance(player->civilizationId, bestUpgradedUnit->unitAIType);
@@ -1039,14 +1039,20 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 	// Note on standard speeds: 0.8-0.9 slow (siege, elephants, base hopite&priests), 1.1-1.2 normal(villagers, infantry,archers), 2 fast
 	// Boats: 1.35-1.4, 1.75, 2, 2.5(upgraded trade ship). War ships are all in 1.35-1.75
 	int basePenaltyValue = 10;
-	if (unitSpeed < 1) {
+	UNIT_SPEED_CATEGORY speedCategory = GetUnitSpeedCategory(unitSpeed);
+	switch (speedCategory) {
+	case AOE_CONST_FUNC::USC_SLOW:
 		basePenaltyValue = 20;
-	}
-	if ((unitSpeed >= 1.0f) && (unitSpeed < 1.5f)) {
+		break;
+	case AOE_CONST_FUNC::USC_NORMAL:
 		basePenaltyValue = 10;
-	}
-	if (unitSpeed >= 1.5f) {
+		break;
+	case AOE_CONST_FUNC::USC_FAST:
 		basePenaltyValue = 2; // Fast units: can defend correctly against priests.
+		break;
+	default:
+		basePenaltyValue = 10;
+		break;
 	}
 	// Costly units are a weakness against priests (especially elephants, but not only)
 	if (unitInfo->totalResourceCost > 160) {
@@ -1074,16 +1080,16 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 	unitInfo->weaknessVs[MC_PRIEST] += basePenaltyValue;
 
 	// Strength vs priests
-	if (!unitInfo->isMelee && (unitSpeed >= 1) && (unitInfo->range > 6)) {
+	if (!unitInfo->isMelee && ((unitSpeed == AOE_CONST_FUNC::USC_FAST) || (unitSpeed == AOE_CONST_FUNC::USC_NORMAL)) && (unitInfo->range > 6)) {
 		unitInfo->strengthVs[MC_PRIEST] += 10; // Range units are slightly better vs priests than melee
 	} else {
 		if (unitInfo->range >= 10) { // siege weapons, actually (archers have 7 max, we don't count range upgrades here)
 			unitInfo->strengthVs[MC_PRIEST] += 20;
 		}
 	}
-	if (unitInfo->isMelee && (unitSpeed >= 1.0f)) {
+	if (unitInfo->isMelee && ((unitSpeed == AOE_CONST_FUNC::USC_FAST) || (unitSpeed == AOE_CONST_FUNC::USC_NORMAL))) {
 		unitInfo->strengthVs[MC_PRIEST] += 15;
-		if (unitInfo->isMelee && (unitSpeed >= 1.5f)) {
+		if (unitInfo->isMelee && (unitSpeed == AOE_CONST_FUNC::USC_FAST)) {
 			unitInfo->strengthVs[MC_PRIEST] += 20; // even more for fast units
 		}
 	} else {
@@ -1250,14 +1256,14 @@ void StrategyBuilder::ComputeGlobalScores() {
 		// Range units (siege): decrease score for slow/inefficient projectiles (catapults !)
 		if (unitInfo->baseUnitDefLiving && (unitInfo->baseUnitDefLiving->projectileUnitId >= 0)) {
 			// Use projectile arc > 0.1? 0.4-0.5 cats, 0.25 slinger
-			// Use proj speed: 2.7 cats 4.5 bolts 6=spear(villager), 8=archers arrows...
+			// Use proj speed: 2.7 cats 4.5 bolts 6=spear(villager), 8=archers arrows+slinger
 			// Use accuracy % (unit)
 			ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *proj = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(unitInfo->baseUnitDefLiving->projectileUnitId);
+			UNIT_PROJECTILE_TYPE pType = GetProjectileType(proj);
 			int p = proj->accuracyPercent; // TEST tmp to remove
 			char *name1 = unitInfo->baseUnitDefLiving->ptrUnitName;
 			char *name2 = proj->ptrUnitName;
 			float parc = proj->projectileArc;
-			int x = proj->unknown_14C;
 			int accuracy = unitInfo->baseUnitDefLiving->accuracyPercent;
 		}
 
@@ -1587,20 +1593,24 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 				}
 			}
 			// Costs...
-			if (resInfo->totalCosts <= 120) {
-				// Very low costs: +15% bonus
+			RESEARCH_COST_CATEGORY researchCostCat = GetResearchCostCategory(resInfo->totalCosts);
+			switch (researchCostCat) {
+			case AOE_CONST_FUNC::RCC_VERY_CHEAP:
 				resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 115) / 100;
-			} else {
-				if (resInfo->totalCosts > 220) {
-					if (resInfo->totalCosts <= 350) {
-						// High costs: -10%
-						resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 90) / 100;
-					} else {
-						// Very high costs: -20%
-						resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 80) / 100;
-					}
-				}
-				// Medium: keep bonus as is (+00%)
+				break;
+			case AOE_CONST_FUNC::RCC_CHEAP:
+				break;
+			case AOE_CONST_FUNC::RCC_MODERATE:
+				resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 90) / 100;
+				break;
+			case AOE_CONST_FUNC::RCC_EXPENSIVE:
+				resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 80) / 100;
+				break;
+			case AOE_CONST_FUNC::RCC_VERY_EXPENSIVE:
+				resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 80) / 100;
+				break;
+			default:
+				break;
 			}
 
 			// Apply a random factor
@@ -1841,7 +1851,7 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 			int tmpScore = unitInfo->strengthVs[weaknessCategory];
 			// Some hardcoded (but still generic) rules
 			if ((weaknessCategory == MILITARY_CATEGORY::MC_TOWER) && (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon)) {
-				if (unitInfo->upgradedUnitDefLiving->blastRadius > 0) {
+				if (unitInfo->upgradedUnitDefLiving->HasBlastDamage()) {
 					tmpScore = (tmpScore * 115) / 100; // catapult-like siege
 				} else {
 					tmpScore = (tmpScore * 105) / 100; // ballista-like siege vs towers

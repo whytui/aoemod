@@ -113,6 +113,7 @@
     <ClInclude Include="include\crLocalization.h" />
     <ClInclude Include="include\crMainInterface.h" />
     <ClInclude Include="include\crPatcher.h" />
+    <ClInclude Include="include\customFuncRules.h" />
     <ClInclude Include="include\drsHandler.h" />
     <ClInclude Include="include\language.h" />
     <ClInclude Include="include\randomizer.h" />
@@ -126,7 +127,6 @@
     <ClInclude Include="include\interface.h" />
     <ClInclude Include="include\AOE_strategy.h" />
     <ClInclude Include="include\StrategyBuilder.h" />
-    <ClInclude Include="include\StrategyBuilderCommon.h" />
     <ClInclude Include="include\StrategyPotentialElemInfo.h" />
     <ClInclude Include="include\TechnologyFilter.h" />
     <ClInclude Include="include\traceMessage.h" />
@@ -159,7 +159,6 @@
     <ClCompile Include="src\RORProcessEditor.cpp" />
     <ClCompile Include="src\AOE_strategy.cpp" />
     <ClCompile Include="src\StrategyBuilder.cpp" />
-    <ClCompile Include="src\StrategyBuilderCommon.cpp" />
     <ClCompile Include="src\StrategyPotentialElemInfo.cpp" />
     <ClCompile Include="src\traceMessages.cpp" />
   </ItemGroup>

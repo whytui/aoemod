@@ -348,8 +348,16 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 
 // This procedure is only for testing purpose.
 void CustomRORInstance::TemporaryEntryPoints(REG_BACKUP *REG_values) {
-	/*if (REG_values->return_address == 0) {
-	}*/
+	if (REG_values->return_address == 0x46BA04) {
+		unsigned long int *p = (unsigned long int *)0x7BFAE8;
+		*p = REG_values->EAX_val; // Original instruction in 0046B9FF
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		long int bufSize = GetIntValueFromRORStack(REG_values, 0x1C); // arg3
+		unsigned char *buf = (unsigned char *)REG_values->EDI_val - bufSize; // This calculation is always correct (getting arg2 in stack isn't)
+		unsigned long int callerAddr = GetIntValueFromRORStack(REG_values, 0x10) - 5;
+		//unsigned char *buf = (unsigned char *) GetIntValueFromRORStack(REG_values, 0x18); // arg2 is wRONG: may have been overwritten (like arg1)
+		WriteDebugLogForDeserializedData(callerAddr, buf, bufSize);
+	}
 }
 #endif;
 

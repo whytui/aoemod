@@ -642,15 +642,18 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId);
 
 
 // Add some text in trace file for important issues we want to know about.
-void AddTraceToFile(char *text);
+void AddTraceToFile(const char *filename, const char *text);
 
 // To customize for debug purpose...
 void DebugDumpAllUnits();
 
 // Writes in a text buffer the content of a "temp map like info" zone.
-#ifdef _DEBUG
-#define thisbufSize 20000
-static char buffer[thisbufSize];
-#endif
 char *DumpPosToTextBuffer(ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *mapInfosStruct, long int posX, long int posY, int radius);
 
+#ifdef _DEBUG
+static const char serializationLogFilename[] = "D:\\AOESrlz.txt";
+extern bool debugSerialization;
+// Write deserialization data into a buffer, then to a log file.
+// This affects greatly performance !!! Debug only.
+void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char *buffer, long int bufferSize);
+#endif

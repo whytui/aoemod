@@ -207,6 +207,13 @@ void CustomRORCommand::OneShotInit() {
 
 	// Update "population limit getter" according to configuration
 	SetMaxPopulationGetterInSPGames(this->crInfo->configInfo.singlePlayerMaxPopulation);
+
+#ifdef _DEBUG
+	if (debugSerialization) {
+		SetDeserializationDebugChange(true);
+		WriteToFile("", serializationLogFilename, false); // reset file content
+	}
+#endif
 }
 
 

@@ -12,6 +12,7 @@
 #include "randomizer.h"
 #include "AOE_strategy.h"
 #include "StrategyPotentialElemInfo.h"
+#include "customFuncRules.h"
 
 
 using namespace AOE_CONST_FUNC;

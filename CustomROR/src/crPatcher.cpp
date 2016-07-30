@@ -184,3 +184,25 @@ bool SetBinaryChangeVarValue(BINSEQ_CATEGORIES binCategory, std::string sequence
 		return false;
 	}
 }
+
+#ifdef _DEBUG
+bool SetDeserializationDebugChange(bool enable) {
+	try {
+		RORProcessEditor pe;
+		unsigned char bufferSeqOFF[] = { 0x89, 0x0D, 0xD8, 0xFA, 0x7B, 0x00, 0xA3, 0xE8, 0xFA, 0x7B, 0x00, 0x5F };
+		unsigned char bufferSeqON[] = { 0x89, 0x0D, 0xD8, 0xFA, 0x7B, 0x00, 0xE8, 0x70, 0xDB, 0xFA, 0xFF, 0x5F };
+		BinarySeqDefinition b = BinarySeqDefinition(sizeof(bufferSeqOFF), 2, 0x6B9F9);
+		b.SetFuncMeaning(0, FUNC_MEANING::FM_OFF);
+		b.SetFuncMeaning(1, FUNC_MEANING::FM_ON);
+		b.SetSeqName(_T("[DEBUG] deserialization output handler"));
+		b.WriteSequence(0, bufferSeqOFF);
+		b.WriteSequence(1, bufferSeqON);
+		pe.WriteFromSequence(&b, enable ? 1 : 0);
+		return true;
+	}
+	catch (std::exception e) {
+		traceMessageHandler.WriteMessage(e.what());
+		return false;
+	}
+}
+#endif

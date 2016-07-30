@@ -53,3 +53,13 @@ static std::string GetHexStringAddress(unsigned long int address) {
 	sprintf_s(buf, "0x%08X", address);
 	return std::string(buf);
 }
+
+// Get an hexadecimal address as a string of (2+)"hexDigits" characters (capital letters, if any). Like 0x1234ABCD.
+static std::string GetHexStringAddress(unsigned long int address, int hexDigits) {
+	if (hexDigits > 8) { return std::string(""); }
+	char buf[32];
+	static char format[] = "0x%08X";
+	format[4] = hexDigits + '0';
+	sprintf_s(buf, format, address);
+	return std::string(buf);
+}

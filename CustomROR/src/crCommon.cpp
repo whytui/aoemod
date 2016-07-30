@@ -2829,13 +2829,13 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 
 // Add some text in trace file for important issues we want to know about.
 // See also traceMessageHandler object for tracing.
-void AddTraceToFile(char *text) {
+void AddTraceToFile(const char *filename, const char *text) {
 	FILE *f;
-	int res = fopen_s(&f, "C:\\AOEError.txt", "a"); // append / do not overwrite
+	int res = fopen_s(&f, filename, "a"); // append / do not overwrite
 	if (res) {
 		return;
 	}
-	fprintf_s(f, text);
+	fwrite(text, strlen(text), sizeof(char), f);
 	fclose(f);
 }
 
@@ -2860,13 +2860,17 @@ void DebugDumpAllUnits() {
 			sprintf_s(buf, "unit %ld\tType=%ld\tDATID=%ld\t1B8=%s\tname=%s\t%d\t%d\t%d\t%d\n", unit->unitInstanceId, unit->unitType,
 				unit->ptrStructDefUnit->DAT_ID1, buf2, unit->ptrStructDefUnit->ptrUnitName,
 				unit->unitStatus, unit->isNotCreatable, unit->isDoppleGanger, unit->unknown_04B);
-			AddTraceToFile(buf);
+			AddTraceToFile("D:\\AOEUnits.txt", buf);
 		}
 	}
 }
 
 
 // For testing purpose
+#ifdef _DEBUG
+#define thisbufSize 20000
+static char buffer[thisbufSize];
+#endif
 char *DumpPosToTextBuffer(ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *mapInfosStruct, long int posX, long int posY, int radius) {
 #ifdef _DEBUG
 	if (((radius * 2 + 1) * (radius * 2 + 1) * 3) >= thisbufSize) { return "Buffer is not large enough for this radius."; }
@@ -2893,3 +2897,47 @@ char *DumpPosToTextBuffer(ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *
 	return "";
 #endif
 }
+
+#ifdef _DEBUG
+bool debugSerialization = false;
+// Write deserialization data into a buffer, then to a log file.
+// This affects greatly performance !!! Debug only.
+void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char *buffer, long int bufferSize) {
+	static int writtenLines = 0;
+	if (!buffer) { return; }
+	static std::string test;
+	test += "{";
+	test += GetHexStringAddress(callAddr);
+	test += "} ";
+	test += "[";
+	test += GetHexStringAddress((unsigned long int)buffer);
+	test += "] sz=";
+	test += to_string(bufferSize);
+	test += " : ";
+	for (int i = 0; i < bufferSize; i++) {
+		test += GetHexStringAddress(buffer[i], 2);
+		test += " ";
+	}
+	test += "- \"";
+	for (int i = 0; i < bufferSize; i++) {
+		char c = (char)buffer[i];
+		if ((c < 32) || (c > 126)) { c = ' '; }
+		test += c;
+	}
+	test += "\"";
+	if (bufferSize == 4) {
+		float f = 0;
+		long int *fakePtr = (long int*)&f;
+		*fakePtr = *((long int*)buffer);
+		test += " - float=";
+		test += std::to_string(f);
+	}
+	test += "\n";
+	writtenLines++;
+	if (writtenLines >= 500) {
+		writtenLines = 0;
+		AddTraceToFile(serializationLogFilename, test.c_str());
+		test.clear();
+	}
+}
+#endif

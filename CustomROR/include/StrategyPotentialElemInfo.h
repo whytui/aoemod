@@ -4,11 +4,21 @@
 #include <set>
 #include <ROR_structures.h>
 #include <AOE_empires_dat.h>
-#include "StrategyBuilderCommon.h"
 
 using namespace AOE_CONST_FUNC;
 
 namespace STRATEGY {
+	
+	// Represents various military categories used to help strategy building decisions
+	enum MILITARY_CATEGORY {
+		MC_NONE = -1, // ignore in computations
+		MC_PRIEST = 0,
+		MC_FAST_RANGED,
+		MC_SIEGE,
+		MC_MELEE,
+		MC_TOWER,
+		MC_COUNT
+	};
 
 	// Represents 1 unit ("definition") that can potentially be selected to be added to strategy.
 	// Used for military units (not buildings, not villagers, not towers)
