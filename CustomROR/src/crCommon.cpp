@@ -2963,10 +2963,10 @@ previousSerzEndOffset = tmpEndOffset;
 }
 #endif
 
+// Automatically detects issues in empires.dat (requires to have been loaded already) and writes logs about errors in trace message handler.
 bool AnalyzeEmpiresDatQuality() {
 	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) { return false; }
-	//global->civilizationDefinitions[0]->techTreeId
 	if (!global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid()) {
 		traceMessageHandler.WriteMessage("ERROR: missing or invalid techInfo structure");
 	}

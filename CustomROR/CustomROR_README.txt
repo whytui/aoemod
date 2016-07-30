@@ -131,6 +131,7 @@ Chat commands:
 - Type "allai" or "allAI" in chat box enable computer-control for ALL players
 - Type "hi" to get Hello world, "about" for information about customROR.
 - Type "timer stats" to get info related to game timer bug.
+- Type "dat check" to get a list of detected problems in empires.dat file (opens a popup window).
 
 Other commands (in customROR options menu)
 - Type "addXXX" to add any unit to any explored location (like in editor). For example, add83=villager, add276=wonder. Right-click to get back to normal game mode.

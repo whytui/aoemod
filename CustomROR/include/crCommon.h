@@ -656,4 +656,5 @@ extern bool debugSerialization;
 void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char *buffer, long int bufferSize);
 #endif
 
+// Automatically detects issues in empires.dat (requires to have been loaded already) and writes logs about errors in trace message handler.
 bool AnalyzeEmpiresDatQuality();
