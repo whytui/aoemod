@@ -2914,13 +2914,13 @@ void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char 
 		previousSerzEndOffset = previousSerzOffset + bufferSize - 0x10000;
 		previousSerzOffset = serzOffset;
 	} else {
-		bool objectChanged = (serzOffset <= previousSerzOffset);
-		if (objectChanged) {
-			test += "*****\n"; // indicate we now deserialize another file (?)
-			totalBufferSize = bufferSize;
-		}
-		previousSerzOffset = serzOffset;
-		previousSerzEndOffset = tmpEndOffset;
+bool objectChanged = (serzOffset <= previousSerzOffset);
+if (objectChanged) {
+	test += "*****\n"; // indicate we now deserialize another file (?)
+	totalBufferSize = bufferSize;
+}
+previousSerzOffset = serzOffset;
+previousSerzEndOffset = tmpEndOffset;
 	}
 
 
@@ -2962,3 +2962,204 @@ void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char 
 	}
 }
 #endif
+
+bool AnalyzeEmpiresDatQuality() {
+	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return false; }
+	//global->civilizationDefinitions[0]->techTreeId
+	if (!global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid()) {
+		traceMessageHandler.WriteMessage("ERROR: missing or invalid techInfo structure");
+	}
+	if (!global->researchDefInfo) {
+		traceMessageHandler.WriteMessage("ERROR: missing or invalid researchInfo structure");
+	}
+	std::string msg;
+	int civResCount = -1;
+	int civUnitDefCount = -1;
+	std::set<short int> techTreeIds; // stores all technology tree IDs
+	// CivDef
+#if 1
+	for (int civId = 0; civId < global->civCount; civId++) {
+		if (civResCount == -1) {
+			civResCount = global->civilizationDefinitions[civId]->civResourcesCount;
+		}
+		if (global->civilizationDefinitions[civId]->civResourcesCount != civResCount) {
+			msg = "Civilization ";
+			msg += std::to_string(civId);
+			msg += " has not the same resources count (";
+			msg += std::to_string(global->civilizationDefinitions[civId]->civResourcesCount);
+			msg += ") as previous civilizations (";
+			msg += std::to_string(civResCount);
+			msg += ")";
+			traceMessageHandler.WriteMessage(msg);
+		}
+		if (civUnitDefCount == -1) {
+			civUnitDefCount = global->civilizationDefinitions[civId]->civUnitDefCount;
+		}
+		if (global->civilizationDefinitions[civId]->civUnitDefCount != civUnitDefCount) {
+			msg = "Civilization ";
+			msg += std::to_string(civId);
+			msg += " has not the same unit definitions count (";
+			msg += std::to_string(global->civilizationDefinitions[civId]->civUnitDefCount);
+			msg += ") as previous civilizations (";
+			msg += std::to_string(civUnitDefCount);
+			msg += "). This can provoke crashes.";
+			traceMessageHandler.WriteMessage(msg);
+		}
+		if (global->civilizationDefinitions[civId]->techTreeId >= global->technologiesInfo->technologyCount) {
+			msg = "Civilization ";
+			msg += std::to_string(civId);
+			msg += " has an invalid tech tree ID (";
+			msg += std::to_string(global->civilizationDefinitions[civId]->techTreeId);
+			msg += ")";
+			traceMessageHandler.WriteMessage(msg);
+		}
+		if (global->civilizationDefinitions[civId]->techTreeId < 0) {
+			msg = "Civilization ";
+			msg += std::to_string(civId);
+			msg += " does not have a tech tree (tech tree id=-1). This is not an error and is acceptable.";
+			traceMessageHandler.WriteMessage(msg);
+		} else {
+			techTreeIds.insert(global->civilizationDefinitions[civId]->techTreeId);
+		}
+		if ((global->civilizationDefinitions[civId]->graphicSetId > 4) || (global->civilizationDefinitions[civId]->graphicSetId < 0)) {
+			msg = "Civilization ";
+			msg += std::to_string(civId);
+			msg += " has an invalid graphic set ID (";
+			msg += std::to_string(global->civilizationDefinitions[civId]->graphicSetId);
+			msg += ")";
+			traceMessageHandler.WriteMessage(msg);
+		}
+	}
+#endif
+	// Technologies
+#if 1
+	for (int techId = 0; techId < global->technologiesInfo->technologyCount; techId++) {
+		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->technologiesInfo->GetTechDef(techId);
+		assert(techDef != NULL);
+		if (techDef) {
+			for (int effectId = 0; effectId < techDef->effectCount; effectId++) {
+				if (!techDef->ptrEffects[effectId].HasValidEffect()) {
+					msg = "Technology ";
+					msg += std::to_string(techId);
+					msg += "/effect #";
+					msg += std::to_string(effectId);
+					msg += " does not have an effective impact";
+					traceMessageHandler.WriteMessage(msg);
+				}
+				if (techTreeIds.find(techId) == techTreeIds.end()) {
+					if (techDef->ptrEffects[effectId].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) {
+						msg = "Technology ";
+						msg += std::to_string(techId);
+						msg += "/effect #";
+						msg += std::to_string(effectId);
+						msg += " has 'set attribute' type, which should not be used. Try to use add or multiply instead";
+						traceMessageHandler.WriteMessage(msg);
+					}
+					if ((techDef->ptrEffects[effectId].effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) &&
+						(techDef->ptrEffects[effectId].effectClass == 0)) { // mode = 0 = set
+						msg = "Technology ";
+						msg += std::to_string(techId);
+						msg += "/effect #";
+						msg += std::to_string(effectId);
+						msg += " has 'set resource' type, which should not be used. Try to use add or multiply instead";
+						traceMessageHandler.WriteMessage(msg);
+					}
+				}
+				// TODO: Negative tech effects should be avoided?
+			}
+			
+		}
+	}
+#endif
+	// Researches
+#if 1
+	for (int researchId = 0; researchId < global->researchDefInfo->researchCount; researchId++) {
+		int remainingRequirementsCount = global->researchDefInfo->researchDefArray[researchId].minRequiredResearchesCount;
+		if ((remainingRequirementsCount < 0) || (remainingRequirementsCount > 4)) {
+			msg = "Research ";
+			msg += std::to_string(researchId);
+			msg += " has an invalid requirements count (";
+			msg += std::to_string(remainingRequirementsCount);
+			msg += ")";
+			traceMessageHandler.WriteMessage(msg);
+			remainingRequirementsCount = 0;
+		}
+		int validReqResearchCount = 0;
+		for (int index = 0; index < 4; index++) {
+			short int reqResearchId = global->researchDefInfo->researchDefArray[researchId].requiredResearchId[index];
+			if (reqResearchId >= 0) {
+				validReqResearchCount++; // found a valid required research id
+				if (reqResearchId >= global->researchDefInfo->researchCount) {
+					msg = "Research ";
+					msg += std::to_string(researchId);
+					msg += " has an invalid required research (id=";
+					msg += std::to_string(reqResearchId);
+					msg += ")";
+					traceMessageHandler.WriteMessage(msg);
+				}
+			}
+		}
+		if (validReqResearchCount > remainingRequirementsCount) {
+			msg = "Research ";
+			msg += std::to_string(researchId);
+			msg += " has optional requirements (more required researches than minRequiredResearch). This should be avoided (used in standard game for 'age' researches). You can set required research IDs to -1 to disable them.";
+			traceMessageHandler.WriteMessage(msg);
+		}
+		if (global->researchDefInfo->researchDefArray[researchId].researchLocation >= 0) {
+			// If research is a shadow research, error
+			if ((global->researchDefInfo->researchDefArray[researchId].researchTime <= 0) ||
+				(global->researchDefInfo->researchDefArray[researchId].buttonId <= 0)) {
+				msg = "Research ";
+				msg += std::to_string(researchId);
+				msg += " is a shadow research but has a research location. If this really is a shadow research, you should set research location to -1.";
+				traceMessageHandler.WriteMessage(msg);
+			}
+		}
+	}
+#endif
+	// TODO: search for techtree-unavailable researches
+	// Units
+#if 1
+	std::set<short int> badBlastLevelUnits;
+	for (int civId = 0; civId < global->civCount; civId++) {
+		for (int unitDefId = 0; unitDefId < global->civilizationDefinitions[civId]->civUnitDefCount; unitDefId++) {
+			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = global->civilizationDefinitions[civId]->GetUnitDefBase(unitDefId);
+			if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass()) {
+				if (unitDefBase->unitAIType < 0) {
+					msg = "UnitDef ";
+					msg += std::to_string(unitDefId);
+					msg += " is missing an AI type (class = -1)";
+					traceMessageHandler.WriteMessage(msg);
+				}
+			}
+			if (unitDefBase && unitDefBase->DerivesFromType50()) {
+				ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *type50 = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)unitDefBase;
+				if ((type50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (type50->blastRadius == 0)) {
+					badBlastLevelUnits.insert(unitDefId);
+					if (false) { // generates too many errors
+						msg = "UnitDef ";
+						msg += std::to_string(unitDefId);
+						msg += " has an inactive blast level set (";
+						msg += std::to_string((int)type50->blastLevel);
+						msg += ") because blast radius is 0 (no blast damage). You should set blast level to 3 when no blast damage is used.";
+						traceMessageHandler.WriteMessage(msg);
+					}
+				}
+			}
+		}
+	}
+	if (badBlastLevelUnits.size() > 0) {
+		msg = "Those units have an inactive blast level set because blast radius is 0 (no blast damage). You should set blast level to 3 when no blast damage is used. ";
+		for each (short int unitDefId in badBlastLevelUnits)
+		{
+			msg += std::to_string(unitDefId);
+			msg += ", ";
+		}
+		traceMessageHandler.WriteMessage(msg);
+	}
+	
+#endif
+
+	return true;
+}

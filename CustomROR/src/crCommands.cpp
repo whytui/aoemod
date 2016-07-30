@@ -499,6 +499,9 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 	if (strcmp(command, "timer stats") == 0) {
 		this->DisplayTimerStats();
 	}
+	if (strcmp(command, "dat check") == 0) {
+		AnalyzeEmpiresDatQuality();
+	}
 
 #ifdef _DEBUG
 	// p0 to p8: quick player change + set AI flags automatically

@@ -655,3 +655,5 @@ extern bool debugSerialization;
 // This affects greatly performance !!! Debug only.
 void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char *buffer, long int bufferSize);
 #endif
+
+bool AnalyzeEmpiresDatQuality();

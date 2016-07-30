@@ -3118,21 +3118,23 @@ namespace ROR_STRUCTURES_10C
 		float *ptrResourceValues;  // List element count is civResourcesCount
 		char graphicSetId;
 		char alwaysOne;
-		char techTreeId;
-		char unused_2B; // probably unused.
+		short int techTreeId;
 
 		bool IsCheckSumValid() { return this->checksum == 0x00549A28; }
 		// Use this to safely get unit definitions
-		STRUCT_DEF_UNIT *GetUnitDef(short int DAT_ID) {
+		STRUCT_DEF_UNIT *GetUnitDef(short int DAT_ID) const {
 			if ((DAT_ID < 0) || (DAT_ID >= this->civUnitDefCount)) { return NULL; }
 			if ((long int)(this->ptrUnitDefArray[DAT_ID]) == 1) { return NULL; }
 			return this->ptrUnitDefArray[DAT_ID];
 		}
-		bool IsUnitAvailable(short int DAT_ID) {
+		STRUCT_UNITDEF_BASE *GetUnitDefBase(short int DAT_ID) const {
+			return (STRUCT_UNITDEF_BASE *)this->GetUnitDef(DAT_ID);
+		}
+		bool IsUnitAvailable(short int DAT_ID) const {
 			if ((DAT_ID < 0) || (DAT_ID >= this->civUnitDefCount)) { return false; }
 			return (this->ptrUnitDefArray[DAT_ID] != NULL); // real pointer or "1" (temp value while reading empires.dat) will both return true
 		}
-		float GetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES resourceIndex) {
+		float GetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES resourceIndex) const {
 			if ((resourceIndex < 0) || (resourceIndex > AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_ALL_RELICS)) { return -1; }
 			return this->ptrResourceValues[resourceIndex];
 		}

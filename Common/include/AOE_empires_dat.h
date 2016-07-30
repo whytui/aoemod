@@ -217,7 +217,7 @@ namespace AOE_CONST_FUNC {
 	enum TECH_DEF_EFFECTS : char {
 		TDE_INVALID = -1,
 		TDE_ATTRIBUTE_MODIFIER_SET = 0,
-		TDE_RESOURCE_MODIFIER_ADD_SET = 1, // add or set value (according to "mode" = effectClass field)
+		TDE_RESOURCE_MODIFIER_ADD_SET = 1, // add or set value (according to "mode" = effectClass field: 0=set, 1=add)
 		TDE_ENABLE_DISABLE_UNIT = 2,
 		TDE_UPGRADE_UNIT = 3, // "source" unit = effectUnit, "target" (upgraded) unit = effectClass
 		TDE_ATTRIBUTE_MODIFIER_ADD = 4, // add value

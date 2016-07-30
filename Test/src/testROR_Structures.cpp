@@ -125,7 +125,7 @@ static bool test_ror_structures() {
 	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT du;
 	trs_assert(&du, 0x176, &du.unknown_176);
 	ROR_STRUCTURES_10C::STRUCT_DEF_CIVILIZATION dc;
-	trs_assert(&dc, 0x2B, &dc.unused_2B);
+	trs_assert(&dc, 0x2A, &dc.techTreeId);
 
 	ROR_STRUCTURES_10C::STRUCT_TECH_DEF_EFFECT tde;
 	trs_assert(&tde, 0x08, &tde.effectValue);
