@@ -898,6 +898,10 @@ void CustomRORCommand::OnGameStart() {
 			}
 		}
 	}
+
+#ifdef _DEBUG
+	WriteDebugLogForDeserializedData(0, NULL, 0); // Force flush if there is remaining output in buffer
+#endif
 }
 
 

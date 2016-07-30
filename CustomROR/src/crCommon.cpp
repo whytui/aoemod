@@ -2899,26 +2899,45 @@ char *DumpPosToTextBuffer(ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *
 }
 
 #ifdef _DEBUG
-bool debugSerialization = false;
+bool debugSerialization = true;
 // Write deserialization data into a buffer, then to a log file.
 // This affects greatly performance !!! Debug only.
 void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char *buffer, long int bufferSize) {
-	static int writtenLines = 0;
-	if (!buffer) { return; }
 	static std::string test;
+	static int writtenLines = 0;
+	if (!buffer || (bufferSize <= 0)) {
+		// Flush
+		if (writtenLines > 0) {
+			writtenLines = 0;
+			AddTraceToFile(serializationLogFilename, test.c_str());
+			test.clear();
+		}
+		return;
+	}
+	static unsigned long int previousSerzOffset = 0;
+	unsigned long int serzOffset = *AOE_OFFSETS::AOE_CURRENT_OFFSET_IN_FILE_DESERIALIZATION;
+	serzOffset -= bufferSize;
+	bool objectChanged = (serzOffset <= previousSerzOffset);
+	if (objectChanged) {
+		test += "*****\n"; // indicate we now deserialize another file (?)
+	}
+	previousSerzOffset = serzOffset;
+
 	test += "{";
 	test += GetHexStringAddress(callAddr);
-	test += "} ";
+	test += "}\t";
 	test += "[";
 	test += GetHexStringAddress((unsigned long int)buffer);
-	test += "] sz=";
+	test += "]\t[+";
+	test += GetHexStringAddress(serzOffset, 5);
+	test += "]\tsz=";
 	test += to_string(bufferSize);
-	test += " : ";
+	test += "\t";
 	for (int i = 0; i < bufferSize; i++) {
 		test += GetHexStringAddress(buffer[i], 2);
 		test += " ";
 	}
-	test += "- \"";
+	test += "\t\"";
 	for (int i = 0; i < bufferSize; i++) {
 		char c = (char)buffer[i];
 		if ((c < 32) || (c > 126)) { c = ' '; }
@@ -2929,7 +2948,7 @@ void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char 
 		float f = 0;
 		long int *fakePtr = (long int*)&f;
 		*fakePtr = *((long int*)buffer);
-		test += " - float=";
+		test += "\tfloat=";
 		test += std::to_string(f);
 	}
 	test += "\n";
