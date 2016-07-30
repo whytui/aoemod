@@ -2914,14 +2914,29 @@ void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char 
 		}
 		return;
 	}
-	static unsigned long int previousSerzOffset = 0;
-	unsigned long int serzOffset = *AOE_OFFSETS::AOE_CURRENT_OFFSET_IN_FILE_DESERIALIZATION;
+	static long int totalBufferSize = 0; // Gives (next) offset
+	static long int previousSerzOffset = 0;
+	static long int previousSerzEndOffset = 0; // last "end position, =this begin position (unless object changed)
+	long int serzOffset = *AOE_OFFSETS::AOE_CURRENT_OFFSET_IN_FILE_DESERIALIZATION;
+	long int tmpEndOffset = serzOffset;
 	serzOffset -= bufferSize;
-	bool objectChanged = (serzOffset <= previousSerzOffset);
-	if (objectChanged) {
-		test += "*****\n"; // indicate we now deserialize another file (?)
+	totalBufferSize += bufferSize;
+	if (previousSerzOffset + bufferSize > 0x10000) {
+		//test += GetHexStringAddress(totalBufferSize - bufferSize);
+		//test += " (reload buffer)\n";
+		serzOffset = 0;
+		previousSerzEndOffset = previousSerzOffset + bufferSize - 0x10000;
+		previousSerzOffset = serzOffset;
+	} else {
+		bool objectChanged = (serzOffset <= previousSerzOffset);
+		if (objectChanged) {
+			test += "*****\n"; // indicate we now deserialize another file (?)
+			totalBufferSize = bufferSize;
+		}
+		previousSerzOffset = serzOffset;
+		previousSerzEndOffset = tmpEndOffset;
 	}
-	previousSerzOffset = serzOffset;
+
 
 	test += "{";
 	test += GetHexStringAddress(callAddr);
@@ -2929,7 +2944,8 @@ void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char 
 	test += "[";
 	test += GetHexStringAddress((unsigned long int)buffer);
 	test += "]\t[+";
-	test += GetHexStringAddress(serzOffset, 5);
+	//test += GetHexStringAddress(serzOffset + totalOffsetCountingResets, 5);
+	test += GetHexStringAddress(totalBufferSize - bufferSize, 5);
 	test += "]\tsz=";
 	test += to_string(bufferSize);
 	test += "\t";
