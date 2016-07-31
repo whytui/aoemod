@@ -11,6 +11,7 @@
 #include <AOE_SN_numbers.h>
 #include <AOE_empires_dat.h>
 #include "Version.h"
+#include "AOE_map.h"
 #include "crCommon.h"
 #include "UI_utilities.h"
 #include "crTrigger.h"

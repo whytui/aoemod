@@ -19,6 +19,7 @@
 #include <basicFilesHandling.h>
 
 #include "AOE_memory.h"
+#include "AOE_map.h"
 #include "UI_utilities.h"
 #include "crConfig.h"
 #include "civilizationInfo.h"
@@ -302,16 +303,6 @@ AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(ROR_STRUCTURES_10C::STRUCT_P
 // Return a list of all unitDefIds that are/can be enabled in player's tech tree.
 std::list<long int> GetActivableUnitDefIDs(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
-// Returns the map visibility mask for given location - old method
-// High word: bit mask per player for "explored"
-// Low word: bit mask per player for "fog visibility"
-// Lower bit is player 0 (gaia), 2nd=player1, etc
-ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int xPos, long int yPos);
-
-
-bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY);
-bool IsExploredForPlayer(long int playerId, long int posX, long int posY);
-
 // Returns true if a unit is idle
 bool IsUnitIdle(ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
 
@@ -325,34 +316,6 @@ AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(RO
 
 // GetDamage(unitDef attacker, unitDef defender) returns long int
 // Call 0043FF10
-
-// Get current mouse position, relative to UIObj
-// If UIObj is null, use current "global" screen relative positions.
-ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition(ROR_STRUCTURES_10C::STRUCT_ANY_UI *UIObj);
-
-// Get "game" coordinates under mouse position. Returns true if successful. Updates posX/posY.
-// If position is not valid, posX/posY are set to -1.
-bool GetGamePositionUnderMouse(float *posX, float *posY);
-
-// Returns "game" coordinates under mouse position (rounded to int).
-// If position is not valid, posX/posY are set to -1.
-ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo();
-
-// Get unit at (mouse) position, using AOE methods.
-// Warning, this impacts the global variables in 0x7D1CF8
-ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, bool allowTempUnits);
-
-// Updates map data to make nearby tiles appear correctly when altitude is not constant (after a manual modification)
-// This does not change altitude values. Altitudes will be softened ONLY if consecutive tiles have maximum 1 altitude difference.
-// This does NOT soften terrain borders, only altitudes !
-void AOE_SoftenAltitudeDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
-	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY);
-
-// Updates map data to make nearby tiles appear correctly when terrain is not constant (after a manual modification)
-// This does NOT soften altitude borders, only terrain !
-void AOE_SoftenTerrainDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
-	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY);
-
 
 // Return the total remaining food amount for a farm ("immediatly available" + "action-remaining").
 // Returns 0 in error cases (please check it is actually a farm !)

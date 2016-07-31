@@ -4,6 +4,7 @@
 #include <ROR_structures.h>
 #include <pointers.h>
 #include <mystrings.h>
+#include "AOE_map.h"
 #include "crCommon.h"
 #include "crCommands.h"
 #include "crLocalization.h"
