@@ -2036,6 +2036,8 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 		}
 	}
 	// Compute bonusForTechsSimilarity
+	int countWithPerfectSimilarity = 0;
+	int unitDefIdWithPerfectSimilarity = -1;
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
 		if (!unitInfo->isSelected && !unitInfo->isBoat && (unitInfo->ageResearchId <= age)) {
 			unitInfo->bonusForTechsSimilarity = 0; // reset
@@ -2075,43 +2077,46 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 			if (unitInfo->hasCivBonus) {
 				unitInfo->bonusForTechsSimilarity = (unitInfo->bonusForTechsSimilarity * 115) / 100; // +15% for civ bonus
 			}
+			for each (PotentialResearchInfo *researchInfo in this->potentialResearchesList)
+			{
+				if (researchInfo->markedForAdd && 
+					(researchInfo->impactedUnitDefIds.find(unitInfo->unitDefId) != researchInfo->impactedUnitDefIds.end())) {
+					if (GetNewUnitIdIfTechUpgradesUnit(researchInfo->techDef, unitInfo->unitDefId) > -1) {
+						// There already is upgrades for 'this' unit in strategy, this is an excellent point
+						unitInfo->bonusForTechsSimilarity = 100;
+						countWithPerfectSimilarity++;
+						unitDefIdWithPerfectSimilarity = unitInfo->unitDefId;
+					}
+				}
+			}
+
 			if (unitInfo->bonusForTechsSimilarity > 100) { unitInfo->bonusForTechsSimilarity = 100; }
 			if (unitInfo->bonusForTechsSimilarity < 0) { unitInfo->bonusForTechsSimilarity = 0; }
-			unitInfo->bonusForTechsSimilarity = unitInfo->bonusForTechsSimilarity / 5; // max 20% impact on global score
 		}
 	}
 
 	// Choose a unit that has both combination of: global score, similarity with main units
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
 		if (!unitInfo->isBoat && !unitInfo->isSelected && (unitInfo->ageResearchId <= age)) {
-			float globalScoreNonZero = (float)(unitInfo->globalScoreEarlyAge);
-			if (globalScoreNonZero <= 0) { globalScoreNonZero = 0; }
-			unitInfo->scoreForEarlyAge = (globalScoreNonZero * (100 + unitInfo->bonusForTechsSimilarity)) / 100;
-			if (hasAlreadyUnits) {
-				float rareStrengthFactor = ((float)unitInfo->bonusForRareStrength);
-				rareStrengthFactor = rareStrengthFactor / 5; // Max 20% impact
-				unitInfo->scoreForEarlyAge = unitInfo->scoreForEarlyAge * (100 +rareStrengthFactor) / 100;
+			if (countWithPerfectSimilarity == 1) {
+				// We found (only) one unit with upgrades that are already in strategy: select it and bypass other criteria.
+				unitInfo->scoreForEarlyAge = (unitInfo->unitDefId == unitDefIdWithPerfectSimilarity) ? 100 : 0;
+			} else {
+				// Standard case
+				float globalScoreNonZero = (float)(unitInfo->globalScoreEarlyAge);
+				if (globalScoreNonZero <= 0) { globalScoreNonZero = 0; }
+				int tmpBonusForTechsSimilarity = unitInfo->bonusForTechsSimilarity / 2; // max 50% impact on global score
+				unitInfo->scoreForEarlyAge = (globalScoreNonZero * (100 + tmpBonusForTechsSimilarity)) / 100;
+				if (hasAlreadyUnits) {
+					float rareStrengthFactor = ((float)unitInfo->bonusForRareStrength);
+					rareStrengthFactor = rareStrengthFactor / 2; // Max 50% impact
+					unitInfo->scoreForEarlyAge = unitInfo->scoreForEarlyAge * (100 + rareStrengthFactor) / 100;
+				}
 			}
 		}
 	}
 
-	if (!hasAlreadyUnits) {
-		// Choose a unit that has both combination of: global score, similarity with main units
-		for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
-			if (!unitInfo->isBoat && !unitInfo->isSelected && (unitInfo->ageResearchId <= age)) {
-				float globalScoreNonZero = (float)(unitInfo->globalScoreEarlyAge);
-				if (globalScoreNonZero <= 0) { globalScoreNonZero = 0; }
-				unitInfo->scoreForEarlyAge = (globalScoreNonZero * (100 + unitInfo->bonusForTechsSimilarity)) / 100;
-			}
-		}
-	} else {
-		// Choose a unit that has both combination of: rare strength bonus for this age, similarity with main units
-		for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
-			if (!unitInfo->isBoat && !unitInfo->isSelected && (unitInfo->ageResearchId <= age)) {
-				unitInfo->scoreForEarlyAge = ((float)unitInfo->bonusForRareStrength) * (100 + unitInfo->bonusForTechsSimilarity) / 100;
-			}
-		}
-	}
+
 	// Best unit selection
 	float bestScore = 0;
 	PotentialUnitInfo *bestUnit = NULL;
@@ -2127,8 +2132,10 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 		bestUnit->isOptionalUnit = true;
 		bestUnit->earlyAgeUnit = true;
 		this->AddUnitIntoToSelection(bestUnit);
-		this->log += "Early age unit selection: ";
-		this->log += bestUnit->unitName;
+		this->log += "[";
+		this->log += std::to_string(age);
+		this->log += "] Early age unit selection: ";
+		this->log += bestUnit->GetBaseUnitName();
 		this->log += " earlyscore=";
 		this->log += std::to_string((int)bestUnit->scoreForEarlyAge);
 		this->log += newline;
@@ -2197,7 +2204,7 @@ void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 		{
 			if (!unitInfo->isSelected && (unitInfo->ageResearchId <= currentAge)) {
 				this->log += "Early age not-selected unit: ";
-				this->log += unitInfo->unitName;
+				this->log += unitInfo->GetBaseUnitName();
 				this->log += " earlyscore=";
 				this->log += std::to_string((int)unitInfo->scoreForEarlyAge);
 				this->log += newline;
@@ -2854,7 +2861,7 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 				unitInfo->desiredCount = 0;
 			}
 			this->log += "Desired count for ";
-			this->log += unitInfo->unitName;
+			this->log += unitInfo->GetUpgradedUnitName();
 			this->log += "=";
 			this->log += std::to_string(unitInfo->desiredCount);
 			this->log += newline;

@@ -71,6 +71,30 @@ namespace STRATEGY {
 		float scoreForUnitCount; // Used in temporary treatments to compute number of units to add in strategy
 		float scoreForEarlyAge; // A temporary score for early age unit choices
 		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstStratElem; // First strategy element that trains such a unit
+		
+
+		// Returns localized name of base unit
+		const char *GetUpgradedUnitName() {
+			static char buffer[100];
+			buffer[0] = 0;
+			if (this->baseUnitDefLiving) {
+				GetLanguageDllText(this->upgradedUnitDefLiving->languageDLLID_Name, buffer, sizeof(buffer),
+					this->upgradedUnitDefLiving->ptrUnitName);
+				return buffer;
+			}
+			return this->unitName;
+		}
+		// Returns localized name of base unit
+		const char *GetBaseUnitName() {
+			static char buffer[100];
+			buffer[0] = 0;
+			if (this->baseUnitDefLiving) {
+				GetLanguageDllText(this->baseUnitDefLiving->languageDLLID_Name, buffer, sizeof(buffer),
+					this->baseUnitDefLiving->ptrUnitName);
+				return buffer;
+			}
+			return this->unitName;
+		}
 	};
 
 	class PotentialResearchInfo {

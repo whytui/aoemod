@@ -15,7 +15,7 @@ public:
 	// Get localized text from internal map and writes it in buffer.
 	// Returns true if string was found. Otherwise, defaultText is written into buffer.
 	bool ReadTranslation(unsigned short int stringId, char *buffer, long int bufferSize, const char *defaultText) const;
-	// Returns translated text, or defaultText if not found
+	// Returns translated text (custom strings only), or defaultText if not found.
 	const char *GetTranslation(unsigned short int stringId, const char *defaultText) const;
 	// Read a localization text file and imports all strings from it
 	// Returns true if successful

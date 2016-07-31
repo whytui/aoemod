@@ -39,7 +39,7 @@ bool LocalizationHandler::ReadTranslation(unsigned short int stringId, char *buf
 }
 
 
-// Returns translated text, or defaultText if not found
+// Returns translated text (custom strings only), or defaultText if not found.
 const char *LocalizationHandler::GetTranslation(unsigned short int stringId, const char *defaultText) const {
 	if (this->StringExists(stringId)) {
 		return this->GetString(stringId);

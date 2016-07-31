@@ -440,7 +440,7 @@ short int GetNewUnitIdIfTechUpgradesUnit(STRUCT_TECH_DEF *techDef, short int uni
 		if (techEffect) {
 			// Upgrade THIS unit to another unit
 			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) && (techEffect->effectUnit == unitDefId)) {
-				return techEffect->effectClass;
+				return techEffect->effectClass; // "effectClass" represents target unit def id here ;)
 			}
 		}
 	}
