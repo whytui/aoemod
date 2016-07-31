@@ -1497,6 +1497,66 @@ ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long
 	return GetUnitStruct(*foundUnitId);
 }
 
+// Updates map data to make nearby tiles appear correctly when altitude is not constant (after a manual modification)
+// This does not change altitude values. Altitudes will be softened ONLY if consecutive tiles have maximum 1 altitude difference.
+// This does NOT soften terrain borders, only altitudes !
+void AOE_SoftenAltitudeDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
+	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY) {
+	if (!mapInfo || !mapInfo->IsCheckSumValid()) {
+		return;
+	}
+	const unsigned long int addr = 0x447E40;
+	_asm {
+		PUSH 0;
+		PUSH 0;
+		PUSH 0;
+		PUSH maxPosX;
+		PUSH maxPosY;
+		PUSH minPosX;
+		PUSH minPosY;
+		MOV ECX, mapInfo;
+		CALL addr;
+	}
+}
+
+// Updates map data to make nearby tiles appear correctly when terrain is not constant (after a manual modification)
+// This does NOT soften altitude borders, only terrain !
+void AOE_SoftenTerrainDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
+	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY) {
+	if (!mapInfo || !mapInfo->IsCheckSumValid()) {
+		return;
+	}
+	const unsigned long int updateNearbyTerrainInfo = 0x4487F0;
+	const unsigned long int refreshTerrainUnsure = 0x444980;
+	minPosX--;
+	minPosY--;
+	if (minPosX < 0) { minPosX = 0; }
+	if (minPosY < 0) { minPosY = 0; }
+	maxPosX++;
+	maxPosY++;
+	if (minPosX >= mapInfo->mapArraySizeX) { minPosX = mapInfo->mapArraySizeX; }
+	if (minPosY >= mapInfo->mapArraySizeY) { minPosY = mapInfo->mapArraySizeY; }
+	for (int x = minPosX; x <= maxPosX; x++) {
+		for (int y = minPosY; y <= maxPosY; y++) {
+			_asm {
+				PUSH x;
+				PUSH y;
+				MOV ECX, mapInfo;
+				CALL updateNearbyTerrainInfo;
+			}
+		}
+	}
+	_asm {
+		PUSH 0;
+		PUSH maxPosX;
+		PUSH maxPosY;
+		PUSH minPosX;
+		PUSH minPosY;
+		MOV ECX, mapInfo;
+		CALL refreshTerrainUnsure;
+	}
+}
+
 
 // Return the total remaining food amount for a farm ("immediatly available" + "action-remaining").
 // Returns 0 in error cases (please check it is actually a farm !)

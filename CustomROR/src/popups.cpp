@@ -1008,7 +1008,7 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 	{
 		EditTerrainPopup *nextPopup = new EditTerrainPopup();
 		nextPopup->SetCRCommand(this->crCommand);
-		nextPopup->OpenPopup(400, 300, true);
+		nextPopup->OpenPopup(500, 300, true);
 		this->nextPopup = nextPopup;
 		break;
 	}
@@ -1168,10 +1168,6 @@ EditTerrainPopup::EditTerrainPopup() {
 	this->_ResetPointers();
 	this->elevation = 0;
 	this->terrainId = 0;
-	this->maxPosX = 0;
-	this->maxPosY = 0;
-	this->minPosX = 0;
-	this->minPosY = 0;
 	this->mapSizeX = -1;
 	this->mapSizeY = -1;
 }
@@ -1184,6 +1180,7 @@ void EditTerrainPopup::_ResetPointers() {
 	this->edtMinPosY = NULL;
 	this->edtElevation = NULL;
 	this->edtTerrainId = NULL;
+	this->chkSoften = NULL;
 }
 
 
@@ -1201,19 +1198,32 @@ void EditTerrainPopup::_AddPopupContent() {
 	// Popup is open. Add components
 	long int btnhPos = (hSize - 130) / 2;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
-	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_IDTERRAIN_EDIT, "Edit terrain"), btnhPos, 5, 130, 20, AOE_FONT_BIG_LABEL);
-	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_POSX_MINMAX, "Pos X (min/max)"), 10, 40, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_POSY_MINMAX, "Pos Y (min/max)"), 10, 70, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TERRAINID, "Terrain Id (0-31)"), 10, 100, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_ELEVATION, "Elevation (0-7)"), 10, 130, 120, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TIP_TERRAIN_LEAVE_EMPTY, "Tip: leave terrain/elevation empty to preserve current values."), 10, 160, 350, 20, AOE_FONT_STANDARD_TEXT);
-	this->AddTextBox(popup, &this->edtMinPosX, "0", 3, 140, 40, 80, 20, false, false, true);
-	this->AddTextBox(popup, &this->edtMinPosY, "0", 3, 140, 70, 80, 20, false, false, true);
-	this->AddTextBox(popup, &this->edtMaxPosX, "0", 3, 240, 40, 80, 20, false, false, true);
-	this->AddTextBox(popup, &this->edtMaxPosY, "0", 3, 240, 70, 80, 20, false, false, true);
-	this->AddTextBox(popup, &this->edtTerrainId, "", 2, 140, 100, 80, 20, false, false, true);
-	this->AddTextBox(popup, &this->edtElevation, "", 1, 140, 130, 80, 20, false, false, true);
-	this->AddLabel(popup, &unused, bufText, 10, 190, 350, 20, AOE_FONT_STANDARD_TEXT);
+	long int currentVPos = 5;
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_IDTERRAIN_EDIT, "Edit terrain"), btnhPos, currentVPos, 180, 20, AOE_FONT_BIG_LABEL);
+	currentVPos += 35;
+	long int VPosForInputs = currentVPos;
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_POSX_MINMAX, "Pos X (min/max)"), 10, currentVPos, 120, 20, AOE_FONT_STANDARD_TEXT);
+	currentVPos += 30;
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_POSY_MINMAX, "Pos Y (min/max)"), 10, currentVPos, 120, 20, AOE_FONT_STANDARD_TEXT);
+	currentVPos += 30;
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TERRAINID, "Terrain Id (0-31)"), 10, currentVPos, 120, 20, AOE_FONT_STANDARD_TEXT);
+	currentVPos += 30;
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_ELEVATION, "Elevation (0-7)"), 10, currentVPos, 120, 20, AOE_FONT_STANDARD_TEXT);
+	currentVPos += 30;
+	this->AddLabel(popup, &unused, "Soften modified terrain borders", 10, currentVPos + 6, 350, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddCheckBox(this->popup, &this->chkSoften, 240, currentVPos, 30, 30);
+	currentVPos += 34;
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TIP_TERRAIN_LEAVE_EMPTY, "Tip: leave terrain/elevation empty to preserve current values."), 10, currentVPos, 450, 20, AOE_FONT_STANDARD_TEXT);
+	currentVPos += 30;
+	// Table of inputs
+	this->AddTextBox(popup, &this->edtMinPosX, "0", 3, 140, VPosForInputs, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtMinPosY, "0", 3, 140, VPosForInputs + 30, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtMaxPosX, "0", 3, 240, VPosForInputs, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtMaxPosY, "0", 3, 240, VPosForInputs + 30, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtTerrainId, "", 2, 140, VPosForInputs + 60, 80, 20, false, false, true);
+	this->AddTextBox(popup, &this->edtElevation, "", 1, 140, VPosForInputs + 90, 80, 20, false, false, true);
+	this->AddLabel(popup, &unused, bufText, 10, currentVPos, 350, 20, AOE_FONT_STANDARD_TEXT);
+	currentVPos += 30;
 }
 
 
@@ -1251,6 +1261,7 @@ void EditTerrainPopup::OnBeforeClose(bool isCancel) {
 	assert(mapInfo->mapArraySizeY >= this->mapSizeY);
 	if ((mapInfo->mapArraySizeX < this->mapSizeX) || (mapInfo->mapArraySizeY < this->mapSizeY)) { return; }
 
+	// TODO: move treatments into this->crCommand
 	for (int x = minX; x <= maxX; x++) {
 		for (int y = minY; y <= maxY; y++) {
 			ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO *tile = mapInfo->GetTileInfo(x, y);
@@ -1259,6 +1270,10 @@ void EditTerrainPopup::OnBeforeClose(bool isCancel) {
 				if (!terrainEmpty) { tile->terrainData.SetTerrainId(terrainId); } // checks terrainId is 0-31
 			}
 		}
+	}
+	if (this->chkSoften->IsChecked()) {
+		AOE_SoftenAltitudeDifferences(mapInfo, minX, minY, maxX, maxY);
+		AOE_SoftenTerrainDifferences(mapInfo, minX, minY, maxX, maxY);
 	}
 }
 

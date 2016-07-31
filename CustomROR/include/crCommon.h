@@ -342,6 +342,18 @@ ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo();
 // Warning, this impacts the global variables in 0x7D1CF8
 ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, bool allowTempUnits);
 
+// Updates map data to make nearby tiles appear correctly when altitude is not constant (after a manual modification)
+// This does not change altitude values. Altitudes will be softened ONLY if consecutive tiles have maximum 1 altitude difference.
+// This does NOT soften terrain borders, only altitudes !
+void AOE_SoftenAltitudeDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
+	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY);
+
+// Updates map data to make nearby tiles appear correctly when terrain is not constant (after a manual modification)
+// This does NOT soften altitude borders, only terrain !
+void AOE_SoftenTerrainDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
+	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY);
+
+
 // Return the total remaining food amount for a farm ("immediatly available" + "action-remaining").
 // Returns 0 in error cases (please check it is actually a farm !)
 float GetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit);

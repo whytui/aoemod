@@ -626,7 +626,7 @@ bool CustomRORMainInterface::OpenEditMapSizePopup() {
 // Opens the custom "edit terrain" popup in editor
 // Returns true if OK.
 bool CustomRORMainInterface::OpenCustomTerrainEditPopup() {
-	return (this->OpenCustomGamePopup<EditTerrainPopup>(400, 300, true) != NULL);
+	return (this->OpenCustomGamePopup<EditTerrainPopup>(500, 300, true) != NULL);
 }
 
 

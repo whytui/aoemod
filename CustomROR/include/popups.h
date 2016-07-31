@@ -352,7 +352,6 @@ public:
 	bool isForTriggers;
 private:
 	long int mapSizeX, mapSizeY;
-	long int minPosX, minPosY, maxPosX, maxPosY;
 	char terrainId;
 	char elevation;
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtMinPosX;
@@ -361,6 +360,7 @@ private:
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtMaxPosY;
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtTerrainId;
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtElevation;
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkSoften;
 };
 
 

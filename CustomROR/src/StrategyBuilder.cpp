@@ -2100,7 +2100,7 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 		if (!unitInfo->isBoat && !unitInfo->isSelected && (unitInfo->ageResearchId <= age)) {
 			if (countWithPerfectSimilarity == 1) {
 				// We found (only) one unit with upgrades that are already in strategy: select it and bypass other criteria.
-				unitInfo->scoreForEarlyAge = (unitInfo->unitDefId == unitDefIdWithPerfectSimilarity) ? 100 : 0;
+				unitInfo->scoreForEarlyAge = (unitInfo->unitDefId == unitDefIdWithPerfectSimilarity) ? 100.0f : 0.0f;
 			} else {
 				// Standard case
 				float globalScoreNonZero = (float)(unitInfo->globalScoreEarlyAge);

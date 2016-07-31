@@ -182,7 +182,7 @@ namespace ROR_STRUCTURES_10C
 	static_assert(sizeof(STRUCT_ARMOR_OR_ATTACK) == 4, "STRUCT_ARMOR_OR_ATTACK size");
 
 
-	// Size = 8. Only in temporary treatments
+	// Size = 8. Mostly used in temporary treatments
 	class STRUCT_POSITION_INFO {
 	public:
 		long int posY;
@@ -576,26 +576,24 @@ namespace ROR_STRUCTURES_10C
 	// Size = 0x18
 	class STRUCT_GAME_MAP_TILE_INFO {
 	public:
-		char unknown_00;
-		char unknown_01;
-		char unknown_02;
-		char unknown_03;
-		char elevationGraphicsIndex; // To retrieve elevation graphics in terrain's table - 0 means it is flat ?
+		short int displayX; // +00. A screen X position where to display tile (independent from player's screen position). Units on this tile will be displayed accordingly.
+		short int displayY; // +02. A screen Y position where to display tile (independent from player's screen position). Units on this tile will be displayed accordingly. Changing this value can generate fake elevation (display only).
+		char elevationGraphicsIndex; // To retrieve elevation graphics in terrain's table - 0=flat. HAS an effect on units altitude !
 		TERRAIN_BYTE terrainData; // +5: elevation/terrainID. 3 high bits (0x80/0x40/0x20) represent altitude 0-7. 5 low bits represent terrainId 0-31
 		char unknown_06; // Seen AND EAX, 0x0F on this
-		char unknown_07;
+		char unknown_07; // Updated in 444980 to 0xCC, but reset to 0x0F very frequently (quite instantly). Some status ?
 		char unknown_08;
-		char unknown_09;
-		char unknown_0A;
-		char unknown_0B;
+		char unknown_09; // Seen 0x0F
+		char tileHighlightLevel; // +0A. Tile brillance level (for tile selection in editor). Values in 0-0xB0. Default=0. Updated in 444980 with  arg5 ?
+		char unknown_0B; // maybe +A is a short int
 		char unknown_0C;
 		char unknown_0D;
 		char unknown_0E;
 		char unknown_0F;
 		// 0x10
-		STRUCT_UNIT **unitsOnThisTile; // Array of units occupying this tile. The list ends with a NULL pointer.
-		short int unknown_14; // For elevation ? "IDs" ? see 0x18,0x23 in 4B05DB for proj impacts
-		short int unknown_16; // unsure
+		STRUCT_UNIT **unitsOnThisTile; // +10. Array of units occupying this tile. The list ends with a NULL pointer. NULL if no unit on this tile.
+		short int unitsOnThisTileCount; // +14. Number of units in unitsOnThisTile array. unitsOnThisTile=NULL if unitsOnThisTileCount==0.
+		short int unknown_16; // possibly unused ?
 	};
 
 	// Size = 0xB5F8 to confirm
@@ -615,7 +613,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_TERRAIN_DEF terrainDefinitions[0x20]; // Count is unsure
 		char unknown_338C[0x8D8C - 0x338C];
 		// 8808-1C... 0x10 elems and size=5A0 => start at 2E08 ? WTF. about shp
-		STRUCT_GAME_MAP_TILE_INFO **pTileInfoRows; // 0x8D8C
+		STRUCT_GAME_MAP_TILE_INFO **pTileInfoRows; // 0x8D8C. Please use GetTileInfo(...)
 		// 0x8D90
 		short int terrainCount; // +8D90. Default = 0x17 = 23 different terrains in empires.dat
 		short int unknown_8D92;
@@ -1640,14 +1638,15 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(STRUCT_PLAYER_MAP_INFO) == 0x38, "STRUCT_PLAYER_MAP_INFO size");
 
-	// Size = 0x10
+	// Size = 0x10. Positions to refresh in UI ??? Just a guess
+	// 45EAC0=addElement(posY, posX)
 	class STRUCT_PLAYER_UNKNOWN_58_AND_6C {
 	public:
 		unsigned long int arraySize; // Size for unknown_010
-		unsigned long int unknown_04; // relative +4
-		unsigned long int unknown_08; // A temporary variable for AI ?
+		unsigned long int usedElements; // +4. Number of used slots in array ?
+		unsigned long int unknown_08; // +8. Same as +4.. One is usedcount, other is currentMaxIndex?
 		unsigned long int unknown_0C; // 
-		long int *unknown_010; // a pointer
+		STRUCT_POSITION_INFO *positionsArray; // +10 = array to (posY, posX) as 2 dwords
 	};
 
 	// Size = 0xB0. Added (created) in 4FC5A0.
