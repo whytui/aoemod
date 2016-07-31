@@ -2820,7 +2820,9 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 			case TribeAIGroupHorseArcher:
 				unitInfo->scoreForUnitCount = proportionForOneMainUnit * 1.15f; // bonus for melee and base archer unit count (need more numbers)
 				break;
-			//case TribeAIGroupPriest:
+			case TribeAIGroupPriest:
+				unitInfo->scoreForUnitCount = proportionForOneMainUnit * 0.50f; // Priests: train less than other units (expensive, and too many of them is fruitless)
+				break;
 			//case TribeAIGroupSiegeWeapon:
 			//case TribeAIGroupSlinger:
 			//case TribeAIGroupWarBoat:
