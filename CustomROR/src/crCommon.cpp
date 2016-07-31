@@ -3118,7 +3118,6 @@ bool AnalyzeEmpiresDatQuality() {
 		}
 	}
 #endif
-	// TODO: search for techtree-unavailable researches
 	// Units
 #if 1
 	std::set<short int> badBlastLevelUnits;
@@ -3160,6 +3159,11 @@ bool AnalyzeEmpiresDatQuality() {
 	}
 	
 #endif
+	// Search for techtree-unavailable researches
+	for (int civId = 0; civId < global->civCount; civId++)
+	{
+		DetectDatImpossibleResearches(global, civId);
+	}
 
 	return true;
 }

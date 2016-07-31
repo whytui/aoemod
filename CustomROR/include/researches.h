@@ -53,6 +53,10 @@ int DisableImpossibleResearches();
 // Example in original game: irrigation for persian, armored elephant for yamato, etc.
 int DisablePlayerImpossibleResearches(STRUCT_PLAYER *player);
 
+// Finds all non-disabled researches that are impossible to develop for given civilization's technology tree.
+// Only writes log, does not fix anything.
+int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId);
+
 // Returns true if technology has at least one effect on provided unit definition.
 // Effect can be negative too.
 // Use filter argument to exclude techs like martyrdom or negative effects

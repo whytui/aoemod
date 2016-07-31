@@ -234,6 +234,121 @@ int DisablePlayerImpossibleResearches(STRUCT_PLAYER *player) {
 	return foundCount;
 }
 
+// Finds all non-disabled researches that are impossible to develop for given civilization's technology tree.
+// Only writes log, does not fix anything.
+int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
+	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo || !global->technologiesInfo || !global->civilizationDefinitions) {
+		return 0;
+	}
+	if ((civId < 0) || (civId >= global->civCount)) { return 0; }
+	STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civId];
+	if (civDef->techTreeId >= global->technologiesInfo->technologyCount) {
+		return 0;
+	}
+
+	int resCount = global->researchDefInfo->researchCount;
+	STRUCT_RESEARCH_DEF_INFO *resInfoArray = global->researchDefInfo;
+	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
+	if (!resDefArray) { return 0; }
+
+	std::set<short int> availableResearches; // status in AVAILABLE, BEING_RESEARCHED, DONE_OR_INVALID
+	std::set<short int> disabledResearches; // CST_RESEARCH_STATUS_DISABLED
+	std::set<short int> potentialResearches; // CST_RESEARCH_STATUS_WAITING_REQUIREMENT. We don't know if they can REALLy become available.
+	std::set<short int> potentialToRemove; // internal temp buffer for loop
+
+	// Loop 1 : sort researches into 3 categories (disabled, done or available, undetermined)
+	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techTreeDef = &global->technologiesInfo->ptrTechDefArray[civDef->techTreeId];
+	for (int researchId = 0; researchId < resCount; researchId++) {
+		bool isDisabled = false;
+		for (int effectId = 0; effectId < techTreeDef->effectCount; effectId++) {
+			if (DoesTechDisableResearch(techTreeDef, researchId)) {
+				isDisabled = true;
+			}
+			// Disable unit (building) and this building has a valid "enable research". Like temple for macedonian, academy for persian.
+			if ((techTreeDef->ptrEffects[effectId].effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) &&
+				(techTreeDef->ptrEffects[effectId].effectClass == 0) && (techTreeDef->ptrEffects[effectId].effectUnit > -1)) {
+				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefAsBld = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)
+					civDef->GetUnitDefBase(techTreeDef->ptrEffects[effectId].effectUnit);
+				if (unitDefAsBld && unitDefAsBld->IsCheckSumValid() && unitDefAsBld->IsTypeValid() && (unitDefAsBld->initiatesResearch > -1)) {
+					// We DO have a valid building with a "initiate research" value... And it's not available, making the research unavailable
+					potentialResearches.erase(unitDefAsBld->initiatesResearch);
+					disabledResearches.insert(unitDefAsBld->initiatesResearch);
+				}
+			}
+		}
+		if (isDisabled) {
+			disabledResearches.insert(researchId);
+		} else {
+			potentialResearches.insert(researchId);
+		}
+	}
+
+	std::string techTreeString = "Civ #";
+	techTreeString += std::to_string(civId);
+	techTreeString += " (";
+	techTreeString += civDef->civilizationName;
+	techTreeString += "), tech tree #";
+	techTreeString += std::to_string(civDef->techTreeId);
+
+	// Loop 2 : "recursively" treat elements with "unknown" status (potentialResearches)
+	// until it is empty or we don't progress anymore.
+	int foundCount = 0;
+	int remainingUnknownCount = potentialResearches.size();
+	int previousRemainingCount = 9999;
+	while ((remainingUnknownCount > 0) && (remainingUnknownCount != previousRemainingCount)) {
+		for each (int curResId in potentialResearches) {
+			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &resDefArray[curResId];
+			int minRequiredResearchesCount = resDef->minRequiredResearchesCount;
+			int reqResOK = 0;
+			int reqResImpossible = 0;
+
+			for (int i = 0; i < 4; i++) {
+				if ((resDef->requiredResearchId[i] == -1) ||
+					(std::count(disabledResearches.begin(), disabledResearches.end(), resDef->requiredResearchId[i]) > 0)) {
+					reqResImpossible++;
+				}
+				if (std::count(availableResearches.begin(), availableResearches.end(), resDef->requiredResearchId[i]) > 0) {
+					reqResOK++;
+				}
+			}
+			if (reqResOK >= minRequiredResearchesCount) {
+				availableResearches.insert(curResId);
+				potentialToRemove.insert(curResId);
+			}
+			if (4 - reqResImpossible < minRequiredResearchesCount) {
+				// We found an impossible research (some requirements can't be obtained)
+				disabledResearches.insert(curResId);
+				potentialToRemove.insert(curResId);
+				foundCount++;
+				std::string tmpmsg = techTreeString;
+				tmpmsg += ": this research can never become available: ";
+				tmpmsg += std::to_string(curResId);
+				tmpmsg += " = ";
+				char tmpbuffer[100];
+				GetLanguageDllText(resDef->languageDLLName, tmpbuffer, sizeof(tmpbuffer), resDef->researchName);
+				tmpmsg += tmpbuffer;
+				traceMessageHandler.WriteMessageNoNotification(tmpmsg);
+			}
+		}
+		// Do not do the remove IN the loop ! Do it once iterations are finished
+		for each (auto curResId in potentialToRemove)
+		{
+			potentialResearches.erase(curResId);
+		}
+		potentialToRemove.clear(); // reset temp loop buffer
+
+		previousRemainingCount = remainingUnknownCount;
+		remainingUnknownCount = potentialResearches.size();
+	}
+	if (remainingUnknownCount > 0) {
+		std::string msg = "Could not complete researches tree analysis for ";
+		msg += techTreeString;
+		traceMessageHandler.WriteMessage(msg);
+	}
+	return foundCount;
+}
+
+
 // Disable all impossible researches for all players.
 // An impossible research is a research that is waiting for requirements, including ones that can never be satisfied.
 // Example in original game: irrigation for persian, armored elephant for yamato, etc.

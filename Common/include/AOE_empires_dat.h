@@ -218,7 +218,7 @@ namespace AOE_CONST_FUNC {
 		TDE_INVALID = -1,
 		TDE_ATTRIBUTE_MODIFIER_SET = 0,
 		TDE_RESOURCE_MODIFIER_ADD_SET = 1, // add or set value (according to "mode" = effectClass field: 0=set, 1=add)
-		TDE_ENABLE_DISABLE_UNIT = 2,
+		TDE_ENABLE_DISABLE_UNIT = 2, // effect class is "enable": 0=disable, 1=enable
 		TDE_UPGRADE_UNIT = 3, // "source" unit = effectUnit, "target" (upgraded) unit = effectClass
 		TDE_ATTRIBUTE_MODIFIER_ADD = 4, // add value
 		TDE_ATTRIBUTE_MODIFIER_MULT = 5, // multiply by a value
