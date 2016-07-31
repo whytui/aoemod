@@ -25,6 +25,7 @@
 #include "crLocalization.h"
 #include "StrategyBuilder.h"
 #include "basicFilesHandling.h"
+#include "crMapCopier.h"
 
 #pragma once
 
@@ -373,6 +374,7 @@ public:
 
 	// Returns false if we should prevent unit from moving back (to maxrange) after shooting. Default result=true
 	bool ShouldRetreatAfterShooting(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity);
+
 
 	// ----------------------------------
 	// City plan

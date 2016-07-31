@@ -1404,6 +1404,9 @@ long int GetTotalQueueNumberForUnit(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *bl
 // You can use 0 as posZ value.
 // Returns NULL if it failed
 ROR_STRUCTURES_10C::STRUCT_UNIT *CreateUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ) {
+	if (!player || !player->IsCheckSumValid()) {
+		return NULL;
+	}
 	long int res;
 	_asm {
 		MOV ECX, player

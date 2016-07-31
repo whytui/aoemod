@@ -1210,7 +1210,7 @@ void EditTerrainPopup::_AddPopupContent() {
 	currentVPos += 30;
 	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_ELEVATION, "Elevation (0-7)"), 10, currentVPos, 120, 20, AOE_FONT_STANDARD_TEXT);
 	currentVPos += 30;
-	this->AddLabel(popup, &unused, "Soften modified terrain borders", 10, currentVPos + 6, 350, 20, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_SOFTEN_TERRAIN_OPTION, "Soften modified terrain borders"), 10, currentVPos + 6, 350, 20, AOE_FONT_STANDARD_TEXT);
 	this->AddCheckBox(this->popup, &this->chkSoften, 240, currentVPos, 30, 30);
 	currentVPos += 34;
 	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TIP_TERRAIN_LEAVE_EMPTY, "Tip: leave terrain/elevation empty to preserve current values."), 10, currentVPos, 450, 20, AOE_FONT_STANDARD_TEXT);

@@ -523,6 +523,19 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 			int id = l->unitIdArray[i];
 			if (id == -1) { id = -2; }
 		}
+
+		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		assert((global != NULL) && global->IsCheckSumValid());
+		if (!global || !global->IsCheckSumValid()) { return; }
+		assert((global->gameMapInfo != NULL) && (global->gameMapInfo->IsCheckSumValid()));
+		if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return; }
+		/*ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
+		mapInfo->GetTileInfo(1, 2)->terrainData.SetTerrainId(4);
+		mapInfo->GetTileInfo(10, 2)->terrainData.SetTerrainId(6);
+		mapInfo->GetTileInfo(20, 2)->terrainData.SetTerrainId(10);
+		mapInfo->GetTileInfo(20, 2)->terrainData.SetAltitude(2);
+		RefreshTerrainAfterManualChange(mapInfo, -1, -1, -1, -1);*/
+
 		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, false, NULL);
 		/*STRATEGY::StrategyBuilder *sb = new STRATEGY::StrategyBuilder(this->crInfo, player);
 		//sb->GetStrategyGenerationInfo(player);
@@ -530,11 +543,15 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		delete sb;*/
 	}
 	if (strcmp(command, "a") == 0) {
-		long int playerId = 2;
+		long int playerId = 1;
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		
 		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)FindUnitWithShortcutNumberForPlayer(player, 1);
+		if (unitBase) {
+			unitBase->AOE_destructor(true);
+			return;
+		}
 		ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *type50 = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *)unitBase;
 		if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) { return; }
 		if (unitBase->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING) { return; }

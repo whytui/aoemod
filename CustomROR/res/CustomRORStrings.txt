@@ -174,3 +174,5 @@ Terrain Id (0-31)
 Elevation (0-7)
 [42082]
 Tip: leave terrain/elevation empty to preserve current values.
+[42091] // Label for checkbox option to soften terrain borders
+Soften modified terrain borders

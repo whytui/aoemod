@@ -1,13 +1,6 @@
 #include "../include/AOE_map.h"
 
 
-// TODO: create an include file for such methods AOE_mainStructs or something like that
-// Duplicated from crCommon (dirty !!)
-extern ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS* GetGameSettingsPtr();
-extern ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr();
-extern ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitStruct(long int unitId);
-
-
 
 // Returns the map visibility mask for given location
 // High word: bit mask per player for "explored"
@@ -267,4 +260,20 @@ void AOE_SoftenTerrainDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapI
 		MOV ECX, mapInfo;
 		CALL refreshTerrainUnsure;
 	}
+}
+
+// Refresh and smoothen terrain+altitude in given zone. If all position arguments are -1, all map is treated.
+void RefreshTerrainAfterManualChange(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
+	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY) {
+	if (!mapInfo || !mapInfo->IsCheckSumValid()) {
+		return;
+	}
+	if ((minPosX == -1) && (minPosY == -1) && (maxPosX == -1) && (maxPosY == -1)) {
+		minPosX = 0;
+		minPosY = 0;
+		maxPosX = mapInfo->mapArraySizeX - 1;
+		maxPosY = mapInfo->mapArraySizeY - 1;
+	}
+	AOE_SoftenAltitudeDifferences(mapInfo, minPosX, minPosY, maxPosX, maxPosY);
+	AOE_SoftenTerrainDifferences(mapInfo, minPosX, minPosY, maxPosX, maxPosY);
 }

@@ -3,14 +3,26 @@
 
 #include <Windows.h> // POINT, GetCursorPos...
 #include <assert.h>
+#include <string>
+#include <set>
 #include <AOE_offsets.h>
 #include <ROR_structures.h>
 #include "UI_utilities.h"
+#include "traceMessage.h"
 
 /* This file contains various primitives about map handling */
 
 
 using namespace ROR_STRUCTURES_10C;
+
+
+// TODO: create an include file for such methods AOE_mainStructs or something like that
+// Duplicated from crCommon (dirty !!)
+extern ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS* GetGameSettingsPtr();
+extern ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr();
+extern ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitStruct(long int unitId);
+
+
 
 
 // Returns the map visibility mask for given location - old method
@@ -50,5 +62,9 @@ void AOE_SoftenAltitudeDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *map
 // Updates map data to make nearby tiles appear correctly when terrain is not constant (after a manual modification)
 // This does NOT soften altitude borders, only terrain !
 void AOE_SoftenTerrainDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
+	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY);
+
+// Refresh and smoothen terrain+altitude in given zone. If all position arguments are -1, all map is treated.
+void RefreshTerrainAfterManualChange(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
 	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY);
 

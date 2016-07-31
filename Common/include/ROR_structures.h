@@ -84,6 +84,7 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_UNIT_LIVING;
 	class STRUCT_UNIT_BUILDING;
 	class STRUCT_UNIT_TREE;
+	class STRUCT_UNIT_BASE_LIST;
 
 	// AI
 	class STRUCT_AI;
@@ -214,6 +215,14 @@ namespace ROR_STRUCTURES_10C
 	};
 	static_assert(sizeof(TERRAIN_BYTE) == 1, "TERRAIN_BYTE size");
 #pragma pack(pop)
+
+	// Size=8. Represents a unit list element
+	class STRUCT_UNIT_BASE_LIST {
+	public:
+		STRUCT_UNIT_BASE *unit;
+		STRUCT_UNIT_BASE_LIST *next; // NULL=end of list
+	};
+	static_assert(sizeof(STRUCT_UNIT_BASE_LIST) == 8, "STRUCT_UNIT_BASE_LIST size");
 
 	// Used in AI structures to keep lists of unit IDs. Size=0x10
 	// All methods suppose that usedElemCount==arraySize (no empty slot)
@@ -591,7 +600,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_0E;
 		char unknown_0F;
 		// 0x10
-		STRUCT_UNIT **unitsOnThisTile; // +10. Array of units occupying this tile. The list ends with a NULL pointer. NULL if no unit on this tile.
+		STRUCT_UNIT_BASE_LIST *unitsOnThisTile; // +10. Array of units occupying this tile. The list ends with a NULL pointer. NULL if no unit on this tile.
 		short int unitsOnThisTileCount; // +14. Number of units in unitsOnThisTile array. unitsOnThisTile=NULL if unitsOnThisTileCount==0.
 		short int unknown_16; // possibly unused ?
 	};
@@ -3866,7 +3875,18 @@ namespace ROR_STRUCTURES_10C
 				(this->checksum == 0x0054820C) || // living
 				(this->checksum == 0x00547FA0); // Building
 		}
-
+		// Deletes a units by calling destructor. You should provide freeMemory=true
+		// AOE destructor calls all necessary underlying updates of removing the unit (map, player, AI...)
+		void AOE_destructor(bool freeMemory) {
+			long int doFree = freeMemory ? 1 : 0;
+			unsigned long int myaddr = (unsigned long int)this;
+			_asm {
+				MOV ECX, myaddr;
+				MOV EDX, DS:[ECX];
+				PUSH doFree;
+				CALL DS:[EDX];
+			}
+		}
 	};
 	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE) == 0x88, "STRUCT_UNIT_BASE size");
 

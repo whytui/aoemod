@@ -176,4 +176,5 @@ Id de terrain (0-31)
 Altitude (0-7)
 [42082]
 Astuce: laissez les champs terrain/altitude vides pour préserver les valeurs actuelles.
-
+[42091] // Label for checkbox option to soften terrain borders
+Lisser les limites du terrain modifié

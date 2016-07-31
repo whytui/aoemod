@@ -113,6 +113,7 @@
     <ClInclude Include="include\crGameObjects.h" />
     <ClInclude Include="include\crLocalization.h" />
     <ClInclude Include="include\crMainInterface.h" />
+    <ClInclude Include="include\crMapCopier.h" />
     <ClInclude Include="include\crPatcher.h" />
     <ClInclude Include="include\customFuncRules.h" />
     <ClInclude Include="include\drsHandler.h" />
@@ -148,6 +149,7 @@
     <ClCompile Include="src\crGameObjects.cpp" />
     <ClCompile Include="src\crLocalization.cpp" />
     <ClCompile Include="src\crMainInterface.cpp" />
+    <ClCompile Include="src\crMapCopier.cpp" />
     <ClCompile Include="src\crPatcher.cpp" />
     <ClCompile Include="src\crTrigger.cpp" />
     <ClCompile Include="src\crTriggerSet.cpp" />
