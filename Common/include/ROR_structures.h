@@ -214,6 +214,20 @@ namespace ROR_STRUCTURES_10C
 		}
 	};
 	static_assert(sizeof(TERRAIN_BYTE) == 1, "TERRAIN_BYTE size");
+
+	// Size = 1 byte. This is a shortcut to avoid duplicating bit operations everywhere
+	class BORDER_BYTE {
+	public:
+		char borderData;
+		GROUND_BORDERS GetBorderId() const {
+			return (GROUND_BORDERS)(this->borderData & 0x0F); // 4 low bits = border id
+		}
+		// UNSURE. Shape indexes can go higher, but there seems to be something with values from 0 to 12 ?
+		char GetShapeIndex() const {
+			return (this->borderData & 0xF0); // 4 high bits = border id
+		}
+	};
+	static_assert(sizeof(BORDER_BYTE) == 1, "BORDER_BYTE size");
 #pragma pack(pop)
 
 	// Size=8. Represents a unit list element
@@ -582,18 +596,18 @@ namespace ROR_STRUCTURES_10C
 		}
 	};
 
-	// Size = 0x18
+	// Size = 0x18. The main "actual" map info necessary to set correct terrain/altitude and transitions are terrainData, terrainBorderData and elevationGraphicsIndex
 	class STRUCT_GAME_MAP_TILE_INFO {
 	public:
 		short int displayX; // +00. A screen X position where to display tile (independent from player's screen position). Units on this tile will be displayed accordingly.
 		short int displayY; // +02. A screen Y position where to display tile (independent from player's screen position). Units on this tile will be displayed accordingly. Changing this value can generate fake elevation (display only).
-		char elevationGraphicsIndex; // To retrieve elevation graphics in terrain's table - 0=flat. HAS an effect on units altitude !
+		char elevationGraphicsIndex; // +4. To retrieve elevation graphics in terrain's table - 0=flat. HAS an effect on units altitude ! Please call mapInfo->RecomputeTileDisplayPos(...) after modifying this
 		TERRAIN_BYTE terrainData; // +5: elevation/terrainID. 3 high bits (0x80/0x40/0x20) represent altitude 0-7. 5 low bits represent terrainId 0-31
-		char unknown_06; // Seen AND EAX, 0x0F on this
+		BORDER_BYTE terrainBorderData; // +6. Border id & shape index (for terrain transitions)
 		char unknown_07; // Updated in 444980 to 0xCC, but reset to 0x0F very frequently (quite instantly). Some status ?
 		char unknown_08;
 		char unknown_09; // Seen 0x0F
-		char tileHighlightLevel; // +0A. Tile brillance level (for tile selection in editor). Values in 0-0xB0. Default=0. Updated in 444980 with  arg5 ?
+		char tileHighlightLevel; // +0A. Tile brillance level (for tile selection in editor). Values in 0-0xB0. Default=0, 0x0F=underMouse(editor). Updated in 444980 with arg5 ?
 		char unknown_0B; // maybe +A is a short int
 		char unknown_0C;
 		char unknown_0D;
@@ -629,9 +643,9 @@ namespace ROR_STRUCTURES_10C
 		unsigned short int unknown_8D94;
 		unsigned short int unknown_8D96; // init 0x40 . for Y ?
 		unsigned short int unknown_8D98; // init 0x20 . for X ?
-		unsigned short int unknown_8D9A; // init 0x10
-		unsigned short int unknown_8D9C; // init 0x20. some increment related to X values ?
-		unsigned short int unknown_8D9E; // init 0x10. Some multiplicator related to X values ?
+		unsigned short int unknown_8D9A; // init 0x10. (posX-posY)*unknown_8D9A - (altitude*[unknown_8D9E or unknown_8D9E-1]) = tile.displayY
+		unsigned short int unknown_8D9C; // init 0x20. (posX+posY)*unknown_8D9C = tile.displayX
+		unsigned short int unknown_8D9E; // init 0x10. Use "unknown_8D9E+1" for tile.elevationGraphicIndex in (2,6,8,A,E,F,10), see 0x444B7B.
 		char unknown_8DA0[0x8DB0 - 0x8DA0];
 		char *unknown_8DB0; // ptr, map data also. Size= sizeX*sizeY*1 (x*y bytes)
 		unsigned long int unknown_8DB4; // ptr, map data also ? Size=(sizeX+1)*4 bytes (ptrs ?) = rows for +8DB0
@@ -659,6 +673,30 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_GAME_MAP_TILE_INFO *GetTileInfo(short int x, short int y) {
 			if ((x < 0) || (x >= this->mapArraySizeX) || (y < 0) || (y >= this->mapArraySizeY)) { return NULL; }
 			return &this->pTileInfoRows[x][y];
+		}
+		// Updates a tile's displayX/Y fields according to its elevation and position.
+		// Necessary to fix tile "height" display when altitude/elevationGraphicIndex changed.
+		bool RecomputeTileDisplayPos(short int x, short int y) {
+			if ((x < 0) || (x >= this->mapArraySizeX) || (y < 0) || (y >= this->mapArraySizeY)) { return false; }
+			STRUCT_GAME_MAP_TILE_INFO *tile = this->GetTileInfo(x, y);
+			if (!tile) { return false; }
+			tile->displayX = (x + y) * this->unknown_8D9C;
+			tile->displayY = (x - y) * this->unknown_8D9A;
+			tile->displayY -= tile->terrainData.GetAltitude() * this->unknown_8D9E;
+			switch (tile->elevationGraphicsIndex) {
+			case 2:
+			case 6:
+			case 8:
+			case 0xA:
+			case 0xE:
+			case 0xF:
+			case 0x10:
+				tile->displayY -= this->unknown_8D9E;
+				break;
+			default:
+				break;
+			}
+			return true;
 		}
 	};
 

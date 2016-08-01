@@ -494,6 +494,25 @@ namespace AOE_CONST_FUNC {
 		CST_TR_WALLS = 10
 	};
 
+	enum GROUND_BORDERS : char {
+		CST_GB_UNUSED_0 = 0,
+		CST_GB_GB_VOID = 1,
+		CST_GB_DESERT_WATER = 2,
+		CST_GB_GRASS_WATER = 3,
+		CST_GB_GRASS_DESERT = 4,
+		CST_GB_GRASS_FOREST = 5,
+		CST_GB_GRASS_DESERT2 = 6,
+		CST_GB_WATER_DARK = 7,
+		CST_GB_UNKNOWN_8 = 8,
+		CST_GB_UNKNOWN_9 = 9,
+		CST_GB_UNKNOWN_10 = 10,
+		CST_GB_UNKNOWN_11 = 11,
+		CST_GB_UNKNOWN_12 = 12,
+		CST_GB_UNKNOWN_13 = 13,
+		CST_GB_UNKNOWN_14 = 14,
+		CST_GB_UNKNOWN_15 = 15,
+	};
+
 	// Unit names (this list has been directly generated from in-game data)
 	const static int CST_UNIT_NAMES_MIN_ID = 0;
 	const static int CST_UNIT_NAMES_MAX_ID = 399;

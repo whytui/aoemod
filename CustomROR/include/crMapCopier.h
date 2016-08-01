@@ -15,8 +15,7 @@
 
 using namespace ROR_STRUCTURES_10C;
 
-
-
+#define MAX_MAP_SIZE 255
 
 namespace MAP {
 
@@ -53,12 +52,19 @@ namespace MAP {
 		long int GetCopiedUnitsCount() { return this->copiedUnits.size(); }
 
 	private:
-		TERRAIN_BYTE copiedTerrainData[255][255];
+		const int maxArraySize = MAX_MAP_SIZE;
+		TERRAIN_BYTE copiedTerrainData[MAX_MAP_SIZE][MAX_MAP_SIZE];
+		BORDER_BYTE copiedBorderData[MAX_MAP_SIZE][MAX_MAP_SIZE];
+		char copiedElevationIndexData[MAX_MAP_SIZE][MAX_MAP_SIZE];
 		long int copiedSizeX;
 		long int copiedSizeY;
 		std::list<UNIT_INSTANCE_SERIALIZED_DATA*> copiedUnits;
+
+		void ClearCopiedUnits();
 	};
 
 
 	extern MapCopier mapCopierInstance;
 }
+
+#undef MAX_MAP_SIZE

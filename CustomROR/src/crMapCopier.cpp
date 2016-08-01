@@ -11,6 +11,10 @@ MapCopier::MapCopier() {
 }
 
 MapCopier::~MapCopier() {
+	this->ClearCopiedUnits();
+}
+
+void MapCopier::ClearCopiedUnits() {
 	for each (UNIT_INSTANCE_SERIALIZED_DATA *unitInfo in this->copiedUnits)
 	{
 		delete unitInfo;
@@ -23,6 +27,7 @@ MapCopier::~MapCopier() {
 bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long int maxY) {
 	this->copiedSizeX = 0;
 	this->copiedSizeY = 0;
+	this->ClearCopiedUnits();
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert((global != NULL) && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return false; }
@@ -37,7 +42,9 @@ bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long in
 		for (int y = minY; y <= maxY; y++) {
 			STRUCT_GAME_MAP_TILE_INFO *tile = mapInfo->GetTileInfo(x, y);
 			if (tile) {
-				copiedTerrainData[x - minX][y - minY] = tile->terrainData;
+				this->copiedTerrainData[x - minX][y - minY] = tile->terrainData;
+				this->copiedBorderData[x - minX][y - minY] = tile->terrainBorderData;
+				this->copiedElevationIndexData[x - minX][y - minY] = tile->elevationGraphicsIndex;
 				for (int i = 0; i < tile->unitsOnThisTileCount; i++) {
 					STRUCT_UNIT_BASE_LIST *listElem = tile->unitsOnThisTile;
 					if (!listElem) { break; } // stop as soon as a NULL element is found (should not happen if unitsOnThisTileCount is correct)
@@ -93,6 +100,8 @@ bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
 		traceMessageHandler.WriteMessage("Could not paste map data, map is not large enough");
 		return false;
 	}
+	assert(maxX < this->maxArraySize);
+	assert(maxY < this->maxArraySize);
 	// Clear target map zone first
 	for (int x = startPosX; x <= maxX; x++) {
 		for (int y = startPosY; y <= maxY; y++) {
@@ -131,8 +140,10 @@ bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
 		for (int y = startPosY; y <= maxY; y++) {
 			STRUCT_GAME_MAP_TILE_INFO *tile = mapInfo->GetTileInfo(x, y);
 			if (tile) {
-				tile->terrainData = copiedTerrainData[x - startPosX][y - startPosY];
-				//tile->unitsOnThisTileCount...
+				tile->terrainData = this->copiedTerrainData[x - startPosX][y - startPosY];
+				tile->terrainBorderData = this->copiedBorderData[x - startPosX][y - startPosY];
+				tile->elevationGraphicsIndex = this->copiedElevationIndexData[x - startPosX][y - startPosY];
+				mapInfo->RecomputeTileDisplayPos(x, y); // Necessary when elevation data has been modified
 			} else {
 				std::string msg = "Error: could not access tile info (";
 				msg += std::to_string(x);
@@ -166,6 +177,5 @@ bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
 			}
 		}
 	}
-	RefreshTerrainAfterManualChange(mapInfo, -1, -1, -1, -1);
 	return true;
 }
