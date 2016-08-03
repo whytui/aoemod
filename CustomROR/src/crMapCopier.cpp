@@ -24,7 +24,7 @@ void MapCopier::ClearCopiedUnits() {
 
 
 // Copy map data into internal buffer. Terrain+units
-bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long int maxY) {
+bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long int maxY, bool includeUnits) {
 	this->copiedSizeX = 0;
 	this->copiedSizeY = 0;
 	this->ClearCopiedUnits();
@@ -49,7 +49,12 @@ bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long in
 					STRUCT_UNIT_BASE_LIST *listElem = tile->unitsOnThisTile;
 					if (!listElem) { break; } // stop as soon as a NULL element is found (should not happen if unitsOnThisTileCount is correct)
 					STRUCT_UNIT_BASE *unit = listElem->unit;
-					if (unit && unit->IsCheckSumValidForAUnitClass()) {
+					if (unit && !unit->IsCheckSumValidForAUnitClass()) { unit = NULL; }
+					bool isDecorationOrCliff = unit->ptrStructDefUnit && (
+						(unit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTerrain) ||
+						(unit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCliff));
+					bool copyUnit = includeUnits || isDecorationOrCliff; // Always copy terrain decoration, cliffs
+					if (copyUnit && unit && unit->IsCheckSumValidForAUnitClass()) {
 						UNIT_INSTANCE_SERIALIZED_DATA *unitData = new UNIT_INSTANCE_SERIALIZED_DATA();
 						// Store relative position, not absolute !
 						unitData->posX = unit->positionX - (float)minX;
@@ -177,5 +182,6 @@ bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
 			}
 		}
 	}
+	DiamondMapDrawAllTiles();
 	return true;
 }

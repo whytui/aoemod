@@ -4666,7 +4666,7 @@ namespace ROR_STRUCTURES_10C
 
 
 	// Size ?
-#define CHECKSUM_UI_DIAMOND_MAP 0x005454EC
+#define CHECKSUM_UI_DIAMOND_MAP 0x0054A73C
 	class STRUCT_UI_DIAMOND_MAP : public STRUCT_ANY_UI { // 3C A7 54 00 (editor). Also F4 A3 54 00(game) ?
 	public:
 		STRUCT_GAME_GLOBAL *global; // +F4

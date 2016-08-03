@@ -42,8 +42,9 @@ namespace MAP {
 		MapCopier();
 		~MapCopier();
 
-		// Copy map data into internal buffer. Terrain+units
-		bool CopyMapZone(long int minX, long int minY, long int maxX, long int maxY);
+		// Copy map data into internal buffer (Terrain+units).
+		// includeUnits: if true, all units are copied. If false, only eye candy units are copied.
+		bool CopyMapZone(long int minX, long int minY, long int maxX, long int maxY, bool includeUnits);
 		// Paste from internal buffer to actual map
 		bool PasteMapZone(long int startPosX, long int startPosY);
 

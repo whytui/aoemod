@@ -793,3 +793,39 @@ static void DisplayUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER
 		CALL showSlp;
 	}
 }
+
+
+// Refresh diamond map (draw all tiles)
+static void AOE_DiamondMapDrawAllTiles(ROR_STRUCTURES_10C::STRUCT_UI_DIAMOND_MAP *diamMap) {
+	if (!diamMap || !diamMap->IsCheckSumValid()) { return; }
+	const unsigned long int addr = 0x42D0C0;
+	_asm {
+		MOV ECX, diamMap;
+		CALL addr;
+	}
+}
+
+// Refresh diamond map (draw all tiles) in editor or in-game (automatically finds the correct structure)
+static bool DiamondMapDrawAllTiles() {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *(ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS **) AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT; // GetGameSettingsPtr();
+	if (settings && settings->IsCheckSumValid()) {
+		ROR_STRUCTURES_10C::STRUCT_UI_DIAMOND_MAP *diamMap = NULL;
+		if ((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
+			(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME)) {
+			if (settings->ptrGameUIStruct && settings->ptrGameUIStruct->IsCheckSumValid()) {
+				diamMap = settings->ptrGameUIStruct->diamondMap;
+			}
+		}
+		if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
+			ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+			if (scEditor && scEditor->IsCheckSumValid()) {
+				diamMap = scEditor->diamondMap;
+			}
+		}
+		if (diamMap && diamMap->IsCheckSumValid()) {
+			AOE_DiamondMapDrawAllTiles(diamMap);
+			return true;
+		}
+	}
+	return false;
+}

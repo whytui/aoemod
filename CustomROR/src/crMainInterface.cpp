@@ -125,11 +125,11 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 #ifdef _DEBUG
 	// F4 in editor: test copy
-	if (!isMenuOpen && isInEditor && (pressedKey == VK_F4) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
-		MAP::mapCopierInstance.CopyMapZone(0, 50, 20, 70);
+	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F4) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
+		MAP::mapCopierInstance.CopyMapZone(0, 50, 20, 70, true);
 	}
 	// F5 in editor: test copy
-	if (!isMenuOpen && isInEditor && (pressedKey == VK_F5) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
+	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F5) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
 		MAP::mapCopierInstance.PasteMapZone(20, 20);
 	}
 
