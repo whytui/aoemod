@@ -621,40 +621,33 @@ namespace ROR_STRUCTURES_10C {
 		if (!this->handleROR || !this->gameSettings.IsCheckSumValid()) {
 			return res;
 		}
-		char buf[15];
 		this->RefreshMainGameStructs();
-		sprintf_s(buf, "0x%08X", this->gameSettingsAddr);
-		res += "Settings = " + std::string(buf);
-		sprintf_s(buf, "0x%08X", this->gameSettings.ptrGlobalStruct);
-		res += " - Global = " + std::string(buf);
+		res += "Settings = " + GetHexStringAddress(this->gameSettingsAddr);
+		res += " - Global = " + GetHexStringAddress(this->gameSettings.ptrGlobalStruct);
 		if (!this->gameGlobal.IsCheckSumValid()) { return res; }
-		sprintf_s(buf, "0x%08X", this->gameGlobal.scenarioInformation);
-		res += " - ScenarioInfo = " + std::string(buf);
+		res += " - ScenarioInfo = " + GetHexStringAddress(this->gameGlobal.scenarioInformation);
 		res += "\nTotalPlayers=";
 		res += std::to_string(this->gameGlobal.playerTotalCount);
 		res += " - GlobalCommandsInfo=";
-		sprintf_s(buf, "0x%08X", this->gameGlobal.commandsInfo);
-		res += buf;
-		res += " - GameMapInfo=";
-		sprintf_s(buf, "0x%08X", this->gameGlobal.gameMapInfo);
-		res += buf;
+		res += GetHexStringAddress(this->gameGlobal.commandsInfo);
+		res += " - GameMapInfo = ";
+		res += GetHexStringAddress(this->gameGlobal.gameMapInfo);
+		res += " pTiles = ";
+		res += GetHexStringAddress(this->gameMapInfo.pTileInfoRows);
 		res += "\nPlayers: gaia=";
-		sprintf_s(buf, "0x%08X", this->playerAddresses[0]);
-		res += buf;
+		res += GetHexStringAddress(this->playerAddresses[0]);
 		for (int i = 1; i < this->gameGlobal.playerTotalCount; i++) {
 			if (i == 5) { res += "\np"; } else { res += " - p"; }
 			res += std::to_string(i);
 			res += "= ";
-			sprintf_s(buf, "0x%08X", this->playerAddresses[i]);
-			res += buf;
+			res += GetHexStringAddress(this->playerAddresses[i]);
 		}
 		res += "\nAI";
 		for (int i = 1; i < this->gameGlobal.playerTotalCount; i++) {
 			if (i == 5) { res += "\np"; } else { res += " - p"; }
 			res += std::to_string(i);
 			res += "= ";
-			sprintf_s(buf, "0x%08X", this->players[i].ptrAIStruct);
-			res += buf;
+			res += GetHexStringAddress(this->players[i].ptrAIStruct);
 		}
 
 		return res;

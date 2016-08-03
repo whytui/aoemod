@@ -442,7 +442,8 @@ namespace ROR_STRUCTURES_10C
 		char borderUsagePercentage; // % of border area occupied by non-base terrain
 		char unused_15[3];
 		long int waterShape; // Unclear effect
-		long int nonBaseDefaultTerrainId;
+		char nonBaseDefaultTerrainId;
+		char unused_1D[3];
 		// 0x20
 		long int baseZoneCoverPercentage; // Can be > 100
 		unsigned long int unknown_24; // AGE3: unknown9
@@ -619,13 +620,11 @@ namespace ROR_STRUCTURES_10C
 		short int unknown_16; // possibly unused ?
 	};
 
-	// Size = 0xB5F8 to confirm
+	// Size = 0xB5F8 to confirm. Init in 0x4445E0.
 	class STRUCT_GAME_MAP_INFO {
 	public:
 		unsigned long int checksum; // F4 99 54 00 (parent class 0A 45 54 00)
-		// ptr to map data. Size = 0x18*sizeX*sizeY. pMapData+(sizeY * x * 0x18). +5=terrainId(<0x20,>= is invalid?)?
-		// +2 wprd, +4 byte
-		unsigned long int unknown_0004;
+		STRUCT_GAME_MAP_TILE_INFO *pTilesArray; // +04. Array base of all map tiles
 		long int mapArraySizeY;
 		long int mapArraySizeX;
 		// 0x10
@@ -3915,6 +3914,7 @@ namespace ROR_STRUCTURES_10C
 		}
 		// Deletes a units by calling destructor. You should provide freeMemory=true
 		// AOE destructor calls all necessary underlying updates of removing the unit (map, player, AI...)
+		// Unit will disappear without animation.
 		void AOE_destructor(bool freeMemory) {
 			long int doFree = freeMemory ? 1 : 0;
 			unsigned long int myaddr = (unsigned long int)this;
