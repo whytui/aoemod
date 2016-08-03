@@ -4566,21 +4566,6 @@ namespace ROR_STRUCTURES_10C
 	};
 
 
-	// Size 0x2B8
-	// Can be created in 0x0456240
-	/*class STRUCT_UI_CHECKBOX : public STRUCT_ANY_UI { // 30 4E 54 00
-	public:
-		char unknown_0F4[0x1F6 - 0xF4];
-		short int checked; // +1F6. To update value, see AOE_CheckBox_SetChecked
-		unsigned long int unknown_1F8;
-		STRUCT_ANY_UI **unknown_1FC; // ptr array groupedObjects ? really unsure
-		// 0x200
-		short int unknown_200; // groupedObjectCount ? really unsure
-		// ...
-		bool IsCheckSumValid() { return this->checksum == 0x00544E30; }
-		bool IsChecked() { return this->checked != 0; }
-	};*/
-
 	// Size 0x188
 	// Constructor=0x4685B0
 #define CHECKSUM_UI_LABEL 0x00545A90
@@ -4838,7 +4823,7 @@ namespace ROR_STRUCTURES_10C
 		STRUCT_UI_LABEL *map_lbl_seed_whenEditable; // +53C
 		STRUCT_ANY_UI *map_edt_seed; // +540
 		STRUCT_UI_LABEL *map_lbl_seed_whenReadOnly; // +544
-		STRUCT_ANY_UI *map_edt_seed_whenReadOnly; // +548
+		STRUCT_UI_LABEL *map_edt_seed_whenReadOnly; // +548
 		STRUCT_UI_BUTTON *map_btn_generateMap; // +54C
 		STRUCT_UI_LABEL *map_lbl_bigGeneratingMapNotification; // +550. The big centered message while generating.
 		STRUCT_UI_LABEL *trn_lbl_pencilType; // +554

@@ -8,6 +8,7 @@ MapCopier MAP::mapCopierInstance;
 MapCopier::MapCopier() {
 	this->copiedSizeX = 0;
 	this->copiedSizeY = 0;
+	this->copiedBufferContainsUnits = false;
 }
 
 MapCopier::~MapCopier() {
@@ -20,6 +21,7 @@ void MapCopier::ClearCopiedUnits() {
 		delete unitInfo;
 	}
 	this->copiedUnits.clear();
+	this->copiedBufferContainsUnits = false;
 }
 
 
@@ -28,15 +30,24 @@ bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long in
 	this->copiedSizeX = 0;
 	this->copiedSizeY = 0;
 	this->ClearCopiedUnits();
+	this->lastError = "Technical error";
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert((global != NULL) && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return false; }
 	assert((global->gameMapInfo != NULL) && (global->gameMapInfo->IsCheckSumValid()));
 	if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return false; }
 	STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
-	if ((minX < 0) || (minY < 0)) { return false; }
-	if ((maxX >= mapInfo->mapArraySizeX) || (maxY >= mapInfo->mapArraySizeY)) { return false; }
-	if ((maxX < minX) || (maxY < minY)) { return false; }
+	if ((minX < 0) || (minY < 0)) {
+		this->lastError = "Negative coordinates";
+		return false; }
+	if ((maxX >= mapInfo->mapArraySizeX) || (maxY >= mapInfo->mapArraySizeY)) {
+		this->lastError = "Max position is out of map bounds";
+		return false;
+	}
+	if ((maxX < minX) || (maxY < minY)) {
+		this->lastError = "Inconsistent minimum and maximum positions";
+		return false;
+	}
 
 	for (int x = minX; x <= maxX; x++) {
 		for (int y = minY; y <= maxY; y++) {
@@ -78,31 +89,41 @@ bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long in
 				msg += ", ";
 				msg += std::to_string(y);
 				msg += ")";
-				traceMessageHandler.WriteMessage(msg);
+				traceMessageHandler.WriteMessageNoNotification(msg);
+				this->lastError = msg;
 				return false;
 			}
 		}
 	}
 	// Validate copy only once everything is finished without errors
-	this->copiedSizeX = maxX - minX;
-	this->copiedSizeY = maxY - minY;
+	this->copiedSizeX = maxX - minX + 1;
+	this->copiedSizeY = maxY - minY + 1;
+	this->copiedBufferContainsUnits = includeUnits;
+	this->lastError = "";
 	return true;
 }
 
 // Paste from internal buffer to actual map
 bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
-	if ((this->copiedSizeX <= 0) || (this->copiedSizeY <= 0)) { return false; }
+	if ((this->copiedSizeX <= 0) || (this->copiedSizeY <= 0)) {
+		this->lastError = "No valid buffer to paste.";
+		return false;
+	}
+	this->lastError = "Technical error";
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert((global != NULL) && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return false; }
 	assert((global->gameMapInfo != NULL) && (global->gameMapInfo->IsCheckSumValid()));
 	if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return false; }
 	STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
-	if ((startPosX < 0) || (startPosY < 0)) { return false; }
-	long int maxX = startPosX + this->copiedSizeX;
-	long int maxY = startPosY + this->copiedSizeY;
+	if ((startPosX < 0) || (startPosY < 0)) {
+		this->lastError = "Negative coordinates";
+		return false;
+	}
+	long int maxX = startPosX + this->copiedSizeX - 1;
+	long int maxY = startPosY + this->copiedSizeY - 1;
 	if ((maxX >= mapInfo->mapArraySizeX) || (maxY >= mapInfo->mapArraySizeY)) {
-		traceMessageHandler.WriteMessage("Could not paste map data, map is not large enough");
+		this->lastError = "Could not paste map data, map is not large enough";
 		return false;
 	}
 	assert(maxX < this->maxArraySize);
@@ -135,7 +156,7 @@ bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
 				msg += ", ";
 				msg += std::to_string(y);
 				msg += ")";
-				traceMessageHandler.WriteMessage(msg);
+				traceMessageHandler.WriteMessageNoNotification(msg);
 				return false;
 			}
 		}
@@ -183,5 +204,6 @@ bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
 		}
 	}
 	DiamondMapDrawAllTiles();
+	this->lastError = "";
 	return true;
 }

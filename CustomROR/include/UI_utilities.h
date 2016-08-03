@@ -40,6 +40,44 @@ static const char gameScreenName[] = "Game Screen";
 // The AOE_Addxxx functions create a UI object and store the new object's pointer in ptrObjToCreate parameter
 
 
+
+// Set parent's focus to child object.
+// child CAN be NULL (set focus to parent itself).
+static void AOE_SetFocus(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent, ROR_STRUCTURES_10C::STRUCT_ANY_UI *child) {
+	if (!parent) { return; }
+	_asm {
+		PUSH child
+			MOV ECX, parent
+			MOV EAX, 0x453EB0 // parentObj.setFocus(childObj)
+			CALL EAX
+	}
+}
+
+
+// Show/Hide a UI object
+static void AOE_ShowUIObject(ROR_STRUCTURES_10C::STRUCT_ANY_UI *object, bool show) {
+	if (!object) { return; }
+	long int arg = show ? 1 : 0;
+	_asm {
+		MOV ECX, object
+			MOV EAX, DS:[ECX]
+			PUSH arg
+			CALL DS : [EAX + 0x14]
+	}
+}
+
+// Refresh a UI object
+static void AOE_RefreshUIObject(ROR_STRUCTURES_10C::STRUCT_ANY_UI *object) {
+	if (!object) { return; }
+	_asm {
+		MOV ECX, object
+			MOV EAX, DS:[ECX]
+			PUSH 1
+			CALL DS : [EAX + 0x20]
+	}
+}
+
+
 // Display a small yes/no dialog message (based on game exit popup) + cancel in scenario editor
 // Return pointer (address) to new object.
 // Compatible with scenario editor screen and in-game screen
@@ -376,6 +414,7 @@ static long int AOE_GetComboSelectedIndex(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptr
 }
 
 // Returns an edit object's text
+#pragma message("TODO: NOT for edit, labels only ? To check")
 static char *AOE_GetEditText(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrEdit) {
 	assert(ptrEdit != NULL);
 	if (!ptrEdit) { return NULL; }
@@ -389,16 +428,24 @@ static char *AOE_GetEditText(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrEdit) {
 	return result;
 }
 
-// Set an edit object's text
-static void AOE_SetEditText(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrEdit, char *text) {
-	assert(ptrEdit != NULL);
-	if (!ptrEdit) { return; }
+// Set an label object's text
+static void AOE_SetLabelText(ROR_STRUCTURES_10C::STRUCT_UI_LABEL *ptrLabel, const char *text) {
+	assert(ptrLabel != NULL);
+	if (!ptrLabel || !ptrLabel->IsCheckSumValid()) { return; }
 	_asm {
-		PUSH text
-		MOV ECX, ptrEdit
-		MOV EDX, DS:[ECX]
-		CALL DS:[EDX+0xEC]
+		PUSH text;
+		MOV ECX, ptrLabel;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX+0xEC];
 	}
+}
+
+// Set a TextBox object's text
+static void AOE_SetEditText(ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *ptrTextBox, const char *text) {
+	assert(ptrTextBox != NULL);
+	if (!ptrTextBox || !ptrTextBox->IsCheckSumValid() || !ptrTextBox->pTypedText || (ptrTextBox->maxTextSize <= 0)) { return; }
+	strcpy_s(ptrTextBox->pTypedText, ptrTextBox->maxTextSize - 1, text);
+	AOE_RefreshUIObject(ptrTextBox);
 }
 
 static void AOE_listBox_clear(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *listBox) {
@@ -499,41 +546,6 @@ static void AOE_CloseScreenFullTreatment(ROR_STRUCTURES_10C::STRUCT_ANY_UI *UIOb
 	}
 }
 
-
-// Set parent's focus to child object.
-// child CAN be NULL (set focus to parent itself).
-static void AOE_SetFocus(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent, ROR_STRUCTURES_10C::STRUCT_ANY_UI *child) {
-	if (!parent) { return; }
-	_asm {
-		PUSH child
-		MOV ECX, parent
-		MOV EAX, 0x453EB0 // parentObj.setFocus(childObj)
-		CALL EAX
-	}
-}
-
-
-// Show/Hide a UI object
-static void AOE_ShowUIObject(ROR_STRUCTURES_10C::STRUCT_ANY_UI *object, bool show) {
-	if (!object) { return; }
-	long int arg = show ? 1 : 0;
-	_asm {
-		MOV ECX, object
-		MOV EAX, DS:[ECX]
-		PUSH arg
-		CALL DS:[EAX + 0x14]
-	}
-}
-
-static void AOE_RefreshUIObject(ROR_STRUCTURES_10C::STRUCT_ANY_UI *object) {
-	if (!object) { return; }
-	_asm {
-		MOV ECX, object
-		MOV EAX, DS:[ECX]
-		PUSH 1
-		CALL DS:[EAX + 0x20]
-	}
-}
 
 
 // Create a popup (from Options original model) and returns the new UI object's address as an unsigned long int

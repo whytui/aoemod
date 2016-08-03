@@ -316,9 +316,8 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		}
 		if (!_strnicmp(subCmd, "maptype=", 8)) {
 			subCmd += 8;
-			int newType = atoi(subCmd);
-			if ((newType >= 0) && (newType < AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT) &&
-				((*subCmd == '0') || newType > 0)) {
+			int newType = StrToInt(subCmd, -1);
+			if ((newType >= 0) && (newType < AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT)) {
 				gameSettings->mapTypeChoice = (AOE_CONST_FUNC::MAP_TYPE_INDEX) newType;
 				sprintf_s(outputBuffer, "Map type=%d", newType);
 			}
@@ -327,8 +326,8 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 
 		if (!_strnicmp(subCmd, "control=", 8)) {
 			subCmd += 8;
-			int newId = atoi(subCmd);
-			if ((*subCmd == '0' && (*(subCmd+1) == 0)) || (newId && (newId < 9))) {
+			int newId = StrToInt(subCmd, -1);
+			if (((newId <= 0) && (newId < 9))) {
 				ChangeControlledPlayer(newId, true);
 				sprintf_s(outputBuffer, "Controlled player#=%d", newId);
 			}
@@ -360,8 +359,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 	// Useful for debugging too: select from unitId
 	if (!_strnicmp(command, "select=", 7) && (command[7] >= '0') && (command[7] <= '9')) {
 		char *sUnitId = command + 7;
-		short int id = atoi(sUnitId);
-		if ((id == 0) && (*sUnitId != '0')) { id = -1; }
+		short int id = StrToInt(sUnitId, -1);
 		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = GetUnitStruct(id);
 		AOE_clearSelectedUnits(player);
@@ -4280,7 +4278,8 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 		char bufferSeed[10] = "";
 		sprintf_s(bufferSeed, "%ld", settings->actualMapSeed);
 		assert(scEditor->map_edt_seed_whenReadOnly);
-		AOE_SetEditText(scEditor->map_edt_seed_whenReadOnly, bufferSeed);
+		bool test = scEditor->map_edt_seed_whenReadOnly->IsCheckSumValid();
+		AOE_SetLabelText(scEditor->map_edt_seed_whenReadOnly, bufferSeed);
 		_asm {
 			MOV EDX, 0x52605D
 			CALL EDX // Recalculate pseudo random

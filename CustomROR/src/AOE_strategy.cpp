@@ -160,7 +160,7 @@ void FixAutoBuildStrategyElements(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) 
 			}
 		}
 
-		// save some informatoin: Research/critical researches (no distinction here)
+		// save some information: Research/critical researches (no distinction here)
 		if ((currentStratElem->elementType == AOE_CONST_FUNC::AIUCTech) || (currentStratElem->elementType == AOE_CONST_FUNC::AIUCCritical)) {
 			/*if (currentStratElem->unitDAT_ID == CST_RSID_TOOL_AGE) {
 			toolAge = currentStratElem;

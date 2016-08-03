@@ -107,18 +107,7 @@ void CustomRORInfo::FillIDVectorFromString(vector<short int> &v, long int player
 		text++; // next char
 		if ((*text == ',') || (*text == ';') || (*text == 0)) {
 			currentValue[currentLength] = 0; // end of string
-			short int currentDATID = atoi(currentValue); // Returns 0 if failed... (0 is also an acceptable value)
-			if (currentDATID == 0) {
-				char *tmp = currentValue;
-				bool onlyZeros = true;
-				while ((*tmp != 0) && onlyZeros) {
-					if (*tmp != '0') { onlyZeros = false; }
-					tmp++;
-				}
-				if (!onlyZeros) {
-					currentDATID = -1; // atoi returned 0 but the string is not "0" (it means it failed).
-				}
-			}
+			short int currentDATID = StrToInt(currentValue, -1);
 			if (currentDATID >= 0) {
 				v.push_back(currentDATID);
 			}

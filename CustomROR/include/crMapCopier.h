@@ -48,9 +48,11 @@ namespace MAP {
 		// Paste from internal buffer to actual map
 		bool PasteMapZone(long int startPosX, long int startPosY);
 
-		long int GetCopiedSizeX() { return this->copiedSizeX; }
-		long int GetCopiedSizeY() { return this->copiedSizeY; }
-		long int GetCopiedUnitsCount() { return this->copiedUnits.size(); }
+		long int GetCopiedSizeX() const { return this->copiedSizeX; }
+		long int GetCopiedSizeY() const { return this->copiedSizeY; }
+		long int GetCopiedUnitsCount() const { return this->copiedUnits.size(); }
+		bool BufferContainsUnits() const { return this->copiedBufferContainsUnits; }
+		std::string GetLastError() const { return this->lastError; };
 
 	private:
 		const int maxArraySize = MAX_MAP_SIZE;
@@ -60,6 +62,8 @@ namespace MAP {
 		long int copiedSizeX;
 		long int copiedSizeY;
 		std::list<UNIT_INSTANCE_SERIALIZED_DATA*> copiedUnits;
+		bool copiedBufferContainsUnits;
+		std::string lastError;
 
 		void ClearCopiedUnits();
 	};

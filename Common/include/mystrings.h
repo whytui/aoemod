@@ -67,3 +67,24 @@ static std::string GetHexStringAddress(unsigned long int address, int hexDigits)
 	sprintf_s(buf, format, address);
 	return std::string(buf);
 }
+
+// Returns int value from str, or defaultValue if str is not a valid number
+static int StrToInt(char *str, int defaultValue) {
+	if (str == NULL) {
+		return defaultValue;
+	}
+	int val = atoi(str);
+	if (val != 0) {
+		return val;
+	}
+	char *tmp = str;
+	bool onlyZeros = true;
+	while ((*tmp != 0) && onlyZeros) {
+		if (*tmp != '0') { onlyZeros = false; }
+		tmp++;
+	}
+	if (!onlyZeros) {
+		return -1; // atoi returned 0 but the string is not "0" or "00..." (it means it failed).
+	}
+	return 0;
+}

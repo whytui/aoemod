@@ -129,17 +129,12 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		this->OpenTraceMessagePopup();
 	}
 
+	// F4 in editor: copy map
+	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F4) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
+		this->OpenCustomGamePopup<MapCopyPopup>(600, 450, false);
+	}
 
 #ifdef _DEBUG
-	// F4 in editor: test copy
-	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F4) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
-		MAP::mapCopierInstance.CopyMapZone(0, 50, 20, 70, true);
-	}
-	// F5 in editor: test copy
-	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F5) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
-		MAP::mapCopierInstance.PasteMapZone(20, 20);
-	}
-
 	// TEST - F7 - debug only
 	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F7)) {
 		unsigned long int *marray = (unsigned long int *)AOE_OFFSETS::UNKNOWN_ARRAY_6A18C0;

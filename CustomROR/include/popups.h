@@ -377,3 +377,28 @@ private:
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtTriggerText;
 };
 
+class MapCopyPopup : public CustomPopup {
+public:
+	MapCopyPopup();
+	void _ResetPointers() override;
+	void _AddPopupContent() override;
+
+	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+	bool OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) override;
+private:
+	long int initialPosX, initialPosY; // Coordinates under mouse when popup was opened
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnCopyZone;
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnCopyAllMap;
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnPaste;
+	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtCopyFromX;
+	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtCopyFromY;
+	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtCopyToX;
+	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtCopyToY;
+	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtPasteToX;
+	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtPasteToY;
+	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkIncludeUnits;
+	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtCurrentBufferSize;
+	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtResultMessage;
+
+	std::string GetBufferSizeText();
+};
