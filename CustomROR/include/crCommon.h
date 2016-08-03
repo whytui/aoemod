@@ -178,7 +178,8 @@ public:
 	ROR_STRUCTURES_10C::STRUCT_ANY_UI *GetCustomGamePopup();
 
 	// Get main (first) selected unit, or NULL if none is selected.
-	ROR_STRUCTURES_10C::STRUCT_UNIT *GetMainSelectedUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+	// Works in-game and in editor.
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *GetMainSelectedUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 	// Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
 	ROR_STRUCTURES_10C::STRUCT_UNIT **GetRelevantSelectedUnitsPointer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);

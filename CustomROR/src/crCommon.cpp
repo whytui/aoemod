@@ -390,14 +390,15 @@ ROR_STRUCTURES_10C::STRUCT_ANY_UI *CustomRORInfo::GetCustomGamePopup() {
 
 
 // Get main (first) selected unit, or NULL if none is selected.
-ROR_STRUCTURES_10C::STRUCT_UNIT *CustomRORInfo::GetMainSelectedUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+// Works in-game and in editor.
+ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *CustomRORInfo::GetMainSelectedUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
 	assert(player != NULL);
 	if (!player) { return NULL; }
 	ROR_STRUCTURES_10C::STRUCT_UNIT **selectedUnits = this->GetRelevantSelectedUnitsPointer(player);
 	if (!selectedUnits) {
 		return NULL;
 	}
-	return *selectedUnits; // not sure it always corresponds to selected unit in bottom left panel ?
+	return (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)*selectedUnits; // not sure it always corresponds to selected unit in bottom left panel ? But this works in editor too
 }
 
 // Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)

@@ -176,3 +176,5 @@ Elevation (0-7)
 Tip: leave terrain/elevation empty to preserve current values.
 [42091] // Label for checkbox option to soften terrain borders
 Soften modified terrain borders
+[42092] // Mouse position
+Mouse position

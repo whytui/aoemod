@@ -80,7 +80,7 @@ AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(RO
 
 // If UIObj is null, use current "global" screen positions.
 ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition(ROR_STRUCTURES_10C::STRUCT_ANY_UI *UIObj) {
-	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
+	static ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
 	result.posX = -1;
 	result.posY = -1;
 	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = UIObj;

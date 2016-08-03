@@ -2717,12 +2717,8 @@ void CustomRORCommand::SelectNextIdleMilitaryUnit() {
 	}
 	assert(player->ptrCreatableUnitsListLink->IsCheckSumValid());
 
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **selectedUnits = this->crInfo->GetRelevantSelectedUnitsBasePointer(player);
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *mainSelectedUnit = NULL;
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *mainSelectedUnit = this->crInfo->GetMainSelectedUnit(player);
 	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *firstIgnoredUnit = NULL; // in case seelcted unit = last from list, keep in memory first one to loop back
-	if (selectedUnits) {
-		mainSelectedUnit = selectedUnits[0];
-	}
 	bool ignoreUntilSelectedUnitIsMet = false;
 	if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass()) {
 		ignoreUntilSelectedUnitIsMet = true;

@@ -178,3 +178,5 @@ Altitude (0-7)
 Astuce: laissez les champs terrain/altitude vides pour préserver les valeurs actuelles.
 [42091] // Label for checkbox option to soften terrain borders
 Lisser les limites du terrain modifié
+[42092] // Mouse position
+Position de la souris

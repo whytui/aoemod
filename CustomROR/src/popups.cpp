@@ -308,10 +308,8 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	if (!global) { return; }
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(global->humanPlayerId);
 	if (!player || (player->selectedUnitCount <= 0)) { return; }
-	ROR_STRUCTURES_10C::STRUCT_UNIT **unitArray = this->crInfo->GetRelevantSelectedUnitsPointer(player);
-	if (!unitArray) { return; }
-	ROR_STRUCTURES_10C::STRUCT_UNIT *unit = unitArray[0];
-	if (!unit || (!unit->IsCheckSumValid())) { return; }
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = this->crInfo->GetMainSelectedUnit(player);
+	if (!unit || (!unit->IsCheckSumValidForAUnitClass())) { return; }
 	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 	if (!unitDef) { return; }
 	this->unit = unit;
@@ -471,7 +469,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 
 	long int currentYPos = 10;
 	const long int btnSize = 0xAC;
-	const long int lblTitleHSize = 160;
+	const long int lblTitleHSize = 250;
 	const long int lblMainInfoHSize = 400;
 	std::string mainInfos = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_UNIT_TERM, "Unit");
 	mainInfos += " ";

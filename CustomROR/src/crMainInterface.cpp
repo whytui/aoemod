@@ -72,11 +72,8 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	if ((pressedKey == VK_F10) && isInEditor && !isMenuOpen && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
 		// Additional check
 		assert(GetGameSettingsPtr()->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
-		_asm {
-			MOV ECX, pCurrentUI
-			MOV ECX, DS:[ECX] // We already checked it is not NULL
-			MOV EAX, 0x00494A90 // editor.OpenMenu()
-			CALL EAX
+		if (pCurrentUI) {
+			AOE_EditorOpenMenu((ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)*pCurrentUI);
 		}
 	}
 
@@ -107,9 +104,20 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F1) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
 		settings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
 	}
-	// F2 in editor: edit selected unit
+	// F2 in editor: edit selected unit or show game coordinates at mouse position
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F2) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
-		this->OpenCustomEditorEditUnitPopup();
+		if (this->crCommand->crInfo->GetMainSelectedUnit(GetControlledPlayerStruct_Settings()) == NULL) {
+			float posX, posY;
+			GetGamePositionUnderMouse(&posX, &posY);
+			if ((posX > 0) && (posY > 0)) {
+				char buffer[100];
+				const char *text = localizationHandler.GetTranslation(CRLANG_ID_MOUSE_POSITION, "Mouse position");
+				sprintf_s(buffer, "%.70s: X=%4.2f, y=%4.2f", text, posX, posY);
+				this->crCommand->OpenCustomDialogMessage(buffer, 400, 180);
+			}
+		} else {
+			this->OpenCustomEditorEditUnitPopup();
+		}
 	}
 	// F3 in editor: scenario information
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F3) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
@@ -118,7 +126,6 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 	// CTRL-F1 : display messages
 	if (!isMenuOpen && CTRL && (pressedKey == VK_F1)) {
-		// Double spaces are intented (to compensate weird-looking font)
 		this->OpenTraceMessagePopup();
 	}
 

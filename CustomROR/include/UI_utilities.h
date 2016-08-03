@@ -59,7 +59,7 @@ static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text
 		fct = 0x00457A80;
 	}
 	if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
-		if (currentUI->checksum != 0x00547360) { return 0; }
+		if (currentUI->checksum != CHECKSUM_UI_SCENARIO_EDITOR_MAIN) { return 0; }
 		fct = 0x00457B90;
 	}
 	if (!fct) { return 0; }
@@ -828,4 +828,14 @@ static bool DiamondMapDrawAllTiles() {
 		}
 	}
 	return false;
+}
+
+// Opens scenario editor menu
+static void AOE_EditorOpenMenu(ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *editorUI) {
+	if (!editorUI || !editorUI->IsCheckSumValid()) { return; }
+	_asm {
+		MOV ECX, editorUI;
+		MOV EAX, 0x00494A90; // editor.OpenMenu()
+		CALL EAX;
+	}
 }

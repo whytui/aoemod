@@ -150,7 +150,7 @@ public:
 	void OnBeforeClose(bool isCancel) override;
 	void OnAfterClose(bool isCancel) override;
 private:
-	ROR_STRUCTURES_10C::STRUCT_UNIT *unit;
+	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit;
 	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtStatus;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lbl_s0;
 	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lbl_s2;
@@ -272,6 +272,7 @@ protected:
 
 
 // Generic input box for integers. For float, please use InputBox_float instead (and specify maxLength).
+// Invalid values are replaced by 0.
 template<typename inttype> class InputBox_int : public InputBox {
 public:
 	InputBox_int() { this->_ResetPointers(); }
