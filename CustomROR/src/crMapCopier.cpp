@@ -56,8 +56,9 @@ bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long in
 				this->copiedTerrainData[x - minX][y - minY] = tile->terrainData;
 				this->copiedBorderData[x - minX][y - minY] = tile->terrainBorderData;
 				this->copiedElevationIndexData[x - minX][y - minY] = tile->elevationGraphicsIndex;
-				for (int i = 0; i < tile->unitsOnThisTileCount; i++) {
-					STRUCT_UNIT_BASE_LIST *listElem = tile->unitsOnThisTile;
+				int loopindex;
+				STRUCT_UNIT_BASE_LIST *listElem = tile->unitsOnThisTile;
+				for (loopindex = 0; loopindex < tile->unitsOnThisTileCount; loopindex++) {
 					if (!listElem) { break; } // stop as soon as a NULL element is found (should not happen if unitsOnThisTileCount is correct)
 					STRUCT_UNIT_BASE *unit = listElem->unit;
 					if (unit && !unit->IsCheckSumValidForAUnitClass()) { unit = NULL; }
@@ -81,8 +82,9 @@ bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long in
 						unitData->status = unit->unitStatus;
 						this->copiedUnits.push_back(unitData);
 					}
+					listElem = listElem->next;
 				}
-				//tile->unitsOnThisTileCount...
+				assert(loopindex == tile->unitsOnThisTileCount);
 			} else {
 				std::string msg = "Error: could not access tile info (";
 				msg += std::to_string(x);
@@ -134,15 +136,19 @@ bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
 			STRUCT_GAME_MAP_TILE_INFO *tile = mapInfo->GetTileInfo(x, y);
 			if (tile) {
 				std::set<STRUCT_UNIT_BASE *>unitsToDelete;
+				STRUCT_UNIT_BASE_LIST *listElem = tile->unitsOnThisTile;
 				for (int i = 0; i < tile->unitsOnThisTileCount; i++) {
-					STRUCT_UNIT_BASE_LIST *listElem = tile->unitsOnThisTile;
-					if (!listElem) { break; } // stop as soon as a NULL element is found (should not happen if unitsOnThisTileCount is correct)
+					if (!listElem) {
+						assert(false && "reached end of unit list too early");
+						break; // stop as soon as a NULL element is found (should not happen if unitsOnThisTileCount is correct)
+					}
 					STRUCT_UNIT_BASE *unit = listElem->unit;
 					if (unit && unit->IsCheckSumValidForAUnitClass()) {
 						unitsToDelete.insert(unit); // I prefer NOT to delete units inside this loop. Seems not wise.
 					} else {
 						traceMessageHandler.WriteMessage("Encountered invalid unit data :(");
 					}
+					listElem = listElem->next;
 				}
 				for each (STRUCT_UNIT_BASE *unit in unitsToDelete)
 				{

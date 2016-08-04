@@ -396,12 +396,17 @@ void CustomRORInstance::WMCloseMessageEntryPoint(REG_BACKUP *REG_values) {
 	if (preventGameFromExiting) {
 		REG_values->EAX_val = 0;
 		ChangeReturnAddress(REG_values, 0x41AF29);
+		return;
 	}
 
 	// Do this only if we choose to actually exit program !
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		unsigned long int myEAX = REG_values->EAX_val;
 		unsigned long int myECX = REG_values->ECX_val;
+		assert(myEAX != NULL);
+		assert(myECX != NULL);
+		ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = (ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *)myECX;
+		assert(settings->IsCheckSumValid());
 		_asm {
 			MOV EAX, myEAX
 			MOV ECX, myECX
