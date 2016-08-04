@@ -101,8 +101,17 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	}
 
 	// F1 in editor : switch to unit selection
-	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F1) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
-		settings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
+	if (!isMenuOpen && (isInEditor) && !CTRL && (pressedKey == VK_F1) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
+		if (!SHIFT) {
+			settings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
+		} else {
+			STRUCT_POSITION_INFO mousePosInfo = GetMousePosition();
+			ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitAtMousePosition(mousePosInfo.posX, mousePosInfo.posY, INTERACTION_MODES::CST_IM_LIVING_UNITS, true);
+			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+			if (player && player->IsCheckSumValid() && unit && unit->IsCheckSumValidForAUnitClass()) {
+				SelectOneUnit(player, unit, false);
+			}
+		}
 	}
 	// F2 in editor: edit selected unit or show game coordinates at mouse position
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F2) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
@@ -663,11 +672,11 @@ bool CustomRORMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 
 // Manage right button release action on selected units for given player
 // Returns true if a red cross sign should be displayed (a relevant action occurred)
-bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_SUB1 *UIGameMain,
+bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *UIGameMain,
 	ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY) {
 	if (!UIGameMain || !UIGameMain->IsCheckSumValid()) { return false; }
 	assert(UIGameMain != NULL);
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = UIGameMain->humanControlledPlayer;
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = UIGameMain->controlledPlayer;
 	if (controlledPlayer == NULL) { return false; } // I suppose it shouldn't happen but I don't know all behaviours for this variable
 	unsigned long int unitCount = controlledPlayer->selectedUnitCount;
 	if (unitCount == 0) { return false; }
@@ -679,15 +688,16 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURE
 
 	ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_POSITION_INFO posInfos;
 	long int callResult;
+	// TODO use AOE_GetGameInfoUnderMouse ?
 	_asm {
 		LEA EAX, posInfos
 		PUSH 1
 		PUSH 0
-		PUSH EAX // posInMap(Y,X)
+		PUSH EAX // STRUCT_TEMP_MAP_POSITION_INFO
 		PUSH mousePosY
 		PUSH mousePosX
 		PUSH 0
-		PUSH 0x28
+		PUSH CST_MBA_RELEASE_CLICK //PUSH 0x28 // "click release"
 		MOV EAX, 0x51A650
 		MOV ECX, UIGameMain
 		CALL EAX // get map position from mouse pos
@@ -740,7 +750,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURE
 						assert(global && global->IsCheckSumValid());
 						if (!global || !global->IsCheckSumValid()) { return false; }
 
-						ROR_STRUCTURES_10C::STRUCT_UNIT *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, false);
+						ROR_STRUCTURES_10C::STRUCT_UNIT *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
 						if (unitUnderMouse && unitUnderMouse->IsCheckSumValid()) {
 							ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->GetUnitDefBase();
 							if (unitDefUnderMouse && unitDefUnderMouse->IsCheckSumValidForAUnitClass() &&

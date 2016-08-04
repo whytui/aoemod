@@ -390,6 +390,7 @@ ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *CustomRORInfo::GetMainSelectedUnit(ROR_STR
 	return (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)*selectedUnits; // not sure it always corresponds to selected unit in bottom left panel ? But this works in editor too
 }
 
+
 // Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
 // Please use this instead of playerStruct->selectedStructUnitTable
 ROR_STRUCTURES_10C::STRUCT_UNIT **CustomRORInfo::GetRelevantSelectedUnitsPointer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
@@ -416,59 +417,6 @@ ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **CustomRORInfo::GetRelevantSelectedUnitsBa
 
 
 // Other methods
-
-
-// Returns a pointer to global game struct
-// Warning: can sometimes return NULL when called very early (when the game has just been run)
-ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings; // Otherwise, find it in game settings
-	assert(settings != NULL);
-	if (!settings) { return NULL; }
-	return settings->ptrGlobalStruct;
-}
-
-
-ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS* GetGameSettingsPtr() {
-	assert(*ROR_gameSettings != NULL);
-	return *ROR_gameSettings;
-}
-
-
-ROR_STRUCTURES_10C::STRUCT_ANY_UI *GetCurrentUIStruct() {
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI **p = (ROR_STRUCTURES_10C::STRUCT_ANY_UI **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
-	assert(*p != NULL);
-	return *p;
-}
-
-
-// Returns currently human-controlled player struct according to game settings struct
-ROR_STRUCTURES_10C::STRUCT_PLAYER *GetControlledPlayerStruct_Settings() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player;
-	_asm {
-		MOV ECX, gameSettings
-		MOV EAX, 0x419B70
-		CALL EAX
-		MOV player, EAX
-	}
-	return player;
-}
-
-
-// Returns player struct for given player id
-// returns NULL if incorrect player id or if some structures are invalid/not found
-ROR_STRUCTURES_10C::STRUCT_PLAYER *GetPlayerStruct(long int playerId) {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-	if (!global || !global->IsCheckSumValid() || global->playerTotalCount < 1) { return NULL; }
-	if ((playerId < 0) || (playerId >= global->playerTotalCount) || (playerId >= 9)) {
-		return NULL;
-	}
-	ROR_STRUCTURES_10C::STRUCT_PLAYER **playersArray = global->GetPlayerStructPtrTable();
-	if (!playersArray) {
-		return NULL;
-	}
-	return playersArray[playerId];
-}
 
 
 
@@ -1957,13 +1905,17 @@ void AOE_playerBldHeader_RemoveBldFromArrays(ROR_STRUCTURES_10C::STRUCT_PLAYER_B
 }
 
 
-// Clear player selection then select provided unit.
+// Clear player selection then select provided unit. Compatible with editor too.
 // If centerScreen is true, player's screen will be centered to unit.
 void SelectOneUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase, bool centerScreen) {
-	if (!IsGameRunning()) { return; }
-	if (!player || !player->IsCheckSumValid()) {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	if ((settings->currentUIStatus != GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME) &&
+		(settings->currentUIStatus != GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) &&
+		(settings->currentUIStatus != GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
 		return;
 	}
+	if (!player || !player->IsCheckSumValid()) { return; }
 	AOE_clearSelectedUnits(player);
 	AOE_selectUnit(player, (ROR_STRUCTURES_10C::STRUCT_UNIT*) unitBase, true);
 	if (centerScreen) {
@@ -1972,7 +1924,6 @@ void SelectOneUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C
 		player->unknown_122_posX = (short int)unitBase->positionX;
 		player->unknown_120_posY = (short int)unitBase->positionY;
 	}
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid() || !settings->ptrGameUIStruct ||
 		!settings->ptrGameUIStruct->IsCheckSumValid() || !settings->ptrGameUIStruct->gamePlayUIZone ||
 		!settings->ptrGameUIStruct->gamePlayUIZone->IsCheckSumValid()) {

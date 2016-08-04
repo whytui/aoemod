@@ -1426,10 +1426,10 @@ void CustomRORInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 
 
 	// Now manage custom treatments
-	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_SUB1 *UIGameMain = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_SUB1 *) REG_values->ESI_val;
+	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *UIGameMain = (ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *) REG_values->ESI_val;
 	if (!UIGameMain || !UIGameMain->IsCheckSumValid()) { return; }
 	ror_api_assert(REG_values, UIGameMain != NULL);
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = UIGameMain->humanControlledPlayer;
+	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = UIGameMain->controlledPlayer;
 	if (controlledPlayer == NULL) { return; } // I suppose it shouldn't happen but I don't know all behaviours for this variable
 	unsigned long int unitCount = controlledPlayer->selectedUnitCount;
 	if (unitCount == 0) {

@@ -4479,7 +4479,8 @@ namespace ROR_STRUCTURES_10C
 	class STRUCT_UI_TEXTBOX : public STRUCT_ANY_UI { // 20 52 54 00
 	public:
 		long int hWnd;
-		long int maxTextSize; // =constructor_maxTextSize+1
+		short int maxTextSize; // +F8. =constructor_maxTextSize+1
+		short int unknown_0FA; // +FA
 		char *pTypedText; // +FC.
 		// 0x100
 		char unknown_100[0x128 - 0x100];
@@ -4638,7 +4639,7 @@ namespace ROR_STRUCTURES_10C
 
 
 	// Size ?
-#define CHECKSUM_UI_IN_GAME_SUB1 0x00546688
+/*#define CHECKSUM_UI_IN_GAME_SUB1 0x00546688
 	class STRUCT_UI_IN_GAME_SUB1 : public STRUCT_ANY_UI { // TO DO - name to fix - role to determine
 	public:
 		char unknown_0F4[0x100 - 0x0F4];
@@ -4648,7 +4649,7 @@ namespace ROR_STRUCTURES_10C
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_IN_GAME_SUB1; }
 	};
-
+	*/
 
 	// Size ?
 #define CHECKSUM_UI_DIAMOND_MAP 0x0054A73C
@@ -4705,6 +4706,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return this->checksum == 0x00543CEC; }
 	};
 
+#define CHECKSUM_UI_PLAYING_ZONE 0x00546688
 	// Size 0x380
 	// Constructor 0x518690
 	// Parent can be STRUCT_UI_IN_GAME_MAIN, or editor UI?
@@ -4744,6 +4746,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_141[3];
 
 		char unknown_144[0x334 - 0x144];
+		// +168 : byte
 		// +304, 318, 31C, 320: dwords related to mouse pos?
 
 		unsigned long int unknown_334_ptr; // Ptr to obj size=0x70, ccor=516110. +5C=array size 4*(maxTypeId+1) of ptrs to obj. obj:+4=next,+8=unitId,+30/32/34/36=min/maxPosXY? +C,+20=ptrGraphicsShp?
@@ -4752,8 +4755,14 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int unknown_33C;
 		// 0x340
 		long int unknown_340_unitId; // Target ? Selected ? Under mouse ?
+		unsigned long int unknown_344;
+		unsigned long int unknown_348;
+		unsigned long int unknown_34C;
+		char unknown_350[0x36C - 0x350];
+		long int unsure_gamePosYUnderMouse; // +36C. mouse pos or game pos (or temp variable ?)
+		long int unsure_gamePosXUnderMouse; // +370. mouse pos or game pos (or temp variable ?)
 
-		bool IsCheckSumValid() { return (this->checksum == 0x00546688) || (this->checksum == 0x0054A840); }
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_UI_PLAYING_ZONE) || (this->checksum == 0x0054A840); }
 	};
 
 
@@ -5366,7 +5375,7 @@ namespace ROR_STRUCTURES_10C
 		float posX;
 		unsigned short int unknown_08;
 		unsigned short int unknown_0A;
-		unsigned long int unknown_0C;
+		STRUCT_UNIT_BASE *unit;
 		unsigned long int unknown_10;
 	};
 

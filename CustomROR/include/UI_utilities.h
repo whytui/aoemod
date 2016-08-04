@@ -8,6 +8,7 @@
 #include <assert.h>
 #include "AOE_memory.h"
 #include "drsHandler.h"
+#include "mainStructuresHandling.h"
 
 
 /*
@@ -84,7 +85,7 @@ static void AOE_RefreshUIObject(ROR_STRUCTURES_10C::STRUCT_ANY_UI *object) {
 // Note that settings->currentUIStatus is unchanged when showing such dialog message.
 static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, long int hSize, long int vSize) {
 	char *dlgName = (char *)AOE_CONST_INTERNAL::customDialogScreenName;
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *(ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS **) AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT; // GetGameSettingsPtr();
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (settings == NULL) { return 0; }
 	unsigned long int fct = 0;
 	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = *(ROR_STRUCTURES_10C::STRUCT_ANY_UI **) AOE_OFFSETS::ADDR_VAR_CURRENT_UI_OBJECT;
@@ -672,7 +673,7 @@ static long int AOE_GetGamePosFromMousePos(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING
 		PUSH mousePosY;
 		PUSH mousePosX;
 		PUSH 0;
-		PUSH 0x28;
+		PUSH 0x28; // "click release" MOUSE_BUTTON_ACTION::CST_MBA_RELEASE_CLICK
 		CALL callAddr;
 		MOV res, EAX;
 	}
@@ -819,7 +820,7 @@ static void AOE_DiamondMapDrawAllTiles(ROR_STRUCTURES_10C::STRUCT_UI_DIAMOND_MAP
 
 // Refresh diamond map (draw all tiles) in editor or in-game (automatically finds the correct structure)
 static bool DiamondMapDrawAllTiles() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *(ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS **) AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT; // GetGameSettingsPtr();
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (settings && settings->IsCheckSumValid()) {
 		ROR_STRUCTURES_10C::STRUCT_UI_DIAMOND_MAP *diamMap = NULL;
 		if ((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
@@ -850,4 +851,42 @@ static void AOE_EditorOpenMenu(ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAI
 		MOV EAX, 0x00494A90; // editor.OpenMenu()
 		CALL EAX;
 	}
+}
+
+// Returns game zone UI object for both in-game or scenario editor. Returns NULL if not found.
+static ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *GetGameZone() {
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
+	assert(currentUI);
+	if (!settings || !currentUI || !settings->IsCheckSumValid()) { return NULL; }
+
+	if ((settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) &&
+		(settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) &&
+		(settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME)) {
+		return NULL;
+	}
+
+	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *)currentUI;
+	if (gameMainUI->IsCheckSumValid()) {
+		assert((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
+			(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME));
+		if (gameMainUI->gamePlayUIZone && gameMainUI->gamePlayUIZone->IsCheckSumValid()) {
+			return gameMainUI->gamePlayUIZone;
+		} else {
+			return NULL;
+		}
+	}
+
+	ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditorMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)currentUI;
+
+	if (scEditorMainUI && scEditorMainUI->IsCheckSumValid()) {
+		assert(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
+		if (scEditorMainUI->gamePlayUIZone && scEditorMainUI->gamePlayUIZone->IsCheckSumValid()) {
+			return scEditorMainUI->gamePlayUIZone;
+		} else {
+			return NULL;
+		}
+	}
+	return NULL;
 }

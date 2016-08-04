@@ -118,6 +118,7 @@
     <ClInclude Include="include\customFuncRules.h" />
     <ClInclude Include="include\drsHandler.h" />
     <ClInclude Include="include\language.h" />
+    <ClInclude Include="include\mainStructuresHandling.h" />
     <ClInclude Include="include\randomizer.h" />
     <ClInclude Include="include\researches.h" />
     <ClInclude Include="include\RORProcessEditor.h" />
@@ -157,6 +158,7 @@
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\drsHandler.cpp" />
     <ClCompile Include="src\EXESelfEditor.cpp" />
+    <ClCompile Include="src\mainStructuresHandling.cpp" />
     <ClCompile Include="src\popups.cpp" />
     <ClCompile Include="src\interface.cpp" />
     <ClCompile Include="src\researches.cpp" />

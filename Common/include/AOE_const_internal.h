@@ -62,6 +62,12 @@ namespace AOE_CONST_INTERNAL
 		GDL_EASIEST = 4
 	};
 
+	enum MOUSE_BUTTON_ACTION : long int {
+		CST_MBA_RELEASE_CLICK = 0x28, // 40
+		CST_MBA_LEFT_CLICK = 0x29, // 41
+		CST_MBA_RIGHT_CLICK = 0x2A // 42
+	};
+
 	enum MOUSE_ACTION_TYPES : long int {
 		CST_MAT_NORMAL = 0,
 		CST_MAT_UNKNOWN_01 = 1,

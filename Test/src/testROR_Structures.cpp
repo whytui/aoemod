@@ -209,10 +209,8 @@ static bool test_ror_structures() {
 	ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX lbx;
 	trs_assert(&lbx, 0x102, &lbx.unknown_102);
 
-	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_SUB1 uiigs1;
-	trs_assert(&uiigs1, 0x100, &uiigs1.humanControlledPlayer);
-
 	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE playingzone;
+	trs_assert(&playingzone, 0x100, &playingzone.controlledPlayer);
 	trs_assert(&playingzone, 0x340, &playingzone.unknown_340_unitId);
 
 	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN uiigm;

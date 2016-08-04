@@ -18,6 +18,7 @@
 #include <ROR_global_variables.h>
 #include <basicFilesHandling.h>
 
+#include "mainStructuresHandling.h"
 #include "AOE_memory.h"
 #include "AOE_map.h"
 #include "UI_utilities.h"
@@ -179,6 +180,7 @@ public:
 
 	// Get main (first) selected unit, or NULL if none is selected.
 	// Works in-game and in editor.
+	// See SelectOneUnit for unit selection + AOE_selectUnit, AOE_clearSelectedUnits
 	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *GetMainSelectedUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
 
 	// Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
@@ -199,25 +201,6 @@ private:
 
 /* ----------- GETTERS ------------- */
 
-
-// Returns a pointer to global game struct
-// Warning: can sometimes return NULL when called very early (when the game has just been run)
-ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr();
-
-// Returns a pointer to game settings struct
-// ASSERTS that the pointer is non-NULL
-ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS* GetGameSettingsPtr();
-
-// Returns a pointer to current active UI (?)
-// ASSERTS that the pointer is non-NULL
-ROR_STRUCTURES_10C::STRUCT_ANY_UI *GetCurrentUIStruct();
-
-// Returns currently human-controlled player struct according to game settings struct
-ROR_STRUCTURES_10C::STRUCT_PLAYER *GetControlledPlayerStruct_Settings();
-
-// Returns player struct for given player id
-// returns NULL if incorrect player id
-ROR_STRUCTURES_10C::STRUCT_PLAYER *GetPlayerStruct(long int playerId);
 
 // Useful to get structure from a unit id. May return NULL !
 // Only works for creatable (unitId >= 0). This is just a choice to avoid writing same bugs as ROR
@@ -309,11 +292,6 @@ bool IsUnitIdle(ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
 
 // Calls AOE's code mainAI.findUnit(DAT_Id)
 ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(ROR_STRUCTURES_10C::STRUCT_AI *mainAI, long int DAT_ID);
-
-// Returns a placement error number (ERROR_FOR_UNIT_CREATION) - 0 is OK for creating unit
-AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(ROR_STRUCTURES_10C::STRUCT_PLAYER * player,
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef, float posY, float posX, bool checkVisibility, bool hillMode,
-	bool editorMode, bool checkAirModeAndHPBar, bool checkConflictingUnits);
 
 // GetDamage(unitDef attacker, unitDef defender) returns long int
 // Call 0043FF10
@@ -495,7 +473,7 @@ void AOE_InfAIBuildHistory_setStatus(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, l
 // Remove a building from arrays for a player
 void AOE_playerBldHeader_RemoveBldFromArrays(ROR_STRUCTURES_10C::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
 
-// Clear player selection then select provided unit.
+// Clear player selection then select provided unit. Compatible with editor too.
 // If centerScreen is true, player's screen will be centered to unit.
 void SelectOneUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase, bool centerScreen);
 

@@ -80,7 +80,7 @@ AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(RO
 
 // If UIObj is null, use current "global" screen positions.
 ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition(ROR_STRUCTURES_10C::STRUCT_ANY_UI *UIObj) {
-	static ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
+	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
 	result.posX = -1;
 	result.posY = -1;
 	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = UIObj;
@@ -99,6 +99,25 @@ ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition(ROR_STRUCTURES_10C::ST
 	return result;
 }
 
+// Get current mouse position, in game zone, if found. Returns (-1, -1) if not found.
+ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition() {
+	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
+	result.posX = -1;
+	result.posY = -1;
+	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
+	assert(currentUI);
+	if (!settings || !currentUI) { return result; }
+	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
+	if (!gameZone || !gameZone->IsCheckSumValid()) {
+		return result;
+	}
+	result = GetMousePosition(gameZone);
+	result.posX = result.posX - gameZone->unknown_08C_minPosX;
+	result.posY = result.posY - gameZone->unknown_090_minPosY;
+	return result;
+}
 
 // Get "game" coordinates under mouse position. Returns true if successful. Updates posX/posY.
 // If position is not valid, posX/posY are set to -1.
@@ -110,26 +129,8 @@ bool GetGamePositionUnderMouse(float *posX, float *posY) {
 	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
 	assert(currentUI);
 	if (!settings || !currentUI) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *)currentUI;
-	ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditorMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)currentUI;
-	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone = NULL;
-	if (gameMainUI->IsCheckSumValid()) {
-		assert((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
-			(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME));
-		gameZone = gameMainUI->gamePlayUIZone;
-	}
-	if (scEditorMainUI->IsCheckSumValid()) {
-		assert(gameZone == NULL);
-		assert(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
-		gameZone = scEditorMainUI->gamePlayUIZone;
-	}
+	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
 	if (!gameZone || !gameZone->IsCheckSumValid()) { return false; }
-	if (!settings) { return false; }
-	if ((settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) &&
-		(settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) &&
-		(settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME)) {
-		return false;
-	}
 	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO mousePos = GetMousePosition(gameZone);
 
 	// Analog to 0x5145D1
@@ -150,6 +151,29 @@ bool GetGamePositionUnderMouse(float *posX, float *posY) {
 	return (unknown_res > 0);
 }
 
+// Collects info at mouse position : game position, underlying unit...
+// WARNING: does not return all units
+bool AOE_GetGameInfoUnderMouse(long int maxInteractionMode, long int mousePosX, long int mousePosY, ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_POSITION_INFO *posInfo) {
+	STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
+	if ((posInfo == NULL) || (!gameZone || !gameZone->IsCheckSumValid())) { return false; }
+	const unsigned long int addr = 0x51A650;
+	long int res = 0;
+	const long int arg1 = AOE_CONST_INTERNAL::CST_MBA_RELEASE_CLICK;
+	_asm {
+		PUSH 0;
+		PUSH 0;
+		PUSH posInfo;
+		PUSH mousePosY;
+		PUSH mousePosX;
+		PUSH maxInteractionMode;
+		PUSH arg1;
+		MOV ECX, gameZone
+		CALL addr;
+		MOV res, EAX;
+	}
+	return (res > 0); // really not sure of this. Seen 0x33(found pos?), 0x34(found a unit?)... ?
+}
+
 // Returns "game" coordinates under mouse position (rounded to int).
 // If position is not valid, posX/posY are set to -1.
 ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo() {
@@ -164,36 +188,25 @@ ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo() {
 
 // Get unit at (mouse) position, using AOE methods.
 // Warning, this impacts the global variables in 0x7D1CF8
-ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, bool allowTempUnits) {
+ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, INTERACTION_MODES maxInteractionMode, bool allowTempUnits) {
 	if ((mousePosX < 0) || (mousePosY < 0)) { return NULL; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || !settings->IsCheckSumValid()) { return NULL; }
-	// Only allowed in game or editor
-	if ((settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) &&
-		(settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) &&
-		(settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME)
-		) {
-		return NULL;
-	}
-	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI = settings->ptrGameUIStruct;
-	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) { return NULL; }
-
-	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone = gameMainUI->gamePlayUIZone;
+	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
 	if (!gameZone || !gameZone->IsCheckSumValid()) { return NULL; }
 	long int i_allowTempUnits = allowTempUnits ? 1 : 0;
 	long int result;
+	long int i_maxInteraction = (long int)maxInteractionMode;
 	_asm {
-		MOV ECX, gameZone
-			PUSH i_allowTempUnits
-			PUSH 4 // Max interaction mode
-			PUSH 0x0F // ?
-			PUSH 40 // maxUnitCategory
-			PUSH 0 // minUnitCategory. 10 would be enough. 20 to disable selecting birds.
-			PUSH mousePosY
-			PUSH mousePosX
-			MOV EDX, 0x005145A0
-			CALL EDX
-			MOV result, EAX
+		MOV ECX, gameZone;
+		PUSH i_allowTempUnits;
+		PUSH i_maxInteraction; // arg6 = Max interaction mode
+		PUSH 0x0F; // ? Maybe related to fog visibility
+		PUSH 40; // maxUnitCategory (level ?)
+		PUSH 0; // minUnitCategory. 10 would be enough. 20 to disable selecting birds.
+		PUSH mousePosY;
+		PUSH mousePosX;
+		MOV EDX, 0x005145A0;
+		CALL EDX;
+		MOV result, EAX;
 	}
 	if (!result) { return NULL; }
 	long int *foundUnitId = (long int*)0x7D1CF8;
