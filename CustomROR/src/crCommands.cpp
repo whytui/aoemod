@@ -21,11 +21,11 @@ CustomRORCommand::~CustomRORCommand() {
 bool CustomRORCommand::CheckEnabledFeatures() {
 	char strNotEnabled[] = " NOT ENABLED !";
 	FILE *f;
-	int res = fopen_s(&f, "CustomROR.log", "w+"); // overwrite if already existing
+	int res = fopen_s(&f, "CustomROR\\CustomROR.log", "w+"); // overwrite if already existing
 	if (res) {
 		std::string msg = std::string(localizationHandler.GetTranslation(CRLANG_ID_CANT_WRITE_FILE, "ERROR: cannot write to"));
 		msg += " ";
-		msg += "CustomROR.log";
+		msg += "CustomROR\\CustomROR.log";
 		traceMessageHandler.WriteMessage(msg);
 		return false;
 	}

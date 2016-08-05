@@ -10,7 +10,7 @@ void ChangeItfDRS_file() {
 	FILE *fileTest = NULL;
 	FILE *fileLog = NULL;
 	int logFileRes;
-	logFileRes = fopen_s(&fileLog, "CustomROR.log", "a+"); // appends (do not overwrite)
+	logFileRes = fopen_s(&fileLog, "CustomROR\\CustomROR.log", "a+"); // appends (do not overwrite)
 	bool hasLog = (logFileRes == 0);
 
 	// Check if a custom resolution is enabled in game executable

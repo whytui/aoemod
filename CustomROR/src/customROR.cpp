@@ -366,15 +366,15 @@ void CustomRORInstance::TemporaryEntryPoints(REG_BACKUP *REG_values) {
 // ROR UI has not been initialized yet, DRS files are not loaded, etc.
 void CustomRORInstance::OneShotInit() {
 	traceMessageHandler.WriteMessageNoNotification(localizationHandler.GetTranslation(CRLANG_ID_DEBUG_INIT, "Debug message system initialized."));
-	this->crInfo.configInfo.ReadXMLConfigFile("customROR.xml");
-	this->crInfo.configInfo.ReadCivXMLConfigFile("customROR_civs.xml");
+	this->crInfo.configInfo.ReadXMLConfigFile("CustomROR\\customROR.xml");
+	this->crInfo.configInfo.ReadCivXMLConfigFile("CustomROR\\customROR_civs.xml");
 	this->crCommand.crInfo = &this->crInfo;
 	this->crMainInterface.crCommand = &this->crCommand;
 	// Do not use crCommand before this line !
 
 	// Note: CheckEnabledFeatures writes to log file
 	if (!this->crCommand.CheckEnabledFeatures()) {
-		const char *msg = localizationHandler.GetTranslation(CRLANG_ID_WARN_MISSING_FEATURE, "WARNING: Some features are not enabled in game executable. See CustomROR.log file.");
+		const char *msg = localizationHandler.GetTranslation(CRLANG_ID_WARN_MISSING_FEATURE, "WARNING: Some features are not enabled in game executable. See CustomROR\\CustomROR.log file.");
 		if (this->crInfo.configInfo.showAlertOnMissingFeature) {
 			MessageBoxA(0, msg, "ROR API", MB_ICONWARNING);
 		}
@@ -1848,7 +1848,7 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 			traceMessageHandler.WriteMessage(msg);
 			FILE *fileLog = NULL;
 			int logFileRes;
-			logFileRes = fopen_s(&fileLog, "CustomROR.log", "a+"); // appends (do not overwrite)
+			logFileRes = fopen_s(&fileLog, "CustomROR\\CustomROR.log", "a+"); // appends (do not overwrite)
 			if (logFileRes == 0) {
 				fprintf_s(fileLog, msg);
 				fprintf_s(fileLog, "\n");
