@@ -24,6 +24,7 @@ To install only ROR_API (without customROR):
 ...[Please note that this only has to be done once, now you can plug/unplug any DLL just by changing configuration]...
 - Open ROR_API.conf in a text editor and list the DLL plug-ins you want to add.
 - Write 1 DLL file name per line without spaces or any extra character. Invalid lines are ignored (see provided example).
+- Subdirectories are supported (example: CustomROR\customROR.dll)
 
 
 ***********
