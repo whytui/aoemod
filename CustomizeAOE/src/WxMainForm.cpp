@@ -283,22 +283,32 @@ void WxMainForm::InstallCustomROR() {
 		// Message in log ?
 	}
 	resultPatch = this->FileOpen(true);
-	if (resultPatch && (this->e_api->GetFileVersion().compare(_T("1.0c")))) {
+	std::wstring version = this->e_api->GetFileVersion();
+	if (resultPatch && (version.compare(GET_AOE_FILE_VERSION_LABEL(AOE_VERSION_ROR1_0C)))) {
 		if (wxMessageBox(_T("This is not 1.0c Rise of Rome version. Do you want to try to install customROR anyway ?"),
 			_T("Install customROR"), wxICON_WARNING | wxYES_NO) == wxNO) {
 			this->txtLog->AppendText(_T("Wrong or unsupported version.\n"));
+			SetStatusText(_T("Cancelled by user, did not proceed to installation."));
 			resultPatch = false;
+			return;
+		} else {
+			this->txtLog->AppendText(_T("Wrong or unsupported version, but proceed anyway.\n"));
+			this->txtLog->AppendText(_T("*** If you are using another version than ROR1.0c, you need to modify ROR_API.conf manually after the installation process\n"));
+			this->txtLog->AppendText(_T("*** to replace the line 'CustomROR\\CustomROR.dll by the CustomROR version that matches AOE/ROR version.\n"));
+			wxMessageBox(_T("Please read log in main window for instructions to finish installation for non-ROR1.0c version"),
+				_T("Install customROR"), wxICON_WARNING | wxOK);
 		}
-		this->txtLog->AppendText(_T("Wrong or unsupported version, but proceed anyway.\n"));
 	}
 	if (resultPatch) { this->txtLog->AppendText(_T("...Installing technical fixes and remove obsolete changes.\n")); }
-	resultPatch = resultPatch && this->e_api->RemoveObsoletes();
-	resultPatch = resultPatch && this->e_api->SetAllTechFixes();
 	int writeCallResult = 0;
-	writeCallResult = this->e_api->WriteChangesToFile();
-	if (writeCallResult < 0) {
-		resultPatch = false;
-		this->txtLog->AppendText(_T("Encountered an error, technical code=") + std::to_wstring(writeCallResult) + _T(".\n"));
+	if (resultPatch) {
+		resultPatch = resultPatch && this->e_api->RemoveObsoletes();
+		resultPatch = resultPatch && this->e_api->SetAllTechFixes();
+		writeCallResult = this->e_api->WriteChangesToFile();
+		if (writeCallResult < 0) {
+			resultPatch = false;
+			this->txtLog->AppendText(_T("Encountered an error, technical code=") + std::to_wstring(writeCallResult) + _T(".\n"));
+		}
 	}
 	if (resultPatch) { // Technically this if is not necessary due to bool evaluation !
 		this->txtLog->AppendText(_T("...Installing features: ROR_API support, Windowed Mode, MaxSelectedUnits.\n"));

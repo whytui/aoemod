@@ -385,7 +385,8 @@ bool CAOE_Console::ExecuteCommand(std::wstring cmd) {
 	if (cmd == _T("install customror")) {
 		std::wstring filename = e_api.GetFileName();
 		FAIL_IF_NO_EXE(filename);
-		wprintf_s(_T("Please write customROR files source directory full path and type <return>:\n"));
+		wprintf_s(_T("Please write customizeAOE files source (root) directory full path and type <return>:\n"));
+		wprintf_s(_T("(this folder should contain various files/folders, including ROR_API.dll file and customROR\\ subdirectory)\n"));
 		std::getline(*this->winput, s_input);
 		std::wstring noquotes;
 		if (!s_input.empty() && (s_input.at(0) == _T('\"'))) {

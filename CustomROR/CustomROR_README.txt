@@ -1,16 +1,16 @@
 ﻿CustomROR is a plugin for Rise of Rome. It requires ROR_API.
 
 Installation
-- Extract all files to a directory of your choice (example C:\temp\customROR\): ROR_API.dll, ROR_API.conf, CustomROR.dll, CustomROR.xml
+- Extract all files to a directory of your choice (example C:\temp\customROR\): ROR_API.dll, ROR_API.conf, CustomROR subdirectory, etc.
 - Get latest CustomizeAOE version from http://aoe.heavengames.com/dl-php/showfile.php?fileid=2464
 - Run CustomizeAOE and click Menu>File>Install CustomROR.
-- Select C:\temp\customROR\CustomROR.dll and C:\your_aoe_install_dir\EmpiresX.exe (the game file you want to patch).
+- Select C:\temp\customROR\ROR_API.dll and C:\your_aoe_install_dir\EmpiresX.exe (the game file you want to patch).
   (note: you can copy-paste EmpiresX.exe to EmpiresX2.exe and patch this copy to keep EmpiresX.exe unchanged)
 
 Notes:
-- Several options can be configured in customROR.xml, like conversion resistances.
-- Select a different empires.dat file to use in customROR.xml.
-- Custom civilizations can be configured in customROR_civs.xml.
+- Several options can be configured in CustomROR\customROR.xml, like conversion resistances.
+- Select a different empires.dat file to use in CustomROR\customROR.xml.
+- Custom civilizations can be configured in CustomROR\customROR_civs.xml.
 => Edit XML files with a text editor (with syntax coloration if possible, for example Notepad++)
 - Use CustomizeAOE to change other options if you want. Ths installation process should already have patched CustomROR-required options (including ROR_API).
 - CustomROR will also work if the EXE you patch is not named EmpiresX.exe (for example, Copy of EmpiresX.exe).

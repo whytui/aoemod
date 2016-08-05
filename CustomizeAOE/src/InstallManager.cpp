@@ -18,7 +18,6 @@ bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeF
 
 	std::wstring ROR_filename = targetExeFullPath;
 	std::wstring destDirName = extractDirectory(ROR_filename);
-	std::wstring destCustomROR_DLL = destDirName + _T("\\CustomROR.dll");
 
 	// Compares src and dest
 	if (sourceDirectory.compare(destDirName.c_str()) == 0) {
@@ -28,41 +27,34 @@ bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeF
 
 	// Build all file names
 	std::wstring destCustomRorDir = destDirName + _T("\\CustomROR");
-	std::wstring srcCustomROR_DLL = sourceDirectory + _T("\\customROR.dll");
-	std::wstring srcCustomROR_XML = sourceDirectory + _T("\\CustomROR.xml");
-	std::wstring srcCustomROR_civs_XML = sourceDirectory + _T("\\CustomROR_civs.xml");
 	std::wstring srcRORAPI_DLL = sourceDirectory + _T("\\ROR_API.dll");
 	std::wstring srcRORAPI_CONF = sourceDirectory + _T("\\ROR_API.conf");
 	std::wstring srcWNDMODE_DLL = sourceDirectory + _T("\\wndmode.dll");
 	std::wstring srcCustomROR_dir = sourceDirectory + _T("\\CustomROR\\");
-	std::wstring destCustomROR_XML = destDirName + _T("\\CustomROR.xml");
-	std::wstring destCustomROR_civs_XML = destDirName + _T("\\CustomROR_civs.xml");
+	std::wstring srcCustomROR_DLL = sourceDirectory + _T("\\CustomROR\\CustomROR.dll");
 	std::wstring destRORAPI_DLL = destDirName + _T("\\ROR_API.dll");
 	std::wstring destRORAPI_CONF = destDirName + _T("\\ROR_API.conf");
 	std::wstring destWNDMODE_DLL = destDirName + _T("\\wndmode.dll");
 	std::wstring destCustomROR_dir = destDirName + _T("\\CustomROR\\");
+	std::wstring destCustomROR_DLL = destDirName + _T("\\CustomROR\\CustomROR.dll");
 	// Get current files status (existing ?)
-	bool hasSrcCustomROR_XML = CheckFileExistence(srcCustomROR_XML);
-	bool hasSrcCustomROR_civs_XML = CheckFileExistence(srcCustomROR_civs_XML);
 	bool hasSrcRORAPI_DLL = CheckFileExistence(srcRORAPI_DLL);
 	bool hasSrcRORAPI_CONF = CheckFileExistence(srcRORAPI_CONF);
 	bool hasSrcWNDMODE_DLL = CheckFileExistence(srcWNDMODE_DLL);
 	bool hasSrcCustomRor_dir = DirectoryExists(srcCustomROR_dir);
-	bool hasDestCustomROR_DLL = CheckFileExistence(destCustomROR_DLL);
-	bool hasDestCustomROR_XML = CheckFileExistence(destCustomROR_XML);
-	bool hasDestCustomROR_civs_XML = CheckFileExistence(destCustomROR_civs_XML);
+	bool hasSrcCustomRor_DLL = CheckFileExistence(srcCustomROR_DLL);
 	bool hasDestRORAPI_DLL = CheckFileExistence(destRORAPI_DLL);
 	bool hasDestRORAPI_CONF = CheckFileExistence(destRORAPI_CONF);
 	bool hasDestWNDMODE_DLL = CheckFileExistence(destWNDMODE_DLL);
 	bool hasDestCustomRor_dir = DirectoryExists(destCustomROR_dir);
+	bool hasDestCustomRor_DLL = CheckFileExistence(destCustomROR_DLL);
 	bool hasMissingFiles = false;
 	std::wstring message = _T("Missing files in source directory:");
-	if (!hasDestCustomROR_XML && !hasSrcCustomROR_XML) { message += _T(" CustomROR.xml"); hasMissingFiles = true; }
-	if (!hasDestCustomROR_civs_XML && !hasSrcCustomROR_civs_XML) { message += _T(" CustomROR_civs.xml"); hasMissingFiles = true; }
 	if (!hasDestRORAPI_DLL && !hasSrcRORAPI_DLL) { message += _T(" ROR_API.dll"); hasMissingFiles = true; }
 	if (!hasDestRORAPI_CONF && !hasSrcRORAPI_CONF) { message += _T(" ROR_API.conf"); hasMissingFiles = true; }
 	if (!hasDestWNDMODE_DLL && !hasSrcWNDMODE_DLL) { message += _T(" wndmode.dll"); hasMissingFiles = true; }
 	if (!hasDestCustomRor_dir && !hasSrcCustomRor_dir) { message += _T(" CustomROR\\"); hasMissingFiles = true; }
+	if (!hasSrcCustomRor_DLL && !hasDestCustomRor_DLL) { message += _T(" CustomROR\\customROR.dll"); hasMissingFiles = true; }
 	if (hasMissingFiles) {
 		shortMessage = message;
 		return false;
@@ -76,48 +68,6 @@ bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeF
 	bool copyFailed = false;
 	BOOL singleCopySuccess;
 	std::wstring copyErrors = _T("");
-	// Copy customROR.dll
-	singleCopySuccess = CopyFile(srcCustomROR_DLL.c_str(), destCustomROR_DLL.c_str(), !overwriteFiles);
-	if (!singleCopySuccess) {
-		copyFailed = (overwriteFiles || !hasDestCustomROR_DLL); // Ignore copy errors if target exists AND we chose not to overwrite
-	} else {
-		message = _T("Copied ") + destCustomROR_DLL + _T("\n");
-		logs += message;
-	}
-	// Copy customROR XML files
-	if (hasDestCustomROR_XML && overwriteFiles) {
-		// Try to backup old XML file
-		std::wstring backupFilename = destCustomROR_XML + _T(".old");
-		singleCopySuccess = CopyFile(destCustomROR_XML.c_str(), backupFilename.c_str(), false);
-		if (singleCopySuccess) {
-			message = _T("Created backup file ") + backupFilename + _T("\n");
-			logs += message;
-		}
-	}
-	singleCopySuccess = CopyFile(srcCustomROR_XML.c_str(), destCustomROR_XML.c_str(), !overwriteFiles);
-	if (!singleCopySuccess) {
-		copyFailed = copyFailed || (overwriteFiles || !hasDestCustomROR_DLL);
-	} else {
-		message = _T("Copied ") + destCustomROR_XML + _T("\n");
-		logs += message;
-	}
-
-	if (hasDestCustomROR_civs_XML && overwriteFiles) {
-		// Try to backup old XML file
-		std::wstring backupFilename = destCustomROR_civs_XML + _T(".old");
-		singleCopySuccess = CopyFile(destCustomROR_civs_XML.c_str(), backupFilename.c_str(), false);
-		if (singleCopySuccess) {
-			message = _T("Created backup file ") + backupFilename + _T("\n");
-			logs += message;
-		}
-	}
-	singleCopySuccess = CopyFile(srcCustomROR_civs_XML.c_str(), destCustomROR_civs_XML.c_str(), !overwriteFiles);
-	if (!singleCopySuccess) {
-		copyFailed = copyFailed || (overwriteFiles || !hasDestCustomROR_civs_XML);
-	} else {
-		message = _T("Copied ") + destCustomROR_civs_XML + _T("\n");
-		logs += message;
-	}
 
 	// Copy ROR_API files
 	singleCopySuccess = CopyFile(srcRORAPI_DLL.c_str(), destRORAPI_DLL.c_str(), !overwriteFiles);

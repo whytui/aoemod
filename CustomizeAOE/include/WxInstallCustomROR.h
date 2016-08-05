@@ -32,16 +32,13 @@ private:
 	wxBoxSizer *ButtonsArea;
 	wxFlexGridSizer *grdResourceFiles;
 	wxTextCtrl *edtGameFileName;
-	wxTextCtrl *edtCustomROR_DLL_FilePath;
-	wxTextCtrl *edtCustomROR_XML_FilePath;
-	wxTextCtrl *edtCustomROR_civs_XML_FilePath;
-	wxTextCtrl *edtCustomROR_DRS_FilePath;
 	wxTextCtrl *edtROR_API_DLL_FilePath;
 	wxTextCtrl *edtROR_API_conf_FilePath;
 	wxTextCtrl *edtWndMode_FilePath;
+	wxTextCtrl *edtCustomROR_DLL_FilePath;
 	wxCheckBox *chkOverwriteFiles;
 	wxButton *btnSelectGameFile;
-	wxButton *btnSelectCustomROR_DLL;
+	wxButton *btnSelectRORAPI_DLL;
 	wxButton *btnOK;
 	wxButton *btnCancel;
 
@@ -61,7 +58,7 @@ enum ICR_Components_IDs
 {
 	ID_ICR_CANCEL = 1,
 	ID_ICR_OK = 2,
-	ID_ICR_SELECT_CUSTOMROR_DLL = 3,
+	ID_ICR_SELECT_RORAPI_DLL = 3,
 	ID_ICR_SELECT_GAME_FILE = 4,
 	ID_ICR_EDIT_CUSTOMROR_DLL_PATH = 5
 };

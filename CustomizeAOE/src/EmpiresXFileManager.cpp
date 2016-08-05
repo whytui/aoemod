@@ -101,11 +101,11 @@ bool EmpiresXFileManager::CheckVersionBinarySequence() {
 		versionSeq = new BinarySeqDefinition(EXE_VERSION_CHECK_AOE10C_SIZE, 1, EXE_VERSION_CHECK_AOE10C_OFFSET);
 		versionSeq->WriteSequence(0, EXE_VERSION_CHECK_AOE10C);
 		break;
-	case AOE_VERSION_1_0B:
+	case AOE_VERSION_ROR1_0B:
 		versionSeq = new BinarySeqDefinition(EXE_VERSION_CHECK_10B_SIZE, 1, EXE_VERSION_CHECK_10B_OFFSET);
 		versionSeq->WriteSequence(0, EXE_VERSION_CHECK_10B);
 		break;
-	case AOE_VERSION_1_0C:
+	case AOE_VERSION_ROR1_0C:
 		versionSeq = new BinarySeqDefinition(EXE_VERSION_CHECK_10C_SIZE, 1, EXE_VERSION_CHECK_10C_OFFSET);
 		versionSeq->WriteSequence(0, EXE_VERSION_CHECK_10C);
 		break;
@@ -149,10 +149,10 @@ bool EmpiresXFileManager::FindGameVersion() {
 		this->gameFileVersion = AOE_VERSION_AOE1_0C;
 		break;
 	case EXE_FILE_SIZE_10B:
-		this->gameFileVersion = AOE_VERSION_1_0B;
+		this->gameFileVersion = AOE_VERSION_ROR1_0B;
 		break;
 	case EXE_FILE_SIZE_10C:
-		this->gameFileVersion = AOE_VERSION_1_0C;
+		this->gameFileVersion = AOE_VERSION_ROR1_0C;
 		break;
 	case EXE_FILE_SIZE_UPATCH_BETA:
 		this->gameFileVersion = AOE_VERSION_UPATCH_BETA;

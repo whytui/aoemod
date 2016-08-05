@@ -833,7 +833,7 @@ bool EmpiresX_API::SetBasicCustomROROptions() {
 	bool result = true;
 	result = this->SetROR_API(true);
 	//result = result && this->SetAllROR_API_optionals(true); // Do not install optionals, customROR can install them dynamically
-	if (this->GetAOEManager()->GetFileVersion() == AOE_FILE_VERSION::AOE_VERSION_1_0C) {
+	if (this->GetAOEManager()->GetFileVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C) {
 		result = result && this->SetMaxSelectedUnits(100); // only available in 1.0c version
 	}
 	result = result && this->SetWindowedMode(true);

@@ -46,41 +46,32 @@ void WxInstallCustomROR::ConstructorInit(std::wstring EXEFileName) {
 	this->btnSelectGameFile = new wxButton(this, ICR_Components_IDs::ID_ICR_SELECT_GAME_FILE, _T("Select game EXE"));
 	this->btnOK = new wxButton(this, ICR_Components_IDs::ID_ICR_OK, _T("OK"));
 	this->btnCancel = new wxButton(this, ICR_Components_IDs::ID_ICR_CANCEL, _T("Cancel"));
-	this->btnSelectCustomROR_DLL = new wxButton(this, ICR_Components_IDs::ID_ICR_SELECT_CUSTOMROR_DLL, _T("Select customROR.dll"));
-	this->btnSelectCustomROR_DLL->SetBackgroundColour(wxColor("red"));
+	this->btnSelectRORAPI_DLL = new wxButton(this, ICR_Components_IDs::ID_ICR_SELECT_RORAPI_DLL, _T("Select ROR_API.dll"));
+	this->btnSelectRORAPI_DLL->SetBackgroundColour(wxColor("red"));
 
 	Connect(ICR_Components_IDs::ID_ICR_SELECT_GAME_FILE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallCustomROR::OnSelectGameEXE));
 	Connect(ICR_Components_IDs::ID_ICR_OK, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallCustomROR::OnOK));
 	Connect(ICR_Components_IDs::ID_ICR_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallCustomROR::OnCancel));
-	Connect(ICR_Components_IDs::ID_ICR_SELECT_CUSTOMROR_DLL, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallCustomROR::OnSelectCustomROR_DLL));
+	Connect(ICR_Components_IDs::ID_ICR_SELECT_RORAPI_DLL, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallCustomROR::OnSelectCustomROR_DLL));
 
 	this->GameFileArea->Add(this->btnSelectGameFile, 0, wxALIGN_LEFT);
 	this->GameFileArea->Add(this->edtGameFileName, 1, wxEXPAND);
 
 
 	this->edtCustomROR_DLL_FilePath = new wxTextCtrl(this, ICR_Components_IDs::ID_ICR_EDIT_CUSTOMROR_DLL_PATH, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
-	this->edtCustomROR_XML_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
-	this->edtCustomROR_civs_XML_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
-	this->edtCustomROR_DRS_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtROR_API_DLL_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtROR_API_conf_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtWndMode_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->chkOverwriteFiles = new wxCheckBox(this, wxID_ANY, _T("Replace existing files"), wxDefaultPosition, wxDefaultSize, 0);
 	this->chkOverwriteFiles->Set3StateValue(wxCheckBoxState::wxCHK_CHECKED);
 
-	this->grdResourceFiles->Add(this->btnSelectCustomROR_DLL, 1, wxEXPAND);
-	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Click to select customROR.dll from the installation archive you downloaded (please first extract all files to a directory)."),
+	this->grdResourceFiles->Add(this->btnSelectRORAPI_DLL, 1, wxEXPAND);
+	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Click to select ROR_API.dll from the installation archive you downloaded (please first extract all files from archive)."),
 		wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE), 1, wxEXPAND);
 	this->grdResourceFiles->AddSpacer(20);
 	this->grdResourceFiles->AddSpacer(20);
 	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for customROR.dll")), 1, wxEXPAND);
 	this->grdResourceFiles->Add(this->edtCustomROR_DLL_FilePath, 1, wxEXPAND);
-	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for customROR.xml")), 1, wxEXPAND);
-	this->grdResourceFiles->Add(this->edtCustomROR_XML_FilePath, 1, wxEXPAND);
-	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for customROR_civs.xml")), 1, wxEXPAND);
-	this->grdResourceFiles->Add(this->edtCustomROR_civs_XML_FilePath, 1, wxEXPAND);
-	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for customROR.drs")), 1, wxEXPAND);
-	this->grdResourceFiles->Add(this->edtCustomROR_DRS_FilePath, 1, wxEXPAND);
 	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for ROR_API.dll")), 1, wxEXPAND);
 	this->grdResourceFiles->Add(this->edtROR_API_DLL_FilePath, 1, wxEXPAND);
 	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for ROR_API.conf")), 1, wxEXPAND);
@@ -130,7 +121,7 @@ void WxInstallCustomROR::OnOK(wxCommandEvent& event)
 		return;
 	}
 	if (this->pathToResourceFiles.empty()) {
-		wxMessageBox(_T("Please first select the customROR.dll file to install."), _T("Install customROR"), wxICON_WARNING | wxOK, this);
+		wxMessageBox(_T("Please first select ROR_API.dll file from \"source\" directory."), _T("Install customROR"), wxICON_WARNING | wxOK, this);
 		return;
 	}
 	if (this->hasMissingFile) {
@@ -155,34 +146,28 @@ void WxInstallCustomROR::OnSelectGameEXE(wxCommandEvent& event) {
 
 
 void WxInstallCustomROR::OnSelectCustomROR_DLL(wxCommandEvent& event) {
-	wxFileDialog openFileDialog(this, _("Choose customROR.dll file to install"), "", "", "customROR.dll (customROR.dll)|customROR.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	wxFileDialog openFileDialog(this, _("Choose ROR_API.dll file from installation directory"), "", "", "ROR_API.dll (ROR_API.dll)|ROR_API.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL) {
 		return;
 	}
 	
 	this->pathToResourceFiles = openFileDialog.GetDirectory();
 	// Fill text controls so that user sees source files path
-	this->edtCustomROR_DLL_FilePath->SetValue(openFileDialog.GetPath());
-	this->edtCustomROR_XML_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR.xml"));
-	this->edtCustomROR_civs_XML_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR_civs.xml"));
-	this->edtCustomROR_DRS_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR\\CustomROR.drs"));
+	this->edtCustomROR_DLL_FilePath->SetValue(this->pathToResourceFiles + _T("\\CustomROR\\CustomROR.dll"));
 	this->edtROR_API_DLL_FilePath->SetValue(this->pathToResourceFiles + _T("\\ROR_API.dll"));
 	this->edtROR_API_conf_FilePath->SetValue(this->pathToResourceFiles + _T("\\ROR_API.conf"));
 	this->edtWndMode_FilePath->SetValue(this->pathToResourceFiles + _T("\\wndmode.dll"));
 
 	bool allFilesOK = true;
-	allFilesOK = this->CheckTextCtrlPath(edtCustomROR_DLL_FilePath);
-	allFilesOK = this->CheckTextCtrlPath(edtCustomROR_XML_FilePath) && allFilesOK;
-	allFilesOK = this->CheckTextCtrlPath(edtCustomROR_civs_XML_FilePath) && allFilesOK;
-	allFilesOK = this->CheckTextCtrlPath(edtCustomROR_DRS_FilePath) && allFilesOK;
+	allFilesOK = this->CheckTextCtrlPath(this->edtCustomROR_DLL_FilePath) && allFilesOK;
 	allFilesOK = this->CheckTextCtrlPath(edtROR_API_DLL_FilePath) && allFilesOK;
 	allFilesOK = this->CheckTextCtrlPath(edtROR_API_conf_FilePath) && allFilesOK;
 	allFilesOK = this->CheckTextCtrlPath(edtWndMode_FilePath) && allFilesOK;
 	this->hasMissingFile = !allFilesOK;
 	if (this->hasMissingFile) {
-		this->btnSelectCustomROR_DLL->SetBackgroundColour(*wxRED);
+		this->btnSelectRORAPI_DLL->SetBackgroundColour(*wxRED);
 	} else {
-		this->btnSelectCustomROR_DLL->SetBackgroundColour(*wxGREEN);
+		this->btnSelectRORAPI_DLL->SetBackgroundColour(*wxGREEN);
 	}
 }
 

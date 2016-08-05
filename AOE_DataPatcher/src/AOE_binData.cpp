@@ -41,7 +41,7 @@ BinarySeqDefSet *AOE_binData::GetSeqDefSet(AOE_FILE_VERSION version, BINSEQ_CATE
 		case BC_OPTIONS: return &this->options_AOE10c;
 		default: return NULL;
 		}
-	case AOE_VERSION_1_0B:
+	case AOE_VERSION_ROR1_0B:
 		switch (category) {
 		case BC_NONE: return NULL;
 		case BC_TECH_FIXES: return &this->techFixes_10b;
@@ -55,7 +55,7 @@ BinarySeqDefSet *AOE_binData::GetSeqDefSet(AOE_FILE_VERSION version, BINSEQ_CATE
 		case BC_OBSOLETES: return &this->obsoletes_10b;
 		default: return NULL;
 		}
-	case AOE_VERSION_1_0C:
+	case AOE_VERSION_ROR1_0C:
 	case AOE_VERSION_UPATCH_BETA:
 	case AOE_VERSION_UPATCH_1_1_HD:
 		switch (category) {
