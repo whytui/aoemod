@@ -64,7 +64,8 @@ public:
 	// Opens the custom "simple edit text" popup in editor
 	// When closed, the popup updates outputBuffer if it is provided (not NULL)
 	// Returns true if OK.
-	bool OpenCustomLargeTextEditPopup(char *title, char *initialValue, long int outputBufferSize = 0, char *outputBuffer = NULL, bool readOnly = false, bool withCancelBtn = false);
+	bool OpenCustomTextEditPopup(const char *title, char *initialValue, long int sizeX, long int sizeY,
+		long int outputBufferSize = 0, char *outputBuffer = NULL, bool readOnly = false, bool withCancelBtn = false);
 
 	// Opens the custom "scenario info" popup in editor
 	// Returns true if OK.

@@ -122,7 +122,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				char buffer[100];
 				const char *text = localizationHandler.GetTranslation(CRLANG_ID_MOUSE_POSITION, "Mouse position");
 				sprintf_s(buffer, "%.70s: X=%4.2f, y=%4.2f", text, posX, posY);
-				this->crCommand->OpenCustomDialogMessage(buffer, 400, 180);
+				this->OpenCustomTextEditPopup(text, buffer, 280, 110, sizeof(buffer), NULL, true, false);
 			}
 		} else {
 			this->OpenCustomEditorEditUnitPopup();
@@ -551,8 +551,9 @@ bool CustomRORMainInterface::OpenCustomEditorEditUnitPopup() {
 // Opens the custom "simple edit text" popup in editor
 // outputBuffer is a pointer where the typed text will be copied when the popup is closed. Make sure its allocated size is >=maxLength
 // Returns true if OK.
-bool CustomRORMainInterface::OpenCustomLargeTextEditPopup(char *title, char *initialValue, long int maxLength, char *outputBuffer, bool readOnly, bool withCancelBtn) {
-	SimpleEditTextPopup *p = this->OpenCustomGamePopup<SimpleEditTextPopup>(780, 590, withCancelBtn);
+bool CustomRORMainInterface::OpenCustomTextEditPopup(const char *title, char *initialValue, long int sizeX, long int sizeY, 
+	long int maxLength, char *outputBuffer, bool readOnly, bool withCancelBtn) {
+	SimpleEditTextPopup *p = this->OpenCustomGamePopup<SimpleEditTextPopup>(sizeX, sizeY, withCancelBtn);
 	if (p) {
 		p->AddPopupContent(title, initialValue, maxLength, outputBuffer, readOnly);
 	}
@@ -568,8 +569,8 @@ bool CustomRORMainInterface::OpenTraceMessagePopup() {
 	if (reverseOrder) {
 		title = "Show  debug  messages (reverse order)";
 	}
-	return this->OpenCustomLargeTextEditPopup(title,
-		(char*)traceMessageHandler.GetAllMessages(reverseOrder).c_str(),
+	return this->OpenCustomTextEditPopup(title, (char*)traceMessageHandler.GetAllMessages(reverseOrder).c_str(),
+		780, 590,
 		0, NULL, false /* NOT read only so that scrollbar is active*/, false);
 }
 
