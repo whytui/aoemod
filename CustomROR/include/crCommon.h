@@ -12,7 +12,7 @@
 #include <AOE_const_language.h>
 #include <triggerDefinition.h>
 #include <mystrings.h>
-#include <ROR_commands.h>
+#include <AOE_commands.h>
 #include <Windows.h>
 #include <WinUser.h> // get mouse pos
 #include <ROR_global_variables.h>

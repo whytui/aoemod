@@ -2,7 +2,7 @@
 #include <string>
 #include <mystrings.h>
 #include <AOE_structures.h>
-#include <ROR_struct_debugging.h>
+#include <AOE_struct_debugging.h>
 #include "RORConnector.h"
 #include <sstream>
 #include <iostream>

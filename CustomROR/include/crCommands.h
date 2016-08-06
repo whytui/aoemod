@@ -7,7 +7,7 @@
 #include <mystrings.h>
 
 #include <AOE_const_language.h>
-#include <ROR_struct_export.h>
+#include <AOE_struct_export.h>
 #include <AOE_SN_numbers.h>
 #include <AOE_empires_dat.h>
 #include "Version.h"

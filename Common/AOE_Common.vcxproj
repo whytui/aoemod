@@ -102,12 +102,12 @@
     <ClInclude Include="include\pointers.h" />
     <ClInclude Include="include\ROR_API_assert.h" />
     <ClInclude Include="include\ROR_API_pub.h" />
-    <ClInclude Include="include\ROR_commands.h" />
+    <ClInclude Include="include\AOE_commands.h" />
     <ClInclude Include="include\ROR_global_variables.h" />
     <ClInclude Include="include\AOE_structures.h" />
-    <ClInclude Include="include\ROR_struct_debugging.h" />
-    <ClInclude Include="include\ROR_struct_export.h" />
-    <ClInclude Include="include\ROR_struct_export_remote.h" />
+    <ClInclude Include="include\AOE_struct_debugging.h" />
+    <ClInclude Include="include\AOE_struct_export.h" />
+    <ClInclude Include="include\AOE_struct_export_remote.h" />
     <ClInclude Include="include\triggerDefinition.h" />
   </ItemGroup>
   <ItemGroup>

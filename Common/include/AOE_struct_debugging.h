@@ -9,8 +9,8 @@
 #include <AOE_offsets.h>
 #include <assert.h>
 #include <string>
-#include <ROR_struct_export.h>
-#include <ROR_struct_export_remote.h>
+#include <AOE_struct_export.h>
+#include <AOE_struct_export_remote.h>
 
 /* This file does not provide methods to do any treatments, only tools for debugging.
 */
@@ -66,13 +66,13 @@ namespace AOE_STRUCTURES
 		std::string ExportMainStructInfo();
 		// Export to text all info about an object (copied in a local object, but underlying pointers still refer to ROR process objects)
 		template<class T> std::string ExportHostedRORObject(T *object, unsigned long int actualRORAddress) {
-			AOE_STRUCTURES::ROR_STRUCT_EXPORTER_REMOTE exporter;
+			AOE_STRUCTURES::AOE_STRUCT_EXPORTER_REMOTE exporter;
 			exporter.handleROR = this->handleROR;
 			return exporter.ExportHostedStruct(object, actualRORAddress);
 		}
 		// Export to text all info about an object using a ROR pointer (*object has no meaning from this code's point of view, but only in ROR process context)
 		template<class T> std::string ExportRemoteRORObject(T *object) {
-			AOE_STRUCTURES::ROR_STRUCT_EXPORTER_REMOTE exporter;
+			AOE_STRUCTURES::AOE_STRUCT_EXPORTER_REMOTE exporter;
 			exporter.handleROR = this->handleROR;
 			return exporter.ExportStruct(object);
 		}

@@ -49,7 +49,6 @@ public:
 	void DispatchToCustomCode(REG_BACKUP *REG_values);
 #ifdef _DEBUG
 	void TemporaryEntryPoints(REG_BACKUP *REG_values);
-	//vector<long> list;
 #endif
 
 	// Methods for ROR

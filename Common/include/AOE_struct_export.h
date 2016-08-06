@@ -14,9 +14,9 @@
 namespace AOE_STRUCTURES
 {
 
-	class ROR_STRUCT_EXPORTER {
+	class AOE_STRUCT_EXPORTER {
 	public:
-		ROR_STRUCT_EXPORTER() {}
+		AOE_STRUCT_EXPORTER() {}
 
 		// Default behaviour: provided object is the "real" object so we can directly access its members
 		template<class T> std::string ExportStruct(T *obj, size_t forcedSize = 0) {

@@ -2555,7 +2555,7 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 		return;
 	}
 
-	AOE_STRUCTURES::ROR_STRUCT_EXPORTER writer;
+	AOE_STRUCTURES::AOE_STRUCT_EXPORTER writer;
 	std::string objToString = "";
 
 	fprintf_s(f, "AOE Debug information\n\n");

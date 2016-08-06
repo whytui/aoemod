@@ -7,7 +7,7 @@
 #include <WinUser.h>
 #include <assert.h>
 #include <string>
-#include <ROR_struct_export.h>
+#include <AOE_struct_export.h>
 
 /* This file does not provide methods to do any treatments, only tools for debugging.
 */
@@ -82,12 +82,12 @@ namespace AOE_STRUCTURES
 
 	// This child class can export remote objects (from a different process).
 	// All linked objects are copied from ROR process and then exported (recursively)
-	class ROR_STRUCT_EXPORTER_REMOTE : public AOE_STRUCTURES::ROR_STRUCT_EXPORTER {
+	class AOE_STRUCT_EXPORTER_REMOTE : public AOE_STRUCTURES::AOE_STRUCT_EXPORTER {
 	public:
 		// Handle to ROR process. Set this before calling various methods.
 		HANDLE handleROR;
 
-		ROR_STRUCT_EXPORTER_REMOTE() { this->handleROR = NULL; }
+		AOE_STRUCT_EXPORTER_REMOTE() { this->handleROR = NULL; }
 
 		// Get a (temporary?) object that actually contains all relevant object data (accessible in THIS context/process)
 		virtual void *GetTempObject(void *obj, size_t objSize) {

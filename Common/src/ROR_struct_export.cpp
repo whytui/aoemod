@@ -1,12 +1,12 @@
-#include "../include/ROR_struct_export.h"
+#include "../include/AOE_struct_export.h"
 
 namespace AOE_STRUCTURES {
 	
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(char *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(char *obj, unsigned long int RORAddress) {
 		return std::string(obj);
 	}
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_GAME_SETTINGS *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_GAME_SETTINGS *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "";
 		res += "COMM: ";
@@ -14,7 +14,7 @@ namespace AOE_STRUCTURES {
 		return res;
 	}
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_GAME_GLOBAL *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_GAME_GLOBAL *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "TotalPlayerCount=";
 		res += std::to_string(obj->playerTotalCount);
@@ -25,7 +25,7 @@ namespace AOE_STRUCTURES {
 		return res;
 	}
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_MP_COMMUNICATION *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_MP_COMMUNICATION *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "Player (1-8) types =";
 		assert(obj->maximumPlayerCount == 8);
@@ -36,7 +36,7 @@ namespace AOE_STRUCTURES {
 		return res;
 	}
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_PLAYER *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_PLAYER *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "Player ";
 		res += std::to_string(obj->playerId);
@@ -53,7 +53,7 @@ namespace AOE_STRUCTURES {
 		return res;
 	}
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_BASE *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_BASE *obj, unsigned long int RORAddress) {
 		std::string res = "UnitId=";
 		res += std::to_string(obj->unitInstanceId);
 		res += " - addr= ";
@@ -79,7 +79,7 @@ namespace AOE_STRUCTURES {
 		}
 		return res;
 	}
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_BIRD *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_BIRD *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res;
 		if (obj->ptrActionInformation) {
@@ -91,7 +91,7 @@ namespace AOE_STRUCTURES {
 		}
 		return res;
 	}
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_LIVING *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_LIVING *obj, unsigned long int RORAddress) {
 		STRUCT_UNIT_BUILDING *bld = (STRUCT_UNIT_BUILDING*)obj;
 		std::string res;
 		if (bld->IsTypeValid()) {
@@ -99,7 +99,7 @@ namespace AOE_STRUCTURES {
 		}
 		return res;
 	}
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_BUILDING *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_BUILDING *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res;
 		if (obj->trainUnitActionInfo) {
@@ -109,14 +109,14 @@ namespace AOE_STRUCTURES {
 		return res;
 	}
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT *obj, unsigned long int RORAddress) {
 		return this->ExportStruct_internal((STRUCT_UNIT_BASE*)obj, RORAddress);
 	}
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_DEF_UNIT *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_DEF_UNIT *obj, unsigned long int RORAddress) {
 		return this->ExportStruct_internal((STRUCT_UNITDEF_BASE*)obj, RORAddress);
 	}
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNITDEF_BASE *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNITDEF_BASE *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "DATID1=";
 		res += std::to_string(obj->DAT_ID1);
@@ -147,7 +147,7 @@ namespace AOE_STRUCTURES {
 		return res;
 	}
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNITDEF_TYPE50 *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNITDEF_TYPE50 *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "\nArmor=";
 		res += std::to_string(obj->displayedArmor);
@@ -169,7 +169,7 @@ namespace AOE_STRUCTURES {
 	}
 
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_ARMOR_OR_ATTACK *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_ARMOR_OR_ATTACK *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "cl=";
 		res += std::to_string(obj->classId);
@@ -179,7 +179,7 @@ namespace AOE_STRUCTURES {
 	}
 
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_GROUP_ELEM *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_GROUP_ELEM *obj, unsigned long int RORAddress) {
 		std::string res = "id=";
 		res += std::to_string(obj->unitGroupId);
 		res += " type=";
@@ -228,7 +228,7 @@ namespace AOE_STRUCTURES {
 	}
 
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_ACTION_BASE *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_ACTION_BASE *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "actionType=";
 		res += std::to_string(obj->actionTypeID);
@@ -245,7 +245,7 @@ namespace AOE_STRUCTURES {
 		return res;
 	}
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_ACTION_INFO *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_ACTION_INFO *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		if (!obj->ptrActionLink) {
 			return "No actionLink";
@@ -253,7 +253,7 @@ namespace AOE_STRUCTURES {
 		return this->ExportStruct(obj->ptrActionLink);
 	}
 
-	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_ACTION_LINK *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_ACTION_LINK *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res;
 		if (obj->actionStruct) {
