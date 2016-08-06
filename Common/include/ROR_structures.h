@@ -21,7 +21,7 @@
 * ALL your findings about AOE/ROR structures
 * Please share knowledge for better modding experience !
 */
-namespace ROR_STRUCTURES_10C
+namespace AOE_STRUCTURES
 {
 	typedef char char_array_128[0x80];
 
@@ -538,10 +538,10 @@ namespace ROR_STRUCTURES_10C
 		long int mapSizeX;
 		float unknown_01C; // Default value = 1.5
 		// 0x20
-		ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO **unknown_020; // pointer 1 from mapGenInfo
-		ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO **unknown_024; // pointer 2 from mapGenInfo
-		ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO **unknown_028; // pointer 3 from mapGenInfo
-		ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO **unknown_02C; // pointer 4 from mapGenInfo
+		AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO **unknown_020; // pointer 1 from mapGenInfo
+		AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO **unknown_024; // pointer 2 from mapGenInfo
+		AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO **unknown_028; // pointer 3 from mapGenInfo
+		AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO **unknown_02C; // pointer 4 from mapGenInfo
 		// 0x30
 		STRUCT_MAPGEN_ELEVATION_DATA elevationData; // Size = 0xF80. Copied from mapGenInfo.unknown_3FD4 ?
 
@@ -1017,7 +1017,7 @@ namespace ROR_STRUCTURES_10C
 		// For each of the 4 sides of a building:
 		// If the side is blocked (all neighbour tiles are disabled, side excluding corners),
 		// then disable opposite side neighbour tiles (including corners)
-		void ProtectBuildingOppositeSides(int unitPosX, int unitPosY, float unitRadius_f, char valueToUse = ROR_STRUCTURES_10C::CST_MAP_BUILD_LIKE_DISABLED) {
+		void ProtectBuildingOppositeSides(int unitPosX, int unitPosY, float unitRadius_f, char valueToUse = AOE_STRUCTURES::CST_MAP_BUILD_LIKE_DISABLED) {
 			int unitRadius = (int)unitRadius_f;
 			int unitRadiusDecreaseForHighPositions = 1 -((int)(unitRadius * 2) % 2); // 0 for values like 1.5 or 2.5, 1 for round values
 			// Get borders of the building (last tile part of the building) for simpler calculations
@@ -1561,17 +1561,17 @@ namespace ROR_STRUCTURES_10C
 		// 0x120
 		long int unknown_120;		
 
-		ROR_STRUCTURES_10C::STRUCT_PLAYER ** GetPlayerStructPtrTable() const{
-			return (ROR_STRUCTURES_10C::STRUCT_PLAYER **) this->ptrPlayerStructPtrTable;
+		AOE_STRUCTURES::STRUCT_PLAYER ** GetPlayerStructPtrTable() const{
+			return (AOE_STRUCTURES::STRUCT_PLAYER **) this->ptrPlayerStructPtrTable;
 		}
 		// Returns player structure corresponding to supplied ID. Returns NULL if not found
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *GetPlayerStruct(int playerId) const {
+		AOE_STRUCTURES::STRUCT_PLAYER *GetPlayerStruct(int playerId) const {
 			if (!this->IsCheckSumValid()) { return NULL; }
 			if ((playerId < 0) || (playerId >= this->playerTotalCount) || (playerId >= 9)) { return NULL; }
 			return this->ptrPlayerStructPtrTable[playerId];
 		}
 		// Get a technology definition, or NULL if not found
-		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *GetTechDef(short int techDefId) const {
+		AOE_STRUCTURES::STRUCT_TECH_DEF *GetTechDef(short int techDefId) const {
 			if (!this->technologiesInfo || !this->technologiesInfo->IsCheckSumValid()) { return NULL; }
 			return this->technologiesInfo->GetTechDef(techDefId);
 		}
@@ -2154,7 +2154,7 @@ namespace ROR_STRUCTURES_10C
 		char unknown_AF0[0xC20 - 0xAF0];
 		// 0xC20
 		unsigned long int unknown_C20;
-		ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *ptrGameUIStruct; // +C24
+		AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *ptrGameUIStruct; // +C24
 		long int lastEventPositionsY[5]; // +C28. Used when pressing HOME key
 		// 0xC3C
 		long int lastEventPositionsX[5]; // +C3C. Used when pressing HOME key
@@ -2677,11 +2677,11 @@ namespace ROR_STRUCTURES_10C
 		long int SNNumber[0xE2]; // +194. In game, we use this one (not strategyAI's). Total size=0x388 (4*0xE2). index from 0 to E1. (missing 1 SN?)
 		// 0x51C
 		// Here: a list of small structures size=0x18 (0x32 elems?) = gatherers and their tasks (excluding explorers). builders/repairmen NOT in this array?
-		ROR_STRUCTURES_10C::STRUCT_VILLAGER_TASKS_ELEM gatherersTasks[0x32];
+		AOE_STRUCTURES::STRUCT_VILLAGER_TASKS_ELEM gatherersTasks[0x32];
 		unsigned long int villagerTasksRelevantElemCount; // +9CC. Number of RELEVANT element count in villagerTasks array (array size is fixed, it's included in this structure !)
 		// 0x9D0
 		long int nonExplorerVillagersCount; // +9D0. Counts all villagers BUT explorers
-		ROR_STRUCTURES_10C::STRUCT_UNIT_GROUP_ELEM fakeFirstUnitGroupElem; // +9D4. Organized as a circular list (each elem is a group) ? This one = "fake" elem (like in strategy)
+		AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM fakeFirstUnitGroupElem; // +9D4. Organized as a circular list (each elem is a group) ? This one = "fake" elem (like in strategy)
 		unsigned long int seqUnitGroupId; // +D04. Is = next group's ID.
 		unsigned long int unitGroupsCount; // +D08. This does NOT count fakeFirstUnitGroupElem (so it CAN be 0).
 		unsigned long int unknown_D0C; // a Value in milliseconds (cmp to global+4)
@@ -2789,7 +2789,7 @@ namespace ROR_STRUCTURES_10C
 		unsigned long int checksum;
 		STRUCT_COMMON_AI_OBJECT structMainDecisionAI; // size 0xEC
 		// 0xF0
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *ptrStructPlayer;
+		AOE_STRUCTURES::STRUCT_PLAYER *ptrStructPlayer;
 
 		STRUCT_AI_UNIT_LIST_INFO allMyUnits; // +F4. Can contain empty elements ? Remove in 40B950.
 		STRUCT_BUILD_AI structBuildAI; // +0x104
@@ -3926,7 +3926,7 @@ namespace ROR_STRUCTURES_10C
 			}
 		}
 	};
-	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE) == 0x88, "STRUCT_UNIT_BASE size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_BASE) == 0x88, "STRUCT_UNIT_BASE size");
 
 	
 
@@ -3938,7 +3938,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return (this->checksum == 0x00542E14); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_FLAGS); }
 	};
-	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_FLAG) == 0x8C, "STRUCT_UNIT_FLAG size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_FLAG) == 0x8C, "STRUCT_UNIT_FLAG size");
 
 
 	// BC 41 54 00 = doppleganger (type25). Size=0xB0 (constructor=0x0436030) - derives from type20
@@ -3956,7 +3956,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return (this->checksum == 0x005441BC); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_DOPPLEGANGER); }
 	};
-	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_DOPPLEGANGER) == 0xB0, "STRUCT_UNIT_DOPPLEGANGER size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_DOPPLEGANGER) == 0xB0, "STRUCT_UNIT_DOPPLEGANGER size");
 
 
 	// 38 48 54 00 = dead/fish (type30). Size=0x180 (constructor=0x044AD30) - Derives from type20
@@ -4012,7 +4012,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return (this->checksum == 0x00544838); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_DEAD_UNITS); }
 	};
-	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_DEAD_FISH) == 0x180, "STRUCT_UNIT_DEAD_FISH size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_DEAD_FISH) == 0x180, "STRUCT_UNIT_DEAD_FISH size");
 
 
 	// 48 27 54 00 = bird (type40). Size=0x18C (constructor=0x04058A0) - Derives from type30
@@ -4026,7 +4026,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return (this->checksum == 0x00542748); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BIRD); }
 	};
-	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BIRD) == 0x18C, "STRUCT_UNIT_BIRD size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_BIRD) == 0x18C, "STRUCT_UNIT_BIRD size");
 
 
 	// 4C 32 54 00 = type50 (type50). Size=0x1BC? (constructor=00425F30) - Derives from type40
@@ -4051,7 +4051,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return (this->checksum == 0x0054324C); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TYPE50); }
 	};
-	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50) == 0x1BC, "STRUCT_UNIT_TYPE50 size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_TYPE50) == 0x1BC, "STRUCT_UNIT_TYPE50 size");
 
 
 	// E8 45 54 00 = projectile (type60). Size=1C4 (constructor=0x0443D30) - Derives from type50
@@ -4066,7 +4066,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return (this->checksum == 0x005445E8); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_PROJECTILE); }
 	};
-	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_PROJECTILE) == 0x1C4, "STRUCT_UNIT_PROJECTILE size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE) == 0x1C4, "STRUCT_UNIT_PROJECTILE size");
 	
 
 	// 0C 82 54 00 = living (type70). Size=0x1C0 (constructor=0x04AE2D0) - Derives from type50
@@ -4079,7 +4079,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return (this->checksum == 0x0054820C); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT); }
 	};
-	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING) == 0x1C0, "STRUCT_UNIT_LIVING size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_LIVING) == 0x1C0, "STRUCT_UNIT_LIVING size");
 	
 
 	// A0 7F 54 00 = building (type80). Size=0x1FC (constructor=0x04AC550) - Derives from type70
@@ -4115,7 +4115,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return (this->checksum == 0x00547FA0); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING); }
 	};
-	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING) == 0x1FC, "STRUCT_UNIT_BUILDING size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_BUILDING) == 0x1FC, "STRUCT_UNIT_BUILDING size");
 	
 
 	// 74 84 54 00 = tree (type90). Size=0x88 (constructor=0x04B0D20) - Derives from type10
@@ -4124,7 +4124,7 @@ namespace ROR_STRUCTURES_10C
 		bool IsCheckSumValid() { return (this->checksum == 0x00548474); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TREE); }
 	};
-	static_assert(sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_TREE) == 0x88, "STRUCT_UNIT_TREE size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_TREE) == 0x88, "STRUCT_UNIT_TREE size");
 
 
 	/* Object sizes according to unit type (@constructor in parenthesis)
@@ -5382,53 +5382,53 @@ namespace ROR_STRUCTURES_10C
 
 
 
-	static long int GetUnitStructRealSize(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit) {
-		if (unit->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE);
-		if (((STRUCT_UNIT_BIRD*)unit)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BIRD);
-		if (((STRUCT_UNIT_FLAG*)unit)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_FLAG);
-		if (((STRUCT_UNIT_DEAD_FISH*)unit)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_DEAD_FISH);
-		if (((STRUCT_UNIT_DOPPLEGANGER*)unit)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_DOPPLEGANGER);
-		if (((STRUCT_UNIT_LIVING*)unit)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING);
-		if (((STRUCT_UNIT_PROJECTILE*)unit)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_PROJECTILE);
-		if (((STRUCT_UNIT_TREE*)unit)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BIRD);
-		if (((STRUCT_UNIT_TYPE50*)unit)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50);
-		if (((STRUCT_UNIT_BUILDING*)unit)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING);
+	static long int GetUnitStructRealSize(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
+		if (unit->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BASE);
+		if (((STRUCT_UNIT_BIRD*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BIRD);
+		if (((STRUCT_UNIT_FLAG*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_FLAG);
+		if (((STRUCT_UNIT_DEAD_FISH*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_DEAD_FISH);
+		if (((STRUCT_UNIT_DOPPLEGANGER*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_DOPPLEGANGER);
+		if (((STRUCT_UNIT_LIVING*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_LIVING);
+		if (((STRUCT_UNIT_PROJECTILE*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE);
+		if (((STRUCT_UNIT_TREE*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BIRD);
+		if (((STRUCT_UNIT_TYPE50*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_TYPE50);
+		if (((STRUCT_UNIT_BUILDING*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BUILDING);
 		// unit->unitType is often erroneous ! If not found, try again using only checksum.
-		if (unit->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE);
-		if (((STRUCT_UNIT_BIRD*)unit)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BIRD);
-		if (((STRUCT_UNIT_FLAG*)unit)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_FLAG);
-		if (((STRUCT_UNIT_DEAD_FISH*)unit)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_DEAD_FISH);
-		if (((STRUCT_UNIT_DOPPLEGANGER*)unit)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_DOPPLEGANGER);
-		if (((STRUCT_UNIT_LIVING*)unit)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING);
-		if (((STRUCT_UNIT_PROJECTILE*)unit)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_PROJECTILE);
-		if (((STRUCT_UNIT_TREE*)unit)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BIRD);
-		if (((STRUCT_UNIT_TYPE50*)unit)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50);
-		if (((STRUCT_UNIT_BUILDING*)unit)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING);
+		if (unit->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BASE);
+		if (((STRUCT_UNIT_BIRD*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BIRD);
+		if (((STRUCT_UNIT_FLAG*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_FLAG);
+		if (((STRUCT_UNIT_DEAD_FISH*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_DEAD_FISH);
+		if (((STRUCT_UNIT_DOPPLEGANGER*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_DOPPLEGANGER);
+		if (((STRUCT_UNIT_LIVING*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_LIVING);
+		if (((STRUCT_UNIT_PROJECTILE*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE);
+		if (((STRUCT_UNIT_TREE*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BIRD);
+		if (((STRUCT_UNIT_TYPE50*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_TYPE50);
+		if (((STRUCT_UNIT_BUILDING*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BUILDING);
 		return 0;
 	}
 
-	static long int GetUnitDefStructRealSize(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef) {
-		if (unitDef->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE);
-		if (((STRUCT_UNITDEF_BIRD*)unitDef)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD);
-		if (((STRUCT_UNITDEF_FLAG*)unitDef)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG);
-		if (((STRUCT_UNITDEF_DEAD_FISH*)unitDef)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH);
-		if (((STRUCT_UNITDEF_DOPPLEGANGER*)unitDef)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_DOPPLEGANGER);
-		if (((STRUCT_UNITDEF_LIVING*)unitDef)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING);
-		if (((STRUCT_UNITDEF_PROJECTILE*)unitDef)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE);
-		if (((STRUCT_UNITDEF_TREE*)unitDef)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD);
-		if (((STRUCT_UNITDEF_TYPE50*)unitDef)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50);
-		if (((STRUCT_UNITDEF_BUILDING*)unitDef)->IsTypeValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING);
+	static long int GetUnitDefStructRealSize(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
+		if (unitDef->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BASE);
+		if (((STRUCT_UNITDEF_BIRD*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BIRD);
+		if (((STRUCT_UNITDEF_FLAG*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_FLAG);
+		if (((STRUCT_UNITDEF_DEAD_FISH*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH);
+		if (((STRUCT_UNITDEF_DOPPLEGANGER*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER);
+		if (((STRUCT_UNITDEF_LIVING*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING);
+		if (((STRUCT_UNITDEF_PROJECTILE*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE);
+		if (((STRUCT_UNITDEF_TREE*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BIRD);
+		if (((STRUCT_UNITDEF_TYPE50*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50);
+		if (((STRUCT_UNITDEF_BUILDING*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING);
 		// If not found, try again using only checksum ? There is no reason here (just a copy paste from unit ^^)
-		if (unitDef->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE);
-		if (((STRUCT_UNITDEF_BIRD*)unitDef)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD);
-		if (((STRUCT_UNITDEF_FLAG*)unitDef)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG);
-		if (((STRUCT_UNITDEF_DEAD_FISH*)unitDef)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH);
-		if (((STRUCT_UNITDEF_DOPPLEGANGER*)unitDef)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_DOPPLEGANGER);
-		if (((STRUCT_UNITDEF_LIVING*)unitDef)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING);
-		if (((STRUCT_UNITDEF_PROJECTILE*)unitDef)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE);
-		if (((STRUCT_UNITDEF_TREE*)unitDef)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD);
-		if (((STRUCT_UNITDEF_TYPE50*)unitDef)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50);
-		if (((STRUCT_UNITDEF_BUILDING*)unitDef)->IsCheckSumValid()) return sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING);
+		if (unitDef->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BASE);
+		if (((STRUCT_UNITDEF_BIRD*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BIRD);
+		if (((STRUCT_UNITDEF_FLAG*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_FLAG);
+		if (((STRUCT_UNITDEF_DEAD_FISH*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH);
+		if (((STRUCT_UNITDEF_DOPPLEGANGER*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER);
+		if (((STRUCT_UNITDEF_LIVING*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING);
+		if (((STRUCT_UNITDEF_PROJECTILE*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE);
+		if (((STRUCT_UNITDEF_TREE*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BIRD);
+		if (((STRUCT_UNITDEF_TYPE50*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50);
+		if (((STRUCT_UNITDEF_BUILDING*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING);
 		return 0;
 	}
 }

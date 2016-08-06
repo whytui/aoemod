@@ -143,7 +143,7 @@ void WxDebugMainForm::GuessRORStruct() {
 
 	HANDLE hROR = rConnector.GetRORProcessHandle();
 	if (hROR) {
-		char *structName = ROR_STRUCTURES_10C::DebugStructAtAddress(hROR, address);
+		char *structName = AOE_STRUCTURES::DebugStructAtAddress(hROR, address);
 		//this->edtAddress->SetLabelText(widen(structName));
 		this->lblEXEInfo->SetLabelText(widen(structName));
 	}
@@ -167,7 +167,7 @@ void WxDebugMainForm::ShowMainObjects() {
 	}
 
 	HANDLE hROR = rConnector.GetRORProcessHandle();
-	ROR_STRUCTURES_10C::RORDebugger *rd = new ROR_STRUCTURES_10C::RORDebugger();
+	AOE_STRUCTURES::RORDebugger *rd = new AOE_STRUCTURES::RORDebugger();
 	if (hROR) {
 		rd->handleROR = hROR;
 		bool valid = rd->RefreshMainGameStructs();
@@ -203,7 +203,7 @@ void WxDebugMainForm::ShowGatheringInfo() {
 	}
 
 	HANDLE hROR = rConnector.GetRORProcessHandle();
-	ROR_STRUCTURES_10C::RORDebugger *rd = new ROR_STRUCTURES_10C::RORDebugger();
+	AOE_STRUCTURES::RORDebugger *rd = new AOE_STRUCTURES::RORDebugger();
 	if (hROR) {
 		rd->handleROR = hROR;
 		bool valid = rd->RefreshMainGameStructs();
@@ -212,8 +212,8 @@ void WxDebugMainForm::ShowGatheringInfo() {
 			delete rd;
 			return;
 		}
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = &rd->players[playerId];
-		ROR_STRUCTURES_10C::STRUCT_AI *ai = &rd->playersAI[playerId];
+		AOE_STRUCTURES::STRUCT_PLAYER *player = &rd->players[playerId];
+		AOE_STRUCTURES::STRUCT_AI *ai = &rd->playersAI[playerId];
 		//ai->structConAI.townCenter_posX
 		//ai->structBuildAI.strategyFileName
 		std::string s = "InfAI - ";
@@ -333,17 +333,17 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += std::to_string(ai->structTacAI.unitGroupsCount);
 		int ugCount = ai->structTacAI.unitGroupsCount;
 		int currentUgIndex = 0;
-		ROR_STRUCTURES_10C::STRUCT_UNIT_GROUP_ELEM currentGroup;
+		AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM currentGroup;
 		unsigned long int ugoffset = ((long)&rd->playersAI[playerId].structTacAI.fakeFirstUnitGroupElem - (long)&rd->playersAI[playerId]);
 		unsigned long int fakeFirstGroupRORAddress = ((long int)rd->players[playerId].ptrAIStruct) + ugoffset;
-		ROR_STRUCTURES_10C::GetObjectFromRORData(rd->handleROR, fakeFirstGroupRORAddress, &currentGroup, 0);
+		AOE_STRUCTURES::GetObjectFromRORData(rd->handleROR, fakeFirstGroupRORAddress, &currentGroup, 0);
 		unsigned long int currentGrpAddr = (unsigned long int)currentGroup.next;
 		s += " first real grp=";
 		s += GetHexStringAddress(currentGrpAddr);
 		while ((currentUgIndex < ugCount) && (currentGrpAddr != fakeFirstGroupRORAddress)) {
 			s += "\n * ";
-			ROR_STRUCTURES_10C::GetObjectFromRORData(rd->handleROR, currentGrpAddr, &currentGroup, 0);
-			s += rd->ExportHostedRORObject<ROR_STRUCTURES_10C::STRUCT_UNIT_GROUP_ELEM>(&currentGroup, ((long int)rd->players[playerId].ptrAIStruct) + ugoffset);
+			AOE_STRUCTURES::GetObjectFromRORData(rd->handleROR, currentGrpAddr, &currentGroup, 0);
+			s += rd->ExportHostedRORObject<AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM>(&currentGroup, ((long int)rd->players[playerId].ptrAIStruct) + ugoffset);
 			currentUgIndex++;
 			currentGrpAddr = (unsigned long int)currentGroup.next;
 		}
@@ -376,7 +376,7 @@ void WxDebugMainForm::FindObject() {
 	}
 
 	HANDLE hROR = rConnector.GetRORProcessHandle();
-	ROR_STRUCTURES_10C::RORDebugger *rd = new ROR_STRUCTURES_10C::RORDebugger();
+	AOE_STRUCTURES::RORDebugger *rd = new AOE_STRUCTURES::RORDebugger();
 	if (hROR && objId >= 0) {
 		rd->handleROR = hROR;
 		bool valid = rd->RefreshMainGameStructs();
@@ -392,31 +392,31 @@ void WxDebugMainForm::FindObject() {
 		}
 
 		unsigned long int RORunitAddr;
-		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = rd->GetUnitFromRORData(objId, RORunitAddr);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = rd->GetUnitFromRORData(objId, RORunitAddr);
 		if (unit != NULL) {
-			ROR_STRUCTURES_10C::STRUCT_UNIT_TREE *tree = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING *living = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *building = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNIT_DEAD_FISH *deadfish = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNIT_DOPPLEGANGER *dopple = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNIT_FLAG *flag = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNIT_BIRD *bird = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNIT_PROJECTILE *proj = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *t50 = NULL;
-			if (((ROR_STRUCTURES_10C::STRUCT_UNIT_TREE*)unit)->IsTypeValid()) { tree = (ROR_STRUCTURES_10C::STRUCT_UNIT_TREE*)unit; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING*)unit)->IsTypeValid()) { living = (ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING*)unit; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING*)unit)->IsTypeValid()) { building = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING*)unit; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNIT_DEAD_FISH*)unit)->IsTypeValid()) { deadfish = (ROR_STRUCTURES_10C::STRUCT_UNIT_DEAD_FISH*)unit; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNIT_DOPPLEGANGER*)unit)->IsTypeValid()) { dopple = (ROR_STRUCTURES_10C::STRUCT_UNIT_DOPPLEGANGER*)unit; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNIT_FLAG*)unit)->IsTypeValid()) { flag = (ROR_STRUCTURES_10C::STRUCT_UNIT_FLAG*)unit; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNIT_BIRD*)unit)->IsTypeValid()) { bird = (ROR_STRUCTURES_10C::STRUCT_UNIT_BIRD*)unit; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNIT_PROJECTILE*)unit)->IsTypeValid()) { proj = (ROR_STRUCTURES_10C::STRUCT_UNIT_PROJECTILE*)unit; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50*)unit)->IsTypeValid()) { t50 = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50*)unit; }
+			AOE_STRUCTURES::STRUCT_UNIT_TREE *tree = NULL;
+			AOE_STRUCTURES::STRUCT_UNIT_LIVING *living = NULL;
+			AOE_STRUCTURES::STRUCT_UNIT_BUILDING *building = NULL;
+			AOE_STRUCTURES::STRUCT_UNIT_DEAD_FISH *deadfish = NULL;
+			AOE_STRUCTURES::STRUCT_UNIT_DOPPLEGANGER *dopple = NULL;
+			AOE_STRUCTURES::STRUCT_UNIT_FLAG *flag = NULL;
+			AOE_STRUCTURES::STRUCT_UNIT_BIRD *bird = NULL;
+			AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE *proj = NULL;
+			AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *t50 = NULL;
+			if (((AOE_STRUCTURES::STRUCT_UNIT_TREE*)unit)->IsTypeValid()) { tree = (AOE_STRUCTURES::STRUCT_UNIT_TREE*)unit; }
+			if (((AOE_STRUCTURES::STRUCT_UNIT_LIVING*)unit)->IsTypeValid()) { living = (AOE_STRUCTURES::STRUCT_UNIT_LIVING*)unit; }
+			if (((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)unit)->IsTypeValid()) { building = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)unit; }
+			if (((AOE_STRUCTURES::STRUCT_UNIT_DEAD_FISH*)unit)->IsTypeValid()) { deadfish = (AOE_STRUCTURES::STRUCT_UNIT_DEAD_FISH*)unit; }
+			if (((AOE_STRUCTURES::STRUCT_UNIT_DOPPLEGANGER*)unit)->IsTypeValid()) { dopple = (AOE_STRUCTURES::STRUCT_UNIT_DOPPLEGANGER*)unit; }
+			if (((AOE_STRUCTURES::STRUCT_UNIT_FLAG*)unit)->IsTypeValid()) { flag = (AOE_STRUCTURES::STRUCT_UNIT_FLAG*)unit; }
+			if (((AOE_STRUCTURES::STRUCT_UNIT_BIRD*)unit)->IsTypeValid()) { bird = (AOE_STRUCTURES::STRUCT_UNIT_BIRD*)unit; }
+			if (((AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE*)unit)->IsTypeValid()) { proj = (AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE*)unit; }
+			if (((AOE_STRUCTURES::STRUCT_UNIT_TYPE50*)unit)->IsTypeValid()) { t50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50*)unit; }
 			// Breakpoint here to see unit members
 			free(unit);
 
 			this->edtOutputInfo->WriteText("\n\n");
-			s = rd->ExportRemoteRORObject((ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)RORunitAddr);
+			s = rd->ExportRemoteRORObject((AOE_STRUCTURES::STRUCT_UNIT_BASE *)RORunitAddr);
 			this->edtOutputInfo->WriteText(s);
 			this->edtOutputInfo->WriteText("\n");
 		}
@@ -442,7 +442,7 @@ void WxDebugMainForm::FindUnitDef() {
 	}
 
 	HANDLE hROR = rConnector.GetRORProcessHandle();
-	ROR_STRUCTURES_10C::RORDebugger *rd = new ROR_STRUCTURES_10C::RORDebugger();
+	AOE_STRUCTURES::RORDebugger *rd = new AOE_STRUCTURES::RORDebugger();
 	if (hROR) {
 		rd->handleROR = hROR;
 		bool valid = rd->RefreshMainGameStructs();
@@ -454,33 +454,33 @@ void WxDebugMainForm::FindUnitDef() {
 		}
 		std::string s;
 		unsigned long int RORunitDefAddr;
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = rd->GetUnitDefFromRORData(playerId, unitDefId, RORunitDefAddr);
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = rd->GetUnitDefFromRORData(playerId, unitDefId, RORunitDefAddr);
 		if (unitDef != NULL) {
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_TREE *tree = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *living = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *building = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH *deadfish = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_DOPPLEGANGER *dopple = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *flag = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *bird = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *proj = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *t50 = NULL;
-			if (((ROR_STRUCTURES_10C::STRUCT_UNITDEF_TREE*)unitDef)->IsTypeValid()) { tree = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TREE*)unitDef; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING*)unitDef)->IsTypeValid()) { living = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING*)unitDef; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*)unitDef)->IsTypeValid()) { building = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*)unitDef; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH*)unitDef)->IsTypeValid()) { deadfish = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH*)unitDef; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNITDEF_DOPPLEGANGER*)unitDef)->IsTypeValid()) { dopple = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_DOPPLEGANGER*)unitDef; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG*)unitDef)->IsTypeValid()) { flag = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG*)unitDef; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD*)unitDef)->IsTypeValid()) { bird = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD*)unitDef; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE*)unitDef)->IsTypeValid()) { proj = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE*)unitDef; }
-			if (((ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50*)unitDef)->IsTypeValid()) { t50 = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50*)unitDef; }
+			AOE_STRUCTURES::STRUCT_UNITDEF_TREE *tree = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *living = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *building = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH *deadfish = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER *dopple = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *flag = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *bird = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *proj = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *t50 = NULL;
+			if (((AOE_STRUCTURES::STRUCT_UNITDEF_TREE*)unitDef)->IsTypeValid()) { tree = (AOE_STRUCTURES::STRUCT_UNITDEF_TREE*)unitDef; }
+			if (((AOE_STRUCTURES::STRUCT_UNITDEF_LIVING*)unitDef)->IsTypeValid()) { living = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING*)unitDef; }
+			if (((AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)unitDef)->IsTypeValid()) { building = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)unitDef; }
+			if (((AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH*)unitDef)->IsTypeValid()) { deadfish = (AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH*)unitDef; }
+			if (((AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER*)unitDef)->IsTypeValid()) { dopple = (AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER*)unitDef; }
+			if (((AOE_STRUCTURES::STRUCT_UNITDEF_FLAG*)unitDef)->IsTypeValid()) { flag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG*)unitDef; }
+			if (((AOE_STRUCTURES::STRUCT_UNITDEF_BIRD*)unitDef)->IsTypeValid()) { bird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD*)unitDef; }
+			if (((AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE*)unitDef)->IsTypeValid()) { proj = (AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE*)unitDef; }
+			if (((AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50*)unitDef)->IsTypeValid()) { t50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50*)unitDef; }
 			// Breakpoint here to see unit def members
 			free(unitDef);
 
 			this->edtOutputInfo->WriteText("UnitDefinition addr = ");
 			this->edtOutputInfo->WriteText(GetHexStringAddress(RORunitDefAddr));
 			this->edtOutputInfo->WriteText("\n");
-			s = rd->ExportRemoteRORObject((ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)RORunitDefAddr);
+			s = rd->ExportRemoteRORObject((AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)RORunitDefAddr);
 			this->edtOutputInfo->WriteText(s);
 			this->edtOutputInfo->WriteText("\n");
 		}

@@ -1,22 +1,22 @@
 
 #include "../include/drsHandler.h"
 
-namespace ROR_STRUCTURES_10C {
+namespace AOE_STRUCTURES {
 
 	// Returns a list of ALL object IDs (slpID, wav Id, shp Id, etc) from all DRS files used (loaded at this point) by the game
 	std::list<long int> GetListOfUsedObjectIDsInDrsFiles() {
 		std::list<long int> allIds;
-		ROR_STRUCTURES_10C::STRUCT_DRS_FILE_LINK *lnk = *ROR_STRUCTURES_10C::ROR_firstDrsFileLink;
+		AOE_STRUCTURES::STRUCT_DRS_FILE_LINK *lnk = *AOE_STRUCTURES::ROR_firstDrsFileLink;
 		// Loop on DRS file links
 		while (lnk) {
-			ROR_STRUCTURES_10C::STRUCT_DRS_FILE *drsFile = lnk->drsFileContent;
+			AOE_STRUCTURES::STRUCT_DRS_FILE *drsFile = lnk->drsFileContent;
 			if (drsFile) {
 				// In a DRS file: loop on "forms" ("tables") : slp, bina, wav...
 				for (int itable = 0; itable < lnk->drsFileContent->includedTableCount; itable++) {
 					//char *typeName = lnk->drsFileContent->includedTables[itable].typeName;
-					ROR_STRUCTURES_10C::STRUCT_DRS_TABLE *dt = &lnk->drsFileContent->includedTables[itable];
+					AOE_STRUCTURES::STRUCT_DRS_TABLE *dt = &lnk->drsFileContent->includedTables[itable];
 					for (long int curFile = 0; curFile < dt->filesCount; curFile++) {
-						ROR_STRUCTURES_10C::STRUCT_DRS_TABLE_DATA *dtData =
+						AOE_STRUCTURES::STRUCT_DRS_TABLE_DATA *dtData =
 							drsFile->getDrsTableData(dt->offsetInDrsFile, curFile);
 						allIds.push_back(dtData->objectId);
 					}
@@ -30,8 +30,8 @@ namespace ROR_STRUCTURES_10C {
 
 	// Finds a DRS link object for a specific DRS filename.
 	// Warning: unsure when 2 DRS files have same name (data\ vs data2\ files)
-	ROR_STRUCTURES_10C::STRUCT_DRS_FILE_LINK *FindDrsLinkForFile(const char *drsFilename) {
-		ROR_STRUCTURES_10C::STRUCT_DRS_FILE_LINK *lnk = *ROR_STRUCTURES_10C::ROR_firstDrsFileLink;
+	AOE_STRUCTURES::STRUCT_DRS_FILE_LINK *FindDrsLinkForFile(const char *drsFilename) {
+		AOE_STRUCTURES::STRUCT_DRS_FILE_LINK *lnk = *AOE_STRUCTURES::ROR_firstDrsFileLink;
 		while (lnk && (strcmp(lnk->drsFileName, drsFilename) != 0)) {
 			lnk = lnk->nextDrsFile;
 		}
@@ -40,7 +40,7 @@ namespace ROR_STRUCTURES_10C {
 
 	// Runs constructor on a STRUCT_SLP_INFO object so it refers to a specific SLP.
 	// This makes SLP bitmaps available for further treatments.
-	void InitSlpInfoFromDrs(ROR_STRUCTURES_10C::STRUCT_SLP_INFO *slpInfo, long int slpId, char *shpName) {
+	void InitSlpInfoFromDrs(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo, long int slpId, char *shpName) {
 		if (!EXEADDR_SlpInfo_ctor) { return; }
 		//char *shpName = ""; // unused when slpId is supplied
 		_asm {
@@ -94,7 +94,7 @@ namespace ROR_STRUCTURES_10C {
 	}
 
 	// unused, too technical, please see AOE_GetDrsObject
-	bool AOE_GetDrsObjectInfos(long int objectId, ROR_STRUCTURES_10C::STRUCT_DRS_FILE **outDrsFile,
+	bool AOE_GetDrsObjectInfos(long int objectId, AOE_STRUCTURES::STRUCT_DRS_FILE **outDrsFile,
 		long int *offsetInDrsFile, long int *outSize) {
 		unsigned long int arg6 = (unsigned long int)outSize;
 		unsigned long int arg5 = (unsigned long int)outDrsFile;
@@ -119,15 +119,15 @@ namespace ROR_STRUCTURES_10C {
 	}
 
 	// Returns a SLP file header object that corresponds to a slpID (object ID in one of the used DRS files)
-	ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER *GetSlpFromDrsFiles(long int slpId) {
+	AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *GetSlpFromDrsFiles(long int slpId) {
 		long int size;
-		ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER *res = (ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER *)
+		AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *res = (AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *)
 			AOE_GetDrsObject(/*0x736C7020*/" pls", slpId, &size);
 		return res;
 	}
 
 	// Returns true if an object index (iconId, for example) is valid (exists) in a SLP file (SLP info object)
-	bool IsObjectIndexValidInSlp(ROR_STRUCTURES_10C::STRUCT_SLP_INFO *slpInfo, long int objectIndex) {
+	bool IsObjectIndexValidInSlp(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo, long int objectIndex) {
 		if (!slpInfo || (objectIndex < 0) || !slpInfo->slpFileHeader) {
 			return false;
 		}

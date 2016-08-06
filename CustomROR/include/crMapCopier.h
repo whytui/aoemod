@@ -13,7 +13,7 @@
 #include "crCommon.h"
 
 
-using namespace ROR_STRUCTURES_10C;
+using namespace AOE_STRUCTURES;
 
 #define MAX_MAP_SIZE 255
 

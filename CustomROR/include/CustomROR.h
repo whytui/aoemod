@@ -27,7 +27,7 @@
 In theory, methods from this class should only do the basic treatments that allow plugging in our code:
 - Do the equivalent code to what has been modified in game EXE (some instructions may have been removed so that we can add a CALL <ROR_API>)
 - More globally, manage all compatibility issues between ROR context, it normal execution and our custom code: update registry values, change return address, etc
-- Get context information from registry values / stack and transform it into known C++ objects (cf ROR_STRUCTURES_10C for example).
+- Get context information from registry values / stack and transform it into known C++ objects (cf AOE_STRUCTURES for example).
 - Call custom methods to add features/fixes, etc: generally in crCommand class.
 
 Methods from this class should not do functional treatments, just call entry points/methods from other (more functional) classes.
@@ -105,7 +105,7 @@ public:
 	void ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values);
 	void FixBuildingStratElemUnitID(REG_BACKUP *REG_values);
 	void OverloadIsStratElemUnitAlive_ResetElement(REG_BACKUP *REG_values);
-	//void DisableWeakUnitsFromStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
+	//void DisableWeakUnitsFromStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
 	void OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values);
 	void OnAfterLoadEmpires_DAT(REG_BACKUP *REG_values);
 	void EditorCheckForUnitPlacement(REG_BACKUP *REG_values);

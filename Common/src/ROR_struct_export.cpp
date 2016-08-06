@@ -1,6 +1,6 @@
 #include "../include/ROR_struct_export.h"
 
-namespace ROR_STRUCTURES_10C {
+namespace AOE_STRUCTURES {
 	
 	std::string ROR_STRUCT_EXPORTER::ExportStruct_internal(char *obj, unsigned long int RORAddress) {
 		return std::string(obj);
@@ -10,7 +10,7 @@ namespace ROR_STRUCTURES_10C {
 		if (!obj) { return "NULL"; }
 		std::string res = "";
 		res += "COMM: ";
-		res += this->ExportStruct(obj->MPCommunicationStruct, sizeof(ROR_STRUCTURES_10C::STRUCT_MP_COMMUNICATION));
+		res += this->ExportStruct(obj->MPCommunicationStruct, sizeof(AOE_STRUCTURES::STRUCT_MP_COMMUNICATION));
 		return res;
 	}
 

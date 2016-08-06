@@ -31,14 +31,14 @@ void CustomPopup::SetCRCommand(CustomRORCommand *crCommand) {
 }
 
 // Use it to list all UI objects (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
-void CustomPopup::AddObjectInContentList(ROR_STRUCTURES_10C::STRUCT_ANY_UI *obj) {
+void CustomPopup::AddObjectInContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj) {
 	this->crInfo->AddObjectInPopupContentList(obj);
 }
 
 
 // API to add UI components and add them automatically in "objects to free" list.
-bool CustomPopup::AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
+bool CustomPopup::AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	AOE_FONTS font) {
 	bool res;
@@ -49,8 +49,8 @@ bool CustomPopup::AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 	return res;
 }
 
-bool CustomPopup::AddTextBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
+bool CustomPopup::AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	bool readOnly, bool multiline, bool onlyNumbers, unsigned long int font) {
 		bool res;
@@ -62,8 +62,8 @@ bool CustomPopup::AddTextBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 		return res;
 }
 
-bool CustomPopup::AddCheckBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate,
+bool CustomPopup::AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
 	bool res;
 	res = AOE_AddCheckBox(parent, ptrObjToCreate, hPos, vPos, hSize, vSize);
@@ -73,8 +73,8 @@ bool CustomPopup::AddCheckBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 	return res;
 }
 
-bool CustomPopup::AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
+bool CustomPopup::AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId, AOE_FONTS font) {
 	bool res;
@@ -85,8 +85,8 @@ bool CustomPopup::AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 	return res;
 }
 
-bool CustomPopup::AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
+bool CustomPopup::AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId, AOE_FONTS font) {
 	bool res;
@@ -100,7 +100,7 @@ bool CustomPopup::AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 
 
 // Call this to open a new popup (=>this)
-ROR_STRUCTURES_10C::STRUCT_ANY_UI *CustomPopup::OpenPopup(long int hSize, long int vSize, bool withCancelBtn) {
+AOE_STRUCTURES::STRUCT_ANY_UI *CustomPopup::OpenPopup(long int hSize, long int vSize, bool withCancelBtn) {
 	if (!this->crInfo) { return NULL; }
 	this->hSize = hSize;
 	this->vSize = vSize;
@@ -205,7 +205,7 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool InGameCustomRorOptionsPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) {
+bool InGameCustomRorOptionsPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnTechTreeInfo) {
 		this->openTechTreeInfo = true;
 		this->ClosePopup(false);
@@ -254,7 +254,7 @@ void InGameCustomRorOptionsPopup::OnBeforeClose(bool isCancel) {
 
 void InGameCustomRorOptionsPopup::OnAfterClose(bool isCancel) {
 	if (this->openTechTreeInfo) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
+		AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 		assert(humanPlayer && humanPlayer->IsCheckSumValid());
 
 		SimpleEditTextPopup *tmpNextPopup = new SimpleEditTextPopup();
@@ -269,10 +269,10 @@ void InGameCustomRorOptionsPopup::OnAfterClose(bool isCancel) {
 
 // Specific method to use instead of OpenPopup (special treatments for ingame customROR menu).
 // previousPopup should be game menu popup object.
-ROR_STRUCTURES_10C::STRUCT_ANY_UI *InGameCustomRorOptionsPopup::CloseMenuAndOpenPopup(ROR_STRUCTURES_10C::STRUCT_ANY_UI *previousPopup) {
+AOE_STRUCTURES::STRUCT_ANY_UI *InGameCustomRorOptionsPopup::CloseMenuAndOpenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
 	assert(previousPopup != NULL);
 	if (!previousPopup) { return NULL; }
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *MainGameUIObj = previousPopup->ptrParentObject;
+	AOE_STRUCTURES::STRUCT_ANY_UI *MainGameUIObj = previousPopup->ptrParentObject;
 	this->popup = AOE_CreateCustomOptionsPopupFromMenu(MainGameUIObj);
 	if ((this->popup != NULL) && (!this->IsClosed())) {
 		// WARNING: here we are adding manually the "standard"/"common" OK button.
@@ -306,16 +306,16 @@ void EditorEditUnitInfoPopup::_ResetPointers() {
 
 void EditorEditUnitInfoPopup::_AddPopupContent() {
 	if (this->IsClosed() || (this->popup == NULL)) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(global->humanPlayerId);
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(global->humanPlayerId);
 	if (!player || (player->selectedUnitCount <= 0)) { return; }
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = this->crInfo->GetMainSelectedUnit(player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = this->crInfo->GetMainSelectedUnit(player);
 	if (!unit || (!unit->IsCheckSumValidForAUnitClass())) { return; }
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 	if (!unitDef) { return; }
 	this->unit = unit;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblUnusedPtr = NULL;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblUnusedPtr = NULL;
 	this->AddLabel(this->popup, &lblUnusedPtr, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TITLE, "Edit a unit"), 200, 10, 120, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	char *name = "";
 	short int DATID = -1;
@@ -369,7 +369,7 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool EditorEditUnitInfoPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) {
+bool EditorEditUnitInfoPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (sender->checked) {
 		if (sender == this->chkbox_s0) {
 			AOE_CheckBox_SetChecked(this->chkbox_s2, false);
@@ -410,7 +410,7 @@ void EditorEditUnitInfoPopup::OnBeforeClose(bool isCancel) {
 
 
 void EditorEditUnitInfoPopup::OnAfterClose(bool isCancel) {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return; }
 	// When closing "edit unit" popup, restore unit selection mouse cursor (more practical).
@@ -451,19 +451,19 @@ void InGameUnitPropertiesPopup::_ResetPointers() {
 // Create popup content for unit properties
 void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	if (this->IsClosed() || (this->popup == NULL) || (unitId < 0)) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *) GetUnitStruct(unitId);
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *unitPlayer = unitBase->ptrStructPlayer;
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) GetUnitStruct(unitId);
+	AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = unitBase->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
 	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass() || !unitPlayer || !unitPlayer->IsCheckSumValid() ||
 		!controlledPlayer || !controlledPlayer->IsCheckSumValid() ||
 		!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
 		return;
 	}
 	this->unitId = unitId; // Store it once we checked it is valid.
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *unitDef50 = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)unitDefBase;
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)unitDefBase;
 	bool isValidType50 = unitDef50->DerivesFromType50();
 	bool isMyUnit = (controlledPlayer == unitPlayer);
 	bool isTower = isValidType50 && IsTower(unitDefBase);
@@ -515,7 +515,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unitId);
 	if (unitInfo && (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 		if (unitInfo->spawnTargetUnitId >= 0) {
-			ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *targetUnitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(unitInfo->spawnTargetUnitId);
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(unitInfo->spawnTargetUnitId);
 			char *targetName = NULL;
 			if (targetUnitBase && targetUnitBase->IsCheckSumValidForAUnitClass() &&
 				targetUnitBase->ptrStructDefUnit && targetUnitBase->ptrStructDefUnit->IsCheckSumValid()) {
@@ -557,7 +557,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	if (unitPlayer && isMyUnit && (unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 		char nameBuffer[50];
 		short int researchCount = unitPlayer->ptrResearchesStruct->researchCount;
-		ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *rs = unitPlayer->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
+		AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *rs = unitPlayer->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
 		for (int rid = 0; rid < researchCount; rid++) {
 			if (rs[rid].currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) {
 				if (unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchLocation == unitDefBase->DAT_ID1) {
@@ -590,7 +590,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	if (isMyUnit && (unitDefBase->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FARM)) {
 		this->AddLabel(popup, &this->lblFarmAutoRebuild, (char*)farmInfo.c_str(), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 		
-		ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unusedLabel;
+		AOE_STRUCTURES::STRUCT_UI_LABEL *unusedLabel;
 		this->AddCheckBox(popup, &this->chkRebuildFarmNone, 330, currentYPos - 4, 24, 24);
 		this->AddCheckBox(popup, &this->chkForceRebuildFarm, 430, currentYPos - 4, 24, 24);
 		this->AddCheckBox(popup, &this->chkForceNotRebuildFarm, 530, currentYPos - 4, 24, 24);
@@ -718,7 +718,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool InGameUnitPropertiesPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) {
+bool InGameUnitPropertiesPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnResetAutoMove) {
 		UnitCustomInfo *u = this->crInfo->myGameObjects.FindUnitCustomInfo(this->unitId);
 		if (u) {
@@ -750,12 +750,12 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	if (isCancel) {
 		return;
 	}
-	ROR_STRUCTURES_10C::STRUCT_UNIT *unit = GetUnitStruct(this->unitId); // Might be NULL
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *unitPlayer = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT *unit = GetUnitStruct(this->unitId); // Might be NULL
+	AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = NULL;
 	if (unit && unit->IsCheckSumValid()) {
 		unitPlayer = unit->ptrStructPlayer;
 	}
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
+	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
 	bool isMyUnit = (controlledPlayer == unitPlayer);
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(this->unitId);
 	float posX = -1;
@@ -770,11 +770,11 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	if (isMyUnit && this->chkForceNotRebuildFarm && this->chkForceRebuildFarm &&
 		(this->chkForceNotRebuildFarm->checked || this->chkForceRebuildFarm->checked)) {
 		bool actionIsRebuild = (this->chkForceRebuildFarm->checked != 0); // If false, then it is force NOT rebuild.
-		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **selectedUnits = this->crInfo->GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->crInfo->GetRelevantSelectedUnitsBasePointer(controlledPlayer);
 		for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
 			if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() &&
 				(selectedUnits[i]->ptrStructPlayer == controlledPlayer)) {
-				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *curUnitDefBase = selectedUnits[i]->GetUnitDefinition();
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *curUnitDefBase = selectedUnits[i]->GetUnitDefinition();
 				if (curUnitDefBase && curUnitDefBase->IsCheckSumValidForAUnitClass() && (curUnitDefBase->DAT_ID1 == CST_UNITID_FARM)) {
 					FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(selectedUnits[i]->positionX, selectedUnits[i]->positionY);
 					fri->forceNotRebuild = !actionIsRebuild;
@@ -866,7 +866,7 @@ void EditorScenarioInfoPopup::_AddPopupContent() {
 	long int btnhPos2 = btnSize + btnSimpleSpace * 2; // x position for buttons
 	this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_NONE;
 	this->playerId = -1;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *unused;
 	this->AddLabel(popup, &this->lblTitle, localizationHandler.GetTranslation(CRLANG_IDCUSTOM_EDITOR_MENU, "Custom editor menu"), btnhPos1 - 5, 10, 190, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_IDPLAYER_ID, "PlayerId :"), btnhPos1, 40, 0x60, 30, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	this->AddTextBox(popup, &this->edtPlayerId, "2", 1, btnhPos1 + btnSize - 0x22, 42, 0x22, 20, false, false, true);
@@ -892,11 +892,11 @@ void EditorScenarioInfoPopup::_AddPopupContent() {
 }
 
 
-bool EditorScenarioInfoPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) {
+bool EditorScenarioInfoPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (!sender || !sender->IsCheckSumValid()) { return false; }
 	bool doCloseCustomPopup = false;
 	if (!GetGameGlobalStructPtr()) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo = GetGameGlobalStructPtr()->scenarioInformation;
+	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = GetGameGlobalStructPtr()->scenarioInformation;
 	assert(this->edtPlayerId != NULL);
 
 	if (this->edtPlayerId == NULL) { return false; }
@@ -967,9 +967,9 @@ bool EditorScenarioInfoPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON
 
 void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 	if (isCancel) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid() || (settings->ptrGlobalStruct == NULL)) { return; }
-	ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *sc_info = settings->ptrGlobalStruct->scenarioInformation;
+	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *sc_info = settings->ptrGlobalStruct->scenarioInformation;
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return; }
 	switch (this->popupToOpen) {
 	case SC_INFO_POPUP_TO_OPEN::PTO_TRIGGER:
@@ -1136,7 +1136,7 @@ void EditMapSizeXYPopup::_AddPopupContent() {
 	this->sizeX = 0;
 	this->sizeY = 0;
 
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	// By default, try to reuse existing map dimensions.
 	if (global && global->IsCheckSumValid() && global->gameMapInfo && global->gameMapInfo->IsCheckSumValid()) {
 		this->sizeX = global->gameMapInfo->mapArraySizeX;
@@ -1147,7 +1147,7 @@ void EditMapSizeXYPopup::_AddPopupContent() {
 
 	// Popup is open. Add components
 	long int btnhPos = (hSize - 0xAC) / 2;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *unused;
 	char bufX[5];
 	char bufY[5];
 	sprintf_s(bufX, "%ld", this->sizeX);
@@ -1193,7 +1193,7 @@ void EditTerrainPopup::_ResetPointers() {
 void EditTerrainPopup::_AddPopupContent() {
 	this->mapSizeX = -1;
 	this->mapSizeY = -1;
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid() && global->gameMapInfo && global->gameMapInfo->IsCheckSumValid()) {
 		this->mapSizeX = global->gameMapInfo->mapArraySizeX;
 		this->mapSizeY = global->gameMapInfo->mapArraySizeY;
@@ -1203,7 +1203,7 @@ void EditTerrainPopup::_AddPopupContent() {
 
 	// Popup is open. Add components
 	long int btnhPos = (hSize - 130) / 2;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *unused;
 	long int currentVPos = 5;
 	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_IDTERRAIN_EDIT, "Edit terrain"), btnhPos, currentVPos, 180, 20, AOE_FONT_BIG_LABEL);
 	currentVPos += 35;
@@ -1257,12 +1257,12 @@ void EditTerrainPopup::OnBeforeClose(bool isCancel) {
 	if ((minX > maxX) || (minY > maxY) || (maxX > this->mapSizeX) || (maxY > this->mapSizeY)) {
 		return;
 	}
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert((global != NULL) && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return; }
 	assert((global->gameMapInfo != NULL) && (global->gameMapInfo->IsCheckSumValid()));
 	if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
+	AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
 	assert(mapInfo->mapArraySizeX >= this->mapSizeX);
 	assert(mapInfo->mapArraySizeY >= this->mapSizeY);
 	if ((mapInfo->mapArraySizeX < this->mapSizeX) || (mapInfo->mapArraySizeY < this->mapSizeY)) { return; }
@@ -1270,7 +1270,7 @@ void EditTerrainPopup::OnBeforeClose(bool isCancel) {
 	// TODO: move treatments into this->crCommand
 	for (int x = minX; x <= maxX; x++) {
 		for (int y = minY; y <= maxY; y++) {
-			ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO *tile = mapInfo->GetTileInfo(x, y);
+			AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO *tile = mapInfo->GetTileInfo(x, y);
 			if (tile) {
 				if (!elevationEmpty) { tile->terrainData.SetAltitude(elevation); } // checks elevation is 0-7
 				if (!terrainEmpty) { tile->terrainData.SetTerrainId(terrainId); } // checks terrainId is 0-31
@@ -1301,7 +1301,7 @@ void GenNewTriggerPopup::_AddPopupContent() {
 
 	// Popup is open. Add components
 	//long int btnhPos = (hSize - 130) / 2;
-	//ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
+	//AOE_STRUCTURES::STRUCT_UI_LABEL *unused;
 	
 	bool success = AOE_AddComboBox(popup, &this->cbxActionType, 20, 40, 80, 80, 80, 80, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	this->AddObjectInContentList(this->cbxActionType);
@@ -1337,7 +1337,7 @@ void MapCopyPopup::_ResetPointers() {
 
 void MapCopyPopup::_AddPopupContent() {
 	const long int btnSize = 0xAC;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *unused;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *unused;
 	long int currentVPos = 5;
 	char bufX[20];
 	char bufY[20];
@@ -1389,7 +1389,7 @@ std::string MapCopyPopup::GetBufferSizeText() {
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool MapCopyPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) {
+bool MapCopyPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (sender && sender->ptrParentObject) {
 		AOE_SetFocus(sender->ptrParentObject, sender); // To validate input text.
 	}
@@ -1412,7 +1412,7 @@ bool MapCopyPopup::OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) {
 	}
 	if (sender == this->btnCopyAllMap) {
 		if (this->chkIncludeUnits != NULL) {
-			ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+			AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 			if (global && global->IsCheckSumValid() && global->gameMapInfo && global->gameMapInfo->IsCheckSumValid()) {
 				bool result = MAP::mapCopierInstance.CopyMapZone(0, 0, global->gameMapInfo->mapArraySizeX - 1, global->gameMapInfo->mapArraySizeY - 1, 
 					this->chkIncludeUnits->IsChecked());

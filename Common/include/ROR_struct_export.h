@@ -11,7 +11,7 @@
 /* This file does not provide methods to do any treatments, only tools for debugging.
 */
 
-namespace ROR_STRUCTURES_10C
+namespace AOE_STRUCTURES
 {
 
 	class ROR_STRUCT_EXPORTER {

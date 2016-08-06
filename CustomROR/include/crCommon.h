@@ -42,7 +42,7 @@
 static_assert((UNUSED_PLID_FOR_TRIGGERS >= 0) && (UNUSED_PLID_FOR_TRIGGERS < 16), "Bad player ID for UNUSED_PLID_FOR_TRIGGERS");
 
 using namespace AOE_CONST_FUNC;
-using namespace ROR_STRUCTURES_10C;
+using namespace AOE_STRUCTURES;
 
 
 // Constants
@@ -99,17 +99,17 @@ public:
 
 	// UI Variables : CustomROR yes/no dialog
 	unsigned long int *customYesNoDialogVar;  // customROR's dialog struct. NULL means dialog does not exist.
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *customGameMenuOptionsBtnVar;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGameMenuOptionsBtnVar;
 private:
 	// "OK" button of customROR's game popup. NULL means popup does not exist. See HasOpenedCustomGamePopup.
 	// It is CRUCIAL that this variable is always correctly set (reset).
 	// Never affect this variable manually, let the open/close methods do it.
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *customGamePopupButtonVar;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *customGamePopupCancelBtnVar;
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *customGamePopupVar; // Pointer to our custom game popup object when open. Should be NULL <=> customGamePopupButtonVar==NULL
-	std::vector<ROR_STRUCTURES_10C::STRUCT_ANY_UI*> objectsToFree; // Popup's UI components list. Useful to destroy all of them automatically
-	std::vector<ROR_STRUCTURES_10C::STRUCT_ANY_UI*> garbageComponentsToFree; // Popup's UI components that are waiting to be destroyed (objects that could not be destroyed at popup closing)
-	std::vector<ROR_STRUCTURES_10C::STRUCT_ANY_UI*> garbageComponentsToFree_older; // Popup's UI components that are waiting to be destroyed and that are no longer related the current events (now ready to be destroyed)
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGamePopupButtonVar;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGamePopupCancelBtnVar;
+	AOE_STRUCTURES::STRUCT_ANY_UI *customGamePopupVar; // Pointer to our custom game popup object when open. Should be NULL <=> customGamePopupButtonVar==NULL
+	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> objectsToFree; // Popup's UI components list. Useful to destroy all of them automatically
+	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> garbageComponentsToFree; // Popup's UI components that are waiting to be destroyed (objects that could not be destroyed at popup closing)
+	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> garbageComponentsToFree_older; // Popup's UI components that are waiting to be destroyed and that are no longer related the current events (now ready to be destroyed)
 
 public:
 
@@ -129,7 +129,7 @@ public:
 	// Applies an "auto-attack policy" on all player's selected units (only for owned units !)
 	// flagsToApply is used to determine which flags have to be updated using values from autoAttackPolicyValues.
 	// If flagsToApply.xxx is true, then update unit's auto_attack_policy.xxx to "autoAttackPolicyValues.xxx" value.
-	void ApplyAutoAttackPolicyToPlayerSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, 
+	void ApplyAutoAttackPolicyToPlayerSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 		const AutoAttackPolicy &autoAttackPolicyValues, const AutoAttackPolicy &flagsToApply);
 
 	// Returns true if a custom game popup is opened (only for popups, not dialogs !)
@@ -142,12 +142,12 @@ public:
 	// Return popup UI object if OK, NULL if failed
 	// Fails if another game popup (including options) is already open. Fails if dimensions are too small.
 	// Pauses the game if running (only if a popup is successfully opened)
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn = false);
+	AOE_STRUCTURES::STRUCT_ANY_UI *OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn = false);
 
 	// Use it to list all UI components (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
 	// The method is protected against duplicates, you can safely call it more than once.
 	// Returns true if obj has actually been added to list.
-	bool AddObjectInPopupContentList(ROR_STRUCTURES_10C::STRUCT_ANY_UI *obj);
+	bool AddObjectInPopupContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj);
 
 private:
 	// Free (destroys using AOE destructor) all popup's components
@@ -160,7 +160,7 @@ private:
 public:
 	// Use this to force values for "current custom popup". PLEASE AVOID using it !
 	// Returns true if successful. Fails if a popup is already open.
-	bool ForceSetCurrentGamePopup(ROR_STRUCTURES_10C::STRUCT_ANY_UI *customGamePopup, ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnOK, ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnCancel);
+	bool ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_ANY_UI *customGamePopup, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel);
 	// To be called when game menu is closed to free custom button
 	void ForceClearCustomMenuObjects();
 
@@ -176,16 +176,16 @@ public:
 	// Returns NULL if this popup is not open.
 	// This information is useful to add UI components to the popup.
 	// When adding components, it is not necessary to store component pointers unless we need them to catch events (buttonClick) or get values (input objects)
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *GetCustomGamePopup();
+	AOE_STRUCTURES::STRUCT_ANY_UI *GetCustomGamePopup();
 
 	// Get main (first) selected unit, or NULL if none is selected.
 	// Works in-game and in editor.
 	// See SelectOneUnit for unit selection + AOE_selectUnit, AOE_clearSelectedUnits
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *GetMainSelectedUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *GetMainSelectedUnit(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 	// Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
-	ROR_STRUCTURES_10C::STRUCT_UNIT **GetRelevantSelectedUnitsPointer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE **GetRelevantSelectedUnitsBasePointer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+	AOE_STRUCTURES::STRUCT_UNIT **GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **GetRelevantSelectedUnitsBasePointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 	// Fast-computes the integer distance for X and Y delta values (sqrt(X^2 + Y^2) as an integer).
 	// Returns -1 if invalid (diffX and diffY values are capped at CST_INT_DISTANCE_VALUES_MAX_COORDINATE)
@@ -205,26 +205,26 @@ private:
 // Useful to get structure from a unit id. May return NULL !
 // Only works for creatable (unitId >= 0). This is just a choice to avoid writing same bugs as ROR
 // (some functions use -1 as <No unit> but get an irrevant unit struct then because -1 is not tested before calling getUnitStruct(...))
-ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitStruct(long int unitId);
+AOE_STRUCTURES::STRUCT_UNIT *GetUnitStruct(long int unitId);
 
 // Returns a unit definition if valid, NULL otherwise.
-ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *GetUnitDefStruct(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int unitDefId);
+AOE_STRUCTURES::STRUCT_DEF_UNIT *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitDefId);
 
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
 // WARNING: this overload is risky (does not check actual unit structure type / might access wrong pointers !)
-ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
+AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT *unit);
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
 // Please use THIS overload.
-ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *GetUnitAction(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit);
+AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
 // Returns true if unit definition is a tower (using unit type and the fact it has attacks or not)
 // See also IsTower(datid) in AOE_empires_dat.h, which uses a hardcoded list.
-bool IsTower(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef);
+bool IsTower(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
 
 // Return NULL if one of the objects is NULL/missing
-ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *GetResearchDef(const ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId);
+AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId);
 
 // Returns true if current game is multiplayer, false otherwise (including error cases)
 bool IsMultiplayer();
@@ -237,10 +237,10 @@ bool IsDockRelevantForMap(MAP_TYPE_INDEX mti);
 
 // Return the matching score element
 // Warning: May return NULL.
-ROR_STRUCTURES_10C::STRUCT_SCORE_ELEM *FindScoreElement(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId);
+AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId);
 
 // Get strategy element type for a unit
-AOE_CONST_FUNC::TAIUnitClass GetUnitStrategyElemClass(ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef);
+AOE_CONST_FUNC::TAIUnitClass GetUnitStrategyElemClass(AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef);
 
 // Calculate distance
 float GetDistance(float x1, float y1, float x2, float y2);
@@ -254,7 +254,7 @@ int GetUnitWeight(short int DAT_ID);
 
 // Returns a unit DAT_ID2 (including upgrades) given "base" unit ID (DAT_ID1)
 // You have to make sure DAT_ID1 is not out of bounds. It depends on empires.dat so it can't be checked with a hardcoded value.
-short int GetDAT_ID2(ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **defUnitTable, short int DAT_ID1);
+short int GetDAT_ID2(AOE_STRUCTURES::STRUCT_DEF_UNIT **defUnitTable, short int DAT_ID1);
 
 // Returns true if unit class corresponds to one of
 // - Artefact/flag
@@ -267,7 +267,7 @@ bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
 
 // Returns true if the cost could be correctly computed.
 // Returns false if not. costTable content may have been modified though.
-bool GetUnitCost(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, float costTable[]);
+bool GetUnitCost(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID, float costTable[]);
 
 // Fill resourceTypesOrder with ordered resource types: lower value in resourceAmounts = first position in (out) resourceTypesOrder
 void SortResourceTypes(const int resourceAmounts[], int resourceTypesOrder[]);
@@ -275,62 +275,62 @@ void SortResourceTypes(const int resourceAmounts[], int resourceTypesOrder[]);
 // Common function for panic mode unit searching.
 // Returns true if it is possible to train the unit. In such case, cost is decreased from remainingResources and actorCounter is decreased too.
 // Returns false and does not change values if it is not possible (warning: tempCost can be modified in all cases)
-bool PrepareUnitToAddIfPossible(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int unitId_toAdd, short int unitId_actor,
+bool PrepareUnitToAddIfPossible(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitId_toAdd, short int unitId_actor,
 	long int *actorCounter, short int *lastCostDAT_ID, float remainingResources[], float tempCost[]);
 
 
 // Returns true if a research has been researched for a given player
-bool IsTechResearched(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);
+bool IsTechResearched(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
 // Returns current status of a research for given player.
-AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);
+AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
 
 // Return a list of all unitDefIds that are/can be enabled in player's tech tree.
-std::list<long int> GetActivableUnitDefIDs(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+std::list<long int> GetActivableUnitDefIDs(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 // Returns true if a unit is idle
-bool IsUnitIdle(ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
+bool IsUnitIdle(AOE_STRUCTURES::STRUCT_UNIT *unit);
 
 // Calls AOE's code mainAI.findUnit(DAT_Id)
-ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(ROR_STRUCTURES_10C::STRUCT_AI *mainAI, long int DAT_ID);
+AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI *mainAI, long int DAT_ID);
 
 // GetDamage(unitDef attacker, unitDef defender) returns long int
 // Call 0043FF10
 
 // Return the total remaining food amount for a farm ("immediatly available" + "action-remaining").
 // Returns 0 in error cases (please check it is actually a farm !)
-float GetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit);
+float GetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit);
 
 // Modifies the total remaining food amount for a farm ("immediately available" + "action-remaining").
-bool SetFarmCurrentTotalFood(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farmUnit, float newAmount);
+bool SetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit, float newAmount);
 
 // Returns <> 0 if a unit is (currently) available for a given player. Returns the unit def pointer.
 // Does not consider potential researches that could enable the unit afterwards.
 // Warning: this only works for non-upgraded unit def IDs. OK for clubman, not for axeman (because axeman's DATID1 is clubman's DATID).
-long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 // Searches (at least) a unit with provided shortcut number for given player.
 // The first matching unit is returned (arbitrary), even if there are several.
-ROR_STRUCTURES_10C::STRUCT_UNIT *FindUnitWithShortcutNumberForPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, char shortcutNumber);
+AOE_STRUCTURES::STRUCT_UNIT *FindUnitWithShortcutNumberForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, char shortcutNumber);
 
 // Get number of matching units (for a unitDef ID) for given player. Restricted to "creatable" units
 // -1 are jokers for DAT_ID, unitAIType, unitStatus
-long int GetPlayerUnitCount(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int DAT_ID, 
+long int GetPlayerUnitCount(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID, 
 	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType, char minUnitStatus, char maxUnitStatus);
 
 // Returns a pointer to trigger data
-char *GetTriggerDataPtr(ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo);
+char *GetTriggerDataPtr(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo);
 // Set trigger data pointer. Returns false if failed.
-bool SetTriggerDataPtr(ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo, char *newDataPtr);
+bool SetTriggerDataPtr(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo, char *newDataPtr);
 // Returns trigger data size
-long int GetTriggerDataSize(ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo);
+long int GetTriggerDataSize(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo);
 // Set trigger data size. Returns false if failed.
-bool SetTriggerDataSize(ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo, long int sizeToSet);
+bool SetTriggerDataSize(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo, long int sizeToSet);
 
 // Returns true if provided trigger text contains the END tag before any trigger information.
 bool TriggerTextContainsENDTagAtBeginning(char *triggerText);
 
 // Returns the number of queued units for a given DATID.
-long int GetTotalQueueNumberForUnit(ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *bld, short int unitDefId);
+long int GetTotalQueueNumberForUnit(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld, short int unitDefId);
 
 
 /* ----------- "ACTIVE" methods ------------- */
@@ -360,67 +360,67 @@ bool ApplyCostIfPossible(float costTable[], float resourceTable[]);
 // Calls ROR's method to change a unit's action so it will move to supplied unit/position
 // target can be NULL (only position will matter)
 // unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
-void MoveUnitToTargetOrPosition(ROR_STRUCTURES_10C::STRUCT_UNIT *unitToMove, ROR_STRUCTURES_10C::STRUCT_UNIT *target, float posX, float posY);
+void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT *unitToMove, AOE_STRUCTURES::STRUCT_UNIT *target, float posX, float posY);
 
 // Tells a unit to (move and) attack another unit (using tacAI)
 // Returns true if successful
-bool MoveAndAttackTarget(ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI, ROR_STRUCTURES_10C::STRUCT_UNIT *actor, ROR_STRUCTURES_10C::STRUCT_UNIT *target);
+bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT *actor, AOE_STRUCTURES::STRUCT_UNIT *target);
 
 // Given a list of (actor) units, tell them to interact with a target unit (like a right-click).
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitsToInteractWithTarget(ROR_STRUCTURES_10C::STRUCT_UNIT **actorUnitsList, long int actorUnitsCount, ROR_STRUCTURES_10C::STRUCT_UNIT *target);
+bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT *target);
 
 // Tell a unit to interact with a target unit (like a right-click).
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitToInteractWithTarget(ROR_STRUCTURES_10C::STRUCT_UNIT *actorUnit, ROR_STRUCTURES_10C::STRUCT_UNIT *target);
+bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit, AOE_STRUCTURES::STRUCT_UNIT *target);
 
 // Returns a unitDefCommand object if actor unit has a valid right-click command on target unit.
 // Returns NULL if there no possible interaction
-ROR_STRUCTURES_10C::STRUCT_DEF_UNIT_COMMAND *GetUnitDefCommandForTarget(ROR_STRUCTURES_10C::STRUCT_UNIT *actorUnit, 
-	ROR_STRUCTURES_10C::STRUCT_UNIT *target, bool canSwitchForVillager);
+AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit, 
+	AOE_STRUCTURES::STRUCT_UNIT *target, bool canSwitchForVillager);
 
 
 // Creates a unit at provided location. Does NOT make checks on location, please first make sure GetErrorForUnitCreationAtLocation returns 0.
 // You can use 0 as posZ value.
 // Returns NULL if it failed
-ROR_STRUCTURES_10C::STRUCT_UNIT *CreateUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ);
+AOE_STRUCTURES::STRUCT_UNIT *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ);
 
 // Creates a unit at provided location only if GetErrorForUnitCreationAtLocation agrees !
 // Returns NULL if it failed
-ROR_STRUCTURES_10C::STRUCT_UNIT *CheckAndCreateUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef,
+AOE_STRUCTURES::STRUCT_UNIT *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef,
 	float posY, float posX, bool checkVisibility, bool checkHills, bool checkConflictingUnits);
 
 // Has the same effect as "CTRL-0" or "CTRL-1" etc: assigns a shortcut number to units (and removes this shortcut from old units that had it)
 // Returns 1 on success.
-long int AssignShortcutToSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int shortcutNumber);
+long int AssignShortcutToSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, long int shortcutNumber);
 
 // Selects units that have a given shortcut number.
-long int SelectUnitsUsingShortcut(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int shortcutNumber, bool addToSelection = false);
+long int SelectUnitsUsingShortcut(AOE_STRUCTURES::STRUCT_PLAYER *player, long int shortcutNumber, bool addToSelection = false);
 
 // Apply a research for a player (if possible)
-bool ApplyResearchForPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int research_id);
-bool ApplyResearchForPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int research_id);
+bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
+bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int research_id);
 
 // Enable or disable a research for a player
-void AOE_enableResearch(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int research_id, bool enable);
+void AOE_enableResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, long int research_id, bool enable);
 
 // Disable the research that enables a given unit, so that it can't be trained.
 // For units that are enabled by a "visible" research, like short sword, the research won't be visible (disabled).
 // To be called before game starts
 // Returns true if a research was found and disabled.
-bool DisableUnitForPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int DAT_ID);
+bool DisableUnitForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID);
 
 // Apply a technology for a player. To be used only when there is no research for given technology (like cheat techs).
 // In most cases, please use ApplyResearchForPlayer instead.
-bool ApplyTechnologyForPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int tech_id);
-bool ApplyTechnologyForPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int tech_id);
+bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int tech_id);
+bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int tech_id);
 
 // Calls AOE's method to change a unit owner. Warning, this has bugs, see customROR / crCommand.
-void AOE_ChangeUnitOwner(ROR_STRUCTURES_10C::STRUCT_UNIT *targetUnit, ROR_STRUCTURES_10C::STRUCT_PLAYER *actorPlayer);
+void AOE_ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer);
 
 // Call AOE's Notify event method. Warning, the parameters can have different types.
 // Use the overload with pointers to make sure you don't have cast issues.
@@ -428,9 +428,9 @@ void AOE_callNotifyEvent(long int eventId, long int playerId, long int variant_a
 // Call AOE's Notify event method. Warning, the parameters can have different types. Here pointers here so there is no undesired cast !
 void AOE_callNotifyEvent(long int eventId, long int playerId, void *variant_arg3, void *variant_arg4, void *variant_arg5);
 
-void AOE_clearSelectedUnits(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+void AOE_clearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player);
 // select: if true, add unit to selection. If false, remove from selection.
-bool AOE_selectUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT *unit, bool select);
+bool AOE_selectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT *unit, bool select);
 
 // Calls AOE's path finding method.
 // allArgs indices are 1-15 (do NOT use 0). Warning, some arguments type are NOT long int (there are floats).
@@ -445,41 +445,41 @@ void SetPlayerSharedExploration_safe(long int playerId);
 // Reset an element in infAI.unitElemList. The slot will be re-used later by ROR. cf 0x4BA401.
 // Return true if the element was updated.
 // Return true if the element was updated/reset.
-bool ResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
+bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
 
 // Update an element in infAI.unitElemList if the unit is visible.
 // Reset the element otherwise.
 // If the element is reset, it is ALSO REMOVED from infAI lists.
 // Return true if the element was updated/reset.
-bool UpdateOrResetInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
+bool UpdateOrResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
 
 // Remove a unitId from infAI "info" lists (creatable, gatherable, "defendable", artefact units).
 // This does NOT manage "all my units" and "my buildings" lists. This does NOT manage unitElemList neither.
 // DATID and unitAIType (unitClass) are used for optimisation. You can provide -1 if you don't have the information.
 // Returns false if failed.
-bool RemoveFromInfAIInfoList(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, long int unitId, short int DATID, AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType);
+bool RemoveFromInfAIInfoList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId, short int DATID, AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType);
 
 // Find a unitElem in infAI list, returns NULL if not found.
-ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, long int unitId);
+AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId);
 
 // Change unit owner in InfAI unitListElem according to unit visibility.
 // Return true if updated.
-bool UpdateUnitOwnerInfAIUnitListElem(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit, long int newPlayerId);
+bool UpdateUnitOwnerInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, long int newPlayerId);
 
 // Set status for an element in infAI "construction history" array.
-void AOE_InfAIBuildHistory_setStatus(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, long int posX, long int posY, long int unitDefId,
+void AOE_InfAIBuildHistory_setStatus(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int posX, long int posY, long int unitDefId,
 	AOE_CONST_INTERNAL::INFAI_BLD_HISTORY_STATUS status);
 
 // Remove a building from arrays for a player
-void AOE_playerBldHeader_RemoveBldFromArrays(ROR_STRUCTURES_10C::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
+void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, AOE_STRUCTURES::STRUCT_UNIT *unit);
 
 // Clear player selection then select provided unit. Compatible with editor too.
 // If centerScreen is true, player's screen will be centered to unit.
-void SelectOneUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase, bool centerScreen);
+void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase, bool centerScreen);
 
 // Add a line with an attribute icon/value in game unit info zone (bottom left)
 // If a line is added, lineIndex is incremented.
-void UnitInfoZoneAddAttributeLine(ROR_STRUCTURES_10C::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone,
+void UnitInfoZoneAddAttributeLine(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone,
 	long int iconId, long int displayType, long int displayedValue, long int totalValue, long int &lineIndex);
 
 
@@ -492,7 +492,7 @@ bool AddCommandToGameCmdQueue(void *commandStruct, long int structSize);
 
 // Create a "ROR" command struct (right-click). Returns false if failed.
 bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY);
-bool CreateCmd_RightClick(ROR_STRUCTURES_10C::STRUCT_UNIT **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
+bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
 
 // Create a "ROR" command struct (build). Returns false if failed.
 bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY);
@@ -523,12 +523,12 @@ bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_C
 
 // Create a new unitDef, copied for provided one, using actual derived class.
 // Returns a STRUCT_UNITDEF_BASE, but it can be any derived class (living, building, etc)
-ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *CopyUnitDefToNewUsingGoodClass(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *existingUnitDef);
+AOE_STRUCTURES::STRUCT_UNITDEF_BASE *CopyUnitDefToNewUsingGoodClass(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *existingUnitDef);
 
 // Extends a player's unitDef table to add a new one (unitDef).
 // unitDef's DAT_ID1 and DAT_ID2 are modified with new ID.
 // Returns -1 on failure, new unitDefId on success.
-short int AddUnitDefToPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef);
+short int AddUnitDefToPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
 
 // A constructor for unitDef that copies an existing one.
 template<typename UnitDef> static UnitDef *CopyUnitDefToNew(UnitDef *existingUnitDef) {
@@ -561,7 +561,7 @@ bool AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES category, long int
 // unitButtonInfo is allowed to be NULL.
 // Cost info come from unitButtonInfo.
 // elemLanguageCreationDllId is unit (or research) creationDllId (it includes shortcut key, if any)
-void AOE_GetUIButtonCreationText(char *buffer, ROR_STRUCTURES_10C::STRUCT_UI_UNIT_BUTTON_INFO *unitButtonInfo,
+void AOE_GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BUTTON_INFO *unitButtonInfo,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCmdId, long int elemLanguageCreationDllId);
 
 
@@ -578,12 +578,12 @@ long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UIC
 // Technically, this just updates the button (no button object is created).
 // Refresh may NOT be performed if underlying info (command id, DATID) are unchanged, which may lead to wrong updates
 bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
-	long int DATID, bool isDisabled, const char *creationText, ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconSlpInfo,
+	long int DATID, bool isDisabled, const char *creationText, AOE_STRUCTURES::STRUCT_SLP_INFO *iconSlpInfo,
 	bool forceUpdate);
 
 // Returns true if the button is visible. Use this overload for performance if you already have STRUCT_UI_IN_GAME_MAIN pointer.
 // Returns false if the button is hidden, or if an error occurs.
-bool IsInGameUnitCommandButtonVisible(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int buttonIndex);
+bool IsInGameUnitCommandButtonVisible(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int buttonIndex);
 // Returns true if the button is visible
 // Returns false if the button is hidden, or if an error occurs.
 bool IsInGameUnitCommandButtonVisible(long int buttonIndex);
@@ -600,7 +600,7 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId);
 void DebugDumpAllUnits();
 
 // Writes in a text buffer the content of a "temp map like info" zone.
-char *DumpPosToTextBuffer(ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *mapInfosStruct, long int posX, long int posY, int radius);
+char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *mapInfosStruct, long int posX, long int posY, int radius);
 
 #ifdef _DEBUG
 static const char serializationLogFilename[] = "D:\\AOESrlz.txt";

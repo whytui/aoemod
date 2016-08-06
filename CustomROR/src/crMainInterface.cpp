@@ -23,10 +23,10 @@ CustomRORMainInterface::~CustomRORMainInterface() {
 // Manage key press in game screen and editor.
 // Returns true if event has been handled AND we don't want original code to try to handle it.
 bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool CTRL, bool SHIFT, bool ALT) {
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI **pCurrentUI = (ROR_STRUCTURES_10C::STRUCT_ANY_UI **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
+	AOE_STRUCTURES::STRUCT_ANY_UI **pCurrentUI = (AOE_STRUCTURES::STRUCT_ANY_UI **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
 	assert(pCurrentUI != NULL);
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = *pCurrentUI;
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = *pCurrentUI;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	if (!settings) { return false; }
 	bool isInEditor = (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
@@ -46,7 +46,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		isMenuOpen = (currentUI->focusedComponent && (currentUI->focusedComponent->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MENU));
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return false; } // May occur when a key is pressed and the game just opened
 
 	// Disable ALT-F4 when it would conflict with custom dialog
@@ -73,7 +73,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		// Additional check
 		assert(GetGameSettingsPtr()->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
 		if (pCurrentUI) {
-			AOE_EditorOpenMenu((ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)*pCurrentUI);
+			AOE_EditorOpenMenu((AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)*pCurrentUI);
 		}
 	}
 
@@ -106,8 +106,8 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			settings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
 		} else {
 			STRUCT_POSITION_INFO mousePosInfo = GetMousePosition();
-			ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitAtMousePosition(mousePosInfo.posX, mousePosInfo.posY, INTERACTION_MODES::CST_IM_LIVING_UNITS, true);
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitAtMousePosition(mousePosInfo.posX, mousePosInfo.posY, INTERACTION_MODES::CST_IM_LIVING_UNITS, true);
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 			if (player && player->IsCheckSumValid() && unit && unit->IsCheckSumValidForAUnitClass()) {
 				SelectOneUnit(player, unit, false);
 			}
@@ -147,8 +147,8 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	// TEST - F7 - debug only
 	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F7)) {
 		unsigned long int *marray = (unsigned long int *)AOE_OFFSETS::UNKNOWN_ARRAY_6A18C0;
-		ROR_STRUCTURES_10C::STRUCT_UNKNOWN_MAP_DATA_F04C *md1 = (ROR_STRUCTURES_10C::STRUCT_UNKNOWN_MAP_DATA_F04C *) 0x583BC8;
-		ROR_STRUCTURES_10C::STRUCT_UNKNOWN_MAP_DATA_F04C *md2 = (ROR_STRUCTURES_10C::STRUCT_UNKNOWN_MAP_DATA_F04C *) 0x6A1CC0;
+		AOE_STRUCTURES::STRUCT_UNKNOWN_MAP_DATA_F04C *md1 = (AOE_STRUCTURES::STRUCT_UNKNOWN_MAP_DATA_F04C *) 0x583BC8;
+		AOE_STRUCTURES::STRUCT_UNKNOWN_MAP_DATA_F04C *md2 = (AOE_STRUCTURES::STRUCT_UNKNOWN_MAP_DATA_F04C *) 0x6A1CC0;
 		char txt[1000];
 		memset(txt, 0, 900);
 		long int v = md1->unknown_0CE624_mapUnitOccupiedGrid[0];
@@ -181,12 +181,12 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		int techToShowCount = 0;
 		static char buffer[1024] = "\0";
 		char *posInBuf = buffer;
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = NULL;
-		ROR_STRUCTURES_10C::STRUCT_UNIT *selectedUnit = NULL;
+		AOE_STRUCTURES::STRUCT_PLAYER *player = NULL;
+		AOE_STRUCTURES::STRUCT_UNIT *selectedUnit = NULL;
 		if (global) {
 			player = GetPlayerStruct(global->humanPlayerId);
 		}
-		ROR_STRUCTURES_10C::STRUCT_UNIT **unitArray = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(player);
+		AOE_STRUCTURES::STRUCT_UNIT **unitArray = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(player);
 		if (unitArray) {
 			selectedUnit = unitArray[0];
 		}
@@ -205,18 +205,18 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				}
 			}
 			// TO DO write buffer
-			ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scinfo = global->scenarioInformation;
-			ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *gmapinfo = global->gameMapInfo;
-			ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO *tile = gmapinfo->GetTileInfo(1, 1);
+			AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scinfo = global->scenarioInformation;
+			AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *gmapinfo = global->gameMapInfo;
+			AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO *tile = gmapinfo->GetTileInfo(1, 1);
 			int a = tile->terrainData.GetTerrainId();
 			bool b = tile->terrainData.SetAltitude(3);
 			bool c = tile->terrainData.SetTerrainId(4);
 			a = a + 1;
 
-			ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+			AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
 			if (se != NULL) {
 				int a = se->diamondMap->checksum;
-				ROR_STRUCTURES_10C::STRUCT_TERRAIN_DEF *t = &se->diamondMap->gameMapInfo->terrainDefinitions[0];
+				AOE_STRUCTURES::STRUCT_TERRAIN_DEF *t = &se->diamondMap->gameMapInfo->terrainDefinitions[0];
 				se->diamondMap->gameMapInfo->terrainDefinitions;
 				se->unknown_580->checksum;//
 				se->unknown_59C->checksum;//
@@ -226,7 +226,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				//sprintf_s(buffer, "%08X, %08X", se, se->diamondMap);
 				//this->OpenCustomDialogMessage(buffer, 100, 100);
 				//bool b = se->gamePlayUIZone->IsCheckSumValid();
-				//ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btn = se->btnTabs[0];
+				//AOE_STRUCTURES::STRUCT_UI_BUTTON *btn = se->btnTabs[0];
 				//se->gamePlayUIZone;
 				//se->map_btn_random->visible; // map btn randm
 
@@ -234,18 +234,18 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			}
 
 		}
-		ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameScreen = GetGameSettingsPtr()->ptrGameUIStruct;
+		AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameScreen = GetGameSettingsPtr()->ptrGameUIStruct;
 		if (IsGameRunning()) {
 			// During Game
 
 			selectedUnit = gameScreen->panelSelectedUnit;
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = NULL;
+			AOE_STRUCTURES::STRUCT_PLAYER *player = NULL;
 			if (selectedUnit) { player = selectedUnit->ptrStructPlayer; }
 			if (selectedUnit) {
 				long int actionTargetUnitId = -1;
 				unsigned long int addraction = -1;
-				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = selectedUnit->GetUnitDefBase();
-				ROR_STRUCTURES_10C::STRUCT_UNIT_ACTION_INFO *ainfo = NULL;
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = selectedUnit->GetUnitDefBase();
+				AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO *ainfo = NULL;
 				if ((unitDefBase->unitType >= GLOBAL_UNIT_TYPES::GUT_TYPE50) && (unitDefBase->unitType <= GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 					ainfo = selectedUnit->ptrActionInformation;
 				}
@@ -253,7 +253,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 					actionTargetUnitId = ainfo->ptrActionLink->actionStruct->targetUnitId;
 					addraction = (unsigned long int)ainfo->ptrActionLink->actionStruct;
 				}
-				ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *unitActivity = selectedUnit->currentActivity;
+				AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *unitActivity = selectedUnit->currentActivity;
 				assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
 				if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return false; }
 				if (unitActivity) {
@@ -271,7 +271,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				posInBuf = posInBuf + strlen(posInBuf);
 			}
 			if (player) {
-				ROR_STRUCTURES_10C::STRUCT_AI *ai = player->GetAIStruct();
+				AOE_STRUCTURES::STRUCT_AI *ai = player->GetAIStruct();
 				if (ai) {
 					//ai->structTacAI.plannedResourceNeeds.resourceAmount[0];
 					sprintf_s(posInBuf, 200, "Player %i:\nresId priority order = %ld  %ld  %ld  %ld\nnb gatherers         = %ld  %ld  %ld  %ld\nResources = %ld  %ld  %ld  %ld\n",
@@ -294,12 +294,12 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				posInBuf = posInBuf + strlen(posInBuf);
 			}
 			if (player && selectedUnit && (player->playerId == global->humanPlayerId)) {
-				ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = selectedUnit->ptrStructDefUnit;
+				AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = selectedUnit->ptrStructDefUnit;
 				assert(unitDef && unitDef->IsCheckSumValid());
 				if (unitDef) {
 					char nameBuffer[50];
 					short int researchCount = player->ptrResearchesStruct->researchCount;
-					ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *rs = player->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
+					AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *rs = player->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
 					sTechTreeInfo = "";
 					for (int rid = 0; rid < researchCount; rid++) {
 						if (rs[rid].currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) {
@@ -320,7 +320,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			}
 			//TMP
 			std::string ss = "";
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
+			AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 			assert(humanPlayer && humanPlayer->IsCheckSumValid());
 			if (selectedUnit && selectedUnit->IsCheckSumValid() && (player->playerId == global->humanPlayerId)) {
 				if (selectedUnit->ptrActionInformation && selectedUnit->ptrActionInformation->ptrActionLink &&
@@ -338,10 +338,10 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 		if (this->OpenCustomGamePopup<CustomPopup>(580, 460, false)) {
 			unsigned long int *unused;
-			AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (ROR_STRUCTURES_10C::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
+			AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
 			if (!sTechTreeInfo.empty() && (techToShowCount > 0)) {
-				AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (ROR_STRUCTURES_10C::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
-				AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (ROR_STRUCTURES_10C::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount+1));
+				AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
+				AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount+1));
 			}
 		}
 	}
@@ -357,7 +357,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 
 // Create in-game customROR options screen. Returns false if failed and if return address must be changed.
-bool CustomRORMainInterface::CreateGameCustomRorOptionsPopup(ROR_STRUCTURES_10C::STRUCT_ANY_UI *previousPopup) {
+bool CustomRORMainInterface::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
 	assert(previousPopup != NULL);
 	if (!previousPopup) { return false; }
 
@@ -382,7 +382,7 @@ bool CustomRORMainInterface::CreateGameCustomRorOptionsPopup(ROR_STRUCTURES_10C:
 // Ensure exiting game won't crash due to UI pointer issues related to custom popup (occurs in scenario editor)
 // Returns true if we want NOT the game to exit
 bool CustomRORMainInterface::FixGamePopupIssuesBeforeGameClose() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (this->crCommand->crInfo->HasOpenedCustomGamePopup() && settings &&
 		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
 		// In scenario editor, UI objects are not correctly freed and the game crashes if we have a custom popup opened...
@@ -463,24 +463,24 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 		this->CloseCustomGamePopup(true);
 		return true;
 	}
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *obj = (ROR_STRUCTURES_10C::STRUCT_ANY_UI *)objAddress;
+	AOE_STRUCTURES::STRUCT_ANY_UI *obj = (AOE_STRUCTURES::STRUCT_ANY_UI *)objAddress;
 
 	//Custom checkboxes: check/uncheck + manage custom buttons onclick
 	if (this->crCommand->crInfo->HasOpenedCustomGamePopup()) {
-		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *objAsCheckBox = (ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *)objAddress;
+		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsCheckBox = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsCheckBox->IsCheckSumValid()) {
 			AOE_CheckBox_SetChecked(objAsCheckBox, !objAsCheckBox->IsChecked());
 		}
-		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *objAsButton = (ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *)objAddress;
+		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsButton->IsCheckSumValid()) {
 			return this->OnCustomButtonClick(objAsButton);
 		}
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 
 	// Scenario editor
-	ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
 	if ((se != NULL) && settings && (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
 		// Manage (overload) scenario editor buttons
 		if (obj == se->map_btn_generateMap) {
@@ -489,9 +489,9 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 	}
 
 	// Game menu
-	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MENU *menu = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MENU *)AOE_GetScreenFromName(menuDialogScreenName);
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MENU *menu = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MENU *)AOE_GetScreenFromName(menuDialogScreenName);
 	if (menu && menu->IsCheckSumValid() && settings && (obj->ptrParentObject == menu)) {
-		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *objAsButton = (ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *)objAddress;
+		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsButton->IsCheckSumValid()) {
 			// True for buttons that do not trigger a call to ManageOptionButtonClickInMenu
 			bool btnEventNotCaughtByRORMenuBtnEvent = (objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_SAVE) ||
@@ -522,11 +522,11 @@ void CustomRORMainInterface::FreeInGameCustomOptionsButton() {
 
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool CustomRORMainInterface::OnCustomButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) {
+bool CustomRORMainInterface::OnCustomButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (!sender || !sender->IsCheckSumValid()) { return false; }
 	bool doCloseCustomPopup = false;
 	if (!GetGameGlobalStructPtr()) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo = GetGameGlobalStructPtr()->scenarioInformation;
+	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = GetGameGlobalStructPtr()->scenarioInformation;
 
 	if (this->currentCustomPopup) {
 		bool eventHandled = this->currentCustomPopup->OnButtonClick(sender);
@@ -577,16 +577,16 @@ bool CustomRORMainInterface::OpenTraceMessagePopup() {
 // Open the relevant "view/edit unit" popup for currently selected unit.
 // Returns true if successful.
 bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup() {
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
+	AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 	if (!humanPlayer || !humanPlayer->IsCheckSumValid()) {
 		return false;
 	}
 	if (humanPlayer->selectedUnitCount <= 0) {
 		return false;
 	}
-	ROR_STRUCTURES_10C::STRUCT_UNIT **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(humanPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(humanPlayer);
 	assert(selectedUnits != NULL);
-	ROR_STRUCTURES_10C::STRUCT_UNIT *selectedUnit = selectedUnits[0];
+	AOE_STRUCTURES::STRUCT_UNIT *selectedUnit = selectedUnits[0];
 	if (!selectedUnit || !selectedUnit->IsCheckSumValid()) {
 		return false;
 	}
@@ -603,7 +603,7 @@ bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup() {
 
 // Open the relevant "view/edit unit" popup for provided unit.
 // Returns true if successful.
-bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup(ROR_STRUCTURES_10C::STRUCT_UNIT *unit) {
+bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT *unit) {
 	if (!unit || !unit->IsCheckSumValid()) {
 		return false;
 	}
@@ -624,9 +624,9 @@ bool CustomRORMainInterface::OpenCustomEditorScenarioInfoPopup() {
 		popup->SetVarToUpdate_disableHillModeChecks(&this->crCommand->crInfo->configInfo.editor_disableHillModeChecks);
 		popup->SetVarToUpdate_disableTerrainRestrictionChecks(&this->crCommand->crInfo->configInfo.editor_disableTerrainRestrictions);
 		popup->SetVarToUpdate_lengthenCombatMode(NULL); // Default
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		if (global && global->IsCheckSumValid()) {
-			ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo = global->scenarioInformation;
+			AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = global->scenarioInformation;
 			if (scInfo && scInfo->IsCheckSumValid()) {
 				popup->SetVarToUpdate_lengthenCombatMode(&scInfo->enableLengthenCombatMode);
 			}
@@ -652,10 +652,10 @@ bool CustomRORMainInterface::OpenCustomTerrainEditPopup() {
 
 // Returns true if custom map generation has been executed. False if we want to let original game code apply.
 bool CustomRORMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
 	assert(scEditor && scEditor->IsCheckSumValid());
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return false; }
 	assert(scEditor->map_cbb_mapSize);
@@ -672,11 +672,11 @@ bool CustomRORMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 
 // Manage right button release action on selected units for given player
 // Returns true if a red cross sign should be displayed (a relevant action occurred)
-bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *UIGameMain,
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY) {
+bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameMain,
+	AOE_STRUCTURES::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY) {
 	if (!UIGameMain || !UIGameMain->IsCheckSumValid()) { return false; }
 	assert(UIGameMain != NULL);
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *controlledPlayer = UIGameMain->controlledPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = UIGameMain->controlledPlayer;
 	if (controlledPlayer == NULL) { return false; } // I suppose it shouldn't happen but I don't know all behaviours for this variable
 	unsigned long int unitCount = controlledPlayer->selectedUnitCount;
 	if (unitCount == 0) { return false; }
@@ -684,9 +684,9 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURE
 	if (!this->crCommand->crInfo->configInfo.enableSpawnUnitsMoveToLocation) { return false; }
 	// Get relevant selected units array
 	bool result = false;
-	ROR_STRUCTURES_10C::STRUCT_UNIT **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(controlledPlayer);
 
-	ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_POSITION_INFO posInfos;
+	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO posInfos;
 	long int callResult;
 	// TODO use AOE_GetGameInfoUnderMouse ?
 	_asm {
@@ -714,7 +714,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURE
 	bool hasSelectedBuildings = false;
 	bool hasSelectedLivings = false;
 	for (unsigned long int index = 0; index < unitCount; index++) {
-		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = selectedUnits[index];
+		AOE_STRUCTURES::STRUCT_UNIT *unit = selectedUnits[index];
 		if (unit && unit->IsCheckSumValid() && (unit->ptrStructPlayer == controlledPlayer)) {
 			hasSelectedBuildings = hasSelectedBuildings || (unit->unitType == GUT_BUILDING);
 			hasSelectedLivings = hasSelectedLivings || (unit->unitType == GUT_LIVING_UNIT);
@@ -722,11 +722,11 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURE
 	}
 
 	for (unsigned long int index = 0; index < unitCount; index++) {
-		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = selectedUnits[index];
+		AOE_STRUCTURES::STRUCT_UNIT *unit = selectedUnits[index];
 		// Make sure unit is valid, from MY player
 		if (unit && unit->IsCheckSumValid() && (unit->ptrStructPlayer == controlledPlayer)) {
 			if (unit->unitType == GUT_BUILDING) {
-				ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+				AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 				assert(unitDef != NULL);
 				if (unitDef && (unitDef->unitType == GUT_BUILDING) && (unit->unitStatus == 2) &&
 					(!hasSelectedLivings) && // Do not apply auto-move when both livings and buildings are selected (building selection is probably unintentional)
@@ -746,13 +746,13 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURE
 
 						// Is there a unit to interact with at this position ?
 						long int targetUnitId = -1;
-						ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+						AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 						assert(global && global->IsCheckSumValid());
 						if (!global || !global->IsCheckSumValid()) { return false; }
 
-						ROR_STRUCTURES_10C::STRUCT_UNIT *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
+						AOE_STRUCTURES::STRUCT_UNIT *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
 						if (unitUnderMouse && unitUnderMouse->IsCheckSumValid()) {
-							ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->GetUnitDefBase();
+							AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->GetUnitDefBase();
 							if (unitDefUnderMouse && unitDefUnderMouse->IsCheckSumValidForAUnitClass() &&
 								(unitDefUnderMouse->interactionMode >= AOE_CONST_FUNC::INTERACTION_MODES::CST_IM_RESOURCES)
 								) {

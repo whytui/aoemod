@@ -22,7 +22,7 @@ namespace STRATEGY {
 	// Class that handles the selection of military units for strategy creation.
 	class StrategyBuilder {
 	public:
-		StrategyBuilder(CustomRORInfo *crInfo, ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+		StrategyBuilder(CustomRORInfo *crInfo, AOE_STRUCTURES::STRUCT_PLAYER *player) {
 			this->crInfo = crInfo;
 			this->ai = NULL;
 			this->buildAI = NULL;
@@ -97,16 +97,16 @@ namespace STRATEGY {
 		// Get the strategy element that correspond to an Age Id. researchId must correspond to an age upgrade !
 		// For stone age, returns the "fake" first strategy element (beginning of strategy)
 		// For other researches, returns NULL
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *GetAgeStrategyElement(short int researchId);
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetAgeStrategyElement(short int researchId);
 
 	private:
 		std::string log;
 		static int randomPercentFactor;
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player;
-		ROR_STRUCTURES_10C::STRUCT_AI *ai; // automatically set from player (SetPlayerAndAIStructs)
-		ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI; // automatically set from player (SetPlayerAndAIStructs)
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global;
-		ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings;
+		AOE_STRUCTURES::STRUCT_PLAYER *player;
+		AOE_STRUCTURES::STRUCT_AI *ai; // automatically set from player (SetPlayerAndAIStructs)
+		AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI; // automatically set from player (SetPlayerAndAIStructs)
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global;
+		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings;
 		short int civId;
 		bool isWaterMap;
 		long int maxPopulation;
@@ -126,17 +126,17 @@ namespace STRATEGY {
 		std::list<PotentialResearchInfo*> potentialResearchesList;
 		std::set<PotentialBuildingInfo*> potentialBuildingsList; // Info about needed buildings (units)
 		// Strategy itself
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seTownCenter;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seToolAge;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seBronzeAge;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seIronAge;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seMarket;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seGovCenter;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *seWheel; // May be null
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *seTownCenter;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *seToolAge;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *seBronzeAge;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *seIronAge;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *seMarket;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *seGovCenter;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *seWheel; // May be null
 
 		/*** General methods ***/
 		// Initialize player-related information (for constructor). Please set this->crInfo first.
-		void SetPlayerInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+		void SetPlayerInfo(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 			this->ai = NULL;
 			this->buildAI = NULL;
 			this->player = player;
@@ -167,19 +167,19 @@ namespace STRATEGY {
 
 		// Add a research to strategy just before supplied insertion point. Updates "isInStrategy" field.
 		// Returns actual number of element that were added
-		int AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint);
+		int AddResearchToStrategy(PotentialResearchInfo *resInfo, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint);
 
 		// Add a building to strategy just before supplied insertion point. Updates underlying fields (added count...)
 		// Returns actual number of element that were added
-		int AddBuildingToStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint);
+		int AddBuildingToStrategy(PotentialBuildingInfo *bldInfo, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint);
 
 		// Update a building information object when 1 building has been added to strategy
-		void UpdateBuildingInfoAfterAddInStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *newElem);
+		void UpdateBuildingInfoAfterAddInStrategy(PotentialBuildingInfo *bldInfo, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *newElem);
 
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
 		PotentialResearchInfo *GetResearchInfo(short int researchId) const;
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
-		PotentialResearchInfo *GetResearchInfo(ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef) const;
+		PotentialResearchInfo *GetResearchInfo(AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef) const;
 		// Add building to potential buildings list and initializes underlying info.
 		// Returns NULL if not added, or pointer to object if successful
 		PotentialResearchInfo *AddPotentialResearchInfoToList(short int researchId);
@@ -187,11 +187,11 @@ namespace STRATEGY {
 		// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
 		PotentialBuildingInfo *GetBuildingInfo(short int unitDefId) const;
 		// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
-		PotentialBuildingInfo *GetBuildingInfo(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef) const;
+		PotentialBuildingInfo *GetBuildingInfo(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef) const;
 		// Add building to potential buildings list and initializes underlying info.
 		// Returns true if actually added
 		bool AddPotentialBuildingInfoToList(short int unitDefId);
-		bool AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef);
+		bool AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef);
 
 		// Returns true if a research is available in tech tree
 		bool IsResearchInTechTree(short int researchId);
@@ -202,7 +202,7 @@ namespace STRATEGY {
 		// Fills unitInfos with all available military units from tech tree.
 		// Towers are ignored (not added to list). Boats are ignored on non-water maps.
 		// *** Make sure to delete all PotentialUnitInfo from list when you're finished with the list ***
-		void CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+		void CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 		// Compute all strength/weakness fields for all units in potential units list.
 		void ComputeStrengthsForPotentialUnits();
@@ -275,7 +275,7 @@ namespace STRATEGY {
 		/*** Strategy writing methods ***/
 
 		// Get the very global information about strategy generation (number of villagers, etc)
-		void CollectGlobalStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+		void CollectGlobalStrategyGenerationInfo(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 		// Creates base strategy elements (ages + initial Town center)
 		// Does not add villagers or any other item

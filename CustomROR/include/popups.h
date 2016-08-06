@@ -29,21 +29,21 @@ public:
 	// Reset all internal pointers (base class + child classes)
 	void ResetPointers();
 	// Call this to open a new popup (=>this)
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *OpenPopup(long int hSize, long int vSize, bool withCancelBtn);
+	AOE_STRUCTURES::STRUCT_ANY_UI *OpenPopup(long int hSize, long int vSize, bool withCancelBtn);
 	// Call this to close the popup. This will handle pre/post close events.
 	void ClosePopup(bool isCancel);
 	// Indicates this popup object has been closed and can be deleted safely.
 	bool IsClosed() { return this->isClosed; }
 	// Get the (AOE) popup object
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *GetAOEPopupObject() { return this->popup; }
+	AOE_STRUCTURES::STRUCT_ANY_UI *GetAOEPopupObject() { return this->popup; }
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	virtual bool OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) { return false; };
+	virtual bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) { return false; };
 
 protected:
 	CustomRORInfo *crInfo;
 	CustomRORCommand *crCommand;
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *popup;
+	AOE_STRUCTURES::STRUCT_ANY_UI *popup;
 	bool isClosed; // Indicates this popup object has been closed and can be deleted safely.
 	long int hSize, vSize;
 
@@ -56,36 +56,36 @@ protected:
 	// Overload this method to manage actions to do just after the popup is closed (it is possible here to open another popup)
 	virtual void OnAfterClose(bool isCancel) { };
 	// Use it to list all UI objects (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
-	inline void AddObjectInContentList(ROR_STRUCTURES_10C::STRUCT_ANY_UI *obj);
+	inline void AddObjectInContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj);
 
 	// API to add UI components and add them automatically in "objects to free" list.
-	bool AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-		ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
+	bool AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+		AOE_STRUCTURES::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
-	bool AddTextBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-		ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
+	bool AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+		AOE_STRUCTURES::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		bool readOnly = false, bool multiline = false, bool onlyNumbers = false, unsigned long int font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
-	bool AddCheckBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate,
+	bool AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+		AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize);
 
-	bool AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
+	bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+		AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
-	bool AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
+	bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+		AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
 private:
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnOK;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnCancel;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel;
 
 	// Call this to create popup's specific content
 	void AddPopupContent() {
@@ -108,31 +108,31 @@ public:
 	void _ResetPointers() override;
 	void _AddPopupContent() override;
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) override;
+	bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) override;
 	void OnBeforeClose(bool isCancel) override;
 	void OnAfterClose(bool isCancel) override;
 	// Specific method to use instead of OpenPopup (special treatments for ingame customROR menu).
 	// previousPopup should be game menu popup object.
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI * CloseMenuAndOpenPopup(ROR_STRUCTURES_10C::STRUCT_ANY_UI *previousPopup);
+	AOE_STRUCTURES::STRUCT_ANY_UI * CloseMenuAndOpenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup);
 	// Popup content objects
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *customOptionButtonVar; // "OK" button of customROR's options popup. NULL means popup does not exist. See HasOpenedCustomGamePopup.
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *customOptionHumanPenaltyTextVar;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *customOptionHumanPenaltyLabelVar;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *customOptionGameSpeedTextVar;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *customOptionGameSpeedLabelVar;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *customOptionHeaderLabelVar;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *customOptionFreeTextVar;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *customOptionFreeTextLabelVar;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *customOptionFreeTextAnswerVar;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnTechTreeInfo;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkAutoRebuildFarms;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblAutoRebuildFarms;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtAutoRebuildFarmsMaxFood;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblAutoRebuildFarmsMaxFood;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtAutoRebuildFarmsMinWood;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblAutoRebuildFarmsMinWood;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtAutoRebuildFarmsMaxFarms;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblAutoRebuildFarmsMaxFarms;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *customOptionButtonVar; // "OK" button of customROR's options popup. NULL means popup does not exist. See HasOpenedCustomGamePopup.
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *customOptionHumanPenaltyTextVar;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *customOptionHumanPenaltyLabelVar;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *customOptionGameSpeedTextVar;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *customOptionGameSpeedLabelVar;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *customOptionHeaderLabelVar;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *customOptionFreeTextVar;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *customOptionFreeTextLabelVar;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *customOptionFreeTextAnswerVar;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnTechTreeInfo;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAutoRebuildFarms;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoRebuildFarms;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtAutoRebuildFarmsMaxFood;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoRebuildFarmsMaxFood;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtAutoRebuildFarmsMinWood;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoRebuildFarmsMinWood;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtAutoRebuildFarmsMaxFarms;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoRebuildFarmsMaxFarms;
 
 private:
 	bool openTechTreeInfo;
@@ -146,18 +146,18 @@ public:
 	void _ResetPointers() override;
 	void _AddPopupContent() override;
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) override;
+	bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) override;
 	void OnBeforeClose(bool isCancel) override;
 	void OnAfterClose(bool isCancel) override;
 private:
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtStatus;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lbl_s0;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lbl_s2;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lbl_s4;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkbox_s0;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkbox_s2;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkbox_s4;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtStatus;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lbl_s0;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lbl_s2;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lbl_s4;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkbox_s0;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkbox_s2;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkbox_s4;
 };
 
 
@@ -171,32 +171,32 @@ public:
 	void OnBeforeClose(bool isCancel) override;
 	void OnAfterClose(bool isCancel) override;
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) override;
+	bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) override;
 private:
 	long int unitId; // Warning: Storing pointer would be dangerous if game executions continues (MP ?): unit could be destroyed in the meanwhile.
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblTitle;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblMainInfos;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblChildUnitsAutoMove;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblFarmAutoRebuild;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkRebuildFarmNone; // "default"
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkForceRebuildFarm;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkForceNotRebuildFarm;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnResetAutoMove;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblBuildingTechsMessage;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtBuildingTechs;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblAutoAttackUnits;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblAutoAttackVillagers;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblAutoAttackMilitary;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblAutoAttackTowers;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblAutoAttackBuildings;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblAutoAttackWalls;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkAutoAttackVillagers;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkAutoAttackMilitary;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkAutoAttackTowers;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkAutoAttackBuildings;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkAutoAttackWalls;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtStrengthWeakness;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblConversionResistance;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblTitle;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblMainInfos;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblChildUnitsAutoMove;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblFarmAutoRebuild;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkRebuildFarmNone; // "default"
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkForceRebuildFarm;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkForceNotRebuildFarm;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnResetAutoMove;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblBuildingTechsMessage;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtBuildingTechs;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoAttackUnits;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoAttackVillagers;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoAttackMilitary;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoAttackTowers;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoAttackBuildings;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoAttackWalls;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAutoAttackVillagers;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAutoAttackMilitary;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAutoAttackTowers;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAutoAttackBuildings;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAutoAttackWalls;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtStrengthWeakness;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblConversionResistance;
 };
 
 
@@ -209,7 +209,7 @@ public:
 	void _ResetPointers() override;
 	void _AddPopupContent() override;
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) override;
+	bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) override;
 	void OnAfterClose(bool isCancel) override;
 
 	// Provide the pointer to the boolean that will be updated according to user choice.
@@ -218,17 +218,17 @@ public:
 	void SetVarToUpdate_disableTerrainRestrictionChecks(bool *varToUpdate);
 	void SetVarToUpdate_lengthenCombatMode(long int *varToUpdate);
 private:
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblTitle;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtPlayerId;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnTriggers;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnAI;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnPER;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnTerrainEdit;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnVictoryCondition;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkAllowUnitOverlapping;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkDisableHillModeCheck;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkDisableTerrainRestrictions;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkLengthenCombatMode;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblTitle;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtPlayerId;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnTriggers;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnAI;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnPER;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnTerrainEdit;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnVictoryCondition;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAllowUnitOverlapping;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkDisableHillModeCheck;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkDisableTerrainRestrictions;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkLengthenCombatMode;
 	SC_INFO_POPUP_TO_OPEN popupToOpen;
 	int playerId;
 	bool *varToUpdate_allowUnitOverlapping;
@@ -247,8 +247,8 @@ public:
 	void OnBeforeClose(bool isCancel) override;
 	bool isForTriggers;
 private:
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtText;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblTitle;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtText;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblTitle;
 	long int maxLength;
 	char *bufferToWrite;
 };
@@ -263,9 +263,9 @@ public:
 	void AddPopupContent(const char *title, const char *desc, const char *initialInputValue, long int maxLength, bool readOnly);
 	void OnBeforeClose(bool isCancel) override;
 protected:
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtInput;
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *lblTitle;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtDescription;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtInput;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *lblTitle;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtDescription;
 	long int maxLength;
 	bool readOnly;
 };
@@ -340,8 +340,8 @@ public:
 private:
 	long int sizeX;
 	long int sizeY;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtSizeX;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtSizeY;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtSizeX;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtSizeY;
 };
 
 
@@ -356,13 +356,13 @@ private:
 	long int mapSizeX, mapSizeY;
 	char terrainId;
 	char elevation;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtMinPosX;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtMinPosY;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtMaxPosX;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtMaxPosY;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtTerrainId;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtElevation;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkSoften;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtMinPosX;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtMinPosY;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtMaxPosX;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtMaxPosY;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtTerrainId;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtElevation;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkSoften;
 };
 
 
@@ -372,9 +372,9 @@ public:
 	void _ResetPointers() override;
 	void _AddPopupContent() override;
 private:
-	ROR_STRUCTURES_10C::STRUCT_UI_COMBOBOX *cbxEventType;
-	ROR_STRUCTURES_10C::STRUCT_UI_COMBOBOX *cbxActionType;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtTriggerText;
+	AOE_STRUCTURES::STRUCT_UI_COMBOBOX *cbxEventType;
+	AOE_STRUCTURES::STRUCT_UI_COMBOBOX *cbxActionType;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtTriggerText;
 };
 
 class MapCopyPopup : public CustomPopup {
@@ -384,21 +384,21 @@ public:
 	void _AddPopupContent() override;
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool OnButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender) override;
+	bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) override;
 private:
 	long int initialPosX, initialPosY; // Coordinates under mouse when popup was opened
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnCopyZone;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnCopyAllMap;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *btnPaste;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtCopyFromX;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtCopyFromY;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtCopyToX;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtCopyToY;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtPasteToX;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtPasteToY;
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *chkIncludeUnits;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtCurrentBufferSize;
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *edtResultMessage;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCopyZone;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCopyAllMap;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnPaste;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtCopyFromX;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtCopyFromY;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtCopyToX;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtCopyToY;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtPasteToX;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtPasteToY;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkIncludeUnits;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtCurrentBufferSize;
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtResultMessage;
 
 	std::string GetBufferSizeText();
 };

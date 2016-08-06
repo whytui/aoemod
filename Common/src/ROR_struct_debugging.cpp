@@ -19,7 +19,7 @@ result = _STRINGIZE(x); \
 
 
 
-namespace ROR_STRUCTURES_10C {
+namespace AOE_STRUCTURES {
 
 	long int GuessRORStructureSize(void *pData) {
 		//if (((STRUCT_ACTION_ATTACK *)pData)->IsCheckSumValid()) { return "STRUCT_ACTION_ATTACK"; }
@@ -288,14 +288,14 @@ namespace ROR_STRUCTURES_10C {
 		BOOL ok = ReadProcessMemory(h, (void*)address, &buf4, 4, &readBytes);
 		if ((readBytes == 4) && (ok)) {
 			sprintf_s(outbuf, "0x%08X", buf4);
-			long int objsize = ROR_STRUCTURES_10C::GuessRORStructureSize(&buf4);
+			long int objsize = AOE_STRUCTURES::GuessRORStructureSize(&buf4);
 			if (objsize <= 0) { return outbuf; }
 			// Get the entire object (only useful for debugging with breakpoints)
 			char *objBuffer = (char*)malloc(objsize);
 			ok = ReadProcessMemory(h, (void*)address, objBuffer, objsize, &readBytes);
 			if (ok && (readBytes == objsize)) {
 				// Set a breakpoint at the end of GuessRORStructure to visualize object and its members.
-				res = ROR_STRUCTURES_10C::GuessRORStructure(objBuffer);
+				res = AOE_STRUCTURES::GuessRORStructure(objBuffer);
 			}
 			free(objBuffer);
 		}
@@ -363,7 +363,7 @@ namespace ROR_STRUCTURES_10C {
 		}
 		// Now get all data (columns)
 		for (int i = 0; i < 255; i++) {
-			ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *v = this->mapVisibilityInfoRows[i];
+			AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = this->mapVisibilityInfoRows[i];
 			if (v != NULL) {
 				if (!GetObjectFromRORData(this->handleROR, v, &this->mapVisibilityInfo[i])) {
 					return false;
@@ -486,7 +486,7 @@ namespace ROR_STRUCTURES_10C {
 	// Creates a temporary copy of desired unit (from its ID).
 	// Returns NULL if not found / failed.
 	// You MUST free the object when you no longer need it.
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *RORDebugger::GetUnitFromRORData(long int unitId, unsigned long int &out_RORAddress) {
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *RORDebugger::GetUnitFromRORData(long int unitId, unsigned long int &out_RORAddress) {
 		out_RORAddress = 0;
 		if (!this->handleROR) {
 			return NULL;
@@ -501,14 +501,14 @@ namespace ROR_STRUCTURES_10C {
 			}
 			if (out_RORAddress == NULL) { return NULL; }
 			// Identify the exact type of unit
-			ROR_STRUCTURES_10C::STRUCT_UNIT_BASE fakeUnitBase;
+			AOE_STRUCTURES::STRUCT_UNIT_BASE fakeUnitBase;
 			if (!GetObjectFromRORData(this->handleROR, out_RORAddress, &fakeUnitBase)) {
 				return NULL;
 			}
 			int unitObjSize = GetUnitStructRealSize(&fakeUnitBase);
 			if (unitObjSize <= 0) { return NULL; }
 			// Now get the full object (we know its exact size)
-			ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *resultUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)malloc(unitObjSize);
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *resultUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)malloc(unitObjSize);
 			if (!GetObjectFromRORData(this->handleROR, out_RORAddress, resultUnit)) {
 				free(resultUnit);
 				return NULL;
@@ -529,9 +529,9 @@ namespace ROR_STRUCTURES_10C {
 		}
 		this->RefreshMainGameStructs();
 		if (!this->gameGlobal.IsCheckSumValid()) { return NULL; }
-		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = this->GetUnitFromRORData(unitId, addr);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = this->GetUnitFromRORData(unitId, addr);
 		if (unit == NULL) { return ""; }
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE unitDef;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE unitDef;
 
 		unsigned long int pToRead = (unsigned long int) unit->ptrStructDefUnit;
 		if (unit) { free(unit); } // No longer needed
@@ -549,14 +549,14 @@ namespace ROR_STRUCTURES_10C {
 		}
 		std::string res = "";
 		long int *unitIdList = (long int*)malloc(sizeof(DWORD32) * elemCount);
-		if (ROR_STRUCTURES_10C::GetObjectFromRORData(this->handleROR, RORUnitIdArrayAddress, unitIdList, sizeof(DWORD32) * elemCount)) {
+		if (AOE_STRUCTURES::GetObjectFromRORData(this->handleROR, RORUnitIdArrayAddress, unitIdList, sizeof(DWORD32) * elemCount)) {
 			for (int i = 0; i < elemCount; i++) {
 				res += " ";
 				res += std::to_string(unitIdList[i]);
 				if (unitIdList[i] >= 0) {
 					unsigned long int a = NULL;
-					ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = GetUnitFromRORData(unitIdList[i], a);
-					ROR_STRUCTURES_10C::STRUCT_PLAYER tmpPlayer;
+					AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = GetUnitFromRORData(unitIdList[i], a);
+					AOE_STRUCTURES::STRUCT_PLAYER tmpPlayer;
 					res += "(";
 					if (unit && GetObjectFromRORData(this->handleROR, unit->ptrStructPlayer, &tmpPlayer)) {
 						res += "p";
@@ -577,7 +577,7 @@ namespace ROR_STRUCTURES_10C {
 	// Creates a temporary copy of desired unit definition (from its ID/player).
 	// Returns NULL if not found / failed.
 	// You MUST free the object when you no longer need it.
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *RORDebugger::GetUnitDefFromRORData(long int playerId, long int unitDefId,
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *RORDebugger::GetUnitDefFromRORData(long int playerId, long int unitDefId,
 		unsigned long int &out_RORAddress) {
 		out_RORAddress = 0;
 		if (!this->handleROR) {
@@ -586,7 +586,7 @@ namespace ROR_STRUCTURES_10C {
 		this->RefreshMainGameStructs();
 		if (!this->gameGlobal.IsCheckSumValid()) { return NULL; }
 		if ((playerId < 0) || (playerId > 8) || (unitDefId < 0)) { return NULL; }
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = &this->players[playerId];
+		AOE_STRUCTURES::STRUCT_PLAYER *player = &this->players[playerId];
 		if (unitDefId >= player->structDefUnitArraySize) { return NULL; } // important security to avoid reading out of table
 
 		unsigned long int pToRead = (unsigned long int) player->ptrStructDefUnitTable;
@@ -597,14 +597,14 @@ namespace ROR_STRUCTURES_10C {
 		if (out_RORAddress == NULL) { return NULL; }
 		
 		// Identify the exact type of unit definition
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE fakeUnitDefBase;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE fakeUnitDefBase;
 		if (!GetObjectFromRORData(this->handleROR, out_RORAddress, &fakeUnitDefBase)) {
 			return NULL;
 		}
 		int unitDefObjSize = GetUnitDefStructRealSize(&fakeUnitDefBase);
 		if (unitDefObjSize <= 0) { return NULL; }
 		// Now get the full object (we know its exact size)
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *resultUnitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)malloc(unitDefObjSize);
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *resultUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)malloc(unitDefObjSize);
 		if (!GetObjectFromRORData(this->handleROR, out_RORAddress, resultUnitDef)) {
 			free(resultUnitDef);
 			return NULL;

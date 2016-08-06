@@ -6,7 +6,7 @@
 // High word: bit mask per player for "explored"
 // Low word: bit mask per player for "fog visibility"
 // Lower bit is player 0 (gaia), 2nd=player1, etc
-ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int posX, long int posY) {
+AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int posX, long int posY) {
 	unsigned long int **pMapInfo = (unsigned long int **)AOE_OFFSETS::ADDR_MAP_VISIBILITY_INFO;
 	assert(pMapInfo != NULL);
 	assert(posX >= 0);
@@ -17,7 +17,7 @@ ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int po
 	unsigned long int *pMapInfoX = pMapInfo[posX];
 	assert(pMapInfoX != NULL);
 	if (pMapInfoX == NULL) { return 0; }
-	ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *result = (ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO*) &pMapInfoX[posY];
+	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *result = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*) &pMapInfoX[posY];
 	return result;
 }
 
@@ -30,7 +30,7 @@ bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY) {
 	assert(posX < 256); // TO DO: get exact map size
 	assert(posY < 256); // TO DO: get exact map size
 	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255) || (playerId < 0) || (playerId > 8)) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *v = (ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
+	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
 	return v->isFogVisibleForPlayer(playerId);
 }
 
@@ -42,14 +42,14 @@ bool IsExploredForPlayer(long int playerId, long int posX, long int posY) {
 	assert(posX < 256); // TO DO: get exact map size
 	assert(posY < 256); // TO DO: get exact map size
 	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255) || (playerId < 0) || (playerId > 8)) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO *v = (ROR_STRUCTURES_10C::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
+	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
 	return v->isExploredForPlayer(playerId);
 }
 
 
 // Returns a placement error number (ERROR_FOR_UNIT_CREATION) - 0 is OK for creating unit
-AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(ROR_STRUCTURES_10C::STRUCT_PLAYER * player,
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef, float posY, float posX, bool checkVisibility, bool checkHills,
+AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(AOE_STRUCTURES::STRUCT_PLAYER * player,
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef, float posY, float posX, bool checkVisibility, bool checkHills,
 	bool editorMode, bool checkAirModeAndHPBar, bool checkConflictingUnits) {
 	long int iCheckVisibility = checkVisibility ? 1 : 0;
 	long int iCheckHills = checkHills ? 1 : 0;
@@ -79,11 +79,11 @@ AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(RO
 
 
 // If UIObj is null, use current "global" screen positions.
-ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition(ROR_STRUCTURES_10C::STRUCT_ANY_UI *UIObj) {
-	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
+AOE_STRUCTURES::STRUCT_POSITION_INFO GetMousePosition(AOE_STRUCTURES::STRUCT_ANY_UI *UIObj) {
+	AOE_STRUCTURES::STRUCT_POSITION_INFO result;
 	result.posX = -1;
 	result.posY = -1;
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = UIObj;
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = UIObj;
 	if (!currentUI) {
 		currentUI = AOE_GetCurrentScreen();
 	}
@@ -100,16 +100,16 @@ ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition(ROR_STRUCTURES_10C::ST
 }
 
 // Get current mouse position, in game zone, if found. Returns (-1, -1) if not found.
-ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition() {
-	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
+AOE_STRUCTURES::STRUCT_POSITION_INFO GetMousePosition() {
+	AOE_STRUCTURES::STRUCT_POSITION_INFO result;
 	result.posX = -1;
 	result.posY = -1;
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
 	assert(currentUI);
 	if (!settings || !currentUI) { return result; }
-	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
+	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
 	if (!gameZone || !gameZone->IsCheckSumValid()) {
 		return result;
 	}
@@ -124,14 +124,14 @@ ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetMousePosition() {
 bool GetGamePositionUnderMouse(float *posX, float *posY) {
 	*posX = -1;
 	*posY = -1;
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
 	assert(currentUI);
 	if (!settings || !currentUI) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
+	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
 	if (!gameZone || !gameZone->IsCheckSumValid()) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO mousePos = GetMousePosition(gameZone);
+	AOE_STRUCTURES::STRUCT_POSITION_INFO mousePos = GetMousePosition(gameZone);
 
 	// Analog to 0x5145D1
 	if (mousePos.posX < gameZone->unknown_08C_minPosX) { return false; }
@@ -141,7 +141,7 @@ bool GetGamePositionUnderMouse(float *posX, float *posY) {
 	long int relativeMousePosX = mousePos.posX - gameZone->unknown_08C_minPosX;
 	long int relativeMousePosY = mousePos.posY - gameZone->unknown_090_minPosY;
 
-	ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_POSITION_INFO gamePos;
+	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO gamePos;
 	long int unknown_res = AOE_GetGamePosFromMousePos(gameZone, &gamePos, relativeMousePosX, relativeMousePosY);
 	if (unknown_res > 0) { // really not sure of this. Often 0x33 ?
 		*posX = gamePos.posX;
@@ -153,7 +153,7 @@ bool GetGamePositionUnderMouse(float *posX, float *posY) {
 
 // Collects info at mouse position : game position, underlying unit...
 // WARNING: does not return all units
-bool AOE_GetGameInfoUnderMouse(long int maxInteractionMode, long int mousePosX, long int mousePosY, ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_POSITION_INFO *posInfo) {
+bool AOE_GetGameInfoUnderMouse(long int maxInteractionMode, long int mousePosX, long int mousePosY, AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO *posInfo) {
 	STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
 	if ((posInfo == NULL) || (!gameZone || !gameZone->IsCheckSumValid())) { return false; }
 	const unsigned long int addr = 0x51A650;
@@ -176,8 +176,8 @@ bool AOE_GetGameInfoUnderMouse(long int maxInteractionMode, long int mousePosX, 
 
 // Returns "game" coordinates under mouse position (rounded to int).
 // If position is not valid, posX/posY are set to -1.
-ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo() {
-	ROR_STRUCTURES_10C::STRUCT_POSITION_INFO result;
+AOE_STRUCTURES::STRUCT_POSITION_INFO GetGameMousePositionInfo() {
+	AOE_STRUCTURES::STRUCT_POSITION_INFO result;
 	float x, y;
 	GetGamePositionUnderMouse(&x, &y);
 	result.posX = (long int)x;
@@ -188,9 +188,9 @@ ROR_STRUCTURES_10C::STRUCT_POSITION_INFO GetGameMousePositionInfo() {
 
 // Get unit at (mouse) position, using AOE methods.
 // Warning, this impacts the global variables in 0x7D1CF8
-ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, INTERACTION_MODES maxInteractionMode, bool allowTempUnits) {
+AOE_STRUCTURES::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, INTERACTION_MODES maxInteractionMode, bool allowTempUnits) {
 	if ((mousePosX < 0) || (mousePosY < 0)) { return NULL; }
-	ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
+	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
 	if (!gameZone || !gameZone->IsCheckSumValid()) { return NULL; }
 	long int i_allowTempUnits = allowTempUnits ? 1 : 0;
 	long int result;
@@ -218,7 +218,7 @@ ROR_STRUCTURES_10C::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long
 // Updates map data to make nearby tiles appear correctly when altitude is not constant (after a manual modification)
 // This does not change altitude values. Altitudes will be softened ONLY if consecutive tiles have maximum 1 altitude difference.
 // This does NOT soften terrain borders, only altitudes !
-void AOE_SoftenAltitudeDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
+void AOE_SoftenAltitudeDifferences(AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *mapInfo,
 	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY) {
 	if (!mapInfo || !mapInfo->IsCheckSumValid()) {
 		return;
@@ -239,7 +239,7 @@ void AOE_SoftenAltitudeDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *map
 
 // Updates map data to make nearby tiles appear correctly when terrain is not constant (after a manual modification)
 // This does NOT soften altitude borders, only terrain !
-void AOE_SoftenTerrainDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
+void AOE_SoftenTerrainDifferences(AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *mapInfo,
 	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY) {
 	if (!mapInfo || !mapInfo->IsCheckSumValid()) {
 		return;
@@ -276,7 +276,7 @@ void AOE_SoftenTerrainDifferences(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapI
 }
 
 // Refresh and smoothen terrain+altitude in given zone. If all position arguments are -1, all map is treated.
-void RefreshTerrainAfterManualChange(ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo,
+void RefreshTerrainAfterManualChange(AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *mapInfo,
 	long int minPosX, long int minPosY, long int maxPosX, long int maxPosY) {
 	if (!mapInfo || !mapInfo->IsCheckSumValid()) {
 		return;

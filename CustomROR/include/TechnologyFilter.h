@@ -6,7 +6,7 @@
 #include <AOE_const_functional.h>
 
 
-using namespace ROR_STRUCTURES_10C;
+using namespace AOE_STRUCTURES;
 using namespace AOE_CONST_FUNC;
 
 namespace AOE_TECHNOLOGIES {

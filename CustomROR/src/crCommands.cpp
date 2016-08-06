@@ -268,7 +268,7 @@ void CustomRORCommand::LoadCustomDrsFiles() {
 
 
 // Get custom empires.dat filename (with relative path)
-const char *CustomRORCommand::GetCustomEmpiresDatRelativeFileName(ROR_STRUCTURES_10C::STRUCT_COMMAND_LINE_INFO *cmdLineInfo) {
+const char *CustomRORCommand::GetCustomEmpiresDatRelativeFileName(AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO *cmdLineInfo) {
 	if (!this->crInfo->configInfo.customEmpiresDatRelativePath.empty()) { // TODO use dedicated/correct config
 		const char *filename = this->crInfo->configInfo.customEmpiresDatRelativePath.c_str();
 		if (CheckFileExistence(filename)) {
@@ -299,7 +299,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 	outputBuffer[0] = 0;
 
 	if (!*command) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *gameSettings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = *ROR_gameSettings;
 
 	if (!_strnicmp(command, PREFIX_SET, sizeof(PREFIX_SET))) {
 		// This is a "set ___=___" command.
@@ -340,10 +340,10 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 			int newMaxPop = atoi(subCmd);
 			if ((newMaxPop > 0) && (newMaxPop <= 255)) {
 				if (SetMaxPopulationGetterInSPGames(newMaxPop)) {
-					ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+					AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 					if (global && global->IsCheckSumValid() && global->ptrPlayerStructPtrTable) {
 						for (int i = 0; i < global->playerTotalCount; i++) {
-							ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
+							AOE_STRUCTURES::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
 							if (player && player->IsCheckSumValid()) {
 								player->SetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POPULATION_LIMIT, (float)newMaxPop);
 							}
@@ -360,8 +360,8 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 	if (!_strnicmp(command, "select=", 7) && (command[7] >= '0') && (command[7] <= '9')) {
 		char *sUnitId = command + 7;
 		short int id = StrToInt(sUnitId, -1);
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
-		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = GetUnitStruct(id);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		AOE_STRUCTURES::STRUCT_UNIT *unit = GetUnitStruct(id);
 		AOE_clearSelectedUnits(player);
 		if (unit && unit->IsCheckSumValid()) {
 			AOE_selectUnit(player, unit, true);
@@ -377,12 +377,12 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 	// A good nice trick : add any unit at any (explored) location using scenario editor feature... in game !
 	// Type addXXX where XXX is a unitDefId.
 	if (!_strnicmp(command, "add", 3) && (command[3] >= '0') && (command[3] <= '9')) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 		assert(player != NULL);
 		char *aid = command + 3;
 		short int id = atoi(aid);
 		if ((id == 0) && (*aid != '0')) { id = -1; }
-		ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = GetUnitDefStruct(player, id);
+		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = GetUnitDefStruct(player, id);
 		if (player && player->IsCheckSumValid() && unitDef && unitDef->IsCheckSumValid() && gameSettings->isSinglePlayer) {
 			gameSettings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_EDITOR_SET_UNIT_LOCATION;
 			gameSettings->editorUserSelectedUnitDefId = id;
@@ -394,8 +394,8 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		command += 5;
 		int playerId = atoi(command);
 		if ((playerId == 0) && (*command != '0')) { playerId = -1; }
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 		if (global && global->IsCheckSumValid() && (playerId > 0) && (playerId < global->playerTotalCount)) {
 			player = GetPlayerStruct(playerId);
 		}
@@ -412,14 +412,14 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 	// BETA - TEST
 	if (!_strnicmp(command, "test", 5)) {
 		assert(gameSettings != NULL);
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = gameSettings->ptrGlobalStruct;
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = gameSettings->ptrGlobalStruct;
 		//short int humanPlayerId = global->humanPlayerId;
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
+		AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 		assert(humanPlayer != NULL);
 
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving =
-			//(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 62);
-			(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, CST_UNITID_SHORT_SWORDSMAN);
+		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDefLiving =
+			//(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 62);
+			(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, CST_UNITID_SHORT_SWORDSMAN);
 		if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass()) {
 			unitDefLiving->availableForPlayer = 1;
 			unitDefLiving->trainButton = 13;
@@ -427,7 +427,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 			//unitDefLiving->blastLevel = AOE_CONST_FUNC::BLAST_LEVELS::CST_BL_DAMAGE_RESOURCES;
 			//unitDefLiving->blastRadius = 5;
 		}
-		unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 227);
+		unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 227);
 		if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass()) {
 			unitDefLiving->availableForPlayer = 1;
 			unitDefLiving->trainButton = 27;
@@ -513,7 +513,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 	// TEST temp
 	if (strcmp(command, "b") == 0) {
 		long int playerId = 2;
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		STRUCT_AI_UNIT_LIST_INFO *l = &player->ptrAIStruct->structInfAI.unknown_0F0;
 		int c = l->usedElements;
@@ -522,12 +522,12 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 			if (id == -1) { id = -2; }
 		}
 
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		assert((global != NULL) && global->IsCheckSumValid());
 		if (!global || !global->IsCheckSumValid()) { return; }
 		assert((global->gameMapInfo != NULL) && (global->gameMapInfo->IsCheckSumValid()));
 		if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return; }
-		/*ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
+		/*AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
 		mapInfo->GetTileInfo(1, 2)->terrainData.SetTerrainId(4);
 		mapInfo->GetTileInfo(10, 2)->terrainData.SetTerrainId(6);
 		mapInfo->GetTileInfo(20, 2)->terrainData.SetTerrainId(10);
@@ -542,18 +542,18 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 	}
 	if (strcmp(command, "a") == 0) {
 		long int playerId = 1;
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		
-		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)FindUnitWithShortcutNumberForPlayer(player, 1);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)FindUnitWithShortcutNumberForPlayer(player, 1);
 		if (unitBase) {
 			unitBase->AOE_destructor(true);
 			return;
 		}
-		ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *type50 = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *)unitBase;
+		AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *type50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)unitBase;
 		if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) { return; }
 		if (unitBase->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING) { return; }
-		ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *bld = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING*)unitBase;
+		AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)unitBase;
 		if (!bld->ptrHumanTrainQueueInformation) { return; }
 		bld->unknown_1C4 = 2;
 		bld->ptrHumanTrainQueueInformation[1].unitCount = 2;
@@ -567,13 +567,13 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		v.push_back(77);
 		//GetValidOrderedResearchesListWithDependencies(player, v);
 
-		ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
-		ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
+		AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
+		AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
 		assert(tacAI->IsCheckSumValid());
 		//float posX, posY;
 		//bool ok = GetGamePositionUnderMouse(&posX, &posY);
 		//AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_WORK, 83, false, "eee");
-		//SetFarmCurrentTotalFood((ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING*) (player->custom_selectedUnits[0]), 1);
+		//SetFarmCurrentTotalFood((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*) (player->custom_selectedUnits[0]), 1);
 	}
 
 	// TEST strategy
@@ -584,7 +584,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 
 	// TEST conversion
 	if (strcmp(command, "conversion") == 0) {
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		assert(global != NULL);
 		for (int i = 1; i < global->playerTotalCount; i++) {
 			int FOR_attempt = this->crInfo->activeConversionAttemptsCount[i];
@@ -645,15 +645,15 @@ void CustomRORCommand::ShowF11_zone() {
 
 // UpdatedValue: if <0, it is ignored
 void CustomRORCommand::UpdateWorkRateWithMessage(short int DATID, float updatedValue) {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) {
 		return;
 	}
 	bool firstOne = true;
 	for (int civId = 0; civId < global->civCount; civId++) {
-		ROR_STRUCTURES_10C::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civId];
+		AOE_STRUCTURES::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civId];
 		if (civDef && civDef->IsCheckSumValid()) {
-			ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = civDef->GetUnitDef(DATID);
+			AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = civDef->GetUnitDef(DATID);
 			char msgBuffer[100];
 			if (unitDef && unitDef->IsCheckSumValid()) {
 				if (firstOne) { // Message only once
@@ -677,13 +677,13 @@ void CustomRORCommand::UpdateWorkRateWithMessage(short int DATID, float updatedV
 // Update a technology that increases work rate: change value used to increase.
 // UpdatedValue: if <0, it is ignored
 void CustomRORCommand::UpdateTechAddWorkRateWithMessage(short int techId, short int unitDefId, float updatedValue) {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) {
 		return;
 	}
-	ROR_STRUCTURES_10C::STRUCT_TECH_DEF_INFO *techInfo = global->technologiesInfo;
+	AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *techInfo = global->technologiesInfo;
 	if (techInfo && techInfo->IsCheckSumValid() && techInfo->technologyCount >= 111) {
-		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = &techInfo->ptrTechDefArray[techId];
+		AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = &techInfo->ptrTechDefArray[techId];
 		for (int i = 0; i < techDef->effectCount; i++) {
 			if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) &&
 				(techDef->ptrEffects[i].effectUnit == unitDefId) &&
@@ -706,7 +706,7 @@ void CustomRORCommand::UpdateTechAddWorkRateWithMessage(short int techId, short 
 // This is called just after empires.dat is loaded.
 // Warning: changes here are applied on civ definitions are done once and for all, and impact all games.
 void CustomRORCommand::OnAfterLoadEmpires_DAT() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global);
 	if (!global || !global->IsCheckSumValid()) { return; }
 	// Show hidden units in editor
@@ -715,10 +715,10 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 	if (this->crInfo->configInfo.showHiddenUnitsInEditor > 0) {
 		bool excludeAnnoyingUnits = (this->crInfo->configInfo.showHiddenUnitsInEditor == 1);
 		for (int civid = 0; civid < global->civCount; civid++) {
-			ROR_STRUCTURES_10C::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civid];
+			AOE_STRUCTURES::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civid];
 			if (civDef && civDef->IsCheckSumValid()) {
 				for (int datid = 0; datid < civDef->civUnitDefCount; datid++) {
-					ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = civDef->GetUnitDef(datid);
+					AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = civDef->GetUnitDef(datid);
 					// If config says to exclude annoying units, test if current unitDef is one of banned ones
 					if (unitDef && unitDef->IsCheckSumValid()) {
 						bool doNotShowThisOne = excludeAnnoyingUnits && (
@@ -744,12 +744,12 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 	// Note that adding this at game start does not work, it's too late.
 	if (this->crInfo->configInfo.fixInvisibleTree) {
 		for (int civid = 0; civid < global->civCount; civid++) {
-			ROR_STRUCTURES_10C::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civid];
+			AOE_STRUCTURES::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civid];
 			if (civDef && civDef->IsCheckSumValid()) {
 				if (civDef->civUnitDefCount > 393) {
 					// add condition SLP=799 ?
-					ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDefDest = civDef->GetUnitDef(393); // this tree has graphics with invalid SLP (799)
-					ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDefSrc = civDef->GetUnitDef(391);
+					AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDefDest = civDef->GetUnitDef(393); // this tree has graphics with invalid SLP (799)
+					AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDefSrc = civDef->GetUnitDef(391);
 					if (unitDefDest && unitDefSrc && unitDefDest->IsCheckSumValid() && unitDefSrc->IsCheckSumValid()) {
 						unitDefDest->ptrStandingGraphics = unitDefSrc->ptrStandingGraphics;
 					}
@@ -760,7 +760,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 
 	// Fix gaia attack alert sound once and for all (can be applied on all games, including MP/Scenario, doesn't affect anything).
 	if (global->civCount > 0) {
-		ROR_STRUCTURES_10C::STRUCT_DEF_CIVILIZATION *civDefGaia = global->civilizationDefinitions[0];
+		AOE_STRUCTURES::STRUCT_DEF_CIVILIZATION *civDefGaia = global->civilizationDefinitions[0];
 		if (civDefGaia->civResourcesCount > CST_RES_ORDER_ATTACK_ALERT_SOUND_ID) {
 			civDefGaia->SetResourceValue(CST_RES_ORDER_ATTACK_ALERT_SOUND_ID, 10);
 		}
@@ -796,9 +796,9 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_ARTISANSHIP, CST_UNITID_LUMBERJACK, lumberjackBonus); // +20% instead of +36% (+0.2 / 0.55 initial)
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_CRAFTSMANSHIP, CST_UNITID_LUMBERJACK, lumberjackBonus); // +20% instead of +36% (+0.2 / 0.55 initial)
 		// Palmyra tech tree: adjust villager work rate bonuses
-		ROR_STRUCTURES_10C::STRUCT_TECH_DEF_INFO *techDefInfo = global->technologiesInfo;
+		AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *techDefInfo = global->technologiesInfo;
 		if (techDefInfo && techDefInfo->IsCheckSumValid() && (techDefInfo->technologyCount > CST_TCH_TECH_TREE_PALMYRA)) {
-			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = &techDefInfo->ptrTechDefArray[CST_TCH_TECH_TREE_PALMYRA];
+			AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = &techDefInfo->ptrTechDefArray[CST_TCH_TECH_TREE_PALMYRA];
 			for (int i = 0; i < techDef->effectCount; i++) {
 				if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) &&
 					(techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_WORK_RATE) && // work rate
@@ -812,7 +812,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 					msg += " to ";
 					msg += std::to_string(newValue);
 					msg += " for ";
-					ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = NULL;
+					AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = NULL;
 					if (global->civCount > 1) { // Use an arbitrary civ, just to get unit name.
 						unitDef = global->civilizationDefinitions[0]->GetUnitDef(techDef->ptrEffects[i].effectUnit);
 					}
@@ -863,7 +863,7 @@ void CustomRORCommand::OnGameStart() {
 	this->DisableWaterUnitsIfNeeded();
 
 	// Fix fire galley icon on post-iron age start games (research done notification - for trireme - is NOT triggered in such case !)
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	if (!settings) { return; } // Should never happen
 	if (settings->initialAgeChoice == AOE_CONST_INTERNAL::GAME_INITIAL_AGES::GIA_POST_IRON) { // Post-iron age startup
@@ -906,7 +906,7 @@ void CustomRORCommand::OnGameStart() {
 	// Force shared exploration => always ON (if config says so and not in MP)
 	// Does not impact scenarios
 	if (!settings->isCampaign && !settings->isScenario) {
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 		if (this->crInfo->configInfo.allyExplorationIsAlwaysShared &&
 			!settings->isMultiplayer && global && global->IsCheckSumValid()) {
 			for (int i = 1; i < global->playerTotalCount; i++) {
@@ -928,7 +928,7 @@ void CustomRORCommand::OnGameStart() {
 // Warning: most game structures are not available yet ! It is recommended to only work with STRUCT_GAME_SETTINGS, nothing else.
 // Return false if failed.
 bool CustomRORCommand::ApplyCustomizationOnRandomGameSettings() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
 	if (settings->isCampaign || settings->isSavedGame || settings->isScenario) {
@@ -942,7 +942,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameSettings() {
 
 
 // Set a SN number value in both strategy AI and tac AI.
-void CustomRORCommand::SetSNNumberInStrategyAndTacAI(ROR_STRUCTURES_10C::STRUCT_AI *ai, AOE_CONST_FUNC::SN_NUMBERS snNumber, long int value) {
+void CustomRORCommand::SetSNNumberInStrategyAndTacAI(AOE_STRUCTURES::STRUCT_AI *ai, AOE_CONST_FUNC::SN_NUMBERS snNumber, long int value) {
 	if (!ai || !ai->IsCheckSumValid()) { return; }
 	assert((snNumber >= 0) && (snNumber <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER));
 	if ((snNumber < 0) || (snNumber > AOE_CONST_FUNC::CST_LAST_SN_NUMBER)) { return; }
@@ -956,10 +956,10 @@ void CustomRORCommand::SetSNNumberInStrategyAndTacAI(ROR_STRUCTURES_10C::STRUCT_
 // Does NOT apply to scenario/campaign/load saved game.
 // Return false if failed.
 bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid()) { return false; }
 	
 	// Check game type : allow only random map & deathmatch
@@ -990,7 +990,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 		}
 	}
 	for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		for (int rt = 0; rt < 4; rt++) {
 			player->SetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES) rt, (float)initialResources[rt]);
 		}
@@ -998,9 +998,9 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 
 	// SN Numbers
 	for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (player && player->IsCheckSumValid() && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
-			ROR_STRUCTURES_10C::STRUCT_AI *ai = player->ptrAIStruct;
+			AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
 			
 			if (isDM) {
 				// Deathmatch
@@ -1047,7 +1047,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 	// Initial diplomacy (default=enemy, not neutral) - only if enabled in config
 	if (this->crInfo->configInfo.noNeutralInitialDiplomacy) {
 		for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 			if (player && player->IsCheckSumValid()) {
 				if (settings->teamNumbers[playerId - 1] == 1) { // Note: teamNumber 1 means "no team"
 					// No team: set default diplomacy (game default is neutral, can be set to enemy to avoid all players being against human)
@@ -1074,7 +1074,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 			traceMessageHandler.WriteMessage("Strategy generation for deathmatch games is not supported yet");
 		} else {
 			for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
-				ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+				AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 				if (player && player->IsCheckSumValid()) {
 					STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(this->crInfo, player);
 					sb.CreateStrategyFromScratch();
@@ -1089,7 +1089,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 
 // This is called while scenarioInfo structure is read from a file
 // Scenario texts (including players strategies) havealready been read, but not other information, be careful.
-void CustomRORCommand::InitScenarioInfoTextData(ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scenarioInfo) {
+void CustomRORCommand::InitScenarioInfoTextData(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scenarioInfo) {
 	this->ReloadTriggersFromGameData(scenarioInfo);
 
 	for (int playerId = 0; playerId < 9; playerId++) {
@@ -1105,7 +1105,7 @@ void CustomRORCommand::InitScenarioInfoTextData(ROR_STRUCTURES_10C::STRUCT_SCENA
 void CustomRORCommand::InitMyGameInfo() {
 	this->crInfo->ResetVariables();
 	// Prevent 0% speed at game startup (occurs because of rounding in registry saved value)
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid() && (global->gameSpeed == 0)) {
 		global->gameSpeed = 1;
 	}
@@ -1125,16 +1125,16 @@ bool CustomRORCommand::IsImproveAIEnabled(int playerId) {
 
 // Disable AI flags for human players, based on game initial settings (to be used at game startup)
 void CustomRORCommand::DisableAIFlagsForHuman() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
 
 	bool isSinglePlayer = !IsMultiplayer();
 
-	ROR_STRUCTURES_10C::STRUCT_MP_COMMUNICATION *unknownStruct = *(ROR_STRUCTURES_10C::STRUCT_MP_COMMUNICATION **)AOE_OFFSETS::ADDR_MP_COMM_STRUCT;
+	AOE_STRUCTURES::STRUCT_MP_COMMUNICATION *unknownStruct = *(AOE_STRUCTURES::STRUCT_MP_COMMUNICATION **)AOE_OFFSETS::ADDR_MP_COMM_STRUCT;
 	assert(unknownStruct != NULL);
 	int aValidAIPlayer = -1;
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
 		bool thisPlayerIsHuman = (isSinglePlayer && (loopPlayerId == global->humanPlayerId)) || // SP: use global struct's human playerId: it is always reliable even in loaded games
 			(!isSinglePlayer && (unknownStruct->playerTypes[loopPlayerId] == 2)); // MP: use initial setting from "common MP struct". This is not reliable for saved games but OK in MP games.
 		if (thisPlayerIsHuman) {
@@ -1152,12 +1152,12 @@ void CustomRORCommand::DisableAIFlagsForHuman() {
 
 // Restore AI flags based on human-controlled playerID (to be used in SP games only)
 void CustomRORCommand::RestoreAllAIFlags() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
 	
 	int aValidAIPlayer = -1;
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
 		if (loopPlayerId == global->humanPlayerId) {
 			player->isComputerControlled = 0;
 			player->SetCustomAIFlag(0);
@@ -1182,10 +1182,10 @@ void CustomRORCommand::RestoreAllAIFlags() {
 // This enables AI flags for all players
 void CustomRORCommand::SetAllAIFlags() {
 	if (IsMultiplayer()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
 		if (player->isComputerControlled == 0) {
 			// Player was NOT AI-controlled. We need to update its strategy with (potentially) human-created units
 			this->CheckAIWhenEnablingAIControl(player);
@@ -1199,7 +1199,7 @@ void CustomRORCommand::SetAllAIFlags() {
 // Change human control to another player and set AI flags accordingly (if updateAIFlags is true)
 void CustomRORCommand::ChangeControlledPlayer(int playerId, bool updateAIFlags) {
 	if ((playerId < 0) || (playerId > 8)) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 	// Do not switch to defeated (or invalid) player
 	if (!player || !player->IsCheckSumValid() || (player->aliveStatus == 2)) { return; }
 	_asm {
@@ -1242,17 +1242,17 @@ void CustomRORCommand::CheckAIWhenEnablingAIControl(int playerId) {
 // Call this when changing a player from "AI control" disabled to enabled
 // This will run various actions to fix strategy, etc (example: do not build buildings human already built).
 // The method will do nothing if player is NULL or if its AI structure is NULL.
-void CustomRORCommand::CheckAIWhenEnablingAIControl(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+void CustomRORCommand::CheckAIWhenEnablingAIControl(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	UpdateStrategyWithUnreferencedExistingUnits(player);
 }
 
 
 // This fixes nextStrategyAIExecutionCounter flag for all players (useful for loaded games)
 void CustomRORCommand::FixGameStartAIInitForPlayers() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
 		if ((player->GetAIStruct() != NULL) && !this->FindIfGameStartStrategyInitHasBeenDone(player)) {
 			// It seems we found a player that has not had his "game start AI init", including addition of dynamic strategy elements.
 			// Force the flag to trigger it now (in fact, init will be triggered when AI control is enabled).
@@ -1273,7 +1273,7 @@ bool CustomRORCommand::ManageAIFileSelectionForPlayer(char civilizationId, char 
 	assert(aiFileBuffer != NULL);
 	if (!aiFileBuffer) { return false; }
 
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
 	assert(gameSettings != NULL);
 	CivilizationInfo *civ = this->crInfo->configInfo.GetCivInfo(civilizationId);
 	if (gameSettings->isDeathMatch) {
@@ -1315,11 +1315,11 @@ bool CustomRORCommand::ManageAIFileSelectionForPlayer(char civilizationId, char 
 // This happens only once ! Once an objects has been discovered, this event is never triggered again.
 // Return true if the unit must NOT be captured
 // Default: return false (normal ROR treatments)
-bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(ROR_STRUCTURES_10C::STRUCT_UNIT *beingSeenUnit, ROR_STRUCTURES_10C::STRUCT_PLAYER *actorPlayer) {
+bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT_UNIT *beingSeenUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
 	if (!beingSeenUnit || !beingSeenUnit->IsCheckSumValid()) {
 		return false;
 	}
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = beingSeenUnit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = beingSeenUnit->ptrStructDefUnit;
 	if (!unitDef || !unitDef->IsCheckSumValid()) {
 		return false;
 	}
@@ -1347,9 +1347,9 @@ bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(ROR_STRUCTURES_10C::ST
 // Returns true if we think this init has been done. False otherwise.
 // Warning: this initialization adds resources (SN numbers 8A-8D) to the player, so it must not be run several times !
 // That's why when unsure this returns true (including invalid cases)
-bool CustomRORCommand::FindIfGameStartStrategyInitHasBeenDone(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+bool CustomRORCommand::FindIfGameStartStrategyInitHasBeenDone(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player) { return true; }
-	ROR_STRUCTURES_10C::STRUCT_AI *mainAI = player->GetAIStruct();
+	AOE_STRUCTURES::STRUCT_AI *mainAI = player->GetAIStruct();
 	if (!mainAI) { return true; }
 	if (FindElementInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_HOUSE) < 0) {
 		// Our current criterion is "no house = not initialized". Can we do better ?
@@ -1362,15 +1362,15 @@ bool CustomRORCommand::FindIfGameStartStrategyInitHasBeenDone(ROR_STRUCTURES_10C
 
 // Overloads the "tactical AI update" event that occurs regularly for each AI player.
 // For the algorithm to work well, requires also "FixUnitIdForInProgressBuilding", "FixResetStratElemForUnitId"
-void CustomRORCommand::ManageTacAIUpdate(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
+void CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 	assert(ai && ai->IsCheckSumValid());
 	if (!ai || !ai->IsCheckSumValid()) { return; }
 	assert(ai->structTacAI.IsCheckSumValid());
 	// Get some important / useful objects
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = ai->ptrStructPlayer;
-	ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_PLAYER *player = ai->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
 	assert(globalStruct && globalStruct->IsCheckSumValid());
 	assert(gameSettings && gameSettings->IsCheckSumValid());
 	assert(player && player->IsCheckSumValid());
@@ -1420,14 +1420,14 @@ void CustomRORCommand::ManageTacAIUpdate(ROR_STRUCTURES_10C::STRUCT_AI *ai) {
 
 
 // Entry point aftre a strategy element has been added in buildAI
-void CustomRORCommand::AfterAddElementInStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI, 
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *posToAdd, int countAdded) {
+void CustomRORCommand::AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, 
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *posToAdd, int countAdded) {
 	assert(posToAdd != NULL);
 	assert(posToAdd->IsCheckSumValid());
 	if (!posToAdd || !posToAdd->IsCheckSumValid()) { return; }
 
 	int insertionPos = 0;
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = buildAI->fakeFirstStrategyElement.next;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = buildAI->fakeFirstStrategyElement.next;
 	while (curElem && (curElem != &buildAI->fakeFirstStrategyElement) && (curElem != posToAdd) ) {
 		insertionPos++;
 		curElem = curElem->next;
@@ -1435,7 +1435,7 @@ void CustomRORCommand::AfterAddElementInStrategy(ROR_STRUCTURES_10C::STRUCT_BUIL
 	// Here curElem is == posToAdd (if found)
 
 	for (int i = 0; i < countAdded; i++) {
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *newElem = curElem->next;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *newElem = curElem->next;
 		// Try to update strategy if there is an "unreferenced" existing unit that match newly-added element
 		UpdateStrategyWithUnreferencedExistingUnits(buildAI, newElem->unitDAT_ID, newElem->elementType);
 
@@ -1450,10 +1450,10 @@ void CustomRORCommand::AfterAddElementInStrategy(ROR_STRUCTURES_10C::STRUCT_BUIL
 
 
 // Analyze strategy and fixes what's necessary. Called every <crInfo.configInfo.tacticalAIUpdateDelay> seconds.
-void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
+void CustomRORCommand::AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	// Exit if AI improvement is not enabled.
 	if (!this->IsImproveAIEnabled(buildAI->commonAIObject.playerId)) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	bool difficultyIsEasy = (settings->difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY); // True for easy / easiest
 	if (difficultyIsEasy) { return; } // Do not improve strategy in easy levels.
@@ -1461,14 +1461,14 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 	assert(buildAI != NULL);
 	assert(buildAI->IsCheckSumValid());
 
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstStratElem = &buildAI->fakeFirstStrategyElement;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstStratElem = &buildAI->fakeFirstStrategyElement;
 	if (fakeFirstStratElem == NULL) { return; } // Just a security
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstStratElem->next;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstStratElem->next;
 	assert(buildAI->mainAI != NULL);
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
 	assert(player != NULL);
 
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *elemMainTownCenter = NULL; // Main town center
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *elemMainTownCenter = NULL; // Main town center
 	int townCentersCount = 0; // Total number of town centers.
 	bool foundCounter_one = false; // set to true if we passed the "counter=1" element. Allow us to identify "panic units" from normal strategy units
 	int currentPopulation = 0; // Does not count limited-retrains units
@@ -1484,13 +1484,13 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 	bool foundToolWorking = false;
 	bool foundDomestication = false;
 	//bool foundWatchTower = false, foundSentryTower = false, foundGuardTower = false, foundBallistaTower = false;
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *resWatchTower = NULL, *resSentryTower = NULL, *resGuardTower = NULL, *resBallistaTower = NULL;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *resWatchTower = NULL, *resSentryTower = NULL, *resGuardTower = NULL, *resBallistaTower = NULL;
 	bool foundBallistics = false;
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *wonder = NULL;
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *lastNonTowerElement = fakeFirstStratElem;
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *goodDevelopmentPointElement = NULL; // Represents the location in strategy where we can assume player is strong enough to insert optional researches. Be careful, AI can skip a certain number of items (10 according to SN numbers)
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *stratElem_bronzeAge = NULL;
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *customRorMaxPopBegin = GetCustomRorMaxPopulationBeginStratElem(buildAI);
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *wonder = NULL;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *lastNonTowerElement = fakeFirstStratElem;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *goodDevelopmentPointElement = NULL; // Represents the location in strategy where we can assume player is strong enough to insert optional researches. Be careful, AI can skip a certain number of items (10 according to SN numbers)
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem_bronzeAge = NULL;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *customRorMaxPopBegin = GetCustomRorMaxPopulationBeginStratElem(buildAI);
 	float *resources = (float *)player->ptrResourceValues;
 
 	// Do only 1 loop on strategy and collect all necessary information.
@@ -1597,8 +1597,8 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 		currentStratElem = currentStratElem->next;
 	}
 
-	//ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *endElement; // the element before which to insert, for elements we want to add at the end.
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *optionalsLocation; // the element before which to insert, for optionals elements.
+	//AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *endElement; // the element before which to insert, for elements we want to add at the end.
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *optionalsLocation; // the element before which to insert, for optionals elements.
 	if (goodDevelopmentPointElement) {
 		optionalsLocation = goodDevelopmentPointElement;
 	} else {
@@ -1631,7 +1631,7 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 	// We always add wheel if available in tech tree (and if strategy goes to bronze, at least).
 	if (!foundWheel && canGoToBronzeAge && IsResearchRelevantForStrategy(player, CST_RSID_WHEEL)) {
 		//AddUnitInStrategy_before(buildAI, optionalsLocation, -1, CST_UNITID_MARKET, AIUCTech, CST_RSID_WHEEL, player, "customROR-Wheel");
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *tmpElemForWheel = stratElem_bronzeAge;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *tmpElemForWheel = stratElem_bronzeAge;
 		// get element AFTER bronze to insert before it
 		// Indeed, to add researches, we must use "AddUnitInStrategy_before" method, no "AddUnitInStrategy".
 		if (tmpElemForWheel) { tmpElemForWheel = tmpElemForWheel->next; }
@@ -1729,11 +1729,11 @@ void CustomRORCommand::AnalyzeStrategy(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buil
 // Returns true if a construction should NOT be triggered.
 // Default result is false (standard ROR behavior), this returns true only for specific (custom) cases.
 // Warning: it could be wise for this method to be kept simple... and fast. It's called quite often.
-bool CustomRORCommand::ShouldNotTriggerConstruction(ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *stratElem) {
+bool CustomRORCommand::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem) {
 	if (!tacAI || !tacAI->IsCheckSumValid()) { return false; } // error: use default
 	if (!stratElem || !stratElem->IsCheckSumValid()) { return false; } // error: use default
 
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; } // error: use default
 
@@ -1751,9 +1751,9 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(ROR_STRUCTURES_10C::STRUCT_T
 		return true; // No villager: don't build, of course ! (yes, ROR tries to start construction without villagers ;)
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_AI *ai = tacAI->ptrMainAI;
+	AOE_STRUCTURES::STRUCT_AI *ai = tacAI->ptrMainAI;
 	if (!ai || !ai->IsCheckSumValid()) { return false; } // error: use default
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = ai->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = ai->ptrStructPlayer;
 	if (!player || !player->IsCheckSumValid()) { return false; } // error: use default
 
 	// Situation 1 : I'm going to build a wonder
@@ -1799,10 +1799,10 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(ROR_STRUCTURES_10C::STRUCT_T
 			traceMessageHandler.WriteMessage("Error: Could not find unit definition for wonder");
 			return true; // Unit definition does not exist !
 		}
-		ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[stratElem->unitDAT_ID];
+		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[stratElem->unitDAT_ID];
 		assert(unitDef && unitDef->IsCheckSumValid());
 		if (!unitDef || !unitDef->IsCheckSumValid()) { return true; } // Unit definition does not exist !
-		ROR_STRUCTURES_10C::STRUCT_COST *costs = unitDef->costs;
+		AOE_STRUCTURES::STRUCT_COST *costs = unitDef->costs;
 		for (int i = 0; i < 3; i++) {
 			if (costs[i].costPaid && (costs[i].costType >= 0) &&
 				(costs[i].costType < RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT)) {
@@ -1830,7 +1830,7 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(ROR_STRUCTURES_10C::STRUCT_T
 		long int unfinishedBuildings = 1; // We count the potential new building in the total.
 		for (int i = 0; i < ai->structInfAI.buildingUnits.arraySize; i++) {
 			long int bldId = ai->structInfAI.buildingUnits.unitIdArray[i];
-			ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *)GetUnitStruct(bldId);
+			AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)GetUnitStruct(bldId);
 			if (unit && unit->IsCheckSumValid()) {
 				if (unit->unitStatus < 2) {
 					unfinishedBuildings++;
@@ -1857,7 +1857,7 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(ROR_STRUCTURES_10C::STRUCT_T
 // Calls appropriate "manage panic mode" treatments.
 // Returns true if we want to force usage of original ROR's (bugged) code
 // In most cases, this returns FALSE and ROR's code is NOT used.
-bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(ROR_STRUCTURES_10C::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
+bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
 	if (!mainAI || !mainAI->IsCheckSumValid()) { return false; }
 	long int actorPlayerId = mainAI->structMainDecisionAI.playerId;
 	if (this->IsImproveAIEnabled(actorPlayerId)) {
@@ -1877,7 +1877,7 @@ bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(ROR_STRUCTURES_
 
 
 // Manage strategy updates for panic mode.
-void CustomRORCommand::ManagePanicMode(ROR_STRUCTURES_10C::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
+void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
 	// CONFIG
 	const long int panicModeDelay = this->crInfo->configInfo.panicModeDelay;
 	long int maxPanicModeUnitsInStrategy = this->crInfo->configInfo.maxPanicUnitsCountToAddInStrategy;
@@ -1891,13 +1891,13 @@ void CustomRORCommand::ManagePanicMode(ROR_STRUCTURES_10C::STRUCT_AI *mainAI, lo
 	if (!mainAI || (!mainAI->IsCheckSumValid())) { return; }
 
 	// Other variables
-	ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI = &mainAI->structBuildAI;
-	ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = &mainAI->structInfAI;
-	ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI = &mainAI->structTacAI;
+	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &mainAI->structBuildAI;
+	AOE_STRUCTURES::STRUCT_INF_AI *infAI = &mainAI->structInfAI;
+	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = &mainAI->structTacAI;
 	assert(buildAI->IsCheckSumValid());
 	assert(infAI->IsCheckSumValid());
 	assert(tacAI->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = mainAI->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = mainAI->ptrStructPlayer;
 	assert(player != NULL);
 	assert(player->IsCheckSumValid());
 	char myCivId = player->civilizationId;
@@ -1911,14 +1911,14 @@ void CustomRORCommand::ManagePanicMode(ROR_STRUCTURES_10C::STRUCT_AI *mainAI, lo
 	}
 
 	assert((enemyPlayerId >= 0) && (enemyPlayerId < 9));
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *enemyPlayer = GetPlayerStruct((short int)enemyPlayerId);
+	AOE_STRUCTURES::STRUCT_PLAYER *enemyPlayer = GetPlayerStruct((short int)enemyPlayerId);
 	assert(enemyPlayer != NULL);
 	assert(enemyPlayer->IsCheckSumValid());
 	if (!enemyPlayer) { return; }
 	char enemyCivId = enemyPlayer->civilizationId;
 
 
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *forumUnitStruct;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *forumUnitStruct;
 	forumUnitStruct = AOE_MainAI_findUnit(mainAI, CST_UNITID_FORUM);
 	if (forumUnitStruct == NULL) { return; } // TO DO: make special treatments if no town center (maybe we still have other buildings... Especially temple!)
 	assert(forumUnitStruct->IsCheckSumValidForAUnitClass());
@@ -2040,14 +2040,14 @@ void CustomRORCommand::ManagePanicMode(ROR_STRUCTURES_10C::STRUCT_AI *mainAI, lo
 	// Get my buildings list: quite efficient because we have a dedicated list (only buildings) at player level (does not rely on AI structures)
 	assert(player->ptrBuildingsListHeader != NULL);
 	long int buildingList_count = 0;
-	ROR_STRUCTURES_10C::STRUCT_UNIT **buildingsList = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT **buildingsList = NULL;
 	if (player->ptrBuildingsListHeader) {
 		buildingList_count = player->ptrBuildingsListHeader->buildingsArrayElemCount;
 		buildingsList = player->ptrBuildingsListHeader->ptrBuildingsArray;
 	}
 	assert((buildingList_count == 0) || (buildingsList != NULL));
 	for (int i = 0; i < buildingList_count; i++) {
-		ROR_STRUCTURES_10C::STRUCT_UNIT *loopUnit = NULL;
+		AOE_STRUCTURES::STRUCT_UNIT *loopUnit = NULL;
 		assert(player->ptrBuildingsListHeader != NULL);
 		loopUnit = buildingsList[i];
 		if (loopUnit != NULL) {
@@ -2073,14 +2073,14 @@ void CustomRORCommand::ManagePanicMode(ROR_STRUCTURES_10C::STRUCT_AI *mainAI, lo
 			} else {
 				// For debug - or just in case...
 				// THIS CODE is NO LONGER needed since I fixed the building conversion bug.
-				ROR_STRUCTURES_10C::STRUCT_UNIT *invalidUnit = loopUnit;
+				AOE_STRUCTURES::STRUCT_UNIT *invalidUnit = loopUnit;
 				player->ptrBuildingsListHeader->ptrBuildingsArray[i] = NULL; // Remove invalid entry from list, it could cause a crash when some code accesses it.
 				char buffer[300];
 				sprintf_s(buffer, "ERROR: invalid unit list entry for player #%ld. ptr=%08lX. unitId=%ld GUT=%d, index=%d/%ld.\n",
 					player->playerId, (long int)invalidUnit, invalidUnit->unitInstanceId, (int)invalidUnit->unitType, i, buildingList_count);
 				//AddTraceToFile(buffer);
 				traceMessageHandler.WriteMessage(buffer);
-				ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *invalidUnitDef = invalidUnit->ptrStructDefUnit;
+				AOE_STRUCTURES::STRUCT_DEF_UNIT *invalidUnitDef = invalidUnit->ptrStructDefUnit;
 				long checksum = ((long)invalidUnitDef < 0x10000) ? -1 : invalidUnitDef->checksum; // if invalidUnitDef ptr is low it is probably invalid, don't access it
 				int tmp_DAT_ID = -1;
 				if (checksum == 0x00549930) { // checksum is correct (building unitDef)
@@ -2492,7 +2492,7 @@ void CustomRORCommand::ManagePanicMode(ROR_STRUCTURES_10C::STRUCT_AI *mainAI, lo
 				*(p + 0x29) = 1; // +0xA4 retrains
 			} else {
 				// Insert new
-				AddUnitInStrategy((ROR_STRUCTURES_10C::STRUCT_BUILD_AI *) buildAI, 0, 1, unitId_actor, AIUCLivingUnit, unitId_toAdd, player);
+				AddUnitInStrategy((AOE_STRUCTURES::STRUCT_BUILD_AI *) buildAI, 0, 1, unitId_actor, AIUCLivingUnit, unitId_toAdd, player);
 			}
 
 			totalPanicModeElemCount++;
@@ -2555,16 +2555,16 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 		return;
 	}
 
-	ROR_STRUCTURES_10C::ROR_STRUCT_EXPORTER writer;
+	AOE_STRUCTURES::ROR_STRUCT_EXPORTER writer;
 	std::string objToString = "";
 
 	fprintf_s(f, "AOE Debug information\n\n");
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settingsStruct = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settingsStruct = *ROR_gameSettings;
 	fprintf_s(f, "Global struct = 0x%08lX - %d players (including gaia)\n", (long int)globalStruct, globalStruct->playerTotalCount);
 	fprintf_s(f, "Game settings = 0x%08lX - Map seed=%d - Deathmatch=%d\n", (long int)settingsStruct, settingsStruct->actualMapSeed, settingsStruct->isDeathMatch);
 	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
+		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
 		//fprintf_s(f, "Player %d struct=0x%08lX - Resources=0x%08lX - AI=0x%08lX - %-16s\n", i, (long int)currentPlayer, currentPlayer->ptrResourceValues, currentPlayer->ptrAIStruct, currentPlayer->playerName_length16max);
 		
 		objToString = writer.ExportStruct(currentPlayer);
@@ -2575,8 +2575,8 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 	fprintf_s(f, "\n*** Diplomacy values ***\n");
 	fprintf_s(f, "\nDislike vs p0  p1  p2  p3  p4  p5  p6  p7  p8  - Like vs p0  p1  p2  p3  p4  p5  p6  p7  p8  \n");
 	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
-		ROR_STRUCTURES_10C::STRUCT_AI *ai = currentPlayer->GetAIStruct();
+		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
+		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->GetAIStruct();
 		if (ai == NULL) {
 			fprintf_s(f, "[No AI structure for player #%d.]\n", i);
 		} else {
@@ -2595,14 +2595,14 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 	// Strategy
 	fprintf_s(f, "\n*** Strategies ***\n");
 	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
+		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
 		fprintf_s(f, "\nPlayer %d:\nCounter Class DAT_ID Name                           Actor Unitid InProgress Alive Attempts #created Retrains Ptr\n", i);
-		ROR_STRUCTURES_10C::STRUCT_AI *ai = currentPlayer->GetAIStruct();
+		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->GetAIStruct();
 		if (ai == NULL) {
 			fprintf_s(f, "No AI structure for this player.\n");
 		} else {
-			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstStratElem = &ai->structBuildAI.fakeFirstStrategyElement;
-			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstStratElem->next;
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstStratElem = &ai->structBuildAI.fakeFirstStrategyElement;
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstStratElem->next;
 			while (currentStratElem && (currentStratElem != fakeFirstStratElem)) {
 				fprintf_s(f, "%03ld     %1ld     %-3ld    %-30s %-3ld   %-6ld %-2ld         %-2ld    %-4ld     %-4ld     %-3ld      0x%08lX\n", currentStratElem->elemId, currentStratElem->elementType, currentStratElem->unitDAT_ID,
 					currentStratElem->unitName, currentStratElem->actor, currentStratElem->unitInstanceId, currentStratElem->inProgressCount,
@@ -2615,9 +2615,9 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 
 	fprintf_s(f, "\n*** SN values ***\n");
 	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
+		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
 		fprintf_s(f, "\nPlayer %d:\n", i);
-		ROR_STRUCTURES_10C::STRUCT_AI *ai = currentPlayer->GetAIStruct();
+		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->GetAIStruct();
 		if (ai == NULL) {
 			fprintf_s(f, "No AI structure for this player.\n");
 		} else {
@@ -2634,9 +2634,9 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 
 // Returns how many units were told to move.
 // Returns <0 if there is an error
-int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, float maxDistance) {
+int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUCT_PLAYER *player, float maxDistance) {
 	if (!player) { return -1; }
-	ROR_STRUCTURES_10C::STRUCT_AI *ai = player->GetAIStruct();
+	AOE_STRUCTURES::STRUCT_AI *ai = player->GetAIStruct();
 	if (!ai || !ai->allMyUnits.unitIdArray) { return -1; }
 	if (ai->structTacAI.militaryUnits.usedElements == 0) { return 0; }
 
@@ -2654,12 +2654,12 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(ROR_STRUCTURES_10C::S
 	long int *myUnitsList = ai->allMyUnits.unitIdArray;
 	for (long int index = 0; index < unitCount; index++) {
 		long int unitId = myUnitsList[index];
-		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = NULL;
+		AOE_STRUCTURES::STRUCT_UNIT *unit = NULL;
 		if (unitId > 0) {
 			 unit = GetUnitStruct(unitId);
 		}
 		if (unit != NULL) {
-			ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+			AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 			assert(unitDef != NULL);
 			if ((unit->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT) &&
 				(unitDef->unitAIType != TribeAIGroupCivilian) &&
@@ -2689,44 +2689,44 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(ROR_STRUCTURES_10C::S
 // Requires ManageAI !
 // Disabled in MP games.
 void CustomRORCommand::CallNearbyIdleMilitaryUnits() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	short int playerId = globalStruct->humanPlayerId;
 	if ((playerId < 0) || (playerId > 8)) { return; }
 
 	if (IsMultiplayer()) { return; } // MP protection
-	ROR_STRUCTURES_10C::STRUCT_PLAYER **playerTable = globalStruct->GetPlayerStructPtrTable();
+	AOE_STRUCTURES::STRUCT_PLAYER **playerTable = globalStruct->GetPlayerStructPtrTable();
 	if (!playerTable || !playerTable[playerId]) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = playerTable[playerId];
+	AOE_STRUCTURES::STRUCT_PLAYER *player = playerTable[playerId];
 	this->MoveIdleMilitaryUnitsToMousePosition(player, (float) this->crInfo->configInfo.distanceToCallNearbyIdleMilitaryUnits);
 }
 
 
 // Select next idle military unit for current player
 void CustomRORCommand::SelectNextIdleMilitaryUnit() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	short int playerId = globalStruct->humanPlayerId;
 	if ((playerId < 0) || (playerId > 8)) { return; }
 
-	ROR_STRUCTURES_10C::STRUCT_PLAYER **playerTable = globalStruct->GetPlayerStructPtrTable();
+	AOE_STRUCTURES::STRUCT_PLAYER **playerTable = globalStruct->GetPlayerStructPtrTable();
 	if (!playerTable || !playerTable[playerId]) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = playerTable[playerId];
+	AOE_STRUCTURES::STRUCT_PLAYER *player = playerTable[playerId];
 	if (!player || !player->ptrCreatableUnitsListLink || (player->ptrCreatableUnitsListLink->listElemCount <= 0)) {
 		return;
 	}
 	assert(player->ptrCreatableUnitsListLink->IsCheckSumValid());
 
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *mainSelectedUnit = this->crInfo->GetMainSelectedUnit(player);
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *firstIgnoredUnit = NULL; // in case seelcted unit = last from list, keep in memory first one to loop back
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = this->crInfo->GetMainSelectedUnit(player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *firstIgnoredUnit = NULL; // in case seelcted unit = last from list, keep in memory first one to loop back
 	bool ignoreUntilSelectedUnitIsMet = false;
 	if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass()) {
 		ignoreUntilSelectedUnitIsMet = true;
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *currentUnitElem = player->ptrCreatableUnitsListLink->lastListElement;
+	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *currentUnitElem = player->ptrCreatableUnitsListLink->lastListElement;
 	while (currentUnitElem) {
-		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)currentUnitElem->unit;
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)currentUnitElem->unit;
 		if (unitBase && unitBase->IsCheckSumValidForAUnitClass() && unitBase->ptrStructDefUnit && unitBase->ptrStructDefUnit->IsCheckSumValid()) {
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
 			char result;
 			if ((unitBase->transporterUnit == NULL) && IsNonTowerMilitaryUnit(unitDefBase->unitAIType)) { // Excludes towers
 				_asm {
@@ -2763,15 +2763,15 @@ void CustomRORCommand::SelectNextIdleMilitaryUnit() {
 // This event is triggered during game but as well in scenario editor or during game creation.
 // actionStruct parameter can be NULL if it could not be determined
 // Note: we choose NOT to apply custom treatments when controlled player has an active playing AI (both controlled by human and AI)
-void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, ROR_STRUCTURES_10C::STRUCT_UNIT *unit,
-	ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_OBJECT *actionStruct) {
+void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT *unit,
+	AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *actionStruct) {
 	if (!unit) { return; }
 	if (UIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) {
 		return;
 	}
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = unit->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = unit->ptrStructPlayer;
 	assert(player != NULL);
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	assert(globalStruct != NULL);
 	// Does spawned unit belong to currently human-controlled player ?
 	if (player->playerId != globalStruct->humanPlayerId) {
@@ -2779,7 +2779,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	}
 	if (IsMultiplayer()) { return; } // can provoke out of sync errors
 
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 	assert(unitDef != NULL);
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
 	if (!player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
@@ -2787,7 +2787,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	}
 
 	// Get info on parent unit if possible
-	ROR_STRUCTURES_10C::STRUCT_UNIT *parentUnit = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT *parentUnit = NULL;
 	long int parentUnitId = -1;
 	if (actionStruct) {
 		parentUnit = actionStruct->actor;
@@ -2809,13 +2809,13 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	// Auto target
 	if (this->crInfo->configInfo.enableSpawnUnitsAutoTarget && !player->IsAIActive(this->crInfo->hasManageAIFeatureON) &&
 		parentInfo && (parentInfo->spawnTargetUnitId >= 0)) {
-		ROR_STRUCTURES_10C::STRUCT_UNIT *target = GetUnitStruct(parentInfo->spawnTargetUnitId);
+		AOE_STRUCTURES::STRUCT_UNIT *target = GetUnitStruct(parentInfo->spawnTargetUnitId);
 		// Note: target may not exist (anymore)
 		bool canInteractWithTarget = target && target->IsCheckSumValid();
 		if (canInteractWithTarget) {
-			ROR_STRUCTURES_10C::STRUCT_UNIT_FLAG *targetUnitFlag = (ROR_STRUCTURES_10C::STRUCT_UNIT_FLAG*)target;
+			AOE_STRUCTURES::STRUCT_UNIT_FLAG *targetUnitFlag = (AOE_STRUCTURES::STRUCT_UNIT_FLAG*)target;
 			if (targetUnitFlag->DerivesFromFlag()) {
-				ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *targetUnitDefFlag = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *)targetUnitFlag->GetUnitDefinition();
+				AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *targetUnitDefFlag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *)targetUnitFlag->GetUnitDefinition();
 				// For units that can move, check fog visibility
 				if (targetUnitDefFlag->speed > 0) {
 					canInteractWithTarget = canInteractWithTarget && IsFogVisibleForPlayer(player->playerId, (long)target->positionX, (long)target->positionY);
@@ -2859,14 +2859,14 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 // This is called BEFORE the actual unit owner change process is called. (this is called at the very beginning of unit conversion process)
 // targetUnit is the "victim" (unit that changes owner), actorPlayer is the new owner (player)
 // Technical note: in ROR, unit.changeOwner(newplayer) is [EDX+0x44] call.
-void CustomRORCommand::OnUnitChangeOwner_fixes(ROR_STRUCTURES_10C::STRUCT_UNIT *targetUnit, ROR_STRUCTURES_10C::STRUCT_PLAYER *actorPlayer) {
+void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
 	if (!targetUnit || !actorPlayer) { return; }
 	assert(targetUnit->IsCheckSumValid());
 	assert(actorPlayer->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *targetPlayer = targetUnit->ptrStructPlayer; // The victim (if unit has been converted)
+	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = targetUnit->ptrStructPlayer; // The victim (if unit has been converted)
 	assert(targetPlayer != NULL);
 	assert(targetPlayer->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *targetUnitDef = targetUnit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *targetUnitDef = targetUnit->ptrStructDefUnit;
 	assert(targetUnitDef != NULL);
 	assert(targetUnitDef->IsCheckSumValid());
 
@@ -2896,22 +2896,22 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(ROR_STRUCTURES_10C::STRUCT_UNIT *
 	}
 
 	// Adapt strategy for "actor" player
-	ROR_STRUCTURES_10C::STRUCT_AI *mainAI_actor = actorPlayer->GetAIStruct();
+	AOE_STRUCTURES::STRUCT_AI *mainAI_actor = actorPlayer->GetAIStruct();
 	if (mainAI_actor == NULL) { return; }
-	ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI_actor = &mainAI_actor->structBuildAI;
+	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI_actor = &mainAI_actor->structBuildAI;
 	assert(buildAI_actor != NULL);
 	if (buildAI_actor == NULL) { return; }
 	UpdateStrategyWithExistingUnit(buildAI_actor, targetUnit);
 
 	// Update all players' infAI.unitElemList because it would contain an erroneous playerId, and this would never be fixed/updated
 	// This leads to incorrect behaviours (unit groups stuck because they try to attack their own units...)
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = actorPlayer->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = actorPlayer->ptrGlobalStruct;
 	assert(global && global->IsCheckSumValid());
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *loopPlayer = GetPlayerStruct(loopPlayerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *loopPlayer = GetPlayerStruct(loopPlayerId);
 		if (loopPlayer && loopPlayer->IsCheckSumValid() && loopPlayer->ptrAIStruct && loopPlayer->ptrAIStruct->IsCheckSumValid() &&
 			this->IsImproveAIEnabled(loopPlayerId)) {
-			ROR_STRUCTURES_10C::STRUCT_INF_AI *loopInfAI = &loopPlayer->ptrAIStruct->structInfAI;
+			AOE_STRUCTURES::STRUCT_INF_AI *loopInfAI = &loopPlayer->ptrAIStruct->structInfAI;
 			assert(loopInfAI->IsCheckSumValid());
 			// Fix (or remove) unit from list for each player. We MUST NOT let a bad playerId be stored in unit elem list.
 			UpdateOrResetInfAIUnitListElem(loopInfAI, FindInfAIUnitElemInList(loopInfAI, targetUnit->unitInstanceId));
@@ -2923,12 +2923,12 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(ROR_STRUCTURES_10C::STRUCT_UNIT *
 // Change a unit's owner, for example like a conversion.
 // Capturing an artefact does NOT call this.
 // I don't see any other possible event than CST_ATI_CONVERT. Use CST_GET_INVALID to trigger NO notification.
-bool CustomRORCommand::ChangeUnitOwner(ROR_STRUCTURES_10C::STRUCT_UNIT *targetUnit, ROR_STRUCTURES_10C::STRUCT_PLAYER *actorPlayer, 
+bool CustomRORCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer, 
 	AOE_CONST_INTERNAL::GAME_EVENT_TYPES notifyEvent) {
 	if (!targetUnit || !actorPlayer || !targetUnit->IsCheckSumValid() || !actorPlayer->IsCheckSumValid()) {
 		return false;
 	}
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *oldOwner = targetUnit->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *oldOwner = targetUnit->ptrStructPlayer;
 	this->OnUnitChangeOwner_fixes(targetUnit, actorPlayer);
 	AOE_ChangeUnitOwner(targetUnit, actorPlayer);
 	if ((notifyEvent == AOE_CONST_INTERNAL::CST_GET_INVALID) || (!oldOwner || !oldOwner->IsCheckSumValid())) {
@@ -2945,7 +2945,7 @@ bool CustomRORCommand::ChangeUnitOwner(ROR_STRUCTURES_10C::STRUCT_UNIT *targetUn
 
 // Custom Fixes/features on player.addUnit calls.
 // Note for conversion : unit is currently (temporarily) unavailable in global->GetUnitStruct(unitId) !
-void CustomRORCommand::OnPlayerAddUnitCustomTreatments(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable) {
+void CustomRORCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable) {
 	if (!unit || !unit->IsCheckSumValid()) { return; }
 	if (!player || !player->IsCheckSumValid()) { return; }
 
@@ -2953,7 +2953,7 @@ void CustomRORCommand::OnPlayerAddUnitCustomTreatments(ROR_STRUCTURES_10C::STRUC
 		// We have a creatable unit
 		if ((unit->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) && (unit->unitStatus == 2)) {
 			// Add building to player buildings list (bug in original game), this is done in unit constructor but NOT at unit conversion
-			ROR_STRUCTURES_10C::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader = player->ptrBuildingsListHeader;
+			AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader = player->ptrBuildingsListHeader;
 			assert(buildingsHeader != NULL);
 			if (!buildingsHeader) {
 				traceMessageHandler.WriteMessage("buildingsHeader is NULL for player #" + std::to_string(player->playerId));
@@ -2968,7 +2968,7 @@ void CustomRORCommand::OnPlayerAddUnitCustomTreatments(ROR_STRUCTURES_10C::STRUC
 
 			// Trick for conversion: addBuildingToArrays does not work when unit->player is not the good owner player
 			// So we update it temporarily (ROR code will actually update it later)
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *oldUnitPlayer = unit->ptrStructPlayer;
+			AOE_STRUCTURES::STRUCT_PLAYER *oldUnitPlayer = unit->ptrStructPlayer;
 			unit->ptrStructPlayer = player;
 
 			_asm {
@@ -2987,18 +2987,18 @@ void CustomRORCommand::OnPlayerAddUnitCustomTreatments(ROR_STRUCTURES_10C::STRUC
 
 	// Update unit owner in players' unit list if it is visible to them (useful for conversion / unit capture)
 	// This is very important for artefacts. Probably useful for other units (avoid having wrong playerId in list), but impacts are to be analyzed.
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid()) { return; }
 	long int playerTotalCount = global->playerTotalCount;
 	if ((global->gameRunStatus == 0) && (global->currentGameTime > 0) && (!isTempUnit && !isNotCreatable) &&
 		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING)) {
 		for (int curPlayerId = 1; curPlayerId < playerTotalCount; curPlayerId++) {
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *curPlayer = GetPlayerStruct(curPlayerId);
-			ROR_STRUCTURES_10C::STRUCT_AI *curAI = curPlayer->ptrAIStruct;
+			AOE_STRUCTURES::STRUCT_PLAYER *curPlayer = GetPlayerStruct(curPlayerId);
+			AOE_STRUCTURES::STRUCT_AI *curAI = curPlayer->ptrAIStruct;
 			if (curAI && curAI->IsCheckSumValid() && curAI->structInfAI.IsCheckSumValid()) {
-				UpdateUnitOwnerInfAIUnitListElem(&curAI->structInfAI, (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE*)unit, player->playerId);
+				UpdateUnitOwnerInfAIUnitListElem(&curAI->structInfAI, (AOE_STRUCTURES::STRUCT_UNIT_BASE*)unit, player->playerId);
 			}
 		}
 	}
@@ -3009,7 +3009,7 @@ void CustomRORCommand::OnPlayerAddUnitCustomTreatments(ROR_STRUCTURES_10C::STRUC
 // Note: player.RemoveUnit is called BY unit.destructor.
 // Here unit status can be 2 (if conversion), 7 (quitting editor?), 8 (in-game dying unit) ? +maybe other values
 // Warning: this method is called in many situations, game might NOT be running.
-void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable) {
+void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable) {
 	if (!player || !unit) { return; }
 	assert(player->IsCheckSumValid() && unit->IsCheckSumValid());
 	if (!player->IsCheckSumValid() || !unit->IsCheckSumValid()) { return; }
@@ -3017,22 +3017,22 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 	// Gather information
 	assert(unit->ptrStructPlayer != NULL);
 	if (!unit->ptrStructPlayer) { return; }
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefBase();
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefBase();
 	assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
 	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return; }
 	bool isBuilding = (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING); // Warning: using unit->unitType is risky (not always correct?)
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	bool isInGame = (settings->currentUIStatus == AOE_CONST_INTERNAL::GSUS_PLAYING) || (settings->currentUIStatus == AOE_CONST_INTERNAL::GSUS_GAME_OVER_BUT_STILL_IN_GAME);
 
 	// Update AI struct unit lists that are never updated by ROR (we choose to do this only if AI improvement is enabled).
 	if (isInGame && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() && (unit->unitInstanceId >= 0) && this->IsImproveAIEnabled(player->playerId)) {
-		ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
+		AOE_STRUCTURES::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
 		assert(infAI->IsCheckSumValid());
 		// Update infAI lists (those that are not updated by ROR)
 		long int size = infAI->unitElemListSize;
 		for (long int i = 0; i < size; i++) {
-			ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[i];
+			AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[i];
 			if (curElem->unitId == unit->unitInstanceId) {
 				UpdateOrResetInfAIUnitListElem(infAI, curElem);
 			}
@@ -3044,7 +3044,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 		if (isBuilding && (unit->unitStatus == AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY)) { // status=2 means it is a conversion (or gaia unit captured)
 			// Remove building from player buildings list (bug in original game), this is done in unit destructor but NOT at unit conversion
 			// Note that because of this call, the remove operation is done twice (will be done again in destructor). But the 2nd time, it will just do nothing.
-			ROR_STRUCTURES_10C::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader = player->ptrBuildingsListHeader;
+			AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader = player->ptrBuildingsListHeader;
 			AOE_playerBldHeader_RemoveBldFromArrays(buildingsHeader, unit);
 		}
 
@@ -3053,13 +3053,13 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 			// Not fixed in easiest... But as it is a technical fix, we apply it even if "improve AI" is not enabled.
 			// Note that it has a strong (positive) impact on AI farming + the fact that granary/SP construction is no longer blocked for no valid reason
 			settings->difficultyLevel < AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASIEST) {
-			ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
+			AOE_STRUCTURES::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
 			assert(infAI->IsCheckSumValid());
 			if ((infAI->buildHistoryArray != NULL) && (infAI->buildHistoryArraySize > 0)) {
 				// Disable or reset element for current building
 				long int posX = (long int)unit->positionX;
 				long int posY = (long int)unit->positionY;
-				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefBase();
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefBase();
 				if (unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 					// Setting status to "reset" (3 / =removed) will unblock further construction of same kind of buildings, especially granary/SP.
 					// This could also fix the bad farms placement after some game time (because "existing" farms apply a negative likee value on nearby tiles) ? To verify
@@ -3071,15 +3071,15 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 
 		// If unit is dying: clean AI "unitId" lists: it is useless for lists that only store unit IDs to keep non-existing unitIDs.
 		// This allows to avoid getting very large UnitID arrays (especially creatableAndGatherableUnits that can contain thousand of elements without this optimization)
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		assert(global && global->IsCheckSumValid());
 		if (isInGame && global && global->IsCheckSumValid() && (unit->unitStatus > 2)) {
 			// For all valid players, remove unitId from AI lists...
 			for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
-				ROR_STRUCTURES_10C::STRUCT_PLAYER *loopPlayer = GetPlayerStruct(loopPlayerId);
+				AOE_STRUCTURES::STRUCT_PLAYER *loopPlayer = GetPlayerStruct(loopPlayerId);
 				if (loopPlayer && loopPlayer->IsCheckSumValid() && loopPlayer->ptrAIStruct && (loopPlayer->aliveStatus == 0) &&
 					loopPlayer->ptrAIStruct->IsCheckSumValid() && IsImproveAIEnabled(loopPlayerId)) {
-					ROR_STRUCTURES_10C::STRUCT_INF_AI *loopInfAI = &loopPlayer->ptrAIStruct->structInfAI;
+					AOE_STRUCTURES::STRUCT_INF_AI *loopInfAI = &loopPlayer->ptrAIStruct->structInfAI;
 					assert(loopInfAI->IsCheckSumValid());
 					if (IsClassArtefactOrGatherableOrCreatable(unitDefBase->unitAIType)) {
 						loopInfAI->creatableAndGatherableUnits.Remove(unit->unitInstanceId);
@@ -3105,7 +3105,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 
 	// Auto rebuild farms
 	if (isInGame && unit && unit->IsCheckSumValid() && isBuilding && this->crInfo->configInfo.enableAutoRebuildFarms) {
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefBase();
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefBase();
 		// If this is a farm, and if I have "farm rebuild info" for this position (not in "not rebuild" mode), then trigger a rebuild.
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
 			FarmRebuildInfo *fInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
@@ -3133,7 +3133,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(ROR_STRUCTURES_10C::STRUCT_PLAYER *pla
 
 
 // Returns true if a shortcut has been added/modified
-bool CustomRORCommand::AutoAssignShortcutToUnit(ROR_STRUCTURES_10C::STRUCT_UNIT *unit) {
+bool CustomRORCommand::AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT *unit) {
 	if (!unit || !unit->IsCheckSumValid()) { return false; }
 	// Only care about living units or building
 	if ((unit->unitType != GUT_BUILDING) && (unit->unitType != GUT_LIVING_UNIT)) {
@@ -3142,7 +3142,7 @@ bool CustomRORCommand::AutoAssignShortcutToUnit(ROR_STRUCTURES_10C::STRUCT_UNIT 
 	// We choose not to modify existing shortcut
 	if (unit->shortcutNumber != 0) { return false; }
 
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 	assert(unitDef != NULL);
 
 	int shortcutId = this->crInfo->configInfo.unitShortcutsPriorityReverseOrder ? 9 : 1;
@@ -3172,7 +3172,7 @@ bool CustomRORCommand::AutoAssignShortcutToUnit(ROR_STRUCTURES_10C::STRUCT_UNIT 
 // For not managed cases: Default behaviour is return true (change target) because it allows original code to be executed.
 // The goal is to detect the more relevant situations where we can return false (force attacking current unit: do not switch).
 // The improved algorithm is only used if ImproveAI config is ON.
-bool CustomRORCommand::ShouldChangeTarget(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity, long int targetUnitId) {
+bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity, long int targetUnitId) {
 	assert(this->distanceToConsiderVeryClose > 0);
 
 	// Error cases: let ROR code handle them.
@@ -3180,13 +3180,13 @@ bool CustomRORCommand::ShouldChangeTarget(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVI
 	if (targetUnitId < 0) { return true; } // important check because we call GetUnitStruct on this.
 	//assert(activity->IsCheckSumValid());
 
-	ROR_STRUCTURES_10C::STRUCT_UNIT *actorUnit = activity->ptrUnit;
-	ROR_STRUCTURES_10C::STRUCT_UNIT *newTargetUnit = GetUnitStruct(targetUnitId);
-	ROR_STRUCTURES_10C::STRUCT_UNIT *oldTargetUnit = GetUnitStruct(activity->targetUnitId);
+	AOE_STRUCTURES::STRUCT_UNIT *actorUnit = activity->ptrUnit;
+	AOE_STRUCTURES::STRUCT_UNIT *newTargetUnit = GetUnitStruct(targetUnitId);
+	AOE_STRUCTURES::STRUCT_UNIT *oldTargetUnit = GetUnitStruct(activity->targetUnitId);
 	if (!actorUnit || !newTargetUnit /*|| !oldTargetUnit*/) { return true; }
 	if (!oldTargetUnit) {
 		// activity target unit can be reset by pending treatments. Find if action HAS a valid target. We may want to keep this target.
-		ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *action = GetUnitAction(actorUnit); // May return NULL
+		AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(actorUnit); // May return NULL
 		if (!action || (action->targetUnitId < 0)) {
 			return true;
 		}
@@ -3213,7 +3213,7 @@ bool CustomRORCommand::ShouldChangeTarget(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVI
 		(newTargetUnit->unitType == GLOBAL_UNIT_TYPES::GUT_TREE) || (newTargetUnit->unitStatus > 2)) {
 		return false; // Keep. Not sure if this case can happen. Maybe when a projectile from a dead unit hits me afterwards ?
 	}
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return true; }
 	assert((global->gameMapInfo != NULL) && (global->gameMapInfo->IsCheckSumValid()));
@@ -3248,12 +3248,12 @@ bool CustomRORCommand::ShouldChangeTarget(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVI
 	}
 
 	// Collect info on the 2 units to attack (and "me")
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *actorPlayer = actorUnit->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = actorUnit->ptrStructPlayer;
 	assert(actorPlayer != NULL);
 	assert(actorPlayer->IsCheckSumValid());
 	float *resources = (float *)actorPlayer->ptrResourceValues;
 	assert(resources != NULL);
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *actorUnitDef = actorUnit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *actorUnitDef = actorUnit->ptrStructDefUnit;
 	assert(actorUnitDef != NULL);
 	assert(actorUnitDef->IsCheckSumValid());
 	bool actorIsPriest = (actorUnitDef->DAT_ID1 == CST_UNITID_PRIEST);
@@ -3466,15 +3466,15 @@ bool CustomRORCommand::ShouldChangeTarget(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVI
 
 
 	// If only 1 of the 2 targets has me as its target, attack this one
-	ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *newTargetUnitAction = NULL;
-	ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *actionTargetUnitAction = NULL;
+	AOE_STRUCTURES::STRUCT_ACTION_BASE *newTargetUnitAction = NULL;
+	AOE_STRUCTURES::STRUCT_ACTION_BASE *actionTargetUnitAction = NULL;
 	if ((newTargetUnit->ptrActionInformation) && (newTargetUnit->ptrActionInformation->ptrActionLink) &&
 		(newTargetUnit->ptrActionInformation->ptrActionLink->actionStruct)) {
-		newTargetUnitAction = (ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *)newTargetUnit->ptrActionInformation->ptrActionLink->actionStruct;
+		newTargetUnitAction = (AOE_STRUCTURES::STRUCT_ACTION_BASE *)newTargetUnit->ptrActionInformation->ptrActionLink->actionStruct;
 	}
 	if ((oldTargetUnit->ptrActionInformation) && (oldTargetUnit->ptrActionInformation->ptrActionLink) &&
 		(oldTargetUnit->ptrActionInformation->ptrActionLink->actionStruct)) {
-		actionTargetUnitAction = (ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *)oldTargetUnit->ptrActionInformation->ptrActionLink->actionStruct;
+		actionTargetUnitAction = (AOE_STRUCTURES::STRUCT_ACTION_BASE *)oldTargetUnit->ptrActionInformation->ptrActionLink->actionStruct;
 	}
 	bool newTargetAttacksMe = newTargetUnitAction && (
 		(newTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_UNKNOWN_7) ||
@@ -3528,7 +3528,7 @@ bool CustomRORCommand::ShouldChangeTarget(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVI
 // To be used when target unit is a tower in actor's town
 // Warning: try to keep this function fast and optimized as much as possible. It may be called quite often.
 // The improved algorithm is only used if ImproveAI config is ON.
-bool CustomRORCommand::ShouldAttackTower_towerPanic(ROR_STRUCTURES_10C::STRUCT_UNIT *actorUnit, ROR_STRUCTURES_10C::STRUCT_UNIT *enemyTower) {
+bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT *actorUnit, AOE_STRUCTURES::STRUCT_UNIT *enemyTower) {
 	if (this->crInfo->configInfo.improveAILevel <= 0) {
 		return true; // improve AI is disabled. Return default value.
 	}
@@ -3540,9 +3540,9 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(ROR_STRUCTURES_10C::STRUCT_U
 	assert(actorUnit->ptrStructDefUnit != NULL);
 	assert(enemyTower->ptrStructDefUnit != NULL);
 	if ((!actorUnit->currentActivity) || (!actorUnit->ptrStructDefUnit) || (!enemyTower->ptrStructDefUnit)) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity = actorUnit->currentActivity; // Guaranteed non-NULL
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *actorUnitDef = actorUnit->ptrStructDefUnit; // Guaranteed non-NULL
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *enemyTowerDef = enemyTower->ptrStructDefUnit; // Guaranteed non-NULL
+	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = actorUnit->currentActivity; // Guaranteed non-NULL
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *actorUnitDef = actorUnit->ptrStructDefUnit; // Guaranteed non-NULL
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *enemyTowerDef = enemyTower->ptrStructDefUnit; // Guaranteed non-NULL
 	assert(actorUnitDef->IsCheckSumValid());
 	assert(enemyTowerDef->IsCheckSumValid());
 	if (!actorUnitDef->IsCheckSumValid() || !enemyTowerDef->IsCheckSumValid()) { return false; }
@@ -3558,7 +3558,7 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(ROR_STRUCTURES_10C::STRUCT_U
 			(activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_ATTACK)
 			)) {
 			// Stop attacking/converting allied !
-			ROR_STRUCTURES_10C::STRUCT_UNIT_ACTION_INFO * actionInfo = actorUnit->ptrActionInformation;
+			AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO * actionInfo = actorUnit->ptrActionInformation;
 			if (actionInfo) {
 				_asm {
 					MOV ECX, actionInfo
@@ -3581,8 +3581,8 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(ROR_STRUCTURES_10C::STRUCT_U
 	}
 
 	long int currentTargetId = actorUnit->currentActivity->targetUnitId;
-	ROR_STRUCTURES_10C::STRUCT_UNIT *currentTarget = GetUnitStruct(currentTargetId);
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *currentTargetDef = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT *currentTarget = GetUnitStruct(currentTargetId);
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *currentTargetDef = NULL;
 	if (currentTarget) {
 		currentTargetDef = currentTarget->ptrStructDefUnit;
 	} else {
@@ -3753,13 +3753,13 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(ROR_STRUCTURES_10C::STRUCT_U
 // assignedUnitsCounter is IN OUT: input value can be >0 (number of military units that have already been tasked). We should stop when assignedUnitsCounter reaches 6 (original code's behaviour)
 // In this method, we try to do "standard" treatments, and apply custom improvements only if improveAILevel is enabled in config.
 // The improved algorithm is only used if ImproveAI config is ON.
-void CustomRORCommand::towerPanic_LoopOnVillagers(ROR_STRUCTURES_10C::STRUCT_TAC_AI *tacAI, ROR_STRUCTURES_10C::STRUCT_UNIT *enemyTower,
-	long int *pAssignedUnitsCount, ROR_STRUCTURES_10C::STRUCT_POSITION_INFO *pTCPositionInfo) {
+void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT *enemyTower,
+	long int *pAssignedUnitsCount, AOE_STRUCTURES::STRUCT_POSITION_INFO *pTCPositionInfo) {
 	// Invalid/NULL objects ?
 	if (!tacAI || !enemyTower || !pTCPositionInfo || !tacAI->IsCheckSumValid() || !enemyTower->IsCheckSumValid() || !tacAI->ptrMainAI) { return; }
 	if (*pAssignedUnitsCount < 0) { return; } // Bad input value
 	if (*pAssignedUnitsCount >= 6) { return; } // Already reached maximum assigned tasks
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = tacAI->ptrMainAI->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = tacAI->ptrMainAI->ptrStructPlayer;
 	assert(player->IsCheckSumValid());
 	if (!player->IsCheckSumValid()) { return; }
 	if ((tacAI->allVillagers.arraySize <= 0) || (tacAI->allVillagers.usedElements <= 0)) { return; } // No villager to work on
@@ -3783,7 +3783,7 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(ROR_STRUCTURES_10C::STRUCT_TAC
 	// This loop only collects information (no treatments here)
 	for (int tacAIArrayIndex = 0; tacAIArrayIndex < tacAI->allVillagers.arraySize; tacAIArrayIndex++) { // Loop on "all villagers"
 		if (tacAI->allVillagers.unitIdArray[tacAIArrayIndex] >= 0) { // if current unitId is valid (!= -1)
-			ROR_STRUCTURES_10C::STRUCT_UNIT *currentVillager = GetUnitStruct(tacAI->allVillagers.unitIdArray[tacAIArrayIndex]);
+			AOE_STRUCTURES::STRUCT_UNIT *currentVillager = GetUnitStruct(tacAI->allVillagers.unitIdArray[tacAIArrayIndex]);
 			if (currentVillager) {
 				int iArray = 0;
 				bool found = false;
@@ -3814,8 +3814,8 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(ROR_STRUCTURES_10C::STRUCT_TAC
 	// Now we can loop on units with increasing distance. No need to make a search each time (unlike ROR original code)
 	long int currentIndex = 0;
 	while ((*pAssignedUnitsCount < 6) && (currentIndex < arrayElemCount)) {
-		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = GetUnitStruct(orderedUnitIDs[currentIndex]);
-		ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity = NULL;
+		AOE_STRUCTURES::STRUCT_UNIT *unit = GetUnitStruct(orderedUnitIDs[currentIndex]);
+		AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = NULL;
 		bool valid = unit && unit->IsCheckSumValid();
 		if (valid) { activity = unit->currentActivity; }
 		bool attackTower = true; // Default: attack = most cases (in original code, villager almost always attack the tower)
@@ -3852,17 +3852,17 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(ROR_STRUCTURES_10C::STRUCT_TAC
 
 
 // If fire galley iconId conflicts with catapult trireme, this will move it to a free location (trireme tech because now it's free)
-void CustomRORCommand::MoveFireGalleyIconIfNeeded(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+void CustomRORCommand::MoveFireGalleyIconIfNeeded(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player) { return; }
 	// Check fire galley unit exists for this player (it is a valid DAT_ID)
 	if (CST_UNITID_FIRE_GALLEY >= player->structDefUnitArraySize) { return; }
 	// Check the researches we use exist for this player
-	ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *researchInfo = player->ptrResearchesStruct;
+	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *researchInfo = player->ptrResearchesStruct;
 	assert(researchInfo != NULL);
 	if ((CST_RSID_TRIREME >= researchInfo->researchCount) || (CST_RSID_FIRE_GALLEY >= researchInfo->researchCount) ) { return; }
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **arrUnitDef = player->ptrStructDefUnitTable;
+	AOE_STRUCTURES::STRUCT_DEF_UNIT **arrUnitDef = player->ptrStructDefUnitTable;
 	if (arrUnitDef) {
-		ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = arrUnitDef[CST_UNITID_FIRE_GALLEY];
+		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = arrUnitDef[CST_UNITID_FIRE_GALLEY];
 		if (!unitDef || (unitDef->trainButton == 9)) { return; } // Already at the custom location (also return if invalid unit def)
 		AOE_CONST_FUNC::RESEARCH_STATUSES triremeStatus = GetResearchStatus(player, CST_RSID_TRIREME);
 		AOE_CONST_FUNC::RESEARCH_STATUSES fireGalleyStatus = GetResearchStatus(player, CST_RSID_FIRE_GALLEY);
@@ -3881,7 +3881,7 @@ void CustomRORCommand::MoveFireGalleyIconIfNeeded(ROR_STRUCTURES_10C::STRUCT_PLA
 // If fire galley iconId conflicts with catapult trireme, this will move it to a free location (trireme tech because now it's free)
 // If playerId is invalid, does nothing (no error).
 void CustomRORCommand::MoveFireGalleyIconIfNeeded(short int playerId) {
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 	if (player != NULL) {
 		this->MoveFireGalleyIconIfNeeded(player);
 	}
@@ -3899,7 +3899,7 @@ void CustomRORCommand::MoveFireGalleyIconIfNeeded(short int playerId) {
 // Warning: there might be issues when such units are converted (bug in destructor in AOE, a unitDef for a given DATID should exist for all civs ?)
 // Maybe it's better not to use it for living/buildings units (because of conversion)
 // Note: see also AOE unitDef constructors that copy an existing one, e.g. 4ED1B0 for living (type 70).
-short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int srcDAT_ID, char *name) {
+short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int srcDAT_ID, char *name) {
 	if (!player) { return -1; }
 
 	short int newDAT_ID = player->structDefUnitArraySize;
@@ -3909,7 +3909,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C:
 	}
 	short int nbDef = player->structDefUnitArraySize + 1; // new number of unit definitions
 	long int newSizeInBytes = nbDef * 4;
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **oldArray = player->ptrStructDefUnitTable;
+	AOE_STRUCTURES::STRUCT_DEF_UNIT **oldArray = player->ptrStructDefUnitTable;
 	// Run some checks
 	assert(oldArray != NULL);
 	if (oldArray == NULL) { return -1; }
@@ -3922,7 +3922,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C:
 	}
 
 	// Create new array
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **newArray = (ROR_STRUCTURES_10C::STRUCT_DEF_UNIT **)AOEAlloc(newSizeInBytes);
+	AOE_STRUCTURES::STRUCT_DEF_UNIT **newArray = (AOE_STRUCTURES::STRUCT_DEF_UNIT **)AOEAlloc(newSizeInBytes);
 	if (newArray == NULL) { return -1; } // nothing allocated: return an error
 		
 	// Copy old array into new (for all existing unitDefs => copy pointers)
@@ -3932,10 +3932,10 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C:
 	player->structDefUnitArraySize = nbDef;
 	player->ptrStructDefUnitTable[newDAT_ID] = NULL; // until we set a valid pointer.
 
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *srcDef = player->ptrStructDefUnitTable[srcDAT_ID];
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *srcDef = player->ptrStructDefUnitTable[srcDAT_ID];
 	assert(srcDef != NULL);
 	if (srcDef == NULL) { return -1; }
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *srcDef_base = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)srcDef;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *srcDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)srcDef;
 	if ((srcDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) || (srcDef->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT)) {
 		traceMessageHandler.WriteMessage("WARNING: adding unitdef for living/buildings is disabled due to conversion bug.");
 		// To solve the limitation, a solution could be to add it for all players !
@@ -3947,34 +3947,34 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C:
 	bool hasCommandsHeader = srcDef_base->DerivesFromBird();
 	switch (srcDef->unitType) {
 	case GUT_EYE_CANDY:
-		objectSize = sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE);
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BASE);
 		break;
 	case GUT_FLAGS:
-		objectSize = sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG);
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_FLAG);
 		break;
 	case GUT_DOPPLEGANGER:
-		objectSize = sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_DOPPLEGANGER);
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER);
 		break;
 	case GUT_DEAD_UNITS:
-		objectSize = sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH);
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH);
 		break;
 	case GUT_BIRD:
-		objectSize = sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD);
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BIRD);
 		break;
 	case GUT_TYPE50:
-		objectSize = sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50);
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50);
 		break;
 	case GUT_PROJECTILE:
-		objectSize = sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE);
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE);
 		break;
 	case GUT_LIVING_UNIT:
-		objectSize = sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING);
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING);
 		break;
 	case GUT_BUILDING:
-		objectSize = sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING);
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING);
 		break;
 	case GUT_TREE:
-		objectSize = sizeof(ROR_STRUCTURES_10C::STRUCT_UNITDEF_TREE);
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TREE);
 		break;
 	default:
 		// Not supported
@@ -3985,7 +3985,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C:
 	if (objectSize <= 0) { return -1; }
 
 	// Create new defUnit in the free room we just created
-	ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *newUnitDef = (ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *) AOEAlloc(objectSize);
+	AOE_STRUCTURES::STRUCT_DEF_UNIT *newUnitDef = (AOE_STRUCTURES::STRUCT_DEF_UNIT *) AOEAlloc(objectSize);
 	if (!newUnitDef) { return -1; } // nothing allocated: return an error
 
 	player->ptrStructDefUnitTable[newDAT_ID] = newUnitDef;
@@ -4000,7 +4000,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C:
 	// It belongs to base class => do this for all unit types, even if it seems this array is only used for buildings
 	if (newUnitDef->damageGraphicCount > 0) {
 		newUnitDef->damageGraphicsArray = (unsigned long int *)AOEAlloc(sizeof(unsigned long int) * newUnitDef->damageGraphicCount);
-		memcpy(newUnitDef->damageGraphicsArray, srcDef->damageGraphicsArray, sizeof(ROR_STRUCTURES_10C::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->damageGraphicCount);
+		memcpy(newUnitDef->damageGraphicsArray, srcDef->damageGraphicsArray, sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->damageGraphicCount);
 	} else {
 		assert(newUnitDef->damageGraphicsArray == NULL);
 		newUnitDef->damageGraphicsArray = NULL; // Should already be NULL in this case
@@ -4012,12 +4012,12 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C:
 		newUnitDef->ptrArmorsList = NULL; // Default value, will be overwritten if necessary
 		newUnitDef->ptrAttacksList = NULL; // Default value, will be overwritten if necessary
 		if (newUnitDef->armorsCount > 0) {
-			newUnitDef->ptrArmorsList = (ROR_STRUCTURES_10C::STRUCT_ARMOR_OR_ATTACK *)AOEAlloc(sizeof(ROR_STRUCTURES_10C::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->armorsCount);
-			memcpy(newUnitDef->ptrArmorsList, srcDef->ptrArmorsList, sizeof(ROR_STRUCTURES_10C::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->armorsCount);
+			newUnitDef->ptrArmorsList = (AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->armorsCount);
+			memcpy(newUnitDef->ptrArmorsList, srcDef->ptrArmorsList, sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->armorsCount);
 		}
 		if (newUnitDef->attacksCount > 0) {
-			newUnitDef->ptrAttacksList = (ROR_STRUCTURES_10C::STRUCT_ARMOR_OR_ATTACK *)AOEAlloc(sizeof(ROR_STRUCTURES_10C::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->attacksCount);
-			memcpy(newUnitDef->ptrAttacksList, srcDef->ptrAttacksList, sizeof(ROR_STRUCTURES_10C::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->attacksCount);
+			newUnitDef->ptrAttacksList = (AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->attacksCount);
+			memcpy(newUnitDef->ptrAttacksList, srcDef->ptrAttacksList, sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->attacksCount);
 		}
 	}
 
@@ -4027,19 +4027,19 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C:
 		// Commands: we need to duplicate them (or ROR would free them twice)
 		assert(srcDef->ptrUnitCommandHeader != NULL);
 		if (srcDef->ptrUnitCommandHeader != NULL) {
-			ROR_STRUCTURES_10C::STRUCT_DEF_UNIT_COMMAND_HEADER *newCmdHeader = (ROR_STRUCTURES_10C::STRUCT_DEF_UNIT_COMMAND_HEADER *) AOEAlloc(sizeof(ROR_STRUCTURES_10C::STRUCT_DEF_UNIT_COMMAND_HEADER));
+			AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND_HEADER *newCmdHeader = (AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND_HEADER *) AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND_HEADER));
 			newUnitDef->ptrUnitCommandHeader = newCmdHeader;
 			newCmdHeader->checksum = srcDef->ptrUnitCommandHeader->checksum;
 			newCmdHeader->commandCount = srcDef->ptrUnitCommandHeader->commandCount;
 			if (newCmdHeader->commandCount > 0) {
-				newCmdHeader->ptrCommandArray = (ROR_STRUCTURES_10C::STRUCT_DEF_UNIT_COMMAND**) AOEAlloc(newCmdHeader->commandCount * 4);
+				newCmdHeader->ptrCommandArray = (AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND**) AOEAlloc(newCmdHeader->commandCount * 4);
 			} else {
 				newCmdHeader->ptrCommandArray = NULL;
 			}
 
 			for (long int i = 0; i < newCmdHeader->commandCount; i++) {
-				newCmdHeader->ptrCommandArray[i] = (ROR_STRUCTURES_10C::STRUCT_DEF_UNIT_COMMAND*) AOEAlloc(sizeof(ROR_STRUCTURES_10C::STRUCT_DEF_UNIT_COMMAND)); // Alloc
-				memcpy(newCmdHeader->ptrCommandArray[i], srcDef->ptrUnitCommandHeader->ptrCommandArray[i], sizeof(ROR_STRUCTURES_10C::STRUCT_DEF_UNIT_COMMAND)); // Copy from source
+				newCmdHeader->ptrCommandArray[i] = (AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND*) AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND)); // Alloc
+				memcpy(newCmdHeader->ptrCommandArray[i], srcDef->ptrUnitCommandHeader->ptrCommandArray[i], sizeof(AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND)); // Copy from source
 			}
 		} else {
 			newUnitDef->ptrUnitCommandHeader = NULL; // This should NOT happen
@@ -4064,14 +4064,14 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(ROR_STRUCTURES_10C:
 void CustomRORCommand::ComputeDislikeValues() {
 	if ((this->crInfo->configInfo.dislike_allArtefacts <= 0) || (this->crInfo->configInfo.dislike_humanPlayer <= 0)) { return; }
 
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	assert(globalStruct->GetPlayerStructPtrTable() != NULL);
 	unsigned long int newDislikeValues[9];
 	for (int i = 0; i < 9; i++) { newDislikeValues[i] = CST_DISLIKE_INITIAL_VALUE; }
 
 	// Calculate dislike "penalty" for each player.
 	for (int iPlayerId = 1; iPlayerId < globalStruct->playerTotalCount; iPlayerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = globalStruct->GetPlayerStructPtrTable()[iPlayerId];
+		AOE_STRUCTURES::STRUCT_PLAYER *player = globalStruct->GetPlayerStructPtrTable()[iPlayerId];
 		if (player && player->GetAIStruct()) {
 			float *resources = (float *)player->ptrResourceValues;
 			if (resources[CST_RES_ORDER_STANDING_WONDERS]) { newDislikeValues[iPlayerId] += this->crInfo->configInfo.dislike_allArtefacts; }
@@ -4082,10 +4082,10 @@ void CustomRORCommand::ComputeDislikeValues() {
 	}
 
 	for (int iPlayerId = 1; iPlayerId < globalStruct->playerTotalCount; iPlayerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = globalStruct->GetPlayerStructPtrTable()[iPlayerId];
+		AOE_STRUCTURES::STRUCT_PLAYER *player = globalStruct->GetPlayerStructPtrTable()[iPlayerId];
 		if (player) {
 			for (int iTargetPlayerId = 1; iTargetPlayerId < globalStruct->playerTotalCount; iTargetPlayerId++) {
-				ROR_STRUCTURES_10C::STRUCT_PLAYER *targetPlayer = globalStruct->GetPlayerStructPtrTable()[iTargetPlayerId];
+				AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = globalStruct->GetPlayerStructPtrTable()[iTargetPlayerId];
 				if ((iPlayerId != iTargetPlayerId) && (player->diplomacyVSPlayers[iTargetPlayerId] > 2) && (player->GetAIStruct())) {
 					// Set the new calculated dislike value against player #iTargetPlayerId
 					player->GetAIStruct()->structDiplAI.dislikeTable[iTargetPlayerId] = newDislikeValues[iTargetPlayerId];
@@ -4097,7 +4097,7 @@ void CustomRORCommand::ComputeDislikeValues() {
 
 
 // Technical fix for a method about elevation application when generating map. Original method contains many bugs.
-void CustomRORCommand::Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, ROR_STRUCTURES_10C::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo) {
+void CustomRORCommand::Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo) {
 	if ((distance <= 0) || (posX < 0) || (posY < 0)) { return; }
 	assert(elevInfo != NULL);
 	assert(elevInfo->IsCheckSumValid());
@@ -4113,11 +4113,11 @@ void CustomRORCommand::Fixed_MapGen_applyElevation(long int posX, long int posY,
 	if (maxPosY >= elevInfo->mapSizeY) { maxPosY = elevInfo->mapSizeY - 1; }
 	if (maxPosX >= elevInfo->mapSizeX) { maxPosX = elevInfo->mapSizeX - 1; }
 
-	ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO **pTileInfoRows = elevInfo->unknown_02C;
+	AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO **pTileInfoRows = elevInfo->unknown_02C;
 	// Replace loops in 46F5E1. Was this code written by the internship guy ? It's the only method I saw that is so buggy and so badly written
 	for (long int x = minPosX; x <= maxPosX; x++) {
 		for (long int y = maxPosY; y >= minPosY; y--) {
-			ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO *tile = &pTileInfoRows[x][y];
+			AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO *tile = &pTileInfoRows[x][y];
 			_asm {
 				PUSH tile
 				MOV ECX, elevInfo
@@ -4176,19 +4176,19 @@ void CustomRORCommand::AutoFixGameTimer() {
 
 // Generate map (overload) for scenario editor
 bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int sizeY) {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
 	assert(scEditor && scEditor->IsCheckSumValid());
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *gaia = GetPlayerStruct(0);
+	AOE_STRUCTURES::STRUCT_PLAYER *gaia = GetPlayerStruct(0);
 	assert(gaia && gaia->IsCheckSumValid());
 	if (!gaia || !gaia->IsCheckSumValid()) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = scEditor->global;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = scEditor->global;
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
+	AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
 	if (!mapInfo || !mapInfo->IsCheckSumValid()) { return false; }
 
 	assert(sizeX > 0); assert(sizeX <= 0xFF);
@@ -4252,7 +4252,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 	}
 	if (usesRMGeneration) { // random or seed
 		for (int playerId = 0; playerId < 9; playerId++) {
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 			assert(player && player->IsCheckSumValid());
 			if (player && player->IsCheckSumValid()) {
 				_asm {
@@ -4293,7 +4293,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 	float fposY = (float)posY;
 	// Mange player screen position
 	for (int playerId = 0; playerId < 9; playerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		assert(player && player->IsCheckSumValid());
 		if (player && player->IsCheckSumValid()) {
 			_asm {
@@ -4312,10 +4312,10 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 	}
 	// Player data Realloc
 	for (int playerId = 0; playerId < 9; playerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		assert(player && player->IsCheckSumValid());
 		if (player && player->IsCheckSumValid()) {
-			ROR_STRUCTURES_10C::STRUCT_PLAYER_UNKNOWN_58_AND_6C *unknown_struct = &player->unknown_058;
+			AOE_STRUCTURES::STRUCT_PLAYER_UNKNOWN_58_AND_6C *unknown_struct = &player->unknown_058;
 			_asm {
 				MOV EDX, 0x45EB40 // realloc ?
 				MOV ECX, unknown_struct
@@ -4326,7 +4326,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 			}
 		}
 	}
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL *bigLbl = scEditor->map_lbl_bigGeneratingMapNotification;
+	AOE_STRUCTURES::STRUCT_UI_LABEL *bigLbl = scEditor->map_lbl_bigGeneratingMapNotification;
 	assert(bigLbl && bigLbl->IsCheckSumValid());
 	_asm {
 		MOV EDX, 0x4901B0 // UIscenarioEditor.refreshDiamondMap()
@@ -4339,21 +4339,21 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 
 
 // Handles all custom treatments at scenario editor UI creation (this is called at the end of standard UI creation).
-void CustomRORCommand::CustomScenarioEditorUICreation(ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor) {
+void CustomRORCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor) {
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return; }
 
 	// Manage hidden terrains
-	ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *listBox = scEditor->trn_lst_terrainList;
+	AOE_STRUCTURES::STRUCT_UI_LISTBOX *listBox = scEditor->trn_lst_terrainList;
 	assert(listBox && listBox->IsCheckSumValid());
 	if (listBox && listBox->IsCheckSumValid() && this->crInfo->configInfo.showHiddenTerrainsInEditor) {
 		// Note: unavailable terrainIDs are 2,3,5,7,8,9,11,12,14,15,16,17,18,21,23-31
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = scEditor->global;
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = scEditor->global;
 		assert(global && global->IsCheckSumValid());
 		if (!global && !global->IsCheckSumValid()) { return; }
-		ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
+		AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
 		if (!gameMapInfo && !gameMapInfo->IsCheckSumValid()) { return; }
 		for (int terrainId = 2; terrainId < gameMapInfo->terrainCount; terrainId++) {
-			ROR_STRUCTURES_10C::STRUCT_TERRAIN_DEF *terrainDef = &gameMapInfo->terrainDefinitions[terrainId];
+			AOE_STRUCTURES::STRUCT_TERRAIN_DEF *terrainDef = &gameMapInfo->terrainDefinitions[terrainId];
 			// Exclude standard terrains (already in list)
 			if ((terrainId > 1) && (terrainId != 10) && (terrainId != 13) &&
 				(terrainId != 20) && (terrainId != 4) && (terrainId != 19) && (terrainId != 22)) {
@@ -4383,12 +4383,12 @@ void CustomRORCommand::ApplyCustomizationOnEditorAddUnit(long int &checkVisibili
 
 // Get matching terrainId when user selected a row in terrain list in scenario editor/terrain tab.
 // Returns a terrainId, returns -1 if we want to use default behaviour (no custom choice)
-long int CustomRORCommand::GetTerrainIdForSelectedTerrainIndex(ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor, long int selectedIndex) {
+long int CustomRORCommand::GetTerrainIdForSelectedTerrainIndex(AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor, long int selectedIndex) {
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return -1; }
 	// In default game, the terrain list contains 9 terrains (indexes 0-8).
 	// Standard available terrainIDs are 0=grass,10=forest,1=water,13=desert_palm,20=jungle,4=shallows,19=pine_forest,22=water_dark
 	if (selectedIndex <= 8) { return -1; } // Standard terrains: let normal code be executed.
-	ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *terrains = scEditor->trn_lst_terrainList;
+	AOE_STRUCTURES::STRUCT_UI_LISTBOX *terrains = scEditor->trn_lst_terrainList;
 	assert(terrains && terrains->IsCheckSumValid());
 	if (!terrains || !terrains->IsCheckSumValid()) { return -1; }
 	if (selectedIndex >= terrains->itemCount) { return -1; } // Invalid entry. Should never occur.
@@ -4397,7 +4397,7 @@ long int CustomRORCommand::GetTerrainIdForSelectedTerrainIndex(ROR_STRUCTURES_10
 	// unavailable terrainIDs are 2,3,5,7,8,9,11,12,14,15,16,17,18,21,23-31
 	// TODO : get terrainId from listbox item "optionalId"
 	// We can retrieve terrainId from listbox item "optionalId"
-	ROR_STRUCTURES_10C::STRUCT_UI_LIST_ITEM *currentItem = terrains->firstItem;
+	AOE_STRUCTURES::STRUCT_UI_LIST_ITEM *currentItem = terrains->firstItem;
 	long int currentIndex = 0;
 	while ((currentIndex < terrains->itemCount) && (currentItem != NULL)) {
 		if (currentIndex == selectedIndex) {
@@ -4520,8 +4520,8 @@ void CustomRORCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextP
 
 
 // Fix the check on path finding when trying to assign a task to a villager
-long int CustomRORCommand::GathererCheckPathFinding(ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *actorAsType50, long int *pathFindingArgs) {
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = actorAsType50->ptrStructPlayer;
+long int CustomRORCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *actorAsType50, long int *pathFindingArgs) {
+	AOE_STRUCTURES::STRUCT_PLAYER *player = actorAsType50->ptrStructPlayer;
 	assert(player && player->IsCheckSumValid());
 	bool doFix = true;
 
@@ -4554,7 +4554,7 @@ long int CustomRORCommand::GathererCheckPathFinding(ROR_STRUCTURES_10C::STRUCT_U
 
 // Write the F11 centered text (if displayed)
 // Warning, this is only refreshed when population changes ?
-void CustomRORCommand::WriteF11PopInfoText(ROR_STRUCTURES_10C::STRUCT_UI_F11_POP_PANEL *f11panel, char *bufferToWrite, char *defaultFormat,
+void CustomRORCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_PANEL *f11panel, char *bufferToWrite, char *defaultFormat,
 	char *localizedText, long int currentPop, long int houseMaxPop) {
 	const int bufferSize = 200; // do not know for sure.
 	if (!this->crInfo->configInfo.showCustomPopInfo) {
@@ -4563,7 +4563,7 @@ void CustomRORCommand::WriteF11PopInfoText(ROR_STRUCTURES_10C::STRUCT_UI_F11_POP
 		return;
 	}
 	// Custom treatments: build a custom text
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 	assert(player && player->IsCheckSumValid());
 	long int villCount = -1;
 	long int boatVillCount = -1;
@@ -4595,9 +4595,9 @@ void CustomRORCommand::WriteF11PopInfoText(ROR_STRUCTURES_10C::STRUCT_UI_F11_POP
 // Handles the event "farm is depleted". NOT called when a farm is destroyed/killed.
 // Warning: this event occurs before the farm unit is actually "killed"
 void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *farm = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *)GetUnitStruct(farmUnitId);
+	AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farm = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)GetUnitStruct(farmUnitId);
 	if (!farm || !farm->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = farm->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = farm->ptrStructPlayer;
 	if (!player || !player->IsCheckSumValid()) { return; }
 	if (player != GetControlledPlayerStruct_Settings()) { return; } // Only for human-controlled player
 	if (!player->ptrCreatableUnitsListLink || !player->ptrCreatableUnitsListLink->IsCheckSumValid()) { return; }
@@ -4617,18 +4617,18 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	long int currentFarmCount = GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2); // Include being-built farms
 	bool farmCountConditionIsOK = (currentFarmCount <= this->crInfo->configInfo.autoRebuildFarms_maxFarms);
 
-	ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING *farmerUnit = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT_LIVING *farmerUnit = NULL;
 	// Search for the farmer that was working on this farm (first -arbitrary- one if there are many)
-	ROR_STRUCTURES_10C::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *curElem = player->ptrCreatableUnitsListLink->lastListElement;
+	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *curElem = player->ptrCreatableUnitsListLink->lastListElement;
 	while ((curElem != NULL) && (farmerUnit == NULL)) {
 		if (curElem->unit && curElem->unit->IsCheckSumValid() && curElem->unit->ptrStructDefUnit &&
 			curElem->unit->ptrStructDefUnit->IsCheckSumValid() && (curElem->unit->ptrStructDefUnit->DAT_ID1 == CST_UNITID_FARMER)) {
-			ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *curUnitAction = GetUnitAction(curElem->unit);
+			AOE_STRUCTURES::STRUCT_ACTION_BASE *curUnitAction = GetUnitAction(curElem->unit);
 			// There is 1 special case when farmer's resourceType is NOT berryBush: when AI player repairs a farm (bug: villager type is farmer instead of repairman)
 			if (curUnitAction && (curUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
 				if (curUnitAction->targetUnitId == farmUnitId) {
 					assert(curElem->unit->resourceTypeId == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE);
-					farmerUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *)curElem->unit;
+					farmerUnit = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)curElem->unit;
 				}
 			}
 		}
@@ -4658,17 +4658,17 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 // Disable dock for all players on maps where AI does NOT builds docks.
 void CustomRORCommand::DisableWaterUnitsIfNeeded() {
 	if (!this->crInfo->configInfo.noDockInMostlyLandMaps) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	assert(settings->IsCheckSumValid());
 	if (!settings) { return; } // Should never happen
 	if (settings->isCampaign || settings->isScenario || settings->isSavedGame || settings->isMultiplayer) { return; }
 
 	if (!IsDockRelevantForMap(settings->mapTypeChoice)) {
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 		if (!global || !global->IsCheckSumValid() || !global->ptrPlayerStructPtrTable) { return; }
 		for (int i = 1; i < global->playerTotalCount; i++) {
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
+			AOE_STRUCTURES::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
 			if (player && player->IsCheckSumValid() && (player->structDefUnitArraySize > CST_UNITID_DOCK) &&
 				player->ptrStructDefUnitTable && player->ptrStructDefUnitTable[CST_UNITID_DOCK]) {
 				traceMessageHandler.WriteMessageNoNotification(std::string("Disabled dock for player #") + std::to_string(i));
@@ -4680,16 +4680,16 @@ void CustomRORCommand::DisableWaterUnitsIfNeeded() {
 
 // Disable all walls for current game.
 void CustomRORCommand::DisableWalls() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	assert(settings->IsCheckSumValid());
 	if (!settings) { return; } // Should never happen
 	if (settings->isCampaign || settings->isScenario || settings->isSavedGame || settings->isMultiplayer) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !global->ptrPlayerStructPtrTable) { return; }
 	traceMessageHandler.WriteMessageNoNotification(std::string("Disable walls for all players"));
 	for (int i = 1; i < global->playerTotalCount; i++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->ptrPlayerStructPtrTable[i];
 		if (player && player->IsCheckSumValid())
 		{
 			if ((player->structDefUnitArraySize > CST_UNITID_SMALL_WALL) &&
@@ -4706,11 +4706,11 @@ void CustomRORCommand::DisableWalls() {
 
 // Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
 // This is called quite often (only if improve AI is enabled in customROR configuration)
-void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem) {
+void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem) {
 	if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem) { return; }
 	if (IsMultiplayer()) { return; }
 
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(currentUnitListElem->unitId);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(currentUnitListElem->unitId);
 	bool elementWasReset = false;
 	// Custom treatment: clean obsolete units
 	// If element "memorized" position is visible...
@@ -4750,7 +4750,7 @@ void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(ROR_STRUCTURES_10C::STRU
 
 
 // Called at the end of showUnitCommandButtons
-void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
+void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
 	assert(gameMainUI && gameMainUI->IsCheckSumValid());
 	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
 		return;
@@ -4763,12 +4763,12 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	}
 
 	// Collect info
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 	if (!player || !player->IsCheckSumValid()) {
 		return;
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructDefUnit || !unit->GetUnitDefinition()->IsCheckSumValidForAUnitClass()) {
 		return;
 	}
@@ -4776,7 +4776,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	if (unit->unitStatus != 2) {
 		return;
 	}
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefinition();
 	bool isBuilding = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING);
 	bool isLiving = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT);
 	if (unitDef->commandAttribute == COMMAND_ATTRIBUTES::CST_CA_NONE) { return; } // Corresponds to unselectable, like eye candy
@@ -4787,7 +4787,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	}
 	// For living units
 	if (isLiving) {
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)unitDef;
+		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)unitDef;
 		if ((unitDefLiving->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDefLiving->blastRadius > 0)) {
 			UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically",
@@ -4836,7 +4836,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	long int maxFoundButtonId = -1;
 
 	// TO DO: manage isBusy for living unit ? (not required as long as we don't customize buttons for living units...)
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *unitAsBuilding = (ROR_STRUCTURES_10C::STRUCT_UNIT_BUILDING *)unit;
+	AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unitAsBuilding = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)unit;
 	bool isBusy = false;
 	// Fix queue numbers (otherwise, previous selected building's numbers will still display - and are irrelevant here)
 	int buttonWithQueueNumber = -1;
@@ -4846,7 +4846,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		if (unitAsBuilding->ptrHumanTrainQueueInformation) {
 			queueNumberToDisplay = unitAsBuilding->ptrHumanTrainQueueInformation->unitCount;
 			if (queueNumberToDisplay > 0) {
-				ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *queuedUnitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *) player->GetUnitDefBase(unitAsBuilding->ptrHumanTrainQueueInformation->DATID);
+				AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *queuedUnitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) player->GetUnitDefBase(unitAsBuilding->ptrHumanTrainQueueInformation->DATID);
 				if (queuedUnitDefBase && queuedUnitDefBase->IsCheckSumValidForAUnitClass()) {
 					buttonWithQueueNumber = GetButtonInternalIndexFromDatBtnId(queuedUnitDefBase->trainButton);
 				}
@@ -4854,7 +4854,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		}
 	}
 	for (int currentBtnId = 0; currentBtnId < 12; currentBtnId++) {
-		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *curBtn = gameMainUI->unitCommandButtons[currentBtnId];
+		AOE_STRUCTURES::STRUCT_UI_BUTTON_WITH_NUMBER *curBtn = gameMainUI->unitCommandButtons[currentBtnId];
 		if (curBtn && curBtn->IsCheckSumValid()) {
 			if ((curBtn->commandIDs[0] == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_ADD_TO_QUEUE) ||
 				(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN)) {
@@ -4866,10 +4866,10 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		}
 
 	}
-	ROR_STRUCTURES_10C::STRUCT_ACTION_BASE *currentAction = GetUnitAction(unit);
+	AOE_STRUCTURES::STRUCT_ACTION_BASE *currentAction = GetUnitAction(unit);
 	// For buildings, currentAction is Non-NULL when researching tech, when AI-triggered "train unit", but NULL for human-triggered "train unit"
-	ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_OBJECT *currentActionAsMakeObject = (ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_OBJECT *)currentAction;
-	ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_TECH *currentActionAsMakeTech = (ROR_STRUCTURES_10C::STRUCT_ACTION_MAKE_TECH *)currentAction;
+	AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *currentActionAsMakeObject = (AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *)currentAction;
+	AOE_STRUCTURES::STRUCT_ACTION_MAKE_TECH *currentActionAsMakeTech = (AOE_STRUCTURES::STRUCT_ACTION_MAKE_TECH *)currentAction;
 	if (currentAction != NULL) {
 		isBusy = true;
 		if (currentActionAsMakeObject && currentActionAsMakeObject->IsCheckSumValid() &&
@@ -4883,7 +4883,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 			// This handles ALL MakeTech actions (both AI or human triggered)
 			currentActionDATID = currentActionAsMakeObject->targetUnitDAT_ID;
 			currentActionIsResearch = true;
-			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(player, currentActionAsMakeObject->targetUnitDAT_ID);
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(player, currentActionAsMakeObject->targetUnitDAT_ID);
 			if (resDef) {
 				currentActionLangNameId = resDef->languageDLLName;
 				currentActionName = resDef->researchName;
@@ -4898,7 +4898,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	}
 	// Get names for current action unit (when training a unit).
 	if ((currentActionDATID != -1) && (!currentActionIsResearch)) {
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *curActionUnitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(player, (short int)currentActionDATID);
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *curActionUnitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(player, (short int)currentActionDATID);
 		if (curActionUnitDefBase && curActionUnitDefBase->IsCheckSumValidForAUnitClass()) {
 			if (currentActionName == NULL) {
 				currentActionName = curActionUnitDefBase->ptrUnitName;
@@ -4915,7 +4915,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	for (int currentBtnId = 0; currentBtnId < 12; currentBtnId++) {
 		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID curBtnCmdId = (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)gameMainUI->unitCommandButtons[currentBtnId]->commandIDs[0];
 		if (curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *tmpUnitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)
+			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *tmpUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)
 				GetUnitDefStruct(player, (short int)gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0]);
 
 			if (tmpUnitDef && tmpUnitDef->IsCheckSumValidForAUnitClass() && tmpUnitDef->IsTypeValid() &&
@@ -4924,7 +4924,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 			}
 		}
 		if (curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) {
-			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *tmpResearchDef = GetResearchDef(player, 
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *tmpResearchDef = GetResearchDef(player, 
 				(short int)gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0]);
 			if (tmpResearchDef && ((tmpResearchDef->buttonId >= minButtonIdNextPage) || (tmpResearchDef->buttonId < minButtonId))) {
 				currentButtonDoesNotBelongToThisPage[currentBtnId] = true;
@@ -4936,14 +4936,14 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	// Add custom buttons : not-yet available units/techs
 
 	// RESEARCHES
-	ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *playerResInfo = player->ptrResearchesStruct;
-	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF_INFO *resDefInfo = NULL;
+	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *playerResInfo = player->ptrResearchesStruct;
+	AOE_STRUCTURES::STRUCT_RESEARCH_DEF_INFO *resDefInfo = NULL;
 	if (playerResInfo) {
 		resDefInfo = playerResInfo->ptrResearchDefInfo;
 	}
 	if (playerResInfo && resDefInfo) {
 		for (int researchId = 0; (researchId < playerResInfo->researchCount) && (researchId < resDefInfo->researchCount); researchId++) {
-			ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *status = &playerResInfo->researchStatusesArray[researchId];
+			AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *status = &playerResInfo->researchStatusesArray[researchId];
 			int rawButtonId = resDefInfo->researchDefArray[researchId].buttonId;
 			if ((resDefInfo->researchDefArray[researchId].researchLocation == unitDef->DAT_ID1) &&
 				(rawButtonId > maxFoundButtonId)) {
@@ -4993,8 +4993,8 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 	// TRAIN UNITS
 	if (player->ptrStructDefUnitTable) {
 		for (int loopUnitDefId = 0; loopUnitDefId < player->structDefUnitArraySize; loopUnitDefId++) {
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *loopUnitDef = 
-				(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)player->ptrStructDefUnitTable[loopUnitDefId];
+			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *loopUnitDef = 
+				(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)player->ptrStructDefUnitTable[loopUnitDefId];
 			if (loopUnitDef && loopUnitDef->IsCheckSumValid() && loopUnitDef->IsTypeValid()) { // Only for living units
 				int rawButtonId = loopUnitDef->trainButton;
 				if ((loopUnitDef->trainLocation == unitDef->DAT_ID1) && (rawButtonId > maxFoundButtonId)) {
@@ -5023,8 +5023,8 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 					if (loopUnitDef->availableForPlayer) { preferThisUnit = true; } // if unit is currently available, it has best priority !
 					if (costIsBetter && !loopUnitDef->availableForPlayer) { preferThisUnit = true; }
 					if (preferThisUnit && (!bestElemIsResearch) && (bestElemDATID[buttonIndex] >= 0)) { // only if we already selected a valid DATID (unit, ont research)
-						ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *previousUnit = 
-							(ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)player->ptrStructDefUnitTable[bestElemDATID[buttonIndex]];
+						AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *previousUnit = 
+							(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)player->ptrStructDefUnitTable[bestElemDATID[buttonIndex]];
 						// Cancel "prefer" if new one is stronger (stronger = less priority, because further in tech tree)
 						if ((previousUnit->totalHitPoints < loopUnitDef->totalHitPoints) || // Use only attributes that ALWAYS increase ! Not speed (risky)
 							(previousUnit->displayedAttack < loopUnitDef->displayedAttack)
@@ -5089,7 +5089,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 		}
 	}
 	for (int buttonIndex = 0; buttonIndex < 12; buttonIndex++) {
-		ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
+		AOE_STRUCTURES::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
 		if (buttonIsVisible[buttonIndex] && forceRefresh[buttonIndex]) {
 			long int correctButtonInfoValue = sb->buttonInfoValue[0];
 			long int correctButtonCmdId = sb->commandIDs[0];
@@ -5109,7 +5109,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 			GetLanguageDllText(bestElemLangNameId[buttonIndex], nameBuffer, sizeof(nameBuffer), "");
 			if (bestElemIsResearch[buttonIndex]) {
 				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], !bestElemIsAvailable[buttonIndex], NULL /*elementInfo.c_str()*/, NULL, true);
-				ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
+				AOE_STRUCTURES::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
 				sb->unknown_2C4;
 				sb->helpDllId = sb->helpDllId;
 				sb->winHelpDataDllId;
@@ -5164,7 +5164,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(ROR_STRUCTURES_10C::STRUCT_UI
 
 
 // Refresh status for custom auto-attack policy buttons
-void CustomRORCommand::RefreshCustomAutoAttackButtons(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
+void CustomRORCommand::RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 	const AutoAttackPolicy *attackPolicy) {
 	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
 		return;
@@ -5194,7 +5194,7 @@ void CustomRORCommand::RefreshCustomAutoAttackButtons(ROR_STRUCTURES_10C::STRUCT
 // Called when a game UI command button is clicked.
 // Returns true if event has been handled and must NOT be handle by ROR standard code.
 // Returns false by default (most cases) !
-bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
+bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue) {
 
 	if (!this->crInfo->configInfo.useImprovedButtonBar) {
@@ -5207,10 +5207,10 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 	if (!IsGameRunning()) {
 		return false;
 	}
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = NULL;
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = NULL;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = NULL;
 	if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValid()) {
-		unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
+		unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
 		if (unitBase && unitBase->IsCheckSumValidForAUnitClass()) {
 			player = unitBase->ptrStructPlayer;
 		}
@@ -5223,14 +5223,14 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_STOP) {
 		// Fix strategy when AI is enabled and some action is interrupted by human player
 		if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValid()) {
-			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *stratElem = GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
 			ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
 		}
 	}
 
 	// Handle next page. Note: in ROR, see 485140 (for villager build menu only)
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE) {
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
 		if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
 			return false;
 		}
@@ -5309,21 +5309,21 @@ bool CustomRORCommand::OnGameCommandButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_IN
 // Custom treatment to decide if a potential target unit should be ignored
 // Overload standard rules for catapults(ignores building if HP=1) and "target=wall" cases.
 // Default result=false (on error cases)
-bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity,
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *potentialTargetUnit) {
+bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity,
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *potentialTargetUnit) {
 	assert(this->crInfo->configInfo.useEnhancedRulesForAutoAttackTargetSelection); // should have been checked before calling this
 	if (!activity || !potentialTargetUnit || !potentialTargetUnit->IsCheckSumValidForAUnitClass()) {
 		return false; // error case
 	}
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *targetUnitDefBase = potentialTargetUnit->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDefBase = potentialTargetUnit->GetUnitDefinition();
 	if (!targetUnitDefBase || !targetUnitDefBase->IsCheckSumValidForAUnitClass()) {
 		return false; // error case
 	}
-	ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *actorUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *)activity->ptrUnit;
+	AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)activity->ptrUnit;
 	if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass()) {
 		return false; // We expect ACTOR unit to derive from type50 ! (should be living or building)
 	}
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)actorUnit->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnit->GetUnitDefinition();
 	if (!actorUnitDef || !actorUnitDef->IsCheckSumValidForAUnitClass()) {
 		return false; // We expect ACTOR unit to derive from type50 ! (should be living or building)
 	}
@@ -5374,16 +5374,16 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(ROR_STRUCTURES_10C::STRU
 
 // Manages the display of a unit shortcut for non-standard shortcuts.
 // Returns true if we want to let standard game code execute the shortcut display operation. (default false)
-bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase,
+bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase,
 	long int posX, long int posY, long int unknown_arg3) {
 	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = unitBase->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_PLAYER *player = unitBase->ptrStructPlayer;
 	assert(player && player->IsCheckSumValid() && global && global->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid()) { return false; }
 	if (!global || !global->IsCheckSumValid()) { return false; }
@@ -5438,11 +5438,11 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUC
 		return false;
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER *slpHeader = this->crInfo->customRorUnitShortcuts.slpFileHeader;
+	AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *slpHeader = this->crInfo->customRorUnitShortcuts.slpFileHeader;
 	// slpFrameHeaderBase = first array element (in slp frame headers array)
-	ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *slpFrameHeaderBase = (ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *)
+	AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *slpFrameHeaderBase = (AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *)
 		(slpHeader + 1); // Dirty, but works because structs have same size (done like this in ROR code)
-	ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *slpFrameHeader = slpFrameHeaderBase + slpArrayIndex; // Move to correct frame in array
+	AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *slpFrameHeader = slpFrameHeaderBase + slpArrayIndex; // Move to correct frame in array
 
 	DisplayUnitShortcutSymbol(slpHeader, slpFrameHeader, posX - 9, posY - 8, unknown_arg3);
 	return false;
@@ -5451,9 +5451,9 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUC
 
 // Adds custom attributes (armor) in buildings' unit info zone.
 // currentLine is incremented if lines are added.
-void CustomRORCommand::DisplayCustomBuildingAttributesInUnitInfo(ROR_STRUCTURES_10C::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine) {
+void CustomRORCommand::DisplayCustomBuildingAttributesInUnitInfo(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine) {
 	if (!unitInfoZone || !unitInfoZone->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *unit50 = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *)unitInfoZone->currentUnit;
+	AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *unit50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)unitInfoZone->currentUnit;
 	if (!unit50 || !unit50->IsCheckSumValidForAUnitClass()) {
 		return; // Should not occur, this method is called during processing of buildings
 	}
@@ -5500,22 +5500,22 @@ bool CustomRORCommand::GetLocalizedString(long int stringId, char *buffer, long 
 
 
 // Returns false if we should prevent unit from moving back (to maxrange) after shooting. Default result=true
-bool CustomRORCommand::ShouldRetreatAfterShooting(ROR_STRUCTURES_10C::STRUCT_UNIT_ACTIVITY *activity) {
+bool CustomRORCommand::ShouldRetreatAfterShooting(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity) {
 	assert(activity);
 	if (!activity || !activity->ptrUnit) { return true; }
-	ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *actorUnitType50 = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50*)activity->ptrUnit;
+	AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *actorUnitType50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50*)activity->ptrUnit;
 	if (!actorUnitType50 || !actorUnitType50->IsCheckSumValidForAUnitClass() || !actorUnitType50->DerivesFromType50()) { return true; }
 	if (!actorUnitType50->ptrStructPlayer || !actorUnitType50->ptrStructPlayer->IsCheckSumValid()) { return true; }
 	// This feature is an AI improvement. Do it only if config says so.
 	if (!this->IsImproveAIEnabled(actorUnitType50->ptrStructPlayer->playerId)) {
 		return true;
 	}
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)actorUnitType50->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnitType50->GetUnitDefinition();
 	if (!actorUnitDef || !actorUnitDef->IsCheckSumValidForAUnitClass() || !actorUnitDef->DerivesFromType50()) { return true; }
 	if (!actorUnitDef->DerivesFromType50()) { return true; }
-	ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *targetUnit = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(activity->targetUnitId);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(activity->targetUnitId);
 	if (!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) { return true; }
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *targetUnitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)targetUnit->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *targetUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)targetUnit->GetUnitDefinition();
 	if (targetUnitDef->DerivesFromType50()) {
 		if ((targetUnitDef->projectileUnitId >= 0) && (targetUnitDef->maxRange > actorUnitDef->maxRange)) {
 			// Force NOT retreat after shooting, because enemy has a better range than me !
@@ -5531,17 +5531,17 @@ bool CustomRORCommand::ShouldRetreatAfterShooting(ROR_STRUCTURES_10C::STRUCT_UNI
 // Updates existingBldInfluenceZone with the influence distance we want to use for provided building (positions near building will be preferred)
 // Updates skipThisBuilding to true if the building must be ignored for farm position computation. If true, existingBldInfluenceZone returned value should be ignored.
 // Improvements depend on configuration (useEnhancedFeature and improveAILevel) + game difficulty level
-void CustomRORCommand::FixCityPlanFarmPlacement(ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *existingBuilding, long int &existingBldInfluenceZone, bool &skipThisBuilding) {
+void CustomRORCommand::FixCityPlanFarmPlacement(AOE_STRUCTURES::STRUCT_UNIT_BASE *existingBuilding, long int &existingBldInfluenceZone, bool &skipThisBuilding) {
 	skipThisBuilding = false;
 	existingBldInfluenceZone = 3;
 	if (!existingBuilding || !existingBuilding->IsCheckSumValidForAUnitClass()) { return; }
 
 	// Default behavior / values
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef_base = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)existingBuilding->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)existingBuilding->ptrStructDefUnit;
 	assert(unitDef_base && unitDef_base->IsCheckSumValidForAUnitClass());
 	if (!unitDef_base && !unitDef_base->IsCheckSumValidForAUnitClass()) { return; }
 	
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 
 	// Set some default values
@@ -5606,7 +5606,7 @@ void CustomRORCommand::FixCityPlanFarmPlacement(ROR_STRUCTURES_10C::STRUCT_UNIT_
 
 // Updates temp map like data for choosing a new building location according to existing buildings
 // Improvements depend on configuration (useEnhancedFeature and improveAILevel) + game difficulty level
-void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(ROR_STRUCTURES_10C::STRUCT_INF_AI *infAI, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *stratElem, ROR_STRUCTURES_10C::STRUCT_POSITION_INFO *TCPosition) {
+void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem, AOE_STRUCTURES::STRUCT_POSITION_INFO *TCPosition) {
 	if (!infAI || !stratElem || !TCPosition) { return; }
 	assert(infAI->IsCheckSumValid());
 	assert(stratElem->IsCheckSumValid());
@@ -5624,16 +5624,16 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(ROR_STRUCTURES_10C::ST
 	}
 
 	// Collect useful context information : player, strategy element to build...
-	ROR_STRUCTURES_10C::STRUCT_AI *ai = infAI->ptrMainAI;
+	AOE_STRUCTURES::STRUCT_AI *ai = infAI->ptrMainAI;
 	assert(ai && ai->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = ai->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = ai->ptrStructPlayer;
 	assert(player != NULL);
 	assert(player->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	assert(globalStruct != NULL);
 	assert(globalStruct->IsCheckSumValid());
 
-	ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *mapInfosStruct = ROR_pTempMapBuildLikeInfos;
+	AOE_STRUCTURES::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *mapInfosStruct = ROR_pTempMapBuildLikeInfos;
 	assert(mapInfosStruct != NULL);
 	assert(mapInfosStruct->IsCheckSumValid());
 
@@ -5652,9 +5652,9 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(ROR_STRUCTURES_10C::ST
 	// 1) Loop on my buildings just to collect info
 	for (long int index = 0; index < infAI->buildingUnits.usedElements; index++) {
 		short int unitId = (short int)infAI->buildingUnits.unitIdArray[index];
-		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT *) globalStruct->ptrUnitPointersList[unitId];
+		AOE_STRUCTURES::STRUCT_UNIT *unit = (AOE_STRUCTURES::STRUCT_UNIT *) globalStruct->ptrUnitPointersList[unitId];
 		if (unit) {
-			ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *defUnit = unit->ptrStructDefUnit;
+			AOE_STRUCTURES::STRUCT_DEF_UNIT *defUnit = unit->ptrStructDefUnit;
 			if (defUnit) {
 				if (defUnit->DAT_ID1 == CST_UNITID_HOUSE) {
 					// Mark if we found a house (later we will have special treatment for 1st house to build it faster)
@@ -5674,9 +5674,9 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(ROR_STRUCTURES_10C::ST
 	// 2) Active loop on my buildings
 	for (long int index = 0; index < infAI->buildingUnits.usedElements; index++) {
 		short int unitId = (short int)infAI->buildingUnits.unitIdArray[index];
-		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = (ROR_STRUCTURES_10C::STRUCT_UNIT *) globalStruct->ptrUnitPointersList[unitId];
+		AOE_STRUCTURES::STRUCT_UNIT *unit = (AOE_STRUCTURES::STRUCT_UNIT *) globalStruct->ptrUnitPointersList[unitId];
 		if (unit) {
-			ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *defUnit = unit->ptrStructDefUnit;
+			AOE_STRUCTURES::STRUCT_DEF_UNIT *defUnit = unit->ptrStructDefUnit;
 			if (defUnit) {
 				// Make sure buildings are not all side by side with no space: if 1 side is "all blocked", make sure we don't build on opposite side.
 				// 2 consecutive buildings in a row will be possible, but not more.
@@ -5756,7 +5756,7 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(ROR_STRUCTURES_10C::ST
 bool CustomRORCommand::OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize) {
 	if (this->crInfo->customYesNoDialogVar) { return false; } // Already an opened custom dialog
 
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *customDialogPtr = AOE_GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
+	AOE_STRUCTURES::STRUCT_ANY_UI *customDialogPtr = AOE_GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
 	if (customDialogPtr != NULL) { return false; } // A CloseProgramDialog seems to be already open
 
 	SetGamePause(true);
@@ -5769,7 +5769,7 @@ bool CustomRORCommand::OpenCustomDialogMessage(const char *dialogText, long int 
 // Closes currently opened custom dialog message.
 // Returns -1 if an error occurred, including "no custom dialog is opened".
 // Other results are AOE_CONST_INTERNAL::DIALOG_BUTTON_IDS => Yes/No/Cancel
-long int CustomRORCommand::CloseCustomDialogMessage(ROR_STRUCTURES_10C::STRUCT_UI_POPUP_DIALOG *ptrDialog, unsigned long int ptrSender) {
+long int CustomRORCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG *ptrDialog, unsigned long int ptrSender) {
 	if (this->crInfo->customYesNoDialogVar == NULL) { return -1; } // No opened custom dialog
 	long int returnValue = -1;
 	if (!ptrDialog) { return returnValue; }
@@ -5812,7 +5812,7 @@ Relics/ruins events => arg3/4/5 are unused ?
 void CustomRORCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short int playerId, long int arg3, long int arg4, long int arg5) {
 	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_RESEARCH_COMPLETE) {
 		long int research_id = arg3;
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		assert(player && player->IsCheckSumValid());
 		if (research_id == AOE_CONST_FUNC::CST_RSID_CATAPULT_TRIREME) {
 			this->MoveFireGalleyIconIfNeeded(player);
@@ -5823,7 +5823,7 @@ void CustomRORCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, shor
 		short int bldDAT_ID = (short int)arg3;
 		if (bldDAT_ID = CST_UNITID_MARKET) {
 			// Building a market (first one) enables farms.
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 			assert(player && player->IsCheckSumValid());
 			this->ManageDisableUnitsForFarms(player);
 		}
@@ -5897,14 +5897,14 @@ void CustomRORCommand::ManageTriggersOnGameNotifyEvent(long int eventId, short i
 
 // Entry point to make custom treatments at "disable research" init at game start (for scenarios)
 // This is only executed for scenarios, not DM/RM !
-void CustomRORCommand::OnGameInitDisableResearchesEvent(ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *playerResearchInfo) {
+void CustomRORCommand::OnGameInitDisableResearchesEvent(AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *playerResearchInfo) {
 	assert(playerResearchInfo != NULL);
 	if (!playerResearchInfo) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = playerResearchInfo->ptrPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = playerResearchInfo->ptrPlayer;
 	assert(player && player->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid()) { return; }
 	// Note: get global structure from player, because global variable might not be set yet.
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->GetGlobalStruct();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->GetGlobalStruct();
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return; }
 
@@ -5944,18 +5944,18 @@ void CustomRORCommand::ApplyScenarioSpecificPlayerStartingAge(long int playerId)
 	if (!this->crInfo->hasRemovePlayerInitialAgeInScenarioInit) {
 		return;
 	}
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 	assert(player && player->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid()) { return; }
 
 	if (settings->isScenario != 0) {
-		ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scInfo = global->scenarioInformation;
+		AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = global->scenarioInformation;
 		assert(scInfo && scInfo->IsCheckSumValid());
 		long int startingAge = scInfo->playersStartingAge[playerId - 1]; // Warning: index is playerId - 1
 		assert(player && player->IsCheckSumValid());
@@ -5993,7 +5993,7 @@ void CustomRORCommand::ApplyScenarioSpecificPlayerStartingAge(long int playerId)
 // This method should be called at game start, after "initial" technologies have been applied, so we can override some (and force to disable again some units)
 void CustomRORCommand::ManageTriggerDisableUnitsForExceptions() {
 	for (int playerId = 0; playerId < 9; playerId++) {
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (player) {
 			std::vector<short int>::const_iterator it;
 			for (it = this->crInfo->unitDefToDisable[player->playerId].begin(); it != this->crInfo->unitDefToDisable[player->playerId].end(); it++) {
@@ -6008,7 +6008,7 @@ void CustomRORCommand::ManageTriggerDisableUnitsForExceptions() {
 					(DAT_ID == CST_UNITID_TRADE_BOAT)
 					) {
 					if ((DAT_ID < 0) || (DAT_ID >= player->structDefUnitArraySize)) { return; }
-					ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)player->ptrStructDefUnitTable[DAT_ID];
+					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)player->ptrStructDefUnitTable[DAT_ID];
 					unitDef->availableForPlayer = 0;
 				}
 			}
@@ -6018,20 +6018,20 @@ void CustomRORCommand::ManageTriggerDisableUnitsForExceptions() {
 
 // Manage disable (via trigger) units for farms.
 // Farm is enabled by market construction, which may occur both "ingame" or at game loading (if a market exists, or if starting at bronze).
-void CustomRORCommand::ManageDisableUnitsForFarms(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+void CustomRORCommand::ManageDisableUnitsForFarms(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	std::vector<short int>::const_iterator it;
 	for (it = this->crInfo->unitDefToDisable[player->playerId].begin(); it != this->crInfo->unitDefToDisable[player->playerId].end(); it++) {
 		short int DAT_ID = *it;
 		if (DAT_ID == CST_UNITID_FARM) {
 			if ((DAT_ID < 0) || (DAT_ID >= player->structDefUnitArraySize)) { return; }
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)player->ptrStructDefUnitTable[DAT_ID];
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)player->ptrStructDefUnitTable[DAT_ID];
 			unitDef->availableForPlayer = 0;
 			return;
 		}
 	}
 }
 
-void CustomRORCommand::ReloadTriggersFromGameData(ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *scenarioInfo) {
+void CustomRORCommand::ReloadTriggersFromGameData(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scenarioInfo) {
 	if (this->crInfo->triggerSet) {
 		delete this->crInfo->triggerSet;
 		this->crInfo->triggerSet = NULL;
@@ -6043,7 +6043,7 @@ void CustomRORCommand::ReloadTriggersFromGameData(ROR_STRUCTURES_10C::STRUCT_SCE
 }
 
 void CustomRORCommand::ReloadTriggersFromGameData() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
 	if (!global->scenarioInformation) { return; }
 	this->ReloadTriggersFromGameData(global->scenarioInformation);
@@ -6053,9 +6053,9 @@ void CustomRORCommand::ReloadTriggersFromGameData() {
 // Write trigger to game data, using customROR internal data.
 bool CustomRORCommand::WriteTriggersFromInternalToGameData(bool onlyEnabledTriggers) {
 	if (!this->crInfo->triggerSet) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->scenarioInformation) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *sc_info = global->scenarioInformation; // Guaranteed non-NULL by previous "if"
+	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *sc_info = global->scenarioInformation; // Guaranteed non-NULL by previous "if"
 	assert(sc_info != NULL);
 	if (!sc_info) { return false; }
 	std::string tmpStr = this->crInfo->triggerSet->GetStringForScenarioInfo(onlyEnabledTriggers);
@@ -6074,9 +6074,9 @@ bool CustomRORCommand::WriteTriggersFromInternalToGameData(bool onlyEnabledTrigg
 // Write trigger to game data, using provided text trigger data.
 bool CustomRORCommand::WriteTriggersInGameData(char *triggerText) {
 	if (!triggerText) { triggerText = ""; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->scenarioInformation) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_SCENARIO_INFO *sc_info = global->scenarioInformation; // Guaranteed non-NULL by previous "if"
+	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *sc_info = global->scenarioInformation; // Guaranteed non-NULL by previous "if"
 	assert(sc_info != NULL);
 	if (sc_info == NULL) { return false; }
 
@@ -6116,21 +6116,21 @@ void CustomRORCommand::ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES 
 void CustomRORCommand::ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES evt, CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER &evtInfo) {
 	// Make sure we never execute trigger when game is not running
 	// Also disabled in multiplayer games.
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) || settings->isMultiplayer) {
 		return;
 	}
 
 	// Make sure difficulty level is always set
 	if (evtInfo.difficultyLevel < 0) {
-		ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 		assert(settings);
 		if (!settings) { return; }
 		evtInfo.difficultyLevel = settings->difficultyLevel;
 	}
 	// Make sure current game time is always set
 	if (evtInfo.currentGameTime_s < 0) {
-		ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		assert(global);
 		if (!global) { return; }
 		evtInfo.currentGameTime_s = global->currentGameTime / 1000;
@@ -6153,7 +6153,7 @@ void CustomRORCommand::ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES 
 void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 	if (!trigger) { return; }
 	if (!trigger->IsValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global != NULL);
 	if (!global) { return; }
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_WRITE_CHAT) {
@@ -6172,7 +6172,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		actionResourceValue = trigger->GetParameterValue(CR_TRIGGERS::KW_RESOURCE_VALUE, 0.0);
 		if ((actionPlayerId < 0) || (actionPlayerId >= global->playerTotalCount)) { return; }
 		if ((actionResourceId < 0) || (actionResourceId > AOE_CONST_FUNC::CST_RES_ORDER_ALL_RELICS)) { return; }
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
 		if (player) {
 			player->SetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES)actionResourceId, actionResourceValue);
 		}
@@ -6185,7 +6185,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		actionResourceValue = trigger->GetParameterValue(CR_TRIGGERS::KW_RESOURCE_VALUE, 0.0);
 		if ((actionPlayerId < 0) || (actionPlayerId >= global->playerTotalCount)) { return; }
 		if ((actionResourceId < 0) || (actionResourceId > AOE_CONST_FUNC::CST_RES_ORDER_ALL_RELICS)) { return; }
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
 		if (player) {
 			float oldvalue = player->GetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES)actionResourceId);
 			player->SetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES)actionResourceId, oldvalue + actionResourceValue);
@@ -6201,9 +6201,9 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		long int actionResearchId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_RESEARCH_ID, -1);
 		// This feature is not available for invalid players, nor for gaia player.
 		if ((actionPlayerId <= 0) || (actionPlayerId >= global->playerTotalCount) || (actionResearchId < 0)) { return; }
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
 		if (player) {
-			ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_INFO *pr = player->ptrResearchesStruct;
+			AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *pr = player->ptrResearchesStruct;
 			if (!pr || !pr->researchStatusesArray || (pr->researchCount <= actionResearchId)) { return; }
 			if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_DISABLE_RESEARCH) {
 				// We allow to disable researches only if: they are not being researched and not already researched.
@@ -6240,7 +6240,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			maxPlayerId = global->playerTotalCount - 1;
 		}
 		for (int i = minPlayerId; i <= maxPlayerId; i++) { // This for does only 1 loop in standard case (if NOT using a joker)
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(i);
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(i);
 			if (player) {
 				ApplyTechnologyForPlayer(player, actionTechId);
 			}
@@ -6289,7 +6289,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			((elevationLevel < 0) && (terrainId) < 0)) {
 			return;
 		}
-		ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
+		AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
 		assert(gameMapInfo && gameMapInfo->IsCheckSumValid());
 		if (!gameMapInfo || !gameMapInfo->IsCheckSumValid()) { return; }
 		if ((minPosX >= gameMapInfo->mapArraySizeX) || (minPosY >= gameMapInfo->mapArraySizeY) ||
@@ -6297,7 +6297,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			) { return; }
 		for (int x = minPosX; x <= maxPosX; x++) {
 			for (int y = minPosY; y <= maxPosY; y++) {
-				ROR_STRUCTURES_10C::STRUCT_GAME_MAP_TILE_INFO *tile = gameMapInfo->GetTileInfo(x, y);
+				AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO *tile = gameMapInfo->GetTileInfo(x, y);
 				if (tile) {
 					// Note: tile's "Set" methods are both secure (check the value is in bounds)
 					if (elevationLevel >= 0) { tile->terrainData.SetAltitude((char)elevationLevel); } // TO DO: this does not work well in-game + side effects
@@ -6321,7 +6321,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		float posY = trigger->GetParameterValue(CR_TRIGGERS::KW_POS_Y, (float)-1);
 		long int newOwnerId = trigger->GetParameterValue(CR_TRIGGERS::KW_OWNER_PLAYER_ID, -1);
 
-		ROR_STRUCTURES_10C::STRUCT_UNIT *targetUnit = GetUnitStruct(actionUnitId);
+		AOE_STRUCTURES::STRUCT_UNIT *targetUnit = GetUnitStruct(actionUnitId);
 		if (!targetUnit || !targetUnit->IsCheckSumValid()) { return; }
 		if (unitHP_set >= 0) {
 			targetUnit->remainingHitPoints = unitHP_set;
@@ -6342,7 +6342,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			targetUnit->orientation = orientation;
 		}
 		if ((posX >= 0) && (posY >= 0)) { // This has important side effect, not recommended !!! TO DO.
-			ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
+			AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
 			if ((posX < gameMapInfo->mapArraySizeX) && (posY < gameMapInfo->mapArraySizeY)) {
 				targetUnit->positionX = posX;
 				targetUnit->positionY = posY;
@@ -6364,15 +6364,15 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if ((actionUnitDefId < 0) || (actionPlayerId < 0) || (actionPlayerId >= global->playerTotalCount) || (posX < 0) || (posY < 0)) {
 			return;
 		}
-		ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
+		AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
 		assert(gameMapInfo && gameMapInfo->IsCheckSumValid());
 		if ((posX >= gameMapInfo->mapArraySizeX) || (posY >= gameMapInfo->mapArraySizeY)) { return; }
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
 		if (!player || !player->IsCheckSumValid()) { return; }
 		if (actionUnitDefId >= player->structDefUnitArraySize) { return; }
-		ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[actionUnitDefId];
+		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[actionUnitDefId];
 		if (!unitDef || !unitDef->IsCheckSumValid()) { return; }
-		ROR_STRUCTURES_10C::STRUCT_UNIT *unit = CheckAndCreateUnit(player, unitDef, posX, posY, false, true, true);
+		AOE_STRUCTURES::STRUCT_UNIT *unit = CheckAndCreateUnit(player, unitDef, posX, posY, false, true, true);
 	}
 
 	// Make unique (create dedicated unit definition)
@@ -6382,22 +6382,22 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		long int actionUnitId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_ID, -1);
 		if (actionUnitId < 0) { return; }
 		char *newUnitName = trigger->GetParameterValue(CR_TRIGGERS::KW_UNIT_NAME, "");
-		ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)GetUnitStruct(actionUnitId);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(actionUnitId);
 		if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) { return; }
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
 		if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return; }
 		// Only living units & buildings are allowed
 		if (!unitDefBase->DerivesFromLiving()) {
 			traceMessageHandler.WriteMessage("ERROR: 'Make unique' triggers only support living units and buildings.");
 			return;
 		}
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)unitDefBase;
+		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)unitDefBase;
 		if (!unitDefLiving || !unitDefLiving->IsCheckSumValidForAUnitClass()) { return; }
 
-		ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING *unitLiving = (ROR_STRUCTURES_10C::STRUCT_UNIT_LIVING *)unitBase;
+		AOE_STRUCTURES::STRUCT_UNIT_LIVING *unitLiving = (AOE_STRUCTURES::STRUCT_UNIT_LIVING *)unitBase;
 		if (!unitLiving || !unitLiving->IsCheckSumValidForAUnitClass()) { return; }
 
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefToFree = NULL; // Only used for units that have a temporary unitDef (converted units)
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefToFree = NULL; // Only used for units that have a temporary unitDef (converted units)
 		if (unitLiving->hasDedicatedUnitDef) {
 			unitDefToFree = unitDefBase; // previous unitDef was (also) a temporary one. We will free it.
 		}
@@ -6406,17 +6406,17 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		float HPProportion = unitLiving->remainingHitPoints / ((float)unitDefLiving->totalHitPoints);
 
 		// Create the new (temporary) unit definition.
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *newUnitDefBuilding = NULL;
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *newUnitDefLiving = NULL;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *newUnitDefBuilding = NULL;
+		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *newUnitDefLiving = NULL;
 		if (unitLiving->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) {
 			// Our unit is a building
-			//unitDefBuilding = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)unitDefBase;
-			assert(((ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)unitDefBase)->IsCheckSumValid());
-			newUnitDefBuilding = CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)unitDefBase);
-			newUnitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING*)newUnitDefBuilding;
+			//unitDefBuilding = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)unitDefBase;
+			assert(((AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)unitDefBase)->IsCheckSumValid());
+			newUnitDefBuilding = CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING>((AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)unitDefBase);
+			newUnitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING*)newUnitDefBuilding;
 		} else {
 			// We actually have a living unit
-			newUnitDefLiving = CopyUnitDefToNew<ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING>((ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)unitDefBase);
+			newUnitDefLiving = CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_LIVING>((AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)unitDefBase);
 		}
 
 		// Here newUnitDefLiving is ALWAYS our new unitDef (cast as living=parent class if needed)
@@ -6465,7 +6465,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		}
 
 		// Now associate new unit definition to our unit
-		unitLiving->ptrStructDefUnit = (ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *)newUnitDefLiving;
+		unitLiving->ptrStructDefUnit = (AOE_STRUCTURES::STRUCT_DEF_UNIT *)newUnitDefLiving;
 		unitLiving->hasDedicatedUnitDef = 1; // don't forget to set this flag so that ROR correctly frees everything later.
 		// Force use provided name (if provided)
 		if (*newUnitName != 0) {
@@ -6497,12 +6497,12 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		// A first loop to run checks
 		int commonArraySize = -1;
 		for (int loopPlayerId = 0; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(loopPlayerId);
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(loopPlayerId);
 			if (!player || !player->IsCheckSumValid()) { return; }
 			// Make sure that for all players source UnitDefId exists
 			if (sourceUnitDefId >= player->structDefUnitArraySize) { return; }
 			// Make sure source unitDef exists for all players (remember: it can exist and be disabled, like gaia units for other civs)
-			ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *sourceUnitDef = player->ptrStructDefUnitTable[sourceUnitDefId];
+			AOE_STRUCTURES::STRUCT_DEF_UNIT *sourceUnitDef = player->ptrStructDefUnitTable[sourceUnitDefId];
 			if (!sourceUnitDef || !sourceUnitDef->IsCheckSumValid()) { return; }
 			// Make sure maximum unitDefId is the same for ally players (synchronized)
 			if (commonArraySize == -1) {
@@ -6524,11 +6524,11 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 
 		// A second loop to do the job
 		for (int loopPlayerId = 0; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
-			ROR_STRUCTURES_10C::STRUCT_PLAYER *player = GetPlayerStruct(loopPlayerId);
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(loopPlayerId);
 			assert(player && player->IsCheckSumValid()); // should not happen, already checked
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *sourceUnitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE*) player->ptrStructDefUnitTable[sourceUnitDefId];
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *sourceUnitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE*) player->ptrStructDefUnitTable[sourceUnitDefId];
 			assert(sourceUnitDefBase && sourceUnitDefBase->IsCheckSumValidForAUnitClass()); // should not happen, already checked
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *newUnitDefBase = CopyUnitDefToNewUsingGoodClass(sourceUnitDefBase);
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *newUnitDefBase = CopyUnitDefToNewUsingGoodClass(sourceUnitDefBase);
 			if (!newUnitDefBase) {
 				traceMessageHandler.WriteMessage("ERROR: Failed to copy unit definition");
 				return;
@@ -6568,14 +6568,14 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			bool isFlagOrChild = newUnitDefBase->DerivesFromFlag();
 			bool isDeadFishOrChild = newUnitDefBase->DerivesFromDead_fish();
 			bool isBirdOrChild = newUnitDefBase->DerivesFromBird();
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *newUnitDef_flag = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH *newUnitDef_dead_fish = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *newUnitDef_bird = NULL;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *newUnitDef_type50 = NULL;
-			if (isFlagOrChild) { newUnitDef_flag = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_FLAG *)newUnitDefBase; }
-			if (isDeadFishOrChild) { newUnitDef_dead_fish = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_DEAD_FISH *)newUnitDefBase; }
-			if (isBirdOrChild) { newUnitDef_bird = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *)newUnitDefBase; }
-			if (isType50OrChild) { newUnitDef_type50 = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)newUnitDefBase; }
+			AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *newUnitDef_flag = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH *newUnitDef_dead_fish = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *newUnitDef_bird = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *newUnitDef_type50 = NULL;
+			if (isFlagOrChild) { newUnitDef_flag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *)newUnitDefBase; }
+			if (isDeadFishOrChild) { newUnitDef_dead_fish = (AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH *)newUnitDefBase; }
+			if (isBirdOrChild) { newUnitDef_bird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)newUnitDefBase; }
+			if (isType50OrChild) { newUnitDef_type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)newUnitDefBase; }
 
 			// Apply supplied properties to new unit def.
 			if (trigger->IsParameterDefined(CR_TRIGGERS::KW_TOTAL_HP)) {
@@ -6655,7 +6655,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if ((actionUnitId < 0) || (posX < 0) || (posY < 0)) {
 			return;
 		}
-		ROR_STRUCTURES_10C::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
+		AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
 		assert(gameMapInfo && gameMapInfo->IsCheckSumValid());
 		if ((posX >= gameMapInfo->mapArraySizeX) || (posY >= gameMapInfo->mapArraySizeY)) { return; }
 		MoveUnitToTargetOrPosition(GetUnitStruct(actionUnitId), NULL, posX, posY);
@@ -6668,24 +6668,24 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if ((valueToSet < 0) || (valueToSet > 1)) { // only 0 and 1 are accepted
 			return;
 		}
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *gaia = GetPlayerStruct(0);
+		AOE_STRUCTURES::STRUCT_PLAYER *gaia = GetPlayerStruct(0);
 		assert(gaia && gaia->IsCheckSumValid());
 		if (!gaia || !gaia->IsCheckSumValid()) {
 			return;
 		}
-		ROR_STRUCTURES_10C::STRUCT_PER_TYPE_UNIT_LIST_LINK *creatablesLink = gaia->ptrCreatableUnitsListLink;
+		AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_LINK *creatablesLink = gaia->ptrCreatableUnitsListLink;
 		if (!creatablesLink || !creatablesLink->IsCheckSumValid()) {
 			return;
 		}
 		if (creatablesLink->listElemCount <= 0) {
 			return;
 		}
-		ROR_STRUCTURES_10C::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *currentElem = creatablesLink->lastListElement;
+		AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *currentElem = creatablesLink->lastListElement;
 		int counter = creatablesLink->listElemCount;
 		while ((currentElem != NULL) && (counter >= 1)) {
-			ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *unitBase = (ROR_STRUCTURES_10C::STRUCT_UNIT_BASE *)currentElem->unit;
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)currentElem->unit;
 			if (unitBase && unitBase->IsCheckSumValidForAUnitClass()) {
-				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *)unitBase->ptrStructDefUnit;
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)unitBase->ptrStructDefUnit;
 				if (unitDefBase && unitDefBase &&
 					((unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING) || (unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT)) &&
 					(unitDefBase->unitAIType != AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)
@@ -6694,7 +6694,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 					// Very important : exclude artefacts to avoid human players from capturing artefacts more easily than AI players
 
 					// We can convert into type50 because we checked unit type is 70 or 80
-					ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *unit50 = (ROR_STRUCTURES_10C::STRUCT_UNIT_TYPE50 *)unitBase;
+					AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *unit50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)unitBase;
 					unit50->stillToBeDiscoveredByHuman = valueToSet;
 				}
 			}
@@ -6719,7 +6719,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 void CustomRORCommand::ExecuteTriggerAction(CR_TRIGGERS::crTrigger *trigger) {
 	if (!trigger) { return; }
 	if (IsMultiplayer()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global != NULL);
 	if (!global) { return; }
 	if (!trigger->enabled) { return; }

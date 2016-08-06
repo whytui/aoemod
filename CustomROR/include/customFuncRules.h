@@ -9,7 +9,7 @@
 /* This contains various definitions for "custom" (unofficial) game functional rules
 */
 
-using namespace ROR_STRUCTURES_10C;
+using namespace AOE_STRUCTURES;
 
 namespace AOE_CONST_FUNC {
 

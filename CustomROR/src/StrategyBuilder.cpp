@@ -36,7 +36,7 @@ void StrategyBuilder::FreePotentialElementsList() {
 // Get the strategy element that correspond to an Age Id. researchId must correspond to an age upgrade !
 // For stone age, returns the "fake" first strategy element (beginning of strategy)
 // For other researches, returns NULL
-ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *StrategyBuilder::GetAgeStrategyElement(short int researchId) {
+AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *StrategyBuilder::GetAgeStrategyElement(short int researchId) {
 	switch (researchId) {
 	case CST_RSID_STONE_AGE:
 		return &this->buildAI->fakeFirstStrategyElement;
@@ -70,7 +70,7 @@ int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
 
 // Add a research to strategy just before supplied insertion point. Updates "isInStrategy" field.
 // Returns actual number of element that were added
-int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
+int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
 	assert(insertionPoint);
 	assert(resInfo->researchDef != NULL);
 	if (resInfo->isInStrategy || !insertionPoint || !resInfo->researchDef) { return 0; }
@@ -93,7 +93,7 @@ int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, ROR_S
 
 // Add a building to strategy just before supplied insertion point. Updates underlying fields (added count...)
 // Returns actual number of element that were added
-int StrategyBuilder::AddBuildingToStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
+int StrategyBuilder::AddBuildingToStrategy(PotentialBuildingInfo *bldInfo, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
 	assert(bldInfo->desiredCount > bldInfo->addedInStrategyCount);
 	assert(insertionPoint != NULL);
 	assert((bldInfo->unitDef != NULL) && (bldInfo->unitDefId >= 0));
@@ -109,7 +109,7 @@ int StrategyBuilder::AddBuildingToStrategy(PotentialBuildingInfo *bldInfo, ROR_S
 }
 
 // Update a building information object when 1 building has been added to strategy
-void StrategyBuilder::UpdateBuildingInfoAfterAddInStrategy(PotentialBuildingInfo *bldInfo, ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *newElem) {
+void StrategyBuilder::UpdateBuildingInfoAfterAddInStrategy(PotentialBuildingInfo *bldInfo, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *newElem) {
 	// Update building info underlying fields
 	bldInfo->addedInStrategyCount++;
 	if (bldInfo->firstAddedInStrategy == NULL) {
@@ -134,7 +134,7 @@ PotentialResearchInfo *StrategyBuilder::GetResearchInfo(short int researchId) co
 	return NULL;
 }
 // Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
-PotentialResearchInfo *StrategyBuilder::GetResearchInfo(ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef) const {
+PotentialResearchInfo *StrategyBuilder::GetResearchInfo(AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef) const {
 	for each (PotentialResearchInfo *curResInfo in this->potentialResearchesList) {
 		if (curResInfo->researchDef == resDef) { return curResInfo; }
 	}
@@ -143,7 +143,7 @@ PotentialResearchInfo *StrategyBuilder::GetResearchInfo(ROR_STRUCTURES_10C::STRU
 // Add building to potential buildings list and initializes underlying info.
 // Returns NULL if not added, or pointer to object if successful
 PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int researchId) {
-	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(researchId);
+	AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(researchId);
 	if (!resDef || !this->global || !this->player) { return NULL; }
 	// Check availability (tech tree)
 	if (!this->IsResearchInTechTree(researchId)) {
@@ -168,7 +168,7 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 	if (resDef->costUsed2 > 0) { resInfo->totalCosts += resDef->costAmount2; }
 	if (resDef->costUsed3 > 0) { resInfo->totalCosts += resDef->costAmount3; }
 
-	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(resDef->technologyId);
+	AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->GetTechDef(resDef->technologyId);
 	resInfo->techDef = techDef;
 	// Copy & handle requirements in member fields
 	int currentSlotId = 0;
@@ -178,7 +178,7 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 			resInfo->missingRequiredResearches[currentSlotId] = curReqResId;
 			currentSlotId++;
 			resInfo->researchesThatMustBePutBeforeMe.insert(curReqResId);
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *tmpUnitDef = FindBuildingDefThatEnablesResearch(this->player, curReqResId);
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *tmpUnitDef = FindBuildingDefThatEnablesResearch(this->player, curReqResId);
 			if (tmpUnitDef && tmpUnitDef->IsCheckSumValidForAUnitClass()) {
 				resInfo->unitsThatMustBePutBeforeMe.insert(tmpUnitDef->DAT_ID1);
 				if (resInfo->directRequirementsAreSatisfied) {
@@ -229,7 +229,7 @@ PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(short int unitDefId) con
 	return NULL;
 }
 // Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
-PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef) const {
+PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef) const {
 	for each (PotentialBuildingInfo *curBldInfo in this->potentialBuildingsList) {
 		if (curBldInfo->unitDef == unitDef) { return curBldInfo; }
 	}
@@ -239,13 +239,13 @@ PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(ROR_STRUCTURES_10C::STRU
 // Returns true if actually added
 bool StrategyBuilder::AddPotentialBuildingInfoToList(short int unitDefId) {
 	if (unitDefId < 0) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)player->GetUnitDefBase(unitDefId);
+	AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)player->GetUnitDefBase(unitDefId);
 	if (unitDef && unitDef->IsTypeValid()) {
 		return AddPotentialBuildingInfoToList(unitDef);
 	}
 	return false;
 }
-bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef) {
+bool StrategyBuilder::AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef) {
 	if (!unitDef || !unitDef->IsTypeValid()) { return false; }
 	PotentialBuildingInfo *bldInfo = this->GetBuildingInfo(unitDef->DAT_ID1);
 	if (bldInfo != NULL) {
@@ -256,7 +256,7 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_
 	bldInfo->unitDefId = unitDef->DAT_ID1;
 	bldInfo->enabledByResearchId = FindResearchThatEnableUnit(this->player, unitDef->DAT_ID1, 0);
 	bldInfo->desiredCount = 1;
-	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *parentResDef = player->GetResearchDef(bldInfo->enabledByResearchId);
+	AOE_STRUCTURES::STRUCT_RESEARCH_DEF *parentResDef = player->GetResearchDef(bldInfo->enabledByResearchId);
 	if (parentResDef && (bldInfo->enabledByResearchId >= 0)) {
 		bldInfo->enabledInAge = GetAgeResearchFromDirectRequirement(parentResDef);
 	} else {
@@ -264,9 +264,9 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_
 	}
 	// Is it a high-priority building ?
 	if (unitDef->initiatesResearch >= 0) {
-		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(unitDef->initiatesResearch);
+		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(unitDef->initiatesResearch);
 		if (resDef && (resDef->technologyId >= 0)) {
-			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(resDef->technologyId);
+			AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->GetTechDef(resDef->technologyId);
 			if (techDef) {
 				if (DoesTechEnableUnit(techDef, CST_UNITID_FARM)) {
 					bldInfo->highPriority = true; // The building that enables farming (market in standard game) must be built ASAP.
@@ -286,7 +286,7 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(ROR_STRUCTURES_10C::STRUCT_
 
 // Returns true if a research is available in tech tree
 bool StrategyBuilder::IsResearchInTechTree(short int researchId) {
-	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techTreeDef = this->global->GetTechDef(this->player->techTreeId);
+	AOE_STRUCTURES::STRUCT_TECH_DEF *techTreeDef = this->global->GetTechDef(this->player->techTreeId);
 	if (techTreeDef) {
 		if (DoesTechDisableResearch(techTreeDef, researchId)) {
 			return false; // not available because disabled by tech tree
@@ -297,16 +297,16 @@ bool StrategyBuilder::IsResearchInTechTree(short int researchId) {
 
 // Updates this->mustBeBeforeThisElem and this->mustBeAfterThisElem according to known dependencies on other unit/researches
 // Previous values of mustBeBeforeThisElem  and mustBeAfterThisElem are reset (lost)
-void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI) {
+void PotentialResearchInfo::ComputeStratElemPositionConstraints(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	if (!buildAI) { return; }
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
 	if (!player) { return; }
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirst = &buildAI->fakeFirstStrategyElement;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirst = &buildAI->fakeFirstStrategyElement;
 	this->mustBeBeforeThisElem = NULL;
 	this->mustBeAfterThisElem = NULL;
 
 	// Standard calculation of mustBeAfterThisElem and mustBeBeforeThisElem
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = buildAI->fakeFirstStrategyElement.next;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = buildAI->fakeFirstStrategyElement.next;
 	while (curElem && (curElem != fakeFirst) && (this->mustBeBeforeThisElem == NULL)) {
 		if (this->mustBeBeforeThisElem == NULL) {
 			// "mustBeBeforeThisElem" is the first encountered item that match a "xxxThatMustBePutAfterMe" item
@@ -339,7 +339,7 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_1
 	if (this->forcePlaceForFirstImpactedUnit || this->forcePutAsEarlyAsPossible) {
 		assert(player && player->IsCheckSumValid());
 		if (!player || !player->IsCheckSumValid()) { return; }
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *bestFirstElem = this->mustBeAfterThisElem; // use previous calculations for initial position
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *bestFirstElem = this->mustBeAfterThisElem; // use previous calculations for initial position
 		if (bestFirstElem) {
 			bestFirstElem = bestFirstElem->next;
 		}
@@ -361,7 +361,7 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_1
 						unitClass = TAIUnitClass::AIUCLivingUnit;
 					}
 				}
-				ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstElemThisUnit = FindFirstElementInStrategy(fakeFirst, unitClass, unitDefId);
+				AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstElemThisUnit = FindFirstElementInStrategy(fakeFirst, unitClass, unitDefId);
 				if (firstElemThisUnit && firstElemThisUnit->IsCheckSumValid()) {
 					if ((bestFirstElem == NULL) || GetFirstElementOf(buildAI, bestFirstElem, firstElemThisUnit) == firstElemThisUnit) {
 						bestFirstElem = firstElemThisUnit;
@@ -373,7 +373,7 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_1
 			// Do not insert right here. Let AI train some units before starting upgrades.
 			int elemCount = 0;
 			int maxElemCount = randomizer.GetRandomValue_normal_moreFlat(2, maxValueForMaxElemCount); // Do not add further than x "elems" away from base calculated point
-			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = bestFirstElem;
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = bestFirstElem;
 			while (curElem && (elemCount < maxElemCount)) { // Just move a bit further
 				if (curElem->elementType == TAIUnitClass::AIUCCritical) { elemCount = maxElemCount; } // Force "don't go further" / probably an age upgrade
 				elemCount++;
@@ -395,7 +395,7 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_1
 		}
 	}
 	if (this->forcePutAfterOtherResearches) {
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = this->mustBeBeforeThisElem;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = this->mustBeBeforeThisElem;
 		if (!curElem) {
 			curElem = buildAI->fakeFirstStrategyElement.previous;
 		}
@@ -404,14 +404,14 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_1
 			(curElem != this->mustBeAfterThisElem)) {
 			if ((curElem->elementType == TAIUnitClass::AIUCTech) || (curElem->elementType == TAIUnitClass::AIUCCritical)) {
 				short int resDefId = (short int)curElem->unitDAT_ID;
-				ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = player->GetResearchDef(resDefId);
+				AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = player->GetResearchDef(resDefId);
 				if (resDef) {
-					ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = player->ptrGlobalStruct->GetTechDef(resDef->technologyId);
+					AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = player->ptrGlobalStruct->GetTechDef(resDef->technologyId);
 					if (techDef) {
 						static AOE_TECHNOLOGIES::TechnologyFilterBase filter;
 						for each (short int unitDefId in this->impactedUnitDefIds)
 						{
-							ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = player->GetUnitDefBase(unitDefId);
+							AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->GetUnitDefBase(unitDefId);
 							foundStratElem = foundStratElem || DoesTechAffectUnit(techDef, unitDef, &filter);
 						}
 					}
@@ -434,12 +434,12 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(ROR_STRUCTURES_1
 // Fills unitInfos with all available military units from tech tree.
 // Towers are ignored (not added to list). Boats are ignored on non-water maps.
 // *** Make sure to delete all PotentialUnitInfo from list when you're finished with the list ***
-void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid() || !player->ptrStructDefUnitTable || !player->ptrResearchesStruct) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
 	bool isWaterMap = IsDockRelevantForMap(settings->mapTypeChoice);
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid()) { return; }
 	if (!global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid()) { return; }
 	// Retrieve player tech tree
@@ -583,11 +583,11 @@ void StrategyBuilder::CollectPotentialUnitsInfo(ROR_STRUCTURES_10C::STRUCT_PLAYE
 			float bestRange = unitDefLiving->displayedRange;
 			short int bestAttack = unitDefLiving->displayedAttack;
 			short int bestArmor = unitDefLiving->displayedArmor;
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *bestUpgradedUnit = unitDefLiving;
+			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *bestUpgradedUnit = unitDefLiving;
 			float bestSpeed = unitDefLiving->speed;
 			for each (short int upgradedUnitDefId in unitInfo->upgradesUnitDefId)
 			{
-				ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *upgradedDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)GetUnitDefStruct(player, upgradedUnitDefId);
+				AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *upgradedDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)GetUnitDefStruct(player, upgradedUnitDefId);
 				bool currentIsBetter = false;
 				if (upgradedDef && upgradedDef->IsCheckSumValid()) {
 					if ((upgradedDef->totalHitPoints > bestHP) || (upgradedDef->displayedAttack > bestAttack) ||
@@ -750,7 +750,7 @@ void StrategyBuilder::ComputeStrengthsForPotentialUnits() {
 
 		bool hasInefficientProjectile = false;
 		if (IsRangedUnit(unitInfo->upgradedUnitDefLiving)) {
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *projectile = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)
+			AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *projectile = (AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *)
 				this->player->GetUnitDefBase(unitInfo->upgradedUnitDefLiving->projectileUnitId);
 			if (projectile) {
 				if (GetProjectileType(projectile) == UNIT_PROJECTILE_TYPE::UPT_CATAPULT_STONE) {
@@ -1273,7 +1273,7 @@ void StrategyBuilder::ComputeGlobalScores() {
 
 		// Range units (siege): decrease score for slow/inefficient projectiles (catapults !)
 		if (unitInfo->baseUnitDefLiving && (IsRangedUnit(unitInfo->baseUnitDefLiving))) {
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *proj = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(unitInfo->baseUnitDefLiving->projectileUnitId);
+			AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *proj = (AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(unitInfo->baseUnitDefLiving->projectileUnitId);
 			UNIT_PROJECTILE_TYPE pType = GetProjectileType(proj);
 			if (pType == UNIT_PROJECTILE_TYPE::UPT_CATAPULT_STONE) {
 				unitInfo->globalScore = (unitInfo->globalScore * 90 / 100);
@@ -1500,7 +1500,7 @@ float StrategyBuilder::GetFarmProductionBonus(short int researchId, float suppos
 // Get the additional farm production amount for a technology (not recursive)
 float StrategyBuilder::GetFarmProductionBonusForTech(short int techId, float supposedCurrentProduction) const {
 	if (techId < 0) { return 0; }
-	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(techId);
+	AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(techId);
 	for (int i = 0; (techDef != NULL) && (i < techDef->effectCount); i++) {
 		if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) &&
 			(techDef->ptrEffects[i].effectUnit == CST_RES_ORDER_FARM_FOOD_AMOUNT)) {
@@ -1548,7 +1548,7 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 			if (resInfo->unitInstanceScoreForOptionalResearch < 0) {
 				resInfo->unitInstanceScoreForOptionalResearch = 0;
 			}
-			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resInfo->researchDef->technologyId);
+			AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resInfo->researchDef->technologyId);
 			for (int i = 0; (techDef != NULL) && (i < techDef->effectCount); i++) {
 				if (techDef->ptrEffects[i].IsAttributeModifier()) {
 					if ((techDef->ptrEffects[i].effectClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) &&
@@ -1921,7 +1921,7 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 			if (unitInfo->enabledByResearchId == -1) {
 				lowCostActivation = true;
 			} else {
-				ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(this->player, unitInfo->enabledByResearchId);
+				AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(this->player, unitInfo->enabledByResearchId);
 				if (resDef) {
 					int totalCost = 0;
 					if (resDef->costUsed1) { totalCost += resDef->costAmount1; }
@@ -1978,7 +1978,7 @@ void StrategyBuilder::SelectStrategyUnits() {
 	this->log += newline;
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits) {
 		std::string msg = "Unit id=";
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unit = NULL;
+		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unit = NULL;
 		if (unitInfo->isOptionalUnit) {
 			msg += std::to_string(unitInfo->unitDefId);
 			unit = unitInfo->baseUnitDefLiving;
@@ -1999,7 +1999,7 @@ void StrategyBuilder::SelectStrategyUnits() {
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
 		if (!unitInfo->isSelected) {
 			std::string msg = "[Not selected] Unit id=";
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unit = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unit = NULL;
 			if (unitInfo->isOptionalUnit) {
 				msg += std::to_string(unitInfo->unitDefId);
 				unit = unitInfo->baseUnitDefLiving;
@@ -2060,7 +2060,7 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 				}
 			}
 			// Bonus for no-research units (no cost to have it available)
-			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = player->GetResearchDef(unitInfo->enabledByResearchId);
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = player->GetResearchDef(unitInfo->enabledByResearchId);
 			bool nullCost = (resDef == NULL);
 			if (resDef) {
 				if (((resDef->costUsed1 == 0) || (resDef->costAmount1 == 0)) &&
@@ -2391,9 +2391,9 @@ void StrategyBuilder::ChooseOptionalResearches() {
 // Add researches for villagers/economy (does not mark them for add : optional researches)
 void StrategyBuilder::AddResearchesForEconomy() {
 	for (int unitDefId = 0; unitDefId < this->player->structDefUnitArraySize; unitDefId++) {
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDef = this->player->GetUnitDefBase(unitDefId);
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = this->player->GetUnitDefBase(unitDefId);
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromBird()) {
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *unitDefBird = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BIRD *)unitDef;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDefBird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)unitDef;
 			if (unitDefBird->villagerMode && (unitDefBird->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian)) {
 				this->CollectResearchInfoForUnit(unitDefId, true);
 			}
@@ -2424,9 +2424,9 @@ void StrategyBuilder::AddTowerResearches() {
 	watchTowerInfo->forcePutAsEarlyAsPossible = true;
 	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false);
 
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *watchTower = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)this->player->GetUnitDefBase(CST_UNITID_WATCH_TOWER);
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *watchTower = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)this->player->GetUnitDefBase(CST_UNITID_WATCH_TOWER);
 	if (!watchTower || !watchTower->IsCheckSumValidForAUnitClass() || !watchTower->DerivesFromType50()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *projectileDefInitial = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(watchTower->projectileUnitId);
+	AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *projectileDefInitial = (AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(watchTower->projectileUnitId);
 
 	std::vector<short int> allResearchesForUnit = FindResearchesThatAffectUnit(player, CST_UNITID_WATCH_TOWER, true);
 	// Add the available upgrades (except ballista tower), ignore other techs
@@ -2435,18 +2435,18 @@ void StrategyBuilder::AddTowerResearches() {
 		bool newProjectileIsMuchSlower = false;
 		bool newReloadTimeIsMuchSlower = false;
 		bool isUpgradeUnit = false;
-		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(researchId);
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *destBld = NULL;
+		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(researchId);
+		AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *destBld = NULL;
 		if (resDef && (resDef->technologyId >= 0) && (resDef->researchLocation >= 0)) {
-			ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resDef->technologyId);
+			AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resDef->technologyId);
 			if (techDef) {
 				short int destUnitId = GetNewUnitIdIfTechUpgradesUnit(techDef, CST_UNITID_WATCH_TOWER);
-				destBld = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_TYPE50 *)this->player->GetUnitDefBase(destUnitId);
+				destBld = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)this->player->GetUnitDefBase(destUnitId);
 				isUpgradeUnit = (destUnitId > -1) && (destBld != NULL);
 			}
 		}
 		if (destBld && destBld->IsCheckSumValidForAUnitClass() && destBld->DerivesFromType50()) {
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *projectileDefAfter = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(destBld->projectileUnitId);
+			AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *projectileDefAfter = (AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(destBld->projectileUnitId);
 			if (projectileDefAfter && projectileDefAfter->IsCheckSumValid()) {
 				float speedAfter = projectileDefAfter->speed;
 				float speedInitial = projectileDefInitial->speed;
@@ -2496,9 +2496,9 @@ void StrategyBuilder::AddMandatoryNonMilitaryResearches() {
 
 
 // Get the very global information about strategy generation (number of villagers, etc)
-void StrategyBuilder::CollectGlobalStrategyGenerationInfo(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+void StrategyBuilder::CollectGlobalStrategyGenerationInfo(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
 	this->maxPopulation = this->crInfo->configInfo.singlePlayerMaxPopulation;
 	if (this->maxPopulation <= 0) {
@@ -2544,7 +2544,7 @@ void StrategyBuilder::CollectGlobalStrategyGenerationInfo(ROR_STRUCTURES_10C::ST
 void StrategyBuilder::CreateTCAndAgesStrategyElements() {
 	if (!this->buildAI || !this->buildAI->IsCheckSumValid()) { return; }
 	if (!player || !player->IsCheckSumValid()) { return; }
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
 	
 	// Adding before "fake first" will add in last position in strategy.
 	// Add Town Center
@@ -2605,7 +2605,7 @@ void StrategyBuilder::CreateVillagerStrategyElements() {
 	assert(this->seIronAge != NULL);
 	if (!this->seToolAge || !this->seBronzeAge || !this->seIronAge) { return; }
 
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
 	int totalVillagersCount = this->villagerCount_alwaysRetrain + this->villagerCount_limitedRetrains;
 	assert(this->villagerCount_alwaysRetrain + this->villagerCount_limitedRetrains > 0);
 
@@ -2713,8 +2713,8 @@ void StrategyBuilder::CreateEarlyMilitaryUnitsElements() {
 			}
 		}
 		// Find insertion point
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = &this->buildAI->fakeFirstStrategyElement; // insert just before this
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *minInsertionPoint = NULL; // do not insert before this.
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint = &this->buildAI->fakeFirstStrategyElement; // insert just before this
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *minInsertionPoint = NULL; // do not insert before this.
 		switch (currentAge) {
 		case CST_RSID_STONE_AGE:
 		case CST_RSID_TOOL_AGE:
@@ -2733,7 +2733,7 @@ void StrategyBuilder::CreateEarlyMilitaryUnitsElements() {
 		}
 		// Use orderedUnitsToAdd to add elements in strategy in optimized order (with unit repartition)
 		int loopCount = 0;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *beforeInsertionPoint = insertionPoint->previous;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *beforeInsertionPoint = insertionPoint->previous;
 		for each (PotentialUnitInfo *unitInfo in orderedUnitsToAdd)
 		{
 			long int retrains = 2;
@@ -2745,7 +2745,7 @@ void StrategyBuilder::CreateEarlyMilitaryUnitsElements() {
 			if (loopCount == 4) {
 				// Move insertion point earlier so all units are not onsecutive
 				int movementCount = 0; // = number of elements to reach "minInsertionPoint", backwards movement
-				ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = beforeInsertionPoint->next; // should be 1st inserted element
+				AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = beforeInsertionPoint->next; // should be 1st inserted element
 				while ((movementCount < 100) && curElem && (curElem->previous != minInsertionPoint)) {
 					curElem = curElem->previous;
 					movementCount++;
@@ -2761,7 +2761,7 @@ void StrategyBuilder::CreateEarlyMilitaryUnitsElements() {
 		// Compute unitInfo->firstStratElem
 		for each (PotentialUnitInfo *unitInfo in orderedUnitsToAdd)
 		{
-			ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = this->buildAI->fakeFirstStrategyElement.next;
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = this->buildAI->fakeFirstStrategyElement.next;
 			bool found = false;
 			while (curElem && (curElem != &this->buildAI->fakeFirstStrategyElement) && !found) {
 				if ((curElem->unitDAT_ID == unitInfo->unitDefId) && (curElem->elementType == TAIUnitClass::AIUCLivingUnit)) {
@@ -2869,7 +2869,7 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 	}
 
 	// For the moment, insert all in iron age
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = &this->buildAI->fakeFirstStrategyElement;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint = &this->buildAI->fakeFirstStrategyElement;
 
 	// Fill orderedUnitsToAdd list with ordered units (1 by 1)
 	std::list<PotentialUnitInfo*> orderedUnitsToAdd;
@@ -2982,7 +2982,7 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 			if (resInfo && (resInfo->researchId == resId) && (!resInfo->isInStrategy) && (resInfo->markedForAdd) && resInfo->researchDef) {
 					resInfo->ComputeStratElemPositionConstraints(this->buildAI); // update dependencies on strategy elements
 					// Add to strategy at correct location
-					ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
+					AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
 					if (resInfo->mustBeAfterThisElem != NULL) {
 						insertionPoint = resInfo->mustBeAfterThisElem->next;
 					}
@@ -2992,7 +2992,7 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 					}
 					if ((usefulness >= 2) && (usefulness <= 3)) {
 						int elemCountInAllowedInterval = 0;
-						ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = resInfo->mustBeAfterThisElem->next;
+						AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = resInfo->mustBeAfterThisElem->next;
 						while (curElem && (curElem != &buildAI->fakeFirstStrategyElement) && (curElem != resInfo->mustBeBeforeThisElem)) {
 							elemCountInAllowedInterval++;
 							curElem = curElem->next;
@@ -3038,7 +3038,7 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 			for each (short int unitDefId in resInfo->impactedUnitDefIds) {
 				AOE_TECHNOLOGIES::TechFilterExcludeDrawbacksAndDistributedEffects filter;
 				if (GetNewUnitIdIfTechUpgradesUnit(resInfo->techDef, unitDefId) >= 0) {
-					ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)this->player->GetUnitDefBase(unitDefId);
+					AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)this->player->GetUnitDefBase(unitDefId);
 					if (unitDef && unitDef->DerivesFromLiving()) {
 						int totalUnitCost = 0;
 						for (int i = 0; i < 3; i++) {
@@ -3059,7 +3059,7 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 				resInfo->ComputeStratElemPositionConstraints(this->buildAI);
 				if (resInfo->mustBeAfterThisElem && resInfo->mustBeAfterThisElem->next) {
 					// Put the research after some impacted units
-					ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = curElem = resInfo->mustBeAfterThisElem->next;
+					AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = curElem = resInfo->mustBeAfterThisElem->next;
 					int count = 1;
 					const int unitCountBeforeResearch = 3;
 					int unitCountBeforeResearchWithRandom = unitCountBeforeResearch + randomizer.GetRandomValue_normal_moderate(-4, 4);
@@ -3120,7 +3120,7 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 				if (requirementsAreReady) {
 					resInfo->ComputeStratElemPositionConstraints(this->buildAI); // update dependencies on strategy elements
 					// Add to strategy at correct location
-					ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
+					AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
 					if (resInfo->mustBeAfterThisElem != NULL) {
 						insertionPoint = resInfo->mustBeAfterThisElem->next;
 					}
@@ -3176,13 +3176,13 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 			this->log += "Warning: do not add dock in strategy as this is not a water map";
 		}
 
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = this->GetAgeStrategyElement(bldInfo->enabledInAge);
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &this->buildAI->fakeFirstStrategyElement;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = this->GetAgeStrategyElement(bldInfo->enabledInAge);
 		if (!curElem) {
 			curElem = &this->buildAI->fakeFirstStrategyElement;
 		}
 		curElem = curElem->next;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *insertionPoint = NULL;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint = NULL;
 		if (bldInfo->highPriority) {
 			bldInfo->highPriority = false; // High priority is only for first placed building of this kind
 			insertionPoint = curElem; // insertionPoint being set here, next loop will be ignored in this case
@@ -3222,13 +3222,13 @@ void StrategyBuilder::CreateFarmStrategyElements() {
 	PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
 	if (!farmInfo || (farmInfo->desiredCount <= 0)) { return; }
 
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *myAgeElem = this->GetAgeStrategyElement(farmInfo->enabledInAge);
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *myAgeElem = this->GetAgeStrategyElement(farmInfo->enabledInAge);
 	if (myAgeElem == NULL) {
 		myAgeElem = this->seToolAge;
 	}
 	int stratElemCountInAge = 0;
 	bool foundNextAge = false;
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextAgeElem = myAgeElem->next;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *nextAgeElem = myAgeElem->next;
 	while (nextAgeElem && (nextAgeElem != &this->buildAI->fakeFirstStrategyElement) && !foundNextAge) {
 		foundNextAge = ((nextAgeElem->elementType == TAIUnitClass::AIUCCritical) || (nextAgeElem->elementType == TAIUnitClass::AIUCTech)) &&
 			(nextAgeElem->unitDAT_ID >= CST_RSID_STONE_AGE) && (nextAgeElem->unitDAT_ID <= CST_RSID_IRON_AGE); // +104 for republic age
@@ -3246,7 +3246,7 @@ void StrategyBuilder::CreateFarmStrategyElements() {
 		this->UpdateBuildingInfoAfterAddInStrategy(farmInfo, NULL);
 	}
 	if (randomizer.GetRandomPercentageValue() <= 50) {
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstFarm = FindFirstElementInStrategy(myAgeElem, TAIUnitClass::AIUCBuilding, farmInfo->unitDefId);
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstFarm = FindFirstElementInStrategy(myAgeElem, TAIUnitClass::AIUCBuilding, farmInfo->unitDefId);
 		if (firstFarm && firstFarm->IsCheckSumValid()) {
 			firstFarm->retrains = 6; // Limited retrains to get (a bit) less farms in late game
 		}
@@ -3266,7 +3266,7 @@ void StrategyBuilder::CreateTowerBuildingsStrategyElements() {
 	if (startAge < CST_RSID_TOOL_AGE) {
 		startAge = CST_RSID_TOOL_AGE;
 	}
-	ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *myAgeElem = this->GetAgeStrategyElement(startAge);
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *myAgeElem = this->GetAgeStrategyElement(startAge);
 	if (myAgeElem == NULL) {
 		myAgeElem = this->seToolAge;
 	}
@@ -3290,7 +3290,7 @@ void StrategyBuilder::CreateTowerBuildingsStrategyElements() {
 			break;
 		}
 
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem = myAgeElem;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem = myAgeElem;
 		if (towerInfo->firstAddedInStrategy) {
 			if (GetFirstElementOf(this->buildAI, towerInfo->firstAddedInStrategy, mustBeAfterThisElem) == mustBeAfterThisElem) {
 				mustBeAfterThisElem = towerInfo->firstAddedInStrategy; // mustBeAfterThisElem is the "latest" element
@@ -3305,7 +3305,7 @@ void StrategyBuilder::CreateTowerBuildingsStrategyElements() {
 
 		int stratElemUntilNextAge = 0;
 		bool foundNextAge = false;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *nextAgeElem = mustBeAfterThisElem->next;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *nextAgeElem = mustBeAfterThisElem->next;
 		while (nextAgeElem && (nextAgeElem != &this->buildAI->fakeFirstStrategyElement) && !foundNextAge) {
 			foundNextAge = ((nextAgeElem->elementType == TAIUnitClass::AIUCCritical) || (nextAgeElem->elementType == TAIUnitClass::AIUCTech)) &&
 				(nextAgeElem->unitDAT_ID >= CST_RSID_STONE_AGE) && (nextAgeElem->unitDAT_ID <= CST_RSID_IRON_AGE); // +104 for republic age
@@ -3335,7 +3335,7 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 	// Backup TC: add after all "required" buildings and after gov center (not allowed before) & after iron age too
 	PotentialBuildingInfo *tcInfo = this->GetBuildingInfo(CST_UNITID_FORUM);
 	if (tcInfo && (tcInfo->addedInStrategyCount <= 1) && (tcInfo->desiredCount > 1)) {
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = this->seIronAge;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = this->seIronAge;
 		if (GetFirstElementOf(this->buildAI, curElem, this->seGovCenter) == curElem) {
 			curElem = this->seGovCenter; // Now curElem is the latest of the 2 elements in strategy
 		}
@@ -3392,7 +3392,7 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 		this->log += " units)";
 		this->log += newline;
 		assert(bldInfo->firstAddedInStrategy != NULL);
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *curElem = bldInfo->firstAddedInStrategy;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = bldInfo->firstAddedInStrategy;
 		if (curElem) {
 			int usageOfThisBuildingCount = 0;
 			while (curElem && (bldInfo->addedInStrategyCount < bldInfo->desiredCount) &&
@@ -3560,8 +3560,8 @@ std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitD
 	}
 	// Consider unit's train location too !
 #pragma message("TODO: Add this missing part in original method in strategy.cpp")
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(unitDefId);
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *unitDefLiving = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)unitDefBase;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(unitDefId);
+	AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)unitDefBase;
 	if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass() && unitDefLiving->DerivesFromLiving()) {
 		short int trainLocation = unitDefLiving->trainLocation;
 		if (trainLocation == CST_UNITID_BUILDER) { trainLocation = -1; }
@@ -3579,7 +3579,7 @@ std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitD
 
 	for each (short int resDefId in allResearchesForUnit)
 	{
-		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(player, resDefId);
+		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(player, resDefId);
 		if (resDef) {
 			PotentialResearchInfo *resInfo = this->GetResearchInfo(resDefId);
 			if (resInfo == NULL) {
@@ -3638,7 +3638,7 @@ int StrategyBuilder::UpdateRequiredBuildingsFromValidatedResearches() {
 				}
 			}
 			// Building that enables research
-			ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *parentBld = FindBuildingDefThatEnablesResearch(this->player, resInfo->researchId);
+			AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *parentBld = FindBuildingDefThatEnablesResearch(this->player, resInfo->researchId);
 			if (parentBld) {
 				if (this->AddPotentialBuildingInfoToList(parentBld->DAT_ID1)) {
 					addedElements++;
@@ -3720,12 +3720,12 @@ void StrategyBuilder::AddMissingBuildings() {
 	assert(this->global && this->player);
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
-		std::list<ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*> missingBuildingsDef;
+		std::list<AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*> missingBuildingsDef;
 		missingBuildingsDef.clear();
 		if (!resInfo->directRequirementsAreSatisfied) {
 			for (int i = 0; i < 4; i++) {
 				if (resInfo->missingRequiredResearches[i] >= 0) {
-					ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bldDef = FindBuildingDefThatEnablesResearch(this->player, resInfo->missingRequiredResearches[i]);
+					AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *bldDef = FindBuildingDefThatEnablesResearch(this->player, resInfo->missingRequiredResearches[i]);
 					if (bldDef && bldDef->IsCheckSumValid()) {
 						bool found = false;
 						// We found a building that satisfies a requirement. Is this building (already) in my list
@@ -3745,7 +3745,7 @@ void StrategyBuilder::AddMissingBuildings() {
 
 			// We got a list of buildings that satisfy missing requirements. Pick some until it is ok
 			bool useTemple = false;
-			for each (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bldDef in missingBuildingsDef)
+			for each (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *bldDef in missingBuildingsDef)
 			{
 				// This loop is here to give priority to temple, if relevant
 				if (bldDef->DAT_ID1 == CST_UNITID_TEMPLE) {
@@ -3754,16 +3754,16 @@ void StrategyBuilder::AddMissingBuildings() {
 			}
 			if (useTemple) {
 				auto it = std::remove_if(missingBuildingsDef.begin(), missingBuildingsDef.end(),
-					[](ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bldDef) { return bldDef->DAT_ID1 == CST_UNITID_TEMPLE; }
+					[](AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *bldDef) { return bldDef->DAT_ID1 == CST_UNITID_TEMPLE; }
 				);
 				missingBuildingsDef.erase(it, missingBuildingsDef.end());
 			}
 
 			int loopCount = 0;
 			while (!resInfo->directRequirementsAreSatisfied && (loopCount < 4) && (useTemple || !missingBuildingsDef.empty())) {
-				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bldDef = NULL;
+				AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *bldDef = NULL;
 				if (useTemple) {
-					bldDef = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)this->player->GetUnitDefBase(CST_UNITID_TEMPLE);
+					bldDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)this->player->GetUnitDefBase(CST_UNITID_TEMPLE);
 					useTemple = false;
 				} else {
 					bldDef = missingBuildingsDef.front();

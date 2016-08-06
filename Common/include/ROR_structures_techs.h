@@ -10,7 +10,7 @@ using namespace AOE_CONST_FUNC;
 * ALL your findings about AOE/ROR structures
 * Please share knowledge for better modding experience !
 */
-namespace ROR_STRUCTURES_10C {
+namespace AOE_STRUCTURES {
 
 
 	// Size =  0x0C

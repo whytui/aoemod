@@ -12,7 +12,7 @@
 /* This file does not provide methods to do any treatments, only tools for debugging.
 */
 
-namespace ROR_STRUCTURES_10C
+namespace AOE_STRUCTURES
 {
 
 	// Allocates and gets a copy of a ROR structure
@@ -82,7 +82,7 @@ namespace ROR_STRUCTURES_10C
 
 	// This child class can export remote objects (from a different process).
 	// All linked objects are copied from ROR process and then exported (recursively)
-	class ROR_STRUCT_EXPORTER_REMOTE : public ROR_STRUCTURES_10C::ROR_STRUCT_EXPORTER {
+	class ROR_STRUCT_EXPORTER_REMOTE : public AOE_STRUCTURES::ROR_STRUCT_EXPORTER {
 	public:
 		// Handle to ROR process. Set this before calling various methods.
 		HANDLE handleROR;

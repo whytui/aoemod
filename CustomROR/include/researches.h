@@ -14,7 +14,7 @@
 #include "crLocalization.h"
 #include "TechnologyFilter.h"
 
-using namespace ROR_STRUCTURES_10C;
+using namespace AOE_STRUCTURES;
 using namespace AOE_CONST_FUNC;
 
 // Technologies to ignore for automatic technology adding/detection, because they have drawbacks or unused by AI
@@ -107,8 +107,8 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 // For example, for research 17, it will return temple's definition because temple's unitDef.initiatesResearch == 17.
 // Returns NULL if not found.
 // Warning: result is not unique. Eg. Both barracks (12,132) initiate research 62. This method tries to return the base unit ID (not upgraded one)
-ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(STRUCT_PLAYER *player, short int researchId);
+AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(STRUCT_PLAYER *player, short int researchId);
 
 // Writes text representing available tech tree (available technologies that have not been researched yet)
-std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player);
+std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player);
 

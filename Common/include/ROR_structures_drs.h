@@ -9,7 +9,7 @@
 * ALL your findings about AOE/ROR structures
 * Please share knowledge for better modding experience !
 */
-namespace ROR_STRUCTURES_10C {
+namespace AOE_STRUCTURES {
 
 	class STRUCT_DRS_TABLE;
 	class STRUCT_DRS_TABLE_DATA;

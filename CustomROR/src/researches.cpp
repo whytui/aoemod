@@ -1,6 +1,6 @@
 #include "../include/researches.h"
 
-using namespace ROR_STRUCTURES_10C;
+using namespace AOE_STRUCTURES;
 using namespace AOE_CONST_FUNC;
 
 
@@ -10,10 +10,10 @@ std::string GetTechnologyLocalizedName(short int techId) {
 	if (techId < 0) {
 		return "invalid-tech";
 	}
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
 	assert(settings != NULL);
 	if (!settings) { return ""; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
 		return "";
 	}
@@ -37,10 +37,10 @@ std::string GetResearchLocalizedName(short int researchId) {
 	if (researchId < 0) {
 		return "invalid-research";
 	}
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
 	assert(settings != NULL);
 	if (!settings) { return ""; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
 		return "";
 	}
@@ -87,7 +87,7 @@ short int GetAgeResearchFromDirectRequirement(STRUCT_RESEARCH_DEF *researchDef) 
 // Returns -1 if there is no required age (always available)
 short int FindResearchRequiredAge(STRUCT_PLAYER *player, short int researchId) {
 	if (!player || !player->IsCheckSumValid()) { return -1; }
-	ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef = player->GetResearchDef(researchId);
+	AOE_STRUCTURES::STRUCT_RESEARCH_DEF *researchDef = player->GetResearchDef(researchId);
 	if (!researchDef) { return -1; }
 	// First try in direct requirements
 	short int currentResult = -1;
@@ -102,7 +102,7 @@ short int FindResearchRequiredAge(STRUCT_PLAYER *player, short int researchId) {
 			requirementsActualCount++;
 		}
 	}
-	ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bld = FindBuildingDefThatEnablesResearch(player, researchId);
+	AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *bld = FindBuildingDefThatEnablesResearch(player, researchId);
 	if (bld && bld->IsCheckSumValidForAUnitClass()) {
 		short int bldEnablerResearchId = FindResearchThatEnableUnit(player, bld->DAT_ID1, 0);
 		if (bldEnablerResearchId >= 0) {
@@ -180,7 +180,7 @@ int DisablePlayerImpossibleResearches(STRUCT_PLAYER *player) {
 	int previousRemainingCount = 9999;
 	while ((remainingUnknownCount > 0) && (remainingUnknownCount != previousRemainingCount)) {
 		for each (int curResId in potentialResearches) {
-			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &resDefArray[curResId];
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = &resDefArray[curResId];
 			int minRequiredResearchesCount = resDef->minRequiredResearchesCount;
 			int reqResOK = 0;
 			int reqResImpossible = 0;
@@ -257,7 +257,7 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
 	std::set<short int> potentialToRemove; // internal temp buffer for loop
 
 	// Loop 1 : sort researches into 3 categories (disabled, done or available, undetermined)
-	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techTreeDef = &global->technologiesInfo->ptrTechDefArray[civDef->techTreeId];
+	AOE_STRUCTURES::STRUCT_TECH_DEF *techTreeDef = &global->technologiesInfo->ptrTechDefArray[civDef->techTreeId];
 	for (int researchId = 0; researchId < resCount; researchId++) {
 		bool isDisabled = false;
 		for (int effectId = 0; effectId < techTreeDef->effectCount; effectId++) {
@@ -267,7 +267,7 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
 			// Disable unit (building) and this building has a valid "enable research". Like temple for macedonian, academy for persian.
 			if ((techTreeDef->ptrEffects[effectId].effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) &&
 				(techTreeDef->ptrEffects[effectId].effectClass == 0) && (techTreeDef->ptrEffects[effectId].effectUnit > -1)) {
-				ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefAsBld = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *)
+				AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDefAsBld = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)
 					civDef->GetUnitDefBase(techTreeDef->ptrEffects[effectId].effectUnit);
 				if (unitDefAsBld && unitDefAsBld->IsCheckSumValid() && unitDefAsBld->IsTypeValid() && (unitDefAsBld->initiatesResearch > -1)) {
 					// We DO have a valid building with a "initiate research" value... And it's not available, making the research unavailable
@@ -297,7 +297,7 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
 	int previousRemainingCount = 9999;
 	while ((remainingUnknownCount > 0) && (remainingUnknownCount != previousRemainingCount)) {
 		for each (int curResId in potentialResearches) {
-			ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *resDef = &resDefArray[curResId];
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = &resDefArray[curResId];
 			int minRequiredResearchesCount = resDef->minRequiredResearchesCount;
 			int reqResOK = 0;
 			int reqResImpossible = 0;
@@ -495,16 +495,16 @@ bool DoesTechDisableResearch(STRUCT_TECH_DEF *techDef, short int researchId) {
 
 // Returns true if a unit (DATID) is disabled by player's tech tree
 bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId) {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
 	assert(settings != NULL);
 	if (!settings) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
 		return false;
 	}
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
+	AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
 	if (!player || !player->IsCheckSumValid()) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(player->techTreeId);
+	AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->GetTechDef(player->techTreeId);
 	if (!techDef) {
 		return false;
 	}
@@ -514,16 +514,16 @@ bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId) {
 
 // Returns true if a research (research ID) is disabled by player's tech tree
 bool IsResearchDisabledInTechTree(short int playerId, short int researchId) {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
 	assert(settings != NULL);
 	if (!settings) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
 		return false;
 	}
-	ROR_STRUCTURES_10C::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
+	AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
 	if (!player || !player->IsCheckSumValid()) { return false; }
-	ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = global->GetTechDef(player->techTreeId);
+	AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->GetTechDef(player->techTreeId);
 	if (!techDef) {
 		return false;
 	}
@@ -740,17 +740,17 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 // For example, for research 17, it will return temple's definition because temple's unitDef.initiatesResearch == 17.
 // Returns NULL if not found.
 // Warning: result is not unique. Eg. Both barracks (12,132) initiate research 62. This method tries to return the base unit ID (not upgraded one)
-ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(STRUCT_PLAYER *player, short int researchId) {
+AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(STRUCT_PLAYER *player, short int researchId) {
 	if (!player || !player->IsCheckSumValid() || researchId < 0) { return NULL; }
 	for (int unitDefId = 0; unitDefId < player->structDefUnitArraySize; unitDefId++) {
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDefBuilding = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*)player->ptrStructDefUnitTable[unitDefId];
+		AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDefBuilding = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)player->ptrStructDefUnitTable[unitDefId];
 		if (unitDefBuilding && unitDefBuilding->IsCheckSumValid() && unitDefBuilding->IsTypeValid()) {
 			if (unitDefBuilding->initiatesResearch == researchId) {
 				short int baseBldId = GetBaseBuildingUnitId(unitDefBuilding->DAT_ID1);
 				if (baseBldId != unitDefBuilding->DAT_ID1) {
 					// It seems current unit is an "upgraded" unit. Before returning, try "base" unit because this result would be more relevant
 					if ((baseBldId >= 0) && (baseBldId < player->structDefUnitArraySize)) {
-						ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING* baseBld = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*)player->ptrStructDefUnitTable[baseBldId];
+						AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING* baseBld = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)player->ptrStructDefUnitTable[baseBldId];
 						if (baseBld && baseBld->IsCheckSumValid() && baseBld->IsTypeValid() && (baseBld->initiatesResearch == researchId)) {
 							return baseBld;
 						}
@@ -766,7 +766,7 @@ ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(
 
 // [private] Writes a string representing tech tree information for a given research
 // defaultResearchName = name to write for research, if none can be found automatically
-std::string GetResearchTechTreeLine(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, short int researchId, 
+std::string GetResearchTechTreeLine(AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId, 
 	const char *defaultResearchName) {
 	std::string result;
 	char nameBuffer[50];
@@ -781,7 +781,7 @@ std::string GetResearchTechTreeLine(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, s
 	result += ((nameBuffer[0] == 0) ? defaultResearchName : nameBuffer);
 	if (isAutomaticTech) { result += ")"; }
 
-	ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *rs = player->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
+	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *rs = player->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
 	if (rs[researchId].currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) {
 		result += " (";
 		result += localizationHandler.GetTranslation(CRLANG_ID_NOT_AVAILABLE_YET, "not available yet");
@@ -792,11 +792,11 @@ std::string GetResearchTechTreeLine(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, s
 
 // [private] Get a string representing all (future) available tech tree for building
 // (researches and units that can become available in given building)
-std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *bldDef) {
+std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *bldDef) {
 	// Invalid (technical reasons)
 	if (!bldDef || !bldDef->IsCheckSumValidForAUnitClass() || !bldDef->IsTypeValid() ||
 		!player || !player->IsCheckSumValid()) { return ""; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid() ||
 		!global->technologiesInfo->ptrTechDefArray) { return ""; }
 	// Not relevant (functional reasons)
@@ -812,7 +812,7 @@ std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, 
 
 	bool foundItems = false;
 	short int researchCount = player->ptrResearchesStruct->researchCount;
-	ROR_STRUCTURES_10C::STRUCT_PLAYER_RESEARCH_STATUS *rs = player->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
+	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *rs = player->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
 	// Search all researches that are developed in this building (and write text for each).
 	for (int rid = 0; rid < researchCount; rid++) {
 		*nameBuffer = 0; // Reset string for next usage
@@ -825,7 +825,7 @@ std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, 
 				// Some research, like slinger, camel, are missing researchLocation (-1). We can try to retrieve it from technology/enabledUnit=>trainlocation
 				short int techId = player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].technologyId;
 				if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
-					ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef = &global->technologiesInfo->ptrTechDefArray[techId];
+					AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = &global->technologiesInfo->ptrTechDefArray[techId];
 					short int enabledUnitDefID = -1;
 					if (techDef) {
 						// Find if this tech enables some unit
@@ -844,9 +844,9 @@ std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, 
 						}
 					}
 					if (enabledUnitDefID >= 0) {
-						ROR_STRUCTURES_10C::STRUCT_UNITDEF_BASE *enabledUnitDefBase = player->GetUnitDefBase(enabledUnitDefID);
+						AOE_STRUCTURES::STRUCT_UNITDEF_BASE *enabledUnitDefBase = player->GetUnitDefBase(enabledUnitDefID);
 						if (enabledUnitDefBase && enabledUnitDefBase->IsCheckSumValidForAUnitClass() && enabledUnitDefBase->DerivesFromLiving()) {
-							ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *t = (ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *)enabledUnitDefBase;
+							AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *t = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)enabledUnitDefBase;
 							if (t->trainLocation == bldDef->DAT_ID1) {
 								// Get unit name. Might be used if research does not have a name
 								GetLanguageDllText(t->languageDLLID_Name, nameBufferBackup, sizeof(nameBufferBackup), t->ptrUnitName);
@@ -874,9 +874,9 @@ std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, 
 
 
 // Writes text representing available tech tree (available technologies that have not been researched yet)
-std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) {
+std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return ""; }
-	ROR_STRUCTURES_10C::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid() ||
 		!global->technologiesInfo->ptrTechDefArray) {
 		return "";
@@ -885,8 +885,8 @@ std::string GetRemainingTechTreeText(ROR_STRUCTURES_10C::STRUCT_PLAYER *player) 
 	int unitDefCount = player->structDefUnitArraySize;
 	// Loop on all buildings that can potentially "host" researches
 	for (int i = 0; i < unitDefCount; i++) {
-		ROR_STRUCTURES_10C::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[i];
-		std::string s = GetRemainingTechTreeText(player, (ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING*)unitDef);
+		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[i];
+		std::string s = GetRemainingTechTreeText(player, (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)unitDef);
 		if (!s.empty()) {
 			result += s;
 			result += "\r\n"; // Leave an line break

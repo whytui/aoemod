@@ -15,7 +15,7 @@ using namespace AOE_CONST_INTERNAL;
 *
 * Very useful for debugging: 0x4E83E0 = commandsInfo.executeCommand(ptrCommand)
 */
-namespace ROR_STRUCTURES_10C
+namespace AOE_STRUCTURES
 {
 	// Type 0x00. Size = 0x1C + actorCount*4. Create = 0x42B730. Execute=0x42A280
 	// Actual effect depends on unit def commands, target unit type...

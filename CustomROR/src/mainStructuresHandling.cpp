@@ -1,6 +1,6 @@
 #include "../include/mainStructuresHandling.h"
 
-using namespace ROR_STRUCTURES_10C;
+using namespace AOE_STRUCTURES;
 
 // Returns a pointer to global game struct
 // Warning: can sometimes return NULL when called very early (when the game has just been run)

@@ -26,7 +26,7 @@ public:
 	bool GameAndEditor_OnKeyPress(long int pressedKey, bool CTRL, bool SHIFT, bool ALT);
 
 	// Create in-game customROR options screen. Returns false if failed and if return address must be changed.
-	bool CreateGameCustomRorOptionsPopup(ROR_STRUCTURES_10C::STRUCT_ANY_UI *previousPopup);
+	bool CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup);
 
 private:
 	// Returns NULL if failed (you can't create a custom popup object if previous one is still opened).
@@ -47,7 +47,7 @@ public:
 	bool Global_OnButtonClick(unsigned long int objAddress);
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool OnCustomButtonClick(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *sender);
+	bool OnCustomButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender);
 
 
 	// Opens the custom "edit unit" in editor
@@ -76,8 +76,8 @@ public:
 
 	// Manage right button release action on selected units for given player
 	// Returns true if a red cross sign should be displayed (a relevant action occurred)
-	bool ApplyRightClickReleaseOnSelectedUnits(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *UIGameMain,
-		ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY);
+	bool ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameMain,
+		AOE_STRUCTURES::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY);
 
 	// Open a popup with CustomROR (debug) messages
 	bool OpenTraceMessagePopup();
@@ -87,7 +87,7 @@ public:
 	bool OpenInGameUnitPropertiesPopup();
 	// Open the relevant "view/edit unit" popup for provided unit.
 	// Returns true if successful.
-	bool OpenInGameUnitPropertiesPopup(ROR_STRUCTURES_10C::STRUCT_UNIT *unit);
+	bool OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT *unit);
 
 	// Use this to properly free custom button from options menu. This should (always) be called when ingame menu is closed.
 	void FreeInGameCustomOptionsButton();

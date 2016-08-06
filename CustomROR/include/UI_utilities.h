@@ -44,7 +44,7 @@ static const char gameScreenName[] = "Game Screen";
 
 // Set parent's focus to child object.
 // child CAN be NULL (set focus to parent itself).
-static void AOE_SetFocus(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent, ROR_STRUCTURES_10C::STRUCT_ANY_UI *child) {
+static void AOE_SetFocus(AOE_STRUCTURES::STRUCT_ANY_UI *parent, AOE_STRUCTURES::STRUCT_ANY_UI *child) {
 	if (!parent) { return; }
 	_asm {
 		PUSH child
@@ -56,7 +56,7 @@ static void AOE_SetFocus(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent, ROR_STRUCTUR
 
 
 // Show/Hide a UI object
-static void AOE_ShowUIObject(ROR_STRUCTURES_10C::STRUCT_ANY_UI *object, bool show) {
+static void AOE_ShowUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, bool show) {
 	if (!object) { return; }
 	long int arg = show ? 1 : 0;
 	_asm {
@@ -68,7 +68,7 @@ static void AOE_ShowUIObject(ROR_STRUCTURES_10C::STRUCT_ANY_UI *object, bool sho
 }
 
 // Refresh a UI object
-static void AOE_RefreshUIObject(ROR_STRUCTURES_10C::STRUCT_ANY_UI *object) {
+static void AOE_RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object) {
 	if (!object) { return; }
 	_asm {
 		MOV ECX, object
@@ -83,16 +83,16 @@ static void AOE_RefreshUIObject(ROR_STRUCTURES_10C::STRUCT_ANY_UI *object) {
 // Return pointer (address) to new object.
 // Compatible with scenario editor screen and in-game screen
 // Note that settings->currentUIStatus is unchanged when showing such dialog message.
-static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, long int hSize, long int vSize) {
+static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, long int hSize, long int vSize) {
 	char *dlgName = (char *)AOE_CONST_INTERNAL::customDialogScreenName;
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (settings == NULL) { return 0; }
 	unsigned long int fct = 0;
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = *(ROR_STRUCTURES_10C::STRUCT_ANY_UI **) AOE_OFFSETS::ADDR_VAR_CURRENT_UI_OBJECT;
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = *(AOE_STRUCTURES::STRUCT_ANY_UI **) AOE_OFFSETS::ADDR_VAR_CURRENT_UI_OBJECT;
 	if (currentUI == NULL) { return NULL; }
 	// Get correct call values according to active screen
 	if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) {
-		ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *p = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *)currentUI;
+		AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *p = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *)currentUI;
 		assert(p->visible);
 		if (!p->IsCheckSumValid()) { return NULL; }
 		fct = 0x00457A80;
@@ -102,7 +102,7 @@ static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text
 		fct = 0x00457B90;
 	}
 	if (!fct) { return 0; }
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *obj = NULL;
+	AOE_STRUCTURES::STRUCT_ANY_UI *obj = NULL;
 	// Now call relevant function
 	_asm {
 		PUSH vSize
@@ -124,12 +124,12 @@ static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text
 
 // Create a popup from game screen (from Options original model)
 // Must be called when game screen is active (no other popup)
-static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent, long int hSize, long int vSize) {
+static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *parent, long int hSize, long int vSize) {
 	if (!parent) { return NULL; }
 	char dlgName[] = "dlg6_3";
 	long int arg1;
 	long int arg6;
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *newObj = 0;
+	AOE_STRUCTURES::STRUCT_ANY_UI *newObj = 0;
 	// Alloc
 	_asm {
 		PUSH 0x564
@@ -170,8 +170,8 @@ static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(ROR_STRUCTUR
 
 
 // Note: basic size (eg OK button) is 0x?? / 0x1E
-static bool AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
+static bool AOE_AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
 	if (!parent) { return false; }
@@ -198,8 +198,8 @@ static bool AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 
 
 // Note: basic size (eg OK button) is 0x?? / 0x1E
-static bool AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
+static bool AOE_AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
 	if (!parent) { return false; }
@@ -227,8 +227,8 @@ static bool AOE_AddButton(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 
 
 // For fonts, see AOE_FONTS enum
-static bool AOE_AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
+static bool AOE_AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT
 ) {
@@ -258,8 +258,8 @@ static bool AOE_AddLabel(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 // Create a textbox using ROR methods.
 // If maxTextLength==0, it is replaced by initialText's length.
 // Note: The font used seems to be 14 pixels high (?)
-static bool AOE_AddTextBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
+static bool AOE_AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize, 
 	bool readOnly = false, bool multiline = false, bool onlyNumbers = false, unsigned long int font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
 	if (!parent) { return false; }
@@ -305,8 +305,8 @@ static bool AOE_AddTextBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 
 // Create a "AOE" checkbox (same type as buttons)
 // You need to create a label if you want some text aside the checkbox
-static bool AOE_AddCheckBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON **ptrObjToCreate,
+static bool AOE_AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
 	if (!parent) { return false; }
 	long int result;
@@ -328,7 +328,7 @@ static bool AOE_AddCheckBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 }
 
 
-static void AOE_CheckBox_SetChecked(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *checkBox, bool checked) {
+static void AOE_CheckBox_SetChecked(AOE_STRUCTURES::STRUCT_UI_BUTTON *checkBox, bool checked) {
 	if (!checkBox) { return; }
 	checkBox->checked = checked ? 1 : 0;
 	int arg = checkBox->checked;
@@ -344,7 +344,7 @@ static void AOE_CheckBox_SetChecked(ROR_STRUCTURES_10C::STRUCT_UI_BUTTON *checkB
 // ptrCombo = address of ROR combobox object
 // entryId = id to affect to new entry in combobox (generally=index of the entry)
 // DLLID = ID in language(x).dll of string to use for entry.
-static void AOE_AddEntryInComboUsingDLLID(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrCombo, long int entryId, long int DLLID) {
+static void AOE_AddEntryInComboUsingDLLID(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo, long int entryId, long int DLLID) {
 	assert(ptrCombo != NULL);
 	if (!ptrCombo) { return; }
 	_asm {
@@ -360,8 +360,8 @@ static void AOE_AddEntryInComboUsingDLLID(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptr
 // Creates an empty combobox. Use AddEntryInCombo aftewards.
 // TO DO: this is unfinished
 // Unstable and not correctly supported !
-static bool AOE_AddComboBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
-	ROR_STRUCTURES_10C::STRUCT_UI_COMBOBOX **ptrObjToCreate,
+static bool AOE_AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_COMBOBOX **ptrObjToCreate,
 	long int posX, long int posY, long int listSizeX, long int listSizeY, long int lblSizeX, long int lblSizeY, AOE_FONTS fontId) {
 	if (!parent) { return false; }
 	long int result;
@@ -384,7 +384,7 @@ static bool AOE_AddComboBox(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent,
 }
 
 
-static void AOE_AddEntryInCombo(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrCombo, long int entryId, const char *text) {
+static void AOE_AddEntryInCombo(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo, long int entryId, const char *text) {
 	assert(ptrCombo != NULL);
 	if (!ptrCombo) { return; }
 	_asm {
@@ -401,7 +401,7 @@ static void AOE_AddEntryInCombo(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrCombo, lon
 
 
 // Returns selected index for a combobox object. Returns -1 in error cases.
-static long int AOE_GetComboSelectedIndex(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrCombo) {
+static long int AOE_GetComboSelectedIndex(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo) {
 	assert(ptrCombo != NULL);
 	if (!ptrCombo) { return -1; }
 	long int result = -1;
@@ -416,7 +416,7 @@ static long int AOE_GetComboSelectedIndex(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptr
 
 // Returns an edit object's text
 #pragma message("TODO: NOT for edit, labels only ? To check")
-static char *AOE_GetEditText(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrEdit) {
+static char *AOE_GetEditText(AOE_STRUCTURES::STRUCT_ANY_UI *ptrEdit) {
 	assert(ptrEdit != NULL);
 	if (!ptrEdit) { return NULL; }
 	char *result = NULL;
@@ -430,7 +430,7 @@ static char *AOE_GetEditText(ROR_STRUCTURES_10C::STRUCT_ANY_UI *ptrEdit) {
 }
 
 // Set an label object's text
-static void AOE_SetLabelText(ROR_STRUCTURES_10C::STRUCT_UI_LABEL *ptrLabel, const char *text) {
+static void AOE_SetLabelText(AOE_STRUCTURES::STRUCT_UI_LABEL *ptrLabel, const char *text) {
 	assert(ptrLabel != NULL);
 	if (!ptrLabel || !ptrLabel->IsCheckSumValid()) { return; }
 	_asm {
@@ -442,14 +442,14 @@ static void AOE_SetLabelText(ROR_STRUCTURES_10C::STRUCT_UI_LABEL *ptrLabel, cons
 }
 
 // Set a TextBox object's text
-static void AOE_SetEditText(ROR_STRUCTURES_10C::STRUCT_UI_TEXTBOX *ptrTextBox, const char *text) {
+static void AOE_SetEditText(AOE_STRUCTURES::STRUCT_UI_TEXTBOX *ptrTextBox, const char *text) {
 	assert(ptrTextBox != NULL);
 	if (!ptrTextBox || !ptrTextBox->IsCheckSumValid() || !ptrTextBox->pTypedText || (ptrTextBox->maxTextSize <= 0)) { return; }
 	strcpy_s(ptrTextBox->pTypedText, ptrTextBox->maxTextSize - 1, text);
 	AOE_RefreshUIObject(ptrTextBox);
 }
 
-static void AOE_listBox_clear(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *listBox) {
+static void AOE_listBox_clear(AOE_STRUCTURES::STRUCT_UI_LISTBOX *listBox) {
 	if (!listBox) { return; }
 	_asm {
 		MOV ECX, listBox
@@ -458,7 +458,7 @@ static void AOE_listBox_clear(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *listBox) {
 	}
 }
 
-static void AOE_comboBox_clear(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *comboBox) {
+static void AOE_comboBox_clear(AOE_STRUCTURES::STRUCT_UI_LISTBOX *comboBox) {
 	if (!comboBox) { return; }
 	_asm {
 		MOV ECX, comboBox
@@ -469,7 +469,7 @@ static void AOE_comboBox_clear(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *comboBox) 
 
 
 // Adds an item at position for a listbox / combobox
-static bool AOE_listbox_addItem(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *obj, long int position, const char *text, long int optionalId) {
+static bool AOE_listbox_addItem(AOE_STRUCTURES::STRUCT_UI_LISTBOX *obj, long int position, const char *text, long int optionalId) {
 	if (!obj) { return false; }
 	long int res;
 	_asm {
@@ -486,8 +486,8 @@ static bool AOE_listbox_addItem(ROR_STRUCTURES_10C::STRUCT_UI_LISTBOX *obj, long
 
 
 // Return current screen, using 0x5830E8 structure info
-static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_GetCurrentScreen() {
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *res = NULL;
+static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_GetCurrentScreen() {
+	AOE_STRUCTURES::STRUCT_ANY_UI *res = NULL;
 	_asm {
 		MOV ECX, 0x5830E8
 		MOV EAX, DS:[ECX+0xC]
@@ -499,7 +499,7 @@ static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_GetCurrentScreen() {
 
 // Returns a pointer to a UI object that matches screenName.
 // Can return NULL if no matching screen was found
-static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_GetScreenFromName(const char *screenName) {
+static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_GetScreenFromName(const char *screenName) {
 	unsigned long int result = 0;
 	_asm {
 		MOV EDX, screenName
@@ -509,7 +509,7 @@ static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_GetScreenFromName(const char *scre
 		CALL EAX
 		MOV result, EAX
 	}
-	return (ROR_STRUCTURES_10C::STRUCT_ANY_UI *)result;
+	return (AOE_STRUCTURES::STRUCT_ANY_UI *)result;
 }
 
 
@@ -539,8 +539,8 @@ static void AOE_CloseScreenAndDestroy(const char *screenName) {
 
 
 // Refresh parent, close screen and destroy it.
-static void AOE_CloseScreenFullTreatment(ROR_STRUCTURES_10C::STRUCT_ANY_UI *UIObj) {
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent = UIObj->ptrParentObject;
+static void AOE_CloseScreenFullTreatment(AOE_STRUCTURES::STRUCT_ANY_UI *UIObj) {
+	AOE_STRUCTURES::STRUCT_ANY_UI *parent = UIObj->ptrParentObject;
 	AOE_CloseScreenAndDestroy(UIObj->screenName);
 	if (parent) {
 		AOE_RefreshScreen(parent->screenName, 0);
@@ -551,13 +551,13 @@ static void AOE_CloseScreenFullTreatment(ROR_STRUCTURES_10C::STRUCT_ANY_UI *UIOb
 
 // Create a popup (from Options original model) and returns the new UI object's address as an unsigned long int
 // This must be called when menu is opened
-static ROR_STRUCTURES_10C::STRUCT_ANY_UI *AOE_CreateCustomOptionsPopupFromMenu(ROR_STRUCTURES_10C::STRUCT_ANY_UI *parent) {
+static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateCustomOptionsPopupFromMenu(AOE_STRUCTURES::STRUCT_ANY_UI *parent) {
 	if (!parent) { return NULL; }
 
 	// Analog to 0x43424D
 	AOE_CloseScreenAndDestroy("Menu Dialog");
 	AOE_RefreshScreen("Game Screen", 0);
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *newPtr = (ROR_STRUCTURES_10C::STRUCT_ANY_UI *)AOEAlloc(0x564);
+	AOE_STRUCTURES::STRUCT_ANY_UI *newPtr = (AOE_STRUCTURES::STRUCT_ANY_UI *)AOEAlloc(0x564);
 	if (!newPtr) { return NULL; }
 
 	_asm {
@@ -661,8 +661,8 @@ failed:
 }
 
 
-static long int AOE_GetGamePosFromMousePos(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *gameZone,
-	ROR_STRUCTURES_10C::STRUCT_TEMP_MAP_POSITION_INFO *pPosInfo, long int mousePosX, long int mousePosY) {
+static long int AOE_GetGamePosFromMousePos(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone,
+	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO *pPosInfo, long int mousePosX, long int mousePosY) {
 	if (!gameZone || !pPosInfo || !gameZone->IsCheckSumValid()) { return 0; }
 	const unsigned long int callAddr = 0x511430;
 	long int res;
@@ -690,11 +690,11 @@ static long int AOE_GetGamePosFromMousePos(ROR_STRUCTURES_10C::STRUCT_UI_PLAYING
 // If description == NULL, then creationDllId will be used for displayed context text.
 // IconId and DATID are related to the type of action, be careful to provide consistent values.
 // You can set DATId to 0 if not relevant.
-static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player, long int buttonIndex, long int iconId,
+static bool AOE_InGameAddCommandButton(AOE_STRUCTURES::STRUCT_PLAYER *player, long int buttonIndex, long int iconId,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId, long int DATID,
 	long int helpDllId, long int creationDllId, long int shortcutDllId, const char *name, const char *description,
-	bool isDisabled, ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconSlpInfo) {
-	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *inGameMain = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
+	bool isDisabled, AOE_STRUCTURES::STRUCT_SLP_INFO *iconSlpInfo) {
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *inGameMain = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
 	if (!inGameMain || !inGameMain->IsCheckSumValid() || !inGameMain->visible) {
 		return false;
 	}
@@ -709,7 +709,7 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 	unsigned long int unknown_colorPtr = NULL;
 
 	const unsigned long int calladdr = 0x483760;
-	ROR_STRUCTURES_10C::STRUCT_SLP_INFO *iconsSLP = iconSlpInfo;
+	AOE_STRUCTURES::STRUCT_SLP_INFO *iconsSLP = iconSlpInfo;
 	if ((iconSlpInfo == NULL) || (iconSlpInfo->slpSize == 0)) {
 		iconsSLP = inGameMain->iconsForUnitCommands; // Default (for most cases)
 	}
@@ -747,7 +747,7 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 		return false;
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_UI_BUTTON_WITH_NUMBER *btn = inGameMain->unitCommandButtons[buttonIndex];
+	AOE_STRUCTURES::STRUCT_UI_BUTTON_WITH_NUMBER *btn = inGameMain->unitCommandButtons[buttonIndex];
 	bool showNumber = (btn->showNumber != 0);
 
 	long int long_UICmdId = (long int)UICmdId;
@@ -787,8 +787,8 @@ static bool AOE_InGameAddCommandButton(ROR_STRUCTURES_10C::STRUCT_PLAYER *player
 
 
 // Display shortcut number below unit in game zone. Can be used to display other SLP bitmaps !
-static void DisplayUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER *slpHeader,
-	ROR_STRUCTURES_10C::STRUCT_SLP_FRAME_HEADER *slpFrameHeader, long int posX, long int posY, long int unknown_arg3) {
+static void DisplayUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *slpHeader,
+	AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *slpFrameHeader, long int posX, long int posY, long int unknown_arg3) {
 	unsigned long int showSlp = 0x516390;
 	_asm {
 		MOV ECX, DWORD PTR DS:[0x7C0444];
@@ -809,7 +809,7 @@ static void DisplayUnitShortcutSymbol(ROR_STRUCTURES_10C::STRUCT_SLP_FILE_HEADER
 
 
 // Refresh diamond map (draw all tiles)
-static void AOE_DiamondMapDrawAllTiles(ROR_STRUCTURES_10C::STRUCT_UI_DIAMOND_MAP *diamMap) {
+static void AOE_DiamondMapDrawAllTiles(AOE_STRUCTURES::STRUCT_UI_DIAMOND_MAP *diamMap) {
 	if (!diamMap || !diamMap->IsCheckSumValid()) { return; }
 	const unsigned long int addr = 0x42D0C0;
 	_asm {
@@ -820,9 +820,9 @@ static void AOE_DiamondMapDrawAllTiles(ROR_STRUCTURES_10C::STRUCT_UI_DIAMOND_MAP
 
 // Refresh diamond map (draw all tiles) in editor or in-game (automatically finds the correct structure)
 static bool DiamondMapDrawAllTiles() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (settings && settings->IsCheckSumValid()) {
-		ROR_STRUCTURES_10C::STRUCT_UI_DIAMOND_MAP *diamMap = NULL;
+		AOE_STRUCTURES::STRUCT_UI_DIAMOND_MAP *diamMap = NULL;
 		if ((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
 			(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME)) {
 			if (settings->ptrGameUIStruct && settings->ptrGameUIStruct->IsCheckSumValid()) {
@@ -830,7 +830,7 @@ static bool DiamondMapDrawAllTiles() {
 			}
 		}
 		if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
-			ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+			AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
 			if (scEditor && scEditor->IsCheckSumValid()) {
 				diamMap = scEditor->diamondMap;
 			}
@@ -844,7 +844,7 @@ static bool DiamondMapDrawAllTiles() {
 }
 
 // Opens scenario editor menu
-static void AOE_EditorOpenMenu(ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *editorUI) {
+static void AOE_EditorOpenMenu(AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *editorUI) {
 	if (!editorUI || !editorUI->IsCheckSumValid()) { return; }
 	_asm {
 		MOV ECX, editorUI;
@@ -854,10 +854,10 @@ static void AOE_EditorOpenMenu(ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAI
 }
 
 // Returns game zone UI object for both in-game or scenario editor. Returns NULL if not found.
-static ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *GetGameZone() {
-	ROR_STRUCTURES_10C::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+static AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *GetGameZone() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	ROR_STRUCTURES_10C::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
 	assert(currentUI);
 	if (!settings || !currentUI || !settings->IsCheckSumValid()) { return NULL; }
 
@@ -867,7 +867,7 @@ static ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *GetGameZone() {
 		return NULL;
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_IN_GAME_MAIN *)currentUI;
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *)currentUI;
 	if (gameMainUI->IsCheckSumValid()) {
 		assert((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
 			(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME));
@@ -878,7 +878,7 @@ static ROR_STRUCTURES_10C::STRUCT_UI_PLAYING_ZONE *GetGameZone() {
 		}
 	}
 
-	ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditorMainUI = (ROR_STRUCTURES_10C::STRUCT_UI_SCENARIO_EDITOR_MAIN *)currentUI;
+	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditorMainUI = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)currentUI;
 
 	if (scEditorMainUI && scEditorMainUI->IsCheckSumValid()) {
 		assert(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);

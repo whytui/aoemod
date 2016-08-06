@@ -27,8 +27,8 @@ namespace STRATEGY {
 		PotentialUnitInfo();
 		short int unitDefId; // DATID1 (base unit ID = without upgrades)
 		char *unitName; // For debug
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *baseUnitDefLiving; // (DATID1) Unit definition of base unit, without upgrade
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_LIVING *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
+		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *baseUnitDefLiving; // (DATID1) Unit definition of base unit, without upgrade
+		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
 		short int baseUnitDefId; // non-upgraded unit that can be upgraded to "this" one, if any. -1 in most cases. PLEASE use unitDefId instead.
 		std::list<short int> upgradesUnitDefId; // List of all available unitDefId this unit can be upgraded to
 		short int strongestUpgradeUnitDefId; // Unit definition ID of best available upgraded unit
@@ -70,7 +70,7 @@ namespace STRATEGY {
 		float addedCount;
 		float scoreForUnitCount; // Used in temporary treatments to compute number of units to add in strategy
 		float scoreForEarlyAge; // A temporary score for early age unit choices
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstStratElem; // First strategy element that trains such a unit
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstStratElem; // First strategy element that trains such a unit
 		
 
 		// Returns localized name of base unit
@@ -102,8 +102,8 @@ namespace STRATEGY {
 		PotentialResearchInfo();
 		short int researchId;
 		short int requiredAge; // The age research that is required (direct or indirect requirement). -1 means no age requirement.
-		ROR_STRUCTURES_10C::STRUCT_RESEARCH_DEF *researchDef;
-		ROR_STRUCTURES_10C::STRUCT_TECH_DEF *techDef;
+		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *researchDef;
+		AOE_STRUCTURES::STRUCT_TECH_DEF *techDef;
 		bool hasOptionalRequirements;
 		bool directRequirementsAreSatisfied;
 		short int missingRequiredResearches[4]; // -1 = empty slot. Other value = a required research ID that is not satisfied yet
@@ -118,27 +118,27 @@ namespace STRATEGY {
 		bool forcePutAsEarlyAsPossible; // If true, research will be put as early as possible in strategy (just after its requirements). Default=false. If set, other constraints may be ignored. Used in combination with mustBeAfterThisElem.
 		bool forcePutAfterOtherResearches; // If true, research will be put after all researches that impact "my" impacted units
 		bool isInStrategy; // Set to true once it has been added to strategy
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *mustBeBeforeThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *requiredAgeResearch; // Age research strategy element of my required age.
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *actualStrategyElement;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *mustBeAfterThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *mustBeBeforeThisElem; // Do not modify outside of ComputeStratElemPositionConstraints
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *requiredAgeResearch; // Age research strategy element of my required age.
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *actualStrategyElement;
 		int totalCosts; // Sum of all raw costs (not weighted)
 
 		// Updates this->mustBeBeforeThisElem and this->mustBeAfterThisElem according to known dependencies on other unit/researches
 		// Previous values of mustBeBeforeThisElem  and mustBeAfterThisElem are reset (lost)
-		void ComputeStratElemPositionConstraints(ROR_STRUCTURES_10C::STRUCT_BUILD_AI *buildAI);
+		void ComputeStratElemPositionConstraints(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
 	};
 
 	class PotentialBuildingInfo {
 	public:
 		PotentialBuildingInfo();
 		short int unitDefId;
-		ROR_STRUCTURES_10C::STRUCT_UNITDEF_BUILDING *unitDef;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef;
 		short int enabledByResearchId;
 		short int enabledInAge;
 		int addedInStrategyCount;
 		int desiredCount;
-		ROR_STRUCTURES_10C::STRUCT_STRATEGY_ELEMENT *firstAddedInStrategy; // The first of such buildings that was put in strategy
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstAddedInStrategy; // The first of such buildings that was put in strategy
 		bool highPriority; // If true, start construction of (first) this building ASAP. E.g. market (to enable farming)
 		int unitsToBeTrained; // Number of (always retrainable) units that are trained in such buildings
 	};
