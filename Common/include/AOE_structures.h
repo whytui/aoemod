@@ -30,6 +30,7 @@ namespace AOE_STRUCTURES
 	class STRUCT_RESEARCH_DEF_INFO;
 	class STRUCT_PLAYER_RESEARCH_STATUS;
 	class STRUCT_PLAYER_RESEARCH_INFO;
+	class STRUCT_PLAYER_UNKNOWN_118;
 	class STRUCT_PATH_FINDING_UNKNOWN_POS_INFO;
 	class STRUCT_AI_UNIT_LIST_INFO;
 	class STRUCT_HUMAN_TRAIN_QUEUE_INFO;
@@ -62,6 +63,7 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNIT_MOVEMENT_INFO;
 	class STRUCT_DEF_CIVILIZATION;
 	class STRUCT_DEF_UNIT_COMMAND;
+	class STRUCT_DAMAGE_GRAPHIC;
 	class STRUCT_DEF_UNIT;
 	class STRUCT_UNITDEF_BASE; // Eye candy / common class for all units
 	class STRUCT_UNITDEF_FLAG;
@@ -743,6 +745,19 @@ namespace AOE_STRUCTURES
 			return this->sqrtTable_distanceFromDiffXY[x * 0x10 + y];
 		}
 	};
+
+	// Size 0x14. Constructor = 0x516DA0
+	// Stores explored resource units (other than animal and farms) ?
+	class STRUCT_PLAYER_UNKNOWN_118 {
+	public:
+		STRUCT_NEARBY_UNIT_INFO **arrayNearbyUnitInfos;
+		long int *arrayArraySizeInNearbyUnitInfos; // +04. elem[i] represents array size of arrayNearbyUnitInfos[i]
+		long int *arrayUsedElemInNearbyUnitInfos; // +08. elem[i] represents the used slot count in arrayNearbyUnitInfos[i]
+		STRUCT_PLAYER *player; // Parent player
+		long int arraySize; // +10. Number of (both used/alloc) elements in each array. Cf PLAYER_GATHERABLE_RESOURCE_CATEGORIES.
+	};
+	static_assert(sizeof(STRUCT_PLAYER_UNKNOWN_118) == 0x14, "STRUCT_PLAYER_UNKNOWN_118 size");
+
 
 	// Used in path finding algorithm (included in path finding struct)
 	class STRUCT_PATH_FINDING_UNKNOWN_POS_INFO {
@@ -1811,7 +1826,7 @@ namespace AOE_STRUCTURES
 		// 0x110
 		short int techTreeId; // 45BA12 : DWORD !
 		short int unknown_112;
-		unsigned long int unknown_114_ptr; // set in 0x4F1EF8. Related to +58 ? Size=0x14. Constructor=516DA0.
+		STRUCT_PLAYER_UNKNOWN_118 *spottedResources; // +114. Contains info about resource units. Set in 0x4F1EF8. Related to +58 data. Not related to AI. Each time a tile is explored, underlying resources are added here.
 		float screenPositionY; // axis southwest-northeast like /
 		float screenPositionX; // axis northwest-southeast like \   [origin is left corner - max(X,Y) is right corner]
 		// 0x120
@@ -3207,6 +3222,7 @@ namespace AOE_STRUCTURES
 		char posX;
 		char posZ;
 	};
+	static_assert(sizeof(STRUCT_UNIT_TARGET_POS) == 3, "STRUCT_UNIT_TARGET_POS size");
 
 	// Size = 0x34
 	// (free=0x4580A0). An interesting method: 0x4581B0=moveInfo.replaceByNewDestination(STRUCT_POSITION_INFO*)
@@ -3277,6 +3293,16 @@ namespace AOE_STRUCTURES
 		// END of structure
 	};
 
+	// Size = 08. Deserialized in 0x441775 (for example)
+	class STRUCT_DAMAGE_GRAPHIC {
+	public:
+		unsigned long int *ptrGraphic;
+		char fromDamagePercent; // +4 minimum % of HP from which this graphic is used
+		char oldApplyMode; // +5. unused?
+		char applyMode; // 0,1=add to graphic (flames), 2=replace graphic(walls)
+		char unused_07;
+	};
+	static_assert(sizeof(STRUCT_DAMAGE_GRAPHIC) == 0x8, "STRUCT_DAMAGE_GRAPHIC size");
 
 	// 34 45 54 00 = Eye candy (type10) - size=0xB8 - Constructor 0x441040
 	class STRUCT_UNITDEF_BASE {
@@ -3284,30 +3310,30 @@ namespace AOE_STRUCTURES
 		unsigned long int checksum;
 		char unitType; // +04. $46=70=Living unit, 80=building... On 4 bytes... Sometimes these values are 2-bytes, be careful
 		char unused_003[3];
-		char *ptrUnitName; // +08.
+		char *ptrUnitName; // +08. Internal name. Technically, length is not limited, size is part of serialized data.
 		short int languageDLLID_Name; // If =0, then "ptrUnitName" string will be displayed instead (useful for custom units whose name does not exist in language.dll).
 		short int languageDLLID_Creation;
 		// 0x10
 		short int DAT_ID1; // "Base unit" id from empires.dat. Ex=cavalry
 		short int DAT_ID2; // "Upgraded unit" id from empires.dat. Ex=heavy cavalry
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType; // +14. "Class". TribeAIGroupXXX - 3=building, 18=priest...
-		char *ptrStandingGraphics; // starts with SLP name.
-		unsigned long int ptrUnknownGraphic_01C_dying; // +1C
+		char *ptrStandingGraphics; // +18. starts with SLP name.
+		unsigned long int *ptrDyingGraphic; // +1C. starts with SLP name.
 		// 0x20
-		unsigned long int ptrUnknownGraphic_020;
+		unsigned long int *ptrDyingGraphic2; // +20. Unused ?
 		short int deathMode;
 		short int totalHitPoints; // +026. Including upgrades !
 		float lineOfSight; // +028
 		char garrisonCapacity; // +02C
 		char unused_02D[3];
 		// 0x30
-		float sizeRadius1; // For Y axis
-		float sizeRadius2; // For X axis
-		float HPBarHeight1;
-		unsigned long int unsure_ptrTrainSound; // To confirm is it a ptr or a word (+2 unused bytes)? or selection sound ?
+		float sizeRadiusY; // For Y axis
+		float sizeRadiusX; // For X axis
+		float sizeRadiusZ; // +38.
+		unsigned long int *ptrSelectionSound; // +3C
 		// 0x40
-		unsigned long int ptrUnknownGraphic_040;
-		unsigned long int unknown_044;
+		unsigned long int *ptrTrainSound;
+		unsigned long int *ptrDyingSound; // +44
 		short int deadUnitId; // +48
 		char placementMode; // +4A
 		char airMode; // +4B
@@ -3315,13 +3341,13 @@ namespace AOE_STRUCTURES
 		char hideInEditor;
 		char unknown_04F; // unused ?
 		// 0x50
-		short int unknown_050; // unknown1 in AGE3
+		short int unknown_050; // unknown1 in AGE3. It IS a word value (0x4414D2)
 		char availableForPlayer; // +52. according to tree+researches (+requires enable in empires.dat?). 1="can be trained". 0 does not prevent from having one (scenario, conversion)
 		char unknown_053;
-		short int placementBypassTerrain1;
-		short int placementBypassTerrain2;
-		short int placementTerrain1;
-		short int placementTerrain2;
+		short int placementBypassTerrain1; // +54. Side terrain id ?
+		short int placementBypassTerrain2; // +56. Side terrain id ?
+		short int placementTerrain1; // +58
+		short int placementTerrain2; // +5A
 		float editorRadius1; // for Y axis
 		// 0x60
 		float editorRadius2; // for X axis
@@ -3337,10 +3363,10 @@ namespace AOE_STRUCTURES
 		float resourceStorageAmount_1;
 		float resourceStorageAmount_2;
 		float resourceStorageAmount_3;
-		unsigned long int resourceCapacity;
+		long int resourceCapacity;
 		// 0x80
-		unsigned long int resourceDecay; // Amount of resource that is lost per second
-		float unknown_084; // unknown3A in AGE3
+		long int resourceDecay; // Amount of resource that is lost per second
+		float unknown_084; // unknown3A in AGE3. 0x4415D4
 		char resourceStorageEnableMode_1; // +88. type=RESOURCE_TYPES but on 1 byte only
 		char resourceStorageEnableMode_2;
 		char resourceStorageEnableMode_3;
@@ -3352,25 +3378,25 @@ namespace AOE_STRUCTURES
 		// 0x90
 		char minimapColor;
 		char attackMode;
-		char edibleMeat;
-		char damageGraphicCount;
-		unsigned long int *damageGraphicsArray; // Point to an array of pointers to damage graphics (cf damageGraphicCount)
-		unsigned long int languageDLLHelp;
-		unsigned long int languageDLLHotKeyText;
+		char edibleMeat; // +92
+		char damageGraphicCount; // +93. Count for damageGraphicsArray.
+		STRUCT_DAMAGE_GRAPHIC *damageGraphicsArray; // +94. Point to an array of pointers to damage graphics (cf damageGraphicCount)
+		long int languageDLLHelp;
+		long int languageDLLHotKeyText;
 		// 0xA0
-		unsigned long int hotKey;
+		long int hotKey;
 		char unselectable; // +A4
-		char unknown_0A5; // Unknown6 in AGE3
-		char unknown_selectionMode;
-		char unknown_0A7; // Unknown8 in AGE3
+		char isSpottableResource; // +A5. 1 for resources other than animals and farms. Such units are added to some player list, but what for ?
+		char unknownSpottableResourceAttribute_A6; // +A6. 2 for trees? Is this used ?
+		PLAYER_GATHERABLE_RESOURCE_CATEGORIES spottableResourceCategory; // Unknown8 in AGE3. cf 517166.
 		char selectionEffect;
 		char editorSelectionColor;
 		char unknown_0AA;
 		char unknown_0AB;
-		float selectionRadius1;
+		float selectionRadiusY;
 		// 0xB0
-		float selectionRadius2;
-		float HPBarHeight2;
+		float selectionRadiusX;
+		float selectionRadiusZ; // +B4
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00544534); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_EYE_CANDY); }

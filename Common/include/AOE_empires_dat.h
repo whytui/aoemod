@@ -162,6 +162,17 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_PRIEST_SACRIFICE = 57 // If 1, you can delete (sacrifice) priest while converting to make conversion successful. See tech 212.
 	};
 
+	// Gatherable resource types (different from standard resource types). Animal food is not in the list !
+	// Role ???
+	enum PLAYER_GATHERABLE_RESOURCE_CATEGORIES : char {
+		CST_PGR_WOOD = 0,
+		CST_PGR_FORAGE = 1, // For berry bush
+		CST_PGR_FISH = 2,
+		CST_PGR_STONE = 3,
+		CST_PGR_GOLD = 4,
+		CST_PGR_COUNT = 5
+	};
+
 
 	// Game map type indexes
 	enum MAP_TYPE_INDEX : long int {
