@@ -7,7 +7,7 @@
 #include <set>
 #include <AOE_offsets.h>
 #include <AOE_const_functional.h>
-#include <ROR_structures.h>
+#include <AOE_structures.h>
 #include "UI_utilities.h"
 #include "traceMessage.h"
 

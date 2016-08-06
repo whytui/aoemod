@@ -5,8 +5,8 @@
 #include <list>
 #include <algorithm>
 #include <ROR_API_pub.h>
-#include <ROR_structures.h>
-#include <ROR_structures_drs.h>
+#include <AOE_structures.h>
+#include <AOE_structures_drs.h>
 #include <AOE_offsets.h>
 #include <AOE_const_internal.h>
 #include <AOE_const_language.h>

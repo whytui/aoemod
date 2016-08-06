@@ -6,7 +6,7 @@
 #include <string>
 #include <set>
 #include <AOE_offsets.h>
-#include <ROR_structures.h>
+#include <AOE_structures.h>
 #include "UI_utilities.h"
 #include "traceMessage.h"
 #include "AOE_map.h"

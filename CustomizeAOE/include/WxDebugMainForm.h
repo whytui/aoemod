@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <mystrings.h>
-#include <ROR_structures.h>
+#include <AOE_structures.h>
 #include <ROR_struct_debugging.h>
 #include "RORConnector.h"
 #include <sstream>

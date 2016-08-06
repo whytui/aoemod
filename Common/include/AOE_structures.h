@@ -5,8 +5,8 @@
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
 #include <AOE_empires_dat.h>
-#include <ROR_structures_drs.h>
-#include <ROR_structures_techs.h>
+#include <AOE_structures_drs.h>
+#include <AOE_structures_techs.h>
 #include <gameVersion.h>
 
 

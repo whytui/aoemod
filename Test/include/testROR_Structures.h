@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <ROR_structures.h>
+#include <AOE_structures.h>
 #include <string>
 #include <Windows.h>
 #include "../include/testRandomizer.h"

@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 #include <memory>
-#include <ROR_structures.h>
+#include <AOE_structures.h>
 #include <AOE_const_functional.h>
 #include "crCommon.h"
 #include "researches.h"

@@ -4,7 +4,7 @@
 #include <string>
 #include <assert.h>
 #include "traceMessage.h"
-#include "ROR_structures.h"
+#include "AOE_structures.h"
 
 /* This contains various definitions for "custom" (unofficial) game functional rules
 */

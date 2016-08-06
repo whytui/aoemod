@@ -2,7 +2,7 @@
 
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
-#include <ROR_structures.h>
+#include <AOE_structures.h>
 #include <yvals.h> // for __STRINGIZE
 #include <Windows.h>
 #include <WinUser.h>
