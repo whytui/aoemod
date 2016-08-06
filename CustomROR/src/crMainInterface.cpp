@@ -336,7 +336,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		}
 
 
-		if (this->OpenCustomGamePopup<CustomPopup>(580, 460, false)) {
+		if (this->OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
 			unsigned long int *unused;
 			AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
 			if (!sTechTreeInfo.empty() && (techToShowCount > 0)) {
@@ -410,7 +410,7 @@ template<class popupType> popupType *CustomRORMainInterface::CreateCustomPopupOb
 			return NULL;
 		}
 	}
-	this->currentCustomPopup = (CustomPopup*) new popupType();
+	this->currentCustomPopup = (CustomPopupBase*) new popupType();
 	this->currentCustomPopup->SetCRCommand(this->crCommand);
 	return (popupType*)this->currentCustomPopup;
 }
@@ -439,7 +439,7 @@ template<class popupType> popupType *CustomRORMainInterface::OpenCustomGamePopup
 void CustomRORMainInterface::CloseCustomGamePopup(bool isCancel) {
 	if (this->currentCustomPopup) {
 		this->currentCustomPopup->ClosePopup(isCancel);
-		CustomPopup *next = this->currentCustomPopup->nextPopup;
+		CustomPopupBase *next = this->currentCustomPopup->nextPopup;
 		delete this->currentCustomPopup;
 		this->currentCustomPopup = next; // Generally NULL unless closing the popup triggered a new one.
 
@@ -531,7 +531,7 @@ bool CustomRORMainInterface::OnCustomButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTO
 	if (this->currentCustomPopup) {
 		bool eventHandled = this->currentCustomPopup->OnButtonClick(sender);
 		if (this->currentCustomPopup->IsClosed()) {
-			CustomPopup *next = this->currentCustomPopup->nextPopup;
+			CustomPopupBase *next = this->currentCustomPopup->nextPopup;
 			delete this->currentCustomPopup;
 			this->currentCustomPopup = next; // Generally NULL unless closing the popup triggered a new one.
 		}

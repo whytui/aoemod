@@ -21,6 +21,8 @@
 #include "EXESelfEditor.h"
 #include "drsHandler.h"
 #include "crLocalization.h"
+#include "CustomPopupBase.h"
+#include "InGameCustomRorOptionsPopup.h"
 
 
 /* This class is the interface object between game code (through ROR_API call) and CustomROR plugin code.

@@ -1,6 +1,13 @@
 #include <ROR_structures.h>
 #include "crCommands.h"
-#include "popups.h"
+#include "CustomPopupBase.h"
+#include "EditMapSizeXYPopup.h"
+#include "EditTerrainPopup.h"
+#include "EditorScenarioInfoPopup.h"
+#include "InGameCustomRorOptionsPopup.h"
+#include "EditorEditUnitInfoPopup.h"
+#include "InGameUnitPropertiesPopup.h"
+#include "MapCopyPopup.h"
 #include "traceMessage.h"
 #include "unitShortcuts.h"
 
@@ -14,7 +21,7 @@ public:
 	~CustomRORMainInterface();
 
 	CustomRORCommand *crCommand;
-	CustomPopup *currentCustomPopup;
+	CustomPopupBase *currentCustomPopup;
 
 
 	// Ensure exiting game won't crash due to UI pointer issues related to custom popup (occurs in scenario editor)
