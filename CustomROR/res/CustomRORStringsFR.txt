@@ -5,6 +5,11 @@
 [42000] CustomROR title
 CustomROR
 
+[42094]
+Yes
+[42095]
+No
+
 // *** Technical ***
 [42001]
 Debug message system initialized.
@@ -180,3 +185,25 @@ Astuce: laissez les champs terrain/altitude vides pour préserver les valeurs act
 Lisser les limites du terrain modifié
 [42092] // Mouse position
 Position de la souris
+[42093] // Success
+Succès
+[42096]
+Copier toute la carte
+[42097]
+Copier une zone
+[42098]
+Coller la zone
+[42099] // Copy map units (for checkbox)
+Copier les unités
+[42100] // Title for copy paste map zones
+Copier des portions de carte
+[42101]
+Copier depuis (x/y coin bas-gauche)
+[42102]
+Copier jusqu'à (x/y coin haut-droit)
+[42103]
+Coller vers (x/y coin bas-gauche)
+[42104]
+Carte en mémoire: taille=
+[42105]
+Contient des unités

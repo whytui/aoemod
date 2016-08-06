@@ -40,6 +40,8 @@ const static unsigned long int CRLANG_ID_WELCOME2 = 42009;
 const static unsigned long int CRLANG_ID_CUSTOM = 42085;
 const static unsigned long int CRLANG_ID_ERROR_COULDNT_FIND = 42089;
 const static unsigned long int CRLANG_ID_ERROR_EMPIRES_DAT_USED_INSTEAD = 42090;
+const static unsigned long int CRLANG_ID_YES = 42094;
+const static unsigned long int CRLANG_ID_NO = 42095;
 
 // CustomRor options
 const static unsigned long int CRLANG_ID_CUSTOMROR_OPTIONS_POPUP_TITLE = 42020;
@@ -119,3 +121,14 @@ const static unsigned long int CRLANG_ID_ELEVATION = 42081;
 const static unsigned long int CRLANG_ID_TIP_TERRAIN_LEAVE_EMPTY = 42082;
 const static unsigned long int CRLANG_ID_SOFTEN_TERRAIN_OPTION = 42091;
 const static unsigned long int CRLANG_ID_MOUSE_POSITION = 42092;
+const static unsigned long int CRLANG_ID_SUCCESS = 42093;
+const static unsigned long int CRLANG_ID_COPY_ALL_MAP = 42096;
+const static unsigned long int CRLANG_ID_COPY_MAP_ZONE = 42097;
+const static unsigned long int CRLANG_ID_PASTE_MAP_ZONE = 42098;
+const static unsigned long int CRLANG_ID_COPY_MAP_UNITS = 42099;
+const static unsigned long int CRLANG_ID_COPY_PASTE_MAP_ZONES_TITLE = 42100;
+const static unsigned long int CRLANG_ID_COPY_FROM_MAP_LABEL = 42101;
+const static unsigned long int CRLANG_ID_COPY_TO_MAP_LABEL = 42102;
+const static unsigned long int CRLANG_ID_PASTE_TO_MAP_LABEL = 42103;
+const static unsigned long int CRLANG_ID_MAP_COPY_CURRENT_BUFFER_SIZE = 42104;
+const static unsigned long int CRLANG_ID_MAP_COPY_CURRENT_BUFFER_HAS_UNITS = 42105;

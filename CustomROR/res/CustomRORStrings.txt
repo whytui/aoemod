@@ -4,6 +4,11 @@
 [42000] CustomROR title
 CustomROR
 
+[42094]
+Oui
+[42095]
+Non
+
 // *** Technical ***
 [42001]
 Debug message system initialized.
@@ -178,3 +183,25 @@ Tip: leave terrain/elevation empty to preserve current values.
 Soften modified terrain borders
 [42092] // Mouse position
 Mouse position
+[42093] // Success
+Success
+[42096]
+Copy all map
+[42097]
+Copy map zone
+[42098]
+Paste map zone
+[42099] // Copy map units (for checkbox)
+Copy units
+[42100] // Title for copy paste map zones
+Copy/Paste map zones
+[42101]
+Copy from (x/y of bottom-left corner)
+[42102]
+Copy to (x/y of top-right corner)
+[42103]
+Paste to position (x/y of bottom-left corner)
+[42104]
+Current buffer: size=
+[42105]
+Contains units
