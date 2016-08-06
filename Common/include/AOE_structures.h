@@ -1512,8 +1512,8 @@ namespace AOE_STRUCTURES
 		long int seqUnitId; // Sequence for unit instance IDs (for creatable only ?)
 		unsigned long int unknown_06C_unitIdSeqForTempUnits; // Unsure
 		// +0x70
-		unsigned long int unknown_070_unitIdSeqForNonCreatable; // Unsure. Forced when loading a scenario.
-		unsigned long int unknown_074_useseq70andNot74; // Unsure
+		long int forcedNextUnitId; // Unsure. Forced when loading a scenario.
+		long int forceUseSpecifiedUnitId; // +74. If set (temporarily), use "+70" as next unitInstanceId instead of reading sequence.
 		unsigned long int unknown_078; // random value for seed ?
 		short int humanPlayerId; // +7C. PlayerId that is human controlled (controlledPlayerId)
 		short int unknown_07E;
@@ -3133,9 +3133,10 @@ namespace AOE_STRUCTURES
 	};
 
 
-	// Size = 0x0C (for both parent/child classes)
+	// Size = 0x0C (for both parent/child classes). Constructor=0x4E7AB0 (no parameter).
 	// Parent class checksum=E4 98 54 00, for birds/type50/projectiles
 	// Child class checksum=AC 99 54 00 for living/building
+	// 0x4E7B60=unitCommandHeader.readFromFile(fileId, arg2, arg3)
 	class STRUCT_DEF_UNIT_COMMAND_HEADER {
 	public:
 		unsigned long int checksum; // AC 99 54 00 + E4 98 54 00 (parent class)
@@ -3232,46 +3233,47 @@ namespace AOE_STRUCTURES
 
 
 	// Size = 0x4C
+	// ReadFromFile=0x4E74F0
 	class STRUCT_DEF_UNIT_COMMAND {
 	public:
 		short int alwaysOne;
-		short int unitCommandId;
-		char unknown_04;
-		char unknown_05;
+		short int unitCommandIndex; // +02. index of this unitCommandDef element
+		char unknown_04; // Unknown value
+		char unknown_05; // unused ?
 		AOE_CONST_INTERNAL::INTERNAL_ACTION_ID commandType; // +6
-		short int classId;
-		short int unitId; // a DATID, generally -1
-		char selectionEnabler;
+		short int classId; // +08
+		short int unitId; // +0A.
+		char selectionEnabler; // +0C
 		char unknown_0D;
-		short int terrainId;
+		short int terrainId; // +0E.
 		// 0x10
 		char selectionMode;
-		char unknown_11;
+		char rightClickMode; // +11. what is this ?
 		char unknown_12;
 		char unknown_13;
 		short int resourceTypeIn; // +0x14.
 		short int resourceProductivityMultiplier;
 		short int resourceTypeOut;
 		short int resource;
-		float workRateMultiplier;
+		float workRateMultiplier; // or quantity ?
 		// 0x20
 		float executionRadius;
 		float extraRange;
 		char unknown_28;
-		char unknown_29;
-		char unknown_2A;
-		char unknown_2B;
+		char unknown_29; // unused ?
+		char unknown_2A; // unused ?
+		char unknown_2B; // unused ?
 		float unknown_2C;
 		// 0x30
-		short int unknown_30;
+		short int plunderSource; // What is this ? 0=from resource, 1=from player (AGE3 tooltip)
 		short int unknown_32;
-		unsigned long int ptrUnknownGraphic_34; // graphics NOT carrying resource
-		unsigned long int ptrProceedingGraphic;
-		unsigned long int ptrUnknownGraphic_3C;
+		unsigned long int *ptrToolGraphic; // graphics NOT carrying resource
+		unsigned long int *ptrProceedingGraphic; // +38.
+		unsigned long int *ptrActionGraphic;
 		// 0x40
-		unsigned long int ptrUnknownGraphic_40; // graphics carrying resource ?
-		unsigned long int unknown_44;
-		unsigned long int unknown_48;
+		unsigned long int ptrCarryingGraphic; // graphics carrying resource
+		unsigned long int *executionSound; // +44
+		unsigned long int *resourceDepositSound; // +48
 		// END of structure
 	};
 
@@ -3425,18 +3427,18 @@ namespace AOE_STRUCTURES
 		unsigned long int ptrWalkingGraphic1;
 		// 0xC0
 		unsigned long int ptrWalkingGraphic2;
-		float rotationSpeed;
+		float rotationSpeed; // +C4
 		char unknown_0C8;
 		char unknown_0C9;
-		short int trackingUnit;
-		char trackingUnitUsed;
+		short int trackingUnit; // +CA.
+		char trackingUnitUsed; // +CC.
 		char unknown_0CD;
 		char unknown_0CE;
 		char unknown_0CF;
 		// 0xD0
 		float trackingUnitDensity;
 		char unknown_0D4; // unknown16 in AGE3
-		char unknown_0D5[3];
+		char unknown_0D5[3]; // unused ?
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x005444FC); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_DEAD_UNITS); }
@@ -3444,7 +3446,8 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_DEAD_FISH) == 0xD8, "STRUCT_UNITDEF_DEAD_FISH size");
 
-	// CC 43 54 00 = Bird (type40) - size=0xFC - Constructor 0x43E090
+	// CC 43 54 00 = Bird (type40) - size=0xFC - Constructor 0x43E090.
+	// Deserialize=0x43E230 unitDef.ReadFromFile_bird_40(internalFileRef, ptrGraphicsList, ptrSoundsList)
 	class STRUCT_UNITDEF_BIRD : public STRUCT_UNITDEF_DEAD_FISH {
 	public:
 		STRUCT_DEF_UNIT_COMMAND_HEADER *ptrUnitCommandHeader; // +D8
@@ -3455,13 +3458,13 @@ namespace AOE_STRUCTURES
 		float workRate; // including upgrades. Ex for priest: base = 1, with astrology = 1.3
 		short int dropSite1;
 		short int dropSite2;
-		char villagerMode;
+		char villagerMode; // +EC. An id for "group" of units that can switch definition ?
 		char unknown_0ED;
 		char unknown_0EE;
 		char unknown_0EF;
 		// 0xF0
-		unsigned long int ptrUnknownGraphic_0F0; // or sound ?
-		unsigned long int ptrUnknownGraphic_0F4; // or sound ?
+		unsigned long int *attackSound; // Unknown struct
+		unsigned long int *moveSound; // +F4. Unknown struct
 		char animalMode;
 		char unknown_0F9;
 		char unknown_0FA;
@@ -3477,7 +3480,7 @@ namespace AOE_STRUCTURES
 	// 44 44 54 00 = type50 (type50) - size=0x148 - Constructor 0x43EE10
 	class STRUCT_UNITDEF_TYPE50 : public STRUCT_UNITDEF_BIRD {
 	public:
-		unsigned long int ptrAttackGraphic;
+		unsigned long int *ptrAttackGraphic; // +FC. Unknown struct
 		// 0x100
 		char defaultArmor; // Used when there is no armor in ptrArmorsList?
 		char unknown_101; // default attack ???
@@ -3499,8 +3502,8 @@ namespace AOE_STRUCTURES
 		float reloadTime1;
 		short int projectileUnitId; // +124. Can be used to determine if a military unit is melee (<0) or ranged (>=0)
 		short int accuracyPercent;
-		char towerMode;
-		char unknown_129;
+		char towerMode; // +128
+		char unknown_129; // unused ?
 		short int frameDelay;
 		float graphicDisplacement1;
 		// 0x130
@@ -3562,20 +3565,19 @@ namespace AOE_STRUCTURES
 	// 30 99 54 00 = building (type80) - size=0x17C. Constructor = 0x4EC180
 	class STRUCT_UNITDEF_BUILDING : public STRUCT_UNITDEF_LIVING {
 	public:
-		unsigned long int ptrUnknownSound_164;
-		unsigned long int ptrConstructionGraphic; // Graphics while building is under construction
-		char multiplePlacement; // +16C. IsWall? for building placement (put several at once) ?
+		unsigned long int *ptrConstructionSound; // +164.
+		unsigned long int *ptrConstructionGraphic; // +168. Graphics while building is under construction
+		char multiplePlacement; // +16C. For building placement (put several at once)
 		char unknown_16D;
-		char angle; // +16E. constructionStep (for unfinished) or "angle" (different standing graphic frame?)
-		char unknown_16F;
+		short int graphicsAngle; // +16E. constructionStep (for unfinished) or "angle" (different standing graphic frame?)
 		// 0x170
-		char unknown_170;
+		char disappearWhenBuilt;
 		char unknown_171;
-		short int unknown_172;
-		short int unknown_174;
-		short int unknown_176;
+		short int stackUnitId; // +172. Additional building added on top on this one ?
+		short int placementTerrainId; // +174.
+		short int oldTerrainId; // Obsolete information ? Used to build roads in early versions (according to AGE3 tooltip)
 		short int initiatesResearch;
-		short int unknown_17A;
+		short int unknown_17A; // unused ?
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00549930); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING); }
@@ -3831,7 +3833,7 @@ namespace AOE_STRUCTURES
 		// 0x30
 		float remainingHitPoints;
 		char currentGraphicsDamageIndex; // +34. According to remaining HP ?
-		char orientation; // +35. Also used as building step (<25%, <50%, <75%, >75%)
+		char orientationIndex; // +35. Also used as building step (<25%, <50%, <75%, >75%). For types 30+, step orientationAngle(+9C), not this. See 0x44BBD0(unit+[0xD4]).
 		char mouseSelectionStatus; // +36. 1=selected, 2=right-click-target. Is it a Mask, not an enum !
 		char shortcutNumber; // 0-10, 10+=regrouped units ; 0=none, 10=0x0A="0" key.
 		float positionY; // (+38) bottom-left to upper-right
@@ -3888,15 +3890,15 @@ namespace AOE_STRUCTURES
 				;
 		}
 		STRUCT_UNITDEF_BASE *GetUnitDefinition() { return (STRUCT_UNITDEF_BASE *) this->ptrStructDefUnit; }
-		// Returns true if the unit definition is a flag or a child class (all but eye candy and trees)
+		// Returns true if the unit definition is a flag (20) or a child class (all but eye candy and trees)
 		bool DerivesFromFlag() { 
 			return (this->IsCheckSumValidForAUnitClass() && (this->checksum != 0x00547DA8) && (this->checksum != 0x00548474)); // all but 10 and 90
 		}
-		// Returns true if the unit definition is dead/fish or a child class
+		// Returns true if the unit definition is dead/fish (30) or a child class
 		bool DerivesFromDead_fish() {
 			return this->DerivesFromBird() || (this->checksum == 0x00544838);
 		}
-		// Returns true if the unit definition is a bird or a child class
+		// Returns true if the unit definition is a bird (40) or a child class
 		bool DerivesFromBird() {
 			return this->DerivesFromType50() || (this->checksum == 0x00542748);
 		}
@@ -3967,11 +3969,11 @@ namespace AOE_STRUCTURES
 		float unknown_090; // Used for movement computation ?
 		float unknown_094; // Used for movement computation ?
 		unsigned long int unknown_098;
-		float unknown_09C; // unit orientation angle ?
+		float orientationAngle; // +9C. unit orientation angle. Updating this impacts unit.orientationIndex (+0x35). Angle [0, 2*PI[. 0=heading to northEast (increasing Y)
 		unsigned long int unknown_0A0;
 		STRUCT_UNIT_MOVEMENT_INFO movementInfo; // +A4. Movement info / path finding.
 		STRUCT_UNIT_MOVEMENT_INFO temp_AI_movementInfo; // +D8. Only used in AI treatments(?) to make checks before assigning tasks ? Used when unknown_154_tempFlag_calculatingPath=1
-		float orientationAngle; // +10C. Angle [0, 2*PI[. 0=heading to northEast (increasing Y)
+		float unknown_10C; // +10C.
 		// 0x110
 		float move_initialPosX; // wrong ?
 		float move_initialPosZ; // wrong ?

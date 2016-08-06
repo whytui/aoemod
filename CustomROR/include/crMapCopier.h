@@ -32,7 +32,7 @@ namespace MAP {
 		//posZ
 		short int unitDefId;
 		long int unitId;
-		char orientation; // float in serialized format in AOE ?
+		float orientation; // Represents orientation for types 30-80, orientationIndex as float for types 10/20/90.
 		char status;
 		short int playerId;
 	};

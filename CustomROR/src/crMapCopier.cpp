@@ -78,7 +78,13 @@ bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long in
 							unitData->playerId = unit->ptrStructPlayer->playerId;
 						}
 						unitData->unitId = unit->unitInstanceId;
-						unitData->orientation = unit->orientation; // unsure ?
+						// This dirty trick directly comes from AOE/ROR... 2 different kind of values are stored in 1 field, depending on type.
+						if (unit->DerivesFromDead_fish()) {
+							unitData->orientation = ((AOE_STRUCTURES::STRUCT_UNIT_DEAD_FISH*)unit)->orientationAngle;
+						} else {
+							// Types 10/20/90: there is no (float) orientation, only orientation index, which is stored as is in serialized format.
+							unitData->orientation = (float)unit->orientationIndex;
+						}
 						unitData->status = unit->unitStatus;
 						this->copiedUnits.push_back(unitData);
 					}
@@ -199,13 +205,10 @@ bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
 			//GetErrorForUnitCreationAtLocation(, , unitData->posY, unitData->posX, false, false, true, false, false);
 			STRUCT_PLAYER *player = global->GetPlayerStruct(unitData->playerId);
 			if (player && player->IsCheckSumValid()) {
+				// unitData->unitId is not preserved during this operation. We could using the force flag in global struct,
+				// but here the unit with this id may already exist (here the map is not new nor empty)
 				STRUCT_UNIT_BASE *unit = (STRUCT_UNIT_BASE *)CreateUnit(player, unitData->unitDefId,
-					newPosY, newPosX, 0);
-				if (unit) {
-					unit->orientation = unitData->orientation;
-					unit->unitStatus = unitData->status;
-					// unitData->unitId is not preserved during this operation.
-				}
+					newPosY, newPosX, 0, unitData->status, unitData->orientation);
 			}
 		}
 	}
