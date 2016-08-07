@@ -124,7 +124,7 @@ static bool test_ror_structures() {
 	trs_assert(&duch, 0x08, &duch.commandCount);
 	AOE_STRUCTURES::STRUCT_DEF_UNIT du;
 	trs_assert(&du, 0x176, &du.unknown_176);
-	AOE_STRUCTURES::STRUCT_DEF_CIVILIZATION dc;
+	AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF dc;
 	trs_assert(&dc, 0x2A, &dc.techTreeId);
 
 	AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT tde;
@@ -144,7 +144,7 @@ static bool test_ror_structures() {
 	AOE_STRUCTURES::STRUCT_RESEARCH_DEF_INFO rdi;
 	trs_assert(&rdi, 0x08, &rdi.ptrGlobalStruct);
 	AOE_STRUCTURES::STRUCT_RESEARCH_DEF rd;
-	trs_assert(&rd, 0x3A, &rd.unknown_3A);
+	trs_assert(&rd, 0x38, &rd.unknown_38);
 	assert(sizeof(rd) == 0x3C);	
 
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY uay;

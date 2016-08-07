@@ -3,6 +3,7 @@
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
 #include <AOE_structures.h>
+#include <AOE_struct_unit_def.h>
 #include <yvals.h> // for __STRINGIZE
 #include <Windows.h>
 #include <WinUser.h>

@@ -241,7 +241,7 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
 		return 0;
 	}
 	if ((civId < 0) || (civId >= global->civCount)) { return 0; }
-	STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civId];
+	STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civId];
 	if (civDef->techTreeId >= global->technologiesInfo->technologyCount) {
 		return 0;
 	}

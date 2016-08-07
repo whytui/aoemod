@@ -7,6 +7,7 @@
 #include <AOE_const_language.h>
 #include <AOE_offsets.h>
 #include <AOE_structures.h>
+#include <AOE_struct_unit_def.h>
 #include <ROR_API_assert.h>
 #include <customResolution.h>
 #include <AOE_empires_dat.h>

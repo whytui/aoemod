@@ -210,6 +210,10 @@ AOE_STRUCTURES::STRUCT_UNIT *GetUnitStruct(long int unitId);
 // Returns a unit definition if valid, NULL otherwise.
 AOE_STRUCTURES::STRUCT_DEF_UNIT *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitDefId);
 
+// Get a unit name from empires.dat data (read from civ 0)
+// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
+const char *GetUnitName(short int unitDefId);
+
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
 // WARNING: this overload is risky (does not check actual unit structure type / might access wrong pointers !)

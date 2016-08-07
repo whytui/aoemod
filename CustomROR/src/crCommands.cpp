@@ -512,7 +512,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 #ifdef _DEBUG
 	// TEST temp
 	if (strcmp(command, "b") == 0) {
-		long int playerId = 2;
+		long int playerId = 1;
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		STRUCT_AI_UNIT_LIST_INFO *l = &player->ptrAIStruct->structInfAI.unknown_0F0;
@@ -651,7 +651,7 @@ void CustomRORCommand::UpdateWorkRateWithMessage(short int DATID, float updatedV
 	}
 	bool firstOne = true;
 	for (int civId = 0; civId < global->civCount; civId++) {
-		AOE_STRUCTURES::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civId];
+		AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civId];
 		if (civDef && civDef->IsCheckSumValid()) {
 			AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = civDef->GetUnitDef(DATID);
 			char msgBuffer[100];
@@ -715,7 +715,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 	if (this->crInfo->configInfo.showHiddenUnitsInEditor > 0) {
 		bool excludeAnnoyingUnits = (this->crInfo->configInfo.showHiddenUnitsInEditor == 1);
 		for (int civid = 0; civid < global->civCount; civid++) {
-			AOE_STRUCTURES::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civid];
+			AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civid];
 			if (civDef && civDef->IsCheckSumValid()) {
 				for (int datid = 0; datid < civDef->civUnitDefCount; datid++) {
 					AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = civDef->GetUnitDef(datid);
@@ -744,7 +744,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 	// Note that adding this at game start does not work, it's too late.
 	if (this->crInfo->configInfo.fixInvisibleTree) {
 		for (int civid = 0; civid < global->civCount; civid++) {
-			AOE_STRUCTURES::STRUCT_DEF_CIVILIZATION *civDef = global->civilizationDefinitions[civid];
+			AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civid];
 			if (civDef && civDef->IsCheckSumValid()) {
 				if (civDef->civUnitDefCount > 393) {
 					// add condition SLP=799 ?
@@ -760,7 +760,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 
 	// Fix gaia attack alert sound once and for all (can be applied on all games, including MP/Scenario, doesn't affect anything).
 	if (global->civCount > 0) {
-		AOE_STRUCTURES::STRUCT_DEF_CIVILIZATION *civDefGaia = global->civilizationDefinitions[0];
+		AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDefGaia = global->civilizationDefinitions[0];
 		if (civDefGaia->civResourcesCount > CST_RES_ORDER_ATTACK_ALERT_SOUND_ID) {
 			civDefGaia->SetResourceValue(CST_RES_ORDER_ATTACK_ALERT_SOUND_ID, 10);
 		}
@@ -3477,15 +3477,15 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 		actionTargetUnitAction = (AOE_STRUCTURES::STRUCT_ACTION_BASE *)oldTargetUnit->ptrActionInformation->ptrActionLink->actionStruct;
 	}
 	bool newTargetAttacksMe = newTargetUnitAction && (
-		(newTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_UNKNOWN_7) ||
-		(newTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_ATTACK_9) ||
-		(newTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_CONVERT)
+		(newTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) ||
+		(newTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ATTACK_9) ||
+		(newTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_CONVERT)
 		) &&
 		(newTargetUnitAction->targetUnit == actorUnit);
 	bool actionTargetAttacksMe = actionTargetUnitAction && (
-		(actionTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_UNKNOWN_7) ||
-		(actionTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_ATTACK_9) ||
-		(actionTargetUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_CONVERT)
+		(actionTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) ||
+		(actionTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ATTACK_9) ||
+		(actionTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_CONVERT)
 		) &&
 		(actionTargetUnitAction->targetUnit == actorUnit);
 
@@ -4625,7 +4625,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 			curElem->unit->ptrStructDefUnit->IsCheckSumValid() && (curElem->unit->ptrStructDefUnit->DAT_ID1 == CST_UNITID_FARMER)) {
 			AOE_STRUCTURES::STRUCT_ACTION_BASE *curUnitAction = GetUnitAction(curElem->unit);
 			// There is 1 special case when farmer's resourceType is NOT berryBush: when AI player repairs a farm (bug: villager type is farmer instead of repairman)
-			if (curUnitAction && (curUnitAction->actionTypeID == AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
+			if (curUnitAction && (curUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
 				if (curUnitAction->targetUnitId == farmUnitId) {
 					assert(curElem->unit->resourceTypeId == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE);
 					farmerUnit = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)curElem->unit;
@@ -5146,7 +5146,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	// Note: for human player-triggered "train unit", a STOP button is already visible (command=STOP), leave it unchanged.
 	// WARNING: clicking on STOP for AI-triggered "train unit" does not update strategy and units will never be trained again ! Needs a fix !
 	const int buttonIdForStop = 6;
-	if (isBuilding && (currentAction != NULL) && (currentAction->actionTypeID == INTERNAL_ACTION_ID::CST_IAI_MAKE_OBJECT) &&
+	if (isBuilding && (currentAction != NULL) && (currentAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_MAKE_OBJECT) &&
 		(gameMainUI->unitCommandButtons[buttonIdForStop]->commandIDs[0] != (long int)INGAME_UI_COMMAND_ID::CST_IUC_STOP)) {
 		GetLanguageDllText(LANG_ID_STOP_CURRENT_ACTION, nameBuffer, sizeof(nameBuffer), "Stop current action");
 		AddInGameCommandButton(buttonIdForStop, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, nameBuffer, NULL, true);

@@ -2493,7 +2493,7 @@ void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 		actionStruct = (AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *) (myESP[0]);
 	}	
 	if (actionStruct) {
-		if (!actionStruct->IsCheckSumValid() || (actionStruct->actionTypeID != AOE_CONST_INTERNAL::INTERNAL_ACTION_ID::CST_IAI_MAKE_OBJECT)) {
+		if (!actionStruct->IsCheckSumValid() || (actionStruct->actionTypeID != AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_MAKE_OBJECT)) {
 			actionStruct = NULL; // The value we read is not an "MakeObject" actionstruct, ignore it.
 		}
 	}

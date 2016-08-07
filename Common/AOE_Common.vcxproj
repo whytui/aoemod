@@ -91,9 +91,15 @@
     <ClInclude Include="include\AOE_const_internal.h" />
     <ClInclude Include="include\AOE_const_language.h" />
     <ClInclude Include="include\AOE_empires_dat.h" />
+    <ClInclude Include="include\AOE_hardcoded_unit_names.h" />
     <ClInclude Include="include\AOE_offsets.h" />
     <ClInclude Include="include\AOE_SN_numbers.h" />
-    <ClInclude Include="include\AOE_structures_techs.h" />
+    <ClInclude Include="include\AOE_struct_map_def.h" />
+    <ClInclude Include="include\AOE_struct_research_def.h" />
+    <ClInclude Include="include\AOE_struct_tech_def.h" />
+    <ClInclude Include="include\AOE_struct_civilization_def.h" />
+    <ClInclude Include="include\AOE_struct_terrain_def.h" />
+    <ClInclude Include="include\AOE_struct_unit_def.h" />
     <ClInclude Include="include\basicFilesHandling.h" />
     <ClInclude Include="include\customResolution.h" />
     <ClInclude Include="include\gameVersion.h" />

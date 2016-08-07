@@ -111,42 +111,6 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_INFO) == 0x0C, "STRUCT_TECH_DEF_INFO size");
 
-	// size = 0x3C
-	class STRUCT_RESEARCH_DEF {
-	public:
-		char *researchName;
-		short int requiredResearchId[4]; // +04. 4 possible research IDs (required researches)
-		short int minRequiredResearchesCount; // +0C. Min number of "requiredResearchId" that need to be satisfied to enable this research. NOT number of used elements in array !
-		short int costType1;
-		// 0x10
-		short int costType2;
-		short int costType3;
-		short int costAmount1; // +14
-		short int costAmount2;
-		short int costAmount3; // +18
-		char costUsed1;
-		char costUsed2;
-		char costUsed3; // +1C
-		char unused1D0;
-		short int researchTime; // 1E
-		// 0x20
-		short int technologyId;
-		short int researchType; // 1=dock, 2=granary,etc (see AGE3 tooltip)
-		short int iconId; // 24
-		char buttonId; // 26. 1-5 for first row, 6-10 for second row, 11-15 and 16-20 for 2nd page (2 rows)
-		char unknown_27;
-		short int researchLocation; // 28
-		short int languageDLLName;
-		short int languageDLLDescription; // 2C. Description of research (with effect details like "+1 for xxx", etc)
-		unsigned short int unknown_2E; // "pointer3" ??
-		// 0x30
-		long int languageDLLCreation;
-		long int languageDLLHelp; // +34
-		unsigned short int unknown_38;
-		unsigned short int unknown_3A;
-		//end
-	};
-
 
 	// Returns <0 if this attribute's values are reverse (lower value are better/stronger)
 	// Returns >0 if this attribute's values are standard (higher = better)
@@ -173,9 +137,9 @@ namespace AOE_STRUCTURES {
 		case AOE_CONST_FUNC::TUA_POPULATION_COST: // For logistics: decreasing the cost is better
 		case AOE_CONST_FUNC::TUA_ADD_COST_AMOUNT:
 			return -1;
-		// Not relevant for those ones :
+		case AOE_CONST_FUNC::TUA_PROJECTILE_UNIT: // Hard to tell...
+			// Not relevant for those ones :
 		case AOE_CONST_FUNC::TUA_UNKNOWN_07:
-		case AOE_CONST_FUNC::TUA_PROJECTILE_UNIT:
 		case AOE_CONST_FUNC::TUA_ANGLE:
 		case AOE_CONST_FUNC::TUA_TERRAIN_RESTRICTION_FOR_DAMAGE:
 		case AOE_CONST_FUNC::TUA_NONE:

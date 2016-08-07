@@ -646,9 +646,10 @@ bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass) {
 
 
 bool GetUnitCost(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID, float costTable[]) {
-	if ((DAT_ID < 0) || (DAT_ID > CST_UNIT_NAMES_MAX_ID)) { return false; }
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *defUnit = player->ptrStructDefUnitTable[DAT_ID];
-	if (!defUnit) { return false; }
+	if (!player || !player->IsCheckSumValid()) { return false; }
+	if ((DAT_ID < 0) || (DAT_ID >= player->structDefUnitArraySize)) { return false; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING*)player->GetUnitDefBase(DAT_ID);
+	if (!defUnit || !defUnit->DerivesFromLiving()) { return false; }
 	for (int i = 0; i < 4; i++) { costTable[i] = 0; }
 	if (defUnit->costs[0].costPaid) {
 		if (defUnit->costs[0].costType > MAX_RESOURCE_TYPE_ID) { return false; }
@@ -800,6 +801,18 @@ AOE_STRUCTURES::STRUCT_DEF_UNIT *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLAYER 
 	if (!player || !player->IsCheckSumValid() || (unitDefId < 0)) { return NULL; }
 	if (unitDefId >= player->structDefUnitArraySize) { return NULL; }
 	return player->ptrStructDefUnitTable[unitDefId];
+}
+
+
+// Get a unit name from empires.dat data (read from civ 0)
+// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
+const char *GetUnitName(short int unitDefId) {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return NULL; }
+	if (global->civCount <= 0) { return NULL; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = global->civilizationDefinitions[0]->GetUnitDefBase(unitDefId);
+	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return NULL; }
+	return unitDef->ptrUnitName;
 }
 
 

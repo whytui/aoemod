@@ -137,4 +137,5 @@ namespace AOE_CONST_FUNC
 		CST_BL_DAMAGE_NEARBY_UNITS = 2, // stone thrower, catapult
 		CST_BL_DAMAGE_TARGET_ONLY = 3 // For most units !
 	};
+
 }
