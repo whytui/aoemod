@@ -723,7 +723,7 @@ void CustomRORInstance::ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values) {
 void CustomRORInstance::FixBuildingStratElemUnitID(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_PLAYER *p = (AOE_STRUCTURES::STRUCT_PLAYER*) REG_values->EDI_val;
 	ror_api_assert(REG_values, p != NULL);
-	AOE_STRUCTURES::STRUCT_AI *ai = p->GetAIStruct();
+	AOE_STRUCTURES::STRUCT_AI *ai = p->ptrAIStruct;
 	if (ai) {
 		AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &ai->structBuildAI;
 		ror_api_assert(REG_values, buildAI != NULL);

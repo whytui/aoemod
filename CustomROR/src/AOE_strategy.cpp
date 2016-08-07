@@ -92,7 +92,7 @@ bool IsResearchRelevantForStrategy(AOE_STRUCTURES::STRUCT_PLAYER *player, short 
 // WARNING: AIUCTech and AIUCCritical are 2 different filter values ! Searching for researches won't find tool age/bronze/etc !
 long int FindElementInStrategy(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::TAIUnitClass elementType, short int DAT_ID) {
 	if (!player) { return -1; }
-	AOE_STRUCTURES::STRUCT_AI *mainAI = player->GetAIStruct();
+	AOE_STRUCTURES::STRUCT_AI *mainAI = player->ptrAIStruct;
 	if (!mainAI) { return -1; }
 	if (elementType == AIUCBuilding) {
 		DAT_ID = GetBaseBuildingUnitId(DAT_ID); // do NOT use "DATID2" values in strategy
@@ -222,7 +222,7 @@ void MarkResearchAsDoneInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, shor
 // The method will do nothing if player is NULL or if its AI structure is NULL.
 void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player) { return; }
-	AOE_STRUCTURES::STRUCT_AI *mainAI = player->GetAIStruct();
+	AOE_STRUCTURES::STRUCT_AI *mainAI = player->ptrAIStruct;
 	if (!mainAI) { return; }
 	// Call generic method
 	UpdateStrategyWithUnreferencedExistingUnits(&mainAI->structBuildAI, -1, TAIUnitClass::AIUCNone);
@@ -690,8 +690,8 @@ void ClearStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 // Add units to fit maximum population (especially if >50)
 void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player || !player->ptrAIStruct) { return; }
-	assert(player->GetAIStruct() != NULL);
-	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &player->GetAIStruct()->structBuildAI;
+	assert(player->ptrAIStruct != NULL);
+	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &player->ptrAIStruct->structBuildAI;
 	if (!buildAI) { return; }
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstStratElem = &buildAI->fakeFirstStrategyElement;
 	assert(fakeFirstStratElem != NULL);

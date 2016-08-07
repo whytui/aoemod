@@ -23,6 +23,26 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_POSITION_INFO) == 8, "STRUCT_POSITION_INFO size");
 
 
+	// Size = 0x10
+	class STRUCT_PATH_FINDING_INTERMEDIATE_STEP {
+	public:
+		float posY;
+		float posX;
+		float posZ; // Unsure
+		char remainingSteps; // -1=initial position, 0 for final position, 1 for last before final position...
+	};
+	static_assert(sizeof(STRUCT_PATH_FINDING_INTERMEDIATE_STEP) == 0x10, "STRUCT_PATH_FINDING_INTERMEDIATE_STEP size");
+
+	// Size = 0x3 ! (yes !)
+	class STRUCT_UNIT_TARGET_POS {
+	public:
+		char posY;
+		char posX;
+		char posZ;
+	};
+	static_assert(sizeof(STRUCT_UNIT_TARGET_POS) == 3, "STRUCT_UNIT_TARGET_POS size");
+
+
 	// Size=8. Used in temporary treatments, for example auto-attack unit when idle...
 	class STRUCT_NEARBY_UNIT_INFO {
 	public:

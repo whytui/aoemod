@@ -1253,10 +1253,10 @@ void CustomRORCommand::FixGameStartAIInitForPlayers() {
 	if (!global) { return; }
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
-		if ((player->GetAIStruct() != NULL) && !this->FindIfGameStartStrategyInitHasBeenDone(player)) {
+		if ((player->ptrAIStruct != NULL) && !this->FindIfGameStartStrategyInitHasBeenDone(player)) {
 			// It seems we found a player that has not had his "game start AI init", including addition of dynamic strategy elements.
 			// Force the flag to trigger it now (in fact, init will be triggered when AI control is enabled).
-			player->GetAIStruct()->needGameStartAIInit = 1;
+			player->ptrAIStruct->needGameStartAIInit = 1;
 			// Note: when strategy elements are added to strategy, we'll need to run UpdateStrategyWithUnreferencedExistingUnits
 			// if we want AI not to rebuild already existing houses (+docks, boats...)
 		}
@@ -1349,7 +1349,7 @@ bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT
 // That's why when unsure this returns true (including invalid cases)
 bool CustomRORCommand::FindIfGameStartStrategyInitHasBeenDone(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player) { return true; }
-	AOE_STRUCTURES::STRUCT_AI *mainAI = player->GetAIStruct();
+	AOE_STRUCTURES::STRUCT_AI *mainAI = player->ptrAIStruct;
 	if (!mainAI) { return true; }
 	if (FindElementInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_HOUSE) < 0) {
 		// Our current criterion is "no house = not initialized". Can we do better ?
@@ -2576,7 +2576,7 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 	fprintf_s(f, "\nDislike vs p0  p1  p2  p3  p4  p5  p6  p7  p8  - Like vs p0  p1  p2  p3  p4  p5  p6  p7  p8  \n");
 	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
-		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->GetAIStruct();
+		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->ptrAIStruct;
 		if (ai == NULL) {
 			fprintf_s(f, "[No AI structure for player #%d.]\n", i);
 		} else {
@@ -2597,7 +2597,7 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
 		fprintf_s(f, "\nPlayer %d:\nCounter Class DAT_ID Name                           Actor Unitid InProgress Alive Attempts #created Retrains Ptr\n", i);
-		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->GetAIStruct();
+		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->ptrAIStruct;
 		if (ai == NULL) {
 			fprintf_s(f, "No AI structure for this player.\n");
 		} else {
@@ -2617,7 +2617,7 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
 		fprintf_s(f, "\nPlayer %d:\n", i);
-		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->GetAIStruct();
+		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->ptrAIStruct;
 		if (ai == NULL) {
 			fprintf_s(f, "No AI structure for this player.\n");
 		} else {
@@ -2636,7 +2636,7 @@ void CustomRORCommand::DumpDebugInfoToFile() {
 // Returns <0 if there is an error
 int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUCT_PLAYER *player, float maxDistance) {
 	if (!player) { return -1; }
-	AOE_STRUCTURES::STRUCT_AI *ai = player->GetAIStruct();
+	AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
 	if (!ai || !ai->allMyUnits.unitIdArray) { return -1; }
 	if (ai->structTacAI.militaryUnits.usedElements == 0) { return 0; }
 
@@ -2896,7 +2896,7 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT *targ
 	}
 
 	// Adapt strategy for "actor" player
-	AOE_STRUCTURES::STRUCT_AI *mainAI_actor = actorPlayer->GetAIStruct();
+	AOE_STRUCTURES::STRUCT_AI *mainAI_actor = actorPlayer->ptrAIStruct;
 	if (mainAI_actor == NULL) { return; }
 	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI_actor = &mainAI_actor->structBuildAI;
 	assert(buildAI_actor != NULL);
@@ -4072,7 +4072,7 @@ void CustomRORCommand::ComputeDislikeValues() {
 	// Calculate dislike "penalty" for each player.
 	for (int iPlayerId = 1; iPlayerId < globalStruct->playerTotalCount; iPlayerId++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = globalStruct->GetPlayerStructPtrTable()[iPlayerId];
-		if (player && player->GetAIStruct()) {
+		if (player && player->ptrAIStruct) {
 			float *resources = (float *)player->ptrResourceValues;
 			if (resources[CST_RES_ORDER_STANDING_WONDERS]) { newDislikeValues[iPlayerId] += this->crInfo->configInfo.dislike_allArtefacts; }
 			if (resources[CST_RES_ORDER_ALL_RUINS]) { newDislikeValues[iPlayerId] += this->crInfo->configInfo.dislike_allArtefacts; }
@@ -4086,9 +4086,9 @@ void CustomRORCommand::ComputeDislikeValues() {
 		if (player) {
 			for (int iTargetPlayerId = 1; iTargetPlayerId < globalStruct->playerTotalCount; iTargetPlayerId++) {
 				AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = globalStruct->GetPlayerStructPtrTable()[iTargetPlayerId];
-				if ((iPlayerId != iTargetPlayerId) && (player->diplomacyVSPlayers[iTargetPlayerId] > 2) && (player->GetAIStruct())) {
+				if ((iPlayerId != iTargetPlayerId) && (player->diplomacyVSPlayers[iTargetPlayerId] > 2) && (player->ptrAIStruct)) {
 					// Set the new calculated dislike value against player #iTargetPlayerId
-					player->GetAIStruct()->structDiplAI.dislikeTable[iTargetPlayerId] = newDislikeValues[iTargetPlayerId];
+					player->ptrAIStruct->structDiplAI.dislikeTable[iTargetPlayerId] = newDislikeValues[iTargetPlayerId];
 				}
 			}
 		}

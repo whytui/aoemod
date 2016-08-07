@@ -271,7 +271,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				posInBuf = posInBuf + strlen(posInBuf);
 			}
 			if (player) {
-				AOE_STRUCTURES::STRUCT_AI *ai = player->GetAIStruct();
+				AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
 				if (ai) {
 					//ai->structTacAI.plannedResourceNeeds.resourceAmount[0];
 					sprintf_s(posInBuf, 200, "Player %i:\nresId priority order = %ld  %ld  %ld  %ld\nnb gatherers         = %ld  %ld  %ld  %ld\nResources = %ld  %ld  %ld  %ld\n",
