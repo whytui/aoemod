@@ -35,7 +35,7 @@ namespace AOE_STRUCTURES {
 	};
 
 
-#define SCORE_HEADER_CHECKSUM 0x0054A3E4
+#define CHECKSUM_SCORE_HEADER 0x0054A3E4
 	// Unknown size
 	class STRUCT_SCORE_HEADER {
 	public:
@@ -49,7 +49,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_18;
 		long int currentTotalScore;
 
-		bool IsCheckSumValid() { return this->checksum == SCORE_HEADER_CHECKSUM; }
+		bool IsCheckSumValid() { return this->checksum == CHECKSUM_SCORE_HEADER; }
 	};
 
 }
