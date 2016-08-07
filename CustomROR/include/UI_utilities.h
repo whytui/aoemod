@@ -5,6 +5,7 @@
 #include <AOE_const_internal.h>
 #include <AOE_structures.h>
 #include <AOE_structures_drs.h>
+#include <AOE_struct_game_settings.h>
 #include <assert.h>
 #include "AOE_memory.h"
 #include "drsHandler.h"

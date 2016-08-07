@@ -5,6 +5,8 @@
 #include <AOE_struct_map_tile_info.h>
 #include <AOE_struct_unit_activity.h>
 #include <AOE_struct_unit_actions.h>
+#include <AOE_struct_map_base_common.h>
+#include <AOE_struct_map_visibility_info.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -16,7 +18,6 @@
 namespace AOE_STRUCTURES {
 	// External dependencies
 	class STRUCT_PLAYER;
-
 
 
 	// Size=4

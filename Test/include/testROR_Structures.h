@@ -1,5 +1,8 @@
 #include <assert.h>
 #include <AOE_structures.h>
+#include <AOE_struct_game_settings.h>
+#include <AOE_struct_strategy_element.h>
+#include <AOE_struct_main_ai.h>
 #include <string>
 #include <Windows.h>
 #include "../include/testRandomizer.h"

@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <math.h> // fmodf
+
 using namespace AOE_CONST_FUNC;
 
 /*

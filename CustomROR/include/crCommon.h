@@ -5,7 +5,8 @@
 #include <list>
 #include <algorithm>
 #include <ROR_API_pub.h>
-#include <AOE_structures.h>
+#include <AOE_struct_game_settings.h>
+#include <AOE_struct_main_ai.h>
 #include <AOE_structures_drs.h>
 #include <AOE_offsets.h>
 #include <AOE_const_internal.h>

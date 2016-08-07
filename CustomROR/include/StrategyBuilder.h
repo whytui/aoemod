@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 #include <memory>
-#include <AOE_structures.h>
+#include <AOE_struct_game_settings.h>
 #include <AOE_struct_unit_def.h>
 #include <AOE_const_functional.h>
 #include <basicFilesHandling.h>

@@ -2,8 +2,8 @@
 
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
-#include <AOE_structures.h>
-#include <AOE_struct_unit_def.h>
+#include <AOE_struct_game_settings.h>
+#include <AOE_struct_main_ai.h>
 #include <mystrings.h>
 #include <assert.h>
 #include <string>

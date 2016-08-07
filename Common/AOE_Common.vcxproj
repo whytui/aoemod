@@ -101,7 +101,9 @@
     <ClInclude Include="include\AOE_struct_con_ai.h" />
     <ClInclude Include="include\AOE_struct_diplomacy_ai.h" />
     <ClInclude Include="include\AOE_struct_emotional_ai.h" />
+    <ClInclude Include="include\AOE_struct_game_global.h" />
     <ClInclude Include="include\AOE_struct_game_map_info.h" />
+    <ClInclude Include="include\AOE_struct_game_settings.h" />
     <ClInclude Include="include\AOE_struct_inf_ai.h" />
     <ClInclude Include="include\AOE_struct_main_ai.h" />
     <ClInclude Include="include\AOE_struct_map_base_common.h" />
@@ -114,6 +116,7 @@
     <ClInclude Include="include\AOE_struct_player.h" />
     <ClInclude Include="include\AOE_struct_research_def.h" />
     <ClInclude Include="include\AOE_struct_resource_ai.h" />
+    <ClInclude Include="include\AOE_struct_scenario_info.h" />
     <ClInclude Include="include\AOE_struct_score.h" />
     <ClInclude Include="include\AOE_struct_sound.h" />
     <ClInclude Include="include\AOE_struct_strategy_ai.h" />
