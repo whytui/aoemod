@@ -13,6 +13,8 @@
 #include <AOE_struct_terrain_def.h>
 #include <AOE_struct_map_def.h>
 #include <AOE_struct_map_generation.h>
+#include <AOE_struct_map_visibility_info.h>
+#include <AOE_struct_map_base_common.h>
 #include <gameVersion.h>
 
 
@@ -113,15 +115,12 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNIT_ACTION_INFO;
 
 	// MAP
-	class STRUCT_MAP_VISIBILITY_INFO;
 	class STRUCT_GAME_MAP_TILE_INFO;
 	class STRUCT_GAME_MAP_INFO; // TODO: Confirm exact role
-	class STRUCT_NEARBY_UNIT_INFO;
 	class STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYER_NEARBY_UNITS_INFO;
 	class STRUCT_UNKNOWN_MAP_INFO_7D2058;
 	class STRUCT_UNKNOWN_MAP_DATA_F04C;
 	class STRUCT_TEMP_MAP_BUILD_LIKE_INFOS;
-	class STRUCT_TEMP_MAP_POSITION_INFO;
 
 	// UI components
 	class STRUCT_UI_OBJ_UNKNOWN_INFO;
@@ -159,13 +158,6 @@ namespace AOE_STRUCTURES
 	class STRUCT_UI_WELCOME_MAIN_SCREEN;
 
 
-	// Size = 8. Mostly used in temporary treatments
-	class STRUCT_POSITION_INFO {
-	public:
-		long int posY;
-		long int posX;
-	};
-	static_assert(sizeof(STRUCT_POSITION_INFO) == 8, "STRUCT_POSITION_INFO size");
 
 #pragma pack(push, 1) // Prevent compiler from aligning on dwords (or other alignment)
 	// Size = 1 byte. This is a shortcut to avoid duplicating bit operations everywhere
@@ -288,23 +280,6 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_SPOTTED_RESOURCE_INFO) == 0x14, "STRUCT_SPOTTED_RESOURCE_INFO size");
 
 
-	// Size=4 (1 dword)
-	class STRUCT_MAP_VISIBILITY_INFO {
-	public:
-		short int fogVisibilityMask;
-		short int explorationVisibilityMask;
-		bool isFogVisibleForPlayer(long int playerId) {
-			long int mask = 1 << playerId;
-			return (this->fogVisibilityMask & mask) != 0;
-		}
-		bool isExploredForPlayer(long int playerId) {
-			long int mask = 1 << playerId;
-			return (this->explorationVisibilityMask & mask) != 0;
-		}
-	};
-	static_assert(sizeof(STRUCT_MAP_VISIBILITY_INFO) == 4, "STRUCT_MAP_VISIBILITY_INFO size");
-
-
 	/*******
 	* MAP
 	*/
@@ -412,17 +387,6 @@ namespace AOE_STRUCTURES
 		}
 	};
 
-	// Size=8. Used in temporary treatments, for example auto-attack unit when idle...
-	class STRUCT_NEARBY_UNIT_INFO {
-	public:
-		long int unitId; // +0
-		char distance; // +4. Unsure. Not always valued ?
-		char playerId; // +5
-		char posY; // +6
-		char posX; // +7
-	};
-	static_assert(sizeof(STRUCT_NEARBY_UNIT_INFO) == 0x8, "STRUCT_NEARBY_UNIT_INFO size");
-
 	// Size = 8
 	// Contains information about nearby units for temp treatments.
 	// Each player has its own object
@@ -469,16 +433,6 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_PLAYER_UNKNOWN_118) == 0x14, "STRUCT_PLAYER_UNKNOWN_118 size");
 
-
-	// Used in path finding algorithm (included in path finding struct)
-	class STRUCT_PATH_FINDING_UNKNOWN_POS_INFO {
-	public:
-		char posY;
-		char posX;
-		char unknown_2; // Maybe unused
-		char unknown_3; // Maybe unused
-		long int distance;
-	};
 
 	// Included structure in addresses 0x583BC8 and 0x6A1CC0
 	// Constuctor 00458570
@@ -4458,21 +4412,6 @@ namespace AOE_STRUCTURES
 		// unknown...
 		bool IsCheckSumValid() { return this->checksum == 0x00546468; }
 	};
-
-	// Size 0x14 ?
-	// This struct is used internally to get position info (when clicking, for example)
-	// Often it is in stack, (SUB ESP, ...), not allocated
-	class STRUCT_TEMP_MAP_POSITION_INFO {
-	public:
-		float posY;
-		float posX;
-		unsigned short int unknown_08;
-		unsigned short int unknown_0A;
-		STRUCT_UNIT_BASE *unit;
-		unsigned long int unknown_10;
-	};
-
-
 
 
 	static long int GetUnitStructRealSize(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
