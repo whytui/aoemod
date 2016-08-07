@@ -4027,19 +4027,19 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 		// Commands: we need to duplicate them (or ROR would free them twice)
 		assert(srcDef->ptrUnitCommandHeader != NULL);
 		if (srcDef->ptrUnitCommandHeader != NULL) {
-			AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND_HEADER *newCmdHeader = (AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND_HEADER *) AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND_HEADER));
+			AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER *newCmdHeader = (AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER *) AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER));
 			newUnitDef->ptrUnitCommandHeader = newCmdHeader;
 			newCmdHeader->checksum = srcDef->ptrUnitCommandHeader->checksum;
 			newCmdHeader->commandCount = srcDef->ptrUnitCommandHeader->commandCount;
 			if (newCmdHeader->commandCount > 0) {
-				newCmdHeader->ptrCommandArray = (AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND**) AOEAlloc(newCmdHeader->commandCount * 4);
+				newCmdHeader->ptrCommandArray = (AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF**) AOEAlloc(newCmdHeader->commandCount * 4);
 			} else {
 				newCmdHeader->ptrCommandArray = NULL;
 			}
 
 			for (long int i = 0; i < newCmdHeader->commandCount; i++) {
-				newCmdHeader->ptrCommandArray[i] = (AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND*) AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND)); // Alloc
-				memcpy(newCmdHeader->ptrCommandArray[i], srcDef->ptrUnitCommandHeader->ptrCommandArray[i], sizeof(AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND)); // Copy from source
+				newCmdHeader->ptrCommandArray[i] = (AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF*) AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF)); // Alloc
+				memcpy(newCmdHeader->ptrCommandArray[i], srcDef->ptrUnitCommandHeader->ptrCommandArray[i], sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF)); // Copy from source
 			}
 		} else {
 			newUnitDef->ptrUnitCommandHeader = NULL; // This should NOT happen

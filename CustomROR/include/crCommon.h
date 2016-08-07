@@ -384,7 +384,7 @@ bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit, AOE_ST
 
 // Returns a unitDefCommand object if actor unit has a valid right-click command on target unit.
 // Returns NULL if there no possible interaction
-AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit, 
+AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit,
 	AOE_STRUCTURES::STRUCT_UNIT *target, bool canSwitchForVillager);
 
 

@@ -117,10 +117,10 @@ static bool test_ror_structures() {
 	AOE_STRUCTURES::STRUCT_UNIT_MOVEMENT_INFO movinfo;
 	assert(sizeof(movinfo) == 0x34);
 	trs_assert(&movinfo, 0x30, &movinfo.intermediatePositionsCurrentIndex);
-	AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND duc;
+	AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF duc;
 	trs_assert(&duc, 0x48, &duc.resourceDepositSound);
 	assert(sizeof(duc) == 0x4C);
-	AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND_HEADER duch;
+	AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER duch;
 	trs_assert(&duch, 0x08, &duch.commandCount);
 	AOE_STRUCTURES::STRUCT_DEF_UNIT du;
 	trs_assert(&du, 0x176, &du.unknown_176);

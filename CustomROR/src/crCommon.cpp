@@ -1095,15 +1095,15 @@ bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit, AOE_ST
 
 // Returns a unitDefCommand object if actor unit has a valid right-click command on target unit.
 // Returns NULL if there no possible interaction
-AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit,
+AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit,
 	AOE_STRUCTURES::STRUCT_UNIT *target, bool canSwitchForVillager) {
 	if (!actorUnit || !target || !actorUnit->IsCheckSumValid() || !target->IsCheckSumValid()) { return false; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)actorUnit->ptrStructDefUnit;
 	if (!unitDef_base->DerivesFromBird()) { return false; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDef_asBird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)unitDef_base;
 	if (!unitDef_asBird->ptrUnitCommandHeader || !unitDef_asBird->ptrUnitCommandHeader->IsCheckSumValid()) { return false; }
-	AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND_HEADER *cmdh = unitDef_asBird->ptrUnitCommandHeader;
-	AOE_STRUCTURES::STRUCT_DEF_UNIT_COMMAND *result;
+	AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER *cmdh = unitDef_asBird->ptrUnitCommandHeader;
+	AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *result;
 	assert(cmdh != NULL);
 	if (!cmdh) {
 		return NULL;

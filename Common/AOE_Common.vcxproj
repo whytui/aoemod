@@ -97,8 +97,11 @@
     <ClInclude Include="include\AOE_struct_map_base_common.h" />
     <ClInclude Include="include\AOE_struct_map_def.h" />
     <ClInclude Include="include\AOE_struct_map_generation.h" />
+    <ClInclude Include="include\AOE_struct_map_global_objects.h" />
+    <ClInclude Include="include\AOE_struct_map_tile_info.h" />
     <ClInclude Include="include\AOE_struct_map_visibility_info.h" />
     <ClInclude Include="include\AOE_struct_research_def.h" />
+    <ClInclude Include="include\AOE_struct_score.h" />
     <ClInclude Include="include\AOE_struct_tech_def.h" />
     <ClInclude Include="include\AOE_struct_civilization_def.h" />
     <ClInclude Include="include\AOE_struct_terrain_def.h" />

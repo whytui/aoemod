@@ -15,6 +15,9 @@
 #include <AOE_struct_map_generation.h>
 #include <AOE_struct_map_visibility_info.h>
 #include <AOE_struct_map_base_common.h>
+#include <AOE_struct_map_tile_info.h>
+#include <AOE_struct_map_global_objects.h>
+#include <AOE_struct_score.h>
 #include <gameVersion.h>
 
 
@@ -42,7 +45,6 @@ namespace AOE_STRUCTURES
 	class STRUCT_AI_UNIT_LIST_INFO;
 	class STRUCT_HUMAN_TRAIN_QUEUE_INFO;
 	class STRUCT_SPOTTED_RESOURCE_INFO;
-	class STRUCT_POSITION_INFO;
 	class STRUCT_MP_COMMUNICATION; // Visible at global level
 	class STRUCT_UNKNOWN_GAME_TIME;
 	class STRUCT_COMMAND_LINE_INFO;
@@ -55,8 +57,6 @@ namespace AOE_STRUCTURES
 	class STRUCT_GAME_SETTINGS;
 	class STRUCT_PER_TYPE_UNIT_LIST_ELEMENT;
 	class STRUCT_PER_TYPE_UNIT_LIST_LINK;
-	class STRUCT_SCORE_ELEM;
-	class STRUCT_SCORE_HEADER;
 	class STRUCT_PLAYER_BUILDINGS_HEADER;
 	class STRUCT_PLAYER_UNKNOWN_58_AND_6C;
 	class STRUCT_PLAYER_POP_HIST_INFO;
@@ -79,7 +79,6 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNIT_LIVING;
 	class STRUCT_UNIT_BUILDING;
 	class STRUCT_UNIT_TREE;
-	class STRUCT_UNIT_BASE_LIST;
 
 	// AI
 	class STRUCT_AI;
@@ -115,11 +114,7 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNIT_ACTION_INFO;
 
 	// MAP
-	class STRUCT_GAME_MAP_TILE_INFO;
 	class STRUCT_GAME_MAP_INFO; // TODO: Confirm exact role
-	class STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYER_NEARBY_UNITS_INFO;
-	class STRUCT_UNKNOWN_MAP_INFO_7D2058;
-	class STRUCT_UNKNOWN_MAP_DATA_F04C;
 	class STRUCT_TEMP_MAP_BUILD_LIKE_INFOS;
 
 	// UI components
@@ -158,53 +153,6 @@ namespace AOE_STRUCTURES
 	class STRUCT_UI_WELCOME_MAIN_SCREEN;
 
 
-
-#pragma pack(push, 1) // Prevent compiler from aligning on dwords (or other alignment)
-	// Size = 1 byte. This is a shortcut to avoid duplicating bit operations everywhere
-	class TERRAIN_BYTE {
-	public:
-		char terrainData;
-		char GetTerrainId() const {
-			return this->terrainData & 0x1F;
-		}
-		bool SetTerrainId(char value) { // To properly update terrain, there are more complex treatments to do than this
-			if ((value < 0) || (value > 31)) { return false; }
-			this->terrainData = (this->terrainData & 0xE0) | value; // preserve altitude
-			return true;
-		}
-		char GetAltitude() const {
-			return (this->terrainData & 0xE0) >> 5;
-		}
-		bool SetAltitude(char value) { // To update altitude, there are more complex treatments to do
-			if ((value < 0) || (value > 7)) { return false; }
-			this->terrainData = (this->terrainData & 0x1F) | (value << 5); // preserve terrainId
-			return true;
-		}
-	};
-	static_assert(sizeof(TERRAIN_BYTE) == 1, "TERRAIN_BYTE size");
-
-	// Size = 1 byte. This is a shortcut to avoid duplicating bit operations everywhere
-	class BORDER_BYTE {
-	public:
-		char borderData;
-		GROUND_BORDERS GetBorderId() const {
-			return (GROUND_BORDERS)(this->borderData & 0x0F); // 4 low bits = border id
-		}
-		// UNSURE. Shape indexes can go higher, but there seems to be something with values from 0 to 12 ?
-		char GetShapeIndex() const {
-			return (this->borderData & 0xF0); // 4 high bits = border id
-		}
-	};
-	static_assert(sizeof(BORDER_BYTE) == 1, "BORDER_BYTE size");
-#pragma pack(pop)
-
-	// Size=8. Represents a unit list element
-	class STRUCT_UNIT_BASE_LIST {
-	public:
-		STRUCT_UNIT_BASE *unit;
-		STRUCT_UNIT_BASE_LIST *next; // NULL=end of list
-	};
-	static_assert(sizeof(STRUCT_UNIT_BASE_LIST) == 8, "STRUCT_UNIT_BASE_LIST size");
 
 	// Used in AI structures to keep lists of unit IDs. Size=0x10
 	// All methods suppose that usedElemCount==arraySize (no empty slot)
@@ -285,29 +233,6 @@ namespace AOE_STRUCTURES
 	*/
 
 
-	// Size = 0x18. The main "actual" map info necessary to set correct terrain/altitude and transitions are terrainData, terrainBorderData and elevationGraphicsIndex
-	class STRUCT_GAME_MAP_TILE_INFO {
-	public:
-		short int displayX; // +00. A screen X position where to display tile (independent from player's screen position). Units on this tile will be displayed accordingly.
-		short int displayY; // +02. A screen Y position where to display tile (independent from player's screen position). Units on this tile will be displayed accordingly. Changing this value can generate fake elevation (display only).
-		char elevationGraphicsIndex; // +4. To retrieve elevation graphics in terrain's table - 0=flat. HAS an effect on units altitude ! Please call mapInfo->RecomputeTileDisplayPos(...) after modifying this
-		TERRAIN_BYTE terrainData; // +5: elevation/terrainID. 3 high bits (0x80/0x40/0x20) represent altitude 0-7. 5 low bits represent terrainId 0-31
-		BORDER_BYTE terrainBorderData; // +6. Border id & shape index (for terrain transitions)
-		char unknown_07; // Updated in 444980 to 0xCC, but reset to 0x0F very frequently (quite instantly). Some status ?
-		char unknown_08;
-		char unknown_09; // Seen 0x0F
-		char tileHighlightLevel; // +0A. Tile brillance level (for tile selection in editor). Values in 0-0xB0. Default=0, 0x0F=underMouse(editor). Updated in 444980 with arg5 ?
-		char unknown_0B; // maybe +A is a short int
-		char unknown_0C;
-		char unknown_0D;
-		char unknown_0E;
-		char unknown_0F;
-		// 0x10
-		STRUCT_UNIT_BASE_LIST *unitsOnThisTile; // +10. Array of units occupying this tile. The list ends with a NULL pointer. NULL if no unit on this tile.
-		short int unitsOnThisTileCount; // +14. Number of units in unitsOnThisTile array. unitsOnThisTile=NULL if unitsOnThisTileCount==0.
-		short int unknown_16; // possibly unused ?
-	};
-
 	// Size = 0xB5F8 to confirm. Init in 0x4445E0.
 	class STRUCT_GAME_MAP_INFO {
 	public:
@@ -386,40 +311,8 @@ namespace AOE_STRUCTURES
 			return true;
 		}
 	};
+	static_assert(sizeof(STRUCT_GAME_MAP_INFO) == 0xB5F8, "STRUCT_GAME_MAP_INFO size");
 
-	// Size = 8
-	// Contains information about nearby units for temp treatments.
-	// Each player has its own object
-	class STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYER_NEARBY_UNITS_INFO {
-	public:
-		STRUCT_NEARBY_UNIT_INFO *nearbyUnitInfoArray;
-		short int arraySize; // +4
-		short int numberUsed; // +6
-	};
-
-	// Referenced in global variable 0x7D2058 and also from STRUCT_GAME_MAP_INFO+8DCC
-	// Size = 0x24. Constructor = 0x516800
-	class STRUCT_UNKNOWN_MAP_INFO_7D2058 {
-	public:
-		STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYER_NEARBY_UNITS_INFO **unknown_00; // Array[playerId] => pointer to array of STRUCT_UNKNOWN_MAP_INFO_7D2058_UNITINFOELEM
-		char *unknown_04; // Array size = 0x800 bytes.
-		char *unknown_08; // Array size = 0x800 bytes.
-		char *unknown_0C; // Array size = 0x800 bytes.
-		// 0x10
-		char *unknown_10; // Array size = 0x800 bytes.
-		char *unknown_14; // Array size = 0x800 bytes.
-		long int totalPlayerCount; // Including gaia. It is also the size (number of dwords) of unknown_00 array.
-		long int unknown_1C_size; // unknown_1C_size * 8 = sizeof(unknown_00[x] array)
-		// 0x20
-		char *sqrtTable_distanceFromDiffXY; // ptr to array of 0x10*0x10 bytes. to get a distance for diffX/Y: array[diffX*0x10 + diffY]. X,Y < 0x10.
-		// Returns distance(int, int) as an integer result. Returns -1 if failed or result>0x10. Works only for x,y <= 15 (0x0F)
-		char GetIntDistance(char x, char y) {
-			if ((x < 0) || (x >= 16) || (y < 0) || (y >= 16)) {
-				return -1;
-			}
-			return this->sqrtTable_distanceFromDiffXY[x * 0x10 + y];
-		}
-	};
 
 	// Size 0x14. Constructor = 0x516DA0
 	// Stores explored resource units (other than animal and farms) ?
@@ -432,79 +325,6 @@ namespace AOE_STRUCTURES
 		long int arraySize; // +10. Number of (both used/alloc) elements in each array. Cf PLAYER_GATHERABLE_RESOURCE_CATEGORIES.
 	};
 	static_assert(sizeof(STRUCT_PLAYER_UNKNOWN_118) == 0x14, "STRUCT_PLAYER_UNKNOWN_118 size");
-
-
-	// Included structure in addresses 0x583BC8 and 0x6A1CC0
-	// Constuctor 00458570
-	// This structure is for path finding.
-	// Note: it seems map is split into tiles (1 unit of position = 1 tile) but tiles are split into 4 "quarters".
-	// In this struct, arrays indices are "quarter tiles". (use posX*4 for example).
-	// Arrays value are binary (1 bit of one elementary position), which adds more precision under tile/quarter tile level ?
-	class STRUCT_UNKNOWN_MAP_DATA_F04C {
-	public:
-		unsigned long int checksum; // F0 4C 54 00
-		long int mapArraySizeY;
-		long int mapArraySizeX;
-		char unknown_00000C[0xFF * 0xFF]; // Access to data: 0xFF*y + x ?
-		long int unknown_00FE10_dist16[0xFF * 0xFF]; // +FE10. Array of distance*16 values (?). index=y*0xFF+x. Each tile's distance to src??
-		//char unknown_00FE10[0x4F614 - 0xFE10]; // size ?
-		STRUCT_PATH_FINDING_UNKNOWN_POS_INFO unknown_4F614[0xFF * 0xFF]; // +4F614. Size 7F008. NOT indexed by coordinates ? Sort of list? Steps for short path finding??
-		unsigned long int unknown_0CE61C;
-		// 0x4F620
-		unsigned long int unknown_0CE620;
-		// 458870: set "has unit" at position?
-		long int unknown_0CE624_mapUnitOccupiedGrid[0xFF * 0xFF]; // index posY*4*0xFF+x. Its value is a bits mask ??
-		// 0x10DE28 ?
-		char unknown_010DE28[0x11DC2C - 0x10DE28];
-		long int unknown_011DC2C_index; // an index to access +4F614 + index*8 (byte)?
-		char unknown_011DC30_posY; // current step posY ?
-		char unknown_011DC31_posX; // current step posX ?
-		char unknown_011DC32; // ?
-		char unknown_011DC33; // ?
-		long int unknown_11DC34_distanceOffset; // a distance*16 value. Current step dist*16 ? or best dist*16 ?
-		long int unknown_11DC38_counter; // a counter
-		unsigned long int uknown_11DC3C_ptr; // ptr to F4 99 54 00
-		// 0x11DC40
-		STRUCT_GAME_GLOBAL *globalStruct; // +11DC40: in old debugging times, was used as a global var to "game global", was not exactly the case.
-		STRUCT_UNIT *currentUnit; // 11DC44.
-		unsigned long int unknown_11DC48;
-		long int destinationUnitId; // +11DC4C.
-		// 0x11DC50
-		float *pCurrentTerrainRestriction;
-		float unknown_11DC54; // sizeRadiusY ?
-		float unknown_11DC58; // sizeRadiusX ?
-		long int unknown_11DC5C; // a terrainID ??? or -1 ?
-		// 0x11DC60
-		long int unknown_11DC60; // a terrainID ??? or -1 ?
-		char unknown_11DC64[0x11DC7C - 0x11DC64];
-		long int srcPosY; // +11DC7C
-		// 0x11DC80
-		long int srcPosX; // +11DC80
-		long int destMinPosY_offset; // +11DC84. (destPosY - sizeRadius)*4 ?
-		long int destMinPosX_offset; // +11DC88. (destPosX - sizeRadius2)*4 ?
-		long int destMaxPosY_offset; // +11DC8C. (destPosY + sizeRadius)*4 ? then modified...
-		long int destMaxPosX_offset; // +11DC90. (destPosX + sizeRadius)*4 then modified...
-		long int actorMinPosY_offset; // +11DC94. (actorPosY - sizeRadius)*4 ?
-		long int actorMinPosX_offset; // +11DC98. (actorPosX - sizeRadius)*4 ?
-		long int actorMaxPosY_offset; // +11DC9C. (actorPosY + sizeRadius)*4 ?
-		long int actorMaxPosX_offset; // +11DCA0. (actorPosX + sizeRadius)*4 ?
-		char unknown_11DCA4[0x11DCC8 - 0x11DCA4];
-		long int unknown_11DCC8_distance_offset; // Init=-1. Distance*4 between ? Total distance*4 (in straight line) between src and dest ?
-		char unknown_11DCCC[0x11DCD8 - 0x11DCCC];
-		char unknown_11DCD8_resetCounter; // A counter, +=8 at each pathFinding. When 0xF0 (30 iterations), reset and resets mapData. Value is similar to +C array
-		char unknown_11DCD9[3];
-		long int unknown_11DCDC; // arg15 of 00458930 call
-		// 0x11DCE0
-		long int unknown_11DCE0; // arg14 of 00458930 call
-		long int unknown_11DCE4;
-		long int unknown_11DCE8;
-		long int unknown_11DCEC;
-		// 0x11DCF0
-		long int unknown_11DCF0;
-		long int unknown_11DCF4; // seen 1
-		// ...
-		bool IsCheckSumValid() { return this->checksum == 0x00544CF0; }
-	};
 
 
 	static const unsigned char CST_MAP_BUILD_LIKE_DISABLED = (unsigned char)0xFF;
@@ -1287,40 +1107,6 @@ namespace AOE_STRUCTURES
 		bool IsCheckSumValid() { return (this->checksum == 0x00549B70) || (this->checksum == 0x00544AD4); }
 	};
 	static_assert(sizeof(STRUCT_PER_TYPE_UNIT_LIST_LINK) == 0x0C, "STRUCT_PER_TYPE_UNIT_LIST_LINK size");
-
-	// size = 0x20, to confirm
-	class STRUCT_SCORE_ELEM {
-	public:
-		char unknown_00;
-		char unknown_01;
-		char unknown_02;
-		AOE_CONST_FUNC::SCORE_CATEGORIES category;
-		long int resourceId; // +04 ; RESOURCE_TYPES
-		long int listCounter; // To confirm
-		long int pointsPerScoreElement;
-		// 0x10
-		unsigned long int unknown_10;
-		float value;
-		STRUCT_SCORE_ELEM *next;
-		unsigned long int unknown_1C; // unused ?
-	};
-
-
-	// Unknown size
-	class STRUCT_SCORE_HEADER {
-	public:
-		unsigned long int checksum; // E4 A3 54 00
-		unsigned long int unknown_04; // a pointer
-		unsigned long int unknown_08; // a number ?
-		STRUCT_PLAYER *player;
-		// 0x10
-		unsigned long int unknown_10;
-		STRUCT_SCORE_ELEM *firstScoreElement;
-		unsigned long int unknown_18;
-		long int currentTotalScore;
-
-		bool IsCheckSumValid() { return this->checksum == 0x0054A3E4; }
-	};
 
 
 	// Player's buildings unit list header (only buildings)
@@ -2527,7 +2313,7 @@ namespace AOE_STRUCTURES
 		float targetUnitPositionZ;
 		float unsure_resourceValue; // For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
 		// 0x30
-		STRUCT_DEF_UNIT_COMMAND *command; // +30. Not always used, nullable. For gatherer, it is always set.
+		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set.
 		STRUCT_UNIT_ACTION_INFO *requiredActionInfo; // +34. SubAction ? Link with unit/"actionLink"/action. Allows chaining actions ! This is NOT unit->actionInfo !
 		unsigned long int pGraphics; // ptr to graphics structure, consistent with unit+10 ? w_lumber, etc
 		char unknown_3C; // Flag 0/1, about graphics (about need to refresh graphics ?)

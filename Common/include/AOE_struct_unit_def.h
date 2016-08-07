@@ -38,7 +38,7 @@ namespace AOE_STRUCTURES
 
 	// Size = 0x4C
 	// ReadFromFile=0x4E74F0
-	class STRUCT_DEF_UNIT_COMMAND {
+	class STRUCT_UNIT_COMMAND_DEF {
 	public:
 		short int alwaysOne;
 		short int unitCommandIndex; // +02. index of this unitCommandDef element
@@ -87,10 +87,10 @@ namespace AOE_STRUCTURES
 	// Parent class checksum=E4 98 54 00, for birds/type50/projectiles
 	// Child class checksum=AC 99 54 00 for living/building
 	// 0x4E7B60=unitCommandHeader.readFromFile(fileId, arg2, arg3)
-	class STRUCT_DEF_UNIT_COMMAND_HEADER {
+	class STRUCT_UNIT_COMMAND_DEF_HEADER {
 	public:
 		unsigned long int checksum; // AC 99 54 00 + E4 98 54 00 (parent class)
-		STRUCT_DEF_UNIT_COMMAND **ptrCommandArray; // +4. The pointed list contains "commandCount" pointers to STRUCT_DEF_UNIT_COMMAND objects
+		STRUCT_UNIT_COMMAND_DEF **ptrCommandArray; // +4. The pointed list contains "commandCount" pointers to STRUCT_DEF_UNIT_COMMAND objects
 		short int commandCount; // +8.
 		unsigned short int unused_0A;
 
@@ -281,7 +281,7 @@ namespace AOE_STRUCTURES
 	// Deserialize=0x43E230 unitDef.ReadFromFile_bird_40(internalFileRef, ptrGraphicsList, ptrSoundsList)
 	class STRUCT_UNITDEF_BIRD : public STRUCT_UNITDEF_DEAD_FISH {
 	public:
-		STRUCT_DEF_UNIT_COMMAND_HEADER *ptrUnitCommandHeader; // +D8
+		STRUCT_UNIT_COMMAND_DEF_HEADER *ptrUnitCommandHeader; // +D8
 		short int whenBeingSeenCommandIndex; // +DC. For artefacts, discoveries but also animals
 		short int unknown_0DE;
 		// 0xE0
@@ -548,7 +548,7 @@ namespace AOE_STRUCTURES
 		float trackingUnitDensity;
 		char unknown_0D4; // unknown16 in AGE3
 		char unknown_0D5[3];
-		STRUCT_DEF_UNIT_COMMAND_HEADER *ptrUnitCommandHeader; // +D8
+		STRUCT_UNIT_COMMAND_DEF_HEADER *ptrUnitCommandHeader; // +D8
 		short int whenBeingSeenCommandIndex; // +DC. For artefacts, discoveries but also animals (works with creatable too)
 		short int unknown_0DE;
 		// 0xE0
