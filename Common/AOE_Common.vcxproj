@@ -95,6 +95,7 @@
     <ClInclude Include="include\AOE_offsets.h" />
     <ClInclude Include="include\AOE_SN_numbers.h" />
     <ClInclude Include="include\AOE_struct_map_def.h" />
+    <ClInclude Include="include\AOE_struct_map_generation.h" />
     <ClInclude Include="include\AOE_struct_research_def.h" />
     <ClInclude Include="include\AOE_struct_tech_def.h" />
     <ClInclude Include="include\AOE_struct_civilization_def.h" />
