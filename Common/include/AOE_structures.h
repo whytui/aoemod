@@ -18,6 +18,9 @@
 #include <AOE_struct_map_tile_info.h>
 #include <AOE_struct_map_global_objects.h>
 #include <AOE_struct_score.h>
+#include <AOE_struct_unit_actions.h>
+#include <AOE_struct_command_line_info.h>
+#include <AOE_struct_sound.h>
 #include <gameVersion.h>
 
 
@@ -41,16 +44,11 @@ namespace AOE_STRUCTURES
 	class STRUCT_PLAYER_RESEARCH_STATUS;
 	class STRUCT_PLAYER_RESEARCH_INFO;
 	class STRUCT_PLAYER_UNKNOWN_118;
-	class STRUCT_PATH_FINDING_UNKNOWN_POS_INFO;
 	class STRUCT_AI_UNIT_LIST_INFO;
 	class STRUCT_HUMAN_TRAIN_QUEUE_INFO;
 	class STRUCT_SPOTTED_RESOURCE_INFO;
 	class STRUCT_MP_COMMUNICATION; // Visible at global level
 	class STRUCT_UNKNOWN_GAME_TIME;
-	class STRUCT_COMMAND_LINE_INFO;
-	class STRUCT_SOUND_DATA_ELEMENT;
-	class STRUCT_MAIN_SOUND;
-	class STRUCT_MAIN_MUSIC;
 	class STRUCT_SCENARIO_INFO;
 	class STRUCT_GAME_COMMANDS_INFO;
 	class STRUCT_GAME_GLOBAL;
@@ -98,20 +96,10 @@ namespace AOE_STRUCTURES
 	class STRUCT_INF_AI_BUILDS_HISTORY;
 	class STRUCT_TAC_AI_TARGET_INFO;
 
-	// Action / Activity
-	class STRUCT_ACTION_BASE;
-	class STRUCT_ACTION_MOVE;
-	class STRUCT_ACTION_ATTACK;
-	class STRUCT_ACTION_CONVERSION;
-	class STRUCT_ACTION_LINK;
-	class STRUCT_ACTION_MAKE_OBJECT;
-	class STRUCT_ACTION_DISCOVERY_ARTEFACT;
-	class STRUCT_ACTION_PRODUCE_FARM_FOOD;
-	class STRUCT_ACTION_PROJECTILE;
+	// Activity
 	class STRUCT_UNIT_ACTIVITY_TARGET_ELEM;
 	class STRUCT_UNIT_ACTIVITY_QUEUE;
 	class STRUCT_UNIT_ACTIVITY;
-	class STRUCT_UNIT_ACTION_INFO;
 
 	// MAP
 	class STRUCT_GAME_MAP_INFO; // TODO: Confirm exact role
@@ -679,189 +667,6 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_MP_COMMUNICATION) == 0x1774, "STRUCT_UNKNOWN_P580DA8 Size");
 
-	// Size: seems to be 0x40
-	class STRUCT_SOUND_DATA_ELEMENT {
-		// Object info initially provided by LucTieuPhung
-	public:
-		long int pSound;
-		unsigned long int unknown_04;
-		unsigned short int unknown_08;
-		char filename[0x0C];
-		unsigned long int unknown_18;
-		long int lVolume; // +1C
-		// 0x20
-		long int dwFrequency;
-		long int lPan;
-		unsigned long int unknown_28;
-		unsigned long int unknown_2C;
-		// 0x30
-		unsigned long int unknown_30;
-		unsigned long int pDirectSoundBuffer; // IDirectSoundBuffer*
-		unsigned long int unknown_38;
-		unsigned long int unknown_3C;
-	};
-	static_assert(sizeof(STRUCT_SOUND_DATA_ELEMENT) == 0x40, "STRUCT_SOUND_DATA_ELEMENT Size");
-
-	// Size 0x69C
-	class STRUCT_MAIN_SOUND {
-		// Object info initially provided by LucTieuPhung
-	public:
-		char isDSoundInitialized;
-		char unknown_001; // Related to ListSoundData
-		short int unknown_002;
-		long int hWndToNotify;
-		unsigned long int lpDirectSound; // +08. Real type=IDirectSound* (See DirectSoundCreate)
-		unsigned long int lpPrimaryDsb; // +0C. Real type=IDirectSoundBuffer*
-		// 0x10
-		long int lastErrorCode; // Return value of mixerSetControlDetails, etc.
-		long int tempSoundVolume; // -10000 to 0
-		long int soundVolume; // -10000 to 0 (Registry)
-		char soundFolder[0x104];
-		// 0x120
-		long int hasSoundVolumeCtrl; // Sound Volume Control Found Successfully
-		unsigned long int hMixer; // Real type=HMIXER ?
-		// 0x128 - MIXERLINE: 0xA8 bytes
-		long int ml_cbStruct; // =sizeof(MIXERLINE)
-		unsigned long int unknown_12C;
-		unsigned long int unknown_130;
-		long int ml_dwLineID;
-		unsigned long int unknown_138;
-		unsigned long int unknown_13C;
-		// 0x140
-		long int ml_dwComponentType; // = MIXERLINE_COMPONENTTYPE_SRC_WAVEOUT;
-		char unknown_144[0x1D0 - 0x144];
-		// 0x1D0 - MIXERLINECONTROLS: 0x18 bytes
-		long int mlc_cbStruct; // = sizeof(MIXERLINECONTROLS)
-		long int mlc_dwLineID; // = ml.dwLineID
-		long int mlc_dwControlType; // = MIXERCONTROL_CONTROLTYPE_VOLUME;
-		long int mlc_cControls; // = 1 ?
-		// 0x1E0
-		long int mlc_cbmxctrl; // = sizeof(MIXERCONTROL);
-		long int mlc_pamxctrl; // = &mc
-		// 0x1E8 - MIXERCONTROL: 0x94 bytes
-		long int mc_cbStruct;
-		long int mc_dwControlID;
-		// 0x1F0
-		long int mc_dwControlType;
-		long int mc_fdwControl;
-		long int mc_cMultipleItems;
-		long int mc_szShortName[4]; // +1FC
-		long int szName[0x10]; // +20C
-		long int mc_dwMinimum; // +24C. =0 ?
-		// 0x250
-		long int mc_dwMaximum; // =65535 ?
-		char unknown_254[0x27C - 0x254];
-		// 0x27C - MIXERCONTROLDETAILS: 0x18 bytes
-		long int mcd_cbStruct; // = sizeof(MIXERCONTROLDETAILS);
-		// 0x280
-		long int mcd_dwControlID; // = mc.dwControlID;
-		long int mcd_cChannels;
-		unsigned long int unknown_288;
-		long int mcd_cbDetails; // +28C. = sizeof(MIXERCONTROLDETAILS_UNSIGNED);
-		// 0x290
-		long int mcd_paDetails; // = &mcdu;
-		// 0x294 - MIXERCONTROLDETAILS_UNSIGNED:
-		long int mcdu_dwValue;
-		STRUCT_SOUND_DATA_ELEMENT soundDataArray[0x10];
-		long int soundDataCount; // Number of used elements in soundDataArray ?
-	};
-	static_assert(sizeof(STRUCT_MAIN_SOUND) == 0x69C, "STRUCT_MAIN_SOUND Size");
-
-	// Size = 0x3F8
-	class STRUCT_MAIN_MUSIC {
-		// Object info initially provided by LucTieuPhung
-	public:
-		char soundPath[0x104];
-		char musicFormat; // AudioCD=1, MIDI=2 (WAV=3)
-		char unknown_105;
-		char unknown_106;
-		char unknown_107;
-		STRUCT_MAIN_SOUND *pSound; // +108
-		long int hInstance; // = GetModuleHandle(NULL): Module handle to the file
-		// 0x110
-		long int hWnd; // The window to send MM_MCINOTIFY messages to.
-		long int isTracksInitialized; // //Music Tracks Initialized? Music is playing?
-		long int wDeviceID; // deviceID for mciSendCommand (Play, Stop, Close, etc.)
-		// 0x11C - MCI_PLAY_PARMS: 0x0C bytes
-		long int play_dwCallback;
-		// 0x120
-		long int play_dwFrom;
-		long int play_dwTo;
-		char isPlaying; // is music playback in progress?
-		char musicFileName[0x230 - 0x129]; // "xopen.mp3", "xwon.mp3", "xlost.mp3", ""...
-		// 0x230
-		long int minMusicTrack;
-		long int maxMusicTrack;
-		unsigned long int unknown_238;
-		long int seekPos; // to resume playback
-		// 0x240
-		long int isLooping; // to enable/disable playback loop. 0 for xopen, xwon, xlost.
-		long int currentMusicTrack; // Current music number being played.
-		long int nMusicTracks; // The number of xmusic#.mid or AudioCD tracks found.
-		long int nMusicPlaying; // a counter. +1 for succesful MCI_PLAY. -1 after completing a playback.
-		// 0x250 - music volume
-		long int tempMusicVolume; // To indicate if the volume need to be set. 1 = Music Volume does not need to be set. -10000 to 0 = Music volume to be set.
-		long int musicVolume; // registry value = -musicVolume
-		long int isPaused; // Pause Music related
-		unsigned long int unknown_25C; // related to Pause Music
-		// 0x260
-		unsigned long int unknown_260; // related to Pause Music
-		unsigned long int unknown_264;
-		unsigned long int unknown_268;
-		long int isMusicVolumeStored; // indicates if music volume is stored
-		// 0x270
-		long int currentMusicVolume; // ?
-		long int lastMusicVolumeStorageTime; // a timeGetTime value
-		long int hasMusicVolumeCtrl; // 0/1 flag
-		long int hMixer; // to change volume of an audio line.
-		// 0x280 - MIXERLINE: 0xA8 bytes
-		long int ml_cbStruct; // = sizeof(MIXERLINE);
-		long int ml_dwDestination;
-		long int ml_dwSource;
-		long int ml_dwLineID;
-		// 0x290
-		unsigned long int unknown_290;
-		unsigned long int unknown_294;
-		unsigned long int unknown_29ml_dwComponentType;
-		unsigned long int unknown_29C;
-		// 0x2A0
-		char unknown_2A0[0x328 - 0x2A0];
-		// 0x328 - MIXERLINECONTROLS: 0x18 bytes
-		long int mlc_cbStruct; // = sizeof(MIXERLINECONTROLS);
-		long int mlc_dwLineID; // = ml.dwLineID;
-		// 0x330
-		long int mlc_dwControlType; // = MIXERCONTROL_CONTROLTYPE_VOLUME;
-		long int mlc_cControls;
-		long int mlc_cbmxctrl; // = sizeof(MIXERCONTROL);
-		long int mlc_pamxctrl; // = &mc;
-		// 0x340 - MIXERCONTROL:0x94 bytes
-		//long int mc_cbStruct
-		long int mc_cbStruct;
-		long int mc_dwControlID;
-		long int mc_dwControlType;
-		long int mc_fdwControl;
-		// 0x350
-		long int mc_cMultipleItems;
-		long int mc_szShortName[4]; // +354
-		long int szName[0x10]; // +364
-		long int mc_dwMinimum; // +3A4. =0 ?
-		long int mc_dwMaximum; // +3A8. =65535 ?
-		char unknown_3AC[0x3D4 - 0x3AC];
-		// 0x3D4 - MIXERCONTROLDETAILS: 0x18 bytes
-		long int mcd_cbStruct; // = sizeof(MIXERCONTROLDETAILS);
-		long int mcd_dwControlID; // = mc.dwControlID;
-		long int mcd_cChannels;
-		// 0x3E0
-		unsigned long int unknown_3E0;
-		long int mcd_cbDetails; // +3E4. = sizeof(MIXERCONTROLDETAILS_UNSIGNED);
-		long int mcd_paDetails; // = &mcdu;
-		// 0x3EC - MIXERCONTROLDETAILS_UNSIGNED:
-		long int mcdu_dwValue;
-		unsigned long int unknown_3F0;
-		unsigned long int unknown_3F4;
-	};
-	static_assert(sizeof(STRUCT_MAIN_MUSIC) == 0x3F8, "STRUCT_MAIN_MUSIC Size");
-
 
 	// Size = 0x514C. Constructor=0x0506900
 	// Warning: all arrays[0x10] are indexed by playerId-1, which means tribeNames[0] is player1's name.
@@ -1380,61 +1185,6 @@ namespace AOE_STRUCTURES
 		bool IsCheckSumValid() { return (this->checksum == 0x0054992C); }
 	};
 
-
-	// This structure is contained in stack. Maybe (probably) some fields should never be used here !
-	// Size = 0x143C. "constructor" = 4436F0.
-	class STRUCT_COMMAND_LINE_INFO {
-	public:
-		char applicationName[0x1C];
-		char *unknown_01C; // pointer to stack value, inside a string ?
-		// 0x20
-		char *unknown_020; // pointer to stack value, inside a string ?
-		unsigned long int unknown_024;
-		unsigned long int unknown_028; // a pointer
-		unsigned long int stack_SE_handler; // a pointer to executable code
-		// 0x30
-		char unknown_030[0x1F8 - 0x30];
-		char relativePath_empires_dat[0x14]; // +1F8: (included) string  data2/empires.dat, copied from ADDR_VAR_EMPIRES_DAT_PATH and used in 0x501211.
-		unsigned long int unknown_20C; // a pointer ?
-		// 0x210
-		char unknown_210[0x408 - 0x210];
-		long int CDCheckFailed; // +408.
-		unsigned long int unknown_40C;
-		// 0x410
-		long int hInstance; // +410 ; GetModuleHandle(NULL)
-		char unknown_414[0x518 - 0x414];
-		char unknown_518[0x890 - 0x518]; // Command-line arguments string ?
-		// 0x890
-		long int noStartupFlag; // NOSTARTUP command line flag
-		unsigned long int unknown_894;
-		unsigned long int unknown_898;
-		unsigned long int unknown_89C;
-		long int systemMemoryFlag; // SYSTEMMEMORY command line flag
-		long int noMusicFlag; // +8A4. NOMUSIC command line flag ?
-		long int noSoundFlag; // +8A8. NOSOUND command line flag
-		long int isAudioCD; // +8AC. No Autodetect (force). To confirm
-		unsigned long int unknown_8B0; // MIDI related ?
-		long int isMidiMusic; // +8B4. Force midi. To confirm
-		unsigned long int unknown_8B8; // MIDI related ?
-		unsigned long int unknown_8BC;
-		unsigned long int unknown_8C0;
-		unsigned long int unknown_8C4;
-		long int scrollSpeed; // +8C8 ; From 10 to 200
-		unsigned long int unknown_8CC;
-		unsigned long int unknown_8D0; // Related to scroll speed ?
-		unsigned long int unknown_8D4;
-		unsigned long int unknown_8D8;
-		unsigned long int mouseButtonsStyle; // +8DC. 1 or 2 buttons.
-		long int screenSizeX; // +8E0
-		long int screenSizeY; // +8E4
-		// B12 : "savegame\"
-		// C17 : "scenario\"
-		// D1C : "campaign\"
-		// E21 : "sound\"
-		// 1130 : "avi\"
-		char unknown_8E8[0x143C - 0x8E8];
-	};
-	static_assert(sizeof(STRUCT_COMMAND_LINE_INFO) == 0x143C, "STRUCT_COMMAND_LINE_INFO size");
 
 #ifdef GAMEVERSION_AOE10b
 #define CHECKSUM_GAME_SETTINGS1 0x005509D8
@@ -2292,158 +2042,6 @@ namespace AOE_STRUCTURES
 	};
 
 
-	// Size=0x40 for parent class D8 29 54 00 (*seems* to be the common parent)
-	// constructor=406EA0 / 407050.
-	class STRUCT_ACTION_BASE {
-	public:
-		unsigned long int checksum;
-		AOE_CONST_FUNC::UNIT_ACTION_ID actionTypeID;
-		short int unknown_006;
-		STRUCT_UNIT *actor;
-		AOE_CONST_INTERNAL::ACTION_STATUS actionStatus; // +0xC (byte)
-		char unused[3];
-		// 0x10
-		STRUCT_UNIT *targetUnit;
-		unsigned long int unknown_014; // actor unit pointer ???
-		long int targetUnitId; // +18
-		unsigned long int unknown_unitId; // +1C. A secondary target ?
-		// 0x20
-		float targetUnitPositionY;
-		float targetUnitPositionX;
-		float targetUnitPositionZ;
-		float unsure_resourceValue; // For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
-		// 0x30
-		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set.
-		STRUCT_UNIT_ACTION_INFO *requiredActionInfo; // +34. SubAction ? Link with unit/"actionLink"/action. Allows chaining actions ! This is NOT unit->actionInfo !
-		unsigned long int pGraphics; // ptr to graphics structure, consistent with unit+10 ? w_lumber, etc
-		char unknown_3C; // Flag 0/1, about graphics (about need to refresh graphics ?)
-		char unknown_3D[3]; // Unused. Probably.
-		// 0x40: not in BASE class ; it has different type/role according to child classes. (seen float, word...)
-	};
-
-	// Size = 0x44
-	// Constructor 4052D0: actionMove.constructor(actor, target, maxTargetDistance, pGraphic)
-	class STRUCT_ACTION_MOVE : public STRUCT_ACTION_BASE { // DC 26 54 00
-	public:
-		// 0x40
-		float maxDistanceFromTarget; // The maximum distance from target where we accept to stop movement ?
-	};
-	static_assert(sizeof(STRUCT_ACTION_MOVE) == 0x44, "STRUCT_ACTION_MOVE size");
-
-	// Size 0x5C
-	// Constructor 0x401150 = actionAttack.construct(pUnitActor, pUnitTarget, arg3/4/5, blastRadius, minRange, projectileUnit)
-	class STRUCT_ACTION_ATTACK : public STRUCT_ACTION_BASE { // F8 23 54 00
-	public:
-		// 0x40
-		//short int targetDATID;
-		//short int unknown_42;
-		unsigned long int unknown_40; // Pointer to graphics ?
-		unsigned long int unknown_44;
-		unsigned long int unknown_48;
-		float unknown_4C; // max distance from target I can attack from ?
-		// 0x50
-		long int unknown_50; // Dword
-		short int unknown_54;
-		short int unknown_56;
-		char unknown_58; // set to 0 after attack effect is applied? 401FB7
-		char unknown_59; // +59. Init=1 in 4011F1 or 0 in 4011F7
-		char unknown_5A; // a counter (decremented...)?
-		char unknown_5B;
-		bool IsCheckSumValid() { return this->checksum == 0x005423F8; }
-		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ATTACK_9; } // really unsure :(
-	};
-	static_assert(sizeof(STRUCT_ACTION_ATTACK) == 0x5C, "STRUCT_ACTION_ATTACK size");
-
-	// Size 0x48
-	// Constructor = 4B1CB0
-	class STRUCT_ACTION_CONVERSION : public STRUCT_ACTION_BASE {
-	public:
-		//unsigned long int checksum; // 1C 87 54 00
-		// 0x40 = targetDATID (word) ?really unsure?
-		char unknown_040[0x48 - 0x40];
-
-		bool IsCheckSumValid() { return this->checksum == 0x0054871C; }
-		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_CONVERT; } // really unsure :(
-	};
-
-	// Size 0x50
-	// Constructor 04B4F10
-	class STRUCT_ACTION_MAKE_OBJECT : public STRUCT_ACTION_BASE { // Train unit...
-	public:
-		//unsigned long int checksum; // C4 88 54 00
-		// 0x40
-		short int targetUnitDAT_ID; // being trained unit dat_id
-		short int unknown_042;
-		unsigned long int unknown_044; // maybe 2 shorts or even bytes ?
-		long int strategyElementId; // +48. value from command +0x0C ?
-		char unknown_04C;
-		char unknown_04D[3]; // unused ?
-
-		bool IsCheckSumValid() { return this->checksum == 0x005488C4; }
-		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_MAKE_OBJECT; }
-	};
-
-	// Size 0x48
-	// Constructor 0x4B60B0
-	class STRUCT_ACTION_MAKE_TECH : public STRUCT_ACTION_BASE {
-	public:
-		//unsigned long int checksum; // 90 89 54 00 ?
-		// 0x40
-		short int researchID;
-		short int unknown_42; // Unused... probably
-		long int strategyElementId; // +44
-
-		bool IsCheckSumValid() { return this->checksum == 0x00548990; }
-		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_MAKE_TECH; }
-	};
-
-	// Size = 0x44. checksum=88 87 54 00
-	// Expected commandType = 0x6C (discovery)
-	class STRUCT_ACTION_DISCOVERY_ARTEFACT : public STRUCT_ACTION_BASE {
-	public:
-		char *discoveredByPlayerTable; // +44. Pointer to array of n bytes (depending on total player count).
-		bool IsCheckSumValid() { return (this->checksum == 0x00548788); }
-	};
-
-	// Size = 0x44. checksum=48 88 54 00.
-	// Constructor=0x4B32C0 = actionGatherWithAttack.constructor(actor, defendCmd, targetUnit)
-	// (+34) action->actionInfo has a next action=attack tree (or animal) until it is ready to be gathered ?
-#define CHECKSUM_ACTION_GATHER_WITH_ATTACK 0x00548848
-	class STRUCT_ACTION_GATHER_WITH_ATTACK : public STRUCT_ACTION_BASE {
-	public:
-		long int targetUnitDefId; // +40. Set as a dword in 4B3334
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_GATHER_WITH_ATTACK); }
-	};
-
-
-#define CHECKSUM_ACTION_PRODUCE_FARM_FOOD 0x0054261C
-	// Size = 0x40. Checksum = 1C 26 54 00. This child class does not really have anything specific compared to base class.
-	// "Farm is depleted" event is detected/triggered at 0x40482D.
-	// Warning: farm "total" food is this->resourceValue (+2C) + farmUnit->resourceValue. See GetFarmCurrentTotalFood method.
-	class STRUCT_ACTION_PRODUCE_FARM_FOOD : public STRUCT_ACTION_BASE {
-	public:
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_PRODUCE_FARM_FOOD; }
-	};
-
-
-	// Not very well known. Size = 8 ?
-	class STRUCT_ACTION_LINK {
-	public:
-		STRUCT_ACTION_BASE *actionStruct; // +0. Pointer to an action struct (various types possible) = current action.
-		STRUCT_ACTION_LINK *nextActionLink; // +4. Use case: Action to restore at move end.
-	};
-
-
-	// Size = 0x54 - Constructor=0x404990
-	// Projectiles' actions (move until target or trajectory end is reached)
-#define CHECKSUM_ACTION_PROJECTILE 0x0054267C
-	class STRUCT_ACTION_PROJECTILE : STRUCT_ACTION_BASE {
-	public:
-		char unknown_40[0x54 - 0x40];
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_PROJECTILE; }
-	};
-	static_assert(sizeof(STRUCT_ACTION_PROJECTILE) == 0x54, "STRUCT_ACTION_PROJECTILE size");
-
 	// Not very well known. A "potential" target for a unit ? See 414B00
 	// Size = 0x24.
 	class STRUCT_UNIT_ACTIVITY_TARGET_ELEM {
@@ -2578,24 +2176,6 @@ namespace AOE_STRUCTURES
 		char unknown_131; // unused ?
 		char unknown_132; // unused ?
 		char unknown_133; // unused ?
-	};
-
-	// Accessed via unit+0x184 pointer or from action itself
-	// Size = 0x0C.
-	// Warning: there are 2 usages ("from unit" or "from action")
-	// Example: action cut tree has an action.actionLink = "attack tree" (before it can be gathered)
-	// Chain example: action hunt elephant => subaction attack elephant => subaction move (close enough) to elephant
-	// Note: actions & action chains do NOT handle "resume working" after being attacked, see activity.targetsArray.
-	class STRUCT_UNIT_ACTION_INFO {
-	public:
-		unsigned long int checksum; // A8 88 54 00 (from unit) or 00 26 54 00 (from action)
-		STRUCT_UNIT *ptrUnit;
-		STRUCT_ACTION_LINK *ptrActionLink;
-
-		bool IsCheckSumValid() {
-			return (this->checksum == 0x005488A8) ||
-				(this->checksum == 0x00542600);
-		}
 	};
 
 
