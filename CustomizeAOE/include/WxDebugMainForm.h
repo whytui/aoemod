@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <mystrings.h>
-#include <AOE_structures.h>
+#include <AOE_struct_game_settings.h>
 #include <AOE_struct_debugging.h>
 #include "RORConnector.h"
 #include <sstream>

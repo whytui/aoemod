@@ -2,7 +2,7 @@
 
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
-#include <AOE_structures.h>
+#include <AOE_struct_game_settings.h>
 #include <Windows.h>
 #include <WinUser.h>
 #include <assert.h>

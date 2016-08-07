@@ -5,7 +5,7 @@
 #include <set>
 #include <algorithm>
 #include <assert.h>
-#include <AOE_structures.h>
+#include <AOE_struct_game_global.h>
 #include <ROR_global_variables.h>
 #include <AOE_const_functional.h>
 #include <AOE_const_language.h>

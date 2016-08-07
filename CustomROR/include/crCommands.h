@@ -10,9 +10,10 @@
 #include <AOE_struct_export.h>
 #include <AOE_SN_numbers.h>
 #include <AOE_empires_dat.h>
-#include <AOE_structures.h>
+#include <AOE_struct_game_settings.h>
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_units.h>
+#include <UI\AOE_struct_ui_popup_dialog.h>
 #include "Version.h"
 #include "AOE_map.h"
 #include "crCommon.h"

@@ -1,8 +1,15 @@
 #include <assert.h>
-#include <AOE_structures.h>
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_strategy_element.h>
 #include <AOE_struct_main_ai.h>
+#include <UI_components\AOE_struct_ui_textbox.h>
+#include <UI\AOE_struct_ui_scenario_editor_main.h>
+#include <UI\AOE_struct_ui_unit_info_zone.h>
+#include <UI\AOE_struct_ui_popup_dialog.h>
+#include <UI\AOE_struct_ui_in_game_main.h>
+#include <UI\AOE_struct_ui_game_settings.h>
+#include <UI\AOE_struct_ui_diplomacy_dialog.h>
+#include <UI\AOE_struct_ui_in_game_options.h>
 #include <string>
 #include <Windows.h>
 #include "../include/testRandomizer.h"

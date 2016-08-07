@@ -2,7 +2,10 @@
 #include <assert.h>
 #include <string.h>
 #include <set>
-#include <AOE_structures.h>
+#include <AOE_struct_unit_def.h>
+#include <AOE_struct_strategy_element.h>
+#include <AOE_struct_tech_def.h>
+#include <AOE_struct_research_def.h>
 #include <AOE_empires_dat.h>
 
 using namespace AOE_CONST_FUNC;

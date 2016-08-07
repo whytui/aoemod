@@ -5,6 +5,18 @@
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_main_ai.h>
 #include <AOE_struct_game_settings.h>
+#include <UI_components\AOE_struct_any_ui.h>
+#include <UI_components\AOE_struct_ui_scrollbar.h>
+#include <UI_components\AOE_struct_ui_textbox.h>
+#include <UI\AOE_struct_ui_popup_dialog.h>
+#include <UI\AOE_struct_ui_in_game_options.h>
+#include <UI\AOE_struct_ui_playing_zone.h>
+#include <UI\AOE_struct_ui_join_screen.h>
+#include <UI\AOE_struct_ui_scenario_editor_main.h>
+#include <UI\AOE_struct_ui_diplomacy_dialog.h>
+#include <UI\AOE_struct_ui_in_game_options.h>
+#include <UI\AOE_struct_ui_game_settings.h>
+#include <UI\AOE_struct_ui_in_game_main.h>
 #include <yvals.h> // for __STRINGIZE
 #include <Windows.h>
 #include <WinUser.h>

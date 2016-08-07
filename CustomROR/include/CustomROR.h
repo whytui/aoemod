@@ -6,11 +6,12 @@
 #include <AOE_const_functional.h>
 #include <AOE_const_language.h>
 #include <AOE_offsets.h>
-#include <AOE_structures.h>
 #include <AOE_struct_unit_def.h>
 #include <ROR_API_assert.h>
 #include <customResolution.h>
 #include <AOE_empires_dat.h>
+#include <AOE_struct_game_settings.h>
+#include <UI\AOE_struct_ui_in_game_options.h>
 
 #include <Windows.h> // for messagebox
 #include "crCommon.h"

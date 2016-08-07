@@ -1,7 +1,14 @@
 #pragma once
 #include <assert.h>
 #include <string.h>
-#include <AOE_structures.h>
+#include <UI_components\AOE_struct_any_ui.h>
+#include <UI_components\AOE_struct_ui_button.h>
+#include <UI_components\AOE_struct_ui_button_with_number.h>
+#include <UI_components\AOE_struct_ui_combobox.h>
+#include <UI_components\AOE_struct_ui_label.h>
+#include <UI_components\AOE_struct_ui_listbox.h>
+#include <UI_components\AOE_struct_ui_scrollbar.h>
+#include <UI_components\AOE_struct_ui_textbox.h>
 #include <mystrings.h>
 #include "crCommon.h"
 #include "crCommands.h"

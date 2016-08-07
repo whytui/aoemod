@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <AOE_offsets.h>
 #include <ROR_global_variables.h>
-#include <AOE_structures.h>
+#include <AOE_struct_game_settings.h>
 
 #pragma once
 

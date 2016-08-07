@@ -1,16 +1,18 @@
 
 #pragma once
 
+#include <assert.h>
 #include <AOE_offsets.h>
 #include <AOE_const_internal.h>
-#include <AOE_structures.h>
 #include <AOE_structures_drs.h>
 #include <AOE_struct_game_settings.h>
-#include <assert.h>
+#include <UI_components\AOE_struct_any_ui.h>
+#include <UI_components\AOE_struct_ui_textbox.h>
+#include <UI\AOE_struct_ui_scenario_editor_main.h>
+#include <UI\AOE_struct_ui_in_game_main.h>
 #include "AOE_memory.h"
 #include "drsHandler.h"
 #include "mainStructuresHandling.h"
-
 
 /*
  * This file provides useful (raw) methods to deal with AOE UI objects.

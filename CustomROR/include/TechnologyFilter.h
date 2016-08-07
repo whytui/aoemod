@@ -2,7 +2,6 @@
 
 #include <string>
 #include <assert.h>
-#include <AOE_structures.h>
 #include <AOE_const_functional.h>
 
 

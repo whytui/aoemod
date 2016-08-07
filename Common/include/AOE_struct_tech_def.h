@@ -2,7 +2,7 @@
 #pragma once
 
 #include <math.h> // fmodf
-
+#include <AOE_empires_dat.h>
 using namespace AOE_CONST_FUNC;
 
 /*

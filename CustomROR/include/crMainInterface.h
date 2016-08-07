@@ -1,4 +1,7 @@
-#include <AOE_structures.h>
+#include <AOE_struct_game_settings.h>
+#include <UI\AOE_struct_ui_in_game_menu.h>
+#include <UI\AOE_struct_ui_diplomacy_dialog.h>
+#include <UI\AOE_struct_ui_scenario_editor_menu.h>
 #include "crCommands.h"
 #include "CustomPopupBase.h"
 #include "EditMapSizeXYPopup.h"
