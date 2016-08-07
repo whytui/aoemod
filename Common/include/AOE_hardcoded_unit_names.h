@@ -817,18 +817,16 @@ const static wchar_t *CST_UNIT_NAMES_W[CST_UNIT_NAMES_MAX_ID - CST_UNIT_NAMES_MI
 	_T("Dead_baby_z")
 };
 
-#if 0 // obsolete code
 // Get (hardcoded) name for a specific unit ID. Only for standard IDs !
-static const char *GetUnitName(short int dat_id) {
+static const char *GetHardcodedUnitName(short int dat_id) {
 	if ((dat_id < CST_UNIT_NAMES_MIN_ID) || (dat_id > CST_UNIT_NAMES_MAX_ID)) {
 		return CST_UNIT_NAME_NONE;
 	}
 	return CST_UNIT_NAMES[dat_id];
 }
-static const wchar_t *GetUnitNameW(short int dat_id) {
+static const wchar_t *GetHardcodedUnitNameW(short int dat_id) {
 	if ((dat_id < CST_UNIT_NAMES_MIN_ID) || (dat_id > CST_UNIT_NAMES_MAX_ID)) {
 		return CST_UNIT_NAME_W_NONE;
 	}
 	return CST_UNIT_NAMES_W[dat_id];
 }
-#endif

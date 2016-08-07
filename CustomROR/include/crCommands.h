@@ -14,6 +14,7 @@
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_units.h>
 #include <UI\AOE_struct_ui_popup_dialog.h>
+#include <AOE_hardcoded_unit_names.h>
 #include "Version.h"
 #include "AOE_map.h"
 #include "crCommon.h"

@@ -124,7 +124,7 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 		UnitSpawnShortcutInfo *sinfo = &this->crInfo->configInfo.unitShortcutsInformation[shortcutId];
 		if (sinfo->DAT_ID >= 0) {
 			fprintf_s(f, "unitSpawn shortcut %d: unit=%03d onlyOneUnit=%d (%.12s)\n", shortcutId, sinfo->DAT_ID, sinfo->onlyOneUnit ? 1 : 0,
-				GetUnitName(sinfo->DAT_ID));
+				GetHardcodedUnitName(sinfo->DAT_ID));
 		}
 	}
 	fprintf_s(f, "autoRebuildFarms_maxFarms:                 %ld\n", this->crInfo->configInfo.autoRebuildFarms_maxFarms);

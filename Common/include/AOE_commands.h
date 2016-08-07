@@ -6,6 +6,13 @@
 using namespace AOE_CONST_INTERNAL;
 
 /*
+* This file contains empiresX.exe structures definition
+* Please read README.txt first.
+* Reading/using information from this file implies sharing with the community
+* ALL your findings about AOE/ROR structures
+* Please share knowledge for better modding experience !
+
+
 * This file contains empiresX.exe structures definition for commands
 * Commands are very simple structs that describe basic "user commands"
 * Mostly, it corresponds to human commands (right-click, click to train/research, "stop", change game speed, cheat, etc)
