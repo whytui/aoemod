@@ -30,7 +30,8 @@ void CustomPopupBase::SetCRCommand(CustomRORCommand *crCommand) {
 	}
 }
 
-// Use it to list all UI objects (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
+// Use it to list all UI objects (labels, buttons...) that are created(added) to popup content,
+// so they are automatically freed when popup is closed (using AOE destructor).
 void CustomPopupBase::AddObjectInContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj) {
 	this->crInfo->AddObjectInPopupContentList(obj);
 }

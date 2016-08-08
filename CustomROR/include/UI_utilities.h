@@ -63,10 +63,10 @@ static void AOE_ShowUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, bool show) {
 	if (!object) { return; }
 	long int arg = show ? 1 : 0;
 	_asm {
-		MOV ECX, object
-			MOV EAX, DS:[ECX]
-			PUSH arg
-			CALL DS : [EAX + 0x14]
+		MOV ECX, object;
+		MOV EAX, DS:[ECX];
+		PUSH arg;
+		CALL DS:[EAX + 0x14];
 	}
 }
 
@@ -74,10 +74,10 @@ static void AOE_ShowUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, bool show) {
 static void AOE_RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object) {
 	if (!object) { return; }
 	_asm {
-		MOV ECX, object
-			MOV EAX, DS:[ECX]
-			PUSH 1
-			CALL DS : [EAX + 0x20]
+		MOV ECX, object;
+		MOV EAX, DS:[ECX];
+		PUSH 1;
+		CALL DS:[EAX + 0x20];
 	}
 }
 
@@ -360,8 +360,19 @@ static void AOE_AddEntryInComboUsingDLLID(AOE_STRUCTURES::STRUCT_ANY_UI *ptrComb
 }
 
 
-// Creates an empty combobox. Use AddEntryInCombo aftewards.
-// TO DO: this is unfinished
+// Clear entries from a combobox
+static void AOE_comboBox_clear(AOE_STRUCTURES::STRUCT_UI_COMBOBOX *comboBox) {
+	if (!comboBox) { return; }
+	_asm {
+		MOV ECX, comboBox
+			MOV EDX, 0x461F10
+			CALL EDX
+	}
+}
+
+
+// Creates an empty combobox. Use AddEntryInCombo afterwards.
+// TO DO: this is unfinished. See example in 4881A4...
 // Unstable and not correctly supported !
 static bool AOE_AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	AOE_STRUCTURES::STRUCT_UI_COMBOBOX **ptrObjToCreate,
@@ -457,15 +468,6 @@ static void AOE_listBox_clear(AOE_STRUCTURES::STRUCT_UI_LISTBOX *listBox) {
 	_asm {
 		MOV ECX, listBox
 		MOV EDX, 0x46A6C0
-		CALL EDX
-	}
-}
-
-static void AOE_comboBox_clear(AOE_STRUCTURES::STRUCT_UI_LISTBOX *comboBox) {
-	if (!comboBox) { return; }
-	_asm {
-		MOV ECX, comboBox
-		MOV EDX, 0x461F10
 		CALL EDX
 	}
 }

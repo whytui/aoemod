@@ -18,13 +18,15 @@ namespace AOE_STRUCTURES
 	public:
 		char *itemText;
 		unsigned long int *unknown_04;
-		long int optionalId;
+		long int optionalId; // +0C. Identifier for the list element. This is NOT the same as index.
 		STRUCT_UI_LIST_ITEM *next;
 	};
 
 	// Size = 0x1A0  // F8 53 54 00
 	// Constructor = 0x464A50 (also 00456F20?). Parent class is label (90 5A 54 00).
 	// See also STRUCT_UI_COMBOBOX (that contains a listbox)
+	// 0x46A105 = addEntry(text, index) ?
+	// 0x46A570 = listbox.GetSelectedIndexFromListId(idInList)
 #define CHECKSUM_UI_LISTBOX 0x005453F8
 	class STRUCT_UI_LISTBOX : public STRUCT_ANY_UI {
 	public:
@@ -35,7 +37,11 @@ namespace AOE_STRUCTURES
 		short int unknown_0FE; // maxVisibleIndex??
 		short int selectedIndex; // +100.
 		short int unknown_102; // +102
+		char unknown_104[0x140 - 0x104];
 		// +138=word
+		long int unknown_140; // +140 oneElemSizeY ? updated automatically from ?? Do not modify directly
+		char unknown_144[0x180 - 0x144];
+		long int unknown_180; // item count ?
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_LISTBOX; }
 	};

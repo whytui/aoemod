@@ -158,6 +158,7 @@
     <ClInclude Include="include\UI\AOE_struct_ui_in_game_options.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_join_screen.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_load_saved_game.h" />
+    <ClInclude Include="include\UI\AOE_struct_ui_mp_setup_screen.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_playing_zone.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_popup_dialog.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_scenario_editor_main.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="include\UI\AOE_struct_ui_welcome_main_screen.h" />
     <ClInclude Include="include\UI_components\AOE_struct_any_ui.h" />
     <ClInclude Include="include\UI_components\AOE_struct_ui_button.h" />
+    <ClInclude Include="include\UI_components\AOE_struct_ui_button_combobox.h" />
     <ClInclude Include="include\UI_components\AOE_struct_ui_button_with_number.h" />
     <ClInclude Include="include\UI_components\AOE_struct_ui_combobox.h" />
     <ClInclude Include="include\UI_components\AOE_struct_ui_label.h" />

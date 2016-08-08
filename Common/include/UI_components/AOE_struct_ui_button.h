@@ -17,21 +17,22 @@ namespace AOE_STRUCTURES
 	// Can be created in 0x0456240
 #define CHECKSUM_UI_BUTTON 0x00544E30
 #define CHECKSUM_UI_BUTTON_WITH_NUMBER 0x00549CAC
+#define CHECKSUM_UI_BUTTON_COMBOBOX 0x00545134
 	class STRUCT_UI_BUTTON : public STRUCT_ANY_UI {
 	public: // 30 4E 54 00 (a child class is AC 9C 54 00(size=0x3D4), rarely used. 16 are created in game screen=unit-commands)
 		long int commandIDs[9]; // +F4. Only index 0 is really used ?? Various types (enums) (GAME_SCREEN_BUTTON_IDS, INGAME_UI_COMMAND_ID, etc)
 		long int buttonInfoValue[9]; // +118. For example, a DATID.
 		unsigned long int unknown_13C;
-		unsigned long int unknown_140;
+		long int unknown_140; // 3 for standard buttons, 2 or 6 for checkboxes/combobox-buttons ?
 		unsigned long int unknown_144;
 		unsigned long int* unknown_148_wav; // +148: sound button.wav info? (always 0 except when playing sound ?)
-		unsigned long int* unknown_14C[9]; // Pointers, but not UI structs ?
-		short int unknown_170[9]; // +170. Default -1.
+		unsigned long int* unknown_14C[9]; // Pointers to icons data?
+		short int unknown_170[9]; // +170. Default -1. icon ids ?
 		char unknown_182[0x198 - 0x182];
 		char* unknown_198[9];
 		char* unknown_1BC[9];
 		char unknown_1E0[0x1F6 - 0x1E0];
-		short int checked; // +1F6. To update value, see AOE_CheckBox_SetChecked. Index for commandIDs and buttonInfoValue
+		short int checked; // +1F6. To update value, see AOE_CheckBox_SetChecked. Index for commandIDs and buttonInfoValue. For button, =1 when has focus (text color is highlighted)
 		unsigned long int unknown_1F8;
 		STRUCT_ANY_UI **unknown_1FC; // ptr array groupedObjects ? really unsure
 		// 0x200
@@ -43,7 +44,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_274[9];
 		long int hotkey; // +298. Ascii code of hotkey: 65='A', etc.
 		long int unknown_29C; // +29C. Related to hotkey ? Not sure.
-		unsigned long int unknown_2A0;
+		long int unknown_2A0;
 		char unknown_2A4;
 		char unknown_2A5;
 		char unknown_2A6;
@@ -56,10 +57,17 @@ namespace AOE_STRUCTURES
 		long int readOnly; // +2B0. 45F3A0 to modify ?
 		long int unknown_2B4; // +2B4. 4606D0 = setter ?
 
-		bool IsChecked() { return this->checked != 0; }
-		bool IsCheckSumValid() {
-			return (this->checksum == CHECKSUM_UI_BUTTON_WITH_NUMBER) || (this->checksum == CHECKSUM_UI_BUTTON);
+		bool IsChecked() const {
+			return this->checked != 0;
 		}
+		bool IsCheckSumValid() const {
+			return (this->checksum == CHECKSUM_UI_BUTTON);
+		}
+		bool IsCheckSumValidForAChildClass() const {
+			return (this->checksum == CHECKSUM_UI_BUTTON_WITH_NUMBER) || (this->checksum == CHECKSUM_UI_BUTTON) ||
+				(this->checksum == CHECKSUM_UI_BUTTON_COMBOBOX);
+		}
+		bool IsACheckBox() const { return this->unknown_140 != 3; } // Absolutely unsure, but I've got nothing else at this point
 	};
 	static_assert(sizeof(STRUCT_UI_BUTTON) == 0x2B8, "STRUCT_UI_BUTTON size");
 

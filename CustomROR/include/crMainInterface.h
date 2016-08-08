@@ -2,6 +2,7 @@
 #include <UI\AOE_struct_ui_in_game_menu.h>
 #include <UI\AOE_struct_ui_diplomacy_dialog.h>
 #include <UI\AOE_struct_ui_scenario_editor_menu.h>
+#include <UI\AOE_struct_ui_mp_setup_screen.h>
 #include "crCommands.h"
 #include "CustomPopupBase.h"
 #include "EditMapSizeXYPopup.h"
@@ -10,6 +11,7 @@
 #include "InGameCustomRorOptionsPopup.h"
 #include "EditorEditUnitInfoPopup.h"
 #include "InGameUnitPropertiesPopup.h"
+#include "GenNewTriggerPopup.h"
 #include "MapCopyPopup.h"
 #include "traceMessage.h"
 #include "unitShortcuts.h"

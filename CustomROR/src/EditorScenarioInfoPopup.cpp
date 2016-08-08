@@ -88,7 +88,7 @@ void EditorScenarioInfoPopup::_AddPopupContent() {
 
 
 bool EditorScenarioInfoPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
-	if (!sender || !sender->IsCheckSumValid()) { return false; }
+	if (!sender || !sender->IsCheckSumValidForAChildClass()) { return false; }
 	bool doCloseCustomPopup = false;
 	if (!GetGameGlobalStructPtr()) { return false; }
 	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = GetGameGlobalStructPtr()->scenarioInformation;

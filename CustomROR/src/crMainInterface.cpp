@@ -467,13 +467,18 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 
 	//Custom checkboxes: check/uncheck + manage custom buttons onclick
 	if (this->crCommand->crInfo->HasOpenedCustomGamePopup()) {
-		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsCheckBox = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
-		if (objAsCheckBox->IsCheckSumValid()) {
-			AOE_CheckBox_SetChecked(objAsCheckBox, !objAsCheckBox->IsChecked());
-		}
 		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsButton->IsCheckSumValid()) {
-			return this->OnCustomButtonClick(objAsButton);
+			if (objAsButton->IsACheckBox()) {
+				// We should NOT do this for standard buttons
+				AOE_CheckBox_SetChecked(objAsButton, !objAsButton->IsChecked());
+			}
+			return this->OnCustomButtonClick(objAsButton); // run for checkboxes also.
+		}
+		AOE_STRUCTURES::STRUCT_UI_BUTTON_COMBOBOX *objAsComboboxBtn = (AOE_STRUCTURES::STRUCT_UI_BUTTON_COMBOBOX *)objAddress;
+		if (objAsComboboxBtn->IsCheckSumValid()) {
+			// Is there something to do here to get those comboboxes work properly ?
+			
 		}
 	}
 
@@ -523,7 +528,7 @@ void CustomRORMainInterface::FreeInGameCustomOptionsButton() {
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool CustomRORMainInterface::OnCustomButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
-	if (!sender || !sender->IsCheckSumValid()) { return false; }
+	if (!sender || !sender->IsCheckSumValidForAChildClass()) { return false; }
 	bool doCloseCustomPopup = false;
 	if (!GetGameGlobalStructPtr()) { return false; }
 	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = GetGameGlobalStructPtr()->scenarioInformation;

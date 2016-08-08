@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <string.h>
 #include <mystrings.h>
+#include <UI_components\AOE_struct_ui_button.h>
 #include "CustomPopupBase.h"
 #include "crCommon.h"
 #include "crCommands.h"

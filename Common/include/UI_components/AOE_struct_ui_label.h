@@ -18,8 +18,8 @@ namespace AOE_STRUCTURES
 #define CHECKSUM_UI_LABEL 0x00545A90
 	class STRUCT_UI_LABEL : public STRUCT_ANY_UI {
 	public:
-		unsigned long int unknown_0F4;
-		unsigned short int unknown_0F8;
+		char **labelTexts; // There can be several of them (multi line ?)
+		unsigned short int unknown_0F8; // Maybe lines/texts count ?
 		unsigned short int unknown_0FA;
 		unsigned short int unknown_0FC;
 		unsigned short int unknown_0FE;
@@ -55,7 +55,7 @@ namespace AOE_STRUCTURES
 		char unknown_150; // init -1
 		char unknown_151; // is it used ?
 		short int unknown_152; // is it used ?
-		unsigned long int unknown_154;
+		long int unknown_154; // Set in 0x469190
 		char unknown_158;
 		char unknown_159; // is it used ?
 		short int unknown_15A; // is it used ?
@@ -66,7 +66,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_168;
 		unsigned long int unknown_16C;
 		// 0x170
-		unsigned long int unknown_170;
+		long int unknown_170;
 		char unknown_174;
 		char unknown_175;
 		char unknown_176;
