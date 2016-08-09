@@ -25,8 +25,7 @@ namespace AOE_STRUCTURES
 	// Size = 0x1A0  // F8 53 54 00
 	// Constructor = 0x464A50 (also 00456F20?). Parent class is label (90 5A 54 00).
 	// See also STRUCT_UI_COMBOBOX (that contains a listbox)
-	// 0x46A105 = addEntry(text, index) ?
-	// 0x46A570 = listbox.GetSelectedIndexFromListId(idInList)
+	// 0x46A105 = addEntry(text, index) ? to confirm
 	// 0x464E60 = listbox.GetEntryIndexForPosition(posX, posY) returns word
 	// 0x4650C0 = listBox.highlightEntry???(enum1-7?, index, arg3) ?
 #define CHECKSUM_UI_LISTBOX 0x005453F8
@@ -46,6 +45,20 @@ namespace AOE_STRUCTURES
 		long int maxEntryIndex; // +180. unsure ?
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_LISTBOX; }
+
+		// Get index in listbox (0 to n-1) of element that matches "optionalId"=elementId
+		// Returns -1 if elementId was not found (AOE method's behaviour)
+		long int GetIndexFromElementId(long int elementId) {
+			unsigned long int addr = 0x46A570;
+			long int res = -1;
+			_asm {
+				MOV ECX, this;
+				PUSH elementId;
+				CALL addr;
+				MOV res, EAX;
+			}
+			return res;
+		}
 	};
 
 

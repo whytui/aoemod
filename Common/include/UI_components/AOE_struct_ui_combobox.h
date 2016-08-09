@@ -20,7 +20,6 @@ namespace AOE_STRUCTURES
 	// Size = 0x144 - 50 50 54 00. Direct parent is STRUCT_ANY_UI
 	// Constructor = 0x460A00
 	// 461DA0 : addEntry(text, index) ?
-	// 461E70 : combobox.GetSelectedIndexFromListId(idInList) returns a list index
 	// 461D50 : setSelectedRow?("id"?)
 	// 0x4542C0 set hint dll string(dllid, -1) ?
 #define CHECKSUM_UI_COMBOBOX 0x00545050
@@ -32,7 +31,7 @@ namespace AOE_STRUCTURES
 		// 0x100
 		STRUCT_UI_SCROLLBAR *scrollbar; // +100. Scrollbar to apply on listbox.
 		unsigned long int unknown_104;
-		short int selectedIndex; // +108. Or selected "id" ?
+		short int selectedIndex; // +108. Index in list of current selection (0 to n-1).
 		unsigned short int unknown_10A;
 		long int unknown_10C; // pos or size ?
 		long int unknown_110; // pos or size ?
@@ -51,16 +50,30 @@ namespace AOE_STRUCTURES
 		long int drawBorderAroundText; // init=1. Set in 0x461180 (do not update directly)
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_COMBOBOX; }
+		// Returns index (0 to n-1) of selected entry
 		long int GetSelectedIndex() {
 			if (!this->IsCheckSumValid()) { return -1; }
-			unsigned long int tmp = this->checksum;
+			long int tmp = -1;
 			_asm {
-				MOV ECX, tmp;
+				MOV ECX, this;
 				MOV EAX, 0x461E50;
 				CALL EAX;
 				MOV tmp, EAX;
 			}
 			return tmp;
+		}
+		// Get index in combobox (0 to n-1) of element that matches "optionalId"=elementId
+		// Returns -1 if elementId was not found (AOE method's behaviour)
+		long int GetIndexFromElementId(long int elementId) {
+			unsigned long int addr = 0x461E70;
+			long int res = -1;
+			_asm {
+				MOV ECX, this;
+				PUSH elementId;
+				CALL addr;
+				MOV res, EAX;
+			}
+			return res;
 		}
 		// Show text on right and button on the left if textOnRight=true, reverse otherwise.
 		void ShowTextOnRight(bool textOnRight) {
@@ -82,6 +95,7 @@ namespace AOE_STRUCTURES
 				CALL addr;
 			}
 		}
+
 	};
 
 
