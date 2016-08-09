@@ -148,6 +148,7 @@
     <ClInclude Include="include\triggerDefinition.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_campaign_editor.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_credits_screen.h" />
+    <ClInclude Include="include\UI\AOE_struct_ui_dialog_base.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_diamond_map.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_diplomacy_dialog.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_editor_unit_info_zone.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="include\UI\AOE_struct_ui_scenario_editor_main.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_scenario_editor_main_menu.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_scenario_editor_menu.h" />
+    <ClInclude Include="include\UI\AOE_struct_ui_screen_base.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_unit_info_zone.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_welcome_main_screen.h" />
     <ClInclude Include="include\UI_components\AOE_struct_any_ui.h" />

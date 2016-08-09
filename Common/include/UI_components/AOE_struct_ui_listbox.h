@@ -27,21 +27,23 @@ namespace AOE_STRUCTURES
 	// See also STRUCT_UI_COMBOBOX (that contains a listbox)
 	// 0x46A105 = addEntry(text, index) ?
 	// 0x46A570 = listbox.GetSelectedIndexFromListId(idInList)
+	// 0x464E60 = listbox.GetEntryIndexForPosition(posX, posY) returns word
+	// 0x4650C0 = listBox.highlightEntry???(enum1-7?, index, arg3) ?
 #define CHECKSUM_UI_LISTBOX 0x005453F8
 	class STRUCT_UI_LISTBOX : public STRUCT_ANY_UI {
 	public:
 		STRUCT_UI_LIST_ITEM *firstItem; // +F4. First element of list of items.
-		short int itemCount; // +F8
+		short int itemCount; // +F8. unsure ?
 		short int unknown_0FA;
-		short int unknown_0FC; // minVisibleIndex??
-		short int unknown_0FE; // maxVisibleIndex??
+		short int firstVisibleEntryIndex; // +FC. Not necessarily first entry (if there is a scrollbar)
+		short int lastVisibleEntryIndex; // +FE.
 		short int selectedIndex; // +100.
 		short int unknown_102; // +102
 		char unknown_104[0x140 - 0x104];
 		// +138=word
-		long int unknown_140; // +140 oneElemSizeY ? updated automatically from ?? Do not modify directly
+		long int unknown_140; // +140 oneElemSizeY (or half?) ? updated automatically from ?? Do not modify directly
 		char unknown_144[0x180 - 0x144];
-		long int unknown_180; // item count ?
+		long int maxEntryIndex; // +180. unsure ?
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_LISTBOX; }
 	};

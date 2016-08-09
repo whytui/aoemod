@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <UI\AOE_struct_ui_dialog_base.h>
 #include <UI_components\AOE_struct_any_ui.h>
 #include <UI_components\AOE_struct_ui_button.h>
 
@@ -14,12 +15,11 @@
 namespace AOE_STRUCTURES
 {
 
-	// Size=0x564. In-game Options popup.
+	// Size=0x564. In-game Options popup. Parents 1C 4F 54 00, BC 4B 54 00, D8 A4 54 00 (any_ui = base class)
 	// Constructor = 0x4300D0
 #define CHECKSUM_UI_IN_GAME_OPTIONS 0x005436E0
-	class STRUCT_UI_IN_GAME_OPTIONS : public STRUCT_ANY_UI {
+	class STRUCT_UI_IN_GAME_OPTIONS : public STRUCT_UI_DIALOG_BASE {
 	public:
-		char unknown_0F4[0x490 - 0x0F4];
 		// 0x490
 		unsigned long int unknown_490; // Init with constructor's arg1
 		STRUCT_ANY_UI *lblTitle;
@@ -90,6 +90,6 @@ namespace AOE_STRUCTURES
 		// 0x564: end
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_IN_GAME_OPTIONS; }
 	};
-
+	static_assert(sizeof(STRUCT_UI_IN_GAME_OPTIONS) == 0x564, "STRUCT_UI_IN_GAME_OPTIONS size");
 }
 

@@ -15,6 +15,7 @@ namespace AOE_STRUCTURES
 
 	// Size 0x2B8. Also for checkboxes.
 	// Can be created in 0x0456240
+	// 0x45FCD0 = OnButtonDown?(arg1, mousePosX, mousePosY, arg4, arg5)
 #define CHECKSUM_UI_BUTTON 0x00544E30
 #define CHECKSUM_UI_BUTTON_WITH_NUMBER 0x00549CAC
 #define CHECKSUM_UI_BUTTON_COMBOBOX 0x00545134
@@ -31,13 +32,15 @@ namespace AOE_STRUCTURES
 		char unknown_182[0x198 - 0x182];
 		char* unknown_198[9];
 		char* unknown_1BC[9];
-		char unknown_1E0[0x1F6 - 0x1E0];
+		char unknown_1E0[0x1F4 - 0x1E0];
+		short int unknown_1F4;
 		short int checked; // +1F6. To update value, see AOE_CheckBox_SetChecked. Index for commandIDs and buttonInfoValue. For button, =1 when has focus (text color is highlighted)
 		unsigned long int unknown_1F8;
 		STRUCT_ANY_UI **unknown_1FC; // ptr array groupedObjects ? really unsure
 		// 0x200
 		short int unknown_200; // groupedObjectCount ? really unsure (like radiobuttons?)
-		char unknown_202[0x208 - 0x202];
+		short int unknown_202;
+		long int timeGetTimeValue_204; // +204
 		unsigned long int unknown_208[9]; // +208. default 0x00FFFFFF
 		unsigned long int unknown_22C[9];
 		long int unknown_250[9]; // +250. default 0xFFFF

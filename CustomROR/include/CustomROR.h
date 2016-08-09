@@ -163,6 +163,7 @@ public:
 	void ManageKeyPressInOptions(REG_BACKUP *REG_values);
 	void AfterScenarioEditorCreation(REG_BACKUP *REG_values);
 	void ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_values);
+	void OnComboboxTransferCaptureToPReviousObject(REG_BACKUP *REG_values);
 };
 
 // Main object

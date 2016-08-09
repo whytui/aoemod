@@ -230,6 +230,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004926B5:
 		this->ScenarioEditorChangeSelectedTerrain(REG_values);
 		break;
+	case 0x00451DD0:
+		this->OnComboboxTransferCaptureToPReviousObject(REG_values);
+		break;
 	case 0x004F16BB:
 		this->CheckPopulationCostWithLogistics(REG_values);
 		break;
@@ -2464,6 +2467,26 @@ void CustomRORInstance::ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_valu
 		// Force terrainId to use / skip hardcoded switch from ROR original code
 		REG_values->EAX_val = customTerrainIdToUse;
 		ChangeReturnAddress(REG_values, 0x4926FD);
+	}
+}
+
+
+// From 0x451DCA
+// This is executed when a combobox' list loses focus (and hides), ONLY when the combobox has a "previous" capture UI object (unsure about exact role).
+void CustomRORInstance::OnComboboxTransferCaptureToPReviousObject(REG_BACKUP *REG_values) {
+	ror_api_assert(REG_values, REG_values->EDI_val == 0x5830E8);
+	// EDI + 8 should point to combobox
+	// EDI + C should point to current (main) screen.
+	AOE_STRUCTURES::STRUCT_ANY_UI *objToGiveCapture = (AOE_STRUCTURES::STRUCT_ANY_UI *)REG_values->ESI_val;
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		unsigned long int p = REG_values->EDI_val;
+		const unsigned long int addr = 0x451CC0;
+		_asm {
+			MOV ECX, p;
+			PUSH 0;
+			CALL addr;
+		}
 	}
 }
 

@@ -139,7 +139,7 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(AOE_STRUCTURES::
 		MOV EAX, 0x0052601D // alloc
 		CALL EAX
 		ADD ESP, 4 // for push 0x564
-		MOV newObj, EAX // test
+		MOV newObj, EAX
 	}
 	if (newObj == NULL) { return NULL; }
 
@@ -152,8 +152,8 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(AOE_STRUCTURES::
 		MOV arg6, EAX
 		// Init
 		MOV ECX, newObj
-		MOV EAX, 0x00460730 // UIObj.genericUIConstructor(ScreenName) ?
-		PUSH 0x00557204 // Config dialog
+		MOV EAX, 0x00460730 // DialogObj.genericUIConstructor(ScreenName)
+		PUSH 0x00557204 // Config Dialog
 		CALL EAX
 		// Create popup + show + focus
 		MOV EDX, 0x004607A0
@@ -371,7 +371,7 @@ static void AOE_comboBox_clear(AOE_STRUCTURES::STRUCT_UI_COMBOBOX *comboBox) {
 }
 
 
-// Creates an empty combobox. Use AddEntryInCombo afterwards.
+// Creates a combobox with 1 "empty" entry. Use AddEntryInCombo afterwards.
 // TO DO: this is unfinished. See example in 4881A4...
 // Unstable and not correctly supported !
 static bool AOE_AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,

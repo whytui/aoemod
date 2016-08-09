@@ -22,13 +22,11 @@ namespace AOE_STRUCTURES
 	// 461DA0 : addEntry(text, index) ?
 	// 461E70 : combobox.GetSelectedIndexFromListId(idInList) returns a list index
 	// 461D50 : setSelectedRow?("id"?)
-	// 4613D0 events?
-	// 460E80 onclick?
 	// 0x4542C0 set hint dll string(dllid, -1) ?
 #define CHECKSUM_UI_COMBOBOX 0x00545050
 	class STRUCT_UI_COMBOBOX : public STRUCT_ANY_UI {
 	public:
-		STRUCT_UI_LABEL *displayedLabel; // To confirm
+		STRUCT_UI_LABEL *displayedLabel; // +F4.
 		STRUCT_UI_BUTTON_COMBOBOX *btnShowList; // +F8. 34 51 54 00
 		STRUCT_UI_LISTBOX *underlyingListBox; // +FC.
 		// 0x100

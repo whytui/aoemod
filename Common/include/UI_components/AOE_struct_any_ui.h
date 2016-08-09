@@ -24,15 +24,16 @@ namespace AOE_STRUCTURES
 	// Size=0xF4 for this class, but all child classes are larger !
 	// Constructor: 004523F0 for "screen" objects, 00452580 for components
 	// In general, you should not modify these members directly. You are supposed to use methods (few are implemented in this solution).
-	// D8 4A 54 00 for this base (parent) class ??
+	// D8 4A 54 00 for this base (parent) class
+#define CHECKSUM_ANY_UI 0x00544AD8
 	class STRUCT_ANY_UI {
 	public:
 		unsigned long int checksum; // Depends on UI object type
 		unsigned long int unknown_004; // pointer ?
-		unsigned long int unknown_008;
-		unsigned long int unknown_00C_posX; // unsure
+		STRUCT_ANY_UI *previousPopup; // +08. Really really unsure
+		unsigned long int unknown_00C_posX; // unsure. Absolute posX or something like that ?
 		// 0x10
-		unsigned long int unknown_010_posY; // unsure
+		unsigned long int unknown_010_posY; // unsure. Absolute posY or something like that ?
 		long int sizeX;
 		long int sizeY;
 		char *screenName;
@@ -93,15 +94,15 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_0CC;
 		// 0xD0
 		unsigned long int unknown_0D0;
-		unsigned long int unknown_0D4;
+		long int timeGetTimeValue; // +D4
 		unsigned long int unknown_0D8;
 		unsigned long int unknown_0DC;
 		// 0xE0
 		unsigned long int unknown_0E0;
 		long int helpDllId; // +E4. Dll string Id for help (or tooltip?) ?
 		long int winHelpDataDllId; // +E8. a DllID, used when clicking on help/(object)/details = data for winHelp call.
-		char unknown_0EC;
-		char unknown_0ED;
+		char unknown_0EC; // a "status" for event handling ? 1, 2...
+		char unknown_0ED; // a "status" for event handling ? 1, 2...
 		char unknown_0EE;
 		char unknown_0EF;
 		// 0xF0
