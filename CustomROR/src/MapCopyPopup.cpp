@@ -96,10 +96,10 @@ bool MapCopyPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 		if ((minX < 0) || (minY < 0) || (maxX < 0) || (maxY < 0)) { return true; }
 		bool result = MAP::mapCopierInstance.CopyMapZone(minX, minY, maxX, maxY, this->chkIncludeUnits->IsChecked());
 		if (this->edtResultMessage->pTypedText != NULL) {
-			AOE_SetEditText(this->edtResultMessage, result ? successText : MAP::mapCopierInstance.GetLastError().c_str());
+			this->edtResultMessage->SetText(result ? successText : MAP::mapCopierInstance.GetLastError().c_str());
 		}
 		if (this->edtCurrentBufferSize && this->edtCurrentBufferSize->pTypedText) {
-			AOE_SetEditText(this->edtCurrentBufferSize, this->GetBufferSizeText().c_str());
+			this->edtCurrentBufferSize->SetText(this->GetBufferSizeText().c_str());
 		}
 		return true;
 	}
@@ -110,12 +110,12 @@ bool MapCopyPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 				bool result = MAP::mapCopierInstance.CopyMapZone(0, 0, global->gameMapInfo->mapArraySizeX - 1, global->gameMapInfo->mapArraySizeY - 1, 
 					this->chkIncludeUnits->IsChecked());
 				if (this->edtResultMessage->pTypedText != NULL) {
-					AOE_SetEditText(this->edtResultMessage, result ? successText : MAP::mapCopierInstance.GetLastError().c_str());
+					this->edtResultMessage->SetText(result ? successText : MAP::mapCopierInstance.GetLastError().c_str());
 				}
 			}
 		}
 		if (this->edtCurrentBufferSize && this->edtCurrentBufferSize->pTypedText) {
-			AOE_SetEditText(this->edtCurrentBufferSize, this->GetBufferSizeText().c_str());
+			this->edtCurrentBufferSize->SetText(this->GetBufferSizeText().c_str());
 		}
 		return true;
 	}
@@ -125,7 +125,7 @@ bool MapCopyPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 		long int y = StrToInt(this->edtPasteToY->pTypedText, -1);
 		bool result = MAP::mapCopierInstance.PasteMapZone(x, y);
 		if (this->edtResultMessage && (this->edtResultMessage->pTypedText != NULL)) {
-			AOE_SetEditText(this->edtResultMessage, result ? successText : MAP::mapCopierInstance.GetLastError().c_str());
+			this->edtResultMessage->SetText(result ? successText : MAP::mapCopierInstance.GetLastError().c_str());
 		}
 		return true;
 	}

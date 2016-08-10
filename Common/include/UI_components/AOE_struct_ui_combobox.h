@@ -18,7 +18,7 @@ namespace AOE_STRUCTURES
 {
 
 	// Size = 0x144 - 50 50 54 00. Direct parent is STRUCT_ANY_UI
-	// Constructor = 0x460A00
+	// Constructor = 0x460A00. Comboboxes are not intended to be used in popups and don't work well in native ROR code.
 	// 461DA0 : addEntry(text, index) ?
 	// 461D50 : setSelectedRow?("id"?)
 	// 0x4542C0 set hint dll string(dllid, -1) ?
@@ -30,19 +30,21 @@ namespace AOE_STRUCTURES
 		STRUCT_UI_LISTBOX *underlyingListBox; // +FC.
 		// 0x100
 		STRUCT_UI_SCROLLBAR *scrollbar; // +100. Scrollbar to apply on listbox.
-		unsigned long int unknown_104;
+		long int unknown_104; // Status ? 1=normal, 0=list_shown ? unclear and unsure
 		short int selectedIndex; // +108. Index in list of current selection (0 to n-1).
 		unsigned short int unknown_10A;
-		long int unknown_10C; // pos or size ?
-		long int unknown_110; // pos or size ?
-		long int unknown_114; // pos or size ?
-		long int unknown_118; // pos or size ?
-		char unknown_11C[0x130 - 0x11C];
+		long int labelSizeX; // +10C
+		long int labelSizeY; // +110
+		long int unknown_114; // btnSizeX? or pos ? unsure
+		long int unknown_118; // btnSizeY? or pos ? unsure
+		long int unknown_11C; // +11C. Listbox sizeX ? Calculated when listbox is shown
+		long int unknown_120; // +120. Listbox sizeY ? Calculated when listbox is shown
+		char unknown_124[0x130 - 0x124];
 		// 0x130
 		char unknown_130;
 		char unknown_131;
 		short int unknown_132; // unknown type
-		unsigned long int unknown_134; // unknown type
+		long int unknown_134; // 
 		char unknown_138;
 		char unknown_139[3]; // unknown type
 		long int unknown_13C_lbl_btn_relativePosOrder; // +13C. 0=text on left, 1=text on right
@@ -95,7 +97,14 @@ namespace AOE_STRUCTURES
 				CALL addr;
 			}
 		}
-
+		// Remove all entries from list
+		void Clear() {
+			_asm {
+				MOV ECX, this;
+				MOV EDX, 0x461F10;
+				CALL EDX;
+			}
+		}
 	};
 
 

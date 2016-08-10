@@ -360,17 +360,6 @@ static void AOE_AddEntryInComboUsingDLLID(AOE_STRUCTURES::STRUCT_ANY_UI *ptrComb
 }
 
 
-// Clear entries from a combobox
-static void AOE_comboBox_clear(AOE_STRUCTURES::STRUCT_UI_COMBOBOX *comboBox) {
-	if (!comboBox) { return; }
-	_asm {
-		MOV ECX, comboBox
-			MOV EDX, 0x461F10
-			CALL EDX
-	}
-}
-
-
 // Creates a combobox with 1 "empty" entry. Use AddEntryInCombo afterwards.
 // TO DO: this is unfinished. See example in 4881A4...
 // Unstable and not correctly supported !
@@ -414,20 +403,6 @@ static void AOE_AddEntryInCombo(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo, long in
 }
 
 
-// Returns selected index for a combobox object. Returns -1 in error cases.
-static long int AOE_GetComboSelectedIndex(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo) {
-	assert(ptrCombo != NULL);
-	if (!ptrCombo) { return -1; }
-	long int result = -1;
-	_asm {
-		MOV EDX, 0x461E50
-		MOV ECX, ptrCombo
-		CALL EDX
-		MOV result, EAX
-	}
-	return result;
-}
-
 // Returns an edit object's text
 #pragma message("TODO: NOT for edit, labels only ? To check")
 static char *AOE_GetEditText(AOE_STRUCTURES::STRUCT_ANY_UI *ptrEdit) {
@@ -455,13 +430,6 @@ static void AOE_SetLabelText(AOE_STRUCTURES::STRUCT_UI_LABEL *ptrLabel, const ch
 	}
 }
 
-// Set a TextBox object's text
-static void AOE_SetEditText(AOE_STRUCTURES::STRUCT_UI_TEXTBOX *ptrTextBox, const char *text) {
-	assert(ptrTextBox != NULL);
-	if (!ptrTextBox || !ptrTextBox->IsCheckSumValid() || !ptrTextBox->pTypedText || (ptrTextBox->maxTextSize <= 0)) { return; }
-	strcpy_s(ptrTextBox->pTypedText, ptrTextBox->maxTextSize - 1, text);
-	AOE_RefreshUIObject(ptrTextBox);
-}
 
 static void AOE_listBox_clear(AOE_STRUCTURES::STRUCT_UI_LISTBOX *listBox) {
 	if (!listBox) { return; }

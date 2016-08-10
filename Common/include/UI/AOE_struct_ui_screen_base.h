@@ -18,7 +18,30 @@ namespace AOE_STRUCTURES
 #define CHECKSUM_UI_SCREEN_BASE 0x00544BBC
 	class STRUCT_UI_SCREEN_BASE : public STRUCT_ANY_UI {
 	public:
-		char unknown_0F4[0x478 - 0x0F4];
+		long int unknown_0F4_sizeX;
+		long int unknown_0F4_sizeY;
+		char dialogName[0x10]; // +FC. unknown size
+		char unknown_10C[0x180 - 0x10C];
+		long int unknown_180; // +180. A value 0-4 ?
+		char unknown_184[0x320 - 0x184];
+		char unknown_320;
+		char unknown_321;
+		char unknown_322;
+		char unknown_323;
+		char unknown_324;
+		char unknown_325;
+		char unknown_326[2];
+		long int unknown_328;
+		unsigned long int unknown_32C;
+		long int unknown_330;
+		unsigned long int unknown_334;
+		unsigned long int unknown_338;
+		unsigned long int unknown_33C;
+		char unknown_340_scrName[0x100]; // unknown size
+		char unknown_440[4]; // Maybe part of unknown_340_scrName.
+		unsigned long int *unknown_444;
+		unsigned long int *unknown_448; // A pointer ?
+		char unknown_44C[0x478 - 0x44C];
 	};
 	static_assert(sizeof(STRUCT_UI_SCREEN_BASE) == 0x478, "STRUCT_UI_SCREEN_BASE size");
 }

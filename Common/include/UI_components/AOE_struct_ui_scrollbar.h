@@ -19,6 +19,12 @@ namespace AOE_STRUCTURES
 	class STRUCT_UI_SCROLLBAR : public STRUCT_ANY_UI {
 	public:
 		STRUCT_ANY_UI *objectToScroll; // +F4
+		long int unknown_0F8;
+		char unknown_FC[0x102 - 0xFC];
+		long int unknown_120;
+		long int unknown_124; // previous for +12C?
+		long int unknown_128;
+		long int unknown_12C;
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_SCROLLBAR; }
 	};

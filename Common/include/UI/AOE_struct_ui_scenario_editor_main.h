@@ -55,7 +55,7 @@ namespace AOE_STRUCTURES
 		STRUCT_UI_LABEL *map_lbl_btnSeed; // +51C
 		STRUCT_UI_LABEL *map_lbl_map; // +520
 		STRUCT_UI_LABEL *map_lbl_cbbDefaultTerrain; // +524
-		STRUCT_ANY_UI *map_cbb_defaultTerrain; // +528. Combobox
+		STRUCT_UI_COMBOBOX *map_cbb_defaultTerrain; // +528. Combobox
 		STRUCT_UI_LABEL *map_lbl_mapSize; // +52C
 		STRUCT_UI_COMBOBOX *map_cbb_mapSize; // +530. Combobox
 		STRUCT_UI_LABEL *map_lbl_mapType; // +534

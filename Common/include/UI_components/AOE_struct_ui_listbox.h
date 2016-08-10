@@ -32,17 +32,27 @@ namespace AOE_STRUCTURES
 	class STRUCT_UI_LISTBOX : public STRUCT_ANY_UI {
 	public:
 		STRUCT_UI_LIST_ITEM *firstItem; // +F4. First element of list of items.
-		short int itemCount; // +F8. unsure ?
+		short int itemCount; // +F8.
 		short int unknown_0FA;
 		short int firstVisibleEntryIndex; // +FC. Not necessarily first entry (if there is a scrollbar)
 		short int lastVisibleEntryIndex; // +FE.
 		short int selectedIndex; // +100.
 		short int unknown_102; // +102
 		char unknown_104[0x140 - 0x104];
+		// +134 = long int seen 0xE
 		// +138=word
 		long int unknown_140; // +140 oneElemSizeY (or half?) ? updated automatically from ?? Do not modify directly
-		char unknown_144[0x180 - 0x144];
-		long int maxEntryIndex; // +180. unsure ?
+		char unknown_144[0x170 - 0x144];
+		unsigned long int unknown_170; // dword
+		char unknown_174[0x180 - 0x174];
+		long int unknown_180; // +180. marginX ?
+		long int unknown_184; // marginY ?
+		unsigned long int unknown_188;
+		unsigned long int unknown_18C;
+		long int unknown_190; // default 50
+		unsigned long int unknown_194;
+		unsigned long int unknown_198;
+		unsigned long int unknown_19C;
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_LISTBOX; }
 
@@ -60,7 +70,7 @@ namespace AOE_STRUCTURES
 			return res;
 		}
 	};
-
+	static_assert(sizeof(STRUCT_UI_LISTBOX) == 0x1A0, "STRUCT_UI_LISTBOX size");
 
 }
 

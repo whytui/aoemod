@@ -89,6 +89,10 @@ protected:
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
+	bool AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+		AOE_STRUCTURES::STRUCT_UI_COMBOBOX **ptrObjToCreate, long int posX, long int posY,
+		long int listSizeX, long int listSizeY, long int lblSizeX, long int lblSizeY, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+
 private:
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel;

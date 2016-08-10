@@ -18,6 +18,10 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_08;
 		unsigned long int unknown_0C; // A pointer
 		// 0x10
+		unsigned long int unknown_10;
+		unsigned long int unknown_14;
+		long int screenSizeX;
+		long int screenSizeY;
 	};
 
 	// Parent class for UI objects (both screens and UI components).
@@ -54,8 +58,8 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_04C;
 		// 0x50
 		unsigned long int unknown_050;
-		unsigned long int unknown_054; // ptr ?
-		unsigned long int unknown_058; // ptr ?
+		unsigned long int *unknown_054; // ptr struct size 0x0C. +0=backptr,
+		unsigned long int *unknown_058; // ptr to some list ? +8=next
 		unsigned long int unknown_05C; // A ptr to a list: elem= {+0=STRUCT_ANY_UI*, +4=nextElem}. Used in 453360
 		// 0x60
 		unsigned long int unknown_060;
@@ -95,7 +99,7 @@ namespace AOE_STRUCTURES
 		// 0xD0
 		unsigned long int unknown_0D0;
 		long int timeGetTimeValue; // +D4
-		unsigned long int unknown_0D8;
+		long int unknown_0D8; // a flag ?
 		unsigned long int unknown_0DC;
 		// 0xE0
 		unsigned long int unknown_0E0;

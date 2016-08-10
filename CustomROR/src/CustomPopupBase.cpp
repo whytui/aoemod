@@ -99,6 +99,17 @@ bool CustomPopupBase::AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 }
 
 
+bool CustomPopupBase::AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_COMBOBOX **ptrObjToCreate, long int posX, long int posY,
+	long int listSizeX, long int listSizeY, long int lblSizeX, long int lblSizeY, AOE_FONTS font) {
+	bool res;
+	res = AOE_AddComboBox(parent, ptrObjToCreate, posX, posY, listSizeX, listSizeY, lblSizeX, lblSizeY, font);
+	if (res && ptrObjToCreate) {
+		this->AddObjectInContentList(*ptrObjToCreate);
+	}
+	return res;
+}
+
 
 // Call this to open a new popup (=>this)
 AOE_STRUCTURES::STRUCT_ANY_UI *CustomPopupBase::OpenPopup(long int hSize, long int vSize, bool withCancelBtn) {
