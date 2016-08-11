@@ -12,6 +12,7 @@
 #include <AOE_empires_dat.h>
 #include <AOE_struct_game_settings.h>
 #include <UI\AOE_struct_ui_in_game_options.h>
+#include <AOE_struct_ui_main_info.h>
 
 #include <Windows.h> // for messagebox
 #include "crCommon.h"
@@ -163,7 +164,7 @@ public:
 	void ManageKeyPressInOptions(REG_BACKUP *REG_values);
 	void AfterScenarioEditorCreation(REG_BACKUP *REG_values);
 	void ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_values);
-	void OnComboboxTransferCaptureToPReviousObject(REG_BACKUP *REG_values);
+	void OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *REG_values);
 };
 
 // Main object

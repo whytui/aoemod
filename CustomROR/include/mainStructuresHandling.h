@@ -2,6 +2,7 @@
 #include <AOE_offsets.h>
 #include <ROR_global_variables.h>
 #include <AOE_struct_game_settings.h>
+#include <AOE_struct_ui_main_info.h>
 
 #pragma once
 
@@ -17,6 +18,9 @@ AOE_STRUCTURES::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr();
 // Returns a pointer to game settings struct
 // ASSERTS that the pointer is non-NULL
 AOE_STRUCTURES::STRUCT_GAME_SETTINGS* GetGameSettingsPtr();
+
+// Returns the UI main information object
+AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *GetUIMainInfoStruct();
 
 
 // Returns a pointer to current active UI (?)

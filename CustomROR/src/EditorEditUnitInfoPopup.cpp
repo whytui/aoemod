@@ -136,7 +136,7 @@ bool EditorEditUnitInfoPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *se
 
 void EditorEditUnitInfoPopup::OnBeforeClose(bool isCancel) {
 	if (isCancel) { return; }
-	// Note: setting shortcutNumber can show the unit's status, but only works for player #1. See 0x4A78D9: disable jmp to allow always displaying shortcut
+	// Note: setting shortcutNumber can show the unit's status, but only works for player #1. Fix in 0x4A78D9 to allow other players
 	if (this->chkbox_s0 && this->chkbox_s2 && this->chkbox_s4) {
 		for each (auto curUnit in this->allSelectedUnits)
 		{

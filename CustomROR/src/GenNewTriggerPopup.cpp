@@ -10,6 +10,7 @@ void GenNewTriggerPopup::_ResetPointers() {
 	__super::_ResetPointers();
 	this->cbxActionType = NULL;
 	this->cbxEventType = NULL;
+	this->edtSampleTriggerText = NULL;
 	this->edtTriggerText = NULL;
 	this->btnGenerate = NULL;
 	this->chkBeforeTrigger = NULL;
@@ -19,34 +20,47 @@ void GenNewTriggerPopup::_ResetPointers() {
 
 
 void GenNewTriggerPopup::_AddPopupContent() {
+	// Left part = edit actual triggers.
+	// Right part = generate sample triggers
+	int splitScreenXPos = this->hSize / 2;
+	int btnWidth = 120;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *unused;
 	
-	this->AddLabel(popup, &unused, "Generate trigger samples", 100, 10, 300, 20, AOE_FONT_BIG_LABEL);
+	this->AddLabel(popup, &unused, "Edit trigger", 60, 10, 300, 20, AOE_FONT_BIG_LABEL);
+	this->AddLabel(popup, &unused, "Generate trigger samples", splitScreenXPos+ 40, 10, 300, 20, AOE_FONT_BIG_LABEL);
 
+	// Trigger edition
+	this->AddTextBox(this->popup, &this->edtTriggerText, "", 4000, 10, 50, splitScreenXPos - 20, this->vSize - 90);
+
+	// Sample triggers part
 	int cbxSizeX = 160;
 	int cbxSizeY = 20;
-	int posX = 60;
-	int posY = 50;
-	bool success = this->AddComboBox(popup, &this->cbxEventType, posX, posY, cbxSizeX, cbxSizeY, cbxSizeX, cbxSizeY, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	int comboPosX = splitScreenXPos + 20;
+	int comboPosY = 50;
+	bool success = this->AddComboBox(popup, &this->cbxEventType, comboPosX, comboPosY, cbxSizeX, cbxSizeY, cbxSizeX, cbxSizeY, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	if (!success) { return; }
-	success = this->AddComboBox(popup, &this->cbxActionType, posX + cbxSizeX + 40, posY, cbxSizeX, cbxSizeY, cbxSizeX, cbxSizeY, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	success = this->AddComboBox(popup, &this->cbxActionType, comboPosX + cbxSizeX + 40, comboPosY, cbxSizeX, cbxSizeY, cbxSizeX, cbxSizeY, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	if (!success) { return; }
 	this->cbxEventType->Clear();
 	this->cbxActionType->Clear();
 	this->cbxEventType->SetBorderAroundText(true);
 	this->cbxActionType->SetBorderAroundText(true);
-	// How to force use of scroll bar on comboboxes to avoid going out of screen ?
-	this->AddTextBox(popup, &this->edtTriggerText, NULL, 5000, 20, 240, 460, 60, false, true, false);
-	//this->AddTextBox(popup, &this->edtTriggerText, "abcdef", 5000, 20, 240, 460, 60, false, true, false);
+	// How to force use of scroll bar on comboboxes to avoid going out of screen ? Seems to be an AOE UI framework bug.
 	
-	this->AddCheckBox(popup, &this->chkBeforeTrigger, 420, 120, 24, 24);
-	this->AddCheckBox(popup, &this->chkAfterTrigger, 420, 160, 24, 24);
-	this->AddCheckBox(popup, &this->chkDiffLevelRestriction, 420, 200, 24, 24);
-	this->AddLabel(popup, &unused, "Run another trigger before execution", 180, 120, 220, 20, AOE_FONT_SMALL_TEXT_6);
-	this->AddLabel(popup, &unused, "Run another trigger after execution", 180, 160, 220, 20, AOE_FONT_SMALL_TEXT_6);
-	this->AddLabel(popup, &unused, "Difficulty level condition", 180, 200, 150, 20, AOE_FONT_SMALL_TEXT_6);
+	int chkPosX = this->hSize - 10 - 24;
+	this->AddCheckBox(popup, &this->chkBeforeTrigger, chkPosX, 90, 24, 24);
+	this->AddCheckBox(popup, &this->chkAfterTrigger, chkPosX, 130, 24, 24);
+	this->AddCheckBox(popup, &this->chkDiffLevelRestriction, chkPosX, 170, 24, 24);
+	this->AddLabel(popup, &unused, "Run another trigger before execution", comboPosX, 90, 220, 20, AOE_FONT_SMALL_TEXT_6);
+	this->AddLabel(popup, &unused, "Run another trigger after execution", comboPosX, 130, 220, 20, AOE_FONT_SMALL_TEXT_6);
+	this->AddLabel(popup, &unused, "Difficulty level condition", comboPosX, 170, 150, 20, AOE_FONT_SMALL_TEXT_6);
 
-	this->AddButton(popup, &this->btnGenerate, "Generate", 190, 320, 120, 30);
+	int xSpaceAroundButton = splitScreenXPos - btnWidth;
+	this->AddButton(popup, &this->btnGenerate, "Generate", splitScreenXPos + (xSpaceAroundButton / 2), 200, btnWidth, 30);
+	int remainingHeight = this->vSize - 40 - 250; // button: 30 + 20 for space
+	int sampleBoxSizeY = 300;
+	int sampleBoxPosY = this->vSize - 40 - sampleBoxSizeY;
+	this->AddTextBox(popup, &this->edtSampleTriggerText, NULL, 1000, splitScreenXPos + 20, 250, splitScreenXPos - 40, remainingHeight, false, true, false);
 
 	// Prepare events and actions lists.
 	for (CR_TRIGGERS::TRIGGER_EVENT_TYPES e = CR_TRIGGERS::TRIGGER_EVENT_TYPES::EVENT_NONE;
@@ -68,8 +82,8 @@ void GenNewTriggerPopup::_AddPopupContent() {
 }
 
 void GenNewTriggerPopup::OnBeforeClose(bool isCancel) {
-	/*if (isCancel) { return; }
-	AOE_SetFocus(this->popup, this->btnGenerate);*/
+	AOE_SetFocus(this->popup, this->btnGenerate);
+	if (isCancel) { return; }
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
@@ -100,7 +114,7 @@ bool GenNewTriggerPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender)
 		trgText += CR_TRIGGERS::GenerateActionTriggerString(actId, false);
 		trgText += "\r\n";
 
-		this->edtTriggerText->SetText(trgText.c_str());
+		this->edtSampleTriggerText->SetText(trgText.c_str());
 		return true;
 	}
 	return false;

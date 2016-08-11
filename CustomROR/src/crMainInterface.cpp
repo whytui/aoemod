@@ -465,6 +465,18 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 	}
 	AOE_STRUCTURES::STRUCT_ANY_UI *obj = (AOE_STRUCTURES::STRUCT_ANY_UI *)objAddress;
 
+	AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *uiMainInfo = GetUIMainInfoStruct();
+	if (uiMainInfo && uiMainInfo->previousFocusedObject) {
+		AOE_STRUCTURES::STRUCT_UI_TEXTBOX *prevFocusAsTextbox = (AOE_STRUCTURES::STRUCT_UI_TEXTBOX *)uiMainInfo->previousFocusedObject;
+		if (prevFocusAsTextbox && prevFocusAsTextbox->IsCheckSumValid() && ((unsigned long int)prevFocusAsTextbox != objAddress)) {
+			// Prevent textbox from automatically receiving focus (after a combobox is closed, for example)
+			// This fixes textboxes that sometimes remain active (and not destroyed) when closing popups with ESC or ALT-F4.
+			// This fixes scenario editor's edit text boxes that never lose focus :)
+			// Note that we don't do this if current event's component IS a checkbox
+			uiMainInfo->previousFocusedObject = NULL;
+		}
+	}
+
 	//Custom checkboxes: check/uncheck + manage custom buttons onclick
 	if (this->crCommand->crInfo->HasOpenedCustomGamePopup()) {
 		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;

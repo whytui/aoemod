@@ -127,6 +127,7 @@
     <ClInclude Include="include\AOE_struct_temp_map_build_like_infos.h" />
     <ClInclude Include="include\AOE_struct_terrain_def.h" />
     <ClInclude Include="include\AOE_struct_trade_ai.h" />
+    <ClInclude Include="include\AOE_struct_ui_main_info.h" />
     <ClInclude Include="include\AOE_struct_units.h" />
     <ClInclude Include="include\AOE_struct_unit_actions.h" />
     <ClInclude Include="include\AOE_struct_unit_activity.h" />

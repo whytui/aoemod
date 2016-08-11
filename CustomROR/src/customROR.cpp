@@ -231,7 +231,7 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 		this->ScenarioEditorChangeSelectedTerrain(REG_values);
 		break;
 	case 0x00451DD0:
-		this->OnComboboxTransferCaptureToPReviousObject(REG_values);
+		this->OnComboboxTransferCaptureToPreviousObject(REG_values);
 		break;
 	case 0x004F16BB:
 		this->CheckPopulationCostWithLogistics(REG_values);
@@ -2473,8 +2473,9 @@ void CustomRORInstance::ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_valu
 
 // From 0x451DCA
 // This is executed when a combobox' list loses focus (and hides), ONLY when the combobox has a "previous" capture UI object (unsure about exact role).
-void CustomRORInstance::OnComboboxTransferCaptureToPReviousObject(REG_BACKUP *REG_values) {
-	ror_api_assert(REG_values, REG_values->EDI_val == 0x5830E8);
+void CustomRORInstance::OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *REG_values) {
+	ror_api_assert(REG_values, REG_values->EDI_val == ADDR_VAR_UI_MAIN_INFO);
+	//AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *uiMainInfo = (AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *)REG_values->EDI_val;
 	// EDI + 8 should point to combobox
 	// EDI + C should point to current (main) screen.
 	AOE_STRUCTURES::STRUCT_ANY_UI *objToGiveCapture = (AOE_STRUCTURES::STRUCT_ANY_UI *)REG_values->ESI_val;

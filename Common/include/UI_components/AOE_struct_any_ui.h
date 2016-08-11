@@ -29,6 +29,7 @@ namespace AOE_STRUCTURES
 	// Constructor: 004523F0 for "screen" objects, 00452580 for components
 	// In general, you should not modify these members directly. You are supposed to use methods (few are implemented in this solution).
 	// D8 4A 54 00 for this base (parent) class
+	// [EDX+C4] = uiComponent.setFocus(doFocus)
 #define CHECKSUM_ANY_UI 0x00544AD8
 	class STRUCT_ANY_UI {
 	public:
@@ -50,7 +51,7 @@ namespace AOE_STRUCTURES
 		long int maxPosY; // +30
 		unsigned long int unknown_034;
 		unsigned long int unknown_038; // init = 2
-		STRUCT_ANY_UI *focusedComponent;
+		STRUCT_ANY_UI *focusedComponent; // +3C. Underlying (child) focused component. A parent AND its child can both have focus (?)
 		// 0x40
 		STRUCT_ANY_UI *ptrParentObject; // +40
 		unsigned long int unknown_044;
@@ -69,7 +70,7 @@ namespace AOE_STRUCTURES
 		// 0x70
 		unsigned long int unknown_070;
 		unsigned long int editable; // TO CONFIRM !! seen for text components. What about others ? For button, it is text color when "active"?
-		unsigned long int unknown_078;
+		unsigned long int isFocused; // +78. 1 if control is focused, 0 otherwise. See also +3C. This does not prevent another *child* component from having focus too.
 		unsigned long int unknown_07C; // byte ?
 		// 0x80
 		unsigned long int unknown_080; // Related to "!readonly" ??? But it is NOT "enabled"

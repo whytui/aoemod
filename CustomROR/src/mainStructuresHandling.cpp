@@ -18,6 +18,12 @@ STRUCT_GAME_SETTINGS* GetGameSettingsPtr() {
 }
 
 
+// Returns the UI main information object
+AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *GetUIMainInfoStruct() {
+	return ROR_pUIMainInfo;
+}
+
+
 // Returns a pointer to current active UI (?)
 // ASSERTS that the pointer is non-NULL
 STRUCT_ANY_UI *GetCurrentUIStruct() {
