@@ -223,3 +223,5 @@ Run another trigger before execution
 Run another trigger after execution
 [42114]
 Difficulty level condition
+[42115]
+Please run CustomizeAOE.exe to get full documentation on triggers.

@@ -141,3 +141,4 @@ const static unsigned long int CRLANG_ID_TRG_CHOOSE_ACTION = 42111;
 const static unsigned long int CRLANG_ID_TRG_RUN_BEFORE = 42112;
 const static unsigned long int CRLANG_ID_TRG_RUN_AFTER = 42113;
 const static unsigned long int CRLANG_ID_TRG_DIFF_LEVEL_CONDITION = 42114;
+const static unsigned long int CRLANG_ID_TRG_REFER_TO_CUSTOMIZEAOE_FOR_DOC = 42115;

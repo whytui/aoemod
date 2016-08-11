@@ -225,3 +225,5 @@ Lancer un autre trigger avant celui-ci
 Lancer un autre trigger après celui-ci
 [42114]
 Condition sur le niveau de difficulté
+[42115]
+Lancez CustomizeAOE.exe pour obtenir l'aide complète à propos des triggers.

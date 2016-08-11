@@ -17,7 +17,6 @@ public:
 	// This class needs parameters to create content. Call this after calling OpenPopup().
 	void AddPopupContent(const char *title, const char *initialValue, long int maxLength, char *outputBuffer, bool readOnly);
 	void OnBeforeClose(bool isCancel) override;
-	bool isForTriggers;
 private:
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtText;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblTitle;

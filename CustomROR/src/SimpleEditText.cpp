@@ -10,7 +10,6 @@ SimpleEditTextPopup::SimpleEditTextPopup() {
 
 void SimpleEditTextPopup::_ResetPointers() {
 	__super::_ResetPointers();
-	this->isForTriggers = false;
 	this->edtText = NULL;
 	this->lblTitle = NULL;
 	this->bufferToWrite = NULL;
@@ -35,18 +34,9 @@ void SimpleEditTextPopup::AddPopupContent(const char *title, const char *initial
 void SimpleEditTextPopup::OnBeforeClose(bool isCancel) {
 	if (!isCancel && this->edtText) {
 		AOE_SetFocus(this->edtText->ptrParentObject, NULL); // "validate" typed value.
-		if (this->maxLength > 0) {
-
-			if (this->isForTriggers) {
-				// Use dedicated API to update trigger information
-				this->crCommand->WriteTriggersInGameData(this->edtText->pTypedText);
-			} else {
-				// Standard case: write in provided buffer, if not NULL.
-				if (this->bufferToWrite != NULL) {
-					strcpy_s(this->bufferToWrite, this->maxLength - 1,
-						this->edtText->pTypedText);
-				}
-			}
+		// Write in provided buffer, if not NULL.
+		if ((this->maxLength > 0) && (this->bufferToWrite != NULL)) {
+			strcpy_s(this->bufferToWrite, this->maxLength - 1, this->edtText->pTypedText);
 		}
 	}
 }

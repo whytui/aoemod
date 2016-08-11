@@ -1,4 +1,6 @@
+#pragma once
 #include "../include/EditorScenarioInfoPopup.h"
+#include "../include/GenNewTriggerPopup.h"
 
 
 // Scenario editor main custom popup
@@ -170,13 +172,13 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 	switch (this->popupToOpen) {
 	case SC_INFO_POPUP_TO_OPEN::PTO_TRIGGER:
 		if (!this->nextPopup) {
-			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup();
-			nextPopup->SetCRCommand(this->crCommand);
-			nextPopup->OpenPopup(700, 580, true);
-			nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_EDIT_TRIGGERS, "Edit triggers"),
-				GetTriggerDataPtr(sc_info), 0, NULL, false);
-			nextPopup->isForTriggers = true;
-			this->nextPopup = nextPopup;
+			STRUCT_ANY_UI *currentScreen = AOE_GetCurrentScreen();
+			if (currentScreen) {
+				GenNewTriggerPopup *nextPopup = new GenNewTriggerPopup();
+				nextPopup->SetCRCommand(this->crCommand);
+				nextPopup->OpenPopup(currentScreen->sizeX - 2, currentScreen->sizeY - 2, false);
+				this->nextPopup = nextPopup;
+			}
 		}
 		break;
 	case SC_INFO_POPUP_TO_OPEN::PTO_AI: // AI

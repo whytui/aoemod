@@ -58,16 +58,16 @@ void GenNewTriggerPopup::_AddPopupContent() {
 	this->AddCheckBox(popup, &this->chkBeforeTrigger, chkPosX, 90, 24, 24);
 	this->AddCheckBox(popup, &this->chkAfterTrigger, chkPosX, 130, 24, 24);
 	this->AddCheckBox(popup, &this->chkDiffLevelRestriction, chkPosX, 170, 24, 24);
-	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TRG_RUN_BEFORE, "Run another trigger before execution"), comboPosX, 90, 220, 20, AOE_FONT_SMALL_TEXT_6);
-	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TRG_RUN_AFTER, "Run another trigger after execution"), comboPosX, 130, 220, 20, AOE_FONT_SMALL_TEXT_6);
-	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TRG_DIFF_LEVEL_CONDITION, "Difficulty level condition"), comboPosX, 170, 150, 20, AOE_FONT_SMALL_TEXT_6);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TRG_RUN_BEFORE, "Run another trigger before execution"), comboPosX, 90, 250, 20, AOE_FONT_SMALL_TEXT_6);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TRG_RUN_AFTER, "Run another trigger after execution"), comboPosX, 130, 250, 20, AOE_FONT_SMALL_TEXT_6);
+	this->AddLabel(popup, &unused, localizationHandler.GetTranslation(CRLANG_ID_TRG_DIFF_LEVEL_CONDITION, "Difficulty level condition"), comboPosX, 170, 250, 20, AOE_FONT_SMALL_TEXT_6);
 
 	int xSpaceAroundButton = splitScreenXPos - btnWidth;
 	this->AddButton(popup, &this->btnGenerate, localizationHandler.GetTranslation(CRLANG_ID_GENERATE_TRIGGER_SAMPLE, "Generate"), splitScreenXPos + (xSpaceAroundButton / 2), 200, btnWidth, 30);
 	int remainingHeight = this->vSize - 40 - 250; // button: 30 + 20 for space
 	int sampleBoxSizeY = 300;
 	int sampleBoxPosY = this->vSize - 40 - sampleBoxSizeY;
-	this->AddTextBox(popup, &this->edtSampleTriggerText, NULL, 1000, splitScreenXPos + 20, 250, splitScreenXPos - 40, remainingHeight, false, true, false);
+	this->AddTextBox(popup, &this->edtSampleTriggerText, localizationHandler.GetTranslation(CRLANG_ID_TRG_REFER_TO_CUSTOMIZEAOE_FOR_DOC, "Please run CustomizeAOE.exe to get full documentation on triggers."), 1000, splitScreenXPos + 20, 250, splitScreenXPos - 40, remainingHeight, false, true, false);
 
 	// Prepare events and actions lists.
 	for (CR_TRIGGERS::TRIGGER_EVENT_TYPES e = CR_TRIGGERS::TRIGGER_EVENT_TYPES::EVENT_NONE;
