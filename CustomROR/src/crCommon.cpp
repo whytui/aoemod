@@ -246,16 +246,16 @@ AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int hSize
 
 	// OK button. It is this->customGamePopupButtonVar that identifies the popup (+ the fact it is open)
 	long int btnhPos = (hSize - 0xAC) / 2;
-	long int btnvPos = vSize - 0x26;
-	long int btnHSize = 0xAC;
+	long int btnvPos = vSize - 38;
+	long int btnHSize = 0xAC; // 172
 	if (hasCancelBtn) {
 		btnhPos = (hSize - 0xAC - 20) / 2;
 		btnHSize = 0x50;
 	}
 
-	AOE_AddButton(this->customGamePopupVar, &this->customGamePopupButtonVar, LANG_ID_OK, btnhPos, btnvPos, btnHSize, 0x1E);
+	AOE_AddButton(this->customGamePopupVar, &this->customGamePopupButtonVar, LANG_ID_OK, btnhPos, btnvPos, btnHSize, 30);
 	if (hasCancelBtn) {
-		AOE_AddButton(this->customGamePopupVar, &this->customGamePopupCancelBtnVar, LANG_ID_CANCEL, btnhPos + btnHSize + 0x20, btnvPos, btnHSize, 0x1E);
+		AOE_AddButton(this->customGamePopupVar, &this->customGamePopupCancelBtnVar, LANG_ID_CANCEL, btnhPos + btnHSize + 32, btnvPos, btnHSize, 30);
 	}
 	assert(this->objectsToFree.empty()); // there shouldn't be remaining components from a previous popup.
 

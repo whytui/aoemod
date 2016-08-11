@@ -1,3 +1,5 @@
+#pragma once
+#include <UI_components\AOE_struct_ui_textbox.h>
 #include "../include/SimpleEditText.h"
 
 
@@ -19,7 +21,7 @@ void SimpleEditTextPopup::_ResetPointers() {
 void SimpleEditTextPopup::AddPopupContent(const char *title, const char *initialValue, long int maxLength, char *outputBuffer, bool readOnly) {
 	this->bufferToWrite = outputBuffer;
 	if (maxLength < 1) {
-		maxLength = 0x8000 - 2;
+		maxLength =  AOE_STRUCTURES::STRUCT_UI_TEXTBOX::GetMaxSupportedBufferSize();
 	}
 	this->maxLength = maxLength;
 	int labelSizeX = strlen(title) * 12;

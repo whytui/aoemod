@@ -165,6 +165,7 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid() || (settings->ptrGlobalStruct == NULL)) { return; }
 	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *sc_info = settings->ptrGlobalStruct->scenarioInformation;
+	if (!sc_info || !sc_info->IsCheckSumValid()) { return; }
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return; }
 	switch (this->popupToOpen) {
 	case SC_INFO_POPUP_TO_OPEN::PTO_TRIGGER:
@@ -172,7 +173,8 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup();
 			nextPopup->SetCRCommand(this->crCommand);
 			nextPopup->OpenPopup(700, 580, true);
-			nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_EDIT_TRIGGERS, "Edit triggers"), GetTriggerDataPtr(sc_info), 0, NULL, false);
+			nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_EDIT_TRIGGERS, "Edit triggers"),
+				GetTriggerDataPtr(sc_info), 0, NULL, false);
 			nextPopup->isForTriggers = true;
 			this->nextPopup = nextPopup;
 		}

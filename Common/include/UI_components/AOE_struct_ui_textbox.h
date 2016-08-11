@@ -36,6 +36,11 @@ namespace AOE_STRUCTURES
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_TEXTBOX; }
 
+		// Returns the maximum text length a TextBox can support.
+		static long int GetMaxSupportedBufferSize() {
+			return 0x8000 - 2;
+		}
+
 		void SetText(const char *text) {
 			unsigned long int addr = 0x4623E0;
 			_asm {

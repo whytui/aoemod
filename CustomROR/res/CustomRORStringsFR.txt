@@ -207,3 +207,21 @@ Coller vers (x/y coin bas-gauche)
 Carte en mémoire: taille=
 [42105]
 Contient des unités
+[42106]
+Générer des modèles de trigger
+[42107]
+Sauver
+[42108]
+Recharger
+[42109]
+Generer
+[42110] // trigger samples : choose event
+Choisir un évènement
+[42111] // trigger samples : choose action
+Choisir une action
+[42112]
+Lancer un autre trigger avant celui-ci
+[42113]
+Lancer un autre trigger après celui-ci
+[42114]
+Condition sur le niveau de difficulté

@@ -205,3 +205,21 @@ Paste to position (x/y of bottom-left corner)
 Current buffer: size=
 [42105]
 Contains units
+[42106]
+Generate trigger samples
+[42107]
+Save
+[42108]
+Reload
+[42109]
+Generate
+[42110] // trigger samples : choose event
+Choose an event
+[42111] // trigger samples : choose action
+Choose an action
+[42112]
+Run another trigger before execution
+[42113]
+Run another trigger after execution
+[42114]
+Difficulty level condition

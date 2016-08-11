@@ -27,4 +27,9 @@ private:
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkBeforeTrigger;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAfterTrigger;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkDiffLevelRestriction;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnSaveTriggers;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnReloadTriggers;
+
+	void LoadTriggerTextFromGameInfo();
+	void SaveTriggerTextToGameInfo();
 };
