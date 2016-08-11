@@ -86,6 +86,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\AOE_const_drs.h" />
     <ClInclude Include="include\AOE_const_functional.h" />
     <ClInclude Include="include\AOE_const_global.h" />
     <ClInclude Include="include\AOE_const_internal.h" />

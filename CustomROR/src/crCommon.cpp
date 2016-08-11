@@ -226,7 +226,8 @@ bool CustomRORInfo::HasOpenedCustomDialog() {
 // Fails if another game popup (including options) is already open. Fails if dimensions are too small.
 // Pauses the game if running (only if a popup is successfully opened)
 // Technically, the created (AOE) popup object is based on game options popup.
-AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn) {
+// themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
+AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn, long int themeSlpId) {
 	if (this->HasOpenedCustomGamePopup()) { return false; }
 	if ((hSize < 0xB0) || (vSize < 30)) { return false; }
 	if (!ROR_gameSettings) { return false; }
@@ -235,14 +236,18 @@ AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int hSize
 		(GetGameSettingsPtr()->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING)) {
 		return false;
 	}
-	AOE_STRUCTURES::STRUCT_ANY_UI *currentScreen = GetCurrentUIStruct();
-	if (!currentScreen) { return false; }
+	AOE_STRUCTURES::STRUCT_UI_SCREEN_BASE *currentScreen = (AOE_STRUCTURES::STRUCT_UI_SCREEN_BASE *)GetCurrentUIStruct();
+	assert(currentScreen && currentScreen->IsCheckSumValidForAChildClass());
+	if (!currentScreen || !currentScreen->IsCheckSumValidForAChildClass()) { return false; }
 	// Make sure provided dimensions fit in screen
 	if (currentScreen->sizeX < hSize) { hSize = currentScreen->sizeX - 10; }
 	if (currentScreen->sizeY < vSize) { vSize = currentScreen->sizeY - 10; }
 
 	SetGamePause(true);
-	this->customGamePopupVar = AOE_CreateGameScreenPopup(currentScreen, hSize, vSize);
+	if (themeSlpId < 0) {
+		themeSlpId = currentScreen->themeSlpId;
+	}
+	this->customGamePopupVar = AOE_CreateGameScreenPopup(currentScreen, hSize, vSize, themeSlpId);
 
 	// OK button. It is this->customGamePopupButtonVar that identifies the popup (+ the fact it is open)
 	long int btnhPos = (hSize - 0xAC) / 2;

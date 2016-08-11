@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <UI\AOE_struct_ui_screen_base.h>
 #include <UI_components\AOE_struct_any_ui.h>
 #include <UI_components\AOE_struct_ui_button.h>
 #include <UI_components\AOE_struct_ui_label.h>
@@ -20,13 +21,11 @@
 namespace AOE_STRUCTURES
 {
 
-	// Size 0x948. Constructor 0x48FC40
+	// Size 0x948. Constructor 0x48FC40. Inherits from 9C 57 54 00, then screen_base
 	// This is the parent UI object of in-game screen.
-#define CHECKSUM_UI_SCENARIO_EDITOR_MAIN 0x00547360
-	class STRUCT_UI_SCENARIO_EDITOR_MAIN : public STRUCT_ANY_UI { // 60 73 54 00
+	class STRUCT_UI_SCENARIO_EDITOR_MAIN : public STRUCT_UI_SCREEN_BASE { // 60 73 54 00
 	public:
-		long int hWnd; // TO CONFIRM
-		char unknown_0F8[0x4A8 - 0x0F8];
+		char unknown_478[0x4A8 - 0x478];
 		long int currentMapGenerationChoice; // +4A8. 1=empty, 2=random, 3=from seed
 		long int unknown_04AC; // default 2
 		unsigned long int unknown_04B0;
@@ -117,7 +116,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_940;
 		unsigned long int unknown_944;
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MAIN; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MAIN; }
 	};
 	static_assert(sizeof(STRUCT_UI_SCENARIO_EDITOR_MAIN) == 0x948, "STRUCT_UI_SCENARIO_EDITOR_MAIN size");
 

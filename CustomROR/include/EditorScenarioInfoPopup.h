@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <string.h>
 #include <mystrings.h>
+#include <AOE_const_drs.h>
 #include "CustomPopupBase.h"
 #include "SimpleEditText.h"
 #include "InputBox.h"

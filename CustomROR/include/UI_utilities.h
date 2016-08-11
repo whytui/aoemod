@@ -127,7 +127,8 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, lo
 
 // Create a popup from game screen (from Options original model)
 // Must be called when game screen is active (no other popup)
-static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *parent, long int hSize, long int vSize) {
+static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *parent, long int hSize, long int vSize,
+	long int backgroundSlpId) {
 	if (!parent) { return NULL; }
 	char dlgName[] = "dlg6_3";
 	long int arg1;
@@ -148,7 +149,8 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(AOE_STRUCTURES::
 		MOV ESI, parent
 		MOV EAX, DS:[ESI+0x20]
 		MOV arg1, EAX
-		MOV EAX, DS:[ESI+0x444]
+		//MOV EAX, DS:[ESI+0x444]
+		MOV EAX, backgroundSlpId
 		MOV arg6, EAX
 		// Init
 		MOV ECX, newObj

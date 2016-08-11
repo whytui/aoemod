@@ -176,7 +176,7 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 			if (currentScreen) {
 				GenNewTriggerPopup *nextPopup = new GenNewTriggerPopup();
 				nextPopup->SetCRCommand(this->crCommand);
-				nextPopup->OpenPopup(currentScreen->sizeX - 2, currentScreen->sizeY - 2, false);
+				nextPopup->OpenPopup(currentScreen->sizeX - 2, currentScreen->sizeY - 2, false, AOE_CONST_DRS::LightOrangeTheme);
 				this->nextPopup = nextPopup;
 			}
 		}

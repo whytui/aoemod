@@ -138,12 +138,15 @@ public:
 	// Returns true if a custom dialog is opened (only for dialogs, not popups !)
 	bool HasOpenedCustomDialog();
 
-	// Opens a custom popup window in game screen/editor. The created popup window is empty !
+	// Opens a custom popup window in game screen/editor. The created popup window only contains a "OK" button.
 	// You have to add UI elements afterwards (use GetCustomGamePopup() to get parent object=popup).
 	// Return popup UI object if OK, NULL if failed
 	// Fails if another game popup (including options) is already open. Fails if dimensions are too small.
 	// Pauses the game if running (only if a popup is successfully opened)
-	AOE_STRUCTURES::STRUCT_ANY_UI *OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn = false);
+	// Technically, the created (AOE) popup object is based on game options popup.
+	// themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
+	AOE_STRUCTURES::STRUCT_ANY_UI *OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn = false,
+		long int themeSlpId = -1);
 
 	// Use it to list all UI components (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
 	// The method is protected against duplicates, you can safely call it more than once.

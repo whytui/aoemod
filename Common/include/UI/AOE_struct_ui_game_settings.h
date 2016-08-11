@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <UI\AOE_struct_ui_screen_base.h>
 #include <UI_components\AOE_struct_any_ui.h>
 #include <UI_components\AOE_struct_ui_button.h>
 
@@ -17,11 +18,9 @@ namespace AOE_STRUCTURES
 	// Size = 0x560. 10 78 54 00. Parent=9C 57 54 00 then BC 4B 54 00.
 	// The screen before starting game to choose map type, etc ("advanced" options like map size, etc).
 	// Constructor:0x49BF40
-#define CHECKSUM_UI_GAME_SETTINGS 0x00547810
-	class STRUCT_UI_GAME_SETTINGS : public STRUCT_ANY_UI {
+	class STRUCT_UI_GAME_SETTINGS : public STRUCT_UI_SCREEN_BASE {
 	public:
-		char unknown_0F4[0x478 - 0x0F4];
-		STRUCT_ANY_UI *lblScenarioSettings;
+		STRUCT_ANY_UI *lblScenarioSettings; // +478
 		unsigned long int unknown_47C;
 		// 0x480
 		STRUCT_ANY_UI *lblMapSize;
@@ -89,7 +88,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_558;
 		unsigned long int unknown_55C;
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_GAME_SETTINGS; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_GAME_SETTINGS; }
 	};
 	static_assert(sizeof(STRUCT_UI_GAME_SETTINGS) == 0x560, "STRUCT_UI_GAME_SETTINGS size");
 

@@ -112,14 +112,15 @@ bool CustomPopupBase::AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 
 // Call this to open a new popup (=>this)
-AOE_STRUCTURES::STRUCT_ANY_UI *CustomPopupBase::OpenPopup(long int hSize, long int vSize, bool withCancelBtn) {
+// themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
+AOE_STRUCTURES::STRUCT_ANY_UI *CustomPopupBase::OpenPopup(long int hSize, long int vSize, bool withCancelBtn, long int themeSlpId) {
 	if (!this->crInfo) { return NULL; }
 	this->hSize = hSize;
 	this->vSize = vSize;
 	if (this->crInfo->HasOpenedCustomGamePopup()) {
 		return NULL;
 	}
-	this->popup = this->crInfo->OpenCustomGamePopup(hSize, vSize, withCancelBtn);
+	this->popup = this->crInfo->OpenCustomGamePopup(hSize, vSize, withCancelBtn, themeSlpId);
 	if (this->popup != NULL) {
 		this->AddPopupContent();
 	}

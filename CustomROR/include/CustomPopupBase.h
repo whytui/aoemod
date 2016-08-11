@@ -34,7 +34,8 @@ public:
 	// Reset all internal pointers (base class + child classes)
 	void ResetPointers();
 	// Call this to open a new popup (=>this)
-	AOE_STRUCTURES::STRUCT_ANY_UI *OpenPopup(long int hSize, long int vSize, bool withCancelBtn);
+	// themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
+	AOE_STRUCTURES::STRUCT_ANY_UI *OpenPopup(long int hSize, long int vSize, bool withCancelBtn, long int themeSlpId = -1);
 	// Call this to close the popup. This will handle pre/post close events.
 	void ClosePopup(bool isCancel);
 	// Indicates this popup object has been closed and can be deleted safely.

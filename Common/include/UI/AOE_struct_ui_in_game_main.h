@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <UI\AOE_struct_ui_screen_base.h>
 #include <UI_components\AOE_struct_any_ui.h>
 #include <UI_components\AOE_struct_ui_button_with_number.h>
 #include <UI\AOE_struct_ui_playing_zone.h>
@@ -17,8 +18,7 @@
 */
 namespace AOE_STRUCTURES
 {
-
-
+	
 	// Size=0x28. No constructor (this is a temporary struct). See init in 4F0EEC for example.
 	class STRUCT_UI_UNIT_BUTTON_INFO {
 	public:
@@ -42,15 +42,12 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_UI_UNIT_BUTTON_INFO) == 0x28, "STRUCT_UI_UNIT_BUTTON_INFO size");
 
 
-	// Size 0x7C8
-	// Constructor 0x47D440
+	// Size 0x7C8 - Constructor = 0x47D440. parent object = 9C 57 54 00, common with scenario editor
 	// This is the parent UI object of in-game screen.
 	// Pointed by 005830F4
-#define CHECKSUM_UI_IN_GAME_MAIN 0x0054679C
-	class STRUCT_UI_IN_GAME_MAIN : public STRUCT_ANY_UI { // "Game Screen"
+	class STRUCT_UI_IN_GAME_MAIN : public STRUCT_UI_SCREEN_BASE { // "Game Screen"
 	public:
-		long int hWnd; // TO CONFIRM
-		char unknown_0F8[0x48C - 0x0F8];
+		char unknown_478[0x48C - 0x478];
 		STRUCT_SLP_INFO *iconsForUnitCommands; // +48C. Pointer to SLP data... Cf SLP 50721
 		STRUCT_SLP_INFO *iconsForResearches; // +490. Pointer to SLP data... Cf SLP 50729
 		STRUCT_SLP_INFO *iconsForTrainUnits; // +494. Pointer to SLP data... Cf SLP 50730.
@@ -113,7 +110,7 @@ namespace AOE_STRUCTURES
 		char unknown_7A4[0x7C4 - 0x7A4];
 		long int panelSelectedUnitId; // +7C4. Selected unit ID (in unit details zone)
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_IN_GAME_MAIN; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_IN_GAME_MAIN; }
 	};
 	static_assert(sizeof(STRUCT_UI_IN_GAME_MAIN) == 0x7C8, "STRUCT_UI_IN_GAME_MAIN size");
 
