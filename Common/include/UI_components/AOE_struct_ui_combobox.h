@@ -20,7 +20,7 @@ namespace AOE_STRUCTURES
 	// Size = 0x144 - 50 50 54 00. Direct parent is STRUCT_ANY_UI
 	// Constructor = 0x460A00. Comboboxes are not intended to be used in popups and don't work well in native ROR code.
 	// 461DA0 : addEntry(text, index) ?
-	// 461D50 : setSelectedRow?("id"?)
+	// 461D50 : setSelectedIndex
 	// 0x4542C0 set hint dll string(dllid, -1) ?
 #define CHECKSUM_UI_COMBOBOX 0x00545050
 	class STRUCT_UI_COMBOBOX : public STRUCT_ANY_UI {
@@ -51,22 +51,31 @@ namespace AOE_STRUCTURES
 		// 0x140
 		long int drawBorderAroundText; // init=1. Set in 0x461180 (do not update directly)
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_COMBOBOX; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_COMBOBOX; }
 		// Returns index (0 to n-1) of selected entry
-		long int GetSelectedIndex() {
+		long int GetSelectedIndex() const {
 			if (!this->IsCheckSumValid()) { return -1; }
+			const unsigned long int addr = 0x461E50;
 			long int tmp = -1;
 			_asm {
 				MOV ECX, this;
-				MOV EAX, 0x461E50;
-				CALL EAX;
+				CALL addr;
 				MOV tmp, EAX;
 			}
 			return tmp;
 		}
+		// Set selected index. Argument is row index (not element "custom" ID)
+		void SetSelectedIndex(long int index) {
+			const unsigned long int addr = 0x461D50;
+			_asm {
+				MOV ECX, this;
+				PUSH index;
+				CALL addr;
+			}
+		}
 		// Get index in combobox (0 to n-1) of element that matches "optionalId"=elementId
 		// Returns -1 if elementId was not found (AOE method's behaviour)
-		long int GetIndexFromElementId(long int elementId) {
+		long int GetIndexFromElementId(long int elementId) const {
 			unsigned long int addr = 0x461E70;
 			long int res = -1;
 			_asm {

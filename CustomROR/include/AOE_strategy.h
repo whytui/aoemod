@@ -56,7 +56,7 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_BUILD_AI
 // Tries to add an existing unit to player's strategy (cf buildAI pointer)
 // Returns true if a matching (not in progress/done) strategy element has been found and updated (set to done + associate with unitId)
 // Note: unit may NOT belong to same player because it is used in successful conversion code, before unit is actually transfered to new player.
-bool UpdateStrategyWithExistingUnit(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_STRUCTURES::STRUCT_UNIT *unit);
+bool UpdateStrategyWithExistingUnit(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
 // Calls RoR original code to add an element in strategy (AFTER the element in positionToInsert).
 // Consecutive inserts after a same element are reversed (of course) !

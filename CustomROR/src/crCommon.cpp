@@ -1600,8 +1600,8 @@ bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int te
 
 
 // Calls AOE's method to change a unit owner. Warning, this has bugs, see crCommand.OnUnitChangeOwner_fixes to call missing treatments.
-void AOE_ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
-	if (!targetUnit || !actorPlayer || !targetUnit->IsCheckSumValid() || !actorPlayer->IsCheckSumValid()) {
+void AOE_ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
+	if (!targetUnit || !actorPlayer || !targetUnit->IsCheckSumValidForAUnitClass() || !actorPlayer->IsCheckSumValid()) {
 		return;
 	}
 	_asm {

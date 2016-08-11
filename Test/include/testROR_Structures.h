@@ -2,6 +2,7 @@
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_strategy_element.h>
 #include <AOE_struct_main_ai.h>
+#include <AOE_struct_units.h>
 #include <UI_components\AOE_struct_ui_textbox.h>
 #include <UI\AOE_struct_ui_scenario_editor_main.h>
 #include <UI\AOE_struct_ui_unit_info_zone.h>

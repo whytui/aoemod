@@ -433,7 +433,7 @@ bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int t
 bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int tech_id);
 
 // Calls AOE's method to change a unit owner. Warning, this has bugs, see customROR / crCommand.
-void AOE_ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer);
+void AOE_ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer);
 
 // Call AOE's Notify event method. Warning, the parameters can have different types.
 // Use the overload with pointers to make sure you don't have cast issues.

@@ -2859,9 +2859,9 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 // This is called BEFORE the actual unit owner change process is called. (this is called at the very beginning of unit conversion process)
 // targetUnit is the "victim" (unit that changes owner), actorPlayer is the new owner (player)
 // Technical note: in ROR, unit.changeOwner(newplayer) is [EDX+0x44] call.
-void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
+void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
 	if (!targetUnit || !actorPlayer) { return; }
-	assert(targetUnit->IsCheckSumValid());
+	assert(targetUnit->IsCheckSumValidForAUnitClass());
 	assert(actorPlayer->IsCheckSumValid());
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = targetUnit->ptrStructPlayer; // The victim (if unit has been converted)
 	assert(targetPlayer != NULL);
@@ -2923,9 +2923,9 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT *targ
 // Change a unit's owner, for example like a conversion.
 // Capturing an artefact does NOT call this.
 // I don't see any other possible event than CST_ATI_CONVERT. Use CST_GET_INVALID to trigger NO notification.
-bool CustomRORCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer, 
+bool CustomRORCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer,
 	AOE_CONST_INTERNAL::GAME_EVENT_TYPES notifyEvent) {
-	if (!targetUnit || !actorPlayer || !targetUnit->IsCheckSumValid() || !actorPlayer->IsCheckSumValid()) {
+	if (!targetUnit || !actorPlayer || !targetUnit->IsCheckSumValidForAUnitClass() || !actorPlayer->IsCheckSumValid()) {
 		return false;
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *oldOwner = targetUnit->ptrStructPlayer;
@@ -6322,8 +6322,8 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		float posY = trigger->GetParameterValue(CR_TRIGGERS::KW_POS_Y, (float)-1);
 		long int newOwnerId = trigger->GetParameterValue(CR_TRIGGERS::KW_OWNER_PLAYER_ID, -1);
 
-		AOE_STRUCTURES::STRUCT_UNIT *targetUnit = GetUnitStruct(actionUnitId);
-		if (!targetUnit || !targetUnit->IsCheckSumValid()) { return; }
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(actionUnitId);
+		if (!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) { return; }
 		if (unitHP_set >= 0) {
 			targetUnit->remainingHitPoints = unitHP_set;
 		}
@@ -6336,11 +6336,11 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if (resourceAmount_add != 0) {
 			targetUnit->resourceValue += resourceAmount_add;
 		}
-		if ((graphicsAge >= 0) && (graphicsAge <= 2)) { // TO DO (does not work)
-			targetUnit->currentGraphicsAge = graphicsAge;
-		}
-		if ((orientation >= 0) && (orientation <= 7)) { // Not sure about valid values
-			targetUnit->orientation = orientation;
+		//if ((graphicsAge >= 0) && (graphicsAge <= 2)) { // TO DO (does not work) => use orientation ?
+			//targetUnit->currentGraphicsDamageIndex = graphicsAge;
+		//}
+		if ((orientation >= 0) && (orientation <= 7)) {
+			targetUnit->orientationIndex = orientation;
 		}
 		if ((posX >= 0) && (posY >= 0)) { // This has important side effect, not recommended !!! TO DO.
 			AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;

@@ -236,11 +236,11 @@ public:
 	// This should be called before the actual unit owner change process is called.
 	// targetUnit is the "victim" (unit that changes owner), actorPlayer is the new owner (player)
 	// Technical note: in ROR, unit.changeOwner(newplayer) is [EDX+0x44] call.
-	void OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer);
+	void OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer);
 
 	// Change a unit's owner, for example like a conversion.
 	// I don't see any other possible event than CST_ATI_CONVERT. Use CST_GET_INVALID to trigger NO notification.
-	bool ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer, AOE_CONST_INTERNAL::GAME_EVENT_TYPES notifyEvent = AOE_CONST_INTERNAL::CST_GET_INVALID);
+	bool ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer, AOE_CONST_INTERNAL::GAME_EVENT_TYPES notifyEvent = AOE_CONST_INTERNAL::CST_GET_INVALID);
 
 	// Custom Fixes/features on player.addUnit calls.
 	void OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable);

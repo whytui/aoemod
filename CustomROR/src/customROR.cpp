@@ -605,7 +605,7 @@ void CustomRORInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, actorPlayer->IsCheckSumValid());
 
 	// Manage functional impacts / fixes about unit conversion
-	this->crCommand.OnUnitChangeOwner_fixes(targetUnit, actorPlayer);
+	this->crCommand.OnUnitChangeOwner_fixes((AOE_STRUCTURES::STRUCT_UNIT_BASE*)targetUnit, actorPlayer);
 
 	// Conversions Monitoring:
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = targetUnit->ptrStructPlayer; // The victim (if unit has been converted)

@@ -140,10 +140,10 @@ namespace AOE_STRUCTURES {
 		char unknown_086_hasTarget; // ?
 		char unknown_087;
 
-		bool IsCheckSumValid() { return (this->checksum == 0x00547DA8); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_EYE_CANDY); }
+		bool IsCheckSumValid() const { return (this->checksum == 0x00547DA8); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_EYE_CANDY); }
 		// Returns true if checksum is valid for this class OR a child class
-		bool IsCheckSumValidForAUnitClass() {
+		bool IsCheckSumValidForAUnitClass() const {
 			return (this->checksum == 0x00547DA8) || // eye candy (including cliffs...)
 				(this->checksum == 0x00542E14) || // Flag
 				(this->checksum == 0x005441BC) || // Doppleganger
@@ -156,26 +156,26 @@ namespace AOE_STRUCTURES {
 				(this->checksum == 0x00548474) // Tree
 				;
 		}
-		STRUCT_UNITDEF_BASE *GetUnitDefinition() { return (STRUCT_UNITDEF_BASE *) this->ptrStructDefUnit; }
+		STRUCT_UNITDEF_BASE *GetUnitDefinition() const { return (STRUCT_UNITDEF_BASE *) this->ptrStructDefUnit; }
 		// Returns true if the unit definition is a flag (20) or a child class (all but eye candy and trees)
-		bool DerivesFromFlag() {
+		bool DerivesFromFlag() const {
 			return (this->IsCheckSumValidForAUnitClass() && (this->checksum != 0x00547DA8) && (this->checksum != 0x00548474)); // all but 10 and 90
 		}
 		// Returns true if the unit definition is dead/fish (30) or a child class
-		bool DerivesFromDead_fish() {
+		bool DerivesFromDead_fish() const {
 			return this->DerivesFromBird() || (this->checksum == 0x00544838);
 		}
 		// Returns true if the unit definition is a bird (40) or a child class
-		bool DerivesFromBird() {
+		bool DerivesFromBird() const {
 			return this->DerivesFromType50() || (this->checksum == 0x00542748);
 		}
 		// Returns true if the unit definition is a living unit or a child class (building)
-		bool DerivesFromLiving() {
+		bool DerivesFromLiving() const {
 			return (this->checksum == 0x0054820C) || // living
 				(this->checksum == 0x00547FA0); // Building
 		}
 		// Returns true if the unit definition is type50 or one of its child classes (projectile, living/building).
-		bool DerivesFromType50() {
+		bool DerivesFromType50() const {
 			return (this->checksum == 0x0054324C) || // Type50
 				(this->checksum == 0x005445E8) || // Projectiles
 				(this->checksum == 0x0054820C) || // living

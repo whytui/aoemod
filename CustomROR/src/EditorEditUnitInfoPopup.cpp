@@ -9,6 +9,7 @@ EditorEditUnitInfoPopup::EditorEditUnitInfoPopup() {
 void EditorEditUnitInfoPopup::_ResetPointers() {
 	__super::_ResetPointers();
 	this->unit = NULL;
+	this->allSelectedUnits.clear();
 	this->edtStatus = NULL;
 	this->chkbox_s0 = NULL;
 	this->chkbox_s2 = NULL;
@@ -16,6 +17,7 @@ void EditorEditUnitInfoPopup::_ResetPointers() {
 	this->lbl_s0 = NULL;
 	this->lbl_s2 = NULL;
 	this->lbl_s4 = NULL;
+	this->cbxPlayerOwner = NULL;
 }
 
 
@@ -23,15 +25,26 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	if (this->IsClosed() || (this->popup == NULL)) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
-	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(global->humanPlayerId);
-	if (!player || (player->selectedUnitCount <= 0)) { return; }
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = this->crInfo->GetMainSelectedUnit(player);
+	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetPlayerStruct(global->humanPlayerId);
+	if (!controlledPlayer || !controlledPlayer->IsCheckSumValid() || (controlledPlayer->selectedUnitCount <= 0)) { return; }
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = this->crInfo->GetMainSelectedUnit(controlledPlayer);
 	if (!unit || (!unit->IsCheckSumValidForAUnitClass())) { return; }
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->crInfo->GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+	for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *curUnit = selectedUnits[i];
+		if (curUnit && curUnit->IsCheckSumValidForAUnitClass()) {
+			this->allSelectedUnits.insert(curUnit);
+		}
+	}
+	AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = unit->ptrStructPlayer;
+	if (!unitPlayer || !unitPlayer->IsCheckSumValid()) { return; }
 	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 	if (!unitDef) { return; }
 	this->unit = unit;
+	this->initialOwner = unitPlayer->playerId;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblUnusedPtr = NULL;
-	this->AddLabel(this->popup, &lblUnusedPtr, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TITLE, "Edit a unit"), 200, 10, 120, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddLabel(this->popup, &lblUnusedPtr, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TITLE, "Edit a unit"),
+		180, 10, 200, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	char *name = "";
 	short int DATID = -1;
 	if (unitDef->ptrUnitName) {
@@ -80,6 +93,24 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 		this->chkbox_s0->readOnly = 1;
 		AOE_RefreshUIObject(this->chkbox_s0);
 	}
+	// Player that owns the unit
+	this->AddComboBox(this->popup, &this->cbxPlayerOwner, 20, 20, 120, 20, 120, 20);
+	if (this->cbxPlayerOwner) {
+		this->cbxPlayerOwner->Clear();
+		AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+		long int totalPlayerCount = global->playerTotalCount;
+		if (se && se->IsCheckSumValid()) {
+			totalPlayerCount = se->pl_cbb_playerCount->GetSelectedIndex() + 2; // +2 because: add gaia AND index starts at 0, not 1.
+		}
+		assert(totalPlayerCount < 10);
+		if (totalPlayerCount >= 10) { totalPlayerCount = 9; }
+		char bufNumber[] = "Player  ";
+		for (char i = 0; i < (char)totalPlayerCount; i++) {
+			bufNumber[7] = '0' + i;
+			AOE_AddEntryInCombo(this->cbxPlayerOwner, i, bufNumber);
+		}
+		this->cbxPlayerOwner->SetSelectedIndex(this->initialOwner);
+	}
 }
 
 
@@ -105,19 +136,32 @@ bool EditorEditUnitInfoPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *se
 
 void EditorEditUnitInfoPopup::OnBeforeClose(bool isCancel) {
 	if (isCancel) { return; }
-	// Note: setting shortcutNumber can show the unit's status, but only works for player #1. See 4A78D9: disable jmp to allow always displaying shortcut
+	// Note: setting shortcutNumber can show the unit's status, but only works for player #1. See 0x4A78D9: disable jmp to allow always displaying shortcut
 	if (this->chkbox_s0 && this->chkbox_s2 && this->chkbox_s4) {
-		if (this->chkbox_s0 && (this->chkbox_s0->checked)) {
-			this->unit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_NOT_BUILT;
-			this->unit->shortcutNumber = 1;
+		for each (auto curUnit in this->allSelectedUnits)
+		{
+			if (this->chkbox_s0 && (this->chkbox_s0->checked)) {
+				curUnit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_NOT_BUILT;
+				curUnit->shortcutNumber = 1;
+			}
+			if (this->chkbox_s2 && (this->chkbox_s2->checked)) {
+				curUnit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY;
+				curUnit->shortcutNumber = 0;
+			}
+			if (this->chkbox_s4 && (this->chkbox_s4->checked)) {
+				curUnit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_DYING_ANIMATION;
+				curUnit->shortcutNumber = 3;
+			}
 		}
-		if (this->chkbox_s2 && (this->chkbox_s2->checked)) {
-			this->unit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY;
-			this->unit->shortcutNumber = 0;
-		}
-		if (this->chkbox_s4 && (this->chkbox_s4->checked)) {
-			this->unit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_DYING_ANIMATION;
-			this->unit->shortcutNumber = 3;
+	}
+	// Change owner
+	if (this->cbxPlayerOwner) {
+		int newOwner = this->cbxPlayerOwner->GetSelectedIndex();
+		if (newOwner != this->initialOwner) {
+			for each (auto curUnit in this->allSelectedUnits)
+			{
+				AOE_ChangeUnitOwner(curUnit, GetPlayerStruct(newOwner));
+			}
 		}
 	}
 	this->ResetPointers();

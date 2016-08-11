@@ -337,11 +337,11 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_BUILD_AI
 // Tries to add an existing unit to player's strategy (cf buildAI pointer)
 // Returns true if a matching (not in progress/done) strategy element has been found and updated (set to done + associate with unitId)
 // Note: unit may NOT belong to same player because it is used in successful conversion code, before unit is actually transfered to new player.
-bool UpdateStrategyWithExistingUnit(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_STRUCTURES::STRUCT_UNIT *unit) {
+bool UpdateStrategyWithExistingUnit(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
 	if ((buildAI == NULL) || (unit == NULL)) { return false; }
 	assert(buildAI->IsCheckSumValid());
-	assert(unit->IsCheckSumValid());
-	if (!(buildAI->IsCheckSumValid()) || (!unit->IsCheckSumValid())) { return false; }
+	assert(unit->IsCheckSumValidForAUnitClass());
+	if (!(buildAI->IsCheckSumValid()) || (!unit->IsCheckSumValidForAUnitClass())) { return false; }
 
 	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 	if (!unitDef) { return false; }
