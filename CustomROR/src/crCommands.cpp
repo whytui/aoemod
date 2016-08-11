@@ -4195,11 +4195,11 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 	assert(sizeY > 0); assert(sizeY <= 0xFF);
 	if ((sizeX <= 0) || (sizeY <= 0) || (sizeX > 0xFF) || (sizeY > 0xFF)) { return false; }
 
-	long int mapType = AOE_GetComboSelectedIndex(scEditor->map_cbb_mapType);
+	long int mapType = scEditor->map_cbb_mapType->GetSelectedIndex();
 	char *mapSeedText = AOE_GetEditText(scEditor->map_edt_seed);
 	long int terrainId = 0;
 	long int mapSeed = -1; // Default = -1 (= random)
-	long int playerCount = AOE_GetComboSelectedIndex(scEditor->pl_cbb_playerCount) + 1;
+	long int playerCount = (scEditor->pl_cbb_playerCount->GetSelectedIndex()) + 1;
 
 	if ((scEditor->currentMapGenerationChoice < 1) || (scEditor->currentMapGenerationChoice > 3)) {
 		return false;
@@ -4215,7 +4215,8 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 
 	// Empty
 	if (scEditor->currentMapGenerationChoice == 1) {
-		switch (AOE_GetComboSelectedIndex(scEditor->map_cbb_defaultTerrain)) {
+		assert(scEditor->map_cbb_defaultTerrain);
+		switch (scEditor->map_cbb_defaultTerrain->GetSelectedIndex()) {
 		case 0:
 			terrainId = 0; // grass
 			break;
