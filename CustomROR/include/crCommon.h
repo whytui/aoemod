@@ -188,7 +188,7 @@ public:
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *GetMainSelectedUnit(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 	// Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
-	AOE_STRUCTURES::STRUCT_UNIT **GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE **GetRelevantSelectedUnitsBasePointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 	// Fast-computes the integer distance for X and Y delta values (sqrt(X^2 + Y^2) as an integer).

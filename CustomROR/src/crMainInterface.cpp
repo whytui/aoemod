@@ -182,11 +182,11 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		static char buffer[1024] = "\0";
 		char *posInBuf = buffer;
 		AOE_STRUCTURES::STRUCT_PLAYER *player = NULL;
-		AOE_STRUCTURES::STRUCT_UNIT *selectedUnit = NULL;
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = NULL;
 		if (global) {
 			player = GetPlayerStruct(global->humanPlayerId);
 		}
-		AOE_STRUCTURES::STRUCT_UNIT **unitArray = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(player);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(player);
 		if (unitArray) {
 			selectedUnit = unitArray[0];
 		}
@@ -232,8 +232,8 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 				int aa = 1 + 1;
 			}
-
 		}
+		AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *selectedUnitT50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)selectedUnit;
 		AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameScreen = GetGameSettingsPtr()->ptrGameUIStruct;
 		if (IsGameRunning()) {
 			// During Game
@@ -244,10 +244,10 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			if (selectedUnit) {
 				long int actionTargetUnitId = -1;
 				unsigned long int addraction = -1;
-				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = selectedUnit->GetUnitDefBase();
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = selectedUnit->GetUnitDefinition();
 				AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO *ainfo = NULL;
-				if ((unitDefBase->unitType >= GLOBAL_UNIT_TYPES::GUT_TYPE50) && (unitDefBase->unitType <= GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
-					ainfo = selectedUnit->ptrActionInformation;
+				if (selectedUnitT50 && selectedUnitT50->DerivesFromType50()) {
+					ainfo = selectedUnitT50->ptrActionInformation;
 				}
 				if (ainfo && (ainfo->ptrActionLink) && (ainfo->ptrActionLink->actionStruct)) {
 					actionTargetUnitId = ainfo->ptrActionLink->actionStruct->targetUnitId;
@@ -322,12 +322,12 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			std::string ss = "";
 			AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 			assert(humanPlayer && humanPlayer->IsCheckSumValid());
-			if (selectedUnit && selectedUnit->IsCheckSumValid() && (player->playerId == global->humanPlayerId)) {
-				if (selectedUnit->ptrActionInformation && selectedUnit->ptrActionInformation->ptrActionLink &&
-					selectedUnit->ptrActionInformation->ptrActionLink->actionStruct &&
-					selectedUnit->ptrActionInformation->ptrActionLink->actionStruct->unsure_resourceValue) {
+			if (selectedUnitT50 && selectedUnitT50->DerivesFromType50() && (player->playerId == global->humanPlayerId)) {
+				if (selectedUnitT50->ptrActionInformation && selectedUnitT50->ptrActionInformation->ptrActionLink &&
+					selectedUnitT50->ptrActionInformation->ptrActionLink->actionStruct &&
+					selectedUnitT50->ptrActionInformation->ptrActionLink->actionStruct->unsure_resourceValue) {
 				}
-				long int u = selectedUnit->unitInstanceId;
+				long int u = selectedUnitT50->unitInstanceId;
 				long int t = -1;
 				//CreateCmd_RightClick(u, t, 40, 20);
 				//return false;
@@ -602,13 +602,13 @@ bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup() {
 	if (humanPlayer->selectedUnitCount <= 0) {
 		return false;
 	}
-	AOE_STRUCTURES::STRUCT_UNIT **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(humanPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(humanPlayer);
 	assert(selectedUnits != NULL);
-	AOE_STRUCTURES::STRUCT_UNIT *selectedUnit = selectedUnits[0];
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = selectedUnits[0];
 	if (!selectedUnit || !selectedUnit->IsCheckSumValid()) {
 		return false;
 	}
-	if (!this->OpenInGameUnitPropertiesPopup(selectedUnit)) {
+	if (!this->OpenInGameUnitPropertiesPopup((AOE_STRUCTURES::STRUCT_UNIT*) selectedUnit)) {
 		return false;
 	}
 	
@@ -702,7 +702,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 	if (!this->crCommand->crInfo->configInfo.enableSpawnUnitsMoveToLocation) { return false; }
 	// Get relevant selected units array
 	bool result = false;
-	AOE_STRUCTURES::STRUCT_UNIT **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(controlledPlayer);
 
 	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO posInfos;
 	long int callResult;
@@ -732,17 +732,17 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 	bool hasSelectedBuildings = false;
 	bool hasSelectedLivings = false;
 	for (unsigned long int index = 0; index < unitCount; index++) {
-		AOE_STRUCTURES::STRUCT_UNIT *unit = selectedUnits[index];
-		if (unit && unit->IsCheckSumValid() && (unit->ptrStructPlayer == controlledPlayer)) {
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = selectedUnits[index];
+		if (unit && unit->IsCheckSumValidForAUnitClass() && (unit->ptrStructPlayer == controlledPlayer)) {
 			hasSelectedBuildings = hasSelectedBuildings || (unit->unitType == GUT_BUILDING);
 			hasSelectedLivings = hasSelectedLivings || (unit->unitType == GUT_LIVING_UNIT);
 		}
 	}
 
 	for (unsigned long int index = 0; index < unitCount; index++) {
-		AOE_STRUCTURES::STRUCT_UNIT *unit = selectedUnits[index];
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = selectedUnits[index];
 		// Make sure unit is valid, from MY player
-		if (unit && unit->IsCheckSumValid() && (unit->ptrStructPlayer == controlledPlayer)) {
+		if (unit && unit->IsCheckSumValidForAUnitClass() && (unit->ptrStructPlayer == controlledPlayer)) {
 			if (unit->unitType == GUT_BUILDING) {
 				AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 				assert(unitDef != NULL);

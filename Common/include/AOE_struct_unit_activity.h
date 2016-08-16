@@ -15,7 +15,7 @@
 namespace AOE_STRUCTURES
 {
 	// External dependencies
-	class STRUCT_UNIT;
+	class STRUCT_UNIT_BASE;
 
 
 	// Not very well known. A "potential" target for a unit ? See 414B00

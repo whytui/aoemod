@@ -219,7 +219,7 @@ namespace AOE_STRUCTURES {
 		// 0x130
 		short int unknown_130;
 		short int unknown_132;
-		STRUCT_UNIT *selectedStructUnitTable[26]; // +0x134 is first selected unit's ptr. Last=First?. Only relevant if "selected units" features is NOT installed. See GetRelevantSelectedUnitsPointer(...).
+		STRUCT_UNIT_BASE *selectedStructUnitTable[26]; // +0x134 is first selected unit's ptr. Last=First?. Only relevant if "selected units" features is NOT installed. See GetRelevantSelectedUnitsPointer(...).
 		unsigned long int unknown_19C_mask; // a "per-player" mask. Seen 0 or 0x1FF
 		// 0x1A0
 		short int selectedUnitCount; // Count of currently selected units.
@@ -247,7 +247,7 @@ namespace AOE_STRUCTURES {
 		// From there, a lot of xx 00 00 00 (4 bytes) until +0x67C at least ? Maybe a lot more ?
 		// 0x85C - DO NOT access this unless you checked the "selected units" feature is installed ! On standard game structure stops here.
 		// See GetRelevantSelectedUnitsPointer(...)
-		STRUCT_UNIT *custom_selectedUnits[CST_RS_MAX_SUPPORTED_SELECTED_UNITS]; // ONLY USE THIS if "selected units" feature is installed or you will access bad memory. See GetRelevantSelectedUnitsPointer (in commands)
+		STRUCT_UNIT_BASE *custom_selectedUnits[CST_RS_MAX_SUPPORTED_SELECTED_UNITS]; // ONLY USE THIS if "selected units" feature is installed or you will access bad memory. See GetRelevantSelectedUnitsPointer (in commands)
 
 		STRUCT_GAME_GLOBAL *GetGlobalStruct() const {
 			return (STRUCT_GAME_GLOBAL*) this->ptrGlobalStruct;

@@ -16,7 +16,7 @@ namespace AOE_STRUCTURES {
 
 	// External dependencies
 	class STRUCT_ACTION_BASE;
-	class STRUCT_UNIT;
+	class STRUCT_UNIT_BASE;
 	
 	// Pre-declaration for circular dependencies
 	class STRUCT_UNIT_ACTION_INFO;
@@ -184,7 +184,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_UNIT_ACTION_INFO {
 	public:
 		unsigned long int checksum; // A8 88 54 00 (from unit) or 00 26 54 00 (from action)
-		STRUCT_UNIT *ptrUnit;
+		STRUCT_UNIT_BASE *ptrUnit;
 		STRUCT_ACTION_LINK *ptrActionLink;
 
 		bool IsCheckSumValid() {

@@ -388,20 +388,20 @@ AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::GetCustomGamePopup() {
 AOE_STRUCTURES::STRUCT_UNIT_BASE *CustomRORInfo::GetMainSelectedUnit(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	assert(player != NULL);
 	if (!player) { return NULL; }
-	AOE_STRUCTURES::STRUCT_UNIT **selectedUnits = this->GetRelevantSelectedUnitsPointer(player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->GetRelevantSelectedUnitsPointer(player);
 	if (!selectedUnits) {
 		return NULL;
 	}
-	return (AOE_STRUCTURES::STRUCT_UNIT_BASE *)*selectedUnits; // not sure it always corresponds to selected unit in bottom left panel ? But this works in editor too
+	return *selectedUnits; // not sure it always corresponds to selected unit in bottom left panel ? But this works in editor too
 }
 
 
 // Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
 // Please use this instead of playerStruct->selectedStructUnitTable
-AOE_STRUCTURES::STRUCT_UNIT **CustomRORInfo::GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+AOE_STRUCTURES::STRUCT_UNIT_BASE **CustomRORInfo::GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	assert(player != NULL);
 	if (!player) { return NULL; }
-	AOE_STRUCTURES::STRUCT_UNIT **selectedUnits;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits;
 	if (this->hasCustomSelectedUnitsMemory) {
 		selectedUnits = player->custom_selectedUnits;
 	} else {

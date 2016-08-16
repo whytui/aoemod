@@ -8,6 +8,7 @@
 #include <UI\AOE_struct_ui_diamond_map.h>
 #include <UI\AOE_struct_ui_f11_pop_panel.h>
 #include <AOE_structures_drs.h>
+#include <AOE_struct_units.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -77,7 +78,7 @@ namespace AOE_STRUCTURES
 		char unknown_580[0x5B4 - 0x580];
 		STRUCT_GAME_GLOBAL *gameGlobal; // +5B4.
 		char unknown_5B8[0x5C8 - 0x5B8];
-		STRUCT_UNIT *panelSelectedUnit; // 0x5C8. Pointer to unit selected in unit info zone.
+		STRUCT_UNIT_BASE *panelSelectedUnit; // 0x5C8. Pointer to unit selected in unit info zone.
 		char unknown_5CC[0x5D0 - 0x5CC];
 		STRUCT_UI_UNIT_BUTTON_INFO *tmpUnitBtnCommandsInfo_researches; // +5D0. Pointer to array[]. Only for researches ! Used in internal treatments when showing buttons.
 		STRUCT_UI_UNIT_BUTTON_INFO *tmpUnitBtnCommandsInfo_units; // +5D4. Pointer to array[]. Only for train units ! Used in internal treatments when showing buttons.
