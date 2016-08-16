@@ -1201,7 +1201,7 @@ long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, AOE_STRUCTURES::STR
 // Searches (at least) a unit with provided shortcut number for given player.
 // The first matching unit is returned (arbitrary), even if there are several.
 // Returns NULL if not found
-AOE_STRUCTURES::STRUCT_UNIT *FindUnitWithShortcutNumberForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, char shortcutNumber) {
+AOE_STRUCTURES::STRUCT_UNIT_BASE *FindUnitWithShortcutNumberForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, char shortcutNumber) {
 	assert(player != NULL);
 	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_LINK *units = player->ptrCreatableUnitsListLink;
 	assert(units != NULL);
@@ -1211,7 +1211,7 @@ AOE_STRUCTURES::STRUCT_UNIT *FindUnitWithShortcutNumberForPlayer(AOE_STRUCTURES:
 	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *currentElem = units->lastListElement;
 	int index = 0;
 	while ((currentElem != NULL) && (index < units->listElemCount)) {
-		AOE_STRUCTURES::STRUCT_UNIT *currentUnit = currentElem->unit;
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *currentUnit = currentElem->unit;
 		if (currentUnit && (currentUnit->shortcutNumber == shortcutNumber)) {
 			return currentUnit; // We found a matching element
 		}
@@ -1237,9 +1237,9 @@ long int GetPlayerUnitCount(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT
 	long int result = 0;
 
 	while ((currentElem != NULL) && (index < units->listElemCount)) {
-		AOE_STRUCTURES::STRUCT_UNIT *currentUnit = currentElem->unit;
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = currentUnit->GetUnitDefBase();
-		if (currentUnit && currentUnit->IsCheckSumValid() && unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *currentUnit = currentElem->unit;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = currentUnit->GetUnitDefinition();
+		if (currentUnit && currentUnit->IsCheckSumValidForAUnitClass() && unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 			bool ok_DATID = (DAT_ID == -1) || (currentUnit->ptrStructDefUnit->DAT_ID1 == DAT_ID);
 			bool ok_AIType = (unitAIType == TribeAINone) || (unitDef->unitAIType == unitAIType);
 			bool ok_status = (minUnitStatus == -1) || (currentUnit->unitStatus >= minUnitStatus) &&

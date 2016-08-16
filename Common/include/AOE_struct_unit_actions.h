@@ -29,11 +29,11 @@ namespace AOE_STRUCTURES {
 		unsigned long int checksum;
 		AOE_CONST_FUNC::UNIT_ACTION_ID actionTypeID;
 		short int unknown_006;
-		STRUCT_UNIT *actor;
+		STRUCT_UNIT_BASE *actor;
 		AOE_CONST_INTERNAL::ACTION_STATUS actionStatus; // +0xC (byte)
 		char unused[3];
 		// 0x10
-		STRUCT_UNIT *targetUnit;
+		STRUCT_UNIT_BASE *targetUnit;
 		unsigned long int unknown_014; // actor unit pointer ???
 		long int targetUnitId; // +18
 		unsigned long int unknown_unitId; // +1C. A secondary target ?

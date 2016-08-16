@@ -57,7 +57,7 @@ namespace AOE_STRUCTURES
 		// FC 90 54 00 (villager?gatherer?), DC 91 54 00 (priest), 64 95 54 00 (military?), 24 97 54 00 (towers?), 44 96 54 00
 		// 5C 8E 54 00 (dead alligator?)
 		unsigned long int checksum;
-		STRUCT_UNIT *ptrUnit; // +4. actor unit.
+		STRUCT_UNIT_BASE *ptrUnit; // +4. actor unit.
 		unsigned long int unknown_008;
 		unsigned long int unknown_00C;
 		// 0x10

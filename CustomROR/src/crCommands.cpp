@@ -2787,7 +2787,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	}
 
 	// Get info on parent unit if possible
-	AOE_STRUCTURES::STRUCT_UNIT *parentUnit = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *parentUnit = NULL;
 	long int parentUnitId = -1;
 	if (actionStruct) {
 		parentUnit = actionStruct->actor;
@@ -2848,7 +2848,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	if (!commandCreated && this->crInfo->configInfo.enableSpawnUnitAutoRepairTC && IsVillager(unit->ptrStructDefUnit->DAT_ID1) &&
 		parentUnit && !player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
 		if (parentUnit->remainingHitPoints < (float)parentUnit->ptrStructDefUnit->totalHitPoints) {
-			TellUnitToInteractWithTarget(unit, parentUnit);
+			TellUnitToInteractWithTarget(unit, (AOE_STRUCTURES::STRUCT_UNIT*) parentUnit);
 			commandCreated = true;
 		}
 	}
@@ -3180,7 +3180,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	if (targetUnitId < 0) { return true; } // important check because we call GetUnitStruct on this.
 	//assert(activity->IsCheckSumValid());
 
-	AOE_STRUCTURES::STRUCT_UNIT *actorUnit = activity->ptrUnit;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = activity->ptrUnit;
 	AOE_STRUCTURES::STRUCT_UNIT *newTargetUnit = GetUnitStruct(targetUnitId);
 	AOE_STRUCTURES::STRUCT_UNIT *oldTargetUnit = GetUnitStruct(activity->targetUnitId);
 	if (!actorUnit || !newTargetUnit /*|| !oldTargetUnit*/) { return true; }
@@ -3196,8 +3196,8 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	if (!oldTargetUnit) { return true; } // We really could not find the target, it seems there is none: change target !
 
 	assert(newTargetUnit->IsCheckSumValid());
-	assert(actorUnit->IsCheckSumValid());
-	if (!newTargetUnit->IsCheckSumValid() || !actorUnit->IsCheckSumValid()) {
+	assert(actorUnit->IsCheckSumValidForAUnitClass());
+	if (!newTargetUnit->IsCheckSumValid() || !actorUnit->IsCheckSumValidForAUnitClass()) {
 		return true; // invalid data. Let original code be executed.
 	}
 	if (oldTargetUnit == newTargetUnit) {

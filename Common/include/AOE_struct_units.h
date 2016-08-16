@@ -32,7 +32,7 @@ namespace AOE_STRUCTURES {
 	// Represents a list of units of the same kind (typically, createable units, etc)
 	class STRUCT_PER_TYPE_UNIT_LIST_ELEMENT {
 	public:
-		STRUCT_UNIT *unit;
+		STRUCT_UNIT_BASE *unit;
 		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *previousElement;
 		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *nextElement;
 		unsigned long int unused_0C; // SEEMS to be unused
@@ -91,7 +91,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_018; // ptr to struct 00 30 54 00 - size=0x0C Related to graphics
 		STRUCT_GAME_MAP_TILE_INFO *myTile; // +1C. To confirm. +5=byte=altitude&terrain bits, see TERRAIN_BYTE class
 		// 0x20
-		STRUCT_UNIT *transporterUnit; // Transport boat the unit is in
+		STRUCT_UNIT_BASE *transporterUnit; // Transport boat the unit is in
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *unknown_024; // +24.
 		short int unknown_028;
 		short int unknown_02A; // for graphics ?

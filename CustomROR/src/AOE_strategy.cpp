@@ -246,11 +246,11 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_BUILD_AI
 	assert(creatableListLink != NULL);
 	if (creatableListLink == NULL) { return; }
 	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *creatableListElem = creatableListLink->lastListElement;
-	std::vector<AOE_STRUCTURES::STRUCT_UNIT*> notInStrategyUnitsList;
+	std::vector<AOE_STRUCTURES::STRUCT_UNIT_BASE*> notInStrategyUnitsList;
 	int indexInList = 0;
 	// Fill availableUnitsList with player's (creatable) units list that match DAT_ID
 	while ((creatableListElem != NULL) && (indexInList < creatableListLink->listElemCount)) {
-		AOE_STRUCTURES::STRUCT_UNIT *currentUnit = creatableListElem->unit;
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *currentUnit = creatableListElem->unit;
 		if (currentUnit && (currentUnit->unitInstanceId >= 0) && (currentUnit->ptrStructDefUnit) && // Exclude temporary units (smoke, dead units) with negative id
 			(currentUnit->ptrStructDefUnit->unitType >= AOE_CONST_FUNC::GUT_LIVING_UNIT) && // living + building (+trees, but non-gaia players don't have any)
 			((currentUnit->ptrStructDefUnit->DAT_ID1 == DAT_ID) || (DAT_ID == -1))) {
@@ -272,7 +272,7 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_BUILD_AI
 		// Performance: We only take care of strategy elements that match provided criteria
 		if (((currentElem->elementType == elemType) || (elemType == AIUCNone)) &&
 			((currentElem->unitDAT_ID == DAT_ID) || (DAT_ID == -1))) {
-			std::vector<AOE_STRUCTURES::STRUCT_UNIT*>::iterator it = notInStrategyUnitsList.begin();
+			std::vector<AOE_STRUCTURES::STRUCT_UNIT_BASE*>::iterator it = notInStrategyUnitsList.begin();
 			while (it != notInStrategyUnitsList.end()) {
 				if (currentElem->unitInstanceId == (*it)->unitInstanceId) {
 					it = notInStrategyUnitsList.erase(it); // Remove from list the units that are already "used" by a strategy element
@@ -296,10 +296,10 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_BUILD_AI
 				) {
 				// This unit is not being created, not alive, and retrains condition allows creating some => use an available existing unit if we have one
 				// Search for a matching available unit
-				std::vector<AOE_STRUCTURES::STRUCT_UNIT*>::iterator it = notInStrategyUnitsList.begin();
+				std::vector<AOE_STRUCTURES::STRUCT_UNIT_BASE*>::iterator it = notInStrategyUnitsList.begin();
 				bool found = false;
 				while (!found && (it != notInStrategyUnitsList.end())) {
-					AOE_STRUCTURES::STRUCT_UNIT* currentAvailableUnit = *it;
+					AOE_STRUCTURES::STRUCT_UNIT_BASE* currentAvailableUnit = *it;
 					assert(currentAvailableUnit != NULL);
 					assert(currentAvailableUnit->ptrStructDefUnit != NULL);
 					if ((currentAvailableUnit->ptrStructDefUnit->DAT_ID1 == currentElem->unitDAT_ID) ||

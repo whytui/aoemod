@@ -557,11 +557,11 @@ void CustomRORInstance::CheckPopulationCostWithLogistics(REG_BACKUP *REG_values)
 void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	// Collect information
 	AOE_STRUCTURES::STRUCT_ACTION_CONVERSION *convAction = (AOE_STRUCTURES::STRUCT_ACTION_CONVERSION *)REG_values->ESI_val;
-	AOE_STRUCTURES::STRUCT_UNIT *target = (AOE_STRUCTURES::STRUCT_UNIT *)REG_values->EDI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *target = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
 	ror_api_assert(REG_values, convAction->IsCheckSumValid());
 	ror_api_assert(REG_values, target->IsCheckSumValid());
 	ror_api_assert(REG_values, target == convAction->targetUnit);
-	AOE_STRUCTURES::STRUCT_UNIT *actor = convAction->actor;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actor = convAction->actor;
 	long int myESP = REG_values->ESP_val;
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = target->ptrStructPlayer;
 	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = actor->ptrStructPlayer;
@@ -593,13 +593,13 @@ void CustomRORInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
 
 	// Custom treatments
 	AOE_STRUCTURES::STRUCT_ACTION_CONVERSION *convAction = (AOE_STRUCTURES::STRUCT_ACTION_CONVERSION *)REG_values->ESI_val;
-	AOE_STRUCTURES::STRUCT_UNIT *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT *)REG_values->EDI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
 	ror_api_assert(REG_values, convAction->IsCheckSumValid());
-	ror_api_assert(REG_values, targetUnit->IsCheckSumValid());
+	ror_api_assert(REG_values, targetUnit->IsCheckSumValidForAUnitClass());
 	ror_api_assert(REG_values, targetUnit == convAction->targetUnit);
-	AOE_STRUCTURES::STRUCT_UNIT *actor = convAction->actor;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actor = convAction->actor;
 	ror_api_assert(REG_values, actor != NULL);
-	ror_api_assert(REG_values, actor->IsCheckSumValid());
+	ror_api_assert(REG_values, actor->IsCheckSumValidForAUnitClass());
 	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = actor->ptrStructPlayer; // Player that HAS converted a unit
 	ror_api_assert(REG_values, actorPlayer != NULL);
 	ror_api_assert(REG_values, actorPlayer->IsCheckSumValid());
@@ -1972,21 +1972,21 @@ void CustomRORInstance::ManageAttackActionChange(REG_BACKUP *REG_values) {
 	const float distanceToConsiderVeryClose = 1.5; // Please leave this > 0.
 	REG_values->EAX_val = 2; // Default: change action (let the original code decide)
 	// Get context info
-	AOE_STRUCTURES::STRUCT_UNIT *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT *) REG_values->EDI_val; // "new" possible target
-	AOE_STRUCTURES::STRUCT_UNIT *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT *) REG_values->ESI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) REG_values->EDI_val; // "new" possible target
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) REG_values->ESI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO *actorActionInfo = (AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO *) REG_values->ECX_val;
 
 	if (!actorActionInfo || !actorActionInfo->ptrActionLink || !targetUnit || !actorUnit) {
 		return;
 	}
-	ror_api_assert(REG_values, targetUnit->IsCheckSumValid());
-	ror_api_assert(REG_values, actorUnit->IsCheckSumValid());
+	ror_api_assert(REG_values, targetUnit->IsCheckSumValidForAUnitClass());
+	ror_api_assert(REG_values, actorUnit->IsCheckSumValidForAUnitClass());
 	ror_api_assert(REG_values, actorActionInfo->IsCheckSumValid());
 	AOE_STRUCTURES::STRUCT_ACTION_LINK *link = actorActionInfo->ptrActionLink;
 	ror_api_assert(REG_values, link != NULL);
 	AOE_STRUCTURES::STRUCT_ACTION_ATTACK *action = (AOE_STRUCTURES::STRUCT_ACTION_ATTACK *) link->actionStruct;
 	ror_api_assert(REG_values, action != NULL);
-	AOE_STRUCTURES::STRUCT_UNIT *actionTargetUnit = action->targetUnit; // 00426EE5 original instruction...
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actionTargetUnit = action->targetUnit; // 00426EE5 original instruction...
 	if (!actionTargetUnit) {
 		return; // Change action: there is currently no target !
 	}

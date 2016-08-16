@@ -33,5 +33,7 @@ namespace AOE_CONST_DRS {
 		InGameAchievementTheme = 50061, // Using this for custom screens might look a bit weird. Still better than victory once though !
 	};
 
+	// Bottom friezes
+	// 50734 to 50744 (AOE) + 53010, 53011, 53012 (ROR)
 }
 

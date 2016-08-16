@@ -318,7 +318,7 @@ long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, AOE_STRUCTURES::STR
 
 // Searches (at least) a unit with provided shortcut number for given player.
 // The first matching unit is returned (arbitrary), even if there are several.
-AOE_STRUCTURES::STRUCT_UNIT *FindUnitWithShortcutNumberForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, char shortcutNumber);
+AOE_STRUCTURES::STRUCT_UNIT_BASE *FindUnitWithShortcutNumberForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, char shortcutNumber);
 
 // Get number of matching units (for a unitDef ID) for given player. Restricted to "creatable" units
 // -1 are jokers for DAT_ID, unitAIType, unitStatus
