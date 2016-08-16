@@ -2151,7 +2151,7 @@ void CustomRORInstance::ManageTowerPanicMode_villagers(REG_BACKUP *REG_values) {
 // ROR's function canConvertUnit has a bug, it returns true when enemy unit is an unfinished building (status == 0).
 void CustomRORInstance::ManageBuildingStatus_canConvertUnit(REG_BACKUP *REG_values) {
 	long int unitId = REG_values->EAX_val;
-	AOE_STRUCTURES::STRUCT_UNIT *targetUnit = GetUnitStruct(unitId);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = GetUnitStruct(unitId);
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->EAX_val = (unsigned long int)targetUnit;
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
@@ -3045,8 +3045,8 @@ void CustomRORInstance::FixActivityTargetUnitIdBug_case1F4(REG_BACKUP *REG_value
 	ror_api_assert(REG_values, pUnitId != NULL);
 	long int unitIdFromStack = GetIntValueFromRORStack(REG_values, 0);
 	ror_api_assert(REG_values, *pUnitId == unitIdFromStack);
-	AOE_STRUCTURES::STRUCT_UNIT *paramUnit = NULL;
-	AOE_STRUCTURES::STRUCT_UNIT *activityTargetUnit = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *paramUnit = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *activityTargetUnit = NULL;
 	if (unitIdFromStack != -1) {
 		// FIXED First "get unit struct" (0x4E4796)
 		paramUnit = GetUnitStruct(unitIdFromStack);

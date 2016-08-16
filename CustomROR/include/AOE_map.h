@@ -22,7 +22,7 @@ using namespace AOE_CONST_FUNC;
 // Duplicated from crCommon (dirty !!)
 extern AOE_STRUCTURES::STRUCT_GAME_SETTINGS* GetGameSettingsPtr();
 extern AOE_STRUCTURES::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr();
-extern AOE_STRUCTURES::STRUCT_UNIT *GetUnitStruct(long int unitId);
+extern AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId);
 
 
 
@@ -64,7 +64,7 @@ AOE_STRUCTURES::STRUCT_POSITION_INFO GetGameMousePositionInfo();
 
 // Get unit at (mouse) position, using AOE methods.
 // Warning, this impacts the global variables in 0x7D1CF8
-AOE_STRUCTURES::STRUCT_UNIT *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, INTERACTION_MODES maxInteractionMode, bool allowTempUnits);
+AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, INTERACTION_MODES maxInteractionMode, bool allowTempUnits);
 
 
 // Updates map data to make nearby tiles appear correctly when altitude is not constant (after a manual modification)

@@ -66,7 +66,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_PLAYER *player;
 		unsigned long int allocatedArraySize; // this value * 4 = allocated size (in dwords) for the 4 lists below
 		long int buildingsArrayElemCount;
-		STRUCT_UNIT **ptrBuildingsArray; // Note: this list is always re-organized so there is not empty or obsolete element [0]=>[buildingsArrayElemCount-1]
+		STRUCT_UNIT_BASE **ptrBuildingsArray; // Note: this list is always re-organized so there is not empty or obsolete element [0]=>[buildingsArrayElemCount-1]
 		// 0x10
 		STRUCT_MAP_VISIBILITY_INFO **ptrMapVisibilityInfoPointersArray; // indexes corresponds to ptrBuildingsArray. Data correspond to [0x7D205C] structure.
 		STRUCT_MAP_VISIBILITY_INFO *ptrMapVisibilityInfoArray; // indexes corresponds to ptrBuildingsArray. It seems ptrMapVisibilityInfoArray[i] = *ptrMapVisibilityInfoPointersArray[i]

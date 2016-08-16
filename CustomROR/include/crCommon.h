@@ -209,7 +209,7 @@ private:
 // Useful to get structure from a unit id. May return NULL !
 // Only works for creatable (unitId >= 0). This is just a choice to avoid writing same bugs as ROR
 // (some functions use -1 as <No unit> but get an irrevant unit struct then because -1 is not tested before calling getUnitStruct(...))
-AOE_STRUCTURES::STRUCT_UNIT *GetUnitStruct(long int unitId);
+AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId);
 
 // Returns a unit definition if valid, NULL otherwise.
 AOE_STRUCTURES::STRUCT_DEF_UNIT *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitDefId);
@@ -391,7 +391,7 @@ AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTUR
 // Creates a unit at provided location. Does NOT make checks on location, please first make sure GetErrorForUnitCreationAtLocation returns 0.
 // You can use 0 as posZ value.
 // Returns NULL if it failed
-AOE_STRUCTURES::STRUCT_UNIT *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ);
+AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ);
 
 // Creates a unit at provided location. Does NOT make checks on location, please first make sure GetErrorForUnitCreationAtLocation returns 0.
 // You can use 0 as posZ value.
@@ -403,7 +403,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *play
 
 // Creates a unit at provided location only if GetErrorForUnitCreationAtLocation agrees !
 // Returns NULL if it failed
-AOE_STRUCTURES::STRUCT_UNIT *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef,
+AOE_STRUCTURES::STRUCT_UNIT_BASE *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef,
 	float posY, float posX, bool checkVisibility, bool checkHills, bool checkConflictingUnits);
 
 // Has the same effect as "CTRL-0" or "CTRL-1" etc: assigns a shortcut number to units (and removes this shortcut from old units that had it)

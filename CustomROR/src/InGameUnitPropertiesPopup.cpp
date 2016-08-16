@@ -332,9 +332,9 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	if (isCancel) {
 		return;
 	}
-	AOE_STRUCTURES::STRUCT_UNIT *unit = GetUnitStruct(this->unitId); // Might be NULL
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = GetUnitStruct(this->unitId); // Might be NULL
 	AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = NULL;
-	if (unit && unit->IsCheckSumValid()) {
+	if (unit && unit->IsCheckSumValidForAUnitClass()) {
 		unitPlayer = unit->ptrStructPlayer;
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();

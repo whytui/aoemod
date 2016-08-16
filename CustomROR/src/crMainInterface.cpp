@@ -768,9 +768,9 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 						assert(global && global->IsCheckSumValid());
 						if (!global || !global->IsCheckSumValid()) { return false; }
 
-						AOE_STRUCTURES::STRUCT_UNIT *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
-						if (unitUnderMouse && unitUnderMouse->IsCheckSumValid()) {
-							AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->GetUnitDefBase();
+						AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
+						if (unitUnderMouse && unitUnderMouse->IsCheckSumValidForAUnitClass()) {
+							AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->GetUnitDefinition();
 							if (unitDefUnderMouse && unitDefUnderMouse->IsCheckSumValidForAUnitClass() &&
 								(unitDefUnderMouse->interactionMode >= AOE_CONST_FUNC::INTERACTION_MODES::CST_IM_RESOURCES)
 								) {

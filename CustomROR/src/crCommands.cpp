@@ -2040,25 +2040,25 @@ void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long i
 	// Get my buildings list: quite efficient because we have a dedicated list (only buildings) at player level (does not rely on AI structures)
 	assert(player->ptrBuildingsListHeader != NULL);
 	long int buildingList_count = 0;
-	AOE_STRUCTURES::STRUCT_UNIT **buildingsList = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **buildingsList = NULL;
 	if (player->ptrBuildingsListHeader) {
 		buildingList_count = player->ptrBuildingsListHeader->buildingsArrayElemCount;
 		buildingsList = player->ptrBuildingsListHeader->ptrBuildingsArray;
 	}
 	assert((buildingList_count == 0) || (buildingsList != NULL));
 	for (int i = 0; i < buildingList_count; i++) {
-		AOE_STRUCTURES::STRUCT_UNIT *loopUnit = NULL;
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *loopUnit = NULL;
 		assert(player->ptrBuildingsListHeader != NULL);
 		loopUnit = buildingsList[i];
 		if (loopUnit != NULL) {
 			// We are running so much asserts because player->ptrBuildingsListHeader sometimes contain invalid data !
 			// It happens because of buildings conversion bug
-			assert(loopUnit->IsCheckSumValid());
+			assert(loopUnit->IsCheckSumValidForAUnitClass());
 			assert(GetUnitStruct(player->ptrBuildingsListHeader->ptrBuildingsUnitIDs[i]) == loopUnit);
 			assert(GetUnitStruct(loopUnit->unitInstanceId) == loopUnit);
 			assert(loopUnit->unitType == GUT_BUILDING);
 			assert(loopUnit->ptrStructDefUnit != NULL);
-			if ((loopUnit->IsCheckSumValid()) && (GetUnitStruct(player->ptrBuildingsListHeader->ptrBuildingsUnitIDs[i]) == loopUnit) &&
+			if ((loopUnit->IsCheckSumValidForAUnitClass()) && (GetUnitStruct(player->ptrBuildingsListHeader->ptrBuildingsUnitIDs[i]) == loopUnit) &&
 				(loopUnit->unitType == GUT_BUILDING) && (loopUnit->ptrStructDefUnit != NULL)) {
 				if ((loopUnit->unitStatus == 2) && (loopUnit->ptrStructDefUnit != NULL)) {
 					short int DAT_ID = loopUnit->ptrStructDefUnit->DAT_ID1;
@@ -2073,7 +2073,7 @@ void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long i
 			} else {
 				// For debug - or just in case...
 				// THIS CODE is NO LONGER needed since I fixed the building conversion bug.
-				AOE_STRUCTURES::STRUCT_UNIT *invalidUnit = loopUnit;
+				AOE_STRUCTURES::STRUCT_UNIT_BASE *invalidUnit = loopUnit;
 				player->ptrBuildingsListHeader->ptrBuildingsArray[i] = NULL; // Remove invalid entry from list, it could cause a crash when some code accesses it.
 				char buffer[300];
 				sprintf_s(buffer, "ERROR: invalid unit list entry for player #%ld. ptr=%08lX. unitId=%ld GUT=%d, index=%d/%ld.\n",
@@ -3181,8 +3181,8 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	//assert(activity->IsCheckSumValid());
 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = activity->ptrUnit;
-	AOE_STRUCTURES::STRUCT_UNIT *newTargetUnit = GetUnitStruct(targetUnitId);
-	AOE_STRUCTURES::STRUCT_UNIT *oldTargetUnit = GetUnitStruct(activity->targetUnitId);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *newTargetUnit = GetUnitStruct(targetUnitId);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *oldTargetUnit = GetUnitStruct(activity->targetUnitId);
 	if (!actorUnit || !newTargetUnit /*|| !oldTargetUnit*/) { return true; }
 	if (!oldTargetUnit) {
 		// activity target unit can be reset by pending treatments. Find if action HAS a valid target. We may want to keep this target.
@@ -3195,7 +3195,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	}
 	if (!oldTargetUnit) { return true; } // We really could not find the target, it seems there is none: change target !
 
-	assert(newTargetUnit->IsCheckSumValid());
+	assert(newTargetUnit->IsCheckSumValidForAUnitClass());
 	assert(actorUnit->IsCheckSumValidForAUnitClass());
 	if (!newTargetUnit->IsCheckSumValid() || !actorUnit->IsCheckSumValidForAUnitClass()) {
 		return true; // invalid data. Let original code be executed.
@@ -3468,13 +3468,15 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	// If only 1 of the 2 targets has me as its target, attack this one
 	AOE_STRUCTURES::STRUCT_ACTION_BASE *newTargetUnitAction = NULL;
 	AOE_STRUCTURES::STRUCT_ACTION_BASE *actionTargetUnitAction = NULL;
-	if ((newTargetUnit->ptrActionInformation) && (newTargetUnit->ptrActionInformation->ptrActionLink) &&
-		(newTargetUnit->ptrActionInformation->ptrActionLink->actionStruct)) {
-		newTargetUnitAction = (AOE_STRUCTURES::STRUCT_ACTION_BASE *)newTargetUnit->ptrActionInformation->ptrActionLink->actionStruct;
+	STRUCT_UNIT_BIRD *newTargetUnitBird = (STRUCT_UNIT_BIRD *)newTargetUnit;
+	STRUCT_UNIT_BIRD *oldTargetUnitBird = (STRUCT_UNIT_BIRD *)oldTargetUnit;
+	if (newTargetUnitBird->DerivesFromBird() && (newTargetUnitBird->ptrActionInformation) && (newTargetUnitBird->ptrActionInformation->ptrActionLink) &&
+		(newTargetUnitBird->ptrActionInformation->ptrActionLink->actionStruct)) {
+		newTargetUnitAction = (AOE_STRUCTURES::STRUCT_ACTION_BASE *)newTargetUnitBird->ptrActionInformation->ptrActionLink->actionStruct;
 	}
-	if ((oldTargetUnit->ptrActionInformation) && (oldTargetUnit->ptrActionInformation->ptrActionLink) &&
-		(oldTargetUnit->ptrActionInformation->ptrActionLink->actionStruct)) {
-		actionTargetUnitAction = (AOE_STRUCTURES::STRUCT_ACTION_BASE *)oldTargetUnit->ptrActionInformation->ptrActionLink->actionStruct;
+	if (oldTargetUnitBird->DerivesFromBird() && (oldTargetUnitBird->ptrActionInformation) && (oldTargetUnitBird->ptrActionInformation->ptrActionLink) &&
+		(oldTargetUnitBird->ptrActionInformation->ptrActionLink->actionStruct)) {
+		actionTargetUnitAction = (AOE_STRUCTURES::STRUCT_ACTION_BASE *)oldTargetUnitBird->ptrActionInformation->ptrActionLink->actionStruct;
 	}
 	bool newTargetAttacksMe = newTargetUnitAction && (
 		(newTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) ||
@@ -3581,7 +3583,7 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT 
 	}
 
 	long int currentTargetId = actorUnit->currentActivity->targetUnitId;
-	AOE_STRUCTURES::STRUCT_UNIT *currentTarget = GetUnitStruct(currentTargetId);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *currentTarget = GetUnitStruct(currentTargetId);
 	AOE_STRUCTURES::STRUCT_DEF_UNIT *currentTargetDef = NULL;
 	if (currentTarget) {
 		currentTargetDef = currentTarget->ptrStructDefUnit;
@@ -3617,16 +3619,17 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT 
 			return true;
 		}
 		// Builder: keep for some critical constructions
-		if ((activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_BUILD) && 
+		STRUCT_UNIT_BUILDING *currentTargetAsBld = (STRUCT_UNIT_BUILDING *)currentTarget;
+		if (currentTargetAsBld->IsCheckSumValid() && (activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_BUILD) &&
 			(currentTarget->ptrStructPlayer == actorUnit->ptrStructPlayer)// Just a check
 			) {
 			if (currentTargetDef->DAT_ID1 == CST_UNITID_FORUM) {
 				return false; // Keep building TC
 			}
-			if (currentTarget->constructionProgress > 85) {
+			if (currentTargetAsBld->constructionProgress > 85) {
 				return false; // Almost finished: continue !
 			}
-			if ((currentTarget->constructionProgress > 75) && (IsTower(currentTargetDef->DAT_ID1) )) {
+			if ((currentTargetAsBld->constructionProgress > 75) && (IsTower(currentTargetDef->DAT_ID1))) {
 				return false; // Almost finished tower: continue !
 			}
 		}
@@ -3783,7 +3786,7 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 	// This loop only collects information (no treatments here)
 	for (int tacAIArrayIndex = 0; tacAIArrayIndex < tacAI->allVillagers.arraySize; tacAIArrayIndex++) { // Loop on "all villagers"
 		if (tacAI->allVillagers.unitIdArray[tacAIArrayIndex] >= 0) { // if current unitId is valid (!= -1)
-			AOE_STRUCTURES::STRUCT_UNIT *currentVillager = GetUnitStruct(tacAI->allVillagers.unitIdArray[tacAIArrayIndex]);
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *currentVillager = GetUnitStruct(tacAI->allVillagers.unitIdArray[tacAIArrayIndex]);
 			if (currentVillager) {
 				int iArray = 0;
 				bool found = false;
@@ -6373,7 +6376,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if (actionUnitDefId >= player->structDefUnitArraySize) { return; }
 		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[actionUnitDefId];
 		if (!unitDef || !unitDef->IsCheckSumValid()) { return; }
-		AOE_STRUCTURES::STRUCT_UNIT *unit = CheckAndCreateUnit(player, unitDef, posX, posY, false, true, true);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = CheckAndCreateUnit(player, unitDef, posX, posY, false, true, true);
 	}
 
 	// Make unique (create dedicated unit definition)

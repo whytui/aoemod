@@ -786,10 +786,10 @@ std::list<long int> GetActivableUnitDefIDs(AOE_STRUCTURES::STRUCT_PLAYER *player
 // Useful to get structure from a unit id. May return NULL !
 // Only works for creatable (unitId >= 0). This is just a choice to avoid writing same bugs as ROR
 // (some functions use -1 as <No unit> but get an irrevant unit struct then because -1 is not tested before calling getUnitStruct(...))
-AOE_STRUCTURES::STRUCT_UNIT *GetUnitStruct(long int unitId) {
+AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || (unitId < 0)) { return NULL; }
-	AOE_STRUCTURES::STRUCT_UNIT *result;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *result;
 	_asm {
 		MOV ECX, global
 		PUSH unitId
@@ -1352,7 +1352,7 @@ long int GetTotalQueueNumberForUnit(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld, s
 // Please use CheckAndCreateUnit instead (unless you explicitely do NOT want to check target location)
 // You can use 0 as posZ value.
 // Returns NULL if it failed
-AOE_STRUCTURES::STRUCT_UNIT *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ) {
+AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ) {
 	if (!player || !player->IsCheckSumValid()) {
 		return NULL;
 	}
@@ -1368,7 +1368,7 @@ AOE_STRUCTURES::STRUCT_UNIT *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, l
 		CALL EAX
 		MOV res, EAX
 	}
-	return (AOE_STRUCTURES::STRUCT_UNIT *) res;
+	return (AOE_STRUCTURES::STRUCT_UNIT_BASE *) res;
 }
 
 
@@ -1402,7 +1402,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *play
 
 // Creates a unit at provided location only if GetErrorForUnitCreationAtLocation agrees !
 // Returns NULL if it failed
-AOE_STRUCTURES::STRUCT_UNIT *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef,
+AOE_STRUCTURES::STRUCT_UNIT_BASE *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef,
 	float posX, float posY, bool checkVisibility, bool checkHills, bool checkConflictingUnits) {
 	if (GetErrorForUnitCreationAtLocation(player, unitDef, posY, posX, checkVisibility, checkHills, false, true, checkConflictingUnits) != 0) {
 		return NULL;
