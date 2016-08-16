@@ -39,7 +39,7 @@ bool IsExploredForPlayer(long int playerId, long int posX, long int posY);
 
 // Returns a placement error number (ERROR_FOR_UNIT_CREATION) - 0 is OK for creating unit
 AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(AOE_STRUCTURES::STRUCT_PLAYER * player,
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef, float posY, float posX, bool checkVisibility, bool hillMode,
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef, float posY, float posX, bool checkVisibility, bool hillMode,
 	bool editorMode, bool checkAirModeAndHPBar, bool checkConflictingUnits);
 
 

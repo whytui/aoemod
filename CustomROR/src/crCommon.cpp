@@ -454,7 +454,7 @@ void SetAValidCurrentAIPlayerId() {
 
 // Get strategy element type for a unit
 // Returns AIUCNone if result could not be determined.
-AOE_CONST_FUNC::TAIUnitClass GetUnitStrategyElemClass(AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef) {
+AOE_CONST_FUNC::TAIUnitClass GetUnitStrategyElemClass(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
 	TAIUnitClass unitStrategyClass = AOE_CONST_FUNC::TAIUnitClass::AIUCNone;
 	if (!unitDef) { return unitStrategyClass; }
 	if (unitDef->unitType == GUT_BUILDING) { unitStrategyClass = AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding; }
@@ -473,7 +473,7 @@ float GetDistance(float x1, float y1, float x2, float y2) {
 }
 
 
-short int GetDAT_ID2(AOE_STRUCTURES::STRUCT_DEF_UNIT **defUnitTable, short int DAT_ID1) {
+short int GetDAT_ID2(AOE_STRUCTURES::STRUCT_UNITDEF_BASE **defUnitTable, short int DAT_ID1) {
 	return defUnitTable[DAT_ID1]->DAT_ID2;
 }
 
@@ -802,7 +802,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId) {
 
 
 // Returns a unit definition if valid, NULL otherwise.
-AOE_STRUCTURES::STRUCT_DEF_UNIT *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitDefId) {
+AOE_STRUCTURES::STRUCT_UNITDEF_BASE *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitDefId) {
 	if (!player || !player->IsCheckSumValid() || (unitDefId < 0)) { return NULL; }
 	if (unitDefId >= player->structDefUnitArraySize) { return NULL; }
 	return player->ptrStructDefUnitTable[unitDefId];
@@ -1014,7 +1014,10 @@ bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::S
 	long int posX = (long int)target->positionX;
 	long int posY = (long int)target->positionY;
 	long int posZ = (long int)target->positionZ;
-	float maxRange = actor->ptrStructDefUnit->maxRange;
+	float maxRange = 1;
+	if (actor->DerivesFromType50()) {
+		maxRange = ((STRUCT_UNITDEF_TYPE50*)actor->ptrStructDefUnit)->maxRange;
+	}
 	long int actorUnitId = actor->unitInstanceId;
 	long int targetUnitId = target->unitInstanceId;
 	long int targetPlayerId = target->ptrStructPlayer->playerId;
@@ -1062,7 +1065,8 @@ bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::S
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
+bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, long int actorUnitsCount,
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
 	if (!actorUnitsList || (actorUnitsCount <= 0) || !target || !target->IsCheckSumValid()) { return false; }
 	assert(actorUnitsCount < 255); // More would be... more than huge !
 	if (actorUnitsCount >= 255) { return false; } // This can't be normal
@@ -1135,8 +1139,7 @@ AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTUR
 	// Ignore 293 (upgraded villager): will be used if needed when testing 83 (base villager)
 	for (int i = 0; i < sizeof(villagerDATIDs); i++) {
 		if (villagerDATIDs[i] < actorPlayer->structDefUnitArraySize) {
-			AOE_STRUCTURES::STRUCT_DEF_UNIT *tmpUnitDef = actorPlayer->ptrStructDefUnitTable[villagerDATIDs[i]];
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *tmpUnitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *) tmpUnitDef;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *tmpUnitDefBase = actorPlayer->GetUnitDefBase((short int)villagerDATIDs[i]);
 			if (tmpUnitDefBase && tmpUnitDefBase->IsCheckSumValidForAUnitClass() && tmpUnitDefBase->DerivesFromBird()) {
 				AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *tmpUnitDefBird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)tmpUnitDefBase;
 				cmdh = tmpUnitDefBird->ptrUnitCommandHeader;
@@ -1145,15 +1148,15 @@ AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTUR
 					if (cmdh->IsCheckSumValid()) {
 						// Try other villager type's command (with current "actorUnit")
 						_asm {
-							MOV ECX, cmdh
-							MOV EAX, DS:[ECX]
-							PUSH 0
-							PUSH 0
-							PUSH 0
-							PUSH target
-							PUSH actorUnit
-							CALL DS:[EAX+4]
-							MOV result, EAX
+							MOV ECX, cmdh;
+							MOV EAX, DS:[ECX];
+							PUSH 0;
+							PUSH 0;
+							PUSH 0;
+							PUSH target;
+							PUSH actorUnit;
+							CALL DS:[EAX+4];
+							MOV result, EAX;
 						}
 					} else {
 						std::string msg = "Bad commandHeader at ";
@@ -1402,7 +1405,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *play
 
 // Creates a unit at provided location only if GetErrorForUnitCreationAtLocation agrees !
 // Returns NULL if it failed
-AOE_STRUCTURES::STRUCT_UNIT_BASE *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef,
+AOE_STRUCTURES::STRUCT_UNIT_BASE *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef,
 	float posX, float posY, bool checkVisibility, bool checkHills, bool checkConflictingUnits) {
 	if (GetErrorForUnitCreationAtLocation(player, unitDef, posY, posX, checkVisibility, checkHills, false, true, checkConflictingUnits) != 0) {
 		return NULL;
@@ -2277,14 +2280,14 @@ short int AddUnitDefToPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTUR
 	short int nbDef = player->structDefUnitArraySize + 1; // new number of unit definitions
 	short int newDATID = player->structDefUnitArraySize;
 	long int newSizeInBytes = nbDef * 4;
-	AOE_STRUCTURES::STRUCT_DEF_UNIT **oldArray = player->ptrStructDefUnitTable;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE **oldArray = player->ptrStructDefUnitTable;
 	// Run some checks
 	assert(oldArray != NULL);
 	if (oldArray == NULL) { return -1; }
 	assert(0 <= newDATID);
 
 	// Create new array
-	AOE_STRUCTURES::STRUCT_DEF_UNIT **newArray = (AOE_STRUCTURES::STRUCT_DEF_UNIT **)AOEAlloc(newSizeInBytes);
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE **newArray = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE **)AOEAlloc(newSizeInBytes);
 	if (newArray == NULL) { return -1; } // nothing allocated: return an error
 
 	// Copy old array into new (for all existing unitDefs => copy pointers)
@@ -2292,7 +2295,7 @@ short int AddUnitDefToPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTUR
 	AOEFree(oldArray); // old array is freed, we replace it by new (larger) one
 	player->ptrStructDefUnitTable = newArray;
 	player->structDefUnitArraySize = nbDef;
-	player->ptrStructDefUnitTable[newDATID] = (AOE_STRUCTURES::STRUCT_DEF_UNIT *)unitDef;
+	player->ptrStructDefUnitTable[newDATID] = unitDef;
 	unitDef->DAT_ID1 = newDATID;
 	unitDef->DAT_ID2 = newDATID;
 	return newDATID;

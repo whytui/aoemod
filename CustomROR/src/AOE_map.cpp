@@ -49,7 +49,7 @@ bool IsExploredForPlayer(long int playerId, long int posX, long int posY) {
 
 // Returns a placement error number (ERROR_FOR_UNIT_CREATION) - 0 is OK for creating unit
 AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(AOE_STRUCTURES::STRUCT_PLAYER * player,
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef, float posY, float posX, bool checkVisibility, bool checkHills,
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef, float posY, float posX, bool checkVisibility, bool checkHills,
 	bool editorMode, bool checkAirModeAndHPBar, bool checkConflictingUnits) {
 	long int iCheckVisibility = checkVisibility ? 1 : 0;
 	long int iCheckHills = checkHills ? 1 : 0;
@@ -58,21 +58,21 @@ AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(AO
 	long int iCheckConflictingUnits = checkConflictingUnits ? 1 : 0;
 	AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION res;
 	_asm {
-		MOV ECX, unitDef
-			PUSH iCheckConflictingUnits
-			PUSH iCheckAirModeAndHPBar
-			PUSH iEditorMode
-			PUSH 1
-			PUSH iCheckHills // arg6 = (byte) hillMode (for buildings, 0=no check)
-			PUSH iCheckVisibility
-			PUSH 0
-			PUSH posX
-			PUSH posY
-			PUSH player
-			MOV EAX, DS:[ECX]
-			CALL[EAX + 0x20]
-			MOVSX EAX, AL
-			MOV res, EAX
+		MOV ECX, unitDef;
+		PUSH iCheckConflictingUnits;
+		PUSH iCheckAirModeAndHPBar;
+		PUSH iEditorMode;
+		PUSH 1;
+		PUSH iCheckHills; // arg6 = (byte) hillMode (for buildings, 0=no check)
+		PUSH iCheckVisibility;
+		PUSH 0;
+		PUSH posX;
+		PUSH posY;
+		PUSH player;
+		MOV EAX, DS:[ECX];
+		CALL[EAX + 0x20];
+		MOVSX EAX, AL;
+		MOV res, EAX;
 	}
 	return res;
 }

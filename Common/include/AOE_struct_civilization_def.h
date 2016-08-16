@@ -24,7 +24,7 @@ namespace AOE_STRUCTURES
 		short int civUnitDefCount; // a civilization has its own unit definitions...
 		short int unused_1A; // probably unused.
 	private:
-		STRUCT_DEF_UNIT **ptrUnitDefArray; // Warning: when reading empires.dat, values are temporarily 0/1 (isUnitEnabledForCiv). Array size is civUnitDefCount
+		STRUCT_UNITDEF_BASE **ptrUnitDefArray; // Warning: when reading empires.dat, values are temporarily 0/1 (isUnitEnabledForCiv). Array size is civUnitDefCount
 	public:
 		// 0x20
 		short int civResourcesCount;
@@ -36,7 +36,7 @@ namespace AOE_STRUCTURES
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_CIVILIZATION_DEF; }
 		// Use this to safely get unit definitions
-		STRUCT_DEF_UNIT *GetUnitDef(short int DAT_ID) const {
+		STRUCT_UNITDEF_BASE *GetUnitDef(short int DAT_ID) const {
 			if ((DAT_ID < 0) || (DAT_ID >= this->civUnitDefCount)) { return NULL; }
 			if ((long int)(this->ptrUnitDefArray[DAT_ID]) == 1) { return NULL; }
 			return this->ptrUnitDefArray[DAT_ID];

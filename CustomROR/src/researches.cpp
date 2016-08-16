@@ -885,7 +885,7 @@ std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	int unitDefCount = player->structDefUnitArraySize;
 	// Loop on all buildings that can potentially "host" researches
 	for (int i = 0; i < unitDefCount; i++) {
-		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[i];
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->ptrStructDefUnitTable[i];
 		std::string s = GetRemainingTechTreeText(player, (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)unitDef);
 		if (!s.empty()) {
 			result += s;

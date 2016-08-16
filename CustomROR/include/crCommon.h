@@ -212,7 +212,7 @@ private:
 AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId);
 
 // Returns a unit definition if valid, NULL otherwise.
-AOE_STRUCTURES::STRUCT_DEF_UNIT *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitDefId);
+AOE_STRUCTURES::STRUCT_UNITDEF_BASE *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitDefId);
 
 // Get a unit name from empires.dat data (read from civ 0)
 // Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
@@ -243,7 +243,7 @@ bool IsDockRelevantForMap(MAP_TYPE_INDEX mti);
 AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId);
 
 // Get strategy element type for a unit
-AOE_CONST_FUNC::TAIUnitClass GetUnitStrategyElemClass(AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef);
+AOE_CONST_FUNC::TAIUnitClass GetUnitStrategyElemClass(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
 
 // Calculate distance
 float GetDistance(float x1, float y1, float x2, float y2);
@@ -257,7 +257,7 @@ int GetUnitWeight(short int DAT_ID);
 
 // Returns a unit DAT_ID2 (including upgrades) given "base" unit ID (DAT_ID1)
 // You have to make sure DAT_ID1 is not out of bounds. It depends on empires.dat so it can't be checked with a hardcoded value.
-short int GetDAT_ID2(AOE_STRUCTURES::STRUCT_DEF_UNIT **defUnitTable, short int DAT_ID1);
+short int GetDAT_ID2(AOE_STRUCTURES::STRUCT_UNITDEF_BASE **defUnitTable, short int DAT_ID1);
 
 // Returns true if unit class corresponds to one of
 // - Artefact/flag
@@ -403,7 +403,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *play
 
 // Creates a unit at provided location only if GetErrorForUnitCreationAtLocation agrees !
 // Returns NULL if it failed
-AOE_STRUCTURES::STRUCT_UNIT_BASE *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef,
+AOE_STRUCTURES::STRUCT_UNIT_BASE *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef,
 	float posY, float posX, bool checkVisibility, bool checkHills, bool checkConflictingUnits);
 
 // Has the same effect as "CTRL-0" or "CTRL-1" etc: assigns a shortcut number to units (and removes this shortcut from old units that had it)

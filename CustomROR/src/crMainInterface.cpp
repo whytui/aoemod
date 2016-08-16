@@ -294,8 +294,8 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				posInBuf = posInBuf + strlen(posInBuf);
 			}
 			if (player && selectedUnit && (player->playerId == global->humanPlayerId)) {
-				AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = selectedUnit->ptrStructDefUnit;
-				assert(unitDef && unitDef->IsCheckSumValid());
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = selectedUnit->ptrStructDefUnit;
+				assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
 				if (unitDef) {
 					char nameBuffer[50];
 					short int researchCount = player->ptrResearchesStruct->researchCount;
@@ -744,7 +744,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 		// Make sure unit is valid, from MY player
 		if (unit && unit->IsCheckSumValidForAUnitClass() && (unit->ptrStructPlayer == controlledPlayer)) {
 			if (unit->unitType == GUT_BUILDING) {
-				AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->ptrStructDefUnit;
 				assert(unitDef != NULL);
 				if (unitDef && (unitDef->unitType == GUT_BUILDING) && (unit->unitStatus == 2) &&
 					(!hasSelectedLivings) && // Do not apply auto-move when both livings and buildings are selected (building selection is probably unintentional)

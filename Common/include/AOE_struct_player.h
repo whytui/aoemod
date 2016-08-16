@@ -155,7 +155,7 @@ namespace AOE_STRUCTURES {
 		// 0x20
 		short int unknown_020;
 		short int structDefUnitArraySize; // +22. Number of elements in ptrStructDefUnitTable array = number of "unit definitions" for this player.
-		STRUCT_DEF_UNIT **ptrStructDefUnitTable; // ptr to Array containing pointers to all player unitDefs (index=DATID). They can be NULL (not available/invalid). See also structDefUnitArraySize.
+		STRUCT_UNITDEF_BASE **ptrStructDefUnitTable; // ptr to Array containing pointers to all player unitDefs (index=DATID). They can be NULL (not available/invalid). See also structDefUnitArraySize.
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrCreatableUnitsListLink; // +28. Only building/living + smoke, dead units...?
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrNonCreatableUnitsListLink; // Others than building/living ?
 		// 0x30

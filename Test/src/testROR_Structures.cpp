@@ -122,8 +122,6 @@ static bool test_ror_structures() {
 	assert(sizeof(duc) == 0x4C);
 	AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER duch;
 	trs_assert(&duch, 0x08, &duch.commandCount);
-	AOE_STRUCTURES::STRUCT_DEF_UNIT du;
-	trs_assert(&du, 0x176, &du.unknown_176);
 	AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF dc;
 	trs_assert(&dc, 0x2A, &dc.techTreeId);
 

@@ -500,8 +500,8 @@ void CustomRORInstance::CheckPopulationCostWithLogistics(REG_BACKUP *REG_values)
 	//short int *costPointer = (short int *)REG_values->EDX_val;
 	AOE_STRUCTURES::STRUCT_COST *currentCost = (AOE_STRUCTURES::STRUCT_COST *)(REG_values->EDX_val - 2);
 	long int currentCostIndex = REG_values->ESI_val;
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = (AOE_STRUCTURES::STRUCT_DEF_UNIT *)(REG_values->EDX_val - 0x14A - (6 * currentCostIndex));
-	ror_api_assert(REG_values, unitDef && unitDef->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)(REG_values->EDX_val - 0x14A - (6 * currentCostIndex));
+	ror_api_assert(REG_values, unitDef && unitDef->IsCheckSumValidForAUnitClass());
 	float *myResources = (float *)REG_values->EDI_val;
 	bool resourceValueIsOk = false;
 	long testValue = REG_values->EAX_val & 0x0000FF00; // AH
@@ -565,7 +565,7 @@ void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	long int myESP = REG_values->ESP_val;
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = target->ptrStructPlayer;
 	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = actor->ptrStructPlayer;
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *targetUnitDef = target->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = target->ptrStructDefUnit;
 	// Compute resistance
 	float resistance = this->crInfo.GetConversionResistance(targetPlayer->civilizationId, targetUnitDef->unitAIType);
 
@@ -732,7 +732,7 @@ void CustomRORInstance::FixBuildingStratElemUnitID(REG_BACKUP *REG_values) {
 		ror_api_assert(REG_values, buildAI != NULL);
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ESI_val;
 		ror_api_assert(REG_values, unit != NULL);
-		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->ptrStructDefUnit;
 		ror_api_assert(REG_values, unitDef != NULL);
 		long int unitId = unit->unitInstanceId;
 		char unitStatus = unit->unitStatus;
@@ -1005,7 +1005,7 @@ void CustomRORInstance::ManageCityPlanHouseDistanceFromBuildings(REG_BACKUP *REG
 	long int maxPosXValue; // Will be written in ESP+34, but later
 	// MinPosX will be written in stack from (returned) EAX value in ROR's code.
 
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *defOtherBuilding = otherBuilding->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *defOtherBuilding = otherBuilding->ptrStructDefUnit;
 	ror_api_assert(REG_values, defOtherBuilding != NULL);
 	// Get relevant distance value according to "reference building" type (DAT_ID)
 	float distanceValue = 3; // From original code
@@ -1580,13 +1580,13 @@ void CustomRORInstance::OnAfterLoadEmpires_DAT(REG_BACKUP *REG_values) {
 // From 0051A3BA
 // This is called when user clicks to add a unit in scenario editor (NOT called when moving mouse in game zone).
 void CustomRORInstance::EditorCheckForUnitPlacement(REG_BACKUP *REG_values) {
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = (AOE_STRUCTURES::STRUCT_DEF_UNIT *) REG_values->ESI_val;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *) REG_values->ESI_val;
 	long int callResult = 0;
 	REG_values->ECX_val = REG_values->ESI_val; // in fact it is not necessary because we do the CALL ourselves
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 
 	ror_api_assert(REG_values, unitDef);
-	ror_api_assert(REG_values, unitDef->IsCheckSumValid());
+	ror_api_assert(REG_values, unitDef->IsCheckSumValidForAUnitClass());
 	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 	ror_api_assert(REG_values, player);
 	ror_api_assert(REG_values, player->IsCheckSumValid());

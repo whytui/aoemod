@@ -38,7 +38,7 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = unit->ptrStructPlayer;
 	if (!unitPlayer || !unitPlayer->IsCheckSumValid()) { return; }
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->ptrStructDefUnit;
 	if (!unitDef) { return; }
 	this->unit = unit;
 	this->initialOwner = unitPlayer->playerId;

@@ -254,7 +254,7 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_BUILD_AI
 		if (currentUnit && (currentUnit->unitInstanceId >= 0) && (currentUnit->ptrStructDefUnit) && // Exclude temporary units (smoke, dead units) with negative id
 			(currentUnit->ptrStructDefUnit->unitType >= AOE_CONST_FUNC::GUT_LIVING_UNIT) && // living + building (+trees, but non-gaia players don't have any)
 			((currentUnit->ptrStructDefUnit->DAT_ID1 == DAT_ID) || (DAT_ID == -1))) {
-			AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = currentUnit->ptrStructDefUnit;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = currentUnit->ptrStructDefUnit;
 			notInStrategyUnitsList.push_back(currentUnit);
 		}
 		creatableListElem = creatableListElem->previousElement;
@@ -343,7 +343,7 @@ bool UpdateStrategyWithExistingUnit(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AO
 	assert(unit->IsCheckSumValidForAUnitClass());
 	if (!(buildAI->IsCheckSumValid()) || (!unit->IsCheckSumValidForAUnitClass())) { return false; }
 
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->ptrStructDefUnit;
 	if (!unitDef) { return false; }
 	short int baseDATID = unitDef->DAT_ID1;
 	if (IsVillager(baseDATID)) { baseDATID = CST_UNITID_MAN; } // We don't want forager or repairmen here, just VILLAGERS to match strategy elements !
@@ -752,7 +752,7 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 		elemToMoveFirstAddedHouse = elemToMoveFirstAddedHouse->previous;
 	}
 
-	AOE_STRUCTURES::STRUCT_DEF_UNIT **defUnitTable = player->ptrStructDefUnitTable;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE **defUnitTable = player->ptrStructDefUnitTable;
 
 	// Do only 1 (reverse) loop on strategy and collect all necessary information.
 	// We suppose that a reverse loop will find first the strongest (military) units !
@@ -814,9 +814,10 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 			traceMessageHandler.WriteMessageNoNotification("There is only 1 unit type to add in strategy.");
 			short int DAT_ID = strongerUnits[0];
 			char buf[30];
-			AOE_STRUCTURES::STRUCT_DEF_UNIT *defUnit = defUnitTable[DAT_ID];
+			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) defUnitTable[DAT_ID];
 			//if (!defUnit) { return; }
 			assert(defUnit != NULL);
+			assert(defUnit->DerivesFromLiving());
 			strcpy_s(buf, GetUnitName(DAT_ID));
 			AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, defUnit->trainLocation,
 				AIUCLivingUnit, DAT_ID, player, buf);
@@ -873,9 +874,10 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 			// Add unit
 			short int DAT_ID = strongerUnits[currentIndex];
 			char buf[30];
-			AOE_STRUCTURES::STRUCT_DEF_UNIT *defUnit = defUnitTable[DAT_ID];
+			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)defUnitTable[DAT_ID];
 			//if (!defUnit) { return; }
 			assert(defUnit != NULL);
+			assert(defUnit->DerivesFromLiving());
 			strcpy_s(buf, GetUnitName(DAT_ID));
 			AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, defUnit->trainLocation,
 				AIUCLivingUnit, DAT_ID, player, buf);

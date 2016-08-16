@@ -382,8 +382,8 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		char *aid = command + 3;
 		short int id = atoi(aid);
 		if ((id == 0) && (*aid != '0')) { id = -1; }
-		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = GetUnitDefStruct(player, id);
-		if (player && player->IsCheckSumValid() && unitDef && unitDef->IsCheckSumValid() && gameSettings->isSinglePlayer) {
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = GetUnitDefStruct(player, id);
+		if (player && player->IsCheckSumValid() && unitDef && unitDef->IsCheckSumValidForAUnitClass() && gameSettings->isSinglePlayer) {
 			gameSettings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_EDITOR_SET_UNIT_LOCATION;
 			gameSettings->editorUserSelectedUnitDefId = id;
 			sprintf_s(outputBuffer, "Add %s. Right-click to quit add mode.", unitDef->ptrUnitName);
@@ -653,9 +653,9 @@ void CustomRORCommand::UpdateWorkRateWithMessage(short int DATID, float updatedV
 	for (int civId = 0; civId < global->civCount; civId++) {
 		AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civId];
 		if (civDef && civDef->IsCheckSumValid()) {
-			AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = civDef->GetUnitDef(DATID);
+			AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)civDef->GetUnitDef(DATID);
 			char msgBuffer[100];
-			if (unitDef && unitDef->IsCheckSumValid()) {
+			if (unitDef && unitDef->DerivesFromBird()) {
 				if (firstOne) { // Message only once
 					if (updatedValue < 0) {
 						sprintf_s(msgBuffer, "%s (%d): work rate=%f", unitDef->ptrUnitName, unitDef->DAT_ID1, unitDef->workRate);
@@ -718,9 +718,9 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 			AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civid];
 			if (civDef && civDef->IsCheckSumValid()) {
 				for (int datid = 0; datid < civDef->civUnitDefCount; datid++) {
-					AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = civDef->GetUnitDef(datid);
+					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = civDef->GetUnitDef(datid);
 					// If config says to exclude annoying units, test if current unitDef is one of banned ones
-					if (unitDef && unitDef->IsCheckSumValid()) {
+					if (unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 						bool doNotShowThisOne = excludeAnnoyingUnits && (
 							(unitDef->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_BARRACKS_2_UPGRADE) ||
 							(unitDef->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_TC_2_UPGRADE) ||
@@ -748,9 +748,9 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 			if (civDef && civDef->IsCheckSumValid()) {
 				if (civDef->civUnitDefCount > 393) {
 					// add condition SLP=799 ?
-					AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDefDest = civDef->GetUnitDef(393); // this tree has graphics with invalid SLP (799)
-					AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDefSrc = civDef->GetUnitDef(391);
-					if (unitDefDest && unitDefSrc && unitDefDest->IsCheckSumValid() && unitDefSrc->IsCheckSumValid()) {
+					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefDest = civDef->GetUnitDef(393); // this tree has graphics with invalid SLP (799)
+					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefSrc = civDef->GetUnitDef(391);
+					if (unitDefDest && unitDefSrc && unitDefDest->IsCheckSumValidForAUnitClass() && unitDefSrc->IsCheckSumValidForAUnitClass()) {
 						unitDefDest->ptrStandingGraphics = unitDefSrc->ptrStandingGraphics;
 					}
 				}
@@ -812,11 +812,11 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 					msg += " to ";
 					msg += std::to_string(newValue);
 					msg += " for ";
-					AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = NULL;
+					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = NULL;
 					if (global->civCount > 1) { // Use an arbitrary civ, just to get unit name.
 						unitDef = global->civilizationDefinitions[0]->GetUnitDef(techDef->ptrEffects[i].effectUnit);
 					}
-					if (unitDef && unitDef->IsCheckSumValid()) {
+					if (unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 						char tmpbuf[80];
 						GetLanguageDllText(unitDef->languageDLLID_Name, tmpbuf, sizeof(tmpbuf), unitDef->ptrUnitName);
 						msg += tmpbuf;
@@ -1319,8 +1319,8 @@ bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT
 	if (!beingSeenUnit || !beingSeenUnit->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = beingSeenUnit->ptrStructDefUnit;
-	if (!unitDef || !unitDef->IsCheckSumValid()) {
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = beingSeenUnit->ptrStructDefUnit;
+	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
 
@@ -1799,9 +1799,9 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_A
 			traceMessageHandler.WriteMessage("Error: Could not find unit definition for wonder");
 			return true; // Unit definition does not exist !
 		}
-		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[stratElem->unitDAT_ID];
-		assert(unitDef && unitDef->IsCheckSumValid());
-		if (!unitDef || !unitDef->IsCheckSumValid()) { return true; } // Unit definition does not exist !
+		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) player->ptrStructDefUnitTable[stratElem->unitDAT_ID];
+		assert(unitDef && unitDef->DerivesFromLiving());
+		if (!unitDef || !unitDef->DerivesFromLiving()) { return true; } // Unit definition does not exist !
 		AOE_STRUCTURES::STRUCT_COST *costs = unitDef->costs;
 		for (int i = 0; i < 3; i++) {
 			if (costs[i].costPaid && (costs[i].costType >= 0) &&
@@ -2080,7 +2080,7 @@ void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long i
 					player->playerId, (long int)invalidUnit, invalidUnit->unitInstanceId, (int)invalidUnit->unitType, i, buildingList_count);
 				//AddTraceToFile(buffer);
 				traceMessageHandler.WriteMessage(buffer);
-				AOE_STRUCTURES::STRUCT_DEF_UNIT *invalidUnitDef = invalidUnit->ptrStructDefUnit;
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *invalidUnitDef = invalidUnit->ptrStructDefUnit;
 				long checksum = ((long)invalidUnitDef < 0x10000) ? -1 : invalidUnitDef->checksum; // if invalidUnitDef ptr is low it is probably invalid, don't access it
 				int tmp_DAT_ID = -1;
 				if (checksum == 0x00549930) { // checksum is correct (building unitDef)
@@ -2659,7 +2659,7 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUC
 			unit = (AOE_STRUCTURES::STRUCT_UNIT_BIRD *)GetUnitStruct(unitId);
 		}
 		if (unit != NULL) {
-			AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->ptrStructDefUnit;
 			assert(unitDef != NULL);
 			if ((unit->DerivesFromBird()) &&
 				(unitDef->unitAIType != TribeAIGroupCivilian) &&
@@ -2779,7 +2779,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	}
 	if (IsMultiplayer()) { return; } // can provoke out of sync errors
 
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)unit->ptrStructDefUnit;
 	assert(unitDef != NULL);
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
 	if (!player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
@@ -2823,7 +2823,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 			}
 		}
 		if (canInteractWithTarget) {
-			if (unitDef->ptrUnitCommandHeader) {
+			if (unitDef->DerivesFromBird() && unitDef->ptrUnitCommandHeader) {
 				if (GetUnitDefCommandForTarget(unit, target, true) != NULL) {
 					TellUnitToInteractWithTarget(unit, target);
 					commandCreated = true;
@@ -2866,9 +2866,9 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE 
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = targetUnit->ptrStructPlayer; // The victim (if unit has been converted)
 	assert(targetPlayer != NULL);
 	assert(targetPlayer->IsCheckSumValid());
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *targetUnitDef = targetUnit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = targetUnit->ptrStructDefUnit;
 	assert(targetUnitDef != NULL);
-	assert(targetUnitDef->IsCheckSumValid());
+	assert(targetUnitDef->IsCheckSumValidForAUnitClass());
 
 	// Fix resource bugs
 	if (IsVillager_includingShips(targetUnitDef->DAT_ID1)) {
@@ -3142,8 +3142,9 @@ bool CustomRORCommand::AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE
 	// We choose not to modify existing shortcut
 	if (unit->shortcutNumber != 0) { return false; }
 
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->ptrStructDefUnit;
 	assert(unitDef != NULL);
+	assert(unitDef->IsCheckSumValidForAUnitClass());
 
 	int shortcutId = this->crInfo->configInfo.unitShortcutsPriorityReverseOrder ? 9 : 1;
 	for (int currentIndex = 1; currentIndex < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS; currentIndex++) {
@@ -3253,9 +3254,11 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	assert(actorPlayer->IsCheckSumValid());
 	float *resources = (float *)actorPlayer->ptrResourceValues;
 	assert(resources != NULL);
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *actorUnitDef = actorUnit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50*)actorUnit->ptrStructDefUnit;
 	assert(actorUnitDef != NULL);
-	assert(actorUnitDef->IsCheckSumValid());
+	assert(actorUnitDef->IsCheckSumValidForAUnitClass());
+	assert(actorUnitDef->DerivesFromType50());
+	if (!actorUnitDef || !actorUnitDef->DerivesFromType50()) { return true; } // error case
 	bool actorIsPriest = (actorUnitDef->DAT_ID1 == CST_UNITID_PRIEST);
 	bool actorIsArcher = (actorUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher) ||
 		(actorUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher) ||
@@ -3543,11 +3546,11 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 	assert(enemyTower->ptrStructDefUnit != NULL);
 	if ((!actorUnit->currentActivity) || (!actorUnit->ptrStructDefUnit) || (!enemyTower->ptrStructDefUnit)) { return false; }
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = actorUnit->currentActivity; // Guaranteed non-NULL
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *actorUnitDef = actorUnit->ptrStructDefUnit; // Guaranteed non-NULL
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *enemyTowerDef = enemyTower->ptrStructDefUnit; // Guaranteed non-NULL
-	assert(actorUnitDef->IsCheckSumValid());
-	assert(enemyTowerDef->IsCheckSumValid());
-	if (!actorUnitDef->IsCheckSumValid() || !enemyTowerDef->IsCheckSumValid()) { return false; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnit->ptrStructDefUnit; // Guaranteed non-NULL
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *enemyTowerDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)enemyTower->ptrStructDefUnit; // Guaranteed non-NULL
+	assert(actorUnitDef->DerivesFromType50());
+	assert(enemyTowerDef->DerivesFromType50());
+	if (!actorUnitDef->DerivesFromType50() || !enemyTowerDef->DerivesFromType50()) { return false; }
 
 	if (activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_CONVERT) {
 		return false; // Converting priest: let him proceed. TO DO: improve !
@@ -3563,9 +3566,9 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 			AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO * actionInfo = actorUnit->ptrActionInformation;
 			if (actionInfo) {
 				_asm {
-					MOV ECX, actionInfo
-					MOV EAX, 0x403E50
-					CALL EAX // removeAction
+					MOV ECX, actionInfo;
+					MOV EAX, 0x403E50;
+					CALL EAX; // removeAction
 				}
 			}
 			
@@ -3584,12 +3587,13 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 
 	long int currentTargetId = actorUnit->currentActivity->targetUnitId;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *currentTarget = GetUnitStruct(currentTargetId);
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *currentTargetDef = NULL;
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *currentTargetDef = NULL;
 	if (currentTarget) {
-		currentTargetDef = currentTarget->ptrStructDefUnit;
+		currentTargetDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)currentTarget->ptrStructDefUnit;
 	} else {
 		return true;
 	}
+	assert(currentTargetDef->DerivesFromBird());
 
 	float distanceToTower = GetDistance(actorUnit->positionX, actorUnit->positionY, enemyTower->positionX, enemyTower->positionY);
 	float distanceToCurrentTarget = GetDistance(actorUnit->positionX, actorUnit->positionY, currentTarget->positionX, currentTarget->positionY);
@@ -3863,10 +3867,10 @@ void CustomRORCommand::MoveFireGalleyIconIfNeeded(AOE_STRUCTURES::STRUCT_PLAYER 
 	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *researchInfo = player->ptrResearchesStruct;
 	assert(researchInfo != NULL);
 	if ((CST_RSID_TRIREME >= researchInfo->researchCount) || (CST_RSID_FIRE_GALLEY >= researchInfo->researchCount) ) { return; }
-	AOE_STRUCTURES::STRUCT_DEF_UNIT **arrUnitDef = player->ptrStructDefUnitTable;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE **arrUnitDef = player->ptrStructDefUnitTable;
 	if (arrUnitDef) {
-		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = arrUnitDef[CST_UNITID_FIRE_GALLEY];
-		if (!unitDef || (unitDef->trainButton == 9)) { return; } // Already at the custom location (also return if invalid unit def)
+		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)arrUnitDef[CST_UNITID_FIRE_GALLEY];
+		if (!unitDef || !unitDef->DerivesFromLiving() || (unitDef->trainButton == 9)) { return; } // Already at the custom location (also return if invalid unit def)
 		AOE_CONST_FUNC::RESEARCH_STATUSES triremeStatus = GetResearchStatus(player, CST_RSID_TRIREME);
 		AOE_CONST_FUNC::RESEARCH_STATUSES fireGalleyStatus = GetResearchStatus(player, CST_RSID_FIRE_GALLEY);
 		// If player has fire galley + trireme in his tech tree, make sure both buttons can be visible at any time (if available)
@@ -3912,7 +3916,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 	}
 	short int nbDef = player->structDefUnitArraySize + 1; // new number of unit definitions
 	long int newSizeInBytes = nbDef * 4;
-	AOE_STRUCTURES::STRUCT_DEF_UNIT **oldArray = player->ptrStructDefUnitTable;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE **oldArray = player->ptrStructDefUnitTable;
 	// Run some checks
 	assert(oldArray != NULL);
 	if (oldArray == NULL) { return -1; }
@@ -3925,7 +3929,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 	}
 
 	// Create new array
-	AOE_STRUCTURES::STRUCT_DEF_UNIT **newArray = (AOE_STRUCTURES::STRUCT_DEF_UNIT **)AOEAlloc(newSizeInBytes);
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE **newArray = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE **)AOEAlloc(newSizeInBytes);
 	if (newArray == NULL) { return -1; } // nothing allocated: return an error
 		
 	// Copy old array into new (for all existing unitDefs => copy pointers)
@@ -3935,11 +3939,11 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 	player->structDefUnitArraySize = nbDef;
 	player->ptrStructDefUnitTable[newDAT_ID] = NULL; // until we set a valid pointer.
 
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *srcDef = player->ptrStructDefUnitTable[srcDAT_ID];
-	assert(srcDef != NULL);
-	if (srcDef == NULL) { return -1; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *srcDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)srcDef;
-	if ((srcDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) || (srcDef->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT)) {
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *srcDef_base = player->ptrStructDefUnitTable[srcDAT_ID];
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *srcDef_type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)srcDef_base;
+	assert(srcDef_base != NULL);
+	if (srcDef_base == NULL) { return -1; }
+	if ((srcDef_base->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) || (srcDef_base->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT)) {
 		traceMessageHandler.WriteMessage("WARNING: adding unitdef for living/buildings is disabled due to conversion bug.");
 		// To solve the limitation, a solution could be to add it for all players !
 		return -1;
@@ -3948,7 +3952,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 	long int objectSize = 0;
 	bool hasAttacksAndArmors = srcDef_base->DerivesFromType50();
 	bool hasCommandsHeader = srcDef_base->DerivesFromBird();
-	switch (srcDef->unitType) {
+	switch (srcDef_base->unitType) {
 	case GUT_EYE_CANDY:
 		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BASE);
 		break;
@@ -3988,12 +3992,13 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 	if (objectSize <= 0) { return -1; }
 
 	// Create new defUnit in the free room we just created
-	AOE_STRUCTURES::STRUCT_DEF_UNIT *newUnitDef = (AOE_STRUCTURES::STRUCT_DEF_UNIT *) AOEAlloc(objectSize);
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *newUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *) AOEAlloc(objectSize);
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *newUnitDefType50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)newUnitDef;
 	if (!newUnitDef) { return -1; } // nothing allocated: return an error
 
 	player->ptrStructDefUnitTable[newDAT_ID] = newUnitDef;
 
-	memcpy(newUnitDef, srcDef, objectSize);
+	memcpy(newUnitDef, srcDef_base, objectSize);
 
 	// Very important: update new unitDef's DATIDs or some features will not work
 	newUnitDef->DAT_ID1 = newDAT_ID;
@@ -4002,38 +4007,38 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 	// Manage damage graphics array (allocated for each unitDef)
 	// It belongs to base class => do this for all unit types, even if it seems this array is only used for buildings
 	if (newUnitDef->damageGraphicCount > 0) {
-		newUnitDef->damageGraphicsArray = (unsigned long int *)AOEAlloc(sizeof(unsigned long int) * newUnitDef->damageGraphicCount);
-		memcpy(newUnitDef->damageGraphicsArray, srcDef->damageGraphicsArray, sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->damageGraphicCount);
+		newUnitDef->damageGraphicsArray = (STRUCT_DAMAGE_GRAPHIC *)AOEAlloc(sizeof(STRUCT_DAMAGE_GRAPHIC) * newUnitDef->damageGraphicCount);
+		memcpy(newUnitDef->damageGraphicsArray, srcDef_base->damageGraphicsArray, sizeof(AOE_STRUCTURES::STRUCT_DAMAGE_GRAPHIC) * newUnitDef->damageGraphicCount);
 	} else {
 		assert(newUnitDef->damageGraphicsArray == NULL);
 		newUnitDef->damageGraphicsArray = NULL; // Should already be NULL in this case
 		newUnitDef->damageGraphicCount = 0;// Should not be <0
 	}
 
-	if (hasAttacksAndArmors) {
+	if (hasAttacksAndArmors && srcDef_type50->DerivesFromType50()) {
 		// Attacks and armors are allocated for each unitDef. We need to duplicate them (or ROR would free them twice)
-		newUnitDef->ptrArmorsList = NULL; // Default value, will be overwritten if necessary
-		newUnitDef->ptrAttacksList = NULL; // Default value, will be overwritten if necessary
-		if (newUnitDef->armorsCount > 0) {
-			newUnitDef->ptrArmorsList = (AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->armorsCount);
-			memcpy(newUnitDef->ptrArmorsList, srcDef->ptrArmorsList, sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->armorsCount);
+		newUnitDefType50->ptrArmorsList = NULL; // Default value, will be overwritten if necessary
+		newUnitDefType50->ptrAttacksList = NULL; // Default value, will be overwritten if necessary
+		if (newUnitDefType50->armorsCount > 0) {
+			newUnitDefType50->ptrArmorsList = (AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDefType50->armorsCount);
+			memcpy(newUnitDefType50->ptrArmorsList, srcDef_type50->ptrArmorsList, sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDefType50->armorsCount);
 		}
-		if (newUnitDef->attacksCount > 0) {
-			newUnitDef->ptrAttacksList = (AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->attacksCount);
-			memcpy(newUnitDef->ptrAttacksList, srcDef->ptrAttacksList, sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDef->attacksCount);
+		if (newUnitDefType50->attacksCount > 0) {
+			newUnitDefType50->ptrAttacksList = (AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDefType50->attacksCount);
+			memcpy(newUnitDefType50->ptrAttacksList, srcDef_type50->ptrAttacksList, sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDefType50->attacksCount);
 		}
 	}
 
 	// Graphics structures are COMMON (not freed at unitDef level): we can keep them, they won't be freed twice
 
-	if (hasCommandsHeader) {
+	if (hasCommandsHeader && srcDef_type50->DerivesFromType50()) {
 		// Commands: we need to duplicate them (or ROR would free them twice)
-		assert(srcDef->ptrUnitCommandHeader != NULL);
-		if (srcDef->ptrUnitCommandHeader != NULL) {
+		assert(srcDef_type50->ptrUnitCommandHeader != NULL);
+		if (srcDef_type50->ptrUnitCommandHeader != NULL) {
 			AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER *newCmdHeader = (AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER *) AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER));
-			newUnitDef->ptrUnitCommandHeader = newCmdHeader;
-			newCmdHeader->checksum = srcDef->ptrUnitCommandHeader->checksum;
-			newCmdHeader->commandCount = srcDef->ptrUnitCommandHeader->commandCount;
+			newUnitDefType50->ptrUnitCommandHeader = newCmdHeader;
+			newCmdHeader->checksum = srcDef_type50->ptrUnitCommandHeader->checksum;
+			newCmdHeader->commandCount = srcDef_type50->ptrUnitCommandHeader->commandCount;
 			if (newCmdHeader->commandCount > 0) {
 				newCmdHeader->ptrCommandArray = (AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF**) AOEAlloc(newCmdHeader->commandCount * 4);
 			} else {
@@ -4042,10 +4047,10 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 
 			for (long int i = 0; i < newCmdHeader->commandCount; i++) {
 				newCmdHeader->ptrCommandArray[i] = (AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF*) AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF)); // Alloc
-				memcpy(newCmdHeader->ptrCommandArray[i], srcDef->ptrUnitCommandHeader->ptrCommandArray[i], sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF)); // Copy from source
+				memcpy(newCmdHeader->ptrCommandArray[i], srcDef_type50->ptrUnitCommandHeader->ptrCommandArray[i], sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF)); // Copy from source
 			}
 		} else {
-			newUnitDef->ptrUnitCommandHeader = NULL; // This should NOT happen
+			newUnitDefType50->ptrUnitCommandHeader = NULL; // This should NOT happen
 		}
 	}
 
@@ -5659,8 +5664,9 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = globalStruct->ptrUnitPointersList[unitId];
 		if (unit) {
 			assert(unit->IsCheckSumValidForAUnitClass());
-			AOE_STRUCTURES::STRUCT_DEF_UNIT *defUnit = unit->ptrStructDefUnit;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *defUnit = unit->ptrStructDefUnit;
 			if (defUnit) {
+				assert(defUnit->IsCheckSumValidForAUnitClass());
 				if (defUnit->DAT_ID1 == CST_UNITID_HOUSE) {
 					// Mark if we found a house (later we will have special treatment for 1st house to build it faster)
 					hasHouse = true;
@@ -5679,11 +5685,12 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 	// 2) Active loop on my buildings
 	for (long int index = 0; index < infAI->buildingUnits.usedElements; index++) {
 		short int unitId = (short int)infAI->buildingUnits.unitIdArray[index];
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = globalStruct->ptrUnitPointersList[unitId];
+		AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)globalStruct->ptrUnitPointersList[unitId];
 		if (unit) {
-			assert(unit->IsCheckSumValidForAUnitClass());
-			AOE_STRUCTURES::STRUCT_DEF_UNIT *defUnit = unit->ptrStructDefUnit;
+			assert(unit->IsCheckSumValid()); // IS a building (no other unit type)
+			AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)unit->ptrStructDefUnit;
 			if (defUnit) {
+				assert(defUnit->IsCheckSumValid()); // IS a building definition (no other unit type)
 				// Make sure buildings are not all side by side with no space: if 1 side is "all blocked", make sure we don't build on opposite side.
 				// 2 consecutive buildings in a row will be possible, but not more.
 				int unitX = (int)unit->positionX;
@@ -5694,13 +5701,13 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 					// Too bad because this call's goal is not to disable, but to set a very low priority :-(
 					protectOppositeSidesValue = -1;
 				}
-				mapInfosStruct->ProtectBuildingOppositeSides(unitX, unitY, defUnit->sizeRadius1, protectOppositeSidesValue);
+				mapInfosStruct->ProtectBuildingOppositeSides(unitX, unitY, defUnit->sizeRadiusY, protectOppositeSidesValue);
 
 				// Storage buildings: protect (more) their neighborhood, they need to be easily accessible by gatherers (or new villagers)
 				// Moreover, TC and granary need space to build farms nearby
 
 				// substract this value to X/Y positions that are > to center position to fix rounding.
-				int unitRadiusDecreaseForHighPositions = 1 - (((int)(defUnit->sizeRadius1 * 2)) % 2); // 0 for values like 1.5 or 2.5, 1 for round values
+				int unitRadiusDecreaseForHighPositions = 1 - (((int)(defUnit->sizeRadiusY * 2)) % 2); // 0 for values like 1.5 or 2.5, 1 for round values
 				bool loopUnitIsDropSite = false;
 				long int protectDistance = 0;
 				long int protectValueLargeZone = -8;
@@ -6376,8 +6383,8 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
 		if (!player || !player->IsCheckSumValid()) { return; }
 		if (actionUnitDefId >= player->structDefUnitArraySize) { return; }
-		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = player->ptrStructDefUnitTable[actionUnitDefId];
-		if (!unitDef || !unitDef->IsCheckSumValid()) { return; }
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->ptrStructDefUnitTable[actionUnitDefId];
+		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return; }
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = CheckAndCreateUnit(player, unitDef, posX, posY, false, true, true);
 	}
 
@@ -6471,7 +6478,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		}
 
 		// Now associate new unit definition to our unit
-		unitLiving->ptrStructDefUnit = (AOE_STRUCTURES::STRUCT_DEF_UNIT *)newUnitDefLiving;
+		unitLiving->ptrStructDefUnit = newUnitDefLiving;
 		unitLiving->hasDedicatedUnitDef = 1; // don't forget to set this flag so that ROR correctly frees everything later.
 		// Force use provided name (if provided)
 		if (*newUnitName != 0) {
@@ -6508,8 +6515,8 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			// Make sure that for all players source UnitDefId exists
 			if (sourceUnitDefId >= player->structDefUnitArraySize) { return; }
 			// Make sure source unitDef exists for all players (remember: it can exist and be disabled, like gaia units for other civs)
-			AOE_STRUCTURES::STRUCT_DEF_UNIT *sourceUnitDef = player->ptrStructDefUnitTable[sourceUnitDefId];
-			if (!sourceUnitDef || !sourceUnitDef->IsCheckSumValid()) { return; }
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *sourceUnitDef = player->ptrStructDefUnitTable[sourceUnitDefId];
+			if (!sourceUnitDef || !sourceUnitDef->IsCheckSumValidForAUnitClass()) { return; }
 			// Make sure maximum unitDefId is the same for ally players (synchronized)
 			if (commonArraySize == -1) {
 				commonArraySize = player->structDefUnitArraySize; // first loop: initialize.
