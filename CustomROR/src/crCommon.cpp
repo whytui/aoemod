@@ -2617,14 +2617,15 @@ void DebugDumpAllUnits() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) return;
 	for (int i = 0; (i < GetGameGlobalStructPtr()->seqUnitId - 1) && (i < GetGameGlobalStructPtr()->unitPointersListSize); i++) {
-		AOE_STRUCTURES::STRUCT_UNIT *unit = GetGameGlobalStructPtr()->ptrUnitPointersList[i];
-		if (unit && unit->IsCheckSumValid() && unit->ptrStructDefUnit && unit->ptrStructDefUnit->IsCheckSumValid()) {
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = GetGameGlobalStructPtr()->ptrUnitPointersList[i];
+		if (unit && unit->IsCheckSumValidForAUnitClass() && unit->ptrStructDefUnit && unit->ptrStructDefUnit->IsCheckSumValid()) {
 			char buf[200];
 			char buf2[10];
 			buf2[0] = '-';
 			buf2[1] = 0;
-			if ((unit->ptrStructDefUnit->unitType >= 70) && (unit->ptrStructDefUnit->unitType != 90)) {
-				sprintf_s(buf2, "%d", unit->stillToBeDiscoveredByHuman);
+			AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *unitLiving = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)unit;
+			if (unitLiving->DerivesFromType50()) {
+				sprintf_s(buf2, "%d", unitLiving->stillToBeDiscoveredByHuman);
 			}
 			sprintf_s(buf, "unit %ld\tType=%ld\tDATID=%ld\t1B8=%s\tname=%s\t%d\t%d\t%d\t%d\n", unit->unitInstanceId, unit->unitType,
 				unit->ptrStructDefUnit->DAT_ID1, buf2, unit->ptrStructDefUnit->ptrUnitName,

@@ -100,7 +100,7 @@ public:
 	bool OpenInGameUnitPropertiesPopup();
 	// Open the relevant "view/edit unit" popup for provided unit.
 	// Returns true if successful.
-	bool OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT *unit);
+	bool OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
 	// Use this to properly free custom button from options menu. This should (always) be called when ingame menu is closed.
 	void FreeInGameCustomOptionsButton();

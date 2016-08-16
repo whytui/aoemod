@@ -197,7 +197,7 @@ public:
 
 	// Process event when (human) player sees a unit. This is where gaia units are captured by human player.
 	// Return true if the unit must NOT be captured
-	bool HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT_UNIT *beingSeenUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer);
+	bool HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT_UNIT_BASE *beingSeenUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer);
 
 	// Detects if game start strategy init has been done because nextStrategyAIExecutionCounter can be wrong with saved games
 	// (savegame file format does NOT save this information).
@@ -243,13 +243,13 @@ public:
 	bool ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer, AOE_CONST_INTERNAL::GAME_EVENT_TYPES notifyEvent = AOE_CONST_INTERNAL::CST_GET_INVALID);
 
 	// Custom Fixes/features on player.addUnit calls.
-	void OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable);
+	void OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable);
 
 	// Custom Fixes/features on player.removeUnit calls.
-	void OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable);
+	void OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable);
 
 	// Returns true if a shortcut has been added/modified
-	bool AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT *unit);
+	bool AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
 	// Returns true if a unit should change target to new one, false if it should keep attacking current one.
 	// This choice is very important, unit must NOT change its mind on each call because it is called too often and unit just attacks none of its "attackers"
@@ -258,11 +258,11 @@ public:
 
 	// Returns true if a unit should change target to new one, false if it should keep attacking current one.
 	// To be used when target unit is a tower in actor's town
-	bool ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT *actorUnit, AOE_STRUCTURES::STRUCT_UNIT *enemyTower);
+	bool ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower);
 
 	// Replaces ROR's loop on villagers to pick some and task them to attack enemy tower.
 	// assignedUnitsCounter is IN OUT: input value can be >0 (number of military units that have already been tasked). We should stop when assignedUnitsCounter reaches 6 (original code's behaviour)
-	void towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT *enemyTower, long int *pAssignedUnitsCount, AOE_STRUCTURES::STRUCT_POSITION_INFO *pTCPositionInfo);
+	void towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower, long int *pAssignedUnitsCount, AOE_STRUCTURES::STRUCT_POSITION_INFO *pTCPositionInfo);
 
 	// If fire galley iconId conflicts with catapult trireme, this will move it to a free location (trireme tech because now it's free)
 	void MoveFireGalleyIconIfNeeded(AOE_STRUCTURES::STRUCT_PLAYER *player);

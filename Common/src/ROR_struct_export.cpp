@@ -109,10 +109,6 @@ namespace AOE_STRUCTURES {
 		return res;
 	}
 
-	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT *obj, unsigned long int RORAddress) {
-		return this->ExportStruct_internal((STRUCT_UNIT_BASE*)obj, RORAddress);
-	}
-
 	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_DEF_UNIT *obj, unsigned long int RORAddress) {
 		return this->ExportStruct_internal((STRUCT_UNITDEF_BASE*)obj, RORAddress);
 	}

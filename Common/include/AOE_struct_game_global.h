@@ -100,7 +100,7 @@ namespace AOE_STRUCTURES {
 		// +0x80
 		unsigned long int unknown_080; // list of unit data??
 		float timerInterval;
-		STRUCT_UNIT **ptrUnitPointersList; // +88. pointer to Array of unit struct pointers
+		STRUCT_UNIT_BASE **ptrUnitPointersList; // +88. pointer to Array of unit struct pointers
 		unsigned long int unknown_08C;
 		// +0x90
 		long int unitPointersListSize; // Size of the ptrUnitPointersList Array

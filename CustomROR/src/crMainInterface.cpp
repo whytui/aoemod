@@ -608,7 +608,7 @@ bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup() {
 	if (!selectedUnit || !selectedUnit->IsCheckSumValid()) {
 		return false;
 	}
-	if (!this->OpenInGameUnitPropertiesPopup((AOE_STRUCTURES::STRUCT_UNIT*) selectedUnit)) {
+	if (!this->OpenInGameUnitPropertiesPopup(selectedUnit)) {
 		return false;
 	}
 	
@@ -621,8 +621,8 @@ bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup() {
 
 // Open the relevant "view/edit unit" popup for provided unit.
 // Returns true if successful.
-bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT *unit) {
-	if (!unit || !unit->IsCheckSumValid()) {
+bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
 	InGameUnitPropertiesPopup *popup = this->OpenCustomGamePopup<InGameUnitPropertiesPopup>(600, 500, true);

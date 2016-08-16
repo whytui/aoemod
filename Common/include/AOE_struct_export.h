@@ -108,7 +108,6 @@ namespace AOE_STRUCTURES
 		std::string ExportStruct_internal(STRUCT_UNIT_BIRD *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_LIVING *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_BUILDING *obj, unsigned long int RORAddress);
-		std::string ExportStruct_internal(STRUCT_UNIT *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNITDEF_BASE *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNITDEF_TYPE50 *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_DEF_UNIT *obj, unsigned long int RORAddress);

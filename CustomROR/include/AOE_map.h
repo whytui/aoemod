@@ -8,6 +8,7 @@
 #include <AOE_offsets.h>
 #include <AOE_const_functional.h>
 #include <AOE_struct_game_settings.h>
+#include "mainStructuresHandling.h"
 #include "UI_utilities.h"
 #include "traceMessage.h"
 
@@ -18,10 +19,8 @@ using namespace AOE_STRUCTURES;
 using namespace AOE_CONST_FUNC;
 
 
-// TODO: create an include file for such methods AOE_mainStructs or something like that
+// TODO: create an include file for such methods
 // Duplicated from crCommon (dirty !!)
-extern AOE_STRUCTURES::STRUCT_GAME_SETTINGS* GetGameSettingsPtr();
-extern AOE_STRUCTURES::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr();
 extern AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId);
 
 

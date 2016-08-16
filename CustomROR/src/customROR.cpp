@@ -631,7 +631,7 @@ void CustomRORInstance::ManageOnPlayerAddUnit(REG_BACKUP *REG_values) {
 	// This way, ESP[0]=ROR_return_address, ESP[i]=arg[i] (0 < i < 4)
 	long int *myESP = (long int *)(REG_values->ESP_val + 8);
 	long int isNotCreatable = myESP[2];
-	AOE_STRUCTURES::STRUCT_UNIT *unit = (AOE_STRUCTURES::STRUCT_UNIT *)myESP[1];
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)myESP[1];
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		// Original overwritten code to do now: MOV ESI,ECX and MOV ECX,DWORD PTR SS:[ESP+10] (get arg2)
 		REG_values->ESI_val = REG_values->ECX_val;
@@ -710,7 +710,7 @@ void CustomRORInstance::ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values) {
 	long int *myESP = (long int *)(REG_values->ESP_val + 8);
 	long int isNotCreatable = myESP[2];
 	long int isTempUnit = myESP[3];
-	AOE_STRUCTURES::STRUCT_UNIT *unit = (AOE_STRUCTURES::STRUCT_UNIT *)myESP[1];
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)myESP[1];
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		// Original overwritten code to do now: MOV EAX,DWORD PTR SS:[ESP+8] and MOV ESI,ECX
 		REG_values->ESI_val = REG_values->ECX_val;
@@ -730,7 +730,7 @@ void CustomRORInstance::FixBuildingStratElemUnitID(REG_BACKUP *REG_values) {
 	if (ai) {
 		AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &ai->structBuildAI;
 		ror_api_assert(REG_values, buildAI != NULL);
-		AOE_STRUCTURES::STRUCT_UNIT *unit = (AOE_STRUCTURES::STRUCT_UNIT *)REG_values->ESI_val;
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ESI_val;
 		ror_api_assert(REG_values, unit != NULL);
 		AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 		ror_api_assert(REG_values, unitDef != NULL);
@@ -995,7 +995,7 @@ void CustomRORInstance::ManageCityPlanHouseDistanceFromBuildings(REG_BACKUP *REG
 		return;
 	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	AOE_STRUCTURES::STRUCT_UNIT *otherBuilding = (AOE_STRUCTURES::STRUCT_UNIT *) REG_values->EDI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *otherBuilding = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) REG_values->EDI_val;
 	ror_api_assert(REG_values, otherBuilding != NULL);
 	long int myESP = REG_values->ESP_val;
 	// At this point EBP and EAX both are otherBuilding's Y position. We have the choice to use one of them or re-get from EDI. Doesn't change a lot.
@@ -1179,7 +1179,7 @@ void CustomRORInstance::ManageCityMapLikeValueFarmPlacement(REG_BACKUP *REG_valu
 void CustomRORInstance::OverloadSetInProgress(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = (AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *) REG_values->EBX_val;
 	ror_api_assert(REG_values, stratElem != NULL);
-	AOE_STRUCTURES::STRUCT_UNIT *actor = (AOE_STRUCTURES::STRUCT_UNIT *) REG_values->EDI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actor = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) REG_values->EDI_val;
 	ror_api_assert(REG_values, actor != NULL);
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		stratElem->inProgressCount = 1; // What original (replaced) code used to do
@@ -1210,7 +1210,7 @@ void CustomRORInstance::OverloadResetUnitInAI(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, mainAI != NULL); // mainAI must not be NULL because of TEST ECX,ECX on 4F2B35
 	long int unitId_toReset = REG_values->EAX_val;
 	long int myESP = REG_values->ESP_val;
-	AOE_STRUCTURES::STRUCT_UNIT *unit_toReset = *(AOE_STRUCTURES::STRUCT_UNIT **) (myESP + 0x0C);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit_toReset = *(AOE_STRUCTURES::STRUCT_UNIT_BASE **) (myESP + 0x0C);
 	ror_api_assert(REG_values, unit_toReset != NULL);
 	// What original (replaced) code used to do:
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -1660,12 +1660,14 @@ void CustomRORInstance::EntryPoint_UIUnitSelection(REG_BACKUP *REG_values) {
 // Change return address to 00426D19 if we want NOT to change unit owner.
 void CustomRORInstance::HumanSpecific_onCapturableUnitSeen(REG_BACKUP *REG_values) {
 	long int actorPlayerId = REG_values->EDI_val;
-	AOE_STRUCTURES::STRUCT_UNIT *beingSeenUnit = (AOE_STRUCTURES::STRUCT_UNIT *) REG_values->ESI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *beingSeenUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) REG_values->ESI_val;
 	ror_api_assert(REG_values, actorPlayerId >= 0 && actorPlayerId <= 8);
 	ror_api_assert(REG_values, beingSeenUnit != NULL);
-	ror_api_assert(REG_values, beingSeenUnit->IsCheckSumValid());
+	ror_api_assert(REG_values, beingSeenUnit->IsCheckSumValidForAUnitClass());
+	ror_api_assert(REG_values, beingSeenUnit->DerivesFromType50());
 	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = NULL;
-	if (!beingSeenUnit || !beingSeenUnit->IsCheckSumValid() || (actorPlayerId < 0) || (actorPlayerId > 8)) { return; }
+	if (!beingSeenUnit || !beingSeenUnit->IsCheckSumValidForAUnitClass() || !beingSeenUnit->DerivesFromType50() || 
+		(actorPlayerId < 0) || (actorPlayerId > 8)) { return; }
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		actorPlayer = GetPlayerStruct((short int)actorPlayerId);
@@ -2065,8 +2067,8 @@ void CustomRORInstance::ManageAttackActivityChange_convert(REG_BACKUP *REG_value
 // The JUMP addresses are in ROR modified code (we use some TEST EAX / CMP AL,1 + JE in modified code), that's why we can use this method for different CALL addresses.
 void CustomRORInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ECX_val;
-	AOE_STRUCTURES::STRUCT_UNIT *enemyUnit = (AOE_STRUCTURES::STRUCT_UNIT *)REG_values->EDI_val;
-	AOE_STRUCTURES::STRUCT_UNIT *myUnit = (AOE_STRUCTURES::STRUCT_UNIT *)REG_values->EBX_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EBX_val;
 	//AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ESI_val;
 	REG_values->EAX_val = 1; // Default
 	ror_api_assert(REG_values, activity != NULL); // This has been verified in ROR code just before calling ROR_API
@@ -2074,8 +2076,8 @@ void CustomRORInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_value
 	ror_api_assert(REG_values, myUnit != NULL);
 	//ror_api_assert(REG_values, tacAI != NULL);
 	if (!activity || !enemyUnit || !myUnit) { return; }
-	ror_api_assert(REG_values, enemyUnit->IsCheckSumValid());
-	ror_api_assert(REG_values, myUnit->IsCheckSumValid());
+	ror_api_assert(REG_values, enemyUnit->IsCheckSumValidForAUnitClass());
+	ror_api_assert(REG_values, myUnit->IsCheckSumValidForAUnitClass());
 	//ror_api_assert(REG_values, tacAI->IsCheckSumValid());
 	bool is_attack_activity = false;
 	bool forceKeepCurrentActivity = false; // Default: do NOT skip ! (attack the tower/enemy)
@@ -2093,7 +2095,7 @@ void CustomRORInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_value
 	// Warning: don't forget there is 2 possible contexts (tower in my town OR I was just attacked by enemyUnit)
 
 	if (contextIsTowerInMyTown) {
-		if (!this->crCommand.ShouldAttackTower_towerPanic(myUnit, enemyUnit)) {
+		if (!this->crCommand.ShouldAttackTower_towerPanic((STRUCT_UNIT_BIRD*)myUnit, enemyUnit)) {
 			forceKeepCurrentActivity = true;
 		}
 	}
@@ -2122,7 +2124,7 @@ void CustomRORInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_value
 void CustomRORInstance::ManageTowerPanicMode_villagers(REG_BACKUP *REG_values) {
 	// ROR code context variables
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ESI_val;
-	AOE_STRUCTURES::STRUCT_UNIT *enemyTower = (AOE_STRUCTURES::STRUCT_UNIT *)REG_values->EDI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
 	long int *pAssignedUnitsCount = (long int *)(REG_values->ESP_val + 0x14);
 	AOE_STRUCTURES::STRUCT_POSITION_INFO *pTCPositionInfo = (AOE_STRUCTURES::STRUCT_POSITION_INFO*)(REG_values->ESP_val + 0x20);
 
@@ -2130,7 +2132,7 @@ void CustomRORInstance::ManageTowerPanicMode_villagers(REG_BACKUP *REG_values) {
 
 	//bool forceKeepCurrentActivity = false; // Default: change and attack tower
 	assert(enemyTower != NULL);
-	if (!enemyTower || !enemyTower->IsCheckSumValid() || !tacAI->IsCheckSumValid()) {
+	if (!enemyTower || !enemyTower->IsCheckSumValidForAUnitClass() || !tacAI->IsCheckSumValid()) {
 		return; // Error case. Do nothing
 	}
 
@@ -2633,15 +2635,16 @@ void CustomRORInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 // Called to create units from a scenario file (scenario editor or play scenario)
 // NOT called when loading a saved game, never called in-game, never called when creating units in scenario editor.
 void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
-	AOE_STRUCTURES::STRUCT_UNIT *unit = (AOE_STRUCTURES::STRUCT_UNIT *)REG_values->EDI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
 	ror_api_assert(REG_values, unit != NULL);
 	
 	char iDesiredStatus = *((char*)REG_values->ESP_val + 0x24); // get arg5 (byte)
 	AOE_CONST_INTERNAL::UNIT_STATUS desiredStatus = (AOE_CONST_INTERNAL::UNIT_STATUS)iDesiredStatus;
 
 	// Custom code
+	ror_api_assert(REG_values, unit->IsCheckSumValidForAUnitClass());
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || !unit->IsCheckSumValid() || !unit->ptrStructDefUnit) { return; }
+	if (!settings || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructDefUnit) { return; }
 	// Only modify behaviour in editor.
 	// In real game, we must NOT do such updates because unit would have an invalid state (it is more complex than just changing unitStatus field)
 
@@ -2997,7 +3000,7 @@ void CustomRORInstance::FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values) 
 // From 00412F2C
 void CustomRORInstance::SetActivityTargetUnitIdBug(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
-	AOE_STRUCTURES::STRUCT_UNIT *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT *)REG_values->EAX_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EAX_val;
 	long int unitIdToSearch = GetIntValueFromRORStack(REG_values, 0);
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	if (unitIdToSearch == -1) {
@@ -3012,8 +3015,8 @@ void CustomRORInstance::SetActivityTargetUnitIdBug(REG_BACKUP *REG_values) {
 // Method = retreat after shooting.
 void CustomRORInstance::FixActivityTargetUnitIdBug_retreatAfterShooting(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
-	AOE_STRUCTURES::STRUCT_UNIT *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT *)REG_values->EAX_val;
-	ror_api_assert(REG_values, actorUnit && actorUnit->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EAX_val;
+	ror_api_assert(REG_values, actorUnit && actorUnit->IsCheckSumValidForAUnitClass());
 	ror_api_assert(REG_values, activity && isAValidRORChecksum(activity->checksum));
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	long int targetUnitId = activity->targetUnitId;

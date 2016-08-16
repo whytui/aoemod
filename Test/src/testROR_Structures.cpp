@@ -151,9 +151,6 @@ static bool test_ror_structures() {
 	trs_assert(&uay, 0x60, &uay.unknown_060_unitIdList_targets);
 	trs_assert(&uay, 0x74, &uay.unknown_074_posX);
 	trs_assert(&uay, 0x114, &uay.currentPosX);
-	AOE_STRUCTURES::STRUCT_UNIT u;
-	trs_assert(&u, 0x90, &u.unknown_090);
-	trs_assert(&u, 0x1DE, &u.unknown_1DE);
 	AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO uai;
 	trs_assert(&uai, 0x08, &uai.ptrActionLink);
 

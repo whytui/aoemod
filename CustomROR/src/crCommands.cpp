@@ -1315,8 +1315,8 @@ bool CustomRORCommand::ManageAIFileSelectionForPlayer(char civilizationId, char 
 // This happens only once ! Once an objects has been discovered, this event is never triggered again.
 // Return true if the unit must NOT be captured
 // Default: return false (normal ROR treatments)
-bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT_UNIT *beingSeenUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
-	if (!beingSeenUnit || !beingSeenUnit->IsCheckSumValid()) {
+bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT_UNIT_BASE *beingSeenUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
+	if (!beingSeenUnit || !beingSeenUnit->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
 	AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = beingSeenUnit->ptrStructDefUnit;
@@ -2783,7 +2783,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	assert(unitDef != NULL);
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
 	if (!player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
-		AutoAssignShortcutToUnit((AOE_STRUCTURES::STRUCT_UNIT*)unit);
+		AutoAssignShortcutToUnit(unit);
 	}
 
 	// Get info on parent unit if possible
@@ -2945,8 +2945,8 @@ bool CustomRORCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetU
 
 // Custom Fixes/features on player.addUnit calls.
 // Note for conversion : unit is currently (temporarily) unavailable in global->GetUnitStruct(unitId) !
-void CustomRORCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable) {
-	if (!unit || !unit->IsCheckSumValid()) { return; }
+void CustomRORCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return; }
 	if (!player || !player->IsCheckSumValid()) { return; }
 
 	if (!isNotCreatable && !isTempUnit) {
@@ -3009,15 +3009,15 @@ void CustomRORCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PL
 // Note: player.RemoveUnit is called BY unit.destructor.
 // Here unit status can be 2 (if conversion), 7 (quitting editor?), 8 (in-game dying unit) ? +maybe other values
 // Warning: this method is called in many situations, game might NOT be running.
-void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT *unit, bool isTempUnit, bool isNotCreatable) {
+void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable) {
 	if (!player || !unit) { return; }
-	assert(player->IsCheckSumValid() && unit->IsCheckSumValid());
-	if (!player->IsCheckSumValid() || !unit->IsCheckSumValid()) { return; }
+	assert(player->IsCheckSumValid() && unit->IsCheckSumValidForAUnitClass());
+	if (!player->IsCheckSumValid() || !unit->IsCheckSumValidForAUnitClass()) { return; }
 
 	// Gather information
 	assert(unit->ptrStructPlayer != NULL);
 	if (!unit->ptrStructPlayer) { return; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefBase();
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefinition();
 	assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
 	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return; }
 	bool isBuilding = (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING); // Warning: using unit->unitType is risky (not always correct?)
@@ -3059,7 +3059,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 				// Disable or reset element for current building
 				long int posX = (long int)unit->positionX;
 				long int posY = (long int)unit->positionY;
-				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefBase();
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefinition();
 				if (unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 					// Setting status to "reset" (3 / =removed) will unblock further construction of same kind of buildings, especially granary/SP.
 					// This could also fix the bad farms placement after some game time (because "existing" farms apply a negative likee value on nearby tiles) ? To verify
@@ -3105,7 +3105,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 
 	// Auto rebuild farms
 	if (isInGame && unit && unit->IsCheckSumValid() && isBuilding && this->crInfo->configInfo.enableAutoRebuildFarms) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefBase();
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefinition();
 		// If this is a farm, and if I have "farm rebuild info" for this position (not in "not rebuild" mode), then trigger a rebuild.
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
 			FarmRebuildInfo *fInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
@@ -3133,8 +3133,8 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 
 
 // Returns true if a shortcut has been added/modified
-bool CustomRORCommand::AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT *unit) {
-	if (!unit || !unit->IsCheckSumValid()) { return false; }
+bool CustomRORCommand::AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
 	// Only care about living units or building
 	if ((unit->unitType != GUT_BUILDING) && (unit->unitType != GUT_LIVING_UNIT)) {
 		return false;
@@ -3530,7 +3530,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 // To be used when target unit is a tower in actor's town
 // Warning: try to keep this function fast and optimized as much as possible. It may be called quite often.
 // The improved algorithm is only used if ImproveAI config is ON.
-bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT *actorUnit, AOE_STRUCTURES::STRUCT_UNIT *enemyTower) {
+bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower) {
 	if (this->crInfo->configInfo.improveAILevel <= 0) {
 		return true; // improve AI is disabled. Return default value.
 	}
@@ -3756,10 +3756,10 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT 
 // assignedUnitsCounter is IN OUT: input value can be >0 (number of military units that have already been tasked). We should stop when assignedUnitsCounter reaches 6 (original code's behaviour)
 // In this method, we try to do "standard" treatments, and apply custom improvements only if improveAILevel is enabled in config.
 // The improved algorithm is only used if ImproveAI config is ON.
-void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT *enemyTower,
+void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower,
 	long int *pAssignedUnitsCount, AOE_STRUCTURES::STRUCT_POSITION_INFO *pTCPositionInfo) {
 	// Invalid/NULL objects ?
-	if (!tacAI || !enemyTower || !pTCPositionInfo || !tacAI->IsCheckSumValid() || !enemyTower->IsCheckSumValid() || !tacAI->ptrMainAI) { return; }
+	if (!tacAI || !enemyTower || !pTCPositionInfo || !tacAI->IsCheckSumValid() || !enemyTower->IsCheckSumValidForAUnitClass() || !tacAI->ptrMainAI) { return; }
 	if (*pAssignedUnitsCount < 0) { return; } // Bad input value
 	if (*pAssignedUnitsCount >= 6) { return; } // Already reached maximum assigned tasks
 	AOE_STRUCTURES::STRUCT_PLAYER *player = tacAI->ptrMainAI->ptrStructPlayer;
@@ -3836,7 +3836,7 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 		if (this->IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
 			// Additional "custom" treatments. Try to avoid complex treatments and try to optimize as this code is called very frequently.
 			// Let's use our common function to handle decisions for units against tower in "my" town.
-			if (!this->ShouldAttackTower_towerPanic((AOE_STRUCTURES::STRUCT_UNIT*)unit, enemyTower)) {
+			if (!this->ShouldAttackTower_towerPanic(unit, enemyTower)) {
 				attackTower = false;
 			}
 		}
@@ -5656,8 +5656,9 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 	// 1) Loop on my buildings just to collect info
 	for (long int index = 0; index < infAI->buildingUnits.usedElements; index++) {
 		short int unitId = (short int)infAI->buildingUnits.unitIdArray[index];
-		AOE_STRUCTURES::STRUCT_UNIT *unit = (AOE_STRUCTURES::STRUCT_UNIT *) globalStruct->ptrUnitPointersList[unitId];
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = globalStruct->ptrUnitPointersList[unitId];
 		if (unit) {
+			assert(unit->IsCheckSumValidForAUnitClass());
 			AOE_STRUCTURES::STRUCT_DEF_UNIT *defUnit = unit->ptrStructDefUnit;
 			if (defUnit) {
 				if (defUnit->DAT_ID1 == CST_UNITID_HOUSE) {
@@ -5678,8 +5679,9 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 	// 2) Active loop on my buildings
 	for (long int index = 0; index < infAI->buildingUnits.usedElements; index++) {
 		short int unitId = (short int)infAI->buildingUnits.unitIdArray[index];
-		AOE_STRUCTURES::STRUCT_UNIT *unit = (AOE_STRUCTURES::STRUCT_UNIT *) globalStruct->ptrUnitPointersList[unitId];
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = globalStruct->ptrUnitPointersList[unitId];
 		if (unit) {
+			assert(unit->IsCheckSumValidForAUnitClass());
 			AOE_STRUCTURES::STRUCT_DEF_UNIT *defUnit = unit->ptrStructDefUnit;
 			if (defUnit) {
 				// Make sure buildings are not all side by side with no space: if 1 side is "all blocked", make sure we don't build on opposite side.
