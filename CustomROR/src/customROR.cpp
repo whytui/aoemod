@@ -2498,11 +2498,12 @@ void CustomRORInstance::OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *RE
 // Warning: this is also called by scenario editor and at game init !
 void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 	// Now get informations and check them
-	AOE_STRUCTURES::STRUCT_UNIT *unit = (AOE_STRUCTURES::STRUCT_UNIT*)REG_values->EAX_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit = (AOE_STRUCTURES::STRUCT_UNIT_BIRD*)REG_values->EAX_val;
 	ror_api_assert(REG_values, unit != NULL); // TO DO: Could just return ? Leave that for testing purpose for now...
 	AOE_STRUCTURES::STRUCT_PLAYER *player = unit->ptrStructPlayer;
 	ror_api_assert(REG_values, player != NULL);
-	ror_api_assert(REG_values, unit->IsCheckSumValid());
+	ror_api_assert(REG_values, unit->IsCheckSumValidForAUnitClass());
+	ror_api_assert(REG_values, unit->DerivesFromBird());
 	ror_api_assert(REG_values, player->IsCheckSumValid());
 	
 	ror_api_assert(REG_values, GetGameSettingsPtr() != NULL);

@@ -220,11 +220,6 @@ const char *GetUnitName(short int unitDefId);
 
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
-// WARNING: this overload is risky (does not check actual unit structure type / might access wrong pointers !)
-AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT *unit);
-// Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
-// Return NULL if one of the objects is NULL/missing
-// Please use THIS overload.
 AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
 // Returns true if unit definition is a tower (using unit type and the fact it has attacks or not)
@@ -296,7 +291,8 @@ AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(AOE_STRUCTURES::STRUCT_PLAYE
 std::list<long int> GetActivableUnitDefIDs(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 // Returns true if a unit is idle
-bool IsUnitIdle(AOE_STRUCTURES::STRUCT_UNIT *unit);
+// TODO: check allowed types
+bool IsUnitIdle(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
 // Calls AOE's code mainAI.findUnit(DAT_Id)
 AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI *mainAI, long int DAT_ID);
@@ -368,11 +364,11 @@ bool ApplyCostIfPossible(float costTable[], float resourceTable[]);
 // Calls ROR's method to change a unit's action so it will move to supplied unit/position
 // target can be NULL (only position will matter)
 // unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
-void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT *unitToMove, AOE_STRUCTURES::STRUCT_UNIT *target, float posX, float posY);
+void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_BIRD *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY);
 
 // Tells a unit to (move and) attack another unit (using tacAI)
 // Returns true if successful
-bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT *actor, AOE_STRUCTURES::STRUCT_UNIT *target);
+bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BIRD *actor, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
 
 // Given a list of (actor) units, tell them to interact with a target unit (like a right-click).
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.

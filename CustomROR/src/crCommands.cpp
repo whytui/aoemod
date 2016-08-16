@@ -2654,14 +2654,14 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUC
 	long int *myUnitsList = ai->allMyUnits.unitIdArray;
 	for (long int index = 0; index < unitCount; index++) {
 		long int unitId = myUnitsList[index];
-		AOE_STRUCTURES::STRUCT_UNIT *unit = NULL;
+		AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit = NULL;
 		if (unitId > 0) {
-			 unit = GetUnitStruct(unitId);
+			unit = (AOE_STRUCTURES::STRUCT_UNIT_BIRD *)GetUnitStruct(unitId);
 		}
 		if (unit != NULL) {
 			AOE_STRUCTURES::STRUCT_DEF_UNIT *unitDef = unit->ptrStructDefUnit;
 			assert(unitDef != NULL);
-			if ((unit->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT) &&
+			if ((unit->DerivesFromBird()) &&
 				(unitDef->unitAIType != TribeAIGroupCivilian) &&
 				(unitDef->unitAIType != TribeAIGroupFishingBoat) &&
 				(unitDef->unitAIType != TribeAIGroupTradeBoat) &&
@@ -2763,7 +2763,7 @@ void CustomRORCommand::SelectNextIdleMilitaryUnit() {
 // This event is triggered during game but as well in scenario editor or during game creation.
 // actionStruct parameter can be NULL if it could not be determined
 // Note: we choose NOT to apply custom treatments when controlled player has an active playing AI (both controlled by human and AI)
-void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT *unit,
+void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit,
 	AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *actionStruct) {
 	if (!unit) { return; }
 	if (UIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) {
@@ -2783,7 +2783,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	assert(unitDef != NULL);
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
 	if (!player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
-		AutoAssignShortcutToUnit(unit);
+		AutoAssignShortcutToUnit((AOE_STRUCTURES::STRUCT_UNIT*)unit);
 	}
 
 	// Get info on parent unit if possible
@@ -2824,8 +2824,8 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 		}
 		if (canInteractWithTarget) {
 			if (unitDef->ptrUnitCommandHeader) {
-				if (GetUnitDefCommandForTarget(unit, target, true) != NULL) {
-					TellUnitToInteractWithTarget(unit, target);
+				if (GetUnitDefCommandForTarget((AOE_STRUCTURES::STRUCT_UNIT*)unit, target, true) != NULL) {
+					TellUnitToInteractWithTarget((AOE_STRUCTURES::STRUCT_UNIT*)unit, target);
 					commandCreated = true;
 				}
 			}
@@ -2848,7 +2848,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	if (!commandCreated && this->crInfo->configInfo.enableSpawnUnitAutoRepairTC && IsVillager(unit->ptrStructDefUnit->DAT_ID1) &&
 		parentUnit && !player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
 		if (parentUnit->remainingHitPoints < (float)parentUnit->ptrStructDefUnit->totalHitPoints) {
-			TellUnitToInteractWithTarget(unit, (AOE_STRUCTURES::STRUCT_UNIT*) parentUnit);
+			TellUnitToInteractWithTarget((AOE_STRUCTURES::STRUCT_UNIT*)unit, (AOE_STRUCTURES::STRUCT_UNIT*) parentUnit);
 			commandCreated = true;
 		}
 	}
@@ -3814,9 +3814,9 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 	// Now we can loop on units with increasing distance. No need to make a search each time (unlike ROR original code)
 	long int currentIndex = 0;
 	while ((*pAssignedUnitsCount < 6) && (currentIndex < arrayElemCount)) {
-		AOE_STRUCTURES::STRUCT_UNIT *unit = GetUnitStruct(orderedUnitIDs[currentIndex]);
+		AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit = (AOE_STRUCTURES::STRUCT_UNIT_BIRD *)GetUnitStruct(orderedUnitIDs[currentIndex]);
 		AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = NULL;
-		bool valid = unit && unit->IsCheckSumValid();
+		bool valid = unit && unit->IsCheckSumValidForAUnitClass() && unit->DerivesFromBird();
 		if (valid) { activity = unit->currentActivity; }
 		bool attackTower = true; // Default: attack = most cases (in original code, villager almost always attack the tower)
 		if (valid && activity) {
@@ -3833,14 +3833,14 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 		if (this->IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
 			// Additional "custom" treatments. Try to avoid complex treatments and try to optimize as this code is called very frequently.
 			// Let's use our common function to handle decisions for units against tower in "my" town.
-			if (!this->ShouldAttackTower_towerPanic(unit, enemyTower)) {
+			if (!this->ShouldAttackTower_towerPanic((AOE_STRUCTURES::STRUCT_UNIT*)unit, enemyTower)) {
 				attackTower = false;
 			}
 		}
 
 		if (valid && attackTower) {
 			// Tell villager to go and attack the tower
-			if (MoveAndAttackTarget(tacAI, unit, enemyTower)) {
+			if (MoveAndAttackTarget(tacAI, unit, (AOE_STRUCTURES::STRUCT_UNIT_BASE*)enemyTower)) {
 				(*pAssignedUnitsCount)++;
 			}
 		}
@@ -6659,7 +6659,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
 		assert(gameMapInfo && gameMapInfo->IsCheckSumValid());
 		if ((posX >= gameMapInfo->mapArraySizeX) || (posY >= gameMapInfo->mapArraySizeY)) { return; }
-		MoveUnitToTargetOrPosition(GetUnitStruct(actionUnitId), NULL, posX, posY);
+		MoveUnitToTargetOrPosition((AOE_STRUCTURES::STRUCT_UNIT_BIRD*)GetUnitStruct(actionUnitId), NULL, posX, posY);
 	}
 
 	// Make gaia units human-capturable (or not)

@@ -229,7 +229,7 @@ public:
 	// This event is triggered for ALL units (creatable or not, projectile, smoke, trees...)
 	// This event is triggered during game but as well in scenario editor or during game creation.
 	// actionStruct parameter can be NULL if it could not be determined
-	void OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT *unit,
+	void OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit,
 		AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *actionStruct);
 
 	// Fixes missing treatments when a unit changes owner (eg. unit conversion)

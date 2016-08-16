@@ -823,27 +823,18 @@ const char *GetUnitName(short int unitDefId) {
 
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
-// WARNING: this overload is risky (does not check actual unit structure type / might access wrong pointers !)
-AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT *unit) {
-	if (!unit || (unit->ptrActionInformation == NULL) || (unit->ptrActionInformation->ptrActionLink == NULL)) {
-		return NULL;
-	}
-	assert(unit->ptrActionInformation->IsCheckSumValid()); // This should never occur. Whereas having NULL pointers in action info/link structures is possible (and valid)
-	if (!unit->ptrActionInformation->IsCheckSumValid()) {return NULL; }
-	if (unit->ptrActionInformation->ptrActionLink == NULL) {
-		return NULL;
-	}
-	return unit->ptrActionInformation->ptrActionLink->actionStruct;
-}
-
-// Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
-// Return NULL if one of the objects is NULL/missing
-// Please use THIS overload.
 AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
-	if (!unit->DerivesFromBird()) {
+	if (!unit || !unit->DerivesFromBird()) { return NULL; }
+	AOE_STRUCTURES::STRUCT_UNIT_BIRD *unitAsBird = (AOE_STRUCTURES::STRUCT_UNIT_BIRD *)unit;
+	if ((unitAsBird->ptrActionInformation == NULL) || (unitAsBird->ptrActionInformation->ptrActionLink == NULL)) {
 		return NULL;
 	}
-	return GetUnitAction((AOE_STRUCTURES::STRUCT_UNIT*)unit);
+	assert(unitAsBird->ptrActionInformation->IsCheckSumValid()); // This should never occur. Whereas having NULL pointers in action info/link structures is possible (and valid)
+	if (!unitAsBird->ptrActionInformation->IsCheckSumValid()) { return NULL; }
+	if (unitAsBird->ptrActionInformation->ptrActionLink == NULL) {
+		return NULL;
+	}
+	return unitAsBird->ptrActionInformation->ptrActionLink->actionStruct;
 }
 
 
@@ -936,7 +927,8 @@ AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYE
 
 
 // Returns true if a unit is idle
-bool IsUnitIdle(AOE_STRUCTURES::STRUCT_UNIT *unit) {
+// TODO: check allowed types
+bool IsUnitIdle(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
 	int result;
 	_asm {
 		MOV ECX, unit
@@ -976,16 +968,16 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI 
 // target can be NULL (only position will matter)
 // unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
 // Compatible with MP, but in MP unit will not defend itself if attacked.
-void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT *unitToMove, AOE_STRUCTURES::STRUCT_UNIT *target, float posX, float posY) {
+void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_BIRD *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY) {
 	if (!unitToMove) { return; }
 
 	if (IsMultiplayer()) {
 		// Manage MP games : use a command (but unit will not defend itself if attacked)
-		if (!unitToMove || !unitToMove->IsCheckSumValid()) {
+		if (!unitToMove || !unitToMove->IsCheckSumValidForAUnitClass()) {
 			return;
 		}
 		long int targetId = -1;
-		if (target && target->IsCheckSumValid()) { targetId = target->unitInstanceId; }
+		if (target && target->IsCheckSumValidForAUnitClass()) { targetId = target->unitInstanceId; }
 		CreateCmd_RightClick(unitToMove->unitInstanceId, targetId, posX, posY);
 		return;
 	}
@@ -1010,14 +1002,14 @@ void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT *unitToMove, AOE_STR
 
 
 // Tells a unit to (move and) attack another unit
-bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT *actor, AOE_STRUCTURES::STRUCT_UNIT *target) {
+bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BIRD *actor, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
 	if (!tacAI || !actor || !target) { return false; }
 	assert(tacAI->IsCheckSumValid());
-	assert(actor->IsCheckSumValid());
-	assert(target->IsCheckSumValid());
+	assert(actor->IsCheckSumValidForAUnitClass() && actor->DerivesFromBird());
+	assert(target->IsCheckSumValidForAUnitClass());
 	assert(actor->ptrStructDefUnit);
 	assert(target->ptrStructPlayer);
-	if (!tacAI->IsCheckSumValid() || !actor->IsCheckSumValid() || !target->IsCheckSumValid() || 
+	if (!tacAI->IsCheckSumValid() || !actor->DerivesFromBird() || !target->IsCheckSumValidForAUnitClass() || 
 		!actor->ptrStructDefUnit || !target->ptrStructPlayer) { return false; }
 	long int posX = (long int)target->positionX;
 	long int posY = (long int)target->positionY;
@@ -1266,7 +1258,7 @@ float GetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit) {
 	// This system prevents from gathering faster when assigning >1 villager. (other limitation: each farmer also has a maximum work rate !)
 	// Action contains the remaining "locked" (not available yet) amount.
 	// Unit resource value contains available amount (immediatly gatherable amount).
-	AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction((AOE_STRUCTURES::STRUCT_UNIT*)farmUnit);
+	AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(farmUnit);
 	if (!action) { return 0; }
 	return action->unsure_resourceValue + farmUnit->resourceValue;
 }
@@ -1277,7 +1269,7 @@ bool SetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit, flo
 	if (farmUnit->resourceTypeId != RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE) { return false; }
 	if (!farmUnit->ptrStructDefUnit || !farmUnit->ptrStructDefUnit) { return false; }
 	if (farmUnit->ptrStructDefUnit->DAT_ID1 != CST_UNITID_FARM) { return false; }
-	AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction((AOE_STRUCTURES::STRUCT_UNIT*)farmUnit);
+	AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(farmUnit);
 	if (!action) { return false; }
 	action->unsure_resourceValue = newAmount - farmUnit->resourceValue;
 	if (action->unsure_resourceValue < 0) {
