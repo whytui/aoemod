@@ -1062,7 +1062,7 @@ bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::S
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT *target) {
+bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
 	if (!actorUnitsList || (actorUnitsCount <= 0) || !target || !target->IsCheckSumValid()) { return false; }
 	assert(actorUnitsCount < 255); // More would be... more than huge !
 	if (actorUnitsCount >= 255) { return false; } // This can't be normal
@@ -1084,17 +1084,18 @@ bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT **actorUnitsList,
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit, AOE_STRUCTURES::STRUCT_UNIT *target) {
-	AOE_STRUCTURES::STRUCT_UNIT *local_actorUnit = actorUnit;
+bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
+	if (!actorUnit || !actorUnit->DerivesFromBird()) { return false; }
 	return TellUnitsToInteractWithTarget(&actorUnit, 1, target);
 }
 
 
 // Returns a unitDefCommand object if actor unit has a valid right-click command on target unit.
 // Returns NULL if there no possible interaction
-AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit,
-	AOE_STRUCTURES::STRUCT_UNIT *target, bool canSwitchForVillager) {
-	if (!actorUnit || !target || !actorUnit->IsCheckSumValid() || !target->IsCheckSumValid()) { return false; }
+AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit,
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *target, bool canSwitchForVillager) {
+	if (!actorUnit || !target || !actorUnit->IsCheckSumValidForAUnitClass() || !actorUnit->DerivesFromBird() ||
+		!target->IsCheckSumValidForAUnitClass()) { return false; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)actorUnit->ptrStructDefUnit;
 	if (!unitDef_base->DerivesFromBird()) { return false; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDef_asBird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)unitDef_base;
@@ -1645,8 +1646,8 @@ void AOE_clearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 }
 
 // select: if true, add unit to selection. If false, remove from selection.
-bool AOE_selectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT *unit, bool select) {
-	if (!player || !player->IsCheckSumValid() || !unit || !unit->IsCheckSumValid()) {
+bool AOE_selectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool select) {
+	if (!player || !player->IsCheckSumValid() || !unit || !unit->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
 	long int arg2 = select ? 1 : 0;
@@ -1930,8 +1931,8 @@ void AOE_InfAIBuildHistory_setStatus(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long 
 
 
 // Remove a building from arrays for a player
-void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, AOE_STRUCTURES::STRUCT_UNIT *unit) {
-	if (buildingsHeader && unit && unit->IsCheckSumValid()) {
+void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
+	if (buildingsHeader && unit && unit->IsCheckSumValidForAUnitClass()) {
 		_asm {
 			MOV ECX, buildingsHeader
 			MOV EDX, unit
@@ -1955,7 +1956,7 @@ void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT
 	}
 	if (!player || !player->IsCheckSumValid()) { return; }
 	AOE_clearSelectedUnits(player);
-	AOE_selectUnit(player, (AOE_STRUCTURES::STRUCT_UNIT*) unitBase, true);
+	AOE_selectUnit(player, unitBase, true);
 	if (centerScreen) {
 		player->screenPositionX = unitBase->positionX;
 		player->screenPositionY = unitBase->positionY;
@@ -2027,15 +2028,14 @@ bool AddCommandToGameCmdQueue(void *commandStruct, long int structSize) {
 // targetUnitId is optional. If -1 or non valid, then unit will just move to posX/posY.
 // This method is compatible with MP games (does NOT causes sync issue)
 bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY) {
-	AOE_STRUCTURES::STRUCT_UNIT *unit = GetUnitStruct(actorUnitId);
+	AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit = (STRUCT_UNIT_BIRD*)GetUnitStruct(actorUnitId);
 	if (!unit || !unit->IsCheckSumValid()) {
 		return false;
 	}
-	//AOE_STRUCTURES::STRUCT_UNIT *actorUnit = NULL;
 	return CreateCmd_RightClick(&unit, 1, targetUnitId, posX, posY);
 }
 
-bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY) {
+bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) {

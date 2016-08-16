@@ -361,9 +361,9 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		char *sUnitId = command + 7;
 		short int id = StrToInt(sUnitId, -1);
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
-		AOE_STRUCTURES::STRUCT_UNIT *unit = GetUnitStruct(id);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(id);
 		AOE_clearSelectedUnits(player);
-		if (unit && unit->IsCheckSumValid()) {
+		if (unit && unit->IsCheckSumValidForAUnitClass()) {
 			AOE_selectUnit(player, unit, true);
 			char *name = "?";
 			if (unit->ptrStructDefUnit && unit->ptrStructDefUnit->IsCheckSumValid()) {
@@ -2809,9 +2809,9 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	// Auto target
 	if (this->crInfo->configInfo.enableSpawnUnitsAutoTarget && !player->IsAIActive(this->crInfo->hasManageAIFeatureON) &&
 		parentInfo && (parentInfo->spawnTargetUnitId >= 0)) {
-		AOE_STRUCTURES::STRUCT_UNIT *target = GetUnitStruct(parentInfo->spawnTargetUnitId);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *target = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(parentInfo->spawnTargetUnitId);
 		// Note: target may not exist (anymore)
-		bool canInteractWithTarget = target && target->IsCheckSumValid();
+		bool canInteractWithTarget = target && target->IsCheckSumValidForAUnitClass();
 		if (canInteractWithTarget) {
 			AOE_STRUCTURES::STRUCT_UNIT_FLAG *targetUnitFlag = (AOE_STRUCTURES::STRUCT_UNIT_FLAG*)target;
 			if (targetUnitFlag->DerivesFromFlag()) {
@@ -2824,8 +2824,8 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 		}
 		if (canInteractWithTarget) {
 			if (unitDef->ptrUnitCommandHeader) {
-				if (GetUnitDefCommandForTarget((AOE_STRUCTURES::STRUCT_UNIT*)unit, target, true) != NULL) {
-					TellUnitToInteractWithTarget((AOE_STRUCTURES::STRUCT_UNIT*)unit, target);
+				if (GetUnitDefCommandForTarget(unit, target, true) != NULL) {
+					TellUnitToInteractWithTarget(unit, target);
 					commandCreated = true;
 				}
 			}
@@ -2848,7 +2848,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	if (!commandCreated && this->crInfo->configInfo.enableSpawnUnitAutoRepairTC && IsVillager(unit->ptrStructDefUnit->DAT_ID1) &&
 		parentUnit && !player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
 		if (parentUnit->remainingHitPoints < (float)parentUnit->ptrStructDefUnit->totalHitPoints) {
-			TellUnitToInteractWithTarget((AOE_STRUCTURES::STRUCT_UNIT*)unit, (AOE_STRUCTURES::STRUCT_UNIT*) parentUnit);
+			TellUnitToInteractWithTarget(unit, parentUnit);
 			commandCreated = true;
 		}
 	}
@@ -3045,7 +3045,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 			// Remove building from player buildings list (bug in original game), this is done in unit destructor but NOT at unit conversion
 			// Note that because of this call, the remove operation is done twice (will be done again in destructor). But the 2nd time, it will just do nothing.
 			AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader = player->ptrBuildingsListHeader;
-			AOE_playerBldHeader_RemoveBldFromArrays(buildingsHeader, unit);
+			AOE_playerBldHeader_RemoveBldFromArrays(buildingsHeader, (STRUCT_UNIT_BASE*)unit);
 		}
 
 		// Fix constructions history array
@@ -6644,7 +6644,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		long int actionUnitId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_ID, -1);
 		long int targetUnitId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_TARGET_UNIT_ID, -1);
 		if ((actionUnitId < 0) || (targetUnitId < 0)) { return; }
-		TellUnitToInteractWithTarget(GetUnitStruct(actionUnitId), GetUnitStruct(targetUnitId));
+		TellUnitToInteractWithTarget((AOE_STRUCTURES::STRUCT_UNIT_BIRD*)GetUnitStruct(actionUnitId), (AOE_STRUCTURES::STRUCT_UNIT_BASE*)GetUnitStruct(targetUnitId));
 	}
 
 	// Move a unit

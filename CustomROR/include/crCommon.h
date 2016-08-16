@@ -374,18 +374,18 @@ bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::S
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT *target);
+bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
 
 // Tell a unit to interact with a target unit (like a right-click).
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit, AOE_STRUCTURES::STRUCT_UNIT *target);
+bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
 
 // Returns a unitDefCommand object if actor unit has a valid right-click command on target unit.
 // Returns NULL if there no possible interaction
-AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT *actorUnit,
-	AOE_STRUCTURES::STRUCT_UNIT *target, bool canSwitchForVillager);
+AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit,
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *target, bool canSwitchForVillager);
 
 
 // Creates a unit at provided location. Does NOT make checks on location, please first make sure GetErrorForUnitCreationAtLocation returns 0.
@@ -442,7 +442,7 @@ void AOE_callNotifyEvent(long int eventId, long int playerId, void *variant_arg3
 
 void AOE_clearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player);
 // select: if true, add unit to selection. If false, remove from selection.
-bool AOE_selectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT *unit, bool select);
+bool AOE_selectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool select);
 
 // Calls AOE's path finding method.
 // allArgs indices are 1-15 (do NOT use 0). Warning, some arguments type are NOT long int (there are floats).
@@ -483,7 +483,8 @@ void AOE_InfAIBuildHistory_setStatus(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long 
 	AOE_CONST_INTERNAL::INFAI_BLD_HISTORY_STATUS status);
 
 // Remove a building from arrays for a player
-void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, AOE_STRUCTURES::STRUCT_UNIT *unit);
+void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, 
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
 // Clear player selection then select provided unit. Compatible with editor too.
 // If centerScreen is true, player's screen will be centered to unit.
@@ -504,7 +505,7 @@ bool AddCommandToGameCmdQueue(void *commandStruct, long int structSize);
 
 // Create a "ROR" command struct (right-click). Returns false if failed.
 bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY);
-bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
+bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
 
 // Create a "ROR" command struct (build). Returns false if failed.
 bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY);
