@@ -2726,7 +2726,7 @@ void CustomRORCommand::SelectNextIdleMilitaryUnit() {
 	while (currentUnitElem) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)currentUnitElem->unit;
 		if (unitBase && unitBase->IsCheckSumValidForAUnitClass() && unitBase->unitDefinition && unitBase->unitDefinition->IsCheckSumValid()) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->unitDefinition;
 			char result;
 			if ((unitBase->transporterUnit == NULL) && IsNonTowerMilitaryUnit(unitDefBase->unitAIType)) { // Excludes towers
 				_asm {
@@ -2815,7 +2815,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 		if (canInteractWithTarget) {
 			AOE_STRUCTURES::STRUCT_UNIT_FLAG *targetUnitFlag = (AOE_STRUCTURES::STRUCT_UNIT_FLAG*)target;
 			if (targetUnitFlag->DerivesFromFlag()) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *targetUnitDefFlag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *)targetUnitFlag->GetUnitDefinition();
+				AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *targetUnitDefFlag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *)targetUnitFlag->unitDefinition;
 				// For units that can move, check fog visibility
 				if (targetUnitDefFlag->speed > 0) {
 					canInteractWithTarget = canInteractWithTarget && IsFogVisibleForPlayer(player->playerId, (long)target->positionX, (long)target->positionY);
@@ -3017,7 +3017,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 	// Gather information
 	assert(unit->ptrStructPlayer != NULL);
 	if (!unit->ptrStructPlayer) { return; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unit->unitDefinition;
 	assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
 	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return; }
 	bool isBuilding = (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING); // Warning: using unit->unitType is risky (not always correct?)
@@ -3059,7 +3059,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 				// Disable or reset element for current building
 				long int posX = (long int)unit->positionX;
 				long int posY = (long int)unit->positionY;
-				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefinition();
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 				if (unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 					// Setting status to "reset" (3 / =removed) will unblock further construction of same kind of buildings, especially granary/SP.
 					// This could also fix the bad farms placement after some game time (because "existing" farms apply a negative likee value on nearby tiles) ? To verify
@@ -3105,7 +3105,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 
 	// Auto rebuild farms
 	if (isInGame && unit && unit->IsCheckSumValid() && isBuilding && this->crInfo->configInfo.enableAutoRebuildFarms) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefinition();
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 		// If this is a farm, and if I have "farm rebuild info" for this position (not in "not rebuild" mode), then trigger a rebuild.
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
 			FarmRebuildInfo *fInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
@@ -4778,14 +4778,14 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	}
 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
-	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->unitDefinition || !unit->GetUnitDefinition()->IsCheckSumValidForAUnitClass()) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
 		return;
 	}
 	if (player != unit->ptrStructPlayer) { return; }
 	if (unit->unitStatus != 2) {
 		return;
 	}
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 	bool isBuilding = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING);
 	bool isLiving = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT);
 	if (unitDef->commandAttribute == COMMAND_ATTRIBUTES::CST_CA_NONE) { return; } // Corresponds to unselectable, like eye candy
@@ -5239,7 +5239,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 
 	// Handle next page. Note: in ROR, see 485140 (for villager build menu only)
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->unitDefinition;
 		if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
 			return false;
 		}
@@ -5324,7 +5324,7 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(AOE_STRUCTURES::STRUCT_U
 	if (!activity || !potentialTargetUnit || !potentialTargetUnit->IsCheckSumValidForAUnitClass()) {
 		return false; // error case
 	}
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDefBase = potentialTargetUnit->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDefBase = potentialTargetUnit->unitDefinition;
 	if (!targetUnitDefBase || !targetUnitDefBase->IsCheckSumValidForAUnitClass()) {
 		return false; // error case
 	}
@@ -5332,7 +5332,7 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(AOE_STRUCTURES::STRUCT_U
 	if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass()) {
 		return false; // We expect ACTOR unit to derive from type50 ! (should be living or building)
 	}
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnit->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnit->unitDefinition;
 	if (!actorUnitDef || !actorUnitDef->IsCheckSumValidForAUnitClass()) {
 		return false; // We expect ACTOR unit to derive from type50 ! (should be living or building)
 	}
@@ -5519,12 +5519,12 @@ bool CustomRORCommand::ShouldRetreatAfterShooting(AOE_STRUCTURES::STRUCT_UNIT_AC
 	if (!this->IsImproveAIEnabled(actorUnitType50->ptrStructPlayer->playerId)) {
 		return true;
 	}
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnitType50->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnitType50->unitDefinition;
 	if (!actorUnitDef || !actorUnitDef->IsCheckSumValidForAUnitClass() || !actorUnitDef->DerivesFromType50()) { return true; }
 	if (!actorUnitDef->DerivesFromType50()) { return true; }
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(activity->targetUnitId);
 	if (!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) { return true; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *targetUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)targetUnit->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *targetUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)targetUnit->unitDefinition;
 	if (targetUnitDef->DerivesFromType50()) {
 		if ((targetUnitDef->projectileUnitId >= 0) && (targetUnitDef->maxRange > actorUnitDef->maxRange)) {
 			// Force NOT retreat after shooting, because enemy has a better range than me !
@@ -6397,7 +6397,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		char *newUnitName = trigger->GetParameterValue(CR_TRIGGERS::KW_UNIT_NAME, "");
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(actionUnitId);
 		if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) { return; }
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->unitDefinition;
 		if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return; }
 		// Only living units & buildings are allowed
 		if (!unitDefBase->DerivesFromLiving()) {

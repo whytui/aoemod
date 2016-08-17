@@ -980,7 +980,7 @@ bool IsStrategyCompleteForWonder(AOE_STRUCTURES::STRUCT_AI *ai) {
 					long int actorDATID = -1;
 					AOE_STRUCTURES::STRUCT_UNIT_BASE *actor = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(currentElem->actor);
 					if (actor) {
-						AOE_STRUCTURES::STRUCT_UNITDEF_BASE *actorDef = actor->GetUnitDefinition();
+						AOE_STRUCTURES::STRUCT_UNITDEF_BASE *actorDef = actor->unitDefinition;
 						if (actorDef && actorDef->IsCheckSumValidForAUnitClass()) {
 							actorDATID = actorDef->DAT_ID1;
 						}

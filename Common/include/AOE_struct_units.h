@@ -156,8 +156,6 @@ namespace AOE_STRUCTURES {
 				(this->checksum == 0x00548474) // Tree
 				;
 		}
-		// Obsolete getter
-		STRUCT_UNITDEF_BASE *GetUnitDefinition() const { return this->unitDefinition; }
 		// Returns true if the unit definition is a flag (20) or a child class (all but eye candy and trees)
 		bool DerivesFromFlag() const {
 			return (this->IsCheckSumValidForAUnitClass() && (this->checksum != 0x00547DA8) && (this->checksum != 0x00548474)); // all but 10 and 90

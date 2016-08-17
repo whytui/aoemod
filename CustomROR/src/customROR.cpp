@@ -3200,7 +3200,7 @@ void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, activity && isAValidRORChecksum(activity->checksum));
 	ror_api_assert(REG_values, potentialTargetUnit && potentialTargetUnit->IsCheckSumValidForAUnitClass());
 	if (potentialTargetUnit && potentialTargetUnit->IsCheckSumValidForAUnitClass()) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = potentialTargetUnit->GetUnitDefinition();
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = potentialTargetUnit->unitDefinition;
 		if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass()) {
 			if (unitDefBase->unitAIType == TribeAIGroupWall) {
 				return; // Potential target is a wall: use standard checks/behaviour.

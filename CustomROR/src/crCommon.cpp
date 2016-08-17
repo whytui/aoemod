@@ -183,7 +183,7 @@ void CustomRORInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(AOE_STRUCTURES::S
 	for (int i = 0; i < player->selectedUnitCount; i++) {
 		if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() &&
 			(selectedUnits[i]->ptrStructPlayer == player)) { // Make sure selected unit is mine !
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *currentUnitDefBase = selectedUnits[i]->GetUnitDefinition();
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *currentUnitDefBase = selectedUnits[i]->unitDefinition;
 			if (IsTower(currentUnitDefBase->DAT_ID1) || IsNonTowerMilitaryUnit(currentUnitDefBase->unitAIType)) {
 				UnitCustomInfo *currentUnitInfo = this->myGameObjects.FindOrAddUnitCustomInfo(selectedUnits[i]->unitInstanceId);
 				currentUnitInfo->autoAttackPolicyIsSet = true;
@@ -1234,7 +1234,7 @@ long int GetPlayerUnitCount(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT
 
 	while ((currentElem != NULL) && (index < units->listElemCount)) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *currentUnit = currentElem->unit;
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = currentUnit->GetUnitDefinition();
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = currentUnit->unitDefinition;
 		if (currentUnit && currentUnit->IsCheckSumValidForAUnitClass() && unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 			bool ok_DATID = (DAT_ID == -1) || (currentUnit->unitDefinition->DAT_ID1 == DAT_ID);
 			bool ok_AIType = (unitAIType == TribeAINone) || (unitDef->unitAIType == unitAIType);
@@ -1794,7 +1794,7 @@ bool UpdateOrResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_ST
 	long int actorPlayerId = infAI->commonAIObject.playerId;
 	long int unitPlayerId = -1;
 	if (unitBase) {
-		unitDefBase = unitBase->GetUnitDefinition();
+		unitDefBase = unitBase->unitDefinition;
 		assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
 		if (unitBase->ptrStructPlayer && unitBase->ptrStructPlayer->IsCheckSumValid()) {
 			unitPlayerId = unitBase->ptrStructPlayer->playerId;
@@ -1886,7 +1886,7 @@ bool UpdateUnitOwnerInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_
 	if (!infAI || !infAI->IsCheckSumValid()) { return false; }
 	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
 	if (newPlayerId < 0) { return false; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unit->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unit->unitDefinition;
 	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return false; }
 	if (unit->unitInstanceId < 0) { return false; } // Ignore temp units.
 	bool isVisible = false;

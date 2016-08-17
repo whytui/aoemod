@@ -38,7 +38,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) GetUnitStruct(unitId);
 	AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = unitBase->ptrStructPlayer;
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->unitDefinition;
 	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass() || !unitPlayer || !unitPlayer->IsCheckSumValid() ||
 		!controlledPlayer || !controlledPlayer->IsCheckSumValid() ||
 		!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
@@ -356,7 +356,7 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
 			if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() &&
 				(selectedUnits[i]->ptrStructPlayer == controlledPlayer)) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *curUnitDefBase = selectedUnits[i]->GetUnitDefinition();
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *curUnitDefBase = selectedUnits[i]->unitDefinition;
 				if (curUnitDefBase && curUnitDefBase->IsCheckSumValidForAUnitClass() && (curUnitDefBase->DAT_ID1 == CST_UNITID_FARM)) {
 					FarmRebuildInfo *fri = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(selectedUnits[i]->positionX, selectedUnits[i]->positionY);
 					fri->forceNotRebuild = !actionIsRebuild;

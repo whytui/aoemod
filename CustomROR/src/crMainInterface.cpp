@@ -244,7 +244,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			if (selectedUnit) {
 				long int actionTargetUnitId = -1;
 				unsigned long int addraction = -1;
-				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = selectedUnit->GetUnitDefinition();
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = selectedUnit->unitDefinition;
 				AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO *ainfo = NULL;
 				if (selectedUnitT50 && selectedUnitT50->DerivesFromType50()) {
 					ainfo = selectedUnitT50->ptrActionInformation;
@@ -770,7 +770,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 
 						AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
 						if (unitUnderMouse && unitUnderMouse->IsCheckSumValidForAUnitClass()) {
-							AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->GetUnitDefinition();
+							AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->unitDefinition;
 							if (unitDefUnderMouse && unitDefUnderMouse->IsCheckSumValidForAUnitClass() &&
 								(unitDefUnderMouse->interactionMode >= AOE_CONST_FUNC::INTERACTION_MODES::CST_IM_RESOURCES)
 								) {
