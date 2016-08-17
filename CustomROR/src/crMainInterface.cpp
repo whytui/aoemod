@@ -32,8 +32,10 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	bool isInEditor = (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
 	if (isInEditor) {
 		// Consistency check.
-		assert(currentUI->checksum == 0x00547360);
-		if (currentUI->checksum != 0x00547360) { return false; }
+		assert((currentUI->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MAIN) ||
+			(currentUI->checksum == CHECKSUM_UI_SAVE_AS) ||
+			(currentUI->checksum == CHECKSUM_UI_LOAD));
+		if (currentUI->checksum != CHECKSUM_UI_SCENARIO_EDITOR_MAIN) { return false; }
 	}
 	bool isInGame = (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) && (currentUI->checksum == CHECKSUM_UI_IN_GAME_MAIN); // True if game is running (and has focus)
 	bool isInGame_ScenarioScreen = (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) && (currentUI->checksum == 0x00547B94); // 0x00547B94=scenario info screen

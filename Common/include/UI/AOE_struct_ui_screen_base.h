@@ -18,6 +18,8 @@ namespace AOE_STRUCTURES
 #define CHECKSUM_UI_IN_GAME_MAIN 0x0054679C
 #define CHECKSUM_UI_SCENARIO_EDITOR_MAIN 0x00547360
 #define CHECKSUM_UI_GAME_SETTINGS 0x00547810
+#define CHECKSUM_UI_SAVE_AS 0x00547234 // TODO. "Save Game Screen" (to save scenario also)
+#define CHECKSUM_UI_LOAD 0x005475B8 // TODO.
 
 	// Size=0x478. A base class for all screens and popups (not UI components). Directly derives from base UI class.
 	// Constructor = 0x454430 (0x468150 for intermediate class), Init (own fields) 0x454B60.
