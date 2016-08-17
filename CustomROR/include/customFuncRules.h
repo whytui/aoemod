@@ -61,7 +61,7 @@ namespace AOE_CONST_FUNC {
 
 	// Returns true if unit is ranged unit (shoots projectiles)
 	// Note: priests are not ranged units
-	static inline bool IsRangedUnit(STRUCT_UNITDEF_TYPE50 *unit) {
+	static inline bool IsRangedUnit(STRUCT_UNITDEF_ATTACKABLE *unit) {
 		return (unit && (unit->projectileUnitId >= 0));
 	}
 

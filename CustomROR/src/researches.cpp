@@ -845,8 +845,8 @@ std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_
 					}
 					if (enabledUnitDefID >= 0) {
 						AOE_STRUCTURES::STRUCT_UNITDEF_BASE *enabledUnitDefBase = player->GetUnitDefBase(enabledUnitDefID);
-						if (enabledUnitDefBase && enabledUnitDefBase->IsCheckSumValidForAUnitClass() && enabledUnitDefBase->DerivesFromLiving()) {
-							AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *t = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)enabledUnitDefBase;
+						if (enabledUnitDefBase && enabledUnitDefBase->IsCheckSumValidForAUnitClass() && enabledUnitDefBase->DerivesFromTrainable()) {
+							AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *t = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)enabledUnitDefBase;
 							if (t->trainLocation == bldDef->DAT_ID1) {
 								// Get unit name. Might be used if research does not have a name
 								GetLanguageDllText(t->languageDLLID_Name, nameBufferBackup, sizeof(nameBufferBackup), t->ptrUnitName);

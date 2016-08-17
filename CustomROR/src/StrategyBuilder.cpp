@@ -353,11 +353,11 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(AOE_STRUCTURES::
 			{
 				STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(unitDefId);
 				TAIUnitClass unitClass = TAIUnitClass::AIUCNone;
-				if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass() && unitDefBase->DerivesFromLiving()) {
+				if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass() && unitDefBase->DerivesFromTrainable()) {
 					if (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) {
 						unitClass = TAIUnitClass::AIUCBuilding;
 					}
-					if (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT) {
+					if (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_TRAINABLE) {
 						unitClass = TAIUnitClass::AIUCLivingUnit;
 					}
 				}
@@ -476,9 +476,9 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 	for (int curUnitDefID = 0; curUnitDefID < player->structDefUnitArraySize; curUnitDefID++) {
 		STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(curUnitDefID);
 		bool validUnit = (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
-		validUnit = validUnit && unitDefBase->DerivesFromLiving();
+		validUnit = validUnit && unitDefBase->DerivesFromTrainable();
 		validUnit = validUnit && IsNonTowerMilitaryUnit(unitDefBase->unitAIType);
-		STRUCT_UNITDEF_LIVING *unitDefLiving = (STRUCT_UNITDEF_LIVING *)unitDefBase;
+		STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (STRUCT_UNITDEF_TRAINABLE *)unitDefBase;
 		assert(!validUnit || unitDefLiving->IsCheckSumValid());
 		validUnit = validUnit && (unitDefLiving->towerMode == 0) && (unitDefLiving->speed > 0) &&
 			(unitDefLiving->trainButton > 0) && (unitDefLiving->trainLocation >= 0); // both exclude some heroes/cheats/non-standard units, but not all of them
@@ -583,11 +583,11 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 			float bestRange = unitDefLiving->displayedRange;
 			short int bestAttack = unitDefLiving->displayedAttack;
 			short int bestArmor = unitDefLiving->displayedArmor;
-			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *bestUpgradedUnit = unitDefLiving;
+			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *bestUpgradedUnit = unitDefLiving;
 			float bestSpeed = unitDefLiving->speed;
 			for each (short int upgradedUnitDefId in unitInfo->upgradesUnitDefId)
 			{
-				AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *upgradedDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)GetUnitDefStruct(player, upgradedUnitDefId);
+				AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *upgradedDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)GetUnitDefStruct(player, upgradedUnitDefId);
 				bool currentIsBetter = false;
 				if (upgradedDef && upgradedDef->IsCheckSumValid()) {
 					if ((upgradedDef->totalHitPoints > bestHP) || (upgradedDef->displayedAttack > bestAttack) ||
@@ -1978,7 +1978,7 @@ void StrategyBuilder::SelectStrategyUnits() {
 	this->log += newline;
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits) {
 		std::string msg = "Unit id=";
-		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unit = NULL;
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unit = NULL;
 		if (unitInfo->isOptionalUnit) {
 			msg += std::to_string(unitInfo->unitDefId);
 			unit = unitInfo->baseUnitDefLiving;
@@ -1999,7 +1999,7 @@ void StrategyBuilder::SelectStrategyUnits() {
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
 		if (!unitInfo->isSelected) {
 			std::string msg = "[Not selected] Unit id=";
-			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unit = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unit = NULL;
 			if (unitInfo->isOptionalUnit) {
 				msg += std::to_string(unitInfo->unitDefId);
 				unit = unitInfo->baseUnitDefLiving;
@@ -2392,8 +2392,8 @@ void StrategyBuilder::ChooseOptionalResearches() {
 void StrategyBuilder::AddResearchesForEconomy() {
 	for (int unitDefId = 0; unitDefId < this->player->structDefUnitArraySize; unitDefId++) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = this->player->GetUnitDefBase(unitDefId);
-		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromBird()) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDefBird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)unitDef;
+		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromCommandable()) {
+			AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDefBird = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDef;
 			if (unitDefBird->villagerMode && (unitDefBird->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian)) {
 				this->CollectResearchInfoForUnit(unitDefId, true);
 			}
@@ -2424,8 +2424,8 @@ void StrategyBuilder::AddTowerResearches() {
 	watchTowerInfo->forcePutAsEarlyAsPossible = true;
 	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false);
 
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *watchTower = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)this->player->GetUnitDefBase(CST_UNITID_WATCH_TOWER);
-	if (!watchTower || !watchTower->IsCheckSumValidForAUnitClass() || !watchTower->DerivesFromType50()) { return; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *watchTower = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)this->player->GetUnitDefBase(CST_UNITID_WATCH_TOWER);
+	if (!watchTower || !watchTower->IsCheckSumValidForAUnitClass() || !watchTower->DerivesFromAttackable()) { return; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *projectileDefInitial = (AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(watchTower->projectileUnitId);
 
 	std::vector<short int> allResearchesForUnit = FindResearchesThatAffectUnit(player, CST_UNITID_WATCH_TOWER, true);
@@ -2436,16 +2436,16 @@ void StrategyBuilder::AddTowerResearches() {
 		bool newReloadTimeIsMuchSlower = false;
 		bool isUpgradeUnit = false;
 		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(researchId);
-		AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *destBld = NULL;
+		AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *destBld = NULL;
 		if (resDef && (resDef->technologyId >= 0) && (resDef->researchLocation >= 0)) {
 			AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = this->global->GetTechDef(resDef->technologyId);
 			if (techDef) {
 				short int destUnitId = GetNewUnitIdIfTechUpgradesUnit(techDef, CST_UNITID_WATCH_TOWER);
-				destBld = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)this->player->GetUnitDefBase(destUnitId);
+				destBld = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)this->player->GetUnitDefBase(destUnitId);
 				isUpgradeUnit = (destUnitId > -1) && (destBld != NULL);
 			}
 		}
-		if (destBld && destBld->IsCheckSumValidForAUnitClass() && destBld->DerivesFromType50()) {
+		if (destBld && destBld->IsCheckSumValidForAUnitClass() && destBld->DerivesFromAttackable()) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *projectileDefAfter = (AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(destBld->projectileUnitId);
 			if (projectileDefAfter && projectileDefAfter->IsCheckSumValid()) {
 				float speedAfter = projectileDefAfter->speed;
@@ -3038,8 +3038,8 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 			for each (short int unitDefId in resInfo->impactedUnitDefIds) {
 				AOE_TECHNOLOGIES::TechFilterExcludeDrawbacksAndDistributedEffects filter;
 				if (GetNewUnitIdIfTechUpgradesUnit(resInfo->techDef, unitDefId) >= 0) {
-					AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)this->player->GetUnitDefBase(unitDefId);
-					if (unitDef && unitDef->DerivesFromLiving()) {
+					AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)this->player->GetUnitDefBase(unitDefId);
+					if (unitDef && unitDef->DerivesFromTrainable()) {
 						int totalUnitCost = 0;
 						for (int i = 0; i < 3; i++) {
 							if (unitDef->costs[i].costPaid) {
@@ -3561,8 +3561,8 @@ std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitD
 	// Consider unit's train location too !
 #pragma message("TODO: Add this missing part in original method in strategy.cpp")
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(unitDefId);
-	AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)unitDefBase;
-	if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass() && unitDefLiving->DerivesFromLiving()) {
+	AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDefBase;
+	if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass() && unitDefLiving->DerivesFromTrainable()) {
 		short int trainLocation = unitDefLiving->trainLocation;
 		if (trainLocation == CST_UNITID_BUILDER) { trainLocation = -1; }
 		if (trainLocation >= 0) {

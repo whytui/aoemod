@@ -252,7 +252,7 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_BUILD_AI
 	while ((creatableListElem != NULL) && (indexInList < creatableListLink->listElemCount)) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *currentUnit = creatableListElem->unit;
 		if (currentUnit && (currentUnit->unitInstanceId >= 0) && (currentUnit->unitDefinition) && // Exclude temporary units (smoke, dead units) with negative id
-			(currentUnit->unitDefinition->unitType >= AOE_CONST_FUNC::GUT_LIVING_UNIT) && // living + building (+trees, but non-gaia players don't have any)
+			(currentUnit->unitDefinition->unitType >= AOE_CONST_FUNC::GUT_TRAINABLE) && // living + building (+trees, but non-gaia players don't have any)
 			((currentUnit->unitDefinition->DAT_ID1 == DAT_ID) || (DAT_ID == -1))) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = currentUnit->unitDefinition;
 			notInStrategyUnitsList.push_back(currentUnit);
@@ -814,10 +814,10 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 			traceMessageHandler.WriteMessageNoNotification("There is only 1 unit type to add in strategy.");
 			short int DAT_ID = strongerUnits[0];
 			char buf[30];
-			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) defUnitTable[DAT_ID];
+			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *) defUnitTable[DAT_ID];
 			//if (!defUnit) { return; }
 			assert(defUnit != NULL);
-			assert(defUnit->DerivesFromLiving());
+			assert(defUnit->DerivesFromTrainable());
 			strcpy_s(buf, GetUnitName(DAT_ID));
 			AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, defUnit->trainLocation,
 				AIUCLivingUnit, DAT_ID, player, buf);
@@ -874,10 +874,10 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 			// Add unit
 			short int DAT_ID = strongerUnits[currentIndex];
 			char buf[30];
-			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)defUnitTable[DAT_ID];
+			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)defUnitTable[DAT_ID];
 			//if (!defUnit) { return; }
 			assert(defUnit != NULL);
-			assert(defUnit->DerivesFromLiving());
+			assert(defUnit->DerivesFromTrainable());
 			strcpy_s(buf, GetUnitName(DAT_ID));
 			AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, defUnit->trainLocation,
 				AIUCLivingUnit, DAT_ID, player, buf);

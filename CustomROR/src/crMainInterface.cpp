@@ -233,7 +233,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				int aa = 1 + 1;
 			}
 		}
-		AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *selectedUnitT50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)selectedUnit;
+		AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *selectedUnitT50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)selectedUnit;
 		AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameScreen = GetGameSettingsPtr()->ptrGameUIStruct;
 		if (IsGameRunning()) {
 			// During Game
@@ -246,7 +246,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				unsigned long int addraction = -1;
 				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = selectedUnit->unitDefinition;
 				AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO *ainfo = NULL;
-				if (selectedUnitT50 && selectedUnitT50->DerivesFromType50()) {
+				if (selectedUnitT50 && selectedUnitT50->DerivesFromAttackable()) {
 					ainfo = selectedUnitT50->ptrActionInformation;
 				}
 				if (ainfo && (ainfo->ptrActionLink) && (ainfo->ptrActionLink->actionStruct)) {
@@ -322,7 +322,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			std::string ss = "";
 			AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 			assert(humanPlayer && humanPlayer->IsCheckSumValid());
-			if (selectedUnitT50 && selectedUnitT50->DerivesFromType50() && (player->playerId == global->humanPlayerId)) {
+			if (selectedUnitT50 && selectedUnitT50->DerivesFromAttackable() && (player->playerId == global->humanPlayerId)) {
 				if (selectedUnitT50->ptrActionInformation && selectedUnitT50->ptrActionInformation->ptrActionLink &&
 					selectedUnitT50->ptrActionInformation->ptrActionLink->actionStruct &&
 					selectedUnitT50->ptrActionInformation->ptrActionLink->actionStruct->unsure_resourceValue) {
@@ -735,7 +735,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = selectedUnits[index];
 		if (unit && unit->IsCheckSumValidForAUnitClass() && (unit->ptrStructPlayer == controlledPlayer)) {
 			hasSelectedBuildings = hasSelectedBuildings || (unit->unitType == GUT_BUILDING);
-			hasSelectedLivings = hasSelectedLivings || (unit->unitType == GUT_LIVING_UNIT);
+			hasSelectedLivings = hasSelectedLivings || (unit->unitType == GUT_TRAINABLE);
 		}
 	}
 

@@ -30,8 +30,8 @@ namespace STRATEGY {
 		PotentialUnitInfo();
 		short int unitDefId; // DATID1 (base unit ID = without upgrades)
 		char *unitName; // For debug
-		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *baseUnitDefLiving; // (DATID1) Unit definition of base unit, without upgrade
-		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *baseUnitDefLiving; // (DATID1) Unit definition of base unit, without upgrade
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
 		short int baseUnitDefId; // non-upgraded unit that can be upgraded to "this" one, if any. -1 in most cases. PLEASE use unitDefId instead.
 		std::list<short int> upgradesUnitDefId; // List of all available unitDefId this unit can be upgraded to
 		short int strongestUpgradeUnitDefId; // Unit definition ID of best available upgraded unit

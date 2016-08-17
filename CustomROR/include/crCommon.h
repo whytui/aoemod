@@ -364,27 +364,27 @@ bool ApplyCostIfPossible(float costTable[], float resourceTable[]);
 // Calls ROR's method to change a unit's action so it will move to supplied unit/position
 // target can be NULL (only position will matter)
 // unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
-void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_BIRD *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY);
+void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY);
 
 // Tells a unit to (move and) attack another unit (using tacAI)
 // Returns true if successful
-bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BIRD *actor, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
+bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actor, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
 
 // Given a list of (actor) units, tell them to interact with a target unit (like a right-click).
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
+bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
 
 // Tell a unit to interact with a target unit (like a right-click).
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
+bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
 
 // Returns a unitDefCommand object if actor unit has a valid right-click command on target unit.
 // Returns NULL if there no possible interaction
-AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit,
+AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit,
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *target, bool canSwitchForVillager);
 
 
@@ -505,7 +505,7 @@ bool AddCommandToGameCmdQueue(void *commandStruct, long int structSize);
 
 // Create a "ROR" command struct (right-click). Returns false if failed.
 bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY);
-bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
+bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
 
 // Create a "ROR" command struct (build). Returns false if failed.
 bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY);

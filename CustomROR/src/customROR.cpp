@@ -535,7 +535,7 @@ void CustomRORInstance::CheckPopulationCostWithLogistics(REG_BACKUP *REG_values)
 	// With logistics, barracks' units get a costValue=0 for populationHeadroom, because it's an int and the real value should be 0.5.
 	// This causes erroneous calculations: AI can train infantry when its population headroom==0 (which should not be possible)
 	// Is our unit impacted by logistics (value=0 for pop headroom cost) ?
-	if ((currentCost->costAmount == 0) && (currentCost->costType == CST_RES_ORDER_POPULATION_HEADROOM) && (unitDef->unitType == GUT_LIVING_UNIT)) {
+	if ((currentCost->costAmount == 0) && (currentCost->costType == CST_RES_ORDER_POPULATION_HEADROOM) && (unitDef->unitType == GUT_TRAINABLE)) {
 		if (
 			// We test resource storages to know if this unit type "uses" population: we don't want to impact any unit that would use 0 population
 			((unitDef->resourceStorageType_1 == CST_RES_ORDER_POPULATION_HEADROOM) && (unitDef->resourceStorageAmount_1 < 0)) ||
@@ -1664,9 +1664,9 @@ void CustomRORInstance::HumanSpecific_onCapturableUnitSeen(REG_BACKUP *REG_value
 	ror_api_assert(REG_values, actorPlayerId >= 0 && actorPlayerId <= 8);
 	ror_api_assert(REG_values, beingSeenUnit != NULL);
 	ror_api_assert(REG_values, beingSeenUnit->IsCheckSumValidForAUnitClass());
-	ror_api_assert(REG_values, beingSeenUnit->DerivesFromType50());
+	ror_api_assert(REG_values, beingSeenUnit->DerivesFromAttackable());
 	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = NULL;
-	if (!beingSeenUnit || !beingSeenUnit->IsCheckSumValidForAUnitClass() || !beingSeenUnit->DerivesFromType50() || 
+	if (!beingSeenUnit || !beingSeenUnit->IsCheckSumValidForAUnitClass() || !beingSeenUnit->DerivesFromAttackable() || 
 		(actorPlayerId < 0) || (actorPlayerId > 8)) { return; }
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
@@ -2095,7 +2095,7 @@ void CustomRORInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_value
 	// Warning: don't forget there is 2 possible contexts (tower in my town OR I was just attacked by enemyUnit)
 
 	if (contextIsTowerInMyTown) {
-		if (!this->crCommand.ShouldAttackTower_towerPanic((STRUCT_UNIT_BIRD*)myUnit, enemyUnit)) {
+		if (!this->crCommand.ShouldAttackTower_towerPanic((STRUCT_UNIT_COMMANDABLE*)myUnit, enemyUnit)) {
 			forceKeepCurrentActivity = true;
 		}
 	}
@@ -2500,12 +2500,12 @@ void CustomRORInstance::OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *RE
 // Warning: this is also called by scenario editor and at game init !
 void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 	// Now get informations and check them
-	AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit = (AOE_STRUCTURES::STRUCT_UNIT_BIRD*)REG_values->EAX_val;
+	AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit = (AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE*)REG_values->EAX_val;
 	ror_api_assert(REG_values, unit != NULL); // TO DO: Could just return ? Leave that for testing purpose for now...
 	AOE_STRUCTURES::STRUCT_PLAYER *player = unit->ptrStructPlayer;
 	ror_api_assert(REG_values, player != NULL);
 	ror_api_assert(REG_values, unit->IsCheckSumValidForAUnitClass());
-	ror_api_assert(REG_values, unit->DerivesFromBird());
+	ror_api_assert(REG_values, unit->DerivesFromCommandable());
 	ror_api_assert(REG_values, player->IsCheckSumValid());
 	
 	ror_api_assert(REG_values, GetGameSettingsPtr() != NULL);
@@ -2757,8 +2757,8 @@ void CustomRORInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_value
 	assert(targetUnit && targetUnit->IsCheckSumValidForAUnitClass());
 	if (!actorUnit || !targetUnit) { return; }
 
-	AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *actorAsType50 = NULL;
-	if (actorUnit->DerivesFromType50()) { actorAsType50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)actorUnit; }
+	AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *actorAsType50 = NULL;
+	if (actorUnit->DerivesFromAttackable()) { actorAsType50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)actorUnit; }
 	AOE_STRUCTURES::STRUCT_UNIT_MOVEMENT_INFO *movInfo = NULL;
 	assert(actorAsType50 != NULL);
 

@@ -229,7 +229,7 @@ public:
 	// This event is triggered for ALL units (creatable or not, projectile, smoke, trees...)
 	// This event is triggered during game but as well in scenario editor or during game creation.
 	// actionStruct parameter can be NULL if it could not be determined
-	void OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit,
+	void OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit,
 		AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *actionStruct);
 
 	// Fixes missing treatments when a unit changes owner (eg. unit conversion)
@@ -258,7 +258,7 @@ public:
 
 	// Returns true if a unit should change target to new one, false if it should keep attacking current one.
 	// To be used when target unit is a tower in actor's town
-	bool ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower);
+	bool ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower);
 
 	// Replaces ROR's loop on villagers to pick some and task them to attack enemy tower.
 	// assignedUnitsCounter is IN OUT: input value can be >0 (number of military units that have already been tasked). We should stop when assignedUnitsCounter reaches 6 (original code's behaviour)
@@ -326,7 +326,7 @@ public:
 	void HandleRORDebugLogCall(unsigned long int firstRORCallTextParamAddress);
 
 	// Fix the check on path finding when trying to assign a task to a villager
-	long int GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *actorAsType50, long int *pathFindingArgs);
+	long int GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *actorAsType50, long int *pathFindingArgs);
 
 	// Write the F11 centered text (if displayed)
 	// Warning, this is only refreshed when population changes ?

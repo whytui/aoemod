@@ -221,13 +221,13 @@ namespace AOE_STRUCTURES
 		// Returns true if the unit definition is a flag or a child class (all but eye candy and trees)
 		bool DerivesFromFlag() { return (this->unitType >= (char)AOE_CONST_FUNC::GUT_FLAGS) || (this->unitType <= (char)AOE_CONST_FUNC::GUT_BUILDING); } // all but 10 and 90
 		// Returns true if the unit definition is dead/fish or a child class
-		bool DerivesFromDead_fish() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_DEAD_UNITS) || (this->DerivesFromBird()); }
+		bool DerivesFromMovable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_MOVABLE) || (this->DerivesFromCommandable()); }
 		// Returns true if the unit definition is a bird or a child class
-		bool DerivesFromBird() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_BIRD) || (this->DerivesFromType50()); }
+		bool DerivesFromCommandable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_COMMANDABLE) || (this->DerivesFromAttackable()); }
 		// Returns true if the unit definition is a living unit or a child class (building)
-		bool DerivesFromLiving() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_LIVING_UNIT) || (this->unitType == (char)AOE_CONST_FUNC::GUT_BUILDING); }
+		bool DerivesFromTrainable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_TRAINABLE) || (this->unitType == (char)AOE_CONST_FUNC::GUT_BUILDING); }
 		// Returns true if the unit definition is type50 or one of its child classes (projectile, living/building).
-		bool DerivesFromType50() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_TYPE50) || (this->unitType == (char)AOE_CONST_FUNC::GUT_PROJECTILE) || (this->DerivesFromLiving()); }
+		bool DerivesFromAttackable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_ATTACKABLE) || (this->unitType == (char)AOE_CONST_FUNC::GUT_PROJECTILE) || (this->DerivesFromTrainable()); }
 		unsigned long int GetCopyConstructorAddress() { return 0x440FF0; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_BASE) == 0xB8, "STRUCT_UNITDEF_BASE size");
@@ -252,8 +252,8 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_DOPPLEGANGER) == 0xBC, "STRUCT_UNITDEF_DOPPLEGANGER size");
 
-	// FC 44 54 00 = Dead/fish (type30) - size=0xD8 - Constructor 0x440990
-	class STRUCT_UNITDEF_DEAD_FISH : public STRUCT_UNITDEF_FLAG {
+	// FC 44 54 00 = Movable (type30 - dead/fish in AGE3) - size=0xD8 - Constructor 0x440990
+	class STRUCT_UNITDEF_MOVABLE : public STRUCT_UNITDEF_FLAG {
 	public:
 		unsigned long int ptrWalkingGraphic1;
 		// 0xC0
@@ -272,14 +272,14 @@ namespace AOE_STRUCTURES
 		char unknown_0D5[3]; // unused ?
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x005444FC); }
-		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_DEAD_UNITS); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_MOVABLE); }
 		unsigned long int GetCopyConstructorAddress() { return 0x440910; } // Address of AOE method to create a copy.
 	};
-	static_assert(sizeof(STRUCT_UNITDEF_DEAD_FISH) == 0xD8, "STRUCT_UNITDEF_DEAD_FISH size");
+	static_assert(sizeof(STRUCT_UNITDEF_MOVABLE) == 0xD8, "STRUCT_UNITDEF_MOVABLE size");
 
-	// CC 43 54 00 = Bird (type40) - size=0xFC - Constructor 0x43E090.
-	// Deserialize=0x43E230 unitDef.ReadFromFile_bird_40(internalFileRef, ptrGraphicsList, ptrSoundsList)
-	class STRUCT_UNITDEF_BIRD : public STRUCT_UNITDEF_DEAD_FISH {
+	// CC 43 54 00 = Commandable (type40 - bird in AGE3) - size=0xFC - Constructor 0x43E090.
+	// Deserialize=0x43E230 unitDef.ReadFromFile_40(internalFileRef, ptrGraphicsList, ptrSoundsList)
+	class STRUCT_UNITDEF_COMMANDABLE : public STRUCT_UNITDEF_MOVABLE {
 	public:
 		STRUCT_UNIT_COMMAND_DEF_HEADER *ptrUnitCommandHeader; // +D8
 		short int whenBeingSeenCommandIndex; // +DC. For artefacts, discoveries but also animals
@@ -302,14 +302,14 @@ namespace AOE_STRUCTURES
 		char unknown_0FB;
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x005443CC); }
-		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BIRD); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_COMMANDABLE); }
 		unsigned long int GetCopyConstructorAddress() { return 0x43E010; } // Address of AOE method to create a copy.
 	};
-	static_assert(sizeof(STRUCT_UNITDEF_BIRD) == 0xFC, "STRUCT_UNITDEF_BIRD size");
+	static_assert(sizeof(STRUCT_UNITDEF_COMMANDABLE) == 0xFC, "STRUCT_UNITDEF_COMMANDABLE size");
 
 
 	// 44 44 54 00 = type50 (type50) - size=0x148 - Constructor 0x43EE10
-	class STRUCT_UNITDEF_TYPE50 : public STRUCT_UNITDEF_BIRD {
+	class STRUCT_UNITDEF_ATTACKABLE : public STRUCT_UNITDEF_COMMANDABLE {
 	public:
 		unsigned long int *ptrAttackGraphic; // +FC. Unknown struct
 		// 0x100
@@ -348,15 +348,15 @@ namespace AOE_STRUCTURES
 		float reloadTime2;
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00544444); }
-		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TYPE50); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_ATTACKABLE); }
 		inline unsigned long int GetCopyConstructorAddress() const { return 0x43ED90; } // Address of AOE method to create a copy.
 		inline bool HasBlastDamage() const { return (this->blastRadius > 0); }
 	};
-	static_assert(sizeof(STRUCT_UNITDEF_TYPE50) == 0x148, "STRUCT_UNITDEF_TYPE50 size");
+	static_assert(sizeof(STRUCT_UNITDEF_ATTACKABLE) == 0x148, "STRUCT_UNITDEF_ATTACKABLE size");
 
 
 	// C0 44 54 00 = Projectile (type60) - size=0x154 - Constructor 0x4403D0
-	class STRUCT_UNITDEF_PROJECTILE : public STRUCT_UNITDEF_TYPE50 {
+	class STRUCT_UNITDEF_PROJECTILE : public STRUCT_UNITDEF_ATTACKABLE {
 	public:
 		PROJECTILE_TRAJECTORY_TYPE trajectoryType; // +148. Type of trajectory. Almost all projectiles have default one. Note: if graphics do not hit target, shooting fails.
 		char intelligentProjectile; // +149.
@@ -374,8 +374,8 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_UNITDEF_PROJECTILE) == 0x154, "STRUCT_UNITDEF_PROJECTILE size");
 
 
-	// 70 99 54 00 = living unit (type70) - size=0x164. Constructor = 0x4ECA90
-	class STRUCT_UNITDEF_LIVING : public STRUCT_UNITDEF_TYPE50 {
+	// 70 99 54 00 = Trainable (type70 - living in AGE3) - size=0x164. Constructor = 0x4ECA90
+	class STRUCT_UNITDEF_TRAINABLE : public STRUCT_UNITDEF_ATTACKABLE {
 	public:
 		STRUCT_COST costs[3]; // +148, 3*6 bytes (3 words each)
 		short int trainTime; // +15A.
@@ -387,14 +387,14 @@ namespace AOE_STRUCTURES
 		short int unknown_162;
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00549970); }
-		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TRAINABLE); }
 		unsigned long int GetCopyConstructorAddress() { return 0x4ECA10; } // Address of AOE method to create a copy.
 	};
-	static_assert(sizeof(STRUCT_UNITDEF_LIVING) == 0x164, "STRUCT_UNITDEF_LIVING size");
+	static_assert(sizeof(STRUCT_UNITDEF_TRAINABLE) == 0x164, "STRUCT_UNITDEF_TRAINABLE size");
 
 
 	// 30 99 54 00 = building (type80) - size=0x17C. Constructor = 0x4EC180
-	class STRUCT_UNITDEF_BUILDING : public STRUCT_UNITDEF_LIVING {
+	class STRUCT_UNITDEF_BUILDING : public STRUCT_UNITDEF_TRAINABLE {
 	public:
 		unsigned long int *ptrConstructionSound; // +164.
 		unsigned long int *ptrConstructionGraphic; // +168. Graphics while building is under construction
@@ -429,25 +429,25 @@ namespace AOE_STRUCTURES
 	// Returns a unit definition structure's size according to its actual type
 	static long int GetUnitDefStructRealSize(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
 		if (unitDef->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BASE);
-		if (((STRUCT_UNITDEF_BIRD*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BIRD);
+		if (((STRUCT_UNITDEF_COMMANDABLE*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE);
 		if (((STRUCT_UNITDEF_FLAG*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_FLAG);
-		if (((STRUCT_UNITDEF_DEAD_FISH*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH);
+		if (((STRUCT_UNITDEF_MOVABLE*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE);
 		if (((STRUCT_UNITDEF_DOPPLEGANGER*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER);
-		if (((STRUCT_UNITDEF_LIVING*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING);
+		if (((STRUCT_UNITDEF_TRAINABLE*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE);
 		if (((STRUCT_UNITDEF_PROJECTILE*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE);
-		if (((STRUCT_UNITDEF_TREE*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BIRD);
-		if (((STRUCT_UNITDEF_TYPE50*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50);
+		if (((STRUCT_UNITDEF_TREE*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TREE);
+		if (((STRUCT_UNITDEF_ATTACKABLE*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE);
 		if (((STRUCT_UNITDEF_BUILDING*)unitDef)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING);
 		// If not found, try again using only checksum ? There is no reason here (just a copy paste from unit ^^)
 		if (unitDef->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BASE);
-		if (((STRUCT_UNITDEF_BIRD*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BIRD);
+		if (((STRUCT_UNITDEF_COMMANDABLE*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE);
 		if (((STRUCT_UNITDEF_FLAG*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_FLAG);
-		if (((STRUCT_UNITDEF_DEAD_FISH*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH);
+		if (((STRUCT_UNITDEF_MOVABLE*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE);
 		if (((STRUCT_UNITDEF_DOPPLEGANGER*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER);
-		if (((STRUCT_UNITDEF_LIVING*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING);
+		if (((STRUCT_UNITDEF_TRAINABLE*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE);
 		if (((STRUCT_UNITDEF_PROJECTILE*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE);
-		if (((STRUCT_UNITDEF_TREE*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BIRD);
-		if (((STRUCT_UNITDEF_TYPE50*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50);
+		if (((STRUCT_UNITDEF_TREE*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TREE);
+		if (((STRUCT_UNITDEF_ATTACKABLE*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE);
 		if (((STRUCT_UNITDEF_BUILDING*)unitDef)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING);
 		return 0;
 	}

@@ -458,7 +458,7 @@ AOE_CONST_FUNC::TAIUnitClass GetUnitStrategyElemClass(AOE_STRUCTURES::STRUCT_UNI
 	TAIUnitClass unitStrategyClass = AOE_CONST_FUNC::TAIUnitClass::AIUCNone;
 	if (!unitDef) { return unitStrategyClass; }
 	if (unitDef->unitType == GUT_BUILDING) { unitStrategyClass = AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding; }
-	if (unitDef->unitType == GUT_LIVING_UNIT) { unitStrategyClass = AOE_CONST_FUNC::TAIUnitClass::AIUCLivingUnit; }
+	if (unitDef->unitType == GUT_TRAINABLE) { unitStrategyClass = AOE_CONST_FUNC::TAIUnitClass::AIUCLivingUnit; }
 	return unitStrategyClass;
 }
 
@@ -653,8 +653,8 @@ bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass) {
 bool GetUnitCost(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID, float costTable[]) {
 	if (!player || !player->IsCheckSumValid()) { return false; }
 	if ((DAT_ID < 0) || (DAT_ID >= player->structDefUnitArraySize)) { return false; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING*)player->GetUnitDefBase(DAT_ID);
-	if (!defUnit || !defUnit->DerivesFromLiving()) { return false; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE*)player->GetUnitDefBase(DAT_ID);
+	if (!defUnit || !defUnit->DerivesFromTrainable()) { return false; }
 	for (int i = 0; i < 4; i++) { costTable[i] = 0; }
 	if (defUnit->costs[0].costPaid) {
 		if (defUnit->costs[0].costType > MAX_RESOURCE_TYPE_ID) { return false; }
@@ -824,8 +824,8 @@ const char *GetUnitName(short int unitDefId) {
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
 AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
-	if (!unit || !unit->DerivesFromBird()) { return NULL; }
-	AOE_STRUCTURES::STRUCT_UNIT_BIRD *unitAsBird = (AOE_STRUCTURES::STRUCT_UNIT_BIRD *)unit;
+	if (!unit || !unit->DerivesFromCommandable()) { return NULL; }
+	AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitAsBird = (AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *)unit;
 	if ((unitAsBird->ptrActionInformation == NULL) || (unitAsBird->ptrActionInformation->ptrActionLink == NULL)) {
 		return NULL;
 	}
@@ -841,10 +841,10 @@ AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT_BA
 // Returns true if unit definition is a tower (using unit type and the fact it has attacks or not)
 // See also IsTower(datid) in AOE_empires_dat.h, which uses a hardcoded list.
 bool IsTower(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
-	if (!unitDef->DerivesFromType50()) {
+	if (!unitDef->DerivesFromAttackable()) {
 		return false;
 	}
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)unitDef;
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDef;
 	if (!unitDef50->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
@@ -968,7 +968,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI 
 // target can be NULL (only position will matter)
 // unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
 // Compatible with MP, but in MP unit will not defend itself if attacked.
-void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_BIRD *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY) {
+void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY) {
 	if (!unitToMove) { return; }
 
 	if (IsMultiplayer()) {
@@ -1002,21 +1002,21 @@ void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_BIRD *unitToMove, AO
 
 
 // Tells a unit to (move and) attack another unit
-bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BIRD *actor, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
+bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actor, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
 	if (!tacAI || !actor || !target) { return false; }
 	assert(tacAI->IsCheckSumValid());
-	assert(actor->IsCheckSumValidForAUnitClass() && actor->DerivesFromBird());
+	assert(actor->IsCheckSumValidForAUnitClass() && actor->DerivesFromCommandable());
 	assert(target->IsCheckSumValidForAUnitClass());
 	assert(actor->unitDefinition);
 	assert(target->ptrStructPlayer);
-	if (!tacAI->IsCheckSumValid() || !actor->DerivesFromBird() || !target->IsCheckSumValidForAUnitClass() || 
+	if (!tacAI->IsCheckSumValid() || !actor->DerivesFromCommandable() || !target->IsCheckSumValidForAUnitClass() || 
 		!actor->unitDefinition || !target->ptrStructPlayer) { return false; }
 	long int posX = (long int)target->positionX;
 	long int posY = (long int)target->positionY;
 	long int posZ = (long int)target->positionZ;
 	float maxRange = 1;
-	if (actor->DerivesFromType50()) {
-		maxRange = ((STRUCT_UNITDEF_TYPE50*)actor->unitDefinition)->maxRange;
+	if (actor->DerivesFromAttackable()) {
+		maxRange = ((STRUCT_UNITDEF_ATTACKABLE*)actor->unitDefinition)->maxRange;
 	}
 	long int actorUnitId = actor->unitInstanceId;
 	long int targetUnitId = target->unitInstanceId;
@@ -1065,7 +1065,7 @@ bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::S
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, long int actorUnitsCount,
+bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount,
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
 	if (!actorUnitsList || (actorUnitsCount <= 0) || !target || !target->IsCheckSumValid()) { return false; }
 	assert(actorUnitsCount < 255); // More would be... more than huge !
@@ -1088,21 +1088,21 @@ bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnits
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
-	if (!actorUnit || !actorUnit->DerivesFromBird()) { return false; }
+bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
+	if (!actorUnit || !actorUnit->DerivesFromCommandable()) { return false; }
 	return TellUnitsToInteractWithTarget(&actorUnit, 1, target);
 }
 
 
 // Returns a unitDefCommand object if actor unit has a valid right-click command on target unit.
 // Returns NULL if there no possible interaction
-AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit,
+AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit,
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *target, bool canSwitchForVillager) {
-	if (!actorUnit || !target || !actorUnit->IsCheckSumValidForAUnitClass() || !actorUnit->DerivesFromBird() ||
+	if (!actorUnit || !target || !actorUnit->IsCheckSumValidForAUnitClass() || !actorUnit->DerivesFromCommandable() ||
 		!target->IsCheckSumValidForAUnitClass()) { return false; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)actorUnit->unitDefinition;
-	if (!unitDef_base->DerivesFromBird()) { return false; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDef_asBird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)unitDef_base;
+	if (!unitDef_base->DerivesFromCommandable()) { return false; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDef_asBird = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDef_base;
 	if (!unitDef_asBird->ptrUnitCommandHeader || !unitDef_asBird->ptrUnitCommandHeader->IsCheckSumValid()) { return false; }
 	AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER *cmdh = unitDef_asBird->ptrUnitCommandHeader;
 	AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *result;
@@ -1140,8 +1140,8 @@ AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTUR
 	for (int i = 0; i < sizeof(villagerDATIDs); i++) {
 		if (villagerDATIDs[i] < actorPlayer->structDefUnitArraySize) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *tmpUnitDefBase = actorPlayer->GetUnitDefBase((short int)villagerDATIDs[i]);
-			if (tmpUnitDefBase && tmpUnitDefBase->IsCheckSumValidForAUnitClass() && tmpUnitDefBase->DerivesFromBird()) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *tmpUnitDefBird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)tmpUnitDefBase;
+			if (tmpUnitDefBase && tmpUnitDefBase->IsCheckSumValidForAUnitClass() && tmpUnitDefBase->DerivesFromCommandable()) {
+				AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *tmpUnitDefBird = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)tmpUnitDefBase;
 				cmdh = tmpUnitDefBird->ptrUnitCommandHeader;
 				if (cmdh) {
 					assert(cmdh->IsCheckSumValid());
@@ -1818,9 +1818,9 @@ bool UpdateOrResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_ST
 			elem->posY = (unsigned char)unitBase->positionY;
 			elem->HP = (short)unitBase->remainingHitPoints;
 		}
-		if (unitDefBase && unitDefBase->DerivesFromType50()) {
+		if (unitDefBase && unitDefBase->DerivesFromAttackable()) {
 			// By the way... This part is not really necessary.
-			AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)unitDefBase;
+			AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDefBase;
 			elem->maxRange = unitDef50->maxRange;
 			elem->reloadTime1 = unitDef50->reloadTime1;
 			//elem->attack = unitDef50->displayedAttack;
@@ -2031,14 +2031,14 @@ bool AddCommandToGameCmdQueue(void *commandStruct, long int structSize) {
 // targetUnitId is optional. If -1 or non valid, then unit will just move to posX/posY.
 // This method is compatible with MP games (does NOT causes sync issue)
 bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY) {
-	AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit = (STRUCT_UNIT_BIRD*)GetUnitStruct(actorUnitId);
+	AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit = (STRUCT_UNIT_COMMANDABLE*)GetUnitStruct(actorUnitId);
 	if (!unit || !unit->IsCheckSumValid()) {
 		return false;
 	}
 	return CreateCmd_RightClick(&unit, 1, targetUnitId, posX, posY);
 }
 
-bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY) {
+bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) {
@@ -2232,14 +2232,14 @@ AOE_STRUCTURES::STRUCT_UNITDEF_BASE *CopyUnitDefToNewUsingGoodClass(AOE_STRUCTUR
 		return NULL;
 	}
 	switch (existingUnitDef->unitType) {
-	case GLOBAL_UNIT_TYPES::GUT_BIRD:
-		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_BIRD>((AOE_STRUCTURES::STRUCT_UNITDEF_BIRD*)existingUnitDef);
+	case GLOBAL_UNIT_TYPES::GUT_COMMANDABLE:
+		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE>((AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE*)existingUnitDef);
 		break;
 	case GLOBAL_UNIT_TYPES::GUT_BUILDING:
 		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING>((AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)existingUnitDef);
 		break;
-	case GLOBAL_UNIT_TYPES::GUT_DEAD_UNITS:
-		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH>((AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH*)existingUnitDef);
+	case GLOBAL_UNIT_TYPES::GUT_MOVABLE:
+		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE>((AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE*)existingUnitDef);
 		break;
 	case GLOBAL_UNIT_TYPES::GUT_DOPPLEGANGER:
 		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER>((AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER*)existingUnitDef);
@@ -2250,8 +2250,8 @@ AOE_STRUCTURES::STRUCT_UNITDEF_BASE *CopyUnitDefToNewUsingGoodClass(AOE_STRUCTUR
 	case GLOBAL_UNIT_TYPES::GUT_FLAGS:
 		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_FLAG>((AOE_STRUCTURES::STRUCT_UNITDEF_FLAG*)existingUnitDef);
 		break;
-	case GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT:
-		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_LIVING>((AOE_STRUCTURES::STRUCT_UNITDEF_LIVING*)existingUnitDef);
+	case GLOBAL_UNIT_TYPES::GUT_TRAINABLE:
+		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE>((AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE*)existingUnitDef);
 		break;
 	case GLOBAL_UNIT_TYPES::GUT_PROJECTILE:
 		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE>((AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE*)existingUnitDef);
@@ -2259,8 +2259,8 @@ AOE_STRUCTURES::STRUCT_UNITDEF_BASE *CopyUnitDefToNewUsingGoodClass(AOE_STRUCTUR
 	case GLOBAL_UNIT_TYPES::GUT_TREE:
 		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_TREE>((AOE_STRUCTURES::STRUCT_UNITDEF_TREE*)existingUnitDef);
 		break;
-	case GLOBAL_UNIT_TYPES::GUT_TYPE50:
-		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50>((AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50*)existingUnitDef);
+	case GLOBAL_UNIT_TYPES::GUT_ATTACKABLE:
+		return CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE>((AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE*)existingUnitDef);
 		break;
 	default:
 		traceMessageHandler.WriteMessage("Unhandled unit definition class.");
@@ -2535,7 +2535,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	}
 
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)GetUnitDefStruct(player, (short int)DATID);
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)GetUnitDefStruct(player, (short int)DATID);
 		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 			return false;
 		}
@@ -2626,8 +2626,8 @@ void DebugDumpAllUnits() {
 			char buf2[10];
 			buf2[0] = '-';
 			buf2[1] = 0;
-			AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *unitLiving = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)unit;
-			if (unitLiving->DerivesFromType50()) {
+			AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *unitLiving = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)unit;
+			if (unitLiving->DerivesFromAttackable()) {
 				sprintf_s(buf2, "%d", unitLiving->stillToBeDiscoveredByHuman);
 			}
 			sprintf_s(buf, "unit %ld\tType=%ld\tDATID=%ld\t1B8=%s\tname=%s\t%d\t%d\t%d\t%d\n", unit->unitInstanceId, unit->unitType,
@@ -2919,8 +2919,8 @@ bool AnalyzeEmpiresDatQuality() {
 					traceMessageHandler.WriteMessage(msg);
 				}
 			}
-			if (unitDefBase && unitDefBase->DerivesFromType50()) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)unitDefBase;
+			if (unitDefBase && unitDefBase->DerivesFromAttackable()) {
+				AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDefBase;
 				if ((type50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (type50->blastRadius == 0)) {
 					badBlastLevelUnits.insert(unitDefId);
 					if (false) { // generates too many errors

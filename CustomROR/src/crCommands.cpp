@@ -417,9 +417,9 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 		assert(humanPlayer != NULL);
 
-		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDefLiving =
-			//(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 62);
-			(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, CST_UNITID_SHORT_SWORDSMAN);
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDefLiving =
+			//(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *) GetUnitDefStruct(humanPlayer, 62);
+			(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *) GetUnitDefStruct(humanPlayer, CST_UNITID_SHORT_SWORDSMAN);
 		if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass()) {
 			unitDefLiving->availableForPlayer = 1;
 			unitDefLiving->trainButton = 13;
@@ -427,7 +427,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 			//unitDefLiving->blastLevel = AOE_CONST_FUNC::BLAST_LEVELS::CST_BL_DAMAGE_RESOURCES;
 			//unitDefLiving->blastRadius = 5;
 		}
-		unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) GetUnitDefStruct(humanPlayer, 227);
+		unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *) GetUnitDefStruct(humanPlayer, 227);
 		if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass()) {
 			unitDefLiving->availableForPlayer = 1;
 			unitDefLiving->trainButton = 27;
@@ -550,7 +550,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 			unitBase->AOE_destructor(true);
 			return;
 		}
-		AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *type50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)unitBase;
+		AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *type50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)unitBase;
 		if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) { return; }
 		if (unitBase->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING) { return; }
 		AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)unitBase;
@@ -653,9 +653,9 @@ void CustomRORCommand::UpdateWorkRateWithMessage(short int DATID, float updatedV
 	for (int civId = 0; civId < global->civCount; civId++) {
 		AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civId];
 		if (civDef && civDef->IsCheckSumValid()) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)civDef->GetUnitDef(DATID);
+			AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)civDef->GetUnitDef(DATID);
 			char msgBuffer[100];
-			if (unitDef && unitDef->DerivesFromBird()) {
+			if (unitDef && unitDef->DerivesFromCommandable()) {
 				if (firstOne) { // Message only once
 					if (updatedValue < 0) {
 						sprintf_s(msgBuffer, "%s (%d): work rate=%f", unitDef->ptrUnitName, unitDef->DAT_ID1, unitDef->workRate);
@@ -1799,9 +1799,9 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_A
 			traceMessageHandler.WriteMessage("Error: Could not find unit definition for wonder");
 			return true; // Unit definition does not exist !
 		}
-		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) player->ptrStructDefUnitTable[stratElem->unitDAT_ID];
-		assert(unitDef && unitDef->DerivesFromLiving());
-		if (!unitDef || !unitDef->DerivesFromLiving()) { return true; } // Unit definition does not exist !
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *) player->ptrStructDefUnitTable[stratElem->unitDAT_ID];
+		assert(unitDef && unitDef->DerivesFromTrainable());
+		if (!unitDef || !unitDef->DerivesFromTrainable()) { return true; } // Unit definition does not exist !
 		AOE_STRUCTURES::STRUCT_COST *costs = unitDef->costs;
 		for (int i = 0; i < 3; i++) {
 			if (costs[i].costPaid && (costs[i].costType >= 0) &&
@@ -2654,14 +2654,14 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUC
 	long int *myUnitsList = ai->allMyUnits.unitIdArray;
 	for (long int index = 0; index < unitCount; index++) {
 		long int unitId = myUnitsList[index];
-		AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit = NULL;
+		AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit = NULL;
 		if (unitId > 0) {
-			unit = (AOE_STRUCTURES::STRUCT_UNIT_BIRD *)GetUnitStruct(unitId);
+			unit = (AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *)GetUnitStruct(unitId);
 		}
 		if (unit != NULL) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 			assert(unitDef != NULL);
-			if ((unit->DerivesFromBird()) &&
+			if ((unit->DerivesFromCommandable()) &&
 				(unitDef->unitAIType != TribeAIGroupCivilian) &&
 				(unitDef->unitAIType != TribeAIGroupFishingBoat) &&
 				(unitDef->unitAIType != TribeAIGroupTradeBoat) &&
@@ -2763,7 +2763,7 @@ void CustomRORCommand::SelectNextIdleMilitaryUnit() {
 // This event is triggered during game but as well in scenario editor or during game creation.
 // actionStruct parameter can be NULL if it could not be determined
 // Note: we choose NOT to apply custom treatments when controlled player has an active playing AI (both controlled by human and AI)
-void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit,
+void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit,
 	AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *actionStruct) {
 	if (!unit) { return; }
 	if (UIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) {
@@ -2779,7 +2779,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	}
 	if (IsMultiplayer()) { return; } // can provoke out of sync errors
 
-	AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)unit->unitDefinition;
+	AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unit->unitDefinition;
 	assert(unitDef != NULL);
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
 	if (!player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
@@ -2823,7 +2823,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 			}
 		}
 		if (canInteractWithTarget) {
-			if (unitDef->DerivesFromBird() && unitDef->ptrUnitCommandHeader) {
+			if (unitDef->DerivesFromCommandable() && unitDef->ptrUnitCommandHeader) {
 				if (GetUnitDefCommandForTarget(unit, target, true) != NULL) {
 					TellUnitToInteractWithTarget(unit, target);
 					commandCreated = true;
@@ -2883,7 +2883,7 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE 
 		// HERE: not villager (and not fishing ship, etc)
 		if ((targetUnitDef->DAT_ID1 != CST_UNITID_PRIEST) &&
 			(
-			IsTower(targetUnitDef->DAT_ID1) || (targetUnitDef->unitType == GUT_LIVING_UNIT)
+			IsTower(targetUnitDef->DAT_ID1) || (targetUnitDef->unitType == GUT_TRAINABLE)
 			)) {
 			// living units other than {villagers(+fishing+trade), priests} + towers : update military units count (same bug as villager count)
 			actorPlayer->SetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_MILITARY_POPULATION,
@@ -3136,7 +3136,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 bool CustomRORCommand::AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
 	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
 	// Only care about living units or building
-	if ((unit->unitType != GUT_BUILDING) && (unit->unitType != GUT_LIVING_UNIT)) {
+	if ((unit->unitType != GUT_BUILDING) && (unit->unitType != GUT_TRAINABLE)) {
 		return false;
 	}
 	// We choose not to modify existing shortcut
@@ -3206,11 +3206,11 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	} // same unit: do not change (=no stupid hesitation)
 
 	// Checks for invalid/dead targets
-	if ((oldTargetUnit->remainingHitPoints <= 0) || (oldTargetUnit->unitType < GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT) ||
+	if ((oldTargetUnit->remainingHitPoints <= 0) || (oldTargetUnit->unitType < GLOBAL_UNIT_TYPES::GUT_TRAINABLE) ||
 		(oldTargetUnit->unitType == GLOBAL_UNIT_TYPES::GUT_TREE) || (oldTargetUnit->unitStatus > 2)) {
 		return true; // switch
 	}
-	if ((newTargetUnit->remainingHitPoints <= 0) || (newTargetUnit->unitType < GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT) ||
+	if ((newTargetUnit->remainingHitPoints <= 0) || (newTargetUnit->unitType < GLOBAL_UNIT_TYPES::GUT_TRAINABLE) ||
 		(newTargetUnit->unitType == GLOBAL_UNIT_TYPES::GUT_TREE) || (newTargetUnit->unitStatus > 2)) {
 		return false; // Keep. Not sure if this case can happen. Maybe when a projectile from a dead unit hits me afterwards ?
 	}
@@ -3254,11 +3254,11 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	assert(actorPlayer->IsCheckSumValid());
 	float *resources = (float *)actorPlayer->ptrResourceValues;
 	assert(resources != NULL);
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50*)actorUnit->unitDefinition;
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE*)actorUnit->unitDefinition;
 	assert(actorUnitDef != NULL);
 	assert(actorUnitDef->IsCheckSumValidForAUnitClass());
-	assert(actorUnitDef->DerivesFromType50());
-	if (!actorUnitDef || !actorUnitDef->DerivesFromType50()) { return true; } // error case
+	assert(actorUnitDef->DerivesFromAttackable());
+	if (!actorUnitDef || !actorUnitDef->DerivesFromAttackable()) { return true; } // error case
 	bool actorIsPriest = (actorUnitDef->DAT_ID1 == CST_UNITID_PRIEST);
 	bool actorIsArcher = (actorUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher) ||
 		(actorUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher) ||
@@ -3471,13 +3471,13 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	// If only 1 of the 2 targets has me as its target, attack this one
 	AOE_STRUCTURES::STRUCT_ACTION_BASE *newTargetUnitAction = NULL;
 	AOE_STRUCTURES::STRUCT_ACTION_BASE *actionTargetUnitAction = NULL;
-	STRUCT_UNIT_BIRD *newTargetUnitBird = (STRUCT_UNIT_BIRD *)newTargetUnit;
-	STRUCT_UNIT_BIRD *oldTargetUnitBird = (STRUCT_UNIT_BIRD *)oldTargetUnit;
-	if (newTargetUnitBird->DerivesFromBird() && (newTargetUnitBird->ptrActionInformation) && (newTargetUnitBird->ptrActionInformation->ptrActionLink) &&
+	STRUCT_UNIT_COMMANDABLE *newTargetUnitBird = (STRUCT_UNIT_COMMANDABLE *)newTargetUnit;
+	STRUCT_UNIT_COMMANDABLE *oldTargetUnitBird = (STRUCT_UNIT_COMMANDABLE *)oldTargetUnit;
+	if (newTargetUnitBird->DerivesFromCommandable() && (newTargetUnitBird->ptrActionInformation) && (newTargetUnitBird->ptrActionInformation->ptrActionLink) &&
 		(newTargetUnitBird->ptrActionInformation->ptrActionLink->actionStruct)) {
 		newTargetUnitAction = (AOE_STRUCTURES::STRUCT_ACTION_BASE *)newTargetUnitBird->ptrActionInformation->ptrActionLink->actionStruct;
 	}
-	if (oldTargetUnitBird->DerivesFromBird() && (oldTargetUnitBird->ptrActionInformation) && (oldTargetUnitBird->ptrActionInformation->ptrActionLink) &&
+	if (oldTargetUnitBird->DerivesFromCommandable() && (oldTargetUnitBird->ptrActionInformation) && (oldTargetUnitBird->ptrActionInformation->ptrActionLink) &&
 		(oldTargetUnitBird->ptrActionInformation->ptrActionLink->actionStruct)) {
 		actionTargetUnitAction = (AOE_STRUCTURES::STRUCT_ACTION_BASE *)oldTargetUnitBird->ptrActionInformation->ptrActionLink->actionStruct;
 	}
@@ -3533,7 +3533,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 // To be used when target unit is a tower in actor's town
 // Warning: try to keep this function fast and optimized as much as possible. It may be called quite often.
 // The improved algorithm is only used if ImproveAI config is ON.
-bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_BIRD *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower) {
+bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower) {
 	if (this->crInfo->configInfo.improveAILevel <= 0) {
 		return true; // improve AI is disabled. Return default value.
 	}
@@ -3546,11 +3546,11 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 	assert(enemyTower->unitDefinition != NULL);
 	if ((!actorUnit->currentActivity) || (!actorUnit->unitDefinition) || (!enemyTower->unitDefinition)) { return false; }
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = actorUnit->currentActivity; // Guaranteed non-NULL
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnit->unitDefinition; // Guaranteed non-NULL
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *enemyTowerDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)enemyTower->unitDefinition; // Guaranteed non-NULL
-	assert(actorUnitDef->DerivesFromType50());
-	assert(enemyTowerDef->DerivesFromType50());
-	if (!actorUnitDef->DerivesFromType50() || !enemyTowerDef->DerivesFromType50()) { return false; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)actorUnit->unitDefinition; // Guaranteed non-NULL
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *enemyTowerDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)enemyTower->unitDefinition; // Guaranteed non-NULL
+	assert(actorUnitDef->DerivesFromAttackable());
+	assert(enemyTowerDef->DerivesFromAttackable());
+	if (!actorUnitDef->DerivesFromAttackable() || !enemyTowerDef->DerivesFromAttackable()) { return false; }
 
 	if (activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_CONVERT) {
 		return false; // Converting priest: let him proceed. TO DO: improve !
@@ -3587,13 +3587,13 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 
 	long int currentTargetId = actorUnit->currentActivity->targetUnitId;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *currentTarget = GetUnitStruct(currentTargetId);
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *currentTargetDef = NULL;
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *currentTargetDef = NULL;
 	if (currentTarget) {
-		currentTargetDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)currentTarget->unitDefinition;
+		currentTargetDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)currentTarget->unitDefinition;
 	} else {
 		return true;
 	}
-	assert(currentTargetDef->DerivesFromBird());
+	assert(currentTargetDef->DerivesFromCommandable());
 
 	float distanceToTower = GetDistance(actorUnit->positionX, actorUnit->positionY, enemyTower->positionX, enemyTower->positionY);
 	float distanceToCurrentTarget = GetDistance(actorUnit->positionX, actorUnit->positionY, currentTarget->positionX, currentTarget->positionY);
@@ -3821,9 +3821,9 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 	// Now we can loop on units with increasing distance. No need to make a search each time (unlike ROR original code)
 	long int currentIndex = 0;
 	while ((*pAssignedUnitsCount < 6) && (currentIndex < arrayElemCount)) {
-		AOE_STRUCTURES::STRUCT_UNIT_BIRD *unit = (AOE_STRUCTURES::STRUCT_UNIT_BIRD *)GetUnitStruct(orderedUnitIDs[currentIndex]);
+		AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit = (AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *)GetUnitStruct(orderedUnitIDs[currentIndex]);
 		AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = NULL;
-		bool valid = unit && unit->IsCheckSumValidForAUnitClass() && unit->DerivesFromBird();
+		bool valid = unit && unit->IsCheckSumValidForAUnitClass() && unit->DerivesFromCommandable();
 		if (valid) { activity = unit->currentActivity; }
 		bool attackTower = true; // Default: attack = most cases (in original code, villager almost always attack the tower)
 		if (valid && activity) {
@@ -3869,8 +3869,8 @@ void CustomRORCommand::MoveFireGalleyIconIfNeeded(AOE_STRUCTURES::STRUCT_PLAYER 
 	if ((CST_RSID_TRIREME >= researchInfo->researchCount) || (CST_RSID_FIRE_GALLEY >= researchInfo->researchCount) ) { return; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE **arrUnitDef = player->ptrStructDefUnitTable;
 	if (arrUnitDef) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)arrUnitDef[CST_UNITID_FIRE_GALLEY];
-		if (!unitDef || !unitDef->DerivesFromLiving() || (unitDef->trainButton == 9)) { return; } // Already at the custom location (also return if invalid unit def)
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)arrUnitDef[CST_UNITID_FIRE_GALLEY];
+		if (!unitDef || !unitDef->DerivesFromTrainable() || (unitDef->trainButton == 9)) { return; } // Already at the custom location (also return if invalid unit def)
 		AOE_CONST_FUNC::RESEARCH_STATUSES triremeStatus = GetResearchStatus(player, CST_RSID_TRIREME);
 		AOE_CONST_FUNC::RESEARCH_STATUSES fireGalleyStatus = GetResearchStatus(player, CST_RSID_FIRE_GALLEY);
 		// If player has fire galley + trireme in his tech tree, make sure both buttons can be visible at any time (if available)
@@ -3940,18 +3940,18 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 	player->ptrStructDefUnitTable[newDAT_ID] = NULL; // until we set a valid pointer.
 
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *srcDef_base = player->ptrStructDefUnitTable[srcDAT_ID];
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *srcDef_type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)srcDef_base;
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *srcDef_type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)srcDef_base;
 	assert(srcDef_base != NULL);
 	if (srcDef_base == NULL) { return -1; }
-	if ((srcDef_base->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) || (srcDef_base->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT)) {
+	if ((srcDef_base->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) || (srcDef_base->unitType == GLOBAL_UNIT_TYPES::GUT_TRAINABLE)) {
 		traceMessageHandler.WriteMessage("WARNING: adding unitdef for living/buildings is disabled due to conversion bug.");
 		// To solve the limitation, a solution could be to add it for all players !
 		return -1;
 	}
 
 	long int objectSize = 0;
-	bool hasAttacksAndArmors = srcDef_base->DerivesFromType50();
-	bool hasCommandsHeader = srcDef_base->DerivesFromBird();
+	bool hasAttacksAndArmors = srcDef_base->DerivesFromAttackable();
+	bool hasCommandsHeader = srcDef_base->DerivesFromCommandable();
 	switch (srcDef_base->unitType) {
 	case GUT_EYE_CANDY:
 		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BASE);
@@ -3962,20 +3962,20 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 	case GUT_DOPPLEGANGER:
 		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER);
 		break;
-	case GUT_DEAD_UNITS:
-		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH);
+	case GUT_MOVABLE:
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE);
 		break;
-	case GUT_BIRD:
-		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BIRD);
+	case GUT_COMMANDABLE:
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE);
 		break;
-	case GUT_TYPE50:
-		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50);
+	case GUT_ATTACKABLE:
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE);
 		break;
 	case GUT_PROJECTILE:
 		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE);
 		break;
-	case GUT_LIVING_UNIT:
-		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING);
+	case GUT_TRAINABLE:
+		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE);
 		break;
 	case GUT_BUILDING:
 		objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING);
@@ -3993,7 +3993,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 
 	// Create new defUnit in the free room we just created
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *newUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *) AOEAlloc(objectSize);
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *newUnitDefType50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)newUnitDef;
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *newUnitDefType50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)newUnitDef;
 	if (!newUnitDef) { return -1; } // nothing allocated: return an error
 
 	player->ptrStructDefUnitTable[newDAT_ID] = newUnitDef;
@@ -4015,7 +4015,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 		newUnitDef->damageGraphicCount = 0;// Should not be <0
 	}
 
-	if (hasAttacksAndArmors && srcDef_type50->DerivesFromType50()) {
+	if (hasAttacksAndArmors && srcDef_type50->DerivesFromAttackable()) {
 		// Attacks and armors are allocated for each unitDef. We need to duplicate them (or ROR would free them twice)
 		newUnitDefType50->ptrArmorsList = NULL; // Default value, will be overwritten if necessary
 		newUnitDefType50->ptrAttacksList = NULL; // Default value, will be overwritten if necessary
@@ -4031,7 +4031,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 
 	// Graphics structures are COMMON (not freed at unitDef level): we can keep them, they won't be freed twice
 
-	if (hasCommandsHeader && srcDef_type50->DerivesFromType50()) {
+	if (hasCommandsHeader && srcDef_type50->DerivesFromAttackable()) {
 		// Commands: we need to duplicate them (or ROR would free them twice)
 		assert(srcDef_type50->ptrUnitCommandHeader != NULL);
 		if (srcDef_type50->ptrUnitCommandHeader != NULL) {
@@ -4529,7 +4529,7 @@ void CustomRORCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextP
 
 
 // Fix the check on path finding when trying to assign a task to a villager
-long int CustomRORCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *actorAsType50, long int *pathFindingArgs) {
+long int CustomRORCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *actorAsType50, long int *pathFindingArgs) {
 	AOE_STRUCTURES::STRUCT_PLAYER *player = actorAsType50->ptrStructPlayer;
 	assert(player && player->IsCheckSumValid());
 	bool doFix = true;
@@ -4626,7 +4626,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	long int currentFarmCount = GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2); // Include being-built farms
 	bool farmCountConditionIsOK = (currentFarmCount <= this->crInfo->configInfo.autoRebuildFarms_maxFarms);
 
-	AOE_STRUCTURES::STRUCT_UNIT_LIVING *farmerUnit = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *farmerUnit = NULL;
 	// Search for the farmer that was working on this farm (first -arbitrary- one if there are many)
 	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *curElem = player->ptrCreatableUnitsListLink->lastListElement;
 	while ((curElem != NULL) && (farmerUnit == NULL)) {
@@ -4787,7 +4787,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	}
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 	bool isBuilding = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING);
-	bool isLiving = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT);
+	bool isLiving = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_TRAINABLE);
 	if (unitDef->commandAttribute == COMMAND_ATTRIBUTES::CST_CA_NONE) { return; } // Corresponds to unselectable, like eye candy
 
 	// Current limitation
@@ -4796,7 +4796,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	}
 	// For living units
 	if (isLiving) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)unitDef;
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDef;
 		if ((unitDefLiving->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDefLiving->blastRadius > 0)) {
 			UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically",
@@ -4855,7 +4855,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 		if (unitAsBuilding->ptrHumanTrainQueueInformation) {
 			queueNumberToDisplay = unitAsBuilding->ptrHumanTrainQueueInformation->unitCount;
 			if (queueNumberToDisplay > 0) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *queuedUnitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *) player->GetUnitDefBase(unitAsBuilding->ptrHumanTrainQueueInformation->DATID);
+				AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *queuedUnitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *) player->GetUnitDefBase(unitAsBuilding->ptrHumanTrainQueueInformation->DATID);
 				if (queuedUnitDefBase && queuedUnitDefBase->IsCheckSumValidForAUnitClass()) {
 					buttonWithQueueNumber = GetButtonInternalIndexFromDatBtnId(queuedUnitDefBase->trainButton);
 				}
@@ -4924,7 +4924,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	for (int currentBtnId = 0; currentBtnId < 12; currentBtnId++) {
 		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID curBtnCmdId = (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)gameMainUI->unitCommandButtons[currentBtnId]->commandIDs[0];
 		if (curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *tmpUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)
+			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *tmpUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)
 				GetUnitDefStruct(player, (short int)gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0]);
 
 			if (tmpUnitDef && tmpUnitDef->IsCheckSumValidForAUnitClass() && tmpUnitDef->IsTypeValid() &&
@@ -5002,8 +5002,8 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	// TRAIN UNITS
 	if (player->ptrStructDefUnitTable) {
 		for (int loopUnitDefId = 0; loopUnitDefId < player->structDefUnitArraySize; loopUnitDefId++) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *loopUnitDef = 
-				(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)player->ptrStructDefUnitTable[loopUnitDefId];
+			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *loopUnitDef = 
+				(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)player->ptrStructDefUnitTable[loopUnitDefId];
 			if (loopUnitDef && loopUnitDef->IsCheckSumValid() && loopUnitDef->IsTypeValid()) { // Only for living units
 				int rawButtonId = loopUnitDef->trainButton;
 				if ((loopUnitDef->trainLocation == unitDef->DAT_ID1) && (rawButtonId > maxFoundButtonId)) {
@@ -5032,8 +5032,8 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 					if (loopUnitDef->availableForPlayer) { preferThisUnit = true; } // if unit is currently available, it has best priority !
 					if (costIsBetter && !loopUnitDef->availableForPlayer) { preferThisUnit = true; }
 					if (preferThisUnit && (!bestElemIsResearch) && (bestElemDATID[buttonIndex] >= 0)) { // only if we already selected a valid DATID (unit, ont research)
-						AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *previousUnit = 
-							(AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)player->ptrStructDefUnitTable[bestElemDATID[buttonIndex]];
+						AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *previousUnit = 
+							(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)player->ptrStructDefUnitTable[bestElemDATID[buttonIndex]];
 						// Cancel "prefer" if new one is stronger (stronger = less priority, because further in tech tree)
 						if ((previousUnit->totalHitPoints < loopUnitDef->totalHitPoints) || // Use only attributes that ALWAYS increase ! Not speed (risky)
 							(previousUnit->displayedAttack < loopUnitDef->displayedAttack)
@@ -5328,11 +5328,11 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(AOE_STRUCTURES::STRUCT_U
 	if (!targetUnitDefBase || !targetUnitDefBase->IsCheckSumValidForAUnitClass()) {
 		return false; // error case
 	}
-	AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)activity->ptrUnit;
+	AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)activity->ptrUnit;
 	if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass()) {
 		return false; // We expect ACTOR unit to derive from type50 ! (should be living or building)
 	}
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnit->unitDefinition;
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)actorUnit->unitDefinition;
 	if (!actorUnitDef || !actorUnitDef->IsCheckSumValidForAUnitClass()) {
 		return false; // We expect ACTOR unit to derive from type50 ! (should be living or building)
 	}
@@ -5462,7 +5462,7 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UN
 // currentLine is incremented if lines are added.
 void CustomRORCommand::DisplayCustomBuildingAttributesInUnitInfo(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine) {
 	if (!unitInfoZone || !unitInfoZone->IsCheckSumValid()) { return; }
-	AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *unit50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)unitInfoZone->currentUnit;
+	AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *unit50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)unitInfoZone->currentUnit;
 	if (!unit50 || !unit50->IsCheckSumValidForAUnitClass()) {
 		return; // Should not occur, this method is called during processing of buildings
 	}
@@ -5512,20 +5512,20 @@ bool CustomRORCommand::GetLocalizedString(long int stringId, char *buffer, long 
 bool CustomRORCommand::ShouldRetreatAfterShooting(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity) {
 	assert(activity);
 	if (!activity || !activity->ptrUnit) { return true; }
-	AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *actorUnitType50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50*)activity->ptrUnit;
-	if (!actorUnitType50 || !actorUnitType50->IsCheckSumValidForAUnitClass() || !actorUnitType50->DerivesFromType50()) { return true; }
+	AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *actorUnitType50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE*)activity->ptrUnit;
+	if (!actorUnitType50 || !actorUnitType50->IsCheckSumValidForAUnitClass() || !actorUnitType50->DerivesFromAttackable()) { return true; }
 	if (!actorUnitType50->ptrStructPlayer || !actorUnitType50->ptrStructPlayer->IsCheckSumValid()) { return true; }
 	// This feature is an AI improvement. Do it only if config says so.
 	if (!this->IsImproveAIEnabled(actorUnitType50->ptrStructPlayer->playerId)) {
 		return true;
 	}
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnitType50->unitDefinition;
-	if (!actorUnitDef || !actorUnitDef->IsCheckSumValidForAUnitClass() || !actorUnitDef->DerivesFromType50()) { return true; }
-	if (!actorUnitDef->DerivesFromType50()) { return true; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)actorUnitType50->unitDefinition;
+	if (!actorUnitDef || !actorUnitDef->IsCheckSumValidForAUnitClass() || !actorUnitDef->DerivesFromAttackable()) { return true; }
+	if (!actorUnitDef->DerivesFromAttackable()) { return true; }
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(activity->targetUnitId);
 	if (!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) { return true; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *targetUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)targetUnit->unitDefinition;
-	if (targetUnitDef->DerivesFromType50()) {
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *targetUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)targetUnit->unitDefinition;
+	if (targetUnitDef->DerivesFromAttackable()) {
 		if ((targetUnitDef->projectileUnitId >= 0) && (targetUnitDef->maxRange > actorUnitDef->maxRange)) {
 			// Force NOT retreat after shooting, because enemy has a better range than me !
 			return false;
@@ -6400,14 +6400,14 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->unitDefinition;
 		if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return; }
 		// Only living units & buildings are allowed
-		if (!unitDefBase->DerivesFromLiving()) {
+		if (!unitDefBase->DerivesFromTrainable()) {
 			traceMessageHandler.WriteMessage("ERROR: 'Make unique' triggers only support living units and buildings.");
 			return;
 		}
-		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)unitDefBase;
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDefBase;
 		if (!unitDefLiving || !unitDefLiving->IsCheckSumValidForAUnitClass()) { return; }
 
-		AOE_STRUCTURES::STRUCT_UNIT_LIVING *unitLiving = (AOE_STRUCTURES::STRUCT_UNIT_LIVING *)unitBase;
+		AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unitLiving = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)unitBase;
 		if (!unitLiving || !unitLiving->IsCheckSumValidForAUnitClass()) { return; }
 
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefToFree = NULL; // Only used for units that have a temporary unitDef (converted units)
@@ -6420,16 +6420,16 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 
 		// Create the new (temporary) unit definition.
 		AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *newUnitDefBuilding = NULL;
-		AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *newUnitDefLiving = NULL;
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *newUnitDefLiving = NULL;
 		if (unitLiving->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) {
 			// Our unit is a building
 			//unitDefBuilding = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)unitDefBase;
 			assert(((AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)unitDefBase)->IsCheckSumValid());
 			newUnitDefBuilding = CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING>((AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)unitDefBase);
-			newUnitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_LIVING*)newUnitDefBuilding;
+			newUnitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE*)newUnitDefBuilding;
 		} else {
 			// We actually have a living unit
-			newUnitDefLiving = CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_LIVING>((AOE_STRUCTURES::STRUCT_UNITDEF_LIVING *)unitDefBase);
+			newUnitDefLiving = CopyUnitDefToNew<AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE>((AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDefBase);
 		}
 
 		// Here newUnitDefLiving is ALWAYS our new unitDef (cast as living=parent class if needed)
@@ -6577,18 +6577,18 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 
 			// Apply custom modifications from trigger data
 			// We manipulate here objects from different possible classes. Make sure we work on members that DO exist in our object instance !
-			bool isType50OrChild = newUnitDefBase->DerivesFromType50();
+			bool isType50OrChild = newUnitDefBase->DerivesFromAttackable();
 			bool isFlagOrChild = newUnitDefBase->DerivesFromFlag();
-			bool isDeadFishOrChild = newUnitDefBase->DerivesFromDead_fish();
-			bool isBirdOrChild = newUnitDefBase->DerivesFromBird();
+			bool isMovableOrChild = newUnitDefBase->DerivesFromMovable();
+			bool isCommandableOrChild = newUnitDefBase->DerivesFromCommandable();
 			AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *newUnitDef_flag = NULL;
-			AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH *newUnitDef_dead_fish = NULL;
-			AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *newUnitDef_bird = NULL;
-			AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *newUnitDef_type50 = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE *newUnitDef_movable = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *newUnitDef_commandable = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *newUnitDef_type50 = NULL;
 			if (isFlagOrChild) { newUnitDef_flag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *)newUnitDefBase; }
-			if (isDeadFishOrChild) { newUnitDef_dead_fish = (AOE_STRUCTURES::STRUCT_UNITDEF_DEAD_FISH *)newUnitDefBase; }
-			if (isBirdOrChild) { newUnitDef_bird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)newUnitDefBase; }
-			if (isType50OrChild) { newUnitDef_type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)newUnitDefBase; }
+			if (isMovableOrChild) { newUnitDef_movable = (AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE *)newUnitDefBase; }
+			if (isCommandableOrChild) { newUnitDef_commandable = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)newUnitDefBase; }
+			if (isType50OrChild) { newUnitDef_type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)newUnitDefBase; }
 
 			// Apply supplied properties to new unit def.
 			if (trigger->IsParameterDefined(CR_TRIGGERS::KW_TOTAL_HP)) {
@@ -6610,11 +6610,11 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			if (isFlagOrChild && newUnitDef_flag && (trigger->IsParameterDefined(CR_TRIGGERS::KW_SPEED))) {
 				newUnitDef_flag->speed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_SPEED, newUnitDef_flag->speed);
 			}
-			if (isDeadFishOrChild && newUnitDef_dead_fish && (trigger->IsParameterDefined(CR_TRIGGERS::KW_ROTATION_SPEED))) {
-				newUnitDef_dead_fish->rotationSpeed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_ROTATION_SPEED, newUnitDef_dead_fish->rotationSpeed);
+			if (isMovableOrChild && newUnitDef_movable && (trigger->IsParameterDefined(CR_TRIGGERS::KW_ROTATION_SPEED))) {
+				newUnitDef_movable->rotationSpeed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_ROTATION_SPEED, newUnitDef_movable->rotationSpeed);
 			}
-			if (isBirdOrChild && newUnitDef_bird && (trigger->IsParameterDefined(CR_TRIGGERS::KW_WORK_RATE))) {
-				newUnitDef_bird->workRate = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_WORK_RATE, newUnitDef_bird->workRate);
+			if (isCommandableOrChild && newUnitDef_commandable && (trigger->IsParameterDefined(CR_TRIGGERS::KW_WORK_RATE))) {
+				newUnitDef_commandable->workRate = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_WORK_RATE, newUnitDef_commandable->workRate);
 			}
 			if (isType50OrChild && newUnitDef_type50 && (trigger->IsParameterDefined(CR_TRIGGERS::KW_ACCURACY_PERCENT))) {
 				newUnitDef_type50->accuracyPercent = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_ACCURACY_PERCENT, (long int)newUnitDef_type50->accuracyPercent);
@@ -6656,7 +6656,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		long int actionUnitId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_ID, -1);
 		long int targetUnitId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_TARGET_UNIT_ID, -1);
 		if ((actionUnitId < 0) || (targetUnitId < 0)) { return; }
-		TellUnitToInteractWithTarget((AOE_STRUCTURES::STRUCT_UNIT_BIRD*)GetUnitStruct(actionUnitId), (AOE_STRUCTURES::STRUCT_UNIT_BASE*)GetUnitStruct(targetUnitId));
+		TellUnitToInteractWithTarget((AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE*)GetUnitStruct(actionUnitId), (AOE_STRUCTURES::STRUCT_UNIT_BASE*)GetUnitStruct(targetUnitId));
 	}
 
 	// Move a unit
@@ -6671,7 +6671,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *gameMapInfo = global->gameMapInfo;
 		assert(gameMapInfo && gameMapInfo->IsCheckSumValid());
 		if ((posX >= gameMapInfo->mapArraySizeX) || (posY >= gameMapInfo->mapArraySizeY)) { return; }
-		MoveUnitToTargetOrPosition((AOE_STRUCTURES::STRUCT_UNIT_BIRD*)GetUnitStruct(actionUnitId), NULL, posX, posY);
+		MoveUnitToTargetOrPosition((AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE*)GetUnitStruct(actionUnitId), NULL, posX, posY);
 	}
 
 	// Make gaia units human-capturable (or not)
@@ -6700,14 +6700,14 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			if (unitBase && unitBase->IsCheckSumValidForAUnitClass()) {
 				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)unitBase->unitDefinition;
 				if (unitDefBase && unitDefBase &&
-					((unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING) || (unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT)) &&
+					((unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING) || (unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TRAINABLE)) &&
 					(unitDefBase->unitAIType != AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)
 					) {
 					// Unit is a building or a living unit, so it is capturable
 					// Very important : exclude artefacts to avoid human players from capturing artefacts more easily than AI players
 
 					// We can convert into type50 because we checked unit type is 70 or 80
-					AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *unit50 = (AOE_STRUCTURES::STRUCT_UNIT_TYPE50 *)unitBase;
+					AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *unit50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)unitBase;
 					unit50->stillToBeDiscoveredByHuman = valueToSet;
 				}
 			}

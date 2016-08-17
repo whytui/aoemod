@@ -105,11 +105,11 @@ namespace AOE_STRUCTURES
 		std::string ExportStruct_internal(STRUCT_MP_COMMUNICATION *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_PLAYER *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_BASE *obj, unsigned long int RORAddress);
-		std::string ExportStruct_internal(STRUCT_UNIT_BIRD *obj, unsigned long int RORAddress);
-		std::string ExportStruct_internal(STRUCT_UNIT_LIVING *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_UNIT_COMMANDABLE *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_UNIT_TRAINABLE *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_BUILDING *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNITDEF_BASE *obj, unsigned long int RORAddress);
-		std::string ExportStruct_internal(STRUCT_UNITDEF_TYPE50 *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_UNITDEF_ATTACKABLE *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_ARMOR_OR_ATTACK *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_GROUP_ELEM *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_ACTION_BASE *obj, unsigned long int RORAddress);

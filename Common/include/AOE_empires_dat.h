@@ -36,11 +36,11 @@ namespace AOE_CONST_FUNC {
 		GUT_EYE_CANDY = 10,
 		GUT_FLAGS = 20,
 		GUT_DOPPLEGANGER = 25, // temporary objects?
-		GUT_DEAD_UNITS = 30, // includes resources like "cut" trees, mines... Dead/fish in AGE3.
-		GUT_BIRD = 40,
-		GUT_TYPE50 = 50,
+		GUT_MOVABLE = 30, // includes resources like "cut" trees, mines... Dead/fish in AGE3.
+		GUT_COMMANDABLE = 40,
+		GUT_ATTACKABLE = 50,
 		GUT_PROJECTILE = 60,
-		GUT_LIVING_UNIT = 70,
+		GUT_TRAINABLE = 70,
 		GUT_BUILDING = 80,
 		GUT_TREE = 90 // "not cut" trees
 	};

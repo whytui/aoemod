@@ -74,24 +74,24 @@ namespace AOE_STRUCTURES {
 		res += std::to_string(obj->unknown_078_unitInstanceId);
 		res += "\nDefinition: ";
 		res += this->ExportStruct(obj->unitDefinition);
-		if (obj->DerivesFromBird()) {
-			res += this->ExportStruct<STRUCT_UNIT_BIRD>((STRUCT_UNIT_BIRD*)RORAddress);
+		if (obj->DerivesFromCommandable()) {
+			res += this->ExportStruct<STRUCT_UNIT_COMMANDABLE>((STRUCT_UNIT_COMMANDABLE*)RORAddress);
 		}
 		return res;
 	}
-	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_BIRD *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_COMMANDABLE *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res;
 		if (obj->ptrActionInformation) {
 			res += "\nactionInfo: ";
 			res += this->ExportStruct(obj->ptrActionInformation);
 		}
-		if (obj->DerivesFromLiving()) {
-			res += this->ExportStruct<STRUCT_UNIT_LIVING>((STRUCT_UNIT_LIVING*)RORAddress);
+		if (obj->DerivesFromTrainable()) {
+			res += this->ExportStruct<STRUCT_UNIT_TRAINABLE>((STRUCT_UNIT_TRAINABLE*)RORAddress);
 		}
 		return res;
 	}
-	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_LIVING *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_TRAINABLE *obj, unsigned long int RORAddress) {
 		STRUCT_UNIT_BUILDING *bld = (STRUCT_UNIT_BUILDING*)obj;
 		std::string res;
 		if (bld->IsTypeValid()) {
@@ -134,13 +134,13 @@ namespace AOE_STRUCTURES {
 		res += " - terrainRestriction=";
 		res += std::to_string(obj->terrainRestriction);
 		res += "\n";
-		if (obj->DerivesFromType50()) {
-			res += this->ExportStruct<STRUCT_UNITDEF_TYPE50>((STRUCT_UNITDEF_TYPE50*)RORAddress);
+		if (obj->DerivesFromAttackable()) {
+			res += this->ExportStruct<STRUCT_UNITDEF_ATTACKABLE>((STRUCT_UNITDEF_ATTACKABLE*)RORAddress);
 		}
 		return res;
 	}
 
-	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNITDEF_TYPE50 *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNITDEF_ATTACKABLE *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "\nArmor=";
 		res += std::to_string(obj->displayedArmor);

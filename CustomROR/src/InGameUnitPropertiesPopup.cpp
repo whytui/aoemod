@@ -45,8 +45,8 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		return;
 	}
 	this->unitId = unitId; // Store it once we checked it is valid.
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)unitDefBase;
-	bool isValidType50 = unitDef50->DerivesFromType50();
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDefBase;
+	bool isValidType50 = unitDef50->DerivesFromAttackable();
 	bool isMyUnit = (controlledPlayer == unitPlayer);
 	bool isTower = isValidType50 && IsTower(unitDefBase);
 	bool isMilitary = isValidType50 && (isTower || IsNonTowerMilitaryUnit(unitDefBase->unitAIType));
@@ -280,7 +280,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	}
 
 	// Conversion resistance : only for living/building (other units can't be converted)
-	if (unitBase->ptrStructPlayer && unitBase->ptrStructPlayer->IsCheckSumValid() && unitBase->DerivesFromLiving()) {
+	if (unitBase->ptrStructPlayer && unitBase->ptrStructPlayer->IsCheckSumValid() && unitBase->DerivesFromTrainable()) {
 		float conversionResistance = this->crInfo->GetConversionResistance(unitBase->ptrStructPlayer->civilizationId, unitDefBase->unitAIType);
 		std::string convResistText = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_CONVERSION_RESISTANCE, "Conversion resistance");
 		convResistText += "=";

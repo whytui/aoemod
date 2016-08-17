@@ -77,7 +77,7 @@ namespace AOE_STRUCTURES {
 
 
 
-	// Eye candy (type10) / common class for all units
+	// Eye candy (type10) / common (base) class for all units (unit instances).
 	// A8 7D 54 00. Size=0x88 (constructor 0x04A64B0)
 	class STRUCT_UNIT_BASE {
 	public:
@@ -156,25 +156,25 @@ namespace AOE_STRUCTURES {
 				(this->checksum == 0x00548474) // Tree
 				;
 		}
-		// Returns true if the unit definition is a flag (20) or a child class (all but eye candy and trees)
+		// Returns true if the unit is a flag (20) or a child class (all but eye candy and trees)
 		bool DerivesFromFlag() const {
 			return (this->IsCheckSumValidForAUnitClass() && (this->checksum != 0x00547DA8) && (this->checksum != 0x00548474)); // all but 10 and 90
 		}
-		// Returns true if the unit definition is dead/fish (30) or a child class
-		bool DerivesFromDead_fish() const {
-			return this->DerivesFromBird() || (this->checksum == 0x00544838);
+		// Returns true if the unit is movable (30 - deadfish in AGE3) or a child class
+		bool DerivesFromMovable() const {
+			return this->DerivesFromCommandable() || (this->checksum == 0x00544838);
 		}
-		// Returns true if the unit definition is a bird (40) or a child class
-		bool DerivesFromBird() const {
-			return this->DerivesFromType50() || (this->checksum == 0x00542748);
+		// Returns true if the unit is a commandable (40 - bird in AGE3) or a child class
+		bool DerivesFromCommandable() const {
+			return this->DerivesFromAttackable() || (this->checksum == 0x00542748);
 		}
-		// Returns true if the unit definition is a living unit or a child class (building)
-		bool DerivesFromLiving() const {
+		// Returns true if the unit is a living unit or a child class (building)
+		bool DerivesFromTrainable() const {
 			return (this->checksum == 0x0054820C) || // living
 				(this->checksum == 0x00547FA0); // Building
 		}
-		// Returns true if the unit definition is type50 or one of its child classes (projectile, living/building).
-		bool DerivesFromType50() const {
+		// Returns true if the unit is type50 or one of its child classes (projectile, living/building).
+		bool DerivesFromAttackable() const {
 			return (this->checksum == 0x0054324C) || // Type50
 				(this->checksum == 0x005445E8) || // Projectiles
 				(this->checksum == 0x0054820C) || // living
@@ -201,7 +201,7 @@ namespace AOE_STRUCTURES {
 	// 14 2E 54 00 = flag (type20). Size=0x8C. constructor=0x0415020 - derives from type10
 	class STRUCT_UNIT_FLAG : public STRUCT_UNIT_BASE {
 	public:
-		float unknown_088;
+		float currentMovementSpeed; // +88. Unsure. For graphics refreshing ?
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00542E14); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_FLAGS); }
@@ -227,8 +227,8 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_DOPPLEGANGER) == 0xB0, "STRUCT_UNIT_DOPPLEGANGER size");
 
 
-	// 38 48 54 00 = dead/fish (type30). Size=0x180 (constructor=0x044AD30) - Derives from type20
-	class STRUCT_UNIT_DEAD_FISH : public STRUCT_UNIT_FLAG {
+	// 38 48 54 00 = Movable (type30 - deadfish in AGE3). Size=0x180 (constructor=0x044AD30) - Derives from type20
+	class STRUCT_UNIT_MOVABLE : public STRUCT_UNIT_FLAG {
 	public:
 		unsigned long int unknown_08C;
 		// 0x90
@@ -278,13 +278,13 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_17C;
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00544838); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_DEAD_UNITS); }
+		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_MOVABLE); }
 	};
-	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_DEAD_FISH) == 0x180, "STRUCT_UNIT_DEAD_FISH size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_MOVABLE) == 0x180, "STRUCT_UNIT_MOVABLE size");
 
 
-	// 48 27 54 00 = bird (type40). Size=0x18C (constructor=0x04058A0) - Derives from type30
-	class STRUCT_UNIT_BIRD : public STRUCT_UNIT_DEAD_FISH {
+	// 48 27 54 00 = commandable (type40 - bird in AGE3). Size=0x18C (constructor=0x04058A0) - Derives from type30
+	class STRUCT_UNIT_COMMANDABLE : public STRUCT_UNIT_MOVABLE {
 	public:
 		// 0x180
 		unsigned long int unknown_180;
@@ -292,15 +292,15 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_188;
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00542748); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BIRD); }
+		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_COMMANDABLE); }
 	};
-	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_BIRD) == 0x18C, "STRUCT_UNIT_BIRD size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE) == 0x18C, "STRUCT_UNIT_COMMANDABLE size");
 
 
-	// 4C 32 54 00 = type50 (type50). Size=0x1BC? (constructor=00425F30) - Derives from type40
-	class STRUCT_UNIT_TYPE50 : public STRUCT_UNIT_BIRD {
+	// 4C 32 54 00 = attackable (type50). Size=0x1BC? (constructor=00425F30) - Derives from type40
+	class STRUCT_UNIT_ATTACKABLE : public STRUCT_UNIT_COMMANDABLE {
 	public:
-		unsigned long int unknown_18C_table; // table of 8 (ptr) elements "Y". Y+0=unitID,Y+5=numPlayerOwner,Y+6=byte(pos?),Y+7=byte(pos?)???
+		STRUCT_NEARBY_UNIT_INFO *unknown_18C_table; // table of 8 (ptr) elements "Y". Y+0=unitID,Y+5=numPlayerOwner,Y+6=byte(pos?),Y+7=byte(pos?)???
 		// 0x190
 		unsigned long int unknown_190;
 		unsigned long int *unknown_194; // pointer to unit ID (myself ?)
@@ -317,13 +317,13 @@ namespace AOE_STRUCTURES {
 		char unknown_1B9[3]; // ?
 
 		bool IsCheckSumValid() { return (this->checksum == 0x0054324C); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TYPE50); }
+		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_ATTACKABLE); }
 	};
-	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_TYPE50) == 0x1BC, "STRUCT_UNIT_TYPE50 size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE) == 0x1BC, "STRUCT_UNIT_ATTACKABLE size");
 
 
 	// E8 45 54 00 = projectile (type60). Size=1C4 (constructor=0x0443D30) - Derives from type50
-	class STRUCT_UNIT_PROJECTILE : public STRUCT_UNIT_TYPE50 {
+	class STRUCT_UNIT_PROJECTILE : public STRUCT_UNIT_ATTACKABLE {
 	public:
 		char unknown_1BC; // byte
 		char unknown_1BD;
@@ -337,21 +337,21 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE) == 0x1C4, "STRUCT_UNIT_PROJECTILE size");
 
 
-	// 0C 82 54 00 = living (type70). Size=0x1C0 (constructor=0x04AE2D0) - Derives from type50
-	class STRUCT_UNIT_LIVING : public STRUCT_UNIT_TYPE50 {
+	// 0C 82 54 00 = trainable (type70 - living in AGE3). Size=0x1C0 (constructor=0x04AE2D0) - Derives from type50
+	class STRUCT_UNIT_TRAINABLE : public STRUCT_UNIT_ATTACKABLE {
 	public:
 		char hasDedicatedUnitDef; // +1BC. If true, this->unitDef is a "temporary" copy created when unit was converted, which means it must be freed when unit dies (or changes, for villager mode). See 4AE435 for delete.
 		char unknown_1BD;
 		short int unknown_1BE;
 
 		bool IsCheckSumValid() { return (this->checksum == 0x0054820C); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT); }
+		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TRAINABLE); }
 	};
-	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_LIVING) == 0x1C0, "STRUCT_UNIT_LIVING size");
+	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE) == 0x1C0, "STRUCT_UNIT_TRAINABLE size");
 
 
 	// A0 7F 54 00 = building (type80). Size=0x1FC (constructor=0x04AC550) - Derives from type70
-	class STRUCT_UNIT_BUILDING : public STRUCT_UNIT_LIVING {
+	class STRUCT_UNIT_BUILDING : public STRUCT_UNIT_TRAINABLE {
 	public:
 		// 0x1C0
 		//short int *ptrHumanTrainQueueInformation; // [+00]=Word=unit_DAT_ID, [+02]=trainQueueCount, if 0 then DATID has no meaning.
@@ -397,25 +397,25 @@ namespace AOE_STRUCTURES {
 
 	static long int GetUnitStructRealSize(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
 		if (unit->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BASE);
-		if (((STRUCT_UNIT_BIRD*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BIRD);
+		if (((STRUCT_UNIT_COMMANDABLE*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE);
 		if (((STRUCT_UNIT_FLAG*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_FLAG);
-		if (((STRUCT_UNIT_DEAD_FISH*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_DEAD_FISH);
+		if (((STRUCT_UNIT_MOVABLE*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_MOVABLE);
 		if (((STRUCT_UNIT_DOPPLEGANGER*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_DOPPLEGANGER);
-		if (((STRUCT_UNIT_LIVING*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_LIVING);
+		if (((STRUCT_UNIT_TRAINABLE*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE);
 		if (((STRUCT_UNIT_PROJECTILE*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE);
-		if (((STRUCT_UNIT_TREE*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BIRD);
-		if (((STRUCT_UNIT_TYPE50*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_TYPE50);
+		if (((STRUCT_UNIT_TREE*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_TREE);
+		if (((STRUCT_UNIT_ATTACKABLE*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE);
 		if (((STRUCT_UNIT_BUILDING*)unit)->IsTypeValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BUILDING);
 		// unit->unitType is often erroneous ! If not found, try again using only checksum.
 		if (unit->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BASE);
-		if (((STRUCT_UNIT_BIRD*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BIRD);
+		if (((STRUCT_UNIT_COMMANDABLE*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE);
 		if (((STRUCT_UNIT_FLAG*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_FLAG);
-		if (((STRUCT_UNIT_DEAD_FISH*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_DEAD_FISH);
+		if (((STRUCT_UNIT_MOVABLE*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_MOVABLE);
 		if (((STRUCT_UNIT_DOPPLEGANGER*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_DOPPLEGANGER);
-		if (((STRUCT_UNIT_LIVING*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_LIVING);
+		if (((STRUCT_UNIT_TRAINABLE*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE);
 		if (((STRUCT_UNIT_PROJECTILE*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE);
-		if (((STRUCT_UNIT_TREE*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BIRD);
-		if (((STRUCT_UNIT_TYPE50*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_TYPE50);
+		if (((STRUCT_UNIT_TREE*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_TREE);
+		if (((STRUCT_UNIT_ATTACKABLE*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE);
 		if (((STRUCT_UNIT_BUILDING*)unit)->IsCheckSumValid()) return sizeof(AOE_STRUCTURES::STRUCT_UNIT_BUILDING);
 		return 0;
 	}
