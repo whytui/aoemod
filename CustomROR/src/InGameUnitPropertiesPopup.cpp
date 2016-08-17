@@ -100,8 +100,8 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(unitInfo->spawnTargetUnitId);
 			char *targetName = NULL;
 			if (targetUnitBase && targetUnitBase->IsCheckSumValidForAUnitClass() &&
-				targetUnitBase->ptrStructDefUnit && targetUnitBase->ptrStructDefUnit->IsCheckSumValid()) {
-				targetName = targetUnitBase->ptrStructDefUnit->ptrUnitName;
+				targetUnitBase->unitDefinition && targetUnitBase->unitDefinition->IsCheckSumValidForAUnitClass()) {
+				targetName = targetUnitBase->unitDefinition->ptrUnitName;
 			}
 			autoMoveInfo += "[";
 			autoMoveInfo += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_BUILDING, "Building");

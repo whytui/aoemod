@@ -366,8 +366,8 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		if (unit && unit->IsCheckSumValidForAUnitClass()) {
 			AOE_selectUnit(player, unit, true);
 			char *name = "?";
-			if (unit->ptrStructDefUnit && unit->ptrStructDefUnit->IsCheckSumValid()) {
-				name = unit->ptrStructDefUnit->ptrUnitName;
+			if (unit->unitDefinition && unit->unitDefinition->IsCheckSumValid()) {
+				name = unit->unitDefinition->ptrUnitName;
 			}
 			std::string s = std::string("selected ") + std::string(name);
 			sprintf_s(outputBuffer, s.c_str());
@@ -1319,7 +1319,7 @@ bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT
 	if (!beingSeenUnit || !beingSeenUnit->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = beingSeenUnit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = beingSeenUnit->unitDefinition;
 	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
@@ -2057,11 +2057,11 @@ void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long i
 			assert(GetUnitStruct(player->ptrBuildingsListHeader->ptrBuildingsUnitIDs[i]) == loopUnit);
 			assert(GetUnitStruct(loopUnit->unitInstanceId) == loopUnit);
 			assert(loopUnit->unitType == GUT_BUILDING);
-			assert(loopUnit->ptrStructDefUnit != NULL);
+			assert(loopUnit->unitDefinition != NULL);
 			if ((loopUnit->IsCheckSumValidForAUnitClass()) && (GetUnitStruct(player->ptrBuildingsListHeader->ptrBuildingsUnitIDs[i]) == loopUnit) &&
-				(loopUnit->unitType == GUT_BUILDING) && (loopUnit->ptrStructDefUnit != NULL)) {
-				if ((loopUnit->unitStatus == 2) && (loopUnit->ptrStructDefUnit != NULL)) {
-					short int DAT_ID = loopUnit->ptrStructDefUnit->DAT_ID1;
+				(loopUnit->unitType == GUT_BUILDING) && (loopUnit->unitDefinition != NULL)) {
+				if ((loopUnit->unitStatus == 2) && (loopUnit->unitDefinition != NULL)) {
+					short int DAT_ID = loopUnit->unitDefinition->DAT_ID1;
 					if (DAT_ID == CST_UNITID_ACADEMY) { myAcademyCount++; }
 					if (DAT_ID == CST_UNITID_BARRACKS) { myBarracksCount++; }
 					if (DAT_ID == CST_UNITID_DOCK) { myDockCount++; }
@@ -2080,7 +2080,7 @@ void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long i
 					player->playerId, (long int)invalidUnit, invalidUnit->unitInstanceId, (int)invalidUnit->unitType, i, buildingList_count);
 				//AddTraceToFile(buffer);
 				traceMessageHandler.WriteMessage(buffer);
-				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *invalidUnitDef = invalidUnit->ptrStructDefUnit;
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *invalidUnitDef = invalidUnit->unitDefinition;
 				long checksum = ((long)invalidUnitDef < 0x10000) ? -1 : invalidUnitDef->checksum; // if invalidUnitDef ptr is low it is probably invalid, don't access it
 				int tmp_DAT_ID = -1;
 				if (checksum == 0x00549930) { // checksum is correct (building unitDef)
@@ -2659,7 +2659,7 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUC
 			unit = (AOE_STRUCTURES::STRUCT_UNIT_BIRD *)GetUnitStruct(unitId);
 		}
 		if (unit != NULL) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->ptrStructDefUnit;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 			assert(unitDef != NULL);
 			if ((unit->DerivesFromBird()) &&
 				(unitDef->unitAIType != TribeAIGroupCivilian) &&
@@ -2725,7 +2725,7 @@ void CustomRORCommand::SelectNextIdleMilitaryUnit() {
 	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *currentUnitElem = player->ptrCreatableUnitsListLink->lastListElement;
 	while (currentUnitElem) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)currentUnitElem->unit;
-		if (unitBase && unitBase->IsCheckSumValidForAUnitClass() && unitBase->ptrStructDefUnit && unitBase->ptrStructDefUnit->IsCheckSumValid()) {
+		if (unitBase && unitBase->IsCheckSumValidForAUnitClass() && unitBase->unitDefinition && unitBase->unitDefinition->IsCheckSumValid()) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->GetUnitDefinition();
 			char result;
 			if ((unitBase->transporterUnit == NULL) && IsNonTowerMilitaryUnit(unitDefBase->unitAIType)) { // Excludes towers
@@ -2779,7 +2779,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	}
 	if (IsMultiplayer()) { return; } // can provoke out of sync errors
 
-	AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)unit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)unit->unitDefinition;
 	assert(unitDef != NULL);
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
 	if (!player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
@@ -2845,9 +2845,9 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	}
 
 	// Auto-repair TC for villagers
-	if (!commandCreated && this->crInfo->configInfo.enableSpawnUnitAutoRepairTC && IsVillager(unit->ptrStructDefUnit->DAT_ID1) &&
+	if (!commandCreated && this->crInfo->configInfo.enableSpawnUnitAutoRepairTC && IsVillager(unit->unitDefinition->DAT_ID1) &&
 		parentUnit && !player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
-		if (parentUnit->remainingHitPoints < (float)parentUnit->ptrStructDefUnit->totalHitPoints) {
+		if (parentUnit->remainingHitPoints < (float)parentUnit->unitDefinition->totalHitPoints) {
 			TellUnitToInteractWithTarget(unit, parentUnit);
 			commandCreated = true;
 		}
@@ -2866,7 +2866,7 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE 
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = targetUnit->ptrStructPlayer; // The victim (if unit has been converted)
 	assert(targetPlayer != NULL);
 	assert(targetPlayer->IsCheckSumValid());
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = targetUnit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = targetUnit->unitDefinition;
 	assert(targetUnitDef != NULL);
 	assert(targetUnitDef->IsCheckSumValidForAUnitClass());
 
@@ -3142,7 +3142,7 @@ bool CustomRORCommand::AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE
 	// We choose not to modify existing shortcut
 	if (unit->shortcutNumber != 0) { return false; }
 
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 	assert(unitDef != NULL);
 	assert(unitDef->IsCheckSumValidForAUnitClass());
 
@@ -3254,7 +3254,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	assert(actorPlayer->IsCheckSumValid());
 	float *resources = (float *)actorPlayer->ptrResourceValues;
 	assert(resources != NULL);
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50*)actorUnit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50*)actorUnit->unitDefinition;
 	assert(actorUnitDef != NULL);
 	assert(actorUnitDef->IsCheckSumValidForAUnitClass());
 	assert(actorUnitDef->DerivesFromType50());
@@ -3272,9 +3272,9 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 		) {
 		actorIsArcher = true;
 	}
-	assert(newTargetUnit->ptrStructDefUnit != NULL);
-	assert(oldTargetUnit->ptrStructDefUnit != NULL);
-	if ((newTargetUnit->ptrStructDefUnit == NULL) || (oldTargetUnit->ptrStructDefUnit == NULL)) {
+	assert(newTargetUnit->unitDefinition != NULL);
+	assert(oldTargetUnit->unitDefinition != NULL);
+	if ((newTargetUnit->unitDefinition == NULL) || (oldTargetUnit->unitDefinition == NULL)) {
 		return true; // error case
 	}
 
@@ -3293,14 +3293,14 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 		return false; // keep old because new target is allied (can this happen ? Not sure)
 	}
 	
-	bool newTargetIsVillager = (newTargetUnit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian);// IsVillager(newTargetUnit->ptrStructDefUnit->DAT_ID1);
-	bool actionTargetIsVillager = (oldTargetUnit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian); // IsVillager(oldTargetUnit->ptrStructDefUnit->DAT_ID1);
-	bool newTargetIsPriest = (newTargetUnit->ptrStructDefUnit->DAT_ID1 == CST_UNITID_PRIEST);
-	bool actionTargetIsPriest = (oldTargetUnit->ptrStructDefUnit->DAT_ID1 == CST_UNITID_PRIEST);
-	bool newTargetIsTower = AOE_CONST_FUNC::IsTower(newTargetUnit->ptrStructDefUnit->DAT_ID1);
-	bool actionTargetIsTower = AOE_CONST_FUNC::IsTower(oldTargetUnit->ptrStructDefUnit->DAT_ID1);
-	bool newTargetIsWall = (newTargetUnit->ptrStructDefUnit->unitAIType == TribeAIGroupWall);
-	bool actionTargetIsWall = (oldTargetUnit->ptrStructDefUnit->unitAIType == TribeAIGroupWall);
+	bool newTargetIsVillager = (newTargetUnit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian);// IsVillager(newTargetUnit->unitDefinition->DAT_ID1);
+	bool actionTargetIsVillager = (oldTargetUnit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian); // IsVillager(oldTargetUnit->unitDefinition->DAT_ID1);
+	bool newTargetIsPriest = (newTargetUnit->unitDefinition->DAT_ID1 == CST_UNITID_PRIEST);
+	bool actionTargetIsPriest = (oldTargetUnit->unitDefinition->DAT_ID1 == CST_UNITID_PRIEST);
+	bool newTargetIsTower = AOE_CONST_FUNC::IsTower(newTargetUnit->unitDefinition->DAT_ID1);
+	bool actionTargetIsTower = AOE_CONST_FUNC::IsTower(oldTargetUnit->unitDefinition->DAT_ID1);
+	bool newTargetIsWall = (newTargetUnit->unitDefinition->unitAIType == TribeAIGroupWall);
+	bool actionTargetIsWall = (oldTargetUnit->unitDefinition->unitAIType == TribeAIGroupWall);
 	// Position/distances
 	float myPosX = actorUnit->positionX;
 	float myPosY = actorUnit->positionY;
@@ -3322,7 +3322,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 
 	// VERY FIRST priority decision: fog-hidden enemy: must change target or this would be cheating !!!
 	// Exception for building (they don't move !)
-	if (!isOldTargetVisible && (oldTargetUnit->ptrStructDefUnit->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
+	if (!isOldTargetVisible && (oldTargetUnit->unitDefinition->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 		return true; // Change target
 	}
 
@@ -3332,22 +3332,22 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 		bool canConvertTowers = (resources[RESOURCE_TYPES::CST_RES_ORDER_CAN_CONVERT_BUILDING] > 0);
 		bool alreadyVeryClose_oldTarget_melee = (squareDistanceOldTarget <= distanceToConsiderVeryClose); // For priests (that have both range and "melee" (vs buildings) conversion)
 		bool alreadyVeryClose_newTarget_melee = (squareDistanceOldTarget <= distanceToConsiderVeryClose);
-		bool newTargetIsChariot = (newTargetUnit->ptrStructDefUnit->unitAIType == TribeAIGroupChariot) ||
-			(newTargetUnit->ptrStructDefUnit->unitAIType == TribeAIGroupChariotArcher);
-		bool actionTargetIsChariot = (oldTargetUnit->ptrStructDefUnit->unitAIType == TribeAIGroupChariot) ||
-			(oldTargetUnit->ptrStructDefUnit->unitAIType == TribeAIGroupChariotArcher);
+		bool newTargetIsChariot = (newTargetUnit->unitDefinition->unitAIType == TribeAIGroupChariot) ||
+			(newTargetUnit->unitDefinition->unitAIType == TribeAIGroupChariotArcher);
+		bool actionTargetIsChariot = (oldTargetUnit->unitDefinition->unitAIType == TribeAIGroupChariot) ||
+			(oldTargetUnit->unitDefinition->unitAIType == TribeAIGroupChariotArcher);
 
 		// Top priority: priests can't convert TC, wonder, walls or unfinished buildings => next 2 rules
 		if ((newTargetUnit->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) && (newTargetUnit->unitStatus < 2)) {
 			return false; // Force keep if "new" target is a not-fully built building.
 		}
-		if (newTargetIsWall || (newTargetUnit->ptrStructDefUnit->DAT_ID1 == CST_UNITID_FORUM) || (newTargetUnit->ptrStructDefUnit->DAT_ID1 == CST_UNITID_WONDER)) {
+		if (newTargetIsWall || (newTargetUnit->unitDefinition->DAT_ID1 == CST_UNITID_FORUM) || (newTargetUnit->unitDefinition->DAT_ID1 == CST_UNITID_WONDER)) {
 			return false; // Force keep if "new" target can't be converted.
 		}
 		if ((oldTargetUnit->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) && (oldTargetUnit->unitStatus < 2)) {
 			return true; // Change if current target is a not-fully built building
 		}
-		if (actionTargetIsWall || (oldTargetUnit->ptrStructDefUnit->DAT_ID1 == CST_UNITID_FORUM) || (oldTargetUnit->ptrStructDefUnit->DAT_ID1 == CST_UNITID_WONDER)) {
+		if (actionTargetIsWall || (oldTargetUnit->unitDefinition->DAT_ID1 == CST_UNITID_FORUM) || (oldTargetUnit->unitDefinition->DAT_ID1 == CST_UNITID_WONDER)) {
 			return true;  // Change if current target can't be converted
 		}
 
@@ -3381,8 +3381,8 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 		}
 		// Old target is a building not at range, other is a living unit: switch
 		if (!alreadyVeryClose_oldTarget_melee &&
-			(oldTargetUnit->ptrStructDefUnit->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) &&
-			(newTargetUnit->ptrStructDefUnit->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING)
+			(oldTargetUnit->unitDefinition->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) &&
+			(newTargetUnit->unitDefinition->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING)
 			) {
 			return true;
 		}
@@ -3426,8 +3426,8 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 
 	// I am an archer: if possible, avoid attacking towers (or even buildings) because I'm not good for that
 	if (actorIsArcher) {
-		bool actionTargetIsBuilding = (oldTargetUnit->ptrStructDefUnit->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING);
-		bool targetIsBuilding = (newTargetUnit->ptrStructDefUnit->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING);
+		bool actionTargetIsBuilding = (oldTargetUnit->unitDefinition->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING);
+		bool targetIsBuilding = (newTargetUnit->unitDefinition->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING);
 
 		// Top-Priority exception: try to kill towers with only 1 HP (already done by "easy case" above?)
 		if (newTargetIsTower && (newTargetUnit->remainingHitPoints < 2)) {
@@ -3446,24 +3446,24 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	}
 
 	// When attacking some "priority" units (that are in my range), force keep: siege weapons, some archers
-	if (alreadyVeryClose_oldTarget && (oldTargetUnit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon)) {
+	if (alreadyVeryClose_oldTarget && (oldTargetUnit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon)) {
 		return false; // force keep
 	}
-	if (alreadyVeryClose_oldTarget && (oldTargetUnit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher)) {
+	if (alreadyVeryClose_oldTarget && (oldTargetUnit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher)) {
 		return false; // force keep
 	}
-	if (alreadyVeryClose_oldTarget && (oldTargetUnit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher)) {
+	if (alreadyVeryClose_oldTarget && (oldTargetUnit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher)) {
 		return false; // force keep
 	}
-	if (alreadyVeryClose_oldTarget && (oldTargetUnit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher)) {
+	if (alreadyVeryClose_oldTarget && (oldTargetUnit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher)) {
 		return false; // force keep
 	}
 	// Slingers: attack them, but NOT if I am an archer
-	if (alreadyVeryClose_oldTarget && !actorIsArcher && (oldTargetUnit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger)) {
+	if (alreadyVeryClose_oldTarget && !actorIsArcher && (oldTargetUnit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger)) {
 		return false; // force keep
 	}
 	// Enemy tower: keep if I am war elephant
-	if (alreadyVeryClose_oldTarget && (actorUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider) && (IsTower(oldTargetUnit->ptrStructDefUnit->DAT_ID1))) {
+	if (alreadyVeryClose_oldTarget && (actorUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider) && (IsTower(oldTargetUnit->unitDefinition->DAT_ID1))) {
 		return false; // force keep
 	}
 
@@ -3502,7 +3502,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	}
 
 	// Same enemy unit AI type: just compare HP (they are similar units)
-	if (newTargetUnit->ptrStructDefUnit->unitAIType == oldTargetUnit->ptrStructDefUnit->unitAIType) {
+	if (newTargetUnit->unitDefinition->unitAIType == oldTargetUnit->unitDefinition->unitAIType) {
 		if (newTargetUnit->remainingHitPoints > oldTargetUnit->remainingHitPoints) {
 			return false; // force keep if both units have the same unit type and current one has LESS HP (weaker: keep).
 		} // Else: let other tests be run (just in case they find some reason to choose), if needed it will go to this function's ending "return true;"
@@ -3542,12 +3542,12 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 	assert(this->distanceToConsiderVeryClose > 0);
 	if (!actorUnit || !enemyTower) { return false; }
 	assert(actorUnit->currentActivity != NULL);
-	assert(actorUnit->ptrStructDefUnit != NULL);
-	assert(enemyTower->ptrStructDefUnit != NULL);
-	if ((!actorUnit->currentActivity) || (!actorUnit->ptrStructDefUnit) || (!enemyTower->ptrStructDefUnit)) { return false; }
+	assert(actorUnit->unitDefinition != NULL);
+	assert(enemyTower->unitDefinition != NULL);
+	if ((!actorUnit->currentActivity) || (!actorUnit->unitDefinition) || (!enemyTower->unitDefinition)) { return false; }
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = actorUnit->currentActivity; // Guaranteed non-NULL
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnit->ptrStructDefUnit; // Guaranteed non-NULL
-	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *enemyTowerDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)enemyTower->ptrStructDefUnit; // Guaranteed non-NULL
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)actorUnit->unitDefinition; // Guaranteed non-NULL
+	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *enemyTowerDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)enemyTower->unitDefinition; // Guaranteed non-NULL
 	assert(actorUnitDef->DerivesFromType50());
 	assert(enemyTowerDef->DerivesFromType50());
 	if (!actorUnitDef->DerivesFromType50() || !enemyTowerDef->DerivesFromType50()) { return false; }
@@ -3589,7 +3589,7 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *currentTarget = GetUnitStruct(currentTargetId);
 	AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *currentTargetDef = NULL;
 	if (currentTarget) {
-		currentTargetDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)currentTarget->ptrStructDefUnit;
+		currentTargetDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TYPE50 *)currentTarget->unitDefinition;
 	} else {
 		return true;
 	}
@@ -4630,8 +4630,8 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	// Search for the farmer that was working on this farm (first -arbitrary- one if there are many)
 	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *curElem = player->ptrCreatableUnitsListLink->lastListElement;
 	while ((curElem != NULL) && (farmerUnit == NULL)) {
-		if (curElem->unit && curElem->unit->IsCheckSumValid() && curElem->unit->ptrStructDefUnit &&
-			curElem->unit->ptrStructDefUnit->IsCheckSumValid() && (curElem->unit->ptrStructDefUnit->DAT_ID1 == CST_UNITID_FARMER)) {
+		if (curElem->unit && curElem->unit->IsCheckSumValid() && curElem->unit->unitDefinition &&
+			curElem->unit->unitDefinition->IsCheckSumValid() && (curElem->unit->unitDefinition->DAT_ID1 == CST_UNITID_FARMER)) {
 			AOE_STRUCTURES::STRUCT_ACTION_BASE *curUnitAction = GetUnitAction(curElem->unit);
 			// There is 1 special case when farmer's resourceType is NOT berryBush: when AI player repairs a farm (bug: villager type is farmer instead of repairman)
 			if (curUnitAction && (curUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
@@ -4778,7 +4778,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	}
 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
-	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructDefUnit || !unit->GetUnitDefinition()->IsCheckSumValidForAUnitClass()) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->unitDefinition || !unit->GetUnitDefinition()->IsCheckSumValidForAUnitClass()) {
 		return;
 	}
 	if (player != unit->ptrStructPlayer) { return; }
@@ -5546,7 +5546,7 @@ void CustomRORCommand::FixCityPlanFarmPlacement(AOE_STRUCTURES::STRUCT_UNIT_BASE
 	if (!existingBuilding || !existingBuilding->IsCheckSumValidForAUnitClass()) { return; }
 
 	// Default behavior / values
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)existingBuilding->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)existingBuilding->unitDefinition;
 	assert(unitDef_base && unitDef_base->IsCheckSumValidForAUnitClass());
 	if (!unitDef_base && !unitDef_base->IsCheckSumValidForAUnitClass()) { return; }
 	
@@ -5664,7 +5664,7 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = globalStruct->ptrUnitPointersList[unitId];
 		if (unit) {
 			assert(unit->IsCheckSumValidForAUnitClass());
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *defUnit = unit->ptrStructDefUnit;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *defUnit = unit->unitDefinition;
 			if (defUnit) {
 				assert(defUnit->IsCheckSumValidForAUnitClass());
 				if (defUnit->DAT_ID1 == CST_UNITID_HOUSE) {
@@ -5688,7 +5688,7 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 		AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)globalStruct->ptrUnitPointersList[unitId];
 		if (unit) {
 			assert(unit->IsCheckSumValid()); // IS a building (no other unit type)
-			AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)unit->ptrStructDefUnit;
+			AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *defUnit = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)unit->unitDefinition;
 			if (defUnit) {
 				assert(defUnit->IsCheckSumValid()); // IS a building definition (no other unit type)
 				// Make sure buildings are not all side by side with no space: if 1 side is "all blocked", make sure we don't build on opposite side.
@@ -6478,7 +6478,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		}
 
 		// Now associate new unit definition to our unit
-		unitLiving->ptrStructDefUnit = newUnitDefLiving;
+		unitLiving->unitDefinition = newUnitDefLiving;
 		unitLiving->hasDedicatedUnitDef = 1; // don't forget to set this flag so that ROR correctly frees everything later.
 		// Force use provided name (if provided)
 		if (*newUnitName != 0) {
@@ -6698,7 +6698,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		while ((currentElem != NULL) && (counter >= 1)) {
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)currentElem->unit;
 			if (unitBase && unitBase->IsCheckSumValidForAUnitClass()) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)unitBase->ptrStructDefUnit;
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)unitBase->unitDefinition;
 				if (unitDefBase && unitDefBase &&
 					((unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING) || (unitDefBase->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_LIVING_UNIT)) &&
 					(unitDefBase->unitAIType != AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)

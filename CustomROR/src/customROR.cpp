@@ -565,7 +565,7 @@ void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	long int myESP = REG_values->ESP_val;
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = target->ptrStructPlayer;
 	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = actor->ptrStructPlayer;
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = target->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = target->unitDefinition;
 	// Compute resistance
 	float resistance = this->crInfo.GetConversionResistance(targetPlayer->civilizationId, targetUnitDef->unitAIType);
 
@@ -732,7 +732,7 @@ void CustomRORInstance::FixBuildingStratElemUnitID(REG_BACKUP *REG_values) {
 		ror_api_assert(REG_values, buildAI != NULL);
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ESI_val;
 		ror_api_assert(REG_values, unit != NULL);
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->ptrStructDefUnit;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 		ror_api_assert(REG_values, unitDef != NULL);
 		long int unitId = unit->unitInstanceId;
 		char unitStatus = unit->unitStatus;
@@ -1005,7 +1005,7 @@ void CustomRORInstance::ManageCityPlanHouseDistanceFromBuildings(REG_BACKUP *REG
 	long int maxPosXValue; // Will be written in ESP+34, but later
 	// MinPosX will be written in stack from (returned) EAX value in ROR's code.
 
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *defOtherBuilding = otherBuilding->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *defOtherBuilding = otherBuilding->unitDefinition;
 	ror_api_assert(REG_values, defOtherBuilding != NULL);
 	// Get relevant distance value according to "reference building" type (DAT_ID)
 	float distanceValue = 3; // From original code
@@ -1186,7 +1186,7 @@ void CustomRORInstance::OverloadSetInProgress(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 	if (stratElem->elementType != AOE_CONST_FUNC::TAIUnitClass::AIUCLivingUnit) { return; }
-	if (!actor->ptrStructDefUnit || (actor->ptrStructDefUnit->unitType != AOE_CONST_FUNC::GUT_BUILDING)) { return; }
+	if (!actor->unitDefinition || (actor->unitDefinition->unitType != AOE_CONST_FUNC::GUT_BUILDING)) { return; }
 	// Here: actor is a building and strategy element is a unit to train. Set temporarily unitInstanceId to actor's id or we can't find where it is being trained.
 	stratElem->unitInstanceId = actor->unitInstanceId;
 }
@@ -1226,7 +1226,7 @@ void CustomRORInstance::OverloadResetUnitInAI(REG_BACKUP *REG_values) {
 
 	// Custom treatments: if unit is a building, search for a unit being trained in it and cancel "in progress" flag
 	if (unit_toReset->unitInstanceId != unitId_toReset) { return; } // Should not happen
-	if (!unit_toReset->ptrStructDefUnit || unit_toReset->ptrStructDefUnit->unitType != AOE_CONST_FUNC::GUT_BUILDING) { return; } // Quit if not a building
+	if (!unit_toReset->unitDefinition || unit_toReset->unitDefinition->unitType != AOE_CONST_FUNC::GUT_BUILDING) { return; } // Quit if not a building
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &mainAI->structBuildAI.fakeFirstStrategyElement;
 	ror_api_assert(REG_values, fakeFirstElem != NULL);
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = fakeFirstElem->next;
@@ -2644,7 +2644,7 @@ void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 	// Custom code
 	ror_api_assert(REG_values, unit->IsCheckSumValidForAUnitClass());
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructDefUnit) { return; }
+	if (!settings || !unit->IsCheckSumValidForAUnitClass() || !unit->unitDefinition) { return; }
 	// Only modify behaviour in editor.
 	// In real game, we must NOT do such updates because unit would have an invalid state (it is more complex than just changing unitStatus field)
 
@@ -2660,7 +2660,7 @@ void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 		// For editor only: buildings with a status >2 are not displayed correctly (because game's code tests "status==2").
 		// In this very precise case, force the call that was not done (because of the CMP BL,2 condition).
 		// This needs to be done BEFORE we change unit.unitStatus (the call needs status to be =0).
-		if ((desiredStatus > AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY) && (unit->ptrStructDefUnit->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
+		if ((desiredStatus > AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY) && (unit->unitDefinition->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 			float f = 10000;
 			_asm {
 				PUSH f

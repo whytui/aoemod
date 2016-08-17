@@ -251,10 +251,10 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_BUILD_AI
 	// Fill availableUnitsList with player's (creatable) units list that match DAT_ID
 	while ((creatableListElem != NULL) && (indexInList < creatableListLink->listElemCount)) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *currentUnit = creatableListElem->unit;
-		if (currentUnit && (currentUnit->unitInstanceId >= 0) && (currentUnit->ptrStructDefUnit) && // Exclude temporary units (smoke, dead units) with negative id
-			(currentUnit->ptrStructDefUnit->unitType >= AOE_CONST_FUNC::GUT_LIVING_UNIT) && // living + building (+trees, but non-gaia players don't have any)
-			((currentUnit->ptrStructDefUnit->DAT_ID1 == DAT_ID) || (DAT_ID == -1))) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = currentUnit->ptrStructDefUnit;
+		if (currentUnit && (currentUnit->unitInstanceId >= 0) && (currentUnit->unitDefinition) && // Exclude temporary units (smoke, dead units) with negative id
+			(currentUnit->unitDefinition->unitType >= AOE_CONST_FUNC::GUT_LIVING_UNIT) && // living + building (+trees, but non-gaia players don't have any)
+			((currentUnit->unitDefinition->DAT_ID1 == DAT_ID) || (DAT_ID == -1))) {
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = currentUnit->unitDefinition;
 			notInStrategyUnitsList.push_back(currentUnit);
 		}
 		creatableListElem = creatableListElem->previousElement;
@@ -301,12 +301,12 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_BUILD_AI
 				while (!found && (it != notInStrategyUnitsList.end())) {
 					AOE_STRUCTURES::STRUCT_UNIT_BASE* currentAvailableUnit = *it;
 					assert(currentAvailableUnit != NULL);
-					assert(currentAvailableUnit->ptrStructDefUnit != NULL);
-					if ((currentAvailableUnit->ptrStructDefUnit->DAT_ID1 == currentElem->unitDAT_ID) ||
+					assert(currentAvailableUnit->unitDefinition != NULL);
+					if ((currentAvailableUnit->unitDefinition->DAT_ID1 == currentElem->unitDAT_ID) ||
 						//(currentAvailableUnit->ptrStructDefUnit->DAT_ID2 == currentElem->unitDAT_ID) ||
 						// Previous line does not work because sc editor use "DATID2" value for both DATID1&2 when placing 
 						// The wrong unit in a scenario (house1 instead of house, etc)
-						((currentElem->unitDAT_ID == AOE_CONST_FUNC::CST_UNITID_VILLAGER) && IsVillager(currentAvailableUnit->ptrStructDefUnit->DAT_ID1))
+						((currentElem->unitDAT_ID == AOE_CONST_FUNC::CST_UNITID_VILLAGER) && IsVillager(currentAvailableUnit->unitDefinition->DAT_ID1))
 						) {
 						found = true;
 						currentElem->unitInstanceId = currentAvailableUnit->unitInstanceId; // Associate strategy element to existing unit
@@ -343,7 +343,7 @@ bool UpdateStrategyWithExistingUnit(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AO
 	assert(unit->IsCheckSumValidForAUnitClass());
 	if (!(buildAI->IsCheckSumValid()) || (!unit->IsCheckSumValidForAUnitClass())) { return false; }
 
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 	if (!unitDef) { return false; }
 	short int baseDATID = unitDef->DAT_ID1;
 	if (IsVillager(baseDATID)) { baseDATID = CST_UNITID_MAN; } // We don't want forager or repairmen here, just VILLAGERS to match strategy elements !

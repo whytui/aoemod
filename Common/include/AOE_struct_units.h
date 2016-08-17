@@ -83,7 +83,7 @@ namespace AOE_STRUCTURES {
 	public:
 		unsigned long int checksum;
 		long int unitInstanceId; // Can be negative (temporary units like smoke). Can be something else (or unused?) (seen for flare, type=10)
-		STRUCT_UNITDEF_BASE *ptrStructDefUnit;
+		STRUCT_UNITDEF_BASE *unitDefinition; // +8. Unit definition (model). Living units can have a dedicated unit definition.
 		STRUCT_PLAYER *ptrStructPlayer;
 		// 0x10
 		char *pCurrentGraphics; // Pointer to a structure about graphics...
@@ -157,7 +157,7 @@ namespace AOE_STRUCTURES {
 				;
 		}
 		// Obsolete getter
-		STRUCT_UNITDEF_BASE *GetUnitDefinition() const { return this->ptrStructDefUnit; }
+		STRUCT_UNITDEF_BASE *GetUnitDefinition() const { return this->unitDefinition; }
 		// Returns true if the unit definition is a flag (20) or a child class (all but eye candy and trees)
 		bool DerivesFromFlag() const {
 			return (this->IsCheckSumValidForAUnitClass() && (this->checksum != 0x00547DA8) && (this->checksum != 0x00548474)); // all but 10 and 90

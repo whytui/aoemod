@@ -73,7 +73,7 @@ namespace AOE_STRUCTURES {
 		res += " - UnitId_78?=";
 		res += std::to_string(obj->unknown_078_unitInstanceId);
 		res += "\nDefinition: ";
-		res += this->ExportStruct(obj->ptrStructDefUnit);
+		res += this->ExportStruct(obj->unitDefinition);
 		if (obj->DerivesFromBird()) {
 			res += this->ExportStruct<STRUCT_UNIT_BIRD>((STRUCT_UNIT_BIRD*)RORAddress);
 		}

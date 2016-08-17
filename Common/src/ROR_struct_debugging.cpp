@@ -531,7 +531,7 @@ namespace AOE_STRUCTURES {
 		if (unit == NULL) { return ""; }
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE unitDef;
 
-		unsigned long int pToRead = (unsigned long int) unit->ptrStructDefUnit;
+		unsigned long int pToRead = (unsigned long int) unit->unitDefinition;
 		if (unit) { free(unit); } // No longer needed
 		if (!GetObjectFromRORData(this->handleROR, pToRead, &unitDef)) {
 			return NULL;

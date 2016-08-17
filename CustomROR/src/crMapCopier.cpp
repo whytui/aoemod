@@ -62,17 +62,17 @@ bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long in
 					if (!listElem) { break; } // stop as soon as a NULL element is found (should not happen if unitsOnThisTileCount is correct)
 					STRUCT_UNIT_BASE *unit = listElem->unit;
 					if (unit && !unit->IsCheckSumValidForAUnitClass()) { unit = NULL; }
-					bool isDecorationOrCliff = unit->ptrStructDefUnit && (
-						(unit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTerrain) ||
-						(unit->ptrStructDefUnit->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCliff));
+					bool isDecorationOrCliff = unit->unitDefinition && (
+						(unit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTerrain) ||
+						(unit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCliff));
 					bool copyUnit = includeUnits || isDecorationOrCliff; // Always copy terrain decoration, cliffs
 					if (copyUnit && unit && unit->IsCheckSumValidForAUnitClass()) {
 						UNIT_INSTANCE_SERIALIZED_DATA *unitData = new UNIT_INSTANCE_SERIALIZED_DATA();
 						// Store relative position, not absolute !
 						unitData->posX = unit->positionX - (float)minX;
 						unitData->posY = unit->positionY - (float)minY;
-						if (unit->ptrStructDefUnit) {
-							unitData->unitDefId = unit->ptrStructDefUnit->DAT_ID1;
+						if (unit->unitDefinition) {
+							unitData->unitDefId = unit->unitDefinition->DAT_ID1;
 						}
 						if (unit->ptrStructPlayer && unit->ptrStructPlayer->IsCheckSumValid()) {
 							unitData->playerId = unit->ptrStructPlayer->playerId;

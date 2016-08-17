@@ -1007,16 +1007,16 @@ bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::S
 	assert(tacAI->IsCheckSumValid());
 	assert(actor->IsCheckSumValidForAUnitClass() && actor->DerivesFromBird());
 	assert(target->IsCheckSumValidForAUnitClass());
-	assert(actor->ptrStructDefUnit);
+	assert(actor->unitDefinition);
 	assert(target->ptrStructPlayer);
 	if (!tacAI->IsCheckSumValid() || !actor->DerivesFromBird() || !target->IsCheckSumValidForAUnitClass() || 
-		!actor->ptrStructDefUnit || !target->ptrStructPlayer) { return false; }
+		!actor->unitDefinition || !target->ptrStructPlayer) { return false; }
 	long int posX = (long int)target->positionX;
 	long int posY = (long int)target->positionY;
 	long int posZ = (long int)target->positionZ;
 	float maxRange = 1;
 	if (actor->DerivesFromType50()) {
-		maxRange = ((STRUCT_UNITDEF_TYPE50*)actor->ptrStructDefUnit)->maxRange;
+		maxRange = ((STRUCT_UNITDEF_TYPE50*)actor->unitDefinition)->maxRange;
 	}
 	long int actorUnitId = actor->unitInstanceId;
 	long int targetUnitId = target->unitInstanceId;
@@ -1100,7 +1100,7 @@ AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTUR
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *target, bool canSwitchForVillager) {
 	if (!actorUnit || !target || !actorUnit->IsCheckSumValidForAUnitClass() || !actorUnit->DerivesFromBird() ||
 		!target->IsCheckSumValidForAUnitClass()) { return false; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)actorUnit->ptrStructDefUnit;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)actorUnit->unitDefinition;
 	if (!unitDef_base->DerivesFromBird()) { return false; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *unitDef_asBird = (AOE_STRUCTURES::STRUCT_UNITDEF_BIRD *)unitDef_base;
 	if (!unitDef_asBird->ptrUnitCommandHeader || !unitDef_asBird->ptrUnitCommandHeader->IsCheckSumValid()) { return false; }
@@ -1236,7 +1236,7 @@ long int GetPlayerUnitCount(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *currentUnit = currentElem->unit;
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = currentUnit->GetUnitDefinition();
 		if (currentUnit && currentUnit->IsCheckSumValidForAUnitClass() && unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
-			bool ok_DATID = (DAT_ID == -1) || (currentUnit->ptrStructDefUnit->DAT_ID1 == DAT_ID);
+			bool ok_DATID = (DAT_ID == -1) || (currentUnit->unitDefinition->DAT_ID1 == DAT_ID);
 			bool ok_AIType = (unitAIType == TribeAINone) || (unitDef->unitAIType == unitAIType);
 			bool ok_status = (minUnitStatus == -1) || (currentUnit->unitStatus >= minUnitStatus) &&
 				(maxUnitStatus == -1) || (currentUnit->unitStatus <= maxUnitStatus);
@@ -1256,8 +1256,8 @@ long int GetPlayerUnitCount(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT
 float GetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit) {
 	if (!farmUnit || !farmUnit->IsCheckSumValid()) { return 0; }
 	if (farmUnit->resourceTypeId != RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE) { return 0; }
-	if (!farmUnit->ptrStructDefUnit || !farmUnit->ptrStructDefUnit) { return 0; }
-	if (farmUnit->ptrStructDefUnit->DAT_ID1 != CST_UNITID_FARM) { return 0; }
+	if (!farmUnit->unitDefinition || !farmUnit->unitDefinition) { return 0; }
+	if (farmUnit->unitDefinition->DAT_ID1 != CST_UNITID_FARM) { return 0; }
 	// Farms are quite special. Their "resource value" increases slowly, like docks' trade value.
 	// This system prevents from gathering faster when assigning >1 villager. (other limitation: each farmer also has a maximum work rate !)
 	// Action contains the remaining "locked" (not available yet) amount.
@@ -1271,8 +1271,8 @@ float GetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit) {
 bool SetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit, float newAmount) {
 	if (!farmUnit || !farmUnit->IsCheckSumValid()) { return false; }
 	if (farmUnit->resourceTypeId != RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE) { return false; }
-	if (!farmUnit->ptrStructDefUnit || !farmUnit->ptrStructDefUnit) { return false; }
-	if (farmUnit->ptrStructDefUnit->DAT_ID1 != CST_UNITID_FARM) { return false; }
+	if (!farmUnit->unitDefinition || !farmUnit->unitDefinition) { return false; }
+	if (farmUnit->unitDefinition->DAT_ID1 != CST_UNITID_FARM) { return false; }
 	AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(farmUnit);
 	if (!action) { return false; }
 	action->unsure_resourceValue = newAmount - farmUnit->resourceValue;
@@ -2066,7 +2066,7 @@ bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_BIRD **actorUnitsList, lon
 	cmd->targetVisibleInFog = 0; // default
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(targetUnitId);
 	if (targetUnit && targetUnit->IsCheckSumValidForAUnitClass()) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *) targetUnit->ptrStructDefUnit;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *) targetUnit->unitDefinition;
 		if (targetDef && targetDef->IsCheckSumValidForAUnitClass()) {
 			cmd->targetVisibleInFog = targetDef->visibleInFog;
 		}
@@ -2621,7 +2621,7 @@ void DebugDumpAllUnits() {
 	if (!global || !global->IsCheckSumValid()) return;
 	for (int i = 0; (i < GetGameGlobalStructPtr()->seqUnitId - 1) && (i < GetGameGlobalStructPtr()->unitPointersListSize); i++) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = GetGameGlobalStructPtr()->ptrUnitPointersList[i];
-		if (unit && unit->IsCheckSumValidForAUnitClass() && unit->ptrStructDefUnit && unit->ptrStructDefUnit->IsCheckSumValid()) {
+		if (unit && unit->IsCheckSumValidForAUnitClass() && unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
 			char buf[200];
 			char buf2[10];
 			buf2[0] = '-';
@@ -2631,7 +2631,7 @@ void DebugDumpAllUnits() {
 				sprintf_s(buf2, "%d", unitLiving->stillToBeDiscoveredByHuman);
 			}
 			sprintf_s(buf, "unit %ld\tType=%ld\tDATID=%ld\t1B8=%s\tname=%s\t%d\t%d\t%d\t%d\n", unit->unitInstanceId, unit->unitType,
-				unit->ptrStructDefUnit->DAT_ID1, buf2, unit->ptrStructDefUnit->ptrUnitName,
+				unit->unitDefinition->DAT_ID1, buf2, unit->unitDefinition->ptrUnitName,
 				unit->unitStatus, unit->isNotCreatable, unit->isDoppleGanger, unit->unknown_04B);
 			WriteToFile(buf, "D:\\AOEUnits.txt", true);
 		}
