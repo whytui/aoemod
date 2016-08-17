@@ -374,6 +374,7 @@ namespace AOE_CONST_INTERNAL
 	// For activity.task IDs
 	enum ACTIVITY_TASK_IDS : long int {
 		CST_ATI_NONE = -1, // Used a lot in game code
+		CST_ATI_UNKNOWN_1F4 = 0x1F4, // Notify(react) being attacked ?
 		CST_ATI_UNKNOWN_1FA = 0x1FA,
 		CST_ATI_UNKNOWN_1FB = 0x1FB, // 410999
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B

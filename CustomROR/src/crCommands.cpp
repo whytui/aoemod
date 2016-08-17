@@ -5535,6 +5535,74 @@ bool CustomRORCommand::ShouldRetreatAfterShooting(AOE_STRUCTURES::STRUCT_UNIT_AC
 }
 
 
+// Occurs when a unit is killed by an attack (excludes suicide with DEL, transported units whose transport is destroyed, conversion)
+void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit) {
+	if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass()) {
+		return;
+	}
+	if (!killedUnit || !killedUnit->IsCheckSumValidForAUnitClass()) {
+		return;
+	}
+	assert(killedUnit->DerivesFromAttackable());
+	if (!killedUnit->DerivesFromAttackable()) { return; }
+	if (!actorUnit->DerivesFromTrainable()) {
+		return; // No custom treatments for non-trainable actor (unit that killed another one)
+	}
+#ifdef _DEBUG
+	// TEST - TODO: add parameter, to finish...
+	if (!actorUnit->ptrStructPlayer || !killedUnit->ptrStructPlayer || (killedUnit->ptrStructPlayer->playerId == 0)) {
+		return; // Killing gaia units has no effect here
+	}
+	if (actorUnit->ptrStructPlayer == killedUnit->ptrStructPlayer) {
+		return; // No custom treatments for killing own units
+	}
+	if (killedUnit->ptrStructPlayer->ptrDiplomacyStances[actorUnit->ptrStructPlayer->playerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY) {
+		return; // No custom treatments for killing allied units
+	}
+
+	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *actorUnitTrainable = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)actorUnit;
+	assert(actorUnitTrainable->DerivesFromTrainable());
+	AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *newUnitDef = NULL;
+	bool hasNewUnitDef = false;
+	if (!actorUnitTrainable->hasDedicatedUnitDef) {
+		newUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)CopyUnitDefToNewUsingGoodClass(actorUnitTrainable->unitDefinition);
+		// To be more precise, newUnitDef is STRUCT_UNITDEF_BUILDING if actorUnitTrainable is a building
+		actorUnitTrainable->hasDedicatedUnitDef = 1;
+		actorUnitTrainable->unitDefinition = newUnitDef;
+		hasNewUnitDef = true;
+	} else {
+		newUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)actorUnitTrainable->unitDefinition; // This is already a dedicated unit definition, we can mess with it :)
+	}
+	assert(newUnitDef && newUnitDef->DerivesFromTrainable());
+	char *initialName = newUnitDef->ptrUnitName;
+	std::string name = GetLanguageDllText(newUnitDef->languageDLLID_Name);
+	if (name.empty()) {
+		name = std::string(newUnitDef->ptrUnitName);
+	}
+	if (hasNewUnitDef) {
+		if (!name.empty()) {
+			name += " ";
+		}
+		name += std::to_string(actorUnitTrainable->unitInstanceId);
+	}
+
+	char *newName = (char*)AOEAlloc(name.length() + 1);
+	sprintf_s(newName, name.length() + 1, "%s", name.c_str());
+	AOEFree(initialName);
+	newUnitDef->ptrUnitName = newName;
+	newUnitDef->languageDLLID_Name = -1;
+	if ((actorUnitTrainable->resourceValue == 0) || (actorUnitTrainable->resourceTypeId == CST_RES_ORDER_KILLS)) {
+		actorUnitTrainable->resourceTypeId = CST_RES_ORDER_KILLS;
+		actorUnitTrainable->resourceValue++;
+		if (((int)actorUnitTrainable->resourceValue) % 10 == 0) {
+			CallWriteText("Level up !");
+			newUnitDef->totalHitPoints += 2;
+		}
+	}
+#endif
+}
+
+
 // Computes (existing) building influence zone for farm placement map like values computation.
 // existingBuilding must be a building (current building from loop, to take into account in map like values)
 // Updates existingBldInfluenceZone with the influence distance we want to use for provided building (positions near building will be preferred)
@@ -6405,10 +6473,10 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			return;
 		}
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDefBase;
-		if (!unitDefLiving || !unitDefLiving->IsCheckSumValidForAUnitClass()) { return; }
+		if (!unitDefLiving || !unitDefLiving->DerivesFromTrainable()) { return; }
 
 		AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unitLiving = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)unitBase;
-		if (!unitLiving || !unitLiving->IsCheckSumValidForAUnitClass()) { return; }
+		if (!unitLiving || !unitLiving->DerivesFromTrainable()) { return; }
 
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefToFree = NULL; // Only used for units that have a temporary unitDef (converted units)
 		if (unitLiving->hasDedicatedUnitDef) {

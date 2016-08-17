@@ -28,7 +28,7 @@ namespace AOE_STRUCTURES {
 		long int listCounter; // To confirm
 		long int pointsPerScoreElement;
 		// 0x10
-		unsigned long int unknown_10;
+		long int currentScoreAmount; // +10. Calculated using pointsPerScoreElement and resource value (=number to multiply)
 		float value;
 		STRUCT_SCORE_ELEM *next;
 		unsigned long int unknown_1C; // unused ?

@@ -24,7 +24,7 @@ static void GetLanguageDllText(long int stringID, char *buffer, long int bufferS
 	}
 }
 
-// Get a text from languagex.dll or language.dll
+// Get a text from languagex.dll or language.dll. If not found, returns "".
 static std::string GetLanguageDllText(long int stringID) {
 	char buffer[100];
 	buffer[0] = 0;

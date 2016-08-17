@@ -98,7 +98,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 105
+#define COUNT_ROR_API_10c 106
 #define COUNT_manageAI_10c 13
 
 
@@ -5116,6 +5116,16 @@ void AOE_binData::InitROR_API_10c() {
 		0x51DCA,
 		(0x56, 0x8B, 0xCF, 0xE8, 0xEE, 0xFE, 0xFF, 0xFF, 0x56), // default=no
 		(0x56, 0xE8, 0xA4, 0x77, 0xFC, 0xFF, 0x58, 0x90, 0x56),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		OnAttackableUnitKilled,
+		"Entry point when a unit (types 50-80) is killed by another one.",
+		0x268F8,
+		(0x74, 0x07, 0xC7, 0x46, 0x30, 0x00, 0x00, 0x00, 0x00, 0x5F), // default=no
+		(0x74, 0x07, 0xE8, 0x75, 0x2C, 0xFF, 0xFF, 0x90, 0x90, 0x5F),
 		FM_OFF,
 		FM_ON
 		);

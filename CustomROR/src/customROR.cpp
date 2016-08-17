@@ -338,6 +338,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004ADB99:
 		this->AllowMultiUnitTypeInQueue(REG_values);
 		break;
+	case 0x004268FF:
+		this->EntryPointOnAttackableUnitKilled(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3296,6 +3299,32 @@ void CustomRORInstance::AllowMultiUnitTypeInQueue(REG_BACKUP *REG_values) {
 		ChangeReturnAddress(REG_values, 0x04ADBB6); // preserve queue
 	}
 }
+
+
+// From 0x4268F8. Occurs when a units receives damage from an attack and dies (HP<1 ; death did not occur yet, HP was just updated)
+void CustomRORInstance::EntryPointOnAttackableUnitKilled(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)REG_values->ESI_val;
+	ror_api_assert(REG_values, targetUnit != NULL);
+	ror_api_assert(REG_values, targetUnit->IsCheckSumValidForAUnitClass());
+	ror_api_assert(REG_values, targetUnit->DerivesFromAttackable());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		targetUnit->remainingHitPoints = 0; // Original instruction in 0x4268FA
+	}
+
+	// Get context information
+	long int attacksCount = GetIntValueFromRORStack(REG_values, 0x0C);
+	AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK *pAttacksList = (AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK *)GetIntValueFromRORStack(REG_values, 0x10);
+	float altitudeFactor = GetFloatValueFromRORStack(REG_values, 0x14);
+	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = (AOE_STRUCTURES::STRUCT_PLAYER *)GetIntValueFromRORStack(REG_values, 0x18);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetIntValueFromRORStack(REG_values, 0x1C);
+	ror_api_assert(REG_values, !actorPlayer || actorPlayer->IsCheckSumValid()); // if provided, actor must be valid
+	ror_api_assert(REG_values, !actorUnit || actorUnit->IsCheckSumValidForAUnitClass()); // if provided, actor must be valid
+
+	// Custom treatments
+	this->crCommand.OnAttackableUnitKilled(targetUnit, actorUnit);
+}
+
 
 
 //#pragma warning(pop)

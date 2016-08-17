@@ -380,6 +380,9 @@ public:
 	// Returns false if we should prevent unit from moving back (to maxrange) after shooting. Default result=true
 	bool ShouldRetreatAfterShooting(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity);
 
+	// Occurs when a unit is killed by an attack (excludes suicide with DEL, transported units whose transport is destroyed, conversion)
+	void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit);
+
 
 	// ----------------------------------
 	// City plan

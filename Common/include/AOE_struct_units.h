@@ -92,14 +92,14 @@ namespace AOE_STRUCTURES {
 		STRUCT_GAME_MAP_TILE_INFO *myTile; // +1C. To confirm. +5=byte=altitude&terrain bits, see TERRAIN_BYTE class
 		// 0x20
 		STRUCT_UNIT_BASE *transporterUnit; // Transport boat the unit is in
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unknown_024; // +24.
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *transportedUnits; // +24. List of units in the transport (if "this" is a transport)
 		short int unknown_028;
 		short int unknown_02A; // for graphics ?
 		short int unknown_02C; // for graphics ?
 		short int unknown_02E; // for graphics ?
 		// 0x30
 		float remainingHitPoints;
-		char currentGraphicsDamageIndex; // +34. According to remaining HP ?
+		char currentGraphicsDamageIndex; // +34. According to remaining HP ? A percentage value (0-100)?
 		char orientationIndex; // +35. Also used as building step (<25%, <50%, <75%, >75%). For types 30+, step orientationAngle(+9C), not this. See 0x44BBD0(unit+[0xD4]).
 		char mouseSelectionStatus; // +36. 1=selected, 2=right-click-target. Is it a Mask, not an enum !
 		char shortcutNumber; // 0-10, 10+=regrouped units ; 0=none, 10=0x0A="0" key.
@@ -318,8 +318,8 @@ namespace AOE_STRUCTURES {
 		char stillToBeDiscoveredByHuman; // 1 for gaia units that have not been discovered yet (for gaia units capture system)
 		char unknown_1B9[3]; // ?
 
-		bool IsCheckSumValid() { return (this->checksum == 0x0054324C); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_ATTACKABLE); }
+		bool IsCheckSumValid() const { return (this->checksum == 0x0054324C); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_ATTACKABLE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE) == 0x1BC, "STRUCT_UNIT_ATTACKABLE size");
 
@@ -333,8 +333,8 @@ namespace AOE_STRUCTURES {
 		// 0x1C0
 		unsigned long int unknown_1C0;
 
-		bool IsCheckSumValid() { return (this->checksum == 0x005445E8); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_PROJECTILE); }
+		bool IsCheckSumValid() const { return (this->checksum == 0x005445E8); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_PROJECTILE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE) == 0x1C4, "STRUCT_UNIT_PROJECTILE size");
 
@@ -346,8 +346,8 @@ namespace AOE_STRUCTURES {
 		char unknown_1BD;
 		short int unknown_1BE;
 
-		bool IsCheckSumValid() { return (this->checksum == 0x0054820C); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TRAINABLE); }
+		bool IsCheckSumValid() const { return (this->checksum == 0x0054820C); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TRAINABLE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE) == 0x1C0, "STRUCT_UNIT_TRAINABLE size");
 
@@ -382,8 +382,8 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_1F8;
 
 		// Returns true if checksum is valid FOR A BUILDING only.
-		bool IsCheckSumValid() { return (this->checksum == 0x00547FA0); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING); }
+		bool IsCheckSumValid() const { return (this->checksum == 0x00547FA0); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_BUILDING) == 0x1FC, "STRUCT_UNIT_BUILDING size");
 
@@ -391,8 +391,8 @@ namespace AOE_STRUCTURES {
 	// 74 84 54 00 = tree (type90). Size=0x88 (constructor=0x04B0D20) - Derives from type10
 	class STRUCT_UNIT_TREE : public STRUCT_UNIT_BASE {
 	public:
-		bool IsCheckSumValid() { return (this->checksum == 0x00548474); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TREE); }
+		bool IsCheckSumValid() const { return (this->checksum == 0x00548474); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TREE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_TREE) == 0x88, "STRUCT_UNIT_TREE size");
 

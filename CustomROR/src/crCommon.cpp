@@ -2227,6 +2227,7 @@ bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_C
 
 // Create a new unitDef, copied for provided one, using actual derived class.
 // Returns a STRUCT_UNITDEF_BASE, but it can be any derived class (living, building, etc)
+// This is a shortcut to avoid writing a big "switch" everywhere... The correct class/size will be allocated/initialized according to source class to copy.
 AOE_STRUCTURES::STRUCT_UNITDEF_BASE *CopyUnitDefToNewUsingGoodClass(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *existingUnitDef) {
 	if (!existingUnitDef || !existingUnitDef->IsCheckSumValidForAUnitClass()) {
 		return NULL;

@@ -186,7 +186,7 @@ namespace AOE_STRUCTURES {
 		char aliveStatus; //0=alive, 1=win 2=lost.
 		char isInactive; // +81. 1 for resigned/disconnected ? 45BBE3
 		short int unknown_082; // unused ?
-		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // +84. [pointer+iPlayerId] = diplomacy value: 0=ally,1=neutral, 3=enemy
+		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // +84. [pointer+iPlayerId] = diplomacy value: 0=ally,1=neutral, 3=enemy. gaia&self are neutral !
 		char unknown_088;
 		char unknown_089[3]; // unused ?
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES diplomacyVSPlayers[9]; // +8C. Diplomacy against gaia(p0), p1, p2... 1=self, 2=allied, 3=neutral, 4=enemy. Long ints (4bytes each)
