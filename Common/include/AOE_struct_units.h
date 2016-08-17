@@ -147,8 +147,8 @@ namespace AOE_STRUCTURES {
 			return (this->checksum == 0x00547DA8) || // eye candy (including cliffs...)
 				(this->checksum == 0x00542E14) || // Flag
 				(this->checksum == 0x005441BC) || // Doppleganger
-				(this->checksum == 0x00544838) || // Dead/fish (destroyable?)
-				(this->checksum == 0x00542748) || // Birds
+				(this->checksum == 0x00544838) || // Movable (Dead/fish)
+				(this->checksum == 0x00542748) || // Commandable (Birds)
 				(this->checksum == 0x0054324C) || // Type50
 				(this->checksum == 0x005445E8) || // Projectiles
 				(this->checksum == 0x0054820C) || // living
@@ -275,7 +275,9 @@ namespace AOE_STRUCTURES {
 		char unknown_176; // ?
 		char unknown_177; // ?
 		unsigned long int unknown_178;
-		unsigned long int unknown_17C;
+		char unknown_17C;// orientation index ?
+		char unknown_17D; // orientation index ?
+		char unknown_17E[2];
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00544838); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_MOVABLE); }

@@ -79,10 +79,10 @@ bool MapCopier::CopyMapZone(long int minX, long int minY, long int maxX, long in
 						}
 						unitData->unitId = unit->unitInstanceId;
 						// This dirty trick directly comes from AOE/ROR... 2 different kind of values are stored in 1 field, depending on type.
-						if (unit->DerivesFromMovable()) {
+						if (unit->DerivesFromCommandable()) {
 							unitData->orientation = ((AOE_STRUCTURES::STRUCT_UNIT_MOVABLE*)unit)->orientationAngle;
 						} else {
-							// Types 10/20/90: there is no (float) orientation, only orientation index, which is stored as is in serialized format.
+							// Types 10/20/30/90: there is no (float) orientation (except for 30), only orientation index, which is stored as is in serialized format.
 							unitData->orientation = (float)unit->orientationIndex;
 						}
 						unitData->status = unit->unitStatus;
