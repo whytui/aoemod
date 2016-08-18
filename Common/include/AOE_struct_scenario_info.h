@@ -44,7 +44,7 @@ namespace AOE_STRUCTURES {
 		char unknown_100E; // unused?
 		char unknown_100F; // unused?
 		// 0x10
-		char *scenarioFileName; // +1010
+		char *scenarioFileName; // +1010. Actually reset to "" when loading a non-scenario saved game. Loading a scenario saved game correctly sets this name, very useful !
 		char *scenarioInstructions; // +1014
 		char *scenarioTips;
 		char *scenarioVictoryText;
@@ -67,10 +67,10 @@ namespace AOE_STRUCTURES {
 		char scenarioVictoryAnimationFileName[0xE0]; // +15E8
 		char scenarioFailureAnimationFileName[0xE0]; // +16C8
 		char scenarioBitmapFileName[0xE0]; // +17A8
-		float scenarioVersion; // +1888. Corresponds to .scn/.scx version, like 1.02, 1.03, 1.04, 1.05, 1.13, 1.15(=ROR 1.0a)
+		float scenarioVersion; // +1888. Corresponds to .scn/.scx version, like 1.02, 1.03, 1.04, 1.05, 1.13, 1.15(=ROR 1.0a). Not always reset (when loading a non-scenario game)
 		long int player_unknown_188C[0x10]; // +188C. Often referred to as +18CC-40. Default = 4 ?
-		long int playerIsHumanPlayable[0x10]; // +188C. 0 if computer player only (cannot be played as human)
-		long int playerCivilizationId[0x10]; // +18CC. Often referred to as +18CC+40.
+		long int playerIsHumanPlayable[0x10]; // +18CC. 0 if computer player only (cannot be played as human)
+		long int playerCivilizationId[0x10]; // +190C. Often referred to as +18CC+40.
 		long int playerIsActive[0x10]; // +194C. 1 if player is active. Often referred to as +18CC+80.
 		long int *unknown_198C; // +198C. ptr to struct size=0x20, constructor 45AF60. TO DO.
 		long int startingResources[0x10][4]; // +1990. WARNING: resource order = gold/wood/food/stone here !!!

@@ -52,15 +52,15 @@ namespace AOE_STRUCTURES {
 	class STRUCT_GAME_GLOBAL {
 	public:
 		unsigned long int checksum;
-		unsigned long int currentGameTime; // in milliseconds
-		unsigned long int unknown_008;
-		unsigned long int unknown_00C;
+		long int currentGameTime; // in milliseconds
+		long int unknown_008; // +8. This value is serialized to saved games. Related to time
+		long int unknown_00C; // +C. This value is serialized to saved games. Related to time
 		unsigned long int unknown_010;
 		unsigned long int timeGetTimeValue;
-		float gameSpeed;
+		float gameSpeed; // +18
 		char gamePaused; // confirm exact role, do not use it directly.
 		char gameRunStatus; // 0 = Game in progress. 1 = Game Over. 2 = Not ingame. (Default). 3 = Generate Map (when starting game).
-		short int unknown_01E;
+		short int unknown_01E; // some status too ?
 		// +0x20
 		unsigned long int unknown_020;
 		unsigned long int unknown_024;
@@ -71,7 +71,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int ptrSoundsArray;
 		unsigned long int unknown_034;
 		unsigned long int ptrGraphicsArray; // ptr to list of elements (size=0x48) starting by a unit name?
-		short int playerTotalCount; // Player count including gaia = real player count + 1
+		short int playerTotalCount; // +3C. Player count including gaia = real player count + 1
 		short int unknown_03E;
 		// +0x40
 		STRUCT_PLAYER **ptrPlayerStructPtrTable; // points to table of player struct addresses (pointers)
@@ -89,7 +89,7 @@ namespace AOE_STRUCTURES {
 		unsigned short int unknown_060; // size for +64 ?
 		unsigned short int unknown_062;
 		unsigned long int unknown_064; // .col list ?
-		long int seqUnitId; // Sequence for unit instance IDs (for creatable only ?)
+		long int seqUnitId; // +68. Sequence for unit instance IDs (for creatable only ?)
 		unsigned long int unknown_06C_unitIdSeqForTempUnits; // Unsure
 		// +0x70
 		long int forcedNextUnitId; // Unsure. Forced when loading a scenario.
@@ -108,7 +108,10 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_098;
 		long int unknown_094_ListSize; // Size of x+0x94 array
 		// +0xA0
-		char unknown_0A0[0x10]; // A0: related to aoe.ply ?
+		unsigned long int unknown_0A0; // A0: related to aoe.ply ?
+		long int currentCampaignIndex; // +A4. Identifies the campaign being played. Values are 0-(n-1), but serialized to file as a "1-(n-1)" value ? With a bug handling "-1" in 0051CC92.
+		long int currentCampaignUserIndex; // +A8. Identifies the campaign user ("account")
+		long int currentCampaignScenarioIndex; // +AC. Identifies the scenario index in campaign being played
 		// +0xB0
 		unsigned long int unknown_0B0_playerId; // currently managed playerid?
 		unsigned long int unknownPlayerVar[0x09]; // 9 variables for each player, including gaia

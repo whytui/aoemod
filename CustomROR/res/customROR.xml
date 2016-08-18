@@ -39,6 +39,11 @@
 	<!-- If enabled (recommended), a popup will automatically show up when an error occurs, including trigger debug errors. 
 	Please disable this only if you're getting a lot of (abnormal) messages and report to developer. -->
 	<showCustomRORNotifications enable="1"/>
+
+	<!-- RPG mode: Set to 1 to make units collect XP when killing enemies, and get unique bonuses. Default=0.
+	scenario => impacts only scenario/campaigns. randomGames => impacts RM and DM games.
+	-->
+	<rpgMode scenario="1" randomGames="1"/>
 	
 	<!-- To fix timer bug on modern (fast) computers. Use value=0 to disable. -->
 	<gameTimerSlowDownFactor value="5"/>

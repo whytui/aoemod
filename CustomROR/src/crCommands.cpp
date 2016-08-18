@@ -47,26 +47,28 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 
 	fprintf_s(f, "\nEnd of checks.\n\nConfiguration:\n");
 	// General - not directly related to game
-	fprintf_s(f, "hideWelcomeMessage:                        %d\n", this->crInfo->configInfo.hideWelcomeMessage ? 1 : 0);
-	fprintf_s(f, "showAlertOnMissingFeature:                 %d\n", this->crInfo->configInfo.showAlertOnMissingFeature ? 1 : 0);
-	fprintf_s(f, "autoFixMissingFeatures:                    %d\n", this->crInfo->configInfo.autoFixMissingFeatures ? 1 : 0);
+	fprintf_s(f, "hideWelcomeMessage:                        %d\n", this->crInfo->configInfo.hideWelcomeMessage);
+	fprintf_s(f, "showAlertOnMissingFeature:                 %d\n", this->crInfo->configInfo.showAlertOnMissingFeature);
+	fprintf_s(f, "autoFixMissingFeatures:                    %d\n", this->crInfo->configInfo.autoFixMissingFeatures);
 	fprintf_s(f, "empires.dat relative path to use:          %s\n", this->crInfo->configInfo.customEmpiresDatRelativePath.c_str());
-	fprintf_s(f, "showCustomRORMenu:                         %d\n", this->crInfo->configInfo.showCustomRORMenu ? 1 : 0);
-	fprintf_s(f, "showCustomPopulationInfo:                  %d\n", this->crInfo->configInfo.showCustomPopInfo ? 1 : 0);
-	fprintf_s(f, "useImprovedGameSpeeds:                     %d\n", this->crInfo->configInfo.useImprovedGameSpeeds ? 1 : 0);
+	fprintf_s(f, "showCustomRORMenu:                         %d\n", this->crInfo->configInfo.showCustomRORMenu);
+	fprintf_s(f, "showCustomPopulationInfo:                  %d\n", this->crInfo->configInfo.showCustomPopInfo);
+	fprintf_s(f, "useImprovedGameSpeeds:                     %d\n", this->crInfo->configInfo.useImprovedGameSpeeds);
 	fprintf_s(f, "collectRORDebugLogs:                       %d\n", this->crInfo->configInfo.collectRORDebugLogs);
 	fprintf_s(f, "showCustomRORNotifications:                %d\n", this->crInfo->configInfo.showCustomRORNotifications);
-	fprintf_s(f, "gameTimerSlowDownAutoFix:                  %d\n", this->crInfo->configInfo.gameTimerSlowDownAutoFix ? 1 : 0);
+	fprintf_s(f, "enableRPGModeInRandomGames:                %d\n", this->crInfo->configInfo.enableRPGModeInRandomGames);
+	fprintf_s(f, "enableRPGModeInScenario:                   %d\n", this->crInfo->configInfo.enableRPGModeInScenario);
+	fprintf_s(f, "gameTimerSlowDownAutoFix:                  %d\n", this->crInfo->configInfo.gameTimerSlowDownAutoFix);
 	fprintf_s(f, "gameTimerSlowDownFactor:                   %d\n", this->crInfo->configInfo.gameTimerSlowDownFactor);
-	fprintf_s(f, "fixInvisibleTree:                          %d\n", this->crInfo->configInfo.fixInvisibleTree ? 1 : 0);
-	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", this->crInfo->configInfo.fixHumanPlayer_specificSeeUnit ? 1 : 0);
-	fprintf_s(f, "useImprovedButtonBar:                      %d\n", this->crInfo->configInfo.useImprovedButtonBar ? 1 : 0);
-	fprintf_s(f, "allowMultiQueueing:                        %d\n", this->crInfo->configInfo.allowMultiQueueing ? 1 : 0);
+	fprintf_s(f, "fixInvisibleTree:                          %d\n", this->crInfo->configInfo.fixInvisibleTree);
+	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", this->crInfo->configInfo.fixHumanPlayer_specificSeeUnit);
+	fprintf_s(f, "useImprovedButtonBar:                      %d\n", this->crInfo->configInfo.useImprovedButtonBar);
+	fprintf_s(f, "allowMultiQueueing:                        %d\n", this->crInfo->configInfo.allowMultiQueueing);
 	// General - related to game
-	fprintf_s(f, "allyExplorationIsAlwaysShared:             %d\n", this->crInfo->configInfo.allyExplorationIsAlwaysShared ? 1 : 0);
+	fprintf_s(f, "allyExplorationIsAlwaysShared:             %d\n", this->crInfo->configInfo.allyExplorationIsAlwaysShared);
 	// Random games settings
-	fprintf_s(f, "noNeutralInitialDiplomacy:                 %d\n", this->crInfo->configInfo.noNeutralInitialDiplomacy ? 1 : 0);
-	fprintf_s(f, "noWalls:                                   %d\n", this->crInfo->configInfo.noWalls ? 1 : 0);
+	fprintf_s(f, "noNeutralInitialDiplomacy:                 %d\n", this->crInfo->configInfo.noNeutralInitialDiplomacy);
+	fprintf_s(f, "noWalls:                                   %d\n", this->crInfo->configInfo.noWalls);
 	fprintf_s(f, "[RM] initial food (default/small/med/large) : %ld/%ld/%ld/%ld\n",
 		this->crInfo->configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
 		this->crInfo->configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
@@ -113,24 +115,24 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 		}
 	}
 	// Human interface / shortcuts
-	fprintf_s(f, "useNumPadUnitShortcuts:                    %d\n", this->crInfo->configInfo.enableAdditionalNumpadShortcuts ? 1 : 0);
-	fprintf_s(f, "enableCallNearbyIdleMilitaryUnits:         %d\n", this->crInfo->configInfo.enableCallNearbyIdleMilitaryUnits ? 1 : 0);
+	fprintf_s(f, "useNumPadUnitShortcuts:                    %d\n", this->crInfo->configInfo.enableAdditionalNumpadShortcuts);
+	fprintf_s(f, "enableCallNearbyIdleMilitaryUnits:         %d\n", this->crInfo->configInfo.enableCallNearbyIdleMilitaryUnits);
 	fprintf_s(f, "distanceToCallNearbyIdleMilitaryUnits:     %ld\n", this->crInfo->configInfo.distanceToCallNearbyIdleMilitaryUnits);
-	fprintf_s(f, "enableAutoMoveToLocation:                  %d\n", this->crInfo->configInfo.enableSpawnUnitsMoveToLocation ? 1 : 0);
-	fprintf_s(f, "enableSpawnUnitsAutoTarget:                %d\n", this->crInfo->configInfo.enableSpawnUnitsAutoTarget ? 1 : 0);
-	fprintf_s(f, "enableSpawnUnitAutoRepairTC:               %d\n", this->crInfo->configInfo.enableSpawnUnitAutoRepairTC ? 1 : 0);
-	fprintf_s(f, "unitSpawnShortcutReverseOrder:             %d\n", this->crInfo->configInfo.unitShortcutsPriorityReverseOrder ? 1 : 0);
+	fprintf_s(f, "enableAutoMoveToLocation:                  %d\n", this->crInfo->configInfo.enableSpawnUnitsMoveToLocation);
+	fprintf_s(f, "enableSpawnUnitsAutoTarget:                %d\n", this->crInfo->configInfo.enableSpawnUnitsAutoTarget);
+	fprintf_s(f, "enableSpawnUnitAutoRepairTC:               %d\n", this->crInfo->configInfo.enableSpawnUnitAutoRepairTC);
+	fprintf_s(f, "unitSpawnShortcutReverseOrder:             %d\n", this->crInfo->configInfo.unitShortcutsPriorityReverseOrder);
 	for (int shortcutId = 1; shortcutId < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS; shortcutId++) {
 		UnitSpawnShortcutInfo *sinfo = &this->crInfo->configInfo.unitShortcutsInformation[shortcutId];
 		if (sinfo->DAT_ID >= 0) {
-			fprintf_s(f, "unitSpawn shortcut %d: unit=%03d onlyOneUnit=%d (%.12s)\n", shortcutId, sinfo->DAT_ID, sinfo->onlyOneUnit ? 1 : 0,
+			fprintf_s(f, "unitSpawn shortcut %d: unit=%03d onlyOneUnit=%d (%.12s)\n", shortcutId, sinfo->DAT_ID, sinfo->onlyOneUnit,
 				GetHardcodedUnitName(sinfo->DAT_ID));
 		}
 	}
 	fprintf_s(f, "autoRebuildFarms_maxFarms:                 %ld\n", this->crInfo->configInfo.autoRebuildFarms_maxFarms);
 	fprintf_s(f, "autoRebuildFarms_maxFood:                  %ld\n", this->crInfo->configInfo.autoRebuildFarms_maxFood);
 	fprintf_s(f, "autoRebuildFarms_minWood:                  %ld\n", this->crInfo->configInfo.autoRebuildFarms_minWood);
-	fprintf_s(f, "useEnhancedRulesForAutoAttack:             %ld\n", this->crInfo->configInfo.useEnhancedRulesForAutoAttackTargetSelection ? 1 : 0);
+	fprintf_s(f, "useEnhancedRulesForAutoAttack:             %ld\n", this->crInfo->configInfo.useEnhancedRulesForAutoAttackTargetSelection);
 	fprintf_s(f, "autoAttackPolicy vs towers/military/buildings/villagers/walls\n");
 	fprintf_s(f, "- For Melee Units:  %d/%d/%d/%d/%d\n", this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackTowers,
 		this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackMilitary, 
@@ -160,9 +162,9 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "dislike value - all artefacts/wonder:      %ld\n", this->crInfo->configInfo.dislike_allArtefacts);
 	fprintf_s(f, "dislike value - human player:              %ld\n", this->crInfo->configInfo.dislike_humanPlayer);
 	fprintf_s(f, "fixLogisticsNoHouseBug:                    %d\n", this->crInfo->configInfo.fixLogisticsNoHouseBug ? 1: 0);
-	fprintf_s(f, "fixVillagerWorkRates:                      %d\n", this->crInfo->configInfo.fixVillagerWorkRates ? 1 : 0);
+	fprintf_s(f, "fixVillagerWorkRates:                      %d\n", this->crInfo->configInfo.fixVillagerWorkRates);
 	// City plan
-	fprintf_s(f, "cityPlanLikeValuesEnhancement:             %d\n", this->crInfo->configInfo.cityPlanLikeValuesEnhancement ? 1 : 0);
+	fprintf_s(f, "cityPlanLikeValuesEnhancement:             %d\n", this->crInfo->configInfo.cityPlanLikeValuesEnhancement);
 	//fprintf_s(f, "cityPlanHouseDistanceFromTownCenter:       %f\n", this->crInfo->configInfo.cityPlanHouseDistanceFromTownCenter);
 	//fprintf_s(f, "cityPlanHouseDistanceFromStorageBld:       %f\n", this->crInfo->configInfo.cityPlanHouseDistanceFromStorageBld);
 	//fprintf_s(f, "cityPlanHouseDistanceFromOtherBld:         %f\n", this->crInfo->configInfo.cityPlanHouseDistanceFromOtherBld);
@@ -176,9 +178,9 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	}
 	fprintf_s(f, "disable dock in mostly-land maps:          %ld\n", this->crInfo->configInfo.noDockInMostlyLandMaps ? 1: 0);
 	// Scenario Editor
-	fprintf_s(f, "showHiddenTerrainInEditor:                 %d\n", this->crInfo->configInfo.showHiddenTerrainsInEditor ? 1 : 0);
+	fprintf_s(f, "showHiddenTerrainInEditor:                 %d\n", this->crInfo->configInfo.showHiddenTerrainsInEditor);
 	fprintf_s(f, "showHiddenUnitsInEditor:                   %ld\n", this->crInfo->configInfo.showHiddenUnitsInEditor);
-	fprintf_s(f, "useCustomMapDimensionsInEditor:            %d\n", this->crInfo->configInfo.useCustomMapDimensions ? 1 : 0);
+	fprintf_s(f, "useCustomMapDimensionsInEditor:            %d\n", this->crInfo->configInfo.useCustomMapDimensions);
 
 	// Other
 	fprintf_s(f, "civilizations count:                       %ld\n", this->crInfo->configInfo.civCount);
@@ -857,13 +859,27 @@ void CustomRORCommand::OnGameStart() {
 	// Do not allow using customROR on multiplayer games (however, always restore AI flags or human-controlled players will have an active AI !)
 	if (IsMultiplayer()) { return; }
 
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+
+	// Fix IsScenario flag to correct value (not set when a game is loaded)
+	if (settings->isSavedGame) {
+		settings->isScenario = 0; // Default: consider it is not a scenario
+		// Guess if it is a scenario from scenario information
+		if (settings->ptrGlobalStruct && settings->ptrGlobalStruct->IsCheckSumValid()) {
+			AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = settings->ptrGlobalStruct->scenarioInformation;
+			if (scInfo && scInfo->IsCheckSumValid() && (scInfo->scenarioFileName[0] != 0)) {
+				// scenarioFileName is reliable: it is always correctly set: when starting a new RM/DM/scenario, loading a saved game, etc
+				settings->isScenario = 1;
+			}
+		}
+	}
+
 	// Check AI initialization for loaded games (fix a saved game bug)
 	this->FixGameStartAIInitForPlayers();
 
 	this->DisableWaterUnitsIfNeeded();
 
 	// Fix fire galley icon on post-iron age start games (research done notification - for trireme - is NOT triggered in such case !)
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	if (!settings) { return; } // Should never happen
 	if (settings->initialAgeChoice == AOE_CONST_INTERNAL::GAME_INITIAL_AGES::GIA_POST_IRON) { // Post-iron age startup
@@ -5548,6 +5564,18 @@ void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACK
 	if (!actorUnit->DerivesFromTrainable()) {
 		return; // No custom treatments for non-trainable actor (unit that killed another one)
 	}
+
+	// Check config
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	if (!settings->isSinglePlayer) { return; } // Disable in MP
+	bool isScenario = (settings->isCampaign || settings->isScenario);
+	if (isScenario && !this->crInfo->configInfo.enableRPGModeInScenario) { return; }
+	if (!isScenario && !this->crInfo->configInfo.enableRPGModeInRandomGames) { return; }
+
+	assert(actorUnit->unitDefinition && actorUnit->unitDefinition->IsCheckSumValidForAUnitClass());
+	assert(killedUnit->unitDefinition && killedUnit->unitDefinition->IsCheckSumValidForAUnitClass());
 #ifdef _DEBUG
 	// TEST - TODO: add parameter, to finish...
 	if (!actorUnit->ptrStructPlayer || !killedUnit->ptrStructPlayer || (killedUnit->ptrStructPlayer->playerId == 0)) {
@@ -5558,6 +5586,17 @@ void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACK
 	}
 	if (killedUnit->ptrStructPlayer->ptrDiplomacyStances[actorUnit->ptrStructPlayer->playerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY) {
 		return; // No custom treatments for killing allied units
+	}
+
+	bool actorIsBuilding = false;
+	if (actorUnit->unitDefinition->unitType == GUT_BUILDING) {
+		actorIsBuilding = true;
+		assert(((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)actorUnit)->IsCheckSumValid());
+	}
+	bool killedIsBuilding = false;
+	if (killedUnit->unitDefinition->unitType == GUT_BUILDING) {
+		killedIsBuilding = true;
+		assert(((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)killedUnit)->IsCheckSumValid());
 	}
 
 	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *actorUnitTrainable = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)actorUnit;

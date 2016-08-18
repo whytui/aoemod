@@ -22,17 +22,19 @@ CustomRORConfig::CustomRORConfig() {
 	this->allowMultiQueueing = false; // Game default
 	this->showLogsInReverseOrder = true;
 	this->showCustomRORNotifications = true; // Recommended
+	this->enableRPGModeInRandomGames = false; // Game default
+	this->enableRPGModeInScenario = false; // Game default
 	this->collectRORDebugLogs = 0; // Game default (sort of): do not intercept not-implemented debug log calls.
 	this->improvedGameSpeedFactor = 1.25;
 	this->noDockInMostlyLandMaps = false; // Default: dock is always available.
 	this->fixVillagerWorkRates = false; // Default: keep empires.dat values
 	this->noWalls = false; // Default
-	this->conversionResistance_Boats = 2;
-	this->conversionResistance_Chariots = 8;
-	this->conversionResistance_Macedonian = 4;
-	this->conversionResistance_Priests = 2;
-	this->conversionResistance_WarElephants = 1.25;
-	this->conversionResistance_WarElephants_Persian = 1.25;
+	this->conversionResistance_Boats = 2; // Game default
+	this->conversionResistance_Chariots = 8; // Game default
+	this->conversionResistance_Macedonian = 4; // Game default
+	this->conversionResistance_Priests = 2; // Game default
+	this->conversionResistance_WarElephants = 1; // Game default
+	this->conversionResistance_WarElephants_Persian = 1; // Game default
 	this->improveAILevel = 0; // ROR Default (not active)
 	this->tacticalAIUpdateDelay = 30;
 	this->panicModeDelay = 20;
@@ -271,8 +273,12 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "showCustomRORNotifications") {
 			this->showCustomRORNotifications = XML_GetBoolElement(elem, "enable");
 		}
+		if (elemName == "rpgMode") {
+			this->showCustomRORNotifications = XML_GetBoolElement(elem, "enable");
+		}
 		if (elemName == "gameTimerSlowDownAutoFix") {
-			this->gameTimerSlowDownAutoFix = XML_GetBoolElement(elem, "enable");
+			this->enableRPGModeInScenario = XML_GetBoolElement(elem, "scenario");
+			this->enableRPGModeInRandomGames = XML_GetBoolElement(elem, "randomGames");
 		}
 		if (elemName == "gameTimerSlowDownFactor") {
 			callResult = elem->QueryIntAttribute("value", &intValue);

@@ -123,6 +123,7 @@ Fixes:
 - Fix kill* game crash when used with an invalid player
 - Fix random game crash when using civilizations without a tech tree.
 - Fix tech tree bug in iron/post-iron scenarios. Civ bonus were not applied on upgraded unit (minoan composite bowmen, choson legion).
+- Fix technical bug when loading saved games, internal "is scenario" flag was not correctly handled (may cause bad behaviours in custom treatments)
 
 Chat commands:
 - Type "t" or "time" in chat box to display system time (as a chat message)

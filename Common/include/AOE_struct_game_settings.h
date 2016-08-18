@@ -7,6 +7,7 @@
 #include <AOE_struct_mp_communication.h>
 #include <AOE_structures_drs.h>
 #include <AOE_struct_game_global.h>
+#include <AOE_struct_campaign_info.h>
 #include <gameVersion.h>
 
 /*
@@ -42,8 +43,8 @@ namespace AOE_STRUCTURES {
 	class STRUCT_GAME_SETTINGS {
 	public:
 		unsigned long int checksum;
-		unsigned long int unknown_004_game_nfo_data;
-		unsigned long int unknown_008_ptr_scenario_data;
+		GAME_NFO_DATA *game_nfo_data; // +04. no checksum
+		unsigned long int *unknown_008_ptr_scenario_data; // +08. scenario.inf path... +other data?
 		STRUCT_COMMAND_LINE_INFO *commandLineInfo;
 		// 0x10
 		char unknown_010[0x1C];
@@ -116,10 +117,9 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_8F0;
 		unsigned long int unknown_8F4;
 		float gameSpeed; // +8F8. TO confirm - a struct starts here ?
-		char isScenario; // +8FC. 1 if the game is a scenario, 0 for random game or deathMatch. (offset 0x8FC)
+		char isScenario; // +8FC. 1 for scenario/campaign, 0 for random game/deathMatch. value is ARBITRARY for loaded games, unless we fix it manually (done by customROR)
 		char scenarioFileName[3 + 0x7C]; // +8FD.
 		// 0x900
-		//char unknown_900[0x7C];
 		char unknown_97C;
 		char isSinglePlayer;
 		char isMultiplayer; // 0x97E
