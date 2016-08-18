@@ -274,11 +274,11 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 			this->showCustomRORNotifications = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "rpgMode") {
-			this->showCustomRORNotifications = XML_GetBoolElement(elem, "enable");
-		}
-		if (elemName == "gameTimerSlowDownAutoFix") {
 			this->enableRPGModeInScenario = XML_GetBoolElement(elem, "scenario");
 			this->enableRPGModeInRandomGames = XML_GetBoolElement(elem, "randomGames");
+		}
+		if (elemName == "gameTimerSlowDownAutoFix") {
+			this->gameTimerSlowDownAutoFix = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "gameTimerSlowDownFactor") {
 			callResult = elem->QueryIntAttribute("value", &intValue);
