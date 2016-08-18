@@ -562,7 +562,7 @@ void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_ACTION_CONVERSION *convAction = (AOE_STRUCTURES::STRUCT_ACTION_CONVERSION *)REG_values->ESI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *target = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
 	ror_api_assert(REG_values, convAction->IsCheckSumValid());
-	ror_api_assert(REG_values, target->IsCheckSumValid());
+	ror_api_assert(REG_values, target->IsCheckSumValidForAUnitClass());
 	ror_api_assert(REG_values, target == convAction->targetUnit);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *actor = convAction->actor;
 	long int myESP = REG_values->ESP_val;
