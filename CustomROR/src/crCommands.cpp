@@ -2791,8 +2791,8 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	long int parentUnitId = -1;
 	if (actionStruct) {
 		parentUnit = actionStruct->actor;
-		assert(parentUnit->IsCheckSumValid());
-		if (!parentUnit->IsCheckSumValid()) { parentUnit = NULL; }
+		assert(parentUnit->IsCheckSumValidForAUnitClass());
+		if (!parentUnit->IsCheckSumValidForAUnitClass()) { parentUnit = NULL; }
 		if (parentUnit) {
 			parentUnitId = parentUnit->unitInstanceId;
 		}
