@@ -1139,6 +1139,22 @@ bool CustomRORCommand::IsImproveAIEnabled(int playerId) {
 }
 
 
+// Returns true if RPG mode is active in current game
+bool CustomRORCommand::IsRpgModeEnabled() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	if (!settings->isSinglePlayer) { return false; } // Disable in MP
+	// Note: to work well on saved games, this requires customROR's fix on game's IsScenario information.
+	bool isScenario = (settings->isCampaign || settings->isScenario);
+	if (isScenario) {
+		return this->crInfo->configInfo.enableRPGModeInScenario;
+	} else {
+		return this->crInfo->configInfo.enableRPGModeInRandomGames;
+	}
+}
+
+
 // Disable AI flags for human players, based on game initial settings (to be used at game startup)
 void CustomRORCommand::DisableAIFlagsForHuman() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
@@ -2797,6 +2813,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 
 	AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unit->unitDefinition;
 	assert(unitDef != NULL);
+	assert(unitDef->unitType == GUT_TRAINABLE); // TODO: change method signature => trainable, not commandable
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
 	if (!player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
 		AutoAssignShortcutToUnit(unit);
@@ -2866,6 +2883,14 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 		if (parentUnit->remainingHitPoints < (float)parentUnit->unitDefinition->totalHitPoints) {
 			TellUnitToInteractWithTarget(unit, parentUnit);
 			commandCreated = true;
+		}
+	}
+
+	// RPG mode, if enabled
+	if (this->IsRpgModeEnabled()) {
+		if (RPG_MODE::MakeEpicUnitWithRandomCondition((AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)unit)) {
+			assert(unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass());
+			unit->remainingHitPoints = unit->unitDefinition->totalHitPoints; // Make sure new unit starts with 100% HP.
 		}
 	}
 }
@@ -5561,21 +5586,10 @@ void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACK
 	}
 	assert(killedUnit->DerivesFromAttackable());
 	if (!killedUnit->DerivesFromAttackable()) { return; }
-	if (!actorUnit->DerivesFromTrainable()) {
-		return; // No custom treatments for non-trainable actor (unit that killed another one)
+
+	if (this->IsRpgModeEnabled() && actorUnit->DerivesFromTrainable()) {
+		RPG_MODE::OnUnitKill(killedUnit, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)actorUnit);
 	}
-
-	// Check config
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	assert(settings && settings->IsCheckSumValid());
-	if (!settings || !settings->IsCheckSumValid()) { return; }
-	if (!settings->isSinglePlayer) { return; } // Disable in MP
-	bool isScenario = (settings->isCampaign || settings->isScenario);
-	if (isScenario && !this->crInfo->configInfo.enableRPGModeInScenario) { return; }
-	if (!isScenario && !this->crInfo->configInfo.enableRPGModeInRandomGames) { return; }
-
-	// Here: "RPG" mode is ON
-	RPG_MODE::OnUnitKill(killedUnit, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)actorUnit);
 }
 
 

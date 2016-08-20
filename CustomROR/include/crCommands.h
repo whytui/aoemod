@@ -177,6 +177,9 @@ public:
 	// So we can add custom rules for debugging
 	bool IsImproveAIEnabled(int playerId);
 
+	// Returns true if RPG mode is active in current game
+	bool IsRpgModeEnabled();
+
 	// Disable AI flags for human players, based on game initial settings (to be used at game startup)
 	void DisableAIFlagsForHuman();
 	// Restore AI flags based on human-controlled playerID (to be used in SP games only)

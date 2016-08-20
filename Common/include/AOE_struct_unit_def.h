@@ -319,7 +319,7 @@ namespace AOE_STRUCTURES
 		STRUCT_ARMOR_OR_ATTACK *ptrArmorsList; // +104. ElemSize=0x04. +0=class,+2=amount
 		short int attacksCount; // +108
 		short int unknown_10A;
-		STRUCT_ARMOR_OR_ATTACK *ptrAttacksList; // +10C. ElemSize=0x04. +0=class,+2=amount
+		STRUCT_ARMOR_OR_ATTACK *ptrAttacksList; // +10C. ElemSize=0x04. +0=class,+2=amount. The greatest attack value from list is the total displayed attack in unit info zone.
 		// 0x110
 		TERRAIN_RESTRICTION armorTerrainRestriction; // Provide a multiplier for each terrain
 		short int unknown_112;
@@ -342,7 +342,7 @@ namespace AOE_STRUCTURES
 		float graphicDisplacement3;
 		unsigned long int minRange; // +138.
 		short int displayedArmor; // The number before the "+". For a total 6 armor which is 2+4, displayedArmor=2. total armor is guessed from default armor ?
-		short int displayedAttack;  // The number before the "+". For a total 6 attack which is 2+4, displayedAttack=2. total attack is guessed from ???
+		short int displayedAttack;  // The number before the "+". For a total 6 attack which is 2+4, displayedAttack=2. total attack is the greatest attack value from attacks list
 		// 0x140
 		float displayedRange;
 		float reloadTime2;

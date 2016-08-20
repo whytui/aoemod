@@ -227,8 +227,18 @@ namespace AOE_STRUCTURES {
 		char civPlayerNameIsUsed[0x08 * 0x0A]; // +1198. 8=number of players, 0x0A=number of names (0=unused, 1-9=used)
 		char unknown_11E8[0x1254 - 0x11E8];
 
-		bool IsCheckSumValid() {
+		bool IsCheckSumValid() const {
 			return (this->checksum == CHECKSUM_GAME_SETTINGS1) || (this->checksum == CHECKSUM_GAME_SETTINGS2);
+		}
+		// Add an event position in history (for HOME key)
+		void AddEventInHistory(long int posX, long int posY) {
+			const unsigned long int addr = 0x5064D0;
+			_asm {
+				PUSH posX;
+				PUSH posY;
+				MOV ECX, this;
+				CALL addr;
+			}
 		}
 	};
 	//GAMEVERSION_AOE10c : size 0x11A0
