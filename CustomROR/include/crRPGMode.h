@@ -17,6 +17,9 @@ namespace RPG_MODE {
 	const int maxLevelAttackIncrease = 2;
 	const int maxLevelArmorIncrease = 2;
 	const int epicUnitPercentageChances = 8; // Chances to get a unique unit (percentage value)
+	const int killsToLevelUp = 10;
+	const int xpStolenProportionFromKilledUnit = 5; // 1/xpStolenProportionFromKilledUnit of killed unit's XP is credited to actor unit.
+	static_assert(killsToLevelUp > 0, "killsToLevelUp must be strictly positive");
 
 	void OnUnitKill(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *actorUnit);
 

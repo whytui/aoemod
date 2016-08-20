@@ -45,7 +45,7 @@ namespace RPG_MODE {
 		// Handle "XP"
 		int addedXP = 1;
 		if (killedUnit->resourceTypeId == CST_RES_ORDER_KILLS) {
-			int lootXP = (int)(killedUnit->resourceValue / 5);
+			int lootXP = (int)(killedUnit->resourceValue / xpStolenProportionFromKilledUnit);
 			if (lootXP > 0) {
 				addedXP += lootXP; // Gain a part of killed unit's XP (bonus)
 			}
@@ -54,17 +54,14 @@ namespace RPG_MODE {
 		if ((actorUnitTrainable->resourceValue == 0) || (actorUnitTrainable->resourceTypeId == CST_RES_ORDER_KILLS)) {
 			actorUnitTrainable->resourceTypeId = CST_RES_ORDER_KILLS;
 			if (actorUnitTrainable->resourceValue < 0) { actorUnitTrainable->resourceValue = 0; }
-			int currentLevel = (int)actorUnitTrainable->resourceValue / 10;
+			int currentLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
 			actorUnitTrainable->resourceValue += addedXP;
-			int newLevel = (int)actorUnitTrainable->resourceValue / 10;
+			int newLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
 			if ((newLevel > currentLevel) && (newLevel < maxUnitLevel)) {
-				//std::string msg = "Unit ";
-				//msg += std::to_string(actorUnit->unitInstanceId);
 				std::string msg = actorUnitTrainable->unitDefinition->ptrUnitName;
 				msg += " upgraded to level ";
 				msg += std::to_string(newLevel);
 				CallWriteText(msg.c_str());
-				// TODO: Add an event in "home key" history
 				for (int i = currentLevel; i <= newLevel; i++) {
 					UpgradeUnitLevel(actorUnitTrainable);
 				}
