@@ -31,6 +31,7 @@
 #include "StrategyBuilder.h"
 #include "basicFilesHandling.h"
 #include "crMapCopier.h"
+#include "crRPGMode.h"
 
 #pragma once
 

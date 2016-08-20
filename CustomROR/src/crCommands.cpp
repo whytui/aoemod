@@ -5574,71 +5574,8 @@ void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACK
 	if (isScenario && !this->crInfo->configInfo.enableRPGModeInScenario) { return; }
 	if (!isScenario && !this->crInfo->configInfo.enableRPGModeInRandomGames) { return; }
 
-	assert(actorUnit->unitDefinition && actorUnit->unitDefinition->IsCheckSumValidForAUnitClass());
-	assert(killedUnit->unitDefinition && killedUnit->unitDefinition->IsCheckSumValidForAUnitClass());
-#ifdef _DEBUG
-	// TEST - TODO: add parameter, to finish...
-	if (!actorUnit->ptrStructPlayer || !killedUnit->ptrStructPlayer || (killedUnit->ptrStructPlayer->playerId == 0)) {
-		return; // Killing gaia units has no effect here
-	}
-	if (actorUnit->ptrStructPlayer == killedUnit->ptrStructPlayer) {
-		return; // No custom treatments for killing own units
-	}
-	if (killedUnit->ptrStructPlayer->ptrDiplomacyStances[actorUnit->ptrStructPlayer->playerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY) {
-		return; // No custom treatments for killing allied units
-	}
-
-	bool actorIsBuilding = false;
-	if (actorUnit->unitDefinition->unitType == GUT_BUILDING) {
-		actorIsBuilding = true;
-		assert(((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)actorUnit)->IsCheckSumValid());
-	}
-	bool killedIsBuilding = false;
-	if (killedUnit->unitDefinition->unitType == GUT_BUILDING) {
-		killedIsBuilding = true;
-		assert(((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)killedUnit)->IsCheckSumValid());
-	}
-
-	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *actorUnitTrainable = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)actorUnit;
-	assert(actorUnitTrainable->DerivesFromTrainable());
-	AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *newUnitDef = NULL;
-	bool hasNewUnitDef = false;
-	if (!actorUnitTrainable->hasDedicatedUnitDef) {
-		newUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)CopyUnitDefToNewUsingGoodClass(actorUnitTrainable->unitDefinition);
-		// To be more precise, newUnitDef is STRUCT_UNITDEF_BUILDING if actorUnitTrainable is a building
-		actorUnitTrainable->hasDedicatedUnitDef = 1;
-		actorUnitTrainable->unitDefinition = newUnitDef;
-		hasNewUnitDef = true;
-	} else {
-		newUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)actorUnitTrainable->unitDefinition; // This is already a dedicated unit definition, we can mess with it :)
-	}
-	assert(newUnitDef && newUnitDef->DerivesFromTrainable());
-	char *initialName = newUnitDef->ptrUnitName;
-	std::string name = GetLanguageDllText(newUnitDef->languageDLLID_Name);
-	if (name.empty()) {
-		name = std::string(newUnitDef->ptrUnitName);
-	}
-	if (hasNewUnitDef) {
-		if (!name.empty()) {
-			name += " ";
-		}
-		name += std::to_string(actorUnitTrainable->unitInstanceId);
-	}
-
-	char *newName = (char*)AOEAlloc(name.length() + 1);
-	sprintf_s(newName, name.length() + 1, "%s", name.c_str());
-	AOEFree(initialName);
-	newUnitDef->ptrUnitName = newName;
-	newUnitDef->languageDLLID_Name = -1;
-	if ((actorUnitTrainable->resourceValue == 0) || (actorUnitTrainable->resourceTypeId == CST_RES_ORDER_KILLS)) {
-		actorUnitTrainable->resourceTypeId = CST_RES_ORDER_KILLS;
-		actorUnitTrainable->resourceValue++;
-		if (((int)actorUnitTrainable->resourceValue) % 10 == 0) {
-			CallWriteText("Level up !");
-			newUnitDef->totalHitPoints += 2;
-		}
-	}
-#endif
+	// Here: "RPG" mode is ON
+	RPG_MODE::OnUnitKill(killedUnit, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)actorUnit);
 }
 
 

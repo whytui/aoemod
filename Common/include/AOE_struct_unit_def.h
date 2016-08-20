@@ -218,17 +218,17 @@ namespace AOE_STRUCTURES
 				(this->checksum == 0x005499BC) // Tree - 90
 				);
 		}
-		// Returns true if the unit definition is a flag or a child class (all but eye candy and trees)
+		// Returns true if the unit definition is a flag or a child class (all but eye candy and trees). This does not control the checksum.
 		bool DerivesFromFlag() { return (this->unitType >= (char)AOE_CONST_FUNC::GUT_FLAGS) || (this->unitType <= (char)AOE_CONST_FUNC::GUT_BUILDING); } // all but 10 and 90
-		// Returns true if the unit definition is dead/fish or a child class
+		// Returns true if the unit definition is dead/fish or a child class. This does not control the checksum.
 		bool DerivesFromMovable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_MOVABLE) || (this->DerivesFromCommandable()); }
-		// Returns true if the unit definition is a bird or a child class
+		// Returns true if the unit definition is a bird or a child class. This does not control the checksum.
 		bool DerivesFromCommandable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_COMMANDABLE) || (this->DerivesFromAttackable()); }
-		// Returns true if the unit definition is a living unit or a child class (building)
+		// Returns true if the unit definition is a living unit or a child class (building). This does not control the checksum.
 		bool DerivesFromTrainable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_TRAINABLE) || (this->unitType == (char)AOE_CONST_FUNC::GUT_BUILDING); }
-		// Returns true if the unit definition is type50 or one of its child classes (projectile, living/building).
+		// Returns true if the unit definition is type50 or one of its child classes (projectile, living/building). This does not control the checksum.
 		bool DerivesFromAttackable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_ATTACKABLE) || (this->unitType == (char)AOE_CONST_FUNC::GUT_PROJECTILE) || (this->DerivesFromTrainable()); }
-		unsigned long int GetCopyConstructorAddress() { return 0x440FF0; } // Address of AOE method to create a copy.
+		unsigned long int GetCopyConstructorAddress() { return 0x440FF0; } // Address of AOE method to create a copy
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_BASE) == 0xB8, "STRUCT_UNITDEF_BASE size");
 
