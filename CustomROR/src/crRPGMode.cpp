@@ -52,11 +52,16 @@ namespace RPG_MODE {
 			}
 		}
 
-		if ((actorUnitTrainable->resourceValue == 0) || (actorUnitTrainable->resourceTypeId == resourceTypeUsedForXp)) {
+		if (!actorIsBuilding && (actorUnitTrainable->resourceValue == 0) || (actorUnitTrainable->resourceTypeId == resourceTypeUsedForXp)) {
 			actorUnitTrainable->resourceTypeId = resourceTypeUsedForXp;
 			if (actorUnitTrainable->resourceValue < 0) { actorUnitTrainable->resourceValue = 0; }
 			int currentLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
 			actorUnitTrainable->resourceValue += addedXP;
+			// Hack to prevent units from being "stuck" in status=5 (dying, waiting for resources to be depleted)
+			// Another solution could be to force unit's resource to 0 when it dies ?
+			if (actorUnitTrainable->unitDefinition->resourceDecay <= 0) {
+				actorUnitTrainable->unitDefinition->resourceDecay = 2; // Otherwise, units remain stuck at status 5 and never completely die.
+			}
 			int newLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
 			if ((newLevel > currentLevel) && (newLevel <= maxUnitLevel)) {
 				for (int i = currentLevel; i < newLevel; i++) {
@@ -237,13 +242,14 @@ namespace RPG_MODE {
 		CreateDedicatedUnitDef(unit); // Ensure we modify a specific unit definition !
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
 		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
-		if (unitDef->maxRange + valueToAdd > maxTotalValue) {
+		if ((unitDef->maxRange + valueToAdd > maxTotalValue) && (maxTotalValue >= 0)) {
 			valueToAdd = maxTotalValue - (int)unitDef->maxRange;
 		}
 		if (unitDef->maxRange > 0) {
 			unitDef->maxRange += valueToAdd;
 		}
-		unitDef->lineOfSight += valueToAdd; // Add same bonus to LOS
+		// LOS: disabled, causes irremediable bug in fog system !
+		//unitDef->lineOfSight += valueToAdd; // Add same bonus to LOS
 		return true;
 	}
 

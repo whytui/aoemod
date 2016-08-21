@@ -108,7 +108,7 @@ namespace AOE_STRUCTURES {
 		// 0x40
 		float positionZ; // Read only, because it's updated automatically according to map position(X,Y)
 		float resourceValue; // See resourceValue. Faith (0-100) for priests, food for hunter...
-		char unitStatus; // 0=being_built, 2=ready, at least for buildings... To confirm exact roles. Values=0,1,2,3,5,7,8=max?
+		char unitStatus; // 0=being_built, 2=ready, at least for buildings... To confirm exact roles. Values=0,1,2,3,5,7,8=max? 5=waitingForResourceDepletion.
 		char isNotCreatable; // +49. 1 if the unit is a "not-creatable" unit, like cliffs, etc. Always 1 in parent constructors, set to 0 in "creatable-level" constructor.
 		char isDoppleGanger; // +4A. Is temp unit ? Not 100% sure.
 		char unknown_04B;

@@ -95,7 +95,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	// Automove infos
 	std::string autoMoveInfo = "";
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unitId);
-	if (unitInfo && (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
+	if (isMyUnit && unitInfo && (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 		if (unitInfo->spawnTargetUnitId >= 0) {
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(unitInfo->spawnTargetUnitId);
 			char *targetName = NULL;
@@ -199,7 +199,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 
 #pragma message("TODO more features in unit popup")
 	// Military : guard location ?
-	if (isMilitary) {
+	if (isMilitary && isMyUnit) {
 		bool canHurtOtherUnits = (unitDef50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (unitDef50->blastRadius > 0);
 		this->AddLabel(popup, &this->lblAutoAttackUnits, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_AUTO_ATTACK_UNITS, "Auto attack units:"), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 		this->AddLabel(popup, &this->lblAutoAttackTowers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TOWERS, "Towers"), 180, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
@@ -290,7 +290,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	}
 
 	// Building : future potential techs/units
-	if (!buildingTechAndUnitInfo.empty() && (techToShowCount > 0)) {
+	if (!buildingTechAndUnitInfo.empty() && (techToShowCount > 0) && isMyUnit) {
 		this->AddLabel(popup, &this->lblBuildingTechsMessage, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_FUTURE_UNAVAILABLE_TECHS, "Future technologies, not available yet:"), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 		currentYPos += 20;
 		this->AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, currentYPos, 450, 20 + techToShowCount * 14, true, true);
@@ -342,7 +342,7 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(this->unitId);
 	float posX = -1;
 	float posY = -1;
-	if (unit && unit->IsCheckSumValid()) {
+	if (unit && unit->IsCheckSumValidForAUnitClass()) {
 		posX = unit->positionX;
 		posY = unit->positionY;
 	}
