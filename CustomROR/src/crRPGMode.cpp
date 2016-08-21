@@ -39,9 +39,9 @@ namespace RPG_MODE {
 		AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *actorUnitTrainable = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)actorUnit;
 		assert(actorUnitTrainable->DerivesFromTrainable());
 
-		bool hasNewUnitDef = CreateDedicatedUnitDef(actorUnitTrainable); // True only if the dedicated unitDef is new (unit was still a "standard" unit).
-		assert(actorUnitTrainable->unitDefinition && actorUnitTrainable->unitDefinition->IsCheckSumValidForAUnitClass());
-		if (!actorUnitTrainable->unitDefinition) { return; }
+		//bool hasNewUnitDef = CreateDedicatedUnitDef(actorUnitTrainable); // True only if the dedicated unitDef is new (unit was still a "standard" unit).
+		//assert(actorUnitTrainable->unitDefinition && actorUnitTrainable->unitDefinition->IsCheckSumValidForAUnitClass());
+		//if (!actorUnitTrainable->unitDefinition) { return; }
 
 		// Handle "XP"
 		int addedXP = 1;
@@ -75,6 +75,7 @@ namespace RPG_MODE {
 	// Create a dedicated unit definition for unit, only if it does not already have one
 	// Unit name is modified so that it includes unit instance ID.
 	// Returns true if a unit definition was created, false if there already was a dedicated unit definition.
+	// WARNING: if this returns true, make sure you are not using "unitDef" pointers on old definition !
 	bool CreateDedicatedUnitDef(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit) {
 		if (unit->hasDedicatedUnitDef) {
 			return false;
@@ -261,6 +262,13 @@ namespace RPG_MODE {
 			return; // No upgrades for AI players in easy levels
 		}
 
+		bool hasNewUnitDef = CreateDedicatedUnitDef(unit); // True only if the dedicated unitDef is new (unit was still a "standard" unit).
+		assert(unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass());
+		if (!unit->unitDefinition) {
+			traceMessageHandler.WriteMessage("Duplicate unit definition appears to have failed, this is serious :(");
+			return;
+		}
+
 		int random = randomizer.GetRandomNonZeroPercentageValue();
 		if (random < 6) { // values 1-5
 			IncreaseAttackByPercentage(unit, 3, maxLevelAttackIncrease);
@@ -308,7 +316,8 @@ namespace RPG_MODE {
 		}
 
 		CreateDedicatedUnitDef(unit); // Ensure the unit definition is dedicated so we can customize it.
-		assert(unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass());
+		unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition; // IMPORTANT: update our local pointer, old one is now invalid
+		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
 		DisplayEpicUnitSpawnedMessage(unit);
 
 		// Attack (all but priests)

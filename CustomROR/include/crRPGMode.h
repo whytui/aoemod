@@ -30,6 +30,7 @@ namespace RPG_MODE {
 	// Create a dedicated unit definition for unit, only if it does not already have one
 	// Unit name is modified so that it includes unit instance ID.
 	// Returns true if a unit definition was created, false if there already was a dedicated unit definition.
+	// WARNING: if this returns true, make sure you are not using "unitDef" pointers on old definition !
 	bool CreateDedicatedUnitDef(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit);
 
 	// Increase unit's total HP by given percentage. Total HP is always increased by at least 1 (capped by maxIncreaseValue)
