@@ -7,8 +7,9 @@
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_units.h>
 #include <AOE_struct_player.h>
-#include "crCommon.h"
 #include "randomizer.h"
+#include "unitDefHandling.h"
+#include "crCommon.h"
 
 namespace RPG_MODE {
 
@@ -42,15 +43,22 @@ namespace RPG_MODE {
 	// maxTotalValue is ignored if <0
 	bool IncreaseAttackByRawValue(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int valueToAdd, int maxTotalValue);
 
-	// Increase unit's melee armor by given percentage. Increase amount is always at least 1 (capped by maxIncreaseValue)
+	// Increase unit's armor by given percentage. Increase amount is always at least 1 (capped by maxIncreaseValue)
 	bool IncreaseArmorByPercentage(AOE_CONST_FUNC::ATTACK_CLASS armorClass, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int percentage, int maxIncreaseValue);
 
-	// Increase unit's melee armor by a given value. 
+	// Increase unit's armor by a given value. 
 	// maxTotalValue is ignored if <0
 	bool IncreaseArmorByRawValue(AOE_CONST_FUNC::ATTACK_CLASS armorClass, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int valueToAdd, int maxTotalValue);
 
+	// Increase unit's range (for ranged units) and LOS
+	// maxTotalValue is ignored if <0
+	bool IncreaseRangeByRawValue(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int valueToAdd, int maxTotalValue);
+
 	// Applies effects of upgrading unit's level by 1.
 	void UpgradeUnitLevel(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit);
+
+	// Applies random effects to a unit definition
+	bool ApplyRandomUniqueAttributes(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit);
 
 	// Transforms a unit into a unique "epic" unit if randoms decides to.
 	// Returns true if unit has been transformed into a unique unit.

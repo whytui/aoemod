@@ -179,12 +179,15 @@ namespace RPG_MODE {
 		if ((newValue > maxTotalValue) && (maxTotalValue >= 0)) {
 			newValue = maxTotalValue;
 		}
+		if (newValue < unitDef->ptrAttacksList[bestAttackIndex].amount) {
+			return false; // Do not decrease existing value
+		}
 		unitDef->ptrAttacksList[bestAttackIndex].amount = newValue;
 		return true;
 	}
 
 
-	// Increase unit's melee armor by given percentage. Increase amount is always at least 1 (capped by maxArmorIncrease)
+	// Increase unit's armor by given percentage. Increase amount is always at least 1 (capped by maxArmorIncrease)
 	bool IncreaseArmorByPercentage(AOE_CONST_FUNC::ATTACK_CLASS armorClass, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int percentage, int maxIncreaseValue) {
 		assert(percentage >= 0);
 		percentage += 100;
@@ -192,42 +195,55 @@ namespace RPG_MODE {
 		assert(unit->unitDefinition && unit->IsCheckSumValidForAUnitClass() && unit->unitDefinition->DerivesFromTrainable());
 		CreateDedicatedUnitDef(unit); // Ensure we modify a specific unit definition !
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
-		for (int i = 0; i < unitDef->armorsCount; i++) {
-			if (unitDef->ptrArmorsList[i].classId == armorClass) {
-				int armorValue = unitDef->ptrArmorsList[i].amount;
-				int newValue = armorValue * percentage / 100;
-				if (newValue <= armorValue) {
-					newValue = armorValue + 1;
-				}
-				if (newValue > armorValue + maxIncreaseValue) { newValue = armorValue + maxIncreaseValue; } // limit the increase.
-				unitDef->ptrArmorsList[i].amount = newValue;
-				return true;
-			}
+
+		short int currentArmor = AOE_STRUCTURES::GetArmorFromList(unitDef, armorClass, -1);
+		int newValue = currentArmor * percentage / 100;
+		if (newValue <= currentArmor) {
+			newValue = currentArmor + 1;
 		}
-		// TODO: add melee to armors ?
-		return false;
+		if (newValue > currentArmor + maxIncreaseValue) { newValue = currentArmor + maxIncreaseValue; } // limit the increase.
+		AOE_STRUCTURES::SetArmorInList(unitDef, armorClass, newValue, true); // Add armor if not existing in list
+		return true;
 	}
 
 
-	// Increase unit's melee armor by a given value. 
+	// Increase unit's armor by a given value. 
 	// maxTotalValue is ignored if <0
 	bool IncreaseArmorByRawValue(AOE_CONST_FUNC::ATTACK_CLASS armorClass, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int valueToAdd, int maxTotalValue) {
 		assert(unit && unit->DerivesFromTrainable());
 		assert(unit->unitDefinition && unit->IsCheckSumValidForAUnitClass() && unit->unitDefinition->DerivesFromTrainable());
 		CreateDedicatedUnitDef(unit); // Ensure we modify a specific unit definition !
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
-		for (int i = 0; i < unitDef->armorsCount; i++) {
-			if (unitDef->ptrArmorsList[i].classId == armorClass) {
-				int newValue = unitDef->ptrArmorsList[i].amount + valueToAdd;
-				if ((newValue > maxTotalValue) && (maxTotalValue >= 0)) {
-					newValue = maxTotalValue;
-				}
-				unitDef->ptrArmorsList[i].amount = newValue;
-				return true;
-			}
+		
+		short int currentArmor = AOE_STRUCTURES::GetArmorFromList(unitDef, armorClass, -1);
+		int newValue = currentArmor + valueToAdd;
+		if ((newValue > maxTotalValue) && (maxTotalValue >= 0)) {
+			newValue = maxTotalValue;
 		}
-		// TODO: add melee to armors ?
-		return false;
+		if (newValue < currentArmor) {
+			return false; // Do not decrease existing value
+		}
+		AOE_STRUCTURES::SetArmorInList(unitDef, armorClass, newValue, true); // Add armor if not existing in list
+		return true;
+	}
+
+
+	// Increase unit's range (for ranged units) and LOS
+	// maxTotalValue is ignored if <0
+	bool IncreaseRangeByRawValue(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int valueToAdd, int maxTotalValue) {
+		assert(unit && unit->DerivesFromTrainable());
+		assert(unit->unitDefinition && unit->IsCheckSumValidForAUnitClass() && unit->unitDefinition->DerivesFromTrainable());
+		CreateDedicatedUnitDef(unit); // Ensure we modify a specific unit definition !
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
+		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
+		if (unitDef->maxRange + valueToAdd > maxTotalValue) {
+			valueToAdd = maxTotalValue - (int)unitDef->maxRange;
+		}
+		if (unitDef->maxRange > 0) {
+			unitDef->maxRange += valueToAdd;
+		}
+		unitDef->lineOfSight += valueToAdd; // Add same bonus to LOS
+		return true;
 	}
 
 
@@ -262,6 +278,93 @@ namespace RPG_MODE {
 		IncreaseTotalHPByPercentage(unit, 5, maxLevelHPIncrease);
 	}
 
+
+	// Applies random effects to a unit definition (unitDef must be a "dedicated" unit definition)
+	bool ApplyRandomUniqueAttributes(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit) {
+		assert(unit && unit->IsCheckSumValidForAUnitClass() && unit->hasDedicatedUnitDef && unit->unitDefinition);
+		if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->hasDedicatedUnitDef || !unit->unitDefinition) { return false; }
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
+		int random = randomizer.GetRandomNonZeroPercentageValue(); // To decide the type of bonus
+		bool success = false;
+		bool isMelee = (unitDef->projectileUnitId < 0) && (unitDef->unitAIType != TribeAIGroupPriest);
+		bool isRanged = (unitDef->projectileUnitId >= 0); // Ranged or (ranged)siege weapons
+
+		const int chancesUpgradeAttack = (unitDef->unitAIType != TribeAIGroupPriest) ? 20 : 0;
+		const int chancesUpgradeMeleeArmor = 20;
+		const int chancesUpgradePierceArmor = 5;
+		const int chancesUpgradeRange = isMelee ? 1 : 10; // 1% chance to upgrade LOS (only - no range !) for melee units.
+		//const int chancesUpgradeHP; // Default choice with remaining probabilities
+
+		// Attack (all but priests)
+		if ((random <= chancesUpgradeAttack) && (unitDef->unitAIType != TribeAIGroupPriest)) {
+			int maxRawValue = 1;
+			if (isMelee || (unitDef->displayedAttack > 20)) { // Melee or siege weapons
+				if (unitDef->blastRadius > 0) {
+					maxRawValue = randomizer.GetRandomValue_normal_moreFlat(1, 3); // Limited upgrade value for units with blast damage
+				} else {
+					maxRawValue = randomizer.GetRandomValue_normal_moreFlat(1, 5);
+				}
+			}
+			if (maxRawValue > unitDef->displayedAttack) {
+				maxRawValue = unitDef->displayedAttack; // Do not add more than "nominal" (base) value
+			}
+			success = IncreaseAttackByRawValue(unit, maxRawValue, -1);
+			if (!success) {
+				traceMessageHandler.WriteMessageNoNotification("failed");
+			}
+			return true;
+		}
+		random -= chancesUpgradeAttack;
+
+		// Melee Armor (all, limited amount for "no-armor" units)
+		if (random <= chancesUpgradeMeleeArmor) {
+			int maxRawValue = 2;
+			if ((unitDef->unitAIType != TribeAIGroupPriest) && (unitDef->unitAIType != TribeAIGroupSiegeWeapon)) {
+				// Allow better armor upgrades, but not for "no-armor" units (excludes priests, siege weapons...)
+				maxRawValue = randomizer.GetRandomValue_normal_moreFlat(1, 5);
+			}
+			success = IncreaseArmorByRawValue(AOE_CONST_FUNC::CST_AC_BASE_MELEE, unit, maxRawValue, -1);
+			if (!success) {
+				traceMessageHandler.WriteMessageNoNotification("failed");
+			}
+			return true;
+		}
+		random -= chancesUpgradeMeleeArmor;
+
+		// Pierce armor (low chances) (amount = 1 always)
+		if (random <= chancesUpgradePierceArmor) {
+			success = IncreaseArmorByRawValue(AOE_CONST_FUNC::CST_AC_BASE_PIERCE, unit, 1, -1);
+			if (!success) {
+				traceMessageHandler.WriteMessageNoNotification("failed");
+			}
+			return true;
+		}
+		random -= chancesUpgradePierceArmor;
+
+		// Range (archers, limited amount)
+		if (isRanged && (random <= chancesUpgradeRange)) {
+			int maxImprovement = 5;
+			if (unitDef->unitAIType == TribeAIGroupSiegeWeapon) { maxImprovement = 3; }
+			if (unitDef->unitAIType == TribeAIGroupPriest) { maxImprovement = 3; } // Note: at this point, priests are excluded from this part cf isRanged
+			if (unitDef->displayedRange - unitDef->maxRange < maxImprovement) {
+				success = IncreaseRangeByRawValue(unit, 1, -1);
+				if (!success) {
+					traceMessageHandler.WriteMessageNoNotification("failed");
+				}
+				return true;
+			}
+		}
+		random -= chancesUpgradeRange;
+
+		// HP (all)
+		success = IncreaseTotalHPByPercentage(unit, randomizer.GetRandomValue_normal_moreFlat(10, 35), 100);
+		if (!success) {
+			traceMessageHandler.WriteMessageNoNotification("failed");
+		}
+		return true;
+	}
+
+
 	// Transforms a unit into a unique "epic" unit if randoms decides to.
 	// Returns true if unit has been transformed into a unique unit.
 	bool MakeEpicUnitWithRandomCondition(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit) {
@@ -292,51 +395,12 @@ namespace RPG_MODE {
 		DisplayEpicUnitSpawnedMessage(unit);
 		// Do not add an event history position, because there's already one when a unit spawns.
 
-		random = randomizer.GetRandomNonZeroPercentageValue(); // To decide the type of bonus
-		bool success = false;
-		bool isMelee = (unitDef->maxRange == 0);
-		if ((random <= 25) && (unitDef->unitAIType != TribeAIGroupPriest)) {
-			// Attack (all but priests)
-			int maxRawValue = 1;
-			if (isMelee || (unitDef->displayedAttack > 20)) { // Melee or siege weapons
-				if (unitDef->blastRadius > 0) {
-					maxRawValue = randomizer.GetRandomValue_normal_moreFlat(1, 3); // Limited upgrade value for units with blast damage
-				} else {
-					maxRawValue = randomizer.GetRandomValue_normal_moreFlat(1, 5);
-				}
-			}
-			if (maxRawValue > unitDef->displayedAttack) {
-				maxRawValue = unitDef->displayedAttack; // Do not add more than "nominal" (base) value
-			}
-			success = IncreaseAttackByRawValue(unit, maxRawValue, -1);
-			if (!success) {
-				traceMessageHandler.WriteMessageNoNotification("failed");
-			}
-			return true;
+		// Choose and apply unique attributes
+		if (!ApplyRandomUniqueAttributes(unit)) {
+			// If failed, apply a small HP increase (to make (almost) sure unit actually has at least 1 improved attribute.
+			return IncreaseTotalHPByPercentage(unit, randomizer.GetRandomValue_normal_moreFlat(10, 25), 50);
 		}
-		if (random <= 50) {
-			// Melee Armor (all, limited amount for "no-armor" units)
-			int maxRawValue = 2;
-			if ((unitDef->unitAIType != TribeAIGroupPriest) && (unitDef->unitAIType != TribeAIGroupSiegeWeapon)) {
-				// Allow better armor upgrades, but not for "no-armor" units (excludes priests, siege weapons...)
-				maxRawValue = randomizer.GetRandomValue_normal_moreFlat(1, 5);
-			}
-			success = IncreaseArmorByRawValue(AOE_CONST_FUNC::CST_AC_BASE_MELEE, unit, maxRawValue, -1);
-			if (!success) {
-				traceMessageHandler.WriteMessageNoNotification("failed");
-			}
-			return true;
-		}
-		// Pierce armor (low chances) (amount = 1 always)
-
-		// Range (archers, limited amount)
-
-		// HP (all)
-		success = IncreaseTotalHPByPercentage(unit, randomizer.GetRandomValue_normal_moreFlat(10, 35), 100);
-		if (!success) {
-			traceMessageHandler.WriteMessageNoNotification("failed");
-		}
-		return true;
+		return true; // ApplyRandomUniqueAttributes returned true
 	}
 
 

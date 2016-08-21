@@ -29,6 +29,7 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_COST) == 6, "STRUCT_COST size");
 
 
+	// Size 4. Defines armor/attack amount for a specific class.
 	struct STRUCT_ARMOR_OR_ATTACK {
 		AOE_CONST_FUNC::ATTACK_CLASS classId; // "class" is reserved !
 		short int amount;
@@ -308,7 +309,7 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_UNITDEF_COMMANDABLE) == 0xFC, "STRUCT_UNITDEF_COMMANDABLE size");
 
 
-	// 44 44 54 00 = type50 (type50) - size=0x148 - Constructor 0x43EE10
+	// 44 44 54 00 = type50 (type50) - size=0x148 - Constructor 0x43EE10(readFromFile)
 	class STRUCT_UNITDEF_ATTACKABLE : public STRUCT_UNITDEF_COMMANDABLE {
 	public:
 		unsigned long int *ptrAttackGraphic; // +FC. Unknown struct
@@ -331,7 +332,7 @@ namespace AOE_STRUCTURES
 		char unknown_11F;
 		// 0x120
 		float reloadTime1;
-		short int projectileUnitId; // +124. Can be used to determine if a military unit is melee (<0) or ranged (>=0)
+		short int projectileUnitId; // +124. Can be used to determine if a military unit is melee (<0) or ranged (>=0). Warning: priests would be "melee" with such criteria.
 		short int accuracyPercent;
 		char towerMode; // +128
 		char unknown_129; // unused ?
@@ -342,9 +343,9 @@ namespace AOE_STRUCTURES
 		float graphicDisplacement3;
 		unsigned long int minRange; // +138.
 		short int displayedArmor; // The number before the "+". For a total 6 armor which is 2+4, displayedArmor=2. total armor is guessed from default armor ?
-		short int displayedAttack;  // The number before the "+". For a total 6 attack which is 2+4, displayedAttack=2. total attack is the greatest attack value from attacks list
+		short int displayedAttack; // The number before the "+". For a total 6 attack which is 2+4, displayedAttack=2. total attack is the greatest attack value from attacks list
 		// 0x140
-		float displayedRange;
+		float displayedRange; // The number before the "+". See also maxRange(=total range)
 		float reloadTime2;
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00544444); }

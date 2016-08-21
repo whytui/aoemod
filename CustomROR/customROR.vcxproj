@@ -62,6 +62,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(AOE_include)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>true</BufferSecurityCheck>
+      <TreatSpecificWarningsAsErrors>4715;%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -86,6 +87,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <OmitFramePointers>false</OmitFramePointers>
       <BufferSecurityCheck>true</BufferSecurityCheck>
+      <TreatSpecificWarningsAsErrors>4715;%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -145,6 +147,7 @@
     <ClInclude Include="include\TechnologyFilter.h" />
     <ClInclude Include="include\traceMessage.h" />
     <ClInclude Include="include\UI_utilities.h" />
+    <ClInclude Include="include\unitDefHandling.h" />
     <ClInclude Include="include\unitShortcuts.h" />
     <ClInclude Include="include\Version.h" />
   </ItemGroup>
@@ -189,6 +192,7 @@
     <ClCompile Include="src\StrategyBuilder.cpp" />
     <ClCompile Include="src\StrategyPotentialElemInfo.cpp" />
     <ClCompile Include="src\traceMessages.cpp" />
+    <ClCompile Include="src\unitDefHandling.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CustomROR_README.txt" />
