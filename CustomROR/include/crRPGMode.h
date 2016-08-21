@@ -57,7 +57,9 @@ namespace RPG_MODE {
 	// Applies effects of upgrading unit's level by 1.
 	void UpgradeUnitLevel(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit);
 
-	// Applies random effects to a unit definition
+	// Applies random effects to a unit (this method creates a dedicated unit definition, if necessary)
+	// Returns true if at least 1 attribute has been updated
+	// If result is false, dedicated unit definition may NOT have been created
 	bool ApplyRandomUniqueAttributes(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit);
 
 	// Transforms a unit into a unique "epic" unit if randoms decides to.

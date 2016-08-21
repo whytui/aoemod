@@ -279,24 +279,40 @@ namespace RPG_MODE {
 	}
 
 
-	// Applies random effects to a unit definition (unitDef must be a "dedicated" unit definition)
+	// Applies random effects to a unit (this method creates a dedicated unit definition, if necessary)
+	// Returns true if at least 1 attribute has been updated
+	// If result is false, dedicated unit definition may NOT have been created
 	bool ApplyRandomUniqueAttributes(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit) {
-		assert(unit && unit->IsCheckSumValidForAUnitClass() && unit->hasDedicatedUnitDef && unit->unitDefinition);
-		if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->hasDedicatedUnitDef || !unit->unitDefinition) { return false; }
+		assert(unit && unit->IsCheckSumValidForAUnitClass() && unit->unitDefinition);
+		if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->unitDefinition) { return false; }
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
-		int random = randomizer.GetRandomNonZeroPercentageValue(); // To decide the type of bonus
-		bool success = false;
+		bool hasImprovedAttribute = false;
 		bool isMelee = (unitDef->projectileUnitId < 0) && (unitDef->unitAIType != TribeAIGroupPriest);
 		bool isRanged = (unitDef->projectileUnitId >= 0); // Ranged or (ranged)siege weapons
 
+		// Settings for attribute upgrades choice
 		const int chancesUpgradeAttack = (unitDef->unitAIType != TribeAIGroupPriest) ? 20 : 0;
 		const int chancesUpgradeMeleeArmor = 20;
 		const int chancesUpgradePierceArmor = 5;
 		const int chancesUpgradeRange = isMelee ? 1 : 10; // 1% chance to upgrade LOS (only - no range !) for melee units.
-		//const int chancesUpgradeHP; // Default choice with remaining probabilities
+		const int chancesUpgradeHP = 40;
+
+		const bool improveAttack = (unitDef->unitAIType != TribeAIGroupPriest) && (randomizer.GetRandomNonZeroPercentageValue() <= chancesUpgradeAttack);
+		const bool improveMeleeArmor = (randomizer.GetRandomNonZeroPercentageValue() <= chancesUpgradeMeleeArmor);
+		const bool improvePierceArmor = (randomizer.GetRandomNonZeroPercentageValue() <= chancesUpgradePierceArmor);
+		const bool improveRange = isRanged && (randomizer.GetRandomNonZeroPercentageValue() <= chancesUpgradeRange);
+		const bool improveHP = (randomizer.GetRandomNonZeroPercentageValue() <= chancesUpgradeHP);
+
+		if (!improveAttack && !improveMeleeArmor && !improvePierceArmor && !improveRange && !improveHP) {
+			return false; // Note: we did NOT create a dedicated unit def as it is not necessary
+		}
+
+		CreateDedicatedUnitDef(unit); // Ensure the unit definition is dedicated so we can customize it.
+		assert(unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass());
+		DisplayEpicUnitSpawnedMessage(unit);
 
 		// Attack (all but priests)
-		if ((random <= chancesUpgradeAttack) && (unitDef->unitAIType != TribeAIGroupPriest)) {
+		if (improveAttack) {
 			int maxRawValue = 1;
 			if (isMelee || (unitDef->displayedAttack > 20)) { // Melee or siege weapons
 				if (unitDef->blastRadius > 0) {
@@ -308,58 +324,42 @@ namespace RPG_MODE {
 			if (maxRawValue > unitDef->displayedAttack) {
 				maxRawValue = unitDef->displayedAttack; // Do not add more than "nominal" (base) value
 			}
-			success = IncreaseAttackByRawValue(unit, maxRawValue, -1);
-			if (!success) {
-				traceMessageHandler.WriteMessageNoNotification("failed");
-			}
-			return true;
+			hasImprovedAttribute |= IncreaseAttackByRawValue(unit, maxRawValue, -1);
 		}
-		random -= chancesUpgradeAttack;
 
 		// Melee Armor (all, limited amount for "no-armor" units)
-		if (random <= chancesUpgradeMeleeArmor) {
+		if (improveMeleeArmor) {
 			int maxRawValue = 2;
 			if ((unitDef->unitAIType != TribeAIGroupPriest) && (unitDef->unitAIType != TribeAIGroupSiegeWeapon)) {
 				// Allow better armor upgrades, but not for "no-armor" units (excludes priests, siege weapons...)
 				maxRawValue = randomizer.GetRandomValue_normal_moreFlat(1, 5);
 			}
-			success = IncreaseArmorByRawValue(AOE_CONST_FUNC::CST_AC_BASE_MELEE, unit, maxRawValue, -1);
-			if (!success) {
-				traceMessageHandler.WriteMessageNoNotification("failed");
-			}
-			return true;
+			hasImprovedAttribute |= IncreaseArmorByRawValue(AOE_CONST_FUNC::CST_AC_BASE_MELEE, unit, maxRawValue, -1);
 		}
-		random -= chancesUpgradeMeleeArmor;
 
 		// Pierce armor (low chances) (amount = 1 always)
-		if (random <= chancesUpgradePierceArmor) {
-			success = IncreaseArmorByRawValue(AOE_CONST_FUNC::CST_AC_BASE_PIERCE, unit, 1, -1);
-			if (!success) {
-				traceMessageHandler.WriteMessageNoNotification("failed");
-			}
-			return true;
+		if (improvePierceArmor) {
+			hasImprovedAttribute |= IncreaseArmorByRawValue(AOE_CONST_FUNC::CST_AC_BASE_PIERCE, unit, 1, -1);
 		}
-		random -= chancesUpgradePierceArmor;
 
 		// Range (archers, limited amount)
-		if (isRanged && (random <= chancesUpgradeRange)) {
+		if (improveRange) {
 			int maxImprovement = 5;
 			if (unitDef->unitAIType == TribeAIGroupSiegeWeapon) { maxImprovement = 3; }
 			if (unitDef->unitAIType == TribeAIGroupPriest) { maxImprovement = 3; } // Note: at this point, priests are excluded from this part cf isRanged
 			if (unitDef->displayedRange - unitDef->maxRange < maxImprovement) {
-				success = IncreaseRangeByRawValue(unit, 1, -1);
-				if (!success) {
-					traceMessageHandler.WriteMessageNoNotification("failed");
-				}
-				return true;
+				hasImprovedAttribute |= IncreaseRangeByRawValue(unit, 1, -1);
 			}
 		}
-		random -= chancesUpgradeRange;
 
 		// HP (all)
-		success = IncreaseTotalHPByPercentage(unit, randomizer.GetRandomValue_normal_moreFlat(10, 35), 100);
-		if (!success) {
-			traceMessageHandler.WriteMessageNoNotification("failed");
+		if (improveHP) {
+			hasImprovedAttribute |= IncreaseTotalHPByPercentage(unit, randomizer.GetRandomValue_normal_moreFlat(10, 35), 100);
+		}
+		if (!hasImprovedAttribute) {
+			// Unit has no upgraded attribute. Force one (with a slight HP boost).
+			// Now we are sure the unit has at least 1 specificity
+			unitDef->totalHitPoints += 15;
 		}
 		return true;
 	}
@@ -390,17 +390,7 @@ namespace RPG_MODE {
 			return false;
 		}
 		// Here we decided to actually make the unit unique.
-		CreateDedicatedUnitDef(unit); // Ensure the unit definition is dedicated so we can customize it.
-		assert(unit && unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass());
-		DisplayEpicUnitSpawnedMessage(unit);
-		// Do not add an event history position, because there's already one when a unit spawns.
-
-		// Choose and apply unique attributes
-		if (!ApplyRandomUniqueAttributes(unit)) {
-			// If failed, apply a small HP increase (to make (almost) sure unit actually has at least 1 improved attribute.
-			return IncreaseTotalHPByPercentage(unit, randomizer.GetRandomValue_normal_moreFlat(10, 25), 50);
-		}
-		return true; // ApplyRandomUniqueAttributes returned true
+		return ApplyRandomUniqueAttributes(unit);
 	}
 
 
