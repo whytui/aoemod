@@ -1108,7 +1108,7 @@ int AddResearchesInStrategyForUnit(AOE_STRUCTURES::STRUCT_AI *ai, short int unit
 						AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDefBuilding = FindBuildingDefThatEnablesResearch(player, resDef->requiredResearchId[i]);
 						bool foundElementInStrategy = false;
 						if (unitDefBuilding) {
-							assert(unitDefBuilding->IsCheckSumValid());
+							assert(unitDefBuilding->IsCheckSumValid()); // check BUILDING checksum
 							if (unitDefBuilding->IsCheckSumValid()) {
 								foundElementInStrategy = (FindElementInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) != -1);
 							}

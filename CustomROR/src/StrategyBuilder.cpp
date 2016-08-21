@@ -479,7 +479,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 		validUnit = validUnit && unitDefBase->DerivesFromTrainable();
 		validUnit = validUnit && IsNonTowerMilitaryUnit(unitDefBase->unitAIType);
 		STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (STRUCT_UNITDEF_TRAINABLE *)unitDefBase;
-		assert(!validUnit || unitDefLiving->IsCheckSumValid());
+		assert(!validUnit || unitDefLiving->IsCheckSumValidForAUnitClass());
 		validUnit = validUnit && (unitDefLiving->towerMode == 0) && (unitDefLiving->speed > 0) &&
 			(unitDefLiving->trainButton > 0) && (unitDefLiving->trainLocation >= 0); // both exclude some heroes/cheats/non-standard units, but not all of them
 
@@ -589,7 +589,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 			{
 				AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *upgradedDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)GetUnitDefStruct(player, upgradedUnitDefId);
 				bool currentIsBetter = false;
-				if (upgradedDef && upgradedDef->IsCheckSumValid()) {
+				if (upgradedDef && upgradedDef->IsCheckSumValidForAUnitClass() && upgradedDef->DerivesFromTrainable()) {
 					if ((upgradedDef->totalHitPoints > bestHP) || (upgradedDef->displayedAttack > bestAttack) ||
 						(upgradedDef->displayedArmor > bestArmor) || (upgradedDef->displayedRange > bestRange)) {
 						currentIsBetter = true;
@@ -1116,7 +1116,8 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 			unitInfo->strengthVs[MC_PRIEST] += 10; // Can "one-shot" priests (upgraded). Total +10 (+ranged unit bonus, possibly)
 		}
 	}
-	if (unitInfo->upgradedUnitDefLiving && unitInfo->upgradedUnitDefLiving->IsCheckSumValid()) {
+	if (unitInfo->upgradedUnitDefLiving && unitInfo->upgradedUnitDefLiving->IsCheckSumValidForAUnitClass() &&
+		unitInfo->upgradedUnitDefLiving->DerivesFromTrainable()) {
 		for (int i = 0; i < unitInfo->upgradedUnitDefLiving->attacksCount; i++) {
 			if (unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CHARIOTS_ON_PRIESTS) {
 				unitInfo->strengthVs[MC_PRIEST] += 50;
