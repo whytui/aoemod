@@ -368,7 +368,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		if (unit && unit->IsCheckSumValidForAUnitClass()) {
 			AOE_selectUnit(player, unit, true);
 			char *name = "?";
-			if (unit->unitDefinition && unit->unitDefinition->IsCheckSumValid()) {
+			if (unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
 				name = unit->unitDefinition->ptrUnitName;
 			}
 			std::string s = std::string("selected ") + std::string(name);
@@ -1863,7 +1863,7 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_A
 		for (int i = 0; i < ai->structInfAI.buildingUnits.arraySize; i++) {
 			long int bldId = ai->structInfAI.buildingUnits.unitIdArray[i];
 			AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)GetUnitStruct(bldId);
-			if (unit && unit->IsCheckSumValid()) {
+			if (unit && unit->IsCheckSumValid()) { // check IS building type
 				if (unit->unitStatus < 2) {
 					unfinishedBuildings++;
 				}
@@ -2757,7 +2757,7 @@ void CustomRORCommand::SelectNextIdleMilitaryUnit() {
 	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *currentUnitElem = player->ptrCreatableUnitsListLink->lastListElement;
 	while (currentUnitElem) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)currentUnitElem->unit;
-		if (unitBase && unitBase->IsCheckSumValidForAUnitClass() && unitBase->unitDefinition && unitBase->unitDefinition->IsCheckSumValid()) {
+		if (unitBase && unitBase->IsCheckSumValidForAUnitClass() && unitBase->unitDefinition && unitBase->unitDefinition->IsCheckSumValidForAUnitClass()) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->unitDefinition;
 			char result;
 			if ((unitBase->transporterUnit == NULL) && IsNonTowerMilitaryUnit(unitDefBase->unitAIType)) { // Excludes towers
@@ -3159,7 +3159,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 	}
 
 	// Auto rebuild farms
-	if (isInGame && unit && unit->IsCheckSumValid() && isBuilding && this->crInfo->configInfo.enableAutoRebuildFarms) {
+	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && isBuilding && this->crInfo->configInfo.enableAutoRebuildFarms) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 		// If this is a farm, and if I have "farm rebuild info" for this position (not in "not rebuild" mode), then trigger a rebuild.
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
@@ -3178,7 +3178,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 	}
 
 	// Triggers
-	if (isInGame && unit && unit->IsCheckSumValid() && !isTempUnit &&
+	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && !isTempUnit &&
 		!settings->isMultiplayer && (unit->unitInstanceId >= 0)) {
 		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
 		evtInfo.unitId = unit->unitInstanceId;
@@ -3253,7 +3253,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 
 	assert(newTargetUnit->IsCheckSumValidForAUnitClass());
 	assert(actorUnit->IsCheckSumValidForAUnitClass());
-	if (!newTargetUnit->IsCheckSumValid() || !actorUnit->IsCheckSumValidForAUnitClass()) {
+	if (!newTargetUnit->IsCheckSumValidForAUnitClass() || !actorUnit->IsCheckSumValidForAUnitClass()) {
 		return true; // invalid data. Let original code be executed.
 	}
 	if (oldTargetUnit == newTargetUnit) {
@@ -4664,7 +4664,7 @@ void CustomRORCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_PAN
 // Warning: this event occurs before the farm unit is actually "killed"
 void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farm = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)GetUnitStruct(farmUnitId);
-	if (!farm || !farm->IsCheckSumValid()) { return; }
+	if (!farm || !farm->IsCheckSumValid()) { return; } // (test BUILDING checksum)
 	AOE_STRUCTURES::STRUCT_PLAYER *player = farm->ptrStructPlayer;
 	if (!player || !player->IsCheckSumValid()) { return; }
 	if (player != GetControlledPlayerStruct_Settings()) { return; } // Only for human-controlled player
@@ -4689,8 +4689,8 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	// Search for the farmer that was working on this farm (first -arbitrary- one if there are many)
 	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *curElem = player->ptrCreatableUnitsListLink->lastListElement;
 	while ((curElem != NULL) && (farmerUnit == NULL)) {
-		if (curElem->unit && curElem->unit->IsCheckSumValid() && curElem->unit->unitDefinition &&
-			curElem->unit->unitDefinition->IsCheckSumValid() && (curElem->unit->unitDefinition->DAT_ID1 == CST_UNITID_FARMER)) {
+		if (curElem->unit && curElem->unit->IsCheckSumValidForAUnitClass() && curElem->unit->unitDefinition &&
+			curElem->unit->unitDefinition->IsCheckSumValidForAUnitClass() && (curElem->unit->unitDefinition->DAT_ID1 == CST_UNITID_FARMER)) {
 			AOE_STRUCTURES::STRUCT_ACTION_BASE *curUnitAction = GetUnitAction(curElem->unit);
 			// There is 1 special case when farmer's resourceType is NOT berryBush: when AI player repairs a farm (bug: villager type is farmer instead of repairman)
 			if (curUnitAction && (curUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
@@ -5063,7 +5063,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 		for (int loopUnitDefId = 0; loopUnitDefId < player->structDefUnitArraySize; loopUnitDefId++) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *loopUnitDef = 
 				(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)player->ptrStructDefUnitTable[loopUnitDefId];
-			if (loopUnitDef && loopUnitDef->IsCheckSumValid() && loopUnitDef->IsTypeValid()) { // Only for living units
+			if (loopUnitDef && loopUnitDef->IsCheckSumValidForAUnitClass() && loopUnitDef->IsTypeValid()) { // Only for living units
 				int rawButtonId = loopUnitDef->trainButton;
 				if ((loopUnitDef->trainLocation == unitDef->DAT_ID1) && (rawButtonId > maxFoundButtonId)) {
 					maxFoundButtonId = rawButtonId;
@@ -5277,7 +5277,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 	}
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = NULL;
 	AOE_STRUCTURES::STRUCT_PLAYER *player = NULL;
-	if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValid()) {
+	if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValidForAUnitClass()) {
 		unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
 		if (unitBase && unitBase->IsCheckSumValidForAUnitClass()) {
 			player = unitBase->ptrStructPlayer;
@@ -5290,7 +5290,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_STOP) {
 		// Fix strategy when AI is enabled and some action is interrupted by human player
-		if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValid()) {
+		if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValidForAUnitClass()) {
 			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
 			ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
 		}

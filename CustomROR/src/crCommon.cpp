@@ -1067,7 +1067,7 @@ bool MoveAndAttackTarget(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::S
 // Compatible with MP games (uses "command" interface)
 bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount,
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
-	if (!actorUnitsList || (actorUnitsCount <= 0) || !target || !target->IsCheckSumValid()) { return false; }
+	if (!actorUnitsList || (actorUnitsCount <= 0) || !target || !target->IsCheckSumValidForAUnitClass()) { return false; }
 	assert(actorUnitsCount < 255); // More would be... more than huge !
 	if (actorUnitsCount >= 255) { return false; } // This can't be normal
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
@@ -1254,7 +1254,7 @@ long int GetPlayerUnitCount(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT
 // Return the total remaining food amount for a farm ("immediatly available" + "action-remaining").
 // Returns 0 in error cases (please check it is actually a farm !)
 float GetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit) {
-	if (!farmUnit || !farmUnit->IsCheckSumValid()) { return 0; }
+	if (!farmUnit || !farmUnit->IsCheckSumValid()) { return 0; } // test BUILDING checksum
 	if (farmUnit->resourceTypeId != RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE) { return 0; }
 	if (!farmUnit->unitDefinition || !farmUnit->unitDefinition) { return 0; }
 	if (farmUnit->unitDefinition->DAT_ID1 != CST_UNITID_FARM) { return 0; }
@@ -1269,7 +1269,7 @@ float GetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit) {
 
 // Modifies the total remaining food amount for a farm ("immediately available" + "action-remaining").
 bool SetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit, float newAmount) {
-	if (!farmUnit || !farmUnit->IsCheckSumValid()) { return false; }
+	if (!farmUnit || !farmUnit->IsCheckSumValid()) { return false; } // test BUILDING checksum
 	if (farmUnit->resourceTypeId != RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE) { return false; }
 	if (!farmUnit->unitDefinition || !farmUnit->unitDefinition) { return false; }
 	if (farmUnit->unitDefinition->DAT_ID1 != CST_UNITID_FARM) { return false; }
@@ -2032,7 +2032,7 @@ bool AddCommandToGameCmdQueue(void *commandStruct, long int structSize) {
 // This method is compatible with MP games (does NOT causes sync issue)
 bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY) {
 	AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit = (STRUCT_UNIT_COMMANDABLE*)GetUnitStruct(actorUnitId);
-	if (!unit || !unit->IsCheckSumValid()) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->DerivesFromCommandable()) {
 		return false;
 	}
 	return CreateCmd_RightClick(&unit, 1, targetUnitId, posX, posY);
