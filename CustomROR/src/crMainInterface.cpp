@@ -607,7 +607,7 @@ bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup() {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(humanPlayer);
 	assert(selectedUnits != NULL);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = selectedUnits[0];
-	if (!selectedUnit || !selectedUnit->IsCheckSumValid()) {
+	if (!selectedUnit || !selectedUnit->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
 	if (!this->OpenInGameUnitPropertiesPopup(selectedUnit)) {
