@@ -2795,25 +2795,47 @@ void CustomRORCommand::SelectNextIdleMilitaryUnit() {
 // This event is triggered during game but as well in scenario editor or during game creation.
 // actionStruct parameter can be NULL if it could not be determined
 // Note: we choose NOT to apply custom treatments when controlled player has an active playing AI (both controlled by human and AI)
-void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit,
+void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit,
 	AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *actionStruct) {
-	if (!unit) { return; }
-	if (UIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) {
+	assert(unit && unit->IsCheckSumValidForAUnitClass() && unit->IsTypeValid());
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->IsTypeValid()) { return; }
+
+	// Collect some info
+	bool isInGameSpawnUnit = (actionStruct && actionStruct->IsCheckSumValid() && (UIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING));
+	bool isInGame = (UIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING);
+	bool isScenarioEditor = (UIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
+	bool isGameInit = (!isInGame && !isScenarioEditor);
+	AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
+	assert(unitDef && unitDef->IsTypeValid());
+	if (!unitDef || !unitDef->IsTypeValid()) { return; }
+
+	if (isScenarioEditor || isGameInit) {
 		return;
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *player = unit->ptrStructPlayer;
 	assert(player != NULL);
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	assert(globalStruct != NULL);
-	// Does spawned unit belong to currently human-controlled player ?
-	if (player->playerId != globalStruct->humanPlayerId) {
-		return; // At this point we do nothing when AI players have a new unit... (nor gaia)
-	}
 	if (IsMultiplayer()) { return; } // can provoke out of sync errors
 
-	AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unit->unitDefinition;
-	assert(unitDef != NULL);
-	assert(unitDef->unitType == GUT_TRAINABLE); // TODO: change method signature => trainable, not commandable
+	// RPG mode, if enabled
+	if (isInGameSpawnUnit && this->IsRpgModeEnabled()) {
+		assert(actionStruct->actor->IsCheckSumValidForAUnitClass());
+		if (!((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)actionStruct->actor)->IsTypeValid()) {
+			assert(false && "actor not a building");
+			return;
+		}
+		if (RPG_MODE::MakeEpicUnitWithRandomCondition((AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)unit)) {
+			assert(unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass());
+			unit->remainingHitPoints = unit->unitDefinition->totalHitPoints; // Make sure new unit starts with 100% HP.
+		}
+	}
+
+	// Does spawned unit belong to currently human-controlled player ?
+	if (player->playerId != globalStruct->humanPlayerId) {
+		return; // Next treatments do not apply when AI players have a new unit... (nor gaia)
+	}
+
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
 	if (!player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
 		AutoAssignShortcutToUnit(unit);
@@ -2883,14 +2905,6 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 		if (parentUnit->remainingHitPoints < (float)parentUnit->unitDefinition->totalHitPoints) {
 			TellUnitToInteractWithTarget(unit, parentUnit);
 			commandCreated = true;
-		}
-	}
-
-	// RPG mode, if enabled
-	if (this->IsRpgModeEnabled()) {
-		if (RPG_MODE::MakeEpicUnitWithRandomCondition((AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)unit)) {
-			assert(unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass());
-			unit->remainingHitPoints = unit->unitDefinition->totalHitPoints; // Make sure new unit starts with 100% HP.
 		}
 	}
 }
@@ -3628,13 +3642,17 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 
 	long int currentTargetId = actorUnit->currentActivity->targetUnitId;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *currentTarget = GetUnitStruct(currentTargetId);
-	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *currentTargetDef = NULL;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *currentTargetDef = NULL;
+	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *currentTargetDefAttackable = NULL;
 	if (currentTarget) {
-		currentTargetDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)currentTarget->unitDefinition;
+		currentTargetDef = currentTarget->unitDefinition;
+		if (currentTargetDef->DerivesFromAttackable()) {
+			currentTargetDefAttackable = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)currentTargetDef;
+		}
 	} else {
 		return true;
 	}
-	assert(currentTargetDef->DerivesFromCommandable());
+	assert(currentTargetDef && currentTargetDef->IsCheckSumValidForAUnitClass());
 
 	float distanceToTower = GetDistance(actorUnit->positionX, actorUnit->positionY, enemyTower->positionX, enemyTower->positionY);
 	float distanceToCurrentTarget = GetDistance(actorUnit->positionX, actorUnit->positionY, currentTarget->positionX, currentTarget->positionY);
@@ -3743,10 +3761,10 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 
 
 	// Current target is also a tower in my town. To simplify, we consider a tower is a builing with a (displayed) attack
-	if ((currentTargetDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) && (currentTargetDef->displayedAttack > 0)
+	if ((currentTargetDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) && currentTargetDefAttackable && (currentTargetDefAttackable->displayedAttack > 0)
 		&& (distanceToCurrentTarget < 18)) { // distanceToCurrentTarget < 18: approximative, but we don't want to search for TC + calculate distance, it's unnecessary processing.
 		float HPDifference = currentTarget->remainingHitPoints - enemyTower->remainingHitPoints;
-		float attackDifference = (float)(currentTargetDef->displayedAttack - enemyTowerDef->displayedAttack);
+		float attackDifference = (float)(currentTargetDefAttackable->displayedAttack - enemyTowerDef->displayedAttack);
 		
 		// Keep attacking the target that already is in range, if possible
 		if (distanceToTower < actorRange) {

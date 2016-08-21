@@ -170,7 +170,7 @@ namespace AOE_STRUCTURES
 		float resourceStorageAmount_3;
 		long int resourceCapacity;
 		// 0x80
-		long int resourceDecay; // Amount of resource that is lost per second
+		float resourceDecay; // Amount of resource that is lost per second in unit status 5.
 		float unknown_084; // unknown3A in AGE3. 0x4415D4
 		char resourceStorageEnableMode_1; // +88. type=RESOURCE_TYPES but on 1 byte only
 		char resourceStorageEnableMode_2;
@@ -218,13 +218,13 @@ namespace AOE_STRUCTURES
 				(this->checksum == 0x005499BC) // Tree - 90
 				);
 		}
-		// Returns true if the unit definition is a flag or a child class (all but eye candy and trees). This does not control the checksum.
+		// Returns true if the unit definition is a flag (20) or a child class (all but eye candy and trees). This does not control the checksum.
 		bool DerivesFromFlag() { return (this->unitType >= (char)AOE_CONST_FUNC::GUT_FLAGS) || (this->unitType <= (char)AOE_CONST_FUNC::GUT_BUILDING); } // all but 10 and 90
-		// Returns true if the unit definition is dead/fish or a child class. This does not control the checksum.
+		// Returns true if the unit definition is dead/fish (30) or a child class. This does not control the checksum.
 		bool DerivesFromMovable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_MOVABLE) || (this->DerivesFromCommandable()); }
-		// Returns true if the unit definition is a bird or a child class. This does not control the checksum.
+		// Returns true if the unit definition is a bird (40) or a child class. This does not control the checksum.
 		bool DerivesFromCommandable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_COMMANDABLE) || (this->DerivesFromAttackable()); }
-		// Returns true if the unit definition is a living unit or a child class (building). This does not control the checksum.
+		// Returns true if the unit definition is a living unit (70) or a child class (building). This does not control the checksum.
 		bool DerivesFromTrainable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_TRAINABLE) || (this->unitType == (char)AOE_CONST_FUNC::GUT_BUILDING); }
 		// Returns true if the unit definition is type50 or one of its child classes (projectile, living/building). This does not control the checksum.
 		bool DerivesFromAttackable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_ATTACKABLE) || (this->unitType == (char)AOE_CONST_FUNC::GUT_PROJECTILE) || (this->DerivesFromTrainable()); }

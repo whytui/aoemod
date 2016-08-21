@@ -44,30 +44,28 @@ namespace RPG_MODE {
 
 		// Handle "XP"
 		int addedXP = 1;
-		if (killedUnit->resourceTypeId == CST_RES_ORDER_KILLS) {
+		if (killedUnit->resourceTypeId == resourceTypeUsedForXp) {
 			int lootXP = (int)(killedUnit->resourceValue / xpStolenProportionFromKilledUnit);
 			if (lootXP > 0) {
 				addedXP += lootXP; // Gain a part of killed unit's XP (bonus)
 			}
 		}
 
-		if ((actorUnitTrainable->resourceValue == 0) || (actorUnitTrainable->resourceTypeId == CST_RES_ORDER_KILLS)) {
-			actorUnitTrainable->resourceTypeId = CST_RES_ORDER_KILLS;
+		if ((actorUnitTrainable->resourceValue == 0) || (actorUnitTrainable->resourceTypeId == resourceTypeUsedForXp)) {
+			actorUnitTrainable->resourceTypeId = resourceTypeUsedForXp;
 			if (actorUnitTrainable->resourceValue < 0) { actorUnitTrainable->resourceValue = 0; }
 			int currentLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
 			actorUnitTrainable->resourceValue += addedXP;
 			int newLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
-			if ((newLevel > currentLevel) && (newLevel < maxUnitLevel)) {
-				std::string msg = actorUnitTrainable->unitDefinition->ptrUnitName;
-				msg += " upgraded to level ";
-				msg += std::to_string(newLevel);
-				CallWriteText(msg.c_str());
-				for (int i = currentLevel; i <= newLevel; i++) {
+			if ((newLevel > currentLevel) && (newLevel <= maxUnitLevel)) {
+				for (int i = currentLevel; i < newLevel; i++) {
 					UpgradeUnitLevel(actorUnitTrainable);
 				}
-				AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-				if (settings && settings->IsCheckSumValid()) {
-					settings->AddEventInHistory((long int)actorUnit->positionX, (long int)actorUnit->positionY);
+				if (DisplayLevelUpMessage(actorUnitTrainable, newLevel)) { // True only if unit belongs to human player
+					AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+					if (settings && settings->IsCheckSumValid()) {
+						settings->AddEventInHistory((long int)actorUnit->positionX, (long int)actorUnit->positionY);
+					}
 				}
 			}
 		}
@@ -101,6 +99,11 @@ namespace RPG_MODE {
 		AOEFree(initialName); // Free previous name memory
 		newUnitDef->ptrUnitName = newName; // Replace unitdef name.
 		newUnitDef->languageDLLID_Name = -1; // Prevent from using name from language(x).dll
+
+
+		if (newUnitDef->resourceDecay <= 0) {
+			newUnitDef->resourceDecay = 2; // Otherwise, units remain stuck at status 5 and never completely die.
+		}
 		return true;
 	}
 
@@ -207,7 +210,7 @@ namespace RPG_MODE {
 
 	// Increase unit's melee armor by a given value. 
 	// maxTotalValue is ignored if <0
-	bool IncreaseeArmorByRawValue(AOE_CONST_FUNC::ATTACK_CLASS armorClass, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int valueToAdd, int maxTotalValue) {
+	bool IncreaseArmorByRawValue(AOE_CONST_FUNC::ATTACK_CLASS armorClass, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int valueToAdd, int maxTotalValue) {
 		assert(unit && unit->DerivesFromTrainable());
 		assert(unit->unitDefinition && unit->IsCheckSumValidForAUnitClass() && unit->unitDefinition->DerivesFromTrainable());
 		CreateDedicatedUnitDef(unit); // Ensure we modify a specific unit definition !
@@ -263,14 +266,8 @@ namespace RPG_MODE {
 		// Here we decided to actually make the unit unique.
 		CreateDedicatedUnitDef(unit); // Ensure the unit definition is dedicated so we can customize it.
 		assert(unit && unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass());
-		std::string msg = unit->unitDefinition->ptrUnitName;
-		msg += " spawned as an epic unit";
-		CallWriteText(msg.c_str());
-		/* Do not add an event history position, because there's already one when a unit spawns.
-		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-		if (settings && settings->IsCheckSumValid()) {
-			settings->AddEventInHistory((long int)unit->positionX, (long int)unit->positionY);
-		}*/
+		DisplayEpicUnitSpawnedMessage(unit);
+		// Do not add an event history position, because there's already one when a unit spawns.
 
 		random = randomizer.GetRandomNonZeroPercentageValue(); // To decide the type of bonus
 		bool success = false;
@@ -296,12 +293,12 @@ namespace RPG_MODE {
 		}
 		if (random <= 50) {
 			// Melee Armor (all, limited amount for "no-armor" units)
-			int maxRawValue = 1;
+			int maxRawValue = 2;
 			if ((unitDef->unitAIType != TribeAIGroupPriest) && (unitDef->unitAIType != TribeAIGroupSiegeWeapon)) {
 				// Allow better armor upgrades, but not for "no-armor" units (excludes priests, siege weapons...)
 				maxRawValue = randomizer.GetRandomValue_normal_moreFlat(1, 5);
 			}
-			success = IncreaseeArmorByRawValue(AOE_CONST_FUNC::CST_AC_BASE_MELEE, unit, maxRawValue, 5);
+			success = IncreaseArmorByRawValue(AOE_CONST_FUNC::CST_AC_BASE_MELEE, unit, maxRawValue, -1);
 			if (!success) {
 				traceMessageHandler.WriteMessageNoNotification("failed");
 			}
@@ -316,6 +313,34 @@ namespace RPG_MODE {
 		if (!success) {
 			traceMessageHandler.WriteMessageNoNotification("failed");
 		}
+		return true;
+	}
+
+
+	// Display a "level up" message if unit belongs to human-controlled player
+	bool DisplayLevelUpMessage(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int newLevel) {
+		assert(unit && unit->unitDefinition);
+		if (!unit || !unit->unitDefinition) { return false; }
+		if (unit->ptrStructPlayer != GetControlledPlayerStruct_Settings()) {
+			return false; // only display messages for owned units
+		}
+		std::string msg = unit->unitDefinition->ptrUnitName;
+		msg += " upgraded to level ";
+		msg += std::to_string(newLevel);
+		CallWriteText(msg.c_str());
+		return true;
+	}
+
+	// Display a "new epic unit spawned" message if unit belongs to human-controlled player
+	bool DisplayEpicUnitSpawnedMessage(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit) {
+		assert(unit && unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass());
+		if (!unit || !unit->unitDefinition) { return false; }
+		if (unit->ptrStructPlayer != GetControlledPlayerStruct_Settings()) {
+			return false; // only display messages for owned units
+		}
+		std::string msg = unit->unitDefinition->ptrUnitName;
+		msg += " spawned as an epic unit";
+		CallWriteText(msg.c_str());
 		return true;
 	}
 }

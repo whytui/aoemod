@@ -2500,15 +2500,15 @@ void CustomRORInstance::OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *RE
 // 0x4ED189
 // Called each time a living unit is created.
 // Don't forget to check player (gaia?), unit type...
-// Warning: this is also called by scenario editor and at game init !
+// Warning: this is called by *scenario editor*, *game init* and *in-game unit spawn*
 void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 	// Now get informations and check them
-	AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit = (AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE*)REG_values->EAX_val;
+	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)REG_values->EAX_val;
 	ror_api_assert(REG_values, unit != NULL); // TO DO: Could just return ? Leave that for testing purpose for now...
 	AOE_STRUCTURES::STRUCT_PLAYER *player = unit->ptrStructPlayer;
 	ror_api_assert(REG_values, player != NULL);
 	ror_api_assert(REG_values, unit->IsCheckSumValidForAUnitClass());
-	ror_api_assert(REG_values, unit->DerivesFromCommandable());
+	ror_api_assert(REG_values, unit->DerivesFromTrainable());
 	ror_api_assert(REG_values, player->IsCheckSumValid());
 	
 	ror_api_assert(REG_values, GetGameSettingsPtr() != NULL);
@@ -2524,6 +2524,7 @@ void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 	}	
 	if (actionStruct) {
 		if (!actionStruct->IsCheckSumValid() || (actionStruct->actionTypeID != AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_MAKE_OBJECT)) {
+			assert(false && "action could not be retrieved");
 			actionStruct = NULL; // The value we read is not an "MakeObject" actionstruct, ignore it.
 		}
 	}

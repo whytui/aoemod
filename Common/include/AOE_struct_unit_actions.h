@@ -36,7 +36,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_BASE *targetUnit;
 		unsigned long int unknown_014; // actor unit pointer ???
 		long int targetUnitId; // +18
-		unsigned long int unknown_unitId; // +1C. A secondary target ?
+		long int unknown_unitId; // +1C. A secondary target ?
 		// 0x20
 		float targetUnitPositionY;
 		float targetUnitPositionX;
@@ -104,7 +104,7 @@ namespace AOE_STRUCTURES {
 		// 0x40
 		short int targetUnitDAT_ID; // being trained unit dat_id
 		short int unknown_042;
-		unsigned long int unknown_044; // maybe 2 shorts or even bytes ?
+		float currentTrainTime; // +44. To confirm
 		long int strategyElementId; // +48. value from command +0x0C ?
 		char unknown_04C;
 		char unknown_04D[3]; // unused ?
