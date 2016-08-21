@@ -38,10 +38,10 @@ STRUCT_PLAYER *GetControlledPlayerStruct_Settings() {
 	STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
 	STRUCT_PLAYER *player;
 	_asm {
-		MOV ECX, gameSettings
-			MOV EAX, 0x419B70
-			CALL EAX
-			MOV player, EAX
+		MOV ECX, gameSettings;
+		MOV EAX, 0x419B70;
+		CALL EAX;
+		MOV player, EAX;
 	}
 	return player;
 }

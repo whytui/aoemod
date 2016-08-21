@@ -3,6 +3,7 @@
 
 namespace RPG_MODE {
 
+	// Handle RPG events when a unit kills another one
 	void OnUnitKill(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *actorUnit) {
 		if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass()) { return; }
 		if (!killedUnit || !killedUnit->IsCheckSumValidForAUnitClass()) { return; }
@@ -232,6 +233,18 @@ namespace RPG_MODE {
 
 	// Applies effects of upgrading unit's level by 1.
 	void UpgradeUnitLevel(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit) {
+		assert(unit && unit->IsCheckSumValidForAUnitClass());
+		if (!unit || !unit->ptrStructPlayer) { return; }
+		STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		assert(settings && settings->IsCheckSumValid());
+		assert(global && global->IsCheckSumValid());
+		if (!settings || !settings->IsCheckSumValid() || !global || !global->IsCheckSumValid()) { return; }
+		bool isHumanPlayer = (global->humanPlayerId == unit->ptrStructPlayer->playerId);
+		if ((settings->difficultyLevel >= 3) && (!isHumanPlayer)) {
+			return; // No upgrades for AI players in easy levels
+		}
+
 		int random = randomizer.GetRandomNonZeroPercentageValue();
 		if (random < 6) { // values 1-5
 			IncreaseAttackByPercentage(unit, 3, maxLevelAttackIncrease);
@@ -258,6 +271,16 @@ namespace RPG_MODE {
 		if (!unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) { return false; }
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
 		if (unitDef->villagerMode) { return false; } // unit that can switch unit definition can't be unique (changing unit definition would loose their specificity).
+
+		STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		assert(settings && settings->IsCheckSumValid());
+		assert(global && global->IsCheckSumValid());
+		if (!settings || !settings->IsCheckSumValid() || !global || !global->IsCheckSumValid()) { return false; }
+		bool isHumanPlayer = (global->humanPlayerId == unit->ptrStructPlayer->playerId);
+		if ((settings->difficultyLevel >= 3) && (!isHumanPlayer)) {
+			return false; // No epic units for AI players in easy levels
+		}
 
 		int random = randomizer.GetRandomNonZeroPercentageValue();
 		if (random > epicUnitPercentageChances) {
@@ -309,7 +332,7 @@ namespace RPG_MODE {
 		// Range (archers, limited amount)
 
 		// HP (all)
-		success = IncreaseTotalHPByPercentage(unit, randomizer.GetRandomValue_normal_moreFlat(10, 30), 100);
+		success = IncreaseTotalHPByPercentage(unit, randomizer.GetRandomValue_normal_moreFlat(10, 35), 100);
 		if (!success) {
 			traceMessageHandler.WriteMessageNoNotification("failed");
 		}

@@ -23,6 +23,7 @@ namespace RPG_MODE {
 	const short int resourceTypeUsedForXp = AOE_CONST_FUNC::CST_RES_ORDER_KILLS;
 	//const short int resourceTypeUsedForXp = AOE_CONST_FUNC::CST_RES_ORDER_GOLD; // Nice for testing
 
+	// Handle RPG events when a unit kills another one
 	void OnUnitKill(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *actorUnit);
 
 	// Create a dedicated unit definition for unit, only if it does not already have one
