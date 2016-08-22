@@ -2935,7 +2935,9 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 	{
 		std::vector<short int> tmpResIdAsVector;
-		tmpResIdAsVector.push_back(unitInfo->enabledByResearchId);
+		if (unitInfo->enabledByResearchId >= 0) {
+			tmpResIdAsVector.push_back(unitInfo->enabledByResearchId);
+		}
 		std::vector<short int> requiredResearches = GetValidOrderedResearchesListWithDependencies(this->player, tmpResIdAsVector);
 		// Copy to unitInfo's set once and for all... And apply some filtering
 		for each (short int resId in requiredResearches)
@@ -3546,8 +3548,7 @@ std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitD
 	std::list<short int> result;
 	if (!ai || !ai->IsCheckSumValid()) { return result; }
 	if (!player || !player->IsCheckSumValid()) { return result; }
-	if (!player->ptrResearchesStruct || !player->ptrResearchesStruct->ptrResearchDefInfo ||
-		!player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray) {
+	if (!player->ptrResearchesStruct || !player->ptrResearchesStruct->ptrResearchDefInfo) {
 		return result;
 	}
 	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return result; }

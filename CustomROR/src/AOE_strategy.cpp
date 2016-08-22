@@ -1052,8 +1052,7 @@ int AddResearchesInStrategyForUnit(AOE_STRUCTURES::STRUCT_AI *ai, short int unit
 	if (!ai || !ai->IsCheckSumValid()) { return 0; }
 	AOE_STRUCTURES::STRUCT_PLAYER *player = ai->ptrStructPlayer;
 	if (!player || !player->IsCheckSumValid()) { return 0; }
-	if (!player->ptrResearchesStruct || !player->ptrResearchesStruct->ptrResearchDefInfo ||
-		!player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray) {
+	if (!player->ptrResearchesStruct || !player->ptrResearchesStruct->ptrResearchDefInfo) {
 		return 0;
 	}
 	if (nextElement && !nextElement->IsCheckSumValid()) { nextElement = NULL; }
@@ -1094,7 +1093,7 @@ int AddResearchesInStrategyForUnit(AOE_STRUCTURES::STRUCT_AI *ai, short int unit
 		if ((researchId >= 0) &&
 			(status != NULL) && (status->currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID) && // If already done, no need to add in strategy !
 			(researchId < player->ptrResearchesStruct->ptrResearchDefInfo->researchCount)) {
-			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = &player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(researchId);
 
 			if (ResearchHasOptionalRequirements(resDef)) {
 				// Handle optional requirements. This DOES have importance. eg. in DM, yamato build a temple just to go iron !

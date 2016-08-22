@@ -17,12 +17,13 @@ std::string GetTechnologyLocalizedName(short int techId) {
 	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
 		return "";
 	}
-	for (int i = 0; i < global->researchDefInfo->researchCount; i++) {
-		if (global->researchDefInfo->researchDefArray[i].technologyId == techId) {
+	for (int researchId = 0; researchId < global->researchDefInfo->researchCount; researchId++) {
+		STRUCT_RESEARCH_DEF *resDef = global->researchDefInfo->GetResearchDef(researchId);
+		assert(resDef != NULL);
+		if (resDef && (resDef->technologyId == techId)) {
 			char buffer[100];
 			buffer[0] = 0;
-			GetLanguageDllText(global->researchDefInfo->researchDefArray[i].languageDLLName, buffer, sizeof(buffer),
-				global->researchDefInfo->researchDefArray[i].researchName);
+			GetLanguageDllText(resDef->languageDLLName, buffer, sizeof(buffer), resDef->researchName);
 			return std::string(buffer);
 		}
 	}
@@ -47,10 +48,12 @@ std::string GetResearchLocalizedName(short int researchId) {
 	if (researchId >= global->researchDefInfo->researchCount) {
 		return "invalid-research";
 	}
+	STRUCT_RESEARCH_DEF *resDef = global->researchDefInfo->GetResearchDef(researchId);
+	assert(resDef != NULL);
+	if (!resDef) { return "invalid-research"; }
 	char buffer[100];
 	buffer[0] = 0;
-	GetLanguageDllText(global->researchDefInfo->researchDefArray[researchId].languageDLLName, buffer, sizeof(buffer),
-		global->researchDefInfo->researchDefArray[researchId].researchName);
+	GetLanguageDllText(resDef->languageDLLName, buffer, sizeof(buffer), resDef->researchName);
 	return std::string(buffer);
 }
 
@@ -147,7 +150,6 @@ int DisablePlayerImpossibleResearches(STRUCT_PLAYER *player) {
 	STRUCT_PLAYER_RESEARCH_STATUS *statuses = rinfo->researchStatusesArray;
 	STRUCT_RESEARCH_DEF_INFO *resInfoArray = rinfo->ptrResearchDefInfo;
 	if (!resInfoArray) { return 0; }
-	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
 
 	std::vector<short int> availableResearches; // status in AVAILABLE, BEING_RESEARCHED, DONE_OR_INVALID
 	std::vector<short int> disabledResearches; // CST_RESEARCH_STATUS_DISABLED
@@ -180,7 +182,9 @@ int DisablePlayerImpossibleResearches(STRUCT_PLAYER *player) {
 	int previousRemainingCount = 9999;
 	while ((remainingUnknownCount > 0) && (remainingUnknownCount != previousRemainingCount)) {
 		for each (int curResId in potentialResearches) {
-			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = &resDefArray[curResId];
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = resInfoArray->GetResearchDef(curResId);
+			assert(resDef != NULL);
+			if (!resDef) { continue; }
 			int minRequiredResearchesCount = resDef->minRequiredResearchesCount;
 			int reqResOK = 0;
 			int reqResImpossible = 0;
@@ -248,8 +252,6 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
 
 	int resCount = global->researchDefInfo->researchCount;
 	STRUCT_RESEARCH_DEF_INFO *resInfoArray = global->researchDefInfo;
-	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
-	if (!resDefArray) { return 0; }
 
 	std::set<short int> availableResearches; // status in AVAILABLE, BEING_RESEARCHED, DONE_OR_INVALID
 	std::set<short int> disabledResearches; // CST_RESEARCH_STATUS_DISABLED
@@ -297,7 +299,9 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
 	int previousRemainingCount = 9999;
 	while ((remainingUnknownCount > 0) && (remainingUnknownCount != previousRemainingCount)) {
 		for each (int curResId in potentialResearches) {
-			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = &resDefArray[curResId];
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = resInfoArray->GetResearchDef(curResId);
+			assert(resDef);
+			if (!resDef) { continue; }
 			int minRequiredResearchesCount = resDef->minRequiredResearchesCount;
 			int reqResOK = 0;
 			int reqResImpossible = 0;
@@ -548,13 +552,14 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 	STRUCT_PLAYER_RESEARCH_STATUS *statuses = rinfo->researchStatusesArray;
 	STRUCT_RESEARCH_DEF_INFO *resInfoArray = rinfo->ptrResearchDefInfo;
 	if (!resInfoArray) { return result; }
-	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
 
 	for (int researchId = 0; researchId < resCount; researchId++) {
-		if ((statuses[researchId].currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) &&
-			(resDefArray[researchId].researchName != NULL)) { // to filter out "New research" (invalid researches have no name)
+		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = resInfoArray->GetResearchDef(researchId);
+		assert(resDef);
+		if (resDef && (statuses[researchId].currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) &&
+			(resDef->researchName != NULL)) { // to filter out "New research" (invalid researches have no name)
 			bool added = false;
-			short int techId = resDefArray[researchId].technologyId;
+			short int techId = resDef->technologyId;
 			if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount) &&
 				(global->technologiesInfo->ptrTechDefArray[techId].effectCount > 0)) {
 				// We have a valid technology id. Add to result if it affects our unit.
@@ -590,10 +595,12 @@ short int FindResearchThatEnableUnit(STRUCT_PLAYER *player, short int unitDefId,
 	STRUCT_PLAYER_RESEARCH_STATUS *statuses = rinfo->researchStatusesArray;
 	STRUCT_RESEARCH_DEF_INFO *resInfoArray = rinfo->ptrResearchDefInfo;
 	if (!resInfoArray || !statuses) { return -1; }
-	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
 	for (int researchId = startAtResearchId; researchId < resCount; researchId++) {
+		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = resInfoArray->GetResearchDef(researchId);
+		assert(resDef);
+		if (!resDef) { return -1; }
 		if (statuses[researchId].currentStatus > RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) {
-			short int techId = resDefArray[researchId].technologyId;
+			short int techId = resDef->technologyId;
 			if ((techId >= 0) && DoesTechEnableUnit(&player->ptrGlobalStruct->technologiesInfo->ptrTechDefArray[techId], unitDefId)) {
 				return researchId;
 			}
@@ -618,7 +625,6 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 	STRUCT_PLAYER_RESEARCH_STATUS *statuses = rinfo->researchStatusesArray;
 	STRUCT_RESEARCH_DEF_INFO *resInfoArray = rinfo->ptrResearchDefInfo;
 	if (!resInfoArray || !statuses) { return allValidResearchesToReturn; }
-	STRUCT_RESEARCH_DEF *resDefArray = resInfoArray->researchDefArray;
 
 	std::set<short int> requiredResearches; // Set of research IDs that are required (including input list)
 	for each (short int researchId in researchesList) {
@@ -633,7 +639,7 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 		// Collect required reseaches (=>elementsToAdd) for all researches in list (requiredResearches)
 		for each (short int researchId in requiredResearches)
 		{
-			STRUCT_RESEARCH_DEF *resDef = &resDefArray[researchId];
+			STRUCT_RESEARCH_DEF *resDef = resInfoArray->GetResearchDef(researchId);
 			for (int i = 0; i < 4; i++) {
 				if (!ResearchHasOptionalRequirements(resDef) && (resDef->requiredResearchId[i] > -1)) {
 					// Don't add optional requirements (we can't guess which ones should be actually added)
@@ -659,7 +665,7 @@ std::vector<short int> GetValidOrderedResearchesListWithDependencies(STRUCT_PLAY
 
 	while ((remainingRequirementsCount > 0) && (remainingRequirementsCount != previousRemainingCount)) {
 		for each (short int curResId in requiredResearches) {
-			STRUCT_RESEARCH_DEF *resDef = &resDefArray[curResId];
+			STRUCT_RESEARCH_DEF *resDef = resInfoArray->GetResearchDef(curResId);
 			switch (statuses[curResId].currentStatus) {
 			case RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE:
 			case RESEARCH_STATUSES::CST_RESEARCH_STATUS_BEING_RESEARCHED:
@@ -768,15 +774,21 @@ AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(STRU
 // defaultResearchName = name to write for research, if none can be found automatically
 std::string GetResearchTechTreeLine(AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId, 
 	const char *defaultResearchName) {
-	std::string result;
+	std::string result = "";
 	char nameBuffer[50];
 	nameBuffer[0] = 0;
-	bool isAutomaticTech = (player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId].researchTime <= 0);
+	if (researchId < 0) {
+		traceMessageHandler.WriteMessageNoNotification("Tried to get tech tree line for invalid research ID");
+		return result;
+	}
+	STRUCT_RESEARCH_DEF *resDef = player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(researchId);
+	assert(resDef != NULL);
+	if (resDef == NULL) { return result; }
+	bool isAutomaticTech = (resDef->researchTime <= 0);
 	result = "techId ";
-	result += std::to_string(player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId].technologyId);
+	result += std::to_string(resDef->technologyId);
 	result += " = ";
-	GetLanguageDllText(player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId].languageDLLName, nameBuffer, sizeof(nameBuffer) - 1,
-		player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId].researchName);
+	GetLanguageDllText(resDef->languageDLLName, nameBuffer, sizeof(nameBuffer) - 1, resDef->researchName);
 	if (isAutomaticTech) { result += "("; }
 	result += ((nameBuffer[0] == 0) ? defaultResearchName : nameBuffer);
 	if (isAutomaticTech) { result += ")"; }
@@ -811,6 +823,8 @@ std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_
 	result += std::string(nameBuffer) + std::string(": "); // Write building name as a "header" (title)
 
 	bool foundItems = false;
+	assert(player->ptrResearchesStruct);
+	if (!player->ptrResearchesStruct) { return result; }
 	short int researchCount = player->ptrResearchesStruct->researchCount;
 	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *rs = player->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
 	// Search all researches that are developed in this building (and write text for each).
@@ -820,10 +834,12 @@ std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_
 		if ((rs[rid].currentStatus >= AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) &&
 			(rs[rid].currentStatus < AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID)) {
 
-			short int researchLocation = player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchLocation;
-			if (researchLocation < 0) {
+			STRUCT_RESEARCH_DEF *resDef = player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid);
+			assert(resDef != NULL);
+			//short int researchLocation = resDef->researchLocation;
+			if (resDef && (resDef->researchLocation < 0)) {
 				// Some research, like slinger, camel, are missing researchLocation (-1). We can try to retrieve it from technology/enabledUnit=>trainlocation
-				short int techId = player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].technologyId;
+				short int techId = resDef->technologyId;
 				if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
 					AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = &global->technologiesInfo->ptrTechDefArray[techId];
 					short int enabledUnitDefID = -1;
@@ -858,7 +874,7 @@ std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_
 					}
 				}
 			} else {
-				if ((researchLocation == bldDef->DAT_ID1)) {
+				if (resDef && (resDef->researchLocation == bldDef->DAT_ID1)) {
 					result += "\r\n";
 					result += GetResearchTechTreeLine(player, rid, "");
 					foundItems = true;

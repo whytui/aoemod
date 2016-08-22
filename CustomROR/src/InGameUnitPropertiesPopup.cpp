@@ -142,16 +142,16 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *rs = unitPlayer->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
 		for (int rid = 0; rid < researchCount; rid++) {
 			if (rs[rid].currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) {
-				if (unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchLocation == unitDefBase->DAT_ID1) {
+				if (unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->researchLocation == unitDefBase->DAT_ID1) {
 					techToShowCount++;
 					if (techToShowCount > 0) { buildingTechAndUnitInfo += "\n"; }
 					buildingTechAndUnitInfo += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TECHID_ABBREV, "techId");
 					buildingTechAndUnitInfo += " ";
-					buildingTechAndUnitInfo += std::to_string(unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].technologyId);
+					buildingTechAndUnitInfo += std::to_string(unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->technologyId);
 					buildingTechAndUnitInfo += " = ";
 					*nameBuffer = 0; // Reset string
-					GetLanguageDllText(unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].languageDLLName, nameBuffer, sizeof(nameBuffer) - 1,
-						unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchName);
+					GetLanguageDllText(unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->languageDLLName, nameBuffer, sizeof(nameBuffer) - 1,
+						unitPlayer->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->researchName);
 					buildingTechAndUnitInfo += nameBuffer;
 				}
 			}

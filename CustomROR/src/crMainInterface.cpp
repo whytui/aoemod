@@ -192,6 +192,16 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		if (unitArray) {
 			selectedUnit = unitArray[0];
 		}
+		AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *tmp = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)selectedUnit;
+		if (tmp->IsCheckSumValid()) {
+			if ((tmp->resourceValue > 0) && (tmp->unitDefinition->resourceDecay == 0)) {
+				tmp->resourceValue = 0;
+				if (tmp->hasDedicatedUnitDef) {
+					tmp->unitDefinition->resourceDecay = 5;
+				}
+				return false;
+			}
+		}
 
 		if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
 			// Editor
@@ -305,15 +315,15 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 					sTechTreeInfo = "";
 					for (int rid = 0; rid < researchCount; rid++) {
 						if (rs[rid].currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) {
-							if (player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchLocation == unitDef->DAT_ID1) {
+							if (player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->researchLocation == unitDef->DAT_ID1) {
 								techToShowCount++;
 								if (techToShowCount > 0) { sTechTreeInfo += "\n"; }
 								sTechTreeInfo += "techId ";
-								sTechTreeInfo += std::to_string(player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].technologyId);
+								sTechTreeInfo += std::to_string(player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->technologyId);
 								sTechTreeInfo += " = ";
 								*nameBuffer = 0; // Reset string
-								GetLanguageDllText(player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].languageDLLName, nameBuffer, sizeof(nameBuffer) - 1,
-									player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[rid].researchName);
+								GetLanguageDllText(player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->languageDLLName, nameBuffer, sizeof(nameBuffer) - 1,
+									player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->researchName);
 								sTechTreeInfo += nameBuffer;
 							}
 						}

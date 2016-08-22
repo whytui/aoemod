@@ -759,7 +759,7 @@ std::list<long int> GetActivableUnitDefIDs(AOE_STRUCTURES::STRUCT_PLAYER *player
 	if (playerResInfo && resDefInfo && techDefInfo) {
 		for (int researchId = 0; (researchId < playerResInfo->researchCount) && (researchId < resDefInfo->researchCount); researchId++) {
 			AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *status = &playerResInfo->researchStatusesArray[researchId];
-			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *researchDef = &resDefInfo->researchDefArray[researchId];
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *researchDef = resDefInfo->GetResearchDef(researchId);
 			if (researchDef && status && (status->currentStatus > AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED)) {
 				int techId = researchDef->technologyId;
 				if ((techId >= 0) && (techId < techCount)) {
@@ -863,7 +863,7 @@ AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT
 	if (!ri || (researchId >= ri->researchCount)) {
 		return false;
 	}
-	return &ri->ptrResearchDefInfo->researchDefArray[researchId];
+	return ri->ptrResearchDefInfo->GetResearchDef(researchId);
 }
 
 
@@ -1558,8 +1558,7 @@ bool DisableUnitForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID
 	long int researchId = -1;
 	if (techId >= 0) {
 		for (int i = 0; (i < player->ptrResearchesStruct->ptrResearchDefInfo->researchCount) && (researchId == -1); i++) {
-			assert(player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray != NULL); // should never happen when researchCount >0
-			if (player->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[i].technologyId == techId) {
+			if (player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(i)->technologyId == techId) {
 				researchId = i;
 			}
 		}
@@ -2863,7 +2862,7 @@ bool AnalyzeEmpiresDatQuality() {
 	// Researches
 #if 1
 	for (int researchId = 0; researchId < global->researchDefInfo->researchCount; researchId++) {
-		int remainingRequirementsCount = global->researchDefInfo->researchDefArray[researchId].minRequiredResearchesCount;
+		int remainingRequirementsCount = global->researchDefInfo->GetResearchDef(researchId)->minRequiredResearchesCount;
 		if ((remainingRequirementsCount < 0) || (remainingRequirementsCount > 4)) {
 			msg = "Research ";
 			msg += std::to_string(researchId);
@@ -2875,7 +2874,7 @@ bool AnalyzeEmpiresDatQuality() {
 		}
 		int validReqResearchCount = 0;
 		for (int index = 0; index < 4; index++) {
-			short int reqResearchId = global->researchDefInfo->researchDefArray[researchId].requiredResearchId[index];
+			short int reqResearchId = global->researchDefInfo->GetResearchDef(researchId)->requiredResearchId[index];
 			if (reqResearchId >= 0) {
 				validReqResearchCount++; // found a valid required research id
 				if (reqResearchId >= global->researchDefInfo->researchCount) {
@@ -2894,10 +2893,10 @@ bool AnalyzeEmpiresDatQuality() {
 			msg += " has optional requirements (more required researches than minRequiredResearch). This should be avoided (used in standard game for 'age' researches). You can set required research IDs to -1 to disable them.";
 			traceMessageHandler.WriteMessage(msg);
 		}
-		if (global->researchDefInfo->researchDefArray[researchId].researchLocation >= 0) {
+		if (global->researchDefInfo->GetResearchDef(researchId)->researchLocation >= 0) {
 			// If research is a shadow research, error
-			if ((global->researchDefInfo->researchDefArray[researchId].researchTime <= 0) ||
-				(global->researchDefInfo->researchDefArray[researchId].buttonId <= 0)) {
+			if ((global->researchDefInfo->GetResearchDef(researchId)->researchTime <= 0) ||
+				(global->researchDefInfo->GetResearchDef(researchId)->buttonId <= 0)) {
 				msg = "Research ";
 				msg += std::to_string(researchId);
 				msg += " is a shadow research but has a research location. If this really is a shadow research, you should set research location to -1.";

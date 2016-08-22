@@ -5012,8 +5012,10 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	if (playerResInfo && resDefInfo) {
 		for (int researchId = 0; (researchId < playerResInfo->researchCount) && (researchId < resDefInfo->researchCount); researchId++) {
 			AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *status = &playerResInfo->researchStatusesArray[researchId];
-			int rawButtonId = resDefInfo->researchDefArray[researchId].buttonId;
-			if ((resDefInfo->researchDefArray[researchId].researchLocation == unitDef->DAT_ID1) &&
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = resDefInfo->GetResearchDef(researchId);
+			assert(resDef);
+			int rawButtonId = resDef->buttonId;
+			if ((resDef->researchLocation == unitDef->DAT_ID1) &&
 				(rawButtonId > maxFoundButtonId)) {
 				maxFoundButtonId = rawButtonId;
 			}
@@ -5033,25 +5035,25 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 				// Sorting strategy:
 				// We suppose higher cost=further research, so lower cost should be first (next) available research.
 				long int thisCost = 0;
-				if (resDefInfo->researchDefArray[researchId].costUsed1) {
-					thisCost += resDefInfo->researchDefArray[researchId].costAmount1;
+				if (resDef->costUsed1) {
+					thisCost += resDef->costAmount1;
 				}
-				if (resDefInfo->researchDefArray[researchId].costUsed2) {
-					thisCost += resDefInfo->researchDefArray[researchId].costAmount2;
+				if (resDef->costUsed2) {
+					thisCost += resDef->costAmount2;
 				}
-				if (resDefInfo->researchDefArray[researchId].costUsed3) {
-					thisCost += resDefInfo->researchDefArray[researchId].costAmount3;
+				if (resDef->costUsed3) {
+					thisCost += resDef->costAmount3;
 				}
 				bool costIsBetter = (bestElemTotalCost[buttonIndex] == -1) || (thisCost < bestElemTotalCost[buttonIndex]);
 				
 				if (((isBusy && researchIsAvailable) || costIsBetter) && // When we choose to show available researches, they have best priority.
-					(resDefInfo->researchDefArray[researchId].researchLocation == unitDef->DAT_ID1) &&
-					((resDefInfo->researchDefArray[researchId].researchTime > 0) || researchIsAvailable) // Hide unavailable immediate researches
+					(resDef->researchLocation == unitDef->DAT_ID1) &&
+					((resDef->researchTime > 0) || researchIsAvailable) // Hide unavailable immediate researches
 					) {
 					bestElemDATID[buttonIndex] = researchId;
 					bestElemIsResearch[buttonIndex] = true;
 					bestElemTotalCost[buttonIndex] = thisCost;
-					bestElemLangNameId[buttonIndex] = resDefInfo->researchDefArray[researchId].languageDLLName;
+					bestElemLangNameId[buttonIndex] = resDef->languageDLLName;
 					bestElemIsAvailable[buttonIndex] = researchIsAvailable && !isBusy;
 				}
 			}

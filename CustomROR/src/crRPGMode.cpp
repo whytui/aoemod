@@ -58,7 +58,7 @@ namespace RPG_MODE {
 			int currentLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
 			actorUnitTrainable->resourceValue += addedXP;
 			// Hack to prevent units from being "stuck" in status=5 (dying, waiting for resources to be depleted)
-			// Another solution could be to force unit's resource to 0 when it dies ?
+			// Another solution could be to force unit's resource to 0 when it "dies" (changes status to >2) ?
 			if (actorUnitTrainable->unitDefinition->resourceDecay <= 0) {
 				actorUnitTrainable->unitDefinition->resourceDecay = 2; // Otherwise, units remain stuck at status 5 and never completely die.
 			}
@@ -385,7 +385,7 @@ namespace RPG_MODE {
 	bool MakeEpicUnitWithRandomCondition(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit) {
 		assert(unit && unit->IsCheckSumValidForAUnitClass());
 		if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
-		if (!unit->IsTypeValid()) { return false; } // Only trainable (excluding buildings) can become unique units here
+		if (!unit->IsTypeValid()) { return false; } // Only trainable (*excluding buildings*) can become unique units here
 		if (!unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) { return false; }
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
 		if (unitDef->villagerMode) { return false; } // unit that can switch unit definition can't be unique (changing unit definition would loose their specificity).

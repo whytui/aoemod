@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <assert.h>
 //#include <AOE_const_functional.h>
 #include <AOE_struct_research_def.h>
 #include <AOE_struct_unit_def.h>
@@ -30,11 +31,20 @@ namespace AOE_STRUCTURES {
 
 	// Size = 0x0C. Constructor=0x4E9C60
 	class STRUCT_RESEARCH_DEF_INFO {
-	public:
+	private:
 		STRUCT_RESEARCH_DEF *researchDefArray;
+	public:
 		short int researchCount;
 		short int unknown_06; // unused ?
 		STRUCT_GAME_GLOBAL *ptrGlobalStruct;
+		
+		// Securely gets a pointer to a research definition from its ID. Returns NULL if invalid (does asserts on ID)
+		STRUCT_RESEARCH_DEF *GetResearchDef(short int researchId) const {
+			assert(researchId >= 0);
+			assert(researchId < this->researchCount);
+			if ((researchId < 0) || (researchId >= this->researchCount)) { return NULL; }
+			return &this->researchDefArray[researchId];
+		}
 	};
 	static_assert(sizeof(STRUCT_RESEARCH_DEF_INFO) == 0x0C, "STRUCT_RESEARCH_DEF_INFO size");
 
@@ -278,9 +288,9 @@ namespace AOE_STRUCTURES {
 			return (STRUCT_UNITDEF_BASE *)this->ptrStructDefUnitTable[unitDefId];
 		}
 		STRUCT_RESEARCH_DEF *GetResearchDef(short int researchId) const {
-			if (!this->ptrResearchesStruct || !this->ptrResearchesStruct->ptrResearchDefInfo || !this->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray) { return NULL; }
+			if (!this->ptrResearchesStruct || !this->ptrResearchesStruct->ptrResearchDefInfo) { return NULL; }
 			if ((researchId < 0) || (researchId >= this->ptrResearchesStruct->researchCount)) { return NULL; }
-			return &this->ptrResearchesStruct->ptrResearchDefInfo->researchDefArray[researchId];
+			return this->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(researchId);
 		}
 		// Securely get research status for research id. Returns NULL if input is invalid.
 		STRUCT_PLAYER_RESEARCH_STATUS *GetResearchStatus(short int researchId) const {
