@@ -13,6 +13,7 @@
 
 namespace RPG_MODE {
 
+	const bool collectXpOnKills = true;
 	const int maxUnitLevel = 49;
 	const int maxLevelHPIncrease = 20;
 	const int maxLevelAttackIncrease = 2;

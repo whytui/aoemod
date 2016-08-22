@@ -422,6 +422,16 @@ namespace AOE_CONST_FUNC {
 	const short int CST_UNITID_RUIN = 0x9E; // 158.
 	const short int CST_UNITID_RUIN2 = 0xA3; // 163. The unused (but supported) ruins
 
+	// Resources
+	const short int CST_UNITID_GAZELLE = 65;
+	const short int CST_UNITID_GAZELLE_KING = 384;
+	const short int CST_UNITID_ALLIGATOR = 1;
+	const short int CST_UNITID_ALLIGATOR_KING = 362;
+	const short int CST_UNITID_ELEPHANT = 48;
+	const short int CST_UNITID_ELEPHANT_KING = 90;
+	const short int CST_UNITID_LION = 126;
+	const short int CST_UNITID_LION_KING = 89;
+
 	// Research IDs from empires.dat
 	const short int CST_RSID_STONE_AGE = 100;
 	const short int CST_RSID_TOOL_AGE = 101;
@@ -732,6 +742,43 @@ namespace AOE_CONST_FUNC {
 		case RESOURCE_TYPES::CST_RES_ORDER_FOOD:
 		default:
 			return rawCostValue;
+		}
+	}
+
+
+	// Returns true if a tree unit def ID is a forest (40 food by default), false for "normal" trees (75 wood by default)
+	// unitDefId MUST be a tree (not verified). This is HARDCODED using IDs.
+	static bool TreeUnitIsForest(short int unitDefId) {
+		if ((unitDefId >= 134) && (unitDefId <= 153)) { // serie of basic trees (default 75)
+			return false;
+		}
+		switch (unitDefId) {
+		case 56:
+		case 113:
+		case 114:
+		case 121:
+		case 129:
+		case 161:
+		case 195:
+		case 198:
+		case 203:
+		case 206:
+		case 365:
+		case 366:
+		case 367:
+			// Forest (default 40)
+			return true;
+		case 192:
+		case 193:
+		case 194:
+		case 197:
+		case 391:
+		case 392:
+		case 393:
+			// basic trees (default 75)
+			return false;
+		default:
+			return false; // Unknown units (not trees or custom ?)
 		}
 	}
 

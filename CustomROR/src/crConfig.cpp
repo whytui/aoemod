@@ -29,6 +29,16 @@ CustomRORConfig::CustomRORConfig() {
 	this->noDockInMostlyLandMaps = false; // Default: dock is always available.
 	this->fixVillagerWorkRates = false; // Default: keep empires.dat values
 	this->noWalls = false; // Default
+	this->unitResourceAmountAlligator = 0; // 0 = ignore and use default
+	this->unitResourceAmountBerryBush = 0; // 0 = ignore and use default
+	this->unitResourceAmountElephant = 0; // 0 = ignore and use default
+	this->unitResourceAmountGazelle = 0; // 0 = ignore and use default
+	this->unitResourceAmountGoldMine = 0; // 0 = ignore and use default
+	this->unitResourceAmountLion = 0; // 0 = ignore and use default
+	this->unitResourceAmountStoneMine = 0; // 0 = ignore and use default
+	this->unitResourceAmountTree = 0; // 0 = ignore and use default
+	this->unitResourceAmountTreeForest = 0; // 0 = ignore and use default
+	this->unitResourceAmountFish = 0; // 0 = ignore and use default
 	this->conversionResistance_Boats = 2; // Game default
 	this->conversionResistance_Chariots = 8; // Game default
 	this->conversionResistance_Macedonian = 4; // Game default
@@ -305,6 +315,28 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		if (elemName == "fixVillagerWorkRates") {
 			this->fixVillagerWorkRates = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "resourceAmounts") {
+			callResult = elem->QueryIntAttribute("alligator", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountAlligator = intValue; }
+			callResult = elem->QueryIntAttribute("goldMine", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountGoldMine = intValue; }
+			callResult = elem->QueryIntAttribute("stoneMine", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountStoneMine = intValue; }
+			callResult = elem->QueryIntAttribute("berryBush", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountBerryBush = intValue; }
+			callResult = elem->QueryIntAttribute("gazelle", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountGazelle = intValue; }
+			callResult = elem->QueryIntAttribute("elephant", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountElephant = intValue; }
+			callResult = elem->QueryIntAttribute("lion", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountLion = intValue; }
+			callResult = elem->QueryIntAttribute("tree", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountTree = intValue; }
+			callResult = elem->QueryIntAttribute("forestTree", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountTreeForest = intValue; }
+			callResult = elem->QueryIntAttribute("fish", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountFish = intValue; }
 		}
 
 		// Random games settings

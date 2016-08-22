@@ -65,8 +65,20 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "useImprovedButtonBar:                      %d\n", this->crInfo->configInfo.useImprovedButtonBar);
 	fprintf_s(f, "allowMultiQueueing:                        %d\n", this->crInfo->configInfo.allowMultiQueueing);
 	// General - related to game
-	fprintf_s(f, "allyExplorationIsAlwaysShared:             %d\n", this->crInfo->configInfo.allyExplorationIsAlwaysShared);
+	fprintf_s(f, "unit resource amounts: alligator=%d bush=%d elephant=%d\n"
+		"...gazelle=%d gold=%d lion=%d stone=%d tree=%d forest=%d fish=%d\n",
+		this->crInfo->configInfo.unitResourceAmountAlligator,
+		this->crInfo->configInfo.unitResourceAmountBerryBush, 
+		this->crInfo->configInfo.unitResourceAmountElephant, 
+		this->crInfo->configInfo.unitResourceAmountGazelle, 
+		this->crInfo->configInfo.unitResourceAmountGoldMine, 
+		this->crInfo->configInfo.unitResourceAmountLion, 
+		this->crInfo->configInfo.unitResourceAmountStoneMine, 
+		this->crInfo->configInfo.unitResourceAmountTree, 
+		this->crInfo->configInfo.unitResourceAmountTreeForest,
+		this->crInfo->configInfo.unitResourceAmountFish);
 	// Random games settings
+	fprintf_s(f, "noWalls:                                   %ld\n", this->crInfo->configInfo.noWalls);
 	fprintf_s(f, "noNeutralInitialDiplomacy:                 %d\n", this->crInfo->configInfo.noNeutralInitialDiplomacy);
 	fprintf_s(f, "noWalls:                                   %d\n", this->crInfo->configInfo.noWalls);
 	fprintf_s(f, "[RM] initial food (default/small/med/large) : %ld/%ld/%ld/%ld\n",
@@ -828,6 +840,90 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 					}
 					traceMessageHandler.WriteMessageNoNotification(msg);
 					techDef->ptrEffects[i].effectValue = newValue;
+				}
+			}
+		}
+	}
+
+	// Override resource values according to configuration
+	for (int civid = 0; civid < global->civCount; civid++) {
+		AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civid];
+		if (civDef && civDef->IsCheckSumValid()) {
+			for (int unitDefId = 0; unitDefId < civDef->civUnitDefCount; unitDefId++) {
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = civDef->GetUnitDef(unitDefId);
+				if (unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
+					switch (unitDef->unitAIType) {
+					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupBerryBush:
+						if (this->crInfo->configInfo.unitResourceAmountBerryBush > 0) {
+							unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountBerryBush;
+							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
+						}
+						break;
+					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSeaFish:
+					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupShoreFish:
+						if (this->crInfo->configInfo.unitResourceAmountFish > 0) {
+							unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountFish;
+							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
+						}
+						break;
+					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupGoldMine:
+						if (this->crInfo->configInfo.unitResourceAmountGoldMine > 0) {
+							unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountGoldMine;
+							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
+						}
+						break;
+					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupStoneMine:
+						if (this->crInfo->configInfo.unitResourceAmountStoneMine > 0) {
+							unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountStoneMine;
+							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
+						}
+						break;
+					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPreyAnimal:
+						if (unitDefId == CST_UNITID_GAZELLE) { // Exclude gazelle king, horse
+							if (this->crInfo->configInfo.unitResourceAmountGazelle > 0) {
+								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountGazelle;
+								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
+							}
+						}
+						break;
+					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPredatorAnimal:
+						if (unitDefId == CST_UNITID_LION) {
+							if (this->crInfo->configInfo.unitResourceAmountLion > 0) {
+								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountLion;
+								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
+							}
+						}
+						if (unitDefId == CST_UNITID_ALLIGATOR) {
+							if (this->crInfo->configInfo.unitResourceAmountAlligator > 0) {
+								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountAlligator;
+								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
+							}
+						}
+						if (unitDefId == CST_UNITID_ELEPHANT) {
+							if (this->crInfo->configInfo.unitResourceAmountElephant > 0) {
+								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountElephant;
+								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
+							}
+						}
+						break;
+					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupTree:
+						// There is no way finding automatically if trees are "normal" or forest.
+						if (TreeUnitIsForest(unitDefId)) {
+							// Forest (default 40 wood)
+							if (this->crInfo->configInfo.unitResourceAmountTreeForest > 0) {
+								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountTreeForest;
+								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
+							}
+						} else {
+							// Basic trees (default 75 wood)
+							if (this->crInfo->configInfo.unitResourceAmountTree > 0) {
+								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountTree;
+								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
+							}
+						}
+					default:
+						break;
+					}
 				}
 			}
 		}

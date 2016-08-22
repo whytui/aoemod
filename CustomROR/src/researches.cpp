@@ -270,7 +270,7 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
 			if ((techTreeDef->ptrEffects[effectId].effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) &&
 				(techTreeDef->ptrEffects[effectId].effectClass == 0) && (techTreeDef->ptrEffects[effectId].effectUnit > -1)) {
 				AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDefAsBld = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)
-					civDef->GetUnitDefBase(techTreeDef->ptrEffects[effectId].effectUnit);
+					civDef->GetUnitDef(techTreeDef->ptrEffects[effectId].effectUnit);
 				if (unitDefAsBld && unitDefAsBld->IsCheckSumValid() && unitDefAsBld->IsTypeValid() && (unitDefAsBld->initiatesResearch > -1)) {
 					// We DO have a valid building with a "initiate research" value... And it's not available, making the research unavailable
 					potentialResearches.erase(unitDefAsBld->initiatesResearch);

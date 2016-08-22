@@ -815,7 +815,7 @@ const char *GetUnitName(short int unitDefId) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) { return NULL; }
 	if (global->civCount <= 0) { return NULL; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = global->civilizationDefinitions[0]->GetUnitDefBase(unitDefId);
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = global->civilizationDefinitions[0]->GetUnitDef(unitDefId);
 	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return NULL; }
 	return unitDef->ptrUnitName;
 }
@@ -2910,7 +2910,7 @@ bool AnalyzeEmpiresDatQuality() {
 	std::set<short int> badBlastLevelUnits;
 	for (int civId = 0; civId < global->civCount; civId++) {
 		for (int unitDefId = 0; unitDefId < global->civilizationDefinitions[civId]->civUnitDefCount; unitDefId++) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = global->civilizationDefinitions[civId]->GetUnitDefBase(unitDefId);
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = global->civilizationDefinitions[civId]->GetUnitDef(unitDefId);
 			if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass()) {
 				if (unitDefBase->unitAIType < 0) {
 					msg = "UnitDef ";

@@ -44,33 +44,35 @@ namespace RPG_MODE {
 		//if (!actorUnitTrainable->unitDefinition) { return; }
 
 		// Handle "XP"
-		int addedXP = 1;
-		if (killedUnit->resourceTypeId == resourceTypeUsedForXp) {
-			int lootXP = (int)(killedUnit->resourceValue / xpStolenProportionFromKilledUnit);
-			if (lootXP > 0) {
-				addedXP += lootXP; // Gain a part of killed unit's XP (bonus)
-			}
-		}
-
-		if (!actorIsBuilding && (actorUnitTrainable->resourceValue == 0) || (actorUnitTrainable->resourceTypeId == resourceTypeUsedForXp)) {
-			actorUnitTrainable->resourceTypeId = resourceTypeUsedForXp;
-			if (actorUnitTrainable->resourceValue < 0) { actorUnitTrainable->resourceValue = 0; }
-			int currentLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
-			actorUnitTrainable->resourceValue += addedXP;
-			// Hack to prevent units from being "stuck" in status=5 (dying, waiting for resources to be depleted)
-			// Another solution could be to force unit's resource to 0 when it "dies" (changes status to >2) ?
-			if (actorUnitTrainable->unitDefinition->resourceDecay <= 0) {
-				actorUnitTrainable->unitDefinition->resourceDecay = 2; // Otherwise, units remain stuck at status 5 and never completely die.
-			}
-			int newLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
-			if ((newLevel > currentLevel) && (newLevel <= maxUnitLevel)) {
-				for (int i = currentLevel; i < newLevel; i++) {
-					UpgradeUnitLevel(actorUnitTrainable);
+		if (collectXpOnKills) {
+			int addedXP = 1;
+			if ((killedUnit->resourceTypeId == resourceTypeUsedForXp) && (xpStolenProportionFromKilledUnit > 0)) {
+				int lootXP = (int)(killedUnit->resourceValue / xpStolenProportionFromKilledUnit);
+				if (lootXP > 0) {
+					addedXP += lootXP; // Gain a part of killed unit's XP (bonus)
 				}
-				if (DisplayLevelUpMessage(actorUnitTrainable, newLevel)) { // True only if unit belongs to human player
-					AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-					if (settings && settings->IsCheckSumValid()) {
-						settings->AddEventInHistory((long int)actorUnit->positionX, (long int)actorUnit->positionY);
+			}
+
+			if (!actorIsBuilding && (actorUnitTrainable->resourceValue == 0) || (actorUnitTrainable->resourceTypeId == resourceTypeUsedForXp)) {
+				actorUnitTrainable->resourceTypeId = resourceTypeUsedForXp;
+				if (actorUnitTrainable->resourceValue < 0) { actorUnitTrainable->resourceValue = 0; }
+				int currentLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
+				actorUnitTrainable->resourceValue += addedXP;
+				// Hack to prevent units from being "stuck" in status=5 (dying, waiting for resources to be depleted)
+				// Another solution could be to force unit's resource to 0 when it "dies" (changes status to >2) ?
+				if (actorUnitTrainable->unitDefinition->resourceDecay <= 0) {
+					actorUnitTrainable->unitDefinition->resourceDecay = 2; // Otherwise, units remain stuck at status 5 and never completely die.
+				}
+				int newLevel = (int)actorUnitTrainable->resourceValue / killsToLevelUp;
+				if ((newLevel > currentLevel) && (newLevel <= maxUnitLevel)) {
+					for (int i = currentLevel; i < newLevel; i++) {
+						UpgradeUnitLevel(actorUnitTrainable);
+					}
+					if (DisplayLevelUpMessage(actorUnitTrainable, newLevel)) { // True only if unit belongs to human player
+						AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+						if (settings && settings->IsCheckSumValid()) {
+							settings->AddEventInHistory((long int)actorUnit->positionX, (long int)actorUnit->positionY);
+						}
 					}
 				}
 			}

@@ -35,15 +35,11 @@ namespace AOE_STRUCTURES
 		short int techTreeId;
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_CIVILIZATION_DEF; }
-		// Use this to safely get unit definitions
+		// Safely get a unit definition. Returns NULL if the unit does not exist.
 		STRUCT_UNITDEF_BASE *GetUnitDef(short int DAT_ID) const {
 			if ((DAT_ID < 0) || (DAT_ID >= this->civUnitDefCount)) { return NULL; }
 			if ((long int)(this->ptrUnitDefArray[DAT_ID]) == 1) { return NULL; }
 			return this->ptrUnitDefArray[DAT_ID];
-		}
-		// Safely get a unit definition. Returns NULL if the unit does not exist.
-		STRUCT_UNITDEF_BASE *GetUnitDefBase(short int DAT_ID) const {
-			return (STRUCT_UNITDEF_BASE *)this->GetUnitDef(DAT_ID);
 		}
 		// Returns true if a unit (definition) exists for this civilization, false if not (also if DAT_ID is invalid)
 		// The unit does not require to be "enabled", we just check its existence.

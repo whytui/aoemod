@@ -110,6 +110,16 @@ public:
 	bool fixVillagerWorkRates;
 	bool noWalls;
 	bool noDockInMostlyLandMaps;
+	int unitResourceAmountTree; // <=0 means use empires.dat default (do nothing, in fact)
+	int unitResourceAmountTreeForest; // <=0 means use empires.dat default (do nothing, in fact)
+	int unitResourceAmountBerryBush; // <=0 means use empires.dat default (do nothing, in fact)
+	int unitResourceAmountGazelle; // <=0 means use empires.dat default (do nothing, in fact)
+	int unitResourceAmountLion; // <=0 means use empires.dat default (do nothing, in fact)
+	int unitResourceAmountElephant; // <=0 means use empires.dat default (do nothing, in fact)
+	int unitResourceAmountAlligator; // <=0 means use empires.dat default (do nothing, in fact)
+	int unitResourceAmountGoldMine; // <=0 means use empires.dat default (do nothing, in fact)
+	int unitResourceAmountStoneMine; // <=0 means use empires.dat default (do nothing, in fact)
+	int unitResourceAmountFish; // <=0 means use empires.dat default (do nothing, in fact)
 
 	// Conversion resistance
 	float conversionResistance_Macedonian;
