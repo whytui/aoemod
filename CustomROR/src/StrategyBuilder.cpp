@@ -446,7 +446,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 	assert(player->techTreeId < global->technologiesInfo->technologyCount);
 	STRUCT_TECH_DEF *techDefTechTree = NULL;
 	if (player->techTreeId >= 0) { // a player *might* not have a tech tree.
-		techDefTechTree = &global->technologiesInfo->ptrTechDefArray[player->techTreeId];
+		techDefTechTree = global->technologiesInfo->GetTechDef(player->techTreeId);
 		if (techDefTechTree->effectCount <= 0) { techDefTechTree = NULL; }
 	}
 	this->player = player;
@@ -500,7 +500,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 						[enableUnitResearchId](short int availableResId) { return enableUnitResearchId == availableResId; }
 					);
 					bool researchIsDisabled = (it != allDisabledResearches.end()); // If found, then the research IS disabled
-					STRUCT_TECH_DEF *enableUnitTechDef = &global->technologiesInfo->ptrTechDefArray[enableUnitResearchDef->technologyId];
+					STRUCT_TECH_DEF *enableUnitTechDef = global->technologiesInfo->GetTechDef(enableUnitResearchDef->technologyId);
 					if (enableUnitTechDef && !researchIsDisabled) { // if research object is found AND available in my tech tree (not disabled)
 						for (int i = 0; i < enableUnitTechDef->effectCount; i++) {
 							if (enableUnitTechDef->ptrEffects[i].IsEnableUnit(unitDefBase->DAT_ID1)) {
@@ -553,7 +553,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 				if (curResearchDef) {
 					techId = curResearchDef->technologyId;
 					if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
-						techDef = &global->technologiesInfo->ptrTechDefArray[techId];
+						techDef = global->technologiesInfo->GetTechDef(techId);
 					}
 				}
 				if (techDef && techDef->ptrEffects) {
@@ -653,7 +653,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 				if (curResearchDef) {
 					techId = curResearchDef->technologyId;
 					if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
-						techDef = &global->technologiesInfo->ptrTechDefArray[techId];
+						techDef = global->technologiesInfo->GetTechDef(techId);
 					}
 				}
 				if (techDef && techDef->ptrEffects) {
@@ -678,7 +678,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 				if (curResearchDef) {
 					techId = curResearchDef->technologyId;
 					if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
-						techDef = &global->technologiesInfo->ptrTechDefArray[techId];
+						techDef = global->technologiesInfo->GetTechDef(techId);
 					}
 				}
 				if (techDef && techDef->ptrEffects) {

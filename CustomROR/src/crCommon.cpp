@@ -763,7 +763,7 @@ std::list<long int> GetActivableUnitDefIDs(AOE_STRUCTURES::STRUCT_PLAYER *player
 			if (researchDef && status && (status->currentStatus > AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED)) {
 				int techId = researchDef->technologyId;
 				if ((techId >= 0) && (techId < techCount)) {
-					AOE_STRUCTURES::STRUCT_TECH_DEF *techdef = &techDefInfo->ptrTechDefArray[techId];
+					AOE_STRUCTURES::STRUCT_TECH_DEF *techdef = techDefInfo->GetTechDef(techId);
 					for (int effectId = 0; effectId < techdef->effectCount; effectId++) {
 						if ((techdef->ptrEffects[effectId].effectType == TDE_ENABLE_DISABLE_UNIT) &&
 							(techdef->ptrEffects[effectId].effectClass)) { // effectClass is "Mode" for "enable disable unit"
@@ -1528,23 +1528,23 @@ bool DisableUnitForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID
 	if (!global || !global->IsCheckSumValid()) { return false; }
 	AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *techDefInfo= global->technologiesInfo;
 	if (!techDefInfo || (!techDefInfo->IsCheckSumValid())) { return false; }
-	if (techDefInfo->ptrTechDefArray == NULL) { return false; }
 
 	// Search for the technology that enables that unit
 	long int techId = -1;
 	long int effectsCount = 0;
 	for (int i = 0; (i < techDefInfo->technologyCount) && (techId == -1); i++) {
 		effectsCount = 0;
-		for (int effectId = 0; effectId < techDefInfo->ptrTechDefArray[i].effectCount; effectId++) {
-			assert(techDefInfo->ptrTechDefArray[i].ptrEffects != NULL); // should never happen because effectCount would be 0
+		AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = techDefInfo->GetTechDef(i);
+		for (int effectId = 0; techDef && (effectId < techDef->effectCount); effectId++) {
+			assert(techDef->ptrEffects != NULL); // should never happen because effectCount would be 0
 			// Count number of effects for this tech, excluding the "increase researches count" thing.
-			if ((techDefInfo->ptrTechDefArray[i].ptrEffects[effectId].effectType != AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) || // resource modifier
-				(techDefInfo->ptrTechDefArray[i].ptrEffects[effectId].effectUnit != RESOURCE_TYPES::CST_RES_ORDER_TECHNOLOGIES)
+			if ((techDef->ptrEffects[effectId].effectType != AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) || // resource modifier
+				(techDef->ptrEffects[effectId].effectUnit != RESOURCE_TYPES::CST_RES_ORDER_TECHNOLOGIES)
 				) {
 				effectsCount++;
 			}
-			if ((techDefInfo->ptrTechDefArray[i].ptrEffects[effectId].effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) &&
-				(techDefInfo->ptrTechDefArray[i].ptrEffects[effectId].effectUnit == DAT_ID)
+			if ((techDef->ptrEffects[effectId].effectType == AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) &&
+				(techDef->ptrEffects[effectId].effectUnit == DAT_ID)
 				) {
 				techId = i;
 			}

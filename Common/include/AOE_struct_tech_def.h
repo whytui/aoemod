@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <assert.h>
 #include <math.h> // fmodf
 #include <AOE_empires_dat.h>
 using namespace AOE_CONST_FUNC;
@@ -102,11 +103,15 @@ namespace AOE_STRUCTURES {
 	class STRUCT_TECH_DEF_INFO {
 	public:
 		unsigned long int checksum; // 20 99 54 00
+	private:
 		STRUCT_TECH_DEF *ptrTechDefArray;
+	public:
 		long int technologyCount;
 
 		bool IsCheckSumValid() const { return this->checksum == 0x00549920; }
 		STRUCT_TECH_DEF *GetTechDef(short int techDefId) const {
+			assert(techDefId >= 0);
+			assert(techDefId < this->technologyCount);
 			if ((techDefId < 0) || (techDefId >= this->technologyCount)) { return NULL; }
 			return &this->ptrTechDefArray[techDefId];
 		}

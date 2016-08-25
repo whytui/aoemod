@@ -246,7 +246,7 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
 	}
 	if ((civId < 0) || (civId >= global->civCount)) { return 0; }
 	STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civId];
-	if (civDef->techTreeId >= global->technologiesInfo->technologyCount) {
+	if ((civDef->techTreeId < 0) || (civDef->techTreeId >= global->technologiesInfo->technologyCount)) {
 		return 0;
 	}
 
@@ -259,7 +259,7 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
 	std::set<short int> potentialToRemove; // internal temp buffer for loop
 
 	// Loop 1 : sort researches into 3 categories (disabled, done or available, undetermined)
-	AOE_STRUCTURES::STRUCT_TECH_DEF *techTreeDef = &global->technologiesInfo->ptrTechDefArray[civDef->techTreeId];
+	AOE_STRUCTURES::STRUCT_TECH_DEF *techTreeDef = global->technologiesInfo->GetTechDef(civDef->techTreeId);
 	for (int researchId = 0; researchId < resCount; researchId++) {
 		bool isDisabled = false;
 		for (int effectId = 0; effectId < techTreeDef->effectCount; effectId++) {
@@ -561,7 +561,7 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 			bool added = false;
 			short int techId = resDef->technologyId;
 			if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount) &&
-				(global->technologiesInfo->ptrTechDefArray[techId].effectCount > 0)) {
+				(global->technologiesInfo->GetTechDef(techId)->effectCount > 0)) {
 				// We have a valid technology id. Add to result if it affects our unit.
 				AOE_TECHNOLOGIES::TechnologyFilterBase emptyFilter;
 				AOE_TECHNOLOGIES::TechnologyFilterBase *filter = &emptyFilter;
@@ -569,7 +569,7 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 				if (ignoreUndesirableTechs) {
 					filter = &filterDrawbacks;
 				}
-				if (!added && DoesTechAffectUnit(&global->technologiesInfo->ptrTechDefArray[techId], unitDefBase, filter)) {
+				if (!added && DoesTechAffectUnit(global->technologiesInfo->GetTechDef(techId), unitDefBase, filter)) {
 					result.push_back(researchId);
 					added = true;
 				}
@@ -584,8 +584,7 @@ std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long 
 // startAtResearchId : -1=ignored (joker). If >=0, than the search will start at this index and ignore previous researches.
 short int FindResearchThatEnableUnit(STRUCT_PLAYER *player, short int unitDefId, short int startAtResearchId) {
 	if (!player || !player->IsCheckSumValid() || !player->ptrGlobalStruct || !player->ptrGlobalStruct->IsCheckSumValid() ||
-		!player->ptrGlobalStruct->technologiesInfo || !player->ptrGlobalStruct->technologiesInfo->IsCheckSumValid() ||
-		!player->ptrGlobalStruct->technologiesInfo->ptrTechDefArray) {
+		!player->ptrGlobalStruct->technologiesInfo || !player->ptrGlobalStruct->technologiesInfo->IsCheckSumValid()) {
 		return -1;
 	}
 	if (startAtResearchId < 0) { startAtResearchId = 0; }
@@ -601,7 +600,7 @@ short int FindResearchThatEnableUnit(STRUCT_PLAYER *player, short int unitDefId,
 		if (!resDef) { return -1; }
 		if (statuses[researchId].currentStatus > RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) {
 			short int techId = resDef->technologyId;
-			if ((techId >= 0) && DoesTechEnableUnit(&player->ptrGlobalStruct->technologiesInfo->ptrTechDefArray[techId], unitDefId)) {
+			if ((techId >= 0) && DoesTechEnableUnit(player->ptrGlobalStruct->technologiesInfo->GetTechDef(techId), unitDefId)) {
 				return researchId;
 			}
 		}
@@ -809,8 +808,7 @@ std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_
 	if (!bldDef || !bldDef->IsCheckSumValidForAUnitClass() || !bldDef->IsTypeValid() ||
 		!player || !player->IsCheckSumValid()) { return ""; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
-	if (!global || !global->IsCheckSumValid() || !global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid() ||
-		!global->technologiesInfo->ptrTechDefArray) { return ""; }
+	if (!global || !global->IsCheckSumValid() || !global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid()) { return ""; }
 	// Not relevant (functional reasons)
 	if ((bldDef->unitType != AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING) ||
 		(bldDef->hideInEditor != 0 /*exclude duplicates*/) || (bldDef->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding/*excludes walls*/) ||
@@ -841,7 +839,7 @@ std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_
 				// Some research, like slinger, camel, are missing researchLocation (-1). We can try to retrieve it from technology/enabledUnit=>trainlocation
 				short int techId = resDef->technologyId;
 				if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
-					AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = &global->technologiesInfo->ptrTechDefArray[techId];
+					AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->technologiesInfo->GetTechDef(techId);
 					short int enabledUnitDefID = -1;
 					if (techDef) {
 						// Find if this tech enables some unit
@@ -893,8 +891,7 @@ std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_
 std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return ""; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
-	if (!global || !global->IsCheckSumValid() || !global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid() ||
-		!global->technologiesInfo->ptrTechDefArray) {
+	if (!global || !global->IsCheckSumValid() || !global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid()) {
 		return "";
 	}
 	std::string result;

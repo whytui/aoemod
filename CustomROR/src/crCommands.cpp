@@ -697,7 +697,7 @@ void CustomRORCommand::UpdateTechAddWorkRateWithMessage(short int techId, short 
 	}
 	AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *techInfo = global->technologiesInfo;
 	if (techInfo && techInfo->IsCheckSumValid() && techInfo->technologyCount >= 111) {
-		AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = &techInfo->ptrTechDefArray[techId];
+		AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = techInfo->GetTechDef(techId);
 		for (int i = 0; i < techDef->effectCount; i++) {
 			if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) &&
 				(techDef->ptrEffects[i].effectUnit == unitDefId) &&
@@ -812,7 +812,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 		// Palmyra tech tree: adjust villager work rate bonuses
 		AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *techDefInfo = global->technologiesInfo;
 		if (techDefInfo && techDefInfo->IsCheckSumValid() && (techDefInfo->technologyCount > CST_TCH_TECH_TREE_PALMYRA)) {
-			AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = &techDefInfo->ptrTechDefArray[CST_TCH_TECH_TREE_PALMYRA];
+			AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = techDefInfo->GetTechDef(CST_TCH_TECH_TREE_PALMYRA);
 			for (int i = 0; i < techDef->effectCount; i++) {
 				if ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) &&
 					(techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_WORK_RATE) && // work rate
