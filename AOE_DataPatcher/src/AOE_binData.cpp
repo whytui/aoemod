@@ -93,7 +93,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_windowedMode_10b 3
 #define COUNT_windowedMode_10c 3
 #define COUNT_VEG_windowedMode_10c 21
-#define COUNT_selectedUnits_10c 86
+#define COUNT_selectedUnits_10c 87
 #define COUNT_obsoletes_10c 24
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
@@ -3262,6 +3262,15 @@ void AOE_binData::InitSelectedUnits() {
 		(0x83, 0xC6, 0x04, 0x83, 0xFF, 0x19, 0x7C, 0xCE),
 		SVT_INT_1B,
 		5
+		);
+
+	NEXT_INITSEQ_1_VAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
+		MaxNumber20,
+		"Maximum number of selected units (right-click specific interactions evaluation)",
+		0xF6DC7,
+		(0x83, 0xFE, 0x19),
+		SVT_INT_1B,
+		2
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->selectedUnits_10c.GetBinSeqDefinition(i),
