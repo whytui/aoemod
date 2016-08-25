@@ -109,9 +109,8 @@ namespace AOE_STRUCTURES {
 		long int technologyCount;
 
 		bool IsCheckSumValid() const { return this->checksum == 0x00549920; }
+		// Securely gets a technology definition. Returns NULL if techDefId is invalid
 		STRUCT_TECH_DEF *GetTechDef(short int techDefId) const {
-			assert(techDefId >= 0);
-			assert(techDefId < this->technologyCount);
 			if ((techDefId < 0) || (techDefId >= this->technologyCount)) { return NULL; }
 			return &this->ptrTechDefArray[techDefId];
 		}

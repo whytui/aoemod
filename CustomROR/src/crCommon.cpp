@@ -2908,6 +2908,7 @@ bool AnalyzeEmpiresDatQuality() {
 	// Units
 #if 1
 	std::set<short int> badBlastLevelUnits;
+	std::set<pair<short int, short int>> unitDefCommandAlreadyReported;
 	for (int civId = 0; civId < global->civCount; civId++) {
 		for (int unitDefId = 0; unitDefId < global->civilizationDefinitions[civId]->civUnitDefCount; unitDefId++) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = global->civilizationDefinitions[civId]->GetUnitDef(unitDefId);
@@ -2919,6 +2920,7 @@ bool AnalyzeEmpiresDatQuality() {
 					traceMessageHandler.WriteMessage(msg);
 				}
 			}
+			// Blast type / level consistency (tons of errors)
 			if (unitDefBase && unitDefBase->DerivesFromAttackable()) {
 				AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDefBase;
 				if ((type50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (type50->blastRadius == 0)) {
@@ -2930,6 +2932,38 @@ bool AnalyzeEmpiresDatQuality() {
 						msg += std::to_string((int)type50->blastLevel);
 						msg += ") because blast radius is 0 (no blast damage). You should set blast level to 3 when no blast damage is used.";
 						traceMessageHandler.WriteMessage(msg);
+					}
+				}
+			}
+			// Gather Commands using unitId instead of class (miners) => adding custom stone/gold mines wouldn't work
+			if (unitDefBase && unitDefBase->DerivesFromCommandable()) {
+				AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *commandable = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDefBase;
+				if (commandable->ptrUnitCommandHeader && commandable->ptrUnitCommandHeader->IsCheckSumValid()) {
+					for (int i = 0; i < commandable->ptrUnitCommandHeader->commandCount; i++) {
+						if ((commandable->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK) ||
+							(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
+							if ((commandable->ptrUnitCommandHeader->ptrCommandArray[i]->classId == -1) && 
+								(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitId >= 0) &&
+								(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitId != CST_UNITID_FARM) // Allow farm because they don't have a dedicated AI type (class)
+								) {
+								pair<short int, short int> p;
+								p.first = unitDefId;
+								p.second = i;
+								if (unitDefCommandAlreadyReported.find(p) == unitDefCommandAlreadyReported.end()) {
+									msg = "UnitDef ";
+									msg += std::to_string(unitDefId);
+									msg += ": command #";
+									msg += std::to_string(i);
+									msg += " should not use unitDefId (";
+									msg += std::to_string(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitId);
+									msg += "). Please use unit class instead (civ #";
+									msg += std::to_string(civId);
+									msg += " - the message won't be repeated for other civs)";
+									traceMessageHandler.WriteMessage(msg);
+									unitDefCommandAlreadyReported.insert(p);
+								}
+							}
+						}
 					}
 				}
 			}
