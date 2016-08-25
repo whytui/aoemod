@@ -596,4 +596,47 @@ namespace AOE_CONST_INTERNAL
 		CST_DIR_SE = 6, // x+, y-
 		CST_DIR_SOUTH = 7 // y-
 	};
+
+	// Unit interaction ID. See also UNIT_INTERACTION_MASK_BIT for combinations of such values.
+	// Used to guess mouse cursor to set when hovering on units.
+	enum UNIT_INTERACTION_ID : long int {
+		UII_NO_INTERACTION = 0,
+		UII_PHYSICAL_ATTACK = 1, // Attacks other than conversion. Only walls have this setting instead of UII_ATTACK_GENERIC ?
+		UII_ENTER_TRANSPORT = 2,
+		UII_CAPTURE_ARTEFACT = 3,
+		UII_HEAL = 4, // unsure
+		UII_REPAIR_BUILD = 5, // unsure
+		UII_GATHER_RESOURCES = 6, // NOT gather ?
+		UII_CONVERT = 7, // convert?
+		UII_ATTACK_GENERIC = 8, // includes convert and standard attack ?
+		UII_ATTACK_ANIMAL = 9, // Hunt for villagers, attack for other units
+		UII_COUNT
+	};
+
+	// Each value represents a bit in unit interaction masks. For example first (lowest) bit means "can attack".
+	// Most military units have 7 (attack + U2 +U4) ; not warships. Priests have 0x96 (2+4+0x10+0x80). See switch in 0x4F6F9F.
+	// See also UNIT_INTERACTION_ID for individual values (indexes)
+	enum UNIT_INTERACTION_MASK_BIT : unsigned long int {
+		UIM_NO_INTERACTION = 0, // When no bit is set, there is no possible interaction
+		UIM_MILITARY_ATTACK = 1, // Sword: NOT for civilian hunting
+		UIM_ENTER_TRANSPORT = 2, // Bits 10
+		UIM_CAPTURE_ARTEFACT = 4, // Bits 100. Can capture relics/ruins (same cursor as priest actions)
+		UIM_UNKNOWN_8 = 8, // Bits 1000. Unused ?
+		UIM_HEAL = 16, // Bits 10000 0x10. Priest's healing ability.
+		UIM_REPAIR_BUILD = 32, // Bits 100000 0x20. Build or repair ability
+		UIM_GATHER_RESOURCES = 64, // Bits 1000000 0x40. Gather from resource units, including hunting animals.
+		UIM_CONVERT = 128 // Bits 1000000 0x80
+	};
+
+	// Mouse cursors ID.
+	enum GAME_CURSOR {
+		GC_NORMAL = 0,
+		GC_WAIT = 1,
+		GC_GROUP = 2, // is it used ?
+		GC_HAND = 3, // Gather, repair, build...
+		GC_ATTACK = 4, // Sword cursor
+		GC_CONVERT_HEAL_CAPTURE = 5, // For priests + capture artefacts + enter transport
+		GC_GET_HELP = 6, // Pointer + question mark (when clicking on "?" to get context help)
+		GC_COUNT
+	};
 }

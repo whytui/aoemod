@@ -195,8 +195,8 @@ namespace AOE_STRUCTURES
 		char isSpottableResource; // +A5. 1 for resources other than animals and farms. Such units are added to some player list, but what for ?
 		char unknownSpottableResourceAttribute_A6; // +A6. 2 for trees? Is this used ?
 		PLAYER_GATHERABLE_RESOURCE_CATEGORIES spottableResourceCategory; // Unknown8 in AGE3. cf 517166.
-		char selectionEffect;
-		char editorSelectionColor;
+		char selectionEffect; // +A8
+		char editorSelectionColor; // +A9
 		char unknown_0AA;
 		char unknown_0AB;
 		float selectionRadiusY;

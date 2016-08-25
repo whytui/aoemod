@@ -144,6 +144,18 @@ namespace AOE_STRUCTURES {
 		long int targetUnitDefId; // +40. Set as a dword in 4B3334
 		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_GATHER_WITH_ATTACK); }
 	};
+	static_assert(sizeof(STRUCT_ACTION_GATHER_WITH_ATTACK) == 0x44, "STRUCT_ACTION_GATHER_WITH_ATTACK size");
+
+	// Size = 0x44. checksum=98 25 54 00.
+	// Constructor= 0x402EF0
+#define CHECKSUM_ACTION_GATHER_WITHOUT_ATTACK 0x00542598
+	class STRUCT_ACTION_GATHER_WITHOUT_ATTACK : public STRUCT_ACTION_BASE {
+	public:
+		short int targetUnitDefId; // +40. DATID1 of target.
+		short int unused_42;
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_GATHER_WITHOUT_ATTACK); }
+	};
+	static_assert(sizeof(STRUCT_ACTION_GATHER_WITHOUT_ATTACK) == 0x44, "STRUCT_ACTION_GATHER_WITHOUT_ATTACK size");
 
 
 #define CHECKSUM_ACTION_PRODUCE_FARM_FOOD 0x0054261C

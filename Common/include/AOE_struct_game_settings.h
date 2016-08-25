@@ -17,9 +17,32 @@
 * ALL your findings about AOE/ROR structures
 * Please share knowledge for better modding experience !
 */
+
+using namespace AOE_CONST_INTERNAL;
+
 namespace AOE_STRUCTURES {
 	// External dependencies
 	class STRUCT_UI_IN_GAME_MAIN;
+
+	// Size 0x2C. Used in 0x4F6D7E
+	// Provides interaction mode information for each AI type (considering unit=potential target of a right-click)
+	// Information depends on diplomacy values (cf AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES): e.g. a building can be repaired if allied OR attacked if enemy.
+	class STRUCT_AITYPE_RIGHTCLICK_INFO {
+	public:
+		GLOBAL_UNIT_AI_TYPES unitTypeId;
+		short int unknown_02; // maybe unused OR unitTypeId is a long int
+		UNIT_INTERACTION_ID selfUnitInteraction; // +04. Mask of UNIT_INTERACTION_MASK_BIT bits, for the player itself (dipl1 / actor&target units have same owner)
+		long int selfLangDllId; // +08. Text for "self" (dipl1). Example: repair, heal...
+		UNIT_INTERACTION_ID gaiaUnitInteraction; // +0C. Mask of UNIT_INTERACTION_MASK_BIT bits, for "gaia" (dipl0)
+		long int gaiaLangDllId; // +10. Text for "gaia" targets (dipl0)
+		UNIT_INTERACTION_ID alliedUnitInteraction; // +14. Mask of UNIT_INTERACTION_MASK_BIT bits, for allied diplomacy
+		long int alliedLangDllId; // +18. Text for allied diplomacy. Example: repair, heal...
+		UNIT_INTERACTION_ID neutralUnitInteraction; // +1C. Mask of UNIT_INTERACTION_MASK_BIT bits, for neutral diplomacy
+		long int neutralLangDllId; // +20. Text for neutral diplomacy
+		UNIT_INTERACTION_ID enemyUnitInteraction; // +24. Mask of UNIT_INTERACTION_MASK_BIT bits, for enemy diplomacy
+		long int enemyLangDllId; // +28. Text for enemy diplomacy
+	};
+	static_assert(sizeof(STRUCT_AITYPE_RIGHTCLICK_INFO) == 0x2C, "STRUCT_AITYPE_RIGHTCLICK_INFO size");
 
 
 #ifdef GAMEVERSION_AOE10b
@@ -39,7 +62,7 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_GAME_SETTINGS2 0x005430B4 // parent class
 #endif
 	// Size = 0x11A0 (AOE1.0b&c). Constructor 0x4F91C0 (empires.exe)
-	// Size = 0x1254. Constructor 0x5004C0(1.0b), ?(1.0c)
+	// Size = 0x1254. Constructor 0x5004C0(1.0b), 0x4FDFA0(1.0c) - arg1=commandLineInfo, arg2=?
 	class STRUCT_GAME_SETTINGS {
 	public:
 		unsigned long int checksum;
@@ -164,7 +187,11 @@ namespace AOE_STRUCTURES {
 		char unknown_A1E;
 		char unknown_A1F;
 		// 0xA20
-		char unknown_A20[0xA34 - 0xA20];
+		unsigned long int unknown_A20;
+		STRUCT_AITYPE_RIGHTCLICK_INFO *rightClickAITypeInfo; // +A24. index=aitype. Used for (player+19C != 0). Data=0x55A238.
+		long int rightClickAITypeInfoArraySize; // +A28. Actually, is the used number of AI types. Value=const from 0x55AFF8.
+		STRUCT_AITYPE_RIGHTCLICK_INFO *basicRightClickAITypeInfo; // +A2C. index=aitype. Interactions that are ALWYAS available (no matter (if)which unit is selected). Data=0x55A918.
+		long int basicRightClickAITypeInfoArraySize; // +A30. Actually, is the used number of AI types. Value=const from 0x55AFFC.
 		long int unknown_A34[9]; // Indexed by playerId. Value = an int ?
 		char unknown_A58[0xA7C - 0xA58];
 		unsigned long int mapSizeChoice; // +A7C

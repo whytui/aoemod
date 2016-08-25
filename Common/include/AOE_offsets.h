@@ -47,6 +47,8 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x565C18;
 	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x56CFF8;
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x5620A4;
+	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0; //TODO
+	static const unsigned long int AOE_CURSORS_INFO = 0; // Pointer to structure about cursors
 #endif
 #ifdef GAMEVERSION_AOE10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -81,6 +83,8 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x7CBD10;
 	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7CBD14;
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x551F20;
+	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0; // TODO
+	static const unsigned long int AOE_CURSORS_INFO = 0; // Pointer to structure about cursors
 #endif
 #ifdef GAMEVERSION_ROR10b
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
@@ -116,6 +120,8 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x7D70C0;
 	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7D70C8;
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55B734;
+	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0; // TODO
+	static const unsigned long int AOE_CURSORS_INFO = 0; // Pointer to structure about cursors
 #endif
 #ifdef GAMEVERSION_ROR10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -156,6 +162,8 @@ namespace AOE_OFFSETS
 	static const unsigned char **AOE_CURRENT_POSITION_IN_FILE_DESERIALIZATION = (const unsigned char **)0x7BFAE8; // Pointer to current position in file content buffer
 	static const long int *AOE_CURRENTLY_OPENED_FILE_SIZE = (long int *)0x7BFAEC;
 	static const unsigned char *AOE_CURRENTLY_OPENED_FILE_BUFFER = (const unsigned char*)0x7BFAF0;
+	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0x55BDC8; // Array of 40 mask values for unit interactions (for each AI unit type - "class" in AGE3)
+	static const unsigned long int AOE_CURSORS_INFO = 0x582EDC; // Pointer to structure about cursors
 #endif
 	static const unsigned long int *UNKNOWN_ARRAY_6A18C0 = (unsigned long int *)0x6A18C0; // Size = 0x100 elements = 0x400 bytes
 	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = ADDR_VAR_UI_MAIN_INFO + 0x0C; // part of a bigger struct, +C

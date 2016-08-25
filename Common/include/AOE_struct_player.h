@@ -230,7 +230,8 @@ namespace AOE_STRUCTURES {
 		short int unknown_130;
 		short int unknown_132;
 		STRUCT_UNIT_BASE *selectedStructUnitTable[26]; // +0x134 is first selected unit's ptr. Last=First?. Only relevant if "selected units" features is NOT installed. See GetRelevantSelectedUnitsPointer(...).
-		unsigned long int unknown_19C_mask; // a "per-player" mask. Seen 0 or 0x1FF
+		// +19C : a mask for interactions (depending on selected units). Bits: Refer to UNIT_INTERACTION_MASK_BIT.
+		unsigned long int currentInteractionMask;
 		// 0x1A0
 		short int selectedUnitCount; // Count of currently selected units.
 		char groupNumberIsUsed[0x7E]; // In fact, indices 0-0x0A are unused because 0 is unused and 1-0x0A are shortcut numbers, not groups.

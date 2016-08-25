@@ -69,7 +69,7 @@ namespace AOE_CONST_FUNC {
 		TribeAIGroupWall = 27,  // 0x1B
 		// Added from AGE3 information
 		TribeAIGroupArtefact = 1, // ruins/artefacts
-		TribeAIGroupUnused = 17, // 0x11. TODO : mistake ?
+		TribeAIGroupUnusedHealer = 17, // 0x11. TODO : mistake ? Could be TribeAIGroupHealer, given it *seems* to have healing interaction but not conversion
 		TribeAIGroupChariot = 35, // 0x23. Chariot/scythe (excluding chariot archer)
 		TribeAIGroupHorseArcher = 36, // 0x24
 		TribeAIGroupSlinger = 39, // 0x27
@@ -162,7 +162,7 @@ namespace AOE_CONST_FUNC {
 	};
 
 	// Gatherable resource types (different from standard resource types). Animal food is not in the list !
-	// Role ???
+	// Internal role only ???
 	enum PLAYER_GATHERABLE_RESOURCE_CATEGORIES : char {
 		CST_PGR_WOOD = 0,
 		CST_PGR_FORAGE = 1, // For berry bush
