@@ -2862,9 +2862,17 @@ bool AnalyzeEmpiresDatQuality() {
 	// Researches
 #if 1
 	for (int researchId = 0; researchId < global->researchDefInfo->researchCount; researchId++) {
-		int remainingRequirementsCount = global->researchDefInfo->GetResearchDef(researchId)->minRequiredResearchesCount;
+		STRUCT_RESEARCH_DEF *resDef = global->researchDefInfo->GetResearchDef(researchId);
+		if (!resDef) {
+			msg = "ERROR: Research #";
+			msg += std::to_string(researchId);
+			msg += " is NULL";
+			traceMessageHandler.WriteMessage(msg);
+			continue;
+		}
+		int remainingRequirementsCount = resDef->minRequiredResearchesCount;
 		if ((remainingRequirementsCount < 0) || (remainingRequirementsCount > 4)) {
-			msg = "Research ";
+			msg = "Research #";
 			msg += std::to_string(researchId);
 			msg += " has an invalid requirements count (";
 			msg += std::to_string(remainingRequirementsCount);
@@ -2874,11 +2882,11 @@ bool AnalyzeEmpiresDatQuality() {
 		}
 		int validReqResearchCount = 0;
 		for (int index = 0; index < 4; index++) {
-			short int reqResearchId = global->researchDefInfo->GetResearchDef(researchId)->requiredResearchId[index];
+			short int reqResearchId = resDef->requiredResearchId[index];
 			if (reqResearchId >= 0) {
 				validReqResearchCount++; // found a valid required research id
 				if (reqResearchId >= global->researchDefInfo->researchCount) {
-					msg = "Research ";
+					msg = "Research #";
 					msg += std::to_string(researchId);
 					msg += " has an invalid required research (id=";
 					msg += std::to_string(reqResearchId);
@@ -2888,16 +2896,32 @@ bool AnalyzeEmpiresDatQuality() {
 			}
 		}
 		if (validReqResearchCount > remainingRequirementsCount) {
-			msg = "Research ";
+			msg = "Research #";
 			msg += std::to_string(researchId);
 			msg += " has optional requirements (more required researches than minRequiredResearch). This should be avoided (used in standard game for 'age' researches). You can set required research IDs to -1 to disable them.";
 			traceMessageHandler.WriteMessage(msg);
 		}
-		if (global->researchDefInfo->GetResearchDef(researchId)->researchLocation >= 0) {
+		bool hasDuplicateRequirement = false;
+		for (int index = 0; index < 4; index++) {
+			short int reqResearchId = resDef->requiredResearchId[index];
+			if (reqResearchId >= 0) {
+				for (int index2 = index + 1; index2 < 4; index2++) {
+					if (reqResearchId == resDef->requiredResearchId[index2]) {
+						hasDuplicateRequirement = true;
+					}
+				}
+			}
+		}
+		if (hasDuplicateRequirement) {
+			msg = "Research #";
+			msg += std::to_string(researchId);
+			msg += " has duplicate requirements (other than -1).";
+			traceMessageHandler.WriteMessage(msg);
+		}
+		if (resDef->researchLocation >= 0) {
 			// If research is a shadow research, error
-			if ((global->researchDefInfo->GetResearchDef(researchId)->researchTime <= 0) ||
-				(global->researchDefInfo->GetResearchDef(researchId)->buttonId <= 0)) {
-				msg = "Research ";
+			if ((resDef->researchTime <= 0) || (resDef->buttonId <= 0)) {
+				msg = "Research #";
 				msg += std::to_string(researchId);
 				msg += " is a shadow research but has a research location. If this really is a shadow research, you should set research location to -1.";
 				traceMessageHandler.WriteMessage(msg);
