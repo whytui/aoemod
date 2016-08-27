@@ -25,7 +25,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_UI_IN_GAME_MAIN;
 
 	// Size 0x2C. Used in 0x4F6D7E
-	// Provides interaction mode information for each AI type (considering unit=potential target of a right-click)
+	// Provides interaction mode information for an AI type (considering unit=potential target of a right-click)
 	// Information depends on diplomacy values (cf AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES): e.g. a building can be repaired if allied OR attacked if enemy.
 	class STRUCT_AITYPE_RIGHTCLICK_INFO {
 	public:
@@ -188,9 +188,9 @@ namespace AOE_STRUCTURES {
 		char unknown_A1F;
 		// 0xA20
 		unsigned long int unknown_A20;
-		STRUCT_AITYPE_RIGHTCLICK_INFO *rightClickAITypeInfo; // +A24. index=aitype. Used for (player+19C != 0). Data=0x55A238.
-		long int rightClickAITypeInfoArraySize; // +A28. Actually, is the used number of AI types. Value=const from 0x55AFF8.
-		STRUCT_AITYPE_RIGHTCLICK_INFO *basicRightClickAITypeInfo; // +A2C. index=aitype. Interactions that are ALWYAS available (no matter (if)which unit is selected). Data=0x55A918.
+		STRUCT_AITYPE_RIGHTCLICK_INFO *forSelectionRightClickAITypeInfo; // +A24. index=aitype. Right-click info for current selection. Data=0x55A238.
+		long int forSelectionRightClickAITypeInfoArraySize; // +A28. Actually, is the used number of AI types. Value=const from 0x55AFF8.
+		STRUCT_AITYPE_RIGHTCLICK_INFO *basicRightClickAITypeInfo; // +A2C. index=aitype. Interactions that are ALWAYS available (no matter (if)which unit is selected). Data=0x55A918.
 		long int basicRightClickAITypeInfoArraySize; // +A30. Actually, is the used number of AI types. Value=const from 0x55AFFC.
 		long int unknown_A34[9]; // Indexed by playerId. Value = an int ?
 		char unknown_A58[0xA7C - 0xA58];
@@ -266,6 +266,32 @@ namespace AOE_STRUCTURES {
 				MOV ECX, this;
 				CALL addr;
 			}
+		}
+		// withSelectedUnit: true to get info that applies for selected unit, false to get "basic" info (rules that always apply)
+		// Returns NULL if not found
+		STRUCT_AITYPE_RIGHTCLICK_INFO *GetRightClickInfoArrayBase(bool withSelectedUnit) {
+			if (withSelectedUnit) {
+				return this->forSelectionRightClickAITypeInfo;
+			} else {
+				return this->basicRightClickAITypeInfo;
+			}
+		}
+		// Get right-click info for a given AI type.
+		// withSelectedUnit: true to get info that applies for selected unit, false to get "basic" info (rules that always apply)
+		// Returns NULL if not found
+		STRUCT_AITYPE_RIGHTCLICK_INFO *GetRightClickInfo(GLOBAL_UNIT_AI_TYPES unitAIType, bool withSelectedUnit) {
+			if (withSelectedUnit) {
+				if ((unitAIType < 0) || (unitAIType >= this->forSelectionRightClickAITypeInfoArraySize)) {
+					return NULL;
+				}
+			} else {
+				if ((unitAIType < 0) || (unitAIType >= this->basicRightClickAITypeInfoArraySize)) {
+					return NULL;
+				}
+			}
+			STRUCT_AITYPE_RIGHTCLICK_INFO *rci = this->GetRightClickInfoArrayBase(withSelectedUnit);
+			if (!rci) { return NULL; }
+			return &rci[unitAIType];
 		}
 	};
 	//GAMEVERSION_AOE10c : size 0x11A0
