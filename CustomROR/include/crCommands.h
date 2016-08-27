@@ -387,6 +387,11 @@ public:
 	// Occurs when a unit is killed by an attack (excludes suicide with DEL, transported units whose transport is destroyed, conversion)
 	void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit);
 
+	// Entry point when mouse hovers on a unit. foundInteraction and foundHintDllId values are IN/OUT, you are allowed to update them to overload ROR default behaviour.
+	// Note: this only impacts mouse displayed cursor and hint text, not which right-click actions are actually possible.
+	// Returns true if output values have been updated.
+	bool OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
+		UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId);
 
 	// ----------------------------------
 	// City plan

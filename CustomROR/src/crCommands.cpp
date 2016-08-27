@@ -5709,6 +5709,36 @@ void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACK
 }
 
 
+// Entry point when mouse hovers on a unit. foundInteraction and foundHintDllId values are IN/OUT, you are allowed to update them to overload ROR default behaviour.
+// Note: this only impacts mouse displayed cursor and hint text, not which right-click actions are actually possible.
+// Returns true if output values have been updated.
+bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
+	UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId) {
+	if (!this->crInfo->configInfo.useImprovedButtonBar) { // TODO: use a dedicated config
+		return false;
+	}
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !controlledPlayer || !controlledPlayer->IsCheckSumValid() || unitPlayerId < 0) {
+		return false;
+	}
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
+	assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
+	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return false; }
+	bool updatedValues = false;
+	if ((unit->unitStatus == 2) && (unitDef->DAT_ID1 == CST_UNITID_FARM)) {
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = this->crInfo->GetMainSelectedUnit(controlledPlayer);
+		if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass() && mainSelectedUnit->DerivesFromTrainable()) {
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *selectedUnitDef = mainSelectedUnit->unitDefinition;
+			if (selectedUnitDef && selectedUnitDef->IsCheckSumValidForAUnitClass() && (selectedUnitDef->unitAIType == TribeAIGroupCivilian)) {
+				foundInteraction = UNIT_INTERACTION_ID::UII_GATHER_RESOURCES;
+				foundHintDllId = 3823;
+				updatedValues = true;
+			}
+		}
+	}
+	return updatedValues;
+}
+
+
 // Computes (existing) building influence zone for farm placement map like values computation.
 // existingBuilding must be a building (current building from loop, to take into account in map like values)
 // Updates existingBldInfluenceZone with the influence distance we want to use for provided building (positions near building will be preferred)

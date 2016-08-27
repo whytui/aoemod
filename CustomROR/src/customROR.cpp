@@ -341,6 +341,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004268FF:
 		this->EntryPointOnAttackableUnitKilled(REG_values);
 		break;
+	case 0x004F6F9E:
+		this->EntryPointOnHoverOnUnit(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3327,5 +3330,32 @@ void CustomRORInstance::EntryPointOnAttackableUnitKilled(REG_BACKUP *REG_values)
 }
 
 
+// From 0x4F6F96 : player.HoverOnUnit(...).
+// May change return address to 0x4F7177 (force return NULL in ROR's method)
+void CustomRORInstance::EntryPointOnHoverOnUnit(REG_BACKUP *REG_values) {
+	// Get context and local variables from ROR method.
+	UNIT_INTERACTION_ID foundInteraction = (UNIT_INTERACTION_ID)REG_values->EAX_val;
+	long int foundHintDllId = REG_values->ESI_val;
+	STRUCT_UNIT_BASE *unit = (STRUCT_UNIT_BASE *)GetIntValueFromRORStack(REG_values, 0x18);
+	STRUCT_PLAYER *controlledPlayer = (STRUCT_PLAYER *)GetIntValueFromRORStack(REG_values, 0x10);
+	long int unitPlayerId = GetIntValueFromRORStack(REG_values, 0x14);
+	GLOBAL_UNIT_AI_TYPES unitAIType = (GLOBAL_UNIT_AI_TYPES)GetIntValueFromRORStack(REG_values, 0x30);
+	long int unitDefId = GetIntValueFromRORStack(REG_values, 0x20);
+	long int totalHP = GetIntValueFromRORStack(REG_values, 0x1C);
+	if (unit) { ror_api_assert(REG_values, unit->IsCheckSumValidForAUnitClass()); }
+	ror_api_assert(REG_values, controlledPlayer && controlledPlayer->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		if (foundInteraction < 0) {
+			ChangeReturnAddress(REG_values, 0x4F7177);
+		}
+	}
+	// Custom treatments
+	if (this->crCommand.OnHoverOnUnit(unit, controlledPlayer, unitPlayerId, foundInteraction, foundHintDllId)) {
+		REG_values->ESI_val = foundHintDllId;
+		REG_values->EAX_val = foundInteraction;
+	}
+
+}
 
 //#pragma warning(pop)

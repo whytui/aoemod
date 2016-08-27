@@ -57,12 +57,12 @@ namespace AOE_STRUCTURES
 		// +168 : byte
 		// +304, 318, 31C, 320: dwords related to mouse pos?
 
-		unsigned long int unknown_334_ptr; // Ptr to obj size=0x70, ccor=516110. +5C=array size 4*(maxTypeId+1) of ptrs to obj. obj:+4=next,+8=unitId,+30/32/34/36=min/maxPosXY? +C,+20=ptrGraphicsShp?
+		unsigned long int unknown_334_ptr; // Ptr to obj size=0x70, ccor=516110. +5C=array size 4*((layer?)maxTypeId+1) of ptrs to obj. obj:+4=next,+8=unitId,+30/32/34/36=min/maxPosXY? +C,+20=ptrGraphicsShp?
 		// Note: +4C=maxTypeId, typeIDs: 00=eyeCandy,10=birds,20=flag/deadfish/living/building/tree,30,40=?
 		unsigned long int unknown_338_ptr; // Ptr to same kind of obj as +334
 		unsigned long int unknown_33C;
 		// 0x340
-		long int unknown_340_unitId; // Target ? Selected ? Under mouse ?
+		long int unknown_340_unitId; // +340. Under mouse ?
 		unsigned long int unknown_344;
 		unsigned long int unknown_348;
 		unsigned long int unknown_34C;
