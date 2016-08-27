@@ -5724,15 +5724,32 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 	assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
 	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return false; }
 	bool updatedValues = false;
-	if ((unit->unitStatus == 2) && (unitDef->DAT_ID1 == CST_UNITID_FARM)) {
+	PLAYER_DIPLOMACY_VALUES diplValue = controlledPlayer->diplomacyVSPlayers[unitPlayerId];
+	GLOBAL_UNIT_AI_TYPES actorAIType = TribeAINone; // controlled player's main selected unit AI type
+	bool actorIsVillager = false; // true if controlled player's main selected unit is a civilian (class 4)
+
+	if (unit->DerivesFromTrainable()) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = this->crInfo->GetMainSelectedUnit(controlledPlayer);
 		if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass() && mainSelectedUnit->DerivesFromTrainable()) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *selectedUnitDef = mainSelectedUnit->unitDefinition;
-			if (selectedUnitDef && selectedUnitDef->IsCheckSumValidForAUnitClass() && (selectedUnitDef->unitAIType == TribeAIGroupCivilian)) {
-				foundInteraction = UNIT_INTERACTION_ID::UII_GATHER_RESOURCES;
-				foundHintDllId = 3823;
-				updatedValues = true;
+			if (selectedUnitDef && selectedUnitDef->IsCheckSumValidForAUnitClass()) {
+				actorIsVillager = (selectedUnitDef->unitAIType == TribeAIGroupCivilian);
+				actorAIType = selectedUnitDef->unitAIType;
 			}
+		}
+	}
+
+	// Villagers and owned farm: show "hand" cursor
+	if ((unit->unitStatus == 2) && (unitDef->DAT_ID1 == CST_UNITID_FARM) && actorIsVillager && (diplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_SELF)) {
+		foundInteraction = UNIT_INTERACTION_ID::UII_GATHER_RESOURCES;
+		foundHintDllId = LANG_ID_HINT_CLICK_TO_GATHER_BUSH_HERE; // not exactly correct, this is for bushes, not farms !
+		updatedValues = true;
+	}
+	// Fishing ships and villagers can fish : show "hand" cursor. However issues with fish SHP files make that "mouse hover" is not correctly detected by game
+	if ((actorAIType == TribeAIGroupFishingBoat) || (actorAIType == TribeAIGroupCivilian)) {
+		if ((unitDef->unitAIType == TribeAIGroupSeaFish) || (unitDef->unitAIType == TribeAIGroupShoreFish) || (unitDef->unitAIType == TribeAIGroupUnknownFish)) {
+			foundHintDllId = LANG_ID_HINT_CLICK_TO_FISH_HERE; // "Click to fish here"
+			updatedValues = true;
 		}
 	}
 	return updatedValues;

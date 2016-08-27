@@ -22,6 +22,9 @@ const static unsigned long int LANG_ID_AI_FILENAME_LAST_VALID = 27058; // Last v
 const static unsigned long int LANG_ID_STOP_CURRENT_ACTION = 0x1D4DD;
 const static unsigned long int LANG_ID_NEXT_PAGE = 0x1D4D7;
 
+const static unsigned long int LANG_ID_HINT_CLICK_TO_FISH_HERE = 3707;
+const static unsigned long int LANG_ID_HINT_CLICK_TO_GATHER_BUSH_HERE = 3823;
+
 
 // *******************************************************
 // Custom strings
