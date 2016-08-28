@@ -344,6 +344,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004F6F9E:
 		this->EntryPointOnHoverOnUnit(REG_values);
 		break;
+	case 0x00411D46:
+		this->EntryPointAfterActivityStop(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3355,7 +3358,20 @@ void CustomRORInstance::EntryPointOnHoverOnUnit(REG_BACKUP *REG_values) {
 		REG_values->ESI_val = foundHintDllId;
 		REG_values->EAX_val = foundInteraction;
 	}
-
 }
+
+
+// From 00411D3A. Called on unitActivity.stop(bool)
+void CustomRORInstance::EntryPointAfterActivityStop(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *unitActivity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
+	ror_api_assert(REG_values, unitActivity != NULL); // control checksums ? Not sure I have the whole list
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->EAX_val = 1;
+	}
+	// Custom treatments
+	this->crCommand.OnUnitActivityStop(unitActivity);
+}
+
 
 //#pragma warning(pop)

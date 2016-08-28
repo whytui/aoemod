@@ -4,7 +4,7 @@
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_map_tile_info.h>
 #include <AOE_struct_unit_activity.h>
-#include <AOE_struct_unit_actions.h>
+//#include <AOE_struct_unit_actions.h>
 #include <AOE_struct_map_base_common.h>
 #include <AOE_struct_map_visibility_info.h>
 
@@ -18,6 +18,8 @@
 namespace AOE_STRUCTURES {
 	// External dependencies
 	class STRUCT_PLAYER;
+	class STRUCT_ACTION_BASE;
+	class STRUCT_UNIT_ACTION_INFO;
 
 
 	// Size=4

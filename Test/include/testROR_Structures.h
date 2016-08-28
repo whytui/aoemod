@@ -11,6 +11,7 @@
 #include <UI\AOE_struct_ui_game_settings.h>
 #include <UI\AOE_struct_ui_diplomacy_dialog.h>
 #include <UI\AOE_struct_ui_in_game_options.h>
+#include <AOE_struct_unit_actions.h>
 #include <string>
 #include <Windows.h>
 #include "../include/testRandomizer.h"

@@ -3986,7 +3986,7 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 			// Corresponds to filter (exclude 2C9 and 2BC) in original game code
 			// Don't know why first loop does NOT exclude 2C9 (only excludes 2BC)
 			if ((activity->internalId_whenAttacked == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_UNKNOWN_2BC_ATTACKING) ||
-				(activity->internalId_whenAttacked == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_UNKNOWN_2C9)) {
+				(activity->internalId_whenAttacked == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_GATHERER_REACTION_WHEN_ATTACKED)) {
 				attackTower = false;
 			}
 		}
@@ -5753,6 +5753,50 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 		}
 	}
 	return updatedValues;
+}
+
+
+// Entry point when a unit activity stops.
+// This is NOT called when 
+void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity) {
+	AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit = (AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *)activity->ptrUnit;
+	if (!unit) { return; }
+	assert(unit->IsCheckSumValidForAUnitClass());
+	if (!unit->IsCheckSumValidForAUnitClass()) { return; }
+	if (!unit->DerivesFromCommandable()) { return; }
+	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
+	if (unit->ptrStructPlayer != controlledPlayer) { return; }
+	if (controlledPlayer->isComputerControlled) { return; }
+
+	bool noNextActivity = true;
+	// Remark: if manually stopped, activity->nextActivityQueueUsedElems == 0
+	for (int i = 0; i < activity->nextActivityQueueUsedElems; i++) {
+		ACTIVITY_TASK_IDS taskId = activity->nextActivitiesQueue_unsure[i].activityId;
+		if (taskId != ACTIVITY_TASK_IDS::CST_ATI_NOTIFY_ACTIVITY_COMPLETED) {
+			noNextActivity = false;
+		}
+	}
+	return;
+	if (noNextActivity) {
+		// TEST
+		float refX = 5;
+		float refY = 6;
+		if ((abs(unit->positionX - refX) > 1) || (abs(unit->positionY - refY) > 1)) {
+			if (IsUnitIdle(unit) && unit->ptrActionInformation) {
+				if (!unit->ptrActionInformation->ptrActionLink || !unit->ptrActionInformation->ptrActionLink->actionStruct) {
+					// For MP compabitiliy; use a command
+					if (!this->crInfo->configInfo.forceMPCompatibility) {
+						AOE_STRUCTURES::STRUCT_ACTION_MOVE *move = (AOE_STRUCTURES::STRUCT_ACTION_MOVE *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ACTION_MOVE));
+						move->Constructor(unit, NULL, 1, NULL);
+						move->targetUnitPositionX = 5;
+						move->targetUnitPositionY = 5;
+						move->maxDistanceFromTarget = 1;
+						unit->ptrActionInformation->AssignAction(move);
+					}
+				}
+			}
+		}
+	}
 }
 
 

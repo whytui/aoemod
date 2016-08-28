@@ -1,9 +1,11 @@
 
 #pragma once
 
+#include <assert.h>
 #include <AOE_empires_dat.h>
 #include <AOE_const_internal.h>
 #include <AOE_struct_unit_def.h>
+#include <AOE_struct_units.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -41,7 +43,7 @@ namespace AOE_STRUCTURES {
 		float targetUnitPositionY;
 		float targetUnitPositionX;
 		float targetUnitPositionZ;
-		float unsure_resourceValue; // For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
+		float unsure_resourceValue; // +2C. For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
 		// 0x30
 		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set.
 		STRUCT_UNIT_ACTION_INFO *requiredActionInfo; // +34. SubAction ? Link with unit/"actionLink"/action. Allows chaining actions ! This is NOT unit->actionInfo !
@@ -51,17 +53,33 @@ namespace AOE_STRUCTURES {
 		// 0x40: not in BASE class ; it has different type/role according to child classes. (seen float, word...)
 	};
 
+#define CHECKSUM_ACTION_MOVE 0x005426DC
 	// Size = 0x44
-	// Constructor 4052D0: actionMove.constructor(actor, target, maxTargetDistance, pGraphic)
+	// Constructor 0x4052D0: actionMove.constructor(actor, target, maxTargetDistance, pGraphic)
 	class STRUCT_ACTION_MOVE : public STRUCT_ACTION_BASE { // DC 26 54 00
 	public:
 		// 0x40
 		float maxDistanceFromTarget; // The maximum distance from target where we accept to stop movement ?
+
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_ACTION_MOVE); }
+		void Constructor(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target, long int maxTargetDistance, unsigned long int pGraphic) {
+			assert(actor && actor->IsCheckSumValidForAUnitClass());
+			const unsigned long int addr = 0x4052D0;
+			_asm {
+				MOV ECX, this;
+				PUSH pGraphic;
+				PUSH maxTargetDistance;
+				PUSH target;
+				PUSH actor;
+				CALL addr;
+			}
+		}
 	};
 	static_assert(sizeof(STRUCT_ACTION_MOVE) == 0x44, "STRUCT_ACTION_MOVE size");
 
 	// Size 0x5C
 	// Constructor 0x401150 = actionAttack.construct(pUnitActor, pUnitTarget, arg3/4/5, blastRadius, minRange, projectileUnit)
+	// This action corresponds to giving 1 shot, then action status comes to 1 and a new attack action is created (to confirm)
 	class STRUCT_ACTION_ATTACK : public STRUCT_ACTION_BASE { // F8 23 54 00
 	public:
 		// 0x40
@@ -138,6 +156,7 @@ namespace AOE_STRUCTURES {
 	// Size = 0x44. checksum=48 88 54 00.
 	// Constructor=0x4B32C0 = actionGatherWithAttack.constructor(actor, defendCmd, targetUnit)
 	// (+34) action->actionInfo has a next action=attack tree (or animal) until it is ready to be gathered ?
+	// When target status <=2, the "attack phase" is used (0x4B361E), otherwise gathering phase is done (0x4B363B)
 #define CHECKSUM_ACTION_GATHER_WITH_ATTACK 0x00548848
 	class STRUCT_ACTION_GATHER_WITH_ATTACK : public STRUCT_ACTION_BASE {
 	public:
@@ -199,11 +218,20 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_BASE *ptrUnit;
 		STRUCT_ACTION_LINK *ptrActionLink;
 
-		bool IsCheckSumValid() {
+		bool IsCheckSumValid() const {
 			return (this->checksum == 0x005488A8) ||
 				(this->checksum == 0x00542600);
 		}
-	};
 
+		void AssignAction(STRUCT_ACTION_BASE *action) {
+			const unsigned long int addr = 0x404400;
+			_asm {
+				MOV ECX, this;
+				PUSH action;
+				CALL addr;
+			}
+		}
+	};
+	static_assert(sizeof(STRUCT_UNIT_ACTION_INFO) == 0x0C, "STRUCT_UNIT_ACTION_INFO size");
 
 }

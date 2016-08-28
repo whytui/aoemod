@@ -8,6 +8,7 @@
 #include <AOE_struct_strategy_element.h>
 #include <AOE_struct_build_ai.h>
 #include <AOE_const_functional.h>
+#include <AOE_struct_unit_actions.h>
 #include "crCommon.h"
 #include "researches.h"
 #include "randomizer.h"

@@ -393,6 +393,9 @@ public:
 	bool OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
 		UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId);
 
+	// Entry point when a unit activity stops.
+	void OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity);
+
 	// ----------------------------------
 	// City plan
 

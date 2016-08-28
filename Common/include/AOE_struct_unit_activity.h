@@ -18,7 +18,7 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNIT_BASE;
 
 
-	// Not very well known. A "potential" target for a unit ? See 414B00
+	// Not very well known. A "potential" target for a unit ? See 0x414B00
 	// Size = 0x24.
 	class STRUCT_UNIT_ACTIVITY_TARGET_ELEM {
 	public:
@@ -36,12 +36,13 @@ namespace AOE_STRUCTURES
 	};
 
 	// Size = 0x18. No dedicated constructor? See 0x414D90 for init/adding to array.
+	// Values remain in fields even when unit is idle.
 	class STRUCT_UNIT_ACTIVITY_QUEUE {
 	public:
-		long int targetUnitId; // 
+		long int targetUnitId; // +0. Sometimes = actor?
 		long int actorUnitId; // +4. My unit id ?
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS activityId; // +8. Queued activity ID
-		long int genericParam4; // +C. Can be different things ? Seen targetUnitId...
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS activityId; // +8. Queued activity ID. Or event id ??? GAME_EVENT_TYPES?
+		long int genericParam4; // +C. Can be different things ? Seen targetUnitId, activityId(...
 		long int genericParam5; // +10. Seen currentHP value.
 		long int genericParam6; // +14. Seen unitDefMaxHP value (int).
 	};
@@ -64,9 +65,9 @@ namespace AOE_STRUCTURES
 		long int targetsInfoArrayUsedElements; // Number of "used" elements in array.
 		unsigned long int targetsInfoArrayTotalSize; // Allocated elements
 		STRUCT_UNIT_ACTIVITY_TARGET_ELEM *targetsInfoArray; // +18. Potential/previous? targets. THIS is used to get back to work after being attacked !
-		unsigned long int unknown_01C; // elems in +24 array
+		long int nextActivityQueueUsedElems; // +1C. Actually used elems in +24 array
 		// 0x20
-		unsigned long int unknown_020; // Seen only 0x0A. Size of +20 array ??
+		long int nextActivityQueueArraySize; // +20. Allocated array size (number of elements) for +24.
 		STRUCT_UNIT_ACTIVITY_QUEUE *nextActivitiesQueue_unsure; // TO DO. ElemSize = 0x18. See 414D90
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64
 		unsigned long int unknown_02C; // A distance?. 0x64 in 4DA4C9. Distance to TC ?

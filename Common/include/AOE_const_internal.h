@@ -215,9 +215,13 @@ namespace AOE_CONST_INTERNAL
 		CST_GET_NOT_ENOUGH_RESOURCES = 0x7D, // need houses, food/wood or maxPop reached (to build or train, NOT for repair)
 		CST_GET_FARM_DEPLETED = 0x7E, // Sound 0x10
 		CST_GET_UNKNOWN_1F9 = 0x1F9, // see 0x4F3531
+		CST_GET_UNKNOWN_1FA = 0x1FA, // Villager activity end, could not find nearby similar targets ? arg4=activityId
 		CST_GET_UNIT_ATTACKED = 0x201,
 		CST_GET_MOVEMENT_FINISHED = 0x202, // unsure
+		CST_GET_UNKOWN_206 = 0x206,
+		CST_GET_UNKOWN_207 = 0x207,
 		CST_GET_TRIBUTE_RECEIVED = 0x20A,
+		CST_GET_UNKOWN_20C = 0x20C,
 		CST_GET_SEE_UNIT = 0x20D
 	};
 
@@ -374,8 +378,8 @@ namespace AOE_CONST_INTERNAL
 	// For activity.task IDs
 	enum ACTIVITY_TASK_IDS : long int {
 		CST_ATI_NONE = -1, // Used a lot in game code
-		CST_ATI_UNKNOWN_1F4 = 0x1F4, // Notify(react) being attacked ?
-		CST_ATI_UNKNOWN_1FA = 0x1FA,
+		CST_ATI_UNKNOWN_1F4 = 0x1F4, // Notify(react) being attacked ? GenericArg4=actorUnitId ?
+		CST_ATI_NOTIFY_ACTIVITY_COMPLETED = 0x1FA, // Notify activity completed (normal completion) ?
 		CST_ATI_UNKNOWN_1FB = 0x1FB, // 410999
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
 		CST_ATI_ESCAPE_PROJECTILE = 0x20F, // when someone shoots at me ? "escape attack"? 4E62F3
@@ -396,14 +400,14 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_RESEARCH_TECH = 0x26C, // includes train unit when triggered by AI.
 		CST_ATI_UNLOAD = 0x26D, // unsure. Includes move+unload. Such unit can't be used as actor in strategy element.
 		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
-		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targetted farm
+		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targetted farm or enemy projectile dies ?
 		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // 
 		CST_ATI_UNKNOWN_2BD = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.captureArtefact?(myUnitId, targetUnitId)
 		CST_ATI_UNKNOWN_2BE = 0x2BE,
 		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ??
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
 		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF...
-		CST_ATI_UNKNOWN_2C9 = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
+		CST_ATI_GATHERER_REACTION_WHEN_ATTACKED = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
 		CST_ATI_HOLD_POSITION = 0x2D5, // Do not auto-attack. See 4E6740 for cats (don't search for target), 413F89 for other units (cancel attack if not at range?)
 		CST_ATI_UNKNOWN_2D9 = 0x2D9
 	};

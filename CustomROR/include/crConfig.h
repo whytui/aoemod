@@ -82,6 +82,7 @@ public:
 	bool fixHumanPlayer_specificSeeUnit;
 	bool allyExplorationIsAlwaysShared;
 	long int singlePlayerMaxPopulation;
+	bool forceMPCompatibility; // If true, try to protect MP games from sync errors from customROR treatements ; some features might be restricted/disabled.
 	// Technical
 	bool autoFixMissingFeatures;
 	long int gameTimerSlowDownFactor;

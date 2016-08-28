@@ -11,6 +11,7 @@ UnitSpawnShortcutInfo::UnitSpawnShortcutInfo() {
 // Constructor
 CustomRORConfig::CustomRORConfig() {
 	// Hardcoded initialization. If values are provided in config XML file, it will overload this.
+	this->forceMPCompatibility = false;
 	this->autoFixMissingFeatures = false;
 	this->couldNotReadXMLConfig = false;
 	this->couldNotReadCivXMLConfig = false;

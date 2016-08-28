@@ -4,6 +4,8 @@
 #include <AOE_const_internal.h>
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_main_ai.h>
+#include <AOE_struct_unit_actions.h>
+#include <AOE_struct_units.h>
 #include <mystrings.h>
 #include <assert.h>
 #include <string>

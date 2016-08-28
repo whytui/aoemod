@@ -83,7 +83,9 @@ namespace AOE_STRUCTURES {
 		if (!obj) { return "NULL"; }
 		std::string res;
 		if (obj->ptrActionInformation) {
-			res += "\nactionInfo: ";
+			res += "\nactionInfo[";
+			res += GetHexStringAddress(obj->ptrActionInformation);
+			res += "]: ";
 			res += this->ExportStruct(obj->ptrActionInformation);
 		}
 		if (obj->DerivesFromTrainable()) {

@@ -106,7 +106,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_0E0;
 		long int helpDllId; // +E4. Dll string Id for help (or tooltip?) ?
 		long int winHelpDataDllId; // +E8. a DllID, used when clicking on help/(object)/details = data for winHelp call.
-		char unknown_0EC; // a "status" for event handling ? 1, 2...
+		char unknown_0EC; // a "status" for event handling ? 1, 2... 1 for left click, 2 for right-click ??
 		char unknown_0ED; // a "status" for event handling ? 1, 2...
 		char unknown_0EE;
 		char unknown_0EF;
