@@ -866,12 +866,13 @@ static AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *GetGameZone() {
 	return NULL;
 }
 
-// Change mouse cursor
+// Change mouse cursor. Warning, the game may change it back rapidly (eg. in game when hovering units).
 static void SetGameCursor(AOE_CONST_INTERNAL::GAME_CURSOR cursorId) {
-	const unsigned long int pCursorsStruct = AOE_OFFSETS::AOE_CURSORS_INFO;
+	const unsigned long int pCursorsStruct = AOE_OFFSETS::AOE_VAR_CURSORS_INFO;
 	const unsigned long int addr = 0x44A6C0;
 	_asm {
 		MOV ECX, pCursorsStruct;
+		MOV ECX, DS:[ECX];
 		PUSH cursorId;
 		CALL addr;
 	}
