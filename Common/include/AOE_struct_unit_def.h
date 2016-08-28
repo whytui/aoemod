@@ -286,7 +286,7 @@ namespace AOE_STRUCTURES
 		short int whenBeingSeenCommandIndex; // +DC. For artefacts, discoveries but also animals
 		short int unknown_0DE;
 		// 0xE0
-		float searchRadius;
+		float searchRadius; // The distance unit will seek to auto-attack enemy units.
 		float workRate; // including upgrades. Ex for priest: base = 1, with astrology = 1.3
 		short int dropSite1;
 		short int dropSite2;

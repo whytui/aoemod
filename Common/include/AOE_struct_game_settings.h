@@ -44,6 +44,35 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(STRUCT_AITYPE_RIGHTCLICK_INFO) == 0x2C, "STRUCT_AITYPE_RIGHTCLICK_INFO size");
 
+	// Unknown size. See variable AOE_VAR_CURSORS_INFO
+	class STRUCT_CURSOR_SLP_INFO
+	{
+	public:
+		long int unknown000;
+		unsigned long int *unknown004;
+		unsigned long int *unknown008;
+		unsigned long int *unknown00C;
+		long int unknown010;
+		long int unknown014;
+		unsigned long int *unknown018;
+		unsigned long int *unknown01C;
+		unsigned long int *unknown020;
+		unsigned long int *unknown024;
+		unsigned long int *unknown028;
+		unsigned long int *unknown02C;
+		unsigned long int *unknown030;
+		unsigned long int *unknown034;
+		unsigned long int *unknown038;
+		unsigned long int *unknown03C;
+		char unknown_040[0x58 - 0x40];
+		STRUCT_SLP_INFO *currentSlpInfo; // +5C
+		char unknown_05C[0x8C - 0x5C];
+		long int currentCursorId; // +8C : mouse cursor id
+		char unknown_090[0x14C - 0x90];
+		char currentSlpName[0x104]; // +14C : "mcursors.slp"
+		long int currentSlpCount; // +250
+	};
+
 
 #ifdef GAMEVERSION_AOE10b
 #define CHECKSUM_GAME_SETTINGS1 0x005509D8
@@ -106,7 +135,8 @@ namespace AOE_STRUCTURES {
 		long int unknown_1B8; // Values 1,4,6,... ? SubMouseActionType ? Used when mouseActionType=6 (villager build menu) or in editor. Seen 1=editor_moveUnit?, 3, 4(editor_putunit?). Unsure !
 		long int unknown_1BC;
 		// 0x1C0
-		char unknown_1C0[0x10];
+		STRUCT_CURSOR_SLP_INFO *unknown_1C0; // +1C0. Pointer to something about mouse cursors ? Same as *(0x582EDC)
+		char unknown_1C4[0xC];
 		// 0x1D0
 		unsigned long int unknown_1D0;
 		long int hCursor; // Cursor handle, default=10003

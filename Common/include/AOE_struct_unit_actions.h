@@ -62,7 +62,7 @@ namespace AOE_STRUCTURES {
 		float maxDistanceFromTarget; // The maximum distance from target where we accept to stop movement ?
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_ACTION_MOVE); }
-		void Constructor(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target, long int maxTargetDistance, unsigned long int pGraphic) {
+		void Constructor(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target, float maxTargetDistance, unsigned long int pGraphic) {
 			assert(actor && actor->IsCheckSumValidForAUnitClass());
 			const unsigned long int addr = 0x4052D0;
 			_asm {

@@ -34,3 +34,5 @@ AOE_STRUCTURES::STRUCT_PLAYER *GetControlledPlayerStruct_Settings();
 // returns NULL if incorrect player id
 AOE_STRUCTURES::STRUCT_PLAYER *GetPlayerStruct(long int playerId);
 
+AOE_STRUCTURES::STRUCT_CURSOR_SLP_INFO *GetCursorInfo();
+

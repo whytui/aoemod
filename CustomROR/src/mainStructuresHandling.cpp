@@ -62,3 +62,7 @@ STRUCT_PLAYER *GetPlayerStruct(long int playerId) {
 	return playersArray[playerId];
 }
 
+
+AOE_STRUCTURES::STRUCT_CURSOR_SLP_INFO *GetCursorInfo() {
+	return *(AOE_STRUCTURES::STRUCT_CURSOR_SLP_INFO**)AOE_VAR_CURSORS_INFO;
+}
