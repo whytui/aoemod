@@ -5843,6 +5843,8 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 		}
 	}
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+
+	// Auto-protect unit/zone (unit will go back to zone/unit to defend if its current activity is over).
 	if (noNextActivity && unitInfo && unitInfo->HasValidProtectInfo()
 		&& this->crInfo->configInfo.useImprovedButtonBar /*enableCallNearbyIdleMilitaryUnits*/) { // TODO: specific config
 		float refX = unitInfo->protectPosX;
@@ -5856,6 +5858,10 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 			if (unitToProtect && unitToProtect->IsCheckSumValidForAUnitClass()) {
 				refX = unitToProtect->positionX;
 				refY = unitToProtect->positionY;
+			} else {
+				// Unit is specified but invalid (maybe it died): remove obsolete info.
+				unitInfo->ResetProtectInfo();
+				this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(unitInfo->unitId);
 			}
 		}
 		if ((refX >= 0) || (refY >= 0)) {
