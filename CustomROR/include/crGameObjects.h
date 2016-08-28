@@ -20,13 +20,18 @@ public:
 	float spawnUnitMoveToPosX;
 	float spawnUnitMoveToPosY;
 	long int spawnTargetUnitId;
-	//AUTO_ATTACK_POLICIES autoAttackPolicy;
 	AutoAttackPolicy autoAttackPolicy;
 	bool autoAttackPolicyIsSet;
+	float protectPosX;
+	float protectPosY;
+	long int protectUnitId;
 
 	// Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)
-	bool CanBeRemoved();
+	bool CanBeRemoved() const;
+	// Returns true if one of (protect unit, protect location) is defined.
+	bool HasValidProtectInfo() const;
 	void ResetSpawnAutoTargetInfo();
+	void ResetProtectInfo();
 };
 
 

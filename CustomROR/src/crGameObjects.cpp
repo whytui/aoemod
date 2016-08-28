@@ -4,15 +4,14 @@
 
 UnitCustomInfo::UnitCustomInfo() {
 	this->unitId = -1;
-	this->spawnUnitMoveToPosX = -1;
-	this->spawnUnitMoveToPosY = -1;
-	this->spawnTargetUnitId = -1;
+	this->ResetSpawnAutoTargetInfo();
 	this->autoAttackPolicyIsSet = false;
 	//autoAttackPolicy : default constructor will initialize it correctly.
+	this->ResetProtectInfo();
 }
 
 // Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)
-bool UnitCustomInfo::CanBeRemoved() {
+bool UnitCustomInfo::CanBeRemoved() const {
 	if (this->unitId < 0) { return true; } // invalid unit id = can remove
 	// Is the spawn auto target/auto move defined ?
 	if ((this->spawnTargetUnitId >= 0) || (this->spawnUnitMoveToPosX >= 0) || (this->spawnUnitMoveToPosY >= 0)) {
@@ -22,14 +21,31 @@ bool UnitCustomInfo::CanBeRemoved() {
 	if (!this->autoAttackPolicyIsSet) {
 		return false;
 	}
+	// Is "protect" policy set ?
+	if ((this->protectUnitId >= 0) || (this->protectPosX >= 0) || (this->protectPosY >= 0)) {
+		return false;
+	}
 	// We checked all values, and none is set to a "useful" value.
 	return true;
+}
+
+// Returns true if one of (protect unit, protect location) is defined.
+bool UnitCustomInfo::HasValidProtectInfo() const {
+	bool protectUnit = (this->protectUnitId >= 0);
+	bool protectPos = (this->protectPosX >= 0) && (this->protectPosX >= 0);
+	return (protectUnit && !protectPos) || (!protectUnit && protectPos);
 }
 
 void UnitCustomInfo::ResetSpawnAutoTargetInfo() {
 	this->spawnUnitMoveToPosX = -1;
 	this->spawnUnitMoveToPosY = -1;
 	this->spawnTargetUnitId = -1;
+}
+
+void UnitCustomInfo::ResetProtectInfo() {
+	this->protectPosX = -1;
+	this->protectPosY = -1;
+	this->protectUnitId = -1;
 }
 
 

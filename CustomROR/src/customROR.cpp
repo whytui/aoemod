@@ -344,6 +344,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004F6F9E:
 		this->EntryPointOnHoverOnUnit(REG_values);
 		break;
+	case 0x005133A8:
+		this->EntryPointShowInGameDefaultCursor_noUnitUnderMouse(REG_values);
+		break;
 	case 0x00411D46:
 		this->EntryPointAfterActivityStop(REG_values);
 		break;
@@ -3334,9 +3337,11 @@ void CustomRORInstance::EntryPointOnAttackableUnitKilled(REG_BACKUP *REG_values)
 
 
 // From 0x4F6F96 : player.HoverOnUnit(...).
-// May change return address to 0x4F7177 (force return NULL in ROR's method)
+// May change return address to 0x4F7177 (force return NULL in ROR's method) or 0x4F7179 (return with EAX's current value)
 void CustomRORInstance::EntryPointOnHoverOnUnit(REG_BACKUP *REG_values) {
 	// Get context and local variables from ROR method.
+	GAME_CURSOR *pOutputCursor = (GAME_CURSOR*)REG_values->EBP_val;
+	long int *pOutputDllId = (long int *)REG_values->EBX_val;
 	UNIT_INTERACTION_ID foundInteraction = (UNIT_INTERACTION_ID)REG_values->EAX_val;
 	long int foundHintDllId = REG_values->ESI_val;
 	STRUCT_UNIT_BASE *unit = (STRUCT_UNIT_BASE *)GetIntValueFromRORStack(REG_values, 0x18);
@@ -3354,10 +3359,39 @@ void CustomRORInstance::EntryPointOnHoverOnUnit(REG_BACKUP *REG_values) {
 		}
 	}
 	// Custom treatments
-	if (this->crCommand.OnHoverOnUnit(unit, controlledPlayer, unitPlayerId, foundInteraction, foundHintDllId)) {
+	GAME_CURSOR forcedCursor = (GAME_CURSOR)-1;
+	if (this->crCommand.OnHoverOnUnit(unit, controlledPlayer, unitPlayerId, foundInteraction, foundHintDllId, forcedCursor)) {
 		REG_values->ESI_val = foundHintDllId;
 		REG_values->EAX_val = foundInteraction;
 	}
+	if (forcedCursor >= 0) {
+		REG_values->EAX_val = 1;
+		*pOutputCursor = forcedCursor;
+		*pOutputDllId = foundHintDllId;
+		ChangeReturnAddress(REG_values, 0x4F7179); // Stop treatments and force usage of this cursor.
+	}
+}
+
+
+// From 0051339B
+void CustomRORInstance::EntryPointShowInGameDefaultCursor_noUnitUnderMouse(REG_BACKUP *REG_values) {
+	GAME_CURSOR cursorToSet = GAME_CURSOR::GC_NORMAL; // Game default behaviour
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		// Compatibility is done below (call to SetGameCursor)
+	}
+
+	// Custom treatments (update cursorToSet if necessary)
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (settings) {
+		ror_api_assert(REG_values, settings->IsCheckSumValid());
+		if (settings->mouseActionType < 0) {
+			// TEST
+			//cursorToSet = GAME_CURSOR::GC_GROUP;
+		}
+	}
+
+	SetGameCursor(cursorToSet);
 }
 
 

@@ -5711,9 +5711,11 @@ void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACK
 
 // Entry point when mouse hovers on a unit. foundInteraction and foundHintDllId values are IN/OUT, you are allowed to update them to overload ROR default behaviour.
 // Note: this only impacts mouse displayed cursor and hint text, not which right-click actions are actually possible.
+// If returned cursorToForce is >= 0, then stop other treatments and use this value as new cursor.
 // Returns true if output values have been updated.
 bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
-	UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId) {
+	UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId, GAME_CURSOR &cursorToForce) {
+	cursorToForce = (GAME_CURSOR)-1; // Default
 	if (!this->crInfo->configInfo.useImprovedButtonBar) { // TODO: use a dedicated config
 		return false;
 	}
@@ -5737,6 +5739,17 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 				actorAIType = selectedUnitDef->unitAIType;
 			}
 		}
+	}
+
+	// High priority : if mouse status is a custom one, prevent updating mouse cursor inconsistently
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	if (settings->mouseActionType < 0) {
+		foundHintDllId = 0;
+		foundInteraction = UNIT_INTERACTION_ID::UII_NO_INTERACTION;
+		cursorToForce = GAME_CURSOR::GC_GROUP; // Force usage of this mouse cursor
+		return true; // Disable further treatments.
 	}
 
 	// Villagers and owned farm: show "hand" cursor
@@ -5776,22 +5789,36 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 			noNextActivity = false;
 		}
 	}
-	return;
-	if (noNextActivity) {
+	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+	if (noNextActivity && unitInfo && unitInfo->HasValidProtectInfo()
+		&& this->crInfo->configInfo.enableCallNearbyIdleMilitaryUnits) { // TODO: specific config
 		// TEST
-		float refX = 5;
-		float refY = 6;
-		if ((abs(unit->positionX - refX) > 1) || (abs(unit->positionY - refY) > 1)) {
-			if (IsUnitIdle(unit) && unit->ptrActionInformation) {
-				if (!unit->ptrActionInformation->ptrActionLink || !unit->ptrActionInformation->ptrActionLink->actionStruct) {
-					// For MP compabitiliy; use a command
-					if (!this->crInfo->configInfo.forceMPCompatibility) {
-						AOE_STRUCTURES::STRUCT_ACTION_MOVE *move = (AOE_STRUCTURES::STRUCT_ACTION_MOVE *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ACTION_MOVE));
-						move->Constructor(unit, NULL, 1, NULL);
-						move->targetUnitPositionX = 5;
-						move->targetUnitPositionY = 5;
-						move->maxDistanceFromTarget = 1;
-						unit->ptrActionInformation->AssignAction(move);
+		float refX = unitInfo->protectPosX;
+		float refY = unitInfo->protectPosY;
+		AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unit->unitDefinition;
+		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromCommandable());
+		float distance = unitDef->searchRadius - 1;
+		if (distance < 2) { distance = 2; }
+		if (unitInfo->protectUnitId >= 0) {
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *unitToProtect = GetUnitStruct(unitInfo->unitId);
+			if (unitToProtect && unitToProtect->IsCheckSumValidForAUnitClass()) {
+				refX = unitToProtect->positionX;
+				refY = unitToProtect->positionY;
+			}
+		}
+		if ((refX >= 0) || (refY >= 0)) {
+			if ((abs(unit->positionX - refX) > distance) || (abs(unit->positionY - refY) > distance)) {
+				if (IsUnitIdle(unit) && unit->ptrActionInformation) {
+					if (!unit->ptrActionInformation->ptrActionLink || !unit->ptrActionInformation->ptrActionLink->actionStruct) {
+						// For MP compabitiliy; use a command
+						if (!this->crInfo->configInfo.forceMPCompatibility) {
+							AOE_STRUCTURES::STRUCT_ACTION_MOVE *move = (AOE_STRUCTURES::STRUCT_ACTION_MOVE *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ACTION_MOVE));
+							move->Constructor(unit, NULL, distance, NULL);
+							move->targetUnitPositionX = refX;
+							move->targetUnitPositionY = refY;
+							move->maxDistanceFromTarget = distance;
+							unit->ptrActionInformation->AssignAction(move);
+						}
 					}
 				}
 			}

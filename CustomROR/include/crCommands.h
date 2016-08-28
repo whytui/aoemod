@@ -389,9 +389,10 @@ public:
 
 	// Entry point when mouse hovers on a unit. foundInteraction and foundHintDllId values are IN/OUT, you are allowed to update them to overload ROR default behaviour.
 	// Note: this only impacts mouse displayed cursor and hint text, not which right-click actions are actually possible.
+	// If returned cursorToForce is >= 0, then stop other treatments and use this value as new cursor.
 	// Returns true if output values have been updated.
 	bool OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
-		UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId);
+		UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId, GAME_CURSOR &cursorToForce);
 
 	// Entry point when a unit activity stops.
 	void OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity);
