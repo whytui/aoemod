@@ -175,6 +175,9 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		}
 		bool c1 = md1->IsCheckSumValid();
 		c1 = md2->IsCheckSumValid();
+
+		settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE;
+		SetGameCursor(GAME_CURSOR::GC_GROUP);
 	}
 
 	// TEST - F8 - show dialog
@@ -708,7 +711,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 	assert(UIGameMain != NULL);
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = UIGameMain->controlledPlayer;
 	if (controlledPlayer == NULL) { return false; } // I suppose it shouldn't happen but I don't know all behaviours for this variable
-	unsigned long int unitCount = controlledPlayer->selectedUnitCount;
+	long int unitCount = controlledPlayer->selectedUnitCount;
 	if (unitCount == 0) { return false; }
 
 	if (!this->crCommand->crInfo->configInfo.enableSpawnUnitsMoveToLocation) { return false; }
@@ -743,7 +746,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 	// First loop to collect info on selected units. Not really necessary at this point.
 	bool hasSelectedBuildings = false;
 	bool hasSelectedLivings = false;
-	for (unsigned long int index = 0; index < unitCount; index++) {
+	for (long int index = 0; index < unitCount; index++) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = selectedUnits[index];
 		if (unit && unit->IsCheckSumValidForAUnitClass() && (unit->ptrStructPlayer == controlledPlayer)) {
 			hasSelectedBuildings = hasSelectedBuildings || (unit->unitType == GUT_BUILDING);
@@ -751,7 +754,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 		}
 	}
 
-	for (unsigned long int index = 0; index < unitCount; index++) {
+	for (long int index = 0; index < unitCount; index++) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = selectedUnits[index];
 		// Make sure unit is valid, from MY player
 		if (unit && unit->IsCheckSumValidForAUnitClass() && (unit->ptrStructPlayer == controlledPlayer)) {

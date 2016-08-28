@@ -93,6 +93,7 @@ public:
 	void ManageTowerPanicMode_villagers(REG_BACKUP *REG_values);
 	void ManageBuildingStatus_canConvertUnit(REG_BACKUP *REG_values);
 	void ManageGameTimerSkips(REG_BACKUP *REG_values);
+	void OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_values);
 	void OnGameRightClickUpEvent(REG_BACKUP *REG_values);
 	void OnGameRightClickUpRedCrossDisplay(REG_BACKUP *REG_values);
 	void OnLivingUnitCreation(REG_BACKUP *REG_values);

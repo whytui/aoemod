@@ -113,6 +113,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004348DE:
 		this->ManageOnDialogUserEvent(REG_values);
 		break;
+	case 0x00519FE3:
+		this->OnGameRightClickUpInGameCheckActionType(REG_values);
+		break;
 	case 0x0051A508:
 		this->OnGameRightClickUpEvent(REG_values);
 		break;
@@ -1405,8 +1408,31 @@ void CustomRORInstance::ManageOnDialogUserEvent(REG_BACKUP *REG_values) {
 }
 
 
-// Plugged on 51A203's call
-// Triggered when player releases right click in game screen
+// From 0x519FDC. May change return address to 0x51A0F4 (to replace original JNZ)
+// This is called in-game, when a right-click is performed.
+void CustomRORInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_values) {
+	MOUSE_ACTION_TYPES mouseActionType = (MOUSE_ACTION_TYPES)REG_values->EAX_val;
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	if (mouseActionType != MOUSE_ACTION_TYPES::CST_MAT_NORMAL) {
+		// Mouse action types other than NORMAL (0): use default behaviour.
+		ChangeReturnAddress(REG_values, 0x51A0F4); // Cf JNZ in 0x519FDE
+	}
+	if (mouseActionType >= 0) {
+		return; // No custom treatments for standard mouse action types. Note there are other entry points in sub-calls. (OnGameRightClickUpEvent, etc)
+	}
+
+	// If we choose to handle custom mouse action types here, then ChangeReturnAddress for mouseActionType<0 too (like original code)
+	long int mousePosX = GetIntValueFromRORStack(REG_values, 0x28);
+	long int mousePosY = GetIntValueFromRORStack(REG_values, 0x2C);
+	float posX, posY;
+	GetGamePositionUnderMouse(&posX, &posY);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_RESOURCES, false);
+	this->crCommand.OnInGameRightClickCustomAction(posX, posY, unitUnderMouse);
+}
+
+
+// Plugged on 0x51A203's call
+// Triggered when player releases right click in game screen, for default mouse action type only.
 void CustomRORInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 	unsigned long int myESP = REG_values->ESP_val;
 	const long int CST_OnGameRightClickUpEvent_IGNORE_CLICK = 0x0051A63D;
@@ -1461,7 +1487,7 @@ void CustomRORInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 	long int mousePosY = *(long int *)(myESP + 0x38);
 	if (this->crMainInterface.ApplyRightClickReleaseOnSelectedUnits(UIGameMain, controlledPlayer, mousePosX, mousePosY)) {
 		REG_values->EAX_val = CST_OnGameRightClickUpEvent_HANDLE_CLICK; // Continue (no real jump)
-		short int *customLocalVar = (short int *)(REG_values->ESP_val + 0x12); // This local var is not used anymore in original code: we can use it for ourselves
+		short int *customLocalVar = (short int *)(REG_values->ESP_val + 0x12); // This local var is not used anymore in original code: we can use it for ourselves. See OnGameRightClickUpRedCrossDisplay.
 		*customLocalVar = 1;
 	}
 }
@@ -3386,8 +3412,7 @@ void CustomRORInstance::EntryPointShowInGameDefaultCursor_noUnitUnderMouse(REG_B
 	if (settings) {
 		ror_api_assert(REG_values, settings->IsCheckSumValid());
 		if (settings->mouseActionType < 0) {
-			// TEST
-			//cursorToSet = GAME_CURSOR::GC_GROUP;
+			cursorToSet = GetCursorForCustomActionType(settings->mouseActionType);
 		}
 	}
 

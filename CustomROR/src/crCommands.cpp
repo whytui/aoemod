@@ -5748,7 +5748,7 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 	if (settings->mouseActionType < 0) {
 		foundHintDllId = 0;
 		foundInteraction = UNIT_INTERACTION_ID::UII_NO_INTERACTION;
-		cursorToForce = GAME_CURSOR::GC_GROUP; // Force usage of this mouse cursor
+		cursorToForce = GetCursorForCustomActionType(settings->mouseActionType); // Force usage of this mouse cursor
 		return true; // Disable further treatments.
 	}
 
@@ -5766,6 +5766,59 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 		}
 	}
 	return updatedValues;
+}
+
+
+// Handles a right-click (in-game) when mouse action type is a custom one.
+// mouseTargetUnit can be NULL
+void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE_STRUCTURES::STRUCT_UNIT_BASE *mouseTargetUnit) {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	assert(settings->mouseActionType < 0); // here, we should only handle custom action types
+	if ((posX < 0) || (posY < 0)) { return; } // invalid position
+	if (mouseTargetUnit) {
+		assert(mouseTargetUnit->IsCheckSumValidForAUnitClass());
+		if (!mouseTargetUnit->IsCheckSumValidForAUnitClass()) { return; }
+	}
+	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
+	assert(controlledPlayer && controlledPlayer->IsCheckSumValid());
+
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = this->crInfo->GetMainSelectedUnit(controlledPlayer);
+	bool actorIsMyUnit = false;
+	if (actorUnit) {
+		assert(actorUnit->IsCheckSumValidForAUnitClass());
+		if (!actorUnit->IsCheckSumValidForAUnitClass()) { actorUnit = NULL; }
+		actorIsMyUnit = (actorUnit->ptrStructPlayer == controlledPlayer);
+	}
+	UnitCustomInfo *unitInfo = NULL;
+	if (actorUnit) {
+		unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+	}
+
+	switch (settings->mouseActionType) {
+	case CST_MAT_CR_PROTECT_UNIT_OR_ZONE:
+		if (actorIsMyUnit && actorUnit && actorUnit->DerivesFromMovable()) {
+			if (!unitInfo) {
+				unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(actorUnit->unitInstanceId);
+			}
+			if (unitInfo) {
+				unitInfo->ResetProtectInfo();
+				if (mouseTargetUnit) {
+					unitInfo->protectUnitId = mouseTargetUnit->unitInstanceId;
+				} else {
+					unitInfo->protectPosX = posX;
+					unitInfo->protectPosY = posY;
+				}
+			}
+		}
+		break;
+	default:
+		break;
+	}
+
+	// Restore mouse status before quitting
+	settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
+	SetGameCursor(GAME_CURSOR::GC_NORMAL);
 }
 
 
@@ -5791,16 +5844,15 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	}
 	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 	if (noNextActivity && unitInfo && unitInfo->HasValidProtectInfo()
-		&& this->crInfo->configInfo.enableCallNearbyIdleMilitaryUnits) { // TODO: specific config
-		// TEST
+		&& this->crInfo->configInfo.useImprovedButtonBar /*enableCallNearbyIdleMilitaryUnits*/) { // TODO: specific config
 		float refX = unitInfo->protectPosX;
 		float refY = unitInfo->protectPosY;
 		AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unit->unitDefinition;
 		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromCommandable());
-		float distance = unitDef->searchRadius - 1;
-		if (distance < 2) { distance = 2; }
+		float distance = unitDef->searchRadius / 2; // use a constant (to be closer, for range units !) ?
+		if (distance < 2) { distance = 2; } // use a config ?
 		if (unitInfo->protectUnitId >= 0) {
-			AOE_STRUCTURES::STRUCT_UNIT_BASE *unitToProtect = GetUnitStruct(unitInfo->unitId);
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *unitToProtect = GetUnitStruct(unitInfo->protectUnitId);
 			if (unitToProtect && unitToProtect->IsCheckSumValidForAUnitClass()) {
 				refX = unitToProtect->positionX;
 				refY = unitToProtect->positionY;
@@ -5818,6 +5870,8 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 							move->targetUnitPositionY = refY;
 							move->maxDistanceFromTarget = distance;
 							unit->ptrActionInformation->AssignAction(move);
+						} else {
+							CreateCmd_RightClick(unit->unitInstanceId, -1, refX, refY);
 						}
 					}
 				}

@@ -43,11 +43,11 @@ AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION GetErrorForUnitCreationAtLocation(AO
 	bool editorMode, bool checkAirModeAndHPBar, bool checkConflictingUnits);
 
 
-// Get current mouse position, relative to UIObj
+// Get current *mouse* position, relative to UIObj
 // If UIObj is null, use current "global" screen relative positions.
 AOE_STRUCTURES::STRUCT_POSITION_INFO GetMousePosition(AOE_STRUCTURES::STRUCT_ANY_UI *UIObj);
 
-// Get current mouse position, in game zone, if found. Returns (-1, -1) if not found.
+// Get current *mouse* position, in game zone, if found. Returns (-1, -1) if not found.
 AOE_STRUCTURES::STRUCT_POSITION_INFO GetMousePosition();
 
 // Get "game" coordinates under mouse position. Returns true if successful. Updates posX/posY.

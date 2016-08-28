@@ -68,6 +68,7 @@ namespace AOE_CONST_INTERNAL
 		CST_MBA_RIGHT_CLICK = 0x2A // 42
 	};
 
+	// Defines mouse behaviour (when left/right/double clicking, moving...) in playing zone.
 	enum MOUSE_ACTION_TYPES : long int {
 		CST_MAT_NORMAL = 0,
 		CST_MAT_UNKNOWN_01 = 1,
@@ -94,7 +95,11 @@ namespace AOE_CONST_INTERNAL
 		CST_MAT_SELECT_HEAL_TARGET = 0x66,
 		CST_MAT_SELECT_UNKNOWN_67 = 0x67, // Some sub-action (in-game) = select unit to attack ?
 		CST_MAT_SELECT_REPAIR_TARGET = 0x68,
-		CST_MAT_SELECT_UNKNOWN_69 = 0x69 // Some sub-action (in-game)
+		CST_MAT_SELECT_UNKNOWN_69 = 0x69, // Some sub-action (in-game)
+
+		// Custom mouse action types
+		// Avoid using -1, just in case
+		CST_MAT_CR_PROTECT_UNIT_OR_ZONE = -2
 	};
 
 	enum INTERNAL_MAIN_CATEGORIES : long int {

@@ -394,6 +394,11 @@ public:
 	bool OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
 		UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId, GAME_CURSOR &cursorToForce);
 
+	// Handles a right-click (in-game) when mouse action type is a custom one.
+	// posX and posY are game positions
+	// mouseTargetUnit can be NULL
+	void OnInGameRightClickCustomAction(float posX, float posY, AOE_STRUCTURES::STRUCT_UNIT_BASE *mouseTargetUnit);
+
 	// Entry point when a unit activity stops.
 	void OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity);
 
