@@ -167,7 +167,8 @@ namespace AOE_CONST_INTERNAL
 		CST_IUC_CROR_DONT_ATTACK_VILLAGERS = 100, // Do not auto-attack villagers
 		CST_IUC_CROR_DONT_ATTACK_BUILDINGS, // Do not auto-attack non-tower buildings
 		CST_IUC_CROR_NO_AUTO_ATTACK, // Do not auto-attack any unit
-		CST_IUC_CROR_RESET_AUTO_ATTACK // Restore auto-attack behaviour
+		CST_IUC_CROR_RESET_AUTO_ATTACK, // Restore auto-attack behaviour
+		CST_IUC_CROR_DEFEND // Protect a unit/zone
 
 	};
 

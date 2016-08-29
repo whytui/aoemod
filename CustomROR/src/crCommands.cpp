@@ -4936,7 +4936,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
 		return;
 	}
-	if (player != unit->ptrStructPlayer) { return; }
+	if (player != unit->ptrStructPlayer) { return; } // unit does not belong to "me"
 	if (unit->unitStatus != 2) {
 		return;
 	}
@@ -4954,6 +4954,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDef;
 		if ((unitDefLiving->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDefLiving->blastRadius > 0)) {
 			UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+			// TODO: localization
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically",
 				&this->crInfo->customRorIcons, true);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false, "Click to prevent unit from attacking buildings automatically",
@@ -4965,6 +4966,8 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 			const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &this->crInfo->configInfo.autoAttackOptionDefaultValues;
 			this->RefreshCustomAutoAttackButtons(gameMainUI, aap);
 		}
+		AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, "Click to select a unit or a position to defend",
+			NULL /*&this->crInfo->customRorIcons*/, false);
 		return;
 	}
 	
@@ -5467,6 +5470,15 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		if (!unitInfo) { return false; } // this is an error case
 		this->crInfo->ApplyAutoAttackPolicyToPlayerSelectedUnits(player, unitInfo->autoAttackPolicy, flagsToApply);
 	}
+	// Button "protect unit or protect zone" : set mouse custom cursor type
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND) {
+		SetGameCursor(GAME_CURSOR::GC_GROUP);
+		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		if (settings && settings->IsCheckSumValid()) {
+			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE;
+			CallWriteCenteredText("Right-click to define the unit or the position to protect"); // TODO localization
+		}
+	}
 
 	return false;
 }
@@ -5797,6 +5809,15 @@ void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AO
 
 	switch (settings->mouseActionType) {
 	case CST_MAT_CR_PROTECT_UNIT_OR_ZONE:
+		if (actorIsMyUnit && (actorUnit == mouseTargetUnit)) {
+			unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+			if (unitInfo) {
+				unitInfo->ResetProtectInfo();
+				this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(actorUnit->unitInstanceId);
+			}
+			CallWriteCenteredText("Removed protect information for current unit.");
+			break;
+		}
 		if (actorIsMyUnit && actorUnit && actorUnit->DerivesFromMovable()) {
 			if (!unitInfo) {
 				unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(actorUnit->unitInstanceId);

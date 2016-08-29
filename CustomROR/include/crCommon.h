@@ -86,8 +86,8 @@ public:
 	// Warning: playerName index are from 0 to 8 here instead of 1 to 9 ! Be careful.
 	char nameIndexIsUsedByPlayer[CST_MAX_TOTAL_CIV_COUNT][CST_MAX_NUMBER_OF_PLAYER_NAMES_PER_CIV];
 	// Own DRS objects
-	STRUCT_SLP_INFO customRorIcons;
-	STRUCT_SLP_INFO customRorUnitShortcuts;
+	STRUCT_SLP_INFO customRorIcons; // CustomROR-specific icons
+	STRUCT_SLP_INFO customRorUnitShortcuts; // CustomROR-specific SLP for unit shortcuts (number displayed nearby unit selection white square)
 
 	// Triggers
 	CR_TRIGGERS::crTriggerSet *triggerSet; // all information about custom triggers.

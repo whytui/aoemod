@@ -33,6 +33,7 @@ static const long int CST_CUSTOMROR_ICON_ID_DONT_ATTACK_VILLAGERS = 0;
 static const long int CST_CUSTOMROR_ICON_ID_DONT_ATTACK_BUILDINGS = 1;
 static const long int CST_CUSTOMROR_ICON_ID_DONT_AUTO_ATTACK = 3;
 static const long int CST_CUSTOMROR_ICON_ID_RESTORE_AUTO_ATTACK = 2;
+static const long int CST_CUSTOMROR_ICON_ID_DEFEND_UNIT_OR_POSITION = 4; // TODO
 static const long int CST_CUSTOMROR_MAX_SLP_INDEX_IN_UNIT_SHORTCUTS_FILE = 12; // "10-20" + "G" bitmaps.
 static const long int CST_CUSTOMROR_MAX_SLP_INDEX_FOR_UNIT_SHORTCUTS = 11; // Max itemindex that corresponds to a valid shortcut, in "shortcuts SLP"
 static const long int CST_CUSTOMROR_SLP_INDEX_FOR_UNIT_SHORTCUT_10 = 1; // Other itemIndexes are (10+i) => (CST_CUSTOMROR_SLP_ID_FOR_UNIT_SHORTCUT_10+i)
@@ -47,6 +48,7 @@ static const long int CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT = 12; // SLP.item
 #define CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS 4
 #define CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED 9
 #define CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT 10
+#define CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT 8
 
 
 // Manage Resolution
