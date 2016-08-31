@@ -197,7 +197,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			selectedUnit = unitArray[0];
 		}
 		AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *tmp = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)selectedUnit;
-		if (tmp->IsCheckSumValid()) {
+		/*if (tmp->IsCheckSumValid()) {
 			if ((tmp->resourceValue > 0) && (tmp->unitDefinition->resourceDecay == 0)) {
 				tmp->resourceValue = 0;
 				if (tmp->hasDedicatedUnitDef) {
@@ -205,7 +205,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				}
 				return false;
 			}
-		}
+		}*/
 
 		if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
 			// Editor
