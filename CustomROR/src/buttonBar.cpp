@@ -4,6 +4,16 @@
 namespace BUTTONBAR {
 
 
+// Hide a button from buttonbar. cmdButtonId shuold be in [0,11]
+void HideCommandButton(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, int cmdButtonId) {
+	assert((cmdButtonId >= 0) && (cmdButtonId < 12));
+	if ((cmdButtonId < 0) || (cmdButtonId >= 12)) { return; }
+	AOE_ShowUIObject(gameMainUI->unitCommandButtons[cmdButtonId], false);
+	gameMainUI->unitCommandButtons[cmdButtonId]->buttonInfoValue[0] = -1;
+	gameMainUI->unitCommandButtons[cmdButtonId]->commandIDs[0] = 0;
+}
+
+
 // Refresh status for custom auto-attack policy buttons
 void RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 	const AutoAttackPolicy *attackPolicy) {
@@ -102,6 +112,10 @@ void AddButtonsForLivingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 		}
 		AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, "Click to select a unit or a position to defend",
 			NULL /*CUSTOMROR::crInfo.customRorIcons*/, false);
+	}
+
+	if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE) {
+		SetButtonBarForDefendUnitOrZone(gameMainUI, unit);
 	}
 }
 
@@ -382,9 +396,7 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 				}
 			}
 			if (!forceShowAnyway) {
-				AOE_ShowUIObject(gameMainUI->unitCommandButtons[currentBtnId], false);
-				gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0] = -1;
-				gameMainUI->unitCommandButtons[currentBtnId]->commandIDs[0] = 0;
+				HideCommandButton(gameMainUI, currentBtnId);
 			}
 		}
 	}
@@ -472,5 +484,23 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 		gameMainUI->unitCommandButtons[5]->buttonInfoValue[0] = hasNextPage;
 	}
 }
+
+
+
+// Update the whole button bar when user clicks "defend unit/zone"
+void SetButtonBarForDefendUnitOrZone(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit) {
+	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) { return; }
+	// Hide all previous buttons
+	for (int btnId = 0; btnId < 12; btnId++) {
+		BUTTONBAR::HideCommandButton(gameMainUI, btnId);
+	}
+	if (!unit || !unit->IsCheckSumValid()) { return; } // MUST be trainable, not building
+
+	AddInGameCommandButton(0, INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_OR_BACK, 0, false, "Back",
+		NULL, false);
+	AddInGameCommandButton(1, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, "Stop defending current position/unit",
+		NULL, false);
+}
+
 
 }

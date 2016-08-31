@@ -11,6 +11,9 @@
 
 namespace BUTTONBAR {
 
+// Hide a button from buttonbar. cmdButtonId shuold be in [0,11]
+void HideCommandButton(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, int cmdButtonId);
+
 // Refresh status for custom auto-attack policy buttons
 void RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, const AutoAttackPolicy *attackPolicy);
 
@@ -26,6 +29,9 @@ void AddButtonsForLivingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 // Add relevant buttons in command bar for "building" unit (type=80). Excludes all other unit types.
 void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit);
 
+
+// Update the whole button bar when user clicks "defend unit/zone"
+void SetButtonBarForDefendUnitOrZone(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit);
 
 
 }

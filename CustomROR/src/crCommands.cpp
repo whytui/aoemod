@@ -4967,6 +4967,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		return false;
 	}
 
+#pragma message("TODO: For treatments below, do not unitBase but ALL compatible selected units !")
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_SELECTION) {
 		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE) {
 			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
@@ -4980,6 +4981,20 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValidForAUnitClass()) {
 			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
 			ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
+		}
+		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE) {
+			if (IsUnitIdle(unitBase)) {
+				UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
+				if (unitInfo) {
+					unitInfo->ResetProtectInfo();
+					CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
+#ifdef _DEBUG
+					CallWriteCenteredText("Removed protect info");
+#endif
+					settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
+					SetGameCursor(GAME_CURSOR::GC_NORMAL);
+				}
+			}
 		}
 		return false; // Let ROR code execute normally here, we just ran "auxiliary" treatments.
 	}
@@ -5065,6 +5080,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE;
 			CallWriteCenteredText("Right-click to define the unit or the position to protect"); // TODO localization
 		}
+		BUTTONBAR::SetButtonBarForDefendUnitOrZone(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)unitBase);
 	}
 
 	return false;
@@ -6745,5 +6761,6 @@ void CustomRORCommand::ExecuteTriggerAction(CR_TRIGGERS::crTrigger *trigger) {
 		}
 	}
 }
+
 
 }
