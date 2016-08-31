@@ -33,6 +33,7 @@
 #include "basicFilesHandling.h"
 #include "crMapCopier.h"
 #include "crRPGMode.h"
+#include "buttonBar.h"
 
 #pragma once
 
@@ -359,9 +360,6 @@ public:
 	// Returns false by default (most cases) !
 	bool OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue);
-
-	// Refresh status for custom auto-attack policy buttons
-	void RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, const AutoAttackPolicy *attackPolicy);
 
 	// Custom treatment to decide if a potential target unit should be ignored
 	// Overload standard rules for catapults(ignores building if HP=1) and "target=wall" cases.

@@ -1,15 +1,40 @@
 
 #include "../include/buttonBar.h"
 
-namespace CUSTOMROR {
+namespace BUTTONBAR {
+
+
+// Refresh status for custom auto-attack policy buttons
+void RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
+	const AutoAttackPolicy *attackPolicy) {
+	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
+		return;
+	}
+	if (!attackPolicy) {
+		attackPolicy = &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
+	}
+	int value = attackPolicy->attackVillagers ? 0 : 1;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]->showNumber = value;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]->numberToDisplay = value;
+	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]);
+	value = attackPolicy->attackNonTowerBuildings ? 0 : 1;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS]->showNumber = value;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS]->numberToDisplay = value;
+	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS]);
+	value = (!attackPolicy->attackMilitary && !attackPolicy->attackNonTowerBuildings && !attackPolicy->attackTowers && !attackPolicy->attackVillagers);
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]->showNumber = value;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]->numberToDisplay = value;
+	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]);
+	value = (attackPolicy->Equals(CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues)) ? 1 : 0;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]->showNumber = value;
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]->numberToDisplay = value;
+	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]);
+}
+
 
 
 // Called at the end of showUnitCommandButtons
 void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
-
-	//CustomRORInfo::configInfo.allowMultiQueueing;
-
-#ifdef fklf
 	assert(gameMainUI && gameMainUI->IsCheckSumValid());
 	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
 		return;
@@ -63,7 +88,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false, "Click to restore normal auto-attack behaviour",
 					&CUSTOMROR::crInfo.customRorIcons, false);
 				const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
-				this->RefreshCustomAutoAttackButtons(gameMainUI, aap);
+				RefreshCustomAutoAttackButtons(gameMainUI, aap);
 			}
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, "Click to select a unit or a position to defend",
 				NULL /*CUSTOMROR::crInfo.customRorIcons*/, false);
@@ -429,7 +454,6 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 		// We store the information "this is not last page" in button's infoValue.
 		gameMainUI->unitCommandButtons[5]->buttonInfoValue[0] = hasNextPage;
 	}
-#endif
 }
 
 }

@@ -207,7 +207,7 @@ bool CrGameObjects::RemoveFarmRebuildInfo(float posX, float posY) {
 // Remove "protect" info from all "unit info" objects that tell to protect a specific unit id
 bool CrGameObjects::RemoveProtectedUnit(long int protectedUnitId) {
 	if (protectedUnitId < 0) { return false; }
-	bool result;
+	bool result = false;
 	std::vector<long int> modifiedUnitIdList;
 	for each(UnitCustomInfo *unitInfo in this->unitCustomInfoList) {
 		if (unitInfo->protectUnitId == protectedUnitId) {
