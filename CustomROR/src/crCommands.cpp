@@ -5387,6 +5387,9 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 	if (!IsGameRunning()) {
 		return false;
 	}
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = NULL;
 	AOE_STRUCTURES::STRUCT_PLAYER *player = NULL;
 	if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValidForAUnitClass()) {
@@ -5400,12 +5403,21 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		return false;
 	}
 
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_SELECTION) {
+		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE) {
+			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
+			SetGameCursor(GAME_CURSOR::GC_NORMAL);
+			return true; // this action "exited" from "select unit to defend" action. It must not unselect unit too ! Mark event as handled.
+		}
+	}
+
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_STOP) {
 		// Fix strategy when AI is enabled and some action is interrupted by human player
 		if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValidForAUnitClass()) {
 			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
 			ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
 		}
+		return false; // Let ROR code execute normally here, we just ran "auxiliary" treatments.
 	}
 
 	// Handle next page. Note: in ROR, see 485140 (for villager build menu only)

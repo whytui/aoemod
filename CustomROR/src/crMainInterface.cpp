@@ -22,6 +22,7 @@ CustomRORMainInterface::~CustomRORMainInterface() {
 
 // Manage key press in game screen and editor.
 // Returns true if event has been handled AND we don't want original code to try to handle it.
+// Warning: UI components may catch and handle events before so this method is NOT called. See crCommand.OnGameCommandButtonClick.
 bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool CTRL, bool SHIFT, bool ALT) {
 	AOE_STRUCTURES::STRUCT_ANY_UI **pCurrentUI = (AOE_STRUCTURES::STRUCT_ANY_UI **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
 	assert(pCurrentUI != NULL);
