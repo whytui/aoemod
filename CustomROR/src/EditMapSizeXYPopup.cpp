@@ -48,5 +48,5 @@ void EditMapSizeXYPopup::OnAfterClose(bool isCancel) {
 	long int x = atoi(textX);
 	long int y = atoi(textY);
 	if ((x <= 0) || (y <= 0) || (x > 255) || (y > 255)) { return; }
-	this->crCommand->ScenarioEditor_customGenerateMap(x, y);
+	CUSTOMROR::crCommand.ScenarioEditor_customGenerateMap(x, y);
 }

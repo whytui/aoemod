@@ -23,14 +23,11 @@
 class CustomPopupBase {
 public:
 	CustomPopupBase();
-	CustomPopupBase(CustomRORCommand *crCommand);
 	~CustomPopupBase() {};
 
 	// The popup to open after this one is closed (optional, of course)
 	CustomPopupBase *nextPopup;
 
-	// To provide crCommand (shared) object
-	void SetCRCommand(CustomRORCommand *crCommand);
 	// Reset all internal pointers (base class + child classes)
 	void ResetPointers();
 	// Call this to open a new popup (=>this)
@@ -47,8 +44,6 @@ public:
 	virtual bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) { return false; };
 
 protected:
-	CustomRORInfo *crInfo;
-	CustomRORCommand *crCommand;
 	AOE_STRUCTURES::STRUCT_ANY_UI *popup;
 	bool isClosed; // Indicates this popup object has been closed and can be deleted safely.
 	long int hSize, vSize;

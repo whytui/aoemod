@@ -37,11 +37,11 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 	char maxFarmsTextBuffer[12];
 	char maxFoodTextBuffer[12];
 	char minWoodTextBuffer[12];
-	sprintf_s(customOptionHumanPenaltyTextBuffer, "%ld", this->crInfo->configInfo.dislike_humanPlayer);
-	sprintf_s(customOptionGameSpeedFactorTextBuffer, "%d", (int)(this->crInfo->configInfo.improvedGameSpeedFactor * (float)100));
-	sprintf_s(maxFarmsTextBuffer, "%d", this->crInfo->configInfo.autoRebuildFarms_maxFarms);
-	sprintf_s(maxFoodTextBuffer, "%d", this->crInfo->configInfo.autoRebuildFarms_maxFood);
-	sprintf_s(minWoodTextBuffer, "%d", this->crInfo->configInfo.autoRebuildFarms_minWood);
+	sprintf_s(customOptionHumanPenaltyTextBuffer, "%ld", CUSTOMROR::crInfo.configInfo.dislike_humanPlayer);
+	sprintf_s(customOptionGameSpeedFactorTextBuffer, "%d", (int)(CUSTOMROR::crInfo.configInfo.improvedGameSpeedFactor * (float)100));
+	sprintf_s(maxFarmsTextBuffer, "%d", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFarms);
+	sprintf_s(maxFoodTextBuffer, "%d", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFood);
+	sprintf_s(minWoodTextBuffer, "%d", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_minWood);
 
 
 	//this->customGamePopupButtonVar
@@ -57,7 +57,7 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 	// Farms autorebuild
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS, txtAutoRebuildFarms), 0x10, 0x64, 0x100, 0x1E);
 	this->AddCheckBox(this->popup, &this->chkAutoRebuildFarms, 0x120, 0x64, 0x1E, 0x1E);
-	AOE_CheckBox_SetChecked(this->chkAutoRebuildFarms, this->crInfo->configInfo.enableAutoRebuildFarms);
+	AOE_CheckBox_SetChecked(this->chkAutoRebuildFarms, CUSTOMROR::crInfo.configInfo.enableAutoRebuildFarms);
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_FOOD, txtAutoRebuildFarmsMaxFood), 0x10, 0x80, 0x100, 0x1E);
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMinWood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MIN_WOOD, txtAutoRebuildFarmsMinWood), 0x10, 0x98, 0x100, 0x1E);
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_NUMBER, txtAutoRebuildFarmsMaxNumber), 0x10, 0xB0, 0x100, 0x1E);
@@ -87,14 +87,14 @@ void InGameCustomRorOptionsPopup::OnBeforeClose(bool isCancel) {
 	char *typedText;
 	if (this->customOptionHumanPenaltyTextVar) {
 		typedText = this->customOptionHumanPenaltyTextVar->pTypedText;
-		this->crInfo->configInfo.dislike_humanPlayer = atoi(typedText); // does not raise. Returns 0 if invalid.
+		CUSTOMROR::crInfo.configInfo.dislike_humanPlayer = atoi(typedText); // does not raise. Returns 0 if invalid.
 	}
 
 	if (this->customOptionGameSpeedTextVar) {
 		typedText = this->customOptionGameSpeedTextVar->pTypedText;
 		float f = (float)(atof(typedText) / 100); // does not raise. Returns 0 if invalid.
 		if (f > 1) {
-			this->crInfo->configInfo.improvedGameSpeedFactor = f;
+			CUSTOMROR::crInfo.configInfo.improvedGameSpeedFactor = f;
 		}
 	}
 
@@ -104,19 +104,19 @@ void InGameCustomRorOptionsPopup::OnBeforeClose(bool isCancel) {
 	}
 
 	if (this->chkAutoRebuildFarms) {
-		this->crInfo->configInfo.enableAutoRebuildFarms = (this->chkAutoRebuildFarms->checked != 0);
+		CUSTOMROR::crInfo.configInfo.enableAutoRebuildFarms = (this->chkAutoRebuildFarms->checked != 0);
 	}
 	if (this->edtAutoRebuildFarmsMaxFarms) {
 		typedText = this->edtAutoRebuildFarmsMaxFarms->pTypedText;
-		this->crInfo->configInfo.autoRebuildFarms_maxFarms = atoi(typedText); // does not raise. Returns 0 if invalid.
+		CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFarms = atoi(typedText); // does not raise. Returns 0 if invalid.
 	}
 	if (this->edtAutoRebuildFarmsMaxFood) {
 		typedText = this->edtAutoRebuildFarmsMaxFood->pTypedText;
-		this->crInfo->configInfo.autoRebuildFarms_maxFood = atoi(typedText); // does not raise. Returns 0 if invalid.
+		CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFood = atoi(typedText); // does not raise. Returns 0 if invalid.
 	}
 	if (this->edtAutoRebuildFarmsMinWood) {
 		typedText = this->edtAutoRebuildFarmsMinWood->pTypedText;
-		this->crInfo->configInfo.autoRebuildFarms_minWood = atoi(typedText); // does not raise. Returns 0 if invalid.
+		CUSTOMROR::crInfo.configInfo.autoRebuildFarms_minWood = atoi(typedText); // does not raise. Returns 0 if invalid.
 	}
 }
 
@@ -127,7 +127,6 @@ void InGameCustomRorOptionsPopup::OnAfterClose(bool isCancel) {
 		assert(humanPlayer && humanPlayer->IsCheckSumValid());
 
 		SimpleEditTextPopup *tmpNextPopup = new SimpleEditTextPopup();
-		tmpNextPopup->SetCRCommand(this->crCommand);
 		tmpNextPopup->OpenPopup(700, 580, false);
 		tmpNextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE_CAN_BE_RESEARCHED_TITLE, "Technology tree that can still be researched"),
 			GetRemainingTechTreeText(humanPlayer).c_str(), 10000, NULL, false);

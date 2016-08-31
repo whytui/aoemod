@@ -431,7 +431,6 @@ template<class popupType> popupType *CustomRORMainInterface::CreateCustomPopupOb
 		}
 	}
 	this->currentCustomPopup = (CustomPopupBase*) new popupType();
-	this->currentCustomPopup->SetCRCommand(this->crCommand);
 	return (popupType*)this->currentCustomPopup;
 }
 

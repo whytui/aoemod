@@ -1,16 +1,10 @@
 #include "../include/CustomPopupBase.h"
 
 CustomPopupBase::CustomPopupBase() {
-	this->SetCRCommand(NULL);
 	this->ResetPointers();
 	this->isClosed = false;
 }
 
-CustomPopupBase::CustomPopupBase(CustomRORCommand *crCommand) {
-	this->SetCRCommand(crCommand);
-	this->ResetPointers();
-	this->isClosed = false;
-}
 
 void CustomPopupBase::ResetPointers() {
 	this->nextPopup = NULL;
@@ -22,18 +16,10 @@ void CustomPopupBase::ResetPointers() {
 }
 
 
-void CustomPopupBase::SetCRCommand(CustomRORCommand *crCommand) {
-	this->crCommand = crCommand;
-	this->crInfo = NULL;
-	if (crCommand) {
-		this->crInfo = &CUSTOMROR::crInfo;
-	}
-}
-
 // Use it to list all UI objects (labels, buttons...) that are created(added) to popup content,
 // so they are automatically freed when popup is closed (using AOE destructor).
 void CustomPopupBase::AddObjectInContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj) {
-	this->crInfo->AddObjectInPopupContentList(obj);
+	CUSTOMROR::crInfo.AddObjectInPopupContentList(obj);
 }
 
 
@@ -114,13 +100,12 @@ bool CustomPopupBase::AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 // Call this to open a new popup (=>this)
 // themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
 AOE_STRUCTURES::STRUCT_ANY_UI *CustomPopupBase::OpenPopup(long int hSize, long int vSize, bool withCancelBtn, long int themeSlpId) {
-	if (!this->crInfo) { return NULL; }
 	this->hSize = hSize;
 	this->vSize = vSize;
-	if (this->crInfo->HasOpenedCustomGamePopup()) {
+	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) {
 		return NULL;
 	}
-	this->popup = this->crInfo->OpenCustomGamePopup(hSize, vSize, withCancelBtn, themeSlpId);
+	this->popup = CUSTOMROR::crInfo.OpenCustomGamePopup(hSize, vSize, withCancelBtn, themeSlpId);
 	if (this->popup != NULL) {
 		this->AddPopupContent();
 	}
@@ -130,10 +115,9 @@ AOE_STRUCTURES::STRUCT_ANY_UI *CustomPopupBase::OpenPopup(long int hSize, long i
 
 // Call this to close the popup. This will handle pre/post close events.
 void CustomPopupBase::ClosePopup(bool isCancel) {
-	if (!this->crInfo) { return; }
 	if (this->IsClosed()) { return; }
 	this->OnBeforeClose(isCancel);
-	this->crInfo->CloseCustomGamePopup();
+	CUSTOMROR::crInfo.CloseCustomGamePopup();
 	this->OnAfterClose(isCancel);
 	// NO because we may have opened a new one in post-actions ! // this->currentCustomGamePopup = CUSTOM_GAME_POPUP_TYPES::CGPT_NONE;
 	this->isClosed = true;

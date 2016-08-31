@@ -27,9 +27,9 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	if (!global) { return; }
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetPlayerStruct(global->humanPlayerId);
 	if (!controlledPlayer || !controlledPlayer->IsCheckSumValid() || (controlledPlayer->selectedUnitCount <= 0)) { return; }
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = this->crInfo->GetMainSelectedUnit(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = CUSTOMROR::crInfo.GetMainSelectedUnit(controlledPlayer);
 	if (!unit || (!unit->IsCheckSumValidForAUnitClass())) { return; }
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->crInfo->GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
 	for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *curUnit = selectedUnits[i];
 		if (curUnit && curUnit->IsCheckSumValidForAUnitClass()) {

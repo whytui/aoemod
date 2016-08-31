@@ -175,7 +175,6 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 			STRUCT_ANY_UI *currentScreen = AOE_GetCurrentScreen();
 			if (currentScreen) {
 				GenNewTriggerPopup *nextPopup = new GenNewTriggerPopup();
-				nextPopup->SetCRCommand(this->crCommand);
 				nextPopup->OpenPopup(currentScreen->sizeX - 2, currentScreen->sizeY - 2, false, AOE_CONST_DRS::LightOrangeTheme);
 				this->nextPopup = nextPopup;
 			}
@@ -186,7 +185,6 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 		if (settings->ptrGlobalStruct && settings->ptrGlobalStruct->scenarioInformation &&
 			(settings->ptrGlobalStruct->scenarioInformation->strategyFileSize[this->playerId - 1] > 0)) {
 			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup();
-			nextPopup->SetCRCommand(this->crCommand);
 			nextPopup->OpenPopup(700, 580, false);
 			nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_GET_STRATEGY, "Get Strategy (read only)"), settings->ptrGlobalStruct->scenarioInformation->strategyFileContent[this->playerId - 1],
 				settings->ptrGlobalStruct->scenarioInformation->strategyFileSize[this->playerId - 1], NULL, false);
@@ -198,7 +196,6 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 		if (settings->ptrGlobalStruct && settings->ptrGlobalStruct->scenarioInformation &&
 			(settings->ptrGlobalStruct->scenarioInformation->personalityFileSize[this->playerId - 1] > 0)) {
 			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup();
-			nextPopup->SetCRCommand(this->crCommand);
 			nextPopup->OpenPopup(700, 580, false);
 			nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_GET_PERSONALITY, "Get Personality (read only)"), settings->ptrGlobalStruct->scenarioInformation->personalityFileContent[this->playerId - 1],
 				settings->ptrGlobalStruct->scenarioInformation->personalityFileSize[this->playerId - 1], NULL, false);
@@ -208,7 +205,6 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 	case SC_INFO_POPUP_TO_OPEN::PTO_TERRAIN_EDIT: // terrain edit
 	{
 		EditTerrainPopup *nextPopup = new EditTerrainPopup();
-		nextPopup->SetCRCommand(this->crCommand);
 		nextPopup->OpenPopup(500, 300, true);
 		this->nextPopup = nextPopup;
 		break;
@@ -216,7 +212,6 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 	case SC_INFO_POPUP_TO_OPEN::PTO_VICTORY_CONDITION:
 	{
 		InputBox_int<long int> *nextPopup = new InputBox_int<long int>();
-		nextPopup->SetCRCommand(this->crCommand);
 		nextPopup->OpenPopup(450, 200, true);
 		nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_GOLD_VICT_CONDITION, "Gold victory condition"),
 			localizationHandler.GetTranslation(CRLANG_ID_GOLD_VICT_CONDITION_DETAILS, "If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select \"custom\" in general victory conditions tab."),
