@@ -108,6 +108,7 @@
     <ClInclude Include="include\AOE_map.h" />
     <ClInclude Include="include\AOE_memory.h" />
     <ClInclude Include="include\autoAttackPolicy.h" />
+    <ClInclude Include="include\buttonBar.h" />
     <ClInclude Include="include\civilizationInfo.h" />
     <ClInclude Include="include\crCommands.h" />
     <ClInclude Include="include\crCommon.h" />
@@ -157,6 +158,7 @@
     <ClCompile Include="..\..\tinyxml\tinyxmlerror.cpp" />
     <ClCompile Include="..\..\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="src\AOE_map.cpp" />
+    <ClCompile Include="src\buttonBar.cpp" />
     <ClCompile Include="src\civilizationInfo.cpp" />
     <ClCompile Include="src\crCommands.cpp" />
     <ClCompile Include="src\crCommon.cpp" />

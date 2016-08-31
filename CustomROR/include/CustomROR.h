@@ -43,10 +43,10 @@ public:
 	CustomRORInstance();
 
 	// Variables / config values
-	CustomRORInfo crInfo;
+	static CustomRORInfo crInfo;
 	// Main class for customROR "functional" treatments
-	CustomRORMainInterface crMainInterface;
-	CustomRORCommand crCommand;
+	static CustomRORMainInterface crMainInterface;
+	static CustomRORCommand crCommand;
 
 	// Entry point : Game code -> ROR_API -> CustomRORInstance.DispatchToCustomCode(...) -> customROR treatments
 	void DispatchToCustomCode(REG_BACKUP *REG_values);

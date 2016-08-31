@@ -1,6 +1,12 @@
 #include "../include/CustomROR.h"
 
 
+// Static objects : visible at global level.
+CustomRORInfo CustomRORInstance::crInfo;
+CustomRORMainInterface CustomRORInstance::crMainInterface;
+CustomRORCommand CustomRORInstance::crCommand;
+
+
 //#pragma warning(push)
 //#pragma warning(disable: 4731) // Allow modifying EBP in assembler code... Required for compliance with some AOE methods. Be careful !
 //#pragma warning(disable: 4733) // Allow modifying FS[0]... Required for compliance with some AOE methods. Be careful !

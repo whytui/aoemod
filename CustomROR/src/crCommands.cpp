@@ -4928,7 +4928,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	if (!IsGameRunning() || !this->crInfo->configInfo.useImprovedButtonBar) {
 		return;
 	}
-
+	
 	// Collect info
 	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 	if (!player || !player->IsCheckSumValid()) {
@@ -5341,6 +5341,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 		gameMainUI->unitCommandButtons[5]->buttonInfoValue[0] = hasNextPage;
 	}
 }
+
 
 
 // Refresh status for custom auto-attack policy buttons

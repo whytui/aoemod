@@ -14,7 +14,7 @@
 namespace RPG_MODE {
 
 	const bool collectXpOnKills = true;
-	const int maxUnitLevel = 49;
+	const int maxUnitLevel = 9;
 	const int maxLevelHPIncrease = 20;
 	const int maxLevelAttackIncrease = 2;
 	const int maxLevelArmorIncrease = 2;
@@ -22,8 +22,8 @@ namespace RPG_MODE {
 	const int killsToLevelUp = 10;
 	const int xpStolenProportionFromKilledUnit = 5; // 1/xpStolenProportionFromKilledUnit of killed unit's XP is credited to actor unit.
 	static_assert(killsToLevelUp > 0, "killsToLevelUp must be strictly positive");
-	const short int resourceTypeUsedForXp = AOE_CONST_FUNC::CST_RES_ORDER_KILLS;
-	//const short int resourceTypeUsedForXp = AOE_CONST_FUNC::CST_RES_ORDER_GOLD; // Nice for testing
+	//const short int resourceTypeUsedForXp = AOE_CONST_FUNC::CST_RES_ORDER_KILLS;
+	const short int resourceTypeUsedForXp = AOE_CONST_FUNC::CST_RES_ORDER_GOLD; // Nice for testing
 
 	// Handle RPG events when a unit kills another one
 	void OnUnitKill(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *actorUnit);
