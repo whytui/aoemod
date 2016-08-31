@@ -1,10 +1,13 @@
 
 #include "../include/buttonBar.h"
 
+namespace CUSTOMROR {
 
 
 // Called at the end of showUnitCommandButtons
 void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
+
+	//CustomRORInfo::configInfo.allowMultiQueueing;
 
 #ifdef fklf
 	assert(gameMainUI && gameMainUI->IsCheckSumValid());
@@ -49,26 +52,26 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDef;
 		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_NORMAL) {
 			if ((unitDefLiving->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDefLiving->blastRadius > 0)) {
-				UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+				UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 				// TODO: localization
 				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically",
-					&this->crInfo->customRorIcons, true);
+					&CUSTOMROR::crInfo.customRorIcons, true);
 				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false, "Click to prevent unit from attacking buildings automatically",
-					&this->crInfo->customRorIcons, false);
+					&CUSTOMROR::crInfo.customRorIcons, false);
 				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, "Click to prevent unit from attacking other units automatically",
-					&this->crInfo->customRorIcons, false);
+					&CUSTOMROR::crInfo.customRorIcons, false);
 				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false, "Click to restore normal auto-attack behaviour",
-					&this->crInfo->customRorIcons, false);
-				const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &this->crInfo->configInfo.autoAttackOptionDefaultValues;
+					&CUSTOMROR::crInfo.customRorIcons, false);
+				const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
 				this->RefreshCustomAutoAttackButtons(gameMainUI, aap);
 			}
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, "Click to select a unit or a position to defend",
-				NULL /*&this->crInfo->customRorIcons*/, false);
+				NULL /*CUSTOMROR::crInfo.customRorIcons*/, false);
 		}
 		return;
 	}
 
-	bool multiQueueing = this->crInfo->configInfo.allowMultiQueueing; // If true, a building can have >1 unit "def" in queue.
+	bool multiQueueing = CUSTOMROR::crInfo.configInfo.allowMultiQueueing; // If true, a building can have >1 unit "def" in queue.
 	bool buttonIsVisible[12]; // Is button visible after standard buttons display.
 	bool forceRefresh[12]; // Used to force refresh of buttons : text or read-only status can be wrong when switching between 2 similar units that have different current actions.
 	bool currentButtonDoesNotBelongToThisPage[12];
@@ -427,4 +430,6 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 		gameMainUI->unitCommandButtons[5]->buttonInfoValue[0] = hasNextPage;
 	}
 #endif
+}
+
 }

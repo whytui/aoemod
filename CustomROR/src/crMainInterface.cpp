@@ -1,5 +1,9 @@
 #include "../include/crMainInterface.h"
 
+
+namespace CUSTOMROR {
+
+
 // Static global object
 CustomRORMainInterface CUSTOMROR::crMainInterface;
 
@@ -813,3 +817,4 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 	return result;
 }
 
+}

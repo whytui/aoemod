@@ -39,6 +39,9 @@
 #define CRCMD_TEXT_BUFFER_SIZE 256
 
 
+namespace CUSTOMROR {
+
+
 // TEMPORARY
 #ifdef _DEBUG
 static bool _DEBUG_improveThisPlayer(int playerId) {
@@ -471,8 +474,6 @@ public:
 };
 
 
-
-namespace CUSTOMROR {
 	// A unique global object for everyone
 	extern CustomRORCommand crCommand;
 }

@@ -6,7 +6,15 @@
 #include "crCommon.h"
 #include "CustomRORInfo.h"
 
+namespace CUSTOMROR {
+
+// Refresh status for custom auto-attack policy buttons
+//void RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, const AutoAttackPolicy *attackPolicy);
+
 
 // Called at the end of showUnitCommandButtons
 void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI);
 
+
+
+}

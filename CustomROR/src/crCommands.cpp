@@ -1,6 +1,10 @@
 #include "../include/crCommands.h"
 
 
+namespace CUSTOMROR {
+
+
+
 // Global static objects
 CustomRORCommand CUSTOMROR::crCommand;
 
@@ -7181,3 +7185,4 @@ void CustomRORCommand::ExecuteTriggerAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 }
 
+}

@@ -19,6 +19,9 @@
 #include "traceMessage.h"
 #include "unitShortcuts.h"
 
+namespace CUSTOMROR {
+
+
 /* This class manages main interactions between ROR (via CustomRORInstance class) and customROR commands
  * Especially, UI events are managed here as our UI objects need to access CustomRORCommand object.
 */
@@ -110,7 +113,6 @@ public:
 };
 
 
-namespace CUSTOMROR {
 	// Global unique object
 	extern CustomRORMainInterface crMainInterface;
 }

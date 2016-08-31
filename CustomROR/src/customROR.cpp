@@ -6,6 +6,8 @@
 //#pragma warning(disable: 4731) // Allow modifying EBP in assembler code... Required for compliance with some AOE methods. Be careful !
 //#pragma warning(disable: 4733) // Allow modifying FS[0]... Required for compliance with some AOE methods. Be careful !
 
+namespace CUSTOMROR {
+
 CustomRORInstance::CustomRORInstance() {}
 
 
@@ -3435,5 +3437,7 @@ void CustomRORInstance::EntryPointAfterActivityStop(REG_BACKUP *REG_values) {
 	CUSTOMROR::crCommand.OnUnitActivityStop(unitActivity);
 }
 
+
+}
 
 //#pragma warning(pop)
