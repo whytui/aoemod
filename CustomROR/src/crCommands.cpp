@@ -3086,6 +3086,9 @@ bool CustomRORCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetU
 		return true; // No notification to handle
 	}
 
+	// Handle internal structures
+	this->crInfo->myGameObjects.RemoveAllInfoForUnit(targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY);
+
 	// Not handled: other events than conversion (is there any ?)
 
 	// Warning, for a conversion, arg2= actor playerId (priest), arg3=victim playerId
@@ -5718,6 +5721,9 @@ void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACK
 	if (this->IsRpgModeEnabled() && actorUnit->DerivesFromTrainable()) {
 		RPG_MODE::OnUnitKill(killedUnit, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)actorUnit);
 	}
+
+	// Handle internal objects
+	this->crInfo->myGameObjects.RemoveAllInfoForUnit(killedUnit->unitInstanceId, killedUnit->positionX, killedUnit->positionY);
 }
 
 
@@ -5876,7 +5882,17 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 		if (distance < 2) { distance = 2; } // use a config ?
 		if (unitInfo->protectUnitId >= 0) {
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *unitToProtect = GetUnitStruct(unitInfo->protectUnitId);
-			if (unitToProtect && unitToProtect->IsCheckSumValidForAUnitClass()) {
+			if (unitToProtect && !unitToProtect->IsCheckSumValidForAUnitClass()) {
+				unitToProtect = NULL;
+				assert(!"ERROR: unit to protect has an invalid checksum");
+			}
+			if (unitToProtect) {
+				bool unitIsVisible = IsFogVisibleForPlayer(controlledPlayer->playerId, (long int)unitToProtect->positionX, (long int)unitToProtect->positionY);
+				if (!unitIsVisible) {
+					unitToProtect = NULL; // Can't protect (follow) a unit if I don't see it (would be cheating)
+				}
+			}
+			if (unitToProtect) {
 				refX = unitToProtect->positionX;
 				refY = unitToProtect->positionY;
 			} else {

@@ -58,6 +58,9 @@ public:
 	void FreeAllUnitCustomInfoList();
 	void FreeAllFarmRebuildInfoList();
 
+	// Remove all information concerning a specific unit
+	bool RemoveAllInfoForUnit(long int unitId, float posX, float posY);
+
 	// Returns a UnitCustomInfo pointer to matching element for given unitId.
 	// Returns NULL if not found.
 	// Asserts unitId > 0
@@ -80,6 +83,9 @@ public:
 	// Remove a FarmRebuildInfo element from list
 	// Returns true if an element was found (and removed)
 	bool RemoveFarmRebuildInfo(float posX, float posY);
+
+	// Remove "protect" info from all "unit info" objects that tell to protect a specific unit id
+	bool RemoveProtectedUnit(long int protectedUnitId);
 
 private:
 	vector<UnitCustomInfo*> unitCustomInfoList;

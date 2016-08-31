@@ -91,6 +91,21 @@ void CrGameObjects::FreeAllFarmRebuildInfoList() {
 }
 
 
+
+// Remove all information concerning a specific unit
+bool CrGameObjects::RemoveAllInfoForUnit(long int unitId, float posX, float posY) {
+	bool result = false;
+	if ((posX >= 0) && (posY >= 0)) {
+		result |= this->RemoveFarmRebuildInfo(posX, posX);
+	}
+	if (unitId != -1) {
+		result |= this->RemoveUnitCustomInfo(unitId);
+		result |= this->RemoveProtectedUnit(unitId);
+	}
+	return result;
+}
+
+
 // Returns a UnitCustomInfo pointer to matching element for given unitId.
 // Returns NULL if not found.
 // Asserts unitId > 0
@@ -186,5 +201,25 @@ bool CrGameObjects::RemoveFarmRebuildInfo(float posX, float posY) {
 	bool found = (it != this->farmRebuildInfoList.end());
 	this->farmRebuildInfoList.erase(it, this->farmRebuildInfoList.end());
 	return found;
+}
+
+
+// Remove "protect" info from all "unit info" objects that tell to protect a specific unit id
+bool CrGameObjects::RemoveProtectedUnit(long int protectedUnitId) {
+	if (protectedUnitId < 0) { return false; }
+	bool result;
+	std::vector<long int> modifiedUnitIdList;
+	for each(UnitCustomInfo *unitInfo in this->unitCustomInfoList) {
+		if (unitInfo->protectUnitId == protectedUnitId) {
+			unitInfo->ResetProtectInfo();
+			result = true;
+			modifiedUnitIdList.push_back(unitInfo->unitId);
+		}
+	}
+	// Clean empty unitCustomInfo objects, if any
+	for each(long int unitIdToCheck in modifiedUnitIdList) {
+		this->RemoveUnitCustomInfoIfEmpty(unitIdToCheck);
+	}
+	return result;
 }
 
