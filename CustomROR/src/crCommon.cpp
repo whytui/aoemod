@@ -2,6 +2,8 @@
 
 static char _intDistanceValues[CST_INT_DISTANCE_VALUES_MAX_COORDINATE + 1][CST_INT_DISTANCE_VALUES_MAX_COORDINATE + 1] = { '\0' };
 
+CustomRORConfig CustomRORInfo::configInfo;
+
 
 CustomRORInfo::CustomRORInfo() {
 	this->triggerSet = NULL;

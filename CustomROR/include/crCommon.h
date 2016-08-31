@@ -67,7 +67,7 @@ public:
 	~CustomRORInfo();
 
 	// Custom ROR Configuration
-	CustomRORConfig configInfo;
+	static CustomRORConfig configInfo;
 	bool hasFixForBuildingStratElemUnitId;
 	bool hasManageAIFeatureON; // Is "ManageAI" feature installed (use custom flag "isAI" in player struct)
 	bool hasCustomSelectedUnitsMemory; // Player struct size is extended to host more selected units
