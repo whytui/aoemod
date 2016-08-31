@@ -3143,6 +3143,8 @@ void CustomRORInstance::EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_
 
 // From 00481410 - UIGameMain.DoButtonAction(commandId, infoValue, arg3)
 // Forcing return address to 0x4815BE allows to skip ROR treatments (this button click will be ignored by ROR)
+// WARNING: This method may receive "OnKeyPress" events before the "OnKeyPress" method, for example pressing ESC when a unit is selected (ESC = button shortcut)
+// In such situations, the "GameAndEditor_ManageKeyPress" method never receives the event because THIS code already handled it.
 void CustomRORInstance::EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *)REG_values->ECX_val;
 	ror_api_assert(REG_values, gameMainUI && gameMainUI->IsCheckSumValid());
@@ -3154,9 +3156,10 @@ void CustomRORInstance::EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_value
 	long int arg1 = GetIntValueFromRORStack(REG_values, 4);
 	long int arg2 = GetIntValueFromRORStack(REG_values, 8);
 	long int arg3 = GetIntValueFromRORStack(REG_values, 0x0C);
+	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID eventCommandId = (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)arg1;
 
 	// Do custom treatments here
-	forceIgnoreThisEvent = this->crCommand.OnGameCommandButtonClick(gameMainUI, (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)arg1, arg2);
+	forceIgnoreThisEvent = this->crCommand.OnGameCommandButtonClick(gameMainUI, eventCommandId, arg2);
 
 	// Do not modify below.
 	if (forceIgnoreThisEvent) {
