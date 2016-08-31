@@ -121,6 +121,7 @@
     <ClInclude Include="include\crRPGMode.h" />
     <ClInclude Include="include\customFuncRules.h" />
     <ClInclude Include="include\CustomPopupBase.h" />
+    <ClInclude Include="include\CustomRORInfo.h" />
     <ClInclude Include="include\drsHandler.h" />
     <ClInclude Include="include\EditMapSizeXYPopup.h" />
     <ClInclude Include="include\EditorEditUnitInfoPopup.h" />
@@ -173,6 +174,7 @@
     <ClCompile Include="src\crTriggerSet.cpp" />
     <ClCompile Include="src\CustomPopupBase.cpp" />
     <ClCompile Include="src\customROR.cpp" />
+    <ClCompile Include="src\CustomRORInfo.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\drsHandler.cpp" />
     <ClCompile Include="src\EditMapSizeXYPopup.cpp" />

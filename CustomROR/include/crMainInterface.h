@@ -5,6 +5,7 @@
 #include <UI\AOE_struct_ui_mp_setup_screen.h>
 #include <AOE_struct_unit_actions.h>
 #include <AOE_struct_units.h>
+#include "CustomRORInfo.h"
 #include "crCommands.h"
 #include "CustomPopupBase.h"
 #include "EditMapSizeXYPopup.h"

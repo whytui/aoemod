@@ -16,6 +16,7 @@
 
 #include <Windows.h> // for messagebox
 #include "crCommon.h"
+#include "CustomRORInfo.h"
 #include "crConfig.h"
 #include "crCommands.h"
 #include "crMainInterface.h"

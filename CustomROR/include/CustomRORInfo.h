@@ -1,0 +1,200 @@
+
+#pragma once
+
+#include <assert.h>
+#include <list>
+#include <algorithm>
+#include <ROR_API_pub.h>
+#include <AOE_struct_game_settings.h>
+#include <AOE_struct_main_ai.h>
+#include <AOE_struct_unit_actions.h>
+#include <AOE_structures_drs.h>
+#include <AOE_offsets.h>
+#include <AOE_const_internal.h>
+#include <AOE_const_language.h>
+#include <mystrings.h>
+#include <Windows.h>
+#include <ROR_global_variables.h>
+
+#include "mainStructuresHandling.h"
+#include "UI_utilities.h"
+#include "crConfig.h"
+#include "civilizationInfo.h"
+#include "traceMessage.h"
+#include "crGameObjects.h"
+#include "interface.h" // SLP/icon ids...
+#include "language.h"
+#include "crLocalization.h"
+#include "crCommon.h"
+
+
+// Defines common objects/variables/methods for CustomROR
+
+#define CST_TIMER_STATS_ARRAY_SIZE 20
+
+using namespace AOE_CONST_FUNC;
+using namespace AOE_STRUCTURES;
+
+
+// Constants
+static char *txtHumanPenalty = "Dislike penalty for human player";
+static char *txtGameSpeedFactor = "Game speed change factor*100 (125 for 1.25)";
+static char *txtAutoRebuildFarms = "Auto. rebuild farms";
+static char *txtAutoRebuildFarmsMaxNumber = "Auto. rebuild farms max number";
+static char *txtAutoRebuildFarmsMaxFood = "Auto. rebuild farms max food";
+static char *txtAutoRebuildFarmsMinWood = "Auto. rebuild farms min wood";
+
+
+// Max X/Y value we can quick-calculate distances on.
+#define CST_INT_DISTANCE_VALUES_MAX_COORDINATE 30
+
+
+// Internal structures/variables for CustomROR that are not read from configuration
+class CustomRORInfo {
+public:
+	CustomRORInfo();
+	~CustomRORInfo();
+
+	// Custom ROR Configuration
+	static CustomRORConfig configInfo;
+	bool hasFixForBuildingStratElemUnitId;
+	bool hasManageAIFeatureON; // Is "ManageAI" feature installed (use custom flag "isAI" in player struct)
+	bool hasCustomSelectedUnitsMemory; // Player struct size is extended to host more selected units
+	bool hasRemovePlayerInitialAgeInScenarioInit;
+	// Internal variables
+	vector<short int> unitDefToDisable[9];
+	vector<short int> researchesToDisable[9];
+	CrGameObjects myGameObjects;
+	int gameTimerSlowDownCounter;
+	long int CollectedTimerIntervalsIndex;
+	long int CollectedTimerIntervals_ms[CST_TIMER_STATS_ARRAY_SIZE];
+	int LastGameTimerAutoFix_second;
+	long int lastCustomRORTimeExecution_gameTime_s; // In seconds. Used to limit customROR treatments in ROR's timer execution.
+	int LastDislikeValuesComputationTime_second; // Stores game time when we last computed players dislike values.
+	// To know which civ player names are already used when choosing names. Values: -1=unused, >=0=used by player #i
+	// Warning: playerName index are from 0 to 8 here instead of 1 to 9 ! Be careful.
+	char nameIndexIsUsedByPlayer[CST_MAX_TOTAL_CIV_COUNT][CST_MAX_NUMBER_OF_PLAYER_NAMES_PER_CIV];
+	// Own DRS objects
+	STRUCT_SLP_INFO customRorIcons; // CustomROR-specific icons
+	STRUCT_SLP_INFO customRorUnitShortcuts; // CustomROR-specific SLP for unit shortcuts (number displayed nearby unit selection white square)
+
+	// Triggers
+	CR_TRIGGERS::crTriggerSet *triggerSet; // all information about custom triggers.
+	long int triggersLastCheckTime_s; // In seconds. Last game time when triggers have been checked (for "timer" trigger types)
+
+	// To monitor conversion efficiency
+	long int activeConversionAttemptsCount[9]; // Per playerId
+	long int activeConversionSuccessfulAttemptsCount[9]; // Per playerId
+	long int passiveConversionAttemptsCount[9]; // Per playerId
+	long int passiveConversionSuccessfulAttemptsCount[9]; // Per playerId
+
+	// UI Variables : CustomROR yes/no dialog
+	unsigned long int *customYesNoDialogVar;  // customROR's dialog struct. NULL means dialog does not exist.
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGameMenuOptionsBtnVar;
+private:
+	// "OK" button of customROR's game popup. NULL means popup does not exist. See HasOpenedCustomGamePopup.
+	// It is CRUCIAL that this variable is always correctly set (reset).
+	// Never affect this variable manually, let the open/close methods do it.
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGamePopupButtonVar;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGamePopupCancelBtnVar;
+	AOE_STRUCTURES::STRUCT_ANY_UI *customGamePopupVar; // Pointer to our custom game popup object when open. Should be NULL <=> customGamePopupButtonVar==NULL
+	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> objectsToFree; // Popup's UI components list. Useful to destroy all of them automatically
+	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> garbageComponentsToFree; // Popup's UI components that are waiting to be destroyed (objects that could not be destroyed at popup closing)
+	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> garbageComponentsToFree_older; // Popup's UI components that are waiting to be destroyed and that are no longer related the current events (now ready to be destroyed)
+
+public:
+
+	// Reset variables that are used during game.
+	// Only reset internal variables that are game-dependent !
+	// This is called on each game start/load
+	void ResetVariables();
+
+	// Resets and fills the list of unitDefID to disable for a player from a comma-separated list.
+	void FillUnitDefToDisableFromString(long int playerId, const char *text);
+	// Resets and fills the list of researchID to disable for a player from a comma-separated list.
+	void FillResearchesToDisableFromString(long int playerId, const char *text);
+
+	// Compute conversion resistance
+	float GetConversionResistance(char civId, short int unitClass);
+
+	// Applies an "auto-attack policy" on all player's selected units (only for owned units !)
+	// flagsToApply is used to determine which flags have to be updated using values from autoAttackPolicyValues.
+	// If flagsToApply.xxx is true, then update unit's auto_attack_policy.xxx to "autoAttackPolicyValues.xxx" value.
+	void ApplyAutoAttackPolicyToPlayerSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, 
+		const AutoAttackPolicy &autoAttackPolicyValues, const AutoAttackPolicy &flagsToApply);
+
+	// Returns true if a custom game popup is opened (only for popups, not dialogs !)
+	bool HasOpenedCustomGamePopup();
+	// Returns true if a custom dialog is opened (only for dialogs, not popups !)
+	bool HasOpenedCustomDialog();
+
+	// Opens a custom popup window in game screen/editor. The created popup window only contains a "OK" button.
+	// You have to add UI elements afterwards (use GetCustomGamePopup() to get parent object=popup).
+	// Return popup UI object if OK, NULL if failed
+	// Fails if another game popup (including options) is already open. Fails if dimensions are too small.
+	// Pauses the game if running (only if a popup is successfully opened)
+	// Technically, the created (AOE) popup object is based on game options popup.
+	// themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
+	AOE_STRUCTURES::STRUCT_ANY_UI *OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn = false,
+		long int themeSlpId = -1);
+
+	// Use it to list all UI components (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
+	// The method is protected against duplicates, you can safely call it more than once.
+	// Returns true if obj has actually been added to list.
+	bool AddObjectInPopupContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj);
+
+private:
+	// Free (destroys using AOE destructor) all popup's components
+	// The reason we don't free those immediatly is because they might be used in current event (button onclick, etc).
+	// Warning: this must NOT be called at any moment, make sure none of the concerned object is currently being used (specially for onclick events...)
+	void FreePopupAddedObjects();
+	// Free remaining UI components that could not be freed yet
+	void FreeGarbagePopupComponents();
+
+public:
+	// Use this to force values for "current custom popup". PLEASE AVOID using it !
+	// Returns true if successful. Fails if a popup is already open.
+	bool ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_ANY_UI *customGamePopup, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel);
+	// To be called when game menu is closed to free custom button
+	void ForceClearCustomMenuObjects();
+
+	// Closes currently opened custom popup window in game screen.
+	void CloseCustomGamePopup();
+
+	// Return true if provided memory address is our custom game popup OK button (excluding custom options)
+	bool IsCustomGamePopupOKButton(unsigned long int UIObjectAddress);
+	// Return true if provided memory address is our custom game popup Cancel button (excluding custom options)
+	bool IsCustomGamePopupCancelButton(unsigned long int UIObjectAddress);
+
+	// Returns custom popup window in game screen (excluding customROR options popup).
+	// Returns NULL if this popup is not open.
+	// This information is useful to add UI components to the popup.
+	// When adding components, it is not necessary to store component pointers unless we need them to catch events (buttonClick) or get values (input objects)
+	AOE_STRUCTURES::STRUCT_ANY_UI *GetCustomGamePopup();
+
+	// Get main (first) selected unit, or NULL if none is selected.
+	// Works in-game and in editor.
+	// See SelectOneUnit for unit selection + AOE_selectUnit, AOE_clearSelectedUnits
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *GetMainSelectedUnit(AOE_STRUCTURES::STRUCT_PLAYER *player);
+
+	// Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **GetRelevantSelectedUnitsBasePointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
+
+	// Fast-computes the integer distance for X and Y delta values (sqrt(X^2 + Y^2) as an integer).
+	// Returns -1 if invalid (diffX and diffY values are capped at CST_INT_DISTANCE_VALUES_MAX_COORDINATE)
+	static char GetIntDistance(char diffX, char diffY);
+
+private:
+	// Private method: fill a vector from a list of numeric values (short int)
+	// Separator is , or ;
+	void FillIDVectorFromString(vector<short int> &v, long int playerId, const char *text);
+
+};
+
+
+namespace CUSTOMROR {
+	extern CustomRORInfo crInfo;
+
+}
+

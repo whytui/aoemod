@@ -9,6 +9,7 @@
 #include <AOE_const_functional.h>
 #include <basicFilesHandling.h>
 #include "crCommon.h"
+#include "CustomRORInfo.h"
 #include "researches.h"
 #include "randomizer.h"
 #include "AOE_strategy.h"

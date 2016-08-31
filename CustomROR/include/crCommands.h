@@ -18,6 +18,7 @@
 #include "Version.h"
 #include "AOE_map.h"
 #include "crCommon.h"
+#include "CustomRORInfo.h"
 #include "UI_utilities.h"
 #include "crTrigger.h"
 #include "crTriggerSet.h"
