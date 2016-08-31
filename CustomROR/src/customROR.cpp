@@ -4,7 +4,7 @@
 // Static objects : visible at global level.
 CustomRORInfo CustomRORInstance::crInfo;
 CustomRORMainInterface CustomRORInstance::crMainInterface;
-CustomRORCommand CustomRORInstance::crCommand;
+//CustomRORCommand CustomRORInstance::crCommand;
 
 
 //#pragma warning(push)
@@ -392,12 +392,11 @@ void CustomRORInstance::OneShotInit() {
 	traceMessageHandler.WriteMessageNoNotification(localizationHandler.GetTranslation(CRLANG_ID_DEBUG_INIT, "Debug message system initialized."));
 	this->crInfo.configInfo.ReadXMLConfigFile("CustomROR\\customROR.xml");
 	this->crInfo.configInfo.ReadCivXMLConfigFile("CustomROR\\customROR_civs.xml");
-	this->crCommand.crInfo = &this->crInfo;
-	this->crMainInterface.crCommand = &this->crCommand;
+	this->crMainInterface.crCommand = &CUSTOMROR::crCommand;
 	// Do not use crCommand before this line !
 
 	// Note: CheckEnabledFeatures writes to log file
-	if (!this->crCommand.CheckEnabledFeatures()) {
+	if (!CUSTOMROR::crCommand.CheckEnabledFeatures()) {
 		const char *msg = localizationHandler.GetTranslation(CRLANG_ID_WARN_MISSING_FEATURE, "WARNING: Some features are not enabled in game executable. See CustomROR\\CustomROR.log file.");
 		if (this->crInfo.configInfo.showAlertOnMissingFeature) {
 			MessageBoxA(0, msg, "ROR API", MB_ICONWARNING);
@@ -406,7 +405,7 @@ void CustomRORInstance::OneShotInit() {
 	}
 	
 	// Custom treatments for initialization
-	this->crCommand.OneShotInit();
+	CUSTOMROR::crCommand.OneShotInit();
 }
 
 
@@ -466,7 +465,7 @@ void CustomRORInstance::ReadTextFromChat(REG_BACKUP *REG_values) {
 
 	// Now do our own treatments
 	if (IsMultiplayer()) { return; }
-	this->crCommand.HandleChatCommand(txt);
+	CUSTOMROR::crCommand.HandleChatCommand(txt);
 }
 
 
@@ -474,7 +473,7 @@ void CustomRORInstance::ReadTextFromChat(REG_BACKUP *REG_values) {
 // Warning: for scenarios, if there is an introduction screen, this method is called at that moment
 // (game might not be displayed yet)
 void CustomRORInstance::ActionOnGameStart(REG_BACKUP *REG_values) {
-	this->crCommand.OnGameStart();
+	CUSTOMROR::crCommand.OnGameStart();
 }
 
 
@@ -492,7 +491,7 @@ void CustomRORInstance::InitBeforeGameStart(REG_BACKUP *REG_values, bool isSaved
 		}
 	}
 
-	this->crCommand.OnNewGame(isSavedGame);
+	CUSTOMROR::crCommand.OnNewGame(isSavedGame);
 }
 
 // This is called while scenarioInfo structure is read from a file (cf 0x506937)
@@ -510,7 +509,7 @@ void CustomRORInstance::InitScenarioInfoTextData(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scenarioInfo = (AOE_STRUCTURES::STRUCT_SCENARIO_INFO *)REG_values->ESI_val;
 	ror_api_assert(REG_values, scenarioInfo && scenarioInfo->IsCheckSumValid());
 
-	this->crCommand.InitScenarioInfoTextData(scenarioInfo);
+	CUSTOMROR::crCommand.InitScenarioInfoTextData(scenarioInfo);
 }
 
 
@@ -626,7 +625,7 @@ void CustomRORInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, actorPlayer->IsCheckSumValid());
 
 	// Manage functional impacts / fixes about unit conversion
-	this->crCommand.OnUnitChangeOwner_fixes((AOE_STRUCTURES::STRUCT_UNIT_BASE*)targetUnit, actorPlayer);
+	CUSTOMROR::crCommand.OnUnitChangeOwner_fixes((AOE_STRUCTURES::STRUCT_UNIT_BASE*)targetUnit, actorPlayer);
 
 	// Conversions Monitoring:
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = targetUnit->ptrStructPlayer; // The victim (if unit has been converted)
@@ -660,7 +659,7 @@ void CustomRORInstance::ManageOnPlayerAddUnit(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 	// Now custom treatments
-	this->crCommand.OnPlayerAddUnitCustomTreatments(player, unit, (isTempUnit!=0), (isNotCreatable!=0));
+	CUSTOMROR::crCommand.OnPlayerAddUnitCustomTreatments(player, unit, (isTempUnit!=0), (isNotCreatable!=0));
 }
 
 
@@ -712,7 +711,7 @@ void CustomRORInstance::MapGen_applyElevation(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, posY >= 0);
 	if ((dist <= 0) || (posX < 0) || (posY < 0)) { return; }
 	AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo = (AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO*) REG_values->ECX_val;
-	this->crCommand.Fixed_MapGen_applyElevation(posX, posY, dist, elevInfo);
+	CUSTOMROR::crCommand.Fixed_MapGen_applyElevation(posX, posY, dist, elevInfo);
 }
 
 
@@ -739,7 +738,7 @@ void CustomRORInstance::ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	this->crCommand.OnPlayerRemoveUnit(player, unit, isTempUnit != 0, isNotCreatable != 0);
+	CUSTOMROR::crCommand.OnPlayerRemoveUnit(player, unit, isTempUnit != 0, isNotCreatable != 0);
 }
 
 
@@ -852,7 +851,7 @@ void CustomRORInstance::AfterAddElementInStrategy(REG_BACKUP *REG_values) {
 	long int retrains = args[5];
 	long int positionCounter = args[6]; // position in strategy list, NOT elemId !
 	
-	this->crCommand.AfterAddElementInStrategy(buildAI, posToAdd, nbToCreate);
+	CUSTOMROR::crCommand.AfterAddElementInStrategy(buildAI, posToAdd, nbToCreate);
 }
 
 
@@ -979,7 +978,7 @@ void CustomRORInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 
 	// Update triggers data before saving, 
 	// so that when loading game we will have relevant trigger information (which have already been executed, etc)
-	this->crCommand.WriteTriggersFromInternalToGameData(true);
+	CUSTOMROR::crCommand.WriteTriggersFromInternalToGameData(true);
 }
 
 
@@ -997,7 +996,7 @@ void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 	//short int enemyPlayerId = (short int) *(long int *)(myESP + 0x98);
 	short int enemyPlayerId = (short int)GetIntValueFromRORStack(REG_values, 0x98);
 
-	if (!this->crCommand.RunManagePanicMode_isUsageOfRORCodeWanted(mainAI, enemyPlayerId, timeSinceLastPanicMode, currentGameTime_ms)) {
+	if (!CUSTOMROR::crCommand.RunManagePanicMode_isUsageOfRORCodeWanted(mainAI, enemyPlayerId, timeSinceLastPanicMode, currentGameTime_ms)) {
 		return;
 	}
 	// if previous function returns true, it means we want to force usage of ROR original panic mode code.
@@ -1094,7 +1093,7 @@ void CustomRORInstance::ManageCityMapLikeComputationCall1(REG_BACKUP *REG_values
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *) GetIntValueFromRORStack(REG_values, 0x1C);
 	ror_api_assert(REG_values, infAI != NULL);
 
-	this->crCommand.ManageCityPlanOtherBuildingsImpact(infAI, stratElem, (AOE_STRUCTURES::STRUCT_POSITION_INFO*)TCPositionYX);
+	CUSTOMROR::crCommand.ManageCityPlanOtherBuildingsImpact(infAI, stratElem, (AOE_STRUCTURES::STRUCT_POSITION_INFO*)TCPositionYX);
 }
 
 
@@ -1187,7 +1186,7 @@ void CustomRORInstance::ManageCityMapLikeValueFarmPlacement(REG_BACKUP *REG_valu
 
 	long int existingBldInfluenceZone = REG_values->EAX_val;
 	bool skipThisBuilding = false;
-	this->crCommand.FixCityPlanFarmPlacement(unitExistingBld_base, existingBldInfluenceZone, skipThisBuilding);
+	CUSTOMROR::crCommand.FixCityPlanFarmPlacement(unitExistingBld_base, existingBldInfluenceZone, skipThisBuilding);
 	REG_values->EAX_val = existingBldInfluenceZone;
 
 	if (skipThisBuilding) {
@@ -1304,7 +1303,7 @@ void CustomRORInstance::AuditOnDoStrategyElementBuilding(REG_BACKUP *REG_values)
 	// Custom treatments
 	ror_api_assert(REG_values, stratElem->elementType == AIUCBuilding);
 
-	doNotRunConstruction = this->crCommand.ShouldNotTriggerConstruction(tacAI, stratElem);
+	doNotRunConstruction = CUSTOMROR::crCommand.ShouldNotTriggerConstruction(tacAI, stratElem);
 
 	// Do not modify below
 	if (doNotRunConstruction) {
@@ -1405,7 +1404,7 @@ void CustomRORInstance::ManageOnDialogUserEvent(REG_BACKUP *REG_values) {
 		ChangeReturnAddress(REG_values, 0x43498C); // Disable ROR's treatments for this call to dialog.OnUserEvent(...)
 		REG_values->EAX_val = 1;
 		if (evtStatus == 1) { // button has actually been clicked
-			long int returnValue = this->crCommand.CloseCustomDialogMessage(ptrDialog, ptrSender);
+			long int returnValue = CUSTOMROR::crCommand.CloseCustomDialogMessage(ptrDialog, ptrSender);
 			// Manage user choice
 			// ...
 		}
@@ -1433,7 +1432,7 @@ void CustomRORInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_
 	float posX, posY;
 	GetGamePositionUnderMouse(&posX, &posY);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_RESOURCES, false);
-	this->crCommand.OnInGameRightClickCustomAction(posX, posY, unitUnderMouse);
+	CUSTOMROR::crCommand.OnInGameRightClickCustomAction(posX, posY, unitUnderMouse);
 }
 
 
@@ -1569,7 +1568,7 @@ void CustomRORInstance::ManageTacAIUpdate(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_AI *ai = (AOE_STRUCTURES::STRUCT_AI *)REG_values->EDX_val;
 	if ((ai == NULL) || (tacAI == NULL)) { return; }
 
-	this->crCommand.ManageTacAIUpdate(ai);
+	CUSTOMROR::crCommand.ManageTacAIUpdate(ai);
 }
 
 
@@ -1603,7 +1602,7 @@ void CustomRORInstance::ManageDefeatedAIPlayerTacAIUpdate(REG_BACKUP *REG_values
 // This is called just before calling empires.dat loading ([global]+0xB0), called from 0x501211.
 void CustomRORInstance::OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO *cmdLineInfo = (AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO *)REG_values->ECX_val;
-	const char *empiresDatRelativeFileName = this->crCommand.GetCustomEmpiresDatRelativeFileName(cmdLineInfo);
+	const char *empiresDatRelativeFileName = CUSTOMROR::crCommand.GetCustomEmpiresDatRelativeFileName(cmdLineInfo);
 #ifdef GAMEVERSION_AOE10b
 	REG_values->EAX_val = 
 #else
@@ -1617,7 +1616,7 @@ void CustomRORInstance::OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values) {
 // This is called just after empires.dat is loaded.
 void CustomRORInstance::OnAfterLoadEmpires_DAT(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true; // There is nothing special to do for this change to be compatible with ROR execution.
-	this->crCommand.OnAfterLoadEmpires_DAT();
+	CUSTOMROR::crCommand.OnAfterLoadEmpires_DAT();
 }
 
 
@@ -1650,7 +1649,7 @@ void CustomRORInstance::EditorCheckForUnitPlacement(REG_BACKUP *REG_values) {
 	bool ignoreTerrainRestrictionErrors = false;
 
 	// Let crCommand object customize the parameters according to configuration and user choices...
-	this->crCommand.ApplyCustomizationOnEditorAddUnit(checkVisibility, checkHillMode, editorMode, checkAirModeAndHPBar, checkConflictingUnits, ignoreTerrainRestrictionErrors);
+	CUSTOMROR::crCommand.ApplyCustomizationOnEditorAddUnit(checkVisibility, checkHillMode, editorMode, checkAirModeAndHPBar, checkConflictingUnits, ignoreTerrainRestrictionErrors);
 
 	// CALL defUnit.GetErrorForUnitCreationAtLocation(player, posY, posX, arg4, checkVisibility, hillMode, arg7, editorMode, checkAirModeAndHPBar?, checkConflictingUnits)
 	_asm {
@@ -1720,7 +1719,7 @@ void CustomRORInstance::HumanSpecific_onCapturableUnitSeen(REG_BACKUP *REG_value
 	bool doNotCaptureUnit = false;
 
 	// Custom treatments here
-	doNotCaptureUnit = this->crCommand.HumanSpecific_onCapturableUnitSeen(beingSeenUnit, actorPlayer);
+	doNotCaptureUnit = CUSTOMROR::crCommand.HumanSpecific_onCapturableUnitSeen(beingSeenUnit, actorPlayer);
 
 	// Do not modify below.
 	if (doNotCaptureUnit) {
@@ -1857,7 +1856,7 @@ void CustomRORInstance::ManageAIFileSelectionForPlayer(REG_BACKUP *REG_values) {
 	char *buffer2 = stackPtr[2];
 
 	strcpy_s(buffer2, 22, "RandomGameSpecialized");
-	if (!this->crCommand.ManageAIFileSelectionForPlayer(p->civilizationId, buffer1)) {
+	if (!CUSTOMROR::crCommand.ManageAIFileSelectionForPlayer(p->civilizationId, buffer1)) {
 		ChangeReturnAddress(REG_values, 0x004F36F8); // continue "player.chooseAIFileName" function normally
 	}
 
@@ -2043,7 +2042,7 @@ void CustomRORInstance::ManageAttackActionChange(REG_BACKUP *REG_values) {
 	}
 
 	// Run algorithm to decide if unit should keep target or change
-	bool shouldChange = this->crCommand.ShouldChangeTarget(actorUnit->currentActivity, targetUnit->unitInstanceId);
+	bool shouldChange = CUSTOMROR::crCommand.ShouldChangeTarget(actorUnit->currentActivity, targetUnit->unitInstanceId);
 	if (!shouldChange) { REG_values->EDI_val = (long)actionTargetUnit; REG_values->EAX_val = 2; }
 }
 #endif
@@ -2066,7 +2065,7 @@ void CustomRORInstance::ManageAttackActivityChange1(REG_BACKUP *REG_values) {
 	long int *arg_targetUnitId = (long int*)(REG_values->ESP_val + 0x14); // Get arg1 (pointer, we may want to update it)
 
 	// Custom Treatments.
-	if ((*arg_targetUnitId != -1) && !this->crCommand.ShouldChangeTarget(activity, *arg_targetUnitId)) {
+	if ((*arg_targetUnitId != -1) && !CUSTOMROR::crCommand.ShouldChangeTarget(activity, *arg_targetUnitId)) {
 		*arg_targetUnitId = activity->targetUnitId; // Force current target to keep it (do not change target).
 	}
 	if (*arg_targetUnitId == -1) {
@@ -2095,7 +2094,7 @@ void CustomRORInstance::ManageAttackActivityChange_convert(REG_BACKUP *REG_value
 	// Custom Treatments.
 	if (*arg_targetUnitId == -1) { return; } // Let normal code manage this...
 
-	if (!this->crCommand.ShouldChangeTarget(activity, *arg_targetUnitId)) {
+	if (!CUSTOMROR::crCommand.ShouldChangeTarget(activity, *arg_targetUnitId)) {
 		*arg_targetUnitId = activity->targetUnitId; // Force current target to keep it (do not change target).
 	}
 }
@@ -2139,12 +2138,12 @@ void CustomRORInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_value
 	// Warning: don't forget there is 2 possible contexts (tower in my town OR I was just attacked by enemyUnit)
 
 	if (contextIsTowerInMyTown) {
-		if (!this->crCommand.ShouldAttackTower_towerPanic((STRUCT_UNIT_COMMANDABLE*)myUnit, enemyUnit)) {
+		if (!CUSTOMROR::crCommand.ShouldAttackTower_towerPanic((STRUCT_UNIT_COMMANDABLE*)myUnit, enemyUnit)) {
 			forceKeepCurrentActivity = true;
 		}
 	}
 	if (contextIsReactionToAttack) {
-		forceKeepCurrentActivity = !this->crCommand.ShouldChangeTarget(activity, enemyUnit->unitInstanceId);
+		forceKeepCurrentActivity = !CUSTOMROR::crCommand.ShouldChangeTarget(activity, enemyUnit->unitInstanceId);
 	}
 
 
@@ -2189,7 +2188,7 @@ void CustomRORInstance::ManageTowerPanicMode_villagers(REG_BACKUP *REG_values) {
 	}
 
 	// Will handle loop on villager and task them to attack the tower (if conditions for that are met).
-	this->crCommand.towerPanic_LoopOnVillagers(tacAI, enemyTower, pAssignedUnitsCount, pTCPositionInfo);
+	CUSTOMROR::crCommand.towerPanic_LoopOnVillagers(tacAI, enemyTower, pAssignedUnitsCount, pTCPositionInfo);
 }
 
 
@@ -2244,7 +2243,7 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	if ((this->crInfo.configInfo.dislikeComputeInterval > 0) &&
 		(currentGameTime >= (this->crInfo.LastDislikeValuesComputationTime_second + this->crInfo.configInfo.dislikeComputeInterval))) {
 		this->crInfo.LastDislikeValuesComputationTime_second = currentGameTime;
-		this->crCommand.ComputeDislikeValues();
+		CUSTOMROR::crCommand.ComputeDislikeValues();
 	}
 
 	// Manage triggers
@@ -2255,7 +2254,7 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
 		memset(&evtInfo, -1, sizeof(evtInfo));
 		evtInfo.currentGameTime_s = currentGameTime;
-		this->crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_TIMER, evtInfo);
+		CUSTOMROR::crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_TIMER, evtInfo);
 
 		// "Passive" triggers (we need to test their criteria regulary)
 
@@ -2272,8 +2271,8 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 					evtInfo.playerId = iPlayerId;
 					evtInfo.resourceId = currentResourceId;
 					evtInfo.resourceValue = value;
-					this->crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_MORE_THAN, evtInfo);
-					this->crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_LESS_THAN, evtInfo);
+					CUSTOMROR::crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_MORE_THAN, evtInfo);
+					CUSTOMROR::crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_LESS_THAN, evtInfo);
 				}
 			}
 		}
@@ -2314,7 +2313,7 @@ void CustomRORInstance::CollectTimerStats(REG_BACKUP *REG_values) {
 
 	// Auto compute slow down factor if option is enabled and only once every CST_TIMER_STATS_ARRAY_SIZE
 	if (this->crInfo.configInfo.gameTimerSlowDownAutoFix && (this->crInfo.CollectedTimerIntervalsIndex == CST_TIMER_STATS_ARRAY_SIZE)) {
-		this->crCommand.AutoFixGameTimer();
+		CUSTOMROR::crCommand.AutoFixGameTimer();
 	}
 }
 
@@ -2445,7 +2444,7 @@ void CustomRORInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 		typedText = crOptionsPopup->customOptionFreeTextVar->pTypedText;
 		char *answer;
 		unsigned long int h = crOptionsPopup->customOptionFreeTextAnswerVar->hWnd;
-		/*bool result =*/ crCommand.ExecuteCommand(typedText, &answer);
+		/*bool result =*/ CUSTOMROR::crCommand.ExecuteCommand(typedText, &answer);
 		SendMessageA((HWND)h, WM_SETTEXT, 0, (LPARAM)answer);
 		SendMessageA((HWND)h, EM_SETREADONLY, 1, 0);
 		//SendMessageA((HWND)h, WM_SETFOCUS, 0, 0);
@@ -2488,7 +2487,7 @@ void CustomRORInstance::AfterScenarioEditorCreation(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 	// Custom actions
-	this->crCommand.CustomScenarioEditorUICreation(scEditor);
+	CUSTOMROR::crCommand.CustomScenarioEditorUICreation(scEditor);
 }
 
 
@@ -2507,7 +2506,7 @@ void CustomRORInstance::ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_valu
 	// Custom treatments
 	if (!this->crInfo.configInfo.showHiddenTerrainsInEditor) { return; }
 	long int customTerrainIdToUse = -1;
-	customTerrainIdToUse = this->crCommand.GetTerrainIdForSelectedTerrainIndex(scEditor, selectedIndex);
+	customTerrainIdToUse = CUSTOMROR::crCommand.GetTerrainIdForSelectedTerrainIndex(scEditor, selectedIndex);
 
 	if (customTerrainIdToUse > -1) {
 		// Force terrainId to use / skip hardcoded switch from ROR original code
@@ -2577,7 +2576,7 @@ void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 	AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentStatus = settings->currentUIStatus;
 	
 	// Now do custom code
-	this->crCommand.OnLivingUnitCreation(currentStatus, unit, actionStruct);
+	CUSTOMROR::crCommand.OnLivingUnitCreation(currentStatus, unit, actionStruct);
 }
 
 
@@ -2600,7 +2599,7 @@ void CustomRORInstance::OnGameSettingsNotifyEvent(REG_BACKUP *REG_values) {
 	}
 
 	// Custom code
-	this->crCommand.EntryPoint_GameSettingsNotifyEvent(eventId, (short int)playerId, arg3, arg4, arg5);
+	CUSTOMROR::crCommand.EntryPoint_GameSettingsNotifyEvent(eventId, (short int)playerId, arg3, arg4, arg5);
 }
 
 
@@ -2614,7 +2613,7 @@ void CustomRORInstance::OnGameInitDisableResearchesEvent(REG_BACKUP *REG_values)
 	}
 
 	// Custom treatments
-	this->crCommand.OnGameInitDisableResearchesEvent(playerResearchInfo);
+	CUSTOMROR::crCommand.OnGameInitDisableResearchesEvent(playerResearchInfo);
 
 	// Do not modify below. Make sure this is always executed (do not RETURN before)
 	const unsigned long int updateResearchStatuses = 0x4EB38D;
@@ -2655,7 +2654,7 @@ void CustomRORInstance::OnGameInitAfterSetInitialAge(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, currentPlayerId >= 0);
 	ror_api_assert(REG_values, currentPlayerId < playerTotalCount);
 	// Custom treatments
-	this->crCommand.OnGameInitAfterApplyingTechTrees(currentPlayerId);
+	CUSTOMROR::crCommand.OnGameInitAfterApplyingTechTrees(currentPlayerId);
 }
 
 
@@ -2757,7 +2756,7 @@ void CustomRORInstance::RORDebugLogHandler(REG_BACKUP *REG_values) {
 		return;
 	}
 
-	this->crCommand.HandleRORDebugLogCall(textStackAddress);
+	CUSTOMROR::crCommand.HandleRORDebugLogCall(textStackAddress);
 }
 
 
@@ -2776,7 +2775,7 @@ void CustomRORInstance::CollectAOEDebugLogsInGame(REG_BACKUP *REG_values) {
 	char *message = *(char**)(REG_values->ESP_val + 8); // Method's arg2
 
 	unsigned long int textStackAddress = REG_values->ESP_val + 8;
-	this->crCommand.HandleRORDebugLogCall(textStackAddress);
+	CUSTOMROR::crCommand.HandleRORDebugLogCall(textStackAddress);
 }
 
 
@@ -2835,7 +2834,7 @@ void CustomRORInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_value
 	// For second call, there are lots of failure due to start position <> unit position.
 	// Use a trick to prevent that.
 	if (secondCall && actorAsType50) {
-		REG_values->EAX_val = this->crCommand.GathererCheckPathFinding(actorAsType50, pathFindingArgs);
+		REG_values->EAX_val = CUSTOMROR::crCommand.GathererCheckPathFinding(actorAsType50, pathFindingArgs);
 	}
 }
 
@@ -2858,7 +2857,7 @@ void CustomRORInstance::ShowUnitShortcutNumbers(REG_BACKUP *REG_values) {
 	long int stack1C = GetIntValueFromRORStack(REG_values, 0x1C);
 	stack1C = stack1C & 0xFFFF; // It is a word (MOVSX)
 	long int stack10 = GetIntValueFromRORStack(REG_values, 0x10);
-	if (this->crCommand.DisplayCustomUnitShortcutSymbol(unitBase, stack1C, stack20, stack10)) {
+	if (CUSTOMROR::crCommand.DisplayCustomUnitShortcutSymbol(unitBase, stack1C, stack20, stack10)) {
 		ChangeReturnAddress(REG_values, RA_showStandardShortcut); // standard behaviour if call returned true
 	}
 }
@@ -2994,7 +2993,7 @@ void CustomRORInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
 	char *localizedText = (char *)GetIntValueFromRORStack(REG_values, 8);
 	long int currentPop = GetIntValueFromRORStack(REG_values, 0xC); // arg4
 	long int houseMaxPop = GetIntValueFromRORStack(REG_values, 0x10); // arg5
-	this->crCommand.WriteF11PopInfoText(f11panel, bufferToWrite, format, localizedText, currentPop, houseMaxPop);
+	CUSTOMROR::crCommand.WriteF11PopInfoText(f11panel, bufferToWrite, format, localizedText, currentPop, houseMaxPop);
 }
 
 // From 004C41B3 (in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID))
@@ -3015,11 +3014,11 @@ void CustomRORInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_va
 	REG_values->ECX_val = (unsigned long int) infAI->ptrMainAI; // Required for call 0x40BAB0
 	REG_values->EAX_val = currentUnitId; // modified ROR code PUSHes EAX, not ECX.
 
-	if ((currentUnitId >= 0) && this->crCommand.IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
+	if ((currentUnitId >= 0) && CUSTOMROR::crCommand.IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
 		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *unitListElemBase = infAI->unitElemList;
 		if (!unitListElemBase || (loopIndex >= infAI->unitElemListSize)) { return; }
 		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem = &unitListElemBase[loopIndex];
-		this->crCommand.OnFindEnemyUnitIdWithinRangeLoop(infAI, currentUnitListElem);
+		CUSTOMROR::crCommand.OnFindEnemyUnitIdWithinRangeLoop(infAI, currentUnitListElem);
 	}
 }
 
@@ -3075,7 +3074,7 @@ void CustomRORInstance::FixActivityTargetUnitIdBug_retreatAfterShooting(REG_BACK
 		return; // No target = no need to continue with custom treatments
 	}
 	// Custom treatments
-	if (!this->crCommand.ShouldRetreatAfterShooting(activity)) {
+	if (!CUSTOMROR::crCommand.ShouldRetreatAfterShooting(activity)) {
 		REG_values->EAX_val = 0; // Unit not found
 		ChangeReturnAddress(REG_values, 0x4E64C7); // jump AFTER the call that get unit struct. The next test will see NULL value and exit method.
 	}
@@ -3143,7 +3142,7 @@ void CustomRORInstance::EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_
 		}
 	}
 	// Custom treatments:
-	this->crCommand.AfterShowUnitCommandButtons(gameMainUI);
+	CUSTOMROR::crCommand.AfterShowUnitCommandButtons(gameMainUI);
 }
 
 
@@ -3165,7 +3164,7 @@ void CustomRORInstance::EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_value
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID eventCommandId = (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)arg1;
 
 	// Do custom treatments here
-	forceIgnoreThisEvent = this->crCommand.OnGameCommandButtonClick(gameMainUI, eventCommandId, arg2);
+	forceIgnoreThisEvent = CUSTOMROR::crCommand.OnGameCommandButtonClick(gameMainUI, eventCommandId, arg2);
 
 	// Do not modify below.
 	if (forceIgnoreThisEvent) {
@@ -3255,7 +3254,7 @@ void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 			}
 		}
 	}
-	bool ignoreThisTarget = this->crCommand.AutoSearchTargetShouldIgnoreUnit(activity, potentialTargetUnit);
+	bool ignoreThisTarget = CUSTOMROR::crCommand.AutoSearchTargetShouldIgnoreUnit(activity, potentialTargetUnit);
 
 
 	// Do not modify below.
@@ -3277,7 +3276,7 @@ void CustomRORInstance::EntryPointOnBuildingInfoDisplay(REG_BACKUP *REG_values) 
 	}
 	// Custom code
 	// This updates REG_values->ESI_val if necessary.
-	this->crCommand.DisplayCustomBuildingAttributesInUnitInfo(unitInfoZone, REG_values->ESI_val);
+	CUSTOMROR::crCommand.DisplayCustomBuildingAttributesInUnitInfo(unitInfoZone, REG_values->ESI_val);
 }
 
 
@@ -3321,7 +3320,7 @@ void CustomRORInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 		long int bufferSize = GetIntValueFromRORStack(REG_values, 0x0C);
 #endif
 		buffer[bufferSize - 1] = 0; // Just in case.
-		bool successfullyFoundString = this->crCommand.GetLocalizedString(stringDllId, buffer, bufferSize);
+		bool successfullyFoundString = CUSTOMROR::crCommand.GetLocalizedString(stringDllId, buffer, bufferSize);
 		if (successfullyFoundString) {
 			ChangeReturnAddress(REG_values, returnAddress); // (RETN 0x0C instruction) Prevent ROR from searching in language(x).dll
 		}
@@ -3367,7 +3366,7 @@ void CustomRORInstance::EntryPointOnAttackableUnitKilled(REG_BACKUP *REG_values)
 	ror_api_assert(REG_values, !actorUnit || actorUnit->IsCheckSumValidForAUnitClass()); // if provided, actor must be valid
 
 	// Custom treatments
-	this->crCommand.OnAttackableUnitKilled(targetUnit, actorUnit);
+	CUSTOMROR::crCommand.OnAttackableUnitKilled(targetUnit, actorUnit);
 }
 
 
@@ -3395,7 +3394,7 @@ void CustomRORInstance::EntryPointOnHoverOnUnit(REG_BACKUP *REG_values) {
 	}
 	// Custom treatments
 	GAME_CURSOR forcedCursor = (GAME_CURSOR)-1;
-	if (this->crCommand.OnHoverOnUnit(unit, controlledPlayer, unitPlayerId, foundInteraction, foundHintDllId, forcedCursor)) {
+	if (CUSTOMROR::crCommand.OnHoverOnUnit(unit, controlledPlayer, unitPlayerId, foundInteraction, foundHintDllId, forcedCursor)) {
 		REG_values->ESI_val = foundHintDllId;
 		REG_values->EAX_val = foundInteraction;
 	}
@@ -3438,7 +3437,7 @@ void CustomRORInstance::EntryPointAfterActivityStop(REG_BACKUP *REG_values) {
 		REG_values->EAX_val = 1;
 	}
 	// Custom treatments
-	this->crCommand.OnUnitActivityStop(unitActivity);
+	CUSTOMROR::crCommand.OnUnitActivityStop(unitActivity);
 }
 
 

@@ -55,7 +55,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	// Disable ALT-F4 when it would conflict with custom dialog
 	// (isInGame) condition is optional. If removed, ALT-F4 will be disabled in scenario editor when our dialog is on.
 	// WARNING: we can't prevent this to occur if user clicks on the top-right corner cross :(
-	if ((isInGame) && (ALT) && (pressedKey == VK_F4) && (this->crCommand->crInfo->customYesNoDialogVar != NULL)) {
+	if ((isInGame) && (ALT) && (pressedKey == VK_F4) && (CUSTOMROR::crInfo.customYesNoDialogVar != NULL)) {
 		// Disable ALT-F4 when our custom dialog is ON (based on the same dialog, would provoke conflicts and our dialog would stay ON forever)
 		return true;
 	}
@@ -72,7 +72,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 	// If Key=F10 (0x79) and "current UI"=scenario editor then open menu. 
 	// Do NOT do this from other screens or when a popup is already opened !!! Never ! Or game will crash afterwards.
-	if ((pressedKey == VK_F10) && isInEditor && !isMenuOpen && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
+	if ((pressedKey == VK_F10) && isInEditor && !isMenuOpen && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
 		// Additional check
 		assert(GetGameSettingsPtr()->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
 		if (pCurrentUI) {
@@ -88,7 +88,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	// F9 in game: bring idle military units to current location (screen position).
 	// Requires ManageAI !
 	if ((pressedKey == VK_F9) && isInGame && !isMenuOpen) {
-		if (this->crCommand->crInfo->configInfo.enableCallNearbyIdleMilitaryUnits) {
+		if (CUSTOMROR::crInfo.configInfo.enableCallNearbyIdleMilitaryUnits) {
 			this->crCommand->CallNearbyIdleMilitaryUnits();
 		}
 	}
@@ -99,12 +99,12 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	}
 
 	// ESC (1B) - close custom dialog if opened
-	if ((isInEditor || isInGame) && ((pressedKey == VK_ESCAPE) /*|| (pressedKey == VK_RETURN)*/) && (this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
+	if ((isInEditor || isInGame) && ((pressedKey == VK_ESCAPE) /*|| (pressedKey == VK_RETURN)*/) && (CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
 		this->CloseCustomGamePopup(true);
 	}
 
 	// F1 in editor : switch to unit selection
-	if (!isMenuOpen && (isInEditor) && !CTRL && (pressedKey == VK_F1) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
+	if (!isMenuOpen && (isInEditor) && !CTRL && (pressedKey == VK_F1) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
 		if (!SHIFT) {
 			settings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
 		} else {
@@ -117,8 +117,8 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		}
 	}
 	// F2 in editor: edit selected unit or show game coordinates at mouse position
-	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F2) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
-		if (this->crCommand->crInfo->GetMainSelectedUnit(GetControlledPlayerStruct_Settings()) == NULL) {
+	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F2) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
+		if (CUSTOMROR::crInfo.GetMainSelectedUnit(GetControlledPlayerStruct_Settings()) == NULL) {
 			float posX, posY;
 			GetGamePositionUnderMouse(&posX, &posY);
 			if ((posX > 0) && (posY > 0)) {
@@ -132,7 +132,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		}
 	}
 	// F3 in editor: scenario information
-	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F3) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
+	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F3) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
 		this->OpenCustomEditorScenarioInfoPopup();
 	}
 
@@ -142,7 +142,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	}
 
 	// F4 in editor: copy map
-	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F4) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
+	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F4) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
 		this->OpenCustomGamePopup<MapCopyPopup>(600, 450, false);
 	}
 
@@ -182,7 +182,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	}
 
 	// TEST - F8 - show dialog
-	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F8) && (!this->crCommand->crInfo->HasOpenedCustomGamePopup())) {
+	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F8) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
 		std::string sTechTreeInfo = "";
 		int techToShowCount = 0;
 		static char buffer[1024] = "\0";
@@ -192,7 +192,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		if (global) {
 			player = GetPlayerStruct(global->humanPlayerId);
 		}
-		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(player);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(player);
 		if (unitArray) {
 			selectedUnit = unitArray[0];
 		}
@@ -354,10 +354,10 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 		if (this->OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
 			unsigned long int *unused;
-			AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
+			AOE_AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
 			if (!sTechTreeInfo.empty() && (techToShowCount > 0)) {
-				AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
-				AOE_AddLabel(this->crCommand->crInfo->GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount+1));
+				AOE_AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
+				AOE_AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount+1));
 			}
 		}
 	}
@@ -377,8 +377,8 @@ bool CustomRORMainInterface::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STR
 	assert(previousPopup != NULL);
 	if (!previousPopup) { return false; }
 
-	assert(!this->crCommand->crInfo->HasOpenedCustomGamePopup()); // Custom popup is not already open
-	if (this->crCommand->crInfo->HasOpenedCustomGamePopup()) { return true; } // do nothing, but not treated as alloc error
+	assert(!CUSTOMROR::crInfo.HasOpenedCustomGamePopup()); // Custom popup is not already open
+	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) { return true; } // do nothing, but not treated as alloc error
 	
 	InGameCustomRorOptionsPopup *popupUIObject = this->CreateCustomPopupObject<InGameCustomRorOptionsPopup>();
 	if (popupUIObject) {
@@ -389,7 +389,7 @@ bool CustomRORMainInterface::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STR
 		return false; // need to change return address
 	}
 	// Dirty workaround because custom options popup is not created using standard procedures :(
-	this->crCommand->crInfo->ForceSetCurrentGamePopup(popupUIObject->GetAOEPopupObject(), popupUIObject->customOptionButtonVar, NULL);
+	CUSTOMROR::crInfo.ForceSetCurrentGamePopup(popupUIObject->GetAOEPopupObject(), popupUIObject->customOptionButtonVar, NULL);
 	
 	return true;
 }
@@ -399,12 +399,12 @@ bool CustomRORMainInterface::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STR
 // Returns true if we want NOT the game to exit
 bool CustomRORMainInterface::FixGamePopupIssuesBeforeGameClose() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (this->crCommand->crInfo->HasOpenedCustomGamePopup() && settings &&
+	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup() && settings &&
 		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
 		// In scenario editor, UI objects are not correctly freed and the game crashes if we have a custom popup opened...
 		// Closing the popup solves the issue !
 		this->CloseCustomGamePopup(true);
-		assert(!this->crCommand->crInfo->HasOpenedCustomGamePopup());
+		assert(!CUSTOMROR::crInfo.HasOpenedCustomGamePopup());
 		return true; // Do NOT exit game (if possible). We consider the ALT-F4 closed the popup (that's a choice...)
 	}
 	return false;
@@ -414,7 +414,7 @@ bool CustomRORMainInterface::FixGamePopupIssuesBeforeGameClose() {
 // Returns NULL if failed (you can't create a custom popup object if previous one is still opened).
 // If result is non-NULL, you can call [result]->OpenPopup() to actually open the popup.
 template<class popupType> popupType *CustomRORMainInterface::CreateCustomPopupObject() {
-	if (this->crCommand->crInfo->HasOpenedCustomGamePopup()) {
+	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) {
 		return NULL;
 	}
 	if (this->currentCustomPopup) {
@@ -469,12 +469,12 @@ void CustomRORMainInterface::CloseCustomGamePopup(bool isCancel) {
 // Called for ALL button clicks in the game.
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
-	if (this->crCommand->crInfo->IsCustomGamePopupOKButton(objAddress)) {
+	if (CUSTOMROR::crInfo.IsCustomGamePopupOKButton(objAddress)) {
 		// Close the custom popup when it is open and we just clicked on OK button.
 		this->CloseCustomGamePopup(false);
 		return true;
 	}
-	if (this->crCommand->crInfo->IsCustomGamePopupCancelButton(objAddress)) {
+	if (CUSTOMROR::crInfo.IsCustomGamePopupCancelButton(objAddress)) {
 		// Close the custom popup when it is open and we just clicked on Cancel button.
 		this->CloseCustomGamePopup(true);
 		return true;
@@ -494,7 +494,7 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 	}
 
 	//Custom checkboxes: check/uncheck + manage custom buttons onclick
-	if (this->crCommand->crInfo->HasOpenedCustomGamePopup()) {
+	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) {
 		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsButton->IsCheckSumValid()) {
 			if (objAsButton->IsACheckBox()) {
@@ -533,7 +533,7 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_HELP);
 			if (btnEventNotCaughtByRORMenuBtnEvent) {
 				this->FreeInGameCustomOptionsButton(); // Free custom button if needed, for buttons not handled in ManageOptionButtonClickInMenu.
-				this->crCommand->crInfo->ForceClearCustomMenuObjects(); // Here we CAN already free custom button because it's not in use (current event is about another button)
+				CUSTOMROR::crInfo.ForceClearCustomMenuObjects(); // Here we CAN already free custom button because it's not in use (current event is about another button)
 			}
 		}
 	}
@@ -544,11 +544,11 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 
 // Use this to properly free custom button from options menu. This should (always) be called when ingame menu is closed.
 void CustomRORMainInterface::FreeInGameCustomOptionsButton() {
-	if (this->crCommand->crInfo->configInfo.showCustomRORMenu) {
+	if (CUSTOMROR::crInfo.configInfo.showCustomRORMenu) {
 		// Add "custom options" button (from game menu) to our "garbage collector" so that it is freed later.
-		if (this->crCommand->crInfo->customGameMenuOptionsBtnVar) {
-			this->crCommand->crInfo->AddObjectInPopupContentList(this->crCommand->crInfo->customGameMenuOptionsBtnVar);
-			this->crCommand->crInfo->customGameMenuOptionsBtnVar = NULL;
+		if (CUSTOMROR::crInfo.customGameMenuOptionsBtnVar) {
+			CUSTOMROR::crInfo.AddObjectInPopupContentList(CUSTOMROR::crInfo.customGameMenuOptionsBtnVar);
+			CUSTOMROR::crInfo.customGameMenuOptionsBtnVar = NULL;
 		}
 	}
 }
@@ -596,7 +596,7 @@ bool CustomRORMainInterface::OpenCustomTextEditPopup(const char *title, char *in
 
 // Open a popup with CustomROR (debug) messages
 bool CustomRORMainInterface::OpenTraceMessagePopup() {
-	bool reverseOrder = this->crCommand->crInfo->configInfo.showLogsInReverseOrder;
+	bool reverseOrder = CUSTOMROR::crInfo.configInfo.showLogsInReverseOrder;
 	// Double spaces are intented (to compensate weird-looking font)
 	char *title = "Show  debug  messages";
 	if (reverseOrder) {
@@ -618,7 +618,7 @@ bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup() {
 	if (humanPlayer->selectedUnitCount <= 0) {
 		return false;
 	}
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(humanPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(humanPlayer);
 	assert(selectedUnits != NULL);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = selectedUnits[0];
 	if (!selectedUnit || !selectedUnit->IsCheckSumValidForAUnitClass()) {
@@ -654,9 +654,9 @@ bool CustomRORMainInterface::OpenCustomEditorScenarioInfoPopup() {
 	EditorScenarioInfoPopup *popup = this->OpenCustomGamePopup<EditorScenarioInfoPopup>(500, 400, false);
 	bool result = (popup != NULL);
 	if (popup) {
-		popup->SetVarToUpdate_allowUnitOverlapping(&this->crCommand->crInfo->configInfo.editor_allowUnitOverlapping);
-		popup->SetVarToUpdate_disableHillModeChecks(&this->crCommand->crInfo->configInfo.editor_disableHillModeChecks);
-		popup->SetVarToUpdate_disableTerrainRestrictionChecks(&this->crCommand->crInfo->configInfo.editor_disableTerrainRestrictions);
+		popup->SetVarToUpdate_allowUnitOverlapping(&CUSTOMROR::crInfo.configInfo.editor_allowUnitOverlapping);
+		popup->SetVarToUpdate_disableHillModeChecks(&CUSTOMROR::crInfo.configInfo.editor_disableHillModeChecks);
+		popup->SetVarToUpdate_disableTerrainRestrictionChecks(&CUSTOMROR::crInfo.configInfo.editor_disableTerrainRestrictions);
 		popup->SetVarToUpdate_lengthenCombatMode(NULL); // Default
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		if (global && global->IsCheckSumValid()) {
@@ -697,7 +697,7 @@ bool CustomRORMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 	long int mapSizeIndex = scEditor->map_cbb_mapSize->GetSelectedIndex();
 	if (mapSizeIndex != 6) { return false; }
 	// Here: custom map size
-	if (!this->crCommand->crInfo->configInfo.useCustomMapDimensions) { return false; }
+	if (!CUSTOMROR::crInfo.configInfo.useCustomMapDimensions) { return false; }
 	// If result is true, WE generated the map ourselves => Disable standard generation code.
 	this->OpenEditMapSizePopup();
 	return true;
@@ -715,10 +715,10 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 	long int unitCount = controlledPlayer->selectedUnitCount;
 	if (unitCount == 0) { return false; }
 
-	if (!this->crCommand->crInfo->configInfo.enableSpawnUnitsMoveToLocation) { return false; }
+	if (!CUSTOMROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation) { return false; }
 	// Get relevant selected units array
 	bool result = false;
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->crCommand->crInfo->GetRelevantSelectedUnitsPointer(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(controlledPlayer);
 
 	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO posInfos;
 	long int callResult;
@@ -769,10 +769,10 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 
 					// If the player clicked ON the building itself, cancel auto-move.
 					if ((abs(posInfos.posX - unit->positionX) < 2) && (abs(posInfos.posY - unit->positionY) < 2)) {
-						UnitCustomInfo *u = this->crCommand->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+						UnitCustomInfo *u = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 						if (u) {
 							u->ResetSpawnAutoTargetInfo();
-							this->crCommand->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(unit->unitInstanceId);
+							CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unit->unitInstanceId);
 							CallWriteText("Disabled auto-move for new units for selected building");
 						}
 					} else {
@@ -795,7 +795,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 						}
 
 						// Add to list (or update) to set new units target position/unit
-						UnitCustomInfo *unitInfo = this->crCommand->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unit->unitInstanceId);
+						UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unit->unitInstanceId);
 						if (unitInfo) {
 							unitInfo->spawnTargetUnitId = targetUnitId;
 							unitInfo->spawnUnitMoveToPosX = posInfos.posX;

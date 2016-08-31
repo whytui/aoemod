@@ -46,7 +46,6 @@ public:
 	static CustomRORInfo crInfo;
 	// Main class for customROR "functional" treatments
 	static CustomRORMainInterface crMainInterface;
-	static CustomRORCommand crCommand;
 
 	// Entry point : Game code -> ROR_API -> CustomRORInstance.DispatchToCustomCode(...) -> customROR treatments
 	void DispatchToCustomCode(REG_BACKUP *REG_values);

@@ -81,10 +81,7 @@ It contains all main "functional" methods whose behaviour depends on CustomROR c
 class CustomRORCommand {
 public:
 	CustomRORCommand();
-	CustomRORCommand(CustomRORInfo *crInfo);
 	~CustomRORCommand();
-
-	CustomRORInfo *crInfo;
 
 private:
 	const float distanceToConsiderVeryClose = 1.0; // Distance (added to range) under which a target is considered "within range". Please leave this > 0.
@@ -473,3 +470,8 @@ public:
 };
 
 
+
+namespace CUSTOMROR {
+	// A unique global object for everyone
+	extern CustomRORCommand crCommand;
+}

@@ -2,7 +2,11 @@
 
 static char _intDistanceValues[CST_INT_DISTANCE_VALUES_MAX_COORDINATE + 1][CST_INT_DISTANCE_VALUES_MAX_COORDINATE + 1] = { '\0' };
 
+
+// Global static objects
 CustomRORConfig CustomRORInfo::configInfo;
+CustomRORInfo CUSTOMROR::crInfo;
+
 
 
 CustomRORInfo::CustomRORInfo() {

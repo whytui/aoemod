@@ -26,7 +26,7 @@ void CustomPopupBase::SetCRCommand(CustomRORCommand *crCommand) {
 	this->crCommand = crCommand;
 	this->crInfo = NULL;
 	if (crCommand) {
-		this->crInfo = crCommand->crInfo;
+		this->crInfo = &CUSTOMROR::crInfo;
 	}
 }
 

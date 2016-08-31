@@ -204,6 +204,15 @@ private:
 };
 
 
+namespace CUSTOMROR {
+	extern CustomRORInfo crInfo;
+
+}
+
+
+
+
+
 /* ----------- GETTERS ------------- */
 
 

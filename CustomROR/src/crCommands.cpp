@@ -1,17 +1,17 @@
 #include "../include/crCommands.h"
 
 
+// Global static objects
+CustomRORCommand CUSTOMROR::crCommand;
+
+
 char outputBuffer[CRCMD_TEXT_BUFFER_SIZE];
 
 
 
 CustomRORCommand::CustomRORCommand() {
-	this->crInfo = NULL;
 }
 
-CustomRORCommand::CustomRORCommand(CustomRORInfo *crInfo) {
-	this->crInfo = crInfo;
-}
 
 
 CustomRORCommand::~CustomRORCommand() {
@@ -30,11 +30,11 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 		return false;
 	}
 	fprintf_s(f, "CustomROR %s\n", VER_FILE_VERSION_STR);
-	if (this->crInfo->configInfo.couldNotReadXMLConfig) {
+	if (CUSTOMROR::crInfo.configInfo.couldNotReadXMLConfig) {
 		fprintf_s(f, localizationHandler.GetTranslation(CRLANG_ID_CANT_READ_XML_CONFIG, "Warning: configuration could not be read from XML file (missing or incorrect file)."));
 		fprintf_s(f, "\n\n");
 	}
-	if (this->crInfo->configInfo.couldNotReadCivXMLConfig) {
+	if (CUSTOMROR::crInfo.configInfo.couldNotReadCivXMLConfig) {
 		fprintf_s(f, localizationHandler.GetTranslation(CRLANG_ID_CANT_READ_CIV_XML_CONFIG, "customROR_civs.xml could not be read (missing or incorrect file). This is not an error unless you want to use custom civilizations."));
 		fprintf_s(f, "\n\n");
 	}
@@ -43,159 +43,159 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "\nThis detects if some features from this version of CustomROR will not work because you need to enable them with \"CustomizeAOE\".\n");
 	
 	// Analyze EXE memory and check all necessary ROR_API calls are enabled.
-	bool RORAPIFullyInstalled = CheckRorApiSequencesAreInstalled(f, this->crInfo->configInfo.autoFixMissingFeatures);
+	bool RORAPIFullyInstalled = CheckRorApiSequencesAreInstalled(f, CUSTOMROR::crInfo.configInfo.autoFixMissingFeatures);
 
 	fprintf_s(f, "\nEnd of checks.\n\nConfiguration:\n");
 	// General - not directly related to game
-	fprintf_s(f, "hideWelcomeMessage:                        %d\n", this->crInfo->configInfo.hideWelcomeMessage);
-	fprintf_s(f, "showAlertOnMissingFeature:                 %d\n", this->crInfo->configInfo.showAlertOnMissingFeature);
-	fprintf_s(f, "autoFixMissingFeatures:                    %d\n", this->crInfo->configInfo.autoFixMissingFeatures);
-	fprintf_s(f, "empires.dat relative path to use:          %s\n", this->crInfo->configInfo.customEmpiresDatRelativePath.c_str());
-	fprintf_s(f, "showCustomRORMenu:                         %d\n", this->crInfo->configInfo.showCustomRORMenu);
-	fprintf_s(f, "showCustomPopulationInfo:                  %d\n", this->crInfo->configInfo.showCustomPopInfo);
-	fprintf_s(f, "useImprovedGameSpeeds:                     %d\n", this->crInfo->configInfo.useImprovedGameSpeeds);
-	fprintf_s(f, "collectRORDebugLogs:                       %d\n", this->crInfo->configInfo.collectRORDebugLogs);
-	fprintf_s(f, "showCustomRORNotifications:                %d\n", this->crInfo->configInfo.showCustomRORNotifications);
-	fprintf_s(f, "enableRPGModeInRandomGames:                %d\n", this->crInfo->configInfo.enableRPGModeInRandomGames);
-	fprintf_s(f, "enableRPGModeInScenario:                   %d\n", this->crInfo->configInfo.enableRPGModeInScenario);
-	fprintf_s(f, "gameTimerSlowDownAutoFix:                  %d\n", this->crInfo->configInfo.gameTimerSlowDownAutoFix);
-	fprintf_s(f, "gameTimerSlowDownFactor:                   %d\n", this->crInfo->configInfo.gameTimerSlowDownFactor);
-	fprintf_s(f, "fixInvisibleTree:                          %d\n", this->crInfo->configInfo.fixInvisibleTree);
-	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", this->crInfo->configInfo.fixHumanPlayer_specificSeeUnit);
-	fprintf_s(f, "useImprovedButtonBar:                      %d\n", this->crInfo->configInfo.useImprovedButtonBar);
-	fprintf_s(f, "allowMultiQueueing:                        %d\n", this->crInfo->configInfo.allowMultiQueueing);
+	fprintf_s(f, "hideWelcomeMessage:                        %d\n", CUSTOMROR::crInfo.configInfo.hideWelcomeMessage);
+	fprintf_s(f, "showAlertOnMissingFeature:                 %d\n", CUSTOMROR::crInfo.configInfo.showAlertOnMissingFeature);
+	fprintf_s(f, "autoFixMissingFeatures:                    %d\n", CUSTOMROR::crInfo.configInfo.autoFixMissingFeatures);
+	fprintf_s(f, "empires.dat relative path to use:          %s\n", CUSTOMROR::crInfo.configInfo.customEmpiresDatRelativePath.c_str());
+	fprintf_s(f, "showCustomRORMenu:                         %d\n", CUSTOMROR::crInfo.configInfo.showCustomRORMenu);
+	fprintf_s(f, "showCustomPopulationInfo:                  %d\n", CUSTOMROR::crInfo.configInfo.showCustomPopInfo);
+	fprintf_s(f, "useImprovedGameSpeeds:                     %d\n", CUSTOMROR::crInfo.configInfo.useImprovedGameSpeeds);
+	fprintf_s(f, "collectRORDebugLogs:                       %d\n", CUSTOMROR::crInfo.configInfo.collectRORDebugLogs);
+	fprintf_s(f, "showCustomRORNotifications:                %d\n", CUSTOMROR::crInfo.configInfo.showCustomRORNotifications);
+	fprintf_s(f, "enableRPGModeInRandomGames:                %d\n", CUSTOMROR::crInfo.configInfo.enableRPGModeInRandomGames);
+	fprintf_s(f, "enableRPGModeInScenario:                   %d\n", CUSTOMROR::crInfo.configInfo.enableRPGModeInScenario);
+	fprintf_s(f, "gameTimerSlowDownAutoFix:                  %d\n", CUSTOMROR::crInfo.configInfo.gameTimerSlowDownAutoFix);
+	fprintf_s(f, "gameTimerSlowDownFactor:                   %d\n", CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor);
+	fprintf_s(f, "fixInvisibleTree:                          %d\n", CUSTOMROR::crInfo.configInfo.fixInvisibleTree);
+	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", CUSTOMROR::crInfo.configInfo.fixHumanPlayer_specificSeeUnit);
+	fprintf_s(f, "useImprovedButtonBar:                      %d\n", CUSTOMROR::crInfo.configInfo.useImprovedButtonBar);
+	fprintf_s(f, "allowMultiQueueing:                        %d\n", CUSTOMROR::crInfo.configInfo.allowMultiQueueing);
 	// General - related to game
 	fprintf_s(f, "unit resource amounts: alligator=%d bush=%d elephant=%d\n"
 		"...gazelle=%d gold=%d lion=%d stone=%d tree=%d forest=%d fish=%d\n",
-		this->crInfo->configInfo.unitResourceAmountAlligator,
-		this->crInfo->configInfo.unitResourceAmountBerryBush, 
-		this->crInfo->configInfo.unitResourceAmountElephant, 
-		this->crInfo->configInfo.unitResourceAmountGazelle, 
-		this->crInfo->configInfo.unitResourceAmountGoldMine, 
-		this->crInfo->configInfo.unitResourceAmountLion, 
-		this->crInfo->configInfo.unitResourceAmountStoneMine, 
-		this->crInfo->configInfo.unitResourceAmountTree, 
-		this->crInfo->configInfo.unitResourceAmountTreeForest,
-		this->crInfo->configInfo.unitResourceAmountFish);
+		CUSTOMROR::crInfo.configInfo.unitResourceAmountAlligator,
+		CUSTOMROR::crInfo.configInfo.unitResourceAmountBerryBush, 
+		CUSTOMROR::crInfo.configInfo.unitResourceAmountElephant, 
+		CUSTOMROR::crInfo.configInfo.unitResourceAmountGazelle, 
+		CUSTOMROR::crInfo.configInfo.unitResourceAmountGoldMine, 
+		CUSTOMROR::crInfo.configInfo.unitResourceAmountLion, 
+		CUSTOMROR::crInfo.configInfo.unitResourceAmountStoneMine, 
+		CUSTOMROR::crInfo.configInfo.unitResourceAmountTree, 
+		CUSTOMROR::crInfo.configInfo.unitResourceAmountTreeForest,
+		CUSTOMROR::crInfo.configInfo.unitResourceAmountFish);
 	// Random games settings
-	fprintf_s(f, "noWalls:                                   %ld\n", this->crInfo->configInfo.noWalls);
-	fprintf_s(f, "noNeutralInitialDiplomacy:                 %d\n", this->crInfo->configInfo.noNeutralInitialDiplomacy);
-	fprintf_s(f, "noWalls:                                   %d\n", this->crInfo->configInfo.noWalls);
+	fprintf_s(f, "noWalls:                                   %ld\n", CUSTOMROR::crInfo.configInfo.noWalls);
+	fprintf_s(f, "noNeutralInitialDiplomacy:                 %d\n", CUSTOMROR::crInfo.configInfo.noNeutralInitialDiplomacy);
+	fprintf_s(f, "noWalls:                                   %d\n", CUSTOMROR::crInfo.configInfo.noWalls);
 	fprintf_s(f, "[RM] initial food (default/small/med/large) : %ld/%ld/%ld/%ld\n",
-		this->crInfo->configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_FOOD]);
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_FOOD]);
 	fprintf_s(f, "[RM] initial wood (default/small/med/large) : %ld/%ld/%ld/%ld\n",
-		this->crInfo->configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_WOOD]);
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_WOOD]);
 	fprintf_s(f, "[RM] initial stone (default/small/med/large): %ld/%ld/%ld/%ld\n",
-		this->crInfo->configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_STONE]);
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_STONE]);
 	fprintf_s(f, "[RM] initial gold (default/small/med/large) : %ld/%ld/%ld/%ld\n",
-		this->crInfo->configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
-		this->crInfo->configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
+		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
 	fprintf_s(f, "[DM] initial resources (food/wood/stone/gold): %ld/%ld/%ld/%ld\n",
-		this->crInfo->configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		this->crInfo->configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		this->crInfo->configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		this->crInfo->configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+		CUSTOMROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		CUSTOMROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		CUSTOMROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		CUSTOMROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
 	fprintf_s(f, "[RM] initialBonus for AI (food/wood/stone/gold): %ld/%ld/%ld/%ld\n",
-		this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
 	fprintf_s(f, "[DM] initialBonus for AI (food/wood/stone/gold): %ld/%ld/%ld/%ld\n",
-		this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
 	for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
-		if (this->crInfo->configInfo.defaultPerNumbers_RM_isSet[i]) {
-			fprintf_s(f, "[RM] Force PER number #%ld to %ld\n", i, this->crInfo->configInfo.defaultPerNumbers_RM[i]);
+		if (CUSTOMROR::crInfo.configInfo.defaultPerNumbers_RM_isSet[i]) {
+			fprintf_s(f, "[RM] Force PER number #%ld to %ld\n", i, CUSTOMROR::crInfo.configInfo.defaultPerNumbers_RM[i]);
 		}
 	}
 	for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
-		if (this->crInfo->configInfo.defaultPerNumbers_DM_isSet[i]) {
-			fprintf_s(f, "[DM] Force PER number #%ld to %ld\n", i, this->crInfo->configInfo.defaultPerNumbers_DM[i]);
+		if (CUSTOMROR::crInfo.configInfo.defaultPerNumbers_DM_isSet[i]) {
+			fprintf_s(f, "[DM] Force PER number #%ld to %ld\n", i, CUSTOMROR::crInfo.configInfo.defaultPerNumbers_DM[i]);
 		}
 	}
 	// Human interface / shortcuts
-	fprintf_s(f, "useNumPadUnitShortcuts:                    %d\n", this->crInfo->configInfo.enableAdditionalNumpadShortcuts);
-	fprintf_s(f, "enableCallNearbyIdleMilitaryUnits:         %d\n", this->crInfo->configInfo.enableCallNearbyIdleMilitaryUnits);
-	fprintf_s(f, "distanceToCallNearbyIdleMilitaryUnits:     %ld\n", this->crInfo->configInfo.distanceToCallNearbyIdleMilitaryUnits);
-	fprintf_s(f, "enableAutoMoveToLocation:                  %d\n", this->crInfo->configInfo.enableSpawnUnitsMoveToLocation);
-	fprintf_s(f, "enableSpawnUnitsAutoTarget:                %d\n", this->crInfo->configInfo.enableSpawnUnitsAutoTarget);
-	fprintf_s(f, "enableSpawnUnitAutoRepairTC:               %d\n", this->crInfo->configInfo.enableSpawnUnitAutoRepairTC);
-	fprintf_s(f, "unitSpawnShortcutReverseOrder:             %d\n", this->crInfo->configInfo.unitShortcutsPriorityReverseOrder);
+	fprintf_s(f, "useNumPadUnitShortcuts:                    %d\n", CUSTOMROR::crInfo.configInfo.enableAdditionalNumpadShortcuts);
+	fprintf_s(f, "enableCallNearbyIdleMilitaryUnits:         %d\n", CUSTOMROR::crInfo.configInfo.enableCallNearbyIdleMilitaryUnits);
+	fprintf_s(f, "distanceToCallNearbyIdleMilitaryUnits:     %ld\n", CUSTOMROR::crInfo.configInfo.distanceToCallNearbyIdleMilitaryUnits);
+	fprintf_s(f, "enableAutoMoveToLocation:                  %d\n", CUSTOMROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation);
+	fprintf_s(f, "enableSpawnUnitsAutoTarget:                %d\n", CUSTOMROR::crInfo.configInfo.enableSpawnUnitsAutoTarget);
+	fprintf_s(f, "enableSpawnUnitAutoRepairTC:               %d\n", CUSTOMROR::crInfo.configInfo.enableSpawnUnitAutoRepairTC);
+	fprintf_s(f, "unitSpawnShortcutReverseOrder:             %d\n", CUSTOMROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder);
 	for (int shortcutId = 1; shortcutId < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS; shortcutId++) {
-		UnitSpawnShortcutInfo *sinfo = &this->crInfo->configInfo.unitShortcutsInformation[shortcutId];
+		UnitSpawnShortcutInfo *sinfo = &CUSTOMROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
 		if (sinfo->DAT_ID >= 0) {
 			fprintf_s(f, "unitSpawn shortcut %d: unit=%03d onlyOneUnit=%d (%.12s)\n", shortcutId, sinfo->DAT_ID, sinfo->onlyOneUnit,
 				GetHardcodedUnitName(sinfo->DAT_ID));
 		}
 	}
-	fprintf_s(f, "autoRebuildFarms_maxFarms:                 %ld\n", this->crInfo->configInfo.autoRebuildFarms_maxFarms);
-	fprintf_s(f, "autoRebuildFarms_maxFood:                  %ld\n", this->crInfo->configInfo.autoRebuildFarms_maxFood);
-	fprintf_s(f, "autoRebuildFarms_minWood:                  %ld\n", this->crInfo->configInfo.autoRebuildFarms_minWood);
-	fprintf_s(f, "useEnhancedRulesForAutoAttack:             %ld\n", this->crInfo->configInfo.useEnhancedRulesForAutoAttackTargetSelection);
+	fprintf_s(f, "autoRebuildFarms_maxFarms:                 %ld\n", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFarms);
+	fprintf_s(f, "autoRebuildFarms_maxFood:                  %ld\n", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFood);
+	fprintf_s(f, "autoRebuildFarms_minWood:                  %ld\n", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_minWood);
+	fprintf_s(f, "useEnhancedRulesForAutoAttack:             %ld\n", CUSTOMROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection);
 	fprintf_s(f, "autoAttackPolicy vs towers/military/buildings/villagers/walls\n");
-	fprintf_s(f, "- For Melee Units:  %d/%d/%d/%d/%d\n", this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackTowers,
-		this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackMilitary, 
-		this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackNonTowerBuildings, 
-		this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackVillagers, 
-		this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits.attackWalls);
-	fprintf_s(f, "- For Ranged Units: %d/%d/%d/%d/%d\n", this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits.attackTowers,
-		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits.attackMilitary,
-		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits.attackNonTowerBuildings,
-		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits.attackVillagers,
-		this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits.attackWalls);
+	fprintf_s(f, "- For Melee Units:  %d/%d/%d/%d/%d\n", CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackTowers,
+		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackMilitary, 
+		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackNonTowerBuildings, 
+		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackVillagers, 
+		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackWalls);
+	fprintf_s(f, "- For Ranged Units: %d/%d/%d/%d/%d\n", CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackTowers,
+		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackMilitary,
+		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackNonTowerBuildings,
+		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackVillagers,
+		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackWalls);
 
 	// Conversion
-	fprintf_s(f, "conversionResistance_Boats:                %f\n", this->crInfo->configInfo.conversionResistance_Boats);
-	fprintf_s(f, "conversionResistance_Chariots:             %f\n", this->crInfo->configInfo.conversionResistance_Chariots);
-	fprintf_s(f, "conversionResistance_Macedonian:           %f\n", this->crInfo->configInfo.conversionResistance_Macedonian);
-	fprintf_s(f, "conversionResistance_Priests:              %f\n", this->crInfo->configInfo.conversionResistance_Priests);
-	fprintf_s(f, "conversionResistance_WarElephants:         %f\n", this->crInfo->configInfo.conversionResistance_WarElephants);
-	fprintf_s(f, "conversionResistance_WarElephants_Persian: %f\n", this->crInfo->configInfo.conversionResistance_WarElephants_Persian);
+	fprintf_s(f, "conversionResistance_Boats:                %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_Boats);
+	fprintf_s(f, "conversionResistance_Chariots:             %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_Chariots);
+	fprintf_s(f, "conversionResistance_Macedonian:           %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_Macedonian);
+	fprintf_s(f, "conversionResistance_Priests:              %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_Priests);
+	fprintf_s(f, "conversionResistance_WarElephants:         %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_WarElephants);
+	fprintf_s(f, "conversionResistance_WarElephants_Persian: %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_WarElephants_Persian);
 	// Various AI
-	fprintf_s(f, "improveAILevel:                            %ld\n", this->crInfo->configInfo.improveAILevel);
-	fprintf_s(f, "tacticalAIUpdateDelay:                     %ld\n", this->crInfo->configInfo.tacticalAIUpdateDelay);
-	fprintf_s(f, "minPopulationBeforeOptionalItems:          %ld\n", this->crInfo->configInfo.minPopulationBeforeBuildOptionalItems);
-	fprintf_s(f, "maxPanicUnitsCountToAddInStrategy:         %ld\n", this->crInfo->configInfo.maxPanicUnitsCountToAddInStrategy);
-	fprintf_s(f, "panicModeDelay:                            %ld\n", this->crInfo->configInfo.panicModeDelay);
-	fprintf_s(f, "dislike computation interval:              %ld\n", this->crInfo->configInfo.dislikeComputeInterval);
-	fprintf_s(f, "dislike value - all artefacts/wonder:      %ld\n", this->crInfo->configInfo.dislike_allArtefacts);
-	fprintf_s(f, "dislike value - human player:              %ld\n", this->crInfo->configInfo.dislike_humanPlayer);
-	fprintf_s(f, "fixLogisticsNoHouseBug:                    %d\n", this->crInfo->configInfo.fixLogisticsNoHouseBug ? 1: 0);
-	fprintf_s(f, "fixVillagerWorkRates:                      %d\n", this->crInfo->configInfo.fixVillagerWorkRates);
+	fprintf_s(f, "improveAILevel:                            %ld\n", CUSTOMROR::crInfo.configInfo.improveAILevel);
+	fprintf_s(f, "tacticalAIUpdateDelay:                     %ld\n", CUSTOMROR::crInfo.configInfo.tacticalAIUpdateDelay);
+	fprintf_s(f, "minPopulationBeforeOptionalItems:          %ld\n", CUSTOMROR::crInfo.configInfo.minPopulationBeforeBuildOptionalItems);
+	fprintf_s(f, "maxPanicUnitsCountToAddInStrategy:         %ld\n", CUSTOMROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy);
+	fprintf_s(f, "panicModeDelay:                            %ld\n", CUSTOMROR::crInfo.configInfo.panicModeDelay);
+	fprintf_s(f, "dislike computation interval:              %ld\n", CUSTOMROR::crInfo.configInfo.dislikeComputeInterval);
+	fprintf_s(f, "dislike value - all artefacts/wonder:      %ld\n", CUSTOMROR::crInfo.configInfo.dislike_allArtefacts);
+	fprintf_s(f, "dislike value - human player:              %ld\n", CUSTOMROR::crInfo.configInfo.dislike_humanPlayer);
+	fprintf_s(f, "fixLogisticsNoHouseBug:                    %d\n", CUSTOMROR::crInfo.configInfo.fixLogisticsNoHouseBug ? 1: 0);
+	fprintf_s(f, "fixVillagerWorkRates:                      %d\n", CUSTOMROR::crInfo.configInfo.fixVillagerWorkRates);
 	// City plan
-	fprintf_s(f, "cityPlanLikeValuesEnhancement:             %d\n", this->crInfo->configInfo.cityPlanLikeValuesEnhancement);
-	//fprintf_s(f, "cityPlanHouseDistanceFromTownCenter:       %f\n", this->crInfo->configInfo.cityPlanHouseDistanceFromTownCenter);
-	//fprintf_s(f, "cityPlanHouseDistanceFromStorageBld:       %f\n", this->crInfo->configInfo.cityPlanHouseDistanceFromStorageBld);
-	//fprintf_s(f, "cityPlanHouseDistanceFromOtherBld:         %f\n", this->crInfo->configInfo.cityPlanHouseDistanceFromOtherBld);
-	fprintf_s(f, "cityPlanBerryBushWeightForGranary:         %ld\n", this->crInfo->configInfo.cityPlanBerryBushWeightForGranary);
+	fprintf_s(f, "cityPlanLikeValuesEnhancement:             %d\n", CUSTOMROR::crInfo.configInfo.cityPlanLikeValuesEnhancement);
+	//fprintf_s(f, "cityPlanHouseDistanceFromTownCenter:       %f\n", CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromTownCenter);
+	//fprintf_s(f, "cityPlanHouseDistanceFromStorageBld:       %f\n", CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromStorageBld);
+	//fprintf_s(f, "cityPlanHouseDistanceFromOtherBld:         %f\n", CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromOtherBld);
+	fprintf_s(f, "cityPlanBerryBushWeightForGranary:         %ld\n", CUSTOMROR::crInfo.configInfo.cityPlanBerryBushWeightForGranary);
 	// Map generation
-	fprintf_s(f, "random map relics count:                   %ld\n", this->crInfo->configInfo.randomMapRelicsCount);
-	fprintf_s(f, "random map ruins count:                    %ld\n", this->crInfo->configInfo.randomMapRuinsCount);
-	fprintf_s(f, "use map gen. elevation customization:      %d\n", this->crInfo->configInfo.useMapGenerationCustomElevationCalculation ? 1: 0);
+	fprintf_s(f, "random map relics count:                   %ld\n", CUSTOMROR::crInfo.configInfo.randomMapRelicsCount);
+	fprintf_s(f, "random map ruins count:                    %ld\n", CUSTOMROR::crInfo.configInfo.randomMapRuinsCount);
+	fprintf_s(f, "use map gen. elevation customization:      %d\n", CUSTOMROR::crInfo.configInfo.useMapGenerationCustomElevationCalculation ? 1: 0);
 	for (int mapType = 0; mapType < 10; mapType++) {
-		fprintf_s(f, "map gen. elevation factor  mapType=%ld value=%f\n", mapType, this->crInfo->configInfo.mapGenerationCustomElevationFactor[mapType]);
+		fprintf_s(f, "map gen. elevation factor  mapType=%ld value=%f\n", mapType, CUSTOMROR::crInfo.configInfo.mapGenerationCustomElevationFactor[mapType]);
 	}
-	fprintf_s(f, "disable dock in mostly-land maps:          %ld\n", this->crInfo->configInfo.noDockInMostlyLandMaps ? 1: 0);
+	fprintf_s(f, "disable dock in mostly-land maps:          %ld\n", CUSTOMROR::crInfo.configInfo.noDockInMostlyLandMaps ? 1: 0);
 	// Scenario Editor
-	fprintf_s(f, "showHiddenTerrainInEditor:                 %d\n", this->crInfo->configInfo.showHiddenTerrainsInEditor);
-	fprintf_s(f, "showHiddenUnitsInEditor:                   %ld\n", this->crInfo->configInfo.showHiddenUnitsInEditor);
-	fprintf_s(f, "useCustomMapDimensionsInEditor:            %d\n", this->crInfo->configInfo.useCustomMapDimensions);
+	fprintf_s(f, "showHiddenTerrainInEditor:                 %d\n", CUSTOMROR::crInfo.configInfo.showHiddenTerrainsInEditor);
+	fprintf_s(f, "showHiddenUnitsInEditor:                   %ld\n", CUSTOMROR::crInfo.configInfo.showHiddenUnitsInEditor);
+	fprintf_s(f, "useCustomMapDimensionsInEditor:            %d\n", CUSTOMROR::crInfo.configInfo.useCustomMapDimensions);
 
 	// Other
-	fprintf_s(f, "civilizations count:                       %ld\n", this->crInfo->configInfo.civCount);
+	fprintf_s(f, "civilizations count:                       %ld\n", CUSTOMROR::crInfo.configInfo.civCount);
 
 	fprintf_s(f, "End of configuration.\n\n");
 	fclose(f);
@@ -220,7 +220,7 @@ void CustomRORCommand::OneShotInit() {
 	this->LoadCustomDrsFiles();
 
 	// Update "population limit getter" according to configuration
-	SetMaxPopulationGetterInSPGames(this->crInfo->configInfo.singlePlayerMaxPopulation);
+	SetMaxPopulationGetterInSPGames(CUSTOMROR::crInfo.configInfo.singlePlayerMaxPopulation);
 
 #ifdef _DEBUG
 	if (debugSerialization) {
@@ -234,23 +234,23 @@ void CustomRORCommand::OneShotInit() {
 // Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 void CustomRORCommand::ReadIfCustomSelectedUnitsMemoryZoneIsUsed() {
 	// TO DO: check all sequences ?
-	this->crInfo->hasCustomSelectedUnitsMemory = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_SELECTED_UNITS, "InitBuffer1");
+	CUSTOMROR::crInfo.hasCustomSelectedUnitsMemory = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_SELECTED_UNITS, "InitBuffer1");
 }
 
 // Reads game executable to determine if ManageAI is installed (does game use player->unused_customAIFlag ?)
 void CustomRORCommand::ReadIfManageAIIsOn() {
-	this->crInfo->hasManageAIFeatureON = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_MANAGE_AI, "Init_is_computer_for_AI_1");
+	CUSTOMROR::crInfo.hasManageAIFeatureON = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_MANAGE_AI, "Init_is_computer_for_AI_1");
 }
 
 
 // Reads game executable to determine if various sequences are installed or not
 void CustomRORCommand::ReadOtherSequencesStatus() {
-	this->crInfo->hasRemovePlayerInitialAgeInScenarioInit = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
+	CUSTOMROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
 }
 
 // Load custom strings files
 void CustomRORCommand::LoadCustomLocalizationFiles() {
-	for each (std::string filename in this->crInfo->configInfo.customStringsFilesList) {
+	for each (std::string filename in CUSTOMROR::crInfo.configInfo.customStringsFilesList) {
 		std::string msg;
 		if (!localizationHandler.LoadTranslationsFromFile(filename)) {
 			msg = "Failed to load strings from ";
@@ -264,27 +264,27 @@ void CustomRORCommand::LoadCustomLocalizationFiles() {
 
 // Load custom DRS files
 void CustomRORCommand::LoadCustomDrsFiles() {
-	for each (DrsFileToLoad *drs in this->crInfo->configInfo.customDrsFilesList)
+	for each (DrsFileToLoad *drs in CUSTOMROR::crInfo.configInfo.customDrsFilesList)
 	{
 		AOE_AddDrsFile(drs->filename.c_str(), drs->folder.c_str());
 	}
 
 	// Prepare custom DRS data
-	if (this->crInfo->configInfo.useImprovedButtonBar) {
-		if (this->crInfo->configInfo.showAlertOnMissingFeature && !FindDrsLinkForFile(CST_CUSTOMROR_DRS_FILENAME)) {
+	if (CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) {
+		if (CUSTOMROR::crInfo.configInfo.showAlertOnMissingFeature && !FindDrsLinkForFile(CST_CUSTOMROR_DRS_FILENAME)) {
 			MessageBoxA(0, "ERROR : Could not find customROR.drs or it is invalid.", "CustomROR", MB_ICONWARNING);
 		}
 		// Initialize global variable so we can retrieve our button icons when needed
-		InitSlpInfoFromDrs(&this->crInfo->customRorIcons, CST_CUSTOMROR_CMD_ICONS_SLP_ID);
-		InitSlpInfoFromDrs(&this->crInfo->customRorUnitShortcuts, CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
+		InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorIcons, CST_CUSTOMROR_CMD_ICONS_SLP_ID);
+		InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorUnitShortcuts, CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
 	}
 }
 
 
 // Get custom empires.dat filename (with relative path)
 const char *CustomRORCommand::GetCustomEmpiresDatRelativeFileName(AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO *cmdLineInfo) {
-	if (!this->crInfo->configInfo.customEmpiresDatRelativePath.empty()) { // TODO use dedicated/correct config
-		const char *filename = this->crInfo->configInfo.customEmpiresDatRelativePath.c_str();
+	if (!CUSTOMROR::crInfo.configInfo.customEmpiresDatRelativePath.empty()) { // TODO use dedicated/correct config
+		const char *filename = CUSTOMROR::crInfo.configInfo.customEmpiresDatRelativePath.c_str();
 		if (CheckFileExistence(filename)) {
 			return filename;
 		}
@@ -601,11 +601,11 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		assert(global != NULL);
 		for (int i = 1; i < global->playerTotalCount; i++) {
-			int FOR_attempt = this->crInfo->activeConversionAttemptsCount[i];
-			int FOR_success = this->crInfo->activeConversionSuccessfulAttemptsCount[i];
+			int FOR_attempt = CUSTOMROR::crInfo.activeConversionAttemptsCount[i];
+			int FOR_success = CUSTOMROR::crInfo.activeConversionSuccessfulAttemptsCount[i];
 			float FOR_pct = FOR_attempt == 0 ? 0 : ((float)FOR_success) / ((float)FOR_attempt);
-			int AGAINST_attempt = this->crInfo->passiveConversionAttemptsCount[i];
-			int AGAINST_success = this->crInfo->passiveConversionSuccessfulAttemptsCount[i];
+			int AGAINST_attempt = CUSTOMROR::crInfo.passiveConversionAttemptsCount[i];
+			int AGAINST_success = CUSTOMROR::crInfo.passiveConversionSuccessfulAttemptsCount[i];
 			float AGAINST_pct = AGAINST_attempt == 0 ? 0 : ((float)AGAINST_success) / ((float)AGAINST_attempt);
 			char buffer[200];
 			sprintf_s(buffer, "Conversions FOR p%d: %d/%d = %f%%   AGAINST p%d: %d/%d = %f%%.",
@@ -724,10 +724,9 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 	assert(global);
 	if (!global || !global->IsCheckSumValid()) { return; }
 	// Show hidden units in editor
-	assert(this->crInfo);
 	assert(global->civCount < 256); // it is a short (2 bytes)
-	if (this->crInfo->configInfo.showHiddenUnitsInEditor > 0) {
-		bool excludeAnnoyingUnits = (this->crInfo->configInfo.showHiddenUnitsInEditor == 1);
+	if (CUSTOMROR::crInfo.configInfo.showHiddenUnitsInEditor > 0) {
+		bool excludeAnnoyingUnits = (CUSTOMROR::crInfo.configInfo.showHiddenUnitsInEditor == 1);
 		for (int civid = 0; civid < global->civCount; civid++) {
 			AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civid];
 			if (civDef && civDef->IsCheckSumValid()) {
@@ -756,7 +755,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 
 	// Assign graphics to the invisible tree.
 	// Note that adding this at game start does not work, it's too late.
-	if (this->crInfo->configInfo.fixInvisibleTree) {
+	if (CUSTOMROR::crInfo.configInfo.fixInvisibleTree) {
 		for (int civid = 0; civid < global->civCount; civid++) {
 			AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civid];
 			if (civDef && civDef->IsCheckSumValid()) {
@@ -781,7 +780,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 	}
 
 	// Fix villager work rates
-	if (this->crInfo->configInfo.fixVillagerWorkRates && (global->civCount > 1)) {
+	if (CUSTOMROR::crInfo.configInfo.fixVillagerWorkRates && (global->civCount > 1)) {
 		traceMessageHandler.WriteMessageNoNotification("Fixing villager work rates");
 		this->UpdateWorkRateWithMessage(CST_UNITID_VILLAGER, -1); // Original=1
 		this->UpdateWorkRateWithMessage(CST_UNITID_VILLAGER2, -1); // Original=1
@@ -854,54 +853,54 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 				if (unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 					switch (unitDef->unitAIType) {
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupBerryBush:
-						if (this->crInfo->configInfo.unitResourceAmountBerryBush > 0) {
-							unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountBerryBush;
+						if (CUSTOMROR::crInfo.configInfo.unitResourceAmountBerryBush > 0) {
+							unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountBerryBush;
 							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 						}
 						break;
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSeaFish:
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupShoreFish:
-						if (this->crInfo->configInfo.unitResourceAmountFish > 0) {
-							unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountFish;
+						if (CUSTOMROR::crInfo.configInfo.unitResourceAmountFish > 0) {
+							unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountFish;
 							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 						}
 						break;
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupGoldMine:
-						if (this->crInfo->configInfo.unitResourceAmountGoldMine > 0) {
-							unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountGoldMine;
+						if (CUSTOMROR::crInfo.configInfo.unitResourceAmountGoldMine > 0) {
+							unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountGoldMine;
 							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 						}
 						break;
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupStoneMine:
-						if (this->crInfo->configInfo.unitResourceAmountStoneMine > 0) {
-							unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountStoneMine;
+						if (CUSTOMROR::crInfo.configInfo.unitResourceAmountStoneMine > 0) {
+							unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountStoneMine;
 							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 						}
 						break;
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPreyAnimal:
 						if (unitDefId == CST_UNITID_GAZELLE) { // Exclude gazelle king, horse
-							if (this->crInfo->configInfo.unitResourceAmountGazelle > 0) {
-								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountGazelle;
+							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountGazelle > 0) {
+								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountGazelle;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						}
 						break;
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPredatorAnimal:
 						if (unitDefId == CST_UNITID_LION) {
-							if (this->crInfo->configInfo.unitResourceAmountLion > 0) {
-								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountLion;
+							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountLion > 0) {
+								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountLion;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						}
 						if (unitDefId == CST_UNITID_ALLIGATOR) {
-							if (this->crInfo->configInfo.unitResourceAmountAlligator > 0) {
-								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountAlligator;
+							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountAlligator > 0) {
+								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountAlligator;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						}
 						if (unitDefId == CST_UNITID_ELEPHANT) {
-							if (this->crInfo->configInfo.unitResourceAmountElephant > 0) {
-								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountElephant;
+							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountElephant > 0) {
+								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountElephant;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						}
@@ -910,14 +909,14 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 						// There is no way finding automatically if trees are "normal" or forest.
 						if (TreeUnitIsForest(unitDefId)) {
 							// Forest (default 40 wood)
-							if (this->crInfo->configInfo.unitResourceAmountTreeForest > 0) {
-								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountTreeForest;
+							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountTreeForest > 0) {
+								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountTreeForest;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						} else {
 							// Basic trees (default 75 wood)
-							if (this->crInfo->configInfo.unitResourceAmountTree > 0) {
-								unitDef->resourceCapacity = this->crInfo->configInfo.unitResourceAmountTree;
+							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountTree > 0) {
+								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountTree;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						}
@@ -1001,7 +1000,7 @@ void CustomRORCommand::OnGameStart() {
 	}
 
 	// REQUIRES game UI to be active
-	if (!this->crInfo->configInfo.hideWelcomeMessage && !settings->isMultiplayer) {
+	if (!CUSTOMROR::crInfo.configInfo.hideWelcomeMessage && !settings->isMultiplayer) {
 		std::string msg = localizationHandler.GetTranslation(CRLANG_ID_WELCOME1, "Welcome. CustomROR");
 		msg += " "; 
 		msg += VER_FILE_VERSION_STR;
@@ -1019,7 +1018,7 @@ void CustomRORCommand::OnGameStart() {
 	// Does not impact scenarios
 	if (!settings->isCampaign && !settings->isScenario) {
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
-		if (this->crInfo->configInfo.allyExplorationIsAlwaysShared &&
+		if (CUSTOMROR::crInfo.configInfo.allyExplorationIsAlwaysShared &&
 			!settings->isMultiplayer && global && global->IsCheckSumValid()) {
 			for (int i = 1; i < global->playerTotalCount; i++) {
 				SetPlayerSharedExploration_safe(i);
@@ -1084,7 +1083,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 	}
 	bool isDM = (settings->isDeathMatch != 0);
 
-	if (this->crInfo->configInfo.noWalls) {
+	if (CUSTOMROR::crInfo.configInfo.noWalls) {
 		this->DisableWalls();
 	}
 
@@ -1092,13 +1091,13 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 	long int initialResources[4] = { 200, 200, 150, 0 };
 	if (isDM) {
 		for (int i = 0; i < 4; i++) {
-			initialResources[i] = this->crInfo->configInfo.initialResources_DM[i];
+			initialResources[i] = CUSTOMROR::crInfo.configInfo.initialResources_DM[i];
 		}
 	} else {
 		int choice = settings->initialResourcesChoice;
 		if ((choice < 0) || (choice > 3)) { choice = 0; } // Make sure we have a valid choice 0-3
 		for (int i = 0; i < 4; i++) {
-			initialResources[i] = this->crInfo->configInfo.initialResourcesByChoice_RM[choice][i];
+			initialResources[i] = CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[choice][i];
 		}
 	}
 	for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
@@ -1117,17 +1116,17 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 			if (isDM) {
 				// Deathmatch
 				for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
-					if (this->crInfo->configInfo.defaultPerNumbers_DM_isSet[i]) {
+					if (CUSTOMROR::crInfo.configInfo.defaultPerNumbers_DM_isSet[i]) {
 						this->SetSNNumberInStrategyAndTacAI(ai, (AOE_CONST_FUNC::SN_NUMBERS)i,
-							this->crInfo->configInfo.defaultPerNumbers_DM[i]);
+							CUSTOMROR::crInfo.configInfo.defaultPerNumbers_DM[i]);
 					}
 				}
 			} else {
 				// Random map
 				for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
-					if (this->crInfo->configInfo.defaultPerNumbers_RM_isSet[i]) {
+					if (CUSTOMROR::crInfo.configInfo.defaultPerNumbers_RM_isSet[i]) {
 						this->SetSNNumberInStrategyAndTacAI(ai, (AOE_CONST_FUNC::SN_NUMBERS)i,
-							this->crInfo->configInfo.defaultPerNumbers_RM[i]);
+							CUSTOMROR::crInfo.configInfo.defaultPerNumbers_RM[i]);
 					}
 				}
 			}
@@ -1135,17 +1134,17 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 			// Manage the 4 "hardest difficulty" SN numbers
 			if (settings->difficultyLevelChoice == 0) {
 				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialFood,
-					isDM ? this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD] :
-					this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_FOOD]);
+					isDM ? CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD] :
+					CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_FOOD]);
 				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialWood,
-					isDM ? this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD] :
-					this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_WOOD]);
+					isDM ? CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD] :
+					CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_WOOD]);
 				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialStone,
-					isDM ? this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE] :
-					this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_STONE]);
+					isDM ? CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE] :
+					CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_STONE]);
 				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialGold,
-					isDM ? this->crInfo->configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD] :
-					this->crInfo->configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+					isDM ? CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD] :
+					CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
 			} else {
 				// Not hardest : disable the bonus for AI
 				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialFood, 0);
@@ -1157,7 +1156,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 	}
 
 	// Initial diplomacy (default=enemy, not neutral) - only if enabled in config
-	if (this->crInfo->configInfo.noNeutralInitialDiplomacy) {
+	if (CUSTOMROR::crInfo.configInfo.noNeutralInitialDiplomacy) {
 		for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
 			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 			if (player && player->IsCheckSumValid()) {
@@ -1180,15 +1179,15 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 	}
 
 	// Strategy
-	if ((!settings->isDeathMatch && this->crInfo->configInfo.generateStrategyForRM) ||
-		(settings->isDeathMatch && this->crInfo->configInfo.generateStrategyForDM)) {
+	if ((!settings->isDeathMatch && CUSTOMROR::crInfo.configInfo.generateStrategyForRM) ||
+		(settings->isDeathMatch && CUSTOMROR::crInfo.configInfo.generateStrategyForDM)) {
 		if (settings->isDeathMatch) {
 			traceMessageHandler.WriteMessage("Strategy generation for deathmatch games is not supported yet");
 		} else {
 			for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
 				AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 				if (player && player->IsCheckSumValid()) {
-					STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(this->crInfo, player);
+					STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(&CUSTOMROR::crInfo, player);
 					sb.CreateStrategyFromScratch();
 				}
 			}
@@ -1205,9 +1204,9 @@ void CustomRORCommand::InitScenarioInfoTextData(AOE_STRUCTURES::STRUCT_SCENARIO_
 	this->ReloadTriggersFromGameData(scenarioInfo);
 
 	for (int playerId = 0; playerId < 9; playerId++) {
-		if (this->crInfo->triggerSet != NULL) {
-			this->crInfo->FillUnitDefToDisableFromString(playerId, this->crInfo->triggerSet->disable_unitDefIDTextList[playerId].c_str());
-			this->crInfo->FillResearchesToDisableFromString(playerId, this->crInfo->triggerSet->disable_researchIDTextList[playerId].c_str());
+		if (CUSTOMROR::crInfo.triggerSet != NULL) {
+			CUSTOMROR::crInfo.FillUnitDefToDisableFromString(playerId, CUSTOMROR::crInfo.triggerSet->disable_unitDefIDTextList[playerId].c_str());
+			CUSTOMROR::crInfo.FillResearchesToDisableFromString(playerId, CUSTOMROR::crInfo.triggerSet->disable_researchIDTextList[playerId].c_str());
 		}
 	}
 }
@@ -1215,7 +1214,7 @@ void CustomRORCommand::InitScenarioInfoTextData(AOE_STRUCTURES::STRUCT_SCENARIO_
 
 // Initialize internal game-specific variables (called on each game start/load)
 void CustomRORCommand::InitMyGameInfo() {
-	this->crInfo->ResetVariables();
+	CUSTOMROR::crInfo.ResetVariables();
 	// Prevent 0% speed at game startup (occurs because of rounding in registry saved value)
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid() && (global->gameSpeed == 0)) {
@@ -1228,9 +1227,9 @@ void CustomRORCommand::InitMyGameInfo() {
 // So we can add custom rules for debugging
 bool CustomRORCommand::IsImproveAIEnabled(int playerId) {
 #ifdef _DEBUG
-	return (this->crInfo->configInfo.improveAILevel > 0) && _DEBUG_improveThisPlayer(playerId);
+	return (CUSTOMROR::crInfo.configInfo.improveAILevel > 0) && _DEBUG_improveThisPlayer(playerId);
 #else
-	return (this->crInfo->configInfo.improveAILevel > 0);
+	return (CUSTOMROR::crInfo.configInfo.improveAILevel > 0);
 #endif
 }
 
@@ -1244,9 +1243,9 @@ bool CustomRORCommand::IsRpgModeEnabled() {
 	// Note: to work well on saved games, this requires customROR's fix on game's IsScenario information.
 	bool isScenario = (settings->isCampaign || settings->isScenario);
 	if (isScenario) {
-		return this->crInfo->configInfo.enableRPGModeInScenario;
+		return CUSTOMROR::crInfo.configInfo.enableRPGModeInScenario;
 	} else {
-		return this->crInfo->configInfo.enableRPGModeInRandomGames;
+		return CUSTOMROR::crInfo.configInfo.enableRPGModeInRandomGames;
 	}
 }
 
@@ -1403,7 +1402,7 @@ bool CustomRORCommand::ManageAIFileSelectionForPlayer(char civilizationId, char 
 
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
 	assert(gameSettings != NULL);
-	CivilizationInfo *civ = this->crInfo->configInfo.GetCivInfo(civilizationId);
+	CivilizationInfo *civ = CUSTOMROR::crInfo.configInfo.GetCivInfo(civilizationId);
 	if (gameSettings->isDeathMatch) {
 		if (civ) {
 			strcpy_s(aiFileBuffer, 255, civ->deathmatch_AI_file.c_str());
@@ -1457,7 +1456,7 @@ bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT
 	evtInfo.playerId = actorPlayer->playerId;
 	this->ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES::EVENT_DISCOVER_GAIA_UNIT, evtInfo);
 
-	if (this->crInfo->configInfo.fixHumanPlayer_specificSeeUnit &&
+	if (CUSTOMROR::crInfo.configInfo.fixHumanPlayer_specificSeeUnit &&
 		(unitDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
 		// Do not capture artefacts in human-specific section, let "normal"/common code do it.
 		// This prevents human from capturing artefacts faster than AI players.
@@ -1515,8 +1514,8 @@ void CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 	// Recompute SNScalingFrequency from configuration (only the first call will occur too early, using ROR's default value (4 if not overloaded)
 	// Warning: SNScalingFrequency unit is normally MINUTES. CustomROR switched it to seconds.
 	// Do not update if the current value is acceptable (it might be a saved game)
-	if (tacAI->SNNumber[0x63] < this->crInfo->configInfo.MINVALUE_tacticalAIUpdateDelay) {
-		tacAI->SNNumber[0x63] = this->crInfo->configInfo.tacticalAIUpdateDelay; // Update SNScalingFrequency with customROR config value
+	if (tacAI->SNNumber[0x63] < CUSTOMROR::crInfo.configInfo.MINVALUE_tacticalAIUpdateDelay) {
+		tacAI->SNNumber[0x63] = CUSTOMROR::crInfo.configInfo.tacticalAIUpdateDelay; // Update SNScalingFrequency with customROR config value
 	}
 
 	int ironAgeResearched = IsTechResearched(player, CST_RSID_IRON_AGE);
@@ -1638,7 +1637,7 @@ void CustomRORCommand::AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI)
 		if ((currentStratElem->elementType == AIUCLivingUnit) && (currentStratElem->retrains == -1)) {
 			currentPopulation++;
 			// minPopulationBeforeBuildOptionalItems+1 : take next one and insert BEFORE (inserting BEFORE an given element preserves insert order consistency. After reverses all).
-			if (!goodDevelopmentPointElement && ironAgeResearched && (currentPopulation >= this->crInfo->configInfo.minPopulationBeforeBuildOptionalItems + 1)) {
+			if (!goodDevelopmentPointElement && ironAgeResearched && (currentPopulation >= CUSTOMROR::crInfo.configInfo.minPopulationBeforeBuildOptionalItems + 1)) {
 				// We store the location where player theoritically has a population=[minPopulationBeforeBuildOptionalItems] (we also ask for iron age).
 				// BUT AI can skip items so this strategy element is triggered BEFORE the [minPopulationBeforeBuildOptionalItems] units are really trained (alive).
 				// SO: Use a HIGHER value for the tested population amount than the value we really would like to use.
@@ -1665,7 +1664,7 @@ void CustomRORCommand::AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI)
 		// Unblock "stuck buildings". We intentionally set unitInstanceId to -1 but keep "inprogress" when an unfinished building is destroyed.
 		// The goal is to wait (forw THIS update) before trying to build it again.
 		// Warning: The 2 other "fixes" about destroyed buildings are absolutely required or AI will build, build and rebuild the same thing forever.
-		if (this->crInfo->hasFixForBuildingStratElemUnitId && (currentStratElem->inProgressCount == 1) && (currentStratElem->elementType == AIUCBuilding) && (currentStratElem->unitInstanceId == -1)) {
+		if (CUSTOMROR::crInfo.hasFixForBuildingStratElemUnitId && (currentStratElem->inProgressCount == 1) && (currentStratElem->elementType == AIUCBuilding) && (currentStratElem->unitInstanceId == -1)) {
 			currentStratElem->inProgressCount = 0;
 		}
 
@@ -1790,7 +1789,7 @@ void CustomRORCommand::AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI)
 		// Make sure new item is after watch tower tech
 		MoveStrategyElement_after_ifWrongOrder(buildAI, resWatchTower, optionalsLocation->previous);
 	}
-	// if (this->crInfo->configInfo.improveAILevel <= ...) or IsImproveAIEnabled(player->playerId)
+	// if (CUSTOMROR::crInfo.configInfo.improveAILevel <= ...) or IsImproveAIEnabled(player->playerId)
 	// then add only at a certain level of AI improvement ? (if implemented some day)
 	if (!resGuardTower && ironAgeResearched && (isVeryRich || isStrong) && IsResearchRelevantForStrategy(player, CST_RSID_GUARD_TOWER)) {
 		AddUnitInStrategy_before(buildAI, optionalsLocation, -1, CST_UNITID_GRANARY, AIUCTech, CST_RSID_GUARD_TOWER, player, "customROR-GuardTower");
@@ -2007,8 +2006,8 @@ bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES:
 // Manage strategy updates for panic mode.
 void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
 	// CONFIG
-	const long int panicModeDelay = this->crInfo->configInfo.panicModeDelay;
-	long int maxPanicModeUnitsInStrategy = this->crInfo->configInfo.maxPanicUnitsCountToAddInStrategy;
+	const long int panicModeDelay = CUSTOMROR::crInfo.configInfo.panicModeDelay;
+	long int maxPanicModeUnitsInStrategy = CUSTOMROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy;
 	const long int maxPanicModeSeekEnemyDistance = 20; // 0x14. Hardcoded in original code
 #define PANIC_MODE_ARRAYS_MAX_SIZE 20 // technical limit to the number of panic mode units
 	if (maxPanicModeUnitsInStrategy > PANIC_MODE_ARRAYS_MAX_SIZE) { maxPanicModeUnitsInStrategy = PANIC_MODE_ARRAYS_MAX_SIZE; }
@@ -2825,7 +2824,7 @@ void CustomRORCommand::CallNearbyIdleMilitaryUnits() {
 	AOE_STRUCTURES::STRUCT_PLAYER **playerTable = globalStruct->GetPlayerStructPtrTable();
 	if (!playerTable || !playerTable[playerId]) { return; }
 	AOE_STRUCTURES::STRUCT_PLAYER *player = playerTable[playerId];
-	this->MoveIdleMilitaryUnitsToMousePosition(player, (float) this->crInfo->configInfo.distanceToCallNearbyIdleMilitaryUnits);
+	this->MoveIdleMilitaryUnitsToMousePosition(player, (float) CUSTOMROR::crInfo.configInfo.distanceToCallNearbyIdleMilitaryUnits);
 }
 
 
@@ -2843,7 +2842,7 @@ void CustomRORCommand::SelectNextIdleMilitaryUnit() {
 	}
 	assert(player->ptrCreatableUnitsListLink->IsCheckSumValid());
 
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = this->crInfo->GetMainSelectedUnit(player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = CUSTOMROR::crInfo.GetMainSelectedUnit(player);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *firstIgnoredUnit = NULL; // in case seelcted unit = last from list, keep in memory first one to loop back
 	bool ignoreUntilSelectedUnitIsMet = false;
 	if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass()) {
@@ -2933,7 +2932,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	}
 
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
-	if (!player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
+	if (!player->IsAIActive(CUSTOMROR::crInfo.hasManageAIFeatureON)) {
 		AutoAssignShortcutToUnit(unit);
 	}
 
@@ -2951,14 +2950,13 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 
 	UnitCustomInfo *parentInfo = NULL;
 	if (parentUnitId >= 0) {
-		assert(this->crInfo != NULL);
-		parentInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(parentUnitId); // Result can be NULL (not found)
+		parentInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(parentUnitId); // Result can be NULL (not found)
 	}
 
 	bool commandCreated = false; // To make sure we create only 1 command (or 0)
 
 	// Auto target
-	if (this->crInfo->configInfo.enableSpawnUnitsAutoTarget && !player->IsAIActive(this->crInfo->hasManageAIFeatureON) &&
+	if (CUSTOMROR::crInfo.configInfo.enableSpawnUnitsAutoTarget && !player->IsAIActive(CUSTOMROR::crInfo.hasManageAIFeatureON) &&
 		parentInfo && (parentInfo->spawnTargetUnitId >= 0)) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *target = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(parentInfo->spawnTargetUnitId);
 		// Note: target may not exist (anymore)
@@ -2983,21 +2981,21 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 		} else {
 			if (parentInfo) { // double-check ;)  Here target no longer exists: remove auto-target
 				parentInfo->ResetSpawnAutoTargetInfo();
-				this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(parentInfo->unitId);
+				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(parentInfo->unitId);
 			}
 		}
 	}
 
 	// Move spawned unit to building's target location if we have/found one. And if option is enabled.
-	if (!commandCreated && this->crInfo->configInfo.enableSpawnUnitsMoveToLocation && !player->IsAIActive(this->crInfo->hasManageAIFeatureON) &&
+	if (!commandCreated && CUSTOMROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation && !player->IsAIActive(CUSTOMROR::crInfo.hasManageAIFeatureON) &&
 		parentInfo && (parentInfo->spawnUnitMoveToPosX >= 0) && (parentInfo->spawnUnitMoveToPosY >= 0)) {
 		MoveUnitToTargetOrPosition(unit, NULL, parentInfo->spawnUnitMoveToPosX, parentInfo->spawnUnitMoveToPosY);
 		commandCreated = true;
 	}
 
 	// Auto-repair TC for villagers
-	if (!commandCreated && this->crInfo->configInfo.enableSpawnUnitAutoRepairTC && IsVillager(unit->unitDefinition->DAT_ID1) &&
-		parentUnit && !player->IsAIActive(this->crInfo->hasManageAIFeatureON)) {
+	if (!commandCreated && CUSTOMROR::crInfo.configInfo.enableSpawnUnitAutoRepairTC && IsVillager(unit->unitDefinition->DAT_ID1) &&
+		parentUnit && !player->IsAIActive(CUSTOMROR::crInfo.hasManageAIFeatureON)) {
 		if (parentUnit->remainingHitPoints < (float)parentUnit->unitDefinition->totalHitPoints) {
 			TellUnitToInteractWithTarget(unit, parentUnit);
 			commandCreated = true;
@@ -3087,7 +3085,7 @@ bool CustomRORCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetU
 	}
 
 	// Handle internal structures
-	this->crInfo->myGameObjects.RemoveAllInfoForUnit(targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY);
+	CUSTOMROR::crInfo.myGameObjects.RemoveAllInfoForUnit(targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY);
 
 	// Not handled: other events than conversion (is there any ?)
 
@@ -3258,11 +3256,11 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 	}
 
 	// Auto rebuild farms
-	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && isBuilding && this->crInfo->configInfo.enableAutoRebuildFarms) {
+	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && isBuilding && CUSTOMROR::crInfo.configInfo.enableAutoRebuildFarms) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 		// If this is a farm, and if I have "farm rebuild info" for this position (not in "not rebuild" mode), then trigger a rebuild.
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
-			FarmRebuildInfo *fInfo = this->crInfo->myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
+			FarmRebuildInfo *fInfo = CUSTOMROR::crInfo.myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
 			if (fInfo && (fInfo->playerId == player->playerId) && !fInfo->forceNotRebuild &&
 				(fInfo->villagerUnitId >= 0) && IsUnitAvailableForPlayer(CST_UNITID_FARM, player)) {
 				// As long as we use a game command, it is compatible with multiplayer.
@@ -3271,7 +3269,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 			}
 			if (fInfo && !fInfo->forceNotRebuild && !fInfo->forceRebuild) {
 				// Remove farm rebuild info when it was added automatically (none of the force rebuild/not rebuild are set)
-				this->crInfo->myGameObjects.RemoveFarmRebuildInfo(unit->positionX, unit->positionY);
+				CUSTOMROR::crInfo.myGameObjects.RemoveFarmRebuildInfo(unit->positionX, unit->positionY);
 			}
 		}
 	}
@@ -3300,14 +3298,14 @@ bool CustomRORCommand::AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE
 	assert(unitDef != NULL);
 	assert(unitDef->IsCheckSumValidForAUnitClass());
 
-	int shortcutId = this->crInfo->configInfo.unitShortcutsPriorityReverseOrder ? 9 : 1;
+	int shortcutId = CUSTOMROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder ? 9 : 1;
 	for (int currentIndex = 1; currentIndex < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS; currentIndex++) {
-		if (this->crInfo->configInfo.unitShortcutsPriorityReverseOrder) {
+		if (CUSTOMROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder) {
 			shortcutId = CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS - currentIndex;
 		}
 		assert(shortcutId < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS);
 		assert(shortcutId >= 0);
-		UnitSpawnShortcutInfo *shortcutInfo = &this->crInfo->configInfo.unitShortcutsInformation[shortcutId];
+		UnitSpawnShortcutInfo *shortcutInfo = &CUSTOMROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
 		if (shortcutInfo->DAT_ID == unitDef->DAT_ID1) {
 			// This rule matches our unit DAT ID.
 			// If "only 1 unit" is NOT enabled, always assign. Otherwise, check the shortcut number is still unused.
@@ -3688,7 +3686,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 // Warning: try to keep this function fast and optimized as much as possible. It may be called quite often.
 // The improved algorithm is only used if ImproveAI config is ON.
 bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower) {
-	if (this->crInfo->configInfo.improveAILevel <= 0) {
+	if (CUSTOMROR::crInfo.configInfo.improveAILevel <= 0) {
 		return true; // improve AI is disabled. Return default value.
 	}
 	
@@ -4228,7 +4226,7 @@ short int CustomRORCommand::DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STR
 
 
 void CustomRORCommand::ComputeDislikeValues() {
-	if ((this->crInfo->configInfo.dislike_allArtefacts <= 0) || (this->crInfo->configInfo.dislike_humanPlayer <= 0)) { return; }
+	if ((CUSTOMROR::crInfo.configInfo.dislike_allArtefacts <= 0) || (CUSTOMROR::crInfo.configInfo.dislike_humanPlayer <= 0)) { return; }
 
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	assert(globalStruct->GetPlayerStructPtrTable() != NULL);
@@ -4240,10 +4238,10 @@ void CustomRORCommand::ComputeDislikeValues() {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = globalStruct->GetPlayerStructPtrTable()[iPlayerId];
 		if (player && player->ptrAIStruct) {
 			float *resources = (float *)player->ptrResourceValues;
-			if (resources[CST_RES_ORDER_STANDING_WONDERS]) { newDislikeValues[iPlayerId] += this->crInfo->configInfo.dislike_allArtefacts; }
-			if (resources[CST_RES_ORDER_ALL_RUINS]) { newDislikeValues[iPlayerId] += this->crInfo->configInfo.dislike_allArtefacts; }
-			if (resources[CST_RES_ORDER_ALL_RELICS]) { newDislikeValues[iPlayerId] += this->crInfo->configInfo.dislike_allArtefacts; }
-			if (player->isComputerControlled == 0) { newDislikeValues[iPlayerId] += this->crInfo->configInfo.dislike_humanPlayer; }
+			if (resources[CST_RES_ORDER_STANDING_WONDERS]) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_allArtefacts; }
+			if (resources[CST_RES_ORDER_ALL_RUINS]) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_allArtefacts; }
+			if (resources[CST_RES_ORDER_ALL_RELICS]) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_allArtefacts; }
+			if (player->isComputerControlled == 0) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_humanPlayer; }
 		}
 	}
 
@@ -4299,11 +4297,11 @@ void CustomRORCommand::Fixed_MapGen_applyElevation(long int posX, long int posY,
 void CustomRORCommand::DisplayTimerStats() {
 	long int result = 0;
 	for (int i = 0; i < CST_TIMER_STATS_ARRAY_SIZE; i++) {
-		result += this->crInfo->CollectedTimerIntervals_ms[i];
+		result += CUSTOMROR::crInfo.CollectedTimerIntervals_ms[i];
 	}
 	result = result / CST_TIMER_STATS_ARRAY_SIZE;
 	char buf[70];
-	sprintf_s(buf, "Avg timer interval is %ld ms - slow down factor is %ld", result, this->crInfo->configInfo.gameTimerSlowDownFactor);
+	sprintf_s(buf, "Avg timer interval is %ld ms - slow down factor is %ld", result, CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor);
 	CallWriteText(buf);
 }
 
@@ -4314,27 +4312,27 @@ void CustomRORCommand::AutoFixGameTimer() {
 	time_t t = time(0); // get current time
 	struct tm now;
 	localtime_s(&now, &t);
-	if (this->crInfo->LastGameTimerAutoFix_second == now.tm_sec) { return; } // Prevents from doing this more than once per second
+	if (CUSTOMROR::crInfo.LastGameTimerAutoFix_second == now.tm_sec) { return; } // Prevents from doing this more than once per second
 	long int result = 0;
 	for (int i = 0; i < CST_TIMER_STATS_ARRAY_SIZE; i++) {
-		if (this->crInfo->CollectedTimerIntervals_ms[i] < 0) { return; } // does not update if we did not collect enough stats (invalid values remain)
-		result += this->crInfo->CollectedTimerIntervals_ms[i];
+		if (CUSTOMROR::crInfo.CollectedTimerIntervals_ms[i] < 0) { return; } // does not update if we did not collect enough stats (invalid values remain)
+		result += CUSTOMROR::crInfo.CollectedTimerIntervals_ms[i];
 	}
 	result = result / CST_TIMER_STATS_ARRAY_SIZE; // Get average
 	// Hardcoded limit. Choose a better value. A variable ?
-	if ((result < CST_TIMER_INTERVAL_TOO_FAST) && (this->crInfo->configInfo.gameTimerSlowDownFactor < CST_MAXIMUM_SLOW_DOWN_FACTOR)) {
-		this->crInfo->configInfo.gameTimerSlowDownFactor++;
+	if ((result < CST_TIMER_INTERVAL_TOO_FAST) && (CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor < CST_MAXIMUM_SLOW_DOWN_FACTOR)) {
+		CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor++;
 		reset = true;
 	}
-	if ((result > CST_TIMER_INTERVAL_TOO_SLOW) && (this->crInfo->configInfo.gameTimerSlowDownFactor > 1)) {
-		this->crInfo->configInfo.gameTimerSlowDownFactor--;
+	if ((result > CST_TIMER_INTERVAL_TOO_SLOW) && (CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor > 1)) {
+		CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor--;
 		reset = true;
 	}
-	this->crInfo->LastGameTimerAutoFix_second = now.tm_sec;
+	CUSTOMROR::crInfo.LastGameTimerAutoFix_second = now.tm_sec;
 
 	if (reset) {
 		for (int i = 0; i < CST_TIMER_STATS_ARRAY_SIZE; i++) {
-			this->crInfo->CollectedTimerIntervals_ms[i] = -1; // Reset statistics
+			CUSTOMROR::crInfo.CollectedTimerIntervals_ms[i] = -1; // Reset statistics
 		}
 	}
 }
@@ -4512,7 +4510,7 @@ void CustomRORCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_
 	// Manage hidden terrains
 	AOE_STRUCTURES::STRUCT_UI_LISTBOX *listBox = scEditor->trn_lst_terrainList;
 	assert(listBox && listBox->IsCheckSumValid());
-	if (listBox && listBox->IsCheckSumValid() && this->crInfo->configInfo.showHiddenTerrainsInEditor) {
+	if (listBox && listBox->IsCheckSumValid() && CUSTOMROR::crInfo.configInfo.showHiddenTerrainsInEditor) {
 		// Note: unavailable terrainIDs are 2,3,5,7,8,9,11,12,14,15,16,17,18,21,23-31
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = scEditor->global;
 		assert(global && global->IsCheckSumValid());
@@ -4530,7 +4528,7 @@ void CustomRORCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_
 	}
 
 	// Manage custom map dimensions
-	if (this->crInfo->configInfo.useCustomMapDimensions &&
+	if (CUSTOMROR::crInfo.configInfo.useCustomMapDimensions &&
 		scEditor->map_cbb_mapSize && scEditor->map_cbb_mapSize->IsCheckSumValid() &&
 		scEditor->map_cbb_mapSize->underlyingListBox && scEditor->map_cbb_mapSize->underlyingListBox->IsCheckSumValid()) {
 		AOE_listbox_addItem(scEditor->map_cbb_mapSize->underlyingListBox, 
@@ -4542,9 +4540,9 @@ void CustomRORCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_
 // This methods modifies provided variables that will be passed to "check unit placement" method before adding a unit in scenario editor.
 // For example, to allow creating several units at the same location, force checkConflictingUnits to 0.
 void CustomRORCommand::ApplyCustomizationOnEditorAddUnit(long int &checkVisibility, long int &checkHillMode, long int &editorMode, long int &checkAirModeAndHPBar, long int &checkConflictingUnits, bool &IgnoreTerrainRestrictions) {
-	checkConflictingUnits = !this->crInfo->configInfo.editor_allowUnitOverlapping;
-	checkHillMode = !this->crInfo->configInfo.editor_disableHillModeChecks;
-	IgnoreTerrainRestrictions = this->crInfo->configInfo.editor_disableTerrainRestrictions;
+	checkConflictingUnits = !CUSTOMROR::crInfo.configInfo.editor_allowUnitOverlapping;
+	checkHillMode = !CUSTOMROR::crInfo.configInfo.editor_disableHillModeChecks;
+	IgnoreTerrainRestrictions = CUSTOMROR::crInfo.configInfo.editor_disableTerrainRestrictions;
 }
 
 
@@ -4593,7 +4591,7 @@ void CustomRORCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextP
 	if (msgInitial.length() <= 0) { return; }
 
 	// Filter some messages if option is set (param=1 means filtered)
-	if (this->crInfo->configInfo.collectRORDebugLogs == 1) {
+	if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs == 1) {
 		// Exclude some technical messages that are not very interesting.
 		if (msgInitial == "Resume requested") {
 			return;
@@ -4724,7 +4722,7 @@ long int CustomRORCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_
 void CustomRORCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_PANEL *f11panel, char *bufferToWrite, char *defaultFormat,
 	char *localizedText, long int currentPop, long int houseMaxPop) {
 	const int bufferSize = 200; // do not know for sure.
-	if (!this->crInfo->configInfo.showCustomPopInfo) {
+	if (!CUSTOMROR::crInfo.configInfo.showCustomPopInfo) {
 		// Default behaviour
 		sprintf_s(bufferToWrite, 200, defaultFormat, localizedText, currentPop, houseMaxPop);
 		return;
@@ -4775,14 +4773,14 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	}
 
 	// Is feature enabled ?
-	if (!this->crInfo->configInfo.enableAutoRebuildFarms) { return; }
+	if (!CUSTOMROR::crInfo.configInfo.enableAutoRebuildFarms) { return; }
 
 	// Check auto-rebuild farms conditions (parameters)
-	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_FOOD) > this->crInfo->configInfo.autoRebuildFarms_maxFood) { return; }
-	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_WOOD) < this->crInfo->configInfo.autoRebuildFarms_minWood) { return; }
+	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_FOOD) > CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFood) { return; }
+	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_WOOD) < CUSTOMROR::crInfo.configInfo.autoRebuildFarms_minWood) { return; }
 	// Remark : currentFarmCount includes current farm (that is going to be deleted)
 	long int currentFarmCount = GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2); // Include being-built farms
-	bool farmCountConditionIsOK = (currentFarmCount <= this->crInfo->configInfo.autoRebuildFarms_maxFarms);
+	bool farmCountConditionIsOK = (currentFarmCount <= CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFarms);
 
 	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *farmerUnit = NULL;
 	// Search for the farmer that was working on this farm (first -arbitrary- one if there are many)
@@ -4803,7 +4801,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	}
 	if (farmerUnit) {
 		if (!farmCountConditionIsOK) {
-			FarmRebuildInfo *ftmp = this->crInfo->myGameObjects.FindFarmRebuildInfo(farm->positionX, farm->positionY);
+			FarmRebuildInfo *ftmp = CUSTOMROR::crInfo.myGameObjects.FindFarmRebuildInfo(farm->positionX, farm->positionY);
 			if (ftmp && ftmp->forceRebuild) {
 				farmCountConditionIsOK = true; // "Force rebuild" flag is stronger than farm number limitation.
 			}
@@ -4811,7 +4809,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 
 		if (farmCountConditionIsOK) {
 			// Add/Update farm rebuild info to trigger construction of a new farm when "this" one is actually removed.
-			FarmRebuildInfo *f = this->crInfo->myGameObjects.FindOrAddFarmRebuildInfo(farm->positionX, farm->positionY);
+			FarmRebuildInfo *f = CUSTOMROR::crInfo.myGameObjects.FindOrAddFarmRebuildInfo(farm->positionX, farm->positionY);
 			f->villagerUnitId = farmerUnit->unitInstanceId;
 			f->playerId = player->playerId;
 			f->posX = farm->positionX; // Only useful if just added (otherwise, unchanged)
@@ -4824,7 +4822,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 
 // Disable dock for all players on maps where AI does NOT builds docks.
 void CustomRORCommand::DisableWaterUnitsIfNeeded() {
-	if (!this->crInfo->configInfo.noDockInMostlyLandMaps) { return; }
+	if (!CUSTOMROR::crInfo.configInfo.noDockInMostlyLandMaps) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	assert(settings->IsCheckSumValid());
@@ -4887,7 +4885,7 @@ void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_I
 		// - unit moved to a position which is NO LONGER visible to me
 		if (!unitBase || !unitBase->ptrStructPlayer ||
 			(!IsFogVisibleForPlayer(infAI->commonAIObject.playerId, (long int)unitBase->positionX, (long int)unitBase->positionY))) {
-			if (this->crInfo->configInfo.collectRORDebugLogs == 2) {
+			if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs == 2) {
 				int noLongerExists = (unitBase == NULL) ? 1 : 0;
 				std::string s = "Removed unit #";
 				s += std::to_string(currentUnitListElem->unitId);
@@ -4903,7 +4901,7 @@ void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_I
 	if (!elementWasReset && unitBase && unitBase->ptrStructPlayer && (unitBase->ptrStructPlayer->playerId != currentUnitListElem->playerId)) {
 		// If unit owner player does not match element's playerId (unit has been captured/converted) => important to fix, causes bad behaviors.
 		if (UpdateOrResetInfAIUnitListElem(infAI, currentUnitListElem)) {
-			if (this->crInfo->configInfo.collectRORDebugLogs >= 2) {
+			if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs >= 2) {
 				std::string s = "Updated unit #";
 				s += std::to_string(currentUnitListElem->unitId);
 				s += " owner from unitElemList (p#";
@@ -4925,7 +4923,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 	if (gameMainUI->panelSelectedUnit == NULL) {
 		return;
 	}
-	if (!IsGameRunning() || !this->crInfo->configInfo.useImprovedButtonBar) {
+	if (!IsGameRunning() || !CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) {
 		return;
 	}
 	
@@ -4963,26 +4961,26 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDef;
 		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_NORMAL) {
 			if ((unitDefLiving->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDefLiving->blastRadius > 0)) {
-				UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+				UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 				// TODO: localization
 				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically",
-					&this->crInfo->customRorIcons, true);
+					&CUSTOMROR::crInfo.customRorIcons, true);
 				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false, "Click to prevent unit from attacking buildings automatically",
-					&this->crInfo->customRorIcons, false);
+					&CUSTOMROR::crInfo.customRorIcons, false);
 				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, "Click to prevent unit from attacking other units automatically",
-					&this->crInfo->customRorIcons, false);
+					&CUSTOMROR::crInfo.customRorIcons, false);
 				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false, "Click to restore normal auto-attack behaviour",
-					&this->crInfo->customRorIcons, false);
-				const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &this->crInfo->configInfo.autoAttackOptionDefaultValues;
+					&CUSTOMROR::crInfo.customRorIcons, false);
+				const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
 				this->RefreshCustomAutoAttackButtons(gameMainUI, aap);
 			}
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, "Click to select a unit or a position to defend",
-				NULL /*&this->crInfo->customRorIcons*/, false);
+				NULL /*&CUSTOMROR::crInfo.customRorIcons*/, false);
 		}
 		return;
 	}
 	
-	bool multiQueueing = this->crInfo->configInfo.allowMultiQueueing; // If true, a building can have >1 unit "def" in queue.
+	bool multiQueueing = CUSTOMROR::crInfo.configInfo.allowMultiQueueing; // If true, a building can have >1 unit "def" in queue.
 	bool buttonIsVisible[12]; // Is button visible after standard buttons display.
 	bool forceRefresh[12]; // Used to force refresh of buttons : text or read-only status can be wrong when switching between 2 similar units that have different current actions.
 	bool currentButtonDoesNotBelongToThisPage[12];
@@ -5351,7 +5349,7 @@ void CustomRORCommand::RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_
 		return;
 	}
 	if (!attackPolicy) {
-		attackPolicy = &this->crInfo->configInfo.autoAttackOptionDefaultValues;
+		attackPolicy = &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
 	}
 	int value = attackPolicy->attackVillagers ? 0 : 1;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]->showNumber = value;
@@ -5365,7 +5363,7 @@ void CustomRORCommand::RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]->showNumber = value;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]->numberToDisplay = value;
 	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]);
-	value = (attackPolicy->Equals(this->crInfo->configInfo.autoAttackOptionDefaultValues)) ? 1 : 0;
+	value = (attackPolicy->Equals(CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues)) ? 1 : 0;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]->showNumber = value;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]->numberToDisplay = value;
 	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]);
@@ -5378,7 +5376,7 @@ void CustomRORCommand::RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_
 bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue) {
 
-	if (!this->crInfo->configInfo.useImprovedButtonBar) {
+	if (!CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) {
 		return false;
 	}
 
@@ -5449,7 +5447,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 	bool updateAutoAttackInfo = false;
 	AutoAttackPolicy flagsToApply = { false, false, false, false, false };
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS) {
-		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackVillagers = false;
 		flagsToApply.attackVillagers = true; // this flag has been updated
@@ -5457,7 +5455,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS) {
-		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
 		flagsToApply.attackNonTowerBuildings = true; // this flag has been updated
@@ -5465,7 +5463,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK) {
-		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackMilitary = false;
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
@@ -5479,20 +5477,20 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK) {
-		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = false;
 		unitInfo->autoAttackPolicy.SetDefaultValues();
 		flagsToApply.SetAllValues(true); // All flags have been updated.
-		this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
+		CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
 		RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
 		updateAutoAttackInfo = true;
 	}
 	// Apply changes on ALL compatible selected units
 	if (updateAutoAttackInfo) {
-		UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
 		assert(unitInfo != NULL); // Was just added
 		if (!unitInfo) { return false; } // this is an error case
-		this->crInfo->ApplyAutoAttackPolicyToPlayerSelectedUnits(player, unitInfo->autoAttackPolicy, flagsToApply);
+		CUSTOMROR::crInfo.ApplyAutoAttackPolicyToPlayerSelectedUnits(player, unitInfo->autoAttackPolicy, flagsToApply);
 	}
 	// Button "protect unit or protect zone" : set mouse custom cursor type
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND) {
@@ -5513,7 +5511,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 // Default result=false (on error cases)
 bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity,
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *potentialTargetUnit) {
-	assert(this->crInfo->configInfo.useEnhancedRulesForAutoAttackTargetSelection); // should have been checked before calling this
+	assert(CUSTOMROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection); // should have been checked before calling this
 	if (!activity || !potentialTargetUnit || !potentialTargetUnit->IsCheckSumValidForAUnitClass()) {
 		return false; // error case
 	}
@@ -5547,10 +5545,10 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(AOE_STRUCTURES::STRUCT_U
 
 	// Custom rules
 	bool hasRuleAtUnitLevel = false;
-	AutoAttackPolicy *policy = isMelee ? &this->crInfo->configInfo.autoAttackOptionForBlastMeleeUnits :
-		&this->crInfo->configInfo.autoAttackOptionForBlastRangedUnits;
+	AutoAttackPolicy *policy = isMelee ? &CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits :
+		&CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits;
 	// If there is a config at unit level, use it instead of global parameter.
-	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
 	if (unitInfo && unitInfo->autoAttackPolicyIsSet) {
 		policy = &unitInfo->autoAttackPolicy;
 		hasRuleAtUnitLevel = true;
@@ -5613,7 +5611,7 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UN
 
 	// Here: unit has a custom shortcut OR shortcut 10 (not displayed in standard game)
 
-	if (this->crInfo->customRorIcons.slpSize <= 0) {
+	if (CUSTOMROR::crInfo.customRorIcons.slpSize <= 0) {
 		return false; // Error case: missing SLP data
 	}
 
@@ -5640,7 +5638,7 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UN
 		return false;
 	}
 
-	AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *slpHeader = this->crInfo->customRorUnitShortcuts.slpFileHeader;
+	AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *slpHeader = CUSTOMROR::crInfo.customRorUnitShortcuts.slpFileHeader;
 	// slpFrameHeaderBase = first array element (in slp frame headers array)
 	AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *slpFrameHeaderBase = (AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *)
 		(slpHeader + 1); // Dirty, but works because structs have same size (done like this in ROR code)
@@ -5744,7 +5742,7 @@ void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACK
 	}
 
 	// Handle internal objects
-	this->crInfo->myGameObjects.RemoveAllInfoForUnit(killedUnit->unitInstanceId, killedUnit->positionX, killedUnit->positionY);
+	CUSTOMROR::crInfo.myGameObjects.RemoveAllInfoForUnit(killedUnit->unitInstanceId, killedUnit->positionX, killedUnit->positionY);
 }
 
 
@@ -5755,7 +5753,7 @@ void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACK
 bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
 	UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId, GAME_CURSOR &cursorToForce) {
 	cursorToForce = (GAME_CURSOR)-1; // Default
-	if (!this->crInfo->configInfo.useImprovedButtonBar) { // TODO: use a dedicated config
+	if (!CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) { // TODO: use a dedicated config
 		return false;
 	}
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !controlledPlayer || !controlledPlayer->IsCheckSumValid() || unitPlayerId < 0) {
@@ -5770,7 +5768,7 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 	bool actorIsVillager = false; // true if controlled player's main selected unit is a civilian (class 4)
 
 	if (unit->DerivesFromTrainable()) {
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = this->crInfo->GetMainSelectedUnit(controlledPlayer);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = CUSTOMROR::crInfo.GetMainSelectedUnit(controlledPlayer);
 		if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass() && mainSelectedUnit->DerivesFromTrainable()) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *selectedUnitDef = mainSelectedUnit->unitDefinition;
 			if (selectedUnitDef && selectedUnitDef->IsCheckSumValidForAUnitClass()) {
@@ -5822,7 +5820,7 @@ void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AO
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
 	assert(controlledPlayer && controlledPlayer->IsCheckSumValid());
 
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = this->crInfo->GetMainSelectedUnit(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = CUSTOMROR::crInfo.GetMainSelectedUnit(controlledPlayer);
 	bool actorIsMyUnit = false;
 	if (actorUnit) {
 		assert(actorUnit->IsCheckSumValidForAUnitClass());
@@ -5831,23 +5829,23 @@ void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AO
 	}
 	UnitCustomInfo *unitInfo = NULL;
 	if (actorUnit) {
-		unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+		unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
 	}
 
 	switch (settings->mouseActionType) {
 	case CST_MAT_CR_PROTECT_UNIT_OR_ZONE:
 		if (actorIsMyUnit && (actorUnit == mouseTargetUnit)) {
-			unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+			unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
 			if (unitInfo) {
 				unitInfo->ResetProtectInfo();
-				this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(actorUnit->unitInstanceId);
+				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(actorUnit->unitInstanceId);
 			}
 			CallWriteCenteredText("Removed protect information for current unit.");
 			break;
 		}
 		if (actorIsMyUnit && actorUnit && actorUnit->DerivesFromMovable()) {
 			if (!unitInfo) {
-				unitInfo = this->crInfo->myGameObjects.FindOrAddUnitCustomInfo(actorUnit->unitInstanceId);
+				unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(actorUnit->unitInstanceId);
 			}
 			if (unitInfo) {
 				unitInfo->ResetProtectInfo();
@@ -5890,11 +5888,11 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 			noNextActivity = false;
 		}
 	}
-	UnitCustomInfo *unitInfo = this->crInfo->myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 
 	// Auto-protect unit/zone (unit will go back to zone/unit to defend if its current activity is over).
 	if (noNextActivity && unitInfo && unitInfo->HasValidProtectInfo()
-		&& this->crInfo->configInfo.useImprovedButtonBar /*enableCallNearbyIdleMilitaryUnits*/) { // TODO: specific config
+		&& CUSTOMROR::crInfo.configInfo.useImprovedButtonBar /*enableCallNearbyIdleMilitaryUnits*/) { // TODO: specific config
 		float refX = unitInfo->protectPosX;
 		float refY = unitInfo->protectPosY;
 		AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unit->unitDefinition;
@@ -5919,7 +5917,7 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 			} else {
 				// Unit is specified but invalid (maybe it died): remove obsolete info.
 				unitInfo->ResetProtectInfo();
-				this->crInfo->myGameObjects.RemoveUnitCustomInfoIfEmpty(unitInfo->unitId);
+				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitInfo->unitId);
 			}
 		}
 		if ((refX >= 0) || (refY >= 0)) {
@@ -5927,7 +5925,7 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 				if (IsUnitIdle(unit) && unit->ptrActionInformation) {
 					if (!unit->ptrActionInformation->ptrActionLink || !unit->ptrActionInformation->ptrActionLink->actionStruct) {
 						// For MP compabitiliy; use a command
-						if (!this->crInfo->configInfo.forceMPCompatibility) {
+						if (!CUSTOMROR::crInfo.configInfo.forceMPCompatibility) {
 							AOE_STRUCTURES::STRUCT_ACTION_MOVE *move = (AOE_STRUCTURES::STRUCT_ACTION_MOVE *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ACTION_MOVE));
 							move->Constructor(unit, NULL, distance, NULL);
 							move->targetUnitPositionX = refX;
@@ -5966,7 +5964,7 @@ void CustomRORCommand::FixCityPlanFarmPlacement(AOE_STRUCTURES::STRUCT_UNIT_BASE
 	// Set some default values
 	existingBldInfluenceZone = (int)unitDef_base->lineOfSight; // Default (from ROR code: use existing bld LOS)
 	int difficultyLevel = settings->difficultyLevel;
-	bool useEnhancedFeature = this->crInfo->configInfo.cityPlanLikeValuesEnhancement;
+	bool useEnhancedFeature = CUSTOMROR::crInfo.configInfo.cityPlanLikeValuesEnhancement;
 	bool isRelevantDropSite = (unitDef_base->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_GRANARY) ||
 		(unitDef_base->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FORUM); // Note: forager's storage sites are defined in empires.dat (Drop site in AGE3) => granary (68) and TC (109)
 	
@@ -6036,7 +6034,7 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 	assert(TC_y >= 0);
 
 	// Stop here is feature is not enabled in configuration
-	if (!this->crInfo->configInfo.cityPlanLikeValuesEnhancement) { return; }
+	if (!CUSTOMROR::crInfo.configInfo.cityPlanLikeValuesEnhancement) { return; }
 
 	if (!this->IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
 		return;
@@ -6177,13 +6175,13 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 // Return true if OK, false if failed - Fails if another custom dialog (or quit game dialog) is already open
 // Pauses the game if running (only if a dialog is successfully opened)
 bool CustomRORCommand::OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize) {
-	if (this->crInfo->customYesNoDialogVar) { return false; } // Already an opened custom dialog
+	if (CUSTOMROR::crInfo.customYesNoDialogVar) { return false; } // Already an opened custom dialog
 
 	AOE_STRUCTURES::STRUCT_ANY_UI *customDialogPtr = AOE_GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
 	if (customDialogPtr != NULL) { return false; } // A CloseProgramDialog seems to be already open
 
 	SetGamePause(true);
-	this->crInfo->customYesNoDialogVar = (unsigned long int*) AOE_CreateDialogPopup(dialogText, hSize, vSize);
+	CUSTOMROR::crInfo.customYesNoDialogVar = (unsigned long int*) AOE_CreateDialogPopup(dialogText, hSize, vSize);
 
 	return true;
 }
@@ -6193,7 +6191,7 @@ bool CustomRORCommand::OpenCustomDialogMessage(const char *dialogText, long int 
 // Returns -1 if an error occurred, including "no custom dialog is opened".
 // Other results are AOE_CONST_INTERNAL::DIALOG_BUTTON_IDS => Yes/No/Cancel
 long int CustomRORCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG *ptrDialog, unsigned long int ptrSender) {
-	if (this->crInfo->customYesNoDialogVar == NULL) { return -1; } // No opened custom dialog
+	if (CUSTOMROR::crInfo.customYesNoDialogVar == NULL) { return -1; } // No opened custom dialog
 	long int returnValue = -1;
 	if (!ptrDialog) { return returnValue; }
 	if (ptrSender == (unsigned long) ptrDialog->btnYes) {
@@ -6210,7 +6208,7 @@ long int CustomRORCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_PO
 	AOE_RefreshScreen("Game Screen", 0);
 	assert(strcmp(ptrDialog->screenName, AOE_CONST_INTERNAL::customDialogScreenName) == 0);
 	AOE_CloseScreenAndDestroy(AOE_CONST_INTERNAL::customDialogScreenName);
-	this->crInfo->customYesNoDialogVar = NULL;
+	CUSTOMROR::crInfo.customYesNoDialogVar = NULL;
 
 	long int *Ihavenoideawhatthisis = (long int *)0x7C0338; // cf 0x481264
 	Ihavenoideawhatthisis = 0;
@@ -6333,7 +6331,7 @@ void CustomRORCommand::OnGameInitDisableResearchesEvent(AOE_STRUCTURES::STRUCT_P
 
 	// For current player, disable the units we have from trigger data.
 	std::vector<short int>::const_iterator it;
-	for (it = this->crInfo->unitDefToDisable[player->playerId].begin(); it != this->crInfo->unitDefToDisable[player->playerId].end(); it++) {
+	for (it = CUSTOMROR::crInfo.unitDefToDisable[player->playerId].begin(); it != CUSTOMROR::crInfo.unitDefToDisable[player->playerId].end(); it++) {
 		short int DAT_ID = *it;
 		if (DisableUnitForPlayer(player, DAT_ID)) {
 			// success
@@ -6344,7 +6342,7 @@ void CustomRORCommand::OnGameInitDisableResearchesEvent(AOE_STRUCTURES::STRUCT_P
 	}
 
 	// Disable researches from trigger data
-	for (it = this->crInfo->researchesToDisable[player->playerId].begin(); it != this->crInfo->researchesToDisable[player->playerId].end(); it++) {
+	for (it = CUSTOMROR::crInfo.researchesToDisable[player->playerId].begin(); it != CUSTOMROR::crInfo.researchesToDisable[player->playerId].end(); it++) {
 		short int researchId = *it;
 		AOE_enableResearch(player, researchId, false);
 	}
@@ -6364,7 +6362,7 @@ void CustomRORCommand::OnGameInitAfterApplyingTechTrees(long int playerId) {
 
 // Apply starting age to a player (only for scenarios). Player's specific starting age is read in STRUCT_SCENARIO_INFO
 void CustomRORCommand::ApplyScenarioSpecificPlayerStartingAge(long int playerId) {
-	if (!this->crInfo->hasRemovePlayerInitialAgeInScenarioInit) {
+	if (!CUSTOMROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit) {
 		return;
 	}
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -6419,7 +6417,7 @@ void CustomRORCommand::ManageTriggerDisableUnitsForExceptions() {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (player) {
 			std::vector<short int>::const_iterator it;
-			for (it = this->crInfo->unitDefToDisable[player->playerId].begin(); it != this->crInfo->unitDefToDisable[player->playerId].end(); it++) {
+			for (it = CUSTOMROR::crInfo.unitDefToDisable[player->playerId].begin(); it != CUSTOMROR::crInfo.unitDefToDisable[player->playerId].end(); it++) {
 				short int DAT_ID = *it;
 				if (
 					(DAT_ID == CST_UNITID_FARM) || // See also ManageDisableUnitsForFarms - it can be enabled during the game
@@ -6443,7 +6441,7 @@ void CustomRORCommand::ManageTriggerDisableUnitsForExceptions() {
 // Farm is enabled by market construction, which may occur both "ingame" or at game loading (if a market exists, or if starting at bronze).
 void CustomRORCommand::ManageDisableUnitsForFarms(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	std::vector<short int>::const_iterator it;
-	for (it = this->crInfo->unitDefToDisable[player->playerId].begin(); it != this->crInfo->unitDefToDisable[player->playerId].end(); it++) {
+	for (it = CUSTOMROR::crInfo.unitDefToDisable[player->playerId].begin(); it != CUSTOMROR::crInfo.unitDefToDisable[player->playerId].end(); it++) {
 		short int DAT_ID = *it;
 		if (DAT_ID == CST_UNITID_FARM) {
 			if ((DAT_ID < 0) || (DAT_ID >= player->structDefUnitArraySize)) { return; }
@@ -6455,14 +6453,14 @@ void CustomRORCommand::ManageDisableUnitsForFarms(AOE_STRUCTURES::STRUCT_PLAYER 
 }
 
 void CustomRORCommand::ReloadTriggersFromGameData(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scenarioInfo) {
-	if (this->crInfo->triggerSet) {
-		delete this->crInfo->triggerSet;
-		this->crInfo->triggerSet = NULL;
+	if (CUSTOMROR::crInfo.triggerSet) {
+		delete CUSTOMROR::crInfo.triggerSet;
+		CUSTOMROR::crInfo.triggerSet = NULL;
 	}
-	this->crInfo->triggerSet = new CR_TRIGGERS::crTriggerSet();
+	CUSTOMROR::crInfo.triggerSet = new CR_TRIGGERS::crTriggerSet();
 	if (!scenarioInfo || (!scenarioInfo->IsCheckSumValid())) { return; }
 
-	this->crInfo->triggerSet->ReadFromFileContent(GetTriggerDataPtr(scenarioInfo));
+	CUSTOMROR::crInfo.triggerSet->ReadFromFileContent(GetTriggerDataPtr(scenarioInfo));
 }
 
 void CustomRORCommand::ReloadTriggersFromGameData() {
@@ -6475,13 +6473,13 @@ void CustomRORCommand::ReloadTriggersFromGameData() {
 
 // Write trigger to game data, using customROR internal data.
 bool CustomRORCommand::WriteTriggersFromInternalToGameData(bool onlyEnabledTriggers) {
-	if (!this->crInfo->triggerSet) { return false; }
+	if (!CUSTOMROR::crInfo.triggerSet) { return false; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->scenarioInformation) { return false; }
 	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *sc_info = global->scenarioInformation; // Guaranteed non-NULL by previous "if"
 	assert(sc_info != NULL);
 	if (!sc_info) { return false; }
-	std::string tmpStr = this->crInfo->triggerSet->GetStringForScenarioInfo(onlyEnabledTriggers);
+	std::string tmpStr = CUSTOMROR::crInfo.triggerSet->GetStringForScenarioInfo(onlyEnabledTriggers);
 	char *trgData = GetTriggerDataPtr(sc_info);
 
 	// Free previous value, if any
@@ -6523,8 +6521,8 @@ bool CustomRORCommand::WriteTriggersInGameData(char *triggerText) {
 
 // Export CustomROR's internal data triggers to Trigger text format.
 std::string CustomRORCommand::GetTriggerTextFromInternalData() {
-	if (!this->crInfo->triggerSet) { return ""; }
-	return this->crInfo->triggerSet->GetStringForScenarioInfo(false);
+	if (!CUSTOMROR::crInfo.triggerSet) { return ""; }
+	return CUSTOMROR::crInfo.triggerSet->GetStringForScenarioInfo(false);
 }
 
 
@@ -6559,13 +6557,13 @@ void CustomRORCommand::ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES 
 		evtInfo.currentGameTime_s = global->currentGameTime / 1000;
 	}
 	// Loop on triggers and execute those that are ready
-	if (this->crInfo->triggerSet && (!this->crInfo->triggerSet->IsEmpty())) {
-		CR_TRIGGERS::crTrigger *currentTrigger = this->crInfo->triggerSet->IteratorFirst();
+	if (CUSTOMROR::crInfo.triggerSet && (!CUSTOMROR::crInfo.triggerSet->IsEmpty())) {
+		CR_TRIGGERS::crTrigger *currentTrigger = CUSTOMROR::crInfo.triggerSet->IteratorFirst();
 		while (currentTrigger) {
 			if (currentTrigger->CanExecuteNow(evt, evtInfo)) {
 				this->ExecuteTriggerAction(currentTrigger);
 			}
-			currentTrigger = this->crInfo->triggerSet->IteratorNext();
+			currentTrigger = CUSTOMROR::crInfo.triggerSet->IteratorNext();
 		}
 	}
 }
@@ -6687,9 +6685,9 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_DISABLE_TRIGGER) {
-		if (this->crInfo->triggerSet) {
+		if (CUSTOMROR::crInfo.triggerSet) {
 			char *targetTriggerName = trigger->GetParameterValue(CR_TRIGGERS::KW_TARGET_TRIGGER_NAME, "");
-			CR_TRIGGERS::crTrigger *otherTrigger = this->crInfo->triggerSet->GetTrigger(targetTriggerName);
+			CR_TRIGGERS::crTrigger *otherTrigger = CUSTOMROR::crInfo.triggerSet->GetTrigger(targetTriggerName);
 			if (otherTrigger) {
 				otherTrigger->enabled = false;
 			}
@@ -7044,7 +7042,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		}
 
 		// Update other triggers with new unitDefId
-		CR_TRIGGERS::crTrigger *currentTrg = this->crInfo->triggerSet->IteratorFirst();
+		CR_TRIGGERS::crTrigger *currentTrg = CUSTOMROR::crInfo.triggerSet->IteratorFirst();
 		while (currentTrg) {
 			// Search for enabled triggers for same player, that want to spawn a unit...
 			if (currentTrg->enabled && (currentTrg->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_ADD_UNIT_INSTANCE)) {
@@ -7055,7 +7053,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 					currentTrg->SetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_DEF_ID, newUnitDefId);
 				}
 			}
-			currentTrg = this->crInfo->triggerSet->IteratorNext();
+			currentTrg = CUSTOMROR::crInfo.triggerSet->IteratorNext();
 		}
 
 		trigger->enabled = false; // Creating unit def is not repeatable. Force disable.
@@ -7162,8 +7160,8 @@ void CustomRORCommand::ExecuteTriggerAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 
 	// Common for all triggers types: manage trigger to run "before".
-	if (!trigger->triggerNameToRunBefore.empty() && this->crInfo->triggerSet) {
-		CR_TRIGGERS::crTrigger *trBefore = this->crInfo->triggerSet->GetTrigger(trigger->triggerNameToRunBefore);
+	if (!trigger->triggerNameToRunBefore.empty() && CUSTOMROR::crInfo.triggerSet) {
+		CR_TRIGGERS::crTrigger *trBefore = CUSTOMROR::crInfo.triggerSet->GetTrigger(trigger->triggerNameToRunBefore);
 		// Do not allow calling repeatable triggers: those triggers may remain enabled (because they are repeatable), which may lead to infinite dependencies.
 		if (trBefore && (trBefore->enabled) && (!trBefore->IsRepeatable())) {
 			this->ExecuteTriggerAction(trBefore);
@@ -7174,8 +7172,8 @@ void CustomRORCommand::ExecuteTriggerAction(CR_TRIGGERS::crTrigger *trigger) {
 	this->Trigger_JustDoAction(trigger);
 
 	// Common for all triggers types: manage trigger to run "after".
-	if (!trigger->triggerNameToRunAfter.empty() && this->crInfo->triggerSet) {
-		CR_TRIGGERS::crTrigger *trAfter = this->crInfo->triggerSet->GetTrigger(trigger->triggerNameToRunAfter);
+	if (!trigger->triggerNameToRunAfter.empty() && CUSTOMROR::crInfo.triggerSet) {
+		CR_TRIGGERS::crTrigger *trAfter = CUSTOMROR::crInfo.triggerSet->GetTrigger(trigger->triggerNameToRunAfter);
 		// Do not allow calling repeatable triggers: those triggers may remain enabled (because they are repeatable), which may lead to infinite dependencies.
 		if (trAfter && (trAfter->enabled) && (!trAfter->IsRepeatable())) {
 			ExecuteTriggerAction(trAfter);
