@@ -33,7 +33,7 @@ void RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *game
 
 
 
-// Called at the end of showUnitCommandButtons
+// Called at the end of showUnitCommandButtons. Dispatches to specific command buttons handler (living unit, building.. or none !)
 void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
 	assert(gameMainUI && gameMainUI->IsCheckSumValid());
 	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
@@ -44,8 +44,8 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 	}
 
 	// Collect info
-	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
-	if (!player || !player->IsCheckSumValid()) {
+	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
+	if (!controlledPlayer || !controlledPlayer->IsCheckSumValid()) {
 		return;
 	}
 
@@ -53,48 +53,65 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
 		return;
 	}
-	if (player != unit->ptrStructPlayer) { return; } // unit does not belong to "me"
+	if (controlledPlayer != unit->ptrStructPlayer) { return; } // unit does not belong to "me"
 	if (unit->unitStatus != 2) {
 		return;
 	}
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
-	bool isBuilding = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING);
-	bool isLiving = (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_TRAINABLE);
+	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return; }
 	if (unitDef->commandAttribute == COMMAND_ATTRIBUTES::CST_CA_NONE) { return; } // Corresponds to unselectable, like eye candy
 
+	// For living units (trainable)
+	if (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_TRAINABLE) {
+		AddButtonsForLivingUnit(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)unit);
+		return;
+	}
+	// Buildings
+	if (unitDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) {
+		AddButtonsForBuildingUnit(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)unit);
+		return;
+	}
+}
+
+
+// Add relevant buttons in command bar for "trainable" unit (type=70). Excludes all other unit types, even child classes (buildings)
+void AddButtonsForLivingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit) {
+	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) { return; }
+	if (!unit || !unit->IsCheckSumValid()) { return; } // MUST be trainable
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	if (!settings || !settings->IsCheckSumValid()) {
-		return;
-	}
+	if (!settings || !settings->IsCheckSumValid()) { return; }
 
-	// Current limitation
-	if (!isLiving && !isBuilding) {
-		return;
-	}
-	// For living units
-	if (isLiving) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDef;
-		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_NORMAL) {
-			if ((unitDefLiving->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDefLiving->blastRadius > 0)) {
-				UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
-				// TODO: localization
-				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically",
-					&CUSTOMROR::crInfo.customRorIcons, true);
-				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false, "Click to prevent unit from attacking buildings automatically",
-					&CUSTOMROR::crInfo.customRorIcons, false);
-				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, "Click to prevent unit from attacking other units automatically",
-					&CUSTOMROR::crInfo.customRorIcons, false);
-				AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false, "Click to restore normal auto-attack behaviour",
-					&CUSTOMROR::crInfo.customRorIcons, false);
-				const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
-				RefreshCustomAutoAttackButtons(gameMainUI, aap);
-			}
-			AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, "Click to select a unit or a position to defend",
-				NULL /*CUSTOMROR::crInfo.customRorIcons*/, false);
+	AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
+	assert(unitDef && unitDef->IsCheckSumValid()); // Trainable !
+
+	if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_NORMAL) {
+		if ((unitDef->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDef->blastRadius > 0)) {
+			UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+			// TODO: localization
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically",
+				&CUSTOMROR::crInfo.customRorIcons, true);
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false, "Click to prevent unit from attacking buildings automatically",
+				&CUSTOMROR::crInfo.customRorIcons, false);
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, "Click to prevent unit from attacking other units automatically",
+				&CUSTOMROR::crInfo.customRorIcons, false);
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false, "Click to restore normal auto-attack behaviour",
+				&CUSTOMROR::crInfo.customRorIcons, false);
+			const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
+			RefreshCustomAutoAttackButtons(gameMainUI, aap);
 		}
-		return;
+		AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, "Click to select a unit or a position to defend",
+			NULL /*CUSTOMROR::crInfo.customRorIcons*/, false);
 	}
+}
+
+
+// Add relevant buttons in command bar for "building" unit (type=80). Excludes all other unit types.
+void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit) {
+	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
+	if (!controlledPlayer || !controlledPlayer->IsCheckSumValid()) { return; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)unit->unitDefinition;
+	if (!unitDef || !unitDef->IsCheckSumValid()) { return; } // MUST be building type
 
 	bool multiQueueing = CUSTOMROR::crInfo.configInfo.allowMultiQueueing; // If true, a building can have >1 unit "def" in queue.
 	bool buttonIsVisible[12]; // Is button visible after standard buttons display.
@@ -121,7 +138,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 	long int currentActionButtonIndex = -1;
 	short int currentActionLangNameId = -1;
 	char *currentActionName = NULL; // useful when currentActionLangNameId is invalid.
-	std::list<long int> activableUnitDefIDs = GetActivableUnitDefIDs(player); // A list of unitDef IDs that can be enabled thanks to (available) researches.
+	std::list<long int> activableUnitDefIDs = GetActivableUnitDefIDs(controlledPlayer); // A list of unitDef IDs that can be enabled thanks to (available) researches.
 	// To support >1 page
 	long int minButtonId = gameMainUI->panelButtonIdPageOffset;
 	long int minButtonIdNextPage = gameMainUI->panelButtonIdPageOffset + 10 + 1; // 10=pageSize, +1 for next button after "this" last !
@@ -138,7 +155,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 		if (unitAsBuilding->ptrHumanTrainQueueInformation) {
 			queueNumberToDisplay = unitAsBuilding->ptrHumanTrainQueueInformation->unitCount;
 			if (queueNumberToDisplay > 0) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *queuedUnitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *) player->GetUnitDefBase(unitAsBuilding->ptrHumanTrainQueueInformation->DATID);
+				AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *queuedUnitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *) controlledPlayer->GetUnitDefBase(unitAsBuilding->ptrHumanTrainQueueInformation->DATID);
 				if (queuedUnitDefBase && queuedUnitDefBase->IsCheckSumValidForAUnitClass()) {
 					buttonWithQueueNumber = GetButtonInternalIndexFromDatBtnId(queuedUnitDefBase->trainButton);
 				}
@@ -175,7 +192,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 			// This handles ALL MakeTech actions (both AI or human triggered)
 			currentActionDATID = currentActionAsMakeObject->targetUnitDAT_ID;
 			currentActionIsResearch = true;
-			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(player, currentActionAsMakeObject->targetUnitDAT_ID);
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(controlledPlayer, currentActionAsMakeObject->targetUnitDAT_ID);
 			if (resDef) {
 				currentActionLangNameId = resDef->languageDLLName;
 				currentActionName = resDef->researchName;
@@ -190,7 +207,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 	}
 	// Get names for current action unit (when training a unit).
 	if ((currentActionDATID != -1) && (!currentActionIsResearch)) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *curActionUnitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(player, (short int)currentActionDATID);
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *curActionUnitDefBase = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)GetUnitDefStruct(controlledPlayer, (short int)currentActionDATID);
 		if (curActionUnitDefBase && curActionUnitDefBase->IsCheckSumValidForAUnitClass()) {
 			if (currentActionName == NULL) {
 				currentActionName = curActionUnitDefBase->ptrUnitName;
@@ -208,7 +225,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID curBtnCmdId = (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)gameMainUI->unitCommandButtons[currentBtnId]->commandIDs[0];
 		if (curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *tmpUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)
-				GetUnitDefStruct(player, (short int)gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0]);
+				GetUnitDefStruct(controlledPlayer, (short int)gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0]);
 
 			if (tmpUnitDef && tmpUnitDef->IsCheckSumValidForAUnitClass() && tmpUnitDef->IsTypeValid() &&
 				((tmpUnitDef->trainButton >= minButtonIdNextPage) || (tmpUnitDef->trainButton < minButtonId))) {
@@ -216,7 +233,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 			}
 		}
 		if (curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) {
-			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *tmpResearchDef = GetResearchDef(player,
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *tmpResearchDef = GetResearchDef(controlledPlayer,
 				(short int)gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0]);
 			if (tmpResearchDef && ((tmpResearchDef->buttonId >= minButtonIdNextPage) || (tmpResearchDef->buttonId < minButtonId))) {
 				currentButtonDoesNotBelongToThisPage[currentBtnId] = true;
@@ -228,7 +245,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 	// Add custom buttons : not-yet available units/techs
 
 	// RESEARCHES
-	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *playerResInfo = player->ptrResearchesStruct;
+	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *playerResInfo = controlledPlayer->ptrResearchesStruct;
 	AOE_STRUCTURES::STRUCT_RESEARCH_DEF_INFO *resDefInfo = NULL;
 	if (playerResInfo) {
 		resDefInfo = playerResInfo->ptrResearchDefInfo;
@@ -285,10 +302,10 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 	}
 
 	// TRAIN UNITS
-	if (player->ptrStructDefUnitTable) {
-		for (int loopUnitDefId = 0; loopUnitDefId < player->structDefUnitArraySize; loopUnitDefId++) {
+	if (controlledPlayer->ptrStructDefUnitTable) {
+		for (int loopUnitDefId = 0; loopUnitDefId < controlledPlayer->structDefUnitArraySize; loopUnitDefId++) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *loopUnitDef =
-				(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)player->ptrStructDefUnitTable[loopUnitDefId];
+				(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)controlledPlayer->ptrStructDefUnitTable[loopUnitDefId];
 			if (loopUnitDef && loopUnitDef->IsCheckSumValidForAUnitClass() && loopUnitDef->IsTypeValid()) { // Only for living units
 				int rawButtonId = loopUnitDef->trainButton;
 				if ((loopUnitDef->trainLocation == unitDef->DAT_ID1) && (rawButtonId > maxFoundButtonId)) {
@@ -318,7 +335,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 					if (costIsBetter && !loopUnitDef->availableForPlayer) { preferThisUnit = true; }
 					if (preferThisUnit && (!bestElemIsResearch) && (bestElemDATID[buttonIndex] >= 0)) { // only if we already selected a valid DATID (unit, ont research)
 						AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *previousUnit =
-							(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)player->ptrStructDefUnitTable[bestElemDATID[buttonIndex]];
+							(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)controlledPlayer->ptrStructDefUnitTable[bestElemDATID[buttonIndex]];
 						// Cancel "prefer" if new one is stronger (stronger = less priority, because further in tech tree)
 						if ((previousUnit->totalHitPoints < loopUnitDef->totalHitPoints) || // Use only attributes that ALWAYS increase ! Not speed (risky)
 							(previousUnit->displayedAttack < loopUnitDef->displayedAttack)
@@ -352,7 +369,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 		if (currentButtonDoesNotBelongToThisPage[currentBtnId]) {
 			bool forceShowAnyway = false;
 			// There is only 1 exception : currently-being trained unit should always be displayed
-			if (isBuilding && (currentActionDATID > -1)) {
+			if (currentActionDATID > -1) {
 				AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID curBtnCmdId = (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)gameMainUI->unitCommandButtons[currentBtnId]->commandIDs[0];
 				long int btnDATID = gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0];
 				if ((curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) &&
@@ -440,7 +457,7 @@ void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMai
 	// Note: for human player-triggered "train unit", a STOP button is already visible (command=STOP), leave it unchanged.
 	// WARNING: clicking on STOP for AI-triggered "train unit" does not update strategy and units will never be trained again ! Needs a fix !
 	const int buttonIdForStop = 6;
-	if (isBuilding && (currentAction != NULL) && (currentAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_MAKE_OBJECT) &&
+	if ((currentAction != NULL) && (currentAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_MAKE_OBJECT) &&
 		(gameMainUI->unitCommandButtons[buttonIdForStop]->commandIDs[0] != (long int)INGAME_UI_COMMAND_ID::CST_IUC_STOP)) {
 		GetLanguageDllText(LANG_ID_STOP_CURRENT_ACTION, nameBuffer, sizeof(nameBuffer), "Stop current action");
 		AddInGameCommandButton(buttonIdForStop, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, nameBuffer, NULL, true);
