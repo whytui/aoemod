@@ -1,11 +1,6 @@
 #include "../include/CustomROR.h"
 
 
-// Static objects : visible at global level.
-CustomRORInfo CustomRORInstance::crInfo;
-CustomRORMainInterface CustomRORInstance::crMainInterface;
-//CustomRORCommand CustomRORInstance::crCommand;
-
 
 //#pragma warning(push)
 //#pragma warning(disable: 4731) // Allow modifying EBP in assembler code... Required for compliance with some AOE methods. Be careful !
@@ -390,15 +385,15 @@ void CustomRORInstance::TemporaryEntryPoints(REG_BACKUP *REG_values) {
 // ROR UI has not been initialized yet, DRS files are not loaded, etc.
 void CustomRORInstance::OneShotInit() {
 	traceMessageHandler.WriteMessageNoNotification(localizationHandler.GetTranslation(CRLANG_ID_DEBUG_INIT, "Debug message system initialized."));
-	this->crInfo.configInfo.ReadXMLConfigFile("CustomROR\\customROR.xml");
-	this->crInfo.configInfo.ReadCivXMLConfigFile("CustomROR\\customROR_civs.xml");
-	this->crMainInterface.crCommand = &CUSTOMROR::crCommand;
+	CUSTOMROR::crInfo.configInfo.ReadXMLConfigFile("CustomROR\\customROR.xml");
+	CUSTOMROR::crInfo.configInfo.ReadCivXMLConfigFile("CustomROR\\customROR_civs.xml");
+	CUSTOMROR::crMainInterface.crCommand = &CUSTOMROR::crCommand;
 	// Do not use crCommand before this line !
 
 	// Note: CheckEnabledFeatures writes to log file
 	if (!CUSTOMROR::crCommand.CheckEnabledFeatures()) {
 		const char *msg = localizationHandler.GetTranslation(CRLANG_ID_WARN_MISSING_FEATURE, "WARNING: Some features are not enabled in game executable. See CustomROR\\CustomROR.log file.");
-		if (this->crInfo.configInfo.showAlertOnMissingFeature) {
+		if (CUSTOMROR::crInfo.configInfo.showAlertOnMissingFeature) {
 			MessageBoxA(0, msg, "ROR API", MB_ICONWARNING);
 		}
 		traceMessageHandler.WriteMessageNoNotification(msg);
@@ -414,7 +409,7 @@ void CustomRORInstance::OneShotInit() {
 void CustomRORInstance::WMCloseMessageEntryPoint(REG_BACKUP *REG_values) {
 	bool preventGameFromExiting = false;
 	// Do custom treatments NOW or never ;)
-	preventGameFromExiting = preventGameFromExiting || this->crMainInterface.FixGamePopupIssuesBeforeGameClose();
+	preventGameFromExiting = preventGameFromExiting || CUSTOMROR::crMainInterface.FixGamePopupIssuesBeforeGameClose();
 
 	if (preventGameFromExiting) {
 		REG_values->EAX_val = 0;
@@ -537,7 +532,7 @@ void CustomRORInstance::CheckPopulationCostWithLogistics(REG_BACKUP *REG_values)
 	}
 
 	// Custom treatments
-	if (!this->crInfo.configInfo.fixLogisticsNoHouseBug) { return; }
+	if (!CUSTOMROR::crInfo.configInfo.fixLogisticsNoHouseBug) { return; }
 
 	bool trainUnitWasAskedByHuman = false;
 	// A bit dirty but there is no better way to do this. It seems "human-asked" train unit actions always come from the same method, let's take advantage of this:
@@ -587,7 +582,7 @@ void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = actor->ptrStructPlayer;
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = target->unitDefinition;
 	// Compute resistance
-	float resistance = this->crInfo.GetConversionResistance(targetPlayer->civilizationId, targetUnitDef->unitAIType);
+	float resistance = CUSTOMROR::crInfo.GetConversionResistance(targetPlayer->civilizationId, targetUnitDef->unitAIType);
 
 	// Save computed resistance to dedicated stack record
 	_asm {
@@ -598,8 +593,8 @@ void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 
 	// For monitoring
-	this->crInfo.passiveConversionAttemptsCount[targetPlayer->playerId]++;
-	this->crInfo.activeConversionAttemptsCount[actorPlayer->playerId]++;
+	CUSTOMROR::crInfo.passiveConversionAttemptsCount[targetPlayer->playerId]++;
+	CUSTOMROR::crInfo.activeConversionAttemptsCount[actorPlayer->playerId]++;
 }
 
 
@@ -631,8 +626,8 @@ void CustomRORInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = targetUnit->ptrStructPlayer; // The victim (if unit has been converted)
 	assert(targetPlayer != NULL);
 	assert(targetPlayer->IsCheckSumValid());
-	this->crInfo.passiveConversionSuccessfulAttemptsCount[targetPlayer->playerId]++;
-	this->crInfo.activeConversionSuccessfulAttemptsCount[actorPlayer->playerId]++;
+	CUSTOMROR::crInfo.passiveConversionSuccessfulAttemptsCount[targetPlayer->playerId]++;
+	CUSTOMROR::crInfo.activeConversionSuccessfulAttemptsCount[actorPlayer->playerId]++;
 
 }
 
@@ -679,13 +674,13 @@ void CustomRORInstance::MapGen_elevationProportionCalc(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 	// Custom treatments
-	if (!this->crInfo.configInfo.useMapGenerationCustomElevationCalculation) { return; }
+	if (!CUSTOMROR::crInfo.configInfo.useMapGenerationCustomElevationCalculation) { return; }
 	long int *myECX = (long int *)REG_values->EBX_val;
 	long int mapType = myECX[0x34 / 4];
 	assert(mapType < AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT);
 	assert(mapType >= 0);
 	if ((mapType < 0) || (mapType >= AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT)) { return; }
-	float tmpValue = ((float)elevationBaseCalcValue) * this->crInfo.configInfo.mapGenerationCustomElevationFactor[mapType];
+	float tmpValue = ((float)elevationBaseCalcValue) * CUSTOMROR::crInfo.configInfo.mapGenerationCustomElevationFactor[mapType];
 	if (mapType == AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_HILLS) {
 		tmpValue = tmpValue / 5; // Because of hardcoded *5 in game code that will be applied afterwards.
 	}
@@ -1029,13 +1024,13 @@ void CustomRORInstance::ManageCityPlanHouseDistanceFromBuildings(REG_BACKUP *REG
 	ror_api_assert(REG_values, defOtherBuilding != NULL);
 	// Get relevant distance value according to "reference building" type (DAT_ID)
 	float distanceValue = 3; // From original code
-	/*float distanceValue = this->crInfo.configInfo.cityPlanHouseDistanceFromOtherBld;
+	/*float distanceValue = CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromOtherBld;
 	if (defOtherBuilding->DAT_ID1 == CST_UNITID_FORUM) {
-		distanceValue = this->crInfo.configInfo.cityPlanHouseDistanceFromTownCenter;
+		distanceValue = CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromTownCenter;
 	}
 	if ((defOtherBuilding->DAT_ID1 == CST_UNITID_GRANARY) ||
 		(defOtherBuilding->DAT_ID1 == CST_UNITID_STORAGE_PIT)) {
-		distanceValue = this->crInfo.configInfo.cityPlanHouseDistanceFromStorageBld;
+		distanceValue = CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromStorageBld;
 	}*/
 
 	// Do like original code but with a custom value (distanceValue)
@@ -1158,7 +1153,7 @@ void CustomRORInstance::ManageCityMapLikeValueAroundBushes(REG_BACKUP *REG_value
 	}
 
 	// Set the "like value". A hardcoded value has been push'ed, now update with the real value we want to use
-	*likeValueToAdd = this->crInfo.configInfo.cityPlanBerryBushWeightForGranary;
+	*likeValueToAdd = CUSTOMROR::crInfo.configInfo.cityPlanBerryBushWeightForGranary;
 }
 
 
@@ -1331,7 +1326,7 @@ void CustomRORInstance::GlobalOnButtonClick(REG_BACKUP *REG_values) {
 	}
 
 	// Custom treatments
-	if (this->crMainInterface.Global_OnButtonClick(objAddr)) {
+	if (CUSTOMROR::crMainInterface.Global_OnButtonClick(objAddr)) {
 		ChangeReturnAddress(REG_values, 0x460568);
 	}
 }
@@ -1372,7 +1367,7 @@ void CustomRORInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
 	bool altIsOn = (GetKeyState(VK_MENU) < 0); // is ALT key pressed ?
 
 	// Call our dedicated event manager.
-	if (this->crMainInterface.GameAndEditor_OnKeyPress(pressedKey, ctrlIsON, shiftIsON, altIsOn)) {
+	if (CUSTOMROR::crMainInterface.GameAndEditor_OnKeyPress(pressedKey, ctrlIsON, shiftIsON, altIsOn)) {
 		REG_values->EAX_val = 0;
 		ChangeReturnAddress(REG_values, 0x41A7C5); // Will NEG EAX (still 0) and then ignore the key press event
 		return;
@@ -1400,7 +1395,7 @@ void CustomRORInstance::ManageOnDialogUserEvent(REG_BACKUP *REG_values) {
 	long int evtStatus = REG_values->EDX_val; // 1="real" button click
 
 	// Now do custom treatments
-	if ((unsigned long int *) ptrDialog == this->crInfo.customYesNoDialogVar) {
+	if ((unsigned long int *) ptrDialog == CUSTOMROR::crInfo.customYesNoDialogVar) {
 		ChangeReturnAddress(REG_values, 0x43498C); // Disable ROR's treatments for this call to dialog.OnUserEvent(...)
 		REG_values->EAX_val = 1;
 		if (evtStatus == 1) { // button has actually been clicked
@@ -1490,7 +1485,7 @@ void CustomRORInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 
 	long int mousePosX = *(long int *)(myESP + 0x34);
 	long int mousePosY = *(long int *)(myESP + 0x38);
-	if (this->crMainInterface.ApplyRightClickReleaseOnSelectedUnits(UIGameMain, controlledPlayer, mousePosX, mousePosY)) {
+	if (CUSTOMROR::crMainInterface.ApplyRightClickReleaseOnSelectedUnits(UIGameMain, controlledPlayer, mousePosX, mousePosY)) {
 		REG_values->EAX_val = CST_OnGameRightClickUpEvent_HANDLE_CLICK; // Continue (no real jump)
 		short int *customLocalVar = (short int *)(REG_values->ESP_val + 0x12); // This local var is not used anymore in original code: we can use it for ourselves. See OnGameRightClickUpRedCrossDisplay.
 		*customLocalVar = 1;
@@ -1533,7 +1528,7 @@ void CustomRORInstance::ManageChangeGameSpeed(REG_BACKUP *REG_values) {
 	
 
 	// if custom game speeds are not enabled, use standard calculation
-	if (!this->crInfo.configInfo.useImprovedGameSpeeds) {
+	if (!CUSTOMROR::crInfo.configInfo.useImprovedGameSpeeds) {
 		// Reimplement standard algorithm (use only 1.0, 1.5, 2.0 hardcoded values)
 		if (*bool_increaseSpeed) {
 			*gameSpeed = *gameSpeed + 0.5f;
@@ -1547,9 +1542,9 @@ void CustomRORInstance::ManageChangeGameSpeed(REG_BACKUP *REG_values) {
 
 	// Calculate new speed
 	if (*bool_increaseSpeed) {
-		*gameSpeed = (*gameSpeed) * this->crInfo.configInfo.improvedGameSpeedFactor;
+		*gameSpeed = (*gameSpeed) * CUSTOMROR::crInfo.configInfo.improvedGameSpeedFactor;
 	} else {
-		*gameSpeed = (*gameSpeed) / this->crInfo.configInfo.improvedGameSpeedFactor;
+		*gameSpeed = (*gameSpeed) / CUSTOMROR::crInfo.configInfo.improvedGameSpeedFactor;
 	}
 	// Fix value when ~1 (fix rounding issues)
 	if (abs(*gameSpeed - 1) <= 0.1) { *gameSpeed = 1; }
@@ -1729,12 +1724,12 @@ void CustomRORInstance::HumanSpecific_onCapturableUnitSeen(REG_BACKUP *REG_value
 
 
 void CustomRORInstance::ManageRelicsCount(REG_BACKUP *REG_values) {
-	REG_values->EAX_val = this->crInfo.configInfo.randomMapRelicsCount;
+	REG_values->EAX_val = CUSTOMROR::crInfo.configInfo.randomMapRelicsCount;
 }
 
 
 void CustomRORInstance::ManageRuinsCount(REG_BACKUP *REG_values) {
-	REG_values->EAX_val = this->crInfo.configInfo.randomMapRuinsCount;
+	REG_values->EAX_val = CUSTOMROR::crInfo.configInfo.randomMapRuinsCount;
 }
 
 
@@ -1743,7 +1738,7 @@ void CustomRORInstance::ManageCivIdControlAfterGameSettingsSelection(REG_BACKUP 
 		return;
 	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	if ((REG_values->EAX_val < 0) || (REG_values->EAX_val > this->crInfo.configInfo.civCount) ) {
+	if ((REG_values->EAX_val < 0) || (REG_values->EAX_val > CUSTOMROR::crInfo.configInfo.civCount) ) {
 		// Bad civilization, jump to the code that randomly chooses one (normal behaviour with "random" option)
 		ChangeReturnAddress(REG_values, 0x00503423);
 	} else {
@@ -1814,11 +1809,11 @@ void CustomRORInstance::ManageGetPlayerNameDLLStringIdOffset2(REG_BACKUP *REG_va
 	// Custom civ: we don't have names for them in language(x).dll
 
 	// Try to use player names provided in configuration file.
-	CivilizationInfo *c = this->crInfo.configInfo.GetCivInfo(civId);
+	CivilizationInfo *c = CUSTOMROR::crInfo.configInfo.GetCivInfo(civId);
 	if (c) {
 		if (playerId > 8) { playerId = 8; } // Would be nonsense but this will avoid writing out of nameIndexIsUsedByPlayer bounds
 		if (playerId < 0) { playerId = 0; } // Same thing
-		std::string s = c->ChooseRandomPlayerName(this->crInfo.nameIndexIsUsedByPlayer[civId], playerId);
+		std::string s = c->ChooseRandomPlayerName(CUSTOMROR::crInfo.nameIndexIsUsedByPlayer[civId], playerId);
 		if (!s.empty()) {
 			char **buffer = (char **)(myESP + 4); // arg2 that was pushed
 			long int *bufferSize = (long int *)(myESP + 8); // arg3 that was pushed
@@ -1887,11 +1882,11 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	// Do we already have a global struct ? If Yes, check civ number in empires.dat (if not matching our config, it may crash)
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	if (globalStruct != NULL) {
-		if (globalStruct->civCount < this->crInfo.configInfo.civCount) {
+		if (globalStruct->civCount < CUSTOMROR::crInfo.configInfo.civCount) {
 			// This situation is quite bad. empires.dat contains less civs than XML config.
 			// We can only detect this when global struct already exists.
 			// On first time we run a game, settings are displayed BEFORE the global struct is created (and before empires.dat is loaded)
-			this->crInfo.configInfo.civCount = globalStruct->civCount;
+			CUSTOMROR::crInfo.configInfo.civCount = globalStruct->civCount;
 			const char *msg = localizationHandler.GetTranslation(CRLANG_ID_MISSING_CIVS_IN_EMPIRES_DAT, "ERROR: there are more civs in customROR_civs.xml than in empires.dat. This may cause game crashes !");
 			traceMessageHandler.WriteMessage(msg);
 			FILE *fileLog = NULL;
@@ -1906,8 +1901,8 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	}
 
 	// Manage custom civs
-	for (int civid = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civid <= this->crInfo.configInfo.civCount; civid++) {
-		CivilizationInfo *civInfo = this->crInfo.configInfo.GetCivInfo(civid);
+	for (int civid = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civid <= CUSTOMROR::crInfo.configInfo.civCount; civid++) {
+		CivilizationInfo *civInfo = CUSTOMROR::crInfo.configInfo.GetCivInfo(civid);
 		if (civInfo) {
 			AOE_AddEntryInCombo(ptrCombo, civid, civInfo->GetCivName().c_str());
 		} else {
@@ -1917,7 +1912,7 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	
 
 	// Add random entry
-	AOE_AddEntryInComboUsingDLLID(ptrCombo, this->crInfo.configInfo.civCount + 1, 0x280A);
+	AOE_AddEntryInComboUsingDLLID(ptrCombo, CUSTOMROR::crInfo.configInfo.civCount + 1, 0x280A);
 }
 
 
@@ -1945,8 +1940,8 @@ void CustomRORInstance::ManageCivsInEditorCombo(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 	// Manage custom civs
-	for (int civId = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civId <= this->crInfo.configInfo.civCount; civId++) {
-		CivilizationInfo *civInfo = this->crInfo.configInfo.GetCivInfo(civId);
+	for (int civId = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civId <= CUSTOMROR::crInfo.configInfo.civCount; civId++) {
+		CivilizationInfo *civInfo = CUSTOMROR::crInfo.configInfo.GetCivInfo(civId);
 		if (civInfo) {
 			AOE_AddEntryInCombo(ptrCombo, 0, civInfo->GetCivName().c_str());
 		} else {
@@ -1964,8 +1959,8 @@ void CustomRORInstance::GetInGameCustomCivName(REG_BACKUP *REG_values) {
 	long int bufferSize = REG_values->EDI_val;
 	char *buffer = (char *)REG_values->ESI_val;
 
-	CivilizationInfo *civInfo = this->crInfo.configInfo.GetCivInfo(civId);
-	if ((civId > this->crInfo.configInfo.civCount) || (civId < 1) || (!civInfo)) {
+	CivilizationInfo *civInfo = CUSTOMROR::crInfo.configInfo.GetCivInfo(civId);
+	if ((civId > CUSTOMROR::crInfo.configInfo.civCount) || (civId < 1) || (!civInfo)) {
 		// Unknown civ id (or not defined in customROR config). Use original (overwritten code)
 		// Note: civ name is NOT displayed when controlling player 0 (gaia)
 		long int myEAX = REG_values->EAX_val;
@@ -1993,7 +1988,7 @@ void CustomRORInstance::CheckPlayerCreationAtGameStartup(REG_BACKUP *REG_values)
 	unsigned long int myEBX = REG_values->EBX_val;
 	unsigned long int myEDX = REG_values->EDX_val;
 	unsigned char civId = *(unsigned char*)(myESI + myEBX + 0x251);
-	if (civId > this->crInfo.configInfo.civCount) { civId = 1; } // Force value to avoid game crash
+	if (civId > CUSTOMROR::crInfo.configInfo.civCount) { civId = 1; } // Force value to avoid game crash
 	myEDX = myEDX & 0xFFFFFF00; // Remove "DL" part (low byte)
 	myEDX = myEDX | civId; // Replace with civId
 	REG_values->EDX_val = myEDX;
@@ -2227,8 +2222,8 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	REG_values->ECX_val = myECX;
 	REG_values->EDX_val = myEDX;
 
-	if (++this->crInfo.gameTimerSlowDownCounter > this->crInfo.configInfo.gameTimerSlowDownFactor) {
-		this->crInfo.gameTimerSlowDownCounter = 0;
+	if (++CUSTOMROR::crInfo.gameTimerSlowDownCounter > CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor) {
+		CUSTOMROR::crInfo.gameTimerSlowDownCounter = 0;
 	}
 	else {
 		ChangeReturnAddress(REG_values, 0x51D940);
@@ -2240,15 +2235,15 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	assert(global != NULL);
 	if (!global) { return; }
 	long int currentGameTime = global->currentGameTime / 1000;
-	if ((this->crInfo.configInfo.dislikeComputeInterval > 0) &&
-		(currentGameTime >= (this->crInfo.LastDislikeValuesComputationTime_second + this->crInfo.configInfo.dislikeComputeInterval))) {
-		this->crInfo.LastDislikeValuesComputationTime_second = currentGameTime;
+	if ((CUSTOMROR::crInfo.configInfo.dislikeComputeInterval > 0) &&
+		(currentGameTime >= (CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second + CUSTOMROR::crInfo.configInfo.dislikeComputeInterval))) {
+		CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second = currentGameTime;
 		CUSTOMROR::crCommand.ComputeDislikeValues();
 	}
 
 	// Manage triggers
-	if (this->crInfo.triggersLastCheckTime_s + 1 <= currentGameTime) {
-		this->crInfo.triggersLastCheckTime_s = currentGameTime;
+	if (CUSTOMROR::crInfo.triggersLastCheckTime_s + 1 <= currentGameTime) {
+		CUSTOMROR::crInfo.triggersLastCheckTime_s = currentGameTime;
 
 		// Timer trigger
 		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
@@ -2279,17 +2274,17 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	}
 
 	// Other customROR "timer" treatments: do them only once every second maximum (for performance)
-	if (this->crInfo.lastCustomRORTimeExecution_gameTime_s + 1 <= currentGameTime) {
-		this->crInfo.lastCustomRORTimeExecution_gameTime_s = currentGameTime;
+	if (CUSTOMROR::crInfo.lastCustomRORTimeExecution_gameTime_s + 1 <= currentGameTime) {
+		CUSTOMROR::crInfo.lastCustomRORTimeExecution_gameTime_s = currentGameTime;
 	} else {
 		// No enough time has run since last execution.
 		return;
 	}
 
 	// If there are pending messages, show them
-	if (traceMessageHandler.HasUnreadMessages() && this->crInfo.configInfo.showCustomRORNotifications) {
+	if (traceMessageHandler.HasUnreadMessages() && CUSTOMROR::crInfo.configInfo.showCustomRORNotifications) {
 		traceMessageHandler.MarkAsRead(true);
-		this->crMainInterface.OpenTraceMessagePopup();
+		CUSTOMROR::crMainInterface.OpenTraceMessagePopup();
 	}
 }
 
@@ -2308,11 +2303,11 @@ void CustomRORInstance::CollectTimerStats(REG_BACKUP *REG_values) {
 		g->currentGameTime = REG_values->EAX_val;
 	}
 	
-	if (this->crInfo.CollectedTimerIntervalsIndex >= CST_TIMER_STATS_ARRAY_SIZE) { this->crInfo.CollectedTimerIntervalsIndex = 0; }
-	this->crInfo.CollectedTimerIntervals_ms[this->crInfo.CollectedTimerIntervalsIndex++] = interval_ms;
+	if (CUSTOMROR::crInfo.CollectedTimerIntervalsIndex >= CST_TIMER_STATS_ARRAY_SIZE) { CUSTOMROR::crInfo.CollectedTimerIntervalsIndex = 0; }
+	CUSTOMROR::crInfo.CollectedTimerIntervals_ms[CUSTOMROR::crInfo.CollectedTimerIntervalsIndex++] = interval_ms;
 
 	// Auto compute slow down factor if option is enabled and only once every CST_TIMER_STATS_ARRAY_SIZE
-	if (this->crInfo.configInfo.gameTimerSlowDownAutoFix && (this->crInfo.CollectedTimerIntervalsIndex == CST_TIMER_STATS_ARRAY_SIZE)) {
+	if (CUSTOMROR::crInfo.configInfo.gameTimerSlowDownAutoFix && (CUSTOMROR::crInfo.CollectedTimerIntervalsIndex == CST_TIMER_STATS_ARRAY_SIZE)) {
 		CUSTOMROR::crCommand.AutoFixGameTimer();
 	}
 }
@@ -2320,7 +2315,7 @@ void CustomRORInstance::CollectTimerStats(REG_BACKUP *REG_values) {
 
 
 // This overloads the original code that displays Option button in game menu.
-// Reads this->crInfo.configInfo.showCustomRORMenu Parameter to display standard menu OR customized menu
+// Reads CUSTOMROR::crInfo.configInfo.showCustomRORMenu Parameter to display standard menu OR customized menu
 void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 	long int myESI = REG_values->ESI_val;
 	long int myEDI = REG_values->EDI_val;
@@ -2338,20 +2333,20 @@ void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 
 		// Standard Options button
-		long int xSize = this->crInfo.configInfo.showCustomRORMenu ? 0xA0 : 0x168;
+		long int xSize = CUSTOMROR::crInfo.configInfo.showCustomRORMenu ? 0xA0 : 0x168;
 		myEAX = AOE_AddButton((AOE_STRUCTURES::STRUCT_ANY_UI*) myESI, (AOE_STRUCTURES::STRUCT_UI_BUTTON**) pOptionsBtn,
 			LANG_ID_GAME_OPTIONS, 0x14, myEBP, xSize, 0x1E, 5, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	}
 	
 	// Limit to single player, causes crash on multi.
-	assert(this->crInfo.customGameMenuOptionsBtnVar == NULL);
+	assert(CUSTOMROR::crInfo.customGameMenuOptionsBtnVar == NULL);
 	long int dllIdToUse = LANG_ID_OPTIONS;
 	if (localizationHandler.StringExists(CRLANG_ID_CUSTOMROR)) {
 		dllIdToUse = CRLANG_ID_CUSTOMROR;
 	}
-	if (myEAX && this->crInfo.configInfo.showCustomRORMenu && !IsMultiplayer()) {
+	if (myEAX && CUSTOMROR::crInfo.configInfo.showCustomRORMenu && !IsMultiplayer()) {
 		myEAX = AOE_AddButton((AOE_STRUCTURES::STRUCT_ANY_UI*)myESI,
-			(AOE_STRUCTURES::STRUCT_UI_BUTTON**)&this->crInfo.customGameMenuOptionsBtnVar, 
+			(AOE_STRUCTURES::STRUCT_UI_BUTTON**)&CUSTOMROR::crInfo.customGameMenuOptionsBtnVar, 
 			dllIdToUse, 0xD0, myEBP, 0xAC, 0x1E,
 			AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	}
@@ -2369,13 +2364,13 @@ void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	long int myESP = REG_values->ESP_val;
 	AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup = (AOE_STRUCTURES::STRUCT_ANY_UI *)REG_values->ESI_val;
 
-	if (this->crInfo.configInfo.showCustomRORMenu) {
+	if (CUSTOMROR::crInfo.configInfo.showCustomRORMenu) {
 		// Before returning, make sure we always "free" the "custom options" button (from game menu).
-		this->crMainInterface.FreeInGameCustomOptionsButton();
+		CUSTOMROR::crMainInterface.FreeInGameCustomOptionsButton();
 		// If it is another button than "custom options", we can free custom options button.
 		// Otherwise, custom popup will manage this (we already added the button in objects to free).
 		if (myEAX != AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS) {
-			this->crInfo.ForceClearCustomMenuObjects();
+			CUSTOMROR::crInfo.ForceClearCustomMenuObjects();
 		}
 	}
 
@@ -2385,10 +2380,10 @@ void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 
 	if (myEAX != AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS) { return; }
 
-	if (!this->crInfo.configInfo.showCustomRORMenu) { return; } // In theory this should be useless because we shouldn't come here if it is disabled
+	if (!CUSTOMROR::crInfo.configInfo.showCustomRORMenu) { return; } // In theory this should be useless because we shouldn't come here if it is disabled
 
 	// Now manage the case when the clicked button is our custom button...
-	this->crMainInterface.CreateGameCustomRorOptionsPopup(previousPopup);
+	CUSTOMROR::crMainInterface.CreateGameCustomRorOptionsPopup(previousPopup);
 	ChangeReturnAddress(REG_values, 0x004342A7);
 }
 
@@ -2425,9 +2420,9 @@ void CustomRORInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 	
 	InGameCustomRorOptionsPopup *crOptionsPopup = NULL;
 	bool isCustomROROptionsPopupOpen = false;
-	if (this->crMainInterface.currentCustomPopup != NULL) {
-		if (dynamic_cast<InGameCustomRorOptionsPopup*>(this->crMainInterface.currentCustomPopup) != NULL) {
-			crOptionsPopup = (InGameCustomRorOptionsPopup*)this->crMainInterface.currentCustomPopup;
+	if (CUSTOMROR::crMainInterface.currentCustomPopup != NULL) {
+		if (dynamic_cast<InGameCustomRorOptionsPopup*>(CUSTOMROR::crMainInterface.currentCustomPopup) != NULL) {
+			crOptionsPopup = (InGameCustomRorOptionsPopup*)CUSTOMROR::crMainInterface.currentCustomPopup;
 			isCustomROROptionsPopupOpen = true;
 		} else {
 			traceMessageHandler.WriteMessage("Internal ERROR: bad popup object type");
@@ -2439,7 +2434,7 @@ void CustomRORInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 		return;
 	}
 	
-	if ((arg2 == 0) && (this->crInfo.configInfo.showCustomRORMenu) &&
+	if ((arg2 == 0) && (CUSTOMROR::crInfo.configInfo.showCustomRORMenu) &&
 		(senderAddr == (unsigned long int) crOptionsPopup->customOptionFreeTextVar) && (crOptionsPopup->customOptionFreeTextVar != NULL)) {
 		typedText = crOptionsPopup->customOptionFreeTextVar->pTypedText;
 		char *answer;
@@ -2455,11 +2450,11 @@ void CustomRORInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 	// Return if the event is NOT a click on CustomROR in-game custom options OK button.
 	// In that case, continue "original" method (compares sender to other "standard" buttons)
 	if ((!crOptionsPopup->customOptionButtonVar) || (senderAddr != (unsigned long int)crOptionsPopup->customOptionButtonVar) ||
-		!this->crInfo.configInfo.showCustomRORMenu || (!isCustomROROptionsPopupOpen)) {
+		!CUSTOMROR::crInfo.configInfo.showCustomRORMenu || (!isCustomROROptionsPopupOpen)) {
 		ChangeReturnAddress(REG_values, 0x0043134A);
 		return;
 	}
-	// Here: this->crInfo.configInfo.showCustomRORMenu is ON (previous if "returned" if not)
+	// Here: CUSTOMROR::crInfo.configInfo.showCustomRORMenu is ON (previous if "returned" if not)
 	// Note that we are sure that current popup is customROR custom game options, and the event is a click on OK.
 
 	// Here: our custom options button has been clicked.
@@ -2504,7 +2499,7 @@ void CustomRORInstance::ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_valu
 	}
 	
 	// Custom treatments
-	if (!this->crInfo.configInfo.showHiddenTerrainsInEditor) { return; }
+	if (!CUSTOMROR::crInfo.configInfo.showHiddenTerrainsInEditor) { return; }
 	long int customTerrainIdToUse = -1;
 	customTerrainIdToUse = CUSTOMROR::crCommand.GetTerrainIdForSelectedTerrainIndex(scEditor, selectedIndex);
 
@@ -2668,7 +2663,7 @@ void CustomRORInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 	}
 	long int keyChar = *((unsigned long int*)(REG_values->ESP_val + 0x04)); // arg1
 	// In custom popups, RETURN in a textbox loses focus (so it is taken into account)
-	if ((this->crInfo.HasOpenedCustomGamePopup()) && (keyChar == VK_RETURN) && (textbox->IsCheckSumValid()) &&
+	if ((CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) && (keyChar == VK_RETURN) && (textbox->IsCheckSumValid()) &&
 		(textbox->inputType != 7)) {
 		AOE_SetFocus(textbox->ptrParentObject, NULL);
 	}
@@ -2725,7 +2720,7 @@ void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 // We must return (do nothing) for those calls.
 void CustomRORInstance::RORDebugLogHandler(REG_BACKUP *REG_values) {
 	// If disabled in config, exit and do nothing (default - corresponds to standard behaviour)
-	if (this->crInfo.configInfo.collectRORDebugLogs <= 0) { return; }
+	if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs <= 0) { return; }
 
 	unsigned long int returnAddress = *(unsigned long int*)REG_values->ESP_val;
 
@@ -2767,7 +2762,7 @@ void CustomRORInstance::CollectAOEDebugLogsInGame(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->EAX_val = *(long int*)(0x554740); // For MOV EAX,DWORD PTR DS:[554740]
 	}
-	if (this->crInfo.configInfo.collectRORDebugLogs < 2) {
+	if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs < 2) {
 		return;
 	}
 	//AOE_STRUCTURES::STRUCT_AI *ai = *(AOE_STRUCTURES::STRUCT_AI **)(REG_values->ESP_val + 4);
@@ -3236,7 +3231,7 @@ void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 
 	// Return here if we don't want custom rules. We will get standard behaviour.
 	// Standard behaviour is: ignore buildings with HP=1 for catapults, ignore walls unless arg1==1 and current target IS a wall too.
-	if (!this->crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection) {
+	if (!CUSTOMROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection) {
 		return;
 	}
 
@@ -3331,7 +3326,7 @@ void CustomRORInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 // From 004ADB91. Normal code tests if number of queue items is > 0. If so, current queue is cancelled before adding a new item in queue.
 void CustomRORInstance::AllowMultiUnitTypeInQueue(REG_BACKUP *REG_values) {
 	short int elemCount = (REG_values->EAX_val & 0xFFFF); // AX / it is a word
-	bool forceKeepCurrentQueue = this->crInfo.configInfo.allowMultiQueueing; // Game default = false
+	bool forceKeepCurrentQueue = CUSTOMROR::crInfo.configInfo.allowMultiQueueing; // Game default = false
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		if (elemCount <= 0) {

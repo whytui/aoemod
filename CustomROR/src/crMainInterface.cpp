@@ -1,5 +1,9 @@
 #include "../include/crMainInterface.h"
 
+// Static global object
+CustomRORMainInterface CUSTOMROR::crMainInterface;
+
+
 CustomRORMainInterface::CustomRORMainInterface() {
 	this->crCommand = NULL;
 	this->currentCustomPopup = NULL;

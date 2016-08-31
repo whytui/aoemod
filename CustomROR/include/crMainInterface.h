@@ -107,3 +107,9 @@ public:
 	// Use this to properly free custom button from options menu. This should (always) be called when ingame menu is closed.
 	void FreeInGameCustomOptionsButton();
 };
+
+
+namespace CUSTOMROR {
+	// Global unique object
+	extern CustomRORMainInterface crMainInterface;
+}
