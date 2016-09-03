@@ -77,6 +77,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004B7E23:
 		this->FixAutoBuildHouse_countHouse(REG_values);
 		break;
+	case 0x004B7E66:
+		this->FixAutoBuildHouse_maxPopSignedCharLimitation(REG_values);
+		break;
 	case 0x004B801C:
 		this->AfterAddDynamicStratElems(REG_values);
 		break;
@@ -936,6 +939,30 @@ void CustomRORInstance::FixAutoBuildHouse_countHouse(REG_BACKUP *REG_values) {
 		REG_values->EAX_val = CST_UNITID_FORUM;
 	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
+}
+
+
+// From 004B7E5E
+void CustomRORInstance::FixAutoBuildHouse_maxPopSignedCharLimitation(REG_BACKUP *REG_values) {
+	// Get context information
+	long int hostedPopulationAtCurrentPoint = REG_values->EBX_val;
+	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = (AOE_STRUCTURES::STRUCT_BUILD_AI *)REG_values->ESI_val;
+	ror_api_assert(REG_values, (buildAI != NULL) && buildAI->IsCheckSumValid());
+	ror_api_assert(REG_values, (buildAI->mainAI != NULL) && buildAI->mainAI->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = &buildAI->mainAI->structTacAI;
+	ror_api_assert(REG_values, tacAI->IsCheckSumValid());
+	long int houseOverage = tacAI->SNNumber[SNHouseOverage];
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	if (hostedPopulationAtCurrentPoint > houseOverage + CUSTOMROR::crInfo.configInfo.singlePlayerMaxPopulation) {
+		// Exit loop (enough houses)
+		// This can only happen if initial strategy contains (enough - or too many - houses). "Normal" exit loop is when end of strategy is reached.
+		ChangeReturnAddress(REG_values, 0x4B7E8C);
+		return;
+	} else {
+		// Continue loop (not enough houses)
+		ChangeReturnAddress(REG_values, 0x4B7E7E); // Skip "old" bugged comparison (not supporting higher populations than 127)
+		return;
+	}
 }
 
 

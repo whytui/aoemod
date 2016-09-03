@@ -98,7 +98,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 110
+#define COUNT_ROR_API_10c 111
 #define COUNT_manageAI_10c 13
 
 
@@ -2196,7 +2196,7 @@ void AOE_binData::InitOptions_AOE10b() {
 
 	NEXT_INITSEQ_1_VAR(this->options_AOE10b.GetBinSeqDefinition(i),
 		SetAIHousesMaxPop,
-		"Set the maximum population value that will be used to compute AI's auto-build houses functionality.",
+		"Set the maximum population value that will be used to compute AI's auto-build houses functionality. Maximum supported value is 127.",
 		0x100AB8,
 		(0xE8, 0xA3, 0xD0, 0xF7, 0xFF, 0x83, 0xC0, 0x32, 0x3B, 0xC6),
 		SVT_INT_1B,
@@ -2225,7 +2225,7 @@ void AOE_binData::InitOptions_AOE10c() {
 
 	NEXT_INITSEQ_1_VAR(this->options_AOE10c.GetBinSeqDefinition(i),
 		SetAIHousesMaxPop,
-		"Set the maximum population value that will be used to compute AI's auto-build houses functionality.",
+		"Set the maximum population value that will be used to compute AI's auto-build houses functionality. Maximum supported value is 127.",
 		0xB5CC4,
 		(0xE8, 0xE7, 0xF8, 0x01, 0x00, 0x83, 0xC0, 0x32, 0x3B, 0xD8),
 		SVT_INT_1B,
@@ -2383,7 +2383,7 @@ void AOE_binData::InitOptions_10b() {
 
 	NEXT_INITSEQ_1_VAR(this->options_10b.GetBinSeqDefinition(i),
 		SetAIHousesMaxPop,
-		"Set the maximum population value that will be used to compute AI's auto-build houses functionality.",
+		"Set the maximum population value that will be used to compute AI's auto-build houses functionality. Maximum supported value is 127.",
 		0xB8C32,
 		(0xE8, 0xD9, 0xFD, 0x01, 0x00, 0x83, 0xC0, 0x32, 0x3B, 0xD8),
 		SVT_INT_1B,
@@ -2735,7 +2735,7 @@ Default = 04",
 
 	NEXT_INITSEQ_1_VAR(this->options_10c.GetBinSeqDefinition(i),
 		SetAIHousesMaxPop,
-		"Set the maximum population value that will be used to compute AI's auto-build houses functionality.",
+		"Set the maximum population value that will be used to compute AI's auto-build houses functionality. Maximum supported value is 127. Please use customROR mod to allow higher values.",
 		753266,
 		(0xE8, 0x59, 0xF9, 0x01, 0x00, 0x83, 0xC0, 0x32, 0x3B, 0xD8),
 		SVT_INT_1B,
@@ -4641,6 +4641,16 @@ void AOE_binData::InitROR_API_10c() {
 		0xB7E1C,
 		(0x8B, 0xCF, 0xE8, 0x2D, 0xC3, 0xF9, 0xFF, 0x83, 0xF8, 0x6D),
 		(0x8B, 0xCF, 0xE8, 0x51, 0x17, 0xF6, 0xFF, 0x83, 0xF8, 0x6D),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		FixAutoBuildHousesMaxPop127Limitation,
+		"Fix house accounting when adding dynamic strategy elements. This allows using maximum population values higher than 127.",
+		0xB7E5E,
+		(0x83, 0xC3, 0x04, 0x8B, 0x8E, 0xBC, 0x05, 0x00, 0x00, 0x68, 0x98, 0x00, 0x00, 0x00),
+		(0x83, 0xC3, 0x04, 0xE8, 0x0E, 0x17, 0xF6, 0xFF, 0x90, 0x68, 0x98, 0x00, 0x00, 0x00),
 		FM_OFF,
 		FM_ON
 		);

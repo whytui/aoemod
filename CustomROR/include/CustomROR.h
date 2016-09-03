@@ -76,6 +76,7 @@ namespace CUSTOMROR {
 		void AfterAddElementInStrategy(REG_BACKUP *REG_values);
 		void FixAutoBuildWarships_addStratElem(REG_BACKUP *REG_values);
 		void FixAutoBuildHouse_countHouse(REG_BACKUP *REG_values);
+		void FixAutoBuildHouse_maxPopSignedCharLimitation(REG_BACKUP *REG_values);
 		void AfterAddDynamicStratElems(REG_BACKUP *REG_values);
 		void GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values);
 		void GlobalOnButtonClick(REG_BACKUP *REG_values);
