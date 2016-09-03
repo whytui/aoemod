@@ -38,8 +38,8 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 	}
 
 	wxMenu *menuFile = new wxMenu;
-	menuFile->Append(ID_Select, "Select file...\tCtrl-O", "Select Rise of Rome executable file");
-	menuFile->Append(ID_SelectFromReg, "Select file from registry\tCtrl-R", "Automatically select file from registry information");
+	menuFile->Append(ID_Select, "Select AOE/ROR file...\tCtrl-O", "Select Rise of Rome executable file");
+	menuFile->Append(ID_SelectFromReg, "Select AOE/ROR file from registry\tCtrl-R", "Automatically select file from registry information");
 	menuFile->Append(ID_RunGame, "Run selected game file\tF9", "Run game using selected EXE");
 	menuFile->Append(ID_EditGameFile, "Edit game file\tCtrl-E", "Open CustomizeAOE file edition screen.");
 	menuFile->Append(ID_CloseGameFile, "Close game file\tCtrl-W", "Close currently selected file to unlock it.");
