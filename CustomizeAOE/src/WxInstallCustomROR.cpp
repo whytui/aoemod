@@ -90,7 +90,7 @@ void WxInstallCustomROR::ConstructorInit(std::wstring EXEFileName) {
 	this->MainArea->Add(new wxTextCtrl(this, wxID_ANY, _T("This screen allows you to install customROR (requires ROR 1.0a).\n")
 		_T("-------------------------------------------------\n")
 		_T("First make sure all files from \"CustomizeAOE\" archive have been extracted into 1 (single) directory. You can use any directory, it is only temporary.\n")
-		_T("Then click the \"Select customROR.dll\" button, and choose customROR.dll from the temporary directory that contains all files from the archive.\n\n")
+		_T("Then click the \"Select ROR_API.dll\" button, and choose ROR_API.dll from the temporary directory that contains all files from the archive.\n\n")
 		_T("Also select the game EXE file to patch (if not have not selected it yet).\n")
 		_T("If you want to preserve your original EmpiresX.EXE, just copy-paste it manually into a new file EmpiresX_xxx.EXE.\n")
 		_T("=> You can then select EmpiresX_xxx.EXE, customROR will be installed on this file and other EXE files will remain unchanged.\n\n")

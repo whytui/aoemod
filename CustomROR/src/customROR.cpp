@@ -942,7 +942,7 @@ void CustomRORInstance::FixAutoBuildHouse_countHouse(REG_BACKUP *REG_values) {
 }
 
 
-// From 004B7E5E
+// From 004B7E5E. (Always) Changes return address to 0x4B7E7E (continue loop - normal case) or 0x4B7E8C (exit loop)
 void CustomRORInstance::FixAutoBuildHouse_maxPopSignedCharLimitation(REG_BACKUP *REG_values) {
 	// Get context information
 	long int hostedPopulationAtCurrentPoint = REG_values->EBX_val;
