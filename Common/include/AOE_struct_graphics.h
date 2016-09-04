@@ -66,7 +66,7 @@ namespace AOE_STRUCTURES
 		STRUCT_GRAPHIC_ATTACK_SOUND_INFO *attackSoundsArray; // +44. Number of elements is angleCount ! It is only set if attackSoundUsed is true (NULL otherwise)
 		char graphicName[0x15]; // +48. Long name
 		char unused_5D[3];
-		short int angleCount; // +60
+		short int angleCount; // +60. Defines number of elements in attackSoundsArray (if attackSoundUsed=1). angleCount must be >=8 to allow valid movement. Otherwise, possible unit movement orientations will be limited !
 		short int unknown_62;
 		float speedMultiplier; // +64
 		float frameRate; // +68

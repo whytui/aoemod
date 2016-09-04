@@ -238,7 +238,7 @@ namespace AOE_STRUCTURES {
 		float unknown_090_y; // Used for movement computation ?
 		float unknown_094_x; // Used for movement computation ?
 		unsigned long int unknown_098;
-		float orientationAngle; // +9C. unit orientation angle. Updating this impacts unit.orientationIndex (+0x35). Angle [0, 2*PI[. 0=heading to northEast (increasing Y)
+		float orientationAngle; // +9C. unit orientation angle. Updating this impacts unit.orientationIndex (+0x35). Angle [0, 2*PI[. 0=heading to northEast (increasing Y). Warning: walking graphics need to have 8 angles to allow valid movement.
 		unsigned long int unknown_0A0;
 		STRUCT_UNIT_MOVEMENT_INFO movementInfo; // +A4. Movement info / path finding.
 		STRUCT_UNIT_MOVEMENT_INFO temp_AI_movementInfo; // +D8. Only used in AI treatments(?) to make checks before assigning tasks ? Used when unknown_154_tempFlag_calculatingPath=1

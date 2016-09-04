@@ -335,6 +335,17 @@ void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT
 void UnitInfoZoneAddAttributeLine(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone,
 	long int iconId, long int displayType, long int displayedValue, long int totalValue, long int &lineIndex);
 
+// Modifies walking graphics "angle count" to allow units to move correctly.
+// Returns true if successful. If modified, this impacts all units using the graphics, and is not reversible.
+// Restricted to unit definitions that do NOT use attack sounds.
+// You may also want (need) to modify unit definition's speed, terrain restriction, interactionMode...
+bool ForceAllowMovementForUnitWalkingGraphics(AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE *unitDef);
+
+// Make a building capable of moving.
+// This may affect other buildings that use the same walking graphic (including other players !) ; however other player's unit won't move till you change their speed.
+// Returns true if successful
+bool AllowMovementForBuilding(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef, float speed);
+
 
 // -- Commands
 

@@ -1577,6 +1577,65 @@ void UnitInfoZoneAddAttributeLine(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unit
 }
 
 
+// Modifies walking graphics "angle count" to allow units to move correctly.
+// Returns true if successful. If modified, this impacts all units using the graphics, and is not reversible.
+// Restricted to unit definitions that do NOT use attack sounds.
+// You may also want (need) to modify unit definition's speed, terrain restriction, interactionMode...
+bool ForceAllowMovementForUnitWalkingGraphics(AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE *unitDef) {
+	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass() || !unitDef->DerivesFromMovable()) {
+		return false;
+	}
+	if (!unitDef->ptrWalkingGraphic1) {
+		return false;
+	}
+	if (unitDef->ptrWalkingGraphic1->angleCount >= 8) {
+		return true; // Did nothing, but should be (already) compatible with movement
+	}
+	if (!unitDef->ptrWalkingGraphic1->attackSoundUsed) {
+		assert(unitDef->ptrWalkingGraphic1->attackSoundsArray == NULL);
+		unitDef->ptrWalkingGraphic1->angleCount = 8;
+		return true;
+	}
+	/*
+	// This part MODIFIES the graphics, is not reversible and impacts everything using the graphics
+	int initialCount = unitDef->ptrWalkingGraphic1->angleCount;
+	unitDef->ptrWalkingGraphic1->angleCount = 8;
+	if (unitDef->ptrWalkingGraphic1->attackSoundUsed && unitDef->ptrWalkingGraphic1->attackSoundsArray) {
+		STRUCT_GRAPHIC_ATTACK_SOUND_INFO *newArray = (STRUCT_GRAPHIC_ATTACK_SOUND_INFO*)AOEAllocZeroMemory(8, sizeof(STRUCT_GRAPHIC_ATTACK_SOUND_INFO));
+		memcpy_s(newArray, sizeof(STRUCT_GRAPHIC_ATTACK_SOUND_INFO) * initialCount, unitDef->ptrWalkingGraphic1->attackSoundsArray, sizeof(STRUCT_GRAPHIC_ATTACK_SOUND_INFO) * initialCount);
+
+		for (int i = initialCount + 1; i <= 8; i++) {
+			for (int j = 0; j < 3; j++) {
+				unitDef->ptrWalkingGraphic1->attackSoundsArray[i].pSound[j]->filesCount = 0;;
+				unitDef->ptrWalkingGraphic1->attackSoundsArray[i].pSound[j]->fileInfoArray = NULL;
+				unitDef->ptrWalkingGraphic1->attackSoundsArray[i].pSound[j]->soundId = -1;
+				unitDef->ptrWalkingGraphic1->attackSoundsArray[i].soundDelay[j] = 0;
+			}
+		}
+		AOEFree(unitDef->ptrWalkingGraphic1->attackSoundsArray);
+		unitDef->ptrWalkingGraphic1->attackSoundsArray = newArray;
+	}
+	return true;
+	*/
+	return false;
+}
+
+// Make a building capable of moving.
+// This may affect other buildings that use the same walking graphic (including other players !) ; however other player's unit won't move till you change their speed.
+// Returns true if successful
+bool AllowMovementForBuilding(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef, float speed) {
+	if (!unitDef || !unitDef->IsCheckSumValid()) { return false; }
+	if (!ForceAllowMovementForUnitWalkingGraphics(unitDef)) {
+		return false;
+	}
+	unitDef->speed = speed;
+	unitDef->rotationSpeed = 0;
+	unitDef->terrainRestriction = TERRAIN_RESTRICTION::CST_TR_LAND_LIVING_UNITS;
+	unitDef->interactionMode = INTERACTION_MODES::CST_IM_LIVING_UNITS;
+	return true;
+}
+
+
 // commandStruct must have been allocated with a "AOE" alloc method like AOEAlloc(...)
 // It is freed by game code, don't use it / free it afterwards !
 // Returns false if failed
