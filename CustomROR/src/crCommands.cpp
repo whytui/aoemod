@@ -5078,7 +5078,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 		if (settings && settings->IsCheckSumValid()) {
 			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE;
-			CallWriteCenteredText("Right-click to define the unit or the position to protect"); // TODO localization
+			CallWriteCenteredText(localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_SET_PROTECT_OBJECT, "Right-click to define the unit or the position to protect"));
 		}
 		BUTTONBAR::SetButtonBarForDefendUnitOrZone(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)unitBase);
 	}

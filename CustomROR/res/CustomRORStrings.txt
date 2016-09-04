@@ -75,6 +75,24 @@ All players are now computer-managed.
 Can't be trained right now: 
 [42088] // Can't do research at this point
 Can't be researched right now: 
+[42116]
+Click to prevent unit from attacking villagers automatically
+[42117]
+Click to prevent unit from attacking buildings automatically
+[42118]
+Click to prevent unit from attacking other units automatically
+[42119]
+Click to restore normal auto-attack behaviour
+[42120]
+Protect a position/unit
+[42121] // Hotkey for "protect / defend"
+P
+[42122]
+Back
+[42123]
+Stop defending current position/unit
+[42124]
+Right-click to define the unit or the position to protect
 
 // *** Unit properties ***
 [42036] // Unit properties: Initial

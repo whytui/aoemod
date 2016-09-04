@@ -77,6 +77,24 @@ Tous les joueurs sont désormais gérés par l'IA.
 Indisponible: 
 [42088] // Can't do research at this point
 Indisponible: 
+[42116]
+Cliquez pour empêcher l'unité d'attaquer les villageois
+[42117]
+Cliquez pour empêcher l'unité d'attaquer les bâtiments
+[42118]
+Cliquez pour empêcher l'unité d'attaquer les autres types d'unités
+[42119]
+Cliquez pour restaurer le comportement par défaut d'attaque des unités ennemies
+[42120]
+Protéger un emplacement / une unité.
+[42121] // Hotkey for "protect / defend"
+P
+[42122]
+Retour
+[42123]
+Ne plus protéger la zone/l'unité actuelle
+[42124]
+Cliquez avec le bouton droit pour définir l'unité ou l'endroit à protéger
 
 // *** Unit properties ***
 [42036] // Unit properties: Initial

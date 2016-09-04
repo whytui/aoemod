@@ -60,6 +60,7 @@ const static unsigned long int CRLANG_ID_AUTO_REBUILD_FARMS_MAX_FOOD = 42034;
 const static unsigned long int CRLANG_ID_AUTO_REBUILD_FARMS_MIN_WOOD = 42035;
 
 const static unsigned long int CRLANG_ID_DEFAULT_CIV_NAME = 42023;
+
 // Custom buttons
 const static unsigned long int CRLANG_ID_BEING_RESEARCHED = 42024;
 const static unsigned long int CRLANG_ID_BEING_TRAINED = 42025;
@@ -68,6 +69,15 @@ const static unsigned long int CRLANG_ID_AI_FLAGS_RECOMPUTED = 42026;
 const static unsigned long int CRLANG_ID_AI_FLAGS_ALL_SET = 42027;
 const static unsigned long int CRLANG_ID_CANT_TRAIN = 42087;
 const static unsigned long int CRLANG_ID_CANT_RESEARCH = 42088;
+const static unsigned long int CRLANG_ID_BTN_DONT_ATTACK_VILLAGER = 42116;
+const static unsigned long int CRLANG_ID_BTN_DONT_ATTACK_BUILDINGS = 42117;
+const static unsigned long int CRLANG_ID_BTN_DONT_ATTACK_OTHER = 42118;
+const static unsigned long int CRLANG_ID_BTN_RESTORE_ATTACK_BEHAVIOUR = 42119;
+const static unsigned long int CRLANG_ID_BTN_UNIT_PROTECT_TEXT = 42120;
+const static unsigned long int CRLANG_ID_BTN_UNIT_PROTECT_HOTKEY = 42121;
+const static unsigned long int CRLANG_ID_BTN_BACK = 42122;
+const static unsigned long int CRLANG_ID_BTN_UNIT_STOP_PROTECTING = 42123;
+const static unsigned long int CRLANG_ID_BTN_UNIT_SET_PROTECT_OBJECT = 42124;
 
 // Unit properties
 const static unsigned long int CRLANG_ID_UNITPROP_INITIAL = 42036;
@@ -100,6 +110,7 @@ const static unsigned long int CRLANG_ID_UNITPROP_FUTURE_UNAVAILABLE_TECHS = 420
 const static unsigned long int CRLANG_ID_UNITPROP_ATTACK_BONUSES_FOR = 42083;
 const static unsigned long int CRLANG_ID_UNITPROP_ARMOR_WEAKNESSES = 42084;
 const static unsigned long int CRLANG_ID_UNITPROP_CONVERSION_RESISTANCE = 42086;
+
 // Scenario editor
 const static unsigned long int CRLANG_IDCUSTOM_EDITOR_MENU = 42063;
 const static unsigned long int CRLANG_IDPLAYER_ID = 42064;

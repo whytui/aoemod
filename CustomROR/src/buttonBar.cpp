@@ -98,22 +98,28 @@ void AddButtonsForLivingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 	if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_NORMAL) {
 		if ((unitDef->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDef->blastRadius > 0)) {
 			UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
-			// TODO: localization
-			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false, "Click to prevent unit from attacking villagers automatically",
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false,
+				localizationHandler.GetTranslation(CRLANG_ID_BTN_DONT_ATTACK_VILLAGER, "Click to prevent unit from attacking villagers automatically"),
 				&CUSTOMROR::crInfo.customRorIcons, true);
-			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false, "Click to prevent unit from attacking buildings automatically",
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false,
+				localizationHandler.GetTranslation(CRLANG_ID_BTN_DONT_ATTACK_BUILDINGS, "Click to prevent unit from attacking buildings automatically"),
 				&CUSTOMROR::crInfo.customRorIcons, false);
-			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, "Click to prevent unit from attacking other units automatically",
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, 
+				localizationHandler.GetTranslation(CRLANG_ID_BTN_DONT_ATTACK_OTHER, "Click to prevent unit from attacking other units automatically"),
 				&CUSTOMROR::crInfo.customRorIcons, false);
-			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false, "Click to restore normal auto-attack behaviour",
+			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false,
+				localizationHandler.GetTranslation(CRLANG_ID_BTN_RESTORE_ATTACK_BEHAVIOUR, "Click to restore normal auto-attack behaviour"),
 				&CUSTOMROR::crInfo.customRorIcons, false);
 			const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
 			RefreshCustomAutoAttackButtons(gameMainUI, aap);
 		}
-		// TODO: Localization: use 2 strings (one for the shortcut). concatenate and use also the dllid for ...->hotkey = 'P'
-		AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, "Protect a position/unit (P)",
-			NULL /*CUSTOMROR::crInfo.customRorIcons*/, false);
-		gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT]->hotkey = 'P'; // shortcut key for "defend/protect"
+		const char *protectHotkey = localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_PROTECT_HOTKEY, "P");
+		std::string protectText = localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_PROTECT_TEXT, "Protect a position/unit");
+		protectText += " ";
+		protectText += protectHotkey[0]; // protectHotkey can't be NULL. Worst case, protectHotkey[0] = \0, but this will not cause any error.
+		AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, 
+			protectText.c_str(), NULL /*CUSTOMROR::crInfo.customRorIcons*/, false);
+		gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT]->hotkey = protectHotkey[0]; // shortcut key for "defend/protect"
 		gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT]->unknown_29C = 0;
 	}
 
@@ -499,9 +505,11 @@ void SetButtonBarForDefendUnitOrZone(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gam
 	}
 	if (!unit || !unit->IsCheckSumValid()) { return; } // MUST be trainable, not building
 
-	AddInGameCommandButton(0, INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_OR_BACK, 0, false, "Back",
+	AddInGameCommandButton(0, INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_OR_BACK, 0, false, 
+		localizationHandler.GetTranslation(CRLANG_ID_BTN_BACK, "Back"),
 		NULL, false);
-	AddInGameCommandButton(1, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, "Stop defending current position/unit",
+	AddInGameCommandButton(1, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, 
+		localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_STOP_PROTECTING, "Stop defending current position/unit"),
 		NULL, false);
 }
 
