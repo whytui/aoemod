@@ -5,6 +5,7 @@
 #include <AOE_struct_civilization_def.h>
 #include <AOE_struct_player.h>
 #include <AOE_struct_scenario_info.h>
+#include <AOE_struct_dat_sound.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -68,7 +69,7 @@ namespace AOE_STRUCTURES {
 		short int soundsArrayElemCount;
 		short int unknown_02E; // maybe 2 bytes, not 1 word
 		// +0x30
-		unsigned long int ptrSoundsArray;
+		STRUCT_DAT_SOUND **ptrSoundsArray;
 		unsigned long int unknown_034;
 		unsigned long int ptrGraphicsArray; // ptr to list of elements (size=0x48) starting by a unit name?
 		short int playerTotalCount; // +3C. Player count including gaia = real player count + 1

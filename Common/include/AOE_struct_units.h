@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <AOE_struct_graphics.h>
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_map_tile_info.h>
 #include <AOE_struct_unit_activity.h>
@@ -88,7 +89,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNITDEF_BASE *unitDefinition; // +8. Unit definition (model). Living units can have a dedicated unit definition.
 		STRUCT_PLAYER *ptrStructPlayer;
 		// 0x10
-		char *pCurrentGraphics; // Pointer to a structure about graphics...
+		STRUCT_GRAPHICS *pCurrentGraphics; // +10
 		unsigned long int unknown_014;
 		unsigned long int unknown_018; // ptr to struct 00 30 54 00 - size=0x0C Related to graphics
 		STRUCT_GAME_MAP_TILE_INFO *myTile; // +1C. To confirm. +5=byte=altitude&terrain bits, see TERRAIN_BYTE class
@@ -137,7 +138,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_07C; // Related to terrain restriction ????
 		// 0x80
 		unsigned long int unknown_080;
-		char unknown_084; // related to movement ?
+		char unknown_084; // related to movement ? "isMapInfoUpToDateForThisUnit" ?
 		char unknown_085; // related to movement ? Previous value of +84 ?
 		char unknown_086_hasTarget; // ?
 		char unknown_087;
@@ -203,7 +204,7 @@ namespace AOE_STRUCTURES {
 	// 14 2E 54 00 = flag (type20). Size=0x8C. constructor=0x0415020 - derives from type10
 	class STRUCT_UNIT_FLAG : public STRUCT_UNIT_BASE {
 	public:
-		float currentMovementSpeed; // +88. Unsure. For graphics refreshing ?
+		float currentMovementSpeed; // +88
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00542E14); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_FLAGS); }
@@ -234,8 +235,8 @@ namespace AOE_STRUCTURES {
 	public:
 		unsigned long int unknown_08C;
 		// 0x90
-		float unknown_090; // Used for movement computation ?
-		float unknown_094; // Used for movement computation ?
+		float unknown_090_y; // Used for movement computation ?
+		float unknown_094_x; // Used for movement computation ?
 		unsigned long int unknown_098;
 		float orientationAngle; // +9C. unit orientation angle. Updating this impacts unit.orientationIndex (+0x35). Angle [0, 2*PI[. 0=heading to northEast (increasing Y)
 		unsigned long int unknown_0A0;

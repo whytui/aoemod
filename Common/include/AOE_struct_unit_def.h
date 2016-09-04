@@ -4,6 +4,7 @@
 #include <AOE_const_functional.h>
 #include <AOE_const_internal.h>
 #include <AOE_empires_dat.h>
+#include <AOE_struct_graphics.h>
 #include <gameVersion.h>
 
 using namespace AOE_CONST_FUNC;
@@ -77,8 +78,8 @@ namespace AOE_STRUCTURES
 		unsigned long int *ptrActionGraphic;
 		// 0x40
 		unsigned long int ptrCarryingGraphic; // graphics carrying resource
-		unsigned long int *executionSound; // +44
-		unsigned long int *resourceDepositSound; // +48
+		STRUCT_DAT_SOUND *executionSound; // +44
+		STRUCT_DAT_SOUND *resourceDepositSound; // +48
 		// END of structure
 	};
 
@@ -102,7 +103,7 @@ namespace AOE_STRUCTURES
 	// Size = 08. Deserialized in 0x441775 (for example)
 	class STRUCT_DAMAGE_GRAPHIC {
 	public:
-		unsigned long int *ptrGraphic;
+		STRUCT_GRAPHICS *ptrGraphic;
 		char fromDamagePercent; // +4 minimum % of HP from which this graphic is used
 		char oldApplyMode; // +5. unused?
 		char applyMode; // 0,1=add to graphic (flames), 2=replace graphic(walls)
@@ -123,10 +124,10 @@ namespace AOE_STRUCTURES
 		short int DAT_ID1; // "Base unit" id from empires.dat. Ex=cavalry
 		short int DAT_ID2; // "Upgraded unit" id from empires.dat. Ex=heavy cavalry
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType; // +14. "Class". TribeAIGroupXXX - 3=building, 18=priest...
-		char *ptrStandingGraphics; // +18. starts with SLP name.
-		unsigned long int *ptrDyingGraphic; // +1C. starts with SLP name.
+		STRUCT_GRAPHICS *ptrStandingGraphics; // +18. starts with SLP name.
+		STRUCT_GRAPHICS *ptrDyingGraphic; // +1C. starts with SLP name.
 		// 0x20
-		unsigned long int *ptrDyingGraphic2; // +20. Unused ?
+		STRUCT_GRAPHICS *ptrDyingGraphic2; // +20. Unused ?
 		short int deathMode;
 		short int totalHitPoints; // +026. Including upgrades !
 		float lineOfSight; // +028
@@ -136,10 +137,10 @@ namespace AOE_STRUCTURES
 		float sizeRadiusY; // For Y axis
 		float sizeRadiusX; // For X axis
 		float sizeRadiusZ; // +38.
-		unsigned long int *ptrSelectionSound; // +3C
+		STRUCT_DAT_SOUND *ptrSelectionSound; // +3C
 		// 0x40
-		unsigned long int *ptrTrainSound;
-		unsigned long int *ptrDyingSound; // +44
+		STRUCT_DAT_SOUND *ptrTrainSound;
+		STRUCT_DAT_SOUND *ptrDyingSound; // +44
 		short int deadUnitId; // +48
 		char placementMode; // +4A
 		char airMode; // +4B
@@ -256,9 +257,9 @@ namespace AOE_STRUCTURES
 	// FC 44 54 00 = Movable (type30 - dead/fish in AGE3) - size=0xD8 - Constructor 0x440990
 	class STRUCT_UNITDEF_MOVABLE : public STRUCT_UNITDEF_FLAG {
 	public:
-		unsigned long int ptrWalkingGraphic1;
+		STRUCT_GRAPHICS *ptrWalkingGraphic1;
 		// 0xC0
-		unsigned long int ptrWalkingGraphic2;
+		STRUCT_GRAPHICS *ptrWalkingGraphic2;
 		float rotationSpeed; // +C4
 		char unknown_0C8;
 		char unknown_0C9;
@@ -295,8 +296,8 @@ namespace AOE_STRUCTURES
 		char unknown_0EE;
 		char unknown_0EF;
 		// 0xF0
-		unsigned long int *attackSound; // Unknown struct
-		unsigned long int *moveSound; // +F4. Unknown struct
+		STRUCT_DAT_SOUND *attackSound; // Unknown struct
+		STRUCT_DAT_SOUND *moveSound; // +F4. Unknown struct
 		char animalMode;
 		char unknown_0F9;
 		char unknown_0FA;
@@ -312,7 +313,7 @@ namespace AOE_STRUCTURES
 	// 44 44 54 00 = type50 (type50) - size=0x148 - Constructor 0x43EE10(readFromFile)
 	class STRUCT_UNITDEF_ATTACKABLE : public STRUCT_UNITDEF_COMMANDABLE {
 	public:
-		unsigned long int *ptrAttackGraphic; // +FC. Unknown struct
+		STRUCT_GRAPHICS *ptrAttackGraphic; // +FC.
 		// 0x100
 		char defaultArmor; // Used when there is no armor in ptrArmorsList?
 		char unknown_101; // default attack ???
@@ -397,8 +398,8 @@ namespace AOE_STRUCTURES
 	// 30 99 54 00 = building (type80) - size=0x17C. Constructor = 0x4EC180
 	class STRUCT_UNITDEF_BUILDING : public STRUCT_UNITDEF_TRAINABLE {
 	public:
-		unsigned long int *ptrConstructionSound; // +164.
-		unsigned long int *ptrConstructionGraphic; // +168. Graphics while building is under construction
+		STRUCT_DAT_SOUND *ptrConstructionSound; // +164.
+		STRUCT_GRAPHICS *ptrConstructionGraphic; // +168. Graphics while building is under construction
 		char multiplePlacement; // +16C. For building placement (put several at once)
 		char unknown_16D;
 		short int graphicsAngle; // +16E. constructionStep (for unfinished) or "angle" (different standing graphic frame?)
