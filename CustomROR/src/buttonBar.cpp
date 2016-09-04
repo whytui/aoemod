@@ -508,9 +508,13 @@ void SetButtonBarForDefendUnitOrZone(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gam
 	AddInGameCommandButton(0, INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_OR_BACK, 0, false, 
 		localizationHandler.GetTranslation(CRLANG_ID_BTN_BACK, "Back"),
 		NULL, false);
-	AddInGameCommandButton(1, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false, 
-		localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_STOP_PROTECTING, "Stop defending current position/unit"),
-		NULL, false);
+
+	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+	if (unitInfo && unitInfo->HasValidProtectInfo()) {
+		AddInGameCommandButton(1, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false,
+			localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_STOP_PROTECTING, "Stop defending current position/unit"),
+			NULL, false);
+	}
 }
 
 

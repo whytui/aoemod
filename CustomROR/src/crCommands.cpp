@@ -4991,10 +4991,11 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 #ifdef _DEBUG
 					CallWriteCenteredText("Removed protect info");
 #endif
-					settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
-					SetGameCursor(GAME_CURSOR::GC_NORMAL);
 				}
 			}
+			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
+			SetGameCursor(GAME_CURSOR::GC_NORMAL);
+			BUTTONBAR::SetButtonBarForDefendUnitOrZone(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)unitBase);
 		}
 		return false; // Let ROR code execute normally here, we just ran "auxiliary" treatments.
 	}
