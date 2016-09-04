@@ -4364,6 +4364,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 	if ((sizeX <= 0) || (sizeY <= 0) || (sizeX > 0xFF) || (sizeY > 0xFF)) { return false; }
 
 	long int mapType = scEditor->map_cbb_mapType->GetSelectedIndex();
+	assert(scEditor && scEditor->map_edt_seed->IsCheckSumValid());
 	char *mapSeedText = AOE_GetEditText(scEditor->map_edt_seed);
 	long int terrainId = 0;
 	long int mapSeed = -1; // Default = -1 (= random)

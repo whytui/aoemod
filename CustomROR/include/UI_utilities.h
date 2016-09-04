@@ -406,8 +406,7 @@ static void AOE_AddEntryInCombo(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo, long in
 
 
 // Returns an edit object's text
-#pragma message("TODO: NOT for edit, labels only ? To check")
-static char *AOE_GetEditText(AOE_STRUCTURES::STRUCT_ANY_UI *ptrEdit) {
+static char *AOE_GetEditText(AOE_STRUCTURES::STRUCT_UI_TEXTBOX *ptrEdit) {
 	assert(ptrEdit != NULL);
 	if (!ptrEdit) { return NULL; }
 	char *result = NULL;
@@ -419,6 +418,7 @@ static char *AOE_GetEditText(AOE_STRUCTURES::STRUCT_ANY_UI *ptrEdit) {
 	}
 	return result;
 }
+
 
 // Set an label object's text
 static void AOE_SetLabelText(AOE_STRUCTURES::STRUCT_UI_LABEL *ptrLabel, const char *text) {

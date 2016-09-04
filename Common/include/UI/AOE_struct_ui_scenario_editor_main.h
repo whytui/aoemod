@@ -60,7 +60,7 @@ namespace AOE_STRUCTURES
 		STRUCT_UI_LABEL *map_lbl_mapType; // +534
 		STRUCT_UI_COMBOBOX *map_cbb_mapType; // +538
 		STRUCT_UI_LABEL *map_lbl_seed_whenEditable; // +53C
-		STRUCT_ANY_UI *map_edt_seed; // +540
+		STRUCT_UI_TEXTBOX *map_edt_seed; // +540
 		STRUCT_UI_LABEL *map_lbl_seed_whenReadOnly; // +544
 		STRUCT_UI_LABEL *map_edt_seed_whenReadOnly; // +548
 		STRUCT_UI_BUTTON *map_btn_generateMap; // +54C
