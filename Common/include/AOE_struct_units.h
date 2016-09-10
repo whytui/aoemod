@@ -82,6 +82,7 @@ namespace AOE_STRUCTURES {
 
 	// Eye candy (type10) / common (base) class for all units (unit instances).
 	// A8 7D 54 00. Size=0x88 (constructor 0x04A64B0)
+	// 0x4CD2D0 = unitGroupElem.task(tacAI, mainAI, unitGrpTaskId, resetOrg, arg5=oCA)
 	class STRUCT_UNIT_BASE {
 	public:
 		unsigned long int checksum;
@@ -134,7 +135,7 @@ namespace AOE_STRUCTURES {
 		// +68 = number of elements in ?
 		// 0x70
 		long int unknown_070; // a number
-		STRUCT_UNIT_ACTIVITY *currentActivity; // +74
+		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code.
 		short int unknown_078_unitInstanceId; // ? related to +70,+68
 		short int unknown_07A;
 		unsigned long int unknown_07C; // Related to terrain restriction ????

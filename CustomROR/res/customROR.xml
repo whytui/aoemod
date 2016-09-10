@@ -235,4 +235,6 @@
 	<per_number gameType="DM" sn="186" value="0"></per_number><!--SNCoopDemandTributeInterval: to disable tributes between AI players-->
 	<per_number gameType="RM" sn="187" value="0"></per_number><!--SNCoopDemandTributeMaximum: to disable tributes between AI players-->
 	<per_number gameType="DM" sn="187" value="0"></per_number><!--SNCoopDemandTributeMaximum: to disable tributes between AI players-->
+	<!--<per_number gameType="RM" sn="188" value="1"></per_number>--><!--SNAttackWinningPlayer. In Game init, it has 33% chances to be set to 1-->
+	<!--<per_number gameType="DM" sn="188" value="1"></per_number>--><!--SNAttackWinningPlayer. In Game init, it has 33% chances to be set to 1-->
 </customROR>

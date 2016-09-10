@@ -359,6 +359,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x00411D46:
 		this->EntryPointAfterActivityStop(REG_values);
 		break;
+	case 0x0040ACDF:
+		this->EntryPointGetMostDislikedPlayerId(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3462,6 +3465,43 @@ void CustomRORInstance::EntryPointAfterActivityStop(REG_BACKUP *REG_values) {
 	}
 	// Custom treatments
 	CUSTOMROR::crCommand.OnUnitActivityStop(unitActivity);
+}
+
+
+// From 0x40ACDA: diplAI.GetMostDislikedPlayerId(askTributeAmount, askTributePlayerId, bAttackWinningPlayer, attackWinningPlayerFactor)
+// This may change return address to 0x40AD8E to bypass standard treatments.
+void CustomRORInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_DIPLOMACY_AI *diplAI = (AOE_STRUCTURES::STRUCT_DIPLOMACY_AI *)REG_values->EDI_val;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = (AOE_STRUCTURES::STRUCT_PLAYER *)REG_values->EAX_val;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = (AOE_STRUCTURES::STRUCT_GAME_GLOBAL *)REG_values->ECX_val;
+	ror_api_assert(REG_values, diplAI && diplAI->IsCheckSumValid());
+	ror_api_assert(REG_values, player && player->IsCheckSumValid());
+	ror_api_assert(REG_values, global && global->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		if (global->playerTotalCount <= 1) {
+			ChangeReturnAddress(REG_values, 0x40AD8E);
+		}
+	}
+	long int askTributeAmount = GetIntValueFromRORStack(REG_values, 0x14);
+	long int askTributePlayerId = GetIntValueFromRORStack(REG_values, 0x18);
+	long int attackWinningPlayerFlag = GetIntValueFromRORStack(REG_values, 0x1C);
+	long int attackWinningPlayerFactor = GetIntValueFromRORStack(REG_values, 0x20);
+	bool skipStandardTreatment = false; // Set it to true to bypass standard ROR calculations of target playerId
+	long int mostDislikedPlayerId = -1; // Modify it to impact returned value and set target playerId
+
+	// Custom treatments
+	if (CUSTOMROR::crCommand.IsImproveAIEnabled(player->playerId)) {
+		// Override the calculation of target player Id (most disliked)
+		mostDislikedPlayerId = CUSTOMROR::crCommand.GetMostDislikedPlayer(player, diplAI, askTributeAmount, askTributePlayerId,
+			(attackWinningPlayerFlag != 0), attackWinningPlayerFactor);
+		skipStandardTreatment = true;
+	}
+
+	if (skipStandardTreatment) {
+		REG_values->EDX_val = mostDislikedPlayerId; // no impact if we do NOT change return address.
+		ChangeReturnAddress(REG_values, 0x40AD8E); // Exit and return EDX' value (default -1)
+	}
 }
 
 

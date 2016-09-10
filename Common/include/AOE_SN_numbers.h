@@ -182,7 +182,7 @@ namespace AOE_CONST_FUNC {
 		SNTargetEvaluationInProgress = 185,
 		SNCoopDemandTributeInterval = 186,
 		SNCoopDemandTributeMaximum = 187,
-		SNAttackWinningPlayer = 188, // Controls whether or not the computer player will attack the winning player (if there is more than one to choose from).  Must be 0 or 1
+		SNAttackWinningPlayer = 188, // Controls whether or not the computer player will attack the winning player (if there is more than one to choose from).  Must be 0 or 1. If 0, the weakest player is targetted !
 		//? attack factor  ? ? ? ? = 189,
 		SNMaximumFood = 190,
 		SNMaximumWood = 191,

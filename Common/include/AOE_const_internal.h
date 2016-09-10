@@ -455,42 +455,43 @@ namespace AOE_CONST_INTERNAL
 
 	// See 4DF84C
 	enum UNIT_GROUP_TYPES : long int {
-		CST_UGT_LAND_ATTACK = 0x64, // Related to SNMaximumAttackGroupSize
-		CST_UGT_LAND_DEFEND = 0x65, // Related to SNMaximumDefendGroupSize
-		CST_UGT_LAND_EXPLORE = 0x66, // Related to SNMaximumExploreGroupSize
-		CST_UGT_BOAT_ATTACK = 0x67, // Related to SNMaximumBoatAttackGroupSize
-		CST_UGT_BOAT_DEFEND = 0x68, // Related to SNMaximumBoatDefendGroupSize
-		CST_UGT_BOAT_EXPLORE = 0x69, // Related to SNMaximumBoatExploreGroupSize
+		CST_UGT_LAND_ATTACK = 0x64, // (100) Related to SNMaximumAttackGroupSize
+		CST_UGT_LAND_DEFEND = 0x65, // (101) Related to SNMaximumDefendGroupSize
+		CST_UGT_LAND_EXPLORE = 0x66, // (102) Related to SNMaximumExploreGroupSize
+		CST_UGT_BOAT_ATTACK = 0x67, // (103) Related to SNMaximumBoatAttackGroupSize
+		CST_UGT_BOAT_DEFEND = 0x68, // (104) Related to SNMaximumBoatDefendGroupSize
+		CST_UGT_BOAT_EXPLORE = 0x69, // (105) Related to SNMaximumBoatExploreGroupSize
 		// Next ones : trade/fish/transport escorts ? Just a supposition
-		CST_UGT_UNKNOWN_6A = 0x6A,
-		CST_UGT_UNKNOWN_6B = 0x6B,
-		CST_UGT_UNKNOWN_6C = 0x6C,
-		CST_UGT_ARTEFACT = 0x6D // Seen with target=own TC.
+		CST_UGT_UNKNOWN_6A = 0x6A, // (106)
+		CST_UGT_UNKNOWN_6B = 0x6B, // (107)
+		CST_UGT_UNKNOWN_6C = 0x6C, // (108)
+		CST_UGT_ARTEFACT = 0x6D // (109) Seen with target=own TC.
 	};
 
 	enum UNIT_GROUP_TASK_IDS : long int {
 		CST_UGT_UNKNOWN_00 = 0, // stop ? 0x4CD349
 		CST_UGT_UNKNOWN_01 = 1, // Idle ? Set in 4CD110. Default=1 (0 in constructor, but 1 after init)
 		CST_UGT_UNKNOWN_02_ATTACK = 2,
-		CST_UGT_RETREAT = 3, // 4CD640
-		CST_UGT_DEFEND_UNIT = 4, // 4CE309
+		CST_UGT_RETREAT = 3, // 4CD640, 0x4D51DF
+		CST_UGT_DEFEND_UNIT = 4, // 4CE309, 0x4D5E6D
 		CST_UGT_UNKNOWN_05 = 5, // "add up HPs of my units" ?
 		CST_UGT_UNKNOWN_06 = 6, // "add up HPs of my units" ?
-		CST_UGT_EXTERMINATE = 7, // 4CD7A9
+		CST_UGT_EXTERMINATE = 7, // 0x4CD7A9. Set in 0x4D50AB, See 0x4D535D
 		CST_UGT_EXPLORE = 8, // 4CD977
 		CST_UGT_UNKNOWN_09 = 9, // 4CD425. Regroup ? Uses SNAttackGroupGatherSpacing
 		CST_UGT_GO_FISHING = 0x0A, // 4CE4AB
 		CST_UGT_TRADE = 0x0B, // 4CE651
-		CST_UGT_UNKNOWN_0C = 0x0C, // "add up HPs of my units" ?
-		CST_UGT_UNUSED_0D = 0x0D, // SEEMS to be unused (invalid)
+		CST_UGT_UNKNOWN_0C = 0x0C, // "add up HPs of my units" ? See 0x4D5130
+		CST_UGT_UNKNOWN_0D = 0x0D, // See 4D4729
 		CST_UGT_UNKNOWN_0E = 0x0E, // 4CD425. Regroup ?
-		CST_UGT_UNUSED_0F = 0x0F, // SEEMS to be unused (invalid)
-		CST_UGT_UNUSED_10 = 0x10, // SEEMS to be unused (invalid)
-		CST_UGT_UNUSED_11 = 0x11, // SEEMS to be unused (invalid)
-		CST_UGT_UNUSED_12 = 0x12, // SEEMS to be unused (invalid)
-		CST_UGT_UNKNOWN_13 = 0x13, // "add up HPs of my units" ?
+		CST_UGT_UNKNOWN_0F = 0x0F, // Reset ?
+		CST_UGT_UNKNOWN_10 = 0x10, // See 0x4D4D03
+		CST_UGT_UNKNOWN_11 = 0x11, //
+		CST_UGT_UNKNOWN_12 = 0x12, // 
+		CST_UGT_UNKNOWN_13 = 0x13, // "add up HPs of my units" ? See 0x4D5140
 		CST_UGT_ATTACK_ROUNDUP_TARGET = 0x14,
-		CST_UGT_UNKNOWN_15_ATTACK = 15
+		CST_UGT_UNKNOWN_15_ATTACK = 15,
+		CST_UGT_UNKNOWN_16 = 0x16 // Set in 0x4D4C5F
 	};
 
 	// See 0x4D0880, 0x4D1BB5

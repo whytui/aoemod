@@ -139,6 +139,7 @@ namespace CUSTOMROR {
 		void EntryPointOnHoverOnUnit(REG_BACKUP *REG_values);
 		void EntryPointShowInGameDefaultCursor_noUnitUnderMouse(REG_BACKUP *REG_values);
 		void EntryPointAfterActivityStop(REG_BACKUP *REG_values);
+		void EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

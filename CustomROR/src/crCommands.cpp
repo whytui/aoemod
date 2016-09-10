@@ -1111,7 +1111,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 		}
 	}
 
-	// SN Numbers
+	// SN Numbers (update both strategyAI and tacAI)
 	for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (player && player->IsCheckSumValid() && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
@@ -5523,6 +5523,57 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 			}
 		}
 	}
+}
+
+
+// Returns the most disliked playerIdn, impacting which player "I" will attack.
+long int CustomRORCommand::GetMostDislikedPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_DIPLOMACY_AI *diplAI,
+	long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor) {
+	assert(player && player->IsCheckSumValid());
+	assert(diplAI && diplAI->IsCheckSumValid());
+	if (!player || !player->IsCheckSumValid() || !diplAI || !diplAI->IsCheckSumValid()) { return -1; }
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	assert(global && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) { return -1; }
+
+	long int mostDislikedPlayerId = -1;
+	long int bestDislikeValue = -1;
+
+	// Loop on all non-gaia players
+	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(loopPlayerId);
+		if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) &&
+			loopPlayer->ptrScoreInformation && loopPlayer->ptrScoreInformation->IsCheckSumValid() &&
+			(loopPlayer->aliveStatus != 2)) { // Cf 0x40ACFA: exclude defeated players
+			assert((loopPlayerId >= 1) && (loopPlayerId < global->playerTotalCount) && (loopPlayerId <= 8));
+			if (player->ptrDiplomacyStances[loopPlayerId] != 0) { // Not allied, cf call in 0x40AD14)
+				long int playerScoreFactor = 0; // default: no impact
+				if (attackWinningPlayer && (attackWinningPlayerFactor > 0)) {
+					playerScoreFactor = loopPlayer->ptrScoreInformation->currentTotalScore / attackWinningPlayerFactor;
+				}
+				// In game code, there is a "else" that does the opposite effect if attackWinningPlayer is false (factor is substracted !)
+				long int thisDislikeValue = diplAI->dislikeTable[loopPlayerId] + playerScoreFactor;
+				if (thisDislikeValue > bestDislikeValue) {
+					bestDislikeValue = thisDislikeValue;
+					mostDislikedPlayerId = loopPlayerId;
+				}
+			}
+		}
+	}
+
+	// TO DO: wonder/all artefacts = top priority
+	// TO DO: building a wonder = 2nd priority
+	// + other rules (current target, attacking me, etc)
+	// Use a random part
+	
+	// TEST
+	/*std::string msg = "p#";
+	msg += std::to_string(player->playerId);
+	msg += ": target=";
+	msg += std::to_string(mostDislikedPlayerId);
+	CallWriteText(msg.c_str());*/
+
+	return mostDislikedPlayerId;
 }
 
 

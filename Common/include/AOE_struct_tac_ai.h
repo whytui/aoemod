@@ -102,7 +102,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_1B8;
 		unsigned long int unknown_1BC;
 		// 0x1C0
-		unsigned long int unknown_1C0;
+		long int unknown_1C0;
 		unsigned long int unknown_1C4;
 		unsigned long int unknown_1C8;
 		unsigned long int unknown_1CC;
@@ -156,7 +156,7 @@ namespace AOE_STRUCTURES {
 		long int targetUnitId;
 		float targetEvaluation; // +04. According to SNTargetEvaluationxxx numbers
 		long int unknown_08;
-		long int infAIUnitElemListIndex; // +C. Index of matching element in infAI.unitListElem.
+		long int infAIUnitElemListIndex; // +C. Index of matching element in infAI.unitListElem. "Previous" elements in infAI.unitListElem are ignored ?
 		// 0x10
 		long int unknown_10;
 		long int unknown_14;
@@ -172,7 +172,7 @@ namespace AOE_STRUCTURES {
 
 
 	// Tactical AI. Lots of things are managed here !
-	// size 0x100C - Constructor=0x4CEBE0. Corresponds to MainAI+0x1146C
+	// size 0x100C - Constructor=0x4CEBE0, Deserialize=0x4CEF10. Corresponds to MainAI+0x1146C
 	class STRUCT_TAC_AI {
 	public:
 		unsigned long int checksum;
@@ -213,16 +213,8 @@ namespace AOE_STRUCTURES {
 		// 0xD20
 		unsigned long int buildFrequencyCounter; // incremented until it reaches SNBuildFrequency
 		unsigned long int timeSinceLastAttackResponse_seconds; // To confirm. Compared to SNAttackResponseSeparationTime. See 4E0BC0.
-		unsigned long int unknown_D28_ptrTargetInfo; //ptr to playerIdTarget? SEEMS TO BE WHAT DEFINES WHO TO ATTACK?
-		unsigned long int unknown_D2C;
-		// 0xD30
-		unsigned long int unknown_D30;
-		unsigned long int unknown_D34; // some counter ? Related to buildAI?
-		unsigned long int unknown_D38;
-		unsigned long int unknown_D3C;
-		// 0xD40
-		unsigned long int unknown_D40;
-		unsigned long int unknown_D44;
+		STRUCT_AI_UNIT_LIST_INFO targetPlayers; // +D28. Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK? Always only 1 element (sometimes hardcoded?4D622C)
+		STRUCT_AI_UNIT_LIST_INFO likedPlayers; // +D38. allied playerIds ? "myself" IS in list ! In practise, always 2 elements? (me + most liked player) ?
 		STRUCT_AI_UNIT_LIST_INFO IdleOrInRangeMilitaryUnits; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960
 		STRUCT_AI_UNIT_LIST_INFO unknownUnits_D58; // TC + villagers ? + others? Builders ?
 		unsigned long int gathererCount_actual[4]; // +D68. Index IS resource ID.
