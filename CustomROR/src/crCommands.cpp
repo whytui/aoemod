@@ -3197,7 +3197,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 
 	if (!isNotCreatable && !isTempUnit) {
 		// We have a creatable unit
-		if (isBuilding && (unit->unitStatus == AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY)) { // status=2 means it is a conversion (or gaia unit captured)
+		if (isBuilding && (unit->unitStatus == AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY)) { // status=2 means it is a conversion (or gaia unit captured)
 			// Remove building from player buildings list (bug in original game), this is done in unit destructor but NOT at unit conversion
 			// Note that because of this call, the remove operation is done twice (will be done again in destructor). But the 2nd time, it will just do nothing.
 			AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader = player->ptrBuildingsListHeader;

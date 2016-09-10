@@ -25,6 +25,7 @@ namespace AOE_STRUCTURES {
 
 
 	// Size 0x10. Constructor = 0x4A2000 = datSound.read(internalFileId, pSounds, pMPInfo)
+	// 0x4A2370=play(arg1)
 	class STRUCT_DAT_SOUND {
 	public:
 		short int unknown_00;

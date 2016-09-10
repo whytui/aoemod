@@ -127,8 +127,8 @@ namespace AOE_STRUCTURES
 		STRUCT_GRAPHICS *ptrStandingGraphics; // +18. starts with SLP name.
 		STRUCT_GRAPHICS *ptrDyingGraphic; // +1C. starts with SLP name.
 		// 0x20
-		STRUCT_GRAPHICS *ptrDyingGraphic2; // +20. Unused ?
-		short int deathMode;
+		STRUCT_GRAPHICS *ptrDyingGraphic2; // +20. Used only when deathMode = true
+		short int deathMode; // +024. If 1, then unit status 6 is used. Otherwise, units die as soon as their own resources are depleted.
 		short int totalHitPoints; // +026. Including upgrades !
 		float lineOfSight; // +028
 		char garrisonCapacity; // +02C

@@ -184,9 +184,6 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		}
 		bool c1 = md1->IsCheckSumValid();
 		c1 = md2->IsCheckSumValid();
-
-		settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE;
-		SetGameCursor(GAME_CURSOR::GC_GROUP);
 	}
 
 	// TEST - F8 - show dialog

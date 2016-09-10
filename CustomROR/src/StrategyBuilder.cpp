@@ -2533,7 +2533,6 @@ void StrategyBuilder::CollectGlobalStrategyGenerationInfo(AOE_STRUCTURES::STRUCT
 
 	this->villagerCount_alwaysRetrain = fixedVillagerCount;
 	this->villagerCount_limitedRetrains = limitedRetrainsVillagerCount;
-	// TODO: more villagers if max population > 50 ?
 	if (this->maxPopulation > 50) {
 		int additionalPop = this->maxPopulation - 50;
 		// A third (33%) of additional population will be villager. A third of those will have limited retrains
@@ -2546,7 +2545,7 @@ void StrategyBuilder::CollectGlobalStrategyGenerationInfo(AOE_STRUCTURES::STRUCT
 	this->log += std::to_string(this->villagerCount_limitedRetrains);
 	this->log += newline;
 
-	// "civilian" Boats : TODO
+	// "civilian" Boats : TODO. ROR can handle it meanwhile
 	if (this->isWaterMap) {
 
 	}

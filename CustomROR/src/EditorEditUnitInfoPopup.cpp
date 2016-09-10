@@ -142,15 +142,15 @@ void EditorEditUnitInfoPopup::OnBeforeClose(bool isCancel) {
 		for each (auto curUnit in this->allSelectedUnits)
 		{
 			if (this->chkbox_s0 && (this->chkbox_s0->checked)) {
-				curUnit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_NOT_BUILT;
+				curUnit->unitStatus = AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_0_NOT_BUILT;
 				curUnit->shortcutNumber = 1;
 			}
 			if (this->chkbox_s2 && (this->chkbox_s2->checked)) {
-				curUnit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_READY;
+				curUnit->unitStatus = AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY;
 				curUnit->shortcutNumber = 0;
 			}
 			if (this->chkbox_s4 && (this->chkbox_s4->checked)) {
-				curUnit->unitStatus = AOE_CONST_INTERNAL::UNIT_STATUS::CST_US_DYING_ANIMATION;
+				curUnit->unitStatus = AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_4_DYING_ANIMATION;
 				curUnit->shortcutNumber = 3;
 			}
 		}

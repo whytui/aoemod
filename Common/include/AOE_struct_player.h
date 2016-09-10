@@ -135,8 +135,8 @@ namespace AOE_STRUCTURES {
 
 
 	// Size 0x14. Constructor = 0x516DA0
-	// Stores explored resource units (other than animal and farms) ?
-	class STRUCT_PLAYER_UNKNOWN_118 {
+	// Stores explored resource units (that can NOT move = other than animal and farms)
+	class STRUCT_PLAYER_MOTIONLESS_SPOTTED_GATHERABLE {
 	public:
 		STRUCT_NEARBY_UNIT_INFO **arrayNearbyUnitInfos;
 		long int *arrayArraySizeInNearbyUnitInfos; // +04. elem[i] represents array size of arrayNearbyUnitInfos[i]
@@ -144,7 +144,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_PLAYER *player; // Parent player
 		long int arraySize; // +10. Number of (both used/alloc) elements in each array. Cf PLAYER_GATHERABLE_RESOURCE_CATEGORIES.
 	};
-	static_assert(sizeof(STRUCT_PLAYER_UNKNOWN_118) == 0x14, "STRUCT_PLAYER_UNKNOWN_118 size");
+	static_assert(sizeof(STRUCT_PLAYER_MOTIONLESS_SPOTTED_GATHERABLE) == 0x14, "STRUCT_PLAYER_UNKNOWN_118 size");
 
 
 	// PLAYER. Constructor=0x4EFB00
@@ -217,7 +217,7 @@ namespace AOE_STRUCTURES {
 		// 0x110
 		short int techTreeId; // 45BA12 : DWORD !
 		short int unknown_112;
-		STRUCT_PLAYER_UNKNOWN_118 *spottedResources; // +114. Contains info about resource units. Set in 0x4F1EF8. Related to +58 data. Not related to AI. Each time a tile is explored, underlying resources are added here.
+		STRUCT_PLAYER_MOTIONLESS_SPOTTED_GATHERABLE *spottedResources; // +114. Contains info about resource units. Set in 0x4F1EF8. Related to +58 data. Not related to AI. Each time a tile is explored, underlying resources are added here.
 		float screenPositionY; // axis southwest-northeast like /
 		float screenPositionX; // axis northwest-southeast like \   [origin is left corner - max(X,Y) is right corner]
 		// 0x120

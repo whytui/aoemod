@@ -62,6 +62,7 @@ namespace AOE_CONST_INTERNAL
 		GDL_EASIEST = 4
 	};
 
+
 	enum MOUSE_BUTTON_ACTION : long int {
 		CST_MBA_RELEASE_CLICK = 0x28, // 40
 		CST_MBA_LEFT_CLICK = 0x29, // 41
@@ -276,23 +277,25 @@ namespace AOE_CONST_INTERNAL
 		CST_IMUT_COUNT = 0x0B // If this is wrong and you fix it, please fix also infAI struct definition
 	};
 
-	enum UNIT_STATUS : char {
-		CST_US_NOT_BUILT = 0, // Relevant for buildings
-		CST_US_UNKNOWN_1 = 1,
-		CST_US_READY = 2, // Initial status for living units, normal status for buildings (once built)/living units
-		// In terms of gameplay, statuses >2 are dead/dying units, but can be used for resources/technical units...
-		// Units with status>2 have no action, no longer count in player resources, etc.
-		CST_US_UNKNOWN_3 = 3, // used to trigger unit death (intermediate status ?)
-		CST_US_BERRY_BUSH = 3,
-		CST_US_CUT_TREE = 3, // A tree that is ready to be gathered
-		CST_US_DYING_ANIMATION = 4, // Relevant for living units (including animals)
-		CST_US_UNKNOWN_5 = 5, // frequent for smoke units ?
-		CST_US_MINES = 5, // Gold mine, stone mine
-		CST_US_GATHERABLE_ANIMAL, // Animal dead bodys that still provide meat.
-		CST_US_UNKNOWN_6 = 6, // not used for living units. Not used at all ?
-		CST_US_UNKNOWN_7 = 7, // Death, unit no longer produces "visibility". Unit is no longer displayed at all ?
-		CST_US_TO_DESTROY = 8 // Unit structure plays no role, just waiting to be destroyed/freed ?
+	// Ordered statuses for units. Units lifecycle go from 0 to 7 (8?). Some steps may not be used for all unit types.
+	// When a status is not used/has no specific role for a unit, then the status advances to next status (e.g. status 1 => 2 immediately)
+	// unit.setStatus = [EDX+5C]. unit.manageStatusChange?=[EDX+24]
+	enum GAME_UNIT_STATUS : char {
+		GUS_0_NOT_BUILT = 0, // Seems to be relevant only for buildings. This status is kept as long as building is not fully built.
+		GUS_1_UNKNOWN_1 = 1, // Not sure this status is really used/has a valid role ?
+		GUS_2_READY = 2, // Standard "alive" status for most units
+		
+		// Triggered when HP < 1. From here, unit can no longer have actions, no longer provides fog visibility.
+		// Berry bushes, "cut" trees have this status ? Unit no longer receives damage except blast damage (trees/animals destroyed by catapults...)
+		// Unit's graphic is now dying graphic (unitDef+1C), dying sound is played when status becomes 3.
+		GUS_3_WAIT_RESOURCE_DEPLETION_NO_DYING_ANIMATION = 3, // Go to status=4 if unit has a dyingAnimation1. Otherwise, this status has the same role as status=5 (in this case, go directly to 6 or 7 once depleted).
+		GUS_4_DYING_ANIMATION = 4, // Dying animation is being run (?)
+		GUS_5_WAIT_RESOURCE_DEPLETION_AFTER_ANIMATION = 5, // Unit keeps this status until owned resources are depleted (down to 0), depending on resourceDecay and being gathered by some unit. Unit only produces visibility on its own tile ?
+		GUS_6_DYING_ANIMATION_2 = 6, //  Used only when deathMode=true (NOT used in standard game). This status uses dyingGraphic2.
+		GUS_7_UNKNOWN_7 = 7, // Unit actual death. Unit is no longer displayed at all and "dead unit" is created.
+		GUS_8_UNKNOWN_8 = 8 // Invalid, waiting to be freed (or already freed ?)
 	};
+
 
 	// Unsure / to debug
 	enum ACTION_STATUS : char {
