@@ -144,8 +144,10 @@ void SetGamePause(bool pauseOn) {
 
 // DO NOT call this if current UI is not "in-game" screen
 void CallWriteText(const char *txt) {
-	assert(GetGameSettingsPtr() != NULL);
-	assert(GetGameSettingsPtr()->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING);
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings != NULL);
+	assert((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
+		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME));
 	long int addr = (long int)txt;
 	long int writeFct = 0x480760; // DisplayChatTextOnNextLine
 	_asm {

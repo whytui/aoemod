@@ -5536,8 +5536,65 @@ long int CustomRORCommand::GetMostDislikedPlayer(AOE_STRUCTURES::STRUCT_PLAYER *
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return -1; }
 
+	if (player->aliveStatus > 0) { return -1; }
+
 	long int mostDislikedPlayerId = -1;
 	long int bestDislikeValue = -1;
+
+	bool hasBuiltWonder[9];
+	bool hasInProgressWonder[9];
+	long int allRelicsOrRuinsCounter[9]; // 0=normal, 1=all relics OR all ruins, 2=all relics AND all ruins
+	for (int i = 0; i < 9; i++) {
+		hasBuiltWonder[i] = false;
+		hasInProgressWonder[i] = false;
+		allRelicsOrRuinsCounter[i] = 0;
+	}
+
+	// Count wonders/relics/ruins : they are public-visible: there is no cheating in counting them this way
+	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(loopPlayerId);
+		if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) && (loopPlayer->aliveStatus != 2) &&
+			(player->ptrDiplomacyStances[loopPlayerId] != 0) && loopPlayer->ptrBuildingsListHeader) {
+
+			// Getting those 3 specific resources is no cheating (whereas getting food amount would be !)
+			if (loopPlayer->GetResourceValue(CST_RES_ORDER_ALL_RUINS) > 0) {
+				allRelicsOrRuinsCounter[loopPlayerId]++;
+			}
+			if (loopPlayer->GetResourceValue(CST_RES_ORDER_ALL_RELICS) > 0) {
+				allRelicsOrRuinsCounter[loopPlayerId]++;
+			}
+			if (loopPlayer->GetResourceValue(CST_RES_ORDER_STANDING_WONDERS) > 0) {
+				hasBuiltWonder[loopPlayerId] = true;
+			} else {
+				// Optimization: loop in player's buildings only if no standing wonder found in resources
+				// Cons: ignores being-built wonders when a standing one exists.
+				// Pros: avoids looping on the whole list in most cases !
+				for (int i = 0; i < loopPlayer->ptrBuildingsListHeader->buildingsArrayElemCount; i++) {
+					if (loopPlayer->ptrBuildingsListHeader->ptrBuildingsArray[i] && loopPlayer->ptrBuildingsListHeader->ptrBuildingsArray[i]->unitDefinition &&
+						(loopPlayer->ptrBuildingsListHeader->ptrBuildingsArray[i]->unitDefinition->DAT_ID1 == CST_UNITID_WONDER)) {
+						switch (loopPlayer->ptrBuildingsListHeader->ptrBuildingsArray[i]->unitStatus) {
+						case GAME_UNIT_STATUS::GUS_0_NOT_BUILT:
+						case GAME_UNIT_STATUS::GUS_1_UNKNOWN_1:
+							hasInProgressWonder[loopPlayerId] = true;
+							break;
+						case GAME_UNIT_STATUS::GUS_2_READY:
+							// This loop is not supposed to detect built wonders (already found in resource).
+							assert(false && "Inconsistentcy: a wonder was not detected in resources");
+							hasBuiltWonder[loopPlayerId] = true;
+							break;
+						default:
+							// >= 3 : dying, ignore it
+							break;
+						}
+					}
+					if (hasInProgressWonder[loopPlayerId]) {
+						break; // We don't need to continue looping on all buildings. This will continue with next playerId loop.
+					}
+				}
+			}
+		}
+	}
+
 
 	// Loop on all non-gaia players
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
@@ -5550,9 +5607,21 @@ long int CustomRORCommand::GetMostDislikedPlayer(AOE_STRUCTURES::STRUCT_PLAYER *
 				long int playerScoreFactor = 0; // default: no impact
 				if (attackWinningPlayer && (attackWinningPlayerFactor > 0)) {
 					playerScoreFactor = loopPlayer->ptrScoreInformation->currentTotalScore / attackWinningPlayerFactor;
+					// Note: In game code, there is a "else" that does the opposite effect if attackWinningPlayer is false (factor is substracted !)
 				}
-				// In game code, there is a "else" that does the opposite effect if attackWinningPlayer is false (factor is substracted !)
-				long int thisDislikeValue = diplAI->dislikeTable[loopPlayerId] + playerScoreFactor;
+
+				// Handle some priority rules (NOT in standard game)
+				long int otherDislikeAmount = 0;
+				if (hasInProgressWonder[loopPlayerId]) {
+					otherDislikeAmount += 100;
+				}
+				if (hasBuiltWonder[loopPlayerId]) {
+					otherDislikeAmount += 200; // Very top priority ! However other criteria can still make the decision between 2 players having a wonder.
+				}
+				otherDislikeAmount += allRelicsOrRuinsCounter[loopPlayerId] * 100;
+				// TODO: we could try to handle remaining time for each one (relics/ruins/wonder) + check victory conditions (or maybe not, this is still a good criteria even if not a victory condition)
+
+				long int thisDislikeValue = diplAI->dislikeTable[loopPlayerId] + playerScoreFactor + otherDislikeAmount;
 				if (thisDislikeValue > bestDislikeValue) {
 					bestDislikeValue = thisDislikeValue;
 					mostDislikedPlayerId = loopPlayerId;
@@ -5561,8 +5630,6 @@ long int CustomRORCommand::GetMostDislikedPlayer(AOE_STRUCTURES::STRUCT_PLAYER *
 		}
 	}
 
-	// TO DO: wonder/all artefacts = top priority
-	// TO DO: building a wonder = 2nd priority
 	// + other rules (current target, attacking me, etc)
 	// Use a random part
 	
