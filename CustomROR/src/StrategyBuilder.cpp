@@ -2488,6 +2488,15 @@ void StrategyBuilder::AddMandatoryNonMilitaryResearches() {
 			farmInfo->desiredCount = normalOrEasy ? 5 : 7;
 		}
 		farmInfo->highPriority = true;
+		int additionalPop = this->maxPopulation - 50;
+		if (additionalPop > 0) {
+			farmInfo->desiredCount += (additionalPop / 10); // 1 additional farm for each additional "10 population" group
+			const int maxAllowedFarms = this->isWaterMap ? 16: 20; // Max number of farms
+			if (farmInfo->desiredCount > maxAllowedFarms) { farmInfo->desiredCount = maxAllowedFarms; }
+		}
+		this->log += "Desired number of farms: ";
+		this->log += std::to_string(farmInfo->desiredCount);
+		this->log += newline;
 	}
 }
 
@@ -2525,6 +2534,17 @@ void StrategyBuilder::CollectGlobalStrategyGenerationInfo(AOE_STRUCTURES::STRUCT
 	this->villagerCount_alwaysRetrain = fixedVillagerCount;
 	this->villagerCount_limitedRetrains = limitedRetrainsVillagerCount;
 	// TODO: more villagers if max population > 50 ?
+	if (this->maxPopulation > 50) {
+		int additionalPop = this->maxPopulation - 50;
+		// A third (33%) of additional population will be villager. A third of those will have limited retrains
+		this->villagerCount_alwaysRetrain += (2 * additionalPop) / 9;
+		this->villagerCount_limitedRetrains += additionalPop / 9;
+	}
+	this->log += "Villager count: ";
+	this->log += std::to_string(this->villagerCount_alwaysRetrain);
+	this->log += "+";
+	this->log += std::to_string(this->villagerCount_limitedRetrains);
+	this->log += newline;
 
 	// "civilian" Boats : TODO
 	if (this->isWaterMap) {
