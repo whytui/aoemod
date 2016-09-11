@@ -133,6 +133,7 @@
     <ClInclude Include="include\InputBox.h" />
     <ClInclude Include="include\language.h" />
     <ClInclude Include="include\mainStructuresHandling.h" />
+    <ClInclude Include="include\playerTargeting.h" />
     <ClInclude Include="include\randomizer.h" />
     <ClInclude Include="include\researches.h" />
     <ClInclude Include="include\RORProcessEditor.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="src\mainStructuresHandling.cpp" />
     <ClCompile Include="src\MapCopyPopup.cpp" />
     <ClCompile Include="src\interface.cpp" />
+    <ClCompile Include="src\playerTargeting.cpp" />
     <ClCompile Include="src\researches.cpp" />
     <ClCompile Include="src\RORProcessEditor.cpp" />
     <ClCompile Include="src\AOE_strategy.cpp" />

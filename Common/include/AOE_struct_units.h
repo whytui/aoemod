@@ -118,7 +118,7 @@ namespace AOE_STRUCTURES {
 		char unknown_04B;
 		short int resourceTypeId; // A unit can hold only 1 resource. =0x22=34 for priest.
 		char unitType; // +4E. Warning: this value is often WRONG. See unitDef value instead. Only 1-byte here, whereas it is 4-bytes in unitDef struct. 70=living, etc. See GLOBAL_UNIT_TYPES
-		char unitCountThatAreTargettingMe; // Number of (other)units that have "me" as target. See 4AADB0.
+		char unitCountThatAreTargetingMe; // Number of (other)units that have "me" as target. See 4AADB0.
 		// 0x50
 		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *ptrElemInPlayerUnitList; // +50.
 		unsigned long int unknown_054; // +54 a ptr. An array. Elemsize=4? about movement ?

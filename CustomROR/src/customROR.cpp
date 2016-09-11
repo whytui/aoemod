@@ -3493,7 +3493,7 @@ void CustomRORInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values
 	// Custom treatments
 	if (CUSTOMROR::crCommand.IsImproveAIEnabled(player->playerId)) {
 		// Override the calculation of target player Id (most disliked)
-		mostDislikedPlayerId = CUSTOMROR::crCommand.GetMostDislikedPlayer(player, diplAI, askTributeAmount, askTributePlayerId,
+		mostDislikedPlayerId = CUSTOMROR::playerTargetingHandler.GetMostDislikedPlayer(player, diplAI, askTributeAmount, askTributePlayerId,
 			(attackWinningPlayerFlag != 0), attackWinningPlayerFactor);
 		skipStandardTreatment = true;
 	}

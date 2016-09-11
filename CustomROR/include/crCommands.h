@@ -34,6 +34,7 @@
 #include "crMapCopier.h"
 #include "crRPGMode.h"
 #include "buttonBar.h"
+#include "playerTargeting.h"
 
 #pragma once
 
@@ -400,10 +401,6 @@ public:
 
 	// Entry point when a unit activity stops.
 	void OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity);
-
-	// Returns the most disliked playerIdn, impacting which player "I" will attack.
-	long int GetMostDislikedPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_DIPLOMACY_AI *diplAI, 
-		long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor);
 
 	// ----------------------------------
 	// City plan

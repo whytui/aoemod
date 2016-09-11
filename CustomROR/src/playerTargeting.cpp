@@ -1,0 +1,313 @@
+#include "../include/playerTargeting.h"
+
+
+namespace CUSTOMROR {
+
+	// Global static objects
+	PlayerTargeting playerTargetingHandler;
+
+
+
+	AIPlayerTargetingInfo::AIPlayerTargetingInfo() {
+		this->ResetInfo();
+	}
+
+	// Reset all underlying info (useful at game start, etc)
+	void AIPlayerTargetingInfo::ResetInfo() {
+		for (int i = 0; i < 9; i++) {
+			this->lastComputedDislikeSubScore[i] = 0;
+			this->previousAttackCountsByEnemyPlayers[i] = 0;
+			this->attacksByEnemyPlayersDuringLastPeriod[i] = 0;
+		}
+		this->lastUpdateGameTime = 0;
+		this->nextUpdateGameTime = 0;
+	}
+
+
+	// Recompute information (only) if refresh delay has been reached
+	// Returns true if information have been recomputed (false is not necessarily an error)
+	bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
+		assert(player && player->IsCheckSumValid());
+		assert(player->playerId == this->myPlayerId);
+		if (!player || !player->IsCheckSumValid() || (player->playerId != this->myPlayerId)) { return false; }
+		STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+		assert(global && global->IsCheckSumValid());
+		assert(global->currentGameTime >= 0);
+		if (this->lastUpdateGameTime > 0) {
+			if ((global->currentGameTime <= this->lastUpdateGameTime + (1000 * updateDetailedDislikeInfoMaxDelay)) &&
+				(global->currentGameTime <= this->nextUpdateGameTime)
+				) {
+				return false; // Next update time AND Max delay (which is no more but a security) have both not been reached
+			}
+		}
+		assert(player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid());
+		if (!player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) { return false; }
+
+		this->lastUpdateGameTime = global->currentGameTime;
+		this->nextUpdateGameTime = global->currentGameTime +
+			(1000 * randomizer.GetRandomValue_normal_moreFlat(updateDetailedDislikeInfoMinDelay, updateDetailedDislikeInfoMaxDelay));
+
+		bool ignoreThisPlayer[9];
+		for (int i = 0; i < 9; i++) {
+			ignoreThisPlayer[i] = false;
+		}
+		long int totalAttacksDuringPeriod = 0;
+		int numberOfValidEnemyPlayers = 0;
+
+		// Reset values for all players (even unused ones, just in case)
+		for (int i = 0; i < 9; i++) {
+			this->lastComputedDislikeSubScore[i] = 0;
+		}
+		// Collect individual information
+		for (int targetPlayerId = 1; targetPlayerId < global->playerTotalCount; targetPlayerId++) {
+			STRUCT_PLAYER *targetPlayer = global->GetPlayerStruct(targetPlayerId);
+			assert(targetPlayer && targetPlayer->IsCheckSumValid());
+			if (!targetPlayer || !targetPlayer->IsCheckSumValid()) { continue; }
+			if ((targetPlayer->aliveStatus > 0) || (targetPlayer->playerId == this->myPlayerId) ||
+				(player->ptrDiplomacyStances[targetPlayerId] == 0)) { // 0 means allied
+				ignoreThisPlayer[targetPlayerId] = true;
+				continue;
+			}
+			numberOfValidEnemyPlayers++;
+
+			long int previousAttacksByTargetPlayerCount = this->previousAttackCountsByEnemyPlayers[targetPlayerId];
+			this->previousAttackCountsByEnemyPlayers[targetPlayerId] = player->ptrAIStruct->structTacAI.attacksByPlayerCount[targetPlayerId];
+			// Number of attacks BY target player on me during this period
+			this->attacksByEnemyPlayersDuringLastPeriod[targetPlayerId] = player->ptrAIStruct->structTacAI.attacksByPlayerCount[targetPlayerId] - previousAttacksByTargetPlayerCount;
+			totalAttacksDuringPeriod += this->attacksByEnemyPlayersDuringLastPeriod[targetPlayerId];
+		}
+
+		int averageAttackCountByPlayerDuringPeriod = (numberOfValidEnemyPlayers > 0) ? totalAttacksDuringPeriod / numberOfValidEnemyPlayers : 0;
+
+		// Processing part
+		for (int targetPlayerId = 1; targetPlayerId < global->playerTotalCount; targetPlayerId++) {
+			if (ignoreThisPlayer[targetPlayerId]) {
+				this->lastComputedDislikeSubScore[targetPlayerId] = 0;
+				continue;
+			}
+			STRUCT_PLAYER *targetPlayer = global->GetPlayerStruct(targetPlayerId);
+			// targetPlayer pointer was already checked previously, cf ignoreThisPlayer[targetPlayerId]
+
+
+			// TODO: compute each lastComputedDislikeSubScore
+			// + other rules (current target, attacking me, enemy towers near my town, buildings IN my town? etc)
+
+			if (this->attacksByEnemyPlayersDuringLastPeriod[targetPlayerId] > averageAttackCountByPlayerDuringPeriod) {
+				this->lastComputedDislikeSubScore[targetPlayerId] += 5; // This player attacked me "more than average" => I don't like him
+			}
+
+			int randomFactor = randomizer.GetRandomValue_normal_moderate(0, 10);
+			this->lastComputedDislikeSubScore[targetPlayerId] += randomFactor;
+
+
+		}
+
+		for (int i = 0; i < 9; i++) {
+			if (this->lastComputedDislikeSubScore[i] < 0) {
+				this->lastComputedDislikeSubScore[i] = 0; // avoid negative values.
+			}
+		}
+		return true;
+	}
+
+
+
+	PlayerTargeting::PlayerTargeting() {
+	}
+
+	// Reset all underlying info (useful at game start, etc)
+	void PlayerTargeting::ResetAllInfo() {
+		for (int i = 0; i < 9; i++) {
+			this->GetPlayerInfo(i)->ResetInfo();
+			this->GetPlayerInfo(i)->myPlayerId = i;
+		}
+	}
+
+	// Safely get a player's info
+	AIPlayerTargetingInfo *PlayerTargeting::GetPlayerInfo(long int playerId) {
+		if ((playerId < 0) || (playerId > 8)) { return 0; }
+		return &this->playersAIInfo[playerId];
+	}
+
+
+	// Returns a 0-100 factor according to a delay (in game "years") corresponding to a victory condition timer (up to 2000 "years")
+	// yearsDelay should be >=0
+	long int PlayerTargeting::GetPercentFactorFromVictoryConditionDelay(long int yearsDelay) {
+		assert(yearsDelay >= 0);
+		if (yearsDelay < 0) { yearsDelay = 0; }
+		int delayProportion = 2000 - yearsDelay;
+		if (delayProportion < 0) { delayProportion = 0; } // now delayProportion is 0<=x<=2000
+		delayProportion = delayProportion / 20; // get a 0-100 value, ~100 representing a low remaining delay !
+		return delayProportion;
+	}
+
+
+	// Returns the most disliked playerIdn, impacting which player "I" will attack.
+	// Note: standard ROR code (0x40ACDA) is total crap : applies "score/factor" instead of "score*factor/100", and when attackWinningPlayerFactor=false, the score factor is substracted (instead of ignored)
+	long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DIPLOMACY_AI *diplAI,
+		long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor) {
+		assert(player && player->IsCheckSumValid());
+		assert(diplAI && diplAI->IsCheckSumValid());
+		if (!player || !player->IsCheckSumValid() || !diplAI || !diplAI->IsCheckSumValid()) { return -1; }
+		STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+		STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		assert(global && global->IsCheckSumValid());
+		if (!global || !global->IsCheckSumValid()) { return -1; }
+		assert(settings && settings->IsCheckSumValid());
+		if (!settings || !settings->IsCheckSumValid()) { return -1; }
+
+		if (player->aliveStatus > 0) { return -1; }
+		if ((player->playerId < 1) || (player->playerId >= global->playerTotalCount)) { return -1; }
+		AIPlayerTargetingInfo *playerTargetInfo = this->GetPlayerInfo(player->playerId);
+		if (playerTargetInfo) {
+			// Update internal info for current player (info is not updated on each call, for both performance and to avoid changing target on each call here !)
+			playerTargetInfo->RecomputeInfo(player);
+		}
+		assert(attackWinningPlayerFactor <= 100);
+		if (attackWinningPlayerFactor > 100) { attackWinningPlayerFactor = 100; }
+		if (attackWinningPlayerFactor < 0) { attackWinningPlayerFactor = 0; }
+
+		// TEST: disable targeting when military population is very low ?
+		int currentVillagerCount = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CIVILIAN_POPULATION);
+		int totalPopulation = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CURRENT_POPULATION);
+		if (totalPopulation - currentVillagerCount < 3) {
+			return -1; // Less than 3 military units: forget about targeting enemies
+		}
+
+		bool hasStandardVictoryCondition = (global->generalVictoryCondition == GAME_GLOBAL_GENERAL_VICTORY_CONDITION::GGVC_STANDARD);
+
+		long int mostDislikedPlayerId = -1;
+		long int bestDislikeValue = -1;
+
+		bool hasBuiltWonder[9];
+		bool hasInProgressWonder[9];
+		long int allRelicsOrRuinsCounter[9]; // 0=normal, 1=all relics OR all ruins, 2=all relics AND all ruins
+		for (int i = 0; i < 9; i++) {
+			hasBuiltWonder[i] = false;
+			hasInProgressWonder[i] = false;
+			allRelicsOrRuinsCounter[i] = 0;
+		}
+
+		// Count wonders/relics/ruins : they are public-visible: there is no cheating in counting them this way
+		for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+			STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(loopPlayerId);
+			if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) && (loopPlayer->aliveStatus != 2) &&
+				(player->ptrDiplomacyStances[loopPlayerId] != 0) && loopPlayer->ptrBuildingsListHeader) {
+				// Getting those 3 specific resources is no cheating (whereas getting food amount would be !)
+				if (loopPlayer->GetResourceValue(CST_RES_ORDER_ALL_RUINS) > 0) {
+					allRelicsOrRuinsCounter[loopPlayerId]++;
+				}
+				if (loopPlayer->GetResourceValue(CST_RES_ORDER_ALL_RELICS) > 0) {
+					allRelicsOrRuinsCounter[loopPlayerId]++;
+				}
+				if (loopPlayer->GetResourceValue(CST_RES_ORDER_STANDING_WONDERS) > 0) {
+					hasBuiltWonder[loopPlayerId] = true;
+				} else {
+					// Optimization: loop in player's buildings only if no standing wonder found in resources
+					// Cons: ignores being-built wonders when a standing one exists.
+					// Pros: avoids looping on the whole list in most cases !
+					for (int i = 0; i < loopPlayer->ptrBuildingsListHeader->buildingsArrayElemCount; i++) {
+						if (loopPlayer->ptrBuildingsListHeader->ptrBuildingsArray[i] && loopPlayer->ptrBuildingsListHeader->ptrBuildingsArray[i]->unitDefinition &&
+							(loopPlayer->ptrBuildingsListHeader->ptrBuildingsArray[i]->unitDefinition->DAT_ID1 == CST_UNITID_WONDER)) {
+							switch (loopPlayer->ptrBuildingsListHeader->ptrBuildingsArray[i]->unitStatus) {
+							case GAME_UNIT_STATUS::GUS_0_NOT_BUILT:
+							case GAME_UNIT_STATUS::GUS_1_UNKNOWN_1:
+								hasInProgressWonder[loopPlayerId] = true;
+								break;
+							case GAME_UNIT_STATUS::GUS_2_READY:
+								// This loop is not supposed to detect built wonders (already found in resource).
+								assert(false && "Inconsistentcy: a wonder was not detected in resources");
+								hasBuiltWonder[loopPlayerId] = true;
+								break;
+							default:
+								// >= 3 : dying, ignore it
+								break;
+							}
+						}
+						if (hasInProgressWonder[loopPlayerId]) {
+							break; // We don't need to continue looping on all buildings. This will continue with next playerId loop.
+						}
+					}
+				}
+			}
+		}
+
+
+		// Loop on all non-gaia players
+		for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+			STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(loopPlayerId);
+			if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) &&
+				loopPlayer->ptrScoreInformation && loopPlayer->ptrScoreInformation->IsCheckSumValid() &&
+				(loopPlayer->aliveStatus != 2)) { // Cf 0x40ACFA: exclude defeated players
+				assert((loopPlayerId >= 1) && (loopPlayerId < global->playerTotalCount) && (loopPlayerId <= 8));
+				if (player->ptrDiplomacyStances[loopPlayerId] != 0) { // Not allied, cf call in 0x40AD14)
+					long int playerScoreFactor = 0; // default: no impact
+					if (attackWinningPlayer && (attackWinningPlayerFactor > 0)) {
+						// Note: in game code, the formula is completely erroneous (DIVIDES by factor !)
+						playerScoreFactor = loopPlayer->ptrScoreInformation->currentTotalScore * attackWinningPlayerFactor / 100;
+						// Note: In game code, there is a "else" that does the opposite effect if attackWinningPlayer is false (factor is substracted !)
+					}
+
+					// Handle some priority rules (NOT in standard game)
+
+					long int otherDislikeAmount = 0;
+					if (hasStandardVictoryCondition) {
+						// Wonders/relics/ruins can trigger victory in standard conditions
+						if (hasInProgressWonder[loopPlayerId]) {
+							// Building a wonder: victory timer is not launched yet, but this is critical though.
+							otherDislikeAmount += 80;
+						}
+						if (hasBuiltWonder[loopPlayerId]) {
+							// Player has a standing wonder (which leads to victory)
+							int wonderVictoryDelay = settings->playerWondersVictoryDelays[loopPlayerId];
+							assert(wonderVictoryDelay > -1); // standard victory condition + player has a wonder = delay should be set
+							
+							int wonderDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay(wonderVictoryDelay);
+							otherDislikeAmount += 100 + wonderDelayProportion; // Very top priority ! However other criteria can still make the decision between 2 players having a wonder.
+						}
+
+						if (player->remainingTimeToAllRelicsVictory > -1) {
+							// Player has all relics (which leads to victory)
+							int relicsDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay((int)player->remainingTimeToAllRelicsVictory);
+							otherDislikeAmount += 100 + relicsDelayProportion;
+						}
+						if (player->remainingTimeToAllRuinsVictory > -1) {
+							// Player has all ruins (which leads to victory)
+							int ruinsDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay((int)player->remainingTimeToAllRuinsVictory);
+							otherDislikeAmount += 100 + ruinsDelayProportion;
+						}
+					} else {
+						// Wonders/relics/ruins are not (direct) victory conditions. Impact is reduced.
+						if (hasInProgressWonder[loopPlayerId]) {
+							otherDislikeAmount += 15;
+						}
+						if (hasBuiltWonder[loopPlayerId]) {
+							otherDislikeAmount += 30;
+						}
+						otherDislikeAmount += allRelicsOrRuinsCounter[loopPlayerId] * 20;
+					}
+
+					long int thisDislikeValue = diplAI->dislikeTable[loopPlayerId] + playerScoreFactor + otherDislikeAmount;
+					if (playerTargetInfo) {
+						thisDislikeValue += playerTargetInfo->lastComputedDislikeSubScore[loopPlayerId];
+					}
+					if (thisDislikeValue > bestDislikeValue) {
+						bestDislikeValue = thisDislikeValue;
+						mostDislikedPlayerId = loopPlayerId;
+					}
+				}
+			}
+		}
+
+		// TEST
+		/*std::string msg = "p#";
+		msg += std::to_string(player->playerId);
+		msg += ": target=";
+		msg += std::to_string(mostDislikedPlayerId);
+		CallWriteText(msg.c_str());*/
+
+		return mostDislikedPlayerId;
+	}
+
+
+}
