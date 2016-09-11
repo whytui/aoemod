@@ -16,6 +16,17 @@
 */
 namespace AOE_STRUCTURES {
 
+	// Those dumbasses managed to have 2 inverted values between scenario info and global struct (although values are copied directly from each other)
+	// Don't confuse with GENERAL_VICTORY_CONDITION values.
+	enum GAME_GLOBAL_GENERAL_VICTORY_CONDITION : long int {
+		GGVC_STANDARD = 0,
+		GGVC_CONQUEST = 1,
+		GGVC_SCORE = 3, // stupid developers ! 0x50B4D5
+		GGVC_TIME_LIMIT = 2, // stupid developers ! 0x50B4AC
+		GGVC_CUSTOM = 4
+	};
+
+
 
 	// Size = ? - 04 99 54 00
 	class STRUCT_GAME_COMMANDS_INFO {
@@ -53,15 +64,15 @@ namespace AOE_STRUCTURES {
 	class STRUCT_GAME_GLOBAL {
 	public:
 		unsigned long int checksum;
-		long int currentGameTime; // in milliseconds
+		long int currentGameTime; // in milliseconds. Note: 2 game "years" = 1 second.
 		long int unknown_008; // +8. This value is serialized to saved games. Related to time
 		long int unknown_00C; // +C. This value is serialized to saved games. Related to time
 		unsigned long int unknown_010;
 		unsigned long int timeGetTimeValue;
 		float gameSpeed; // +18
 		char gamePaused; // confirm exact role, do not use it directly.
-		char gameRunStatus; // 0 = Game in progress. 1 = Game Over. 2 = Not ingame. (Default). 3 = Generate Map (when starting game).
-		short int unknown_01E; // some status too ?
+		char gameRunStatus; // +1D. 0 = Game in progress. 1 = Game Over. 2 = Not ingame. (Default). 3 = Generate Map (when starting game).
+		short int unknown_01E; // +E1, status for general victory conditions? Set to 0x65 when all relics timer completes 0x50C2D0, 0x67=genvictoryTimerCompleted?
 		// +0x20
 		unsigned long int unknown_020;
 		unsigned long int unknown_024;
@@ -100,7 +111,7 @@ namespace AOE_STRUCTURES {
 		short int unknown_07E;
 		// +0x80
 		unsigned long int unknown_080; // list of unit data??
-		float timerInterval; // +84
+		float timerInterval; // +84. Unit is *half* a "game year" (like the 2000 years for wonder victory) ?
 		STRUCT_UNIT_BASE **ptrUnitPointersList; // +88. pointer to Array of unit struct pointers
 		unsigned long int unknown_08C;
 		// +0x90
@@ -132,14 +143,14 @@ namespace AOE_STRUCTURES {
 		// +0x100
 		unsigned long int unknown_100_difficultyLevel; // NOT always diff. level. See in game settings struct.
 		STRUCT_RESEARCH_DEF_INFO *researchDefInfo; // +104.
-		unsigned long int unknown_108;
-		unsigned long int relicsCount;
+		GAME_GLOBAL_GENERAL_VICTORY_CONDITION generalVictoryCondition; // +108. 0=standard, 1=conquest...
+		long int relicsCount;
 		// +0x110
-		unsigned long int ruinsCount;
-		char unknown_114;
+		long int ruinsCount;
+		char generalVictoryConditionIsScore; // +114. Unsure of the exact meaning, but set to 1 only when general condition=score
 		char unknown_115[3]; // unused ?
-		unsigned long int unknown_118;
-		char WRONG_showScores; // 0x11C. WRONG ?
+		float generalVictory_remainingTimeAmount; // +118. Used when victory condition is "score". compared to 1 in 0x50BF38
+		char showScores; // 0x11C. Call 0x484F90 to set it (global.showScores(bool))
 		char temporaryTargetPlayerId; // 11D. Used for AI players. "ConCP", CP=computerPlayer? Con=?concerned?
 		short int unknown_11E;
 		// 0x120

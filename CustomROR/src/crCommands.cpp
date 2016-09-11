@@ -4724,7 +4724,7 @@ long int CustomRORCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_
 
 // Write the F11 centered text (if displayed)
 // Warning, this is only refreshed when population changes ?
-void CustomRORCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_PANEL *f11panel, char *bufferToWrite, char *defaultFormat,
+void CustomRORCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *f11panel, char *bufferToWrite, char *defaultFormat,
 	char *localizedText, long int currentPop, long int houseMaxPop) {
 	const int bufferSize = 200; // do not know for sure.
 	if (!CUSTOMROR::crInfo.configInfo.showCustomPopInfo) {

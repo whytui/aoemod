@@ -444,7 +444,7 @@ namespace AOE_CONST_INTERNAL
 		CST_DTI_COUNT = 0x14
 	};
 
-	// General victory condition choice
+	// General victory condition choice. WARNING: in game global, 2 values are inverted.
 	enum GENERAL_VICTORY_CONDITION : long int {
 		GVC_STANDARD = 0,
 		GVC_CONQUEST = 1,

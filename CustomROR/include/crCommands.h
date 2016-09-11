@@ -336,7 +336,7 @@ public:
 
 	// Write the F11 centered text (if displayed)
 	// Warning, this is only refreshed when population changes ?
-	void WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_PANEL *f11panel, char *bufferToWrite, char *defaultFormat,
+	void WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *f11panel, char *bufferToWrite, char *defaultFormat,
 		char *localizedText, long int currentPop, long int houseMaxPop);
 
 	// Handles the event "farm is depleted". NOT called when a farm is destroyed/killed.

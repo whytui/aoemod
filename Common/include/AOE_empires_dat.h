@@ -112,13 +112,13 @@ namespace AOE_CONST_FUNC {
 		CST_RES_BASIC_RESOURCE_COUNT = 4, // many locations use these 4 resources, including AI structures. Put after pop headroom for practical debugging display.
 		CST_RES_ORDER_UNKNOWN_05 = 5, // ?
 		CST_RES_ORDER_CURRENT_AGE = 6, // TO CONFIRM
-		CST_RES_ORDER_RELICS = 7, // TO CONFIRM,
+		CST_RES_ORDER_RELICS = 7, // Number of owned relics
 		CST_RES_ORDER_GAME_TIME = 9, // in seconds WRONG ? Housage ?
 		CST_RES_ORDER_TRADE_PRODUCTION = 10, // Default 1 ?
 		CST_RES_ORDER_CURRENT_POPULATION = 11,
 		CST_RES_ORDER_CORPSE_DECAY_TIME = 12, // TO CONFIRM. Remains 0 in game ?
 		CST_RES_ORDER_DISCOVERIES = 13, // TO CONFIRM
-		CST_RES_ORDER_RUINS = 14, // TO CONFIRM
+		CST_RES_ORDER_RUINS = 14, // Number of owned ruins
 		CST_RES_ORDER_MEAT_STORAGE = 15, // TO CONFIRM. Remains 0 in game ?
 		CST_RES_ORDER_BERRY_STORAGE = 16, // TO CONFIRM
 		CST_RES_ORDER_FISH_STORAGE = 17, // TO CONFIRM

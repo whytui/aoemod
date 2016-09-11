@@ -24,13 +24,14 @@ namespace AOE_STRUCTURES
 		long int screenSizeY;
 	};
 
+
+#define CHECKSUM_ANY_UI 0x00544AD8
 	// Parent class for UI objects (both screens and UI components).
 	// Size=0xF4 for this class, but all child classes are larger !
 	// Constructor: 004523F0 for "screen" objects, 00452580 for components
 	// In general, you should not modify these members directly. You are supposed to use methods (few are implemented in this solution).
 	// D8 4A 54 00 for this base (parent) class
 	// [EDX+C4] = uiComponent.setFocus(doFocus)
-#define CHECKSUM_ANY_UI 0x00544AD8
 	class STRUCT_ANY_UI {
 	public:
 		unsigned long int checksum; // Depends on UI object type

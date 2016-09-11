@@ -7,6 +7,7 @@
 #include <UI\AOE_struct_ui_playing_zone.h>
 #include <UI\AOE_struct_ui_diamond_map.h>
 #include <UI\AOE_struct_ui_f11_pop_panel.h>
+#include <UI_components\AOE_struct_ui_gameColoredInfoLabel.h>
 #include <AOE_structures_drs.h>
 #include <AOE_struct_units.h>
 
@@ -68,9 +69,10 @@ namespace AOE_STRUCTURES
 		STRUCT_UI_BUTTON_WITH_NUMBER *btnMenu; // +500. Also referred as commandButtons[0xE]
 		STRUCT_UI_BUTTON_WITH_NUMBER *btnHelp; // +504. Also referred as commandButtons[0xF]
 		STRUCT_UI_BUTTON_WITH_NUMBER *btnShowScores; // +508. Also referred as commandButtons[0x10]
-		char unknown_50C[0x518 - 0x50C];
-		STRUCT_ANY_UI *unknown_518[10]; // cf 47F753
-		STRUCT_UI_F11_POP_PANEL *populationInfoPanel; // 0x540. F11 "pop : x/y" zone ?
+		char unknown_50C[0x514 - 0x50C];
+		STRUCT_GAME_COLORED_INFO_LABEL *topLeftInfoLabel; // +514. The left part (game time + speed) of F11 infos.
+		STRUCT_GAME_COLORED_INFO_LABEL *victoryTimersInfoLabels[10]; // +518. cf 0x47F753,0x4839EA
+		STRUCT_UI_F11_POP_LABEL *populationInfoPanel; // 0x540. F11 "pop : x/y" zone ?
 		STRUCT_UI_IN_GAME_TEXT_ZONE *ingameErrorTextZone; // 0x544
 		char unknown_548[0x55C - 0x548];
 		STRUCT_UI_IN_GAME_TEXT_ZONE *ingameChatTextZone[8]; // 0x55C ; check count !

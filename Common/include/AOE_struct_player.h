@@ -210,10 +210,10 @@ namespace AOE_STRUCTURES {
 		// 0xE0
 		long int unknown_0E0[9]; // A dword per player 0-8
 		long int sharedExploration; // +104. 1=shared exploration (writing tech).
-		char hasAlliedVictory;
+		char hasAlliedVictory; // +108.
 		AOE_CONST_FUNC::CIVILIZATIONS civilizationId; // +109. 1 byte (char)
 		short int unknown_10A; // unused ?
-		unsigned long int ptrPlayerColorStruct; // quite unknown. +26=color(word)? +28=sub_struct
+		unsigned long int ptrPlayerColorStruct; // quite unknown. +4=name(x.col), +26=color(word)? +28=sub_struct
 		// 0x110
 		short int techTreeId; // 45BA12 : DWORD !
 		short int unknown_112;
@@ -254,8 +254,9 @@ namespace AOE_STRUCTURES {
 		char AIDebugTextLine5[0x100]; // +640.
 		char AIDebugTextLine6[0x100]; // +740.
 		STRUCT_PLAYER_POP_HIST_INFO *populationHistoryInfo; // +840. Information for achievements screen (timeline)
-		char unknown_844[0x85C - 0x844];
-		// From there, a lot of xx 00 00 00 (4 bytes) until +0x67C at least ? Maybe a lot more ?
+		float remainingTimeToAllRuinsVictory; // +844. -1 means not relevant (I do not have all ruins). See 0x50BF00 method
+		float remainingTimeToAllRelicsVictory; // +848. -1 means not relevant (I do not have all relics). See 0x50BF00 method
+		char unknown_84C[0x85C - 0x84C];
 		// 0x85C - DO NOT access this unless you checked the "selected units" feature is installed ! On standard game structure stops here.
 		// See GetRelevantSelectedUnitsPointer(...)
 		STRUCT_UNIT_BASE *custom_selectedUnits[CST_RS_MAX_SUPPORTED_SELECTED_UNITS]; // ONLY USE THIS if "selected units" feature is installed or you will access bad memory. See GetRelevantSelectedUnitsPointer (in commands)

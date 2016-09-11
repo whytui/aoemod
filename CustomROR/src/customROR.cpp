@@ -3012,7 +3012,7 @@ void CustomRORInstance::FixUnsupportedRomanTileSetInEditorIcons(REG_BACKUP *REG_
 
 // From 004FAA30
 void CustomRORInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
-	AOE_STRUCTURES::STRUCT_UI_F11_POP_PANEL *f11panel = (AOE_STRUCTURES::STRUCT_UI_F11_POP_PANEL *)REG_values->ESI_val;
+	AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *f11panel = (AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *)REG_values->ESI_val;
 	ror_api_assert(REG_values, f11panel && f11panel->IsCheckSumValid());
 	
 	char *bufferToWrite = (char*) GetIntValueFromRORStack(REG_values, 0); // arg1=buffer

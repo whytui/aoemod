@@ -122,7 +122,7 @@ namespace AOE_STRUCTURES {
 		long int maxMusicTrack;
 		long int currentMusicTrack;
 		// 0x80
-		char musicFilename[0x184 - 0x80]; // Chack this...
+		char musicFilename[0x184 - 0x80]; // Check this...
 		long int musicIsLooping; // +184
 		long int musicSeekPos; // Resume from minimized window
 		STRUCT_MP_COMMUNICATION *MPCommunicationStruct; // +18C
@@ -202,11 +202,13 @@ namespace AOE_STRUCTURES {
 		unsigned long int chosenPlayerIndex[9]; // index in 0-8 (playerId, including gaia)
 		// to 9D4...
 		unsigned long int unknown_9D4;
-		unsigned long int unknown_9D8[9]; // ???
+		long int playerWondersVictoryDelays[9]; // +9D8. index in 0-8 (playerId, including gaia). Remaining "years" for each player's wonder victory trigger. See 0x41C100. If a wonder is destroyed but player has still another one, the counter is NOT reset.
 		// to 9FC...
-		unsigned long int gameIsRunning; // You can simply set it to 0 to pause game.
+		long int gameIsRunning; // +9FC. You can simply set it to 0 to pause game.
 		// 0xA00
-		char unknown_A00[0x0C];
+		long int unknown_A00; // +A00. 1 if timer is stopped ?
+		long int unknown_A04; // +A04. Related with timer status too ?
+		unsigned long int unknown_A08;
 		float unknown_A0C;
 		char difficultyLevelChoice; // +A10. Get in 41C190. Copied into +993
 		char unknown_A11;
