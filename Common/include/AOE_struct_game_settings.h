@@ -202,7 +202,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int chosenPlayerIndex[9]; // index in 0-8 (playerId, including gaia)
 		// to 9D4...
 		unsigned long int unknown_9D4;
-		long int playerWondersVictoryDelays[9]; // +9D8. index in 0-8 (playerId, including gaia). Remaining "years" for each player's wonder victory trigger. See 0x41C100. If a wonder is destroyed but player has still another one, the counter is NOT reset.
+		long int playerWondersVictoryDelays[9]; // +9D8. index in 0-8 (playerId, including gaia). Remaining "years" for each player's wonder victory trigger. See 0x41C100. If a wonder is destroyed but player has still another one, the counter is NOT reset. -1=not relevant.
 		// to 9FC...
 		long int gameIsRunning; // +9FC. You can simply set it to 0 to pause game.
 		// 0xA00

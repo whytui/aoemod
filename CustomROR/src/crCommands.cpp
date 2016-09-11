@@ -5527,17 +5527,26 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 
 
 // Returns the most disliked playerIdn, impacting which player "I" will attack.
+// Note: standard ROR code (0x40ACDA) is total crap : applies "score/factor" instead of "score*factor/100", and when attackWinningPlayerFactor=false, the score factor is substracted (instead of ignored)
 long int CustomRORCommand::GetMostDislikedPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_DIPLOMACY_AI *diplAI,
 	long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor) {
 	assert(player && player->IsCheckSumValid());
 	assert(diplAI && diplAI->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid() || !diplAI || !diplAI->IsCheckSumValid()) { return -1; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return -1; }
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return -1; }
 
 	if (player->aliveStatus > 0) { return -1; }
+	assert(attackWinningPlayerFactor <= 100);
+	if (attackWinningPlayerFactor > 100) { attackWinningPlayerFactor = 100; }
+	if (attackWinningPlayerFactor < 0) { attackWinningPlayerFactor = 0; }
 
+
+	bool hasStandardVictoryCondition = (global->generalVictoryCondition == GAME_GLOBAL_GENERAL_VICTORY_CONDITION::GGVC_STANDARD);
 	long int mostDislikedPlayerId = -1;
 	long int bestDislikeValue = -1;
 
@@ -5555,7 +5564,6 @@ long int CustomRORCommand::GetMostDislikedPlayer(AOE_STRUCTURES::STRUCT_PLAYER *
 		AOE_STRUCTURES::STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(loopPlayerId);
 		if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) && (loopPlayer->aliveStatus != 2) &&
 			(player->ptrDiplomacyStances[loopPlayerId] != 0) && loopPlayer->ptrBuildingsListHeader) {
-
 			// Getting those 3 specific resources is no cheating (whereas getting food amount would be !)
 			if (loopPlayer->GetResourceValue(CST_RES_ORDER_ALL_RUINS) > 0) {
 				allRelicsOrRuinsCounter[loopPlayerId]++;
@@ -5606,21 +5614,55 @@ long int CustomRORCommand::GetMostDislikedPlayer(AOE_STRUCTURES::STRUCT_PLAYER *
 			if (player->ptrDiplomacyStances[loopPlayerId] != 0) { // Not allied, cf call in 0x40AD14)
 				long int playerScoreFactor = 0; // default: no impact
 				if (attackWinningPlayer && (attackWinningPlayerFactor > 0)) {
-					playerScoreFactor = loopPlayer->ptrScoreInformation->currentTotalScore / attackWinningPlayerFactor;
+					// Note: in game code, the formula is completely erroneous (DIVIDES by factor !)
+					playerScoreFactor = loopPlayer->ptrScoreInformation->currentTotalScore * attackWinningPlayerFactor / 100;
 					// Note: In game code, there is a "else" that does the opposite effect if attackWinningPlayer is false (factor is substracted !)
 				}
 
 				// Handle some priority rules (NOT in standard game)
-				long int otherDislikeAmount = 0;
-				if (hasInProgressWonder[loopPlayerId]) {
-					otherDislikeAmount += 100;
-				}
-				if (hasBuiltWonder[loopPlayerId]) {
-					otherDislikeAmount += 200; // Very top priority ! However other criteria can still make the decision between 2 players having a wonder.
-				}
-				otherDislikeAmount += allRelicsOrRuinsCounter[loopPlayerId] * 100;
-				// TODO: we could try to handle remaining time for each one (relics/ruins/wonder) + check victory conditions (or maybe not, this is still a good criteria even if not a victory condition)
 
+				long int otherDislikeAmount = 0;
+				if (hasStandardVictoryCondition) {
+					// Wonders/relics/ruins can trigger victory in standard conditions
+					if (hasInProgressWonder[loopPlayerId]) {
+						// Building a wonder: victory timer is not launched yet, but this is critical though.
+						otherDislikeAmount += 80;
+					}
+					if (hasBuiltWonder[loopPlayerId]) {
+						// Player has a standing wonder (which leads to victory)
+						int wonderVictoryDelay = settings->playerWondersVictoryDelays[loopPlayerId];
+						assert(wonderVictoryDelay > -1); // standard victory condition + player has a wonder = delay should be set
+						int wonderDelayProportion = 2000 - wonderVictoryDelay;
+						if (wonderDelayProportion < 0) { wonderDelayProportion = 0; }
+						wonderDelayProportion = wonderDelayProportion / 20; // get a 0-100 value, 100 being a very urgent situation !
+						otherDislikeAmount += 100 + wonderDelayProportion; // Very top priority ! However other criteria can still make the decision between 2 players having a wonder.
+					}
+
+					if (player->remainingTimeToAllRelicsVictory > -1) {
+						// Player has all relics (which leads to victory)
+						int relicsDelayProportion = 2000 - (int)player->remainingTimeToAllRelicsVictory;
+						if (relicsDelayProportion < 0) { relicsDelayProportion = 0; }
+						relicsDelayProportion = relicsDelayProportion / 20; // get a 0-100 value, 100 being a very urgent situation !
+						otherDislikeAmount += 100 + relicsDelayProportion;
+					}
+					if (player->remainingTimeToAllRuinsVictory > -1) {
+						// Player has all ruins (which leads to victory)
+						int ruinsDelayProportion = 2000 - (int)player->remainingTimeToAllRuinsVictory;
+						if (ruinsDelayProportion < 0) { ruinsDelayProportion = 0; }
+						ruinsDelayProportion = ruinsDelayProportion / 20; // get a 0-100 value, 100 being a very urgent situation !
+						otherDislikeAmount += 100 + ruinsDelayProportion;
+					}
+				} else {
+					// Wonders/relics/ruins are not (direct) victory conditions. Impact is reduced.
+					if (hasInProgressWonder[loopPlayerId]) {
+						otherDislikeAmount += 15;
+					}
+					if (hasBuiltWonder[loopPlayerId]) {
+						otherDislikeAmount += 30;
+					}
+					otherDislikeAmount += allRelicsOrRuinsCounter[loopPlayerId] * 20;
+				}
+				
 				long int thisDislikeValue = diplAI->dislikeTable[loopPlayerId] + playerScoreFactor + otherDislikeAmount;
 				if (thisDislikeValue > bestDislikeValue) {
 					bestDislikeValue = thisDislikeValue;
@@ -5630,7 +5672,8 @@ long int CustomRORCommand::GetMostDislikedPlayer(AOE_STRUCTURES::STRUCT_PLAYER *
 		}
 	}
 
-	// + other rules (current target, attacking me, etc)
+	// + other rules (current target, attacking me, enemy towers near my town,  buildings IN my town? etc)
+	// Use more complex rules, but compute them only after some delay (store it in customror internal object)
 	// Use a random part
 	
 	// TEST
