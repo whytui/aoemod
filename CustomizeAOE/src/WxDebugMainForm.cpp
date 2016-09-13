@@ -190,6 +190,8 @@ void WxDebugMainForm::ShowMainObjects() {
 // Collect and display info about a player Gathering strategy/status
 void WxDebugMainForm::ShowGatheringInfo() {
 	this->edtOutputInfo->Clear();
+	this->edtOutputInfo->WriteText("** Please wait ***\n");
+	this->Update();
 	RORConnector rConnector = RORConnector();
 	if (!rConnector.ConnectToROR()) {
 		return;
@@ -329,13 +331,23 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += " D64=";
 		s += std::to_string(ai->structTacAI.unknown_D64_villagerCount);*/
 
-		s += "\nTarget player=";
+		s += "\n*** Attacking *** Target player=";
 		int tpCount = ai->structTacAI.targetPlayers.usedElements;
 		long int targetPlayer0 = -1;
 		if (tpCount > 0) {
 			AOE_STRUCTURES::GetObjectFromRORData(rd->handleROR, ai->structTacAI.targetPlayers.unitIdArray, &targetPlayer0, 4 /*DWORD*/);
 		}
 		s += std::to_string(targetPlayer0);
+		s += " lastTacticalUpdateTime=";
+		s += std::to_string(ai->structTacAI.lastTacticalUpdateTime / 1000);
+		s += " lastAttackResponseTime=";
+		s += std::to_string(ai->structTacAI.lastAttackResponseTime_ms / 1000);
+		s += " lastAIUpdateTime=";
+		s += std::to_string(ai->structTacAI.lastAIUpdateTime_ms / 1000);
+		s += " lastCoopSharAttackTime=";
+		s += std::to_string(ai->structTacAI.lastCoopSharAttackTime_ms / 1000);
+		s += " lastPanicModeTime=";
+		s += std::to_string(ai->structTacAI.lastPanicModeTime / 1000);
 		s += "\nUnit groups: count=";
 		s += std::to_string(ai->structTacAI.unitGroupsCount);
 		int ugCount = ai->structTacAI.unitGroupsCount;
@@ -359,6 +371,7 @@ void WxDebugMainForm::ShowGatheringInfo() {
 
 		s += "\nTO DO...\n";
 
+		this->edtOutputInfo->Clear();
 		this->edtOutputInfo->WriteText(s);
 	}
 	delete rd;

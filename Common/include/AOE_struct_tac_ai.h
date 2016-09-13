@@ -238,7 +238,7 @@ namespace AOE_STRUCTURES {
 		long int granaryAddedToStrategy; // +F8C. 1 when a granary has been inserted into strategy.
 		// 0xF90
 		long int unknown_F90_someTimeValue; // 4D2245,4D242A...
-		long int lastPanicModeTime; // +F94. In seconds. To be compared with globalStruct+4
+		long int lastPanicModeTime; // +F94. In milliseconds. To be compared with globalStruct+4
 		long int unknown_F98_timeAboutTributes; // Related to SNCoopDemandTributeInterval
 		unsigned long int unknown_F9C;
 		// 0xFA0
