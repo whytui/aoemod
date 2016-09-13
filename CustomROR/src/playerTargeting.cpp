@@ -21,6 +21,7 @@ namespace CUSTOMROR {
 		}
 		this->lastUpdateGameTime = 0;
 		this->nextUpdateGameTime = 0;
+		this->lastTargetPlayerChangeGameTime = 0;
 	}
 
 
@@ -34,7 +35,7 @@ namespace CUSTOMROR {
 		assert(global && global->IsCheckSumValid());
 		assert(global->currentGameTime >= 0);
 		if (this->lastUpdateGameTime > 0) {
-			if ((global->currentGameTime <= this->lastUpdateGameTime + (1000 * updateDetailedDislikeInfoMaxDelay)) &&
+			if ((global->currentGameTime <= this->lastUpdateGameTime + (1000 * TARGETING_CONST::updateDetailedDislikeInfoMaxDelay)) &&
 				(global->currentGameTime <= this->nextUpdateGameTime)
 				) {
 				return false; // Next update time AND Max delay (which is no more but a security) have both not been reached
@@ -43,14 +44,17 @@ namespace CUSTOMROR {
 		assert(player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid());
 		if (!player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) { return false; }
 
+		// HERE: it is time for info update.
+
 		this->lastUpdateGameTime = global->currentGameTime;
 		this->nextUpdateGameTime = global->currentGameTime +
-			(1000 * randomizer.GetRandomValue_normal_moreFlat(updateDetailedDislikeInfoMinDelay, updateDetailedDislikeInfoMaxDelay));
+			(1000 * randomizer.GetRandomValue_normal_moreFlat(TARGETING_CONST::updateDetailedDislikeInfoMinDelay, TARGETING_CONST::updateDetailedDislikeInfoMaxDelay));
 
 		bool ignoreThisPlayer[9];
-		for (int i = 0; i < 9; i++) {
+		for (int i = 1; i < 9; i++) {
 			ignoreThisPlayer[i] = false;
 		}
+		ignoreThisPlayer[0] = true; // always ignore gaia
 		long int totalAttacksDuringPeriod = 0;
 		int numberOfValidEnemyPlayers = 0;
 
@@ -91,15 +95,68 @@ namespace CUSTOMROR {
 
 			// TODO: compute each lastComputedDislikeSubScore
 			// + other rules (current target, attacking me, enemy towers near my town, buildings IN my town? etc)
+			// player with lots of towers ?
+			// Attacking a allied player ?
 
 			if (this->attacksByEnemyPlayersDuringLastPeriod[targetPlayerId] > averageAttackCountByPlayerDuringPeriod) {
-				this->lastComputedDislikeSubScore[targetPlayerId] += 5; // This player attacked me "more than average" => I don't like him
+				this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreAttackedMeMoreThanAverage; // This player attacked me "more than average" => I don't like him
 			}
 
-			int randomFactor = randomizer.GetRandomValue_normal_moderate(0, 10);
+			int randomFactor = randomizer.GetRandomValue_normal_moderate(0, TARGETING_CONST::dislikeSubScoreRandomFactor);
 			this->lastComputedDislikeSubScore[targetPlayerId] += randomFactor;
 
 
+		}
+
+
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_MainAI_findUnit(player->ptrAIStruct, CST_UNITID_FORUM);
+		if (!myTC->IsCheckSumValidForAUnitClass()) { myTC = NULL; }
+
+		// Analyze known enemy units ?
+		// TODO: this should be done along the game when "I" receive alerts from attacks, and reset it at each re-computation
+		for (int i = 0; i < player->ptrAIStruct->structInfAI.unitElemListSize; i++) {
+			long int unitPlayerId = player->ptrAIStruct->structInfAI.unitElemList[i].playerId;
+			bool ignoreThisUnit = ignoreThisPlayer[unitPlayerId];
+			long int unitPosX = player->ptrAIStruct->structInfAI.unitElemList[i].posX;
+			long int unitPosY = player->ptrAIStruct->structInfAI.unitElemList[i].posY;
+			if (!ignoreThisUnit) {
+				bool isVisible = IsFogVisibleForPlayer(player->playerId, unitPosX, unitPosY); // fast operation: ok with performance
+				if (isVisible) {
+					STRUCT_UNIT_BASE *unit = global->GetUnitFromId(player->ptrAIStruct->structInfAI.unitElemList[i].unitId);
+					if (!unit) {
+						// Remove from list ? (no cheating: position is fog-visible)
+						// Do not remove during the loop, do it afterwards
+					}
+				} else {
+					// Remove from list (can be added back later) ? Warning, might impact severely AI as it cheats a bit in attack phases. Fix/improve AI attack first ?
+					// Do not remove during the loop, do it afterwards
+				}
+				
+				STRUCT_PLAYER *targetPlayer = global->GetPlayerStruct(unitPlayerId);
+				bool isAggressive = IsNonTowerMilitaryUnit(player->ptrAIStruct->structInfAI.unitElemList[i].unitClass);
+				if (targetPlayer && targetPlayer->IsCheckSumValid()) {
+					// Using the "unitDef*" overload is better than "unitDefId" overload (which is hardcoded).
+					isAggressive |= IsTower(targetPlayer->GetUnitDefBase(player->ptrAIStruct->structInfAI.unitElemList[i].unitDATID));
+				}
+				
+				ignoreThisUnit = ignoreThisUnit || !isVisible || !isAggressive;
+			}
+
+			if (!ignoreThisUnit) {
+				long int sqDistToMyTC = ((unitPosX - (long int)myTC->positionX) * (unitPosX - (long int)myTC->positionX)) +
+					((unitPosY - (long int)myTC->positionY) * (unitPosY - (long int)myTC->positionY)); // distance^2
+				bool isInMyTown = sqDistToMyTC < TARGETING_CONST::townSizeSquare;
+				bool isNearMyTown = !isInMyTown && (sqDistToMyTC < TARGETING_CONST::townNeighborhoodSizeSquare); // between town limit & neighborhood max distance
+
+			}
+		}
+		
+		// To ensure some continuity in targeting, current target is given a small boost (not forever, this is limited to "msAfterWhichCurrentTargetLosesExtraValue")
+		if ((player->ptrAIStruct->structTacAI.targetPlayers.usedElements > 0) &&
+			(this->lastTargetPlayerChangeGameTime - global->currentGameTime > TARGETING_CONST::msAfterWhichCurrentTargetLosesExtraValue))
+		{
+			int currentTargetPlayerId = player->ptrAIStruct->structTacAI.targetPlayers.unitIdArray[0];
+			this->lastComputedDislikeSubScore[currentTargetPlayerId] += TARGETING_CONST::extraValueForCurrentTarget;
 		}
 
 		for (int i = 0; i < 9; i++) {
@@ -135,9 +192,9 @@ namespace CUSTOMROR {
 	long int PlayerTargeting::GetPercentFactorFromVictoryConditionDelay(long int yearsDelay) {
 		assert(yearsDelay >= 0);
 		if (yearsDelay < 0) { yearsDelay = 0; }
-		int delayProportion = 2000 - yearsDelay;
+		int delayProportion = TARGETING_CONST::yearsCountInArtefactsVictoryDelay - yearsDelay;
 		if (delayProportion < 0) { delayProportion = 0; } // now delayProportion is 0<=x<=2000
-		delayProportion = delayProportion / 20; // get a 0-100 value, ~100 representing a low remaining delay !
+		delayProportion = delayProportion / (TARGETING_CONST::yearsCountInArtefactsVictoryDelay / 100); // get a 0-100 value, ~100 representing a low remaining delay !
 		return delayProportion;
 	}
 
@@ -255,7 +312,7 @@ namespace CUSTOMROR {
 						// Wonders/relics/ruins can trigger victory in standard conditions
 						if (hasInProgressWonder[loopPlayerId]) {
 							// Building a wonder: victory timer is not launched yet, but this is critical though.
-							otherDislikeAmount += 80;
+							otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningWonderInConstruction;
 						}
 						if (hasBuiltWonder[loopPlayerId]) {
 							// Player has a standing wonder (which leads to victory)
@@ -263,28 +320,28 @@ namespace CUSTOMROR {
 							assert(wonderVictoryDelay > -1); // standard victory condition + player has a wonder = delay should be set
 							
 							int wonderDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay(wonderVictoryDelay);
-							otherDislikeAmount += 100 + wonderDelayProportion; // Very top priority ! However other criteria can still make the decision between 2 players having a wonder.
+							otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningWonderBuilt + wonderDelayProportion; // Very top priority ! However other criteria can still make the decision between 2 players having a wonder.
 						}
 
 						if (player->remainingTimeToAllRelicsVictory > -1) {
 							// Player has all relics (which leads to victory)
 							int relicsDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay((int)player->remainingTimeToAllRelicsVictory);
-							otherDislikeAmount += 100 + relicsDelayProportion;
+							otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningAllArtefacts + relicsDelayProportion;
 						}
 						if (player->remainingTimeToAllRuinsVictory > -1) {
 							// Player has all ruins (which leads to victory)
 							int ruinsDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay((int)player->remainingTimeToAllRuinsVictory);
-							otherDislikeAmount += 100 + ruinsDelayProportion;
+							otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningAllArtefacts + ruinsDelayProportion;
 						}
 					} else {
 						// Wonders/relics/ruins are not (direct) victory conditions. Impact is reduced.
 						if (hasInProgressWonder[loopPlayerId]) {
-							otherDislikeAmount += 15;
+							otherDislikeAmount += TARGETING_CONST::dislikeAmountNoWinningWonderInConstruction;
 						}
 						if (hasBuiltWonder[loopPlayerId]) {
-							otherDislikeAmount += 30;
+							otherDislikeAmount += TARGETING_CONST::dislikeAmountNoWinningWonderBuilt;
 						}
-						otherDislikeAmount += allRelicsOrRuinsCounter[loopPlayerId] * 20;
+						otherDislikeAmount += allRelicsOrRuinsCounter[loopPlayerId] * TARGETING_CONST::dislikeAmountNoWinningAllArtefacts;
 					}
 
 					long int thisDislikeValue = diplAI->dislikeTable[loopPlayerId] + playerScoreFactor + otherDislikeAmount;
@@ -306,6 +363,13 @@ namespace CUSTOMROR {
 		msg += std::to_string(mostDislikedPlayerId);
 		CallWriteText(msg.c_str());*/
 
+		if (player->ptrAIStruct) {
+			if ((player->ptrAIStruct->structTacAI.targetPlayers.usedElements == 0) ||
+				(mostDislikedPlayerId != player->ptrAIStruct->structTacAI.targetPlayers.unitIdArray[0])) {
+				// Target player changed: save game time
+				playerTargetInfo->lastTargetPlayerChangeGameTime = global->currentGameTime;
+			}
+		}
 		return mostDislikedPlayerId;
 	}
 

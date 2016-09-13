@@ -78,6 +78,12 @@ namespace AOE_STRUCTURES
 		return res;
 	}
 
+	// Returns true if result was updated successfully. Returns false if failed (result is set to 0)
+	static bool GetDword(HANDLE h, unsigned long int address, unsigned long int &result) {
+		result = 0;
+		if (h == NULL) { return false; }
+		return GetObjectFromRORData(h, address, &result, 4); // Writes directly in result variable
+	}
 
 
 	// This child class can export remote objects (from a different process).
@@ -125,6 +131,16 @@ namespace AOE_STRUCTURES
 		// Get a zero-terminated string (unknown size). Poor performance but more secure/clean
 		virtual std::string GetZeroTerminatedStringFromRORData(unsigned long int gameAddress, long int maxLength = 0) {
 			return GetZeroTerminatedString(this->handleROR, gameAddress, maxLength);
+		}
+
+		// Get a DWORD value (4-bytes) as an unsigned int.
+		virtual unsigned long int GetDwordFromRORData(unsigned long int gameAddress) {
+			unsigned long int result;
+			if (GetDword(this->handleROR, gameAddress, result)) {
+				return result;
+			} else {
+				return 0;
+			}
 		}
 	};
 

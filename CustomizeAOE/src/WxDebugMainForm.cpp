@@ -329,7 +329,14 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += " D64=";
 		s += std::to_string(ai->structTacAI.unknown_D64_villagerCount);*/
 
-		s += "\n\nUnit groups: count=";
+		s += "\nTarget player=";
+		int tpCount = ai->structTacAI.targetPlayers.usedElements;
+		long int targetPlayer0 = -1;
+		if (tpCount > 0) {
+			AOE_STRUCTURES::GetObjectFromRORData(rd->handleROR, ai->structTacAI.targetPlayers.unitIdArray, &targetPlayer0, 4 /*DWORD*/);
+		}
+		s += std::to_string(targetPlayer0);
+		s += "\nUnit groups: count=";
 		s += std::to_string(ai->structTacAI.unitGroupsCount);
 		int ugCount = ai->structTacAI.unitGroupsCount;
 		int currentUgIndex = 0;

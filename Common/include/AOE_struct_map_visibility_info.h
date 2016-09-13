@@ -15,10 +15,12 @@ namespace AOE_STRUCTURES {
 	public:
 		short int fogVisibilityMask;
 		short int explorationVisibilityMask;
+		// Returns true if a position is fog-visible to a player. This call is fast (bit-and operation, no underlying call)
 		bool isFogVisibleForPlayer(long int playerId) {
 			long int mask = 1 << playerId;
 			return (this->fogVisibilityMask & mask) != 0;
 		}
+		// Returns true if a position has been explored by a player. This call is fast (bit-and operation, no underlying call)
 		bool isExploredForPlayer(long int playerId) {
 			long int mask = 1 << playerId;
 			return (this->explorationVisibilityMask & mask) != 0;

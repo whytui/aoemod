@@ -88,6 +88,12 @@ namespace AOE_STRUCTURES
 			return res;
 		}
 
+		// Get a DWORD value (4-bytes) as an unsigned int.
+		virtual unsigned long int GetDwordFromRORData(unsigned long int gameAddress) {
+			unsigned long int *p = (unsigned long int*)gameAddress;
+			return *p;
+		}
+
 	protected:
 		// Get a (temporary - if remote) object that actually contains all relevant object data (accessible in THIS context/process)
 		// Do not call directly. Call CleanTempObject once you're finished with object.
@@ -106,6 +112,7 @@ namespace AOE_STRUCTURES
 		std::string ExportStruct_internal(STRUCT_GAME_GLOBAL *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_MP_COMMUNICATION *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_PLAYER *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_AI *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_BASE *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_COMMANDABLE *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_TRAINABLE *obj, unsigned long int RORAddress);

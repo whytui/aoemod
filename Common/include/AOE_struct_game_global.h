@@ -177,6 +177,12 @@ namespace AOE_STRUCTURES {
 			if ((restriction >= this->terrainRestrictionCount) || (restriction < 0)) { return NULL; }
 			return this->ptrTerrainRestrictionArray[restriction];
 		}
+		STRUCT_UNIT_BASE *GetUnitFromId(long int unitId) const {
+			if ((unitId < 0) || (unitId >= this->seqUnitId)) {
+				return NULL;
+			}
+			return ptrUnitPointersList[unitId];
+		}
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_GAME_GLOBAL1) || (this->checksum == CHECKSUM_GAME_GLOBAL2); }
 	};
 

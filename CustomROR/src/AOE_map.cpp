@@ -22,6 +22,9 @@ AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int posX, 
 }
 
 
+// Returns true if a position is fog-visible for a player.
+// This is quite fast: directly accesses (optimized) memory, no underlying calls.
+// Warning: posX/posY values are not controlled regarding map size !
 bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY) {
 	assert(playerId >= 0);
 	assert(playerId < 9);
@@ -34,6 +37,9 @@ bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY) {
 	return v->isFogVisibleForPlayer(playerId);
 }
 
+// Returns true if a position has been explored by a player
+// This is quite fast: directly accesses (optimized) memory, no underlying calls.
+// Warning: posX/posY values are not controlled regarding map size !
 bool IsExploredForPlayer(long int playerId, long int posX, long int posY) {
 	assert(playerId >= 0);
 	assert(playerId < 9);
