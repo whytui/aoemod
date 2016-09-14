@@ -13,21 +13,21 @@ namespace AOE_STRUCTURES {
 	static const unsigned char CST_MAP_BUILD_LIKE_DISABLED = (unsigned char)0xFF;
 	static const unsigned char CST_MAP_BUILD_LIKE_MAX_VALUE = (unsigned char)CST_MAP_BUILD_LIKE_DISABLED - 1;
 
-#define CHECKSUM_MAP_TILE_INFOS 0x005443C8
-	// One is included in 0x7C04A0 address.
+#define CHECKSUM_MAP_TILE_VALUES 0x005443C8
+	// One is included in 0x7C04A0 address, other in each infAI (stores exploration info)
 	// Size= 0x28. Constructor = 0x43D420 mapInfo.constructor(sizeY, sizeX, defaultValue)
 	// Describes a structure that stores information for currently-AI-managed player's build position priorities (for a given building to be constructed).
-	// Other usages: in infAI: explored map info. -1=? 0=?, 1= ? 2=to re-explore??
+	// Other usages: in infAI: explored map info. -1=not explored, 0=explored, 1= ? 2=to re-explore??
 	// Note about coordinates: (posX,posY)=(i,j) is the tile where i<x<i+1 and i<y<i+1
-	// So coordinates go from 0 to ("size"-1). ("grid" goes from 0 to "size").
+	// So coordinates go from 0 to ("size"-1).
 	class STRUCT_MAP_TILE_VALUES {
 	public:
 		unsigned long int checksum; // C8 43 54 00
 		long int mapArraySizeY;
 		long int mapArraySizeX;
-		long int unknown_0C_toDecreaseToPosY; // +0C. startPosY? Always 0 in standard game
+		long int startPosY; // +0C. Always 0 in standard game. Value to substract before using indexes.
 		// 0x10
-		long int unknown_10_toDecreaseToPosX; // +10. startPosX? Always 0 in standard game
+		long int startPosX; // +10. Always 0 in standard game. Value to substract before using indexes.
 		// mapLikeValuesMemoryZone[mapArraySizeX * (x) + (y)] should be the same as ptrRowsPtr[X][Y]. Strange conception. Foir perf maybe ?
 		// Please use supplied methods if possible.
 		unsigned char *mapLikeValuesMemoryZone; // +14. Pointer to the beginning of map values memory zone. But the game accesses it via ptrRowsPtr (that gives pointers to each row (X))
@@ -35,14 +35,13 @@ namespace AOE_STRUCTURES {
 		long int unknown_1C;
 		// 0x20
 		long int unknown_matchCount;
-		unsigned char maxLikeValue; // 0xFE generally (always ?). FF is a NO, 0->0xFE are "like values"
+		unsigned char maxValue; // 0xFE for build "like" values (always ?). FF is a NO, 0->0xFE are "like values"
 		char unknown_25[3];
-		// to be continued... unknowns. Size ?
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_MAP_TILE_INFOS; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_MAP_TILE_VALUES; }
 
 		// Easy-to-use methods
-		bool IsPositionValid(long int posX, long int posY) {
+		bool IsPositionValid(long int posX, long int posY) const {
 			return ((posX >= 0) && (posX < this->mapArraySizeX) &&
 				(posY >= 0) && (posY < this->mapArraySizeY)
 				);
@@ -85,7 +84,7 @@ namespace AOE_STRUCTURES {
 
 		// Returns true if 1 of the line-end is disabled.
 		// On each side, if one of the last 2 tiles is disabled, then the result is true
-		bool IsAnExtremityBlocked_yLine(long int posX, long int posY_low, long int posY_high) {
+		bool IsAnExtremityBlocked_yLine(long int posX, long int posY_low, long int posY_high) const {
 			// Checks on values
 			if (posY_low > posY_high) { return true; }
 			if (posX < 0) { posX = 0; }
@@ -108,7 +107,7 @@ namespace AOE_STRUCTURES {
 
 		// Returns true if 1 of the line-end is disabled.
 		// On each side, if one of the last 2 tiles is disabled, then the result is true
-		bool IsAnExtremityBlocked_xLine(long int posX_low, long int posX_high, long int posY) {
+		bool IsAnExtremityBlocked_xLine(long int posX_low, long int posX_high, long int posY) const {
 			// Checks on values
 			if (posX_low > posX_high) { return true; }
 			if (posY < 0) { posY = 0; }
@@ -127,7 +126,7 @@ namespace AOE_STRUCTURES {
 			return false;
 		}
 
-		bool IsRegionAllDisabled(long int posX_low, long int posY_low, long int posX_high, long int posY_high) {
+		bool IsRegionAllDisabled(long int posX_low, long int posY_low, long int posX_high, long int posY_high) const {
 			// Checks on values
 			if ((posX_low > posX_high) || (posY_low > posY_high)) { return true; }
 			if (posX_low < 0) { posX_low = 0; }
