@@ -105,7 +105,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_1C0;
 		unsigned long int unknown_1C4;
 		unsigned long int unknown_1C8;
-		unsigned long int unknown_1CC;
+		long int unknown_1CC_lastGameTime; // +1CC. Last game time of "task active soldier" execution for the group ?
 		// 0x1D0
 		long int attackPlayId; // attackId that is being played. -1=Non-Play-based attack
 		char unknown_1D4;
@@ -166,7 +166,7 @@ namespace AOE_STRUCTURES {
 		// 0x20
 		long int unknown_20;
 		long int unknown_24;
-		long int unknown_28; // A flag, default 1 ?
+		long int unknown_28; // A flag, default 1 ? Set to 0 in 45DF0
 	};
 	static_assert(sizeof(STRUCT_TAC_AI_TARGET_INFO) == 0x2C, "STRUCT_TAC_AI_TARGET_INFO size");
 
@@ -209,14 +209,14 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_D10;
 		unsigned long int lastAttackResponseTime_ms; // +D14. Value in milliseconds. Used to compute +D24 ?
 		unsigned long int unknown_D18;
-		long int lastTacticalUpdateTime; // +D1C. Value in milliseconds
+		long int lastTacticalUpdateTime; // +D1C. Value in milliseconds. See customROR config (tacticalAI/updateDelay) or SNScalingFrequency in standard game.
 		// 0xD20
 		unsigned long int buildFrequencyCounter; // incremented until it reaches SNBuildFrequency
 		unsigned long int timeSinceLastAttackResponse_seconds; // To confirm. Compared to SNAttackResponseSeparationTime. See 4E0BC0.
 		STRUCT_AI_UNIT_LIST_INFO targetPlayers; // +D28. Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK? Always only 1 element (sometimes hardcoded?4D622C)
 		STRUCT_AI_UNIT_LIST_INFO likedPlayers; // +D38. allied playerIds ? "myself" IS in list ! In practise, always 2 elements? (me + most liked player) ?
 		STRUCT_AI_UNIT_LIST_INFO IdleOrInRangeMilitaryUnits; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960
-		STRUCT_AI_UNIT_LIST_INFO unknownUnits_D58; // TC + villagers ? + others? Builders ?
+		STRUCT_AI_UNIT_LIST_INFO unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ?
 		unsigned long int gathererCount_actual[4]; // +D68. Index IS resource ID.
 		long int gathererCount_desired[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT]; // +D78. Villager count we want to assign to each type of resource (4). Index IS resource Type ID
 		long int extraResourceTypeNeededByPriority[4]; // +D88 First=most needed. Use extraResourceAmount with this index to get resource amount. <0 amount = I must collect
@@ -233,7 +233,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_TAC_AI_BUILD_TO_TRIGGER constructionToTrigger; // E4C : an included temporary struct (=>F78 or F80?) about building currently analyzed for being built. +0=DATID to build. +108=actorUnitId?
 		long int currentAIUpdateVillagerId; // Currently evaluated villager unitId (from allVillagers array). Set to -1 when I have no villager or out of loop ?
 		long int unknown_F80; // signed dword
-		long int unknown_F84; // internal ID ? 4D1CF7. Related to attacking
+		long int lastProcessedUnitGroupId; // +F84. a unit group ID. 4D1CF7,4D3ACB. Current group for treatments(just technical, to continue work when has no time to finish?)
 		long int storagePitAddedToStrategy; // +F88. 1 when a SP has been inserted into strategy.
 		long int granaryAddedToStrategy; // +F8C. 1 when a granary has been inserted into strategy.
 		// 0xF90
@@ -242,7 +242,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_F98_timeAboutTributes; // Related to SNCoopDemandTributeInterval
 		unsigned long int unknown_F9C;
 		// 0xFA0
-		unsigned long int lastCoopSharAttackTime_ms; // A game time value in milliseconds.
+		long int lastCoopSharAttackTime_ms; // Only used if SNCoopShareAttacking=1 (0x4E2CD7). In milliseconds. Updated when an group is tasked to attack some target?
 		unsigned long int unknown_FA4; // flag ? about exploration ? Used in gatherer affectation methods
 		unsigned long int unknown_FA8;
 		STRUCT_TAC_AI_TARGET_INFO targetInfo; // +FAC.

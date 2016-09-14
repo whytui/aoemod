@@ -106,7 +106,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_AI_UNIT_LIST_INFO playerCreatableUnits; // +128. All player-creatable units (villager, military, buildings...). NOT resources.
 		STRUCT_AI_UNIT_LIST_INFO artefactsAndFlags; // +138. Store the found flags/artefacts.
 		STRUCT_AI_UNIT_LIST_INFO elementsToDefend; // +148. Can be TC, dock, relic, ruin, mines+bushes. Related to SNxxxDefendPriority
-		STRUCT_TEMP_MAP_BUILD_LIKE_INFOS buildMapLikeInfo; // +158. Size to check
+		STRUCT_MAP_TILE_VALUES mapExplorationInfo; // +158. Values = ? 2=to reexplore?
 		// Remove unit from allMyUnits & buildingUnits: 0x4BF440.
 		STRUCT_AI_UNIT_LIST_INFO allMyUnits; // +180. To confirm.
 		STRUCT_AI_UNIT_LIST_INFO buildingUnits; // +190

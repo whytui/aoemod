@@ -5634,7 +5634,7 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 	assert(globalStruct != NULL);
 	assert(globalStruct->IsCheckSumValid());
 
-	AOE_STRUCTURES::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *mapInfosStruct = ROR_pTempMapBuildLikeInfos;
+	AOE_STRUCTURES::STRUCT_MAP_TILE_VALUES *mapInfosStruct = ROR_pTempMapBuildLikeInfos;
 	assert(mapInfosStruct != NULL);
 	assert(mapInfosStruct->IsCheckSumValid());
 

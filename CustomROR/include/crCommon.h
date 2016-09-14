@@ -465,7 +465,7 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId);
 void DebugDumpAllUnits();
 
 // Writes in a text buffer the content of a "temp map like info" zone.
-char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_TEMP_MAP_BUILD_LIKE_INFOS *mapInfosStruct, long int posX, long int posY, int radius);
+char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_MAP_TILE_VALUES *mapInfosStruct, long int posX, long int posY, int radius);
 
 #ifdef _DEBUG
 static const char serializationLogFilename[] = "D:\\AOESrlz.txt";

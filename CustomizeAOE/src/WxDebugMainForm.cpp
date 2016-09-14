@@ -34,6 +34,7 @@ void WxDebugMainForm::ConstructorInit() {
 	this->btnGuessRORStruct = new wxButton(this, ID_DMF_GUESS_STRUCT, _T("Guess ROR structure"));
 	this->btnShowMainObjets = new wxButton(this, ID_DMF_SHOW_MAIN_OBJECTS, _T("Show main structures"));
 	this->btnShowGatheringInfo = new wxButton(this, ID_DMF_SHOW_GATHERING_INFO, _T("Debug gathering"));
+	this->btnShowMilitaryInfo = new wxButton(this, ID_DMF_SHOW_MILITARY_INFO, _T("Debug military"));
 	this->btnFindUnit = new wxButton(this, ID_DMF_FIND_UNIT, _T("Find unit"));
 	this->btnFindUnitDef = new wxButton(this, ID_DMF_FIND_UNIT_DEF, _T("Find unitDef"));
 
@@ -41,6 +42,7 @@ void WxDebugMainForm::ConstructorInit() {
 	Connect(ID_DMF_GUESS_STRUCT, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDebugMainForm::OnGuessRORStruct));
 	Connect(ID_DMF_SHOW_MAIN_OBJECTS, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDebugMainForm::OnShowMainObjects));
 	Connect(ID_DMF_SHOW_GATHERING_INFO, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDebugMainForm::OnShowGatheringInfo));
+	Connect(ID_DMF_SHOW_MILITARY_INFO, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDebugMainForm::OnShowMilitaryInfo));
 	Connect(ID_DMF_FIND_UNIT, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDebugMainForm::OnFindObject));
 	Connect(ID_DMF_FIND_UNIT_DEF, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDebugMainForm::OnFindUnitDef));
 
@@ -76,6 +78,8 @@ void WxDebugMainForm::ConstructorInit() {
 	this->GameObjectsArea->Add(this->btnShowMainObjets);
 	this->GameObjectsArea->AddSpacer(5);
 	this->GameObjectsArea->Add(this->btnShowGatheringInfo);
+	this->GameObjectsArea->AddSpacer(5);
+	this->GameObjectsArea->Add(this->btnShowMilitaryInfo);
 	this->GameObjectsArea->AddSpacer(5);
 	this->GameObjectsArea->Add(this->btnFindUnit);
 	this->GameObjectsArea->AddSpacer(5);
@@ -125,6 +129,32 @@ void WxDebugMainForm::OnShowMainObjects(wxCommandEvent& event)
 void WxDebugMainForm::OnShowGatheringInfo(wxCommandEvent& event)
 {
 	this->ShowGatheringInfo();
+}
+
+void WxDebugMainForm::OnShowMilitaryInfo(wxCommandEvent& event)
+{
+	this->ShowMilitaryInfo();
+}
+
+
+std::string WxDebugMainForm::MilliSecondsToString(long int milliseconds) {
+	std::string result;
+	long int totalSeconds = milliseconds / 1000;
+	long int hours = totalSeconds / 3600;
+	long int remainder = totalSeconds % 3600;
+	long int minutes = remainder / 60;
+	long int seconds = remainder % 60;
+	if (hours > 0) {
+		result += std::to_string(hours);
+		result += ":";
+	}
+	char buffer[5];
+	sprintf_s(buffer, "%02d", minutes);
+	result += buffer;
+	result += ":";
+	sprintf_s(buffer, "%02d", seconds);
+	result += buffer;
+	return result;
 }
 
 
@@ -331,6 +361,47 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += " D64=";
 		s += std::to_string(ai->structTacAI.unknown_D64_villagerCount);*/
 
+		s += "\nTO DO...\n";
+
+		this->edtOutputInfo->Clear();
+		this->edtOutputInfo->WriteText(s);
+	}
+	delete rd;
+	rConnector.DisconnectFromROR();
+}
+
+
+// Collect and display info about a player Military strategy/status
+void WxDebugMainForm::ShowMilitaryInfo() {
+	this->edtOutputInfo->Clear();
+	this->edtOutputInfo->WriteText("** Please wait ***\n");
+	this->Update();
+	RORConnector rConnector = RORConnector();
+	if (!rConnector.ConnectToROR()) {
+		return;
+	}
+	long int objId = -1;
+	wxString input = this->edtSubId->GetValue();
+	if (input.IsNumber()) {
+		if (!input.ToLong(&objId, 10)) {
+			objId = -1;
+		}
+	}
+
+	HANDLE hROR = rConnector.GetRORProcessHandle();
+	AOE_STRUCTURES::RORDebugger *rd = new AOE_STRUCTURES::RORDebugger();
+	if (hROR) {
+		rd->handleROR = hROR;
+		bool valid = rd->RefreshMainGameStructs();
+		int playerId = this->edtPlayerId->GetSelection();
+		if ((playerId < 1) || (playerId >= rd->gameGlobal.playerTotalCount)) {
+			delete rd;
+			return;
+		}
+		AOE_STRUCTURES::STRUCT_PLAYER *player = &rd->players[playerId];
+		AOE_STRUCTURES::STRUCT_AI *ai = &rd->playersAI[playerId];
+		std::string s;
+
 		s += "\n*** Attacking *** Target player=";
 		int tpCount = ai->structTacAI.targetPlayers.usedElements;
 		long int targetPlayer0 = -1;
@@ -339,17 +410,17 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		}
 		s += std::to_string(targetPlayer0);
 		s += " lastTacticalUpdateTime=";
-		s += std::to_string(ai->structTacAI.lastTacticalUpdateTime / 1000);
+		s += MilliSecondsToString(ai->structTacAI.lastTacticalUpdateTime);
 		s += " lastAttackResponseTime=";
-		s += std::to_string(ai->structTacAI.lastAttackResponseTime_ms / 1000);
-		s += " lastAIUpdateTime=";
-		s += std::to_string(ai->structTacAI.lastAIUpdateTime_ms / 1000);
+		s += MilliSecondsToString(ai->structTacAI.lastAttackResponseTime_ms);
 		s += " lastCoopSharAttackTime=";
-		s += std::to_string(ai->structTacAI.lastCoopSharAttackTime_ms / 1000);
+		s += MilliSecondsToString(ai->structTacAI.lastCoopSharAttackTime_ms);
 		s += " lastPanicModeTime=";
-		s += std::to_string(ai->structTacAI.lastPanicModeTime / 1000);
+		s += MilliSecondsToString(ai->structTacAI.lastPanicModeTime);
+		s += "\nlastAIUpdateTime=";
+		s += MilliSecondsToString(ai->structTacAI.lastAIUpdateTime_ms);
 		s += "\nUnit groups: count=";
-		s += std::to_string(ai->structTacAI.unitGroupsCount);
+		s += MilliSecondsToString(ai->structTacAI.unitGroupsCount);
 		int ugCount = ai->structTacAI.unitGroupsCount;
 		int currentUgIndex = 0;
 		AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM currentGroup;
@@ -368,16 +439,12 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		}
 		s += "\n";
 
-
-		s += "\nTO DO...\n";
-
 		this->edtOutputInfo->Clear();
 		this->edtOutputInfo->WriteText(s);
 	}
 	delete rd;
 	rConnector.DisconnectFromROR();
 }
-
 
 
 // Find unit

@@ -43,6 +43,7 @@ private:
 	wxButton *btnOK;
 	wxButton *btnShowMainObjets;
 	wxButton *btnShowGatheringInfo;
+	wxButton *btnShowMilitaryInfo;
 	wxButton *btnFindUnit;
 	wxButton *btnFindUnitDef;
 
@@ -52,12 +53,15 @@ private:
 	void OnFindUnitDef(wxCommandEvent& event);
 	void OnShowMainObjects(wxCommandEvent& event);
 	void OnShowGatheringInfo(wxCommandEvent& event);
+	void OnShowMilitaryInfo(wxCommandEvent& event);
 
 	wxDECLARE_EVENT_TABLE();
 
+	static std::string MilliSecondsToString(long int milliseconds);
 	void GuessRORStruct();
 	void ShowMainObjects();
 	void ShowGatheringInfo();
+	void ShowMilitaryInfo();
 	void FindObject();
 	void FindUnitDef();
 };
@@ -69,7 +73,8 @@ enum CR_DebugMainForm_IDs
 	ID_DMF_SHOW_MAIN_OBJECTS,
 	ID_DMF_FIND_UNIT,
 	ID_DMF_FIND_UNIT_DEF,
-	ID_DMF_SHOW_GATHERING_INFO
+	ID_DMF_SHOW_GATHERING_INFO,
+	ID_DMF_SHOW_MILITARY_INFO
 };
 
 

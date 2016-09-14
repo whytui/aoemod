@@ -10,26 +10,28 @@
 */
 namespace AOE_STRUCTURES {
 
-
 	static const unsigned char CST_MAP_BUILD_LIKE_DISABLED = (unsigned char)0xFF;
 	static const unsigned char CST_MAP_BUILD_LIKE_MAX_VALUE = (unsigned char)CST_MAP_BUILD_LIKE_DISABLED - 1;
-	// Included in 0x7C04A0 address.
-	// Size= 0x28 ?
-	// Describes a temp structure that stores information for currently-AI-managed player's build position priorities (for a given building to be constructed).
+
+#define CHECKSUM_MAP_TILE_INFOS 0x005443C8
+	// One is included in 0x7C04A0 address.
+	// Size= 0x28. Constructor = 0x43D420 mapInfo.constructor(sizeY, sizeX, defaultValue)
+	// Describes a structure that stores information for currently-AI-managed player's build position priorities (for a given building to be constructed).
+	// Other usages: in infAI: explored map info. -1=? 0=?, 1= ? 2=to re-explore??
 	// Note about coordinates: (posX,posY)=(i,j) is the tile where i<x<i+1 and i<y<i+1
 	// So coordinates go from 0 to ("size"-1). ("grid" goes from 0 to "size").
-	class STRUCT_TEMP_MAP_BUILD_LIKE_INFOS {
+	class STRUCT_MAP_TILE_VALUES {
 	public:
 		unsigned long int checksum; // C8 43 54 00
 		long int mapArraySizeY;
 		long int mapArraySizeX;
-		long int unknown_0C_toDecreaseToPosY;
+		long int unknown_0C_toDecreaseToPosY; // +0C. startPosY? Always 0 in standard game
 		// 0x10
-		long int unknown_10_toDecreaseToPosX;
-		// mapLikeValuesMemoryZone[mapArraySizeX * (x) + (y)] should be the same as ptrRowsPtr[X][Y]. Strange conception.
+		long int unknown_10_toDecreaseToPosX; // +10. startPosX? Always 0 in standard game
+		// mapLikeValuesMemoryZone[mapArraySizeX * (x) + (y)] should be the same as ptrRowsPtr[X][Y]. Strange conception. Foir perf maybe ?
 		// Please use supplied methods if possible.
-		unsigned char *mapLikeValuesMemoryZone; // Pointer to the beginning of map values memory zone. But the game accesses it via ptrRowsPtr (that gives pointers to each row (X))
-		unsigned char **ptrRowsPtr; // The list of pointers to each row (X dimension) in mapLikeValues. ptrRowsPtr[X] is a pointer to the row X.
+		unsigned char *mapLikeValuesMemoryZone; // +14. Pointer to the beginning of map values memory zone. But the game accesses it via ptrRowsPtr (that gives pointers to each row (X))
+		unsigned char **ptrRowsPtr; // +18. The list of pointers to each row (X dimension) in mapLikeValues. ptrRowsPtr[X] is a pointer to the row X.
 		long int unknown_1C;
 		// 0x20
 		long int unknown_matchCount;
@@ -37,7 +39,7 @@ namespace AOE_STRUCTURES {
 		char unknown_25[3];
 		// to be continued... unknowns. Size ?
 
-		bool IsCheckSumValid() { return this->checksum == 0x005443C8; }
+		bool IsCheckSumValid() { return this->checksum == CHECKSUM_MAP_TILE_INFOS; }
 
 		// Easy-to-use methods
 		bool IsPositionValid(long int posX, long int posY) {
@@ -241,6 +243,7 @@ namespace AOE_STRUCTURES {
 			// If a corner tile if disabled, do we disable diagonal-opposed corner tile ?
 		}
 	};
+	static_assert(sizeof(STRUCT_MAP_TILE_VALUES) == 0x28, "STRUCT_MAP_TILE_VALUES size");
 
 
 }
