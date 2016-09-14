@@ -17,6 +17,7 @@
 #include <UI\AOE_struct_ui_in_game_options.h>
 #include <UI\AOE_struct_ui_game_settings.h>
 #include <UI\AOE_struct_ui_in_game_main.h>
+#include <AOE_struct_map_tile_values.h>
 #include <yvals.h> // for __STRINGIZE
 #include <Windows.h>
 #include <WinUser.h>

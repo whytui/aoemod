@@ -5,7 +5,7 @@
 #include <AOE_empires_dat.h>
 #include <AOE_struct_common_ai_object.h>
 #include <AOE_struct_ai_unit_list_info.h>
-#include <AOE_struct_temp_map_build_like_infos.h>
+#include <AOE_struct_map_tile_values.h>
 
 
 /*
