@@ -18,6 +18,7 @@
 #include "MapCopyPopup.h"
 #include "traceMessage.h"
 #include "unitShortcuts.h"
+#include "exportToBitmap.h"
 
 namespace CUSTOMROR {
 

@@ -53,12 +53,12 @@ namespace AOE_STRUCTURES {
 			if (*posY >= this->mapArraySizeX) { *posY = this->mapArraySizeX - 1; }
 		}
 		// Will not fail/crash if position is out of bounds
-		unsigned char GetMapLikeValue(long int posX, long int posY) {
+		unsigned char GetTileValue(long int posX, long int posY) const {
 			return this->IsPositionValid(posX, posY) ? ptrRowsPtr[posX][posY] : CST_MAP_BUILD_LIKE_DISABLED;
 		}
 		// Set a tile like value
 		// Will not fail/crash if position is out of bounds
-		void SetMapLikeValue(long int posX, long int posY, long int value) {
+		void SetTileValue(long int posX, long int posY, long int value) {
 			if (this->IsPositionValid(posX, posY)) { ptrRowsPtr[posX][posY] = (unsigned char)value; }
 		}
 		// Increments a tile like value with provided value (can be <0). Preserves disabled ones (0xFF)

@@ -127,6 +127,7 @@
     <ClInclude Include="include\EditorEditUnitInfoPopup.h" />
     <ClInclude Include="include\EditorScenarioInfoPopup.h" />
     <ClInclude Include="include\EditTerrainPopup.h" />
+    <ClInclude Include="include\exportToBitmap.h" />
     <ClInclude Include="include\GenNewTriggerPopup.h" />
     <ClInclude Include="include\InGameCustomRorOptionsPopup.h" />
     <ClInclude Include="include\InGameUnitPropertiesPopup.h" />

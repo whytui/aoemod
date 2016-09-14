@@ -530,6 +530,14 @@ namespace AOE_CONST_INTERNAL
 		CST_BHS_MAX_VALUE = 3
 	};
 
+	// Tile exploration status for infAI
+	enum INFAI_TILE_EXPLORATION_STATUS : char {
+		CST_TES_UNEXPLORED = -1,
+		CST_TES_EXPLORED = 0,
+		CST_TES_FAILED = 1, // Failed getting to location
+		CST_TES_TO_REEXPLORE_MILITARY = 2 // marked for re-exploration by military units
+	};
+
 	// See also 481445 switch
 	enum GAME_SCREEN_BUTTON_IDS {
 		// Standard game button IDs

@@ -2291,7 +2291,7 @@ char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_MAP_TILE_VALUES *mapInfosStruct
 	int pos = 0;
 	for (long int i = -radius; i <= radius; i++) {
 		for (long int j = -radius; j <= radius; j++) {
-			unsigned char value = (unsigned char)mapInfosStruct->GetMapLikeValue(posX + i, posY + j);
+			unsigned char value = (unsigned char)mapInfosStruct->GetTileValue(posX + i, posY + j);
 			if (value == 0xFF) {
 				sprintf_s(&buffer[pos], 4, "-1 ");
 			} else {

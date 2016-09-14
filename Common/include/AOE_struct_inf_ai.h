@@ -106,7 +106,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_AI_UNIT_LIST_INFO playerCreatableUnits; // +128. All player-creatable units (villager, military, buildings...). NOT resources.
 		STRUCT_AI_UNIT_LIST_INFO artefactsAndFlags; // +138. Store the found flags/artefacts.
 		STRUCT_AI_UNIT_LIST_INFO elementsToDefend; // +148. Can be TC, dock, relic, ruin, mines+bushes. Related to SNxxxDefendPriority
-		STRUCT_MAP_TILE_VALUES mapExplorationInfo; // +158. Values = ? 2=to reexplore?
+		STRUCT_MAP_TILE_VALUES mapExplorationInfo; // +158. Values = INFAI_TILE_EXPLORATION_STATUS
 		// Remove unit from allMyUnits & buildingUnits: 0x4BF440.
 		STRUCT_AI_UNIT_LIST_INFO allMyUnits; // +180. To confirm.
 		STRUCT_AI_UNIT_LIST_INFO buildingUnits; // +190
@@ -150,7 +150,11 @@ namespace AOE_STRUCTURES {
 		char learnUHFileName[0x100]; // +0xFF90. Name of xxx.uh file. Not sure this is really used.
 		// 0x10090: end
 
-		bool IsCheckSumValid() { return this->checksum == 0x00548B74; }
+		bool IsCheckSumValid() const { return this->checksum == 0x00548B74; }
+
+		AOE_CONST_INTERNAL::INFAI_TILE_EXPLORATION_STATUS GetExplorationStatus(long int posX, long int posY) const {
+			return (AOE_CONST_INTERNAL::INFAI_TILE_EXPLORATION_STATUS)this->mapExplorationInfo.GetTileValue(posX, posX);
+		}
 	};
 	static_assert(sizeof(STRUCT_INF_AI) == 0x10090, "STRUCT_INF_AI size");
 
