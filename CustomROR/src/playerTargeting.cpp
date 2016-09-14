@@ -110,7 +110,7 @@ namespace CUSTOMROR {
 
 
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_MainAI_findUnit(player->ptrAIStruct, CST_UNITID_FORUM);
-		if (!myTC->IsCheckSumValidForAUnitClass()) { myTC = NULL; }
+		if (myTC && !myTC->IsCheckSumValidForAUnitClass()) { myTC = NULL; }
 
 		// Analyze known enemy units ?
 		// TODO: this should be done along the game when "I" receive alerts from attacks, and reset it at each re-computation
