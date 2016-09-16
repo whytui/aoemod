@@ -95,12 +95,6 @@ void SortResourceTypes(const int resourceAmounts[], int resourceTypesOrder[]);
 bool PrepareUnitToAddIfPossible(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitId_toAdd, short int unitId_actor,
 	long int *actorCounter, short int *lastCostDAT_ID, float remainingResources[], float tempCost[]);
 
-
-// Returns true if a research has been researched for a given player
-bool IsTechResearched(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
-// Returns current status of a research for given player.
-AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
-
 // Return a list of all unitDefIds that are/can be enabled in player's tech tree.
 std::list<long int> GetActivableUnitDefIDs(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
@@ -227,10 +221,6 @@ long int AssignShortcutToSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, lo
 // Selects units that have a given shortcut number.
 long int SelectUnitsUsingShortcut(AOE_STRUCTURES::STRUCT_PLAYER *player, long int shortcutNumber, bool addToSelection = false);
 
-// Apply a research for a player (if possible)
-bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
-bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int research_id);
-
 // Enable or disable a research for a player
 void AOE_enableResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, long int research_id, bool enable);
 
@@ -239,11 +229,6 @@ void AOE_enableResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, long int research
 // To be called before game starts
 // Returns true if a research was found and disabled.
 bool DisableUnitForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID);
-
-// Apply a technology for a player. To be used only when there is no research for given technology (like cheat techs).
-// In most cases, please use ApplyResearchForPlayer instead.
-bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int tech_id);
-bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int tech_id);
 
 // Calls AOE's method to change a unit owner. Warning, this has bugs, see customROR / crCommand.
 void AOE_ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer);
@@ -395,6 +380,7 @@ bool AnalyzeEmpiresDatQuality();
 
 
 // TODO: move in a dedicated file
+// Returns the cursor that corresponds to a given mouse action type (for custom ones)
 static GAME_CURSOR GetCursorForCustomActionType(MOUSE_ACTION_TYPES mouseActionType) {
 	switch (mouseActionType) {
 	case AOE_CONST_INTERNAL::CST_MAT_CR_PROTECT_UNIT_OR_ZONE:

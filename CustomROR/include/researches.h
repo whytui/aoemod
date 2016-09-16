@@ -112,3 +112,21 @@ AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *FindBuildingDefThatEnablesResearch(STRU
 // Writes text representing available tech tree (available technologies that have not been researched yet)
 std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
+
+// Apply a technology for a player. To be used only when there is no research for given technology (like cheat techs).
+// In most cases, please use ApplyResearchForPlayer instead.
+bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int tech_id);
+bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int tech_id);
+
+
+// Apply a research for a player (if possible)
+bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
+bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int research_id);
+
+
+// Returns true if a research has been researched for a given player
+bool IsTechResearched(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
+
+// Returns current status of a research for given player.
+AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
+

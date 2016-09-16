@@ -908,3 +908,79 @@ std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	return result;
 }
 
+
+// Apply a technology for a player. To be used only when there is no research for given technology (like cheat techs).
+// In most cases, please use ApplyResearchForPlayer instead.
+bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int tech_id) {
+	if (!player || !player->IsCheckSumValid() || (!player->ptrGlobalStruct) || (!player->ptrGlobalStruct->IsCheckSumValid())) { return false; }
+	if (tech_id < 0) { return false; } // The call we do will check that tech_id is valid.
+	AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *techDefInfo = player->ptrGlobalStruct->technologiesInfo;
+	if (!techDefInfo || !techDefInfo->IsCheckSumValid()) { return false; }
+	_asm {
+		MOV ECX, techDefInfo;
+		XOR EAX, EAX;
+		MOV AX, tech_id;
+		PUSH player;
+		PUSH EAX;
+		MOV EAX, 0x004EBB10;
+		CALL EAX;
+		// No return value
+	}
+	return true;
+}
+bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int tech_id) {
+	return ApplyTechnologyForPlayer(player, (short int)tech_id);
+}
+
+
+// Apply a research for a player (if possible).
+// Return true if successful
+bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id) {
+	if (!player || !player->IsCheckSumValid() || (!player->ptrResearchesStruct)) { return false; }
+	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *researchInfo = player->ptrResearchesStruct;
+	if (!researchInfo) { return false; }
+	if ((research_id < 0) || (research_id >= researchInfo->researchCount)) { return false; }
+	short int currentStatus = researchInfo->researchStatusesArray[research_id].currentStatus;
+	if ((currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) ||
+		(currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID)) {
+		return false;
+	}
+	long int result;
+	// Apply research if its status is not done and not disabled.
+	_asm {
+		MOV ECX, researchInfo;
+		XOR EAX, EAX;
+		MOV AX, research_id;
+		PUSH EAX;
+		MOV EAX, 0x004EAA3D;
+		CALL EAX;
+		MOV result, EAX;
+	}
+	return (result != 0);
+}
+bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int research_id) {
+	return ApplyResearchForPlayer(player, (short int)research_id);
+}
+
+
+// Returns true if a research has been researched for a given player
+bool IsTechResearched(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id) {
+	assert(player != NULL);
+	assert(player->ptrResearchesStruct != NULL);
+	if (player->ptrResearchesStruct == NULL) { return false; }
+	if (player->ptrResearchesStruct->researchCount <= research_id) { return false; }
+	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS status = player->ptrResearchesStruct->researchStatusesArray[research_id];
+	return (status.currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID);
+}
+
+
+// Returns current status of a research for given player.
+// Returns CST_RESEARCH_STATUS_DONE_OR_INVALID if research_id is invalid (not in bounds)
+AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id) {
+	assert(player != NULL);
+	assert(player->ptrResearchesStruct != NULL);
+	if (player->ptrResearchesStruct == NULL) { return AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID; }
+	if ((research_id < 0) || (player->ptrResearchesStruct->researchCount <= research_id)) { return AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID; }
+	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS status = player->ptrResearchesStruct->researchStatusesArray[research_id];
+	return status.currentStatus;
+}
