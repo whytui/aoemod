@@ -39,76 +39,6 @@ float GetDistance(float x1, float y1, float x2, float y2) {
 }
 
 
-// Returns a weight for a military unit. Scale is totally subjective ! Just a tool for algorithms...
-// Super units have a high weight.
-// Weak unit have a low weight
-int GetUnitWeight(short int DAT_ID) {
-	switch (DAT_ID) {
-		// Super units
-	case CST_UNITID_ARMORED_ELEPHANT:
-	case CST_UNITID_CATAPHRACT:
-	case CST_UNITID_CENTURION:
-	case CST_UNITID_HEAVY_CATAPULT:
-	case CST_UNITID_HEAVY_CHARIOT:
-	case CST_UNITID_HEAVY_HORSE_ARCHER:
-	case CST_UNITID_HELEPOLIS:
-	case CST_UNITID_LEGION:
-		return 1000;
-		// Naval best units
-	case CST_UNITID_JUGGERNAUGHT:
-	case CST_UNITID_TRIREME:
-		return 900;
-		// Intermediate "almost-super" units
-	case CST_UNITID_PHALANX:
-	case CST_UNITID_CATAPULT:
-	case CST_UNITID_HEAVY_CAVALRY:
-		return 600;
-	case CST_UNITID_PRIEST:
-		return 600; // ? Depends on researches !
-	case CST_UNITID_ELEPHANT_ARCHER:
-		return 400;
-
-	case CST_UNITID_HORSE_ARCHER:
-		return 300;
-	case CST_UNITID_LONG_SWORDSMAN:
-	case CST_UNITID_BALLISTA:
-	case CST_UNITID_HOPLITE:
-	case CST_UNITID_STONE_THROWER:
-	case CST_UNITID_WAR_ELEPHANT:
-	case CST_UNITID_WAR_GALLEY:
-	case CST_UNITID_CATAPULT_TRIREME:
-		return 200;
-	case CST_UNITID_CAVALRY:
-	case CST_UNITID_CHARIOT:
-		return 100;
-		// Units under 100 do NOT have upgrades to super units except CST_UNITID_SHORT_SWORDSMAN and CST_UNITID_SCOUT_SHIP
-		// (this is nothing but a choice from method writer ;)
-	case CST_UNITID_COMPOSITE_BOWMAN:
-		return 90;
-	case CST_UNITID_CAMEL:
-		return 50;
-
-		// Weak units...
-	case CST_UNITID_CHARIOT_ARCHER:
-	case CST_UNITID_SCOUT_SHIP:
-		return 25;
-	case CST_UNITID_IMPROVED_BOWMAN:
-	case CST_UNITID_BROAD_SWORDSMAN:
-		return 10;
-	case CST_UNITID_SHORT_SWORDSMAN:
-		return 5;
-	case CST_UNITID_SLINGER:
-	case CST_UNITID_SCOUT:
-	case CST_UNITID_BOWMAN:
-		return 2;
-	case CST_UNITID_CLUBMAN:
-		return 1;
-	default:
-		return 0;
-		break;
-	}
-}
-
 
 // Pause/unpause the game
 void SetGamePause(bool pauseOn) {
@@ -175,41 +105,6 @@ bool ApplyCostIfPossible(float costTable[], float resourceTable[]) {
 	resourceTable[CST_RES_ORDER_STONE] -= costTable[CST_RES_ORDER_STONE];
 	resourceTable[CST_RES_ORDER_GOLD] -= costTable[CST_RES_ORDER_GOLD];
 	return true;
-}
-
-
-// Returns true if unit class corresponds to one of
-// - Artefact/flag
-// - Gatherable unit (mine, tree, gazelle - but not other animals, bushes...)
-// - Units that can be created by players: buildings, living units
-bool IsClassArtefactOrGatherableOrCreatable(GLOBAL_UNIT_AI_TYPES unitClass) {
-	AOE_STRUCTURES::STRUCT_INF_AI fakeInfAI; // unused, ROR method must be static (not using members)
-	const unsigned long int addr = 0x4BE100;
-	long int res;
-	long int dword_unitClass = unitClass;
-	_asm {
-		LEA ECX, fakeInfAI;
-		PUSH dword_unitClass;
-		CALL addr;
-		MOV res, EAX;
-	}
-	return (res != 0);
-}
-
-
-// Returns true if unit class corresponds to units that can be created by players: buildings, living units
-bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass) {
-	AOE_STRUCTURES::STRUCT_INF_AI fakeInfAI; // unused, ROR method must be static (not using members)
-	const unsigned long int addr = 0x4BE140;
-	long int res;
-	long int dword_unitClass = unitClass;
-	_asm {
-		LEA ECX, fakeInfAI;
-		PUSH dword_unitClass;
-		CALL addr;
-		MOV res, EAX;
-	}
-	return (res != 0);
 }
 
 

@@ -92,4 +92,25 @@ namespace AOE_STRUCTURES {
 	// Get strategy element type for a unit
 	AOE_CONST_FUNC::TAIUnitClass GetUnitStrategyElemClass(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
 
+
+	// Returns a weight for a military unit. Scale is totally subjective ! Just a tool for algorithms...
+	// Super units have a high weight.
+	// Weak unit have a low weight
+	int GetUnitWeight(short int DAT_ID);
+
+	// Returns true if unit class corresponds to one of
+	// - Artefact/flag
+	// - Gatherable unit (mine, tree, gazelle - but not other animals, bushes...)
+	// - Units that can be created by players: buildings, living units
+	bool IsClassArtefactOrGatherableOrCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
+
+	// Returns true if unit class corresponds to units that can be created by players: buildings, living units
+	bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
+
+	// Returns true if unit class is targetable as a resource from AI point of view: fish, gazelle, bush, trees, mines
+	bool IsClassTargetableAsResource(GLOBAL_UNIT_AI_TYPES unitClass);
+
+	// Returns true if unit class is artefact or flag
+	bool IsArtefactOrFlag(GLOBAL_UNIT_AI_TYPES unitClass);
+
 }

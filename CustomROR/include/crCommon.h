@@ -33,6 +33,7 @@
 #include "language.h"
 #include "researches.h"
 #include "crLocalization.h"
+#include "unitDefHandling.h"
 
 
 // Methods in this file are simple primitives that don't depend on customROR configuration. They generally are calls to existing game methods.
@@ -80,21 +81,6 @@ AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYE
 
 // Calculate distance
 float GetDistance(float x1, float y1, float x2, float y2);
-
-
-// Returns a weight for a military unit. Scale is totally subjective ! Just a tool for algorithms...
-// Super units have a high weight.
-// Weak unit have a low weight
-int GetUnitWeight(short int DAT_ID);
-
-// Returns true if unit class corresponds to one of
-// - Artefact/flag
-// - Gatherable unit (mine, tree, gazelle - but not other animals, bushes...)
-// - Units that can be created by players: buildings, living units
-bool IsClassArtefactOrGatherableOrCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
-
-// Returns true if unit class corresponds to units that can be created by players: buildings, living units
-bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
 
 // Returns true if the cost could be correctly computed.
 // Returns false if not. costTable content may have been modified though.
