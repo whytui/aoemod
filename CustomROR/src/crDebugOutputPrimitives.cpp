@@ -21,7 +21,7 @@ bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 			}
 		}
 
-		const long int paletteSize = 4 * 4; // 4 colors, 4 DWORDs
+		const long int paletteSize = 4 * 4; // 4 colors, 4 bytes/DWORD
 		unsigned char myPalette[paletteSize];
 		memset(myPalette, 0, paletteSize);
 		for (int i = 0; i < 3; i++) {
