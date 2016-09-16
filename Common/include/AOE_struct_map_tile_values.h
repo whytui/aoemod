@@ -23,8 +23,8 @@ namespace AOE_STRUCTURES {
 	class STRUCT_MAP_TILE_VALUES {
 	public:
 		unsigned long int checksum; // C8 43 54 00
-		long int mapArraySizeY;
-		long int mapArraySizeX;
+		long int mapArraySizeY; // +04. This can differ from actual map size !
+		long int mapArraySizeX; // +08. This can differ from actual map size !
 		long int startPosY; // +0C. Always 0 in standard game. Value to substract before using indexes.
 		// 0x10
 		long int startPosX; // +10. Always 0 in standard game. Value to substract before using indexes.
@@ -32,10 +32,9 @@ namespace AOE_STRUCTURES {
 		// Please use supplied methods if possible.
 		unsigned char *mapLikeValuesMemoryZone; // +14. Pointer to the beginning of map values memory zone. But the game accesses it via ptrRowsPtr (that gives pointers to each row (X))
 		unsigned char **ptrRowsPtr; // +18. The list of pointers to each row (X dimension) in mapLikeValues. ptrRowsPtr[X] is a pointer to the row X.
-		long int unknown_1C;
-		// 0x20
-		long int unknown_matchCount;
-		unsigned char maxValue; // 0xFE for build "like" values (always ?). FF is a NO, 0->0xFE are "like values"
+		long int unknown_1C; // +1C. Not always initialized !
+		long int unknown_matchCount; // +20. Not always initialized !
+		unsigned char maxValue; // +24. Not always initialized !. 0xFE for build "like" values (always ?). FF is a NO, 0->0xFE are "like values"
 		char unknown_25[3];
 
 		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_MAP_TILE_VALUES; }

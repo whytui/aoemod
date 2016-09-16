@@ -227,9 +227,9 @@ void CustomRORCommand::OneShotInit() {
 	SetMaxPopulationGetterInSPGames(CUSTOMROR::crInfo.configInfo.singlePlayerMaxPopulation);
 
 #ifdef _DEBUG
-	if (debugSerialization) {
+	if (CR_DEBUG::debugSerialization) {
 		SetDeserializationDebugChange(true);
-		WriteToFile("", serializationLogFilename, false); // reset file content
+		WriteToFile("", CR_DEBUG::serializationLogFilename, false); // reset file content
 	}
 #endif
 }
@@ -1033,7 +1033,7 @@ void CustomRORCommand::OnGameStart() {
 	}
 
 #ifdef _DEBUG
-	WriteDebugLogForDeserializedData(0, NULL, 0); // Force flush if there is remaining output in buffer
+	CR_DEBUG::WriteDebugLogForDeserializedData(0, NULL, 0); // Force flush if there is remaining output in buffer
 #endif
 }
 
@@ -5644,7 +5644,7 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 	// For 3*3 building: buildingPos=(5.5,10.5) (for example) => tiles are (4,9)->(6,9) (4,10)->(6,10) (4,11)->(6,11)
 #ifdef _DEBUG
 	// Note: x appears vertically in this representation
-	char *test = DumpPosToTextBuffer(mapInfosStruct, TC_x, TC_y, 25); // TEST - TO DO : REMOVE
+	char *test = CR_DEBUG::DumpPosToTextBuffer(mapInfosStruct, TC_x, TC_y, 25); // TEST - TO DO : REMOVE
 #endif
 
 	bool hasHouse = false; // True if at least 1 house already exists
@@ -5749,7 +5749,7 @@ void CustomRORCommand::ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT
 	//mapInfosStruct->SetMapLikeValue(TC_x, TC_y, 0); // TEST - TO DO : REMOVE
 	char oldtest[20000];
 	strcpy_s(oldtest, test);
-	test = DumpPosToTextBuffer(mapInfosStruct, TC_x, TC_y, 25); // TEST - TO DO : REMOVE
+	test = CR_DEBUG::DumpPosToTextBuffer(mapInfosStruct, TC_x, TC_y, 25); // TEST - TO DO : REMOVE
 #endif
 }
 

@@ -188,22 +188,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		//TEST exp
 		//_BITMAP::ExportDataAsBitmap("D:\\test.bmp");
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
-		if (!player || !player->IsCheckSumValid()) { return false; }
-		if (player->ptrAIStruct && (player->ptrAIStruct->structInfAI.XMapSize > 0) && (player->ptrAIStruct->structInfAI.YMapSize > 0)) {
-			
-			int pos = 0;
-			char *b = (char*)malloc(player->ptrAIStruct->structInfAI.XMapSize * player->ptrAIStruct->structInfAI.YMapSize);
-			for (int y = 0; y < player->ptrAIStruct->structInfAI.YMapSize; y++) {
-				for (int x = 0; x < player->ptrAIStruct->structInfAI.XMapSize; x++) {
-					b[pos] = player->ptrAIStruct->structInfAI.mapExplorationInfo.GetTileValue(x, y);
-					pos++;
-				}
-			}
-			_BITMAP::ExportDataAsBitmap("D:\\test.bmp",
-				player->ptrAIStruct->structInfAI.XMapSize, player->ptrAIStruct->structInfAI.YMapSize,
-				b, -1, 3);
-			free(b);
-		}
+		CR_DEBUG::exportInfAIExplorationToBitmap(player);
 	}
 
 	// TEST - F8 - show dialog

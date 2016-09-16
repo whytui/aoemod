@@ -35,6 +35,7 @@
 #include "crRPGMode.h"
 #include "buttonBar.h"
 #include "playerTargeting.h"
+#include "crDebugOutputPrimitives.h"
 
 #pragma once
 

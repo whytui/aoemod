@@ -113,6 +113,7 @@
     <ClInclude Include="include\crCommands.h" />
     <ClInclude Include="include\crCommon.h" />
     <ClInclude Include="include\crConfig.h" />
+    <ClInclude Include="include\crDebugOutputPrimitives.h" />
     <ClInclude Include="include\crGameObjects.h" />
     <ClInclude Include="include\crLocalization.h" />
     <ClInclude Include="include\crMainInterface.h" />
@@ -166,6 +167,7 @@
     <ClCompile Include="src\crCommands.cpp" />
     <ClCompile Include="src\crCommon.cpp" />
     <ClCompile Include="src\crConfig.cpp" />
+    <ClCompile Include="src\crDebugOutputPrimitives.cpp" />
     <ClCompile Include="src\crGameObjects.cpp" />
     <ClCompile Include="src\crLocalization.cpp" />
     <ClCompile Include="src\crMainInterface.cpp" />

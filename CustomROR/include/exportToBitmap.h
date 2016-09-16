@@ -108,6 +108,7 @@ template<typename T> bool ExportDataAsBitmap(const char *filename, long int size
 }
 
 
+// TO remove
 static bool ExportDataAsBitmap(const char *filename) {
 	if (!filename) { return false; }
 	FILE *file;

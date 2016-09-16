@@ -461,20 +461,6 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId);
 // ---------- Other
 
 
-// To customize for debug purpose...
-void DebugDumpAllUnits();
-
-// Writes in a text buffer the content of a "temp map like info" zone.
-char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_MAP_TILE_VALUES *mapInfosStruct, long int posX, long int posY, int radius);
-
-#ifdef _DEBUG
-static const char serializationLogFilename[] = "D:\\AOESrlz.txt";
-extern bool debugSerialization;
-// Write deserialization data into a buffer, then to a log file.
-// This affects greatly performance !!! Debug only.
-void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char *buffer, long int bufferSize);
-#endif
-
 // Automatically detects issues in empires.dat (requires to have been loaded already) and writes logs about errors in trace message handler.
 bool AnalyzeEmpiresDatQuality();
 

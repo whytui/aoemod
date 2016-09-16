@@ -382,8 +382,8 @@ void CustomRORInstance::TemporaryEntryPoints(REG_BACKUP *REG_values) {
 		long int bufSize = GetIntValueFromRORStack(REG_values, 0x1C); // arg3
 		unsigned char *buf = (unsigned char *)REG_values->EDI_val - bufSize; // This calculation is always correct (getting arg2 in stack isn't)
 		unsigned long int callerAddr = GetIntValueFromRORStack(REG_values, 0x10) - 5;
-		//unsigned char *buf = (unsigned char *) GetIntValueFromRORStack(REG_values, 0x18); // arg2 is wRONG: may have been overwritten (like arg1)
-		WriteDebugLogForDeserializedData(callerAddr, buf, bufSize);
+		//unsigned char *buf = (unsigned char *) GetIntValueFromRORStack(REG_values, 0x18); // arg2 is WRONG: may have been overwritten (like arg1)
+		CR_DEBUG::WriteDebugLogForDeserializedData(callerAddr, buf, bufSize);
 	}
 }
 #endif;
