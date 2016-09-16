@@ -190,7 +190,7 @@ void CustomRORInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(AOE_STRUCTURES::S
 		if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() &&
 			(selectedUnits[i]->ptrStructPlayer == player)) { // Make sure selected unit is mine !
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *currentUnitDefBase = selectedUnits[i]->unitDefinition;
-			if (IsTower(currentUnitDefBase->DAT_ID1) || IsNonTowerMilitaryUnit(currentUnitDefBase->unitAIType)) {
+			if (IsTower(currentUnitDefBase) || IsNonTowerMilitaryUnit(currentUnitDefBase->unitAIType)) {
 				UnitCustomInfo *currentUnitInfo = this->myGameObjects.FindOrAddUnitCustomInfo(selectedUnits[i]->unitInstanceId);
 				currentUnitInfo->autoAttackPolicyIsSet = true;
 				if (flagsToApply.attackMilitary) {

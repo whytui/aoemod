@@ -3037,7 +3037,7 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE 
 		// HERE: not villager (and not fishing ship, etc)
 		if ((targetUnitDef->DAT_ID1 != CST_UNITID_PRIEST) &&
 			(
-			IsTower(targetUnitDef->DAT_ID1) || (targetUnitDef->unitType == GUT_TRAINABLE)
+			IsTower(targetUnitDef) || (targetUnitDef->unitType == GUT_TRAINABLE)
 			)) {
 			// living units other than {villagers(+fishing+trade), priests} + towers : update military units count (same bug as villager count)
 			actorPlayer->SetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_MILITARY_POPULATION,
@@ -3454,8 +3454,8 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	bool actionTargetIsVillager = (oldTargetUnit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian); // IsVillager(oldTargetUnit->unitDefinition->DAT_ID1);
 	bool newTargetIsPriest = (newTargetUnit->unitDefinition->DAT_ID1 == CST_UNITID_PRIEST);
 	bool actionTargetIsPriest = (oldTargetUnit->unitDefinition->DAT_ID1 == CST_UNITID_PRIEST);
-	bool newTargetIsTower = AOE_CONST_FUNC::IsTower(newTargetUnit->unitDefinition->DAT_ID1);
-	bool actionTargetIsTower = AOE_CONST_FUNC::IsTower(oldTargetUnit->unitDefinition->DAT_ID1);
+	bool newTargetIsTower = IsTower(newTargetUnit->unitDefinition);
+	bool actionTargetIsTower = IsTower(oldTargetUnit->unitDefinition);
 	bool newTargetIsWall = (newTargetUnit->unitDefinition->unitAIType == TribeAIGroupWall);
 	bool actionTargetIsWall = (oldTargetUnit->unitDefinition->unitAIType == TribeAIGroupWall);
 	// Position/distances
@@ -3620,7 +3620,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 		return false; // force keep
 	}
 	// Enemy tower: keep if I am war elephant
-	if (alreadyVeryClose_oldTarget && (actorUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider) && (IsTower(oldTargetUnit->unitDefinition->DAT_ID1))) {
+	if (alreadyVeryClose_oldTarget && (actorUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider) && (IsTower(oldTargetUnit->unitDefinition))) {
 		return false; // force keep
 	}
 
@@ -3794,7 +3794,7 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 			if (currentTargetAsBld->constructionProgress > 85) {
 				return false; // Almost finished: continue !
 			}
-			if ((currentTargetAsBld->constructionProgress > 75) && (IsTower(currentTargetDef->DAT_ID1))) {
+			if ((currentTargetAsBld->constructionProgress > 75) && (IsTower(currentTargetDef))) {
 				return false; // Almost finished tower: continue !
 			}
 		}
@@ -5139,7 +5139,7 @@ bool CustomRORCommand::AutoSearchTargetShouldIgnoreUnit(AOE_STRUCTURES::STRUCT_U
 	}
 
 	bool targetIsVillager = IsVillager_includingShips(targetUnitDefBase->DAT_ID1);
-	bool targetIsNonTowerBuilding = (targetUnitDefBase->unitAIType == TribeAIGroupBuilding) && (!IsTower(targetUnitDefBase->DAT_ID1));
+	bool targetIsNonTowerBuilding = (targetUnitDefBase->unitAIType == TribeAIGroupBuilding) && (!IsTower(targetUnitDefBase));
 
 	bool policyTellsToIgnore =
 		(!policy->attackVillagers && targetIsVillager) ||
@@ -5571,7 +5571,7 @@ void CustomRORCommand::FixCityPlanFarmPlacement(AOE_STRUCTURES::STRUCT_UNIT_BASE
 		// Do not add "like" value near storage pit because it disturbs other gatherers
 		// Do not add "like" value near towers because they almost always are far from TC
 		if ((unitDef_base->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_STORAGE_PIT) ||
-			IsTower(unitDef_base->DAT_ID1) ){
+			IsTower(unitDef_base) ){
 			skipThisBuilding = true;
 		}
 		if (!isRelevantDropSite) {

@@ -26,6 +26,7 @@
 #include "language.h"
 #include "crLocalization.h"
 #include "crCommon.h"
+#include "unitDefHandling.h"
 
 
 // Defines common objects/variables/methods for CustomROR

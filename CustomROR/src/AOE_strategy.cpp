@@ -718,8 +718,10 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	bool noTowerFoundYet = true;
 	long int consecutiveTowerCount = 0;
 	bool canExitLoop = false;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->GetUnitDefBase((short int)currentStratElem->unitDAT_ID);
+	// Warning: unitDef might be NULL
 	while (currentStratElem && (currentStratElem != fakeFirstStratElem) && !canExitLoop) {
-		if (IsTower((unsigned short int)currentStratElem->unitDAT_ID)) {
+		if (unitDef && IsTower(unitDef)) {
 			noTowerFoundYet = false;
 			consecutiveTowerCount++;
 		} else {

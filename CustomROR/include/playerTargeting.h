@@ -9,6 +9,7 @@
 #include "mainStructuresHandling.h"
 #include "randomizer.h"
 #include "crCommon.h"
+#include "unitDefHandling.h"
 
 using namespace std;
 using namespace AOE_STRUCTURES;

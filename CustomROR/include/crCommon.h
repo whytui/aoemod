@@ -62,10 +62,6 @@ const char *GetUnitName(short int unitDefId);
 // Return NULL if one of the objects is NULL/missing
 AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
-// Returns true if unit definition is a tower (using unit type and the fact it has attacks or not)
-// See also IsTower(datid) in AOE_empires_dat.h, which uses a hardcoded list.
-bool IsTower(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
-
 // Return NULL if one of the objects is NULL/missing
 AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId);
 
@@ -82,9 +78,6 @@ bool IsDockRelevantForMap(MAP_TYPE_INDEX mti);
 // Warning: May return NULL.
 AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId);
 
-// Get strategy element type for a unit
-AOE_CONST_FUNC::TAIUnitClass GetUnitStrategyElemClass(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
-
 // Calculate distance
 float GetDistance(float x1, float y1, float x2, float y2);
 
@@ -93,11 +86,6 @@ float GetDistance(float x1, float y1, float x2, float y2);
 // Super units have a high weight.
 // Weak unit have a low weight
 int GetUnitWeight(short int DAT_ID);
-
-
-// Returns a unit DAT_ID2 (including upgrades) given "base" unit ID (DAT_ID1)
-// You have to make sure DAT_ID1 is not out of bounds. It depends on empires.dat so it can't be checked with a hardcoded value.
-short int GetDAT_ID2(AOE_STRUCTURES::STRUCT_UNITDEF_BASE **defUnitTable, short int DAT_ID1);
 
 // Returns true if unit class corresponds to one of
 // - Artefact/flag
@@ -335,17 +323,6 @@ void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT
 void UnitInfoZoneAddAttributeLine(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone,
 	long int iconId, long int displayType, long int displayedValue, long int totalValue, long int &lineIndex);
 
-// Modifies walking graphics "angle count" to allow units to move correctly.
-// Returns true if successful. If modified, this impacts all units using the graphics, and is not reversible.
-// Restricted to unit definitions that do NOT use attack sounds.
-// You may also want (need) to modify unit definition's speed, terrain restriction, interactionMode...
-bool ForceAllowMovementForUnitWalkingGraphics(AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE *unitDef);
-
-// Make a building capable of moving.
-// This may affect other buildings that use the same walking graphic (including other players !) ; however other player's unit won't move till you change their speed.
-// Returns true if successful
-bool AllowMovementForBuilding(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef, float speed);
-
 
 // -- Commands
 
@@ -382,40 +359,6 @@ bool CreateCmd_SetSteroids(bool enable);
 // Create a "ROR" command struct (pay tribute). Returns false if failed.
 bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_CONST_FUNC::RESOURCE_TYPES resourceType, float amount, float tributeInefficiency);
 
-
-// ---------- Unit def
-
-// Create a new unitDef, copied for provided one, using actual derived class.
-// Returns a STRUCT_UNITDEF_BASE, but it can be any derived class (living, building, etc)
-// This is a shortcut to avoid writing a big "switch" everywhere... The correct class/size will be allocated/initialized according to source class to copy.
-AOE_STRUCTURES::STRUCT_UNITDEF_BASE *CopyUnitDefToNewUsingGoodClass(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *existingUnitDef);
-
-// Extends a player's unitDef table to add a new one (unitDef).
-// unitDef's DAT_ID1 and DAT_ID2 are modified with new ID.
-// Returns -1 on failure, new unitDefId on success.
-short int AddUnitDefToPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
-
-// A constructor for unitDef that copies an existing one.
-template<typename UnitDef> static UnitDef *CopyUnitDefToNew(UnitDef *existingUnitDef) {
-	if (!existingUnitDef || !existingUnitDef->IsCheckSumValid()) {
-		return NULL;
-	}
-	UnitDef *newUnitDef = (UnitDef *)AOEAlloc(sizeof(UnitDef));
-	if (!newUnitDef) {
-		return newUnitDef;
-	}
-	unsigned long int addr = existingUnitDef->GetCopyConstructorAddress();
-	if (!addr) {
-		return NULL;
-	}
-	_asm {
-		MOV ECX, newUnitDef;
-		PUSH 1; // 1 means this is "initial" call (not inherited call from child class)
-		PUSH existingUnitDef;
-		CALL addr
-	}
-	return newUnitDef;
-}
 
 // Get a localized string using ROR method.
 // Returns true on success.

@@ -636,9 +636,9 @@ namespace AOE_CONST_FUNC {
 		return dat_id;
 	}
 
-	// Returns true if a unit is a tower (hardcoded list)
-	// See also IsTower overload in crCommon.h.
-	static bool IsTower(short int dat_id) {
+	// Returns true if a unit is a tower (hardcoded list). Please do not use.
+	// See also IsTower overload in unitDefHandling.h.
+	static bool IsTower_hardcoded(short int dat_id) {
 		return (dat_id == CST_UNITID_WATCH_TOWER) ||
 			(dat_id == CST_UNITID_SENTRY_TOWER) ||
 			(dat_id == CST_UNITID_GUARD_TOWER) ||

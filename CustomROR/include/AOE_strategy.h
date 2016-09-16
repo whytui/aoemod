@@ -12,6 +12,7 @@
 #include "crCommon.h"
 #include "researches.h"
 #include "randomizer.h"
+#include "unitDefHandling.h"
 
 /*
 * This file contains primitives to deal with (AI) strategy.
