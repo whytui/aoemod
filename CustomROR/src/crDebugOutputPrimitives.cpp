@@ -20,9 +20,20 @@ bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 				pos++;
 			}
 		}
-		_BITMAP::ExportDataAsBitmap("D:\\test.bmp",
+
+		const long int paletteSize = 4 * 4; // 4 colors, 4 DWORDs
+		unsigned char myPalette[paletteSize];
+		memset(myPalette, 0, paletteSize);
+		for (int i = 0; i < 3; i++) {
+			myPalette[0 * 4 + i] = 127; // grey for -1 (unexplored)
+		}
+		myPalette[1 * 4 + 1] = 255; // Green for 0 (explored
+		myPalette[2 * 4 + 2] = 255; // Red for 1 (failed)
+		myPalette[3 * 4 + 0] = 255; // Blue for 2 (to reexplore)
+
+		_BITMAP::ExportDataAsBitmapUsingPalette("D:\\test.bmp",
 			player->ptrAIStruct->structInfAI.XMapSize, player->ptrAIStruct->structInfAI.YMapSize,
-			b, -1, 3);
+			b, -1, myPalette, paletteSize);
 		free(b);
 	}
 	return true;

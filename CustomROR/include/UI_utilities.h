@@ -50,10 +50,10 @@ static const char gameScreenName[] = "Game Screen";
 static void AOE_SetFocus(AOE_STRUCTURES::STRUCT_ANY_UI *parent, AOE_STRUCTURES::STRUCT_ANY_UI *child) {
 	if (!parent) { return; }
 	_asm {
-		PUSH child
-			MOV ECX, parent
-			MOV EAX, 0x453EB0 // parentObj.setFocus(childObj)
-			CALL EAX
+		PUSH child;
+		MOV ECX, parent;
+		MOV EAX, 0x453EB0; // parentObj.setFocus(childObj)
+		CALL EAX;
 	}
 }
 

@@ -10,18 +10,22 @@
 namespace _BITMAP {
 
 
-static bool GenerateBitmap(FILE *file, long int pixelsX, long int pixelsY, long int bitsPerPixel, const char *dataArray) {
+// Generates a BMP file using data (=pixel values) from dataArray
+// pixelsX/pixelsY must be even numbers.
+// palette is allowed to be NULL or incomplete.
+static bool GenerateBitmap(FILE *file, long int pixelsX, long int pixelsY, long int bitsPerPixel, const unsigned char *dataArray,
+	const unsigned char *palette, long int paletteSizeInBytes) {
 	assert(dataArray != NULL);
 	assert(bitsPerPixel > 0);
 	assert(bitsPerPixel <= 24);
 	if ((dataArray == NULL) || (bitsPerPixel <= 0) || (bitsPerPixel > 24)) { return false; }
-	long int paletteSize = 0;
+	long int filePaletteSize = 0;
 	switch (bitsPerPixel) {
 	case 4:
-		paletteSize = 0x80;
+		filePaletteSize = 0x80;
 		break;
 	case 8:
-		paletteSize = 0x400;
+		filePaletteSize = 0x400;
 		break;
 	}
 	long int bmpInfoSize = 0x36 - 0xE;
@@ -43,38 +47,82 @@ static bool GenerateBitmap(FILE *file, long int pixelsX, long int pixelsY, long 
 	*p = 0x36;
 	p = (long int*)(headerAndBmpInfo + 0x22);
 	*p = imgBytesSize;
-	char *palette = NULL;
-	if (paletteSize > 0) {
-		palette = (char*)malloc(paletteSize);
-		memset(palette, 0, paletteSize);
+	char *defaultPalette = NULL;
+	if (filePaletteSize > 0) {
+		defaultPalette = (char*)malloc(filePaletteSize);
+		memset(defaultPalette, 0, filePaletteSize);
 		for (int i = 0; i < 256; i++) {
-			palette[i * 4] = i; // Blue
-			palette[i * 4 + 1] = i; // Green
-			palette[i * 4 + 2] = i; // Red
+			defaultPalette[i * 4] = i; // Blue
+			defaultPalette[i * 4 + 1] = i; // Green
+			defaultPalette[i * 4 + 2] = i; // Red
 			// +3 : remains zero
+		}
+		if (palette && (paletteSizeInBytes > 0)) {
+			assert(paletteSizeInBytes <= filePaletteSize);
+			if (paletteSizeInBytes > filePaletteSize) {
+				paletteSizeInBytes = filePaletteSize;
+			}
+			memcpy_s(defaultPalette, filePaletteSize, palette, paletteSizeInBytes);
 		}
 	}
 	fwrite(headerAndBmpInfo, 0x36, sizeof(unsigned char), file);
-	if (paletteSize > 0) {
-		assert(palette != NULL);
-		fwrite(palette, paletteSize, sizeof(unsigned char), file);
+	if (filePaletteSize > 0) {
+		assert(defaultPalette != NULL);
+		fwrite(defaultPalette, filePaletteSize, sizeof(unsigned char), file);
 	}
-	if (palette) {
-		free(palette);
+	if (defaultPalette) {
+		free(defaultPalette);
 	}
 	fwrite(dataArray, imgBytesSize, sizeof(unsigned char), file);
 	return true;
 }
 
 
-// Dataarray: values must be from left to right then top to bottom
-template<typename T> bool ExportDataAsBitmap(const char *filename, long int sizeX, long int sizeY, const T *dataArray,
+// sizeX and sizeY = size of dataArray, and size of exported image.
+// dataArray: values must be from left to right then top to bottom. Other types than 1-byte are accepted but values must be 0-255 (after adding minValue).
+// minValue = lowest value in dataArray. Used so bitmap's pixel values always start at 0 (important for matching palette colors)
+// palette (nullable) = palette to use, does not require to contain 256 colors. Each color is 4 bytes: Blue/Green/Red/zero. First color=lowest value's color.
+// paletteSizeInBytes = exact size in bytes of palette memory (4*number of RGB colors)
+template<typename T> bool ExportDataAsBitmapUsingPalette(const char *filename, long int sizeX, long int sizeY, const T *dataArray,
+	int minValue, const unsigned char *palette, long int paletteSizeInBytes) {
+	assert((sizeof(T) == 1) || (sizeof(T) == 2) || (sizeof(T) == 4));
+	if (!filename) { return false; }
+	FILE *file;
+	errno_t e = fopen_s(&file, filename, "wb+"); // overwrite
+	if (e) {
+		return false;
+	}
+	
+	// Copy input buffer to a correctly-ordered buffer, using easy-to-use values (0-4)
+	unsigned char *buffer = (unsigned char*)malloc(sizeX * sizeY);
+	for (int x = 0; x < sizeX; x++) {
+		for (int y = sizeY - 1; y >= 0; y--) {
+			int offset = (y * sizeX) + x;
+			buffer[offset] = ((unsigned char)(dataArray[offset] - minValue)); // so values start at 0
+		}
+	}
+
+	int pixelsX = sizeX;
+	int pixelsY = sizeY;
+	int imgBytesSize = pixelsX * pixelsY;
+	GenerateBitmap(file, pixelsX, pixelsY, 8, buffer, palette, paletteSizeInBytes);
+	free(buffer);
+	fclose(file);
+	return true;
+}
+
+
+// sizeX and sizeY = size of dataArray, and size of exported image.
+// dataArray: values must be from left to right then top to bottom. Other types than 1-byte are accepted but values must be 0-255 (after adding minValue).
+// minValue = minimal existing value in dataArray (maxValue = maximal value)
+// If maxValue-minValue is low enough, values are multiplied to distribute them in [0-255] interval, which produces better shades of grey rendering.
+template<typename T> bool ExportDataAsBitmapGreyShades(const char *filename, long int sizeX, long int sizeY, const T *dataArray,
 	int minValue, int maxValue) {
 	assert((sizeof(T) == 1) || (sizeof(T) == 2) || (sizeof(T) == 4));
 	if (!filename) { return false; }
 	if (maxValue < minValue) { return false; }
 	FILE *file;
-	errno_t e = fopen_s(&file, filename, "wb+");
+	errno_t e = fopen_s(&file, filename, "wb+"); // overwrite
 	if (e) {
 		return false;
 	}
@@ -89,51 +137,26 @@ template<typename T> bool ExportDataAsBitmap(const char *filename, long int size
 	}
 	assert(range > 0);
 	int factor = 256 / range;
-	
+
+	// Copy input buffer to a correctly-ordered buffer, using easy-to-use values (0-4)
 	unsigned char *buffer = (unsigned char*)malloc(sizeX * sizeY);
 	for (int x = 0; x < sizeX; x++) {
 		for (int y = sizeY - 1; y >= 0; y--) {
 			int offset = (y * sizeX) + x;
-			buffer[offset] = ((unsigned char)(dataArray[offset] + valueToAdd)) * factor;
+			buffer[offset] = ((unsigned char)(dataArray[offset] + valueToAdd)) * factor; // get a repartition of values 0-255 and exploit all shades of grey
 		}
 	}
 
 	int pixelsX = sizeX;
 	int pixelsY = sizeY;
 	int imgBytesSize = pixelsX * pixelsY;
-	GenerateBitmap(file, pixelsX, pixelsY, 8, (const char*) buffer);
+	GenerateBitmap(file, pixelsX, pixelsY, 8, buffer, NULL, 0);
 	free(buffer);
 	fclose(file);
 	return true;
 }
 
 
-// TO remove
-static bool ExportDataAsBitmap(const char *filename) {
-	if (!filename) { return false; }
-	FILE *file;
-	errno_t e = fopen_s(&file, filename, "wb+");
-	if (e) {
-		return false;
-	}
-
-	int pixelsX = 32;
-	int pixelsY = 32;
-	int imgBytesSize = pixelsX * pixelsY;
-	char *buf1 = (char*)malloc(imgBytesSize);
-	memset(buf1, 0, imgBytesSize);
-	for (int x = 0; x < pixelsX; x++) {
-		for (int y = pixelsY - 1; y >= 0; y--) {
-			int offset = (y * pixelsX) + x;
-			buf1[offset] = (char)offset;
-			//buf[offset] = (char)x * 8;
-		}
-	}
-	GenerateBitmap(file, pixelsX, pixelsY, 8, buf1);
-	free(buf1);
-	fclose(file);
-	return true;
-}
 
 }
 
