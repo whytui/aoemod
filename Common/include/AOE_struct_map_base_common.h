@@ -22,6 +22,13 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(STRUCT_POSITION_INFO) == 8, "STRUCT_POSITION_INFO size");
 
+	// Size = 0x0C. Created in 0x520F20
+	class STRUCT_CHAINED_POS_INFO {
+	public:
+		long int posY;
+		long int posX;
+		STRUCT_CHAINED_POS_INFO *next; // can be NULL
+	};
 
 	// Size = 0x10
 	class STRUCT_PATH_FINDING_INTERMEDIATE_STEP {

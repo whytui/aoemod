@@ -15,6 +15,7 @@ namespace AOE_STRUCTURES {
 	// External dependencies
 	class STRUCT_UNIT_BASE;
 	class STRUCT_GAME_GLOBAL;
+	class STRUCT_GAME_MAP_INFO;
 
 
 	/*
@@ -129,5 +130,31 @@ namespace AOE_STRUCTURES {
 		bool IsCheckSumValid() { return this->checksum == 0x00544CF0; }
 	};
 
+
+	// Size = 0x51C. Constructor = 0x521060 (gameMapInfo, terrainRestrictionValues, layer)
+	class STRUCT_GAME_TERRAIN_RESTRICTION_INFO {
+	public:
+		long int unknown_00_array[0xFF]; // Values are (almost) always zero ?
+		unsigned long int unknown_3FC; // unused ?
+		unsigned long int unknown_400;
+		char *terrainAccessibilityValues; // +404: array of mapSizeX*mapSizeY bytes. Default values = -1. Value = 0 when terrain accessibility (restriction) is same as next (y+1) ?
+		char *unknown_408_ptrCols_404; // +408: pointers to cols from +404 array. Array size = mapSizeX*4 (dwords). the array[x] = position in bytesarray
+		char unknown_40C[0xFF]; // +40C. Default values=-1
+		char unknown_50B; // unused ?
+		unsigned long int unknown_50C;
+		float *terrainRestrictionValues; // +510. count = +514 ("layer") ?
+		long int terrainsCountInTerrainRestrictions; // +514. Determines the element count in terrainRestrictionValues.
+		STRUCT_GAME_MAP_INFO *gameMapInfo; // +518
+	};
+
+
+	// Size = 0x0C. Constructor = 0x5219C0
+	// 0x521C60 = getItem(i)
+	class STRUCT_MAP_TERRAIN_RESTRICTION_INFO_LINK {
+	public:
+		STRUCT_GAME_TERRAIN_RESTRICTION_INFO **ptrArray; // +00. Element count is "+4" dword.
+		long int arrayElemCount; // +04: number of items in array (allocated size = elemCount*4)
+		STRUCT_GAME_MAP_INFO *gameMapInfo; // +08
+	};
 
 }

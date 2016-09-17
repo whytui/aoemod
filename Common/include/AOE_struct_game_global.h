@@ -92,8 +92,8 @@ namespace AOE_STRUCTURES {
 		STRUCT_CIVILIZATION_DEF **civilizationDefinitions; // +48. A pointer to the array of pointers to civ definitions. Array size is civCount
 		STRUCT_TECH_DEF_INFO *technologiesInfo; // +4C. 20 99 54 00
 		// +0x50
-		unsigned short int terrainRestrictionCount; // Size for ptrTerrainRestrictionArray array
-		unsigned short int nbOfTerrainPerTerrainRestriction; // +52. How many terrain for each terrain restriction (common for all)
+		short int terrainRestrictionCount; // Size for ptrTerrainRestrictionArray array
+		short int nbOfTerrainPerTerrainRestriction; // +52. How many terrain for each terrain restriction (common for all).
 		float **ptrTerrainRestrictionArray; // +54. Array of pointers to terrain restriction info (if an array of float=0/1). Example 426951. ptrTerrainRestrictionArray[terrainRestriction][terrainId]=float : 0=inaccessible, othervalue=accessible=damagefactor
 		STRUCT_GAME_COMMANDS_INFO *commandsInfo; // +58. 04 99 54 00.
 		STRUCT_SCENARIO_INFO *scenarioInformation; // +5C.

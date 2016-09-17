@@ -34,6 +34,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_TERRAIN_DEF terrainDefinitions[0x20]; // Count is unsure
 		char unknown_338C[0x8D8C - 0x338C];
 		// 8808-1C... 0x10 elems and size=5A0 => start at 2E08 ? WTF. about shp
+#pragma message("NOT rows => cols")
 		STRUCT_GAME_MAP_TILE_INFO **pTileInfoRows; // 0x8D8C. Please use GetTileInfo(...)
 		// 0x8D90
 		short int terrainCount; // +8D90. Default = 0x17 = 23 different terrains in empires.dat
@@ -54,7 +55,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_MAP_GENERATION_INFO *unknown_8DBC_mapgenInfos;
 		// 0x8DC0
 		STRUCT_GAME_GLOBAL *globalStruct;
-		unsigned long int unknown_ptrMapInfosLink; // +8DC4. Size=0C. +0=ptr_array_dwords.+4=arraySize. +8=backPtr to this. constructor 5219C0. 521C60=getItem(i)
+		STRUCT_MAP_TERRAIN_RESTRICTION_INFO_LINK *unknown_ptrMapInfosLink; // +8DC4. Size=0C. +0=ptr_array_ptrs.+4=arraySize. +8=backPtr to GameMapInfo. constructor 5219C0. 521C60=getItem(i)
 		unsigned long int unknown_8DC8; // +8DC8. ptr, size=0x0C. +0/+4=mapSizeYX.+8=ptr_array(sizeX*sizeY*4). Constructor 517E30. Related to 7D205C
 		STRUCT_UNKNOWN_MAP_INFO_7D2058 *unknown_8DCC;
 		char unknown_8DD0[0x8DE4 - 0x8DD0];
@@ -67,8 +68,8 @@ namespace AOE_STRUCTURES {
 		// 0x8DF8
 		char unknown_8DF8_array[0x100 * 0x28]; // Array: 0x100 elements, size=0x28. All are dwords.
 
-		bool IsCheckSumValid() { return this->checksum == 0x005499F4; }
-		STRUCT_GAME_MAP_TILE_INFO *GetTileInfo(short int x, short int y) {
+		bool IsCheckSumValid() const { return this->checksum == 0x005499F4; }
+		STRUCT_GAME_MAP_TILE_INFO *GetTileInfo(short int x, short int y) const {
 			if ((x < 0) || (x >= this->mapArraySizeX) || (y < 0) || (y >= this->mapArraySizeY)) { return NULL; }
 			return &this->pTileInfoRows[x][y];
 		}

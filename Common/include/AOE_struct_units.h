@@ -138,7 +138,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code.
 		short int unknown_078_unitInstanceId; // ? related to +70,+68
 		short int unknown_07A;
-		unsigned long int unknown_07C; // Related to terrain restriction ????
+		long int unknown_07C; // Related to terrain restriction ???? Index of matching unknownGameTerrainRestriction object ?
 		// 0x80
 		unsigned long int unknown_080;
 		char unknown_084; // related to movement ? "isMapInfoUpToDateForThisUnit" ?
