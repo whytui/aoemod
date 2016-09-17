@@ -629,7 +629,7 @@ namespace AOE_STRUCTURES {
 		res += " - GameMapInfo = ";
 		res += GetHexStringAddress(this->gameGlobal.gameMapInfo);
 		res += " pTiles = ";
-		res += GetHexStringAddress(this->gameMapInfo.pTileInfoRows);
+		res += GetHexStringAddress(this->gameMapInfo.pTileInfoCols);
 		res += "\nPlayers: gaia=";
 		res += GetHexStringAddress(this->playerAddresses[0]);
 		for (int i = 1; i < this->gameGlobal.playerTotalCount; i++) {

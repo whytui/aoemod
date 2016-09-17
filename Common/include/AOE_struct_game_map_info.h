@@ -34,8 +34,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_TERRAIN_DEF terrainDefinitions[0x20]; // Count is unsure
 		char unknown_338C[0x8D8C - 0x338C];
 		// 8808-1C... 0x10 elems and size=5A0 => start at 2E08 ? WTF. about shp
-#pragma message("NOT rows => cols")
-		STRUCT_GAME_MAP_TILE_INFO **pTileInfoRows; // 0x8D8C. Please use GetTileInfo(...)
+		STRUCT_GAME_MAP_TILE_INFO **pTileInfoCols; // 0x8D8C. Please use GetTileInfo(...)
 		// 0x8D90
 		short int terrainCount; // +8D90. Default = 0x17 = 23 different terrains in empires.dat
 		short int unknown_8D92;
@@ -71,7 +70,7 @@ namespace AOE_STRUCTURES {
 		bool IsCheckSumValid() const { return this->checksum == 0x005499F4; }
 		STRUCT_GAME_MAP_TILE_INFO *GetTileInfo(short int x, short int y) const {
 			if ((x < 0) || (x >= this->mapArraySizeX) || (y < 0) || (y >= this->mapArraySizeY)) { return NULL; }
-			return &this->pTileInfoRows[x][y];
+			return &this->pTileInfoCols[x][y];
 		}
 		// Updates a tile's displayX/Y fields according to its elevation and position.
 		// Necessary to fix tile "height" display when altitude/elevationGraphicIndex changed.

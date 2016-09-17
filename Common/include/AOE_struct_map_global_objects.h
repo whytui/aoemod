@@ -136,15 +136,29 @@ namespace AOE_STRUCTURES {
 	public:
 		long int unknown_00_array[0xFF]; // Values are (almost) always zero ?
 		unsigned long int unknown_3FC; // unused ?
-		unsigned long int unknown_400;
+		unsigned long int unknown_400; // unused ?
 		char *terrainAccessibilityValues; // +404: array of mapSizeX*mapSizeY bytes. Default values = -1. Value = 0 when terrain accessibility (restriction) is same as next (y+1) ?
-		char *unknown_408_ptrCols_404; // +408: pointers to cols from +404 array. Array size = mapSizeX*4 (dwords). the array[x] = position in bytesarray
+		char **terrainAccessibilityValuesCols; // +408: pointers to cols from +404 array. Array size = mapSizeX*4 (dwords). the array[x] = position in bytesarray
 		char unknown_40C[0xFF]; // +40C. Default values=-1
 		char unknown_50B; // unused ?
-		unsigned long int unknown_50C;
-		float *terrainRestrictionValues; // +510. count = +514 ("layer") ?
+		unsigned long int unknown_50C; // unused ?
+		float *terrainRestrictionValues; // +510. Index = terrainId. count = +514 ("layer") ?
 		long int terrainsCountInTerrainRestrictions; // +514. Determines the element count in terrainRestrictionValues.
 		STRUCT_GAME_MAP_INFO *gameMapInfo; // +518
+
+		char GetTerrainAccessibilityValue(long int posX, long int posY) const {
+			if ((posX < 0) || (posY < 0)) { return -1; }
+			if ((posX > 255) || (posY > 255)) { return -1; }
+			assert(this->gameMapInfo);
+			//if ((posX >= this->gameMapInfo->mapArraySizeX) || (posY >= this->gameMapInfo->mapArraySizeY)) { return -1; }
+			assert(this->terrainAccessibilityValues);
+			assert(this->terrainAccessibilityValuesCols);
+			if (!this->terrainAccessibilityValuesCols) { return -1; }
+			char *pCol = this->terrainAccessibilityValuesCols[posX];
+			assert(pCol != NULL);
+			if (pCol == NULL) { return -1; }
+			return pCol[posY];
+		}
 	};
 
 
