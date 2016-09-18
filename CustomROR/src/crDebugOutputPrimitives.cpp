@@ -40,6 +40,49 @@ bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 }
 
 
+bool exportGameTerrainRestrictionValuesToBitmap() {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return false; }
+	if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return false; }
+	if (!global->gameMapInfo->unknown_ptrMapInfosLink) { return false; }
+	if ((global->gameMapInfo->unknown_ptrMapInfosLink->ptrArray == NULL) || (
+		global->gameMapInfo->unknown_ptrMapInfosLink->arrayElemCount <= 0)) {
+		return false;
+	}
+	STRUCT_GAME_TERRAIN_RESTRICTION_INFO *gameTerrainRestrInfo = NULL;
+	int index = 0;
+	// Find the terrain restriction info that matches "game global" : number of terrain per terrain restriction must match
+	while ((index < global->gameMapInfo->unknown_ptrMapInfosLink->arrayElemCount) && (gameTerrainRestrInfo == NULL)) {
+		gameTerrainRestrInfo = global->gameMapInfo->unknown_ptrMapInfosLink->ptrArray[index];
+		if (gameTerrainRestrInfo) {
+			if ((gameTerrainRestrInfo->terrainsCountInTerrainRestrictions <= 0) ||
+				(gameTerrainRestrInfo->terrainsCountInTerrainRestrictions != global->nbOfTerrainPerTerrainRestriction)) {
+				gameTerrainRestrInfo = NULL;
+			}
+		}
+		index++;
+	}
+	if (gameTerrainRestrInfo == NULL) { return false; }
+
+	int sizeX = global->gameMapInfo->mapArraySizeX;
+	int sizeY = global->gameMapInfo->mapArraySizeY;
+	assert((sizeX > 0) && (sizeY > 0));
+	if ((sizeX <= 0) || (sizeY <= 0)) { return false; }
+	int pos = 0;
+	char *b = (char*)malloc(sizeX * sizeY);
+	for (int y = 0; y < sizeY; y++) {
+		for (int x = 0; x < sizeX; x++) {
+			b[pos] = gameTerrainRestrInfo->GetTerrainAccessibilityValue(x, y);
+			pos++;
+		}
+	}
+	_BITMAP::ExportDataAsBitmapGreyShades("D:\\testtrn.bmp", sizeX, sizeY, b, 0, 255);
+
+	free(b);
+	return true;
+}
+
+
 // To customize for debug purpose...
 void DebugDumpAllUnits() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();

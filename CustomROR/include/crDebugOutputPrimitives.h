@@ -22,6 +22,8 @@ namespace CR_DEBUG {
 
 bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player);
 
+bool exportGameTerrainRestrictionValuesToBitmap();
+
 // To customize for debug purpose...
 void DebugDumpAllUnits();
 
