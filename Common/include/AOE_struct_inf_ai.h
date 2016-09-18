@@ -153,7 +153,7 @@ namespace AOE_STRUCTURES {
 		bool IsCheckSumValid() const { return this->checksum == 0x00548B74; }
 
 		AOE_CONST_INTERNAL::INFAI_TILE_EXPLORATION_STATUS GetExplorationStatus(long int posX, long int posY) const {
-			return (AOE_CONST_INTERNAL::INFAI_TILE_EXPLORATION_STATUS)this->mapExplorationInfo.GetTileValue(posX, posX);
+			return (AOE_CONST_INTERNAL::INFAI_TILE_EXPLORATION_STATUS)this->mapExplorationInfo.GetTileValue(posX, posX, 0xFF);
 		}
 	};
 	static_assert(sizeof(STRUCT_INF_AI) == 0x10090, "STRUCT_INF_AI size");

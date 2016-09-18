@@ -9,18 +9,12 @@ using namespace AOE_STRUCTURES;
 
 namespace CR_DEBUG {
 
+// Export InfAI's exploration status map data to a bitmap using color codes
 bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return false; }
-	if (player->ptrAIStruct && (player->ptrAIStruct->structInfAI.XMapSize > 0) && (player->ptrAIStruct->structInfAI.YMapSize > 0)) {
-		int pos = 0;
-		char *b = (char*)malloc(player->ptrAIStruct->structInfAI.XMapSize * player->ptrAIStruct->structInfAI.YMapSize);
-		for (int y = 0; y < player->ptrAIStruct->structInfAI.YMapSize; y++) {
-			for (int x = 0; x < player->ptrAIStruct->structInfAI.XMapSize; x++) {
-				b[pos] = player->ptrAIStruct->structInfAI.mapExplorationInfo.GetTileValue(x, y);
-				pos++;
-			}
-		}
-
+	long int mapSizeX = player->ptrAIStruct->structInfAI.XMapSize;
+	long int mapSizeY = player->ptrAIStruct->structInfAI.YMapSize;
+	if (player->ptrAIStruct && (mapSizeX > 0) && (mapSizeY > 0)) {
 		const long int paletteSize = 4 * 4; // 4 colors, 4 bytes/DWORD
 		unsigned char myPalette[paletteSize];
 		memset(myPalette, 0, paletteSize);
@@ -31,10 +25,9 @@ bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 		myPalette[2 * 4 + 2] = 255; // Red for 1 (failed)
 		myPalette[3 * 4 + 0] = 255; // Blue for 2 (to reexplore)
 
-		_BITMAP::BitmapExporter::ExportDataAsBitmapUsingPalette("D:\\test.bmp",
-			player->ptrAIStruct->structInfAI.XMapSize, player->ptrAIStruct->structInfAI.YMapSize,
-			b, -1, myPalette, paletteSize);
-		free(b);
+		_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\test2.bmp",
+			mapSizeX, mapSizeY,
+			(const unsigned char**)player->ptrAIStruct->structInfAI.mapExplorationInfo.ptrColsPtr, -1, myPalette, paletteSize);
 	}
 	return true;
 }
@@ -76,14 +69,14 @@ bool exportGameTerrainRestrictionValuesToBitmap() {
 			pos++;
 		}
 	}
-	_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades("D:\\testtrn.bmp", sizeX, sizeY, b, 0, 255);
+	_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades("D:\\testtrn.bmp", sizeX, sizeY, b, 0, 255, false);
 
 	free(b);
 	return true;
 }
 
 
-// To customize for debug purpose...
+
 void DebugDumpAllUnits() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) return;
@@ -115,7 +108,7 @@ char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_MAP_TILE_VALUES *mapInfosStruct
 	int pos = 0;
 	for (long int i = -radius; i <= radius; i++) {
 		for (long int j = -radius; j <= radius; j++) {
-			unsigned char value = (unsigned char)mapInfosStruct->GetTileValue(posX + i, posY + j);
+			unsigned char value = (unsigned char)mapInfosStruct->GetTileValue(posX + i, posY + j, CST_MAP_BUILD_LIKE_DISABLED);
 			if (value == 0xFF) {
 				sprintf_s(&buffer[pos], 4, "-1 ");
 			} else {
@@ -137,6 +130,7 @@ char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_MAP_TILE_VALUES *mapInfosStruct
 bool debugSerialization = false;
 // Write deserialization data into a buffer, then to a log file.
 // This affects greatly performance !!! Debug only.
+// This uses a buffer system, which is flushed when exiting game.
 void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char *buffer, long int bufferSize) {
 	static std::string test;
 	static int writtenLines = 0;

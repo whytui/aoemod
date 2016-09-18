@@ -23,15 +23,17 @@ namespace AOE_STRUCTURES {
 	class STRUCT_MAP_TILE_VALUES {
 	public:
 		unsigned long int checksum; // C8 43 54 00
-		long int mapArraySizeY; // +04. This can differ from actual map size !
-		long int mapArraySizeX; // +08. This can differ from actual map size !
+		long int arraySizeY; // +04. This can differ from actual map size !
+		long int arraySizeX; // +08. This can differ from actual map size !
 		long int startPosY; // +0C. Always 0 in standard game. Value to substract before using indexes.
 		// 0x10
 		long int startPosX; // +10. Always 0 in standard game. Value to substract before using indexes.
-		// mapLikeValuesMemoryZone[mapArraySizeX * (x) + (y)] should be the same as ptrRowsPtr[X][Y]. Strange conception. Foir perf maybe ?
+		// mapLikeValuesMemoryZone[arraySizeY * (x) + (y)] should be the same as ptrColsPtr[X][Y]. NOT ALWAYS TRUE. Strange conception. For perf maybe ?
 		// Please use supplied methods if possible.
-		unsigned char *mapLikeValuesMemoryZone; // +14. Pointer to the beginning of map values memory zone. But the game accesses it via ptrRowsPtr (that gives pointers to each row (X))
-		unsigned char **ptrRowsPtr; // +18. The list of pointers to each row (X dimension) in mapLikeValues. ptrRowsPtr[X] is a pointer to the row X.
+	private:
+		unsigned char *mapLikeValuesMemoryZone; // +14. Pointer to the beginning of map values memory zone. Do not use directly. Size is this->arraySizeX*this->arraySizeY (bytes).
+	public:
+		unsigned char **ptrColsPtr; // +18. The list of pointers to each row (X dimension) in mapLikeValues. ptrColsPtr[X]=mapData+(X*mapsizeY) is a pointer to the column X.
 		long int unknown_1C; // +1C. Not always initialized !
 		long int unknown_matchCount; // +20. Not always initialized !
 		unsigned char maxValue; // +24. Not always initialized !. 0xFE for build "like" values (always ?). FF is a NO, 0->0xFE are "like values"
@@ -40,44 +42,47 @@ namespace AOE_STRUCTURES {
 		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_MAP_TILE_VALUES; }
 
 		// Easy-to-use methods
-		bool IsPositionValid(long int posX, long int posY) const {
-			return ((posX >= 0) && (posX < this->mapArraySizeX) &&
-				(posY >= 0) && (posY < this->mapArraySizeY)
+
+		// Returns true if position is valid regarding this object's allocated array.
+		// Position is not guaranteed to be valid regarding actual map size !
+		inline bool IsPositionValid(long int posX, long int posY) const {
+			return ((posX >= 0) && (posX < this->arraySizeX) &&
+				(posY >= 0) && (posY < this->arraySizeY)
 				);
 		};
 		bool FixPositionToGetInMapBounds(long int *posX, long int *posY) {
 			if (*posX < 0) { *posX = 0; }
 			if (*posY < 0) { *posY = 0; }
-			if (*posX >= this->mapArraySizeX) { *posX = this->mapArraySizeX - 1; }
-			if (*posY >= this->mapArraySizeX) { *posY = this->mapArraySizeX - 1; }
+			if (*posX >= this->arraySizeX) { *posX = this->arraySizeX - 1; }
+			if (*posY >= this->arraySizeX) { *posY = this->arraySizeX - 1; }
 		}
 		// Will not fail/crash if position is out of bounds
-		unsigned char GetTileValue(long int posX, long int posY) const {
-			return this->IsPositionValid(posX, posY) ? ptrRowsPtr[posX][posY] : CST_MAP_BUILD_LIKE_DISABLED;
+		unsigned char GetTileValue(long int posX, long int posY, unsigned char valueIfInvalidPos) const {
+			return this->IsPositionValid(posX, posY) ? ptrColsPtr[posX][posY] : valueIfInvalidPos/*CST_MAP_BUILD_LIKE_DISABLED*/;
 		}
 		// Set a tile like value
 		// Will not fail/crash if position is out of bounds
 		void SetTileValue(long int posX, long int posY, long int value) {
-			if (this->IsPositionValid(posX, posY)) { ptrRowsPtr[posX][posY] = (unsigned char)value; }
+			if (this->IsPositionValid(posX, posY)) { ptrColsPtr[posX][posY] = (unsigned char)value; }
 		}
 		// Increments a tile like value with provided value (can be <0). Preserves disabled ones (0xFF)
 		// Will not fail/crash if position is out of bounds
 		void AddToMapLikeValue(long int posX, long int posY, long int relativeValue) {
-			if (!this->IsPositionValid(posX, posY) || (ptrRowsPtr[posX][posY] == CST_MAP_BUILD_LIKE_DISABLED)) {
+			if (!this->IsPositionValid(posX, posY) || (ptrColsPtr[posX][posY] == CST_MAP_BUILD_LIKE_DISABLED)) {
 				return;
 			}
-			long int v = ptrRowsPtr[posX][posY]; // long int to avoid overflows
+			long int v = ptrColsPtr[posX][posY]; // long int to avoid overflows
 			v += relativeValue;
 			if (v > CST_MAP_BUILD_LIKE_MAX_VALUE) { v = CST_MAP_BUILD_LIKE_MAX_VALUE; }
 			if (v < 0) { v = 0; }
-			ptrRowsPtr[posX][posY] = (unsigned char)v;
+			ptrColsPtr[posX][posY] = (unsigned char)v;
 
 		}
 		// Set a tile like value but preserves disabled ones (0xFF)
 		// Will not fail/crash if position is out of bounds.
 		void SetMapLikeValueIfNotFF(long int posX, long int posY, long int value) {
-			if (this->IsPositionValid(posX, posY) && (ptrRowsPtr[posX][posY] != CST_MAP_BUILD_LIKE_DISABLED)) {
-				ptrRowsPtr[posX][posY] = (unsigned char)value;
+			if (this->IsPositionValid(posX, posY) && (ptrColsPtr[posX][posY] != CST_MAP_BUILD_LIKE_DISABLED)) {
+				ptrColsPtr[posX][posY] = (unsigned char)value;
 			}
 		}
 
@@ -89,11 +94,11 @@ namespace AOE_STRUCTURES {
 			if (posX < 0) { posX = 0; }
 			if (posY_low < 0) { posY_low = 0; }
 			if (posY_high < 0) { posY_high = 0; }
-			if (posX >= this->mapArraySizeX) { posX = mapArraySizeX - 1; }
-			if (posY_low >= this->mapArraySizeY) { posY_low = mapArraySizeY - 1; }
-			if (posY_high >= this->mapArraySizeY) { posY_high = mapArraySizeY - 1; }
-			unsigned char *currentRow = this->ptrRowsPtr[posX];
-			if (posY_low >= mapArraySizeY - 1) { return true; }
+			if (posX >= this->arraySizeX) { posX = arraySizeX - 1; }
+			if (posY_low >= this->arraySizeY) { posY_low = arraySizeY - 1; }
+			if (posY_high >= this->arraySizeY) { posY_high = arraySizeY - 1; }
+			unsigned char *currentRow = this->ptrColsPtr[posX];
+			if (posY_low >= arraySizeY - 1) { return true; }
 			if ((currentRow[posY_low] == CST_MAP_BUILD_LIKE_DISABLED) || (currentRow[posY_low + 1] == CST_MAP_BUILD_LIKE_DISABLED)) {
 				return true;
 			}
@@ -112,16 +117,16 @@ namespace AOE_STRUCTURES {
 			if (posY < 0) { posY = 0; }
 			if (posX_low < 0) { posX_low = 0; }
 			if (posX_high < 0) { posX_high = 0; }
-			if (posY >= this->mapArraySizeY) { posY = mapArraySizeY - 1; }
-			if (posX_low >= this->mapArraySizeX) { posX_low = mapArraySizeX - 1; }
-			if (posX_high >= this->mapArraySizeX) { posX_high = mapArraySizeX - 1; }
-			unsigned char *currentRow = this->ptrRowsPtr[posX_low];
-			if (this->ptrRowsPtr[posX_low][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
-			if (posX_low >= mapArraySizeX - 1) { return true; }
-			if (this->ptrRowsPtr[posX_low + 1][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
-			if (this->ptrRowsPtr[posX_high][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
+			if (posY >= this->arraySizeY) { posY = arraySizeY - 1; }
+			if (posX_low >= this->arraySizeX) { posX_low = arraySizeX - 1; }
+			if (posX_high >= this->arraySizeX) { posX_high = arraySizeX - 1; }
+			unsigned char *currentRow = this->ptrColsPtr[posX_low];
+			if (this->ptrColsPtr[posX_low][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
+			if (posX_low >= arraySizeX - 1) { return true; }
+			if (this->ptrColsPtr[posX_low + 1][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
+			if (this->ptrColsPtr[posX_high][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
 			if (posX_high <= 0) { return true; }
-			if (this->ptrRowsPtr[posX_high - 1][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
+			if (this->ptrColsPtr[posX_high - 1][posY] == CST_MAP_BUILD_LIKE_DISABLED) { return true; }
 			return false;
 		}
 
@@ -132,12 +137,12 @@ namespace AOE_STRUCTURES {
 			if (posY_low < 0) { posY_low = 0; }
 			if (posX_high < 0) { posX_high = 0; }
 			if (posY_high < 0) { posY_high = 0; }
-			if (posX_low >= this->mapArraySizeX) { posX_low = mapArraySizeX - 1; }
-			if (posY_low >= this->mapArraySizeY) { posY_low = mapArraySizeY - 1; }
-			if (posX_high >= this->mapArraySizeX) { posX_high = mapArraySizeX - 1; }
-			if (posY_high >= this->mapArraySizeY) { posY_high = mapArraySizeY - 1; }
+			if (posX_low >= this->arraySizeX) { posX_low = arraySizeX - 1; }
+			if (posY_low >= this->arraySizeY) { posY_low = arraySizeY - 1; }
+			if (posX_high >= this->arraySizeX) { posX_high = arraySizeX - 1; }
+			if (posY_high >= this->arraySizeY) { posY_high = arraySizeY - 1; }
 			for (long int i = posX_low; i <= posX_high; i++) {
-				unsigned char *currentRow = this->ptrRowsPtr[i];
+				unsigned char *currentRow = this->ptrColsPtr[i];
 				for (long int j = posY_low; j <= posY_high; j++) {
 					if (currentRow[j] != CST_MAP_BUILD_LIKE_DISABLED) {
 						return false;
@@ -155,13 +160,13 @@ namespace AOE_STRUCTURES {
 			if (posY_low < 0) { posY_low = 0; }
 			if (posX_high < 0) { posX_high = 0; }
 			if (posY_high < 0) { posY_high = 0; }
-			if (posX_low >= this->mapArraySizeX) { posX_low = mapArraySizeX - 1; }
-			if (posY_low >= this->mapArraySizeY) { posY_low = mapArraySizeY - 1; }
-			if (posX_high >= this->mapArraySizeX) { posX_high = mapArraySizeX - 1; }
-			if (posY_high >= this->mapArraySizeY) { posY_high = mapArraySizeY - 1; }
+			if (posX_low >= this->arraySizeX) { posX_low = arraySizeX - 1; }
+			if (posY_low >= this->arraySizeY) { posY_low = arraySizeY - 1; }
+			if (posX_high >= this->arraySizeX) { posX_high = arraySizeX - 1; }
+			if (posY_high >= this->arraySizeY) { posY_high = arraySizeY - 1; }
 			// Treatments
 			for (long int i = posX_low; i <= posX_high; i++) {
-				unsigned char *currentRow = this->ptrRowsPtr[i];
+				unsigned char *currentRow = this->ptrColsPtr[i];
 				for (long int j = posY_low; j <= posY_high; j++) {
 					if (!preserveDisabled || (currentRow[j] != CST_MAP_BUILD_LIKE_DISABLED)) {
 						currentRow[j] = (unsigned char)value;
@@ -179,13 +184,13 @@ namespace AOE_STRUCTURES {
 			if (posY_low < 0) { posY_low = 0; }
 			if (posX_high < 0) { posX_high = 0; }
 			if (posY_high < 0) { posY_high = 0; }
-			if (posX_low >= this->mapArraySizeX) { posX_low = mapArraySizeX - 1; }
-			if (posY_low >= this->mapArraySizeY) { posY_low = mapArraySizeY - 1; }
-			if (posX_high >= this->mapArraySizeX) { posX_high = mapArraySizeX - 1; }
-			if (posY_high >= this->mapArraySizeY) { posY_high = mapArraySizeY - 1; }
+			if (posX_low >= this->arraySizeX) { posX_low = arraySizeX - 1; }
+			if (posY_low >= this->arraySizeY) { posY_low = arraySizeY - 1; }
+			if (posX_high >= this->arraySizeX) { posX_high = arraySizeX - 1; }
+			if (posY_high >= this->arraySizeY) { posY_high = arraySizeY - 1; }
 			// Treatments
 			for (long int i = posX_low; i <= posX_high; i++) {
-				unsigned char *currentRow = this->ptrRowsPtr[i];
+				unsigned char *currentRow = this->ptrColsPtr[i];
 				for (long int j = posY_low; j <= posY_high; j++) {
 					long int tmpvalue = currentRow[j];
 					if (tmpvalue != CST_MAP_BUILD_LIKE_DISABLED) {

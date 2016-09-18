@@ -20,6 +20,7 @@ using namespace AOE_STRUCTURES;
 
 namespace CR_DEBUG {
 
+// Export InfAI's exploration status map data to a bitmap using color codes
 bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player);
 
 bool exportGameTerrainRestrictionValuesToBitmap();
@@ -35,6 +36,7 @@ static const char serializationLogFilename[] = "D:\\AOESrlz.txt";
 extern bool debugSerialization;
 // Write deserialization data into a buffer, then to a log file.
 // This affects greatly performance !!! Debug only.
+// This uses a buffer system, which is flushed when exiting game.
 void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char *buffer, long int bufferSize);
 
 
