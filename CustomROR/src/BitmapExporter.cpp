@@ -6,7 +6,7 @@ namespace _BITMAP {
 // file must be opened/closed by caller : here it must be an actively opened file with write authorization.
 // bitsPerPixel can be 4, 8, 16, 24 (8 recommended = tested value)
 // palette is allowed to be NULL or incomplete: it is only used to "overwrite" the default palette. if "palette" is incomplete, default colors will be used for missing entries.
-// dataArray MUST contain values in following order: line (left to right) then column (bottom to top)
+// dataArray MUST contain values in following order: line (left to right) then column (bottom to top - WARNING !)
 // This method supports any size (X/Y) and takes care of BMP format trick for X sizes that are not a multiple of 4.
 bool BitmapExporter::GenerateBitmap(FILE *file, long int pixelsX, long int pixelsY, long int bitsPerPixel,
 	const unsigned char *dataArray, const unsigned char *palette, long int paletteSizeInBytes) {

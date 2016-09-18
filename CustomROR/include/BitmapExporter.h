@@ -17,7 +17,7 @@ private:
 	// file must be opened/closed by caller : here it must be an actively opened file with write authorization.
 	// bitsPerPixel can be 4, 8, 16, 24 (8 recommended = tested value)
 	// palette is allowed to be NULL or incomplete: it is only used to "overwrite" the default palette. if "palette" is incomplete, default colors will be used for missing entries.
-	// dataArray MUST contain values in following order: line (left to right) then column (bottom to top)
+	// dataArray MUST contain values in following order: line (left to right) then column (bottom to top - WARNING !)
 	// This method supports any size (X/Y) and takes care of BMP format trick for X sizes that are not a multiple of 4.
 	static bool GenerateBitmap(FILE *file, long int pixelsX, long int pixelsY, long int bitsPerPixel, const unsigned char *dataArray,
 		const unsigned char *palette, long int paletteSizeInBytes);
@@ -44,7 +44,7 @@ template<typename T> static bool ExportDataAsBitmapUsingPalette(const char *file
 	// Copy input buffer to a correctly-ordered buffer, using easy-to-use values (0-4)
 	unsigned char *buffer = (unsigned char*)malloc(sizeX * sizeY);
 	for (int x = 0; x < sizeX; x++) {
-		for (int y = sizeY - 1; y >= 0; y--) {
+		for (int y = 0; y < sizeY - 1; y++) {
 			int offsetBmp = (y * sizeX) + x;
 			int offsetSrc = offsetBmp; // if provided buffer's organization is the expected one: in memory, values are organized like (x0y0 x1y0 x2y0... x0y1 x1y1 x2y1... x0y2 x1y2 x2y2...)
 			if (reverseAxes) {
@@ -85,8 +85,9 @@ template<typename T> static bool ExportDataColumnsAsBitmapUsingPalette(const cha
 	// Copy input buffer to a correctly-ordered buffer, using easy-to-use values (0-4)
 	unsigned char *buffer = (unsigned char*)malloc(sizeX * sizeY);
 	// Provided buffer's organization is the expected one: in memory, values are organized like (x0y0 x1y0 x2y0... x0y1 x1y1 x2y1... x0y2 x1y2 x2y2...)
+	// Note that increasing y values go from bottom to top, which IS expected behaviour
 	for (int x = 0; x < sizeX; x++) {
-		for (int y = sizeY - 1; y >= 0; y--) {
+		for (int y = 0; y < sizeY - 1; y++) {
 			int offset = (y * sizeX) + x;
 			const T *srcData = dataColumnPointers[x];
 			buffer[offset] = ((unsigned char)(srcData[y] - minValue)); // so values start at 0
@@ -134,21 +135,15 @@ template<typename T> static bool ExportDataAsBitmapGreyShades(const char *filena
 
 	// Copy input buffer to a correctly-ordered buffer, using easy-to-use values (0-4)
 	unsigned char *buffer = (unsigned char*)malloc(sizeX * sizeY);
-	if (reverseAxes) {
-		// Provided buffer is accessed like buffer[x][y] : in memory, values are organized like (x0y0 x0y1 x0y2... x1y0 x1y1 x1y2... x2y0 x2y1 x2y2...)
-		for (int y = sizeY - 1; y >= 0; y--) {
-			for (int x = 0; x < sizeX; x++) {
-				int offset = (x * sizeY) + y;
-				buffer[offset] = ((unsigned char)(dataArray[offset] + valueToAdd)) * factor; // get a repartition of values 0-255 and exploit all shades of grey
+	for (int x = 0; x < sizeX; x++) {
+		for (int y = 0; y < sizeY - 1; y++) {
+			int offsetSrc = (y * sizeX) + x; // If provided buffer's organization is the expected one: in memory, values are organized like (x0y0 x1y0 x2y0... x0y1 x1y1 x2y1... x0y2 x1y2 x2y2...)
+			if (reverseAxes) {
+				// Provided buffer is accessed like buffer[x][y] : in memory, values are organized like (x0y0 x0y1 x0y2... x1y0 x1y1 x1y2... x2y0 x2y1 x2y2...)
+				offsetSrc = (x * sizeY) + y;
 			}
-		}
-	} else {
-		// Provided buffer's organization is the expected one: in memory, values are organized like (x0y0 x1y0 x2y0... x0y1 x1y1 x2y1... x0y2 x1y2 x2y2...)
-		for (int x = 0; x < sizeX; x++) {
-			for (int y = sizeY - 1; y >= 0; y--) {
-				int offset = (y * sizeX) + x;
-				buffer[offset] = ((unsigned char)(dataArray[offset] + valueToAdd)) * factor; // get a repartition of values 0-255 and exploit all shades of grey
-			}
+			int offsetDest = (y * sizeX) + x;
+			buffer[offsetDest] = ((unsigned char)(dataArray[offsetSrc] + valueToAdd)) * factor; // get a repartition of values 0-255 and exploit all shades of grey
 		}
 	}
 
