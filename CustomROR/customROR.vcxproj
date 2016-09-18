@@ -128,7 +128,7 @@
     <ClInclude Include="include\EditorEditUnitInfoPopup.h" />
     <ClInclude Include="include\EditorScenarioInfoPopup.h" />
     <ClInclude Include="include\EditTerrainPopup.h" />
-    <ClInclude Include="include\exportToBitmap.h" />
+    <ClInclude Include="include\BitmapExporter.h" />
     <ClInclude Include="include\GenNewTriggerPopup.h" />
     <ClInclude Include="include\InGameCustomRorOptionsPopup.h" />
     <ClInclude Include="include\InGameUnitPropertiesPopup.h" />
@@ -162,6 +162,7 @@
     <ClCompile Include="..\..\tinyxml\tinyxmlerror.cpp" />
     <ClCompile Include="..\..\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="src\AOE_map.cpp" />
+    <ClCompile Include="src\BitmapExporter.cpp" />
     <ClCompile Include="src\buttonBar.cpp" />
     <ClCompile Include="src\civilizationInfo.cpp" />
     <ClCompile Include="src\crCommands.cpp" />

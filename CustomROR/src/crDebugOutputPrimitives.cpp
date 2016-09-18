@@ -31,7 +31,7 @@ bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 		myPalette[2 * 4 + 2] = 255; // Red for 1 (failed)
 		myPalette[3 * 4 + 0] = 255; // Blue for 2 (to reexplore)
 
-		_BITMAP::ExportDataAsBitmapUsingPalette("D:\\test.bmp",
+		_BITMAP::BitmapExporter::ExportDataAsBitmapUsingPalette("D:\\test.bmp",
 			player->ptrAIStruct->structInfAI.XMapSize, player->ptrAIStruct->structInfAI.YMapSize,
 			b, -1, myPalette, paletteSize);
 		free(b);
@@ -76,7 +76,7 @@ bool exportGameTerrainRestrictionValuesToBitmap() {
 			pos++;
 		}
 	}
-	_BITMAP::ExportDataAsBitmapGreyShades("D:\\testtrn.bmp", sizeX, sizeY, b, 0, 255);
+	_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades("D:\\testtrn.bmp", sizeX, sizeY, b, 0, 255);
 
 	free(b);
 	return true;

@@ -11,7 +11,7 @@
 #include <AOE_struct_main_ai.h>
 #include "mainStructuresHandling.h"
 #include "basicFilesHandling.h"
-#include "exportToBitmap.h"
+#include "BitmapExporter.h"
 
 /* This file contains various primitives for debugging */
 
