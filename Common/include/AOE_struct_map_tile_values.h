@@ -28,8 +28,8 @@ namespace AOE_STRUCTURES {
 		long int startPosY; // +0C. Always 0 in standard game. Value to substract before using indexes.
 		// 0x10
 		long int startPosX; // +10. Always 0 in standard game. Value to substract before using indexes.
-		// mapLikeValuesMemoryZone[arraySizeY * (x) + (y)] should be the same as ptrColsPtr[X][Y]. NOT ALWAYS TRUE. Strange conception. For perf maybe ?
-		// Please use supplied methods if possible.
+		// mapLikeValuesMemoryZone[arraySizeY * (x) + (y)] should be the same as ptrColsPtr[X][Y]. Strange conception. For perf maybe ?
+		// Please use supplied methods (because of map size/Array size differences)
 	private:
 		unsigned char *mapLikeValuesMemoryZone; // +14. Pointer to the beginning of map values memory zone. Do not use directly. Size is this->arraySizeX*this->arraySizeY (bytes).
 	public:

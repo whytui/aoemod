@@ -25,9 +25,8 @@ bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 		myPalette[2 * 4 + 2] = 255; // Red for 1 (failed)
 		myPalette[3 * 4 + 0] = 255; // Blue for 2 (to reexplore)
 
-		_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\test2.bmp",
-			mapSizeX, mapSizeY,
-			(const unsigned char**)player->ptrAIStruct->structInfAI.mapExplorationInfo.ptrColsPtr, -1, myPalette, paletteSize);
+		_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\test.bmp", mapSizeX, mapSizeY,
+			player->ptrAIStruct->structInfAI.mapExplorationInfo.ptrColsPtr, -1, myPalette, paletteSize);
 	}
 	return true;
 }
@@ -57,21 +56,14 @@ bool exportGameTerrainRestrictionValuesToBitmap() {
 	}
 	if (gameTerrainRestrInfo == NULL) { return false; }
 
+	// Found the correct object. Export its map data.
 	int sizeX = global->gameMapInfo->mapArraySizeX;
 	int sizeY = global->gameMapInfo->mapArraySizeY;
 	assert((sizeX > 0) && (sizeY > 0));
 	if ((sizeX <= 0) || (sizeY <= 0)) { return false; }
-	int pos = 0;
-	char *b = (char*)malloc(sizeX * sizeY);
-	for (int y = 0; y < sizeY; y++) {
-		for (int x = 0; x < sizeX; x++) {
-			b[pos] = gameTerrainRestrInfo->GetTerrainAccessibilityValue(x, y);
-			pos++;
-		}
-	}
-	_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades("D:\\testtrn.bmp", sizeX, sizeY, b, 0, 255, false);
 
-	free(b);
+	_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\testtrn.bmp", sizeX, sizeY,
+		gameTerrainRestrInfo->terrainAccessibilityValuesCols, 0, NULL, 0);
 	return true;
 }
 

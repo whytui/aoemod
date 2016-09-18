@@ -33,7 +33,7 @@ public:
 // If reverseAxes is true, the function writes map data to a buffer with an inversion of X/Y axes. To be used when provided array's first index is X (Y values are consecutive in memory)
 template<typename T> static bool ExportDataAsBitmapUsingPalette(const char *filename, long int sizeX, long int sizeY,
 	const T *dataArray, int minValue, const unsigned char *palette, long int paletteSizeInBytes, bool reverseAxes) {
-	assert((sizeof(T) == 1) || (sizeof(T) == 2) || (sizeof(T) == 4));
+	static_assert((sizeof(T) == 1) || (sizeof(T) == 2) || (sizeof(T) == 4), "ExportDataAsBitmapUsingPalette: T must be a BYTE, WORD or DWORD numeric type");
 	if (!filename) { return false; }
 	FILE *file;
 	errno_t e = fopen_s(&file, filename, "wb+"); // overwrite
@@ -43,22 +43,15 @@ template<typename T> static bool ExportDataAsBitmapUsingPalette(const char *file
 	
 	// Copy input buffer to a correctly-ordered buffer, using easy-to-use values (0-4)
 	unsigned char *buffer = (unsigned char*)malloc(sizeX * sizeY);
-	if (reverseAxes) {
-		// Provided buffer is accessed like buffer[x][y] : in memory, values are organized like (x0y0 x0y1 x0y2... x1y0 x1y1 x1y2... x2y0 x2y1 x2y2...)
-		for (int x = 0; x < sizeX; x++) {
-			for (int y = sizeY - 1; y >= 0; y--) {
-				int offsetSrc = (x * sizeY) + y;
-				int offsetBmp = (y * sizeX) + x;
-				buffer[offsetBmp] = ((unsigned char)(dataArray[offsetSrc] - minValue)); // so values start at 0
+	for (int x = 0; x < sizeX; x++) {
+		for (int y = sizeY - 1; y >= 0; y--) {
+			int offsetBmp = (y * sizeX) + x;
+			int offsetSrc = offsetBmp; // if provided buffer's organization is the expected one: in memory, values are organized like (x0y0 x1y0 x2y0... x0y1 x1y1 x2y1... x0y2 x1y2 x2y2...)
+			if (reverseAxes) {
+				// Provided buffer is accessed like buffer[x][y] : in memory, values are organized like (x0y0 x0y1 x0y2... x1y0 x1y1 x1y2... x2y0 x2y1 x2y2...)
+				offsetSrc = (x * sizeY) + y;
 			}
-		}
-	} else {
-		// Provided buffer's organization is the expected one: in memory, values are organized like (x0y0 x1y0 x2y0... x0y1 x1y1 x2y1... x0y2 x1y2 x2y2...)
-		for (int x = 0; x < sizeX; x++) {
-			for (int y = sizeY - 1; y >= 0; y--) {
-				int offset = (y * sizeX) + x;
-				buffer[offset] = ((unsigned char)(dataArray[offset] - minValue)); // so values start at 0
-			}
+			buffer[offset] = ((unsigned char)(dataArray[offset] - minValue)); // so values start at 0
 		}
 	}
 
@@ -79,9 +72,9 @@ template<typename T> static bool ExportDataAsBitmapUsingPalette(const char *file
 // palette (nullable) = palette to use, does not require to contain 256 colors. Each color is 4 bytes: Blue/Green/Red/zero. First color=lowest value's color.
 // paletteSizeInBytes = exact size in bytes of palette memory (4*number of RGB colors)
 template<typename T> static bool ExportDataColumnsAsBitmapUsingPalette(const char *filename, long int sizeX, long int sizeY,
-	const T **dataColumnPointers, int minValue, const unsigned char *palette, long int paletteSizeInBytes) {
+	T **dataColumnPointers, int minValue, const unsigned char *palette, long int paletteSizeInBytes) {
 	assert(paletteSizeInBytes % 4 == 0);
-	assert((sizeof(T) == 1) || (sizeof(T) == 2) || (sizeof(T) == 4));
+	static_assert((sizeof(T) == 1) || (sizeof(T) == 2) || (sizeof(T) == 4), "ExportDataColumnsAsBitmapUsingPalette: T must be a BYTE, WORD or DWORD numeric type");
 	if (!filename) { return false; }
 	FILE *file;
 	errno_t e = fopen_s(&file, filename, "wb+"); // overwrite
