@@ -718,9 +718,9 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	bool noTowerFoundYet = true;
 	long int consecutiveTowerCount = 0;
 	bool canExitLoop = false;
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->GetUnitDefBase((short int)currentStratElem->unitDAT_ID);
-	// Warning: unitDef might be NULL
 	while (currentStratElem && (currentStratElem != fakeFirstStratElem) && !canExitLoop) {
+		// Warning: unitDef might be NULL
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->GetUnitDefBase((short int)currentStratElem->unitDAT_ID);
 		if (unitDef && IsTower(unitDef)) {
 			noTowerFoundYet = false;
 			consecutiveTowerCount++;
@@ -737,7 +737,9 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (consecutiveTowerCount > MIN_ENDING_TOWER_COUNT_TO_FORCE_INSERT) {
 		assert(currentStratElem != NULL);
 		if (currentStratElem == NULL) { return; } // ERROR !
-		elemToInsertBefore = currentStratElem->next;
+		if (currentStratElem != fakeFirstStratElem) {
+			elemToInsertBefore = currentStratElem->next;
+		}
 		// Leave some towers before our added units
 		for (int i = 0; i < MIN_ENDING_TOWER_COUNT_TO_FORCE_INSERT - 1; i++) {
 			elemToInsertBefore = elemToInsertBefore->next;

@@ -29,7 +29,7 @@ namespace AOE_STRUCTURES {
 		float sizeRadius1;
 		// 0x60
 		float sizeRadius2;
-		unsigned long int unknown_064;
+		float unknown_064;
 		unsigned long int unknown68_skipCount; // Unsure. "skip" term found in 408891
 		STRUCT_STRATEGY_ELEMENT *next;
 		// 0x70
@@ -46,9 +46,9 @@ namespace AOE_STRUCTURES {
 		// With customROR, we also value it for in-progress buildings => in-construction building already has its ID, use it
 		// With customROR, we also value it for in-progress living units => store actor's unitID. This way, if building is destroyed, we can cancel its strategy element (otherwise it remains stuck forever)
 		// 0x90
-		unsigned long int unknown_090;
-		unsigned long int unknown_094;
-		unsigned long int unknown_098;
+		long int unknown_090;
+		long int unknown_094;
+		long int unknown_098;
 		unsigned long int unknown_09C;
 		// 0xA0
 		long int totalCount; // Total number of created units. "#blds"
