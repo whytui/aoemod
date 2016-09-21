@@ -2634,12 +2634,7 @@ void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long i
 	}
 
 	if (strategyUpdated) {
-		_asm {
-			// Update "last panic mode time" variable... Only if we did something.
-			MOV ECX, tacAI
-				MOV EAX, currentGameTime_ms
-				MOV DWORD PTR DS : [ECX + 0xF94], EAX
-		}
+		tacAI->lastPanicModeTime = currentGameTime_ms;
 	}
 
 	// If NOT panic mode, cancel panic mode units that are not being trained (no need to train them anymore). Too late for "in progress" ones...
