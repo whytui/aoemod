@@ -2035,7 +2035,12 @@ void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long i
 	char myCivId = player->civilizationId;
 
 	long int myMilitaryUnitsCount = tacAI->militaryUnits.usedElements; // does not count villagers, nor towers
-	//long unsigned int structPlayer = (long unsigned int) player;
+	
+	AIPlayerTargetingInfo *playerInfo = CUSTOMROR::playerTargetingHandler.GetPlayerInfo(player->playerId);
+	if (playerInfo != NULL) {
+		assert(playerInfo->myPlayerId == player->playerId);
+		playerInfo->panicModeProvokedByEnemyPlayersDuringLastPeriod[enemyPlayerId]++;
+	}
 
 	// Same control as original: abort if delay is not complete
 	if (timeSinceLastPanicMode_s < panicModeDelay) {

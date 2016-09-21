@@ -28,7 +28,7 @@ namespace CUSTOMROR {
 		const long int dislikeAmountNoWinningAllArtefacts = 20; // Not triggering a victory condition
 		const long int dislikeAmountNoWinningWonderBuilt = 30; // Not triggering a victory condition
 		const long int dislikeAmountNoWinningWonderInConstruction = 15; // Not triggering a victory condition
-		const long int extraValueForCurrentTarget = 3; // (fake) dislike value added to current target
+		const long int extraValueForCurrentTarget = 5; // (fake) dislike value added to current target
 		const long int msAfterWhichCurrentTargetLosesExtraValue = 180 * 1000; // After x milliseconds with the same target player, current target no longer receives "extraValueForCurrentTarget" (more chances to change target)
 		// Dislike score "sub" values + parameters
 		const long int townSize = 20; // In tiles
@@ -37,6 +37,8 @@ namespace CUSTOMROR {
 		const long int townNeighborhoodSizeSquare = townNeighborhoodSize * townNeighborhoodSize;
 		const long int dislikeSubScoreRandomFactor = 10;
 		const long int dislikeSubScoreAttackedMeMoreThanAverage = 5;
+		const long int dislikeSubScoreAttackedMyTown = 12;
+		const long int dislikeSubScoreMostSpottedUnitsMyTown = 3;
 
 	}
 
@@ -53,6 +55,7 @@ namespace CUSTOMROR {
 		// Number of enemy attacks (from each player) during last period of time
 		// Warning: as this also counts towers shooting my explorers (for example), this information must be used carefully
 		long int attacksByEnemyPlayersDuringLastPeriod[9];
+		long int panicModeProvokedByEnemyPlayersDuringLastPeriod[9]; // Counter of "panic modes" triggered by each player during last period of time.
 
 		// Reset all underlying info (useful at game start, etc)
 		void ResetInfo();
