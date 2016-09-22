@@ -152,7 +152,7 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 			ignoreThisUnit = ignoreThisUnit || !isVisible || !isAggressive;
 		}
 
-		if (!ignoreThisUnit) {
+		if (!ignoreThisUnit && myTC) {
 			long int sqDistToMyTC = ((unitPosX - (long int)myTC->positionX) * (unitPosX - (long int)myTC->positionX)) +
 				((unitPosY - (long int)myTC->positionY) * (unitPosY - (long int)myTC->positionY)); // distance^2
 			bool isInMyTown = sqDistToMyTC < TARGETING_CONST::townSizeSquare;
