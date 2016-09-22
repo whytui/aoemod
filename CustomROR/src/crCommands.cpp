@@ -2092,6 +2092,7 @@ void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long i
 	long int enemyPriestVictimsCount = 0; // Easily convertible units: slow units like elephants or possibly hoplites
 	long int enemyChariotsCount = 0;
 	long int enemyTowersCount = 0;
+	// TODO: here are hardcoded buildings. Try to make something more generic.
 	long int myBarracksCount = 0;
 	long int myRangeCount = 0;
 	long int myStableCount = 0;
@@ -2289,54 +2290,50 @@ void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long i
 	int hasAristocracy = IsTechResearched(player, CST_RSID_ARISTOCRACY);
 
 	// Collect info on current strategy status (panic mode elements, if any).
-	//long int currentStratElem = buildAI + 0xF0;
-	long int currentStratElem = ((long int)buildAI) + 0xF0;
-	long int firstStratElem = currentStratElem;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentStratElem = &buildAI->fakeFirstStrategyElement;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstStratElem = currentStratElem;
 	bool go_on = true;
 	long int inProgressPanicUnitCount = 0;
-	long int panicStratElemToReuse[PANIC_MODE_ARRAYS_MAX_SIZE];
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *panicStratElemToReuse[PANIC_MODE_ARRAYS_MAX_SIZE];
 	long int panicStratElemToReuseCount = 0;
-	for (int i = 0; i < PANIC_MODE_ARRAYS_MAX_SIZE; i++) { panicStratElemToReuse[i] = 0; }
+	for (int i = 0; i < PANIC_MODE_ARRAYS_MAX_SIZE; i++) { panicStratElemToReuse[i] = NULL; }
 	// Loop only on the beginning of strategy. Stop at "counter=1" or when meeting a "setGather..." (panic mode units always are before those).
 	while ((currentStratElem != NULL) && (go_on)) {
-		currentStratElem = *(long int *)(currentStratElem + 0x6C); // next
-		long int elemDATID = *(long int *)(currentStratElem + 0x04);
-		long int elemCounter = *(long int *)(currentStratElem + 0x0C);
-		long int elemType = *(long int *)(currentStratElem + 0x74);
-		long int elemInProgress = *(long int *)(currentStratElem + 0x80);
-		long int elemAliveCount = *(long int *)(currentStratElem + 0x84);
-		long int elemActorDATID = *(long int *)(currentStratElem + 0x8C);
-		long int elemTotalCount = *(long int *)(currentStratElem + 0xA0);
-		long int elemRetrains = *(long int *)(currentStratElem + 0xA4);
-		// 0x00542A3C identifies the "fake" 1st element of the list. If we get back to it, we looped on all elements (should not happen unless the strategy is empty)
-		if ((elemType == 6) || (elemCounter == 1) || (currentStratElem == firstStratElem)) { go_on = false; }
+		currentStratElem = currentStratElem->next;
+		// If we get back to fake first element, we looped on all elements (should not happen unless the strategy is empty)
+		if ((currentStratElem->elementType == TAIUnitClass::AIUCStrategyCmd) ||
+			(currentStratElem->elemId == 1) || (currentStratElem == firstStratElem)) {
+			go_on = false;
+		}
 
 		bool isPanicModeElement = false;
-		if ((elemRetrains == 1) && // retrainable element
-			((elemType == 2) || ((elemType == 0) && (elemDATID == CST_UNITID_WATCH_TOWER))) // living OR tower
-			) {
+		if ((currentStratElem->retrains == 1) && // retrainable element
+			((currentStratElem->elementType == TAIUnitClass::AIUCLivingUnit) || // We could add a filter to exclude villagers here
+			((currentStratElem->elementType == TAIUnitClass::AIUCBuilding) && (currentStratElem->unitDAT_ID == CST_UNITID_WATCH_TOWER)))
+			) { // living OR tower
 			isPanicModeElement = true;
 		}
 
 		// Test if it is an obsolete panic mode element (retrains=1, already trained... and dead).
 		if (isPanicModeElement) {
 			//if ((elemInProgress == 0) && (elemAliveCount == 0) && (elemTotalCount > 0)) {
-			if (elemInProgress == 0) {
+			if (currentStratElem->inProgressCount == 0) {
 				// Can reuse this one (or update it, if not trained yet).
-				if (panicStratElemToReuseCount < 20) { // TODO use a constant
+				if (panicStratElemToReuseCount < PANIC_MODE_ARRAYS_MAX_SIZE) {
 					panicStratElemToReuse[panicStratElemToReuseCount] = currentStratElem;
 					panicStratElemToReuseCount++;
 				}
 			} else {
+				short int actorUnitDefId = (short int)currentStratElem->actor;
 				inProgressPanicUnitCount++; // Do NOT modify this strategy element. It is being trained.
 				// This also means that a building is currently used to train the unit: remove it from our available buildings list
-				if (elemActorDATID == CST_UNITID_BARRACKS) { myBarracksCount--; }
-				if (elemActorDATID == CST_UNITID_RANGE) { myRangeCount--; }
-				if (elemActorDATID == CST_UNITID_STABLE) { myStableCount--; }
-				if (elemActorDATID == CST_UNITID_DOCK) { myDockCount--; }
-				if (elemActorDATID == CST_UNITID_TEMPLE) { myTempleCount--; }
-				if (elemActorDATID == CST_UNITID_SIEGE_WORKSHOP) { mySiegeWorkshopCount--; }
-				if (elemActorDATID == CST_UNITID_ACADEMY) { myAcademyCount--; }
+				if (actorUnitDefId == CST_UNITID_BARRACKS) { myBarracksCount--; }
+				if (actorUnitDefId == CST_UNITID_RANGE) { myRangeCount--; }
+				if (actorUnitDefId == CST_UNITID_STABLE) { myStableCount--; }
+				if (actorUnitDefId == CST_UNITID_DOCK) { myDockCount--; }
+				if (actorUnitDefId == CST_UNITID_TEMPLE) { myTempleCount--; }
+				if (actorUnitDefId == CST_UNITID_SIEGE_WORKSHOP) { mySiegeWorkshopCount--; }
+				if (actorUnitDefId == CST_UNITID_ACADEMY) { myAcademyCount--; }
 			}
 		}
 	}
@@ -2615,18 +2612,21 @@ void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long i
 			if (panicStratElemToReuse[reuseIndex] != NULL) {
 				// update strategy element
 				long int *p = (long int*)panicStratElemToReuse[reuseIndex];
-				*(p + 1) = unitId_toAdd;
-				*(p + 2) = -1; // unit instance id
-				// Note: we could search for name in defUnit instead of using hardcoded one. But this is faster and this name is unused by the game code.
-				const char *buf = GetUnitName(unitId_toAdd);
-				strcpy_s((char *)(p + 4), 20, buf);
-				*(p + 0x1D) = 2; // +0x74 unit type
-				*(p + 0x20) = 0; // +0x80 in progress
-				*(p + 0x21) = 0; // +0x84 alive
-				*(p + 0x22) = 0; // +0x88 attempts
-				*(p + 0x23) = unitId_actor; // +0x8C actor
-				*(p + 0x28) = 0; // +0xA0 total count
-				*(p + 0x29) = 1; // +0xA4 retrains
+				panicStratElemToReuse[reuseIndex]->unitDAT_ID = unitId_toAdd;
+				panicStratElemToReuse[reuseIndex]->unitInstanceId = -1;
+				panicStratElemToReuse[reuseIndex]->elementType = TAIUnitClass::AIUCLivingUnit;
+				panicStratElemToReuse[reuseIndex]->inProgressCount = 0;
+				panicStratElemToReuse[reuseIndex]->aliveCount = 0;
+				panicStratElemToReuse[reuseIndex]->buildAttempts = 0;
+				panicStratElemToReuse[reuseIndex]->actor = unitId_actor;
+				panicStratElemToReuse[reuseIndex]->totalCount = 0;
+				panicStratElemToReuse[reuseIndex]->retrains = 1;
+				panicStratElemToReuse[reuseIndex]->unitName[0] = 0;
+				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBaseToAdd = player->GetUnitDefBase(unitId_toAdd);
+				if (unitDefBaseToAdd && unitDefBaseToAdd->IsCheckSumValidForAUnitClass()) {
+					// Using internal name is sufficient here
+					strcpy_s(panicStratElemToReuse[reuseIndex]->unitName, 0x3C, unitDefBaseToAdd->ptrUnitName);
+				}
 			} else {
 				// Insert new
 				AddUnitInStrategy((AOE_STRUCTURES::STRUCT_BUILD_AI *) buildAI, 0, 1, unitId_actor, AIUCLivingUnit, unitId_toAdd, player);
