@@ -11,7 +11,6 @@ namespace CR_DEBUG {
 
 
 void DumpDebugInfoToFile() {
-#ifdef _DEBUG
 	char buf[] = "Error opening debug file :       ";
 	FILE *f;
 	int res = fopen_s(&f, "F:\\AOEDebug.txt", "w+"); // overwrite if already existing
@@ -92,9 +91,7 @@ void DumpDebugInfoToFile() {
 			}
 		}
 	}
-
 	fclose(f);
-#endif
 }
 
 

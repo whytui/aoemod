@@ -96,7 +96,10 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 	// Stop here is feature is not enabled in configuration
 	if (!CUSTOMROR::crInfo.configInfo.cityPlanLikeValuesEnhancement) { return; }
 
-	if (!CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	if (!CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId) || (settings->difficultyLevel >= GAME_DIFFICULTY_LEVEL::GDL_EASY)) {
 		return;
 	}
 
@@ -120,7 +123,11 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 	// For 3*3 building: buildingPos=(5.5,10.5) (for example) => tiles are (4,9)->(6,9) (4,10)->(6,10) (4,11)->(6,11)
 #ifdef _DEBUG
 	// Note: x appears vertically in this representation
-	char *test = CR_DEBUG::DumpPosToTextBuffer(mapInfosStruct, TC_x, TC_y, 25); // TEST - TO DO : REMOVE
+	//char *test = CR_DEBUG::DumpPosToTextBuffer(mapInfosStruct, TC_x, TC_y, 25); // TEST - TO DO : REMOVE
+	static bool expBMP = false;
+	if (expBMP) {
+		_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\ctypln1.bmp", mapInfosStruct->arraySizeX, mapInfosStruct->arraySizeY, mapInfosStruct->ptrColsPtr, -1, NULL, 0);
+	}
 #endif
 
 	bool hasHouse = false; // True if at least 1 house already exists
@@ -218,14 +225,72 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 				// Farms : we don't need to add a bonus near TC/granary, ROR code will do it (see ManageCityMapLikeValueFarmPlacement(...) !)
 			}
 		}
+
+		// 3) Is there enemy units around that could destroy the building before I build it ?
+		assert(infAI->unitElemList != NULL);
+		if (infAI->unitElemList && (settings->difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD)) {
+			// Hard/Hardest levels only
+			long int mapSizeX = infAI->XMapSize;
+			long int mapSizeY = infAI->YMapSize;
+			if (globalStruct->gameMapInfo && globalStruct->gameMapInfo->IsCheckSumValid()) { // This source is more reliable than infAI
+				mapSizeX = globalStruct->gameMapInfo->mapArraySizeX;
+				mapSizeY = globalStruct->gameMapInfo->mapArraySizeY;
+			}
+			for (int i = 0; i < infAI->unitElemListSize; i++) {
+				int unitPlayerId = infAI->unitElemList[i].playerId;
+				int posX = infAI->unitElemList[i].posX;
+				int posY = infAI->unitElemList[i].posY;
+				if ((unitPlayerId > 0) && (unitPlayerId <= globalStruct->playerTotalCount) &&
+					(player->diplomacyVSPlayers[unitPlayerId] >= PLAYER_DIPLOMACY_VALUES::CST_PDV_NEUTRAL) && // Neutral or enemy
+					((posX >= 0) && (posX < mapSizeX) && (posY >= 0) && (posY < mapSizeY)) && // Valid position
+					(infAI->unitElemList[i].unitId >= 0) && (unitPlayerId != player->playerId)) {
+					AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = globalStruct->GetPlayerStruct(infAI->unitElemList[i].playerId);
+					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unitPlayer->GetUnitDefBase(infAI->unitElemList[i].unitDATID);
+					bool isTower = IsTower(unitDef);
+					bool posIsVisible = IsFogVisibleForPlayer(player->playerId, posX, posY);
+					bool isAggressive = isTower || IsNonTowerMilitaryUnit(unitDef->unitAIType);
+					if (isAggressive && (posIsVisible || (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) || (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower))) {
+						AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *unitAttackable = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)globalStruct->GetUnitFromId(infAI->unitElemList[i].unitId);
+						assert(!unitAttackable || unitAttackable->IsCheckSumValidForAUnitClass());
+						if (unitAttackable && unitAttackable->DerivesFromAttackable()) {
+							AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(unitAttackable);
+							bool isBusy = false; // true if unit has already a combat task (if I can see that information)
+							if (action && posIsVisible) { // do not cheat: if not visible, we can't know if unit is idle/busy, and with which kind of task
+								isBusy = (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) ||
+									(action->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK_9) ||
+									(action->actionTypeID == UNIT_ACTION_ID::CST_IAI_CONVERT);
+							}
+							if (!isBusy) {
+								// Unit is idle, or maybe moving, guarding a location, etc: it may be ready to attack any new construction
+								assert(unitDef->DerivesFromAttackable());
+								AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDefAtt = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE*)unitDef;
+								int unitRadiusDecreaseForHighPositions = 1 - (((int)(unitDef->sizeRadiusY * 2)) % 2); // 0 for values like 1.5 or 2.5, 1 for round values
+								int distance = (int)unitDefAtt->maxRange;
+								if (distance < 2) { distance = 2; }
+								if (distance > 18) { distance = 18; }
+								// Avoid building near this enemy unit
+								mapInfosStruct->AddMapLikeValueRectangle(posX - distance, posY - distance,
+									posX + distance - unitRadiusDecreaseForHighPositions, posY + distance - unitRadiusDecreaseForHighPositions,
+									-10);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// 4) Take into account previous failures ?
+		
 	}
 
 
 #ifdef _DEBUG
-	//mapInfosStruct->SetMapLikeValue(TC_x, TC_y, 0); // TEST - TO DO : REMOVE
-	char oldtest[20000];
-	strcpy_s(oldtest, test);
-	test = CR_DEBUG::DumpPosToTextBuffer(mapInfosStruct, TC_x, TC_y, 25); // TEST - TO DO : REMOVE
+	//char oldtest[20000];
+	//strcpy_s(oldtest, test);
+	//test = CR_DEBUG::DumpPosToTextBuffer(mapInfosStruct, TC_x, TC_y, 25); // TEST - TO DO : REMOVE
+	if (expBMP) {
+		_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\ctypln2.bmp", mapInfosStruct->arraySizeX, mapInfosStruct->arraySizeY, mapInfosStruct->ptrColsPtr, -1, NULL, 0);
+	}
 #endif
 }
 

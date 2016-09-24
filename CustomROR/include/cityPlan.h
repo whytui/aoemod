@@ -6,6 +6,7 @@
 #include <AOE_struct_units.h>
 #include "CustomRORInfo.h"
 #include "crDebugOutputPrimitives.h"
+#include "BitmapExporter.h"
 
 namespace CITY_PLAN {
 

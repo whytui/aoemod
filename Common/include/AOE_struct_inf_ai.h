@@ -95,8 +95,8 @@ namespace AOE_STRUCTURES {
 		STRUCT_AI_UNIT_LIST_INFO unknown_0F0; // Unused ?? See 0x4DB4E2.
 		// 0x100
 		STRUCT_AI *ptrMainAI;
-		long int YMapSize;
-		long int XMapSize;
+		long int YMapSize; // +104. Warning: this might NOT be initialized
+		long int XMapSize; // +108. Warning: this might NOT be initialized
 		unsigned long int unknown_10C;
 		// 0x110
 		long int unitElemListSize; // +110. Total allocated size of unitElemList (the array can contain some "-1")
