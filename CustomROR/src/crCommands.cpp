@@ -250,6 +250,7 @@ void CustomRORCommand::ReadIfManageAIIsOn() {
 // Reads game executable to determine if various sequences are installed or not
 void CustomRORCommand::ReadOtherSequencesStatus() {
 	CUSTOMROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
+	CUSTOMROR::crInfo.hasFixForBuildingStratElemUnitId = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixUnitIdForInProgressBuilding");
 }
 
 // Load custom strings files
