@@ -36,6 +36,7 @@
 #include "buttonBar.h"
 #include "playerTargeting.h"
 #include "crDebugOutputPrimitives.h"
+#include "StrategyUpdater.h"
 
 #pragma once
 
@@ -43,29 +44,6 @@
 
 
 namespace CUSTOMROR {
-
-
-// TEMPORARY
-#ifdef _DEBUG
-static bool _DEBUG_improveThisPlayer(int playerId) {
-	bool applyFilter = false; // TRUE = DEBUG, false = normal
-
-	static bool msgDone = false;
-	if (!msgDone) {
-		msgDone = true;
-		if (applyFilter)
-			traceMessageHandler.WriteMessage("Using DEBUG AI improvement filter");
-	}
-	if (applyFilter) {
-		// Filter clause (DEBUG)
-		return playerId >= 5;
-	}
-
-	// Normal: no filter
-	return true;
-}
-#endif
-
 
 
 
@@ -177,10 +155,6 @@ public:
 	// Initialize internal game-specific variables (to call on each game start/load)
 	void InitMyGameInfo();
 
-	// Use this API to get "do we improve AI" information. This takes care of customROR configuration + possible custom rules.
-	// So we can add custom rules for debugging
-	bool IsImproveAIEnabled(int playerId);
-
 	// Returns true if RPG mode is active in current game
 	bool IsRpgModeEnabled();
 
@@ -286,9 +260,6 @@ public:
 	// Entry point aftre a strategy element has been added in buildAI
 	void AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *posToAdd,
 		int countAdded);
-
-	// Analyze strategy and fixes what's necessary. Called every <crInfo.configInfo.tacticalAIUpdateDelay> seconds.
-	void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
 
 	// Overloads the "tactical AI update" event that occurs regularly for each AI player.
 	// For the algorithm to work well, requires also "FixUnitIdForInProgressBuilding", "FixResetStratElemForUnitId"

@@ -421,3 +421,38 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE **CustomRORInfo::GetRelevantSelectedUnitsBasePo
 }
 
 
+
+// TEMPORARY
+#ifdef _DEBUG
+static bool _DEBUG_improveThisPlayer(int playerId) {
+	bool applyFilter = false; // TRUE = DEBUG, false = normal
+
+	static bool msgDone = false;
+	if (!msgDone) {
+		msgDone = true;
+		if (applyFilter)
+			traceMessageHandler.WriteMessage("Using DEBUG AI improvement filter");
+	}
+	if (applyFilter) {
+		// Filter clause (DEBUG)
+		return playerId >= 5;
+	}
+
+	// Normal: no filter
+	return true;
+}
+#endif
+
+
+
+// Use this API to get "do we improve AI" information. This takes care of customROR configuration + possible custom rules.
+// So we can add custom rules for debugging
+bool CUSTOMROR::IsImproveAIEnabled(int playerId) {
+#ifdef _DEBUG
+	return (CUSTOMROR::crInfo.configInfo.improveAILevel > 0) && _DEBUG_improveThisPlayer(playerId);
+#else
+	return (CUSTOMROR::crInfo.configInfo.improveAILevel > 0);
+#endif
+}
+
+

@@ -194,8 +194,14 @@ private:
 };
 
 
+
+
 namespace CUSTOMROR {
 	extern CustomRORInfo crInfo;
+
+	// Use this API to get "do we improve AI" information. This takes care of customROR configuration + possible custom rules.
+	// So we can add custom rules for debugging
+	bool IsImproveAIEnabled(int playerId);
 
 }
 

@@ -3041,7 +3041,7 @@ void CustomRORInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_va
 	REG_values->ECX_val = (unsigned long int) infAI->ptrMainAI; // Required for call 0x40BAB0
 	REG_values->EAX_val = currentUnitId; // modified ROR code PUSHes EAX, not ECX.
 
-	if ((currentUnitId >= 0) && CUSTOMROR::crCommand.IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
+	if ((currentUnitId >= 0) && CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
 		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *unitListElemBase = infAI->unitElemList;
 		if (!unitListElemBase || (loopIndex >= infAI->unitElemListSize)) { return; }
 		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem = &unitListElemBase[loopIndex];
@@ -3491,7 +3491,7 @@ void CustomRORInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values
 	long int mostDislikedPlayerId = -1; // Modify it to impact returned value and set target playerId
 
 	// Custom treatments
-	if (CUSTOMROR::crCommand.IsImproveAIEnabled(player->playerId)) {
+	if (CUSTOMROR::IsImproveAIEnabled(player->playerId)) {
 		// Override the calculation of target player Id (most disliked)
 		mostDislikedPlayerId = CUSTOMROR::playerTargetingHandler.GetMostDislikedPlayer(player, diplAI, askTributeAmount, askTributePlayerId,
 			(attackWinningPlayerFlag != 0), attackWinningPlayerFactor);

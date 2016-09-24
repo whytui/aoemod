@@ -149,6 +149,7 @@
     <ClInclude Include="include\SimpleEditText.h" />
     <ClInclude Include="include\StrategyBuilder.h" />
     <ClInclude Include="include\StrategyPotentialElemInfo.h" />
+    <ClInclude Include="include\StrategyUpdater.h" />
     <ClInclude Include="include\TechnologyFilter.h" />
     <ClInclude Include="include\traceMessage.h" />
     <ClInclude Include="include\UI_utilities.h" />
@@ -201,6 +202,7 @@
     <ClCompile Include="src\SimpleEditText.cpp" />
     <ClCompile Include="src\StrategyBuilder.cpp" />
     <ClCompile Include="src\StrategyPotentialElemInfo.cpp" />
+    <ClCompile Include="src\StrategyUpdater.cpp" />
     <ClCompile Include="src\traceMessages.cpp" />
     <ClCompile Include="src\unitDefHandling.cpp" />
   </ItemGroup>

@@ -374,7 +374,6 @@ long int GetButtonInternalIndexFromDatBtnId(char DATButtonId);
 
 // ---------- Other
 
-
 // Automatically detects issues in empires.dat (requires to have been loaded already) and writes logs about errors in trace message handler.
 bool AnalyzeEmpiresDatQuality();
 
@@ -385,6 +384,8 @@ static GAME_CURSOR GetCursorForCustomActionType(MOUSE_ACTION_TYPES mouseActionTy
 	switch (mouseActionType) {
 	case AOE_CONST_INTERNAL::CST_MAT_CR_PROTECT_UNIT_OR_ZONE:
 		return GAME_CURSOR::GC_GROUP;
+	case AOE_CONST_INTERNAL::CST_MAT_VILLAGER_SET_BUILDING_LOCATION:
+		return GAME_CURSOR::GC_HAND;
 	case AOE_CONST_INTERNAL::CST_MAT_NORMAL:
 	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_01:
 	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_02_SELECT_ZONE:
@@ -392,7 +393,6 @@ static GAME_CURSOR GetCursorForCustomActionType(MOUSE_ACTION_TYPES mouseActionTy
 	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_04:
 	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_05:
 	case AOE_CONST_INTERNAL::CST_MAT_VILLAGER_BUILD_MENU:
-	case AOE_CONST_INTERNAL::CST_MAT_VILLAGER_SET_BUILDING_LOCATION:
 	case AOE_CONST_INTERNAL::CST_MAT_EDITOR_SET_UNIT_LOCATION:
 	case AOE_CONST_INTERNAL::CST_MAT_SET_TERRAIN_TYPE:
 	case AOE_CONST_INTERNAL::CST_MAT_SET_ALTITUDE:
