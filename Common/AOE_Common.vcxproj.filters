@@ -1,0 +1,344 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Fichiers de ressources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\AOE_model">
+      <UniqueIdentifier>{5e681429-7ff7-488b-85c9-610615ce6042}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\AOE_genie">
+      <UniqueIdentifier>{208f187f-72f0-48e8-8e44-209187969aeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\AOE_model\AI">
+      <UniqueIdentifier>{2ef2b9ef-867e-4ee2-9138-673ffa5f16c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\AOE_model\UI">
+      <UniqueIdentifier>{a6708643-358f-4ff9-8455-05abcaa9b886}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\AOE_model\UI_components">
+      <UniqueIdentifier>{aeeff56c-d732-4cb6-9ede-e155c640ada9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\triggerDefinition.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_const_functional.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_const_global.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_const_internal.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_const_language.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\customResolution.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mystrings.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ROR_API_assert.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ROR_API_pub.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pointers.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_SN_numbers.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ROR_global_variables.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gameVersion.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_offsets.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\basicFilesHandling.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_debugging.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_export.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_export_remote.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_structures_drs.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_civilization_def.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_research_def.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_unit_def.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_tech_def.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_empires_dat.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_hardcoded_unit_names.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_terrain_def.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_map_def.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_map_generation.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_map_visibility_info.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_map_base_common.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_map_tile_info.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_map_global_objects.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_score.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_unit_actions.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_command_line_info.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_sound.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_mp_communication.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_game_map_info.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_unit_activity.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_units.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_player.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_common_ai_object.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_build_ai.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_con_ai.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_inf_ai.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_tac_ai.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_trade_ai.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_diplomacy_ai.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_emotional_ai.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_resource_ai.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_strategy_ai.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_ai_unit_list_info.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_strategy_element.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_main_ai.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_scenario_info.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_game_global.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_game_settings.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_any_ui.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_ui_button.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_ui_button_with_number.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_ui_combobox.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_ui_label.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_ui_listbox.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_ui_scrollbar.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_ui_textbox.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_diamond_map.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_in_game_menu.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_playing_zone.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_diplomacy_dialog.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_scenario_editor_menu.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_scenario_editor_main.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_editor_unit_info_zone.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_unit_info_zone.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_f11_pop_panel.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_in_game_options.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_in_game_main.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_popup_dialog.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_load_saved_game.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_campaign_editor.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_join_screen.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_credits_screen.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_welcome_main_screen.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_scenario_editor_main_menu.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_game_settings.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_other.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_commands.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_mp_setup_screen.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_ui_button_combobox.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_screen_base.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_dialog_base.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_ui_main_info.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_const_drs.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_campaign_info.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_graphics.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_dat_sound.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_ui_gameColoredInfoLabel.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_map_tile_values.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\triggerDefinition.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ROR_struct_debugging.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ROR_struct_export.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\basicFilesHandling.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\AoEX.ico">
+      <Filter>Fichiers de ressources</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

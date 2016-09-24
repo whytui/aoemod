@@ -1,8 +1,6 @@
 
 #include "../include/crLocalization.h"
 
-#define BUFFER_SIZE 1024
-
 
 // Define it only once (in .cpp file) so all files will use the same instance.
 LocalizationHandler localizationHandler;
@@ -103,3 +101,4 @@ void LocalizationHandler::SetString(unsigned short int stringId, const char *tex
 	strcpy_s(s, length + 1, text);
 	this->localizedStrings[stringId] = s;
 }
+
