@@ -203,6 +203,9 @@
     <ClInclude Include="include\language.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
+    <ClInclude Include="include\cityPlan.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -345,6 +348,9 @@
     </ClCompile>
     <ClCompile Include="src\BitmapExporter.cpp">
       <Filter>Fichiers sources\Technical</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cityPlan.cpp">
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1120,7 +1120,7 @@ void CustomRORInstance::ManageCityMapLikeComputationCall1(REG_BACKUP *REG_values
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *) GetIntValueFromRORStack(REG_values, 0x1C);
 	ror_api_assert(REG_values, infAI != NULL);
 
-	CUSTOMROR::crCommand.ManageCityPlanOtherBuildingsImpact(infAI, stratElem, (AOE_STRUCTURES::STRUCT_POSITION_INFO*)TCPositionYX);
+	CITY_PLAN::ManageCityPlanOtherBuildingsImpact(infAI, stratElem, (AOE_STRUCTURES::STRUCT_POSITION_INFO*)TCPositionYX);
 }
 
 
@@ -1213,7 +1213,7 @@ void CustomRORInstance::ManageCityMapLikeValueFarmPlacement(REG_BACKUP *REG_valu
 
 	long int existingBldInfluenceZone = REG_values->EAX_val;
 	bool skipThisBuilding = false;
-	CUSTOMROR::crCommand.FixCityPlanFarmPlacement(unitExistingBld_base, existingBldInfluenceZone, skipThisBuilding);
+	CITY_PLAN::FixCityPlanFarmPlacement(unitExistingBld_base, existingBldInfluenceZone, skipThisBuilding);
 	REG_values->EAX_val = existingBldInfluenceZone;
 
 	if (skipThisBuilding) {

@@ -27,6 +27,7 @@
 #include "crLocalization.h"
 #include "CustomPopupBase.h"
 #include "InGameCustomRorOptionsPopup.h"
+#include "cityPlan.h"
 
 
 namespace CUSTOMROR {
