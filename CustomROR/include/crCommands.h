@@ -191,8 +191,6 @@ public:
 	void PrintDateTime();
 	// Displays game map seed (from game settings) in "in-game" chat
 	void PrintMapSeed();
-	// Dumps useful information for debugging.
-	void DumpDebugInfoToFile();
 
 	// Returns how many units where told to move.
 	// If maxDistance > 0, only units at a maximum distance of maxDistance are told to move.
@@ -273,9 +271,6 @@ public:
 	// Returns true if we want to force usage of original ROR's (bugged) code
 	// In most cases, this returns true and ROR's code is not used.
 	bool RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms);
-
-	// Manage strategy updates for panic mode.
-	void ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms);
 
 	void ComputeDislikeValues();
 

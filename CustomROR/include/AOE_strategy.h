@@ -21,6 +21,8 @@
 
 using namespace AOE_CONST_FUNC;
 
+namespace STRATEGY {
+
 const char CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN[] = "CustomRORMaxPopulation";
 
 // Returns the element between elem1 and elem2 that comes first in strategy
@@ -160,3 +162,5 @@ AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetCustomRorMaxPopulationBeginStratElem
 // Dumps strategy to text format, for debugging.
 std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
 
+
+}

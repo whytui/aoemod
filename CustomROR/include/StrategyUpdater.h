@@ -8,8 +8,8 @@
 #include "CustomRORInfo.h"
 #include "researches.h"
 #include "AOE_strategy.h"
-#include "StrategyPotentialElemInfo.h"
-#include "customFuncRules.h"
+//#include "customFuncRules.h"
+#include "playerTargeting.h"
 
 
 using namespace AOE_CONST_FUNC;
@@ -26,6 +26,10 @@ namespace STRATEGY {
 
 	// Analyze strategy and fixes what's necessary. Called every <crInfo.configInfo.tacticalAIUpdateDelay> seconds.
 	void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
+
+
+	// Manage strategy updates for panic mode.
+	void ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms);
 
 
 }

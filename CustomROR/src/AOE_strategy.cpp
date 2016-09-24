@@ -63,6 +63,9 @@ public:
 };
 
 
+namespace STRATEGY {
+
+
 // Returns the element between elem1 and elem2 that comes first in strategy
 // Returns NULL if not found (elem1 & elem2 do not belong to buildAI's strategy)
 AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetFirstElementOf(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI,
@@ -1432,3 +1435,5 @@ std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	return result;
 }
 
+
+}

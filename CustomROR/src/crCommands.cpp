@@ -418,7 +418,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 			player = GetPlayerStruct(playerId);
 		}
 		if (player && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
-			std::string s = ExportStrategyToText(&player->ptrAIStruct->structBuildAI);
+			std::string s = STRATEGY::ExportStrategyToText(&player->ptrAIStruct->structBuildAI);
 			traceMessageHandler.WriteMessage(s);
 			//this->OpenCustomDialogMessage(s.c_str(), 700, 550);
 			sprintf_s(outputBuffer, "Close this window to see strategy.");
@@ -504,7 +504,9 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_ALL_SET, "All players are now computer-managed."));
 	}
 	if (strcmp(command, "dump") == 0) {
-		this->DumpDebugInfoToFile();
+#ifdef _DEBUG
+		CR_DEBUG::DumpDebugInfoToFile();
+#endif
 	}
 	if (strcmp(command, "about") == 0) {
 		std::string s = localizationHandler.GetTranslation(CRLANG_ID_CUSTOMROR, "CustomROR");
@@ -1364,7 +1366,7 @@ void CustomRORCommand::CheckAIWhenEnablingAIControl(int playerId) {
 // This will run various actions to fix strategy, etc (example: do not build buildings human already built).
 // The method will do nothing if player is NULL or if its AI structure is NULL.
 void CustomRORCommand::CheckAIWhenEnablingAIControl(AOE_STRUCTURES::STRUCT_PLAYER *player) {
-	UpdateStrategyWithUnreferencedExistingUnits(player);
+	STRATEGY::UpdateStrategyWithUnreferencedExistingUnits(player);
 }
 
 
@@ -1472,7 +1474,7 @@ bool CustomRORCommand::FindIfGameStartStrategyInitHasBeenDone(AOE_STRUCTURES::ST
 	if (!player) { return true; }
 	AOE_STRUCTURES::STRUCT_AI *mainAI = player->ptrAIStruct;
 	if (!mainAI) { return true; }
-	if (FindElementInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_HOUSE) < 0) {
+	if (STRATEGY::FindElementInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCBuilding, CST_UNITID_HOUSE) < 0) {
 		// Our current criterion is "no house = not initialized". Can we do better ?
 		return false;
 	}
@@ -1522,9 +1524,9 @@ void CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 		if (applyAIFix) {
 			if (gameSettings->difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD) {
 				// Search for techs that can be added to strategy and would improve my military units
-				AddUsefulMilitaryTechsToStrategy(player);
+				STRATEGY::AddUsefulMilitaryTechsToStrategy(player);
 			}
-			AdaptStrategyToMaxPopulation(player);
+			STRATEGY::AdaptStrategyToMaxPopulation(player);
 		}
 	}
 
@@ -1558,12 +1560,12 @@ void CustomRORCommand::AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI
 	for (int i = 0; i < countAdded; i++) {
 		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *newElem = curElem->next;
 		// Try to update strategy if there is an "unreferenced" existing unit that match newly-added element
-		UpdateStrategyWithUnreferencedExistingUnits(buildAI, newElem->unitDAT_ID, newElem->elementType);
+		STRATEGY::UpdateStrategyWithUnreferencedExistingUnits(buildAI, newElem->unitDAT_ID, newElem->elementType);
 
 		// Granary / SP that are inserted at very beginning of strategy: move it after first house.
 		if (((newElem->unitDAT_ID == CST_UNITID_GRANARY) || (newElem->unitDAT_ID == CST_UNITID_STORAGE_PIT)) && (insertionPos < 2)) {
 			// Warning: this may move strategy element !
-			MoveStrategyElement_after_ifWrongOrder(buildAI, CST_UNITID_HOUSE, TAIUnitClass::AIUCBuilding, newElem->unitDAT_ID, TAIUnitClass::AIUCNone);
+			STRATEGY::MoveStrategyElement_after_ifWrongOrder(buildAI, CST_UNITID_HOUSE, TAIUnitClass::AIUCBuilding, newElem->unitDAT_ID, TAIUnitClass::AIUCNone);
 		}
 		curElem = curElem->next; // We are sure curElem did not move, use this (newElem may have been moved forward in strategy)
 	}
@@ -1604,7 +1606,7 @@ bool CustomRORCommand::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_A
 	if (stratElem->unitDAT_ID == CST_UNITID_WONDER) {
 		// *****
 		// Make sure all researches from my strategy are already done before starting a wonder
-		if (!IsStrategyCompleteForWonder(ai)) {
+		if (!STRATEGY::IsStrategyCompleteForWonder(ai)) {
 			return true;
 		}
 
@@ -1705,8 +1707,8 @@ bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES:
 	if (!mainAI || !mainAI->IsCheckSumValid()) { return false; }
 	long int actorPlayerId = mainAI->structMainDecisionAI.playerId;
 	if (IsImproveAIEnabled(actorPlayerId)) {
-		// When AI improvements are on, used our treatments, not ROR code.
-		this->ManagePanicMode(mainAI, enemyPlayerId, timeSinceLastPanicMode_s, currentGameTime_ms);
+		// When AI improvements are ON, use our treatments, not ROR code.
+		STRATEGY::ManagePanicMode(mainAI, enemyPlayerId, timeSinceLastPanicMode_s, currentGameTime_ms);
 		return false;
 	}
 
@@ -1718,654 +1720,6 @@ bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES:
 	// Delay is reached, ROR code can be called.
 	return true;
 }
-
-
-// Manage strategy updates for panic mode.
-void CustomRORCommand::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
-	// CONFIG
-	const long int panicModeDelay = CUSTOMROR::crInfo.configInfo.panicModeDelay;
-	long int maxPanicModeUnitsInStrategy = CUSTOMROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy;
-	const long int maxPanicModeSeekEnemyDistance = 20; // 0x14. Hardcoded in original code
-#define PANIC_MODE_ARRAYS_MAX_SIZE 20 // technical limit to the number of panic mode units
-	if (maxPanicModeUnitsInStrategy > PANIC_MODE_ARRAYS_MAX_SIZE) { maxPanicModeUnitsInStrategy = PANIC_MODE_ARRAYS_MAX_SIZE; }
-
-	// Collect context information/variables
-	assert(mainAI != NULL);
-	assert(mainAI->IsCheckSumValid());
-	if (!mainAI || (!mainAI->IsCheckSumValid())) { return; }
-
-	// Other variables
-	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &mainAI->structBuildAI;
-	AOE_STRUCTURES::STRUCT_INF_AI *infAI = &mainAI->structInfAI;
-	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = &mainAI->structTacAI;
-	assert(buildAI->IsCheckSumValid());
-	assert(infAI->IsCheckSumValid());
-	assert(tacAI->IsCheckSumValid());
-	AOE_STRUCTURES::STRUCT_PLAYER *player = mainAI->ptrStructPlayer;
-	assert(player != NULL);
-	assert(player->IsCheckSumValid());
-	char myCivId = player->civilizationId;
-
-	long int myMilitaryUnitsCount = tacAI->militaryUnits.usedElements; // does not count villagers, nor towers
-	
-	AIPlayerTargetingInfo *playerInfo = CUSTOMROR::playerTargetingHandler.GetPlayerInfo(player->playerId);
-	if (playerInfo != NULL) {
-		assert(playerInfo->myPlayerId == player->playerId);
-		playerInfo->panicModeProvokedByEnemyPlayersDuringLastPeriod[enemyPlayerId]++;
-	}
-
-	// Same control as original: abort if delay is not complete
-	if (timeSinceLastPanicMode_s < panicModeDelay) {
-		return;
-	}
-
-	assert((enemyPlayerId >= 0) && (enemyPlayerId < 9));
-	AOE_STRUCTURES::STRUCT_PLAYER *enemyPlayer = GetPlayerStruct((short int)enemyPlayerId);
-	assert(enemyPlayer != NULL);
-	assert(enemyPlayer->IsCheckSumValid());
-	if (!enemyPlayer) { return; }
-	char enemyCivId = enemyPlayer->civilizationId;
-
-
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *forumUnitStruct;
-	forumUnitStruct = AOE_MainAI_findUnit(mainAI, CST_UNITID_FORUM);
-	if (forumUnitStruct == NULL) { return; } // TO DO: make special treatments if no town center (maybe we still have other buildings... Especially temple!)
-	assert(forumUnitStruct->IsCheckSumValidForAUnitClass());
-	// Add "fake" enemys "priestVictims" so that we create units to defend what's left and possibly convert a villager ! Use fake position ?
-	long int forumPosX = (long int)forumUnitStruct->positionX;
-	long int forumPosY = (long int)forumUnitStruct->positionY;
-
-	// My resources
-	float remainingResources[MAX_RESOURCE_TYPE_ID];
-	remainingResources[CST_RES_ORDER_FOOD] = player->GetResourceValue(CST_RES_ORDER_FOOD); // *(float *)(ptrResources + 4 * CST_RES_ORDER_FOOD);
-	remainingResources[CST_RES_ORDER_WOOD] = player->GetResourceValue(CST_RES_ORDER_WOOD); //*(float *)(ptrResources + 4 * CST_RES_ORDER_WOOD);
-	remainingResources[CST_RES_ORDER_STONE] = player->GetResourceValue(CST_RES_ORDER_STONE); //*(float *)(ptrResources + 4 * CST_RES_ORDER_STONE);
-	remainingResources[CST_RES_ORDER_GOLD] = player->GetResourceValue(CST_RES_ORDER_GOLD); //*(float *)(ptrResources + 4 * CST_RES_ORDER_GOLD);
-	remainingResources[CST_RES_ORDER_POPULATION_HEADROOM] = player->GetResourceValue(CST_RES_ORDER_POPULATION_HEADROOM); //*(float *)(ptrResources + 0x10); // free population left in houses
-	// Keep some necessary basic resources left to create villagers/forum if needed
-	remainingResources[CST_RES_ORDER_FOOD] -= 150;
-	remainingResources[CST_RES_ORDER_WOOD] -= 200;
-	if (remainingResources[CST_RES_ORDER_POPULATION_HEADROOM] <= 0) { return; } // No room for new units
-	// We don't use pop_headroom anymore at this point. We could use it to limit the number of added units.
-	if ((remainingResources[CST_RES_ORDER_FOOD] < 40) && (remainingResources[CST_RES_ORDER_WOOD] < 20) &&
-		(remainingResources[CST_RES_ORDER_GOLD] < 15)) {
-		return;
-	} // Out of resources: exit now. Optional check.
-
-	float tempCost[MAX_RESOURCE_TYPE_ID + 1];
-	short int lastCostDAT_ID = -1; // DAT ID to which last computed cost corresponds to.
-	for (int i = 0; i < 4; i++) { tempCost[i] = 0; }
-
-	long int totalEnemyCount = 0; // Total count of enemy units in my town
-	long int enemyPriestCount = 0;
-	long int enemyCamelVictimsCount = 0; // Units I can kill with camels: chariots, cavalry, horse archers
-	long int enemySlingerVictimsCount = 0; // All archers but elephant (they are slow, they can't make my units run after them)
-	long int enemySiegeWeaponsCount = 0;
-	long int enemyPriestVictimsCount = 0; // Easily convertible units: slow units like elephants or possibly hoplites
-	long int enemyChariotsCount = 0;
-	long int enemyTowersCount = 0;
-	// TODO: here are hardcoded buildings. Try to make something more generic.
-	long int myBarracksCount = 0;
-	long int myRangeCount = 0;
-	long int myStableCount = 0;
-	long int myTempleCount = 0;
-	long int mySiegeWorkshopCount = 0;
-	long int myAcademyCount = 0;
-	long int myDockCount = 0;
-	bool hasBoats = false;
-	long int square_maxPanicModeSeekEnemyDistance = maxPanicModeSeekEnemyDistance * maxPanicModeSeekEnemyDistance;
-	long int unitListElementCount = infAI->unitElemListSize;
-	long int unitListBase = (long int)infAI->unitElemList;
-	assert((unitListElementCount == 0) || (infAI->unitElemList != NULL));
-	// Collect info about ATTACKER's units in my town. Note: the unit list we use may not be up to date depending on "my" exploration and what happened to involved units
-	// In standard game, infAI->unitElemList contains many obsolete information (never cleaned up !). This is improved in customROR.
-	for (int i = 0; i < unitListElementCount; i++) {
-		char *unitElementNumPlayer = (char *)(unitListBase + i * 0x24 + 0x0B);
-
-		// We could count "my" buildings from this list but it is incomplete ! Original game searches there but it's bad. We will search directly in player.building_list list.
-		if (*unitElementNumPlayer == enemyPlayerId) {
-			// Count enemy units in my town
-			long int diffX = (forumPosX - infAI->unitElemList[i].posX);
-			long int diffY = (forumPosY - infAI->unitElemList[i].posY);
-			if ((diffX * diffX) + (diffY * diffY) <= square_maxPanicModeSeekEnemyDistance) {
-				totalEnemyCount++;
-				if (infAI->unitElemList[i].unitDATID == CST_UNITID_PRIEST) { enemyPriestCount++; }
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_CAVALRY) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HEAVY_CAVALRY) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CATAPHRACT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HORSE_ARCHER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HEAVY_HORSE_ARCHER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CHARIOT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CHARIOT_ARCHER)) {
-					enemyCamelVictimsCount++;
-				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_SCOUT_SHIP) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_WAR_GALLEY) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_TRIREME) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CATAPULT_TRIREME) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_JUGGERNAUGHT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_FIRE_GALLEY)) {
-					hasBoats = true;
-				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_BOWMAN) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_IMPROVED_BOWMAN) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_COMPOSITE_BOWMAN) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CHARIOT_ARCHER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HORSE_ARCHER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HEAVY_HORSE_ARCHER) // ||
-					// Remove elephant archer ? His slowness makes him quite different for defence strategy (he won't make my slow units run after him)
-					//(infAI->unitElemList[i].unitDATID == CST_UNITID_ELEPHANT_ARCHER)
-					) {
-					enemySlingerVictimsCount++;
-				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_BALLISTA) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HELEPOLIS) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_STONE_THROWER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CATAPULT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HEAVY_CATAPULT)) {
-					enemySiegeWeaponsCount++;
-				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_ELEPHANT_ARCHER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_WAR_ELEPHANT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_ARMORED_ELEPHANT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HOPLITE) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_PHALANX) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CENTURION)) {
-					enemyPriestVictimsCount++;
-				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_HEAVY_CHARIOT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CHARIOT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CHARIOT_ARCHER)) {
-					enemyChariotsCount++;
-				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_WATCH_TOWER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_SENTRY_TOWER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_GUARD_TOWER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_BALLISTA_TOWER)) {
-					enemyTowersCount++;
-				}
-			}
-		}
-	}
-	// Get my buildings list: quite efficient because we have a dedicated list (only buildings) at player level (does not rely on AI structures)
-	assert(player->ptrBuildingsListHeader != NULL);
-	long int buildingList_count = 0;
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **buildingsList = NULL;
-	if (player->ptrBuildingsListHeader) {
-		buildingList_count = player->ptrBuildingsListHeader->buildingsArrayElemCount;
-		buildingsList = player->ptrBuildingsListHeader->ptrBuildingsArray;
-	}
-	assert((buildingList_count == 0) || (buildingsList != NULL));
-	for (int i = 0; i < buildingList_count; i++) {
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *loopUnit = NULL;
-		assert(player->ptrBuildingsListHeader != NULL);
-		loopUnit = buildingsList[i];
-		if (loopUnit != NULL) {
-			// We are running so much asserts because player->ptrBuildingsListHeader sometimes contain invalid data !
-			// It happens because of buildings conversion bug
-			assert(loopUnit->IsCheckSumValidForAUnitClass());
-			assert(GetUnitStruct(player->ptrBuildingsListHeader->ptrBuildingsUnitIDs[i]) == loopUnit);
-			assert(GetUnitStruct(loopUnit->unitInstanceId) == loopUnit);
-			assert(loopUnit->unitType == GUT_BUILDING);
-			assert(loopUnit->unitDefinition != NULL);
-			if ((loopUnit->IsCheckSumValidForAUnitClass()) && (GetUnitStruct(player->ptrBuildingsListHeader->ptrBuildingsUnitIDs[i]) == loopUnit) &&
-				(loopUnit->unitType == GUT_BUILDING) && (loopUnit->unitDefinition != NULL)) {
-				if ((loopUnit->unitStatus == 2) && (loopUnit->unitDefinition != NULL)) {
-					short int DAT_ID = loopUnit->unitDefinition->DAT_ID1;
-					if (DAT_ID == CST_UNITID_ACADEMY) { myAcademyCount++; }
-					if (DAT_ID == CST_UNITID_BARRACKS) { myBarracksCount++; }
-					if (DAT_ID == CST_UNITID_DOCK) { myDockCount++; }
-					if (DAT_ID == CST_UNITID_RANGE) { myRangeCount++; }
-					if (DAT_ID == CST_UNITID_STABLE) { myStableCount++; }
-					if (DAT_ID == CST_UNITID_SIEGE_WORKSHOP) { mySiegeWorkshopCount++; }
-					if (DAT_ID == CST_UNITID_TEMPLE) { myTempleCount++; }
-				}
-			} else {
-				// For debug - or just in case...
-				// THIS CODE is NO LONGER needed since I fixed the building conversion bug.
-				AOE_STRUCTURES::STRUCT_UNIT_BASE *invalidUnit = loopUnit;
-				player->ptrBuildingsListHeader->ptrBuildingsArray[i] = NULL; // Remove invalid entry from list, it could cause a crash when some code accesses it.
-				char buffer[300];
-				sprintf_s(buffer, "ERROR: invalid unit list entry for player #%ld. ptr=%08lX. unitId=%ld GUT=%d, index=%d/%ld.\n",
-					player->playerId, (long int)invalidUnit, invalidUnit->unitInstanceId, (int)invalidUnit->unitType, i, buildingList_count);
-				//AddTraceToFile(buffer);
-				traceMessageHandler.WriteMessage(buffer);
-				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *invalidUnitDef = invalidUnit->unitDefinition;
-				long checksum = ((long)invalidUnitDef < 0x10000) ? -1 : invalidUnitDef->checksum; // if invalidUnitDef ptr is low it is probably invalid, don't access it
-				int tmp_DAT_ID = -1;
-				if (checksum == 0x00549930) { // checksum is correct (building unitDef)
-					tmp_DAT_ID = invalidUnitDef->DAT_ID1;
-				}
-				sprintf_s(buffer, "unitDef=%08lX checksum=%08lX, DAT_ID=%d\n", (long)invalidUnitDef, checksum, tmp_DAT_ID);
-				//AddTraceToFile(buffer); // Do it separately in case we have a crash because of unitDef (even if we try to be careful, we can't detect invalid pointers with 100% confidence)
-				traceMessageHandler.WriteMessage(buffer);
-
-				//sprintf_s(buffer, "An error occurred. CustomROR could prevent game crash. See error log file on c:\\ (or C:\\Users\\...\\AppData\\Local\\VirtualStore) and report to developer.");
-				traceMessageHandler.WriteMessage("An error occurred. CustomROR could prevent game crash. Please report to developer.");
-				//this->OpenCustomDialogMessage(buffer, 450, 250);
-			}
-		}
-	}
-
-	if (!myAcademyCount && !myBarracksCount && !myRangeCount && !mySiegeWorkshopCount && !myStableCount && !myTempleCount) {
-		return; // No building, no need to continue
-	}
-	// For large enemy armies, ignore units when their number is very low (example: do not impact choices because of 1 single cavalry).
-	if (totalEnemyCount > 6) {
-		if (enemyCamelVictimsCount * 100 / totalEnemyCount < 16) { enemyCamelVictimsCount = 0; }
-		if (enemySiegeWeaponsCount * 100 / totalEnemyCount < 16) { enemySiegeWeaponsCount = 0; }
-		if (enemyChariotsCount * 100 / totalEnemyCount < 20) { enemyChariotsCount = 0; }
-		if (enemyPriestVictimsCount * 100 / totalEnemyCount < 16) { enemyPriestVictimsCount = 0; }
-		if (enemySlingerVictimsCount * 100 / totalEnemyCount < 16) { enemySlingerVictimsCount = 0; }
-		// Do NOT update enemyPriestCount. Always take care of priest, it is too important, even alone
-		// Same for towers
-	}
-
-	// Basic units (where DATID1=DATID2)
-	int canTrainSlinger = IsUnitAvailableForPlayer(CST_UNITID_SLINGER, player);
-	int canTrainClubman = IsUnitAvailableForPlayer(CST_UNITID_CLUBMAN, player);
-	// + axe
-	int canTrainSwordsman = IsUnitAvailableForPlayer(CST_UNITID_SHORT_SWORDSMAN, player); //+others
-	// broad, long sword
-	int canTrainScout = IsUnitAvailableForPlayer(CST_UNITID_SCOUT, player);
-	int canTrainCavalry = IsUnitAvailableForPlayer(CST_UNITID_CAVALRY, player);
-	int canTrainChariot = IsUnitAvailableForPlayer(CST_UNITID_CHARIOT, player);
-	int canTrainCamel = IsUnitAvailableForPlayer(CST_UNITID_CAMEL, player);
-	int canTrainWarElephant = IsUnitAvailableForPlayer(CST_UNITID_WAR_ELEPHANT, player);
-	int canTrainBowman = IsUnitAvailableForPlayer(CST_UNITID_BOWMAN, player);
-	int canTrainImprovedBowman = IsUnitAvailableForPlayer(CST_UNITID_IMPROVED_BOWMAN, player);
-	// + composite
-	int canTrainChariotArcher = IsUnitAvailableForPlayer(CST_UNITID_CHARIOT_ARCHER, player);
-	int canTrainHorseArcher = IsUnitAvailableForPlayer(CST_UNITID_HORSE_ARCHER, player);
-	int canTrainElephantArcher = IsUnitAvailableForPlayer(CST_UNITID_ELEPHANT_ARCHER, player);
-	int canTrainPriest = IsUnitAvailableForPlayer(CST_UNITID_PRIEST, player);
-	int canTrainHoplite = IsUnitAvailableForPlayer(CST_UNITID_HOPLITE, player);
-	int canTrainBallista = IsUnitAvailableForPlayer(CST_UNITID_BALLISTA, player);
-	int canTrainStoneThrower = IsUnitAvailableForPlayer(CST_UNITID_STONE_THROWER, player);
-	// Fire galley, scout ship...
-
-	// Upgraded units (DATID1 <> DATID2) => do not search in unit_def array but search if tech has been researched
-	// The canTrainxxx && clause is useful for performance, we check the prerequisite first as we already have this information
-	int canTrainLegion = canTrainSwordsman && IsTechResearched(player, CST_RSID_LEGION);
-	int canTrainHeavyCavalry = canTrainCavalry && IsTechResearched(player, CST_RSID_HEAVY_CAVALRY);
-	int canTrainCataphract = canTrainHeavyCavalry && IsTechResearched(player, CST_RSID_CATAPHRACT);
-	int canTrainHeavyChariot = canTrainChariot && IsTechResearched(player, CST_RSID_HEAVY_CHARIOT);
-	int canTrainArmoredElephant = canTrainWarElephant && IsTechResearched(player, CST_RSID_ARMORED_ELEPHANT);
-	int canTrainPhalanx = canTrainHoplite && IsTechResearched(player, CST_RSID_PHALANX);
-	int canTrainCenturion = canTrainPhalanx && IsTechResearched(player, CST_RSID_CENTURION);
-	int canTrainHelepolis = canTrainBallista && IsTechResearched(player, CST_RSID_HELEPOLIS);
-	int canTrainCatapult = canTrainStoneThrower && IsTechResearched(player, CST_RSID_CATAPULT);
-	int canTrainHeavyCatapult = canTrainCatapult && IsTechResearched(player, CST_RSID_HEAVY_CATAPULT);
-	int canTrainHeavyHorseArcher = canTrainHorseArcher && IsTechResearched(player, CST_RSID_HEAVY_HORSE_ARCHER);
-
-	// Other info about researches
-	int hasAristocracy = IsTechResearched(player, CST_RSID_ARISTOCRACY);
-
-	// Collect info on current strategy status (panic mode elements, if any).
-	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentStratElem = &buildAI->fakeFirstStrategyElement;
-	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstStratElem = currentStratElem;
-	bool go_on = true;
-	long int inProgressPanicUnitCount = 0;
-	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *panicStratElemToReuse[PANIC_MODE_ARRAYS_MAX_SIZE];
-	long int panicStratElemToReuseCount = 0;
-	for (int i = 0; i < PANIC_MODE_ARRAYS_MAX_SIZE; i++) { panicStratElemToReuse[i] = NULL; }
-	// Loop only on the beginning of strategy. Stop at "counter=1" or when meeting a "setGather..." (panic mode units always are before those).
-	while ((currentStratElem != NULL) && (go_on)) {
-		currentStratElem = currentStratElem->next;
-		// If we get back to fake first element, we looped on all elements (should not happen unless the strategy is empty)
-		if ((currentStratElem->elementType == TAIUnitClass::AIUCStrategyCmd) ||
-			(currentStratElem->elemId == 1) || (currentStratElem == firstStratElem)) {
-			go_on = false;
-		}
-
-		bool isPanicModeElement = false;
-		if ((currentStratElem->retrains == 1) && // retrainable element
-			((currentStratElem->elementType == TAIUnitClass::AIUCLivingUnit) || // We could add a filter to exclude villagers here
-			((currentStratElem->elementType == TAIUnitClass::AIUCBuilding) && (currentStratElem->unitDAT_ID == CST_UNITID_WATCH_TOWER)))
-			) { // living OR tower
-			isPanicModeElement = true;
-		}
-
-		// Test if it is an obsolete panic mode element (retrains=1, already trained... and dead).
-		if (isPanicModeElement) {
-			//if ((elemInProgress == 0) && (elemAliveCount == 0) && (elemTotalCount > 0)) {
-			if (currentStratElem->inProgressCount == 0) {
-				// Can reuse this one (or update it, if not trained yet).
-				if (panicStratElemToReuseCount < PANIC_MODE_ARRAYS_MAX_SIZE) {
-					panicStratElemToReuse[panicStratElemToReuseCount] = currentStratElem;
-					panicStratElemToReuseCount++;
-				}
-			} else {
-				short int actorUnitDefId = (short int)currentStratElem->actor;
-				inProgressPanicUnitCount++; // Do NOT modify this strategy element. It is being trained.
-				// This also means that a building is currently used to train the unit: remove it from our available buildings list
-				if (actorUnitDefId == CST_UNITID_BARRACKS) { myBarracksCount--; }
-				if (actorUnitDefId == CST_UNITID_RANGE) { myRangeCount--; }
-				if (actorUnitDefId == CST_UNITID_STABLE) { myStableCount--; }
-				if (actorUnitDefId == CST_UNITID_DOCK) { myDockCount--; }
-				if (actorUnitDefId == CST_UNITID_TEMPLE) { myTempleCount--; }
-				if (actorUnitDefId == CST_UNITID_SIEGE_WORKSHOP) { mySiegeWorkshopCount--; }
-				if (actorUnitDefId == CST_UNITID_ACADEMY) { myAcademyCount--; }
-			}
-		}
-	}
-	if (inProgressPanicUnitCount >= maxPanicModeUnitsInStrategy) { return; } // panic mode unit count in strategy is already at maximum
-
-	bool strategyUpdated = false; // Set to true if we add something in strategy
-	long int totalPanicModeElemCount = inProgressPanicUnitCount;
-	long int unitToCreateCount = maxPanicModeUnitsInStrategy; // <= 0 means NO panic mode. Max value is maxPanicModeUnitsInStrategy.
-	if (totalEnemyCount - myMilitaryUnitsCount < maxPanicModeUnitsInStrategy) {
-		unitToCreateCount = totalEnemyCount - myMilitaryUnitsCount;
-	}
-
-	// Main loop to insert panic units one by one
-	while (totalPanicModeElemCount < unitToCreateCount) {
-		long int reuseIndex = totalPanicModeElemCount - inProgressPanicUnitCount;
-		short int unitId_toAdd = -1;
-		short int unitId_actor = -1;
-		bool found = false;
-
-		// 1 : enemy has priests. Create as much chariots as possible
-		if (enemyPriestCount > 0) {
-			// 1a (scythe) chariot
-			if ((!found) && canTrainChariot && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_CHARIOT;
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// 1b : chariot archer
-			if ((!found) && (canTrainChariotArcher) && (myRangeCount > 0)) {
-				unitId_toAdd = CST_UNITID_CHARIOT_ARCHER;
-				unitId_actor = CST_UNITID_RANGE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myRangeCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-		}
-
-		// TODO insert 2 ? If any kind of tower, siege, armored ele, slinger, infantry... avoid priest.
-		// if (!found && (enemyTowersCount > 0))
-
-		// 2 : Super units - but avoid heavy catapults ?
-		// Warning: in strategy, use DATAID1 (base unit), not DATID2 (upgraded unit)
-		if (!found) {
-			if (!found && canTrainCenturion && (myAcademyCount > 0)) {
-				unitId_toAdd = CST_UNITID_HOPLITE;
-				unitId_actor = CST_UNITID_ACADEMY;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myAcademyCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			if (!found && canTrainLegion && (myBarracksCount > 0)) {
-				unitId_toAdd = CST_UNITID_SHORT_SWORDSMAN;
-				unitId_actor = CST_UNITID_BARRACKS;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myBarracksCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// For civs that have both armored elephants and cataphracts (and/or heavy chariots), try elephant before cataphract (if no priest, and not too much range units)
-			// Elephant is stronger against infantry
-			if (!found && canTrainArmoredElephant && (enemyPriestCount == 0) && (myStableCount > 0) &&
-				((enemySlingerVictimsCount + enemySiegeWeaponsCount) * 100 / totalEnemyCount < 30) &&
-				((myCivId == CST_CIVID_PERSIAN) || (myCivId == CST_CIVID_PALMYRA) || (myCivId == CST_CIVID_HITTITE) || (myCivId == CST_CIVID_MACEDONIAN))) {
-				unitId_toAdd = CST_UNITID_WAR_ELEPHANT;
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			if (!found && canTrainCataphract && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_CAVALRY;
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			if (!found && canTrainHeavyChariot && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_CHARIOT;
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			if (!found && canTrainHelepolis && (mySiegeWorkshopCount > 0)) {
-				unitId_toAdd = CST_UNITID_BALLISTA;
-				unitId_actor = CST_UNITID_SIEGE_WORKSHOP;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &mySiegeWorkshopCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Avoid training armored elephants when enemy priests are up there. We better train anything else, even a scout
-			if (!found && canTrainArmoredElephant && (enemyPriestCount == 0) && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_WAR_ELEPHANT;
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			if (!found && canTrainHeavyHorseArcher && (myRangeCount > 0)) {
-				unitId_toAdd = CST_UNITID_HORSE_ARCHER;
-				unitId_actor = CST_UNITID_RANGE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myRangeCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// If I have a temple, I may suppose I am a "good-priest" civ, at least I have priests in my normal strategy
-			// This is not perfectly correct: Yamato just builds a temple in DM as requirement to upgrade to iron.
-			// Also, in RM, priest researches may not be available/researched yet
-			// That's why we must NOT place this in top priority in "super units" section
-			// Also, avoid this if there is too much chariots in enemy's army
-			if (!found && canTrainPriest && (myTempleCount > 0) && (enemyCivId != CST_CIVID_MACEDONIAN)) {
-				if (!((enemyChariotsCount > 3) || // More than 3 chariots: always consider it is too much
-					((enemyChariotsCount > 0) && (totalEnemyCount < 5)) || // only a few enemy units, including chariot: do NOT train priests
-					((enemyChariotsCount * 100) / totalEnemyCount > 20) // More than 20% of enemy units are chariots: do NOT train priests
-					)) {
-					unitId_toAdd = CST_UNITID_PRIEST;
-					unitId_actor = CST_UNITID_TEMPLE;
-					found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myTempleCount, &lastCostDAT_ID, remainingResources, tempCost);
-				}
-			}
-
-			// Heavy Catapults: very destructive in my own town, not on top priority in such a situation !
-			// TODO. Put it in lower priority ?
-		}
-
-		// 3 : Specific counter-attack units
-		// Priests already have been added in "super" unit section with necessary criteria
-		// Slingers: only do them if enemy has much bowmen and if I can't do better than clubmen
-		// Chariot (against priests) have been managed in 1st priority rules
-		if (!found) {
-			// 3a : Camel (if we can do cataphracts or armored elephants, it is has already been done to its maximum number in super units section)
-			// TODO : improve this. If I can train (heavy) cavalry and enemy has more "other" units than chariots/cavalry, train cavalry instead
-			if (!found && canTrainCamel && (enemyCamelVictimsCount > 0) && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_CAMEL;
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Against siege weapons, try to create fast/strong units, avoid archers
-			if (!found && canTrainCavalry && (enemySiegeWeaponsCount > 0) && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_CAVALRY; // cavalry or heavy cav (cataphract: already managed)
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			if (!found && canTrainChariot && (enemySiegeWeaponsCount > 0) && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_CHARIOT;
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Catapult (not stone thrower). Only if several enemy siege weapons
-			if (!found && canTrainCatapult && (enemySiegeWeaponsCount > 2) && (mySiegeWorkshopCount > 0)) {
-				unitId_toAdd = CST_UNITID_CATAPULT;
-				unitId_actor = CST_UNITID_SIEGE_WORKSHOP;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &mySiegeWorkshopCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// If greek or macedonian (they have bonuses): hoplite BEFORE standard infantry
-			if (!found && (enemySiegeWeaponsCount > 2) && ((myCivId == CST_CIVID_MACEDONIAN) || (myCivId == CST_CIVID_GREEK)) && (myAcademyCount > 0)) {
-				unitId_toAdd = CST_UNITID_HOPLITE;
-				unitId_actor = CST_UNITID_ACADEMY;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myAcademyCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			if (!found && canTrainSwordsman && (enemySiegeWeaponsCount > 0) && (myBarracksCount > 0)) {
-				unitId_toAdd = CST_UNITID_SHORT_SWORDSMAN;
-				unitId_actor = CST_UNITID_BARRACKS;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myBarracksCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			if (!found && canTrainHoplite && (enemySiegeWeaponsCount > 0) && (myAcademyCount > 0)) {
-				unitId_toAdd = CST_UNITID_HOPLITE;
-				unitId_actor = CST_UNITID_ACADEMY;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myAcademyCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Scout. TODO Try more complex rules (only if many siege weapons)
-			if (!found && canTrainScout && (enemySiegeWeaponsCount > 1) && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_SCOUT;
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Clubman: only if there are a lot of siege weapon (otherwise, try others like archers first)
-			if (!found && canTrainClubman && (enemySiegeWeaponsCount > 5) && (myBarracksCount > 0)) {
-				unitId_toAdd = CST_UNITID_CLUBMAN; // or axeman
-				unitId_actor = CST_UNITID_BARRACKS;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myBarracksCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-		}
-
-		// 4 : Other units
-		if (!found) {
-			if (!found && canTrainPhalanx && (myAcademyCount > 0)) {
-				unitId_toAdd = CST_UNITID_HOPLITE;
-				unitId_actor = CST_UNITID_ACADEMY;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myAcademyCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Only if greek or macedonian (they have bonuses) + if aristocracy is ON (faster hoplites): try hoplite BEFORE some other units.
-			// NOT for roman: try standard infantry first because it has a bonus
-			if (!found && ((myCivId == CST_CIVID_GREEK) || (myCivId == CST_CIVID_MACEDONIAN) || (hasAristocracy)) && (myCivId != CST_CIVID_ROMAN) && (myAcademyCount > 0)) {
-				unitId_toAdd = CST_UNITID_HOPLITE;
-				unitId_actor = CST_UNITID_ACADEMY;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myAcademyCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Heavy cavalry
-			if (!found && (canTrainHeavyCavalry) && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_CAVALRY; // heavy cav (cataphract: already managed)
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Horse archer
-			if (!found && (canTrainHorseArcher) && (myRangeCount > 0)) {
-				unitId_toAdd = CST_UNITID_HORSE_ARCHER;
-				unitId_actor = CST_UNITID_RANGE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myRangeCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// All swordsmen but legion (already managed). Fast to train. In addition, I have only 1 barracks (or this means I have good infantry)
-			if (!found && canTrainSwordsman && (myBarracksCount > 0)) {
-				unitId_toAdd = CST_UNITID_SHORT_SWORDSMAN; // or axeman
-				unitId_actor = CST_UNITID_BARRACKS;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myBarracksCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// basic chariot
-			if (!found && (canTrainChariot) && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_CHARIOT;
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Basic hoplite.
-			if (!found && canTrainHoplite && (myAcademyCount > 0)) {
-				unitId_toAdd = CST_UNITID_HOPLITE;
-				unitId_actor = CST_UNITID_ACADEMY;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myAcademyCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Elephant archer (if no priest)
-			if (!found && (enemyPriestCount == 0) && (canTrainElephantArcher) && (myRangeCount > 0)) {
-				unitId_toAdd = CST_UNITID_ELEPHANT_ARCHER;
-				unitId_actor = CST_UNITID_RANGE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myRangeCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Catapult against archers
-			if (!found && canTrainCatapult && (mySiegeWorkshopCount > 0) && (enemySlingerVictimsCount * 100 / totalEnemyCount > 30)) {
-				unitId_toAdd = CST_UNITID_STONE_THROWER;
-				unitId_actor = CST_UNITID_SIEGE_WORKSHOP;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &mySiegeWorkshopCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Ballista (better than basic stone thrower but not as good as catapult)
-			if (!found && canTrainBallista && (mySiegeWorkshopCount > 0)) {
-				unitId_toAdd = CST_UNITID_BALLISTA;
-				unitId_actor = CST_UNITID_SIEGE_WORKSHOP;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &mySiegeWorkshopCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Stone thrower against archers (after ballista)
-			if (!found && canTrainStoneThrower && (mySiegeWorkshopCount > 0) && (enemySlingerVictimsCount * 100 / totalEnemyCount > 30)) {
-				unitId_toAdd = CST_UNITID_STONE_THROWER;
-				unitId_actor = CST_UNITID_SIEGE_WORKSHOP;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &mySiegeWorkshopCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Improved/composite bowman
-			if (!found && canTrainImprovedBowman && (myRangeCount > 0)) {
-				unitId_toAdd = CST_UNITID_IMPROVED_BOWMAN;
-				unitId_actor = CST_UNITID_RANGE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myRangeCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Scout
-			if (!found && canTrainScout && (myStableCount > 0)) {
-				unitId_toAdd = CST_UNITID_SCOUT;
-				unitId_actor = CST_UNITID_STABLE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myStableCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Slinger => only if there are much bowmen
-			if (!found && canTrainSlinger && (myBarracksCount > 0) && (enemySlingerVictimsCount * 100 / totalEnemyCount > 30)) {
-				unitId_toAdd = CST_UNITID_SLINGER; // or axeman
-				unitId_actor = CST_UNITID_BARRACKS;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myBarracksCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Basic bowman
-			if (!found && canTrainBowman && (myRangeCount > 0)) {
-				unitId_toAdd = CST_UNITID_BOWMAN;
-				unitId_actor = CST_UNITID_RANGE;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myRangeCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// Clubman (or axe)
-			if (!found && canTrainClubman && (myBarracksCount > 0)) {
-				unitId_toAdd = CST_UNITID_CLUBMAN; // or axeman
-				unitId_actor = CST_UNITID_BARRACKS;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &myBarracksCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-			// stone thrower: last call? (can be useful when out of food)
-			if (!found && canTrainStoneThrower && (mySiegeWorkshopCount > 0)) {
-				unitId_toAdd = CST_UNITID_STONE_THROWER;
-				unitId_actor = CST_UNITID_SIEGE_WORKSHOP;
-				found = PrepareUnitToAddIfPossible(player, unitId_toAdd, unitId_actor, &mySiegeWorkshopCount, &lastCostDAT_ID, remainingResources, tempCost);
-			}
-		}
-
-		// Add the unit in strategy
-		//if (found || (unitId_toAdd > -1)) {
-		if (found) {
-			strategyUpdated = true;
-			if (panicStratElemToReuse[reuseIndex] != NULL) {
-				// update strategy element
-				long int *p = (long int*)panicStratElemToReuse[reuseIndex];
-				panicStratElemToReuse[reuseIndex]->unitDAT_ID = unitId_toAdd;
-				panicStratElemToReuse[reuseIndex]->unitInstanceId = -1;
-				panicStratElemToReuse[reuseIndex]->elementType = TAIUnitClass::AIUCLivingUnit;
-				panicStratElemToReuse[reuseIndex]->inProgressCount = 0;
-				panicStratElemToReuse[reuseIndex]->aliveCount = 0;
-				panicStratElemToReuse[reuseIndex]->buildAttempts = 0;
-				panicStratElemToReuse[reuseIndex]->actor = unitId_actor;
-				panicStratElemToReuse[reuseIndex]->totalCount = 0;
-				panicStratElemToReuse[reuseIndex]->retrains = 1;
-				panicStratElemToReuse[reuseIndex]->unitName[0] = 0;
-				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBaseToAdd = player->GetUnitDefBase(unitId_toAdd);
-				if (unitDefBaseToAdd && unitDefBaseToAdd->IsCheckSumValidForAUnitClass()) {
-					// Using internal name is sufficient here
-					strcpy_s(panicStratElemToReuse[reuseIndex]->unitName, 0x3C, unitDefBaseToAdd->ptrUnitName);
-				}
-			} else {
-				// Insert new
-				AddUnitInStrategy((AOE_STRUCTURES::STRUCT_BUILD_AI *) buildAI, 0, 1, unitId_actor, AIUCLivingUnit, unitId_toAdd, player);
-			}
-
-			totalPanicModeElemCount++;
-		} else {
-			totalPanicModeElemCount = 999; // stop !
-		}
-	}
-
-	if (strategyUpdated) {
-		tacAI->lastPanicModeTime = currentGameTime_ms;
-	}
-
-	// If NOT panic mode, cancel panic mode units that are not being trained (no need to train them anymore). Too late for "in progress" ones...
-	// Limitation: this "clean" can only be executed if I am attacked but out of my town :(
-	if ((unitToCreateCount < 0) && (panicStratElemToReuse[0] != 0)) {
-		for (int i = 0; i < PANIC_MODE_ARRAYS_MAX_SIZE; i++) {
-			long int *p = (long int*)panicStratElemToReuse[i];
-			if ((p != NULL) && (*(p + 0x20) == 0)) { // Not in progress
-				*(p + 0x28) += 2; // +0xA0 total count. Make sure it is >=1 (original game often uses 2 and not 1, why ? Maybe just a mistake)
-			}
-		}
-	}
-}
-// End of panic mode management
 
 
 void CustomRORCommand::PrintDateTime() {
@@ -2385,94 +1739,6 @@ void CustomRORCommand::PrintMapSeed() {
 	char text[50];
 	sprintf_s(text, 50, "Map seed=%d.", *mapSeed);
 	CallWriteText(text);
-}
-
-
-void CustomRORCommand::DumpDebugInfoToFile() {
-#ifdef _DEBUG
-	char buf[] = "Error opening debug file :       ";
-	FILE *f;
-	int res = fopen_s(&f, "F:\\AOEDebug.txt", "w+"); // overwrite if already existing
-	if (res) {
-		sprintf_s(buf + 28, 5, "%d", res);
-		CallWriteText(buf);
-		return;
-	}
-
-	AOE_STRUCTURES::AOE_STRUCT_EXPORTER writer;
-	std::string objToString = "";
-
-	fprintf_s(f, "AOE Debug information\n\n");
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settingsStruct = *ROR_gameSettings;
-	fprintf_s(f, "Global struct = 0x%08lX - %d players (including gaia)\n", (long int)globalStruct, globalStruct->playerTotalCount);
-	fprintf_s(f, "Game settings = 0x%08lX - Map seed=%d - Deathmatch=%d\n", (long int)settingsStruct, settingsStruct->actualMapSeed, settingsStruct->isDeathMatch);
-	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
-		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
-		//fprintf_s(f, "Player %d struct=0x%08lX - Resources=0x%08lX - AI=0x%08lX - %-16s\n", i, (long int)currentPlayer, currentPlayer->ptrResourceValues, currentPlayer->ptrAIStruct, currentPlayer->playerName_length16max);
-		
-		objToString = writer.ExportStruct(currentPlayer);
-		fprintf_s(f, objToString.c_str());
-	}
-
-	// Diplomacy values
-	fprintf_s(f, "\n*** Diplomacy values ***\n");
-	fprintf_s(f, "\nDislike vs p0  p1  p2  p3  p4  p5  p6  p7  p8  - Like vs p0  p1  p2  p3  p4  p5  p6  p7  p8  \n");
-	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
-		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
-		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->ptrAIStruct;
-		if (ai == NULL) {
-			fprintf_s(f, "[No AI structure for player #%d.]\n", i);
-		} else {
-			fprintf_s(f, "player %d :", i);
-			for (int iTargetPlayer = 0; iTargetPlayer < 9; iTargetPlayer++) {
-				fprintf_s(f, " %-3ld", ai->structDiplAI.dislikeTable[iTargetPlayer]);
-			}
-			fprintf_s(f, " -        ");
-			for (int iTargetPlayer = 0; iTargetPlayer < 9; iTargetPlayer++) {
-				fprintf_s(f, " %-3ld", ai->structDiplAI.likeTable[iTargetPlayer]);
-			}
-			fprintf_s(f, "\n");
-		}
-	}
-
-	// Strategy
-	fprintf_s(f, "\n*** Strategies ***\n");
-	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
-		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
-		fprintf_s(f, "\nPlayer %d:\nCounter Class DAT_ID Name                           Actor Unitid InProgress Alive Attempts #created Retrains Ptr\n", i);
-		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->ptrAIStruct;
-		if (ai == NULL) {
-			fprintf_s(f, "No AI structure for this player.\n");
-		} else {
-			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstStratElem = &ai->structBuildAI.fakeFirstStrategyElement;
-			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstStratElem->next;
-			while (currentStratElem && (currentStratElem != fakeFirstStratElem)) {
-				fprintf_s(f, "%03ld     %1ld     %-3ld    %-30s %-3ld   %-6ld %-2ld         %-2ld    %-4ld     %-4ld     %-3ld      0x%08lX\n", currentStratElem->elemId, currentStratElem->elementType, currentStratElem->unitDAT_ID,
-					currentStratElem->unitName, currentStratElem->actor, currentStratElem->unitInstanceId, currentStratElem->inProgressCount,
-					currentStratElem->aliveCount, currentStratElem->buildAttempts, currentStratElem->totalCount, currentStratElem->retrains, (long int)currentStratElem
-					);
-				currentStratElem = currentStratElem->next;
-			}
-		}
-	}
-
-	fprintf_s(f, "\n*** SN values ***\n");
-	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
-		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
-		fprintf_s(f, "\nPlayer %d:\n", i);
-		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->ptrAIStruct;
-		if (ai == NULL) {
-			fprintf_s(f, "No AI structure for this player.\n");
-		} else {
-			for (int sn = 0; sn < 227; sn++) {
-				fprintf_s(f, "SN%-3ld   value=%ld\n", sn, ai->structTacAI.SNNumber[sn]);
-			}
-		}
-	}
-
-	fclose(f);
-#endif
 }
 
 
@@ -2767,7 +2033,7 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE 
 	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI_actor = &mainAI_actor->structBuildAI;
 	assert(buildAI_actor != NULL);
 	if (buildAI_actor == NULL) { return; }
-	UpdateStrategyWithExistingUnit(buildAI_actor, targetUnit);
+	STRATEGY::UpdateStrategyWithExistingUnit(buildAI_actor, targetUnit);
 
 	// Update all players' infAI.unitElemList because it would contain an erroneous playerId, and this would never be fixed/updated
 	// This leads to incorrect behaviours (unit groups stuck because they try to attack their own units...)
@@ -4693,8 +3959,8 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_STOP) {
 		// Fix strategy when AI is enabled and some action is interrupted by human player
 		if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValidForAUnitClass()) {
-			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
-			ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = STRATEGY::GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
+			STRATEGY::ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
 		}
 		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE) {
 			if (IsUnitIdle(unitBase)) {

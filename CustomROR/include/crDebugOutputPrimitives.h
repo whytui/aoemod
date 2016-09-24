@@ -12,6 +12,7 @@
 #include "mainStructuresHandling.h"
 #include "basicFilesHandling.h"
 #include "BitmapExporter.h"
+#include <AOE_struct_export.h>
 
 /* This file contains various primitives for debugging */
 
@@ -19,6 +20,9 @@
 using namespace AOE_STRUCTURES;
 
 namespace CR_DEBUG {
+
+// Dumps useful information for debugging.
+void DumpDebugInfoToFile();
 
 // Export InfAI's exploration status map data to a bitmap using color codes
 bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player);

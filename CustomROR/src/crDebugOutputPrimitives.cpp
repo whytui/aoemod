@@ -9,6 +9,95 @@ using namespace AOE_STRUCTURES;
 
 namespace CR_DEBUG {
 
+
+void DumpDebugInfoToFile() {
+#ifdef _DEBUG
+	char buf[] = "Error opening debug file :       ";
+	FILE *f;
+	int res = fopen_s(&f, "F:\\AOEDebug.txt", "w+"); // overwrite if already existing
+	if (res) {
+		sprintf_s(buf + 28, 5, "%d", res);
+		//CallWriteText(buf);
+		return;
+	}
+
+	AOE_STRUCTURES::AOE_STRUCT_EXPORTER writer;
+	std::string objToString = "";
+
+	fprintf_s(f, "AOE Debug information\n\n");
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settingsStruct = *ROR_gameSettings;
+	fprintf_s(f, "Global struct = 0x%08lX - %d players (including gaia)\n", (long int)globalStruct, globalStruct->playerTotalCount);
+	fprintf_s(f, "Game settings = 0x%08lX - Map seed=%d - Deathmatch=%d\n", (long int)settingsStruct, settingsStruct->actualMapSeed, settingsStruct->isDeathMatch);
+	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
+		//fprintf_s(f, "Player %d struct=0x%08lX - Resources=0x%08lX - AI=0x%08lX - %-16s\n", i, (long int)currentPlayer, currentPlayer->ptrResourceValues, currentPlayer->ptrAIStruct, currentPlayer->playerName_length16max);
+		
+		objToString = writer.ExportStruct(currentPlayer);
+		fprintf_s(f, objToString.c_str());
+	}
+
+	// Diplomacy values
+	fprintf_s(f, "\n*** Diplomacy values ***\n");
+	fprintf_s(f, "\nDislike vs p0  p1  p2  p3  p4  p5  p6  p7  p8  - Like vs p0  p1  p2  p3  p4  p5  p6  p7  p8  \n");
+	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
+		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->ptrAIStruct;
+		if (ai == NULL) {
+			fprintf_s(f, "[No AI structure for player #%d.]\n", i);
+		} else {
+			fprintf_s(f, "player %d :", i);
+			for (int iTargetPlayer = 0; iTargetPlayer < 9; iTargetPlayer++) {
+				fprintf_s(f, " %-3ld", ai->structDiplAI.dislikeTable[iTargetPlayer]);
+			}
+			fprintf_s(f, " -        ");
+			for (int iTargetPlayer = 0; iTargetPlayer < 9; iTargetPlayer++) {
+				fprintf_s(f, " %-3ld", ai->structDiplAI.likeTable[iTargetPlayer]);
+			}
+			fprintf_s(f, "\n");
+		}
+	}
+
+	// Strategy
+	fprintf_s(f, "\n*** Strategies ***\n");
+	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
+		fprintf_s(f, "\nPlayer %d:\nCounter Class DAT_ID Name                           Actor Unitid InProgress Alive Attempts #created Retrains Ptr\n", i);
+		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->ptrAIStruct;
+		if (ai == NULL) {
+			fprintf_s(f, "No AI structure for this player.\n");
+		} else {
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstStratElem = &ai->structBuildAI.fakeFirstStrategyElement;
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstStratElem->next;
+			while (currentStratElem && (currentStratElem != fakeFirstStratElem)) {
+				fprintf_s(f, "%03ld     %1ld     %-3ld    %-30s %-3ld   %-6ld %-2ld         %-2ld    %-4ld     %-4ld     %-3ld      0x%08lX\n", currentStratElem->elemId, currentStratElem->elementType, currentStratElem->unitDAT_ID,
+					currentStratElem->unitName, currentStratElem->actor, currentStratElem->unitInstanceId, currentStratElem->inProgressCount,
+					currentStratElem->aliveCount, currentStratElem->buildAttempts, currentStratElem->totalCount, currentStratElem->retrains, (long int)currentStratElem
+					);
+				currentStratElem = currentStratElem->next;
+			}
+		}
+	}
+
+	fprintf_s(f, "\n*** SN values ***\n");
+	for (int i = 0; i < globalStruct->playerTotalCount; i++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *currentPlayer = globalStruct->GetPlayerStructPtrTable()[i];
+		fprintf_s(f, "\nPlayer %d:\n", i);
+		AOE_STRUCTURES::STRUCT_AI *ai = currentPlayer->ptrAIStruct;
+		if (ai == NULL) {
+			fprintf_s(f, "No AI structure for this player.\n");
+		} else {
+			for (int sn = 0; sn < 227; sn++) {
+				fprintf_s(f, "SN%-3ld   value=%ld\n", sn, ai->structTacAI.SNNumber[sn]);
+			}
+		}
+	}
+
+	fclose(f);
+#endif
+}
+
+
 // Export InfAI's exploration status map data to a bitmap using color codes
 bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return false; }
