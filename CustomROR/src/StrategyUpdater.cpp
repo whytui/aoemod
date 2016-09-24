@@ -928,3 +928,132 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 }
 // End of panic mode management
 
+
+
+// Returns true if a construction should NOT be triggered.
+// Default result is false (standard ROR behavior), this returns true only for specific (custom) cases.
+// Warning: it could be wise for this method to be kept simple... and fast. It's called quite often.
+bool STRATEGY::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem) {
+	if (!tacAI || !tacAI->IsCheckSumValid()) { return false; } // error: use default
+	if (!stratElem || !stratElem->IsCheckSumValid()) { return false; } // error: use default
+
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return false; } // error: use default
+
+	// AI improvements are not enabled => return default value (like in normal ROR code)
+	if (!CUSTOMROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
+		return false; // error: use default
+	}
+
+	// Easy difficulty levels / MP games: default behavior too
+	if (settings->isMultiplayer || (settings->difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY)) { return false; } // use default
+
+	assert(stratElem->elementType == TAIUnitClass::AIUCBuilding);
+	long int villagerTotalCount = tacAI->allVillagers.usedElements;
+	if (villagerTotalCount <= 0) {
+		return true; // No villager: don't build, of course ! (yes, ROR tries to start construction without villagers ;)
+	}
+
+	AOE_STRUCTURES::STRUCT_AI *ai = tacAI->ptrMainAI;
+	if (!ai || !ai->IsCheckSumValid()) { return false; } // error: use default
+	AOE_STRUCTURES::STRUCT_PLAYER *player = ai->ptrStructPlayer;
+	if (!player || !player->IsCheckSumValid()) { return false; } // error: use default
+
+	// Situation 1 : I'm going to build a wonder
+	if (stratElem->unitDAT_ID == CST_UNITID_WONDER) {
+		// *****
+		// Make sure all researches from my strategy are already done before starting a wonder
+		if (!STRATEGY::IsStrategyCompleteForWonder(ai)) {
+			return true;
+		}
+
+		// *****
+		// Make sure I have extra resources before starting a wonder
+
+		// Collect desired extra amounts
+		float myVirtualResources[RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT];
+		// Start with a resource "debt" = extra amount I want to keep on hand
+		myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_FOOD] = (float)-tacAI->SNNumber[SN_NUMBERS::SNMinimumFood];
+		myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_WOOD] = (float)-tacAI->SNNumber[SN_NUMBERS::SNMinimumWood];
+		myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_STONE] = (float)-tacAI->SNNumber[SN_NUMBERS::SNMinimumStone];
+		myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_GOLD] = (float)-tacAI->SNNumber[SN_NUMBERS::SNMinimumGold];
+		// Apply some hardcoded minimum requirements (for hard levels - excludes "medium")
+		// Do not use hardcoded values for campaign / scenario : as we're using SN numbers, if the scenario if correctly designed, it will still work normally.
+		if ((settings->difficultyLevel < AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_MEDIUM) && (!settings->isCampaign) && (!settings->isScenario)) {
+			// I know that wonders don't require food, be let's remain generic... 
+			// Moreover, that can prevent from starting a wonder when food is very low, which is a healthy restriction.
+			if (myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_FOOD] > -300) {
+				myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_FOOD] = -300;
+			}
+			if (myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_WOOD] > -300) {
+				myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_WOOD] = -300;
+			}
+			if (myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_STONE] > -200) {
+				myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_STONE] = -200;
+			}
+			if (myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_GOLD] > -250) {
+				myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_GOLD] = -250;
+			}
+		}
+
+		long int unitDefCount = player->structDefUnitArraySize;
+		if (!player->ptrStructDefUnitTable) { unitDefCount = 0; }
+		if ((stratElem->unitDAT_ID < 0) || (stratElem->unitDAT_ID >= unitDefCount)) {
+			traceMessageHandler.WriteMessage("Error: Could not find unit definition for wonder");
+			return true; // Unit definition does not exist !
+		}
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *) player->ptrStructDefUnitTable[stratElem->unitDAT_ID];
+		assert(unitDef && unitDef->DerivesFromTrainable());
+		if (!unitDef || !unitDef->DerivesFromTrainable()) { return true; } // Unit definition does not exist !
+		AOE_STRUCTURES::STRUCT_COST *costs = unitDef->costs;
+		for (int i = 0; i < 3; i++) {
+			if (costs[i].costPaid && (costs[i].costType >= 0) &&
+				(costs[i].costType < RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT)) {
+				// (valid) cost used: substract amount from my resources. We only car about food/wood/stone/gold here.
+				myVirtualResources[costs[i].costType] -= (float)costs[i].costAmount;
+			}
+		}
+		// Add player's actual owned resources and check the total
+		for (int resourceType = 0; resourceType < RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT; resourceType++) {
+			myVirtualResources[resourceType] += player->GetResourceValue((RESOURCE_TYPES)resourceType);
+			if (myVirtualResources[resourceType] <= 0) { return true; } // A resource is missing. Cancel construction !
+		}
+
+		// *****
+		// Another player already has a wonder
+		// TO DO. To define what are the rules we want to apply.
+
+		// [Wonder] We found no reason to cancel construction, so... let's proceed !
+		return false;
+	}
+
+	// Situation 2 : I already have a lot of pending constructions
+	if (stratElem->unitDAT_ID != CST_UNITID_FORUM) { // Allow building a TC even if I have many pending constructions*
+		// First get the number of pending constructions
+		long int unfinishedBuildings = 1; // We count the potential new building in the total.
+		for (int i = 0; i < ai->structInfAI.buildingUnits.arraySize; i++) {
+			long int bldId = ai->structInfAI.buildingUnits.unitIdArray[i];
+			AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)GetUnitStruct(bldId);
+			if (unit && unit->IsCheckSumValid()) { // check IS building type
+				if (unit->unitStatus < 2) {
+					unfinishedBuildings++;
+				}
+			}
+		}
+		long int allowedExtraConstructionCount = 0;
+		// Is total number of construction (including new potential one) too large ?
+		if (villagerTotalCount + allowedExtraConstructionCount < unfinishedBuildings) {
+#ifdef _DEBUG
+			std::string msg = "Cancel construction launch: too many pending constructions / p#";
+			msg += to_string(player->playerId);
+			traceMessageHandler.WriteMessageNoNotification(msg); // Temporary message for debug
+#endif
+			return true; // There are too many constructions, more than my villagers count. Do NOT add a new construction !
+		}
+	}
+
+	// [General] We found no reason to cancel construction, so... let's proceed !
+	return false;
+}
+

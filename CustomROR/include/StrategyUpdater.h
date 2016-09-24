@@ -32,4 +32,8 @@ namespace STRATEGY {
 	void ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms);
 
 
+	// Returns true if a construction should NOT be triggered.
+	// Default result is false, this returns true only for specific (custom) cases.
+	bool ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem);
+
 }

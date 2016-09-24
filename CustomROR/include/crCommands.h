@@ -263,9 +263,6 @@ public:
 	// For the algorithm to work well, requires also "FixUnitIdForInProgressBuilding", "FixResetStratElemForUnitId"
 	void ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai);
 
-	// Returns true if a construction should NOT be triggered.
-	// Default result is false, this returns true only for specific (custom) cases.
-	bool ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem);
 
 	// Calls appropriate "manage panic mode" treatments.
 	// Returns true if we want to force usage of original ROR's (bugged) code

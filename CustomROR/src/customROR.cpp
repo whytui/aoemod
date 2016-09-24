@@ -1330,7 +1330,7 @@ void CustomRORInstance::AuditOnDoStrategyElementBuilding(REG_BACKUP *REG_values)
 	// Custom treatments
 	ror_api_assert(REG_values, stratElem->elementType == AIUCBuilding);
 
-	doNotRunConstruction = CUSTOMROR::crCommand.ShouldNotTriggerConstruction(tacAI, stratElem);
+	doNotRunConstruction = STRATEGY::ShouldNotTriggerConstruction(tacAI, stratElem);
 
 	// Do not modify below
 	if (doNotRunConstruction) {
