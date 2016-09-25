@@ -411,11 +411,11 @@ namespace AOE_CONST_INTERNAL
 		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
 		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targetted farm or enemy projectile dies ?
 		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // 
-		CST_ATI_UNKNOWN_2BD = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.captureArtefact?(myUnitId, targetUnitId)
+		CST_ATI_DEFEND_UNIT = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.defend/followUnit?(myUnitId, targetUnitId)
 		CST_ATI_UNKNOWN_2BE = 0x2BE,
 		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ??
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
-		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF...
+		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF... Used to retreat to position 4DA160
 		CST_ATI_GATHERER_REACTION_WHEN_ATTACKED = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
 		CST_ATI_HOLD_POSITION = 0x2D5, // Do not auto-attack. See 4E6740 for cats (don't search for target), 413F89 for other units (cancel attack if not at range?)
 		CST_ATI_UNKNOWN_2D9 = 0x2D9
@@ -462,9 +462,9 @@ namespace AOE_CONST_INTERNAL
 		CST_UGT_BOAT_DEFEND = 0x68, // (104) Related to SNMaximumBoatDefendGroupSize
 		CST_UGT_BOAT_EXPLORE = 0x69, // (105) Related to SNMaximumBoatExploreGroupSize
 		// Next ones : trade/fish/transport escorts ? Just a supposition
-		CST_UGT_UNKNOWN_6A = 0x6A, // (106)
-		CST_UGT_UNKNOWN_6B = 0x6B, // (107)
-		CST_UGT_UNKNOWN_6C = 0x6C, // (108)
+		CST_UGT_TRANSPORT_BOAT = 0x6A, // (106) Transport boats (1 per group). Using task 12 to transport units.
+		CST_UGT_FISHING_SHIP = 0x6B, // (107) Fishing ships (1 per group) Can go fishing(10), exploring(8). Can have idle task(1) but still fishing anyway !
+		CST_UGT_TRADE_SHIP = 0x6C, // (108) Trade ships (1 per group ?). Task 11 = trade.
 		CST_UGT_ARTEFACT = 0x6D // (109) Seen with target=own TC. There is 1 group per relic ?
 	};
 
@@ -477,20 +477,20 @@ namespace AOE_CONST_INTERNAL
 		CST_UGT_UNKNOWN_05 = 5, // "add up HPs of my units" ?
 		CST_UGT_UNKNOWN_06 = 6, // "add up HPs of my units" ?
 		CST_UGT_EXTERMINATE = 7, // 0x4CD7A9. Set in 0x4D50AB, 0x4D5DD7 See 0x4D535D
-		CST_UGT_EXPLORE = 8, // 4CD977
+		CST_UGT_EXPLORE = 8, // 4CD977. For boats too (only?) (fishing ships only, not war boats?)
 		CST_UGT_UNKNOWN_09 = 9, // 4CD425. Regroup ? Uses SNAttackGroupGatherSpacing
-		CST_UGT_GO_FISHING = 0x0A, // 4CE4AB
-		CST_UGT_TRADE = 0x0B, // 4CE651
-		CST_UGT_UNKNOWN_0C = 0x0C, // "add up HPs of my units" ? See 0x4D5130
-		CST_UGT_UNKNOWN_0D = 0x0D, // See 4D4729
-		CST_UGT_UNKNOWN_0E = 0x0E, // 4CD425. Regroup ? Used to instruct artefacts to go to TC ? unsure
-		CST_UGT_UNKNOWN_0F = 0x0F, // Reset ?
-		CST_UGT_UNKNOWN_10 = 0x10, // See 0x4D4D03
+		CST_UGT_GO_FISHING = 0x0A, // (10) Active fishing ships may also have an idle (1) group task ! See 0x4CE4AB
+		CST_UGT_TRADE = 0x0B, // (11) 0x4CE651. targetUnitId is (always) other player's dock.
+		CST_UGT_TRANSPORT_UNITS = 0x0C, // (12) transport units, includes: go to rally point, wait/load, transport and unload phases. See 0x4D5130. Group has no target unit/player, but a target destination
+		CST_UGT_UNKNOWN_0D = 0x0D, // (13) See 4D4729,4D5F32. Waiting for a free transport ? really unsure
+		CST_UGT_UNKNOWN_0E = 0x0E, // (14) 0x4CD425. Regroup ? Used to instruct artefacts to go to TC ? unsure
+		CST_UGT_LOAD_INTO_TRANSPORT = 0x0F, // (15) Go to transport. When transport is full, remaining units are excluded from group (?)
+		CST_UGT_IN_TRANSPORT = 0x10, // (16) In a transport/waiting to be unloaded. See 0x4D4D03.
 		CST_UGT_UNKNOWN_11 = 0x11, //
 		CST_UGT_UNKNOWN_12 = 0x12, // 
-		CST_UGT_UNKNOWN_13 = 0x13, // "add up HPs of my units" ? See 0x4D5140. Seen for artefact groups (go to TC?)
+		CST_UGT_UNKNOWN_13 = 0x13, // (19) Send artefacts to TC ? See 0x4D5140.
 		CST_UGT_ATTACK_ROUNDUP_TARGET = 0x14,
-		CST_UGT_UNKNOWN_15_ATTACK = 15,
+		CST_UGT_UNKNOWN_15_ATTACK = 0x15, // (21) straight attack ? to check. 0x4CE114
 		CST_UGT_UNKNOWN_16 = 0x16 // Set in 0x4D4C5F
 	};
 

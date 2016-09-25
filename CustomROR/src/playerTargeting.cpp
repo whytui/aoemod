@@ -136,6 +136,12 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 				if (!unit) {
 					// Remove from list ? (no cheating: position is fog-visible)
 					// Do not remove during the loop, do it afterwards
+				} else {
+					// By the way, update unit position in infAI list (it is often NOT up to date)
+					long int unitPosX = (long int)unit->positionX;
+					long int unitPosY = (long int)unit->positionY;
+					player->ptrAIStruct->structInfAI.unitElemList[i].posX = (char)unitPosX;
+					player->ptrAIStruct->structInfAI.unitElemList[i].posY = (char)unitPosY;
 				}
 			} else {
 				// Remove from list (can be added back later) ? Warning, might impact severely AI as it cheats a bit in attack phases. Fix/improve AI attack first ?

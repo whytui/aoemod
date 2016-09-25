@@ -30,7 +30,7 @@ namespace AOE_STRUCTURES {
 		short int unitDATID; // +04
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitClass; // +06 - short int
 		unsigned char posY; // +08
-		unsigned char posX;
+		unsigned char posX; // +09
 		unsigned char posZ;
 		char playerId; // 0x0B
 		//float HP; // +C. unit health points
@@ -55,7 +55,7 @@ namespace AOE_STRUCTURES {
 	// Methods: 0x4C3300: infAI.addOrUpdateBldHistory(unitDefId, posY, posX, status)
 	// 0x4C34C0: infAI.array1F8_setStatus(unitDefId, posY, posX, status)
 	// 0x4C3550: infAI.getAddrOfUnusedElemIn1F8List(DAT_ID)
-	// 0x4C3590: infAI.hasBuildingIn1F8(DAT_ID, pos, pos, allowedDistance). This is bugged in standard game because status always remains=1, even if building no longer exists! This may prevent some constructions to be started
+	// 0x4C3590: infAI.hasBuildingIn1F8(DAT_ID, pos, pos, allowedDistance). This is bugged in standard game because status always remains=1, even if building no longer exists! This may prevent some constructions from being started
 	class STRUCT_INF_AI_BUILDS_HISTORY {
 	public:
 		long int unitDefId;

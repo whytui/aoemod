@@ -66,7 +66,7 @@ namespace AOE_STRUCTURES {
 		// 0x10
 		long int unknown_resetOrg; // +10. resetOrg ?
 		AOE_CONST_INTERNAL::UNIT_GROUP_TYPES unitGroupType; // +14. internal id: 64,65,66,67,6A,6B,6C,6D(=artefacts?)
-		long int taskSubTypeId;
+		long int taskSubTypeId; // +18. 0,4 = capture?
 		long int myUnitsIdArray[0x28]; // +1C. 40 elements, can be non-consecutive (ignore -1 values).
 		// 0xBC
 		long int myUnitsHPArray[0x28]; // +BC. 40 elements. Also used as myUnitsIdArray+0xA0.
@@ -84,7 +84,7 @@ namespace AOE_STRUCTURES {
 		// 0x180
 		AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS currentTask; // TaskId, see 4CD339. Values in 0-0x15
 		long int targetUnitId; // +184. including defended unit case ?
-		long int targetDAT_ID;
+		long int targetDAT_ID; // +188. unitDefId of target unit.
 		float targetPosY;
 		// 0x190
 		float targetPosX;
@@ -95,12 +95,12 @@ namespace AOE_STRUCTURES {
 		float posX;
 		float posZ;
 		long int unknown_1A8;
-		float unknown_1AC_posY;
+		float retreatPosY; // +1AC. 0x4CD65E. Only for retreat ?
 		// 0x1B0
-		float unknown_1B0_posX;
-		float unknown_1B4_posZ;
-		unsigned long int unknown_1B8;
-		unsigned long int unknown_1BC;
+		float retreatPosX;
+		float retreatPosZ;
+		float unknown_1B8; // type: unsure
+		float unknown_1BC; // type: unsure
 		// 0x1C0
 		long int unknown_1C0;
 		unsigned long int unknown_1C4;
@@ -108,11 +108,11 @@ namespace AOE_STRUCTURES {
 		long int unknown_1CC_lastGameTime; // +1CC. Last game time of "task active soldier" execution for the group ?
 		// 0x1D0
 		long int attackPlayId; // attackId that is being played. -1=Non-Play-based attack
-		char unknown_1D4;
+		char unknown_1D4; // +1D4. Number of elements in +1D8 ?
 		char unknown_1D5;
 		short int unknown_1D6; // check type (2 bytes ?)
-		// 1D8
-		char unknown_1D8[0x2C8 - 0x1D8];
+		unsigned long int *unknown_1D8; // +1D8. Array of struct size=0x10, +0/+4=float pos?
+		char unknown_1DC[0x2C8 - 0x1DC];
 		char unknown_2C8; // A counter ? 0x4CD42F
 		char unknown_2C9;
 		char unknown_2CA; // ?
@@ -216,7 +216,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_AI_UNIT_LIST_INFO targetPlayers; // +D28. Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK? Always only 1 element (sometimes hardcoded?4D622C)
 		STRUCT_AI_UNIT_LIST_INFO likedPlayers; // +D38. allied playerIds ? "myself" IS in list ! In practise, always 2 elements? (me + most liked player) ?
 		STRUCT_AI_UNIT_LIST_INFO IdleOrInRangeMilitaryUnits; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960
-		STRUCT_AI_UNIT_LIST_INFO unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ?
+		STRUCT_AI_UNIT_LIST_INFO unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ? Unit that defend something ?
 		unsigned long int gathererCount_actual[4]; // +D68. Index IS resource ID.
 		long int gathererCount_desired[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT]; // +D78. Villager count we want to assign to each type of resource (4). Index IS resource Type ID
 		long int extraResourceTypeNeededByPriority[4]; // +D88 First=most needed. Use extraResourceAmount with this index to get resource amount. <0 amount = I must collect

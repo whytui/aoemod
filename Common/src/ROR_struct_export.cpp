@@ -204,10 +204,10 @@ namespace AOE_STRUCTURES {
 		res += std::to_string(obj->posX);
 		res += " posY=";
 		res += std::to_string(obj->posY);
-		res += " - 1B0_posX=";
-		res += std::to_string(obj->unknown_1B0_posX);
-		res += " 1AC_posY=";
-		res += std::to_string(obj->unknown_1AC_posY);
+		res += " - retreatPosX=";
+		res += std::to_string(obj->retreatPosX);
+		res += " retreatPosY=";
+		res += std::to_string(obj->retreatPosY);
 		res += "\n\ttargetPlayerId=";
 		res += std::to_string(obj->targetPlayerId);
 		res += " targetUnitId=";
