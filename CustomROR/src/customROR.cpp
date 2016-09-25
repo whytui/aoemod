@@ -1159,14 +1159,14 @@ void CustomRORInstance::ManageCityMapLikeComputationCall2(REG_BACKUP *REG_values
 	// Do original code's call to fill temp map info
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		_asm {
-			MOV ECX, infAI // in original code: MOV ECX,EBP
-				PUSH TownHighestPositionYX
-				PUSH TownLowestPositionYX
-				PUSH TCPositionYX
-				PUSH - 1 // arg2=DAT_ID
-				PUSH 0 // arg1=placementType
-				MOV EAX, 0x004C1EF0
-				CALL EAX
+			MOV ECX, infAI; // in original code: MOV ECX,EBP
+			PUSH TownHighestPositionYX;
+			PUSH TownLowestPositionYX;
+			PUSH TCPositionYX;
+			PUSH -1; // arg2=DAT_ID
+			PUSH 0; // arg1=placementType
+			MOV EAX, 0x004C1EF0;
+			CALL EAX;
 		}
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
