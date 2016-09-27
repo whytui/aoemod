@@ -54,7 +54,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_MAP_GENERATION_INFO *unknown_8DBC_mapgenInfos;
 		// 0x8DC0
 		STRUCT_GAME_GLOBAL *globalStruct;
-		STRUCT_MAP_TERRAIN_RESTRICTION_INFO_LINK *unknown_ptrMapInfosLink; // +8DC4. Size=0C. +0=ptr_array_ptrs.+4=arraySize. +8=backPtr to GameMapInfo. constructor 5219C0. 521C60=getItem(i)
+		STRUCT_MAP_TERRAIN_ZONES_INFO_LINK *terrainZonesInfoLink; // +8DC4.
 		unsigned long int unknown_8DC8; // +8DC8. ptr, size=0x0C. +0/+4=mapSizeYX.+8=ptr_array(sizeX*sizeY*4). Constructor 517E30. Related to 7D205C
 		STRUCT_UNKNOWN_MAP_INFO_7D2058 *unknown_8DCC;
 		char unknown_8DD0[0x8DE4 - 0x8DD0];
@@ -68,6 +68,9 @@ namespace AOE_STRUCTURES {
 		char unknown_8DF8_array[0x100 * 0x28]; // Array: 0x100 elements, size=0x28. All are dwords.
 
 		bool IsCheckSumValid() const { return this->checksum == 0x005499F4; }
+		bool IsPositionInBounds(long int x, long int y) const {
+			return (x >= 0) && (y >= 0) && (x < this->mapArraySizeX) && (y < this->mapArraySizeY);
+		}
 		STRUCT_GAME_MAP_TILE_INFO *GetTileInfo(short int x, short int y) const {
 			if ((x < 0) || (x >= this->mapArraySizeX) || (y < 0) || (y >= this->mapArraySizeY)) { return NULL; }
 			return &this->pTileInfoCols[x][y];

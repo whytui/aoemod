@@ -29,10 +29,8 @@ namespace CUSTOMROR {
 class CustomRORMainInterface {
 public:
 	CustomRORMainInterface();
-	CustomRORMainInterface(CustomRORCommand *crCommand);
 	~CustomRORMainInterface();
 
-	CustomRORCommand *crCommand;
 	CustomPopupBase *currentCustomPopup;
 
 

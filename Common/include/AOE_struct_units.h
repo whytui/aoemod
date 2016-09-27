@@ -138,7 +138,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code.
 		short int unknown_078_unitInstanceId; // ? related to +70,+68
 		short int unknown_07A;
-		long int unknown_07C; // Related to terrain restriction ???? Index of matching unknownGameTerrainRestriction object ?
+		long int terrainZoneInfoIndex; // +7C. Index of terrainZoneInfo in terrainZoneInfoLink array. -1 means not initialized yet.
 		// 0x80
 		unsigned long int unknown_080;
 		char unknown_084; // related to movement ? "isMapInfoUpToDateForThisUnit" ?
@@ -198,6 +198,37 @@ namespace AOE_STRUCTURES {
 				PUSH doFree;
 				CALL DS : [EDX];
 			}
+		}
+
+		// Returns the ID of underlying terrain zone (identifies the continent/island or lake/sea where I currently belong)
+		// This allows to distinguish locations/units I can travel to (for example, a villager can only walk to its island - unless there are shallows)
+		// Accessible destinations are tiles with the same terrain zone ID
+		// Warning: the returned terrainZoneId has only a meaning for THIS unit (or units with same terrain accessibility)
+		// This method is NOT const. If unit underlying zoneInfo index has not been computed yet, if will be done here.
+		char GetMyTerrainZoneId() {
+			unsigned long int addr = 0x4ABA60;
+			char result;
+			_asm {
+				MOV ECX, this;
+				CALL addr;
+				MOV result, AL; // Warning: returned value is a byte (EAX high bytes are undetermined)
+			}
+			return result;
+		}
+
+		// Returns the ID of terrain zone at a specific location (from MY terrain restriction point of view)
+		// This method is NOT const. If unit underlying zoneInfo index has not been computed yet, if will be done here.
+		char GetTerrainZoneIdAtPos(long int x, long int y) {
+			unsigned long int addr = 0x4AB9E0;
+			char result;
+			_asm {
+				MOV ECX, this;
+				PUSH x;
+				PUSH y;
+				CALL addr;
+				MOV result, AL; // Warning: returned value is a byte (EAX high bytes are undetermined)
+			}
+			return result;
 		}
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_BASE) == 0x88, "STRUCT_UNIT_BASE size");

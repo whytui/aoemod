@@ -395,8 +395,6 @@ void CustomRORInstance::OneShotInit() {
 	traceMessageHandler.WriteMessageNoNotification(localizationHandler.GetTranslation(CRLANG_ID_DEBUG_INIT, "Debug message system initialized."));
 	CUSTOMROR::crInfo.configInfo.ReadXMLConfigFile("CustomROR\\customROR.xml");
 	CUSTOMROR::crInfo.configInfo.ReadCivXMLConfigFile("CustomROR\\customROR_civs.xml");
-	CUSTOMROR::crMainInterface.crCommand = &CUSTOMROR::crCommand;
-	// Do not use crCommand before this line !
 
 	// Note: CheckEnabledFeatures writes to log file
 	if (!CUSTOMROR::crCommand.CheckEnabledFeatures()) {

@@ -17,7 +17,6 @@ namespace AOE_STRUCTURES {
 	class STRUCT_GAME_GLOBAL;
 	class STRUCT_GAME_MAP_INFO;
 
-
 	/*
 	Objects from this file are not very well known...
 	*/
@@ -132,43 +131,75 @@ namespace AOE_STRUCTURES {
 
 
 	// Size = 0x51C. Constructor = 0x521060 (gameMapInfo, terrainRestrictionValues, layer)
-	class STRUCT_GAME_TERRAIN_RESTRICTION_INFO {
+	// Contains information about terrain zones, for a specific set of terrain restriction accessibility
+	// The map terrain zones repartition depends on terrain restriction sets (ex: shallows can split 2 islands from lion/gazelle perspective (terrRest=1), but not for a villager (terrRest=7))
+	// What identifies this object is 1) number of terrain per restriction
+	// 2) the set of terrain restriction values, taken as boolean (just comparing the fact that terrain is accessible or not).
+	class STRUCT_GAME_TERRAIN_ZONES_INFO {
 	public:
 		long int unknown_00_array[0xFF]; // Values are (almost) always zero ?
-		unsigned long int unknown_3FC; // unused ?
-		unsigned long int unknown_400; // unused ?
-		char *terrainAccessibilityValues; // +404: array of mapSizeX*mapSizeY bytes. Default values = -1. Value = 0 when terrain accessibility (restriction) is same as next (y+1) ?
-		char **terrainAccessibilityValuesCols; // +408: pointers to cols from +404 array. Array size = mapSizeX*4 (dwords). the array[x] = position in bytesarray
+		unsigned long int unused_3FC; // +3FC. Always BAADFOOD ?
+		unsigned long int unused_400; // +400. Always BAADFOOD ?
+		char *landAndWaterIdentifiersArray; // +404: array of mapSizeX*mapSizeY bytes. -1=not initialized. Value=continent/island/lake/sea identifier for current tile. Each ID represents a zone of the map.
+		char **landAndWaterIdentifiersCols; // +408: pointers to cols from +404 array. Array size = mapSizeX*4 (dwords). the array[x] = position in bytesarray
 		char unknown_40C[0xFF]; // +40C. Default values=-1
 		char unknown_50B; // unused ?
-		unsigned long int unknown_50C; // unused ?
-		float *terrainRestrictionValues; // +510. Index = terrainId. count = +514 ("layer") ?
+		unsigned long int unknown_50C; // +50C. Always BAADFOOD ?
+		float *terrainRestrictionValues; // +510. Index = terrainId.
 		long int terrainsCountInTerrainRestrictions; // +514. Determines the element count in terrainRestrictionValues.
 		STRUCT_GAME_MAP_INFO *gameMapInfo; // +518
 
-		char GetTerrainAccessibilityValue(long int posX, long int posY) const {
+		// Returns the terrain zone ID at given position, from this terrainZoneInfo's perspective
+		char GetTerrainZoneId(long int posX, long int posY) const {
 			if ((posX < 0) || (posY < 0)) { return -1; }
 			if ((posX > 255) || (posY > 255)) { return -1; }
 			assert(this->gameMapInfo);
 			//if ((posX >= this->gameMapInfo->mapArraySizeX) || (posY >= this->gameMapInfo->mapArraySizeY)) { return -1; }
-			assert(this->terrainAccessibilityValues);
-			assert(this->terrainAccessibilityValuesCols);
-			if (!this->terrainAccessibilityValuesCols) { return -1; }
-			char *pCol = this->terrainAccessibilityValuesCols[posX];
+			assert(this->landAndWaterIdentifiersArray);
+			assert(this->landAndWaterIdentifiersCols);
+			if (!this->landAndWaterIdentifiersCols) { return -1; }
+			char *pCol = this->landAndWaterIdentifiersCols[posX];
 			assert(pCol != NULL);
 			if (pCol == NULL) { return -1; }
 			return pCol[posY];
+		}
+
+		// Returns true if target position belong to the same zone as source position (accepting a maxDistance margin)
+		// TO CONFIRM
+		bool IsSameZone(long int posX, long int posY, long int targetPosX, long int targetPosY, float maxDistance) const {
+			unsigned long int addr = 0x521640;
+			long int result = 0;
+			_asm {
+				MOV ECX, this;
+				PUSH maxDistance;
+				PUSH targetPosX;
+				PUSH targetPosY;
+				PUSH posX;
+				PUSH posY;
+				CALL addr; // returns a dword (containing 0 or 1)
+				MOV EAX, result;
+			}
 		}
 	};
 
 
 	// Size = 0x0C. Constructor = 0x5219C0
-	// 0x521C60 = getItem(i)
-	class STRUCT_MAP_TERRAIN_RESTRICTION_INFO_LINK {
+	// Provides the terrain zones info for each set of "terrain restriction accessibility values" (taken as bool).
+	// An entry in ptrTerrainZoneInfoArray is identified by 1) number of terrains (in terrain restriction values array)
+	// and 2) set of "bool" accessibility values in terrain restriction array.
+	// 0x521B50 = GetTerrainZoneInfo(pTerrainRestrictionValues, nbTerrainPerTerrainRestr, pOutFoundIndex), returns pointer to STRUCT_GAME_TERRAIN_ZONES_INFO
+	class STRUCT_MAP_TERRAIN_ZONES_INFO_LINK {
 	public:
-		STRUCT_GAME_TERRAIN_RESTRICTION_INFO **ptrArray; // +00. Element count is "+4" dword.
+		STRUCT_GAME_TERRAIN_ZONES_INFO **ptrTerrainZoneInfoArray; // +00. Element count is "+4" dword.
 		long int arrayElemCount; // +04: number of items in array (allocated size = elemCount*4)
 		STRUCT_GAME_MAP_INFO *gameMapInfo; // +08
+
+		// Securely retrieve a terrain zone info from its index (cf 0x521C60)
+		STRUCT_GAME_TERRAIN_ZONES_INFO *GetTerrainZoneInfo(long int index) const {
+			assert((index >= 0) && (index < this->arrayElemCount));
+			if ((index < 0) || (index >= this->arrayElemCount)) { return NULL; }
+			return this->ptrTerrainZoneInfoArray[index];
+		}
 	};
 
 }

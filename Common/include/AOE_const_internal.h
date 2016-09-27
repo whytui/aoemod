@@ -457,15 +457,16 @@ namespace AOE_CONST_INTERNAL
 	enum UNIT_GROUP_TYPES : long int {
 		CST_UGT_LAND_ATTACK = 0x64, // (100) Related to SNMaximumAttackGroupSize
 		CST_UGT_LAND_DEFEND = 0x65, // (101) Related to SNMaximumDefendGroupSize
-		CST_UGT_LAND_EXPLORE = 0x66, // (102) Related to SNMaximumExploreGroupSize
+		CST_UGT_LAND_EXPLORE = 0x66, // (102) Related to SNMaximumExploreGroupSize. NOT for exploring villagers (?)
 		CST_UGT_BOAT_ATTACK = 0x67, // (103) Related to SNMaximumBoatAttackGroupSize
 		CST_UGT_BOAT_DEFEND = 0x68, // (104) Related to SNMaximumBoatDefendGroupSize
-		CST_UGT_BOAT_EXPLORE = 0x69, // (105) Related to SNMaximumBoatExploreGroupSize
+		CST_UGT_BOAT_EXPLORE = 0x69, // (105) Related to SNMaximumBoatExploreGroupSize. NOT for exploring fishing ships
 		// Next ones : trade/fish/transport escorts ? Just a supposition
 		CST_UGT_TRANSPORT_BOAT = 0x6A, // (106) Transport boats (1 per group). Using task 12 to transport units.
 		CST_UGT_FISHING_SHIP = 0x6B, // (107) Fishing ships (1 per group) Can go fishing(10), exploring(8). Can have idle task(1) but still fishing anyway !
 		CST_UGT_TRADE_SHIP = 0x6C, // (108) Trade ships (1 per group ?). Task 11 = trade.
 		CST_UGT_ARTEFACT = 0x6D // (109) Seen with target=own TC. There is 1 group per relic ?
+		// It *seems* there is no other group type
 	};
 
 	enum UNIT_GROUP_TASK_IDS : long int {

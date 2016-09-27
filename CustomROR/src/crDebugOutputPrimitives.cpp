@@ -118,20 +118,21 @@ bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 }
 
 
+// Exports the STRUCT_GAME_TERRAIN_RESTRICTION_INFO data as a bitmap
 bool exportGameTerrainRestrictionValuesToBitmap() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) { return false; }
 	if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return false; }
-	if (!global->gameMapInfo->unknown_ptrMapInfosLink) { return false; }
-	if ((global->gameMapInfo->unknown_ptrMapInfosLink->ptrArray == NULL) || (
-		global->gameMapInfo->unknown_ptrMapInfosLink->arrayElemCount <= 0)) {
+	if (!global->gameMapInfo->terrainZonesInfoLink) { return false; }
+	if ((global->gameMapInfo->terrainZonesInfoLink->ptrTerrainZoneInfoArray == NULL) || (
+		global->gameMapInfo->terrainZonesInfoLink->arrayElemCount <= 0)) {
 		return false;
 	}
-	STRUCT_GAME_TERRAIN_RESTRICTION_INFO *gameTerrainRestrInfo = NULL;
+	STRUCT_GAME_TERRAIN_ZONES_INFO *gameTerrainRestrInfo = NULL;
 	int index = 0;
 	// Find the terrain restriction info that matches "game global" : number of terrain per terrain restriction must match
-	while ((index < global->gameMapInfo->unknown_ptrMapInfosLink->arrayElemCount) && (gameTerrainRestrInfo == NULL)) {
-		gameTerrainRestrInfo = global->gameMapInfo->unknown_ptrMapInfosLink->ptrArray[index];
+	while ((index < global->gameMapInfo->terrainZonesInfoLink->arrayElemCount) && (gameTerrainRestrInfo == NULL)) {
+		gameTerrainRestrInfo = global->gameMapInfo->terrainZonesInfoLink->ptrTerrainZoneInfoArray[index];
 		if (gameTerrainRestrInfo) {
 			if ((gameTerrainRestrInfo->terrainsCountInTerrainRestrictions <= 0) ||
 				(gameTerrainRestrInfo->terrainsCountInTerrainRestrictions != global->nbOfTerrainPerTerrainRestriction)) {
@@ -148,8 +149,19 @@ bool exportGameTerrainRestrictionValuesToBitmap() {
 	assert((sizeX > 0) && (sizeY > 0));
 	if ((sizeX <= 0) || (sizeY <= 0)) { return false; }
 
-	_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\testtrn.bmp", sizeX, sizeY,
-		gameTerrainRestrInfo->terrainAccessibilityValuesCols, 0, NULL, 0);
+	int maxValue = -1;
+	for (int i = 0; i < sizeX * sizeY; i++) {
+		int v = gameTerrainRestrInfo->landAndWaterIdentifiersArray[i];
+		if (v > maxValue) {
+			maxValue = v;
+		}
+	}
+
+	_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades("D:\\testtrn0.bmp", sizeX, sizeY,
+		gameTerrainRestrInfo->landAndWaterIdentifiersArray, 0, maxValue, true);
+
+	/*_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\testtrn.bmp", sizeX, sizeY,
+		gameTerrainRestrInfo->landAndWaterIdentifiersCols, 0, myPalette, paletteSize);*/
 	return true;
 }
 
