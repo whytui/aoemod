@@ -1,5 +1,6 @@
 
 #pragma once
+#include <assert.h>
 
 /*
 * This file contains empiresX.exe structures definition

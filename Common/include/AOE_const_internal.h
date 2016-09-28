@@ -457,7 +457,7 @@ namespace AOE_CONST_INTERNAL
 	enum UNIT_GROUP_TYPES : long int {
 		CST_UGT_LAND_ATTACK = 0x64, // (100) Related to SNMaximumAttackGroupSize
 		CST_UGT_LAND_DEFEND = 0x65, // (101) Related to SNMaximumDefendGroupSize
-		CST_UGT_LAND_EXPLORE = 0x66, // (102) Related to SNMaximumExploreGroupSize. NOT for exploring villagers (?)
+		CST_UGT_LAND_EXPLORE = 0x66, // (102) Related to SNMaximumExploreGroupSize. NOT for exploring villagers (?). See SNNumberExploreGroups
 		CST_UGT_BOAT_ATTACK = 0x67, // (103) Related to SNMaximumBoatAttackGroupSize
 		CST_UGT_BOAT_DEFEND = 0x68, // (104) Related to SNMaximumBoatDefendGroupSize
 		CST_UGT_BOAT_EXPLORE = 0x69, // (105) Related to SNMaximumBoatExploreGroupSize. NOT for exploring fishing ships
@@ -478,7 +478,7 @@ namespace AOE_CONST_INTERNAL
 		CST_UGT_UNKNOWN_05 = 5, // "add up HPs of my units" ?
 		CST_UGT_UNKNOWN_06 = 6, // "add up HPs of my units" ?
 		CST_UGT_EXTERMINATE = 7, // 0x4CD7A9. Set in 0x4D50AB, 0x4D5DD7 See 0x4D535D
-		CST_UGT_EXPLORE = 8, // 4CD977. For boats too (only?) (fishing ships only, not war boats?)
+		CST_UGT_EXPLORE = 8, // 4CD977. For boats too. NOT for civilians/fishing ships.
 		CST_UGT_UNKNOWN_09 = 9, // 4CD425. Regroup ? Uses SNAttackGroupGatherSpacing
 		CST_UGT_GO_FISHING = 0x0A, // (10) Active fishing ships may also have an idle (1) group task ! See 0x4CE4AB
 		CST_UGT_TRADE = 0x0B, // (11) 0x4CE651. targetUnitId is (always) other player's dock.

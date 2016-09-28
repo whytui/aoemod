@@ -56,6 +56,7 @@ namespace AOE_STRUCTURES {
 
 	// Size = 0x330. Constructor()=0x4CC630
 	// tacAI.createGroup(useSequence)=0x4E0400 ; tacAI.removeUnitGroup(unitGroupId)=0x4E04B0
+	// tacAI.RemoveAllGroups(unitGroupType)=0x4E0520, -1=joker
 	// Organized as a loop chained list. See TacAI (first elem is included in TacAI).
 	class STRUCT_UNIT_GROUP_ELEM {
 	public:
@@ -206,7 +207,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unitGroupsCount; // +D08. This does NOT count fakeFirstUnitGroupElem (so it CAN be 0).
 		unsigned long int unknown_D0C; // a Value in milliseconds (cmp to global+4)
 		// 0xD10
-		unsigned long int unknown_D10;
+		long int unknown_D10_ms; // +D10. A time value in ms
 		unsigned long int lastAttackResponseTime_ms; // +D14. Value in milliseconds. Used to compute +D24 ?
 		unsigned long int unknown_D18;
 		long int lastTacticalUpdateTime; // +D1C. Value in milliseconds. See customROR config (tacticalAI/updateDelay) or SNScalingFrequency in standard game.
