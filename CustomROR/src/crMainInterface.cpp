@@ -182,6 +182,8 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		//TEST exp
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 		//CR_DEBUG::exportInfAIExplorationToBitmap(player);
+		//CR_DEBUG::exportVisibilityToBitmap(true, -1);
+		//CR_DEBUG::exportVisibilityToBitmap(false, 1);
 		CR_DEBUG::exportGameTerrainRestrictionValuesToBitmap();
 		/*_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades("D:\\test1.bmp", global->gameMapInfo->mapArraySizeX, 
 			global->gameMapInfo->mapArraySizeY, global->gameMapInfo->unknown_8DB0, 0, 255, false);*/

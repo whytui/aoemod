@@ -136,6 +136,7 @@
     <ClInclude Include="include\InputBox.h" />
     <ClInclude Include="include\language.h" />
     <ClInclude Include="include\mainStructuresHandling.h" />
+    <ClInclude Include="include\palette.h" />
     <ClInclude Include="include\playerTargeting.h" />
     <ClInclude Include="include\randomizer.h" />
     <ClInclude Include="include\researches.h" />

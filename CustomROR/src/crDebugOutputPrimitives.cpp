@@ -107,7 +107,7 @@ bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 		for (int i = 0; i < 3; i++) {
 			myPalette[0 * 4 + i] = 127; // grey for -1 (unexplored)
 		}
-		myPalette[1 * 4 + 1] = 255; // Green for 0 (explored
+		myPalette[1 * 4 + 1] = 255; // Green for 0 (explored)
 		myPalette[2 * 4 + 2] = 255; // Red for 1 (failed)
 		myPalette[3 * 4 + 0] = 255; // Blue for 2 (to reexplore)
 
@@ -162,6 +162,38 @@ bool exportGameTerrainRestrictionValuesToBitmap() {
 
 	/*_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\testtrn.bmp", sizeX, sizeY,
 		gameTerrainRestrInfo->landAndWaterIdentifiersCols, 0, myPalette, paletteSize);*/
+	return true;
+}
+
+
+// Export map visibility values to a bitmap.
+// fogVisibility : true=export fog visibility, false=export exploration
+// playerIdFilter : if -1, export for all players (value=mask), otherwise, export for supplied player only
+bool exportVisibilityToBitmap(bool fogVisibility, long int playerIdFilter) {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return false; }
+	if ((playerIdFilter < -1) || (playerIdFilter >= global->playerTotalCount)) { return false; } // -1 is allowed (joker)
+	const int mask = (playerIdFilter >= 0) ? (1 << playerIdFilter) : 0; // only used if playerId is not -1.
+	if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return false; }
+	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_LINK *visLink = global->gameMapInfo->mapVisibilityLink;
+	if (!visLink || !visLink->tilesVisibilityArray) { return false; }
+	if ((visLink->mapSizeX <= 0) || (visLink->mapSizeY <= 0)) { return false; }
+	unsigned char *valuesArray = (unsigned char*)malloc(visLink->mapSizeX * visLink->mapSizeY);
+	if (!valuesArray) { return false; }
+	for (int i = 0; i < visLink->mapSizeX * visLink->mapSizeY; i++) {
+		if (fogVisibility) {
+			valuesArray[i] = (visLink->tilesVisibilityArray[i].fogVisibilityMask) & 0xFF;
+		} else {
+			valuesArray[i] = (visLink->tilesVisibilityArray[i].explorationVisibilityMask) & 0xFF;
+		}
+		if (playerIdFilter >= 0) {
+			valuesArray[i] = valuesArray[i] & mask;
+		}
+	}
+	char *filename = fogVisibility ? "D:\\testfog.bmp" : "D:\\testexpl.bmp";
+	_BITMAP::BitmapExporter::ExportDataAsBitmapUsingPalette(filename, global->gameMapInfo->mapArraySizeX,
+		global->gameMapInfo->mapArraySizeY, valuesArray, 0, _BITMAP::itfDrsPalette50509, _countof(_BITMAP::itfDrsPalette50509), true);
+	free(valuesArray);
 	return true;
 }
 

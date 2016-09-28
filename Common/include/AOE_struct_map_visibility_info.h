@@ -28,4 +28,29 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(STRUCT_MAP_VISIBILITY_INFO) == 4, "STRUCT_MAP_VISIBILITY_INFO size");
 
+
+	// Size 0x0C. Constructor = 0x517E30
+	class STRUCT_MAP_VISIBILITY_LINK {
+	public:
+		long int mapSizeY;
+		long int mapSizeX;
+		// +08. Array size (number of dwords) = sizeX*sizeY (*4 to get bytes count)
+		// Each DWORD represents a mask of fog visibility+exploration for all players
+		// The 0x7D205C variable points to this array too.
+		STRUCT_MAP_VISIBILITY_INFO *tilesVisibilityArray;
+
+		// Returns a pointer to tile visibility info at specified position
+		// Returns NULL if position is invalid
+		STRUCT_MAP_VISIBILITY_INFO *GetPtrTileVisibility(long int posX, long int posY) const {
+			assert(posX >= 0);
+			assert(posY >= 0);
+			assert(posX < this->mapSizeX);
+			assert(posY < this->mapSizeY);
+			if ((posX < 0) || (posY < 0) || (posX >= this->mapSizeX) || (posY >= this->mapSizeY)) { return NULL; }
+			long int dwordOffset = (posX * this->mapSizeX + posY);
+			return &this->tilesVisibilityArray[dwordOffset];
+		}
+	};
+	static_assert(sizeof(STRUCT_MAP_VISIBILITY_LINK) == 0x0C, "STRUCT_PLAYER_FOG_VISIBILITY size");
+
 }

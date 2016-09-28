@@ -51,7 +51,7 @@ template<typename T> static bool ExportDataAsBitmapUsingPalette(const char *file
 				// Provided buffer is accessed like buffer[x][y] : in memory, values are organized like (x0y0 x0y1 x0y2... x1y0 x1y1 x1y2... x2y0 x2y1 x2y2...)
 				offsetSrc = (x * sizeY) + y;
 			}
-			buffer[offset] = ((unsigned char)(dataArray[offset] - minValue)); // so values start at 0
+			buffer[offsetBmp] = ((unsigned char)(dataArray[offsetSrc] - minValue)); // so values start at 0
 		}
 	}
 

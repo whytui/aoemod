@@ -7,18 +7,19 @@
 // Low word: bit mask per player for "fog visibility"
 // Lower bit is player 0 (gaia), 2nd=player1, etc
 AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int posX, long int posY) {
-	unsigned long int **pMapInfo = (unsigned long int **)AOE_OFFSETS::ADDR_MAP_VISIBILITY_INFO;
-	assert(pMapInfo != NULL);
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) { return NULL; }
+	assert(global->gameMapInfo && global->gameMapInfo->IsCheckSumValid());
+	if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return NULL; }
+	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_LINK *visLink = global->gameMapInfo->mapVisibilityLink;
+	if (!visLink) { return NULL; }
 	assert(posX >= 0);
 	assert(posY >= 0);
-	assert(posX < 256); // TO DO: get exact map size
-	assert(posY < 256); // TO DO: get exact map size
-	if ((pMapInfo == NULL) || (posX < 0) || (posY < 0) || (posX >= 256) || (posY >= 256)) { return 0; }
-	unsigned long int *pMapInfoX = pMapInfo[posX];
-	assert(pMapInfoX != NULL);
-	if (pMapInfoX == NULL) { return 0; }
-	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *result = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*) &pMapInfoX[posY];
-	return result;
+	assert(posX < visLink->mapSizeX);
+	assert(posY < visLink->mapSizeY);
+	if ((posX < 0) || (posY < 0) || (posX >= visLink->mapSizeX) || (posY >= visLink->mapSizeY)) { return NULL; }
+	return visLink->GetPtrTileVisibility(posX, posY);
 }
 
 

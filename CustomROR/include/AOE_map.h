@@ -19,8 +19,6 @@ using namespace AOE_STRUCTURES;
 using namespace AOE_CONST_FUNC;
 
 
-// TODO: create an include file for such methods
-// Duplicated from crCommon (dirty !!)
 extern AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId);
 
 

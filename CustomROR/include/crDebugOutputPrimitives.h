@@ -9,10 +9,11 @@
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_player.h>
 #include <AOE_struct_main_ai.h>
+#include <AOE_struct_export.h>
 #include "mainStructuresHandling.h"
 #include "basicFilesHandling.h"
 #include "BitmapExporter.h"
-#include <AOE_struct_export.h>
+#include "palette.h"
 
 /* This file contains various primitives for debugging */
 
@@ -21,6 +22,7 @@ using namespace AOE_STRUCTURES;
 
 namespace CR_DEBUG {
 
+
 // Dumps useful information for debugging.
 void DumpDebugInfoToFile();
 
@@ -28,6 +30,11 @@ void DumpDebugInfoToFile();
 bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player);
 
 bool exportGameTerrainRestrictionValuesToBitmap();
+
+// Export map visibility values to a bitmap.
+// fogVisibility : true=export fog visibility, false=export exploration
+// playerIdFilter : if -1, export for all players (value=mask), otherwise, export for supplied player only
+bool exportVisibilityToBitmap(bool fogVisibility, long int playerIdFilter);
 
 // To customize for debug purpose...
 void DebugDumpAllUnits();
