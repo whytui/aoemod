@@ -401,6 +401,13 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = &rd->players[playerId];
 		AOE_STRUCTURES::STRUCT_AI *ai = &rd->playersAI[playerId];
 		std::string s;
+		if (player) {
+			char bufname[20];
+			if (AOE_STRUCTURES::GetObjectFromRORData(rd->handleROR, player->playerName_length16max, &bufname, 16)) {
+				s = bufname;
+			}
+		}
+		
 
 		s += "\n*** Attacking *** Target player=";
 		int tpCount = ai->structTacAI.targetPlayers.usedElements;
@@ -409,7 +416,31 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 			AOE_STRUCTURES::GetObjectFromRORData(rd->handleROR, ai->structTacAI.targetPlayers.unitIdArray, &targetPlayer0, 4 /*DWORD*/);
 		}
 		s += std::to_string(targetPlayer0);
-		s += " lastTacticalUpdateTime=";
+		s += ". tacAI.targetInfo [";
+		s += GetHexStringAddress((unsigned long int)rd->players[playerId].ptrAIStruct + 0x1146C);
+		s += "] unitid=";
+		s += std::to_string(ai->structTacAI.targetInfo.targetUnitId);
+		s += " eval=";
+		s += std::to_string(ai->structTacAI.targetInfo.targetEvaluation);
+		s += " [+8]";
+		s += std::to_string(ai->structTacAI.targetInfo.unknown_08);
+		s += " listIdx=";
+		s += std::to_string(ai->structTacAI.targetInfo.infAIUnitElemListIndex);
+		s += "\n[+10]";
+		s += std::to_string(ai->structTacAI.targetInfo.unknown_10);
+		s += " [+14]";
+		s += std::to_string(ai->structTacAI.targetInfo.unknown_14);
+		s += " isBld?=";
+		s += std::to_string(ai->structTacAI.targetInfo.unknown_18);
+		s += " [+1C]";
+		s += std::to_string(ai->structTacAI.targetInfo.unknown_1C);
+		s += " [+20]";
+		s += std::to_string(ai->structTacAI.targetInfo.unknown_20);
+		s += " [+24]";
+		s += std::to_string(ai->structTacAI.targetInfo.unknown_24);
+		s += " [+28]";
+		s += std::to_string(ai->structTacAI.targetInfo.unknown_28);
+		s += "\nlastTacticalUpdateTime=";
 		s += MilliSecondsToString(ai->structTacAI.lastTacticalUpdateTime);
 		s += " lastAttackResponseTime=";
 		s += MilliSecondsToString(ai->structTacAI.lastAttackResponseTime_ms);

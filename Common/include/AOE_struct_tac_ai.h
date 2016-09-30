@@ -163,9 +163,9 @@ namespace AOE_STRUCTURES {
 		long int unknown_14;
 		char unknown_18; // default 0. is building ? ignore speed? ? Really unsure. See 4C0ABC
 		char unused_19[3];
-		long int unknown_1C;
+		long int unknown_1C; // some (target) unit id ?
 		// 0x20
-		long int unknown_20;
+		float unknown_20;
 		long int unknown_24;
 		long int unknown_28; // A flag, default 1 ? Set to 0 in 45DF0
 	};
