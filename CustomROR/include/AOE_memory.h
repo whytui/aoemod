@@ -19,7 +19,7 @@ void CallAOEDestructor(unsigned long int **ptrObj);
 
 
 
-// Allocates memory using ROR's method
+// Allocates memory using ROR's method (0x52601D)
 static void *AOEAlloc(long int sizeInBytes) {
 	void *p;
 	_asm {
@@ -45,7 +45,7 @@ static void *AOEAllocZeroMemory(long int number, long int elemSizeInBytes) {
 	}
 }
 
-// Free memory using ROR's method
+// Free memory using ROR's method (0x525FC2)
 static void AOEFree(void *p) {
 	_asm {
 		MOV EAX, 0x525FC2

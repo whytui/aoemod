@@ -37,7 +37,7 @@ namespace AOE_STRUCTURES {
 		short int HP; // +C. unit health points
 		short int unused_0E;
 		// 0x10
-		long int unknown_10; // an int used in target rating evaluation, multiplied with //SNTargetEvaluationAttackAttempts in 4C0852
+		long int attackAttempts; // +10. Number of time the unit has been selected as "main target".
 		char unknown_14;
 		char unused_15;
 		short int unused_16;

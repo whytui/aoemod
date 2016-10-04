@@ -89,7 +89,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int uknown_11DC3C_ptr; // ptr to F4 99 54 00
 		// 0x11DC40
 		STRUCT_GAME_GLOBAL *globalStruct; // +11DC40: in old debugging times, was used as a global var to "game global", was not exactly the case.
-		STRUCT_UNIT_BASE *currentUnit; // 11DC44.
+		STRUCT_UNIT_BASE *currentUnit; // 11DC44. The unit for which a path finding is being run
 		unsigned long int unknown_11DC48;
 		long int destinationUnitId; // +11DC4C.
 		// 0x11DC50
@@ -111,19 +111,21 @@ namespace AOE_STRUCTURES {
 		long int actorMinPosX_offset; // +11DC98. (actorPosX - sizeRadius)*4 ?
 		long int actorMaxPosY_offset; // +11DC9C. (actorPosY + sizeRadius)*4 ?
 		long int actorMaxPosX_offset; // +11DCA0. (actorPosX + sizeRadius)*4 ?
-		char unknown_11DCA4[0x11DCC8 - 0x11DCA4];
+		char unknown_11DCA4[0x11DCC4 - 0x11DCA4];
+		long int unknown_11DCC4_counter; // +11DCC4. INC in 0x45A4E0
 		long int unknown_11DCC8_distance_offset; // Init=-1. Distance*4 between ? Total distance*4 (in straight line) between src and dest ?
 		char unknown_11DCCC[0x11DCD8 - 0x11DCCC];
-		char unknown_11DCD8_resetCounter; // A counter, +=8 at each pathFinding. When 0xF0 (30 iterations), reset and resets mapData. Value is similar to +C array
+		char unknown_11DCD8_resetCounter; // +11DCD8. A counter, +=8 at each pathFinding. When 0xF0 (30 iterations), reset and resets mapData. Value is similar to +C array
 		char unknown_11DCD9[3];
-		long int unknown_11DCDC; // arg15 of 00458930 call
+		long int unknown_11DCDC; // arg15 of 00458930 call. Seen 0x1B
 		// 0x11DCE0
 		long int unknown_11DCE0; // arg14 of 00458930 call
-		long int unknown_11DCE4;
-		long int unknown_11DCE8;
+		// unknown_11DCE4 is a STRUCT_AI_UNIT_LIST_INFO. To rename.
+		long int *unknown_11DCE4; // +11DCE4 = array of unit IDs
+		long int unknown_11DCE8; // +11DCE8 = used count in unknown_11DCE4
 		long int unknown_11DCEC;
 		// 0x11DCF0
-		long int unknown_11DCF0;
+		long int unknown_11DCF0; // +11DCF0 = allocated number of elems in unknown_11DCE4
 		long int unknown_11DCF4; // seen 1
 		// ...
 		bool IsCheckSumValid() { return this->checksum == 0x00544CF0; }

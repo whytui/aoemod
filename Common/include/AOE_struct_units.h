@@ -83,6 +83,16 @@ namespace AOE_STRUCTURES {
 	// Eye candy (type10) / common (base) class for all units (unit instances).
 	// A8 7D 54 00. Size=0x88 (constructor 0x04A64B0)
 	// 0x4CD2D0 = unitGroupElem.task(tacAI, mainAI, unitGrpTaskId, resetOrg, arg5=oCA)
+	// Methods:
+	// +0x44 = unit.convertToPlayer(ptrPlayer)
+	// +0x74 = unit.CalcDamageFrom(attacksCount, pAttacksList, f_altitudeFactor, actorPlayer, actorUnit). Ex 0x426910.
+	// +0xF0 = unit.GetAttackAltitudeFactor(targetUnit). WARNING: Returns in ST (FLD xxx), not EAX. Ex 0x4AEC00.
+	// +0xFC = unit.FLD_speed()
+	// +0x100 = unit.FLD_reloadTime1()
+	// +0x104 = unit.calcDamageFrom(unit)?. WARNING: Returns in ST (FLD xxx), not EAX. Ex 0x427AC0.
+	// +0x10C = unit.FLD_maxRange(). Loads 0 for units that do not derive from type50 (attackable)
+	// +0x198 = MoveTo(posY,posX,posZ,fMaxRange,targetUnitId,arg6,arg7,arg8,arg9) ?
+	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
 	class STRUCT_UNIT_BASE {
 	public:
 		unsigned long int checksum;
@@ -227,6 +237,33 @@ namespace AOE_STRUCTURES {
 				PUSH y;
 				CALL addr;
 				MOV result, AL; // Warning: returned value is a byte (EAX high bytes are undetermined)
+			}
+			return result;
+		}
+
+		// Get unit max range, returns 0 for types that do not derive from Type50 (attackable).
+		// This is analog to "EDX+0x10C" call
+		float GetMaxRange() const {
+			if (!this->DerivesFromAttackable()) {
+				return 0.f;
+			}
+			return ((STRUCT_UNITDEF_ATTACKABLE*)this->unitDefinition)->maxRange;
+		}
+
+		// Returns true if unit can move to target. Still not well known
+		long int CanMoveTo(long int targetUnitId, float maxRange, long int arg3, long int arg4, long int arg5, long int arg6) {
+			long int result;
+			_asm {
+				MOV ECX, this;
+				MOV EDX, DS:[ECX];
+				PUSH arg6;
+				PUSH arg5;
+				PUSH arg4;
+				PUSH arg3;
+				PUSH maxRange;
+				PUSH targetUnitId;
+				CALL DS:[EDX + 0x194];
+				MOV result, EAX;
 			}
 			return result;
 		}

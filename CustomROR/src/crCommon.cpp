@@ -1032,14 +1032,15 @@ bool AOE_selectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUC
 }
 
 
-// Calls AOE's path finding method.
+// Calls AOE's path finding method, using 0x583BC8 (not 0x6A1CC0)
 // allArgs indices are 1-15 (do NOT use 0). Warning, allArgs[6] is a float, not an int.
 // Arguments (1-15) are:
 // srcPosY, srcPosX, destPosY, destPosX, ptrActorUnit, f_range?, targetUnitId, updateUnitPathInfo?(!OnlyCheck),
-// arg9, arg10, arg11, arg12, arg13(int_distance?), arg14, arg15
+// arg9, arg10, arg11, arg12, arg13(int_distance?), arg14(unitGrp?), arg15
+// See also AOE_calcPathForMove
 long int callFindPathForUnit(long int allArgs[15 + 1]) {
-	const long int myecx = 0x583BC8;
-	const long int callAddr = 0x458930;
+	const unsigned long int myecx = 0x583BC8;
+	const unsigned long int callAddr = 0x458930;
 	long int result;
 	_asm {
 		MOV ECX, myecx
@@ -1098,6 +1099,53 @@ long int callFindPathForUnit(long int allArgs[15 + 1]) {
 }
 
 
+// pathFindingStruct can be 0x583BC8 or 0x6A1CC0. Don't know the specific roles yet :(
+// updateUnitPathInfo = "do move". If false, this just checks if movement is possible.
+// arg15 : seen 0x1B hardcoded
+long int AOE_calcPathForMove(STRUCT_UNKNOWN_MAP_DATA_F04C *pathFindingStruct,
+	long int srcPosY, long int srcPosX, long int destPosY, long int destPosX,
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *ptrActorUnit, float maxRange, long int targetUnitId, long int updateUnitPathInfo,
+	long int arg9, long int arg10, long int arg11, long int arg12,
+	long int distance_unsure, AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *unitGroup_unsure, long int arg15) {
+	const unsigned long int callAddr = 0x458930;
+#ifdef _DEBUG
+	// DEBUG: run some data quality checks
+	assert(pathFindingStruct && pathFindingStruct->IsCheckSumValid());
+	assert((updateUnitPathInfo == 0) || (updateUnitPathInfo == 1));
+	if (ptrActorUnit) {
+		assert(ptrActorUnit->IsCheckSumValidForAUnitClass());
+	}
+	if (unitGroup_unsure) {
+		assert(unitGroup_unsure->IsCheckSumValid());
+	}
+	assert(targetUnitId >= -1);
+#endif
+	long int result = 0;
+	_asm {
+		MOV ECX, pathFindingStruct;
+		PUSH arg15;
+		PUSH unitGroup_unsure;
+		PUSH distance_unsure;
+		PUSH arg12;
+		PUSH arg11;
+		PUSH arg10;
+		PUSH arg9;
+		PUSH updateUnitPathInfo;
+		PUSH targetUnitId;
+		PUSH maxRange;
+		PUSH ptrActorUnit;
+		PUSH destPosX;
+		PUSH destPosY;
+		PUSH srcPosX;
+		PUSH srcPosY;
+		CALL callAddr;
+		MOV result, EAX;
+	}
+	return result;
+}
+
+
+
 // Set "shared exploration" flag for a given player to true or false.
 // Old version: Not compatible with MP games (to verify)
 void SetPlayerSharedExploration_hard(long int playerId, bool enable) {
@@ -1138,7 +1186,7 @@ bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) 
 	elem->posZ = 0;
 	elem->playerId = 0;
 	elem->HP = 0;
-	elem->unknown_10 = 0;
+	elem->attackAttempts = 0;
 	elem->unknown_14 = 0;
 	elem->attack = 0;
 	elem->reloadTime1 = 0;
@@ -1232,7 +1280,7 @@ bool RemoveFromInfAIInfoList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unit
 }
 
 
-// Find a unitElem in infAI list, returns NULL if not found.
+// Find a unitElem in infAI list, returns NULL if not found. Similar to 0x4BD710.
 AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId) {
 	if (!infAI || !infAI->IsCheckSumValid() || (unitId < 0)) { return NULL; }
 	for (int i = 0; i < infAI->unitElemListSize; i++) {

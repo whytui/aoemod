@@ -407,7 +407,6 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 				s = bufname;
 			}
 		}
-		
 
 		s += "\n*** Attacking *** Target player=";
 		int tpCount = ai->structTacAI.targetPlayers.usedElements;
@@ -417,29 +416,30 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		}
 		s += std::to_string(targetPlayer0);
 		s += ". tacAI.targetInfo [";
-		s += GetHexStringAddress((unsigned long int)rd->players[playerId].ptrAIStruct + 0x1146C);
-		s += "] unitid=";
+		AOE_STRUCTURES::STRUCT_TAC_AI *remoteTacAIAddress = (AOE_STRUCTURES::STRUCT_TAC_AI *)(((unsigned long int)rd->players[playerId].ptrAIStruct) + 0x1146C);
+		s += GetHexStringAddress((unsigned long int)&remoteTacAIAddress->targetInfo);
+		s += "] [targetUnitid]";
 		s += std::to_string(ai->structTacAI.targetInfo.targetUnitId);
 		s += " eval=";
 		s += std::to_string(ai->structTacAI.targetInfo.targetEvaluation);
-		s += " [+8]";
-		s += std::to_string(ai->structTacAI.targetInfo.unknown_08);
+		s += " [infAIindex]";
+		s += std::to_string(ai->structTacAI.targetInfo.targetInfAIUnitElemListIndex);
 		s += " listIdx=";
-		s += std::to_string(ai->structTacAI.targetInfo.infAIUnitElemListIndex);
+		s += std::to_string(ai->structTacAI.targetInfo.currentSearchInfAIUnitElemListIndex);
 		s += "\n[+10]";
 		s += std::to_string(ai->structTacAI.targetInfo.unknown_10);
 		s += " [+14]";
 		s += std::to_string(ai->structTacAI.targetInfo.unknown_14);
 		s += " isBld?=";
-		s += std::to_string(ai->structTacAI.targetInfo.unknown_18);
-		s += " [+1C]";
-		s += std::to_string(ai->structTacAI.targetInfo.unknown_1C);
-		s += " [+20]";
-		s += std::to_string(ai->structTacAI.targetInfo.unknown_20);
-		s += " [+24]";
-		s += std::to_string(ai->structTacAI.targetInfo.unknown_24);
-		s += " [+28]";
-		s += std::to_string(ai->structTacAI.targetInfo.unknown_28);
+		s += std::to_string(ai->structTacAI.targetInfo.currentSearchIsBuildings);
+		s += " [bldUnitId]";
+		s += std::to_string(ai->structTacAI.targetInfo.buildingTargetUnitId);
+		s += " [+bldEval]";
+		s += std::to_string(ai->structTacAI.targetInfo.buildingTargetEvaluation);
+		s += " [+infAIbldIndex]";
+		s += std::to_string(ai->structTacAI.targetInfo.buildingTargetInfAIUnitElemListIndex);
+		s += " [inProgress]";
+		s += std::to_string(ai->structTacAI.targetInfo.targetSearchInProgress);
 		s += "\nlastTacticalUpdateTime=";
 		s += MilliSecondsToString(ai->structTacAI.lastTacticalUpdateTime);
 		s += " lastAttackResponseTime=";

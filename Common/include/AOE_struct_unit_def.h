@@ -325,7 +325,7 @@ namespace AOE_STRUCTURES
 		// 0x110
 		TERRAIN_RESTRICTION armorTerrainRestriction; // Provide a multiplier for each terrain
 		short int unknown_112;
-		float maxRange; // Total range (8 if 7+1 is displayed). displayed range is the number before the "+" (7 in the example).
+		float maxRange; // +114. Total range (8 if 7+1 is displayed). displayed range is the number before the "+" (7 in the example).
 		float blastRadius; // +118. Distance blast damage applies. 0 means there is no blast damage.
 		AOE_CONST_FUNC::BLAST_LEVELS blastLevel; // +11C. PLEASE always check if blastRadius>0. A lot of units have "wrongly" blastLevel=0
 		char unknown_11D;

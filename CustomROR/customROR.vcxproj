@@ -107,6 +107,8 @@
     <ClInclude Include="..\..\tinyxml\tinyxml.h" />
     <ClInclude Include="include\AOE_map.h" />
     <ClInclude Include="include\AOE_memory.h" />
+    <ClInclude Include="include\AOEPrimitives_units.h" />
+    <ClInclude Include="include\AOE_time.h" />
     <ClInclude Include="include\autoAttackPolicy.h" />
     <ClInclude Include="include\buttonBar.h" />
     <ClInclude Include="include\cityPlan.h" />
@@ -157,6 +159,7 @@
     <ClInclude Include="include\UI_utilities.h" />
     <ClInclude Include="include\unitDefHandling.h" />
     <ClInclude Include="include\unitShortcuts.h" />
+    <ClInclude Include="include\unitTargeting.h" />
     <ClInclude Include="include\Version.h" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +168,7 @@
     <ClCompile Include="..\..\tinyxml\tinyxmlerror.cpp" />
     <ClCompile Include="..\..\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="src\AOE_map.cpp" />
+    <ClCompile Include="src\AOEPrimitives_units.cpp" />
     <ClCompile Include="src\BitmapExporter.cpp" />
     <ClCompile Include="src\buttonBar.cpp" />
     <ClCompile Include="src\cityPlan.cpp" />
@@ -208,6 +212,7 @@
     <ClCompile Include="src\StrategyUpdater.cpp" />
     <ClCompile Include="src\traceMessages.cpp" />
     <ClCompile Include="src\unitDefHandling.cpp" />
+    <ClCompile Include="src\unitTargeting.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CustomROR_README.txt" />

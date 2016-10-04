@@ -50,6 +50,7 @@ namespace AOE_STRUCTURES
 
 	// Not very well known. Accessed via unit+0x74 pointer (+70? too)
 	// Size=0x134??? May depend on sub-class
+	// [EDX+0xC4]=activity.canConvert(targetUnitId) ?
 	// [EDX+0xCC]=activity.dequeue(activityQueue) ?
 	class STRUCT_UNIT_ACTIVITY {
 	public:

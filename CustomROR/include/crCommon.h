@@ -243,9 +243,22 @@ void AOE_clearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player);
 // select: if true, add unit to selection. If false, remove from selection.
 bool AOE_selectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool select);
 
-// Calls AOE's path finding method.
-// allArgs indices are 1-15 (do NOT use 0). Warning, some arguments type are NOT long int (there are floats).
+// Calls AOE's path finding method, using 0x583BC8 (not 0x6A1CC0)
+// allArgs indices are 1-15 (do NOT use 0). Warning, allArgs[6] is a float, not an int.
+// Arguments (1-15) are:
+// srcPosY, srcPosX, destPosY, destPosX, ptrActorUnit, f_range?, targetUnitId, updateUnitPathInfo?(!OnlyCheck),
+// arg9, arg10, arg11, arg12, arg13(int_distance?), arg14(unitGrp?), arg15
+// See also AOE_calcPathForMove
 long int callFindPathForUnit(long int allArgs[15 + 1]);
+
+// pathFindingStruct can be 0x583BC8 or 0x6A1CC0. Don't know the specific roles yet :(
+// updateUnitPathInfo = "do move". If false, this just checks if movement is possible.
+long int AOE_calcPathForMove(STRUCT_UNKNOWN_MAP_DATA_F04C *pathFindingStruct,
+	long int srcPosY, long int srcPosX, long int destPosY, long int destPosX, 
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *ptrActorUnit, float maxRange, long int targetUnitId, long int updateUnitPathInfo,
+	long int arg9, long int arg10, long int arg11, long int arg12, 
+	long int distance_unsure, AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *unitGroup_unsure, long int arg15);
+
 
 // Set "shared exploration" flag for a given player to true or false. Do not use this with MP game (not sure if it causes sync error)
 void SetPlayerSharedExploration_hard(long int playerId, bool enable);

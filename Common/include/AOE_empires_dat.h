@@ -305,7 +305,7 @@ namespace AOE_CONST_FUNC {
 		CST_IAI_RETREAT_TO_SHOOTING_RANGE = 0x6D,
 		CST_IAI_GATHER_WITH_ATTACK = 0x6E, // (110) Hunt, cut wood, fish. Gather activities with an attack phase (includes fishing !)
 		CST_IAI_TRADE = 0x6F,
-		CST_IAI_GENERATE_WONDER_VICTORY = 120, // AGE3?
+		CST_IAI_GENERATE_WONDER_VICTORY = 120, // 0x78. See 0x4C5A4C.
 		CST_IAI_DESELECT_WHEN_TASKED = 121, // AGE3?
 		CST_IAI_LOOT = 122, // AGE3?
 		CST_IAI_HOUSING = 123, // AGE3?

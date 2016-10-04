@@ -300,10 +300,10 @@ namespace AOE_CONST_INTERNAL
 	// Unsure / to debug
 	enum ACTION_STATUS : char {
 		CST_AS_UNKNOWN_01 = 1, // ?? 40544D. Considered as idle (0x40662A)
-		CST_AS_UNKNOWN_02 = 2, // Seen when moving was finished? (idle)
+		CST_AS_UNKNOWN_02 = 2, // Seen when moving was finished? (idle). For gen. wonder victory, means wonder is unfinished?
 		CST_AS_UNKNOWN_03 = 3, // Can start moving to action location (temporary state) ? 40547F. Considered idle !
 		CST_AS_UNKNOWN_04 = 4, // Moving to action location ?
-		CST_AS_UNKNOWN_06 = 6, // "start" in progress ? (analog to 3?)
+		CST_AS_UNKNOWN_06 = 6, // "start" in progress ? (analog to 3?). For gen. wonder victory, means timer has started?
 		CST_AS_UNKNOWN_07 = 7, // in progress ? (analog to 4?). For both attack, build, etc
 		CST_AS_UNKNOWN_0B = 0x0B, // Seen when moving to bird location (after killing it)
 		CST_AS_UNKNOWN_0C = 0x0C, // waiting for requirement ? Really unsure

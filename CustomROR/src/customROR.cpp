@@ -362,6 +362,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x0040ACDF:
 		this->EntryPointGetMostDislikedPlayerId(REG_values);
 		break;
+	case 0x004BFFCC:
+		this->EntryPointInfAIGroupFindMainTarget(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3500,6 +3503,44 @@ void CustomRORInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values
 		REG_values->EDX_val = mostDislikedPlayerId; // no impact if we do NOT change return address.
 		ChangeReturnAddress(REG_values, 0x40AD8E); // Exit and return EDX' value (default -1)
 	}
+}
+
+
+// From 004BFFC5. infAI.findAttackTarget(targetPlayerId, unitGroup, pTacAI_targetInfo, timeGetTimeValue)
+// Can change return value to 0x4C0E3C if we chose to override ROR method (and NOT execute it)
+void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ESI_val;
+	ror_api_assert(REG_values, infAI && infAI->IsCheckSumValid());
+	long int targetPlayerId = GetIntValueFromRORStack(REG_values, 0x88); // arg1
+	AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *unitGroup = (AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *) 
+		GetIntValueFromRORStack(REG_values, 0x8C); // arg2
+	ror_api_assert(REG_values, (unsigned long int)unitGroup == REG_values->EBP_val);
+	ror_api_assert(REG_values, REG_values->EBP_val == REG_values->ECX_val);
+	ror_api_assert(REG_values, unitGroup && unitGroup->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_TAC_AI_TARGET_INFO *targetInfo = (AOE_STRUCTURES::STRUCT_TAC_AI_TARGET_INFO *)
+		GetIntValueFromRORStack(REG_values, 0x90); // arg3
+	long int argTimeGetTimeValue = GetIntValueFromRORStack(REG_values, 0x94); // arg4
+	ror_api_assert(REG_values, (targetPlayerId >= -1) && (targetPlayerId <= 8)); // Very tolerant. I doubt -1 and 0 are valid
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->EAX_val = unitGroup->commanderUnitId; // same as replaced instruction 0x4BFFC7
+	}
+	bool noCustomTreatment = false; // for debugging
+	if (noCustomTreatment || !CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
+		return;
+	}
+
+#ifndef _DEBUG
+	return; // NOT ready yet for release version
+#endif
+
+	// Here, custom treatments are enabled
+	ChangeReturnAddress(REG_values, 0x4C0E3C);
+	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *resultInfAIUnitElem = NULL;
+
+	resultInfAIUnitElem = CUSTOMROR::FindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
+
+	REG_values->EAX_val = (unsigned long int)resultInfAIUnitElem;
 }
 
 

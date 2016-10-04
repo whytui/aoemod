@@ -49,6 +49,7 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x5620A4;
 	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0; //TODO
 	static const unsigned long int AOE_VAR_CURSORS_INFO = 0; // Pointer to structure about cursors
+	static const unsigned long int *AOE_LNK_TIMEGETTIME = 0;
 #endif
 #ifdef GAMEVERSION_AOE10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -85,6 +86,7 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x551F20;
 	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0; // TODO
 	static const unsigned long int AOE_VAR_CURSORS_INFO = 0; // Pointer to structure about cursors
+	static const unsigned long int *AOE_LNK_TIMEGETTIME = 0;
 #endif
 #ifdef GAMEVERSION_ROR10b
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
@@ -122,6 +124,7 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55B734;
 	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0; // TODO
 	static const unsigned long int AOE_VAR_CURSORS_INFO = 0; // Pointer to structure about cursors
+	static const unsigned long int *AOE_LNK_TIMEGETTIME = 0;
 #endif
 #ifdef GAMEVERSION_ROR10c
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x1000;
@@ -164,6 +167,7 @@ namespace AOE_OFFSETS
 	static const unsigned char *AOE_CURRENTLY_OPENED_FILE_BUFFER = (const unsigned char*)0x7BFAF0;
 	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0x55BDC8; // Array of 40 mask values for unit interactions (for each AI unit type - "class" in AGE3)
 	static const unsigned long int AOE_VAR_CURSORS_INFO = 0x582EDC; // Pointer to structure about cursors
+	static const unsigned long int *AOE_LNK_TIMEGETTIME = (unsigned long int *)0x5423BC;
 #endif
 	static const unsigned long int *UNKNOWN_ARRAY_6A18C0 = (unsigned long int *)0x6A18C0; // Size = 0x100 elements = 0x400 bytes
 	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = ADDR_VAR_UI_MAIN_INFO + 0x0C; // part of a bigger struct, +C

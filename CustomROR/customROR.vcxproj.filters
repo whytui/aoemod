@@ -80,9 +80,6 @@
     <ClInclude Include="include\crGameObjects.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\AOE_memory.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\autoAttackPolicy.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -207,6 +204,18 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\palette.h">
+      <Filter>Fichiers d%27en-tête\Technical</Filter>
+    </ClInclude>
+    <ClInclude Include="include\unitTargeting.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOEPrimitives_units.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_memory.h">
+      <Filter>Fichiers d%27en-tête\Technical</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_time.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
   </ItemGroup>
@@ -353,6 +362,12 @@
       <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
     <ClCompile Include="src\cityPlan.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\unitTargeting.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AOEPrimitives_units.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

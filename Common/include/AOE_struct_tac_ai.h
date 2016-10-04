@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <assert.h>
 #include <AOE_empires_dat.h>
 #include <AOE_const_internal.h>
 #include <AOE_struct_common_ai_object.h>
@@ -119,13 +120,44 @@ namespace AOE_STRUCTURES {
 		char unknown_2CA; // ?
 		char unknown_2CB; // ?
 		long int targetUnitIdArrayUsedElemCount; // +2CC. Index of first UNused element in targetUnitIdArray (=> values 0-14). See 0x4CEBB6
-		long int targetUnitIdArray[20]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4)
+		long int targetUnitIdArray[20]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4). Get=0x4CEB90
 		long int targetPlayerId; // +320. Related to targetUnitIdArray unit's playerId (last inserted? All the same player?)
-		long int unknown_324; // a dword, but containing a 1-byte value. Bool, maybe.
+		long int terrainZoneId; // +324. TerrainZoneId (to identify the island/lake/sea the group is in)
 		long int unknown_328_gameTime; // Last tasking time, consistent with global+4.
 		unsigned long int unknown_gameTime_ms; // +0x32C. To confirm
 		// End (0x330)
-		bool IsCheckSumValid() { return this->checksum == 0x00548CE0; }
+		bool IsCheckSumValid() const { return this->checksum == 0x00548CE0; }
+		// Safely get a unit id from targets array. Limited to 20 values !
+		long int GetTargetUnitIdFromArray(long int index) const {
+			assert(index < 20); // Overflow !
+			assert(this->targetUnitIdArrayUsedElemCount <= 20);
+			if ((index < 0) || (index >= this->targetUnitIdArrayUsedElemCount) || (index >= 20)) {
+				return -1;
+			}
+			return this->targetUnitIdArray[index];
+		}
+		// Safely adds a unit id to targets array. Limited to 20 values !
+		bool AddTargetUnitIdToArray(long int unitId) {
+			assert(this->targetUnitIdArrayUsedElemCount < 20);
+			if (this->targetUnitIdArrayUsedElemCount >= 20) {
+				return false; // overflow: can't add
+			}
+			this->targetUnitIdArray[this->targetUnitIdArrayUsedElemCount] = unitId;
+			this->targetUnitIdArrayUsedElemCount++;
+			return true;
+		}
+		// Safely gets a unit ID from myUnitsIdArray
+		long int GetMyUnitId(long int index) const {
+			assert(index < 40); // Overflow !
+			if ((index < 0) || (index >= 40)) { return -1; }
+			return this->myUnitsIdArray[index];
+		}
+		// Safely gets a unit HP from myUnitsHPArray
+		long int GetMyUnitHP(long int index) const {
+			assert(index < 40); // Overflow !
+			if ((index < 0) || (index >= 40)) { return 0; }
+			return this->myUnitsHPArray[index];
+		}
 	};
 
 
@@ -156,18 +188,18 @@ namespace AOE_STRUCTURES {
 	public:
 		long int targetUnitId;
 		float targetEvaluation; // +04. According to SNTargetEvaluationxxx numbers
-		long int unknown_08;
-		long int infAIUnitElemListIndex; // +C. Index of matching element in infAI.unitListElem. "Previous" elements in infAI.unitListElem are ignored ?
+		long int targetInfAIUnitElemListIndex; // +08. infAIUnitElemListIndex corresponding to (main) target ?
+		long int currentSearchInfAIUnitElemListIndex; // +0C. Index of current search element in infAI.unitListElem ? "Previous" elements in infAI.unitListElem are ignored ?
 		// 0x10
-		long int unknown_10;
-		long int unknown_14;
-		char unknown_18; // default 0. is building ? ignore speed? ? Really unsure. See 4C0ABC
+		long int unknown_10; // default -1
+		long int unknown_14; // default -1
+		char currentSearchIsBuildings; // +18. default 0. Search building targets ? See 4C0ABC, 4C0E1A (search buildings if no living found?)
 		char unused_19[3];
-		long int unknown_1C; // some (target) unit id ?
+		long int buildingTargetUnitId; // +1C. Target buiding id (secondary target ?)
 		// 0x20
-		float unknown_20;
-		long int unknown_24;
-		long int unknown_28; // A flag, default 1 ? Set to 0 in 45DF0
+		float buildingTargetEvaluation; // +20. Target evaluation for building target.
+		long int buildingTargetInfAIUnitElemListIndex; // +24. Target building infAI list index ?
+		long int targetSearchInProgress; // +28.
 	};
 	static_assert(sizeof(STRUCT_TAC_AI_TARGET_INFO) == 0x2C, "STRUCT_TAC_AI_TARGET_INFO size");
 
