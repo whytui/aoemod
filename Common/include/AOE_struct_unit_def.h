@@ -263,8 +263,8 @@ namespace AOE_STRUCTURES
 		float rotationSpeed; // +C4
 		char unknown_0C8;
 		char unknown_0C9;
-		short int trackingUnit; // +CA.
-		char trackingUnitUsed; // +CC.
+		short int trackingUnit; // +CA. Used to define the "smoke" unit to leave behind "me". Used for "flame bolts", etc.
+		char trackingUnitUsed; // +CC. 0=disable, 1=?, 2=?
 		char unknown_0CD;
 		char unknown_0CE;
 		char unknown_0CF;

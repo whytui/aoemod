@@ -122,7 +122,7 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_MEAT_STORAGE = 15, // TO CONFIRM. Remains 0 in game ?
 		CST_RES_ORDER_BERRY_STORAGE = 16, // TO CONFIRM
 		CST_RES_ORDER_FISH_STORAGE = 17, // TO CONFIRM
-		CST_RES_ORDER_TOTAL_UNITS_OWNED = 19,
+		CST_RES_ORDER_TOTAL_UNITS_OWNED = 19, // Total number of (*all*) units, not decreased when a unit is lost
 		CST_RES_ORDER_KILLS = 20,
 		CST_RES_ORDER_TECHNOLOGIES = 21, // Number of researched technologies (as in score)
 		CST_RES_ORDER_MAP_EXPLORATION = 22, // Percentage
@@ -158,7 +158,8 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_ALL_RUINS = 54,
 		CST_RES_ORDER_ALL_RELICS = 55,
 		CST_RES_ORDER_HEALING = 56, // Affect priests healing rate, see tech 211 (medecine)
-		CST_RES_ORDER_PRIEST_SACRIFICE = 57 // If 1, you can delete (sacrifice) priest while converting to make conversion successful. See tech 212.
+		CST_RES_ORDER_PRIEST_SACRIFICE = 57, // If 1, you can delete (sacrifice) priest while converting to make conversion successful. See tech 212.
+		CST_RES_COUNT = 58
 	};
 
 	// Gatherable resource types (different from standard resource types). Animal food is not in the list !

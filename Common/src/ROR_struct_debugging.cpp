@@ -404,6 +404,7 @@ namespace AOE_STRUCTURES {
 			for (int i = 0; i < 9; i++) {
 				ZeroMemory(&this->players[i], sizeof(this->players[i]));
 				ZeroMemory(&this->playersAI[i], sizeof(this->playersAI[i]));
+				ZeroMemory(&this->playerResources[i], sizeof(this->playerResources[i]));
 			}
 			return false;
 		}
@@ -417,6 +418,7 @@ namespace AOE_STRUCTURES {
 		}
 		for (int j = 0; j < 9; j++) {
 			ZeroMemory(&this->players[j], sizeof(this->players[j]));
+			ZeroMemory(&this->playerResources[j], sizeof(this->playerResources[j]));
 		}
 		for (int i = 1; i < this->gameGlobal.playerTotalCount; i++) {
 			// Non-gaia players have a smaller structure (0x84C instead of 0x85C)
@@ -425,6 +427,11 @@ namespace AOE_STRUCTURES {
 			}
 			if (this->players[i].ptrAIStruct != NULL) {
 				if (!GetObjectFromRORData(this->handleROR, this->players[i].ptrAIStruct, &this->playersAI[i])) {
+					return false;
+				}
+			}
+			if (this->players[i].ptrResourceValues != NULL) {
+				if (!GetObjectFromRORData(this->handleROR, this->players[i].ptrResourceValues, &this->playerResources[i], sizeof(float) * CST_RES_COUNT)) {
 					return false;
 				}
 			}

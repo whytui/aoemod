@@ -59,6 +59,7 @@ namespace AOE_STRUCTURES
 		// Copies of player structures
 		unsigned long int playerAddresses[9];
 		AOE_STRUCTURES::STRUCT_PLAYER players[9];
+		float playerResources[9][CST_RES_COUNT];
 		AOE_STRUCTURES::STRUCT_AI playersAI[9];
 		// Copy of scenario info structure
 		AOE_STRUCTURES::STRUCT_SCENARIO_INFO scenarioInfo;

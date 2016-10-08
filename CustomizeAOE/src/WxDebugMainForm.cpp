@@ -292,7 +292,7 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		}
 		s += "\nForestTiles = ";
 		s += std::to_string(ai->structInfAI.foundForestTiles);
-		s += "\nUnit Lists...\n+114: count = ";
+		s += "\nUnitElem Lists...\n+114: count = ";
 		s += std::to_string(ai->structInfAI.unitElemListSize); // unitElemListSize (array size)
 		s += "\nCreatableGatherable count = ";
 		s += std::to_string(ai->structInfAI.creatableAndGatherableUnits.usedElements);
@@ -450,6 +450,16 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		s += MilliSecondsToString(ai->structTacAI.lastPanicModeTime);
 		s += "\nlastAIUpdateTime=";
 		s += MilliSecondsToString(ai->structTacAI.lastAIUpdateTime_ms);
+
+		s += "\nIdle?MilitaryUnitsListCount=";
+		s += std::to_string(ai->structTacAI.militaryUnits.usedElements);
+		s += " - military=";
+		s += std::to_string(rd->playerResources[playerId][CST_RES_ORDER_MILITARY_POPULATION]);
+		s += " - totalUnitsOwned=";
+		s += std::to_string(rd->playerResources[playerId][CST_RES_ORDER_TOTAL_UNITS_OWNED]);
+
+
+
 		s += "\nUnit groups: count=";
 		s += MilliSecondsToString(ai->structTacAI.unitGroupsCount);
 		int ugCount = ai->structTacAI.unitGroupsCount;
