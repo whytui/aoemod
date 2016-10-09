@@ -38,6 +38,8 @@
 #include "crDebugOutputPrimitives.h"
 #include "StrategyUpdater.h"
 #include "cityPlan.h"
+#include "unitTargeting.h"
+#include "playerTargeting.h"
 
 #pragma once
 

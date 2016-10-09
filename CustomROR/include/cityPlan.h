@@ -7,6 +7,7 @@
 #include "CustomRORInfo.h"
 #include "crDebugOutputPrimitives.h"
 #include "BitmapExporter.h"
+#include "AOEPrimitives_units.h"
 
 namespace CITY_PLAN {
 

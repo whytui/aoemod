@@ -59,10 +59,6 @@ AOE_STRUCTURES::STRUCT_UNITDEF_BASE *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLA
 // Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
 const char *GetUnitName(short int unitDefId);
 
-// Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
-// Return NULL if one of the objects is NULL/missing
-AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
-
 // Return NULL if one of the objects is NULL/missing
 AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId);
 
@@ -98,22 +94,10 @@ bool PrepareUnitToAddIfPossible(AOE_STRUCTURES::STRUCT_PLAYER *player, short int
 // Return a list of all unitDefIds that are/can be enabled in player's tech tree.
 std::list<long int> GetActivableUnitDefIDs(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
-// Returns true if a unit is idle
-// TODO: check allowed types
-bool IsUnitIdle(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
 // Calls AOE's code mainAI.findUnit(DAT_Id)
 AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI *mainAI, long int DAT_ID);
 
-// GetDamage(unitDef attacker, unitDef defender) returns long int
-// Call 0043FF10
-
-// Return the total remaining food amount for a farm ("immediatly available" + "action-remaining").
-// Returns 0 in error cases (please check it is actually a farm !)
-float GetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit);
-
-// Modifies the total remaining food amount for a farm ("immediately available" + "action-remaining").
-bool SetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit, float newAmount);
 
 // Returns <> 0 if a unit is (currently) available for a given player. Returns the unit def pointer.
 // Does not consider potential researches that could enable the unit afterwards.

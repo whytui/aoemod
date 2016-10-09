@@ -71,7 +71,7 @@ namespace AOE_STRUCTURES {
 		bool IsPositionInBounds(long int x, long int y) const {
 			return (x >= 0) && (y >= 0) && (x < this->mapArraySizeX) && (y < this->mapArraySizeY);
 		}
-		STRUCT_GAME_MAP_TILE_INFO *GetTileInfo(short int x, short int y) const {
+		STRUCT_GAME_MAP_TILE_INFO *GetTileInfo(long int x, long int y) const {
 			if ((x < 0) || (x >= this->mapArraySizeX) || (y < 0) || (y >= this->mapArraySizeY)) { return NULL; }
 			return &this->pTileInfoCols[x][y];
 		}

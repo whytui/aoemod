@@ -257,23 +257,6 @@ const char *GetUnitName(short int unitDefId) {
 }
 
 
-// Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
-// Return NULL if one of the objects is NULL/missing
-AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
-	if (!unit || !unit->DerivesFromCommandable()) { return NULL; }
-	AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitAsBird = (AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *)unit;
-	if ((unitAsBird->ptrActionInformation == NULL) || (unitAsBird->ptrActionInformation->ptrActionLink == NULL)) {
-		return NULL;
-	}
-	assert(unitAsBird->ptrActionInformation->IsCheckSumValid()); // This should never occur. Whereas having NULL pointers in action info/link structures is possible (and valid)
-	if (!unitAsBird->ptrActionInformation->IsCheckSumValid()) { return NULL; }
-	if (unitAsBird->ptrActionInformation->ptrActionLink == NULL) {
-		return NULL;
-	}
-	return unitAsBird->ptrActionInformation->ptrActionLink->actionStruct;
-}
-
-
 // Return NULL if one of the objects is NULL/missing
 AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId) {
 	if (!player || !player->IsCheckSumValid() || (researchId < 0)) {
@@ -343,20 +326,6 @@ AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYE
 	}
 	assert(security < 199); // to alert on infinite loops ! (debug)
 	return NULL;
-}
-
-
-// Returns true if a unit is idle
-// TODO: check allowed types
-bool IsUnitIdle(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
-	int result;
-	_asm {
-		MOV ECX, unit
-		MOV EAX, 0x00406610
-		CALL EAX
-		MOV result, EAX
-	}
-	return (result != 0);
 }
 
 
@@ -668,39 +637,6 @@ long int GetPlayerUnitCount(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT
 		index++;
 	}
 	return result;
-}
-
-
-// Return the total remaining food amount for a farm ("immediatly available" + "action-remaining").
-// Returns 0 in error cases (please check it is actually a farm !)
-float GetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit) {
-	if (!farmUnit || !farmUnit->IsCheckSumValid()) { return 0; } // test BUILDING checksum
-	if (farmUnit->resourceTypeId != RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE) { return 0; }
-	if (!farmUnit->unitDefinition || !farmUnit->unitDefinition) { return 0; }
-	if (farmUnit->unitDefinition->DAT_ID1 != CST_UNITID_FARM) { return 0; }
-	// Farms are quite special. Their "resource value" increases slowly, like docks' trade value.
-	// This system prevents from gathering faster when assigning >1 villager. (other limitation: each farmer also has a maximum work rate !)
-	// Action contains the remaining "locked" (not available yet) amount.
-	// Unit resource value contains available amount (immediatly gatherable amount).
-	AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(farmUnit);
-	if (!action) { return 0; }
-	return action->unsure_resourceValue + farmUnit->resourceValue;
-}
-
-// Modifies the total remaining food amount for a farm ("immediately available" + "action-remaining").
-bool SetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit, float newAmount) {
-	if (!farmUnit || !farmUnit->IsCheckSumValid()) { return false; } // test BUILDING checksum
-	if (farmUnit->resourceTypeId != RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE) { return false; }
-	if (!farmUnit->unitDefinition || !farmUnit->unitDefinition) { return false; }
-	if (farmUnit->unitDefinition->DAT_ID1 != CST_UNITID_FARM) { return false; }
-	AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(farmUnit);
-	if (!action) { return false; }
-	action->unsure_resourceValue = newAmount - farmUnit->resourceValue;
-	if (action->unsure_resourceValue < 0) {
-		action->unsure_resourceValue = 0;
-		farmUnit->resourceValue = newAmount;
-	}
-	return true;
 }
 
 

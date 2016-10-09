@@ -1299,6 +1299,7 @@ void CustomRORCommand::InitScenarioInfoTextData(AOE_STRUCTURES::STRUCT_SCENARIO_
 void CustomRORCommand::InitMyGameInfo() {
 	CUSTOMROR::crInfo.ResetVariables();
 	CUSTOMROR::playerTargetingHandler.ResetAllInfo();
+	CUSTOMROR::unitTargetingHandler.ResetAllInfo();
 	// Prevent 0% speed at game startup (occurs because of rounding in registry saved value)
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid() && (global->gameSpeed == 0)) {
@@ -1728,7 +1729,7 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUC
 				(unitDef->unitAIType != TribeAIGroupWarBoat) &&
 				(unitDef->unitAIType != TribeAIGroupArtefact)
 				) {
-				if (IsUnitIdle(unit)) {
+				if (AOE_METHODS::IsUnitIdle(unit)) {
 					// maxDistance <= 0 : argument is ignored (=> always true). Otherwise: check distance condition
 					if ((maxDistance <= 0) || (GetDistance(posX, posY, unit->positionX, unit->positionY) <= maxDistance)) {
 						CreateCmd_RightClick(unit->unitInstanceId, -1, posX, posY);
@@ -2271,7 +2272,7 @@ bool CustomRORCommand::ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	if (!actorUnit || !newTargetUnit /*|| !oldTargetUnit*/) { return true; }
 	if (!oldTargetUnit) {
 		// activity target unit can be reset by pending treatments. Find if action HAS a valid target. We may want to keep this target.
-		AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(actorUnit); // May return NULL
+		AOE_STRUCTURES::STRUCT_ACTION_BASE *action = AOE_METHODS::GetUnitAction(actorUnit); // May return NULL
 		if (!action || (action->targetUnitId < 0)) {
 			return true;
 		}
@@ -3721,7 +3722,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	while ((curElem != NULL) && (farmerUnit == NULL)) {
 		if (curElem->unit && curElem->unit->IsCheckSumValidForAUnitClass() && curElem->unit->unitDefinition &&
 			curElem->unit->unitDefinition->IsCheckSumValidForAUnitClass() && (curElem->unit->unitDefinition->DAT_ID1 == CST_UNITID_FARMER)) {
-			AOE_STRUCTURES::STRUCT_ACTION_BASE *curUnitAction = GetUnitAction(curElem->unit);
+			AOE_STRUCTURES::STRUCT_ACTION_BASE *curUnitAction = AOE_METHODS::GetUnitAction(curElem->unit);
 			// There is 1 special case when farmer's resourceType is NOT berryBush: when AI player repairs a farm (bug: villager type is farmer instead of repairman)
 			// Also, if more than 1 villager is gathering the same farm, it is possible than some of them have a resourceId = -1.
 			if (curUnitAction && (curUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
@@ -3912,7 +3913,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 			STRATEGY::ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
 		}
 		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE) {
-			if (IsUnitIdle(unitBase)) {
+			if (AOE_METHODS::IsUnitIdle(unitBase)) {
 				UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
 				if (unitInfo) {
 					unitInfo->ResetProtectInfo();
@@ -4433,7 +4434,7 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 		}
 		if ((refX >= 0) || (refY >= 0)) {
 			if ((abs(unit->positionX - refX) > distance) || (abs(unit->positionY - refY) > distance)) {
-				if (IsUnitIdle(unit) && unit->ptrActionInformation) {
+				if (AOE_METHODS::IsUnitIdle(unit) && unit->ptrActionInformation) {
 					if (!unit->ptrActionInformation->ptrActionLink || !unit->ptrActionInformation->ptrActionLink->actionStruct) {
 						// For MP compabitiliy; use a command
 						if (!CUSTOMROR::crInfo.configInfo.forceMPCompatibility) {

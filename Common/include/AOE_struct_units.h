@@ -46,7 +46,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_PER_TYPE_UNIT_LIST_LINK {
 	public:
 		unsigned long int checksum; // 70 9B 54 00 or D4 4A 54 00
-		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *lastListElement;
+		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *lastListElement; // NULL if empty. To loop, use "previous" pointer at each iteration and stop when NULL is found.
 		short int listElemCount; // +08
 		short int unused_0A;
 
@@ -93,7 +93,8 @@ namespace AOE_STRUCTURES {
 	// +0x10C = unit.FLD_maxRange(). Loads 0 for units that do not derive from type50 (attackable)
 	// +0x198 = MoveTo(posY,posX,posZ,fMaxRange,targetUnitId,arg6,arg7,arg8,arg9) ?
 	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
-	// +0x309 = unit.assignAction(action). ex: 0x406490.
+	// +0x208 = unit.assignAction(action). ex: 0x406490.
+	// +0x210 = unit.idIdle() to confirm. ex: 0x406610.
 	class STRUCT_UNIT_BASE {
 	public:
 		unsigned long int checksum;

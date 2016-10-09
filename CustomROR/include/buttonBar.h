@@ -8,6 +8,7 @@
 #include <UI\AOE_struct_ui_in_game_main.h>
 #include "crCommon.h"
 #include "CustomRORInfo.h"
+#include "AOEPrimitives_units.h"
 
 namespace BUTTONBAR {
 
