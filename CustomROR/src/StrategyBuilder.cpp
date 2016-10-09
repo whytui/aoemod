@@ -286,6 +286,10 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNIT
 
 // Returns true if a research is available in tech tree
 bool StrategyBuilder::IsResearchInTechTree(short int researchId) {
+	if ((this->player->techTreeId < 0) || (this->global->scenarioInformation && this->global->scenarioInformation->fullTechTree)
+		|| (this->settings->allTechs)) {
+		return (researchId >= 0);
+	}
 	AOE_STRUCTURES::STRUCT_TECH_DEF *techTreeDef = this->global->GetTechDef(this->player->techTreeId);
 	if (techTreeDef) {
 		if (DoesTechDisableResearch(techTreeDef, researchId)) {
@@ -3616,7 +3620,11 @@ std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitD
 				}
 				resInfo->impactedUnitDefIds.insert(idToAdd);
 			} else {
-				assert(false && "ERROR: research info was not added for resId=");
+				static bool assertMessageDisplayed = false;
+				if (!assertMessageDisplayed) {
+					assert(false && "ERROR: research info was not added");
+				}
+				assertMessageDisplayed = true;
 				this->log += "ERROR: research info was not added for resId=";
 				this->log += std::to_string(resDefId);
 				this->log += newline;

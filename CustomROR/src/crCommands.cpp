@@ -993,6 +993,46 @@ void CustomRORCommand::OnGameStart() {
 				settings->isDeathMatch = 1;
 			}
 		}
+		if (global) {
+			for (int i = 0; i < global->playerTotalCount; i++) {
+				AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(i);
+				if (player && player->IsCheckSumValid()) {
+					if (scInfo && scInfo->fullTechTree) {
+						player->techTreeId = -1;
+					} else {
+						player->techTreeId = -2; // NOT set when loading a game (not serialized in savegame format) ! Do not use -1 (generally means all tech)
+						// Try to get the correct tech tree id from civ definition. Risky when playing saved games from a different DAT version.
+						if ((player->civilizationId >= 0) && (player->civilizationId < global->civCount)) {
+							player->techTreeId = global->civilizationDefinitions[player->civilizationId]->techTreeId;
+						}
+					}
+				}
+			}
+		}
+	} else {
+		if (scInfo && settings->allTechs) {
+			scInfo->fullTechTree = 1;
+			for (int i = 0; i < _countof(scInfo->playersStartingAge); i++) {
+				switch (settings->initialAgeChoice) {
+					// Warning: scInfo->playersStartingAge values are a different enum (0-4)
+				case GAME_INITIAL_AGES::GIA_TOOL:
+					scInfo->playersStartingAge[i] = 1;
+					break;
+				case GAME_INITIAL_AGES::GIA_BRONZE:
+					scInfo->playersStartingAge[i] = 2;
+					break;
+				case GAME_INITIAL_AGES::GIA_IRON:
+					scInfo->playersStartingAge[i] = 3;
+					break;
+				case GAME_INITIAL_AGES::GIA_POST_IRON:
+					scInfo->playersStartingAge[i] = 4;
+					break;
+				default:
+					// Others: nomad/stone/default
+					scInfo->playersStartingAge[i] = 0;
+				}
+			}
+		}
 	}
 
 	// Check AI initialization for loaded games (fix a saved game bug)
