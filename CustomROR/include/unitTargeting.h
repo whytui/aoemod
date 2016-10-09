@@ -24,6 +24,20 @@ namespace CUSTOMROR {
 
 	}
 
+
+	STRUCT_INF_AI_UNIT_LIST_ELEM *TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
+		STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
+
+
+	STRUCT_INF_AI_UNIT_LIST_ELEM *ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
+		STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
+
+	// If current target is still a valid target, return its pointer in InfAI elem list.
+	// Returns NULL otherwise
+	STRUCT_INF_AI_UNIT_LIST_ELEM *GetInfAIElemForCurrentTargetIfStillEligible(STRUCT_INF_AI *infAI, long int targetPlayerId,
+		STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
+
+
 	// baseTimeGetTimeValue = TimeGetTime() value (ms) for total AI treatment process time calculation. We must not go over global->tmp_allowedTimeForAITreatment
 	// If successful, returns a pointer to the selected STRUCT_INF_AI_UNIT_LIST_ELEM element.
 	// If successful, unitGroup targets array contains only 1 target (in most cases... to check in case when units block the way to main target)
@@ -43,5 +57,15 @@ namespace CUSTOMROR {
 	// Estimates the total time to kill a group's units at target position, considering enemy units known from infAI elem list
 	float GetTimeToKillGroupUnitsAtTargetPosition(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_UNIT_BASE *targetUnit);
 
+
+	// NOTE: this corresponds to original AOE method, kept for backup/information/debugging. Do not use this method
+	// baseTimeGetTimeValue = TimeGetTime() value (ms) for total AI treatment process time calculation. We must not go over global->tmp_allowedTimeForAITreatment
+	// If successful, returns a pointer to the selected STRUCT_INF_AI_UNIT_LIST_ELEM element.
+	// If successful, unitGroup targets array contains only 1 target (in most cases... to check in case when units block the way to main target)
+	// Returns false if found nothing OR if search could not be completed in time.
+#ifdef _DEBUG
+	STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
+		STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
+#endif
 
 }

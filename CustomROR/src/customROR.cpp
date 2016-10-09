@@ -3538,7 +3538,8 @@ void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_value
 	ChangeReturnAddress(REG_values, 0x4C0E3C);
 	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *resultInfAIUnitElem = NULL;
 
-	resultInfAIUnitElem = CUSTOMROR::FindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
+	resultInfAIUnitElem = CUSTOMROR::TestFindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
+	//resultInfAIUnitElem = CUSTOMROR::FindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
 
 	REG_values->EAX_val = (unsigned long int)resultInfAIUnitElem;
 }
