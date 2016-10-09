@@ -93,9 +93,9 @@ namespace AOE_STRUCTURES {
 		long int disableTechnologyFlags[0x10][AOE_CONST_INTERNAL::SC_ED_DISABLE_TECHNOLOGY_INDICES::CST_DTI_COUNT]; // +4BF4. Total Size =0x500 bytes. Used in 0x507E50=scenarioInfo.applyDisabledResearches(player)
 		long int enableLengthenCombatMode; // +50F4. A flag 0/1. If 1, lengthen combat mode is ON (most units get *3 HP, it is technology 0x64)
 		long int unknown_50F8; // +50F8 ? Unused ?
-		long int fullTechTree; // +50FC
+		long int fullTechTree; // +50FC. Stored in savegame files, but not initialized in RM/DM games ! (fixed by customROR)
 		// 0x5100
-		long int playersStartingAge[0x10]; // 1=Tool, 4=post iron. Warning, this does not correspond to CST_AGE_TOOL, etc. Index is playerId-1.
+		long int playersStartingAge[0x10]; // 1=Tool, 4=post iron. Warning, this does not correspond to CST_AGE_TOOL, etc. Index is playerId-1. Not initialized in RM/DM games ! (fixed by customROR)
 		// 0x5140
 		AOE_CONST_INTERNAL::GENERAL_VICTORY_CONDITION generalVictory_mainCondition; // 0=Standard, 1=Conquest, 2=Score, 3=Time Limit, 4=Custom
 		long int generalVictory_scoreAmount; // Default 900
