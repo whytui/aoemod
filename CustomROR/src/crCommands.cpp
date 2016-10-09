@@ -962,16 +962,35 @@ void CustomRORCommand::OnGameStart() {
 	if (IsMultiplayer()) { return; }
 
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (global && !global->IsCheckSumValid()) {
+		global = NULL;
+		assert(false && "Bad global checksum");
+	}
+	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = NULL;
+	if (global) {
+		scInfo = global->scenarioInformation;
+		if (scInfo && !scInfo->IsCheckSumValid()) {
+			assert(false && "Bad checksum for scenario information");
+			scInfo = NULL;
+		}
+	}
 
 	// Fix IsScenario flag to correct value (not set when a game is loaded)
 	if (settings->isSavedGame) {
 		settings->isScenario = 0; // Default: consider it is not a scenario
 		// Guess if it is a scenario from scenario information
-		if (settings->ptrGlobalStruct && settings->ptrGlobalStruct->IsCheckSumValid()) {
-			AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = settings->ptrGlobalStruct->scenarioInformation;
-			if (scInfo && scInfo->IsCheckSumValid() && (scInfo->scenarioFileName[0] != 0)) {
+		if (scInfo && scInfo->IsCheckSumValid()) {
+			if (scInfo->scenarioFileName[0] != 0) {
 				// scenarioFileName is reliable: it is always correctly set: when starting a new RM/DM/scenario, loading a saved game, etc
 				settings->isScenario = 1;
+			}
+
+			// Fix isDeathMatch flag in saved games
+			int initialFood = scInfo->startingResources[1][CST_RES_ORDER_FOOD]; // Warning: by default, this is wrong (too) in DM games !!! Requires customROR's fix
+			if (initialFood > 2000) {
+				settings->isDeathMatch = 1;
 			}
 		}
 	}
@@ -992,6 +1011,23 @@ void CustomRORCommand::OnGameStart() {
 
 	// Manage game settings customization for new random games
 	this->ApplyCustomizationOnRandomGameStart();
+
+	// Fix Initial resources in Scenario information (after applying customization, because it includes setting initial resource values.
+	if (!settings->isSavedGame && global) {
+		if (scInfo && scInfo->IsCheckSumValid()) {
+			AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(1);
+			if (!player) {
+				player = global->GetPlayerStruct(0);
+				assert(false && "Could not find player 1");
+			}
+			for (int i = 0; i < _countof(scInfo->startingResources); i++) {
+				scInfo->startingResources[i][CST_RES_ORDER_FOOD] = (long int)player->GetResourceValue(CST_RES_ORDER_FOOD);
+				scInfo->startingResources[i][CST_RES_ORDER_WOOD] = (long int)player->GetResourceValue(CST_RES_ORDER_WOOD);
+				scInfo->startingResources[i][CST_RES_ORDER_STONE] = (long int)player->GetResourceValue(CST_RES_ORDER_STONE);
+				scInfo->startingResources[i][CST_RES_ORDER_GOLD] = (long int)player->GetResourceValue(CST_RES_ORDER_GOLD);
+			}
+		}
+	}
 
 	// Triggers
 	this->ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_GAME_START);

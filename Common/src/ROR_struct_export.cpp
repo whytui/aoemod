@@ -9,7 +9,13 @@ namespace AOE_STRUCTURES {
 	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_GAME_SETTINGS *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "";
-		res += "COMM: ";
+		res += "DM=";
+		res += std::to_string(obj->isDeathMatch);
+		res += " isScn=";
+		res += std::to_string(obj->isScenario);
+		res += " savedGame=";
+		res += std::to_string(obj->isSavedGame);
+		res += "\nCOMM: ";
 		res += this->ExportStruct(obj->MPCommunicationStruct, sizeof(AOE_STRUCTURES::STRUCT_MP_COMMUNICATION));
 		return res;
 	}
