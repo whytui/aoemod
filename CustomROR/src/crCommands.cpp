@@ -1621,7 +1621,7 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUC
 	if (!player) { return -1; }
 	AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
 	if (!ai || !ai->allMyUnits.unitIdArray) { return -1; }
-	if (ai->structTacAI.militaryUnits.usedElements == 0) { return 0; }
+	if (ai->structTacAI.landMilitaryUnits.usedElements == 0) { return 0; }
 
 	float posY;
 	float posX;

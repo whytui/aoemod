@@ -43,8 +43,8 @@ namespace AOE_STRUCTURES {
 		// 0x10
 		char *unknown_10; // Array size = 0x800 bytes.
 		char *unknown_14; // Array size = 0x800 bytes.
-		long int totalPlayerCount; // Including gaia. It is also the size (number of dwords) of unknown_00 array.
-		long int unknown_1C_size; // unknown_1C_size * 8 = sizeof(unknown_00[x] array)
+		long int totalPlayerCount; // +18. Including gaia. It is also the size (number of dwords) of unknown_00 array.
+		long int unknown_00_elemCount; // +1C. Number of elements in unknown_00[x]
 		// 0x20
 		char *sqrtTable_distanceFromDiffXY; // ptr to array of 0x10*0x10 bytes. to get a distance for diffX/Y: array[diffX*0x10 + diffY]. X,Y < 0x10.
 		// Returns distance(int, int) as an integer result. Returns -1 if failed or result>0x10. Works only for x,y <= 15 (0x0F)

@@ -378,6 +378,8 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 	this->Update();
 	RORConnector rConnector = RORConnector();
 	if (!rConnector.ConnectToROR()) {
+		this->edtOutputInfo->Clear();
+		this->edtOutputInfo->WriteText("Failed ConnectToROR\n");
 		return;
 	}
 	long int objId = -1;
@@ -396,6 +398,8 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		int playerId = this->edtPlayerId->GetSelection();
 		if ((playerId < 1) || (playerId >= rd->gameGlobal.playerTotalCount)) {
 			delete rd;
+			this->edtOutputInfo->Clear();
+			this->edtOutputInfo->WriteText("Invalid player id\n");
 			return;
 		}
 		AOE_STRUCTURES::STRUCT_PLAYER *player = &rd->players[playerId];
@@ -451,11 +455,12 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		s += "\nlastAIUpdateTime=";
 		s += MilliSecondsToString(ai->structTacAI.lastAIUpdateTime_ms);
 
-		s += "\nIdle?MilitaryUnitsListCount=";
-		s += std::to_string(ai->structTacAI.militaryUnits.usedElements);
-		s += " - military=";
-		s += std::to_string(rd->playerResources[playerId][CST_RES_ORDER_MILITARY_POPULATION]);
-		s += " - totalUnitsOwned=";
+		s += "\nLandMilitary=";
+		s += std::to_string(ai->structTacAI.landMilitaryUnits.usedElements);
+		s += " => ";
+		s += rd->GetUnitNamesFromArrayOfID((long)ai->structTacAI.landMilitaryUnits.unitIdArray, ai->structTacAI.landMilitaryUnits.usedElements);
+
+		s += "\ntotalUnitsOwned=";
 		s += std::to_string(rd->playerResources[playerId][CST_RES_ORDER_TOTAL_UNITS_OWNED]);
 
 
@@ -482,6 +487,9 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 
 		this->edtOutputInfo->Clear();
 		this->edtOutputInfo->WriteText(s);
+	} else {
+		this->edtOutputInfo->Clear();
+		this->edtOutputInfo->WriteText("Failed to get hROR\n");
 	}
 	delete rd;
 	rConnector.DisconnectFromROR();

@@ -119,7 +119,7 @@ namespace AOE_STRUCTURES {
 		char unknown_2C9;
 		char unknown_2CA; // ?
 		char unknown_2CB; // ?
-		long int targetUnitIdArrayUsedElemCount; // +2CC. Index of first UNused element in targetUnitIdArray (=> values 0-14). See 0x4CEBB6
+		long int targetUnitIdArrayUsedElemCount; // +2CC. Index of first UNused element in targetUnitIdArray (=> values 0-19). See 0x4CEBB6
 		long int targetUnitIdArray[20]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4). Get=0x4CEB90
 		long int targetPlayerId; // +320. Related to targetUnitIdArray unit's playerId (last inserted? All the same player?)
 		long int terrainZoneId; // +324. TerrainZoneId (to identify the island/lake/sea the group is in)
@@ -146,13 +146,13 @@ namespace AOE_STRUCTURES {
 			this->targetUnitIdArrayUsedElemCount++;
 			return true;
 		}
-		// Safely gets a unit ID from myUnitsIdArray
+		// Safely gets a unit ID from myUnitsIdArray. Limited to 40 values.
 		long int GetMyUnitId(long int index) const {
 			assert(index < 40); // Overflow !
 			if ((index < 0) || (index >= 40)) { return -1; }
 			return this->myUnitsIdArray[index];
 		}
-		// Safely gets a unit HP from myUnitsHPArray
+		// Safely gets a unit HP from myUnitsHPArray. Limited to 40 values.
 		long int GetMyUnitHP(long int index) const {
 			assert(index < 40); // Overflow !
 			if ((index < 0) || (index >= 40)) { return 0; }
@@ -219,9 +219,9 @@ namespace AOE_STRUCTURES {
 		// 0x100
 		//long int allVillagersArraySize; // Size for ptrAllVillagersArray. Can be higher than exact count (if empty spaces).
 		STRUCT_AI_UNIT_LIST_INFO villagerExplorers; // +104.
-		STRUCT_AI_UNIT_LIST_INFO militaryUnits; // +114. military unitIds that do NOT belong to a unitGroup. Does NOT contain boats, nor towers. Includes priests.
+		STRUCT_AI_UNIT_LIST_INFO landMilitaryUnits; // +114. military unitIds that do NOT belong to a unitGroup. Contains military unit (cf AI type - 0x4D277A), EXCLUDING towers, boats
 		STRUCT_AI_UNIT_LIST_INFO unknown_124; // NOT SURE it is a STRUCT_AI_UNIT_LIST_INFO
-		STRUCT_AI_UNIT_LIST_INFO allBoats; // +134. Includes both fishing + military boats
+		STRUCT_AI_UNIT_LIST_INFO allBoats; // +134. Includes trade/fishing/transport/war boat AI type units.
 		STRUCT_AI_UNIT_LIST_INFO warShips; // +144
 		STRUCT_AI_UNIT_LIST_INFO fishingShips; // +154
 		STRUCT_AI_UNIT_LIST_INFO tradeShips; // +164

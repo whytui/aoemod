@@ -93,6 +93,7 @@ namespace AOE_STRUCTURES {
 	// +0x10C = unit.FLD_maxRange(). Loads 0 for units that do not derive from type50 (attackable)
 	// +0x198 = MoveTo(posY,posX,posZ,fMaxRange,targetUnitId,arg6,arg7,arg8,arg9) ?
 	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
+	// +0x309 = unit.assignAction(action). ex: 0x406490.
 	class STRUCT_UNIT_BASE {
 	public:
 		unsigned long int checksum;
@@ -365,7 +366,7 @@ namespace AOE_STRUCTURES {
 		// 0x180
 		unsigned long int unknown_180;
 		STRUCT_UNIT_ACTION_INFO *ptrActionInformation; // +184. Useful to retrieve unit's action.
-		unsigned long int unknown_188;
+		long int rightClickActionCounter_unsure; // +188. Incremented eac time a right-click action is done by player ?
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00542748); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_COMMANDABLE); }
@@ -376,16 +377,7 @@ namespace AOE_STRUCTURES {
 	// 4C 32 54 00 = attackable (type50). Size=0x1BC? (constructor=00425F30) - Derives from type40
 	class STRUCT_UNIT_ATTACKABLE : public STRUCT_UNIT_COMMANDABLE {
 	public:
-		STRUCT_NEARBY_UNIT_INFO *unknown_18C_table; // table of 8 (ptr) elements "Y". Y+0=unitID,Y+5=numPlayerOwner,Y+6=byte(pos?),Y+7=byte(pos?)???
-		// 0x190
-		unsigned long int unknown_190;
-		unsigned long int *unknown_194; // pointer to unit ID (myself ?)
-		unsigned long int unknown_198;
-		unsigned long int unknown_19C;
-		unsigned long int unknown_1A0;
-		unsigned long int unknown_1A4;
-		unsigned long int unknown_1A8;
-		unsigned long int unknown_1AC;
+		STRUCT_NEARBY_UNIT_INFO *myVisibilityToOtherPlayers_unsure[9]; // +18C. Provides visibility info from other player's point of view ?
 		// 0x1B0
 		STRUCT_MAP_VISIBILITY_INFO unknownVisibility_1B0; // Same "nature" object as +0x1E4. A mask for map visibility (visible for ...)?
 		float unknown_1B4; // Time to next xxx?

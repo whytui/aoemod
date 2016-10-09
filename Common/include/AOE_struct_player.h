@@ -223,9 +223,9 @@ namespace AOE_STRUCTURES {
 		// 0x120
 		short int unknown_120_posY; // screen pos ?
 		short int unknown_122_posX; // screen pos ?
-		unsigned long int unknown_124;
-		unsigned long int unknown_128; // split ; +0x129=?
-		unsigned long int unknown_12C;
+		long int unknown_124;
+		long int unknown_128; // split ; +0x129=?
+		long int unknown_12C;
 		// 0x130
 		short int unknown_130;
 		short int unknown_132;

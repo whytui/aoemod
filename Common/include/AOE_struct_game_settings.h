@@ -106,7 +106,11 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_038;
 		unsigned long int unknown_03C;
 		// 0x40
-		char unknown_040[0x1C];
+		unsigned long int unknown_040;
+		unsigned long int unknown_044;
+		unsigned long int *unknown_048;
+		unsigned long int *unknown_04C; // +4C. basegame ?? Ptr to struct size>=478
+		char unknown_050[0xC];
 		STRUCT_SLP_INFO **ptrInfosSLP; // +5C. Pointer to array slpInfo, size=3 ? index 0=shortcut numbers
 		// 0x60
 		STRUCT_MAIN_SOUND *pSoundStruct; // Size 69C, see 41894B. Generally =NULL, only set while being used.
@@ -143,8 +147,8 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_1D8;
 		unsigned long int unknown_1DC;
 		// 0x1E0
-		long int unknown_1E0;
-		long int unknown_ptrFonts; // Ptr to array, elemSize=0x0C, elemIndex = fontId
+		long int fontsCount; // +1E0. 0x418E7B. Default=12.
+		long int unknown_ptrFonts; // +1E4. Ptr to array, elemSize=0x0C, elemIndex = fontId
 		char gameDirFullPath[0x105]; // To confirm
 		char languageDLLRelativePath[0x105]; // 2ED. "language.dll"
 		char unknown_3F2; // unused ?
@@ -257,7 +261,7 @@ namespace AOE_STRUCTURES {
 		// 0xAE0
 		AOE_CONST_INTERNAL::GAME_INITIAL_AGES initialAgeChoice; // 0=default, 1=nomad, 2=stone, 3=tool 4=bronze, 5=iron, 6=post-iron. Set in 505570
 		char unknown_AE4; // +AE4. Set in 505580
-		char isDeathMatch; // +AE5. Set in 505590
+		char isDeathMatch; // +AE5. Set in 505590. NOT correct when loading a saved game ?
 		char maxPopulation; // +AE6. For MP games. Set in 5055A0, Get in 5054F0. [+A9E in aoe10b]
 		char unknown_AE7[0x09];
 		// 0xAF0

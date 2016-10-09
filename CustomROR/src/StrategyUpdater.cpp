@@ -307,7 +307,7 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 	assert(player->IsCheckSumValid());
 	char myCivId = player->civilizationId;
 
-	long int myMilitaryUnitsCount = tacAI->militaryUnits.usedElements; // does not count villagers, nor towers
+	long int myMilitaryUnitsCount = tacAI->landMilitaryUnits.usedElements; // does not count villagers, nor towers - nor boats
 
 	CUSTOMROR::AIPlayerTargetingInfo *playerInfo = CUSTOMROR::playerTargetingHandler.GetPlayerInfo(player->playerId);
 	if (playerInfo != NULL) {
