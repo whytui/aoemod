@@ -66,6 +66,29 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(STRUCT_INF_AI_BUILDS_HISTORY) == 0x8, "STRUCT_INF_AI_BUILDS_HISTORY size");
 
+	// Represents information for 1 recorded attack event. This can be both me being attacked or me attacking an enemy
+	// So one of attacker and target playerId is "me", but both can be (always only one, of course).
+	// Element size = 0x18. see 4C3719,4C3FF2. 
+	// 0x4C3660 = add entry
+	class STRUCT_INF_AI_ATTACK_HISTORY {
+	public:
+		long int myIndex; // Index in InfaAI array ?
+		char unknown_04;
+		unsigned char minPosY; // +05
+		unsigned char minPosX; // +06
+		unsigned char maxPosY; // +07
+		unsigned char maxPosX; // +08
+		char attackerPlayerId; // +09. Records both my attacks and me being attacked.
+		char targetPlayerId; // +0A. Records both my attacks and me being attacked.
+		char unknown_0B;
+		short int unknown_0C;
+		char unknown_0E;
+		char unknown_0F;
+		long int attackGameTime;
+		long int unknown_14;
+	};
+	static_assert(sizeof(STRUCT_INF_AI_ATTACK_HISTORY) == 0x18, "STRUCT_INF_AI_ATTACK_HISTORY size");
+
 
 	// Size=0x14. Used in InfAI structure.
 	class STRUCT_SPOTTED_RESOURCE_INFO {
@@ -116,17 +139,14 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_1F0;
 		long int buildHistoryArraySize; // +1F4. Allocated element count of +1F8 list. (default=0xC8=200)
 		STRUCT_INF_AI_BUILDS_HISTORY *buildHistoryArray; // +1F8.
-		long int unknown_1FC; // Element count in unknown_200_ptrSomeArray array ? Init=25
+		long int attacksHistoryAllocatedSize; // +1FC. Element count in attacksHistory array. Init=25
 		// 0x200
-		// Element size = 0x18. see 4C3719,4C3FF2. +0=dword=index(-1=bad?), +4=? +(5,6)=byte(minposYX?),(7,8)=byte(maxposYX?)
-		// +9=playerIdAttacker(notme) +A=playerId_me? +C=word +E=byte +10=ptr? +14=dword,init=-1
-		// Related to being attacked ? add in 4C3660.
-		unsigned long int *unknown_200_ptrSomeArray;
+		STRUCT_INF_AI_ATTACK_HISTORY *attacksHistory; // +200. Element size = 0x18
 		long int unknown_204;
-		char unknown_208[0x308 - 0x208]; // +208. Unused, not even initialized ?
+		char unknown_208[0x100]; // +208. Unused, not even initialized ?
 		char terrainZoneFullyExplored[0xFF]; // +308. Index=terrainZoneId. Get=4BC690 Set=4BC6E0. Zone fully explored? Not sure this works well as terrainZone IDs depend on terrain restrictions ! (not the same for all units)
 		char unused_407; // +407.
-		// +408: included array of 4*4 elems size=0xC (3 dwords?). Total size in bytes=0xC0
+		// +408: included array of 4*4 elems size=0xC (3 dwords?). Total size in bytes=0xC0. Index corresponds to each quarter of the map ??
 		unsigned long int unknown_408[4 * 4 * 3];
 		unsigned long int *unknown_4C8; // +4C8. Pointer to struct size=0x10. Array of 4 dwords.
 		unsigned long int *unknown_4CC; // +4CC. Pointer to struct size=0x10. Array of 4 dwords.

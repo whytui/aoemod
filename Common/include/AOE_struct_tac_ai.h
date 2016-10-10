@@ -71,7 +71,7 @@ namespace AOE_STRUCTURES {
 		// 0x10
 		long int unknown_resetOrg; // +10. resetOrg ?
 		AOE_CONST_INTERNAL::UNIT_GROUP_TYPES unitGroupType; // +14. Set in 0x4CCC70.
-		long int taskSubTypeId; // +18. 0,4 = capture?
+		long int taskSubTypeId; // +18. -1=default. 0,4 = capture?
 		long int myUnitsIdArray[0x28]; // +1C. 40 elements, can be non-consecutive (ignore -1 values).
 		// 0xBC
 		long int myUnitsHPArray[0x28]; // +BC. 40 elements. Also used as myUnitsIdArray+0xA0.
@@ -118,7 +118,7 @@ namespace AOE_STRUCTURES {
 		short int unknown_1D6; // check type (2 bytes ?)
 		float *unknown_1D8; // +1D8. Array of struct size=0x10, +0/+4=float pos? INCLUDED array ? Related to attacking ? Intermediate movement steps to go to target ?
 		char unknown_1DC[0x2C8 - 0x1DC];
-		char unknown_2C8; // A counter ? 0x4CD42F, 0x4D37B4: if<=0xA(10) regroup?
+		char regroupAttempts; // +2C8. Unsure. When reaches 10, the group is considered regrouped ? 0x4CD42F, 0x4D37B4
 		char unknown_2C9;
 		char unknown_2CA; // ?
 		char unknown_2CB; // ?

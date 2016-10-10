@@ -485,13 +485,13 @@ namespace AOE_CONST_INTERNAL
 		CST_UGT_TRADE = 0x0B, // (11) 0x4CE651. targetUnitId is (always) other player's dock.
 		CST_UGT_TRANSPORT_UNITS = 0x0C, // (12) transport units, includes: go to rally point, wait/load, transport and unload phases. See 0x4D5130. Group has no target unit/player, but a target destination
 		CST_UGT_UNKNOWN_0D = 0x0D, // (13) See 4D4729,4D5F32. Waiting for a free transport ? really unsure
-		CST_UGT_UNKNOWN_0E = 0x0E, // (14) 0x4CD425, 0x4D3DAC,4D3F95,4D44E0. Regroup to transport meeting place ? Used to instruct artefacts to go to TC ? unsure. Always followed by 0xD ?
+		CST_UGT_UNKNOWN_0E = 0x0E, // (14) 0x4CD425, 0x4D3DAC,4D3F95,4D44E0. Similar to regroup, but does not use SNAttackGroupGatherSpacing. Always(?) followed by task 0xD?
 		CST_UGT_LOAD_INTO_TRANSPORT = 0x0F, // (15) Go to transport. When transport is full, remaining units are excluded from group (?). 0x4D484F,0x4D48EE.
 		CST_UGT_IN_TRANSPORT = 0x10, // (16) In a transport/waiting to be unloaded. See 0x4D4D03.
 		CST_UGT_UNKNOWN_11 = 0x11, //
 		CST_UGT_UNKNOWN_12 = 0x12, // 
 		CST_UGT_UNKNOWN_13 = 0x13, // (19) Send artefacts to TC ? See 0x4D5140,0x4D38F3.
-		CST_UGT_ATTACK_ROUNDUP_TARGET = 0x14, // For "play" attacking, requires a attackPlayId value
+		CST_UGT_ATTACK_ROUNDUP_TARGET = 0x14, // NOT For "play" attacking, incompatible with attackPlayId (must be -1). Is this the "attack blindly" phase ? Wait for 10s to retry?
 		CST_UGT_ATTACK_15 = 0x15, // (21) Attack, just orders a MoveTo without a specific target? . 0x4CE12F
 		CST_UGT_UNKNOWN_16 = 0x16 // Set in 0x4D4C5F
 	};

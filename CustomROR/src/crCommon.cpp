@@ -1042,7 +1042,7 @@ long int AOE_calcPathForMove(STRUCT_UNKNOWN_MAP_DATA_F04C *pathFindingStruct,
 	long int srcPosY, long int srcPosX, long int destPosY, long int destPosX,
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *ptrActorUnit, float maxRange, long int targetUnitId, long int updateUnitPathInfo,
 	long int arg9, long int arg10, long int arg11, long int arg12,
-	long int distance_unsure, AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *unitGroup_unsure, long int arg15) {
+	long int distance_unsure, long int targetPlayerId, long int unknown_unitClass) {
 	const unsigned long int callAddr = 0x458930;
 #ifdef _DEBUG
 	// DEBUG: run some data quality checks
@@ -1051,16 +1051,13 @@ long int AOE_calcPathForMove(STRUCT_UNKNOWN_MAP_DATA_F04C *pathFindingStruct,
 	if (ptrActorUnit) {
 		assert(ptrActorUnit->IsCheckSumValidForAUnitClass());
 	}
-	if (unitGroup_unsure) {
-		assert(unitGroup_unsure->IsCheckSumValid());
-	}
 	assert(targetUnitId >= -1);
 #endif
 	long int result = 0;
 	_asm {
 		MOV ECX, pathFindingStruct;
-		PUSH arg15;
-		PUSH unitGroup_unsure;
+		PUSH unknown_unitClass;
+		PUSH targetPlayerId;
 		PUSH distance_unsure;
 		PUSH arg12;
 		PUSH arg11;

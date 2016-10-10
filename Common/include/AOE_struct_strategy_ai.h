@@ -23,7 +23,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1008
 		// 0xF0
 		STRUCT_AI *ptrMainAI;
-		long int unknown_0F4; // +F4. Related to tasking idle soldiers ? 0x4D39A8. Some enum ? Same as group.subTaskId?
+		long int unknown_0F4; // +F4. Related to tasking idle soldiers ? 0x4D39A8. Some enum ? Same as group.subTaskId? =-1 until strategyAI init is done in 4CC0F0, then hardcoded=0xB.
 		char tempPerFile[0x100]; // +F8
 		char unknown_1F8[0x234 - 0x1F8];
 		long int unknown_targetUnitId; // +1FC. Related to unit groups? To confirm. Something to attack ? Protect?

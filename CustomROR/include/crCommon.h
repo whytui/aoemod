@@ -241,7 +241,7 @@ long int AOE_calcPathForMove(STRUCT_UNKNOWN_MAP_DATA_F04C *pathFindingStruct,
 	long int srcPosY, long int srcPosX, long int destPosY, long int destPosX, 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *ptrActorUnit, float maxRange, long int targetUnitId, long int updateUnitPathInfo,
 	long int arg9, long int arg10, long int arg11, long int arg12, 
-	long int distance_unsure, AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *unitGroup_unsure, long int arg15);
+	long int distance_unsure, long int targetPlayerId, long int unknown_unitClass);
 
 
 // Set "shared exploration" flag for a given player to true or false. Do not use this with MP game (not sure if it causes sync error)

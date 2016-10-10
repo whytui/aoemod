@@ -117,9 +117,9 @@ namespace AOE_STRUCTURES {
 		char unknown_11DCCC[0x11DCD8 - 0x11DCCC];
 		char unknown_11DCD8_resetCounter; // +11DCD8. A counter, +=8 at each pathFinding. When 0xF0 (30 iterations), reset and resets mapData. Value is similar to +C array
 		char unknown_11DCD9[3];
-		long int unknown_11DCDC; // arg15 of 00458930 call. Seen 0x1B
+		long int unknown_11DCDC_unitClass; // +11DCDC. arg15 of 00458930 call. Seen 0x1B (walls????). Used in 459AD4
 		// 0x11DCE0
-		long int unknown_11DCE0; // arg14 of 00458930 call
+		long int unknown_11DCE0; // arg14 of 00458930 call. A playerId ?
 		// unknown_11DCE4 is a STRUCT_AI_UNIT_LIST_INFO. To rename.
 		long int *unknown_11DCE4; // +11DCE4 = array of unit IDs
 		long int unknown_11DCE8; // +11DCE8 = used count in unknown_11DCE4

@@ -88,7 +88,7 @@ namespace AOE_STRUCTURES
 		char unknown_03; // unused?
 		long int actorUnitId; // +4.
 		short int activityId; // +8, a word. Cf ACTIVITY_TASK_IDS (but on 2 bytes;).
-		char unknown_0A; // +A. =arg13 in 42BCF0
+		char priority; // +A. =arg13 in 42BCF0, computed from ZeroPriorityDistance
 		char unknown_0B; // +B. Unused ?
 		long int targetUnitId; // DWORD.
 		// 0x10
