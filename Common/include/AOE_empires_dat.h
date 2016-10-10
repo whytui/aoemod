@@ -300,7 +300,7 @@ namespace AOE_CONST_FUNC {
 		CST_IAI_RESEARCH = 0x67, // =MakeTech
 		CST_IAI_CONVERT = 0x68,
 		CST_IAI_HEAL = 0x69,
-		CST_IAI_REPAIR = 0x6A,
+		CST_IAI_REPAIR = 0x6A, // 106
 		CST_IAI_ARTIFACT_CAPTURE = 0x6B, // Get auto-converted = "Be discovered". To confirm / get precisions
 		CST_IAI_DISCOVERY_CAPTURE = 0x6C, // Be discovered for discovery (NOT relics/ruins)
 		CST_IAI_RETREAT_TO_SHOOTING_RANGE = 0x6D,

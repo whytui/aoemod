@@ -37,8 +37,11 @@ namespace CUSTOMROR {
 		// Reset all underlying info (useful at game start, etc)
 		void ResetAllInfo();
 
+		// Initializes internal information for a new search for a given player
 		void InitNewSearch(long int playerId);
 
+		// Reset all values. InProgress is set to false (0)
+		void ResetTargetInfo(STRUCT_TAC_AI_TARGET_INFO *targetInfo);
 
 		// Computes the damage dealt by a group on a unit, cf 0x4C62F0.
 		float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_UNIT_BASE *targetUnit);
@@ -79,7 +82,7 @@ namespace CUSTOMROR {
 		bool SetPriorityTargetLocation(STRUCT_INF_AI *infAI, long int targetPlayerId,
 			STRUCT_UNIT_BASE *groupLeader, STRUCT_TAC_AI_TARGET_INFO *targetInfo);
 
-		STRUCT_INF_AI_UNIT_LIST_ELEM* FindTargetUnitNearLocation(STRUCT_INF_AI *infAI, long int targetPlayerId);
+		STRUCT_INF_AI_UNIT_LIST_ELEM* FindTargetUnitNearPriorityLocation(STRUCT_INF_AI *infAI, long int targetPlayerId);
 
 	};
 

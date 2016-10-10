@@ -305,6 +305,7 @@ namespace AOE_CONST_INTERNAL
 		CST_AS_UNKNOWN_04 = 4, // Moving to action location ?
 		CST_AS_UNKNOWN_06 = 6, // "start" in progress ? (analog to 3?). For gen. wonder victory, means timer has started?
 		CST_AS_UNKNOWN_07 = 7, // in progress ? (analog to 4?). For both attack, build, etc
+		CST_AS_UNKNOWN_0A = 0x0A, // Seen on stuck villager (repairman that could not get to target)
 		CST_AS_UNKNOWN_0B = 0x0B, // Seen when moving to bird location (after killing it)
 		CST_AS_UNKNOWN_0C = 0x0C, // waiting for requirement ? Really unsure
 		CST_AS_UNKNOWN_0D = 0x0D, // Set when unit can't move (speed==0) ?? 405472. This status is an Idle status.
@@ -415,7 +416,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_2BE = 0x2BE,
 		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ??
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
-		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF... Used to retreat to position 4DA160
+		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF... Used to retreat to position 4DA160. Used also in attacks grpType0x15? 4DA193
 		CST_ATI_GATHERER_REACTION_WHEN_ATTACKED = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
 		CST_ATI_HOLD_POSITION = 0x2D5, // Do not auto-attack. See 4E6740 for cats (don't search for target), 413F89 for other units (cancel attack if not at range?)
 		CST_ATI_UNKNOWN_2D9 = 0x2D9
@@ -470,28 +471,28 @@ namespace AOE_CONST_INTERNAL
 	};
 
 	enum UNIT_GROUP_TASK_IDS : long int {
-		CST_UGT_UNKNOWN_00 = 0, // stop ? 0x4CD349
-		CST_UGT_UNKNOWN_01 = 1, // Idle ? Set in 4CD110. Default=1 (0 in constructor, but 1 after init)
-		CST_UGT_UNKNOWN_02_ATTACK = 2, // Attack a specific target, but units will attack units at sight on their way, provide attack response even if *other* units are attacked... "prudent" attack ? 0x4D567D=taskActiveSoldiers
+		CST_UGT_NOT_SET = 0, // stop ? 0x4CD349
+		CST_UGT_IDLE = 1, // Idle ? Set in 4CD110. Default=1 (0 in constructor, but 1 after init)
+		CST_UGT_ATTACK_02 = 2, // Attack a specific target, but units will attack units at sight on their way, provide attack response even if *other* units are attacked... "prudent" attack ? 0x4D567D=taskActiveSoldiers. Includes response to attack
 		CST_UGT_RETREAT = 3, // 4CD640, 0x4D51DF
 		CST_UGT_DEFEND_UNIT = 4, // 4CE309, 0x4D5E6D
 		CST_UGT_UNKNOWN_05 = 5, // "add up HPs of my units" ?
 		CST_UGT_UNKNOWN_06 = 6, // "add up HPs of my units" ?
 		CST_UGT_EXTERMINATE = 7, // 0x4CD7A9. Set in 0x4D50AB, 0x4D5DD7 See 0x4D535D
 		CST_UGT_EXPLORE = 8, // 4CD977. For boats too. NOT for civilians/fishing ships.
-		CST_UGT_UNKNOWN_09 = 9, // 4CD425. Regroup ? Uses SNAttackGroupGatherSpacing
+		CST_UGT_REGROUP = 9, // 4CD425. Uses SNAttackGroupGatherSpacing or artefact return distance. Assigned to idle groups when some units are far from leader.
 		CST_UGT_GO_FISHING = 0x0A, // (10) Active fishing ships may also have an idle (1) group task ! See 0x4CE4AB
 		CST_UGT_TRADE = 0x0B, // (11) 0x4CE651. targetUnitId is (always) other player's dock.
 		CST_UGT_TRANSPORT_UNITS = 0x0C, // (12) transport units, includes: go to rally point, wait/load, transport and unload phases. See 0x4D5130. Group has no target unit/player, but a target destination
 		CST_UGT_UNKNOWN_0D = 0x0D, // (13) See 4D4729,4D5F32. Waiting for a free transport ? really unsure
-		CST_UGT_UNKNOWN_0E = 0x0E, // (14) 0x4CD425. Regroup ? Used to instruct artefacts to go to TC ? unsure
-		CST_UGT_LOAD_INTO_TRANSPORT = 0x0F, // (15) Go to transport. When transport is full, remaining units are excluded from group (?)
+		CST_UGT_UNKNOWN_0E = 0x0E, // (14) 0x4CD425, 0x4D3DAC,4D3F95,4D44E0. Regroup to transport meeting place ? Used to instruct artefacts to go to TC ? unsure. Always followed by 0xD ?
+		CST_UGT_LOAD_INTO_TRANSPORT = 0x0F, // (15) Go to transport. When transport is full, remaining units are excluded from group (?). 0x4D484F,0x4D48EE.
 		CST_UGT_IN_TRANSPORT = 0x10, // (16) In a transport/waiting to be unloaded. See 0x4D4D03.
 		CST_UGT_UNKNOWN_11 = 0x11, //
 		CST_UGT_UNKNOWN_12 = 0x12, // 
-		CST_UGT_UNKNOWN_13 = 0x13, // (19) Send artefacts to TC ? See 0x4D5140.
-		CST_UGT_ATTACK_ROUNDUP_TARGET = 0x14,
-		CST_UGT_UNKNOWN_15_ATTACK = 0x15, // (21) straight attack ? to check. 0x4CE114
+		CST_UGT_UNKNOWN_13 = 0x13, // (19) Send artefacts to TC ? See 0x4D5140,0x4D38F3.
+		CST_UGT_ATTACK_ROUNDUP_TARGET = 0x14, // For "play" attacking, requires a attackPlayId value
+		CST_UGT_ATTACK_15 = 0x15, // (21) Attack, just orders a MoveTo without a specific target? . 0x4CE12F
 		CST_UGT_UNKNOWN_16 = 0x16 // Set in 0x4D4C5F
 	};
 

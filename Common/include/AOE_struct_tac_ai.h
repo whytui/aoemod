@@ -59,15 +59,18 @@ namespace AOE_STRUCTURES {
 	// tacAI.createGroup(useSequence)=0x4E0400 ; tacAI.removeUnitGroup(unitGroupId)=0x4E04B0
 	// tacAI.RemoveAllGroups(unitGroupType)=0x4E0520, -1=joker
 	// Organized as a loop chained list. See TacAI (first elem is included in TacAI).
+	// 0x4DC670=tacAI.SetupUnitGroups()
+	// 0x4CE950=unitGroupElem.areUnitsWithinGrpRange(tacAI, mainAI). Returns true if all units are <groupSpacing or artefactreturndistance
+	// 0x4E07F0 = tacAI.searchNearestGroupFromPosition(groupType, distance, pPosYX)
 	class STRUCT_UNIT_GROUP_ELEM {
 	public:
 		unsigned long int checksum; // E0 8C 54 00
 		STRUCT_UNIT_GROUP_ELEM *next;
 		STRUCT_UNIT_GROUP_ELEM *previous;
-		long int unitGroupId; // A unique ID
+		long int unitGroupId; // A unique ID. Set in 0x4CCC50.
 		// 0x10
 		long int unknown_resetOrg; // +10. resetOrg ?
-		AOE_CONST_INTERNAL::UNIT_GROUP_TYPES unitGroupType; // +14. internal id: 64,65,66,67,6A,6B,6C,6D(=artefacts?)
+		AOE_CONST_INTERNAL::UNIT_GROUP_TYPES unitGroupType; // +14. Set in 0x4CCC70.
 		long int taskSubTypeId; // +18. 0,4 = capture?
 		long int myUnitsIdArray[0x28]; // +1C. 40 elements, can be non-consecutive (ignore -1 values).
 		// 0xBC
@@ -92,7 +95,7 @@ namespace AOE_STRUCTURES {
 		float targetPosX;
 		float unknown_194;
 		unsigned long int unknown_198; // seems int. DWORD?
-		float posY; // not sure what this is exactly, NOT group "supposed" position ?
+		float posY; // not sure what this is exactly, NOT group "supposed" position ? Leader pos ?
 		// 0x1A0
 		float posX;
 		float posZ;
@@ -105,7 +108,7 @@ namespace AOE_STRUCTURES {
 		float unknown_1BC; // type: unsure
 		// 0x1C0
 		long int unknown_1C0;
-		unsigned long int unknown_1C4;
+		long int unknown_1C4_unitGroupId; // +1C4. To confirm. Related to transport?
 		unsigned long int unknown_1C8;
 		long int unknown_1CC_lastGameTime; // +1CC. Last game time of "task active soldier" execution for the group ?
 		// 0x1D0
@@ -113,7 +116,7 @@ namespace AOE_STRUCTURES {
 		char unknown_1D4; // +1D4. Number of elements in +1D8 ?
 		char unknown_1D5;
 		short int unknown_1D6; // check type (2 bytes ?)
-		unsigned long int *unknown_1D8; // +1D8. Array of struct size=0x10, +0/+4=float pos?
+		float *unknown_1D8; // +1D8. Array of struct size=0x10, +0/+4=float pos? INCLUDED array ? Related to attacking ? Intermediate movement steps to go to target ?
 		char unknown_1DC[0x2C8 - 0x1DC];
 		char unknown_2C8; // A counter ? 0x4CD42F, 0x4D37B4: if<=0xA(10) regroup?
 		char unknown_2C9;
@@ -123,7 +126,7 @@ namespace AOE_STRUCTURES {
 		long int targetUnitIdArray[20]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4). Get=0x4CEB90
 		long int targetPlayerId; // +320. Related to targetUnitIdArray unit's playerId (last inserted? All the same player?)
 		long int terrainZoneId; // +324. TerrainZoneId (to identify the island/lake/sea the group is in)
-		long int unknown_328_gameTime; // Last tasking time, consistent with global+4.
+		long int unknown_328_gameTime; // Last tasking time (milliseconds). 10 seconds min between roundup attacks (0x4CDAFC)
 		unsigned long int unknown_gameTime_ms; // +0x32C. To confirm
 		// End (0x330)
 		bool IsCheckSumValid() const { return this->checksum == 0x00548CE0; }
@@ -244,8 +247,8 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_D18;
 		long int lastTacticalUpdateTime; // +D1C. Value in milliseconds. See customROR config (tacticalAI/updateDelay) or SNScalingFrequency in standard game.
 		// 0xD20
-		unsigned long int buildFrequencyCounter; // incremented until it reaches SNBuildFrequency
-		unsigned long int timeSinceLastAttackResponse_seconds; // To confirm. Compared to SNAttackResponseSeparationTime. See 4E0BC0.
+		long int buildFrequencyCounter; // incremented until it reaches SNBuildFrequency
+		long int currentAttackSeparationTime_seconds; // +D24. Compared to SNAttackResponseSeparationTime,SNAttackSeparationTimeRandomness. See 4E0BC0,4E0C03.
 		STRUCT_AI_UNIT_LIST_INFO targetPlayers; // +D28. Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK? Always only 1 element (sometimes hardcoded?4D622C)
 		STRUCT_AI_UNIT_LIST_INFO likedPlayers; // +D38. allied playerIds ? "myself" IS in list ! In practise, always 2 elements? (me + most liked player) ?
 		STRUCT_AI_UNIT_LIST_INFO IdleOrInRangeMilitaryUnits; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960
@@ -278,7 +281,7 @@ namespace AOE_STRUCTURES {
 		long int lastCoopSharAttackTime_ms; // Only used if SNCoopShareAttacking=1 (0x4E2CD7). In milliseconds. Updated when an group is tasked to attack some target?
 		unsigned long int unknown_FA4; // flag ? about exploration ? Used in gatherer affectation methods
 		unsigned long int unknown_FA8;
-		STRUCT_TAC_AI_TARGET_INFO targetInfo; // +FAC.
+		STRUCT_TAC_AI_TARGET_INFO targetInfo; // +FAC. This is only used in "group.FindAttackTarget". Values only make sense when inProgress=1 (unused otherwise).
 		long int attacksByPlayerCount[9]; // +FD8. number of times this player attacked me ?
 		long int lastUAms; // +FFC. "LastUAms" (UpdateAI). Time spent in last updateAI execution
 		long int averageUpdateAITime_ms; // +1000. Updated each time unknown_1004_time_counter reaches 20 and is reset. "Average UAms" ?

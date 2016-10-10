@@ -91,7 +91,7 @@ namespace AOE_STRUCTURES {
 	// +0x100 = unit.FLD_reloadTime1()
 	// +0x104 = unit.calcDamageFrom(unit)?. WARNING: Returns in ST (FLD xxx), not EAX. Ex 0x427AC0.
 	// +0x10C = unit.FLD_maxRange(). Loads 0 for units that do not derive from type50 (attackable)
-	// +0x198 = MoveTo(posY,posX,posZ,fMaxRange,targetUnitId,arg6,arg7,arg8,arg9) ?
+	// +0x198 = MoveTo(posY,posX,posZ,fMaxRange,targetUnitId,arg6,arg7,arg8,arg9) ? returns 1 if ok. Move&attack?
 	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
 	// +0x208 = unit.assignAction(action). ex: 0x406490.
 	// +0x210 = unit.idIdle() to confirm. ex: 0x406610.

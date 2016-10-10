@@ -22,10 +22,29 @@ void UnitTargeting::ResetAllInfo() {
 }
 
 
+// Initializes internal information for a new search for a given player
 void UnitTargeting::InitNewSearch(long int playerId) {
 	assert((playerId >= 0) && (playerId < _countof(this->lastChosenTargetUnitId)));
 	this->priorityLocation[playerId].posX = -1;
 	this->priorityLocation[playerId].posY = -1;
+}
+
+
+// Reset all values. InProgress is set to false (0)
+void UnitTargeting::ResetTargetInfo(STRUCT_TAC_AI_TARGET_INFO *targetInfo) {
+	assert(targetInfo != NULL);
+	if (!targetInfo) { return; }
+	targetInfo->targetUnitId = -1;
+	targetInfo->targetEvaluation = -1.f;
+	targetInfo->targetInfAIUnitElemListIndex = -1;
+	targetInfo->currentSearchInfAIUnitElemListIndex = 0;
+	targetInfo->unknown_10 = -1;
+	targetInfo->unknown_14 = -1;
+	targetInfo->currentSearchIsBuildings = 0; // start with living units
+	targetInfo->buildingTargetUnitId = -1;
+	targetInfo->buildingTargetEvaluation = -1.f;
+	targetInfo->buildingTargetInfAIUnitElemListIndex = -1;
+	targetInfo->targetSearchInProgress = 1;
 }
 
 
@@ -47,7 +66,7 @@ void UnitTargeting::SetTarget(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP_ELEM *unit
 	targetInfo->targetEvaluation = targetEvaluation;
 	targetInfo->targetInfAIUnitElemListIndex = index;
 	targetInfo->targetSearchInProgress = 0;
-	targetInfAIElem->attackAttempts++;
+	targetInfAIElem->attackAttempts++; // TODO/WARNING: also done by caller but only in 0x4D4376
 	long int myPlayerId = infAI->commonAIObject.playerId;
 	if (this->lastChosenTargetUnitId[myPlayerId] != targetInfAIElem->unitId) {
 		this->lastChosenTargetUnitId[myPlayerId] = targetInfAIElem->unitId;
@@ -147,7 +166,6 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 
 	// TODO: consider fog visibility
 	// TODO: if target is building & i see living units, return NULL?
-	// TODO: invalidate if there are wonders to destroy or relics to take...
 
 	for (int i = unitGroup->targetUnitIdArrayUsedElemCount; i >= 0; i--) {
 		long int loopTargetId = unitGroup->GetTargetUnitIdFromArray(i);
@@ -158,9 +176,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 		if (loopTargetUnit && loopTargetUnit->IsCheckSumValidForAUnitClass() && loopTargetUnit->ptrStructPlayer &&
 			loopTargetUnit->ptrStructPlayer->IsCheckSumValid()) {
 			long int loopTargetPlayerId = loopTargetUnit->ptrStructPlayer->playerId;
-			long int isLoopUnitEnemy = (loopTargetPlayerId > 0) &&
-				(groupLeader->ptrStructPlayer->ptrDiplomacyStances[loopTargetPlayerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY);
-			if (isLoopUnitEnemy && (loopTargetUnit->unitStatus <= AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY)) {
+			if ((loopTargetPlayerId > 0) && (loopTargetUnit->unitStatus <= AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY)) {
 				long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, groupLeader->GetMaxRange(),
 					0, 1, -1, -1);
 				if (canMoveToTarget) {
@@ -188,6 +204,17 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 	// TODO
 	// Don't forget to take into account this->priorityLocation[myplayerid]
 	// TODO: attack towers/military units that protect target ?
+
+	//TEST
+	for (int i = 0; i < infAI->unitElemListSize; i++) {
+		if (infAI->unitElemList[i].playerId == targetPlayerId) {
+			//TEST!
+			if (infAI->unitElemList[i].unitClass != 1) {
+				this->SetTarget(infAI, unitGroup, targetInfo, &infAI->unitElemList[i], 0 /*TODO*/, 1);
+				return &infAI->unitElemList[i];
+			}
+		}
+	}
 
 	// if found:
 	// this->SetTarget(infAI, unitGroup, targetInfo, , , );
@@ -320,7 +347,7 @@ bool UnitTargeting::SetPriorityTargetLocation(STRUCT_INF_AI *infAI, long int tar
 }
 
 
-STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearLocation(STRUCT_INF_AI *infAI, long int targetPlayerId) {
+STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearPriorityLocation(STRUCT_INF_AI *infAI, long int targetPlayerId) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
 	STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
@@ -332,9 +359,8 @@ STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearLocation(STRUCT_I
 
 	long int centerPosX = this->priorityLocation[myPlayerId].posX;
 	long int centerPosY = this->priorityLocation[myPlayerId].posY;
-	
-	// Draw squares around target position, getting more and more far, until we find an eligible target
 
+	// Draw squares around target position, getting more and more far, until we find an eligible target
 	for (int curDist = 0; curDist <= TARGETING_CONST::maxDistToSearchUnitsNearTargetLocation; curDist++) {
 		// Start at top-left
 		long int basePosX = centerPosX - curDist;
@@ -345,12 +371,13 @@ STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearLocation(STRUCT_I
 			STRUCT_GAME_MAP_TILE_INFO *curTile = mapInfo->GetTileInfo(basePosX + xOffset, centerPosY - curDist);
 			STRUCT_UNIT_BASE_LIST *curListElem = curTile->unitsOnThisTile;
 			// "Top" tile
-			for (int i = 0; i < curTile->unitsOnThisTileCount; i++) {
+			for (int i = 0; i < curTile->unitsOnThisTileCount + 1; i++) {
 				if (curListElem) {
 					STRUCT_UNIT_BASE *curUnit = curListElem->unit;
 					if (curUnit && curUnit->IsCheckSumValidForAUnitClass() && (curUnit->ptrStructPlayer == targetPlayer) &&
 						(curUnit->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) && (curUnit->remainingHitPoints > 0) &&
-						curUnit->unitDefinition && (curUnit->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
+						curUnit->unitDefinition && 
+						(curUnit->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
 						return FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
 					}
 					curListElem = curListElem->next;
@@ -428,9 +455,16 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 	assert(tacAI && tacAI->IsCheckSumValid());
 	if (!tacAI || !tacAI->IsCheckSumValid()) { targetInfo->targetSearchInProgress = 0; return NULL; }
 
+	if (groupLeader->ptrStructPlayer->ptrDiplomacyStances[targetPlayerId] != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY) {
+		assert(false && "Trying to find a target for a non-enemy player");
+		targetInfo->targetSearchInProgress = 0; return NULL;
+	}
+
 	// Already initialized: continue...
 	if (targetInfo->targetSearchInProgress) {
 		return this->ContinueFindGroupMainTargetInProgress(infAI, targetPlayerId, unitGroup, targetInfo, baseTimeGetTimeValue);
+	} else {
+		this->ResetTargetInfo(targetInfo);
 	}
 
 	this->InitNewSearch(player->playerId);
@@ -462,7 +496,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 	// Target has all relics or all ruins: find location (into class member)
 	if (this->SetPriorityTargetLocation(infAI, targetPlayerId, groupLeader, targetInfo)) {
 		// Before looping on infAI elem list, try a quick look at target position: maybe there are units guarding this place !
-		STRUCT_INF_AI_UNIT_LIST_ELEM *targetNearArtefact = this->FindTargetUnitNearLocation(infAI, targetPlayerId);
+		STRUCT_INF_AI_UNIT_LIST_ELEM *targetNearArtefact = this->FindTargetUnitNearPriorityLocation(infAI, targetPlayerId);
 		if (targetNearArtefact != NULL) {
 			this->SetTarget(infAI, unitGroup, targetInfo, targetNearArtefact, leaderTerrainZoneId, 1); // Low score: we have no clue if unit is moving or gonna move away from our true target.
 			return targetNearArtefact;
@@ -473,7 +507,8 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 	if (!targetPlayer || !targetPlayer->IsCheckSumValid()) { targetInfo->targetSearchInProgress = 0; return NULL; }
 
 	// What do we do with current target, if any ?
-	//this->GetInfAIElemForCurrentTargetIfStillEligible(infAI, targetPlayerId, unitGroup, targetInfo, baseTimeGetTimeValue);
+	STRUCT_INF_AI_UNIT_LIST_ELEM *currentTarget = this->GetInfAIElemForCurrentTargetIfStillEligible(infAI, targetPlayerId, unitGroup, targetInfo, baseTimeGetTimeValue);
+	// TODO
 
 	// Player global situation
 	int villagerCount = tacAI->allVillagers.usedElements;
@@ -484,9 +519,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 
 	// Group composition
 	STRUCT_UNIT_BASE *groupUnitsPtr[40]; // save pointers to unit group units
-	for (int i = 0; i < 40; i++) {
-		groupUnitsPtr[i] = NULL;
-	}
+	memset(groupUnitsPtr, 0, sizeof(groupUnitsPtr));
 	int curPos = 0;
 	int foundCount = 0;
 	int meleeCount = 0;
@@ -541,8 +574,10 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 	bool canAttackBuildings = (siegeCount + meleeCount + slingerCount > (myGrpUnitCount / 3));
 	bool allowTargetingCivilian = !settings->isDeathMatch; // in deathmatch, attacking civilian is NOT a priority (at all)
 
-	targetInfo->targetSearchInProgress = 0;
-	return NULL;
+	//targetInfo->targetSearchInProgress = 0;
+	//return NULL;
+	targetInfo->targetSearchInProgress = 1;
+	return this->ContinueFindGroupMainTargetInProgress(infAI, targetPlayerId, unitGroup, targetInfo, baseTimeGetTimeValue);
 }
 
 
@@ -956,7 +991,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 	assert(targetInfo->targetInfAIUnitElemListIndex >= 0);
 	assert(targetInfo->targetInfAIUnitElemListIndex < infAI->unitElemListSize);
 	targetInfo->targetSearchInProgress = 0; // 0x4C0DF1
-	infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].attackAttempts++; // 0x4C0DEF
+	infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].attackAttempts++; // 0x4C0DEF. WARNING: also done by caller but only in 0x4D4376
 #ifdef _DEBUG
 	// Just to make *really* sure this is always true. To remove later.
 	assert(&infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex] == FindInfAIUnitElemInList(infAI, unitGroup->GetTargetUnitIdFromArray(0)));
@@ -1411,7 +1446,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 	assert(targetInfo->targetInfAIUnitElemListIndex >= 0);
 	assert(targetInfo->targetInfAIUnitElemListIndex < infAI->unitElemListSize);
 	targetInfo->targetSearchInProgress = 0; // 0x4C0DF1
-	infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].attackAttempts++; // 0x4C0DEF
+	infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].attackAttempts++; // 0x4C0DEF. WARNING: also done by caller but only in 0x4D4376
 	// 0x4C0E00
 	// Extremely NOT optimized (lol) ! Doing a whole loop to find something we already have = &infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex]
 	STRUCT_INF_AI_UNIT_LIST_ELEM *result = FindInfAIUnitElemInList(infAI, unitGroup->GetTargetUnitIdFromArray(0));

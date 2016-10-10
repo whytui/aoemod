@@ -3508,6 +3508,8 @@ void CustomRORInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values
 
 // From 004BFFC5. infAI.findAttackTarget(targetPlayerId, unitGroup, pTacAI_targetInfo, timeGetTimeValue)
 // Can change return value to 0x4C0E3C if we chose to override ROR method (and NOT execute it)
+// This method searches for a target when AI player has an idle military situation (?)
+// Callers are 0x4D4348, 0x4D53F9, 0x4D5BF2 (parent method=0x4D3AB0=tacAITaskActiveGroups?)
 void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ESI_val;
 	ror_api_assert(REG_values, infAI && infAI->IsCheckSumValid());
