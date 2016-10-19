@@ -24,7 +24,7 @@ namespace AOE_STRUCTURES
 	public:
 		long int actorPlayerId;
 		long int internalId;
-		unsigned long int unknown_08;
+		long int unknown_08;
 		long int targetUnitId;
 		// 0x10
 		long int targetPlayerId;
@@ -71,15 +71,15 @@ namespace AOE_STRUCTURES
 		long int nextActivityQueueArraySize; // +20. Allocated array size (number of elements) for +24.
 		STRUCT_UNIT_ACTIVITY_QUEUE *nextActivitiesQueue_unsure; // TO DO. ElemSize = 0x18. See 414D90
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64
-		unsigned long int unknown_02C; // A distance?. 0x64 in 4DA4C9. Distance to TC ?
+		long int unknown_02C; // A distance?. 0x64 in 4DA4C9. Distance to TC ? cf targetsInfoArray+08
 		// 0x30
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
 		long int targetUnitId; // +34
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // +38. Target AI type (3=building...)
-		float posY;
+		float targetPosY;
 		// 0x40
-		float posX;
-		float posZ;
+		float targetPosX;
+		float targetPosZ;
 		float maxDistance; // +48.
 		unsigned long int unitIdToDefend; // +4C. Unit ID to capture or defend ?
 		// 0x50

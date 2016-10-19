@@ -209,7 +209,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 	for (int i = 0; i < infAI->unitElemListSize; i++) {
 		if (infAI->unitElemList[i].playerId == targetPlayerId) {
 			//TEST!
-			if (infAI->unitElemList[i].unitClass != 1) {
+			if ((infAI->unitElemList[i].unitClass != 1) && (GetUnitStruct(infAI->unitElemList[i].unitId) != NULL)) {
 				this->SetTarget(infAI, unitGroup, targetInfo, &infAI->unitElemList[i], 0 /*TODO*/, 1);
 				return &infAI->unitElemList[i];
 			}

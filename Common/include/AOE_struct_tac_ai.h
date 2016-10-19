@@ -186,7 +186,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_TAC_AI_BUILD_TO_TRIGGER) == 0x130, "STRUCT_TAC_AI_BUILD_TO_TRIGGER size");
 
 
-	// Included in tacAI structure. Size=0x2C.
+	// Included in tacAI structure (+FAC). Size=0x2C.
 	class STRUCT_TAC_AI_TARGET_INFO {
 	public:
 		long int targetUnitId;

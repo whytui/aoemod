@@ -73,7 +73,10 @@ namespace AOE_STRUCTURES {
 	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_BASE *obj, unsigned long int RORAddress) {
 		std::string res = "UnitId=";
 		res += std::to_string(obj->unitInstanceId);
-		res += " - addr= ";
+		res += " [p";
+		unsigned long int unitPlayerId = this->GetDwordFromRORData((unsigned long int)&obj->ptrStructPlayer->playerId) & 0xFFFF;
+		res += std::to_string(unitPlayerId);
+		res += "] addr= ";
 		char buf[11];
 		sprintf_s(buf, "0x%08X", RORAddress);
 		res += buf;
@@ -91,6 +94,8 @@ namespace AOE_STRUCTURES {
 		res += std::to_string(obj->unknown_078_unitInstanceId);
 		res += "\nDefinition: ";
 		res += this->ExportStruct(obj->unitDefinition);
+		res += "\nActivity: ";
+		res += this->ExportStruct(obj->currentActivity);
 		if (obj->DerivesFromCommandable()) {
 			res += this->ExportStruct<STRUCT_UNIT_COMMANDABLE>((STRUCT_UNIT_COMMANDABLE*)RORAddress);
 		}
@@ -276,6 +281,70 @@ namespace AOE_STRUCTURES {
 			res += "\nHasNext=> ";
 			res += this->ExportStruct(obj->nextActionLink);
 		}
+		return res;
+	}
+
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_ACTIVITY *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
+		std::string res;
+		res += "Activity id=";
+		//res += std::to_string(obj->currentActionId);
+		res += GetHexStringAddress(obj->currentActionId, 3);
+		res += " [+28]=";
+		//res += std::to_string(obj->internalId_whenAttacked);
+		res += GetHexStringAddress(obj->internalId_whenAttacked, 3);
+		res += " (backup: ";
+		//res += std::to_string(obj->previousActionId);
+		res += GetHexStringAddress(obj->previousActionId, 3);
+		res += " - ";
+		//res += std::to_string(obj->previous_whenAttackedInternalId);
+		res += GetHexStringAddress(obj->previous_whenAttackedInternalId, 3);
+		res += ") curPos X=";
+		res += std::to_string(obj->currentPosX);
+		res += " Y=";
+		res += std::to_string(obj->currentPosY);
+		res += " maxDist=";
+		res += std::to_string(obj->maxDistance);
+		res += "\nPos X=";
+		res += std::to_string(obj->targetPosX);
+		res += " Y=";
+		res += std::to_string(obj->targetPosY);
+		res += "\nTarget id=";
+		res += std::to_string(obj->targetUnitId);
+		res += " AIType=";
+		res += std::to_string(obj->targetUnitType);
+		res += " (previous id=";
+		res += std::to_string(obj->previousTargetUnitId);
+		res += " AIType=";
+		res += std::to_string(obj->previousTargetUnitType);
+		res += ")\ntargetArraySize=";
+		res += std::to_string(obj->targetsInfoArrayUsedElements);
+		res += " ";
+		res += this->ExportArrayOfStruct(obj->targetsInfoArray, obj->targetsInfoArrayUsedElements);
+
+		res += "\nunknown60:";
+		for (int i = 0; i < obj->unknown_060_unitIdList_targets.usedElements; i++) {
+			unsigned long int tmp = this->GetDwordFromRORData((unsigned long int)(obj->unknown_060_unitIdList_targets.unitIdArray + i));
+			long int unitId = (long int)tmp;
+			res += " ";
+			res += std::to_string(unitId);
+		}
+		//res += this->ExportArrayOfStruct(obj->unknown_060_unitIdList_targets.unitIdArray, );
+
+		return res;
+	}
+
+
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_ACTIVITY_TARGET_ELEM *obj, unsigned long int RORAddress) {
+		if (!obj) { return "NULL"; }
+		std::string res = "[p";
+		res += std::to_string(obj->actorPlayerId);
+		res += "/p";
+		res += std::to_string(obj->targetPlayerId);
+		res += " internalId=";
+		res += std::to_string(obj->internalId);
+		res += " target=";
+		res += std::to_string(obj->targetUnitId);
 		return res;
 	}
 

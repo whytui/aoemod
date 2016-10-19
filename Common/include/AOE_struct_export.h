@@ -124,6 +124,8 @@ namespace AOE_STRUCTURES
 		std::string ExportStruct_internal(STRUCT_ACTION_BASE *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_UNIT_ACTION_INFO *obj, unsigned long int RORAddress);
 		std::string ExportStruct_internal(STRUCT_ACTION_LINK *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_UNIT_ACTIVITY *obj, unsigned long int RORAddress);
+		std::string ExportStruct_internal(STRUCT_UNIT_ACTIVITY_TARGET_ELEM *obj, unsigned long int RORAddress);
 	};
 
 

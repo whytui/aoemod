@@ -419,7 +419,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF... Used to retreat to position 4DA160. Used also in attacks grpType0x15? 4DA193
 		CST_ATI_GATHERER_REACTION_WHEN_ATTACKED = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
 		CST_ATI_HOLD_POSITION = 0x2D5, // Do not auto-attack. See 4E6740 for cats (don't search for target), 413F89 for other units (cancel attack if not at range?)
-		CST_ATI_UNKNOWN_2D9 = 0x2D9
+		CST_ATI_UNKNOWN_2D9 = 0x2D9 // "pop" a target from array ? (switch back to previous target?)
 	};
 
 

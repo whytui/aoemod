@@ -60,7 +60,7 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 	menuBar->Append(menuTriggers, "&Triggers");
 #ifdef _DEBUG
 	wxMenu *menuDebug = new wxMenu;
-	menuDebug->Append(ID_Debug, "Debug Rise of Rome");
+	menuDebug->Append(ID_Debug, "Debug Rise of Rome\tF1");
 	menuBar->Append(menuDebug, "&Debug");
 #endif
 	menuBar->Append(menuHelp, "&Help");
