@@ -91,8 +91,12 @@ namespace AOE_STRUCTURES
 		short int panelButtonIdPageOffset; // +5E2. 0=first page, 10=second page. No other possibility in standard game.
 		short int panelLastButtonId; // +5E4. Maximum button id for last page.
 		short int unknown_5E6; // unused ?
-		char unknown_5E8[0x724 - 0x5E8]; // includes unused fields ?
-		long int currentChatTextLine;
+		char unknown_5E8[0x714 - 0x5E8]; // includes unused fields ?
+		long int tileset; // +714
+		long int unknown_sizeX; // +718
+		long int unknown_71C; // +71C
+		unsigned long int unknown_720;
+		long int currentChatTextLine; // +724
 		char unknown_728[0x734 - 0x728];
 		long int unknown_debugText_strlen; // +734
 		char unknown_debugText[0x34];

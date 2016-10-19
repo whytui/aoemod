@@ -41,6 +41,8 @@ static const char menuDialogScreenName[] = "Menu Dialog";
 static const char gameScreenName[] = "Game Screen";
 
 
+static const int CST_MAX_SUPPORTED_TILESET_COUNT = 4;
+
 // The AOE_Addxxx functions create a UI object and store the new object's pointer in ptrObjToCreate parameter
 
 
@@ -697,9 +699,9 @@ static bool AOE_InGameAddCommandButton(AOE_STRUCTURES::STRUCT_PLAYER *player, lo
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_BUILD) {
 		unknown_colorPtr = player->ptrPlayerColorStruct + 0x28;
 		assert(player->tileSet >= 0);
-		assert(player->tileSet <= 4);
+		assert(player->tileSet <= CST_MAX_SUPPORTED_TILESET_COUNT);
 		int tileSet = player->tileSet;
-		if ((tileSet < 0) || (tileSet > 4)) { tileSet = 0; } // in theory, this is not necessary.
+		if ((tileSet < 0) || (tileSet > CST_MAX_SUPPORTED_TILESET_COUNT)) { tileSet = 0; } // in theory, this is not necessary.
 		iconsSLP = inGameMain->iconsForBuildings[player->tileSet];
 	}
 	if ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) ||

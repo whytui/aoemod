@@ -439,7 +439,7 @@ namespace AOE_STRUCTURES {
 		short int unknown_1D2; // see 004ADE3C, 4AE1C3. Values -1, 4 ?
 		float constructionProgress;
 		long int strategyElementId; // +1D8. Strategy element ID (building's) : used to update strategy element when construction ends.
-		char unknown_1DC; // Consistent with player+0x54. An index for ?
+		char tileset; // +1DC.
 		char unknown_1DD; // value = 0 or 100 ? Switched when construction ends?
 		short int unknown_1DE;
 		// 0x1E0

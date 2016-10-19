@@ -16,7 +16,9 @@ namespace AOE_STRUCTURES
 
 
 #define CHECKSUM_CIVILIZATION_DEF 0x00549A28
-	// Size 0x2C
+	// Size 0x2C. Constructor = 0x4EF4F0 = civDef.constructor(internalFileId)
+	// Destructor 0x4EF4D0 = civDef.destructor(do_free)
+	// Parent struct is B0 4A 54 00
 	class STRUCT_CIVILIZATION_DEF {
 	public:
 		unsigned long int checksum; // 28 9A 54 00
@@ -30,8 +32,8 @@ namespace AOE_STRUCTURES
 		short int civResourcesCount;
 		short int unused_22; // probably unused.
 		float *ptrResourceValues;  // List element count is civResourcesCount
-		char graphicSetId;
-		char alwaysOne;
+		char graphicSetId; // +28 = tileset.
+		char alwaysOne; // +29. Set (hardcoded) in 4EF503
 		short int techTreeId;
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_CIVILIZATION_DEF; }
