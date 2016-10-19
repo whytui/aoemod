@@ -22,7 +22,7 @@ namespace AOE_STRUCTURES
 	// Size = 0x24.
 	class STRUCT_UNIT_ACTIVITY_TARGET_ELEM {
 	public:
-		long int actorPlayerId;
+		long int actorUnitId;
 		long int internalId;
 		long int unknown_08;
 		long int targetUnitId;
@@ -48,10 +48,37 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_QUEUE) == 0x18, "STRUCT_UNIT_ACTIVITY_QUEUE size");
 
-	// Not very well known. Accessed via unit+0x74 pointer (+70? too)
+	// Unit artificial intelligence (not reserved to AI players !).
 	// Size=0x134??? May depend on sub-class
+	// [EDX+0x1C]=
+	// [EDX+0x20]=activity.prepareTmpMapInfo?(arg1) : collects info about nearby units (cf ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE)
+	// [EDX+0x2C]=activity.isXxx(internalId)? : true for non-interruptible activities? (repair, heal,convert,attack,defend/capture+0x264)
+	// [EDX+0x30]=activity.autoChooseTargetAtReach?(checkWallsIfCurrentTargetIsWall?, checkCalcPath?, arg3)
+	// [EDX+0x40]=activity.findGatherTarget?(targetAIType, arg2, arg3, arg4, arg5)
+	// [EDX+0x44]=activity.xxx(resourceGatherType, arg2)
+	// [EDX+0x50]=activity.isNotArtefact(ptrUnit)
+	// [EDX+0x58]=activity.stop(bool?)
+	// [EDX+0x5C]=activity.setAttackOrGatherTarget(targetUnitId, force)
+	// [EDX+0x60]=activity.setAttackTarget(targetUnitId)
+	// [EDX+0x64]=activity.setGatherWithAttackTarget(targetId, force) for hunters, lumberjacks...
+	// [EDX+0x68]=activity.setGatherNoAttackTarget(targetId, force) for miners, forager, farmers...
+	// [EDX+0x6C]=activity.convertTarget(unitId, force)
+	// [EDX+0x70]=activity.setHealAction?(targetUnitId, force) to confirm
+	// [EDX+0x74]=activity.setRepairAction(targetUnitId, force) ?
+	// [EDX+0x78]=activity.setBuildAction(targetUnitId, force)
+	// [EDX+0x88]=
+	// [EDX+0x90]= +2D4
+	// [EDX+0x9C]=activity.fleeToRandomPlace(arg1, arg2, arg3, force)???
+	// [EDX+0xA4]=activity.fleeFromAttacker(force)
+	// [EDX+0xA8]=activity.related to 26F
+	// [EDX+0xB4]=activity.  transport load ?
+	// [EDX+0xB8]=activity. for 2D3
+	// [EDX+0xC0]=activity.GetResourceGatherType(AIType)
 	// [EDX+0xC4]=activity.canConvert(targetUnitId) ?
-	// [EDX+0xCC]=activity.dequeue(activityQueue) ?
+	// [EDX+0xC8]=activity.setTargetFromArray?(targetsInfoArray, arg2)
+	// [EDX+0xCC]=activity.dequeue(activityQueue) ? Returns some enum (3,4..)
+	// [EDX+0xD8]=
+	// [EDX+0xE8]=when being attacked?
 	class STRUCT_UNIT_ACTIVITY {
 	public:
 		// Known checksums: 
@@ -65,12 +92,12 @@ namespace AOE_STRUCTURES
 		// 0x10
 		long int targetsInfoArrayUsedElements; // Number of "used" elements in array.
 		unsigned long int targetsInfoArrayTotalSize; // Allocated elements
-		STRUCT_UNIT_ACTIVITY_TARGET_ELEM *targetsInfoArray; // +18. Potential/previous? targets. THIS is used to get back to work after being attacked !
+		STRUCT_UNIT_ACTIVITY_TARGET_ELEM *targetsInfoArray; // +18. Stacked activities ? THIS is used to get back to work after being attacked !
 		long int nextActivityQueueUsedElems; // +1C. Actually used elems in +24 array
 		// 0x20
 		long int nextActivityQueueArraySize; // +20. Allocated array size (number of elements) for +24.
 		STRUCT_UNIT_ACTIVITY_QUEUE *nextActivitiesQueue_unsure; // TO DO. ElemSize = 0x18. See 414D90
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64. "Reaction task to interruptions?"
 		long int unknown_02C; // A distance?. 0x64 in 4DA4C9. Distance to TC ? cf targetsInfoArray+08
 		// 0x30
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
@@ -81,14 +108,14 @@ namespace AOE_STRUCTURES
 		float targetPosX;
 		float targetPosZ;
 		float maxDistance; // +48.
-		unsigned long int unitIdToDefend; // +4C. Unit ID to capture or defend ?
+		long int unitIdToDefend; // +4C. Unit ID to capture or defend ?
 		// 0x50
-		unsigned long int previous_whenAttackedInternalId; // +50. Backup for +28
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS previous_whenAttackedInternalId; // +50. Backup for +28
 		long int previousActionId; // Backup for currentActionId. set in 40F6D0 method, 411D00
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES previousTargetUnitId; // +58. Previous target class
-		long int previousTargetUnitType; // +5C
+		long int previousTargetUnitType; // +5C. Type=GLOBAL_UNIT_AI_TYPES but as a dword.
 		// 0x60
-		STRUCT_AI_UNIT_LIST_INFO unknown_060_unitIdList_targets; // +60. Warning, arraySize can be >usedElemCount here.
+		STRUCT_AI_UNIT_LIST_INFO ListOfUnitIdThatAttackedMe; // +60. Warning, arraySize can be >usedElemCount here. List of units that attacked me.
 		// 0x70
 		float unknown_070_posY;
 		float unknown_074_posX;
@@ -150,7 +177,7 @@ namespace AOE_STRUCTURES
 		long int playerNearbyUnitsInfoIndexesArraySize; // +128. number of elements in +124.
 		unsigned long int unknown_12C;
 		// 0x130
-		char unknown_130; // A flag ? 410C00
+		char unknown_130; // A flag ? 410C00. 4E49C3: set when activity changed to hunt to defend against an animal?
 		char unknown_131; // unused ?
 		char unknown_132; // unused ?
 		char unknown_133; // unused ?

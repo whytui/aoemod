@@ -94,7 +94,7 @@ namespace AOE_STRUCTURES {
 		res += std::to_string(obj->unknown_078_unitInstanceId);
 		res += "\nDefinition: ";
 		res += this->ExportStruct(obj->unitDefinition);
-		res += "\nActivity: ";
+		res += "\n\nActivity: ";
 		res += this->ExportStruct(obj->currentActivity);
 		if (obj->DerivesFromCommandable()) {
 			res += this->ExportStruct<STRUCT_UNIT_COMMANDABLE>((STRUCT_UNIT_COMMANDABLE*)RORAddress);
@@ -323,26 +323,24 @@ namespace AOE_STRUCTURES {
 		res += this->ExportArrayOfStruct(obj->targetsInfoArray, obj->targetsInfoArrayUsedElements);
 
 		res += "\nunknown60:";
-		for (int i = 0; i < obj->unknown_060_unitIdList_targets.usedElements; i++) {
-			unsigned long int tmp = this->GetDwordFromRORData((unsigned long int)(obj->unknown_060_unitIdList_targets.unitIdArray + i));
+		for (int i = 0; i < obj->ListOfUnitIdThatAttackedMe.usedElements; i++) {
+			unsigned long int tmp = this->GetDwordFromRORData((unsigned long int)(obj->ListOfUnitIdThatAttackedMe.unitIdArray + i));
 			long int unitId = (long int)tmp;
 			res += " ";
 			res += std::to_string(unitId);
 		}
-		//res += this->ExportArrayOfStruct(obj->unknown_060_unitIdList_targets.unitIdArray, );
-
 		return res;
 	}
 
 
 	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_ACTIVITY_TARGET_ELEM *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
-		std::string res = "[p";
-		res += std::to_string(obj->actorPlayerId);
-		res += "/p";
+		std::string res = "[";
+		res += std::to_string(obj->actorUnitId);
+		res += " atk p";
 		res += std::to_string(obj->targetPlayerId);
-		res += " internalId=";
-		res += std::to_string(obj->internalId);
+		res += "] internalId=";
+		res += GetHexStringAddress(obj->internalId, 3);
 		res += " target=";
 		res += std::to_string(obj->targetUnitId);
 		return res;

@@ -2920,7 +2920,7 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 			// Corresponds to filter (exclude 2C9 and 2BC) in original game code
 			// Don't know why first loop does NOT exclude 2C9 (only excludes 2BC)
 			if ((activity->internalId_whenAttacked == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_UNKNOWN_2BC_ATTACKING) ||
-				(activity->internalId_whenAttacked == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_GATHERER_REACTION_WHEN_ATTACKED)) {
+				(activity->internalId_whenAttacked == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_GATHERER_ATT_REACTION_WHEN_ATTACKED)) {
 				attackTower = false;
 			}
 		}

@@ -388,10 +388,12 @@ namespace AOE_CONST_INTERNAL
 	// For activity.task IDs
 	enum ACTIVITY_TASK_IDS : long int {
 		CST_ATI_NONE = -1, // Used a lot in game code
-		CST_ATI_UNKNOWN_1F4 = 0x1F4, // Notify(react) being attacked ? GenericArg4=actorUnitId ?
+		CST_ATI_NOTIFY_BEING_ATTACKED = 0x1F4, // Notify(react) being attacked ? GenericArg4=actorUnitId ? Triggers a player.NotifyEvent with event 0x201
 		CST_ATI_NOTIFY_ACTIVITY_COMPLETED = 0x1FA, // Notify activity completed (normal completion) ?
 		CST_ATI_UNKNOWN_1FB = 0x1FB, // 410999
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
+		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted?
+		CST_ATI_UNKNOWN_209 = 0x209, // Related to notification when being attacked ? see 0x4E4769
 		CST_ATI_ESCAPE_PROJECTILE = 0x20F, // when someone shoots at me ? "escape attack"? 4E62F3
 		CST_ATI_ATTACK = 0x258,
 		CST_ATI_DEFEND_OR_CAPTURE = 0x259, // unsure, but it is used to capture relics
@@ -401,24 +403,37 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_EXPLORE = 0x25D,
 		CST_ATI_GATHER_NOATTACK = 0x261, // Forager, farmer, miners (gathering that doesn't have an "attack" phase.
 		CST_ATI_MOVE = 0x262, // Eg: used to capture relic. More specific than just move ?
+		CST_ATI_UNKNOWN_264 = 0x264,
 		CST_ATI_GATHER_ATTACK = 0x265, // woodcutter, hunter, fisherman (gatherer that have an "attack" phase - not really true for fish, but anyway !)
 		CST_ATI_UNKNOWN_266 = 0x266, // regroup in unit group ??? Related to SNAttackGroupGatherSpacing in 4CD551?
+		CST_ATI_UNKNOWN_267 = 0x267,
 		CST_ATI_UNKNOWN_268 = 0x268, // some movement ?
 		CST_ATI_GO_TO_TRANSPORT = 0x269, // Unsure
 		CST_ATI_REPAIR = 0x26A,
 		CST_ATI_HUMAN_TRAIN_UNIT = 0x26B, // only when triggered by human ?
 		CST_ATI_RESEARCH_TECH = 0x26C, // includes train unit when triggered by AI.
 		CST_ATI_UNLOAD = 0x26D, // unsure. Includes move+unload. Such unit can't be used as actor in strategy element.
+		CST_ATI_UNKNOWN_26E = 0x26E, // load ?
+		CST_ATI_UNKNOWN_26F = 0x26F,
 		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
 		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targetted farm or enemy projectile dies ?
 		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // 
 		CST_ATI_DEFEND_UNIT = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.defend/followUnit?(myUnitId, targetUnitId)
-		CST_ATI_UNKNOWN_2BE = 0x2BE,
+		CST_ATI_UNKNOWN_2BE = 0x2BE, // build+0x64
 		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ??
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
+		CST_ATI_GATHERER_NOATT_REACTION_WHEN_ATTACKED = 0x2C5, // TO CONFIRM
 		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF... Used to retreat to position 4DA160. Used also in attacks grpType0x15? 4DA193
-		CST_ATI_GATHERER_REACTION_WHEN_ATTACKED = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
+		CST_ATI_UNKNOWN_2C8 = 0x2C8, // 264+64 see 0x41363F
+		CST_ATI_GATHERER_ATT_REACTION_WHEN_ATTACKED = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
+		CST_ATI_UNKNOWN_2CE = 0x2CE, // (26A+64) Repair?? see 0x413595
+		CST_ATI_UNKNOWN_2D1 = 0x2D1, // Unload (26D+64? see 0x4135A7
+		CST_ATI_UNKNOWN_2D2 = 0x2D2,
+		CST_ATI_UNKNOWN_2D3 = 0x2D3,
+		CST_ATI_UNKNOWN_2D4 = 0x2D4,
 		CST_ATI_HOLD_POSITION = 0x2D5, // Do not auto-attack. See 4E6740 for cats (don't search for target), 413F89 for other units (cancel attack if not at range?)
+		CST_ATI_UNKNOWN_2D6 = 0x2D6, // ? see 0x4133DC
+		CST_ATI_UNKNOWN_2D7 = 0x2D7, // ? see 0x4134F8
 		CST_ATI_UNKNOWN_2D9 = 0x2D9 // "pop" a target from array ? (switch back to previous target?)
 	};
 

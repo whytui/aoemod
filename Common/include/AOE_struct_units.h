@@ -91,6 +91,9 @@ namespace AOE_STRUCTURES {
 	// +0x100 = unit.FLD_reloadTime1()
 	// +0x104 = unit.calcDamageFrom(unit)?. WARNING: Returns in ST (FLD xxx), not EAX. Ex 0x427AC0.
 	// +0x10C = unit.FLD_maxRange(). Loads 0 for units that do not derive from type50 (attackable)
+	// +0x150 = unit.setAttackAction?(targetUnitId, force)
+	// +0x154 = unit.??(fposY, fposX, arg3, arg4, force?) create action move ?
+	// +0x164 = unit.goGather(targetUnitId, force?) returns 1 on success
 	// +0x198 = CanMoveTo(posY,posX,posZ,fMaxRange,targetUnitId,pArg6_float,arg7_size?,targetPlayerId,someUnitClass) ? returns 1 if ok.
 	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
 	// +0x1A4 = DoMove?(posY,posX,posZ,fMaxRange,targetUnitId, pArg6_float,arg7_size,arg8,arg9,targetPlayerId,someUnitClass)
@@ -156,7 +159,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_080;
 		char unknown_084; // related to movement ? "isMapInfoUpToDateForThisUnit" ?
 		char unknown_085; // related to movement ? Previous value of +84 ?
-		char unknown_086_hasTarget; // ?
+		char unknown_086_hasTarget; // ? Or maybe "is currently attacked/target of an attack" ? For map blinking?
 		char unknown_087;
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00547DA8); }
