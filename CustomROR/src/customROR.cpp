@@ -401,6 +401,7 @@ void CustomRORInstance::OneShotInit() {
 	traceMessageHandler.WriteMessageNoNotification(localizationHandler.GetTranslation(CRLANG_ID_DEBUG_INIT, "Debug message system initialized."));
 	CUSTOMROR::crInfo.configInfo.ReadXMLConfigFile("CustomROR\\customROR.xml");
 	CUSTOMROR::crInfo.configInfo.ReadCivXMLConfigFile("CustomROR\\customROR_civs.xml");
+	CUSTOMROR::crInfo.configInfo.ReadTilesetXMLConfigFile("CustomROR\\customROR_tilesets.xml");
 
 	// Note: CheckEnabledFeatures writes to log file
 	if (!CUSTOMROR::crCommand.CheckEnabledFeatures()) {
@@ -3032,7 +3033,7 @@ void CustomRORInstance::OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_v
 		gameMainUI->tilesetRelatedGraphicsSizeX = sizeX_714;
 		ChangeReturnAddress(REG_values, 0x481792);
 	}
-	bool useCustomTreatments = false;
+	bool useCustomTreatments = true;
 
 	if (!useCustomTreatments) {
 		return;

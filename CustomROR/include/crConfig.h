@@ -10,6 +10,7 @@
 #include <AOE_empires_dat.h>
 #include "civilizationInfo.h"
 #include "autoAttackPolicy.h"
+#include "TileSetHandler.h"
 
 using namespace std;
 
@@ -69,6 +70,7 @@ public:
 	// Variables - CustomROR-specific
 	bool couldNotReadXMLConfig;
 	bool couldNotReadCivXMLConfig;
+	bool couldNotReadTilesetXMLConfig;
 	bool showAlertOnMissingFeature;
 	bool hideWelcomeMessage;
 	bool showCustomRORMenu;
@@ -194,6 +196,9 @@ public:
 	// Read civilizations info XML file
 	bool ReadCivXMLConfigFile(char *fileName);
 	CivilizationInfo *GetCivInfo(int civId);
+
+	// Read tileset info XML file
+	bool ReadTilesetXMLConfigFile(char *fileName);
 
 	// Constants (not customizable)
 	const float MINVALUE_improvedGameSpeedFactor = (float) 1.1;

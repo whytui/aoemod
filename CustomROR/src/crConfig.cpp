@@ -15,6 +15,7 @@ CustomRORConfig::CustomRORConfig() {
 	this->autoFixMissingFeatures = false;
 	this->couldNotReadXMLConfig = false;
 	this->couldNotReadCivXMLConfig = false;
+	this->couldNotReadTilesetXMLConfig = false;
 	this->showAlertOnMissingFeature = true;
 	this->hideWelcomeMessage = false;
 	this->showCustomRORMenu = false;
@@ -835,4 +836,99 @@ bool CustomRORConfig::ReadCivXMLConfigFile(char *fileName) {
 CivilizationInfo *CustomRORConfig::GetCivInfo(int civId) {
 	if ((civId < 0) || (civId >= CST_MAX_TOTAL_CIV_COUNT)) { return NULL; }
 	return this->allCivInfo[civId];
+}
+
+
+// Read tileset info XML file
+bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
+	TiXmlDocument doc(fileName);
+	if (!doc.LoadFile()) {
+		this->couldNotReadTilesetXMLConfig = true;
+		return false;
+	}
+
+	TiXmlHandle hdl(&doc);
+	string mainNodeTag = hdl.FirstChildElement().Element()->Value();
+	if (mainNodeTag != "customROR_tilesets") {
+		// Not a valid customROR config XML file.
+		this->couldNotReadTilesetXMLConfig = true;
+		return false;
+	}
+	TiXmlElement *elem = hdl.FirstChildElement().FirstChildElement().Element();
+	if (!elem) {
+		return false;
+	}
+
+	while (elem) {
+		int callResult;
+		int intValue; // buffer when reading int values
+		string elemName = elem->Value();
+		string categoryName;
+		if (elemName == "tilesets") {
+			callResult = elem->QueryIntAttribute("count", &intValue);
+			assert(abs(intValue) < TILESET::MAX_TILESET_TOTAL_SUPPORTED_COUNT);
+			if ((callResult == TIXML_SUCCESS) && (intValue >= TILESET::TILESET_COUNT_STANDARD_ROR)) {
+				TILESET::tilesetHandler.tilesetCount = intValue;
+			}
+		}
+
+		if (elemName == "tileset") {
+			int tilesetId = 0;
+			callResult = elem->QueryIntAttribute("id", &intValue);
+			if (callResult == TIXML_SUCCESS) { tilesetId = intValue; }
+			if ((tilesetId >= TILESET::TILESET_COUNT_STANDARD_ROR) && (tilesetId < TILESET::MAX_TILESET_TOTAL_SUPPORTED_COUNT)) {
+				TILESET::CustomTilesetInfo *tilesetInfo = TILESET::tilesetHandler.GetTilesetInfo(tilesetId);
+				if (!tilesetInfo) {
+					this->couldNotReadTilesetXMLConfig = true; // ERROR
+					return false;
+				}
+				std::string tilesetName = this->XML_GetAttributeValue(elem, "name");
+				tilesetInfo->tilesetId = tilesetId;
+				tilesetInfo->tilesetName = tilesetName;
+
+				TiXmlElement *subElem = elem->FirstChildElement();
+				while (subElem) {
+					string subElemName = subElem->Value();
+					if (subElemName == "theme_info") {
+						callResult = subElem->QueryIntAttribute("slpid", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdThemeInfo = intValue; }
+					}
+					if (subElemName == "checkboxes") {
+						callResult = subElem->QueryIntAttribute("slpid", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdCheckboxes = intValue; }
+					}
+					if (subElemName == "building_icons") {
+						callResult = subElem->QueryIntAttribute("slpid", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdBuildingIcons = intValue; }
+					}
+					if (subElemName == "common_command_icons") {
+						callResult = subElem->QueryIntAttribute("slpid", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdCommonCommandIcons = intValue; }
+					}
+					if (subElemName == "button_board") {
+						callResult = subElem->QueryIntAttribute("slpid_low", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdButtonBoardLow = intValue; }
+						callResult = subElem->QueryIntAttribute("slpid_medium", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdButtonBoardMedium = intValue; }
+						callResult = subElem->QueryIntAttribute("slpid_high", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdButtonBoardHigh = intValue; }
+					}
+					if (subElemName == "game") {
+						callResult = subElem->QueryIntAttribute("slpid_low", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdGameScreenLow = intValue; }
+						callResult = subElem->QueryIntAttribute("slpid_medium", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdGameScreenMedium = intValue; }
+						callResult = subElem->QueryIntAttribute("slpid_high", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdGameScreenHigh = intValue; }
+					}
+					
+					subElem = subElem->NextSiblingElement();
+				}
+			}
+		}
+
+		elem = elem->NextSiblingElement(); // next XML element 
+	}
+
+	return true;
 }

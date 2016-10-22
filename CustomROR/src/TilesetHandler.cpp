@@ -9,10 +9,34 @@ using namespace AOE_CONST_DRS;
 using namespace AOE_STRUCTURES;
 
 
+CustomTilesetInfo::CustomTilesetInfo() {
+	this->tilesetId = -1;
+	this->tilesetName = "";
+	this->slpIdBuildingIcons = -1;
+	this->slpIdButtonBoardHigh = -1;
+	this->slpIdButtonBoardLow = -1;
+	this->slpIdButtonBoardMedium = -1;
+	this->slpIdCheckboxes = -1;
+	this->slpIdCheckboxes = -1;
+	this->slpIdCommonCommandIcons = -1;
+	this->slpIdGameScreenHigh = -1;
+	this->slpIdGameScreenLow = -1;
+	this->slpIdGameScreenMedium = -1;
+	this->slpIdThemeInfo = -1;
+}
+
+
 TilesetHandler::TilesetHandler() {
 	this->tilesetCount = TILESET_COUNT_STANDARD_ROR;
 }
 
+
+CustomTilesetInfo *TilesetHandler::GetTilesetInfo(long int tileset) {
+	assert(tileset >= 0);
+	assert(tileset < MAX_TILESET_TOTAL_SUPPORTED_COUNT);
+	if ((tileset < 0) || (tileset >= MAX_TILESET_TOTAL_SUPPORTED_COUNT)) { return NULL; }
+	return &this->tilesetsInfo[tileset];
+}
 
 
 // This corresponds to ROR code in 0x481792
@@ -36,7 +60,9 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		slpId = SLPID_TILESET_SCREEN_THEME_ROR; // Roman
 	}
 	if (tileset > MAX_STANDARD_TILESET_ID) {
-		slpId = SLPID_TILESET_SCREEN_THEME_BASE_STD; // TODO
+		if (this->tilesetsInfo[tileset].tilesetId == tileset) { // true only if it has been set from config
+			slpId = this->tilesetsInfo[tileset].slpIdThemeInfo;
+		}
 	}
 	unsigned long int callAddr1 = 0x4553F0;
 	const char *tmpText = dlg6_x.c_str();
@@ -61,7 +87,9 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		slpId = SLPID_TILESET_CHECKBOXES_ROR; // Roman
 	}
 	if (tileset > MAX_STANDARD_TILESET_ID) {
-		slpId = SLPID_TILESET_SCREEN_THEME_BASE_STD; // TODO
+		if (this->tilesetsInfo[tileset].tilesetId == tileset) { // true only if it has been set from config
+			slpId = this->tilesetsInfo[tileset].slpIdCheckboxes;
+		}
 	}
 	unsigned long int callAddr3 = 0x455A50;
 	tmpText = btn6_x.c_str();
@@ -97,7 +125,9 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		slpId = SLPID_TILESET_BUTTON_BOARD_LOW_RESOLUTION_ROR; // Roman
 	}
 	if (tileset > MAX_STANDARD_TILESET_ID) {
-		slpId = SLPID_TILESET_BUTTON_BOARD_LOW_RESOLUTION_BASE_STD; // TODO
+		if (this->tilesetsInfo[tileset].tilesetId == tileset) { // true only if it has been set from config
+			slpId = this->tilesetsInfo[tileset].slpIdButtonBoardLow;
+		}
 	}
 	InitSlpInfoFromDrs(gameMainUI->buttonBoardResolutionA, slpId, btnbrdax_shp.c_str());
 
@@ -117,7 +147,9 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		slpId = SLPID_TILESET_COMMON_CMD_ICONS_ROR; // Roman
 	}
 	if (tileset > MAX_STANDARD_TILESET_ID) {
-		slpId = SLPID_TILESET_COMMON_CMD_ICONS_BASE_STD; // TODO
+		if (this->tilesetsInfo[tileset].tilesetId == tileset) { // true only if it has been set from config
+			slpId = this->tilesetsInfo[tileset].slpIdCommonCommandIcons;
+		}
 	}
 	InitSlpInfoFromDrs(gameMainUI->iconsForOtherButtons, slpId, btnbrdax_shp.c_str());
 
@@ -137,7 +169,9 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		slpId = SLPID_TILESET_BUTTON_BOARD_MEDIUM_RESOLUTION_ROR; // Roman
 	}
 	if (tileset > MAX_STANDARD_TILESET_ID) {
-		slpId = SLPID_TILESET_BUTTON_BOARD_MEDIUM_RESOLUTION_BASE_STD; // TODO
+		if (this->tilesetsInfo[tileset].tilesetId == tileset) { // true only if it has been set from config
+			slpId = this->tilesetsInfo[tileset].slpIdButtonBoardMedium;
+		}
 	}
 	InitSlpInfoFromDrs(gameMainUI->buttonBoardResolutionB, slpId, btnbrdbx_shp.c_str());
 
@@ -157,7 +191,9 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		slpId = SLPID_TILESET_BUTTON_BOARD_HIGH_RESOLUTION_ROR; // Roman
 	}
 	if (tileset > MAX_STANDARD_TILESET_ID) {
-		slpId = SLPID_TILESET_BUTTON_BOARD_HIGH_RESOLUTION_BASE_STD; // TODO
+		if (this->tilesetsInfo[tileset].tilesetId == tileset) { // true only if it has been set from config
+			slpId = this->tilesetsInfo[tileset].slpIdButtonBoardHigh;
+		}
 	}
 	InitSlpInfoFromDrs(gameMainUI->buttonBoardResolutionC, slpId, btnbrdcx_shp.c_str());
 
@@ -212,7 +248,20 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 			break;
 		}
 	} else {
-		slpId = SLPID_TILESET_GAME_FRIEZES_LOW_RESOLUTION_BASE_STD; // TODO !
+		if (this->tilesetsInfo[tileset].tilesetId == tileset) { // true only if it has been set from config
+			switch (resolution) {
+			case 1:
+				slpId = this->tilesetsInfo[tileset].slpIdGameScreenLow;
+				break;
+			case 2:
+				slpId = this->tilesetsInfo[tileset].slpIdGameScreenMedium;
+				break;
+			case 3:
+				slpId = this->tilesetsInfo[tileset].slpIdGameScreenHigh;
+				break;
+			}
+			
+		}
 	}
 	gameMainUI->gameTopAndBottomFriezes = (STRUCT_SLP_INFO*)AOEAlloc(0x20);
 	if (!gameMainUI->gameTopAndBottomFriezes) {
