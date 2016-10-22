@@ -2,6 +2,7 @@
 #pragma once
 
 #include <UI_components\AOE_struct_ui_button.h>
+#include <AOE_structures_drs.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -22,7 +23,7 @@ namespace AOE_STRUCTURES
 		// 0x2C0
 		char unknown_2C0; // Values 0, 3 .. ?
 		char unknown_2C1[3];
-		unsigned long int *unknown_2C4;
+		STRUCT_SLP_INFO *unknown_2C4_btnBoard;
 		unsigned long int *unknown_2C8;
 		unsigned long int unknown_2CC;
 		char contextHelpText[0x100]; // +2D0.

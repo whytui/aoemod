@@ -4,12 +4,14 @@
 #include <UI\AOE_struct_ui_screen_base.h>
 #include <UI_components\AOE_struct_any_ui.h>
 #include <UI_components\AOE_struct_ui_button_with_number.h>
+#include <UI_components\AOE_struct_ui_label.h>
 #include <UI\AOE_struct_ui_playing_zone.h>
 #include <UI\AOE_struct_ui_diamond_map.h>
 #include <UI\AOE_struct_ui_f11_pop_panel.h>
 #include <UI_components\AOE_struct_ui_gameColoredInfoLabel.h>
 #include <AOE_structures_drs.h>
 #include <AOE_struct_units.h>
+#include <UI\AOE_struct_ui_player_resource_values.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -49,19 +51,24 @@ namespace AOE_STRUCTURES
 	// Pointed by 005830F4
 	class STRUCT_UI_IN_GAME_MAIN : public STRUCT_UI_SCREEN_BASE { // "Game Screen"
 	public:
-		char unknown_478[0x48C - 0x478];
+		STRUCT_SLP_INFO *gameTopAndBottomFriezes; // +478. Top and down friezes, depending on both resolution and tileset. gameX.shp (X=a/b or c)
+		STRUCT_SLP_INFO *buttonBoardResolutionA; // +47C. btnbrda%d.shp. For lowest resolution.
+		STRUCT_SLP_INFO *iconsForOtherButtons; // +480. btnoth%d.shp
+		STRUCT_SLP_INFO *buttonBoardResolutionB; // +484. btnbrdb%d.shp. For intermediate resolution.
+		STRUCT_SLP_INFO *buttonBoardResolutionC; // +488. btnbrdc%d.shp. For highest resolution.
 		STRUCT_SLP_INFO *iconsForUnitCommands; // +48C. Pointer to SLP data... Cf SLP 50721
 		STRUCT_SLP_INFO *iconsForResearches; // +490. Pointer to SLP data... Cf SLP 50729
 		STRUCT_SLP_INFO *iconsForTrainUnits; // +494. Pointer to SLP data... Cf SLP 50730.
 		STRUCT_SLP_INFO *iconsForBuildings[5]; // +498 + tileset*4. There is no free slot for more tilesets. SLPId= C610+i except tileset4=>CF0D.
 		STRUCT_SLP_INFO *unknown_4AC_icons; // +4AC. Used in 48250F. Includes the "cancel" icon, id=10. SLP 50725 ?
-		short int unknown_4B0_iconId; // +4B0. Icon id for Next page button ?
+		short int nextPageIconId; // +4B0. Icon id for Next page button ?
 		short int unknown_4B2_iconId; // +4B2. Icon id for unselect button ?
-		unsigned long int unknown_4B4;
+		short int unknown_4B4; // +4B4. Icon id ?
+		short int unknown_4B6;
 		STRUCT_UI_PLAYING_ZONE *gamePlayUIZone; // +4B8. 88 66 54 00.
 		STRUCT_UI_DIAMOND_MAP *diamondMap; // +4BC. ptr to F4 A3 54 00.
 		// 0x4C0
-		unsigned long int unknown_4C0; // Struct size=0x118, constructor=4F7C00. 98 9D 54 00
+		STRUCT_UI_PLAYER_RESOURCE_VALUES *resourceValuesIndicator; // +4C0. The resource values (food/wood/stone/gold) on top. NOT the corresponding icons ?
 		unsigned long int unknown_4C4;
 		STRUCT_UI_BUTTON_WITH_NUMBER *unitCommandButtons[12]; // +4C8. 2 rows of 6 slpButtons for command buttons in bottom center zone.
 		STRUCT_UI_BUTTON_WITH_NUMBER *btnChat; // +4F8. Also referred as commandButtons[0xC]. Not visible in SP games.
@@ -77,7 +84,8 @@ namespace AOE_STRUCTURES
 		char unknown_548[0x55C - 0x548];
 		STRUCT_UI_IN_GAME_TEXT_ZONE *ingameChatTextZone[8]; // 0x55C ; check count !
 		STRUCT_ANY_UI *unknown_57C; // 50 5D 54 00
-		char unknown_580[0x5B4 - 0x580];
+		STRUCT_UI_LABEL *lblCurrentAge; // +580. The current age indication on top (centered).
+		char unknown_584[0x5B4 - 0x584];
 		STRUCT_GAME_GLOBAL *gameGlobal; // +5B4.
 		char unknown_5B8[0x5C8 - 0x5B8];
 		STRUCT_UNIT_BASE *panelSelectedUnit; // 0x5C8. Pointer to unit selected in unit info zone.
@@ -93,7 +101,7 @@ namespace AOE_STRUCTURES
 		short int unknown_5E6; // unused ?
 		char unknown_5E8[0x714 - 0x5E8]; // includes unused fields ?
 		long int tileset; // +714
-		long int unknown_sizeX; // +718
+		long int tilesetRelatedGraphicsSizeX; // +718. "this" (gamemainui) sizeX when tileset-dependent graphics were last loaded
 		long int unknown_71C; // +71C
 		unsigned long int unknown_720;
 		long int currentChatTextLine; // +724

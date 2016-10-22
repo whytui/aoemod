@@ -33,6 +33,29 @@ namespace AOE_CONST_DRS {
 		InGameAchievementTheme = 50061, // Using this for custom screens might look a bit weird. Still better than victory once though !
 	};
 
+	// Tileset-related
+	const long int SLPID_TILESET_SCREEN_THEME_BASE_STD = 50006; // 0xC356. For tilesets 0-3
+	const long int SLPID_TILESET_SCREEN_THEME_ROR = 53000; // 0xC356. For tileset 4 (ROR)
+	const long int SLPID_TILESET_CHECKBOXES_BASE_STD = 50605; // 0xC5AD. For tilesets 0-3 (btn6_%d)
+	const long int SLPID_TILESET_CHECKBOXES_ROR = 53004; // 0xCF0C. For tileset 4 (ROR)
+	const long int SLPID_TILESET_BLD_ICONS_BASE_STD = 50704; // 0xC610. For tilesets 0-3
+	const long int SLPID_TILESET_BLD_ICONS_ROR = 53005; // 0xCF0D. For tileset 4 (ROR)
+	const long int SLPID_TILESET_BUTTON_BOARD_LOW_RESOLUTION_BASE_STD = 50713; // 0xC619. For tilesets 0-3. See 0x481A64. (btnbrda%d.shp)
+	const long int SLPID_TILESET_BUTTON_BOARD_LOW_RESOLUTION_ROR = 53006; // 0xCF0E. For tileset 4 (ROR)
+	const long int SLPID_TILESET_BUTTON_BOARD_MEDIUM_RESOLUTION_BASE_STD = 50717; // 0xC61D. For tilesets 0-3. (btnbrdb%d.shp)
+	const long int SLPID_TILESET_BUTTON_BOARD_MEDIUM_RESOLUTION_ROR = 53007; // 0xCF0F. For tileset 4 (ROR)
+	const long int SLPID_TILESET_BUTTON_BOARD_HIGH_RESOLUTION_BASE_STD = 50747; // 0xC63B. For tilesets 0-3. (btnbrdc%d.shp)
+	const long int SLPID_TILESET_BUTTON_BOARD_HIGH_RESOLUTION_ROR = 53008; // 0xCF10. For tileset 4 (ROR)
+	const long int SLPID_TILESET_COMMON_CMD_ICONS_BASE_STD = 50725; // C625. For tilesets 0-3. See 0x481B08 (btnoth%d.shp)
+	const long int SLPID_TILESET_COMMON_CMD_ICONS_ROR = 53009; // 0xCF11. For tileset 4 (ROR)
+	const long int SLPID_TILESET_GAME_FRIEZES_LOW_RESOLUTION_BASE_STD = 50733; // 0xC62D. For tilesets 0-3. gamea%d.shp
+	const long int SLPID_TILESET_GAME_FRIEZES_LOW_RESOLUTION_ROR = 53010; // 0xCF12. For tileset 4 (ROR). gamea%d.shp
+	const long int SLPID_TILESET_GAME_FRIEZES_MEDIUM_RESOLUTION_BASE_STD = 50737; // 0xC631. For tilesets 0-3. gameb%d.shp
+	const long int SLPID_TILESET_GAME_FRIEZES_MEDIUM_RESOLUTION_ROR = 53011; // 0xCF13. For tileset 4 (ROR). gameb%d.shp
+	const long int SLPID_TILESET_GAME_FRIEZES_HIGH_RESOLUTION_BASE_STD = 50741; // 0xC635. For tilesets 0-3. gamec%d.shp
+	const long int SLPID_TILESET_GAME_FRIEZES_HIGH_RESOLUTION_ROR = 53012; // 0xCF14. For tileset 4 (ROR). gamec%d.shp
+
+
 	// Bottom friezes
 	// 50734 to 50744 (AOE) + 53010, 53011, 53012 (ROR)
 }

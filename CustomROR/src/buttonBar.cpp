@@ -442,7 +442,7 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 			if (bestElemIsResearch[buttonIndex]) {
 				AddInGameCommandButton(buttonIndex, INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH, bestElemDATID[buttonIndex], !bestElemIsAvailable[buttonIndex], NULL /*elementInfo.c_str()*/, NULL, true);
 				AOE_STRUCTURES::STRUCT_UI_BUTTON_WITH_NUMBER *sb = gameMainUI->unitCommandButtons[buttonIndex];
-				sb->unknown_2C4;
+				sb->unknown_2C4_btnBoard;
 				sb->helpDllId = sb->helpDllId;
 				sb->winHelpDataDllId;
 				sb->buttonInfoValue;

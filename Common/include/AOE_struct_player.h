@@ -181,7 +181,7 @@ namespace AOE_STRUCTURES {
 		char AIControlMode; // 1=human, 2=gaia, 3=computer. Do not customize it. It is important when loading/saving, impacts destructor...
 		char unknown_049;
 		short int playerId; // 0x4A
-		short int unknown_04C; // something's size ? related to civ ?
+		short int resourcesCount; // 0x4C. Number of resources (0x3A = 58 in standard game)
 	private:
 		// 0x4E - Unused in standard game. Used by "ManageAI" mod to enable(1)/disable(0) AI control.
 		// Check if "ManageAI" feature is installed before using this. => Use IsAIActive(...) instead of using this directly

@@ -218,6 +218,9 @@
     <ClInclude Include="include\AOE_time.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
+    <ClInclude Include="include\TileSetHandler.h">
+      <Filter>Fichiers d%27en-tête\Technical</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -369,6 +372,9 @@
     </ClCompile>
     <ClCompile Include="src\AOEPrimitives_units.cpp">
       <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TilesetHandler.cpp">
+      <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

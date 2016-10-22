@@ -40,7 +40,8 @@ namespace AOE_STRUCTURES {
 
 	// Runs constructor on a STRUCT_SLP_INFO object so it refers to a specific SLP.
 	// This makes SLP bitmaps available for further treatments.
-	void InitSlpInfoFromDrs(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo, long int slpId, char *shpName) {
+	// You need to alloc slpInfo first !
+	void InitSlpInfoFromDrs(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo, long int slpId, const char *shpName) {
 		if (!EXEADDR_SlpInfo_ctor) { return; }
 		//char *shpName = ""; // unused when slpId is supplied
 		_asm {
@@ -48,6 +49,30 @@ namespace AOE_STRUCTURES {
 			PUSH shpName;
 			MOV ECX, slpInfo;
 			CALL EXEADDR_SlpInfo_ctor;
+		}
+	}
+
+
+	// Frees all underlying info from a SLP INFO object, but does NOT free slpInfo itself.
+	void AOE_FreeSlpInfoUnderlyingObjects(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo) {
+		assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
+		const unsigned long int callAddress = 0x49F840; // TO DO : constant & other versions
+		assert(slpInfo != NULL);
+		_asm {
+			MOV ECX, slpInfo;
+			CALL callAddress;
+		}
+	}
+
+	// Completely (properly) frees a slp info object
+	void FreeSlpInfo(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo) {
+		AOE_FreeSlpInfoUnderlyingObjects(slpInfo);
+		const unsigned long int callHeapFree = 0x525FC2; // TO DO : constant & other versions
+		_asm {
+			MOV ECX, slpInfo;
+			PUSH ECX;
+			CALL callHeapFree;
+			ADD ESP, 4;
 		}
 	}
 

@@ -33,7 +33,7 @@ namespace AOE_STRUCTURES
 	class STRUCT_UI_DIAMOND_MAP : public STRUCT_ANY_UI { // 3C A7 54 00 (editor). Also F4 A3 54 00(game) ?
 	public:
 		STRUCT_GAME_GLOBAL *global; // +F4
-		STRUCT_PLAYER *controlledPlayer;
+		STRUCT_PLAYER *controlledPlayer; // +F8
 		STRUCT_GAME_MAP_INFO *gameMapInfo; // +FC
 		// 0x100
 		char *unknown_100[0x128 - 0x100];

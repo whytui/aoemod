@@ -27,7 +27,7 @@ namespace AOE_STRUCTURES
 		STRUCT_SLP_INFO *healthSlp; // +100. Health.shp, slpId=0xC639
 		STRUCT_SLP_INFO *itemIconSlp; // +104. itemicon.shp, slpid=0xC62B
 		STRUCT_SLP_INFO *iconsForTrainUnits; // +108. Check type (STRUCT_SLP_INFO ok, but is pointer ok ?)
-		STRUCT_SLP_INFO **iconsForBuildings; // +10C. ArraySize=5 (tilesets)? Check type (STRUCT_SLP_INFO ok, but is pointer ok ?)
+		STRUCT_SLP_INFO **iconsForBuildings; // +10C. Pointer to array of building icons for each tileset. ArraySize=5 (5 tilesets). Points to sc. editor OR game main UI array.
 		STRUCT_PLAYER *controlledPlayer; // +110.
 		STRUCT_UNIT_BASE *currentUnit; // +114
 		long int unknown_118;

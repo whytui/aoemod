@@ -167,6 +167,7 @@
     <ClInclude Include="include\UI\AOE_struct_ui_join_screen.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_load_saved_game.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_mp_setup_screen.h" />
+    <ClInclude Include="include\UI\AOE_struct_ui_player_resource_values.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_playing_zone.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_popup_dialog.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_scenario_editor_main.h" />

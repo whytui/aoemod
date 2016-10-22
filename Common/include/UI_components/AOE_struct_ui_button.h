@@ -47,13 +47,13 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_274[9];
 		long int hotkey; // +298. Ascii code of hotkey: 65='A', etc.
 		long int unknown_29C; // +29C. Related to hotkey ? Not sure.
-		long int unknown_2A0;
-		char unknown_2A4;
-		char unknown_2A5;
-		char unknown_2A6;
-		char unknown_2A7;
-		char unknown_2A8;
-		char unknown_2A9;
+		long int unknown_2A0; // border size ?
+		char unknown_2A4; // border color ?
+		char unknown_2A5; // border color ?
+		char unknown_2A6; // border color ?
+		char unknown_2A7; // border color ?
+		char unknown_2A8; // border color ?
+		char unknown_2A9; // border color ?
 		char unknown_2AA_unused; // +2AA : unused ?
 		char unknown_2AB_unused; // +2AB : unused ?
 		char unknown_2AD_unused[4]; // +2AC unsure

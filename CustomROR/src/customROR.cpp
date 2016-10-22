@@ -290,6 +290,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004978B6:
 		this->FixUnsupportedRomanTileSetInEditorIcons(REG_values);
 		break;
+	case 0x00481782:
+		this->OnGameMainUiInitTilesetRelatedGraphics(REG_values);
+		break;
 	case 0x004FAA36:
 		this->WriteF11PopInfoText(REG_values);
 		break;
@@ -3011,6 +3014,35 @@ void CustomRORInstance::FixUnsupportedRomanTileSetInEditorIcons(REG_BACKUP *REG_
 }
 
 
+// From 0048177A
+// Changes return address to 0x481E0A if custom treatments are used or to 0x481792 to use standard AOE code.
+void CustomRORInstance::OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) REG_values->ESI_val;
+	ror_api_assert(REG_values, gameMainUI && gameMainUI->IsCheckSumValid());
+	long int sizeX_714 = REG_values->EDX_val;
+	ror_api_assert(REG_values, sizeX_714 == gameMainUI->sizeX);
+	long int tileset = REG_values->EAX_val;
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->EBX_val = tileset;
+		if (REG_values->EBX_val >= 5) {
+			REG_values->EBX_val = 0;
+		}
+		gameMainUI->tileset = tileset;
+		gameMainUI->tilesetRelatedGraphicsSizeX = sizeX_714;
+		ChangeReturnAddress(REG_values, 0x481792);
+	}
+	bool useCustomTreatments = false;
+
+	if (!useCustomTreatments) {
+		return;
+	}
+	TILESET::tilesetHandler.InitGameMainUITilesetDependentGraphics(gameMainUI, tileset);
+	
+	ChangeReturnAddress(REG_values, 0x481E0A); // after init of tileset-dependent graphics (overriden part)
+}
+
+
 // From 004FAA30
 void CustomRORInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *f11panel = (AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *)REG_values->ESI_val;
@@ -3527,7 +3559,7 @@ void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_value
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->EAX_val = unitGroup->commanderUnitId; // same as replaced instruction 0x4BFFC7
 	}
-	bool noCustomTreatment = false; // for debugging
+	bool noCustomTreatment = true; // for debugging
 	if (noCustomTreatment || !CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
 		return;
 	}

@@ -15,7 +15,7 @@ namespace AOE_STRUCTURES
 	// Size 0x21C Constructor 0x4A42A0
 	class STRUCT_UI_EDITOR_UNIT_INFO_ZONE : public STRUCT_UI_UNIT_INFO_ZONE {
 		long int currentUnitDefId; // +214
-		long int currentTileSet; // +218. 0-4.
+		long int currentTileSet; // +218. 0-4. Useful for building icons only ?
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_IN_GAME_UNIT_INFO_ZONE; }
 	};
 	static_assert(sizeof(STRUCT_UI_EDITOR_UNIT_INFO_ZONE) == 0x21C, "STRUCT_UI_EDITOR_UNIT_INFO_ZONE size");

@@ -159,7 +159,7 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_ALL_RELICS = 55,
 		CST_RES_ORDER_HEALING = 56, // Affect priests healing rate, see tech 211 (medecine)
 		CST_RES_ORDER_PRIEST_SACRIFICE = 57, // If 1, you can delete (sacrifice) priest while converting to make conversion successful. See tech 212.
-		CST_RES_COUNT = 58
+		CST_RES_COUNT = 58 // 0x3A = corresponds to player+0x4C
 	};
 
 	// Gatherable resource types (different from standard resource types). Animal food is not in the list !

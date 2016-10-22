@@ -155,6 +155,7 @@
     <ClInclude Include="include\StrategyPotentialElemInfo.h" />
     <ClInclude Include="include\StrategyUpdater.h" />
     <ClInclude Include="include\TechnologyFilter.h" />
+    <ClInclude Include="include\TileSetHandler.h" />
     <ClInclude Include="include\traceMessage.h" />
     <ClInclude Include="include\UI_utilities.h" />
     <ClInclude Include="include\unitDefHandling.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="src\StrategyBuilder.cpp" />
     <ClCompile Include="src\StrategyPotentialElemInfo.cpp" />
     <ClCompile Include="src\StrategyUpdater.cpp" />
+    <ClCompile Include="src\TilesetHandler.cpp" />
     <ClCompile Include="src\traceMessages.cpp" />
     <ClCompile Include="src\unitDefHandling.cpp" />
     <ClCompile Include="src\unitTargeting.cpp" />

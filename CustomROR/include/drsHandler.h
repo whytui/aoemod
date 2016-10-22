@@ -18,8 +18,14 @@ namespace AOE_STRUCTURES {
 
 	// Runs constructor on a STRUCT_SLP_INFO object so it refers to a specific SLP.
 	// This makes SLP bitmaps available for further treatments.
-	void InitSlpInfoFromDrs(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo, long int slpId, char *shpName = "");
+	// You need to alloc slpInfo first !
+	void InitSlpInfoFromDrs(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo, long int slpId, const char *shpName = "");
 
+	// Frees all underlying info from a SLP INFO object, but does NOT free slpInfo itself.
+	void AOE_FreeSlpInfoUnderlyingObjects(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo);
+
+	// Completely (properly) frees a slp info object
+	void FreeSlpInfo(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo);
 
 	// Loads / add a DRS file to internal data so its content (slp, wav, etc) is available like any other resources.
 	// Filename is the DRS file name with extension. Example "graphics.drs"

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <UI_components\AOE_struct_any_ui.h>
+#include <AOE_structures_drs.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -52,7 +53,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_33C;
 		char dialogNameForPopup[0x104]; // +340. Dialog name for options popup (dlg6_0) + diplomacy, menu, etc
 		long int themeSlpId; // +444. Determines the colors, background images, UI component themes to use in popups
-		unsigned long int unknown_448; // pointer?
+		STRUCT_SLP_INFO *unknown_448; // +448. unsure
 		char unknown_44C[0x478 - 0x44C];
 		bool IsCheckSumValid() const {
 			return (this->checksum == CHECKSUM_UI_SCREEN_BASE);
