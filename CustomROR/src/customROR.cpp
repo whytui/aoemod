@@ -296,6 +296,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004F87FD:
 		this->OnDisplayBuildingIconInUnitInfoZone(REG_values);
 		break;
+	case 0x004A440A:
+		this->OnEditorSetBuildingIconInUnitInfoZone(REG_values);
+		break;
 	case 0x004FAA36:
 		this->WriteF11PopInfoText(REG_values);
 		break;
@@ -3079,6 +3082,45 @@ void CustomRORInstance::OnDisplayBuildingIconInUnitInfoZone(REG_BACKUP *REG_valu
 	traceMessageHandler.WriteMessage(std::string("Error: could not get building icons for tileset ") + std::to_string(unitTileSet));
 	REG_values->EDX_val = 0;
 	// ... And exit in "standard" behaviour to use tileset 0 (do not change return address)
+}
+
+
+// From 004A4402. In editorUnitInfoZone.setUnitDef(unitDef, player). Ensure SLPInfo is correct even for custom tilesets
+void CustomRORInstance::OnEditorSetBuildingIconInUnitInfoZone(REG_BACKUP *REG_values) {
+	long int currentTileset = REG_values->EDX_val;
+	AOE_STRUCTURES::STRUCT_UI_EDITOR_UNIT_INFO_ZONE *editorUnitInfoZone = (AOE_STRUCTURES::STRUCT_UI_EDITOR_UNIT_INFO_ZONE*)REG_values->EBP_val;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)REG_values->EAX_val;
+	AOE_STRUCTURES::STRUCT_SLP_INFO **iconsForBuildings = (AOE_STRUCTURES::STRUCT_SLP_INFO **)REG_values->ECX_val;
+	ror_api_assert(REG_values, unitDef && unitDef->IsCheckSumValidForAUnitClass());
+	ror_api_assert(REG_values, editorUnitInfoZone && editorUnitInfoZone->IsCheckSumValid());
+	ror_api_assert(REG_values, iconsForBuildings != NULL);
+	// Remark: game code is a bit hazardous. It supposes that command attribute==2 makes that unit object IS a building, which may be wrong depending on empires.dat.
+	REG_values->EDX_val = 0;
+	if (unitDef->IsCheckSumValid()) {
+		// We try to be more secure here. Access the field only if object IS a valid building object (avoid overflow).
+		REG_values->EDX_val = unitDef->graphicsAngle; // 0x4A4405
+	}
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+
+	if ((currentTileset < 0) || (currentTileset >= TILESET::tilesetHandler.tilesetCount)) {
+		traceMessageHandler.WriteMessage(std::string("Error: tileset ") + std::to_string(currentTileset) + std::string(" is invalid"));
+		currentTileset = 0;
+	}
+	if (currentTileset <= TILESET::MAX_STANDARD_TILESET_ID) {
+		return; // Standard case: correctly handled by ROR code
+	}
+	
+	// Custom tilesets: all we have to do is replace EDI by the correct pointer
+	AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo = TILESET::tilesetHandler.GetBuildingIconsSlpInfoForTileSet(currentTileset);
+	if (slpInfo) {
+		REG_values->EDI_val = (unsigned long int)slpInfo;
+		return;
+	}
+	// Not found ? use default icons instead to avoid crash or UI issues
+	traceMessageHandler.WriteMessage(std::string("Error: could not get building icons for tileset ") + std::to_string(currentTileset));
+	REG_values->EDI_val = (unsigned long int) iconsForBuildings[0];
 }
 
 
