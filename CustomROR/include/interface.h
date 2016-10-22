@@ -22,12 +22,10 @@ Custom ROR uses 10000-14999.
 */
 
 // ***************** These numbers must match DRS file object IDs !!! ************************
+// See also AOE_const_drs.h
 // Identifies customROR SLP IDs (id in DRS file)
 static const long int CST_CUSTOMROR_CMD_ICONS_SLP_ID = 10000; // CustomROR command icons
 static const long int CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID = 10001; // Custom shortcuts (10-20)
-
-static const long int CST_BLD_ICONS_AOE_TILESETS_SLP_ID_BASE = 0xC610; // (50704-50707) SLP IDs for building icons for tilesets 0-3 (AOE ones - not roman tileset)
-static const long int CST_BLD_ICONS_ROMAN_TILESET_SLP_ID = 0xCF0D; // (53005) SLP ID for roman building icons (tileset 4)
 
 static const long int CST_CUSTOMROR_ICON_ID_DONT_ATTACK_VILLAGERS = 0;
 static const long int CST_CUSTOMROR_ICON_ID_DONT_ATTACK_BUILDINGS = 1;

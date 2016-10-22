@@ -167,8 +167,8 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		gameMainUI->gameTopAndBottomFriezes = NULL;
 	}
 	std::string gamex_shp = "";
-	//slpId = -1;
 	int resolution = 0;
+	slpId = -1;
 	if (gameMainUI->sizeX < 0x320) {
 		// Low resolution
 		gamex_shp = "gamea" + tilesetAsString + ".shp";
@@ -184,7 +184,6 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 			resolution = 3;
 		}
 	}
-	slpId = -1;
 	if (tileset <= MAX_STANDARD_TILESET_ID) {
 		// For ROR-supported tilesets
 		switch (resolution) {

@@ -30,6 +30,7 @@ public:
 
 	int tilesetCount;
 
+	// Overrides GameMainUI components initialization in 0x4978AF, to allow usage of custom tilesets
 	void InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int tileset);
 
 
