@@ -27,6 +27,7 @@ enum TILESET_ID {
 class CustomTilesetInfo {
 public:
 	CustomTilesetInfo();
+	~CustomTilesetInfo();
 
 	long int tilesetId;
 	std::string tilesetName; // Optional name.
@@ -40,6 +41,16 @@ public:
 	long int slpIdGameScreenLow;
 	long int slpIdGameScreenMedium;
 	long int slpIdGameScreenHigh;
+
+	// Get the SLPInfo for building icons for this tileset. Automatically handles SLP object loading/freeing.
+	AOE_STRUCTURES::STRUCT_SLP_INFO *GetIconsForBuildings();
+
+private:
+	AOE_STRUCTURES::STRUCT_SLP_INFO *iconsForBuildings; // SLPInfo object for building icons. Loaded only when necessary, freed when "this" is destroyed.
+
+	// Set SLP info object for building icons for this tileset. It needs to be freed when "this" is destroyed.
+	void InitBuildingIcons();
+
 };
 
 
@@ -54,6 +65,8 @@ public:
 	// Overrides GameMainUI components initialization in 0x4978AF, to allow usage of custom tilesets
 	void InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int tileset);
 
+	// Get the slpinfo for building icons for a custom tileset
+	AOE_STRUCTURES::STRUCT_SLP_INFO *GetBuildingIconsSlpInfoForTileSet(long int tileset);
 
 private:
 	CustomTilesetInfo tilesetsInfo[256];

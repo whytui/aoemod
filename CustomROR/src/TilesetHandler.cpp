@@ -23,7 +23,38 @@ CustomTilesetInfo::CustomTilesetInfo() {
 	this->slpIdGameScreenLow = -1;
 	this->slpIdGameScreenMedium = -1;
 	this->slpIdThemeInfo = -1;
+	this->iconsForBuildings = NULL;
 }
+
+
+CustomTilesetInfo::~CustomTilesetInfo() {
+	if (this->iconsForBuildings != NULL) {
+		AOEFree(this->iconsForBuildings);
+	}
+}
+
+
+// Set SLP info object for building icons for this tileset. It needs to be freed when "this" is destroyed.
+void CustomTilesetInfo::InitBuildingIcons() {
+	assert(this->iconsForBuildings == NULL);
+	this->iconsForBuildings = (STRUCT_SLP_INFO*)AOEAlloc(0x20);
+	if (!this->iconsForBuildings) {
+		traceMessageHandler.WriteMessage("Error with AOEAlloc for iconsForBuildings");
+		return;
+	}
+	TILESET::InitSlpInfoFromDrs(this->iconsForBuildings, this->slpIdBuildingIcons, "");
+}
+
+
+// Get the SLPInfo for building icons for this tileset. Automatically handles SLP object loading/freeing.
+AOE_STRUCTURES::STRUCT_SLP_INFO *CustomTilesetInfo::GetIconsForBuildings() {
+	if (this->iconsForBuildings == NULL) {
+		this->InitBuildingIcons();
+	}
+	return this->iconsForBuildings;
+}
+
+
 
 
 TilesetHandler::TilesetHandler() {
@@ -315,6 +346,16 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		PUSH 0;
 		CALL callAddr4_seticon; // call in 0x481E05
 	}
+}
+
+
+// Get the slpinfo for building icons for a custom tileset
+STRUCT_SLP_INFO *TilesetHandler::GetBuildingIconsSlpInfoForTileSet(long int tileset) {
+	CustomTilesetInfo *info = this->GetTilesetInfo(tileset);
+	if (!info || (info->tilesetId != tileset)) {
+		return NULL;
+	}
+	return info->GetIconsForBuildings();
 }
 
 

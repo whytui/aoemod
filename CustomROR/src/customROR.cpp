@@ -293,6 +293,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x00481782:
 		this->OnGameMainUiInitTilesetRelatedGraphics(REG_values);
 		break;
+	case 0x004F87FD:
+		this->OnDisplayBuildingIconInUnitInfoZone(REG_values);
+		break;
 	case 0x004FAA36:
 		this->WriteF11PopInfoText(REG_values);
 		break;
@@ -3041,6 +3044,41 @@ void CustomRORInstance::OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_v
 	TILESET::tilesetHandler.InitGameMainUITilesetDependentGraphics(gameMainUI, tileset);
 	
 	ChangeReturnAddress(REG_values, 0x481E0A); // after init of tileset-dependent graphics (overriden part)
+}
+
+
+// From 0x4F87F6. Change return address to 0x4F8801 for custom tilesets.
+void CustomRORInstance::OnDisplayBuildingIconInUnitInfoZone(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unitBld = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)REG_values->ECX_val;
+	// Remark: game code is a bit hazardous. It supposes that command attribute==2 makes that unit object IS a building, which may be wrong depending on empires.dat.
+	long int unitTileSet = 0;
+	if (unitBld->IsCheckSumValid()) {
+		// We try to be more secure here. Access the field only if object IS a valid building object (avoid overflow).
+		unitTileSet = unitBld->tileset;
+	}
+	REG_values->EDX_val = unitTileSet; // Always set EDX, this can't do any harm (even if not supposed to be useful for custom tilesets)
+	ror_api_assert(REG_values, unitBld->IsCheckSumValidForAUnitClass());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+	if ((unitTileSet < 0) || (unitTileSet >= TILESET::tilesetHandler.tilesetCount)) {
+		traceMessageHandler.WriteMessage(std::string("Error: tileset ") + std::to_string(unitTileSet) + std::string(" is invalid"));
+		unitTileSet = 0;
+	}
+	if (unitTileSet <= TILESET::MAX_STANDARD_TILESET_ID) {
+		return; // Do not change return address. We're finished here (EDX has been set correctly).
+	}
+	// We have a custom tileset
+	AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo = TILESET::tilesetHandler.GetBuildingIconsSlpInfoForTileSet(unitTileSet);
+	if (slpInfo) {
+		REG_values->EDI_val = (unsigned long int)slpInfo;
+		ChangeReturnAddress(REG_values, 0x4F8801); // Skip the MOV EDI,DWORD PTR DS:[EDI+EDX*4]
+		return;
+	}
+	// Not found ? use default icons instead to avoid crash or UI issues
+	traceMessageHandler.WriteMessage(std::string("Error: could not get building icons for tileset ") + std::to_string(unitTileSet));
+	REG_values->EDX_val = 0;
+	// ... And exit in "standard" behaviour to use tileset 0 (do not change return address)
 }
 
 
