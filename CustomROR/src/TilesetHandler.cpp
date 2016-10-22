@@ -169,7 +169,7 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 	std::string gamex_shp = "";
 	//slpId = -1;
 	int resolution = 0;
-	if (gameMainUI->sizeX <= 0x320) {
+	if (gameMainUI->sizeX < 0x320) {
 		// Low resolution
 		gamex_shp = "gamea" + tilesetAsString + ".shp";
 		resolution = 1;
