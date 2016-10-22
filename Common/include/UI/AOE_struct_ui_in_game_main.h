@@ -60,7 +60,7 @@ namespace AOE_STRUCTURES
 		STRUCT_SLP_INFO *iconsForResearches; // +490. Pointer to SLP data... Cf SLP 50729
 		STRUCT_SLP_INFO *iconsForTrainUnits; // +494. Pointer to SLP data... Cf SLP 50730.
 		STRUCT_SLP_INFO *iconsForBuildings[5]; // +498 + tileset*4. There is no free slot for more tilesets. SLPId= C610+i except tileset4=>CF0D.
-		STRUCT_SLP_INFO *unknown_4AC_icons; // +4AC. Used in 48250F. Includes the "cancel" icon, id=10. SLP 50725 ?
+		STRUCT_SLP_INFO *iconsNextCancelForCurrentResolution; // +4AC. Updated according to tileset/resolution. Used in 48250F. "cancel" icon(10), "next" (id?). SLP 50725-50728 or 53009. In low resolution, uses smaller icons to avoid conflict with map.
 		short int nextPageIconId; // +4B0. Icon id for Next page button ?
 		short int unknown_4B2_iconId; // +4B2. Icon id for unselect button ?
 		short int unknown_4B4; // +4B4. Icon id ?

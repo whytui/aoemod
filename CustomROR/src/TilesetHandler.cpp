@@ -282,15 +282,15 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 
 	if (resolution > 1) {
 		// Medium/high resolutions
-		gameMainUI->unknown_4AC_icons = gameMainUI->iconsForUnitCommands;
+		gameMainUI->iconsNextCancelForCurrentResolution = gameMainUI->iconsForUnitCommands;
 	} else {
 		// Low
-		gameMainUI->unknown_4AC_icons = gameMainUI->iconsForOtherButtons; // "next" and "cancel" need to be smaller not to conflict with map
+		gameMainUI->iconsNextCancelForCurrentResolution = gameMainUI->iconsForOtherButtons; // "next" and "cancel" need to be smaller not to conflict with map
 	}
 	STRUCT_UI_BUTTON_WITH_NUMBER *nextPageBtn = gameMainUI->unitCommandButtons[5];
 	assert(nextPageBtn != NULL);
 	long int nextPageIconId = gameMainUI->nextPageIconId;
-	STRUCT_SLP_INFO *unknown_4AC_icons = gameMainUI->unknown_4AC_icons;
+	STRUCT_SLP_INFO *unknown_4AC_icons = gameMainUI->iconsNextCancelForCurrentResolution;
 	unsigned long int callAddr4_seticon = 0x45EF60;
 	_asm {
 		MOV ECX, nextPageBtn;
@@ -328,7 +328,7 @@ void TilesetHandler::FillColorArgs(unsigned char *argColor, long int tileset) {
 		argColor[3] = 0x6F;
 		argColor[4] = 0xEE;
 		argColor[5] = 0x38;
-		break;
+		return;
 	case TILESET_GREECE:
 		argColor[0] = 0x72;
 		argColor[1] = 0x73;
@@ -336,7 +336,7 @@ void TilesetHandler::FillColorArgs(unsigned char *argColor, long int tileset) {
 		argColor[3] = 0x74;
 		argColor[4] = 0xB7;
 		argColor[5] = 0xB8;
-		break;
+		return;
 	case TILESET_BABYLONIAN:
 		argColor[0] = 0xB9;
 		argColor[1] = 0x77;
@@ -344,7 +344,7 @@ void TilesetHandler::FillColorArgs(unsigned char *argColor, long int tileset) {
 		argColor[3] = 0x78;
 		argColor[4] = 0x78;
 		argColor[5] = 0x79;
-		break;
+		return;
 	case TILESET_ASIAN:
 		argColor[0] = 0x8A;
 		argColor[1] = 0xED;
@@ -352,7 +352,7 @@ void TilesetHandler::FillColorArgs(unsigned char *argColor, long int tileset) {
 		argColor[3] = 0xEE;
 		argColor[4] = 0x38;
 		argColor[5] = 0x95;
-		break;
+		return;
 	case TILESET_ROMAN:
 		argColor[0] = 0x73;
 		argColor[1] = 0x74;
@@ -360,11 +360,17 @@ void TilesetHandler::FillColorArgs(unsigned char *argColor, long int tileset) {
 		argColor[3] = 0x75;
 		argColor[4] = 0x76;
 		argColor[5] = 0x77;
-		break;
+		return;
 	default:
 		break;
 	}
-	// TODO: custom tilesets
+	argColor[0] = 0x7E;
+	argColor[1] = 0x6D;
+	argColor[2] = 0x6F;
+	argColor[3] = 0x6F;
+	argColor[4] = 0xEE;
+	argColor[5] = 0x38;
+	// TODO: custom tilesets: add a config for this.
 }
 
 void TilesetHandler::SetBorderColors(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, unsigned char *argColor) {

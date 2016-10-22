@@ -714,11 +714,13 @@ static bool AOE_InGameAddCommandButton(AOE_STRUCTURES::STRUCT_PLAYER *player, lo
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_OR_BACK) || 
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_SELECTION) || 
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE)) {
-		iconsSLP = inGameMain->unknown_4AC_icons;
+		iconsSLP = inGameMain->iconsNextCancelForCurrentResolution;
 	}
 
 	// Check that iconId is valid in SLP : otherwise, the whole game display will encounter serious issues !
 	if (!IsObjectIndexValidInSlp(iconsSLP, iconId)) {
+		std::string msg = "iconId " + std::to_string(iconId) + " does not exist in current SLP file.";
+		traceMessageHandler.WriteMessageNoNotification(msg);
 		assert(!"iconId does not exist in this SLP file. Maybe a DRS file is missing.");
 		return false;
 	}
