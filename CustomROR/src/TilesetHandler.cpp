@@ -42,7 +42,7 @@ void CustomTilesetInfo::InitBuildingIcons() {
 		traceMessageHandler.WriteMessage("Error with AOEAlloc for iconsForBuildings");
 		return;
 	}
-	TILESET::InitSlpInfoFromDrs(this->iconsForBuildings, this->slpIdBuildingIcons, "");
+	AOE_METHODS::InitSlpInfoFromDrs(this->iconsForBuildings, this->slpIdBuildingIcons, "");
 }
 
 
@@ -142,7 +142,7 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 	
 	// 0x4819E6
 	if (gameMainUI->buttonBoardResolutionA != NULL) {
-		AOE_STRUCTURES::AOE_FreeSlpInfoUnderlyingObjects(gameMainUI->buttonBoardResolutionA); // call 0x49F840 and free
+		AOE_METHODS::FreeSlpInfoUnderlyingObjects(gameMainUI->buttonBoardResolutionA); // call 0x49F840 and free
 		gameMainUI->buttonBoardResolutionA = NULL;
 	}
 	std::string btnbrdax_shp = "btnbrda" + tilesetAsString + ".shp";
@@ -160,11 +160,11 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 			slpId = this->tilesetsInfo[tileset].slpIdButtonBoardLow;
 		}
 	}
-	InitSlpInfoFromDrs(gameMainUI->buttonBoardResolutionA, slpId, btnbrdax_shp.c_str());
+	AOE_METHODS::InitSlpInfoFromDrs(gameMainUI->buttonBoardResolutionA, slpId, btnbrdax_shp.c_str());
 
 	// 0x481A7B
 	if (gameMainUI->iconsForOtherButtons != NULL) {
-		AOE_STRUCTURES::AOE_FreeSlpInfoUnderlyingObjects(gameMainUI->iconsForOtherButtons);
+		AOE_METHODS::FreeSlpInfoUnderlyingObjects(gameMainUI->iconsForOtherButtons);
 		gameMainUI->iconsForOtherButtons = NULL;
 	}
 	std::string btnothx_shp = "btnoth" + tilesetAsString + ".shp";
@@ -182,11 +182,11 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 			slpId = this->tilesetsInfo[tileset].slpIdCommonCommandIcons;
 		}
 	}
-	InitSlpInfoFromDrs(gameMainUI->iconsForOtherButtons, slpId, btnbrdax_shp.c_str());
+	AOE_METHODS::InitSlpInfoFromDrs(gameMainUI->iconsForOtherButtons, slpId, btnbrdax_shp.c_str());
 
 	// 0x481B34
 	if (gameMainUI->buttonBoardResolutionB != NULL) {
-		AOE_STRUCTURES::AOE_FreeSlpInfoUnderlyingObjects(gameMainUI->buttonBoardResolutionB);
+		AOE_METHODS::FreeSlpInfoUnderlyingObjects(gameMainUI->buttonBoardResolutionB);
 		gameMainUI->buttonBoardResolutionB = NULL;
 	}
 	std::string btnbrdbx_shp = "btnbrdb" + tilesetAsString + ".shp";
@@ -204,11 +204,11 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 			slpId = this->tilesetsInfo[tileset].slpIdButtonBoardMedium;
 		}
 	}
-	InitSlpInfoFromDrs(gameMainUI->buttonBoardResolutionB, slpId, btnbrdbx_shp.c_str());
+	AOE_METHODS::InitSlpInfoFromDrs(gameMainUI->buttonBoardResolutionB, slpId, btnbrdbx_shp.c_str());
 
 	// 0x481BC0
 	if (gameMainUI->buttonBoardResolutionC != NULL) {
-		AOE_STRUCTURES::AOE_FreeSlpInfoUnderlyingObjects(gameMainUI->buttonBoardResolutionC);
+		AOE_METHODS::FreeSlpInfoUnderlyingObjects(gameMainUI->buttonBoardResolutionC);
 		gameMainUI->buttonBoardResolutionC = NULL;
 	}
 	std::string btnbrdcx_shp = "btnbrdc" + tilesetAsString + ".shp";
@@ -226,11 +226,11 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 			slpId = this->tilesetsInfo[tileset].slpIdButtonBoardHigh;
 		}
 	}
-	InitSlpInfoFromDrs(gameMainUI->buttonBoardResolutionC, slpId, btnbrdcx_shp.c_str());
+	AOE_METHODS::InitSlpInfoFromDrs(gameMainUI->buttonBoardResolutionC, slpId, btnbrdcx_shp.c_str());
 
 	// 0x481C61
 	if (gameMainUI->gameTopAndBottomFriezes != NULL) {
-		AOE_STRUCTURES::AOE_FreeSlpInfoUnderlyingObjects(gameMainUI->gameTopAndBottomFriezes); // call 0x49F840 and free
+		AOE_METHODS::FreeSlpInfoUnderlyingObjects(gameMainUI->gameTopAndBottomFriezes); // call 0x49F840 and free
 		gameMainUI->gameTopAndBottomFriezes = NULL;
 	}
 	std::string gamex_shp = "";
@@ -299,7 +299,7 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		traceMessageHandler.WriteMessage("Error with AOEAlloc for gameTopAndBottomFriezes");
 		return;
 	}
-	InitSlpInfoFromDrs(gameMainUI->gameTopAndBottomFriezes, slpId, gamex_shp.c_str());
+	AOE_METHODS::InitSlpInfoFromDrs(gameMainUI->gameTopAndBottomFriezes, slpId, gamex_shp.c_str());
 	// End of tileset-related inits : 0x481D51
 
 	for (int i = 0; i < 12; i++) {

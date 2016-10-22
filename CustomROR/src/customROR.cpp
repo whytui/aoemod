@@ -3012,7 +3012,7 @@ void CustomRORInstance::FixUnsupportedRomanTileSetInEditorIcons(REG_BACKUP *REG_
 		SetIntValueToRORStack(REG_values, 0x1D4, 1); // set local var = 1 (step for exception manager?)
 		SetIntValueToRORStack(REG_values, 0x10, (unsigned long int)slpInfo); // save pointer (although it seems to be unused)
 		long int slpId = AOE_CONST_DRS::SLPID_TILESET_BLD_ICONS_ROR;
-		InitSlpInfoFromDrs(slpInfo, slpId, shpName);
+		AOE_METHODS::InitSlpInfoFromDrs(slpInfo, slpId, shpName);
 		REG_values->EAX_val = (unsigned long int)slpInfo;
 	} else {
 		REG_values->EAX_val = 0;

@@ -271,7 +271,7 @@ void CustomRORCommand::LoadCustomLocalizationFiles() {
 void CustomRORCommand::LoadCustomDrsFiles() {
 	for each (DrsFileToLoad *drs in CUSTOMROR::crInfo.configInfo.customDrsFilesList)
 	{
-		AOE_AddDrsFile(drs->filename.c_str(), drs->folder.c_str());
+		AOE_METHODS::AddDrsFile(drs->filename.c_str(), drs->folder.c_str());
 	}
 
 	// Prepare custom DRS data
@@ -280,8 +280,8 @@ void CustomRORCommand::LoadCustomDrsFiles() {
 			MessageBoxA(0, "ERROR : Could not find customROR.drs or it is invalid.", "CustomROR", MB_ICONWARNING);
 		}
 		// Initialize global variable so we can retrieve our button icons when needed
-		InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorIcons, CST_CUSTOMROR_CMD_ICONS_SLP_ID);
-		InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorUnitShortcuts, CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
+		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorIcons, CST_CUSTOMROR_CMD_ICONS_SLP_ID);
+		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorUnitShortcuts, CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
 	}
 }
 

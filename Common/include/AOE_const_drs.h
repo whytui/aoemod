@@ -55,8 +55,5 @@ namespace AOE_CONST_DRS {
 	const long int SLPID_TILESET_GAME_FRIEZES_HIGH_RESOLUTION_BASE_STD = 50741; // 0xC635. For tilesets 0-3. gamec%d.shp
 	const long int SLPID_TILESET_GAME_FRIEZES_HIGH_RESOLUTION_ROR = 53012; // 0xCF14. For tileset 4 (ROR). gamec%d.shp
 
-
-	// Bottom friezes
-	// 50734 to 50744 (AOE) + 53010, 53011, 53012 (ROR)
 }
 
