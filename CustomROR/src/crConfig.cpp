@@ -922,17 +922,17 @@ bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdGameScreenHigh = intValue; }
 					}
 					if (subElemName == "button_borders") {
-						callResult = subElem->QueryIntAttribute("col1", &intValue);
+						callResult = subElem->QueryIntAttribute("out_top_right", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[0] = intValue; }
-						callResult = subElem->QueryIntAttribute("col2", &intValue);
+						callResult = subElem->QueryIntAttribute("mid_top_right", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[1] = intValue; }
-						callResult = subElem->QueryIntAttribute("col3", &intValue);
+						callResult = subElem->QueryIntAttribute("in_top_right", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[2] = intValue; }
-						callResult = subElem->QueryIntAttribute("col4", &intValue);
+						callResult = subElem->QueryIntAttribute("in_bottom_left", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[3] = intValue; }
-						callResult = subElem->QueryIntAttribute("col5", &intValue);
+						callResult = subElem->QueryIntAttribute("mid_bottom_left", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[4] = intValue; }
-						callResult = subElem->QueryIntAttribute("col6", &intValue);
+						callResult = subElem->QueryIntAttribute("out_bottom_left", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[5] = intValue; }
 					}
 					

@@ -23,6 +23,15 @@ enum TILESET_ID {
 	TILESET_COUNT_STANDARD_ROR
 };
 
+// Describes the order of values in button border colors array (arguments for call 0x455950, etc)
+enum BTN_BORDER_COLOR_ORDER {
+	OUT_TOP_RIGHT = 0,
+	MID_TOP_RIGHT = 1,
+	IN_TOP_RIGHT = 2,
+	IN_BOTTOM_LEFT = 3,
+	MID_BOTTOM_LEFT = 4,
+	OUT_BOTTOM_LEFT = 5
+};
 
 class CustomTilesetInfo {
 public:
@@ -40,7 +49,7 @@ public:
 	long int slpIdGameScreenLow;
 	long int slpIdGameScreenMedium;
 	long int slpIdGameScreenHigh;
-	unsigned char btnBorderColors[6];
+	unsigned char btnBorderColors[6]; // Index: cf BTN_BORDER_COLOR_ORDER
 
 	// Sets "my" tileset ID and does some underlying processing.
 	void SetTilesetId(long int tileset);

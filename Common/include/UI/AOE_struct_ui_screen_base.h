@@ -38,12 +38,12 @@ namespace AOE_STRUCTURES
 		long int unknown_slpId_314; // +314
 		unsigned long int unknown_318;
 		unsigned long int unknown_31C;
-		char unknown_320;
-		char unknown_321;
-		char unknown_322;
-		char unknown_323;
-		char unknown_324;
-		char unknown_325;
+		char unknown_colorForBtnBorderOutTopRight; // +320
+		char unknown_colorForBtnBorderMidTopRight; // +321
+		char unknown_colorForBtnBorderInTopRight; // +322
+		char unknown_colorForBtnBorderInBottomLeft; // +323
+		char unknown_colorForBtnBorderMidBottomLeft; // +324
+		char unknown_colorForBtnBorderOutBottomLeft; // +325
 		char unknown_326[2]; // unused
 		long int unknown_328;
 		unsigned long int unknown_32C;
