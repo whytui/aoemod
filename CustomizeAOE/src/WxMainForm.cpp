@@ -69,7 +69,8 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 	SetStatusText("");
 	
 	this->txtLog = new wxTextCtrl(this, wxID_ANY,
-		_T("Welcome. Do not forget to backup you original game EXE file.\n")
+		_T("CustomizeAOE ") + widen(VER_FILE_VERSION_STR) +
+		_T(" - welcome. Do not forget to backup you original game EXE file.\n")
 		_T("You can also customize/run a copy of empiresX.exe and keep empiresX.exe unchanged.\n")
 		_T("Latest Version: http://aoe.heavengames.com/dl-php/showfile.php?fileid=2464 \n")
 		_T("\nPlease RUN ME AS ADMIN or most features will probably not work !\n\n"),
