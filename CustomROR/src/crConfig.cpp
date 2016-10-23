@@ -876,15 +876,18 @@ bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
 			int tilesetId = 0;
 			callResult = elem->QueryIntAttribute("id", &intValue);
 			if (callResult == TIXML_SUCCESS) { tilesetId = intValue; }
-			if ((tilesetId >= TILESET::TILESET_COUNT_STANDARD_ROR) && (tilesetId < TILESET::MAX_TILESET_TOTAL_SUPPORTED_COUNT)) {
+			bool tilesetCanBeModified = (TILESET::tilesetHandler.allowCustomizeStandardTilesets || (tilesetId >= TILESET::TILESET_COUNT_STANDARD_ROR));
+			if (tilesetCanBeModified && (tilesetId < TILESET::MAX_TILESET_TOTAL_SUPPORTED_COUNT)) {
 				TILESET::CustomTilesetInfo *tilesetInfo = TILESET::tilesetHandler.GetTilesetInfo(tilesetId);
 				if (!tilesetInfo) {
 					this->couldNotReadTilesetXMLConfig = true; // ERROR
 					return false;
 				}
+				TILESET::tilesetHandler.usesCustomCivs = true;
 				std::string tilesetName = this->XML_GetAttributeValue(elem, "name");
 				tilesetInfo->SetTilesetId(tilesetId);
 				tilesetInfo->tilesetName = tilesetName;
+				tilesetInfo->isCustomized = true;
 
 				TiXmlElement *subElem = elem->FirstChildElement();
 				while (subElem) {
@@ -921,7 +924,7 @@ bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
 						callResult = subElem->QueryIntAttribute("slpid_high", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdGameScreenHigh = intValue; }
 					}
-					if (subElemName == "button_borders") {
+					if (subElemName == "button_border_colors") {
 						callResult = subElem->QueryIntAttribute("out_top_right", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[0] = intValue; }
 						callResult = subElem->QueryIntAttribute("mid_top_right", &intValue);

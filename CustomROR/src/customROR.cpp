@@ -2992,14 +2992,12 @@ void CustomRORInstance::InitPlayersCivInScenarioEditor(REG_BACKUP *REG_values) {
 // From 0x4978AF. The ROR-added code to support roman tileset in icons in editor does not work at all. Fix it.
 void CustomRORInstance::FixUnsupportedRomanTileSetInEditorIcons(REG_BACKUP *REG_values) {
 	bool useStandardBehavior = false;
-	if (REG_values->fixesForGameEXECompatibilityAreDone) {
-		return;
-	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	if (useStandardBehavior) {
 		REG_values->EDI_val = 1; // This is exactly what original code does.
 		return;
 	}
+
 	// Custom code
 	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditorUI = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN*)REG_values->ESI_val;
 	ror_api_assert(REG_values, scEditorUI && scEditorUI->IsCheckSumValid());
@@ -3039,7 +3037,7 @@ void CustomRORInstance::OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_v
 		gameMainUI->tilesetRelatedGraphicsSizeX = sizeX_714;
 		ChangeReturnAddress(REG_values, 0x481792);
 	}
-	bool useCustomTreatments = true;
+	bool useCustomTreatments = TILESET::tilesetHandler.usesCustomCivs; // Use standard code when no tileset customization is configured
 
 	if (!useCustomTreatments) {
 		return;
@@ -3068,7 +3066,9 @@ void CustomRORInstance::OnDisplayBuildingIconInUnitInfoZone(REG_BACKUP *REG_valu
 		traceMessageHandler.WriteMessage(std::string("Error: tileset ") + std::to_string(unitTileSet) + std::string(" is invalid"));
 		unitTileSet = 0;
 	}
-	if (unitTileSet <= TILESET::MAX_STANDARD_TILESET_ID) {
+	bool useCustomTreatments = TILESET::tilesetHandler.usesCustomCivs; // Use standard code when no tileset customization is configured
+
+	if (!useCustomTreatments || !TILESET::tilesetHandler.IsCustomized(unitTileSet)) {
 		return; // Do not change return address. We're finished here (EDX has been set correctly).
 	}
 	// We have a custom tileset
@@ -3108,7 +3108,9 @@ void CustomRORInstance::OnEditorSetBuildingIconInUnitInfoZone(REG_BACKUP *REG_va
 		traceMessageHandler.WriteMessage(std::string("Error: tileset ") + std::to_string(currentTileset) + std::string(" is invalid"));
 		currentTileset = 0;
 	}
-	if (currentTileset <= TILESET::MAX_STANDARD_TILESET_ID) {
+	bool useCustomTreatments = TILESET::tilesetHandler.usesCustomCivs; // Use standard code when no tileset customization is configured
+
+	if (!useCustomTreatments || !TILESET::tilesetHandler.IsCustomized(currentTileset)) {
 		return; // Standard case: correctly handled by ROR code
 	}
 	

@@ -39,6 +39,7 @@ public:
 	~CustomTilesetInfo();
 
 	std::string tilesetName; // Optional name.
+	bool isCustomized; // mostly useful for standard tilesets.
 	long int slpIdThemeInfo;
 	long int slpIdCheckboxes;
 	long int slpIdBuildingIcons;
@@ -77,8 +78,12 @@ public:
 	TilesetHandler();
 
 	CustomTilesetInfo *GetTilesetInfo(long int tileset);
+	// Returns true if the specified tileset (ID) is customized by configuration.
+	bool IsCustomized(long int tileset);
 
 	int tilesetCount;
+	bool usesCustomCivs; // Set to true if specific configuration for tilesets is being used.
+	bool allowCustomizeStandardTilesets; // If true, it is allowed to modify standard tilesets.
 
 	// Overrides GameMainUI components initialization in 0x4978AF, to allow usage of custom tilesets
 	void InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int tileset);
@@ -91,6 +96,8 @@ private:
 
 	// Make sure that argColor's size is 6. (indexes 0-5)
 	void SetBorderColors(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, unsigned char *argColor);
+
+	void InitStandardTilesetsData();
 };
 
 extern TilesetHandler tilesetHandler;
