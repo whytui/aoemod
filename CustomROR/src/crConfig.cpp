@@ -883,7 +883,7 @@ bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
 					return false;
 				}
 				std::string tilesetName = this->XML_GetAttributeValue(elem, "name");
-				tilesetInfo->tilesetId = tilesetId;
+				tilesetInfo->SetTilesetId(tilesetId);
 				tilesetInfo->tilesetName = tilesetName;
 
 				TiXmlElement *subElem = elem->FirstChildElement();
@@ -920,6 +920,20 @@ bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdGameScreenMedium = intValue; }
 						callResult = subElem->QueryIntAttribute("slpid_high", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdGameScreenHigh = intValue; }
+					}
+					if (subElemName == "button_borders") {
+						callResult = subElem->QueryIntAttribute("col1", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[0] = intValue; }
+						callResult = subElem->QueryIntAttribute("col2", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[1] = intValue; }
+						callResult = subElem->QueryIntAttribute("col3", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[2] = intValue; }
+						callResult = subElem->QueryIntAttribute("col4", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[3] = intValue; }
+						callResult = subElem->QueryIntAttribute("col5", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[4] = intValue; }
+						callResult = subElem->QueryIntAttribute("col6", &intValue);
+						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[5] = intValue; }
 					}
 					
 					subElem = subElem->NextSiblingElement();

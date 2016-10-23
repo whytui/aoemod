@@ -19,3 +19,4 @@ To optimize symbols loading at debugging startup:
 Create an environment variable (can be at user level) _NT_SYMBOL_PATH.
 Set its value to srv*c:\symbols*https://msdl.microsoft.com/download/symbols
 You can replace c:\symbols by any other local directory (will be created if necessary)
+Uncheck Microsoft symbol server ?

@@ -29,7 +29,6 @@ public:
 	CustomTilesetInfo();
 	~CustomTilesetInfo();
 
-	long int tilesetId;
 	std::string tilesetName; // Optional name.
 	long int slpIdThemeInfo;
 	long int slpIdCheckboxes;
@@ -41,15 +40,25 @@ public:
 	long int slpIdGameScreenLow;
 	long int slpIdGameScreenMedium;
 	long int slpIdGameScreenHigh;
+	unsigned char btnBorderColors[6];
+
+	// Sets "my" tileset ID and does some underlying processing.
+	void SetTilesetId(long int tileset);
+	inline long int GetTilesetId() const { return this->tilesetId; }
 
 	// Get the SLPInfo for building icons for this tileset. Automatically handles SLP object loading/freeing.
 	AOE_STRUCTURES::STRUCT_SLP_INFO *GetIconsForBuildings();
 
 private:
+	long int tilesetId;
 	AOE_STRUCTURES::STRUCT_SLP_INFO *iconsForBuildings; // SLPInfo object for building icons. Loaded only when necessary, freed when "this" is destroyed.
 
 	// Set SLP info object for building icons for this tileset. It needs to be freed when "this" is destroyed.
 	void InitBuildingIcons();
+
+	// Initialized button border colors using hardcoded values from ROR code.
+	// Requires this->tilesetId to be set correctly
+	void InitHardcodedBtnBorderColors();
 
 };
 
@@ -72,7 +81,6 @@ private:
 	CustomTilesetInfo tilesetsInfo[256];
 
 	// Make sure that argColor's size is 6. (indexes 0-5)
-	void FillColorArgs(unsigned char *argColor, long int tileset);
 	void SetBorderColors(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, unsigned char *argColor);
 };
 
