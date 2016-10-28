@@ -61,7 +61,6 @@ namespace STRATEGY {
 			if (WriteToFile(this->log, filename, false)) {
 				traceMessageHandler.WriteMessageNoNotification(std::string("Strategy: find logs in ") + filename);
 			}
-			//WriteToFile("coucou\r\ntoto\nriri", filename, false);
 #endif
 		}
 		CustomRORInfo *crInfo;

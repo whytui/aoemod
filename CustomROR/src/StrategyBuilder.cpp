@@ -3753,7 +3753,7 @@ void StrategyBuilder::AddMissingBuildings() {
 		missingBuildingsDef.clear();
 		if (!resInfo->directRequirementsAreSatisfied) {
 			for (int i = 0; i < 4; i++) {
-				if (resInfo->missingRequiredResearches[i] >= 0) {
+				if ((resInfo->missingRequiredResearches[i] >= 0) && (this->IsResearchInTechTree(resInfo->missingRequiredResearches[i]))) {
 					AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *bldDef = FindBuildingDefThatEnablesResearch(this->player, resInfo->missingRequiredResearches[i]);
 					if (bldDef && bldDef->IsCheckSumValid()) {
 						bool found = false;
@@ -3799,6 +3799,7 @@ void StrategyBuilder::AddMissingBuildings() {
 					missingBuildingsDef.pop_front(); // remove the item we just read
 				}
 				if (!IsUnitDisabledInTechTree(this->player->playerId, bldDef->DAT_ID1)) {
+					this->log.append("Added building #" + std::to_string(bldDef->DAT_ID1) + " (" + bldDef->ptrUnitName + ") to list due to missing requirements.\n");
 					this->AddPotentialBuildingInfoToList(bldDef);
 					for (int i = 0; i < 4; i++) {
 						if (resInfo->missingRequiredResearches[i] == bldDef->initiatesResearch) {
