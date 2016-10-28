@@ -204,6 +204,8 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 	// TODO
 	// Don't forget to take into account this->priorityLocation[myplayerid]
 	// TODO: attack towers/military units that protect target ?
+	// Attack target in my town, if any ? (even if another player ?) exclude villager explorers (run too fast?)
+	// Detect if already in enemy town/territory: if so, seek for close targets (more importance to distance)
 
 	//TEST
 	for (int i = 0; i < infAI->unitElemListSize; i++) {
@@ -211,6 +213,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 			//TEST!
 			if ((infAI->unitElemList[i].unitClass != 1) && (GetUnitStruct(infAI->unitElemList[i].unitId) != NULL)) {
 				this->SetTarget(infAI, unitGroup, targetInfo, &infAI->unitElemList[i], 0 /*TODO*/, 1);
+				targetInfo->targetSearchInProgress = 0;
 				return &infAI->unitElemList[i];
 			}
 		}

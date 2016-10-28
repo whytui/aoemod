@@ -19,6 +19,7 @@
 #include "traceMessage.h"
 #include "unitShortcuts.h"
 #include "crDebugOutputPrimitives.h"
+#include "playerHandling.h"
 
 namespace CUSTOMROR {
 

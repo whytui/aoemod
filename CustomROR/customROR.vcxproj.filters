@@ -221,6 +221,9 @@
     <ClInclude Include="include\TileSetHandler.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
+    <ClInclude Include="include\playerHandling.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -375,6 +378,9 @@
     </ClCompile>
     <ClCompile Include="src\TilesetHandler.cpp">
       <Filter>Fichiers sources\Technical</Filter>
+    </ClCompile>
+    <ClCompile Include="src\playerHandling.cpp">
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

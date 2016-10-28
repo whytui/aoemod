@@ -257,17 +257,6 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		if (unitArray) {
 			selectedUnit = unitArray[0];
 		}
-		AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *tmp = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)selectedUnit;
-		/*if (tmp->IsCheckSumValid()) {
-			if ((tmp->resourceValue > 0) && (tmp->unitDefinition->resourceDecay == 0)) {
-				tmp->resourceValue = 0;
-				if (tmp->hasDedicatedUnitDef) {
-					tmp->unitDefinition->resourceDecay = 5;
-				}
-				return false;
-			}
-		}*/
-
 		if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
 			// Editor
 			if (player && (player->selectedUnitCount > 0)) {
@@ -285,30 +274,6 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scinfo = global->scenarioInformation;
 			AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *gmapinfo = global->gameMapInfo;
 			AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO *tile = gmapinfo->GetTileInfo(1, 1);
-			int a = tile->terrainData.GetTerrainId();
-			bool b = tile->terrainData.SetAltitude(3);
-			bool c = tile->terrainData.SetTerrainId(4);
-			a = a + 1;
-
-			AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
-			if (se != NULL) {
-				int a = se->diamondMap->checksum;
-				AOE_STRUCTURES::STRUCT_TERRAIN_DEF *t = &se->diamondMap->gameMapInfo->terrainDefinitions[0];
-				se->diamondMap->gameMapInfo->terrainDefinitions;
-				se->unknown_580->checksum;//
-				se->unknown_59C->checksum;//
-				se->trn_lst_terrainList->checksum;
-				se->unknown_5AC->sizeX += 50;//
-				//char buffer[111];
-				//sprintf_s(buffer, "%08X, %08X", se, se->diamondMap);
-				//this->OpenCustomDialogMessage(buffer, 100, 100);
-				//bool b = se->gamePlayUIZone->IsCheckSumValid();
-				//AOE_STRUCTURES::STRUCT_UI_BUTTON *btn = se->btnTabs[0];
-				//se->gamePlayUIZone;
-				//se->map_btn_random->visible; // map btn randm
-
-				int aa = 1 + 1;
-			}
 		}
 		AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *selectedUnitT50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)selectedUnit;
 		AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameScreen = GetGameSettingsPtr()->ptrGameUIStruct;
@@ -373,43 +338,13 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			if (player && selectedUnit && (player->playerId == global->humanPlayerId)) {
 				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = selectedUnit->unitDefinition;
 				assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
-				if (unitDef) {
-					char nameBuffer[50];
-					short int researchCount = player->ptrResearchesStruct->researchCount;
-					AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *rs = player->ptrResearchesStruct->researchStatusesArray; // ->currentStatus
-					sTechTreeInfo = "";
-					for (int rid = 0; rid < researchCount; rid++) {
-						if (rs[rid].currentStatus == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) {
-							if (player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->researchLocation == unitDef->DAT_ID1) {
-								techToShowCount++;
-								if (techToShowCount > 0) { sTechTreeInfo += "\n"; }
-								sTechTreeInfo += "techId ";
-								sTechTreeInfo += std::to_string(player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->technologyId);
-								sTechTreeInfo += " = ";
-								*nameBuffer = 0; // Reset string
-								GetLanguageDllText(player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->languageDLLName, nameBuffer, sizeof(nameBuffer) - 1,
-									player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(rid)->researchName);
-								sTechTreeInfo += nameBuffer;
-							}
-						}
-					}
-				}
 			}
 			//TMP
 			std::string ss = "";
 			AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 			assert(humanPlayer && humanPlayer->IsCheckSumValid());
-			if (selectedUnitT50 && selectedUnitT50->DerivesFromAttackable() && (player->playerId == global->humanPlayerId)) {
-				if (selectedUnitT50->ptrActionInformation && selectedUnitT50->ptrActionInformation->ptrActionLink &&
-					selectedUnitT50->ptrActionInformation->ptrActionLink->actionStruct &&
-					selectedUnitT50->ptrActionInformation->ptrActionLink->actionStruct->unsure_resourceValue) {
-				}
-				long int u = selectedUnitT50->unitInstanceId;
-				long int t = -1;
-				//CreateCmd_RightClick(u, t, 40, 20);
-				//return false;
-				//CreateCmd_Build(u, 110, 1, 1);
-			}
+			PLAYER::MakeMainUnitForShortcutSelection(humanPlayer, selectedUnit);
+			return false;
 		}
 
 
