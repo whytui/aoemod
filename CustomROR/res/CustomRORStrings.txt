@@ -93,6 +93,8 @@ Back
 Stop defending current position/unit
 [42124]
 Right-click to define the unit or the position to protect
+[42125]
+Make main unit for keyboard shortcut selection
 
 // *** Unit properties ***
 [42036] // Unit properties: Initial

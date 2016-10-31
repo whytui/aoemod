@@ -7,7 +7,7 @@
 #include "crCommands.h"
 #include "crLocalization.h"
 #include "AOE_const_language.h"
-
+#include "playerHandling.h"
 
 
 class InGameUnitPropertiesPopup : public CustomPopupBase {
@@ -46,4 +46,5 @@ private:
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAutoAttackWalls;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtStrengthWeakness;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblConversionResistance;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnMakeMainUnitForShortcutSelection;
 };

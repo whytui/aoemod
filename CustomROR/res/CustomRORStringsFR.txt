@@ -95,6 +95,8 @@ Retour
 Ne plus protéger la zone/l'unité actuelle
 [42124]
 Cliquez avec le bouton droit pour définir l'unité ou l'endroit à protéger
+[42125]
+Marquer comme unité principale pour sélection rapide (clavier)
 
 // *** Unit properties ***
 [42036] // Unit properties: Initial

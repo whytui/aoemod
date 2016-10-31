@@ -28,6 +28,7 @@ void InGameUnitPropertiesPopup::_ResetPointers() {
 	this->chkAutoAttackWalls = NULL;
 	this->edtStrengthWeakness = NULL;
 	this->lblConversionResistance = NULL;
+	this->btnMakeMainUnitForShortcutSelection = NULL;
 }
 
 // Create popup content for unit properties
@@ -197,7 +198,6 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 	}
 
-#pragma message("TODO more features in unit popup")
 	// Military : guard location ?
 	if (isMilitary && isMyUnit) {
 		bool canHurtOtherUnits = (unitDef50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (unitDef50->blastRadius > 0);
@@ -297,6 +297,13 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		currentYPos += 20 + techToShowCount * 14 + 20;
 	}
 
+	if (isMyUnit) {
+		this->AddButton(popup, &this->btnMakeMainUnitForShortcutSelection,
+			localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_MAKE_MAIN_FOR_KEY_SHORTCUT_SELECTION, "Make main unit for keyboard shortcut selection"),
+			30, currentYPos, 400, 22);
+		currentYPos += 30;
+	}
+
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
@@ -323,6 +330,9 @@ bool InGameUnitPropertiesPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *
 	if (sender == this->chkRebuildFarmNone) {
 		AOE_CheckBox_SetChecked(this->chkForceRebuildFarm, false);
 		AOE_CheckBox_SetChecked(this->chkForceNotRebuildFarm, false);
+	}
+	if (sender == this->btnMakeMainUnitForShortcutSelection) {
+		PLAYER::MakeMainUnitForShortcutSelection(this->unitId);
 	}
 	return false; // Not one of our buttons; let ROR code be executed normally
 }

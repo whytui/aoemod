@@ -343,10 +343,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			std::string ss = "";
 			AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 			assert(humanPlayer && humanPlayer->IsCheckSumValid());
-			PLAYER::MakeMainUnitForShortcutSelection(humanPlayer, selectedUnit);
-			return false;
 		}
-
 
 		if (this->OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
 			unsigned long int *unused;

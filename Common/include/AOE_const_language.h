@@ -78,6 +78,7 @@ const static unsigned long int CRLANG_ID_BTN_UNIT_PROTECT_HOTKEY = 42121;
 const static unsigned long int CRLANG_ID_BTN_BACK = 42122;
 const static unsigned long int CRLANG_ID_BTN_UNIT_STOP_PROTECTING = 42123;
 const static unsigned long int CRLANG_ID_BTN_UNIT_SET_PROTECT_OBJECT = 42124;
+const static unsigned long int CRLANG_ID_BTN_UNIT_MAKE_MAIN_FOR_KEY_SHORTCUT_SELECTION = 42125;
 
 // Unit properties
 const static unsigned long int CRLANG_ID_UNITPROP_INITIAL = 42036;
