@@ -4,13 +4,29 @@
 namespace BUTTONBAR {
 
 
-// Hide a button from buttonbar. cmdButtonId shuold be in [0,11]
+// Hide a button from buttonbar. cmdButtonId should be in [0,11]
 void HideCommandButton(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, int cmdButtonId) {
 	assert((cmdButtonId >= 0) && (cmdButtonId < 12));
 	if ((cmdButtonId < 0) || (cmdButtonId >= 12)) { return; }
 	AOE_ShowUIObject(gameMainUI->unitCommandButtons[cmdButtonId], false);
 	gameMainUI->unitCommandButtons[cmdButtonId]->buttonInfoValue[0] = -1;
 	gameMainUI->unitCommandButtons[cmdButtonId]->commandIDs[0] = 0;
+}
+
+
+// Force refresh of game button bar
+void ForceRefresh(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
+	_asm {
+		MOV ECX, gameMainUI;
+		CALL BUTTONBAR_CONST::MAIN_GAME_ZONE_COMMAND_BAR_RESET_PAGE;
+	}
+}
+// Force refresh of game button bar
+void ForceRefresh() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	BUTTONBAR::ForceRefresh(settings->ptrGameUIStruct);
 }
 
 

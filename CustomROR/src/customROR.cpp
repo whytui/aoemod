@@ -3271,7 +3271,7 @@ void CustomRORInstance::FixKillXCrashOnUnknownPlayer(REG_BACKUP *REG_values) {
 }
 
 
-// From 00483489. end of ShowUnitComandButtons (in-game screen)
+// From 00483489. end of ShowUnitComandButtons (in-game screen - begin=0x482290)
 void CustomRORInstance::EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->ESI_val);
 	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *)REG_values->ECX_val;

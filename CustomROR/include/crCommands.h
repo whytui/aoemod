@@ -323,6 +323,12 @@ public:
 	// Called at the end of showUnitCommandButtons
 	void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI);
 
+	// User interface command handler for 1 single unit.
+	// isPanelUnit = true if unitBase is the main selected unit (the one visible in bottom-left unit info zone)
+	// "Common" treatments (interface updates, etc) are only done when isPanelUnit = true
+	bool ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
+		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase, bool isPanelUnit);
+
 	// Called when a game UI command button is clicked.
 	// Returns true if event has been handled and must NOT be handle by ROR standard code.
 	// Returns false by default (most cases) !
@@ -360,6 +366,12 @@ public:
 	// Returns true if output values have been updated.
 	bool OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
 		UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId, GAME_CURSOR &cursorToForce);
+
+	// Handles a right-click (in-game) when mouse action type is a custom one, for 1 single selected unit
+	// posX and posY are game positions
+	// mouseTargetUnit can be NULL
+	void OnInGameRightClickCustomAction(float posX, float posY, AOE_STRUCTURES::STRUCT_UNIT_BASE *mouseTargetUnit, 
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit);
 
 	// Handles a right-click (in-game) when mouse action type is a custom one.
 	// posX and posY are game positions

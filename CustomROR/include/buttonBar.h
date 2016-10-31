@@ -12,8 +12,16 @@
 
 namespace BUTTONBAR {
 
-// Hide a button from buttonbar. cmdButtonId shuold be in [0,11]
+	namespace BUTTONBAR_CONST {
+		const unsigned long int MAIN_GAME_ZONE_COMMAND_BAR_RESET_PAGE = 0x482290;
+	}
+
+// Hide a button from buttonbar. cmdButtonId should be in [0,11]
 void HideCommandButton(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, int cmdButtonId);
+
+// Force refresh of game button bar
+void ForceRefresh(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI);
+void ForceRefresh();
 
 // Refresh status for custom auto-attack policy buttons
 void RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, const AutoAttackPolicy *attackPolicy);

@@ -3865,6 +3865,48 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 }
 
 
+// User interface command handler for 1 single unit.
+// isPanelUnit = true if unitBase is the main selected unit (the one visible in bottom-left unit info zone)
+// "Common" treatments (interface updates, etc) are only done when isPanelUnit = true
+bool CustomRORCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
+	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase,
+	bool isPanelUnit) {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+	bool unitIsMine = (player == unitBase->ptrStructPlayer);
+
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_STOP) {
+		// Fix strategy when AI is enabled and some action is interrupted by human player
+		if (unitIsMine && unitBase && unitBase->IsCheckSumValidForAUnitClass()) {
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = STRATEGY::GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
+			STRATEGY::ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
+		}
+		if (unitIsMine && (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE)) {
+			if (AOE_METHODS::IsUnitIdle(unitBase)) {
+				UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
+				if (unitInfo) {
+					unitInfo->ResetProtectInfo();
+					CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
+#ifdef _DEBUG
+					if (isPanelUnit) { CallWriteCenteredText("Removed protect info"); }
+#endif
+				}
+			}
+			if (isPanelUnit) {
+				settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
+				SetGameCursor(GAME_CURSOR::GC_NORMAL);
+				BUTTONBAR::ForceRefresh(settings->ptrGameUIStruct);
+			}
+		}
+		return false; // Let ROR code execute normally here, we just ran "auxiliary" treatments.
+	}
+
+	return false;
+}
+
+
 // Called when a game UI command button is clicked.
 // Returns true if event has been handled and must NOT be handle by ROR standard code.
 // Returns false by default (most cases) !
@@ -3884,55 +3926,33 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *panelUnitBase = NULL;
 	AOE_STRUCTURES::STRUCT_PLAYER *player = NULL;
 	if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValidForAUnitClass()) {
-		unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
-		if (unitBase && unitBase->IsCheckSumValidForAUnitClass()) {
-			player = unitBase->ptrStructPlayer;
+		panelUnitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) gameMainUI->panelSelectedUnit;
+		if (panelUnitBase && panelUnitBase->IsCheckSumValidForAUnitClass()) {
+			player = panelUnitBase->ptrStructPlayer;
 		}
 	}
 	// No additional actions when viewing a unit that is not mine !
-	if (!unitBase || !player || !player ->IsCheckSumValid() || (player != GetControlledPlayerStruct_Settings())) {
+	if (!panelUnitBase || !player || !player->IsCheckSumValid() || (player != GetControlledPlayerStruct_Settings())) {
 		return false;
 	}
 
-#pragma message("TODO: For treatments below, do not unitBase but ALL compatible selected units !")
-	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_SELECTION) {
+	if ((uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_SELECTION) ||
+		(uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_OR_BACK)){
 		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE) {
 			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
 			SetGameCursor(GAME_CURSOR::GC_NORMAL);
+			BUTTONBAR::ForceRefresh();
 			return true; // this action "exited" from "select unit to defend" action. It must not unselect unit too ! Mark event as handled.
 		}
 	}
 
-	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_STOP) {
-		// Fix strategy when AI is enabled and some action is interrupted by human player
-		if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValidForAUnitClass()) {
-			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = STRATEGY::GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
-			STRATEGY::ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
-		}
-		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE) {
-			if (AOE_METHODS::IsUnitIdle(unitBase)) {
-				UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
-				if (unitInfo) {
-					unitInfo->ResetProtectInfo();
-					CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
-#ifdef _DEBUG
-					CallWriteCenteredText("Removed protect info");
-#endif
-				}
-			}
-			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
-			SetGameCursor(GAME_CURSOR::GC_NORMAL);
-			BUTTONBAR::SetButtonBarForDefendUnitOrZone(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)unitBase);
-		}
-		return false; // Let ROR code execute normally here, we just ran "auxiliary" treatments.
-	}
 
 	// Handle next page. Note: in ROR, see 485140 (for villager build menu only)
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE) {
-		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->unitDefinition;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = panelUnitBase->unitDefinition;
 		if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
 			return false;
 		}
@@ -3954,11 +3974,33 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		return true; // Do not execute normal code for NEXT PAGE
 	}
 
+	// Unit-specific treatments
+	bool eventFullyHandled = false;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsBasePointer(player);
+	assert(selectedUnits != NULL);
+	for (int i = 0; i < player->selectedUnitCount; i++) {
+		// Run treatments for all selected units (except "panel unit", will be done last)
+		if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() && (selectedUnits[i] != panelUnitBase)) {
+			// Note: also called for selected units that are NOT "mine", be careful.
+			if (this->ApplyUserCommandForUnit(gameMainUI, uiCommandId, infoValue, selectedUnits[i], false)) {
+				eventFullyHandled = true;
+			}
+		}
+	}
+	// Handle panel unit last, because common treatments are done there (may change Game ui, mouse type, etc)
+	if (this->ApplyUserCommandForUnit(gameMainUI, uiCommandId, infoValue, panelUnitBase, true)) {
+		eventFullyHandled = true;
+	}
+	if (eventFullyHandled) {
+		return true;
+	}
+
 	// Custom buttons
+	// Legacy code: auto-attack policies: update panel unit, then other selected units
 	bool updateAutoAttackInfo = false;
 	AutoAttackPolicy flagsToApply = { false, false, false, false, false };
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS) {
-		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackVillagers = false;
 		flagsToApply.attackVillagers = true; // this flag has been updated
@@ -3966,7 +4008,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS) {
-		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
 		flagsToApply.attackNonTowerBuildings = true; // this flag has been updated
@@ -3974,7 +4016,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK) {
-		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackMilitary = false;
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
@@ -3988,21 +4030,22 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK) {
-		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = false;
 		unitInfo->autoAttackPolicy.SetDefaultValues();
 		flagsToApply.SetAllValues(true); // All flags have been updated.
-		CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
+		CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(panelUnitBase->unitInstanceId);
 		BUTTONBAR::RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
 		updateAutoAttackInfo = true;
 	}
 	// Apply changes on ALL compatible selected units
 	if (updateAutoAttackInfo) {
-		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(panelUnitBase->unitInstanceId);
 		assert(unitInfo != NULL); // Was just added
 		if (!unitInfo) { return false; } // this is an error case
 		CUSTOMROR::crInfo.ApplyAutoAttackPolicyToPlayerSelectedUnits(player, unitInfo->autoAttackPolicy, flagsToApply);
 	}
+
 	// Button "protect unit or protect zone" : set mouse custom cursor type
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND) {
 		SetGameCursor(GAME_CURSOR::GC_GROUP);
@@ -4011,7 +4054,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE;
 			CallWriteCenteredText(localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_SET_PROTECT_OBJECT, "Right-click to define the unit or the position to protect"));
 		}
-		BUTTONBAR::SetButtonBarForDefendUnitOrZone(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)unitBase);
+		BUTTONBAR::SetButtonBarForDefendUnitOrZone(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)panelUnitBase);
 	}
 
 	return false;
@@ -4318,6 +4361,52 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 }
 
 
+// Handles a right-click (in-game) when mouse action type is a custom one, for 1 single selected unit
+// posX and posY are game positions
+// mouseTargetUnit can be NULL
+void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE_STRUCTURES::STRUCT_UNIT_BASE *mouseTargetUnit,
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit) {
+	if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass()) { return; }
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
+	assert(controlledPlayer && controlledPlayer->IsCheckSumValid());
+	bool actorIsMyUnit = (actorUnit->ptrStructPlayer == controlledPlayer);
+	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+
+	switch (settings->mouseActionType) {
+	case CST_MAT_CR_PROTECT_UNIT_OR_ZONE:
+		if (actorIsMyUnit && (actorUnit == mouseTargetUnit)) {
+			unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+			if (unitInfo) {
+				unitInfo->ResetProtectInfo();
+				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(actorUnit->unitInstanceId);
+			}
+			CallWriteCenteredText("Removed protect information for current unit.");
+			break;
+		}
+		if (actorIsMyUnit && actorUnit && actorUnit->DerivesFromMovable()) {
+
+			if (!unitInfo) {
+				unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(actorUnit->unitInstanceId);
+			}
+			if (unitInfo) {
+				unitInfo->ResetProtectInfo();
+				if (mouseTargetUnit) {
+					unitInfo->protectUnitId = mouseTargetUnit->unitInstanceId;
+				} else {
+					unitInfo->protectPosX = posX;
+					unitInfo->protectPosY = posY;
+				}
+			}
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+
 // Handles a right-click (in-game) when mouse action type is a custom one.
 // mouseTargetUnit can be NULL
 void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE_STRUCTURES::STRUCT_UNIT_BASE *mouseTargetUnit) {
@@ -4339,42 +4428,28 @@ void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AO
 		if (!actorUnit->IsCheckSumValidForAUnitClass()) { actorUnit = NULL; }
 		actorIsMyUnit = (actorUnit->ptrStructPlayer == controlledPlayer);
 	}
-	UnitCustomInfo *unitInfo = NULL;
-	if (actorUnit) {
-		unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+	if (!actorIsMyUnit) { return; }
+	
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+	assert(selectedUnits != NULL);
+	for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
+		// Run treatments for all selected units
+		if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass()) {
+			// Note: also called for selected units that are NOT "mine", be careful.
+			this->OnInGameRightClickCustomAction(posX, posY, mouseTargetUnit, selectedUnits[i]);
+		}
 	}
 
+	// Common post-actions
+
+	// Restore mouse status before quitting
 	switch (settings->mouseActionType) {
 	case CST_MAT_CR_PROTECT_UNIT_OR_ZONE:
-		if (actorIsMyUnit && (actorUnit == mouseTargetUnit)) {
-			unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
-			if (unitInfo) {
-				unitInfo->ResetProtectInfo();
-				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(actorUnit->unitInstanceId);
-			}
-			CallWriteCenteredText("Removed protect information for current unit.");
-			break;
-		}
-		if (actorIsMyUnit && actorUnit && actorUnit->DerivesFromMovable()) {
-			if (!unitInfo) {
-				unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(actorUnit->unitInstanceId);
-			}
-			if (unitInfo) {
-				unitInfo->ResetProtectInfo();
-				if (mouseTargetUnit) {
-					unitInfo->protectUnitId = mouseTargetUnit->unitInstanceId;
-				} else {
-					unitInfo->protectPosX = posX;
-					unitInfo->protectPosY = posY;
-				}
-			}
-		}
+		BUTTONBAR::ForceRefresh(settings->ptrGameUIStruct);
 		break;
 	default:
 		break;
 	}
-
-	// Restore mouse status before quitting
 	settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
 	SetGameCursor(GAME_CURSOR::GC_NORMAL);
 }
