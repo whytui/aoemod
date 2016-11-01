@@ -1,5 +1,40 @@
 #include "../include/playerHandling.h"
 
+
+
+namespace AOE_METHODS {
+
+void ClearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+	if (!player || !player->IsCheckSumValid()) {
+		return;
+	}
+	_asm {
+		MOV ECX, player;
+		MOV EDX, 0x0045DCB0; // player.ClearSelectedUnits
+		CALL EDX;
+	}
+}
+
+// select: if true, add unit to selection. If false, remove from selection.
+bool SelectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool select) {
+	if (!player || !player->IsCheckSumValid() || !unit || !unit->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	long int arg2 = select ? 1 : 0;
+	long int result = 0;
+	_asm {
+		MOV ECX, player;
+		PUSH arg2;
+		PUSH unit;
+		MOV EDX, 0x0045DC10; // player.selectUnit(pUnit, bool)
+		CALL EDX;
+		MOV result, EAX;
+	}
+	return (result != 0);
+}
+
+}
+
 namespace PLAYER {
 
 

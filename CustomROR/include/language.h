@@ -5,12 +5,13 @@
 
 // Get a text from languagex.dll or language.dll, using ROR method. See also GetLanguageDllText.
 static void AOE_LoadStringLanguage(long int stringID, char *buffer, long int bufferSize) {
+	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 	_asm {
-		PUSH bufferSize
-		PUSH buffer
-		PUSH stringID
-		MOV EAX, 0x004FF530
-		CALL EAX
+		PUSH bufferSize;
+		PUSH buffer;
+		PUSH stringID;
+		MOV EAX, 0x004FF530;
+		CALL EAX;
 	}
 }
 

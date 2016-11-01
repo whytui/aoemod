@@ -36,6 +36,7 @@
 #include "unitDefHandling.h"
 #include "buttonBarCommon.h"
 #include "AOEPrimitives_gameCommand.h"
+#include "playerHandling.h"
 
 
 // Methods in this file are simple primitives that don't depend on customROR configuration. They generally are calls to existing game methods.
@@ -106,12 +107,6 @@ long int GetTotalQueueNumberForUnit(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld, s
 // Pause/unpause the game
 void SetGamePause(bool pauseOn);
 
-// This will display a text in the game screen (like chat)
-void CallWriteText(const char *txt);
-
-// This will display a text in the game screen (like yellow/orange error messages)
-void CallWriteCenteredText(const char *txt, long int numLine = 1, long int color = 0x55, long int background = 0);
-
 
 // If resourceTable has enough resources, returns true and deduces the cost from resourceTable.
 // If not, returns false and does not modify any value.
@@ -180,9 +175,6 @@ void AOE_callNotifyEvent(long int eventId, long int playerId, long int variant_a
 // Call AOE's Notify event method. Warning, the parameters can have different types. Here pointers here so there is no undesired cast !
 void AOE_callNotifyEvent(long int eventId, long int playerId, void *variant_arg3, void *variant_arg4, void *variant_arg5);
 
-void AOE_clearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player);
-// select: if true, add unit to selection. If false, remove from selection.
-bool AOE_selectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool select);
 
 
 // Set "shared exploration" flag for a given player to true or false. Do not use this with MP game (not sure if it causes sync error)

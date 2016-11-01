@@ -19,45 +19,11 @@ void SetGamePause(bool pauseOn) {
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) { return; } // Call should be robust enough, but we still check this
 	long int argPause = pauseOn ? 1 : 0;
 	_asm {
-		PUSH 0 // arg2 - what is this ?
-		PUSH argPause
-		MOV EAX, 0x0419A60
-		MOV ECX, settings
-		CALL EAX
-	}
-}
-
-
-// DO NOT call this if current UI is not "in-game" screen
-void CallWriteText(const char *txt) {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	assert(settings != NULL);
-	assert((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
-		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME));
-	long int addr = (long int)txt;
-	long int writeFct = 0x480760; // DisplayChatTextOnNextLine
-	_asm {
-		push addr
-		mov ECX, ds:[0x580E38]
-		mov ECX, ds:[ECX + 0xC24]
-		call writeFct
-	}
-}
-
-
-// This will display a text in the game screen (like yellow/orange error messages)
-// Note: such a message disappears when the user clicks somewhere.
-void CallWriteCenteredText(const char *txt, long int numLine, long int color, long int background) {
-	long int addr = (long int)txt;
-	long int writeFct = 0x0482260;
-	_asm {
-		PUSH background
-		PUSH color
-		PUSH addr
-		PUSH numLine
-		mov ECX, ds:[0x580E38]
-		mov ECX, ds:[ECX + 0xC24]
-		call writeFct
+		PUSH 0; // arg2 - what is this ?
+		PUSH argPause;
+		MOV EAX, 0x0419A60;
+		MOV ECX, settings;
+		CALL EAX;
 	}
 }
 
@@ -660,37 +626,6 @@ void AOE_callNotifyEvent(long int eventId, long int playerId, void *variant_arg3
 }
 
 
-void AOE_clearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player) {
-	if (!player || !player->IsCheckSumValid()) {
-		return;
-	}
-	_asm {
-		MOV ECX, player;
-		MOV EDX, 0x0045DCB0; // player.ClearSelectedUnits
-		CALL EDX;
-	}
-}
-
-// select: if true, add unit to selection. If false, remove from selection.
-bool AOE_selectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool select) {
-	if (!player || !player->IsCheckSumValid() || !unit || !unit->IsCheckSumValidForAUnitClass()) {
-		return false;
-	}
-	long int arg2 = select ? 1 : 0;
-	long int result = 0;
-	_asm {
-		MOV ECX, player;
-		PUSH arg2;
-		PUSH unit;
-		MOV EDX, 0x0045DC10; // player.selectUnit(pUnit, bool)
-		CALL EDX;
-		MOV result, EAX;
-	}
-	return (result != 0);
-}
-
-
-
 
 // Set "shared exploration" flag for a given player to true or false.
 // Old version: Not compatible with MP games (to verify)
@@ -880,6 +815,7 @@ void AOE_InfAIBuildHistory_setStatus(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long 
 	// Note: bad position values have no impact here (no possible crash), it will just find no item. Same for unitDefId.
 	assert((status >= 0) && (status <= AOE_CONST_INTERNAL::CST_BHS_MAX_VALUE));
 	long int status_long = status;
+	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 	const unsigned long int RORMethod = 0x4C34C0;
 	_asm {
 		MOV ECX, infAI
@@ -894,6 +830,7 @@ void AOE_InfAIBuildHistory_setStatus(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long 
 
 // Remove a building from arrays for a player
 void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
+	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 	if (buildingsHeader && unit && unit->IsCheckSumValidForAUnitClass()) {
 		_asm {
 			MOV ECX, buildingsHeader
@@ -917,8 +854,8 @@ void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT
 		return;
 	}
 	if (!player || !player->IsCheckSumValid()) { return; }
-	AOE_clearSelectedUnits(player);
-	AOE_selectUnit(player, unitBase, true);
+	AOE_METHODS::ClearSelectedUnits(player);
+	AOE_METHODS::SelectUnit(player, unitBase, true);
 	if (centerScreen) {
 		player->screenPositionX = unitBase->positionX;
 		player->screenPositionY = unitBase->positionY;
@@ -971,6 +908,7 @@ bool AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES category, long int
 		return false;
 	}
 	long int result = 0;
+	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 	const unsigned long int addr = 0x4FF580;
 	_asm {
 		PUSH bufferSize;
@@ -997,6 +935,7 @@ void AOE_GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BU
 		return;
 	}
 	buffer[0] = 0;
+	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 	unsigned long int addr = 0x4834F0;
 	_asm {
 		PUSH elemLanguageCreationDllId;

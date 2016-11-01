@@ -381,9 +381,9 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		short int id = StrToInt(sUnitId, -1);
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(id);
-		AOE_clearSelectedUnits(player);
+		AOE_METHODS::ClearSelectedUnits(player);
 		if (unit && unit->IsCheckSumValidForAUnitClass()) {
-			AOE_selectUnit(player, unit, true);
+			AOE_METHODS::SelectUnit(player, unit, true);
 			char *name = "?";
 			if (unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
 				name = unit->unitDefinition->ptrUnitName;
