@@ -9,12 +9,10 @@
 #include "crCommon.h"
 #include "CustomRORInfo.h"
 #include "AOEPrimitives_units.h"
+#include "buttonBarConst.h"
 
 namespace BUTTONBAR {
 
-	namespace BUTTONBAR_CONST {
-		const unsigned long int MAIN_GAME_ZONE_COMMAND_BAR_RESET_PAGE = 0x482290;
-	}
 
 // Hide a button from buttonbar. cmdButtonId should be in [0,11]
 void HideCommandButton(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, int cmdButtonId);

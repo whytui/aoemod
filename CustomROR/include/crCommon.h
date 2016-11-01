@@ -34,6 +34,7 @@
 #include "researches.h"
 #include "crLocalization.h"
 #include "unitDefHandling.h"
+#include "buttonBarConst.h"
 
 
 // Methods in this file are simple primitives that don't depend on customROR configuration. They generally are calls to existing game methods.
@@ -340,10 +341,6 @@ bool AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES category, long int
 void AOE_GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BUTTON_INFO *unitButtonInfo,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCmdId, long int elemLanguageCreationDllId);
 
-
-// Returns the icon id relevant for provided UI command id, if found.
-// Returns -1 if not found.
-long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId);
 
 // Add a command button in unit-commands zone (under game zone).
 // buttonIndex: 0-4 = first row, 6-10=second row, 5 and 11 are "special" right buttons (11=unselect/cancel, generally)

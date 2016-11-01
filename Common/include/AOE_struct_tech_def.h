@@ -27,6 +27,7 @@ namespace AOE_STRUCTURES {
 		short int effectAttribute; // +06. see TECH_UNIT_ATTRIBUTES (not always this enum but always 2 bytes)
 		float effectValue; // +08. Sometimes unused (enable unit, upgrade unit, etc). Sometimes includes 2 info using modulo !
 
+		// A secure getter for techeffect value, supporting all cases.
 		float GetValue() const {
 			// Attribute modifier (set/add/mult) on armor or attack: exception (need to apply a modulo on value)
 			if (((this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
@@ -45,6 +46,10 @@ namespace AOE_STRUCTURES {
 			case TECH_DEF_EFFECTS::TDE_INVALID:
 				return false;
 			case TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET:
+				if (this->effectAttribute == (short int)TECH_UNIT_ATTRIBUTES::TUA_ANGLE) {
+					return this->GetValue() != 0; // Attribute 17 is always add ?
+				}
+				return true;
 			case TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH:
 				return true;
 			case TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET:

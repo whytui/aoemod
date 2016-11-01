@@ -111,6 +111,7 @@
     <ClInclude Include="include\AOE_time.h" />
     <ClInclude Include="include\autoAttackPolicy.h" />
     <ClInclude Include="include\buttonBar.h" />
+    <ClInclude Include="include\buttonBarConst.h" />
     <ClInclude Include="include\cityPlan.h" />
     <ClInclude Include="include\civilizationInfo.h" />
     <ClInclude Include="include\crCommands.h" />
@@ -173,6 +174,7 @@
     <ClCompile Include="src\AOEPrimitives_units.cpp" />
     <ClCompile Include="src\BitmapExporter.cpp" />
     <ClCompile Include="src\buttonBar.cpp" />
+    <ClCompile Include="src\buttonBarConst.cpp" />
     <ClCompile Include="src\cityPlan.cpp" />
     <ClCompile Include="src\civilizationInfo.cpp" />
     <ClCompile Include="src\crCommands.cpp" />

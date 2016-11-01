@@ -2,6 +2,7 @@
 #include "../include/buttonBar.h"
 
 namespace BUTTONBAR {
+;
 
 
 // Hide a button from buttonbar. cmdButtonId should be in [0,11]
@@ -528,7 +529,7 @@ void SetButtonBarForDefendUnitOrZone(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gam
 
 	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 	if (unitInfo && unitInfo->HasValidProtectInfo()) {
-		AddInGameCommandButton(1, INGAME_UI_COMMAND_ID::CST_IUC_STOP, 0, false,
+		AddInGameCommandButton(1, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND_STOP, 0, false,
 			localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_STOP_PROTECTING, "Stop defending current position/unit"),
 			NULL, false);
 	}

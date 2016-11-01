@@ -24,18 +24,28 @@ Custom ROR uses 10000-14999.
 // ***************** These numbers must match DRS file object IDs !!! ************************
 // See also AOE_const_drs.h
 // Identifies customROR SLP IDs (id in DRS file)
+
+namespace AOE_CONST_DRS {
+;
+
 static const long int CST_CUSTOMROR_CMD_ICONS_SLP_ID = 10000; // CustomROR command icons
 static const long int CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID = 10001; // Custom shortcuts (10-20)
 
-static const long int CST_CUSTOMROR_ICON_ID_DONT_ATTACK_VILLAGERS = 0;
-static const long int CST_CUSTOMROR_ICON_ID_DONT_ATTACK_BUILDINGS = 1;
-static const long int CST_CUSTOMROR_ICON_ID_DONT_AUTO_ATTACK = 3;
-static const long int CST_CUSTOMROR_ICON_ID_RESTORE_AUTO_ATTACK = 2;
-static const long int CST_CUSTOMROR_ICON_ID_DEFEND_UNIT_OR_POSITION = 4; // TODO
+
 static const long int CST_CUSTOMROR_MAX_SLP_INDEX_IN_UNIT_SHORTCUTS_FILE = 12; // "10-20" + "G" bitmaps.
 static const long int CST_CUSTOMROR_MAX_SLP_INDEX_FOR_UNIT_SHORTCUTS = 11; // Max itemindex that corresponds to a valid shortcut, in "shortcuts SLP"
 static const long int CST_CUSTOMROR_SLP_INDEX_FOR_UNIT_SHORTCUT_10 = 1; // Other itemIndexes are (10+i) => (CST_CUSTOMROR_SLP_ID_FOR_UNIT_SHORTCUT_10+i)
 static const long int CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT = 12; // SLP.itemindex for "G" (group) icon
+
+
+// Button bar command icon IDs for customROR (cf customROR.drs). Must correspond to actual SLPIDs in DRS file !
+enum CustomRorIconId : long int {
+	CR_ICON_DONT_ATTACK_VILLAGERS = 0,
+	CR_ICON_DONT_ATTACK_BUILDINGS = 1,
+	CR_ICON_RESTORE_AUTO_ATTACK = 2,
+	CR_ICON_DONT_AUTO_ATTACK = 3,
+	CR_ICON_DEFEND_UNIT_OR_POSITION = 4
+};
 
 
 // "DAT" button IDs (1-5 first row, 6-10 second row, etc)
@@ -51,3 +61,5 @@ static const long int CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT = 12; // SLP.item
 
 // Manage Resolution
 void ChangeItfDRS_file(); // Change interfac.drs filename to manage custom resolutions
+
+}

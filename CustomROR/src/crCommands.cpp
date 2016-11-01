@@ -218,7 +218,7 @@ void CustomRORCommand::OneShotInit() {
 	this->LoadCustomLocalizationFiles();
 
 	// Manage interfac.drs file to use
-	ChangeItfDRS_file();
+	AOE_CONST_DRS::ChangeItfDRS_file();
 
 	// Prepare custom DRS data
 	this->LoadCustomDrsFiles();
@@ -280,8 +280,8 @@ void CustomRORCommand::LoadCustomDrsFiles() {
 			MessageBoxA(0, "ERROR : Could not find customROR.drs or it is invalid.", "CustomROR", MB_ICONWARNING);
 		}
 		// Initialize global variable so we can retrieve our button icons when needed
-		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorIcons, CST_CUSTOMROR_CMD_ICONS_SLP_ID);
-		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorUnitShortcuts, CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
+		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorIcons, AOE_CONST_DRS::CST_CUSTOMROR_CMD_ICONS_SLP_ID);
+		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorUnitShortcuts, AOE_CONST_DRS::CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
 	}
 }
 
@@ -3883,6 +3883,9 @@ bool CustomRORCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = STRATEGY::GetStrategyElementForActorBuilding(player, unitBase->unitInstanceId);
 			STRATEGY::ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
 		}
+		return false; // Let ROR code execute normally here, we just ran "auxiliary" treatments.
+	}
+	if (uiCommandId == CST_IUC_CROR_DEFEND_STOP) {
 		if (unitIsMine && (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE)) {
 			UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
 			if (unitInfo) {
@@ -3898,7 +3901,7 @@ bool CustomRORCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 				BUTTONBAR::ForceRefresh(settings->ptrGameUIStruct);
 			}
 		}
-		return false; // Let ROR code execute normally here, we just ran "auxiliary" treatments.
+		return true;
 	}
 
 	return false;
@@ -4177,13 +4180,13 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UN
 			return false;
 		}
 		slpFileIndex = (shortcutDisplayValue - 10) + // get a "index" 0-10 instead of a value 10-20
-			CST_CUSTOMROR_SLP_INDEX_FOR_UNIT_SHORTCUT_10; // Add offset to position on "shortcut 10" index in SLP file
+			AOE_CONST_DRS::CST_CUSTOMROR_SLP_INDEX_FOR_UNIT_SHORTCUT_10; // Add offset to position on "shortcut 10" index in SLP file
 	} else {
-		slpFileIndex = CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT; // shortcut corresponds to a unit group, not a shortcut
+		slpFileIndex = AOE_CONST_DRS::CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT; // shortcut corresponds to a unit group, not a shortcut
 	}
 	slpArrayIndex = slpFileIndex - 1;
-	if ((slpFileIndex < 0) || (slpFileIndex > CST_CUSTOMROR_MAX_SLP_INDEX_IN_UNIT_SHORTCUTS_FILE) ||
-		((slpFileIndex > CST_CUSTOMROR_MAX_SLP_INDEX_FOR_UNIT_SHORTCUTS) && (slpFileIndex != CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT))
+	if ((slpFileIndex < 0) || (slpFileIndex > AOE_CONST_DRS::CST_CUSTOMROR_MAX_SLP_INDEX_IN_UNIT_SHORTCUTS_FILE) ||
+		((slpFileIndex > AOE_CONST_DRS::CST_CUSTOMROR_MAX_SLP_INDEX_FOR_UNIT_SHORTCUTS) && (slpFileIndex != AOE_CONST_DRS::CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT))
 		) {
 		std::string msg = "ERROR: tried to use a wrong Slp.itemIndex: ";
 		msg += std::to_string(slpFileIndex);

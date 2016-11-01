@@ -1621,92 +1621,6 @@ void AOE_GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BU
 }
 
 
-// Returns the icon id relevant for provided UI command id, if found.
-// Returns -1 if not found. (WARNING: check this case in caller, -1 is not an acceptable value)
-long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId) {
-	// Note : icon 6 in actions is a nice flag but is unused.
-	switch (UICmdId) {
-	case AOE_CONST_INTERNAL::CST_IUC_WORK:
-		return -1; // does not have an icon ?
-	case AOE_CONST_INTERNAL::CST_IUC_MOVE:
-		return 1; // Just a supposition as it is not implemented ! (actually, from early versions then removed, probably)
-	case AOE_CONST_INTERNAL::CST_IUC_BUILD:
-		return 2; // cf 482598, 483273
-	case AOE_CONST_INTERNAL::CST_IUC_EXCHANGE:
-		return -1; // unused/not implemented?
-	case AOE_CONST_INTERNAL::CST_IUC_STOP:
-		return 3; // hand icon
-	case AOE_CONST_INTERNAL::CST_IUC_CANCEL_SELECTION:
-		return 0x0A;
-	case AOE_CONST_INTERNAL::CST_IUC_UNLOAD_TRANSPORT:
-		return 5;
-	case AOE_CONST_INTERNAL::CST_IUC_REGROUP:
-		return 7;
-	case AOE_CONST_INTERNAL::CST_IUC_UNGROUP:
-		return 8;
-	case AOE_CONST_INTERNAL::CST_IUC_FORMATION:
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_CANCEL_OR_BACK:
-		return 0xA; // To confirm it is a constant. Cf 482526.
-	case AOE_CONST_INTERNAL::CST_IUC_NEXT_PAGE:
-		return 0xB; // To confirm it is a constant. Cf 4824F9.
-	case AOE_CONST_INTERNAL::CST_IUC_CHAT:
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_DIPLOMACY:
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_MENU:
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_TRADE_WITH:
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_CANCEL_BUILD:
-		return 3; // cf 0x482C30
-	case AOE_CONST_INTERNAL::CST_IUC_SHOW_HELP:
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_HOLD_POSITION:
-		return 4; // cf 4827AD
-	case AOE_CONST_INTERNAL::CST_IUC_ATTACK_POSITION:
-		return 0xC; // cf 4827DD
-	case AOE_CONST_INTERNAL::CST_IUC_SHOW_SCORES:
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_TRADE_FOOD_FOR_GOLD:
-		return 0x57; // cf 482AB7
-	case AOE_CONST_INTERNAL::CST_IUC_TRADE_WOOD_FOR_GOLD:
-		return 0x56;
-	case AOE_CONST_INTERNAL::CST_IUC_TRADE_STONE_FOR_GOLD:
-		return 0x58;
-	case AOE_CONST_INTERNAL::CST_IUC_HEAL:
-		return 0x0D; // cf 4828E9
-	case AOE_CONST_INTERNAL::CST_IUC_CONVERT:
-		return 0x0E;
-	case AOE_CONST_INTERNAL::CST_IUC_ATTACK:
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_REPAIR:
-		return 0;
-	case AOE_CONST_INTERNAL::CST_IUC_ADD_TO_QUEUE:
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_DROP_FROM_QUEUE:
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_DO_RESEARCH:
-	case AOE_CONST_INTERNAL::CST_IUC_DO_TRAIN:
-	case AOE_CONST_INTERNAL::CST_IUC_DO_BUILD:
-		// Those ones do not have a specific icon id, it depends on unit/research...
-		break;
-	case AOE_CONST_INTERNAL::CST_IUC_CROR_DONT_ATTACK_VILLAGERS:
-		return CST_CUSTOMROR_ICON_ID_DONT_ATTACK_VILLAGERS;
-	case AOE_CONST_INTERNAL::CST_IUC_CROR_DONT_ATTACK_BUILDINGS:
-		return CST_CUSTOMROR_ICON_ID_DONT_ATTACK_BUILDINGS;
-	case AOE_CONST_INTERNAL::CST_IUC_CROR_NO_AUTO_ATTACK:
-		return CST_CUSTOMROR_ICON_ID_DONT_AUTO_ATTACK;
-	case AOE_CONST_INTERNAL::CST_IUC_CROR_RESET_AUTO_ATTACK:
-		return CST_CUSTOMROR_ICON_ID_RESTORE_AUTO_ATTACK;
-	case AOE_CONST_INTERNAL::CST_IUC_CROR_DEFEND:
-		return CST_CUSTOMROR_ICON_ID_DEFEND_UNIT_OR_POSITION;
-	default:
-		break;
-	}
-	return -1; // unknown or not applicable
-}
-
 // Returns true if the button is visible. Use this overload for performance if you already have STRUCT_UI_IN_GAME_MAIN pointer.
 // Returns false if the button is hidden, or if an error occurs.
 bool IsInGameUnitCommandButtonVisible(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int buttonIndex) {
@@ -1774,7 +1688,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	if (!player || !player->IsCheckSumValid()) { return false; }
 	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *inGameMain = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
 	if (!inGameMain || !inGameMain->IsCheckSumValid()) { return false; }
-	long int iconId = GuessIconIdFromUICommandId(UICmdId);
+	long int iconId = BUTTONBAR::BUTTONBAR_CONST::GuessIconIdFromUICommandId(UICmdId);
 	long int helpDllId = 0;
 	long int creationDllId = 0;
 	long int creationDllId_original = 0; // unchanged creationDllId (without the +100000, for units)

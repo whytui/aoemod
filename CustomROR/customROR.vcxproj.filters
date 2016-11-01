@@ -224,6 +224,9 @@
     <ClInclude Include="include\playerHandling.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="include\buttonBarConst.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -380,6 +383,9 @@
       <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
     <ClCompile Include="src\playerHandling.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\buttonBarConst.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
