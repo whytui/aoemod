@@ -3884,15 +3884,13 @@ bool CustomRORCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 			STRATEGY::ResetStrategyElementStatus(stratElem); // does nothing if stratElem is NULL.
 		}
 		if (unitIsMine && (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE)) {
-			if (AOE_METHODS::IsUnitIdle(unitBase)) {
-				UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
-				if (unitInfo) {
-					unitInfo->ResetProtectInfo();
-					CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
+			UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
+			if (unitInfo) {
+				unitInfo->ResetProtectInfo();
+				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
 #ifdef _DEBUG
-					if (isPanelUnit) { CallWriteCenteredText("Removed protect info"); }
+				if (isPanelUnit) { CallWriteCenteredText("Removed protect info"); }
 #endif
-				}
 			}
 			if (isPanelUnit) {
 				settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;

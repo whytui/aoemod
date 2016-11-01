@@ -16,6 +16,7 @@ void HideCommandButton(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, int c
 
 // Force refresh of game button bar
 void ForceRefresh(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
+	// Note: this call uses recursivity in ROR_API (this ROR methods calls customROR...)
 	_asm {
 		MOV ECX, gameMainUI;
 		CALL BUTTONBAR_CONST::MAIN_GAME_ZONE_COMMAND_BAR_RESET_PAGE;
