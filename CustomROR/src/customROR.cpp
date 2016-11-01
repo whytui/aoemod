@@ -3563,7 +3563,7 @@ void CustomRORInstance::EntryPointShowInGameDefaultCursor_noUnitUnderMouse(REG_B
 	if (settings) {
 		ror_api_assert(REG_values, settings->IsCheckSumValid());
 		if (settings->mouseActionType < 0) {
-			cursorToSet = GetCursorForCustomActionType(settings->mouseActionType);
+			cursorToSet = BUTTONBAR::BUTTONBAR_CONST::GetCursorForCustomActionType(settings->mouseActionType);
 		}
 	}
 

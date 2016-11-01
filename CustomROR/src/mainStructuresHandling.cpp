@@ -66,3 +66,29 @@ STRUCT_PLAYER *GetPlayerStruct(long int playerId) {
 AOE_STRUCTURES::STRUCT_CURSOR_SLP_INFO *GetCursorInfo() {
 	return *(AOE_STRUCTURES::STRUCT_CURSOR_SLP_INFO**)AOE_VAR_CURSORS_INFO;
 }
+
+
+bool IsMultiplayer() {
+#pragma message("TODO: bugs in IsMultiplayer when running MP and then SP games")
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = (AOE_STRUCTURES::STRUCT_GAME_SETTINGS *)AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT;
+	if (settings == NULL) { return false; }
+	return (settings->isMultiplayer != 0);
+}
+
+
+// Returns true if the game is currently running
+bool IsGameRunning() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) {
+		return false;
+	}
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid()) {
+		return false;
+	}
+	if (global->gameRunStatus != 0) {
+		return false;
+	}
+
+	return (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING);
+}

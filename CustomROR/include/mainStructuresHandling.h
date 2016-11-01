@@ -36,3 +36,9 @@ AOE_STRUCTURES::STRUCT_PLAYER *GetPlayerStruct(long int playerId);
 
 AOE_STRUCTURES::STRUCT_CURSOR_SLP_INFO *GetCursorInfo();
 
+// Returns true if current game is multiplayer, false otherwise (including error cases)
+bool IsMultiplayer();
+
+// Returns true if the game is currently running
+bool IsGameRunning();
+

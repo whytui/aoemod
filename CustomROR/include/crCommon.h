@@ -63,12 +63,6 @@ const char *GetUnitName(short int unitDefId);
 // Return NULL if one of the objects is NULL/missing
 AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId);
 
-// Returns true if current game is multiplayer, false otherwise (including error cases)
-bool IsMultiplayer();
-
-// Returns true if the game is currently running
-bool IsGameRunning();
-
 // Returns true for maps where AI does build a dock and boats. Warning: for unknown map type (custom), this returns true.
 bool IsDockRelevantForMap(MAP_TYPE_INDEX mti);
 
@@ -342,59 +336,9 @@ void AOE_GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BU
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCmdId, long int elemLanguageCreationDllId);
 
 
-// Add a command button in unit-commands zone (under game zone).
-// buttonIndex: 0-4 = first row, 6-10=second row, 5 and 11 are "special" right buttons (11=unselect/cancel, generally)
-// DATID can be a unitDefId (train), researchId (do_research)... Set it to 0 when not relevant.
-// isDisabled : set it to true to get a read only button (no possible click)
-// creationText can be left NULL to display a text using unit/research/etc's LanguageDLLID.
-// iconSlpInfo can be left NULL unless we want to use specific SLP resource for icon.
-// Technically, this just updates the button (no button object is created).
-// Refresh may NOT be performed if underlying info (command id, DATID) are unchanged, which may lead to wrong updates
-bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
-	long int DATID, bool isDisabled, const char *creationText, AOE_STRUCTURES::STRUCT_SLP_INFO *iconSlpInfo,
-	bool forceUpdate);
-
-
 // ---------- Other
 
 // Automatically detects issues in empires.dat (requires to have been loaded already) and writes logs about errors in trace message handler.
 bool AnalyzeEmpiresDatQuality();
 
-
-// TODO: move in a dedicated file
-// Returns the cursor that corresponds to a given mouse action type (for custom ones)
-static GAME_CURSOR GetCursorForCustomActionType(MOUSE_ACTION_TYPES mouseActionType) {
-	switch (mouseActionType) {
-	case AOE_CONST_INTERNAL::CST_MAT_CR_PROTECT_UNIT_OR_ZONE:
-		return GAME_CURSOR::GC_GROUP;
-	case AOE_CONST_INTERNAL::CST_MAT_VILLAGER_SET_BUILDING_LOCATION:
-		return GAME_CURSOR::GC_HAND;
-	case AOE_CONST_INTERNAL::CST_MAT_NORMAL:
-	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_01:
-	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_02_SELECT_ZONE:
-	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_03_SELECT_ZONE:
-	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_04:
-	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_05:
-	case AOE_CONST_INTERNAL::CST_MAT_VILLAGER_BUILD_MENU:
-	case AOE_CONST_INTERNAL::CST_MAT_EDITOR_SET_UNIT_LOCATION:
-	case AOE_CONST_INTERNAL::CST_MAT_SET_TERRAIN_TYPE:
-	case AOE_CONST_INTERNAL::CST_MAT_SET_ALTITUDE:
-	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_0E:
-	case AOE_CONST_INTERNAL::CST_MAT_EDITOR_MOVE_UNIT:
-	case AOE_CONST_INTERNAL::CST_MAT_EDITOR_SELECT_TARGET_UNIT:
-	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_11_SELECT_ZONE:
-	case AOE_CONST_INTERNAL::CST_MAT_UNKNOWN_12_SELECT_UNIT_CANT_UNSELECT:
-	case AOE_CONST_INTERNAL::CST_MAT_SET_CLIFFS:
-	case AOE_CONST_INTERNAL::CST_MAT_EDITOR_CHANGE_ORIENTATION:
-	case AOE_CONST_INTERNAL::CST_MAT_SET_WALLS:
-	case AOE_CONST_INTERNAL::CST_MAT_CLICK_ZONE_TO_ATTACK:
-	case AOE_CONST_INTERNAL::CST_MAT_SELECT_CONVERT_TARGET:
-	case AOE_CONST_INTERNAL::CST_MAT_SELECT_HEAL_TARGET:
-	case AOE_CONST_INTERNAL::CST_MAT_SELECT_UNKNOWN_67:
-	case AOE_CONST_INTERNAL::CST_MAT_SELECT_REPAIR_TARGET:
-	case AOE_CONST_INTERNAL::CST_MAT_SELECT_UNKNOWN_69:
-	default:
-		return GAME_CURSOR::GC_NORMAL; // This is NOT correct for all types... This method is supposed to handle custom types, not standard ones.
-	}
-}
 

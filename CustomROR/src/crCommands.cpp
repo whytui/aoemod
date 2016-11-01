@@ -4341,7 +4341,7 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 	if (settings->mouseActionType < 0) {
 		foundHintDllId = 0;
 		foundInteraction = UNIT_INTERACTION_ID::UII_NO_INTERACTION;
-		cursorToForce = GetCursorForCustomActionType(settings->mouseActionType); // Force usage of this mouse cursor
+		cursorToForce = BUTTONBAR::BUTTONBAR_CONST::GetCursorForCustomActionType(settings->mouseActionType); // Force usage of this mouse cursor
 		return true; // Disable further treatments.
 	}
 
