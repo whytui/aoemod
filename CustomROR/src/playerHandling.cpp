@@ -3,6 +3,36 @@
 namespace PLAYER {
 
 
+
+	// Call this to make sure "currently managed AI player" is valid, so that AI is not stuck.
+	void SetAValidCurrentAIPlayerId() {
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (!global) { return; }
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct((short int)global->currentlyManagedAIPlayer);
+		if (player && (player->isComputerControlled)) { return; } // Currently manager playerId is OK (player is actually computer-controlled).
+		for (int playerId = 1; playerId < global->playerTotalCount; playerId++) {
+			player = GetPlayerStruct(playerId);
+			if (player && player->isComputerControlled) {
+				global->currentlyManagedAIPlayer = playerId;
+				return; // Found (and set) one. Exit.
+			}
+		}
+	}
+
+
+	// Remove all AI-controlled flags for currently controlled player (cf game settings structure).
+	// Only for single player games.
+	void RemoveAIFlagsForCurrentlyControlledPlayer() {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		if (!player) { return; }
+		player->isComputerControlled = 0;
+		player->SetCustomAIFlag(0);
+		// Make sure to set current AI player to a valid player
+		SetAValidCurrentAIPlayerId();
+	}
+
+
+
 	// Return a list of all unitDefIds that are/can be enabled in player's tech tree.
 	std::list<long int> GetActivableUnitDefIDs(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 		std::list<long int> result;

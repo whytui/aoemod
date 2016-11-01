@@ -1469,7 +1469,7 @@ void CustomRORInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_
 	long int mousePosY = GetIntValueFromRORStack(REG_values, 0x2C);
 	float posX, posY;
 	GetGamePositionUnderMouse(&posX, &posY);
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_RESOURCES, false);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = AOE_METHODS::GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_RESOURCES, false);
 	CUSTOMROR::crCommand.OnInGameRightClickCustomAction(posX, posY, unitUnderMouse);
 }
 
@@ -2866,7 +2866,7 @@ void CustomRORInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_value
 
 	if (firstCall) {
 		// At this point we don't have(need) a fix for first call (it doesnt seem to fail too much)
-		REG_values->EAX_val = callFindPathForUnit(pathFindingArgs);
+		REG_values->EAX_val = AOE_METHODS::CallFindPathForUnit(pathFindingArgs);
 		return;
 	}
 	// For second call, there are lots of failure due to start position <> unit position.

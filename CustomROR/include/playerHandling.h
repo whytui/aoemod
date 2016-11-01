@@ -20,6 +20,14 @@ using namespace AOE_STRUCTURES;
 
 namespace PLAYER {
 
+	// Call this to make sure "currently managed AI player" is valid, so that AI is not stuck.
+	void SetAValidCurrentAIPlayerId();
+
+	// Remove all AI-controlled flags for currently controlled player (cf game settings structure).
+	// Only for single player games.
+	void RemoveAIFlagsForCurrentlyControlledPlayer();
+
+
 	// Return a list of all unitDefIds that are/can be enabled in player's tech tree.
 	std::list<long int> GetActivableUnitDefIDs(AOE_STRUCTURES::STRUCT_PLAYER *player);
 

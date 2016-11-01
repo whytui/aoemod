@@ -111,7 +111,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			settings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
 		} else {
 			STRUCT_POSITION_INFO mousePosInfo = GetMousePosition();
-			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitAtMousePosition(mousePosInfo.posX, mousePosInfo.posY, INTERACTION_MODES::CST_IM_LIVING_UNITS, true);
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)AOE_METHODS::GetUnitAtMousePosition(mousePosInfo.posX, mousePosInfo.posY, INTERACTION_MODES::CST_IM_LIVING_UNITS, true);
 			AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 			if (player && player->IsCheckSumValid() && unit && unit->IsCheckSumValidForAUnitClass()) {
 				SelectOneUnit(player, unit, false);
@@ -776,7 +776,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 						assert(global && global->IsCheckSumValid());
 						if (!global || !global->IsCheckSumValid()) { return false; }
 
-						AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
+						AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = AOE_METHODS::GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
 						if (unitUnderMouse && unitUnderMouse->IsCheckSumValidForAUnitClass()) {
 							AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->unitDefinition;
 							if (unitDefUnderMouse && unitDefUnderMouse->IsCheckSumValidForAUnitClass() &&

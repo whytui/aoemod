@@ -3640,7 +3640,7 @@ long int CustomRORCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_
 	}
 
 	// Do the call
-	long int pathFindingResult = callFindPathForUnit(pathFindingArgs);
+	long int pathFindingResult = AOE_METHODS::CallFindPathForUnit(pathFindingArgs);
 
 	if (doFix) {
 		// Do NOT forget to restore correct values !!!!

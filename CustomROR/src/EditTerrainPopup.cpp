@@ -110,8 +110,8 @@ void EditTerrainPopup::OnBeforeClose(bool isCancel) {
 		}
 	}
 	if (this->chkSoften->IsChecked()) {
-		AOE_SoftenAltitudeDifferences(mapInfo, minX, minY, maxX, maxY);
-		AOE_SoftenTerrainDifferences(mapInfo, minX, minY, maxX, maxY);
+		AOE_METHODS::SoftenAltitudeDifferences(mapInfo, minX, minY, maxX, maxY);
+		AOE_METHODS::SoftenTerrainDifferences(mapInfo, minX, minY, maxX, maxY);
 	}
 }
 

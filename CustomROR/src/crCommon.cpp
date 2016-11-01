@@ -1,34 +1,6 @@
 #include "../include/crCommon.h"
 
 
-
-// Remove all AI-controlled flags for currently controlled player (cf game settings structure).
-// Only for single player games.
-void RemoveAIFlagsForCurrentlyControlledPlayer() {
-	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
-	if (!player) { return; }
-	player->isComputerControlled = 0;
-	player->SetCustomAIFlag(0);
-	// Make sure to set current AI player to a valid player
-	SetAValidCurrentAIPlayerId();
-}
-
-// Call this to make sure "currently managed AI player" is valid, so that AI is not stuck.
-void SetAValidCurrentAIPlayerId() {
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-	if (!global) { return; }
-	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct((short int)global->currentlyManagedAIPlayer);
-	if (player && (player->isComputerControlled)) { return; } // Currently manager playerId is OK (player is actually computer-controlled).
-	for (int playerId = 1; playerId < global->playerTotalCount; playerId++) {
-		player = GetPlayerStruct(playerId);
-		if (player && player->isComputerControlled) {
-			global->currentlyManagedAIPlayer = playerId;
-			return; // Found (and set) one. Exit.
-		}
-	}
-}
-
-
 // Calculate distance
 float GetDistance(float x1, float y1, float x2, float y2) {
 	float dx = x1 - x2;
@@ -589,7 +561,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *play
 // Returns NULL if it failed
 AOE_STRUCTURES::STRUCT_UNIT_BASE *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef,
 	float posX, float posY, bool checkVisibility, bool checkHills, bool checkConflictingUnits) {
-	if (GetErrorForUnitCreationAtLocation(player, unitDef, posY, posX, checkVisibility, checkHills, false, true, checkConflictingUnits) != 0) {
+	if (AOE_METHODS::GetErrorForUnitCreationAtLocation(player, unitDef, posY, posX, checkVisibility, checkHills, false, true, checkConflictingUnits) != 0) {
 		return NULL;
 	}
 	return CreateUnit(player, unitDef->DAT_ID1, posY, posX, 0);
@@ -717,115 +689,6 @@ bool AOE_selectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUC
 	return (result != 0);
 }
 
-
-// Calls AOE's path finding method, using 0x583BC8 (not 0x6A1CC0)
-// allArgs indices are 1-15 (do NOT use 0). Warning, allArgs[6] is a float, not an int.
-// Arguments (1-15) are:
-// srcPosY, srcPosX, destPosY, destPosX, ptrActorUnit, f_range?, targetUnitId, updateUnitPathInfo?(!OnlyCheck),
-// arg9, arg10, arg11, arg12, arg13(int_distance?), arg14(unitGrp?), arg15
-// See also AOE_calcPathForMove
-long int callFindPathForUnit(long int allArgs[15 + 1]) {
-	const unsigned long int myecx = 0x583BC8;
-	const unsigned long int callAddr = 0x458930;
-	long int result;
-	_asm {
-		MOV ECX, myecx
-		MOV EAX, allArgs
-		ADD EAX, 0x3C
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		PUSH DS:[EAX]
-		SUB EAX, 4
-		MOV EAX, callAddr
-		CALL EAX
-		MOV result, EAX
-	}
-#ifdef _DEBUG
-	bool doTrace = false; // change this to enable/disable debug on call result.
-	if (doTrace) {
-		char buffer[800];
-		// fix float arg
-		float *pf = (float*)(&allArgs[6]);
-		double f = (double)*pf;
-		std::string s5 = GetHexStringAddress(allArgs[5]);
-		std::string s7 = GetHexStringAddress(allArgs[7]);
-		sprintf_s(buffer, 800, "%ld %ld %ld %ld %s %7.1f %s %d %d %d %d %d %d %d %d ; res=%d", allArgs[1], allArgs[2], allArgs[3], allArgs[4],
-			s5.c_str(), f, s7.c_str(),
-			allArgs[8], allArgs[9], allArgs[10], allArgs[11], allArgs[12], allArgs[13], allArgs[14], allArgs[15], result);
-		traceMessageHandler.WriteMessageNoNotification(buffer);
-	}
-#endif
-	return result;
-}
-
-
-// pathFindingStruct can be 0x583BC8 or 0x6A1CC0. Don't know the specific roles yet :(
-// updateUnitPathInfo = "do move". If false, this just checks if movement is possible.
-// arg15 : seen 0x1B hardcoded
-long int AOE_calcPathForMove(STRUCT_UNKNOWN_MAP_DATA_F04C *pathFindingStruct,
-	long int srcPosY, long int srcPosX, long int destPosY, long int destPosX,
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *ptrActorUnit, float maxRange, long int targetUnitId, long int updateUnitPathInfo,
-	long int arg9, long int arg10, long int arg11, long int arg12,
-	long int distance_unsure, long int targetPlayerId, long int unknown_unitClass) {
-	const unsigned long int callAddr = 0x458930;
-#ifdef _DEBUG
-	// DEBUG: run some data quality checks
-	assert(pathFindingStruct && pathFindingStruct->IsCheckSumValid());
-	assert((updateUnitPathInfo == 0) || (updateUnitPathInfo == 1));
-	if (ptrActorUnit) {
-		assert(ptrActorUnit->IsCheckSumValidForAUnitClass());
-	}
-	assert(targetUnitId >= -1);
-#endif
-	long int result = 0;
-	_asm {
-		MOV ECX, pathFindingStruct;
-		PUSH unknown_unitClass;
-		PUSH targetPlayerId;
-		PUSH distance_unsure;
-		PUSH arg12;
-		PUSH arg11;
-		PUSH arg10;
-		PUSH arg9;
-		PUSH updateUnitPathInfo;
-		PUSH targetUnitId;
-		PUSH maxRange;
-		PUSH ptrActorUnit;
-		PUSH destPosX;
-		PUSH destPosY;
-		PUSH srcPosX;
-		PUSH srcPosY;
-		CALL callAddr;
-		MOV result, EAX;
-	}
-	return result;
-}
 
 
 
