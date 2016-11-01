@@ -9,10 +9,12 @@
 #include "researches.h"
 #include "AOE_strategy.h"
 //#include "customFuncRules.h"
+#include "playerHandling.h"
 #include "playerTargeting.h"
 
 
 using namespace AOE_CONST_FUNC;
+using namespace PLAYER;
 
 namespace STRATEGY {
 

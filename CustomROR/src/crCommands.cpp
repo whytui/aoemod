@@ -566,7 +566,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)FindUnitWithShortcutNumberForPlayer(player, 1);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)PLAYER::FindUnitWithShortcutNumberForPlayer(player, 1);
 		if (unitBase) {
 			unitBase->AOE_destructor(true);
 			return;
@@ -2195,7 +2195,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
 			FarmRebuildInfo *fInfo = CUSTOMROR::crInfo.myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
 			if (fInfo && (fInfo->playerId == player->playerId) && !fInfo->forceNotRebuild &&
-				(fInfo->villagerUnitId >= 0) && IsUnitAvailableForPlayer(CST_UNITID_FARM, player)) {
+				(fInfo->villagerUnitId >= 0) && PLAYER::IsUnitAvailableForPlayer(CST_UNITID_FARM, player)) {
 				// As long as we use a game command, it is compatible with multiplayer.
 				CreateCmd_Build(fInfo->villagerUnitId, CST_UNITID_FARM, fInfo->posX, fInfo->posY);
 				fInfo->villagerUnitId = -1;
@@ -2242,7 +2242,7 @@ bool CustomRORCommand::AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE
 		if (shortcutInfo->DAT_ID == unitDef->DAT_ID1) {
 			// This rule matches our unit DAT ID.
 			// If "only 1 unit" is NOT enabled, always assign. Otherwise, check the shortcut number is still unused.
-			if (!shortcutInfo->onlyOneUnit || FindUnitWithShortcutNumberForPlayer(unit->ptrStructPlayer, shortcutId) == NULL) {
+			if (!shortcutInfo->onlyOneUnit || PLAYER::FindUnitWithShortcutNumberForPlayer(unit->ptrStructPlayer, shortcutId) == NULL) {
 				unit->shortcutNumber = shortcutId;
 				return true;
 			}
@@ -3668,10 +3668,10 @@ void CustomRORCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LAB
 	long int boatVillCount = -1;
 	// Try to get actual villager count (including fishing ships, etc...)
 	if (player && player->IsCheckSumValid()) {
-		villCount = GetPlayerUnitCount(player, -1, TribeAIGroupCivilian, 2, 2);
-		boatVillCount = GetPlayerUnitCount(player, -1, TribeAIGroupFishingBoat, 2, 2) +
-			GetPlayerUnitCount(player, -1, TribeAIGroupTradeBoat, 2, 2) +
-			GetPlayerUnitCount(player, -1, TribeAIGroupTransportBoat, 2, 2);
+		villCount = PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupCivilian, 2, 2);
+		boatVillCount = PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupFishingBoat, 2, 2) +
+			PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupTradeBoat, 2, 2) +
+			PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupTransportBoat, 2, 2);
 		//villCount = (long int)player->GetResourceValue(CST_RES_ORDER_CIVILIAN_POPULATION); // DONT DO THIS because resource is NOT always up to date
 	}
 	std::string res = localizedText;
@@ -3713,7 +3713,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_FOOD) > CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFood) { return; }
 	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_WOOD) < CUSTOMROR::crInfo.configInfo.autoRebuildFarms_minWood) { return; }
 	// Remark : currentFarmCount includes current farm (that is going to be deleted)
-	long int currentFarmCount = GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2); // Include being-built farms
+	long int currentFarmCount = PLAYER::GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2); // Include being-built farms
 	bool farmCountConditionIsOK = (currentFarmCount <= CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFarms);
 
 	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *farmerUnit = NULL;
@@ -3795,9 +3795,9 @@ void CustomRORCommand::DisableWalls() {
 				player->ptrStructDefUnitTable && player->ptrStructDefUnitTable[CST_UNITID_SMALL_WALL]) {
 				player->ptrStructDefUnitTable[CST_UNITID_SMALL_WALL]->availableForPlayer = 0;
 			}
-			AOE_enableResearch(player, CST_RSID_SMALL_WALL, false);
-			AOE_enableResearch(player, CST_RSID_MEDIUM_WALL, false);
-			AOE_enableResearch(player, CST_RSID_FORTIFICATION, false);
+			AOE_METHODS::AOE_enableResearch(player, CST_RSID_SMALL_WALL, false);
+			AOE_METHODS::AOE_enableResearch(player, CST_RSID_MEDIUM_WALL, false);
+			AOE_METHODS::AOE_enableResearch(player, CST_RSID_FORTIFICATION, false);
 		}
 	}
 }
@@ -4704,7 +4704,7 @@ void CustomRORCommand::OnGameInitDisableResearchesEvent(AOE_STRUCTURES::STRUCT_P
 	// Disable researches from trigger data
 	for (it = CUSTOMROR::crInfo.researchesToDisable[player->playerId].begin(); it != CUSTOMROR::crInfo.researchesToDisable[player->playerId].end(); it++) {
 		short int researchId = *it;
-		AOE_enableResearch(player, researchId, false);
+		AOE_METHODS::AOE_enableResearch(player, researchId, false);
 	}
 }
 

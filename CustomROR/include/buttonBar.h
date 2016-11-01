@@ -10,6 +10,7 @@
 #include "CustomRORInfo.h"
 #include "AOEPrimitives_units.h"
 #include "buttonBarCommon.h"
+#include "playerHandling.h"
 
 namespace BUTTONBAR {
 

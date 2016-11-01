@@ -179,7 +179,7 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 	long int currentActionButtonIndex = -1;
 	short int currentActionLangNameId = -1;
 	char *currentActionName = NULL; // useful when currentActionLangNameId is invalid.
-	std::list<long int> activableUnitDefIDs = GetActivableUnitDefIDs(controlledPlayer); // A list of unitDef IDs that can be enabled thanks to (available) researches.
+	std::list<long int> activableUnitDefIDs = PLAYER::GetActivableUnitDefIDs(controlledPlayer); // A list of unitDef IDs that can be enabled thanks to (available) researches.
 	// To support >1 page
 	long int minButtonId = gameMainUI->panelButtonIdPageOffset;
 	long int minButtonIdNextPage = gameMainUI->panelButtonIdPageOffset + 10 + 1; // 10=pageSize, +1 for next button after "this" last !

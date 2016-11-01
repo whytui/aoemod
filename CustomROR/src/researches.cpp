@@ -4,6 +4,26 @@ using namespace AOE_STRUCTURES;
 using namespace AOE_CONST_FUNC;
 
 
+
+
+// Enable or disable a research for a player
+void AOE_METHODS::AOE_enableResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, long int research_id, bool enable) {
+	if (!player || !player->IsCheckSumValid()) { return; }
+	if (!player->ptrResearchesStruct) { return; }
+	if ((research_id < 0) || (research_id >= player->ptrResearchesStruct->researchCount)) { return; }
+	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
+	const long int f = 0x4F1870;
+	long int argResearch_id = research_id & 0xFF; // It is a byte only
+	long int argEnable = enable ? 1 : 0;
+	_asm {
+		MOV ECX, player;
+		PUSH argEnable;
+		PUSH argResearch_id;
+		CALL f;
+	}
+}
+
+
 // Get a technology name from languagex.dll or language.dll.
 // Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
 std::string GetTechnologyLocalizedName(short int techId) {

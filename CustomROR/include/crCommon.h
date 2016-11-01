@@ -86,27 +86,10 @@ void SortResourceTypes(const int resourceAmounts[], int resourceTypesOrder[]);
 bool PrepareUnitToAddIfPossible(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitId_toAdd, short int unitId_actor,
 	long int *actorCounter, short int *lastCostDAT_ID, float remainingResources[], float tempCost[]);
 
-// Return a list of all unitDefIds that are/can be enabled in player's tech tree.
-std::list<long int> GetActivableUnitDefIDs(AOE_STRUCTURES::STRUCT_PLAYER *player);
-
 
 // Calls AOE's code mainAI.findUnit(DAT_Id)
 AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI *mainAI, long int DAT_ID);
 
-
-// Returns <> 0 if a unit is (currently) available for a given player. Returns the unit def pointer.
-// Does not consider potential researches that could enable the unit afterwards.
-// Warning: this only works for non-upgraded unit def IDs. OK for clubman, not for axeman (because axeman's DATID1 is clubman's DATID).
-long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, AOE_STRUCTURES::STRUCT_PLAYER *player);
-
-// Searches (at least) a unit with provided shortcut number for given player.
-// The first matching unit is returned (arbitrary), even if there are several.
-AOE_STRUCTURES::STRUCT_UNIT_BASE *FindUnitWithShortcutNumberForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, char shortcutNumber);
-
-// Get number of matching units (for a unitDef ID) for given player. Restricted to "creatable" units
-// -1 are jokers for DAT_ID, unitAIType, unitStatus
-long int GetPlayerUnitCount(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID, 
-	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType, char minUnitStatus, char maxUnitStatus);
 
 // Returns a pointer to trigger data
 char *GetTriggerDataPtr(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo);
@@ -200,14 +183,7 @@ long int AssignShortcutToSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, lo
 // Selects units that have a given shortcut number.
 long int SelectUnitsUsingShortcut(AOE_STRUCTURES::STRUCT_PLAYER *player, long int shortcutNumber, bool addToSelection = false);
 
-// Enable or disable a research for a player
-void AOE_enableResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, long int research_id, bool enable);
 
-// Disable the research that enables a given unit, so that it can't be trained.
-// For units that are enabled by a "visible" research, like short sword, the research won't be visible (disabled).
-// To be called before game starts
-// Returns true if a research was found and disabled.
-bool DisableUnitForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID);
 
 // Calls AOE's method to change a unit owner. Warning, this has bugs, see customROR / crCommand.
 void AOE_ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer);

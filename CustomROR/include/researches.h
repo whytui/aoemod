@@ -29,6 +29,12 @@ CST_TCH_BALLISTA_TOWER // because researching ballista tower in RM is not such a
 };
 
 
+namespace AOE_METHODS {
+	// Enable or disable a research for a player
+	void AOE_enableResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, long int research_id, bool enable);
+}
+
+
 // Get a technology name from languagex.dll or language.dll.
 // Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
 std::string GetTechnologyLocalizedName(short int techId);
