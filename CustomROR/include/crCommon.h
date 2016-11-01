@@ -34,7 +34,7 @@
 #include "researches.h"
 #include "crLocalization.h"
 #include "unitDefHandling.h"
-#include "buttonBarConst.h"
+#include "buttonBarCommon.h"
 
 
 // Methods in this file are simple primitives that don't depend on customROR configuration. They generally are calls to existing game methods.
@@ -353,17 +353,6 @@ void AOE_GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BU
 bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId,
 	long int DATID, bool isDisabled, const char *creationText, AOE_STRUCTURES::STRUCT_SLP_INFO *iconSlpInfo,
 	bool forceUpdate);
-
-// Returns true if the button is visible. Use this overload for performance if you already have STRUCT_UI_IN_GAME_MAIN pointer.
-// Returns false if the button is hidden, or if an error occurs.
-bool IsInGameUnitCommandButtonVisible(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int buttonIndex);
-// Returns true if the button is visible
-// Returns false if the button is hidden, or if an error occurs.
-bool IsInGameUnitCommandButtonVisible(long int buttonIndex);
-
-// To be used with button IDs from unit defintion/researches to get a buttonIndex for game main UI structure (command buttons)
-// WARNING: returns -1 if DATButtonId is -1 or invalid.
-long int GetButtonInternalIndexFromDatBtnId(char DATButtonId);
 
 
 // ---------- Other

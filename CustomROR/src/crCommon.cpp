@@ -1621,52 +1621,6 @@ void AOE_GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BU
 }
 
 
-// Returns true if the button is visible. Use this overload for performance if you already have STRUCT_UI_IN_GAME_MAIN pointer.
-// Returns false if the button is hidden, or if an error occurs.
-bool IsInGameUnitCommandButtonVisible(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int buttonIndex) {
-	assert(gameMainUI && gameMainUI->IsCheckSumValid());
-	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
-		return false;
-	}
-	if ((buttonIndex < 0) || (buttonIndex >= 12)) {
-		assert(false); // Should never happen
-		return false;
-	}
-	return (gameMainUI->unitCommandButtons[buttonIndex] != NULL) &&
-		(gameMainUI->unitCommandButtons[buttonIndex]->visible != 0);
-}
-// Returns true if the button is visible
-// Returns false if the button is hidden, or if an error occurs.
-bool IsInGameUnitCommandButtonVisible(long int buttonIndex) {
-	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *inGameMain = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
-	if (!inGameMain || !inGameMain->IsCheckSumValid() || !inGameMain->visible) {
-		return false;
-	}
-	if (inGameMain != (void*)AOE_GetCurrentScreen()) {
-		return false;
-	}
-	return IsInGameUnitCommandButtonVisible(inGameMain, buttonIndex);
-}
-
-
-
-// To be used with button IDs from unit defintion/researches to get a buttonIndex for game main UI structure (command buttons)
-// WARNING: returns -1 if DATButtonId is 0 or negative (invalid)
-// Valid results are 0-4 or 6-10.
-// See also 0x483710 (only works for 2 pages)
-long int GetButtonInternalIndexFromDatBtnId(char DATButtonId) {
-	if (DATButtonId <= 0) { return -1; } // Invalid (including 0).
-	long int tmp = ((DATButtonId - 1) % 10) + 1; // 1-5 is same as 11-15 / 21-25, etc. 6-10 = same as 16-20, etc
-	if (tmp <= 5) {
-		return tmp - 1; // Source 1-5 = index 0-4
-	}
-	if (tmp <= 10) {
-		return tmp; // Source 6-10 = index 6-10
-	}
-	return -1; // Should never happen !
-}
-
-
 // Add a command button in unit-commands zone (under game zone).
 // buttonIndex: 0-4 = first row, 6-10=second row, 5 and 11 are "special" right buttons (11=unselect/cancel, generally)
 // DATID can be a unitDefId (train), researchId (do_research)... Set it to 0 when not relevant.
@@ -1784,7 +1738,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		iconId = 0;
 	}
 	
-	if (!IsInGameUnitCommandButtonVisible(buttonIndex)) { // If this button was not used
+	if (!BUTTONBAR::IsInGameUnitCommandButtonVisible(buttonIndex)) { // If this button was not used
 		inGameMain->panelDisplayedButtonCount++; // Update number of used buttons. Not sure it has any impact
 	}
 	const char *creationTextToUse = (creationText == NULL) ? creationTextIfMissing.c_str() : creationText;

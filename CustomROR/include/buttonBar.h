@@ -9,7 +9,7 @@
 #include "crCommon.h"
 #include "CustomRORInfo.h"
 #include "AOEPrimitives_units.h"
-#include "buttonBarConst.h"
+#include "buttonBarCommon.h"
 
 namespace BUTTONBAR {
 

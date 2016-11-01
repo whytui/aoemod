@@ -3319,7 +3319,7 @@ void CustomRORInstance::EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_value
 // From 0x483710. Fix the transformation of empires.dat button IDs to internal indexes to support more than 1 page
 void CustomRORInstance::ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_values) {
 	long int rawButtonId = GetIntValueFromRORStack(REG_values, 4);
-	long int result = GetButtonInternalIndexFromDatBtnId((char)rawButtonId);
+	long int result = BUTTONBAR::GetButtonInternalIndexFromDatBtnId((char)rawButtonId);
 	if (result < 0) {
 		result = 0; // Make sure always to return a valid buttonId in ROR code ! 0 is default value in original method.
 	}

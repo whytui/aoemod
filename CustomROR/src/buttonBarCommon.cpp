@@ -1,5 +1,5 @@
 
-#include "../include/buttonBar.h"
+#include "../include/buttonBarCommon.h"
 
 namespace BUTTONBAR {
 ;
@@ -95,5 +95,54 @@ long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UIC
 	return AOE_CONST_DRS::AoeButtonBarCommonCommandsIconId::BBC_ICON_INVALID_NONE; // unknown or not applicable
 }
 
+
+} // BUTTONBAR_CONST
+
+
+
+// Returns true if the button is visible. Use this overload for performance if you already have STRUCT_UI_IN_GAME_MAIN pointer.
+// Returns false if the button is hidden, or if an error occurs.
+bool IsInGameUnitCommandButtonVisible(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int buttonIndex) {
+	assert(gameMainUI && gameMainUI->IsCheckSumValid());
+	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
+		return false;
+	}
+	if ((buttonIndex < 0) || (buttonIndex >= 12)) {
+		assert(false); // Should never happen
+		return false;
+	}
+	return (gameMainUI->unitCommandButtons[buttonIndex] != NULL) &&
+		(gameMainUI->unitCommandButtons[buttonIndex]->visible != 0);
 }
+// Returns true if the button is visible
+// Returns false if the button is hidden, or if an error occurs.
+bool IsInGameUnitCommandButtonVisible(long int buttonIndex) {
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *inGameMain = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
+	if (!inGameMain || !inGameMain->IsCheckSumValid() || !inGameMain->visible) {
+		return false;
+	}
+	if (inGameMain != (void*)AOE_GetCurrentScreen()) {
+		return false;
+	}
+	return IsInGameUnitCommandButtonVisible(inGameMain, buttonIndex);
+}
+
+
+// To be used with button IDs from unit defintion/researches to get a buttonIndex for game main UI structure (command buttons)
+// WARNING: returns -1 if DATButtonId is 0 or negative (invalid)
+// Valid results are 0-4 or 6-10.
+// See also 0x483710 (only works for 2 pages)
+long int GetButtonInternalIndexFromDatBtnId(char DATButtonId) {
+	if (DATButtonId <= 0) { return -1; } // Invalid (including 0).
+	long int tmp = ((DATButtonId - 1) % 10) + 1; // 1-5 is same as 11-15 / 21-25, etc. 6-10 = same as 16-20, etc
+	if (tmp <= 5) {
+		return tmp - 1; // Source 1-5 = index 0-4
+	}
+	if (tmp <= 10) {
+		return tmp; // Source 6-10 = index 6-10
+	}
+	return -1; // Should never happen !
+}
+
+
 }
