@@ -63,6 +63,32 @@ STRUCT_PLAYER *GetPlayerStruct(long int playerId) {
 }
 
 
+// Useful to get structure from a unit id. May return NULL !
+// Only works for creatable (unitId >= 0). This is just a choice to avoid writing same bugs as ROR
+// (some functions use -1 as <No unit> but get an irrevant unit struct then because -1 is not tested before calling getUnitStruct(...))
+AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId) {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || (unitId < 0)) { return NULL; }
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *result;
+	_asm {
+		MOV ECX, global
+			PUSH unitId
+			MOV EAX, 0x005206D0
+			CALL EAX
+			MOV result, EAX
+	}
+	return result;
+}
+
+
+// Returns a unit definition if valid, NULL otherwise.
+AOE_STRUCTURES::STRUCT_UNITDEF_BASE *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitDefId) {
+	if (!player || !player->IsCheckSumValid() || (unitDefId < 0)) { return NULL; }
+	if (unitDefId >= player->structDefUnitArraySize) { return NULL; }
+	return player->ptrStructDefUnitTable[unitDefId];
+}
+
+
 AOE_STRUCTURES::STRUCT_CURSOR_SLP_INFO *GetCursorInfo() {
 	return *(AOE_STRUCTURES::STRUCT_CURSOR_SLP_INFO**)AOE_VAR_CURSORS_INFO;
 }

@@ -35,6 +35,7 @@
 #include "crLocalization.h"
 #include "unitDefHandling.h"
 #include "buttonBarCommon.h"
+#include "AOEPrimitives_gameCommand.h"
 
 
 // Methods in this file are simple primitives that don't depend on customROR configuration. They generally are calls to existing game methods.
@@ -47,14 +48,6 @@ static_assert((UNUSED_PLID_FOR_TRIGGERS >= 0) && (UNUSED_PLID_FOR_TRIGGERS < 16)
 
 /* ----------- GETTERS ------------- */
 
-
-// Useful to get structure from a unit id. May return NULL !
-// Only works for creatable (unitId >= 0). This is just a choice to avoid writing same bugs as ROR
-// (some functions use -1 as <No unit> but get an irrevant unit struct then because -1 is not tested before calling getUnitStruct(...))
-AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId);
-
-// Returns a unit definition if valid, NULL otherwise.
-AOE_STRUCTURES::STRUCT_UNITDEF_BASE *GetUnitDefStruct(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitDefId);
 
 // Get a unit name from empires.dat data (read from civ 0)
 // Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
@@ -262,41 +255,6 @@ void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT
 void UnitInfoZoneAddAttributeLine(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone,
 	long int iconId, long int displayType, long int displayedValue, long int totalValue, long int &lineIndex);
 
-
-// -- Commands
-
-// commandStruct must have been allocated with a "AOE" alloc method like AOEAlloc(...)
-// It is freed by game code, don't use it / free it afterwards !
-// Returns false if failed
-bool AddCommandToGameCmdQueue(void *commandStruct, long int structSize);
-
-// Create a "ROR" command struct (right-click). Returns false if failed.
-bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY);
-bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
-
-// Create a "ROR" command struct (build). Returns false if failed.
-bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY);
-
-// Create a "ROR" command struct (change diplomacy). Returns false if failed.
-bool CreateCmd_ChangeDiplomacy(short int playerId, short int targetPlayerId, PLAYER_DIPLOMACY_STANCES diplomacyStance);
-
-// Create a "ROR" command struct (set ally victory flag). Returns false if failed.
-bool CreateCmd_SetAllyVictory(short int playerId, bool enable);
-
-// Create a "ROR" command struct (give writing - set shared exploration). Returns false if failed.
-bool CreateCmd_SetSharedExploration(short int playerId);
-
-// Create a "ROR" command struct (change game speed). Returns false if failed.
-bool CreateCmd_ChangeGameSpeed(float newSpeed);
-
-// Create a "ROR" command struct (add a resource amount to a player). Returns false if failed.
-bool CreateCmd_AddResource(short int playerId, short int resourceId, float value);
-
-// Create a "ROR" command struct (set steroids mode ON/OFF). Returns false if failed.
-bool CreateCmd_SetSteroids(bool enable);
-
-// Create a "ROR" command struct (pay tribute). Returns false if failed.
-bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_CONST_FUNC::RESOURCE_TYPES resourceType, float amount, float tributeInefficiency);
 
 
 // Get a localized string using ROR method.

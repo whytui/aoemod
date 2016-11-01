@@ -227,6 +227,9 @@
     <ClInclude Include="include\buttonBarCommon.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="include\AOEPrimitives_gameCommand.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -386,6 +389,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\buttonBarCommon.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AOEPrimitives_gameCommand.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

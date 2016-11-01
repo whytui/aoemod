@@ -1732,7 +1732,7 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUC
 				if (AOE_METHODS::IsUnitIdle(unit)) {
 					// maxDistance <= 0 : argument is ignored (=> always true). Otherwise: check distance condition
 					if ((maxDistance <= 0) || (GetDistance(posX, posY, unit->positionX, unit->positionY) <= maxDistance)) {
-						CreateCmd_RightClick(unit->unitInstanceId, -1, posX, posY);
+						GAME_COMMANDS::CreateCmd_RightClick(unit->unitInstanceId, -1, posX, posY);
 						//MoveUnitToTargetOrPosition(unit, NULL, posX, posY); // not MP-compatible at this point
 						result++;
 					}
@@ -2197,7 +2197,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 			if (fInfo && (fInfo->playerId == player->playerId) && !fInfo->forceNotRebuild &&
 				(fInfo->villagerUnitId >= 0) && PLAYER::IsUnitAvailableForPlayer(CST_UNITID_FARM, player)) {
 				// As long as we use a game command, it is compatible with multiplayer.
-				CreateCmd_Build(fInfo->villagerUnitId, CST_UNITID_FARM, fInfo->posX, fInfo->posY);
+				GAME_COMMANDS::CreateCmd_Build(fInfo->villagerUnitId, CST_UNITID_FARM, fInfo->posX, fInfo->posY);
 				fInfo->villagerUnitId = -1;
 			}
 			if (fInfo && !fInfo->forceNotRebuild && !fInfo->forceRebuild) {
@@ -4521,7 +4521,7 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 							move->maxDistanceFromTarget = distance;
 							unit->ptrActionInformation->AssignAction(move);
 						} else {
-							CreateCmd_RightClick(unit->unitInstanceId, -1, refX, refY);
+							GAME_COMMANDS::CreateCmd_RightClick(unit->unitInstanceId, -1, refX, refY);
 						}
 					}
 				}
@@ -5038,9 +5038,9 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if (actionPlayerId == targetPlayerId) { return; }
 		if ((diplomacyValue < 0) || (diplomacyValue > 3)) { return; }
 		if (diplomacyValue == 2) { diplomacyValue = 3; } // 2 is unused, let's use it as "enemy" like 3.
-		CreateCmd_ChangeDiplomacy((short int)actionPlayerId, (short int)targetPlayerId, (PLAYER_DIPLOMACY_STANCES)diplomacyValue);
+		GAME_COMMANDS::CreateCmd_ChangeDiplomacy((short int)actionPlayerId, (short int)targetPlayerId, (PLAYER_DIPLOMACY_STANCES)diplomacyValue);
 		if (isMutual) {
-			CreateCmd_ChangeDiplomacy((short int)targetPlayerId, (short int)actionPlayerId, (PLAYER_DIPLOMACY_STANCES)diplomacyValue);
+			GAME_COMMANDS::CreateCmd_ChangeDiplomacy((short int)targetPlayerId, (short int)actionPlayerId, (PLAYER_DIPLOMACY_STANCES)diplomacyValue);
 		}
 	}
 
