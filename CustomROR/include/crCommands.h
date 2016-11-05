@@ -40,6 +40,7 @@
 #include "cityPlan.h"
 #include "unitTargeting.h"
 #include "playerTargeting.h"
+#include "combatAI.h"
 
 #pragma once
 
@@ -72,7 +73,7 @@ public:
 	~CustomRORCommand();
 
 private:
-	const float distanceToConsiderVeryClose = 1.0; // Distance (added to range) under which a target is considered "within range". Please leave this > 0.
+	//const float distanceToConsiderVeryClose = 1.0; // Distance (added to range) under which a target is considered "within range". Please leave this > 0.
 
 	// UpdatedValue: if <0, it is ignored
 	void UpdateWorkRateWithMessage(short int DATID, float updatedValue);
@@ -234,10 +235,6 @@ public:
 	// Returns true if a shortcut has been added/modified
 	bool AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
-	// Returns true if a unit should change target to new one, false if it should keep attacking current one.
-	// This choice is very important, unit must NOT change its mind on each call because it is called too often and unit just attacks none of its "attackers"
-	// Which is a common issue in original game (example: 2-priest trick to safely convert an enemy)
-	bool ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity, long int targetUnitId);
 
 	// Returns true if a unit should change target to new one, false if it should keep attacking current one.
 	// To be used when target unit is a tower in actor's town
@@ -335,11 +332,6 @@ public:
 	bool OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue);
 
-	// Custom treatment to decide if a potential target unit should be ignored
-	// Overload standard rules for catapults(ignores building if HP=1) and "target=wall" cases.
-	// Default result=false (on error cases)
-	bool AutoSearchTargetShouldIgnoreUnit(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity,
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *potentialTargetUnit);
 
 	// Manages the display of a unit shortcut for non-standard shortcuts.
 	// Returns true if we want to let standard game code execute the shortcut display operation. (default false)
@@ -354,8 +346,6 @@ public:
 	// Returns true if a (custom) localized string has been written into buffer.
 	bool GetLocalizedString(long int stringId, char *buffer, long int bufferSize);
 
-	// Returns false if we should prevent unit from moving back (to maxrange) after shooting. Default result=true
-	bool ShouldRetreatAfterShooting(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity);
 
 	// Occurs when a unit is killed by an attack (excludes suicide with DEL, transported units whose transport is destroyed, conversion)
 	void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit);

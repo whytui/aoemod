@@ -2080,7 +2080,7 @@ void CustomRORInstance::ManageAttackActionChange(REG_BACKUP *REG_values) {
 	}
 
 	// Run algorithm to decide if unit should keep target or change
-	bool shouldChange = CUSTOMROR::crCommand.ShouldChangeTarget(actorUnit->currentActivity, targetUnit->unitInstanceId);
+	bool shouldChange = COMBAT::ShouldChangeTarget(actorUnit->currentActivity, targetUnit->unitInstanceId);
 	if (!shouldChange) { REG_values->EDI_val = (long)actionTargetUnit; REG_values->EAX_val = 2; }
 }
 #endif
@@ -2103,7 +2103,7 @@ void CustomRORInstance::ManageAttackActivityChange1(REG_BACKUP *REG_values) {
 	long int *arg_targetUnitId = (long int*)(REG_values->ESP_val + 0x14); // Get arg1 (pointer, we may want to update it)
 
 	// Custom Treatments.
-	if ((*arg_targetUnitId != -1) && !CUSTOMROR::crCommand.ShouldChangeTarget(activity, *arg_targetUnitId)) {
+	if ((*arg_targetUnitId != -1) && !COMBAT::ShouldChangeTarget(activity, *arg_targetUnitId)) {
 		*arg_targetUnitId = activity->targetUnitId; // Force current target to keep it (do not change target).
 	}
 	if (*arg_targetUnitId == -1) {
@@ -2132,7 +2132,7 @@ void CustomRORInstance::ManageAttackActivityChange_convert(REG_BACKUP *REG_value
 	// Custom Treatments.
 	if (*arg_targetUnitId == -1) { return; } // Let normal code manage this...
 
-	if (!CUSTOMROR::crCommand.ShouldChangeTarget(activity, *arg_targetUnitId)) {
+	if (!COMBAT::ShouldChangeTarget(activity, *arg_targetUnitId)) {
 		*arg_targetUnitId = activity->targetUnitId; // Force current target to keep it (do not change target).
 	}
 }
@@ -2181,7 +2181,7 @@ void CustomRORInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_value
 		}
 	}
 	if (contextIsReactionToAttack) {
-		forceKeepCurrentActivity = !CUSTOMROR::crCommand.ShouldChangeTarget(activity, enemyUnit->unitInstanceId);
+		forceKeepCurrentActivity = !COMBAT::ShouldChangeTarget(activity, enemyUnit->unitInstanceId);
 	}
 
 
@@ -3217,7 +3217,7 @@ void CustomRORInstance::FixActivityTargetUnitIdBug_retreatAfterShooting(REG_BACK
 		return; // No target = no need to continue with custom treatments
 	}
 	// Custom treatments
-	if (!CUSTOMROR::crCommand.ShouldRetreatAfterShooting(activity)) {
+	if (!COMBAT::ShouldRetreatAfterShooting(activity)) {
 		REG_values->EAX_val = 0; // Unit not found
 		ChangeReturnAddress(REG_values, 0x4E64C7); // jump AFTER the call that get unit struct. The next test will see NULL value and exit method.
 	}
@@ -3397,7 +3397,7 @@ void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 			}
 		}
 	}
-	bool ignoreThisTarget = CUSTOMROR::crCommand.AutoSearchTargetShouldIgnoreUnit(activity, potentialTargetUnit);
+	bool ignoreThisTarget = COMBAT::AutoSearchTargetShouldIgnoreUnit(activity, potentialTargetUnit);
 
 
 	// Do not modify below.

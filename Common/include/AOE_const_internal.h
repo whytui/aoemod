@@ -395,7 +395,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
 		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted?
 		CST_ATI_UNKNOWN_209 = 0x209, // Related to notification when being attacked ? see 0x4E4769
-		CST_ATI_ESCAPE_PROJECTILE = 0x20F, // when someone shoots at me ? "escape attack"? 4E62F3
+		CST_ATI_ESCAPE_ATTACK = 0x20F, // when someone shoots at me ? "escape attack"? 4E62F3
 		CST_ATI_ATTACK = 0x258,
 		CST_ATI_DEFEND_OR_CAPTURE = 0x259, // unsure, but it is used to capture relics
 		CST_ATI_BUILD = 0x25A,

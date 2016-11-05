@@ -115,6 +115,7 @@
     <ClInclude Include="include\buttonBarCommon.h" />
     <ClInclude Include="include\cityPlan.h" />
     <ClInclude Include="include\civilizationInfo.h" />
+    <ClInclude Include="include\combatAI.h" />
     <ClInclude Include="include\crCommands.h" />
     <ClInclude Include="include\crCommon.h" />
     <ClInclude Include="include\crConfig.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="src\buttonBarCommon.cpp" />
     <ClCompile Include="src\cityPlan.cpp" />
     <ClCompile Include="src\civilizationInfo.cpp" />
+    <ClCompile Include="src\combatAI.cpp" />
     <ClCompile Include="src\crCommands.cpp" />
     <ClCompile Include="src\crCommon.cpp" />
     <ClCompile Include="src\crConfig.cpp" />

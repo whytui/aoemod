@@ -30,6 +30,7 @@
 #include "cityPlan.h"
 #include "unitTargeting.h"
 #include "TileSetHandler.h"
+#include "combatAI.h"
 
 
 namespace CUSTOMROR {
