@@ -6,6 +6,7 @@
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_units.h>
 #include <AOE_struct_player.h>
+#include "AOE_memory.h"
 #include "traceMessage.h"
 #include "mainStructuresHandling.h"
 #include "researches.h"
@@ -73,6 +74,21 @@ namespace PLAYER {
 	// This only has a visible effect for units that can be selected with a shortcut key.
 	// This is only possible when unitId belongs to human-controlled player.
 	bool MakeMainUnitForShortcutSelection(long int unitId);
+
+
+	// OBSOLETE: avoid using it
+	// Duplicates an existing unit definition (srcDAT_ID) into a new unit definition for given player.
+	// New unitDef will be available in player's list. Everything is managed so that the game will automatically free everything correctly.
+	// You can send "" as name (in that case original unit's name will be used). Max length = 0x2F.
+	// Returns the new DAT_ID if successful, -1 otherwise.
+	// You can change any value for the new unitDef (but avoid messing with pointers?), but make sure you do it BEFORE you create units of this kind !
+	// It is not recommended to call this too much ! It would add a lot of unit definition and would impact seriously game performance.
+	// The maximum number of DAT_ID we allow here is 0x7FFF (to take no risk regarding signed short int values)
+	// The method supports all unit (def) types
+	// Warning: there might be issues when such units are converted (bug in destructor in AOE, a unitDef for a given DATID should exist for all civs ?)
+	// Maybe it's better not to use it for living/buildings units (because of conversion)
+	// Note: see also AOE unitDef constructors that copy an existing one, e.g. 4ED1B0 for living (type 70).
+	short int DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int srcDAT_ID, char *name);
 
 
 }

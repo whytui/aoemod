@@ -421,4 +421,39 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 }
 
 
+
+void PlayerTargeting::ComputeDislikeValues() {
+	if ((CUSTOMROR::crInfo.configInfo.dislike_allArtefacts <= 0) || (CUSTOMROR::crInfo.configInfo.dislike_humanPlayer <= 0)) { return; }
+
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
+	assert(globalStruct->GetPlayerStructPtrTable() != NULL);
+	unsigned long int newDislikeValues[9];
+	for (int i = 0; i < 9; i++) { newDislikeValues[i] = CST_DISLIKE_INITIAL_VALUE; }
+
+	// Calculate dislike "penalty" for each player.
+	for (int iPlayerId = 1; iPlayerId < globalStruct->playerTotalCount; iPlayerId++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = globalStruct->GetPlayerStructPtrTable()[iPlayerId];
+		if (player && player->ptrAIStruct) {
+			float *resources = (float *)player->ptrResourceValues;
+			if (resources[CST_RES_ORDER_STANDING_WONDERS]) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_allArtefacts; }
+			if (resources[CST_RES_ORDER_ALL_RUINS]) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_allArtefacts; }
+			if (resources[CST_RES_ORDER_ALL_RELICS]) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_allArtefacts; }
+			if (player->isComputerControlled == 0) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_humanPlayer; }
+		}
+	}
+
+	for (int iPlayerId = 1; iPlayerId < globalStruct->playerTotalCount; iPlayerId++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = globalStruct->GetPlayerStructPtrTable()[iPlayerId];
+		if (player) {
+			for (int iTargetPlayerId = 1; iTargetPlayerId < globalStruct->playerTotalCount; iTargetPlayerId++) {
+				AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = globalStruct->GetPlayerStructPtrTable()[iTargetPlayerId];
+				if ((iPlayerId != iTargetPlayerId) && (player->diplomacyVSPlayers[iTargetPlayerId] > 2) && (player->ptrAIStruct)) {
+					// Set the new calculated dislike value against player #iTargetPlayerId
+					player->ptrAIStruct->structDiplAI.dislikeTable[iTargetPlayerId] = newDislikeValues[iTargetPlayerId];
+				}
+			}
+		}
+	}
+}
+
 }

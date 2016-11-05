@@ -2281,7 +2281,7 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	if ((CUSTOMROR::crInfo.configInfo.dislikeComputeInterval > 0) &&
 		(currentGameTime >= (CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second + CUSTOMROR::crInfo.configInfo.dislikeComputeInterval))) {
 		CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second = currentGameTime;
-		CUSTOMROR::crCommand.ComputeDislikeValues();
+		CUSTOMROR::playerTargetingHandler.ComputeDislikeValues();
 	}
 
 	// Manage triggers

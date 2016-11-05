@@ -313,5 +313,179 @@ namespace PLAYER {
 		return MakeMainUnitForShortcutSelection(unitBase->ptrStructPlayer, unitBase);
 	}
 
+
+	// OBSOLETE: avoid using it
+	// Duplicates an existing unit definition (srcDAT_ID) into a new unit definition for given player.
+	// New unitDef will be available in player's list. Everything is managed so that the game will automatically free everything correctly.
+	// You can send "" as name (in that case original unit's name will be used). Max length = 0x2F.
+	// Returns the new DAT_ID if successful, -1 otherwise.
+	// You can change any value for the new unitDef (but avoid messing with pointers?), but make sure you do it BEFORE you create units of this kind !
+	// It is not recommended to call this too much ! It would add a lot of unit definition and would impact seriously game performance.
+	// The maximum number of DAT_ID we allow here is 0x7FFF (to take no risk regarding signed short int values)
+	// The method supports all unit (def) types
+	// Warning: there might be issues when such units are converted (bug in destructor in AOE, a unitDef for a given DATID should exist for all civs ?)
+	// Maybe it's better not to use it for living/buildings units (because of conversion)
+	// Note: see also AOE unitDef constructors that copy an existing one, e.g. 4ED1B0 for living (type 70).
+	short int DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int srcDAT_ID, char *name) {
+		if (!player) { return -1; }
+
+		short int newDAT_ID = player->structDefUnitArraySize;
+		if (newDAT_ID >= 0x7FFF) {
+			traceMessageHandler.WriteMessage("Error: tried to add too many unit definitions.");
+			return -1;
+		}
+		short int nbDef = player->structDefUnitArraySize + 1; // new number of unit definitions
+		long int newSizeInBytes = nbDef * 4;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE **oldArray = player->ptrStructDefUnitTable;
+		// Run some checks
+		assert(oldArray != NULL);
+		if (oldArray == NULL) { return -1; }
+		assert(player->structDefUnitArraySize > srcDAT_ID);
+		assert(0 <= srcDAT_ID);
+		if ((srcDAT_ID < 0) || (srcDAT_ID >= player->structDefUnitArraySize)) {
+			std::string msg = std::string("ERROR: tried to copy a unit definition that does not exist, ID=") + std::to_string(srcDAT_ID);
+			traceMessageHandler.WriteMessage(msg);
+			return -1;
+		}
+
+		// Create new array
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE **newArray = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE **)AOEAlloc(newSizeInBytes);
+		if (newArray == NULL) { return -1; } // nothing allocated: return an error
+
+		// Copy old array into new (for all existing unitDefs => copy pointers)
+		memcpy(newArray, oldArray, newSizeInBytes);
+		AOEFree(oldArray); // old array is freed, we replace it by new (larger) one
+		player->ptrStructDefUnitTable = newArray;
+		player->structDefUnitArraySize = nbDef;
+		player->ptrStructDefUnitTable[newDAT_ID] = NULL; // until we set a valid pointer.
+
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *srcDef_base = player->ptrStructDefUnitTable[srcDAT_ID];
+		AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *srcDef_type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)srcDef_base;
+		assert(srcDef_base != NULL);
+		if (srcDef_base == NULL) { return -1; }
+		if ((srcDef_base->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING) || (srcDef_base->unitType == GLOBAL_UNIT_TYPES::GUT_TRAINABLE)) {
+			traceMessageHandler.WriteMessage("WARNING: adding unitdef for living/buildings is disabled due to conversion bug.");
+			// To solve the limitation, a solution could be to add it for all players !
+			return -1;
+		}
+
+		long int objectSize = 0;
+		bool hasAttacksAndArmors = srcDef_base->DerivesFromAttackable();
+		bool hasCommandsHeader = srcDef_base->DerivesFromCommandable();
+		switch (srcDef_base->unitType) {
+		case GUT_EYE_CANDY:
+			objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BASE);
+			break;
+		case GUT_FLAGS:
+			objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_FLAG);
+			break;
+		case GUT_DOPPLEGANGER:
+			objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_DOPPLEGANGER);
+			break;
+		case GUT_MOVABLE:
+			objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE);
+			break;
+		case GUT_COMMANDABLE:
+			objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE);
+			break;
+		case GUT_ATTACKABLE:
+			objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE);
+			break;
+		case GUT_PROJECTILE:
+			objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE);
+			break;
+		case GUT_TRAINABLE:
+			objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE);
+			break;
+		case GUT_BUILDING:
+			objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING);
+			break;
+		case GUT_TREE:
+			objectSize = sizeof(AOE_STRUCTURES::STRUCT_UNITDEF_TREE);
+			break;
+		default:
+			// Not supported
+			assert(0 && "Trying to create a non-supported unit type.");
+			traceMessageHandler.WriteMessage("ERROR: Tried to create a non-supported unit type.");
+			return -1;
+		}
+		if (objectSize <= 0) { return -1; }
+
+		// Create new defUnit in the free room we just created
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *newUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *) AOEAlloc(objectSize);
+		AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *newUnitDefType50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)newUnitDef;
+		if (!newUnitDef) { return -1; } // nothing allocated: return an error
+
+		player->ptrStructDefUnitTable[newDAT_ID] = newUnitDef;
+
+		memcpy(newUnitDef, srcDef_base, objectSize);
+
+		// Very important: update new unitDef's DATIDs or some features will not work
+		newUnitDef->DAT_ID1 = newDAT_ID;
+		newUnitDef->DAT_ID2 = newDAT_ID;
+
+		// Manage damage graphics array (allocated for each unitDef)
+		// It belongs to base class => do this for all unit types, even if it seems this array is only used for buildings
+		if (newUnitDef->damageGraphicCount > 0) {
+			newUnitDef->damageGraphicsArray = (STRUCT_DAMAGE_GRAPHIC *)AOEAlloc(sizeof(STRUCT_DAMAGE_GRAPHIC) * newUnitDef->damageGraphicCount);
+			memcpy(newUnitDef->damageGraphicsArray, srcDef_base->damageGraphicsArray, sizeof(AOE_STRUCTURES::STRUCT_DAMAGE_GRAPHIC) * newUnitDef->damageGraphicCount);
+		} else {
+			assert(newUnitDef->damageGraphicsArray == NULL);
+			newUnitDef->damageGraphicsArray = NULL; // Should already be NULL in this case
+			newUnitDef->damageGraphicCount = 0;// Should not be <0
+		}
+
+		if (hasAttacksAndArmors && srcDef_type50->DerivesFromAttackable()) {
+			// Attacks and armors are allocated for each unitDef. We need to duplicate them (or ROR would free them twice)
+			newUnitDefType50->ptrArmorsList = NULL; // Default value, will be overwritten if necessary
+			newUnitDefType50->ptrAttacksList = NULL; // Default value, will be overwritten if necessary
+			if (newUnitDefType50->armorsCount > 0) {
+				newUnitDefType50->ptrArmorsList = (AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDefType50->armorsCount);
+				memcpy(newUnitDefType50->ptrArmorsList, srcDef_type50->ptrArmorsList, sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDefType50->armorsCount);
+			}
+			if (newUnitDefType50->attacksCount > 0) {
+				newUnitDefType50->ptrAttacksList = (AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDefType50->attacksCount);
+				memcpy(newUnitDefType50->ptrAttacksList, srcDef_type50->ptrAttacksList, sizeof(AOE_STRUCTURES::STRUCT_ARMOR_OR_ATTACK) * newUnitDefType50->attacksCount);
+			}
+		}
+
+		// Graphics structures are COMMON (not freed at unitDef level): we can keep them, they won't be freed twice
+
+		if (hasCommandsHeader && srcDef_type50->DerivesFromAttackable()) {
+			// Commands: we need to duplicate them (or ROR would free them twice)
+			assert(srcDef_type50->ptrUnitCommandHeader != NULL);
+			if (srcDef_type50->ptrUnitCommandHeader != NULL) {
+				AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER *newCmdHeader = (AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER *) AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER));
+				newUnitDefType50->ptrUnitCommandHeader = newCmdHeader;
+				newCmdHeader->checksum = srcDef_type50->ptrUnitCommandHeader->checksum;
+				newCmdHeader->commandCount = srcDef_type50->ptrUnitCommandHeader->commandCount;
+				if (newCmdHeader->commandCount > 0) {
+					newCmdHeader->ptrCommandArray = (AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF**) AOEAlloc(newCmdHeader->commandCount * 4);
+				} else {
+					newCmdHeader->ptrCommandArray = NULL;
+				}
+
+				for (long int i = 0; i < newCmdHeader->commandCount; i++) {
+					newCmdHeader->ptrCommandArray[i] = (AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF*) AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF)); // Alloc
+					memcpy(newCmdHeader->ptrCommandArray[i], srcDef_type50->ptrUnitCommandHeader->ptrCommandArray[i], sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF)); // Copy from source
+				}
+			} else {
+				newUnitDefType50->ptrUnitCommandHeader = NULL; // This should NOT happen
+			}
+		}
+
+		// Note: If we keep ptrLanguageDLLName, source unit name will appear in game. If we set to NULL, it will use ptrUnitName instead.
+		if (!name || (*name == 0)) {
+			return newDAT_ID;
+		}
+		newUnitDef->languageDLLID_Name = 0;
+		newUnitDef->languageDLLID_Creation = 0;
+		char *newName = (char *)AOEAlloc(0x30);
+		strcpy_s(newName, 0x30, name);
+		newUnitDef->ptrUnitName = newName; // issues with the name ?
+
+		return newDAT_ID;
+	}
+
 }
 

@@ -248,12 +248,6 @@ public:
 	void MoveFireGalleyIconIfNeeded(AOE_STRUCTURES::STRUCT_PLAYER *player);
 	void MoveFireGalleyIconIfNeeded(short int playerId);
 
-	// Duplicates an existing unit definition (srcDAT_ID) into a new unit definition for given player.
-	// New unitDef will be available in player's list. Everything is managed so that the game will automatically free everything correctly.
-	// You can send "" as name (in that case original unit's name will be used). Max length = 0x2F.
-	// Returns the new DAT_ID if successful, -1 otherwise.
-	// It is not recommended to call this too much ! It would add a lot of unit definition and would impact seriously game performance.
-	short int DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int srcDAT_ID, char *name);
 
 	// Entry point aftre a strategy element has been added in buildAI
 	void AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *posToAdd,
@@ -269,7 +263,6 @@ public:
 	// In most cases, this returns true and ROR's code is not used.
 	bool RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms);
 
-	void ComputeDislikeValues();
 
 	// Technical fix for a method about elevation application when generating map. Original method contains many bugs.
 	void Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo);

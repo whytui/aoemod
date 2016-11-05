@@ -10,6 +10,7 @@
 #include "randomizer.h"
 #include "crCommon.h"
 #include "unitDefHandling.h"
+#include "CustomRORInfo.h"
 
 using namespace std;
 using namespace AOE_STRUCTURES;
@@ -81,6 +82,8 @@ namespace CUSTOMROR {
 		// Returns the most disliked playerIdn, impacting which player "I" will attack.
 		long int GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DIPLOMACY_AI *diplAI,
 			long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor);
+
+		void ComputeDislikeValues();
 
 
 	private:
