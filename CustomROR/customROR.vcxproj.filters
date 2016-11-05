@@ -37,6 +37,12 @@
     <Filter Include="Fichiers d%27en-tête\Technical">
       <UniqueIdentifier>{0b48243e-203b-45f9-b71d-47a402a5a6b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\AI">
+      <UniqueIdentifier>{1dc0e223-2592-4e56-adcc-34fa9c41711d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\AI">
+      <UniqueIdentifier>{effcd91c-0eb6-43d0-8bf8-ce2576c4bbca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\CustomROR.rc">
@@ -164,9 +170,6 @@
     <ClInclude Include="include\CustomRORInfo.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\playerTargeting.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\StrategyUpdater.h">
       <Filter>Fichiers d%27en-tête\Strategy</Filter>
     </ClInclude>
@@ -206,9 +209,6 @@
     <ClInclude Include="include\palette.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
-    <ClInclude Include="include\unitTargeting.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\AOEPrimitives_units.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -230,8 +230,14 @@
     <ClInclude Include="include\AOEPrimitives_gameCommand.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="include\playerTargeting.h">
+      <Filter>Fichiers d%27en-tête\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\unitTargeting.h">
+      <Filter>Fichiers d%27en-tête\AI</Filter>
+    </ClInclude>
     <ClInclude Include="include\combatAI.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers d%27en-tête\AI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -346,9 +352,6 @@
     <ClCompile Include="src\CustomRORInfo.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\playerTargeting.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\StrategyUpdater.cpp">
       <Filter>Fichiers sources\Strategy</Filter>
     </ClCompile>
@@ -379,9 +382,6 @@
     <ClCompile Include="src\cityPlan.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\unitTargeting.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\AOEPrimitives_units.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -398,7 +398,13 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\combatAI.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Fichiers sources\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\unitTargeting.cpp">
+      <Filter>Fichiers sources\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\playerTargeting.cpp">
+      <Filter>Fichiers sources\AI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
