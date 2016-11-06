@@ -4622,7 +4622,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			// Make sure source unitDef exists for all players (remember: it can exist and be disabled, like gaia units for other civs)
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *sourceUnitDef = player->ptrStructDefUnitTable[sourceUnitDefId];
 			if (!sourceUnitDef || !sourceUnitDef->IsCheckSumValidForAUnitClass()) { return; }
-			// Make sure maximum unitDefId is the same for ally players (synchronized)
+			// Make sure maximum unitDefId is the same for all players (synchronized)
 			if (commonArraySize == -1) {
 				commonArraySize = player->structDefUnitArraySize; // first loop: initialize.
 			} else {
@@ -4754,6 +4754,134 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		}
 
 		trigger->enabled = false; // Creating unit def is not repeatable. Force disable.
+	}
+
+	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_MODIFY_UNIT_DEF) {
+		actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -1); // -1 means all players
+		long int sourceUnitDefId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_DEF_ID, -2);
+		if ((sourceUnitDefId < 0) || (actionPlayerId < -1) || (actionPlayerId >= global->playerTotalCount)) { return; }
+
+		// A first loop to run checks
+		int commonArraySize = -1;
+		int minPlayerId = actionPlayerId; // Default: no actual loop (only 1 player)
+		int maxPlayerId = actionPlayerId;
+		if (actionPlayerId == -1) { // joker: actual loop on all players
+			minPlayerId = 0;
+			maxPlayerId = global->playerTotalCount - 1;
+		}
+		for (int loopPlayerId = minPlayerId; loopPlayerId <= maxPlayerId; loopPlayerId++) {
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(loopPlayerId);
+			if (!player || !player->IsCheckSumValid()) { return; }
+			// Make sure that for all players source UnitDefId exists
+			if (sourceUnitDefId >= player->structDefUnitArraySize) { return; }
+			// Make sure source unitDef exists for all players (remember: it can exist and be disabled, like gaia units for other civs)
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *sourceUnitDef = player->ptrStructDefUnitTable[sourceUnitDefId];
+			if (!sourceUnitDef || !sourceUnitDef->IsCheckSumValidForAUnitClass()) { return; }
+			// Make sure maximum unitDefId is the same for all players (synchronized)
+			if (commonArraySize == -1) {
+				commonArraySize = player->structDefUnitArraySize; // first loop: initialize.
+			} else {
+				// after first loop: make sure we always get the same value
+				if (player->structDefUnitArraySize != commonArraySize) {
+					traceMessageHandler.WriteMessage("Player unit definitions are not synchronized for all players, cannot add.");
+					return;
+				}
+			}
+		}
+		assert(commonArraySize >= 0);
+		if (commonArraySize < 0) {
+			traceMessageHandler.WriteMessage("ERROR: commonArraySize<0. How is this possible ?");
+			return;
+		}
+
+		char *newUnitName = trigger->GetParameterValue(CR_TRIGGERS::KW_UNIT_NAME, "");
+
+		// A second loop to do the job
+		for (int loopPlayerId = minPlayerId; loopPlayerId <= maxPlayerId; loopPlayerId++) {
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(loopPlayerId);
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = player->ptrStructDefUnitTable[sourceUnitDefId];
+			// Force use provided name (if provided)
+			if (*newUnitName != 0) {
+				if (unitDefBase->ptrUnitName) {
+					AOEFree(unitDefBase->ptrUnitName);
+				}
+				char *newAllocatedName = (char *)AOEAlloc(0x30);
+				strcpy_s(newAllocatedName, 0x30, newUnitName);
+				unitDefBase->ptrUnitName = newAllocatedName;
+				unitDefBase->languageDLLID_Name = 0;
+				unitDefBase->languageDLLID_Creation = 0;
+			}
+
+			// Apply custom modifications from trigger data
+			// We manipulate here objects from different possible classes. Make sure we work on members that DO exist in our object instance !
+			bool isType50OrChild = unitDefBase->DerivesFromAttackable();
+			bool isFlagOrChild = unitDefBase->DerivesFromFlag();
+			bool isMovableOrChild = unitDefBase->DerivesFromMovable();
+			bool isCommandableOrChild = unitDefBase->DerivesFromCommandable();
+			AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *newUnitDef_flag = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE *newUnitDef_movable = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *newUnitDef_commandable = NULL;
+			AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *newUnitDef_type50 = NULL;
+			if (isFlagOrChild) { newUnitDef_flag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *)unitDefBase; }
+			if (isMovableOrChild) { newUnitDef_movable = (AOE_STRUCTURES::STRUCT_UNITDEF_MOVABLE *)unitDefBase; }
+			if (isCommandableOrChild) { newUnitDef_commandable = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDefBase; }
+			if (isType50OrChild) { newUnitDef_type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDefBase; }
+
+			// Apply supplied properties to new unit def.
+			if (trigger->IsParameterDefined(CR_TRIGGERS::KW_TOTAL_HP)) {
+				float oldTotalHitPoints = (float)unitDefBase->totalHitPoints;
+				unitDefBase->totalHitPoints = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_TOTAL_HP, 1);
+				// Here we modify an existing unit definition: there might be existing unit instances. We have to update them accordingly (like after a HP upgrade from some tech)
+				if (player->ptrCreatableUnitsListLink && player->ptrCreatableUnitsListLink->IsCheckSumValid()) {
+					AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *curElem = player->ptrCreatableUnitsListLink->lastListElement;
+					while (curElem) {
+						if (curElem->unit && curElem->unit->IsCheckSumValidForAUnitClass() && curElem->unit->unitDefinition &&
+							curElem->unit->unitDefinition->IsCheckSumValidForAUnitClass() &&
+							(curElem->unit->unitDefinition->DAT_ID1 == unitDefBase->DAT_ID1)) {
+							float hpProp = curElem->unit->remainingHitPoints / oldTotalHitPoints;
+							curElem->unit->remainingHitPoints = hpProp * (float)unitDefBase->totalHitPoints;
+						}
+						curElem = curElem->previousElement;
+					}
+				}
+			}
+			if (trigger->IsParameterDefined(CR_TRIGGERS::KW_RANGE)) {
+				float suppliedRange = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_RANGE, -1);
+				if (suppliedRange >= 0) {
+					unitDefBase->lineOfSight = suppliedRange;
+					if (isType50OrChild && newUnitDef_type50) {
+						float upgradeRelatedRange = newUnitDef_type50->maxRange - newUnitDef_type50->displayedRange;
+						if (upgradeRelatedRange < 0) { upgradeRelatedRange = 0; }
+						newUnitDef_type50->displayedRange = suppliedRange - upgradeRelatedRange; // the figure before "+". For a "7+1" range, this corresponds to 7.
+						newUnitDef_type50->maxRange = suppliedRange; // Total range. For a "7+1" range, this corresponds to 8.
+					}
+				}
+			}
+			if (isFlagOrChild && newUnitDef_flag && (trigger->IsParameterDefined(CR_TRIGGERS::KW_SPEED))) {
+				newUnitDef_flag->speed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_SPEED, newUnitDef_flag->speed);
+			}
+			if (isMovableOrChild && newUnitDef_movable && (trigger->IsParameterDefined(CR_TRIGGERS::KW_ROTATION_SPEED))) {
+				newUnitDef_movable->rotationSpeed = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_ROTATION_SPEED, newUnitDef_movable->rotationSpeed);
+			}
+			if (isCommandableOrChild && newUnitDef_commandable && (trigger->IsParameterDefined(CR_TRIGGERS::KW_WORK_RATE))) {
+				newUnitDef_commandable->workRate = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_WORK_RATE, newUnitDef_commandable->workRate);
+			}
+			if (isType50OrChild && newUnitDef_type50 && (trigger->IsParameterDefined(CR_TRIGGERS::KW_ACCURACY_PERCENT))) {
+				newUnitDef_type50->accuracyPercent = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_ACCURACY_PERCENT, (long int)newUnitDef_type50->accuracyPercent);
+			}
+			if (isType50OrChild && newUnitDef_type50 && (trigger->IsParameterDefined(CR_TRIGGERS::KW_DISPLAYED_ARMOR))) {
+				newUnitDef_type50->displayedArmor = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_DISPLAYED_ARMOR, (long int)newUnitDef_type50->displayedArmor);
+			}
+			if (isType50OrChild && newUnitDef_type50 && (trigger->IsParameterDefined(CR_TRIGGERS::KW_DISPLAYED_ATTACK))) {
+				newUnitDef_type50->displayedAttack = (short int)trigger->GetParameterValue(CR_TRIGGERS::KW_DISPLAYED_ATTACK, (long int)newUnitDef_type50->displayedAttack);
+			}
+			if (trigger->IsParameterDefined(CR_TRIGGERS::KW_VISIBLE_IN_FOG)) {
+				unitDefBase->visibleInFog = (char)trigger->GetParameterValue(CR_TRIGGERS::KW_VISIBLE_IN_FOG, (long int)unitDefBase->visibleInFog);
+				if (unitDefBase->visibleInFog != 0) {
+					unitDefBase->visibleInFog = 1; // just in case.
+				}
+			}
+		}
 	}
 
 	// Give a command to a unit

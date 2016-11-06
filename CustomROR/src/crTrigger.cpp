@@ -260,6 +260,21 @@ bool crTrigger::IsValid() const {
 		// No check on other values. They all are optional.
 		requiresAllActionKeywords = false;
 	}
+	if (this->triggerActionType == TRIGGER_ACTION_TYPES::TYPE_MODIFY_UNIT_DEF) {
+		// Check only key values: unitdef id to modify and player ID
+		if (!IsPlayerIdValidForTriggerParam(this->GetParameterValue(KW_ACTION_PLAYER_ID, -2))) {
+			missingKeywordMsg += GetTriggerParamKeyword(KW_ACTION_PLAYER_ID);
+			traceMessageHandler.WriteMessage(missingKeywordMsg);
+			return false;
+		}
+		if (this->GetParameterValue(KW_ACTION_UNIT_DEF_ID, -1) < 0) {
+			missingKeywordMsg += GetTriggerParamKeyword(KW_ACTION_UNIT_DEF_ID);
+			traceMessageHandler.WriteMessage(missingKeywordMsg);
+			return false;
+		}
+		// No check on other values. They all are optional.
+		requiresAllActionKeywords = false;
+	}
 	if (this->triggerActionType == TRIGGER_ACTION_TYPES::TYPE_MAKE_UNIQUE) {
 		// Check only key values: identify the unit to modify and give it a new name.
 		if (!this->IsParameterDefined(KW_ACTION_UNIT_ID)) {

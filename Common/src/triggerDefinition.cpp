@@ -104,6 +104,9 @@ namespace CR_TRIGGERS {
 		TRIGGER_ACTION_DEF(TYPE_ADD_UNIT_DEF, "add_unit_def", std::vector<TRIGGER_KWID_PARAMS>(
 		{ KW_FROM_UNIT_DEF_ID, KW_UNIT_NAME, KW_TOTAL_HP, KW_RANGE, KW_SPEED, KW_ROTATION_SPEED, KW_WORK_RATE, KW_ACCURACY_PERCENT, KW_DISPLAYED_ARMOR, KW_DISPLAYED_ATTACK, KW_VISIBLE_IN_FOG }),
 			"Adds a new unit definition, copied from an existing unit definition. This is applied on all players.\nYou can then spawn one or several units based on this definition for any player you want.\nBy default, all attribute are the same as the unit you copied's ones.\nYou can change some attributes using the supplied keywords. \nAll unit attributes are optional.\nTo add 'unique' living units or buildings, see also 'make_unique' (RECOMMENDED)."),
+		TRIGGER_ACTION_DEF(TYPE_MODIFY_UNIT_DEF, "modify_unit_def", std::vector<TRIGGER_KWID_PARAMS>(
+		{ KW_ACTION_PLAYER_ID, KW_ACTION_UNIT_DEF_ID, KW_UNIT_NAME, KW_TOTAL_HP, KW_RANGE, KW_SPEED, KW_ROTATION_SPEED, KW_WORK_RATE, KW_ACCURACY_PERCENT, KW_DISPLAYED_ARMOR, KW_DISPLAYED_ATTACK, KW_VISIBLE_IN_FOG }),
+			"Modifies some attributes of an existing unit definition for a specific player (use -1 to impact all players).\nAll unit attributes are optional.\nExisting units are impacted by the changes."),
 		TRIGGER_ACTION_DEF(TYPE_MAKE_UNIQUE, "make_unique", std::vector<TRIGGER_KWID_PARAMS>(
 		{ KW_ACTION_UNIT_ID, KW_UNIT_NAME, KW_TOTAL_HP, KW_RANGE, KW_SPEED, KW_ROTATION_SPEED, KW_WORK_RATE, KW_ACCURACY_PERCENT, KW_DISPLAYED_ARMOR, KW_DISPLAYED_ATTACK, KW_VISIBLE_IN_FOG }),
 			"Modifies an existing unit to a unique unit with its own attributes, including custom name.\nYou can change some attributes using the supplied keywords. \nAll unit attributes are optional except unit id.\nPlease only use it for living units or buildings."),

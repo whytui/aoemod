@@ -97,6 +97,10 @@ void GenNewTriggerPopup::OnBeforeClose(bool isCancel) {
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool GenNewTriggerPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (!sender) { return false; }
+	if (this->btnSaveTriggers) {
+		// Make sure to lose focus on input fields to validate user entry.
+		AOE_SetFocus(this->btnSaveTriggers->ptrParentObject, NULL);
+	}
 	if (sender == this->btnReloadTriggers) {
 		this->LoadTriggerTextFromGameInfo();
 		return true;
