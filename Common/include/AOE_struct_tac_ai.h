@@ -69,7 +69,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_GROUP_ELEM *previous;
 		long int unitGroupId; // A unique ID. Set in 0x4CCC50.
 		// 0x10
-		long int unknown_resetOrg; // +10. resetOrg ?
+		long int unknown_resetOrg; // +10. resetOrg ? 0 when task changes, 1 when "init" for task has been done ??
 		AOE_CONST_INTERNAL::UNIT_GROUP_TYPES unitGroupType; // +14. Set in 0x4CCC70.
 		long int taskSubTypeId; // +18. -1=default. 0,4 = capture?
 		long int myUnitsIdArray[0x28]; // +1C. 40 elements, can be non-consecutive (ignore -1 values).
@@ -93,7 +93,7 @@ namespace AOE_STRUCTURES {
 		float targetPosY;
 		// 0x190
 		float targetPosX;
-		float unknown_194;
+		float targetPosZ;
 		unsigned long int unknown_198; // seems int. DWORD?
 		float posY; // not sure what this is exactly, NOT group "supposed" position ? Leader pos ?
 		// 0x1A0
@@ -108,7 +108,7 @@ namespace AOE_STRUCTURES {
 		float unknown_1BC; // type: unsure
 		// 0x1C0
 		long int unknown_1C0;
-		long int unknown_1C4_unitGroupId; // +1C4. To confirm. Related to transport?
+		long int transportUnitGroupId; // +1C4. Unit group ID of the transport that does transport "me".
 		unsigned long int unknown_1C8;
 		long int unknown_1CC_lastGameTime; // +1CC. Last game time of "task active soldier" execution for the group ?
 		// 0x1D0
@@ -240,7 +240,7 @@ namespace AOE_STRUCTURES {
 		AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM fakeFirstUnitGroupElem; // +9D4. Organized as a circular list (each elem is a group) ? This one = "fake" elem (like in strategy)
 		unsigned long int seqUnitGroupId; // +D04. Is = next group's ID.
 		unsigned long int unitGroupsCount; // +D08. This does NOT count fakeFirstUnitGroupElem (so it CAN be 0).
-		unsigned long int unknown_D0C; // a Value in milliseconds (cmp to global+4)
+		unsigned long int lastAttackTime_ms; // +D0C. Last attack time (not response time, unlesse SNLockAttackAndAttackResponse=1). Set in 0x4D457B.
 		// 0xD10
 		long int unknown_D10_ms; // +D10. A time value in ms
 		unsigned long int lastAttackResponseTime_ms; // +D14. Value in milliseconds. Used to compute +D24 ?
@@ -259,7 +259,7 @@ namespace AOE_STRUCTURES {
 		long int extraResourceAmount[4]; // +D98. Index is always the same (0=food, 1=food...) <0 amount = I need to collect some. "resDiff"
 		STRUCT_PLANNED_RESOURCE_NEEDS plannedResourceNeeds; // +DA8, size=0x70. Related to //SNMostNeededResourceLookAhead (number of stratElem to take into account)
 		// 0xE18
-		long int attackEnabled; // What is exact meaning ? 1 if attack is currently being run ? Or starts with 0, once set to 1, AI can attack ?
+		long int attackEnabled; // +E18. Starts with 0, Once set to 1, AI can attack.
 		AOE_CONST_INTERNAL::AI_UPDATE_TYPES currentAIUpdateType; // +E1C. loop ID for TacAI treatments types.
 		// 0xE20
 		long int unknown_E20; // a dword, a flag - related to villagers/gathering ?

@@ -584,6 +584,29 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 }
 
 
+// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+// For all non-supported (or without custom treatment) cases, just return false !
+bool UnitTargeting::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP_ELEM *unitGroup) {
+	if (!tacAI || !tacAI->IsCheckSumValid() || !unitGroup || !unitGroup->IsCheckSumValid()) {
+		return false;
+	}
+	// Not-supported unit group type (no custom treatment)
+	if (unitGroup->unitGroupType != UNIT_GROUP_TYPES::CST_UGT_LAND_ATTACK) {
+		return false;
+	}
+
+	if (unitGroup->unknown_resetOrg == 0) {
+		// Task has just been set ?
+	} else {
+		// // Most frequent case
+	}
+
+	//this->priorityLocation
+	//playerTargetingHandler.GetPlayerInfo(tacAI->commonAIObject.playerId)->panicModeProvokedByEnemyPlayersDuringLastPeriod
+
+	return false; //TO DO
+}
+
 
 
 // baseTimeGetTimeValue = TimeGetTime() value (ms) for total AI treatment process time calculation. We must not go over global->tmp_allowedTimeForAITreatment

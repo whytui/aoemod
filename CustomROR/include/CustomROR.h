@@ -148,6 +148,7 @@ namespace CUSTOMROR {
 		void EntryPointAfterActivityStop(REG_BACKUP *REG_values);
 		void EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values);
 		void EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_values);
+		void EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

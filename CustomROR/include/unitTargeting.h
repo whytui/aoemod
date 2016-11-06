@@ -13,6 +13,7 @@
 #include "crCommon.h"
 #include "unitDefHandling.h"
 #include "AOEPrimitives_units.h"
+#include "playerTargeting.h"
 
 using namespace std;
 using namespace AOE_STRUCTURES;
@@ -65,7 +66,10 @@ namespace CUSTOMROR {
 
 		STRUCT_INF_AI_UNIT_LIST_ELEM *TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 			STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
-				
+		
+		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+		// For all non-supported (or without custom treatment) cases, just return false !
+		bool TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP_ELEM *unitGroup);
 
 	private:
 		long int lastChosenTargetUnitId[9];
@@ -101,8 +105,6 @@ namespace CUSTOMROR {
 	// Returns false if found nothing OR if search could not be completed in time.
 	STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 		STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
-
-
 
 
 

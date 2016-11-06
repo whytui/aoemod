@@ -94,9 +94,11 @@ namespace AOE_STRUCTURES {
 	// +0x150 = unit.setAttackAction?(targetUnitId, force)
 	// +0x154 = unit.??(fposY, fposX, arg3, arg4, force?) create action move ?
 	// +0x164 = unit.goGather(targetUnitId, force?) returns 1 on success
-	// +0x198 = CanMoveTo(posY,posX,posZ,fMaxRange,targetUnitId,pArg6_float,arg7_size?,targetPlayerId,someUnitClass) ? returns 1 if ok.
+	// +0x194 = unit.CanAttackUnit???(targetUnitId, fRange, arg3, arg4, arg5, arg6)
+	// +0x198 = CanMoveTo(posY,posX,posZ,fMaxRange,targetUnitId,pArg6_float,arg7_size?,targetPlayerId,someUnitClass) ? returns 1 if ok. someUnitClass=1B=walls
 	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
 	// +0x1A4 = DoMove?(posY,posX,posZ,fMaxRange,targetUnitId, pArg6_float,arg7_size,arg8,arg9,targetPlayerId,someUnitClass)
+	// +0x1CC = unit.xxx(pPosYXZ_target, fRange, targetUnitId) for intelligent attack ?
 	// +0x208 = unit.assignAction(action). ex: 0x406490.
 	// +0x210 = unit.idIdle() to confirm. ex: 0x406610.
 	class STRUCT_UNIT_BASE {

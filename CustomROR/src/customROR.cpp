@@ -374,6 +374,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004BFFCC:
 		this->EntryPointInfAIGroupFindMainTarget(REG_values);
 		break;
+	case 0x004D3B1D:
+		this->EntryPointTacAIHandleActiveGroups(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3659,6 +3662,47 @@ void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_value
 	//resultInfAIUnitElem = CUSTOMROR::FindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
 
 	REG_values->EAX_val = (unsigned long int)resultInfAIUnitElem;
+}
+
+
+// From 004D3B16. tacAI.TaskActiveSoldiers(timeGetTime, allowedtime)
+// Can change return address to 0x4D602F to ignore current group
+void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values) {
+	ror_api_assert(REG_values, REG_values->EBP_val == 0);
+	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->EDI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *unitGroup = (AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *)REG_values->ESI_val;
+	ror_api_assert(REG_values, (tacAI != NULL) && tacAI->IsCheckSumValid());
+	ror_api_assert(REG_values, (unitGroup == NULL) || unitGroup->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		if (unitGroup == NULL) {
+			ChangeReturnAddress(REG_values, 0x4D602F);
+		}
+	}
+	// Standard behavior : NULL group => next loop
+	if ((unitGroup == NULL) || (!unitGroup->IsCheckSumValid())) {
+		return;
+	}
+	// Standard behavior : skip some group types
+	if ((unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_FISHING_SHIP) ||
+		(unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_TRADE_SHIP) ||
+		(unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_TRANSPORT_BOAT) ||
+		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) ||
+		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_IDLE)) {
+		ChangeReturnAddress(REG_values, 0x4D602F);
+		return;
+	}
+
+	bool skipStandardTreatments = false; // Default
+	// Custom treatments
+	if (CUSTOMROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
+		skipStandardTreatments = CUSTOMROR::unitTargetingHandler.TaskActiveUnitGroup(tacAI, unitGroup);
+	}
+
+	// Do not modify below
+	if (skipStandardTreatments) {
+		ChangeReturnAddress(REG_values, 0x4D602F);
+	}
 }
 
 

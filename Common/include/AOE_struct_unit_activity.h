@@ -67,7 +67,7 @@ namespace AOE_STRUCTURES
 	// [EDX+0x74]=activity.setRepairAction(targetUnitId, force) ?
 	// [EDX+0x78]=activity.setBuildAction(targetUnitId, force)
 	// [EDX+0x88]=
-	// [EDX+0x90]= +2D4
+	// [EDX+0x90]=activity.xxx(f_posY, posX, posZ) (used by +2D4?)
 	// [EDX+0x9C]=activity.fleeToRandomPlace(arg1, arg2, arg3, force)???
 	// [EDX+0xA4]=activity.fleeFromAttacker(force)
 	// [EDX+0xA8]=activity.related to 26F
@@ -77,7 +77,7 @@ namespace AOE_STRUCTURES
 	// [EDX+0xC4]=activity.canConvert(targetUnitId) ?
 	// [EDX+0xC8]=activity.setTargetFromArray?(targetsInfoArray, arg2)
 	// [EDX+0xCC]=activity.dequeue(activityQueue) ? Returns some enum (3,4..)
-	// [EDX+0xD8]=
+	// [EDX+0xD8]=activity.chooseTargetForCurrentTask()? ? ex. 0x414600.
 	// [EDX+0xE8]=when being attacked?
 	class STRUCT_UNIT_ACTIVITY {
 	public:

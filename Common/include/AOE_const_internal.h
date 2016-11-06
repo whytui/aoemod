@@ -418,7 +418,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_26F = 0x26F,
 		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
 		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targetted farm or enemy projectile dies ?
-		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // 
+		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // React to agression but also "AI" attacks
 		CST_ATI_DEFEND_UNIT = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.defend/followUnit?(myUnitId, targetUnitId)
 		CST_ATI_UNKNOWN_2BE = 0x2BE, // build+0x64
 		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ??
