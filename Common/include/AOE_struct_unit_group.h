@@ -22,11 +22,11 @@ namespace AOE_STRUCTURES {
 	// 0x4DC670=tacAI.SetupUnitGroups()
 	// 0x4CE950=unitGroupElem.areUnitsWithinGrpRange(tacAI, mainAI). Returns true if all units are <groupSpacing or artefactreturndistance
 	// 0x4E07F0 = tacAI.searchNearestGroupFromPosition(groupType, distance, pPosYX)
-	class STRUCT_UNIT_GROUP_ELEM {
+	class STRUCT_UNIT_GROUP {
 	public:
 		unsigned long int checksum; // E0 8C 54 00
-		STRUCT_UNIT_GROUP_ELEM *next;
-		STRUCT_UNIT_GROUP_ELEM *previous;
+		STRUCT_UNIT_GROUP *next;
+		STRUCT_UNIT_GROUP *previous;
 		long int unitGroupId; // A unique ID. Set in 0x4CCC50.
 		// 0x10
 		long int unknown_resetOrg; // +10. resetOrg ? 0 when task changes, 1 when "init" for task has been done ??

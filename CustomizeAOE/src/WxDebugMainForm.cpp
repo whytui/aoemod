@@ -469,7 +469,7 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		s += MilliSecondsToString(ai->structTacAI.unitGroupsCount);
 		int ugCount = ai->structTacAI.unitGroupsCount;
 		int currentUgIndex = 0;
-		AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM currentGroup;
+		AOE_STRUCTURES::STRUCT_UNIT_GROUP currentGroup;
 		unsigned long int ugoffset = ((long)&rd->playersAI[playerId].structTacAI.fakeFirstUnitGroupElem - (long)&rd->playersAI[playerId]);
 		unsigned long int fakeFirstGroupRORAddress = ((long int)rd->players[playerId].ptrAIStruct) + ugoffset;
 		AOE_STRUCTURES::GetObjectFromRORData(rd->handleROR, fakeFirstGroupRORAddress, &currentGroup, 0);
@@ -479,7 +479,7 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		while ((currentUgIndex < ugCount) && (currentGrpAddr != fakeFirstGroupRORAddress)) {
 			s += "\n * ";
 			AOE_STRUCTURES::GetObjectFromRORData(rd->handleROR, currentGrpAddr, &currentGroup, 0);
-			s += rd->ExportHostedRORObject<AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM>(&currentGroup, ((long int)rd->players[playerId].ptrAIStruct) + ugoffset);
+			s += rd->ExportHostedRORObject<AOE_STRUCTURES::STRUCT_UNIT_GROUP>(&currentGroup, ((long int)rd->players[playerId].ptrAIStruct) + ugoffset);
 			currentUgIndex++;
 			currentGrpAddr = (unsigned long int)currentGroup.next;
 		}

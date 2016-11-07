@@ -188,8 +188,8 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		/*_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades("D:\\test1.bmp", global->gameMapInfo->mapArraySizeX, 
 			global->gameMapInfo->mapArraySizeY, global->gameMapInfo->unknown_8DB0, 0, 255, false);*/
 		if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
-			AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *fakeGroup = &player->ptrAIStruct->structTacAI.fakeFirstUnitGroupElem;
-			AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *curGroup = fakeGroup->next;
+			AOE_STRUCTURES::STRUCT_UNIT_GROUP *fakeGroup = &player->ptrAIStruct->structTacAI.fakeFirstUnitGroupElem;
+			AOE_STRUCTURES::STRUCT_UNIT_GROUP *curGroup = fakeGroup->next;
 			while (curGroup && (curGroup != fakeGroup)) {
 				if ((curGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_ATTACK) && (curGroup->commanderUnitId >= 0)) {
 					//AOE_STRUCTURES::STRUCT_UNIT_BASE *unitWithShortcut1 = FindUnitWithShortcutNumberForPlayer(player, 1);

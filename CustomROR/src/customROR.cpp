@@ -3631,7 +3631,7 @@ void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_value
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ESI_val;
 	ror_api_assert(REG_values, infAI && infAI->IsCheckSumValid());
 	long int targetPlayerId = GetIntValueFromRORStack(REG_values, 0x88); // arg1
-	AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *unitGroup = (AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *) 
+	AOE_STRUCTURES::STRUCT_UNIT_GROUP *unitGroup = (AOE_STRUCTURES::STRUCT_UNIT_GROUP *)
 		GetIntValueFromRORStack(REG_values, 0x8C); // arg2
 	ror_api_assert(REG_values, (unsigned long int)unitGroup == REG_values->EBP_val);
 	ror_api_assert(REG_values, REG_values->EBP_val == REG_values->ECX_val);
@@ -3669,7 +3669,7 @@ void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_value
 void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->EBP_val == 0);
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->EDI_val;
-	AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *unitGroup = (AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM *)REG_values->ESI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_GROUP *unitGroup = (AOE_STRUCTURES::STRUCT_UNIT_GROUP *)REG_values->ESI_val;
 	ror_api_assert(REG_values, (tacAI != NULL) && tacAI->IsCheckSumValid());
 	ror_api_assert(REG_values, (unitGroup == NULL) || unitGroup->IsCheckSumValid());
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {

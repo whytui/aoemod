@@ -50,7 +50,7 @@ void UnitTargeting::ResetTargetInfo(STRUCT_TAC_AI_TARGET_INFO *targetInfo) {
 
 // Set target in unitGroup, in internal data, in targetInfo, in infAIElem.
 // Private method: we do not check input pointers here (be careful)
-void UnitTargeting::SetTarget(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo,
+void UnitTargeting::SetTarget(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo,
 	STRUCT_INF_AI_UNIT_LIST_ELEM *targetInfAIElem, long int leaderTerrainZoneId, float targetEvaluation) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
@@ -96,7 +96,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::FindWonderToAttackInfAIElemPtr(STRU
 
 
 // Computes the damage dealt by a group on a unit, cf 0x4C62F0.
-float UnitTargeting::GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_UNIT_BASE *targetUnit) {
+float UnitTargeting::GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit) {
 	assert(infAI && infAI->IsCheckSumValid() && unitGroup && unitGroup->IsCheckSumValid() &&
 		targetUnit && targetUnit->IsCheckSumValidForAUnitClass());
 	if (!infAI || !infAI->IsCheckSumValid() || !unitGroup || !unitGroup->IsCheckSumValid() ||
@@ -130,7 +130,7 @@ float UnitTargeting::GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROU
 
 
 // Estimates the total time to kill a group's units at target position, considering enemy units known from infAI elem list
-float UnitTargeting::GetTimeToKillGroupUnitsAtTargetPosition(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_UNIT_BASE *targetUnit) {
+float UnitTargeting::GetTimeToKillGroupUnitsAtTargetPosition(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit) {
 	if (!infAI || !infAI->IsCheckSumValid()) { return 0; }
 	if (!unitGroup || !unitGroup->IsCheckSumValid()) { return 0; }
 	if (!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) { return 0; }
@@ -150,7 +150,7 @@ float UnitTargeting::GetTimeToKillGroupUnitsAtTargetPosition(STRUCT_INF_AI *infA
 // If current target is still a valid target, return its pointer in InfAI elem list.
 // Returns NULL otherwise
 STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStillEligible(STRUCT_INF_AI *infAI, long int targetPlayerId,
-	STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
+	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { targetInfo->targetSearchInProgress = 0; return NULL; }
@@ -200,7 +200,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 
 
 STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
-	STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
+	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 	// TODO
 	// Don't forget to take into account this->priorityLocation[myplayerid]
 	// TODO: attack towers/military units that protect target ?
@@ -436,7 +436,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearPriorityLocation(
 
 
 STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
-	STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
+	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 	// Collect info / Check parameters
 	assert(targetInfo != NULL);
 	if (!targetInfo) { return NULL; }
@@ -586,7 +586,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 
 // Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
 // For all non-supported (or without custom treatment) cases, just return false !
-bool UnitTargeting::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP_ELEM *unitGroup) {
+bool UnitTargeting::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup) {
 	if (!tacAI || !tacAI->IsCheckSumValid() || !unitGroup || !unitGroup->IsCheckSumValid()) {
 		return false;
 	}
@@ -639,7 +639,7 @@ bool UnitTargeting::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP_
 // Returns false if found nothing OR if search could not be completed in time.
 // Note: set targetInfo->targetSearchInProgress=0 when search is finished (even if failed)
 STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
-	STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
+	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 
 	// Collect info / Check parameters
 	assert(targetInfo != NULL);
@@ -1059,7 +1059,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 // Returns false if found nothing OR if search could not be completed in time.
 #ifdef _DEBUG
 STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
-	STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
+	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 	// Collect info / Check parameters
 	if (!targetInfo) { return NULL; }
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();

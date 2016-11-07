@@ -196,7 +196,7 @@ namespace AOE_STRUCTURES {
 	}
 
 
-	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_GROUP_ELEM *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_GROUP *obj, unsigned long int RORAddress) {
 		std::string res = "id=";
 		res += std::to_string(obj->unitGroupId);
 		res += " type=";

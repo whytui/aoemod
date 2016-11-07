@@ -127,7 +127,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int villagerTasksRelevantElemCount; // +9CC. Number of RELEVANT element count in villagerTasks array (array size is fixed, it's included in this structure !)
 		// 0x9D0
 		long int nonExplorerVillagersCount; // +9D0. Counts all villagers BUT explorers
-		AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM fakeFirstUnitGroupElem; // +9D4. Organized as a circular list (each elem is a group) ? This one = "fake" elem (like in strategy)
+		AOE_STRUCTURES::STRUCT_UNIT_GROUP fakeFirstUnitGroupElem; // +9D4. Organized as a circular list (each elem is a group) ? This one = "fake" elem (like in strategy)
 		unsigned long int seqUnitGroupId; // +D04. Is = next group's ID.
 		unsigned long int unitGroupsCount; // +D08. This does NOT count fakeFirstUnitGroupElem (so it CAN be 0).
 		unsigned long int lastAttackTime_ms; // +D0C. Last attack time (not response time, unlesse SNLockAttackAndAttackResponse=1). Set in 0x4D457B.

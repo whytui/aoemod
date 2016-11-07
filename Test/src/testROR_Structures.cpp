@@ -70,7 +70,7 @@ static bool test_ror_structures() {
 	AOE_STRUCTURES::STRUCT_PLANNED_RESOURCE_NEEDS prn;
 	assert(sizeof(prn) == 0x70);
 	trs_assert(&prn, 0x6C, &prn.resourceTypesCount);
-	AOE_STRUCTURES::STRUCT_UNIT_GROUP_ELEM uge;
+	AOE_STRUCTURES::STRUCT_UNIT_GROUP uge;
 	assert(sizeof(uge) == 0x330);
 	trs_assert(&uge, 0x1D8, &uge.unknown_1D8);
 	trs_assert(&uge, 0x32C, &uge.unknown_gameTime_ms);

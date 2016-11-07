@@ -45,10 +45,10 @@ namespace CUSTOMROR {
 		void ResetTargetInfo(STRUCT_TAC_AI_TARGET_INFO *targetInfo);
 
 		// Computes the damage dealt by a group on a unit, cf 0x4C62F0.
-		float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_UNIT_BASE *targetUnit);
+		float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
 
 		// Estimates the total time to kill a group's units at target position, considering enemy units known from infAI elem list
-		float GetTimeToKillGroupUnitsAtTargetPosition(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_UNIT_BASE *targetUnit);
+		float GetTimeToKillGroupUnitsAtTargetPosition(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
 
 		// Returns the enemy wonder with higher attack priority. Does not return wonders from allied/neutral players
 		// playerId can be a joker (if -1)
@@ -58,18 +58,18 @@ namespace CUSTOMROR {
 		// If current target is still a valid target, return its pointer in InfAI elem list.
 		// Returns NULL otherwise
 		STRUCT_INF_AI_UNIT_LIST_ELEM *GetInfAIElemForCurrentTargetIfStillEligible(STRUCT_INF_AI *infAI, long int targetPlayerId,
-			STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
+			STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 
 
 		STRUCT_INF_AI_UNIT_LIST_ELEM *ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
-			STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
+			STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 
 		STRUCT_INF_AI_UNIT_LIST_ELEM *TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
-			STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
+			STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 		
 		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
 		// For all non-supported (or without custom treatment) cases, just return false !
-		bool TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP_ELEM *unitGroup);
+		bool TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup);
 
 	private:
 		long int lastChosenTargetUnitId[9];
@@ -79,7 +79,7 @@ namespace CUSTOMROR {
 		
 
 		// Set target in unitGroup, in internal data, in targetInfo.
-		void SetTarget(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo,
+		void SetTarget(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo,
 			STRUCT_INF_AI_UNIT_LIST_ELEM *targetInfAIElem, long int leaderTerrainZoneId, float targetEvaluation);
 
 		// If target player has all relics/ruins, finds the location to attack to capture one.
@@ -104,7 +104,7 @@ namespace CUSTOMROR {
 	// If successful, unitGroup targets array contains only 1 target (in most cases... to check in case when units block the way to main target)
 	// Returns false if found nothing OR if search could not be completed in time.
 	STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
-		STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
+		STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 
 
 
@@ -115,7 +115,7 @@ namespace CUSTOMROR {
 	// Returns false if found nothing OR if search could not be completed in time.
 #ifdef _DEBUG
 	STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
-		STRUCT_UNIT_GROUP_ELEM *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
+		STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 #endif
 
 }
