@@ -17,6 +17,7 @@ void AIPlayerTargetingInfo::ResetInfo() {
 	for (int i = 0; i < 9; i++) {
 		this->lastComputedDislikeSubScore[i] = 0;
 		this->previousAttackCountsByEnemyPlayers[i] = 0;
+		this->panicModeProvokedByEnemyPlayersDuringLastPeriod[i] = 0;
 		this->attacksByEnemyPlayersDuringLastPeriod[i] = 0;
 	}
 	this->lastUpdateGameTime = 0;
@@ -25,7 +26,7 @@ void AIPlayerTargetingInfo::ResetInfo() {
 }
 
 
-// Recompute information (only) if refresh delay has been reached
+// Recompute information (only) if refresh delay has been reached (cf updateDetailedDislikeInfoMaxDelay)
 // Returns true if information have been recomputed (false is not necessarily an error)
 bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 	assert(player && player->IsCheckSumValid());

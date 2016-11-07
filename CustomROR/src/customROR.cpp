@@ -992,8 +992,8 @@ void CustomRORInstance::AfterAddDynamicStratElems(REG_BACKUP *REG_values) {
 	unsigned long int myECX;
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		_asm {
-			MOV ECX, DWORD PTR SS:[ESP+0xAC]
-			MOV myECX, ECX
+			MOV ECX, DWORD PTR SS:[ESP+0xAC];
+			MOV myECX, ECX;
 		}
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
@@ -1024,6 +1024,7 @@ void CustomRORInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 
 
 // This method replaces the "panic mode" management (add units in strategy when attacked and weak)
+// 0x4E22B0=tacAI.DoPanicModeIfNeeded(enemyPlayerId), called every time a unit is attacked (from tacAI.reactToEvent(myUnitId, arg2_unitId, eventId(201 here), arg4, arg5, arg6))
 // WARNING: This method may change return address (only when forcing usage of ROR panic mode algorithm - not recommended)
 void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 	// Collect context information/variables
@@ -1033,8 +1034,6 @@ void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 	assert(mainAI != NULL);
 	assert(mainAI->IsCheckSumValid());
 	if (!mainAI || (!mainAI->IsCheckSumValid())) { return; }
-	long int myESP = REG_values->ESP_val;
-	//short int enemyPlayerId = (short int) *(long int *)(myESP + 0x98);
 	short int enemyPlayerId = (short int)GetIntValueFromRORStack(REG_values, 0x98);
 
 	if (!CUSTOMROR::crCommand.RunManagePanicMode_isUsageOfRORCodeWanted(mainAI, enemyPlayerId, timeSinceLastPanicMode, currentGameTime_ms)) {

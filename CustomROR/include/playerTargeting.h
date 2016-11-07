@@ -29,7 +29,7 @@ namespace CUSTOMROR {
 		const long int dislikeAmountNoWinningAllArtefacts = 20; // Not triggering a victory condition
 		const long int dislikeAmountNoWinningWonderBuilt = 30; // Not triggering a victory condition
 		const long int dislikeAmountNoWinningWonderInConstruction = 15; // Not triggering a victory condition
-		const long int extraValueForCurrentTarget = 5; // (fake) dislike value added to current target
+		const long int extraValueForCurrentTarget = 8; // (fake) dislike value added to current target
 		const long int msAfterWhichCurrentTargetLosesExtraValue = 180 * 1000; // After x milliseconds with the same target player, current target no longer receives "extraValueForCurrentTarget" (more chances to change target)
 		// Dislike score "sub" values + parameters
 		const long int townSize = 20; // In tiles
@@ -48,7 +48,7 @@ namespace CUSTOMROR {
 		AIPlayerTargetingInfo();
 
 		long int myPlayerId;
-		long int lastUpdateGameTime; // milliseconds
+		long int lastUpdateGameTime; // milliseconds since last update of AIPlayer targeting info.
 		long int nextUpdateGameTime; // milliseconds
 		long int lastTargetPlayerChangeGameTime; // milliseconds
 		long int lastComputedDislikeSubScore[9];

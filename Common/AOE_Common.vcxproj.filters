@@ -324,6 +324,9 @@
     <ClInclude Include="include\UI\AOE_struct_ui_player_resource_values.h">
       <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
     </ClInclude>
+    <ClInclude Include="include\AOE_struct_unit_group.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\triggerDefinition.cpp">

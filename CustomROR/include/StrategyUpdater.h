@@ -30,7 +30,9 @@ namespace STRATEGY {
 	void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
 
 
-	// Manage strategy updates for panic mode.
+	// Manage strategy updates for panic mode (AI player is being attacked and seems not to have enough defences).
+	// This method can be called very often (no delay): standard game uses a minimum delay between 2 panic mode evaluations, NOT US !
+	// This strategy is not supposed to impact combat or anything else than strategy (at least in standard game !)
 	void ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms);
 
 

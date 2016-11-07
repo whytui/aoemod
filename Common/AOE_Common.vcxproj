@@ -138,6 +138,7 @@
     <ClInclude Include="include\AOE_struct_unit_actions.h" />
     <ClInclude Include="include\AOE_struct_unit_activity.h" />
     <ClInclude Include="include\AOE_struct_unit_def.h" />
+    <ClInclude Include="include\AOE_struct_unit_group.h" />
     <ClInclude Include="include\basicFilesHandling.h" />
     <ClInclude Include="include\customResolution.h" />
     <ClInclude Include="include\gameVersion.h" />

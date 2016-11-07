@@ -595,6 +595,17 @@ bool UnitTargeting::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP_
 		return false;
 	}
 
+	// Get some main objects
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) { return false; }
+	STRUCT_AI *mainAI = tacAI->ptrMainAI;
+	if (!mainAI || !mainAI->IsCheckSumValid()) { return false; }
+	STRUCT_PLAYER *player = mainAI->ptrStructPlayer;
+	if (!player || !player->IsCheckSumValid()) { return false; }
+	AIPlayerTargetingInfo *myAIInfo = playerTargetingHandler.GetPlayerInfo(tacAI->commonAIObject.playerId);
+	if (!myAIInfo) { return false; }
+
 	if (unitGroup->unknown_resetOrg == 0) {
 		// Task has just been set ?
 	} else {
@@ -603,6 +614,19 @@ bool UnitTargeting::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP_
 
 	//this->priorityLocation
 	//playerTargetingHandler.GetPlayerInfo(tacAI->commonAIObject.playerId)->panicModeProvokedByEnemyPlayersDuringLastPeriod
+
+	if (global->currentGameTime - tacAI->lastPanicModeTime < 20000) { // TODO: constant
+		// Could use mainAI->structInfAI.attacksHistory too
+		// Retreat (test)
+
+	}
+	/*int panicModeCount = 0;
+	for (int i = 1; i < global->playerTotalCount; i++) {
+		panicModeCount += myAIInfo->panicModeProvokedByEnemyPlayersDuringLastPeriod[i];
+		
+		//TARGETING_CONST::updateDetailedDislikeInfoMaxDelay;
+		//myAIInfo->lastUpdateGameTime
+	}*/
 
 	return false; //TO DO
 }
