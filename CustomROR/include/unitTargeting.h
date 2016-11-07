@@ -14,6 +14,7 @@
 #include "unitDefHandling.h"
 #include "AOEPrimitives_units.h"
 #include "playerTargeting.h"
+#include "AOEPrimitives_unitGroup.h"
 
 using namespace std;
 using namespace AOE_STRUCTURES;
