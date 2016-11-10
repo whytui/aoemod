@@ -41,6 +41,7 @@
 #include "unitTargeting.h"
 #include "playerTargeting.h"
 #include "combatAI.h"
+#include "mainCustomAI.h"
 
 #pragma once
 
@@ -255,7 +256,8 @@ public:
 
 	// Overloads the "tactical AI update" event that occurs regularly for each AI player.
 	// For the algorithm to work well, requires also "FixUnitIdForInProgressBuilding", "FixResetStratElemForUnitId"
-	void ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai);
+	// Returns false is the player is dead/invalid. Returns true in most cases.
+	bool ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai);
 
 
 	// Calls appropriate "manage panic mode" treatments.

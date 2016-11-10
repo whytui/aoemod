@@ -8,7 +8,6 @@
 #include "CustomRORInfo.h"
 #include "researches.h"
 #include "AOE_strategy.h"
-//#include "customFuncRules.h"
 #include "playerHandling.h"
 #include "playerTargeting.h"
 

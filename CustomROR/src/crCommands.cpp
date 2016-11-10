@@ -548,18 +548,6 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		if (!global || !global->IsCheckSumValid()) { return; }
 		assert((global->gameMapInfo != NULL) && (global->gameMapInfo->IsCheckSumValid()));
 		if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return; }
-		/*AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
-		mapInfo->GetTileInfo(1, 2)->terrainData.SetTerrainId(4);
-		mapInfo->GetTileInfo(10, 2)->terrainData.SetTerrainId(6);
-		mapInfo->GetTileInfo(20, 2)->terrainData.SetTerrainId(10);
-		mapInfo->GetTileInfo(20, 2)->terrainData.SetAltitude(2);
-		RefreshTerrainAfterManualChange(mapInfo, -1, -1, -1, -1);*/
-
-		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, false, NULL);
-		/*STRATEGY::StrategyBuilder *sb = new STRATEGY::StrategyBuilder(this->crInfo, player);
-		//sb->GetStrategyGenerationInfo(player);
-		sb->CreateStrategyFromScratch();
-		delete sb;*/
 	}
 	if (strcmp(command, "a") == 0) {
 		long int playerId = 1;
@@ -573,28 +561,10 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		}
 		AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *type50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)unitBase;
 		if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) { return; }
-		if (unitBase->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING) { return; }
-		AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)unitBase;
-		if (!bld->ptrHumanTrainQueueInformation) { return; }
-		bld->unknown_1C4 = 2;
-		bld->ptrHumanTrainQueueInformation[1].unitCount = 2;
-		bld->ptrHumanTrainQueueInformation[1].DATID = 83;
-		//AddUsefulMilitaryTechsToStrategy(player);
-		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_SHORT_SWORDSMAN, true, NULL);
-		//AddResearchesInStrategyForUnit(player->ptrAIStruct, CST_UNITID_ARMORED_ELEPHANT, true, NULL);
-
-		std::vector<short int> v;
-		v.push_back(64);
-		v.push_back(77);
-		//GetValidOrderedResearchesListWithDependencies(player, v);
 
 		AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
 		AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
 		assert(tacAI->IsCheckSumValid());
-		//float posX, posY;
-		//bool ok = GetGamePositionUnderMouse(&posX, &posY);
-		//AddInGameCommandButton(5, INGAME_UI_COMMAND_ID::CST_IUC_WORK, 83, false, "eee");
-		//SetFarmCurrentTotalFood((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*) (player->custom_selectedUnits[0]), 1);
 	}
 
 	// TEST strategy
@@ -1069,6 +1039,9 @@ void CustomRORCommand::OnGameStart() {
 		}
 	}
 
+	// Initialize custom AI objects
+	CUSTOM_AI::customAIHandler.GameStartInit();
+
 	// Triggers
 	this->ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_GAME_START);
 
@@ -1300,6 +1273,7 @@ void CustomRORCommand::InitMyGameInfo() {
 	CUSTOMROR::crInfo.ResetVariables();
 	CUSTOMROR::playerTargetingHandler.ResetAllInfo();
 	CUSTOMROR::unitTargetingHandler.ResetAllInfo();
+	CUSTOM_AI::customAIHandler.ResetAllInfo();
 	// Prevent 0% speed at game startup (occurs because of rounding in registry saved value)
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid() && (global->gameSpeed == 0)) {
@@ -1563,9 +1537,10 @@ bool CustomRORCommand::FindIfGameStartStrategyInitHasBeenDone(AOE_STRUCTURES::ST
 
 // Overloads the "tactical AI update" event that occurs regularly for each AI player.
 // For the algorithm to work well, requires also "FixUnitIdForInProgressBuilding", "FixResetStratElemForUnitId"
-void CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
+// Returns false is the player is dead/invalid. Returns true in most cases.
+bool CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 	assert(ai && ai->IsCheckSumValid());
-	if (!ai || !ai->IsCheckSumValid()) { return; }
+	if (!ai || !ai->IsCheckSumValid()) { return false; }
 	assert(ai->structTacAI.IsCheckSumValid());
 	// Get some important / useful objects
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
@@ -1577,44 +1552,26 @@ void CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 	assert(player && player->IsCheckSumValid());
 	if (!globalStruct || !globalStruct->IsCheckSumValid() || !gameSettings || !gameSettings->IsCheckSumValid() ||
 		!player || !player->IsCheckSumValid()) {
-		return;
+		return false;
 	}
 	if (player->aliveStatus != 0) {
-		return; // Do not update players that are not playing anymore.
+		return false; // Do not update players that are not playing anymore.
 	}
+	if (gameSettings->isMultiplayer || (!IsImproveAIEnabled(player->playerId))) { return true; }
 
-	short int numPlayer = player->playerId;
-
-	// Recompute SNScalingFrequency from configuration (only the first call will occur too early, using ROR's default value (4 if not overloaded)
-	// Warning: SNScalingFrequency unit is normally MINUTES. CustomROR switched it to seconds.
-	// Do not update if the current value is acceptable (it might be a saved game)
-	if (tacAI->SNNumber[SNScalingFrequency] < CUSTOMROR::crInfo.configInfo.MINVALUE_tacticalAIUpdateDelay) {
-		tacAI->SNNumber[SNScalingFrequency] = CUSTOMROR::crInfo.configInfo.tacticalAIUpdateDelay; // Update SNScalingFrequency with customROR config value
-	}
-
-	// Fix AI only if config allows improving AI (and NOT in MP games). Keep this info in a local variable.
-	bool applyAIFix = (!gameSettings->isMultiplayer && (IsImproveAIEnabled(numPlayer)));
 
 	// Only for the FIRST tactical update (last one's time is 0): one-shot initializations
 	if (tacAI->lastScalingUpdate <= 0) {
-		if (applyAIFix) {
-			if (gameSettings->difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD) {
-				// Search for techs that can be added to strategy and would improve my military units
-				STRATEGY::AddUsefulMilitaryTechsToStrategy(player);
-			}
-			STRATEGY::AdaptStrategyToMaxPopulation(player);
+		tacAI->lastScalingUpdate = 1; // setting it to 1 ms won't impact the game and allows us to know this init has been run
+		if (CUSTOM_AI::customAIHandler.IsAliveAI(player->playerId)) {
+			CUSTOM_AI::customAIHandler.GetCustomPlayerAI(player->playerId)->RunInitialStrategyAnalysis();
 		}
 	}
 
-	if (globalStruct->currentGameTime < 10000) { // currentGameTime is in milliseconds
-		// This is the begin-of-game call. Do nothing. Next call will really use the appropriate delay (in seconds).
-		return;
+	if (CUSTOM_AI::customAIHandler.IsAliveAI(player->playerId)) {
+		CUSTOM_AI::customAIHandler.GetCustomPlayerAI(player->playerId)->RunStrategyUpdate(globalStruct->currentGameTime);
 	}
-
-	if (applyAIFix) {
-		// Here: a standard call for update tactical AI that waited the normal delay.
-		STRATEGY::AnalyzeStrategy(&ai->structBuildAI);
-	}
+	return true;
 }
 
 

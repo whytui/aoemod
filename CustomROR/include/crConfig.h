@@ -133,7 +133,7 @@ public:
 	float conversionResistance_WarElephants_Persian;
 	// AI
 	long int improveAILevel;
-	long int tacticalAIUpdateDelay;
+	long int tacticalAIUpdateDelay; // In seconds
 	bool generateStrategyForRM;
 	bool generateStrategyForDM;
 	// Panic mode options

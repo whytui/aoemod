@@ -242,6 +242,9 @@
     <ClInclude Include="include\AOEPrimitives_unitGroup.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="include\mainCustomAI.h">
+      <Filter>Fichiers d%27en-tête\AI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -411,6 +414,9 @@
     </ClCompile>
     <ClCompile Include="src\AOEPrimitives_unitGroup.cpp">
       <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mainCustomAI.cpp">
+      <Filter>Fichiers sources\AI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

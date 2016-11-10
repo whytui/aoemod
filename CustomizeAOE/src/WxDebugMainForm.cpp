@@ -444,8 +444,8 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		s += std::to_string(ai->structTacAI.targetInfo.buildingTargetInfAIUnitElemListIndex);
 		s += " [inProgress]";
 		s += std::to_string(ai->structTacAI.targetInfo.targetSearchInProgress);
-		s += "\nlastTacticalUpdateTime=";
-		s += MilliSecondsToString(ai->structTacAI.lastTacticalUpdateTime);
+		s += "\nlastScalingUpdate=";
+		s += MilliSecondsToString(ai->structTacAI.lastScalingUpdate);
 		s += " lastAttackResponseTime=";
 		s += MilliSecondsToString(ai->structTacAI.lastAttackResponseTime_ms);
 		s += " lastCoopSharAttackTime=";

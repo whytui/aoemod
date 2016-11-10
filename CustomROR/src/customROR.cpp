@@ -131,7 +131,7 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x051A5DA:
 		this->OnGameRightClickUpRedCrossDisplay(REG_values);
 		break;
-	case 0x004D09C2:
+	case 0x004D098E:
 		this->ManageTacAIUpdate(REG_values);
 		break;
 	case 0x4D1B81:
@@ -1601,14 +1601,21 @@ void CustomRORInstance::ManageChangeGameSpeed(REG_BACKUP *REG_values) {
 }
 
 
-// Overloads the "tactical AI update" event that occurs regularly for each AI player.
-// For the algorithm to work well, requires also "FixUnitIdForInProgressBuilding", "FixResetStratElemForUnitId"
+// 004D0989.
+// Entry point in the "tactical AI update" event that occurs regularly (every x milliseconds) for each AI player.
+// For the strategy algorithms to work well, requires also "FixUnitIdForInProgressBuilding", "FixResetStratElemForUnitId"
+// May change return address to 0x4D0EFE to skip the whole tacAI update process (dead players...)
 void CustomRORInstance::ManageTacAIUpdate(REG_BACKUP *REG_values) {
+	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->ESI_val);
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ESI_val;
-	AOE_STRUCTURES::STRUCT_AI *ai = (AOE_STRUCTURES::STRUCT_AI *)REG_values->EDX_val;
-	if ((ai == NULL) || (tacAI == NULL)) { return; }
+	ror_api_assert(REG_values, tacAI && tacAI->IsCheckSumValid());
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	REG_values->EDX_val = (unsigned long int) tacAI->ptrMainAI;
+	bool isDeadPlayer = CUSTOMROR::crCommand.ManageTacAIUpdate(tacAI->ptrMainAI);
 
-	CUSTOMROR::crCommand.ManageTacAIUpdate(ai);
+	if (isDeadPlayer) {
+		ChangeReturnAddress(REG_values, 0x4D0EFE);
+	}
 }
 
 
