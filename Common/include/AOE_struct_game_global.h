@@ -177,6 +177,7 @@ namespace AOE_STRUCTURES {
 			if ((restriction >= this->terrainRestrictionCount) || (restriction < 0)) { return NULL; }
 			return this->ptrTerrainRestrictionArray[restriction];
 		}
+		// Returns a unit structure from its ID. Only works for >=0 IDs.
 		STRUCT_UNIT_BASE *GetUnitFromId(long int unitId) const {
 			if ((unitId < 0) || (unitId >= this->seqUnitId)) {
 				return NULL;

@@ -15,6 +15,9 @@
 */
 namespace AOE_STRUCTURES {
 
+	const long int STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT = 40; // 0x28
+	const long int STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT = 20;
+
 	// Size = 0x330. Constructor()=0x4CC630
 	// tacAI.createGroup(useSequence)=0x4E0400 ; tacAI.removeUnitGroup(unitGroupId)=0x4E04B0
 	// tacAI.RemoveAllGroups(unitGroupType)=0x4E0520, -1=joker
@@ -32,9 +35,9 @@ namespace AOE_STRUCTURES {
 		long int unknown_resetOrg; // +10. resetOrg ? 0 when task changes, 1 when "init" for task has been done ??
 		AOE_CONST_INTERNAL::UNIT_GROUP_TYPES unitGroupType; // +14. Set in 0x4CCC70.
 		long int taskSubTypeId; // +18. -1=default. 0,4 = capture?
-		long int myUnitsIdArray[0x28]; // +1C. 40 elements, can be non-consecutive (ignore -1 values).
+		long int myUnitsIdArray[STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT]; // +1C. 40 elements, can be non-consecutive (ignore -1 values).
 		// 0xBC
-		long int myUnitsHPArray[0x28]; // +BC. 40 elements. Also used as myUnitsIdArray+0xA0.
+		long int myUnitsHPArray[STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT]; // +BC. 40 elements. Also used as myUnitsIdArray+0xA0.
 		long int unitCount; // +15C. Must correspond to valid unitIds count in unitIdArray. Warning: 4CCC90 method requires LucTieuPhung's fix to avoid breaking this assertion.
 		// 0x160
 		long int unitMaximumCount; // Unsure
@@ -83,7 +86,7 @@ namespace AOE_STRUCTURES {
 		char unknown_2CA; // ?
 		char unknown_2CB; // ?
 		long int targetUnitIdArrayUsedElemCount; // +2CC. Index of first UNused element in targetUnitIdArray (=> values 0-19). See 0x4CEBB6
-		long int targetUnitIdArray[20]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4). Get=0x4CEB90
+		long int targetUnitIdArray[STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4). Get=0x4CEB90
 		long int targetPlayerId; // +320. Related to targetUnitIdArray unit's playerId (last inserted? All the same player?)
 		long int terrainZoneId; // +324. TerrainZoneId (to identify the island/lake/sea the group is in)
 		long int unknown_328_gameTime; // Last tasking time (milliseconds). 10 seconds min between roundup attacks (0x4CDAFC)
@@ -92,17 +95,17 @@ namespace AOE_STRUCTURES {
 		bool IsCheckSumValid() const { return this->checksum == 0x00548CE0; }
 		// Safely get a unit id from targets array. Limited to 20 slots !
 		long int GetTargetUnitIdFromArray(long int index) const {
-			assert(index < 20); // Overflow !
-			assert(this->targetUnitIdArrayUsedElemCount <= 20);
-			if ((index < 0) || (index >= this->targetUnitIdArrayUsedElemCount) || (index >= 20)) {
+			assert(index < STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT); // Overflow !
+			assert(this->targetUnitIdArrayUsedElemCount <= STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT);
+			if ((index < 0) || (index >= this->targetUnitIdArrayUsedElemCount) || (index >= STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT)) {
 				return -1;
 			}
 			return this->targetUnitIdArray[index];
 		}
 		// Safely adds a unit id to targets array. Limited to 20 slots !
 		bool AddTargetUnitIdToArray(long int unitId) {
-			assert(this->targetUnitIdArrayUsedElemCount < 20);
-			if (this->targetUnitIdArrayUsedElemCount >= 20) {
+			assert(this->targetUnitIdArrayUsedElemCount < STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT);
+			if (this->targetUnitIdArrayUsedElemCount >= STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT) {
 				return false; // overflow: can't add
 			}
 			this->targetUnitIdArray[this->targetUnitIdArrayUsedElemCount] = unitId;
@@ -111,14 +114,14 @@ namespace AOE_STRUCTURES {
 		}
 		// Safely gets a unit ID from myUnitsIdArray. Limited to 40 slots.
 		long int GetMyUnitId(long int index) const {
-			assert(index < 40); // Overflow !
-			if ((index < 0) || (index >= 40)) { return -1; }
+			assert(index < STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT); // Overflow !
+			if ((index < 0) || (index >= STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT)) { return -1; }
 			return this->myUnitsIdArray[index];
 		}
 		// Safely gets a unit HP from myUnitsHPArray. Limited to 40 slots.
 		long int GetMyUnitHP(long int index) const {
-			assert(index < 40); // Overflow !
-			if ((index < 0) || (index >= 40)) { return 0; }
+			assert(index < STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT); // Overflow !
+			if ((index < 0) || (index >= STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT)) { return 0; }
 			return this->myUnitsHPArray[index];
 		}
 	};

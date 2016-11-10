@@ -59,12 +59,6 @@ namespace AOE_CONST_FUNC {
 	}
 
 
-	// Returns true if unit is ranged unit (shoots projectiles)
-	// Note: priests are not ranged units
-	static inline bool IsRangedUnit(STRUCT_UNITDEF_ATTACKABLE *unit) {
-		return (unit && (unit->projectileUnitId >= 0));
-	}
-
 	// You can do comparisons on enum values
 	enum RESEARCH_COST_CATEGORY {
 		RCC_VERY_CHEAP = 0, // <= 120

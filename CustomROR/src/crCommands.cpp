@@ -1588,17 +1588,15 @@ void CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 	// Recompute SNScalingFrequency from configuration (only the first call will occur too early, using ROR's default value (4 if not overloaded)
 	// Warning: SNScalingFrequency unit is normally MINUTES. CustomROR switched it to seconds.
 	// Do not update if the current value is acceptable (it might be a saved game)
-	if (tacAI->SNNumber[0x63] < CUSTOMROR::crInfo.configInfo.MINVALUE_tacticalAIUpdateDelay) {
-		tacAI->SNNumber[0x63] = CUSTOMROR::crInfo.configInfo.tacticalAIUpdateDelay; // Update SNScalingFrequency with customROR config value
+	if (tacAI->SNNumber[SNScalingFrequency] < CUSTOMROR::crInfo.configInfo.MINVALUE_tacticalAIUpdateDelay) {
+		tacAI->SNNumber[SNScalingFrequency] = CUSTOMROR::crInfo.configInfo.tacticalAIUpdateDelay; // Update SNScalingFrequency with customROR config value
 	}
-
-	int ironAgeResearched = IsTechResearched(player, CST_RSID_IRON_AGE);
 
 	// Fix AI only if config allows improving AI (and NOT in MP games). Keep this info in a local variable.
 	bool applyAIFix = (!gameSettings->isMultiplayer && (IsImproveAIEnabled(numPlayer)));
 
 	// Only for the FIRST tactical update (last one's time is 0): one-shot initializations
-	if (tacAI->lastTacticalUpdateTime <= 0) {
+	if (tacAI->lastScalingUpdate <= 0) {
 		if (applyAIFix) {
 			if (gameSettings->difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD) {
 				// Search for techs that can be added to strategy and would improve my military units

@@ -451,7 +451,7 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		s += " lastCoopSharAttackTime=";
 		s += MilliSecondsToString(ai->structTacAI.lastCoopSharAttackTime_ms);
 		s += " lastPanicModeTime=";
-		s += MilliSecondsToString(ai->structTacAI.lastPanicModeTime);
+		s += MilliSecondsToString(ai->structTacAI.lastPanicModeStrategyUpdateTime);
 		s += "\nlastAIUpdateTime=";
 		s += MilliSecondsToString(ai->structTacAI.lastAIUpdateTime_ms);
 

@@ -753,7 +753,7 @@ void StrategyBuilder::ComputeStrengthsForPotentialUnits() {
 		speedHitPointsFactor = speedHitPointsFactor / 3; // get a % value 1-100
 
 		bool hasInefficientProjectile = false;
-		if (IsRangedUnit(unitInfo->upgradedUnitDefLiving)) {
+		if (UnitHasProjectile(unitInfo->upgradedUnitDefLiving)) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *projectile = (AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *)
 				this->player->GetUnitDefBase(unitInfo->upgradedUnitDefLiving->projectileUnitId);
 			if (projectile) {
@@ -1277,7 +1277,7 @@ void StrategyBuilder::ComputeGlobalScores() {
 		unitInfo->globalScore = (unitInfo->globalScore * (100 + diff * 2)) / 100; // Add up to 6% bonus for early availability
 
 		// Range units (siege): decrease score for slow/inefficient projectiles (catapults !)
-		if (unitInfo->baseUnitDefLiving && (IsRangedUnit(unitInfo->baseUnitDefLiving))) {
+		if (unitInfo->baseUnitDefLiving && (UnitHasProjectile(unitInfo->baseUnitDefLiving))) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *proj = (AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(unitInfo->baseUnitDefLiving->projectileUnitId);
 			UNIT_PROJECTILE_TYPE pType = GetProjectileType(proj);
 			if (pType == UNIT_PROJECTILE_TYPE::UPT_CATAPULT_STONE) {

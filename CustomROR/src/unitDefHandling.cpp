@@ -260,6 +260,7 @@ namespace AOE_STRUCTURES {
 
 
 	// Returns true if unit definition is a tower (using unit type and the fact it has attacks or not)
+	// A tower is a unit that can attack (including priests) and can't move.
 	// See also IsTower(datid) in AOE_empires_dat.h, which uses a hardcoded list.
 	bool IsTower(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
 		if (!unitDef->DerivesFromAttackable()) {
@@ -271,7 +272,8 @@ namespace AOE_STRUCTURES {
 		}
 		// A tower is generally a building with attack, BUT be careful, some towers are defined as living units with speed=0
 		// We try to use the most generic criteria: speed=0 & attack>0.
-		return (unitDef50->speed == 0) && (unitDef50->attacksCount > 0);
+		bool canAttack = (unitDef50->attacksCount > 0) || (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest);
+		return (unitDef50->speed == 0) && canAttack;
 	}
 
 
@@ -288,7 +290,7 @@ namespace AOE_STRUCTURES {
 
 	// Returns a weight for a military unit. Scale is totally subjective ! Just a tool for algorithms...
 	// Super units have a high weight.
-	// Weak unit have a low weight
+	// Weak units have a low weight
 	int GetUnitWeight(short int DAT_ID) {
 		switch (DAT_ID) {
 			// Super units

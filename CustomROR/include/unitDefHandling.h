@@ -85,9 +85,39 @@ namespace AOE_STRUCTURES {
 
 
 	// Returns true if unit definition is a tower (using unit type and the fact it has attacks or not)
+	// A tower is a unit that can attack (including priests) and can't move.
 	// See also IsTower(datid) in AOE_empires_dat.h, which uses a hardcoded list.
 	bool IsTower(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
 
+
+	// Returns true if unit shoots projectiles
+	// Note: priests or st francis don't
+	static inline bool UnitHasProjectile(STRUCT_UNITDEF_ATTACKABLE *unitDef) {
+		return (unitDef && (unitDef->projectileUnitId >= 0));
+	}
+
+	// Returns true if unit can attack from distance: projectile units + priests + "melee with range" (like saint francis)
+	static inline bool IsRangedUnit(STRUCT_UNITDEF_ATTACKABLE *unitDef) {
+		if (!unitDef) { return false; }
+		return UnitHasProjectile(unitDef) || (
+			(unitDef->maxRange > 1) && // We could use maxRange>0, but we consider range <= (like fire galley) is like melee.
+			(unitDef->attacksCount > 0) // Excludes projectiles themselves !
+			) || 
+			(unitDef->unitAIType == TribeAIGroupPriest);
+	}
+
+	// Returns true if unit definition has blast damage and can damage units from a friendly player
+	// This does NOT tell if same player's units are affected (see UnitDefProjectileCanDamageOwnUnits instead)
+	static inline bool UnitDefCanDamageFriendlyUnits(STRUCT_UNITDEF_ATTACKABLE *unitDef) {
+		return unitDef && (unitDef->blastRadius > 0) && (unitDef->blastLevel <= BLAST_LEVELS::CST_BL_DAMAGE_NEARBY_UNITS);
+	}
+
+	// Returns true if unit can damage its own units (same player's units).
+	// See also UnitDefCanDamageFriendlyUnits.
+	static inline bool UnitDefProjectileCanDamageOwnUnits(STRUCT_UNITDEF_ATTACKABLE *unitDef) {
+		if (!unitDef || !UnitHasProjectile(unitDef)) { return false; }
+		return (unitDef->blastRadius > 0) && (unitDef->blastLevel <= BLAST_LEVELS::CST_BL_DAMAGE_NEARBY_UNITS);
+	}
 
 	// Get strategy element type for a unit
 	AOE_CONST_FUNC::TAIUnitClass GetUnitStrategyElemClass(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
@@ -95,7 +125,7 @@ namespace AOE_STRUCTURES {
 
 	// Returns a weight for a military unit. Scale is totally subjective ! Just a tool for algorithms...
 	// Super units have a high weight.
-	// Weak unit have a low weight
+	// Weak units have a low weight
 	int GetUnitWeight(short int DAT_ID);
 
 	// Returns true if unit class corresponds to one of

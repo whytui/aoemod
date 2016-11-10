@@ -99,6 +99,7 @@ namespace AOE_STRUCTURES {
 
 	// Tactical AI. Lots of things are managed here !
 	// size 0x100C - Constructor=0x4CEBE0, Deserialize=0x4CEF10. Corresponds to MainAI+0x1146C
+	// [+0x30] mainUpdate(arg1 = always 0 ?). "Scaling" update, tributes/dipl/likes, runs tacAIUpdate(strategy, military, gathering... cf AI_UPDATE_TYPES). Called by 0x4C71A0=main AI update
 	class STRUCT_TAC_AI {
 	public:
 		unsigned long int checksum;
@@ -135,7 +136,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_D10_ms; // +D10. A time value in ms
 		unsigned long int lastAttackResponseTime_ms; // +D14. Value in milliseconds. Used to compute +D24 ?
 		unsigned long int unknown_D18;
-		long int lastTacticalUpdateTime; // +D1C. Value in milliseconds. See customROR config (tacticalAI/updateDelay) or SNScalingFrequency in standard game.
+		long int lastScalingUpdate; // +D1C. Value in milliseconds. See customROR config (tacticalAI/updateDelay) or SNScalingFrequency in standard game.
 		// 0xD20
 		long int buildFrequencyCounter; // incremented until it reaches SNBuildFrequency
 		long int currentAttackSeparationTime_seconds; // +D24. Compared to SNAttackResponseSeparationTime,SNAttackSeparationTimeRandomness. See 4E0BC0,4E0C03.
@@ -164,7 +165,7 @@ namespace AOE_STRUCTURES {
 		long int granaryAddedToStrategy; // +F8C. 1 when a granary has been inserted into strategy.
 		// 0xF90
 		long int unknown_F90_someTimeValue; // 4D2245,4D242A...
-		long int lastPanicModeTime; // +F94. In milliseconds. To be compared with globalStruct+4
+		long int lastPanicModeStrategyUpdateTime; // +F94. In milliseconds. Updated with game time when "panic mode" units are added to strategy.
 		long int unknown_F98_timeAboutTributes; // Related to SNCoopDemandTributeInterval
 		unsigned long int unknown_F9C;
 		// 0xFA0

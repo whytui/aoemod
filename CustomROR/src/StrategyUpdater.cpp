@@ -914,7 +914,7 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 	}
 
 	if (strategyUpdated) {
-		tacAI->lastPanicModeTime = currentGameTime_ms;
+		tacAI->lastPanicModeStrategyUpdateTime = currentGameTime_ms;
 	}
 
 	// If NOT panic mode, cancel panic mode units that are not being trained (no need to train them anymore). Too late for "in progress" ones...
