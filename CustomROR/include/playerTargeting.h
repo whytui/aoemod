@@ -16,13 +16,15 @@
 using namespace std;
 using namespace AOE_STRUCTURES;
 
-namespace CUSTOMROR {
+namespace CUSTOM_AI {
 
 	// Configuration for targeting evaluation
 	namespace TARGETING_CONST {
 		const long int yearsCountInArtefactsVictoryDelay = 2000; // And wonder delay too
 		const long int updateDetailedDislikeInfoMinDelay = 10; // Minimum delay between full recomputing of custom dislike information. In seconds.
 		const long int updateDetailedDislikeInfoMaxDelay = 40; // Maximum delay between full recomputing of custom dislike information. In seconds.
+		const long int persistenceDelayOfIndividualEnemyAttacksInTargetingHistory = 60; // Delay (seconds) after which enemy attacks are no longer taken into account in targeting
+		const long int persistenceDelayOfIndividualEnemyAttacksInTargetingHistoryRandomImpact = 10; // Maximum random time in seconds added/subtracted from persistenceDelayOfIndividualEnemyAttacksInTargetingHistory
 		// Dislike values
 		const long int dislikeAmountWinningAllArtefacts = 100; // Triggering a victory condition after a 2000 years delay
 		const long int dislikeAmountWinningWonderBuilt = 100; // Triggering a victory condition after a 2000 years delay
@@ -46,16 +48,11 @@ namespace CUSTOMROR {
 		AIPlayerTargetingInfo();
 
 		long int myPlayerId;
+		CustomAIMilitaryInfo *militaryAIInfo; // CustomROR military AI info class for this player
 		long int lastUpdateGameTime; // milliseconds since last update of AIPlayer targeting info.
 		long int nextUpdateGameTime; // milliseconds
 		long int lastTargetPlayerChangeGameTime; // milliseconds
 		long int lastComputedDislikeSubScore[9];
-		long int previousAttackCountsByEnemyPlayers[9]; // Number of enemy attacks (from each player) when last update was run
-		// Number of enemy attacks (from each player) during last period of time
-		// Warning: as this also counts towers shooting my explorers (for example), this information must be used carefully
-#pragma message("TODO : remove this ! Has been moved")
-		long int attacksByEnemyPlayersDuringLastPeriod[9];
-		long int panicModeProvokedByEnemyPlayersDuringLastPeriod[9]; // Counter of "panic modes" triggered by each player during last period of time.
 
 		// Reset all underlying info (useful at game start, etc)
 		void ResetInfo();

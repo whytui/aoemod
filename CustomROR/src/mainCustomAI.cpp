@@ -85,11 +85,14 @@ CustomAIHandler::CustomAIHandler() {
 }
 
 // To be executed each time a game starts/is loaded
+// This method is in charge of resetting all AI-related CustomROR structures
 void CustomAIHandler::ResetAllInfo() {
 	this->currentGameTotalPlayerCount = 0;
 	for (int i = 0; i < _countof(this->playerAITable); i++) {
 		this->playerAITable[i].Reset();
 	}
+	CUSTOM_AI::unitTargetingHandler.ResetAllInfo();
+	CUSTOM_AI::playerTargetingHandler.ResetAllInfo();
 }
 
 
@@ -102,6 +105,7 @@ void CustomAIHandler::GameStartInit() {
 	this->currentGameTotalPlayerCount = global->playerTotalCount;
 	for (int i = 1; i < this->currentGameTotalPlayerCount; i++) {
 		this->playerAITable[i].Init(global, i);
+		CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i)->militaryAIInfo = &this->playerAITable[i].militaryAI;
 	}
 
 }

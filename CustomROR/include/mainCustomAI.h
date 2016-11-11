@@ -7,6 +7,8 @@
 #include "CustomRORInfo.h"
 #include "customAIMilitaryInfo.h"
 #include "StrategyUpdater.h"
+#include "unitTargeting.h"
+#include "playerTargeting.h"
 
 using namespace AOE_STRUCTURES;
 
@@ -46,6 +48,8 @@ namespace CUSTOM_AI {
 		bool isValidPlayer;
 	};
 
+
+	// Global object that handles all CustomROR-related AI structures and treatments
 	class CustomAIHandler {
 	public:
 		CustomAIHandler();
@@ -54,6 +58,7 @@ namespace CUSTOM_AI {
 		CustomPlayerAI playerAITable[9];
 
 		// To be executed each time a game starts/is loaded
+		// This method is in charge of resetting all AI-related CustomROR structures
 		void ResetAllInfo();
 
 		// To be executed at game start. Required for all other treatments to work.

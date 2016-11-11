@@ -20,7 +20,7 @@
 using namespace std;
 using namespace AOE_STRUCTURES;
 
-namespace CUSTOMROR {
+namespace CUSTOM_AI {
 
 	// Configuration for targeting evaluation
 	namespace TARGETING_CONST {

@@ -2290,7 +2290,7 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	if ((CUSTOMROR::crInfo.configInfo.dislikeComputeInterval > 0) &&
 		(currentGameTime >= (CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second + CUSTOMROR::crInfo.configInfo.dislikeComputeInterval))) {
 		CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second = currentGameTime;
-		CUSTOMROR::playerTargetingHandler.ComputeDislikeValues();
+		CUSTOM_AI::playerTargetingHandler.ComputeDislikeValues();
 	}
 
 	// Manage triggers
@@ -3618,7 +3618,7 @@ void CustomRORInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values
 	// Custom treatments
 	if (CUSTOMROR::IsImproveAIEnabled(player->playerId)) {
 		// Override the calculation of target player Id (most disliked)
-		mostDislikedPlayerId = CUSTOMROR::playerTargetingHandler.GetMostDislikedPlayer(player, diplAI, askTributeAmount, askTributePlayerId,
+		mostDislikedPlayerId = CUSTOM_AI::playerTargetingHandler.GetMostDislikedPlayer(player, diplAI, askTributeAmount, askTributePlayerId,
 			(attackWinningPlayerFlag != 0), attackWinningPlayerFactor);
 		skipStandardTreatment = true;
 	}
@@ -3664,7 +3664,7 @@ void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_value
 	ChangeReturnAddress(REG_values, 0x4C0E3C);
 	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *resultInfAIUnitElem = NULL;
 
-	resultInfAIUnitElem = CUSTOMROR::unitTargetingHandler.TestFindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
+	resultInfAIUnitElem = CUSTOM_AI::unitTargetingHandler.TestFindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
 	//resultInfAIUnitElem = CUSTOMROR::FindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
 
 	REG_values->EAX_val = (unsigned long int)resultInfAIUnitElem;
@@ -3702,7 +3702,7 @@ void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values
 	bool skipStandardTreatments = false; // Default
 	// Custom treatments
 	if (CUSTOMROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
-		skipStandardTreatments = CUSTOMROR::unitTargetingHandler.TaskActiveUnitGroup(tacAI, unitGroup);
+		skipStandardTreatments = CUSTOM_AI::unitTargetingHandler.TaskActiveUnitGroup(tacAI, unitGroup);
 	}
 
 	// Do not modify below

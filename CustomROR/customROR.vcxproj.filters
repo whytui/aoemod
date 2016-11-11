@@ -86,9 +86,6 @@
     <ClInclude Include="include\crGameObjects.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\autoAttackPolicy.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\drsHandler.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -203,9 +200,6 @@
     <ClInclude Include="include\language.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
-    <ClInclude Include="include\cityPlan.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\palette.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
@@ -253,6 +247,12 @@
     </ClInclude>
     <ClInclude Include="include\GameHistoryIntervalsBase.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cityPlan.h">
+      <Filter>Fichiers d%27en-tête\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\autoAttackPolicy.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -394,9 +394,6 @@
     <ClCompile Include="src\BitmapExporter.cpp">
       <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
-    <ClCompile Include="src\cityPlan.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\AOEPrimitives_units.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -428,6 +425,9 @@
       <Filter>Fichiers sources\AI</Filter>
     </ClCompile>
     <ClCompile Include="src\customAIMilitaryInfo.cpp">
+      <Filter>Fichiers sources\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cityPlan.cpp">
       <Filter>Fichiers sources\AI</Filter>
     </ClCompile>
   </ItemGroup>

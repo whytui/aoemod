@@ -24,12 +24,6 @@ namespace CUSTOM_AI {
 			this->ResetAllInfo();
 		}
 
-		long int previousAttackCountsByEnemyPlayers[9]; // Number of enemy attacks (from each player) when last update was run
-		// Number of enemy attacks (from each player) during last period of time
-		// Warning: as this also counts towers shooting my explorers (for example), this information must be used carefully
-		long int attacksByEnemyPlayersDuringLastPeriod[9];
-		long int panicModeProvokedByEnemyPlayersDuringLastPeriod[9]; // Counter of "panic modes" triggered by each player during last period of time.
-
 		TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> recentAttacksByPlayer[9];
 
 		void ResetAllInfo();
@@ -47,6 +41,9 @@ namespace CUSTOM_AI {
 
 		// Returns true if successful
 		bool SavePanicModeOccurrenceInHistory(long int attackerPlayerId, long int currentGameTime);
+
+		// Get the number of panic mode caused by a player during the specified interval (game times in milliseconds)
+		int GetPanicModesCountFromPlayerInPeriod(long int attackerPlayerId, long int startGameTime, long int endGameTime);
 
 	};
 	

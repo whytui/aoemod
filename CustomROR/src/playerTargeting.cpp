@@ -1,7 +1,7 @@
 #include "../include/playerTargeting.h"
 
 
-namespace CUSTOMROR {
+namespace CUSTOM_AI {
 
 // Global static objects
 PlayerTargeting playerTargetingHandler;
@@ -14,11 +14,9 @@ AIPlayerTargetingInfo::AIPlayerTargetingInfo() {
 
 // Reset all underlying info (useful at game start, etc)
 void AIPlayerTargetingInfo::ResetInfo() {
+	this->militaryAIInfo = NULL;
 	for (int i = 0; i < 9; i++) {
 		this->lastComputedDislikeSubScore[i] = 0;
-		this->previousAttackCountsByEnemyPlayers[i] = 0;
-		this->panicModeProvokedByEnemyPlayersDuringLastPeriod[i] = 0;
-		this->attacksByEnemyPlayersDuringLastPeriod[i] = 0;
 	}
 	this->lastUpdateGameTime = 0;
 	this->nextUpdateGameTime = 0;
@@ -63,6 +61,14 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 	for (int i = 0; i < 9; i++) {
 		this->lastComputedDislikeSubScore[i] = 0;
 	}
+
+	int randomImpact = TARGETING_CONST::persistenceDelayOfIndividualEnemyAttacksInTargetingHistoryRandomImpact;
+	int maxDelayToSearchForEnemyAttacks = TARGETING_CONST::persistenceDelayOfIndividualEnemyAttacksInTargetingHistory +
+		randomizer.GetRandomValue(-randomImpact, randomImpact);
+	if (maxDelayToSearchForEnemyAttacks < 1) { maxDelayToSearchForEnemyAttacks = 1; }
+	long int periodBeginTime = global->currentGameTime - maxDelayToSearchForEnemyAttacks;
+	long int periodEndTime = global->currentGameTime;
+
 	// Collect individual information
 	for (int targetPlayerId = 1; targetPlayerId < global->playerTotalCount; targetPlayerId++) {
 		STRUCT_PLAYER *targetPlayer = global->GetPlayerStruct(targetPlayerId);
@@ -75,13 +81,9 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		}
 		numberOfValidEnemyPlayers++;
 
-		long int previousAttacksByTargetPlayerCount = this->previousAttackCountsByEnemyPlayers[targetPlayerId];
-		this->previousAttackCountsByEnemyPlayers[targetPlayerId] = player->ptrAIStruct->structTacAI.attacksByPlayerCount[targetPlayerId];
-		// Number of attacks BY target player on me during this period
-		this->attacksByEnemyPlayersDuringLastPeriod[targetPlayerId] = player->ptrAIStruct->structTacAI.attacksByPlayerCount[targetPlayerId] - previousAttacksByTargetPlayerCount;
-		totalAttacksDuringPeriod += this->attacksByEnemyPlayersDuringLastPeriod[targetPlayerId];
-
-		//this->panicModeProvokedByEnemyPlayersDuringLastPeriod[...] is filled externally
+		if (this->militaryAIInfo) {
+			totalAttacksDuringPeriod += this->militaryAIInfo->GetAttacksCountFromPlayerInPeriod(targetPlayerId, periodBeginTime, periodEndTime);
+		}
 	}
 
 	int averageAttackCountByPlayerDuringPeriod = (numberOfValidEnemyPlayers > 0) ? totalAttacksDuringPeriod / numberOfValidEnemyPlayers : 0;
@@ -101,11 +103,15 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		// player with lots of towers ?
 		// Attacking a allied player ?
 
-		if (this->attacksByEnemyPlayersDuringLastPeriod[targetPlayerId] > averageAttackCountByPlayerDuringPeriod) {
-			this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreAttackedMeMoreThanAverage; // This player attacked me "more than average" => I don't like him
-		}
-		if (this->panicModeProvokedByEnemyPlayersDuringLastPeriod[targetPlayerId] > 0) {
-			this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreAttackedMyTown;
+		if (this->militaryAIInfo) {
+			int attacksCountByPlayer = this->militaryAIInfo->GetAttacksCountFromPlayerInPeriod(targetPlayerId, periodBeginTime, periodEndTime);
+			if (attacksCountByPlayer > averageAttackCountByPlayerDuringPeriod) {
+				this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreAttackedMeMoreThanAverage; // This player attacked me "more than average" => I don't like him
+			}
+
+			if (this->militaryAIInfo->GetPanicModesCountFromPlayerInPeriod(targetPlayerId, periodBeginTime, periodEndTime) > 0) {
+				this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreAttackedMyTown;
+			}
 		}
 
 		int randomFactor = randomizer.GetRandomValue_normal_moderate(0, TARGETING_CONST::dislikeSubScoreRandomFactor);
@@ -199,11 +205,6 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		if (this->lastComputedDislikeSubScore[i] < 0) {
 			this->lastComputedDislikeSubScore[i] = 0; // Make sure to avoid negative values.
 		}
-	}
-
-	// Reset information fields that are filled externally
-	for (int i = 0; i < 9; i++) {
-		this->panicModeProvokedByEnemyPlayersDuringLastPeriod[i] = 0;
 	}
 
 	return true;

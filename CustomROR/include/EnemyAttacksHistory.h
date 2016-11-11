@@ -40,6 +40,18 @@ namespace CUSTOM_AI {
 			}
 			return result;
 		}
+
+		// Get the number of panic modes cause by a player during the specified interval (game times in milliseconds)
+		int GetPanicModesCountInPeriod(long int startGameTime, long int endGameTime) {
+			if (endGameTime <= startGameTime) { return 0; }
+			CUSTOM_AI::TimeIntervalAttackRecord *interval = this->GetIntervalForGameTime(startGameTime);
+			int result = 0;
+			while (interval && (interval->intervalEndGameTime > endGameTime)) {
+				result += interval->triggeredPanicModesCount;
+				interval = this->GetNextInterval(interval);
+			}
+			return result;
+		}
 	};
 
 	

@@ -8,9 +8,6 @@ namespace CUSTOM_AI {
 		for (int i = 0; i < 9; i++) {
 			this->recentAttacksByPlayer[i].ResetAllInfo();
 			this->recentAttacksByPlayer[i].attackerPlayerId = i;
-			this->attacksByEnemyPlayersDuringLastPeriod[i] = 0;
-			this->panicModeProvokedByEnemyPlayersDuringLastPeriod[i] = 0;
-			this->previousAttackCountsByEnemyPlayers[i] = 0;
 		}
 	}
 
@@ -52,6 +49,12 @@ namespace CUSTOM_AI {
 			interval->triggeredPanicModesCount++;
 		}
 		return (interval != NULL);
+	}
+
+	// Get the number of panic mode caused by a player during the specified interval (game times in milliseconds)
+	int CustomAIMilitaryInfo::GetPanicModesCountFromPlayerInPeriod(long int attackerPlayerId, long int startGameTime, long int endGameTime) {
+		if ((attackerPlayerId < 0) || (attackerPlayerId > 8)) { return 0; }
+		return this->recentAttacksByPlayer[attackerPlayerId].GetPanicModesCountInPeriod(startGameTime, endGameTime);
 	}
 
 }

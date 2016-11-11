@@ -4,7 +4,7 @@
 using namespace AOE_CONST_FUNC;
 using namespace AOE_STRUCTURES;
 
-namespace CUSTOMROR {
+namespace CUSTOM_AI {
 
 // Global static objects
 UnitTargeting unitTargetingHandler;

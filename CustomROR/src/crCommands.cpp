@@ -1271,9 +1271,7 @@ void CustomRORCommand::InitScenarioInfoTextData(AOE_STRUCTURES::STRUCT_SCENARIO_
 // Initialize internal game-specific variables (called on each game start/load)
 void CustomRORCommand::InitMyGameInfo() {
 	CUSTOMROR::crInfo.ResetVariables();
-	CUSTOMROR::playerTargetingHandler.ResetAllInfo();
-	CUSTOMROR::unitTargetingHandler.ResetAllInfo();
-	CUSTOM_AI::customAIHandler.ResetAllInfo();
+	CUSTOM_AI::customAIHandler.ResetAllInfo(); // Reset all CusotmROR AI internal structures/info
 	// Prevent 0% speed at game startup (occurs because of rounding in registry saved value)
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid() && (global->gameSpeed == 0)) {
