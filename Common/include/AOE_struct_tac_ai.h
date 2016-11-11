@@ -173,7 +173,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_FA4; // flag ? about exploration ? Used in gatherer affectation methods
 		unsigned long int unknown_FA8;
 		STRUCT_TAC_AI_TARGET_INFO targetInfo; // +FAC. This is only used in "group.FindAttackTarget". Values only make sense when inProgress=1 (unused otherwise).
-		long int attacksByPlayerCount[9]; // +FD8. number of times this player attacked me ?
+		long int attacksByPlayerCount[9]; // +FD8. number of times this player attacked me. Updated in 0x4D7AF0 (tacAI.reactToEvent 0x201), never used in standard code ?
 		long int lastUAms; // +FFC. "LastUAms" (UpdateAI). Time spent in last updateAI execution
 		long int averageUpdateAITime_ms; // +1000. Updated each time unknown_1004_time_counter reaches 20 and is reset. "Average UAms" ?
 		long int calcAverageUpdateAITime_counter; // Maximum value = 20 = 0x14

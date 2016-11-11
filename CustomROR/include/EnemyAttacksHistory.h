@@ -11,7 +11,7 @@ using namespace AOE_STRUCTURES;
 
 namespace CUSTOM_AI {
 
-
+	// Represents a game time interval and a number of attacks during this time frame.
 	class TimeIntervalAttackRecord : public CUSTOMROR::TimeIntervalRecordBase {
 	public:
 		long int attacksCount;

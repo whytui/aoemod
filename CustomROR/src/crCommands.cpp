@@ -1608,10 +1608,17 @@ void CustomRORCommand::AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI
 // Calls appropriate "manage panic mode" treatments.
 // Returns true if we want to force usage of original ROR's (bugged) code
 // In most cases, this returns FALSE and ROR's code is NOT used.
+// This method is called every time a unit is attacked (from tacAI.reactToEvent for event 0x201 -> DoPanicModeIfNeeded(enemyPlayerId))
 bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
 	if (!mainAI || !mainAI->IsCheckSumValid()) { return false; }
-	long int actorPlayerId = mainAI->structMainDecisionAI.playerId;
-	if (IsImproveAIEnabled(actorPlayerId)) {
+	long int myPlayerId = mainAI->structMainDecisionAI.playerId;
+	if (IsImproveAIEnabled(myPlayerId)) {
+		if (CUSTOM_AI::customAIHandler.IsAliveAI(myPlayerId)) {
+			// Record the attack. The analog treatment in ROR code is in 0x4D7AF0 (update TacAI.attacksByPlayerCount[enemyPlayerId]).
+			// Note: the best place would be to do this directly in tacAI.reactToEvent (event 0x201), but there isn't an entry point there (...for now)
+			CUSTOM_AI::customAIHandler.GetCustomPlayerAI(myPlayerId)->militaryAI.SaveEnemyAttackInHistory(enemyPlayerId, currentGameTime_ms);
+		}
+
 		// When AI improvements are ON, use our treatments, not ROR code.
 		STRATEGY::ManagePanicMode(mainAI, enemyPlayerId, timeSinceLastPanicMode_s, currentGameTime_ms);
 		return false;
