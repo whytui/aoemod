@@ -10,10 +10,11 @@ using namespace AOE_STRUCTURES;
 namespace CUSTOM_AI {
 
 	namespace AI_CONST {
-		const long int townSize = 20; // In tiles
+		const long int townSize = 22; // In tiles. See also SNMinimumTownSize, SNMaximumTownSize, etc. Actual AI towns can be >20 tiles.
 		const long int townSizeSquare = townSize * townSize;
 		const long int townNeighborhoodSize = 30;
 		const long int townNeighborhoodSizeSquare = townNeighborhoodSize * townNeighborhoodSize;
+		const long int townDefendSizeIfWeak = 16; // A limited territory in defense considerations when player has few resources.
 	}
 
 
@@ -45,6 +46,8 @@ namespace CUSTOM_AI {
 		// Get the number of panic mode caused by a player during the specified interval (game times in milliseconds)
 		int GetPanicModesCountFromPlayerInPeriod(long int attackerPlayerId, long int startGameTime, long int endGameTime);
 
+		// Returns a value 0-100 to evaluate player weakness. 100 means player is very weak (no more resources), 0=player is rich.
+		int EvaluatePlayerWeakness(STRUCT_PLAYER *player);
 	};
 	
 }

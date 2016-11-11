@@ -51,7 +51,7 @@ namespace AOE_CONST_FUNC {
 		SNRuinsDefendPriority = 54,
 		SNArtifactDefendPriority = 55,
 		SNTownDefendPriority = 56,
-		SNDefenseDistance = 57,
+		SNDefenseDistance = 57, // Sets the distance at which items (town excluded) are defended.  Must be >= 0
 		SNNumberBoatAttackGroups = 58,
 		SNMinimumBoatAttackGroupSize = 59,
 		SNMaximumBoatAttackGroupSize = 60,

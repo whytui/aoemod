@@ -289,7 +289,8 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 	// CONFIG
 	const long int panicModeDelay = CUSTOMROR::crInfo.configInfo.panicModeDelay;
 	long int maxPanicModeUnitsInStrategy = CUSTOMROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy;
-	const long int maxPanicModeSeekEnemyDistance = 20; // 0x14. Hardcoded in original code
+	long int maxPanicModeSeekEnemyDistance = CUSTOM_AI::AI_CONST::townSize; // Hardcoded in original code to 20 (0x14)
+	const long int maxPanicModeSeekEnemyDistanceIfFewResources = CUSTOM_AI::AI_CONST::townDefendSizeIfWeak; // Defend a smaller territory if weak
 #define PANIC_MODE_ARRAYS_MAX_SIZE 20 // technical limit to the number of panic mode units
 	if (maxPanicModeUnitsInStrategy > PANIC_MODE_ARRAYS_MAX_SIZE) { maxPanicModeUnitsInStrategy = PANIC_MODE_ARRAYS_MAX_SIZE; }
 
@@ -308,8 +309,9 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 	AOE_STRUCTURES::STRUCT_PLAYER *player = mainAI->ptrStructPlayer;
 	assert(player != NULL);
 	assert(player->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
 	char myCivId = player->civilizationId;
-
 	long int myMilitaryUnitsCount = tacAI->landMilitaryUnits.usedElements; // does not count villagers, nor towers - nor boats
 
 	// Same control as original: abort if delay is not complete
@@ -354,6 +356,8 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 		return;
 	} // Out of resources: exit now. Optional check.
 
+	// Evaluate player weakness (0=weak, 100=ok)
+	int myWeaknessScore = (militaryAIInfo == NULL) ? 50 : militaryAIInfo->EvaluatePlayerWeakness(player);
 	float tempCost[MAX_RESOURCE_TYPE_ID + 1];
 	short int lastCostDAT_ID = -1; // DAT ID to which last computed cost corresponds to.
 	for (int i = 0; i < 4; i++) { tempCost[i] = 0; }
@@ -375,17 +379,32 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 	long int myAcademyCount = 0;
 	long int myDockCount = 0;
 	bool hasBoats = false;
-	long int square_maxPanicModeSeekEnemyDistance = maxPanicModeSeekEnemyDistance * maxPanicModeSeekEnemyDistance;
+	// If SNMaximumTownSize has a reasonable value, use it instead of hardcoded value.
+	if ((tacAI->SNNumber[SNMaximumTownSize] > maxPanicModeSeekEnemyDistanceIfFewResources) &&
+		(tacAI->SNNumber[SNMaximumTownSize] < maxPanicModeSeekEnemyDistance + 4)) {
+		maxPanicModeSeekEnemyDistance = tacAI->SNNumber[SNMaximumTownSize];
+	}
+	long int square_maxPanicModeSeekEnemyDistance;
+	if ((myWeaknessScore < 33) || (settings->difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY)) {
+		// Defend a restricted territory if weak OR if level is easy/easiest.
+		square_maxPanicModeSeekEnemyDistance = maxPanicModeSeekEnemyDistanceIfFewResources * maxPanicModeSeekEnemyDistanceIfFewResources;
+	} else {
+		if (myWeaknessScore < 66) {
+			assert(maxPanicModeSeekEnemyDistance > maxPanicModeSeekEnemyDistanceIfFewResources);
+			int intermediateValue = maxPanicModeSeekEnemyDistanceIfFewResources + ((maxPanicModeSeekEnemyDistance - maxPanicModeSeekEnemyDistanceIfFewResources) / 2);
+			square_maxPanicModeSeekEnemyDistance = intermediateValue * intermediateValue;
+		} else {
+			square_maxPanicModeSeekEnemyDistance = maxPanicModeSeekEnemyDistance * maxPanicModeSeekEnemyDistance;
+		}
+	}
 	long int unitListElementCount = infAI->unitElemListSize;
 	long int unitListBase = (long int)infAI->unitElemList;
 	assert((unitListElementCount == 0) || (infAI->unitElemList != NULL));
 	// Collect info about ATTACKER's units in my town. Note: the unit list we use may not be up to date depending on "my" exploration and what happened to involved units
 	// In standard game, infAI->unitElemList contains many obsolete information (never cleaned up !). This is improved in customROR.
 	for (int i = 0; i < unitListElementCount; i++) {
-		char *unitElementNumPlayer = (char *)(unitListBase + i * 0x24 + 0x0B);
-
 		// We could count "my" buildings from this list but it is incomplete ! Original game searches there but it's bad. We will search directly in player.building_list list.
-		if (*unitElementNumPlayer == enemyPlayerId) {
+		if (infAI->unitElemList[i].playerId == enemyPlayerId) {
 			// Count enemy units in my town
 			long int diffX = (forumPosX - infAI->unitElemList[i].posX);
 			long int diffY = (forumPosY - infAI->unitElemList[i].posY);
