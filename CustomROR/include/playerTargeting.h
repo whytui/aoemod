@@ -11,6 +11,7 @@
 #include "crCommon.h"
 #include "unitDefHandling.h"
 #include "CustomRORInfo.h"
+#include "customAIMilitaryInfo.h"
 
 using namespace std;
 using namespace AOE_STRUCTURES;
@@ -32,10 +33,7 @@ namespace CUSTOMROR {
 		const long int extraValueForCurrentTarget = 8; // (fake) dislike value added to current target
 		const long int msAfterWhichCurrentTargetLosesExtraValue = 180 * 1000; // After x milliseconds with the same target player, current target no longer receives "extraValueForCurrentTarget" (more chances to change target)
 		// Dislike score "sub" values + parameters
-		const long int townSize = 20; // In tiles
-		const long int townSizeSquare = townSize * townSize;
-		const long int townNeighborhoodSize = 30;
-		const long int townNeighborhoodSizeSquare = townNeighborhoodSize * townNeighborhoodSize;
+		
 		const long int dislikeSubScoreRandomFactor = 10;
 		const long int dislikeSubScoreAttackedMeMoreThanAverage = 5;
 		const long int dislikeSubScoreAttackedMyTown = 12;

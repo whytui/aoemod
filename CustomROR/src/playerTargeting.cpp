@@ -162,8 +162,8 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		if (!ignoreThisUnit && myTC) {
 			long int sqDistToMyTC = ((unitPosX - (long int)myTC->positionX) * (unitPosX - (long int)myTC->positionX)) +
 				((unitPosY - (long int)myTC->positionY) * (unitPosY - (long int)myTC->positionY)); // distance^2
-			bool isInMyTown = sqDistToMyTC < TARGETING_CONST::townSizeSquare;
-			bool isNearMyTown = !isInMyTown && (sqDistToMyTC < TARGETING_CONST::townNeighborhoodSizeSquare); // between town limit & neighborhood max distance
+			bool isInMyTown = sqDistToMyTC < CUSTOM_AI::AI_CONST::townSizeSquare;
+			bool isNearMyTown = !isInMyTown && (sqDistToMyTC < CUSTOM_AI::AI_CONST::townNeighborhoodSizeSquare); // between town limit & neighborhood max distance
 
 			if (isInMyTown) {
 				spottedEnemyUnits[unitPlayerId] += 3;

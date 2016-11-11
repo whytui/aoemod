@@ -127,6 +127,7 @@
     <ClInclude Include="include\crMapCopier.h" />
     <ClInclude Include="include\crPatcher.h" />
     <ClInclude Include="include\crRPGMode.h" />
+    <ClInclude Include="include\customAIMilitaryInfo.h" />
     <ClInclude Include="include\customFuncRules.h" />
     <ClInclude Include="include\CustomPopupBase.h" />
     <ClInclude Include="include\CustomRORInfo.h" />
@@ -136,6 +137,7 @@
     <ClInclude Include="include\EditorScenarioInfoPopup.h" />
     <ClInclude Include="include\EditTerrainPopup.h" />
     <ClInclude Include="include\BitmapExporter.h" />
+    <ClInclude Include="include\EnemyAttacksHistory.h" />
     <ClInclude Include="include\GenNewTriggerPopup.h" />
     <ClInclude Include="include\InGameCustomRorOptionsPopup.h" />
     <ClInclude Include="include\InGameUnitPropertiesPopup.h" />
@@ -196,6 +198,7 @@
     <ClCompile Include="src\crRPGMode.cpp" />
     <ClCompile Include="src\crTrigger.cpp" />
     <ClCompile Include="src\crTriggerSet.cpp" />
+    <ClCompile Include="src\customAIMilitaryInfo.cpp" />
     <ClCompile Include="src\CustomPopupBase.cpp" />
     <ClCompile Include="src\customROR.cpp" />
     <ClCompile Include="src\CustomRORInfo.cpp" />
