@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <AOE_struct_units.h>
+#include <AOE_struct_player.h>
 #include <AOE_struct_main_ai.h>
 #include "CustomRORInfo.h"
 #include "customAIMilitaryInfo.h"
@@ -10,6 +11,7 @@
 using namespace AOE_STRUCTURES;
 
 namespace CUSTOM_AI {
+
 
 	class CustomPlayerAI {
 	public:
@@ -69,7 +71,7 @@ namespace CUSTOM_AI {
 		}
 	};
 
-	//extern CustomPlayerAI playerAITable[9];
+	// Handler for all players' customROR AI
 	extern CustomAIHandler customAIHandler;
 	
 }

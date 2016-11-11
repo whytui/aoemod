@@ -53,6 +53,7 @@ namespace CUSTOMROR {
 		long int previousAttackCountsByEnemyPlayers[9]; // Number of enemy attacks (from each player) when last update was run
 		// Number of enemy attacks (from each player) during last period of time
 		// Warning: as this also counts towers shooting my explorers (for example), this information must be used carefully
+#pragma message("TODO : remove this ! Has been moved")
 		long int attacksByEnemyPlayersDuringLastPeriod[9];
 		long int panicModeProvokedByEnemyPlayersDuringLastPeriod[9]; // Counter of "panic modes" triggered by each player during last period of time.
 

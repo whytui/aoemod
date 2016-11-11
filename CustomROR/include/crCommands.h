@@ -42,6 +42,7 @@
 #include "playerTargeting.h"
 #include "combatAI.h"
 #include "mainCustomAI.h"
+#include "customAIMilitaryInfo.h"
 
 #pragma once
 

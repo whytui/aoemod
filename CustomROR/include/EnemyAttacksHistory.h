@@ -1,10 +1,6 @@
 #pragma once
 
 #include <assert.h>
-#include <AOE_struct_units.h>
-#include <AOE_struct_main_ai.h>
-#include "CustomRORInfo.h"
-#include "StrategyUpdater.h"
 #include "GameHistoryIntervalsBase.h"
 
 using namespace AOE_STRUCTURES;
@@ -15,10 +11,12 @@ namespace CUSTOM_AI {
 	class TimeIntervalAttackRecord : public CUSTOMROR::TimeIntervalRecordBase {
 	public:
 		long int attacksCount;
+		long int triggeredPanicModesCount; // Number of times strategy panic mode was triggered because of this player's attacks
 
 		void ResetAllInfo() override {
 			__super::ResetAllInfo();
 			this->attacksCount = 0;
+			this->triggeredPanicModesCount = 0;
 		}
 	};
 	

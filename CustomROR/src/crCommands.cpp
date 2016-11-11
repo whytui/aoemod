@@ -1616,11 +1616,12 @@ bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES:
 		if (CUSTOM_AI::customAIHandler.IsAliveAI(myPlayerId)) {
 			// Record the attack. The analog treatment in ROR code is in 0x4D7AF0 (update TacAI.attacksByPlayerCount[enemyPlayerId]).
 			// Note: the best place would be to do this directly in tacAI.reactToEvent (event 0x201), but there isn't an entry point there (...for now)
-			CUSTOM_AI::customAIHandler.GetCustomPlayerAI(myPlayerId)->militaryAI.SaveEnemyAttackInHistory(enemyPlayerId, currentGameTime_ms);
-		}
+			CUSTOM_AI::CustomPlayerAI *playerAI = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(myPlayerId);
+			playerAI->militaryAI.SaveEnemyAttackInHistory(enemyPlayerId, currentGameTime_ms);
 
-		// When AI improvements are ON, use our treatments, not ROR code.
-		STRATEGY::ManagePanicMode(mainAI, enemyPlayerId, timeSinceLastPanicMode_s, currentGameTime_ms);
+			// When AI improvements are ON, use our treatments, not ROR code.
+			STRATEGY::ManagePanicMode(mainAI, enemyPlayerId, timeSinceLastPanicMode_s, currentGameTime_ms, &playerAI->militaryAI);
+		}
 		return false;
 	}
 

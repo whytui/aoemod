@@ -38,7 +38,7 @@ void CustomPlayerAI::Init(STRUCT_GAME_GLOBAL *global, long int playerId) {
 		this->isPlayerAlive = (myPlayer->aliveStatus == 0);
 	}
 	this->lastStrategyAnalysisTime = 0;
-	this->militaryAI.ResetAllInfo();
+//	this->militaryAI.ResetAllInfo();
 }
 
 

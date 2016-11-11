@@ -284,7 +284,8 @@ void STRATEGY::AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 // Manage strategy updates for panic mode (AI player is being attacked and seems not to have enough defences).
 // This method can be called very often (no delay): standard game uses a minimum delay between 2 panic mode evaluations, NOT US !
 // This strategy is not supposed to impact combat or anything else than strategy (at least in standard game !)
-void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
+void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, 
+	long int currentGameTime_ms, CUSTOM_AI::CustomAIMilitaryInfo *militaryAIInfo) {
 	// CONFIG
 	const long int panicModeDelay = CUSTOMROR::crInfo.configInfo.panicModeDelay;
 	long int maxPanicModeUnitsInStrategy = CUSTOMROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy;
@@ -311,15 +312,13 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 
 	long int myMilitaryUnitsCount = tacAI->landMilitaryUnits.usedElements; // does not count villagers, nor towers - nor boats
 
-	CUSTOMROR::AIPlayerTargetingInfo *playerInfo = CUSTOMROR::playerTargetingHandler.GetPlayerInfo(player->playerId);
-	if (playerInfo != NULL) {
-		assert(playerInfo->myPlayerId == player->playerId);
-		playerInfo->panicModeProvokedByEnemyPlayersDuringLastPeriod[enemyPlayerId]++;
-	}
-
 	// Same control as original: abort if delay is not complete
 	if (timeSinceLastPanicMode_s < panicModeDelay) {
 		return;
+	}
+
+	if (militaryAIInfo && player->ptrGlobalStruct && player->ptrGlobalStruct->IsCheckSumValid()) {
+		militaryAIInfo->SavePanicModeOccurrenceInHistory(enemyPlayerId, player->ptrGlobalStruct->currentGameTime);
 	}
 
 	assert((enemyPlayerId >= 0) && (enemyPlayerId < 9));

@@ -44,5 +44,15 @@ namespace CUSTOM_AI {
 		return this->recentAttacksByPlayer[attackerPlayerId].GetAttacksCountInPeriod(startGameTime, endGameTime);
 	}
 
+	// Returns true if successful
+	bool CustomAIMilitaryInfo::SavePanicModeOccurrenceInHistory(long int attackerPlayerId, long int currentGameTime) {
+		if ((attackerPlayerId < 0) || (attackerPlayerId > 8)) { return false; }
+		CUSTOM_AI::TimeIntervalAttackRecord *interval = this->GetAttackInfoForCurrentTimeInterval(attackerPlayerId, currentGameTime);
+		if (interval) {
+			interval->triggeredPanicModesCount++;
+		}
+		return (interval != NULL);
+	}
+
 }
 

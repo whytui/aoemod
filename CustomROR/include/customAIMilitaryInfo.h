@@ -2,9 +2,7 @@
 
 #include <assert.h>
 #include <AOE_struct_units.h>
-#include <AOE_struct_main_ai.h>
 #include "CustomRORInfo.h"
-#include "StrategyUpdater.h"
 #include "EnemyAttacksHistory.h"
 
 using namespace AOE_STRUCTURES;
@@ -19,7 +17,7 @@ namespace CUSTOM_AI {
 	}
 
 
-	// Stores information about military topcis for custom AI (for a specific player)
+	// Stores information about military topics for custom AI (for a specific player)
 	class CustomAIMilitaryInfo {
 	public:
 		CustomAIMilitaryInfo() {
@@ -46,6 +44,10 @@ namespace CUSTOM_AI {
 
 		// Get the number of attacks from a player during the specified interval (game times in milliseconds)
 		int GetAttacksCountFromPlayerInPeriod(long int attackerPlayerId, long int startGameTime, long int endGameTime);
+
+		// Returns true if successful
+		bool SavePanicModeOccurrenceInHistory(long int attackerPlayerId, long int currentGameTime);
+
 	};
 	
 }
