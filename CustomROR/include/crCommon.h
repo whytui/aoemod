@@ -245,3 +245,17 @@ void AOE_GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BU
 bool AnalyzeEmpiresDatQuality();
 
 
+// TO MOVE
+namespace AOE_METHODS {
+	static void GlobalSetNextManagedAIPlayer() {
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (!global || !global->IsCheckSumValid()) { return; }
+		unsigned long int addr = 0x5204D0;
+		_asm {
+			MOV ECX, global;
+			PUSH 3;
+			CALL addr;
+		}
+	}
+}
+

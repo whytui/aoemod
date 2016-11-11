@@ -21,6 +21,7 @@ void CustomPlayerAI::Reset() {
 	this->isValidPlayer = false;
 	this->isPlayerAlive = false;
 	this->lastStrategyAnalysisTime = 0;
+	this->militaryAI.ResetAllInfo();
 }
 
 

@@ -137,7 +137,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *unitList_type60; // +EC. For unit type = projectiles. 0x520BD0
 		// +0xF0
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *unitList_doppleganger; // list of all dopplegangers ?
-		unsigned long int unknown_0F4;
+		long int unknown_0F4; // +F4. Time to allocate for AI treatments
 		long int tmp_allowedTimeForAITreatment; // +F8. For internal treatments (temporary, reset to 0 when finished). This is a time (ms) value allowed for AI treatments.
 		long int currentlyManagedAIPlayer; // +FC. A player id. "currentUpdateComputerPlayer"
 		// +0x100

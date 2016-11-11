@@ -49,7 +49,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_12574;
 		long int nextStrategyAIExecutionCounter; // +12578. Increased, when = 0x14=20 then reset and execute strategy AI.
 		unsigned long int unknown_1257C; // A milliseconds time value ? Related to diplomacy management ?
-		unsigned long int unknown_12580; // +12580. A milliseconds time value ?
+		long int unknown_12580; // +12580. Last mainAI update time
 		unsigned long int unknown_12584; // +12584. A milliseconds time value ? Related to tributes ??
 		unsigned long int tributeChatFrequency; // +12588. Including randomness. Calculated from SNTributeChatFrequency and SNTributeChatRandomness
 		unsigned long int unknown_1258C;

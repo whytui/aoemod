@@ -1604,17 +1604,23 @@ void CustomRORInstance::ManageChangeGameSpeed(REG_BACKUP *REG_values) {
 // 004D0989.
 // Entry point in the "tactical AI update" event that occurs regularly (every x milliseconds) for each AI player.
 // For the strategy algorithms to work well, requires also "FixUnitIdForInProgressBuilding", "FixResetStratElemForUnitId"
+// May change return address to 0x4D0EED to skip the tacAI from this method (but still call underlying tacAI.update()). 
+// ... Note that underlying tacAI.update is also optimized in ManageDefeatedAIPlayerTacAIUpdate(...)
 // May change return address to 0x4D0EFE to skip the whole tacAI update process (dead players...)
+// ... => in this case, we must change managed AI player manually to avoid being stuck
 void CustomRORInstance::ManageTacAIUpdate(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->ESI_val);
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ESI_val;
 	ror_api_assert(REG_values, tacAI && tacAI->IsCheckSumValid());
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	REG_values->EDX_val = (unsigned long int) tacAI->ptrMainAI;
-	bool isDeadPlayer = CUSTOMROR::crCommand.ManageTacAIUpdate(tacAI->ptrMainAI);
+	bool isDeadPlayer = !CUSTOMROR::crCommand.ManageTacAIUpdate(tacAI->ptrMainAI);
 
 	if (isDeadPlayer) {
 		ChangeReturnAddress(REG_values, 0x4D0EFE);
+		AOE_METHODS::GlobalSetNextManagedAIPlayer();
+
+		//ChangeReturnAddress(REG_values, 0x4D0EED); // Other solution that does not require calling GlobalSetNextManagedAIPlayer(). But more treatments are executed.
 	}
 }
 
