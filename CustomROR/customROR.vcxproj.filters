@@ -251,6 +251,9 @@
     <ClInclude Include="include\EnemyAttacksHistory.h">
       <Filter>Fichiers d%27en-tête\AI</Filter>
     </ClInclude>
+    <ClInclude Include="include\GameHistoryIntervalsBase.h">
+      <Filter>Fichiers d%27en-tête\Technical</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">

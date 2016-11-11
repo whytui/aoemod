@@ -138,6 +138,7 @@
     <ClInclude Include="include\EditTerrainPopup.h" />
     <ClInclude Include="include\BitmapExporter.h" />
     <ClInclude Include="include\EnemyAttacksHistory.h" />
+    <ClInclude Include="include\GameHistoryIntervalsBase.h" />
     <ClInclude Include="include\GenNewTriggerPopup.h" />
     <ClInclude Include="include\InGameCustomRorOptionsPopup.h" />
     <ClInclude Include="include\InGameUnitPropertiesPopup.h" />

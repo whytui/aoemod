@@ -32,18 +32,20 @@ namespace CUSTOM_AI {
 		long int attacksByEnemyPlayersDuringLastPeriod[9];
 		long int panicModeProvokedByEnemyPlayersDuringLastPeriod[9]; // Counter of "panic modes" triggered by each player during last period of time.
 
-		TimeIntervalAttacksRecordForPlayer recentAttacksByPlayer[9];
+		TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> recentAttacksByPlayer[9];
 
-		void ResetAllInfo() {
-			for (int i = 0; i < 9; i++) {
-				this->recentAttacksByPlayer[i].ResetAllInfo();
-				this->recentAttacksByPlayer[i].attackerPlayerId = i;
-				this->attacksByEnemyPlayersDuringLastPeriod[i] = 0;
-				this->panicModeProvokedByEnemyPlayersDuringLastPeriod[i] = 0;
-				this->previousAttackCountsByEnemyPlayers[i] = 0;
-			}
-		}
+		void ResetAllInfo();
 
+		// Securely get the attacks information for the player specified. Returns NULL if playerId is invalid.
+		TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> *GetAttackInfoForPlayer(long int attackerPlayerId);
+
+		TimeIntervalAttackRecord *GetAttackInfoForCurrentTimeInterval(long int attackerPlayerId, long int currentGameTime);
+
+		// Returns true if successful
+		bool SaveEnemyAttackInHistory(long int attackerPlayerId, long int currentGameTime);
+
+		// Get the number of attacks from a player during the specified interval (game times in milliseconds)
+		int GetAttacksCountFromPlayerInPeriod(long int attackerPlayerId, long int startGameTime, long int endGameTime);
 	};
 	
 }

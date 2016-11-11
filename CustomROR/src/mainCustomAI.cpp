@@ -39,19 +39,6 @@ void CustomPlayerAI::Init(STRUCT_GAME_GLOBAL *global, long int playerId) {
 	}
 	this->lastStrategyAnalysisTime = 0;
 	this->militaryAI.ResetAllInfo();
-
-	// TEST
-	this->militaryAI.recentAttacksByPlayer[1].InitOnGameStart(global->currentGameTime);
-	//this->militaryAI.recentAttacksByPlayer[1].attackerPlayerId = 1;
-	TimeIntervalAttackRecord *toto = this->militaryAI.recentAttacksByPlayer[1].GetMostRecentInterval();
-	TimeIntervalAttackRecord *titi = this->militaryAI.recentAttacksByPlayer[1].GetOldestValidInterval();
-	TimeIntervalAttackRecord *tutu = this->militaryAI.recentAttacksByPlayer[1].GetIntervalForGameTime(global->currentGameTime);
-	TimeIntervalAttackRecord *tata = this->militaryAI.recentAttacksByPlayer[1].GetIntervalForGameTime(global->currentGameTime + 1000);
-	TimeIntervalAttackRecord *tete = this->militaryAI.recentAttacksByPlayer[1].GetIntervalForGameTime(global->currentGameTime - 1000);
-	TimeIntervalAttackRecord *tyty = this->militaryAI.recentAttacksByPlayer[1].GetIntervalForGameTime(global->currentGameTime + 15000);
-	TimeIntervalAttackRecord *tztz = this->militaryAI.recentAttacksByPlayer[1].GetIntervalForGameTime(global->currentGameTime + 200000);
-	TimeIntervalAttackRecord *tqtq = this->militaryAI.recentAttacksByPlayer[1].GetIntervalForGameTime(global->currentGameTime + 181000);
-	toto->attacksCount++;
 }
 
 
