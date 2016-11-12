@@ -108,6 +108,10 @@ namespace CUSTOMROR {
 			if ((curInterval->intervalStartGameTime <= gameTime) && (gameTime <= curInterval->intervalEndGameTime)) {
 				return curInterval;
 			}
+			// Check oldest interval
+			if ((oldestInterval->intervalStartGameTime <= gameTime) && (gameTime <= oldestInterval->intervalEndGameTime)) {
+				return oldestInterval;
+			}
 			// Other cases : find the relevant interval
 			int curIndex = this->GetFixedRawIntervalIndex(this->indexOfMostRecentInterval - 1);
 			curInterval = this->GetInterval(curIndex);

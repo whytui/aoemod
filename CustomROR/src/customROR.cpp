@@ -3755,8 +3755,9 @@ void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values
 
 	bool skipStandardTreatments = false; // Default
 	// Custom treatments
-	if (CUSTOMROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
-		skipStandardTreatments = CUSTOM_AI::unitTargetingHandler.TaskActiveUnitGroup(tacAI, unitGroup);
+	long int playerId = tacAI->commonAIObject.playerId;
+	if (CUSTOMROR::IsImproveAIEnabled(playerId) && CUSTOM_AI::customAIHandler.IsAliveAI(playerId)) {
+		skipStandardTreatments = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(playerId)->unitGroupAI.TaskActiveUnitGroup(tacAI, unitGroup);
 	}
 
 	// Do not modify below

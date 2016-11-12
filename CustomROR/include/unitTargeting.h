@@ -16,6 +16,7 @@
 #include "playerTargeting.h"
 #include "AOEPrimitives_unitGroup.h"
 #include "AOEPrimitives_units.h"
+#include "customAIMilitaryInfo.h"
 
 using namespace std;
 using namespace AOE_STRUCTURES;
@@ -69,10 +70,6 @@ namespace CUSTOM_AI {
 		STRUCT_INF_AI_UNIT_LIST_ELEM *TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 			STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 		
-		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
-		// For all non-supported (or without custom treatment) cases, just return false !
-		bool TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup);
-
 	private:
 		long int lastChosenTargetUnitId[9];
 		long int lastTargetChangeGameTime[9]; // Only updated when target changes

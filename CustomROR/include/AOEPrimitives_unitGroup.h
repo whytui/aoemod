@@ -24,8 +24,10 @@ bool RemoveUnitFromGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, STRUCT
 
 bool AddUnitToGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, STRUCT_UNIT_BASE *unit);
 
-// Task a unit group (will probably give commands to units)
-bool TaskUnitGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI *tacAI, AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS taskId, long int resetOrg, bool force);
+// Apply a task a unit group (will probably give commands to units)
+// Warning: this does NOT set unitGroup.currentTask/resetOrg, you have to set it before (and set target, ..., if necessary)
+bool ApplyTaskToUnitGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI *tacAI, AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS taskId,
+	long int resetOrg, bool force);
 
 }
 }

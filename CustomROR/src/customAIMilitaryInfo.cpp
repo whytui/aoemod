@@ -9,6 +9,7 @@ namespace CUSTOM_AI {
 			this->recentAttacksByPlayer[i].ResetAllInfo();
 			this->recentAttacksByPlayer[i].attackerPlayerId = i;
 		}
+		this->recentAttacksByPlayer->ResetAllInfo();
 	}
 
 
@@ -25,8 +26,25 @@ namespace CUSTOM_AI {
 		return intervalsForPlayer->GetIntervalForGameTime(currentGameTime);
 	}
 
-	bool CustomAIMilitaryInfo::SaveEnemyAttackInHistory(long int attackerPlayerId, long int currentGameTime, STRUCT_UNIT_BASE *enemyUnit) {
+	// Returns true if successful
+	// myTownCenter is used to evaluate my town position, it is NOT the target of the attack
+	bool CustomAIMilitaryInfo::SaveEnemyAttackInHistory(long int attackerPlayerId, long int currentGameTime, 
+		STRUCT_UNIT_BASE *enemyUnit, STRUCT_UNIT_BASE *myTownCenter) {
 		if ((attackerPlayerId < 0) || (attackerPlayerId > 8)) { return false; }
+
+		if (enemyUnit) {
+			float diff = (enemyUnit->positionX - myTownCenter->positionX);
+			if (diff < 0) { diff = -diff; }
+			if (diff <= AI_CONST::townSize) { // X position fits my town's positions
+				diff = (enemyUnit->positionY - myTownCenter->positionY);
+				if (diff < 0) { diff = -diff; }
+				if (diff <= AI_CONST::townSize) { // Y position too fits my town's positions => it is IN my town's (square) territory
+					this->recentAttacksByPlayer->lastAttackInMyTownPosX = enemyUnit->positionX;
+					this->recentAttacksByPlayer->lastAttackInMyTownPosY = enemyUnit->positionY;
+				}
+			}
+		}
+
 		CUSTOM_AI::TimeIntervalAttackRecord *interval = this->GetAttackInfoForCurrentTimeInterval(attackerPlayerId, currentGameTime);
 		if (interval) {
 			GLOBAL_UNIT_AI_TYPES enemyClass = TribeAINone;
@@ -73,16 +91,16 @@ namespace CUSTOM_AI {
 		float wood = min(maxResValueToEvaluatePlayerWeakness, player->GetResourceValue(CST_RES_ORDER_WOOD));
 		float stone = min(maxResValueToEvaluatePlayerWeakness, player->GetResourceValue(CST_RES_ORDER_STONE));
 		float gold = min(maxResValueToEvaluatePlayerWeakness, player->GetResourceValue(CST_RES_ORDER_GOLD));
-		float score = (food + wood + stone + gold) * 100 / maxResValueToEvaluatePlayerWeakness;
+		float score = (food + wood + stone + gold) * 100 / (maxResValueToEvaluatePlayerWeakness * 4);
 		// Out of a key resource: negative impact
 		if (food < 100) {
-			score = score* 0.8f;
+			score = score* 0.75f;
 		}
 		if (wood < 100) {
-			score = score* 0.9f;
+			score = score* 0.85f;
 		}
 		if (gold < 100) {
-			score = score* 0.9f;
+			score = score* 0.85f;
 		}
 		// Consider current population too
 		float villagerCount = player->GetResourceValue(CST_RES_ORDER_CIVILIAN_POPULATION);
@@ -94,8 +112,8 @@ namespace CUSTOM_AI {
 		}
 		float villagerProportion = villagerCount / villagerMinimumExpected;
 		if (villagerProportion < 0) { villagerProportion = 0; }
-		if (villagerProportion > 100) { villagerProportion = 100; } // if more villagers than expected, ignore it (no bonus)
-		float villagersCountImpact = 0.15f; // 15%
+		if (villagerProportion > 1) { villagerProportion = 1; } // if more villagers than expected, ignore it (no bonus)
+		float villagersCountImpact = 0.90f * (1 - villagerProportion); // Weight = x%
 		score = score * (1 - (score * villagersCountImpact / 100));
 
 		if (score < 0) { score = 0; }

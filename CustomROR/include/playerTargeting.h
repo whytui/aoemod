@@ -57,6 +57,8 @@ namespace CUSTOM_AI {
 		// Reset all underlying info (useful at game start, etc)
 		void ResetInfo();
 
+		void GameStartInit();
+
 		// Recompute information (only) if refresh delay has been reached
 		// Returns true if information have been recomputed (false is not necessarily an error)
 		bool RecomputeInfo(STRUCT_PLAYER *player);

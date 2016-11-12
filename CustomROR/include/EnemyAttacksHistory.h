@@ -32,11 +32,19 @@ namespace CUSTOM_AI {
 	template <typename T> class TimeIntervalAttacksRecordForPlayer : public CUSTOMROR::GameHistoryIntervalsBase<T> {
 	public:
 		TimeIntervalAttacksRecordForPlayer() {
-			
+			this->lastAttackInMyTownPosX = -1;
+			this->lastAttackInMyTownPosY = -1;
+		}
+
+		void ResetAllInfo() override {
+			__super::ResetAllInfo();
+			this->lastAttackInMyTownPosX = -1;
+			this->lastAttackInMyTownPosY = -1;
 		}
 
 		long int attackerPlayerId;
-
+		float lastAttackInMyTownPosX;
+		float lastAttackInMyTownPosY;
 
 		// Get the number of attacks from a player during the specified interval (game times in milliseconds)
 		int GetAttacksCountInPeriod(long int startGameTime, long int endGameTime) {

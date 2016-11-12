@@ -6,6 +6,7 @@
 #include <AOE_struct_main_ai.h>
 #include "CustomRORInfo.h"
 #include "customAIMilitaryInfo.h"
+#include "UnitGroupAI.h"
 #include "StrategyUpdater.h"
 #include "unitTargeting.h"
 #include "playerTargeting.h"
@@ -24,7 +25,8 @@ namespace CUSTOM_AI {
 		STRUCT_AI *mainAI; // ROR main AI structure
 		STRUCT_PLAYER *myPlayer; // ROR player structure
 
-		CustomAIMilitaryInfo militaryAI;
+		CustomAIMilitaryInfo militaryAIInfo;
+		UnitGroupAI unitGroupAI;
 		long int lastStrategyAnalysisTime; // Last time (milliseconds) strategy was analyzed by customROR
 
 		// Reset all information (game (re)start, etc)

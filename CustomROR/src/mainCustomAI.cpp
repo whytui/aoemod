@@ -21,7 +21,9 @@ void CustomPlayerAI::Reset() {
 	this->isValidPlayer = false;
 	this->isPlayerAlive = false;
 	this->lastStrategyAnalysisTime = 0;
-	this->militaryAI.ResetAllInfo();
+	this->militaryAIInfo.ResetAllInfo();
+	this->unitGroupAI.ResetAllInfo();
+	this->unitGroupAI.militaryAIInfo = &this->militaryAIInfo;
 }
 
 
@@ -39,7 +41,6 @@ void CustomPlayerAI::Init(STRUCT_GAME_GLOBAL *global, long int playerId) {
 		this->isPlayerAlive = (myPlayer->aliveStatus == 0);
 	}
 	this->lastStrategyAnalysisTime = 0;
-//	this->militaryAI.ResetAllInfo();
 }
 
 
@@ -96,22 +97,22 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 	}
 	if (!enemyPlayer) { return; }
 	long int enemyPlayerId = enemyPlayer->playerId;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_MainAI_findUnit(this->mainAI, CST_UNITID_FORUM);
 
 	// Record the attack. The analog treatment in ROR code is in 0x4D7AF0 (update TacAI.attacksByPlayerCount[enemyPlayerId]).
 	// Note: we also record gaia attacks (why wouldn't we?)
-	this->militaryAI.SaveEnemyAttackInHistory(enemyPlayerId, global->currentGameTime, enemyUnit);
+	this->militaryAIInfo.SaveEnemyAttackInHistory(enemyPlayerId, global->currentGameTime, enemyUnit, myTC);
 
 
 	// Handle panic mode (if eligible)
 	if (!rorOriginalPanicModeMethodHasBeenRun && (enemyPlayerId > 0)) {
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_MainAI_findUnit(this->mainAI, CST_UNITID_FORUM);
 		// Use an approximate filter on position to reduce the number of calls to panic mode method.
 		// More precise checks are run there, this is just an optimization !
 		bool panicModeIsEligible = CUSTOM_AI::CustomAIMilitaryInfo::IsPanicModeEligible(myTC, myUnit, enemyUnit);
 		long int timeSinceLastPanicMode_ms = (global->currentGameTime - tacAI->lastPanicModeStrategyUpdateTime);
 		panicModeIsEligible &= (timeSinceLastPanicMode_ms >= (CUSTOMROR::crInfo.configInfo.panicModeDelay * 1000));
 		if (panicModeIsEligible) {
-			STRATEGY::ManagePanicMode(tacAI->ptrMainAI, enemyPlayerId, &this->militaryAI);
+			STRATEGY::ManagePanicMode(tacAI->ptrMainAI, enemyPlayerId, &this->militaryAIInfo);
 		}
 	}
 }
@@ -143,7 +144,7 @@ void CustomAIHandler::GameStartInit() {
 	this->currentGameTotalPlayerCount = global->playerTotalCount;
 	for (int i = 1; i < this->currentGameTotalPlayerCount; i++) {
 		this->playerAITable[i].Init(global, i);
-		CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i)->militaryAIInfo = &this->playerAITable[i].militaryAI;
+		CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i)->militaryAIInfo = &this->playerAITable[i].militaryAIInfo;
 	}
 
 }
