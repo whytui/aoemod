@@ -1032,7 +1032,7 @@ void CustomRORInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 // MAKE SURE TacAIOnUnitAttacked entry point is active too
 void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 	// Collect context information/variables
-	long int timeSinceLastPanicMode = REG_values->EDX_val; // in seconds
+	long int timeSinceLastPanicMode_s = REG_values->EDX_val; // in seconds
 	long int currentGameTime_ms = REG_values->ESI_val; // in ms
 	AOE_STRUCTURES::STRUCT_AI *mainAI = (AOE_STRUCTURES::STRUCT_AI *)REG_values->ECX_val;
 	assert(mainAI != NULL);
@@ -1040,12 +1040,19 @@ void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 	if (!mainAI || (!mainAI->IsCheckSumValid())) { return; }
 	short int enemyPlayerId = (short int)GetIntValueFromRORStack(REG_values, 0x98);
 
-	if (!CUSTOMROR::crCommand.RunManagePanicMode_isUsageOfRORCodeWanted(mainAI, enemyPlayerId, timeSinceLastPanicMode, currentGameTime_ms)) {
-		return;
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	if (CUSTOMROR::crCommand.ShouldUseOriginalPanicModeMethod()) {
+		// if it returns true, it means we want to force usage of ROR *original* (crappy) panic mode code.
+		// So let's do it by forcing return address (skip the JMP 004E254F)
+		// However, we first do the check on "last execution" (this test has been overriden by binary change, and is not done anymore in ROR code).
+		if (timeSinceLastPanicMode_s > 180) { // 0xB4
+			// Delay has been reached, panic mode method can be run
+			ChangeReturnAddress(REG_values, 0x4E2307);
+		}
+		// Delay till next execution is not finished. Do nothing right now;
 	}
-	// if previous function returns true, it means we want to force usage of ROR original panic mode code.
-	// So let's do it by forcing return address (skip the JMP 004E254F)
-	ChangeReturnAddress(REG_values, 0x4E2307);
+	// Other cases : use customROR (recommended)
+	// There is nothing to do here, there is another entry point just after (calls TacAIOnUnitAttacked)
 }
 
 
@@ -1071,8 +1078,18 @@ void CustomRORInstance::TacAIOnUnitAttacked(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->EDX_val = tacAI->attacksByPlayerCount[enemyPlayerId]; // 0x4D7AE1
 	}
+
 	// Custom treatments
 
+	// ROR original method for panic mode is deactivated: call customROR treatments.
+	// Make sure to remain consistent about this !
+	bool usedRorPanicModeMethod = CUSTOMROR::crCommand.ShouldUseOriginalPanicModeMethod();
+
+	// Run custom AI treatments for "being attacked" event
+	// ...and runs custom panic mode treatments *if usedRorPanicModeMethod=true*.
+	if (CUSTOMROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
+		CUSTOM_AI::customAIHandler.OnUnitAttacked(tacAI, myUnit, enemyUnit, usedRorPanicModeMethod);
+	}
 }
 
 

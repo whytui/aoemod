@@ -132,7 +132,7 @@ public:
 	float conversionResistance_WarElephants;
 	float conversionResistance_WarElephants_Persian;
 	// AI
-	long int improveAILevel;
+	long int improveAILevel; // 0=disable AI improvements. >0 to allow AI improvements (maybe there will be several improvement levels in the future). See also IsImproveAIEnabled(playerId)
 	long int tacticalAIUpdateDelay; // In seconds
 	bool generateStrategyForRM;
 	bool generateStrategyForDM;

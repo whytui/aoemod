@@ -44,6 +44,11 @@ namespace CUSTOM_AI {
 		// One-shot strategy analysis, only run at game beginning. Not even re-run when loading a saved game.
 		void RunInitialStrategyAnalysis();
 
+		// Triggered each time an AI player's unit is attacked (possibly by a gaia unit)
+		// rorOriginalPanicModMethodHasBeenRun indicates if ROR's panic mode method has been run. If so, panic mode treatments should not be run here.
+		void OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit,
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyUnit, bool rorOriginalPanicModeMethodHasBeenRun);
+
 	private:
 		bool isValidPlayer;
 	};
@@ -69,6 +74,12 @@ namespace CUSTOM_AI {
 			return (playerId > 0) && (playerId < 9) && (this->playerAITable[playerId].IsValidAIPlayer()) && 
 				(this->playerAITable[playerId].isPlayerAlive);
 		}
+
+		// Triggered each time an AI player's unit is attacked (possibly by a gaia unit)
+		// rorOriginalPanicModMethodHasBeenRun indicates if ROR's panic mode method has been run. If so, panic mode treatments should not be run here.
+		void OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit, 
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyUnit, bool rorOriginalPanicModeMethodHasBeenRun);
+
 		CustomPlayerAI *GetCustomPlayerAI(long int playerId) {
 			assert(playerId > 0);
 			assert(playerId < 9);

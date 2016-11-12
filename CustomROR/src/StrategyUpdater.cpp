@@ -282,12 +282,10 @@ void STRATEGY::AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 
 
 // Manage strategy updates for panic mode (AI player is being attacked and seems not to have enough defences).
-// This method can be called very often (on each enemy attack): standard game uses a minimum delay between 2 panic mode evaluations, NOT US !
+// This method is only called if an attack occurs in (near) "my" town, and if "panic mode delay" has passed since last execution.
 // This strategy is not supposed to impact combat or anything else than strategy (at least in standard game !)
-void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, 
-	long int currentGameTime_ms, CUSTOM_AI::CustomAIMilitaryInfo *militaryAIInfo) {
+void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, CUSTOM_AI::CustomAIMilitaryInfo *militaryAIInfo) {
 	// CONFIG
-	const long int panicModeDelay = CUSTOMROR::crInfo.configInfo.panicModeDelay;
 	long int maxPanicModeUnitsInStrategy = CUSTOMROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy;
 	long int maxPanicModeSeekEnemyDistance = CUSTOM_AI::AI_CONST::townSize; // Hardcoded in original code to 20 (0x14)
 	const long int maxPanicModeSeekEnemyDistanceIfFewResources = CUSTOM_AI::AI_CONST::townDefendSizeIfWeak; // Defend a smaller territory if weak
@@ -313,11 +311,6 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 	assert(settings && settings->IsCheckSumValid());
 	char myCivId = player->civilizationId;
 	long int myMilitaryUnitsCount = tacAI->landMilitaryUnits.usedElements; // does not count villagers, nor towers - nor boats
-
-	// Same control as original: abort if delay is not complete
-	if (timeSinceLastPanicMode_s < panicModeDelay) {
-		return;
-	}
 
 	assert((enemyPlayerId >= 0) && (enemyPlayerId < 9));
 	AOE_STRUCTURES::STRUCT_PLAYER *enemyPlayer = GetPlayerStruct((short int)enemyPlayerId);
@@ -933,8 +926,8 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 		}
 	}
 
-	if (strategyUpdated) {
-		tacAI->lastPanicModeStrategyUpdateTime = currentGameTime_ms;
+	if (strategyUpdated && GetGameGlobalStructPtr()) {
+		tacAI->lastPanicModeStrategyUpdateTime = GetGameGlobalStructPtr()->currentGameTime;
 	}
 
 	// If NOT panic mode, cancel panic mode units that are not being trained (no need to train them anymore). Too late for "in progress" ones...

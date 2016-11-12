@@ -48,6 +48,10 @@ namespace CUSTOM_AI {
 
 		// Returns a value 0-100 to evaluate player weakness. 100 means player is very weak (no more resources), 0=player is rich.
 		int EvaluatePlayerWeakness(STRUCT_PLAYER *player);
+
+		// Returns true if unit positions (my unit, TC and enemy unit) are located in such way that panic mode can be triggered.
+		// This is an approximative evaluation, not a complete analysis.
+		static bool IsPanicModeEligible(STRUCT_UNIT_BASE *myTC, STRUCT_UNIT_BASE *myUnit, STRUCT_UNIT_BASE *enemyUnit);
 	};
 	
 }

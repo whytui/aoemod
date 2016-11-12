@@ -99,5 +99,36 @@ namespace CUSTOM_AI {
 		return (int)score;
 	}
 
+
+	// Returns true if unit positions (my unit, TC and enemy unit) are located in such way that panic mode can be triggered.
+	// This is an approximative evaluation, not a complete analysis.
+	bool CustomAIMilitaryInfo::IsPanicModeEligible(STRUCT_UNIT_BASE *myTC, STRUCT_UNIT_BASE *myUnit, STRUCT_UNIT_BASE *enemyUnit) {
+		if (!myUnit || !enemyUnit) {
+			return false; // Error case
+		}
+		if (!myTC) {
+			return true; // No town center. All attacks are critical and must be dealt with
+		}
+		const long int townSizePlusMargin = AI_CONST::townSize + 5; // add some margin to make sure we don't exclude too many cases
+
+		// TC and my unit
+		float diff = (myTC->positionX - myUnit->positionX); // Diff can be negative
+		if ((diff >= -townSizePlusMargin) && (diff <= townSizePlusMargin)) {
+			diff = (myTC->positionY - myUnit->positionY);
+			if ((diff >= -townSizePlusMargin) && (diff <= townSizePlusMargin)) {
+				return true; // my unit is close enough to TC, panic mode can be triggered
+			}
+		}
+		// TC and enemy unit
+		diff = (myTC->positionX - enemyUnit->positionX);
+		if ((diff >= -townSizePlusMargin) && (diff <= townSizePlusMargin)) {
+			diff = (myTC->positionY - enemyUnit->positionY);
+			if ((diff >= -townSizePlusMargin) && (diff <= townSizePlusMargin)) {
+				return true; // enemy unit is close enough to my TC, panic mode can be triggered
+			}
+		}
+		return false; // Both units seem far from my town
+	}
+
 }
 

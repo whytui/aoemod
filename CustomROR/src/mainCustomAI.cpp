@@ -81,6 +81,38 @@ void CustomPlayerAI::RunInitialStrategyAnalysis() {
 }
 
 
+// Triggered each time an AI player's unit is attacked (possibly by a gaia unit)
+// rorOriginalPanicModMethodHasBeenRun indicates if ROR's panic mode method has been run. If so, panic mode treatments should not be run here.
+void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit,
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyUnit, bool rorOriginalPanicModeMethodHasBeenRun) {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	assert(tacAI && myUnit && enemyUnit); // already checked by caller
+	AOE_STRUCTURES::STRUCT_PLAYER *enemyPlayer = enemyUnit->ptrStructPlayer;
+	assert(enemyPlayer && enemyPlayer->IsCheckSumValid());
+	assert(this->mainAI == tacAI->ptrMainAI);
+
+	if (enemyPlayer && enemyPlayer->IsCheckSumValid()) {
+		// Record the attack. The analog treatment in ROR code is in 0x4D7AF0 (update TacAI.attacksByPlayerCount[enemyPlayerId]).
+		this->militaryAI.SaveEnemyAttackInHistory(enemyPlayer->playerId, global->currentGameTime);
+
+	}
+
+	if (!rorOriginalPanicModeMethodHasBeenRun) {
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_MainAI_findUnit(this->mainAI, CST_UNITID_FORUM);
+		// Use an approximate filter on position to reduce the number of calls to panic mode method.
+		// More precise checks are run there, this is just an optimization !
+		bool panicModeIsEligible = CUSTOM_AI::CustomAIMilitaryInfo::IsPanicModeEligible(myTC, myUnit, enemyUnit);
+		long int timeSinceLastPanicMode_ms = (global->currentGameTime - tacAI->lastPanicModeStrategyUpdateTime);
+		panicModeIsEligible &= (timeSinceLastPanicMode_ms >= (CUSTOMROR::crInfo.configInfo.panicModeDelay * 1000));
+		if (panicModeIsEligible) {
+			STRATEGY::ManagePanicMode(tacAI->ptrMainAI, enemyPlayer->playerId, &this->militaryAI);
+		}
+	}
+}
+
+
+
 CustomAIHandler::CustomAIHandler() {
 	this->ResetAllInfo();
 }
@@ -109,6 +141,24 @@ void CustomAIHandler::GameStartInit() {
 		CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i)->militaryAIInfo = &this->playerAITable[i].militaryAI;
 	}
 
+}
+
+
+// Triggered each time an AI player's unit is attacked (possibly by a gaia unit)
+// rorOriginalPanicModMethodHasBeenRun indicates if ROR's panic mode method has been run. If so, panic mode treatments should not be run here.
+void CustomAIHandler::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit,
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyUnit, bool rorOriginalPanicModeMethodHasBeenRun) {
+	assert(tacAI && tacAI->IsCheckSumValid());
+	assert(myUnit && myUnit->IsCheckSumValidForAUnitClass());
+	assert(enemyUnit && enemyUnit->IsCheckSumValidForAUnitClass());
+	if (!tacAI || !tacAI->IsCheckSumValid() || !myUnit || !myUnit->IsCheckSumValidForAUnitClass() || !enemyUnit || !enemyUnit->IsCheckSumValidForAUnitClass()) {
+		return;
+	}
+	long int myPlayerId = tacAI->commonAIObject.playerId;
+	if (!this->IsAliveAI(myPlayerId)) { return; }
+
+	// Dispatch event to player AI
+	this->GetCustomPlayerAI(myPlayerId)->OnUnitAttacked(tacAI, myUnit, enemyUnit, rorOriginalPanicModeMethodHasBeenRun);
 }
 
 

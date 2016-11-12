@@ -30,10 +30,9 @@ namespace STRATEGY {
 
 
 	// Manage strategy updates for panic mode (AI player is being attacked and seems not to have enough defences).
-	// This method can be called very often (no delay): standard game uses a minimum delay between 2 panic mode evaluations, NOT US !
+	// This method is only called if an attack occurs in (near) "my" town, and if "panic mode delay" has passed since last execution.
 	// This strategy is not supposed to impact combat or anything else than strategy (at least in standard game !)
-	void ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, 
-		long int currentGameTime_ms, CUSTOM_AI::CustomAIMilitaryInfo *militaryAIInfo);
+	void ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, CUSTOM_AI::CustomAIMilitaryInfo *militaryAIInfo);
 
 
 	// Returns true if a construction should NOT be triggered.

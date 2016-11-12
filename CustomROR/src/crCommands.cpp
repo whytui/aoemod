@@ -1603,11 +1603,18 @@ void CustomRORCommand::AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI
 }
 
 
+// Returns true if we want to use ROR's method to handle panic mode (not recommended): not optimized, and not very good
+// Returns false if we want to disable completely ROR's method, and use customROR methods for panic mode instead (recommended)
+bool CustomRORCommand::ShouldUseOriginalPanicModeMethod() {
+	return (CUSTOMROR::crInfo.configInfo.improveAILevel == 0);
+}
+
+
 // Calls appropriate "manage panic mode" treatments.
 // Returns true if we want to force usage of original ROR's (bugged) code
 // In most cases, this returns FALSE and ROR's code is NOT used.
 // This method is called *every time a unit is attacked* (from tacAI.reactToEvent for event 0x201 -> DoPanicModeIfNeeded(enemyPlayerId))
-bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
+/*bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
 	if (!mainAI || !mainAI->IsCheckSumValid()) { return false; }
 	long int myPlayerId = mainAI->structMainDecisionAI.playerId;
 	if (IsImproveAIEnabled(myPlayerId)) {
@@ -1630,7 +1637,7 @@ bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES:
 	}
 	// Delay is reached, ROR code can be called.
 	return true;
-}
+}*/
 
 
 void CustomRORCommand::PrintDateTime() {
