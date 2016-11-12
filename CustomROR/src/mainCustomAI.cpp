@@ -87,18 +87,23 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyUnit, bool rorOriginalPanicModeMethodHasBeenRun) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
-	assert(tacAI && myUnit && enemyUnit); // already checked by caller
+	assert(tacAI && myUnit && enemyUnit && enemyUnit->unitDefinition); // already checked by caller
 	AOE_STRUCTURES::STRUCT_PLAYER *enemyPlayer = enemyUnit->ptrStructPlayer;
 	assert(enemyPlayer && enemyPlayer->IsCheckSumValid());
 	assert(this->mainAI == tacAI->ptrMainAI);
-
-	if (enemyPlayer && enemyPlayer->IsCheckSumValid()) {
-		// Record the attack. The analog treatment in ROR code is in 0x4D7AF0 (update TacAI.attacksByPlayerCount[enemyPlayerId]).
-		this->militaryAI.SaveEnemyAttackInHistory(enemyPlayer->playerId, global->currentGameTime);
-
+	if (!tacAI) {
+		tacAI = &this->mainAI->structTacAI; // this should never happen
 	}
+	if (!enemyPlayer) { return; }
+	long int enemyPlayerId = enemyPlayer->playerId;
 
-	if (!rorOriginalPanicModeMethodHasBeenRun) {
+	// Record the attack. The analog treatment in ROR code is in 0x4D7AF0 (update TacAI.attacksByPlayerCount[enemyPlayerId]).
+	// Note: we also record gaia attacks (why wouldn't we?)
+	this->militaryAI.SaveEnemyAttackInHistory(enemyPlayerId, global->currentGameTime, enemyUnit);
+
+
+	// Handle panic mode (if eligible)
+	if (!rorOriginalPanicModeMethodHasBeenRun && (enemyPlayerId > 0)) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_MainAI_findUnit(this->mainAI, CST_UNITID_FORUM);
 		// Use an approximate filter on position to reduce the number of calls to panic mode method.
 		// More precise checks are run there, this is just an optimization !
@@ -106,7 +111,7 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 		long int timeSinceLastPanicMode_ms = (global->currentGameTime - tacAI->lastPanicModeStrategyUpdateTime);
 		panicModeIsEligible &= (timeSinceLastPanicMode_ms >= (CUSTOMROR::crInfo.configInfo.panicModeDelay * 1000));
 		if (panicModeIsEligible) {
-			STRATEGY::ManagePanicMode(tacAI->ptrMainAI, enemyPlayer->playerId, &this->militaryAI);
+			STRATEGY::ManagePanicMode(tacAI->ptrMainAI, enemyPlayerId, &this->militaryAI);
 		}
 	}
 }

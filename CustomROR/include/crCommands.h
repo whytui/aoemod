@@ -265,12 +265,6 @@ public:
 	// Returns false if we want to disable completely ROR's method, and use customROR methods for panic mode instead (recommended)
 	bool ShouldUseOriginalPanicModeMethod();
 
-	// Calls appropriate "manage panic mode" treatments.
-	// Returns true if we want to force usage of original ROR's (bugged) code
-	// In most cases, this returns true and ROR's code is not used.
-	// This method is called *every time a unit is attacked* (from tacAI.reactToEvent for event 0x201 -> DoPanicModeIfNeeded(enemyPlayerId))
-	//bool RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms);
-
 
 	// Technical fix for a method about elevation application when generating map. Original method contains many bugs.
 	void Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo);

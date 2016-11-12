@@ -25,11 +25,15 @@ namespace CUSTOM_AI {
 		return intervalsForPlayer->GetIntervalForGameTime(currentGameTime);
 	}
 
-	bool CustomAIMilitaryInfo::SaveEnemyAttackInHistory(long int attackerPlayerId, long int currentGameTime) {
+	bool CustomAIMilitaryInfo::SaveEnemyAttackInHistory(long int attackerPlayerId, long int currentGameTime, STRUCT_UNIT_BASE *enemyUnit) {
 		if ((attackerPlayerId < 0) || (attackerPlayerId > 8)) { return false; }
 		CUSTOM_AI::TimeIntervalAttackRecord *interval = this->GetAttackInfoForCurrentTimeInterval(attackerPlayerId, currentGameTime);
 		if (interval) {
-			interval->attacksCount++;
+			GLOBAL_UNIT_AI_TYPES enemyClass = TribeAINone;
+			if (enemyUnit && enemyUnit->unitDefinition) {
+				enemyClass = enemyUnit->unitDefinition->unitAIType;
+			}
+			interval->AddAttackRecord(enemyClass);
 		}
 		return (interval != NULL);
 	}

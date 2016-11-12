@@ -12,11 +12,20 @@ namespace CUSTOM_AI {
 	public:
 		long int attacksCount;
 		long int triggeredPanicModesCount; // Number of times strategy panic mode was triggered because of this player's attacks
+		long int attacksCountByClass[62];
 
 		void ResetAllInfo() override {
 			__super::ResetAllInfo();
 			this->attacksCount = 0;
 			this->triggeredPanicModesCount = 0;
+			for (int i = 0; i < _countof(this->attacksCountByClass); i++) { this->attacksCountByClass[i] = 0; }
+		}
+
+		// Record an attack from a unit with the unit class specified
+		void AddAttackRecord(GLOBAL_UNIT_AI_TYPES attackerClass) {
+			this->attacksCount++;
+			if ((attackerClass < 0) || (attackerClass >= _countof(this->attacksCountByClass))) { return; }
+			this->attacksCountByClass[attackerClass]++;
 		}
 	};
 	

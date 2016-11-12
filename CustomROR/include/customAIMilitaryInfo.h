@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <AOE_struct_units.h>
+#include <AOE_struct_player.h>
 #include "CustomRORInfo.h"
 #include "EnemyAttacksHistory.h"
 
@@ -35,7 +36,7 @@ namespace CUSTOM_AI {
 		TimeIntervalAttackRecord *GetAttackInfoForCurrentTimeInterval(long int attackerPlayerId, long int currentGameTime);
 
 		// Returns true if successful
-		bool SaveEnemyAttackInHistory(long int attackerPlayerId, long int currentGameTime);
+		bool SaveEnemyAttackInHistory(long int attackerPlayerId, long int currentGameTime, STRUCT_UNIT_BASE *enemyUnit);
 
 		// Get the number of attacks from a player during the specified interval (game times in milliseconds)
 		int GetAttacksCountFromPlayerInPeriod(long int attackerPlayerId, long int startGameTime, long int endGameTime);
