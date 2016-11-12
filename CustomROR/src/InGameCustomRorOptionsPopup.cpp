@@ -10,6 +10,7 @@ void InGameCustomRorOptionsPopup::_ResetPointers() {
 	__super::_ResetPointers();
 	this->openTechTreeInfo = false;
 	this->btnTechTreeInfo = NULL;
+	this->btnMapCopy = NULL;
 	this->customOptionButtonVar = NULL;
 	this->customOptionFreeTextAnswerVar = NULL;
 	this->customOptionFreeTextLabelVar = NULL;
@@ -71,12 +72,18 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 	this->AddTextBox(this->popup, &this->customOptionFreeTextAnswerVar, "", 100, 0x1C0, 0x120, 0x80, 0x16, true, false);
 	
 	this->AddButton(this->popup, &this->btnTechTreeInfo, localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE, "Tech tree info"), 0x170, 0x34, 0xAC, 0x1E);
+	this->AddButton(this->popup, &this->btnMapCopy, localizationHandler.GetTranslation(-1, "Map copy"), 0x170, 0x50, 0xAC, 0x1E);
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool InGameCustomRorOptionsPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnTechTreeInfo) {
 		this->openTechTreeInfo = true;
+		this->ClosePopup(false);
+		return true;
+	}
+	if (sender == this->btnMapCopy) {
+		this->openMapCopyPopup = true;
 		this->ClosePopup(false);
 		return true;
 	}
@@ -130,6 +137,11 @@ void InGameCustomRorOptionsPopup::OnAfterClose(bool isCancel) {
 		tmpNextPopup->OpenPopup(700, 580, false);
 		tmpNextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE_CAN_BE_RESEARCHED_TITLE, "Technology tree that can still be researched"),
 			GetRemainingTechTreeText(humanPlayer).c_str(), 10000, NULL, false);
+		this->nextPopup = tmpNextPopup;
+	}
+	if (this->openMapCopyPopup) {
+		MapCopyPopup *tmpNextPopup = new MapCopyPopup();
+		tmpNextPopup->OpenPopup(600, 450, false);
 		this->nextPopup = tmpNextPopup;
 	}
 }

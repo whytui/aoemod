@@ -319,10 +319,6 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 		return;
 	}
 
-	if (militaryAIInfo && player->ptrGlobalStruct && player->ptrGlobalStruct->IsCheckSumValid()) {
-		militaryAIInfo->SavePanicModeOccurrenceInHistory(enemyPlayerId, player->ptrGlobalStruct->currentGameTime);
-	}
-
 	assert((enemyPlayerId >= 0) && (enemyPlayerId < 9));
 	AOE_STRUCTURES::STRUCT_PLAYER *enemyPlayer = GetPlayerStruct((short int)enemyPlayerId);
 	assert(enemyPlayer != NULL);
@@ -637,6 +633,12 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 	long int unitToCreateCount = maxPanicModeUnitsInStrategy; // <= 0 means NO panic mode. Max value is maxPanicModeUnitsInStrategy.
 	if (totalEnemyCount - myMilitaryUnitsCount < maxPanicModeUnitsInStrategy) {
 		unitToCreateCount = totalEnemyCount - myMilitaryUnitsCount;
+	}
+
+	if (unitToCreateCount > 0) {
+		if (militaryAIInfo && player->ptrGlobalStruct && player->ptrGlobalStruct->IsCheckSumValid()) {
+			militaryAIInfo->SavePanicModeOccurrenceInHistory(enemyPlayerId, player->ptrGlobalStruct->currentGameTime);
+		}
 	}
 
 	// Main loop to insert panic units one by one

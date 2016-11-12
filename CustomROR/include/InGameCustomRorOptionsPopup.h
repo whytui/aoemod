@@ -8,6 +8,7 @@
 #include "crCommands.h"
 #include "crLocalization.h"
 #include "AOE_const_language.h"
+#include "MapCopyPopup.h"
 
 
 class InGameCustomRorOptionsPopup : public CustomPopupBase {
@@ -33,6 +34,7 @@ public:
 	AOE_STRUCTURES::STRUCT_UI_LABEL *customOptionFreeTextLabelVar;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *customOptionFreeTextAnswerVar;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnTechTreeInfo;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnMapCopy;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAutoRebuildFarms;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoRebuildFarms;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtAutoRebuildFarmsMaxFood;
@@ -44,5 +46,6 @@ public:
 
 private:
 	bool openTechTreeInfo;
+	bool openMapCopyPopup;
 };
 

@@ -25,6 +25,9 @@ void MapCopyPopup::_ResetPointers() {
 }
 
 void MapCopyPopup::_AddPopupContent() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	bool isInEditor = settings && settings->IsCheckSumValid() && (settings->currentUIStatus == GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
+
 	const long int btnSize = 0xAC;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *unused;
 	long int currentVPos = 5;
@@ -62,6 +65,10 @@ void MapCopyPopup::_AddPopupContent() {
 	this->AddButton(popup, &this->btnCopyAllMap, localizationHandler.GetTranslation(CRLANG_ID_COPY_ALL_MAP, "Copy all map"), 30, currentVPos, btnSize, 30, 0);
 	this->AddButton(popup, &this->btnCopyZone, localizationHandler.GetTranslation(CRLANG_ID_COPY_MAP_ZONE, "Copy zone"), 30 + btnSize + 10, currentVPos, btnSize, 30, 0);
 	this->AddButton(popup, &this->btnPaste, localizationHandler.GetTranslation(CRLANG_ID_PASTE_MAP_ZONE, "Paste"), 30 + btnSize * 2 + 20, currentVPos, btnSize, 30, 0);
+	if (!isInEditor && this->btnPaste) {
+		this->btnPaste->editable = 0;
+		this->btnPaste->readOnly = 1;
+	}
 
 	currentVPos += 60;
 	this->AddTextBox(popup, &this->edtResultMessage, "", 200, 30, currentVPos, 450, 30, true, true, false);

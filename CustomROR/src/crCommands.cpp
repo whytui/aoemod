@@ -1606,7 +1606,7 @@ void CustomRORCommand::AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI
 // Calls appropriate "manage panic mode" treatments.
 // Returns true if we want to force usage of original ROR's (bugged) code
 // In most cases, this returns FALSE and ROR's code is NOT used.
-// This method is called every time a unit is attacked (from tacAI.reactToEvent for event 0x201 -> DoPanicModeIfNeeded(enemyPlayerId))
+// This method is called *every time a unit is attacked* (from tacAI.reactToEvent for event 0x201 -> DoPanicModeIfNeeded(enemyPlayerId))
 bool CustomRORCommand::RunManagePanicMode_isUsageOfRORCodeWanted(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, long int timeSinceLastPanicMode_s, long int currentGameTime_ms) {
 	if (!mainAI || !mainAI->IsCheckSumValid()) { return false; }
 	long int myPlayerId = mainAI->structMainDecisionAI.playerId;
