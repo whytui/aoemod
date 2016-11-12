@@ -42,6 +42,9 @@ namespace CUSTOM_AI {
 		int GetAttacksCountInPeriod(long int startGameTime, long int endGameTime) {
 			if (endGameTime <= startGameTime) { return 0; }
 			CUSTOM_AI::TimeIntervalAttackRecord *interval = this->GetIntervalForGameTime(startGameTime);
+			if (interval == NULL) {
+				interval = this->GetOldestValidInterval();
+			}
 			int result = 0;
 			while (interval && (interval->intervalEndGameTime > endGameTime)) {
 				result += interval->attacksCount;
@@ -54,6 +57,9 @@ namespace CUSTOM_AI {
 		int GetPanicModesCountInPeriod(long int startGameTime, long int endGameTime) {
 			if (endGameTime <= startGameTime) { return 0; }
 			CUSTOM_AI::TimeIntervalAttackRecord *interval = this->GetIntervalForGameTime(startGameTime);
+			if (interval == NULL) {
+				interval = this->GetOldestValidInterval();
+			}
 			int result = 0;
 			while (interval && (interval->intervalEndGameTime > endGameTime)) {
 				result += interval->triggeredPanicModesCount;
