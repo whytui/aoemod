@@ -86,6 +86,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x04E2300:
 		this->ManagePanicMode(REG_values);
 		break;
+	case 0x04D7AE6:
+		this->TacAIOnUnitAttacked(REG_values);
+		break;
 	case 0x004C253D:
 		this->ManageCityPlanHouseDistanceFromBuildings(REG_values);
 		break;
@@ -1026,6 +1029,7 @@ void CustomRORInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 // This method replaces the "panic mode" management (add units in strategy when attacked and weak)
 // From 0x4E22B0=tacAI.DoPanicModeIfNeeded(enemyPlayerId), called *every time a unit is attacked* (from tacAI.reactToEvent(myUnitId, arg2_unitId, eventId(201 here), arg4, arg5, arg6))
 // WARNING: This method may change return address (only when forcing usage of ROR panic mode algorithm - not recommended)
+// MAKE SURE TacAIOnUnitAttacked entry point is active too
 void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 	// Collect context information/variables
 	long int timeSinceLastPanicMode = REG_values->EDX_val; // in seconds
@@ -1042,6 +1046,33 @@ void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 	// if previous function returns true, it means we want to force usage of ROR original panic mode code.
 	// So let's do it by forcing return address (skip the JMP 004E254F)
 	ChangeReturnAddress(REG_values, 0x4E2307);
+}
+
+
+// From 0x4D7ADD. tacAI.reactToEvent(...) for event 0x201.
+// This is called each time one of "my" units is attacked (even by gaia).
+// MAKE SURE ManagePanicMode entry point is active too
+void CustomRORInstance::TacAIOnUnitAttacked(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ESI_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EBP_val;
+	long int myUnitId = REG_values->EBX_val;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
+	long int enemyPlayerId = REG_values->ECX_val;
+	AOE_STRUCTURES::STRUCT_PLAYER *enemyPlayer = (AOE_STRUCTURES::STRUCT_PLAYER *)REG_values->EAX_val;
+	// Checks
+	ror_api_assert(REG_values, tacAI && tacAI->IsCheckSumValid());
+	ror_api_assert(REG_values, myUnit && myUnit->IsCheckSumValidForAUnitClass());
+	ror_api_assert(REG_values, enemyUnit && enemyUnit->IsCheckSumValidForAUnitClass());
+	ror_api_assert(REG_values, enemyPlayer && enemyPlayer->IsCheckSumValid());
+	ror_api_assert(REG_values, enemyUnit->ptrStructPlayer == enemyPlayer);
+	ror_api_assert(REG_values, enemyPlayer->playerId == enemyPlayerId);
+	ror_api_assert(REG_values, myUnit->unitInstanceId == myUnitId);
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->EDX_val = tacAI->attacksByPlayerCount[enemyPlayerId]; // 0x4D7AE1
+	}
+	// Custom treatments
+
 }
 
 

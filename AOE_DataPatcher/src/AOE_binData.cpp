@@ -98,7 +98,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 117
+#define COUNT_ROR_API_10c 118
 #define COUNT_manageAI_10c 13
 
 
@@ -4236,10 +4236,20 @@ void AOE_binData::InitROR_API_10c() {
 
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
 		ManagePanicMode,
-		"This will use the custom panic mode management. This improves defence AI a lot. Do not enable this if you don't have ROR_API.dll.",
+		"Please do not enable this if TacAIOnUnitAttackedEvent is not. Do not enable this if you don't have ROR_API.dll.",
 		0x0E22FB,
 		(0x81, 0xFA, 0xB4, 0x00, 0x00, 0x00, 0x0F, 0x8C, 0x48, 0x02, 0x00, 0x00), // default=no
 		(0xE8, 0x74, 0x72, 0xF3, 0xFF, 0x90, 0xE9, 0x49, 0x02, 0x00, 0x00, 0x90),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		TacAIOnUnitAttackedEvent,
+		"Entry point to handle reaction to aggressions in tactical AI. Do not enable this if ManagePanicMode is not.",
+		0xD7ADD,
+		(0x0F, 0xBF, 0x48, 0x4A, 0x8B, 0x94, 0x8E, 0xD8, 0x0F, 0x00, 0x00, 0x8D, 0x84, 0x8E, 0xD8, 0x0F, 0x00, 0x00), // default=no
+		(0x0F, 0xBF, 0x48, 0x4A, 0xE8, 0x8E, 0x1A, 0xF4, 0xFF, 0x90, 0x90, 0x8D, 0x84, 0x8E, 0xD8, 0x0F, 0x00, 0x00),
 		FM_OFF,
 		FM_ON
 		);

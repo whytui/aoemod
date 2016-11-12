@@ -106,12 +106,8 @@ namespace AOE_STRUCTURES {
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=?
 		// 0xF0
 		STRUCT_AI *ptrMainAI;
-		STRUCT_AI_UNIT_LIST_INFO allVillagers; // +F4. Array can contain empty values (-1). Does NOT contain any boat ! 
-		//long int *ptrAllVillagersUnitIdArray; // Array of unitIDs (all villagers). May contain empty values (-1) ?
-		//long int myVillagerCount; // +F8. exact count of villagers in ptrAllVillagersArray
-		//unsigned long int unknown_0FC;
+		STRUCT_AI_UNIT_LIST_INFO allVillagers; // +F4. All *my* villagers. Array can contain empty values (-1). Does NOT contain any boat ! 
 		// 0x100
-		//long int allVillagersArraySize; // Size for ptrAllVillagersArray. Can be higher than exact count (if empty spaces).
 		STRUCT_AI_UNIT_LIST_INFO villagerExplorers; // +104.
 		STRUCT_AI_UNIT_LIST_INFO landMilitaryUnits; // +114. military unitIds that do NOT belong to a unitGroup. Contains military unit (cf AI type - 0x4D277A), EXCLUDING towers, boats
 		STRUCT_AI_UNIT_LIST_INFO unknown_124; // NOT SURE it is a STRUCT_AI_UNIT_LIST_INFO

@@ -67,6 +67,7 @@ namespace CUSTOMROR {
 		void InitScenarioInfoTextData(REG_BACKUP *REG_values);
 		void EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values);
 		void ManagePanicMode(REG_BACKUP *REG_values);
+		void TacAIOnUnitAttacked(REG_BACKUP *REG_values);
 		void ManageCityPlanHouseDistanceFromBuildings(REG_BACKUP *REG_values);
 		void ManageCityMapLikeComputationCall1(REG_BACKUP *REG_values);
 		void ManageCityMapLikeComputationCall2(REG_BACKUP *REG_values);
