@@ -342,7 +342,7 @@ public:
 	bool GetLocalizedString(long int stringId, char *buffer, long int bufferSize);
 
 
-	// Occurs when a unit is killed by an attack (excludes suicide with DEL, transported units whose transport is destroyed, conversion)
+	// Occurs when a unit is killed by an attack (EXCLUDES suicide with DEL, transported units whose transport is destroyed, conversion)
 	void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit);
 
 	// Entry point when mouse hovers on a unit. foundInteraction and foundHintDllId values are IN/OUT, you are allowed to update them to overload ROR default behaviour.

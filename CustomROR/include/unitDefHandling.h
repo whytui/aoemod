@@ -89,6 +89,9 @@ namespace AOE_STRUCTURES {
 	// See also IsTower(datid) in AOE_empires_dat.h, which uses a hardcoded list.
 	bool IsTower(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
 
+	// Returns true if a unit is capable of attacking (conversion or physical attack)
+	// WARNING: this does not take care of villager mode (for example, will return false for a farmer !)
+	bool UnitDefCanAttack(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
 
 	// Returns true if unit shoots projectiles
 	// Note: priests or st francis don't

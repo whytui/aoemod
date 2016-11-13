@@ -32,7 +32,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_GROUP *previous;
 		long int unitGroupId; // A unique ID. Set in 0x4CCC50.
 		// 0x10
-		long int unknown_resetOrg; // +10. resetOrg ? 0 when task changes, 1 when "init" for task has been done ??
+		long int isTasked; // +10. Set to 0 when task changes or when idle, 1 when "init" for task has been done ??
 		AOE_CONST_INTERNAL::UNIT_GROUP_TYPES unitGroupType; // +14. Set in 0x4CCC70.
 		long int taskSubTypeId; // +18. -1=default. 0,4 = capture?
 		long int myUnitsIdArray[STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT]; // +1C. 40 elements, can be non-consecutive (ignore -1 values).
@@ -42,8 +42,8 @@ namespace AOE_STRUCTURES {
 		// 0x160
 		long int unitMaximumCount; // Unsure
 		long int commanderUnitId; // +164. group leader
-		long int totalGroupHP; // +168. or "old" value ? Not always updated: can be quite wrong !
-		long int unsure_previousUnitCount; // +16C. Set from +15Cs
+		long int initialTotalGroupHP; // +168. Total group HP when task was started (used to calculate percent health retreat, etc ?)
+		long int initialUnitCount; // +16C.  Total group unit count when task was started (set when resetOrg=1)
 		// 0x170
 		float unknown_170_posY;
 		float unknown_174_posX;
@@ -73,7 +73,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_1C0;
 		long int transportUnitGroupId; // +1C4. Unit group ID of the transport that does transport "me".
 		unsigned long int unknown_1C8;
-		long int unknown_1CC_lastGameTime; // +1CC. Last game time of "task active soldier" execution for the group ?
+		long int lastTaskingTime_ms; // +1CC. Last game time of "task active soldier" execution for the group ? Compared to SNTacticalUpdateFrequency (default 3 seconds)
 		// 0x1D0
 		long int attackPlayId; // attackId that is being played. -1=Non-Play-based attack
 		char unknown_1D4; // +1D4. Number of elements in +1D8 ?

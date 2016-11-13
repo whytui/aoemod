@@ -27,12 +27,12 @@ namespace CUSTOM_AI {
 	}
 
 	// Returns true if successful
-	// myTownCenter is used to evaluate my town position, it is NOT the target of the attack
+	// myTownCenter is used to evaluate my town position, it is NOT the target of the attack. myTownCenter may be NULL !
 	bool CustomAIMilitaryInfo::SaveEnemyAttackInHistory(long int attackerPlayerId, long int currentGameTime, 
 		STRUCT_UNIT_BASE *enemyUnit, STRUCT_UNIT_BASE *myTownCenter) {
 		if ((attackerPlayerId < 0) || (attackerPlayerId > 8)) { return false; }
 
-		if (enemyUnit) {
+		if (enemyUnit && myTownCenter) {
 			float diff = (enemyUnit->positionX - myTownCenter->positionX);
 			if (diff < 0) { diff = -diff; }
 			if (diff <= AI_CONST::townSize) { // X position fits my town's positions
@@ -94,10 +94,14 @@ namespace CUSTOM_AI {
 		float score = (food + wood + stone + gold) * 100 / (maxResValueToEvaluatePlayerWeakness * 4);
 		// Out of a key resource: negative impact
 		if (food < 100) {
-			score = score* 0.75f;
+			if (food < 60) {
+				score = score* 0.60f;
+			} else {
+				score = score* 0.70f;
+			}
 		}
 		if (wood < 100) {
-			score = score* 0.85f;
+			score = score* 0.75f;
 		}
 		if (gold < 100) {
 			score = score* 0.85f;
@@ -152,5 +156,112 @@ namespace CUSTOM_AI {
 		return false; // Both units seem far from my town
 	}
 
+	// Get main town center, or the "main" unit to defend if no TC is found
+	// This is not supposed to return NULL for a valid player (alive) because we should always find at least 1 valid unit
+	STRUCT_UNIT_BASE *CustomAIMilitaryInfo::GetTownCenterOrUnitToDefend(STRUCT_PLAYER *player) {
+		if (!player || !player->IsCheckSumValid()) { return NULL; }
+		if (!player->ptrCreatableUnitsListLink || !player->ptrCreatableUnitsListLink->IsCheckSumValid()) { return NULL; }
+		STRUCT_UNIT_BASE *unfinishedTC = NULL;
+		STRUCT_UNIT_BASE *priestOrCivilian = NULL;
+		STRUCT_UNIT_BASE *house = NULL;
+		STRUCT_UNIT_BASE *building = NULL;
+		STRUCT_UNIT_BASE *anyUnit = NULL;
+		bool hadVillager = false;
+		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *curElem = player->ptrCreatableUnitsListLink->lastListElement;
+		while (curElem != NULL) {
+			STRUCT_UNIT_BASE *curUnit = curElem->unit;
+			if (curUnit && curUnit->IsCheckSumValidForAUnitClass() && (curUnit->unitStatus <= 2)) {
+				STRUCT_UNITDEF_BASE *curUnitDef = curUnit->unitDefinition;
+				if (curUnitDef && curUnitDef->IsCheckSumValidForAUnitClass()) {
+					if (curUnitDef->DAT_ID1 == CST_UNITID_FORUM) {
+						if (curUnit->unitStatus == 0) {
+							unfinishedTC = curUnit;
+						} else {
+							return curUnit; // Fully built TC always has priority, no need to go further
+						}
+					} else {
+						if (curUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian) {
+							priestOrCivilian = curUnit;
+							hadVillager = true;
+						} else {
+							if (curUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) {
+								priestOrCivilian = curUnit;
+							} else {
+								if (curUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) {
+									if (curUnitDef->DAT_ID1 == CST_UNITID_HOUSE) {
+										house = curUnit;
+									} else {
+										building = curUnit;
+									}
+								} else {
+									anyUnit = curUnit;
+								}
+							}
+						}
+					}
+				}
+			}
+			curElem = curElem->previousElement;
+		}
+		if (hadVillager && unfinishedTC) {
+			return unfinishedTC;
+		}
+		if (priestOrCivilian) {
+			return priestOrCivilian;
+		}
+		if (house) {
+			return house;
+		}
+		if (building) {
+			return building;
+		}
+		return anyUnit;
+	}
+
+
+	// Returns infAI elem list entry for the first found enemy or neutral military unit in specified zone
+	// Returns NULL if not found
+	STRUCT_INF_AI_UNIT_LIST_ELEM *CustomAIMilitaryInfo::FindEnemyMilitaryUnitNearPosition(STRUCT_PLAYER *player, long int posX, long int posY,
+		long int distanceFromCenter, bool landOnly) {
+		if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) { return NULL; }
+		STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+		assert(global && global->IsCheckSumValid());
+		if (!global || !global->IsCheckSumValid()) { return NULL; }
+		assert(global->gameMapInfo && global->gameMapInfo->IsCheckSumValid());
+		global->gameMapInfo->FixPositionToGetInMapBounds(&posX, &posY);
+		assert(distanceFromCenter > 0);
+		if (distanceFromCenter <= 0) { return NULL; }
+		long int minPosX = posX - distanceFromCenter;
+		long int minPosY = posY - distanceFromCenter;
+		long int maxPosX = posX + distanceFromCenter;
+		long int maxPosY = posY + distanceFromCenter;
+		global->gameMapInfo->FixPositionToGetInMapBounds(&minPosX, &minPosY);
+		global->gameMapInfo->FixPositionToGetInMapBounds(&maxPosX, &maxPosY);
+		
+		for (int i = 0; i < player->ptrAIStruct->structInfAI.unitElemListSize; i++) {
+			STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &player->ptrAIStruct->structInfAI.unitElemList[i];
+			bool enemyOrNeutral = (player->diplomacyVSPlayers[curElem->playerId] > PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY);
+			enemyOrNeutral &= (curElem->unitId > -1);
+			STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curElem->unitId);
+			enemyOrNeutral &= (curUnit && curUnit->IsCheckSumValidForAUnitClass() && curUnit->unitDefinition && curUnit->unitDefinition->IsCheckSumValidForAUnitClass());
+			if (enemyOrNeutral && landOnly && IsWaterUnit(curUnit->unitDefinition->unitAIType)) {
+				enemyOrNeutral = false;
+			}
+			if (enemyOrNeutral) {
+				// Villagers are excluded here
+				enemyOrNeutral = (curUnit->unitDefinition->unitAIType != TribeAIGroupCivilian) &&
+					(curUnit->unitDefinition->unitAIType != TribeAIGroupFishingBoat) &&
+					UnitDefCanAttack(curUnit->unitDefinition);
+			}
+			if (enemyOrNeutral) {
+				// Check position
+				if ((curUnit->positionX >= minPosX) && (curUnit->positionX <= maxPosX) &&
+					(curUnit->positionY >= minPosY) && (curUnit->positionY <= maxPosY)) {
+					return curElem;
+				}
+			}
+		}
+		return NULL; // Not found
+	}
 }
 

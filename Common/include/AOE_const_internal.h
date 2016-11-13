@@ -188,6 +188,7 @@ namespace AOE_CONST_INTERNAL
 		CST_GES_FARM_DEPLETED = 0x10
 	};
 
+	// Those event IDs are used in gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX) = [EDX+0x40]=0x501980. Arguments may have different roles
 	enum GAME_EVENT_TYPES : long int {
 		CST_GET_INVALID = -1, // For customROR internal usage
 		CST_GET_CANT_UNLOAD_NO_ROOM = 01,
@@ -218,7 +219,7 @@ namespace AOE_CONST_INTERNAL
 		CST_GET_CANNOT_CONVERT_NEED_MONOTHEISM_BUILDING = 0x78,
 		CST_GET_CANNOT_CONVERT_TC = 0x79,
 		CST_GET_CANNOT_CONVERT_WONDER = 0x7A,
-		CST_GET_SUCCESSFULLY_CONVERTED_UNIT = 0x7B,
+		CST_GET_SUCCESSFULLY_CONVERTED_UNIT = 0x7B, // NotifyEvent: arg2=actor player, arg3=victim player
 		CST_GET_ADD_REMOVE_IN_TRAIN_QUEUE = 0x7C,
 		CST_GET_NOT_ENOUGH_RESOURCES = 0x7D, // need houses, food/wood or maxPop reached (to build or train, NOT for repair)
 		CST_GET_FARM_DEPLETED = 0x7E, // Sound 0x10
@@ -395,6 +396,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
 		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted?
 		CST_ATI_UNKNOWN_209 = 0x209, // Related to notification when being attacked ? see 0x4E4769
+		CST_ATI_UNKNOWN_20B = 0x20B, // Used just after a unit is converted ? 0x4AEBDD
 		CST_ATI_ESCAPE_ATTACK = 0x20F, // when someone shoots at me ? "escape attack"? 4E62F3
 		CST_ATI_ATTACK = 0x258,
 		CST_ATI_DEFEND_OR_CAPTURE = 0x259, // unsure, but it is used to capture relics
@@ -489,12 +491,12 @@ namespace AOE_CONST_INTERNAL
 	enum UNIT_GROUP_TASK_IDS : long int {
 		CST_UGT_NOT_SET = 0, // stop ? 0x4CD349
 		CST_UGT_IDLE = 1, // Idle ? Set in 4CD110. Default=1 (0 in constructor, but 1 after init)
-		CST_UGT_ATTACK_02 = 2, // Attack a specific target, but units will attack units at sight on their way, provide attack response even if *other* units are attacked... "prudent" attack ? 0x4D567D=taskActiveSoldiers. Includes response to attack
+		CST_UGT_ATTACK_02 = 2, // Attack a specific target. The common task for attacking.
 		CST_UGT_RETREAT = 3, // 4CD640, 0x4D51DF
 		CST_UGT_DEFEND_UNIT = 4, // 4CE309, 0x4D5E6D
 		CST_UGT_UNKNOWN_05 = 5, // "add up HPs of my units" ?
 		CST_UGT_UNKNOWN_06 = 6, // "add up HPs of my units" ?
-		CST_UGT_EXTERMINATE = 7, // 0x4CD7A9. Set in 0x4D50AB, 0x4D5DD7 See 0x4D535D
+		CST_UGT_EXTERMINATE = 7, // This is used to set an "explore" attack mode without a specific target. Leader=explorer, others=defenders. This explores from current position, does not use target pos ? 0x4CD7A9. Set in 0x4D50AB, 0x4D5DD7 See 0x4D535D
 		CST_UGT_EXPLORE = 8, // 4CD977. For boats too. NOT for civilians/fishing ships.
 		CST_UGT_REGROUP = 9, // 4CD425. Uses SNAttackGroupGatherSpacing or artefact return distance. Assigned to idle groups when some units are far from leader.
 		CST_UGT_GO_FISHING = 0x0A, // (10) Active fishing ships may also have an idle (1) group task ! See 0x4CE4AB

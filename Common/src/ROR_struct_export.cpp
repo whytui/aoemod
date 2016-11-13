@@ -210,7 +210,7 @@ namespace AOE_STRUCTURES {
 		res += " unitCount=";
 		res += std::to_string(obj->unitCount);
 		res += " totalGroupHP=";
-		res += std::to_string(obj->totalGroupHP);
+		res += std::to_string(obj->initialTotalGroupHP);
 		res += "\n\tposX=";
 		res += std::to_string(obj->posX);
 		res += " posY=";
@@ -241,6 +241,8 @@ namespace AOE_STRUCTURES {
 		res += std::to_string(obj->unknown_1B8);
 		res += " unknown_1BC=";
 		res += std::to_string(obj->unknown_1BC);
+		res += " lastTaskTime_ms=";
+		res += std::to_string(obj->lastTaskingTime_ms);
 		return res;
 	}
 

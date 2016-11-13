@@ -1879,6 +1879,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 // This is called BEFORE the actual unit owner change process is called. (this is called at the very beginning of unit conversion process)
 // targetUnit is the "victim" (unit that changes owner), actorPlayer is the new owner (player)
 // Technical note: in ROR, unit.changeOwner(newplayer) is [EDX+0x44] call.
+// TODO: this is not called when relics/ruins are taken ?
 void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
 	if (!targetUnit || !actorPlayer) { return; }
 	assert(targetUnit->IsCheckSumValidForAUnitClass());
@@ -1935,6 +1936,18 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE 
 			assert(loopInfAI->IsCheckSumValid());
 			// Fix (or remove) unit from list for each player. We MUST NOT let a bad playerId be stored in unit elem list.
 			UpdateOrResetInfAIUnitListElem(loopInfAI, FindInfAIUnitElemInList(loopInfAI, targetUnit->unitInstanceId));
+		}
+	}
+
+	if (targetPlayer && IsImproveAIEnabled(targetPlayer->playerId) && targetPlayer->ptrAIStruct && targetPlayer->ptrAIStruct->IsCheckSumValid()) {
+		// Notify custom AI that a conversion occurred.
+		if (CUSTOM_AI::customAIHandler.IsAliveAI(actorPlayer->playerId) && IsImproveAIEnabled(actorPlayer->playerId)) {
+			if (IsArtefactOrFlag(targetUnitDef->unitAIType)) {
+				// TODO: actually this case never occurs yet, this method is not called in such event.
+				CUSTOM_AI::customAIHandler.GetCustomPlayerAI(actorPlayer->playerId)->OnArtefactControlLoss(targetUnit, actorPlayer);
+			} else {
+				CUSTOM_AI::customAIHandler.GetCustomPlayerAI(actorPlayer->playerId)->OnUnitConverted(targetUnit, actorPlayer);
+			}
 		}
 	}
 }
@@ -3558,7 +3571,7 @@ bool CustomRORCommand::GetLocalizedString(long int stringId, char *buffer, long 
 }
 
 
-// Occurs when a unit is killed by an attack (excludes suicide with DEL, transported units whose transport is destroyed, conversion)
+// Occurs when a unit is killed by an attack (EXCLUDES suicide with DEL, transported units whose transport is destroyed, conversion)
 void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit) {
 	if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass()) {
 		return;
@@ -3569,12 +3582,20 @@ void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACK
 	assert(killedUnit->DerivesFromAttackable());
 	if (!killedUnit->DerivesFromAttackable()) { return; }
 
-	if (this->IsRpgModeEnabled() && actorUnit->DerivesFromTrainable()) {
+	if (this->IsRpgModeEnabled() && actorUnit->DerivesFromTrainable() && (killedUnit->ptrStructPlayer->playerId > 0)) {
 		RPG_MODE::OnUnitKill(killedUnit, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)actorUnit);
 	}
 
 	// Handle internal objects
 	CUSTOMROR::crInfo.myGameObjects.RemoveAllInfoForUnit(killedUnit->unitInstanceId, killedUnit->positionX, killedUnit->positionY);
+	AOE_STRUCTURES::STRUCT_UNIT_BUILDING *killedUnitAsBld = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *) killedUnit;
+	if (killedUnitAsBld->IsCheckSumValid()) {
+		// When destroyed, buildings do not trigger "tacAI.reactToEvent" (they only do it when attacked, but still having HP left)
+		if (killedUnit->ptrStructPlayer && killedUnit->ptrStructPlayer->ptrAIStruct &&
+			IsImproveAIEnabled(killedUnit->ptrStructPlayer->playerId)) {
+			CUSTOM_AI::customAIHandler.OnUnitAttacked(&killedUnit->ptrStructPlayer->ptrAIStruct->structTacAI, killedUnit, actorUnit, false);
+		}
+	}
 }
 
 

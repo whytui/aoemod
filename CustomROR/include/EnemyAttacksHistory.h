@@ -11,12 +11,16 @@ namespace CUSTOM_AI {
 	class TimeIntervalAttackRecord : public CUSTOMROR::TimeIntervalRecordBase {
 	public:
 		long int attacksCount;
+		long int deathsCount; // How many of "my" units were killed (excludes conversions, excludes depleted farms !)
+		long int convertedCount; // How many of "my" units were converted by enemies
 		long int triggeredPanicModesCount; // Number of times strategy panic mode was triggered because of this player's attacks
 		long int attacksCountByClass[62];
 
 		void ResetAllInfo() override {
 			__super::ResetAllInfo();
 			this->attacksCount = 0;
+			this->deathsCount = 0;
+			this->convertedCount = 0;
 			this->triggeredPanicModesCount = 0;
 			for (int i = 0; i < _countof(this->attacksCountByClass); i++) { this->attacksCountByClass[i] = 0; }
 		}

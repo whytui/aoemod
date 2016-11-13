@@ -184,10 +184,10 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		//CR_DEBUG::exportInfAIExplorationToBitmap(player);
 		//CR_DEBUG::exportVisibilityToBitmap(true, -1);
 		//CR_DEBUG::exportVisibilityToBitmap(false, 2);
-		CR_DEBUG::exportGameTerrainRestrictionValuesToBitmap();
+		//CR_DEBUG::exportGameTerrainRestrictionValuesToBitmap();
 		/*_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades("D:\\test1.bmp", global->gameMapInfo->mapArraySizeX, 
 			global->gameMapInfo->mapArraySizeY, global->gameMapInfo->unknown_8DB0, 0, 255, false);*/
-		if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
+		/*if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
 			AOE_STRUCTURES::STRUCT_UNIT_GROUP *fakeGroup = &player->ptrAIStruct->structTacAI.fakeFirstUnitGroupElem;
 			AOE_STRUCTURES::STRUCT_UNIT_GROUP *curGroup = fakeGroup->next;
 			while (curGroup && (curGroup != fakeGroup)) {
@@ -218,7 +218,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 						if (unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 							curGroup->targetDAT_ID = unitDef->DAT_ID1;
 						}
-						curGroup->unknown_resetOrg = 1;
+						curGroup->isTasked = 1;
 						unsigned long int addr = 0x4CD2D0;
 						AOE_STRUCTURES::STRUCT_AI *mainAI = player->ptrAIStruct;
 						AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = &player->ptrAIStruct->structTacAI;
@@ -239,7 +239,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			player->ptrAIStruct->structTacAI.targetInfo.targetUnitId = -1;
 			player->ptrAIStruct->structTacAI.targetInfo.currentSearchInfAIUnitElemListIndex++;
 			
-		}
+		}*/
 	}
 
 	// TEST - F8 - show dialog

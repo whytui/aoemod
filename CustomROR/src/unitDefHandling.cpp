@@ -263,7 +263,7 @@ namespace AOE_STRUCTURES {
 	// A tower is a unit that can attack (including priests) and can't move.
 	// See also IsTower(datid) in AOE_empires_dat.h, which uses a hardcoded list.
 	bool IsTower(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
-		if (!unitDef->DerivesFromAttackable()) {
+		if (!unitDef || !unitDef->DerivesFromAttackable()) {
 			return false;
 		}
 		AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDef;
@@ -276,6 +276,27 @@ namespace AOE_STRUCTURES {
 		return (unitDef50->speed == 0) && canAttack;
 	}
 
+
+	// Returns true if a unit is capable of attacking (conversion or physical attack)
+	// WARNING: this does not take care of villager mode (for example, will return false for a farmer !)
+	bool UnitDefCanAttack(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
+		if (!unitDef || !unitDef->DerivesFromCommandable()) {
+			return false;
+		}
+		AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDefCommandable = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDef;
+		if (unitDefCommandable->ptrUnitCommandHeader && unitDefCommandable->ptrUnitCommandHeader->IsCheckSumValid()) {
+			for (int i = 0; i < unitDefCommandable->ptrUnitCommandHeader->commandCount; i++) {
+				if (unitDefCommandable->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_CONVERT) {
+					return true;
+				}
+			}
+		}
+		AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDef;
+		if (!unitDef50->IsCheckSumValidForAUnitClass()) {
+			return false;
+		}
+		return (unitDef50->attacksCount > 0);
+	}
 
 	// Get strategy element type for a unit
 	// Returns AIUCNone if result could not be determined.

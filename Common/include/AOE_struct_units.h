@@ -86,6 +86,8 @@ namespace AOE_STRUCTURES {
 	// Methods:
 	// +0x44 = unit.convertToPlayer(ptrPlayer)
 	// +0x74 = unit.CalcDamageFrom(attacksCount, pAttacksList, f_altitudeFactor, actorPlayer, actorUnit). Ex 0x426910.
+	// +0xD8 = unit.addVisibility(player, arg2, distance?)
+	// +0xDC = unit.removeVisibilityFrom(player, arg2, distance?)
 	// +0xF0 = unit.GetAttackAltitudeFactor(targetUnit). WARNING: Returns in ST (FLD xxx), not EAX. Ex 0x4AEC00.
 	// +0xFC = unit.FLD_speed()
 	// +0x100 = unit.FLD_reloadTime1()

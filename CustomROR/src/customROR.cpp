@@ -1028,6 +1028,7 @@ void CustomRORInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 
 // This method replaces the "panic mode" management (add units in strategy when attacked and weak)
 // From 0x4E22B0=tacAI.DoPanicModeIfNeeded(enemyPlayerId), called *every time a unit is attacked* (from tacAI.reactToEvent(myUnitId, arg2_unitId, eventId(201 here), arg4, arg5, arg6))
+// WARNING: apparently, when a *building* is killed (final attack that makes HP<1), this is not triggered. However killing living units DOES trigger this.
 // WARNING: This method may change return address (only when forcing usage of ROR panic mode algorithm - not recommended)
 // MAKE SURE TacAIOnUnitAttacked entry point is active too
 void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {

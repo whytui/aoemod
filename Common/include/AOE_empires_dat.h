@@ -117,7 +117,7 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_TRADE_PRODUCTION = 10, // Default 1 ?
 		CST_RES_ORDER_CURRENT_POPULATION = 11,
 		CST_RES_ORDER_CORPSE_DECAY_TIME = 12, // TO CONFIRM. Remains 0 in game ?
-		CST_RES_ORDER_DISCOVERIES = 13, // TO CONFIRM
+		CST_RES_ORDER_DISCOVERIES = 13, // Number of found discoveries (a player flag is set on such discoveries)
 		CST_RES_ORDER_RUINS = 14, // Number of owned ruins
 		CST_RES_ORDER_MEAT_STORAGE = 15, // TO CONFIRM. Remains 0 in game ?
 		CST_RES_ORDER_BERRY_STORAGE = 16, // TO CONFIRM
@@ -138,6 +138,7 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_FAITH_RECHARGING_RATE = 35, // default 2 ?
 		CST_RES_ORDER_FARM_FOOD_AMOUNT = 36, // default 250 ?
 		CST_RES_ORDER_CIVILIAN_POPULATION = 37, // Current number of villagers. Counts TribeAIGroupCivilian, TribeAIGroupFishingBoat, TribeAIGroupTradeBoat
+		CST_RES_ORDER_UNKNOWN_38 = 38, // is this even used ?
 		CST_RES_ORDER_ALL_TECHNOLOGIES = 39,
 		// Current number of military units, including towers, living units except (TribeAIGroupPriest, TribeAIGroupCivilian, TribeAIGroupFishingBoat, TribeAIGroupTradeBoat).
 		// All units count as 1 here, even infantry with logistics.
@@ -150,10 +151,10 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_TRIBUTE_COST = 46, // 0.25 default (0x45B991), 0 for palmyra or all techs.
 		CST_RES_ORDER_GOLD_MINING_PODUCTIVITY = 47, // 1 default ?
 		CST_RES_ORDER_TOWN_CENTER_UNAVAILABLE = 48,
-		CST_RES_ORDER_GOLD_COUNTER = 49,
+		CST_RES_ORDER_GOLD_COUNTER = 49, // Amount of collected gold (excluding tributes and initial resources), cf score (achievements screen)
 		CST_RES_ORDER_SHARED_EXPLORATION = 50,
 		CST_RES_ORDER_HOUSES_AMOUNT = 51,
-		CST_RES_ORDER_TEMPLE_COUNT = 52,
+		CST_RES_ORDER_TEMPLE_COUNT = 52, // Cf score (achievements screen)
 		CST_RES_ORDER_TRIBUTE_SENT = 53,
 		CST_RES_ORDER_ALL_RUINS = 54,
 		CST_RES_ORDER_ALL_RELICS = 55,
@@ -658,7 +659,7 @@ namespace AOE_CONST_FUNC {
 			(dat_id == CST_UNITID_TEMPLE);
 	}
 
-	// Returns true if unit is a military unit, EXCLUDING towers. See also IsTower(unitDefId) function.
+	// Returns true if unit is a military unit, EXCLUDING towers, based on unit class. See also IsTower(unitDefId) function.
 	static bool IsNonTowerMilitaryUnit(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES aiType) {
 		switch (aiType) {
 		case TribeAIGroupArcher:

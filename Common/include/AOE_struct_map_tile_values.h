@@ -54,7 +54,7 @@ namespace AOE_STRUCTURES {
 			if (*posX < 0) { *posX = 0; }
 			if (*posY < 0) { *posY = 0; }
 			if (*posX >= this->arraySizeX) { *posX = this->arraySizeX - 1; }
-			if (*posY >= this->arraySizeX) { *posY = this->arraySizeX - 1; }
+			if (*posY >= this->arraySizeY) { *posY = this->arraySizeY - 1; }
 		}
 		// Will not fail/crash if position is out of bounds
 		unsigned char GetTileValue(long int posX, long int posY, unsigned char valueIfInvalidPos) const {

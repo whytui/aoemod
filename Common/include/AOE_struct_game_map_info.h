@@ -71,6 +71,12 @@ namespace AOE_STRUCTURES {
 		bool IsPositionInBounds(long int x, long int y) const {
 			return (x >= 0) && (y >= 0) && (x < this->mapArraySizeX) && (y < this->mapArraySizeY);
 		}
+		void FixPositionToGetInMapBounds(long int *posX, long int *posY) const {
+			if (*posX < 0) { *posX = 0; }
+			if (*posY < 0) { *posY = 0; }
+			if (*posX >= this->mapArraySizeX) { *posX = this->mapArraySizeX - 1; }
+			if (*posY >= this->mapArraySizeY) { *posY = this->mapArraySizeY - 1; }
+		}
 		STRUCT_GAME_MAP_TILE_INFO *GetTileInfo(long int x, long int y) const {
 			if ((x < 0) || (x >= this->mapArraySizeX) || (y < 0) || (y >= this->mapArraySizeY)) { return NULL; }
 			return &this->pTileInfoCols[x][y];

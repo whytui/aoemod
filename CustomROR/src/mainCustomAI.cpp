@@ -82,6 +82,25 @@ void CustomPlayerAI::RunInitialStrategyAnalysis() {
 }
 
 
+// Triggered when a relic/ruin control was transfered to another player (not necessarily an enemy)
+void CustomPlayerAI::OnArtefactControlLoss(AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit, AOE_STRUCTURES::STRUCT_PLAYER *otherPlayer) {
+
+}
+
+
+// Triggered when one of my units has been converted
+void CustomPlayerAI::OnUnitConverted(AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit, AOE_STRUCTURES::STRUCT_PLAYER *enemyPlayer) {
+	if (!enemyPlayer || !enemyPlayer->IsCheckSumValid()) { return; }
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) { return; }
+	TimeIntervalAttackRecord *interval = this->militaryAIInfo.recentAttacksByPlayer[enemyPlayer->playerId].GetIntervalForGameTime(global->currentGameTime);
+	if (interval) {
+		interval->convertedCount++;
+	}
+}
+
+
 // Triggered each time an AI player's unit is attacked (possibly by a gaia unit)
 // rorOriginalPanicModMethodHasBeenRun indicates if ROR's panic mode method has been run. If so, panic mode treatments should not be run here.
 void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit,
@@ -97,12 +116,21 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 	}
 	if (!enemyPlayer) { return; }
 	long int enemyPlayerId = enemyPlayer->playerId;
+	assert((enemyPlayerId >= 0) && (enemyPlayerId < 9) && (enemyPlayerId < global->playerTotalCount));
+	if ((enemyPlayerId < 0) || (enemyPlayerId > 8)) { return; } // Could cause overflows
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_MainAI_findUnit(this->mainAI, CST_UNITID_FORUM);
 
 	// Record the attack. The analog treatment in ROR code is in 0x4D7AF0 (update TacAI.attacksByPlayerCount[enemyPlayerId]).
 	// Note: we also record gaia attacks (why wouldn't we?)
 	this->militaryAIInfo.SaveEnemyAttackInHistory(enemyPlayerId, global->currentGameTime, enemyUnit, myTC);
 
+	if (myUnit->remainingHitPoints < 1) {
+		// Unit has just been killed
+		TimeIntervalAttackRecord *interval = this->militaryAIInfo.recentAttacksByPlayer[enemyPlayerId].GetIntervalForGameTime(global->currentGameTime);
+		if (interval) {
+			interval->deathsCount++;
+		}
+	}
 
 	// Handle panic mode (if eligible)
 	if (!rorOriginalPanicModeMethodHasBeenRun && (enemyPlayerId > 0)) {

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <AOE_struct_units.h>
 #include <AOE_struct_player.h>
+#include <AOE_struct_game_map_info.h>
 #include "CustomRORInfo.h"
 #include "EnemyAttacksHistory.h"
 
@@ -37,7 +38,7 @@ namespace CUSTOM_AI {
 		TimeIntervalAttackRecord *GetAttackInfoForCurrentTimeInterval(long int attackerPlayerId, long int currentGameTime);
 
 		// Returns true if successful
-		// myTownCenter is used to evaluate my town position, it is NOT the target of the attack
+		// myTownCenter is used to evaluate my town position, it is NOT the target of the attack. myTownCenter may be NULL !
 		bool SaveEnemyAttackInHistory(long int attackerPlayerId, long int currentGameTime, 
 			STRUCT_UNIT_BASE *enemyUnit, STRUCT_UNIT_BASE *myTownCenter);
 
@@ -58,6 +59,15 @@ namespace CUSTOM_AI {
 		// Returns true if unit positions (my unit, TC and enemy unit) are located in such way that panic mode can be triggered.
 		// This is an approximative evaluation, not a complete analysis.
 		static bool IsPanicModeEligible(STRUCT_UNIT_BASE *myTC, STRUCT_UNIT_BASE *myUnit, STRUCT_UNIT_BASE *enemyUnit);
+
+		// Get main town center, or the "main" unit to defend if no TC is found
+		// This is not supposed to return NULL for a valid player (alive) because we should always find at least 1 valid unit
+		static STRUCT_UNIT_BASE *GetTownCenterOrUnitToDefend(STRUCT_PLAYER *player);
+
+		// Returns infAI elem list entry for the first found enemy or neutral military unit in specified zone
+		// Returns NULL if not found
+		static STRUCT_INF_AI_UNIT_LIST_ELEM *FindEnemyMilitaryUnitNearPosition(STRUCT_PLAYER *player, long int posX, long int posY,
+			long int distanceFromCenter, bool landOnly);
 	};
 	
 }
