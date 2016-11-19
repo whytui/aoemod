@@ -73,7 +73,7 @@ namespace CUSTOM_AI {
 		return (interval != NULL);
 	}
 
-	// Get the number of panic mode caused by a player during the specified interval (game times in milliseconds)
+	// Get the number of strategy panic mode caused by a player during the specified interval (game times in milliseconds)
 	int CustomAIMilitaryInfo::GetPanicModesCountFromPlayerInPeriod(long int attackerPlayerId, long int startGameTime, long int endGameTime) {
 		if ((attackerPlayerId < 0) || (attackerPlayerId > 8)) { return 0; }
 		return this->recentAttacksByPlayer[attackerPlayerId].GetPanicModesCountInPeriod(startGameTime, endGameTime);

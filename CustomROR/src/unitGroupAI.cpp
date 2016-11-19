@@ -16,6 +16,55 @@ void UnitGroupAI::ResetAllInfo() {
 }
 
 
+// Computes internal variables about military situation
+// This method should perform few operations to be quite fast
+void UnitGroupAI::EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI) {
+	this->activeGroupsTaskingTempInfo.militarySituation = MILITARY_SITUATION::MS_UNKNOWN;
+	if (!tacAI) { return; }
+	this->activeGroupsTaskingTempInfo.myTotalMilitaryUnitCount = tacAI->landMilitaryUnits.usedElements;
+	
+	if (!this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
+		// Special rules (this could be a scenario without a TC/villagers too: we shouldn't prevent AI from attacking then)
+
+	}
+
+	if (this->activeGroupsTaskingTempInfo.totalPanicModesInPeriod > 0) {
+		this->activeGroupsTaskingTempInfo.militarySituation = MILITARY_SITUATION::MS_WEAK;
+
+		if ((this->activeGroupsTaskingTempInfo.myWeaknessScore > 50) ||
+			(this->activeGroupsTaskingTempInfo.myTotalMilitaryUnitCount < 4)) {
+			this->activeGroupsTaskingTempInfo.militarySituation = MILITARY_SITUATION::MS_CRITICAL;
+			return;
+		}
+		// Under some circumstances, situation is no longer weak
+		// Ex: if enemies in my town were killed and I have many defence now, some DM situations (fast army re-trainining), some unit groups retreated successfully and crushed enemies, etc
+		// TODO
+		return;
+	}
+
+	if (this->activeGroupsTaskingTempInfo.myWeaknessScore >= 70) {
+		this->activeGroupsTaskingTempInfo.militarySituation = MILITARY_SITUATION::MS_WEAK;
+		if (this->activeGroupsTaskingTempInfo.totalAttacksInPeriod > 0) {
+			this->activeGroupsTaskingTempInfo.militarySituation = MILITARY_SITUATION::MS_CRITICAL;
+		}
+		return;
+	}
+
+	this->activeGroupsTaskingTempInfo.militarySituation = MILITARY_SITUATION::MS_NORMAL;
+	if (this->activeGroupsTaskingTempInfo.myTotalMilitaryUnitCount > AI_CONST::armySizeToConsiderStrong) { // TODO: could depend on max population.
+		this->activeGroupsTaskingTempInfo.myTotalMilitaryUnitCount = MILITARY_SITUATION::MS_STRONG;
+		return;
+	}
+	
+	if ((this->activeGroupsTaskingTempInfo.myWeaknessScore < 10) && (this->activeGroupsTaskingTempInfo.totalLandGroups > 1)) {
+		// Rich and at least 2 land military groups (excluding artefact groups !)
+		this->activeGroupsTaskingTempInfo.myTotalMilitaryUnitCount = MILITARY_SITUATION::MS_STRONG;
+		return;
+	}
+	
+}
+
+
 // Set unitGroup.currentTask and call ApplyTask for the group (creates underlying unit commands, etc).
 void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, UNIT_GROUP_TASK_IDS taskId,
 	long int resetOrg, bool force) {
@@ -144,6 +193,8 @@ bool UnitGroupAI::OnTaskActiveGroupsBegin(STRUCT_TAC_AI *tacAI, long int process
 		}
 		loopUnitGroup = loopUnitGroup->next;
 	}
+	this->activeGroupsTaskingTempInfo.totalLandGroups = this->activeGroupsTaskingTempInfo.totalLandAttackGroupCount + 
+		this->activeGroupsTaskingTempInfo.totalLandDefendGroupCount + this->activeGroupsTaskingTempInfo.totalLandExploreGroupCount;
 
 	this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital = false;
 	if (this->activeGroupsTaskingTempInfo.myMainCentralUnit && this->activeGroupsTaskingTempInfo.myMainCentralUnit->unitDefinition) {
@@ -152,6 +203,8 @@ bool UnitGroupAI::OnTaskActiveGroupsBegin(STRUCT_TAC_AI *tacAI, long int process
 			(myMainCentralUnitDef->unitAIType == TribeAIGroupPriest) ||
 			(myMainCentralUnitDef->DAT_ID1 == CST_UNITID_FORUM));
 	}
+
+	this->EvaluateMilitarySituation(tacAI);
 
 	return true; // Normal case: allow processing the groups
 }
@@ -164,7 +217,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	if (!tacAI || !tacAI->IsCheckSumValid() || !unitGroup || !unitGroup->IsCheckSumValid()) {
 		return false;
 	}
-	// Not-supported unit group type (no custom treatment)
+	// Restrict to supported unit group type
 	if ((unitGroup->unitGroupType != UNIT_GROUP_TYPES::CST_UGT_LAND_ATTACK) &&
 		(unitGroup->unitGroupType != UNIT_GROUP_TYPES::CST_UGT_LAND_DEFEND) &&
 		(unitGroup->unitGroupType != UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE)) {
@@ -194,7 +247,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		// Defend grp: see 0x4D3E45
 		// Attack grp: if tacAI.attackEnabled=0, do nothing. Check lastAttackTime_ms, SNAttackSeparationTime, find target (targeting), attack (some complex treatments)
 	} else {
-		// // Most frequent case (cf 04D4722)
+		// Most frequent case (cf 04D4722)
 	}
 
 	STRUCT_UNIT_BASE *myMainCentralUnit = this->activeGroupsTaskingTempInfo.myMainCentralUnit;
@@ -204,7 +257,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		return false; // Let ROR code handle this case
 	}
 
-	int totalGroupsCount = this->activeGroupsTaskingTempInfo.totalLandAttackGroupCount + this->activeGroupsTaskingTempInfo.totalLandDefendGroupCount + this->activeGroupsTaskingTempInfo.totalLandExploreGroupCount;
+	int totalGroupsCount = this->activeGroupsTaskingTempInfo.totalLandGroups;
 	int totalGroupsInTown = this->activeGroupsTaskingTempInfo.townLandAttackGroupCount + this->activeGroupsTaskingTempInfo.townLandDefendGroupCount + this->activeGroupsTaskingTempInfo.townLandExploreGroupCount;
 
 	// Group (leader) distance from our town (or unit to defend)
@@ -359,29 +412,36 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		mainUnitProtectionRadius = 7;
 	}
 
-	// Handle "weak" situations
-
-	// Special: discard explore groups if situation is critical
-	if ((this->activeGroupsTaskingTempInfo.myWeaknessScore > 50) && this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital && 
-		beenAttackedRecently && (unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE)) {
-		float targetPosX = -1;
-		float targetPosY = -1;
-		targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
-		targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
-		if (myMainCentralUnit && ((targetPosX < 0) || (targetPosY < 0))) {
-			targetPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
-			targetPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
-		}
-		UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, enemyUnitNearMyMainUnitInfAIElem,
-			targetPosX, targetPosY, true);
-		return (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET); // True if unit group has been tasked
-	}
-
-	if (unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) {
-		// For explore groups, let ROR code handle all other situations than "I am very weak".
+	if ((unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) && (this->activeGroupsTaskingTempInfo.militarySituation != MILITARY_SITUATION::MS_CRITICAL)) {
+		// For explore groups, let ROR code handle all other situations than "critical".
 		// TODO: explore groups do not respond to attacks, we could do something here ? Or rather in tacAI.react to event maybe
 		return false;
 	}
+
+	// Critical defense situations
+	if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
+		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL) {
+			// Special: discard explore groups if situation is critical
+			if (unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) {
+				float targetPosX = -1;
+				float targetPosY = -1;
+				targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
+				targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
+				if (myMainCentralUnit && ((targetPosX < 0) || (targetPosY < 0))) {
+					targetPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
+					targetPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
+				}
+				UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, enemyUnitNearMyMainUnitInfAIElem,
+					targetPosX, targetPosY, true);
+				return (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET); // True if unit group has been tasked
+			}
+			// Other than explore groups in "critical" situation: retreat at all costs
+
+		}
+	}
+
+
+
 
 	// TODO: no group in my town and few resources (myWeaknessScore) : should depend on random...
 	// ...and player "personality": AI players still should try to attack early in both RM/DM, for example. But not always ? If "I sent" a group to attack, make sure I don't recall it here just after

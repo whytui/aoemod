@@ -109,7 +109,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_AI_UNIT_LIST_INFO allVillagers; // +F4. All *my* villagers. Array can contain empty values (-1). Does NOT contain any boat ! 
 		// 0x100
 		STRUCT_AI_UNIT_LIST_INFO villagerExplorers; // +104.
-		STRUCT_AI_UNIT_LIST_INFO landMilitaryUnits; // +114. military unitIds that do NOT belong to a unitGroup. Contains military unit (cf AI type - 0x4D277A), EXCLUDING towers, boats
+		STRUCT_AI_UNIT_LIST_INFO landMilitaryUnits; // +114. All land military unitIds (cf AI type - 0x4D277A), EXCLUDING towers, boats
 		STRUCT_AI_UNIT_LIST_INFO unknown_124; // NOT SURE it is a STRUCT_AI_UNIT_LIST_INFO
 		STRUCT_AI_UNIT_LIST_INFO allBoats; // +134. Includes trade/fishing/transport/war boat AI type units.
 		STRUCT_AI_UNIT_LIST_INFO warShips; // +144

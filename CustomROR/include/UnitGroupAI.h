@@ -14,6 +14,7 @@ using namespace AOE_STRUCTURES;
 
 namespace CUSTOM_AI {
 
+	enum MILITARY_SITUATION { MS_UNKNOWN, MS_CRITICAL, MS_WEAK, MS_NORMAL, MS_STRONG };
 
 	// Represents common (temporary) information about active unit group tasking
 	// Such data is only valid during the "task active unit groups" loop.
@@ -24,31 +25,37 @@ namespace CUSTOM_AI {
 		}
 		long int processingStartTimeGetTime; // TimeGetTime value of processing start time (provided by ROR code)
 		long int allowedTime; // Time in millisecond we are allowed to spend from processingStartTimeGetTime (provided by ROR code)
+		MILITARY_SITUATION militarySituation;
 		// My town center, or another "main" unit to consider as "main town unit" if no TC was found
 		STRUCT_UNIT_BASE *myMainCentralUnit;
+		int myTotalMilitaryUnitCount;
 		int myWeaknessScore; // myWeaknessScore = 100 if I am weak
-		int totalAttacksInPeriod;
-		int totalPanicModesInPeriod;
+		int totalAttacksInPeriod; // Number of enemy attacks last AI_CONST::delayInWhichEnemyAttacksImpactUnitGroupTasking milliseconds
+		int totalPanicModesInPeriod; // Number of triggered panic modes in last AI_CONST::delayInWhichEnemyAttacksImpactUnitGroupTasking milliseconds
 		int totalLandAttackGroupCount;
 		int totalLandDefendGroupCount;
 		int totalLandExploreGroupCount;
 		int townLandAttackGroupCount;
 		int townLandDefendGroupCount;
 		int townLandExploreGroupCount;
+		int totalLandGroups; // Sum of land military groups, excluding artefacts
 		// mainCentralUnitIsVital determines if "central" unit is TC or a unit that allows survival (villager, priest).
-		// This information can be useful to handle well scenario situations (AI should be able to attack in scenarios when it doesn't have villagers, etc)
+		// If false, player has no villager, TC, etc, and may adopt a more aggressive attitude (nothing to lose) ; especially in scenarios
 		bool mainCentralUnitIsVital;
 
 		void ResetAllInfo() {
 			this->processingStartTimeGetTime = 0;
 			this->allowedTime = 0;
+			this->militarySituation = MILITARY_SITUATION::MS_UNKNOWN;
 			this->myMainCentralUnit = NULL;
+			this->myTotalMilitaryUnitCount = 0;
 			this->myWeaknessScore = 0;
 			this->totalAttacksInPeriod = 0;
 			this->totalPanicModesInPeriod = 0;
 			this->totalLandAttackGroupCount = 0;
 			this->totalLandDefendGroupCount = 0;
 			this->totalLandExploreGroupCount = 0;
+			this->totalLandGroups = 0;
 			this->townLandAttackGroupCount = 0;
 			this->townLandDefendGroupCount = 0;
 			this->townLandExploreGroupCount = 0;
@@ -63,6 +70,10 @@ namespace CUSTOM_AI {
 		CustomAIMilitaryInfo *militaryAIInfo;
 
 		void ResetAllInfo();
+
+		// Computes internal variables about military situation
+		// This method should perform few operations to be quite fast
+		void EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI);
 
 		// Set unitGroup.currentTask and call ApplyTask for the group (creates underlying unit commands, etc).
 		void SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, UNIT_GROUP_TASK_IDS taskId,
