@@ -156,7 +156,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_TAC_AI_BUILD_TO_TRIGGER constructionToTrigger; // E4C : an included temporary struct (=>F78 or F80?) about building currently analyzed for being built. +0=DATID to build. +108=actorUnitId?
 		long int currentAIUpdateVillagerId; // Currently evaluated villager unitId (from allVillagers array). Set to -1 when I have no villager or out of loop ?
 		long int unknown_F80; // +F80. signed dword. A group id ? Last group id that was tasked ?
-		long int lastProcessedUnitGroupId; // +F84. a unit group ID. 4D1CF7,4D3ACB. Current group for treatments(just technical, to continue work when has no time to finish?)
+		long int currentlyProcessedUnitGroupId; // +F84. Id of "next" group to process in active group tasking (just technical, to continue work when has not enough time to finish in 1 execution)
 		long int storagePitAddedToStrategy; // +F88. 1 when a SP has been inserted into strategy.
 		long int granaryAddedToStrategy; // +F8C. 1 when a granary has been inserted into strategy.
 		// 0xF90

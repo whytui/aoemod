@@ -98,7 +98,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 118
+#define COUNT_ROR_API_10c 119
 #define COUNT_manageAI_10c 13
 
 
@@ -5231,8 +5231,18 @@ void AOE_binData::InitROR_API_10c() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
-		OverloadTaskAIActiveSoldiers,
-		"Overload AI active groups handling",
+		OverloadTaskAIActiveSoldiersBeforeLoop,
+		"Overload AI active groups handling: before loop on unit groups",
+		0xD3ABA,
+		(0x8B, 0xF9, 0x8B, 0x87, 0x84, 0x0F, 0x00, 0x00, 0x8B, 0xB7, 0xD8, 0x09, 0x00, 0x00),
+		(0x8B, 0xF9, 0xE8, 0xB3, 0x5A, 0xF4, 0xFF, 0x90, 0x8B, 0xB7, 0xD8, 0x09, 0x00, 0x00),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		OverloadTaskAIActiveSoldiersForEachGroup,
+		"Overload AI active groups handling: for each group",
 		0xD3B16,
 		(0x3B, 0xF5, 0x0F, 0x84, 0x11, 0x25, 0x00, 0x00, 0x8B, 0xCE),
 		(0x3B, 0xF5, 0xE8, 0x57, 0x5A, 0xF4, 0xFF, 0x90, 0x8B, 0xCE),

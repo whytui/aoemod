@@ -65,9 +65,10 @@ namespace CUSTOM_AI {
 		static STRUCT_UNIT_BASE *GetTownCenterOrUnitToDefend(STRUCT_PLAYER *player);
 
 		// Returns infAI elem list entry for the first found enemy or neutral military unit in specified zone
-		// Returns NULL if not found
-		static STRUCT_INF_AI_UNIT_LIST_ELEM *FindEnemyMilitaryUnitNearPosition(STRUCT_PLAYER *player, long int posX, long int posY,
-			long int distanceFromCenter, bool landOnly);
+		// startIndex = index of first element to search in infAI elem list. Use 0 or -1 to start from beginning.
+		// Returns -1 if not found
+		static long int FindInfAiIndexOfEnemyMilitaryUnitNearPosition(STRUCT_PLAYER *player, long int posX, long int posY,
+			long int distanceFromCenter, bool landOnly, long int startIndex);
 	};
 	
 }

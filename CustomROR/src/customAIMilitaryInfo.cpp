@@ -220,17 +220,19 @@ namespace CUSTOM_AI {
 
 
 	// Returns infAI elem list entry for the first found enemy or neutral military unit in specified zone
-	// Returns NULL if not found
-	STRUCT_INF_AI_UNIT_LIST_ELEM *CustomAIMilitaryInfo::FindEnemyMilitaryUnitNearPosition(STRUCT_PLAYER *player, long int posX, long int posY,
-		long int distanceFromCenter, bool landOnly) {
-		if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) { return NULL; }
+	// startIndex = index of first element to search in infAI elem list. Use 0 or -1 to start from beginning.
+	// Returns -1 if not found
+	long int CustomAIMilitaryInfo::FindInfAiIndexOfEnemyMilitaryUnitNearPosition(STRUCT_PLAYER *player, long int posX, long int posY,
+		long int distanceFromCenter, bool landOnly, long int startIndex) {
+		long int resultNotFound = -1;
+		if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) { return resultNotFound; }
 		STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
 		assert(global && global->IsCheckSumValid());
-		if (!global || !global->IsCheckSumValid()) { return NULL; }
+		if (!global || !global->IsCheckSumValid()) { return resultNotFound; }
 		assert(global->gameMapInfo && global->gameMapInfo->IsCheckSumValid());
 		global->gameMapInfo->FixPositionToGetInMapBounds(&posX, &posY);
 		assert(distanceFromCenter > 0);
-		if (distanceFromCenter <= 0) { return NULL; }
+		if (distanceFromCenter <= 0) { return resultNotFound; }
 		long int minPosX = posX - distanceFromCenter;
 		long int minPosY = posY - distanceFromCenter;
 		long int maxPosX = posX + distanceFromCenter;
@@ -238,7 +240,8 @@ namespace CUSTOM_AI {
 		global->gameMapInfo->FixPositionToGetInMapBounds(&minPosX, &minPosY);
 		global->gameMapInfo->FixPositionToGetInMapBounds(&maxPosX, &maxPosY);
 		
-		for (int i = 0; i < player->ptrAIStruct->structInfAI.unitElemListSize; i++) {
+		if (startIndex < 0) { startIndex = 0; }
+		for (int i = startIndex; i < player->ptrAIStruct->structInfAI.unitElemListSize; i++) {
 			STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &player->ptrAIStruct->structInfAI.unitElemList[i];
 			bool enemyOrNeutral = (player->diplomacyVSPlayers[curElem->playerId] > PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY);
 			enemyOrNeutral &= (curElem->unitId > -1);
@@ -257,11 +260,11 @@ namespace CUSTOM_AI {
 				// Check position
 				if ((curUnit->positionX >= minPosX) && (curUnit->positionX <= maxPosX) &&
 					(curUnit->positionY >= minPosY) && (curUnit->positionY <= maxPosY)) {
-					return curElem;
+					return i;
 				}
 			}
 		}
-		return NULL; // Not found
+		return resultNotFound; // Not found
 	}
 }
 

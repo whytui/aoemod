@@ -377,6 +377,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004BFFCC:
 		this->EntryPointInfAIGroupFindMainTarget(REG_values);
 		break;
+	case 0x004D3AC1:
+		this->EntryPointTacAIHandleActiveGroupsBeforeLoop(REG_values);
+		break;
 	case 0x004D3B1D:
 		this->EntryPointTacAIHandleActiveGroups(REG_values);
 		break;
@@ -3726,8 +3729,37 @@ void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_value
 }
 
 
-// From 004D3B16. tacAI.TaskActiveSoldiers(timeGetTime, allowedtime)
+// From 0x4D3ABA. tacAI.TaskActiveSoldiers(timeGetTime, allowedtime) before doing anything else
+// Can change return address to 0x4D6039 to exit procedure
+void CustomRORInstance::EntryPointTacAIHandleActiveGroupsBeforeLoop(REG_BACKUP *REG_values) {
+	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->EDI_val);
+	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ECX_val;
+	ror_api_assert(REG_values, (tacAI != NULL) && tacAI->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->EAX_val = tacAI->currentlyProcessedUnitGroupId;
+	}
+	long int processStartTimeGetTimeValue = GetIntValueFromRORStack(REG_values, 0xE4); // NOT game time ! Cf AOE_METHODS::TimeGetTime()
+	long int allowedTime = GetIntValueFromRORStack(REG_values, 0xE8);
+
+	// Custom treatments
+	bool forceExitProcedure = false;
+
+	long int playerId = tacAI->commonAIObject.playerId;
+	assert(playerId >= 0);
+	forceExitProcedure = !CUSTOM_AI::customAIHandler.GetCustomPlayerAI(playerId)->unitGroupAI.OnTaskActiveGroupsBegin(tacAI, processStartTimeGetTimeValue, allowedTime);
+
+	// Do not modify below.
+	if (forceExitProcedure) {
+		ChangeReturnAddress(REG_values, 0x4D6039);
+		return;
+	}
+}
+
+
+// From 004D3B16. tacAI.TaskActiveSoldiers(timeGetTime, allowedtime) at begin of "for each group" loop
 // Can change return address to 0x4D602F to ignore current group
+// EntryPointTacAIHandleActiveGroupsBeforeLoop is ALWAYS (once) called before this
 void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->EBP_val == 0);
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->EDI_val;
@@ -3744,7 +3776,7 @@ void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values
 	if ((unitGroup == NULL) || (!unitGroup->IsCheckSumValid())) {
 		return;
 	}
-	// Standard behavior : skip some group types
+	// Standard behavior : skip some group types & inactives
 	if ((unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_FISHING_SHIP) ||
 		(unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_TRADE_SHIP) ||
 		(unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_TRANSPORT_BOAT) ||
