@@ -162,6 +162,7 @@ namespace CUSTOM_AI {
 		if (!player || !player->IsCheckSumValid()) { return NULL; }
 		if (!player->ptrCreatableUnitsListLink || !player->ptrCreatableUnitsListLink->IsCheckSumValid()) { return NULL; }
 		STRUCT_UNIT_BASE *unfinishedTC = NULL;
+		STRUCT_UNIT_BASE *finishedTC = NULL;
 		STRUCT_UNIT_BASE *priestOrCivilian = NULL;
 		STRUCT_UNIT_BASE *house = NULL;
 		STRUCT_UNIT_BASE *building = NULL;
@@ -177,7 +178,7 @@ namespace CUSTOM_AI {
 						if (curUnit->unitStatus == 0) {
 							unfinishedTC = curUnit;
 						} else {
-							return curUnit; // Fully built TC always has priority, no need to go further
+							finishedTC = curUnit; // Continue ; "main" TC is last one from the list
 						}
 					} else {
 						if (curUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian) {
@@ -202,6 +203,9 @@ namespace CUSTOM_AI {
 				}
 			}
 			curElem = curElem->previousElement;
+		}
+		if (finishedTC) {
+			return finishedTC;
 		}
 		if (hadVillager && unfinishedTC) {
 			return unfinishedTC;

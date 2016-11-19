@@ -82,7 +82,7 @@ namespace AOE_CONST_FUNC {
 		SNSizeWallGates = 85,
 		SNStoragePitMaxDistance = 86,
 		SNGranaryMaxDistance = 87,
-		SNTacticalUpdateFrequency = 88, // Sets the number of seconds that pass between each tactical AI update. Must be >= 0.
+		SNTacticalUpdateFrequency = 88, // Sets the number of seconds that pass between each tactical AI update. Must be >= 0. Default 3 seconds ?
 		SNTargetEvaluationAttackAttempts = 89, // Sets the multiplier used for the attack attempts rating in computer player target evaluation. Must be >= 0. 
 		SNTargetEvaluationRange = 90, // Sets the multiplier used for the range rating in computer player target evaluation. Must be >= 0. 
 		SNPercentUnitHealthRetreat = 91,

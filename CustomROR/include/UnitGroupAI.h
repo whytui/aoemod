@@ -14,7 +14,12 @@ using namespace AOE_STRUCTURES;
 
 namespace CUSTOM_AI {
 
-	enum MILITARY_SITUATION { MS_UNKNOWN, MS_CRITICAL, MS_WEAK, MS_NORMAL, MS_STRONG };
+	enum MILITARY_SITUATION { MS_UNKNOWN,
+		MS_CRITICAL, // {few resources and few military and recent panic modes} or {very few resources and recently attacked}
+		MS_WEAK, // {recent panic modes} or {very few resources}
+		MS_NORMAL, 
+		MS_STRONG // Large military numbers, with at least 2 land (military) unit groups
+	};
 
 	// Represents common (temporary) information about active unit group tasking
 	// Such data is only valid during the "task active unit groups" loop.
@@ -79,7 +84,7 @@ namespace CUSTOM_AI {
 		void SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, UNIT_GROUP_TASK_IDS taskId,
 			long int resetOrg, bool force);
 
-		// Attack a target or use retreat to approach a zone to defend/attack
+		// Attack a target or use retreat to approach a zone to defend/attack. Updates unitGroup->lastTaskingTime_ms if tasked.
 		// If target is not found and no default retreat position if provided (-1), the group is NOT tasked
 		// Returns the used task id.
 		UNIT_GROUP_TASK_IDS AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_INF_AI_UNIT_LIST_ELEM *targetInfo,

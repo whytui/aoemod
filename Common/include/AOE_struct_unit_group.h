@@ -89,7 +89,7 @@ namespace AOE_STRUCTURES {
 		long int targetUnitIdArray[STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4). Get=0x4CEB90
 		long int targetPlayerId; // +320. Related to targetUnitIdArray unit's playerId (last inserted? All the same player?)
 		long int terrainZoneId; // +324. TerrainZoneId (to identify the island/lake/sea the group is in)
-		long int unknown_328_gameTime; // Last tasking time (milliseconds). 10 seconds min between roundup attacks (0x4CDAFC)
+		long int lastAttackTaskingTime_ms; // Last ATTACK (2,0x14,0x15) tasking time (milliseconds). Attack roundup (0x14) require to wait 10 seconds (0x4CDAFC).
 		unsigned long int unknown_gameTime_ms; // +0x32C. To confirm
 		// End (0x330)
 		bool IsCheckSumValid() const { return this->checksum == 0x00548CE0; }

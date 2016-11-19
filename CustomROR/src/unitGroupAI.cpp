@@ -78,7 +78,7 @@ void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROU
 }
 
 
-// Attack a target or use retreat to approach a zone to defend/attack
+// Attack a target or use retreat to approach a zone to defend/attack. Updates unitGroup->lastTaskingTime_ms if tasked.
 // If target is not found and no default retreat position if provided (-1), the group is NOT tasked
 // Returns the used task id.
 UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_INF_AI_UNIT_LIST_ELEM *targetInfo,
@@ -129,6 +129,7 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 	unitGroup->targetDAT_ID = -1;
 	unitGroup->retreatPosX = targetPosX;
 	unitGroup->retreatPosY = targetPosY;
+	// TODO: do not retreat to exact target position, stop before, especially range units !
 	this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT, 1, forceTasking);
 	unitGroup->lastTaskingTime_ms = global->currentGameTime;
 	return UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT;
@@ -224,6 +225,28 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		return false;
 	}
 
+#ifdef _DEBUG
+	if ((unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_15) ||
+		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_ROUNDUP_TARGET) || // never used as a "current task" ?
+		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_UNKNOWN_05) || 
+		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_UNKNOWN_06) || 
+		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_UNKNOWN_11) || 
+		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_UNKNOWN_12) || 
+		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_EXPLORE) || 
+		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_UNKNOWN_16) ) {
+		assert(false && "Found an group task that required debugging !");
+	
+	}
+#endif
+
+	// Restrict to supported tasks
+	if ((unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02) &&
+		(unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_EXPLORE) &&
+		(unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT) &&
+		(unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_DEFEND_UNIT)) {
+		return false;
+	}
+
 	// Get some main objects
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
@@ -248,6 +271,29 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		// Attack grp: if tacAI.attackEnabled=0, do nothing. Check lastAttackTime_ms, SNAttackSeparationTime, find target (targeting), attack (some complex treatments)
 	} else {
 		// Most frequent case (cf 04D4722)
+		// Manage transports/being transported/waiting...
+		// Retreat: check if "arrived" ?
+		// exterminate: search a target (whatever current activity is ?) and switch to attack(2)
+		// attack: if valid target, call task to attack roundup target(20) but doesn't switch to it? switch to explore or retreat if target destroyed? switch to idle otherwise
+		// defend unit
+		
+		/*if ((this->activeGroupsTaskingTempInfo.militarySituation != MILITARY_SITUATION::MS_CRITICAL) &&
+			(this->activeGroupsTaskingTempInfo.militarySituation != MILITARY_SITUATION::MS_WEAK)) {
+			return false;
+		}
+		if ((this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) &&
+			(unitGroup->lastTaskingTime_ms - global->currentGameTime < tacAI->SNNumber[SNTacticalUpdateFrequency])) {
+			
+			return false;
+		}*/
+	}
+
+	if ((unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) &&
+		(this->activeGroupsTaskingTempInfo.militarySituation != MILITARY_SITUATION::MS_CRITICAL) &&
+		(this->activeGroupsTaskingTempInfo.militarySituation != MILITARY_SITUATION::MS_WEAK)) {
+		// For explore groups, let ROR code handle all other situations than "critical".
+		// TODO: explore groups do not respond to attacks, we could do something here ? Or rather in tacAI.react to event maybe
+		return false;
 	}
 
 	STRUCT_UNIT_BASE *myMainCentralUnit = this->activeGroupsTaskingTempInfo.myMainCentralUnit;
@@ -291,7 +337,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	// Unit group consistution and current activity
 	int groupUnitCount = unitGroup->unitCount;
 	int index = 0;
-	int validUnitsFound = 0;
+	int validUnitsFound = 0; // Number of valid units among group members
 	int badDefenderUnits = 0; // units that are not very relevant for defense. Typically, catapults.
 	int notAttackingUnitsCount = 0; // Number of units that do not currently have an agressive activity.
 	int unitsAttackingNonPriorityTarget = 0;
@@ -412,112 +458,133 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		mainUnitProtectionRadius = 7;
 	}
 
-	if ((unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) && (this->activeGroupsTaskingTempInfo.militarySituation != MILITARY_SITUATION::MS_CRITICAL)) {
-		// For explore groups, let ROR code handle all other situations than "critical".
-		// TODO: explore groups do not respond to attacks, we could do something here ? Or rather in tacAI.react to event maybe
-		return false;
-	}
-
 	// Critical defense situations
-	if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
-		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL) {
-			// Special: discard explore groups if situation is critical
-			if (unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) {
-				float targetPosX = -1;
-				float targetPosY = -1;
-				targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
-				targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
-				if (myMainCentralUnit && ((targetPosX < 0) || (targetPosY < 0))) {
-					targetPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
-					targetPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
-				}
-				UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, enemyUnitNearMyMainUnitInfAIElem,
-					targetPosX, targetPosY, true);
-				return (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET); // True if unit group has been tasked
+	if (unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) {
+		// Special: explore groups. Note that we don't know its current location
+		bool discardExploreAndRetreat = (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL);
+		if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
+			// If we have a town to defend, take less risks
+			if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) {
+				// TODO: use some AI personality criteria (a random value that is not recomputed each time) to decide if AI takes the risk to explore when being weak (beginning of game...)
+				discardExploreAndRetreat = true;
 			}
-			// Other than explore groups in "critical" situation: retreat at all costs
-
 		}
-	}
-
-
-
-
-	// TODO: no group in my town and few resources (myWeaknessScore) : should depend on random...
-	// ...and player "personality": AI players still should try to attack early in both RM/DM, for example. But not always ? If "I sent" a group to attack, make sure I don't recall it here just after
-	// Also, take into account strategy progress: if I am attacking for 10th time in "weak" situation and didn't make any progress in strategy (in RM), then stop it ?
-	if ((this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital && (this->activeGroupsTaskingTempInfo.totalPanicModesInPeriod > 0) &&
-		(this->activeGroupsTaskingTempInfo.myWeaknessScore > 70)) || (totalGroupsInTown <= 1)) { // TEMP TEST
-		// TODO: we should count the groups IN my town
-		if ((unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT) && !AOE_METHODS::IsUnitIdle(commander)) {
-			// TODO: check if leader has reached retreat pos (idle or at target pos)
-			return true; // If still moving, let the group finish retreating ?
+		if (discardExploreAndRetreat && (distanceToMyMainUnit > AI_CONST::townSize + 5)) {
+			unitGroup->targetDAT_ID = -1;
+			unitGroup->targetPlayerId = -1;
+			unitGroup->targetUnitId = -1;
+			unitGroup->targetPosX = -1;
+			unitGroup->targetPosY = -1;
+			this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_IDLE, 0, 1);
+			return true; // Unit group has been tasked
 		}
-		if (distanceToMyMainUnit > AI_CONST::townSize + 5) {
-			// Randomly choose a zone to "defend" : TC or last (in-town) attack position
-			int randomValue = randomizer.GetRandomPercentageValue();
+		if (discardExploreAndRetreat) {
 			float targetPosX = -1;
 			float targetPosY = -1;
-			//if (randomValue > 60) {
-				targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
-				targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
-			//}
-			/*if (randomValue <= 40) {
+			targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
+			targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
+			if (myMainCentralUnit && ((targetPosX < 0) || (targetPosY < 0))) {
 				targetPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
 				targetPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
-			}*/
-			// 40-60: do nothing (do not set targetPosX/targetPosY)
-
+			}
 			UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, enemyUnitNearMyMainUnitInfAIElem,
 				targetPosX, targetPosY, true);
-			
-			if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
-#ifdef _DEBUG
-				std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
-					std::to_string(result) + std::string(" due to weakness, wkn=");
-				msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
-				CallWriteText(msg.c_str());
-#endif
-				return true; // Unit group has been tasked
+			return (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET); // True if unit group has been tasked
+		}
+		return false; // let standard code for explore groups, in normal situations
+	}
+
+
+	if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
+		// Other than explore groups in "critical" situation: retreat at all costs
+		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL) {
+			if ((unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT) && !AOE_METHODS::IsUnitIdle(commander)) {
+				// TODO: check if leader has reached retreat pos or is close enough (idle or at target pos)
+				// TODO: if enely is visible, stop retreating and attack
+				return true; // If still moving, let the group finish retreating ?
 			}
-		} else {
-			// Group is in/near town
-			if (global->currentGameTime - unitGroup->lastTaskingTime_ms > (1000 * tacAI->SNNumber[SNTacticalUpdateFrequency])) {
-				// Attack enemy if visible/if we know a recent location. Otherwise, do nothing
-				UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, enemyUnitNearMyMainUnitInfAIElem, -1, -1, false);
+
+			// Unit group is far from TC: force it to retreat (or attack a unit in my town)
+			if (distanceToMyMainUnit > AI_CONST::townSize + 5) {
+				// Randomly choose a zone to "defend" : TC or last (in-town) attack position
+				int randomValue = randomizer.GetRandomPercentageValue();
+				float targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
+				float targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
+				/*if (randomValue <= 40) {
+				targetPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
+				targetPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
+				}*/
+				UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, enemyUnitNearMyMainUnitInfAIElem,
+					targetPosX, targetPosY, true);
+
 				if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
 #ifdef _DEBUG
 					std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
-						std::to_string(result) + std::string(" due to weakness, wkn=");
+						std::to_string(result) + std::string(" due to critical situation, wkn=");
 					msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
 					CallWriteText(msg.c_str());
 #endif
 					return true; // Unit group has been tasked
 				}
-				return true; // no target, do nothing special
-			}
-
+			} else {
+				// Unit group is already in (or near) town
+				if (global->currentGameTime - unitGroup->lastTaskingTime_ms > (1000 * tacAI->SNNumber[SNTacticalUpdateFrequency])) {
+					// Attack enemy if visible/if we know a recent location. Otherwise, do nothing
+					UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, enemyUnitNearMyMainUnitInfAIElem, -1, -1, false);
+					if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
 #ifdef _DEBUG
-			//CallWriteText("Ordered exterminate due to weakness");
+						std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
+							std::to_string(result) + std::string(" due to weakness, wkn=");
+						msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
+						CallWriteText(msg.c_str());
 #endif
-			//unitGroup->isTasked = 0;
-			//this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_EXTERMINATE, 1, false);
+						return true; // Unit group has been tasked
+					}
+					return true; // no target, do nothing special (stand by - prevent an attack to some target outta town !)
+				}
+				// TODO: if currently no target AND we know a "good" target in town, force doing something even if delay has not passed ?
+				return true; // Wait a bit more time...
+			}
+			return true;
+		}
+		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) {
+			// TODO: if I have priority targets from TARGETING classes, consider attacking them
+			// ... at least in my town or if related to victory conditions
+			return true; // Stand by = prevent ROR from sending this group attacking some non-priority target
+		}
+	} else {
+		// No TC/villager/priest to protect. This may be a scenario or a game-end situation where I am probably gonna lose
+		// Waiting and remaining idle could make the situation worse here
+		// TODO: if I have an allied player, consider running to his town or helping him in battle
+		if ((this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL) ||
+			(this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK)) {
+			return false;
 		}
 	}
 
+	// Remaining: non-critical and non-weak situations
+	if (unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02) {
+		if (unitGroup->taskSubTypeId != -1) {
+			return false; // Let ROR handle this...
+		}
+		// Is current target valid ? Visible ?
+
+	}
 
 
-	return false;
+	// TODO: no group in my town and few resources (myWeaknessScore) : should depend on random...
+	// ...and player "personality": AI players still should try to attack early in both RM/DM, for example. But not always ? If "I sent" a group to attack, make sure I don't recall it here just after
+	// Also, take into account strategy progress: if I am attacking for 10th time in "weak" situation and didn't make any progress in strategy (in RM), then stop it ?
 
 	//this->priorityLocation
 
 	// Could use mainAI->structInfAI.attacksHistory too
-	// Retreat (test)
-	// If group is away from my town and/or partially inactive ?
 
 	// TODO: set tacAI->lastAttackTime_ms if we launch an attack (on a specific target?)
 
-	return false; //TO DO
+	// TODO: attack, lastupdate long time ago, target not visible: force change ?
+
+	return false; //TO DO (let ROR code be executed)
 }
 
 
