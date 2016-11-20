@@ -2675,7 +2675,7 @@ void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 	}
 
 	// Get information about UI status: is this editor, game loading, playing... ?
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	ror_api_assert(REG_values, settings != NULL);
 	ror_api_assert(REG_values, settings->IsCheckSumValid());
 	AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentStatus = settings->currentUIStatus;

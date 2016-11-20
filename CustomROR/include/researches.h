@@ -13,6 +13,7 @@
 #include "language.h"
 #include "crLocalization.h"
 #include "TechnologyFilter.h"
+#include "mainStructuresHandling.h"
 
 using namespace AOE_STRUCTURES;
 using namespace AOE_CONST_FUNC;

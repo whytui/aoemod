@@ -5,16 +5,17 @@ using namespace AOE_STRUCTURES;
 // Returns a pointer to global game struct
 // Warning: can sometimes return NULL when called very early (when the game has just been run)
 STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr() {
-	STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings; // Otherwise, find it in game settings
+	STRUCT_GAME_SETTINGS *settings = (STRUCT_GAME_SETTINGS*)*ROR_gameSettings; // Otherwise, find it in game settings
 	assert(settings != NULL);
 	if (!settings) { return NULL; }
 	return settings->ptrGlobalStruct;
 }
 
 
+// Warning: this can fail when called from constructors (ROR_gameSettings might not be set)
 STRUCT_GAME_SETTINGS* GetGameSettingsPtr() {
-	assert(*ROR_gameSettings != NULL);
-	return *ROR_gameSettings;
+	if (!ROR_gameSettings) { return NULL; }
+	return (STRUCT_GAME_SETTINGS*)*ROR_gameSettings;
 }
 
 

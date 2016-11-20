@@ -30,7 +30,7 @@ std::string GetTechnologyLocalizedName(short int techId) {
 	if (techId < 0) {
 		return "invalid-tech";
 	}
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	if (!settings) { return ""; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
@@ -58,7 +58,7 @@ std::string GetResearchLocalizedName(short int researchId) {
 	if (researchId < 0) {
 		return "invalid-research";
 	}
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	if (!settings) { return ""; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
@@ -377,7 +377,7 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId) {
 // An impossible research is a research that is waiting for requirements, including ones that can never be satisfied.
 // Example in original game: irrigation for persian, armored elephant for yamato, etc.
 int DisableImpossibleResearches() {
-	STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return 0; }
 	STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !global->ptrPlayerStructPtrTable) {
@@ -519,7 +519,7 @@ bool DoesTechDisableResearch(STRUCT_TECH_DEF *techDef, short int researchId) {
 
 // Returns true if a unit (DATID) is disabled by player's tech tree
 bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId) {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	if (!settings) { return false; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
@@ -538,7 +538,7 @@ bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId) {
 
 // Returns true if a research (research ID) is disabled by player's tech tree
 bool IsResearchDisabledInTechTree(short int playerId, short int researchId) {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	if (!settings) { return false; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;

@@ -318,7 +318,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 	outputBuffer[0] = 0;
 
 	if (!*command) { return false; }
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = *ROR_gameSettings;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
 
 	if (!_strnicmp(command, PREFIX_SET, sizeof(PREFIX_SET))) {
 		// This is a "set ___=___" command.
