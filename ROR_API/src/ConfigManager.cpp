@@ -9,6 +9,10 @@ ConfigManager::ConfigManager() {
 ConfigManager::~ConfigManager() {
 	free(this->DLL_names_first);
 	this->DLL_names_first = NULL;
+	if (this->hModules) {
+		free(this->hModules);
+	}
+	this->hModules = NULL;
 }
 
 void ConfigManager::Init() {
@@ -42,7 +46,7 @@ int ConfigManager::ReadConfigFromFile() {
 			if ((len >= 3) && (bufferRead[len - 3] == 'D')) { bufferRead[len - 3] = 'd'; }
 			if ((len >= 2) && (bufferRead[len - 2] == 'L')) { bufferRead[len - 2] = 'l'; }
 			if ((len >= 1) && (bufferRead[len - 1] == 'L')) { bufferRead[len - 1] = 'l'; }
-			ignore_line = ((len < 3) || (bufferRead[0] == '#') || (bufferRead[len - 3] != 'd') || (bufferRead[len - 2] != 'l') || (bufferRead[len - 1] != 'l'));
+			ignore_line = ((len < 4) || (bufferRead[0] == '#') || (bufferRead[len - 4] != '.') || (bufferRead[len - 3] != 'd') || (bufferRead[len - 2] != 'l') || (bufferRead[len - 1] != 'l'));
 			if (!ignore_line) {
 				// Add dll to list
 				this->DLL_names_current->AddAfter(bufferRead, len);
