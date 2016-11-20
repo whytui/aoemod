@@ -12,7 +12,13 @@ UnitGroupAI::UnitGroupAI() {
 
 
 void UnitGroupAI::ResetAllInfo() {
-
+	this->activeGroupsTaskingTempInfo.ResetAllInfo();
+	this->lastDebugInfo = "";
+	this->gameDiffLevel = GAME_DIFFICULTY_LEVEL::GDL_MEDIUM;
+	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (settings && settings->IsCheckSumValid()) {
+		this->gameDiffLevel = settings->difficultyLevel;
+	}
 }
 
 
@@ -43,8 +49,12 @@ void UnitGroupAI::EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI) {
 	}
 
 	if (this->activeGroupsTaskingTempInfo.myWeaknessScore >= 70) {
-		this->activeGroupsTaskingTempInfo.militarySituation = MILITARY_SITUATION::MS_WEAK;
-		if (this->activeGroupsTaskingTempInfo.totalAttacksInPeriod > 0) {
+		if (this->activeGroupsTaskingTempInfo.totalLandGroups > 2) {
+			this->activeGroupsTaskingTempInfo.militarySituation = MILITARY_SITUATION::MS_NORMAL;
+		} else {
+			this->activeGroupsTaskingTempInfo.militarySituation = MILITARY_SITUATION::MS_WEAK;
+		}
+		if ((this->activeGroupsTaskingTempInfo.totalAttacksInTownInPeriod > 0) && (this->activeGroupsTaskingTempInfo.totalLandGroups < 2)) {
 			this->activeGroupsTaskingTempInfo.militarySituation = MILITARY_SITUATION::MS_CRITICAL;
 		}
 		return;
@@ -66,10 +76,15 @@ void UnitGroupAI::EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI) {
 
 
 // Set unitGroup.currentTask and call ApplyTask for the group (creates underlying unit commands, etc).
+// unitGroup.lastTaskingTime_ms is updated
 void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, UNIT_GROUP_TASK_IDS taskId,
 	long int resetOrg, bool force) {
 	if (!unitGroup) { return; }
-	unitGroup->currentTask = taskId;
+	if ((taskId == UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_15) || (taskId == UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_ROUNDUP_TARGET)) {
+		unitGroup->currentTask = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02;
+	} else {
+		unitGroup->currentTask = taskId;
+	}
 	AOE_METHODS::UNIT_GROUP::ApplyTaskToUnitGroup(unitGroup, tacAI, taskId, resetOrg, force);
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid()) {
@@ -115,24 +130,35 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 	unitGroup->targetPosY = targetPosY;
 	unitGroup->unitGroupType = UNIT_GROUP_TYPES::CST_UGT_LAND_ATTACK;
 	unitGroup->isTasked = 0;
+	UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 	if (targetUnit && isVisible) {
+		if (forceTasking && (this->gameDiffLevel <= GAME_DIFFICULTY_LEVEL::GDL_MEDIUM)) {
+			result = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_ROUNDUP_TARGET; // units will avoid being distracted by other targets
+		} else {
+			if (global->currentGameTime - unitGroup->lastTaskingTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms) {
+				// Tasking "CST_UGT_ATTACK_02" many times in a row is dangerous if if sees other targets (unit constantly changes action and is stuck)
+				return UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
+			}
+			result = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02; // units may change target (and very quickly) if  they are challenged or see targets
+		}
 		if (targetUnit->ptrStructPlayer) { // should always be true !
 			unitGroup->targetPlayerId = targetUnit->ptrStructPlayer->playerId;
 		}
 		unitGroup->targetDAT_ID = targetUnit->unitDefinition->DAT_ID1;
-		this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 1, forceTasking);
-		unitGroup->lastTaskingTime_ms = global->currentGameTime;
-		return UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02;
+		unitGroup->targetUnitId = targetUnit->unitInstanceId;
+		this->SetUnitGroupCurrentTask(tacAI, unitGroup, result, 1, forceTasking);
+		return result;
 	}
 	// No (visible) target: use retreat. Maybe we'll find the enemy on our way
 	unitGroup->targetPlayerId = -1;
 	unitGroup->targetDAT_ID = -1;
+	unitGroup->targetUnitId = -1;
 	unitGroup->retreatPosX = targetPosX;
 	unitGroup->retreatPosY = targetPosY;
 	// TODO: do not retreat to exact target position, stop before, especially range units !
-	this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT, 1, forceTasking);
-	unitGroup->lastTaskingTime_ms = global->currentGameTime;
-	return UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT;
+	result = UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT;
+	this->SetUnitGroupCurrentTask(tacAI, unitGroup, result, 1, forceTasking);
+	return result;
 }
 
 
@@ -142,6 +168,8 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 // Returns false to disable all "Task active soldiers" treatments (for this occurrence only)
 bool UnitGroupAI::OnTaskActiveGroupsBegin(STRUCT_TAC_AI *tacAI, long int processStartTimeGetTimeValue, long int allowedTime) {
 	this->activeGroupsTaskingTempInfo.ResetAllInfo();
+	
+	// TODO: do not recompute (except pointers) when tacAI->currentlyProcessedUnitGroupId is >=0 ? (for perf)
 
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
@@ -167,6 +195,7 @@ bool UnitGroupAI::OnTaskActiveGroupsBegin(STRUCT_TAC_AI *tacAI, long int process
 		bool allyOrGaiaOrSelf = (player->diplomacyVSPlayers[enemyPlayerId] <= PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY);
 		if (!allyOrGaiaOrSelf) {
 			this->activeGroupsTaskingTempInfo.totalAttacksInPeriod += this->militaryAIInfo->GetAttacksCountFromPlayerInPeriod(enemyPlayerId, periodStartTime, global->currentGameTime);
+			this->activeGroupsTaskingTempInfo.totalAttacksInTownInPeriod += this->militaryAIInfo->GetAttacksInTownCountFromPlayerInPeriod(enemyPlayerId, periodStartTime, global->currentGameTime);
 			this->activeGroupsTaskingTempInfo.totalPanicModesInPeriod += this->militaryAIInfo->GetPanicModesCountFromPlayerInPeriod(enemyPlayerId, periodStartTime, global->currentGameTime);
 		}
 	}
@@ -207,6 +236,17 @@ bool UnitGroupAI::OnTaskActiveGroupsBegin(STRUCT_TAC_AI *tacAI, long int process
 
 	this->EvaluateMilitarySituation(tacAI);
 
+#ifdef _DEBUG
+	this->lastDebugInfo = "";
+	/*long int t = AOE_METHODS::TimeGetTime();
+	long int spent = t - processStartTimeGetTimeValue;
+	if (spent >= allowedTime) {
+		CallWriteCenteredText("Spent too much time");
+	} else {
+		CallWriteCenteredText("timing ok");
+	}*/
+#endif
+
 	return true; // Normal case: allow processing the groups
 }
 
@@ -234,13 +274,13 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_UNKNOWN_12) || 
 		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_EXPLORE) || 
 		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_UNKNOWN_16) ) {
-		assert(false && "Found an group task that required debugging !");
-	
+		assert(false && "Found an group task that requires debugging !");
 	}
 #endif
 
 	// Restrict to supported tasks
 	if ((unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02) &&
+		(unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_EXTERMINATE) &&
 		(unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_EXPLORE) &&
 		(unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT) &&
 		(unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_DEFEND_UNIT)) {
@@ -299,9 +339,10 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	STRUCT_UNIT_BASE *myMainCentralUnit = this->activeGroupsTaskingTempInfo.myMainCentralUnit;
 	assert(myMainCentralUnit && myMainCentralUnit->IsCheckSumValidForAUnitClass());
 
-	if ((unitGroup->isTasked == 1) && (this->activeGroupsTaskingTempInfo.totalPanicModesInPeriod == 0)) {
+	// TODO: when unitGroup->isTasked == 1 and no recent attacks in my town, use a delay ? (be careful, more than 1 group may be concerned)
+	/*if ((unitGroup->isTasked == 1) && (this->activeGroupsTaskingTempInfo.totalPanicModesInPeriod == 0)) {
 		return false; // Let ROR code handle this case
-	}
+	}*/
 
 	int totalGroupsCount = this->activeGroupsTaskingTempInfo.totalLandGroups;
 	int totalGroupsInTown = this->activeGroupsTaskingTempInfo.townLandAttackGroupCount + this->activeGroupsTaskingTempInfo.townLandDefendGroupCount + this->activeGroupsTaskingTempInfo.townLandExploreGroupCount;
@@ -458,9 +499,12 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		mainUnitProtectionRadius = 7;
 	}
 
-	// Critical defense situations
+#ifdef _DEBUG
+	this->lastDebugInfo += "group#" + std::to_string(unitGroup->unitGroupId) + ": mstatus=" + std::to_string(this->activeGroupsTaskingTempInfo.militarySituation) + " ";
+#endif
+
+	// Manage explore groups here
 	if (unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) {
-		// Special: explore groups. Note that we don't know its current location
 		bool discardExploreAndRetreat = (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL);
 		if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
 			// If we have a town to defend, take less risks
@@ -476,6 +520,9 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 			unitGroup->targetPosX = -1;
 			unitGroup->targetPosY = -1;
 			this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_IDLE, 0, 1);
+#ifdef _DEBUG
+			this->lastDebugInfo += "explore switched to idle\n";
+#endif
 			return true; // Unit group has been tasked
 		}
 		if (discardExploreAndRetreat) {
@@ -489,11 +536,23 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 			}
 			UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, enemyUnitNearMyMainUnitInfAIElem,
 				targetPosX, targetPosY, true);
-			return (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET); // True if unit group has been tasked
+			if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
+#ifdef _DEBUG
+				this->lastDebugInfo += "explore switched to task " + std::to_string(result) + "\n";
+#endif
+				return true; // True if unit group has been tasked
+			}
+#ifdef _DEBUG
+			this->lastDebugInfo += "explore group tasking failed. Use ROR code.\n";
+#endif
+			return false;
 		}
+#ifdef _DEBUG
+		this->lastDebugInfo += "explore group: use ROR code (normal)\n";
+#endif
 		return false; // let standard code for explore groups, in normal situations
 	}
-
+	// Now explore groups have been dealt with
 
 	if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
 		// Other than explore groups in "critical" situation: retreat at all costs
@@ -501,6 +560,9 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 			if ((unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT) && !AOE_METHODS::IsUnitIdle(commander)) {
 				// TODO: check if leader has reached retreat pos or is close enough (idle or at target pos)
 				// TODO: if enely is visible, stop retreating and attack
+#ifdef _DEBUG
+				this->lastDebugInfo += "retreating: skip\n";
+#endif
 				return true; // If still moving, let the group finish retreating ?
 			}
 
@@ -519,10 +581,11 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 
 				if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
 #ifdef _DEBUG
-					std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
+					std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered+force taskId=") +
 						std::to_string(result) + std::string(" due to critical situation, wkn=");
 					msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
 					CallWriteText(msg.c_str());
+					this->lastDebugInfo += std::string("Ordered+force taskId=") + std::to_string(result) + std::string("\n");
 #endif
 					return true; // Unit group has been tasked
 				}
@@ -537,19 +600,32 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 							std::to_string(result) + std::string(" due to weakness, wkn=");
 						msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
 						CallWriteText(msg.c_str());
+						this->lastDebugInfo += std::string("Ordered taskId=") + std::to_string(result) + std::string("\n");
 #endif
 						return true; // Unit group has been tasked
 					}
+#ifdef _DEBUG
+					this->lastDebugInfo += "Already in town, enemy not visible, stand by (skip)\n";
+#endif
 					return true; // no target, do nothing special (stand by - prevent an attack to some target outta town !)
 				}
 				// TODO: if currently no target AND we know a "good" target in town, force doing something even if delay has not passed ?
+#ifdef _DEBUG
+				this->lastDebugInfo += "Already in town, tasking delay not passed, stand by (skip)\n";
+#endif
 				return true; // Wait a bit more time...
 			}
+#ifdef _DEBUG
+			this->lastDebugInfo += "stand by (skip)\n";
+#endif
 			return true;
 		}
 		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) {
 			// TODO: if I have priority targets from TARGETING classes, consider attacking them
 			// ... at least in my town or if related to victory conditions
+#ifdef _DEBUG
+			this->lastDebugInfo += "stand by to avoid suicidal attacking (skip)\n";
+#endif
 			return true; // Stand by = prevent ROR from sending this group attacking some non-priority target
 		}
 	} else {
@@ -558,6 +634,9 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		// TODO: if I have an allied player, consider running to his town or helping him in battle
 		if ((this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL) ||
 			(this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK)) {
+#ifdef _DEBUG
+			this->lastDebugInfo += "No-TC/villager/priest situation: use normal code\n";
+#endif
 			return false;
 		}
 	}
@@ -565,10 +644,20 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	// Remaining: non-critical and non-weak situations
 	if (unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02) {
 		if (unitGroup->taskSubTypeId != -1) {
+#ifdef _DEBUG
+			this->lastDebugInfo += "Protect/capture: use normal code\n";
+#endif
 			return false; // Let ROR handle this...
 		}
 		// Is current target valid ? Visible ?
 
+		
+
+	}
+
+
+	if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
+		// If no target then explore ?
 	}
 
 
@@ -584,6 +673,9 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 
 	// TODO: attack, lastupdate long time ago, target not visible: force change ?
 
+#ifdef _DEBUG
+	this->lastDebugInfo += "Default: use normal code\n";
+#endif
 	return false; //TO DO (let ROR code be executed)
 }
 

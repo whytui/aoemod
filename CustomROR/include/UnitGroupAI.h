@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <AOE_struct_units.h>
 #include <AOE_struct_unit_group.h>
+#include "AOE_time.h"
 #include "AOEPrimitives_units.h"
 #include "AOEPrimitives_unitGroup.h"
 #include "randomizer.h"
@@ -14,7 +15,7 @@ using namespace AOE_STRUCTURES;
 
 namespace CUSTOM_AI {
 
-	enum MILITARY_SITUATION { MS_UNKNOWN,
+	enum MILITARY_SITUATION { MS_UNKNOWN = -1,
 		MS_CRITICAL, // {few resources and few military and recent panic modes} or {very few resources and recently attacked}
 		MS_WEAK, // {recent panic modes} or {very few resources}
 		MS_NORMAL, 
@@ -35,7 +36,8 @@ namespace CUSTOM_AI {
 		STRUCT_UNIT_BASE *myMainCentralUnit;
 		int myTotalMilitaryUnitCount;
 		int myWeaknessScore; // myWeaknessScore = 100 if I am weak
-		int totalAttacksInPeriod; // Number of enemy attacks last AI_CONST::delayInWhichEnemyAttacksImpactUnitGroupTasking milliseconds
+		int totalAttacksInPeriod; // Number of enemy attacks in last AI_CONST::delayInWhichEnemyAttacksImpactUnitGroupTasking milliseconds
+		int totalAttacksInTownInPeriod; // Number of enemy attacks in my town in last AI_CONST::delayInWhichEnemyAttacksImpactUnitGroupTasking milliseconds
 		int totalPanicModesInPeriod; // Number of triggered panic modes in last AI_CONST::delayInWhichEnemyAttacksImpactUnitGroupTasking milliseconds
 		int totalLandAttackGroupCount;
 		int totalLandDefendGroupCount;
@@ -56,6 +58,7 @@ namespace CUSTOM_AI {
 			this->myTotalMilitaryUnitCount = 0;
 			this->myWeaknessScore = 0;
 			this->totalAttacksInPeriod = 0;
+			this->totalAttacksInTownInPeriod = 0;
 			this->totalPanicModesInPeriod = 0;
 			this->totalLandAttackGroupCount = 0;
 			this->totalLandDefendGroupCount = 0;
@@ -73,6 +76,8 @@ namespace CUSTOM_AI {
 		UnitGroupAI();
 
 		CustomAIMilitaryInfo *militaryAIInfo;
+		GAME_DIFFICULTY_LEVEL gameDiffLevel; // Game difficulty level (copied from game settings at game init)
+		std::string lastDebugInfo;
 
 		void ResetAllInfo();
 
@@ -81,6 +86,7 @@ namespace CUSTOM_AI {
 		void EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI);
 
 		// Set unitGroup.currentTask and call ApplyTask for the group (creates underlying unit commands, etc).
+		// unitGroup.lastTaskingTime_ms is updated
 		void SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, UNIT_GROUP_TASK_IDS taskId,
 			long int resetOrg, bool force);
 

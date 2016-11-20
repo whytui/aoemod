@@ -528,6 +528,29 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		int playerId = *(command + 1) - '0';
 		this->ChangeControlledPlayer(playerId, true);
 	}
+
+	// analyze ustom unit groups AI
+	if (strcmp(command, "group") == 0) {
+		std::string s = "";
+		for (int i = 0; i < GetGameGlobalStructPtr()->playerTotalCount; i++) {
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(i);
+			if (player && player->IsCheckSumValid() && player->isComputerControlled) {
+				if (CUSTOM_AI::customAIHandler.IsAliveAI(i)) {
+					s += std::string("[p#") + std::to_string(i) + std::string("]");
+					s += CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i)->unitGroupAI.lastDebugInfo;
+					s += "\r\n";
+				}
+			}
+		}
+		traceMessageHandler.WriteMessage(s);
+	}
+	if (strcmp(command, "pause") == 0) {
+		if (GetGameGlobalStructPtr()->gameSpeed < 0.1f) {
+			GetGameGlobalStructPtr()->gameSpeed = 0.5f;
+		} else {
+			GetGameGlobalStructPtr()->gameSpeed = 0.01f;
+		}
+	}
 #endif
 
 #ifdef _DEBUG

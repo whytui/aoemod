@@ -187,59 +187,6 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		//CR_DEBUG::exportGameTerrainRestrictionValuesToBitmap();
 		/*_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades("D:\\test1.bmp", global->gameMapInfo->mapArraySizeX, 
 			global->gameMapInfo->mapArraySizeY, global->gameMapInfo->unknown_8DB0, 0, 255, false);*/
-		/*if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
-			AOE_STRUCTURES::STRUCT_UNIT_GROUP *fakeGroup = &player->ptrAIStruct->structTacAI.fakeFirstUnitGroupElem;
-			AOE_STRUCTURES::STRUCT_UNIT_GROUP *curGroup = fakeGroup->next;
-			while (curGroup && (curGroup != fakeGroup)) {
-				if ((curGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_ATTACK) && (curGroup->commanderUnitId >= 0)) {
-					//AOE_STRUCTURES::STRUCT_UNIT_BASE *unitWithShortcut1 = FindUnitWithShortcutNumberForPlayer(player, 1);
-					AOE_STRUCTURES::STRUCT_UNIT_BASE *unitWithShortcut1 = CUSTOMROR::crInfo.GetMainSelectedUnit(player);
-					//curGroup->currentTask = UNIT_GROUP_TASK_IDS::CST_UGT_EXTERMINATE;
-					if (unitWithShortcut1 && unitWithShortcut1->IsCheckSumValidForAUnitClass()) {
-						for (int i = 0; i < curGroup->targetUnitIdArrayUsedElemCount; i++) {
-							long int targetUnitId = curGroup->targetUnitIdArray[i];
-							AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = global->GetUnitFromId(targetUnitId);
-							if (targetUnit && targetUnit->IsCheckSumValidForAUnitClass()) {
-								AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = targetUnit->ptrStructPlayer;
-								int tpid = targetPlayer->playerId;
-							}
-							curGroup->targetUnitIdArray[i] = -1;
-						}
-						curGroup->targetUnitIdArrayUsedElemCount = 0;
-
-						curGroup->taskSubTypeId = -1;
-						curGroup->currentTask = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_ROUNDUP_TARGET;
-						curGroup->targetPlayerId = player->playerId;
-						curGroup->targetUnitId = unitWithShortcut1->unitInstanceId;
-						curGroup->targetPosX = unitWithShortcut1->positionX;
-						curGroup->targetPosY = unitWithShortcut1->positionY;
-						AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unitWithShortcut1->unitDefinition;
-						curGroup->targetDAT_ID = -1;
-						if (unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
-							curGroup->targetDAT_ID = unitDef->DAT_ID1;
-						}
-						curGroup->isTasked = 1;
-						unsigned long int addr = 0x4CD2D0;
-						AOE_STRUCTURES::STRUCT_AI *mainAI = player->ptrAIStruct;
-						AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = &player->ptrAIStruct->structTacAI;
-						long int taskId = (long int)curGroup->currentTask;
-						_asm {
-							MOV ECX, curGroup;
-							PUSH 0;
-							PUSH 0;
-							PUSH taskId;
-							PUSH mainAI;
-							PUSH tacAI;
-							CALL addr;
-						}
-					}
-				}
-				curGroup = curGroup->next;
-			}
-			player->ptrAIStruct->structTacAI.targetInfo.targetUnitId = -1;
-			player->ptrAIStruct->structTacAI.targetInfo.currentSearchInfAIUnitElemListIndex++;
-			
-		}*/
 	}
 
 	// TEST - F8 - show dialog

@@ -32,6 +32,7 @@ namespace CUSTOM_AI {
 		STRUCT_UNIT_BASE *enemyUnit, STRUCT_UNIT_BASE *myTownCenter) {
 		if ((attackerPlayerId < 0) || (attackerPlayerId > 8)) { return false; }
 
+		bool inTown = false;
 		if (enemyUnit && myTownCenter) {
 			float diff = (enemyUnit->positionX - myTownCenter->positionX);
 			if (diff < 0) { diff = -diff; }
@@ -41,6 +42,7 @@ namespace CUSTOM_AI {
 				if (diff <= AI_CONST::townSize) { // Y position too fits my town's positions => it is IN my town's (square) territory
 					this->recentAttacksByPlayer->lastAttackInMyTownPosX = enemyUnit->positionX;
 					this->recentAttacksByPlayer->lastAttackInMyTownPosY = enemyUnit->positionY;
+					inTown = true;
 				}
 			}
 		}
@@ -51,7 +53,7 @@ namespace CUSTOM_AI {
 			if (enemyUnit && enemyUnit->unitDefinition) {
 				enemyClass = enemyUnit->unitDefinition->unitAIType;
 			}
-			interval->AddAttackRecord(enemyClass);
+			interval->AddAttackRecord(enemyClass, inTown);
 		}
 		return (interval != NULL);
 	}
@@ -62,6 +64,13 @@ namespace CUSTOM_AI {
 		if ((attackerPlayerId < 0) || (attackerPlayerId > 8)) { return 0; }
 		return this->recentAttacksByPlayer[attackerPlayerId].GetAttacksCountInPeriod(startGameTime, endGameTime);
 	}
+
+	// Get the number of attacks *in my town* from a player during the specified interval (game times in milliseconds)
+	int CustomAIMilitaryInfo::GetAttacksInTownCountFromPlayerInPeriod(long int attackerPlayerId, long int startGameTime, long int endGameTime) {
+		if ((attackerPlayerId < 0) || (attackerPlayerId > 8)) { return 0; }
+		return this->recentAttacksByPlayer[attackerPlayerId].GetAttacksInMyTownCountInPeriod(startGameTime, endGameTime);
+	}
+
 
 	// Returns true if successful
 	bool CustomAIMilitaryInfo::SavePanicModeOccurrenceInHistory(long int attackerPlayerId, long int currentGameTime) {

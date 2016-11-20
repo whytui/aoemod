@@ -115,7 +115,7 @@ namespace AOE_STRUCTURES
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES previousTargetUnitId; // +58. Previous target class
 		long int previousTargetUnitType; // +5C. Type=GLOBAL_UNIT_AI_TYPES but as a dword.
 		// 0x60
-		STRUCT_AI_UNIT_LIST_INFO ListOfUnitIdThatAttackedMe; // +60. Warning, arraySize can be >usedElemCount here. List of units that attacked me.
+		STRUCT_AI_UNIT_LIST_INFO listOfUnitIdThatAttackedMe; // +60. Warning, arraySize can be >usedElemCount here. List of units that attacked me.
 		// 0x70
 		float unknown_070_posY;
 		float unknown_074_posX;

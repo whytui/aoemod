@@ -3758,7 +3758,7 @@ void CustomRORInstance::EntryPointTacAIHandleActiveGroupsBeforeLoop(REG_BACKUP *
 
 
 // From 004D3B16. tacAI.TaskActiveSoldiers(timeGetTime, allowedtime) at begin of "for each group" loop
-// Can change return address to 0x4D602F to ignore current group
+// Can change return address to 0x4D6024 to ignore current group
 // EntryPointTacAIHandleActiveGroupsBeforeLoop is ALWAYS (once) called before this
 void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->EBP_val == 0);
@@ -3766,10 +3766,11 @@ void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values
 	AOE_STRUCTURES::STRUCT_UNIT_GROUP *unitGroup = (AOE_STRUCTURES::STRUCT_UNIT_GROUP *)REG_values->ESI_val;
 	ror_api_assert(REG_values, (tacAI != NULL) && tacAI->IsCheckSumValid());
 	ror_api_assert(REG_values, (unitGroup == NULL) || unitGroup->IsCheckSumValid());
+	const unsigned long int skipToNextGroupAddress = 0x4D6024;
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		if (unitGroup == NULL) {
-			ChangeReturnAddress(REG_values, 0x4D602F);
+			ChangeReturnAddress(REG_values, skipToNextGroupAddress);
 		}
 	}
 	// Standard behavior : NULL group => next loop
@@ -3782,7 +3783,7 @@ void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values
 		(unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_TRANSPORT_BOAT) ||
 		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) ||
 		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_IDLE)) {
-		ChangeReturnAddress(REG_values, 0x4D602F);
+		ChangeReturnAddress(REG_values, skipToNextGroupAddress);
 		return;
 	}
 
@@ -3795,7 +3796,7 @@ void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values
 
 	// Do not modify below
 	if (skipStandardTreatments) {
-		ChangeReturnAddress(REG_values, 0x4D602F);
+		ChangeReturnAddress(REG_values, skipToNextGroupAddress);
 	}
 }
 

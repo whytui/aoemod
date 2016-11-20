@@ -18,6 +18,7 @@ namespace CUSTOM_AI {
 		const long int townNeighborhoodSizeSquare = townNeighborhoodSize * townNeighborhoodSize;
 		const long int townDefendSizeIfWeak = 16; // A limited territory in defense considerations when player has few resources.
 		const long int delayInWhichEnemyAttacksImpactUnitGroupTasking_ms = 15000; // The time in milliseconds we go back in history to count enemy attacks when tasking unit groups
+		const long int minimumDelayBetweenBasicUnitGroupAttackTasking_ms = 1500; // Time to wait between 2 "attack" tasking operations for unit groups.
 		const long int armySizeToConsiderStrong = 20; // Number of military units above which I consider myself strong in a military way
 	}
 
@@ -45,6 +46,9 @@ namespace CUSTOM_AI {
 
 		// Get the number of attacks from a player during the specified interval (game times in milliseconds)
 		int GetAttacksCountFromPlayerInPeriod(long int attackerPlayerId, long int startGameTime, long int endGameTime);
+
+		// Get the number of attacks *in my town* from a player during the specified interval (game times in milliseconds)
+		int GetAttacksInTownCountFromPlayerInPeriod(long int attackerPlayerId, long int startGameTime, long int endGameTime);
 
 		// Returns true if successful
 		bool SavePanicModeOccurrenceInHistory(long int attackerPlayerId, long int currentGameTime);

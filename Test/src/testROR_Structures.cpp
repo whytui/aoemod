@@ -146,7 +146,7 @@ static bool test_ror_structures() {
 	assert(sizeof(rd) == 0x3C);	
 
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY uay;
-	trs_assert(&uay, 0x60, &uay.ListOfUnitIdThatAttackedMe);
+	trs_assert(&uay, 0x60, &uay.listOfUnitIdThatAttackedMe);
 	trs_assert(&uay, 0x74, &uay.unknown_074_posX);
 	trs_assert(&uay, 0x114, &uay.currentPosX);
 	AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO uai;
