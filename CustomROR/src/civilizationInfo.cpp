@@ -6,6 +6,7 @@ CivilizationInfo::CivilizationInfo() {
 	this->ConstructorInit();
 }
 
+
 CivilizationInfo::CivilizationInfo(int civId) {
 	this->ConstructorInit();
 	this->civId = civId;
@@ -15,11 +16,6 @@ CivilizationInfo::CivilizationInfo(int civId) {
 void CivilizationInfo::ConstructorInit() {
 	this->civId = -1;
 	this->SetCivName("");
-	this->deathmatch_AI_file = "";
-	this->deathmatch_water_AI_file = "";
-	this->RM_AI_file_much_water = "";
-	this->RM_AI_file_no_water = "";
-	this->RM_AI_file_some_water = "";
 	for (int i = 1; i <= 9; i++) {
 		this->SetPlayerName(i, "");
 	}
@@ -85,6 +81,7 @@ std::string CivilizationInfo::ChooseRandomPlayerName(char alreadyUsedNamesArray[
 		randoms[index] = -1; // initially, all "randoms" are unset.
 	}
 	for (int index = 0; index < CST_MAX_NUMBER_OF_PLAYER_NAMES_PER_CIV; index++) {
+		// TODO: use our randomizer
 		int r = (rand() % CST_MAX_NUMBER_OF_PLAYER_NAMES_PER_CIV); // random number from 0 to CST_MAX_NUMBER_OF_PLAYER_NAMES_PER_CIV-1
 		while (!available[r]) { // already picked, go to next...
 			r++;

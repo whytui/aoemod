@@ -121,7 +121,7 @@ CustomRORConfig::CustomRORConfig() {
 CustomRORConfig::~CustomRORConfig() {
 	for (int i = 0; i < 256; i++) {
 		if (allCivInfo[i]) {
-			free(allCivInfo[i]);
+			delete allCivInfo[i];
 			allCivInfo[i] = NULL;
 		}
 	}
@@ -794,21 +794,21 @@ bool CustomRORConfig::ReadCivXMLConfigFile(char *fileName) {
 						this->allCivInfo[civId]->SetCivName(this->XML_GetAttributeValue(subElem, "value"));
 					}
 					if (subElemName == "deathmatch_aifile") {
-						this->allCivInfo[civId]->deathmatch_AI_file = this->XML_GetAttributeValue(subElem, "value");
+						this->allCivInfo[civId]->deathmatch_AI_file.push_back(std::string(this->XML_GetAttributeValue(subElem, "value")));
 					}
 					if (subElemName == "deathmatch_aifile_water") {
-						this->allCivInfo[civId]->deathmatch_water_AI_file = this->XML_GetAttributeValue(subElem, "value");
+						this->allCivInfo[civId]->deathmatch_water_AI_file.push_back(std::string(this->XML_GetAttributeValue(subElem, "value")));
 					}
 					if (subElemName == "rm_aifile") {
 						mapCategory = subElem->Attribute("mapCategory");
 						if (mapCategory == "no_water") {
-							this->allCivInfo[civId]->RM_AI_file_no_water = this->XML_GetAttributeValue(subElem, "value");
+							this->allCivInfo[civId]->RM_AI_file_no_water.push_back(std::string(this->XML_GetAttributeValue(subElem, "value")));
 						}
 						if (mapCategory == "some_water") {
-							this->allCivInfo[civId]->RM_AI_file_some_water = this->XML_GetAttributeValue(subElem, "value");
+							this->allCivInfo[civId]->RM_AI_file_some_water.push_back(std::string(this->XML_GetAttributeValue(subElem, "value")));
 						}
 						if (mapCategory == "much_water") {
-							this->allCivInfo[civId]->RM_AI_file_much_water = this->XML_GetAttributeValue(subElem, "value");
+							this->allCivInfo[civId]->RM_AI_file_much_water.push_back(std::string(this->XML_GetAttributeValue(subElem, "value")));
 						}
 					}
 					if (subElemName == "player_name") {

@@ -1472,26 +1472,46 @@ bool CustomRORCommand::ManageAIFileSelectionForPlayer(char civilizationId, char 
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
 	assert(gameSettings != NULL);
 	CivilizationInfo *civ = CUSTOMROR::crInfo.configInfo.GetCivInfo(civilizationId);
+	std::string s;
+	int size = 0;
+	int randomChoice = 0;
 	if (gameSettings->isDeathMatch) {
 		if (civ) {
-			strcpy_s(aiFileBuffer, 255, civ->deathmatch_AI_file.c_str());
-			return true;
+			size = civ->deathmatch_AI_file.size();
+			if (size > 0) {
+				randomChoice = randomizer.GetRandomValue(0, size - 1);
+				s = civ->deathmatch_AI_file.at(randomChoice);
+				strcpy_s(aiFileBuffer, 255, s.c_str());
+			}
 		}
-	}
-
-	// RM or scenario (for players that don't have a strategy).
-	if (civ) {
-		switch (gameSettings->mapTypeChoice) {
-		case 0:
-		case 1:
-			strcpy_s(aiFileBuffer, 255, civ->RM_AI_file_much_water.c_str());
-			break;
-		case 4:
-		case 7:
-			strcpy_s(aiFileBuffer, 255, civ->RM_AI_file_no_water.c_str());
-			break;
-		default:
-			strcpy_s(aiFileBuffer, 255, civ->RM_AI_file_some_water.c_str());
+	} else {
+		// RM or scenario (for players that don't have a strategy).
+		if (civ) {
+			switch (gameSettings->mapTypeChoice) {
+			case 0:
+			case 1:
+				size = civ->RM_AI_file_much_water.size();
+				if (size > 0) {
+					randomChoice = randomizer.GetRandomValue(0, size - 1);
+					s = std::string(civ->RM_AI_file_much_water.at(randomChoice));
+				}
+				break;
+			case 4:
+			case 7:
+				size = civ->RM_AI_file_no_water.size();
+				if (size > 0) {
+					randomChoice = randomizer.GetRandomValue(0, size - 1);
+					s = std::string(civ->RM_AI_file_no_water.at(randomChoice));
+				}
+				break;
+			default:
+				size = civ->RM_AI_file_some_water.size();
+				if (size > 0) {
+					randomChoice = randomizer.GetRandomValue(0, size - 1);
+					s = std::string(civ->RM_AI_file_some_water.at(randomChoice));
+				}
+			}
+			strcpy_s(aiFileBuffer, 255, s.c_str());
 		}
 	}
 

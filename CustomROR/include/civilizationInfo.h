@@ -4,6 +4,7 @@
 #include "../../../tinyxml/tinyxml.h"
 #include <string>
 #include <stdlib.h> // rand
+#include <vector>
 
 using namespace std;
 
@@ -18,11 +19,12 @@ public:
 	CivilizationInfo(int civId);
 	// Variables
 	int civId;
-	std::string deathmatch_AI_file;
-	std::string deathmatch_water_AI_file;
-	std::string RM_AI_file_no_water;
-	std::string RM_AI_file_some_water;
-	std::string RM_AI_file_much_water;
+	vector<string> deathmatch_AI_file;
+	vector<string> deathmatch_water_AI_file;
+	vector<string> RM_AI_file_no_water;
+	vector<string> RM_AI_file_some_water;
+	vector<string> RM_AI_file_much_water;
+	vector<string> test;
 
 	// Methods
 	std::string GetCivName();
