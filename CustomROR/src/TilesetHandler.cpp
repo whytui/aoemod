@@ -60,6 +60,8 @@ void CustomTilesetInfo::InitHardcodedBtnBorderColors() {
 		this->btnBorderColors[3] = 0x6F;
 		this->btnBorderColors[4] = 0xEE;
 		this->btnBorderColors[5] = 0x38;
+		this->textColorRGB = 0;
+		this->textShadowColorRGB = 0xFFFFFF;
 		return;
 	case TILESET_GREECE:
 		this->btnBorderColors[0] = 0x72;
@@ -68,6 +70,8 @@ void CustomTilesetInfo::InitHardcodedBtnBorderColors() {
 		this->btnBorderColors[3] = 0x74;
 		this->btnBorderColors[4] = 0xB7;
 		this->btnBorderColors[5] = 0xB8;
+		this->textColorRGB = 0;
+		this->textShadowColorRGB = 0xFFFFFF;
 		return;
 	case TILESET_BABYLONIAN:
 		this->btnBorderColors[0] = 0xB9;
@@ -76,6 +80,8 @@ void CustomTilesetInfo::InitHardcodedBtnBorderColors() {
 		this->btnBorderColors[3] = 0x78;
 		this->btnBorderColors[4] = 0x78;
 		this->btnBorderColors[5] = 0x79;
+		this->textColorRGB = 0xFFFFFF; // ROR default = white
+		this->textShadowColorRGB = 0x000000; // ROR default = black
 		return;
 	case TILESET_ASIAN:
 		this->btnBorderColors[0] = 0x8A;
@@ -84,6 +90,8 @@ void CustomTilesetInfo::InitHardcodedBtnBorderColors() {
 		this->btnBorderColors[3] = 0xEE;
 		this->btnBorderColors[4] = 0x38;
 		this->btnBorderColors[5] = 0x95;
+		this->textColorRGB = 0xFFFFFF; // ROR default = white
+		this->textShadowColorRGB = 0x000000; // ROR default = black
 		return;
 	case TILESET_ROMAN:
 		this->btnBorderColors[0] = 0x73;
@@ -92,6 +100,8 @@ void CustomTilesetInfo::InitHardcodedBtnBorderColors() {
 		this->btnBorderColors[3] = 0x75;
 		this->btnBorderColors[4] = 0x76;
 		this->btnBorderColors[5] = 0x77;
+		this->textColorRGB = 0xFFFFFF; // ROR default = white
+		this->textShadowColorRGB = 0x000000; // ROR default = black
 		return;
 	default:
 		this->btnBorderColors[0] = 0;
@@ -100,6 +110,8 @@ void CustomTilesetInfo::InitHardcodedBtnBorderColors() {
 		this->btnBorderColors[3] = 0;
 		this->btnBorderColors[4] = 0;
 		this->btnBorderColors[5] = 0;
+		this->textColorRGB = 0xFFFFFF; // ROR default = white
+		this->textShadowColorRGB = 0x000000; // ROR default = black
 	}
 }
 
@@ -116,6 +128,14 @@ AOE_STRUCTURES::STRUCT_SLP_INFO *CustomTilesetInfo::GetIconsForBuildings() {
 		this->InitBuildingIcons();
 	}
 	return this->iconsForBuildings;
+}
+
+
+void CustomTilesetInfo::SetTextColor(unsigned char red, unsigned char green, unsigned char blue) {
+	this->textColorRGB = (blue << 16) + (green << 8) + red;
+}
+void CustomTilesetInfo::SetTextShadowColor(unsigned char red, unsigned char green, unsigned char blue) {
+	this->textShadowColorRGB = (blue << 16) + (green << 8) + red;
 }
 
 
@@ -386,12 +406,8 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		CALL callAddr4_seticon; // call in 0x481E05
 	}
 	// 0x481E21 (tilesets 0,1) or 0x481E9E (tilesets 2,3,4)
-	unsigned long int textColor = 0;
-	unsigned long int shadowTextColor = 0xFFFFFF;
-	if ((tileset == 2) || (tileset == 3) || (tileset == 4)) {
-		textColor = 0xFFFFFF;
-		shadowTextColor = 0;
-	}
+	unsigned long int textColor = tilesetInfo->textColorRGB;
+	unsigned long int shadowTextColor = tilesetInfo->textShadowColorRGB;
 	AOE_SetLabelTextColor(gameMainUI->lblCurrentAge, textColor, shadowTextColor);
 	AOE_SetPlayerResValuesTextColor(gameMainUI->resourceValuesIndicator, textColor, shadowTextColor);
 	AOE_SetButtonTextColor(gameMainUI->btnChat, textColor, shadowTextColor);

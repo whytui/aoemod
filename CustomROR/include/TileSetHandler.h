@@ -52,6 +52,8 @@ public:
 	long int slpIdGameScreenMedium;
 	long int slpIdGameScreenHigh;
 	unsigned char btnBorderColors[6]; // Index: cf BTN_BORDER_COLOR_ORDER
+	unsigned long int textColorRGB;
+	unsigned long int textShadowColorRGB;
 
 	// Sets "my" tileset ID and does some underlying processing.
 	void SetTilesetId(long int tileset);
@@ -59,6 +61,9 @@ public:
 
 	// Get the SLPInfo for building icons for this tileset. Automatically handles SLP object loading/freeing.
 	AOE_STRUCTURES::STRUCT_SLP_INFO *GetIconsForBuildings();
+
+	void SetTextColor(unsigned char red, unsigned char green, unsigned char blue);
+	void SetTextShadowColor(unsigned char red, unsigned char green, unsigned char blue);
 
 private:
 	long int tilesetId;
