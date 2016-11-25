@@ -35,8 +35,8 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_118;
 		unsigned long int unknown_11C; // default 2 ?
 		// 0x120
-		unsigned long int unknown_120;
-		unsigned long int unknown_124;
+		unsigned long int textColor; // +120. RGB. 4th byte is always 0. Taken as char[4], x[0]=red, x[1]=green, x[2]=blue. 000000=black
+		unsigned long int textShadowColor; // +124. RGB. 4th byte is always 0. Taken as char[4], x[0]=red, x[1]=green, x[2]=blue. 000000=black
 		unsigned long int unknown_128; // type ?
 		unsigned long int unknown_12C;
 		// 0x130

@@ -3114,7 +3114,7 @@ void CustomRORInstance::OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_v
 	}
 	TILESET::tilesetHandler.InitGameMainUITilesetDependentGraphics(gameMainUI, tileset);
 	
-	ChangeReturnAddress(REG_values, 0x481E0A); // after init of tileset-dependent graphics (overriden part)
+	ChangeReturnAddress(REG_values, 0x481F26); // after init of tileset-dependent graphics (overriden part)
 }
 
 

@@ -27,8 +27,8 @@ namespace AOE_STRUCTURES
 		long int lastRefreshTimeGetTime; // +104
 		long int unknown_108; // +108. Default=0x1F4
 		unsigned long int unknown_font; // +10C
-		long int unknown_110; // +110. Default = -1
-		unsigned long int unknown_114;
+		unsigned long int textColor; // +110. RGB. 4th byte is always 0. Taken as char[4], x[0]=red, x[1]=green, x[2]=blue. 000000=black
+		unsigned long int textShadowColor; // +114. RGB. 4th byte is always 0. Taken as char[4], x[0]=red, x[1]=green, x[2]=blue. 000000=black
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_PLAYER_RESOURCE_VALUES; }
 	};

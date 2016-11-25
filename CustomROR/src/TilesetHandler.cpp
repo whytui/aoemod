@@ -149,6 +149,7 @@ bool TilesetHandler::IsCustomized(long int tileset) {
 
 
 // This corresponds to ROR code in 0x481792
+#pragma message("TilesetHandler::InitGameMainUITilesetDependentGraphics: to move somewhere else. UIutils should depend on tilesethandler, not the contrary")
 void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int tileset) {
 	assert(gameMainUI && gameMainUI->IsCheckSumValid());
 	assert(tileset >= 0);
@@ -384,6 +385,20 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		PUSH 0;
 		CALL callAddr4_seticon; // call in 0x481E05
 	}
+	// 0x481E21 (tilesets 0,1) or 0x481E9E (tilesets 2,3,4)
+	unsigned long int textColor = 0;
+	unsigned long int shadowTextColor = 0xFFFFFF;
+	if ((tileset == 2) || (tileset == 3) || (tileset == 4)) {
+		textColor = 0xFFFFFF;
+		shadowTextColor = 0;
+	}
+	AOE_SetLabelTextColor(gameMainUI->lblCurrentAge, textColor, shadowTextColor);
+	AOE_SetPlayerResValuesTextColor(gameMainUI->resourceValuesIndicator, textColor, shadowTextColor);
+	AOE_SetButtonTextColor(gameMainUI->btnChat, textColor, shadowTextColor);
+	AOE_SetButtonTextColor(gameMainUI->btnDiplomacy, textColor, shadowTextColor);
+	AOE_SetButtonTextColor(gameMainUI->btnMenu, textColor, shadowTextColor);
+	AOE_SetButtonTextColor(gameMainUI->btnHelp, textColor, shadowTextColor);
+	AOE_SetButtonTextColor(gameMainUI->btnShowScores, textColor, shadowTextColor);
 }
 
 

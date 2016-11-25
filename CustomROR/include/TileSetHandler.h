@@ -6,6 +6,7 @@
 #include "traceMessage.h"
 #include "drsHandler.h"
 #include "AOE_memory.h"
+#include "UI_utilities.h"
 
 namespace TILESET {
 

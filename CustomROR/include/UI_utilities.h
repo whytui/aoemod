@@ -13,7 +13,7 @@
 #include "AOE_memory.h"
 #include "drsHandler.h"
 #include "mainStructuresHandling.h"
-#include "TileSetHandler.h"
+#include "traceMessage.h"
 
 /*
  * This file provides useful (raw) methods to deal with AOE UI objects.
@@ -461,6 +461,44 @@ static bool AOE_listbox_addItem(AOE_STRUCTURES::STRUCT_UI_LISTBOX *obj, long int
 }
 
 
+static void AOE_SetLabelTextColor(AOE_STRUCTURES::STRUCT_UI_LABEL *label, unsigned long int textColorRGB, unsigned long int textShadowColorRGB) {
+	if (!label) { return; }
+	unsigned long int addr = 0x469070;
+	_asm {
+		PUSH textShadowColorRGB;
+		PUSH textColorRGB;
+		MOV ECX, label;
+		CALL addr;
+	}
+}
+
+
+static void AOE_SetPlayerResValuesTextColor(AOE_STRUCTURES::STRUCT_UI_PLAYER_RESOURCE_VALUES *resValues, unsigned long int textColorRGB, unsigned long int textShadowColorRGB) {
+	if (!resValues) { return; }
+	unsigned long int addr = 0x4F7CF0;
+	_asm {
+		PUSH textShadowColorRGB;
+		PUSH textColorRGB;
+		MOV ECX, resValues;
+		CALL addr;
+	}
+}
+
+
+static void AOE_SetButtonTextColor(AOE_STRUCTURES::STRUCT_UI_BUTTON *btn, unsigned long int textColorRGB, 
+	unsigned long int textShadowColorRGB, long int btnInfoIndex = 0) {
+	if (!btn) { return; }
+	unsigned long int addr = 0x45F210;
+	_asm {
+		PUSH textShadowColorRGB;
+		PUSH textColorRGB;
+		PUSH btnInfoIndex;
+		MOV ECX, btn;
+		CALL addr;
+	}
+}
+
+
 // Return current screen, using 0x5830E8 structure info
 static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_GetCurrentScreen() {
 	AOE_STRUCTURES::STRUCT_ANY_UI *res = NULL;
@@ -698,10 +736,16 @@ static bool AOE_InGameAddCommandButton(AOE_STRUCTURES::STRUCT_PLAYER *player, lo
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_BUILD) {
 		unknown_colorPtr = player->ptrPlayerColorStruct + 0x28;
 		assert(player->tileSet >= 0);
-		assert(player->tileSet <= TILESET::tilesetHandler.tilesetCount);
+		//assert(player->tileSet <= TILESET::tilesetHandler.tilesetCount);
 		int tileSet = player->tileSet;
-		if ((tileSet < 0) || (tileSet > TILESET::tilesetHandler.tilesetCount)) { tileSet = 0; } // in theory, this is not necessary.
+		/*TILESET::CustomTilesetInfo *tilesetInfo = TILESET::tilesetHandler.GetTilesetInfo(tileSet);
+		if (tilesetInfo) {
+			iconsSLP = tilesetInfo->GetIconsForBuildings();
+		} else {*/
+			//if ((tileSet < 0) || (tileSet > TILESET::tilesetHandler.tilesetCount)) { tileSet = 0; } // in theory, this is not necessary.
+		if (tileSet < 0) { tileSet = 0; }
 		iconsSLP = inGameMain->iconsForBuildings[player->tileSet];
+		//}
 	}
 	if ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) ||
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_TRADE_FOOD_FOR_GOLD) || 

@@ -41,8 +41,8 @@ namespace AOE_STRUCTURES
 		short int unknown_200; // groupedObjectCount ? really unsure (like radiobuttons?)
 		short int unknown_202;
 		long int timeGetTimeValue_204; // +204
-		unsigned long int unknown_208[9]; // +208. default 0x00FFFFFF
-		unsigned long int unknown_22C[9];
+		unsigned long int textColor[9]; // +208. RGB. 4th byte is always 0. Taken as char[4], x[0]=red, x[1]=green, x[2]=blue. 000000=black
+		unsigned long int textShadowColor[9]; // +22C. RGB. 4th byte is always 0. Taken as char[4], x[0]=red, x[1]=green, x[2]=blue. 000000=black
 		long int unknown_250[9]; // +250. default 0xFFFF
 		unsigned long int unknown_274[9];
 		long int hotkey; // +298. Ascii code of hotkey: 65='A', etc.

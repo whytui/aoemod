@@ -224,6 +224,9 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "autoFixMissingFeatures") {
 			this->autoFixMissingFeatures = XML_GetBoolElement(elem, "enable");
 		}
+		if (elemName == "showWelcomeMessage") {
+			this->hideWelcomeMessage = !XML_GetBoolElement(elem, "enable"); // default is "enabled"
+		}
 		if (elemName == "empiresDat") {
 			this->customEmpiresDatRelativePath = this->XML_GetAttributeValue(elem, "filename");
 		}
@@ -461,7 +464,6 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 			}
 		}
 
-		// TO DO ? this->hideWelcomeMessage
 		// Conversion resistance values
 		if (elemName == "conversionResistance") {
 			categoryName = this->XML_GetAttributeValue(elem, "name");
