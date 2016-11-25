@@ -584,7 +584,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 					std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered+force taskId=") +
 						std::to_string(result) + std::string(" due to critical situation, wkn=");
 					msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
-					CallWriteText(msg.c_str());
+					//CallWriteText(msg.c_str());
 					this->lastDebugInfo += std::string("Ordered+force taskId=") + std::to_string(result) + std::string("\n");
 #endif
 					return true; // Unit group has been tasked
@@ -599,7 +599,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 						std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
 							std::to_string(result) + std::string(" due to weakness, wkn=");
 						msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
-						CallWriteText(msg.c_str());
+						//CallWriteText(msg.c_str());
 						this->lastDebugInfo += std::string("Ordered taskId=") + std::to_string(result) + std::string("\n");
 #endif
 						return true; // Unit group has been tasked

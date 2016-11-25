@@ -326,6 +326,25 @@ bool EmpiresX_API::SetManageAI(bool activate) {
 }
 
 
+// Sets "user selection" to activate/deactivate "MP3 instead of midi" feature
+// Returns true if OK
+bool EmpiresX_API::SetAllAudioVideoOptions(bool activate) {
+	if (this->aoeManager.GetSeqDefCount(BC_AUDIO_VIDEO) == 0) { return false; }
+	try {
+		int choice = activate ? 1 : 0;
+		for (int seqDefIndex = 0; seqDefIndex < this->aoeManager.GetSeqDefCount(BC_AUDIO_VIDEO); seqDefIndex++) {
+			// All options in BC_AUDIO_VIDEO are 0=default=OFF, 1=ON
+			this->aoeManager.SetUserSelection(BC_AUDIO_VIDEO, seqDefIndex, choice);
+		}
+	}
+	catch (std::exception &e) {
+		printf("ERROR: %s\n", e.what());
+		return false;
+	}
+	return true;
+}
+
+
 // Sets "user selection" to activate/deactivate ROR_API
 // This only impacts REQUIRED changes for ROR_API, not optionals.
 // If you disable ROR_API support, make sure you also disable ROR_API optional changes (see SetAllROR_API_optionals(...))
@@ -889,6 +908,8 @@ void EmpiresX_API::DumpAllNames(std::wstring separator) {
 	wprintf(this->aoeManager.DumpSequenceDefNames(BC_ROR_API, separator).c_str());
 	wprintf(_T("\nManage AI:\n"));
 	wprintf(this->aoeManager.DumpSequenceDefNames(BC_MANAGE_AI, separator).c_str());
+	wprintf(_T("\nAudio/Video:\n"));
+	wprintf(this->aoeManager.DumpSequenceDefNames(BC_AUDIO_VIDEO, separator).c_str());
 	wprintf(_T("\nVEG Windowed mode (obsolete):\n"));
 	wprintf(this->aoeManager.DumpSequenceDefNames(BC_VEG_WINDOWED_MODE, separator).c_str());
 	wprintf(_T("\nObsolete sequences:\n"));
@@ -911,6 +932,8 @@ void EmpiresX_API::DumpAllInfo(std::wstring separator, bool withObsoletes) {
 	wprintf(this->aoeManager.DumpSequenceDefInfo(BC_ROR_API, separator, false, false, withObsoletes).c_str());
 	wprintf(_T("\n* Manage AI:\n"));
 	wprintf(this->aoeManager.DumpSequenceDefInfo(BC_MANAGE_AI, separator, false, false, withObsoletes).c_str());
+	wprintf(_T("\n* Audio/Video:\n"));
+	wprintf(this->aoeManager.DumpSequenceDefInfo(BC_AUDIO_VIDEO, separator, false, false, withObsoletes).c_str());
 	wprintf(_T("\n* VEG Windowed mode (obsolete):\n"));
 	wprintf(this->aoeManager.DumpSequenceDefInfo(BC_VEG_WINDOWED_MODE, separator, false, false, withObsoletes).c_str());
 	wprintf(_T("\n* Obsolete sequences:\n"));
@@ -926,6 +949,7 @@ void EmpiresX_API::DumpPendings(std::wstring separator) {
 	wprintf(this->aoeManager.DumpSequenceDefNames(BC_WINDOWED_MODE, separator, true).c_str());
 	wprintf(this->aoeManager.DumpSequenceDefNames(BC_ROR_API, separator, true).c_str());
 	wprintf(this->aoeManager.DumpSequenceDefNames(BC_MANAGE_AI, separator, true).c_str());
+	wprintf(this->aoeManager.DumpSequenceDefNames(BC_AUDIO_VIDEO, separator, true).c_str());
 	wprintf(this->aoeManager.DumpSequenceDefNames(BC_VEG_WINDOWED_MODE, separator, true).c_str());
 	wprintf(this->aoeManager.DumpSequenceDefNames(BC_OBSOLETES, separator, true).c_str());
 	wprintf(_T("\n"));
@@ -939,6 +963,7 @@ std::wstring EmpiresX_API::DumpPendingsToWString(std::wstring separator) {
 	dest += this->aoeManager.DumpSequenceDefNames(BC_WINDOWED_MODE, separator, true);
 	dest += this->aoeManager.DumpSequenceDefNames(BC_ROR_API, separator, true);
 	dest += this->aoeManager.DumpSequenceDefNames(BC_MANAGE_AI, separator, true);
+	dest += this->aoeManager.DumpSequenceDefNames(BC_AUDIO_VIDEO, separator, true);
 	dest += this->aoeManager.DumpSequenceDefNames(BC_VEG_WINDOWED_MODE, separator, true);
 	dest += this->aoeManager.DumpSequenceDefNames(BC_OBSOLETES, separator, true);
 	return dest;
@@ -960,6 +985,8 @@ void EmpiresX_API::DumpNotDefault(std::wstring separator) {
 	if (!str.empty()) wprintf(_T("* ROR API:\n%s\n"), str.c_str());
 	str = this->aoeManager.DumpSequenceDefInfo(BC_MANAGE_AI, separator, false, true);
 	if (!str.empty()) wprintf(_T("* Manage AI:\n%s\n"), str.c_str());
+	str = this->aoeManager.DumpSequenceDefInfo(BC_AUDIO_VIDEO, separator, false, true);
+	if (!str.empty()) wprintf(_T("* Audio/Video:\n%s\n"), str.c_str());
 	str = this->aoeManager.DumpSequenceDefInfo(BC_VEG_WINDOWED_MODE, separator, false, true);
 	if (!str.empty()) wprintf(_T("* VEG windowed mode:\n%s\n"), str.c_str());
 	str = this->aoeManager.DumpSequenceDefInfo(BC_OBSOLETES, separator, false, true);

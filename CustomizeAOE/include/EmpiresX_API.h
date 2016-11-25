@@ -34,6 +34,7 @@ public:
 	bool SetMaxSelectedUnits(unsigned char number);
 	bool SetWindowedMode(bool activate);
 	bool SetManageAI(bool activate);
+	bool SetAllAudioVideoOptions(bool activate);
 	bool SetROR_API(bool activate);
 	bool SetAllROR_API_optionals(bool activate);
 	int HasMissingTechFixes();

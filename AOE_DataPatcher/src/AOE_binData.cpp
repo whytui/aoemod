@@ -67,6 +67,7 @@ BinarySeqDefSet *AOE_binData::GetSeqDefSet(AOE_FILE_VERSION version, BINSEQ_CATE
 		case BC_SELECTED_UNITS: return &this->selectedUnits_10c;
 		case BC_ROR_API: return &this->ROR_API_10c;
 		case BC_MANAGE_AI: return &this->manageAI_10c;
+		case BC_AUDIO_VIDEO: return &this->audioVideo_10c;
 		case BC_OPTIONS: return &this->options_10c;
 		case BC_OBSOLETES: return &this->obsoletes_10c;
 		default: return NULL;
@@ -100,6 +101,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_10b 6
 #define COUNT_ROR_API_10c 119
 #define COUNT_manageAI_10c 13
+#define COUNT_audio_video_10c 9
 
 
 // Throws exceptions if configuration is not OK
@@ -127,6 +129,7 @@ void AOE_binData::InitData() {
 	this->ROR_API_10c.SetCount(COUNT_ROR_API_10c);
 	//this->manageAI_10b.SetCount(0);
 	this->manageAI_10c.SetCount(COUNT_manageAI_10c);
+	this->audioVideo_10c.SetCount(COUNT_audio_video_10c);
 	
 	this->InitResolution_b();
 	this->InitResolution_c();
@@ -147,6 +150,7 @@ void AOE_binData::InitData() {
 	this->InitROR_API_10b();
 	this->InitROR_API_10c();
 	this->InitManageAI();
+	this->InitAudioVideo_10c();
 #ifdef _DEBUG
 	printf("**************************\n");
 #endif
@@ -5467,6 +5471,106 @@ void AOE_binData::InitManageAI() {
 #endif
 }
 
+
+void AOE_binData::InitAudioVideo_10c() {
+	int i = 0;
+
+	NEXT_INITSEQ_2_NOVAR(this->audioVideo_10c.GetBinSeqDefinition(i),
+		AudioMoreFileTypes,
+		"Supports additional file types other than MIDI. Place your mp3 files in the sound folder and name them exactly like the x-files minus the extension.",
+		0x5050A,
+		(0x68, 0x00, 0x32, 0x00, 0x00, 0x68, 0x03, 0x08, 0x00, 0x00, 0x6A, 0x00, 0xC7, 0x44, 0x24, 0x30, 0x0B, 0x02, 0x00, 0x00), // default=no
+		(0x68, 0x00, 0x02, 0x00, 0x00, 0x68, 0x03, 0x08, 0x00, 0x00, 0x6A, 0x00, 0xC7, 0x44, 0x24, 0x30, 0x00, 0x00, 0x00, 0x00),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->audioVideo_10c.GetBinSeqDefinition(i),
+		MP3_xmusic,
+		"Playback xmusic#.mp3 instead of xmusic#.mid.",
+		0x15796C,
+		(0x25, 0x73, 0x78, 0x6D, 0x75, 0x73, 0x69, 0x63, 0x25, 0x64, 0x2E, 0x6D, 0x69, 0x64, 0x00, 0x00), // default=no
+		(0x25, 0x73, 0x78, 0x6D, 0x75, 0x73, 0x69, 0x63, 0x25, 0x64, 0x2E, 0x6D, 0x70, 0x33, 0x00, 0x00),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->audioVideo_10c.GetBinSeqDefinition(i),
+		MP3_extension,
+		"Change .mid to .mp3 extension.",
+		0x15798C,
+		(0x2E, 0x6D, 0x69, 0x64, 0x00, 0x00, 0x00, 0x00), // default=no
+		(0x2E, 0x6D, 0x70, 0x33, 0x00, 0x00, 0x00, 0x00),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->audioVideo_10c.GetBinSeqDefinition(i),
+		MP3_xlost,
+		"Playback xlost.mp3 instead of xlost.mid.",
+		0x15CCB4,
+		(0x78, 0x6C, 0x6F, 0x73, 0x74, 0x2E, 0x6D, 0x69, 0x64, 0x00, 0x00, 0x00), // default=no
+		(0x78, 0x6C, 0x6F, 0x73, 0x74, 0x2E, 0x6D, 0x70, 0x33, 0x00, 0x00, 0x00),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->audioVideo_10c.GetBinSeqDefinition(i),
+		MP3_xwon,
+		"Playback xwon.mp3 instead of xwon.mid.",
+		0x15CCC0,
+		(0x78, 0x77, 0x6F, 0x6E, 0x2E, 0x6D, 0x69, 0x64, 0x00, 0x00, 0x00, 0x00), // default=no
+		(0x78, 0x77, 0x6F, 0x6E, 0x2E, 0x6D, 0x70, 0x33, 0x00, 0x00, 0x00, 0x00),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->audioVideo_10c.GetBinSeqDefinition(i),
+		MP3_xopen,
+		"Playback xopen.mp3 instead of xopen.mid.",
+		0x15CCE8,
+		(0x78, 0x6F, 0x70, 0x65, 0x6E, 0x2E, 0x6D, 0x69, 0x64, 0x00, 0x00, 0x00), // default=no
+		(0x78, 0x6F, 0x70, 0x65, 0x6E, 0x2E, 0x6D, 0x70, 0x33, 0x00, 0x00, 0x00),
+		FM_OFF,
+		FM_ON
+		);
+
+	// Video
+	NEXT_INITSEQ_2_NOVAR(this->audioVideo_10c.GetBinSeqDefinition(i),
+		Video_DisableSizeDoubling,
+		"Disable doubling of video size.\nShould be enabled if the doubling of video size is larger than the set display mode.",
+		0x100609,
+		(0x8B, 0x54, 0x24, 0x1C, 0x8D, 0x2C, 0x09, 0x8D, 0x3C, 0x12), // default=no
+		(0x8B, 0x54, 0x24, 0x1C, 0x8D, 0x29, 0x8D, 0x3A, 0x90, 0x90),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_1_VAR(this->audioVideo_10c.GetBinSeqDefinition(i),
+		Video_displayModeWidth,
+		"Width of the display mode.\nShould be set to a value that your system supports.",
+		0x106216,
+		(0x68, 0x80, 0x02, 0x00, 0x00), // default=no
+		SVT_INT_4B,
+		1
+		);
+
+	NEXT_INITSEQ_1_VAR(this->audioVideo_10c.GetBinSeqDefinition(i),
+		Video_displayModeHeight,
+		"Height of the display mode.\nShould be set to a value that your system supports.",
+		0x106211,
+		(0x68, 0xE0, 0x01, 0x00, 0x00), // default=no
+		SVT_INT_4B,
+		1
+		);
+
+	if (i != COUNT_audio_video_10c) {
+		throw AOE_binDataSetupException("Binary setup error for audioVideo_10c. Bad element count.");
+	}
+#ifdef _DEBUG
+	printf("AudioVideo 1.0c=%d\n", i); // DEBUG
+#endif
+}
 
 void AOE_binData::InitObsoletes() {
 	int i = 0;

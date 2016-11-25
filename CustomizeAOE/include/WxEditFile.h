@@ -91,6 +91,8 @@ private:
 	wxTreeItemId TI_ROR_API_dtl;
 	wxTreeItemId TI_ManageAI;
 	wxTreeItemId TI_ManageAI_dtl;
+	wxTreeItemId TI_AudioVideo;
+	wxTreeItemId TI_AudioVideo_dtl;
 	wxTreeItemId TI_Options;
 	wxTreeItemId TI_Obsolete;
 	wxTreeItemId TI_Obsolete_VEG;

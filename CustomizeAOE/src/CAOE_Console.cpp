@@ -66,38 +66,39 @@ return true; \
 
 void CAOE_Console::ShowCommands() {
 	wprintf_s(_T("Commands are:\n"));
-	wprintf_s(_T("exit / quit       : exit the program. Pending changes will be lost.\n"));
-	wprintf_s(_T("#anything         : lines with leading # are ignored (comments)\n"));
-	wprintf_s(_T("prompt            : to write some text in output (useful in scripts)\n"));
-	wprintf_s(_T("echo [on|off]     : turns on/off echoing typed commands (useful in scripts)\n"));
-	wprintf_s(_T("@anycommand       : disables echo (if enabled) just for this command (similar to DOS)\n"));
-	wprintf_s(_T("open              : select a file manually and open it\n"));
-	wprintf_s(_T("reopen            : open a file if you already selected one (and if you closed it)\n"));
-	wprintf_s(_T("open reg          : get file name from registry and open it\n"));
-	wprintf_s(_T("open txt          : type a file name and open it\n"));
-	wprintf_s(_T("close             : close current file\n"));
-	wprintf_s(_T("filename          : display current file name\n"));
-	wprintf_s(_T("run               : run current file\n"));
-	wprintf_s(_T("cancel            : cancel all pending changes\n"));
-	wprintf_s(_T("pending           : show pending changes\n"));
-	wprintf_s(_T("autofix           : fix (+save) technical bugs (done by \"open...\" commands except in batch mode). This LOSES all pending changes.\n"));
-	wprintf_s(_T("reset all         : reset all changes to defaults\n"));
-	wprintf_s(_T("auto              : set all recommended changes\n"));
-	wprintf_s(_T("save              : write pending changes to file\n"));
-	wprintf_s(_T("dump all          : display information for ALL known sequences\n"));
-	wprintf_s(_T("dump all w obs    : display information for ALL known sequences including OBSOLETE.\n"));
-	wprintf_s(_T("dump names        : display names for ALL known sequences\n"));
-	wprintf_s(_T("dump non default  : display sequences that are currently non-default in file\n"));
-	wprintf_s(_T("selected units    : set a new value for maximum selected units\n"));
-	wprintf_s(_T("windowed [on|off] : enable/disable windowed mode.\n"));
-	wprintf_s(_T("manage ai [on|off]: enable/disable \"manage ai\" features.\n"));
-	wprintf_s(_T("resolution        : change game resolution (type x/y coordinates).\n"));
-	wprintf_s(_T("api [on|off]      : turns on/off ROR API required EXE changes\n"));
-	wprintf_s(_T("set               : set a specific option (see names with <dump names>).\n"));
-	wprintf_s(_T("install customror : copy ROR_API and customROR files to AOE installation folder.\n"));
+	wprintf_s(_T("exit / quit        : exit the program. Pending changes will be lost.\n"));
+	wprintf_s(_T("#anything          : lines with leading # are ignored (comments)\n"));
+	wprintf_s(_T("prompt             : to write some text in output (useful in scripts)\n"));
+	wprintf_s(_T("echo [on|off]      : turns on/off echoing typed commands (useful in scripts)\n"));
+	wprintf_s(_T("@anycommand        : disables echo (if enabled) just for this command (similar to DOS)\n"));
+	wprintf_s(_T("open               : select a file manually and open it\n"));
+	wprintf_s(_T("reopen             : open a file if you already selected one (and if you closed it)\n"));
+	wprintf_s(_T("open reg           : get file name from registry and open it\n"));
+	wprintf_s(_T("open txt           : type a file name and open it\n"));
+	wprintf_s(_T("close              : close current file\n"));
+	wprintf_s(_T("filename           : display current file name\n"));
+	wprintf_s(_T("run                : run current file\n"));
+	wprintf_s(_T("cancel             : cancel all pending changes\n"));
+	wprintf_s(_T("pending            : show pending changes\n"));
+	wprintf_s(_T("autofix            : fix (+save) technical bugs (done by \"open...\" commands except in batch mode). This LOSES all pending changes.\n"));
+	wprintf_s(_T("reset all          : reset all changes to defaults\n"));
+	wprintf_s(_T("auto               : set all recommended changes\n"));
+	wprintf_s(_T("save               : write pending changes to file\n"));
+	wprintf_s(_T("dump all           : display information for ALL known sequences\n"));
+	wprintf_s(_T("dump all w obs     : display information for ALL known sequences including OBSOLETE.\n"));
+	wprintf_s(_T("dump names         : display names for ALL known sequences\n"));
+	wprintf_s(_T("dump non default   : display sequences that are currently non-default in file\n"));
+	wprintf_s(_T("selected units     : set a new value for maximum selected units\n"));
+	wprintf_s(_T("windowed [on|off]  : enable/disable windowed mode.\n"));
+	wprintf_s(_T("manage ai [on|off] : enable/disable \"manage ai\" features.\n"));
+	wprintf_s(_T("audiovideo [on|off]: enable/disable \"mp3\" music file format instead of midi (.mid).\n"));
+	wprintf_s(_T("resolution         : change game resolution (type x/y coordinates).\n"));
+	wprintf_s(_T("api [on|off]       : turns on/off ROR API required EXE changes\n"));
+	wprintf_s(_T("set                : set a specific option (see names with <dump names>).\n"));
+	wprintf_s(_T("install customror  : copy ROR_API and customROR files to AOE installation folder.\n"));
 	// Note: copy itf drs is for use with customROR (copies into itf_custom.drs and preserves interfac.drs files)
-	wprintf_s(_T("copy itf drs      : copy custom interfac.drs files to AOE installation folder (for custom resolutions).\n"));
-	wprintf_s(_T("install color fix : patch windows registry to fix directdraw color bug.\n"));
+	wprintf_s(_T("copy itf drs       : copy custom interfac.drs files to AOE installation folder (for custom resolutions).\n"));
+	wprintf_s(_T("install color fix  : patch windows registry to fix directdraw color bug.\n"));
 }
 
 
@@ -148,6 +149,8 @@ bool CAOE_Console::ExecuteCommand(std::wstring cmd) {
 		if (!this->e_api.ResetToDefault(BC_OPTIONS)) { this->hasError = true; }
 		if (!this->e_api.ResetToDefault(BC_SELECTED_UNITS)) { this->hasError = true; }
 		if (!this->e_api.ResetToDefault(BC_WINDOWED_MODE)) { this->hasError = true; }
+		if (!this->e_api.ResetToDefault(BC_MANAGE_AI)) { this->hasError = true; }
+		if (!this->e_api.ResetToDefault(BC_AUDIO_VIDEO)) { this->hasError = true; }
 		if (!this->e_api.ResetToDefault(BC_OBSOLETES)) { this->hasError = true; }
 		if (!this->e_api.ResetToDefault(BC_VEG_WINDOWED_MODE)) { this->hasError = true; }
 		return true;
@@ -181,6 +184,20 @@ bool CAOE_Console::ExecuteCommand(std::wstring cmd) {
 	}
 	if (cmd == _T("manage ai off")) {
 		if (!this->e_api.SetManageAI(false)) {
+			wprintf_s(_T("The action could not be performed.\n"));
+			this->hasError = true;
+		}
+		return true;
+	}
+	if (cmd == _T("audiovideo on")) {
+		if (!this->e_api.SetAllAudioVideoOptions(true)) {
+			wprintf_s(_T("The action could not be performed.\n"));
+			this->hasError = true;
+		}
+		return true;
+	}
+	if (cmd == _T("audiovideo off")) {
+		if (!this->e_api.SetAllAudioVideoOptions(false)) {
 			wprintf_s(_T("The action could not be performed.\n"));
 			this->hasError = true;
 		}

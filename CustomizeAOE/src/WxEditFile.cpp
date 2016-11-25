@@ -52,6 +52,9 @@ AOEEditTreeItemData::AOEEditTreeItemData(BINSEQ_CATEGORIES category, bool isAdva
 		this->labelText = _T("This section contains all required information to ensure your version contains no known bug and is compatible with customization / mods. ")
 			_T("You should not change this manually.");
 		break;
+	case BC_AUDIO_VIDEO:
+		this->labelText = _T("This section contains audio/video options (excluding custom resolutions)");
+		break;
 	case BC_VEG_WINDOWED_MODE:
 		this->labelText = _T("This section contains obsolete changes for VEG's mod. You should not use this unless you are really sure about what you're doing.");
 		break;
@@ -140,6 +143,7 @@ void WxEditFile::ConstructorInit(EmpiresX_API *api) {
 	TI_SelectedUnits = this->treeView->AppendItem(TI_Root, "Selected units", -1, -1, new AOEEditTreeItemData(BC_SELECTED_UNITS, false));
 	TI_ROR_API = this->treeView->AppendItem(TI_Root, "ROR API", -1, -1, new AOEEditTreeItemData(BC_ROR_API, false));
 	TI_ManageAI = this->treeView->AppendItem(TI_Root, "Manage AI", -1, -1, new AOEEditTreeItemData(BC_MANAGE_AI, false));
+	TI_AudioVideo = this->treeView->AppendItem(TI_Root, "Audio/video", -1, -1, new AOEEditTreeItemData(BC_AUDIO_VIDEO, false));
 	TI_Options = this->treeView->AppendItem(TI_Root, "Options", -1, -1, new AOEEditTreeItemData(BC_OPTIONS, true));
 	TI_Obsolete = this->treeView->AppendItem(TI_Root, "Obsolete", -1, -1, new AOEEditTreeItemData(BC_OBSOLETES, false));
 	TI_Pending = this->treeView->AppendItem(TI_Root, "Pending changes", -1, -1, new AOEEditTreeItemData(true));
@@ -150,6 +154,7 @@ void WxEditFile::ConstructorInit(EmpiresX_API *api) {
 	TI_SelectedUnits_dtl = this->treeView->AppendItem(TI_SelectedUnits, "Advanced", -1, -1, new AOEEditTreeItemData(BC_SELECTED_UNITS, true));
 	TI_ROR_API_dtl = this->treeView->AppendItem(TI_ROR_API, "Advanced", -1, -1, new AOEEditTreeItemData(BC_ROR_API, true));
 	TI_ManageAI_dtl = this->treeView->AppendItem(TI_ManageAI, "Advanced", -1, -1, new AOEEditTreeItemData(BC_MANAGE_AI, true));
+	TI_AudioVideo_dtl = this->treeView->AppendItem(TI_AudioVideo, "Advanced", -1, -1, new AOEEditTreeItemData(BC_AUDIO_VIDEO, true));
 	TI_Obsolete_VEG = this->treeView->AppendItem(TI_Obsolete, "VEG mod", -1, -1, new AOEEditTreeItemData(BC_VEG_WINDOWED_MODE, true));
 	TI_Obsolete_dtl = this->treeView->AppendItem(TI_Obsolete, "Other obsoletes", -1, -1, new AOEEditTreeItemData(BC_OBSOLETES, true));
 	Connect(EF_ComponentIDs::ID_TREE, wxEVT_TREE_SEL_CHANGED, wxCommandEventHandler(WxEditFile::OnTreeSelChange));
@@ -761,6 +766,9 @@ void WxEditFile::OnEnableFeatureClick(wxCommandEvent& event) {
 		// "Simple" features: Only ON/OFF:
 	case BC_MANAGE_AI:
 		this->e_api->SetManageAI(enable);
+		break;
+	case BC_AUDIO_VIDEO:
+		this->e_api->SetAllAudioVideoOptions(enable);
 		break;
 	case BC_ROR_API:
 		//this->e_api->SetAllROR_API_optionals(enable); // Do not install optionals, customROR can install them dynamically
