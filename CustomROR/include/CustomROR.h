@@ -128,6 +128,7 @@ namespace CUSTOMROR {
 		void OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_values);
 		void OnDisplayBuildingIconInUnitInfoZone(REG_BACKUP *REG_values);
 		void OnEditorSetBuildingIconInUnitInfoZone(REG_BACKUP *REG_values);
+		void DisplayCommandBarGetSlpInfoForBuilding(REG_BACKUP *REG_values);
 		void WriteF11PopInfoText(REG_BACKUP *REG_values);
 		void FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_values);
 		void FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values);

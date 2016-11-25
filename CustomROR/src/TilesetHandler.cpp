@@ -130,6 +130,7 @@ TilesetHandler::TilesetHandler() {
 }
 
 
+// Securely gets tileset info. Returns NULL if tileset is invalid
 CustomTilesetInfo *TilesetHandler::GetTilesetInfo(long int tileset) {
 	assert(tileset >= 0);
 	assert(tileset < MAX_TILESET_TOTAL_SUPPORTED_COUNT);
@@ -164,8 +165,15 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 	std::string tilesetAsString = std::to_string(tileset);
 	std::string dlg6_x = "dlg6_" + tilesetAsString;
 	long int slpId;
-	if (this->tilesetsInfo[tileset].GetTilesetId() == tileset) {
-		slpId = this->tilesetsInfo[tileset].slpIdThemeInfo;
+	CustomTilesetInfo *tilesetInfo = this->GetTilesetInfo(tileset);
+	if (tilesetInfo == NULL) {
+		tileset = 0;
+		tilesetInfo = this->GetTilesetInfo(0);
+		traceMessageHandler.WriteMessage("Error: tileset ID is invalid, using 0 instead.");
+		if (!tilesetInfo) { return; }
+	}
+	if (tilesetInfo->GetTilesetId() == tileset) {
+		slpId = tilesetInfo->slpIdThemeInfo;
 	} else {
 		slpId = SLPID_TILESET_SCREEN_THEME_BASE_STD; // Fallback in error cases (we should not end up in this block)
 	}
@@ -187,8 +195,8 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 
 	// 0x4817E7
 	std::string btn6_x = "btn6_" + tilesetAsString;
-	if (this->tilesetsInfo[tileset].GetTilesetId() == tileset) {
-		slpId = this->tilesetsInfo[tileset].slpIdCheckboxes;
+	if (tilesetInfo->GetTilesetId() == tileset) {
+		slpId = tilesetInfo->slpIdCheckboxes;
 	} else {
 		slpId = SLPID_TILESET_CHECKBOXES_BASE_STD; // Fallback in error cases (we should not end up in this block)
 	}
@@ -216,8 +224,8 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		traceMessageHandler.WriteMessage("Error with AOEAlloc for buttonBoardResolutionA");
 		return;
 	}
-	if (this->tilesetsInfo[tileset].GetTilesetId() == tileset) {
-		slpId = this->tilesetsInfo[tileset].slpIdButtonBoardLow;
+	if (tilesetInfo->GetTilesetId() == tileset) {
+		slpId = tilesetInfo->slpIdButtonBoardLow;
 	} else {
 		slpId = SLPID_TILESET_BUTTON_BOARD_LOW_RESOLUTION_BASE_STD; // Fallback in error cases (we should not end up in this block)
 	}
@@ -234,8 +242,8 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		traceMessageHandler.WriteMessage("Error with AOEAlloc for iconsForOtherButtons");
 		return;
 	}
-	if (this->tilesetsInfo[tileset].GetTilesetId() == tileset) {
-		slpId = this->tilesetsInfo[tileset].slpIdCommonCommandIcons;
+	if (tilesetInfo->GetTilesetId() == tileset) {
+		slpId = tilesetInfo->slpIdCommonCommandIcons;
 	} else {
 		slpId = SLPID_TILESET_COMMON_CMD_ICONS_BASE_STD; // Fallback in error cases (we should not end up in this block)
 	}
@@ -252,8 +260,8 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		traceMessageHandler.WriteMessage("Error with AOEAlloc for buttonBoardResolutionB");
 		return;
 	}
-	if (this->tilesetsInfo[tileset].GetTilesetId() == tileset) {
-		slpId = this->tilesetsInfo[tileset].slpIdButtonBoardMedium;
+	if (tilesetInfo->GetTilesetId() == tileset) {
+		slpId = tilesetInfo->slpIdButtonBoardMedium;
 	} else {
 		slpId = SLPID_TILESET_BUTTON_BOARD_MEDIUM_RESOLUTION_BASE_STD; // Fallback in error cases (we should not end up in this block)
 	}
@@ -270,8 +278,8 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 		traceMessageHandler.WriteMessage("Error with AOEAlloc for buttonBoardResolutionC");
 		return;
 	}
-	if (this->tilesetsInfo[tileset].GetTilesetId() == tileset) {
-		slpId = this->tilesetsInfo[tileset].slpIdButtonBoardHigh;
+	if (tilesetInfo->GetTilesetId() == tileset) {
+		slpId = tilesetInfo->slpIdButtonBoardHigh;
 	} else {
 		slpId = SLPID_TILESET_BUTTON_BOARD_HIGH_RESOLUTION_BASE_STD; // Fallback in error cases (we should not end up in this block)
 	}
@@ -302,22 +310,22 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 	}
 	switch (resolution) {
 	case 1:
-		if (this->tilesetsInfo[tileset].GetTilesetId() == tileset) {
-			slpId = this->tilesetsInfo[tileset].slpIdGameScreenLow;
+		if (tilesetInfo->GetTilesetId() == tileset) {
+			slpId = tilesetInfo->slpIdGameScreenLow;
 		} else {
 			slpId = SLPID_TILESET_GAME_FRIEZES_LOW_RESOLUTION_BASE_STD; // Fallback in error cases (we should not end up in this block)
 		}
 		break;
 	case 2:
-		if (this->tilesetsInfo[tileset].GetTilesetId() == tileset) {
-			slpId = this->tilesetsInfo[tileset].slpIdGameScreenMedium;
+		if (tilesetInfo->GetTilesetId() == tileset) {
+			slpId = tilesetInfo->slpIdGameScreenMedium;
 		} else {
 			slpId = SLPID_TILESET_GAME_FRIEZES_MEDIUM_RESOLUTION_BASE_STD; // Fallback in error cases (we should not end up in this block)
 		}
 		break;
 	case 3:
-		if (this->tilesetsInfo[tileset].GetTilesetId() == tileset) {
-			slpId = this->tilesetsInfo[tileset].slpIdGameScreenHigh;
+		if (tilesetInfo->GetTilesetId() == tileset) {
+			slpId = tilesetInfo->slpIdGameScreenHigh;
 		} else {
 			slpId = SLPID_TILESET_GAME_FRIEZES_HIGH_RESOLUTION_BASE_STD; // Fallback in error cases (we should not end up in this block)
 		}
@@ -380,6 +388,7 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 
 
 // Get the slpinfo for building icons for a custom tileset
+// Return NULL if not found (maybe tileset is invalid)
 STRUCT_SLP_INFO *TilesetHandler::GetBuildingIconsSlpInfoForTileSet(long int tileset) {
 	CustomTilesetInfo *info = this->GetTilesetInfo(tileset);
 	if (!info || (info->GetTilesetId() != tileset)) {

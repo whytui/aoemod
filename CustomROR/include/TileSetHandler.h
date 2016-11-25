@@ -77,6 +77,7 @@ class TilesetHandler {
 public:
 	TilesetHandler();
 
+	// Securely gets tileset info. Returns NULL if tileset is invalid
 	CustomTilesetInfo *GetTilesetInfo(long int tileset);
 	// Returns true if the specified tileset (ID) is customized by configuration.
 	bool IsCustomized(long int tileset);
@@ -89,6 +90,7 @@ public:
 	void InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int tileset);
 
 	// Get the slpinfo for building icons for a custom tileset
+	// Return NULL if not found (maybe tileset is invalid)
 	AOE_STRUCTURES::STRUCT_SLP_INFO *GetBuildingIconsSlpInfoForTileSet(long int tileset);
 
 private:

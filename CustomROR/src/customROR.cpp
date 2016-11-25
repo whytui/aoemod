@@ -302,6 +302,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004A440A:
 		this->OnEditorSetBuildingIconInUnitInfoZone(REG_values);
 		break;
+	case 0x004824AF:
+		this->DisplayCommandBarGetSlpInfoForBuilding(REG_values);
+		break;
 	case 0x004FAA36:
 		this->WriteF11PopInfoText(REG_values);
 		break;
@@ -3190,6 +3193,39 @@ void CustomRORInstance::OnEditorSetBuildingIconInUnitInfoZone(REG_BACKUP *REG_va
 	// Not found ? use default icons instead to avoid crash or UI issues
 	traceMessageHandler.WriteMessage(std::string("Error: could not get building icons for tileset ") + std::to_string(currentTileset));
 	REG_values->EDI_val = (unsigned long int) iconsForBuildings[0];
+}
+
+
+// From 0x4824A9: display command bar icons (building icons for build menu)
+void CustomRORInstance::DisplayCommandBarGetSlpInfoForBuilding(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *)REG_values->ESI_val;
+	ror_api_assert(REG_values, gameMainUI && gameMainUI->IsCheckSumValid());
+	long int tilesetId_fixed = REG_values->EDX_val; // ROR code forced this value to 0 if >5.
+	ror_api_assert(REG_values, tilesetId_fixed >= 0);
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+
+	bool useStandardCode = !TILESET::tilesetHandler.usesCustomCivs ||
+		(!TILESET::tilesetHandler.IsCustomized(tilesetId_fixed) && (tilesetId_fixed < 5));
+
+	if (useStandardCode) {
+		if (tilesetId_fixed == 5) {
+			tilesetId_fixed = 0; // Missing check in original game code ! All other values are secured
+		}
+		REG_values->EAX_val = (unsigned long int)gameMainUI->iconsForBuildings[tilesetId_fixed];
+	}
+
+	// Custom treatments: get the REAL (custom) tileset from player structure instead of ROR local variable (which may have been forced to 0)
+	// Getting the info directly from player structure avoids us to overload the code in 0x482308.
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+	if (player && player->IsCheckSumValid()) {
+		tilesetId_fixed = player->tileSet;
+	}
+
+	AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo = TILESET::tilesetHandler.GetBuildingIconsSlpInfoForTileSet(tilesetId_fixed);
+	if (!slpInfo) {
+		slpInfo = TILESET::tilesetHandler.GetBuildingIconsSlpInfoForTileSet(0); // Safe mode: use first tileset
+	}
+	REG_values->EAX_val = (unsigned long int)slpInfo;
 }
 
 
