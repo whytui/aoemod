@@ -461,6 +461,7 @@ static bool AOE_listbox_addItem(AOE_STRUCTURES::STRUCT_UI_LISTBOX *obj, long int
 }
 
 
+// Set text color for a label
 static void AOE_SetLabelTextColor(AOE_STRUCTURES::STRUCT_UI_LABEL *label, unsigned long int textColorRGB, unsigned long int textShadowColorRGB) {
 	if (!label) { return; }
 	unsigned long int addr = 0x469070;
@@ -473,6 +474,7 @@ static void AOE_SetLabelTextColor(AOE_STRUCTURES::STRUCT_UI_LABEL *label, unsign
 }
 
 
+// Set text color for player resource values label
 static void AOE_SetPlayerResValuesTextColor(AOE_STRUCTURES::STRUCT_UI_PLAYER_RESOURCE_VALUES *resValues, unsigned long int textColorRGB, unsigned long int textShadowColorRGB) {
 	if (!resValues) { return; }
 	unsigned long int addr = 0x4F7CF0;
@@ -485,6 +487,7 @@ static void AOE_SetPlayerResValuesTextColor(AOE_STRUCTURES::STRUCT_UI_PLAYER_RES
 }
 
 
+// Set text color for a button, for a given "info index"
 static void AOE_SetButtonTextColor(AOE_STRUCTURES::STRUCT_UI_BUTTON *btn, unsigned long int textColorRGB, 
 	unsigned long int textShadowColorRGB, long int btnInfoIndex = 0) {
 	if (!btn) { return; }

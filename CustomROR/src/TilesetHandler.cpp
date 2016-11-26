@@ -131,9 +131,11 @@ AOE_STRUCTURES::STRUCT_SLP_INFO *CustomTilesetInfo::GetIconsForBuildings() {
 }
 
 
+// Set (unsigned int) text color value from RGB 0-255 values
 void CustomTilesetInfo::SetTextColor(unsigned char red, unsigned char green, unsigned char blue) {
 	this->textColorRGB = (blue << 16) + (green << 8) + red;
 }
+// Set (unsigned int) text shadow color value from RGB 0-255 values
 void CustomTilesetInfo::SetTextShadowColor(unsigned char red, unsigned char green, unsigned char blue) {
 	this->textShadowColorRGB = (blue << 16) + (green << 8) + red;
 }

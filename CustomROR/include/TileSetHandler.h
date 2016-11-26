@@ -62,7 +62,9 @@ public:
 	// Get the SLPInfo for building icons for this tileset. Automatically handles SLP object loading/freeing.
 	AOE_STRUCTURES::STRUCT_SLP_INFO *GetIconsForBuildings();
 
+	// Set (unsigned int) text color value from RGB 0-255 values
 	void SetTextColor(unsigned char red, unsigned char green, unsigned char blue);
+	// Set (unsigned int) text shadow color value from RGB 0-255 values
 	void SetTextShadowColor(unsigned char red, unsigned char green, unsigned char blue);
 
 private:

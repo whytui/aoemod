@@ -244,6 +244,7 @@
       <SubType>Designer</SubType>
     </Xml>
     <Xml Include="res\customROR_civs.xml" />
+    <Xml Include="res\customROR_tilesets.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

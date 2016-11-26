@@ -24,6 +24,9 @@
 		<!-- Contains top and bottom images for game screen. Standard=50733-50736 and 53010 (low), 
 			50737-50740 and 53011 (medium), 50741-50744 and 53012 (high resolution) -->
 		<game slpid_low="50733" slpid_medium="50737" slpid_high="50741"/>
+		<!-- Main game screen text color (current age, menus, etc). Red/green/blue values are 0-255. -->
+		<text_color red="00" green="00" blue="00"/>
+		<text_shadow_color red="255" green="255" blue="255"/>
 		<!-- button_borders: values must be between 0 and 255 -->
 		<button_border_colors out_top_right="126" mid_top_right="109" in_top_right="111"
 			in_bottom_left="111" mid_bottom_left="238" out_bottom_left="56"/>

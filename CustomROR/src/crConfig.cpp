@@ -940,6 +940,30 @@ bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
 						callResult = subElem->QueryIntAttribute("out_bottom_left", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[5] = intValue; }
 					}
+					if (subElemName == "text_color") {
+						unsigned char red = 0;
+						unsigned char green = 0;
+						unsigned char blue = 0;
+						callResult = subElem->QueryIntAttribute("red", &intValue);
+						if (callResult == TIXML_SUCCESS) { red = (unsigned char)intValue; }
+						callResult = subElem->QueryIntAttribute("green", &intValue);
+						if (callResult == TIXML_SUCCESS) { green = (unsigned char)intValue; }
+						callResult = subElem->QueryIntAttribute("blue", &intValue);
+						if (callResult == TIXML_SUCCESS) { blue = (unsigned char)intValue; }
+						tilesetInfo->SetTextColor(red, green, blue);
+					}
+					if (subElemName == "text_shadow_color") {
+						unsigned char red = 0;
+						unsigned char green = 0;
+						unsigned char blue = 0;
+						callResult = subElem->QueryIntAttribute("red", &intValue);
+						if (callResult == TIXML_SUCCESS) { red = (unsigned char)intValue; }
+						callResult = subElem->QueryIntAttribute("green", &intValue);
+						if (callResult == TIXML_SUCCESS) { green = (unsigned char)intValue; }
+						callResult = subElem->QueryIntAttribute("blue", &intValue);
+						if (callResult == TIXML_SUCCESS) { blue = (unsigned char)intValue; }
+						tilesetInfo->SetTextShadowColor(red, green, blue);
+					}
 					
 					subElem = subElem->NextSiblingElement();
 				}
