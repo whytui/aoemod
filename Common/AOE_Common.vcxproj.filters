@@ -327,6 +327,9 @@
     <ClInclude Include="include\AOE_struct_unit_group.h">
       <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
     </ClInclude>
+    <ClInclude Include="include\TileSetDefinition.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\triggerDefinition.cpp">
@@ -339,6 +342,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\basicFilesHandling.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TileSetDefinition.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

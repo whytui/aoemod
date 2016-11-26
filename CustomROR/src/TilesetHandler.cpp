@@ -9,169 +9,13 @@ using namespace AOE_CONST_DRS;
 using namespace AOE_STRUCTURES;
 
 
-CustomTilesetInfo::CustomTilesetInfo() {
-	this->isCustomized = false;
-	this->tilesetId = -1;
-	this->tilesetName = "";
-	this->slpIdBuildingIcons = -1;
-	this->slpIdButtonBoardHigh = -1;
-	this->slpIdButtonBoardLow = -1;
-	this->slpIdButtonBoardMedium = -1;
-	this->slpIdCheckboxes = -1;
-	this->slpIdCheckboxes = -1;
-	this->slpIdCommonCommandIcons = -1;
-	this->slpIdGameScreenHigh = -1;
-	this->slpIdGameScreenLow = -1;
-	this->slpIdGameScreenMedium = -1;
-	this->slpIdThemeInfo = -1;
-	this->iconsForBuildings = NULL;
-	// Initialize button border colors (to 0 here as tilesetId is still undetermined)
-	this->InitHardcodedBtnBorderColors();
-}
-
-
-CustomTilesetInfo::~CustomTilesetInfo() {
-	if (this->iconsForBuildings != NULL) {
-		AOEFree(this->iconsForBuildings);
-	}
-}
-
-
-// Set SLP info object for building icons for this tileset. It needs to be freed when "this" is destroyed.
-void CustomTilesetInfo::InitBuildingIcons() {
-	assert(this->iconsForBuildings == NULL);
-	this->iconsForBuildings = (STRUCT_SLP_INFO*)AOEAlloc(0x20);
-	if (!this->iconsForBuildings) {
-		traceMessageHandler.WriteMessage("Error with AOEAlloc for iconsForBuildings");
-		return;
-	}
-	AOE_METHODS::InitSlpInfoFromDrs(this->iconsForBuildings, this->slpIdBuildingIcons, "");
-}
-
-
-// Initialized button border colors using hardcoded values from ROR code.
-// Requires this->tilesetId to be set correctly
-void CustomTilesetInfo::InitHardcodedBtnBorderColors() {
-	switch (this->tilesetId) {
-	case TILESET_EGYPT:
-		this->btnBorderColors[0] = 0x7E;
-		this->btnBorderColors[1] = 0x6D;
-		this->btnBorderColors[2] = 0x6F;
-		this->btnBorderColors[3] = 0x6F;
-		this->btnBorderColors[4] = 0xEE;
-		this->btnBorderColors[5] = 0x38;
-		this->textColorRGB = 0;
-		this->textShadowColorRGB = 0xFFFFFF;
-		return;
-	case TILESET_GREECE:
-		this->btnBorderColors[0] = 0x72;
-		this->btnBorderColors[1] = 0x73;
-		this->btnBorderColors[2] = 0x74;
-		this->btnBorderColors[3] = 0x74;
-		this->btnBorderColors[4] = 0xB7;
-		this->btnBorderColors[5] = 0xB8;
-		this->textColorRGB = 0;
-		this->textShadowColorRGB = 0xFFFFFF;
-		return;
-	case TILESET_BABYLONIAN:
-		this->btnBorderColors[0] = 0xB9;
-		this->btnBorderColors[1] = 0x77;
-		this->btnBorderColors[2] = 0x78;
-		this->btnBorderColors[3] = 0x78;
-		this->btnBorderColors[4] = 0x78;
-		this->btnBorderColors[5] = 0x79;
-		this->textColorRGB = 0xFFFFFF; // ROR default = white
-		this->textShadowColorRGB = 0x000000; // ROR default = black
-		return;
-	case TILESET_ASIAN:
-		this->btnBorderColors[0] = 0x8A;
-		this->btnBorderColors[1] = 0xED;
-		this->btnBorderColors[2] = 0xEE;
-		this->btnBorderColors[3] = 0xEE;
-		this->btnBorderColors[4] = 0x38;
-		this->btnBorderColors[5] = 0x95;
-		this->textColorRGB = 0xFFFFFF; // ROR default = white
-		this->textShadowColorRGB = 0x000000; // ROR default = black
-		return;
-	case TILESET_ROMAN:
-		this->btnBorderColors[0] = 0x73;
-		this->btnBorderColors[1] = 0x74;
-		this->btnBorderColors[2] = 0x75;
-		this->btnBorderColors[3] = 0x75;
-		this->btnBorderColors[4] = 0x76;
-		this->btnBorderColors[5] = 0x77;
-		this->textColorRGB = 0xFFFFFF; // ROR default = white
-		this->textShadowColorRGB = 0x000000; // ROR default = black
-		return;
-	default:
-		this->btnBorderColors[0] = 0;
-		this->btnBorderColors[1] = 0;
-		this->btnBorderColors[2] = 0;
-		this->btnBorderColors[3] = 0;
-		this->btnBorderColors[4] = 0;
-		this->btnBorderColors[5] = 0;
-		this->textColorRGB = 0xFFFFFF; // ROR default = white
-		this->textShadowColorRGB = 0x000000; // ROR default = black
-	}
-}
-
-// Sets "my" tileset ID and does some underlying processing.
-void CustomTilesetInfo::SetTilesetId(long int tileset) {
-	this->tilesetId = tileset;
-	this->InitHardcodedBtnBorderColors();
-}
-
-
-// Get the SLPInfo for building icons for this tileset. Automatically handles SLP object loading/freeing.
-AOE_STRUCTURES::STRUCT_SLP_INFO *CustomTilesetInfo::GetIconsForBuildings() {
-	if (this->iconsForBuildings == NULL) {
-		this->InitBuildingIcons();
-	}
-	return this->iconsForBuildings;
-}
-
-
-// Set (unsigned int) text color value from RGB 0-255 values
-void CustomTilesetInfo::SetTextColor(unsigned char red, unsigned char green, unsigned char blue) {
-	this->textColorRGB = (blue << 16) + (green << 8) + red;
-}
-// Set (unsigned int) text shadow color value from RGB 0-255 values
-void CustomTilesetInfo::SetTextShadowColor(unsigned char red, unsigned char green, unsigned char blue) {
-	this->textShadowColorRGB = (blue << 16) + (green << 8) + red;
-}
-
-
-
 
 TilesetHandler::TilesetHandler() {
-	this->usesCustomCivs = false;
-	this->allowCustomizeStandardTilesets = true;
-	this->tilesetCount = TILESET_COUNT_STANDARD_ROR;
-	// Initialize standard tilesets data
-	this->InitStandardTilesetsData();
 }
 
-
-// Securely gets tileset info. Returns NULL if tileset is invalid
-CustomTilesetInfo *TilesetHandler::GetTilesetInfo(long int tileset) {
-	assert(tileset >= 0);
-	assert(tileset < MAX_TILESET_TOTAL_SUPPORTED_COUNT);
-	if ((tileset < 0) || (tileset >= MAX_TILESET_TOTAL_SUPPORTED_COUNT)) { return NULL; }
-	return &this->tilesetsInfo[tileset];
-}
-
-
-// Returns true if the specified tileset (ID) is customized by configuration.
-bool TilesetHandler::IsCustomized(long int tileset) {
-	assert(tileset >= 0);
-	assert(tileset < MAX_TILESET_TOTAL_SUPPORTED_COUNT);
-	CustomTilesetInfo *info = this->GetTilesetInfo(tileset);
-	return (info && info->isCustomized);
-}
 
 
 // This corresponds to ROR code in 0x481792
-#pragma message("TilesetHandler::InitGameMainUITilesetDependentGraphics: to move somewhere else. UIutils should depend on tilesethandler, not the contrary")
 void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, long int tileset) {
 	assert(gameMainUI && gameMainUI->IsCheckSumValid());
 	assert(tileset >= 0);
@@ -188,10 +32,10 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 	std::string tilesetAsString = std::to_string(tileset);
 	std::string dlg6_x = "dlg6_" + tilesetAsString;
 	long int slpId;
-	CustomTilesetInfo *tilesetInfo = this->GetTilesetInfo(tileset);
+	CustomTilesetInfo *tilesetInfo = allTilesetsInfo.GetTilesetInfo(tileset);
 	if (tilesetInfo == NULL) {
 		tileset = 0;
-		tilesetInfo = this->GetTilesetInfo(0);
+		tilesetInfo = allTilesetsInfo.GetTilesetInfo(0);
 		traceMessageHandler.WriteMessage("Error: tileset ID is invalid, using 0 instead.");
 		if (!tilesetInfo) { return; }
 	}
@@ -234,7 +78,7 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 
 	// 0x481825
 	// Set interface colors (for button borders ?)
-	this->SetBorderColors(gameMainUI, this->GetTilesetInfo(tileset)->btnBorderColors);
+	this->SetBorderColors(gameMainUI, allTilesetsInfo.GetTilesetInfo(tileset)->btnBorderColors);
 	
 	// 0x4819E6
 	if (gameMainUI->buttonBoardResolutionA != NULL) {
@@ -420,16 +264,6 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 }
 
 
-// Get the slpinfo for building icons for a custom tileset
-// Return NULL if not found (maybe tileset is invalid)
-STRUCT_SLP_INFO *TilesetHandler::GetBuildingIconsSlpInfoForTileSet(long int tileset) {
-	CustomTilesetInfo *info = this->GetTilesetInfo(tileset);
-	if (!info || (info->GetTilesetId() != tileset)) {
-		return NULL;
-	}
-	return info->GetIconsForBuildings();
-}
-
 
 void TilesetHandler::SetBorderColors(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, unsigned char *argColor) {
 	assert(argColor != NULL);
@@ -483,36 +317,5 @@ void TilesetHandler::SetBorderColors(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gam
 }
 
 
-void TilesetHandler::InitStandardTilesetsData() {
-	for (int tsid = 0; tsid <= MAX_TILESET_ID_WITH_STANDARD_SLP_IDS; tsid++) {
-		this->tilesetsInfo[tsid].slpIdBuildingIcons = SLPID_TILESET_BLD_ICONS_BASE_STD + tsid;
-		this->tilesetsInfo[tsid].slpIdButtonBoardHigh = SLPID_TILESET_BUTTON_BOARD_HIGH_RESOLUTION_BASE_STD + tsid;
-		this->tilesetsInfo[tsid].slpIdButtonBoardMedium = SLPID_TILESET_BUTTON_BOARD_MEDIUM_RESOLUTION_BASE_STD + tsid;
-		this->tilesetsInfo[tsid].slpIdButtonBoardLow = SLPID_TILESET_BUTTON_BOARD_LOW_RESOLUTION_BASE_STD + tsid;
-		this->tilesetsInfo[tsid].slpIdCheckboxes= SLPID_TILESET_CHECKBOXES_BASE_STD + tsid;
-		this->tilesetsInfo[tsid].slpIdCommonCommandIcons = SLPID_TILESET_COMMON_CMD_ICONS_BASE_STD + tsid;
-		this->tilesetsInfo[tsid].slpIdGameScreenHigh = SLPID_TILESET_GAME_FRIEZES_HIGH_RESOLUTION_BASE_STD + tsid;
-		this->tilesetsInfo[tsid].slpIdGameScreenMedium = SLPID_TILESET_GAME_FRIEZES_MEDIUM_RESOLUTION_BASE_STD + tsid;
-		this->tilesetsInfo[tsid].slpIdGameScreenLow = SLPID_TILESET_GAME_FRIEZES_LOW_RESOLUTION_BASE_STD + tsid;
-		this->tilesetsInfo[tsid].slpIdThemeInfo = SLPID_TILESET_SCREEN_THEME_BASE_STD + tsid;
-		this->tilesetsInfo[tsid].isCustomized = false;
-		this->tilesetsInfo[tsid].SetTilesetId(tsid);
-		this->tilesetsInfo[tsid].tilesetName = std::string("Standard tileset #") + std::to_string(tsid);
-	}
-	// ROR tileset
-	this->tilesetsInfo[TILESET_ROMAN].slpIdBuildingIcons = SLPID_TILESET_BLD_ICONS_ROR;
-	this->tilesetsInfo[TILESET_ROMAN].slpIdButtonBoardHigh = SLPID_TILESET_BUTTON_BOARD_HIGH_RESOLUTION_ROR;
-	this->tilesetsInfo[TILESET_ROMAN].slpIdButtonBoardMedium = SLPID_TILESET_BUTTON_BOARD_MEDIUM_RESOLUTION_ROR;
-	this->tilesetsInfo[TILESET_ROMAN].slpIdButtonBoardLow = SLPID_TILESET_BUTTON_BOARD_LOW_RESOLUTION_ROR;
-	this->tilesetsInfo[TILESET_ROMAN].slpIdCheckboxes = SLPID_TILESET_CHECKBOXES_ROR;
-	this->tilesetsInfo[TILESET_ROMAN].slpIdCommonCommandIcons = SLPID_TILESET_COMMON_CMD_ICONS_ROR;
-	this->tilesetsInfo[TILESET_ROMAN].slpIdGameScreenHigh = SLPID_TILESET_GAME_FRIEZES_HIGH_RESOLUTION_ROR;
-	this->tilesetsInfo[TILESET_ROMAN].slpIdGameScreenMedium = SLPID_TILESET_GAME_FRIEZES_MEDIUM_RESOLUTION_ROR;
-	this->tilesetsInfo[TILESET_ROMAN].slpIdGameScreenLow = SLPID_TILESET_GAME_FRIEZES_LOW_RESOLUTION_ROR;
-	this->tilesetsInfo[TILESET_ROMAN].slpIdThemeInfo = SLPID_TILESET_SCREEN_THEME_ROR;
-	this->tilesetsInfo[TILESET_ROMAN].isCustomized = false;
-	this->tilesetsInfo[TILESET_ROMAN].SetTilesetId(TILESET_ROMAN); // Also initializes button border colors
-	this->tilesetsInfo[TILESET_ROMAN].tilesetName = std::string("Standard tileset #") + std::to_string(TILESET_ROMAN);
-}
 
 }

@@ -3100,14 +3100,14 @@ void CustomRORInstance::OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_v
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->EBX_val = tileset;
-		if (REG_values->EBX_val >= TILESET::tilesetHandler.tilesetCount) {
+		if (REG_values->EBX_val >= TILESET::allTilesetsInfo.tilesetCount) {
 			REG_values->EBX_val = 0; // 0x481790
 		}
 		gameMainUI->tileset = tileset;
 		gameMainUI->tilesetRelatedGraphicsSizeX = sizeX_714;
 		ChangeReturnAddress(REG_values, 0x481792);
 	}
-	bool useCustomTreatments = TILESET::tilesetHandler.usesCustomCivs; // Use standard code when no tileset customization is configured
+	bool useCustomTreatments = TILESET::allTilesetsInfo.usesCustomCivs; // Use standard code when no tileset customization is configured
 
 	if (!useCustomTreatments) {
 		return;
@@ -3132,17 +3132,17 @@ void CustomRORInstance::OnDisplayBuildingIconInUnitInfoZone(REG_BACKUP *REG_valu
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
-	if ((unitTileSet < 0) || (unitTileSet >= TILESET::tilesetHandler.tilesetCount)) {
+	if ((unitTileSet < 0) || (unitTileSet >= TILESET::allTilesetsInfo.tilesetCount)) {
 		traceMessageHandler.WriteMessage(std::string("Error: tileset ") + std::to_string(unitTileSet) + std::string(" is invalid"));
 		unitTileSet = 0;
 	}
-	bool useCustomTreatments = TILESET::tilesetHandler.usesCustomCivs; // Use standard code when no tileset customization is configured
+	bool useCustomTreatments = TILESET::allTilesetsInfo.usesCustomCivs; // Use standard code when no tileset customization is configured
 
-	if (!useCustomTreatments || !TILESET::tilesetHandler.IsCustomized(unitTileSet)) {
+	if (!useCustomTreatments || !TILESET::allTilesetsInfo.IsCustomized(unitTileSet)) {
 		return; // Do not change return address. We're finished here (EDX has been set correctly).
 	}
 	// We have a custom tileset
-	AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo = TILESET::tilesetHandler.GetBuildingIconsSlpInfoForTileSet(unitTileSet);
+	AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo = TILESET::allTilesetsInfo.GetBuildingIconsSlpInfoForTileSet(unitTileSet);
 	if (slpInfo) {
 		REG_values->EDI_val = (unsigned long int)slpInfo;
 		ChangeReturnAddress(REG_values, 0x4F8801); // Skip the MOV EDI,DWORD PTR DS:[EDI+EDX*4]
@@ -3174,18 +3174,18 @@ void CustomRORInstance::OnEditorSetBuildingIconInUnitInfoZone(REG_BACKUP *REG_va
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if ((currentTileset < 0) || (currentTileset >= TILESET::tilesetHandler.tilesetCount)) {
+	if ((currentTileset < 0) || (currentTileset >= TILESET::allTilesetsInfo.tilesetCount)) {
 		traceMessageHandler.WriteMessage(std::string("Error: tileset ") + std::to_string(currentTileset) + std::string(" is invalid"));
 		currentTileset = 0;
 	}
-	bool useCustomTreatments = TILESET::tilesetHandler.usesCustomCivs; // Use standard code when no tileset customization is configured
+	bool useCustomTreatments = TILESET::allTilesetsInfo.usesCustomCivs; // Use standard code when no tileset customization is configured
 
-	if (!useCustomTreatments || !TILESET::tilesetHandler.IsCustomized(currentTileset)) {
+	if (!useCustomTreatments || !TILESET::allTilesetsInfo.IsCustomized(currentTileset)) {
 		return; // Standard case: correctly handled by ROR code
 	}
 	
 	// Custom tilesets: all we have to do is replace EDI by the correct pointer
-	AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo = TILESET::tilesetHandler.GetBuildingIconsSlpInfoForTileSet(currentTileset);
+	AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo = TILESET::allTilesetsInfo.GetBuildingIconsSlpInfoForTileSet(currentTileset);
 	if (slpInfo) {
 		REG_values->EDI_val = (unsigned long int)slpInfo;
 		return;
@@ -3204,8 +3204,8 @@ void CustomRORInstance::DisplayCommandBarGetSlpInfoForBuilding(REG_BACKUP *REG_v
 	ror_api_assert(REG_values, tilesetId_fixed >= 0);
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 
-	bool useStandardCode = !TILESET::tilesetHandler.usesCustomCivs ||
-		(!TILESET::tilesetHandler.IsCustomized(tilesetId_fixed) && (tilesetId_fixed < 5));
+	bool useStandardCode = !TILESET::allTilesetsInfo.usesCustomCivs ||
+		(!TILESET::allTilesetsInfo.IsCustomized(tilesetId_fixed) && (tilesetId_fixed < 5));
 
 	if (useStandardCode) {
 		if (tilesetId_fixed == 5) {
@@ -3221,9 +3221,9 @@ void CustomRORInstance::DisplayCommandBarGetSlpInfoForBuilding(REG_BACKUP *REG_v
 		tilesetId_fixed = player->tileSet;
 	}
 
-	AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo = TILESET::tilesetHandler.GetBuildingIconsSlpInfoForTileSet(tilesetId_fixed);
+	AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo = TILESET::allTilesetsInfo.GetBuildingIconsSlpInfoForTileSet(tilesetId_fixed);
 	if (!slpInfo) {
-		slpInfo = TILESET::tilesetHandler.GetBuildingIconsSlpInfoForTileSet(0); // Safe mode: use first tileset
+		slpInfo = TILESET::allTilesetsInfo.GetBuildingIconsSlpInfoForTileSet(0); // Safe mode: use first tileset
 	}
 	REG_values->EAX_val = (unsigned long int)slpInfo;
 }

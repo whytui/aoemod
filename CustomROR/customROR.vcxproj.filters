@@ -257,6 +257,9 @@
     <ClInclude Include="include\UnitGroupAI.h">
       <Filter>Fichiers d%27en-tête\AI</Filter>
     </ClInclude>
+    <ClInclude Include="include\CustomTilesetInfo.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -435,6 +438,9 @@
     </ClCompile>
     <ClCompile Include="src\unitGroupAI.cpp">
       <Filter>Fichiers sources\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CustomTilesetInfo.cpp">
+      <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

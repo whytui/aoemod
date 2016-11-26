@@ -870,7 +870,7 @@ bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
 			callResult = elem->QueryIntAttribute("count", &intValue);
 			assert(abs(intValue) < TILESET::MAX_TILESET_TOTAL_SUPPORTED_COUNT);
 			if ((callResult == TIXML_SUCCESS) && (intValue >= TILESET::TILESET_COUNT_STANDARD_ROR)) {
-				TILESET::tilesetHandler.tilesetCount = intValue;
+				TILESET::allTilesetsInfo.tilesetCount = intValue;
 			}
 		}
 
@@ -878,14 +878,14 @@ bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
 			int tilesetId = 0;
 			callResult = elem->QueryIntAttribute("id", &intValue);
 			if (callResult == TIXML_SUCCESS) { tilesetId = intValue; }
-			bool tilesetCanBeModified = (TILESET::tilesetHandler.allowCustomizeStandardTilesets || (tilesetId >= TILESET::TILESET_COUNT_STANDARD_ROR));
+			bool tilesetCanBeModified = (TILESET::allTilesetsInfo.allowCustomizeStandardTilesets || (tilesetId >= TILESET::TILESET_COUNT_STANDARD_ROR));
 			if (tilesetCanBeModified && (tilesetId < TILESET::MAX_TILESET_TOTAL_SUPPORTED_COUNT)) {
-				TILESET::CustomTilesetInfo *tilesetInfo = TILESET::tilesetHandler.GetTilesetInfo(tilesetId);
+				TILESET::CustomTilesetInfo *tilesetInfo = TILESET::allTilesetsInfo.GetTilesetInfo(tilesetId);
 				if (!tilesetInfo) {
 					this->couldNotReadTilesetXMLConfig = true; // ERROR
 					return false;
 				}
-				TILESET::tilesetHandler.usesCustomCivs = true;
+				TILESET::allTilesetsInfo.usesCustomCivs = true;
 				std::string tilesetName = this->XML_GetAttributeValue(elem, "name");
 				tilesetInfo->SetTilesetId(tilesetId);
 				tilesetInfo->tilesetName = tilesetName;

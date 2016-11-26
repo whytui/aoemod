@@ -153,6 +153,7 @@
     <ClInclude Include="include\AOE_struct_debugging.h" />
     <ClInclude Include="include\AOE_struct_export.h" />
     <ClInclude Include="include\AOE_struct_export_remote.h" />
+    <ClInclude Include="include\TileSetDefinition.h" />
     <ClInclude Include="include\triggerDefinition.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_campaign_editor.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_credits_screen.h" />
@@ -192,6 +193,7 @@
     <ClCompile Include="src\basicFilesHandling.cpp" />
     <ClCompile Include="src\ROR_struct_debugging.cpp" />
     <ClCompile Include="src\ROR_struct_export.cpp" />
+    <ClCompile Include="src\TileSetDefinition.cpp" />
     <ClCompile Include="src\triggerDefinition.cpp" />
   </ItemGroup>
   <ItemGroup>

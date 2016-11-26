@@ -14,6 +14,7 @@
 #include "drsHandler.h"
 #include "mainStructuresHandling.h"
 #include "traceMessage.h"
+#include "CustomTilesetInfo.h"
 
 /*
  * This file provides useful (raw) methods to deal with AOE UI objects.
@@ -739,16 +740,15 @@ static bool AOE_InGameAddCommandButton(AOE_STRUCTURES::STRUCT_PLAYER *player, lo
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_BUILD) {
 		unknown_colorPtr = player->ptrPlayerColorStruct + 0x28;
 		assert(player->tileSet >= 0);
-		//assert(player->tileSet <= TILESET::tilesetHandler.tilesetCount);
+		assert(player->tileSet <= TILESET::allTilesetsInfo.tilesetCount);
 		int tileSet = player->tileSet;
-		/*TILESET::CustomTilesetInfo *tilesetInfo = TILESET::tilesetHandler.GetTilesetInfo(tileSet);
+		TILESET::CustomTilesetInfo *tilesetInfo = TILESET::allTilesetsInfo.GetTilesetInfo(tileSet);
 		if (tilesetInfo) {
 			iconsSLP = tilesetInfo->GetIconsForBuildings();
-		} else {*/
-			//if ((tileSet < 0) || (tileSet > TILESET::tilesetHandler.tilesetCount)) { tileSet = 0; } // in theory, this is not necessary.
-		if (tileSet < 0) { tileSet = 0; }
-		iconsSLP = inGameMain->iconsForBuildings[player->tileSet];
-		//}
+		} else {
+			if ((tileSet < 0) || (tileSet > TILESET::allTilesetsInfo.tilesetCount)) { tileSet = 0; } // in theory, this is not necessary.
+			iconsSLP = inGameMain->iconsForBuildings[player->tileSet];
+		}
 	}
 	if ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) ||
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_TRADE_FOOD_FOR_GOLD) || 
