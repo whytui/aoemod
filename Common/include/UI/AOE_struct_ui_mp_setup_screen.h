@@ -21,6 +21,7 @@ namespace AOE_STRUCTURES
 	// Size = 0x898 . 7C 6D 54 00.
 	// Main screen for game settings (MP or SP)
 	// Constructor: 0x487F40
+	// 0x48B640: mpSetupScreen.InitPlayers?(?)
 #define CHECKSUM_UI_MP_SETUP_SCREEN 0x00546D7C
 	class STRUCT_UI_MP_SETUP_SCREEN : public STRUCT_ANY_UI {
 	public:

@@ -209,6 +209,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x0050A5B9: // Both have almost same custom code and behaviour (we can still use returnAddress to distinguish the 2 cases)
 		this->CheckPlayerCreationAtGameStartup(REG_values);
 		break;
+	case 0x0048D143:
+		this->PickRandomCivForPlayer(REG_values);
+		break;
 	case 0x00501985:
 		this->OnGameSettingsNotifyEvent(REG_values);
 		break;
@@ -2110,6 +2113,31 @@ void CustomRORInstance::CheckPlayerCreationAtGameStartup(REG_BACKUP *REG_values)
 	if (isHumanPlayer && IsMultiplayer()) {
 		ChangeReturnAddress(REG_values, 0x50A576);
 	}
+}
+
+
+// From 0048D13C. Randomly picks civilizations for each player, at game settings screen init.
+// May change return address to 0x48D156
+void CustomRORInstance::PickRandomCivForPlayer(REG_BACKUP *REG_values) {
+	long int curPlayerIndex = REG_values->ESI_val; // = playerId-1 (beware)
+	
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		long int pseudoRandom = AOE_METHODS::GetAndReCalcPseudoRandomValue();
+		REG_values->EAX_val = pseudoRandom;
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+	
+	if (!CUSTOMROR::crInfo.configInfo.allowPickingCustomCivsInRandomInit) {
+		return;
+	}
+
+	// Custom treatments
+	long int pseudoRandom = AOE_METHODS::GetAndReCalcPseudoRandomValue();
+	long int choice = pseudoRandom % CUSTOMROR::crInfo.configInfo.civCount; // civCount does not include "gaia" civ.
+	choice++; // Because civ0 is "gaia" civ, we must ignore it. Now choice is in [1..n] interval.
+	REG_values->EAX_val = choice;
+	REG_values->ECX_val = (unsigned long int)GetGameSettingsPtr();
+	ChangeReturnAddress(REG_values, 0x48D156);
 }
 
 

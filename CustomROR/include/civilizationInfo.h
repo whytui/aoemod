@@ -24,7 +24,6 @@ public:
 	vector<string> RM_AI_file_no_water;
 	vector<string> RM_AI_file_some_water;
 	vector<string> RM_AI_file_much_water;
-	vector<string> test;
 
 	// Methods
 	std::string GetCivName();

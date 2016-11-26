@@ -257,5 +257,16 @@ namespace AOE_METHODS {
 			CALL addr;
 		}
 	}
+
+	// ROR's method to get a pseudo-random value
+	static long int GetAndReCalcPseudoRandomValue() {
+		long int result;
+		_asm {
+			MOV EDX, 0x52605D;
+			CALL EDX; // Recalculate pseudo random
+			MOV result, EAX;
+		}
+		return result;
+	}
 }
 

@@ -722,7 +722,6 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 					std::to_string(unitGroup->targetUnitId) + (" can't be located. Set new target = leader's target (") +
 					std::to_string(commanderAction->targetUnitId) + std::string(")\n");
 				this->lastDebugInfo += msg;
-				CallWriteCenteredText(msg.c_str());
 #endif
 				unitGroup->targetUnitId = commanderAction->targetUnitId;
 				unitGroup->targetPosX = newTargetUnit->positionX;

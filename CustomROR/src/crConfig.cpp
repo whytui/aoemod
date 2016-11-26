@@ -61,6 +61,7 @@ CustomRORConfig::CustomRORConfig() {
 	//this->cityPlanHouseDistanceFromOtherBld = 3; // Game default
 	this->cityPlanBerryBushWeightForGranary = 0x28; // NOT game default (0x80) because it doesn't work well.
 	this->civCount = AOE_CONST_FUNC::CIVILIZATIONS::CST_CIVID_STANDARD_MAX;
+	this->allowPickingCustomCivsInRandomInit = false; // Game default
 	for (int i = 0; i < 256; i++) {
 		allCivInfo[i] = NULL;
 	}
@@ -776,6 +777,9 @@ bool CustomRORConfig::ReadCivXMLConfigFile(char *fileName) {
 			callResult = elem->QueryIntAttribute("count", &intValue);
 			assert(abs(intValue) < 256);
 			if (callResult == TIXML_SUCCESS) { this->civCount = intValue; }
+		}
+		if (elemName == "allowPickingCustomCivsInRandomInit") {
+			this->allowPickingCustomCivsInRandomInit = XML_GetBoolElement(elem, "enable");
 		}
 
 		if (elemName == "civ") {

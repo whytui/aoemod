@@ -239,12 +239,12 @@ namespace AOE_STRUCTURES {
 		unsigned long int victoryConditionChoice; // 0=standard, 1=conquest, 7=time limit, 8=score
 		// 0xA90
 		unsigned long int victoryConditionChoice_parameter; // or float ?
-		unsigned long int unknownA94; // Bytes for chosen civs ?
-		unsigned long int unknownA98;
+		unsigned char chosenCivs[8]; // +A94. Selected civ ID for each player (in game settings screen). Index is playerId-1. Set in 0x5053C0. See also 0x48D13E for random picking
+		//unsigned long int unknownA98;
 		unsigned long int unknownA9C;
 		// 0xAA0
 		char unknown_AA0[0x20]; // dwords index=0-7. Limits player # ? 8 Players: [0,1,2,3,4,5,6,7] 4 Players: [0,1,2,3,0,1,2,3] 2 Players: [0,1,0,1,0,1,0,1]
-		// 0XAC0
+		// 0xAC0
 		unsigned long int unknownAC0;
 		char chosenPlayerNum[8]; // Corresponds to the colored number in game settings screen
 		char unknown_ACC;

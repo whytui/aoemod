@@ -3,10 +3,14 @@
 <!-- This XML file is dedicated to handle custom Civilizations in customROR -->
 <!-- If you deliver a mod with empires.dat containing additional civs (+ possibly dedicated AI files), deliver this file also. -->
 <customROR_civs>
+	<!-- civilizations.count represents the number of supported civs. Civs with ID above this value will be ignored.
+	Note: civID=0 is reserved for gaia and is not taken into account here. -->
 	<civilizations count="16"/>
+	<!-- allowPickingCustomCivsInRandomInit: if true, custom civs may be initially selected when starting a new random game. Default=false (only ROR civs can be selected by default) -->
+	<allowPickingCustomCivsInRandomInit enable="false"/>
 	
 	<!-- Additional civs -->
-	<!-- civ id MUST match AGE3 (empires.dat) civ_id -->
+	<!-- civ id MUST match AGE3 (empires.dat) civ_id. -->
 	<civ id="17">
 		<civ_name value="civ1"/>
 		<player_name index="1" value="Bob"/>

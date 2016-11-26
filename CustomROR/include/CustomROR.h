@@ -168,6 +168,7 @@ namespace CUSTOMROR {
 		void ManageCivsInEditorCombo(REG_BACKUP *REG_values);
 		void GetInGameCustomCivName(REG_BACKUP *REG_values);
 		void CheckPlayerCreationAtGameStartup(REG_BACKUP *REG_values);
+		void PickRandomCivForPlayer(REG_BACKUP *REG_values);
 
 		// Manage Game Timer considerations
 		void CollectTimerStats(REG_BACKUP *REG_values);

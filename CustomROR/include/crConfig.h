@@ -162,6 +162,7 @@ public:
 	bool useCustomMapDimensions;
 	// Civilizations
 	long int civCount; // Does NOT count gaia (index=0)
+	bool allowPickingCustomCivsInRandomInit;
 	// Human interface
 	bool enableCallNearbyIdleMilitaryUnits;
 	long int distanceToCallNearbyIdleMilitaryUnits;

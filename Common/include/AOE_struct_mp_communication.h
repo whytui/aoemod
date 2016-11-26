@@ -36,8 +36,9 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_09D0[8];
 		char unknown_09F0[0x1000 - 0x9F0];
 		// 0x1000
-		// +10E0= a playerId for MP ? "localControlPlayerId ?"
-		char unknown_1000[0x1100 - 0x1000];
+		char unknown_1000[0x10E0 - 0x1000];
+		long int localControlPlayerId; // +10E0. "local" playerId for MP.
+		char unknown_10E4[0x1100 - 0x10E4];
 		// +1179= byte
 		char unknown_1100[0x12A0 - 0x1100];
 		unsigned long int unknown_12A0;
