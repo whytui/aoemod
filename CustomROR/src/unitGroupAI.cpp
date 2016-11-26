@@ -293,7 +293,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	if (!global || !global->IsCheckSumValid()) { return false; }
 	STRUCT_AI *mainAI = tacAI->ptrMainAI;
 	if (!mainAI || !mainAI->IsCheckSumValid()) { return false; }
-	STRUCT_PLAYER *player = mainAI->ptrStructPlayer;
+	STRUCT_PLAYER *player = mainAI->ptrStructPlayer; // Current AI player
 	if (!player || !player->IsCheckSumValid()) { return false; }
 	if (unitGroup->commanderUnitId < 0) { return false; }
 	long int myPlayerId = tacAI->commonAIObject.playerId;
@@ -378,7 +378,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	// Unit group consistution and current activity
 	int groupUnitCount = unitGroup->unitCount;
 	int index = 0;
-	int validUnitsFound = 0; // Number of valid units among group members
+	/*int validUnitsFound = 0; // Number of valid units among group members
 	int badDefenderUnits = 0; // units that are not very relevant for defense. Typically, catapults.
 	int notAttackingUnitsCount = 0; // Number of units that do not currently have an agressive activity.
 	int unitsAttackingNonPriorityTarget = 0;
@@ -432,7 +432,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	}
 	int consideredInactiveCount = notAttackingUnitsCount + unitsAttackingNonPriorityTarget;
 	int halfGroup = groupUnitCount / 2;
-	bool unitGroupIsAlmostIdle = (consideredInactiveCount > 0) && (consideredInactiveCount >= halfGroup);
+	bool unitGroupIsAlmostIdle = (consideredInactiveCount > 0) && (consideredInactiveCount >= halfGroup);*/
 
 	STRUCT_UNIT_BASE *enemyUnitNearMyMainUnit = NULL;
 	STRUCT_INF_AI_UNIT_LIST_ELEM *enemyUnitNearMyMainUnitInfAIElem = NULL;
@@ -649,10 +649,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 #endif
 			return false; // Let ROR handle this...
 		}
-		// Is current target valid ? Visible ?
-
-		
-
+		return this->TaskActiveAttackGroup(player, unitGroup);
 	}
 
 
@@ -677,6 +674,71 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	this->lastDebugInfo += "Default: use normal code\n";
 #endif
 	return false; //TO DO (let ROR code be executed)
+}
+
+
+// Task an active attack group, when player situation is not critical/weak.
+// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup) {
+	// Is current target valid ? Visible ?
+	// If no (valid) current target then attack nearby units or units attacking my leader/my group
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid() || !player || !player->ptrAIStruct) { return false; }
+	STRUCT_UNIT_BASE *currentTargetUnit = global->GetUnitFromId(unitGroup->targetUnitId);
+	STRUCT_UNIT_BASE *commanderUnit = global->GetUnitFromId(unitGroup->commanderUnitId);
+	if (!commanderUnit || !commanderUnit->IsCheckSumValidForAUnitClass()) { return false; }
+	STRUCT_PLAYER *currentTargetPlayer = NULL;
+	if (currentTargetUnit) {
+		currentTargetPlayer = currentTargetUnit->ptrStructPlayer;
+	}
+	bool allyOrGaiaOrSelf = true;
+	if (currentTargetPlayer) {
+		allyOrGaiaOrSelf = (player->diplomacyVSPlayers[currentTargetPlayer->playerId] <= PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY);
+	}
+	if (allyOrGaiaOrSelf) {
+		currentTargetUnit = NULL;
+		currentTargetPlayer = NULL;
+	}
+	bool targetIsVisible = false;
+	if (currentTargetUnit) {
+		targetIsVisible = IsFogVisibleForPlayer(player->playerId, (long int)currentTargetUnit->positionX, (long int)currentTargetUnit->positionY);
+	}
+	if (!currentTargetUnit) {
+		unitGroup->targetDAT_ID = -1;
+		unitGroup->targetUnitId = -1;
+	}
+	if (currentTargetUnit && !targetIsVisible) {
+		// Search if there is some other target at reach
+		STRUCT_ACTION_BASE *commanderAction = AOE_METHODS::GetUnitAction(commanderUnit);
+		if (commanderAction && (commanderAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK_9)) {
+			STRUCT_UNIT_BASE *newTargetUnit = commanderAction->targetUnit;
+			if (!newTargetUnit) {
+				newTargetUnit = global->GetUnitFromId(commanderAction->targetUnitId);
+			}
+			bool newTargetIsVisible = newTargetUnit && IsFogVisibleForPlayer(player->playerId, (long int)newTargetUnit->positionX, (long int)newTargetUnit->positionY);
+			if (newTargetUnit && newTargetUnit->unitDefinition && newTargetUnit->ptrStructPlayer && newTargetIsVisible) {
+#ifdef _DEBUG
+				std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string("Target #") + 
+					std::to_string(unitGroup->targetUnitId) + (" can't be located. Set new target = leader's target (") +
+					std::to_string(commanderAction->targetUnitId) + std::string(")\n");
+				this->lastDebugInfo += msg;
+				CallWriteCenteredText(msg.c_str());
+#endif
+				unitGroup->targetUnitId = commanderAction->targetUnitId;
+				unitGroup->targetPosX = newTargetUnit->positionX;
+				unitGroup->targetPosY = newTargetUnit->positionY;
+				unitGroup->targetDAT_ID = newTargetUnit->unitDefinition->DAT_ID1;
+				unitGroup->targetPlayerId = newTargetUnit->ptrStructPlayer->playerId;
+				// Set unit group task, but do not force (if units already have an activity, let them)
+				// Remark: there is no risk this "tasking" occurs too many times in a row, because here the case is "I have a target that is not visible" and we set a visible target.
+				this->SetUnitGroupCurrentTask(&player->ptrAIStruct->structTacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 1, false);
+				return true;
+			}
+		}
+		// Is some unit attacking the leader or some unit of the group (or some of my nearby units ?)
+		// TODO
+	}
+	return false;
 }
 
 

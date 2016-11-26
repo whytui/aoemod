@@ -112,6 +112,9 @@ namespace CUSTOM_AI {
 		// DO NOT access it from other methods.
 		ActiveUnitGroupTaskingContextInfo activeGroupsTaskingTempInfo;
 
+		// Task an active attack group, when player situation is not critical/weak.
+		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+		bool TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup);
 	};
 
 }

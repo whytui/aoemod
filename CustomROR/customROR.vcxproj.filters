@@ -43,6 +43,12 @@
     <Filter Include="Fichiers d%27en-tête\AI">
       <UniqueIdentifier>{effcd91c-0eb6-43d0-8bf8-ce2576c4bbca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\CivTilesetTrigger">
+      <UniqueIdentifier>{3bd80b5d-5764-404d-b040-b5e41a7a23f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\CivTilesetTrigger">
+      <UniqueIdentifier>{1f5f5f9c-ec47-4ef2-973c-442b15384bf0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\CustomROR.rc">
@@ -69,15 +75,6 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\crCommon.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\civilizationInfo.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\crTrigger.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\crTriggerSet.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\crMainInterface.h">
@@ -212,9 +209,6 @@
     <ClInclude Include="include\AOE_time.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
-    <ClInclude Include="include\TileSetHandler.h">
-      <Filter>Fichiers d%27en-tête\Technical</Filter>
-    </ClInclude>
     <ClInclude Include="include\playerHandling.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -257,8 +251,20 @@
     <ClInclude Include="include\UnitGroupAI.h">
       <Filter>Fichiers d%27en-tête\AI</Filter>
     </ClInclude>
+    <ClInclude Include="include\TileSetHandler.h">
+      <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\civilizationInfo.h">
+      <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\crTriggerSet.h">
+      <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\crTrigger.h">
+      <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
+    </ClInclude>
     <ClInclude Include="include\CustomTilesetInfo.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -284,15 +290,6 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\crCommon.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\civilizationInfo.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\crTrigger.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\crTriggerSet.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\crMainInterface.cpp">
@@ -403,9 +400,6 @@
     <ClCompile Include="src\AOEPrimitives_units.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\TilesetHandler.cpp">
-      <Filter>Fichiers sources\Technical</Filter>
-    </ClCompile>
     <ClCompile Include="src\playerHandling.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -439,8 +433,20 @@
     <ClCompile Include="src\unitGroupAI.cpp">
       <Filter>Fichiers sources\AI</Filter>
     </ClCompile>
+    <ClCompile Include="src\TilesetHandler.cpp">
+      <Filter>Fichiers sources\CivTilesetTrigger</Filter>
+    </ClCompile>
+    <ClCompile Include="src\civilizationInfo.cpp">
+      <Filter>Fichiers sources\CivTilesetTrigger</Filter>
+    </ClCompile>
     <ClCompile Include="src\CustomTilesetInfo.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Fichiers sources\CivTilesetTrigger</Filter>
+    </ClCompile>
+    <ClCompile Include="src\crTriggerSet.cpp">
+      <Filter>Fichiers sources\CivTilesetTrigger</Filter>
+    </ClCompile>
+    <ClCompile Include="src\crTrigger.cpp">
+      <Filter>Fichiers sources\CivTilesetTrigger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
