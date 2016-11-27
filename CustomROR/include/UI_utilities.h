@@ -965,3 +965,22 @@ static void CallWriteCenteredText(const char *txt, long int numLine = 1, long in
 		call writeFct;
 	}
 }
+
+
+// Displays the green blinking around a unit (like in right-click)
+static void SetGreenBlinkingOnUnit(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gamePlayZone, long int unitId,
+	unsigned long int blinkingTime_ms) {
+	if (!gamePlayZone || !gamePlayZone->IsCheckSumValid()) {
+		return;
+	}
+	if ((blinkingTime_ms < 0) || (unitId <= 0)) { return; } // Invalid arguments
+	unsigned long int addr = 0x50F970;
+	_asm {
+		MOV ECX, gamePlayZone;
+		PUSH 2;
+		PUSH 2;
+		PUSH blinkingTime_ms;
+		PUSH unitId; // must NOT be <0
+		CALL addr;
+	}
+}

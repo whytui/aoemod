@@ -14,12 +14,29 @@
 namespace AOE_STRUCTURES
 {
 
+	// Information to display green highlight (blinking) under units, like after a right click.
+	// Size=0x14. no constructor (alloc in 0x50F1F2)
+	// See 0x50F970 = gamePlayZone.setGreenUnitBlinking(unitId, time_ms, arg3, arg4)
+	// To allow more than 1 blinking at once, remove SUB DWORD PTR DS:[EAX+8],EBP in 0x50F9B0 (but some other clicks like move (red cross) will still stop the blinkings)
+	class STRUCT_UNIT_GREEN_BLINKING_INFO {
+	public:
+		long int isActive;
+		long int unitId; // Warning: never set this to -1 or invalid unit ID !
+		unsigned long int blinkingStartAbsoluteTime; // +08. TimGetTime value when blinking started
+		unsigned long int blinkingTime; // +0C. Time amount in milliseconds the blinking should last.
+		char mouseSelectionStatus; // +10. Corresponds to unit.mouseSelectionStatus. 1=selected, 2=right-click-target. Is it a Mask, not an enum ! Used to update unit After blinking stops ?
+		char unused_11[3];
+	};
+	static_assert(sizeof(STRUCT_UNIT_GREEN_BLINKING_INFO) == 0x14, "STRUCT_UNIT_GREEN_BLINKING_INFO size");
+
+
 #define CHECKSUM_UI_PLAYING_ZONE 0x00546688
-	// Size 0x380
-	// Constructor 0x518690
+	// Size 0x380 - Constructor 0x518690
 	// Parent can be STRUCT_UI_IN_GAME_MAIN, or editor UI?
 	// Also used in editor !
 	// 88 66 54 00, parent = 40 A8 54 00, 1C A6 54 00, then UI base
+	// 0x50F8D0 = gameZone.displayGreenBlinkingUnitReclangle()
+	// 0x50F970 = gamePlayZone.setGreenUnitBlinking(unitId, time_ms, arg3, arg4)
 	class STRUCT_UI_PLAYING_ZONE : public STRUCT_ANY_UI {
 	public:
 		long int hWnd; // TO CONFIRM. +F4
@@ -66,12 +83,21 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_344;
 		unsigned long int unknown_348;
 		unsigned long int unknown_34C;
-		char unknown_350[0x36C - 0x350];
+		unsigned long int unknown_350;
+		STRUCT_UNIT_GREEN_BLINKING_INFO *greenUnitBlinkingInfoArray; // +354. Never NULL (alloc in ccor). Pointer to array of info for green unit blinking.
+		long int numberOfBlinkingGreenUnitRectangles; // +358. Number of active "right-click" blinking unit indicators
+		long int blinkingGreenUnitRectanglesArraySize; // +35C. Array size for +354 (greenUnitBlinkingInfoArray). Hardcoded to 8 in 0x50F1E8.
+		// From 0x360, we're no longer in 1C A6 54 00 overload ?
+		char unknown_360[0x36C - 0x360];
 		long int unsure_gamePosYUnderMouse; // +36C. mouse pos or game pos (or temp variable ?)
 		long int unsure_gamePosXUnderMouse; // +370. mouse pos or game pos (or temp variable ?)
+		unsigned long int unknown_374;
+		unsigned long int unknown_378;
+		unsigned long int unknown_37C;
 
 		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_UI_PLAYING_ZONE) || (this->checksum == 0x0054A840); }
 	};
+	static_assert(sizeof(STRUCT_UI_PLAYING_ZONE) == 0x380, "STRUCT_UI_PLAYING_ZONE size");
 
 
 }
