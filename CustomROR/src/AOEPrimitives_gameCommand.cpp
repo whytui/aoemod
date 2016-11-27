@@ -92,6 +92,22 @@ bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsLi
 }
 
 
+// Create a "ROR" command struct (stop). Returns false if failed.
+bool CreateCmd_Stop(long int actorUnitId) {
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(actorUnitId);
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid()) {
+		return false;
+	}
+	const long int structSize = 0x06; // 0x02 + 4*1 (1 actor unit)... Unusual, but correct !
+	AOE_STRUCTURES::COMMAND_STOP_ACTION *cmd = (AOE_STRUCTURES::COMMAND_STOP_ACTION *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_STOP_ACTION;
+	assert(cmd->IsCmdIdValid());
+	cmd->actorCount = 1;
+	cmd->unitId[0] = actorUnitId;
+	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
 // Create a "ROR" command struct (build). Returns false if failed.
 bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(actorUnitId);

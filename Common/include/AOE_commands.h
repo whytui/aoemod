@@ -5,6 +5,8 @@
 
 using namespace AOE_CONST_INTERNAL;
 
+#pragma pack(push, 1) // Prevent compiler from aligning on dwords (or other alignment). Very important here as there are some weird structures.
+
 /*
 * This file contains empiresX.exe structures definition
 * Please read README.txt first.
@@ -49,6 +51,7 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(COMMAND_RIGHT_CLICK) >= 0x1C, "COMMAND_RIGHT_CLICK size");
 
+
 	// Type 0x01. Size = 0x2 + actorCount*4 (yes !). Create=. Execute=42A730
 	struct COMMAND_STOP_ACTION {
 	public:
@@ -58,6 +61,7 @@ namespace AOE_STRUCTURES
 
 		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_STOP_ACTION; }
 	};
+	static_assert(sizeof(COMMAND_STOP_ACTION) == 0x06, "COMMAND_STOP_ACTION size");
 
 
 	// Type 0x02. Size= + actorCount*4. Create=. Execute=0x42A780
@@ -367,3 +371,4 @@ namespace AOE_STRUCTURES
 
 }
 
+#pragma pack(pop)

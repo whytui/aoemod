@@ -1616,6 +1616,9 @@ bool CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 
 	if (CUSTOM_AI::customAIHandler.IsAliveAI(player->playerId)) {
 		CUSTOM_AI::customAIHandler.GetCustomPlayerAI(player->playerId)->RunStrategyUpdate(globalStruct->currentGameTime);
+		// TEST. TODO: set a delay
+		CUSTOM_AI::customAIHandler.GetCustomPlayerAI(player->playerId)->CheckForDuplicateFarmers(player);
+		CUSTOM_AI::customAIHandler.GetCustomPlayerAI(player->playerId)->FixStuckRepairmen(player);
 	}
 	return true;
 }

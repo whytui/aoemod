@@ -57,6 +57,12 @@ namespace CUSTOM_AI {
 		void OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit,
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyUnit, bool rorOriginalPanicModeMethodHasBeenRun);
 
+		// Remove farmers when more than 1 are assigned to the same farm.
+		void CheckForDuplicateFarmers(AOE_STRUCTURES::STRUCT_PLAYER *player);
+
+		// Fix repairment that are stuck in idle status because they got blocked at some point in their movement.
+		void FixStuckRepairmen(AOE_STRUCTURES::STRUCT_PLAYER *player);
+
 	private:
 		bool isValidPlayer;
 	};

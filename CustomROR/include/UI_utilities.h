@@ -968,7 +968,9 @@ static void CallWriteCenteredText(const char *txt, long int numLine = 1, long in
 
 
 // Displays the green blinking around a unit (like in right-click)
-static void SetGreenBlinkingOnUnit(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gamePlayZone, long int unitId,
+// Default blinking time in ROR code is 1500 milliseconds.
+// To allow more than 1 blinking at once, remove the SUB instruction in 0x50F9B0.
+static void DisplayGreenBlinkingOnUnit(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gamePlayZone, long int unitId,
 	unsigned long int blinkingTime_ms) {
 	if (!gamePlayZone || !gamePlayZone->IsCheckSumValid()) {
 		return;

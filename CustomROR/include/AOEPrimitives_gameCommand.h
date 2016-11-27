@@ -30,6 +30,9 @@ namespace GAME_COMMANDS {
 	bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY);
 	bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
 
+	// Create a "ROR" command struct (stop). Returns false if failed.
+	bool CreateCmd_Stop(long int actorUnitId);
+
 	// Create a "ROR" command struct (build). Returns false if failed.
 	bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY);
 

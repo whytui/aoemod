@@ -307,7 +307,7 @@ namespace AOE_CONST_INTERNAL
 		CST_AS_UNKNOWN_04 = 4, // Moving to action location ?
 		CST_AS_UNKNOWN_06 = 6, // "start" in progress ? (analog to 3?). For gen. wonder victory, means timer has started?
 		CST_AS_UNKNOWN_07 = 7, // in progress ? (analog to 4?). For both attack, build, etc
-		CST_AS_UNKNOWN_0A = 0x0A, // Seen on stuck villager (repairman that could not get to target)
+		CST_AS_UNKNOWN_0A_STUCK = 0x0A, // Seen on stuck villager (repairman that could not get to target)
 		CST_AS_UNKNOWN_0B = 0x0B, // Seen when moving to bird location (after killing it)
 		CST_AS_UNKNOWN_0C = 0x0C, // waiting for requirement ? Really unsure
 		CST_AS_UNKNOWN_0D = 0x0D, // Set when unit can't move (speed==0) ?? 405472. This status is an Idle status.
