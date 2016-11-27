@@ -272,6 +272,11 @@ void CustomRORCommand::LoadCustomDrsFiles() {
 	for each (DrsFileToLoad *drs in CUSTOMROR::crInfo.configInfo.customDrsFilesList)
 	{
 		AOE_METHODS::AddDrsFile(drs->filename.c_str(), drs->folder.c_str());
+		if (FindDrsLinkForFile(drs->filename.c_str())) {
+			traceMessageHandler.WriteMessageNoNotification(drs->folder + std::string("\\") +drs->filename + std::string(" has been loaded"));
+		} else {
+			traceMessageHandler.WriteMessage(std::string("ERROR : ") + drs->folder + std::string("\\") + drs->filename + std::string(" could NOT be loaded"));
+		}
 	}
 
 	// Prepare custom DRS data

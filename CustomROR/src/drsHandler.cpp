@@ -7,7 +7,7 @@ namespace AOE_METHODS {
 	// Frees all underlying info from a SLP INFO object, but does NOT free slpInfo itself.
 	void FreeSlpInfoUnderlyingObjects(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo) {
 		assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
-		const unsigned long int callAddress = 0x49F840; // TO DO : constant & other versions
+		const unsigned long int callAddress = 0x49F840; // TODO : constant & other versions
 		assert(slpInfo != NULL);
 		_asm {
 			MOV ECX, slpInfo;
@@ -99,8 +99,9 @@ namespace AOE_METHODS {
 
 	// Completely (properly) frees a slp info object
 	void FreeSlpInfo(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo) {
+		assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 		AOE_METHODS::FreeSlpInfoUnderlyingObjects(slpInfo);
-		const unsigned long int callHeapFree = 0x525FC2; // TO DO : constant & other versions
+		const unsigned long int callHeapFree = 0x525FC2; // TODO : constant & other versions
 		_asm {
 			MOV ECX, slpInfo;
 			PUSH ECX;
