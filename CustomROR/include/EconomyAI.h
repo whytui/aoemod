@@ -23,12 +23,12 @@ namespace CUSTOM_AI {
 			this->ResetAllInfo();
 		}
 
-		unsigned long int lastVillagersFix_ms; // Last game time (milliseconds) when fix on villagers were run
+		long int lastVillagersFix_ms; // Last game time (milliseconds) when fix on villagers were run
 
 		void ResetAllInfo();
 
 		// Run various fixes on villager actions, provided that a sufficient delay has passed since last execution
-		void RunFixesOnVillagerActions(AOE_STRUCTURES::STRUCT_PLAYER *player);
+		void RunFixesOnVillagerActions(AOE_STRUCTURES::STRUCT_PLAYER *player, long int currentGameTime);
 
 	private:
 		// Remove farmers when more than 1 are assigned to the same farm.

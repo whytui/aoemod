@@ -1616,7 +1616,7 @@ bool CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 
 	if (CUSTOM_AI::customAIHandler.IsAliveAI(player->playerId)) {
 		CUSTOM_AI::customAIHandler.GetCustomPlayerAI(player->playerId)->RunStrategyUpdate(globalStruct->currentGameTime);
-		CUSTOM_AI::customAIHandler.GetCustomPlayerAI(player->playerId)->economyAI.RunFixesOnVillagerActions(player);
+		CUSTOM_AI::customAIHandler.GetCustomPlayerAI(player->playerId)->economyAI.RunFixesOnVillagerActions(player, globalStruct->currentGameTime);
 	}
 	return true;
 }

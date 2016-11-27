@@ -9,11 +9,10 @@ void EconomyAI::ResetAllInfo() {
 
 
 // Run various fixes on villager actions, provided that a sufficient delay has passed since last execution
-void EconomyAI::RunFixesOnVillagerActions(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+void EconomyAI::RunFixesOnVillagerActions(AOE_STRUCTURES::STRUCT_PLAYER *player, long int currentGameTime) {
 	if (!player || !player->IsCheckSumValid() || !player->ptrGlobalStruct || !player->ptrGlobalStruct->IsCheckSumValid()) {
 		return;
 	}
-	unsigned long int currentGameTime = player->ptrGlobalStruct->currentGameTime;
 	if (currentGameTime - this->lastVillagersFix_ms < AI_CONST::delayForVillagerFixes_ms) {
 		// We've not waited enough.
 		return;
