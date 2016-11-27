@@ -266,6 +266,9 @@
     <ClInclude Include="include\CustomTilesetInfo.h">
       <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
     </ClInclude>
+    <ClInclude Include="include\EconomyAI.h">
+      <Filter>Fichiers d%27en-tête\AI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -447,6 +450,9 @@
     </ClCompile>
     <ClCompile Include="src\crTrigger.cpp">
       <Filter>Fichiers sources\CivTilesetTrigger</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EconomyAI.cpp">
+      <Filter>Fichiers sources\AI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -133,6 +133,7 @@
     <ClInclude Include="include\CustomRORInfo.h" />
     <ClInclude Include="include\CustomTilesetInfo.h" />
     <ClInclude Include="include\drsHandler.h" />
+    <ClInclude Include="include\EconomyAI.h" />
     <ClInclude Include="include\EditMapSizeXYPopup.h" />
     <ClInclude Include="include\EditorEditUnitInfoPopup.h" />
     <ClInclude Include="include\EditorScenarioInfoPopup.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="src\CustomTilesetInfo.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\drsHandler.cpp" />
+    <ClCompile Include="src\EconomyAI.cpp" />
     <ClCompile Include="src\EditMapSizeXYPopup.cpp" />
     <ClCompile Include="src\EditorEditUnitInfoPopup.cpp" />
     <ClCompile Include="src\EditorScenarioInfoPopup.cpp" />

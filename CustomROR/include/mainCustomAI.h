@@ -7,6 +7,7 @@
 #include "CustomRORInfo.h"
 #include "customAIMilitaryInfo.h"
 #include "UnitGroupAI.h"
+#include "EconomyAI.h"
 #include "StrategyUpdater.h"
 #include "unitTargeting.h"
 #include "playerTargeting.h"
@@ -27,6 +28,7 @@ namespace CUSTOM_AI {
 
 		CustomAIMilitaryInfo militaryAIInfo;
 		UnitGroupAI unitGroupAI;
+		EconomyAI economyAI;
 		long int lastStrategyAnalysisTime; // Last time (milliseconds) strategy was analyzed by customROR
 
 		// Reset all information (game (re)start, etc)
@@ -56,12 +58,6 @@ namespace CUSTOM_AI {
 		// rorOriginalPanicModMethodHasBeenRun indicates if ROR's panic mode method has been run. If so, panic mode treatments should not be run here.
 		void OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit,
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyUnit, bool rorOriginalPanicModeMethodHasBeenRun);
-
-		// Remove farmers when more than 1 are assigned to the same farm.
-		void CheckForDuplicateFarmers(AOE_STRUCTURES::STRUCT_PLAYER *player);
-
-		// Fix repairment that are stuck in idle status because they got blocked at some point in their movement.
-		void FixStuckRepairmen(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 	private:
 		bool isValidPlayer;
