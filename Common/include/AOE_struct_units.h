@@ -354,7 +354,7 @@ namespace AOE_STRUCTURES {
 		long int targetPositionsArrayUsedElements; // size of unknown_168_ptrList
 		// 0x170
 		unsigned long int targetPositionsArrayTotalSize; // allocated number of elements (elemSize=3, warning, it is unusual).
-		char isInMovement; // Not sure
+		char isInMovement; // +174. Not sure
 		char unknown_175;
 		char unknown_176; // ?
 		char unknown_177; // ?
@@ -375,7 +375,7 @@ namespace AOE_STRUCTURES {
 		// 0x180
 		unsigned long int unknown_180;
 		STRUCT_UNIT_ACTION_INFO *ptrActionInformation; // +184. Useful to retrieve unit's action.
-		long int rightClickActionCounter_unsure; // +188. Incremented eac time a right-click action is done by player ?
+		long int rightClickActionCounter_unsure; // +188. Incremented each time a right-click action is done by player ?
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00542748); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_COMMANDABLE); }

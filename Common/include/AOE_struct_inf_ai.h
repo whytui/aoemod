@@ -124,7 +124,7 @@ namespace AOE_STRUCTURES {
 		// 0x110
 		long int unitElemListSize; // +110. Total allocated size of unitElemList (the array can contain some "-1")
 		// Unit lists : see 0x4BDD10. In those 4 unit lists, elements are never cleaned/removed !
-		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units that can be created by players + resources + artefacts
+		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units that can be created by players + resources + artefacts. AddUpdate=0x4BD750.
 		STRUCT_AI_UNIT_LIST_INFO creatableAndGatherableUnits; // +118. units that can be created by players + resources (gazelle but not other animals) + artefacts
 		STRUCT_AI_UNIT_LIST_INFO playerCreatableUnits; // +128. All player-creatable units (villager, military, buildings...). NOT resources.
 		STRUCT_AI_UNIT_LIST_INFO artefactsAndFlags; // +138. Store the found flags/artefacts.

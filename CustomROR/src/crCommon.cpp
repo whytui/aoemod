@@ -773,6 +773,26 @@ AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(AOE_STRUCT
 }
 
 
+// Add a unit in infAI elem list, or update if existing. Warning: this uses unit structure's info, even if it is not visible !
+// Please check for visibility to avoid "cheating"
+// Returns true if successful
+bool AddUpdateInfAIElemList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
+	if (!infAI || !infAI->IsCheckSumValid() || !unit || !unit->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	unsigned long int addr = 0x4BD750;
+	// Use ROR method that does all the stuff...
+	long int result;
+	_asm{
+		MOV ECX, infAI;
+		PUSH unit;
+		CALL addr;
+		MOV result, EAX;
+	}
+	return (result != 0);
+}
+
+
 // Change unit owner in InfAI unitListElem according to unit visibility
 // Return true if updated.
 bool UpdateUnitOwnerInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit,

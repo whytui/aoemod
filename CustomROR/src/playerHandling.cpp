@@ -267,6 +267,7 @@ namespace PLAYER {
 			return false;
 		}
 		short int unitDefId = unit->unitDefinition->DAT_ID1;
+		// Could use ptrBuildingsListHeader ?
 		assert(player->ptrCreatableUnitsListLink && player->ptrCreatableUnitsListLink->IsCheckSumValid());
 		if (!player->ptrCreatableUnitsListLink || !player->ptrCreatableUnitsListLink->IsCheckSumValid()) {
 			return false;

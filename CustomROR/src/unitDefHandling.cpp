@@ -280,10 +280,12 @@ namespace AOE_STRUCTURES {
 	// Returns true if a unit is capable of attacking (conversion or physical attack)
 	// WARNING: this does not take care of villager mode (for example, will return false for a farmer !)
 	bool UnitDefCanAttack(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
+		// Non-commandable (type 40) units can't attack
 		if (!unitDef || !unitDef->DerivesFromCommandable()) {
 			return false;
 		}
 		AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDefCommandable = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDef;
+		// Special: if it can convert, return true
 		if (unitDefCommandable->ptrUnitCommandHeader && unitDefCommandable->ptrUnitCommandHeader->IsCheckSumValid()) {
 			for (int i = 0; i < unitDefCommandable->ptrUnitCommandHeader->commandCount; i++) {
 				if (unitDefCommandable->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_CONVERT) {
@@ -291,10 +293,13 @@ namespace AOE_STRUCTURES {
 				}
 			}
 		}
+		// Now handle physical attacks: non-type50 units can't attack physically
 		AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDef;
 		if (!unitDef50->IsCheckSumValidForAUnitClass()) {
 			return false;
 		}
+		// Unit can attack <=> it has at least 1 attack specified
+		// Note: will return false for archimedes (although there is a bug in AI that allows AI to have him attack with something like 0.00001 attack !)
 		return (unitDef50->attacksCount > 0);
 	}
 

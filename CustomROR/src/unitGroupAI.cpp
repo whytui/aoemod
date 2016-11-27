@@ -22,6 +22,28 @@ void UnitGroupAI::ResetAllInfo() {
 }
 
 
+// Sets unitGroup target* fields from provided target unit. Does not set task or run any treatment.
+// targetUnit can be NULL.
+void UnitGroupAI::SetUnitGroupTarget(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit) {
+	if (!unitGroup) { return; }
+	if (!targetUnit || !targetUnit->unitDefinition || !targetUnit->ptrStructPlayer) {
+		unitGroup->targetDAT_ID = -1;
+		unitGroup->targetPlayerId = -1;
+		unitGroup->targetUnitId = -1;
+		unitGroup->targetPosX = -1;
+		unitGroup->targetPosY = -1;
+		unitGroup->targetPosZ = -1;
+		return;
+	}
+	unitGroup->targetDAT_ID = targetUnit->unitDefinition->DAT_ID1;
+	unitGroup->targetPlayerId = targetUnit->ptrStructPlayer->playerId;
+	unitGroup->targetUnitId = targetUnit->unitInstanceId;
+	unitGroup->targetPosX = targetUnit->positionX;
+	unitGroup->targetPosY = targetUnit->positionY;
+	unitGroup->targetPosZ = targetUnit->positionY;
+}
+
+
 // Computes internal variables about military situation
 // This method should perform few operations to be quite fast
 void UnitGroupAI::EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI) {
@@ -77,6 +99,7 @@ void UnitGroupAI::EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI) {
 
 // Set unitGroup.currentTask and call ApplyTask for the group (creates underlying unit commands, etc).
 // unitGroup.lastTaskingTime_ms is updated
+// unitGroup->lastAttackTaskingTime_ms is updated if taskId is an attack task.
 void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, UNIT_GROUP_TASK_IDS taskId,
 	long int resetOrg, bool force) {
 	if (!unitGroup) { return; }
@@ -89,6 +112,9 @@ void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROU
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid()) {
 		unitGroup->lastTaskingTime_ms = global->currentGameTime;
+		if (unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02) {
+			unitGroup->lastAttackTaskingTime_ms = global->currentGameTime;
+		}
 	}
 }
 
@@ -150,9 +176,7 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 		return result;
 	}
 	// No (visible) target: use retreat. Maybe we'll find the enemy on our way
-	unitGroup->targetPlayerId = -1;
-	unitGroup->targetDAT_ID = -1;
-	unitGroup->targetUnitId = -1;
+	this->SetUnitGroupTarget(unitGroup, NULL);
 	unitGroup->retreatPosX = targetPosX;
 	unitGroup->retreatPosY = targetPosY;
 	// TODO: do not retreat to exact target position, stop before, especially range units !
@@ -322,7 +346,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 			return false;
 		}
 		if ((this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) &&
-			(unitGroup->lastTaskingTime_ms - global->currentGameTime < tacAI->SNNumber[SNTacticalUpdateFrequency])) {
+			(global->currentGameTime- unitGroup->lastTaskingTime_ms < tacAI->SNNumber[SNTacticalUpdateFrequency])) {
 			
 			return false;
 		}*/
@@ -375,65 +399,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		}
 	}
 
-	// Unit group consistution and current activity
 	int groupUnitCount = unitGroup->unitCount;
-	int index = 0;
-	/*int validUnitsFound = 0; // Number of valid units among group members
-	int badDefenderUnits = 0; // units that are not very relevant for defense. Typically, catapults.
-	int notAttackingUnitsCount = 0; // Number of units that do not currently have an agressive activity.
-	int unitsAttackingNonPriorityTarget = 0;
-	while ((index < STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT) && (validUnitsFound < groupUnitCount)) {
-		long int curUnitId = unitGroup->GetMyUnitId(index);
-		if (curUnitId > -1) {
-			STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curUnitId);
-			if (curUnit && curUnit->IsCheckSumValidForAUnitClass()) {
-				validUnitsFound++;
-				assert(curUnit->unitDefinition && curUnit->unitDefinition->IsCheckSumValidForAUnitClass());
-				if (!curUnit->unitDefinition) { return false; } // ERROR
-				STRUCT_UNITDEF_BASE *unitDef = curUnit->unitDefinition;
-				if (unitDef->DerivesFromAttackable() && curUnit->DerivesFromAttackable()) {
-					STRUCT_UNITDEF_ATTACKABLE* unitDefAttackable = (STRUCT_UNITDEF_ATTACKABLE*)curUnit->unitDefinition;
-					if (UnitDefProjectileCanDamageOwnUnits(unitDefAttackable)) {
-						badDefenderUnits++;
-					}
-					STRUCT_UNIT_ATTACKABLE *unitAttackable = (STRUCT_UNIT_ATTACKABLE*)curUnit;
-					assert(unitAttackable->IsCheckSumValidForAUnitClass());
-					if (unitAttackable->currentActivity) {
-						bool hasAttackActivity = (unitAttackable->currentActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_ATTACK) ||
-							(unitAttackable->currentActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_CONVERT);
-						STRUCT_ACTION_BASE *unitAction = AOE_METHODS::GetUnitAction(curUnit);
-						bool actionIsAgressive = unitAction && (
-							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_CONVERT) ||
-							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK_9) ||
-							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) // Unsure !!!
-							);
-						if (!hasAttackActivity && !actionIsAgressive) {
-							notAttackingUnitsCount++;
-						}
-						if (hasAttackActivity && actionIsAgressive && unitAction) {
-							STRUCT_UNIT_BASE *targetUnit = unitAction->targetUnit;
-							if (!targetUnit) {
-								targetUnit = global->GetUnitFromId(unitAction->targetUnitId);
-							}
-							if (targetUnit && targetUnit->IsCheckSumValidForAUnitClass() && targetUnit->unitDefinition && targetUnit->unitDefinition->IsCheckSumValidForAUnitClass()) {
-								GLOBAL_UNIT_AI_TYPES targetAIType = targetUnit->unitDefinition->unitAIType;
-								if (((targetAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) ||
-									(targetAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall)) &&
-									(!IsTower(targetUnit->unitDefinition))) {
-									unitsAttackingNonPriorityTarget++;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		index++;
-	}
-	int consideredInactiveCount = notAttackingUnitsCount + unitsAttackingNonPriorityTarget;
-	int halfGroup = groupUnitCount / 2;
-	bool unitGroupIsAlmostIdle = (consideredInactiveCount > 0) && (consideredInactiveCount >= halfGroup);*/
-
 	STRUCT_UNIT_BASE *enemyUnitNearMyMainUnit = NULL;
 	STRUCT_INF_AI_UNIT_LIST_ELEM *enemyUnitNearMyMainUnitInfAIElem = NULL;
 	bool enemyUnitNearMyMainUnitIsCurrentlyVisible = false;
@@ -514,11 +480,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 			}
 		}
 		if (discardExploreAndRetreat && (distanceToMyMainUnit > AI_CONST::townSize + 5)) {
-			unitGroup->targetDAT_ID = -1;
-			unitGroup->targetPlayerId = -1;
-			unitGroup->targetUnitId = -1;
-			unitGroup->targetPosX = -1;
-			unitGroup->targetPosY = -1;
+			this->SetUnitGroupTarget(unitGroup, NULL);
 			this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_IDLE, 0, 1);
 #ifdef _DEBUG
 			this->lastDebugInfo += "explore switched to idle\n";
@@ -585,7 +547,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 						std::to_string(result) + std::string(" due to critical situation, wkn=");
 					msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
 					//CallWriteText(msg.c_str());
-					this->lastDebugInfo += std::string("Ordered+force taskId=") + std::to_string(result) + std::string("\n");
+					this->lastDebugInfo += msg + std::string("\n");
 #endif
 					return true; // Unit group has been tasked
 				}
@@ -600,7 +562,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 							std::to_string(result) + std::string(" due to weakness, wkn=");
 						msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
 						//CallWriteText(msg.c_str());
-						this->lastDebugInfo += std::string("Ordered taskId=") + std::to_string(result) + std::string("\n");
+						this->lastDebugInfo += msg + std::string("\n");
 #endif
 						return true; // Unit group has been tasked
 					}
@@ -621,12 +583,92 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 			return true;
 		}
 		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) {
+			if (unitGroup->isTasked &&
+				// TODO: could use a longer delay than minimumDelayBetweenBasicUnitGroupAttackTasking_ms
+				(global->currentGameTime - unitGroup->lastTaskingTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
+				return false;
+			}
+
+			UnitGroupDetailedInfo detailedInfo;
+			this->CollectInfoAboutGroup(player, unitGroup, &detailedInfo);
+
+			// Help leader if under attack
+			if (detailedInfo.unitIdAttackingMyLeader > -1) {
+				long int newTargetId = detailedInfo.unitsAttackingMyGroup.front();
+				STRUCT_UNIT_BASE *newTargetUnit = global->GetUnitFromId(newTargetId);
+				if (newTargetUnit && newTargetUnit->IsCheckSumValidForAUnitClass()) {
+					this->SetUnitGroupTarget(unitGroup, newTargetUnit);
+					this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 0, false);
+#ifdef _DEBUG
+					this->lastDebugInfo += "weak situation: set target to help leader (under attack)\n";
+#endif
+					return true; // unit group has been tasked
+				}
+			}
+
+			// Help other units if under attack
+			// TODO: Use condition: detailedInfo.unitGroupIsAlmostIdle ? According to personality ? Random ? Difficulty
+			if (!detailedInfo.unitsAttackingMyGroup.empty()) {
+				long int newTargetId = detailedInfo.unitsAttackingMyGroup.front();
+				STRUCT_UNIT_BASE *newTargetUnit = global->GetUnitFromId(newTargetId);
+				if (newTargetUnit && newTargetUnit->IsCheckSumValidForAUnitClass()) {
+					this->SetUnitGroupTarget(unitGroup, newTargetUnit);
+					this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 0, false);
+#ifdef _DEBUG
+					this->lastDebugInfo += "weak situation: set target from list of units attacking my group\n";
+#endif
+					return true; // unit group has been tasked
+				}
+			}
+
+			// Note: GetNumberOfUnitsUnderAttack should be 0 here as we already treated such cases just above (help if under attack)
+
+			// TODO: if group is away from town, choose between retreating and other attack actions
+			bool groupIsAway = (distanceToMyMainUnit > AI_CONST::townSize + 5);
+			bool forceRetreat = false;
+			if (groupIsAway) {
+				forceRetreat = false; // TODO: set true according other variables, random... ?
+			}
+
+			if (!forceRetreat && detailedInfo.unitGroupIsAlmostIdle) {
+				if (enemyUnitNearMyMainUnit && enemyUnitNearMyMainUnitIsCurrentlyVisible) {
+					this->SetUnitGroupTarget(unitGroup, enemyUnitNearMyMainUnit);
+					this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 1, false);
+#ifdef _DEBUG
+					this->lastDebugInfo += "weak situation: set target = target found near leader\n";
+#endif
+					return true; // unit group has been tasked
+				}
+			}
+
+			if (detailedInfo.unitGroupIsAlmostIdle) {
+				assert(myMainCentralUnit != NULL); // guaranteed by top "if" condition
+				float retreatPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
+				float retreatPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
+				UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, NULL, retreatPosX, retreatPosY, false);
+				if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
+#ifdef _DEBUG
+					std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
+						std::to_string(result) + std::string(" for idle grp, weak case, wkn=");
+					msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
+					//CallWriteText(msg.c_str());
+					this->lastDebugInfo += msg + std::string("\n");
+#endif
+					return true; // Unit group has been tasked
+				}
+				// Retreating failed ?
+			}
+			if (groupIsAway) {
+				return false; // Let ROR do something with this group. Being idle out of nowhere is no use !
+			}
+
 			// TODO: if I have priority targets from TARGETING classes, consider attacking them
 			// ... at least in my town or if related to victory conditions
 #ifdef _DEBUG
 			this->lastDebugInfo += "stand by to avoid suicidal attacking (skip)\n";
 #endif
 			return true; // Stand by = prevent ROR from sending this group attacking some non-priority target
+
 		}
 	} else {
 		// No TC/villager/priest to protect. This may be a scenario or a game-end situation where I am probably gonna lose
@@ -704,8 +746,7 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 		targetIsVisible = IsFogVisibleForPlayer(player->playerId, (long int)currentTargetUnit->positionX, (long int)currentTargetUnit->positionY);
 	}
 	if (!currentTargetUnit) {
-		unitGroup->targetDAT_ID = -1;
-		unitGroup->targetUnitId = -1;
+		this->SetUnitGroupTarget(unitGroup, NULL);
 	}
 	if (currentTargetUnit && !targetIsVisible) {
 		// Search if there is some other target at reach
@@ -723,11 +764,7 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 					std::to_string(commanderAction->targetUnitId) + std::string(")\n");
 				this->lastDebugInfo += msg;
 #endif
-				unitGroup->targetUnitId = commanderAction->targetUnitId;
-				unitGroup->targetPosX = newTargetUnit->positionX;
-				unitGroup->targetPosY = newTargetUnit->positionY;
-				unitGroup->targetDAT_ID = newTargetUnit->unitDefinition->DAT_ID1;
-				unitGroup->targetPlayerId = newTargetUnit->ptrStructPlayer->playerId;
+				this->SetUnitGroupTarget(unitGroup, newTargetUnit);
 				// Set unit group task, but do not force (if units already have an activity, let them)
 				// Remark: there is no risk this "tasking" occurs too many times in a row, because here the case is "I have a target that is not visible" and we set a visible target.
 				this->SetUnitGroupCurrentTask(&player->ptrAIStruct->structTacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 1, false);
@@ -738,6 +775,73 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 		// TODO
 	}
 	return false;
+}
+
+
+// Collects info on group and sets UnitGroupDetailedInfo fields
+void UnitGroupAI::CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup, UnitGroupDetailedInfo *outputInfos) {
+	if (!outputInfos) { return; }
+	outputInfos->ResetAllInfo();
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) { return; }
+	// Unit group consistution and current activity
+	int groupUnitCount = unitGroup->unitCount;
+	int index = 0;
+	while ((index < STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT) && (outputInfos->validUnitsCount < groupUnitCount)) {
+		long int curUnitId = unitGroup->GetMyUnitId(index);
+		if (curUnitId > -1) {
+			STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curUnitId);
+			if (curUnit && curUnit->IsCheckSumValidForAUnitClass()) {
+				outputInfos->validUnitsCount++;
+				assert(curUnit->unitDefinition && curUnit->unitDefinition->IsCheckSumValidForAUnitClass());
+				if (!curUnit->unitDefinition) { return; } // ERROR
+				STRUCT_UNITDEF_BASE *unitDef = curUnit->unitDefinition;
+				if (unitDef->DerivesFromAttackable() && curUnit->DerivesFromAttackable()) {
+					STRUCT_UNITDEF_ATTACKABLE* unitDefAttackable = (STRUCT_UNITDEF_ATTACKABLE*)curUnit->unitDefinition;
+					if (UnitDefProjectileCanDamageOwnUnits(unitDefAttackable)) {
+						outputInfos->badDefenderUnitsCount++;
+					}
+					STRUCT_UNIT_ATTACKABLE *unitAttackable = (STRUCT_UNIT_ATTACKABLE*)curUnit;
+					assert(unitAttackable->IsCheckSumValidForAUnitClass());
+					if (unitAttackable->currentActivity) {
+						bool hasAttackActivity = (unitAttackable->currentActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_ATTACK) ||
+							(unitAttackable->currentActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_CONVERT);
+						STRUCT_ACTION_BASE *unitAction = AOE_METHODS::GetUnitAction(curUnit);
+						bool actionIsAgressive = unitAction && (
+							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_CONVERT) ||
+							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK_9) ||
+							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) // Unsure !!!
+							);
+						if (!hasAttackActivity && !actionIsAgressive) {
+							outputInfos->notAttackingUnitsCount++;
+						}
+						if (hasAttackActivity && actionIsAgressive && unitAction) {
+							STRUCT_UNIT_BASE *targetUnit = unitAction->targetUnit;
+							if (!targetUnit) {
+								targetUnit = global->GetUnitFromId(unitAction->targetUnitId);
+							}
+							if (targetUnit && targetUnit->IsCheckSumValidForAUnitClass() && targetUnit->unitDefinition && targetUnit->unitDefinition->IsCheckSumValidForAUnitClass()) {
+								if (!UnitDefCanAttack(targetUnit->unitDefinition)) {
+									outputInfos->unitsAttackingNonPriorityTarget++;
+								} else {
+									// Technically, "target" could be attacking something else, but chances are it's aiming at a unit that is mine, or allied to me.
+									outputInfos->unitsAttackingMyGroup.push_back(targetUnit->unitInstanceId);
+									if (curUnit->unitInstanceId == unitGroup->commanderUnitId) {
+										outputInfos->unitIdAttackingMyLeader = targetUnit->unitInstanceId;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		index++;
+	}
+	int consideredInactiveCount = outputInfos->notAttackingUnitsCount + outputInfos->unitsAttackingNonPriorityTarget;
+	int halfGroup = groupUnitCount / 2;
+	outputInfos->unitGroupIsAlmostIdle = (consideredInactiveCount > 0) && (consideredInactiveCount >= halfGroup);
 }
 
 

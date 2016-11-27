@@ -123,6 +123,16 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 	// Record the attack. The analog treatment in ROR code is in 0x4D7AF0 (update TacAI.attacksByPlayerCount[enemyPlayerId]).
 	// Note: we also record gaia attacks (why wouldn't we?)
 	this->militaryAIInfo.SaveEnemyAttackInHistory(enemyPlayerId, global->currentGameTime, enemyUnit, myTC);
+	
+	AOE_STRUCTURES::STRUCT_INF_AI *infAI = &this->mainAI->structInfAI;
+	if (infAI && infAI->IsCheckSumValid()) {
+		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem = FindInfAIUnitElemInList(infAI, enemyUnit->unitInstanceId);
+		if (!elem) {
+			// Make sure attacker IS in my unit elem list (infAI).
+			// Until I figure out how this list is valued (and why it is so... wrong!), let's use this hack to make sure attackers are found in panic mode analysis.
+			AddUpdateInfAIElemList(infAI, enemyUnit);
+		}
+	}
 
 	if (myUnit->remainingHitPoints < 1) {
 		// Unit has just been killed

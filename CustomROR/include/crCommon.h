@@ -203,6 +203,11 @@ bool RemoveFromInfAIInfoList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unit
 // Find a unitElem in infAI list, returns NULL if not found.
 AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId);
 
+// Add a unit in infAI elem list, or update if existing. Warning: this uses unit structure's info, even if it is not visible !
+// Please check for visibility to avoid "cheating"
+// Returns true if successful
+bool AddUpdateInfAIElemList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
+
 // Change unit owner in InfAI unitListElem according to unit visibility.
 // Return true if updated.
 bool UpdateUnitOwnerInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, long int newPlayerId);

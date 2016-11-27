@@ -22,6 +22,35 @@ namespace CUSTOM_AI {
 		MS_STRONG // Large military numbers, with at least 2 land (military) unit groups
 	};
 
+
+	class UnitGroupDetailedInfo {
+	public:
+		UnitGroupDetailedInfo() {
+			this->ResetAllInfo();
+		}
+		int validUnitsCount; // Number of units in group that could actually be retrieved
+		int badDefenderUnitsCount; // Number of units that are not relevant for defending
+		int notAttackingUnitsCount; // Number of units that are not currently attacking an enemy
+		int unitsAttackingNonPriorityTarget; // Number of units that are attacking a non-priority target (=units that can't attack/defend itself)
+		bool unitGroupIsAlmostIdle;
+		long int unitIdAttackingMyLeader; // Unit ID (or -1) of the unit that is attacking the group's leader
+		std::list<long int> unitsAttackingMyGroup; // List of unit IDs that are attacking some members of the group. Does NOT include ALL units attacking my group !
+
+		// Number of units (in group) that are under attack. This information is not 100% reliable: if my units is attacking a (nontower) building, we can't know if it is being attacked itself.
+		int GetNumberOfUnitsUnderAttack() { return this->unitsAttackingNonPriorityTarget; }
+
+		void ResetAllInfo() {
+			this->badDefenderUnitsCount = 0;
+			this->notAttackingUnitsCount = 0;
+			this->unitGroupIsAlmostIdle = false;
+			this->unitsAttackingNonPriorityTarget = 0;
+			this->validUnitsCount = 0;
+			this->unitIdAttackingMyLeader = -1;
+			this->unitsAttackingMyGroup.clear();
+		}
+	};
+
+
 	// Represents common (temporary) information about active unit group tasking
 	// Such data is only valid during the "task active unit groups" loop.
 	class ActiveUnitGroupTaskingContextInfo {
@@ -48,6 +77,7 @@ namespace CUSTOM_AI {
 		int totalLandGroups; // Sum of land military groups, excluding artefacts
 		// mainCentralUnitIsVital determines if "central" unit is TC or a unit that allows survival (villager, priest).
 		// If false, player has no villager, TC, etc, and may adopt a more aggressive attitude (nothing to lose) ; especially in scenarios
+		// Being true means that myMainCentralUnit is non-NULL
 		bool mainCentralUnitIsVital;
 
 		void ResetAllInfo() {
@@ -81,12 +111,17 @@ namespace CUSTOM_AI {
 
 		void ResetAllInfo();
 
+		// Sets unitGroup target* fields from provided target unit. Does not set task or run any treatment.
+		// targetUnit can be NULL.
+		void SetUnitGroupTarget(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
+
 		// Computes internal variables about military situation
 		// This method should perform few operations to be quite fast
 		void EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI);
 
 		// Set unitGroup.currentTask and call ApplyTask for the group (creates underlying unit commands, etc).
 		// unitGroup.lastTaskingTime_ms is updated
+		// unitGroup->lastAttackTaskingTime_ms is updated if taskId is an attack task.
 		void SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, UNIT_GROUP_TASK_IDS taskId,
 			long int resetOrg, bool force);
 
@@ -115,6 +150,9 @@ namespace CUSTOM_AI {
 		// Task an active attack group, when player situation is not critical/weak.
 		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
 		bool TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup);
+
+		// Collects info on group and sets UnitGroupDetailedInfo fields
+		void CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup, UnitGroupDetailedInfo *outputInfos);
 	};
 
 }
