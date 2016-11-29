@@ -269,6 +269,12 @@
     <ClInclude Include="include\EconomyAI.h">
       <Filter>Fichiers d%27en-tête\AI</Filter>
     </ClInclude>
+    <ClInclude Include="include\autoRebuildFarmConfig.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="include\commonConfigEnums.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">

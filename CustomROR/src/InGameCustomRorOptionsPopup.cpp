@@ -9,6 +9,7 @@ InGameCustomRorOptionsPopup::InGameCustomRorOptionsPopup() {
 void InGameCustomRorOptionsPopup::_ResetPointers() {
 	__super::_ResetPointers();
 	this->openTechTreeInfo = false;
+	this->autoRebuildFarmConfig = NULL;
 	this->btnTechTreeInfo = NULL;
 	this->btnMapCopy = NULL;
 	this->customOptionButtonVar = NULL;
@@ -32,7 +33,11 @@ void InGameCustomRorOptionsPopup::_ResetPointers() {
 
 void InGameCustomRorOptionsPopup::_AddPopupContent() {
 	if (this->IsClosed() || (this->popup == NULL)) { return; }
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return; }
 
+	this->autoRebuildFarmConfig = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->isScenario || settings->isCampaign, settings->isDeathMatch);
+	if (!this->autoRebuildFarmConfig) { return; } // ERROR !
 	char customOptionHumanPenaltyTextBuffer[12];
 	char customOptionGameSpeedFactorTextBuffer[12];
 	char maxFarmsTextBuffer[12];
@@ -40,9 +45,9 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 	char minWoodTextBuffer[12];
 	sprintf_s(customOptionHumanPenaltyTextBuffer, "%ld", CUSTOMROR::crInfo.configInfo.dislike_humanPlayer);
 	sprintf_s(customOptionGameSpeedFactorTextBuffer, "%d", (int)(CUSTOMROR::crInfo.configInfo.improvedGameSpeedFactor * (float)100));
-	sprintf_s(maxFarmsTextBuffer, "%d", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFarms);
-	sprintf_s(maxFoodTextBuffer, "%d", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFood);
-	sprintf_s(minWoodTextBuffer, "%d", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_minWood);
+	sprintf_s(maxFarmsTextBuffer, "%d", this->autoRebuildFarmConfig->autoRebuildFarms_maxFarms);
+	sprintf_s(maxFoodTextBuffer, "%d", this->autoRebuildFarmConfig->autoRebuildFarms_maxFood);
+	sprintf_s(minWoodTextBuffer, "%d", this->autoRebuildFarmConfig->autoRebuildFarms_minWood);
 
 
 	//this->customGamePopupButtonVar
@@ -58,7 +63,7 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 	// Farms autorebuild
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS, txtAutoRebuildFarms), 0x10, 0x64, 0x100, 0x1E);
 	this->AddCheckBox(this->popup, &this->chkAutoRebuildFarms, 0x120, 0x64, 0x1E, 0x1E);
-	AOE_CheckBox_SetChecked(this->chkAutoRebuildFarms, CUSTOMROR::crInfo.configInfo.enableAutoRebuildFarms);
+	AOE_CheckBox_SetChecked(this->chkAutoRebuildFarms, autoRebuildFarmConfig->enableAutoRebuildFarms);
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_FOOD, txtAutoRebuildFarmsMaxFood), 0x10, 0x80, 0x100, 0x1E);
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMinWood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MIN_WOOD, txtAutoRebuildFarmsMinWood), 0x10, 0x98, 0x100, 0x1E);
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_NUMBER, txtAutoRebuildFarmsMaxNumber), 0x10, 0xB0, 0x100, 0x1E);
@@ -110,20 +115,22 @@ void InGameCustomRorOptionsPopup::OnBeforeClose(bool isCancel) {
 		ShowWindow((HWND)h, SW_HIDE);
 	}
 
-	if (this->chkAutoRebuildFarms) {
-		CUSTOMROR::crInfo.configInfo.enableAutoRebuildFarms = (this->chkAutoRebuildFarms->checked != 0);
-	}
-	if (this->edtAutoRebuildFarmsMaxFarms) {
-		typedText = this->edtAutoRebuildFarmsMaxFarms->pTypedText;
-		CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFarms = atoi(typedText); // does not raise. Returns 0 if invalid.
-	}
-	if (this->edtAutoRebuildFarmsMaxFood) {
-		typedText = this->edtAutoRebuildFarmsMaxFood->pTypedText;
-		CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFood = atoi(typedText); // does not raise. Returns 0 if invalid.
-	}
-	if (this->edtAutoRebuildFarmsMinWood) {
-		typedText = this->edtAutoRebuildFarmsMinWood->pTypedText;
-		CUSTOMROR::crInfo.configInfo.autoRebuildFarms_minWood = atoi(typedText); // does not raise. Returns 0 if invalid.
+	if (this->autoRebuildFarmConfig) {
+		if (this->chkAutoRebuildFarms) {
+			this->autoRebuildFarmConfig->enableAutoRebuildFarms = (this->chkAutoRebuildFarms->checked != 0);
+		}
+		if (this->edtAutoRebuildFarmsMaxFarms) {
+			typedText = this->edtAutoRebuildFarmsMaxFarms->pTypedText;
+			this->autoRebuildFarmConfig->autoRebuildFarms_maxFarms = atoi(typedText); // does not raise. Returns 0 if invalid.
+		}
+		if (this->edtAutoRebuildFarmsMaxFood) {
+			typedText = this->edtAutoRebuildFarmsMaxFood->pTypedText;
+			this->autoRebuildFarmConfig->autoRebuildFarms_maxFood = atoi(typedText); // does not raise. Returns 0 if invalid.
+		}
+		if (this->edtAutoRebuildFarmsMinWood) {
+			typedText = this->edtAutoRebuildFarmsMinWood->pTypedText;
+			this->autoRebuildFarmConfig->autoRebuildFarms_minWood = atoi(typedText); // does not raise. Returns 0 if invalid.
+		}
 	}
 }
 

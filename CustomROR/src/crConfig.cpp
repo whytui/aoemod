@@ -90,10 +90,6 @@ CustomRORConfig::CustomRORConfig() {
 	this->fixHumanPlayer_specificSeeUnit = false;
 	this->allyExplorationIsAlwaysShared = false; // Game default
 	this->singlePlayerMaxPopulation = 50; // Game default
-	this->enableAutoRebuildFarms = false;
-	this->autoRebuildFarms_maxFarms = 4;
-	this->autoRebuildFarms_maxFood = 3000;
-	this->autoRebuildFarms_minWood = 200;
 	this->noNeutralInitialDiplomacy = false; // Game default.
 	this->InitializeDefaultResourceValues();
 	for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
@@ -180,6 +176,23 @@ const char * CustomRORConfig::XML_GetAttributeValue(TiXmlElement *elem, const ch
 	if (!attr) { return ""; }
 	return attr;
 }
+
+
+// Reads the gameType attribute and returns the result in ConfigGameType enum. Returns CFG_GAME_UNKNOWN if not found
+CUSTOMROR::ConfigGameType CustomRORConfig::XML_ReadGameTypeAttribute(TiXmlElement *elem) {
+	if (!elem) { return CUSTOMROR::CFG_GAME_UNKNOWN; }
+	const char *attr = elem->Attribute("gameType");
+	if (!attr) { return CUSTOMROR::CFG_GAME_UNKNOWN; }
+	if (_stricmp(attr, "DM") == 0) {
+		return CUSTOMROR::CFG_GAME_DEATHMATCH;
+	}
+	if (_stricmp(attr, "RM") == 0) {
+		return CUSTOMROR::CFG_GAME_RANDOM_GAME;
+	}
+	// Other types: not handled yet
+	return CUSTOMROR::CFG_GAME_UNKNOWN;
+}
+
 
 void CustomRORConfig::SetAutoAttackPolicyFromAttributes(AutoAttackPolicy *aap, TiXmlElement *elem) {
 	if (!aap || !elem) { return; }
@@ -353,13 +366,13 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 			this->noWalls = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "initialResources") {
-			categoryName = this->XML_GetAttributeValue(elem, "gameType");
+			CUSTOMROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
 			int RMChoice = -1;
-			if (categoryName == "RM") {
+			if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
 				callResult = elem->QueryIntAttribute("choice", &intValue);
 				if (callResult == TIXML_SUCCESS) { RMChoice = intValue; }
 			}
-			if (categoryName == "DM") {
+			if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
 				RMChoice = 0;
 			}
 			if (RMChoice > 3) {
@@ -369,44 +382,44 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 			if (RMChoice >= 0) {
 				callResult = elem->QueryIntAttribute("food", &intValue);
 				if (callResult == TIXML_SUCCESS) {
-					if (categoryName == "RM") {
+					if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
 						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
 					}
-					if (categoryName == "DM") {
+					if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
 						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
 					}
 				}
 				callResult = elem->QueryIntAttribute("wood", &intValue);
 				if (callResult == TIXML_SUCCESS) {
-					if (categoryName == "RM") {
+					if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
 						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
 					}
-					if (categoryName == "DM") {
+					if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
 						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
 					}
 				}
 				callResult = elem->QueryIntAttribute("stone", &intValue);
 				if (callResult == TIXML_SUCCESS) {
-					if (categoryName == "RM") {
+					if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
 						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
 					}
-					if (categoryName == "DM") {
+					if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
 						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
 					}
 				}
 				callResult = elem->QueryIntAttribute("gold", &intValue);
 				if (callResult == TIXML_SUCCESS) {
-					if (categoryName == "RM") {
+					if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
 						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
 					}
-					if (categoryName == "DM") {
+					if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
 						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
 					}
 				}
 			}
 		}
 		if (elemName == "per_number") {
-			categoryName = this->XML_GetAttributeValue(elem, "gameType");
+			CUSTOMROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
 			int snNumber = -1;
 			int snValue = -1;
 			callResult = elem->QueryIntAttribute("sn", &intValue);
@@ -414,52 +427,52 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 			callResult = elem->QueryIntAttribute("value", &intValue);
 			if (callResult == TIXML_SUCCESS) { snValue = intValue; }
 			if ((snNumber >= AOE_CONST_FUNC::CST_FIRST_SN_NUMBER) && (snNumber <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER) &&
-				(categoryName == "RM")) {
+				(gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME)) {
 				this->defaultPerNumbers_RM[snNumber] = snValue;
 				this->defaultPerNumbers_RM_isSet[snNumber] = true;
 			}
 			if ((snNumber >= AOE_CONST_FUNC::CST_FIRST_SN_NUMBER) && (snNumber <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER) &&
-				(categoryName == "DM")) {
+				(gameType == CUSTOMROR::CFG_GAME_DEATHMATCH)) {
 				this->defaultPerNumbers_DM[snNumber] = snValue;
 				this->defaultPerNumbers_DM_isSet[snNumber] = true;
 			}
 		}
 
 		if (elemName == "initialResourceAIBonus") {
-			categoryName = this->XML_GetAttributeValue(elem, "gameType");
+			CUSTOMROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
 			callResult = elem->QueryIntAttribute("food", &intValue);
 			if (callResult == TIXML_SUCCESS) {
-				if (categoryName == "RM") {
+				if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
 					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
 				}
-				if (categoryName == "DM") {
+				if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
 					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
 				}
 			}
 			callResult = elem->QueryIntAttribute("wood", &intValue);
 			if (callResult == TIXML_SUCCESS) {
-				if (categoryName == "RM") {
+				if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
 					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
 				}
-				if (categoryName == "DM") {
+				if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
 					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
 				}
 			}
 			callResult = elem->QueryIntAttribute("stone", &intValue);
 			if (callResult == TIXML_SUCCESS) {
-				if (categoryName == "RM") {
+				if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
 					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
 				}
-				if (categoryName == "DM") {
+				if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
 					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
 				}
 			}
 			callResult = elem->QueryIntAttribute("gold", &intValue);
 			if (callResult == TIXML_SUCCESS) {
-				if (categoryName == "RM") {
+				if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
 					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
 				}
-				if (categoryName == "DM") {
+				if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
 					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
 				}
 			}
@@ -543,12 +556,15 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "strategyAI") {
 			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "generateAutomaticStrategy") {
-				std::string gameType = this->XML_GetAttributeValue(elem, "gameType");
-				if (gameType == "RM") {
-					this->generateStrategyForRM = this->XML_GetBoolElement(elem, "enable");
-				}
-				if (gameType == "DM") {
+				switch (this->XML_ReadGameTypeAttribute(elem)) {
+				case CUSTOMROR::CFG_GAME_DEATHMATCH:
 					this->generateStrategyForDM = this->XML_GetBoolElement(elem, "enable");
+					break;
+				case CUSTOMROR::CFG_GAME_RANDOM_GAME:
+					this->generateStrategyForRM = this->XML_GetBoolElement(elem, "enable");
+					break;
+				default:
+					break;
 				}
 			}
 		}
@@ -638,13 +654,16 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 
 		if (elemName == "autoRebuildFarms") {
-			this->enableAutoRebuildFarms = XML_GetBoolElement(elem, "enable");
-			callResult = elem->QueryIntAttribute("maxFarms", &intValue);
-			if (callResult == TIXML_SUCCESS) { this->autoRebuildFarms_maxFarms = intValue; }
-			callResult = elem->QueryIntAttribute("minWood", &intValue);
-			if (callResult == TIXML_SUCCESS) { this->autoRebuildFarms_minWood = intValue; }
-			callResult = elem->QueryIntAttribute("maxFood", &intValue);
-			if (callResult == TIXML_SUCCESS) { this->autoRebuildFarms_maxFood = intValue; }
+			CUSTOMROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
+			if ((gameType != CUSTOMROR::CFG_GAME_UNKNOWN) && (gameType < CUSTOMROR::CFG_GAME_TYPES_COUNT)) {
+				this->autoRebuildFarmsConfig[gameType].enableAutoRebuildFarms = XML_GetBoolElement(elem, "enable");
+				callResult = elem->QueryIntAttribute("maxFarms", &intValue);
+				if (callResult == TIXML_SUCCESS) { this->autoRebuildFarmsConfig[gameType].autoRebuildFarms_maxFarms = intValue; }
+				callResult = elem->QueryIntAttribute("minWood", &intValue);
+				if (callResult == TIXML_SUCCESS) { this->autoRebuildFarmsConfig[gameType].autoRebuildFarms_minWood = intValue; }
+				callResult = elem->QueryIntAttribute("maxFood", &intValue);
+				if (callResult == TIXML_SUCCESS) { this->autoRebuildFarmsConfig[gameType].autoRebuildFarms_maxFood = intValue; }
+			}
 		}
 
 		if (elemName == "unitSpawn") {
@@ -719,8 +738,8 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 	if (this->panicModeDelay < this->MINVALUE_panicModeDelay) { this->panicModeDelay = this->MINVALUE_panicModeDelay; }
 	if (this->maxPanicUnitsCountToAddInStrategy < this->MINVALUE_maxPanicUnitsCountToAddInStrategy) { this->maxPanicUnitsCountToAddInStrategy = this->MINVALUE_maxPanicUnitsCountToAddInStrategy; }
 	if (this->minPopulationBeforeBuildOptionalItems < this->MINVALUE_minPopulationBeforeBuildOptionalItems) { this->minPopulationBeforeBuildOptionalItems = this->MINVALUE_minPopulationBeforeBuildOptionalItems; }
-	if (this->autoRebuildFarms_maxFood < this->MINVALUE_resourceAmount) { this->autoRebuildFarms_maxFood = this->MINVALUE_resourceAmount; }
-	if (this->autoRebuildFarms_minWood < this->MINVALUE_resourceAmount) { this->autoRebuildFarms_minWood = this->MINVALUE_resourceAmount; }
+	//if (this->autoRebuildFarms_maxFood < this->MINVALUE_resourceAmount) { this->autoRebuildFarms_maxFood = this->MINVALUE_resourceAmount; }
+	//if (this->autoRebuildFarms_minWood < this->MINVALUE_resourceAmount) { this->autoRebuildFarms_minWood = this->MINVALUE_resourceAmount; }
 	if ((this->dislikeComputeInterval != 0) && (this->dislikeComputeInterval < this->MINVALUE_dislikeComputeInterval)) { this->dislikeComputeInterval = this->MINVALUE_dislikeComputeInterval; }
 	if (this->dislike_allArtefacts < this->MINVALUE_dislike) { this->dislike_allArtefacts = this->MINVALUE_dislike; }
 	if (this->dislike_humanPlayer < this->MINVALUE_dislike) { this->dislike_humanPlayer = this->MINVALUE_dislike; }
@@ -979,3 +998,15 @@ bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
 
 	return true;
 }
+
+CUSTOMROR::CONFIG::AutoRebuildFarmConfig *CustomRORConfig::GetAutoRebuildFarmConfig(long int isScenario, long int isDM) {
+	// NOT using scenario setting at this point ?
+	/*if (isScenario) {
+		return &this->autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_SCENARIO];
+	}*/
+	if (isDM) {
+		return &this->autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_DEATHMATCH];
+	}
+	return &this->autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_RANDOM_GAME];
+}
+

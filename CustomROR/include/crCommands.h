@@ -43,6 +43,7 @@
 #include "combatAI.h"
 #include "mainCustomAI.h"
 #include "customAIMilitaryInfo.h"
+#include "autoRebuildFarmConfig.h"
 
 #pragma once
 

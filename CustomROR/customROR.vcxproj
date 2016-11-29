@@ -112,11 +112,13 @@
     <ClInclude Include="include\AOEPrimitives_units.h" />
     <ClInclude Include="include\AOE_time.h" />
     <ClInclude Include="include\autoAttackPolicy.h" />
+    <ClInclude Include="include\autoRebuildFarmConfig.h" />
     <ClInclude Include="include\buttonBar.h" />
     <ClInclude Include="include\buttonBarCommon.h" />
     <ClInclude Include="include\cityPlan.h" />
     <ClInclude Include="include\civilizationInfo.h" />
     <ClInclude Include="include\combatAI.h" />
+    <ClInclude Include="include\commonConfigEnums.h" />
     <ClInclude Include="include\crCommands.h" />
     <ClInclude Include="include\crCommon.h" />
     <ClInclude Include="include\crConfig.h" />

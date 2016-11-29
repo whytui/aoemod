@@ -145,9 +145,13 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 				GetHardcodedUnitName(sinfo->DAT_ID));
 		}
 	}
-	fprintf_s(f, "autoRebuildFarms_maxFarms:                 %ld\n", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFarms);
-	fprintf_s(f, "autoRebuildFarms_maxFood:                  %ld\n", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFood);
-	fprintf_s(f, "autoRebuildFarms_minWood:                  %ld\n", CUSTOMROR::crInfo.configInfo.autoRebuildFarms_minWood);
+	for (CUSTOMROR::ConfigGameType i = (CUSTOMROR::ConfigGameType)(CUSTOMROR::CFG_GAME_UNKNOWN + 1); i < CUSTOMROR::CFG_GAME_TYPES_COUNT; i = (CUSTOMROR::ConfigGameType)(i + 1)) {
+		const char *name = CUSTOMROR::ConfigGameTypeNames[i];
+		fprintf_s(f, "[%s] autoRebuildFarms:                %ld\n", name, CUSTOMROR::crInfo.configInfo.autoRebuildFarmsConfig[i].enableAutoRebuildFarms ? 1 : 0);
+		fprintf_s(f, "[%s] autoRebuildFarms_maxFarms:       %ld\n", name, CUSTOMROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_maxFarms);
+		fprintf_s(f, "[%s] autoRebuildFarms_maxFood:        %ld\n", name, CUSTOMROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_maxFood);
+		fprintf_s(f, "[%s] autoRebuildFarms_minWood:        %ld\n", name, CUSTOMROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_minWood);
+	}
 	fprintf_s(f, "useEnhancedRulesForAutoAttack:             %ld\n", CUSTOMROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection);
 	fprintf_s(f, "autoAttackPolicy vs towers/military/buildings/villagers/walls\n");
 	fprintf_s(f, "- For Melee Units:  %d/%d/%d/%d/%d\n", CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackTowers,
@@ -2189,7 +2193,8 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 	}
 
 	// Auto rebuild farms
-	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && isBuilding && CUSTOMROR::crInfo.configInfo.enableAutoRebuildFarms) {
+	bool enableAutoRebuildFarms = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->isScenario || settings->isCampaign, settings->isDeathMatch)->enableAutoRebuildFarms;
+	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && isBuilding && enableAutoRebuildFarms) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 		// If this is a farm, and if I have "farm rebuild info" for this position (not in "not rebuild" mode), then trigger a rebuild.
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
@@ -3138,14 +3143,17 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	}
 
 	// Is feature enabled ?
-	if (!CUSTOMROR::crInfo.configInfo.enableAutoRebuildFarms) { return; }
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	CUSTOMROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->isScenario || settings->isCampaign, settings->isDeathMatch);
+	if (!autoRebuildFarmConfig->enableAutoRebuildFarms) { return; }
 
 	// Check auto-rebuild farms conditions (parameters)
-	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_FOOD) > CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFood) { return; }
-	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_WOOD) < CUSTOMROR::crInfo.configInfo.autoRebuildFarms_minWood) { return; }
+	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_FOOD) > autoRebuildFarmConfig->autoRebuildFarms_maxFood) { return; }
+	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_WOOD) < autoRebuildFarmConfig->autoRebuildFarms_minWood) { return; }
 	// Remark : currentFarmCount includes current farm (that is going to be deleted)
 	long int currentFarmCount = PLAYER::GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2); // Include being-built farms
-	bool farmCountConditionIsOK = (currentFarmCount <= CUSTOMROR::crInfo.configInfo.autoRebuildFarms_maxFarms);
+	bool farmCountConditionIsOK = (currentFarmCount <= autoRebuildFarmConfig->autoRebuildFarms_maxFarms);
 
 	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *farmerUnit = NULL;
 	// Search for the farmer that was working on this farm (first -arbitrary- one if there are many)

@@ -157,7 +157,8 @@
 	<gameKey name="useNumPadUnitShortcuts" enable="1"></gameKey>
 	
 	<!-- Turn ON/OFF auto rebuild farms feature. -->
-	<autoRebuildFarms enable="1" maxFarms="4" minWood="200" maxFood="2000"></autoRebuildFarms>
+	<autoRebuildFarms gameType="RM" enable="1" maxFarms="9" minWood="200" maxFood="2000"></autoRebuildFarms>
+	<autoRebuildFarms gameType="DM" enable="1" maxFarms="3" minWood="2000" maxFood="20000"></autoRebuildFarms>
 	
 	<!-- AutoMoveToLocation: Right-click from a building to define where new units should walk. 0=disable, 1=enable. -->
 	<unitSpawn name="autoMoveToLocation" enable="1"></unitSpawn>

@@ -8,6 +8,8 @@
 #include <AOE_const_functional.h>
 #include <AOE_SN_numbers.h>
 #include <AOE_empires_dat.h>
+#include "commonConfigEnums.h"
+#include "autoRebuildFarmConfig.h"
 #include "civilizationInfo.h"
 #include "autoAttackPolicy.h"
 #include "TileSetHandler.h"
@@ -21,6 +23,8 @@ using namespace std;
 #define CST_MAXIMUM_SLOW_DOWN_FACTOR 50
 
 #define CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS 10 // counts 0 that is unused (used for "no shortcut" in fact)
+
+
 
 class UnitSpawnShortcutInfo {
 public:
@@ -172,10 +176,7 @@ public:
 	bool unitShortcutsPriorityReverseOrder; // If true, try to set shortcut=9 before 8,7... 1
 	UnitSpawnShortcutInfo unitShortcutsInformation[CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS]; // index 0 is unused
 	bool enableAdditionalNumpadShortcuts; // If true, numpad 0-9 keys are additional unit shortcuts.
-	bool enableAutoRebuildFarms; // Enable the feature, rebuilding a farm also has other conditions...
-	long int autoRebuildFarms_maxFarms; // Maximum number of farms that can be reached with "auto construction" of farms
-	long int autoRebuildFarms_maxFood; // Maximum amount of food we allow before automatically rebuilding a farm.
-	long int autoRebuildFarms_minWood; // Minimum amount of wood we require before automatically rebuilding a farm.
+	CUSTOMROR::CONFIG::AutoRebuildFarmConfig autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_TYPES_COUNT];
 	bool useImprovedButtonBar;
 	bool allowMultiQueueing;
 	bool useEnhancedRulesForAutoAttackTargetSelection;
@@ -193,6 +194,10 @@ public:
 	bool XML_GetBoolElement(TiXmlElement *elem, const char *attributeName);
 	// Returns matching attribute value, if found, or empty string if not found.
 	const char * XML_GetAttributeValue(TiXmlElement *elem, const char *attributeName);
+
+	// Reads the gameType attribute and returns the result in ConfigGameType enum. Returns CFG_GAME_UNKNOWN if not found
+	CUSTOMROR::ConfigGameType XML_ReadGameTypeAttribute(TiXmlElement *elem);
+
 	void SetAutoAttackPolicyFromAttributes(AutoAttackPolicy *aap, TiXmlElement *elem);
 	// Read civilizations info XML file
 	bool ReadCivXMLConfigFile(char *fileName);
@@ -200,6 +205,8 @@ public:
 
 	// Read tileset info XML file
 	bool ReadTilesetXMLConfigFile(char *fileName);
+
+	CUSTOMROR::CONFIG::AutoRebuildFarmConfig *GetAutoRebuildFarmConfig(long int isScenario, long int isDM);
 
 	// Constants (not customizable)
 	const float MINVALUE_improvedGameSpeedFactor = (float) 1.1;

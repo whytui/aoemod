@@ -9,6 +9,7 @@
 #include "crLocalization.h"
 #include "AOE_const_language.h"
 #include "MapCopyPopup.h"
+#include "autoRebuildFarmConfig.h"
 
 
 class InGameCustomRorOptionsPopup : public CustomPopupBase {
@@ -47,5 +48,6 @@ public:
 private:
 	bool openTechTreeInfo;
 	bool openMapCopyPopup;
+	CUSTOMROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig;
 };
 

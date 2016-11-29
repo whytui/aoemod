@@ -155,7 +155,7 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 	unitGroup->targetPosX = targetPosX;
 	unitGroup->targetPosY = targetPosY;
 	unitGroup->unitGroupType = UNIT_GROUP_TYPES::CST_UGT_LAND_ATTACK;
-	unitGroup->isTasked = 0;
+	unitGroup->isTasked = 1; // As we set a precise task with precise target (or at least position), consider the group as "task initialized"
 	UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 	if (targetUnit && isVisible) {
 		if (forceTasking && (this->gameDiffLevel <= GAME_DIFFICULTY_LEVEL::GDL_MEDIUM)) {
@@ -624,6 +624,8 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 			// Note: GetNumberOfUnitsUnderAttack should be 0 here as we already treated such cases just above (help if under attack)
 
 			// TODO: if group is away from town, choose between retreating and other attack actions
+			// TODO: group might be away, but protecting villagers (eg a storage pit near gold that has been attacked)
+			// TODO: On the contrary: it might be important to allow defending villagers outside the town
 			bool groupIsAway = (distanceToMyMainUnit > AI_CONST::townSize + 5);
 			bool forceRetreat = false;
 			if (groupIsAway) {
@@ -650,7 +652,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 #ifdef _DEBUG
 					std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
 						std::to_string(result) + std::string(" for idle grp, weak case, wkn=");
-					msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
+					msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCntTwn=") + std::to_string(totalGroupsInTown);
 					//CallWriteText(msg.c_str());
 					this->lastDebugInfo += msg + std::string("\n");
 #endif
