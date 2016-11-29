@@ -3493,6 +3493,12 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		if (settings && settings->IsCheckSumValid()) {
 			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE;
 			AOE_METHODS::CallWriteCenteredText(localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_SET_PROTECT_OBJECT, "Right-click to define the unit or the position to protect"));
+			if (settings->ptrGameUIStruct && settings->ptrGameUIStruct->gamePlayUIZone) {
+				UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(panelUnitBase->unitInstanceId);
+				if (unitInfo && (unitInfo->protectUnitId > -1)) {
+					AOE_METHODS::DisplayGreenBlinkingOnUnit(settings->ptrGameUIStruct->gamePlayUIZone, unitInfo->protectUnitId, 1000);
+				}
+			}
 		}
 		BUTTONBAR::SetButtonBarForDefendUnitOrZone(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)panelUnitBase);
 	}
@@ -3738,6 +3744,9 @@ void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AO
 				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(actorUnit->unitInstanceId);
 			}
 			AOE_METHODS::CallWriteCenteredText("Removed protect information for current unit.");
+			if (settings->ptrGameUIStruct && settings->ptrGameUIStruct->gamePlayUIZone) {
+				AOE_METHODS::DisplayGreenBlinkingOnUnit(settings->ptrGameUIStruct->gamePlayUIZone, actorUnit->unitInstanceId, 1000);
+			}
 			break;
 		}
 		if (actorIsMyUnit && actorUnit && actorUnit->DerivesFromMovable()) {
@@ -3749,6 +3758,9 @@ void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AO
 				unitInfo->ResetProtectInfo();
 				if (mouseTargetUnit) {
 					unitInfo->protectUnitId = mouseTargetUnit->unitInstanceId;
+					if (settings->ptrGameUIStruct && settings->ptrGameUIStruct->gamePlayUIZone) {
+						AOE_METHODS::DisplayGreenBlinkingOnUnit(settings->ptrGameUIStruct->gamePlayUIZone, mouseTargetUnit->unitInstanceId, 1000);
+					}
 				} else {
 					unitInfo->protectPosX = posX;
 					unitInfo->protectPosY = posY;
