@@ -63,7 +63,7 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 	// Farms autorebuild
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS, txtAutoRebuildFarms), 0x10, 0x64, 0x100, 0x1E);
 	this->AddCheckBox(this->popup, &this->chkAutoRebuildFarms, 0x120, 0x64, 0x1E, 0x1E);
-	AOE_METHODS::AOE_CheckBox_SetChecked(this->chkAutoRebuildFarms, autoRebuildFarmConfig->enableAutoRebuildFarms);
+	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkAutoRebuildFarms, autoRebuildFarmConfig->enableAutoRebuildFarms);
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_FOOD, txtAutoRebuildFarmsMaxFood), 0x10, 0x80, 0x100, 0x1E);
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMinWood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MIN_WOOD, txtAutoRebuildFarmsMinWood), 0x10, 0x98, 0x100, 0x1E);
 	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_NUMBER, txtAutoRebuildFarmsMaxNumber), 0x10, 0xB0, 0x100, 0x1E);
@@ -165,7 +165,7 @@ AOE_STRUCTURES::STRUCT_ANY_UI *InGameCustomRorOptionsPopup::CloseMenuAndOpenPopu
 		// WARNING: here we are adding manually the "standard"/"common" OK button.
 		// Normally, this button is created by our popups API (and freed automatically).
 		// So we MUST NOT call AddObjectInContentList on this->customOptionButtonVar ! Or the game will crash (trying to free it twice)
-		AOE_METHODS::AOE_AddButton(this->popup, &this->customOptionButtonVar, LANG_ID_OK, 0xD8, 0x160, 0xAC, 0x1E); // OK button
+		AOE_METHODS::UI_BASE::AddButton(this->popup, &this->customOptionButtonVar, LANG_ID_OK, 0xD8, 0x160, 0xAC, 0x1E); // OK button
 
 		this->_AddPopupContent();
 	}

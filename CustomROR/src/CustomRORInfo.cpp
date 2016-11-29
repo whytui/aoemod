@@ -253,7 +253,7 @@ AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int hSize
 	if (themeSlpId < 0) {
 		themeSlpId = currentScreen->themeSlpId;
 	}
-	this->customGamePopupVar = AOE_METHODS::AOE_CreateGameScreenPopup(currentScreen, hSize, vSize, themeSlpId);
+	this->customGamePopupVar = AOE_METHODS::CreateGameScreenPopup(currentScreen, hSize, vSize, themeSlpId);
 
 	// OK button. It is this->customGamePopupButtonVar that identifies the popup (+ the fact it is open)
 	long int btnhPos = (hSize - 0xAC) / 2;
@@ -264,9 +264,9 @@ AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int hSize
 		btnHSize = 0x50;
 	}
 
-	AOE_METHODS::AOE_AddButton(this->customGamePopupVar, &this->customGamePopupButtonVar, LANG_ID_OK, btnhPos, btnvPos, btnHSize, 30);
+	AOE_METHODS::UI_BASE::AddButton(this->customGamePopupVar, &this->customGamePopupButtonVar, LANG_ID_OK, btnhPos, btnvPos, btnHSize, 30);
 	if (hasCancelBtn) {
-		AOE_METHODS::AOE_AddButton(this->customGamePopupVar, &this->customGamePopupCancelBtnVar, LANG_ID_CANCEL, btnhPos + btnHSize + 32, btnvPos, btnHSize, 30);
+		AOE_METHODS::UI_BASE::AddButton(this->customGamePopupVar, &this->customGamePopupCancelBtnVar, LANG_ID_CANCEL, btnhPos + btnHSize + 32, btnvPos, btnHSize, 30);
 	}
 	assert(this->objectsToFree.empty()); // there shouldn't be remaining components from a previous popup.
 
@@ -365,7 +365,7 @@ void CustomRORInfo::CloseCustomGamePopup() {
 
 	assert(popupUIObj != NULL);
 	if (popupUIObj != NULL) {
-		AOE_METHODS::AOE_CloseScreenFullTreatment(popupUIObj);
+		AOE_METHODS::CloseScreenFullTreatment(popupUIObj);
 	}
 	SetGamePause(false);
 }

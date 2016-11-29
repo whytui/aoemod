@@ -2712,7 +2712,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return false; }
-	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_METHODS::AOE_GetScreenFromName(scenarioEditorScreenName);
+	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_METHODS::GetScreenFromName(scenarioEditorScreenName);
 	assert(scEditor && scEditor->IsCheckSumValid());
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return false; }
 	AOE_STRUCTURES::STRUCT_PLAYER *gaia = GetPlayerStruct(0);
@@ -2730,7 +2730,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 
 	long int mapType = scEditor->map_cbb_mapType->GetSelectedIndex();
 	assert(scEditor && scEditor->map_edt_seed->IsCheckSumValid());
-	char *mapSeedText = AOE_METHODS::AOE_GetEditText(scEditor->map_edt_seed);
+	char *mapSeedText = AOE_METHODS::UI_BASE::GetEditText(scEditor->map_edt_seed);
 	long int terrainId = 0;
 	long int mapSeed = -1; // Default = -1 (= random)
 	long int playerCount = (scEditor->pl_cbb_playerCount->GetSelectedIndex()) + 1;
@@ -2814,7 +2814,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 		sprintf_s(bufferSeed, "%ld", settings->actualMapSeed);
 		assert(scEditor->map_edt_seed_whenReadOnly);
 		bool test = scEditor->map_edt_seed_whenReadOnly->IsCheckSumValid();
-		AOE_METHODS::AOE_SetLabelText(scEditor->map_edt_seed_whenReadOnly, bufferSeed);
+		AOE_METHODS::UI_BASE::SetLabelText(scEditor->map_edt_seed_whenReadOnly, bufferSeed);
 		_asm {
 			MOV EDX, 0x52605D
 			CALL EDX // Recalculate pseudo random
@@ -2868,7 +2868,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 		MOV ECX, scEditor
 		CALL EDX
 	}
-	AOE_METHODS::AOE_ShowUIObject(bigLbl, false); // Remove the "generating" label
+	AOE_METHODS::UI_BASE::ShowUIObject(bigLbl, false); // Remove the "generating" label
 	return true;
 }
 
@@ -2892,7 +2892,7 @@ void CustomRORCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_
 			// Exclude standard terrains (already in list)
 			if ((terrainId > 1) && (terrainId != 10) && (terrainId != 13) &&
 				(terrainId != 20) && (terrainId != 4) && (terrainId != 19) && (terrainId != 22)) {
-				AOE_METHODS::AOE_listbox_addItem(listBox, listBox->itemCount, terrainDef->terrainName, terrainId);
+				AOE_METHODS::UI_BASE::Listbox_addItem(listBox, listBox->itemCount, terrainDef->terrainName, terrainId);
 			}
 		}
 	}
@@ -2901,7 +2901,7 @@ void CustomRORCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_
 	if (CUSTOMROR::crInfo.configInfo.useCustomMapDimensions &&
 		scEditor->map_cbb_mapSize && scEditor->map_cbb_mapSize->IsCheckSumValid() &&
 		scEditor->map_cbb_mapSize->underlyingListBox && scEditor->map_cbb_mapSize->underlyingListBox->IsCheckSumValid()) {
-		AOE_METHODS::AOE_listbox_addItem(scEditor->map_cbb_mapSize->underlyingListBox,
+		AOE_METHODS::UI_BASE::Listbox_addItem(scEditor->map_cbb_mapSize->underlyingListBox,
 			scEditor->map_cbb_mapSize->underlyingListBox->itemCount, localizationHandler.GetTranslation(CRLANG_ID_CUSTOM, "Custom"), 0);
 	}
 }
@@ -3890,7 +3890,7 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 bool CustomRORCommand::OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize) {
 	if (CUSTOMROR::crInfo.customYesNoDialogVar) { return false; } // Already an opened custom dialog
 
-	AOE_STRUCTURES::STRUCT_ANY_UI *customDialogPtr = AOE_METHODS::AOE_GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
+	AOE_STRUCTURES::STRUCT_ANY_UI *customDialogPtr = AOE_METHODS::GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
 	if (customDialogPtr != NULL) { return false; } // A CloseProgramDialog seems to be already open
 
 	SetGamePause(true);
@@ -3918,9 +3918,9 @@ long int CustomRORCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_PO
 	}
 	// Close the dialog
 	// TO DO: use CloseScreenFullTreatment(..) instead
-	AOE_METHODS::AOE_RefreshScreen("Game Screen", 0);
+	AOE_METHODS::RefreshScreen("Game Screen", 0);
 	assert(strcmp(ptrDialog->screenName, AOE_CONST_INTERNAL::customDialogScreenName) == 0);
-	AOE_METHODS::AOE_CloseScreenAndDestroy(AOE_CONST_INTERNAL::customDialogScreenName);
+	AOE_METHODS::CloseScreenAndDestroy(AOE_CONST_INTERNAL::customDialogScreenName);
 	CUSTOMROR::crInfo.customYesNoDialogVar = NULL;
 
 	long int *Ihavenoideawhatthisis = (long int *)0x7C0338; // cf 0x481264

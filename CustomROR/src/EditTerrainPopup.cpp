@@ -69,7 +69,7 @@ void EditTerrainPopup::OnBeforeClose(bool isCancel) {
 	if (isCancel) { return; }
 	assert(this->edtElevation);
 	if (!this->edtElevation) { return; }
-	AOE_METHODS::AOE_SetFocus(this->edtElevation->ptrParentObject, NULL);
+	AOE_METHODS::UI_BASE::SetFocus(this->edtElevation->ptrParentObject, NULL);
 	if ((this->mapSizeX < 0) || (this->mapSizeY < 0)) { return; }
 	bool elevationEmpty = ((this->edtElevation->pTypedText == NULL) || (this->edtElevation->pTypedText[0] == '\0'));
 	bool terrainEmpty = ((this->edtTerrainId->pTypedText == NULL) || (this->edtTerrainId->pTypedText[0] == '\0'));

@@ -90,7 +90,7 @@ std::string MapCopyPopup::GetBufferSizeText() {
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool MapCopyPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (sender && sender->ptrParentObject) {
-		AOE_METHODS::AOE_SetFocus(sender->ptrParentObject, sender); // To validate input text.
+		AOE_METHODS::UI_BASE::SetFocus(sender->ptrParentObject, sender); // To validate input text.
 	}
 	const char *successText = localizationHandler.GetTranslation(CRLANG_ID_SUCCESS, "success");
 	if (sender == this->btnCopyZone) {

@@ -56,7 +56,7 @@ public:
 	}
 	void OnBeforeClose(bool isCancel) override {
 		if (isCancel || !this->edtInput || this->readOnly || !this->bufferToWrite) { return; }
-		AOE_METHODS::AOE_SetFocus(this->edtInput->ptrParentObject, NULL); // "validate" typed value.
+		AOE_METHODS::UI_BASE::SetFocus(this->edtInput->ptrParentObject, NULL); // "validate" typed value.
 		inttype value = atoi(this->edtInput->pTypedText); // atoi returns 0 if invalid, we use that behaviour too
 		*this->bufferToWrite = value;
 	}
@@ -70,7 +70,7 @@ private:
 // A specific implementation for float (use atof).
 void InputBox_int<float>::OnBeforeClose(bool isCancel) {
 	if (isCancel || !this->edtInput || this->readOnly || !this->bufferToWrite) { return; }
-	AOE_METHODS::AOE_SetFocus(this->edtInput->ptrParentObject, NULL); // "validate" typed value.
+	AOE_METHODS::UI_BASE::SetFocus(this->edtInput->ptrParentObject, NULL); // "validate" typed value.
 	float value = (float)atof(this->edtInput->pTypedText); // atof returns 0 if invalid, we use that behaviour too
 	*this->bufferToWrite = value;
 }

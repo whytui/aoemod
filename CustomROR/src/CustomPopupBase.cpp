@@ -29,7 +29,7 @@ bool CustomPopupBase::AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	AOE_FONTS font) {
 	bool res;
-	res = AOE_METHODS::AOE_AddLabel(parent, ptrObjToCreate, label, hPos, vPos, hSize, vSize, font);
+	res = AOE_METHODS::UI_BASE::AddLabel(parent, ptrObjToCreate, label, hPos, vPos, hSize, vSize, font);
 	if (res && ptrObjToCreate) {
 		this->AddObjectInContentList(*ptrObjToCreate);
 	}
@@ -41,7 +41,7 @@ bool CustomPopupBase::AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	bool readOnly, bool multiline, bool onlyNumbers, unsigned long int font) {
 		bool res;
-		res = AOE_METHODS::AOE_AddTextBox(parent, ptrObjToCreate, initialText, maxTextLength, hPos, vPos, hSize, vSize,
+		res = AOE_METHODS::UI_BASE::AddTextBox(parent, ptrObjToCreate, initialText, maxTextLength, hPos, vPos, hSize, vSize,
 			readOnly, multiline, onlyNumbers, font);
 		if (res && ptrObjToCreate) {
 			this->AddObjectInContentList(*ptrObjToCreate);
@@ -53,7 +53,7 @@ bool CustomPopupBase::AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
 	bool res;
-	res = AOE_METHODS::AOE_AddCheckBox(parent, ptrObjToCreate, hPos, vPos, hSize, vSize);
+	res = AOE_METHODS::UI_BASE::AddCheckBox(parent, ptrObjToCreate, hPos, vPos, hSize, vSize);
 	if (res && ptrObjToCreate) {
 		this->AddObjectInContentList(*ptrObjToCreate);
 	}
@@ -65,7 +65,7 @@ bool CustomPopupBase::AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId, AOE_FONTS font) {
 	bool res;
-	res = AOE_METHODS::AOE_AddButton(parent, ptrObjToCreate, caption, hPos, vPos, hSize, vSize, buttonId, font);
+	res = AOE_METHODS::UI_BASE::AddButton(parent, ptrObjToCreate, caption, hPos, vPos, hSize, vSize, buttonId, font);
 	if (res && ptrObjToCreate) {
 		this->AddObjectInContentList(*ptrObjToCreate);
 	}
@@ -77,7 +77,7 @@ bool CustomPopupBase::AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId, AOE_FONTS font) {
 	bool res;
-	res = AOE_METHODS::AOE_AddButton(parent, ptrObjToCreate, DLL_STRING_ID, hPos, vPos, hSize, vSize, buttonId, font);
+	res = AOE_METHODS::UI_BASE::AddButton(parent, ptrObjToCreate, DLL_STRING_ID, hPos, vPos, hSize, vSize, buttonId, font);
 	if (res && ptrObjToCreate) {
 		this->AddObjectInContentList(*ptrObjToCreate);
 	}
@@ -89,7 +89,7 @@ bool CustomPopupBase::AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	AOE_STRUCTURES::STRUCT_UI_COMBOBOX **ptrObjToCreate, long int posX, long int posY,
 	long int listSizeX, long int listSizeY, long int lblSizeX, long int lblSizeY, AOE_FONTS font) {
 	bool res;
-	res = AOE_METHODS::AOE_AddComboBox(parent, ptrObjToCreate, posX, posY, listSizeX, listSizeY, lblSizeX, lblSizeY, font);
+	res = AOE_METHODS::UI_BASE::AddComboBox(parent, ptrObjToCreate, posX, posY, listSizeX, listSizeY, lblSizeX, lblSizeY, font);
 	if (res && ptrObjToCreate) {
 		this->AddObjectInContentList(*ptrObjToCreate);
 	}

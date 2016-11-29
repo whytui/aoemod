@@ -184,15 +184,15 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 
 		FarmRebuildInfo *fri = CUSTOMROR::crInfo.myGameObjects.FindFarmRebuildInfo(unitBase->positionX, unitBase->positionY);
 		if (!fri) {
-			AOE_METHODS::AOE_CheckBox_SetChecked(this->chkRebuildFarmNone, true);
+			AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkRebuildFarmNone, true);
 		} else {
 			if (fri->forceNotRebuild) {
-				AOE_METHODS::AOE_CheckBox_SetChecked(this->chkForceNotRebuildFarm, true);
+				AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkForceNotRebuildFarm, true);
 			} else {
 				if (fri->forceRebuild) {
-					AOE_METHODS::AOE_CheckBox_SetChecked(this->chkForceRebuildFarm, true);
+					AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkForceRebuildFarm, true);
 				} else {
-					AOE_METHODS::AOE_CheckBox_SetChecked(this->chkRebuildFarmNone, true);
+					AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkRebuildFarmNone, true);
 				}
 			}
 		}
@@ -230,11 +230,11 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 			// No unit-specific config, and unit does not fit user config (not a blast attack unit)
 			aap = &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
 		}
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkAutoAttackTowers, aap->attackTowers);
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkAutoAttackMilitary, aap->attackMilitary);
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkAutoAttackBuildings, aap->attackNonTowerBuildings);
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkAutoAttackVillagers, aap->attackVillagers);
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkAutoAttackWalls, aap->attackWalls);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkAutoAttackTowers, aap->attackTowers);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkAutoAttackMilitary, aap->attackMilitary);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkAutoAttackBuildings, aap->attackNonTowerBuildings);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkAutoAttackVillagers, aap->attackVillagers);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkAutoAttackWalls, aap->attackWalls);
 	}
 
 	// Special attacks and armors (unit bonus/malus)
@@ -315,21 +315,21 @@ bool InGameUnitPropertiesPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *
 			CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(this->unitId);
 		}
 		// Auto-move has been reset, hide label and button.
-		AOE_METHODS::AOE_ShowUIObject(this->btnResetAutoMove, false);
-		AOE_METHODS::AOE_ShowUIObject(this->lblChildUnitsAutoMove, false);
+		AOE_METHODS::UI_BASE::ShowUIObject(this->btnResetAutoMove, false);
+		AOE_METHODS::UI_BASE::ShowUIObject(this->lblChildUnitsAutoMove, false);
 		return true;
 	}
 	if (sender == this->chkForceNotRebuildFarm) {
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkRebuildFarmNone, false);
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkForceRebuildFarm, false);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkRebuildFarmNone, false);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkForceRebuildFarm, false);
 	}
 	if (sender == this->chkForceRebuildFarm) {
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkRebuildFarmNone, false);
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkForceNotRebuildFarm, false);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkRebuildFarmNone, false);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkForceNotRebuildFarm, false);
 	}
 	if (sender == this->chkRebuildFarmNone) {
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkForceRebuildFarm, false);
-		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkForceNotRebuildFarm, false);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkForceRebuildFarm, false);
+		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkForceNotRebuildFarm, false);
 	}
 	if (sender == this->btnMakeMainUnitForShortcutSelection) {
 		PLAYER::MakeMainUnitForShortcutSelection(this->unitId);

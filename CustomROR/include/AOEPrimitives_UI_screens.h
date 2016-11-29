@@ -20,11 +20,12 @@
 
 
 namespace AOE_METHODS {
-
+namespace UI_BASE {
+;
 
 // Create a popup from game screen (from Options original model)
 // Must be called when game screen is active (no other popup)
-static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *parent, long int hSize, long int vSize,
+static AOE_STRUCTURES::STRUCT_ANY_UI *CreateGameScreenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *parent, long int hSize, long int vSize,
 	long int backgroundSlpId) {
 	if (!parent) { return NULL; }
 	char dlgName[] = "dlg6_3";
@@ -73,7 +74,7 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(AOE_STRUCTURES::
 
 
 // Return current screen, using 0x5830E8 structure info
-static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_GetCurrentScreen() {
+static AOE_STRUCTURES::STRUCT_ANY_UI *GetCurrentScreen() {
 	AOE_STRUCTURES::STRUCT_ANY_UI *res = NULL;
 	_asm {
 		MOV ECX, 0x5830E8;
@@ -86,7 +87,7 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_GetCurrentScreen() {
 
 // Returns a pointer to a UI object that matches screenName.
 // Can return NULL if no matching screen was found
-static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_GetScreenFromName(const char *screenName) {
+static AOE_STRUCTURES::STRUCT_ANY_UI *GetScreenFromName(const char *screenName) {
 	unsigned long int result = 0;
 	_asm {
 		MOV EDX, screenName;
@@ -101,7 +102,7 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_GetScreenFromName(const char *screenNa
 
 
 // Calls 0x451BE0
-static void AOE_RefreshScreen(const char *screenName, unsigned long int arg2) {
+static void RefreshScreen(const char *screenName, unsigned long int arg2) {
 	_asm {
 		PUSH arg2;
 		MOV EDX, screenName;
@@ -114,7 +115,7 @@ static void AOE_RefreshScreen(const char *screenName, unsigned long int arg2) {
 
 // (cf 0x451DF0)
 // ROR code first (not always, sometimes after?) calls RefreshScreen on the parent and then CloseScreenAndDestroy.
-static void AOE_CloseScreenAndDestroy(const char *screenName) {
+static void CloseScreenAndDestroy(const char *screenName) {
 	_asm {
 		MOV EDX, screenName
 			PUSH EDX // arg1 = screen name
@@ -126,12 +127,13 @@ static void AOE_CloseScreenAndDestroy(const char *screenName) {
 
 
 // Refresh parent, close screen and destroy it.
-static void AOE_CloseScreenFullTreatment(AOE_STRUCTURES::STRUCT_ANY_UI *UIObj) {
+static void CloseScreenFullTreatment(AOE_STRUCTURES::STRUCT_ANY_UI *UIObj) {
 	AOE_STRUCTURES::STRUCT_ANY_UI *parent = UIObj->ptrParentObject;
-	AOE_CloseScreenAndDestroy(UIObj->screenName);
+	CloseScreenAndDestroy(UIObj->screenName);
 	if (parent) {
-		AOE_RefreshScreen(parent->screenName, 0);
+		RefreshScreen(parent->screenName, 0);
 	}
 }
 
+}
 }

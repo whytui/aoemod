@@ -321,7 +321,7 @@ AOE_STRUCTURES::STRUCT_POSITION_INFO GetMousePosition(AOE_STRUCTURES::STRUCT_ANY
 	result.posY = -1;
 	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = UIObj;
 	if (!currentUI) {
-		currentUI = AOE_METHODS::AOE_GetCurrentScreen();
+		currentUI = AOE_METHODS::GetCurrentScreen();
 	}
 	assert(currentUI);
 	if (!currentUI) { return result; }
@@ -342,7 +342,7 @@ AOE_STRUCTURES::STRUCT_POSITION_INFO GetMousePosition() {
 	result.posY = -1;
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_METHODS::AOE_GetCurrentScreen();
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_METHODS::GetCurrentScreen();
 	assert(currentUI);
 	if (!settings || !currentUI) { return result; }
 	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone = AOE_METHODS::GetGameZone();
@@ -362,7 +362,7 @@ bool GetGamePositionUnderMouse(float *posX, float *posY) {
 	*posY = -1;
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_METHODS::AOE_GetCurrentScreen();
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_METHODS::GetCurrentScreen();
 	assert(currentUI);
 	if (!settings || !currentUI) { return false; }
 	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone = AOE_METHODS::GetGameZone();

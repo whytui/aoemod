@@ -254,13 +254,13 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 	// 0x481E21 (tilesets 0,1) or 0x481E9E (tilesets 2,3,4)
 	unsigned long int textColor = tilesetInfo->textColorRGB;
 	unsigned long int shadowTextColor = tilesetInfo->textShadowColorRGB;
-	AOE_METHODS::AOE_SetLabelTextColor(gameMainUI->lblCurrentAge, textColor, shadowTextColor);
-	AOE_METHODS::AOE_SetPlayerResValuesTextColor(gameMainUI->resourceValuesIndicator, textColor, shadowTextColor);
-	AOE_METHODS::AOE_SetButtonTextColor(gameMainUI->btnChat, textColor, shadowTextColor);
-	AOE_METHODS::AOE_SetButtonTextColor(gameMainUI->btnDiplomacy, textColor, shadowTextColor);
-	AOE_METHODS::AOE_SetButtonTextColor(gameMainUI->btnMenu, textColor, shadowTextColor);
-	AOE_METHODS::AOE_SetButtonTextColor(gameMainUI->btnHelp, textColor, shadowTextColor);
-	AOE_METHODS::AOE_SetButtonTextColor(gameMainUI->btnShowScores, textColor, shadowTextColor);
+	AOE_METHODS::UI_BASE::SetLabelTextColor(gameMainUI->lblCurrentAge, textColor, shadowTextColor);
+	AOE_METHODS::UI_BASE::SetPlayerResValuesTextColor(gameMainUI->resourceValuesIndicator, textColor, shadowTextColor);
+	AOE_METHODS::UI_BASE::SetButtonTextColor(gameMainUI->btnChat, textColor, shadowTextColor);
+	AOE_METHODS::UI_BASE::SetButtonTextColor(gameMainUI->btnDiplomacy, textColor, shadowTextColor);
+	AOE_METHODS::UI_BASE::SetButtonTextColor(gameMainUI->btnMenu, textColor, shadowTextColor);
+	AOE_METHODS::UI_BASE::SetButtonTextColor(gameMainUI->btnHelp, textColor, shadowTextColor);
+	AOE_METHODS::UI_BASE::SetButtonTextColor(gameMainUI->btnShowScores, textColor, shadowTextColor);
 }
 
 

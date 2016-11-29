@@ -37,11 +37,12 @@ enum AOE_FONTS : long int {
 
 namespace AOE_METHODS {
 
-
+namespace UI_BASE {
+;
 
 // Set parent's focus to child object.
 // child CAN be NULL (set focus to parent itself).
-static void AOE_SetFocus(AOE_STRUCTURES::STRUCT_ANY_UI *parent, AOE_STRUCTURES::STRUCT_ANY_UI *child) {
+static void SetFocus(AOE_STRUCTURES::STRUCT_ANY_UI *parent, AOE_STRUCTURES::STRUCT_ANY_UI *child) {
 	if (!parent) { return; }
 	unsigned long int addr = 0x453EB0; // parentObj.setFocus(childObj)
 	_asm {
@@ -53,7 +54,7 @@ static void AOE_SetFocus(AOE_STRUCTURES::STRUCT_ANY_UI *parent, AOE_STRUCTURES::
 
 
 // Show/Hide a UI object
-static void AOE_ShowUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, bool show) {
+static void ShowUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, bool show) {
 	if (!object) { return; }
 	long int arg = show ? 1 : 0;
 	_asm {
@@ -65,7 +66,7 @@ static void AOE_ShowUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, bool show) {
 }
 
 // Refresh a UI object
-static void AOE_RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object) {
+static void RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object) {
 	if (!object) { return; }
 	_asm {
 		MOV ECX, object;
@@ -81,35 +82,35 @@ static void AOE_RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object) {
 
 
 // Note: basic size (eg OK button) is 0x?? / 0x1E
-static bool AOE_AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
 	if (!parent) { return false; }
 	unsigned long int result;
 	_asm {
-		MOV ECX, parent
-			PUSH buttonId
-			PUSH 0 // arg10?
-			PUSH font
-			PUSH vSize
-			PUSH hSize
-			PUSH vPos
-			PUSH hPos
-			PUSH 0x00 // arg4
-			PUSH DLL_STRING_ID
-			PUSH ptrObjToCreate
-			PUSH ECX
-			MOV EAX, 0x00455D10 // addbutton
-			CALL EAX
-			MOV result, EAX
+		MOV ECX, parent;
+		PUSH buttonId;
+		PUSH 0; // arg10?
+		PUSH font;
+		PUSH vSize;
+		PUSH hSize;
+		PUSH vPos;
+		PUSH hPos;
+		PUSH 0x00; // arg4
+		PUSH DLL_STRING_ID;
+		PUSH ptrObjToCreate;
+		PUSH ECX;
+		MOV EAX, 0x00455D10; // addbutton
+		CALL EAX;
+		MOV result, EAX;
 	}
 	return result != 0;
 }
 
 
 // Note: basic size (eg OK button) is 0x?? / 0x1E
-static bool AOE_AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
@@ -137,7 +138,7 @@ static bool AOE_AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 
 // For fonts, see AOE_FONTS enum
-static bool AOE_AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	AOE_STRUCTURES::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT
@@ -168,7 +169,7 @@ static bool AOE_AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 // Create a textbox using ROR methods.
 // If maxTextLength==0, it is replaced by initialText's length.
 // Note: The font used seems to be 14 pixels high (?)
-static bool AOE_AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	bool readOnly = false, bool multiline = false, bool onlyNumbers = false, unsigned long int font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
@@ -215,7 +216,7 @@ static bool AOE_AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 // Create a "AOE" checkbox (same type as buttons)
 // You need to create a label if you want some text aside the checkbox
-static bool AOE_AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
 	if (!parent) { return false; }
@@ -238,7 +239,7 @@ static bool AOE_AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 }
 
 
-static void AOE_CheckBox_SetChecked(AOE_STRUCTURES::STRUCT_UI_BUTTON *checkBox, bool checked) {
+static void CheckBox_SetChecked(AOE_STRUCTURES::STRUCT_UI_BUTTON *checkBox, bool checked) {
 	if (!checkBox) { return; }
 	checkBox->checked = checked ? 1 : 0;
 	int arg = checkBox->checked;
@@ -254,7 +255,7 @@ static void AOE_CheckBox_SetChecked(AOE_STRUCTURES::STRUCT_UI_BUTTON *checkBox, 
 // ptrCombo = address of ROR combobox object
 // entryId = id to affect to new entry in combobox (generally=index of the entry)
 // DLLID = ID in language(x).dll of string to use for entry.
-static void AOE_AddEntryInComboUsingDLLID(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo, long int entryId, long int DLLID) {
+static void AddEntryInComboUsingDLLID(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo, long int entryId, long int DLLID) {
 	assert(ptrCombo != NULL);
 	if (!ptrCombo) { return; }
 	_asm {
@@ -270,7 +271,7 @@ static void AOE_AddEntryInComboUsingDLLID(AOE_STRUCTURES::STRUCT_ANY_UI *ptrComb
 // Creates a combobox with 1 "empty" entry. Use AddEntryInCombo afterwards.
 // TO DO: this is unfinished. See example in 0x4881A4...
 // Unstable and not correctly supported !
-static bool AOE_AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	AOE_STRUCTURES::STRUCT_UI_COMBOBOX **ptrObjToCreate,
 	long int posX, long int posY, long int listSizeX, long int listSizeY, long int lblSizeX, long int lblSizeY, AOE_FONTS fontId) {
 	if (!parent) { return false; }
@@ -295,7 +296,7 @@ static bool AOE_AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 
 
-static void AOE_AddEntryInCombo(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo, long int entryId, const char *text) {
+static void AddEntryInCombo(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo, long int entryId, const char *text) {
 	assert(ptrCombo != NULL);
 	if (!ptrCombo) { return; }
 	_asm {
@@ -312,7 +313,7 @@ static void AOE_AddEntryInCombo(AOE_STRUCTURES::STRUCT_ANY_UI *ptrCombo, long in
 
 
 // Returns an edit object's text
-static char *AOE_GetEditText(AOE_STRUCTURES::STRUCT_UI_TEXTBOX *ptrEdit) {
+static char *GetEditText(AOE_STRUCTURES::STRUCT_UI_TEXTBOX *ptrEdit) {
 	assert(ptrEdit != NULL);
 	if (!ptrEdit) { return NULL; }
 	char *result = NULL;
@@ -327,7 +328,7 @@ static char *AOE_GetEditText(AOE_STRUCTURES::STRUCT_UI_TEXTBOX *ptrEdit) {
 
 
 // Set an label object's text
-static void AOE_SetLabelText(AOE_STRUCTURES::STRUCT_UI_LABEL *ptrLabel, const char *text) {
+static void SetLabelText(AOE_STRUCTURES::STRUCT_UI_LABEL *ptrLabel, const char *text) {
 	assert(ptrLabel != NULL);
 	if (!ptrLabel || !ptrLabel->IsCheckSumValid()) { return; }
 	_asm {
@@ -339,7 +340,7 @@ static void AOE_SetLabelText(AOE_STRUCTURES::STRUCT_UI_LABEL *ptrLabel, const ch
 }
 
 
-static void AOE_listBox_clear(AOE_STRUCTURES::STRUCT_UI_LISTBOX *listBox) {
+static void ListBox_clear(AOE_STRUCTURES::STRUCT_UI_LISTBOX *listBox) {
 	if (!listBox) { return; }
 	_asm {
 		MOV ECX, listBox
@@ -350,7 +351,7 @@ static void AOE_listBox_clear(AOE_STRUCTURES::STRUCT_UI_LISTBOX *listBox) {
 
 
 // Adds an item at position for a listbox / combobox
-static bool AOE_listbox_addItem(AOE_STRUCTURES::STRUCT_UI_LISTBOX *obj, long int position, const char *text, long int optionalId) {
+static bool Listbox_addItem(AOE_STRUCTURES::STRUCT_UI_LISTBOX *obj, long int position, const char *text, long int optionalId) {
 	if (!obj) { return false; }
 	long int res;
 	_asm {
@@ -367,7 +368,7 @@ static bool AOE_listbox_addItem(AOE_STRUCTURES::STRUCT_UI_LISTBOX *obj, long int
 
 
 // Set text color for a label
-static void AOE_SetLabelTextColor(AOE_STRUCTURES::STRUCT_UI_LABEL *label, unsigned long int textColorRGB, unsigned long int textShadowColorRGB) {
+static void SetLabelTextColor(AOE_STRUCTURES::STRUCT_UI_LABEL *label, unsigned long int textColorRGB, unsigned long int textShadowColorRGB) {
 	if (!label) { return; }
 	unsigned long int addr = 0x469070;
 	_asm {
@@ -380,7 +381,7 @@ static void AOE_SetLabelTextColor(AOE_STRUCTURES::STRUCT_UI_LABEL *label, unsign
 
 
 // Set text color for player resource values label
-static void AOE_SetPlayerResValuesTextColor(AOE_STRUCTURES::STRUCT_UI_PLAYER_RESOURCE_VALUES *resValues, unsigned long int textColorRGB, unsigned long int textShadowColorRGB) {
+static void SetPlayerResValuesTextColor(AOE_STRUCTURES::STRUCT_UI_PLAYER_RESOURCE_VALUES *resValues, unsigned long int textColorRGB, unsigned long int textShadowColorRGB) {
 	if (!resValues) { return; }
 	unsigned long int addr = 0x4F7CF0;
 	_asm {
@@ -393,7 +394,7 @@ static void AOE_SetPlayerResValuesTextColor(AOE_STRUCTURES::STRUCT_UI_PLAYER_RES
 
 
 // Set text color for a button, for a given "info index"
-static void AOE_SetButtonTextColor(AOE_STRUCTURES::STRUCT_UI_BUTTON *btn, unsigned long int textColorRGB, 
+static void SetButtonTextColor(AOE_STRUCTURES::STRUCT_UI_BUTTON *btn, unsigned long int textColorRGB, 
 	unsigned long int textShadowColorRGB, long int btnInfoIndex = 0) {
 	if (!btn) { return; }
 	unsigned long int addr = 0x45F210;
@@ -406,4 +407,5 @@ static void AOE_SetButtonTextColor(AOE_STRUCTURES::STRUCT_UI_BUTTON *btn, unsign
 	}
 }
 
+}
 }

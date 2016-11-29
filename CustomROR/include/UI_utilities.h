@@ -28,6 +28,9 @@ static const char menuDialogScreenName[] = "Menu Dialog";
 static const char gameScreenName[] = "Game Screen";
 
 namespace AOE_METHODS {
+;
+
+using namespace UI_BASE;
 
 
 // Display a small yes/no dialog message (based on game exit popup) + cancel in scenario editor
@@ -79,8 +82,8 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateCustomOptionsPopupFromMenu(AOE_S
 	if (!parent) { return NULL; }
 
 	// Analog to 0x43424D
-	AOE_CloseScreenAndDestroy("Menu Dialog");
-	AOE_RefreshScreen("Game Screen", 0);
+	CloseScreenAndDestroy("Menu Dialog");
+	RefreshScreen("Game Screen", 0);
 	AOE_STRUCTURES::STRUCT_ANY_UI *newPtr = (AOE_STRUCTURES::STRUCT_ANY_UI *)AOEAlloc(0x564);
 	if (!newPtr) { return NULL; }
 
@@ -218,11 +221,11 @@ static bool AOE_InGameAddCommandButton(AOE_STRUCTURES::STRUCT_PLAYER *player, lo
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UICmdId, long int DATID,
 	long int helpDllId, long int creationDllId, long int shortcutDllId, const char *name, const char *description,
 	bool isDisabled, AOE_STRUCTURES::STRUCT_SLP_INFO *iconSlpInfo) {
-	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *inGameMain = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *inGameMain = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) GetScreenFromName(gameScreenName);
 	if (!inGameMain || !inGameMain->IsCheckSumValid() || !inGameMain->visible) {
 		return false;
 	}
-	if (inGameMain != (void*)AOE_GetCurrentScreen()) {
+	if (inGameMain != (void*)GetCurrentScreen()) {
 		return false;
 	}
 
@@ -361,7 +364,7 @@ static bool DiamondMapDrawAllTiles() {
 			}
 		}
 		if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
-			AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+			AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)GetScreenFromName(scenarioEditorScreenName);
 			if (scEditor && scEditor->IsCheckSumValid()) {
 				diamMap = scEditor->diamondMap;
 			}
@@ -388,7 +391,7 @@ static void AOE_EditorOpenMenu(AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *e
 static AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *GetGameZone() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = GetCurrentScreen();
 	assert(currentUI);
 	if (!settings || !currentUI || !settings->IsCheckSumValid()) { return NULL; }
 
