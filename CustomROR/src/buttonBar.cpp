@@ -9,7 +9,7 @@ namespace BUTTONBAR {
 void HideCommandButton(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, int cmdButtonId) {
 	assert((cmdButtonId >= 0) && (cmdButtonId < 12));
 	if ((cmdButtonId < 0) || (cmdButtonId >= 12)) { return; }
-	AOE_ShowUIObject(gameMainUI->unitCommandButtons[cmdButtonId], false);
+	AOE_METHODS::AOE_ShowUIObject(gameMainUI->unitCommandButtons[cmdButtonId], false);
 	gameMainUI->unitCommandButtons[cmdButtonId]->buttonInfoValue[0] = -1;
 	gameMainUI->unitCommandButtons[cmdButtonId]->commandIDs[0] = 0;
 }
@@ -44,19 +44,19 @@ void RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *game
 	int value = attackPolicy->attackVillagers ? 0 : 1;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]->showNumber = value;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]->numberToDisplay = value;
-	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]);
+	AOE_METHODS::AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]);
 	value = attackPolicy->attackNonTowerBuildings ? 0 : 1;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS]->showNumber = value;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS]->numberToDisplay = value;
-	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS]);
+	AOE_METHODS::AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS]);
 	value = (!attackPolicy->attackMilitary && !attackPolicy->attackNonTowerBuildings && !attackPolicy->attackTowers && !attackPolicy->attackVillagers);
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]->showNumber = value;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]->numberToDisplay = value;
-	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]);
+	AOE_METHODS::AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]);
 	value = (attackPolicy->Equals(CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues)) ? 1 : 0;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]->showNumber = value;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]->numberToDisplay = value;
-	AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]);
+	AOE_METHODS::AOE_RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]);
 }
 
 
@@ -555,7 +555,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 	if (!player || !player->IsCheckSumValid()) { return false; }
-	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *inGameMain = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *inGameMain = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) AOE_METHODS::AOE_GetScreenFromName(gameScreenName);
 	if (!inGameMain || !inGameMain->IsCheckSumValid()) { return false; }
 	long int iconId = BUTTONBAR::BUTTONBAR_CONST::GuessIconIdFromUICommandId(UICmdId);
 	long int helpDllId = 0;
@@ -663,7 +663,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		button->commandIDs[0] = -1;
 		button->hotkey = hotkeyDllId;
 	}
-	return AOE_InGameAddCommandButton(player, buttonIndex, iconId, UICmdId, DATID,
+	return AOE_METHODS::AOE_InGameAddCommandButton(player, buttonIndex, iconId, UICmdId, DATID,
 		helpDllId, creationDllId, hotkeyDllId,
 		pName, creationTextToUse, isDisabled, iconSlpInfo);
 }

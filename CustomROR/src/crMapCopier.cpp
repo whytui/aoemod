@@ -212,7 +212,7 @@ bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
 			}
 		}
 	}
-	DiamondMapDrawAllTiles();
+	AOE_METHODS::DiamondMapDrawAllTiles();
 	this->lastError = "";
 	return true;
 }

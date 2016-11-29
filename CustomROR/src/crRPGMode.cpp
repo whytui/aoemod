@@ -421,7 +421,7 @@ namespace RPG_MODE {
 		std::string msg = unit->unitDefinition->ptrUnitName;
 		msg += " upgraded to level ";
 		msg += std::to_string(newLevel);
-		CallWriteText(msg.c_str());
+		AOE_METHODS::CallWriteText(msg.c_str());
 		return true;
 	}
 
@@ -434,7 +434,7 @@ namespace RPG_MODE {
 		}
 		std::string msg = unit->unitDefinition->ptrUnitName;
 		msg += " spawned as an epic unit";
-		CallWriteText(msg.c_str());
+		AOE_METHODS::CallWriteText(msg.c_str());
 		return true;
 	}
 }

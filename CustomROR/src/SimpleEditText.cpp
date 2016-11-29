@@ -33,7 +33,7 @@ void SimpleEditTextPopup::AddPopupContent(const char *title, const char *initial
 
 void SimpleEditTextPopup::OnBeforeClose(bool isCancel) {
 	if (!isCancel && this->edtText) {
-		AOE_SetFocus(this->edtText->ptrParentObject, NULL); // "validate" typed value.
+		AOE_METHODS::AOE_SetFocus(this->edtText->ptrParentObject, NULL); // "validate" typed value.
 		// Write in provided buffer, if not NULL.
 		if ((this->maxLength > 0) && (this->bufferToWrite != NULL)) {
 			strcpy_s(this->bufferToWrite, this->maxLength - 1, this->edtText->pTypedText);

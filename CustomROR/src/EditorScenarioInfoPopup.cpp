@@ -33,25 +33,25 @@ void EditorScenarioInfoPopup::_ResetPointers() {
 void EditorScenarioInfoPopup::SetVarToUpdate_allowUnitOverlapping(bool *varToUpdate) {
 	this->varToUpdate_allowUnitOverlapping = varToUpdate;
 	if (this->chkAllowUnitOverlapping && varToUpdate) {
-		AOE_CheckBox_SetChecked(this->chkAllowUnitOverlapping, *varToUpdate);
+		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkAllowUnitOverlapping, *varToUpdate);
 	}
 }
 void EditorScenarioInfoPopup::SetVarToUpdate_disableHillModeChecks(bool *varToUpdate) {
 	this->varToUpdate_disableHillModeChecks = varToUpdate;
 	if (this->chkDisableHillModeCheck && varToUpdate) {
-		AOE_CheckBox_SetChecked(this->chkDisableHillModeCheck, *varToUpdate);
+		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkDisableHillModeCheck, *varToUpdate);
 	}
 }
 void EditorScenarioInfoPopup::SetVarToUpdate_disableTerrainRestrictionChecks(bool *varToUpdate) {
 	this->varToUpdate_disableTerrainRestrictionChecks = varToUpdate;
 	if (this->chkDisableTerrainRestrictions && varToUpdate) {
-		AOE_CheckBox_SetChecked(this->chkDisableTerrainRestrictions, *varToUpdate);
+		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkDisableTerrainRestrictions, *varToUpdate);
 	}
 }
 void EditorScenarioInfoPopup::SetVarToUpdate_lengthenCombatMode(long int *varToUpdate) {
 	this->varToUpdate_lengthenCombatMode = varToUpdate;
 	if (this->chkLengthenCombatMode && varToUpdate) {
-		AOE_CheckBox_SetChecked(this->chkLengthenCombatMode, (*varToUpdate != 0));
+		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkLengthenCombatMode, (*varToUpdate != 0));
 	}
 }
 
@@ -98,7 +98,7 @@ bool EditorScenarioInfoPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *se
 
 	if (this->edtPlayerId == NULL) { return false; }
 	if (sender->ptrParentObject) {
-		AOE_SetFocus(sender->ptrParentObject, sender); // To validate input text.
+		AOE_METHODS::AOE_SetFocus(sender->ptrParentObject, sender); // To validate input text.
 	}
 	if (this->edtPlayerId->pTypedText != NULL) {
 		this->playerId = (this->edtPlayerId->pTypedText[0] - '0');
@@ -172,7 +172,7 @@ void EditorScenarioInfoPopup::OnAfterClose(bool isCancel) {
 	switch (this->popupToOpen) {
 	case SC_INFO_POPUP_TO_OPEN::PTO_TRIGGER:
 		if (!this->nextPopup) {
-			STRUCT_ANY_UI *currentScreen = AOE_GetCurrentScreen();
+			STRUCT_ANY_UI *currentScreen = AOE_METHODS::AOE_GetCurrentScreen();
 			if (currentScreen) {
 				GenNewTriggerPopup *nextPopup = new GenNewTriggerPopup();
 				nextPopup->OpenPopup(currentScreen->sizeX - 2, currentScreen->sizeY - 2, false, AOE_CONST_DRS::LightOrangeTheme);

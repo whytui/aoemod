@@ -117,11 +117,11 @@ bool IsInGameUnitCommandButtonVisible(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *ga
 // Returns true if the button is visible
 // Returns false if the button is hidden, or if an error occurs.
 bool IsInGameUnitCommandButtonVisible(long int buttonIndex) {
-	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *inGameMain = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) AOE_GetScreenFromName(gameScreenName);
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *inGameMain = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) AOE_METHODS::AOE_GetScreenFromName(gameScreenName);
 	if (!inGameMain || !inGameMain->IsCheckSumValid() || !inGameMain->visible) {
 		return false;
 	}
-	if (inGameMain != (void*)AOE_GetCurrentScreen()) {
+	if (inGameMain != (void*)AOE_METHODS::AOE_GetCurrentScreen()) {
 		return false;
 	}
 	return IsInGameUnitCommandButtonVisible(inGameMain, buttonIndex);

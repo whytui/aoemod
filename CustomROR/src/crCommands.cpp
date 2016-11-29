@@ -497,7 +497,7 @@ fail:
 
 void CustomRORCommand::HandleChatCommand(char *command) {
 	if (strcmp(command, "hi") == 0) {
-		CallWriteText("Hello world !");
+		AOE_METHODS::CallWriteText("Hello world !");
 	}
 	if (strcmp(command, "seed") == 0) {
 		this->PrintMapSeed();
@@ -507,11 +507,11 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 	}
 	if ((strcmp(command, "ai") == 0) || (strcmp(command, "AI") == 0)) {
 		this->RestoreAllAIFlags();
-		CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_RECOMPUTED, "AI flags have been recomputed"));
+		AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_RECOMPUTED, "AI flags have been recomputed"));
 	}
 	if ((strcmp(command, "allai") == 0) || (strcmp(command, "allAI") == 0)) {
 		this->SetAllAIFlags();
-		CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_ALL_SET, "All players are now computer-managed."));
+		AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_ALL_SET, "All players are now computer-managed."));
 	}
 	if (strcmp(command, "dump") == 0) {
 #ifdef _DEBUG
@@ -522,7 +522,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		std::string s = localizationHandler.GetTranslation(CRLANG_ID_CUSTOMROR, "CustomROR");
 		s += " ";
 		s += VER_FILE_VERSION_STR;
-		CallWriteText(s.c_str());
+		AOE_METHODS::CallWriteText(s.c_str());
 	}
 	if (strcmp(command, "timer stats") == 0) {
 		this->DisplayTimerStats();
@@ -620,7 +620,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 			sprintf_s(buffer, "Conversions FOR p%d: %d/%d = %f%%   AGAINST p%d: %d/%d = %f%%.",
 				i, FOR_success, FOR_attempt, FOR_pct * 100,
 				i, AGAINST_success, AGAINST_attempt, AGAINST_pct * 100);
-			CallWriteText(buffer);
+			AOE_METHODS::CallWriteText(buffer);
 
 			FILE *f;
 			int res = fopen_s(&f, "F:\\AOEDebug2.txt", "a+"); // overwrite if already existing
@@ -1094,7 +1094,7 @@ void CustomRORCommand::OnGameStart() {
 		msg += VER_FILE_VERSION_STR;
 		msg += " ";
 		msg += localizationHandler.GetTranslation(CRLANG_ID_WELCOME2, "plugin is active.");
-		CallWriteText(msg.c_str());
+		AOE_METHODS::CallWriteText(msg.c_str());
 	}
 
 	// Show automatically "F11" information at game startup
@@ -1670,7 +1670,7 @@ void CustomRORCommand::PrintDateTime() {
 	time(&rawtime);
 	ctime_s(timebuf2, 30, &rawtime);
 	sprintf_s(timebuf, "Time=%s", timebuf2, 40);
-	CallWriteText(timebuf);
+	AOE_METHODS::CallWriteText(timebuf);
 }
 
 
@@ -1679,7 +1679,7 @@ void CustomRORCommand::PrintMapSeed() {
 	unsigned long int *mapSeed = (unsigned long int *) ((*addr) + 0x34);
 	char text[50];
 	sprintf_s(text, 50, "Map seed=%d.", *mapSeed);
-	CallWriteText(text);
+	AOE_METHODS::CallWriteText(text);
 }
 
 
@@ -2671,7 +2671,7 @@ void CustomRORCommand::DisplayTimerStats() {
 	result = result / CST_TIMER_STATS_ARRAY_SIZE;
 	char buf[70];
 	sprintf_s(buf, "Avg timer interval is %ld ms - slow down factor is %ld", result, CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor);
-	CallWriteText(buf);
+	AOE_METHODS::CallWriteText(buf);
 }
 
 
@@ -2712,7 +2712,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return false; }
-	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_METHODS::AOE_GetScreenFromName(scenarioEditorScreenName);
 	assert(scEditor && scEditor->IsCheckSumValid());
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return false; }
 	AOE_STRUCTURES::STRUCT_PLAYER *gaia = GetPlayerStruct(0);
@@ -2730,7 +2730,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 
 	long int mapType = scEditor->map_cbb_mapType->GetSelectedIndex();
 	assert(scEditor && scEditor->map_edt_seed->IsCheckSumValid());
-	char *mapSeedText = AOE_GetEditText(scEditor->map_edt_seed);
+	char *mapSeedText = AOE_METHODS::AOE_GetEditText(scEditor->map_edt_seed);
 	long int terrainId = 0;
 	long int mapSeed = -1; // Default = -1 (= random)
 	long int playerCount = (scEditor->pl_cbb_playerCount->GetSelectedIndex()) + 1;
@@ -2814,7 +2814,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 		sprintf_s(bufferSeed, "%ld", settings->actualMapSeed);
 		assert(scEditor->map_edt_seed_whenReadOnly);
 		bool test = scEditor->map_edt_seed_whenReadOnly->IsCheckSumValid();
-		AOE_SetLabelText(scEditor->map_edt_seed_whenReadOnly, bufferSeed);
+		AOE_METHODS::AOE_SetLabelText(scEditor->map_edt_seed_whenReadOnly, bufferSeed);
 		_asm {
 			MOV EDX, 0x52605D
 			CALL EDX // Recalculate pseudo random
@@ -2868,7 +2868,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 		MOV ECX, scEditor
 		CALL EDX
 	}
-	AOE_ShowUIObject(bigLbl, false); // Remove the "generating" label
+	AOE_METHODS::AOE_ShowUIObject(bigLbl, false); // Remove the "generating" label
 	return true;
 }
 
@@ -2892,7 +2892,7 @@ void CustomRORCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_
 			// Exclude standard terrains (already in list)
 			if ((terrainId > 1) && (terrainId != 10) && (terrainId != 13) &&
 				(terrainId != 20) && (terrainId != 4) && (terrainId != 19) && (terrainId != 22)) {
-				AOE_listbox_addItem(listBox, listBox->itemCount, terrainDef->terrainName, terrainId);
+				AOE_METHODS::AOE_listbox_addItem(listBox, listBox->itemCount, terrainDef->terrainName, terrainId);
 			}
 		}
 	}
@@ -2901,7 +2901,7 @@ void CustomRORCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_
 	if (CUSTOMROR::crInfo.configInfo.useCustomMapDimensions &&
 		scEditor->map_cbb_mapSize && scEditor->map_cbb_mapSize->IsCheckSumValid() &&
 		scEditor->map_cbb_mapSize->underlyingListBox && scEditor->map_cbb_mapSize->underlyingListBox->IsCheckSumValid()) {
-		AOE_listbox_addItem(scEditor->map_cbb_mapSize->underlyingListBox, 
+		AOE_METHODS::AOE_listbox_addItem(scEditor->map_cbb_mapSize->underlyingListBox,
 			scEditor->map_cbb_mapSize->underlyingListBox->itemCount, localizationHandler.GetTranslation(CRLANG_ID_CUSTOM, "Custom"), 0);
 	}
 }
@@ -3331,12 +3331,12 @@ bool CustomRORCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 				unitInfo->ResetProtectInfo();
 				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
 #ifdef _DEBUG
-				if (isPanelUnit) { CallWriteCenteredText("Removed protect info"); }
+				if (isPanelUnit) { AOE_METHODS::CallWriteCenteredText("Removed protect info"); }
 #endif
 			}
 			if (isPanelUnit) {
 				settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
-				SetGameCursor(GAME_CURSOR::GC_NORMAL);
+				AOE_METHODS::SetGameCursor(GAME_CURSOR::GC_NORMAL);
 				BUTTONBAR::ForceRefresh(settings->ptrGameUIStruct);
 			}
 		}
@@ -3383,7 +3383,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 		(uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_OR_BACK)){
 		if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE) {
 			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
-			SetGameCursor(GAME_CURSOR::GC_NORMAL);
+			AOE_METHODS::SetGameCursor(GAME_CURSOR::GC_NORMAL);
 			BUTTONBAR::ForceRefresh();
 			return true; // this action "exited" from "select unit to defend" action. It must not unselect unit too ! Mark event as handled.
 		}
@@ -3488,11 +3488,11 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 
 	// Button "protect unit or protect zone" : set mouse custom cursor type
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND) {
-		SetGameCursor(GAME_CURSOR::GC_GROUP);
+		AOE_METHODS::SetGameCursor(GAME_CURSOR::GC_GROUP);
 		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 		if (settings && settings->IsCheckSumValid()) {
 			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE;
-			CallWriteCenteredText(localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_SET_PROTECT_OBJECT, "Right-click to define the unit or the position to protect"));
+			AOE_METHODS::CallWriteCenteredText(localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_SET_PROTECT_OBJECT, "Right-click to define the unit or the position to protect"));
 		}
 		BUTTONBAR::SetButtonBarForDefendUnitOrZone(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)panelUnitBase);
 	}
@@ -3573,7 +3573,7 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UN
 		(slpHeader + 1); // Dirty, but works because structs have same size (done like this in ROR code)
 	AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *slpFrameHeader = slpFrameHeaderBase + slpArrayIndex; // Move to correct frame in array
 
-	DisplayUnitShortcutSymbol(slpHeader, slpFrameHeader, posX - 9, posY - 8, unknown_arg3);
+	AOE_METHODS::DisplayUnitShortcutSymbol(slpHeader, slpFrameHeader, posX - 9, posY - 8, unknown_arg3);
 	return false;
 }
 
@@ -3737,7 +3737,7 @@ void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AO
 				unitInfo->ResetProtectInfo();
 				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(actorUnit->unitInstanceId);
 			}
-			CallWriteCenteredText("Removed protect information for current unit.");
+			AOE_METHODS::CallWriteCenteredText("Removed protect information for current unit.");
 			break;
 		}
 		if (actorIsMyUnit && actorUnit && actorUnit->DerivesFromMovable()) {
@@ -3806,7 +3806,7 @@ void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AO
 		break;
 	}
 	settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
-	SetGameCursor(GAME_CURSOR::GC_NORMAL);
+	AOE_METHODS::SetGameCursor(GAME_CURSOR::GC_NORMAL);
 }
 
 
@@ -3890,11 +3890,11 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 bool CustomRORCommand::OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize) {
 	if (CUSTOMROR::crInfo.customYesNoDialogVar) { return false; } // Already an opened custom dialog
 
-	AOE_STRUCTURES::STRUCT_ANY_UI *customDialogPtr = AOE_GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
+	AOE_STRUCTURES::STRUCT_ANY_UI *customDialogPtr = AOE_METHODS::AOE_GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
 	if (customDialogPtr != NULL) { return false; } // A CloseProgramDialog seems to be already open
 
 	SetGamePause(true);
-	CUSTOMROR::crInfo.customYesNoDialogVar = (unsigned long int*) AOE_CreateDialogPopup(dialogText, hSize, vSize);
+	CUSTOMROR::crInfo.customYesNoDialogVar = (unsigned long int*) AOE_METHODS::AOE_CreateDialogPopup(dialogText, hSize, vSize);
 
 	return true;
 }
@@ -3918,9 +3918,9 @@ long int CustomRORCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_PO
 	}
 	// Close the dialog
 	// TO DO: use CloseScreenFullTreatment(..) instead
-	AOE_RefreshScreen("Game Screen", 0);
+	AOE_METHODS::AOE_RefreshScreen("Game Screen", 0);
 	assert(strcmp(ptrDialog->screenName, AOE_CONST_INTERNAL::customDialogScreenName) == 0);
-	AOE_CloseScreenAndDestroy(AOE_CONST_INTERNAL::customDialogScreenName);
+	AOE_METHODS::AOE_CloseScreenAndDestroy(AOE_CONST_INTERNAL::customDialogScreenName);
 	CUSTOMROR::crInfo.customYesNoDialogVar = NULL;
 
 	long int *Ihavenoideawhatthisis = (long int *)0x7C0338; // cf 0x481264
@@ -4291,10 +4291,10 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 	assert(global != NULL);
 	if (!global) { return; }
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_WRITE_CHAT) {
-		CallWriteText(trigger->GetParameterValue(CR_TRIGGERS::KW_MESSAGE, ""));
+		AOE_METHODS::CallWriteText(trigger->GetParameterValue(CR_TRIGGERS::KW_MESSAGE, ""));
 	}
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_WRITE_CENTERED_MESSAGE) {
-		CallWriteCenteredText(trigger->GetParameterValue(CR_TRIGGERS::KW_MESSAGE, ""));
+		AOE_METHODS::CallWriteCenteredText(trigger->GetParameterValue(CR_TRIGGERS::KW_MESSAGE, ""));
 	}
 	long int actionPlayerId = -1;
 	long int actionResourceId = -1;

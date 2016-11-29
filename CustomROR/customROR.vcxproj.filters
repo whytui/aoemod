@@ -284,6 +284,9 @@
     <ClInclude Include="include\AOEPrimitives_UI_components.h">
       <Filter>Fichiers d%27en-tête\Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="include\AOEPrimitives_UI_screens.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">

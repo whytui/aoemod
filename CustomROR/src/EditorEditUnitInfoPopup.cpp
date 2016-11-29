@@ -81,24 +81,24 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	// Check current status' box
 	switch (unit->unitStatus) {
 	case 0:
-		AOE_CheckBox_SetChecked(this->chkbox_s0, true);
+		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkbox_s0, true);
 		break;
 	case 2:
-		AOE_CheckBox_SetChecked(this->chkbox_s2, true);
+		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkbox_s2, true);
 		break;
 	case 4:
-		AOE_CheckBox_SetChecked(this->chkbox_s4, true);
+		AOE_METHODS::AOE_CheckBox_SetChecked(this->chkbox_s4, true);
 		break;
 	}
 	if (disableInitial) {
 		this->chkbox_s0->readOnly = 1;
-		AOE_RefreshUIObject(this->chkbox_s0);
+		AOE_METHODS::AOE_RefreshUIObject(this->chkbox_s0);
 	}
 	// Player that owns the unit
 	this->AddComboBox(this->popup, &this->cbxPlayerOwner, 20, 20, 120, 20, 120, 20);
 	if (this->cbxPlayerOwner) {
 		this->cbxPlayerOwner->Clear();
-		AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+		AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_METHODS::AOE_GetScreenFromName(scenarioEditorScreenName);
 		long int totalPlayerCount = global->playerTotalCount;
 		if (se && se->IsCheckSumValid()) {
 			totalPlayerCount = se->pl_cbb_playerCount->GetSelectedIndex() + 2; // +2 because: add gaia AND index starts at 0, not 1.
@@ -108,7 +108,7 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 		char bufNumber[] = "Player  ";
 		for (char i = 0; i < (char)totalPlayerCount; i++) {
 			bufNumber[7] = '0' + i;
-			AOE_AddEntryInCombo(this->cbxPlayerOwner, i, bufNumber);
+			AOE_METHODS::AOE_AddEntryInCombo(this->cbxPlayerOwner, i, bufNumber);
 		}
 		this->cbxPlayerOwner->SetSelectedIndex(this->initialOwner);
 	}
@@ -119,16 +119,16 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 bool EditorEditUnitInfoPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (sender->checked) {
 		if (sender == this->chkbox_s0) {
-			AOE_CheckBox_SetChecked(this->chkbox_s2, false);
-			AOE_CheckBox_SetChecked(this->chkbox_s4, false);
+			AOE_METHODS::AOE_CheckBox_SetChecked(this->chkbox_s2, false);
+			AOE_METHODS::AOE_CheckBox_SetChecked(this->chkbox_s4, false);
 		}
 		if (sender == this->chkbox_s2) {
-			AOE_CheckBox_SetChecked(this->chkbox_s0, false);
-			AOE_CheckBox_SetChecked(this->chkbox_s4, false);
+			AOE_METHODS::AOE_CheckBox_SetChecked(this->chkbox_s0, false);
+			AOE_METHODS::AOE_CheckBox_SetChecked(this->chkbox_s4, false);
 		}
 		if (sender == this->chkbox_s4) {
-			AOE_CheckBox_SetChecked(this->chkbox_s2, false);
-			AOE_CheckBox_SetChecked(this->chkbox_s0, false);
+			AOE_METHODS::AOE_CheckBox_SetChecked(this->chkbox_s2, false);
+			AOE_METHODS::AOE_CheckBox_SetChecked(this->chkbox_s0, false);
 		}
 	}
 	return false;

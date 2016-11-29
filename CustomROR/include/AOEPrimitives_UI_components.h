@@ -1,5 +1,13 @@
 
 #pragma once
+#include <assert.h>
+#include <string.h>
+#include <UI_components\AOE_struct_any_ui.h>
+#include <UI_components\AOE_struct_ui_button.h>
+#include <UI_components\AOE_struct_ui_label.h>
+#include <UI_components\AOE_struct_ui_textbox.h>
+#include <UI_components\AOE_struct_ui_combobox.h>
+#include <UI\AOE_struct_ui_player_resource_values.h>
 
 /*
 * This file provides useful (raw) methods to deal with AOE UI components.
@@ -9,6 +17,7 @@
 * ALL your findings about AOE/ROR structures
 * Please share knowledge for better modding experience !
 */
+
 
 enum AOE_FONTS : long int {
 	AOE_FONT_BIG_LABEL = 0,
@@ -26,6 +35,49 @@ enum AOE_FONTS : long int {
 	// 12+ invalids
 };
 
+namespace AOE_METHODS {
+
+
+
+// Set parent's focus to child object.
+// child CAN be NULL (set focus to parent itself).
+static void AOE_SetFocus(AOE_STRUCTURES::STRUCT_ANY_UI *parent, AOE_STRUCTURES::STRUCT_ANY_UI *child) {
+	if (!parent) { return; }
+	unsigned long int addr = 0x453EB0; // parentObj.setFocus(childObj)
+	_asm {
+		PUSH child;
+		MOV ECX, parent;
+		CALL addr;
+	}
+}
+
+
+// Show/Hide a UI object
+static void AOE_ShowUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, bool show) {
+	if (!object) { return; }
+	long int arg = show ? 1 : 0;
+	_asm {
+		MOV ECX, object;
+		MOV EAX, DS:[ECX];
+		PUSH arg;
+		CALL DS:[EAX + 0x14];
+	}
+}
+
+// Refresh a UI object
+static void AOE_RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object) {
+	if (!object) { return; }
+	_asm {
+		MOV ECX, object;
+		MOV EAX, DS:[ECX];
+		PUSH 1;
+		CALL DS:[EAX + 0x20];
+	}
+}
+
+
+
+// The AOE_Addxxx functions create a UI object and store the new object's pointer in ptrObjToCreate parameter
 
 
 // Note: basic size (eg OK button) is 0x?? / 0x1E
@@ -354,3 +406,4 @@ static void AOE_SetButtonTextColor(AOE_STRUCTURES::STRUCT_UI_BUTTON *btn, unsign
 	}
 }
 
+}

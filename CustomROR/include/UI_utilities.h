@@ -7,10 +7,10 @@
 #include <AOE_structures_drs.h>
 #include <AOE_struct_game_settings.h>
 #include <UI_components\AOE_struct_any_ui.h>
-#include <UI_components\AOE_struct_ui_textbox.h>
 #include <UI\AOE_struct_ui_scenario_editor_main.h>
 #include <UI\AOE_struct_ui_in_game_main.h>
 #include "AOEPrimitives_UI_components.h"
+#include "AOEPrimitives_UI_screens.h"
 #include "AOE_memory.h"
 #include "drsHandler.h"
 #include "mainStructuresHandling.h"
@@ -27,46 +27,7 @@ static const char scenarioEditorScreenName[] = "Scenario Editor Screen";
 static const char menuDialogScreenName[] = "Menu Dialog";
 static const char gameScreenName[] = "Game Screen";
 
-
-// The AOE_Addxxx functions create a UI object and store the new object's pointer in ptrObjToCreate parameter
-
-
-
-// Set parent's focus to child object.
-// child CAN be NULL (set focus to parent itself).
-static void AOE_SetFocus(AOE_STRUCTURES::STRUCT_ANY_UI *parent, AOE_STRUCTURES::STRUCT_ANY_UI *child) {
-	if (!parent) { return; }
-	_asm {
-		PUSH child;
-		MOV ECX, parent;
-		MOV EAX, 0x453EB0; // parentObj.setFocus(childObj)
-		CALL EAX;
-	}
-}
-
-
-// Show/Hide a UI object
-static void AOE_ShowUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, bool show) {
-	if (!object) { return; }
-	long int arg = show ? 1 : 0;
-	_asm {
-		MOV ECX, object;
-		MOV EAX, DS:[ECX];
-		PUSH arg;
-		CALL DS:[EAX + 0x14];
-	}
-}
-
-// Refresh a UI object
-static void AOE_RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object) {
-	if (!object) { return; }
-	_asm {
-		MOV ECX, object;
-		MOV EAX, DS:[ECX];
-		PUSH 1;
-		CALL DS:[EAX + 0x20];
-	}
-}
+namespace AOE_METHODS {
 
 
 // Display a small yes/no dialog message (based on game exit popup) + cancel in scenario editor
@@ -95,135 +56,21 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, lo
 	AOE_STRUCTURES::STRUCT_ANY_UI *obj = NULL;
 	// Now call relevant function
 	_asm {
-		PUSH vSize
-		PUSH hSize
-		MOV EAX, dlgName
-		PUSH EAX
-		MOV EAX, text
-		PUSH EAX
-		MOV ECX, currentUI
-		MOV EAX, fct
-		CALL EAX // showDialog(ptrText, dlgName, hSize, vSize)
-		MOV ECX, currentUI
-		MOV EAX, DS:[ECX+0x3C] // Focused object = new popup
-		MOV obj, EAX
+		PUSH vSize;
+		PUSH hSize;
+		MOV EAX, dlgName;
+		PUSH EAX;
+		MOV EAX, text;
+		PUSH EAX;
+		MOV ECX, currentUI;
+		MOV EAX, fct;
+		CALL EAX; // showDialog(ptrText, dlgName, hSize, vSize)
+		MOV ECX, currentUI;
+		MOV EAX, DS:[ECX + 0x3C]; // Focused object = new popup
+		MOV obj, EAX;
 	}
 	return obj;
 }
-
-
-// Create a popup from game screen (from Options original model)
-// Must be called when game screen is active (no other popup)
-static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateGameScreenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *parent, long int hSize, long int vSize,
-	long int backgroundSlpId) {
-	if (!parent) { return NULL; }
-	char dlgName[] = "dlg6_3";
-	long int arg1;
-	long int arg6;
-	AOE_STRUCTURES::STRUCT_ANY_UI *newObj = 0;
-	// Alloc
-	_asm {
-		PUSH 0x564
-		MOV EAX, 0x0052601D // alloc
-		CALL EAX
-		ADD ESP, 4 // for push 0x564
-		MOV newObj, EAX
-	}
-	if (newObj == NULL) { return NULL; }
-
-	_asm {
-		// Get data
-		MOV ESI, parent
-		MOV EAX, DS:[ESI+0x20]
-		MOV arg1, EAX
-		//MOV EAX, DS:[ESI+0x444]
-		MOV EAX, backgroundSlpId
-		MOV arg6, EAX
-		// Init
-		MOV ECX, newObj
-		MOV EAX, 0x00460730 // DialogObj.genericUIConstructor(ScreenName)
-		PUSH 0x00557204 // Config Dialog
-		CALL EAX
-		// Create popup + show + focus
-		MOV EDX, 0x004607A0
-		MOV ECX, newObj
-		PUSH 1 // arg7
-		PUSH arg6
-		LEA EAX, dlgName
-		PUSH EAX
-		PUSH vSize
-		PUSH hSize
-		PUSH parent
-		PUSH arg1
-		CALL EDX //UIObj.createPopupAndFocus(arg1, parentUI, hSize, vSize, dlgName?, arg6, arg7)?
-	}
-	return newObj;
-}
-
-
-
-// Return current screen, using 0x5830E8 structure info
-static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_GetCurrentScreen() {
-	AOE_STRUCTURES::STRUCT_ANY_UI *res = NULL;
-	_asm {
-		MOV ECX, 0x5830E8
-		MOV EAX, DS:[ECX+0xC]
-		MOV res, EAX
-	}
-	return res;
-}
-
-
-// Returns a pointer to a UI object that matches screenName.
-// Can return NULL if no matching screen was found
-static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_GetScreenFromName(const char *screenName) {
-	unsigned long int result = 0;
-	_asm {
-		MOV EDX, screenName
-		PUSH EDX
-		MOV ECX, 0x5830E8 // A struct directly included in ROR variables section
-		MOV EAX, 0x451AE0
-		CALL EAX
-		MOV result, EAX
-	}
-	return (AOE_STRUCTURES::STRUCT_ANY_UI *)result;
-}
-
-
-// Calls 0x451BE0
-static void AOE_RefreshScreen(const char *screenName, unsigned long int arg2) {
-	_asm {
-		PUSH arg2
-		MOV EDX, screenName
-		PUSH EDX
-		MOV ECX, 0x5830E8 // A struct directly included in ROR variables section
-		MOV EAX, 0x451BE0
-		CALL EAX
-	}
-}
-
-// (cf 0x451DF0)
-// ROR code first (not always, sometimes after?) calls RefreshScreen on the parent and then CloseScreenAndDestroy.
-static void AOE_CloseScreenAndDestroy(const char *screenName) {
-	_asm {
-		MOV EDX, screenName
-		PUSH EDX // arg1 = screen name
-		MOV ECX, 0x5830E8 // A struct directly included in ROR variables section
-		MOV EAX, 0x451DF0
-		CALL EAX // close screen and destroy (free)
-	}
-}
-
-
-// Refresh parent, close screen and destroy it.
-static void AOE_CloseScreenFullTreatment(AOE_STRUCTURES::STRUCT_ANY_UI *UIObj) {
-	AOE_STRUCTURES::STRUCT_ANY_UI *parent = UIObj->ptrParentObject;
-	AOE_CloseScreenAndDestroy(UIObj->screenName);
-	if (parent) {
-		AOE_RefreshScreen(parent->screenName, 0);
-	}
-}
-
 
 
 // Create a popup (from Options original model) and returns the new UI object's address as an unsigned long int
@@ -644,4 +491,6 @@ static void DisplayGreenBlinkingOnUnit(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *g
 		PUSH unitId; // must NOT be <0
 		CALL addr;
 	}
+}
+
 }

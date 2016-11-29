@@ -107,6 +107,7 @@
     <ClInclude Include="..\..\tinyxml\tinyxml.h" />
     <ClInclude Include="include\AOEPrimitives_gameCommand.h" />
     <ClInclude Include="include\AOEPrimitives_UI_components.h" />
+    <ClInclude Include="include\AOEPrimitives_UI_screens.h" />
     <ClInclude Include="include\AOEPrimitives_unitGroup.h" />
     <ClInclude Include="include\AOE_map.h" />
     <ClInclude Include="include\AOE_memory.h" />

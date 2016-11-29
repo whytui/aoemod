@@ -73,24 +73,24 @@ void GenNewTriggerPopup::_AddPopupContent() {
 	for (CR_TRIGGERS::TRIGGER_EVENT_TYPES e = CR_TRIGGERS::TRIGGER_EVENT_TYPES::EVENT_NONE;
 		e < CR_TRIGGERS::TRIGGER_EVENTS_TYPES_COUNT; e = CR_TRIGGERS::TRIGGER_EVENT_TYPES(e + 1)) {
 		if (e == CR_TRIGGERS::TRIGGER_EVENT_TYPES::EVENT_NONE) {
-			AOE_AddEntryInCombo(this->cbxEventType, 0, localizationHandler.GetTranslation(CRLANG_ID_TRG_CHOOSE_EVENT, "Choose an event"));
+			AOE_METHODS::AOE_AddEntryInCombo(this->cbxEventType, 0, localizationHandler.GetTranslation(CRLANG_ID_TRG_CHOOSE_EVENT, "Choose an event"));
 		} else {
-			AOE_AddEntryInCombo(this->cbxEventType, (long int)e, CR_TRIGGERS::TriggerEventTypeToText(e));
+			AOE_METHODS::AOE_AddEntryInCombo(this->cbxEventType, (long int)e, CR_TRIGGERS::TriggerEventTypeToText(e));
 		}
 	}
 	for (CR_TRIGGERS::TRIGGER_ACTION_TYPES a = CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_NONE;
 		a < CR_TRIGGERS::TRIGGER_ACTION_TYPES_COUNT; a = CR_TRIGGERS::TRIGGER_ACTION_TYPES(a + 1)) {
 		if (a == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_NONE) {
-			AOE_AddEntryInCombo(this->cbxActionType, 0, localizationHandler.GetTranslation(CRLANG_ID_TRG_CHOOSE_ACTION, "Choose an action"));
+			AOE_METHODS::AOE_AddEntryInCombo(this->cbxActionType, 0, localizationHandler.GetTranslation(CRLANG_ID_TRG_CHOOSE_ACTION, "Choose an action"));
 		} else {
-			AOE_AddEntryInCombo(this->cbxActionType, (long int)a, CR_TRIGGERS::TriggerActionTypeToText(a));
+			AOE_METHODS::AOE_AddEntryInCombo(this->cbxActionType, (long int)a, CR_TRIGGERS::TriggerActionTypeToText(a));
 		}
 	}
 	this->LoadTriggerTextFromGameInfo();
 }
 
 void GenNewTriggerPopup::OnBeforeClose(bool isCancel) {
-	AOE_SetFocus(this->popup, this->btnGenerate);
+	AOE_METHODS::AOE_SetFocus(this->popup, this->btnGenerate);
 	if (isCancel) { return; }
 }
 
@@ -99,7 +99,7 @@ bool GenNewTriggerPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender)
 	if (!sender) { return false; }
 	if (this->btnSaveTriggers) {
 		// Make sure to lose focus on input fields to validate user entry.
-		AOE_SetFocus(this->btnSaveTriggers->ptrParentObject, NULL);
+		AOE_METHODS::AOE_SetFocus(this->btnSaveTriggers->ptrParentObject, NULL);
 	}
 	if (sender == this->btnReloadTriggers) {
 		this->LoadTriggerTextFromGameInfo();

@@ -321,7 +321,7 @@ AOE_STRUCTURES::STRUCT_POSITION_INFO GetMousePosition(AOE_STRUCTURES::STRUCT_ANY
 	result.posY = -1;
 	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = UIObj;
 	if (!currentUI) {
-		currentUI = AOE_GetCurrentScreen();
+		currentUI = AOE_METHODS::AOE_GetCurrentScreen();
 	}
 	assert(currentUI);
 	if (!currentUI) { return result; }
@@ -342,10 +342,10 @@ AOE_STRUCTURES::STRUCT_POSITION_INFO GetMousePosition() {
 	result.posY = -1;
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_METHODS::AOE_GetCurrentScreen();
 	assert(currentUI);
 	if (!settings || !currentUI) { return result; }
-	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
+	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone = AOE_METHODS::GetGameZone();
 	if (!gameZone || !gameZone->IsCheckSumValid()) {
 		return result;
 	}
@@ -362,10 +362,10 @@ bool GetGamePositionUnderMouse(float *posX, float *posY) {
 	*posY = -1;
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_GetCurrentScreen();
+	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = AOE_METHODS::AOE_GetCurrentScreen();
 	assert(currentUI);
 	if (!settings || !currentUI) { return false; }
-	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
+	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone = AOE_METHODS::GetGameZone();
 	if (!gameZone || !gameZone->IsCheckSumValid()) { return false; }
 	AOE_STRUCTURES::STRUCT_POSITION_INFO mousePos = GetMousePosition(gameZone);
 
@@ -378,7 +378,7 @@ bool GetGamePositionUnderMouse(float *posX, float *posY) {
 	long int relativeMousePosY = mousePos.posY - gameZone->unknown_090_minPosY;
 
 	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO gamePos;
-	long int unknown_res = AOE_GetGamePosFromMousePos(gameZone, &gamePos, relativeMousePosX, relativeMousePosY);
+	long int unknown_res = AOE_METHODS::AOE_GetGamePosFromMousePos(gameZone, &gamePos, relativeMousePosX, relativeMousePosY);
 	if (unknown_res > 0) { // really not sure of this. Often 0x33 ?
 		*posX = gamePos.posX;
 		*posY = gamePos.posY;

@@ -887,7 +887,7 @@ void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT
 		!settings->ptrGameUIStruct->gamePlayUIZone->IsCheckSumValid()) {
 		return;
 	}
-	AOE_RefreshUIObject(settings->ptrGameUIStruct->gamePlayUIZone);
+	AOE_METHODS::AOE_RefreshUIObject(settings->ptrGameUIStruct->gamePlayUIZone);
 }
 
 

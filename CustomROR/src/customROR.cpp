@@ -1992,7 +1992,7 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 		}
 		if (i == 0x0F) { DLL_ID = 0x2809; } // Stupid inversion between palmyra and macedonia
 		if (i == 0x10) { DLL_ID = 0x2808; } // Stupid inversion between palmyra and macedonia
-		AOE_AddEntryInComboUsingDLLID(ptrCombo, i, DLL_ID);
+		AOE_METHODS::AOE_AddEntryInComboUsingDLLID(ptrCombo, i, DLL_ID);
 	}
 
 	// Do we already have a global struct ? If Yes, check civ number in empires.dat (if not matching our config, it may crash)
@@ -2020,15 +2020,15 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	for (int civid = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civid <= CUSTOMROR::crInfo.configInfo.civCount; civid++) {
 		CivilizationInfo *civInfo = CUSTOMROR::crInfo.configInfo.GetCivInfo(civid);
 		if (civInfo) {
-			AOE_AddEntryInCombo(ptrCombo, civid, civInfo->GetCivName().c_str());
+			AOE_METHODS::AOE_AddEntryInCombo(ptrCombo, civid, civInfo->GetCivName().c_str());
 		} else {
-			AOE_AddEntryInCombo(ptrCombo, civid, localizationHandler.GetTranslation(CRLANG_ID_DEFAULT_CIV_NAME, "Custom civilization"));
+			AOE_METHODS::AOE_AddEntryInCombo(ptrCombo, civid, localizationHandler.GetTranslation(CRLANG_ID_DEFAULT_CIV_NAME, "Custom civilization"));
 		}
 	}
 	
 
 	// Add random entry
-	AOE_AddEntryInComboUsingDLLID(ptrCombo, CUSTOMROR::crInfo.configInfo.civCount + 1, 0x280A);
+	AOE_METHODS::AOE_AddEntryInComboUsingDLLID(ptrCombo, CUSTOMROR::crInfo.configInfo.civCount + 1, 0x280A);
 }
 
 
@@ -2051,7 +2051,7 @@ void CustomRORInstance::ManageCivsInEditorCombo(REG_BACKUP *REG_values) {
 			}
 			if (i == 0x0F) { DLL_ID = 0x2809; } // Stupid inversion between palmyra and macedonia
 			if (i == 0x10) { DLL_ID = 0x2808; } // Stupid inversion between palmyra and macedonia
-			AOE_AddEntryInComboUsingDLLID(ptrCombo, 0, DLL_ID);
+			AOE_METHODS::AOE_AddEntryInComboUsingDLLID(ptrCombo, 0, DLL_ID);
 		}
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
@@ -2059,9 +2059,9 @@ void CustomRORInstance::ManageCivsInEditorCombo(REG_BACKUP *REG_values) {
 	for (int civId = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civId <= CUSTOMROR::crInfo.configInfo.civCount; civId++) {
 		CivilizationInfo *civInfo = CUSTOMROR::crInfo.configInfo.GetCivInfo(civId);
 		if (civInfo) {
-			AOE_AddEntryInCombo(ptrCombo, 0, civInfo->GetCivName().c_str());
+			AOE_METHODS::AOE_AddEntryInCombo(ptrCombo, 0, civInfo->GetCivName().c_str());
 		} else {
-			AOE_AddEntryInCombo(ptrCombo, 0, localizationHandler.GetTranslation(CRLANG_ID_DEFAULT_CIV_NAME, "Custom civilization"));
+			AOE_METHODS::AOE_AddEntryInCombo(ptrCombo, 0, localizationHandler.GetTranslation(CRLANG_ID_DEFAULT_CIV_NAME, "Custom civilization"));
 		}
 	}
 
@@ -2475,7 +2475,7 @@ void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 
 		// Standard Options button
 		long int xSize = CUSTOMROR::crInfo.configInfo.showCustomRORMenu ? 0xA0 : 0x168;
-		myEAX = AOE_AddButton((AOE_STRUCTURES::STRUCT_ANY_UI*) myESI, (AOE_STRUCTURES::STRUCT_UI_BUTTON**) pOptionsBtn,
+		myEAX = AOE_METHODS::AOE_AddButton((AOE_STRUCTURES::STRUCT_ANY_UI*) myESI, (AOE_STRUCTURES::STRUCT_UI_BUTTON**) pOptionsBtn,
 			LANG_ID_GAME_OPTIONS, 0x14, myEBP, xSize, 0x1E, 5, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	}
 	
@@ -2486,7 +2486,7 @@ void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 		dllIdToUse = CRLANG_ID_CUSTOMROR;
 	}
 	if (myEAX && CUSTOMROR::crInfo.configInfo.showCustomRORMenu && !IsMultiplayer()) {
-		myEAX = AOE_AddButton((AOE_STRUCTURES::STRUCT_ANY_UI*)myESI,
+		myEAX = AOE_METHODS::AOE_AddButton((AOE_STRUCTURES::STRUCT_ANY_UI*)myESI,
 			(AOE_STRUCTURES::STRUCT_UI_BUTTON**)&CUSTOMROR::crInfo.customGameMenuOptionsBtnVar, 
 			dllIdToUse, 0xD0, myEBP, 0xAC, 0x1E,
 			AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS, AOE_FONTS::AOE_FONT_BIG_LABEL);
@@ -2548,7 +2548,7 @@ void CustomRORInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 		return; // sender=cancel button (from original options menu), return normally and continue (original JNZ would not jump)
 	}
 	// Force set focus to parent (popup) to validate currently typed text, if any. No effect in normal options menu.
-	AOE_SetFocus(parentAsGameOptions, NULL);
+	AOE_METHODS::AOE_SetFocus(parentAsGameOptions, NULL);
 
 	// Note: myESP + 0x110 is return address of original code method... So arg1 is +0x114, arg2 0x118...
 	unsigned long int arg2 = *((unsigned long int*) (myESP + 0x118)); // For textBox, 1 means ESC or click away
@@ -2806,7 +2806,7 @@ void CustomRORInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 	// In custom popups, RETURN in a textbox loses focus (so it is taken into account)
 	if ((CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) && (keyChar == VK_RETURN) && (textbox->IsCheckSumValid()) &&
 		(textbox->inputType != 7)) {
-		AOE_SetFocus(textbox->ptrParentObject, NULL);
+		AOE_METHODS::AOE_SetFocus(textbox->ptrParentObject, NULL);
 	}
 }
 
@@ -3698,7 +3698,7 @@ void CustomRORInstance::EntryPointShowInGameDefaultCursor_noUnitUnderMouse(REG_B
 		}
 	}
 
-	SetGameCursor(cursorToSet);
+	AOE_METHODS::SetGameCursor(cursorToSet);
 }
 
 

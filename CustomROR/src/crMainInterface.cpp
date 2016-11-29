@@ -78,7 +78,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		// Additional check
 		assert(GetGameSettingsPtr()->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
 		if (pCurrentUI) {
-			AOE_EditorOpenMenu((AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)*pCurrentUI);
+			AOE_METHODS::AOE_EditorOpenMenu((AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)*pCurrentUI);
 		}
 	}
 
@@ -294,10 +294,10 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 		if (this->OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
 			unsigned long int *unused;
-			AOE_AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
+			AOE_METHODS::AOE_AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
 			if (!sTechTreeInfo.empty() && (techToShowCount > 0)) {
-				AOE_AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
-				AOE_AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount+1));
+				AOE_METHODS::AOE_AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
+				AOE_METHODS::AOE_AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount + 1));
 			}
 		}
 	}
@@ -438,7 +438,7 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 		if (objAsButton->IsCheckSumValid()) {
 			if (objAsButton->IsACheckBox()) {
 				// We should NOT do this for standard buttons
-				AOE_CheckBox_SetChecked(objAsButton, !objAsButton->IsChecked());
+				AOE_METHODS::AOE_CheckBox_SetChecked(objAsButton, !objAsButton->IsChecked());
 			}
 			return this->OnCustomButtonClick(objAsButton); // run for checkboxes also.
 		}
@@ -452,7 +452,7 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 
 	// Scenario editor
-	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_METHODS::AOE_GetScreenFromName(scenarioEditorScreenName);
 	if ((se != NULL) && settings && (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
 		// Manage (overload) scenario editor buttons
 		if (obj == se->map_btn_generateMap) {
@@ -461,7 +461,7 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 	}
 
 	// Game menu
-	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MENU *menu = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MENU *)AOE_GetScreenFromName(menuDialogScreenName);
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MENU *menu = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MENU *)AOE_METHODS::AOE_GetScreenFromName(menuDialogScreenName);
 	if (menu && menu->IsCheckSumValid() && settings && (obj->ptrParentObject == menu)) {
 		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsButton->IsCheckSumValid()) {
@@ -628,7 +628,7 @@ bool CustomRORMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return false; }
-	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_GetScreenFromName(scenarioEditorScreenName);
+	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_METHODS::AOE_GetScreenFromName(scenarioEditorScreenName);
 	assert(scEditor && scEditor->IsCheckSumValid());
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return false; }
 	assert(scEditor->map_cbb_mapSize);
@@ -712,7 +712,7 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 						if (u) {
 							u->ResetSpawnAutoTargetInfo();
 							CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unit->unitInstanceId);
-							CallWriteText("Disabled auto-move for new units for selected building");
+							AOE_METHODS::CallWriteText("Disabled auto-move for new units for selected building");
 						}
 					} else {
 						// For "valid clicks" (not on building itself), add building+click info (target unit or position) to list

@@ -5,6 +5,7 @@
 #include <UI_components\AOE_struct_any_ui.h>
 #include <UI_components\AOE_struct_ui_button.h>
 #include <UI_components\AOE_struct_ui_label.h>
+#include <UI_components\AOE_struct_ui_textbox.h>
 #include <UI_components\AOE_struct_ui_combobox.h>
 #include <UI\AOE_struct_ui_diamond_map.h>
 #include <UI\AOE_struct_ui_playing_zone.h>
