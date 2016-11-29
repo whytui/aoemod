@@ -49,6 +49,12 @@
     <Filter Include="Fichiers sources\CustomRorFeatures">
       <UniqueIdentifier>{3bd80b5d-5764-404d-b040-b5e41a7a23f6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\Primitives">
+      <UniqueIdentifier>{710af812-a215-4a2f-9c5e-9996d8a3ecbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\Primitives">
+      <UniqueIdentifier>{bece1ffc-475b-49f8-b632-51591dc6c8ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\CustomROR.rc">
@@ -64,9 +70,6 @@
     </ClInclude>
     <ClInclude Include="..\..\tinyxml\tinyxml.h">
       <Filter>Fichiers d%27en-tête\TinyXML</Filter>
-    </ClInclude>
-    <ClInclude Include="include\UI_utilities.h">
-      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\crCommands.h">
       <Filter>Fichiers d%27en-tête</Filter>
@@ -108,9 +111,6 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\customFuncRules.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\AOE_map.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\mainStructuresHandling.h">
@@ -194,9 +194,6 @@
     <ClInclude Include="include\palette.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
-    <ClInclude Include="include\AOEPrimitives_units.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\AOE_memory.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
@@ -209,9 +206,6 @@
     <ClInclude Include="include\buttonBarCommon.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\AOEPrimitives_gameCommand.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\playerTargeting.h">
       <Filter>Fichiers d%27en-tête\AI</Filter>
     </ClInclude>
@@ -220,9 +214,6 @@
     </ClInclude>
     <ClInclude Include="include\combatAI.h">
       <Filter>Fichiers d%27en-tête\AI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\AOEPrimitives_unitGroup.h">
-      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\mainCustomAI.h">
       <Filter>Fichiers d%27en-tête\AI</Filter>
@@ -275,6 +266,24 @@
     <ClInclude Include="include\commonConfigEnums.h">
       <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
     </ClInclude>
+    <ClInclude Include="include\UI_utilities.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOEPrimitives_gameCommand.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOEPrimitives_units.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOEPrimitives_unitGroup.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_map.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOEPrimitives_UI_components.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -324,9 +333,6 @@
     </ClCompile>
     <ClCompile Include="src\AOE_strategy.cpp">
       <Filter>Fichiers sources\Strategy</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AOE_map.cpp">
-      <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\mainStructuresHandling.cpp">
       <Filter>Fichiers sources</Filter>
@@ -400,16 +406,10 @@
     <ClCompile Include="src\BitmapExporter.cpp">
       <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
-    <ClCompile Include="src\AOEPrimitives_units.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\playerHandling.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\buttonBarCommon.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AOEPrimitives_gameCommand.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\combatAI.cpp">
@@ -420,9 +420,6 @@
     </ClCompile>
     <ClCompile Include="src\playerTargeting.cpp">
       <Filter>Fichiers sources\AI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\AOEPrimitives_unitGroup.cpp">
-      <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\mainCustomAI.cpp">
       <Filter>Fichiers sources\AI</Filter>
@@ -459,6 +456,18 @@
     </ClCompile>
     <ClCompile Include="src\crRPGMode.cpp">
       <Filter>Fichiers sources\CustomRorFeatures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AOE_map.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AOEPrimitives_gameCommand.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AOEPrimitives_unitGroup.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AOEPrimitives_units.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
