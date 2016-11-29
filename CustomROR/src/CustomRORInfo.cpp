@@ -4,7 +4,7 @@ static char _intDistanceValues[CST_INT_DISTANCE_VALUES_MAX_COORDINATE + 1][CST_I
 
 
 // Global static objects
-CustomRORConfig CustomRORInfo::configInfo;
+CONFIG::CustomRORConfig CustomRORInfo::configInfo;
 CustomRORInfo CUSTOMROR::crInfo;
 
 

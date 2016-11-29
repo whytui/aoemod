@@ -35,6 +35,7 @@
 
 using namespace AOE_CONST_FUNC;
 using namespace AOE_STRUCTURES;
+using namespace CUSTOMROR;
 
 
 // Constants
@@ -57,7 +58,7 @@ public:
 	~CustomRORInfo();
 
 	// Custom ROR Configuration
-	static CustomRORConfig configInfo;
+	static CONFIG::CustomRORConfig configInfo;
 	bool hasFixForBuildingStratElemUnitId;
 	bool hasManageAIFeatureON; // Is "ManageAI" feature installed (use custom flag "isAI" in player struct)
 	bool hasCustomSelectedUnitsMemory; // Player struct size is extended to host more selected units

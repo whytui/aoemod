@@ -24,7 +24,9 @@ using namespace std;
 
 #define CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS 10 // counts 0 that is unused (used for "no shortcut" in fact)
 
-
+namespace CUSTOMROR {
+namespace CONFIG {
+;
 
 class UnitSpawnShortcutInfo {
 public:
@@ -247,3 +249,7 @@ private:
 // If attribute value is "0" or "false", returns false.
 // All other values = return true.
 bool XML_GetBoolElement(TiXmlElement *elem, const char *attributeName);
+
+
+}
+}

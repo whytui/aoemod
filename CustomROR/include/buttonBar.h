@@ -12,6 +12,8 @@
 #include "buttonBarCommon.h"
 #include "playerHandling.h"
 
+using namespace CUSTOMROR;
+
 namespace BUTTONBAR {
 
 

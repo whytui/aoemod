@@ -1,5 +1,9 @@
 #include "../include/crConfig.h"
 
+namespace CUSTOMROR {
+namespace CONFIG {
+;
+
 
 // Constructor
 UnitSpawnShortcutInfo::UnitSpawnShortcutInfo() {
@@ -1010,3 +1014,5 @@ CUSTOMROR::CONFIG::AutoRebuildFarmConfig *CustomRORConfig::GetAutoRebuildFarmCon
 	return &this->autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_RANDOM_GAME];
 }
 
+}
+}

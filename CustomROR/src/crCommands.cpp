@@ -139,7 +139,7 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "enableSpawnUnitAutoRepairTC:               %d\n", CUSTOMROR::crInfo.configInfo.enableSpawnUnitAutoRepairTC);
 	fprintf_s(f, "unitSpawnShortcutReverseOrder:             %d\n", CUSTOMROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder);
 	for (int shortcutId = 1; shortcutId < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS; shortcutId++) {
-		UnitSpawnShortcutInfo *sinfo = &CUSTOMROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
+		CONFIG::UnitSpawnShortcutInfo *sinfo = &CUSTOMROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
 		if (sinfo->DAT_ID >= 0) {
 			fprintf_s(f, "unitSpawn shortcut %d: unit=%03d onlyOneUnit=%d (%.12s)\n", shortcutId, sinfo->DAT_ID, sinfo->onlyOneUnit,
 				GetHardcodedUnitName(sinfo->DAT_ID));
@@ -273,7 +273,7 @@ void CustomRORCommand::LoadCustomLocalizationFiles() {
 
 // Load custom DRS files
 void CustomRORCommand::LoadCustomDrsFiles() {
-	for each (DrsFileToLoad *drs in CUSTOMROR::crInfo.configInfo.customDrsFilesList)
+	for each (CONFIG::DrsFileToLoad *drs in CUSTOMROR::crInfo.configInfo.customDrsFilesList)
 	{
 		AOE_METHODS::AddDrsFile(drs->filename.c_str(), drs->folder.c_str());
 		if (FindDrsLinkForFile(drs->filename.c_str())) {
@@ -2243,7 +2243,7 @@ bool CustomRORCommand::AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE
 		}
 		assert(shortcutId < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS);
 		assert(shortcutId >= 0);
-		UnitSpawnShortcutInfo *shortcutInfo = &CUSTOMROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
+		CONFIG::UnitSpawnShortcutInfo *shortcutInfo = &CUSTOMROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
 		if (shortcutInfo->DAT_ID == unitDef->DAT_ID1) {
 			// This rule matches our unit DAT ID.
 			// If "only 1 unit" is NOT enabled, always assign. Otherwise, check the shortcut number is still unused.
