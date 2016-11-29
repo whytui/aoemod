@@ -43,11 +43,11 @@
     <Filter Include="Fichiers d%27en-tête\AI">
       <UniqueIdentifier>{effcd91c-0eb6-43d0-8bf8-ce2576c4bbca}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Fichiers sources\CivTilesetTrigger">
-      <UniqueIdentifier>{3bd80b5d-5764-404d-b040-b5e41a7a23f6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Fichiers d%27en-tête\CivTilesetTrigger">
+    <Filter Include="Fichiers d%27en-tête\CustomRorFeatures">
       <UniqueIdentifier>{1f5f5f9c-ec47-4ef2-973c-442b15384bf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\CustomRorFeatures">
+      <UniqueIdentifier>{3bd80b5d-5764-404d-b040-b5e41a7a23f6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -113,9 +113,6 @@
     <ClInclude Include="include\AOE_map.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\crMapCopier.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\mainStructuresHandling.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -151,9 +148,6 @@
     </ClInclude>
     <ClInclude Include="include\MapCopyPopup.h">
       <Filter>Fichiers d%27en-tête\customUI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\crRPGMode.h">
-      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\unitDefHandling.h">
       <Filter>Fichiers d%27en-tête</Filter>
@@ -245,35 +239,41 @@
     <ClInclude Include="include\cityPlan.h">
       <Filter>Fichiers d%27en-tête\AI</Filter>
     </ClInclude>
-    <ClInclude Include="include\autoAttackPolicy.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\UnitGroupAI.h">
       <Filter>Fichiers d%27en-tête\AI</Filter>
     </ClInclude>
     <ClInclude Include="include\TileSetHandler.h">
-      <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
     </ClInclude>
     <ClInclude Include="include\civilizationInfo.h">
-      <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
     </ClInclude>
     <ClInclude Include="include\crTriggerSet.h">
-      <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
     </ClInclude>
     <ClInclude Include="include\crTrigger.h">
-      <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
     </ClInclude>
     <ClInclude Include="include\CustomTilesetInfo.h">
-      <Filter>Fichiers d%27en-tête\CivTilesetTrigger</Filter>
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
     </ClInclude>
     <ClInclude Include="include\EconomyAI.h">
       <Filter>Fichiers d%27en-tête\AI</Filter>
     </ClInclude>
+    <ClInclude Include="include\autoAttackPolicy.h">
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
+    </ClInclude>
     <ClInclude Include="include\autoRebuildFarmConfig.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
+    </ClInclude>
+    <ClInclude Include="include\crMapCopier.h">
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
+    </ClInclude>
+    <ClInclude Include="include\crRPGMode.h">
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
     </ClInclude>
     <ClInclude Include="include\commonConfigEnums.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -328,9 +328,6 @@
     <ClCompile Include="src\AOE_map.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\crMapCopier.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\mainStructuresHandling.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -366,9 +363,6 @@
     </ClCompile>
     <ClCompile Include="src\MapCopyPopup.cpp">
       <Filter>Fichiers sources\customUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\crRPGMode.cpp">
-      <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\unitDefHandling.cpp">
       <Filter>Fichiers sources</Filter>
@@ -443,22 +437,28 @@
       <Filter>Fichiers sources\AI</Filter>
     </ClCompile>
     <ClCompile Include="src\TilesetHandler.cpp">
-      <Filter>Fichiers sources\CivTilesetTrigger</Filter>
+      <Filter>Fichiers sources\CustomRorFeatures</Filter>
     </ClCompile>
     <ClCompile Include="src\civilizationInfo.cpp">
-      <Filter>Fichiers sources\CivTilesetTrigger</Filter>
+      <Filter>Fichiers sources\CustomRorFeatures</Filter>
     </ClCompile>
     <ClCompile Include="src\CustomTilesetInfo.cpp">
-      <Filter>Fichiers sources\CivTilesetTrigger</Filter>
+      <Filter>Fichiers sources\CustomRorFeatures</Filter>
     </ClCompile>
     <ClCompile Include="src\crTriggerSet.cpp">
-      <Filter>Fichiers sources\CivTilesetTrigger</Filter>
+      <Filter>Fichiers sources\CustomRorFeatures</Filter>
     </ClCompile>
     <ClCompile Include="src\crTrigger.cpp">
-      <Filter>Fichiers sources\CivTilesetTrigger</Filter>
+      <Filter>Fichiers sources\CustomRorFeatures</Filter>
     </ClCompile>
     <ClCompile Include="src\EconomyAI.cpp">
       <Filter>Fichiers sources\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\crMapCopier.cpp">
+      <Filter>Fichiers sources\CustomRorFeatures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\crRPGMode.cpp">
+      <Filter>Fichiers sources\CustomRorFeatures</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
