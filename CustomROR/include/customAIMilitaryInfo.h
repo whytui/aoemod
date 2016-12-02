@@ -72,6 +72,7 @@ namespace CUSTOM_AI {
 		// Returns infAI elem list entry for the first found enemy or neutral military unit in specified zone
 		// startIndex = index of first element to search in infAI elem list. Use 0 or -1 to start from beginning.
 		// Returns -1 if not found
+		// Excludes units that cannot attack (villagers, fishing boats, transports...)
 		static long int FindInfAiIndexOfEnemyMilitaryUnitNearPosition(STRUCT_PLAYER *player, long int posX, long int posY,
 			long int distanceFromCenter, bool landOnly, long int startIndex);
 	};

@@ -79,6 +79,10 @@ namespace CUSTOM_AI {
 		// If false, player has no villager, TC, etc, and may adopt a more aggressive attitude (nothing to lose) ; especially in scenarios
 		// Being true means that myMainCentralUnit is non-NULL
 		bool mainCentralUnitIsVital;
+		std::list<STRUCT_INF_AI_UNIT_LIST_ELEM *> enemiesNearMyMainUnit; // A list of enemies close to my main unit, valued from InfAI list.
+		STRUCT_UNIT_BASE *enemyUnitNearMyMainUnit = NULL; // Enemy unit that is located near my 'main central unit'. Can be NULL.
+		STRUCT_INF_AI_UNIT_LIST_ELEM *enemyUnitNearMyMainUnitInfAIElem = NULL; // infAI elem of enemy unit near my main central unit. Can be NULL
+		bool enemyUnitNearMyMainUnitIsCurrentlyVisible; // True if enemyUnitNearMyMainUnit is currently visible
 
 		void ResetAllInfo() {
 			this->processingStartTimeGetTime = 0;
@@ -98,6 +102,9 @@ namespace CUSTOM_AI {
 			this->townLandDefendGroupCount = 0;
 			this->townLandExploreGroupCount = 0;
 			this->mainCentralUnitIsVital = false;
+			this->enemyUnitNearMyMainUnit = NULL;
+			this->enemyUnitNearMyMainUnitInfAIElem = NULL;
+			this->enemyUnitNearMyMainUnitIsCurrentlyVisible = false;
 		}
 	};
 
@@ -126,6 +133,7 @@ namespace CUSTOM_AI {
 			long int resetOrg, bool force);
 
 		// Attack a target or use retreat to approach a zone to defend/attack. Updates unitGroup->lastTaskingTime_ms if tasked.
+		// Updates unitGroup->lastAttackTaskingTime_ms is an attack task is assigned.
 		// If target is not found and no default retreat position if provided (-1), the group is NOT tasked
 		// Returns the used task id.
 		UNIT_GROUP_TASK_IDS AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_INF_AI_UNIT_LIST_ELEM *targetInfo,
@@ -153,6 +161,12 @@ namespace CUSTOM_AI {
 
 		// Collects info on group and sets UnitGroupDetailedInfo fields
 		void CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup, UnitGroupDetailedInfo *outputInfos);
+
+		// Collects info on enemy units near "main central unit"
+		void CollectEnemyUnitsNearMyMainUnit(STRUCT_PLAYER *player);
+
+		// Returns the element from "list of enemies near my main unit" that is closest to a specified position.
+		STRUCT_INF_AI_UNIT_LIST_ELEM *GetInfElemEnemyUnitCloserToPosition(STRUCT_PLAYER *player, long int posX, long int posY);
 	};
 
 }
