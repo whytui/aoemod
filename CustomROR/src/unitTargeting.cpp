@@ -95,58 +95,6 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::FindWonderToAttackInfAIElemPtr(STRU
 }
 
 
-// Computes the damage dealt by a group on a unit, cf 0x4C62F0.
-float UnitTargeting::GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit) {
-	assert(infAI && infAI->IsCheckSumValid() && unitGroup && unitGroup->IsCheckSumValid() &&
-		targetUnit && targetUnit->IsCheckSumValidForAUnitClass());
-	if (!infAI || !infAI->IsCheckSumValid() || !unitGroup || !unitGroup->IsCheckSumValid() ||
-		!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) {
-		return 0;
-	}
-	if (unitGroup->unitCount <= 0) {
-		return 0;
-	}
-	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-	assert(global && global->IsCheckSumValid());
-	if (!global || !global->IsCheckSumValid()) {
-		return 0;
-	}
-	assert(unitGroup->unitCount <= 40);
-	float totalDamagePerSecond = 0;
-	for (int i = 0; i < unitGroup->unitCount; i++) {
-		long int myUnitId = unitGroup->GetMyUnitId(i);
-		STRUCT_UNIT_BASE *myUnit = NULL;
-		if (myUnitId > -1) {
-			myUnit = global->GetUnitFromId(myUnitId);
-		}
-		if (myUnit && myUnit->IsCheckSumValidForAUnitClass()) {
-			float myDamage = AOE_METHODS::CalcDamage(myUnit, targetUnit);
-			float myReloadTime = AOE_METHODS::GetReloadTime1(myUnit);
-			totalDamagePerSecond += (myDamage / myReloadTime);
-		}
-	}
-	return totalDamagePerSecond;
-}
-
-
-// Estimates the total time to kill a group's units at target position, considering enemy units known from infAI elem list
-float UnitTargeting::GetTimeToKillGroupUnitsAtTargetPosition(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit) {
-	if (!infAI || !infAI->IsCheckSumValid()) { return 0; }
-	if (!unitGroup || !unitGroup->IsCheckSumValid()) { return 0; }
-	if (!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) { return 0; }
-	unsigned long int callAddr = 0x4C6400;
-	float result;
-	_asm {
-		MOV ECX, infAI;
-		PUSH targetUnit;
-		PUSH unitGroup;
-		CALL callAddr;
-		FSTP DS : [result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
-	}
-	return result;
-}
-
-
 // If current target is still a valid target, return its pointer in InfAI elem list.
 // Returns NULL otherwise
 STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStillEligible(STRUCT_INF_AI *infAI, long int targetPlayerId,
@@ -811,7 +759,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 				continue;
 			}
 			// 0x4C0705 : begin calculations
-			float groupDamage = unitTargetingHandler.GetGroupDamageOnUnit(infAI, unitGroup, curUnit); // Damage per second, actually
+			float groupDamage = COMBAT::GetGroupDamageOnUnit(infAI, unitGroup, curUnit); // Damage per second, actually
 			if (groupDamage <= 0) { // ADDED. What happens in AOE code? e.g. group has only priests?
 				continue;
 			}
@@ -820,7 +768,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 				continue; // 0x4C0740
 			}
 			// 0x4C0728
-			float timeToKillMyUnitsAtTargetPos = unitTargetingHandler.GetTimeToKillGroupUnitsAtTargetPosition(infAI, unitGroup, curUnit);
+			float timeToKillMyUnitsAtTargetPos = AOE_METHODS::GetTimeToKillGroupUnitsAtTargetPosition(infAI, unitGroup, curUnit);
 			if (timeToKillMyUnitsAtTargetPos <= 0) {
 				continue; // 0x4C0755
 			}
@@ -1253,7 +1201,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 				continue;
 			}
 			// 0x4C0705 : begin calculations
-			float groupDamage = unitTargetingHandler.GetGroupDamageOnUnit(infAI, unitGroup, curUnit); // Damage per second, actually
+			float groupDamage = COMBAT::GetGroupDamageOnUnit(infAI, unitGroup, curUnit); // Damage per second, actually
 			if (groupDamage <= 0) { // ADDED. What happens in AOE code? e.g. group has only priests?
 				continue;
 			}
@@ -1262,7 +1210,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 				continue; // 0x4C0740
 			}
 			// 0x4C0728
-			float timeToKillMyUnitsAtTargetPos = unitTargetingHandler.GetTimeToKillGroupUnitsAtTargetPosition(infAI, unitGroup, curUnit);
+			float timeToKillMyUnitsAtTargetPos = AOE_METHODS::GetTimeToKillGroupUnitsAtTargetPosition(infAI, unitGroup, curUnit);
 			if (timeToKillMyUnitsAtTargetPos <= 0) {
 				continue; // 0x4C0755
 			}

@@ -9,6 +9,13 @@
 
 using namespace AOE_STRUCTURES;
 
+namespace AOE_METHODS {
+
+	// Estimates the total time to kill a group's units at target position, considering enemy units known from infAI elem list
+	float GetTimeToKillGroupUnitsAtTargetPosition(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
+
+}
+
 namespace COMBAT {
 
 	namespace COMBAT_CONST {
@@ -30,5 +37,9 @@ namespace COMBAT {
 
 	// Returns false if we should prevent unit from moving back (to maxrange) after shooting. Default result=true
 	bool ShouldRetreatAfterShooting(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity);
+
+
+	// Computes the damage dealt by a group on a unit, cf 0x4C62F0.
+	float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
 
 }

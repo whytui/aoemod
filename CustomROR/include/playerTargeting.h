@@ -81,6 +81,7 @@ namespace CUSTOM_AI {
 		long int GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DIPLOMACY_AI *diplAI,
 			long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor);
 
+		// Compute AI dislike values, taking care of customROR config (dislike human, all ruins, etc)
 		void ComputeDislikeValues();
 
 

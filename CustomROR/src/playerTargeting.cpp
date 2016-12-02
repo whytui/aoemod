@@ -242,7 +242,7 @@ long int PlayerTargeting::GetPercentFactorFromVictoryConditionDelay(long int yea
 }
 
 
-// Returns the most disliked playerIdn, impacting which player "I" will attack.
+// Returns the most disliked playerId, impacting which player "I" will attack.
 // Note: standard ROR code (0x40ACDA) is total crap : applies "score/factor" instead of "score*factor/100", and when attackWinningPlayerFactor=false, the score factor is substracted (instead of ignored)
 long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DIPLOMACY_AI *diplAI,
 	long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor) {
@@ -423,7 +423,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 }
 
 
-
+// Compute AI dislike values, taking care of customROR config (dislike human, all ruins, etc)
 void PlayerTargeting::ComputeDislikeValues() {
 	if ((CUSTOMROR::crInfo.configInfo.dislike_allArtefacts <= 0) || (CUSTOMROR::crInfo.configInfo.dislike_humanPlayer <= 0)) { return; }
 

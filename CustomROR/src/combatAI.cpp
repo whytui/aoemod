@@ -2,6 +2,29 @@
 
 using namespace AOE_STRUCTURES;
 
+
+namespace AOE_METHODS {
+
+	// Estimates the total time to kill a group's units at target position, considering enemy units known from infAI elem list
+	float GetTimeToKillGroupUnitsAtTargetPosition(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit) {
+		if (!infAI || !infAI->IsCheckSumValid()) { return 0; }
+		if (!unitGroup || !unitGroup->IsCheckSumValid()) { return 0; }
+		if (!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) { return 0; }
+		unsigned long int callAddr = 0x4C6400;
+		float result;
+		_asm {
+			MOV ECX, infAI;
+			PUSH targetUnit;
+			PUSH unitGroup;
+			CALL callAddr;
+			FSTP DS:[result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
+		}
+		return result;
+	}
+
+}
+
+
 namespace COMBAT {
 ;
 
@@ -456,6 +479,40 @@ bool ShouldRetreatAfterShooting(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity) 
 		}
 	}
 	return true; // Default behaviour
+}
+
+
+// Computes the damage dealt by a group on a unit, cf 0x4C62F0.
+float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit) {
+	assert(infAI && infAI->IsCheckSumValid() && unitGroup && unitGroup->IsCheckSumValid() &&
+		targetUnit && targetUnit->IsCheckSumValidForAUnitClass());
+	if (!infAI || !infAI->IsCheckSumValid() || !unitGroup || !unitGroup->IsCheckSumValid() ||
+		!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) {
+		return 0;
+	}
+	if (unitGroup->unitCount <= 0) {
+		return 0;
+	}
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) {
+		return 0;
+	}
+	assert(unitGroup->unitCount <= 40);
+	float totalDamagePerSecond = 0;
+	for (int i = 0; i < unitGroup->unitCount; i++) {
+		long int myUnitId = unitGroup->GetMyUnitId(i);
+		STRUCT_UNIT_BASE *myUnit = NULL;
+		if (myUnitId > -1) {
+			myUnit = global->GetUnitFromId(myUnitId);
+		}
+		if (myUnit && myUnit->IsCheckSumValidForAUnitClass()) {
+			float myDamage = AOE_METHODS::CalcDamage(myUnit, targetUnit);
+			float myReloadTime = AOE_METHODS::GetReloadTime1(myUnit);
+			totalDamagePerSecond += (myDamage / myReloadTime);
+		}
+	}
+	return totalDamagePerSecond;
 }
 
 

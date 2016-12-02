@@ -175,6 +175,7 @@ namespace CUSTOM_AI {
 
 		// Task an active attack group, when player situation is critical AND there is a vital central unit (like TC, villager).
 		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+		// The main idea in this case is to retreat at all costs and protect "main" unit
 		bool TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup);
 
 		// Task an active attack group, when player situation is "weak" AND there is a vital central unit (like TC, villager).

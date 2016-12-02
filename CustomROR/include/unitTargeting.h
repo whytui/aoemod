@@ -17,6 +17,7 @@
 #include "AOEPrimitives_unitGroup.h"
 #include "AOEPrimitives_units.h"
 #include "customAIMilitaryInfo.h"
+#include "combatAI.h"
 
 using namespace std;
 using namespace AOE_STRUCTURES;
@@ -46,12 +47,6 @@ namespace CUSTOM_AI {
 
 		// Reset all values. InProgress is set to false (0)
 		void ResetTargetInfo(STRUCT_TAC_AI_TARGET_INFO *targetInfo);
-
-		// Computes the damage dealt by a group on a unit, cf 0x4C62F0.
-		float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
-
-		// Estimates the total time to kill a group's units at target position, considering enemy units known from infAI elem list
-		float GetTimeToKillGroupUnitsAtTargetPosition(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
 
 		// Returns the enemy wonder with higher attack priority. Does not return wonders from allied/neutral players
 		// playerId can be a joker (if -1)

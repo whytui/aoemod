@@ -368,11 +368,6 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		return false; // Let ROR code handle this case
 	}*/
 
-	int totalGroupsCount = this->activeGroupsTaskingTempInfo.totalLandGroups;
-	int totalGroupsInTown = this->activeGroupsTaskingTempInfo.townLandAttackGroupCount + this->activeGroupsTaskingTempInfo.townLandDefendGroupCount + this->activeGroupsTaskingTempInfo.townLandExploreGroupCount;
-
-	// Group (leader) distance from our town (or unit to defend)
-	
 	STRUCT_UNIT_BASE *commander = global->GetUnitFromId(unitGroup->commanderUnitId); // Group leader. Guaranteed non-NULL
 	if (!commander) {
 		std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(".group#") +
@@ -412,7 +407,6 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	// Now explore groups have been dealt with
 
 	if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
-		// Other than explore groups in "critical" situation: retreat at all costs
 		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL) {
 			// Critical with a unit to defend: see dedicated method.
 			return this->TaskActiveAttackGroupCriticalWithVitalMainUnit(player, unitGroup);
@@ -448,7 +442,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 
 
 	if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
-		// If no target then explore ?
+		// If non weak and no target then explore ?
 	}
 
 
@@ -459,8 +453,6 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	//this->priorityLocation
 
 	// Could use mainAI->structInfAI.attacksHistory too
-
-	// TODO: set tacAI->lastAttackTime_ms if we launch an attack (on a specific target?)
 
 	// TODO: attack, lastupdate long time ago, target not visible: force change ?
 
@@ -473,6 +465,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 
 // Task an active attack group, when player situation is critical AND there is a vital central unit (like TC, villager).
 // Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+// The main idea in this case is to retreat at all costs and protect "main" unit
 bool UnitGroupAI::TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup) {
 	STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !player || !player->ptrAIStruct) { return false; }
