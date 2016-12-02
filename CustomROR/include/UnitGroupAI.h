@@ -79,6 +79,8 @@ namespace CUSTOM_AI {
 		// If false, player has no villager, TC, etc, and may adopt a more aggressive attitude (nothing to lose) ; especially in scenarios
 		// Being true means that myMainCentralUnit is non-NULL
 		bool mainCentralUnitIsVital;
+		long int mainUnitSearchZoneRadius;
+		long int mainUnitProtectionRadius;
 		std::list<STRUCT_INF_AI_UNIT_LIST_ELEM *> enemiesNearMyMainUnit; // A list of enemies close to my main unit, valued from InfAI list.
 		STRUCT_UNIT_BASE *enemyUnitNearMyMainUnit = NULL; // Enemy unit that is located near my 'main central unit'. Can be NULL.
 		STRUCT_INF_AI_UNIT_LIST_ELEM *enemyUnitNearMyMainUnitInfAIElem = NULL; // infAI elem of enemy unit near my main central unit. Can be NULL
@@ -105,7 +107,12 @@ namespace CUSTOM_AI {
 			this->enemyUnitNearMyMainUnit = NULL;
 			this->enemyUnitNearMyMainUnitInfAIElem = NULL;
 			this->enemyUnitNearMyMainUnitIsCurrentlyVisible = false;
+			this->mainUnitProtectionRadius = 5;
+			this->mainUnitSearchZoneRadius = 5;
 		}
+
+		// Returns true if I have been attacked recently
+		inline bool BeenAttackedRecently() const { return (this->totalAttacksInPeriod > 0) || (this->totalPanicModesInPeriod > 0); }
 	};
 
 	class UnitGroupAI {
@@ -154,6 +161,9 @@ namespace CUSTOM_AI {
 		// "static" temporary information, only valid during the task active soliders loop.
 		// DO NOT access it from other methods.
 		ActiveUnitGroupTaskingContextInfo activeGroupsTaskingTempInfo;
+		float curGroupDistanceToMainUnit; // Distance between group and "my main" unit. Only relevant in "task active solider" methods
+		float curUnitGroupOrientationXFromMainUnit = 0; // -1 if group is "left" of main unit, 1 if on the "right" (X axis)
+		float curUnitGroupOrientationYFromMainUnit = 0; // -1 if group is "down" of main unit, 1 if "upper" (Y axis)
 
 		// Task an active attack group, when player situation is not critical/weak.
 		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
@@ -162,6 +172,10 @@ namespace CUSTOM_AI {
 		// Task an active attack group, when player situation is critical AND there is a vital central unit (like TC, villager).
 		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
 		bool TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup);
+
+		// Task an active attack group, when player situation is "weak" AND there is a vital central unit (like TC, villager).
+		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+		bool TaskActiveAttackGroupWeakWithVitalMainUnit(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup);
 
 		// Collects info on group and sets UnitGroupDetailedInfo fields
 		void CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup, UnitGroupDetailedInfo *outputInfos);

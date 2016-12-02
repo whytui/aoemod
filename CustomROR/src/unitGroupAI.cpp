@@ -262,6 +262,14 @@ bool UnitGroupAI::OnTaskActiveGroupsBegin(STRUCT_TAC_AI *tacAI, long int process
 	this->EvaluateMilitarySituation(tacAI);
 	this->CollectEnemyUnitsNearMyMainUnit(player);
 
+	this->activeGroupsTaskingTempInfo.mainUnitSearchZoneRadius = 5;
+	this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius = 5;
+	if (this->activeGroupsTaskingTempInfo.myMainCentralUnit && this->activeGroupsTaskingTempInfo.myMainCentralUnit->unitDefinition &&
+		(this->activeGroupsTaskingTempInfo.myMainCentralUnit->unitDefinition->DAT_ID1 == CST_UNITID_FORUM)) {
+		this->activeGroupsTaskingTempInfo.mainUnitSearchZoneRadius = AI_CONST::townSize + 5;
+		this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius = 7;
+	}
+
 #ifdef _DEBUG
 	this->lastDebugInfo = "";
 	/*long int t = AOE_METHODS::TimeGetTime();
@@ -382,33 +390,26 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		traceMessageHandler.WriteMessage(msg);
 		return false;
 	}
-	float distanceToMyMainUnit = -1;
-	float unitGroupOrientationXFromMainUnit = 0; // -1 if group is "left" of main unit, 1 if on the "right" (X axis)
-	float unitGroupOrientationYFromMainUnit = 0; // -1 if group is "down" of main unit, 1 if "upper" (Y axis)
+	// Variables depending on unit group location
+	this->curGroupDistanceToMainUnit = -1;
+	this->curUnitGroupOrientationXFromMainUnit = 0; // -1 if group is "left" of main unit, 1 if on the "right" (X axis)
+	this->curUnitGroupOrientationYFromMainUnit = 0; // -1 if group is "down" of main unit, 1 if "upper" (Y axis)
 	if (myMainCentralUnit && myMainCentralUnit->IsCheckSumValidForAUnitClass()) {
-		distanceToMyMainUnit = GetDistance(commander->positionX, commander->positionY, myMainCentralUnit->positionX, myMainCentralUnit->positionY);
+		this->curGroupDistanceToMainUnit = GetDistance(commander->positionX, commander->positionY, myMainCentralUnit->positionX, myMainCentralUnit->positionY);
 		if (commander->positionX < myMainCentralUnit->positionX) {
-			unitGroupOrientationXFromMainUnit = -1;
+			this->curUnitGroupOrientationXFromMainUnit = -1;
 		}
 		if (commander->positionX > myMainCentralUnit->positionX) {
-			unitGroupOrientationXFromMainUnit = 1;
+			this->curUnitGroupOrientationXFromMainUnit = 1;
 		}
 		if (commander->positionY < myMainCentralUnit->positionY) {
-			unitGroupOrientationYFromMainUnit = -1;
+			this->curUnitGroupOrientationYFromMainUnit = -1;
 		}
 		if (commander->positionY > myMainCentralUnit->positionY) {
-			unitGroupOrientationYFromMainUnit = 1;
+			this->curUnitGroupOrientationYFromMainUnit = 1;
 		}
 	}
 
-	int groupUnitCount = unitGroup->unitCount;
-	bool beenAttackedRecently = (this->activeGroupsTaskingTempInfo.totalAttacksInPeriod > 0) || (this->activeGroupsTaskingTempInfo.totalPanicModesInPeriod > 0);
-	long int mainUnitSearchZoneRadius = 5;
-	long int mainUnitProtectionRadius = 5;
-	if (myMainCentralUnit && myMainCentralUnit->unitDefinition && (myMainCentralUnit->unitDefinition->DAT_ID1 == CST_UNITID_FORUM)) {
-		mainUnitSearchZoneRadius = AI_CONST::townSize + 5;
-		mainUnitProtectionRadius = 7;
-	}
 
 #ifdef _DEBUG
 	this->lastDebugInfo += "group#" + std::to_string(unitGroup->unitGroupId) + ": mstatus=" + std::to_string(this->activeGroupsTaskingTempInfo.militarySituation) + " ";
@@ -424,7 +425,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 				discardExploreAndRetreat = true;
 			}
 		}
-		if (discardExploreAndRetreat && (distanceToMyMainUnit > AI_CONST::townSize + 5)) {
+		if (discardExploreAndRetreat && (this->curGroupDistanceToMainUnit > AI_CONST::townSize + 5)) {
 			this->SetUnitGroupTarget(unitGroup, NULL);
 			this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_IDLE, 0, 1);
 #ifdef _DEBUG
@@ -438,8 +439,8 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 			targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
 			targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
 			if (myMainCentralUnit && ((targetPosX < 0) || (targetPosY < 0))) {
-				targetPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
-				targetPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
+				targetPosX = myMainCentralUnit->positionX + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationXFromMainUnit);
+				targetPosY = myMainCentralUnit->positionY + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationYFromMainUnit);
 			}
 			STRUCT_INF_AI_UNIT_LIST_ELEM *targetElem = this->GetInfElemEnemyUnitCloserToPosition(player, (long int)targetPosX, (long int)targetPosY);
 			UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
@@ -470,97 +471,12 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
 		// Other than explore groups in "critical" situation: retreat at all costs
 		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL) {
+			// Critical with a unit to defend: see dedicated method.
 			return this->TaskActiveAttackGroupCriticalWithVitalMainUnit(player, unitGroup);
 		}
 		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) {
-			if (unitGroup->isTasked &&
-				// TODO: could use a longer delay than minimumDelayBetweenBasicUnitGroupAttackTasking_ms
-				(global->currentGameTime - unitGroup->lastTaskingTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
-				return false;
-			}
-
-			UnitGroupDetailedInfo detailedInfo;
-			this->CollectInfoAboutGroup(player, unitGroup, &detailedInfo);
-
-			// Help leader if under attack
-			if (detailedInfo.unitIdAttackingMyLeader > -1) {
-				long int newTargetId = detailedInfo.unitsAttackingMyGroup.front();
-				STRUCT_UNIT_BASE *newTargetUnit = global->GetUnitFromId(newTargetId);
-				if (newTargetUnit && newTargetUnit->IsCheckSumValidForAUnitClass()) {
-					this->SetUnitGroupTarget(unitGroup, newTargetUnit);
-					this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 0, false);
-#ifdef _DEBUG
-					this->lastDebugInfo += "weak situation: set target to help leader (under attack)\n";
-#endif
-					return true; // unit group has been tasked
-				}
-			}
-
-			// Help other units if under attack
-			// TODO: Use condition: detailedInfo.unitGroupIsAlmostIdle ? According to personality ? Random ? Difficulty
-			if (!detailedInfo.unitsAttackingMyGroup.empty()) {
-				long int newTargetId = detailedInfo.unitsAttackingMyGroup.front();
-				STRUCT_UNIT_BASE *newTargetUnit = global->GetUnitFromId(newTargetId);
-				if (newTargetUnit && newTargetUnit->IsCheckSumValidForAUnitClass()) {
-					this->SetUnitGroupTarget(unitGroup, newTargetUnit);
-					this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 0, false);
-#ifdef _DEBUG
-					this->lastDebugInfo += "weak situation: set target from list of units attacking my group\n";
-#endif
-					return true; // unit group has been tasked
-				}
-			}
-
-			// Note: GetNumberOfUnitsUnderAttack should be 0 here as we already treated such cases just above (help if under attack)
-
-			// TODO: if group is away from town, choose between retreating and other attack actions
-			// TODO: group might be away, but protecting villagers (eg a storage pit near gold that has been attacked)
-			// TODO: On the contrary: it might be important to allow defending villagers outside the town
-			bool groupIsAway = (distanceToMyMainUnit > AI_CONST::townSize + 5);
-			bool forceRetreat = false;
-			if (groupIsAway) {
-				forceRetreat = false; // TODO: set true according other variables, random... ?
-			}
-
-			if (!forceRetreat && detailedInfo.unitGroupIsAlmostIdle) {
-				if (this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit && this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitIsCurrentlyVisible) {
-					this->SetUnitGroupTarget(unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit);
-					this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 1, false);
-#ifdef _DEBUG
-					this->lastDebugInfo += "weak situation: set target = target found near leader\n";
-#endif
-					return true; // unit group has been tasked
-				}
-			}
-
-			if (detailedInfo.unitGroupIsAlmostIdle) {
-				assert(myMainCentralUnit != NULL); // guaranteed by top "if" condition
-				float retreatPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
-				float retreatPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
-				UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, NULL, retreatPosX, retreatPosY, false);
-				if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
-#ifdef _DEBUG
-					std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
-						std::to_string(result) + std::string(" for idle grp, weak case, wkn=");
-					msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCntTwn=") + std::to_string(totalGroupsInTown);
-					//CallWriteText(msg.c_str());
-					this->lastDebugInfo += msg + std::string("\n");
-#endif
-					return true; // Unit group has been tasked
-				}
-				// Retreating failed ?
-			}
-			if (groupIsAway) {
-				return false; // Let ROR do something with this group. Being idle out of nowhere is no use !
-			}
-
-			// TODO: if I have priority targets from TARGETING classes, consider attacking them
-			// ... at least in my town or if related to victory conditions
-#ifdef _DEBUG
-			this->lastDebugInfo += "stand by to avoid suicidal attacking (skip)\n";
-#endif
-			return true; // Stand by = prevent ROR from sending this group attacking some non-priority target
-
+			// Weak with a unit to defend: see dedicated method.
+			this->TaskActiveAttackGroupWeakWithVitalMainUnit(player, unitGroup);
 		}
 	} else {
 		// No TC/villager/priest to protect. This may be a scenario or a game-end situation where I am probably gonna lose
@@ -697,6 +613,107 @@ bool UnitGroupAI::TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *
 	this->lastDebugInfo += "stand by (skip)\n";
 #endif
 	return true;
+}
+
+
+// Task an active attack group, when player situation is "weak" AND there is a vital central unit (like TC, villager).
+// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+bool UnitGroupAI::TaskActiveAttackGroupWeakWithVitalMainUnit(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup) {
+	STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid() || !player || !player->ptrAIStruct) { return false; }
+	STRUCT_UNIT_BASE *commander = global->GetUnitFromId(unitGroup->commanderUnitId); // Group leader. Guaranteed non-NULL
+	STRUCT_TAC_AI *tacAI = &player->ptrAIStruct->structTacAI;
+	if (unitGroup->isTasked &&
+		// TODO: could use a longer delay than minimumDelayBetweenBasicUnitGroupAttackTasking_ms
+		(global->currentGameTime - unitGroup->lastTaskingTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
+		return false;
+	}
+
+	UnitGroupDetailedInfo detailedInfo;
+	this->CollectInfoAboutGroup(player, unitGroup, &detailedInfo);
+	float distanceToMyMainUnit = -1;
+	if (this->activeGroupsTaskingTempInfo.myMainCentralUnit && this->activeGroupsTaskingTempInfo.myMainCentralUnit->IsCheckSumValidForAUnitClass()) {
+		distanceToMyMainUnit = GetDistance(commander->positionX, commander->positionY, this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX, this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY);
+	}
+
+	// Help leader if under attack
+	if (detailedInfo.unitIdAttackingMyLeader > -1) {
+		long int newTargetId = detailedInfo.unitsAttackingMyGroup.front();
+		STRUCT_UNIT_BASE *newTargetUnit = global->GetUnitFromId(newTargetId);
+		if (newTargetUnit && newTargetUnit->IsCheckSumValidForAUnitClass()) {
+			this->SetUnitGroupTarget(unitGroup, newTargetUnit);
+			this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 0, false);
+#ifdef _DEBUG
+			this->lastDebugInfo += "weak situation: set target to help leader (under attack)\n";
+#endif
+			return true; // unit group has been tasked
+		}
+	}
+
+	// Help other units if under attack
+	// TODO: Use condition: detailedInfo.unitGroupIsAlmostIdle ? According to personality ? Random ? Difficulty
+	if (!detailedInfo.unitsAttackingMyGroup.empty()) {
+		long int newTargetId = detailedInfo.unitsAttackingMyGroup.front();
+		STRUCT_UNIT_BASE *newTargetUnit = global->GetUnitFromId(newTargetId);
+		if (newTargetUnit && newTargetUnit->IsCheckSumValidForAUnitClass()) {
+			this->SetUnitGroupTarget(unitGroup, newTargetUnit);
+			this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 0, false);
+#ifdef _DEBUG
+			this->lastDebugInfo += "weak situation: set target from list of units attacking my group\n";
+#endif
+			return true; // unit group has been tasked
+		}
+	}
+
+	// Note: GetNumberOfUnitsUnderAttack should be 0 here as we already treated such cases just above (help if under attack)
+
+	// TODO: if group is away from town, choose between retreating and other attack actions
+	// TODO: group might be away, but protecting villagers (eg a storage pit near gold that has been attacked)
+	// TODO: On the contrary: it might be important to allow defending villagers outside the town
+	bool groupIsAway = (distanceToMyMainUnit > AI_CONST::townSize + 5);
+	bool forceRetreat = false;
+	if (groupIsAway) {
+		forceRetreat = false; // TODO: set true according other variables, random... ?
+	}
+
+	if (!forceRetreat && detailedInfo.unitGroupIsAlmostIdle) {
+		if (this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit && this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitIsCurrentlyVisible) {
+			this->SetUnitGroupTarget(unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit);
+			this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 1, false);
+#ifdef _DEBUG
+			this->lastDebugInfo += "weak situation: set target = target found near leader\n";
+#endif
+			return true; // unit group has been tasked
+		}
+	}
+
+	if (detailedInfo.unitGroupIsAlmostIdle) {
+		assert(this->activeGroupsTaskingTempInfo.myMainCentralUnit != NULL); // guaranteed by top "if" condition
+		float retreatPosX = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationXFromMainUnit);
+		float retreatPosY = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationYFromMainUnit);
+		UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, NULL, retreatPosX, retreatPosY, false);
+		if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
+#ifdef _DEBUG
+			std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
+				std::to_string(result) + std::string(" for idle grp, weak case, wkn=");
+			msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCntTwn=") + std::to_string(this->activeGroupsTaskingTempInfo.townLandAttackGroupCount + this->activeGroupsTaskingTempInfo.townLandDefendGroupCount + this->activeGroupsTaskingTempInfo.townLandExploreGroupCount);
+			//CallWriteText(msg.c_str());
+			this->lastDebugInfo += msg + std::string("\n");
+#endif
+			return true; // Unit group has been tasked
+		}
+		// Retreating failed ?
+	}
+	if (groupIsAway) {
+		return false; // Let ROR do something with this group. Being idle out of nowhere is no use !
+	}
+
+	// TODO: if I have priority targets from TARGETING classes, consider attacking them
+	// ... at least in my town or if related to victory conditions
+#ifdef _DEBUG
+	this->lastDebugInfo += "stand by to avoid suicidal attacking (skip)\n";
+#endif
+	return true; // Stand by = prevent ROR from sending this group attacking some non-priority target
 }
 
 
