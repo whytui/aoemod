@@ -350,16 +350,6 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		// exterminate: search a target (whatever current activity is ?) and switch to attack(2)
 		// attack: if valid target, call task to attack roundup target(20) but doesn't switch to it? switch to explore or retreat if target destroyed? switch to idle otherwise
 		// defend unit
-		
-		/*if ((this->activeGroupsTaskingTempInfo.militarySituation != MILITARY_SITUATION::MS_CRITICAL) &&
-			(this->activeGroupsTaskingTempInfo.militarySituation != MILITARY_SITUATION::MS_WEAK)) {
-			return false;
-		}
-		if ((this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) &&
-			(global->currentGameTime- unitGroup->lastTaskingTime_ms < tacAI->SNNumber[SNTacticalUpdateFrequency])) {
-			
-			return false;
-		}*/
 	}
 
 	if ((unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) &&
@@ -417,54 +407,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 
 	// Manage explore groups here
 	if (unitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) {
-		bool discardExploreAndRetreat = (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL);
-		if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
-			// If we have a town to defend, take less risks
-			if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) {
-				// TODO: use some AI personality criteria (a random value that is not recomputed each time) to decide if AI takes the risk to explore when being weak (beginning of game...)
-				discardExploreAndRetreat = true;
-			}
-		}
-		if (discardExploreAndRetreat && (this->curGroupDistanceToMainUnit > AI_CONST::townSize + 5)) {
-			this->SetUnitGroupTarget(unitGroup, NULL);
-			this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_IDLE, 0, 1);
-#ifdef _DEBUG
-			this->lastDebugInfo += "explore switched to idle\n";
-#endif
-			return true; // Unit group has been tasked
-		}
-		if (discardExploreAndRetreat) {
-			float targetPosX = -1;
-			float targetPosY = -1;
-			targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
-			targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
-			if (myMainCentralUnit && ((targetPosX < 0) || (targetPosY < 0))) {
-				targetPosX = myMainCentralUnit->positionX + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationXFromMainUnit);
-				targetPosY = myMainCentralUnit->positionY + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationYFromMainUnit);
-			}
-			STRUCT_INF_AI_UNIT_LIST_ELEM *targetElem = this->GetInfElemEnemyUnitCloserToPosition(player, (long int)targetPosX, (long int)targetPosY);
-			UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
-			if (targetElem) {
-				result = this->AttackOrRetreat(tacAI, unitGroup, targetElem, targetPosX, targetPosY, true);
-			} else {
-				result = this->AttackOrRetreat(tacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem,
-					targetPosX, targetPosY, true);
-			}
-			if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
-#ifdef _DEBUG
-				this->lastDebugInfo += "explore switched to task " + std::to_string(result) + "\n";
-#endif
-				return true; // True if unit group has been tasked
-			}
-#ifdef _DEBUG
-			this->lastDebugInfo += "explore group tasking failed. Use ROR code.\n";
-#endif
-			return false;
-		}
-#ifdef _DEBUG
-		this->lastDebugInfo += "explore group: use ROR code (normal)\n";
-#endif
-		return false; // let standard code for explore groups, in normal situations
+		this->TaskActiveExploreGroup(player, unitGroup);
 	}
 	// Now explore groups have been dealt with
 
@@ -482,6 +425,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		// No TC/villager/priest to protect. This may be a scenario or a game-end situation where I am probably gonna lose
 		// Waiting and remaining idle could make the situation worse here
 		// TODO: if I have an allied player, consider running to his town or helping him in battle
+		// TODO: check for priority target ?
 		if ((this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL) ||
 			(this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK)) {
 #ifdef _DEBUG
@@ -773,6 +717,64 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 		// TODO
 	}
 	return false;
+}
+
+
+// Task an active explore group
+// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+bool UnitGroupAI::TaskActiveExploreGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup) {
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid() || !player || !player->ptrAIStruct) { return false; }
+	STRUCT_TAC_AI *tacAI = &player->ptrAIStruct->structTacAI;
+
+	bool discardExploreAndRetreat = (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL);
+	if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
+		// If we have a town to defend, take less risks
+		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) {
+			// TODO: use some AI personality criteria (a random value that is not recomputed each time) to decide if AI takes the risk to explore when being weak (beginning of game...)
+			discardExploreAndRetreat = true;
+		}
+	}
+	if (discardExploreAndRetreat && (this->curGroupDistanceToMainUnit > AI_CONST::townSize + 5)) {
+		this->SetUnitGroupTarget(unitGroup, NULL);
+		this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_IDLE, 0, 1);
+#ifdef _DEBUG
+		this->lastDebugInfo += "explore switched to idle\n";
+#endif
+		return true; // Unit group has been tasked
+	}
+	if (discardExploreAndRetreat) {
+		float targetPosX = -1;
+		float targetPosY = -1;
+		targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
+		targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
+		if (this->activeGroupsTaskingTempInfo.myMainCentralUnit && ((targetPosX < 0) || (targetPosY < 0))) {
+			targetPosX = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationXFromMainUnit);
+			targetPosY = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationYFromMainUnit);
+		}
+		STRUCT_INF_AI_UNIT_LIST_ELEM *targetElem = this->GetInfElemEnemyUnitCloserToPosition(player, (long int)targetPosX, (long int)targetPosY);
+		UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
+		if (targetElem) {
+			result = this->AttackOrRetreat(tacAI, unitGroup, targetElem, targetPosX, targetPosY, true);
+		} else {
+			result = this->AttackOrRetreat(tacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem,
+				targetPosX, targetPosY, true);
+		}
+		if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
+#ifdef _DEBUG
+			this->lastDebugInfo += "explore switched to task " + std::to_string(result) + "\n";
+#endif
+			return true; // True if unit group has been tasked
+		}
+#ifdef _DEBUG
+		this->lastDebugInfo += "explore group tasking failed. Use ROR code.\n";
+#endif
+		return false;
+	}
+#ifdef _DEBUG
+	this->lastDebugInfo += "explore group: use ROR code (normal)\n";
+#endif
+	return false; // let standard code for explore groups, in normal situations
 }
 
 

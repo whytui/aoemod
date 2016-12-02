@@ -165,6 +165,10 @@ namespace CUSTOM_AI {
 		float curUnitGroupOrientationXFromMainUnit = 0; // -1 if group is "left" of main unit, 1 if on the "right" (X axis)
 		float curUnitGroupOrientationYFromMainUnit = 0; // -1 if group is "down" of main unit, 1 if "upper" (Y axis)
 
+		// Task an active explore group
+		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+		bool TaskActiveExploreGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup);
+
 		// Task an active attack group, when player situation is not critical/weak.
 		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
 		bool TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup);
