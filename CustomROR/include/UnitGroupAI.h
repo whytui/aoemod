@@ -159,6 +159,10 @@ namespace CUSTOM_AI {
 		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
 		bool TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup);
 
+		// Task an active attack group, when player situation is critical AND there is a vital central unit (like TC, villager).
+		// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+		bool TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup);
+
 		// Collects info on group and sets UnitGroupDetailedInfo fields
 		void CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup, UnitGroupDetailedInfo *outputInfos);
 

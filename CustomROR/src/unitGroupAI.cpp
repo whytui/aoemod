@@ -470,79 +470,7 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	if (this->activeGroupsTaskingTempInfo.mainCentralUnitIsVital) {
 		// Other than explore groups in "critical" situation: retreat at all costs
 		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_CRITICAL) {
-			if ((unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT) && !AOE_METHODS::IsUnitIdle(commander)) {
-				// TODO: check if leader has reached retreat pos or is close enough (idle or at target pos)
-				// TODO: if enely is visible, stop retreating and attack
-#ifdef _DEBUG
-				this->lastDebugInfo += "retreating: skip\n";
-#endif
-				return true; // If still moving, let the group finish retreating ?
-			}
-
-			// Unit group is far from TC: force it to retreat (or attack a unit in my town)
-			if (distanceToMyMainUnit > AI_CONST::townSize + 5) {
-				// Randomly choose a zone to "defend" : TC or last (in-town) attack position
-				int randomValue = randomizer.GetRandomPercentageValue();
-				float targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
-				float targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
-				/*if (randomValue <= 40) {
-				targetPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
-				targetPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
-				}*/
-				STRUCT_INF_AI_UNIT_LIST_ELEM *targetElem = this->GetInfElemEnemyUnitCloserToPosition(player, (long int)targetPosX, (long int)targetPosY);
-				UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
-				if (targetElem) {
-					result = this->AttackOrRetreat(tacAI, unitGroup, targetElem, targetPosX, targetPosY, true);
-				} else {
-					UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem,
-						targetPosX, targetPosY, true);
-				}
-				if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
-#ifdef _DEBUG
-					std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered+force taskId=") +
-						std::to_string(result) + std::string(" due to critical situation, wkn=");
-					msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
-					//CallWriteText(msg.c_str());
-					this->lastDebugInfo += msg + std::string("\n");
-#endif
-					return true; // Unit group has been tasked
-				}
-			} else {
-				// Unit group is already in (or near) town
-				if (global->currentGameTime - unitGroup->lastTaskingTime_ms > (1000 * tacAI->SNNumber[SNTacticalUpdateFrequency])) {
-					STRUCT_INF_AI_UNIT_LIST_ELEM *targetElem = this->GetInfElemEnemyUnitCloserToPosition(player, (long int)commander->positionX, (long int)commander->positionY);
-					UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
-					// Attack enemy if visible/if we know a recent location. Otherwise, do nothing (we don't set a retreat position in AttackOrRetreat call)
-					if (targetElem) {
-						result = this->AttackOrRetreat(tacAI, unitGroup, targetElem, -1, -1, true);
-					} else {
-						result = this->AttackOrRetreat(tacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem, -1, -1, false);
-					}
-					if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
-#ifdef _DEBUG
-						std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
-							std::to_string(result) + std::string(" due to weakness, wkn=");
-						msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
-						//CallWriteText(msg.c_str());
-						this->lastDebugInfo += msg + std::string("\n");
-#endif
-						return true; // Unit group has been tasked
-					}
-#ifdef _DEBUG
-					this->lastDebugInfo += "Already in town, enemy not visible, stand by (skip)\n";
-#endif
-					return true; // no target, do nothing special (stand by - prevent an attack to some target outta town !)
-				}
-				// TODO: if currently no target AND we know a "good" target in town, force doing something even if delay has not passed ?
-#ifdef _DEBUG
-				this->lastDebugInfo += "Already in town, tasking delay not passed, stand by (skip)\n";
-#endif
-				return true; // Wait a bit more time...
-			}
-#ifdef _DEBUG
-			this->lastDebugInfo += "stand by (skip)\n";
-#endif
-			return true;
+			return this->TaskActiveAttackGroupCriticalWithVitalMainUnit(player, unitGroup);
 		}
 		if (this->activeGroupsTaskingTempInfo.militarySituation == MILITARY_SITUATION::MS_WEAK) {
 			if (unitGroup->isTasked &&
@@ -680,6 +608,95 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	this->lastDebugInfo += "Default: use normal code\n";
 #endif
 	return false; //TO DO (let ROR code be executed)
+}
+
+
+// Task an active attack group, when player situation is critical AND there is a vital central unit (like TC, villager).
+// Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
+bool UnitGroupAI::TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup) {
+	STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid() || !player || !player->ptrAIStruct) { return false; }
+	STRUCT_UNIT_BASE *commander = global->GetUnitFromId(unitGroup->commanderUnitId); // Group leader. Guaranteed non-NULL
+	STRUCT_TAC_AI *tacAI = &player->ptrAIStruct->structTacAI;
+	if ((unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT) && !AOE_METHODS::IsUnitIdle(commander)) {
+		// TODO: check if leader has reached retreat pos or is close enough (idle or at target pos)
+		// TODO: if enemy is visible, stop retreating and attack
+#ifdef _DEBUG
+		this->lastDebugInfo += "retreating: skip\n";
+#endif
+		return true; // If still moving, let the group finish retreating ?
+	}
+
+	int totalGroupsInTown = this->activeGroupsTaskingTempInfo.townLandAttackGroupCount + this->activeGroupsTaskingTempInfo.townLandDefendGroupCount + this->activeGroupsTaskingTempInfo.townLandExploreGroupCount;
+
+	float distanceToMyMainUnit = -1;
+	if (this->activeGroupsTaskingTempInfo.myMainCentralUnit && this->activeGroupsTaskingTempInfo.myMainCentralUnit->IsCheckSumValidForAUnitClass()) {
+		distanceToMyMainUnit = GetDistance(commander->positionX, commander->positionY, this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX, this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY);
+	}
+	// Unit group is far from TC: force it to retreat (or attack a unit in my town)
+	if (distanceToMyMainUnit > AI_CONST::townSize + 5) {
+		// Randomly choose a zone to "defend" : TC or last (in-town) attack position
+		int randomValue = randomizer.GetRandomPercentageValue();
+		float targetPosX = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosX; // may be -1
+		float targetPosY = militaryAIInfo->recentAttacksByPlayer->lastAttackInMyTownPosY; // may be -1
+		/*if (randomValue <= 40) {
+		targetPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
+		targetPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
+		}*/
+		STRUCT_INF_AI_UNIT_LIST_ELEM *targetElem = this->GetInfElemEnemyUnitCloserToPosition(player, (long int)targetPosX, (long int)targetPosY);
+		UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
+		if (targetElem) {
+			result = this->AttackOrRetreat(&player->ptrAIStruct->structTacAI, unitGroup, targetElem, targetPosX, targetPosY, true);
+		} else {
+			UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(&player->ptrAIStruct->structTacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem,
+				targetPosX, targetPosY, true);
+		}
+		if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
+#ifdef _DEBUG
+			std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered+force taskId=") +
+				std::to_string(result) + std::string(" due to critical situation, wkn=");
+			msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
+			//CallWriteText(msg.c_str());
+			this->lastDebugInfo += msg + std::string("\n");
+#endif
+			return true; // Unit group has been tasked
+		}
+	} else {
+		// Unit group is already in (or near) town
+		if (global->currentGameTime - unitGroup->lastTaskingTime_ms > (1000 * tacAI->SNNumber[SNTacticalUpdateFrequency])) {
+			STRUCT_INF_AI_UNIT_LIST_ELEM *targetElem = this->GetInfElemEnemyUnitCloserToPosition(player, (long int)commander->positionX, (long int)commander->positionY);
+			UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
+			// Attack enemy if visible/if we know a recent location. Otherwise, do nothing (we don't set a retreat position in AttackOrRetreat call)
+			if (targetElem) {
+				result = this->AttackOrRetreat(tacAI, unitGroup, targetElem, -1, -1, true);
+			} else {
+				result = this->AttackOrRetreat(tacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem, -1, -1, false);
+			}
+			if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
+#ifdef _DEBUG
+				std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
+					std::to_string(result) + std::string(" due to weakness, wkn=");
+				msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCnt=") + std::to_string(totalGroupsInTown);
+				//CallWriteText(msg.c_str());
+				this->lastDebugInfo += msg + std::string("\n");
+#endif
+				return true; // Unit group has been tasked
+			}
+#ifdef _DEBUG
+			this->lastDebugInfo += "Already in town, enemy not visible, stand by (skip)\n";
+#endif
+			return true; // no target, do nothing special (stand by - prevent an attack to some target outta town !)
+		}
+		// TODO: if currently no target AND we know a "good" target in town, force doing something even if delay has not passed ?
+#ifdef _DEBUG
+		this->lastDebugInfo += "Already in town, tasking delay not passed, stand by (skip)\n";
+#endif
+		return true; // Wait a bit more time...
+	}
+#ifdef _DEBUG
+	this->lastDebugInfo += "stand by (skip)\n";
+#endif
+	return true;
 }
 
 
