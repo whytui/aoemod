@@ -176,12 +176,12 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 		this->SetUnitGroupCurrentTask(tacAI, unitGroup, result, 1, forceTasking);
 		return result;
 	}
-	// No (visible) target: use retreat. Maybe we'll find the enemy on our way
+	// No (visible) target. Maybe we'll find the enemy on our way
 	this->SetUnitGroupTarget(unitGroup, NULL);
 	unitGroup->retreatPosX = targetPosX;
 	unitGroup->retreatPosY = targetPosY;
 	// TODO: do not retreat to exact target position, stop before, especially range units !
-	result = UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT;
+	result = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02; // attack with no target still works: operate a troop movement. Do not use CST_UGT_RETREAT.
 	this->SetUnitGroupCurrentTask(tacAI, unitGroup, result, 1, forceTasking);
 	return result;
 }
