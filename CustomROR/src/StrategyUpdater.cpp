@@ -1,10 +1,31 @@
 #include "../include/StrategyUpdater.h"
 
-using namespace STRATEGY;
+namespace STRATEGY {
+
+
+// This is called from buildAI.resetStratElemForUnitId, when testing is "elem.alive" field.
+// The fixes in this method are "technical" and are always applied (even if improve AI is disabled)
+void CheckStratElemAliveForReset(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentElement) {
+	if (!buildAI || !buildAI->IsCheckSumValid() || !currentElement || !currentElement->IsCheckSumValid()) {
+		return;
+	}
+	// Manage the case when "in-progress" building is destroyed: do not reset it immediately because it would be re-triggered, destroyed again by same enemy (while HP=1) and so on
+	// We just reset unitInstanceId to -1 to show that the unit no longer exists. Next strategy update will detect it and reset it "asynchronously".
+	if ((currentElement->inProgressCount > 0) && (currentElement->elementType == AIUCBuilding)) {
+		currentElement->unitInstanceId = -1;
+		if (currentElement->unitDAT_ID == CST_UNITID_WONDER) { // Fix a bug with wonders, by the way
+			assert(buildAI->mainAI && buildAI->mainAI->IsCheckSumValid());
+			if ((buildAI->mainAI) && (buildAI->mainAI->IsCheckSumValid())) {
+				// Make sure "wonder is being built flag" is reset;
+				buildAI->mainAI->structTacAI.myWonderBeingBuiltFlag = 0;
+			}
+		}
+	}
+}
 
 
 // Analyze strategy and fixes what's necessary. Called every <crInfo.configInfo.tacticalAIUpdateDelay> seconds.
-void STRATEGY::AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
+void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	// Exit if AI improvement is not enabled.
 	if (!CUSTOMROR::IsImproveAIEnabled(buildAI->commonAIObject.playerId)) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -1072,3 +1093,5 @@ bool STRATEGY::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI
 	return false;
 }
 
+
+}

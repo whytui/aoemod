@@ -25,6 +25,10 @@ namespace STRATEGY {
 	
 	};*/
 
+	// This is called from buildAI.resetStratElemForUnitId, when testing is "elem.alive" field.
+	// The fixes in this method are "technical" and are always applied (even if improve AI is disabled)
+	void CheckStratElemAliveForReset(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentElement);
+
 	// Analyze strategy and fixes what's necessary. Called every <crInfo.configInfo.tacticalAIUpdateDelay> seconds.
 	void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
 

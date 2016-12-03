@@ -820,7 +820,7 @@ void CustomRORInstance::FixBuildingStratElemUnitID(REG_BACKUP *REG_values) {
 }
 
 
-// From 0x4B8C74
+// From 0x4B8C74 (in buildAI.resetStratElemForUnitId)
 // Test if strategy element is alive for reset purpose (like original code). In addition, resets unitInstanceId if the strategy element is "in progress" (to be detected by next custom tactical update).
 // For the algorithm to work well, requires also "FixUnitIdForInProgressBuilding", "ManageTacticalAIUpdate"
 // Performance info: The loop first tests strategy element's unitInstanceId, so ROR_API is only called once in the loop, which is a good thing.
@@ -831,22 +831,11 @@ void CustomRORInstance::OverloadIsStratElemUnitAlive_ResetElement(REG_BACKUP *RE
 	ror_api_assert(REG_values, buildAI != NULL);
 	ror_api_assert(REG_values, buildAI->IsCheckSumValid());
 
-	// Now manage the case when "in-progress" building is destroyed: do not reset it immediatly because it would be re-triggered, destroyed again by same enemy (while HP=1) and so on
-	// We just reset unitInstanceId to -1 to show that the unit no longer exists. Next strategy update will detect it and reset it "asynchronously".
-	if ((currentElement->inProgressCount > 0) && (currentElement->elementType == AIUCBuilding)) {
-		currentElement->unitInstanceId = -1;
-		if (currentElement->unitDAT_ID == CST_UNITID_WONDER) {
-			assert(buildAI->mainAI && buildAI->mainAI->IsCheckSumValid());
-			if ((buildAI->mainAI) && (buildAI->mainAI->IsCheckSumValid())) {
-				// Make sure "wonder is being built flag" is reset;
-				buildAI->mainAI->structTacAI.myWonderBeingBuiltFlag = 0;
-			}
-		}
-		REG_values->EAX_val = 0; // if in progress, it can't be alive
-	} else {
-		// This corresponds to original code we overloaded to call ROR_API: return alive_count. If >0, the strategy element will be reset.
-		REG_values->EAX_val = currentElement->aliveCount;
-	}
+	// Run technical fixes (even in improve AI is disabled)
+	STRATEGY::CheckStratElemAliveForReset(buildAI, currentElement);
+
+	// This corresponds to original code we overloaded to call ROR_API: return alive_count. If >0, the strategy element will be reset.
+	REG_values->EAX_val = currentElement->aliveCount;
 }
 
 
