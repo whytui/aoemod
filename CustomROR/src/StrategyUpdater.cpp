@@ -1,6 +1,11 @@
 #include "../include/StrategyUpdater.h"
 
 namespace STRATEGY {
+;
+
+// Static common object. Index is playerId
+StrategyUpdater strategyUpdater[9];
+
 
 
 // This is called from buildAI.resetStratElemForUnitId, when testing is "elem.alive" field.
@@ -12,6 +17,10 @@ void CheckStratElemAliveForReset(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_S
 	// Manage the case when "in-progress" building is destroyed: do not reset it immediately because it would be re-triggered, destroyed again by same enemy (while HP=1) and so on
 	// We just reset unitInstanceId to -1 to show that the unit no longer exists. Next strategy update will detect it and reset it "asynchronously".
 	if ((currentElement->inProgressCount > 0) && (currentElement->elementType == AIUCBuilding)) {
+		assert(buildAI->mainAI && buildAI->mainAI->IsCheckSumValid() && buildAI->mainAI->player && buildAI->mainAI->player->IsCheckSumValid());
+		if (!buildAI->mainAI || !buildAI->mainAI->player) { return; } // error case
+		STRUCT_GAME_GLOBAL *global = buildAI->mainAI->player->ptrGlobalStruct;
+		strategyUpdater[buildAI->commonAIObject.playerId].AddLastInProgressFailureInfoForStratElem(currentElement->elemId, global->currentGameTime);
 		currentElement->unitInstanceId = -1;
 		if (currentElement->unitDAT_ID == CST_UNITID_WONDER) { // Fix a bug with wonders, by the way
 			assert(buildAI->mainAI && buildAI->mainAI->IsCheckSumValid());
@@ -42,6 +51,8 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	assert(buildAI->mainAI != NULL);
 	AOE_STRUCTURES::STRUCT_PLAYER *player = buildAI->mainAI->ptrStructPlayer;
 	assert(player != NULL);
+	assert((player->playerId >= 0) && (player->playerId < 9));
+	if (!player || (player < 0) || (player->playerId >= 9)) { return; }
 
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *elemMainTownCenter = NULL; // Main town center
 	int townCentersCount = 0; // Total number of town centers.
@@ -114,7 +125,11 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 		// Warning: The 2 other "fixes" about destroyed buildings are absolutely required or AI will build, build and rebuild the same thing forever.
 		if (CUSTOMROR::crInfo.hasFixForBuildingStratElemUnitId && (currentStratElem->inProgressCount == 1) &&
 			(currentStratElem->elementType == AIUCBuilding) && (currentStratElem->unitInstanceId == -1)) {
-			currentStratElem->inProgressCount = 0;
+			long int lastDestructionTime = strategyUpdater[player->playerId].GetLastInProgressFailureGameTimeForBldStratElem(currentStratElem->elemId);
+			if ((lastDestructionTime < 0) ||
+				(player->ptrGlobalStruct->currentGameTime - lastDestructionTime > CUSTOM_AI::AI_CONST::delayToRetryFailedConstruction)) {
+				currentStratElem->inProgressCount = 0;
+			} // else: not waited enough
 		}
 
 		// Collect info on existing elements...

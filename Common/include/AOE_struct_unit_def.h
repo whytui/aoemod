@@ -352,7 +352,7 @@ namespace AOE_STRUCTURES
 		bool IsCheckSumValid() const { return (this->checksum == 0x00544444); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_ATTACKABLE); }
 		inline unsigned long int GetCopyConstructorAddress() const { return 0x43ED90; } // Address of AOE method to create a copy, method arg1=pUnitDefToCopy, arg2=1 for "initial call" (0 for inherited sub-calls)
-		inline bool HasBlastDamage() const { return (this->blastRadius > 0); }
+		inline bool HasBlastDamage() const { return (this->blastRadius > 0) && (this->blastLevel < CST_BL_DAMAGE_TARGET_ONLY); }
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_ATTACKABLE) == 0x148, "STRUCT_UNITDEF_ATTACKABLE size");
 

@@ -32,13 +32,22 @@ namespace CUSTOM_AI {
 		long int lastStrategyAnalysisTime; // Last time (milliseconds) strategy was analyzed by customROR
 
 		// Reset all information (game (re)start, etc)
-		void Reset();
+		void ResetAllInfo();
 
 		// Game start init
 		void Init(STRUCT_GAME_GLOBAL *global, long int playerId);
 
 		// Returns true if player is enabled, alive, has AI structure
 		bool IsValidAIPlayer();
+
+		// Safely get strategyUpdater for the specified player.
+		// Returns NULL if player is invalid
+		STRATEGY::StrategyUpdater *GetStrategyUpdater(long int playerId) {
+			assert((playerId >= 0) && (playerId < 9));
+			if ((playerId < 0) || (playerId >= 9)) { return NULL; }
+			return &STRATEGY::strategyUpdater[playerId];
+		}
+
 
 		// Functional treatments
 		// Runs strategy update if needed.
@@ -61,6 +70,8 @@ namespace CUSTOM_AI {
 
 	private:
 		bool isValidPlayer;
+
+		void ResetOwnFields();
 	};
 
 
@@ -95,6 +106,9 @@ namespace CUSTOM_AI {
 			assert(playerId < 9);
 			return &this->playerAITable[playerId];
 		}
+
+	private:
+		void ResetOwnFields();
 	};
 
 	// Handler for all players' customROR AI

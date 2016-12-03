@@ -9,22 +9,31 @@ CustomAIHandler customAIHandler;
 
 
 CustomPlayerAI::CustomPlayerAI() {
-	this->Reset();
+	// Do not call reset on other objects from constructor
+	this->ResetOwnFields();
 }
 
 
 // Reset all information (game (re)start, etc)
-void CustomPlayerAI::Reset() {
+void CustomPlayerAI::ResetAllInfo() {
+	this->ResetOwnFields();
+	for (int i = 0; i < 9; i++) {
+		STRATEGY::strategyUpdater[i].ResetAllInfo();
+	}
+	this->militaryAIInfo.ResetAllInfo();
+	this->unitGroupAI.ResetAllInfo();
+	this->unitGroupAI.militaryAIInfo = &this->militaryAIInfo;
+	this->economyAI.ResetAllInfo();
+}
+
+// Reset own fields (game (re)start, etc)
+void CustomPlayerAI::ResetOwnFields() {
 	this->mainAI = NULL;
 	this->myPlayer = NULL;
 	this->myPlayerId = -1;
 	this->isValidPlayer = false;
 	this->isPlayerAlive = false;
 	this->lastStrategyAnalysisTime = 0;
-	this->militaryAIInfo.ResetAllInfo();
-	this->unitGroupAI.ResetAllInfo();
-	this->unitGroupAI.militaryAIInfo = &this->militaryAIInfo;
-	this->economyAI.ResetAllInfo();
 }
 
 
@@ -155,15 +164,20 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 
 
 CustomAIHandler::CustomAIHandler() {
-	this->ResetAllInfo();
+	// Do not call reset on other objects from constructor
+	this->ResetOwnFields();
+}
+
+void CustomAIHandler::ResetOwnFields() {
+	this->currentGameTotalPlayerCount = 0;
 }
 
 // To be executed each time a game starts/is loaded
 // This method is in charge of resetting all AI-related CustomROR structures
 void CustomAIHandler::ResetAllInfo() {
-	this->currentGameTotalPlayerCount = 0;
+	this->ResetOwnFields();
 	for (int i = 0; i < _countof(this->playerAITable); i++) {
-		this->playerAITable[i].Reset();
+		this->playerAITable[i].ResetAllInfo();
 	}
 	CUSTOM_AI::unitTargetingHandler.ResetAllInfo();
 	CUSTOM_AI::playerTargetingHandler.ResetAllInfo();

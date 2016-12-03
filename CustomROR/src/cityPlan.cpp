@@ -252,15 +252,17 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 					if (isAggressive && (posIsVisible || (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) || (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower))) {
 						AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *unitAttackable = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)globalStruct->GetUnitFromId(infAI->unitElemList[i].unitId);
 						assert(!unitAttackable || unitAttackable->IsCheckSumValidForAUnitClass());
+						AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDefAtk = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDef;
 						if (unitAttackable && unitAttackable->DerivesFromAttackable()) {
 							AOE_STRUCTURES::STRUCT_ACTION_BASE *action = AOE_METHODS::GetUnitAction(unitAttackable);
+							bool hasBlastDamage = unitDefAtk->HasBlastDamage();
 							bool isBusy = false; // true if unit has already a combat task (if I can see that information)
 							if (action && posIsVisible) { // do not cheat: if not visible, we can't know if unit is idle/busy, and with which kind of task
 								isBusy = (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) ||
 									(action->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK_9) ||
 									(action->actionTypeID == UNIT_ACTION_ID::CST_IAI_CONVERT);
 							}
-							if (!isBusy) {
+							if (!isBusy || hasBlastDamage) {
 								// Unit is idle, or maybe moving, guarding a location, etc: it may be ready to attack any new construction
 								assert(unitDef->DerivesFromAttackable());
 								AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDefAtt = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE*)unitDef;

@@ -1,6 +1,7 @@
 #pragma once
 #include <assert.h>
 #include <string.h>
+#include <list>
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_unit_def.h>
 #include <AOE_const_functional.h>
@@ -15,15 +16,57 @@
 using namespace AOE_CONST_FUNC;
 using namespace PLAYER;
 
+
+namespace CUSTOM_AI {
+
+	namespace AI_CONST {
+		const unsigned long int delayToRetryFailedConstruction = 5000; // Base delay in milliseconds after which a failed construction (destroyed by some enemy before it is finished) is tried again
+	}
+}
+
+
 namespace STRATEGY {
 
 	// Class that handles in-game strategy handling
-	/*class StrategyUpdater {
+	class StrategyUpdater {
 	public:
+		StrategyUpdater() {
+			this->ResetAllInfo();
+		}
 		
+		void ResetAllInfo() {
+			this->inProgressBuildingLastFailuresWithGameTime.clear();
+		}
+
+		// Returns game time (milliseconds) when a building was last destroyed while "in progress" in strategy, referred by its elemId in strategy.
+		// Returns -1 if no information was found (building has not been destroyed while "in progress").
+		long int GetLastInProgressFailureGameTimeForBldStratElem(long int elemId) {
+			for each (std::pair<long int, long int> info in this->inProgressBuildingLastFailuresWithGameTime)
+			{
+				if (info.first == elemId) { return info.second; }
+			}
+			return -1;
+		}
+
+		// Add an entry in internal list of last times when buildings were destroyed while "in progress".
+		// Previous information for elemId is overwritten (delete if existing + add)
+		void AddLastInProgressFailureInfoForStratElem(long int elemId, long int gameTime_ms) {
+			this->RemoveLastInProgressFailureInfoForStratElem(elemId);
+			this->inProgressBuildingLastFailuresWithGameTime.push_back(std::pair<long int, long int>(elemId, gameTime_ms));
+		}
+
+		// Removes information about "building was destroyed while in progress" for the specified strategy element (elemId)
+		void RemoveLastInProgressFailureInfoForStratElem(long int elemId) {
+			auto it = remove_if(this->inProgressBuildingLastFailuresWithGameTime.begin(), this->inProgressBuildingLastFailuresWithGameTime.end(), 
+				[elemId](std::pair<long int, long int> info) {return info.first == elemId; });
+			this->inProgressBuildingLastFailuresWithGameTime.erase(it, this->inProgressBuildingLastFailuresWithGameTime.end());
+		}
 	private:
-	
-	};*/
+		std::list<std::pair<long int, long int>> inProgressBuildingLastFailuresWithGameTime; // first=stratElem.elemId, second=failureGameTime_ms
+
+	};
+
+	extern StrategyUpdater strategyUpdater[9];
 
 	// This is called from buildAI.resetStratElemForUnitId, when testing is "elem.alive" field.
 	// The fixes in this method are "technical" and are always applied (even if improve AI is disabled)

@@ -5,14 +5,17 @@
 #include "traceMessage.h"
 
 
-
-namespace CUSTOMROR {
-
+namespace CUSTOM_AI {
 	namespace AI_CONST {
 		const long int maxIntervalsInHistory = 20; // Number of (most recent) intervals we keep in history
 		const long int historyIntervalLength_ms = 5000;
 		static_assert(AI_CONST::historyIntervalLength_ms > 0, "historyIntervalLength_ms must be > 0");
 	}
+}
+
+using namespace CUSTOM_AI;
+
+namespace CUSTOMROR {
 
 	// Represents a basic interval of game time (cf historyIntervalLength_ms)
 	// Can be derived to store specific information for time intervals.
