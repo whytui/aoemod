@@ -288,9 +288,12 @@ namespace PLAYER {
 			curElem = curElem->previousElement;
 		}
 		if (firstFound && thisUnitElem && (thisUnitElem != firstFound)) {
+			STRUCT_UNIT_BASE *otherUnit = firstFound->unit;
 			// Exchange position with "main" unit
-			thisUnitElem->unit = firstFound->unit;
+			thisUnitElem->unit = otherUnit;
+			otherUnit->ptrElemInPlayerUnitList = thisUnitElem;
 			firstFound->unit = unit;
+			unit->ptrElemInPlayerUnitList = firstFound;
 			return true;
 		}
 		return (firstFound == thisUnitElem); // "Success" if was already first in list
