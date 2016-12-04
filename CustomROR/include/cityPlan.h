@@ -8,6 +8,7 @@
 #include "crDebugOutputPrimitives.h"
 #include "BitmapExporter.h"
 #include "AOEPrimitives_units.h"
+#include "unitHandling.h"
 
 namespace CITY_PLAN {
 

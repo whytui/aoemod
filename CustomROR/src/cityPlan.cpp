@@ -252,7 +252,7 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 						assert(!unitAttackable || unitAttackable->IsCheckSumValidForAUnitClass());
 						AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDefAtk = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDef;
 						if (unitAttackable && unitAttackable->DerivesFromAttackable()) {
-							AOE_STRUCTURES::STRUCT_ACTION_BASE *action = AOE_METHODS::GetUnitAction(unitAttackable);
+							AOE_STRUCTURES::STRUCT_ACTION_BASE *action = AOE_STRUCTURES::GetUnitAction(unitAttackable);
 							bool hasBlastDamage = unitDefAtk->HasBlastDamage();
 							bool isBusy = false; // true if unit has already a combat task (if I can see that information)
 							if (action && posIsVisible) { // do not cheat: if not visible, we can't know if unit is idle/busy, and with which kind of task

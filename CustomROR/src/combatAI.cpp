@@ -115,7 +115,7 @@ bool ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity, long int
 	if (!actorUnit || !newTargetUnit /*|| !oldTargetUnit*/) { return true; }
 	if (!oldTargetUnit) {
 		// activity target unit can be reset by pending treatments. Find if action HAS a valid target. We may want to keep this target.
-		AOE_STRUCTURES::STRUCT_ACTION_BASE *action = AOE_METHODS::GetUnitAction(actorUnit); // May return NULL
+		AOE_STRUCTURES::STRUCT_ACTION_BASE *action = AOE_STRUCTURES::GetUnitAction(actorUnit); // May return NULL
 		if (!action || (action->targetUnitId < 0)) {
 			return true;
 		}

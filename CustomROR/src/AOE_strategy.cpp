@@ -643,7 +643,7 @@ void RemoveAllReferencesToStratElemIDs(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 		STRUCT_UNIT_BUILDING *bld = (STRUCT_UNIT_BUILDING *)curElem->unit;
 		if (bld && bld->IsTypeValid()) {
 			bld->strategyElementId = -1;
-			STRUCT_ACTION_BASE *actionBase = AOE_METHODS::GetUnitAction(bld);
+			STRUCT_ACTION_BASE *actionBase = AOE_STRUCTURES::GetUnitAction(bld);
 			STRUCT_ACTION_MAKE_OBJECT *actionTrain = (STRUCT_ACTION_MAKE_OBJECT *)actionBase;
 			if (actionTrain && actionTrain->IsCheckSumValid()) {
 				actionTrain->strategyElementId = -1;

@@ -42,15 +42,4 @@ float GetSpeed(STRUCT_UNIT_BASE *unit);
 
 bool IsUnitIdle(STRUCT_UNIT_BASE *unit);
 
-// Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
-// Return NULL if one of the objects is NULL/missing
-AOE_STRUCTURES::STRUCT_ACTION_BASE *GetUnitAction(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
-
-// Return the total remaining food amount for a farm ("immediatly available" + "action-remaining").
-// Returns 0 in error cases (please check it is actually a farm !)
-float GetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit);
-
-// Modifies the total remaining food amount for a farm ("immediately available" + "action-remaining").
-bool SetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit, float newAmount);
-
 }

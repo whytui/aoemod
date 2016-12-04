@@ -5,6 +5,7 @@
 #include <AOE_struct_player.h>
 #include "CustomRORInfo.h"
 #include "AOEPrimitives_units.h"
+#include "unitHandling.h"
 
 
 using namespace AOE_STRUCTURES;

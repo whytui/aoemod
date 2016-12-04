@@ -40,7 +40,7 @@ void EconomyAI::CheckForDuplicateFarmers(AOE_STRUCTURES::STRUCT_PLAYER *player) 
 			// Beware repairmen ! (AI bug: their unitDef remains farmers). Here we check action=gather to avoid this.
 			if ((unit->unitStatus == GAME_UNIT_STATUS::GUS_2_READY) && unit->unitDefinition &&
 				unit->unitDefinition->IsCheckSumValidForAUnitClass() && (unit->unitDefinition->DAT_ID1 == CST_UNITID_FARMER)) {
-				STRUCT_ACTION_BASE *action = AOE_METHODS::GetUnitAction(unit);
+				STRUCT_ACTION_BASE *action = AOE_STRUCTURES::GetUnitAction(unit);
 				STRUCT_ACTION_GATHER_WITHOUT_ATTACK *actionGather = NULL;
 				if (action && (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
 					actionGather = (STRUCT_ACTION_GATHER_WITHOUT_ATTACK *)action;
@@ -91,7 +91,7 @@ void EconomyAI::FixStuckRepairmen(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = curElem->unit;
 			if (unit && unit->IsCheckSumValidForAUnitClass() && unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass() &&
 				(unit->unitStatus == GAME_UNIT_STATUS::GUS_2_READY)) {
-				STRUCT_ACTION_BASE *action = AOE_METHODS::GetUnitAction(unit);
+				STRUCT_ACTION_BASE *action = AOE_STRUCTURES::GetUnitAction(unit);
 				if (action && (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_REPAIR)) {
 					int actionStatus = action->actionStatus;
 					bool foundMoveAction = false;

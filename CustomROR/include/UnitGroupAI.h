@@ -9,6 +9,7 @@
 #include "randomizer.h"
 #include "CustomRORInfo.h"
 #include "customAIMilitaryInfo.h"
+#include "unitHandling.h"
 
 
 using namespace AOE_STRUCTURES;
@@ -191,17 +192,7 @@ namespace CUSTOM_AI {
 		// Returns the element from "list of enemies near my main unit" that is closest to a specified position.
 		STRUCT_INF_AI_UNIT_LIST_ELEM *GetInfElemEnemyUnitCloserToPosition(STRUCT_PLAYER *player, long int posX, long int posY);
 
-		// Returns true if unit is currently fighting against (or moving towards) a MILITARY target (excluding houses, villagers, etc)
-		// Returns false if target is not visible or out of reach
-		bool HasVisibleMilitaryTarget(STRUCT_UNIT_BASE *unit);
 
-		// Returns current action target IF it is an attack action (including conversion)
-		STRUCT_UNIT_BASE *GetAttackTarget(STRUCT_UNIT_BASE *unit);
-
-		// Return the target position for a unit/action
-		// The result might be {-1, -1}
-		std::pair<float, float> GetActionTargetPosition(STRUCT_ACTION_BASE *action);
-		std::pair<float, float> GetActionTargetPosition(STRUCT_UNIT_BASE *unit);
 	};
 
 }

@@ -287,6 +287,9 @@
     <ClInclude Include="include\AOEPrimitives_UI_screens.h">
       <Filter>Fichiers d%27en-tête\Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="include\unitHandling.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -470,6 +473,9 @@
       <Filter>Fichiers sources\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\AOEPrimitives_units.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\unitHandling.cpp">
       <Filter>Fichiers sources\Primitives</Filter>
     </ClCompile>
   </ItemGroup>

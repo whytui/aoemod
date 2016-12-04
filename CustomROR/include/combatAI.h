@@ -5,6 +5,7 @@
 #include "unitDefHandling.h"
 #include "CustomRORInfo.h"
 #include "AOEPrimitives_units.h"
+#include "unitHandling.h"
 
 
 using namespace AOE_STRUCTURES;

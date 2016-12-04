@@ -216,7 +216,7 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 		}
 
 	}
-	AOE_STRUCTURES::STRUCT_ACTION_BASE *currentAction = AOE_METHODS::GetUnitAction(unit);
+	AOE_STRUCTURES::STRUCT_ACTION_BASE *currentAction = AOE_STRUCTURES::GetUnitAction(unit);
 	// For buildings, currentAction is Non-NULL when researching tech, when AI-triggered "train unit", but NULL for human-triggered "train unit"
 	AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *currentActionAsMakeObject = (AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *)currentAction;
 	AOE_STRUCTURES::STRUCT_ACTION_MAKE_TECH *currentActionAsMakeTech = (AOE_STRUCTURES::STRUCT_ACTION_MAKE_TECH *)currentAction;

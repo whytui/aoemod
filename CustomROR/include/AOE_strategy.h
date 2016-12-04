@@ -14,6 +14,7 @@
 #include "randomizer.h"
 #include "unitDefHandling.h"
 #include "AOEPrimitives_units.h"
+#include "unitHandling.h"
 
 /*
 * This file contains primitives to deal with (AI) strategy.

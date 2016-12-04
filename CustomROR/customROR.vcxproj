@@ -175,6 +175,7 @@
     <ClInclude Include="include\UI_utilities.h" />
     <ClInclude Include="include\unitDefHandling.h" />
     <ClInclude Include="include\UnitGroupAI.h" />
+    <ClInclude Include="include\unitHandling.h" />
     <ClInclude Include="include\unitShortcuts.h" />
     <ClInclude Include="include\unitTargeting.h" />
     <ClInclude Include="include\Version.h" />
@@ -240,6 +241,7 @@
     <ClCompile Include="src\traceMessages.cpp" />
     <ClCompile Include="src\unitDefHandling.cpp" />
     <ClCompile Include="src\unitGroupAI.cpp" />
+    <ClCompile Include="src\unitHandling.cpp" />
     <ClCompile Include="src\unitTargeting.cpp" />
   </ItemGroup>
   <ItemGroup>

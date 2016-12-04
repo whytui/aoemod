@@ -3161,7 +3161,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	while ((curElem != NULL) && (farmerUnit == NULL)) {
 		if (curElem->unit && curElem->unit->IsCheckSumValidForAUnitClass() && curElem->unit->unitDefinition &&
 			curElem->unit->unitDefinition->IsCheckSumValidForAUnitClass() && (curElem->unit->unitDefinition->DAT_ID1 == CST_UNITID_FARMER)) {
-			AOE_STRUCTURES::STRUCT_ACTION_BASE *curUnitAction = AOE_METHODS::GetUnitAction(curElem->unit);
+			AOE_STRUCTURES::STRUCT_ACTION_BASE *curUnitAction = AOE_STRUCTURES::GetUnitAction(curElem->unit);
 			// There is 1 special case when farmer's resourceType is NOT berryBush: when AI player repairs a farm (bug: villager type is farmer instead of repairman)
 			// Also, if more than 1 villager is gathering the same farm, it is possible than some of them have a resourceId = -1.
 			if (curUnitAction && (curUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
