@@ -122,8 +122,6 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 	// For 2*2 building: buildingPos=(5,10) (for example) => tiles are (4,9) (4,10) (5,9) (5,10)
 	// For 3*3 building: buildingPos=(5.5,10.5) (for example) => tiles are (4,9)->(6,9) (4,10)->(6,10) (4,11)->(6,11)
 #ifdef _DEBUG
-	// Note: x appears vertically in this representation
-	//char *test = CR_DEBUG::DumpPosToTextBuffer(mapInfosStruct, TC_x, TC_y, 25); // TEST - TO DO : REMOVE
 	static bool expBMP = false;
 	if (expBMP) {
 		_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\ctypln1.bmp", mapInfosStruct->arraySizeX, mapInfosStruct->arraySizeY, mapInfosStruct->ptrColsPtr, -1, NULL, 0);
@@ -287,9 +285,6 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 
 
 #ifdef _DEBUG
-	//char oldtest[20000];
-	//strcpy_s(oldtest, test);
-	//test = CR_DEBUG::DumpPosToTextBuffer(mapInfosStruct, TC_x, TC_y, 25); // TEST - TO DO : REMOVE
 	if (expBMP) {
 		_BITMAP::BitmapExporter::ExportDataColumnsAsBitmapUsingPalette("D:\\ctypln2.bmp", mapInfosStruct->arraySizeX, mapInfosStruct->arraySizeY, mapInfosStruct->ptrColsPtr, -1, NULL, 0);
 	}

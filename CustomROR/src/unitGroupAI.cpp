@@ -471,13 +471,24 @@ bool UnitGroupAI::TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *
 	if (!global || !global->IsCheckSumValid() || !player || !player->ptrAIStruct) { return false; }
 	STRUCT_UNIT_BASE *commander = global->GetUnitFromId(unitGroup->commanderUnitId); // Group leader. Guaranteed non-NULL
 	STRUCT_TAC_AI *tacAI = &player->ptrAIStruct->structTacAI;
-	if ((unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT) && !AOE_METHODS::IsUnitIdle(commander)) {
-		// TODO: check if leader has reached retreat pos or is close enough (idle or at target pos)
-		// TODO: if enemy is visible, stop retreating and attack
-#ifdef _DEBUG
-		this->lastDebugInfo += "retreating: skip\n";
-#endif
-		return true; // If still moving, let the group finish retreating ?
+	if (!this->activeGroupsTaskingTempInfo.myMainCentralUnit) { return false; } // should NOT be NULL in this case
+	
+	bool commanderHasMilitaryTarget = this->HasVisibleMilitaryTarget(commander);
+	bool commanderTargetIsInTown = false;
+	STRUCT_ACTION_BASE *action = AOE_METHODS::GetUnitAction(commander);
+	if (action) {
+		std::pair<float, float> targetPosition = this->GetActionTargetPosition(action);
+		float diffX = (targetPosition.first- this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX);
+		float diffY = (targetPosition.second - this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY);
+		if ((-this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius <= diffX) && (diffX <= this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius) &&
+			(-this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius <= diffY) && (diffY <= this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius)) {
+			commanderTargetIsInTown = true;
+		}
+	}
+	bool doNotRetaskCommander = commanderHasMilitaryTarget || commanderTargetIsInTown;
+	if (doNotRetaskCommander && unitGroup->isTasked &&
+		(global->currentGameTime - unitGroup->lastTaskingTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
+		return false;
 	}
 
 	int totalGroupsInTown = this->activeGroupsTaskingTempInfo.townLandAttackGroupCount + this->activeGroupsTaskingTempInfo.townLandDefendGroupCount + this->activeGroupsTaskingTempInfo.townLandExploreGroupCount;
@@ -560,6 +571,7 @@ bool UnitGroupAI::TaskActiveAttackGroupWeakWithVitalMainUnit(STRUCT_PLAYER *play
 	if (!global || !global->IsCheckSumValid() || !player || !player->ptrAIStruct) { return false; }
 	STRUCT_UNIT_BASE *commander = global->GetUnitFromId(unitGroup->commanderUnitId); // Group leader. Guaranteed non-NULL
 	STRUCT_TAC_AI *tacAI = &player->ptrAIStruct->structTacAI;
+	bool commanderHasMilitaryTarget = this->HasVisibleMilitaryTarget(commander);
 	if (unitGroup->isTasked &&
 		// TODO: could use a longer delay than minimumDelayBetweenBasicUnitGroupAttackTasking_ms
 		(global->currentGameTime - unitGroup->lastTaskingTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
@@ -911,6 +923,71 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitGroupAI::GetInfElemEnemyUnitCloserToPosition(S
 		}
 	}
 	return bestElem;
+}
+
+
+// Returns current action target IF it is an attack action (including conversion)
+STRUCT_UNIT_BASE *UnitGroupAI::GetAttackTarget(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->ptrStructPlayer || !unit->ptrStructPlayer->ptrGlobalStruct) { return false; }
+	STRUCT_ACTION_BASE *commanderAction = AOE_METHODS::GetUnitAction(unit);
+	if (!commanderAction) {
+		return NULL;
+	}
+	if ((commanderAction->actionTypeID != UNIT_ACTION_ID::CST_IAI_ATTACK_9) && (commanderAction->actionTypeID != UNIT_ACTION_ID::CST_IAI_CONVERT)) {
+		return NULL;
+	}
+	STRUCT_UNIT_BASE *targetUnit = commanderAction->targetUnit;
+	if (!targetUnit) {
+		targetUnit = unit->ptrStructPlayer->ptrGlobalStruct->GetUnitFromId(commanderAction->targetUnitId);
+	}
+	return targetUnit;
+}
+
+
+// Returns true if unit is currently fighting against (or moving towards) a MILITARY target (excluding houses, villagers, etc)
+// Returns false if target is not visible or out of reach
+bool UnitGroupAI::HasVisibleMilitaryTarget(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->ptrStructPlayer || !unit->ptrStructPlayer->ptrGlobalStruct) { return false; }
+	STRUCT_UNIT_BASE *targetUnit = this->GetAttackTarget(unit);
+	if (!targetUnit) { return false; }
+	if (!IsFogVisibleForPlayer(unit->ptrStructPlayer->playerId, (long int)targetUnit->positionX, (long int)targetUnit->positionY)) {
+		return false;
+	}
+	return UnitDefCanAttack(targetUnit->unitDefinition);
+}
+
+
+// Return the target position for a unit/action
+// The result might be {-1, -1}
+std::pair<float, float> UnitGroupAI::GetActionTargetPosition(STRUCT_ACTION_BASE *action) {
+	if (!action) { return std::pair<float, float>(-1.f, -1.f); }
+	if (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_MOVE_1) {
+		return std::pair<float, float>(action->targetUnitPositionX, action->targetUnitPositionY);
+	}
+	std::pair<float, float> result;
+	// Recursively search for an underlying MOVE "required" action
+	if (action->requiredActionInfo && action->requiredActionInfo->ptrActionLink && action->requiredActionInfo->ptrActionLink->actionStruct) {
+		result = this->GetActionTargetPosition(action->requiredActionInfo->ptrActionLink->actionStruct);
+		if ((result.first > -1) && (result.second > -1)) { return result; }
+	}
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return result; }
+	STRUCT_UNIT_BASE *targetUnit = action->targetUnit;
+	if (!targetUnit) { 
+		targetUnit = global->GetUnitFromId(action->targetUnitId);
+	}
+	if (targetUnit && targetUnit->IsCheckSumValidForAUnitClass()) {
+		result.first = targetUnit->positionX;
+		result.second = targetUnit->positionY;
+	}
+	return result;
+}
+
+// Return the target position for a unit/action
+// The result might be {-1, -1}
+std::pair<float, float> UnitGroupAI::GetActionTargetPosition(STRUCT_UNIT_BASE *unit) {
+	STRUCT_ACTION_BASE *action = AOE_METHODS::GetUnitAction(unit);
+	return this->GetActionTargetPosition(action);
 }
 
 
