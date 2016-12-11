@@ -69,8 +69,7 @@ bool FileSelector::ReadRegistry()
 	WCHAR szBuffer[MAX_PATH + 1];
 	DWORD dwBufferSize = sizeof(szBuffer);
 	LONG res;
-	m_isFileValid = false;
-	//AOE_REG_KEY_INSTALLDIR;
+	this->m_isFileValid = false;
 
 	HKEY hKey;
 	res = ERROR_FILE_NOT_FOUND;
@@ -97,5 +96,44 @@ bool FileSelector::ReadRegistry()
 		return m_isFileValid;
 	}
 	return false;
+}
+
+
+// Modifies registry to change AOE/ROR installation directory
+bool FileSelector::SetInstallDirInRegistry(const std::wstring &newPath) {
+	WCHAR szBuffer[MAX_PATH + 1];
+	DWORD newPathLength = newPath.length();
+	DWORD dwBufferSize = newPathLength * sizeof(wchar_t);
+	LONG res;
+
+	if (dwBufferSize > MAX_PATH) {
+		return false;
+	}
+
+	std::wstring checkFilename = newPath;
+	checkFilename += _T("\\");
+	checkFilename += AOE_EXE_NAME;
+	if (!CheckFileExistence(checkFilename)) {
+		return false;
+	}
+
+	swprintf_s(szBuffer, newPath.c_str());
+
+	HKEY hKey = NULL;
+	res = ERROR_FILE_NOT_FOUND;
+	// Do not use: not compatible with Windows XP
+	//res = RegGetValue(HKEY_LOCAL_MACHINE, AOE_REG_PATH_INSTALLDIR_32, AOE_REG_KEY_INSTALLDIR, RRF_RT_ANY, NULL, (LPBYTE)szBuffer, &dwBufferSize);
+
+	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, AOE_REG_PATH_INSTALLDIR_32, 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS) {
+		res = RegSetValueEx(hKey, AOE_REG_KEY_INSTALLDIR, NULL, REG_SZ, (LPBYTE)szBuffer, dwBufferSize + 1);
+	}
+	if (res != ERROR_SUCCESS) {
+		if (hKey) { RegCloseKey(hKey); }
+		if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, AOE_REG_PATH_INSTALLDIR_64, 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS) {
+			res = RegSetValueEx(hKey, AOE_REG_KEY_INSTALLDIR, NULL, REG_SZ, (LPBYTE)szBuffer, dwBufferSize + 1);
+		}
+	}
+	RegCloseKey(hKey);
+	return true;
 }
 

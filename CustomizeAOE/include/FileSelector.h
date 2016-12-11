@@ -27,6 +27,9 @@ public:
 	bool AskFileName(); // The user selects a file
 	bool SetFileName(const std::wstring &fileName);
 
+	// Modifies registry to change AOE/ROR installation directory
+	bool SetInstallDirInRegistry(const std::wstring &newPath);
+
 protected:
 	bool m_isFileValid;
 	std::wstring m_fileName;
