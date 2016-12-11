@@ -237,7 +237,7 @@ namespace AOE_STRUCTURES
 	// 0C 44 54 00 = flag (type20) - size=0xBC - Constructor 0x43E9B0
 	class STRUCT_UNITDEF_FLAG : public STRUCT_UNITDEF_BASE {
 	public:
-		float speed; // 0xB8
+		float speed; // 0xB8. Unit movement speed.
 		bool IsCheckSumValid() const { return (this->checksum == 0x0054440C); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_FLAGS); }
 		unsigned long int GetCopyConstructorAddress() { return 0x43E930; } // Address of AOE method to create a copy.

@@ -187,6 +187,7 @@ namespace CUSTOM_AI {
 		void CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP *unitGroup, UnitGroupDetailedInfo *outputInfos);
 
 		// Collects info on enemy units near "main central unit"
+		// Computes "building in my town" fields in military AI
 		void CollectEnemyUnitsNearMyMainUnit(STRUCT_PLAYER *player);
 
 		// Returns the element from "list of enemies near my main unit" that is closest to a specified position.

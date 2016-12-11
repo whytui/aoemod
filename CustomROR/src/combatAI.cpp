@@ -238,7 +238,7 @@ bool ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity, long int
 	distanceX = (oldTargetUnit->positionX - myPosX);
 	distanceY = (oldTargetUnit->positionY - myPosY);
 	float squareDistanceOldTarget = (distanceX * distanceX) + (distanceY * distanceY);
-	bool isOldTargetVisible = IsFogVisibleForPlayer(actorPlayer->playerId, (long int)oldTargetUnit->positionX, (long int)oldTargetUnit->positionY);
+	bool isOldTargetPosKnown = IsUnitPositionKnown(actorPlayer, oldTargetUnit);
 	// The value to test distances, taking into account unit range.
 	float squareVeryCloseTestDistance = (actorUnitDef->maxRange + COMBAT_CONST::distanceToConsiderVeryClose);
 	squareVeryCloseTestDistance = squareVeryCloseTestDistance * squareVeryCloseTestDistance;
@@ -249,8 +249,7 @@ bool ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity, long int
 	bool alreadyVeryClose_newTarget = (squareDistanceNewTarget <= squareVeryCloseTestDistance); // If true, consider I don't need moving to attack
 
 	// VERY FIRST priority decision: fog-hidden enemy: must change target or this would be cheating !!!
-	// Exception for building (they don't move !)
-	if (!isOldTargetVisible && (oldTargetUnit->unitDefinition->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
+	if (!isOldTargetPosKnown) {
 		return true; // Change target
 	}
 

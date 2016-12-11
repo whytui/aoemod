@@ -93,6 +93,9 @@ namespace AOE_STRUCTURES {
 	// WARNING: this does not take care of villager mode (for example, will return false for a farmer !)
 	bool UnitDefCanAttack(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
 
+	// Returns 0 for classes that do NOT have a speed !
+	float GetUnitDefSpeed(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
+
 	// Returns true if unit shoots projectiles
 	// Note: priests or st francis don't
 	static inline bool UnitHasProjectile(STRUCT_UNITDEF_ATTACKABLE *unitDef) {

@@ -271,7 +271,7 @@ namespace AOE_STRUCTURES {
 			return false;
 		}
 		// A tower is generally a building with attack, BUT be careful, some towers are defined as living units with speed=0
-		// We try to use the most generic criteria: speed=0 & attack>0.
+		// We try to use the most generic criteria: speed=0 & attack>0. Note that speed attributes comes from flag (T20) so it always exists for here (Type50).
 		bool canAttack = (unitDef50->attacksCount > 0) || (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest);
 		return (unitDef50->speed == 0) && canAttack;
 	}
@@ -301,6 +301,16 @@ namespace AOE_STRUCTURES {
 		// Unit can attack <=> it has at least 1 attack specified
 		// Note: will return false for archimedes (although there is a bug in AI that allows AI to have him attack with something like 0.00001 attack !)
 		return (unitDef50->attacksCount > 0);
+	}
+
+	// Returns 0 for classes that do NOT have a speed !
+	float GetUnitDefSpeed(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
+		// Non-flag (type 20) units can't move and have no speed
+		if (!unitDef || !unitDef->DerivesFromFlag()) {
+			return 0.f;
+		}
+		AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *unitDefFlag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *)unitDef;
+		return unitDefFlag->speed;
 	}
 
 	// Get strategy element type for a unit

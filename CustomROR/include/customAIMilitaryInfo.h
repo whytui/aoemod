@@ -4,6 +4,7 @@
 #include <AOE_struct_units.h>
 #include <AOE_struct_player.h>
 #include <AOE_struct_game_map_info.h>
+#include <AOE_struct_inf_ai.h>
 #include "CustomRORInfo.h"
 #include "EnemyAttacksHistory.h"
 
@@ -30,7 +31,12 @@ namespace CUSTOM_AI {
 			this->ResetAllInfo();
 		}
 
+		// Stores information about recent history of being attacked by other players
 		TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> recentAttacksByPlayer[9];
+		
+		// Refers to information in InfAI list of an enemy building spotted in my town (potential target for idle units or in-town groups)
+		STRUCT_INF_AI_UNIT_LIST_ELEM *enemyBuildingInMyTown;
+		STRUCT_INF_AI_UNIT_LIST_ELEM *enemyTowerInMyTown;
 
 		void ResetAllInfo();
 

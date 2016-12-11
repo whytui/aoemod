@@ -9,6 +9,8 @@ namespace CUSTOM_AI {
 			this->recentAttacksByPlayer[i].ResetAllInfo();
 			this->recentAttacksByPlayer[i].attackerPlayerId = i;
 		}
+		this->enemyBuildingInMyTown = NULL;
+		this->enemyTowerInMyTown = NULL;
 		this->recentAttacksByPlayer->ResetAllInfo();
 	}
 

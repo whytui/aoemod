@@ -117,5 +117,16 @@ std::pair<float, float> GetActionTargetPosition(STRUCT_UNIT_BASE *unit) {
 }
 
 
+// Returns true if "player" knows where targetUnit is located: unit is visible OR its location is explored and its speed=0
+bool IsUnitPositionKnown(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *targetUnit) {
+	if (!player || !player->IsCheckSumValid()) { return false; }
+	if (!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) { return false; }
+	if (GetUnitDefSpeed(targetUnit->unitDefinition) <= 0) {
+		return IsExploredForPlayer(player->playerId, (long int)targetUnit->positionX, (long int)targetUnit->positionY);
+	} else {
+		return IsFogVisibleForPlayer(player->playerId, (long int)targetUnit->positionX, (long int)targetUnit->positionY);
+	}
+}
+
 }
 

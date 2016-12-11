@@ -3859,8 +3859,7 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 				assert(!"ERROR: unit to protect has an invalid checksum");
 			}
 			if (unitToProtect) {
-				bool unitIsVisible = IsFogVisibleForPlayer(controlledPlayer->playerId, (long int)unitToProtect->positionX, (long int)unitToProtect->positionY);
-				if (!unitIsVisible) {
+				if (!IsUnitPositionKnown(controlledPlayer, unitToProtect)) {
 					unitToProtect = NULL; // Can't protect (follow) a unit if I don't see it (would be cheating)
 				}
 			}

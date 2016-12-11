@@ -86,13 +86,7 @@
     <ClInclude Include="include\crGameObjects.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\drsHandler.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\unitShortcuts.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\researches.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\crLocalization.h">
@@ -111,9 +105,6 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\customFuncRules.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\mainStructuresHandling.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\CustomPopupBase.h">
@@ -148,9 +139,6 @@
     </ClInclude>
     <ClInclude Include="include\MapCopyPopup.h">
       <Filter>Fichiers d%27en-tête\customUI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\unitDefHandling.h">
-      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\buttonBar.h">
       <Filter>Fichiers d%27en-tête</Filter>
@@ -199,9 +187,6 @@
     </ClInclude>
     <ClInclude Include="include\AOE_time.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
-    </ClInclude>
-    <ClInclude Include="include\playerHandling.h">
-      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\buttonBarCommon.h">
       <Filter>Fichiers d%27en-tête</Filter>
@@ -290,6 +275,21 @@
     <ClInclude Include="include\unitHandling.h">
       <Filter>Fichiers d%27en-tête\Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="include\playerHandling.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\unitDefHandling.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mainStructuresHandling.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\drsHandler.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
+    <ClInclude Include="include\researches.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -322,12 +322,6 @@
     <ClCompile Include="src\crGameObjects.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\drsHandler.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\researches.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\crLocalization.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -339,9 +333,6 @@
     </ClCompile>
     <ClCompile Include="src\AOE_strategy.cpp">
       <Filter>Fichiers sources\Strategy</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mainStructuresHandling.cpp">
-      <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\CustomPopupBase.cpp">
       <Filter>Fichiers sources\customUI</Filter>
@@ -376,9 +367,6 @@
     <ClCompile Include="src\MapCopyPopup.cpp">
       <Filter>Fichiers sources\customUI</Filter>
     </ClCompile>
-    <ClCompile Include="src\unitDefHandling.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\buttonBar.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -411,9 +399,6 @@
     </ClCompile>
     <ClCompile Include="src\BitmapExporter.cpp">
       <Filter>Fichiers sources\Technical</Filter>
-    </ClCompile>
-    <ClCompile Include="src\playerHandling.cpp">
-      <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\buttonBarCommon.cpp">
       <Filter>Fichiers sources</Filter>
@@ -476,6 +461,21 @@
       <Filter>Fichiers sources\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\unitHandling.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\unitDefHandling.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\playerHandling.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mainStructuresHandling.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\researches.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\drsHandler.cpp">
       <Filter>Fichiers sources\Primitives</Filter>
     </ClCompile>
   </ItemGroup>
