@@ -48,6 +48,7 @@ private:
 	void OnEditGameFile(wxCommandEvent& event);
 	void OnCloseGameFile(wxCommandEvent& event);
 	void OnFixDDrawColorBug(wxCommandEvent& event);
+	void OnChangeInstallDirInRegistry(wxCommandEvent& event);
 	void OnInstallCustomROR(wxCommandEvent& event);
 	void OnInstallCustomResolution(wxCommandEvent& event);
 	void OnInstallSuggestedOptions(wxCommandEvent& event);
@@ -62,6 +63,7 @@ private:
 	void EditFile();
 	void RunGame();
 	void FixDDrawColorBug();
+	void ChangeInstallDirInRegistry();
 	void InstallCustomROR();
 	void InstallSuggestedOptions();
 	void ChooseCustomResolution();
@@ -81,6 +83,7 @@ enum
 	ID_InstallSuggestedOptions = 7,
 	ID_CloseGameFile = 8,
 	ID_FixDDrawColorBug = 9,
+	ID_ChangeInstallDirInRegistry = 10,
 	ID_GenTriggerDoc = 100,
 	ID_GenTriggerSample = 101,
 	ID_Debug = 200

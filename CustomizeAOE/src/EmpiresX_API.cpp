@@ -18,6 +18,12 @@ bool EmpiresX_API::SetFileNameFromRegistry() {
 }
 
 
+// Modifies Windows registry to set a new AOE isntallation directory
+bool EmpiresX_API::SetInstallDirInRegistry(const std::wstring &newPath) {
+	return this->aoeFileSelector.SetInstallDirInRegistry(newPath);
+}
+
+
 // Asks the user to select manually the target executable file
 // Returns true if the file exists
 bool EmpiresX_API::SetFileNameManually() {

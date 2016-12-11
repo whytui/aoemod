@@ -19,6 +19,8 @@ public:
 	bool IsFileOpen();
 	bool OpenEmpiresXFile();
 	bool CloseEmpiresXFile();
+	// Modifies Windows registry to set a new AOE isntallation directory
+	bool SetInstallDirInRegistry(const std::wstring &newPath);
 
 	bool CancelPendingChanges(bool onlyInvalids = false);
 	bool CancelPendingChanges(BINSEQ_CATEGORIES category, bool onlyInvalids = false);

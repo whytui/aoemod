@@ -11,6 +11,7 @@ EVT_MENU(ID_InstallCustomROR, WxMainForm::OnInstallCustomROR)
 EVT_MENU(ID_InstallCustomResolution, WxMainForm::OnInstallCustomResolution)
 EVT_MENU(ID_InstallSuggestedOptions, WxMainForm::OnInstallSuggestedOptions)
 EVT_MENU(ID_FixDDrawColorBug, WxMainForm::OnFixDDrawColorBug)
+EVT_MENU(ID_ChangeInstallDirInRegistry, WxMainForm::OnChangeInstallDirInRegistry)
 EVT_MENU(ID_GenTriggerDoc, WxMainForm::OnExportTriggerHTMLDoc)
 EVT_MENU(ID_GenTriggerSample, WxMainForm::OnSampleTrigger)
 #ifdef _DEBUG
@@ -48,6 +49,7 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 	menuFile->Append(ID_InstallCustomResolution, "Change game resolution...", "Update game and add custom files to handle custom resolutions.");
 	menuFile->Append(ID_InstallSuggestedOptions, "Install Suggested Options", "Automatically patch currently selected file with suggested options, including 1920*1200 resolution.");
 	menuFile->Append(ID_FixDDrawColorBug, "Fix DirectDraw color bug", "Updates regitry to fix DirectDraw color bug on currently selected file.");
+	menuFile->Append(ID_ChangeInstallDirInRegistry, "Change AOE install dir", "Updates regitry to set a new installation directory for AOE.");
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
 	wxMenu *menuTriggers = new wxMenu;
@@ -147,6 +149,11 @@ void WxMainForm::OnFixDDrawColorBug(wxCommandEvent& event) {
 }
 
 
+void WxMainForm::OnChangeInstallDirInRegistry(wxCommandEvent& event) {
+	this->ChangeInstallDirInRegistry();
+}
+
+
 bool WxMainForm::FileOpen(bool force) {
 	bool result = false;
 	if (this->e_api->GetFileName() == _T("")) { return false; }
@@ -238,6 +245,35 @@ void WxMainForm::FixDDrawColorBug() {
 	}
 }
 
+
+void WxMainForm::ChangeInstallDirInRegistry() {
+
+	std::wstring wTitle = _T("Please the direcotry to use as Age of Empires installation directory");
+	wxDirDialog *dirDialog = new wxDirDialog(this, wTitle, wxEmptyString);
+	dirDialog->SetPath(this->e_api->GetFileName());
+	bool success = dirDialog->ShowModal() == wxID_OK;
+	wxString dir = dirDialog->GetPath();
+	success = success && !dir.empty();
+	delete dirDialog;
+	if (!success) { return; }
+
+	std::wstring dirname = dir;
+
+	std::wstring checkFilename = dirname + _T("\\") + AOE_EXE_NAME;
+	if (!CheckFileExistence(checkFilename)) {
+		std::wstring msg = _T("Could not find ");
+		msg += AOE_EXE_NAME;
+		msg += _T(" in the directory specified.");
+		wxMessageBox(msg, "Customize AOE", wxOK | wxICON_ERROR);
+		return;
+	}
+
+	if (this->e_api->SetInstallDirInRegistry(dirname)) {
+		SetStatusText("Changed install dir in Windows registry");
+	} else {
+		SetStatusText("Failed to change install dir in Windows registry (is this program run as admin?)");
+	}
+}
 
 // This automatically installs CustomROR : copies files from user-provided source dir and patches EXE file.
 void WxMainForm::InstallCustomROR() {

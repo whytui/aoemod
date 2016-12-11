@@ -91,7 +91,7 @@ bool FileSelector::ReadRegistry()
 		szBuffer[dwBufferSize] = 0;
 		m_fileName = szBuffer;
 		m_fileName += _T("\\");
-		m_fileName += AOE_EXE_NAME;
+		m_fileName += ROR_EXE_NAME;
 		m_isFileValid = CheckFileExistence(m_fileName);
 		return m_isFileValid;
 	}
@@ -112,7 +112,7 @@ bool FileSelector::SetInstallDirInRegistry(const std::wstring &newPath) {
 
 	std::wstring checkFilename = newPath;
 	checkFilename += _T("\\");
-	checkFilename += AOE_EXE_NAME;
+	checkFilename += ROR_EXE_NAME;
 	if (!CheckFileExistence(checkFilename)) {
 		return false;
 	}
