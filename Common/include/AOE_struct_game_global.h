@@ -59,18 +59,18 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_GAME_GLOBAL1 0x0054A4F8
 #define CHECKSUM_GAME_GLOBAL2 0x0054A954
 #endif
-	// Size = 0x124 - F8 A4 54 00. Parent=54 A9 54 00
+	// Size = 0x124 - F8 A4 54 00. Parent=54 A9 54 00. "RGE_Game_World" in source code.
 	// Constructor 0x509AE0 (parent 51B140)
 	class STRUCT_GAME_GLOBAL {
 	public:
 		unsigned long int checksum;
-		long int currentGameTime; // in milliseconds. Note: 2 game "years" = 1 second.
-		long int unknown_008; // +8. This value is serialized to saved games. Related to time
-		long int unknown_00C; // +C. This value is serialized to saved games. Related to time
-		unsigned long int unknown_010;
-		unsigned long int timeGetTimeValue;
+		long int currentGameTime; // in milliseconds. Note: 2 game "years" = 1 second. Originally named "world_time".
+		long int oldGameTime; // +8. This value is serialized to saved games. Related to time
+		long int gameTimeDelta; // +C. This value is serialized to saved games. Related to time
+		unsigned long int unknown_010_timer;
+		unsigned long int timeGetTimeValue; // "old time" ?
 		float gameSpeed; // +18
-		char gamePaused; // confirm exact role, do not use it directly.
+		char gamePaused; // confirm exact role, do not use it directly. "tempPause"
 		char gameRunStatus; // +1D. 0 = Game in progress. 1 = Game Over. 2 = Not ingame. (Default). 3 = Generate Map (when starting game).
 		short int unknown_01E; // +E1, status for general victory conditions? Set to 0x65 when all relics timer completes 0x50C2D0, 0x67=genvictoryTimerCompleted?
 		// +0x20
@@ -81,7 +81,7 @@ namespace AOE_STRUCTURES {
 		short int unknown_02E; // maybe 2 bytes, not 1 word
 		// +0x30
 		STRUCT_DAT_SOUND **ptrSoundsArray;
-		unsigned long int unknown_034;
+		unsigned long int unknown_034; // Sprites count ?
 		unsigned long int ptrGraphicsArray; // ptr to list of elements (size=0x48) starting by a unit name?
 		short int playerTotalCount; // +3C. Player count including gaia = real player count + 1
 		short int unknown_03E;
@@ -101,7 +101,7 @@ namespace AOE_STRUCTURES {
 		unsigned short int unknown_060; // size for +64 ?
 		unsigned short int unknown_062;
 		unsigned long int unknown_064; // .col list ?
-		long int seqUnitId; // +68. Sequence for unit instance IDs (for creatable only ?)
+		long int seqUnitId; // +68. Sequence for unit instance IDs (for creatable only ?). *Next* object ID.
 		unsigned long int unknown_06C_unitIdSeqForTempUnits; // Unsure
 		// +0x70
 		long int forcedNextUnitId; // Unsure. Forced when loading a scenario.

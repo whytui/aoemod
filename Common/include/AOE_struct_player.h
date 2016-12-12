@@ -157,8 +157,8 @@ namespace AOE_STRUCTURES {
 	public:
 		unsigned long int checksum; // 0x00549B80 or 0x00549A44 (normal player) or 0x00544D18 (parent class)
 		long int isComputerControlled; // 0/1. Mostly for "military" behaviours, not for MainAI-related behaviours.
-		unsigned long int unknown_008; // value is from [55473C] ?
-		unsigned long int unknown_00C;
+		unsigned long int unknown_008; // value is from [55473C] ? "numberGroupsValue" ?
+		unsigned long int unknown_00C; // "maxNumberGroupsValue" ?
 		// 0x10
 		unsigned long int unknown_010;
 		unsigned long int unknown_014;

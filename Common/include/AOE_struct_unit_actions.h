@@ -43,7 +43,7 @@ namespace AOE_STRUCTURES {
 		float targetUnitPositionY;
 		float targetUnitPositionX;
 		float targetUnitPositionZ;
-		float unsure_resourceValue; // +2C. For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
+		float timer; // +2C. For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
 		// 0x30
 		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set.
 		STRUCT_UNIT_ACTION_INFO *requiredActionInfo; // +34. SubAction ? Link with unit/"actionLink"/action. Allows chaining actions ! This is NOT unit->actionInfo !
@@ -59,7 +59,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_ACTION_MOVE : public STRUCT_ACTION_BASE { // DC 26 54 00
 	public:
 		// 0x40
-		float maxDistanceFromTarget; // The maximum distance from target where we accept to stop movement ?
+		float maxDistanceFromTarget; // The maximum distance from target where we accept to stop movement ? "range_in"
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_ACTION_MOVE); }
 		void Constructor(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target, float maxTargetDistance, unsigned long int pGraphic) {
@@ -85,11 +85,12 @@ namespace AOE_STRUCTURES {
 		// 0x40
 		//short int targetDATID;
 		//short int unknown_42;
-		unsigned long int unknown_40; // Pointer to graphics ?
-		unsigned long int unknown_44;
-		unsigned long int unknown_48;
-		float unknown_4C; // max distance from target I can attack from ?
+		unsigned long int unknown_40; // Pointer to graphics ? "move_sprite_in"?
+		unsigned long int unknown_44; // "fight_sprite_in" ?
+		unsigned long int unknown_48; // "wait_sprite_in" ?
+		float unknown_4C; // max distance from target I can attack from ? // "min_range_in"?
 		// 0x50
+		// missile_id_in (short)? then fire_missile_at_frame_in (short) ?
 		long int unknown_50; // Dword
 		short int unknown_54;
 		short int unknown_56;

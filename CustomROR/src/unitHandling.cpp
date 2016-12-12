@@ -33,7 +33,7 @@ float GetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit) {
 	// Unit resource value contains available amount (immediatly gatherable amount).
 	AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(farmUnit);
 	if (!action) { return 0; }
-	return action->unsure_resourceValue + farmUnit->resourceValue;
+	return action->timer + farmUnit->resourceValue;
 }
 
 // Modifies the total remaining food amount for a farm ("immediately available" + "action-remaining").
@@ -44,9 +44,9 @@ bool SetFarmCurrentTotalFood(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farmUnit, flo
 	if (farmUnit->unitDefinition->DAT_ID1 != CST_UNITID_FARM) { return false; }
 	AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(farmUnit);
 	if (!action) { return false; }
-	action->unsure_resourceValue = newAmount - farmUnit->resourceValue;
-	if (action->unsure_resourceValue < 0) {
-		action->unsure_resourceValue = 0;
+	action->timer = newAmount - farmUnit->resourceValue;
+	if (action->timer < 0) {
+		action->timer = 0;
 		farmUnit->resourceValue = newAmount;
 	}
 	return true;

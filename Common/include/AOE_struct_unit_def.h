@@ -49,37 +49,37 @@ namespace AOE_STRUCTURES
 		AOE_CONST_FUNC::UNIT_ACTION_ID commandType; // +6
 		short int classId; // +08
 		short int unitId; // +0A.
-		char selectionEnabler; // +0C
-		char unknown_0D;
+		char selectionEnabler; // +0C // combat_level?
+		char unknown_0D; // combat_level_flag?
 		short int terrainId; // +0E.
 		// 0x10
-		char selectionMode;
-		char rightClickMode; // +11. what is this ?
-		char unknown_12;
+		char selectionMode; // owner_type ?
+		char rightClickMode; // +11. what is this ? "holding_attr" ?
+		char unknown_12; // state_building ???
 		char unknown_13;
 		short int resourceTypeIn; // +0x14.
 		short int resourceProductivityMultiplier;
 		short int resourceTypeOut;
 		short int resource;
-		float workRateMultiplier; // or quantity ?
+		float workRateMultiplier; // or quantity ? "work_val1"
 		// 0x20
-		float executionRadius;
-		float extraRange;
-		char unknown_28;
-		char unknown_29; // unused ?
-		char unknown_2A; // unused ?
-		char unknown_2B; // unused ?
+		float executionRadius; // "work_val2"
+		float extraRange; // "work_range"
+		char unknown_28; // "search_flag"
+		char unknown_29; // unused ? "search_wait_time" ?
+		char unknown_2A; // unused ? "work_flag" ?
+		char unknown_2B; // unused ? " work_flag2" ?
 		float unknown_2C;
 		// 0x30
 		short int plunderSource; // What is this ? 0=from resource, 1=from player (AGE3 tooltip)
 		short int unknown_32;
-		unsigned long int *ptrToolGraphic; // graphics NOT carrying resource
-		unsigned long int *ptrProceedingGraphic; // +38.
-		unsigned long int *ptrActionGraphic;
+		unsigned long int *ptrToolGraphic; // graphics NOT carrying resource "move_sprite"
+		unsigned long int *ptrProceedingGraphic; // +38. "work_sprite"
+		unsigned long int *ptrActionGraphic; // +3C. "work_sprite2"
 		// 0x40
 		unsigned long int ptrCarryingGraphic; // graphics carrying resource
-		STRUCT_DAT_SOUND *executionSound; // +44
-		STRUCT_DAT_SOUND *resourceDepositSound; // +48
+		STRUCT_DAT_SOUND *executionSound; // +44 "work_sound"
+		STRUCT_DAT_SOUND *resourceDepositSound; // +48 "work_sound2"
 		// END of structure
 	};
 
@@ -127,8 +127,8 @@ namespace AOE_STRUCTURES
 		STRUCT_GRAPHICS *ptrStandingGraphics; // +18. starts with SLP name.
 		STRUCT_GRAPHICS *ptrDyingGraphic; // +1C. starts with SLP name.
 		// 0x20
-		STRUCT_GRAPHICS *ptrDyingGraphic2; // +20. Used only when deathMode = true
-		short int deathMode; // +024. If 1, then unit status 6 is used. Otherwise, units die as soon as their own resources are depleted.
+		STRUCT_GRAPHICS *ptrDyingGraphic2; // +20. Used only when deathMode = true ("undead")
+		short int deathMode; // +024. If 1, then unit status 6 is used. Otherwise, units die as soon as their own resources are depleted. ("undead flag")
 		short int totalHitPoints; // +026. Including upgrades !
 		float lineOfSight; // +028
 		char garrisonCapacity; // +02C
@@ -139,53 +139,53 @@ namespace AOE_STRUCTURES
 		float sizeRadiusZ; // +38.
 		STRUCT_DAT_SOUND *ptrSelectionSound; // +3C
 		// 0x40
-		STRUCT_DAT_SOUND *ptrTrainSound;
+		STRUCT_DAT_SOUND *ptrTrainSound; // +40. "Created" sound
 		STRUCT_DAT_SOUND *ptrDyingSound; // +44
 		short int deadUnitId; // +48
-		char placementMode; // +4A
-		char airMode; // +4B
+		char placementMode; // +4A. "sort_number"
+		char airMode; // +4B. "can_be_built_on"
 		short int iconId; // +4C
 		char hideInEditor;
 		char unknown_04F; // unused ?
 		// 0x50
-		short int unknown_050; // unknown1 in AGE3. It IS a word value (0x4414D2)
+		short int unknown_050; // unknown1 in AGE3. It IS a word value (0x4414D2) "portrait_pict" ?
 		char availableForPlayer; // +52. according to tree+researches (+requires enable in empires.dat?). 1="can be trained". 0 does not prevent from having one (scenario, conversion)
 		char unknown_053;
-		short int placementBypassTerrain1; // +54. Side terrain id ?
-		short int placementBypassTerrain2; // +56. Side terrain id ?
-		short int placementTerrain1; // +58
-		short int placementTerrain2; // +5A
-		float editorRadius1; // for Y axis
+		short int placementBypassTerrain1; // +54. Side terrain id ? "tile_req1"
+		short int placementBypassTerrain2; // +56. Side terrain id ? "tile_req2"
+		short int placementTerrain1; // +58 "center_tile_req1"
+		short int placementTerrain2; // +5A "center_tile_req2"
+		float editorRadius1; // for Y axis "construction_radius"
 		// 0x60
-		float editorRadius2; // for X axis
-		char hillMode; // 0=no restriction, 2 for buildings ?
+		float editorRadius2; // for X axis "construction_radius"
+		char hillMode; // 0=no restriction, 2 for buildings ? "elevation_flag"
 		char visibleInFog; // +65. Can be 0,1, 3 ("inverted visibility" in AGE3, but not exact. smoke has 3).
-		short int terrainRestriction;
-		char flyMode;
+		short int terrainRestriction; // +66
+		char flyMode; // +68. "movement_type"
 		char unknown_069;
-		short int resourceStorageType_1; // +6A. A resource Id.
+		short int resourceStorageType_1; // +6A. A resource Id. "attribute_type_held"
 		short int resourceStorageType_2;
 		short int resourceStorageType_3;
 		// 0x70
-		float resourceStorageAmount_1;
+		float resourceStorageAmount_1; // "attribute_amount_held"
 		float resourceStorageAmount_2;
 		float resourceStorageAmount_3;
 		long int resourceCapacity;
 		// 0x80
 		float resourceDecay; // Amount of resource that is lost per second in unit status 5.
-		float unknown_084; // unknown3A in AGE3. 0x4415D4
-		char resourceStorageEnableMode_1; // +88. type=RESOURCE_TYPES but on 1 byte only
+		float unknown_084; // unknown3A in AGE3. 0x4415D4 "multiple_attribute_mod"
+		char resourceStorageEnableMode_1; // +88. type=RESOURCE_TYPES but on 1 byte only "attribute_flag"
 		char resourceStorageEnableMode_2;
 		char resourceStorageEnableMode_3;
-		char blastArmorLevel;
-		char triggerType; // same as class ? TribeAIGroupCivilian = 4, etc?
-		AOE_CONST_FUNC::INTERACTION_MODES interactionMode; // +8D. 1-byte.
-		char minimapMode; // +8E.
-		AOE_CONST_FUNC::COMMAND_ATTRIBUTES commandAttribute; // +8F.
+		char blastArmorLevel; // "area_effect_object_level"
+		char triggerType; // same as class ? TribeAIGroupCivilian = 4, etc? "combat_level"
+		AOE_CONST_FUNC::INTERACTION_MODES interactionMode; // +8D. 1-byte. "select_level"
+		char minimapMode; // +8E. "map_draw_level"
+		AOE_CONST_FUNC::COMMAND_ATTRIBUTES commandAttribute; // +8F. "unit_level"
 		// 0x90
 		char minimapColor;
-		char attackMode;
-		char edibleMeat; // +92
+		char attackMode; // "attack_reaction"
+		char edibleMeat; // +92 "convert_terrain_flag" ?
 		char damageGraphicCount; // +93. Count for damageGraphicsArray.
 		STRUCT_DAMAGE_GRAPHIC *damageGraphicsArray; // +94. Point to an array of pointers to damage graphics (cf damageGraphicCount)
 		long int languageDLLHelp;

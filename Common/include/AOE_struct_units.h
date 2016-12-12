@@ -147,6 +147,7 @@ namespace AOE_STRUCTURES {
 		// 0x60
 		long int unknown_054_arraySize; // +60. Number of allocated elements in +54 (to confirm)
 		char unknown_064[0x70 - 0x64];
+		// objectCollisionList ?
 		// +50 a ptr. ? +4,+8=dword. Related to playerUnitListStruct?
 		// +54 a ptr. An array. Elemsize=4? about movement ?
 		// +58: number of used elements in +54 ??
@@ -316,11 +317,11 @@ namespace AOE_STRUCTURES {
 	public:
 		unsigned long int unknown_08C;
 		// 0x90
-		float unknown_090_y; // Used for movement computation ?
-		float unknown_094_x; // Used for movement computation ?
-		unsigned long int unknown_098;
+		float velocityY; // Used for movement computation ?
+		float velocityX; // +94. Used for movement computation ?
+		unsigned long int velocityZ; // +98.
 		float orientationAngle; // +9C. unit orientation angle. Updating this impacts unit.orientationIndex (+0x35). Angle [0, 2*PI[. 0=heading to northEast (increasing Y). Warning: walking graphics need to have 8 angles to allow valid movement.
-		unsigned long int unknown_0A0;
+		unsigned long int unknown_0A0; // +A0. "turn_towards_time" ?
 		STRUCT_UNIT_MOVEMENT_INFO movementInfo; // +A4. Movement info / path finding.
 		STRUCT_UNIT_MOVEMENT_INFO temp_AI_movementInfo; // +D8. Only used in AI treatments(?) to make checks before assigning tasks ? Used when unknown_154_tempFlag_calculatingPath=1
 		float unknown_10C; // +10C.
