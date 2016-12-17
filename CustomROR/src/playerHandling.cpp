@@ -38,6 +38,24 @@ bool SelectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UN
 namespace PLAYER {
 
 
+	// Returns true if a position is fog-visible for a player (or a player with shared exploration).
+	// This is quite fast: directly accesses (optimized) memory, no underlying calls.
+	// Warning: posX/posY values are not controlled regarding map size !
+	bool IsFogVisibleForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int posX, long int posY) {
+		if (!player || !player->IsCheckSumValid()) { return false; }
+		STRUCT_MAP_VISIBILITY_MASK myMask = player->myFogVisibilityMask;
+		return IsFogVisibleForMask(myMask, posX, posY);
+	}
+
+	// Returns true if a position has been explored by a player (or a player with shared exploration).
+	// This is quite fast: directly accesses (optimized) memory, no underlying calls.
+	// Warning: posX/posY values are not controlled regarding map size !
+	bool IsExploredForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int posX, long int posY) {
+		if (!player || !player->IsCheckSumValid()) { return false; }
+		STRUCT_MAP_VISIBILITY_MASK myMask = player->myExplorationVisibilityMask;
+		return IsExploredForMask(myMask, posX, posY);
+	}
+
 
 	// Call this to make sure "currently managed AI player" is valid, so that AI is not stuck.
 	void SetAValidCurrentAIPlayerId() {

@@ -285,7 +285,8 @@ AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int posX, 
 // Returns true if a position is fog-visible for a player.
 // This is quite fast: directly accesses (optimized) memory, no underlying calls.
 // Warning: posX/posY values are not controlled regarding map size !
-bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY) {
+// Does not support shared exploration !
+bool IsFogVisibleForPlayerWithoutSharedExploration(long int playerId, long int posX, long int posY) {
 	assert(playerId >= 0);
 	assert(playerId < 9);
 	assert(posX >= 0);
@@ -294,13 +295,14 @@ bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY) {
 	assert(posY < 256); // TO DO: get exact map size
 	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255) || (playerId < 0) || (playerId > 8)) { return false; }
 	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
-	return v->isFogVisibleForPlayer(playerId);
+	return v->isFogVisibleForPlayerWithoutSharedExploration(playerId);
 }
 
 // Returns true if a position has been explored by a player
 // This is quite fast: directly accesses (optimized) memory, no underlying calls.
 // Warning: posX/posY values are not controlled regarding map size !
-bool IsExploredForPlayer(long int playerId, long int posX, long int posY) {
+// Does not support shared exploration !
+bool IsExploredForPlayerWithoutSharedExploration(long int playerId, long int posX, long int posY) {
 	assert(playerId >= 0);
 	assert(playerId < 9);
 	assert(posX >= 0);
@@ -309,8 +311,37 @@ bool IsExploredForPlayer(long int playerId, long int posX, long int posY) {
 	assert(posY < 256); // TO DO: get exact map size
 	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255) || (playerId < 0) || (playerId > 8)) { return false; }
 	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
-	return v->isExploredForPlayer(playerId);
+	return v->isExploredForPlayerWithoutSharedExploration(playerId);
 }
+
+
+
+// Returns true if a position is fog-visible for a player.
+// This is quite fast: directly accesses (optimized) memory, no underlying calls.
+// Warning: posX/posY values are not controlled regarding map size !
+bool IsFogVisibleForMask(STRUCT_MAP_VISIBILITY_MASK fogVisibilityMask, long int posX, long int posY) {
+	assert(posX >= 0);
+	assert(posY >= 0);
+	assert(posX < 256); // TO DO: get exact map size
+	assert(posY < 256); // TO DO: get exact map size
+	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255)) { return false; }
+	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
+	return v->isFogVisibleForMask(fogVisibilityMask);
+}
+
+// Returns true if a position has been explored by a player
+// This is quite fast: directly accesses (optimized) memory, no underlying calls.
+// Warning: posX/posY values are not controlled regarding map size !
+bool IsExploredForMask(STRUCT_MAP_VISIBILITY_MASK explorationVisibilityMask, long int posX, long int posY) {
+	assert(posX >= 0);
+	assert(posY >= 0);
+	assert(posX < 256); // TO DO: get exact map size
+	assert(posY < 256); // TO DO: get exact map size
+	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255)) { return false; }
+	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
+	return v->isExploredForMask(explorationVisibilityMask);
+}
+
 
 
 

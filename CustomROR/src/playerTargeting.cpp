@@ -137,7 +137,7 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		long int unitPosX = player->ptrAIStruct->structInfAI.unitElemList[i].posX;
 		long int unitPosY = player->ptrAIStruct->structInfAI.unitElemList[i].posY;
 		if (!ignoreThisUnit) {
-			bool isVisible = IsFogVisibleForPlayer(player->playerId, unitPosX, unitPosY); // fast operation: ok with performance
+			bool isVisible = PLAYER::IsFogVisibleForPlayer(player, unitPosX, unitPosY); // fast operation: ok with performance
 			if (isVisible) {
 				STRUCT_UNIT_BASE *unit = global->GetUnitFromId(player->ptrAIStruct->structInfAI.unitElemList[i].unitId);
 				if (!unit) {

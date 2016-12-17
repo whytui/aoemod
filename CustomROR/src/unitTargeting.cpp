@@ -220,7 +220,7 @@ bool UnitTargeting::SetPriorityTargetLocation(STRUCT_INF_AI *infAI, long int tar
 				STRUCT_UNIT_BASE *curUnit = curElem->unit;
 				if (curUnit && curUnit->IsCheckSumValidForAUnitClass() && curUnit->unitDefinition && curUnit->unitDefinition->IsCheckSumValidForAUnitClass()) {
 					if (curUnit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact) {
-						if (IsExploredForPlayer(myPlayerId, (long int)curUnit->positionX, (long int)curUnit->positionY)) {
+						if (PLAYER::IsExploredForPlayer(player, (long int)curUnit->positionX, (long int)curUnit->positionY)) {
 							short int unitDefId = curUnit->unitDefinition->DAT_ID1;
 							bool isRelic = (unitDefId == CST_UNITID_RELIC);
 							bool ignoreIt = false;
@@ -749,7 +749,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 			if ((diffX <= 5) && (diffY <= 5)) {
 				consideredVisible = true; // ah!!! cheating
 			} else {
-				consideredVisible = IsFogVisibleForPlayer(player->playerId, (long int)curUnit->positionX, (long int)curUnit->positionY);
+				consideredVisible = PLAYER::IsFogVisibleForPlayer(player, (long int)curUnit->positionX, (long int)curUnit->positionY);
 			}
 			if (!consideredVisible) {
 				continue;
@@ -1191,7 +1191,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 			if ((diffX <= 5) && (diffY <= 5)) {
 				consideredVisible = true; // ah!!! cheating
 			} else {
-				consideredVisible = IsFogVisibleForPlayer(player->playerId, (long int)curUnit->positionX, (long int)curUnit->positionY);
+				consideredVisible = PLAYER::IsFogVisibleForPlayer(player, (long int)curUnit->positionX, (long int)curUnit->positionY);
 			}
 			if (!consideredVisible) {
 				continue;

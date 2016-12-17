@@ -1891,7 +1891,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 				AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *targetUnitDefFlag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *)targetUnitFlag->unitDefinition;
 				// For units that can move, check fog visibility
 				if (targetUnitDefFlag->speed > 0) {
-					canInteractWithTarget = canInteractWithTarget && IsFogVisibleForPlayer(player->playerId, (long)target->positionX, (long)target->positionY);
+					canInteractWithTarget = canInteractWithTarget && PLAYER::IsFogVisibleForPlayer(player, (long)target->positionX, (long)target->positionY);
 				}
 			}
 		}
@@ -3245,19 +3245,19 @@ void CustomRORCommand::DisableWalls() {
 // Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
 // This is called quite often (only if improve AI is enabled in customROR configuration)
 void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem) {
-	if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem) { return; }
+	if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem || !infAI->ptrMainAI || !infAI->ptrMainAI->IsCheckSumValid()) { return; }
 	if (IsMultiplayer()) { return; }
 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(currentUnitListElem->unitId);
 	bool elementWasReset = false;
 	// Custom treatment: clean obsolete units
 	// If element "memorized" position is visible...
-	if (IsFogVisibleForPlayer(infAI->commonAIObject.playerId, currentUnitListElem->posX, currentUnitListElem->posY)) {
+	if (PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, currentUnitListElem->posX, currentUnitListElem->posY)) {
 		// Clean entry if: (we are in the case when "unit list" position is visible, so we can update it without cheating !)
 		// - unit no longer exist
 		// - unit moved to a position which is NO LONGER visible to me
 		if (!unitBase || !unitBase->ptrStructPlayer ||
-			(!IsFogVisibleForPlayer(infAI->commonAIObject.playerId, (long int)unitBase->positionX, (long int)unitBase->positionY))) {
+			(!PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, (long int)unitBase->positionX, (long int)unitBase->positionY))) {
 			if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs == 2) {
 				int noLongerExists = (unitBase == NULL) ? 1 : 0;
 				std::string s = "Removed unit #";

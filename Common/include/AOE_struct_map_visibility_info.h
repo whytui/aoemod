@@ -23,22 +23,30 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_MAP_VISIBILITY_MASK) == 4, "STRUCT_MAP_VISIBILITY_MASK size");
 
 
-#pragma message("TODO: this does not work with shared exploration ! See 517670")
 	// Size=4 (1 dword)
 	class STRUCT_MAP_VISIBILITY_INFO : public STRUCT_MAP_VISIBILITY_MASK {
 	public:
 		
 		// Returns true if a position is fog-visible to a player. This call is fast (bit-and operation, no underlying call)
 		// Does NOT support shared exploration
-		bool isFogVisibleForPlayer(long int playerId) {
+		bool isFogVisibleForPlayerWithoutSharedExploration(long int playerId) {
 			long int mask = 1 << playerId;
 			return (this->fogVisibilityMask & mask) != 0;
 		}
 		// Returns true if a position has been explored by a player. This call is fast (bit-and operation, no underlying call)
 		// Does NOT support shared exploration
-		bool isExploredForPlayer(long int playerId) {
+		bool isExploredForPlayerWithoutSharedExploration(long int playerId) {
 			long int mask = 1 << playerId;
 			return (this->explorationVisibilityMask & mask) != 0;
+		}
+
+		// Returns true if a position is fog-visible to a player. This call is fast (bit-and operation, no underlying call)
+		bool isFogVisibleForMask(STRUCT_MAP_VISIBILITY_MASK visibilityMask) {
+			return (this->fogVisibilityMask & visibilityMask.fogVisibilityMask) != 0;
+		}
+		// Returns true if a position has been explored by a player. This call is fast (bit-and operation, no underlying call)
+		bool isExploredForMask(STRUCT_MAP_VISIBILITY_MASK visibilityMask) {
+			return (this->explorationVisibilityMask & visibilityMask.explorationVisibilityMask) != 0;
 		}
 	};
 	static_assert(sizeof(STRUCT_MAP_VISIBILITY_INFO) == 4, "STRUCT_MAP_VISIBILITY_INFO size");

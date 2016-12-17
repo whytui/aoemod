@@ -10,6 +10,7 @@
 #include "AOE_map.h"
 #include "unitDefHandling.h"
 #include "mainStructuresHandling.h"
+#include "playerHandling.h"
 
 /* This file contains primitives about units handling */
 

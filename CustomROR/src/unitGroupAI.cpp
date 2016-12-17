@@ -132,7 +132,7 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 		targetUnit = global->GetUnitFromId(targetInfo->unitId);
 	}
 
-	bool isVisible = targetUnit && IsFogVisibleForPlayer(tacAI->commonAIObject.playerId, (long int)targetUnit->positionX, (long int)targetUnit->positionY);
+	bool isVisible = targetUnit && PLAYER::IsFogVisibleForPlayer(tacAI->ptrMainAI->player, (long int)targetUnit->positionX, (long int)targetUnit->positionY);
 	float targetPosX = -1.f;
 	float targetPosY = -1.f;
 	if (targetInfo) {
@@ -733,7 +733,7 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 			if (!newTargetUnit) {
 				newTargetUnit = global->GetUnitFromId(commanderAction->targetUnitId);
 			}
-			bool newTargetIsVisible = newTargetUnit && IsFogVisibleForPlayer(player->playerId, (long int)newTargetUnit->positionX, (long int)newTargetUnit->positionY);
+			bool newTargetIsVisible = newTargetUnit && PLAYER::IsFogVisibleForPlayer(player, (long int)newTargetUnit->positionX, (long int)newTargetUnit->positionY);
 			if (newTargetUnit && newTargetUnit->unitDefinition && newTargetUnit->ptrStructPlayer && newTargetIsVisible) {
 #ifdef _DEBUG
 				std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string("Target #") + 
@@ -970,7 +970,7 @@ void UnitGroupAI::CollectEnemyUnitsNearMyMainUnit(STRUCT_PLAYER *player) {
 		}
 	}
 	if (this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit) {
-		this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitIsCurrentlyVisible = IsFogVisibleForPlayer(player->playerId,
+		this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitIsCurrentlyVisible = PLAYER::IsFogVisibleForPlayer(player,
 			(long int)this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit->positionX, (long int)this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit->positionY);
 	}
 }
@@ -985,9 +985,9 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitGroupAI::GetInfElemEnemyUnitCloserToPosition(S
 		if (!bestElem) {
 			bestElem = e;
 			bestSquareDist = (e->posX - posX) * (e->posX - posX) + (e->posX - posY) * (e->posX - posY);
-			bestElemIsVisible = IsFogVisibleForPlayer(player->playerId, e->posX, e->posY);
+			bestElemIsVisible = PLAYER::IsFogVisibleForPlayer(player, e->posX, e->posY);
 		} else {
-			bool thisUnitIsVisible = IsFogVisibleForPlayer(player->playerId, e->posX, e->posY);
+			bool thisUnitIsVisible = PLAYER::IsFogVisibleForPlayer(player, e->posX, e->posY);
 			// Visibility is top criterion.
 			if (!bestElemIsVisible || thisUnitIsVisible) {
 				long int curSquareDist = (e->posX - posX) * (e->posX - posX) + (e->posX - posY) * (e->posX - posY);

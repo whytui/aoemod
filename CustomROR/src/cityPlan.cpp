@@ -245,7 +245,7 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 					AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = globalStruct->GetPlayerStruct(infAI->unitElemList[i].playerId);
 					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unitPlayer->GetUnitDefBase(infAI->unitElemList[i].unitDATID);
 					bool isTower = IsTower(unitDef);
-					bool posIsVisible = IsFogVisibleForPlayer(player->playerId, posX, posY);
+					bool posIsVisible = PLAYER::IsFogVisibleForPlayer(player, posX, posY);
 					bool isAggressive = isTower || IsNonTowerMilitaryUnit(unitDef->unitAIType);
 					if (isAggressive && (posIsVisible || (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) || (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower))) {
 						AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *unitAttackable = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)globalStruct->GetUnitFromId(infAI->unitElemList[i].unitId);

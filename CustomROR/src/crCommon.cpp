@@ -681,7 +681,7 @@ bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) 
 // If the element is reset, it is ALSO REMOVED from infAI lists.
 // Return true if the element was updated/reset.
 bool UpdateOrResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) {
-	if (!infAI || !infAI->IsCheckSumValid() || !elem) { return false; }
+	if (!infAI || !infAI->IsCheckSumValid() || !elem || !infAI->ptrMainAI) { return false; }
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(elem->unitId);
 	assert((unitBase == NULL) || (unitBase->IsCheckSumValidForAUnitClass()));
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = NULL;
@@ -698,10 +698,10 @@ bool UpdateOrResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_ST
 	if (unitBase && unitDefBase) {
 		if (unitDefBase->visibleInFog) {
 			// The unit still exists, and is visible through fog: only remove it from the list if its position is not EXPLORED.
-			unitItVisible = IsExploredForPlayer(actorPlayerId, (long int)unitBase->positionX, (long int)unitBase->positionY);
+			unitItVisible = PLAYER::IsExploredForPlayer(infAI->ptrMainAI->player, (long int)unitBase->positionX, (long int)unitBase->positionY);
 		} else {
 			// Standard case, check fog visibility.
-			unitItVisible = IsFogVisibleForPlayer(actorPlayerId, (long int)unitBase->positionX, (long int)unitBase->positionY);
+			unitItVisible = PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, (long int)unitBase->positionX, (long int)unitBase->positionY);
 		}
 	}
 	if (unitItVisible) {
@@ -797,7 +797,7 @@ bool AddUpdateInfAIElemList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES
 // Return true if updated.
 bool UpdateUnitOwnerInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit,
 	long int newPlayerId) {
-	if (!infAI || !infAI->IsCheckSumValid()) { return false; }
+	if (!infAI || !infAI->IsCheckSumValid() || !infAI->ptrMainAI) { return false; }
 	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
 	if (newPlayerId < 0) { return false; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unit->unitDefinition;
@@ -805,9 +805,9 @@ bool UpdateUnitOwnerInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_
 	if (unit->unitInstanceId < 0) { return false; } // Ignore temp units.
 	bool isVisible = false;
 	if (unitDefBase->visibleInFog) {
-		isVisible = IsExploredForPlayer(infAI->commonAIObject.playerId, (long int)unit->positionX, (long int)unit->positionY);
+		isVisible = PLAYER::IsExploredForPlayer(infAI->ptrMainAI->player, (long int)unit->positionX, (long int)unit->positionY);
 	} else {
-		isVisible = IsFogVisibleForPlayer(infAI->commonAIObject.playerId, (long int)unit->positionX, (long int)unit->positionY);
+		isVisible = PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, (long int)unit->positionX, (long int)unit->positionY);
 	}
 	// Search for unit in infAI unit elem list
 	long int size = infAI->unitElemListSize;

@@ -76,7 +76,7 @@ bool HasVisibleMilitaryTarget(STRUCT_UNIT_BASE *unit) {
 	if (!unit || !unit->ptrStructPlayer || !unit->ptrStructPlayer->ptrGlobalStruct) { return false; }
 	STRUCT_UNIT_BASE *targetUnit = GetAttackTarget(unit);
 	if (!targetUnit) { return false; }
-	if (!IsFogVisibleForPlayer(unit->ptrStructPlayer->playerId, (long int)targetUnit->positionX, (long int)targetUnit->positionY)) {
+	if (!PLAYER::IsFogVisibleForPlayer(unit->ptrStructPlayer, (long int)targetUnit->positionX, (long int)targetUnit->positionY)) {
 		return false;
 	}
 	return UnitDefCanAttack(targetUnit->unitDefinition);
@@ -122,9 +122,9 @@ bool IsUnitPositionKnown(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *targetUnit) {
 	if (!player || !player->IsCheckSumValid()) { return false; }
 	if (!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) { return false; }
 	if (GetUnitDefSpeed(targetUnit->unitDefinition) <= 0) {
-		return IsExploredForPlayer(player->playerId, (long int)targetUnit->positionX, (long int)targetUnit->positionY);
+		return PLAYER::IsExploredForPlayer(player, (long int)targetUnit->positionX, (long int)targetUnit->positionY);
 	} else {
-		return IsFogVisibleForPlayer(player->playerId, (long int)targetUnit->positionX, (long int)targetUnit->positionY);
+		return PLAYER::IsFogVisibleForPlayer(player, (long int)targetUnit->positionX, (long int)targetUnit->positionY);
 	}
 }
 

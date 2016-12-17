@@ -6,6 +6,7 @@
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_units.h>
 #include <AOE_struct_player.h>
+#include "AOE_map.h"
 #include "AOE_memory.h"
 #include "traceMessage.h"
 #include "mainStructuresHandling.h"
@@ -29,6 +30,17 @@ namespace AOE_METHODS {
 }
 
 namespace PLAYER {
+
+	// Returns true if a position is fog-visible for a player.
+	// This is quite fast: directly accesses (optimized) memory, no underlying calls.
+	// Warning: posX/posY values are not controlled regarding map size !
+	bool IsFogVisibleForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int posX, long int posY);
+
+	// Returns true if a position has been explored by a player
+	// This is quite fast: directly accesses (optimized) memory, no underlying calls.
+	// Warning: posX/posY values are not controlled regarding map size !
+	bool IsExploredForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int posX, long int posY);
+
 
 	// Call this to make sure "currently managed AI player" is valid, so that AI is not stuck.
 	void SetAValidCurrentAIPlayerId();

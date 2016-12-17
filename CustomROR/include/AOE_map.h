@@ -81,12 +81,25 @@ AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *GetMapVisibilityInfo(long int xPos, 
 // Returns true if a position is fog-visible for a player.
 // This is quite fast: directly accesses (optimized) memory, no underlying calls.
 // Warning: posX/posY values are not controlled regarding map size !
-bool IsFogVisibleForPlayer(long int playerId, long int posX, long int posY);
+// Does not support shared exploration !
+bool IsFogVisibleForPlayerWithoutSharedExploration(long int playerId, long int posX, long int posY);
 
 // Returns true if a position has been explored by a player
 // This is quite fast: directly accesses (optimized) memory, no underlying calls.
 // Warning: posX/posY values are not controlled regarding map size !
-bool IsExploredForPlayer(long int playerId, long int posX, long int posY);
+// Does not support shared exploration !
+bool IsExploredForPlayerWithoutSharedExploration(long int playerId, long int posX, long int posY);
+
+
+// Returns true if a position is fog-visible for a player.
+// This is quite fast: directly accesses (optimized) memory, no underlying calls.
+// Warning: posX/posY values are not controlled regarding map size !
+bool IsFogVisibleForMask(STRUCT_MAP_VISIBILITY_MASK fogVisibilityMask, long int posX, long int posY);
+
+// Returns true if a position has been explored by a player
+// This is quite fast: directly accesses (optimized) memory, no underlying calls.
+// Warning: posX/posY values are not controlled regarding map size !
+bool IsExploredForMask(STRUCT_MAP_VISIBILITY_MASK explorationVisibilityMask, long int posX, long int posY);
 
 
 // Get current *mouse* position, relative to UIObj

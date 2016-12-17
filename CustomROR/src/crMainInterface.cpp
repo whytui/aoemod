@@ -204,6 +204,11 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		if (unitArray) {
 			selectedUnit = unitArray[0];
 		}
+		float x, y;
+		GetGamePositionUnderMouse(&x, &y);
+		bool expl = PLAYER::IsExploredForPlayer(player, (long)x, (long)y);
+		bool fogVis = PLAYER::IsFogVisibleForPlayer(player, (long)x, (long)y);
+
 		if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
 			// Editor
 			if (player && (player->selectedUnitCount > 0)) {
