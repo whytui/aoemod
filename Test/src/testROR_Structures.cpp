@@ -152,7 +152,7 @@ static bool test_ror_structures() {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO uai;
 	trs_assert(&uai, 0x08, &uai.ptrActionLink);
 
-	assert(sizeof(AOE_STRUCTURES::STRUCT_PLAYER_UNKNOWN_58_AND_6C) == 0x14);
+	assert(sizeof(AOE_STRUCTURES::STRUCT_PLAYER_NEW_EXPLORED_TILES) == 0x14);
 	AOE_STRUCTURES::STRUCT_PLAYER p;
 	trs_assert(&p, 0x238, &p.unknown_238);
 	trs_assert(&p, 0x840, &p.populationHistoryInfo);

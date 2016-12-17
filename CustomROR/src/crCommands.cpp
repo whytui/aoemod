@@ -2850,9 +2850,9 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		assert(player && player->IsCheckSumValid());
 		if (player && player->IsCheckSumValid()) {
-			AOE_STRUCTURES::STRUCT_PLAYER_UNKNOWN_58_AND_6C *unknown_struct = &player->unknown_058;
+			AOE_STRUCTURES::STRUCT_PLAYER_NEW_EXPLORED_TILES *unknown_struct = &player->newExploredTilesForInfAI;
 			_asm {
-				MOV EDX, 0x45EB40 // realloc ?
+				MOV EDX, 0x45EB40 // resetArray()
 				MOV ECX, unknown_struct
 				CALL EDX
 				MOV EDX, 0x45E940 // player.SetVisibilityInfoOn?()

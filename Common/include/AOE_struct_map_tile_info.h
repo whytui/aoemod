@@ -75,7 +75,7 @@ namespace AOE_STRUCTURES {
 		BORDER_BYTE terrainBorderData; // +6. Border id & shape index (for terrain transitions)
 		char unknown_07; // Updated in 444980 to 0xCC, but reset to 0x0F very frequently (quite instantly). Some status ?
 		char unknown_08;
-		char unknown_09; // Seen 0x0F
+		char unknown_09; // Set =0x0F in 0x5179DE.
 		char tileHighlightLevel; // +0A. Tile brillance level (for tile selection in editor). Values in 0-0xB0. Default=0, 0x0F=underMouse(editor). Updated in 444980 with arg5 ?
 		char unknown_0B; // maybe +A is a short int
 		char unknown_0C;

@@ -11,17 +11,20 @@
 */
 namespace AOE_STRUCTURES {
 
+#pragma message("TODO: this does not work with shared exploration ! See 517670")
 	// Size=4 (1 dword)
 	class STRUCT_MAP_VISIBILITY_INFO {
 	public:
-		short int fogVisibilityMask;
+		short int fogVisibilityMask; // warning: low bytes when used as a DWORD
 		short int explorationVisibilityMask;
 		// Returns true if a position is fog-visible to a player. This call is fast (bit-and operation, no underlying call)
+		// Does NOT support shared exploration
 		bool isFogVisibleForPlayer(long int playerId) {
 			long int mask = 1 << playerId;
 			return (this->fogVisibilityMask & mask) != 0;
 		}
 		// Returns true if a position has been explored by a player. This call is fast (bit-and operation, no underlying call)
+		// Does NOT support shared exploration
 		bool isExploredForPlayer(long int playerId) {
 			long int mask = 1 << playerId;
 			return (this->explorationVisibilityMask & mask) != 0;

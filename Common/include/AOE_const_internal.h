@@ -556,6 +556,7 @@ namespace AOE_CONST_INTERNAL
 		CST_TES_EXPLORED = 0,
 		CST_TES_FAILED = 1, // Failed getting to location
 		CST_TES_TO_REEXPLORE_MILITARY = 2 // marked for re-exploration by military units
+		// 0xF9 ??? 0x5179F1
 	};
 
 	// See also 481445 switch

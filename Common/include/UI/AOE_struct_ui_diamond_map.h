@@ -29,6 +29,13 @@ namespace AOE_STRUCTURES
 
 
 	// Size ?
+	// 0x42CD60 = diamMap.mainDraw() ? Main draw entry point ?
+	// 0x42CF30 = diamMap.clearImage()
+	// 0x42D0C0 = diamMap.drawAllTiles()
+	// 0x42D130 = diamMap.drawExploredTiles()
+	// 0x42D670 = diamMap.drawSelectedArea()
+	// 0x42D710 = diamMap.drawObjects()
+	// 0x42DC10 = diamMap.draw() (EDX+F4)
 #define CHECKSUM_UI_DIAMOND_MAP 0x0054A73C
 	class STRUCT_UI_DIAMOND_MAP : public STRUCT_ANY_UI { // 3C A7 54 00 (editor). Also F4 A3 54 00(game) ?
 	public:

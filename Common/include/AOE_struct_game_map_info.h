@@ -31,7 +31,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_0014; // = mapSizeX * [+8D98]
 		char unknown_0018_array[0x6 * 0x13];// 0x18: array of elems size=0x6, 3 words. 0x13 elems ? Init in 444240
 		short int unknown_008A;
-		STRUCT_TERRAIN_DEF terrainDefinitions[0x20]; // Count is unsure
+		STRUCT_TERRAIN_DEF terrainDefinitions[0x20]; // +8C. Count is unsure
 		char unknown_338C[0x8D8C - 0x338C];
 		// 8808-1C... 0x10 elems and size=5A0 => start at 2E08 ? WTF. about shp
 		STRUCT_GAME_MAP_TILE_INFO **pTileInfoCols; // 0x8D8C. Please use GetTileInfo(...)

@@ -146,8 +146,8 @@ namespace AOE_STRUCTURES {
 		char unknown_208[0x100]; // +208. Unused, not even initialized ?
 		char terrainZoneFullyExplored[0xFF]; // +308. Index=terrainZoneId. Get=4BC690 Set=4BC6E0. Zone fully explored? Not sure this works well as terrainZone IDs depend on terrain restrictions ! (not the same for all units)
 		char unused_407; // +407.
-		// +408: included array of 4*4 elems size=0xC (3 dwords?). Total size in bytes=0xC0. Index corresponds to each quarter of the map ??
-		unsigned long int unknown_408[4 * 4 * 3];
+		// +408: included array of 4*4 elems size=0xC (3 dwords?). Total size in bytes=0xC0. Index corresponds to each quarter of the map ?? Represents number of explored tiles by map zone ?
+		long int unknown_408[4 * 4 * 3];
 		unsigned long int *unknown_4C8; // +4C8. Pointer to struct size=0x10. Array of 4 dwords.
 		unsigned long int *unknown_4CC; // +4CC. Pointer to struct size=0x10. Array of 4 dwords.
 		// 0x4D0

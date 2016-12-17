@@ -286,10 +286,6 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = selectedUnit->unitDefinition;
 				assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
 			}
-			//TMP
-			std::string ss = "";
-			AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
-			assert(humanPlayer && humanPlayer->IsCheckSumValid());
 		}
 
 		if (this->OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {

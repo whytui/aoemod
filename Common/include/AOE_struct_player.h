@@ -96,7 +96,7 @@ namespace AOE_STRUCTURES {
 		char *myTilesVisibility; // size = totalTilesCount bytes. Initialized content to 0xFF. 1 if fog-visible, 0 if explored but not visible ?
 		long int mapSizeY;
 		long int mapSizeX;
-		long int unknown_1C_totalTilesCount;
+		long int unknown_1C_totalTilesCount; // +1C. Explored tiles count ?
 		// 0x20
 		long int totalTilesCount; // = mapSizeX * mapSizeY
 		unsigned long int playerIdMask_low; // (p0=1,p1=2,p2=4...). = (1 << playerID)
@@ -110,16 +110,18 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(STRUCT_PLAYER_MAP_INFO) == 0x38, "STRUCT_PLAYER_MAP_INFO size");
 
-	// Size = 0x10. Positions to refresh in UI ??? Just a guess
-	// 45EAC0=addElement(posY, posX)
-	class STRUCT_PLAYER_UNKNOWN_58_AND_6C {
+	// Size = 0x14. Positions to refresh in UI ??? Just a guess. Position to refresh in AI (became visible) ?
+	// 0x45EAC0 = addElement(posY, posX)
+	// 0x45EB40 = resetArray() : if needRealloc==1, frees then allocates a new positionsArray
+	class STRUCT_PLAYER_NEW_EXPLORED_TILES {
 	public:
 		unsigned long int arraySize; // Size for unknown_010
-		unsigned long int usedElements; // +4. Number of used slots in array ?
-		unsigned long int unknown_08; // +8. Same as +4.. One is usedcount, other is currentMaxIndex?
-		unsigned long int unknown_0C; // 
+		long int usedElements; // +4. Number of used slots in array ?
+		long int unknown_08; // +8. Temporary value for treatments ? "Pop" in 0x45EBE0 (reset and return previous count)
+		long int reallocOnReset; // +C. Flag to indicate to free and re-alloc the array ? (initial state=1, then always 0 ?)
 		STRUCT_POSITION_INFO *positionsArray; // +10 = array to (posY, posX) as 2 dwords
 	};
+	static_assert(sizeof(STRUCT_PLAYER_NEW_EXPLORED_TILES) == 0x14, "Size of STRUCT_PLAYER_NEW_EXPLORED_TILES");
 
 
 	// Size = 0x14 - Constructor = 0x4B09F0
@@ -157,13 +159,13 @@ namespace AOE_STRUCTURES {
 	public:
 		unsigned long int checksum; // 0x00549B80 or 0x00549A44 (normal player) or 0x00544D18 (parent class)
 		long int isComputerControlled; // 0/1. Mostly for "military" behaviours, not for MainAI-related behaviours.
-		unsigned long int unknown_008; // value is from [55473C] ? "numberGroupsValue" ?
-		unsigned long int unknown_00C; // "maxNumberGroupsValue" ?
+		long int unknown_008; // value is from [55473C] ? "numberGroupsValue" ?
+		long int unknown_00C; // "maxNumberGroupsValue" ?
 		// 0x10
-		unsigned long int unknown_010;
+		long int unknown_010; // Used in-game, not initialized in editor.
 		unsigned long int unknown_014;
-		unsigned long int unknown_018;
-		unsigned long int unknown_01C;
+		unsigned long int unknown_018; // Unused ?
+		unsigned long int unknown_01C; // Unused ?
 		// 0x20
 		short int unknown_020;
 		short int structDefUnitArraySize; // +22. Number of elements in ptrStructDefUnitTable array = number of "unit definitions" for this player.
@@ -192,8 +194,8 @@ namespace AOE_STRUCTURES {
 		float *ptrResourceValues; // To get a resource value: player->ptrResourceValues[CST_RES_ORDER_xxx])
 		char tileSet; // +54. Civilization tileset, 5 max (0-4). 4 is ROR's added tileset.
 		char unknown_055_unused[3];
-		STRUCT_PLAYER_UNKNOWN_58_AND_6C unknown_058;
-		STRUCT_PLAYER_UNKNOWN_58_AND_6C unknown_06C;
+		STRUCT_PLAYER_NEW_EXPLORED_TILES newExploredTilesForInfAI; // +58. New explored tiles. Read/reset in "manageInfAI". It is non-empty only temporarily ! Avoid using this directly.
+		STRUCT_PLAYER_NEW_EXPLORED_TILES newExploredTilesForDiamMap; // +6C. For diamond map (for human-controlled). It is non-empty only temporarily ! 0x5179A9: JMP to prevent from refreshing diamMap.
 		// 0x80
 		char aliveStatus; //0=alive, 1=win 2=lost.
 		char isInactive; // +81. 1 for resigned/disconnected ? 45BBE3
@@ -203,11 +205,11 @@ namespace AOE_STRUCTURES {
 		char unknown_089[3]; // unused ?
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES diplomacyVSPlayers[9]; // +8C. Diplomacy against gaia(p0), p1, p2... 1=self, 2=allied, 3=neutral, 4=enemy. Long ints (4bytes each)
 		// 0xB0
-		long int unknown_0B0[9]; // B0: bool (dword) per playerId, related to visibility/exploration ?
+		long int unknown_0B0[9]; // B0: bool (dword) per playerId, related to visibility/exploration ? (and to player that is human-controlled ?)
 		short int unknown_0D4; // +D4. some mask for exploration. In fact, +D4 and D6 are 1 field (dword)
 		short int greyedMapToShowPlayerMask; // +D6. Bit-to-bit mask. bit1(low)=gaia, bit2=player1... Max possible value=0x1FF
-		short int clearMapToShowPlayerMask; // +D8. Bit-to-bit mask. bit1(low)=gaia, bit2=player1... Max possible value=0x1FF
-		short int unknown_0DA; // a mask too. In fact, +D8 and DA are 1 field (dword)
+		short int clearMapToShowPlayerMask; // +D8. Bit-to-bit mask. bit1(low)=gaia, bit2=player1... Max possible value=0x1FF. Bit=1=this player gives me fog-visibility ?
+		short int unknown_0DA; // a mask too. In fact, +D8 and DA are 1 field (dword). Bit=1=this player gives me exploration ?
 		long int unknown_0DC; // A mask too ?
 		// 0xE0
 		long int unknown_0E0[9]; // A dword per player 0-8
