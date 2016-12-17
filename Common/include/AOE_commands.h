@@ -42,9 +42,7 @@ namespace AOE_STRUCTURES
 		char sharedExploration; // +12. sharedExploration ? Only in MP games.
 		char unknown_13; // Init =0 in 42B800. Only in MP games.
 		long int unknown_14; // related to fogMask & explorationMask ? Only in MP games.
-		// unknown_18: STRUCT_MAP_VISIBILITY_INFO (4 bytes) = fogVisibilityMask + explorationVisibilityMask. Filled from 7D205C array.
-		short int fogVisibilityMask; // +18
-		short int explorationVisibilityMask; // +1A
+		STRUCT_MAP_VISIBILITY_MASK *visibilityMask; // +18
 
 		long int actorIdList[1]; // +1C.
 		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_RIGHT_CLICK; }

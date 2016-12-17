@@ -76,7 +76,7 @@ namespace AOE_STRUCTURES {
 		// 0x4F620
 		unsigned long int unknown_0CE620;
 		// 458870: set "has unit" at position?
-		long int unknown_0CE624_mapUnitOccupiedGrid[0xFF * 0xFF]; // index posY*4*0xFF+x. Its value is a bits mask ??
+		long int unknown_0CE624_mapUnitOccupiedGrid[0xFF * 0xFF]; // index posY*4*0xFF+x. Its value is a bits mask ?? STRUCT_MAP_VISIBILITY_MASK?
 		// 0x10DE28 ?
 		char unknown_010DE28[0x11DC2C - 0x10DE28];
 		long int unknown_011DC2C_index; // an index to access +4F614 + index*8 (byte)?

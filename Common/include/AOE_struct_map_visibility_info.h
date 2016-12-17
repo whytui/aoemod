@@ -11,12 +11,23 @@
 */
 namespace AOE_STRUCTURES {
 
+	// Bit-masks that represent fog visibility and exploration masks.
+	// Each bit corresponds to a player, starting with gaia (player0) at lowest bit
+	// Warning: if accessed as a DWORD (long int), be aware that the low WORD is fog-visibility, high WORD being exploration.
+	// Max possible value for each "short int" (mask) = 0x1FF (9 lower bits set for players 0-8).
+	class STRUCT_MAP_VISIBILITY_MASK {
+	public:
+		unsigned short int fogVisibilityMask; // warning: low bytes when used as a DWORD
+		unsigned short int explorationVisibilityMask;
+	};
+	static_assert(sizeof(STRUCT_MAP_VISIBILITY_MASK) == 4, "STRUCT_MAP_VISIBILITY_MASK size");
+
+
 #pragma message("TODO: this does not work with shared exploration ! See 517670")
 	// Size=4 (1 dword)
-	class STRUCT_MAP_VISIBILITY_INFO {
+	class STRUCT_MAP_VISIBILITY_INFO : public STRUCT_MAP_VISIBILITY_MASK {
 	public:
-		short int fogVisibilityMask; // warning: low bytes when used as a DWORD
-		short int explorationVisibilityMask;
+		
 		// Returns true if a position is fog-visible to a player. This call is fast (bit-and operation, no underlying call)
 		// Does NOT support shared exploration
 		bool isFogVisibleForPlayer(long int playerId) {

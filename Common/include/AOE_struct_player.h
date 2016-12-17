@@ -99,18 +99,17 @@ namespace AOE_STRUCTURES {
 		long int unknown_1C_totalTilesCount; // +1C. Explored tiles count ?
 		// 0x20
 		long int totalTilesCount; // = mapSizeX * mapSizeY
-		unsigned long int playerIdMask_low; // (p0=1,p1=2,p2=4...). = (1 << playerID)
-		unsigned long int playerIdNegMask_low; // = NOT playerIdMask_low
-		unsigned long int playerIdMask_high; // =(1 << playerID) << 8
+		STRUCT_MAP_VISIBILITY_MASK playerIdMask_low; // +24. Fog visibility mask ? (p0=1,p1=2,p2=4...). = (1 << playerID)
+		STRUCT_MAP_VISIBILITY_MASK playerIdNegMask_low; // +28. = NOT playerIdMask_low
+		STRUCT_MAP_VISIBILITY_MASK playerIdMask_high; // +2C. Exploration mask ? =(1 << playerID) << 8
 		// 0x30
-		unsigned long int playerIdNegMask_high; // = NOT  playerIdMask_high
+		STRUCT_MAP_VISIBILITY_MASK playerIdNegMask_high; // = NOT  playerIdMask_high
 		unsigned long int unknown_34;
-
-		unsigned long int GetPlayerIdMask() { return this->playerIdMask_high | this->playerIdMask_high; }
 	};
 	static_assert(sizeof(STRUCT_PLAYER_MAP_INFO) == 0x38, "STRUCT_PLAYER_MAP_INFO size");
 
-	// Size = 0x14. Positions to refresh in UI ??? Just a guess. Position to refresh in AI (became visible) ?
+
+	// Size = 0x14. Newly explored tiles positions, stored in a temporary array (flushed once taken into account)
 	// 0x45EAC0 = addElement(posY, posX)
 	// 0x45EB40 = resetArray() : if needRealloc==1, frees then allocates a new positionsArray
 	class STRUCT_PLAYER_NEW_EXPLORED_TILES {
@@ -206,10 +205,12 @@ namespace AOE_STRUCTURES {
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES diplomacyVSPlayers[9]; // +8C. Diplomacy against gaia(p0), p1, p2... 1=self, 2=allied, 3=neutral, 4=enemy. Long ints (4bytes each)
 		// 0xB0
 		long int unknown_0B0[9]; // B0: bool (dword) per playerId, related to visibility/exploration ? (and to player that is human-controlled ?)
-		short int unknown_0D4; // +D4. some mask for exploration. In fact, +D4 and D6 are 1 field (dword)
+		STRUCT_MAP_VISIBILITY_MASK myExplorationVisibilityMask; // +D4. Mask to use to check tiles "explored" for this player.
+		STRUCT_MAP_VISIBILITY_MASK myFogVisibilityMask; // +D8. Mask to use to check tiles "fog visibility" for this player.
+		/*short int unknown_0D4; // +D4. some mask for exploration. In fact, +D4 and D6 are 1 field (dword)
 		short int greyedMapToShowPlayerMask; // +D6. Bit-to-bit mask. bit1(low)=gaia, bit2=player1... Max possible value=0x1FF
 		short int clearMapToShowPlayerMask; // +D8. Bit-to-bit mask. bit1(low)=gaia, bit2=player1... Max possible value=0x1FF. Bit=1=this player gives me fog-visibility ?
-		short int unknown_0DA; // a mask too. In fact, +D8 and DA are 1 field (dword). Bit=1=this player gives me exploration ?
+		short int unknown_0DA; // a mask too. In fact, +D8 and DA are 1 field (dword). Bit=1=this player gives me exploration ?*/
 		long int unknown_0DC; // A mask too ?
 		// 0xE0
 		long int unknown_0E0[9]; // A dword per player 0-8

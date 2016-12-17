@@ -81,8 +81,8 @@ bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsLi
 #pragma message("MP Not fully supported at this point")
 		// Not handled at this point
 		// See 0x42B7ED...
-		cmd->fogVisibilityMask = 0; // TO DO
-		cmd->explorationVisibilityMask = 0; // TO DO
+		cmd->visibilityMask->explorationVisibilityMask = 0; // TO DO
+		cmd->visibilityMask->fogVisibilityMask = 0; // TO DO
 		cmd->sharedExploration = 0; // TO DO
 		cmd->unknown_13 = 0; // TO DO
 		cmd->unknown_14 = 0; // TO DO
