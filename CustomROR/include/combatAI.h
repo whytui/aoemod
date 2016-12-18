@@ -21,6 +21,7 @@ namespace COMBAT {
 
 	namespace COMBAT_CONST {
 		const float distanceToConsiderVeryClose = 1.0; // Distance (added to range) under which a target is considered "within range". Please leave this > 0.
+		const long int distanceAlwaysTaskIdleMilitaryUnitsOnAttack = 6; // Max distance *idle* nearby units will always be tasked when "I" am attacked
 	}
 
 	// Custom treatment to decide if a potential target unit should be ignored

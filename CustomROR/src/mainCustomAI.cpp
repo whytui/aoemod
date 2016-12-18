@@ -160,6 +160,49 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 			STRATEGY::ManagePanicMode(tacAI->ptrMainAI, enemyPlayerId, &this->militaryAIInfo);
 		}
 	}
+
+	// Have nearby unit groups react to the attack if idle/attacking a secondary target
+	if (enemyPlayerId > 0) {
+		STRUCT_UNIT_GROUP *fakeGrp = &tacAI->fakeFirstUnitGroupElem;
+		STRUCT_UNIT_GROUP *curGrp = fakeGrp->next;
+		while (curGrp && (curGrp != fakeGrp)) {
+			STRUCT_UNIT_BASE *curLeader = global->GetUnitFromId(curGrp->commanderUnitId);
+			if (curLeader && curLeader->IsCheckSumValidForAUnitClass()) {
+				bool canChangeTarget = false;
+				STRUCT_UNIT_BASE *curGroupTarget = global->GetUnitFromId(curGrp->targetUnitId);
+				if (!curGroupTarget) { canChangeTarget = true; } else {
+					if (curGroupTarget->unitDefinition) {
+						if (!UnitDefCanAttack(curGroupTarget->unitDefinition) && (curGroupTarget->unitDefinition->DAT_ID1 != CST_UNITID_WONDER)) {
+							canChangeTarget = true;
+						}
+					}
+				}
+				if (canChangeTarget) {
+					long int sqrdist = (long int)((curLeader->positionX - enemyUnit->positionX) * (curLeader->positionX - enemyUnit->positionX) +
+						(curLeader->positionY - enemyUnit->positionY) * (curLeader->positionY - enemyUnit->positionY));
+					if (sqrdist < COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack * COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack) { // TODO: constant
+						// Do *not* task units (could conflict with other treatments, get units stuck, etc) but set group's target
+						this->unitGroupAI.SetUnitGroupTarget(curGrp, enemyUnit);
+
+						// Task idle units ?
+						int remainingUnits = curGrp->unitCount;
+						for (int i = 0; i < STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT; i++) {
+							STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curGrp->GetMyUnitId(i));
+							if (curUnit && curUnit->IsCheckSumValidForAUnitClass()) {
+								remainingUnits--;
+								if (AOE_METHODS::IsUnitIdle(curUnit) && curUnit->DerivesFromCommandable()) {
+									MoveAndAttackTarget(tacAI, (STRUCT_UNIT_COMMANDABLE*)curUnit, enemyUnit);
+								}
+							}
+						}
+						
+					}
+				}
+			}
+
+			curGrp = curGrp->next;
+		}
+	}
 }
 
 

@@ -17,8 +17,8 @@ namespace AOE_CONST_FUNC {
 		SNMinimumAttackGroupSize = 16,
 		SNTotalNumberExplorers = 18,
 		SNPercentEnemySightedResponse = 19,
-		SNEnemySightedResponseDistance = 20,
-		SNSentryDistance = 22,
+		SNEnemySightedResponseDistance = 20, // Sets the distance inside of which units will be candidates for response to an enemy attack. Must be >= 0 and <= 144
+		SNSentryDistance = 22, // Sets the distance at which the town is defended. Must be >= 0
 		SNArtifactReturnDistance = 23,
 		SNPercentVictoryClamp = 24,
 		SNMinimumDefendGroupSize = 25,
