@@ -3762,7 +3762,7 @@ void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_value
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->EAX_val = unitGroup->commanderUnitId; // same as replaced instruction 0x4BFFC7
 	}
-	bool noCustomTreatment = true; // for debugging
+	bool noCustomTreatment = false; // for debugging
 	if (noCustomTreatment || !CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
 		return;
 	}

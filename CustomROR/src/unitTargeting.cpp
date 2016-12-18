@@ -148,9 +148,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 
 STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
-	// TODO: attack towers/military units that protect target ?
-	// Attack target in my town, if any ? (even if another player ?) exclude villager explorers (run too fast?)
-	// Detect if already in enemy town/territory: if so, seek for close targets (more importance to distance)
+	// exclude villager explorers (run too fast) ?
 	// TOOD: if too much time spent, return NULL (keep inprogress=1)
 
 	long int priorityPosX = this->priorityLocation[infAI->commonAIObject.playerId].posX;
@@ -206,8 +204,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 			}
 
 			if ((infAI->unitElemList[i].unitClass != TribeAIGroupArtefact) &&
-				(GetUnitStruct(infAI->unitElemList[i].unitId) != NULL) /*&&
-				(*targetToUpdate == NULL)*/) {
+				(GetUnitStruct(infAI->unitElemList[i].unitId) != NULL)) {
 				bool curElemIsBetter = (*targetToUpdate == NULL);
 				if (*targetToUpdate != NULL) {
 					curElemIsBetter = ((*targetToUpdate)->attack <= 0) && (infAI->unitElemList[i].attack > 0);
@@ -231,10 +228,6 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 		this->SetTarget(infAI, unitGroup, targetInfo, farTarget, leaderTerrainZoneId, 1);
 		return farTarget;
 	}
-	// if found:
-	// this->SetTarget(infAI, unitGroup, targetInfo, , , );
-
-	targetInfo->targetSearchInProgress = 0;
 	return NULL;
 }
 
