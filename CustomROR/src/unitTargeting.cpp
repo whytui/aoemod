@@ -159,8 +159,8 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 	if ((priorityPosX < 0) || (priorityPosY < 0)) {
 		if (!this->groupIsInMyTown[infAI->commonAIObject.playerId]) {
 			// Group is already on a military campaign: search targets near current position. Don't cross the whole map each time we change target ! (which is default behaviour !)
-			priorityPosX = unitGroup->posX;
-			priorityPosY = unitGroup->posY;
+			priorityPosX = (long int)unitGroup->posX;
+			priorityPosY = (long int)unitGroup->posY;
 		} else {
 			// Group is in town: no restriction on target position. Allow attacking enemy towns, which may be far from my town.
 			priorityPosX = -1;
@@ -178,7 +178,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 		STRUCT_UNITDEF_ATTACKABLE *unitDef = (STRUCT_UNITDEF_ATTACKABLE*)groupLeader->unitDefinition;
 		leaderIsRanged = (unitDef->unitAIType != TribeAIGroupPriest) && IsRangedUnit(unitDef); // exclude priest because of building conversion ?
 		if (leaderIsRanged) {
-			losToUse = unitDef->maxRange;
+			losToUse = (long int)unitDef->maxRange;
 		}
 	}
 	
@@ -206,8 +206,13 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 			}
 
 			if ((infAI->unitElemList[i].unitClass != TribeAIGroupArtefact) &&
-				(GetUnitStruct(infAI->unitElemList[i].unitId) != NULL) &&
-				(*targetToUpdate == NULL)) {
+				(GetUnitStruct(infAI->unitElemList[i].unitId) != NULL) /*&&
+				(*targetToUpdate == NULL)*/) {
+				bool curElemIsBetter = (*targetToUpdate == NULL);
+				if (*targetToUpdate != NULL) {
+					curElemIsBetter = ((*targetToUpdate)->attack <= 0) && (infAI->unitElemList[i].attack > 0);
+				}
+
 				*targetToUpdate = &infAI->unitElemList[i];
 			}
 		}
