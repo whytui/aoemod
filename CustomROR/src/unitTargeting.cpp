@@ -18,6 +18,7 @@ void UnitTargeting::ResetAllInfo() {
 		this->lastTargetSelectionGameTime[i] = 0;
 		this->priorityLocation[i].posX = -1;
 		this->priorityLocation[i].posY = -1;
+		this->groupIsInMyTown[i] = false;
 	}
 }
 
@@ -27,6 +28,7 @@ void UnitTargeting::InitNewSearch(long int playerId) {
 	assert((playerId >= 0) && (playerId < _countof(this->lastChosenTargetUnitId)));
 	this->priorityLocation[playerId].posX = -1;
 	this->priorityLocation[playerId].posY = -1;
+	this->groupIsInMyTown[playerId] = false;
 }
 
 
@@ -95,7 +97,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::FindWonderToAttackInfAIElemPtr(STRU
 }
 
 
-// If current target is still a valid target, return its pointer in InfAI elem list.
+// If current target is still a valid target - and its position is known -, return its pointer in InfAI elem list.
 // Returns NULL otherwise
 STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStillEligible(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
@@ -112,9 +114,6 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 		return NULL;
 	}
 
-	// TODO: consider fog visibility
-	// TODO: if target is building & i see living units, return NULL?
-
 	for (int i = unitGroup->targetUnitIdArrayUsedElemCount; i >= 0; i--) {
 		long int loopTargetId = unitGroup->GetTargetUnitIdFromArray(i);
 		STRUCT_UNIT_BASE *loopTargetUnit = NULL;
@@ -122,7 +121,8 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 			loopTargetUnit = global->GetUnitFromId(loopTargetId);
 		}
 		if (loopTargetUnit && loopTargetUnit->IsCheckSumValidForAUnitClass() && loopTargetUnit->ptrStructPlayer &&
-			loopTargetUnit->ptrStructPlayer->IsCheckSumValid()) {
+			loopTargetUnit->ptrStructPlayer->IsCheckSumValid() && 
+			IsUnitPositionKnown(infAI->ptrMainAI->player, loopTargetUnit)) {
 			long int loopTargetPlayerId = loopTargetUnit->ptrStructPlayer->playerId;
 			if ((loopTargetPlayerId > 0) && (loopTargetUnit->unitStatus <= AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY)) {
 				long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, groupLeader->GetMaxRange(),
@@ -130,7 +130,6 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 				if (canMoveToTarget) {
 					// Additional conditions/checks ?
 					// check game time since when we have the same target ?
-					// Invalidate if not visible/far ?
 
 					unitGroup->targetUnitIdArrayUsedElemCount = 0; // Reset (no need to erase values from array)
 					unitGroup->AddTargetUnitIdToArray(loopTargetId);
@@ -149,24 +148,84 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 
 STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
-	// TODO
-	// Don't forget to take into account this->priorityLocation[myplayerid]
 	// TODO: attack towers/military units that protect target ?
 	// Attack target in my town, if any ? (even if another player ?) exclude villager explorers (run too fast?)
 	// Detect if already in enemy town/territory: if so, seek for close targets (more importance to distance)
+	// TOOD: if too much time spent, return NULL (keep inprogress=1)
 
-	//TEST
+	long int priorityPosX = this->priorityLocation[infAI->commonAIObject.playerId].posX;
+	long int priorityPosY = this->priorityLocation[infAI->commonAIObject.playerId].posY;
+	bool usePriorityPos = true;
+	if ((priorityPosX < 0) || (priorityPosY < 0)) {
+		if (!this->groupIsInMyTown[infAI->commonAIObject.playerId]) {
+			// Group is already on a military campaign: search targets near current position. Don't cross the whole map each time we change target ! (which is default behaviour !)
+			priorityPosX = unitGroup->posX;
+			priorityPosY = unitGroup->posY;
+		} else {
+			// Group is in town: no restriction on target position. Allow attacking enemy towns, which may be far from my town.
+			priorityPosX = -1;
+			priorityPosY = -1;
+			usePriorityPos = false;
+		}
+	}
+
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	STRUCT_UNIT_BASE *groupLeader = global->GetUnitFromId(unitGroup->commanderUnitId);
+	bool leaderIsRanged = false;
+	long int losToUse = 6;
+	if (groupLeader->DerivesFromAttackable()) {
+		STRUCT_UNITDEF_ATTACKABLE *unitDef = (STRUCT_UNITDEF_ATTACKABLE*)groupLeader->unitDefinition;
+		leaderIsRanged = (unitDef->unitAIType != TribeAIGroupPriest) && IsRangedUnit(unitDef); // exclude priest because of building conversion ?
+		if (leaderIsRanged) {
+			losToUse = unitDef->maxRange;
+		}
+	}
+	
+	char leaderTerrainZoneId = groupLeader->GetMyTerrainZoneId();
+	STRUCT_INF_AI_UNIT_LIST_ELEM *nearbyTarget = NULL;
+	STRUCT_INF_AI_UNIT_LIST_ELEM *secondaryTarget = NULL; // valid target which does not respect "priority position"
+	STRUCT_INF_AI_UNIT_LIST_ELEM *farTarget = NULL; // valid target which is really far
+
 	for (int i = 0; i < infAI->unitElemListSize; i++) {
 		if (infAI->unitElemList[i].playerId == targetPlayerId) {
-			//TEST!
-			if ((infAI->unitElemList[i].unitClass != 1) && (GetUnitStruct(infAI->unitElemList[i].unitId) != NULL)) {
-				this->SetTarget(infAI, unitGroup, targetInfo, &infAI->unitElemList[i], 0 /*TODO*/, 1);
-				targetInfo->targetSearchInProgress = 0;
-				return &infAI->unitElemList[i];
+			STRUCT_INF_AI_UNIT_LIST_ELEM **targetToUpdate = &nearbyTarget;
+			if (usePriorityPos) {
+				long int diffX = infAI->unitElemList[i].posX - priorityPosX;
+				long int diffY = infAI->unitElemList[i].posY - priorityPosY;
+				long int diffsqr = diffX * diffX + diffY * diffY;
+				if (diffsqr <= losToUse * losToUse) {
+					targetToUpdate = &nearbyTarget;
+				} else {
+					if (diffsqr > AI_CONST::townSizeSquare) { // enemy further than "town size": consider it very far, with very low priority (if using a priority position)
+						targetToUpdate = &farTarget;
+					} else {
+						targetToUpdate = &secondaryTarget;
+					}
+				}
+			}
+
+			if ((infAI->unitElemList[i].unitClass != TribeAIGroupArtefact) &&
+				(GetUnitStruct(infAI->unitElemList[i].unitId) != NULL) &&
+				(*targetToUpdate == NULL)) {
+				*targetToUpdate = &infAI->unitElemList[i];
 			}
 		}
 	}
 
+	targetInfo->targetSearchInProgress = 0;
+	if (nearbyTarget) {
+		this->SetTarget(infAI, unitGroup, targetInfo, nearbyTarget, leaderTerrainZoneId, 1);
+		return nearbyTarget;
+	}
+	if (secondaryTarget) {
+		this->SetTarget(infAI, unitGroup, targetInfo, secondaryTarget, leaderTerrainZoneId, 1);
+		return secondaryTarget;
+	}
+	if (farTarget) {
+		this->SetTarget(infAI, unitGroup, targetInfo, farTarget, leaderTerrainZoneId, 1);
+		return farTarget;
+	}
 	// if found:
 	// this->SetTarget(infAI, unitGroup, targetInfo, , , );
 
@@ -420,6 +479,18 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 
 	this->InitNewSearch(player->playerId);
 
+	// Group position is in town ?
+	this->groupIsInMyTown[player->playerId] = false;
+	STRUCT_UNIT_BASE *myMainCentralUnit = CUSTOM_AI::CustomAIMilitaryInfo::GetTownCenterOrUnitToDefend(player);
+	if (myMainCentralUnit && myMainCentralUnit->IsCheckSumValidForAUnitClass()) {
+		long int diffX = (long int)(groupLeader->positionX - myMainCentralUnit->positionX);
+		long int diffY = (long int)(groupLeader->positionY - myMainCentralUnit->positionY);
+		long int diff = diffX * diffX + diffY * diffY;
+		if (diff < CUSTOM_AI::AI_CONST::townNeighborhoodSizeSquare) {
+			this->groupIsInMyTown[player->playerId] = true;
+		}
+	}
+
 	char leaderTerrainZoneId = groupLeader->GetMyTerrainZoneId();
 	STRUCT_UNITDEF_BASE *groupLeaderDef = groupLeader->unitDefinition;
 	assert(groupLeaderDef && groupLeaderDef->IsCheckSumValidForAUnitClass());
@@ -457,9 +528,14 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 	STRUCT_PLAYER *targetPlayer = global->GetPlayerStruct(targetPlayerId);
 	if (!targetPlayer || !targetPlayer->IsCheckSumValid()) { targetInfo->targetSearchInProgress = 0; return NULL; }
 
-	// What do we do with current target, if any ?
 	STRUCT_INF_AI_UNIT_LIST_ELEM *currentTarget = this->GetInfAIElemForCurrentTargetIfStillEligible(infAI, targetPlayerId, unitGroup, targetInfo, baseTimeGetTimeValue);
-	// TODO
+	if (currentTarget) {
+		if ((currentTarget->attack > 0) || (currentTarget->unitClass != GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding)) {
+			// if current target is not a building, keep it (villager, military units...
+			return currentTarget;
+		}
+		// If current target is a building (non-tower), try to find another target
+	}
 
 	// Player global situation
 	int villagerCount = tacAI->allVillagers.usedElements;
@@ -525,8 +601,6 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 	bool canAttackBuildings = (siegeCount + meleeCount + slingerCount > (myGrpUnitCount / 3));
 	bool allowTargetingCivilian = !settings->isDeathMatch; // in deathmatch, attacking civilian is NOT a priority (at all)
 
-	//targetInfo->targetSearchInProgress = 0;
-	//return NULL;
 	targetInfo->targetSearchInProgress = 1;
 	return this->ContinueFindGroupMainTargetInProgress(infAI, targetPlayerId, unitGroup, targetInfo, baseTimeGetTimeValue);
 }

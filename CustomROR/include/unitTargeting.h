@@ -53,7 +53,7 @@ namespace CUSTOM_AI {
 		// Returns NULL if not found
 		STRUCT_INF_AI_UNIT_LIST_ELEM *FindWonderToAttackInfAIElemPtr(STRUCT_INF_AI *infAI, long int playerId);
 
-		// If current target is still a valid target, return its pointer in InfAI elem list.
+		// If current target is still a valid target - and its position is known -, return its pointer in InfAI elem list.
 		// Returns NULL otherwise
 		STRUCT_INF_AI_UNIT_LIST_ELEM *GetInfAIElemForCurrentTargetIfStillEligible(STRUCT_INF_AI *infAI, long int targetPlayerId,
 			STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
@@ -70,7 +70,7 @@ namespace CUSTOM_AI {
 		long int lastTargetChangeGameTime[9]; // Only updated when target changes
 		long int lastTargetSelectionGameTime[9]; // Updated each time a target is selected, even if same as before
 		STRUCT_POSITION_INFO priorityLocation[9]; // If other than (-1,-1), determines a location (for each AI player) to attack with high priority (all relics, etc)
-		
+		bool groupIsInMyTown[9]; // True to indicate unit group is currently n town (defensive position or idle)
 
 		// Set target in unitGroup, in internal data, in targetInfo.
 		void SetTarget(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo,
