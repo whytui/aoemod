@@ -110,6 +110,7 @@ namespace CUSTOM_AI {
 			this->enemyUnitNearMyMainUnitIsCurrentlyVisible = false;
 			this->mainUnitProtectionRadius = 5;
 			this->mainUnitSearchZoneRadius = 5;
+			this->enemiesNearMyMainUnit.clear();
 		}
 
 		// Returns true if I have been attacked recently
