@@ -167,7 +167,9 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 		}
 	}
 
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(settings && settings->IsCheckSumValid());
 	assert(global && global->IsCheckSumValid());
 	STRUCT_UNIT_BASE *groupLeader = global->GetUnitFromId(unitGroup->commanderUnitId);
 	bool leaderIsRanged = false;
@@ -181,25 +183,41 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 	}
 	
 	char leaderTerrainZoneId = groupLeader->GetMyTerrainZoneId();
-	STRUCT_INF_AI_UNIT_LIST_ELEM *nearbyTarget = NULL;
-	STRUCT_INF_AI_UNIT_LIST_ELEM *secondaryTarget = NULL; // valid target which does not respect "priority position"
-	STRUCT_INF_AI_UNIT_LIST_ELEM *farTarget = NULL; // valid target which is really far
+	STRUCT_INF_AI_UNIT_LIST_ELEM *militaryTargetsByDistance[3]; // Military targets. index 0=close=priority, index2=far
+	STRUCT_INF_AI_UNIT_LIST_ELEM *buildingTargetsByDistance[3]; // Building targets. index 0=close=priority, index2=far
+	STRUCT_INF_AI_UNIT_LIST_ELEM *otherLivingTargetsByDistance[3]; // Civilians, etc. index 0=close=priority, index2=far
+	for (int i = 0; i < 3; i++) { // init
+		buildingTargetsByDistance[i] = militaryTargetsByDistance[i] = otherLivingTargetsByDistance[i] = NULL;
+	}
 
 	for (int i = 0; i < infAI->unitElemListSize; i++) {
 		if (infAI->unitElemList[i].playerId == targetPlayerId) {
-			STRUCT_INF_AI_UNIT_LIST_ELEM **targetToUpdate = &nearbyTarget;
+			GLOBAL_UNIT_AI_TYPES curAIType = infAI->unitElemList[i].unitClass;
+			int distanceLevel = 0;
+			STRUCT_INF_AI_UNIT_LIST_ELEM **targetToUpdate = &militaryTargetsByDistance[0];
 			if (usePriorityPos) {
 				long int diffX = infAI->unitElemList[i].posX - priorityPosX;
 				long int diffY = infAI->unitElemList[i].posY - priorityPosY;
 				long int diffsqr = diffX * diffX + diffY * diffY;
 				if (diffsqr <= losToUse * losToUse) {
-					targetToUpdate = &nearbyTarget;
+					distanceLevel = 0;
 				} else {
 					if (diffsqr > AI_CONST::townSizeSquare) { // enemy further than "town size": consider it very far, with very low priority (if using a priority position)
-						targetToUpdate = &farTarget;
+						distanceLevel = 2;
 					} else {
-						targetToUpdate = &secondaryTarget;
+						distanceLevel = 1;
 					}
+				}
+			}
+			bool curIsMilitaryUnitOrTower = ((infAI->unitElemList[i].attack > 0) && (infAI->unitElemList[i].unitClass != TribeAIGroupCivilian));
+			bool curIsBuilding = !curIsMilitaryUnitOrTower && (infAI->unitElemList[i].unitClass != TribeAIGroupBuilding);
+			if (curIsMilitaryUnitOrTower) {
+				targetToUpdate = &militaryTargetsByDistance[distanceLevel];
+			} else {
+				if (curIsBuilding) {
+					targetToUpdate = &buildingTargetsByDistance[distanceLevel];
+				} else {
+					targetToUpdate = &otherLivingTargetsByDistance[distanceLevel];
 				}
 			}
 
@@ -207,7 +225,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 				(GetUnitStruct(infAI->unitElemList[i].unitId) != NULL)) {
 				bool curElemIsBetter = (*targetToUpdate == NULL);
 				if (*targetToUpdate != NULL) {
-					curElemIsBetter = ((*targetToUpdate)->attack <= 0) && (infAI->unitElemList[i].attack > 0);
+					curElemIsBetter = ((*targetToUpdate)->attack <= 0) && curIsMilitaryUnitOrTower;
 				}
 
 				*targetToUpdate = &infAI->unitElemList[i];
@@ -216,17 +234,57 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 	}
 
 	targetInfo->targetSearchInProgress = 0;
-	if (nearbyTarget) {
-		this->SetTarget(infAI, unitGroup, targetInfo, nearbyTarget, leaderTerrainZoneId, 1);
-		return nearbyTarget;
-	}
-	if (secondaryTarget) {
-		this->SetTarget(infAI, unitGroup, targetInfo, secondaryTarget, leaderTerrainZoneId, 1);
-		return secondaryTarget;
-	}
-	if (farTarget) {
-		this->SetTarget(infAI, unitGroup, targetInfo, farTarget, leaderTerrainZoneId, 1);
-		return farTarget;
+	// Select top-priority target from "grid" of targets
+	if (settings->isDeathMatch) {
+		// Distance is a sufficient criterion. Of course, at similar distance, try to attack living units, but avoid running through map too much
+		for (int i = 0; i < 3; i++) {
+			if (militaryTargetsByDistance[i]) {
+				this->SetTarget(infAI, unitGroup, targetInfo, militaryTargetsByDistance[i], leaderTerrainZoneId, 1);
+				return militaryTargetsByDistance[i];
+			}
+			if (otherLivingTargetsByDistance[i]) {
+				this->SetTarget(infAI, unitGroup, targetInfo, otherLivingTargetsByDistance[i], leaderTerrainZoneId, 1);
+				return otherLivingTargetsByDistance[i];
+			}
+			if (buildingTargetsByDistance[i]) {
+				this->SetTarget(infAI, unitGroup, targetInfo, buildingTargetsByDistance[i], leaderTerrainZoneId, 1);
+				return buildingTargetsByDistance[i];
+			}
+		}
+	} else {
+		// Scenario, random games: avoid attacking buildings as main target when there are living units to attack: it would waste my time, maybe I won't even manage to destroy the building...
+		// TODO: decide if I must avoid or attack towers according to group composition
+		for (int i = 0; i < 2; i++) {
+			if (militaryTargetsByDistance[i]) {
+				this->SetTarget(infAI, unitGroup, targetInfo, militaryTargetsByDistance[i], leaderTerrainZoneId, 1);
+				return militaryTargetsByDistance[i];
+			}
+			if (otherLivingTargetsByDistance[i]) {
+				this->SetTarget(infAI, unitGroup, targetInfo, otherLivingTargetsByDistance[i], leaderTerrainZoneId, 1);
+				return otherLivingTargetsByDistance[i];
+			}
+		}
+		// Nearby and middle-distance units have lower priority in this case
+		for (int i = 0; i < 2; i++) {
+			if (buildingTargetsByDistance[i]) {
+				this->SetTarget(infAI, unitGroup, targetInfo, buildingTargetsByDistance[i], leaderTerrainZoneId, 1);
+				return buildingTargetsByDistance[i];
+			}
+		}
+		// Last: "very far" units
+		if (militaryTargetsByDistance[2]) {
+			this->SetTarget(infAI, unitGroup, targetInfo, militaryTargetsByDistance[2], leaderTerrainZoneId, 1);
+			return militaryTargetsByDistance[2];
+		}
+		if (otherLivingTargetsByDistance[2]) {
+			this->SetTarget(infAI, unitGroup, targetInfo, otherLivingTargetsByDistance[2], leaderTerrainZoneId, 1);
+			return otherLivingTargetsByDistance[2];
+		}
+		// Last of all: far buildings
+		if (buildingTargetsByDistance[2]) {
+			this->SetTarget(infAI, unitGroup, targetInfo, buildingTargetsByDistance[2], leaderTerrainZoneId, 1);
+			return buildingTargetsByDistance[2];
+		}
 	}
 	return NULL;
 }

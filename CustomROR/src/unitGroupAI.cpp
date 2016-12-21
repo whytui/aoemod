@@ -119,7 +119,7 @@ void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROU
 }
 
 
-// Attack a target or use retreat to approach a zone to defend/attack. Updates unitGroup->lastTaskingTime_ms if tasked.
+// Attack a target or approaches a zone to defend/attack. Updates unitGroup->lastTaskingTime_ms if tasked.
 // Updates unitGroup->lastAttackTaskingTime_ms is an attack task is assigned.
 // If target is not found and no default retreat position if provided (-1), the group is NOT tasked
 // Returns the used task id.
@@ -746,6 +746,19 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 				// Remark: there is no risk this "tasking" occurs too many times in a row, because here the case is "I have a target that is not visible" and we set a visible target.
 				this->SetUnitGroupCurrentTask(&player->ptrAIStruct->structTacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 1, false);
 				return true;
+			}
+			if (global->currentGameTime - unitGroup->lastTaskingTime_ms < AI_CONST::delayBetweenUnitGroupAttackTasking_ms) {
+				return true;
+			}
+			// Commander has no target. Continue attacking "non-visible" one = go to last known position using infAI elem.
+			// Find infAI elem for currentTargetUnit
+			AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem = FindInfAIUnitElemInList(&tacAI->ptrMainAI->structInfAI, currentTargetUnit->unitInstanceId);
+			if (elem) {
+				this->AttackOrRetreat(tacAI, unitGroup, NULL, elem->posX, elem->posY, false);
+				return true;
+			} else {
+				// The target is unknown in infAI list. Prevent the game code from possibly cheating here. We'll have to find a new valid target.
+				this->SetUnitGroupTarget(unitGroup, NULL);
 			}
 		}
 		// Is some unit attacking the leader or some unit of the group (or some of my nearby units ?)

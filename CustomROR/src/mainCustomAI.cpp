@@ -124,6 +124,11 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 	if (!tacAI) {
 		tacAI = &this->mainAI->structTacAI; // this should never happen
 	}
+
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	// Exit in MP games because some treatments are not compatible
+	if (!settings || !settings->IsCheckSumValid() || !settings->isSinglePlayer) { return; }
+
 	if (!enemyPlayer) { return; }
 	long int enemyPlayerId = enemyPlayer->playerId;
 	assert((enemyPlayerId >= 0) && (enemyPlayerId < 9) && (enemyPlayerId < global->playerTotalCount));

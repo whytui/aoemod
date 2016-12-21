@@ -141,7 +141,7 @@ namespace CUSTOM_AI {
 		void SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, UNIT_GROUP_TASK_IDS taskId,
 			long int resetOrg, bool force);
 
-		// Attack a target or use retreat to approach a zone to defend/attack. Updates unitGroup->lastTaskingTime_ms if tasked.
+		// Attack a target or approaches a zone to defend/attack. Updates unitGroup->lastTaskingTime_ms if tasked.
 		// Updates unitGroup->lastAttackTaskingTime_ms is an attack task is assigned.
 		// If target is not found and no default retreat position if provided (-1), the group is NOT tasked
 		// Returns the used task id.
