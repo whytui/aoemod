@@ -62,6 +62,7 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		this->lastComputedDislikeSubScore[i] = 0;
 	}
 
+	// TODO: randomImpact is not compliant with MP games ?
 	int randomImpact = TARGETING_CONST::persistenceDelayOfIndividualEnemyAttacksInTargetingHistoryRandomImpact;
 	int maxDelayToSearchForEnemyAttacks = TARGETING_CONST::persistenceDelayOfIndividualEnemyAttacksInTargetingHistory +
 		randomizer.GetRandomValue(-randomImpact, randomImpact);
@@ -104,11 +105,23 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		// Attacking a allied player ?
 
 		if (this->militaryAIInfo) {
+			// Has player a tower in my town ?
+			if (this->militaryAIInfo->enemyTowerInMyTown && (this->militaryAIInfo->enemyTowerInMyTown->unitId > -1) &&
+				(this->militaryAIInfo->enemyTowerInMyTown->playerId == targetPlayerId)) {
+				if (global->GetUnitFromId(this->militaryAIInfo->enemyTowerInMyTown->unitId)) {
+					this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreHasTowerInMyTown;
+				} else {
+					ResetInfAIUnitListElem(this->militaryAIInfo->enemyTowerInMyTown);
+					this->militaryAIInfo->enemyTowerInMyTown = NULL;
+				}
+			}
+
+			// Add "score" for players that attacked me
 			int attacksCountByPlayer = this->militaryAIInfo->GetAttacksCountFromPlayerInPeriod(targetPlayerId, periodBeginTime, periodEndTime);
 			if (attacksCountByPlayer > averageAttackCountByPlayerDuringPeriod) {
 				this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreAttackedMeMoreThanAverage; // This player attacked me "more than average" => I don't like him
 			}
-
+			// Especially for "panic modes" triggered
 			if (this->militaryAIInfo->GetPanicModesCountFromPlayerInPeriod(targetPlayerId, periodBeginTime, periodEndTime) > 0) {
 				this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreAttackedMyTown;
 			}
@@ -116,8 +129,6 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 
 		int randomFactor = randomizer.GetRandomValue_normal_moderate(0, TARGETING_CONST::dislikeSubScoreRandomFactor);
 		this->lastComputedDislikeSubScore[targetPlayerId] += randomFactor;
-
-
 	}
 
 
@@ -136,7 +147,7 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		bool ignoreThisUnit = ignoreThisPlayer[unitPlayerId];
 		long int unitPosX = player->ptrAIStruct->structInfAI.unitElemList[i].posX;
 		long int unitPosY = player->ptrAIStruct->structInfAI.unitElemList[i].posY;
-		if (!ignoreThisUnit) {
+		if (!ignoreThisUnit && (unitPosX >= 0) && (unitPosY >= 0)) {
 			bool isVisible = PLAYER::IsFogVisibleForPlayer(player, unitPosX, unitPosY); // fast operation: ok with performance
 			if (isVisible) {
 				STRUCT_UNIT_BASE *unit = global->GetUnitFromId(player->ptrAIStruct->structInfAI.unitElemList[i].unitId);
@@ -194,11 +205,16 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 	}
 		
 	// To ensure some continuity in targeting, current target is given a small boost (not forever, this is limited to "msAfterWhichCurrentTargetLosesExtraValue")
-	if ((player->ptrAIStruct->structTacAI.targetPlayers.usedElements > 0) &&
-		(this->lastTargetPlayerChangeGameTime - global->currentGameTime > TARGETING_CONST::msAfterWhichCurrentTargetLosesExtraValue))
+	long int curDelay = global->currentGameTime - this->lastTargetPlayerChangeGameTime;
+	if (curDelay < 0) { curDelay = 0; }
+	if (this->lastTargetPlayerChangeGameTime <= 0) { curDelay = 1000000; }
+	if (player->ptrAIStruct->structTacAI.targetPlayers.usedElements > 0)
 	{
 		int currentTargetPlayerId = player->ptrAIStruct->structTacAI.targetPlayers.unitIdArray[0];
-		this->lastComputedDislikeSubScore[currentTargetPlayerId] += TARGETING_CONST::extraValueForCurrentTarget;
+		long int extraValueDecay = ((curDelay / 1000) * TARGETING_CONST::extraValueForCurrentTargetDecayBy100SecondsPeriod) / 100;
+		long int extraValue = TARGETING_CONST::extraValueForCurrentTarget - extraValueDecay;
+		if (extraValue < 0) { extraValue = 0; }
+		this->lastComputedDislikeSubScore[currentTargetPlayerId] += extraValue;
 	}
 
 	for (int i = 0; i < 9; i++) {
@@ -288,7 +304,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 		allRelicsOrRuinsCounter[i] = 0;
 	}
 
-	// Count wonders/relics/ruins : they are public-visible: there is no cheating in counting them this way
+	// Count wonders/relics/ruins : they are public-visible (in scores): there is no cheating in counting them this way
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 		STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(loopPlayerId);
 		if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) && (loopPlayer->aliveStatus != 2) &&
@@ -344,6 +360,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 				long int playerScoreFactor = 0; // default: no impact
 				if (attackWinningPlayer && (attackWinningPlayerFactor > 0)) {
 					// Note: in game code, the formula is completely erroneous (DIVIDES by factor !)
+					// TODO: find a better formula ?
 					playerScoreFactor = loopPlayer->ptrScoreInformation->currentTotalScore * attackWinningPlayerFactor / 100;
 					// Note: In game code, there is a "else" that does the opposite effect if attackWinningPlayer is false (factor is substracted !)
 				}

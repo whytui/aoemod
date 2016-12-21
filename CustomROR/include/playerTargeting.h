@@ -32,14 +32,15 @@ namespace CUSTOM_AI {
 		const long int dislikeAmountNoWinningAllArtefacts = 20; // Not triggering a victory condition
 		const long int dislikeAmountNoWinningWonderBuilt = 30; // Not triggering a victory condition
 		const long int dislikeAmountNoWinningWonderInConstruction = 15; // Not triggering a victory condition
-		const long int extraValueForCurrentTarget = 8; // (fake) dislike value added to current target
-		const long int msAfterWhichCurrentTargetLosesExtraValue = 180 * 1000; // After x milliseconds with the same target player, current target no longer receives "extraValueForCurrentTarget" (more chances to change target)
+		const long int extraValueForCurrentTarget = 16; // (fake) maximum dislike value added to current target. This base value is decreased as time passes since last target player change.
+		const long int extraValueForCurrentTargetDecayBy100SecondsPeriod = 10; // (fake) dislike value added to current target that is decreased (decay) during 100 seconds.
+
 		// Dislike score "sub" values + parameters
-		
 		const long int dislikeSubScoreRandomFactor = 10;
 		const long int dislikeSubScoreAttackedMeMoreThanAverage = 5;
 		const long int dislikeSubScoreAttackedMyTown = 12;
 		const long int dislikeSubScoreMostSpottedUnitsMyTown = 3;
+		const long int dislikeSubScoreHasTowerInMyTown = 20;
 
 	}
 

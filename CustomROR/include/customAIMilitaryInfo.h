@@ -37,6 +37,7 @@ namespace CUSTOM_AI {
 		
 		// Refers to information in InfAI list of an enemy building spotted in my town (potential target for idle units or in-town groups)
 		STRUCT_INF_AI_UNIT_LIST_ELEM *enemyBuildingInMyTown;
+		// Refers to information in InfAI list of an enemy tower spotted in my town
 		STRUCT_INF_AI_UNIT_LIST_ELEM *enemyTowerInMyTown;
 
 		void ResetAllInfo();
