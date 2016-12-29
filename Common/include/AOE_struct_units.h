@@ -80,7 +80,7 @@ namespace AOE_STRUCTURES {
 
 
 
-	// Eye candy (type10) / common (base) class for all units (unit instances).
+	// Eye candy (type10) / common (base) class for all units (unit instances). Name=RGE_Static_Object
 	// A8 7D 54 00. Size=0x88 (constructor 0x04A64B0)
 	// 0x4CD2D0 = unitGroupElem.task(tacAI, mainAI, unitGrpTaskId, resetOrg, arg5=oCA)
 	// Methods:
@@ -88,6 +88,7 @@ namespace AOE_STRUCTURES {
 	// +0x74 = unit.CalcDamageFrom(attacksCount, pAttacksList, f_altitudeFactor, actorPlayer, actorUnit). Ex 0x426910.
 	// +0xD8 = unit.addVisibility(player, arg2, distance?)
 	// +0xDC = unit.removeVisibilityFrom(player, arg2, distance?)
+	// +0xEC = unit.setIsUnderAttack(bool)
 	// +0xF0 = unit.GetAttackAltitudeFactor(targetUnit). WARNING: Returns in ST (FLD xxx), not EAX. Ex 0x4AEC00.
 	// +0xFC = unit.FLD_speed()
 	// +0x100 = unit.FLD_reloadTime1()
@@ -164,7 +165,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_080;
 		char unknown_084; // related to movement ? "isMapInfoUpToDateForThisUnit" ?
 		char unknown_085; // related to movement ? Previous value of +84 ?
-		char unknown_086_hasTarget; // ? Or maybe "is currently attacked/target of an attack" ? For map blinking?
+		char isBeingAttacked; // +86. For map blinking (+other treatments?)? This is constantly reset and re-computed in "unit.timerUpdate(?)" 0x426BF0 treatments.
 		char unknown_087;
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00547DA8); }

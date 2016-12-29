@@ -225,6 +225,7 @@ namespace AOE_CONST_INTERNAL
 		CST_GET_FARM_DEPLETED = 0x7E, // Sound 0x10
 		CST_GET_UNKNOWN_1F9 = 0x1F9, // see 0x4F3531
 		CST_GET_UNKNOWN_1FA = 0x1FA, // Villager activity end, could not find nearby similar targets ? arg4=activityId
+		//CST_GET_SAW_ENEMY_UNIT = 0x1FF, // Unsure ?? possible confusion with activity tasks IDs
 		CST_GET_UNIT_ATTACKED = 0x201,
 		CST_GET_MOVEMENT_FINISHED = 0x202, // unsure
 		CST_GET_UNKOWN_206 = 0x206,
@@ -399,12 +400,12 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_1F7 = 0x1F7, // Notify something...? See 0x4143B7
 		CST_ATI_UNKNOWN_1F8 = 0x1F8, // Notify something...? See 0x4143B7
 		CST_ATI_NOTIFY_ACTION_FAILED = 0x1F9, // To confirm
-		CST_ATI_NOTIFY_ACTION_COMPLETED = 0x1FA, // Notify activity completed (normal completion
+		CST_ATI_NOTIFY_ACTION_COMPLETED = 0x1FA, // Notify activity completed (normal completion)
 		CST_ATI_NOTIFY_ACTION_INVALIDATED = 0x1FB, // 410999
 		CST_ATI_UNKNOWN_1FC = 0x1FC, // Notify something... Target moved ? The "target is no longer visible" is a sub-case of this
 		CST_ATI_UNKNOWN_1FD = 0x1FD, // Notify something...? See 0x4143B7
 		CST_ATI_UNKNOWN_1FE = 0x1FE, // Notify something...? See 0x41426A
-		CST_ATI_NOTIFY_SAW_ENEMY_UNIT = 0x1FF, // To confirm. See 0x4143B7
+		CST_ATI_NOTIFY_SAW_ENEMY_UNIT = 0x1FF, // To confirm. See 0x4143B7 WRONG ? is it GAME_EVENT_TYPES instead ?
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
 		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted?
 		CST_ATI_UNKNOWN_203 = 0x203, // ? See 0x4143B7

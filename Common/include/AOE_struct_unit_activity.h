@@ -37,6 +37,7 @@ namespace AOE_STRUCTURES
 
 	// Size = 0x18. No dedicated constructor? See 0x414D90 for init/adding to array.
 	// Values remain in fields even when unit is idle.
+	// Is this "NotifyEvent" ?
 	class STRUCT_UNIT_ACTIVITY_QUEUE {
 	public:
 		long int targetUnitId; // +0. Sometimes = actor?
@@ -89,6 +90,7 @@ namespace AOE_STRUCTURES
 		unsigned long int checksum;
 		STRUCT_UNIT_BASE *ptrUnit; // +4. actor unit.
 		unsigned long int unknown_008;
+		// TODO: there might be unitGroupId somewhere here...
 		unsigned long int unknown_00C;
 		// 0x10
 		long int targetsInfoArrayUsedElements; // Number of "used" elements in array.
@@ -116,8 +118,11 @@ namespace AOE_STRUCTURES
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES previousTargetUnitId; // +58. Previous target class
 		long int previousTargetUnitType; // +5C. Type=GLOBAL_UNIT_AI_TYPES but as a dword.
 		// 0x60
-		// TODO: is this "units attackING me" ?
-		STRUCT_AI_UNIT_LIST_INFO listOfUnitIdThatAttackedMe; // +60. Warning, arraySize can be >usedElemCount here. List of units that attacked me.
+		// Recomputed in each activity update (very often!)?
+		// Unis IDs are added on "activity.processNotify" for being attacked.
+		// Unit IDs are removed on "updateActivity" (?), cf loop in 40F8E2: for each unit: if unit.activity.targetId != myUnitId then remove from list.
+		// Warning: Units that do NOT have an activity (tame lion...) are not well listed here (it's quite a bug in the game, units are supposed to all have an activity... I think)
+		STRUCT_AI_UNIT_LIST_INFO unitIDsThatAttackMe;
 		// 0x70
 		float unknown_070_posY;
 		float unknown_074_posX;

@@ -324,9 +324,9 @@ namespace AOE_STRUCTURES {
 		res += " ";
 		res += this->ExportArrayOfStruct(obj->targetsInfoArray, obj->targetsInfoArrayUsedElements);
 
-		res += "\nunknown60:";
-		for (int i = 0; i < obj->listOfUnitIdThatAttackedMe.usedElements; i++) {
-			unsigned long int tmp = this->GetDwordFromRORData((unsigned long int)(obj->listOfUnitIdThatAttackedMe.unitIdArray + i));
+		res += "\nunitIDsThatAttackMe:";
+		for (int i = 0; i < obj->unitIDsThatAttackMe.usedElements; i++) {
+			unsigned long int tmp = this->GetDwordFromRORData((unsigned long int)(obj->unitIDsThatAttackMe.unitIdArray + i));
 			long int unitId = (long int)tmp;
 			res += " ";
 			res += std::to_string(unitId);
