@@ -99,7 +99,7 @@ namespace AOE_STRUCTURES {
 		char unknown_5A; // a counter (decremented...)?
 		char unknown_5B;
 		bool IsCheckSumValid() { return this->checksum == 0x005423F8; }
-		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ATTACK_9; } // really unsure :(
+		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ATTACK; } // really unsure :(
 	};
 	static_assert(sizeof(STRUCT_ACTION_ATTACK) == 0x5C, "STRUCT_ACTION_ATTACK size");
 

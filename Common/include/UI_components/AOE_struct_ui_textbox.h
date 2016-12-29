@@ -12,8 +12,8 @@
 */
 namespace AOE_STRUCTURES
 {
-
-	// Size 0x16C? - Constructor = 0x462050
+	
+	// Size 0x16C? - Constructor = 0x462050. Name=TEditPanel
 	// Can be created in 0x0456A30
 #define CHECKSUM_UI_TEXTBOX 0x00545220
 	class STRUCT_UI_TEXTBOX : public STRUCT_ANY_UI { // 20 52 54 00

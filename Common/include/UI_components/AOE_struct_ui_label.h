@@ -12,6 +12,14 @@
 */
 namespace AOE_STRUCTURES
 {
+	// Represents text alignment for labels (including combobox displayed text). Vertical & horizontal alignment are separate values.
+	enum TextPanelAlignment : long int {
+		ALIGN_CENTER = 0, // align center.
+		ALIGN_LEFT = 1, // align left. Not relevant for vertical align
+		ALIGN_RIGHT = 2, // align right. Not relevant for vertical align
+		ALIGN_TOP = 3, // align top. Not relevant for horizontal align
+		ALIGN_BOTTOM = 4 // align bottom. Not relevant for horizontal align
+	};
 
 	// Size 0x188
 	// Constructor=0x4685B0 (no arg)
@@ -30,8 +38,8 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_108;
 		unsigned long int unknown_10C;
 		// 0x110
-		unsigned long int unknown_110;
-		unsigned long int unknown_114;
+		TextPanelAlignment verticalAlign; // +110. Set in 0x4F7CF0.
+		TextPanelAlignment horizontalAlign; // +114. Set in 0x4F7CF0.
 		unsigned long int unknown_118;
 		unsigned long int unknown_11C; // default 2 ?
 		// 0x120

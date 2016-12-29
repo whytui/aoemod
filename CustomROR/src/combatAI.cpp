@@ -410,13 +410,13 @@ bool ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity, long int
 	}
 	bool newTargetAttacksMe = newTargetUnitAction && (
 		(newTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) ||
-		(newTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ATTACK_9) ||
+		(newTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ATTACK) ||
 		(newTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_CONVERT)
 		) &&
 		(newTargetUnitAction->targetUnit == actorUnit);
 	bool actionTargetAttacksMe = actionTargetUnitAction && (
 		(actionTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) ||
-		(actionTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ATTACK_9) ||
+		(actionTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ATTACK) ||
 		(actionTargetUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_CONVERT)
 		) &&
 		(actionTargetUnitAction->targetUnit == actorUnit);

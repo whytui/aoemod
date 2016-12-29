@@ -14,7 +14,7 @@ namespace AOE_STRUCTURES
 {
 
 	// Size = 0x1C4 // B8 56 54 00
-	// Constructor = 0x466E30.
+	// Constructor = 0x466E30. Destructor = 0x466F80
 #define CHECKSUM_UI_SCROLLBAR 0x005456B8
 	class STRUCT_UI_SCROLLBAR : public STRUCT_ANY_UI {
 	public:

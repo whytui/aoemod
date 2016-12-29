@@ -236,6 +236,10 @@ static bool test_ror_structures() {
 	AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE uiunitinfozone;
 	trs_assert(&uiunitinfozone, 0x1E0, &uiunitinfozone.currentUnitPlayer);
 
+	AOE_STRUCTURES::STRUCT_MP_HOST_OPTIONS mpho;
+	trs_assert(&mpho, 0xCC, &mpho.unknown_CC);
+	trs_assert(&mpho, 0x105, &mpho.allTechnologies);
+
 #endif
 	return true;
 }

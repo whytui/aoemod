@@ -11,7 +11,7 @@
 namespace AOE_STRUCTURES
 {
 
-	class STRUCT_UI_OBJ_UNKNOWN_INFO {
+	class STRUCT_UI_DRAW_AREA {
 	public:
 		unsigned long int unknown_00; // A pointer
 		long int hWnd;
@@ -26,25 +26,26 @@ namespace AOE_STRUCTURES
 
 
 #define CHECKSUM_ANY_UI 0x00544AD8
-	// Parent class for UI objects (both screens and UI components).
+	// Parent class for UI objects (both screens and UI components) = TPanel
 	// Size=0xF4 for this class, but all child classes are larger !
-	// Constructor: 004523F0 for "screen" objects, 00452580 for components
+	// Constructor: 004523F0 for "screen" objects (arg1=name), 00452580 for components (no arg). Destructor=0x4526B0
 	// In general, you should not modify these members directly. You are supposed to use methods (few are implemented in this solution).
 	// D8 4A 54 00 for this base (parent) class
 	// [EDX+C4] = uiComponent.setFocus(doFocus)
+	// 0x451F20 = struct PanelNode * TPanelSystem::findPanelNode(char *panelName)
 	class STRUCT_ANY_UI {
 	public:
 		unsigned long int checksum; // Depends on UI object type
-		unsigned long int unknown_004; // pointer ?
-		STRUCT_ANY_UI *previousPopup; // +08. Really really unsure
-		unsigned long int unknown_00C_posX; // unsure. Absolute posX or something like that ?
+		STRUCT_ANY_UI *previousPanel; // +04.
+		STRUCT_ANY_UI *previousPopup; // +08. Really really unsure. Previous modal panel ?
+		long int posX; // +0x0C. Absolute posX
 		// 0x10
-		unsigned long int unknown_010_posY; // unsure. Absolute posY or something like that ?
+		long int posY; // +x010. Absolute posY
 		long int sizeX;
 		long int sizeY;
 		char *screenName;
 		// 0x20
-		STRUCT_UI_OBJ_UNKNOWN_INFO *unknown_020; // pointer. +04=hWnd +13C=evtStatus?? +1F6=objectIndex,+F4+objectIndex*4=ButtonId +17C=hObject?
+		STRUCT_UI_DRAW_AREA *renderArea; // pointer. +04=hWnd +13C=evtStatus?? +1F6=objectIndex,+F4+objectIndex*4=ButtonId +17C=hObject?
 		long int minPosX; // +24. Min X position for this UI object. +24=a pRect object (4 position dwords)
 		long int minPosY; // +28
 		long int maxPosX; // +2C
@@ -121,8 +122,8 @@ namespace AOE_STRUCTURES
 		// Components: F4 is 2 words...?
 
 		long int GetHWnd() {
-			if (!this->unknown_020) { return 0; }
-			return this->unknown_020->hWnd;
+			if (!this->renderArea) { return 0; }
+			return this->renderArea->hWnd;
 		}
 	};
 	static_assert(sizeof(STRUCT_ANY_UI) == 0xF4, "STRUCT_ANY_UI size");

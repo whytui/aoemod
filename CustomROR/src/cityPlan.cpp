@@ -257,7 +257,7 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 							bool isBusy = false; // true if unit has already a combat task (if I can see that information)
 							if (action && posIsVisible) { // do not cheat: if not visible, we can't know if unit is idle/busy, and with which kind of task
 								isBusy = (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) ||
-									(action->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK_9) ||
+									(action->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK) ||
 									(action->actionTypeID == UNIT_ACTION_ID::CST_IAI_CONVERT);
 							}
 							if (!isBusy || hasBlastDamage) {

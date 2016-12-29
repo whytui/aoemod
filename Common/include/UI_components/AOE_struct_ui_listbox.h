@@ -47,7 +47,7 @@ namespace AOE_STRUCTURES
 		char unknown_174[0x180 - 0x174];
 		long int unknown_180; // +180. marginX ?
 		long int unknown_184; // marginY ?
-		unsigned long int unknown_188;
+		long int unknown_188; // autoTrack ?
 		unsigned long int unknown_18C;
 		long int unknown_190; // default 50
 		unsigned long int unknown_194;

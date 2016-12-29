@@ -59,7 +59,7 @@ STRUCT_UNIT_BASE *GetAttackTarget(STRUCT_UNIT_BASE *unit) {
 	if (!commanderAction) {
 		return NULL;
 	}
-	if ((commanderAction->actionTypeID != UNIT_ACTION_ID::CST_IAI_ATTACK_9) && (commanderAction->actionTypeID != UNIT_ACTION_ID::CST_IAI_CONVERT)) {
+	if ((commanderAction->actionTypeID != UNIT_ACTION_ID::CST_IAI_ATTACK) && (commanderAction->actionTypeID != UNIT_ACTION_ID::CST_IAI_CONVERT)) {
 		return NULL;
 	}
 	STRUCT_UNIT_BASE *targetUnit = commanderAction->targetUnit;

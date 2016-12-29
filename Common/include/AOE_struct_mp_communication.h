@@ -14,6 +14,58 @@ namespace AOE_STRUCTURES {
 	typedef char char_array_128[0x80];
 
 
+#pragma pack(push, 1) // Prevent compiler from aligning on dwords (or other alignment)
+	// "Variable" size (depending on host version ?), in ROR 1.0a (last official version), it is 0x114.
+	// See 0x504FD0 = MPComm.copyHostOptionsFrom(tempOptionsStruct, size)
+	class STRUCT_MP_HOST_OPTIONS {
+	public:
+		float gameSpeed;
+		char isScenario; // +04
+		char scenarioName[0x80]; // +05. Scenario name, if relevant (or "").
+		char isSinglePlayer; // +85
+		char isMultiPlayer; // +86
+		unsigned char mapSizeX; // +87
+		unsigned char mapSizeY; // +88
+		char unknown_89_maxPlayerCount; // +89. Maximum allowed player count for map ?
+		char enableCheatMode; // +8A
+		char pathFindingMPChoice; // +8B. To confirm
+		char unknown_8C; // +8C. Cf unknown_984.
+		char hasRevealMapAtStartup; // +8D
+		char hasNoFogAtStartup; // +8E
+		char enableColoredChat; // +8F. To confirm
+		char playerCountWithoutGaia; // +90
+		char unknown_91_enableDeveloperOptions; // +91. Not sure
+		char playerGameVersion[9]; // +92 to +9A included. 0="", 1="1.0", 2="1.0a", etc. Index is playerId
+		AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL difficultyLevel; // +9B. 1-byte.
+		char teamNumber[9]; // +9C. Index is playerId
+		char unknown_A5[3]; // unused ?
+		// +A8: a structure starts here ?
+		long int mapSizeChoice; // +A8
+		long int mapTypeChoice; // +AC
+		long int unknown_B0; // +B0. gameSettings+A84
+		long int unknown_B4; // +B4. gameSettings+A88
+		long int victoryConditionChoice; // +B8
+		unsigned long int victoryConditionChoice_parameter; // +BC. or float ?
+		char chosenCiv[9]; // +C0 (relative +18) to +C8
+		char unknown_C9[3]; // +C9
+		long int unknown_CC[9]; // +CC. Cf unknown_AA0. Limits player # ? 8 Players: [0,1,2,3,4,5,6,7] 4 Players: [0,1,2,3,0,1,2,3] 2 Players: [0,1,0,1,0,1,0,1]
+		char chosenPlayerNum[9]; // +F0 (relative +48).  Corresponds to the colored number in game settings screen
+		char playerNameCivDLLID_Offset[9]; // +F9
+		char unknown_102; // +102. Cf unknown_AD6
+		char unknown_103; // +103. Cf unknown_AD7
+		char fixedPositions; // +104
+		char allTechnologies; // +105
+		char unknown_106[2];
+		long int initialResourcesChoice; // +108
+		long int initialAgeChoice; //+10C
+		char unknown_110; // +110. cf unknown_AE4
+		char isDeathMatch; // +111
+		char populationLimit; // +112.
+		char unused_113; // +113
+	};
+	static_assert(sizeof(STRUCT_MP_HOST_OPTIONS) == 0x114, "STRUCT_MP_HOST_OPTIONS size");
+#pragma pack(pop)
+
 
 	// This structure does not have a checksum. It is referenced by 0x580DA8
 	// It is probably this structure that collects all 'common' information to be multiplayer-compatible (player names, etc).
@@ -22,14 +74,14 @@ namespace AOE_STRUCTURES {
 	class STRUCT_MP_COMMUNICATION {
 	public:
 		unsigned long int unknown_0000;
-		unsigned long int unknown_0004; // ptr to float?
+		STRUCT_MP_HOST_OPTIONS *MPGameOptions; // +04. See size in +171C field. Contains MP game settings info. Freed in 0x4258A0.
 		unsigned long int unknown_0008;
 		unsigned long int unknown_000C;
 		// 0x10
 		unsigned long int unknown_0010;
 		unsigned long int unknown_0014;
 		unsigned long int *unknown_0018_ptr; // Ptr to ? Player types ?
-		unsigned long int unknown_001C; // type ?
+		long int unknown_001C; // flag ?
 		// 0x20
 		unsigned long int unknown_0020; // Dword
 		char unknown_0024[0x9D0 - 0x24];
@@ -101,7 +153,7 @@ namespace AOE_STRUCTURES {
 		// 0x1700
 		char unknown_1708[0x1718 - 0x1708];
 		unsigned long int unknown_1718;
-		unsigned long int unknown_171C; // ?
+		long int MPGameOptionsStructSize; // +171C. Game options struct size (cf +04). Set in 0x425848. Is 0x114 in ROR 1.0a version.
 		unsigned long int unknown_1720[10]; // +1720. 1 per (COMM) playerId (0 and 9 unused)
 		unsigned long int unknown_1748; // ?
 		unsigned long int unknown_174C[10]; // +174C ?. 1 per (COMM) playerId (0 and 9 unused)

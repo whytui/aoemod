@@ -3837,7 +3837,7 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 	// Remark: if manually stopped, activity->nextActivityQueueUsedElems == 0
 	for (int i = 0; i < activity->nextActivityQueueUsedElems; i++) {
 		ACTIVITY_TASK_IDS taskId = activity->nextActivitiesQueue_unsure[i].activityId;
-		if (taskId != ACTIVITY_TASK_IDS::CST_ATI_NOTIFY_ACTIVITY_COMPLETED) {
+		if (taskId != ACTIVITY_TASK_IDS::CST_ATI_NOTIFY_ACTION_COMPLETED) {
 			noNextActivity = false;
 		}
 	}

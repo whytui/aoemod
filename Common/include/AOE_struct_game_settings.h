@@ -190,14 +190,12 @@ namespace AOE_STRUCTURES {
 		char unknown_984; // Something to do with screen width and height??
 		char revealMap; // 0x985. Set in 41BB00
 		char noFog; // 0x986. Set in 41BB10
-		char unknown_987; // default 1 ? Set in 41BB20
-		char playerCount; // +988.
-		char unknown_989; // can set speed > 16 ?
-		char playerGameVersion[0x08]; // 0-127 ; 0="", 1="1.0", 2="1.0a", etc (array offset in 0-7)
-		char unknown_992;
+		char unknown_987_coloredChat; // default 1 ? Set in 41BB20
+		char playerCount; // +988. NOT counting gaia.
+		char unknown_989_gameDeveloperOptionsEnabled; // can set speed > 16 ?
+		char playerGameVersion[0x09]; // 0-127 ; 0="", 1="1.0", 2="1.0a", etc. Index is playerId
 		AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL difficultyLevel; // +993. 0=hardest, 1=hard, 2, 3, 4=easiest. Set in 41BBC0
-		char teamNumbers[0x08]; // player 1-8 (array offset in 0-7). Values: 1=noTeam, >1=teamId.
-		char unknown_99C;
+		char teamNumbers[0x09]; // +994. player 1-8 (array offset in 0-8). Values: 1=noTeam, >1=teamId.
 		// 0x9A0
 		long int isCampaign; // get in 41B720, set in 41BA50
 		long int isSavedGame; // +9A4. set in 41BA60
@@ -239,26 +237,20 @@ namespace AOE_STRUCTURES {
 		unsigned long int victoryConditionChoice; // 0=standard, 1=conquest, 7=time limit, 8=score
 		// 0xA90
 		unsigned long int victoryConditionChoice_parameter; // or float ?
-		unsigned char chosenCivs[8]; // +A94. Selected civ ID for each player (in game settings screen). Index is playerId-1. Set in 0x5053C0. See also 0x48D13E for random picking
-		//unsigned long int unknownA98;
-		unsigned long int unknownA9C;
+		unsigned char chosenCivs[9]; // +A94. Selected civ ID for each player (in game settings screen). Index is playerId-1. Set in 0x5053C0. See also 0x48D13E for random picking
+		unsigned char unknownA9D[3]; // +A9D. unused
 		// 0xAA0
-		char unknown_AA0[0x20]; // dwords index=0-7. Limits player # ? 8 Players: [0,1,2,3,4,5,6,7] 4 Players: [0,1,2,3,0,1,2,3] 2 Players: [0,1,0,1,0,1,0,1]
-		// 0xAC0
-		unsigned long int unknownAC0;
-		char chosenPlayerNum[8]; // Corresponds to the colored number in game settings screen
-		char unknown_ACC;
+		long int unknown_AA0[9]; // +AA0. Limits player # ? 8 Players: [0,1,2,3,4,5,6,7] 4 Players: [0,1,2,3,0,1,2,3] 2 Players: [0,1,0,1,0,1,0,1]
+		char chosenPlayerNum[9]; // +AC4. Corresponds to the colored number in game settings screen
 		// 0xACD
-		char playerNameCivDLLID_Offset[8]; // per player. 4400+x=language_dll_id of a civ (player) name.
-		// 0xAD5
-		char unknown_AD5;
+		char playerNameCivDLLID_Offset[9]; // per player. 4400+x=language_dll_id of a civ (player) name.
 		char unknown_AD6; // +AD6. Set in 505520.
 		char unknown_AD7; // +AD7. Set in 505530.
 		char fixedPositions; // +AD8. Set in 505540
 		char allTechs; // +AD9. Set in 505550
 		char unknown_ADA;
 		char unknown_ADB;
-		unsigned long int initialResourcesChoice; // +ADC. 0=default, 3=large. Set in 505560.
+		long int initialResourcesChoice; // +ADC. 0=default, 3=large. Set in 505560.
 		// 0xAE0
 		AOE_CONST_INTERNAL::GAME_INITIAL_AGES initialAgeChoice; // 0=default, 1=nomad, 2=stone, 3=tool 4=bronze, 5=iron, 6=post-iron. Set in 505570
 		char unknown_AE4; // +AE4. Set in 505580

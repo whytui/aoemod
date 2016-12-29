@@ -301,18 +301,21 @@ namespace AOE_CONST_INTERNAL
 
 	// Unsure / to debug
 	enum ACTION_STATUS : char {
-		CST_AS_UNKNOWN_01 = 1, // ?? 40544D. Considered as idle (0x40662A)
-		CST_AS_UNKNOWN_02 = 2, // Seen when moving was finished? (idle). For gen. wonder victory, means wonder is unfinished?
-		CST_AS_UNKNOWN_03 = 3, // Can start moving to action location (temporary state) ? 40547F. Considered idle !
-		CST_AS_UNKNOWN_04 = 4, // Moving to action location ?
-		CST_AS_UNKNOWN_06 = 6, // "start" in progress ? (analog to 3?). For gen. wonder victory, means timer has started?
-		CST_AS_UNKNOWN_07 = 7, // in progress ? (analog to 4?). For both attack, build, etc
-		CST_AS_UNKNOWN_0A_STUCK = 0x0A, // Seen on stuck villager (repairman that could not get to target)
-		CST_AS_UNKNOWN_0B = 0x0B, // Seen when moving to bird location (after killing it)
-		CST_AS_UNKNOWN_0C = 0x0C, // waiting for requirement ? Really unsure
-		CST_AS_UNKNOWN_0D = 0x0D, // Set when unit can't move (speed==0) ?? 405472. This status is an Idle status.
-		CST_AS_UNKNOWN_0E = 0x0E, // ? Considered idle.
-		CST_AS_UNKNOWN_0F = 0x0F // Seen while moving (just moving)
+		CST_AS_01_NONE = 1, // ?? 40544D. Considered as idle (0x40662A)
+		CST_AS_02_DONE = 2, // Seen when moving was finished? (idle). For gen. wonder victory, means wonder is unfinished?
+		CST_AS_03_SEARCH = 3, // Can start moving to action location (temporary state) ? 40547F. Considered idle !
+		CST_AS_04_GOTO = 4, // Moving to action location ? (a transitional state)
+		CST_AS_04_GOTO2 = 5,
+		CST_AS_06_WORK = 6, // "start" in progress ? (analog to 3?). For gen. wonder victory, means timer has started? (a transitional state)
+		CST_AS_07_WORK2 = 7, // in progress ? (analog to 4?). For both attack, build, etc
+		CST_AS_08_RETURN = 8, // ???
+		CST_AS_08_TURN = 9, // ???
+		CST_AS_0A_DELAY = 0x0A, // Seen on stuck villager (repairman that could not get to target)
+		CST_AS_0B_MOVE = 0x0B, // Seen when moving to bird location (after killing it)
+		CST_AS_0C_ATTACK = 0x0C, // waiting for requirement ? Really unsure
+		CST_AS_0D_FAILED = 0x0D, // Set when unit can't move (speed==0) ?? 405472. This status is an Idle status.
+		CST_AS_0E_INVALIDATED = 0x0E, // ? Considered idle.
+		CST_AS_0F_UNKNOWN = 0x0F // Seen while moving (just moving). This *really* is an "unknown" status.
 	};
 
 	enum INTERNAL_COMMAND_ID : char {
@@ -390,36 +393,46 @@ namespace AOE_CONST_INTERNAL
 	// For activity.task IDs
 	enum ACTIVITY_TASK_IDS : long int {
 		CST_ATI_NONE = -1, // Used a lot in game code
-		CST_ATI_NOTIFY_BEING_ATTACKED = 0x1F4, // Notify(react) being attacked ? GenericArg4=actorUnitId ? Triggers a player.NotifyEvent with event 0x201
-		CST_ATI_NOTIFY_ACTIVITY_COMPLETED = 0x1FA, // Notify activity completed (normal completion) ?
-		CST_ATI_UNKNOWN_1FB = 0x1FB, // 410999
+		CST_ATI_NOTIFY_BEING_ATTACKED = 0x1F4, // (500) Notify(react) being attacked ? GenericArg4=actorUnitId ? Triggers a player.NotifyEvent with event 0x201
+		CST_ATI_UNKNOWN_1F5 = 0x1F5,
+		CST_ATI_UNKNOWN_1F6 = 0x1F6, // Notify something...? See 0x4143B7
+		CST_ATI_UNKNOWN_1F7 = 0x1F7, // Notify something...? See 0x4143B7
+		CST_ATI_UNKNOWN_1F8 = 0x1F8, // Notify something...? See 0x4143B7
+		CST_ATI_NOTIFY_ACTION_FAILED = 0x1F9, // To confirm
+		CST_ATI_NOTIFY_ACTION_COMPLETED = 0x1FA, // Notify activity completed (normal completion
+		CST_ATI_NOTIFY_ACTION_INVALIDATED = 0x1FB, // 410999
+		CST_ATI_UNKNOWN_1FC = 0x1FC, // Notify something... Target moved ? The "target is no longer visible" is a sub-case of this
+		CST_ATI_UNKNOWN_1FD = 0x1FD, // Notify something...? See 0x4143B7
+		CST_ATI_UNKNOWN_1FE = 0x1FE, // Notify something...? See 0x41426A
+		CST_ATI_NOTIFY_SAW_ENEMY_UNIT = 0x1FF, // To confirm. See 0x4143B7
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
 		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted?
+		CST_ATI_UNKNOWN_203 = 0x203, // ? See 0x4143B7
 		CST_ATI_UNKNOWN_209 = 0x209, // Related to notification when being attacked ? see 0x4E4769
 		CST_ATI_UNKNOWN_20B = 0x20B, // Used just after a unit is converted ? 0x4AEBDD
 		CST_ATI_ESCAPE_ATTACK = 0x20F, // when someone shoots at me ? "escape attack"? 4E62F3
 		CST_ATI_ATTACK = 0x258,
-		CST_ATI_DEFEND_OR_CAPTURE = 0x259, // unsure, but it is used to capture relics
+		CST_ATI_DEFEND_OR_CAPTURE = 0x259, // primary role is defend (position or object), but it is used to capture relics
 		CST_ATI_BUILD = 0x25A,
 		CST_ATI_HEAL = 0x25B,
 		CST_ATI_CONVERT = 0x25C,
 		CST_ATI_EXPLORE = 0x25D,
 		CST_ATI_GATHER_NOATTACK = 0x261, // Forager, farmer, miners (gathering that doesn't have an "attack" phase.
-		CST_ATI_MOVE = 0x262, // Eg: used to capture relic. More specific than just move ?
-		CST_ATI_UNKNOWN_264 = 0x264,
+		CST_ATI_MOVE = 0x262, // 
+		CST_ATI_FOLLOW_OBJECT = 0x264,
 		CST_ATI_GATHER_ATTACK = 0x265, // woodcutter, hunter, fisherman (gatherer that have an "attack" phase - not really true for fish, but anyway !)
-		CST_ATI_UNKNOWN_266 = 0x266, // regroup in unit group ??? Related to SNAttackGroupGatherSpacing in 4CD551?
-		CST_ATI_UNKNOWN_267 = 0x267,
+		CST_ATI_UNKNOWN_266 = 0x266, // regroup in unit group ??? Related to SNAttackGroupGatherSpacing in 4CD551? Transport object ?
+		CST_ATI_TRADE_WITH_OBJECT = 0x267,
 		CST_ATI_UNKNOWN_268 = 0x268, // some movement ?
 		CST_ATI_GO_TO_TRANSPORT = 0x269, // Unsure
 		CST_ATI_REPAIR = 0x26A,
 		CST_ATI_HUMAN_TRAIN_UNIT = 0x26B, // only when triggered by human ?
 		CST_ATI_RESEARCH_TECH = 0x26C, // includes train unit when triggered by AI.
 		CST_ATI_UNLOAD = 0x26D, // unsure. Includes move+unload. Such unit can't be used as actor in strategy element.
-		CST_ATI_UNKNOWN_26E = 0x26E, // load ?
-		CST_ATI_UNKNOWN_26F = 0x26F,
+		CST_ATI_UNKNOWN_26E = 0x26E, // load ? see 0x412DF0
+		CST_ATI_UNKNOWN_26F = 0x26F, // see 0x412E60
 		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
-		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targetted farm or enemy projectile dies ?
+		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targeted farm or enemy projectile dies ?
 		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // React to agression but also "AI" attacks
 		CST_ATI_DEFEND_UNIT = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.defend/followUnit?(myUnitId, targetUnitId)
 		CST_ATI_UNKNOWN_2BE = 0x2BE, // build+0x64

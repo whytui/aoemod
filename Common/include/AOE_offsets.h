@@ -9,6 +9,9 @@
 namespace AOE_OFFSETS
 {
 	// Some useful raw addresses
+#ifdef GAMEVERSION_PTRIBE
+	static const unsigned long int ADDR_VAR_UI_MAIN_INFO = 0x00595B90; // seems to be the base point for managing screens, popups = TPanelSystem
+#endif
 #ifdef GAMEVERSION_AOE10a
 	static const unsigned long int ADDR_FILE_EXE_MIN = 0x400;
 #endif
@@ -147,7 +150,7 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054AA60;
 	//static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A1808; // Do not use it
 	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x580E38;
-	static const unsigned long int ADDR_VAR_UI_MAIN_INFO = 0x005830E8; // seems to be the base point for managing screens, popups
+	static const unsigned long int ADDR_VAR_UI_MAIN_INFO = 0x005830E8; // seems to be the base point for managing screens, popups = TPanelSystem
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x0055CA5C;
 	static const unsigned long int ADDR_VAR_EMPIRES_DAT_PATH = 0x005577C8; // data2\empires.dat
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x580D8C;

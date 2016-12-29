@@ -50,6 +50,7 @@ namespace AOE_STRUCTURES
 
 	// Unit artificial intelligence (not reserved to AI players !).
 	// Size=0x134??? May depend on sub-class
+	// 0x413890 = UnitAIModule::processNotify(struct NotifyEvent *,unsigned long). NotifyEvent's size=0x18
 	// [EDX+0x1C]=
 	// [EDX+0x20]=activity.prepareTmpMapInfo?(arg1) : collects info about nearby units (cf ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE)
 	// [EDX+0x2C]=activity.isXxx(internalId)? : true for non-interruptible activities? (repair, heal,convert,attack,defend/capture+0x264)
@@ -97,17 +98,17 @@ namespace AOE_STRUCTURES
 		// 0x20
 		long int nextActivityQueueArraySize; // +20. Allocated array size (number of elements) for +24.
 		STRUCT_UNIT_ACTIVITY_QUEUE *nextActivitiesQueue_unsure; // TO DO. ElemSize = 0x18. See 414D90
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64. "Reaction task to interruptions?"
-		long int unknown_02C; // A distance?. 0x64 in 4DA4C9. Distance to TC ? cf targetsInfoArray+08
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64. "Reaction task to interruptions?" Priority ?
+		long int order; // 0x64 in 4DA4C9. cf targetsInfoArray+08. Maybe WRONG ? order could be +28 ?
 		// 0x30
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
-		long int targetUnitId; // +34
-		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // +38. Target AI type (3=building...)
+		long int targetUnitId; // +34. Current target unit instance ID.
+		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // +38. Target AI type (3=building...).
 		float targetPosY;
 		// 0x40
 		float targetPosX;
 		float targetPosZ;
-		float maxDistance; // +48.
+		float maxDistance; // +48. "Desired target distance"
 		long int unitIdToDefend; // +4C. Unit ID to capture or defend ?
 		// 0x50
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS previous_whenAttackedInternalId; // +50. Backup for +28
@@ -115,11 +116,12 @@ namespace AOE_STRUCTURES
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES previousTargetUnitId; // +58. Previous target class
 		long int previousTargetUnitType; // +5C. Type=GLOBAL_UNIT_AI_TYPES but as a dword.
 		// 0x60
+		// TODO: is this "units attackING me" ?
 		STRUCT_AI_UNIT_LIST_INFO listOfUnitIdThatAttackedMe; // +60. Warning, arraySize can be >usedElemCount here. List of units that attacked me.
 		// 0x70
 		float unknown_070_posY;
 		float unknown_074_posX;
-		unsigned long int unknown_078; // a unitId. Commander???
+		long int unknown_078; // a unitId. Commander??? TODO: test it
 		unsigned long int unknown_07C; // unknown type
 		// 0x80
 		float unknown_080_posY;

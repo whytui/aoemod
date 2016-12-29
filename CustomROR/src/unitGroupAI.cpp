@@ -728,7 +728,7 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 	if (currentTargetUnit && !targetPosIsKnown) {
 		// Search if there is some other target at reach
 		STRUCT_ACTION_BASE *commanderAction = AOE_STRUCTURES::GetUnitAction(commanderUnit);
-		if (commanderAction && (commanderAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK_9)) {
+		if (commanderAction && (commanderAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK)) {
 			STRUCT_UNIT_BASE *newTargetUnit = commanderAction->targetUnit;
 			if (!newTargetUnit) {
 				newTargetUnit = global->GetUnitFromId(commanderAction->targetUnitId);
@@ -883,7 +883,7 @@ void UnitGroupAI::CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 						STRUCT_ACTION_BASE *unitAction = AOE_STRUCTURES::GetUnitAction(curUnit);
 						bool actionIsAgressive = unitAction && (
 							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_CONVERT) ||
-							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK_9) ||
+							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK) ||
 							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) // Unsure !!!
 							);
 						if (!hasAttackActivity && !actionIsAgressive) {

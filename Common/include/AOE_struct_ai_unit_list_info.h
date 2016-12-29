@@ -10,7 +10,7 @@
 */
 namespace AOE_STRUCTURES {
 
-	// Used in AI structures to keep lists of unit IDs. Size=0x10
+	// Used in AI structures to keep lists of unit IDs. Size=0x10. Name = ManagedArray
 	// All methods suppose that usedElemCount==arraySize (no empty slot)
 	// 0x4C6880 = unitElemList.containsUnitId(pUnitId)
 	// 0x4E3AF0 = unitElemList.Remove(unitId) 
@@ -19,7 +19,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_AI_UNIT_LIST_INFO {
 	public:
 		long int *unitIdArray; // Pointer to array of unitIDs. NULL when size==0
-		long int usedElements; // +4. Number of elements in array that are actually used
+		long int usedElements; // +4. Number of elements in array that are actually used. "Number"
 		long int maxElementCount; // +8. Max or desired value ?
 		long int arraySize; // +C. Number of allocated elements in array
 

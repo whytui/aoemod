@@ -57,7 +57,7 @@ namespace AOE_STRUCTURES {
 	};
 
 
-	// Included structure in addresses 0x583BC8 and 0x6A1CC0
+	// Included structure in addresses 0x583BC8 and 0x6A1CC0 (open paths and traversed paths ?)
 	// Constuctor 00458570
 	// This structure is for path finding.
 	// Note: it seems map is split into tiles (1 unit of position = 1 tile) but tiles are split into 4 "quarters".

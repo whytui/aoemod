@@ -102,7 +102,7 @@ void EconomyAI::FixStuckRepairmen(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 							foundMoveAction = true;
 						}
 					}
-					if (!foundMoveAction && (actionStatus == ACTION_STATUS::CST_AS_UNKNOWN_0A_STUCK)) {
+					if (!foundMoveAction && (actionStatus == ACTION_STATUS::CST_AS_0A_DELAY)) {
 						// Experimental: not sure the conditions match the case that causes problems in game ! But first tests seem ok !
 #ifdef _DEBUG
 						GetGameSettingsPtr()->AddEventInHistory((long int)unit->positionX, (long int)unit->positionY);
@@ -113,7 +113,7 @@ void EconomyAI::FixStuckRepairmen(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 #ifdef _DEBUG
 					// TMP
 					else {
-						if (actionStatus == ACTION_STATUS::CST_AS_UNKNOWN_0A_STUCK) {
+						if (actionStatus == ACTION_STATUS::CST_AS_0A_DELAY) {
 							GetGameSettingsPtr()->AddEventInHistory((long int)unit->positionX, (long int)unit->positionY);
 							AOE_METHODS::CallWriteCenteredText("Found action status 0x0A (stuck unit?)", 2);
 						}
