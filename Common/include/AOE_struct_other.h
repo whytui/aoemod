@@ -44,6 +44,5 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_TIMELINE_COLUMN_INFO) == 0xB0, "STRUCT_TIMELINE_COLUMN_INFO size");
 
-
 }
 

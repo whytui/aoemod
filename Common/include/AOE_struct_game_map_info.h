@@ -19,7 +19,10 @@ namespace AOE_STRUCTURES {
 	class STRUCT_GAME_GLOBAL;
 
 
-	// Size = 0xB5F8 to confirm. Init in 0x4445E0.
+#define CHECKSUM_RGE_MAP 0x005445A0
+#define CHECKSUM_GAME_MAP 0x005499F4
+	// Parent size=0x88D0. Cosntructor=0x443CE0(fromFile)
+	// Size = 0xB5F8. Init in 0x4445E0. Constructor=0x4ED4B0(fromFile)
 	class STRUCT_GAME_MAP_INFO {
 	public:
 		unsigned long int checksum; // F4 99 54 00 (parent class 0A 45 54 00)
@@ -57,6 +60,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_MAP_TERRAIN_ZONES_INFO_LINK *terrainZonesInfoLink; // +8DC4.
 		STRUCT_MAP_VISIBILITY_LINK *mapVisibilityLink; // +8DC8. Link to an array with visibility masks tile by tile. Data array is the same as 0x7D205C
 		STRUCT_UNKNOWN_MAP_INFO_7D2058 *unknown_8DCC;
+		// Parent class ends here
 		char unknown_8DD0[0x8DE4 - 0x8DD0];
 		unsigned long int unknown_8DE4; // init -1
 		unsigned long int unknown_8DE8; // init -1
@@ -67,7 +71,7 @@ namespace AOE_STRUCTURES {
 		// 0x8DF8
 		char unknown_8DF8_array[0x100 * 0x28]; // Array: 0x100 elements, size=0x28. All are dwords.
 
-		bool IsCheckSumValid() const { return this->checksum == 0x005499F4; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_GAME_MAP; }
 		bool IsPositionInBounds(long int x, long int y) const {
 			return (x >= 0) && (y >= 0) && (x < this->mapArraySizeX) && (y < this->mapArraySizeY);
 		}

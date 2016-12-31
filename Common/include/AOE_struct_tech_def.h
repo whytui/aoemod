@@ -105,16 +105,19 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_TECH_DEF) == 0x2C, "STRUCT_TECH_DEF size");
 
 
-	// Size = 0x0C, alloc in 0x50A1CB
+	// Size = 0x0C, alloc in 0x50A1CB. 
+	// Constructor=0x4EBAC0 (checksum 0x00549920=child)
+	// Constructor=0x43B480(fromFile),0x43B5F0(fromFileName), destructor 0x43B7D0
+	// "RGE_effects" (parent) or Tribe_Effects ?
 	class STRUCT_TECH_DEF_INFO {
 	public:
-		unsigned long int checksum; // 20 99 54 00
+		unsigned long int checksum; // 20 99 54 00 (TribeEffects) or BC 43 54 00 (RGE_Effects)
 	private:
 		STRUCT_TECH_DEF *ptrTechDefArray;
 	public:
 		long int technologyCount;
 
-		bool IsCheckSumValid() const { return this->checksum == 0x00549920; }
+		bool IsCheckSumValid() const { return (this->checksum == 0x00549920) || (this->checksum == 0x005443BC); }
 		// Securely gets a technology definition. Returns NULL if techDefId is invalid
 		STRUCT_TECH_DEF *GetTechDef(short int techDefId) const {
 			if ((techDefId < 0) || (techDefId >= this->technologyCount)) { return NULL; }

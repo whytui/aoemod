@@ -87,7 +87,7 @@ bool HasVisibleMilitaryTarget(STRUCT_UNIT_BASE *unit) {
 // The result might be {-1, -1}
 std::pair<float, float> GetActionTargetPosition(STRUCT_ACTION_BASE *action) {
 	if (!action) { return std::pair<float, float>(-1.f, -1.f); }
-	if (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_MOVE_1) {
+	if (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_MOVE_TO) {
 		return std::pair<float, float>(action->targetUnitPositionX, action->targetUnitPositionY);
 	}
 	std::pair<float, float> result;

@@ -12,16 +12,20 @@
 */
 namespace AOE_STRUCTURES {
 
+	// Credit: First debugging of sound objects was initially done by LucTieuPhung
 
-	// Size: seems to be 0x40
-	class STRUCT_SOUND_DATA_ELEMENT {
-		// Object info initially provided by LucTieuPhung
+	class STRUCT_SOUND_DRIVER;
+
+
+	// Size = 0x3C?. Constructor=0x4A2BE0 (to confirm). "TDigital"
+	class STRUCT_SOUND_TDIGITAL {
 	public:
-		long int pSound;
+		STRUCT_SOUND_DRIVER *pSoundStruct;
 		unsigned long int unknown_04;
 		unsigned short int unknown_08;
-		char filename[0x0C];
-		unsigned long int unknown_18;
+		char soundName[0x0D]; // +0A. e.g. Size=0xC + 1 for ending "\0" (0x4A2C0C)
+		char unknown_17; // unused ?
+		long int unknown_18;
 		long int lVolume; // +1C
 		// 0x20
 		long int dwFrequency;
@@ -32,16 +36,16 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_30;
 		unsigned long int pDirectSoundBuffer; // IDirectSoundBuffer*
 		unsigned long int unknown_38;
-		unsigned long int unknown_3C;
 	};
-	static_assert(sizeof(STRUCT_SOUND_DATA_ELEMENT) == 0x40, "STRUCT_SOUND_DATA_ELEMENT Size");
+	static_assert(sizeof(STRUCT_SOUND_TDIGITAL) == 0x3C, "STRUCT_SOUND_TDIGITAL Size");
 
-	// Size 0x69C
-	class STRUCT_MAIN_SOUND {
-		// Object info initially provided by LucTieuPhung
+
+	// Size 0x69C. Constructor=0x4A2560. "TSoundDriver"
+	// Init: see 0x418920
+	class STRUCT_SOUND_DRIVER {
 	public:
 		char isDSoundInitialized;
-		char unknown_001; // Related to ListSoundData
+		char unknown_001; // Related to soundDataArray
 		short int unknown_002;
 		long int hWndToNotify;
 		unsigned long int lpDirectSound; // +08. Real type=IDirectSound* (See DirectSoundCreate)
@@ -54,15 +58,14 @@ namespace AOE_STRUCTURES {
 		// 0x120
 		long int hasSoundVolumeCtrl; // Sound Volume Control Found Successfully
 		unsigned long int hMixer; // Real type=HMIXER ?
-		// 0x128 - MIXERLINE: 0xA8 bytes
-		long int ml_cbStruct; // =sizeof(MIXERLINE)
+		long int mixerLineSize; // +128. =sizeof(MIXERLINE) = 0xA8. 0x4A2A17
 		unsigned long int unknown_12C;
 		unsigned long int unknown_130;
 		long int ml_dwLineID;
 		unsigned long int unknown_138;
 		unsigned long int unknown_13C;
 		// 0x140
-		long int ml_dwComponentType; // = MIXERLINE_COMPONENTTYPE_SRC_WAVEOUT;
+		long int ml_dwComponentType; // = MIXERLINE_COMPONENTTYPE_SRC_WAVEOUT. =0x1008
 		char unknown_144[0x1D0 - 0x144];
 		// 0x1D0 - MIXERLINECONTROLS: 0x18 bytes
 		long int mlc_cbStruct; // = sizeof(MIXERLINECONTROLS)
@@ -89,28 +92,28 @@ namespace AOE_STRUCTURES {
 		long int mcd_cbStruct; // = sizeof(MIXERCONTROLDETAILS);
 		// 0x280
 		long int mcd_dwControlID; // = mc.dwControlID;
-		long int mcd_cChannels;
+		long int mcd_cChannels; // +284. =1?
 		unsigned long int unknown_288;
-		long int mcd_cbDetails; // +28C. = sizeof(MIXERCONTROLDETAILS_UNSIGNED);
+		long int mcd_cbDetails; // +28C. = sizeof(MIXERCONTROLDETAILS_UNSIGNED) = 4?
 		// 0x290
 		long int mcd_paDetails; // = &mcdu;
 		// 0x294 - MIXERCONTROLDETAILS_UNSIGNED:
 		long int mcdu_dwValue;
-		STRUCT_SOUND_DATA_ELEMENT soundDataArray[0x10];
-		long int soundDataCount; // Number of used elements in soundDataArray ?
+		STRUCT_SOUND_TDIGITAL *stackedSoundsToPlay[0x100]; // +298. Array of (buffered?) soundDataElements. Only values from 0 to (stackedSoundsCount-1) are valid. Add in 0x4A2950
+		long int stackedSoundsCount; // +698. Number of used elements in stackedSoundsToPlay
 	};
-	static_assert(sizeof(STRUCT_MAIN_SOUND) == 0x69C, "STRUCT_MAIN_SOUND Size");
+	static_assert(sizeof(STRUCT_SOUND_DRIVER) == 0x69C, "STRUCT_SOUND_DRIVER Size");
+
 
 	// Size = 0x3F8
 	class STRUCT_MAIN_MUSIC {
-		// Object info initially provided by LucTieuPhung
 	public:
 		char soundPath[0x104];
 		char musicFormat; // AudioCD=1, MIDI=2 (WAV=3)
 		char unknown_105;
 		char unknown_106;
 		char unknown_107;
-		STRUCT_MAIN_SOUND *pSound; // +108
+		STRUCT_SOUND_DRIVER *pSound; // +108
 		long int hInstance; // = GetModuleHandle(NULL): Module handle to the file
 		// 0x110
 		long int hWnd; // The window to send MM_MCINOTIFY messages to.

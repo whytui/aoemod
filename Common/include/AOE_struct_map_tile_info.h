@@ -78,12 +78,15 @@ namespace AOE_STRUCTURES {
 		char unknown_09; // Set =0x0F in 0x5179DE.
 		char tileHighlightLevel; // +0A. Tile brillance level (for tile selection in editor). Values in 0-0xB0. Default=0, 0x0F=underMouse(editor). Updated in 444980 with arg5 ?
 		char unknown_0B; // maybe +A is a short int
+		// A sub-structure starts here ?
 		char unknown_0C;
 		char unknown_0D;
 		char unknown_0E;
 		char unknown_0F;
 		// 0x10
-		STRUCT_UNIT_BASE_LIST *unitsOnThisTile; // +10. Array of units occupying this tile. The list ends with a NULL pointer. NULL if no unit on this tile.
+		// +10. Array of units occupying this tile. The list ends with a NULL pointer. NULL if no unit on this tile.
+		// Note: in the list, we find dopplegangers which correspond to enemy buildings under fog (represents the last explored view, maybe the real unit no longer exists)
+		STRUCT_UNIT_BASE_LIST *unitsOnThisTile;
 		short int unitsOnThisTileCount; // +14. Number of units in unitsOnThisTile array. unitsOnThisTile=NULL if unitsOnThisTileCount==0.
 		short int unknown_16; // possibly unused ?
 	};

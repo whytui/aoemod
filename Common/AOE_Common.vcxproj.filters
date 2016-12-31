@@ -330,6 +330,9 @@
     <ClInclude Include="include\TileSetDefinition.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="include\AOE_struct_sprites.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\triggerDefinition.cpp">

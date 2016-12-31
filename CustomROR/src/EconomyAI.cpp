@@ -98,7 +98,7 @@ void EconomyAI::FixStuckRepairmen(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 					STRUCT_UNIT_ACTION_INFO *uai = action->requiredActionInfo;
 					if (uai && uai->ptrActionLink) {
 						STRUCT_ACTION_BASE *reqAction = uai->ptrActionLink->actionStruct;
-						if (reqAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_MOVE_1) {
+						if (reqAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_MOVE_TO) {
 							foundMoveAction = true;
 						}
 					}

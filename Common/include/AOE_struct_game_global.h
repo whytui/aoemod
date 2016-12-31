@@ -6,6 +6,7 @@
 #include <AOE_struct_player.h>
 #include <AOE_struct_scenario_info.h>
 #include <AOE_struct_dat_sound.h>
+#include <AOE_struct_mp_communication.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -28,7 +29,11 @@ namespace AOE_STRUCTURES {
 
 
 
-	// Size = ? - 04 99 54 00
+#define CHECKSUM_RGE_COMMAND 0x00543498
+#define CHECKSUM_GAME_COMMANDS_INFO 0x00549904 // =Tribe_Command
+	// Size = 0x18 for both classes RGE_command/Tribe_Command
+	// Constructor = 0x42A0B0 (RGE_command) - 00 54 34 98
+	// Constructor = 0x4E8390 (Tribe_Command) - 04 99 54 00
 	class STRUCT_GAME_COMMANDS_INFO {
 	public:
 		unsigned long int checksum;
@@ -37,10 +42,11 @@ namespace AOE_STRUCTURES {
 		long int currentCommandSize; // unsure
 		// 0x10
 		long int timestamp; // Value from timeGetTime
-		unsigned long int *unknown_14; // Ptr to struct similar to [580DA8]
+		STRUCT_MP_COMMUNICATION *MPCommunicationStruct; // +18. cf also [0x580DA8]
 
-		bool IsCheckSumValid() { return this->checksum == 0x00549904; }
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_GAME_COMMANDS_INFO) || (this->checksum == CHECKSUM_RGE_COMMAND); }
 	};
+	static_assert(sizeof(STRUCT_GAME_COMMANDS_INFO) == 0x18, "STRUCT_GAME_COMMANDS_INFO size");
 
 
 #ifdef GAMEVERSION_AOE10b
@@ -90,7 +96,7 @@ namespace AOE_STRUCTURES {
 		short int civCount; // +44. Number of civilizations.
 		short int unknown_046;
 		STRUCT_CIVILIZATION_DEF **civilizationDefinitions; // +48. A pointer to the array of pointers to civ definitions. Array size is civCount
-		STRUCT_TECH_DEF_INFO *technologiesInfo; // +4C. 20 99 54 00
+		STRUCT_TECH_DEF_INFO *technologiesInfo; // +4C. 20 99 54 00 or BC 34 54 00 (parent?)
 		// +0x50
 		short int terrainRestrictionCount; // Size for ptrTerrainRestrictionArray array
 		short int nbOfTerrainPerTerrainRestriction; // +52. How many terrain for each terrain restriction (common for all).

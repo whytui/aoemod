@@ -125,6 +125,7 @@
     <ClInclude Include="include\AOE_struct_scenario_info.h" />
     <ClInclude Include="include\AOE_struct_score.h" />
     <ClInclude Include="include\AOE_struct_sound.h" />
+    <ClInclude Include="include\AOE_struct_sprites.h" />
     <ClInclude Include="include\AOE_struct_strategy_ai.h" />
     <ClInclude Include="include\AOE_struct_strategy_element.h" />
     <ClInclude Include="include\AOE_struct_tac_ai.h" />

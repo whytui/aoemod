@@ -94,10 +94,10 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_MAPGEN_ELEVATION_LINK) == 8, "STRUCT_MAPGEN_ELEVATION_LINK size");
 
 
-	// size=0x4F5C, constructor=471D20.
+	// size=0x4F5C, constructor=471D20,0x46DA10(fromFile).
 	class STRUCT_MAP_GENERATION_INFO {
 	public:
-		unsigned long int checksum; // 18 5D 54 00, parent objects are C8 5C 54 00, DC 5C 54 00
+		unsigned long int checksum; // 18 5D 54 00, parent objects are C8 5C 54 00(base), DC 5C 54 00
 		unsigned long int unknown_0004; // a "parent" mapgen object ?
 		STRUCT_MAPGEN_ELEVATION_LINK *elevationInfoFirstLinkElem; // represents a list of elevation info objects ?
 		STRUCT_GAME_MAP_INFO *gameMapInfo;

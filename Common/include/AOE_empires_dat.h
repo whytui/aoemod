@@ -277,7 +277,7 @@ namespace AOE_CONST_FUNC {
 	// For "action" structures.
 	// AOE 2.4.97: see 0x4BD23A
 	enum UNIT_ACTION_ID : short int {
-		CST_IAI_MOVE_1 = 1, // Used as sub-action to move to target ? Used to capture relics
+		CST_IAI_MOVE_TO = 1, // Used as sub-action to move to target ? Used to capture relics
 		CST_IAI_FOLLOW = 2, // TO CONFIRM (AGE3)
 		CST_IAI_GARRISON_ENTER = 3, // Enter
 		CST_IAI_EXPLORE = 4, // 
@@ -291,7 +291,7 @@ namespace AOE_CONST_FUNC {
 		CST_IAI_TRANSPORT = 0x0C,
 		CST_IAI_GUARD = 0x0D, // TO CONFIRM or auto-attack ?
 		CST_IAI_RUNAWAY = 0x14, // "Escape" in AGE3
-		CST_IAI_MAKE = 0x15, // "Make" in AGE3
+		CST_IAI_MAKE = 0x15, // "Make". Like produce farm food.
 		CST_IAI_EXPLORE_UNSURE_1E = 0x1E, // unsure... see also 4 ?
 		CST_IAI_UNKNOWN_FOR_BIRD = 0x28, // fly ?
 		CST_IAI_CHEAT_SPAWN_UNIT = 0x64, // bigdaddy, etc
@@ -308,7 +308,7 @@ namespace AOE_CONST_FUNC {
 		CST_IAI_RETREAT_TO_SHOOTING_RANGE = 0x6D, // Or Explore ? (0x45C2D0 in AOE 2.4.97)
 		CST_IAI_GATHER_WITH_ATTACK = 0x6E, // (110) Hunt, cut wood, fish. Gather activities with an attack phase (includes fishing !)
 		CST_IAI_TRADE = 0x6F,
-		CST_IAI_GENERATE_WONDER_VICTORY = 120, // 0x78. See 0x4C5A4C.
+		CST_IAI_GENERATE_WONDER_VICTORY = 120, // 0x78. See 0x4C5A4C. Triggers the "wonder winning condition delay" (if victory conditions are compatible) and sets visibility for the building to all players.
 		CST_IAI_DESELECT_WHEN_TASKED = 121, // AGE3?
 		CST_IAI_LOOT = 122, // AGE3?
 		CST_IAI_HOUSING = 123, // AGE3?

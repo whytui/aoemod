@@ -36,13 +36,13 @@ static bool test_ror_structures() {
 #ifdef _DEBUG
 	AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO clinfo;
 	trs_assert(&clinfo, 0x8E4, &clinfo.screenSizeY);
-	AOE_STRUCTURES::STRUCT_SOUND_DATA_ELEMENT sounddataelem;
-	trs_assert(&sounddataelem, 0x3C, &sounddataelem.unknown_3C);
-	AOE_STRUCTURES::STRUCT_MAIN_SOUND mainsound;
+	AOE_STRUCTURES::STRUCT_SOUND_TDIGITAL sounddataelem;
+	trs_assert(&sounddataelem, 0x38, &sounddataelem.unknown_38);
+	AOE_STRUCTURES::STRUCT_SOUND_DRIVER mainsound;
 	assert(sizeof(mainsound) == 0x69C);
 	trs_assert(&mainsound, 0x1D0, &mainsound.mlc_cbStruct);
 	trs_assert(&mainsound, 0x250, &mainsound.mc_dwMaximum);
-	trs_assert(&mainsound, 0x698, &mainsound.soundDataCount);
+	trs_assert(&mainsound, 0x698, &mainsound.stackedSoundsCount);
 	AOE_STRUCTURES::STRUCT_MAIN_MUSIC mainmusic;
 	assert(sizeof(mainmusic) == 0x3F8);
 	trs_assert(&mainmusic, 0x3F4, &mainmusic.unknown_3F4);

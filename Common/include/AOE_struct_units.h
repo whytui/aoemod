@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <AOE_struct_sprites.h>
 #include <AOE_struct_graphics.h>
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_map_tile_info.h>
@@ -55,15 +56,15 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_PER_TYPE_UNIT_LIST_LINK) == 0x0C, "STRUCT_PER_TYPE_UNIT_LIST_LINK size");
 
 
-	// Size = 0x34
+	// Size = 0x34. Name=InfluenceMap
 	// (free=0x4580A0). An interesting method: 0x4581B0=moveInfo.replaceByNewDestination(STRUCT_POSITION_INFO*)
 	// About movement/path finding
 	class STRUCT_UNIT_MOVEMENT_INFO {
 	public:
 		unsigned long int unknown_00;
-		unsigned long int unknown_04;
-		unsigned long int unknown_08;
-		unsigned long int unknown_0C;
+		unsigned long int unknown_04; // targetPosY (float) ?
+		unsigned long int unknown_08; // targetPosX (float) ?
+		unsigned long int unknown_0C; // targetPosZ (float) ?
 		// 0x10
 		unsigned long int unknown_10; // unknown type/size
 		unsigned long int unknown_14;
@@ -84,10 +85,11 @@ namespace AOE_STRUCTURES {
 	// A8 7D 54 00. Size=0x88 (constructor 0x04A64B0)
 	// 0x4CD2D0 = unitGroupElem.task(tacAI, mainAI, unitGrpTaskId, resetOrg, arg5=oCA)
 	// Methods:
+	// +0x38 = unit.setGraphics(pGraphics)
 	// +0x44 = unit.convertToPlayer(ptrPlayer)
 	// +0x74 = unit.CalcDamageFrom(attacksCount, pAttacksList, f_altitudeFactor, actorPlayer, actorUnit). Ex 0x426910.
-	// +0xD8 = unit.addVisibility(player, arg2, distance?)
-	// +0xDC = unit.removeVisibilityFrom(player, arg2, distance?)
+	// +0xD8 = unit.addVisibilityTo(playerToImpact, arg2, distance?)
+	// +0xDC = unit.removeVisibilityFor(playerToImpact, arg2, distance?)
 	// +0xEC = unit.setIsUnderAttack(bool)
 	// +0xF0 = unit.GetAttackAltitudeFactor(targetUnit). WARNING: Returns in ST (FLD xxx), not EAX. Ex 0x4AEC00.
 	// +0xFC = unit.FLD_speed()
@@ -102,6 +104,7 @@ namespace AOE_STRUCTURES {
 	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
 	// +0x1A4 = DoMove?(posY,posX,posZ,fMaxRange,targetUnitId, pArg6_float,arg7_size,arg8,arg9,targetPlayerId,someUnitClass)
 	// +0x1CC = unit.xxx(pPosYXZ_target, fRange, targetUnitId) for intelligent attack ?
+	// +0x1E4 = unit.createSpriteList(ptrUnit)
 	// +0x208 = unit.assignAction(action). ex: 0x406490.
 	// +0x210 = unit.idIdle() to confirm. ex: 0x406610.
 	class STRUCT_UNIT_BASE {
@@ -113,7 +116,7 @@ namespace AOE_STRUCTURES {
 		// 0x10
 		STRUCT_GRAPHICS *pCurrentGraphics; // +10
 		unsigned long int unknown_014;
-		unsigned long int unknown_018; // ptr to struct 00 30 54 00 - size=0x0C Related to graphics
+		STRUCT_ACTIVE_SPRITE_LIST *spriteList; // ptr to struct 00 30 54 00 - size=0x0C Related to graphics
 		STRUCT_GAME_MAP_TILE_INFO *myTile; // +1C. To confirm. +5=byte=altitude&terrain bits, see TERRAIN_BYTE class
 		// 0x20
 		STRUCT_UNIT_BASE *transporterUnit; // Transport boat the unit is in
@@ -157,7 +160,7 @@ namespace AOE_STRUCTURES {
 		// +68 = number of elements in ?
 		// 0x70
 		long int unknown_070; // a number
-		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code.
+		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code. Warning: some unit don't have one (e.g. lion tame)
 		short int unknown_078_unitInstanceId; // ? related to +70,+68
 		short int unknown_07A;
 		long int terrainZoneInfoIndex; // +7C. Index of terrainZoneInfo in terrainZoneInfoLink array. -1 means not initialized yet.
@@ -318,9 +321,9 @@ namespace AOE_STRUCTURES {
 	public:
 		unsigned long int unknown_08C;
 		// 0x90
-		float velocityY; // Used for movement computation ?
-		float velocityX; // +94. Used for movement computation ?
-		unsigned long int velocityZ; // +98.
+		float velocityY; // +90. Used for movement computation ? Used for missiles.
+		float velocityX; // +94. Used for movement computation ? Used for missiles.
+		float velocityZ; // +98.
 		float orientationAngle; // +9C. unit orientation angle. Updating this impacts unit.orientationIndex (+0x35). Angle [0, 2*PI[. 0=heading to northEast (increasing Y). Warning: walking graphics need to have 8 angles to allow valid movement.
 		unsigned long int unknown_0A0; // +A0. "turn_towards_time" ?
 		STRUCT_UNIT_MOVEMENT_INFO movementInfo; // +A4. Movement info / path finding.
@@ -330,7 +333,7 @@ namespace AOE_STRUCTURES {
 		float move_initialPosX; // wrong ?
 		float move_initialPosZ; // wrong ?
 		unsigned long int unknown_118;
-		float move_targetPosY; // updated from action struct on action updates.
+		float move_targetPosY; // updated from action struct on action updates. Set in 0x44BE90
 		// 0x120
 		float move_targetPosX;
 		float move_targetPosZ;
@@ -338,9 +341,9 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_12C;
 		// 0x130
 		unsigned long int unknown_130;
-		float move_distanceFromTargetToReach; // The maximum distance to target to reach before movement is considered done.
-		long int move_targetUnitId;
-		float targetSizeRadiusY;
+		float move_distanceFromTargetToReach; // +134. The maximum distance to target to reach before movement is considered done. "Action range"
+		long int move_targetUnitId; // +138. Set in 0x44BED0
+		float targetSizeRadiusY; // +13C. Set in 0x44BEE0
 		// 0x140
 		float targetSizeRadiusX;
 		long int unknown_144; // =targetPositionsArrayUsedElements+0xF ?
@@ -446,7 +449,7 @@ namespace AOE_STRUCTURES {
 		float constructionProgress;
 		long int strategyElementId; // +1D8. Strategy element ID (building's) : used to update strategy element when construction ends.
 		char tileset; // +1DC.
-		char unknown_1DD; // value = 0 or 100 ? Switched when construction ends?
+		char unknown_1DD; // value = 0 or 100 (not sure)? Switched when construction ends?
 		short int unknown_1DE;
 		// 0x1E0
 		unsigned long int unknown_1E0;

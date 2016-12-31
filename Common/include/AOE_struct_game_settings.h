@@ -114,10 +114,10 @@ namespace AOE_STRUCTURES {
 		char unknown_050[0xC];
 		STRUCT_SLP_INFO **ptrInfosSLP; // +5C. Pointer to array slpInfo, size=3 ? index 0=shortcut numbers
 		// 0x60
-		STRUCT_MAIN_SOUND *pSoundStruct; // Size 69C, see 41894B. Generally =NULL, only set while being used.
-		STRUCT_MAIN_MUSIC *pMusicStruct; // Size 3F8, see 418B14. Generally =NULL, only set while being used.
+		STRUCT_SOUND_DRIVER *pSoundDriver; // +60. Size 69C, see 41894B. Generally =NULL, only set while being used.
+		STRUCT_MAIN_MUSIC *pMusicStruct; // +64. Size 3F8, see 418B14. Generally =NULL, only set while being used.
 		long int commonSoundDataArrayElemCount; // +68. Default 0x11 (see 4FEF2D).
-		unsigned long int ptrCommonSoundDataArray; // +6C.
+		STRUCT_SOUND_TDIGITAL *ptrCommonSoundDataArray; // +6C. Elem size=0x3C, ccor=0x4A2BE0
 		// 0x70
 		char musicFormat; // 0=AudioCD, 1=MIDI
 		char unknown_071;

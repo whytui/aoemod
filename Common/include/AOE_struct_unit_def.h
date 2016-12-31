@@ -159,7 +159,7 @@ namespace AOE_STRUCTURES
 		// 0x60
 		float editorRadius2; // for X axis "construction_radius"
 		char hillMode; // 0=no restriction, 2 for buildings ? "elevation_flag"
-		char visibleInFog; // +65. Can be 0,1, 3 ("inverted visibility" in AGE3, but not exact. smoke has 3).
+		char visibleInFog; // +65. Can be 0,1, 3 ("inverted visibility" in AGE3, but not exact. smoke has 3). >0 = always visible for others. Note: this never provides visibility, unit is not selectable, but is visible (greyed) through fog (like buildings)
 		short int terrainRestriction; // +66
 		char flyMode; // +68. "movement_type"
 		char unknown_069;
@@ -284,7 +284,7 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNITDEF_COMMANDABLE : public STRUCT_UNITDEF_MOVABLE {
 	public:
 		STRUCT_UNIT_COMMAND_DEF_HEADER *ptrUnitCommandHeader; // +D8
-		short int whenBeingSeenCommandIndex; // +DC. For artefacts, discoveries but also animals
+		short int whenBeingSeenCommandIndex; // +DC. For artefacts, discoveries but also animals. "convert herd" in AGE3 ?
 		short int unknown_0DE;
 		// 0xE0
 		float searchRadius; // The distance unit will seek to auto-attack enemy units.
