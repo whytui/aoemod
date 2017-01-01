@@ -153,7 +153,7 @@ namespace AOE_STRUCTURES {
 	// If selected units features is installed, size is increased to host selected unit pointers at the end of the structure.
 	// Size will depend on how many maximum selected units it has been set.
 	// +0x30 = player.taskUnit?(playerId, unitId, activityId, targetUnitId, arg5, fposY, fposX, arg8, f_range, arg10, arg11, arg12?)
-	// +0xE8 = player.notifyEvent(unitId, arg2, eventId?, arg4, arg5, arg6)
+	// +0xE8 = player.notifyEvent(unitId, arg2, eventId, arg4, arg5, arg6). Eg. 0x4F3350
 	class STRUCT_PLAYER {
 	public:
 		unsigned long int checksum; // 0x00549B80 or 0x00549A44 (normal player) or 0x00544D18 (parent class)

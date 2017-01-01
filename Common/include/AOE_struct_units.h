@@ -89,6 +89,7 @@ namespace AOE_STRUCTURES {
 	// +0x38 = unit.setGraphics(pGraphics)
 	// +0x44 = unit.convertToPlayer(ptrPlayer)
 	// +0x74 = unit.CalcDamageFrom(attacksCount, pAttacksList, f_altitudeFactor, actorPlayer, actorUnit). Ex 0x426910.
+	// 0x+9C = unit.createMoveToAction(targetUnit, fposY, fposX, fposZ)
 	// +0xD8 = unit.addVisibilityTo(playerToImpact, arg2, distance?)
 	// +0xDC = unit.removeVisibilityFor(playerToImpact, arg2, distance?)
 	// +0xEC = unit.setIsUnderAttack(bool)
@@ -146,7 +147,7 @@ namespace AOE_STRUCTURES {
 		char unitCountThatAreTargetingMe; // +4F. Number of (other)units that have "me" as target (repairman, gatherer, attacker...). See 4AADB0. Warning: the count is not reliable: when moving to it, the other unit counts TWICE (and counts for 1 when actually doing the action)
 		// 0x50
 		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *ptrElemInPlayerUnitList; // +50. Link to corresponding reference in player's creatable units list. Can be NULL in saved games (if not "used" yet ?)
-		STRUCT_MANAGED_ARRAY unknown_054; // +54 a ptr. about movement ? Related to playerUnitListStruct? objectCollisionList ?
+		STRUCT_MANAGED_ARRAY unknown_054; // +54 a ptr. about movement ? objectCollisionList ? Units in same Formation ? A list of unitID.
 		STRUCT_MANAGED_ARRAY unitIDsInMyGroup; // +64. list of IDs of the units in same group as me.
 		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code. Warning: some unit don't have one (e.g. lion tame)
 		long int groupLeaderUnitId; // +78. Unit Id of my group's leader

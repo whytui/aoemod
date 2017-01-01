@@ -26,7 +26,7 @@ using namespace AOE_CONST_INTERNAL;
 */
 namespace AOE_STRUCTURES
 {
-	// Type 0x00. Size = 0x1C + actorCount*4. Create = 0x42B730. Execute=0x42A280
+	// Type 0x00 "Order". Size = 0x1C + actorCount*4. Create = 0x42B730. Execute=0x42A280
 	// Actual effect depends on unit def commands, target unit type...
 	struct COMMAND_RIGHT_CLICK {
 	public:
@@ -64,7 +64,7 @@ namespace AOE_STRUCTURES
 
 	// Type 0x02. Size= + actorCount*4. Create=. Execute=0x42A780
 	// For AI (only) ? Task an idle villager ?
-	struct COMMAND_UNKNOWN_02_TASK {
+	struct COMMAND_WORK {
 	public:
 		char cmdId;
 		char actorCount; // +1. Elem count for actorIdList
@@ -77,11 +77,60 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_14;
 		unsigned long int unknown_18;
 		long int actorUnitIdList[1]; // +1C. Array size is only known dynamically.
-		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_UNKNOWN_02_TASK; }
+		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_WORK; }
 	};
 
-	// Type 0xA. Size = 0x28. Create=42BCF0. Execute=0042B120
-	// For AI (only) ?
+
+	// Type 0x04. Size = 0x14. Create=0x42BA90
+	// Create a fully-built construction (immediately ready), also works for any other unit (non building)
+	// The unit is created even if map position, terrain restriction, etc are invalid.
+	// Please make sure unitDefIdToCreate is valid (exists) for provided player
+	struct COMMAND_CREATE {
+	public:
+		char cmdId;
+		char unknown_01; // +1.
+		short int unitDefIdToCreate; // +02. Identifies what object (def) to create
+		short int playerId; // +04. Player Id for which create the unit
+		short int unknown_06; // +06. Probably unused
+		float posY; // +08
+		float posX; // +0C
+		float posZ; // +10
+		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CREATE; }
+	};
+	static_assert(sizeof(COMMAND_CREATE) == 0x14, "COMMAND_CREATE size");
+
+	// Type 0x6 "Formation". Size = 0x08 + x*4. Create=0x42BB60, Exec=0x42AE20
+	// Takes top-left unit as leader (lol). Other units move according to the formation specified (base = leader position)
+	// This just orders a movement action, the formation is not preserved afterwards, and may not work well if units are moving (especially leader)
+	// Not sure this always works very well, some units may ignore the movement.
+	struct COMMAND_FORMATION {
+	public:
+		char cmdId;
+		char unknown_01; // +1. Unused ?
+		short int unknown_02; // +02. Unused ?
+		long int unitCount; // +04. Number of unit IDs in unitIdArray.
+		INTERNAL_UNIT_FORMATION_ID formationType; // +08. Represents how the type of formation units will organize into
+		long int unitIdArray[1]; // +0C. Array size is only known dynamically.
+		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_FORMATION; }
+	};
+	static_assert(sizeof(COMMAND_FORMATION) >= 0x10, "COMMAND_FORMATION size");
+
+	// Type 0x07. Size = 0x08. Create=0x42BB20, Exec=0x42AD40
+	// Commands a player to give a resource amount to another player. Tribute taxes are NOT supported here !
+	struct COMMAND_GIVE_RESOURCE {
+	public:
+		char cmdId;
+		char fromPlayerId; // +1. Player that will pay the resource
+		char toPlayerId; // +02. Player that will receive the resource
+		char resourceId; // +03
+		float resourceValue; // +04
+		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_GIVE_RESOURCE; }
+	};
+	static_assert(sizeof(COMMAND_GIVE_RESOURCE) == 0x08, "COMMAND_GIVE_RESOURCE size");
+
+
+	// Type 0xA "AI order". Size = 0x28. Create=42BCF0. Execute=0042B120
+	// For AI (only).
 	struct COMMAND_TASK_UNIT {
 	public:
 		char cmdId;
@@ -139,7 +188,7 @@ namespace AOE_STRUCTURES
 		long int actorUnitIdArray[1]; // +24. Array size is only known dynamically.
 		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_HOLD_POSITION; }
 	};
-	static_assert(sizeof(COMMAND_TASK_UNIT) >= 0x24, "COMMAND_TASK_UNIT size");
+	static_assert(sizeof(COMMAND_HOLD_POSITION) >= 0x24, "COMMAND_HOLD_POSITION size");
 
 	// Type 0x64. Size = 0x10 ? Create=0x4E9490, 0x4E94E0
 	// NOT enqueue. Mainly used by AI. + some cheats use it ?
@@ -192,7 +241,7 @@ namespace AOE_STRUCTURES
 
 		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_BUILD; }
 	};
-	static_assert(sizeof(COMMAND_MAKE_OBJECT) >= 0x14, "COMMAND_START_RESEARCH size (variable)");
+	static_assert(sizeof(COMMAND_MAKE_OBJECT) >= 0x14, "COMMAND_MAKE_OBJECT size (variable)");
 
 
 	// Type 0x67. Size = 0x10. Common to several "subtypes". Those commands are executed in 4E8EB0.
@@ -205,7 +254,7 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(COMMAND_67_BASE) == 0x2, "COMMAND_67_BASE size");
 	
 
-	// Type 67, subtype 0. Change diplomacy. Create = 04E9890.
+	// Type 67, subtype 0. Change diplomacy. Create = 04E9890. "Set relation"
 	struct COMMAND_CHANGE_DIPLOMACY : COMMAND_67_BASE {
 	public:
 		short int actorPlayerId; // +2
@@ -236,7 +285,7 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(COMMAND_CHANGE_GAME_SPEED) == 0x10, "COMMAND_CHANGE_GAME_SPEED size");
 
-	// Type 67, subtype 2. Add resource. Unused in ROR ?
+	// Type 67, subtype 2. Add resource. Unused in ROR ? "Inventory"
 	struct COMMAND_ADD_RESOURCE : COMMAND_67_BASE {
 	public:
 		short int actorPlayerId; // +2
@@ -251,11 +300,20 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(COMMAND_ADD_RESOURCE) == 0x10, "COMMAND_ADD_RESOURCE size");
 
-	// Type 67, subtype 4. Set steroids mode ON/OFF. Unused in ROR ?
+	// Type 67, subtype 3.  Unused in ROR. "Upgrade town". Does nothing ? Maybe this was never used at all !
+	struct COMMAND_UPGRADE_TOWN : COMMAND_67_BASE {
+	public:
+		short int unknown_02;
+		unsigned long int unknown_04;
+		unsigned long int unknown_08; // not initialized ??
+	};
+	static_assert(sizeof(COMMAND_UPGRADE_TOWN) == 0x0C, "COMMAND_UPGRADE_TOWN size"); // UNSURE
+
+	// Type 67, subtype 4. Set steroids mode ON/OFF. "quick build"
 	struct COMMAND_SET_STEROIDS_MODE : COMMAND_67_BASE {
 	public:
 		short int steroidsModeFlag; // +2. 0 or 1.
-		short int unused_4;
+		short int unused_4;	
 		short int unused_6;
 		float unused_8;
 		short int unused_C;
@@ -281,7 +339,7 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(COMMAND_SET_ALLY_VICTORY) == 0x10, "COMMAND_SET_ALLY_VICTORY size");
 
-	// Type 67, subtype 6. Change diplomacy. Create = 04E9840.
+	// Type 67, subtype 6. Change diplomacy. Create = 0x4E9840. Exec=0x50C570 ExecuteCheatCommand(playerId, subType)
 	struct COMMAND_CHEAT : COMMAND_67_BASE {
 	public:
 		short int actorPlayerId; // +2

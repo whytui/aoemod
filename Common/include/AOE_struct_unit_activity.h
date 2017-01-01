@@ -70,7 +70,7 @@ namespace AOE_STRUCTURES
 	// [EDX+0x78]=activity.setBuildAction(targetUnitId, force)
 	// [EDX+0x88]=
 	// [EDX+0x90]=activity.xxx(f_posY, posX, posZ) (used by +2D4?)
-	// [EDX+0x9C]=activity.fleeToRandomPlace(arg1, arg2, arg3, force)???
+	// [EDX+0x9C]=activity.fleeToRandomPlace(arg1, arg2, arg3, force)??? Eg 0x412650
 	// [EDX+0xA4]=activity.fleeFromAttacker(force)
 	// [EDX+0xA8]=activity.related to 26F
 	// [EDX+0xB4]=activity.  transport load ?

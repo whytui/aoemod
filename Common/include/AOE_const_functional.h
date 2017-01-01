@@ -103,7 +103,7 @@ namespace AOE_CONST_FUNC
 	// Internal Action Ids. See INTERNAL_ACTION_ID in AOE_const_internal.
 	
 
-	enum INTERACTION_MODES : char {
+	enum INTERACTION_MODES : unsigned char { // unsigned char type confirmed.
 		CST_IM_NONE = 0, // Unable to select, move, attack. Eye candy, dead units, projectiles...
 		CST_IM_CAPTURE_ONLY = 1, // Unable to select, move, attack, but can capture (used in 162, 330: flags)
 		CST_IM_RESOURCES = 2, // Can select, only villagers can target (+ military unit for animals...). Animals, trees, fish, mines, bushes.

@@ -109,6 +109,7 @@ bool CreateCmd_Stop(long int actorUnitId) {
 
 
 // Create a "ROR" command struct (build). Returns false if failed.
+// The building is created at construction step (status=0, HP=1)
 bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(actorUnitId);
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid()) {
@@ -125,6 +126,65 @@ bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float po
 	cmd->stratElemId = -1;
 	cmd->posX = posX;
 	cmd->posY = posY;
+	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+// Create a "ROR" command struct (build). Returns false if failed. This creates a fully-built building.
+// Important note: the unit WILL actually be created even if map position/terrain restriction/conflicting units are invalid
+// This also works to create non-building units
+// WARNING: the game will crash if DATID is invalid for provided player
+bool CreateCmd_CompleteBuild(long int playerId, short int unitDefIdToCreate, float posX, float posY) {
+	assert((playerId >= 0) && (playerId <= 8));
+	if ((playerId < 0) || (playerId > 8) || (unitDefIdToCreate < 0)) { return false; }
+	const long int structSize = sizeof(COMMAND_CREATE);
+	AOE_STRUCTURES::COMMAND_CREATE *cmd = (AOE_STRUCTURES::COMMAND_CREATE *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_CREATE;
+	assert(cmd->IsCmdIdValid());
+	cmd->playerId = (short int)playerId;
+	cmd->unitDefIdToCreate = unitDefIdToCreate;
+	cmd->posX = posX;
+	cmd->posY = posY;
+	cmd->posZ = -1;
+	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
+// Takes top-left unit as leader (lol). Other units move according to the formation specified (base = leader position)
+// This just orders a movement action, the formation is not preserved afterwards, and may not work well if units are moving (especially leader)
+// Not sure this always works very well, some units may ignore the movement.
+bool CreateCmd_Formation(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount, INTERNAL_UNIT_FORMATION_ID formationType) {
+	assert(actorUnitsCount > 0);
+	if (actorUnitsCount <= 0) { return false; }
+	const long int structSize = 0x08 + (4 * actorUnitsCount);
+	AOE_STRUCTURES::COMMAND_FORMATION *cmd = (AOE_STRUCTURES::COMMAND_FORMATION *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_FORMATION;
+	assert(cmd->IsCmdIdValid());
+	cmd->unitCount = actorUnitsCount;
+	cmd->formationType = formationType;
+	for (int i = 0; i < actorUnitsCount; i++) {
+		if (actorUnitsList[i]) {
+			assert(actorUnitsList[i]->IsCheckSumValidForAUnitClass());
+			cmd->unitIdArray[i] = actorUnitsList[i]->unitInstanceId;
+		} else {
+			cmd->unitIdArray[i] = -1;
+		}
+	}
+	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
+// Creates a "ROR" command to pay a (tribute free !) tribute from a player to another one.
+// "fromPlayerId" player must have enough resources to pay or the command will have no effect.
+bool CreateCmd_GiveResource(long int fromPlayerId, long int toPlayerId, long int resourceType, float resourceAmount) {
+	assert((fromPlayerId >= 0) && (fromPlayerId < 9) && (toPlayerId >= 0) && (toPlayerId < 9));
+	const long int structSize = sizeof(AOE_STRUCTURES::COMMAND_GIVE_RESOURCE);
+	AOE_STRUCTURES::COMMAND_GIVE_RESOURCE *cmd = (AOE_STRUCTURES::COMMAND_GIVE_RESOURCE *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_GIVE_RESOURCE;
+	assert(cmd->IsCmdIdValid());
+	cmd->fromPlayerId = (char)fromPlayerId;
+	cmd->toPlayerId = (char)toPlayerId;
+	cmd->resourceId = (char)resourceType;
+	cmd->resourceValue = resourceAmount;
 	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
 }
 

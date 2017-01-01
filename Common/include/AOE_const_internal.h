@@ -189,6 +189,9 @@ namespace AOE_CONST_INTERNAL
 	};
 
 	// Those event IDs are used in gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX) = [EDX+0x40]=0x501980. Arguments may have different roles
+	// And player.NotifyEvent
+	// And player.handleEventInAI(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F34C0)
+	// WARNING: to debug: not sure all values are the same enm. There might be separate enums for player/gameSettings notifyEvent...
 	enum GAME_EVENT_TYPES : long int {
 		CST_GET_INVALID = -1, // For customROR internal usage
 		CST_GET_CANT_UNLOAD_NO_ROOM = 01,
@@ -197,7 +200,7 @@ namespace AOE_CONST_INTERNAL
 		CST_GET_UNKNOWN_04_PLAYER_DISCONNECTED = 04,
 		CST_GET_UNKNOWN_05_PLAYER_DISCONNECTED_ABANDONED = 05,
 		CST_GET_PLAYER_LOST = 06,
-		CST_GET_TRIBUTE_PAID = 07,
+		CST_GET_TRIBUTE_PAID = 07, // gameSettings.NotifyEvent: arg2=actorPlayerId, arg3=targetPlayerId, arg4=resourceId, arg5=resourceType
 		CST_GET_DIPLOMACY_CHANGED = 8,
 		CST_GET_RESEARCH_COMPLETE = 0x64,
 		CST_GET_CANCELED_RESEARCH = 0x65,
@@ -223,14 +226,16 @@ namespace AOE_CONST_INTERNAL
 		CST_GET_ADD_REMOVE_IN_TRAIN_QUEUE = 0x7C,
 		CST_GET_NOT_ENOUGH_RESOURCES = 0x7D, // need houses, food/wood or maxPop reached (to build or train, NOT for repair)
 		CST_GET_FARM_DEPLETED = 0x7E, // Sound 0x10
-		CST_GET_UNKNOWN_1F9 = 0x1F9, // see 0x4F3531
+		CST_GET_UNKNOWN_1F9 = 0x1F9, // Unit death/loss ? see 0x4F3531(=if fishing ship then remove group)
 		CST_GET_UNKNOWN_1FA = 0x1FA, // Villager activity end, could not find nearby similar targets ? arg4=activityId
 		//CST_GET_SAW_ENEMY_UNIT = 0x1FF, // Unsure ?? possible confusion with activity tasks IDs
 		CST_GET_UNIT_ATTACKED = 0x201,
 		CST_GET_MOVEMENT_FINISHED = 0x202, // unsure
-		CST_GET_UNKOWN_206 = 0x206,
-		CST_GET_UNKOWN_207 = 0x207,
-		CST_GET_TRIBUTE_RECEIVED = 0x20A,
+		CST_GET_TOO_FAR_FROM_LAND = 0x206, // to confirm [player notif]
+		CST_GET_CANNOT_UNLOAD = 0x207, // Not enough space to unload ? To confirm [player notif]
+		CST_GET_UNKOWN_208 = 0x208, // for early versions only ?
+		CST_GET_UNKOWN_209 = 0x209, // When triggered, AI player adds dislike for target player
+		CST_GET_TRIBUTE_RECEIVED = 0x20A, // [player notifications only?]
 		CST_GET_UNKOWN_20C = 0x20C,
 		CST_GET_SEE_UNIT = 0x20D
 	};
@@ -322,18 +327,31 @@ namespace AOE_CONST_INTERNAL
 	enum INTERNAL_COMMAND_ID : char {
 		CST_ICI_RIGHT_CLICK = 0, // Some kind of joker: for right-click: will guess command according to unit def interaction, target, etc
 		CST_ICI_STOP_ACTION = 1, // This command is concerned by farm bug in 1.0b version (resets food). 1.0c "Hack" fix is in 0x42A75B.
-		CST_ICI_UNKNOWN_02_TASK = 2, // task ? task from idle ? see 42A780
-		CST_ICI_ADD_RESOURCE = 0x05, // Only used for AI "personality resource bonus" ?
-		CST_ICI_TASK_UNIT = 0x0A, // Task from existing activity ?
+		CST_ICI_WORK = 2, // task ? see 0x42A780 "work"
+		CST_ICI_MOVE = 3, // 0x42BA70
+		CST_ICI_CREATE = 4, // Create a fully built building (not construction step). Also works to create other units. No check is made before creating unit !
+		CST_ICI_ADD_RESOURCE = 0x05, // Only used for AI "personality resource bonus" ? "add attribute"
+		CST_ICI_FORMATION = 0x06, // different from group ? Walk in formation ? // 0x42BB60
+		CST_ICI_GIVE_RESOURCE = 0x07, // Give a resource amount from a player to another. Tribute taxes are NOT supported here.
+		CST_ICI_CREATE_GROUP = 0x08, // group units 0x42BBE0
+		CST_ICI_REMOVE_GROUP = 0x09, // "destroy group".
+		CST_ICI_TASK_UNIT = 0x0A, // AI order.
 		CST_ICI_RESIGN = 0x0B, // Only for MP games when clicking resign in menu. See exec=42B290
+		// 0xE ? 0x42BC40
+		// 0xF : 0x42BC80 guard/protect unit ?
 		CST_ICI_HOLD_POSITION = 0x11, // To confirm
 		CST_ICI_TRIGGER_TRAIN_UNIT = 0x64, // unsure, when AI triggers a train unit action ? + some cheats?
 		CST_ICI_RESEARCH = 0x65,
 		CST_ICI_BUILD = 0x66,
-		CST_ICI_CHANGE_SETTING = 0x67, // Includes cheats, game speed change, diplomacy change
+		CST_ICI_CHANGE_SETTING = 0x67, // Includes cheats(6), game speed change(1), diplomacy change(0)
+		CST_ICI_EXPLORE = 0x68,
+		CST_ICI_UNKNOWN_69 = 0x69,// 0x69 0x4E9710 / exec 0x4E8B00
 		CST_ICI_KILL_UNIT = 0x6A,
+		CST_ICI_UNKNOWN_6B = 0x6B, // exec: 4E9160
 		CST_ICI_PAY_TRIBUTE = 0x6C,
 		CST_ICI_SET_TRADE_RESOURCE_TYPE = 0x6D, // Set resource to trade in a trade ship.
+		CST_ICI_UNKNOWN_6E = 0x6E, // Repair ? exec: 4E9380.
+		CST_ICI_UNKNOWN_6F = 0x6F, // Unload ? exec: 4E93D0
 		CST_ICI_QUEUE_UNQUEUE_UNIT = 0x77, // Only for human-called "train unit" ? Include right-click to unqueue.
 		CST_ICI_ADD_SCORE_ELEM = (char)0xFF // A special one...
 	};
@@ -341,11 +359,21 @@ namespace AOE_CONST_INTERNAL
 		CST_IC67_CHANGE_DIPLOMACY = 0,
 		CST_IC67_CHANGE_GAME_SPEED = 1,
 		CST_IC67_ADD_RESOURCE = 2,
-		CST_IC67_SET_STEROIDS_MODE = 4,
+		CST_IC67_UPGRADE_TOWN = 3, // Unused
+		CST_IC67_SET_STEROIDS_MODE = 4, // "quick build"
 		CST_IC67_SET_ALLY_VICTORY = 5,
 		CST_IC67_CHEAT = 6,
 		CST_IC67_APPLY_WRITING_TECH = 7,
 		CST_IC67_SYNC_ERROR = 8 // Save game to syncerr?.gam (!) and quit game + sync error message. Saved game seems NOT to be playable
+	};
+
+	enum INTERNAL_UNIT_FORMATION_ID : long int {
+		CST_UFI0_LEFT_RIGHT_AXIS = 0, // Using space=1 align on +X+Y diagonal (left to right?)
+		CST_UFI1_BOTTOM_TOP_AXIS = 1, // Using space=1.5 align on -X+Y diagonal (bottom to top?)
+		CST_UFI2_Y_AXIS = 2, // Using space=2, align on Y axis
+		CST_UFI3_X_AXIS = 3, // Using space=2, align on X axis
+		CST_UFI4_UNKNOWN_V = 4, // Using space=1.5? Draws a "V" ?
+		CST_UFI5_UNKNOWN_V = 5 // Using space=1.5? Draws a "V" ?
 	};
 
 	enum INTERNAL_CHEAT_ID : short int {
@@ -444,7 +472,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_2C8 = 0x2C8, // 264+64 see 0x41363F
 		CST_ATI_GATHERER_ATT_REACTION_WHEN_ATTACKED = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
 		CST_ATI_UNKNOWN_2CE = 0x2CE, // (26A+64) Repair?? see 0x413595
-		CST_ATI_UNKNOWN_2D1 = 0x2D1, // Unload (26D+64? see 0x4135A7
+		CST_ATI_UNKNOWN_2D1 = 0x2D1, // Unload (26D+64?) see 0x4135A7
 		CST_ATI_UNKNOWN_2D2 = 0x2D2,
 		CST_ATI_UNKNOWN_2D3 = 0x2D3,
 		CST_ATI_UNKNOWN_2D4 = 0x2D4,

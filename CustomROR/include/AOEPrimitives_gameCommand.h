@@ -36,6 +36,20 @@ namespace GAME_COMMANDS {
 	// Create a "ROR" command struct (build). Returns false if failed.
 	bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY);
 
+	// Create a "ROR" command struct (build). Returns false if failed. This creates a fully-built building
+	// Important note: the unit WILL actually be created even if map position/terrain restriction/conflicting units are invalid
+	// This also works to create non-building units
+	bool CreateCmd_CompleteBuild(long int playerId, short int unitDefIdToCreate, float posX, float posY);
+
+	// Takes top-left unit as leader (lol). Other units move according to the formation specified (base = leader position)
+	// This just orders a movement action, the formation is not preserved afterwards, and may not work well if units are moving (especially leader)
+	// Not sure this always works very well, some units may ignore the movement.
+	bool CreateCmd_Formation(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount, INTERNAL_UNIT_FORMATION_ID formationType);
+
+	// Creates a "ROR" command to pay a (tribute free !) tribute from a player to another one.
+	// "fromPlayerId" player must have enough resources to pay or the command will have no effect.
+	bool CreateCmd_GiveResource(long int fromPlayerId, long int toPlayerId, long int resourceType, float resourceAmount);
+
 	// Create a "ROR" command struct (change diplomacy). Returns false if failed.
 	bool CreateCmd_ChangeDiplomacy(short int playerId, short int targetPlayerId, PLAYER_DIPLOMACY_STANCES diplomacyStance);
 
