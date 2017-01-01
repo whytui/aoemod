@@ -146,18 +146,8 @@ namespace AOE_STRUCTURES {
 		char unitCountThatAreTargetingMe; // +4F. Number of (other)units that have "me" as target (repairman, gatherer, attacker...). See 4AADB0. Warning: the count is not reliable: when moving to it, the other unit counts TWICE (and counts for 1 when actually doing the action)
 		// 0x50
 		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *ptrElemInPlayerUnitList; // +50. Link to corresponding reference in player's creatable units list. Can be NULL in saved games (if not "used" yet ?)
-		STRUCT_MANAGED_ARRAY unknown_054; // +54 a ptr. An array. Elemsize=4? about movement ? +4,+8=dword. Related to playerUnitListStruct? objectCollisionList ?
-		/*unsigned long int unknown_054; // +54 a ptr. An array. Elemsize=4? about movement ? +4,+8=dword. Related to playerUnitListStruct? objectCollisionList ?
-		long int unknown_054_usedElemCount; // +58. (to confirm)
-		long int unknown_054_maxElemCount; // +5C. (to confirm)
-		// 0x60
-		long int unknown_054_arraySize; // +60. Number of allocated elements in +54 (to confirm)*/
+		STRUCT_MANAGED_ARRAY unknown_054; // +54 a ptr. about movement ? Related to playerUnitListStruct? objectCollisionList ?
 		STRUCT_MANAGED_ARRAY unitIDsInMyGroup; // +64. list of IDs of the units in same group as me.
-		/*long int *unitIDsInMyGroup; // +64. list of IDs of the units in same group as me.
-		long int unknown_68; // +68 = number of elements in ?
-		long int unknown_6C;
-		// 0x70
-		long int unknown_070; // a number*/
 		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code. Warning: some unit don't have one (e.g. lion tame)
 		long int groupLeaderUnitId; // +78. Unit Id of my group's leader
 		long int terrainZoneInfoIndex; // +7C. Index of terrainZoneInfo in terrainZoneInfoLink array. -1 means not initialized yet.

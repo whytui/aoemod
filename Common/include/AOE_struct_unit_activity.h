@@ -170,7 +170,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_0FC; // int, consistent with +0F8 and global.playerVar ?
 		// 0x100
 		unsigned long int unknown_100;
-		unsigned long int unknown_104;
+		long int unknown_104_gameTime; // +104. Some game time (ms) in the *future* ? (next xxx) ?
 		unsigned long int unknown_108; // int, consistent with +10C
 		unsigned long int unknown_10C; // int, consistent with +108
 		// 0x110
