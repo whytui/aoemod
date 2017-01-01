@@ -755,7 +755,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 						unitGroup->AddTargetUnitIdToArray(enemyWonderInfo->unitId);
 						return enemyWonderInfo;
 					}
-					STRUCT_AI_UNIT_LIST_INFO tempList;
+					STRUCT_MANAGED_ARRAY tempList;
 					// This call searches a path, even if enemy units block the way ? Unsure
 					bool success = AOE_METHODS::MoveToTarget_1A0(groupLeader, enemyWonderInfo->unitId, groupLeader->GetMaxRange(),
 						0, 1, targetPlayerId, 0x1B, &tempList);
@@ -1000,7 +1000,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 				targetInfo->buildingTargetInfAIUnitElemListIndex = targetInfo->currentSearchInfAIUnitElemListIndex; // NOT using curIndex. Not to skip some buildings in search ?
 			}
 			long int unknown_EBP = targetInfo->currentSearchIsBuildings ? -1 : 0x1B;
-			STRUCT_AI_UNIT_LIST_INFO tempListForMove;
+			STRUCT_MANAGED_ARRAY tempListForMove;
 			tempListForMove.arraySize = 0;
 			tempListForMove.maxElementCount = 0;
 			tempListForMove.unitIdArray = NULL;
@@ -1186,7 +1186,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 						return enemyWonderInfo;
 					}
 					// 0x4C02B6
-					STRUCT_AI_UNIT_LIST_INFO tempList;
+					STRUCT_MANAGED_ARRAY tempList;
 					// This call searches a path, even if enemy units block the way ? Unsure
 					bool success = AOE_METHODS::MoveToTarget_1A0(groupLeader, enemyWonderInfo->unitId, groupLeader->GetMaxRange(),
 						0, 1, targetPlayerId, 0x1B, &tempList);
@@ -1448,7 +1448,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 				targetInfo->buildingTargetInfAIUnitElemListIndex = targetInfo->currentSearchInfAIUnitElemListIndex; // NOT using curIndex. Not to skip some buildings in search ?
 			} // 0x4C0AF8
 			long int unknown_EBP = targetInfo->currentSearchIsBuildings ? -1 : 0x1B;
-			STRUCT_AI_UNIT_LIST_INFO tempListForMove;
+			STRUCT_MANAGED_ARRAY tempListForMove;
 			tempListForMove.arraySize = 0;
 			tempListForMove.maxElementCount = 0;
 			tempListForMove.unitIdArray = NULL;

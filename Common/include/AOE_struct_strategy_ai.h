@@ -2,7 +2,7 @@
 #pragma once
 
 #include <AOE_struct_common_ai_object.h>
-#include <AOE_struct_ai_unit_list_info.h>
+#include <AOE_struct_managed_array.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -27,9 +27,9 @@ namespace AOE_STRUCTURES {
 		char tempPerFile[0x100]; // +F8
 		char unknown_1F8[0x234 - 0x1F8];
 		long int unknown_targetUnitId; // +1FC. Related to unit groups? To confirm. Something to attack ? Protect?
-		STRUCT_AI_UNIT_LIST_INFO unknown_238; // List of SN numbers (index) ? For debugging ?
-		STRUCT_AI_UNIT_LIST_INFO unknown_248; // List of SN numbers (index) ? For debugging ?
-		STRUCT_AI_UNIT_LIST_INFO unknown_258; // List of SN numbers (index) ? For debugging ?
+		STRUCT_MANAGED_ARRAY unknown_238; // List of SN numbers (index) ? For debugging ?
+		STRUCT_MANAGED_ARRAY unknown_248; // List of SN numbers (index) ? For debugging ?
+		STRUCT_MANAGED_ARRAY unknown_258; // List of SN numbers (index) ? For debugging ?
 		unsigned long int structPersonalityChecksum; // +268. 9C 8C 54 00
 		long int SNNumber[0xE3]; // +26C. only used in init phases ?
 		// 0x5F8: end

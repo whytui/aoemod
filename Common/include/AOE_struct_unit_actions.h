@@ -27,7 +27,9 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_ACTION_BASE 0x005429D8
 	// Size=0x40 for parent class D8 29 54 00 (RGE_Action)
 	// constructor=406EA0(actor, arg2) / 407050. + 406E40?(fromFile)
-	// Note: Actions are created from game commands in 0x4B4600 = unitActionInfo.createActionForCommand(unitDefCommand, arg2, posY, posX, posZ)
+	// Note: (some) Actions are created from game commands in 0x4B4600 = unitActionInfo.createActionForCommand(unitDefCommand, arg2, posY, posX, posZ)
+	// EDX+28 = action.update()?
+	// EDX+5C = action.setStatus?(actionStatus)
 	class STRUCT_ACTION_BASE {
 	public:
 		unsigned long int checksum;
@@ -321,6 +323,7 @@ namespace AOE_STRUCTURES {
 	// [id 0x78] Size = 0x40. checksum=68 8A 54 00. Constructor 0x4B7220 ?
 	// Expected commandType = 0x78 (generate wonder victory)
 	// This action sets the timer for victory (according to victory conditions though) and sets visibility to all players
+	// "Timer" field starts at 0 and counts the "up time" (since wonder is fully built)
 #define CHECKSUM_ACTION_GENERATE_WONDER_VICTORY 0x00548A68
 	class STRUCT_ACTION_GENERATE_WONDER_VICTORY : public STRUCT_ACTION_BASE {
 	public:

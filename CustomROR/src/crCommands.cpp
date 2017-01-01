@@ -568,7 +568,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		long int playerId = 1;
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
-		STRUCT_AI_UNIT_LIST_INFO *l = &player->ptrAIStruct->structInfAI.unknown_0F0;
+		STRUCT_MANAGED_ARRAY *l = &player->ptrAIStruct->structInfAI.unknown_0F0;
 		int c = l->usedElements;
 		for (int i = 0; i < c; i++) {
 			int id = l->unitIdArray[i];

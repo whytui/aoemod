@@ -4,7 +4,7 @@
 #include <AOE_const_internal.h>
 #include <AOE_empires_dat.h>
 #include <AOE_struct_common_ai_object.h>
-#include <AOE_struct_ai_unit_list_info.h>
+#include <AOE_struct_managed_array.h>
 #include <AOE_struct_map_tile_values.h>
 
 
@@ -115,7 +115,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int checksum;
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1005
 		// 0xF0
-		STRUCT_AI_UNIT_LIST_INFO unknown_0F0; // Unused ?? See 0x4DB4E2.
+		STRUCT_MANAGED_ARRAY unknown_0F0; // Unused ?? See 0x4DB4E2.
 		// 0x100
 		STRUCT_AI *ptrMainAI;
 		long int YMapSize; // +104. Warning: this might NOT be initialized
@@ -125,14 +125,14 @@ namespace AOE_STRUCTURES {
 		long int unitElemListSize; // +110. Total allocated size of unitElemList (the array can contain some "-1")
 		// Unit lists : see 0x4BDD10. In those 4 unit lists, elements are never cleaned/removed !
 		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units that can be created by players + resources + artefacts. AddUpdate=0x4BD750.
-		STRUCT_AI_UNIT_LIST_INFO creatableAndGatherableUnits; // +118. units that can be created by players + resources (gazelle but not other animals) + artefacts
-		STRUCT_AI_UNIT_LIST_INFO playerCreatableUnits; // +128. All player-creatable units (villager, military, buildings...). NOT resources.
-		STRUCT_AI_UNIT_LIST_INFO artefactsAndFlags; // +138. Store the found flags/artefacts.
-		STRUCT_AI_UNIT_LIST_INFO elementsToDefend; // +148. Can be TC, dock, relic, ruin, mines+bushes. Related to SNxxxDefendPriority
+		STRUCT_MANAGED_ARRAY creatableAndGatherableUnits; // +118. units that can be created by players + resources (gazelle but not other animals) + artefacts
+		STRUCT_MANAGED_ARRAY playerCreatableUnits; // +128. All player-creatable units (villager, military, buildings...). NOT resources.
+		STRUCT_MANAGED_ARRAY artefactsAndFlags; // +138. Store the found flags/artefacts.
+		STRUCT_MANAGED_ARRAY elementsToDefend; // +148. Can be TC, dock, relic, ruin, mines+bushes. Related to SNxxxDefendPriority
 		STRUCT_MAP_TILE_VALUES mapExplorationInfo; // +158. Values = INFAI_TILE_EXPLORATION_STATUS
 		// Remove unit from allMyUnits & buildingUnits: 0x4BF440.
-		STRUCT_AI_UNIT_LIST_INFO allMyUnits; // +180. To confirm.
-		STRUCT_AI_UNIT_LIST_INFO buildingUnits; // +190
+		STRUCT_MANAGED_ARRAY allMyUnits; // +180. To confirm.
+		STRUCT_MANAGED_ARRAY buildingUnits; // +190
 		// 0x1A0
 		char unknown_1A0[0x1F0 - 0x1A0];
 		// 0x1F0

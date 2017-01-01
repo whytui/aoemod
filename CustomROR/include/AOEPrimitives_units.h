@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <string>
+#include <AOE_struct_managed_array.h>
 #include <AOE_struct_units.h>
 #include <AOE_struct_unit_actions.h>
 #include <AOE_struct_tac_ai.h>
@@ -22,7 +23,7 @@ namespace AOE_METHODS {
 // tempList should be empty in input, filled by this method. Please free the array (if non-NULL) afterwards !
 // Call [unit+0x1A0], for example 0x44E130.
 bool MoveToTarget_1A0(STRUCT_UNIT_BASE *unit, long int targetUnitId, float range, long int arg3,
-	long int arg4, long int targetPlayerId, long int arg6, STRUCT_AI_UNIT_LIST_INFO *tempList);
+	long int arg4, long int targetPlayerId, long int arg6, STRUCT_MANAGED_ARRAY *tempList);
 
 
 // Add a unit to all relevant infAI lists. Cf 0x4BE0D0

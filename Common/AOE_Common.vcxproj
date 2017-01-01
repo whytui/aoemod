@@ -97,7 +97,6 @@
     <ClInclude Include="include\AOE_hardcoded_unit_names.h" />
     <ClInclude Include="include\AOE_offsets.h" />
     <ClInclude Include="include\AOE_SN_numbers.h" />
-    <ClInclude Include="include\AOE_struct_ai_unit_list_info.h" />
     <ClInclude Include="include\AOE_struct_build_ai.h" />
     <ClInclude Include="include\AOE_struct_campaign_info.h" />
     <ClInclude Include="include\AOE_struct_command_line_info.h" />
@@ -112,6 +111,7 @@
     <ClInclude Include="include\AOE_struct_graphics.h" />
     <ClInclude Include="include\AOE_struct_inf_ai.h" />
     <ClInclude Include="include\AOE_struct_main_ai.h" />
+    <ClInclude Include="include\AOE_struct_managed_array.h" />
     <ClInclude Include="include\AOE_struct_map_base_common.h" />
     <ClInclude Include="include\AOE_struct_map_def.h" />
     <ClInclude Include="include\AOE_struct_map_generation.h" />

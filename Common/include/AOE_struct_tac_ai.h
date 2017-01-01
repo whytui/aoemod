@@ -5,7 +5,7 @@
 #include <AOE_empires_dat.h>
 #include <AOE_const_internal.h>
 #include <AOE_struct_common_ai_object.h>
-#include <AOE_struct_ai_unit_list_info.h>
+#include <AOE_struct_managed_array.h>
 #include <AOE_struct_strategy_element.h>
 #include <AOE_struct_unit_group.h>
 
@@ -106,17 +106,17 @@ namespace AOE_STRUCTURES {
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=?
 		// 0xF0
 		STRUCT_AI *ptrMainAI;
-		STRUCT_AI_UNIT_LIST_INFO allVillagers; // +F4. All *my* villagers. Array can contain empty values (-1). Does NOT contain any boat ! 
+		STRUCT_MANAGED_ARRAY allVillagers; // +F4. All *my* villagers. Array can contain empty values (-1). Does NOT contain any boat ! 
 		// 0x100
-		STRUCT_AI_UNIT_LIST_INFO villagerExplorers; // +104.
-		STRUCT_AI_UNIT_LIST_INFO landMilitaryUnits; // +114. All land military unitIds (cf AI type - 0x4D277A), EXCLUDING towers, boats
-		STRUCT_AI_UNIT_LIST_INFO unknown_124; // NOT SURE it is a STRUCT_AI_UNIT_LIST_INFO
-		STRUCT_AI_UNIT_LIST_INFO allBoats; // +134. Includes trade/fishing/transport/war boat AI type units.
-		STRUCT_AI_UNIT_LIST_INFO warShips; // +144
-		STRUCT_AI_UNIT_LIST_INFO fishingShips; // +154
-		STRUCT_AI_UNIT_LIST_INFO tradeShips; // +164
-		STRUCT_AI_UNIT_LIST_INFO transportShips; // +174
-		STRUCT_AI_UNIT_LIST_INFO relics; // +184. Relics only ? What is sure is that is does NOT include ruins.
+		STRUCT_MANAGED_ARRAY villagerExplorers; // +104.
+		STRUCT_MANAGED_ARRAY landMilitaryUnits; // +114. All land military unitIds (cf AI type - 0x4D277A), EXCLUDING towers, boats
+		STRUCT_MANAGED_ARRAY unknown_124; // NOT SURE it is a STRUCT_MANAGED_ARRAY
+		STRUCT_MANAGED_ARRAY allBoats; // +134. Includes trade/fishing/transport/war boat AI type units.
+		STRUCT_MANAGED_ARRAY warShips; // +144
+		STRUCT_MANAGED_ARRAY fishingShips; // +154
+		STRUCT_MANAGED_ARRAY tradeShips; // +164
+		STRUCT_MANAGED_ARRAY transportShips; // +174
+		STRUCT_MANAGED_ARRAY relics; // +184. Relics only ? What is sure is that is does NOT include ruins.
 		long int SNNumber[0xE2]; // +194. In game, we use this one (not strategyAI's). Total size=0x388 (4*0xE2). index from 0 to E1. (missing 1 SN?)
 		// 0x51C
 		// Here: a list of small structures size=0x18 (0x32 elems?) = gatherers and their tasks (excluding explorers). builders/repairmen NOT in this array?
@@ -136,10 +136,10 @@ namespace AOE_STRUCTURES {
 		// 0xD20
 		long int buildFrequencyCounter; // incremented until it reaches SNBuildFrequency
 		long int currentAttackSeparationTime_seconds; // +D24. Compared to SNAttackResponseSeparationTime,SNAttackSeparationTimeRandomness. See 4E0BC0,4E0C03.
-		STRUCT_AI_UNIT_LIST_INFO targetPlayers; // +D28. Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK? Always only 1 element (sometimes hardcoded?4D622C)
-		STRUCT_AI_UNIT_LIST_INFO likedPlayers; // +D38. allied playerIds ? "myself" IS in list ! In practise, always 2 elements? (me + most liked player) ?
-		STRUCT_AI_UNIT_LIST_INFO IdleOrInRangeMilitaryUnits; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960
-		STRUCT_AI_UNIT_LIST_INFO unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ? Unit that defend something ?
+		STRUCT_MANAGED_ARRAY targetPlayers; // +D28. Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK? Always only 1 element (sometimes hardcoded?4D622C)
+		STRUCT_MANAGED_ARRAY likedPlayers; // +D38. allied playerIds ? "myself" IS in list ! In practise, always 2 elements? (me + most liked player) ?
+		STRUCT_MANAGED_ARRAY IdleOrInRangeMilitaryUnits; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960
+		STRUCT_MANAGED_ARRAY unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ? Unit that defend something ?
 		unsigned long int gathererCount_actual[4]; // +D68. Index IS resource ID.
 		long int gathererCount_desired[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT]; // +D78. Villager count we want to assign to each type of resource (4). Index IS resource Type ID
 		long int extraResourceTypeNeededByPriority[4]; // +D88 First=most needed. Use extraResourceAmount with this index to get resource amount. <0 amount = I must collect

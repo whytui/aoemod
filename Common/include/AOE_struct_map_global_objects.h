@@ -120,12 +120,12 @@ namespace AOE_STRUCTURES {
 		long int unknown_11DCDC_unitClass; // +11DCDC. arg15 of 00458930 call. Seen 0x1B (walls????). Used in 459AD4
 		// 0x11DCE0
 		long int unknown_11DCE0; // arg14 of 00458930 call. A playerId ?
-		// unknown_11DCE4 is a STRUCT_AI_UNIT_LIST_INFO. To rename.
-		long int *unknown_11DCE4; // +11DCE4 = array of unit IDs
+		STRUCT_MANAGED_ARRAY unknown_11DCE4; // +11DCE4 = array of unit IDs
+		/*long int *unknown_11DCE4; // +11DCE4 = array of unit IDs
 		long int unknown_11DCE8; // +11DCE8 = used count in unknown_11DCE4
 		long int unknown_11DCEC;
 		// 0x11DCF0
-		long int unknown_11DCF0; // +11DCF0 = allocated number of elems in unknown_11DCE4
+		long int unknown_11DCF0; // +11DCF0 = allocated number of elems in unknown_11DCE4*/
 		long int unknown_11DCF4; // seen 1
 		// ...
 		bool IsCheckSumValid() { return this->checksum == 0x00544CF0; }

@@ -183,9 +183,6 @@
     <ClInclude Include="include\AOE_struct_strategy_ai.h">
       <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
     </ClInclude>
-    <ClInclude Include="include\AOE_struct_ai_unit_list_info.h">
-      <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
-    </ClInclude>
     <ClInclude Include="include\AOE_struct_strategy_element.h">
       <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
     </ClInclude>
@@ -331,6 +328,9 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\AOE_struct_sprites.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_managed_array.h">
       <Filter>Fichiers d%27en-tête\AOE_model</Filter>
     </ClInclude>
   </ItemGroup>

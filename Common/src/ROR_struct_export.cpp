@@ -91,7 +91,7 @@ namespace AOE_STRUCTURES {
 		res += " - y=";
 		res += std::to_string(obj->positionY);
 		res += " - UnitId_78?=";
-		res += std::to_string(obj->unknown_078_unitInstanceId);
+		res += std::to_string(obj->groupLeaderUnitId);
 		res += "\nDefinition: ";
 		res += this->ExportStruct(obj->unitDefinition);
 		res += "\n\nActivity: ";

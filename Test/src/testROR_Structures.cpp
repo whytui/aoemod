@@ -171,7 +171,7 @@ static bool test_ror_structures() {
 	assert(sizeof(AOE_STRUCTURES::STRUCT_TERRAIN_DEF) == 0x198);
 	trs_assert(&umapF04C, 0xCE624, &umapF04C.unknown_0CE624_mapUnitOccupiedGrid);
 	trs_assert(&umapF04C, 0x10DE28, &umapF04C.unknown_010DE28);
-	trs_assert(&umapF04C, 0x11DCE8, &umapF04C.unknown_11DCE8);
+	trs_assert(&umapF04C, 0x11DCE4, &umapF04C.unknown_11DCE4);
 	assert(sizeof(AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO) == 0x18);
 	assert(sizeof(gmapinfo) == 0xB5F8);
 	trs_assert(&gmapinfo, 0x8DF0, &gmapinfo.unknown_8DF0);

@@ -93,6 +93,7 @@ namespace AOE_STRUCTURES {
 	// Size = 0x11A0 (AOE1.0b&c). Constructor 0x4F91C0 (empires.exe)
 	// Size = 0x1254. Constructor 0x5004C0(1.0b), 0x4FDFA0(1.0c) - arg1=commandLineInfo, arg2=?
 	// Warning: this mainly represents information from UI, many fields are NOT RELEVANT (and arbitratry) when loading a saved game.
+	// [EDX+40] gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX)
 	class STRUCT_GAME_SETTINGS {
 	public:
 		unsigned long int checksum;

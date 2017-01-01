@@ -204,6 +204,26 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		if (unitArray) {
 			selectedUnit = unitArray[0];
 		}
+		if (player && player->ptrAIStruct) {
+			auto fake = &player->ptrAIStruct->structTacAI.fakeFirstUnitGroupElem;
+			auto curGrp = fake->next;
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *curUnit = NULL;
+			while (curGrp && (curGrp != fake)) {
+				for (int i = 0; i < 40; i++) {
+					long int curUnitId = curGrp->GetMyUnitId(i);
+					int grpId = curGrp->unitGroupId;
+					int commanderId = curGrp->commanderUnitId;
+					AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *act = NULL;
+					curUnit = global->GetUnitFromId(curUnitId);
+					if (curUnit) {
+						int myGrpLeaderId = curUnit->groupLeaderUnitId;
+						act = curUnit->currentActivity;
+					}
+				}
+				curGrp = curGrp->next;
+			}
+		}
+
 		float x, y;
 		GetGamePositionUnderMouse(&x, &y);
 		bool expl = PLAYER::IsExploredForPlayer(player, (long)x, (long)y);
@@ -231,7 +251,6 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameScreen = GetGameSettingsPtr()->ptrGameUIStruct;
 		if (IsGameRunning()) {
 			// During Game
-
 			selectedUnit = gameScreen->panelSelectedUnit;
 			AOE_STRUCTURES::STRUCT_PLAYER *player = NULL;
 			if (selectedUnit) { player = selectedUnit->ptrStructPlayer; }

@@ -10,6 +10,7 @@
 #include <AOE_struct_strategy_ai.h>
 #include <AOE_struct_tac_ai.h>
 #include <AOE_struct_trade_ai.h>
+#include <AOE_struct_managed_array.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -31,7 +32,7 @@ namespace AOE_STRUCTURES {
 		// 0xF0
 		STRUCT_PLAYER *ptrStructPlayer;
 
-		STRUCT_AI_UNIT_LIST_INFO allMyUnits; // +F4. Can contain empty elements ? Remove in 40B950.
+		STRUCT_MANAGED_ARRAY allMyUnits; // +F4. Can contain empty elements ? Remove in 40B950.
 		STRUCT_BUILD_AI structBuildAI; // +0x104
 		STRUCT_CON_AI structConAI; // +0x6C4 ; city plan
 		STRUCT_DIPLOMACY_AI structDiplAI; // +0x9DC

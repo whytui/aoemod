@@ -3,7 +3,7 @@
 
 #include <AOE_empires_dat.h>
 #include <AOE_const_internal.h>
-#include <AOE_struct_ai_unit_list_info.h>
+#include <AOE_struct_managed_array.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -122,7 +122,7 @@ namespace AOE_STRUCTURES
 		// Unis IDs are added on "activity.processNotify" for being attacked.
 		// Unit IDs are removed on "updateActivity" (?), cf loop in 40F8E2: for each unit: if unit.activity.targetId != myUnitId then remove from list.
 		// Warning: Units that do NOT have an activity (tame lion...) are not well listed here (it's quite a bug in the game, units are supposed to all have an activity... I think)
-		STRUCT_AI_UNIT_LIST_INFO unitIDsThatAttackMe;
+		STRUCT_MANAGED_ARRAY unitIDsThatAttackMe;
 		// 0x70
 		float unknown_070_posY;
 		float unknown_074_posX;
