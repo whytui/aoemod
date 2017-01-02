@@ -46,6 +46,7 @@ namespace AOE_STRUCTURES
 
 		long int actorIdList[1]; // +1C.
 		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_RIGHT_CLICK; }
+		long int MySizeInBytes() const { return 0x1C + 4 * this->actorCount; }
 	};
 	static_assert(sizeof(COMMAND_RIGHT_CLICK) >= 0x1C, "COMMAND_RIGHT_CLICK size");
 
@@ -157,6 +158,53 @@ namespace AOE_STRUCTURES
 		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_TASK_UNIT; }
 	};
 	static_assert(sizeof(COMMAND_TASK_UNIT) == 0x28, "COMMAND_TASK_UNIT size");
+
+	// Type 0x0C. Size = 0x9 + x*3 ?
+	// Set target position ?
+	struct COMMAND_UNKNOWN_C {
+	public:
+		char cmdId;
+		char playerId;
+		short int unknown_02;
+		long int unitId;
+		unsigned char positionsCount; // +08. Number of elements in positionsArray (also gives structure size)
+		STRUCT_UNIT_TARGET_POS positionsArray[1]; // +09. Array size is only known dynamically.
+
+		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_UNKNOWN_C; }
+		long int MySizeInBytes() const { return 0x09 + 3 * this->positionsCount; }
+	};
+	static_assert(sizeof(COMMAND_UNKNOWN_C) == 0x09 + 3, "COMMAND_UNKNOWN_C size");
+
+
+	// Type 0x0E. Size = 0x10?
+	struct COMMAND_UNKNOWN_E {
+	public:
+		char cmdId;
+		char playerId; // +01. Player must be unit owner
+		short int unknown_02;
+		long int unitId; // +04. Actor unit ?
+		long int unitId2; // +08. Target unit ?
+		long int unknown_0C;
+
+		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_UNKNOWN_E; }
+	};
+	static_assert(sizeof(COMMAND_UNKNOWN_E) == 0x10, "COMMAND_UNKNOWN_C size");
+
+
+	// Type 0x10. Size = 0x04 + x*4. Execute=0x42B3F0
+	// Shift-right click for path finding
+	struct COMMAND_ADD_INTERMEDIATE_MOVEMENT_STEP {
+	public:
+		char cmdId;
+		char unitCount;
+		unsigned char posY; // +02
+		unsigned char posX; // +03
+		long int unitIdArray[1]; // +04. Array size is only known dynamically.
+
+		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_ADD_INTERMEDIATE_MOVEMENT_STEP; }
+		long int MySizeInBytes() const { return 0x04 + 3 * this->unitCount; }
+	};
+	static_assert(sizeof(COMMAND_ADD_INTERMEDIATE_MOVEMENT_STEP) == 0x04 + 4, "COMMAND_ADD_INTERMEDIATE_MOVEMENT_STEP size");
 
 
 	// Type 0x11. Size = 0x24+x*4. Create=. Execute=0042B1A0

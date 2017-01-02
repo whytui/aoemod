@@ -60,41 +60,41 @@ namespace AOE_CONST_FUNC {
 		//TribeAIGroupHeavyMountedSoldier = 23, // 0x17 - name from rules.rps, not very exact/explicit (only chariot archer has it)
 		TribeAIGroupChariotArcher = 23, // 0x17. Only chariot archer
 		TribeAIGroupElephantRider = 24, // 0x18. war elephant + armored elephant, including hannibal
-		TribeAIGroupHeavyFootSoldier = 25, // 0x19 - Hero_Archimedes, Hero-Tiberius, Hero-Perseus, Hero-Xerxes, Hero_Jason
+		TribeAIGroupHero = 25, // 0x19 - Hero_Archimedes, Hero-Tiberius, Hero-Perseus, Hero-Xerxes, Hero_Jason
 		TribeAIGroupElephantArcher = 26, // 0x1A
 		TribeAIGroupPhalanx = 28, // 0x1C
 		TribeAIGroupTradeBoat = 2,
 		TribeAIGroupTransportBoat = 20, // 0x14
 		TribeAIGroupWarBoat = 22, //0x16 - Includes fire galley, Jagannath...
 		TribeAIGroupWall = 27,  // 0x1B
-		// Added from AGE3 information
 		TribeAIGroupArtefact = 1, // ruins/artefacts
-		TribeAIGroupUnusedHealer = 17, // 0x11. TODO : mistake ? Could be TribeAIGroupHealer, given it *seems* to have healing interaction but not conversion
+		TribeAIGroupUnusedHealer = 17, // 0x11. Could be TribeAIGroupHealer, given it *seems* to have healing interaction but not conversion
 		TribeAIGroupChariot = 35, // 0x23. Chariot/scythe (excluding chariot archer)
 		TribeAIGroupHorseArcher = 36, // 0x24
 		TribeAIGroupSlinger = 39, // 0x27
+		// Unused... If only these WERE used !
 		TribeAIGroupUnused_Farm = 49, // 0x31 UNUSED ? Farms are buildings (3) !
 		TribeAIGroupUnused_Tower = 52, // 0x34 UNUSED ? Towers are buildings (3) ! Don't use this number in your algorithms ;)
 		// Gatherable
-		TribeAIGroupSeaFish = 5,
-		TribeAIGroupBerryBush = 7,
-		TribeAIGroupStoneMine = 8,
-		TribeAIGroupPreyAnimal = 9,
-		TribeAIGroupTree = 15, // 0xF
-		TribeAIGroupGoldMine = 32, // 0x20
-		TribeAIGroupShoreFish = 33, // 0x21
+		TribeAIGroupSeaFish = 5, // no unitAI
+		TribeAIGroupBerryBush = 7, // no unitAI
+		TribeAIGroupStoneMine = 8, // no unitAI
+		TribeAIGroupPreyAnimal = 9, // gazelle (+king) and horse.
+		TribeAIGroupTree = 15, // 0xF. no unitAI
+		TribeAIGroupGoldMine = 32, // 0x20. no unitAI
+		TribeAIGroupShoreFish = 33, // 0x21. no unitAI
 		TribeAIGroupPredatorAnimal = 10, // 0xA
-		TribeAIGroupUnknownFish = 31, // 0x1F - a gatherable unused fish type.
+		TribeAIGroupUnknownFish = 31, // 0x1F - a gatherable unused fish type. no unitAI
 		// Other
-		TribeAIGroupOther_Dead_Projectile = 11, // 0xB
-		TribeAIGroupTerrain = 14, // 0x0E
-		TribeAIGroupTreeStump = 16, // 0x10
+		TribeAIGroupOther_Dead_Projectile = 11, // 0xB. no unitAI
+		TribeAIGroupTerrain = 14, // 0x0E. no unitAI
+		TribeAIGroupTreeStump = 16, // 0x10. no unitAI
 		TribeAIGroupTradeCart = 19, // 0x13. It is a villager type (seen in 0x485ADD).
-		TribeAIGroupFlag = 30,
+		TribeAIGroupFlag = 30, // 0x1E. no unitAI
 		TribeAIGroupCliff = 34, // 0x22
 		TribeAIGroupBird = 38,
 		TribeAIGroupHorse = 61,
-		TribeAIGroupDomesticatedAnimal = 29 // Lion_trained (unit 60)
+		TribeAIGroupDomesticatedAnimal = 29 // Lion_trained (unit 60). no unitAI (!)
 		//37=smoke? (dolphin??)
 	};
 
@@ -669,8 +669,8 @@ namespace AOE_CONST_FUNC {
 		case TribeAIGroupElephantArcher:
 		case TribeAIGroupElephantRider:
 		case TribeAIGroupFootSoldier:
-		case TribeAIGroupHeavyFootSoldier:
-		//case TribeAIGroupHeavyMountedSoldier:
+		case TribeAIGroupHero:
+		//case TribeAIGroupHeavyMountedSoldier (chariot archer)
 		case TribeAIGroupHorse:
 		case TribeAIGroupHorseArcher:
 		case TribeAIGroupMountedSoldier:

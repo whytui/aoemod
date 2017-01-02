@@ -1189,7 +1189,7 @@ void StrategyBuilder::ComputeScoresVsTower(PotentialUnitInfo *unitInfo) {
 		unitInfo->strengthVs[MC_TOWER] += 30; // cool in tool/bronze, weak later
 		break;
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx:
-	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupHeavyFootSoldier: // Heroes only ?!
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupHero: // Heroes only ?!
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider:
 		unitInfo->strengthVs[MC_TOWER] += 20; // cumulate with below melee classes
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier:
@@ -2842,7 +2842,7 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 			case TribeAIGroupChariot:
 			case TribeAIGroupElephantRider:
 			case TribeAIGroupFootSoldier:
-			case TribeAIGroupHeavyFootSoldier:
+			case TribeAIGroupHero:
 			case TribeAIGroupPhalanx:
 			case TribeAIGroupMountedSoldier:
 			case TribeAIGroupArcher:

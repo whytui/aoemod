@@ -95,7 +95,7 @@ namespace AOE_CONST_FUNC {
 			break;
 			// slow/middle-speed infantry
 		case AOE_CONST_FUNC::TribeAIGroupFootSoldier:
-		case AOE_CONST_FUNC::TribeAIGroupHeavyFootSoldier:
+		case AOE_CONST_FUNC::TribeAIGroupHero:
 		case AOE_CONST_FUNC::TribeAIGroupPhalanx:
 		case AOE_CONST_FUNC::TribeAIGroupElephantRider:
 			id1 = 2;
@@ -122,7 +122,7 @@ namespace AOE_CONST_FUNC {
 			break;
 			// slow/middle-speed infantry
 		case AOE_CONST_FUNC::TribeAIGroupFootSoldier:
-		case AOE_CONST_FUNC::TribeAIGroupHeavyFootSoldier:
+		case AOE_CONST_FUNC::TribeAIGroupHero:
 		case AOE_CONST_FUNC::TribeAIGroupPhalanx:
 		case AOE_CONST_FUNC::TribeAIGroupElephantRider:
 			return (id1 == 2);

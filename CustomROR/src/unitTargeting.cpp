@@ -630,7 +630,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 			case GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot:
 			case GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider:
 			case GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier:
-			case GLOBAL_UNIT_AI_TYPES::TribeAIGroupHeavyFootSoldier:
+			case GLOBAL_UNIT_AI_TYPES::TribeAIGroupHero:
 			case GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier:
 			case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx:
 			case GLOBAL_UNIT_AI_TYPES::TribeAIGroupDomesticatedAnimal:

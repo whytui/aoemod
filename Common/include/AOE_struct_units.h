@@ -109,6 +109,7 @@ namespace AOE_STRUCTURES {
 	// +0x1E4 = unit.createSpriteList(ptrUnit)
 	// +0x208 = unit.assignAction(action). ex: 0x406490.
 	// +0x210 = unit.idIdle() to confirm. ex: 0x406610.
+	// +0x254 = unit.createUnitActivity(). ("combatUnit.initUnitAI") For living units only (types 70/80) ?
 	class STRUCT_UNIT_BASE {
 	public:
 		unsigned long int checksum;
@@ -148,7 +149,7 @@ namespace AOE_STRUCTURES {
 		// 0x50
 		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *ptrElemInPlayerUnitList; // +50. Link to corresponding reference in player's creatable units list. Can be NULL in saved games (if not "used" yet ?)
 		STRUCT_MANAGED_ARRAY unknown_054; // +54 a ptr. about movement ? objectCollisionList ? Units in same Formation ? A list of unitID.
-		STRUCT_MANAGED_ARRAY unitIDsInMyGroup; // +64. list of IDs of the units in same group as me.
+		STRUCT_MANAGED_ARRAY unitIDsInMyGroup; // +64. list of IDs of the units in same group as me. A limit to 25 in 0x4ABEC8 (beware stack overflow)
 		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code. Warning: some unit don't have one (e.g. lion tame)
 		long int groupLeaderUnitId; // +78. Unit Id of my group's leader
 		long int terrainZoneInfoIndex; // +7C. Index of terrainZoneInfo in terrainZoneInfoLink array. -1 means not initialized yet.

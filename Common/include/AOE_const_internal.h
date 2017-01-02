@@ -191,6 +191,7 @@ namespace AOE_CONST_INTERNAL
 	// Those event IDs are used in gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX) = [EDX+0x40]=0x501980. Arguments may have different roles
 	// And player.NotifyEvent
 	// And player.handleEventInAI(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F34C0)
+	// And 0x413890 = UnitActivity.processNotify(struct NotifyEvent *, unsigned long)
 	// WARNING: to debug: not sure all values are the same enm. There might be separate enums for player/gameSettings notifyEvent...
 	enum GAME_EVENT_TYPES : long int {
 		CST_GET_INVALID = -1, // For customROR internal usage
@@ -337,6 +338,11 @@ namespace AOE_CONST_INTERNAL
 		CST_ICI_REMOVE_GROUP = 0x09, // "destroy group".
 		CST_ICI_TASK_UNIT = 0x0A, // AI order.
 		CST_ICI_RESIGN = 0x0B, // Only for MP games when clicking resign in menu. See exec=42B290
+		CST_ICI_UNKNOWN_C = 0x0C, // Add target pos ? 0x42B3B0
+		CST_ICI_UNKNOWN_D = 0x0D, // unused ?
+		CST_ICI_UNKNOWN_E = 0x0E, // exec=0x42B4A0
+		CST_ICI_UNKNOWN_F = 0x0F, // exec=0x42B4E0
+		CST_ICI_ADD_INTERMEDIATE_MOVEMENT_STEP = 0x10, // When shift-right clicking to specify intermediate movement step
 		// 0xE ? 0x42BC40
 		// 0xF : 0x42BC80 guard/protect unit ?
 		CST_ICI_HOLD_POSITION = 0x11, // To confirm
@@ -420,6 +426,7 @@ namespace AOE_CONST_INTERNAL
 	};
 
 	// For activity.task IDs
+	// Those values seem to be the same enum as player's notify event id ??? cf 0x410A20 STRUCT_UNIT_ACTIVITY_QUEUE.activityId passed to player notify
 	enum ACTIVITY_TASK_IDS : long int {
 		CST_ATI_NONE = -1, // Used a lot in game code
 		CST_ATI_NOTIFY_BEING_ATTACKED = 0x1F4, // (500) Notify(react) being attacked ? GenericArg4=actorUnitId ? Triggers a player.NotifyEvent with event 0x201

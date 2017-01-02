@@ -441,7 +441,7 @@ namespace AOE_STRUCTURES {
 		case AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider:
 		case AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat:
 		case AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier:
-		case AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupHeavyFootSoldier:
+		case AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupHero:
 		case AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnusedHealer:
 		case AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher:
 		case AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier:

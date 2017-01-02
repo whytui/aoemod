@@ -1,6 +1,8 @@
 
 #pragma once
 
+#pragma pack(push, 1) // Prevent compiler from aligning on dwords (or other alignment). Very important here as there are some weird structures.
+
 /*
 * This file contains empiresX.exe structures definition
 * Please read README.txt first.
@@ -37,6 +39,7 @@ namespace AOE_STRUCTURES {
 		float posX;
 		float posZ; // Unsure
 		char remainingSteps; // -1=initial position, 0 for final position, 1 for last before final position...
+		char unknown_0D[3];
 	};
 	static_assert(sizeof(STRUCT_PATH_FINDING_INTERMEDIATE_STEP) == 0x10, "STRUCT_PATH_FINDING_INTERMEDIATE_STEP size");
 
@@ -87,3 +90,5 @@ namespace AOE_STRUCTURES {
 	};
 
 }
+
+#pragma pack(pop)
