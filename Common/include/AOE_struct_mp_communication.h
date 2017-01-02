@@ -15,9 +15,9 @@ namespace AOE_STRUCTURES {
 
 
 #pragma pack(push, 1) // Prevent compiler from aligning on dwords (or other alignment)
-	// "Variable" size (depending on host version ?), in ROR 1.0a (last official version), it is 0x114.
+	// Size=0xA8. Depends on game version (size is specified in communications?)
 	// See 0x504FD0 = MPComm.copyHostOptionsFrom(tempOptionsStruct, size)
-	class STRUCT_MP_HOST_OPTIONS {
+	class STRUCT_RGE_GAME_OPTIONS {
 	public:
 		float gameSpeed;
 		char isScenario; // +04
@@ -38,9 +38,14 @@ namespace AOE_STRUCTURES {
 		char playerGameVersion[9]; // +92 to +9A included. 0="", 1="1.0", 2="1.0a", etc. Index is playerId
 		AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL difficultyLevel; // +9B. 1-byte.
 		char teamNumber[9]; // +9C. Index is playerId
-		char unknown_A5[3]; // unused ?
-		// +A8: a structure starts here ?
-		long int mapSizeChoice; // +A8
+		char unknown_A5[3]; // unused ?		
+	};
+	static_assert(sizeof(STRUCT_RGE_GAME_OPTIONS) == 0xA8, "STRUCT_RGE_GAME_OPTIONS size");
+
+	// This structure is the additional part to add to RGE_Game_Options.
+	// 0x505170=gameSettings.setTribeSpecificGameOptions(&tribeSpecificGameOptions)
+	struct STRUCT_TRIBE_SPECIFIC_GAME_OPTIONS {
+		long int mapSizeChoice; // +A8 (total offset)
 		long int mapTypeChoice; // +AC
 		long int unknown_B0; // +B0. gameSettings+A84
 		long int unknown_B4; // +B4. gameSettings+A88
@@ -63,7 +68,15 @@ namespace AOE_STRUCTURES {
 		char populationLimit; // +112.
 		char unused_113; // +113
 	};
-	static_assert(sizeof(STRUCT_MP_HOST_OPTIONS) == 0x114, "STRUCT_MP_HOST_OPTIONS size");
+
+	// Size=0x114. Depends on game version (size is specified in communications?). Latest overload/version of game options communication message ?
+	// 0x505070 = xxx.SetOptions(tribeOptions*)
+	struct STRUCT_TRIBE_GAME_OPTIONS : STRUCT_RGE_GAME_OPTIONS {
+	public:
+		STRUCT_TRIBE_SPECIFIC_GAME_OPTIONS tribeSpecificOptions;
+	};
+	static_assert(sizeof(STRUCT_TRIBE_GAME_OPTIONS) == 0x114, "STRUCT_TRIBE_GAME_OPTIONS size");
+
 #pragma pack(pop)
 
 
@@ -74,7 +87,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_MP_COMMUNICATION {
 	public:
 		unsigned long int unknown_0000;
-		STRUCT_MP_HOST_OPTIONS *MPGameOptions; // +04. See size in +171C field. Contains MP game settings info. Freed in 0x4258A0.
+		STRUCT_TRIBE_GAME_OPTIONS *MPGameOptions; // +04. See size in +171C field. Contains MP game settings info. Freed in 0x4258A0.
 		unsigned long int unknown_0008;
 		unsigned long int unknown_000C;
 		// 0x10

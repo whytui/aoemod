@@ -175,20 +175,20 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_8EC;
 		unsigned long int unknown_8F0;
 		unsigned long int unknown_8F4;
-		float gameSpeed; // +8F8. TO confirm - a struct starts here ?
+		float gameSpeed; // +8F8. A struct starts here ?
 		char isScenario; // +8FC. 1 for scenario/campaign, 0 for random game/deathMatch. value is ARBITRARY for loaded games, unless we fix it manually (done by customROR)
 		char scenarioFileName[3 + 0x7C]; // +8FD.
 		// 0x900
 		char unknown_97C;
-		char isSinglePlayer;
-		char isMultiplayer; // 0x97E
+		char isSinglePlayer; // 0x97D. Not correct AFTER player a MP game ? Set in 0x41BA70
+		char isMultiplayer; // 0x97E. Set in 0x41BA90
 		char mapSizeX;
 		// 0x980
 		char mapSizeY;
-		char unknown_981; // Related to map size. Always 8 ? Max player # ?
+		char unknown_981_maxMapPlayerCount; // Related to map size. Always 8 ? Max player # ?
 		char enableCheatMode; // +982. Set in 41BAE0
 		char unknown_983; // +983. path finding for MP ? 0-2 default/medium/high ?
-		char unknown_984; // Something to do with screen width and height??
+		char unknown_984; // Something to do with screen width and height?? annoyCheaters or cheatNotification ? Unsure
 		char revealMap; // 0x985. Set in 41BB00
 		char noFog; // 0x986. Set in 41BB10
 		char unknown_987_coloredChat; // default 1 ? Set in 41BB20

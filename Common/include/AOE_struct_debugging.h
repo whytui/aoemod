@@ -8,15 +8,22 @@
 #include <UI_components\AOE_struct_any_ui.h>
 #include <UI_components\AOE_struct_ui_scrollbar.h>
 #include <UI_components\AOE_struct_ui_textbox.h>
+#include <UI_components\AOE_struct_ui_gameColoredInfoLabel.h>
 #include <UI\AOE_struct_ui_popup_dialog.h>
 #include <UI\AOE_struct_ui_in_game_options.h>
 #include <UI\AOE_struct_ui_playing_zone.h>
 #include <UI\AOE_struct_ui_join_screen.h>
 #include <UI\AOE_struct_ui_scenario_editor_main.h>
+#include <UI\AOE_struct_ui_scenario_editor_menu.h>
 #include <UI\AOE_struct_ui_diplomacy_dialog.h>
 #include <UI\AOE_struct_ui_in_game_options.h>
 #include <UI\AOE_struct_ui_game_settings.h>
 #include <UI\AOE_struct_ui_in_game_main.h>
+#include <UI\AOE_struct_ui_in_game_menu.h>
+#include <UI\AOE_struct_ui_mp_setup_screen.h>
+#include <UI\AOE_struct_ui_credits_screen.h>
+#include <UI\AOE_struct_ui_f11_pop_panel.h>
+#include <UI\AOE_struct_ui_welcome_main_screen.h>
 #include <AOE_struct_map_tile_values.h>
 #include <yvals.h> // for __STRINGIZE
 #include <Windows.h>

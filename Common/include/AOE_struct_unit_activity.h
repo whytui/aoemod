@@ -49,23 +49,24 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_QUEUE) == 0x18, "STRUCT_UNIT_ACTIVITY_QUEUE size");
 
 
-#define CHECKSUM_UNIT_ACTIVITY_BASE 0x00542D10 // Base class (not used directly?)
-#define CHECKSUM_UNIT_ACTIVITY_GAZELLE 0x00548D7C // "prey animal" TribeHuntedAnimalUnitAI (class 9)
+#define CHECKSUM_UNIT_ACTIVITY_BASE 0x00542D10 // Base class (not used directly?). Constructor=0x40EDF0.
+#define CHECKSUM_UNIT_ACTIVITY_PREY_ANIMAL 0x00548D7C // "prey animal" TribeHuntedAnimalUnitAI (class 9). Constructor 0x4E3B50
 #define CHECKSUM_UNIT_ACTIVITY_LION 0x0054901C // Constructor=0x4E4170
-#define CHECKSUM_UNIT_ACTIVITY_GAIA_ELEPHANT 0x00548F3C // TribeElephantUnitAI. Hardcoded to class=0A, unitDefId=0x30
+#define CHECKSUM_UNIT_ACTIVITY_GAIA_ELEPHANT 0x00548F3C // TribeElephantUnitAI. Hardcoded to class=0A, unitDefId=0x30. Constructor 0x4E4040.
 #define CHECKSUM_UNIT_ACTIVITY_PREDATOR_ANIMAL 0x00548E5C // Constructor=0x4E3E50. All non-lion, non-elephant predator animals.
 #define CHECKSUM_UNIT_ACTIVITY_NON_DISCOVERY_ARTEFACT 0x00549644 // Constructor 0x4E6900. All artefacts that are NOT discovery (excludes unitDefId 10 and 99, which no longer exists in empires.dat)
+#define CHECKSUM_UNIT_ACTIVITY_CIVILIAN 0x005490FC // For class=4. constructor=0x4E44D0
 #define CHECKSUM_UNIT_ACTIVITY_PRIEST 0x005491DC // Constructor 0x4E4E00. Class 18 (0x12)
 #define CHECKSUM_UNIT_ACTIVITY_MILITARY 0x00549564 // Constructor 0x4E60F0. Archers, melee, war ships, (non-priest)heroes/cheat units
 #define CHECKSUM_UNIT_ACTIVITY_TOWER 0x00549724 // Constructor 0x4E6D60. For hardcoded unitDefIDs. EXCLUDES Lazor tower (=military)
-#define CHECKSUM_UNIT_ACTIVITY_CIVILIAN 0x005490FC // For class=4. constructor=0x4E44D0
 #define CHECKSUM_UNIT_ACTIVITY_BUILDING 0x00549804 // For class 3 (excluding towers). constructor=0x4E6F40
 #define CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP 0x005492C4 // Constructor=0x4E56F0. Class=2
 #define CHECKSUM_UNIT_ACTIVITY_FISHING_SHIP 0x00549484 // Constructor=0x4E5DC0. Class=0x15
 #define CHECKSUM_UNIT_ACTIVITY_TRANSPORT_SHIP 0x005493A4 // Constructor=0x4E5B40. Class=0x14
-
 	// Unit artificial intelligence (not reserved to AI players !). "UnitAIModule"
-	// Size=0x134 for ALL child classes. Constructor=0x40EDF0. 0x4AFBE0=createUnitActivity(...)
+	// In standard game, only living units have this object, but not all (lion_trained doesn't have one)
+	// However, unitActivity is destroyed in unit base class, so it is possible to add unit activity to ANY unit.
+	// Size=0x134 for ALL child classes. Constructor=0x40EDF0 (base). 0x4AFBE0=createUnitActivity(...)
 	// 0x413890 = UnitActivity.processNotify(struct NotifyEvent *,unsigned long). NotifyEvent's size=0x18. Common to all child classes ?
 	// NotifyEvent+C = eventId (is this same enum as gameSettings/player events?)
 	// [EDX+0x18]=activity.notifyEvent?(arg1, arg2, eventId, arg4, arg5, arg6)
@@ -100,36 +101,27 @@ namespace AOE_STRUCTURES
 	// [EDX+0xE8]=when being attacked?
 	class STRUCT_UNIT_ACTIVITY {
 	public:
-		// Known checksums: 
-		// 1C 90 54 00 (predator animals?), 7C 8D 54 00 (gazelle), 3C 8F 54 00 (elephant), 04 98 54 00 (buildings?), 
-		// FC 90 54 00 (villager?gatherer?), DC 91 54 00 (priest), 64 95 54 00 (military?), 24 97 54 00 (towers?), 44 96 54 00
-		// 5C 8E 54 00 (dead alligator?)
 		unsigned long int checksum;
 		STRUCT_UNIT_BASE *ptrUnit; // +4. actor unit.
-		unsigned long int unknown_008; // default -1 ?
+		long int unknown_008; // default -1 ?
 		GLOBAL_UNIT_AI_TYPES unitAIType; // +0C. unit AI type (on 4 bytes ?)
 		short int unused_unitAIType; // +0E. Because unitAIType is 4-bytes here (apparently)
-		// 0x10
-		long int targetsInfoArrayUsedElements; // Number of "used" elements in array.
-		unsigned long int targetsInfoArrayTotalSize; // Allocated elements
+		long int targetsInfoArrayUsedElements; // +10. Number of "used" elements in array.
+		unsigned long int targetsInfoArrayTotalSize; // +14. Allocated elements
 		STRUCT_UNIT_ACTIVITY_TARGET_ELEM *targetsInfoArray; // +18. Stacked activities ? THIS is used to get back to work after being attacked !
 		long int nextActivityQueueUsedElems; // +1C. Actually used elems in +24 array
-		// 0x20
 		long int nextActivityQueueArraySize; // +20. Allocated array size (number of elements) for +24.
 		STRUCT_UNIT_ACTIVITY_QUEUE *nextActivitiesQueue_unsure; // TO DO. ElemSize = 0x18. See 414D90
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64. "Reaction task to interruptions?" Priority ?
-		long int order; // 0x64 in 4DA4C9. cf targetsInfoArray+08. Maybe WRONG ? order could be +28 ?
-		// 0x30
+		long int order; // +2C. 0x64 in 4DA4C9. cf targetsInfoArray+08. Maybe WRONG ? order could be +28 ?
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
 		long int targetUnitId; // +34. Current target unit instance ID.
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // +38. Target AI type (3=building...).
-		float targetPosY;
-		// 0x40
-		float targetPosX;
-		float targetPosZ;
+		float targetPosY; // +3C
+		float targetPosX; // +40
+		float targetPosZ; // +44
 		float maxDistance; // +48. "Desired target distance". Default 2 ?
 		long int unitIdToDefend; // +4C. Unit ID to capture or defend ?
-		// 0x50
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS previous_whenAttackedInternalId; // +50. Backup for +28
 		long int previousActionId; // Backup for currentActionId. set in 40F6D0 method, 411D00
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES previousTargetUnitId; // +58. Previous target class
@@ -186,7 +178,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_0F8; // int, consistent with +0FC and global.playerVar ?
 		long int unknown_0FC; // int, consistent with +0F8 and global.playerVar ? Init=random+(unknown_100*3/4)
 		// 0x100
-		long int unknown_100; // init 0xBB8=3000. Base for random seed calculation. The highest it is, the lowest are chances of "reacting". Lion=6000(low reaction %), gazelle=4000(high)
+		long int unknown_100_baseForRandomSeed; // init 0xBB8=3000. Base for random seed calculation. The highest it is, the lowest are chances of "reacting". Lion=6000(low reaction %), gazelle=4000(high)
 		long int unknown_104_gameTime; // +104. Some game time (ms) in the *future* ? (next xxx) ?
 		unsigned long int unknown_108; // int, consistent with +10C
 		unsigned long int unknown_10C; // int, consistent with +108
@@ -205,6 +197,22 @@ namespace AOE_STRUCTURES
 		char unknown_131; // unused ?
 		char unknown_132; // unused ?
 		char unknown_133; // unused ?
+		bool IsCheckSumValid() const { 
+			return (this->checksum == CHECKSUM_UNIT_ACTIVITY_BASE) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_BUILDING) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_CIVILIAN) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_FISHING_SHIP) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_GAIA_ELEPHANT) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_LION) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_MILITARY) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_NON_DISCOVERY_ARTEFACT) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_PREDATOR_ANIMAL) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_PREY_ANIMAL) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_PRIEST) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_TOWER) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP) ||
+				(this->checksum == CHECKSUM_UNIT_ACTIVITY_TRANSPORT_SHIP);
+		}
 	};
 
 }
