@@ -34,7 +34,14 @@ namespace GAME_COMMANDS {
 	bool CreateCmd_Stop(long int actorUnitId);
 
 	// Create a "ROR" command struct (build). Returns false if failed.
+	// The building is created at construction step (status=0, HP=1)
+	// ONLY for building (type 80)
 	bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY);
+
+	// Create a "ROR" command struct (build). Returns false if failed.
+	// The building is created at construction step (status=0, HP=1)
+	// ONLY for building (type 80)
+	bool CreateCmd_Build_withoutBuilder(long int playerId, short int DATID, float posX, float posY);
 
 	// Create a "ROR" command struct (build). Returns false if failed. This creates a fully-built building
 	// Important note: the unit WILL actually be created even if map position/terrain restriction/conflicting units are invalid

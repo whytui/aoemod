@@ -110,9 +110,11 @@ bool CreateCmd_Stop(long int actorUnitId) {
 
 // Create a "ROR" command struct (build). Returns false if failed.
 // The building is created at construction step (status=0, HP=1)
+// ONLY for building (type 80)
 bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY) {
+	assert(DATID >= 0);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(actorUnitId);
-	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid()) {
+	if ((DATID < 0) || !unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid()) {
 		return false;
 	}
 	const long int structSize = 0x18; // 0x14 + 4*1 (1 actor unit)
@@ -128,6 +130,29 @@ bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float po
 	cmd->posY = posY;
 	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
 }
+
+
+// Create a "ROR" command struct (build). Returns false if failed.
+// The building is created at construction step (status=0, HP=1)
+// ONLY for building (type 80)
+bool CreateCmd_Build_withoutBuilder(long int playerId, short int DATID, float posX, float posY) {
+	assert((playerId >= 0) && (playerId < 9));
+	assert(DATID >= 0);
+	if ((playerId < 0) || (playerId > 8) || (DATID < 0)) { return false; }
+	const long int structSize = 0x18; // 0x14 + 4*1 (1 actor unit)
+	AOE_STRUCTURES::COMMAND_MAKE_OBJECT *cmd = (AOE_STRUCTURES::COMMAND_MAKE_OBJECT *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_BUILD;
+	assert(cmd->IsCmdIdValid());
+	cmd->builderIdList[0] = -1;
+	cmd->builderCount = 1;
+	cmd->playerId = (char)playerId;
+	cmd->unitDefIdToBuild = DATID;
+	cmd->stratElemId = -1;
+	cmd->posX = posX;
+	cmd->posY = posY;
+	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
+}
+
 
 // Create a "ROR" command struct (build). Returns false if failed. This creates a fully-built building.
 // Important note: the unit WILL actually be created even if map position/terrain restriction/conflicting units are invalid

@@ -178,7 +178,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_0F8; // int, consistent with +0FC and global.playerVar ?
 		long int unknown_0FC; // int, consistent with +0F8 and global.playerVar ? Init=random+(unknown_100*3/4)
 		// 0x100
-		long int unknown_100_baseForRandomSeed; // init 0xBB8=3000. Base for random seed calculation. The highest it is, the lowest are chances of "reacting". Lion=6000(low reaction %), gazelle=4000(high)
+		long int unknown_100_baseForRandomSeed; // init 0xBB8=3000. Base for random seed calculation. The highest it is, the lowest are chances of "reacting" ? Lion=6000(low reaction %), gazelle=4000(high)
 		long int unknown_104_gameTime; // +104. Some game time (ms) in the *future* ? (next xxx) ?
 		unsigned long int unknown_108; // int, consistent with +10C
 		unsigned long int unknown_10C; // int, consistent with +108
@@ -197,6 +197,7 @@ namespace AOE_STRUCTURES
 		char unknown_131; // unused ?
 		char unknown_132; // unused ?
 		char unknown_133; // unused ?
+		// Returns true if checksum is one of the valid possible Activity structure checksums
 		bool IsCheckSumValid() const { 
 			return (this->checksum == CHECKSUM_UNIT_ACTIVITY_BASE) ||
 				(this->checksum == CHECKSUM_UNIT_ACTIVITY_BUILDING) ||

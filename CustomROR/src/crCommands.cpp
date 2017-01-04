@@ -4506,6 +4506,7 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		long int actionUnitDefId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_DEF_ID, -1);
 		float posX = trigger->GetParameterValue(CR_TRIGGERS::KW_POS_X, (float)-1);
 		float posY = trigger->GetParameterValue(CR_TRIGGERS::KW_POS_Y, (float)-1);
+		long int useInitialBuildingStatus = trigger->GetParameterValue(CR_TRIGGERS::KW_USE_INITIAL_BUILDING_STATUS, 0);
 		if ((actionUnitDefId < 0) || (actionPlayerId < 0) || (actionPlayerId >= global->playerTotalCount) || (posX < 0) || (posY < 0)) {
 			return;
 		}
@@ -4517,7 +4518,22 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if (actionUnitDefId >= player->structDefUnitArraySize) { return; }
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->ptrStructDefUnitTable[actionUnitDefId];
 		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return; }
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = CheckAndCreateUnit(player, unitDef, posX, posY, false, true, true);
+		
+		bool result = false;
+		if (useInitialBuildingStatus) {
+			if (unitDef->unitType != GLOBAL_UNIT_TYPES::GUT_BUILDING) {
+				traceMessageHandler.WriteMessage("ERROR: 'use initial building status' option can only be used with building units.");
+				return;
+			}
+			// To create non-constructed buildings:
+			result = GAME_COMMANDS::CreateCmd_Build_withoutBuilder(player->playerId, unitDef->DAT_ID1, posX, posY + 5);
+		} else {
+			result = GAME_COMMANDS::CreateCmd_CompleteBuild(player->playerId, unitDef->DAT_ID1, posX, posY);
+		}
+		if (!result) {
+			traceMessageHandler.WriteMessage("ERROR: Unit instance creation failed.");
+			return;
+		}
 	}
 
 	// Make unique (create dedicated unit definition)
