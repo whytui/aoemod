@@ -90,4 +90,8 @@ namespace GAME_COMMANDS {
 	// Seems to do no more than "move to"
 	bool CreateCmd_Explore(long int actorPlayerId, long int actorUnitId, float posX, float posY);
 
+	// Create a "ROR" command struct (kill a unit). Returns false if failed.
+	// WARNING: do not call this for units that don't derive from trainable (living units) because unit->kill() method wouldn't exist (you'll get a crash)
+	bool CreateCmd_KillUnit(long int unitId);
+
 }

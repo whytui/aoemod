@@ -198,17 +198,6 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(global->humanPlayerId);
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = NULL;
 		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(player);
-		if (global) {
-			static float totox = 1;
-			static int m = 0;
-			GAME_COMMANDS::CreateCmd_Formation((AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **)unitArray, player->selectedUnitCount, (INTERNAL_UNIT_FORMATION_ID)m);
-			std::string s = std::string("count=") + std::to_string(player->selectedUnitCount) + std::string(" => ") + std::to_string(m);
-			AOE_METHODS::CallWriteText(s.c_str());
-			totox++;
-			m++;
-			if (m > 4) { m = 0; }
-		}
-		return false;
 		if (unitArray) {
 			selectedUnit = unitArray[0];
 		}

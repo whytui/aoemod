@@ -392,4 +392,17 @@ bool CreateCmd_Explore(long int actorPlayerId, long int actorUnitId, float posX,
 }
 
 
+// Create a "ROR" command struct (kill a unit). Returns false if failed.
+// WARNING: do not call this for units that don't derive from trainable (living units) because unit->kill() method wouldn't exist (you'll get a crash)
+bool CreateCmd_KillUnit(long int unitId) {
+	assert(unitId >= 0);
+	if (unitId < 0) { return false; }
+	const long int structSize = sizeof(AOE_STRUCTURES::COMMAND_KILL_UNIT);
+	AOE_STRUCTURES::COMMAND_KILL_UNIT *cmd = (AOE_STRUCTURES::COMMAND_KILL_UNIT *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_KILL_UNIT;
+	assert(cmd->IsCmdIdValid());
+	cmd->unitId = unitId;
+	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
+}
+
 }

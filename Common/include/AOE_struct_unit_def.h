@@ -176,9 +176,9 @@ namespace AOE_STRUCTURES
 		float unknown_084; // unknown3A in AGE3. 0x4415D4 "multiple_attribute_mod"
 		char resourceStorageEnableMode_1; // +88. type=RESOURCE_TYPES but on 1 byte only "attribute_flag"
 		char resourceStorageEnableMode_2;
-		char resourceStorageEnableMode_3;
-		char blastArmorLevel; // "area_effect_object_level"
-		char triggerType; // same as class ? TribeAIGroupCivilian = 4, etc? "combat_level"
+		char resourceStorageEnableMode_3; // +8A
+		char blastArmorLevel; // +8B. "area_effect_object_level"
+		char triggerType; // +8C. Same as class ? TribeAIGroupCivilian = 4, etc? "combat_level"
 		AOE_CONST_FUNC::INTERACTION_MODES interactionMode; // +8D. 1-byte. "select_level"
 		char minimapMode; // +8E. "map_draw_level"
 		AOE_CONST_FUNC::COMMAND_ATTRIBUTES commandAttribute; // +8F. "unit_level"

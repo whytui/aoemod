@@ -88,7 +88,10 @@ namespace AOE_STRUCTURES {
 	// Methods:
 	// +0x38 = unit.setGraphics(pGraphics)
 	// +0x44 = unit.convertToPlayer(ptrPlayer)
+	// +x05C = unit.setStatus(newStatus). Contains a hack to revive relics/ruins because of relics in a dying transport boat.
+	// +0x6C = unit.killAndHandleSacrifice(). Does not delete units if they have resources ! (trees, mines, etc)
 	// +0x74 = unit.CalcDamageFrom(attacksCount, pAttacksList, f_altitudeFactor, actorPlayer, actorUnit). Ex 0x426910.
+	// +0x84 = unit.setResourceValue?(f_value, isAdd, checkResourceCapacity)
 	// 0x+9C = unit.createMoveToAction(targetUnit, fposY, fposX, fposZ)
 	// +0xD8 = unit.addVisibilityTo(playerToImpact, arg2, distance?)
 	// +0xDC = unit.removeVisibilityFor(playerToImpact, arg2, distance?)
@@ -111,7 +114,7 @@ namespace AOE_STRUCTURES {
 	// +0x1E4 = unit.createSpriteList(ptrUnit)
 	// +0x208 = unit.assignAction(action). ex: 0x406490.
 	// +0x210 = unit.idIdle() to confirm. ex: 0x406610.
-	// +0x244 = unit.kill(). ex: 0x4ED6D0
+	// +0x244 = unit.kill(). ex: 0x4ED6D0. Not for all unit types !
 	// +0x254 = unit.createUnitActivity(). ("combatUnit.initUnitAI") For living units only (types 70/80) ?
 	class STRUCT_UNIT_BASE {
 	public:

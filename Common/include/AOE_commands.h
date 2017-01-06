@@ -492,6 +492,7 @@ namespace AOE_STRUCTURES
 
 
 	// Type 0x6A. Size = 0x04 + actorCount*4. Create=0x4E9920. Exec=0x4E9130
+	// No check is performed at command execution (except that unit does exist)
 	struct COMMAND_KILL_UNIT {
 	public:
 		char cmdId;

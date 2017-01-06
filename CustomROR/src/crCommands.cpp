@@ -560,6 +560,19 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 			GetGameGlobalStructPtr()->gameSpeed = 0.01f;
 		}
 	}
+
+	if (strcmp(command, "assassin") == 0) {
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		assert((player != NULL) && player->IsCheckSumValid());
+		if (!player || !player->IsCheckSumValid()) { return; }
+		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(player);
+		if (unitArray && unitArray[0] && unitArray[0]->IsCheckSumValidForAUnitClass()) {
+			if (unitArray[0]->DerivesFromTrainable()) {
+				GAME_COMMANDS::CreateCmd_KillUnit(unitArray[0]->unitInstanceId);
+			}
+		}
+	}
 #endif
 
 #ifdef _DEBUG
