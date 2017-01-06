@@ -57,7 +57,7 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(STRUCT_PLAYER_RESEARCH_STATUS) == 8, "STRUCT_PLAYER_RESEARCH_STATUS size");
 
-	// Size=0x10. Constructor=4EA91C
+	// Size=0x10. Constructor=0x4EA91C. "Tribe_Player_Tech"
 	class STRUCT_PLAYER_RESEARCH_INFO {
 	public:
 		STRUCT_PLAYER_RESEARCH_STATUS *researchStatusesArray;
@@ -153,6 +153,15 @@ namespace AOE_STRUCTURES {
 	// If selected units features is installed, size is increased to host selected unit pointers at the end of the structure.
 	// Size will depend on how many maximum selected units it has been set.
 	// +0x30 = player.taskUnit?(playerId, unitId, activityId, targetUnitId, arg5, fposY, fposX, arg8, f_range, arg10, arg11, arg12?)
+	// +0xA0 = player.CreateCmdMoveForSelectedUnits(arg1,posY,posX)
+	// +0xA8 = player.executeCommandOnSelectedUnits(targetUnit, f_posY, f_posX)
+	// +0xC8 = (unused) player.createCommandE ? => 0x45E760
+	// +0xCC = (unused) player.createCommandF ? => 0x45E790
+	// +0xD0 = player.createCommand9 ? => 0x45E7B0
+	// +0xD4 = player.createCommandB ? => 0x45E7D0
+	// +0xD8 = player.createCmdAddIntermediateMovementStep => 0x45E800
+	// +0xDC = player.AddUnitPtrInPlayerAndGlobalStructLists(unitStruct, isNotCreatable, isTempUnit) - get arg2
+	// +0xE0 = player.RemoveUnit(ptrUnit, isNotCreatable, isTempUnit, arg4=unit+50?)
 	// +0xE8 = player.notifyEvent(unitId, arg2, eventId, arg4, arg5, arg6). Eg. 0x4F3350
 	class STRUCT_PLAYER {
 	public:

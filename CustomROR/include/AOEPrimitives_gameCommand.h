@@ -38,6 +38,11 @@ namespace GAME_COMMANDS {
 	// ONLY for building (type 80)
 	bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY);
 
+	// Create a "ROR" command struct (build multiple = walls-like). Returns false if failed.
+	// The building is created at construction step (status=0, HP=1)
+	// ONLY for building (type 80)
+	bool CreateCmd_BuildMultiple(long int playerId, long int actorUnitId, short int DATID, float minPosX, float minPosY, float maxPosX, float maxPosY);
+
 	// Create a "ROR" command struct (build). Returns false if failed.
 	// The building is created at construction step (status=0, HP=1)
 	// ONLY for building (type 80)
@@ -77,5 +82,12 @@ namespace GAME_COMMANDS {
 
 	// Create a "ROR" command struct (pay tribute). Returns false if failed.
 	bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_CONST_FUNC::RESOURCE_TYPES resourceType, float amount, float tributeInefficiency);
+
+	// Create a "ROR" command struct (attack position). Returns false if failed.
+	bool CreateCmd_AttackPosition(long int actorUnitId, float posX, float posY);
+
+	// Create a "ROR" command struct (explore). Returns false if failed.
+	// Seems to do no more than "move to"
+	bool CreateCmd_Explore(long int actorPlayerId, long int actorUnitId, float posX, float posY);
 
 }

@@ -132,6 +132,30 @@ bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float po
 }
 
 
+// Create a "ROR" command struct (build multiple = walls-like). Returns false if failed.
+// The building is created at construction step (status=0, HP=1)
+// ONLY for building (type 80)
+// actorUnitId can be -1 (no builder)
+bool CreateCmd_BuildMultiple(long int playerId, long int actorUnitId, short int DATID, float minPosX, float minPosY, float maxPosX, float maxPosY) {
+	assert((DATID >= 0) && (playerId >= 0) && (playerId < 9));
+	const long int structSize = 0x14; // 0x10 + 4*1 (1 actor unit)
+	AOE_STRUCTURES::COMMAND_BUILD_MULTIPLE *cmd = (AOE_STRUCTURES::COMMAND_BUILD_MULTIPLE *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_BUILD_MULTIPLE;
+	cmd->builderCount = 1;
+	assert(cmd->IsCmdIdValid());
+	assert(cmd->MySizeInBytes() == structSize);
+	cmd->builderIdList[0] = actorUnitId;
+	cmd->playerId = (char)playerId;
+	cmd->unitDefIdToBuild = DATID;
+	cmd->stratElemId = -1;
+	cmd->minPosX = (char)minPosX;
+	cmd->minPosY = (char)minPosY;
+	cmd->maxPosX = (char)maxPosX;
+	cmd->maxPosY = (char)maxPosY;
+	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
 // Create a "ROR" command struct (build). Returns false if failed.
 // The building is created at construction step (status=0, HP=1)
 // ONLY for building (type 80)
@@ -318,6 +342,8 @@ bool CreateCmd_SetSteroids(bool enable) {
 
 // Create a "ROR" command struct (pay tribute). Returns false if failed.
 bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_CONST_FUNC::RESOURCE_TYPES resourceType, float amount, float tributeInefficiency) {
+	assert((actorPlayerId >= 0) && (targetPlayerId >= 0));
+	if ((actorPlayerId < 0) || (targetPlayerId < 0)) { return false; }
 	const long int structSize = sizeof(AOE_STRUCTURES::COMMAND_PAY_TRIBUTE);
 	AOE_STRUCTURES::COMMAND_PAY_TRIBUTE *cmd = (AOE_STRUCTURES::COMMAND_PAY_TRIBUTE *)AOEAllocZeroMemory(1, structSize);
 	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_PAY_TRIBUTE;
@@ -329,5 +355,41 @@ bool CreateCmd_PayTribute(long int actorPlayerId, long int targetPlayerId, AOE_C
 	cmd->tributeTaxProportion = tributeInefficiency;
 	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
 }
+
+
+// Create a "ROR" command struct (attack position). Returns false if failed.
+bool CreateCmd_AttackPosition(long int actorUnitId, float posX, float posY) {
+	assert(actorUnitId >= 0);
+	if (actorUnitId < 0) { return false; }
+	const long int structSize = 0x0C + 4; // Size for 1 unit in array
+	AOE_STRUCTURES::COMMAND_ATTACK_POSITION *cmd = (AOE_STRUCTURES::COMMAND_ATTACK_POSITION *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_ATTACK_POSITION;
+	cmd->actorCount = 1;
+	assert(cmd->IsCmdIdValid());
+	assert(cmd->MySizeInBytes() == structSize);
+	cmd->actorIdList[0] = actorUnitId;
+	cmd->posX = posX;
+	cmd->posY = posY;
+	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
+// Create a "ROR" command struct (explore). Returns false if failed.
+// Seems to do no more than "move to"
+bool CreateCmd_Explore(long int actorPlayerId, long int actorUnitId, float posX, float posY) {
+	assert((actorUnitId >= 0) && (actorPlayerId >= 0));
+	if ((actorUnitId < 0) || (actorPlayerId < 0)) { return false; }
+	const long int structSize = 0x0C + 4; // Size for 1 unit in array
+	AOE_STRUCTURES::COMMAND_EXPLORE *cmd = (AOE_STRUCTURES::COMMAND_EXPLORE *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_EXPLORE;
+	cmd->actorCount = 1;
+	assert(cmd->IsCmdIdValid());
+	assert(cmd->MySizeInBytes() == structSize);
+	cmd->actorIdList[0] = actorUnitId;
+	cmd->posX = posX;
+	cmd->posY = posY;
+	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
+}
+
 
 }

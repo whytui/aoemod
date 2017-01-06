@@ -76,6 +76,7 @@ namespace AOE_STRUCTURES
 	// [EDX+0x30]=activity.autoChooseTargetAtReach?(checkWallsIfCurrentTargetIsWall?, checkCalcPath?, arg3)
 	// [EDX+0x40]=activity.findGatherTarget?(targetAIType, arg2, arg3, arg4, arg5)
 	// [EDX+0x44]=activity.xxx(resourceGatherType, arg2)
+	// [EDX+0x44]=activity.explore??
 	// [EDX+0x50]=activity.isNotArtefact(ptrUnit)
 	// [EDX+0x58]=activity.stop(bool "use+28_task?))
 	// [EDX+0x5C]=activity.setAttackOrGatherTarget(targetUnitId, force)

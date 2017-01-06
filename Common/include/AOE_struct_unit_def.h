@@ -38,7 +38,7 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_ARMOR_OR_ATTACK) == 4, "STRUCT_ARMOR_OR_ATTACK size");
 
 
-	// Size = 0x4C
+	// Size = 0x4C. "Task". Definition of unit commands (cf empires.dat)
 	// ReadFromFile=0x4E74F0
 	class STRUCT_UNIT_COMMAND_DEF {
 	public:
@@ -296,7 +296,7 @@ namespace AOE_STRUCTURES
 		char unknown_0EE;
 		char unknown_0EF;
 		// 0xF0
-		STRUCT_DAT_SOUND *attackSound; // Unknown struct
+		STRUCT_DAT_SOUND *attackSound; // +F0.
 		STRUCT_DAT_SOUND *moveSound; // +F4. Unknown struct
 		char animalMode;
 		char unknown_0F9;

@@ -4319,7 +4319,9 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if ((actionResourceId < 0) || (actionResourceId > AOE_CONST_FUNC::CST_RES_ORDER_ALL_RELICS)) { return; }
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
 		if (player) {
-			player->SetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES)actionResourceId, actionResourceValue);
+			// Using game commands make this trigger MP-compatible
+			float oldvalue = player->GetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES)actionResourceId);
+			GAME_COMMANDS::CreateCmd_AddResource((short int)actionPlayerId, (short int)actionResourceId, actionResourceValue - oldvalue);
 		}
 	}
 
@@ -4329,11 +4331,11 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		actionResourceId = trigger->GetParameterValue(CR_TRIGGERS::KW_RESOURCE_ID, -1);
 		actionResourceValue = trigger->GetParameterValue(CR_TRIGGERS::KW_RESOURCE_VALUE, 0.0);
 		if ((actionPlayerId < 0) || (actionPlayerId >= global->playerTotalCount)) { return; }
-		if ((actionResourceId < 0) || (actionResourceId > AOE_CONST_FUNC::CST_RES_ORDER_ALL_RELICS)) { return; }
+		if ((actionResourceId < 0) || (actionResourceId >= AOE_CONST_FUNC::CST_RES_COUNT)) { return; }
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
 		if (player) {
-			float oldvalue = player->GetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES)actionResourceId);
-			player->SetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES)actionResourceId, oldvalue + actionResourceValue);
+			// Using game commands make this trigger MP-compatible
+			GAME_COMMANDS::CreateCmd_AddResource((short int)actionPlayerId, (short int)actionResourceId, actionResourceValue);
 		}
 	}
 

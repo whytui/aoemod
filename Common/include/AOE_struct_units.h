@@ -98,9 +98,11 @@ namespace AOE_STRUCTURES {
 	// +0x100 = unit.FLD_reloadTime1()
 	// +0x104 = unit.calcDamageFrom(unit)?. WARNING: Returns in ST (FLD xxx), not EAX. Ex 0x427AC0.
 	// +0x10C = unit.FLD_maxRange(). Loads 0 for units that do not derive from type50 (attackable)
+	// +0x14C = unit.attackPosition(fposY, fposX, arg3, arg4)
 	// +0x150 = unit.setAttackAction?(targetUnitId, force)
 	// +0x154 = unit.??(fposY, fposX, arg3, arg4, force?) create action move ?
 	// +0x164 = unit.goGather(targetUnitId, force?) returns 1 on success
+	// +0x17C = unit.Explore(posY, posX, arg3)
 	// +0x194 = unit.CanAttackUnit???(targetUnitId, fRange, arg3, arg4, arg5, arg6)
 	// +0x198 = CanMoveTo(posY,posX,posZ,fMaxRange,targetUnitId,pArg6_float,arg7_size?,targetPlayerId,someUnitClass) ? returns 1 if ok. someUnitClass=1B=walls
 	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
@@ -109,6 +111,7 @@ namespace AOE_STRUCTURES {
 	// +0x1E4 = unit.createSpriteList(ptrUnit)
 	// +0x208 = unit.assignAction(action). ex: 0x406490.
 	// +0x210 = unit.idIdle() to confirm. ex: 0x406610.
+	// +0x244 = unit.kill(). ex: 0x4ED6D0
 	// +0x254 = unit.createUnitActivity(). ("combatUnit.initUnitAI") For living units only (types 70/80) ?
 	class STRUCT_UNIT_BASE {
 	public:
@@ -151,7 +154,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_MANAGED_ARRAY unknown_054; // +54 a ptr. about movement ? objectCollisionList ? Units in same Formation ? A list of unitID.
 		STRUCT_MANAGED_ARRAY unitIDsInMyGroup; // +64. list of IDs of the units in same group as me. A limit to 25 in 0x4ABEC8 (beware stack overflow)
 		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code. Warning: some unit don't have one (e.g. lion tame)
-		long int groupLeaderUnitId; // +78. Unit Id of my group's leader
+		long int groupLeaderUnitId; // +78. Unit Id of my group's leader. -1 when unitIDsInMyGroup is empty.
 		long int terrainZoneInfoIndex; // +7C. Index of terrainZoneInfo in terrainZoneInfoLink array. -1 means not initialized yet.
 		// 0x80
 		float unknown_080;

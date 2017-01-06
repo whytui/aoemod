@@ -10,7 +10,7 @@
 */
 namespace AOE_STRUCTURES {
 
-	// size = 0x3C
+	// size = 0x3C. "Player tech" ?
 	class STRUCT_RESEARCH_DEF {
 	public:
 		char *researchName;
@@ -35,7 +35,7 @@ namespace AOE_STRUCTURES {
 		char buttonId; // 26. 1-5 for first row, 6-10 for second row, 11-15 and 16-20 for 2nd page (2 rows)
 		char unknown_27;
 		short int researchLocation; // 28
-		short int languageDLLName;
+		short int languageDLLName; // 2A.
 		short int languageDLLDescription; // 2C. Description of research (with effect details like "+1 for xxx", etc)
 		unsigned short int unknown_2E; // unused ?
 		// 0x30

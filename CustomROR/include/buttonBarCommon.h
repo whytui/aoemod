@@ -48,7 +48,7 @@ namespace BUTTONBAR {
 			case AOE_CONST_INTERNAL::CST_MAT_SELECT_HEAL_TARGET:
 			case AOE_CONST_INTERNAL::CST_MAT_SELECT_UNKNOWN_67:
 			case AOE_CONST_INTERNAL::CST_MAT_SELECT_REPAIR_TARGET:
-			case AOE_CONST_INTERNAL::CST_MAT_SELECT_UNKNOWN_69:
+			case AOE_CONST_INTERNAL::CST_MAT_SELECT_UNLOAD_TRANSPORT:
 			default:
 				return GAME_CURSOR::GC_NORMAL; // This is NOT correct for all types... This method is supposed to handle custom types, not standard ones.
 			}

@@ -79,7 +79,7 @@ namespace AOE_CONST_INTERNAL
 		CST_MAT_UNKNOWN_05 = 5,
 		CST_MAT_VILLAGER_BUILD_MENU = 6,
 		CST_MAT_VILLAGER_SET_BUILDING_LOCATION = 7,
-		CST_MAT_EDITOR_SET_UNIT_LOCATION = 8,
+		CST_MAT_EDITOR_SET_UNIT_LOCATION = 8, // create units, including buildings (fully built !)
 		CST_MAT_SET_TERRAIN_TYPE = 9,
 		CST_MAT_SET_ALTITUDE = 0x0A,
 		CST_MAT_UNKNOWN_0E = 0x0E,
@@ -94,9 +94,9 @@ namespace AOE_CONST_INTERNAL
 		CST_MAT_CLICK_ZONE_TO_ATTACK = 0x64,
 		CST_MAT_SELECT_CONVERT_TARGET = 0x65,
 		CST_MAT_SELECT_HEAL_TARGET = 0x66,
-		CST_MAT_SELECT_UNKNOWN_67 = 0x67, // Some sub-action (in-game) = select unit to attack ?
+		CST_MAT_SELECT_UNKNOWN_67 = 0x67, // Related to VILLAGER_SET_BUILDING_LOCATION?
 		CST_MAT_SELECT_REPAIR_TARGET = 0x68,
-		CST_MAT_SELECT_UNKNOWN_69 = 0x69, // Some sub-action (in-game)
+		CST_MAT_SELECT_UNLOAD_TRANSPORT = 0x69,
 
 		// Custom mouse action types
 		// Avoid using -1, just in case
@@ -338,26 +338,24 @@ namespace AOE_CONST_INTERNAL
 		CST_ICI_REMOVE_GROUP = 0x09, // "destroy group".
 		CST_ICI_TASK_UNIT = 0x0A, // AI order.
 		CST_ICI_RESIGN = 0x0B, // Only for MP games when clicking resign in menu. See exec=42B290
-		CST_ICI_UNKNOWN_C = 0x0C, // Add target pos ? 0x42B3B0
+		CST_ICI_UNKNOWN_C = 0x0C, // Add target pos ?
 		CST_ICI_UNKNOWN_D = 0x0D, // unused ?
 		CST_ICI_UNKNOWN_E = 0x0E, // exec=0x42B4A0
-		CST_ICI_UNKNOWN_F = 0x0F, // exec=0x42B4E0
+		CST_ICI_UNKNOWN_F = 0x0F, // exec=0x42B4E0 0x42BC80 guard/protect unit ?
 		CST_ICI_ADD_INTERMEDIATE_MOVEMENT_STEP = 0x10, // When shift-right clicking to specify intermediate movement step
-		// 0xE ? 0x42BC40
-		// 0xF : 0x42BC80 guard/protect unit ?
 		CST_ICI_HOLD_POSITION = 0x11, // To confirm
 		CST_ICI_TRIGGER_TRAIN_UNIT = 0x64, // unsure, when AI triggers a train unit action ? + some cheats?
 		CST_ICI_RESEARCH = 0x65,
 		CST_ICI_BUILD = 0x66,
 		CST_ICI_CHANGE_SETTING = 0x67, // Includes cheats(6), game speed change(1), diplomacy change(0)
-		CST_ICI_EXPLORE = 0x68,
-		CST_ICI_UNKNOWN_69 = 0x69,// 0x69 0x4E9710 / exec 0x4E8B00
+		CST_ICI_EXPLORE = 0x68, // Not sure this does more than just moving to the specified position
+		CST_ICI_BUILD_MULTIPLE = 0x69,// Build wall-like construction (many contiguous building units)
 		CST_ICI_KILL_UNIT = 0x6A,
-		CST_ICI_UNKNOWN_6B = 0x6B, // exec: 4E9160
+		CST_ICI_ATTACK_POSITION = 0x6B, // For example, used for catapults...
 		CST_ICI_PAY_TRIBUTE = 0x6C,
 		CST_ICI_SET_TRADE_RESOURCE_TYPE = 0x6D, // Set resource to trade in a trade ship.
-		CST_ICI_UNKNOWN_6E = 0x6E, // Repair ? exec: 4E9380.
-		CST_ICI_UNKNOWN_6F = 0x6F, // Unload ? exec: 4E93D0
+		CST_ICI_REPAIR = 0x6E, // Repair (using repair button, not via right-click)
+		CST_ICI_UNLOAD_TRANSPORT = 0x6F, // Unload units from transport units
 		CST_ICI_QUEUE_UNQUEUE_UNIT = 0x77, // Only for human-called "train unit" ? Include right-click to unqueue.
 		CST_ICI_ADD_SCORE_ELEM = (char)0xFF // A special one...
 	};
@@ -382,6 +380,7 @@ namespace AOE_CONST_INTERNAL
 		CST_UFI5_UNKNOWN_V = 5 // Using space=1.5? Draws a "V" ?
 	};
 
+	// Identifies cheats in command 0x67/subtype 6.
 	enum INTERNAL_CHEAT_ID : short int {
 		CST_CHT_PHOTON_MAN = 0x0, // unit 274 = nuke trooper
 		CST_CHT_E_MC2_TROOPER = 0x1, // unit 248 = nuke trooper (e=mc2 trooper)
@@ -479,7 +478,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_2C8 = 0x2C8, // 264+64 see 0x41363F
 		CST_ATI_GATHERER_ATT_REACTION_WHEN_ATTACKED = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
 		CST_ATI_UNKNOWN_2CE = 0x2CE, // (26A+64) Repair?? see 0x413595
-		CST_ATI_UNKNOWN_2D1 = 0x2D1, // Unload (26D+64?) see 0x4135A7
+		CST_ATI_UNKNOWN_2D1_UNLOAD = 0x2D1, // Unload "execution"? (26D+0x64?) see 0x4135A7, 0x4E942B(execCmdUnload)
 		CST_ATI_UNKNOWN_2D2 = 0x2D2,
 		CST_ATI_UNKNOWN_2D3 = 0x2D3,
 		CST_ATI_UNKNOWN_2D4 = 0x2D4,
