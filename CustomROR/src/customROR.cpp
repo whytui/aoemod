@@ -772,6 +772,7 @@ void CustomRORInstance::ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values) {
 
 
 // Fills strategy element's unitId when construction begins (while in progress)
+// In method buildingUnit.initialize (0x4AC8A0)
 void CustomRORInstance::FixBuildingStratElemUnitID(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_PLAYER *p = (AOE_STRUCTURES::STRUCT_PLAYER*) REG_values->EDI_val;
 	ror_api_assert(REG_values, p != NULL);
@@ -2666,6 +2667,7 @@ void CustomRORInstance::OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *RE
 // Called each time a living unit is created.
 // Don't forget to check player (gaia?), unit type...
 // Warning: this is called by *scenario editor*, *game init* and *in-game unit spawn*
+// NOT called when loading a saved game...
 void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 	// Now get informations and check them
 	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)REG_values->EAX_val;
@@ -2800,12 +2802,13 @@ void CustomRORInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 }
 
 
-// From 004EFEB5
+// From 004EFF0F - in player.createUnit(f_posY, f_posX, f_posZ?, DAT_ID, status, f_orientation)
 // Called to create units from a scenario file (scenario editor or play scenario)
 // NOT called when loading a saved game, never called in-game, never called when creating units in scenario editor.
 void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
 	ror_api_assert(REG_values, unit != NULL);
+	REG_values->fixesForGameEXECompatibilityAreDone = true; // there is nothing to do for compatibility (CALL ROR_API is added instead of NOPs)
 	
 	char iDesiredStatus = *((char*)REG_values->ESP_val + 0x24); // get arg5 (byte)
 	AOE_CONST_INTERNAL::GAME_UNIT_STATUS desiredStatus = (AOE_CONST_INTERNAL::GAME_UNIT_STATUS)iDesiredStatus;
@@ -2830,13 +2833,7 @@ void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 		// In this very precise case, force the call that was not done (because of the CMP BL,2 condition).
 		// This needs to be done BEFORE we change unit.unitStatus (the call needs status to be =0).
 		if ((desiredStatus > AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY) && (unit->unitDefinition->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
-			float f = 10000;
-			_asm {
-				PUSH f
-				MOV ECX, unit
-				MOV EAX, 0x4AD7B0
-				CALL EAX
-			}
+			AOE_METHODS::BuildingUnitDoConstruct((STRUCT_UNIT_BUILDING*)unit, 10000.f);
 		}
 		unit->unitStatus = desiredStatus;
 	}

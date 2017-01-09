@@ -120,5 +120,18 @@ bool IsUnitIdle(STRUCT_UNIT_BASE *unit) {
 }
 
 
+// Make progress in building construction according to timeToAdd (in seconds)
+void BuildingUnitDoConstruct(STRUCT_UNIT_BUILDING *building, float timeToAdd_seconds) {
+	if (!building || !building->IsCheckSumValid()) {
+		return;
+	}
+	_asm {
+		PUSH timeToAdd_seconds;
+		MOV ECX, building;
+		MOV EAX, 0x4AD7B0; // For ROR 1.0c
+		CALL EAX;
+	}
+}
+
 }
 

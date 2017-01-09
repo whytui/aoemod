@@ -43,4 +43,7 @@ float GetSpeed(STRUCT_UNIT_BASE *unit);
 
 bool IsUnitIdle(STRUCT_UNIT_BASE *unit);
 
+// Make progress in building construction according to timeToAdd (in seconds)
+void BuildingUnitDoConstruct(STRUCT_UNIT_BUILDING *building, float timeToAdd_seconds);
+
 }

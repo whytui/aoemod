@@ -115,7 +115,7 @@ namespace AOE_STRUCTURES {
 	// +0x208 = unit.assignAction(action). ex: 0x406490.
 	// +0x210 = unit.idIdle() to confirm. ex: 0x406610.
 	// +0x244 = unit.kill(). ex: 0x4ED6D0. Not for all unit types !
-	// +0x254 = unit.createUnitActivity(). ("combatUnit.initUnitAI") For living units only (types 70/80) ?
+	// +0x254 = unit.createUnitActivity(). ("combatUnit.initUnitAI") Only called for living units only (types 70/80). Does not free previous activity, if any !
 	class STRUCT_UNIT_BASE {
 	public:
 		unsigned long int checksum;
@@ -414,7 +414,9 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE) == 0x1C4, "STRUCT_UNIT_PROJECTILE size");
 
 
-	// 0C 82 54 00 = trainable (type70 - living in AGE3). Size=0x1C0 (constructor=0x04AE2D0) - Derives from type50
+	// 0C 82 54 00 = trainable (type70 - living in AGE3). Size=0x1C0 - Derives from type50
+	// Constructor=0x4AE2D0=livingUnit.constructor(UnitDef, player, posY, posX, posZ?,arg6)
+	// Constructor=0x4AE380 (internalFileId, global, isLeafClass), uses 0x4AE5C0=livingUnit.readFromFile(internalFileId, global)
 	class STRUCT_UNIT_TRAINABLE : public STRUCT_UNIT_ATTACKABLE {
 	public:
 		char hasDedicatedUnitDef; // +1BC. If true, this->unitDef is a "temporary" copy created when unit was converted, which means it must be freed when unit dies (or changes, for villager mode). See 4AE435 for delete.
@@ -427,7 +429,10 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE) == 0x1C0, "STRUCT_UNIT_TRAINABLE size");
 
 
-	// A0 7F 54 00 = building (type80). Size=0x1FC (constructor=0x04AC550) - Derives from type70
+	// A0 7F 54 00 = building (type80). Size=0x1FC - Derives from type70
+	// Constructor=0x4AC3F0=bldUnit.constructor(7 args)
+	// Constructor=0x4AC550=bldUnit.constructor(defUnit, player, posY, posX, posZ, arg6)
+	// Constructor=0x4AC670=bldUnit.constructor(internalFileId, global, isLeafClass)
 	class STRUCT_UNIT_BUILDING : public STRUCT_UNIT_TRAINABLE {
 	public:
 		// 0x1C0
