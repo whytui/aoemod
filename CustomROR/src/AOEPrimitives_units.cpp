@@ -133,5 +133,34 @@ void BuildingUnitDoConstruct(STRUCT_UNIT_BUILDING *building, float timeToAdd_sec
 	}
 }
 
+
+// Create unit activity using derived class that corresponds to supplied checksum (calls the correct constructor)
+// Any unit (even base type) can have an activity, even if ROR originally only does that for living&building.
+// Returns true if successful.
+bool CreateUnitActivity(STRUCT_UNIT_BASE *unit, unsigned long int activityClassChecksum) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !activityClassChecksum) { return false; }
+	if (!isAValidRORChecksum(activityClassChecksum)) { return false; }
+	unsigned long int ccorAddr = STRUCT_UNIT_ACTIVITY::ConstructorAddress(activityClassChecksum);
+	if (!ccorAddr) { return false; }
+	STRUCT_UNIT_ACTIVITY *activity = (STRUCT_UNIT_ACTIVITY*)AOEAllocZeroMemory(1, sizeof(STRUCT_UNIT_ACTIVITY));
+	if (!activity) { return false; }
+	STRUCT_UNIT_ACTIVITY *result_check = NULL;
+	long int arg2 = 0x0A; // Note: arg2=0x0A in all cases but artefacts(5)
+	if (unit->unitDefinition && (unit->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
+		arg2 = 5;
+	}
+	_asm {
+		MOV ECX, activity;
+		PUSH arg2;
+		PUSH unit;
+		CALL ccorAddr;
+		MOV result_check, EAX;
+	}
+	assert(result_check == activity);
+	unit->currentActivity = activity;
+	return true;
+}
+
+
 }
 

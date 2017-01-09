@@ -389,6 +389,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004D3B1D:
 		this->EntryPointTacAIHandleActiveGroups(REG_values);
 		break;
+	case 0x004AFBE5:
+		this->EntryPointBeforeUnitCreateActivity(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3847,6 +3850,39 @@ void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values
 	// Do not modify below
 	if (skipStandardTreatments) {
 		ChangeReturnAddress(REG_values, skipToNextGroupAddress);
+	}
+}
+
+
+// From 0x4AFBDF=unit.createActivity. This is executed before the method actually starts.
+// Change return address to 0x4AFC6E to return and skip ROR treatments.
+void CustomRORInstance::EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_values) {
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		// Fix the 2 "PUSHs" values. Previous EAX and EDX values are unused, we use them to PUSH the correct values in ROR code.
+		REG_values->EAX_val = -1; // For 0x4AFBE0
+		REG_values->EDX_val = 0x53474A; // For 0x4AFBE2
+	}
+	// Custom treatments
+	bool skipRORTreatments = false;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ECX_val;
+	ror_api_assert(REG_values, unit && unit->IsCheckSumValidForAUnitClass());
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) {
+		return;
+	}
+	// The method does not check for existing pointer (and does not free it if necessary). Do it now.
+	// Remark: this is not a bug in standard game as this situation never occurs. However, this is a necessary precaution if we want to add custom unitActivity structures.
+	if (unit->currentActivity) {
+		AOEFree(unit->currentActivity);
+		unit->currentActivity = NULL;
+	}
+
+	skipRORTreatments = !CUSTOMROR::crCommand.AllowCreateActivityStructForUnit(unit);
+	CUSTOMROR::crCommand.OnUnitCreateActivityStruct(unit);
+
+	if (skipRORTreatments || (unit->currentActivity != NULL)) {
+		// Make sure to always skip ROR code if currentActivity exists.
+		ChangeReturnAddress(REG_values, 0x4AFC6E);
 	}
 }
 

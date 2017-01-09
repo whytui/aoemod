@@ -3908,6 +3908,46 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 }
 
 
+// Entry point when creating unit activity structure
+void CustomRORCommand::OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase) {
+	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass() || !unitBase->ptrStructPlayer ||
+		!unitBase->unitDefinition || !unitBase->unitDefinition->IsCheckSumValidForAUnitClass()) {
+		return;
+	}
+	if (IsImproveAIEnabled(unitBase->ptrStructPlayer->playerId)) {
+		if (unitBase->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupDomesticatedAnimal) {
+			// Create unit activity (example: trained_lion)
+			AOE_METHODS::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_PREDATOR_ANIMAL);
+		}
+	}
+}
+
+
+// Returns true if the unit specified can have a unit activity.
+bool CustomRORCommand::AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase) {
+	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass() || !unitBase->unitDefinition) { return false; }
+	switch (unitBase->unitDefinition->unitAIType) {
+		// List of unit classes that can' have "unit AI" (unit activity)
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupBerryBush:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupFlag:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupGoldMine:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupOther_Dead_Projectile:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSeaFish:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupShoreFish:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnknownFish:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupTree:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupTreeStump:
+		// Those ones are not correctly handled in 0x4AFBE0=unit.createUnitActivity() (however, there is no bug because this is only called for living units)
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupBird:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupCliff:
+		// Any added custom class that shouldn't have unit AI should be added here...
+		return false;
+	default:
+		return true;
+	}
+}
+
+
 // Opens a custom dialog message (based on CloseProgramDialog) and pauses game execution (if running)
 // Return true if OK, false if failed - Fails if another custom dialog (or quit game dialog) is already open
 // Pauses the game if running (only if a dialog is successfully opened)

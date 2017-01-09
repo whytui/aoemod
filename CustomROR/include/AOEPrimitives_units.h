@@ -9,6 +9,7 @@
 #include <AOE_struct_tac_ai.h>
 #include <AOE_struct_inf_ai.h>
 #include <AOE_struct_game_settings.h>
+#include "AOE_memory.h"
 #include "mainStructuresHandling.h"
 
 /* This file contains AOE primitives about units handling */
@@ -45,5 +46,10 @@ bool IsUnitIdle(STRUCT_UNIT_BASE *unit);
 
 // Make progress in building construction according to timeToAdd (in seconds)
 void BuildingUnitDoConstruct(STRUCT_UNIT_BUILDING *building, float timeToAdd_seconds);
+
+// Create unit activity using derived class that corresponds to supplied checksum (calls the correct constructor)
+// Any unit (even base type) can have an activity, even if ROR originally only does that for living&building.
+// Returns true if successful.
+bool CreateUnitActivity(STRUCT_UNIT_BASE *unit, unsigned long int activityClassChecksum);
 
 }

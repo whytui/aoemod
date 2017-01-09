@@ -50,28 +50,27 @@ namespace AOE_CONST_FUNC {
 	enum GLOBAL_UNIT_AI_TYPES : short int {
 		TribeAINone = -1, // use as a joker in some methods
 		TribeAIGroupArcher = 0, // bowman + improved/composite
-		TribeAIGroupBuilding = 3,
-		TribeAIGroupCivilian = 4, // All villager excluding boats !
+		TribeAIGroupBuilding = 3, // All buildings, including towers, wonders, farms, excluding walls.
+		TribeAIGroupCivilian = 4, // All villagers excluding boats !
 		TribeAIGroupFootSoldier = 6, // Barracks infantry
 		TribeAIGroupMountedSoldier = 12, // 0xC ; cavalry
 		TribeAIGroupSiegeWeapon = 13, // 0x0D
 		TribeAIGroupPriest = 18, // 0x12
-		TribeAIGroupFishingBoat = 21, // 0x15
-		//TribeAIGroupHeavyMountedSoldier = 23, // 0x17 - name from rules.rps, not very exact/explicit (only chariot archer has it)
-		TribeAIGroupChariotArcher = 23, // 0x17. Only chariot archer
+		TribeAIGroupChariotArcher = 23, // 0x17. Only chariot archer. "TribeAIGroupHeavyMountedSoldier" in rules.rps file.
 		TribeAIGroupElephantRider = 24, // 0x18. war elephant + armored elephant, including hannibal
 		TribeAIGroupHero = 25, // 0x19 - Hero_Archimedes, Hero-Tiberius, Hero-Perseus, Hero-Xerxes, Hero_Jason
 		TribeAIGroupElephantArcher = 26, // 0x1A
 		TribeAIGroupPhalanx = 28, // 0x1C
+		TribeAIGroupChariot = 35, // 0x23. Chariot/scythe (excluding chariot archer)
+		TribeAIGroupHorseArcher = 36, // 0x24
+		TribeAIGroupSlinger = 39, // 0x27
 		TribeAIGroupTradeBoat = 2,
 		TribeAIGroupTransportBoat = 20, // 0x14
+		TribeAIGroupFishingBoat = 21, // 0x15
 		TribeAIGroupWarBoat = 22, //0x16 - Includes fire galley, Jagannath...
 		TribeAIGroupWall = 27,  // 0x1B
 		TribeAIGroupArtefact = 1, // ruins/artefacts
 		TribeAIGroupUnusedHealer = 17, // 0x11. Could be TribeAIGroupHealer, given it *seems* to have healing interaction but not conversion
-		TribeAIGroupChariot = 35, // 0x23. Chariot/scythe (excluding chariot archer)
-		TribeAIGroupHorseArcher = 36, // 0x24
-		TribeAIGroupSlinger = 39, // 0x27
 		// Unused... If only these WERE used !
 		TribeAIGroupUnused_Farm = 49, // 0x31 UNUSED ? Farms are buildings (3) !
 		TribeAIGroupUnused_Tower = 52, // 0x34 UNUSED ? Towers are buildings (3) ! Don't use this number in your algorithms ;)

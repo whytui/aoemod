@@ -51,13 +51,13 @@ namespace AOE_STRUCTURES
 
 #define CHECKSUM_UNIT_ACTIVITY_BASE 0x00542D10 // Base class (not used directly?). Constructor=0x40EDF0.
 #define CHECKSUM_UNIT_ACTIVITY_PREY_ANIMAL 0x00548D7C // "prey animal" TribeHuntedAnimalUnitAI (class 9). Constructor 0x4E3B50
-#define CHECKSUM_UNIT_ACTIVITY_LION 0x0054901C // Constructor=0x4E4170
+#define CHECKSUM_UNIT_ACTIVITY_LION 0x0054901C // Constructor=0x4E4170. Specificity is to wait for killed target to decay before attacking another one + attacks randomly ?
 #define CHECKSUM_UNIT_ACTIVITY_GAIA_ELEPHANT 0x00548F3C // TribeElephantUnitAI. Hardcoded to class=0A, unitDefId=0x30. Constructor 0x4E4040.
 #define CHECKSUM_UNIT_ACTIVITY_PREDATOR_ANIMAL 0x00548E5C // Constructor=0x4E3E50. All non-lion, non-elephant predator animals.
 #define CHECKSUM_UNIT_ACTIVITY_NON_DISCOVERY_ARTEFACT 0x00549644 // Constructor 0x4E6900. All artefacts that are NOT discovery (excludes unitDefId 10 and 99, which no longer exists in empires.dat)
 #define CHECKSUM_UNIT_ACTIVITY_CIVILIAN 0x005490FC // For class=4. constructor=0x4E44D0
 #define CHECKSUM_UNIT_ACTIVITY_PRIEST 0x005491DC // Constructor 0x4E4E00. Class 18 (0x12)
-#define CHECKSUM_UNIT_ACTIVITY_MILITARY 0x00549564 // Constructor 0x4E60F0. Archers, melee, war ships, (non-priest)heroes/cheat units
+#define CHECKSUM_UNIT_ACTIVITY_MILITARY 0x00549564 // Constructor 0x4E60F0. Archers, melee, war ships, (non-priest)heroes/cheat units. Classes 0,6,12,13,17,19,22,23,24,25,26,28 and >33 if classes are added.
 #define CHECKSUM_UNIT_ACTIVITY_TOWER 0x00549724 // Constructor 0x4E6D60. For hardcoded unitDefIDs. EXCLUDES Lazor tower (=military)
 #define CHECKSUM_UNIT_ACTIVITY_BUILDING 0x00549804 // For class 3 (excluding towers). constructor=0x4E6F40
 #define CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP 0x005492C4 // Constructor=0x4E56F0. Class=2
@@ -66,7 +66,7 @@ namespace AOE_STRUCTURES
 	// Unit artificial intelligence (not reserved to AI players !). "UnitAIModule"
 	// In standard game, only living units have this object, but not all (lion_trained doesn't have one)
 	// However, unitActivity is destroyed in unit base class, so it is possible to add unit activity to ANY unit.
-	// Size=0x134 for ALL child classes. Constructor=0x40EDF0 (base). 0x4AFBE0=createUnitActivity(...)
+	// Size=0x134 for ALL child classes. Constructor=0x40EDF0 (base). 0x4AFBE0=unit.createUnitActivity()
 	// 0x413890 = UnitActivity.processNotify(struct NotifyEvent *,unsigned long). NotifyEvent's size=0x18. Common to all child classes ?
 	// NotifyEvent+C = eventId (is this same enum as gameSettings/player events?)
 	// [EDX+0x18]=activity.notifyEvent?(arg1, arg2, eventId, arg4, arg5, arg6)
@@ -214,6 +214,41 @@ namespace AOE_STRUCTURES
 				(this->checksum == CHECKSUM_UNIT_ACTIVITY_TOWER) ||
 				(this->checksum == CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP) ||
 				(this->checksum == CHECKSUM_UNIT_ACTIVITY_TRANSPORT_SHIP);
+		}
+		// Returns address of constructor(arg1=pUnit, arg2=?=generally 0x0A)
+		static unsigned long int ConstructorAddress(unsigned long int classChecksum) {
+			switch (classChecksum) {
+			case CHECKSUM_UNIT_ACTIVITY_BUILDING:
+				return 0x4E6F40;
+			case CHECKSUM_UNIT_ACTIVITY_CIVILIAN:
+				return 0x4E44D0;
+			case CHECKSUM_UNIT_ACTIVITY_FISHING_SHIP:
+				return 0x4E5DC0;
+			case CHECKSUM_UNIT_ACTIVITY_GAIA_ELEPHANT:
+				return 0x4E4040;
+			case CHECKSUM_UNIT_ACTIVITY_LION:
+				return 0x4E4170;
+			case CHECKSUM_UNIT_ACTIVITY_MILITARY:
+				return 0x4E60F0;
+			case CHECKSUM_UNIT_ACTIVITY_NON_DISCOVERY_ARTEFACT:
+				return 0x4E6900;
+			case CHECKSUM_UNIT_ACTIVITY_PREDATOR_ANIMAL:
+				return 0x4E3E50;
+			case CHECKSUM_UNIT_ACTIVITY_PREY_ANIMAL:
+				return 0x4E3B50;
+			case CHECKSUM_UNIT_ACTIVITY_PRIEST:
+				return 0x4E4E00;
+			case CHECKSUM_UNIT_ACTIVITY_TOWER:
+				return 0x4E6D60;
+			case CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP:
+				return 0x4E56F0;
+			case CHECKSUM_UNIT_ACTIVITY_TRANSPORT_SHIP:
+				return 0x4E5B40;
+			case CHECKSUM_UNIT_ACTIVITY_BASE:
+				return 0x40EDF0;
+			default:
+				return NULL;
+			}
 		}
 	};
 
