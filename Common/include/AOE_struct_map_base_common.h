@@ -1,6 +1,8 @@
 
 #pragma once
 
+// Please avoid adding includes here.
+
 #pragma pack(push, 1) // Prevent compiler from aligning on dwords (or other alignment). Very important here as there are some weird structures.
 
 /*
@@ -24,7 +26,7 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(STRUCT_POSITION_INFO) == 8, "STRUCT_POSITION_INFO size");
 
-	// Size = 0x0C. Created in 0x520F20
+	// Size = 0x0C. Can be created in 0x520F20, or other places (inline, e.g. 45801C)
 	class STRUCT_CHAINED_POS_INFO {
 	public:
 		long int posY;
@@ -32,8 +34,8 @@ namespace AOE_STRUCTURES {
 		STRUCT_CHAINED_POS_INFO *next; // can be NULL
 	};
 
-	// Size = 0x10
-	class STRUCT_PATH_FINDING_INTERMEDIATE_STEP {
+	// Size = 0x10. "WayPoint"
+	class STRUCT_WAYPOINT {
 	public:
 		float posY;
 		float posX;
@@ -41,7 +43,7 @@ namespace AOE_STRUCTURES {
 		char remainingSteps; // -1=initial position, 0 for final position, 1 for last before final position...
 		char unknown_0D[3];
 	};
-	static_assert(sizeof(STRUCT_PATH_FINDING_INTERMEDIATE_STEP) == 0x10, "STRUCT_PATH_FINDING_INTERMEDIATE_STEP size");
+	static_assert(sizeof(STRUCT_WAYPOINT) == 0x10, "STRUCT_WAYPOINT size");
 
 	// Size = 0x3 ! (yes !)
 	class STRUCT_UNIT_TARGET_POS {
@@ -57,7 +59,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_NEARBY_UNIT_INFO {
 	public:
 		long int unitId; // +0
-		char distance; // +4. Unsure. Not always valued ?
+		char distance; // +4. Unsure. Not always valued ? -1 means invalid ?
 		char playerId; // +5
 		char posY; // +6
 		char posX; // +7

@@ -57,7 +57,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_PER_TYPE_UNIT_LIST_LINK) == 0x0C, "STRUCT_PER_TYPE_UNIT_LIST_LINK size");
 
 
-	// Size = 0x34. Name=InfluenceMap
+	// Size = 0x34. Name=InfluenceMap or "Path" ? Constructor=0x457FE0 ?
 	// (free=0x4580A0). An interesting method: 0x4581B0=moveInfo.replaceByNewDestination(STRUCT_POSITION_INFO*)
 	// About movement/path finding
 	class STRUCT_UNIT_MOVEMENT_INFO {
@@ -73,7 +73,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_1C;
 		// 0x20
 		unsigned long int unknown_20; // unknown type/size
-		STRUCT_PATH_FINDING_INTERMEDIATE_STEP *intermediatePositions; // +24
+		STRUCT_WAYPOINT *intermediatePositions; // +24
 		long int intermediatePositionsArraySize; // +28
 		long int intermediatePositionsUsedElementsCount; // +2C
 		// 0x30

@@ -4,6 +4,7 @@
 #include <AOE_empires_dat.h>
 #include <AOE_const_internal.h>
 #include <AOE_struct_managed_array.h>
+#include <AOE_struct_map_base_common.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -18,12 +19,11 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNIT_BASE;
 
 
-	// Not very well known. A "potential" target for a unit ? See 0x414B00
-	// Size = 0x24.
-	class STRUCT_UNIT_ACTIVITY_TARGET_ELEM {
+	// Size = 0x24. "OrderEvent". See 0x414B00
+	class STRUCT_UNIT_ACTIVITY_ORDER_EVENT {
 	public:
 		long int actorUnitId;
-		long int internalId;
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS activityId;
 		long int unknown_08;
 		long int targetUnitId;
 		// 0x10
@@ -34,10 +34,12 @@ namespace AOE_STRUCTURES
 		// 0x20
 		float maxRange; // Actor's maximum range.
 	};
+	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_ORDER_EVENT) == 0x24, "STRUCT_UNIT_ACTIVITY_ORDER_EVENT size");
+
 
 	// Size = 0x18. No dedicated constructor? See 0x414D90 for init/adding to array. "NotifyEvent"
-	// Values remain in fields even when unit is idle.
-	class STRUCT_UNIT_ACTIVITY_QUEUE {
+	// Values remain in fields even when unit is idle: check "nextActivityQueueUsedElems".
+	class STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT {
 	public:
 		long int targetUnitId; // +0. Sometimes = actor?
 		long int actorUnitId; // +4. My unit id ?
@@ -46,7 +48,36 @@ namespace AOE_STRUCTURES
 		long int genericParam5; // +10. Seen currentHP value.
 		long int genericParam6; // +14. Seen unitDefMaxHP value (int).
 	};
-	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_QUEUE) == 0x18, "STRUCT_UNIT_ACTIVITY_QUEUE size");
+	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT) == 0x18, "STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT size");
+
+
+	// Size=0x8. Is it STRUCT_NEARBY_UNIT_INFO ??? Maybe not as +6/+7 fields seem to be unused here ?
+	class STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM {
+	public:
+		long int unitId;
+		char unknown_04; // +04. -1=invalid or N/A
+		char unknown_05; // +05. -1=invalid or N/A
+		char unknown_06; // Unused ?
+		char unknown_07; // Unused ?
+	};
+	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM) == 0x8, "STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM size");
+	// Size=0x1C8. Constructor=0x40D2F0 (see other methods just after)
+	class STRUCT_UNIT_ACTIVITY_UNKNOWN_12C {
+	public:
+		STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM unknown_00[50]; // +00.
+		unsigned long int unknown_190;
+		unsigned long int unknown_194;
+		unsigned long int unknown_198; // A struct size=0x0C, ccor(init?)=0x46A7E0
+		unsigned long int unknown_19C;
+		unsigned long int unknown_1A0; // end of struct...
+		unsigned long int unknown_1A4[5]; // +1A4. Cf 0x40D390. (index can be 0-4)
+		char unknown_1B8; // +1B8. Default=0xFD=253
+		char unused_1B9[3];
+		unsigned long int unknown_1BC;
+		unsigned long int unknown_1C0;
+		unsigned long int unknown_1C4;
+	};
+	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_UNKNOWN_12C) == 0x1C8, "STRUCT_UNIT_ACTIVITY_UNKNOWN_12C size");
 
 
 #define CHECKSUM_UNIT_ACTIVITY_BASE 0x00542D10 // Base class (not used directly?). Constructor=0x40EDF0.
@@ -67,8 +98,6 @@ namespace AOE_STRUCTURES
 	// In standard game, only living units have this object, but not all (lion_trained doesn't have one)
 	// However, unitActivity is destroyed in unit base class, so it is possible to add unit activity to ANY unit.
 	// Size=0x134 for ALL child classes. Constructor=0x40EDF0 (base). 0x4AFBE0=unit.createUnitActivity()
-	// 0x413890 = UnitActivity.processNotify(struct NotifyEvent *,unsigned long). NotifyEvent's size=0x18. Common to all child classes ?
-	// NotifyEvent+C = eventId (is this same enum as gameSettings/player events?)
 	// [EDX+0x18]=activity.notifyEvent?(arg1, arg2, eventId, arg4, arg5, arg6)
 	// [EDX+0x1C]=activity.CallNotifyEvent(arg1, arg2, arg3..?) - get arg1=ptr
 	// [EDX+0x20]=activity.prepareTmpMapInfo?(arg1) : collects info about nearby units (cf ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE)
@@ -96,8 +125,9 @@ namespace AOE_STRUCTURES
 	// [EDX+0xB8]=activity. for 2D3
 	// [EDX+0xC0]=activity.GetResourceGatherType(AIType)
 	// [EDX+0xC4]=activity.canConvert(targetUnitId) ?
-	// [EDX+0xC8]=activity.setTargetFromArray?(targetsInfoArray, arg2)
-	// [EDX+0xCC]=activity.dequeue(activityQueue) ? Returns some enum (3,4..)
+	// [EDX+0xC8]=activity.activity.processOrder(orderEvent, arg2)
+	// [EDX+0xCC]=activity.ProcessNotify(notifyEvent) ? Returns some enum (3,4,5=do nothing special?,6=triggered an activity?..) "ProcessNotify" ? Ex:priest=0x4E5370, military=0x4E62D0, base=0x413890
+	// [EDX+0xD4]=activity.manageAutoAttackNearbyUnit(arg1)? ProcessIdle(agr1)? 0x4145A0 (base proc, used by many children), priest=0x4E54E0
 	// [EDX+0xD8]=activity.chooseTargetForCurrentTask()? ? ex. 0x414600.
 	// [EDX+0xE8]=when being attacked?
 	class STRUCT_UNIT_ACTIVITY {
@@ -105,16 +135,18 @@ namespace AOE_STRUCTURES
 		unsigned long int checksum;
 		STRUCT_UNIT_BASE *ptrUnit; // +4. actor unit.
 		long int unknown_008; // default -1 ?
-		GLOBAL_UNIT_AI_TYPES unitAIType; // +0C. unit AI type (on 4 bytes ?)
-		short int unused_unitAIType; // +0E. Because unitAIType is 4-bytes here (apparently)
-		long int targetsInfoArrayUsedElements; // +10. Number of "used" elements in array.
-		unsigned long int targetsInfoArrayTotalSize; // +14. Allocated elements
-		STRUCT_UNIT_ACTIVITY_TARGET_ELEM *targetsInfoArray; // +18. Stacked activities ? THIS is used to get back to work after being attacked !
-		long int nextActivityQueueUsedElems; // +1C. Actually used elems in +24 array
-		long int nextActivityQueueArraySize; // +20. Allocated array size (number of elements) for +24.
-		STRUCT_UNIT_ACTIVITY_QUEUE *nextActivitiesQueue_unsure; // TO DO. ElemSize = 0x18. See 414D90
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64. "Reaction task to interruptions?" Priority ?
-		long int order; // +2C. 0x64 in 4DA4C9. cf targetsInfoArray+08. Maybe WRONG ? order could be +28 ?
+		GLOBAL_UNIT_AI_TYPES unitAIType; // +0C. unit AI type (on 4 bytes).
+	private:
+		short int unused_unitAIType; // +0E. Because unitAIType is 4-bytes here. Do not write on these bytes !
+	public:
+		long int orderQueueUsedElemCount; // +10. Number of "used" elements in array.
+		long int orderQueueSize; // +14. Allocated elements
+		STRUCT_UNIT_ACTIVITY_ORDER_EVENT *orderQueue; // +18. Stacked activities ? THIS is used to get back to work after being attacked !
+		long int notifyQueueUsedElemCount; // +1C. Actually used elems in Notify queue
+		long int notifyQueueArraySize; // +20. Allocated array size (number of elements) for Notify queue.
+		STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyQueue; // +24. See 0x414D90(add)
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // +28. taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64. "Reaction task to interruptions?" Priority ?
+		long int unsure_currentOrder; // +2C. 0x64 in 4DA4C9. cf targetsInfoArray+08. Maybe WRONG ? order could be +28 ?
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
 		long int targetUnitId; // +34. Current target unit instance ID.
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // +38. Target AI type (3=building...).
@@ -123,66 +155,27 @@ namespace AOE_STRUCTURES
 		float targetPosZ; // +44
 		float maxDistance; // +48. "Desired target distance". Default 2 ?
 		long int unitIdToDefend; // +4C. Unit ID to capture or defend ?
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS previous_whenAttackedInternalId; // +50. Backup for +28
-		long int previousActionId; // Backup for currentActionId. set in 40F6D0 method, 411D00
-		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES previousTargetUnitId; // +58. Previous target class
-		long int previousTargetUnitType; // +5C. Type=GLOBAL_UNIT_AI_TYPES but as a dword.
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS previous_whenAttackedInternalId; // +50. Backup for +28. "lastOrder?"
+		long int previousActionId; // +54. Backup for currentActionId. set in 40F6D0 method, 411D00. "lastAction"
+		long int previousTargetUnitId; // +58. Previous target class
+		 AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES previousTargetUnitType; // +5C. Type=GLOBAL_UNIT_AI_TYPES but as a dword.
 		// 0x60
 		// Recomputed in each activity update (very often!)?
 		// Unis IDs are added on "activity.processNotify" for being attacked.
-		// Unit IDs are removed on "updateActivity" (?), cf loop in 40F8E2: for each unit: if unit.activity.targetId != myUnitId then remove from list.
+		// Unit IDs are removed on "updateActivity" (?), cf loop in 0x40F8E2: for each unit: if unit.activity.targetId != myUnitId then remove from list.
 		// Warning: Units that do NOT have an activity (tame lion...) are not well listed here (it's quite a bug in the game, units are supposed to all have an activity... I think)
 		STRUCT_MANAGED_ARRAY unitIDsThatAttackMe;
-		// 0x70
-		float unknown_070_posY;
-		float unknown_074_posX;
-		long int unknown_078; // a unitId. Commander??? TODO: test it
-		unsigned long int unknown_07C; // unknown type
-		// 0x80
-		float unknown_080_posY;
-		float unknown_084_posX;
-		unsigned long int unknown_088; // unknown type
-		unsigned long int unknown_08C; // unknown type
-		// 0x90
-		float unknown_090_posY;
-		float unknown_094_posX;
-		unsigned long int unknown_098; // unknown type
-		unsigned long int unknown_09C; // unknown type
-		// 0xA0
-		float unknown_0A0_posY;
-		float unknown_0A4_posX;
-		unsigned long int unknown_0A8; // unknown type
-		unsigned long int unknown_0AC; // unknown type
-		// 0xB0
-		float unknown_0B0_posY;
-		float unknown_0B4_posX;
-		unsigned long int unknown_0B8; // unknown type
-		unsigned long int unknown_0BC; // unknown type
-		// 0xC0
-		float unknown_0C0_posY;
-		float unknown_0C4_posX;
-		unsigned long int unknown_0C8; // unknown type
-		unsigned long int unknown_0CC; // unknown type
-		// 0xD0
-		float unknown_0D0_posY;
-		float unknown_0D4_posX;
-		unsigned long int unknown_0D8; // unknown type
-		unsigned long int unknown_0DC; // unknown type
-		// 0xE0
-		float unknown_0E0_posY;
-		float unknown_0E4_posX;
-		unsigned long int unknown_0E8; // unknown type
-		unsigned long int unknown_0EC; // unknown type
+		STRUCT_WAYPOINT waypointQueue[8]; // +70.
 		// 0xF0
-		unsigned long int unknown_0F0;
-		unsigned long int unknown_0F4; // int, consistent with +0FC and global.playerVar ?
-		unsigned long int unknown_0F8; // int, consistent with +0FC and global.playerVar ?
+		unsigned long int unknown_0F0; // wayPointQueueSize ???
+		unsigned long int lastUpdateTime; // +F4. To confirm
+		unsigned long int unknown_0F8; // +F8.
 		long int unknown_0FC; // int, consistent with +0F8 and global.playerVar ? Init=random+(unknown_100*3/4)
 		// 0x100
 		long int unknown_100_baseForRandomSeed; // init 0xBB8=3000. Base for random seed calculation. The highest it is, the lowest are chances of "reacting" ? Lion=6000(low reaction %), gazelle=4000(high)
-		long int unknown_104_gameTime; // +104. Some game time (ms) in the *future* ? (next xxx) ?
-		unsigned long int unknown_108; // int, consistent with +10C
-		unsigned long int unknown_10C; // int, consistent with +108
+		unsigned long int unknown_104_gameTime; // +104. Some game time (ms) in the *future* ? (next xxx) ? Or defenseBuffer ?? Or idleTimeout?
+		unsigned long int unknown_108; // int, consistent with +10C. Default 0 (NULL?)
+		unsigned long int unknown_10C; // int, consistent with +108. Default 0x3E8=1000?
 		// 0x110
 		float currentPosY;
 		float currentPosX;
@@ -192,7 +185,7 @@ namespace AOE_STRUCTURES
 		float unitLineOfSight; // init 1. To confirm (read from unitDef.lineOfSight?)
 		long int *unknownListOfUnitAITypes; // +124. List of unit classes I can interact with ????? List size/content is hardcoded, depends on activity type.
 		long int playerNearbyUnitsunknownListOfUnitAITypesArraySize; // +128. number of elements in +124.
-		unsigned long int unknown_12C;
+		STRUCT_UNIT_ACTIVITY_UNKNOWN_12C *unknown_12C; // +12C. Can be NULL.
 		// 0x130
 		char unknown_130; // A flag ? 410C00. 4E49C3: set when activity changed to hunt to defend against an animal?
 		char unknown_131; // unused ?

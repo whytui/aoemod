@@ -320,9 +320,9 @@ namespace AOE_STRUCTURES {
 		res += " AIType=";
 		res += std::to_string(obj->previousTargetUnitType);
 		res += ")\ntargetArraySize=";
-		res += std::to_string(obj->targetsInfoArrayUsedElements);
+		res += std::to_string(obj->orderQueueUsedElemCount);
 		res += " ";
-		res += this->ExportArrayOfStruct(obj->targetsInfoArray, obj->targetsInfoArrayUsedElements);
+		res += this->ExportArrayOfStruct(obj->orderQueue, obj->orderQueueUsedElemCount);
 
 		res += "\nunitIDsThatAttackMe:";
 		for (int i = 0; i < obj->unitIDsThatAttackMe.usedElements; i++) {
@@ -335,14 +335,14 @@ namespace AOE_STRUCTURES {
 	}
 
 
-	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_ACTIVITY_TARGET_ELEM *obj, unsigned long int RORAddress) {
+	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_UNIT_ACTIVITY_ORDER_EVENT *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
 		std::string res = "[";
 		res += std::to_string(obj->actorUnitId);
 		res += " atk p";
 		res += std::to_string(obj->targetPlayerId);
 		res += "] internalId=";
-		res += GetHexStringAddress(obj->internalId, 3);
+		res += GetHexStringAddress(obj->activityId, 3);
 		res += " target=";
 		res += std::to_string(obj->targetUnitId);
 		return res;
