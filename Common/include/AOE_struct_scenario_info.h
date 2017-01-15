@@ -68,7 +68,7 @@ namespace AOE_STRUCTURES {
 		char scenarioFailureAnimationFileName[0xE0]; // +16C8
 		char scenarioBitmapFileName[0xE0]; // +17A8
 		float scenarioVersion; // +1888. Corresponds to .scn/.scx version, like 1.02, 1.03, 1.04, 1.05, 1.13, 1.15(=ROR 1.0a). Not always reset (when loading a non-scenario game)
-		long int player_unknown_188C[0x10]; // +188C. Often referred to as +18CC-40. Default = 4 ?
+		long int player_unknown_188C_posture[0x10]; // +188C. Often referred to as +18CC-40. Default = 4 ? Player posture ?
 		long int playerIsHumanPlayable[0x10]; // +18CC. 0 if computer player only (cannot be played as human)
 		long int playerCivilizationId[0x10]; // +190C. Often referred to as +18CC+40.
 		long int playerIsActive[0x10]; // +194C. 1 if player is active. Often referred to as +18CC+80.

@@ -17,26 +17,23 @@ namespace AOE_STRUCTURES {
 	class STRUCT_GAME_GLOBAL;
 	class STRUCT_GAME_MAP_INFO;
 
-	/*
-	Objects from this file are not very well known...
-	*/
-
 
 	// Size = 8
-	// Contains information about nearby units for temp treatments.
-	// Each player has its own object
-	class STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYER_NEARBY_UNITS_INFO {
+	// Contains information about visible units.
+	class STRUCT_VISIBLE_UNIT_INFO_SET {
 	public:
-		STRUCT_NEARBY_UNIT_INFO *nearbyUnitInfoArray;
+		STRUCT_NEARBY_UNIT_INFO *nearbyUnitInfoArray; // +00. Represents a list of visible units
 		short int arraySize; // +4
 		short int numberUsed; // +6
 	};
+	static_assert(sizeof(STRUCT_VISIBLE_UNIT_INFO_SET) == 8, "STRUCT_VISIBLE_UNIT_INFO_SET size");
+
 
 	// Referenced in global variable 0x7D2058 and also from STRUCT_GAME_MAP_INFO+8DCC
 	// Size = 0x24. Constructor = 0x516800
 	class STRUCT_UNKNOWN_MAP_INFO_7D2058 {
 	public:
-		STRUCT_UNKNOWN_MAP_INFO_7D2058_PLAYER_NEARBY_UNITS_INFO **unknown_00; // Array[playerId] => pointer to array of STRUCT_UNKNOWN_MAP_INFO_7D2058_UNITINFOELEM
+		STRUCT_VISIBLE_UNIT_INFO_SET **visibleUnitsByPlayerAndUnitAIType; // 2-dims array. Index are playerId then unitAIType. List of visible units (including mine) by unit class.
 		char *unknown_04; // Array size = 0x800 bytes.
 		char *unknown_08; // Array size = 0x800 bytes.
 		char *unknown_0C; // Array size = 0x800 bytes.
@@ -44,17 +41,25 @@ namespace AOE_STRUCTURES {
 		char *unknown_10; // Array size = 0x800 bytes.
 		char *unknown_14; // Array size = 0x800 bytes.
 		long int totalPlayerCount; // +18. Including gaia. It is also the size (number of dwords) of unknown_00 array.
-		long int unknown_00_elemCount; // +1C. Number of elements in unknown_00[x]
+		long int unknown_00_elemCount; // +1C. Number of elements in unknown_00[x]. See 0x516A50
 		// 0x20
-		char *sqrtTable_distanceFromDiffXY; // ptr to array of 0x10*0x10 bytes. to get a distance for diffX/Y: array[diffX*0x10 + diffY]. X,Y < 0x10.
+		unsigned char *sqrtTable_distanceFromDiffXY; // ptr to array of 0x10*0x10 bytes. to get a distance for diffX/Y: array[diffX*0x10 + diffY]. X,Y < 0x10.
 		// Returns distance(int, int) as an integer result. Returns -1 if failed or result>0x10. Works only for x,y <= 15 (0x0F)
-		char GetIntDistance(char x, char y) {
-			if ((x < 0) || (x >= 16) || (y < 0) || (y >= 16)) {
+		unsigned char GetIntDistance(unsigned char x, unsigned char y) {
+			if ((x >= 16) || (y >= 16)) {
 				return -1;
 			}
 			return this->sqrtTable_distanceFromDiffXY[x * 0x10 + y];
 		}
+		STRUCT_VISIBLE_UNIT_INFO_SET *GetUnknown_00_elem(long int playerId, long int unitAIType) const {
+			if ((playerId < 0) || (playerId > this->totalPlayerCount) || (unitAIType < 0) || (unitAIType >= unknown_00_elemCount)) {
+				return NULL;
+			}
+			return &visibleUnitsByPlayerAndUnitAIType[playerId][unitAIType];
+		}
 	};
+	static_assert(sizeof(STRUCT_UNKNOWN_MAP_INFO_7D2058) == 0x24, "STRUCT_UNKNOWN_MAP_INFO_7D2058 size");
+
 
 
 	// Included structure in addresses 0x583BC8 and 0x6A1CC0 (open paths and traversed paths ?)

@@ -1,5 +1,6 @@
 
 #pragma once
+#include <AOE_struct_color_def.h>
 
 /*
 * This file contains empiresX.exe structures definition

@@ -83,7 +83,7 @@ namespace AOE_STRUCTURES {
 	// This structure does not have a checksum. It is referenced by 0x580DA8
 	// It is probably this structure that collects all 'common' information to be multiplayer-compatible (player names, etc).
 	// pointed by GameSettings+18C ?
-	// Size=0x1774
+	// Size=0x1774. "TCommunication_Handler"
 	class STRUCT_MP_COMMUNICATION {
 	public:
 		unsigned long int unknown_0000;
@@ -94,16 +94,23 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_0010;
 		unsigned long int unknown_0014;
 		unsigned long int *unknown_0018_ptr; // Ptr to ? Player types ?
-		long int unknown_001C; // flag ?
+		long int isHost; // +1C. See 0x423EF0.
 		// 0x20
 		unsigned long int unknown_0020; // Dword
 		char unknown_0024[0x9D0 - 0x24];
 		unsigned long int unknown_09D0[8];
 		char unknown_09F0[0x1000 - 0x9F0];
 		// 0x1000
-		char unknown_1000[0x10E0 - 0x1000];
+		char unknown_1000[0x10C8 - 0x1000];
+		unsigned long int unknown_10C8_time; // +10C8. Value for "player: T#%d". Response time or similar thing ??? Allowed time ?
+		char unknown_10CC[0x10E0 - 0x10CC];
 		long int localControlPlayerId; // +10E0. "local" playerId for MP.
-		char unknown_10E4[0x1100 - 0x10E4];
+		long int isMPGame; // +10E4. See 0x41EBEC. If 0, then it is a single player game (0x423E36).
+		unsigned long int unknown_10E8;
+		unsigned long int unknown_10EC;
+		float unknown_10F0_RX;
+		float unknown_10F4_TX;
+		char unknown_10F8[0x1100 - 0x10F8];
 		// +1179= byte
 		char unknown_1100[0x12A0 - 0x1100];
 		unsigned long int unknown_12A0;
@@ -123,7 +130,8 @@ namespace AOE_STRUCTURES {
 		short int maximumPlayerCount; // +12D8. Is 8
 		short int unknown_12DA;
 		//char unknown_12DC[0x13C0 - 0x12DC];
-		char unknown_12DC[0x136C - 0x12DC];
+		char unknown_12DC[0x1344 - 0x12DC];
+		unsigned long int lastCommTime[10]; // +1348. some timeGettime (difference) value for each player
 		unsigned long int unknown_136C[10]; // +136C. 1 per (COMM) playerId (0 and 9 unused). TO VERIFY
 		char unknown_1394[0x13C0 - 0x1394];
 		unsigned long int unknown_13C0[10]; // +13C0. 1 per (COMM) playerId (0 and 9 unused)
@@ -135,18 +143,20 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_1494;
 		unsigned long int unknown_1498;
 		char unknown_149C[0x14C4 - 0x149C];
-		long int *unknown_14C4; // Related to players communication. +114=ptr (player queue)?
+		long int *communicationQueue; // +14C4. Related to players communication. +114=ptr (player queue)? AddItem in 0x428090
 		char unknown_14C8[0x14D4 - 0x14C8];
 		unsigned long int *unknown_14D4_ptr; // Ptr to struct size=0x240, constructor=0x428990.
 		unsigned long int *unknown_14D8_ptr; // Ptr to struct size=0x7EC, constructor=0x429330. +0=backptr
 		char unknown_14DC[0x14E0 - 0x14DC];
-		long int *unknown_14E0; // Related to players communication
+		long int *unknown_14E0; // +14E0. Some class related to players communication.
 		char unknown_14E4[0x1528 - 0x14E4];
 		unsigned long int unknown_1528[10]; // +1528. 1 per (COMM) playerId (0 and 9 unused)
 		char unknown_1550;
 		char unknown_1551[3];
 		unsigned long int unknown_1554;
-		unsigned long int unknown_1558[3]; // ?
+		unsigned long int unknown_1558; // +1558. Timer status ? 3=not_initialized, 4=paused, 5=running.
+		unsigned long int unknown_155C;
+		unsigned long int unknown_1560;
 		unsigned long int unknown_1564[10]; // +1564. 1 per (COMM) playerId (0 and 9 unused). Some DPlay info ?
 		unsigned long int unknown_158C;
 		// 0x1590
@@ -160,17 +170,20 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_165C[10]; // 1 per (COMM) playerId (0 and 9 unused)
 		unsigned long int unknown_1684[10]; // 1 per (COMM) playerId (0 and 9 unused)
 		unsigned long int unknown_16AC[10]; // +16AC. 1 per (COMM) playerId (0 and 9 unused)
-		AOE_CONST_INTERNAL::GAME_PLAYER_TYPES playerTypes[10]; // 0x16D4.  1 per (COMM) playerId. Values: 0=gaia/other, 2=human, 4=computer
+		AOE_CONST_INTERNAL::GAME_PLAYER_TYPES playerTypes[10]; // 0x16D4. 1 per (COMM) playerId. Values: 0=gaia/other, 2=human, 4=computer. "Player state"
 		char unknown_16FC[10];
 		char unknown_1706[2]; // unused ?
 		// 0x1700
-		char unknown_1708[0x1718 - 0x1708];
+		unsigned long int unknown_1708;
+		unsigned long int sharedRandomSeed; // +170C. Set in 0x423B90.
+		unsigned long int unknown_1710;
+		unsigned long int unknown_1714;
 		unsigned long int unknown_1718;
 		long int MPGameOptionsStructSize; // +171C. Game options struct size (cf +04). Set in 0x425848. Is 0x114 in ROR 1.0a version.
-		unsigned long int unknown_1720[10]; // +1720. 1 per (COMM) playerId (0 and 9 unused)
+		unsigned long int unknown_1720[10]; // +1720. 1 per (COMM) playerId (0 and 9 unused). "Response time" for player i, or similar thing ? Compared to +10C8.
 		unsigned long int unknown_1748; // ?
 		unsigned long int unknown_174C[10]; // +174C ?. 1 per (COMM) playerId (0 and 9 unused)
 	};
-	static_assert(sizeof(STRUCT_MP_COMMUNICATION) == 0x1774, "STRUCT_UNKNOWN_P580DA8 Size");
+	static_assert(sizeof(STRUCT_MP_COMMUNICATION) == 0x1774, "STRUCT_MP_COMMUNICATION Size");
 
 }

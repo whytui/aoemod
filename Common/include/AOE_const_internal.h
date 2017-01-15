@@ -47,11 +47,13 @@ namespace AOE_CONST_INTERNAL
 	};
 
 	enum GAME_PLAYER_TYPES : long int {
-		GPT_GAIA_OR_OTHER = 0,
-		GPT_UNKNOWN_1 = 1,
-		GPT_HUMAN_CONTROLLED = 2,
-		GPT_UNKNOWN_3 = 3,
-		GPT_COMPUTER_CONTROLLED = 4,
+		GPT_GAIA_OR_OTHER = 0, // "-" in 0x423C96
+		GPT_UNKNOWN_1 = 1, // unused ?
+		GPT_HUMAN_CONTROLLED = 2, // "W"
+		GPT_UNKNOWN_3 = 3, // unused ?
+		GPT_COMPUTER_CONTROLLED = 4, // "C"
+		GPT_UNKNOWN_5 = 5, // "X" Human controlled to (could be secondary human on same player ????)
+		GPT_UNKNOWN_6 = 6 // "V" (viewing?)
 	};
 
 	enum GAME_DIFFICULTY_LEVEL : char {

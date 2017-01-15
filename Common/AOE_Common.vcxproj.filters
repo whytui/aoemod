@@ -333,6 +333,9 @@
     <ClInclude Include="include\AOE_struct_managed_array.h">
       <Filter>Fichiers d%27en-tête\AOE_model</Filter>
     </ClInclude>
+    <ClInclude Include="include\AOE_struct_color_def.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\triggerDefinition.cpp">

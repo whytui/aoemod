@@ -206,6 +206,20 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		bool expl = PLAYER::IsExploredForPlayer(player, (long)x, (long)y);
 		bool fogVis = PLAYER::IsFogVisibleForPlayer(player, (long)x, (long)y);
 
+		STRUCT_UNKNOWN_MAP_INFO_7D2058 *m = *ROR_unknown_mapInfo_7D2058;
+		STRUCT_VISIBLE_UNIT_INFO_SET *vs = m->GetUnknown_00_elem(player->playerId, GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian);
+		if (vs) {
+			for (int i = 0; i < vs->numberUsed; i++) {
+				int otherPid = vs->nearbyUnitInfoArray[i].playerId;
+				long int curUnitId = vs->nearbyUnitInfoArray[i].unitId;
+				STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curUnitId);
+				long int seerPosX = vs->nearbyUnitInfoArray[i].posX;
+				long int seerPosY = vs->nearbyUnitInfoArray[i].posY;
+				long int initialDist = vs->nearbyUnitInfoArray[i].distance;
+				
+			}
+		}
+
 		if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
 			// Editor
 			if (player && (player->selectedUnitCount > 0)) {

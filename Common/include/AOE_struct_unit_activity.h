@@ -24,7 +24,7 @@ namespace AOE_STRUCTURES
 	public:
 		long int actorUnitId;
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS activityId;
-		long int unknown_08;
+		long int unknown_08; // related to activity+2C. A value 0-100 (or -1) ? See 0x41375C
 		long int targetUnitId;
 		// 0x10
 		long int targetPlayerId;
@@ -98,8 +98,8 @@ namespace AOE_STRUCTURES
 	// In standard game, only living units have this object, but not all (lion_trained doesn't have one)
 	// However, unitActivity is destroyed in unit base class, so it is possible to add unit activity to ANY unit.
 	// Size=0x134 for ALL child classes. Constructor=0x40EDF0 (base). 0x4AFBE0=unit.createUnitActivity()
-	// [EDX+0x18]=activity.notifyEvent?(arg1, arg2, eventId, arg4, arg5, arg6)
-	// [EDX+0x1C]=activity.CallNotifyEvent(arg1, arg2, arg3..?) - get arg1=ptr
+	// [EDX+0x18]=activity.notifyCommander(NotifyEvent*). Eg. 0x410A20
+	// [EDX+0x1C]=activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). Eg. 0x4109F0 => calls [EDX+0x18]
 	// [EDX+0x20]=activity.prepareTmpMapInfo?(arg1) : collects info about nearby units (cf ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE)
 	// [EDX+0x2C]=activity.isXxx(internalId)? : true for non-interruptible activities? (repair, heal,convert,attack,defend/capture+0x264)
 	// [EDX+0x30]=activity.autoChooseTargetAtReach?(checkWallsIfCurrentTargetIsWall?, checkCalcPath?, arg3)
@@ -135,7 +135,7 @@ namespace AOE_STRUCTURES
 		unsigned long int checksum;
 		STRUCT_UNIT_BASE *ptrUnit; // +4. actor unit.
 		long int unknown_008; // default -1 ?
-		GLOBAL_UNIT_AI_TYPES unitAIType; // +0C. unit AI type (on 4 bytes).
+		GLOBAL_UNIT_AI_TYPES unitAIType; // +0C. unit AI type (on 4 bytes, actually).
 	private:
 		short int unused_unitAIType; // +0E. Because unitAIType is 4-bytes here. Do not write on these bytes !
 	public:
@@ -146,7 +146,7 @@ namespace AOE_STRUCTURES
 		long int notifyQueueArraySize; // +20. Allocated array size (number of elements) for Notify queue.
 		STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyQueue; // +24. See 0x414D90(add)
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // +28. taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64. "Reaction task to interruptions?" Priority ?
-		long int unsure_currentOrder; // +2C. 0x64 in 4DA4C9. cf targetsInfoArray+08. Maybe WRONG ? order could be +28 ?
+		long int unknown_2C; // +2C. 0x64 in 4DA4C9,4D841F. cf targetsInfoArray+08. CMP to enemySightedRespDist in 0x4D85B7. Updated in 0x40F8B1. Special values -1,100. Normal values 0-99. Distance to current target ? Reset to -1 when activity stops.
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
 		long int targetUnitId; // +34. Current target unit instance ID.
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // +38. Target AI type (3=building...).

@@ -19,10 +19,11 @@ namespace AOE_STRUCTURES {
 	class STRUCT_GAME_GLOBAL;
 
 
-#define CHECKSUM_RGE_MAP 0x005445A0
+#define CHECKSUM_RGE_MAP 0x005445A0 // Parent class
 #define CHECKSUM_GAME_MAP 0x005499F4
-	// Parent size=0x88D0. Cosntructor=0x443CE0(fromFile)
-	// Size = 0xB5F8. Init in 0x4445E0. Constructor=0x4ED4B0(fromFile)
+	// Parent size=0x88D0. Constructor=0x443CE0(fromFile), 0x443D80
+	// Size = 0xB5F8. Init in 0x4445E0. Constructor=0x4ED4B0(fromFile), 0x4ED800.
+	// "Tribe_Map"
 	class STRUCT_GAME_MAP_INFO {
 	public:
 		unsigned long int checksum; // F4 99 54 00 (parent class 0A 45 54 00)

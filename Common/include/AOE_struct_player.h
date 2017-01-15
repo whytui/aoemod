@@ -29,7 +29,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_AI;
 
 
-	// Size = 0x0C. Constructor=0x4E9C60
+	// Size = 0x0C. Constructor=0x4E9C60. "Tribe_Tech"
 	class STRUCT_RESEARCH_DEF_INFO {
 	private:
 		STRUCT_RESEARCH_DEF *researchDefArray;
@@ -70,7 +70,7 @@ namespace AOE_STRUCTURES {
 
 
 	// Player's buildings unit list header (only buildings)
-	// Size 0x1C
+	// Size 0x1C. Constructor=0x436850
 	class STRUCT_PLAYER_BUILDINGS_HEADER {
 	public:
 		STRUCT_PLAYER *player;
@@ -84,8 +84,8 @@ namespace AOE_STRUCTURES {
 	};
 
 
-	// Size = 0x38. Constructor = 005173D0
-	// Probably used to stored player's exploration ?
+	// Size = 0x38. Constructor = 0x5173D0. "Visible_Map" (unsure) ?
+	// Probably used to store player's exploration ?
 	class STRUCT_PLAYER_MAP_INFO {
 	public:
 		char **unitCountThatSeeTile_row; // "sizeX" dwords. DS:[myMapRows+x*4] => DS:[...]+y=byte = unitCount that see this tile ?
@@ -109,7 +109,8 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_PLAYER_MAP_INFO) == 0x38, "STRUCT_PLAYER_MAP_INFO size");
 
 
-	// Size = 0x14. Newly explored tiles positions, stored in a temporary array (flushed once taken into account)
+	// Size = 0x14. "RGE_Tile_List" ? Constructor=0x45EB80
+	// Newly explored tiles positions, stored in a temporary array (flushed once taken into account)
 	// 0x45EAC0 = addElement(posY, posX)
 	// 0x45EB40 = resetArray() : if needRealloc==1, frees then allocates a new positionsArray
 	class STRUCT_PLAYER_NEW_EXPLORED_TILES {
@@ -148,6 +149,10 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_PLAYER_MOTIONLESS_SPOTTED_GATHERABLE) == 0x14, "STRUCT_PLAYER_UNKNOWN_118 size");
 
 
+
+#define CHECKSUM_STRUCT_RGE_PLAYER 0x00544D18 // Base class
+#define CHECKSUM_STRUCT_PLAYER 0x00549A44 // Normal player (non-gaia)
+#define CHECKSUM_STRUCT_GAIA_PLAYER 0x00549B80
 	// PLAYER. Constructor=0x4EFB00
 	// Standard player struct sizes are 0x85C (gaia) or 0x84C (non-gaia).
 	// If selected units features is installed, size is increased to host selected unit pointers at the end of the structure.
@@ -162,10 +167,10 @@ namespace AOE_STRUCTURES {
 	// +0xD8 = player.createCmdAddIntermediateMovementStep => 0x45E800
 	// +0xDC = player.AddUnitPtrInPlayerAndGlobalStructLists(unitStruct, isNotCreatable, isTempUnit) - get arg2
 	// +0xE0 = player.RemoveUnit(ptrUnit, isNotCreatable, isTempUnit, arg4=unit+50?)
-	// +0xE8 = player.notifyEvent(unitId, arg2, eventId, arg4, arg5, arg6). Eg. 0x4F3350
+	// +0xE8 = player.notifyEvent(unitId, arg2, eventId, arg4, arg5, arg6). Eg. 0x4F3350. Args: see NotifyEvent struct.
 	class STRUCT_PLAYER {
 	public:
-		unsigned long int checksum; // 0x00549B80 or 0x00549A44 (normal player) or 0x00544D18 (parent class)
+		unsigned long int checksum; // 0x00549B80 or 0x00549A44 (normal player) or 0x00544D18 (parent class RGE_player)
 		long int isComputerControlled; // 0/1. Mostly for "military" behaviours, not for MainAI-related behaviours.
 		long int unknown_008; // value is from [55473C] ? "numberGroupsValue" ?
 		long int unknown_00C; // "maxNumberGroupsValue" ?
@@ -216,10 +221,6 @@ namespace AOE_STRUCTURES {
 		long int unknown_0B0[9]; // B0: bool (dword) per playerId, related to visibility/exploration ? (and to player that is human-controlled ?)
 		STRUCT_MAP_VISIBILITY_MASK myExplorationVisibilityMask; // +D4. Mask to use to check tiles "explored" for this player.
 		STRUCT_MAP_VISIBILITY_MASK myFogVisibilityMask; // +D8. Mask to use to check tiles "fog visibility" for this player.
-		/*short int unknown_0D4; // +D4. some mask for exploration. In fact, +D4 and D6 are 1 field (dword)
-		short int greyedMapToShowPlayerMask; // +D6. Bit-to-bit mask. bit1(low)=gaia, bit2=player1... Max possible value=0x1FF
-		short int clearMapToShowPlayerMask; // +D8. Bit-to-bit mask. bit1(low)=gaia, bit2=player1... Max possible value=0x1FF. Bit=1=this player gives me fog-visibility ?
-		short int unknown_0DA; // a mask too. In fact, +D8 and DA are 1 field (dword). Bit=1=this player gives me exploration ?*/
 		long int unknown_0DC; // A mask too ?
 		// 0xE0
 		long int unknown_0E0[9]; // A dword per player 0-8
@@ -227,7 +228,7 @@ namespace AOE_STRUCTURES {
 		char hasAlliedVictory; // +108.
 		AOE_CONST_FUNC::CIVILIZATIONS civilizationId; // +109. 1 byte (char)
 		short int unknown_10A; // unused ?
-		unsigned long int ptrPlayerColorStruct; // quite unknown. +4=name(x.col), +26=color(word)? +28=sub_struct
+		unsigned long int ptrPlayerColorStruct; // quite unknown. +4=name(x.col), +26=color(word)? +28=sub_struct. See 0x45D400
 		// 0x110
 		short int techTreeId; // 45BA12 : DWORD ! Warning: NOT saved => wrong in loaded games (but fixed by customROR)
 		short int unknown_112;
@@ -270,7 +271,10 @@ namespace AOE_STRUCTURES {
 		STRUCT_PLAYER_POP_HIST_INFO *populationHistoryInfo; // +840. Information for achievements screen (timeline)
 		float remainingTimeToAllRuinsVictory; // +844. -1 means not relevant (I do not have all ruins). See 0x50BF00 method
 		float remainingTimeToAllRelicsVictory; // +848. -1 means not relevant (I do not have all relics). See 0x50BF00 method
-		char unknown_84C[0x85C - 0x84C];
+		unsigned long int unknown_84C; // +84C. Gaia only
+		unsigned long int unknown_850; // +850. Gaia only. Default 0x1D.
+		unsigned long int unknown_854; // +854. Gaia only
+		unsigned long int unknown_858; // +858. Gaia only
 		// 0x85C - DO NOT access this unless you checked the "selected units" feature is installed ! On standard game structure stops here.
 		// See GetRelevantSelectedUnitsPointer(...)
 		STRUCT_UNIT_BASE *custom_selectedUnits[CST_RS_MAX_SUPPORTED_SELECTED_UNITS]; // ONLY USE THIS if "selected units" feature is installed or you will access bad memory. See GetRelevantSelectedUnitsPointer (in commands)
@@ -279,8 +283,8 @@ namespace AOE_STRUCTURES {
 			return (STRUCT_GAME_GLOBAL*) this->ptrGlobalStruct;
 		}
 		bool IsCheckSumValid() const {
-			return (this->checksum == 0x00549B80) || (this->checksum == 0x00549A44) ||
-				(this->checksum == 0x00544D18); // parent class checksum
+			return (this->checksum == CHECKSUM_STRUCT_PLAYER) || (this->checksum == CHECKSUM_STRUCT_GAIA_PLAYER) ||
+				(this->checksum == CHECKSUM_STRUCT_RGE_PLAYER); // parent class checksum
 		}
 		// Returns true if AI "economy" control is active for the player, depending on game EXE (is "ManageAI" feature installed ?)
 		bool IsAIActive(bool hasManageAIFeatureON) {

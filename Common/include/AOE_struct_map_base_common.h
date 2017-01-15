@@ -48,21 +48,22 @@ namespace AOE_STRUCTURES {
 	// Size = 0x3 ! (yes !)
 	class STRUCT_UNIT_TARGET_POS {
 	public:
-		char posY;
-		char posX;
-		char posZ;
+		unsigned char posY;
+		unsigned char posX;
+		unsigned char posZ;
 	};
 	static_assert(sizeof(STRUCT_UNIT_TARGET_POS) == 3, "STRUCT_UNIT_TARGET_POS size");
 
 
-	// Size=8. Used in temporary treatments, for example auto-attack unit when idle...
+	// Size=8. Used in temporary treatments (but not only !), for example auto-attack unit when idle...
+	// Be careful, position and distance are not updated when units move !
 	class STRUCT_NEARBY_UNIT_INFO {
 	public:
 		long int unitId; // +0
-		char distance; // +4. Unsure. Not always valued ? -1 means invalid ?
+		unsigned char distance; // +4. Unsure. Not always valued ? -1 means invalid ?
 		char playerId; // +5
-		char posY; // +6
-		char posX; // +7
+		unsigned char posY; // +6. Position of unit that "sees" unitId when this is created. May not be correct afterwards.
+		unsigned char posX; // +7. Position of unit that "sees" unitId when this is created. May not be correct afterwards.
 	};
 	static_assert(sizeof(STRUCT_NEARBY_UNIT_INFO) == 0x8, "STRUCT_NEARBY_UNIT_INFO size");
 
@@ -70,8 +71,8 @@ namespace AOE_STRUCTURES {
 	// Used in path finding algorithm (included in path finding struct)
 	class STRUCT_PATH_FINDING_UNKNOWN_POS_INFO {
 	public:
-		char posY;
-		char posX;
+		unsigned char posY;
+		unsigned char posX;
 		char unknown_2; // Maybe unused
 		char unknown_3; // Maybe unused
 		long int distance;

@@ -44,7 +44,7 @@ namespace AOE_STRUCTURES {
 	};
 
 	// Player's unit-per-type list. Intermediate structure to a list of all units of a given type (example: createables)
-	// Size 0x0C
+	// Size 0x0C. Constructor=0x450FF0(0x00544AD4). "Tribe_Object_List"
 	class STRUCT_PER_TYPE_UNIT_LIST_LINK {
 	public:
 		unsigned long int checksum; // 70 9B 54 00 or D4 4A 54 00
@@ -383,15 +383,15 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE) == 0x18C, "STRUCT_UNIT_COMMANDABLE size");
 
 
-	// 4C 32 54 00 = attackable (type50). Size=0x1BC? (constructor=00425F30) - Derives from type40
+	// 4C 32 54 00 = attackable (type50). Size=0x1BC (constructor=00425F30) - Derives from type40
 	class STRUCT_UNIT_ATTACKABLE : public STRUCT_UNIT_COMMANDABLE {
 	public:
 		STRUCT_NEARBY_UNIT_INFO *myVisibilityToOtherPlayers_unsure[9]; // +18C. Provides visibility info from other player's point of view ?
 		// 0x1B0
 		STRUCT_MAP_VISIBILITY_INFO unknownVisibility_1B0; // Same "nature" object as +0x1E4. A mask for map visibility (visible for ...)?
 		float unknown_1B4; // Time to next xxx?
-		char stillToBeDiscoveredByHuman; // 1 for gaia units that have not been discovered yet (for gaia units capture system)
-		char unknown_1B9[3]; // ?
+		char stillToBeDiscoveredByHuman; // +1B8. 1 for gaia units that have not been discovered yet (for gaia units capture system). Only non-AI players can capture gaia units.
+		char unknown_1B9[3]; // unused?
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x0054324C); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_ATTACKABLE); }
@@ -419,7 +419,7 @@ namespace AOE_STRUCTURES {
 	// Constructor=0x4AE380 (internalFileId, global, isLeafClass), uses 0x4AE5C0=livingUnit.readFromFile(internalFileId, global)
 	class STRUCT_UNIT_TRAINABLE : public STRUCT_UNIT_ATTACKABLE {
 	public:
-		char hasDedicatedUnitDef; // +1BC. If true, this->unitDef is a "temporary" copy created when unit was converted, which means it must be freed when unit dies (or changes, for villager mode). See 4AE435 for delete.
+		char hasDedicatedUnitDef; // +1BC. If true, this->unitDef is a "temporary" copy created when unit was converted, which means it must be freed when unit dies (or changes, for villager mode). See 0x4AE435 for delete.
 		char unknown_1BD;
 		short int unknown_1BE;
 

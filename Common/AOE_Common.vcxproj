@@ -99,6 +99,7 @@
     <ClInclude Include="include\AOE_SN_numbers.h" />
     <ClInclude Include="include\AOE_struct_build_ai.h" />
     <ClInclude Include="include\AOE_struct_campaign_info.h" />
+    <ClInclude Include="include\AOE_struct_color_def.h" />
     <ClInclude Include="include\AOE_struct_command_line_info.h" />
     <ClInclude Include="include\AOE_struct_common_ai_object.h" />
     <ClInclude Include="include\AOE_struct_con_ai.h" />

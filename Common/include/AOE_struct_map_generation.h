@@ -56,25 +56,31 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_MAPGEN_ELEVATION_DATA) == 0xF80, "STRUCT_MAPGEN_ELEVATION_DATA size");
 
 
-	// Size = 0xFB0, constructor=0x46F030
-	// TO DO: there are also checksums 00545D04, 00545D10, 00545D14, 00545D4C, 00545CD8 that have the same parent ?
-	class STRUCT_MAPGEN_ELEVATION_INFO {
+#define CHECKSUM_MAPGEN_BASE 0x00545CC8 // Common parent to more classes ? Ccor 0x46BD00
+	// Size = 0x30. Constructor=0x46BD00
+	class STRUCT_MAPGEN_BASE {
 	public:
-		unsigned long int checksum; // 00 5D 54 00, parent=C8 5C 54 00 (same parent as STRUCT_MAP_GENERATION_INFO ?)
-		STRUCT_MAP_GENERATION_INFO *mapGenInfo; // a "parent" mapgen object ?
-		unsigned long int unknown_008;
+		unsigned long int checksum; // C8 5C 54 00
+		STRUCT_MAPGEN_BASE *parentMapGenObject; // +04
+		STRUCT_MAPGEN_BASE *unknown_08; // +08. represents a list of elevation info objects ? Old name = elevationInfoFirstLinkElem
 		STRUCT_GAME_MAP_INFO *gameMapInfo;
-		// 0x10
 		STRUCT_GAME_MAP_TILE_INFO **pTileInfoRows; // same as gameMapInfo+8D8C
 		long int mapSizeY;
 		long int mapSizeX;
 		float unknown_01C; // Default value = 1.5
-		// 0x20
 		STRUCT_GAME_MAP_TILE_INFO **unknown_020; // pointer 1 from mapGenInfo
 		STRUCT_GAME_MAP_TILE_INFO **unknown_024; // pointer 2 from mapGenInfo
 		STRUCT_GAME_MAP_TILE_INFO **unknown_028; // pointer 3 from mapGenInfo
 		STRUCT_GAME_MAP_TILE_INFO **unknown_02C; // pointer 4 from mapGenInfo
-		// 0x30
+	};
+	static_assert(sizeof(STRUCT_MAPGEN_BASE) == 0x30, "STRUCT_MAPGEN_BASE size");
+
+
+	// Size = 0xFB0, constructor=0x46F030
+	// TO DO: there are also checksums 00545D04, 00545D10(ccor=0x4704D0,size=0x1920), 00545D14, 00545D4C, 00545CD8 that have the same parent ?
+	class STRUCT_MAPGEN_ELEVATION_INFO : public STRUCT_MAPGEN_BASE {
+	public:
+		// unsigned long int checksum; // 00 5D 54 00, parent=C8 5C 54 00 (same parent as STRUCT_MAP_GENERATION_INFO ?)
 		STRUCT_MAPGEN_ELEVATION_DATA elevationData; // Size = 0xF80. Copied from mapGenInfo.unknown_3FD4 ?
 
 		bool IsCheckSumValid() {
@@ -94,23 +100,13 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_MAPGEN_ELEVATION_LINK) == 8, "STRUCT_MAPGEN_ELEVATION_LINK size");
 
 
+#define CHECKSUM_TRIBE_LAND_MAKER 0x00545D18 // Child class, corresponds to Tribe_Map (the one to use)
+#define CHECKSUM_CONTROLER_OF_LANDSCAPE 0x00545CDC // This intermediate class corresponds to RGE_Map level
+
 	// size=0x4F5C, constructor=471D20,0x46DA10(fromFile).
-	class STRUCT_MAP_GENERATION_INFO {
+	// Base="ControlerOfLandscape", child="TribeLandMaker"
+	class STRUCT_MAP_GENERATION_INFO : public STRUCT_MAPGEN_BASE {
 	public:
-		unsigned long int checksum; // 18 5D 54 00, parent objects are C8 5C 54 00(base), DC 5C 54 00
-		unsigned long int unknown_0004; // a "parent" mapgen object ?
-		STRUCT_MAPGEN_ELEVATION_LINK *elevationInfoFirstLinkElem; // represents a list of elevation info objects ?
-		STRUCT_GAME_MAP_INFO *gameMapInfo;
-		// 0x10
-		unsigned long int unknown_0010; // Same as STRUCT_GAME_MAP_INFO+8D8C
-		long int mapArraySizeY;
-		long int mapArraySizeX;
-		unsigned long int unknown_001C;
-		// 0x20
-		unsigned long int unknown_0020; // pointer 1
-		unsigned long int unknown_0024; // pointer 2
-		unsigned long int unknown_0028; // pointer 3
-		unsigned long int unknown_002C; // pointer 4
 		// 0x30
 		unsigned long int unknown_0030;
 		long int mapType;
@@ -128,16 +124,18 @@ namespace AOE_STRUCTURES {
 		char borderUsagePercentage;
 		char unknown_1471[3];
 		char unknown_1474[0x270C - 0x1474];
-		STRUCT_MAPGEN_OBJECT_TO_PLACE objectsToPlaceOnMap[0x63]; // +270C
+		STRUCT_MAPGEN_OBJECT_PLACER objectsToPlaceOnMap[0x63]; // +270C
 		long int numberOfMapGenObjectElems; // +399C.
 		// 0x39A0
-		char unknown_39A0[0x3FD4 - 0x39A0];
+		char unknown_39A0[0x3FD0 - 0x39A0];
+		unsigned long int unknown_3FD0;
 		STRUCT_MAPGEN_ELEVATION_DATA elevationData; // +3FD4. Size=0xF80
 		unsigned long int mapTypesCount; // +4F54.
 		STRUCT_MAPGEN_MAP_TYPE *mapGenMapTypesInfoArray; // +4F58.
 
 		bool IsCheckSumValid() {
-			return (this->checksum == 0x00545D18) || (this->checksum == 0x00545CC8) || (this->checksum == 0x00545CDC);
+			return (this->checksum == CHECKSUM_TRIBE_LAND_MAKER) || //(this->checksum == CHECKSUM_MAPGEN_BASE) ||
+				(this->checksum == CHECKSUM_CONTROLER_OF_LANDSCAPE);
 		}
 	};
 	static_assert(sizeof(STRUCT_MAP_GENERATION_INFO) == 0x4F5C, "STRUCT_MAP_GENERATION_INFO size");

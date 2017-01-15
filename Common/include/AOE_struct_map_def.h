@@ -54,28 +54,28 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_MAPGEN_BASE_ZONE_INFO) == 0x2C, "STRUCT_MAPGEN_BASE_ZONE_INFO size");
 
 
-	// Size = 0x30
+	// Size = 0x30. "ObjectPlacer"
 	// Initial debug topic for this object: http://aoe.heavengames.com/cgi-bin/aoecgi/display.cgi?action=ct&f=17,6326,,30
-	class STRUCT_MAPGEN_OBJECT_TO_PLACE {
+	class STRUCT_MAPGEN_OBJECT_PLACER {
 	public:
 		long int unit_DAT_ID;
-		unsigned long int placementTerrainId; // -1: "joker"?.
-		char groupMode; // 0: only 1 unit is placed (objectCountPerGroup is ignored). - or 2: All units of groups are placed
-		char unknown_05_groupMode; // 0 or 1 ???
-		unsigned short int unknown_0A_unused; // TO Confirm it is unused...
-		unsigned long int objectCountPerGroup; // Number of object to place for each group
+		unsigned long int placementTerrainId; // +04. (-1)="joker"?.
+		char groupMode; // +08. 0: only 1 unit is placed (objectCountPerGroup is ignored). - or 2: All units of groups are placed
+		char unknown_05_groupMode; // +09. 0 or 1 ???
+		unsigned short int unknown_0A_unused; // +0A. TO Confirm it is unused...
+		unsigned long int objectCountPerGroup; // +0C. Number of object to place for each group
 		// 0x10
 		unsigned long int fluctuation; // Max random variation in the number of objects in the group (can vary in + or -).
 		long int groupsCount; // Number of groups to create. Each group can contain 1 or several objects.
-		long int groupRadius;
+		long int groupRadius; // +18.
 		long int ownAtStart; // 0=No, -1=Yes. Can be "Yes" only if "set for all players" is ON.
 		// 0x20
 		unsigned long int setPlaceForAllPlayers; // 1=done once per player. -1, -2=done only once, does not depend on players count.
 		long int minDistanceToPlayers;
 		long int maxDistanceToPlayers;
-		unsigned long int unknown_2C; // Always 1 ?
+		unsigned long int unknown_2C; // Always 1 ? "used" or "enabled" ? 
 	};
-	static_assert(sizeof(STRUCT_MAPGEN_OBJECT_TO_PLACE) == 0x30, "STRUCT_MAPGEN_OBJECT_TO_PLACE size");
+	static_assert(sizeof(STRUCT_MAPGEN_OBJECT_PLACER) == 0x30, "STRUCT_MAPGEN_OBJECT_PLACER size");
 
 
 	// Size 0x48
@@ -102,7 +102,7 @@ namespace AOE_STRUCTURES
 		long int terrainsInfoCount;
 		STRUCT_MAPGEN_TERRAINS_INFO *pTerrainInfoArray; // +34. ElemSize=0x18
 		long int objectsToPlaceOnMapInfoCount; // +38
-		STRUCT_MAPGEN_OBJECT_TO_PLACE *objectsToPlaceOnMapInfoArray;
+		STRUCT_MAPGEN_OBJECT_PLACER *objectsToPlaceOnMapInfoArray;
 		// 0x40
 		unsigned long int unknownOtherInfoCount;
 		STRUCT_MAPGEN_TERRAINS_INFO *unknownOtherInfoArray; // +44. ElemSize=0x18. According to AGE3, same structure as terrain info. Unused in standard empires.dat.

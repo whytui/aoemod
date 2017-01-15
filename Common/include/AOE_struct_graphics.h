@@ -39,6 +39,7 @@ namespace AOE_STRUCTURES
 
 
 	// Size = 0x78. Constructor = 0x4A4C40 = graphic.readFromFile(internalFileId, pSoundStruct, pMPInfo?)
+	// "RGE_Sprite"
 	class STRUCT_GRAPHICS {
 	public:
 		char slpName[0x0D];

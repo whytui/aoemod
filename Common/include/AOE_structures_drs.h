@@ -96,7 +96,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_1C;
 	};
 
-	// Size = 0x20. Constructor = 0x49F5F0
+	// Size = 0x20. Constructor = 0x49F5F0. "TShape".
 	// Destructor? = 0x49F840 (does NOT free).
 	// 0x49FA90=slpInfo.GetShapeCount() : info taken from slpFileHeader
 	class STRUCT_SLP_INFO {
