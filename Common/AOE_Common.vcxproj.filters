@@ -297,9 +297,6 @@
     <ClInclude Include="include\UI\AOE_struct_ui_dialog_base.h">
       <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
     </ClInclude>
-    <ClInclude Include="include\AOE_struct_ui_main_info.h">
-      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
-    </ClInclude>
     <ClInclude Include="include\AOE_const_drs.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -335,6 +332,9 @@
     </ClInclude>
     <ClInclude Include="include\AOE_struct_color_def.h">
       <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_ui_main_info.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

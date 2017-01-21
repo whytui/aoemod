@@ -39,7 +39,7 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	if (!CUSTOMROR::IsImproveAIEnabled(buildAI->commonAIObject.playerId)) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
-	bool difficultyIsEasy = (settings->difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY); // True for easy / easiest
+	bool difficultyIsEasy = (settings->rgeGameOptions.difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY); // True for easy / easiest
 	if (difficultyIsEasy) { return; } // Do not improve strategy in easy levels.
 
 	assert(buildAI != NULL);
@@ -107,7 +107,7 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 
 		// On iron age, disable limited-retrains weak units (except panic units, if any). Make sure NOT to disable villagers.
 		if (ironAgeResearched && foundCounter_one && (currentStratElem->elementType == AIUCLivingUnit) && (currentStratElem->retrains > -1) &&
-			(currentStratElem->inProgressCount == 0) && (!settings->isScenario)) {
+			(currentStratElem->inProgressCount == 0) && (!settings->rgeGameOptions.isScenario)) {
 			long int DATID = currentStratElem->unitDAT_ID;
 			if ((DATID == CST_UNITID_SLINGER) ||
 				(DATID == CST_UNITID_BOWMAN) ||
@@ -309,7 +309,7 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 		numberOfAddedResearches++;
 	}
 	// Add a secondary town center when there is only one. It's a good security.
-	if ((townCentersCount == 1) && (settings->difficultyLevel <= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_HARD)) { // Hard/hardest only
+	if ((townCentersCount == 1) && (settings->rgeGameOptions.difficultyLevel <= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_HARD)) { // Hard/hardest only
 		AddUnitInStrategy_before(buildAI, optionalsLocation, -1, -1, AIUCBuilding, CST_UNITID_FORUM, player, "customROR-BackupTC");
 		townCentersCount++;
 	}
@@ -410,7 +410,7 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 		maxPanicModeSeekEnemyDistance = tacAI->SNNumber[SNMaximumTownSize];
 	}
 	long int square_maxPanicModeSeekEnemyDistance;
-	if ((myWeaknessScore < 33) || (settings->difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY)) {
+	if ((myWeaknessScore < 33) || (settings->rgeGameOptions.difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY)) {
 		// Defend a restricted territory if weak OR if level is easy/easiest.
 		square_maxPanicModeSeekEnemyDistance = maxPanicModeSeekEnemyDistanceIfFewResources * maxPanicModeSeekEnemyDistanceIfFewResources;
 	} else {
@@ -998,7 +998,7 @@ bool STRATEGY::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI
 	}
 
 	// Easy difficulty levels / MP games: default behavior too
-	if (settings->isMultiplayer || (settings->difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY)) { return false; } // use default
+	if (settings->rgeGameOptions.isMultiPlayer || (settings->rgeGameOptions.difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY)) { return false; } // use default
 
 	assert(stratElem->elementType == TAIUnitClass::AIUCBuilding);
 	long int villagerTotalCount = tacAI->allVillagers.usedElements;
@@ -1031,7 +1031,7 @@ bool STRATEGY::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI
 		myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_GOLD] = (float)-tacAI->SNNumber[SN_NUMBERS::SNMinimumGold];
 		// Apply some hardcoded minimum requirements (for hard levels - excludes "medium")
 		// Do not use hardcoded values for campaign / scenario : as we're using SN numbers, if the scenario if correctly designed, it will still work normally.
-		if ((settings->difficultyLevel < AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_MEDIUM) && (!settings->isCampaign) && (!settings->isScenario)) {
+		if ((settings->rgeGameOptions.difficultyLevel < AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_MEDIUM) && (!settings->isCampaign) && (!settings->rgeGameOptions.isScenario)) {
 			// I know that wonders don't require food, be let's remain generic... 
 			// Moreover, that can prevent from starting a wonder when food is very low, which is a healthy restriction.
 			if (myVirtualResources[RESOURCE_TYPES::CST_RES_ORDER_FOOD] > -300) {

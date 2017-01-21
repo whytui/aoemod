@@ -58,16 +58,30 @@ namespace AOE_STRUCTURES {
 		CAMPAIGN_FILE_INFO *campaignInfo; // +110.
 	};
 
+
 	// TO move somewhere
+	// Size=0x118. Constructor=0x43C6B0. "RGE_Game_Info" ?
 	class GAME_NFO_DATA {
 	public:
 		long int currentUserIndex; // Currently selected "user". starts at 0.
 		long int userCount; // +4
 		CAMPAIGN_USER_INFO **userInfoArray; // +08. The users you create in campaign menu.
 		unsigned long int unknown_0C; // unsure
-		unsigned long int unknown_10; // unsure
-		char filename[0x100]; // unsure
+		unsigned long int unknown_10; // +10. unsure
+		char filename[0x104]; // +14. unsure
 	};
+	static_assert(sizeof(GAME_NFO_DATA) == 0x118, "GAME_NFO_DATA size");
+
+
+	// Size=0x10C. Constructor=0x476CD0.
+	// Scenario.inf path + other data ?
+	class STRUCT_SCENARIO_INF_DATA {
+	public:
+		char unknown_00[0x104]; // unknown size
+		unsigned long int unknown_104; // +104. A DWORD.
+		unsigned long int *unknown_108; // +108. Array of elems, size=0x10C
+	};
+	static_assert(sizeof(STRUCT_SCENARIO_INF_DATA) == 0x10C, "STRUCT_SCENARIO_INF_DATA size");
 
 
 }

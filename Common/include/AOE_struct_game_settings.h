@@ -23,6 +23,7 @@ using namespace AOE_CONST_INTERNAL;
 namespace AOE_STRUCTURES {
 	// External dependencies
 	class STRUCT_UI_IN_GAME_MAIN;
+	class STRUCT_ANY_UI;
 
 	// Size 0x2C. Used in 0x4F6D7E
 	// Provides interaction mode information for an AI type (considering unit=potential target of a right-click)
@@ -44,7 +45,8 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(STRUCT_AITYPE_RIGHTCLICK_INFO) == 0x2C, "STRUCT_AITYPE_RIGHTCLICK_INFO size");
 
-	// Unknown size. See variable AOE_VAR_CURSORS_INFO
+	// Size=0x254. Constructor=0x4496E0. See variable AOE_VAR_CURSORS_INFO
+	// "TMousePointer" ?
 	class STRUCT_CURSOR_SLP_INFO
 	{
 	public:
@@ -74,6 +76,24 @@ namespace AOE_STRUCTURES {
 	};
 
 
+	// Size=0x110. Constructor=0x46AD60.
+	// There are 2 instances: 1 pointed by 0x580DC0 and 1 pointed by game settings.
+	class STRUCT_TREGISTRY {
+	public:
+		unsigned long int unknown_00;
+		// TODO
+	};
+
+	// Size=0x7B0. Constructor=0x42BF80.
+	class STRUCT_TDEBUGGING_LOG {
+		unsigned long int unknown_00;
+		// TODO
+	};
+
+	// Size=0x100. Constructor=0x41C830
+	// For chatting (with taunts...)
+	class STRUCT_TCHAT {}; // TODO
+
 #ifdef GAMEVERSION_AOE10b
 #define CHECKSUM_GAME_SETTINGS1 0x005509D8
 #define CHECKSUM_GAME_SETTINGS2 0x00553B78 // parent class
@@ -87,33 +107,121 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_GAME_SETTINGS2 0x00547DE8 // parent class
 #endif
 #ifdef GAMEVERSION_ROR10c
-#define CHECKSUM_GAME_SETTINGS1 0x0054A264
-#define CHECKSUM_GAME_SETTINGS2 0x005430B4 // parent class
+#define CHECKSUM_GAME_SETTINGS 0x0054A264 // "Tribe Game"
+#define CHECKSUM_GAME_SETTINGS_BASE 0x005430B4 // "RGE_Base_Game". Base class. Constructor=0x4162B0
 #endif
-	// Size = 0x11A0 (AOE1.0b&c). Constructor 0x4F91C0 (empires.exe)
+	// Size = 0x11A0 (AOE1.0b&c). Constructor 0x4F91C0 (empires.exe). "RGE_Base_Game"
 	// Size = 0x1254. Constructor 0x5004C0(1.0b), 0x4FDFA0(1.0c) - arg1=commandLineInfo, arg2=?
 	// Warning: this mainly represents information from UI, many fields are NOT RELEVANT (and arbitratry) when loading a saved game.
-	// [EDX+40] gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX). (0x501980)
+	// +0x00 = gameSettings.destructor(do_free)
+	// +0x04 = gameSettings.run()
+	// +0x08 = gameSettings.HandleMessage(arg1, arg2, WM_xxx, arg4, arg5) "wndProc"
+	// +0x0C = gameSettings.setProgMode(int) = setScreenStatus
+	// +0x10 = gameSettings.setGameMode(int, int) = setMouseStatus
+	// +0x14 = gameSettings.setControlledPlayer(playerId)
+	// +0x18 = gameSettings.getErrorCode()
+	// +0x1C = gameSettings.getString(int, long, char* int)
+	// +0x20 = gameSettings.getString(long,char *,int)
+	// +0x24 = gameSettings.LoadStringLanguage(stringID)
+	// +0x28 = gameSettings.getString2(int, long, long, char*, int)
+	// +0x2C = gameSettings.GetGameZoneUIObj() = gameSettings.getViewPanel
+	// +0x30 = gameSettings.GetDiamondMapObj()
+	// +0x34 = gameSettings.GetNewScenarioHeader(scenarioInfo)
+	// +0x38 = gameSettings.GetNewScenarioHeader(internalFileId)
+	// +0x3C = gameSettings.GetNewScenarioInfo(internalFileId)
+	// +0x40 = gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX). (0x501980)
+	// +0x44 = gameSettings.ResetComm()
+	// +0x48 = gameSettings.SendGameOptions()
+	// +0x4C = gameSettings.ReceiveGameOptions()
+	// +0x54 = gameSettings.DoCheatCode(playerId, text)
+	// +0x58 = gameSettings.InitializeMusic() ?
+	// +0x5C = gameSettings.ShutdownMusic() ?
+	// +0x68 = gameSettings.setup()
+	// +0x6C = gameSettings.setupCmdLineOptions()
+	// +0x70 = gameSettings.setupClass()
+	// +0x74 = gameSettings.setupMainWindow()
+	// +0x78 = gameSettings.setupGraphicsSystem()?
+	// +0x7C = gameSettings.setupPalette()
+	// +0x80 = gameSettings.setupMouse()
+	// +0x84 = gameSettings.setupRegistry()
+	// +0x88 = gameSettings.SetupDebugLogs()
+	// +0x8C = gameSettings.setupChat()
+	// +0x90 = gameSettings.setupComm()
+	// +0x94 = gameSettings.setupSoundSystem()
+	// +0x98 = gameSettings.setupFonts()
+	// +0x9C = gameSettings.setupSounds()
+	// +0xA0 = gameSettings.setupSLP??()
+	// +0xA4 = gameSettings.setupBlankScreen()
+	// +0xA8 = gameSettings.setupTimings()
+	// +0xAC = gameSettings.stopSoundSystem()
+	// +0xB0 = gameSettings.restartSoundSystem()
+	// +0xB4 = gameSettings.GetMusicStatus(...) ? Or setupMusic?
+	// +0xB8 = gameSettings.PlayMusic() ?
+	// +0xBC = gameSettings.createGlobal()
+	// +0xC0 = int RGE_Base_Game::handle_message(struct tagMSG *)
+	// +0xC4 = int RGE_Base_Game::handle_idle(void)
+	// +0xC8 = gameSettings.handleMouseMove?(parg1, uint, uint, long)
+	// +0xCC = gameSettings.OnKeyDown(parg1, eventID?, key, arg4)
+	// +0xD0 = gameSettings.handle_user_command(void *,unsigned int,unsigned int,long)
+	// +0xD4 = gameSettings.handleCommand(void*, uint, uint, long)
+	// +0xD8 = gameSettings.handleMusicDone(void*, uint, uint, long)
+	// +0xDC = gameSettings.handlePaint(void*, uint, uint, long)
+	// +0xE0 = gameSettings.handleActivate()
+	// +0xE4 = gameSettings.handleInitMenu()
+	// +0xE8 = gameSettings.handleExitMenu()
+	// +0xEC = gameSettings.handleSize(parg1, uint, uint, long)
+	// +0xF0 = gameSettings.handlePaletteChanged(parg1, uint, uint, long)
+	// +0xF4 = gameSettings.handleQueryNewPalette(parg1, uint, uint, long)
+	// +0xF8 = gameSettings.HandleClose?(arg1, WM_xx, arg3, arg4)
+	// +0xFC = gameSettings.HandleDestroy(void*, arg2, arg3, arg4)
+	// +0x100 = gameSettings.actionUpdate()? Does nothing?
+	// +0x104 = int RGE_Base_Game::action_mouse_move(long,long,int,int,int,int)
+	// +0x108 = int RGE_Base_Game::action_key_down(unsigned long,int,int,int,int)
+	// +0x10C = int RGE_Base_Game::action_user_command(unsigned long,unsigned long)
+	// +0x110 = int RGE_Base_Game::action_command(unsigned long,unsigned long)
+	// +0x114 = int RGE_Base_Game::action_music_done(void)
+	// +0x118 = int RGE_Base_Game::action_activate(void)
+	// +0x11C = int RGE_Base_Game::action_deactivate(void)
+	// +0x120 = int RGE_Base_Game::action_init_menu(void)
+	// +0x124 = int RGE_Base_Game::action_exit_menu(void)
+	// +0x128 = int RGE_Base_Game::action_size(void)
+	// +0x12C = gameSettings.action_close(void)
+	// +0x130 = gameSettings.calcTimings()
+	// +0x134 = gameSettings.calcTimingsText()
+	// +0x138 = gameSettings.showTimings()
+	// +0x13C = gameSettings.showComm(). Can be called to display MP comm info in bottom-left in colored chat-like !
+	// +0x140 = gameSettings.showAI(). Can be called to display MP comm info in bottom-left in colored chat-like !
+	// +0x144 = 
+	// +0x148 = [Last for both classes]
 	class STRUCT_GAME_SETTINGS {
 	public:
 		unsigned long int checksum;
 		GAME_NFO_DATA *game_nfo_data; // +04. no checksum
-		unsigned long int *unknown_008_ptr_scenario_data; // +08. scenario.inf path... +other data?
+		STRUCT_SCENARIO_INF_DATA *scenarioInfData; // +08. scenario.inf path... +other data?
 		STRUCT_COMMAND_LINE_INFO *commandLineInfo;
 		// 0x10
-		char unknown_010[0x1C];
+		unsigned long int unknown_010_hwnd; // +10. Some hwnd.
+		unsigned long int unknown_014;
+		unsigned long int unknown_018;
+		unsigned long int unknown_01C;
+		unsigned long int unknown_020;
+		unsigned long int unknown_024;
+		unsigned long int unknown_028;
 		unsigned long int scenarioMapSeed; // +2C. When supplied manually through scenario editor. -1 for RM / DM
 		unsigned long int unknown_030;
 		unsigned long int actualMapSeed; //+34.  THE actual map seed
 		unsigned long int unknown_038;
 		unsigned long int unknown_03C;
 		// 0x40
-		unsigned long int unknown_040;
+		unsigned long int errorCode; // +40. Get in 0x417460.
 		unsigned long int unknown_044;
-		unsigned long int *unknown_048;
-		unsigned long int *unknown_04C; // +4C. basegame ?? Ptr to struct size>=478
-		char unknown_050[0xC];
-		STRUCT_SLP_INFO **ptrInfosSLP; // +5C. Pointer to array slpInfo, size=3 ? index 0=shortcut numbers
+		unsigned long int *drawSystem; // +48. TDrawSystem
+		unsigned long int *unknown_04C; // +4C. basegame ?? Ptr to struct size>=478. TDrawArea ?
+		//char unknown_050[0xC];
+		unsigned long int unknown_050;
+		unsigned long int unknown_054;
+		long int infoSLPCount; // +58. Number of elements in ptrInfosSLP array.
+		STRUCT_SLP_INFO **ptrInfosSLP; // +5C. Pointer to array slpInfo, default size=3. index 0=shortcut numbers
 		// 0x60
 		STRUCT_SOUND_DRIVER *pSoundDriver; // +60. Size 69C, see 41894B. Generally =NULL, only set while being used.
 		STRUCT_MAIN_MUSIC *pMusicStruct; // +64. Size 3F8, see 418B14. Generally =NULL, only set while being used.
@@ -133,15 +241,21 @@ namespace AOE_STRUCTURES {
 		long int musicSeekPos; // Resume from minimized window
 		STRUCT_MP_COMMUNICATION *MPCommunicationStruct; // +18C
 		// 0x190
-		char unknown_190[0x1AC - 0x190];
-		unsigned long int unknown_1AC; // related to registry ?
+		long int stopIfSyncFail; // +190. Unsure.
+		long int dropPacketsIntentionally; // +194. Unsure. Not sure it does have an effect in final versions ?
+		long int showSyncChatMessages; // 198. Unsure.
+		long int enableStepMode; // +19C. Unsure. Not sure it does have an effect in final versions ?
+		long int enableSpeedControl; // +1A0. Unsure.
+		STRUCT_TDEBUGGING_LOG *appLogger; // +1A4.
+		unsigned long int unknown_1A8; // +1A8. Related to logger.
+		STRUCT_TREGISTRY *unknown_1AC_registry; // related to registry ?
 		// 0x1B0
 		AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentUIStatus; // 0=loading,2=inMenu,4=playing,7=editor
-		AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES mouseActionType; // +1B4. Set this during game, you'll be able to edit the map !! userSelected* fields
-		long int unknown_1B8; // Values 1,4,6,... ? SubMouseActionType ? Used when mouseActionType=6 (villager build menu) or in editor. Seen 1=editor_moveUnit?, 3, 4(editor_putunit?). Unsure !
+		AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES mouseActionType; // +1B4. "Game mode". Set this during game, you'll be able to edit the map !! userSelected* fields
+		long int gameModeSub; // Values 1,4,6,... ? SubMouseActionType ? Used when mouseActionType=6 (villager build menu) or in editor. Seen 1=editor_moveUnit?, 3, 4(editor_putunit?). Unsure !
 		long int unknown_1BC;
 		// 0x1C0
-		STRUCT_CURSOR_SLP_INFO *unknown_1C0; // +1C0. Pointer to something about mouse cursors ? Same as *(0x582EDC)
+		STRUCT_CURSOR_SLP_INFO *mousePointer; // +1C0. Pointer to something about mouse cursors ? Same as *(0x582EDC)
 		char unknown_1C4[0xC];
 		// 0x1D0
 		unsigned long int unknown_1D0;
@@ -161,12 +275,15 @@ namespace AOE_STRUCTURES {
 		short int editorUserSelectedTerrainId; // Can be changed in editor/terrain tab
 		// 0x400
 		short int editorUserSelectedAltitude; // in editor/terrain tab
-		short int editorTerrainPencilSize; // in editor/terrain tab
-		char debugString_404[0x508 - 0x404]; // "Avg view time"...
+		short int editorTerrainPencilSize; // +402. in editor/terrain tab
+		char debugStringTimings[0x508 - 0x404]; // +404. Timings text. "Avg view time"... See 0x41B390.
 		long int unknown_508;
 		long int unknown_50C; // a counter
 		char unknown_510[0x528 - 0x510];
-		char unknown_528[0x8E0 - 0x528]; // An included array, elemSize=0x20; getter=417430
+		// WRONG ???char unknown_528[0x8E0 - 0x528]; // An included array, elemSize=0x20; getter=417430. See 4190B0=setupTimings
+		char unknown_528[0x588 - 0x528];
+		STRUCT_ANY_UI *f5debugPanel; // +588. Unsure
+		char unknown_58C[0x8E0 - 0x58C];
 		// +4F0 : pointer ? +100=Affects DisableMapSizeSetting
 		// 0x8E0
 		long int screenSizeX; // To confirm + confirm type
@@ -175,28 +292,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_8EC;
 		unsigned long int unknown_8F0;
 		unsigned long int unknown_8F4;
-		float gameSpeed; // +8F8. A struct starts here ?
-		char isScenario; // +8FC. 1 for scenario/campaign, 0 for random game/deathMatch. value is ARBITRARY for loaded games, unless we fix it manually (done by customROR)
-		char scenarioFileName[3 + 0x7C]; // +8FD.
-		// 0x900
-		char unknown_97C;
-		char isSinglePlayer; // 0x97D. Not correct AFTER player a MP game ? Set in 0x41BA70
-		char isMultiplayer; // 0x97E. Set in 0x41BA90
-		char mapSizeX;
-		// 0x980
-		char mapSizeY;
-		char unknown_981_maxMapPlayerCount; // Related to map size. Always 8 ? Max player # ?
-		char enableCheatMode; // +982. Set in 41BAE0
-		char unknown_983; // +983. path finding for MP ? 0-2 default/medium/high ?
-		char unknown_984; // Something to do with screen width and height?? annoyCheaters or cheatNotification ? Unsure
-		char revealMap; // 0x985. Set in 41BB00
-		char noFog; // 0x986. Set in 41BB10
-		char unknown_987_coloredChat; // default 1 ? Set in 41BB20
-		char playerCount; // +988. NOT counting gaia.
-		char unknown_989_gameDeveloperOptionsEnabled; // can set speed > 16 ?
-		char playerGameVersion[0x09]; // 0-127 ; 0="", 1="1.0", 2="1.0a", etc. Index is playerId
-		AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL difficultyLevel; // +993. 0=hardest, 1=hard, 2, 3, 4=easiest. Set in 41BBC0
-		char teamNumbers[0x09]; // +994. player 1-8 (array offset in 0-8). Values: 1=noTeam, >1=teamId.
+		STRUCT_RGE_GAME_OPTIONS rgeGameOptions; // +8A8. Size=0xA8. Cf 0x41B430.
 		// 0x9A0
 		long int isCampaign; // get in 41B720, set in 41BA50
 		long int isSavedGame; // +9A4. set in 41BA60
@@ -271,7 +367,7 @@ namespace AOE_STRUCTURES {
 		long int lastAccessedEventIndex; // +C54. -1=no "last event". Or a 0-4 value. To remember which index was used in last "home key" press.
 		// 0xC58
 		char unknown_C58[0x106C - 0xC58];
-		char debugString[0x1190 - 0x106C]; // Unknown_ size
+		char debugString[0x1190 - 0x106C]; // +106C. Unknown_ size
 		// 0x1190
 		char isInitMPScreen; // +1190. Set in 5055B0. ??? to confirm. is MP game ?
 		char unknown_1191;
@@ -285,7 +381,7 @@ namespace AOE_STRUCTURES {
 		char unknown_11E8[0x1254 - 0x11E8];
 
 		bool IsCheckSumValid() const {
-			return (this->checksum == CHECKSUM_GAME_SETTINGS1) || (this->checksum == CHECKSUM_GAME_SETTINGS2);
+			return (this->checksum == CHECKSUM_GAME_SETTINGS) || (this->checksum == CHECKSUM_GAME_SETTINGS_BASE);
 		}
 		// Add an event position in history (for HOME key)
 		void AddEventInHistory(long int posX, long int posY) {

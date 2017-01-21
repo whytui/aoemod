@@ -191,7 +191,7 @@ namespace AOE_STRUCTURES {
 
 	// [id 0x65] Size 0x40
 	// Constructor = 0x4B1390
-	// Derives from "0x005429D8" , ccor 0x406E40
+	// Derives from "0x005429D8" , ccor 0x406E40, 0x4B13C0
 #define CHECKSUM_ACTION_BUILD 0x005486BC
 	class STRUCT_ACTION_BUILD : public STRUCT_ACTION_BASE {
 	public:

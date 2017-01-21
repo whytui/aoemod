@@ -24,7 +24,10 @@ namespace AOE_STRUCTURES {
 
 	// The main AI object. Total size = 0x125C8. Constructor = 0x4C6960.
 	// Checksums: F0 8B 54 00 (normal) + parents 04 2C 54 00, B0 2B 54 00
-	// [+0x30] mainUpdate(arg1)
+	// +0x00 = destructor(do_free)
+	// +0x08 = save?
+	// +0x18 = AI.startAIHistoryFile(arg1)
+	// +0x30 = update(arg1)
 	class STRUCT_AI {
 	public:
 		unsigned long int checksum;

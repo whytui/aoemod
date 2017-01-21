@@ -431,7 +431,7 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 	}
 	AOE_STRUCTURES::STRUCT_ANY_UI *obj = (AOE_STRUCTURES::STRUCT_ANY_UI *)objAddress;
 
-	AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *uiMainInfo = GetUIMainInfoStruct();
+	AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *uiMainInfo = GetUIMainInfoStruct();
 	if (uiMainInfo && uiMainInfo->previousFocusedObject) {
 		AOE_STRUCTURES::STRUCT_UI_TEXTBOX *prevFocusAsTextbox = (AOE_STRUCTURES::STRUCT_UI_TEXTBOX *)uiMainInfo->previousFocusedObject;
 		if (prevFocusAsTextbox && prevFocusAsTextbox->IsCheckSumValid() && ((unsigned long int)prevFocusAsTextbox != objAddress)) {

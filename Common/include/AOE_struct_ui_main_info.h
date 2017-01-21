@@ -16,7 +16,7 @@ namespace AOE_STRUCTURES
 	// Structure included in 0x5830E8 address (ROR 1.0c) => see ADDR_VAR_UI_MAIN_INFO
 	// Size > 0xAD0?. Constructor = 0x451990?
 	// Name=TPanelSystem
-	class STRUCT_UI_MAIN_INFO {
+	class STRUCT_UI_PANEL_SYSTEM {
 	public:
 		STRUCT_ANY_UI *uiObjectReceivingEvents; // +00. If non-NULL, this object will intercept all UI events (other components will be unreactive)
 		STRUCT_ANY_UI *unknown_004;

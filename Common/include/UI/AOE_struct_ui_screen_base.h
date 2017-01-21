@@ -15,7 +15,7 @@ namespace AOE_STRUCTURES
 {
 
 #define CHECKSUM_UI_SCREEN_BASE 0x00544BBC
-#define CHECKSUM_UI_SCREEN_INTERMEDIATE 0x0054579C // Some mysterious intermediate (child) class with no own member ?
+#define CHECKSUM_UI_SCREEN_INTERMEDIATE 0x0054579C // Some mysterious intermediate (child) class with no own member ? "Blank screen" ?
 #define CHECKSUM_UI_IN_GAME_MAIN 0x0054679C
 #define CHECKSUM_UI_SCENARIO_EDITOR_MAIN 0x00547360
 #define CHECKSUM_UI_GAME_SETTINGS 0x00547810

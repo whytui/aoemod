@@ -1561,13 +1561,13 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 						if (this->settings && this->settings->IsCheckSumValid()) {
 							// Add HP to all buildings (the only attribute that really improves buildings)
 							int valueToAdd = 20; // easy levels: will probably not be enough to add architecture
-							if (this->settings->difficultyLevel == 2) {
+							if (this->settings->rgeGameOptions.difficultyLevel == 2) {
 								valueToAdd = randomizer.GetRandomValue_normal_moderate(10, 60); // will sometimes do...
 							}
-							if (this->settings->difficultyLevel == 1) {
+							if (this->settings->rgeGameOptions.difficultyLevel == 1) {
 								valueToAdd = randomizer.GetRandomValue_normal_moderate(35, 75); // will generally do...
 							}
-							if (this->settings->difficultyLevel == 0) {
+							if (this->settings->rgeGameOptions.difficultyLevel == 0) {
 								valueToAdd = randomizer.GetRandomValue_normal_moderate(45, 70); // random part, but almost always enough to actually add architecture
 							}
 							resInfo->unitInstanceScoreForOptionalResearch += valueToAdd;
@@ -2461,7 +2461,7 @@ void StrategyBuilder::AddTowerResearches() {
 		}
 		if (isUpgradeUnit && !newProjectileIsMuchSlower && !newReloadTimeIsMuchSlower) {
 			PotentialResearchInfo *resInfo = this->AddPotentialResearchInfoToList(researchId);
-			if (resInfo && this->settings && this->settings->IsCheckSumValid() && (this->settings->difficultyLevel < 2) &&
+			if (resInfo && this->settings && this->settings->IsCheckSumValid() && (this->settings->rgeGameOptions.difficultyLevel < 2) &&
 				this->IsResearchInTechTree(resInfo->researchId)) { // this check is not necessary: if not available, it won't be in allResearchesForUnit
 				resInfo->forcePutAsEarlyAsPossible = true; // Force tower upgrades to be researched quickly
 			}
@@ -2484,7 +2484,7 @@ void StrategyBuilder::AddMandatoryNonMilitaryResearches() {
 	this->AddPotentialBuildingInfoToList(CST_UNITID_FARM); // Add if not already present
 	PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
 	// Set desired number of farms
-	bool normalOrEasy = (this->settings->difficultyLevel >= 2);
+	bool normalOrEasy = (this->settings->rgeGameOptions.difficultyLevel >= 2);
 	if (farmInfo) {
 		if (this->isWaterMap) {
 			farmInfo->desiredCount = normalOrEasy ? 4 : 5;

@@ -18,6 +18,7 @@ namespace AOE_STRUCTURES
 	// Size=0x14. no constructor (alloc in 0x50F1F2)
 	// See 0x50F970 = gamePlayZone.setGreenUnitBlinking(unitId, time_ms, arg3, arg4)
 	// To allow more than 1 blinking at once, remove SUB DWORD PTR DS:[EAX+8],EBP in 0x50F9B0 (but some other clicks like move (red cross) will still stop the blinkings)
+	// "View Panel"
 	class STRUCT_UNIT_GREEN_BLINKING_INFO {
 	public:
 		long int isActive;
@@ -73,6 +74,7 @@ namespace AOE_STRUCTURES
 		char unknown_144[0x334 - 0x144];
 		// +168 : byte
 		// +304, 318, 31C, 320: dwords related to mouse pos?
+		// +324 = TDrawArea ? unsure
 
 		unsigned long int unknown_334_ptr; // Ptr to obj size=0x70, ccor=516110. +5C=array size 4*((layer?)maxTypeId+1) of ptrs to obj. obj:+4=next,+8=unitId,+30/32/34/36=min/maxPosXY? +C,+20=ptrGraphicsShp?
 		// Note: +4C=maxTypeId, typeIDs: 00=eyeCandy,10=birds,20=flag/deadfish/living/building/tree,30,40=?

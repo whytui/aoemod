@@ -23,7 +23,7 @@ void FixCityPlanFarmPlacement(AOE_STRUCTURES::STRUCT_UNIT_BASE *existingBuilding
 
 	// Set some default values
 	existingBldInfluenceZone = (int)unitDef_base->lineOfSight; // Default (from ROR code: use existing bld LOS)
-	int difficultyLevel = settings->difficultyLevel;
+	int difficultyLevel = settings->rgeGameOptions.difficultyLevel;
 	bool useEnhancedFeature = CUSTOMROR::crInfo.configInfo.cityPlanLikeValuesEnhancement;
 	bool isRelevantDropSite = (unitDef_base->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_GRANARY) ||
 		(unitDef_base->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FORUM); // Note: forager's storage sites are defined in empires.dat (Drop site in AGE3) => granary (68) and TC (109)
@@ -99,7 +99,7 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return; }
-	if (!CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId) || (settings->difficultyLevel >= GAME_DIFFICULTY_LEVEL::GDL_EASY)) {
+	if (!CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId) || (settings->rgeGameOptions.difficultyLevel >= GAME_DIFFICULTY_LEVEL::GDL_EASY)) {
 		return;
 	}
 
@@ -226,7 +226,7 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 
 		// 3) Is there enemy units around that could destroy the building before I build it ?
 		assert(infAI->unitElemList != NULL);
-		if (infAI->unitElemList && (settings->difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD)) {
+		if (infAI->unitElemList && (settings->rgeGameOptions.difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD)) {
 			// Hard/Hardest levels only
 			long int mapSizeX = infAI->XMapSize;
 			long int mapSizeY = infAI->YMapSize;

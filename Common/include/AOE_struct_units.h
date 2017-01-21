@@ -86,36 +86,126 @@ namespace AOE_STRUCTURES {
 	// A8 7D 54 00. Size=0x88 (constructor 0x04A64B0)
 	// 0x4CD2D0 = unitGroupElem.task(tacAI, mainAI, unitGrpTaskId, resetOrg, arg5=oCA)
 	// Methods:
-	// +0x38 = unit.setGraphics(pGraphics)
-	// +0x44 = unit.convertToPlayer(ptrPlayer)
-	// +x05C = unit.setStatus(newStatus). Contains a hack to revive relics/ruins because of relics in a dying transport boat.
+	// +0x0C = unit.draw(pDrawArea, arg2, arg3, ptrColorForMap?)
+	// +0x10 = void RGE_Static_Object::shadow_draw(TDrawArea *,short,short,unsigned char)
+	// +0x14 = void RGE_Static_Object::normal_draw(TDrawArea *,short,short)
+	// +0x18 = void RGE_Static_Object::draw_front_frame(TDrawArea *,short,short)
+	// +0x1C = void RGE_Static_Object::draw_back_frame(TDrawArea *,short,short)
+	// +0x20 = void RGE_Static_Object::draw_frame(TDrawArea *,short,short)
+	// +0x24 = unsigned char RGE_Static_Object::update(void)
+	// +0x28 = void RGE_Static_Object::check_damage_sprites(void)
+	// +0x2C = void RGE_Static_Object::rehook(void)
+	// +0x30 = void RGE_Static_Object::save(int)
+	// +0x34 = float unit.teleport(f_posY, f_posX, fPosZ)
+	// +0x38 = void RGE_Static_Object::new_sprite(RGE_Sprite *)
+	// +0x3C = void RGE_Static_Object::add_overlay_sprite(RGE_Sprite *,unsigned char)
+	// +0x40 = void RGE_Static_Object::remove_overlay_sprite(RGE_Sprite *)
+	// +0x44 = unit.changeOwner(pPlayer)
+	// +0x48 = void RGE_Static_Object::modify(float,unsigned char)
+	// +0x4C = void RGE_Static_Object::modify_delta(attribute, float_value) (add attribute)
+	// +0x50 = unitBuilding.applyMultEffect(f_value, attribute) (multiply by percentage)
+	// +0x54 = void RGE_Static_Object::transform(unitDef*)
+	// +0x58 = unit.createDedicatedUnitDef(unitDef*)
+	// +0x5C = unit.setStatus(newStatus). Contains a hack to revive relics/ruins because of relics in a dying transport boat.
+	// +0x68 = void RGE_Static_Object::destroy_obj(void) = set status=7
 	// +0x6C = unit.killAndHandleSacrifice(). Does not delete units if they have resources ! (trees, mines, etc)
-	// +0x74 = unit.CalcDamageFrom(attacksCount, pAttacksList, f_altitudeFactor, actorPlayer, actorUnit). Ex 0x426910.
-	// +0x84 = unit.setResourceValue?(f_value, isAdd, checkResourceCapacity)
-	// 0x+9C = unit.createMoveToAction(targetUnit, fposY, fposX, fposZ)
+	// +0x70 = unit.applyDamageFrom(attkCount, pAttkList, f_altitudeFactor, actorPlayer, actorUnit) (EDX+70)
+	// +0x74 = unit.calcDamageFrom(attacksCount, pAttacksList, f_altitudeFactor, actorPlayer, actorUnit). Calculates only !
+	// +0x78 = unit.rotate(long)
+	// +0x7C = unit.readyToAttack?()
+	// +0x80 = unit.setOwnedResource(resourceId, float_value)
+	// +0x84 = unit.setResourceValue(f_value, isAdd, checkResourceCapacity)
+	// +0x88 = unit.setHealAction(unitId, force)
+	// +0x8C = unsigned char RGE_Static_Object::heal(float) (heal ME)
+	// +0x98 = unit.executeRightClick(targetUnit, float posY, posX, posZ) (do_command)
+	// +0x9C = unit.createMoveToAction(targetUnitStruct, pos, pos, fposZ)
+	// +0xA0 = unit.work(targetUnit, float_posY, posX, posZ)
+	// +0xA4 = void unit.stop()
+	// +0xB4 = unit.setOrientation(float) "newAngle"
+	// +0xB8 = unit.spawnDeadUnit()
+	// +0xC0 = unit.setBeingWorkedOn(pUnit, short, unsigned char)
+	// +0xC4 = unit.releaseBeingWorkedOn(pUnit)
+	// +0xC8 = unit.isMoving()
+	// +0xCC = unit.getActionTarget()
+	// +0xD0 = ?? 
 	// +0xD8 = unit.addVisibilityTo(playerToImpact, arg2, distance?)
 	// +0xDC = unit.removeVisibilityFor(playerToImpact, arg2, distance?)
+	// +0xE8 = unit.isUnderAttack()
 	// +0xEC = unit.setIsUnderAttack(bool)
-	// +0xF0 = unit.GetAttackAltitudeFactor(targetUnit). WARNING: Returns in ST (FLD xxx), not EAX. Ex 0x4AEC00.
-	// +0xFC = unit.FLD_speed()
-	// +0x100 = unit.FLD_reloadTime1()
+	// +0xF0 = unit.GetAttackAltitudeFactor(targetUnit). WARNING: Returns in ST (FLD xxx), not EAX. "calcAttackModifier"
+	// +0xF4 = unit.currentMovementSpeed(). Will be 0 if unit is idle/not moving.
+	// +0xF8 = unit.getOrientationAngle() ?
+	// +0xFC = unit.FLD_getMaxSpeed()
+	// +0x100 = unit.FLD_reloadTime1() "rateOfFire"
 	// +0x104 = unit.calcDamageFrom(unit)?. WARNING: Returns in ST (FLD xxx), not EAX. Ex 0x427AC0.
+	// +0x108 = unit.GetAttackAmountInST()
 	// +0x10C = unit.FLD_maxRange(). Loads 0 for units that do not derive from type50 (attackable)
+	// +0x110 = unit.getMinRange()
+	// +0x114 = unit.IsTilePassable(fposY, fposX, boolMapPtrToUse)
+	// +0x118 = unsigned char RGE_Moving_Object::facetToNextWaypoint(void)const 
+	// +0x11C = unit.getActionTargetUnitId()
+	// +0x120 = unit.FLDActionPosY()
+	// +0x124 = unit.FLDActionPosX()
+	// +0x128 = unit.FLDActionPosZ()
+	// +0x140 = unit.logMessage(?)?
 	// +0x14C = unit.attackPosition(fposY, fposX, arg3, arg4)
 	// +0x150 = unit.setAttackAction?(targetUnitId, force)
-	// +0x154 = unit.??(fposY, fposX, arg3, arg4, force?) create action move ?
-	// +0x164 = unit.goGather(targetUnitId, force?) returns 1 on success
+	// +0x154 = unit.moveTo(fposY, fposX, arg3, arg4, force?) create action move ?
+	// +0x158 = unit.MoveTo(targetUnitId, maxRange, force)
+	// +0x15C = unit.MoveTo(targetUnitId, force?)
+	// +0x160 = ?? Does nothing and returns 0 for all classes ?
+	// +0x164 = unit.goGather(targetUnitId, force?) returns 1 on success. "hunt"
+	// +0x168 = unit.gather(targetUnitId, int). "gather" (without attack phase)
+	// +0x16C = unit.convert(unitId, force?)
+	// +0x170 = unit.repair(unitId, force)
+	// +0x174 = unit.build(unitId, force)
+	// +0x178 = unit.trade(unitId, force)
 	// +0x17C = unit.Explore(posY, posX, arg3)
+	// +0x180 = unit.garrisonEnter(posY, posX, arg3)
+	// +0x184 =? unit.transport(float posY, posX, posZ, force?)
+	// +0x188 =? unit.transport(float posY, posX, posZ, force?)
+	// +0x18C = unit.stopAction()
 	// +0x194 = unit.CanAttackUnit???(targetUnitId, fRange, arg3, arg4, arg5, arg6)
 	// +0x198 = CanMoveTo(posY,posX,posZ,fMaxRange,targetUnitId,pArg6_float,arg7_size?,targetPlayerId,someUnitClass) ? returns 1 if ok. someUnitClass=1B=walls
 	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
 	// +0x1A4 = DoMove?(posY,posX,posZ,fMaxRange,targetUnitId, pArg6_float,arg7_size,arg8,arg9,targetPlayerId,someUnitClass)
 	// +0x1CC = unit.xxx(pPosYXZ_target, fRange, targetUnitId) for intelligent attack ?
+	// +0x1D8 = bldUnit.readFromFile(internalFileId, global)
+	// +0x1DC = unit.init(unitDef, player)
+	// +0x1E0 = unit.createObjectList()
 	// +0x1E4 = unit.createSpriteList(ptrUnit)
-	// +0x208 = unit.assignAction(action). ex: 0x406490.
-	// +0x210 = unit.idIdle() to confirm. ex: 0x406610.
+	// +0x1E8 = unit.initialize(defUnit, player, pos, pos, arg5)
+	// +0x1EC = unit.stopMoving() just set currentSpeed to 0 ? Don't use ?
+	// +0x1F0 = unsigned char RGE_Moving_Object::turn_towards(RGE_Static_Object *,float,float)
+	// +0x1F4 = unitMovable.initialize(unitDef, player, fposY, fposX, fposZ) ?? For Type30+
+	// +0x1F8 = unit.work2(targetUnit, (float)posY, posX, posZ, force?).
+	// +0x1FC = unit.executeCommand(commandIndex) (set_task)
+	// +0x200 = void RGE_Action_Object::setTaskByTaskID(int) (executeCommand?)
+	// +0x204 = unit.setAction(action)
+	// +0x208 = unit.setOnlyAction(action). ex: 0x406490.
+	// +0x20C = unit.addEndAction(action)
+	// +0x210 = unit.isIdle() to confirm. ex: 0x406610.
+	// +0x214 = unit.findMatchingCommandDef(targetUnit, posY, posX, posZ)
+	// +0x218 = unit.initialize(defUnit, player, posY, posX, posZ, arg6) (type 40)
+	// +0x21C = unit.createActionList() for type40+
+	// +0x220 = unit.ApplyMyBlastAttack??(posY, posX, posZ, impactedUnit, arg5)
+	// +0x224 = unsigned char RGE_Combat_Object::attack(RGE_Static_Object *,RGE_Combat_Object *)
+	// +0x228 = unit.startAttack?(targetUnit, actorUnit?)
+	// +0x22C = unit.applyMyEffectiveAttack(targetUnit, actorUnit, posY, posX, posZ)
+	// +0x230 = unit.getArmorForMelee(pOutArmorValue, pOutDisplayedArmor)
+	// +0x234 = unit.getAttackValue(pOutAttackValue, pOutDisplayedAttack)
+	// +0x238 = unit.getRange(pMaxRange, pDisplayedRange)
+	// +0x23C = unit.getReloadTime(pReloadTime1, pReloadTime2)
+	// +0x240 = unit.initialize(...) (unittype 50)
 	// +0x244 = unit.kill(). ex: 0x4ED6D0. Not for all unit types !
+	// +0x248 = unit.getPierceArmor(pArmorValue, pDisplayedArmor)
+	// +0x24C = ?
+	// +0x250 = unit.IsHigherThanIncludingCliffs(targetUnit)
 	// +0x254 = unit.createUnitActivity(). ("combatUnit.initUnitAI") Only called for living units only (types 70/80). Does not free previous activity, if any !
+	// +0x258 = livingUnit.init(...)
+	// +0x25C = unit.handleResStorageWhenDeleted?
+	// +0x260 = unit.giveResStorageToOwner?()
+	// +0x264 [last] = bldUnit.init(...)
 	class STRUCT_UNIT_BASE {
 	public:
 		unsigned long int checksum;
@@ -123,7 +213,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNITDEF_BASE *unitDefinition; // +8. Unit definition (model). Living units can have a dedicated unit definition.
 		STRUCT_PLAYER *ptrStructPlayer;
 		// 0x10
-		STRUCT_GRAPHICS *pCurrentGraphics; // +10
+		STRUCT_GRAPHICS *pCurrentGraphics; // +10. Note: contains speed multiplier to handle altitude change !
 		unsigned long int unknown_014;
 		STRUCT_ACTIVE_SPRITE_LIST *spriteList; // ptr to struct 00 30 54 00 - size=0x0C Related to graphics
 		STRUCT_GAME_MAP_TILE_INFO *myTile; // +1C. To confirm. +5=byte=altitude&terrain bits, see TERRAIN_BYTE class
@@ -163,7 +253,7 @@ namespace AOE_STRUCTURES {
 		float unknown_080;
 		char unknown_084; // related to movement ? "isMapInfoUpToDateForThisUnit" ?
 		char unknown_085; // related to movement ? Previous value of +84 ?
-		char isBeingAttacked; // +86. For map blinking (+other treatments?)? This is constantly reset and re-computed in "unit.timerUpdate(?)" 0x426BF0 treatments.
+		char isBeingAttacked; // +86. For map blinking (+other treatments?). This is constantly reset and re-computed in "unit.timerUpdate(?)" 0x426BF0 treatments.
 		char unknown_087;
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00547DA8); }
@@ -282,10 +372,10 @@ namespace AOE_STRUCTURES {
 
 
 
-	// 14 2E 54 00 = flag (type20). Size=0x8C. constructor=0x0415020 - derives from type10
+	// 14 2E 54 00 = flag (type20). Size=0x8C. constructor=0x0415020 - derives from type10. "Animated object".
 	class STRUCT_UNIT_FLAG : public STRUCT_UNIT_BASE {
 	public:
-		float currentMovementSpeed; // +88
+		float currentMovementSpeed; // +88. Unit is moving <=> currentMovementSpeed>0
 
 		bool IsCheckSumValid() { return (this->checksum == 0x00542E14); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_FLAGS); }
@@ -389,7 +479,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_NEARBY_UNIT_INFO *myVisibilityToOtherPlayers_unsure[9]; // +18C. Provides visibility info from other player's point of view ?
 		// 0x1B0
 		STRUCT_MAP_VISIBILITY_INFO unknownVisibility_1B0; // Same "nature" object as +0x1E4. A mask for map visibility (visible for ...)?
-		float unknown_1B4; // Time to next xxx?
+		float unknown_1B4; // Time till unit can give a shot ? (attack) ?
 		char stillToBeDiscoveredByHuman; // +1B8. 1 for gaia units that have not been discovered yet (for gaia units capture system). Only non-AI players can capture gaia units.
 		char unknown_1B9[3]; // unused?
 

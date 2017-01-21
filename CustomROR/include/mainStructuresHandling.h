@@ -20,7 +20,7 @@ AOE_STRUCTURES::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr();
 AOE_STRUCTURES::STRUCT_GAME_SETTINGS* GetGameSettingsPtr();
 
 // Returns the UI main information object
-AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *GetUIMainInfoStruct();
+AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *GetUIMainInfoStruct();
 
 
 // Returns a pointer to current active UI (?)

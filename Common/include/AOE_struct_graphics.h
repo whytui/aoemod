@@ -69,7 +69,7 @@ namespace AOE_STRUCTURES
 		char unused_5D[3];
 		short int angleCount; // +60. Defines number of elements in attackSoundsArray (if attackSoundUsed=1). angleCount must be >=8 to allow valid movement. Otherwise, possible unit movement orientations will be limited !
 		short int unknown_62;
-		float speedMultiplier; // +64
+		float speedMultiplier; // +64. This is used to make unit walk faster when descending altitude, etc
 		float frameRate; // +68
 		float replayDelay; // +6C
 		char sequenceType; // +70

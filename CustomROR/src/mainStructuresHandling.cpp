@@ -20,7 +20,7 @@ STRUCT_GAME_SETTINGS* GetGameSettingsPtr() {
 
 
 // Returns the UI main information object
-AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *GetUIMainInfoStruct() {
+AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *GetUIMainInfoStruct() {
 	return ROR_pUIMainInfo;
 }
 
@@ -99,7 +99,7 @@ bool IsMultiplayer() {
 #pragma message("TODO: bugs in IsMultiplayer when running MP and then SP games")
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = (AOE_STRUCTURES::STRUCT_GAME_SETTINGS *)AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT;
 	if (settings == NULL) { return false; }
-	return (settings->isMultiplayer != 0);
+	return (settings->rgeGameOptions.isMultiPlayer != 0);
 }
 
 

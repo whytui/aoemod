@@ -36,7 +36,7 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
 
-	this->autoRebuildFarmConfig = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->isScenario || settings->isCampaign, settings->isDeathMatch);
+	this->autoRebuildFarmConfig = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch);
 	if (!this->autoRebuildFarmConfig) { return; } // ERROR !
 	char customOptionHumanPenaltyTextBuffer[12];
 	char customOptionGameSpeedFactorTextBuffer[12];

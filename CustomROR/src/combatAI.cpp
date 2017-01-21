@@ -211,7 +211,7 @@ bool ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity, long int
 		return true; // AI improvement is disabled: let ROR original code do its normal behavior.
 	}
 	// Do not improve in easy levels
-	if (GetGameSettingsPtr() && (GetGameSettingsPtr()->difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY)) { return true; }
+	if (GetGameSettingsPtr() && (GetGameSettingsPtr()->rgeGameOptions.difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY)) { return true; }
 
 	// A target is mine or allied
 	if (actorUnit->ptrStructPlayer->ptrDiplomacyStances[oldTargetUnit->ptrStructPlayer->playerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY) {

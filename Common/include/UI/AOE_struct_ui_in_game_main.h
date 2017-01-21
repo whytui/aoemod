@@ -80,8 +80,7 @@ namespace AOE_STRUCTURES
 		STRUCT_GAME_COLORED_INFO_LABEL *topLeftInfoLabel; // +514. The left part (game time + speed) of F11 infos.
 		STRUCT_GAME_COLORED_INFO_LABEL *victoryTimersInfoLabels[10]; // +518. cf 0x47F753,0x4839EA
 		STRUCT_UI_F11_POP_LABEL *populationInfoPanel; // 0x540. F11 "pop : x/y" zone ?
-		STRUCT_UI_IN_GAME_TEXT_ZONE *ingameErrorTextZone; // 0x544
-		char unknown_548[0x55C - 0x548];
+		STRUCT_UI_IN_GAME_TEXT_ZONE *ingameErrorTextZone[6]; // 0x544. 6 lines for orange bottom-left messages. Reverse order (index0=bottom)
 		STRUCT_UI_IN_GAME_TEXT_ZONE *ingameChatTextZone[8]; // 0x55C ; check count !
 		STRUCT_ANY_UI *unknown_57C; // 50 5D 54 00
 		STRUCT_UI_LABEL *lblCurrentAge; // +580. The current age indication on top (centered).

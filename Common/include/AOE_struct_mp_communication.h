@@ -80,10 +80,41 @@ namespace AOE_STRUCTURES {
 #pragma pack(pop)
 
 
-	// This structure does not have a checksum. It is referenced by 0x580DA8
+	// Size=0x7EC. Constructor=0x429330.
+	class STRUCT_COMM_SYNCHRONIZE {
+	public:
+		unsigned long int unknown_000; // Ptr to commHandler ?
+		unsigned long int unknown_004;
+		unsigned long int unknown_008;
+		long int stopIfSyncFail1; // +0C (see 0x41E0C0)
+		long int stopIfSyncFail2; // +10 (see 0x41E0C0)
+	};
+
+	// Size=0x240. Constructor=0x428990.
+	class STRUCT_COMM_SPEED  {
+	public:
+		char debugTextLatency[0x100];
+		char *unknown_info_100[6]; // +100. Some structure, starting with text. Unsure
+		long int enableSpeedControl; // +118. Set in 0x428BF0
+		unsigned long int unknown_11C; // +11C. Impacts lag when clicking ?! (multiplier for "turn" ?)
+		unsigned long int unknown_120; // +120. Related to +11C (previous or next value ?)
+		unsigned long int unknown_124;
+		unsigned long int unknown_128;
+		long int unknown_12C; // +12C. A divider for highest "unknown_148". Seen 0x0A (10)
+		long int unknown_130; // +130. Related to +12C. (previous or next value ?)
+		char unknown_134[0x148 - 0x134];
+		long int unknown_148[9]; // +148. Index is playerId-1. Latency, or something like that?
+		char unknown_16C[0x214 - 0x16C];
+		long int unknown_214; // +214. = 1+max(unknown_148)/unknown_12C, but the minimal value is 4+1 (0x4290D9)
+		char unknown_218[0x240 - 0x218];
+	};
+	static_assert(sizeof(STRUCT_COMM_SPEED) == 0x240, "STRUCT_COMM_SPEED size");
+
+
+	// This structure does not have a checksum. It is referenced by 0x580DA8.
 	// It is probably this structure that collects all 'common' information to be multiplayer-compatible (player names, etc).
 	// pointed by GameSettings+18C ?
-	// Size=0x1774. "TCommunication_Handler"
+	// Size=0x1774. Constructor=0x41E1C0. "TCommunication_Handler"
 	class STRUCT_MP_COMMUNICATION {
 	public:
 		unsigned long int unknown_0000;
@@ -145,8 +176,8 @@ namespace AOE_STRUCTURES {
 		char unknown_149C[0x14C4 - 0x149C];
 		long int *communicationQueue; // +14C4. Related to players communication. +114=ptr (player queue)? AddItem in 0x428090
 		char unknown_14C8[0x14D4 - 0x14C8];
-		unsigned long int *unknown_14D4_ptr; // Ptr to struct size=0x240, constructor=0x428990.
-		unsigned long int *unknown_14D8_ptr; // Ptr to struct size=0x7EC, constructor=0x429330. +0=backptr
+		STRUCT_COMM_SPEED *commSpeedControl; // +14D4.
+		STRUCT_COMM_SYNCHRONIZE *commSynchronize; // +14D8.
 		char unknown_14DC[0x14E0 - 0x14DC];
 		long int *unknown_14E0; // +14E0. Some class related to players communication.
 		char unknown_14E4[0x1528 - 0x14E4];

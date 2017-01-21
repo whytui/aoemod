@@ -266,7 +266,7 @@ namespace RPG_MODE {
 		assert(global && global->IsCheckSumValid());
 		if (!settings || !settings->IsCheckSumValid() || !global || !global->IsCheckSumValid()) { return; }
 		bool isHumanPlayer = (global->humanPlayerId == unit->ptrStructPlayer->playerId);
-		if ((settings->difficultyLevel >= 3) && (!isHumanPlayer)) {
+		if ((settings->rgeGameOptions.difficultyLevel >= 3) && (!isHumanPlayer)) {
 			return; // No upgrades for AI players in easy levels
 		}
 
@@ -398,7 +398,7 @@ namespace RPG_MODE {
 		assert(global && global->IsCheckSumValid());
 		if (!settings || !settings->IsCheckSumValid() || !global || !global->IsCheckSumValid()) { return false; }
 		bool isHumanPlayer = (global->humanPlayerId == unit->ptrStructPlayer->playerId);
-		if ((settings->difficultyLevel >= 3) && (!isHumanPlayer)) {
+		if ((settings->rgeGameOptions.difficultyLevel >= 3) && (!isHumanPlayer)) {
 			return false; // No epic units for AI players in easy levels
 		}
 

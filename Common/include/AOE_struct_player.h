@@ -150,24 +150,50 @@ namespace AOE_STRUCTURES {
 
 
 
-#define CHECKSUM_STRUCT_RGE_PLAYER 0x00544D18 // Base class
+#define CHECKSUM_STRUCT_RGE_PLAYER 0x00544D18 // Base class. Size=0x224 cf 0x51CF39?
 #define CHECKSUM_STRUCT_PLAYER 0x00549A44 // Normal player (non-gaia)
 #define CHECKSUM_STRUCT_GAIA_PLAYER 0x00549B80
-	// PLAYER. Constructor=0x4EFB00
+	// PLAYER. Constructor=0x4EFB00. RGE_Player ccor=0x45B6A0
 	// Standard player struct sizes are 0x85C (gaia) or 0x84C (non-gaia).
 	// If selected units features is installed, size is increased to host selected unit pointers at the end of the structure.
 	// Size will depend on how many maximum selected units it has been set.
-	// +0x30 = player.taskUnit?(playerId, unitId, activityId, targetUnitId, arg5, fposY, fposX, arg8, f_range, arg10, arg11, arg12?)
+	// +0x04 = player.setAliveStatus(aliveStatus)
+	// +0x18 = player.isEnemy(playerId)
+	// +0x1C = player.isAlliedOrMyself(playerId)
+	// +0x20 = player.isNeutralWith(playerId)
+	// +0x28 = player.setDiplomaticStance(playerId, newstance)
+	// +0x2C = player.prepareAI(...) ?
+	// +0x30 = player.sendAIOrderToUnit(playerId, unitId, activityId, targetUnitId, arg5, fposY, fposX, arg8, f_range, arg10, arg11, priorityRegardingDistance?)
+	// +0x34 = player.processAIOrder(playerId, unitId, actionId, arg4, arg5_byte, fposY, fposX, fposZ, f_maxRange?, arg10, arg11, arg12)
+	// +0x38 = 
+	// +0x80 = player.save?
+	// +0x84 = player.save2?
+	// +0x88 = player.save_info?
+	// +0x90 = player.setInitialScreenPos???(arg1, arg2, global, arg4, arg5, arg6)
+	// +0x94 = player.createUnit(DATID, posY, posX, posZ, arg5). Used to place initial units (cf objectPlacer), add unit in editor
 	// +0xA0 = player.CreateCmdMoveForSelectedUnits(arg1,posY,posX)
-	// +0xA8 = player.executeCommandOnSelectedUnits(targetUnit, f_posY, f_posX)
+	// +0xA4 = unsigned char RGE_Player::command_make_work(RGE_Static_Object *,float,float)
+	// +0xA8 = player.createGenericOrderCommandForSelectedUnits(targetUnit, f_posY, f_posX)
+	// +0xAC = player.createCommandStop()
+	// +0xB0 = player.command_place_object(short,float,float,float)
+	// +0xB4 = player.addResourceAsCommand(resourceId, floatValue)
+	// +0xB8 = player.createCmdGiveResource(arg1, arg2, arg3)
+	// +0xBC = player.createCmdFormation(formationId)
+	// +0xC0 = player.createCmdHoldPosition()
+	// +0xC4 = player.createCmdCreateGroup()
 	// +0xC8 = (unused) player.createCommandE ? => 0x45E760
 	// +0xCC = (unused) player.createCommandF ? => 0x45E790
-	// +0xD0 = player.createCommand9 ? => 0x45E7B0
+	// +0xD0 = player.createCmdRemoveGroup?(...) => 0x45E7B0 (cmd 9). Called on unit death?
 	// +0xD4 = player.createCommandB ? => 0x45E7D0
 	// +0xD8 = player.createCmdAddIntermediateMovementStep => 0x45E800
-	// +0xDC = player.AddUnitPtrInPlayerAndGlobalStructLists(unitStruct, isNotCreatable, isTempUnit) - get arg2
+	// +0xDC = player.AddUnit(unitStruct, isNotCreatable, isTempUnit) - get arg2
 	// +0xE0 = player.RemoveUnit(ptrUnit, isNotCreatable, isTempUnit, arg4=unit+50?)
+	// +0xE4 = player.logMessage(...)
 	// +0xE8 = player.notifyEvent(unitId, arg2, eventId, arg4, arg5, arg6). Eg. 0x4F3350. Args: see NotifyEvent struct.
+	// +0xEC = player.pseudoScoreTxtInfo?
+	// +0xF0 = player.createScoreHeader? (from file?)
+	// +0xF4 = player.createScoreHeader?
+	// +0xFC = player.startConstruction(villagerUnitId, DATID_bld, f_posY, f_posX, stratElemId)
 	class STRUCT_PLAYER {
 	public:
 		unsigned long int checksum; // 0x00549B80 or 0x00549A44 (normal player) or 0x00544D18 (parent class RGE_player)
@@ -253,6 +279,7 @@ namespace AOE_STRUCTURES {
 		// 1FF byte is NOT initialized, it is a bug but only minor (we this byte is reached, game resets all groups and this time it will be initialized... But will also clear +220 byte !)
 		// after 0x220, something different starts here (different initialization)?
 		unsigned long int unknown_220; // Warning, if not part of groupNumberIsUsed, then there is a bug, +220 byte can be reset when group max number count is reached
+		// End of RGE_Player class.
 		STRUCT_PLAYER_RESEARCH_INFO *ptrResearchesStruct; // +224.
 		unsigned long int unknown_228;
 		unsigned long int unknown_22C; // a counter (decreased...?)

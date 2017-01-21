@@ -98,38 +98,62 @@ namespace AOE_STRUCTURES
 	// In standard game, only living units have this object, but not all (lion_trained doesn't have one)
 	// However, unitActivity is destroyed in unit base class, so it is possible to add unit activity to ANY unit.
 	// Size=0x134 for ALL child classes. Constructor=0x40EDF0 (base). 0x4AFBE0=unit.createUnitActivity()
-	// [EDX+0x18]=activity.notifyCommander(NotifyEvent*). Eg. 0x410A20
-	// [EDX+0x1C]=activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). Eg. 0x4109F0 => calls [EDX+0x18]
-	// [EDX+0x20]=activity.prepareTmpMapInfo?(arg1) : collects info about nearby units (cf ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE)
-	// [EDX+0x2C]=activity.isXxx(internalId)? : true for non-interruptible activities? (repair, heal,convert,attack,defend/capture+0x264)
-	// [EDX+0x30]=activity.autoChooseTargetAtReach?(checkWallsIfCurrentTargetIsWall?, checkCalcPath?, arg3)
-	// [EDX+0x40]=activity.findGatherTarget?(targetAIType, arg2, arg3, arg4, arg5)
-	// [EDX+0x44]=activity.xxx(resourceGatherType, arg2)
-	// [EDX+0x44]=activity.explore??
-	// [EDX+0x50]=activity.isNotArtefact(ptrUnit)
-	// [EDX+0x58]=activity.stop(bool "use+28_task?))
-	// [EDX+0x5C]=activity.setAttackOrGatherTarget(targetUnitId, force)
-	// [EDX+0x60]=activity.setAttackTarget(targetUnitId)
-	// [EDX+0x64]=activity.setGatherWithAttackTarget(targetId, force) for hunters, lumberjacks...
-	// [EDX+0x68]=activity.setGatherNoAttackTarget(targetId, force) for miners, forager, farmers...
-	// [EDX+0x6C]=activity.convertTarget(unitId, force)
-	// [EDX+0x70]=activity.setHealAction?(targetUnitId, force) to confirm
-	// [EDX+0x74]=activity.setRepairAction(targetUnitId, force) ?
-	// [EDX+0x78]=activity.setBuildAction(targetUnitId, force)
-	// [EDX+0x88]=
-	// [EDX+0x90]=activity.xxx(f_posY, posX, posZ) (used by +2D4?)
-	// [EDX+0x9C]=activity.fleeToRandomPlace(arg1, arg2, arg3, force)??? Eg 0x412650
-	// [EDX+0xA4]=activity.fleeFromAttacker(force)
-	// [EDX+0xA8]=activity.related to 26F
-	// [EDX+0xB4]=activity.  transport load ?
-	// [EDX+0xB8]=activity. for 2D3
-	// [EDX+0xC0]=activity.GetResourceGatherType(AIType)
-	// [EDX+0xC4]=activity.canConvert(targetUnitId) ?
-	// [EDX+0xC8]=activity.activity.processOrder(orderEvent, arg2)
-	// [EDX+0xCC]=activity.ProcessNotify(notifyEvent) ? Returns some enum (3,4,5=do nothing special?,6=triggered an activity?..) "ProcessNotify" ? Ex:priest=0x4E5370, military=0x4E62D0, base=0x413890
-	// [EDX+0xD4]=activity.manageAutoAttackNearbyUnit(arg1)? ProcessIdle(agr1)? 0x4145A0 (base proc, used by many children), priest=0x4E54E0
-	// [EDX+0xD8]=activity.chooseTargetForCurrentTask()? ? ex. 0x414600.
-	// [EDX+0xE8]=when being attacked?
+	// +0x00 = activity.destructor(do_free)
+	// +0x04 = activity.save(internalFileId)
+	// +0x08 = activity.load(internalFileId)
+	// +0x0C = activityBase.GetOwnerPlayer()
+	// +0x10 = activity.order(?, taskId, targetUnitId, targetPlayerId, posY, posX, posZ, maxRange, arg9, arg10, arg11)
+	// +0x14 = activity.notify(actorUnitId, targetUnitId, internalId, targetUnitClass, currentHP, maxHP)
+	// +0x18 = activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). Eg. 0x410A20
+	// +0x1C = activity.notifyCommander(NotifyEvent*). Eg. 0x4109F0 => calls [EDX+0x18]
+	// +0x20 = activity.prepareTmpMapInfo?(arg1) : collects info about nearby units (cf ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE)
+	// +0x2C = activity.isRetryableOrder(internalId) : true for non-interruptible activities (repair, heal, convert, attack, defend/capture+0x264)
+	// +0x30 = activity.autoChooseTargetAtReach?(checkWallsIfCurrentTargetIsWall?, checkCalcPath?, arg3) BestUnitToAttack??
+	// ?int UnitAIModule::mostDangerousEnemy(float *)
+	// ?int UnitAIModule::weakestEnemy(float *)
+	// ?int UnitAIModule::closestAttacker(float *)
+	// ?int UnitAIModule::closestObject(int,int,int,float *)
+	// ?int UnitAIModule::closestUndiscoveredTile(int *,int *,int)
+	// +0x40 = activity.findGatherTarget?(targetAIType, arg2, arg3, arg4, arg5)
+	// +0x44 = activity.xxx(resourceGatherType, arg2)
+	// +0x48 = ?int UnitAIModule::closestUndiscoveredTile(int *,int *,int)
+	// +0x4C = activity.logDebug???
+	// +0x50 = activity.isNotArtefact(ptrUnit) "canAttackUnit" ?
+	// +0x54 = 
+	// +0x58 = activity.stop(bool "use+28_order?))
+	// +0x5C = activity.setAttackOrGatherAttackTarget(targetUnitId, force)
+	// +0x60 = activity.setAttackTarget(targetUnitId)
+	// +0x64 = activity.setGatherWithAttackTarget(targetId, force) for hunters, lumberjacks... ("huntObject")
+	// +0x68 = activity.setGatherNoAttackTarget(targetId, force) for miners, forager, farmers...
+	// +0x6C = activity.convertTarget(unitId, force)
+	// +0x70 = activity.healTarget(targetUnitId, force)
+	// +0x74 = activity.setRepairAction(targetUnitId, force)
+	// +0x78 = activity.setBuildAction(targetUnitId, force)
+	// +0x7C = activity.tradeWithObject(targetUnitId, force)
+	// +0x80 = activity.explore(int posY, int posX, posZ)
+	// +0x84 = activity.enterObject(targetUnitId, force)
+	// +0x88 = activity.transport(arg1, arg2, arg3)
+	// +0x90 = activity.moveTo(fposY, fposX, arg3, arg4, force)
+	// +0x94 = activity.moveTo(targetUnitId, f_maxRange, force?)
+	// +0x98 = activity.moveTo(int,int)
+	// +0x9C = activity.evasiveMoveTo(arg1, arg2, arg3, force). Eg 0x412650
+	// +0xA0 = activity.?(force)
+	// +0xA4 = activity.runAwayFromAttackers(force)
+	// +0xA8 = activity.followObject(targetUnitId, f_dist, force)
+	// +0xAC = activity.defendObject(targetUnitId, f_dist, force)
+	// +0xB0 = activity.defendPosition(float, float, float, force)
+	// +0xB4 = activity.  transport load ?
+	// +0xB8 = activity. for 2D3
+	// +0xBC = activity.isImportantObject(AIType)
+	// +0xC0 = activity.GetResourceGatherType(AIType)
+	// +0xC4 = activity.canConvert(targetUnitId) ?
+	// +0xC8 = activity.processOrder(orderEvent, arg2)
+	// +0xCC = activity.ProcessNotify(notifyEvent). Returns some enum (3,4,5=do nothing special?,6=triggered an activity?..) "ProcessNotify" ? Ex:priest=0x4E5370, military=0x4E62D0, base=0x413890
+	// +0xD4 = activity.ProcessIdle(arg1)? 0x4145A0 (base proc, used by many children), priest=0x4E54E0. For example, auto-targeting of idle units.
+	// +0xD8 = activity.ProcessMisc(). ex. 0x414600. Find target? Returns some enum
+	// +0xDC = activity.processRetryableOrder() [Last for all except priest activity]. Returns some enum
+	// PriestActivity+0xE0
+	// PriestActivity+0xE4 [Last]
 	class STRUCT_UNIT_ACTIVITY {
 	public:
 		unsigned long int checksum;
@@ -183,8 +207,8 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_11C;
 		// 0x120
 		float unitLineOfSight; // init 1. To confirm (read from unitDef.lineOfSight?)
-		long int *unknownListOfUnitAITypes; // +124. List of unit classes I can interact with ????? List size/content is hardcoded, depends on activity type.
-		long int playerNearbyUnitsunknownListOfUnitAITypesArraySize; // +128. number of elements in +124.
+		long int *listOfImportantUnitAITypes; // +124. List size/content is hardcoded, depends on activity type.
+		long int listOfImportantUnitAITypesArraySize; // +128. number of elements in +124.
 		STRUCT_UNIT_ACTIVITY_UNKNOWN_12C *unknown_12C; // +12C. Can be NULL.
 		// 0x130
 		char unknown_130; // A flag ? 410C00. 4E49C3: set when activity changed to hunt to defend against an animal?

@@ -81,11 +81,11 @@ void CustomPlayerAI::RunInitialStrategyAnalysis() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
 	assert(gameSettings && gameSettings->IsCheckSumValid());
 	if (!gameSettings || !gameSettings->IsCheckSumValid()) { return; }
-	if (gameSettings->difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD) {
+	if (gameSettings->rgeGameOptions.difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD) {
 		// Hard/hardest: Search for techs that can be added to strategy and would improve my military units
 		STRATEGY::AddUsefulMilitaryTechsToStrategy(this->myPlayer);
 	}
-	if (gameSettings->difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_EASY) {
+	if (gameSettings->rgeGameOptions.difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_EASY) {
 		// All levels except easiest
 		STRATEGY::AdaptStrategyToMaxPopulation(this->myPlayer);
 	}
@@ -127,7 +127,7 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	// Exit in MP games because some treatments are not compatible
-	if (!settings || !settings->IsCheckSumValid() || !settings->isSinglePlayer) { return; }
+	if (!settings || !settings->IsCheckSumValid() || !settings->rgeGameOptions.isSinglePlayer) { return; }
 
 	if (!enemyPlayer) { return; }
 	long int enemyPlayerId = enemyPlayer->playerId;

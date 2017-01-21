@@ -35,21 +35,22 @@ namespace AOE_STRUCTURES {
 	};
 
 
+#define CHECKSUM_SCORE_HEADER_BASE 0x0054A60C // Constructor=0x50D380, 0x50D6D0
 #define CHECKSUM_SCORE_HEADER 0x0054A3E4
-	// Unknown size
+	// Size=0x20 (both). Constructor=0x5084C0, 0x5084F0.
 	class STRUCT_SCORE_HEADER {
 	public:
 		unsigned long int checksum; // E4 A3 54 00
 		unsigned long int unknown_04; // a pointer
 		unsigned long int unknown_08; // a number ?
-		STRUCT_PLAYER *player;
-		// 0x10
+		STRUCT_PLAYER *player; // +0C.
 		unsigned long int unknown_10;
 		STRUCT_SCORE_ELEM *firstScoreElement;
 		unsigned long int unknown_18;
 		long int currentTotalScore;
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_SCORE_HEADER; }
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_SCORE_HEADER) || (this->checksum == CHECKSUM_SCORE_HEADER_BASE); }
 	};
+	static_assert(sizeof(STRUCT_SCORE_HEADER) == 0x20, "STRUCT_SCORE_HEADER size");
 
 }

@@ -32,8 +32,9 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_40C;
 		// 0x410
 		long int hInstance; // +410 ; GetModuleHandle(NULL)
-		char unknown_414[0x518 - 0x414];
-		char unknown_518[0x890 - 0x518]; // Command-line arguments string ?
+		unsigned long int unknown_414;
+		char unknown_418_registry[0x100]; // +418. Registry path ?
+		char unknown_518[0x890 - 0x518]; // +518. Command-line arguments string ?
 		// 0x890
 		long int noStartupFlag; // NOSTARTUP command line flag
 		unsigned long int unknown_894;

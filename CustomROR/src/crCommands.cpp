@@ -411,7 +411,7 @@ bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
 		short int id = atoi(aid);
 		if ((id == 0) && (*aid != '0')) { id = -1; }
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = GetUnitDefStruct(player, id);
-		if (player && player->IsCheckSumValid() && unitDef && unitDef->IsCheckSumValidForAUnitClass() && gameSettings->isSinglePlayer) {
+		if (player && player->IsCheckSumValid() && unitDef && unitDef->IsCheckSumValidForAUnitClass() && gameSettings->rgeGameOptions.isSinglePlayer) {
 			gameSettings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_EDITOR_SET_UNIT_LOCATION;
 			gameSettings->editorUserSelectedUnitDefId = id;
 			sprintf_s(outputBuffer, "Add %s. Right-click to quit add mode.", unitDef->ptrUnitName);
@@ -994,12 +994,12 @@ void CustomRORCommand::OnGameStart() {
 
 	// Fix IsScenario flag to correct value (not set when a game is loaded)
 	if (settings->isSavedGame) {
-		settings->isScenario = 0; // Default: consider it is not a scenario
+		settings->rgeGameOptions.isScenario = 0; // Default: consider it is not a scenario
 		// Guess if it is a scenario from scenario information
 		if (scInfo && scInfo->IsCheckSumValid()) {
 			if (scInfo->scenarioFileName[0] != 0) {
 				// scenarioFileName is reliable: it is always correctly set: when starting a new RM/DM/scenario, loading a saved game, etc
-				settings->isScenario = 1;
+				settings->rgeGameOptions.isScenario = 1;
 			}
 
 			// Fix isDeathMatch flag in saved games
@@ -1101,7 +1101,7 @@ void CustomRORCommand::OnGameStart() {
 	}
 
 	// REQUIRES game UI to be active
-	if (!CUSTOMROR::crInfo.configInfo.hideWelcomeMessage && !settings->isMultiplayer) {
+	if (!CUSTOMROR::crInfo.configInfo.hideWelcomeMessage && !settings->rgeGameOptions.isMultiPlayer) {
 		std::string msg = localizationHandler.GetTranslation(CRLANG_ID_WELCOME1, "Welcome. CustomROR");
 		msg += " "; 
 		msg += VER_FILE_VERSION_STR;
@@ -1111,16 +1111,16 @@ void CustomRORCommand::OnGameStart() {
 	}
 
 	// Show automatically "F11" information at game startup
-	if (!settings->isMultiplayer) {
+	if (!settings->rgeGameOptions.isMultiPlayer) {
 		this->ShowF11_zone();
 	}
 
 	// Force shared exploration => always ON (if config says so and not in MP)
 	// Does not impact scenarios
-	if (!settings->isCampaign && !settings->isScenario) {
+	if (!settings->isCampaign && !settings->rgeGameOptions.isScenario) {
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 		if (CUSTOMROR::crInfo.configInfo.allyExplorationIsAlwaysShared &&
-			!settings->isMultiplayer && global && global->IsCheckSumValid()) {
+			!settings->rgeGameOptions.isMultiPlayer && global && global->IsCheckSumValid()) {
 			for (int i = 1; i < global->playerTotalCount; i++) {
 				SetPlayerSharedExploration_safe(i);
 				//ApplyResearchForPlayer(player, CST_RSID_WRITING);
@@ -1143,7 +1143,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameSettings() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
-	if (settings->isCampaign || settings->isSavedGame || settings->isScenario) {
+	if (settings->isCampaign || settings->isSavedGame || settings->rgeGameOptions.isScenario) {
 		return false;
 	}
 
@@ -1175,11 +1175,11 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 	if (!global || !global->IsCheckSumValid()) { return false; }
 	
 	// Check game type : allow only random map & deathmatch
-	if (settings->isCampaign || settings->isSavedGame || settings->isScenario) {
+	if (settings->isCampaign || settings->isSavedGame || settings->rgeGameOptions.isScenario) {
 		return false;
 	}
 #pragma message("Customization on random game start: MP not supported")
-	if (settings->isMultiplayer) {
+	if (settings->rgeGameOptions.isMultiPlayer) {
 		return false;
 	}
 	bool isDM = (settings->isDeathMatch != 0);
@@ -1201,7 +1201,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 			initialResources[i] = CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[choice][i];
 		}
 	}
-	for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
+	for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		for (int rt = 0; rt < 4; rt++) {
 			player->SetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES) rt, (float)initialResources[rt]);
@@ -1209,7 +1209,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 	}
 
 	// SN Numbers (update both strategyAI and tacAI)
-	for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
+	for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (player && player->IsCheckSumValid() && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
 			AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
@@ -1258,13 +1258,13 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 
 	// Initial diplomacy (default=enemy, not neutral) - only if enabled in config
 	if (CUSTOMROR::crInfo.configInfo.noNeutralInitialDiplomacy) {
-		for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
+		for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
 			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 			if (player && player->IsCheckSumValid()) {
-				if (settings->teamNumbers[playerId - 1] == 1) { // Note: teamNumber 1 means "no team"
+				if (settings->rgeGameOptions.teamNumber[playerId - 1] == 1) { // Note: teamNumber 1 means "no team"
 					// No team: set default diplomacy (game default is neutral, can be set to enemy to avoid all players being against human)
 					assert(player->ptrDiplomacyStances != NULL);
-					for (int otherPlayerId = 1; otherPlayerId <= settings->playerCount; otherPlayerId++) {
+					for (int otherPlayerId = 1; otherPlayerId <= settings->rgeGameOptions.playerCountWithoutGaia; otherPlayerId++) {
 						if ((otherPlayerId != playerId) && player->ptrDiplomacyStances) {
 							player->ptrDiplomacyStances[otherPlayerId] = AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY;
 							player->diplomacyVSPlayers[otherPlayerId] = AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY;
@@ -1285,7 +1285,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 		if (settings->isDeathMatch) {
 			traceMessageHandler.WriteMessage("Strategy generation for deathmatch games is not supported yet");
 		} else {
-			for (long int playerId = 1; playerId <= settings->playerCount; playerId++) {
+			for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
 				AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 				if (player && player->IsCheckSumValid()) {
 					STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(&CUSTOMROR::crInfo, player);
@@ -1330,9 +1330,9 @@ bool CustomRORCommand::IsRpgModeEnabled() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
-	if (!settings->isSinglePlayer) { return false; } // Disable in MP
+	if (!settings->rgeGameOptions.isSinglePlayer) { return false; } // Disable in MP
 	// Note: to work well on saved games, this requires customROR's fix on game's IsScenario information.
-	bool isScenario = (settings->isCampaign || settings->isScenario);
+	bool isScenario = (settings->isCampaign || settings->rgeGameOptions.isScenario);
 	if (isScenario) {
 		return CUSTOMROR::crInfo.configInfo.enableRPGModeInScenario;
 	} else {
@@ -1620,7 +1620,7 @@ bool CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 	if (player->aliveStatus != 0) {
 		return false; // Do not update players that are not playing anymore.
 	}
-	if (gameSettings->isMultiplayer || (!IsImproveAIEnabled(player->playerId))) { return true; }
+	if (gameSettings->rgeGameOptions.isMultiPlayer || (!IsImproveAIEnabled(player->playerId))) { return true; }
 
 
 	// Only for the FIRST tactical update (last one's time is 0): one-shot initializations
@@ -2154,7 +2154,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 		if (isInGame && isBuilding && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() &&
 			// Not fixed in easiest... But as it is a technical fix, we apply it even if "improve AI" is not enabled.
 			// Note that it has a strong (positive) impact on AI farming + the fact that granary/SP construction is no longer blocked for no valid reason
-			settings->difficultyLevel < AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASIEST) {
+			settings->rgeGameOptions.difficultyLevel < AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASIEST) {
 			AOE_STRUCTURES::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
 			assert(infAI->IsCheckSumValid());
 			if ((infAI->buildHistoryArray != NULL) && (infAI->buildHistoryArraySize > 0)) {
@@ -2206,7 +2206,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 	}
 
 	// Auto rebuild farms
-	bool enableAutoRebuildFarms = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->isScenario || settings->isCampaign, settings->isDeathMatch)->enableAutoRebuildFarms;
+	bool enableAutoRebuildFarms = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch)->enableAutoRebuildFarms;
 	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && isBuilding && enableAutoRebuildFarms) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 		// If this is a farm, and if I have "farm rebuild info" for this position (not in "not rebuild" mode), then trigger a rebuild.
@@ -2227,7 +2227,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 
 	// Triggers
 	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && !isTempUnit &&
-		!settings->isMultiplayer && (unit->unitInstanceId >= 0)) {
+		!settings->rgeGameOptions.isMultiPlayer && (unit->unitInstanceId >= 0)) {
 		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
 		evtInfo.unitId = unit->unitInstanceId;
 		this->ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_UNIT_LOSS, evtInfo);
@@ -3158,7 +3158,7 @@ void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
 	// Is feature enabled ?
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
-	CUSTOMROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->isScenario || settings->isCampaign, settings->isDeathMatch);
+	CUSTOMROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch);
 	if (!autoRebuildFarmConfig->enableAutoRebuildFarms) { return; }
 
 	// Check auto-rebuild farms conditions (parameters)
@@ -3213,7 +3213,7 @@ void CustomRORCommand::DisableWaterUnitsIfNeeded() {
 	assert(settings != NULL);
 	assert(settings->IsCheckSumValid());
 	if (!settings) { return; } // Should never happen
-	if (settings->isCampaign || settings->isScenario || settings->isSavedGame || settings->isMultiplayer) { return; }
+	if (settings->isCampaign || settings->rgeGameOptions.isScenario || settings->isSavedGame || settings->rgeGameOptions.isMultiPlayer) { return; }
 
 	if (!IsDockRelevantForMap(settings->mapTypeChoice)) {
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
@@ -3235,7 +3235,7 @@ void CustomRORCommand::DisableWalls() {
 	assert(settings != NULL);
 	assert(settings->IsCheckSumValid());
 	if (!settings) { return; } // Should never happen
-	if (settings->isCampaign || settings->isScenario || settings->isSavedGame || settings->isMultiplayer) { return; }
+	if (settings->isCampaign || settings->rgeGameOptions.isScenario || settings->isSavedGame || settings->rgeGameOptions.isMultiPlayer) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid() || !global->ptrPlayerStructPtrTable) { return; }
 	traceMessageHandler.WriteMessageNoNotification(std::string("Disable walls for all players"));
@@ -4152,7 +4152,7 @@ void CustomRORCommand::ApplyScenarioSpecificPlayerStartingAge(long int playerId)
 	assert(player && player->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid()) { return; }
 
-	if (settings->isScenario != 0) {
+	if (settings->rgeGameOptions.isScenario != 0) {
 		AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = global->scenarioInformation;
 		assert(scInfo && scInfo->IsCheckSumValid());
 		long int startingAge = scInfo->playersStartingAge[playerId - 1]; // Warning: index is playerId - 1
@@ -4315,7 +4315,7 @@ void CustomRORCommand::ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES 
 	// Make sure we never execute trigger when game is not running
 	// Also disabled in multiplayer games.
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) || settings->isMultiplayer) {
+	if (!settings || (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) || settings->rgeGameOptions.isMultiPlayer) {
 		return;
 	}
 
@@ -4324,7 +4324,7 @@ void CustomRORCommand::ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES 
 		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 		assert(settings);
 		if (!settings) { return; }
-		evtInfo.difficultyLevel = settings->difficultyLevel;
+		evtInfo.difficultyLevel = settings->rgeGameOptions.difficultyLevel;
 	}
 	// Make sure current game time is always set
 	if (evtInfo.currentGameTime_s < 0) {

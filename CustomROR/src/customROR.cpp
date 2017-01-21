@@ -2648,8 +2648,8 @@ void CustomRORInstance::ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_valu
 // From 0x451DCA
 // This is executed when a combobox' list loses focus (and hides), ONLY when the combobox has a "previous" capture UI object (unsure about exact role).
 void CustomRORInstance::OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *REG_values) {
-	ror_api_assert(REG_values, REG_values->EDI_val == ADDR_VAR_UI_MAIN_INFO);
-	//AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *uiMainInfo = (AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *)REG_values->EDI_val;
+	ror_api_assert(REG_values, REG_values->EDI_val == ADDR_VAR_PANEL_SYSTEM);
+	//AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *uiMainInfo = (AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *)REG_values->EDI_val;
 	// EDI + 8 should point to combobox
 	// EDI + C should point to current (main) screen.
 	AOE_STRUCTURES::STRUCT_ANY_UI *objToGiveCapture = (AOE_STRUCTURES::STRUCT_ANY_UI *)REG_values->ESI_val;

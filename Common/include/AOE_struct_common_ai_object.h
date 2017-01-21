@@ -25,7 +25,7 @@ namespace AOE_STRUCTURES {
 		char playerName[0x40]; // size=64
 		unsigned long int unknown_08C; // (3 bytes + 1 unused?)
 		// 0x90
-		char unknown_080[0x10];
+		char unknown_090[0x10];
 		// 0xA0
 		char unknown_0A0[0x40];
 		// 0xE0

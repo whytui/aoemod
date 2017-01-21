@@ -65,7 +65,7 @@ namespace AOE_STRUCTURES {
 #endif
 #ifdef GAMEVERSION_ROR10c
 #define CHECKSUM_GAME_GLOBAL1 0x0054A4F8 // Tribe
-#define CHECKSUM_GAME_GLOBAL2 0x0054A954 // RGE
+#define CHECKSUM_GAME_GLOBAL2 0x0054A954 // RGE (size=0x104)
 #endif
 	// Size = 0x124 - F8 A4 54 00 (Tribe_World). Parent=54 A9 54 00. "RGE_Game_World" in source code.
 	// Constructor 0x509AE0 (parent 0x51B140)
@@ -204,6 +204,7 @@ namespace AOE_STRUCTURES {
 		long int currentlyManagedAIPlayer; // +FC. A player id. "currentUpdateComputerPlayer"
 		// +0x100
 		unsigned long int unknown_100_difficultyLevel; // NOT always diff. level. See in game settings struct.
+		// Base class ends here
 		STRUCT_RESEARCH_DEF_INFO *researchDefInfo; // +104.
 		GAME_GLOBAL_GENERAL_VICTORY_CONDITION generalVictoryCondition; // +108. 0=standard, 1=conquest...
 		long int relicsCount;

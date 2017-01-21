@@ -12,7 +12,7 @@ namespace AOE_STRUCTURES {
 		res += "DM=";
 		res += std::to_string(obj->isDeathMatch);
 		res += " isScn=";
-		res += std::to_string(obj->isScenario);
+		res += std::to_string(obj->rgeGameOptions.isScenario);
 		res += " savedGame=";
 		res += std::to_string(obj->isSavedGame);
 		res += "\nCOMM: ";

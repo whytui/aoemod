@@ -17,7 +17,7 @@ void UnitGroupAI::ResetAllInfo() {
 	this->gameDiffLevel = GAME_DIFFICULTY_LEVEL::GDL_MEDIUM;
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (settings && settings->IsCheckSumValid()) {
-		this->gameDiffLevel = settings->difficultyLevel;
+		this->gameDiffLevel = settings->rgeGameOptions.difficultyLevel;
 	}
 }
 

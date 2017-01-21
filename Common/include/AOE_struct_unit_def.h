@@ -39,6 +39,7 @@ namespace AOE_STRUCTURES
 
 
 	// Size = 0x4C. "Task". Definition of unit commands (cf empires.dat)
+	// Constructor = 0x4E73B0.
 	// ReadFromFile=0x4E74F0
 	class STRUCT_UNIT_COMMAND_DEF {
 	public:
@@ -89,6 +90,10 @@ namespace AOE_STRUCTURES
 	// Parent class checksum=E4 98 54 00, for birds/type50/projectiles
 	// Child class checksum=AC 99 54 00 for living/building
 	// 0x4E7B60=unitCommandHeader.readFromFile(fileId, arg2, arg3)
+	// +0x00 = unitDefCmdHeader.createUnitDefCmd(arg1, arg2)
+	// +0x04 = unitDefCmdHeader.FindRelevantCommand(ptrActorUnit, ptrTargetUnit, f_posY, f_posX, posZ)
+	// +0x08 = unitDefCmdHeader.IsCommandConvertOrAttack(commandInfo)
+	// +0x0C = unitDefCmdHeader.xx(unitCmdDef, actorUnit, targetUnit, arg4) [Last]
 	class STRUCT_UNIT_COMMAND_DEF_HEADER {
 	public:
 		unsigned long int checksum; // AC 99 54 00 + E4 98 54 00 (parent class)
@@ -111,7 +116,22 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_DAMAGE_GRAPHIC) == 0x8, "STRUCT_DAMAGE_GRAPHIC size");
 
-	// 34 45 54 00 = Eye candy (type10) - size=0xB8 - Constructor 0x441040
+
+	// 34 45 54 00 = Eye candy (type10) - size=0xB8 - Constructor 0x441040, 0x441070, 0x440FF0
+	// +0x00 = unit.destructor(do_free)
+	// +0x04 = unitDef.copyObj(unitDef)?
+	// +0x08 = unitDef.applySetEffect(f_value, attribute)
+	// +0x0C = unitDef.applyAddEffect(f_value, attribute)
+	// +0x10 = unitDef.applyMultEffect(f_value, attribute)
+	// +0x14 = unitDef.save(internalFileId)
+	// +0x18 = unitDef.createUnit(player, posY, posX, posZ)
+	// +0x1C = unitDef.createCopy()
+	// +0x20 = unitDef.GetErrorForUnitCreationAtLocation(player, posY, posX, pOutPosInfo, checkVisibility, hillMode, arg7, editorMode, checkAirModeAndHPBar, checkConflictingUnits) "checkPlacement"
+	// +0x24 = unsigned char RGE_Master_Static_Object::alignment(float &,float &, global, unsigned char)
+	// +0x28 = ? unitDef.getDamageValueFromOtherUnitDef(unitDef)
+	// +0x2C = unitDef.playAttackSound()
+	// +0x30 = unitDef.playMoveSound?
+	// +0x34 = unitDef.draw(TDrawArea *,short,short,RGE_Color_Table *,long,long) [last for base, flag, movable, tree]
 	class STRUCT_UNITDEF_BASE {
 	public:
 		unsigned long int checksum;
@@ -234,7 +254,7 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_BASE) == 0xB8, "STRUCT_UNITDEF_BASE size");
 
-	// 0C 44 54 00 = flag (type20) - size=0xBC - Constructor 0x43E9B0
+	// 0C 44 54 00 = flag (type20) - size=0xBC - Constructor 0x43E9B0. Max method=+0x34. "MasterAnimatedObject".
 	class STRUCT_UNITDEF_FLAG : public STRUCT_UNITDEF_BASE {
 	public:
 		float speed; // 0xB8. Unit movement speed.
@@ -244,7 +264,8 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_FLAG) == 0xBC, "STRUCT_UNITDEF_FLAG size");
 
-	// 84 44 54 00 = Doppleganger - size 0xBC. Constructor(createCopy)=0x4402C0
+	// 84 44 54 00 = Doppleganger - size 0xBC. Constructor(createCopy)=0x4402C0. Max method=+0x38
+	// +0x38 = unitDefDoppleganger.xxx(player, f_pos, pos, pos)? create unit?
 	class STRUCT_UNITDEF_DOPPLEGANGER : public STRUCT_UNITDEF_FLAG {
 	public:
 		// 0xBC - no additional fields ?
@@ -254,7 +275,7 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_DOPPLEGANGER) == 0xBC, "STRUCT_UNITDEF_DOPPLEGANGER size");
 
-	// FC 44 54 00 = Movable (type30 - dead/fish in AGE3) - size=0xD8 - Constructor 0x440990
+	// FC 44 54 00 = Movable (type30 - dead/fish in AGE3) - size=0xD8 - Constructor 0x440990. Max method=+0x34. "MasterMovingObject"
 	class STRUCT_UNITDEF_MOVABLE : public STRUCT_UNITDEF_FLAG {
 	public:
 		STRUCT_GRAPHICS *ptrWalkingGraphic1;
@@ -279,8 +300,9 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_MOVABLE) == 0xD8, "STRUCT_UNITDEF_MOVABLE size");
 
-	// CC 43 54 00 = Commandable (type40 - bird in AGE3) - size=0xFC - Constructor 0x43E090.
-	// Deserialize=0x43E230 unitDef.ReadFromFile_40(internalFileRef, ptrGraphicsList, ptrSoundsList)
+	// CC 43 54 00 = Commandable (type40 - bird in AGE3) - size=0xFC - Constructor 0x43E090. "MasterActionObject"
+	// Deserialize=0x43E230 unitDef.ReadFromFile_40(internalFileRef, ptrGraphicsList, ptrSoundsList). Max method=+0x38
+	// +0x38 = unitDef.GetNewDefUnitCommandHeader() ("createTaskList") [Last for commandable, attackable, projectile, trainable]
 	class STRUCT_UNITDEF_COMMANDABLE : public STRUCT_UNITDEF_MOVABLE {
 	public:
 		STRUCT_UNIT_COMMAND_DEF_HEADER *ptrUnitCommandHeader; // +D8
@@ -310,7 +332,8 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_UNITDEF_COMMANDABLE) == 0xFC, "STRUCT_UNITDEF_COMMANDABLE size");
 
 
-	// 44 44 54 00 = type50 (type50) - size=0x148 - Constructor 0x43EE10(readFromFile)
+	// 44 44 54 00 = type50 (type50) - size=0x148 - Constructor 0x43EE10(readFromFile). Max method=+0x38
+	// "RGE_MasterCombatObject"
 	class STRUCT_UNITDEF_ATTACKABLE : public STRUCT_UNITDEF_COMMANDABLE {
 	public:
 		STRUCT_GRAPHICS *ptrAttackGraphic; // +FC.
@@ -325,14 +348,13 @@ namespace AOE_STRUCTURES
 		// 0x110
 		TERRAIN_RESTRICTION armorTerrainRestriction; // Provide a multiplier for each terrain
 		short int unknown_112;
-		float maxRange; // +114. Total range (8 if 7+1 is displayed). displayed range is the number before the "+" (7 in the example).
+		float maxRange; // +114. Total range (8 if 7+1 is displayed). displayed range is the number before the "+" (7 in the example). "Weapon range"
 		float blastRadius; // +118. Distance blast damage applies. 0 means there is no blast damage.
 		AOE_CONST_FUNC::BLAST_LEVELS blastLevel; // +11C. PLEASE always check if blastRadius>0. A lot of units have "wrongly" blastLevel=0
 		char unknown_11D;
 		char unknown_11E;
 		char unknown_11F;
-		// 0x120
-		float reloadTime1;
+		float reloadTime1; // +0x120. Rate of fire.
 		short int projectileUnitId; // +124. Can be used to determine if a military unit is melee (<0) or ranged (>=0). Warning: priests would be "melee" with such criteria.
 		short int accuracyPercent;
 		char towerMode; // +128
@@ -357,7 +379,7 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_UNITDEF_ATTACKABLE) == 0x148, "STRUCT_UNITDEF_ATTACKABLE size");
 
 
-	// C0 44 54 00 = Projectile (type60) - size=0x154 - Constructor 0x4403D0
+	// C0 44 54 00 = Projectile (type60) - size=0x154 - Constructor 0x4403D0. Max method=+0x38
 	class STRUCT_UNITDEF_PROJECTILE : public STRUCT_UNITDEF_ATTACKABLE {
 	public:
 		PROJECTILE_TRAJECTORY_TYPE trajectoryType; // +148. Type of trajectory. Almost all projectiles have default one. Note: if graphics do not hit target, shooting fails.
@@ -376,7 +398,7 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_UNITDEF_PROJECTILE) == 0x154, "STRUCT_UNITDEF_PROJECTILE size");
 
 
-	// 70 99 54 00 = Trainable (type70 - living in AGE3) - size=0x164. Constructor = 0x4ECA90
+	// 70 99 54 00 = Trainable (type70 - living in AGE3) - size=0x164. Constructor = 0x4ECA90. Max method=+0x38. "TribeMasterCombatObject"
 	class STRUCT_UNITDEF_TRAINABLE : public STRUCT_UNITDEF_ATTACKABLE {
 	public:
 		STRUCT_COST costs[3]; // +148, 3*6 bytes (3 words each)
@@ -395,7 +417,8 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_UNITDEF_TRAINABLE) == 0x164, "STRUCT_UNITDEF_TRAINABLE size");
 
 
-	// 30 99 54 00 = building (type80) - size=0x17C. Constructor = 0x4EC180
+	// 30 99 54 00 = building (type80) - size=0x17C. Constructor = 0x4EC180. Max method=+0x3C
+	// +0x3C = unitDefBld.createUnit(arg1, arg2)
 	class STRUCT_UNITDEF_BUILDING : public STRUCT_UNITDEF_TRAINABLE {
 	public:
 		STRUCT_DAT_SOUND *ptrConstructionSound; // +164.

@@ -154,7 +154,7 @@ namespace STRATEGY {
 			this->maxPopulation = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_POPULATION_LIMIT);
 			// Set max population from config. Not necessary if resources have already been valued (which is the case with current implementation)
 			assert(this->crInfo != NULL);
-			if (this->crInfo && this->settings && (this->settings->isSinglePlayer)) {
+			if (this->crInfo && this->settings && (this->settings->rgeGameOptions.isSinglePlayer)) {
 				this->maxPopulation = this->crInfo->configInfo.singlePlayerMaxPopulation;
 			}
 		}

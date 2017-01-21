@@ -458,14 +458,14 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_MOVE = 0x262, // 
 		CST_ATI_FOLLOW_OBJECT = 0x264,
 		CST_ATI_GATHER_ATTACK = 0x265, // woodcutter, hunter, fisherman (gatherer that have an "attack" phase - not really true for fish, but anyway !)
-		CST_ATI_UNKNOWN_266 = 0x266, // regroup in unit group ??? Related to SNAttackGroupGatherSpacing in 4CD551? Transport object ?
+		CST_ATI_UNKNOWN_266 = 0x266, // regroup in unit group ??? Related to SNAttackGroupGatherSpacing in 4CD551? Group&wait for transport ?
 		CST_ATI_TRADE_WITH_OBJECT = 0x267,
 		CST_ATI_UNKNOWN_268 = 0x268, // some movement ?
-		CST_ATI_GO_TO_TRANSPORT = 0x269, // Unsure
+		CST_ATI_ENTER_TRANSPORT = 0x269, // Cf 0x412350.
 		CST_ATI_REPAIR = 0x26A,
 		CST_ATI_HUMAN_TRAIN_UNIT = 0x26B, // only when triggered by human ?
 		CST_ATI_RESEARCH_TECH = 0x26C, // includes train unit when triggered by AI.
-		CST_ATI_UNLOAD = 0x26D, // unsure. Includes move+unload. Such unit can't be used as actor in strategy element.
+		CST_ATI_TRANSPORT = 0x26D, // unsure. Includes move+unload. Such unit can't be used as actor in strategy element.
 		CST_ATI_UNKNOWN_26E = 0x26E, // load ? see 0x412DF0
 		CST_ATI_UNKNOWN_26F = 0x26F, // see 0x412E60
 		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
@@ -522,7 +522,40 @@ namespace AOE_CONST_INTERNAL
 		GVC_CUSTOM = 4
 	};
 
-	// See 4DF84C
+	// To be used only in scenario information.
+	enum SCENARIO_INFO_AGE_ID : long int {
+		SIA_NONE = 0,
+		SIA_STONE_AGE = 1,
+		SIA_TOOL_AGE = 2,
+		SIA_BRONZE_AGE = 3,
+		SIA_GOLD_AGE = 4
+	};
+
+	// To be used only in scenario information: those resource IDs don't match the "official" ones.
+	enum SCENARIO_INFO_RESOURCE_TYPE : long int {
+		WRT_NONE = -1, // For custom usage
+		WRT_GOLD = 0,
+		WRT_WOOD = 1,
+		WRT_FOOD = 2,
+		WRT_STONE = 3,
+		WRT_POPULATION = 4,
+		WRT_AGE = 5, // Here stone age=1, tool=2, bronze=3, iron=4
+		WRT_EXPLORATION = 6
+	};
+
+	// Types of individual victory conditions
+	enum INDIVIDUAL_VICTORY_CONDITION : long int {
+		IVC_NONE = 0, // Not set.
+		IVC_DESTROY_OBJECT_OR_PLAYER = 1, // If only targetPlayerId is set (non-zero), then "kill a player"
+		IVC_CREATE_OBJECTS = 2, // Create some amount, in a zone...
+		IVC_MOVE_OBJECT = 3, // To other object, to zone...
+		IVC_SPECIFIC_RESOURCE = 4, // Reach some "resource" amount (gold, exploration, age...), using non-standard resource IDs: IDs: 0=gold/wood/food/stone/4=pop/5=age/6=explore
+		IVC_CAPTURE_OBJECT = 5,
+		IVC_STANDARD_RESOURCES = 6, // In this case, resourceType actually refers to resource IDs !
+		IVC_DO_SPECIFIC_RESEARCH = 7 // Do a specific research, given its research ID (NOT techId)
+	};
+
+	// See 0x4DF84C
 	enum UNIT_GROUP_TYPES : long int {
 		CST_UGT_LAND_ATTACK = 0x64, // (100) Related to SNMaximumAttackGroupSize
 		CST_UGT_LAND_DEFEND = 0x65, // (101) Related to SNMaximumDefendGroupSize

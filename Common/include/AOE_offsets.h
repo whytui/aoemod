@@ -150,7 +150,7 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054AA60;
 	//static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A1808; // Do not use it
 	static const unsigned long int ADDR_VAR_GAME_SETTINGS_STRUCT = 0x580E38;
-	static const unsigned long int ADDR_VAR_UI_MAIN_INFO = 0x005830E8; // seems to be the base point for managing screens, popups = TPanelSystem
+	static const unsigned long int ADDR_VAR_PANEL_SYSTEM = 0x005830E8; // seems to be the base point for managing screens, popups = TPanelSystem
 	static const unsigned long int ADDR_VAR_INTERFAC_DRS_NAME = 0x0055CA5C;
 	static const unsigned long int ADDR_VAR_EMPIRES_DAT_PATH = 0x005577C8; // data2\empires.dat
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x580D8C;
@@ -172,10 +172,12 @@ namespace AOE_OFFSETS
 	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0x55BDC8; // Array of 40 mask values for unit interactions (for each AI unit type - "class" in AGE3)
 	static const unsigned long int AOE_VAR_CURSORS_INFO = 0x582EDC; // Pointer to structure about cursors
 	static const unsigned long int *AOE_LNK_TIMEGETTIME = (unsigned long int *)0x5423BC;
+	static const unsigned long int **ADDR_VAR_REGISTRY_OBJECT_DEFAULT_REG_PATH = (const unsigned long int **)0x580DC0; // Contains a TRegistry object pointer.
+	static const unsigned long int **ADDR_VAR_TCHAT_OBJECT = (const unsigned long int **)0x580DA0;
 #endif
 	static const unsigned long int *UNKNOWN_ARRAY_6A18C0 = (unsigned long int *)0x6A18C0; // Size = 0x100 elements = 0x400 bytes
-	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = ADDR_VAR_UI_MAIN_INFO + 0x0C; // part of a bigger struct, +C
-	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = ADDR_VAR_UI_MAIN_INFO + 0x0C; // part of a bigger struct, +C
+	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = ADDR_VAR_PANEL_SYSTEM + 0x0C; // part of a bigger struct, +C
+	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = ADDR_VAR_PANEL_SYSTEM + 0x0C; // part of a bigger struct, +C
 
 	// Game executable interface procedure address (ROR_API call)
 #ifdef GAMEVERSION_AOE10b
