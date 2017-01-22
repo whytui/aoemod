@@ -84,7 +84,9 @@ namespace AOE_STRUCTURES
 		STRUCT_UI_IN_GAME_TEXT_ZONE *ingameChatTextZone[8]; // 0x55C ; check count !
 		STRUCT_ANY_UI *unknown_57C; // 50 5D 54 00
 		STRUCT_UI_LABEL *lblCurrentAge; // +580. The current age indication on top (centered).
-		char unknown_584[0x5B4 - 0x584];
+		STRUCT_ANY_UI *unknown_584;
+		STRUCT_ANY_UI *debugInfoBar; // +588. The text zone displayed instead of resource indicators.
+		char unknown_58C[0x5B4 - 0x58C];
 		STRUCT_GAME_GLOBAL *gameGlobal; // +5B4.
 		char unknown_5B8[0x5C8 - 0x5B8];
 		STRUCT_UNIT_BASE *panelSelectedUnit; // 0x5C8. Pointer to unit selected in unit info zone.

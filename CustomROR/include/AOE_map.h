@@ -60,6 +60,10 @@ namespace AOE_METHODS {
 		long int minPosX, long int minPosY, long int maxPosX, long int maxPosY);
 
 
+	// Force a refresh of game zone after modifying terrain (for example)
+	void ForceRefreshOfGameZone();
+
+
 	// Collects info at mouse position : game position, underlying unit...
 	bool GetGameInfoUnderMouse(long int maxInteractionMode, long int mousePosX, long int mousePosY, AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO *posInfo);
 

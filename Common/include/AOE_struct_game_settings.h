@@ -288,7 +288,7 @@ namespace AOE_STRUCTURES {
 		// 0x8E0
 		long int screenSizeX; // To confirm + confirm type
 		long int screenSizeY; // To confirm + confirm type
-		unsigned long int unknown_8E8;
+		long int showDebugTimings; // +8E8. Show debug timings instead of resource icon/values in top-left section.
 		unsigned long int unknown_8EC;
 		unsigned long int unknown_8F0;
 		unsigned long int unknown_8F4;

@@ -97,6 +97,7 @@
     <ClInclude Include="include\AOE_hardcoded_unit_names.h" />
     <ClInclude Include="include\AOE_offsets.h" />
     <ClInclude Include="include\AOE_SN_numbers.h" />
+    <ClInclude Include="include\AOE_struct_border_def.h" />
     <ClInclude Include="include\AOE_struct_build_ai.h" />
     <ClInclude Include="include\AOE_struct_campaign_info.h" />
     <ClInclude Include="include\AOE_struct_color_def.h" />

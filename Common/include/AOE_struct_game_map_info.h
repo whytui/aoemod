@@ -2,6 +2,7 @@
 #pragma once
 
 #include <AOE_struct_terrain_def.h>
+#include <AOE_struct_border_def.h>
 #include <AOE_struct_map_tile_info.h>
 #include <AOE_struct_map_generation.h>
 #include <AOE_struct_map_global_objects.h>
@@ -18,33 +19,49 @@ namespace AOE_STRUCTURES {
 	// External dependencies
 	class STRUCT_GAME_GLOBAL;
 
+#pragma pack(push, 1) // Prevent compiler from aligning on dwords (or other alignment). Very important here as there are some weird structures.
+	
+	// Size=0x06. For tile position/size display
+	class STRUCT_ELEVATION_TILE_SIZE_INFO {
+	public:
+		short int unknown_00_Y_tile_size;
+		short int unknown_02_X_tile_size;
+		short int unknown_04_Z_tile_offset; // +04. A signed value.
+	};
+	static_assert(sizeof(STRUCT_ELEVATION_TILE_SIZE_INFO) == 0x06, "STRUCT_ELEVATION_TILE_SIZE_INFO size");
 
-#define CHECKSUM_RGE_MAP 0x005445A0 // Parent class
+
+#define CHECKSUM_RGE_MAP 0x005445A0 // Base class
 #define CHECKSUM_GAME_MAP 0x005499F4
 	// Parent size=0x88D0. Constructor=0x443CE0(fromFile), 0x443D80
 	// Size = 0xB5F8. Init in 0x4445E0. Constructor=0x4ED4B0(fromFile), 0x4ED800.
 	// "Tribe_Map"
+	// +00 = destructor(do_free)
+	// +04 = gameMapInfo.init(internalFileId?)?
+	// +14 = gameMapInfo.setRawAltitudeValueNoCalc(posYstart, posXstart, size?; altitude)
+	// +18 = gameMapInfo.setAltitude(fromPosY, fromPosX, toPosY, toPosX, pencilSize, altitude)
+	// +28 = gameMapInfo.generateMap(globalStruct, mapSize, mapSize, mapType, playerCount)
+	// +2C = RGE_map.save(internalFileId) [Last for base class]
+	// +30 = RGE_map.xxx(...) [Last]
 	class STRUCT_GAME_MAP_INFO {
 	public:
-		unsigned long int checksum; // F4 99 54 00 (parent class 0A 45 54 00)
+		unsigned long int checksum; // F4 99 54 00 (base class 0A 45 54 00)
 		STRUCT_GAME_MAP_TILE_INFO *pTilesArray; // +04. Array base of all map tiles
-		long int mapArraySizeY;
-		long int mapArraySizeX;
+		long int mapArraySizeY; // +08.
+		long int mapArraySizeX; // +0C.
 		// 0x10
 		unsigned long int unknown_0010; // = mapSizeY * [+8D96]
 		unsigned long int unknown_0014; // = mapSizeX * [+8D98]
-		char unknown_0018_array[0x6 * 0x13];// 0x18: array of elems size=0x6, 3 words. 0x13 elems ? Init in 444240
+		STRUCT_ELEVATION_TILE_SIZE_INFO tileSizeInfoForElevations[ELEVATION_GRAPHICS_TYPE::EGT_COUNT];// +18. Array (19) of tile size info for various elevation graphics. Init (hardcoded) in 0x444240.
 		short int unknown_008A;
 		STRUCT_TERRAIN_DEF terrainDefinitions[0x20]; // +8C. Count is unsure
-		char unknown_338C[0x8D8C - 0x338C];
-		// 8808-1C... 0x10 elems and size=5A0 => start at 2E08 ? WTF. about shp
+		STRUCT_BORDER_DEF borderDefinitions[0x10]; // +338C. Array of 0x10 elements.
 		STRUCT_GAME_MAP_TILE_INFO **pTileInfoCols; // 0x8D8C. Please use GetTileInfo(...)
-		// 0x8D90
 		short int terrainCount; // +8D90. Default = 0x17 = 23 different terrains in empires.dat
 		short int unknown_8D92;
 		unsigned short int unknown_8D94;
-		unsigned short int unknown_8D96; // init 0x40 . for Y ?
-		unsigned short int unknown_8D98; // init 0x20 . for X ?
+		unsigned short int unknown_8D96; // init 0x40 . for Y tile size ?
+		unsigned short int unknown_8D98; // init 0x20 . for X tile size ?
 		unsigned short int unknown_8D9A; // init 0x10. (posX-posY)*unknown_8D9A - (altitude*[unknown_8D9E or unknown_8D9E-1]) = tile.displayY
 		unsigned short int unknown_8D9C; // init 0x20. (posX+posY)*unknown_8D9C = tile.displayX
 		unsigned short int unknown_8D9E; // init 0x10. Use "unknown_8D9E+1" for tile.elevationGraphicIndex in (2,6,8,A,E,F,10), see 0x444B7B.
@@ -55,9 +72,8 @@ namespace AOE_STRUCTURES {
 		char hasFog; // 0x8DB9
 		char unknown_8DBA;
 		char unknown_8DBB;
-		STRUCT_MAP_GENERATION_INFO *unknown_8DBC_mapgenInfos;
-		// 0x8DC0
-		STRUCT_GAME_GLOBAL *globalStruct;
+		STRUCT_MAP_GENERATION_INFO *mapgenInfos; // +8DBC.
+		STRUCT_GAME_GLOBAL *globalStruct; // +8DC0
 		STRUCT_MAP_TERRAIN_ZONES_INFO_LINK *terrainZonesInfoLink; // +8DC4.
 		STRUCT_MAP_VISIBILITY_LINK *mapVisibilityLink; // +8DC8. Link to an array with visibility masks tile by tile. Data array is the same as 0x7D205C
 		STRUCT_UNKNOWN_MAP_INFO_7D2058 *unknown_8DCC;
@@ -82,6 +98,7 @@ namespace AOE_STRUCTURES {
 			if (*posX >= this->mapArraySizeX) { *posX = this->mapArraySizeX - 1; }
 			if (*posY >= this->mapArraySizeY) { *posY = this->mapArraySizeY - 1; }
 		}
+		// Safely gets Tile info for coordinates. Returns NULL if invalid coordinates.
 		STRUCT_GAME_MAP_TILE_INFO *GetTileInfo(long int x, long int y) const {
 			if ((x < 0) || (x >= this->mapArraySizeX) || (y < 0) || (y >= this->mapArraySizeY)) { return NULL; }
 			return &this->pTileInfoCols[x][y];
@@ -114,4 +131,5 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_GAME_MAP_INFO) == 0xB5F8, "STRUCT_GAME_MAP_INFO size");
 
 
+#pragma pack(pop)
 }

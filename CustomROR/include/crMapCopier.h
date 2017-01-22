@@ -57,7 +57,7 @@ namespace MAP {
 	private:
 		const int maxArraySize = MAX_MAP_SIZE;
 		TERRAIN_BYTE copiedTerrainData[MAX_MAP_SIZE][MAX_MAP_SIZE];
-		BORDER_BYTE copiedBorderData[MAX_MAP_SIZE][MAX_MAP_SIZE];
+		TERRAIN_BORDER_BYTE copiedBorderData[MAX_MAP_SIZE][MAX_MAP_SIZE];
 		char copiedElevationIndexData[MAX_MAP_SIZE][MAX_MAP_SIZE];
 		long int copiedSizeX;
 		long int copiedSizeY;

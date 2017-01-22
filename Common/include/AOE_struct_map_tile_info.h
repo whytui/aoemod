@@ -42,18 +42,32 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(TERRAIN_BYTE) == 1, "TERRAIN_BYTE size");
 
 	// Size = 1 byte. This is a shortcut to avoid duplicating bit operations everywhere
-	class BORDER_BYTE {
+	// 4 bits (high) for shapeIndex. Seems to be bit-wise in some way ? Not sure it corresponds to actual shape index !
+	// 4 bits (low) for border ID.
+	class TERRAIN_BORDER_BYTE {
 	public:
-		char borderData;
+		char borderData; // Do not use directly.
 		AOE_CONST_FUNC::GROUND_BORDERS GetBorderId() const {
 			return (AOE_CONST_FUNC::GROUND_BORDERS)(this->borderData & 0x0F); // 4 low bits = border id
 		}
-		// UNSURE. Shape indexes can go higher, but there seems to be something with values from 0 to 12 ?
+		// Shape indexes can be 0-15, 0=none. They depend on borders.drs SLP shapes.
 		char GetShapeIndex() const {
-			return (this->borderData & 0xF0); // 4 high bits = border id
+			return (this->borderData & 0xF0) >> 4; // 4 high bits = shape index
+		}
+		// Set border Id. Value must be 0-15.
+		bool SetBorderId(char value) {
+			if ((value < 0) || (value >= 16)) { return false; }
+			this->borderData = (this->borderData & 0xF0) | value; // preserve shape index
+			return true;
+		}
+		// Set shape index. Value must be 0-15. Not sure of the exact role of this value.
+		bool SetShapeIndex(char value) {
+			if ((value < 0) || (value >= 16)) { return false; }
+			this->borderData = (this->borderData & 0x0F) | (value << 4); // preserve border Id
+			return true;
 		}
 	};
-	static_assert(sizeof(BORDER_BYTE) == 1, "BORDER_BYTE size");
+	static_assert(sizeof(TERRAIN_BORDER_BYTE) == 1, "TERRAIN_BORDER_BYTE size");
 #pragma pack(pop)
 
 	// Size=8. Represents a unit list element
@@ -72,12 +86,12 @@ namespace AOE_STRUCTURES {
 		short int displayY; // +02. A screen Y position where to display tile (independent from player's screen position). Units on this tile will be displayed accordingly. Changing this value can generate fake elevation (display only).
 		char elevationGraphicsIndex; // +4. To retrieve elevation graphics in terrain's table - 0=flat. HAS an effect on units altitude ! Please call mapInfo->RecomputeTileDisplayPos(...) after modifying this
 		TERRAIN_BYTE terrainData; // +5: elevation/terrainID. 3 high bits (0x80/0x40/0x20) represent altitude 0-7. 5 low bits represent terrainId 0-31
-		BORDER_BYTE terrainBorderData; // +6. Border id & shape index (for terrain transitions)
-		char unknown_07; // Updated in 444980 to 0xCC, but reset to 0x0F very frequently (quite instantly). Some status ?
-		char unknown_08;
-		char unknown_09; // Set =0x0F in 0x5179DE.
+		TERRAIN_BORDER_BYTE terrainBorderData; // +6. Border id & shape index (for terrain transitions)
+		char unknown_07; // Updated in 444980 to 0xCC, but reset to 0x0F very frequently (quite instantly). Some status ? Depends on current player perspective.
+		char unknown_08; // Some status ? Depends on current player perspective. Reset value=-1.
+		char unknown_09; // Set =0x0F in 0x5179DE. Some status ? Depends on current player perspective.
 		char tileHighlightLevel; // +0A. Tile brillance level (for tile selection in editor). Values in 0-0xB0. Default=0, 0x0F=underMouse(editor). Updated in 444980 with arg5 ?
-		char unknown_0B; // maybe +A is a short int
+		char unknown_0B; // +0B. Some status ? Depends on current player perspective.
 		// A sub-structure starts here ?
 		char unknown_0C;
 		char unknown_0D;

@@ -205,6 +205,15 @@ void SoftenTerrainDifferences(AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *mapInfo,
 }
 
 
+// Force a refresh of game zone after modifying terrain (for example)
+void ForceRefreshOfGameZone() {
+	STRUCT_UI_PLAYING_ZONE *gameZone = AOE_METHODS::GetGameZone();
+	if (gameZone && gameZone->IsCheckSumValid()) {
+		RefreshUIObject(gameZone, 2);
+	}
+}
+
+
 // Collects info at mouse position : game position, underlying unit...
 // WARNING: does not return all units
 bool AOE_GetGameInfoUnderMouse(long int maxInteractionMode, long int mousePosX, long int mousePosY, AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO *posInfo) {

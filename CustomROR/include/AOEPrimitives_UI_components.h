@@ -76,6 +76,17 @@ static void RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object) {
 	}
 }
 
+// Refresh a UI object. forceLevel is not very well known !
+static void RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, long int forceLevel) {
+	if (!object) { return; }
+	_asm {
+		MOV ECX, object;
+		MOV EAX, DS:[ECX];
+		PUSH forceLevel;
+		CALL DS:[EAX + 0x20];
+	}
+}
+
 
 
 // The AOE_Addxxx functions create a UI object and store the new object's pointer in ptrObjToCreate parameter

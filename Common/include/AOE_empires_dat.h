@@ -560,15 +560,17 @@ namespace AOE_CONST_FUNC {
 		CST_TR_WALLS = 10
 	};
 
+	// Represents boundaries between 2 terrain types.
+	// Border-terrain types are limited: dark water, water(includes shallows), desert(includes various terrains), grass(includes forests, etc)
 	enum GROUND_BORDERS : char {
-		CST_GB_UNUSED_0 = 0,
+		CST_GB_NO_BORDER = 0, // When terrain is not a border (in a zone where terrain is constant)
 		CST_GB_GB_VOID = 1,
 		CST_GB_DESERT_WATER = 2,
 		CST_GB_GRASS_WATER = 3,
 		CST_GB_GRASS_DESERT = 4,
 		CST_GB_GRASS_FOREST = 5,
-		CST_GB_GRASS_DESERT2 = 6,
-		CST_GB_WATER_DARK = 7,
+		CST_GB_GRASS_DESERT2 = 6, // Commonly found
+		CST_GB_WATER_DARK = 7, // Light water / dark water
 		CST_GB_UNKNOWN_8 = 8,
 		CST_GB_UNKNOWN_9 = 9,
 		CST_GB_UNKNOWN_10 = 10,
@@ -578,6 +580,31 @@ namespace AOE_CONST_FUNC {
 		CST_GB_UNKNOWN_14 = 14,
 		CST_GB_UNKNOWN_15 = 15,
 	};
+
+
+	enum ELEVATION_GRAPHICS_TYPE {
+		EGT_UNKNOWN_00 = 0, // Flat terrain ?
+		EGT_UNKNOWN_01 = 1,
+		EGT_UNKNOWN_02 = 2,
+		EGT_UNKNOWN_03 = 3,
+		EGT_UNKNOWN_04 = 4,
+		EGT_UNKNOWN_05 = 5,
+		EGT_UNKNOWN_06 = 6,
+		EGT_UNKNOWN_07 = 7,
+		EGT_UNKNOWN_08 = 8,
+		EGT_UNKNOWN_09 = 9,
+		EGT_UNKNOWN_10 = 10,
+		EGT_UNKNOWN_11 = 11,
+		EGT_UNKNOWN_12 = 12,
+		EGT_UNKNOWN_13 = 13,
+		EGT_UNKNOWN_14 = 14,
+		EGT_UNKNOWN_15 = 15,
+		EGT_UNKNOWN_16 = 16,
+		EGT_UNKNOWN_17 = 17,
+		EGT_UNKNOWN_18 = 18,
+		EGT_COUNT
+	};
+	static_assert(EGT_COUNT == 0x13, "Number of elevation graphics types");
 
 
 	// ----------------------------------------------------------------------------------------------
