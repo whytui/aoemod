@@ -29,12 +29,13 @@ namespace CONFIG {
 ;
 
 
+// Describes the in-game "F5" debug levels.
 enum INGAME_DEBUG_LEVEL {
-	IDL_STANDARD_TIMES_AVG = 0,
-	IDL_STANDARD_TIMES_MAX = 1,
-	IDL_STANDARD_MAX_ALLOWED_LEVEL = 1,
-	IDL_HIDDEN_COMM = 2,
-	IDL_HIDDEN_AI = 3,
+	IDL_STANDARD_TIMES_AVG = 0, // After pressing once on F5.
+	IDL_STANDARD_TIMES_MAX = 1, // After pressing twice on F5.
+	IDL_STANDARD_MAX_ALLOWED_LEVEL = 1, // In standard game, a third press on F5 returns to normal mode.
+	IDL_HIDDEN_COMM = 2, // Corresponds to the hidden debug infos about communications (for MP games)
+	IDL_HIDDEN_AI = 3, // Corresponds to the hidden debug infos about AI player (currently selected as human-controlled)
 	IDL_CUSTOM = 4,
 	IDL_COUNT
 };
@@ -197,8 +198,8 @@ public:
 	AutoAttackPolicy autoAttackOptionForBlastMeleeUnits;
 	AutoAttackPolicy autoAttackOptionForBlastRangedUnits;
 	const AutoAttackPolicy autoAttackOptionDefaultValues = AutoAttackPolicy(true, true, true, true, false);
-	bool useF5LabelZoneForCustomDebugInfo;
-	bool enableInGameDisplayDebugInfo;
+	bool enableInGameDisplayDebugInfo; // If true, allows more "F5 debug levels" in game screen.
+	bool useF5LabelZoneForCustomDebugInfo; // If true, resource info bar can be replaced by debug text.
 
 	// Methods
 	// Read CustomROR main configuration XML file

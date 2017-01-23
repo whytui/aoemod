@@ -116,10 +116,11 @@ CustomRORConfig::CustomRORConfig() {
 		this->mapGenerationCustomElevationFactor[mapType] = 1; // Default factor: *1 does not change value.
 	}
 
-	this->useF5LabelZoneForCustomDebugInfo = true;
-	this->enableInGameDisplayDebugInfo = true;
-#ifndef _DEBUG 
 	this->enableInGameDisplayDebugInfo = false;
+	this->useF5LabelZoneForCustomDebugInfo = false;
+#ifdef _DEBUG 
+	this->enableInGameDisplayDebugInfo = true;
+	this->useF5LabelZoneForCustomDebugInfo = true;
 #endif
 }
 
