@@ -36,6 +36,7 @@
 #include "buttonBar.h"
 #include "playerTargeting.h"
 #include "crDebugOutputPrimitives.h"
+#include "AOEPrimitives_UI_gameMain.h"
 #include "StrategyUpdater.h"
 #include "cityPlan.h"
 #include "unitTargeting.h"
@@ -372,6 +373,10 @@ public:
 
 	// Returns true if the unit specified can have a unit activity.
 	bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase);
+
+	// Handle the optional display of debug information (like F5 info)
+	// Returns true if standard game info (F5 zone) must NOT be executed.
+	bool HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings);
 
 	// ----------------------------------
 	// Methods about internal UI framework

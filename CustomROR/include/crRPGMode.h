@@ -10,6 +10,7 @@
 #include "randomizer.h"
 #include "unitDefHandling.h"
 #include "crCommon.h"
+#include "AOEPrimitives_UI_gameMain.h"
 
 namespace RPG_MODE {
 

@@ -115,6 +115,12 @@ CustomRORConfig::CustomRORConfig() {
 	for (int mapType = 0; mapType < AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT; mapType++) {
 		this->mapGenerationCustomElevationFactor[mapType] = 1; // Default factor: *1 does not change value.
 	}
+
+	this->useF5LabelZoneForCustomDebugInfo = true;
+	this->enableInGameDisplayDebugInfo = true;
+#ifndef _DEBUG 
+	this->enableInGameDisplayDebugInfo = false;
+#endif
 }
 
 

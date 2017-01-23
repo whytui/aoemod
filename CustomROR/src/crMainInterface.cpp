@@ -148,6 +148,25 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		this->OpenCustomGamePopup<MapCopyPopup>(600, 450, false);
 	}
 
+	// F5 in game: set debug info level
+	if (!isMenuOpen && isInGame && (pressedKey == VK_F5)) {
+		// Note: See 0x484BE0 = mainGameUI.OnF5() => is executed BEFORE this method ! So "debug level" has already been updated.
+		// Note: mainGameUI.OnF5() does NOT reset AOE_VAR_F5_DEBUG_INFO_TYPE when disabling debugging: we can guess what what the last debugging level.
+		if (!settings->showDebugTimings && (*AOE_VAR_F5_DEBUG_INFO_TYPE == 1) && 
+			CUSTOMROR::crInfo.configInfo.enableInGameDisplayDebugInfo) {
+			// Force a third state of debugging.
+			settings->showDebugTimings = 1;
+			*AOE_VAR_F5_DEBUG_INFO_TYPE = 2;
+
+			// Restore debug label visibility instead of resources (optional: depends if we want to show stuff in there)
+			if (settings->ptrGameUIStruct && CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
+				AOE_METHODS::UI_BASE::ShowUIObject(settings->ptrGameUIStruct->lblF5debugInfo, true);
+				AOE_METHODS::UI_BASE::ShowUIObject(settings->ptrGameUIStruct->resourceValuesIndicator, false);
+			}
+			//return true; // There is no need to disable ROR treatments: mainGameUI.OnF5() has already been executed.
+		}
+	}
+
 #ifdef _DEBUG
 	// TEST - F7 - debug only
 	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F7)) {

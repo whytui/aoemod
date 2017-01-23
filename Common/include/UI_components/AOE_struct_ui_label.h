@@ -23,6 +23,7 @@ namespace AOE_STRUCTURES
 
 	// Size 0x188
 	// Constructor=0x4685B0 (no arg)
+	// +0xEC = label.setText???(text)
 #define CHECKSUM_UI_LABEL 0x00545A90
 	class STRUCT_UI_LABEL : public STRUCT_ANY_UI {
 	public:

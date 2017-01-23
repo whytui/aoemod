@@ -587,7 +587,7 @@ bool UnitGroupAI::TaskActiveAttackGroupWeakWithVitalMainUnit(STRUCT_PLAYER *play
 
 	// Help leader if under attack
 	if (detailedInfo.unitIdAttackingMyLeader > -1) {
-		long int newTargetId = detailedInfo.unitsAttackingMyGroup.front();
+		long int newTargetId = detailedInfo.unitIdAttackingMyLeader;
 		STRUCT_UNIT_BASE *newTargetUnit = global->GetUnitFromId(newTargetId);
 		if (newTargetUnit && newTargetUnit->IsCheckSumValidForAUnitClass()) {
 			this->SetUnitGroupTarget(unitGroup, newTargetUnit);
@@ -858,7 +858,7 @@ void UnitGroupAI::CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return; }
-	// Unit group consistution and current activity
+	// Unit group constitution and current activity
 	int groupUnitCount = unitGroup->unitCount;
 	int index = 0;
 	while ((index < STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT) && (outputInfos->validUnitsCount < groupUnitCount)) {
@@ -878,6 +878,15 @@ void UnitGroupAI::CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 					STRUCT_UNIT_ATTACKABLE *unitAttackable = (STRUCT_UNIT_ATTACKABLE*)curUnit;
 					assert(unitAttackable->IsCheckSumValidForAUnitClass());
 					if (unitAttackable->currentActivity) {
+						// Handle the list of units attacking my group
+						for (int i = 0; i < unitAttackable->currentActivity->unitIDsThatAttackMe.usedElements; i++) {
+							outputInfos->unitsAttackingMyGroup.push_back(unitAttackable->currentActivity->unitIDsThatAttackMe.unitIdArray[i]);
+							if (curUnit->unitInstanceId == unitGroup->commanderUnitId) {
+								// TODO: There might be more than one of such units !
+								outputInfos->unitIdAttackingMyLeader = unitAttackable->currentActivity->unitIDsThatAttackMe.unitIdArray[i];
+							}
+						}
+
 						bool hasAttackActivity = (unitAttackable->currentActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_ATTACK) ||
 							(unitAttackable->currentActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_CONVERT);
 						STRUCT_ACTION_BASE *unitAction = AOE_STRUCTURES::GetUnitAction(curUnit);
@@ -888,23 +897,6 @@ void UnitGroupAI::CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 							);
 						if (!hasAttackActivity && !actionIsAgressive) {
 							outputInfos->notAttackingUnitsCount++;
-						}
-						if (hasAttackActivity && actionIsAgressive && unitAction) {
-							STRUCT_UNIT_BASE *targetUnit = unitAction->targetUnit;
-							if (!targetUnit) {
-								targetUnit = global->GetUnitFromId(unitAction->targetUnitId);
-							}
-							if (targetUnit && targetUnit->IsCheckSumValidForAUnitClass() && targetUnit->unitDefinition && targetUnit->unitDefinition->IsCheckSumValidForAUnitClass()) {
-								if (!UnitDefCanAttack(targetUnit->unitDefinition)) {
-									outputInfos->unitsAttackingNonPriorityTarget++;
-								} else {
-									// Technically, "target" could be attacking something else, but chances are it's aiming at a unit that is mine, or allied to me.
-									outputInfos->unitsAttackingMyGroup.push_back(targetUnit->unitInstanceId);
-									if (curUnit->unitInstanceId == unitGroup->commanderUnitId) {
-										outputInfos->unitIdAttackingMyLeader = targetUnit->unitInstanceId;
-									}
-								}
-							}
 						}
 					}
 				}

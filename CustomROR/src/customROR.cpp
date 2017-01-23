@@ -392,6 +392,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004AFBE5:
 		this->EntryPointBeforeUnitCreateActivity(REG_values);
 		break;
+	case 0x00501647:
+		this->OverrideShowF5DebugInfo(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3883,6 +3886,29 @@ void CustomRORInstance::EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_value
 	if (skipRORTreatments || (unit->currentActivity != NULL)) {
 		// Make sure to always skip ROR code if currentActivity exists.
 		ChangeReturnAddress(REG_values, 0x4AFC6E);
+	}
+}
+
+
+// From 0x501640. In gameSettings.showTimings(). (show F5 debug info in game screen)
+// Does not change return address. It is possible to disable standard behaviour: just set ECX=NULL.
+void CustomRORInstance::OverrideShowF5DebugInfo(REG_BACKUP *REG_values) {
+	STRUCT_GAME_SETTINGS *settings = (STRUCT_GAME_SETTINGS *)REG_values->EAX_val;
+	ror_api_assert(REG_values, settings && settings->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->ECX_val = (unsigned long int)settings->ptrGameUIStruct;
+	}
+	bool disableStandardDebugDisplay = false;
+
+	// Custom code
+	if (settings->ptrGameUIStruct) {
+		disableStandardDebugDisplay = CUSTOMROR::crCommand.HandleShowDebugGameInfo(settings);
+	}
+
+	// Do not modify below.
+	if (disableStandardDebugDisplay) {
+		REG_values->ECX_val = NULL;
 	}
 }
 

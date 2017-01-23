@@ -3948,6 +3948,25 @@ bool CustomRORCommand::AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_U
 }
 
 
+// Handle the optional display of debug information (like F5 info)
+// Returns true if standard game info (F5 zone) must NOT be executed.
+bool CustomRORCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings) {
+	if (*AOE_VAR_F5_DEBUG_INFO_TYPE < 2) {
+		return false; // Do standard treatments.
+	}
+	// 2+ are custom debugging states. Here we are in such situation.
+#ifdef _DEBUG
+	if (CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
+		AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, "Test debugging");
+	}
+	AOE_METHODS::UI_BASE::GameMainUI_writeTextDebugLines(settings->ptrGameUIStruct, NULL, "Hello", "I hope", "You are", "doing", "well");
+#else
+	return false;
+#endif;
+	return true;
+}
+
+
 // Opens a custom dialog message (based on CloseProgramDialog) and pauses game execution (if running)
 // Return true if OK, false if failed - Fails if another custom dialog (or quit game dialog) is already open
 // Pauses the game if running (only if a dialog is successfully opened)

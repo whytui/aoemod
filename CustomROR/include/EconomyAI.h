@@ -6,6 +6,7 @@
 #include "CustomRORInfo.h"
 #include "AOEPrimitives_units.h"
 #include "unitHandling.h"
+#include "AOEPrimitives_UI_gameMain.h"
 
 
 using namespace AOE_STRUCTURES;

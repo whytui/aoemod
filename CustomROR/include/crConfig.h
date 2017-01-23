@@ -185,6 +185,8 @@ public:
 	AutoAttackPolicy autoAttackOptionForBlastMeleeUnits;
 	AutoAttackPolicy autoAttackOptionForBlastRangedUnits;
 	const AutoAttackPolicy autoAttackOptionDefaultValues = AutoAttackPolicy(true, true, true, true, false);
+	bool useF5LabelZoneForCustomDebugInfo;
+	bool enableInGameDisplayDebugInfo;
 
 	// Methods
 	// Read CustomROR main configuration XML file

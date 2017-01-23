@@ -85,7 +85,7 @@ namespace AOE_STRUCTURES
 		STRUCT_ANY_UI *unknown_57C; // 50 5D 54 00
 		STRUCT_UI_LABEL *lblCurrentAge; // +580. The current age indication on top (centered).
 		STRUCT_ANY_UI *unknown_584;
-		STRUCT_ANY_UI *debugInfoBar; // +588. The text zone displayed instead of resource indicators.
+		STRUCT_UI_LABEL *lblF5debugInfo; // +588. The text zone displayed instead of resource indicators.
 		char unknown_58C[0x5B4 - 0x58C];
 		STRUCT_GAME_GLOBAL *gameGlobal; // +5B4.
 		char unknown_5B8[0x5C8 - 0x5B8];

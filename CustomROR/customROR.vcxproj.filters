@@ -290,6 +290,9 @@
     <ClInclude Include="include\researches.h">
       <Filter>Fichiers d%27en-tête\Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="include\AOEPrimitives_UI_gameMain.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">

@@ -92,7 +92,31 @@ namespace AOE_STRUCTURES {
 
 	// Size=0x100. Constructor=0x41C830
 	// For chatting (with taunts...)
-	class STRUCT_TCHAT {}; // TODO
+	class STRUCT_TCHAT {
+		STRUCT_SOUND_DRIVER *pSoundDriver; // +00. TO CONFIRM
+		unsigned long int unknown_04[9]; // +04. Set in 0x41CA50. Indexes 0-9 (0 is accepted in 'get' in 0x41CA70).
+		unsigned long int unknown_28;
+		unsigned long int unknown_2C[0x33]; // +2C. 51 slots for taunts ?
+		unsigned long int unknown_F8; // +F8.
+		unsigned long int unknown_FC; // Struct, size=0x198
+	};
+	static_assert(sizeof(STRUCT_TCHAT) == 0x100, "STRUCT_TCHAT size");
+
+
+	// Not sure this really is a structure. Seems so ?
+	class STRUCT_GAME_SETTINGS_UNKNOWN_UI_INFO {
+	public:
+		unsigned long int unknown_timeGetTime_00; // About time refreshing ?
+		unsigned long int unknown_averageViewTime_04; // +04. Average view time ?
+		unsigned long int unknown_08;
+		unsigned long int unknown_0C;
+		unsigned long int unknown_10;
+		unsigned long int unknown_14;
+		unsigned long int unknown_18;
+		unsigned long int unknown_max_1C; // +1C. Max view time ???
+	};
+	static_assert(sizeof(STRUCT_GAME_SETTINGS_UNKNOWN_UI_INFO) == 0x20, "STRUCT_GAME_SETTINGS_UNKNOWN_UI_INFO size");
+
 
 #ifdef GAMEVERSION_AOE10b
 #define CHECKSUM_GAME_SETTINGS1 0x005509D8
@@ -188,7 +212,7 @@ namespace AOE_STRUCTURES {
 	// +0x12C = gameSettings.action_close(void)
 	// +0x130 = gameSettings.calcTimings()
 	// +0x134 = gameSettings.calcTimingsText()
-	// +0x138 = gameSettings.showTimings()
+	// +0x138 = gameSettings.showTimings(). Called from 0x41AA5D from gameSettings.handlePaint(void*, uint, uint, long). Called when showDebugTimings=1.
 	// +0x13C = gameSettings.showComm(). Can be called to display MP comm info in bottom-left in colored chat-like !
 	// +0x140 = gameSettings.showAI(). Can be called to display MP comm info in bottom-left in colored chat-like !
 	// +0x144 = 
@@ -277,18 +301,20 @@ namespace AOE_STRUCTURES {
 		short int editorUserSelectedAltitude; // in editor/terrain tab
 		short int editorTerrainPencilSize; // +402. in editor/terrain tab
 		char debugStringTimings[0x508 - 0x404]; // +404. Timings text. "Avg view time"... See 0x41B390.
-		long int unknown_508;
-		long int unknown_50C; // a counter
-		char unknown_510[0x528 - 0x510];
-		// WRONG ???char unknown_528[0x8E0 - 0x528]; // An included array, elemSize=0x20; getter=417430. See 4190B0=setupTimings
-		char unknown_528[0x588 - 0x528];
-		STRUCT_ANY_UI *f5debugPanel; // +588. Unsure
-		char unknown_58C[0x8E0 - 0x58C];
 		// +4F0 : pointer ? +100=Affects DisableMapSizeSetting
+		long int unknown_508;
+		unsigned long int unknown_50C; // a counter
+		char unknown_510[0x520 - 0x510];
+		unsigned long int unknown_520; // first value in "t%lu,f%lu,max(r(v%lu,m%lu,o%lu),s%lu,u%lu,c%lu,ls%lu,lg%lu,p%lu,o%lu)"
+		unsigned long int unknown_524; // second value in "t%lu,f%lu,max(r(v%lu,m%lu,o%lu),s%lu,u%lu,c%lu,ls%lu,lg%lu,p%lu,o%lu)"
+		// +528. elemSize=0x20; getter=417430. See 4190B0=setupTimings. Not really an array (in fact, indexes correspond to specific objects and are hardcoded)
+		// Index correspondance in debug strings: 0=? 1=u%lu 2=? 3=? 4=o%lu(last) 5=? 6=v%lu 7=m%lu 8=? 9=? 10=ls%lu 11=? 12=lg%lu 13=p%lu
+		STRUCT_GAME_SETTINGS_UNKNOWN_UI_INFO unknown_UI_info_array[16]; // actual number is unknown !!!
+		char unknown_5A8[0x8E0 - 0x728]; // etc
 		// 0x8E0
 		long int screenSizeX; // To confirm + confirm type
 		long int screenSizeY; // To confirm + confirm type
-		long int showDebugTimings; // +8E8. Show debug timings instead of resource icon/values in top-left section.
+		long int showDebugTimings; // +8E8. Show debug timings instead of resource icon/values in top-left section. See also AOE_VAR_F5_DEBUG_INFO_TYPE.
 		unsigned long int unknown_8EC;
 		unsigned long int unknown_8F0;
 		unsigned long int unknown_8F4;
@@ -358,7 +384,7 @@ namespace AOE_STRUCTURES {
 		char unknown_AF0[0xC20 - 0xAF0];
 		// 0xC20
 		unsigned long int unknown_C20;
-		STRUCT_UI_IN_GAME_MAIN *ptrGameUIStruct; // +C24
+		STRUCT_UI_IN_GAME_MAIN *ptrGameUIStruct; // +C24.
 		long int lastEventPositionsY[5]; // +C28. Used when pressing HOME key
 		// 0xC3C
 		long int lastEventPositionsX[5]; // +C3C. Used when pressing HOME key
