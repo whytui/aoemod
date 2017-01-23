@@ -119,16 +119,16 @@ namespace AOE_STRUCTURES {
 
 
 #ifdef GAMEVERSION_AOE10b
-#define CHECKSUM_GAME_SETTINGS1 0x005509D8
-#define CHECKSUM_GAME_SETTINGS2 0x00553B78 // parent class
+#define CHECKSUM_GAME_SETTINGS 0x005509D8
+#define CHECKSUM_GAME_SETTINGS_BASE 0x00553B78 // Base class
 #endif
 #ifdef GAMEVERSION_AOE10c
-#define CHECKSUM_GAME_SETTINGS1 0x0054301C
-#define CHECKSUM_GAME_SETTINGS2 0x0053C0A4 // parent class
+#define CHECKSUM_GAME_SETTINGS 0x0054301C
+#define CHECKSUM_GAME_SETTINGS_BASE 0x0053C0A4 // Base class
 #endif
 #ifdef GAMEVERSION_ROR10b
-#define CHECKSUM_GAME_SETTINGS1 0x0054F6E0
-#define CHECKSUM_GAME_SETTINGS2 0x00547DE8 // parent class
+#define CHECKSUM_GAME_SETTINGS 0x0054F6E0
+#define CHECKSUM_GAME_SETTINGS_BASE 0x00547DE8 // Base class
 #endif
 #ifdef GAMEVERSION_ROR10c
 #define CHECKSUM_GAME_SETTINGS 0x0054A264 // "Tribe Game"
@@ -214,7 +214,7 @@ namespace AOE_STRUCTURES {
 	// +0x134 = gameSettings.calcTimingsText()
 	// +0x138 = gameSettings.showTimings(). Called from 0x41AA5D from gameSettings.handlePaint(void*, uint, uint, long). Called when showDebugTimings=1.
 	// +0x13C = gameSettings.showComm(). Can be called to display MP comm info in bottom-left in colored chat-like !
-	// +0x140 = gameSettings.showAI(). Can be called to display MP comm info in bottom-left in colored chat-like !
+	// +0x140 = gameSettings.showAI(). Can be called to display AI info in bottom-left in colored chat-like !
 	// +0x144 = 
 	// +0x148 = [Last for both classes]
 	class STRUCT_GAME_SETTINGS {

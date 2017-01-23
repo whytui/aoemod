@@ -28,6 +28,18 @@ namespace CUSTOMROR {
 namespace CONFIG {
 ;
 
+
+enum INGAME_DEBUG_LEVEL {
+	IDL_STANDARD_TIMES_AVG = 0,
+	IDL_STANDARD_TIMES_MAX = 1,
+	IDL_STANDARD_MAX_ALLOWED_LEVEL = 1,
+	IDL_HIDDEN_COMM = 2,
+	IDL_HIDDEN_AI = 3,
+	IDL_CUSTOM = 4,
+	IDL_COUNT
+};
+
+
 class UnitSpawnShortcutInfo {
 public:
 	UnitSpawnShortcutInfo();

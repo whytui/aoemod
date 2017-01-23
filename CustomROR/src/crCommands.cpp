@@ -3951,18 +3951,38 @@ bool CustomRORCommand::AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_U
 // Handle the optional display of debug information (like F5 info)
 // Returns true if standard game info (F5 zone) must NOT be executed.
 bool CustomRORCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings) {
-	if (*AOE_VAR_F5_DEBUG_INFO_TYPE < 2) {
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	if (*AOE_VAR_F5_DEBUG_INFO_TYPE <= CUSTOMROR::CONFIG::IDL_STANDARD_MAX_ALLOWED_LEVEL) {
 		return false; // Do standard treatments.
 	}
 	// 2+ are custom debugging states. Here we are in such situation.
-#ifdef _DEBUG
-	if (CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
-		AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, "Test debugging");
+
+	switch (*AOE_VAR_F5_DEBUG_INFO_TYPE) {
+	case CUSTOMROR::CONFIG::IDL_HIDDEN_COMM:
+		_asm {
+			MOV ECX, settings;
+			MOV EDX, DS:[ECX];
+			CALL DS:[EDX + 0x13C]; // gameSettings.showComm()
+		}
+		break;
+	case CUSTOMROR::CONFIG::IDL_HIDDEN_AI:
+		_asm {
+			MOV ECX, settings;
+			MOV EDX, DS:[ECX];
+			CALL DS:[EDX + 0x140]; // gameSettings.showAI()
+		}
+		break;
+	case CUSTOMROR::CONFIG::IDL_CUSTOM:
+		if (CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
+			AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, "Test debugging");
+		}
+		AOE_METHODS::UI_BASE::GameMainUI_writeTextDebugLines(settings->ptrGameUIStruct, NULL, "Hello", "I hope", "You are", "doing", "well");
+		break;
+	default:
+		break;
 	}
-	AOE_METHODS::UI_BASE::GameMainUI_writeTextDebugLines(settings->ptrGameUIStruct, NULL, "Hello", "I hope", "You are", "doing", "well");
-#else
-	return false;
-#endif;
+
+
 	return true;
 }
 
