@@ -378,6 +378,9 @@ public:
 	// Returns true if standard game info (F5 zone) must NOT be executed.
 	bool HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings);
 
+	// Changes current in-game debug info level (F5)
+	void SetNextInGameDebugInfoLevel();
+
 	// ----------------------------------
 	// Methods about internal UI framework
 

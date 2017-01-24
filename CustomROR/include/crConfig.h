@@ -34,7 +34,7 @@ enum INGAME_DEBUG_LEVEL {
 	IDL_STANDARD_TIMES_AVG = 0, // After pressing once on F5.
 	IDL_STANDARD_TIMES_MAX = 1, // After pressing twice on F5.
 	IDL_STANDARD_MAX_ALLOWED_LEVEL = 1, // In standard game, a third press on F5 returns to normal mode.
-	IDL_HIDDEN_COMM = 2, // Corresponds to the hidden debug infos about communications (for MP games)
+	IDL_HIDDEN_COMM = 2, // Corresponds to the hidden debug infos about communications (useful in MP games)
 	IDL_HIDDEN_AI = 3, // Corresponds to the hidden debug infos about AI player (currently selected as human-controlled)
 	IDL_CUSTOM = 4,
 	IDL_COUNT

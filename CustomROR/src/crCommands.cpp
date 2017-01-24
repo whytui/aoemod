@@ -3964,26 +3964,54 @@ bool CustomRORCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTI
 			MOV EDX, DS:[ECX];
 			CALL DS:[EDX + 0x13C]; // gameSettings.showComm()
 		}
-		break;
+		return true;
 	case CUSTOMROR::CONFIG::IDL_HIDDEN_AI:
 		_asm {
 			MOV ECX, settings;
 			MOV EDX, DS:[ECX];
 			CALL DS:[EDX + 0x140]; // gameSettings.showAI()
 		}
-		break;
+		return true;
 	case CUSTOMROR::CONFIG::IDL_CUSTOM:
 		if (CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
 			AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, "Test debugging");
 		}
 		AOE_METHODS::UI_BASE::GameMainUI_writeTextDebugLines(settings->ptrGameUIStruct, NULL, "Hello", "I hope", "You are", "doing", "well");
-		break;
+		return true;
 	default:
 		break;
 	}
-
-
 	return true;
+}
+
+
+// Changes current in-game debug info level (F5)
+void CustomRORCommand::SetNextInGameDebugInfoLevel() {
+#ifdef GAMEVERSION_ROR10c
+	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) {
+		return;
+	}
+	// Note: See 0x484BE0 = mainGameUI.OnF5() => is executed BEFORE this method ! So "debug level" has already been updated.
+	// Note: mainGameUI.OnF5() does NOT reset AOE_VAR_F5_DEBUG_INFO_TYPE when debugging is disabled: we can guess what what the last debugging level.
+	if (!settings->showDebugTimings && (*AOE_VAR_F5_DEBUG_INFO_TYPE >= CUSTOMROR::CONFIG::IDL_STANDARD_MAX_ALLOWED_LEVEL) &&
+		CUSTOMROR::crInfo.configInfo.enableInGameDisplayDebugInfo) {
+		assert(*AOE_VAR_F5_DEBUG_INFO_TYPE <= CUSTOMROR::CONFIG::IDL_COUNT);
+		// Force additional states of debugging (custom debug levels).
+		(*AOE_VAR_F5_DEBUG_INFO_TYPE)++;
+		if (*AOE_VAR_F5_DEBUG_INFO_TYPE < CUSTOMROR::CONFIG::IDL_COUNT) {
+			settings->showDebugTimings = 1;
+			// Restore debug label visibility instead of resources (optional: depends if we want to show stuff in there)
+			if (settings->ptrGameUIStruct && CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo &&
+				(*AOE_VAR_F5_DEBUG_INFO_TYPE != CUSTOMROR::CONFIG::IDL_HIDDEN_AI) && // This one does not use F5 debug text bar
+				(*AOE_VAR_F5_DEBUG_INFO_TYPE != CUSTOMROR::CONFIG::IDL_HIDDEN_COMM) // This one does not use F5 debug text bar
+				) {
+				AOE_METHODS::UI_BASE::ShowUIObject(settings->ptrGameUIStruct->lblF5debugInfo, true);
+				AOE_METHODS::UI_BASE::ShowUIObject(settings->ptrGameUIStruct->resourceValuesIndicator, false);
+			}
+		}
+	}
+#endif
 }
 
 
