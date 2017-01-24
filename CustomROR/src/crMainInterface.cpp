@@ -177,7 +177,9 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 #ifdef _DEBUG
 	// TEST - F7 - debug only
 	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F7)) {
+#ifdef GAMEVERSION_ROR10c
 		unsigned long int *marray = (unsigned long int *)AOE_OFFSETS::UNKNOWN_ARRAY_6A18C0;
+#endif
 		AOE_STRUCTURES::STRUCT_UNKNOWN_MAP_DATA_F04C *md1 = (AOE_STRUCTURES::STRUCT_UNKNOWN_MAP_DATA_F04C *) 0x583BC8;
 		AOE_STRUCTURES::STRUCT_UNKNOWN_MAP_DATA_F04C *md2 = (AOE_STRUCTURES::STRUCT_UNKNOWN_MAP_DATA_F04C *) 0x6A1CC0;
 		char txt[1000];

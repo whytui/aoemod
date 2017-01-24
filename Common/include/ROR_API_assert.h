@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <assert.h>
+#include <ROR_API_pub.h>
 
 // Do not call this directly. Please use ror_api_assert macro.
 static void _ror_api_assert(REG_BACKUP *REG_values, wchar_t *expression, const wchar_t *file, unsigned int line) {

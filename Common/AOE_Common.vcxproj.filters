@@ -28,6 +28,9 @@
     <Filter Include="Fichiers d%27en-tête\AOE_model\UI_components">
       <UniqueIdentifier>{aeeff56c-d732-4cb6-9ede-e155c640ada9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\AOE_tech">
+      <UniqueIdentifier>{691c4e1c-ee5c-4242-94bf-9c9af2343d53}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\triggerDefinition.h">
@@ -43,9 +46,6 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\AOE_const_language.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\customResolution.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\mystrings.h">
@@ -67,9 +67,6 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\gameVersion.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\AOE_offsets.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\basicFilesHandling.h">
@@ -338,6 +335,24 @@
     </ClInclude>
     <ClInclude Include="include\AOE_struct_border_def.h">
       <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_offsets.h">
+      <Filter>Fichiers d%27en-tête\AOE_tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_offsets_ROR10c.h">
+      <Filter>Fichiers d%27en-tête\AOE_tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_offsets_ROR10b.h">
+      <Filter>Fichiers d%27en-tête\AOE_tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_offsets_AOE10b.h">
+      <Filter>Fichiers d%27en-tête\AOE_tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_offsets_AOE10c.h">
+      <Filter>Fichiers d%27en-tête\AOE_tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\customResolution.h">
+      <Filter>Fichiers d%27en-tête\AOE_tech</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

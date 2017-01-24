@@ -96,6 +96,10 @@
     <ClInclude Include="include\AOE_empires_dat.h" />
     <ClInclude Include="include\AOE_hardcoded_unit_names.h" />
     <ClInclude Include="include\AOE_offsets.h" />
+    <ClInclude Include="include\AOE_offsets_AOE10b.h" />
+    <ClInclude Include="include\AOE_offsets_AOE10c.h" />
+    <ClInclude Include="include\AOE_offsets_ROR10b.h" />
+    <ClInclude Include="include\AOE_offsets_ROR10c.h" />
     <ClInclude Include="include\AOE_SN_numbers.h" />
     <ClInclude Include="include\AOE_struct_border_def.h" />
     <ClInclude Include="include\AOE_struct_build_ai.h" />
