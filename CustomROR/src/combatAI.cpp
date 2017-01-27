@@ -506,8 +506,8 @@ float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, S
 			myUnit = global->GetUnitFromId(myUnitId);
 		}
 		if (myUnit && myUnit->IsCheckSumValidForAUnitClass()) {
-			float myDamage = AOE_METHODS::CalcDamage(myUnit, targetUnit);
-			float myReloadTime = AOE_METHODS::GetReloadTime1(myUnit);
+			float myDamage = AOE_METHODS::UNIT::CalcDamage(myUnit, targetUnit);
+			float myReloadTime = AOE_METHODS::UNIT::GetReloadTime1(myUnit);
 			totalDamagePerSecond += (myDamage / myReloadTime);
 		}
 	}

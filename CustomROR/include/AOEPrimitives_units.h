@@ -17,6 +17,8 @@
 using namespace AOE_STRUCTURES;
 
 namespace AOE_METHODS {
+namespace UNIT {
+;
 
 // Exact role to confirm.
 // MAYBE this method allows finding path with enemy units blocking the way. Such units are added to path finding struct's unitid array (unknown_11DCE4) ?
@@ -51,5 +53,15 @@ void BuildingUnitDoConstruct(STRUCT_UNIT_BUILDING *building, float timeToAdd_sec
 // Any unit (even base type) can have an activity, even if ROR originally only does that for living&building.
 // Returns true if successful.
 bool CreateUnitActivity(STRUCT_UNIT_BASE *unit, unsigned long int activityClassChecksum);
+
+// Add visibility for given unit to specified player (might NOT be unit owner)
+// If useUnitSizeRadius, do not use distance but unit.unitDef.sizeRadius instead.
+bool AddVisibility(STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *playerToUpdate, bool useUnitSizeRadius, long int distance);
+
+// Remove visibility for given unit from specified player (might NOT be unit owner)
+// If useUnitSizeRadius, do not use distance but unit.unitDef.sizeRadius instead.
+bool RemoveVisibility(STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *playerToUpdate, bool useUnitSizeRadius, long int distance);
+
+}
 
 }

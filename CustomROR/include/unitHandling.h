@@ -43,4 +43,9 @@ std::pair<float, float> GetActionTargetPosition(STRUCT_UNIT_BASE *unit);
 // Returns true if "player" knows where targetUnit is located: unit is visible OR its location is explored and its speed=0
 bool IsUnitPositionKnown(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *targetUnit);
 
+
+// Change line of sight for a unique unit. Fails if unit does NOT have a dedicated unit definition.
+bool ChangeLOSForUniqueUnit(STRUCT_UNIT_TRAINABLE *unit, float newLOS);
+
+
 }

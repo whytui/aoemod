@@ -3,6 +3,10 @@
 
 namespace AOE_METHODS {
 
+
+namespace UNIT {
+;
+
 // Exact role to confirm.
 // MAYBE this method allows finding path with enemy units blocking the way. Such units are added to path finding struct's unitid array (unknown_11DCE4) ?
 // arg6: seen -1 or 0x1B (hardcoded). Could be a AI unit class (walls) ?
@@ -159,6 +163,47 @@ bool CreateUnitActivity(STRUCT_UNIT_BASE *unit, unsigned long int activityClassC
 	assert(result_check == activity);
 	unit->currentActivity = activity;
 	return true;
+}
+
+
+// Add visibility for given unit to specified player (might NOT be unit owner)
+// If useUnitSizeRadius, do not use distance but unit.unitDef.sizeRadius instead.
+bool AddVisibility(STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *playerToUpdate, bool useUnitSizeRadius, long int distance) {
+	if (!unit || !playerToUpdate || !unit->IsCheckSumValidForAUnitClass() || !playerToUpdate->IsCheckSumValid() || !unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	long int arg2 = useUnitSizeRadius ? 1 : 0;
+	_asm {
+		MOV ECX, unit;
+		PUSH distance;
+		PUSH arg2;
+		PUSH playerToUpdate;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX+0xD8];
+	}
+	return true;
+}
+
+
+// Remove visibility for given unit from specified player (might NOT be unit owner)
+// If useUnitSizeRadius, do not use distance but unit.unitDef.sizeRadius instead.
+bool RemoveVisibility(STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *playerToUpdate, bool useUnitSizeRadius, long int distance) {
+	if (!unit || !playerToUpdate || !unit->IsCheckSumValidForAUnitClass() || !playerToUpdate->IsCheckSumValid() || !unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	long int arg2 = useUnitSizeRadius ? 1 : 0;
+	_asm {
+		MOV ECX, unit;
+		PUSH distance;
+		PUSH arg2;
+		PUSH playerToUpdate;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX+0xDC];
+	}
+	return true;
+}
+
+
 }
 
 

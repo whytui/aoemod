@@ -347,7 +347,7 @@ bool UnitTargeting::SetPriorityTargetLocation(STRUCT_INF_AI *infAI, long int tar
 								}
 							}
 							if (isRelic) {
-								if (AOE_METHODS::IsUnitIdle(curUnit)) {
+								if (AOE_METHODS::UNIT::IsUnitIdle(curUnit)) {
 									targetRelics.push_back(curUnit);
 								}
 							} else {
@@ -757,7 +757,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 					}
 					STRUCT_MANAGED_ARRAY tempList;
 					// This call searches a path, even if enemy units block the way ? Unsure
-					bool success = AOE_METHODS::MoveToTarget_1A0(groupLeader, enemyWonderInfo->unitId, groupLeader->GetMaxRange(),
+					bool success = AOE_METHODS::UNIT::MoveToTarget_1A0(groupLeader, enemyWonderInfo->unitId, groupLeader->GetMaxRange(),
 						0, 1, targetPlayerId, 0x1B, &tempList);
 					if (success) {
 						if (tempList.usedElements > 0) {
@@ -781,7 +781,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 									}
 									// Add units that block access to wonder to targets list ??
 									// Note: this is cheating, currentUnit may not be visible !
-									AOE_METHODS::AddUnitInInfAILists(infAI, currentUnitId);
+									AOE_METHODS::UNIT::AddUnitInInfAILists(infAI, currentUnitId);
 									if (i > tempList.arraySize - 1) {
 										// 0x4C0410. Dead code & unused ? How could usedElemCount be > allocCount ???
 										assert(false);
@@ -885,7 +885,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 				continue;
 			}
 			// 0x4C06D6
-			if (isPriest && !AOE_METHODS::CanConvert(groupLeader, curElem->unitId)) {
+			if (isPriest && !AOE_METHODS::UNIT::CanConvert(groupLeader, curElem->unitId)) {
 				continue;
 			}
 			// 0x4C0705 : begin calculations
@@ -991,7 +991,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 			if ((targetInfo->targetUnitId != -1) && (targetInfo->targetEvaluation >= totalEvaluation)) { // 0x4C0A99 : compare with previous best score
 				continue;
 			}
-			if (!targetInfo->currentSearchIsBuildings && (AOE_METHODS::GetSpeed(curUnit) <= 0)) {
+			if (!targetInfo->currentSearchIsBuildings && (AOE_METHODS::UNIT::GetSpeed(curUnit) <= 0)) {
 				// A non-building search found a building (or non-moving) unit. Save it, but in "building" slot
 				// Improvement: is it a tower ? Can it attack (attack OR convert) ?
 				// Note: not checking terrainZone, movement...
@@ -1008,7 +1008,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 			if (leaderTerrainZoneId == curUnitTerrainZoneId) {
 				bool canMoveToTarget = (groupLeader->CanMoveTo(curElem->unitId, groupLeader->GetMaxRange(), 0, 1, -1, -1) != 0);
 				if (!canMoveToTarget) {
-					bool canMoveToTargetIfKillingEnemies = AOE_METHODS::MoveToTarget_1A0(groupLeader, curElem->unitId,
+					bool canMoveToTargetIfKillingEnemies = AOE_METHODS::UNIT::MoveToTarget_1A0(groupLeader, curElem->unitId,
 						groupLeader->GetMaxRange(), 0, 1, targetPlayerId, unknown_EBP, &tempListForMove);
 				}
 			}
@@ -1032,7 +1032,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 							//assert(false && "How can usedElemCount be > arraySize ?");
 						}
 						// 0x4C0C8C
-						AOE_METHODS::AddUnitInInfAILists(infAI, tempListForMove.unitIdArray[i]);
+						AOE_METHODS::UNIT::AddUnitInInfAILists(infAI, tempListForMove.unitIdArray[i]);
 						if (i >= tempListForMove.arraySize) {
 							// 0x4C0CA4 - I don't see the point of this code. WTF ? Maybe this was a macro, used a bit too much ?
 							// TODO
@@ -1188,7 +1188,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 					// 0x4C02B6
 					STRUCT_MANAGED_ARRAY tempList;
 					// This call searches a path, even if enemy units block the way ? Unsure
-					bool success = AOE_METHODS::MoveToTarget_1A0(groupLeader, enemyWonderInfo->unitId, groupLeader->GetMaxRange(),
+					bool success = AOE_METHODS::UNIT::MoveToTarget_1A0(groupLeader, enemyWonderInfo->unitId, groupLeader->GetMaxRange(),
 						0, 1, targetPlayerId, 0x1B, &tempList);
 					if (success) {
 						// 0x4C030F
@@ -1215,7 +1215,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 									// 0x4C03F8
 									// Add units that block access to wonder to targets list ??
 									// Note: this is cheating, currentUnit may not be visible !
-									AOE_METHODS::AddUnitInInfAILists(infAI, currentUnitId);
+									AOE_METHODS::UNIT::AddUnitInInfAILists(infAI, currentUnitId);
 									if (i > tempList.arraySize - 1) {
 										// 0x4C0410. Dead code & unused ? How could usedElemCount be > allocCount ???
 										assert(false);
@@ -1327,7 +1327,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 				continue;
 			}
 			// 0x4C06D6
-			if (isPriest && !AOE_METHODS::CanConvert(groupLeader, curElem->unitId)) {
+			if (isPriest && !AOE_METHODS::UNIT::CanConvert(groupLeader, curElem->unitId)) {
 				continue;
 			}
 			// 0x4C0705 : begin calculations
@@ -1439,7 +1439,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 			if ((targetInfo->targetUnitId != -1) && (targetInfo->targetEvaluation >= totalEvaluation)) { // 0x4C0A99 : compare with previous best score
 				continue;
 			} // 0x4C0ABA
-			if (!targetInfo->currentSearchIsBuildings && (AOE_METHODS::GetSpeed(curUnit) <= 0)) {
+			if (!targetInfo->currentSearchIsBuildings && (AOE_METHODS::UNIT::GetSpeed(curUnit) <= 0)) {
 				// A non-building search found a building (or non-moving) unit. Save it, but in "building" slot
 				// Improvement: is it a tower ? Can it attack (attack OR convert) ?
 				// Note: not checking terrainZone, movement...
@@ -1457,7 +1457,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 				bool canMoveToTarget = (groupLeader->CanMoveTo(curElem->unitId, groupLeader->GetMaxRange(), 0, 1, -1, -1) != 0);
 				if (!canMoveToTarget) {
 					// 0x4C0B62
-					bool canMoveToTargetIfKillingEnemies = AOE_METHODS::MoveToTarget_1A0(groupLeader, curElem->unitId,
+					bool canMoveToTargetIfKillingEnemies = AOE_METHODS::UNIT::MoveToTarget_1A0(groupLeader, curElem->unitId,
 						groupLeader->GetMaxRange(), 0, 1, targetPlayerId, unknown_EBP, &tempListForMove);
 				}
 			}
@@ -1483,7 +1483,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 							//assert(false && "How can usedElemCount be > arraySize ?");
 						}
 						// 0x4C0C8C
-						AOE_METHODS::AddUnitInInfAILists(infAI, tempListForMove.unitIdArray[i]);
+						AOE_METHODS::UNIT::AddUnitInInfAILists(infAI, tempListForMove.unitIdArray[i]);
 						if (i >= tempListForMove.arraySize) {
 							// 0x4C0CA4 - I don't see the point of this code. WTF ? Maybe this was a macro, used a bit too much ?
 							// TODO

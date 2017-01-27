@@ -1733,7 +1733,7 @@ int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUC
 				(unitDef->unitAIType != TribeAIGroupWarBoat) &&
 				(unitDef->unitAIType != TribeAIGroupArtefact)
 				) {
-				if (AOE_METHODS::IsUnitIdle(unit)) {
+				if (AOE_METHODS::UNIT::IsUnitIdle(unit)) {
 					// maxDistance <= 0 : argument is ignored (=> always true). Otherwise: check distance condition
 					if ((maxDistance <= 0) || (GetDistance(posX, posY, unit->positionX, unit->positionY) <= maxDistance)) {
 						GAME_COMMANDS::CreateCmd_RightClick(unit->unitInstanceId, -1, posX, posY);
@@ -2576,8 +2576,8 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 			// This IF corresponds to original code: do NOT re-task villager that are currently attacking something ("whenattacked=2BC" or that...?(2C9))
 			// Corresponds to filter (exclude 2C9 and 2BC) in original game code
 			// Don't know why first loop does NOT exclude 2C9 (only excludes 2BC)
-			if ((activity->internalId_whenAttacked == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_UNKNOWN_2BC_ATTACKING) ||
-				(activity->internalId_whenAttacked == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_GATHERER_ATT_REACTION_WHEN_ATTACKED)) {
+			if ((activity->orderTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_UNKNOWN_2BC_ATTACKING) ||
+				(activity->orderTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_GATHERER_ATT_REACTION_WHEN_ATTACKED)) {
 				attackTower = false;
 			}
 		}
@@ -3887,7 +3887,7 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 		}
 		if ((refX >= 0) || (refY >= 0)) {
 			if ((abs(unit->positionX - refX) > distance) || (abs(unit->positionY - refY) > distance)) {
-				if (AOE_METHODS::IsUnitIdle(unit) && unit->ptrActionInformation) {
+				if (AOE_METHODS::UNIT::IsUnitIdle(unit) && unit->ptrActionInformation) {
 					if (!unit->ptrActionInformation->ptrActionLink || !unit->ptrActionInformation->ptrActionLink->actionStruct) {
 						// For MP compabitiliy; use a command
 						if (!CUSTOMROR::crInfo.configInfo.forceMPCompatibility) {
@@ -3917,7 +3917,7 @@ void CustomRORCommand::OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BA
 	if (IsImproveAIEnabled(unitBase->ptrStructPlayer->playerId)) {
 		if (unitBase->unitDefinition->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupDomesticatedAnimal) {
 			// Create unit activity (example: trained_lion)
-			AOE_METHODS::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_PREDATOR_ANIMAL);
+			AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_PREDATOR_ANIMAL);
 		}
 	}
 }
@@ -4711,10 +4711,13 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 			// Fix actual Hit points
 			unitLiving->remainingHitPoints = newUnitDefLiving->totalHitPoints * HPProportion;
 		}
+		bool updateLOS = false;
+		float suppliedRange = -1;
 		if (trigger->IsParameterDefined(CR_TRIGGERS::KW_RANGE)) {
-			float suppliedRange = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_RANGE, -1);
+			updateLOS = true;
+			suppliedRange = trigger->GetParameterValue<float>(CR_TRIGGERS::KW_RANGE, -1);
 			if (suppliedRange >= 0) {
-				newUnitDefLiving->lineOfSight = suppliedRange;
+				//newUnitDefLiving->lineOfSight = suppliedRange; // See below. LOS can't be changed this way.
 				float upgradeRelatedRange = newUnitDefLiving->maxRange - newUnitDefLiving->displayedRange;
 				if (upgradeRelatedRange < 0) { upgradeRelatedRange = 0; }
 				newUnitDefLiving->displayedRange = suppliedRange - upgradeRelatedRange; // the figure before "+". For a "7+1" range, this corresponds to 7.
@@ -4766,10 +4769,16 @@ void CustomRORCommand::Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if (unitDefToFree) {
 			AOEFree(unitDefToFree);
 		}
+
+		// Handle visibility
+		if (updateLOS && (suppliedRange >= 0)) {
+			AOE_STRUCTURES::ChangeLOSForUniqueUnit(unitLiving, suppliedRange);
+		}
 	}
 
 	// A big one: create unit def (actually, duplicate + customize)
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_ADD_UNIT_DEF) {
+		// Unit definitions MUST always match for *all* players, or the game may crash.
 		//actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -1);
 		long int sourceUnitDefId = trigger->GetParameterValue(CR_TRIGGERS::KW_FROM_UNIT_DEF_ID, -2);
 		char *newUnitName = trigger->GetParameterValue(CR_TRIGGERS::KW_UNIT_NAME, "");

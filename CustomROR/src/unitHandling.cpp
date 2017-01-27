@@ -128,5 +128,29 @@ bool IsUnitPositionKnown(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *targetUnit) {
 	}
 }
 
+
+// Change line of sight for a unique unit. Fails if unit does NOT have a dedicated unit definition.
+bool ChangeLOSForUniqueUnit(STRUCT_UNIT_TRAINABLE *unit, float newLOS) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->DerivesFromTrainable() || !unit->unitDefinition || !unit->unitDefinition->DerivesFromTrainable()) {
+		return false;
+	}
+	if (!unit->hasDedicatedUnitDef) {
+		return false;
+	}
+	if ((unit->unitDefinition->unitType == GUT_BUILDING) && (unit->unitStatus == AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_0_NOT_BUILT)) {
+		AOE_METHODS::UNIT::RemoveVisibility(unit, unit->ptrStructPlayer, 1, -1);
+	} else {
+		AOE_METHODS::UNIT::RemoveVisibility(unit, unit->ptrStructPlayer, 0, -1);
+	}
+	unit->unitDefinition->lineOfSight = newLOS;
+	if ((unit->unitDefinition->unitType == GUT_BUILDING) && (unit->unitStatus == AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_0_NOT_BUILT)) {
+		AOE_METHODS::UNIT::AddVisibility(unit, unit->ptrStructPlayer, 1, -1);
+	} else {
+		AOE_METHODS::UNIT::AddVisibility(unit, unit->ptrStructPlayer, 0, -1);
+	}
+	return true;
+}
+
+
 }
 

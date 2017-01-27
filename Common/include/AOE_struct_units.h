@@ -128,8 +128,8 @@ namespace AOE_STRUCTURES {
 	// +0xC8 = unit.isMoving()
 	// +0xCC = unit.getActionTarget()
 	// +0xD0 = ?? 
-	// +0xD8 = unit.addVisibilityTo(playerToImpact, arg2, distance?)
-	// +0xDC = unit.removeVisibilityFor(playerToImpact, arg2, distance?)
+	// +0xD8 = unit.addVisibilityTo(playerToImpact, flagAboutSizeRadius???, (int)distance). Distance=-1=>use_LOS
+	// +0xDC = unit.removeVisibilityFor(playerToImpact, flagAboutSizeRadius???, (int)distance). To modify a unit LOS, call this, change LOS, then call unit.addVisibilityTo, see 0x4ACC81.
 	// +0xE8 = unit.isUnderAttack()
 	// +0xEC = unit.setIsUnderAttack(bool)
 	// +0xF0 = unit.GetAttackAltitudeFactor(targetUnit). WARNING: Returns in ST (FLD xxx), not EAX. "calcAttackModifier"
@@ -530,7 +530,8 @@ namespace AOE_STRUCTURES {
 		STRUCT_HUMAN_TRAIN_QUEUE_INFO *ptrHumanTrainQueueInformation; // +1C0. Only relevant for human-triggered "train unit".
 		short int unknown_1C4; // Max number of different units in queue ?
 		short int trainUnitQueueCurrentElemCount; // +1C6. Number of different queued unit types. Warning: it is >=1 only when TRAINING a unit that was "human-asked" ? This flag does NOT mean "busy" !
-		unsigned long int unknown_1C8;
+		char unknown_1C8; // +1C8. Default 1.
+		char unknown_1C9[3]; // Probably unused.
 		STRUCT_UNIT_ACTION_INFO *trainUnitActionInfo; // +1CC. Only for makeobject actions (not research).
 		// 0x1D0
 		char queueActionsCounter; // Increments when I click to train/enqueue a unit or cancel it. (if I cancel 3 queued units, it decreases by 3)

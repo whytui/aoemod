@@ -770,7 +770,7 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 	}
 
 	// No target, group in town, commander is idle
-	if (!currentTargetUnit && !groupIsAway && AOE_METHODS::IsUnitIdle(commanderUnit)) {
+	if (!currentTargetUnit && !groupIsAway && AOE_METHODS::UNIT::IsUnitIdle(commanderUnit)) {
 		// If group is idle and there is some enemy building in my town, attack it (be careful with towers if I am too weak ?)
 		STRUCT_INF_AI_UNIT_LIST_ELEM *targetInTown = this->militaryAIInfo->enemyTowerInMyTown;
 		if (!targetInTown) {

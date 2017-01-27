@@ -225,7 +225,7 @@ void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToM
 		CALL EAX
 	}
 	if (unitToMove->currentActivity) {
-		unitToMove->currentActivity->internalId_whenAttacked = CST_ATI_NONE; // (-1) force to defend itself when attacked.
+		unitToMove->currentActivity->orderTaskId = CST_ATI_NONE; // (-1) force to defend itself when attacked.
 	}
 }
 

@@ -195,7 +195,7 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 							STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curGrp->GetMyUnitId(i));
 							if (curUnit && curUnit->IsCheckSumValidForAUnitClass()) {
 								remainingUnits--;
-								if (AOE_METHODS::IsUnitIdle(curUnit) && curUnit->DerivesFromCommandable()) {
+								if (AOE_METHODS::UNIT::IsUnitIdle(curUnit) && curUnit->DerivesFromCommandable()) {
 									MoveAndAttackTarget(tacAI, (STRUCT_UNIT_COMMANDABLE*)curUnit, enemyUnit);
 								}
 							}

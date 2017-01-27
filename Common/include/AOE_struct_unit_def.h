@@ -175,9 +175,9 @@ namespace AOE_STRUCTURES
 		short int placementBypassTerrain2; // +56. Side terrain id ? "tile_req2"
 		short int placementTerrain1; // +58 "center_tile_req1"
 		short int placementTerrain2; // +5A "center_tile_req2"
-		float editorRadius1; // for Y axis "construction_radius"
+		float editorRadiusY; // for Y axis "construction_radius". Used if placementTerrainId>=0, for example ?
 		// 0x60
-		float editorRadius2; // for X axis "construction_radius"
+		float editorRadiusX; // for X axis "construction_radius". Used if placementTerrainId>=0, for example ?
 		char hillMode; // 0=no restriction, 2 for buildings ? "elevation_flag"
 		char visibleInFog; // +65. Can be 0,1, 3 ("inverted visibility" in AGE3, but not exact. smoke has 3). >0 = always visible for others. Note: this never provides visibility, unit is not selectable, but is visible (greyed) through fog (like buildings)
 		short int terrainRestriction; // +66
@@ -275,6 +275,7 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_DOPPLEGANGER) == 0xBC, "STRUCT_UNITDEF_DOPPLEGANGER size");
 
+
 	// FC 44 54 00 = Movable (type30 - dead/fish in AGE3) - size=0xD8 - Constructor 0x440990. Max method=+0x34. "MasterMovingObject"
 	class STRUCT_UNITDEF_MOVABLE : public STRUCT_UNITDEF_FLAG {
 	public:
@@ -300,13 +301,14 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_MOVABLE) == 0xD8, "STRUCT_UNITDEF_MOVABLE size");
 
+
 	// CC 43 54 00 = Commandable (type40 - bird in AGE3) - size=0xFC - Constructor 0x43E090. "MasterActionObject"
 	// Deserialize=0x43E230 unitDef.ReadFromFile_40(internalFileRef, ptrGraphicsList, ptrSoundsList). Max method=+0x38
 	// +0x38 = unitDef.GetNewDefUnitCommandHeader() ("createTaskList") [Last for commandable, attackable, projectile, trainable]
 	class STRUCT_UNITDEF_COMMANDABLE : public STRUCT_UNITDEF_MOVABLE {
 	public:
 		STRUCT_UNIT_COMMAND_DEF_HEADER *ptrUnitCommandHeader; // +D8
-		short int whenBeingSeenCommandIndex; // +DC. For artefacts, discoveries but also animals. "convert herd" in AGE3 ?
+		short int whenIdleCommandIndex; // +DC. Unit-command to execute when unit is idle (and status=2). Used for artefacts, discoveries, animals, farms... "convert herd" in AGE3 ?
 		short int unknown_0DE;
 		// 0xE0
 		float searchRadius; // The distance unit will seek to auto-attack enemy units.
@@ -320,7 +322,7 @@ namespace AOE_STRUCTURES
 		// 0xF0
 		STRUCT_DAT_SOUND *attackSound; // +F0.
 		STRUCT_DAT_SOUND *moveSound; // +F4. Unknown struct
-		char animalMode;
+		char animalMode; // +F8.
 		char unknown_0F9;
 		char unknown_0FA;
 		char unknown_0FB;
@@ -426,8 +428,7 @@ namespace AOE_STRUCTURES
 		char multiplePlacement; // +16C. For building placement (put several at once)
 		char unknown_16D;
 		short int graphicsAngle; // +16E. constructionStep (for unfinished) or "angle" (different standing graphic frame?)
-		// 0x170
-		char disappearWhenBuilt;
+		char dieWhenBuilt; // +170. If true, unit is killed (by unit.killAndHandleSacrifice()) immediately when fully built.
 		char unknown_171;
 		short int stackUnitId; // +172. Additional building added on top on this one ?
 		short int placementTerrainId; // +174.

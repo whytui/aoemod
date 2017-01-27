@@ -2839,7 +2839,7 @@ void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 		// In this very precise case, force the call that was not done (because of the CMP BL,2 condition).
 		// This needs to be done BEFORE we change unit.unitStatus (the call needs status to be =0).
 		if ((desiredStatus > AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY) && (unit->unitDefinition->unitType == AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
-			AOE_METHODS::BuildingUnitDoConstruct((STRUCT_UNIT_BUILDING*)unit, 10000.f);
+			AOE_METHODS::UNIT::BuildingUnitDoConstruct((STRUCT_UNIT_BUILDING*)unit, 10000.f);
 		}
 		unit->unitStatus = desiredStatus;
 	}

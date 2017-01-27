@@ -101,7 +101,7 @@ namespace AOE_STRUCTURES
 	// +0x00 = activity.destructor(do_free)
 	// +0x04 = activity.save(internalFileId)
 	// +0x08 = activity.load(internalFileId)
-	// +0x0C = activityBase.GetOwnerPlayer()
+	// +0x0C = activity.GetOwnerPlayer()
 	// +0x10 = activity.order(?, taskId, targetUnitId, targetPlayerId, posY, posX, posZ, maxRange, arg9, arg10, arg11)
 	// +0x14 = activity.notify(actorUnitId, targetUnitId, internalId, targetUnitClass, currentHP, maxHP)
 	// +0x18 = activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). Eg. 0x410A20
@@ -118,7 +118,7 @@ namespace AOE_STRUCTURES
 	// +0x44 = activity.xxx(resourceGatherType, arg2)
 	// +0x48 = ?int UnitAIModule::closestUndiscoveredTile(int *,int *,int)
 	// +0x4C = activity.logDebug???
-	// +0x50 = activity.isNotArtefact(ptrUnit) "canAttackUnit" ?
+	// +0x50 = activity.canAttackUnit(ptrUnit). Or can convert, for priest activity.
 	// +0x54 = 
 	// +0x58 = activity.stop(bool "use+28_order?))
 	// +0x5C = activity.setAttackOrGatherAttackTarget(targetUnitId, force)
@@ -169,7 +169,7 @@ namespace AOE_STRUCTURES
 		long int notifyQueueUsedElemCount; // +1C. Actually used elems in Notify queue
 		long int notifyQueueArraySize; // +20. Allocated array size (number of elements) for Notify queue.
 		STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyQueue; // +24. See 0x414D90(add)
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS internalId_whenAttacked; // +28. taskId. Auto-tasking ID ? Used when idle or attacked? If -1, then unit reacts to attack ? See 414600. Related to +30 value +0x64. "Reaction task to interruptions?" Priority ?
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS orderTaskId; // +28. The current *explicit* order. If -1, then unit reacts to attack, see 414600.
 		long int unknown_2C; // +2C. 0x64 in 4DA4C9,4D841F. cf targetsInfoArray+08. CMP to enemySightedRespDist in 0x4D85B7. Updated in 0x40F8B1. Special values -1,100. Normal values 0-99. Distance to current target ? Reset to -1 when activity stops.
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
 		long int targetUnitId; // +34. Current target unit instance ID.
@@ -211,7 +211,7 @@ namespace AOE_STRUCTURES
 		long int listOfImportantUnitAITypesArraySize; // +128. number of elements in +124.
 		STRUCT_UNIT_ACTIVITY_UNKNOWN_12C *unknown_12C; // +12C. Can be NULL.
 		// 0x130
-		char unknown_130; // A flag ? 410C00. 4E49C3: set when activity changed to hunt to defend against an animal?
+		char unknown_130_switchBackFromHunter_unsure; // A flag ? 410C00. 4E49C3: set when activity changed to hunt to defend against an animal?
 		char unknown_131; // unused ?
 		char unknown_132; // unused ?
 		char unknown_133; // unused ?
