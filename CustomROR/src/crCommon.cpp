@@ -1,7 +1,7 @@
 #include "../include/crCommon.h"
 
 
-// Calculate distance
+// Calculate distance (without optimization)
 float GetDistance(float x1, float y1, float x2, float y2) {
 	float dx = x1 - x2;
 	float dy = y1 - y2;
@@ -143,32 +143,6 @@ bool IsDockRelevantForMap(MAP_TYPE_INDEX mti) {
 }
 
 
-// Return the matching score element
-// Warning: May return NULL.
-AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId) {
-	if (!player) { return NULL; }
-	AOE_STRUCTURES::STRUCT_SCORE_HEADER *header = player->ptrScoreInformation;
-	assert(header != NULL); // Should never happen (or maybe for gaia?)
-	if (!header) { return NULL; }
-	assert(header->IsCheckSumValid());
-	if (!header->IsCheckSumValid()) { return NULL; }
-	AOE_STRUCTURES::STRUCT_SCORE_ELEM *currentElem = header->firstScoreElement;
-	//if (currentElem) {
-		//currentElem = currentElem->next;
-	//}
-	int security = 0;
-	while (currentElem && (security < 200)) {
-		if ((currentElem->category == category) && (currentElem->resourceId == resourceId)) {
-			return currentElem;
-		}
-		security++;
-		currentElem = currentElem->next;
-	}
-	assert(security < 199); // to alert on infinite loops ! (debug)
-	return NULL;
-}
-
-
 // Calls AOE's code mainAI.findUnit(DAT_Id)
 AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI *mainAI, long int DAT_ID) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit;
@@ -190,124 +164,6 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI 
 		MOV unit, EAX // Save the result in our variable. Can be NULL (not found)
 	}
 	return unit;
-}
-
-
-// Calls ROR's method to change a unit's action so it will move to supplied unit/position
-// target can be NULL (only position will matter)
-// unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
-// Compatible with MP, but in MP unit will not defend itself if attacked.
-void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY) {
-	if (!unitToMove) { return; }
-
-	if (IsMultiplayer()) {
-		// Manage MP games : use a command (but unit will not defend itself if attacked)
-		if (!unitToMove || !unitToMove->IsCheckSumValidForAUnitClass()) {
-			return;
-		}
-		long int targetId = -1;
-		if (target && target->IsCheckSumValidForAUnitClass()) { targetId = target->unitInstanceId; }
-		GAME_COMMANDS::CreateCmd_RightClick(unitToMove->unitInstanceId, targetId, posX, posY);
-		return;
-	}
-
-	// unit.createMoveToAction(targetUnitStruct,pos,pos,arg4) does NOT support if action info struct does not exist.
-	if (!unitToMove->ptrActionInformation) { return; }
-	AOE_STRUCTURES::STRUCT_PLAYER *player = unitToMove->ptrStructPlayer;
-
-	_asm {
-		MOV ECX, unitToMove
-		MOV EAX, 0x405DB0 // unit.createMoveToAction(targetUnitStruct,pos,pos,arg4)
-		PUSH 0 // posZ?, 0 in game call when using mouse click, so we do the same
-		PUSH posX
-		PUSH posY
-		PUSH target
-		CALL EAX
-	}
-	if (unitToMove->currentActivity) {
-		unitToMove->currentActivity->orderTaskId = CST_ATI_NONE; // (-1) force to defend itself when attacked.
-	}
-}
-
-
-// Returns a unitDefCommand object if actor unit has a valid right-click command on target unit.
-// Returns NULL if there no possible interaction
-AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit,
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *target, bool canSwitchForVillager) {
-	if (!actorUnit || !target || !actorUnit->IsCheckSumValidForAUnitClass() || !actorUnit->DerivesFromCommandable() ||
-		!target->IsCheckSumValidForAUnitClass()) { return false; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef_base = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)actorUnit->unitDefinition;
-	if (!unitDef_base->DerivesFromCommandable()) { return false; }
-	AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDef_asBird = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDef_base;
-	if (!unitDef_asBird->ptrUnitCommandHeader || !unitDef_asBird->ptrUnitCommandHeader->IsCheckSumValid()) { return false; }
-	AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF_HEADER *cmdh = unitDef_asBird->ptrUnitCommandHeader;
-	AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *result;
-	assert(cmdh != NULL);
-	if (!cmdh) {
-		return NULL;
-	}
-	_asm {
-		MOV ECX, cmdh
-		MOV EAX, DS:[ECX]
-		PUSH 0
-		PUSH 0
-		PUSH 0
-		PUSH target
-		PUSH actorUnit
-		CALL DS:[EAX+4]
-		MOV result, EAX
-	}
-	if ((result != NULL) || !canSwitchForVillager) {
-		return result; // Not villager mode: return what we just found.
-	}
-
-	// Here: not found but we can try other villager types if unit is a villager
-	if (!unitDef_asBird->villagerMode) {
-		return NULL;
-	}
-	// Try other villager types
-	// We choose to use hardcoded villager IDS for simple/faster treatment
-	static const long int villagerDATIDs[] = { 83, 118, 119, 120, 122, 123, 124, 127, 156, 251, 259 };
-	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = actorUnit->ptrStructPlayer;
-	if (!actorPlayer || !actorPlayer->IsCheckSumValid()) {
-		return NULL;
-	}
-	// Ignore 293 (upgraded villager): will be used if needed when testing 83 (base villager)
-	for (int i = 0; i < sizeof(villagerDATIDs); i++) {
-		if (villagerDATIDs[i] < actorPlayer->structDefUnitArraySize) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *tmpUnitDefBase = actorPlayer->GetUnitDefBase((short int)villagerDATIDs[i]);
-			if (tmpUnitDefBase && tmpUnitDefBase->IsCheckSumValidForAUnitClass() && tmpUnitDefBase->DerivesFromCommandable()) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *tmpUnitDefBird = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)tmpUnitDefBase;
-				cmdh = tmpUnitDefBird->ptrUnitCommandHeader;
-				if (cmdh) {
-					assert(cmdh->IsCheckSumValid());
-					if (cmdh->IsCheckSumValid()) {
-						// Try other villager type's command (with current "actorUnit")
-						_asm {
-							MOV ECX, cmdh;
-							MOV EAX, DS:[ECX];
-							PUSH 0;
-							PUSH 0;
-							PUSH 0;
-							PUSH target;
-							PUSH actorUnit;
-							CALL DS:[EAX+4];
-							MOV result, EAX;
-						}
-					} else {
-						std::string msg = "Bad commandHeader at ";
-						msg += GetHexStringAddress((long)cmdh);
-						traceMessageHandler.WriteMessage(msg);
-						result = NULL;
-					}
-				}
-				if (result) {
-					return result; // If successful, return the command found. Otherwise, continue.
-				}
-			}
-		}
-	}
-	return NULL;
 }
 
 
@@ -364,153 +220,6 @@ bool TriggerTextContainsENDTagAtBeginning(char *triggerText) {
 }
 
 
-// Returns the number of queued units for a given DATID.
-long int GetTotalQueueNumberForUnit(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld, short int unitDefId) {
-	if (!bld || !bld->IsTypeValid() || !bld->ptrHumanTrainQueueInformation) { return 0; }
-	if (unitDefId < 0) { return 0; }
-	long int result = 0;
-	for (int index = 0; index < bld->trainUnitQueueCurrentElemCount; index++) {
-		if ((bld->ptrHumanTrainQueueInformation[index].DATID == unitDefId) && (bld->ptrHumanTrainQueueInformation[index].unitCount >= 0)) {
-			result += bld->ptrHumanTrainQueueInformation[index].unitCount;
-		}
-	}
-	return result;
-}
-
-
-// Creates a unit at provided location. Does NOT make checks on location, please first make sure GetErrorForUnitCreationAtLocation returns 0.
-// Please use CheckAndCreateUnit instead (unless you explicitely do NOT want to check target location)
-// You can use 0 as posZ value.
-// Returns NULL if it failed
-AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ) {
-	if (!player || !player->IsCheckSumValid()) {
-		return NULL;
-	}
-	long int res;
-	_asm {
-		MOV ECX, player
-		PUSH 0 // arg5=unused ?
-		PUSH posZ
-		PUSH posX
-		PUSH posY
-		PUSH DAT_ID
-		MOV EAX, 0x4F0B50 // does not check if there is free space to accept the new unit nor terrain restriction... (check it first)
-		CALL EAX
-		MOV res, EAX
-	}
-	return (AOE_STRUCTURES::STRUCT_UNIT_BASE *) res;
-}
-
-
-// Creates a unit at provided location. Does NOT make checks on location, please first make sure GetErrorForUnitCreationAtLocation returns 0.
-// Please use CheckAndCreateUnit instead (unless you explicitely do NOT want to check target location)
-// You can use 0 as posZ value.
-// Warning: orientation IS unit.orientation for types 30-80. But for types 10/20/90, is corresponds to orientationIndex as float.
-// Returns NULL if it failed
-// Compatible with both in-game and editor screens. This overload corresponds to deserialize (and create) unit operation.
-AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ,
-	long int status, float orientation) {
-	if (!player || !player->IsCheckSumValid()) {
-		return NULL;
-	}
-	long int res;
-	_asm {
-		PUSH orientation;
-		PUSH status;
-		PUSH DAT_ID;
-		PUSH posZ;
-		PUSH posX;
-		PUSH posY;
-		MOV ECX, player;
-		MOV EAX, DS:[ECX];
-		CALL DS:[EAX + 0x60];
-		MOV res, EAX;
-	}
-	return (AOE_STRUCTURES::STRUCT_UNIT_BASE *) res;
-}
-
-
-// Creates a unit at provided location only if GetErrorForUnitCreationAtLocation agrees !
-// Returns NULL if it failed
-AOE_STRUCTURES::STRUCT_UNIT_BASE *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef,
-	float posX, float posY, bool checkVisibility, bool checkHills, bool checkConflictingUnits) {
-	if (AOE_METHODS::GetErrorForUnitCreationAtLocation(player, unitDef, posY, posX, checkVisibility, checkHills, false, true, checkConflictingUnits) != 0) {
-		return NULL;
-	}
-	return CreateUnit(player, unitDef->DAT_ID1, posY, posX, 0);
-}
-
-
-// Will has the same effect as "CTRL-0" or "CTRL-1" etc: assigns a shortcut number to units (and removes this shortcut from old units that had it)
-// Do not use numbers > 10 (0x0A), they are used for groups. You can use negative values.
-// shortcutNumber must be an "internal" shortcut number ([-11;-2], 0 or [1-10] for shortcuts). This is not checked here.
-// shortcutNumber>10 values correspond to groups.
-// Other numbers than 1-9 will never be displayed as SLP file contains only 1-9 images (unless using custom DRS/SLPs)
-// Returns 1 on success.
-long int AssignShortcutToSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, long int shortcutNumber) {
-	if (!player) { return 0; }
-	// shortcutNumber is a char, actually.
-	if ((shortcutNumber < -128) || (shortcutNumber > 127)) { return 0; }
-	char c_shortcut = (char)shortcutNumber;
-	long int res = 0;
-	//GetPlayerStruct(playerId);
-	_asm {
-		MOV ECX, player
-		MOVSX EAX, c_shortcut
-		PUSH EAX
-		MOV EDX, 0x0045DE00 // player.assignShortcut(shortcutNumber)
-		CALL EDX
-		MOV res, EAX
-	}
-	return res;
-}
-
-// Selects units that have a given shortcut number.
-// shortcutNumber must be an "internal" shortcut number ([-11;-2], 0 or [1-10] for shortcuts). This is not checked here.
-// shortcutNumber>10 values correspond to groups.
-// Returns 1 on success.
-long int SelectUnitsUsingShortcut(AOE_STRUCTURES::STRUCT_PLAYER *player, long int shortcutNumber, bool addToSelection) {
-	if (!player) { return 0; }
-	// shortcutNumber is a char, actually.
-	//if ((shortcutNumber < 0) || (shortcutNumber > 0xFF)) { return 0; }
-	if ((shortcutNumber < -128) || (shortcutNumber > 127)) { return 0; }
-	char c_shortcut = (char)shortcutNumber;
-	long int res = 0;
-	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
-	if (!addToSelection) { // Clear selection first
-		_asm {
-			MOV ECX, player
-			MOV EDX, 0x0045DCB0 // player.ClearSelectedUnits
-			CALL EDX
-		}
-	}
-	_asm {
-		MOV ECX, player
-		MOVSX EAX, c_shortcut
-		PUSH EAX
-		MOV EDX, 0x0045DF40 // player.selectUnitsForShortcut(shortcutNumber)
-		CALL EDX
-		MOV res, EAX
-	}
-	return res;
-}
-
-
-// Calls AOE's method to change a unit owner. Warning, this has bugs, see crCommand.OnUnitChangeOwner_fixes to call missing treatments.
-void AOE_ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
-	if (!targetUnit || !actorPlayer || !targetUnit->IsCheckSumValidForAUnitClass() || !actorPlayer->IsCheckSumValid()) {
-		return;
-	}
-	_asm {
-		MOV ECX, targetUnit
-		MOV EAX, actorPlayer
-		MOV EDX, DS:[ECX]
-		PUSH EAX
-		CALL DS:[EDX+0x44] // unit.convertToPlayer(ptrPlayer)
-	}
-}
-
-
 // Call AOE's Notify event method. Warning, the parameters can have different types.
 // Use the overload with pointers to make sure you don't have cast issues.
 void AOE_callNotifyEvent(long int eventId, long int playerId, long int variant_arg3, long int variant_arg4, long int variant_arg5){
@@ -526,39 +235,6 @@ void AOE_callNotifyEvent(long int eventId, long int playerId, long int variant_a
 		MOV EAX, 0x501980
 		CALL EAX
 	}
-}
-// Call AOE's Notify event method. Warning, the parameters can have different types. Here pointers here so there is no undesired cast !
-void AOE_callNotifyEvent(long int eventId, long int playerId, void *variant_arg3, void *variant_arg4, void *variant_arg5) {
-	AOE_callNotifyEvent(eventId, playerId, *(long int*)variant_arg3, *(long int*)variant_arg4, *(long int*)variant_arg5);
-}
-
-
-
-// Set "shared exploration" flag for a given player to true or false.
-// Old version: Not compatible with MP games (to verify)
-void SetPlayerSharedExploration_hard(long int playerId, bool enable) {
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-	if (!global || !global->IsCheckSumValid()) {
-		return;
-	}
-	if ((playerId < 0) || (playerId > global->playerTotalCount)) { return; }
-	AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
-	if (!player || !player->IsCheckSumValid()) { return; }
-	long int value = enable ? 1 : 0;
-	player->sharedExploration = enable;
-	player->SetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_SHARED_EXPLORATION, enable);
-	_asm {
-		// Cf 0x4F6CAF
-		MOV ECX, global;
-		MOV EAX, 0x520C60;
-		CALL EAX;
-	}
-}
-
-
-// Set "shared exploration" flag for a given player to true or false. This version should be compatible with MP games (uses ROR command system)
-void SetPlayerSharedExploration_safe(long int playerId) {
-	GAME_COMMANDS::CreateCmd_SetSharedExploration((short int)playerId);
 }
 
 
@@ -767,34 +443,6 @@ void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILD
 			CALL EAX
 		}
 	}
-}
-
-
-// Clear player selection then select provided unit. Compatible with editor too.
-// If centerScreen is true, player's screen will be centered to unit.
-void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase, bool centerScreen) {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || !settings->IsCheckSumValid()) { return; }
-	if ((settings->currentUIStatus != GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME) &&
-		(settings->currentUIStatus != GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) &&
-		(settings->currentUIStatus != GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
-		return;
-	}
-	if (!player || !player->IsCheckSumValid()) { return; }
-	AOE_METHODS::ClearSelectedUnits(player);
-	AOE_METHODS::SelectUnit(player, unitBase, true);
-	if (centerScreen) {
-		player->screenPositionX = unitBase->positionX;
-		player->screenPositionY = unitBase->positionY;
-		player->unknown_122_posX = (short int)unitBase->positionX;
-		player->unknown_120_posY = (short int)unitBase->positionY;
-	}
-	if (!settings || !settings->IsCheckSumValid() || !settings->ptrGameUIStruct ||
-		!settings->ptrGameUIStruct->IsCheckSumValid() || !settings->ptrGameUIStruct->gamePlayUIZone ||
-		!settings->ptrGameUIStruct->gamePlayUIZone->IsCheckSumValid()) {
-		return;
-	}
-	AOE_METHODS::UI_BASE::RefreshUIObject(settings->ptrGameUIStruct->gamePlayUIZone);
 }
 
 

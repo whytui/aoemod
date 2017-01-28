@@ -62,4 +62,11 @@ bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **act
 // Compatible with MP games (uses "command" interface)
 bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
 
+
+// Calls ROR's method to change a unit's action so it will move to supplied unit/position
+// target can be NULL (only position will matter)
+// unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
+void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY);
+
+
 }

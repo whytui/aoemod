@@ -66,9 +66,9 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 	if ((isInGame) && (!isMenuOpen) && (pressedKey >= VK_NUMPAD0) && (pressedKey <= VK_NUMPAD9)) {
 		long int shortcutNumber = GetShortcutInternalValueFromKey(pressedKey);
 		if (CTRL) {
-			AssignShortcutToSelectedUnits(GetControlledPlayerStruct_Settings(), shortcutNumber);
+			AOE_METHODS::UNIT::AssignShortcutToSelectedUnits(GetControlledPlayerStruct_Settings(), shortcutNumber);
 		} else {
-			SelectUnitsUsingShortcut(GetControlledPlayerStruct_Settings(), shortcutNumber, SHIFT);
+			AOE_METHODS::UNIT::SelectUnitsUsingShortcut(GetControlledPlayerStruct_Settings(), shortcutNumber, SHIFT);
 		}
 	}
 

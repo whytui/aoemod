@@ -11,6 +11,7 @@
 #include "traceMessage.h"
 #include "mainStructuresHandling.h"
 #include "researches.h"
+#include "AOEPrimitives_gameCommand.h"
 
 #pragma once
 
@@ -23,9 +24,13 @@ using namespace AOE_STRUCTURES;
 namespace AOE_METHODS {
 
 	void ClearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player);
+
 	// select: if true, add unit to selection. If false, remove from selection.
 	bool SelectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool select);
 
+	// Return the matching score element
+	// Warning: May return NULL.
+	AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId);
 
 }
 
@@ -74,6 +79,11 @@ namespace PLAYER {
 	bool DisableUnitForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID);
 
 
+	// Clear player selection then select provided unit. Compatible with editor too.
+	// If centerScreen is true, player's screen will be centered to unit.
+	void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase, bool centerScreen);
+
+
 	// Transforms specified unit to "main" unit when a quick selection (via keyboard shortcut) is requested.
 	// For example, for key 'H', the "main" TC is selected. This method allows to set the "main" TC to select with 'H'.
 	// Actually, this moves the unit in player's "creatable" units list
@@ -101,6 +111,13 @@ namespace PLAYER {
 	// Maybe it's better not to use it for living/buildings units (because of conversion)
 	// Note: see also AOE unitDef constructors that copy an existing one, e.g. 4ED1B0 for living (type 70).
 	short int DuplicateUnitDefinitionForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int srcDAT_ID, char *name);
+
+
+	// Set "shared exploration" flag for a given player to true or false. Do not use this with MP game (not sure if it causes sync error)
+	void SetPlayerSharedExploration_hard(long int playerId, bool enable);
+
+	// Set "shared exploration" flag for a given player to true or false. This version should be compatible with MP games (uses ROR command system)
+	void SetPlayerSharedExploration_safe(long int playerId);
 
 
 }

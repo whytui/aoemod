@@ -161,7 +161,7 @@ void EditorEditUnitInfoPopup::OnBeforeClose(bool isCancel) {
 		if (newOwner != this->initialOwner) {
 			for each (auto curUnit in this->allSelectedUnits)
 			{
-				AOE_ChangeUnitOwner(curUnit, GetPlayerStruct(newOwner));
+				AOE_METHODS::UNIT::ChangeUnitOwner(curUnit, GetPlayerStruct(newOwner));
 			}
 		}
 	}

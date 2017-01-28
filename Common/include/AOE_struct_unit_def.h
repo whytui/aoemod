@@ -315,7 +315,7 @@ namespace AOE_STRUCTURES
 		float workRate; // including upgrades. Ex for priest: base = 1, with astrology = 1.3
 		short int dropSite1;
 		short int dropSite2;
-		char villagerMode; // +EC. An id for "group" of units that can switch definition ?
+		char unitDefinitionSwitchGroupId; // +EC. 0=none. An id for "group" of units that can switch definition. id=1 for villagers (builder, forager, etc).
 		char unknown_0ED;
 		char unknown_0EE;
 		char unknown_0EF;

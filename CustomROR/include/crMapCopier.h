@@ -11,6 +11,7 @@
 #include "traceMessage.h"
 #include "AOE_map.h"
 #include "crCommon.h"
+#include "AOEPrimitives_units.h"
 
 
 using namespace AOE_STRUCTURES;

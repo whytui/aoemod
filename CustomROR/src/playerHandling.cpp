@@ -33,6 +33,34 @@ bool SelectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UN
 	return (result != 0);
 }
 
+
+// Return the matching score element
+// Warning: May return NULL.
+AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId) {
+	if (!player) { return NULL; }
+	AOE_STRUCTURES::STRUCT_SCORE_HEADER *header = player->ptrScoreInformation;
+	assert(header != NULL); // Should never happen (or maybe for gaia?)
+	if (!header) { return NULL; }
+	assert(header->IsCheckSumValid());
+	if (!header->IsCheckSumValid()) { return NULL; }
+	AOE_STRUCTURES::STRUCT_SCORE_ELEM *currentElem = header->firstScoreElement;
+	//if (currentElem) {
+	//currentElem = currentElem->next;
+	//}
+	int security = 0;
+	while (currentElem && (security < 200)) {
+		if ((currentElem->category == category) && (currentElem->resourceId == resourceId)) {
+			return currentElem;
+		}
+		security++;
+		currentElem = currentElem->next;
+	}
+	assert(security < 199); // to alert on infinite loops ! (debug)
+	return NULL;
+}
+
+
+
 }
 
 namespace PLAYER {
@@ -265,6 +293,34 @@ namespace PLAYER {
 			return true;
 		}
 		return false;
+	}
+
+
+	// Clear player selection then select provided unit. Compatible with editor too.
+	// If centerScreen is true, player's screen will be centered to unit.
+	void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase, bool centerScreen) {
+		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		if (!settings || !settings->IsCheckSumValid()) { return; }
+		if ((settings->currentUIStatus != GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME) &&
+			(settings->currentUIStatus != GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) &&
+			(settings->currentUIStatus != GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
+			return;
+		}
+		if (!player || !player->IsCheckSumValid()) { return; }
+		AOE_METHODS::ClearSelectedUnits(player);
+		AOE_METHODS::SelectUnit(player, unitBase, true);
+		if (centerScreen) {
+			player->screenPositionX = unitBase->positionX;
+			player->screenPositionY = unitBase->positionY;
+			player->unknown_122_posX = (short int)unitBase->positionX;
+			player->unknown_120_posY = (short int)unitBase->positionY;
+		}
+		if (!settings || !settings->IsCheckSumValid() || !settings->ptrGameUIStruct ||
+			!settings->ptrGameUIStruct->IsCheckSumValid() || !settings->ptrGameUIStruct->gamePlayUIZone ||
+			!settings->ptrGameUIStruct->gamePlayUIZone->IsCheckSumValid()) {
+			return;
+		}
+		AOE_METHODS::UI_BASE::RefreshUIObject(settings->ptrGameUIStruct->gamePlayUIZone);
 	}
 
 
@@ -507,6 +563,34 @@ namespace PLAYER {
 		newUnitDef->ptrUnitName = newName; // issues with the name ?
 
 		return newDAT_ID;
+	}
+
+
+	// Set "shared exploration" flag for a given player to true or false.
+	// Old version: Not compatible with MP games (to verify)
+	void SetPlayerSharedExploration_hard(long int playerId, bool enable) {
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (!global || !global->IsCheckSumValid()) {
+			return;
+		}
+		if ((playerId < 0) || (playerId > global->playerTotalCount)) { return; }
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
+		if (!player || !player->IsCheckSumValid()) { return; }
+		long int value = enable ? 1 : 0;
+		player->sharedExploration = enable;
+		player->SetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_SHARED_EXPLORATION, enable);
+		_asm {
+			// Cf 0x4F6CAF
+			MOV ECX, global;
+			MOV EAX, 0x520C60;
+			CALL EAX;
+		}
+	}
+
+
+	// Set "shared exploration" flag for a given player to true or false. This version should be compatible with MP games (uses ROR command system)
+	void SetPlayerSharedExploration_safe(long int playerId) {
+		GAME_COMMANDS::CreateCmd_SetSharedExploration((short int)playerId);
 	}
 
 }

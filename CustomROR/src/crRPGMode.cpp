@@ -390,7 +390,7 @@ namespace RPG_MODE {
 		if (!unit->IsTypeValid()) { return false; } // Only trainable (*excluding buildings*) can become unique units here
 		if (!unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) { return false; }
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
-		if (unitDef->villagerMode) { return false; } // unit that can switch unit definition can't be unique (changing unit definition would loose their specificity).
+		if (unitDef->unitDefinitionSwitchGroupId) { return false; } // unit that can switch unit definition can't be unique (changing unit definition would loose their specificity).
 
 		STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 		STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();

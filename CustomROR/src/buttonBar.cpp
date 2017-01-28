@@ -208,7 +208,7 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 		if (curBtn && curBtn->IsCheckSumValid()) {
 			if ((curBtn->commandIDs[0] == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_ADD_TO_QUEUE) ||
 				(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN)) {
-				long int n = GetTotalQueueNumberForUnit(unitAsBuilding, (short int)curBtn->buttonInfoValue[0]);
+				long int n = AOE_METHODS::UNIT::GetTotalQueueNumberForUnit(unitAsBuilding, (short int)curBtn->buttonInfoValue[0]);
 				curBtn->showNumber = (n > 0) ? 1 : 0;
 				curBtn->numberToDisplay = n;
 				forceRefresh[currentBtnId] = true;

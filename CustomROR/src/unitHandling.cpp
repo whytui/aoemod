@@ -180,5 +180,42 @@ bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actor
 }
 
 
+// Calls ROR's method to change a unit's action so it will move to supplied unit/position
+// target can be NULL (only position will matter)
+// unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
+// Compatible with MP, but in MP unit will not defend itself if attacked.
+void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY) {
+	if (!unitToMove) { return; }
+
+	if (IsMultiplayer()) {
+		// Manage MP games : use a command (but unit will not defend itself if attacked)
+		if (!unitToMove || !unitToMove->IsCheckSumValidForAUnitClass()) {
+			return;
+		}
+		long int targetId = -1;
+		if (target && target->IsCheckSumValidForAUnitClass()) { targetId = target->unitInstanceId; }
+		GAME_COMMANDS::CreateCmd_RightClick(unitToMove->unitInstanceId, targetId, posX, posY);
+		return;
+	}
+
+	// unit.createMoveToAction(targetUnitStruct,pos,pos,arg4) does NOT support if action info struct does not exist.
+	if (!unitToMove->ptrActionInformation) { return; }
+	AOE_STRUCTURES::STRUCT_PLAYER *player = unitToMove->ptrStructPlayer;
+
+	_asm {
+		MOV ECX, unitToMove;
+		MOV EAX, 0x405DB0; // unit.createMoveToAction(targetUnitStruct,pos,pos,arg4)
+		PUSH 0; // posZ?, 0 in game call when using mouse click, so we do the same
+		PUSH posX;
+		PUSH posY;
+		PUSH target;
+		CALL EAX;
+	}
+	if (unitToMove->currentActivity) {
+		unitToMove->currentActivity->orderTaskId = CST_ATI_NONE; // (-1) force to defend itself when attacked.
+	}
+}
+
+
 }
 

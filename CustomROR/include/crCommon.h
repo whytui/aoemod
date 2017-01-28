@@ -60,11 +60,7 @@ AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT
 // Returns true for maps where AI does build a dock and boats. Warning: for unknown map type (custom), this returns true.
 bool IsDockRelevantForMap(MAP_TYPE_INDEX mti);
 
-// Return the matching score element
-// Warning: May return NULL.
-AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId);
-
-// Calculate distance
+// Calculate distance (without optimization)
 float GetDistance(float x1, float y1, float x2, float y2);
 
 // Returns true if the cost could be correctly computed.
@@ -97,8 +93,6 @@ bool SetTriggerDataSize(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo, long int s
 // Returns true if provided trigger text contains the END tag before any trigger information.
 bool TriggerTextContainsENDTagAtBeginning(char *triggerText);
 
-// Returns the number of queued units for a given DATID.
-long int GetTotalQueueNumberForUnit(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld, short int unitDefId);
 
 
 /* ----------- "ACTIVE" methods ------------- */
@@ -112,61 +106,11 @@ void SetGamePause(bool pauseOn);
 // If not, returns false and does not modify any value.
 bool ApplyCostIfPossible(float costTable[], float resourceTable[]);
 
-// Calls ROR's method to change a unit's action so it will move to supplied unit/position
-// target can be NULL (only position will matter)
-// unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
-void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY);
-
-
-// Returns a unitDefCommand object if actor unit has a valid right-click command on target unit.
-// Returns NULL if there no possible interaction
-AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit,
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *target, bool canSwitchForVillager);
-
-
-// Creates a unit at provided location. Does NOT make checks on location, please first make sure GetErrorForUnitCreationAtLocation returns 0.
-// You can use 0 as posZ value.
-// Returns NULL if it failed
-AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ);
-
-// Creates a unit at provided location. Does NOT make checks on location, please first make sure GetErrorForUnitCreationAtLocation returns 0.
-// You can use 0 as posZ value.
-// Warning: orientation IS unit.orientation for types 30-80. But for types 10/20/90, is corresponds to orientationIndex as float.
-// Returns NULL if it failed
-// Compatible with both in-game and editor screens. This overload corresponds to deserialize (and create) unit operation.
-AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, long int DAT_ID, float posY, float posX, float posZ,
-	long int status, float orientation);
-
-// Creates a unit at provided location only if GetErrorForUnitCreationAtLocation agrees !
-// Returns NULL if it failed
-AOE_STRUCTURES::STRUCT_UNIT_BASE *CheckAndCreateUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef,
-	float posY, float posX, bool checkVisibility, bool checkHills, bool checkConflictingUnits);
-
-// Has the same effect as "CTRL-0" or "CTRL-1" etc: assigns a shortcut number to units (and removes this shortcut from old units that had it)
-// Returns 1 on success.
-long int AssignShortcutToSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, long int shortcutNumber);
-
-// Selects units that have a given shortcut number.
-long int SelectUnitsUsingShortcut(AOE_STRUCTURES::STRUCT_PLAYER *player, long int shortcutNumber, bool addToSelection = false);
-
-
-
-// Calls AOE's method to change a unit owner. Warning, this has bugs, see customROR / crCommand.
-void AOE_ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer);
 
 // Call AOE's Notify event method. Warning, the parameters can have different types.
 // Use the overload with pointers to make sure you don't have cast issues.
 void AOE_callNotifyEvent(long int eventId, long int playerId, long int variant_arg3, long int variant_arg4, long int variant_arg5);
-// Call AOE's Notify event method. Warning, the parameters can have different types. Here pointers here so there is no undesired cast !
-void AOE_callNotifyEvent(long int eventId, long int playerId, void *variant_arg3, void *variant_arg4, void *variant_arg5);
 
-
-
-// Set "shared exploration" flag for a given player to true or false. Do not use this with MP game (not sure if it causes sync error)
-void SetPlayerSharedExploration_hard(long int playerId, bool enable);
-
-// Set "shared exploration" flag for a given player to true or false. This version should be compatible with MP games (uses ROR command system)
-void SetPlayerSharedExploration_safe(long int playerId);
 
 // Reset an element in infAI.unitElemList. The slot will be re-used later by ROR. cf 0x4BA401.
 // Return true if the element was updated.
@@ -204,10 +148,6 @@ void AOE_InfAIBuildHistory_setStatus(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long 
 // Remove a building from arrays for a player
 void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
-
-// Clear player selection then select provided unit. Compatible with editor too.
-// If centerScreen is true, player's screen will be centered to unit.
-void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase, bool centerScreen);
 
 // Add a line with an attribute icon/value in game unit info zone (bottom left)
 // If a line is added, lineIndex is incremented.

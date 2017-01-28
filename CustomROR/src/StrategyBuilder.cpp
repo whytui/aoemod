@@ -2399,7 +2399,7 @@ void StrategyBuilder::AddResearchesForEconomy() {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = this->player->GetUnitDefBase(unitDefId);
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromCommandable()) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDefBird = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDef;
-			if (unitDefBird->villagerMode && (unitDefBird->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian)) {
+			if (unitDefBird->unitDefinitionSwitchGroupId && (unitDefBird->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian)) {
 				this->CollectResearchInfoForUnit(unitDefId, true);
 			}
 			if (unitDefId == CST_UNITID_FARM) {

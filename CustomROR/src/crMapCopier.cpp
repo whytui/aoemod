@@ -207,7 +207,7 @@ bool MapCopier::PasteMapZone(long int startPosX, long int startPosY) {
 			if (player && player->IsCheckSumValid()) {
 				// unitData->unitId is not preserved during this operation. We could using the force flag in global struct,
 				// but here the unit with this id may already exist (here the map is not new nor empty)
-				STRUCT_UNIT_BASE *unit = (STRUCT_UNIT_BASE *)CreateUnit(player, unitData->unitDefId,
+				STRUCT_UNIT_BASE *unit = (STRUCT_UNIT_BASE *)AOE_METHODS::UNIT::CreateUnitNoMapCheck(player, unitData->unitDefId,
 					newPosY, newPosX, 0, unitData->status, unitData->orientation);
 			}
 		}

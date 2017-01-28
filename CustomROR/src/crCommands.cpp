@@ -1824,7 +1824,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 		}
 		if (canInteractWithTarget) {
 			if (unitDef->DerivesFromCommandable() && unitDef->ptrUnitCommandHeader) {
-				if (GetUnitDefCommandForTarget(unit, target, true) != NULL) {
+				if (AOE_METHODS::UNIT::GetUnitDefCommandForTarget(unit, target, true) != NULL) {
 					commandCreated = TellUnitToInteractWithTarget(unit, target);
 				}
 			}
@@ -1942,7 +1942,7 @@ bool CustomRORCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetU
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *oldOwner = targetUnit->ptrStructPlayer;
 	this->OnUnitChangeOwner_fixes(targetUnit, actorPlayer);
-	AOE_ChangeUnitOwner(targetUnit, actorPlayer);
+	AOE_METHODS::UNIT::ChangeUnitOwner(targetUnit, actorPlayer);
 	if ((notifyEvent == AOE_CONST_INTERNAL::CST_GET_INVALID) || (!oldOwner || !oldOwner->IsCheckSumValid())) {
 		return true; // No notification to handle
 	}
