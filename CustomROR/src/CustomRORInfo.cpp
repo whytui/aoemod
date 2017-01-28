@@ -456,3 +456,18 @@ bool CUSTOMROR::IsImproveAIEnabled(int playerId) {
 }
 
 
+// Returns true if RPG mode is active in current game
+bool CUSTOMROR::IsRpgModeEnabled() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	if (!settings->rgeGameOptions.isSinglePlayer) { return false; } // Disable in MP
+	// Note: to work well on saved games, this requires customROR's fix on game's IsScenario information.
+	bool isScenario = (settings->isCampaign || settings->rgeGameOptions.isScenario);
+	if (isScenario) {
+		return CUSTOMROR::crInfo.configInfo.enableRPGModeInScenario;
+	} else {
+		return CUSTOMROR::crInfo.configInfo.enableRPGModeInRandomGames;
+	}
+}
+

@@ -30,7 +30,7 @@ namespace AOE_STRUCTURES
 	// Size=0x174. Constructor = 0x4FAC10 timerInfoGameLabel.constructor(arg1=parentUI.unknown_020, gameUIZone)
 	// Destructor = 0x4FAD30
 	// +0x50: SetPosition(x, y) ?
-	class STRUCT_GAME_COLORED_INFO_LABEL : STRUCT_ANY_UI {
+	class STRUCT_GAME_COLORED_INFO_LABEL : public STRUCT_ANY_UI {
 	public:
 		unsigned long int unknown_0F4;
 		unsigned long int unknown_0F8;

@@ -63,6 +63,9 @@ namespace CUSTOM_AI {
 		// Recompute information (only) if refresh delay has been reached
 		// Returns true if information have been recomputed (false is not necessarily an error)
 		bool RecomputeInfo(STRUCT_PLAYER *player);
+
+		// Returns the current target player ID from TacAI information. Returns -1 if invalid/not set.
+		long int GetCurrentTacAITargetPlayerId(STRUCT_PLAYER *player);
 	};
 
 	class PlayerTargeting {

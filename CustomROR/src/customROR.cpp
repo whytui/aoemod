@@ -2358,6 +2358,7 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	}
 	REG_values->ECX_val = myECX;
 	REG_values->EDX_val = myEDX;
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
 
 	if (++CUSTOMROR::crInfo.gameTimerSlowDownCounter > CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor) {
 		CUSTOMROR::crInfo.gameTimerSlowDownCounter = 0;
@@ -2368,55 +2369,7 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 
 	// TO DO: Not the best place to do that...
 	// Can we find a better place to dedicate customROR timer things ?
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-	assert(global != NULL);
-	if (!global) { return; }
-	long int currentGameTime = global->currentGameTime / 1000;
-	if ((CUSTOMROR::crInfo.configInfo.dislikeComputeInterval > 0) &&
-		(currentGameTime >= (CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second + CUSTOMROR::crInfo.configInfo.dislikeComputeInterval))) {
-		CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second = currentGameTime;
-		CUSTOM_AI::playerTargetingHandler.ComputeDislikeValues();
-	}
-
-	// Manage triggers
-	if (CUSTOMROR::crInfo.triggersLastCheckTime_s + 1 <= currentGameTime) {
-		CUSTOMROR::crInfo.triggersLastCheckTime_s = currentGameTime;
-
-		// Timer trigger
-		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
-		memset(&evtInfo, -1, sizeof(evtInfo));
-		evtInfo.currentGameTime_s = currentGameTime;
-		CUSTOMROR::crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_TIMER, evtInfo);
-
-		// "Passive" triggers (we need to test their criteria regulary)
-
-		// Trigger type: Reached some resource value...?
-		memset(&evtInfo, -1, sizeof(evtInfo)); // Reset event info
-		for (int iPlayerId = 1; iPlayerId < global->playerTotalCount; iPlayerId++) {
-			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(iPlayerId);
-			if (player && player->IsCheckSumValid()) {
-				// We set a limitation for performance: only the 4 main resources are supported. We could just remove the limitation in this "for" loop.
-				for (int currentResourceId = AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD;
-					currentResourceId < AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT; currentResourceId++) {
-					float value = player->GetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES)currentResourceId);
-					evtInfo.currentGameTime_s = currentGameTime;
-					evtInfo.playerId = iPlayerId;
-					evtInfo.resourceId = currentResourceId;
-					evtInfo.resourceValue = value;
-					CUSTOMROR::crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_MORE_THAN, evtInfo);
-					CUSTOMROR::crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_LESS_THAN, evtInfo);
-				}
-			}
-		}
-	}
-
-	// Other customROR "timer" treatments: do them only once every second maximum (for performance)
-	if (CUSTOMROR::crInfo.lastCustomRORTimeExecution_gameTime_s + 1 <= currentGameTime) {
-		CUSTOMROR::crInfo.lastCustomRORTimeExecution_gameTime_s = currentGameTime;
-	} else {
-		// No enough time has run since last execution.
-		return;
-	}
+	CUSTOMROR::crCommand.OnGameTimer();
 
 	// If there are pending messages, show them
 	if (traceMessageHandler.HasUnreadMessages() && CUSTOMROR::crInfo.configInfo.showCustomRORNotifications) {
@@ -3632,7 +3585,7 @@ void CustomRORInstance::EntryPointOnAttackableUnitKilled(REG_BACKUP *REG_values)
 	ror_api_assert(REG_values, !actorUnit || actorUnit->IsCheckSumValidForAUnitClass()); // if provided, actor must be valid
 
 	// Custom treatments
-	CUSTOMROR::crCommand.OnAttackableUnitKilled(targetUnit, actorUnit);
+	CUSTOMROR::UNIT::OnAttackableUnitKilled(targetUnit, actorUnit);
 }
 
 

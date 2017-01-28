@@ -2,6 +2,8 @@
 
 
 namespace AOE_STRUCTURES {
+;
+
 
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
@@ -149,6 +151,32 @@ bool ChangeLOSForUniqueUnit(STRUCT_UNIT_TRAINABLE *unit, float newLOS) {
 		AOE_METHODS::UNIT::AddVisibility(unit, unit->ptrStructPlayer, 0, -1);
 	}
 	return true;
+}
+
+
+// Given a list of (actor) units, tell them to interact with a target unit (like a right-click).
+// This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
+// Return true if successful (we don't know if the created command makes sense and if it will actually do something)
+// Compatible with MP games (uses "command" interface)
+bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount,
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
+	if (!actorUnitsList || (actorUnitsCount <= 0) || !target || !target->IsCheckSumValidForAUnitClass()) { return false; }
+	assert(actorUnitsCount < 255); // More would be... more than huge !
+	if (actorUnitsCount >= 255) { return false; } // This can't be normal
+	float posX = target->positionX;
+	float posY = target->positionY;
+	GAME_COMMANDS::CreateCmd_RightClick(actorUnitsList, actorUnitsCount, target->unitInstanceId, target->positionX, target->positionY);
+	return true;
+}
+
+
+// Tell a unit to interact with a target unit (like a right-click).
+// This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
+// Return true if successful (we don't know if the created command makes sense and if it will actually do something)
+// Compatible with MP games (uses "command" interface)
+bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
+	if (!actorUnit || !actorUnit->DerivesFromCommandable()) { return false; }
+	return TellUnitsToInteractWithTarget(&actorUnit, 1, target);
 }
 
 

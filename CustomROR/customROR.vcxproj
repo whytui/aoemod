@@ -174,6 +174,7 @@
     <ClInclude Include="include\TileSetHandler.h" />
     <ClInclude Include="include\traceMessage.h" />
     <ClInclude Include="include\UI_utilities.h" />
+    <ClInclude Include="include\UnitCustomMethods.h" />
     <ClInclude Include="include\unitDefHandling.h" />
     <ClInclude Include="include\UnitGroupAI.h" />
     <ClInclude Include="include\unitHandling.h" />
@@ -240,6 +241,7 @@
     <ClCompile Include="src\StrategyUpdater.cpp" />
     <ClCompile Include="src\TilesetHandler.cpp" />
     <ClCompile Include="src\traceMessages.cpp" />
+    <ClCompile Include="src\UnitCustomMethods.cpp" />
     <ClCompile Include="src\unitDefHandling.cpp" />
     <ClCompile Include="src\unitGroupAI.cpp" />
     <ClCompile Include="src\unitHandling.cpp" />

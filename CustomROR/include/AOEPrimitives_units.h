@@ -32,6 +32,9 @@ bool MoveToTarget_1A0(STRUCT_UNIT_BASE *unit, long int targetUnitId, float range
 // Add a unit to all relevant infAI lists. Cf 0x4BE0D0
 bool AddUnitInInfAILists(STRUCT_INF_AI *infAI, long int unitId);
 
+// Returns true if unit can attack (or convert) target, taking into account faith for priests, etc.
+bool CanAttackTarget(AOE_STRUCTURES::STRUCT_UNIT_BASE *actor, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
+
 // Returns true if a unit can convert another (actually, for priests)
 bool CanConvert(STRUCT_UNIT_BASE *unit, long int targetUnitId);
 

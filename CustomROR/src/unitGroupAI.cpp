@@ -463,6 +463,49 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 }
 
 
+// Triggered when a member of unit group is being attacked. Does nothing if unitGroup==NULL.
+void UnitGroupAI::OnUnitGroupAttacked(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *myUnit, STRUCT_UNIT_BASE *enemyUnit) {
+	if (!unitGroup || !unitGroup->IsCheckSumValid() || !myUnit || !myUnit->IsCheckSumValidForAUnitClass() ||
+		!enemyUnit || !enemyUnit->IsCheckSumValidForAUnitClass() || !myUnit->ptrStructPlayer) {
+		return;
+	}
+	STRUCT_GAME_GLOBAL *global = myUnit->ptrStructPlayer->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid()) { return; }
+	if (GetGameSettingsPtr()->rgeGameOptions.difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_MEDIUM) {
+		return; // easy/medium: do not use this feature.
+	}
+
+	// Make sure unit group has not already been tasked very recently (to avoid accumulation of orders/counter-orders)
+	if (unitGroup &&
+		(global->currentGameTime - unitGroup->lastTaskingTime_ms >= AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
+		// Unit is part of a group. Check if other members can help
+		for (int i = 0; i < myUnit->unitIDsInMyGroup.usedElements; i++) {
+			long int alliedUnitId = myUnit->unitIDsInMyGroup.unitIdArray[i];
+			STRUCT_UNIT_BASE *alliedUnit = global->GetUnitFromId(alliedUnitId);
+			if (alliedUnit && alliedUnit->IsCheckSumValidForAUnitClass() && (alliedUnit != myUnit) && alliedUnit->currentActivity &&
+				AOE_METHODS::UNIT::CanAttackTarget(alliedUnit, enemyUnit)) {
+				STRUCT_UNIT_BASE *alliedUnitCurTarget = global->GetUnitFromId(alliedUnit->currentActivity->targetUnitId);
+				bool canChangeTarget = (alliedUnitCurTarget == NULL);
+				if (alliedUnitCurTarget && alliedUnitCurTarget->IsCheckSumValidForAUnitClass() && alliedUnitCurTarget->unitDefinition) {
+					// Note: do not interrupt allied units that are attacking villagers or wonders
+					canChangeTarget = (alliedUnitCurTarget->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian) &&
+						!UnitDefCanAttack(alliedUnitCurTarget->unitDefinition) && (alliedUnitCurTarget->unitDefinition->DAT_ID1 != CST_UNITID_WONDER);
+				}
+				if (canChangeTarget) {
+					long int sqrdist = (long int)((alliedUnit->positionX - enemyUnit->positionX) * (alliedUnit->positionX - enemyUnit->positionX) +
+						(alliedUnit->positionY - enemyUnit->positionY) * (alliedUnit->positionY - enemyUnit->positionY));
+					if (sqrdist < COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack * COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack) {
+						GAME_COMMANDS::CreateCmd_RightClick(alliedUnit->unitInstanceId, enemyUnit->unitInstanceId,
+							enemyUnit->positionX, enemyUnit->positionY);
+						unitGroup->lastTaskingTime_ms = global->currentGameTime;
+					}
+				}
+			}
+		}
+	}
+}
+
+
 // Task an active attack group, when player situation is critical AND there is a vital central unit (like TC, villager).
 // Returns true if group has been tasked, and standard treatments must be skipped. Default=false (let standard ROR code be executed)
 // The main idea in this case is to retreat at all costs and protect "main" unit

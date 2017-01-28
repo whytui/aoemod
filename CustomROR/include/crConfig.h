@@ -225,6 +225,7 @@ public:
 
 	CUSTOMROR::CONFIG::AutoRebuildFarmConfig *GetAutoRebuildFarmConfig(long int isScenario, long int isDM);
 
+
 	// Constants (not customizable)
 	const float MINVALUE_improvedGameSpeedFactor = (float) 1.1;
 	const long int MINVALUE_collectRORDebugLogs = 0;

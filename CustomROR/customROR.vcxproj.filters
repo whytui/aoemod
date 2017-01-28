@@ -293,6 +293,9 @@
     <ClInclude Include="include\AOEPrimitives_UI_gameMain.h">
       <Filter>Fichiers d%27en-tête\Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="include\UnitCustomMethods.h">
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -480,6 +483,9 @@
     </ClCompile>
     <ClCompile Include="src\drsHandler.cpp">
       <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UnitCustomMethods.cpp">
+      <Filter>Fichiers sources\CustomRorFeatures</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

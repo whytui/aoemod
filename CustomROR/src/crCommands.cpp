@@ -653,29 +653,30 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 
 void CustomRORCommand::ShowF11_zone() {
 	// Show automatically "F11" information at game startup
-	_asm {
-		MOV EAX, AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT
-		MOV EAX, DS:[EAX]
-		MOV ESI, DS:[EAX+0xC24] // struct 9C 67 54 00 (game screen) //settings->ptrGameUIStruct;
-		// This code is directly inspired from 0x480D4F (press on F11)
-		PUSH 0
-		MOV ECX, DWORD PTR SS:[ESI+0x514]
-		PUSH 2
-		MOV EAX, 0x004FAF80
-		CALL EAX
-		MOV ECX, DWORD PTR SS:[ESI+0x540]
-		PUSH 1
-		MOV EDX,DWORD PTR DS:[ECX]
-		CALL DWORD PTR DS:[EDX+0x14]
-		MOV ECX, ESI
-		MOV EAX, 0x004839A0
-		CALL EAX
-		MOV ESI, DWORD PTR SS:[ESI+0x4B8]
-		PUSH 1
-		MOV ECX, ESI
-		MOV EDX, DWORD PTR SS:[ESI]
-		CALL DWORD PTR DS:[EDX+0x20]
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid() || !settings->ptrGameUIStruct || !settings->ptrGameUIStruct->IsCheckSumValid()) {
+		return;
 	}
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = settings->ptrGameUIStruct;
+	AOE_STRUCTURES::STRUCT_ANY_UI *topleft = gameMainUI->topLeftInfoLabel;
+	AOE_STRUCTURES::STRUCT_ANY_UI *popInfo = gameMainUI->populationInfoPanel;
+	AOE_STRUCTURES::STRUCT_ANY_UI *playZone = gameMainUI->gamePlayUIZone;
+	assert(topleft && popInfo && playZone);
+	if (!topleft || !popInfo || !playZone) { return; }
+	const unsigned long int addr1 = 0x004FAF80;
+	const unsigned long int addr2 = 0x004839A0;
+	_asm {
+		MOV ECX, topleft;
+		PUSH 0;
+		PUSH 2;
+		CALL addr1;
+	}
+	AOE_METHODS::UI_BASE::ShowUIObject(popInfo, true);
+	_asm {
+		MOV ECX, gameMainUI;
+		CALL addr2;
+	}
+	AOE_METHODS::UI_BASE::RefreshUIObject(playZone, 1);
 }
 
 
@@ -1325,22 +1326,6 @@ void CustomRORCommand::InitMyGameInfo() {
 }
 
 
-// Returns true if RPG mode is active in current game
-bool CustomRORCommand::IsRpgModeEnabled() {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	assert(settings && settings->IsCheckSumValid());
-	if (!settings || !settings->IsCheckSumValid()) { return false; }
-	if (!settings->rgeGameOptions.isSinglePlayer) { return false; } // Disable in MP
-	// Note: to work well on saved games, this requires customROR's fix on game's IsScenario information.
-	bool isScenario = (settings->isCampaign || settings->rgeGameOptions.isScenario);
-	if (isScenario) {
-		return CUSTOMROR::crInfo.configInfo.enableRPGModeInScenario;
-	} else {
-		return CUSTOMROR::crInfo.configInfo.enableRPGModeInRandomGames;
-	}
-}
-
-
 // Disable AI flags for human players, based on game initial settings (to be used at game startup)
 void CustomRORCommand::DisableAIFlagsForHuman() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
@@ -1688,135 +1673,64 @@ void CustomRORCommand::PrintDateTime() {
 
 
 void CustomRORCommand::PrintMapSeed() {
-	long int *addr = (long int *)AOE_OFFSETS::ADDR_VAR_GAME_SETTINGS_STRUCT;
-	unsigned long int *mapSeed = (unsigned long int *) ((*addr) + 0x34);
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return; }
 	char text[50];
-	sprintf_s(text, 50, "Map seed=%d.", *mapSeed);
+	sprintf_s(text, 50, "Map seed=%ld.", settings->actualMapSeed);
 	AOE_METHODS::CallWriteText(text);
 }
 
 
-// Returns how many units were told to move.
-// Returns <0 if there is an error
-int CustomRORCommand::MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUCT_PLAYER *player, float maxDistance) {
-	if (!player) { return -1; }
-	AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
-	if (!ai || !ai->allMyUnits.unitIdArray) { return -1; }
-	if (ai->structTacAI.landMilitaryUnits.usedElements == 0) { return 0; }
-
-	float posY;
-	float posX;
-	if (!GetGamePositionUnderMouse(&posX, &posY)) { return 0; }
-	if ((posX < 0) || (posY < 0)) { return 0; }
-	int result = 0;
-
-	long int unitCount = ai->allMyUnits.usedElements;
-	if (ai->allMyUnits.arraySize < unitCount) {
-		unitCount = ai->allMyUnits.arraySize;
-		traceMessageHandler.WriteMessage("Invalid element count in AI.allMyUnits !");
+// This is called very frequently when game is running. Not called if game is paused or stuck.
+void CustomRORCommand::OnGameTimer() {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global != NULL);
+	if (!global) { return; }
+	long int currentGameTime = global->currentGameTime / 1000;
+	if ((CUSTOMROR::crInfo.configInfo.dislikeComputeInterval > 0) &&
+		(currentGameTime >= (CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second + CUSTOMROR::crInfo.configInfo.dislikeComputeInterval))) {
+		CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second = currentGameTime;
+		CUSTOM_AI::playerTargetingHandler.ComputeDislikeValues();
 	}
-	long int *myUnitsList = ai->allMyUnits.unitIdArray;
-	for (long int index = 0; index < unitCount; index++) {
-		long int unitId = myUnitsList[index];
-		AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit = NULL;
-		if (unitId > 0) {
-			unit = (AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *)GetUnitStruct(unitId);
-		}
-		if (unit != NULL) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
-			assert(unitDef != NULL);
-			if ((unit->DerivesFromCommandable()) &&
-				(unitDef->unitAIType != TribeAIGroupCivilian) &&
-				(unitDef->unitAIType != TribeAIGroupFishingBoat) &&
-				(unitDef->unitAIType != TribeAIGroupTradeBoat) &&
-				(unitDef->unitAIType != TribeAIGroupTransportBoat) &&
-				(unitDef->unitAIType != TribeAIGroupWarBoat) &&
-				(unitDef->unitAIType != TribeAIGroupArtefact)
-				) {
-				if (AOE_METHODS::UNIT::IsUnitIdle(unit)) {
-					// maxDistance <= 0 : argument is ignored (=> always true). Otherwise: check distance condition
-					if ((maxDistance <= 0) || (GetDistance(posX, posY, unit->positionX, unit->positionY) <= maxDistance)) {
-						GAME_COMMANDS::CreateCmd_RightClick(unit->unitInstanceId, -1, posX, posY);
-						//MoveUnitToTargetOrPosition(unit, NULL, posX, posY); // not MP-compatible at this point
-						result++;
-					}
+
+	// Manage triggers
+	if (CUSTOMROR::crInfo.triggersLastCheckTime_s + 1 <= currentGameTime) {
+		CUSTOMROR::crInfo.triggersLastCheckTime_s = currentGameTime;
+
+		// Timer trigger
+		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
+		memset(&evtInfo, -1, sizeof(evtInfo));
+		evtInfo.currentGameTime_s = currentGameTime;
+		CUSTOMROR::crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_TIMER, evtInfo);
+
+		// "Passive" triggers (we need to test their criteria regulary)
+
+		// Trigger type: Reached some resource value...?
+		memset(&evtInfo, -1, sizeof(evtInfo)); // Reset event info
+		for (int iPlayerId = 1; iPlayerId < global->playerTotalCount; iPlayerId++) {
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(iPlayerId);
+			if (player && player->IsCheckSumValid()) {
+				// We set a limitation for performance: only the 4 main resources are supported. We could just remove the limitation in this "for" loop.
+				for (int currentResourceId = AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD;
+					currentResourceId < AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT; currentResourceId++) {
+					float value = player->GetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES)currentResourceId);
+					evtInfo.currentGameTime_s = currentGameTime;
+					evtInfo.playerId = iPlayerId;
+					evtInfo.resourceId = currentResourceId;
+					evtInfo.resourceValue = value;
+					CUSTOMROR::crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_MORE_THAN, evtInfo);
+					CUSTOMROR::crCommand.ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_LESS_THAN, evtInfo);
 				}
 			}
 		}
 	}
 
-	return result;
-}
-
-
-// Searches all idle units in a specified range (see config) and order them to come at screen location
-// Requires ManageAI !
-// Disabled in MP games.
-void CustomRORCommand::CallNearbyIdleMilitaryUnits() {
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
-	short int playerId = globalStruct->humanPlayerId;
-	if ((playerId < 0) || (playerId > 8)) { return; }
-
-	if (IsMultiplayer()) { return; } // MP protection
-	AOE_STRUCTURES::STRUCT_PLAYER **playerTable = globalStruct->GetPlayerStructPtrTable();
-	if (!playerTable || !playerTable[playerId]) { return; }
-	AOE_STRUCTURES::STRUCT_PLAYER *player = playerTable[playerId];
-	this->MoveIdleMilitaryUnitsToMousePosition(player, (float) CUSTOMROR::crInfo.configInfo.distanceToCallNearbyIdleMilitaryUnits);
-}
-
-
-// Select next idle military unit for current player
-void CustomRORCommand::SelectNextIdleMilitaryUnit() {
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
-	short int playerId = globalStruct->humanPlayerId;
-	if ((playerId < 0) || (playerId > 8)) { return; }
-
-	AOE_STRUCTURES::STRUCT_PLAYER **playerTable = globalStruct->GetPlayerStructPtrTable();
-	if (!playerTable || !playerTable[playerId]) { return; }
-	AOE_STRUCTURES::STRUCT_PLAYER *player = playerTable[playerId];
-	if (!player || !player->ptrCreatableUnitsListLink || (player->ptrCreatableUnitsListLink->listElemCount <= 0)) {
+	// Other customROR "timer" treatments: do them only once every second maximum (for performance)
+	if (CUSTOMROR::crInfo.lastCustomRORTimeExecution_gameTime_s + 1 <= currentGameTime) {
+		CUSTOMROR::crInfo.lastCustomRORTimeExecution_gameTime_s = currentGameTime;
+	} else {
+		// No enough time has run since last execution.
 		return;
-	}
-	assert(player->ptrCreatableUnitsListLink->IsCheckSumValid());
-
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = CUSTOMROR::crInfo.GetMainSelectedUnit(player);
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *firstIgnoredUnit = NULL; // in case seelcted unit = last from list, keep in memory first one to loop back
-	bool ignoreUntilSelectedUnitIsMet = false;
-	if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass()) {
-		ignoreUntilSelectedUnitIsMet = true;
-	}
-
-	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *currentUnitElem = player->ptrCreatableUnitsListLink->lastListElement;
-	while (currentUnitElem) {
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)currentUnitElem->unit;
-		if (unitBase && unitBase->IsCheckSumValidForAUnitClass() && unitBase->unitDefinition && unitBase->unitDefinition->IsCheckSumValidForAUnitClass()) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->unitDefinition;
-			char result;
-			if ((unitBase->transporterUnit == NULL) && IsNonTowerMilitaryUnit(unitDefBase->unitAIType)) { // Excludes towers
-				_asm {
-					MOV ECX, unitBase;
-					MOV EDX, DS:[ECX];
-					CALL DS:[EDX + 0x210]; // unit.IsIdle() (this just test action status : not expensive)
-					MOV result, AL
-				}
-				if (result) {
-					if (!ignoreUntilSelectedUnitIsMet) {
-						SelectOneUnit(player, unitBase, true);
-						return;
-					}
-					if (firstIgnoredUnit == NULL) {
-						firstIgnoredUnit = unitBase;
-					}
-				}
-			}
-			if (unitBase == mainSelectedUnit) {
-				ignoreUntilSelectedUnitIsMet = false;
-			}
-		}
-		currentUnitElem = currentUnitElem->previousElement;
-	}
-	if (firstIgnoredUnit) {
-		SelectOneUnit(player, firstIgnoredUnit, true);
 	}
 }
 
@@ -1851,7 +1765,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	if (IsMultiplayer()) { return; } // can provoke out of sync errors
 
 	// RPG mode, if enabled
-	if (isInGameSpawnUnit && this->IsRpgModeEnabled()) {
+	if (isInGameSpawnUnit && CUSTOMROR::IsRpgModeEnabled()) {
 		assert(actionStruct->actor->IsCheckSumValidForAUnitClass());
 		if (!((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)actionStruct->actor)->IsTypeValid()) {
 			assert(false && "actor not a building");
@@ -1870,7 +1784,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
 	if (!player->IsAIActive(CUSTOMROR::crInfo.hasManageAIFeatureON)) {
-		AutoAssignShortcutToUnit(unit);
+		CUSTOMROR::UNIT::AutoAssignShortcutToUnit(unit);
 	}
 
 	// Get info on parent unit if possible
@@ -1911,8 +1825,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 		if (canInteractWithTarget) {
 			if (unitDef->DerivesFromCommandable() && unitDef->ptrUnitCommandHeader) {
 				if (GetUnitDefCommandForTarget(unit, target, true) != NULL) {
-					TellUnitToInteractWithTarget(unit, target);
-					commandCreated = true;
+					commandCreated = TellUnitToInteractWithTarget(unit, target);
 				}
 			}
 		} else {
@@ -2235,41 +2148,6 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 }
 
 
-// Returns true if a shortcut has been added/modified
-bool CustomRORCommand::AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
-	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
-	// Only care about living units or building
-	if ((unit->unitType != GUT_BUILDING) && (unit->unitType != GUT_TRAINABLE)) {
-		return false;
-	}
-	// We choose not to modify existing shortcut
-	if (unit->shortcutNumber != 0) { return false; }
-
-	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
-	assert(unitDef != NULL);
-	assert(unitDef->IsCheckSumValidForAUnitClass());
-
-	int shortcutId = CUSTOMROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder ? 9 : 1;
-	for (int currentIndex = 1; currentIndex < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS; currentIndex++) {
-		if (CUSTOMROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder) {
-			shortcutId = CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS - currentIndex;
-		}
-		assert(shortcutId < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS);
-		assert(shortcutId >= 0);
-		CONFIG::UnitSpawnShortcutInfo *shortcutInfo = &CUSTOMROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
-		if (shortcutInfo->DAT_ID == unitDef->DAT_ID1) {
-			// This rule matches our unit DAT ID.
-			// If "only 1 unit" is NOT enabled, always assign. Otherwise, check the shortcut number is still unused.
-			if (!shortcutInfo->onlyOneUnit || PLAYER::FindUnitWithShortcutNumberForPlayer(unit->ptrStructPlayer, shortcutId) == NULL) {
-				unit->shortcutNumber = shortcutId;
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-
 // Returns true if a unit should change target to attack tower, false if it should keep its current activity.
 // Default return value is true (for error/invalid cases). Note: it is better to return true in most case to make sure the tower can be destroyed !
 // To be used when target unit is a tower in actor's town
@@ -2517,6 +2395,12 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 	if (!player->IsCheckSumValid()) { return; }
 	if ((tacAI->allVillagers.arraySize <= 0) || (tacAI->allVillagers.usedElements <= 0)) { return; } // No villager to work on
 
+	// Check enemyTower IS actually enemy
+	if (!enemyTower->ptrStructPlayer || (player->ptrDiplomacyStances[enemyTower->ptrStructPlayer->playerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY)) {
+		traceMessageHandler.WriteMessage("towerPanic_LoopOnVillagers: tower does not belong to an enemy/neutral player");
+		return;
+	}
+
 	if (IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
 		// A special case: poor little villager is alone and big nasty tower is strong. Don't commit suicide !
 		if ((tacAI->allVillagers.arraySize <= 1) && (enemyTower->remainingHitPoints > 50) && (*pAssignedUnitsCount <= 0)) {
@@ -2593,7 +2477,7 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 
 		if (valid && attackTower) {
 			// Tell villager to go and attack the tower
-			if (MoveAndAttackTarget(tacAI, unit, (AOE_STRUCTURES::STRUCT_UNIT_BASE*)enemyTower)) {
+			if (GAME_COMMANDS::CreateCmd_RightClick(unit->unitInstanceId, enemyTower->unitInstanceId, enemyTower->positionX, enemyTower->positionY)) {
 				(*pAssignedUnitsCount)++;
 			}
 		}
@@ -3140,72 +3024,6 @@ void CustomRORCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LAB
 }
 
 
-// Handles the event "farm is depleted". NOT called when a farm is destroyed/killed.
-// Warning: this event occurs before the farm unit is actually "killed"
-void CustomRORCommand::OnFarmDepleted(long int farmUnitId) {
-	AOE_STRUCTURES::STRUCT_UNIT_BUILDING *farm = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)GetUnitStruct(farmUnitId);
-	if (!farm || !farm->IsCheckSumValid()) { return; } // (test BUILDING checksum)
-	AOE_STRUCTURES::STRUCT_PLAYER *player = farm->ptrStructPlayer;
-	if (!player || !player->IsCheckSumValid()) { return; }
-	if (player != GetControlledPlayerStruct_Settings()) { return; } // Only for human-controlled player
-	if (!player->ptrCreatableUnitsListLink || !player->ptrCreatableUnitsListLink->IsCheckSumValid()) { return; }
-	if (!IsGameRunning()) {
-		assert(false);
-		traceMessageHandler.WriteMessage("OnFarmDepleted called but game not running");
-		return;
-	}
-
-	// Is feature enabled ?
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || !settings->IsCheckSumValid()) { return; }
-	CUSTOMROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch);
-	if (!autoRebuildFarmConfig->enableAutoRebuildFarms) { return; }
-
-	// Check auto-rebuild farms conditions (parameters)
-	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_FOOD) > autoRebuildFarmConfig->autoRebuildFarms_maxFood) { return; }
-	if (player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_WOOD) < autoRebuildFarmConfig->autoRebuildFarms_minWood) { return; }
-	// Remark : currentFarmCount includes current farm (that is going to be deleted)
-	long int currentFarmCount = PLAYER::GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2); // Include being-built farms
-	bool farmCountConditionIsOK = (currentFarmCount <= autoRebuildFarmConfig->autoRebuildFarms_maxFarms);
-
-	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *farmerUnit = NULL;
-	// Search for the farmer that was working on this farm (first -arbitrary- one if there are many)
-	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *curElem = player->ptrCreatableUnitsListLink->lastListElement;
-	while ((curElem != NULL) && (farmerUnit == NULL)) {
-		if (curElem->unit && curElem->unit->IsCheckSumValidForAUnitClass() && curElem->unit->unitDefinition &&
-			curElem->unit->unitDefinition->IsCheckSumValidForAUnitClass() && (curElem->unit->unitDefinition->DAT_ID1 == CST_UNITID_FARMER)) {
-			AOE_STRUCTURES::STRUCT_ACTION_BASE *curUnitAction = AOE_STRUCTURES::GetUnitAction(curElem->unit);
-			// There is 1 special case when farmer's resourceType is NOT berryBush: when AI player repairs a farm (bug: villager type is farmer instead of repairman)
-			// Also, if more than 1 villager is gathering the same farm, it is possible than some of them have a resourceId = -1.
-			if (curUnitAction && (curUnitAction->actionTypeID == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
-				if ((curUnitAction->targetUnitId == farmUnitId) && (curElem->unit->resourceTypeId == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE)) {
-					farmerUnit = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)curElem->unit;
-				}
-			}
-		}
-		curElem = curElem->previousElement;
-	}
-	if (farmerUnit) {
-		if (!farmCountConditionIsOK) {
-			FarmRebuildInfo *ftmp = CUSTOMROR::crInfo.myGameObjects.FindFarmRebuildInfo(farm->positionX, farm->positionY);
-			if (ftmp && ftmp->forceRebuild) {
-				farmCountConditionIsOK = true; // "Force rebuild" flag is stronger than farm number limitation.
-			}
-		}
-
-		if (farmCountConditionIsOK) {
-			// Add/Update farm rebuild info to trigger construction of a new farm when "this" one is actually removed.
-			FarmRebuildInfo *f = CUSTOMROR::crInfo.myGameObjects.FindOrAddFarmRebuildInfo(farm->positionX, farm->positionY);
-			f->villagerUnitId = farmerUnit->unitInstanceId;
-			f->playerId = player->playerId;
-			f->posX = farm->positionX; // Only useful if just added (otherwise, unchanged)
-			f->posY = farm->positionY; // Only useful if just added (otherwise, unchanged)
-			f->gameTime = (player->ptrGlobalStruct != NULL) ? player->ptrGlobalStruct->currentGameTime : 0;
-		}
-	}
-}
-
-
 // Disable dock for all players on maps where AI does NOT builds docks.
 void CustomRORCommand::DisableWaterUnitsIfNeeded() {
 	if (!CUSTOMROR::crInfo.configInfo.noDockInMostlyLandMaps) { return; }
@@ -3647,34 +3465,6 @@ bool CustomRORCommand::GetLocalizedString(long int stringId, char *buffer, long 
 }
 
 
-// Occurs when a unit is killed by an attack (EXCLUDES suicide with DEL, transported units whose transport is destroyed, conversion)
-void CustomRORCommand::OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit) {
-	if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass()) {
-		return;
-	}
-	if (!killedUnit || !killedUnit->IsCheckSumValidForAUnitClass()) {
-		return;
-	}
-	assert(killedUnit->DerivesFromAttackable());
-	if (!killedUnit->DerivesFromAttackable()) { return; }
-
-	if (this->IsRpgModeEnabled() && actorUnit->DerivesFromTrainable() && (killedUnit->ptrStructPlayer->playerId > 0)) {
-		RPG_MODE::OnUnitKill(killedUnit, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)actorUnit);
-	}
-
-	// Handle internal objects
-	CUSTOMROR::crInfo.myGameObjects.RemoveAllInfoForUnit(killedUnit->unitInstanceId, killedUnit->positionX, killedUnit->positionY);
-	AOE_STRUCTURES::STRUCT_UNIT_BUILDING *killedUnitAsBld = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *) killedUnit;
-	if (killedUnitAsBld->IsCheckSumValid()) {
-		// When destroyed, buildings do not trigger "tacAI.reactToEvent" (they only do it when attacked, but still having HP left)
-		if (killedUnit->ptrStructPlayer && killedUnit->ptrStructPlayer->ptrAIStruct &&
-			IsImproveAIEnabled(killedUnit->ptrStructPlayer->playerId)) {
-			CUSTOM_AI::customAIHandler.OnUnitAttacked(&killedUnit->ptrStructPlayer->ptrAIStruct->structTacAI, killedUnit, actorUnit, false);
-		}
-	}
-}
-
-
 // Entry point when mouse hovers on a unit. foundInteraction and foundHintDllId values are IN/OUT, you are allowed to update them to overload ROR default behaviour.
 // Note: this only impacts mouse displayed cursor and hint text, not which right-click actions are actually possible.
 // If returned cursorToForce is >= 0, then stop other treatments and use this value as new cursor.
@@ -3976,7 +3766,29 @@ bool CustomRORCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTI
 		if (CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
 			AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, "Test debugging");
 		}
-		AOE_METHODS::UI_BASE::GameMainUI_writeTextDebugLines(settings->ptrGameUIStruct, NULL, "Hello", "I hope", "You are", "doing", "well");
+		{
+			STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+			if (!global) { return false; }
+			std::string msg[9];
+			for (int i = 2; i <= 7; i++) {
+				CUSTOM_AI::AIPlayerTargetingInfo *info = CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i);
+				if (!info) { msg[i] = ""; continue; }
+				int curTargetPlayerId = info->GetCurrentTacAITargetPlayerId(global->GetPlayerStruct(i));
+				msg[i] = std::string("p#") + std::to_string(i) + std::string(" targt=") + std::to_string(curTargetPlayerId) +
+					std::string(" ; subdslk vs");
+				for (int j = 1; j < global->playerTotalCount; j++) {
+					msg[i] += std::string(" p") + std::to_string(j) + std::string("=");
+					msg[i] += to_string(info->lastComputedDislikeSubScore[i]);
+				}
+			}
+			AOE_METHODS::UI_BASE::GameMainUI_writeTextDebugLines(settings->ptrGameUIStruct, msg[2].c_str(),
+				msg[3].c_str(),
+				msg[4].c_str(),
+				msg[5].c_str(),
+				msg[6].c_str(),
+				msg[7].c_str()
+				);
+		}
 		return true;
 	default:
 		break;
@@ -4098,7 +3910,7 @@ void CustomRORCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, shor
 		// This is called when a farm is fully depleted (and dies), NOT when a farm is destroyed/killed
 		// Warning: when this event is called, the farm is killed just after, so be careful about modifications done here !
 		long int farmUnitId = arg3;
-		this->OnFarmDepleted(farmUnitId);
+		CUSTOMROR::UNIT::OnFarmDepleted(farmUnitId);
 	}
 
 

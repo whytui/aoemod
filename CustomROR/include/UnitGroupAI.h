@@ -10,6 +10,7 @@
 #include "CustomRORInfo.h"
 #include "customAIMilitaryInfo.h"
 #include "unitHandling.h"
+#include "combatAI.h"
 
 
 using namespace AOE_STRUCTURES;
@@ -158,6 +159,9 @@ namespace CUSTOM_AI {
 		// For all non-supported (or without custom treatment) cases, just return false !
 		// Note: OnTaskActiveGroupsBegin has been called once before calling this (n' times)
 		bool TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup);
+
+		// Triggered when a member of unit group is being attacked. Does nothing if unitGroup==NULL.
+		void OnUnitGroupAttacked(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *myUnit, STRUCT_UNIT_BASE *enemyUnit);
 
 	private:
 		// "static" temporary information, only valid during the task active soliders loop.

@@ -204,5 +204,8 @@ namespace CUSTOMROR {
 	// So we can add custom rules for debugging
 	bool IsImproveAIEnabled(int playerId);
 
+	// Returns true if RPG mode is active in current game
+	bool IsRpgModeEnabled();
+
 }
 

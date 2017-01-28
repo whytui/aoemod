@@ -336,7 +336,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_A04; // +A04. Related with timer status too ?
 		unsigned long int unknown_A08;
 		float unknown_A0C;
-		char difficultyLevelChoice; // +A10. Get in 41C190. Copied into +993
+		AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL difficultyLevelChoice; // +A10. Get in 41C190. Copied into +993=rgeGameOptions.
 		char unknown_A11;
 		char unknown_A12;
 		char unknown_A13;

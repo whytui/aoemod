@@ -45,6 +45,7 @@
 #include "mainCustomAI.h"
 #include "customAIMilitaryInfo.h"
 #include "autoRebuildFarmConfig.h"
+#include "UnitCustomMethods.h"
 
 #pragma once
 
@@ -163,8 +164,6 @@ public:
 	// Initialize internal game-specific variables (to call on each game start/load)
 	void InitMyGameInfo();
 
-	// Returns true if RPG mode is active in current game
-	bool IsRpgModeEnabled();
 
 	// Disable AI flags for human players, based on game initial settings (to be used at game startup)
 	void DisableAIFlagsForHuman();
@@ -200,17 +199,8 @@ public:
 	// Displays game map seed (from game settings) in "in-game" chat
 	void PrintMapSeed();
 
-	// Returns how many units where told to move.
-	// If maxDistance > 0, only units at a maximum distance of maxDistance are told to move.
-	// Returns <0 if there is an error
-	int MoveIdleMilitaryUnitsToMousePosition(AOE_STRUCTURES::STRUCT_PLAYER *player, float maxDistance = 0);
-
-	// Searches all idle units in a specified range (see config) and order them to come at screen location
-	// Requires ManageAI !
-	void CallNearbyIdleMilitaryUnits();
-
-	// Select next idle military unit for current player
-	void SelectNextIdleMilitaryUnit();
+	// This is called very frequently when game is running. Not called if game is paused or stuck.
+	void OnGameTimer();
 
 	// Main method to manage "OnCreate" event for unit.
 	// This event occurs after the unit is created and added in player/global structs/lists.
@@ -235,10 +225,6 @@ public:
 
 	// Custom Fixes/features on player.removeUnit calls.
 	void OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable);
-
-	// Returns true if a shortcut has been added/modified
-	bool AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
-
 
 	// Returns true if a unit should change target to new one, false if it should keep attacking current one.
 	// To be used when target unit is a tower in actor's town
@@ -301,10 +287,6 @@ public:
 	void WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *f11panel, char *bufferToWrite, char *defaultFormat,
 		char *localizedText, long int currentPop, long int houseMaxPop);
 
-	// Handles the event "farm is depleted". NOT called when a farm is destroyed/killed.
-	// Warning: this event occurs before the farm unit is actually "killed"
-	void OnFarmDepleted(long int farmUnitId);
-
 	// Disable dock for all players on maps where AI does NOT builds docks.
 	void DisableWaterUnitsIfNeeded();
 
@@ -343,9 +325,6 @@ public:
 	// Returns true if a (custom) localized string has been written into buffer.
 	bool GetLocalizedString(long int stringId, char *buffer, long int bufferSize);
 
-
-	// Occurs when a unit is killed by an attack (EXCLUDES suicide with DEL, transported units whose transport is destroyed, conversion)
-	void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit);
 
 	// Entry point when mouse hovers on a unit. foundInteraction and foundHintDllId values are IN/OUT, you are allowed to update them to overload ROR default behaviour.
 	// Note: this only impacts mouse displayed cursor and hint text, not which right-click actions are actually possible.

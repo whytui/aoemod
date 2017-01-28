@@ -45,6 +45,31 @@ bool AddUnitToGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, STRUCT_UNIT
 }
 
 
+// Find unit's unit group, if any. NULL if not found
+STRUCT_UNIT_GROUP *FindUnitGroup(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid()) {
+		return NULL;
+	}
+	STRUCT_PLAYER *player = unit->ptrStructPlayer;
+	if (!player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid() || (player->ptrAIStruct->structTacAI.unitGroupsCount <= 0)) {
+		return NULL;
+	}
+	long int leaderUnitId = unit->groupLeaderUnitId;
+	if (leaderUnitId < 0) {
+		leaderUnitId = unit->unitInstanceId;
+	}
+	STRUCT_UNIT_GROUP *fakeFirstGroup = &player->ptrAIStruct->structTacAI.fakeFirstUnitGroupElem;
+	STRUCT_UNIT_GROUP *curGrp = fakeFirstGroup->next;
+	while (curGrp && (curGrp != fakeFirstGroup)) {
+		if (curGrp->commanderUnitId == leaderUnitId) {
+			return curGrp;
+		}
+		curGrp = curGrp->next;
+	}
+	return NULL;
+}
+
+
 // Apply a task a unit group (will probably give commands to units)
 // Warning: this does NOT set unitGroup.currentTask/resetOrg, you have to set it before (and set target, ..., if necessary)
 bool ApplyTaskToUnitGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI *tacAI, AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS taskId,

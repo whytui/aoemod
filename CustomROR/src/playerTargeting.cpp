@@ -24,6 +24,18 @@ void AIPlayerTargetingInfo::ResetInfo() {
 }
 
 
+// Returns the current target player ID from TacAI information. Returns -1 if invalid/not set.
+long int AIPlayerTargetingInfo::GetCurrentTacAITargetPlayerId(STRUCT_PLAYER *player) {
+	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) {
+		return -1;
+	}
+	if (player->ptrAIStruct->structTacAI.targetPlayers.usedElements <= 0) { 
+		return -1;
+	}
+	return player->ptrAIStruct->structTacAI.targetPlayers.unitIdArray[0];
+}
+
+
 // Recompute information (only) if refresh delay has been reached (cf updateDetailedDislikeInfoMaxDelay)
 // Returns true if information have been recomputed (false is not necessarily an error)
 bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
@@ -208,9 +220,9 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 	long int curDelay = global->currentGameTime - this->lastTargetPlayerChangeGameTime;
 	if (curDelay < 0) { curDelay = 0; }
 	if (this->lastTargetPlayerChangeGameTime <= 0) { curDelay = 1000000; }
-	if (player->ptrAIStruct->structTacAI.targetPlayers.usedElements > 0)
+	long int currentTargetPlayerId = this->GetCurrentTacAITargetPlayerId(player);
+	if (currentTargetPlayerId >= 0)
 	{
-		int currentTargetPlayerId = player->ptrAIStruct->structTacAI.targetPlayers.unitIdArray[0];
 		long int extraValueDecay = ((curDelay / 1000) * TARGETING_CONST::extraValueForCurrentTargetDecayBy100SecondsPeriod) / 100;
 		long int extraValue = TARGETING_CONST::extraValueForCurrentTarget - extraValueDecay;
 		if (extraValue < 0) { extraValue = 0; }
@@ -283,7 +295,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 	if (attackWinningPlayerFactor > 100) { attackWinningPlayerFactor = 100; }
 	if (attackWinningPlayerFactor < 0) { attackWinningPlayerFactor = 0; }
 
-	// TEST: disable targeting when military population is very low ?
+	// TEST: disable targeting when my military population is very low ?
 	int currentVillagerCount = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CIVILIAN_POPULATION);
 	int totalPopulation = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CURRENT_POPULATION);
 	if (totalPopulation - currentVillagerCount < 3) {
@@ -423,19 +435,6 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 			playerTargetInfo->lastTargetPlayerChangeGameTime = global->currentGameTime;
 		}
 	}
-#ifdef _DEBUG
-	// TEST
-	/*std::string msg = "p#";
-	msg += std::to_string(player->playerId);
-	msg += ": target=";
-	msg += std::to_string(mostDislikedPlayerId);
-	CallWriteText(msg.c_str());*/
-	/*std::string msg = "p#";
-	msg += std::to_string(player->playerId);
-	msg += " target=";
-	msg += std::to_string(mostDislikedPlayerId);
-	traceMessageHandler.WriteMessageNoNotification(msg);*/
-#endif
 	return mostDislikedPlayerId;
 }
 

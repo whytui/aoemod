@@ -55,13 +55,33 @@ bool CanConvert(STRUCT_UNIT_BASE *unit, long int targetUnitId) {
 		return false;
 	}
 	STRUCT_UNIT_ACTIVITY *activity = unit->currentActivity;
-	if (!activity) { return false; }
+	if (!activity || !activity->IsCheckSumValid()) { return false; }
 	long int result;
 	_asm {
 		MOV ECX, activity;
 		PUSH targetUnitId;
 		MOV EDX, DS:[ECX];
 		CALL DS:[EDX + 0xC4];
+		MOV result, EAX;
+	}
+	return (result != 0);
+}
+
+
+
+// Returns true if unit can attack target, taking into account faith for priests, etc.
+bool CanAttackTarget(AOE_STRUCTURES::STRUCT_UNIT_BASE *actor, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
+	if (!actor || !target || !actor->IsCheckSumValidForAUnitClass() || !target->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	STRUCT_UNIT_ACTIVITY *activity = actor->currentActivity;
+	if (!activity || !activity->IsCheckSumValid()) { return false; }
+	long int result;
+	_asm {
+		MOV ECX, activity;
+		PUSH target; // arg1 is unit pointer, NOT unit ID.
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX + 0x50];
 		MOV result, EAX;
 	}
 	return (result != 0);
@@ -82,6 +102,7 @@ float CalcDamage(STRUCT_UNIT_BASE *attacker, STRUCT_UNIT_BASE *defender) {
 	}
 	return result;
 }
+
 
 // All-unit classes compatible getter for reload time.
 float GetReloadTime1(STRUCT_UNIT_BASE *unit) {

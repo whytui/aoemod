@@ -53,7 +53,7 @@ static void SetFocus(AOE_STRUCTURES::STRUCT_ANY_UI *parent, AOE_STRUCTURES::STRU
 }
 
 
-// Show/Hide a UI object
+// Show/Hide a UI object (cf CALL DS:[EDX+0x14])
 static void ShowUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, bool show) {
 	if (!object) { return; }
 	long int arg = show ? 1 : 0;
@@ -65,7 +65,7 @@ static void ShowUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, bool show) {
 	}
 }
 
-// Refresh a UI object
+// Refresh a UI object (cf CALL DS:[EDX+0x20])
 static void RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object) {
 	if (!object) { return; }
 	_asm {

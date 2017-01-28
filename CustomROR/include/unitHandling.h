@@ -11,11 +11,13 @@
 #include "unitDefHandling.h"
 #include "mainStructuresHandling.h"
 #include "playerHandling.h"
+#include "AOEPrimitives_gameCommand.h"
 
-/* This file contains primitives about units handling */
+/* This file contains primitives about units handling = basic operations */
 
 
 namespace AOE_STRUCTURES {
+;
 
 // Securely get an action pointer without having to re-write all checks/gets for intermediate objects.
 // Return NULL if one of the objects is NULL/missing
@@ -47,5 +49,17 @@ bool IsUnitPositionKnown(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *targetUnit);
 // Change line of sight for a unique unit. Fails if unit does NOT have a dedicated unit definition.
 bool ChangeLOSForUniqueUnit(STRUCT_UNIT_TRAINABLE *unit, float newLOS);
 
+
+// Given a list of (actor) units, tell them to interact with a target unit (like a right-click).
+// This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
+// Return true if successful (we don't know if the created command makes sense and if it will actually do something)
+// Compatible with MP games (uses "command" interface)
+bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
+
+// Tell a unit to interact with a target unit (like a right-click).
+// This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
+// Return true if successful (we don't know if the created command makes sense and if it will actually do something)
+// Compatible with MP games (uses "command" interface)
+bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
 
 }
