@@ -300,10 +300,6 @@ public:
 	// currentLine is incremented if lines are added.
 	void DisplayCustomBuildingAttributesInUnitInfo(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine);
 
-	// Get a localized string to overload ROR's string localization system (language(x).dll)
-	// Returns true if a (custom) localized string has been written into buffer.
-	bool GetLocalizedString(long int stringId, char *buffer, long int bufferSize);
-
 
 	// Entry point when mouse hovers on a unit. foundInteraction and foundHintDllId values are IN/OUT, you are allowed to update them to overload ROR default behaviour.
 	// Note: this only impacts mouse displayed cursor and hint text, not which right-click actions are actually possible.

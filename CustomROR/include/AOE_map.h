@@ -20,7 +20,9 @@ using namespace AOE_STRUCTURES;
 using namespace AOE_CONST_FUNC;
 
 
-extern AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId);
+namespace AOE_STRUCTURES {
+	extern STRUCT_UNIT_BASE *GetUnitStruct(long int unitId);
+}
 
 
 namespace AOE_METHODS {

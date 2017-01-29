@@ -39,7 +39,7 @@ using namespace UI_BASE;
 // Note that settings->currentUIStatus is unchanged when showing such dialog message.
 static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, long int hSize, long int vSize) {
 	char *dlgName = (char *)AOE_CONST_INTERNAL::customDialogScreenName;
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
 	if (settings == NULL) { return 0; }
 	unsigned long int fct = 0;
 	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = *(AOE_STRUCTURES::STRUCT_ANY_UI **) AOE_OFFSETS::ADDR_VAR_CURRENT_UI_OBJECT;
@@ -354,7 +354,7 @@ static void AOE_DiamondMapDrawAllTiles(AOE_STRUCTURES::STRUCT_UI_DIAMOND_MAP *di
 
 // Refresh diamond map (draw all tiles) in editor or in-game (automatically finds the correct structure)
 static bool DiamondMapDrawAllTiles() {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
 	if (settings && settings->IsCheckSumValid()) {
 		AOE_STRUCTURES::STRUCT_UI_DIAMOND_MAP *diamMap = NULL;
 		if ((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
@@ -389,7 +389,7 @@ static void AOE_EditorOpenMenu(AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *e
 
 // Returns game zone UI object for both in-game or scenario editor. Returns NULL if not found.
 static AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *GetGameZone() {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = GetCurrentScreen();
 	assert(currentUI);

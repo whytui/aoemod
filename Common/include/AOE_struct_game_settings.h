@@ -276,7 +276,7 @@ namespace AOE_STRUCTURES {
 		// 0x1B0
 		AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentUIStatus; // 0=loading,2=inMenu,4=playing,7=editor
 		AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES mouseActionType; // +1B4. "Game mode". Set this during game, you'll be able to edit the map !! userSelected* fields
-		long int gameModeSub; // Values 1,4,6,... ? SubMouseActionType ? Used when mouseActionType=6 (villager build menu) or in editor. Seen 1=editor_moveUnit?, 3, 4(editor_putunit?). Unsure !
+		long int gameModeSub; // +1B8. Values 1,4,6,... ? SubMouseActionType ? Used when mouseActionType=6 (villager build menu) or in editor. Seen 1=editor_moveUnit?, 3, 4(editor_putunit?). Unsure !
 		long int unknown_1BC;
 		// 0x1C0
 		STRUCT_CURSOR_SLP_INFO *mousePointer; // +1C0. Pointer to something about mouse cursors ? Same as *(0x582EDC)

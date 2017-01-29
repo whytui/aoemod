@@ -3312,14 +3312,6 @@ void CustomRORCommand::DisplayCustomBuildingAttributesInUnitInfo(AOE_STRUCTURES:
 }
 
 
-// Get a localized string to overload ROR's string localization system (language(x).dll)
-// Returns true if a (custom) localized string has been written into buffer.
-bool CustomRORCommand::GetLocalizedString(long int stringId, char *buffer, long int bufferSize) {
-	if (!buffer) { return false; }
-	return localizationHandler.ReadTranslation((short int)stringId, buffer, bufferSize);
-}
-
-
 // Entry point when mouse hovers on a unit. foundInteraction and foundHintDllId values are IN/OUT, you are allowed to update them to overload ROR default behaviour.
 // Note: this only impacts mouse displayed cursor and hint text, not which right-click actions are actually possible.
 // If returned cursorToForce is >= 0, then stop other treatments and use this value as new cursor.

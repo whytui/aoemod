@@ -3539,7 +3539,7 @@ void CustomRORInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 		long int bufferSize = GetIntValueFromRORStack(REG_values, 0x0C);
 #endif
 		buffer[bufferSize - 1] = 0; // Just in case.
-		bool successfullyFoundString = CUSTOMROR::crCommand.GetLocalizedString(stringDllId, buffer, bufferSize);
+		bool successfullyFoundString = CUSTOMROR::GetLocalizedString(stringDllId, buffer, bufferSize);
 		if (successfullyFoundString) {
 			ChangeReturnAddress(REG_values, returnAddress); // (RETN 0x0C instruction) Prevent ROR from searching in language(x).dll
 		}

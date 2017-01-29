@@ -212,5 +212,10 @@ namespace CUSTOMROR {
 	// Returns false if we want to disable completely ROR's method, and use customROR methods for panic mode instead (recommended)
 	bool ShouldUseOriginalPanicModeMethod();
 
+
+	// Get a localized string to overload ROR's string localization system (language(x).dll)
+	// Returns true if a (custom) localized string has been written into buffer.
+	bool GetLocalizedString(long int stringId, char *buffer, long int bufferSize);
+
 }
 

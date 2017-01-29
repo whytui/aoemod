@@ -11,6 +11,9 @@ This file contains primitives mainly to retrieve main structures from global var
 */
 
 
+namespace AOE_STRUCTURES {
+;
+
 // Returns a pointer to global game struct
 // Warning: can sometimes return NULL when called very early (when the game has just been run)
 AOE_STRUCTURES::STRUCT_GAME_GLOBAL* GetGameGlobalStructPtr();
@@ -51,3 +54,4 @@ bool IsMultiplayer();
 // Returns true if the game is currently running
 bool IsGameRunning();
 
+}

@@ -1,6 +1,8 @@
 #include "../include/mainStructuresHandling.h"
 
-using namespace AOE_STRUCTURES;
+namespace AOE_STRUCTURES {
+;
+
 
 // Returns a pointer to global game struct
 // Warning: can sometimes return NULL when called very early (when the game has just been run)
@@ -36,7 +38,7 @@ STRUCT_ANY_UI *GetCurrentUIStruct() {
 
 // Returns currently human-controlled player struct according to game settings struct
 STRUCT_PLAYER *GetControlledPlayerStruct_Settings() {
-	STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
+	STRUCT_GAME_SETTINGS *gameSettings = AOE_STRUCTURES::GetGameSettingsPtr();
 	STRUCT_PLAYER *player;
 	_asm {
 		MOV ECX, gameSettings;
@@ -51,7 +53,7 @@ STRUCT_PLAYER *GetControlledPlayerStruct_Settings() {
 // Returns player struct for given player id
 // returns NULL if incorrect player id or if some structures are invalid/not found
 STRUCT_PLAYER *GetPlayerStruct(long int playerId) {
-	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	STRUCT_GAME_GLOBAL *global = AOE_STRUCTURES::GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid() || global->playerTotalCount < 1) { return NULL; }
 	if ((playerId < 0) || (playerId >= global->playerTotalCount) || (playerId >= 9)) {
 		return NULL;
@@ -68,15 +70,15 @@ STRUCT_PLAYER *GetPlayerStruct(long int playerId) {
 // Only works for creatable (unitId >= 0). This is just a choice to avoid writing same bugs as ROR
 // (some functions use -1 as <No unit> but get an irrevant unit struct then because -1 is not tested before calling getUnitStruct(...))
 AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitStruct(long int unitId) {
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = AOE_STRUCTURES::GetGameGlobalStructPtr();
 	if (!global || (unitId < 0)) { return NULL; }
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *result;
 	_asm {
-		MOV ECX, global
-			PUSH unitId
-			MOV EAX, 0x005206D0
-			CALL EAX
-			MOV result, EAX
+		MOV ECX, global;
+		PUSH unitId;
+		MOV EAX, 0x005206D0;
+		CALL EAX;
+		MOV result, EAX;
 	}
 	return result;
 }
@@ -105,7 +107,7 @@ bool IsMultiplayer() {
 
 // Returns true if the game is currently running
 bool IsGameRunning() {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) {
 		return false;
 	}
@@ -118,4 +120,6 @@ bool IsGameRunning() {
 	}
 
 	return (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING);
+}
+
 }

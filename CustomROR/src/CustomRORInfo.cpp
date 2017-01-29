@@ -479,3 +479,11 @@ bool CUSTOMROR::ShouldUseOriginalPanicModeMethod() {
 }
 
 
+// Get a localized string to overload ROR's string localization system (language(x).dll)
+// Returns true if a (custom) localized string has been written into buffer.
+bool CUSTOMROR::GetLocalizedString(long int stringId, char *buffer, long int bufferSize) {
+	if (!buffer) { return false; }
+	return localizationHandler.ReadTranslation((short int)stringId, buffer, bufferSize);
+}
+
+
