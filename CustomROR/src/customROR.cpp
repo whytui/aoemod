@@ -1047,7 +1047,7 @@ void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 	short int enemyPlayerId = (short int)GetIntValueFromRORStack(REG_values, 0x98);
 
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	if (CUSTOMROR::crCommand.ShouldUseOriginalPanicModeMethod()) {
+	if (CUSTOMROR::ShouldUseOriginalPanicModeMethod()) {
 		// if it returns true, it means we want to force usage of ROR *original* (crappy) panic mode code.
 		// So let's do it by forcing return address (skip the JMP 004E254F)
 		// However, we first do the check on "last execution" (this test has been overriden by binary change, and is not done anymore in ROR code).
@@ -1089,7 +1089,7 @@ void CustomRORInstance::TacAIOnUnitAttacked(REG_BACKUP *REG_values) {
 
 	// ROR original method for panic mode is deactivated: call customROR treatments.
 	// Make sure to remain consistent about this !
-	bool usedRorPanicModeMethod = CUSTOMROR::crCommand.ShouldUseOriginalPanicModeMethod();
+	bool usedRorPanicModeMethod = CUSTOMROR::ShouldUseOriginalPanicModeMethod();
 
 	// Run custom AI treatments for "being attacked" event
 	// ...and runs custom panic mode treatments *if usedRorPanicModeMethod=true*.

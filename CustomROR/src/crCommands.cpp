@@ -1654,13 +1654,6 @@ void CustomRORCommand::AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI
 }
 
 
-// Returns true if we want to use ROR's method to handle panic mode (not recommended): not optimized, and not very good
-// Returns false if we want to disable completely ROR's method, and use customROR methods for panic mode instead (recommended)
-bool CustomRORCommand::ShouldUseOriginalPanicModeMethod() {
-	return (CUSTOMROR::crInfo.configInfo.improveAILevel == 0);
-}
-
-
 void CustomRORCommand::PrintDateTime() {
 	time_t rawtime;
 	char timebuf[50];
@@ -1768,7 +1761,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 	if (isInGameSpawnUnit && CUSTOMROR::IsRpgModeEnabled()) {
 		assert(actionStruct->actor->IsCheckSumValidForAUnitClass());
 		if (!((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)actionStruct->actor)->IsTypeValid()) {
-			assert(false && "actor not a building");
+			assert(false && "actor is not a building");
 			return;
 		}
 		if (RPG_MODE::MakeEpicUnitWithRandomCondition((AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)unit)) {

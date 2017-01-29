@@ -471,3 +471,11 @@ bool CUSTOMROR::IsRpgModeEnabled() {
 	}
 }
 
+
+// Returns true if we want to use ROR's method to handle panic mode (not recommended): not optimized, and not very good
+// Returns false if we want to disable completely ROR's method, and use customROR methods for panic mode instead (recommended)
+bool CUSTOMROR::ShouldUseOriginalPanicModeMethod() {
+	return (CUSTOMROR::crInfo.configInfo.improveAILevel == 0);
+}
+
+

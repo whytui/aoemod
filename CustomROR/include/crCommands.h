@@ -249,11 +249,6 @@ public:
 	bool ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai);
 
 
-	// Returns true if we want to use ROR's method to handle panic mode (not recommended): not optimized, and not very good
-	// Returns false if we want to disable completely ROR's method, and use customROR methods for panic mode instead (recommended)
-	bool ShouldUseOriginalPanicModeMethod();
-
-
 	// Technical fix for a method about elevation application when generating map. Original method contains many bugs.
 	void Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo);
 
