@@ -21,16 +21,45 @@ This file contains primitives to manipulate unit definition objects.
 
 using namespace AOE_STRUCTURES;
 
+
+// External dependency because CUSTOMROR fixes some bugs in player handling primitives
+namespace STRATEGY {
+	extern void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_PLAYER *player);
+}
+
 namespace AOE_METHODS {
+namespace PLAYER {
+;
 
-	void ClearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
-	// select: if true, add unit to selection. If false, remove from selection.
-	bool SelectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool select);
+void ClearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
-	// Return the matching score element
-	// Warning: May return NULL.
-	AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId);
+// select: if true, add unit to selection. If false, remove from selection.
+bool SelectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool select);
+
+// Return the matching score element
+// Warning: May return NULL.
+AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId);
+
+
+// Call this when changing a player from "AI control" disabled to enabled
+// This will run various actions to fix strategy, etc (example: do not build buildings human already built).
+// The method will do nothing if player is NULL or if its AI structure is NULL.
+void CheckAIWhenEnablingAIControl(int playerId);
+void CheckAIWhenEnablingAIControl(AOE_STRUCTURES::STRUCT_PLAYER *player);
+
+// Disable AI flags for human players, based on game initial settings (to be used at game startup)
+void DisableAIFlagsForHuman();
+// Restore AI flags based on human-controlled playerID (to be used in SP games only)
+void RestoreAllAIFlags();
+void SetAllAIFlags();
+
+// Change human control to another player and set AI flags accordingly (if updateAIFlags is true)
+void ChangeControlledPlayer(int playerId, bool updateAIFlags);
+
+
+}
+
 
 }
 

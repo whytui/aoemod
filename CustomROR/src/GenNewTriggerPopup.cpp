@@ -154,5 +154,5 @@ void GenNewTriggerPopup::LoadTriggerTextFromGameInfo() {
 
 void GenNewTriggerPopup::SaveTriggerTextToGameInfo() {
 	// Use dedicated API to update trigger information
-	CUSTOMROR::crCommand.WriteTriggersInGameData(this->edtTriggerText->pTypedText);
+	CUSTOMROR::TRIGGER::WriteTriggersInGameData(this->edtTriggerText->pTypedText);
 }

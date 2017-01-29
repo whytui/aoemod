@@ -544,7 +544,7 @@ void CustomRORInstance::InitScenarioInfoTextData(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scenarioInfo = (AOE_STRUCTURES::STRUCT_SCENARIO_INFO *)REG_values->ESI_val;
 	ror_api_assert(REG_values, scenarioInfo && scenarioInfo->IsCheckSumValid());
 
-	CUSTOMROR::crCommand.InitScenarioInfoTextData(scenarioInfo);
+	CUSTOMROR::TRIGGER::InitScenarioInfoTextData(scenarioInfo);
 }
 
 
@@ -1027,7 +1027,7 @@ void CustomRORInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 
 	// Update triggers data before saving, 
 	// so that when loading game we will have relevant trigger information (which have already been executed, etc)
-	CUSTOMROR::crCommand.WriteTriggersFromInternalToGameData(true);
+	CUSTOMROR::TRIGGER::WriteTriggersFromInternalToGameData(true);
 }
 
 
@@ -2699,7 +2699,7 @@ void CustomRORInstance::OnGameInitDisableResearchesEvent(REG_BACKUP *REG_values)
 	}
 
 	// Custom treatments
-	CUSTOMROR::crCommand.OnGameInitDisableResearchesEvent(playerResearchInfo);
+	CUSTOMROR::TRIGGER::OnGameInitDisableResearchesEvent(playerResearchInfo);
 
 	// Do not modify below. Make sure this is always executed (do not RETURN before)
 	const unsigned long int updateResearchStatuses = 0x4EB38D;

@@ -46,6 +46,7 @@
 #include "customAIMilitaryInfo.h"
 #include "autoRebuildFarmConfig.h"
 #include "UnitCustomMethods.h"
+#include "GameTriggerHandling.h"
 
 #pragma once
 
@@ -157,26 +158,9 @@ public:
 	// Set a SN number value in both strategy AI and tac AI.
 	void SetSNNumberInStrategyAndTacAI(AOE_STRUCTURES::STRUCT_AI *ai, AOE_CONST_FUNC::SN_NUMBERS snNumber, long int value);
 
-	// This is called while scenarioInfo structure is read from a file
-	// Scenario texts (including players strategies) havealready been read, but not other information, be careful.
-	void InitScenarioInfoTextData(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scenarioInfo);
-
 	// Initialize internal game-specific variables (to call on each game start/load)
 	void InitMyGameInfo();
 
-
-	// Disable AI flags for human players, based on game initial settings (to be used at game startup)
-	void DisableAIFlagsForHuman();
-	// Restore AI flags based on human-controlled playerID (to be used in SP games only)
-	void RestoreAllAIFlags();
-	void SetAllAIFlags();
-	// Change human control to another player and set AI flags accordingly (if updateAIFlags is true)
-	void ChangeControlledPlayer(int playerId, bool updateAIFlags);
-	// Call this when changing a player from "AI control" disabled to enabled
-	// This will run various actions to fix strategy, etc (example: do not build buildings human already built).
-	// The method will do nothing if player is NULL or if its AI structure is NULL.
-	void CheckAIWhenEnablingAIControl(int playerId);
-	void CheckAIWhenEnablingAIControl(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 	// This fixes nextStrategyAIExecutionCounter flag for all players (useful for loaded games)
 	void FixGameStartAIInitForPlayers();
@@ -369,48 +353,9 @@ public:
 	long int CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG *ptrDialog, unsigned long int ptrSender);
 
 
-	// ---------------------------------
-	// Some Entry points / triggers
-
 	// This is called on GameSettings.NotifyEvent game method call.
 	void EntryPoint_GameSettingsNotifyEvent(long int eventId, short int playerId, long int arg3, long int arg4, long int arg5);
 
-	// This is dedicated to triggers handling on "GameSettingsNotifyEvent" event.
-	void ManageTriggersOnGameNotifyEvent(long int eventId, short int playerId, long int arg3, long int arg4, long int arg5);
-
-	// Entry point to make custom treatments at "disable research" init at game start (for scenarios)
-	// This is only executed for scenarios, not DM/RM !
-	void OnGameInitDisableResearchesEvent(AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *playerResearchInfo);
-
-	// Manage disable (via trigger) units for villager, house, fishing ship, trade ship, farms
-	// This method should be called at game start, after "initial" technologies have been applied, so we can override some (and force to disable again some units)
-	void ManageTriggerDisableUnitsForExceptions();
-	// Manage disable (via trigger) units for farms
-	// Farm is enabled by market construction, which may occur both "ingame" or at game loading (if a market exists, or if starting at bronze).
-	void ManageDisableUnitsForFarms(AOE_STRUCTURES::STRUCT_PLAYER *player);
-
-	// Triggers
-	void ReloadTriggersFromGameData();
-	void ReloadTriggersFromGameData(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scenarioInfo);
-	// Write trigger to game data, using customROR internal data.
-	bool WriteTriggersFromInternalToGameData(bool onlyEnabledTriggers);
-	// Write trigger to game data, using provided text trigger data.
-	bool WriteTriggersInGameData(char *triggerText);
-	// Export CustomROR's internal data triggers to Trigger text format.
-	std::string GetTriggerTextFromInternalData();
-
-	// Manage triggers execution for a specific event
-	void ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES evt);
-	void ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES evt, CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER &evtInfo);
-
-	// Execute a trigger (considering requirements are OK)
-	void ExecuteTriggerAction(CR_TRIGGERS::crTrigger *trigger);
-	private:
-	// Just execute a "standard" trigger. this only does the action part, does not check and does not manage other impacts.
-	// Do not call directly.
-	void Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger);
-
-	public:
 
 };
 

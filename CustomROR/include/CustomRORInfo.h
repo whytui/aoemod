@@ -64,8 +64,8 @@ public:
 	bool hasCustomSelectedUnitsMemory; // Player struct size is extended to host more selected units
 	bool hasRemovePlayerInitialAgeInScenarioInit;
 	// Internal variables
-	vector<short int> unitDefToDisable[9];
-	vector<short int> researchesToDisable[9];
+	vector<short int> unitDefToDisable[9]; // List of unitDefIDs to disable because of triggers (for scenarios)
+	vector<short int> researchesToDisable[9]; // List of researchIDs to disable because of triggers (for scenarios)
 	CrGameObjects myGameObjects;
 	int gameTimerSlowDownCounter;
 	long int CollectedTimerIntervalsIndex;

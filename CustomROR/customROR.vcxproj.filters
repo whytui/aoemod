@@ -296,6 +296,9 @@
     <ClInclude Include="include\UnitCustomMethods.h">
       <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
     </ClInclude>
+    <ClInclude Include="include\GameTriggerHandling.h">
+      <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -485,6 +488,9 @@
       <Filter>Fichiers sources\Primitives</Filter>
     </ClCompile>
     <ClCompile Include="src\UnitCustomMethods.cpp">
+      <Filter>Fichiers sources\CustomRorFeatures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameTriggerHandling.cpp">
       <Filter>Fichiers sources\CustomRorFeatures</Filter>
     </ClCompile>
   </ItemGroup>

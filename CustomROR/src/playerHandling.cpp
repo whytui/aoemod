@@ -3,6 +3,9 @@
 
 
 namespace AOE_METHODS {
+namespace PLAYER {
+;
+
 
 void ClearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) {
@@ -60,7 +63,131 @@ AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYE
 }
 
 
+// Call this when changing a player from "AI control" disabled to enabled
+// This will run various actions to fix strategy, etc (example: do not build buildings human already built).
+// The method will do nothing if player is NULL or if its AI structure is NULL.
+void CheckAIWhenEnablingAIControl(int playerId) {
+	CheckAIWhenEnablingAIControl(GetPlayerStruct(playerId));
+}
 
+// Call this when changing a player from "AI control" disabled to enabled
+// This will run various actions to fix strategy, etc (example: do not build buildings human already built).
+// The method will do nothing if player is NULL or if its AI structure is NULL.
+void CheckAIWhenEnablingAIControl(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+	STRATEGY::UpdateStrategyWithUnreferencedExistingUnits(player);
+}
+
+
+// Disable AI flags for human players, based on game initial settings (to be used at game startup)
+void DisableAIFlagsForHuman() {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global) { return; }
+
+	bool isSinglePlayer = !IsMultiplayer();
+
+	AOE_STRUCTURES::STRUCT_MP_COMMUNICATION *unknownStruct = *(AOE_STRUCTURES::STRUCT_MP_COMMUNICATION **)AOE_OFFSETS::ADDR_MP_COMM_STRUCT;
+	assert(unknownStruct != NULL);
+	int aValidAIPlayer = -1;
+	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
+		bool thisPlayerIsHuman = (isSinglePlayer && (loopPlayerId == global->humanPlayerId)) || // SP: use global struct's human playerId: it is always reliable even in loaded games
+			(!isSinglePlayer && (unknownStruct->playerTypes[loopPlayerId] == 2)); // MP: use initial setting from "common MP struct". This is not reliable for saved games but OK in MP games.
+		if (thisPlayerIsHuman) {
+			player->isComputerControlled = 0;
+			player->SetCustomAIFlag(0);
+		}
+		if ((!thisPlayerIsHuman) && (aValidAIPlayer == -1)) {
+			// Need to save one arbitrary AI player ID to set "currently managed AI player" or everything will be stuck
+			aValidAIPlayer = loopPlayerId;
+		}
+	}
+	global->currentlyManagedAIPlayer = aValidAIPlayer; // Required to avoid stuck AI
+}
+
+
+// Restore AI flags based on human-controlled playerID (to be used in SP games only)
+void RestoreAllAIFlags() {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global) { return; }
+
+	int aValidAIPlayer = -1;
+	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
+		if (loopPlayerId == global->humanPlayerId) {
+			player->isComputerControlled = 0;
+			player->SetCustomAIFlag(0);
+		} else {
+			if (player->isComputerControlled == 0) {
+				// Player was NOT AI-controlled. We need to update its strategy with (potentially) human-created units
+				CheckAIWhenEnablingAIControl(player);
+			}
+			player->isComputerControlled = 1;
+			player->SetCustomAIFlag(1);
+			// Need to save an arbitrary AI player ID to set "currently managed AI player" or everything will be stuck
+			if (aValidAIPlayer == -1) {
+				aValidAIPlayer = loopPlayerId;
+			}
+		}
+
+	}
+	global->currentlyManagedAIPlayer = aValidAIPlayer; // Required to avoid stuck AI
+}
+
+
+// This enables AI flags for all players
+void SetAllAIFlags() {
+	if (IsMultiplayer()) { return; }
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global) { return; }
+	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
+		if (player->isComputerControlled == 0) {
+			// Player was NOT AI-controlled. We need to update its strategy with (potentially) human-created units
+			CheckAIWhenEnablingAIControl(player);
+		}
+		player->isComputerControlled = 1;
+		player->SetCustomAIFlag(1);
+	}
+}
+
+
+// Change human control to another player and set AI flags accordingly (if updateAIFlags is true)
+void ChangeControlledPlayer(int playerId, bool updateAIFlags) {
+	if ((playerId < 0) || (playerId > 8)) { return; }
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+	// Do not switch to defeated (or invalid) player
+	if (!player || !player->IsCheckSumValid() || (player->aliveStatus == 2)) { return; }
+	_asm {
+		MOV ESI, DWORD PTR DS:[0x580E38] // Game settings
+		MOV ECX, ESI
+		MOV EAX, 0x00419B70
+		CALL EAX // Get currently managed player
+		MOV ECX, EAX
+		MOV EAX, 0x45DCB0
+		CALL EAX // Clear selected units
+		CMP DWORD PTR SS:[ECX+0x1B4], 6 // mouseActionType
+		JNZ step2
+		CMP DWORD PTR SS:[ECX+0x1B8], 1
+		JNZ step2
+		MOV EAX, DWORD PTR SS:[ESI]
+		PUSH 0
+		PUSH 0
+		MOV ECX, ESI
+		CALL DWORD PTR DS:[EAX+0x10]
+	step2:
+		MOV EDX, DWORD PTR SS:[ESI]
+		MOV EAX, playerId
+		PUSH EAX
+		MOV ECX, ESI
+		CALL DWORD PTR DS:[EDX+0x14] // Change controlled player
+	}
+	if (updateAIFlags) {
+		AOE_METHODS::PLAYER::RestoreAllAIFlags();
+	}
+}
+
+
+}
 }
 
 namespace PLAYER {
@@ -307,8 +434,8 @@ namespace PLAYER {
 			return;
 		}
 		if (!player || !player->IsCheckSumValid()) { return; }
-		AOE_METHODS::ClearSelectedUnits(player);
-		AOE_METHODS::SelectUnit(player, unitBase, true);
+		AOE_METHODS::PLAYER::ClearSelectedUnits(player);
+		AOE_METHODS::PLAYER::SelectUnit(player, unitBase, true);
 		if (centerScreen) {
 			player->screenPositionX = unitBase->positionX;
 			player->screenPositionY = unitBase->positionY;
