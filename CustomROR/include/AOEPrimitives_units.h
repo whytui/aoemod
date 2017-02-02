@@ -21,6 +21,32 @@ namespace AOE_METHODS {
 namespace UNIT {
 ;
 
+/* *** some basic getters *** */
+
+// All unit-classes-compatible getter for speed.
+float GetSpeed(STRUCT_UNIT_BASE *unit);
+
+// All unit-classes-compatible getter for reload time.
+float GetReloadTime1(STRUCT_UNIT_BASE *unit);
+
+// Get Melee armor (for display) for attackable units.
+// Returns NULL if unit type is incompatible (and sets values to 0).
+bool GetMeleeArmor(STRUCT_UNIT_ATTACKABLE *unit, short int &meleeDisplayedValue, short int &meleeTotalValue);
+
+// Get Pierce armor (for display) for trainable units.
+// Returns NULL if unit type is incompatible (and sets values to 0).
+bool GetPierceArmor(STRUCT_UNIT_TRAINABLE *unit, short int &pierceDisplayedValue, short int &pierceTotalValue);
+
+
+
+/* *** Other... *** */
+
+
+// Returns the number of queued units for a given DATID.
+long int GetTotalQueueNumberForUnit(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld, short int unitDefId);
+
+
+
 // Exact role to confirm.
 // MAYBE this method allows finding path with enemy units blocking the way. Such units are added to path finding struct's unitid array (unknown_11DCE4) ?
 // arg6: seen 0x1B (hardcoded)
@@ -41,12 +67,6 @@ bool CanConvert(STRUCT_UNIT_BASE *unit, long int targetUnitId);
 
 // Gets the damage from an attacked over a target (defender)
 float CalcDamage(STRUCT_UNIT_BASE *attacker, STRUCT_UNIT_BASE *defender);
-
-// All unit-classes-compatible getter for reload time.
-float GetReloadTime1(STRUCT_UNIT_BASE *unit);
-
-// All unit-classes-compatible getter for speed.
-float GetSpeed(STRUCT_UNIT_BASE *unit);
 
 bool IsUnitIdle(STRUCT_UNIT_BASE *unit);
 
@@ -96,10 +116,6 @@ long int AssignShortcutToSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, lo
 
 // Selects units that have a given shortcut number.
 long int SelectUnitsUsingShortcut(AOE_STRUCTURES::STRUCT_PLAYER *player, long int shortcutNumber, bool addToSelection = false);
-
-
-// Returns the number of queued units for a given DATID.
-long int GetTotalQueueNumberForUnit(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld, short int unitDefId);
 
 
 // Returns a unitDefCommand object if actor unit has a valid right-click command on target unit.

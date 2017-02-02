@@ -67,7 +67,8 @@ namespace AOE_OFFSETS
 	static const unsigned long int **ADDR_VAR_TCHAT_OBJECT = (const unsigned long int **)0x580DA0;
 	static unsigned long int *AOE_VAR_F5_DEBUG_INFO_TYPE = (unsigned long int *)0x7C0648; // Variable =0/1 indicating current type of "F5 debug info".
 	static const unsigned long int *UNKNOWN_ARRAY_6A18C0 = (unsigned long int *)0x6A18C0; // Size = 0x100 elements = 0x400 bytes
-
+	static const unsigned long int *AOE_VAR_FOUND_UNIT_ID_UNDER_MOUSE = (const unsigned long int*)0x7D1CF8;
+	static const short int *AOE_VAR_FOUND_UNIT_AI_TYPE_UNDER_MOUSE = (const short int*)0x7D1CFC;
 
 
 	// Game executable interface procedure address (ROR_API call)

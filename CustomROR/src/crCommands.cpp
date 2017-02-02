@@ -3272,12 +3272,13 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UN
 
 // Adds custom attributes (armor) in buildings' unit info zone.
 // currentLine is incremented if lines are added.
-void CustomRORCommand::DisplayCustomBuildingAttributesInUnitInfo(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine) {
+void CustomRORCommand::DisplayCustomBuildingAttackAttributesInUnitInfo(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine) {
 	if (!unitInfoZone || !unitInfoZone->IsCheckSumValid()) { return; }
 	AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *unit50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)unitInfoZone->currentUnit;
 	if (!unit50 || !unit50->IsCheckSumValidForAUnitClass()) {
 		return; // Should not occur, this method is called during processing of buildings
 	}
+
 	// Show pierce if non-zero value
 	short int pierceTotalValue = 0;
 	short int pierceDisplayedValue = 0;
@@ -3285,29 +3286,16 @@ void CustomRORCommand::DisplayCustomBuildingAttributesInUnitInfo(AOE_STRUCTURES:
 	short int meleeDisplayedValue = 0;
 	long int iconIdMeleeArmor = AOE_CONST_DRS::UIZ_ICON_ARMOR; // melee armor icon in SLP (8)
 	long int iconIdPierce = AOE_CONST_DRS::UIZ_ICON_SHIELD; // pierce armor icon in SLP (10)
-	_asm {
-		MOV ECX, unit50;
-		LEA EAX, pierceDisplayedValue;
-		LEA EDX, pierceTotalValue;
-		PUSH EAX;
-		PUSH EDX;
-		MOV EDX, DS:[ECX];
-		CALL DS:[EDX + 0x248]; // Get pierce armor
-		MOV ECX, unit50;
-		LEA EAX, meleeDisplayedValue;
-		LEA EDX, meleeTotalValue;
-		PUSH EAX;
-		PUSH EDX;
-		MOV EDX, DS:[ECX];
-		CALL DS:[EDX + 0x230]; // Get melee armor
-	}
+	AOE_METHODS::UNIT::GetMeleeArmor(unit50, meleeDisplayedValue, meleeTotalValue);
+	AOE_METHODS::UNIT::GetPierceArmor((AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)unit50, pierceDisplayedValue, pierceTotalValue);
+
 	if (meleeTotalValue > 0) {
 		// Note: line is incremented in the method if a line is added.
-		UnitInfoZoneAddAttributeLine(unitInfoZone, iconIdMeleeArmor, 1, meleeDisplayedValue, meleeTotalValue, currentLine);
+		AOE_METHODS::UI_BASE::UnitInfoZoneAddAttributeLine(unitInfoZone, iconIdMeleeArmor, 1, meleeDisplayedValue, meleeTotalValue, currentLine);
 	}
 	if (pierceTotalValue > 0) {
 		// Note: line is incremented in the method if a line is added.
-		UnitInfoZoneAddAttributeLine(unitInfoZone, iconIdPierce, 1, pierceDisplayedValue, pierceTotalValue, currentLine);
+		AOE_METHODS::UI_BASE::UnitInfoZoneAddAttributeLine(unitInfoZone, iconIdPierce, 1, pierceDisplayedValue, pierceTotalValue, currentLine);
 	}
 }
 

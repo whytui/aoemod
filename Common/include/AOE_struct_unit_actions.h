@@ -40,7 +40,7 @@ namespace AOE_STRUCTURES {
 		char unused[3];
 		// 0x10
 		STRUCT_UNIT_BASE *targetUnit;
-		unsigned long int unknown_014; // actor unit pointer ???
+		STRUCT_UNIT_BASE *targetUnit2; // +14. Secondary target pointer (used for missiles only ?)
 		long int targetUnitId; // +18
 		long int targetUnitId2; // +1C. A secondary target ? See 0x4073F0=action.setTargetUnit2(arg1). Used for missiles (only ?)
 		// 0x20

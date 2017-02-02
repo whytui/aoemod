@@ -446,32 +446,6 @@ void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILD
 }
 
 
-// Add a line with an attribute icon/value in game unit info zone (bottom left)
-// If a line is added, lineIndex is incremented.
-void UnitInfoZoneAddAttributeLine(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone,
-	long int iconId, long int displayType, long int displayedValue, long int totalValue, long int &lineIndex) {
-	if (!unitInfoZone || !unitInfoZone->IsCheckSumValid()) {
-		return;
-	}
-	if (iconId < 0) { return; } // and zero ?
-	// Make sure we use correct stack data
-	totalValue = totalValue & 0xFFFF;
-	displayedValue = displayedValue & 0xFFFF;
-	long int line = lineIndex; // PUSH lineIndex would not push the VALUE !
-	_asm {
-		PUSH totalValue;
-		PUSH displayedValue;
-		PUSH displayType;
-		PUSH iconId;
-		PUSH line;
-		MOV ECX, unitInfoZone;
-		MOV EDX, DS:[ECX];
-		CALL DS:[EDX + 0xE4]; // Add info line
-	}
-	lineIndex++;
-}
-
-
 // Get a localized string using ROR method.
 // Returns true on success.
 bool AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES category, long int commandId, long int subParam, char *buffer, long int bufferSize) {

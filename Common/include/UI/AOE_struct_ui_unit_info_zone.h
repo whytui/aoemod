@@ -39,9 +39,9 @@ namespace AOE_STRUCTURES
 		short int currentUnitResourceTypeId; // +12C
 		short int unknown_12E;
 		float currentUnitResourceAmount; // +130
-		char unknown_134;
+		GAME_UNIT_STATUS unitStatus; // +134.
 		char unknown_135[3]; // unused?
-		char unknown_138[0x13C - 0x138];
+		float unknown_138; // +138. trade goods (for dock) ??
 		unsigned long int *unknown_13C; // +13C. Pointer to ? First garrisoned unit ?
 		short int garrisonedUnitCount; // +140. To confirm
 		short int unknown_142;
@@ -54,7 +54,7 @@ namespace AOE_STRUCTURES
 		short int unknown_156; // +156. unused ?
 		long int maxRange; // +158. The TOTAL unit range. Only used to know if refresh is needed, not used for actual display.
 		float reloadTime1; // +15C. 
-		short int unknown_160;
+		UNIT_ACTION_ID unknown_160; // +160. Specifies if unit is currently training a unit, researching a tech
 		short int unknown_162;
 		short int unknown_164;
 		char unknown_166;
@@ -65,8 +65,8 @@ namespace AOE_STRUCTURES
 		char unknown_1CB; // unused ?
 		long int unknown_1CC;
 		float currentUnitLineOfSight; // +1D0
-		long int unknown_1D4;
-		long int unknown_1D8;
+		long int currentPopulation; // +1D4. To confirm
+		long int currentResource5Value; // +1D8. 
 		char currentUnitShortcutNumber; // +1DC
 		char unknown_1DD[3];
 		STRUCT_PLAYER *currentUnitPlayer; // +1E0.

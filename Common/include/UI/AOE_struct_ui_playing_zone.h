@@ -31,14 +31,14 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_UNIT_GREEN_BLINKING_INFO) == 0x14, "STRUCT_UNIT_GREEN_BLINKING_INFO size");
 
 
-#define CHECKSUM_UI_PLAYING_ZONE 0x00546688
-	// Size 0x380 - Constructor 0x518690
-	// Parent can be STRUCT_UI_IN_GAME_MAIN, or editor UI?
-	// Also used in editor !
-	// 88 66 54 00, parent = 40 A8 54 00, 1C A6 54 00, then UI base
-	// 0x50F8D0 = gameZone.displayGreenBlinkingUnitReclangle()
-	// 0x50F970 = gamePlayZone.setGreenUnitBlinking(unitId, time_ms, arg3, arg4)
-	class STRUCT_UI_PLAYING_ZONE : public STRUCT_ANY_UI {
+#define CHECKSUM_UI_RGE_VIEW 0x0054A61C // ccor 0x50EFF0
+#define CHECKSUM_UI_RGE_MAIN_VIEW 0x0054A840 // ccor 0x518690
+#define CHECKSUM_UI_TRIBE_MAIN_VIEW 0x00546688 // ccor "inline", see 0x47D975, 0x48FE1A. Synonym for playing zone (or gameZone, etc)
+#define CHECKSUM_UI_PLAYING_ZONE CHECKSUM_UI_TRIBE_MAIN_VIEW // NO specific constructor, set directly in mainGameUI.ccor and editorMainUI.ccor !
+
+	// Size = 0x360 - Constructor 0x50EFF0 "RGE_view"
+	// Only used for main game UI ? (in alpha, another child class was map view)
+	class STRUCT_UI_RGE_VIEW : public STRUCT_ANY_UI {
 	public:
 		long int hWnd; // TO CONFIRM. +F4
 		unsigned long unknown_0F8;
@@ -65,7 +65,8 @@ namespace AOE_STRUCTURES
 		short int unknown_12A;
 		short int unknown_12C;
 		short int unknown_12E;
-		char unknown_130[0x138 - 0x130];
+		long int unknown_130_mousePosX; // +130. A relative mouse pos X.
+		long int unknown_134_mousePosY; // +134. A relative mouse pos Y.
 		float screenGamePosY; // +138.
 		float screenGamePosX; // +13C.
 		char unknown_140;
@@ -85,19 +86,44 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_344;
 		unsigned long int unknown_348;
 		unsigned long int unknown_34C;
-		unsigned long int unknown_350;
+		unsigned long int *unknown_350; // +350. Something that handles displaying the red cross ? A list of those things ? (+0/+4=links?) See 0x516050. ElemSize=0x30.+8=slp +20=replaymode +24=lasttimegettime?
 		STRUCT_UNIT_GREEN_BLINKING_INFO *greenUnitBlinkingInfoArray; // +354. Never NULL (alloc in ccor). Pointer to array of info for green unit blinking.
 		long int numberOfBlinkingGreenUnitRectangles; // +358. Number of active "right-click" blinking unit indicators
 		long int blinkingGreenUnitRectanglesArraySize; // +35C. Array size for +354 (greenUnitBlinkingInfoArray). Hardcoded to 8 in 0x50F1E8.
-		// From 0x360, we're no longer in 1C A6 54 00 overload ?
-		char unknown_360[0x36C - 0x360];
+
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UI_PLAYING_ZONE) || 
+			(this->checksum == CHECKSUM_UI_RGE_MAIN_VIEW) || 
+			(this->checksum == CHECKSUM_UI_RGE_VIEW);
+		}
+	};
+	static_assert(sizeof(STRUCT_UI_RGE_VIEW) == 0x360, "STRUCT_UI_RGE_VIEW size");
+
+
+	// Size 0x380 - Constructor 0x518690. "TRIBE_Main_View" (same structure with 2 checksums)
+	// Parent can be STRUCT_UI_IN_GAME_MAIN, or editor UI (Also used in editor)
+	// 88 66 54 00 (inline constructor), parent = 40 A8 54 00 (ccor 0x518690)
+	// 0x50F8D0 = gameZone.displayGreenBlinkingUnitReclangle()
+	// 0x50F970 = gamePlayZone.setGreenUnitBlinking(unitId, time_ms, arg3, arg4)
+	// +D0 = int RGE_View::do_paint(long,long,long,long,int) ??
+	// +E4 = gameZone.canAlwaysBeSelected(pUnit) : 1 for dock (selectable even under fog)
+	// +E8 = gameZone.getInfoAboutCommand?(pUnit, unitAIType) ? Hardcoded for towers.
+	// +EC = gameZone.onMouseHoldMove(arg1, mousePosX,mousePosY...). left or right btn down + mouse is moving
+	// +F0 = gameZone.OnMouseHoldMove(mousePosX, mousePosY) left or right btn down + mouse is moving
+	// +F4 = gameZone.OnMouseEndDrag?(mousePosX, mousePosY) both left and right click ? ("mouseMoveAction")
+	// +104 = gameZone.MouseRightDown(mousePosX, mousePosY, arg3, arg4). Excludes "drag end".
+	// +110 = gameZone.createContiguousBuildings(minPosY, minPosX, maxPosY, maxPosX)
+	class STRUCT_UI_PLAYING_ZONE : public STRUCT_UI_RGE_VIEW {
+	public:
+		unsigned long int unknown_360;
+		unsigned long int unknown_364;
+		unsigned long int unknown_368;
 		long int unsure_gamePosYUnderMouse; // +36C. mouse pos or game pos (or temp variable ?)
 		long int unsure_gamePosXUnderMouse; // +370. mouse pos or game pos (or temp variable ?)
 		unsigned long int unknown_374;
 		unsigned long int unknown_378;
 		unsigned long int unknown_37C;
 
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_UI_PLAYING_ZONE) || (this->checksum == 0x0054A840); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UI_PLAYING_ZONE) || (this->checksum == CHECKSUM_UI_RGE_MAIN_VIEW); }
 	};
 	static_assert(sizeof(STRUCT_UI_PLAYING_ZONE) == 0x380, "STRUCT_UI_PLAYING_ZONE size");
 

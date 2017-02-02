@@ -98,7 +98,6 @@ namespace CUSTOMROR {
 		void ManageGameTimerSkips(REG_BACKUP *REG_values);
 		void OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_values);
 		void OnGameRightClickUpEvent(REG_BACKUP *REG_values);
-		void OnGameRightClickUpRedCrossDisplay(REG_BACKUP *REG_values);
 		void OnLivingUnitCreation(REG_BACKUP *REG_values);
 		void OnGameSettingsNotifyEvent(REG_BACKUP *REG_values);
 		void OnGameInitDisableResearchesEvent(REG_BACKUP *REG_values);
@@ -141,7 +140,7 @@ namespace CUSTOMROR {
 		void ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_values);
 		void FixPlayerNoTechTree_applyTech(REG_BACKUP *REG_values);
 		void EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values);
-		void EntryPointOnBuildingInfoDisplay(REG_BACKUP *REG_values);
+		void EntryPointOnBuildingAttackInfoDisplay(REG_BACKUP *REG_values);
 		void EntryPointOnGetLocalizedString(REG_BACKUP *REG_values);
 		void AllowMultiUnitTypeInQueue(REG_BACKUP *REG_values);
 		void EntryPointOnAttackableUnitKilled(REG_BACKUP *REG_values);
@@ -154,6 +153,9 @@ namespace CUSTOMROR {
 		void EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values);
 		void EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_values);
 		void OverrideShowF5DebugInfo(REG_BACKUP *REG_values);
+		void UnitCanTradeWith(REG_BACKUP *REG_values);
+		void EntryPointDisplayBuildingInfoResource(REG_BACKUP *REG_values);
+		void EntryPointRefreshTradeGoodsInUnitInfoZone(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

@@ -217,5 +217,43 @@ void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToM
 }
 
 
+// Returns true if unit (typically, a trade boat) can trade with target unit (typically, a building like dock)
+bool CanTradeWithUnitDef(STRUCT_UNIT_BASE *unit, long int targetUnitDefId) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->DerivesFromTrainable()) {
+		// Note: in standard game, only trainable and building units can trade. For other unit types, DS:[EDX+0x138] points to a "return 0" function.
+		return false;
+	}
+	if (!unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid() || !unit->ptrStructPlayer->ptrStructDefUnitTable) {
+		return false;
+	}
+	STRUCT_PLAYER *player = unit->ptrStructPlayer;
+	// This requires unitDef to be the same for all players (which is a strong AOE requirement anyway)
+	STRUCT_UNITDEF_BASE *targetUnitDef = player->GetUnitDefBase((short int)targetUnitDefId);
+	if (!targetUnitDef || !targetUnitDef->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	// A unit that offers trading is a unit that has "trade goods" in its resource storage (typically, enable_mode=0).
+	return UnitDefOffersTrading(targetUnitDef);
 }
 
+
+// Returns true if it is possible to trade with this unit (it has trade goods in its resource storage)
+bool UnitOffersTrading(STRUCT_UNIT_BASE *unit) {
+	// We could also check resource storage in unitDef.
+	// It may only differ if at some point during the game we change unit's resourceTypeId into CST_RES_ORDER_TRADE_GOODS.
+	return unit && unit->unitDefinition && UnitDefOffersTrading(unit->unitDefinition);
+}
+
+
+// Returns true if it is possible to trade with this unit (it has trade goods in its resource storage)
+bool UnitDefOffersTrading(STRUCT_UNITDEF_BASE *unitDef) {
+	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	return (unitDef->resourceStorageType_1 == CST_RES_ORDER_TRADE_GOODS) ||
+		(unitDef->resourceStorageType_2 == CST_RES_ORDER_TRADE_GOODS) ||
+		(unitDef->resourceStorageType_3 == CST_RES_ORDER_TRADE_GOODS);
+}
+
+
+}

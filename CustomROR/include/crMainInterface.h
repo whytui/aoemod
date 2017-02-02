@@ -95,7 +95,7 @@ public:
 
 	// Manage right button release action on selected units for given player
 	// Returns true if a red cross sign should be displayed (a relevant action occurred)
-	bool ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameMain,
+	bool ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameZone,
 		AOE_STRUCTURES::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY);
 
 	// Open a popup with CustomROR (debug) messages

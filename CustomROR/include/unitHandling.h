@@ -60,13 +60,22 @@ bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **act
 // This can result to an attack action, heal, convert, gather, etc, according to actor/target units.
 // Return true if successful (we don't know if the created command makes sense and if it will actually do something)
 // Compatible with MP games (uses "command" interface)
-bool TellUnitToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
+bool TellUnitToInteractWithTarget(STRUCT_UNIT_COMMANDABLE *actorUnit, STRUCT_UNIT_BASE *target);
 
 
 // Calls ROR's method to change a unit's action so it will move to supplied unit/position
 // target can be NULL (only position will matter)
 // unitToMove->ptrActionInformation is required to be NON-NULL ! Or the method will return without doing anything.
-void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToMove, AOE_STRUCTURES::STRUCT_UNIT_BASE *target, float posX, float posY);
+void MoveUnitToTargetOrPosition(STRUCT_UNIT_COMMANDABLE *unitToMove, STRUCT_UNIT_BASE *target, float posX, float posY);
 
+
+// Returns true if unit (typically, a trade boat) can trade with target unit (typically, a building like dock)
+bool CanTradeWithUnitDef(STRUCT_UNIT_BASE *unit, long int targetUnitDefId);
+
+// Returns true if it is possible to trade with this unit (it has trade goods in its resource storage)
+bool UnitOffersTrading(STRUCT_UNIT_BASE *unit);
+
+// Returns true if it is possible to trade with this unit (it has trade goods in its resource storage)
+bool UnitDefOffersTrading(STRUCT_UNITDEF_BASE *unitDef);
 
 }

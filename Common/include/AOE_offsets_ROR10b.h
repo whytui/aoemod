@@ -62,6 +62,8 @@ namespace AOE_OFFSETS
 	static const unsigned long int **ADDR_VAR_REGISTRY_OBJECT_DEFAULT_REG_PATH = (const unsigned long int **)0x585E10; // Contains a TRegistry object pointer.
 	static const unsigned long int **ADDR_VAR_TCHAT_OBJECT = (const unsigned long int **)0x585DF0;
 	static unsigned long int *AOE_VAR_F5_DEBUG_INFO_TYPE = (unsigned long int *)0; // Variable =0/1 indicating current type of "F5 debug info".
+	static const unsigned long int *AOE_VAR_FOUND_UNIT_ID_UNDER_MOUSE = (const unsigned long int*)0;
+	static const short int *AOE_VAR_FOUND_UNIT_AI_TYPE_UNDER_MOUSE = (const short int*)0;
 
 
 	// Game executable interface procedure address (ROR_API call)

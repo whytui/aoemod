@@ -313,8 +313,8 @@ namespace AOE_STRUCTURES
 		// 0xE0
 		float searchRadius; // The distance unit will seek to auto-attack enemy units.
 		float workRate; // including upgrades. Ex for priest: base = 1, with astrology = 1.3
-		short int dropSite1;
-		short int dropSite2;
+		short int dropSite1; // +E8. Storage building/deposit unit 1.
+		short int dropSite2; // +EA. Storage building/deposit unit 2.
 		char unitDefinitionSwitchGroupId; // +EC. 0=none. An id for "group" of units that can switch definition. id=1 for villagers (builder, forager, etc).
 		char unknown_0ED;
 		char unknown_0EE;

@@ -32,7 +32,7 @@ namespace CUSTOM_AI {
 		const long int dislikeAmountNoWinningAllArtefacts = 20; // Not triggering a victory condition
 		const long int dislikeAmountNoWinningWonderBuilt = 30; // Not triggering a victory condition
 		const long int dislikeAmountNoWinningWonderInConstruction = 15; // Not triggering a victory condition
-		const long int extraValueForCurrentTarget = 16; // (fake) maximum dislike value added to current target. This base value is decreased as time passes since last target player change.
+		const long int extraValueForCurrentTarget = 20; // (fake) maximum dislike value added to current target. This base value is decreased as time passes since last target player change.
 		const long int extraValueForCurrentTargetDecayBy100SecondsPeriod = 10; // (fake) dislike value added to current target that is decreased (decay) during 100 seconds.
 
 		// Dislike score "sub" values + parameters
@@ -53,7 +53,7 @@ namespace CUSTOM_AI {
 		long int lastUpdateGameTime; // milliseconds since last update of AIPlayer targeting info.
 		long int nextUpdateGameTime; // milliseconds
 		long int lastTargetPlayerChangeGameTime; // milliseconds
-		long int lastComputedDislikeSubScore[9];
+		long int lastComputedDislikeSubScore[9]; // A Dislike score for each player, taking into account complex rules (players that attacked me, etc) + a random part.
 
 		// Reset all underlying info (useful at game start, etc)
 		void ResetInfo();
@@ -85,7 +85,8 @@ namespace CUSTOM_AI {
 		long int GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DIPLOMACY_AI *diplAI,
 			long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor);
 
-		// Compute AI dislike values, taking care of customROR config (dislike human, all ruins, etc)
+		// Compute AI dislike values, taking care of customROR config (dislike human, all relics/ruins, has wonder)
+		// In standard game, dislike update is run when a unit is attacked (see 0x4D7B0F), which is disabled by "disable_dislike_human_player" change in AOE_binData.
 		void ComputeDislikeValues();
 
 

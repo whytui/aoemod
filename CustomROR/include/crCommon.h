@@ -149,12 +149,6 @@ void AOE_InfAIBuildHistory_setStatus(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long 
 void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
-// Add a line with an attribute icon/value in game unit info zone (bottom left)
-// If a line is added, lineIndex is incremented.
-void UnitInfoZoneAddAttributeLine(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone,
-	long int iconId, long int displayType, long int displayedValue, long int totalValue, long int &lineIndex);
-
-
 
 // Get a localized string using ROR method.
 // Returns true on success.

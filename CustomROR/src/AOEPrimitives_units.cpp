@@ -7,6 +7,77 @@ namespace AOE_METHODS {
 namespace UNIT {
 ;
 
+/* *** some basic getters *** */
+
+// All unit-classes-compatible getter for speed.
+float GetSpeed(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return 0; }
+	float result;
+	_asm {
+		MOV ECX, unit;
+		MOV EDX, DS:[ECX];
+		CALL DS : [EDX + 0xFC]; // returns 0 for classes with no speed attribute
+		FSTP DS : [result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
+	}
+	return result;
+}
+
+
+// All-unit classes compatible getter for reload time.
+float GetReloadTime1(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return 0; }
+	float result;
+	_asm {
+		MOV ECX, unit;
+		MOV EDX, DS:[ECX];
+		CALL DS : [EDX + 0x100]; // returns 0 for classes with no reload attribute
+		FSTP DS : [result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
+	}
+	return result;
+}
+
+
+// Get Melee armor (for display) for attackable units.
+// Returns NULL if unit type is incompatible (and sets values to 0).
+bool GetMeleeArmor(STRUCT_UNIT_ATTACKABLE *unit, short int &meleeDisplayedValue, short int &meleeTotalValue) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->DerivesFromAttackable()) {
+		meleeDisplayedValue = 0;
+		meleeTotalValue = 0;
+		return false;
+	}
+	_asm {
+		PUSH meleeDisplayedValue;
+		PUSH meleeTotalValue;
+		MOV ECX, unit;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX + 0x230]; // Get melee armor
+	}
+	return true;
+}
+
+// Get Pierce armor (for display) for trainable units.
+// Returns NULL if unit type is incompatible (and sets values to 0).
+bool GetPierceArmor(STRUCT_UNIT_TRAINABLE *unit, short int &pierceDisplayedValue, short int &pierceTotalValue) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->DerivesFromTrainable()) {
+		pierceDisplayedValue = 0;
+		pierceTotalValue = 0;
+		return false;
+	}
+	_asm {
+		PUSH pierceDisplayedValue;
+		PUSH pierceTotalValue;
+		MOV ECX, unit;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX + 0x248]; // Get melee armor (for types 70+ only)
+	}
+	return true;
+}
+
+
+/* *** Other... *** */
+
+
+
 // Exact role to confirm.
 // MAYBE this method allows finding path with enemy units blocking the way. Such units are added to path finding struct's unitid array (unknown_11DCE4) ?
 // arg6: seen -1 or 0x1B (hardcoded). Could be a AI unit class (walls) ?
@@ -103,32 +174,6 @@ float CalcDamage(STRUCT_UNIT_BASE *attacker, STRUCT_UNIT_BASE *defender) {
 	return result;
 }
 
-
-// All-unit classes compatible getter for reload time.
-float GetReloadTime1(STRUCT_UNIT_BASE *unit) {
-	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return 0; }
-	float result;
-	_asm {
-		MOV ECX, unit;
-		MOV EDX, DS:[ECX];
-		CALL DS:[EDX + 0x100]; // returns 0 for classes with no reload attribute
-		FSTP DS:[result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
-	}
-	return result;
-}
-
-// All unit-classes-compatible getter for speed.
-float GetSpeed(STRUCT_UNIT_BASE *unit) {
-	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return 0; }
-	float result;
-	_asm {
-		MOV ECX, unit;
-		MOV EDX, DS:[ECX];
-		CALL DS:[EDX + 0xFC]; // returns 0 for classes with no speed attribute
-		FSTP DS:[result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
-	}
-	return result;
-}
 
 
 // Returns true if a unit is idle

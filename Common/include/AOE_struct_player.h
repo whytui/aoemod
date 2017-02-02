@@ -330,6 +330,7 @@ namespace AOE_STRUCTURES {
 			this->ptrResourceValues[resourceIndex] = value;
 		}
 		void SetCustomAIFlag(char value) { this->unused_customAIFlag = value; } // Sets customROR's AI flag.
+		// Securely gets a unit definition pointer. Returns NULL if not found/invalid.
 		STRUCT_UNITDEF_BASE *GetUnitDefBase(short int unitDefId) const {
 			if ((unitDefId < 0) || (unitDefId >= this->structDefUnitArraySize)) { return NULL; }
 			return (STRUCT_UNITDEF_BASE *)this->ptrStructDefUnitTable[unitDefId];

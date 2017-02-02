@@ -112,7 +112,8 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_UNKNOWN_05 = 5, // ?
 		CST_RES_ORDER_CURRENT_AGE = 6, // TO CONFIRM
 		CST_RES_ORDER_RELICS = 7, // Number of owned relics
-		CST_RES_ORDER_GAME_TIME = 9, // in seconds WRONG ? Housage ?
+		CST_RES_ORDER_UNKNOWN_08_TRADE_BONUS = 8, // Trade bonus ? Supposed to have an impact on trading (trade workshop gives 10 of this !)
+		CST_RES_ORDER_TRADE_GOODS = 9, // The trade goods amount we can see in docks. Only impacts other players (that trade) ! Cf 0x4F8FC2.
 		CST_RES_ORDER_TRADE_PRODUCTION = 10, // Default 1 ?
 		CST_RES_ORDER_CURRENT_POPULATION = 11,
 		CST_RES_ORDER_CORPSE_DECAY_TIME = 12, // TO CONFIRM. Remains 0 in game ?

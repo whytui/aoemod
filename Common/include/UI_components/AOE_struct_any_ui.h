@@ -32,7 +32,21 @@ namespace AOE_STRUCTURES
 	// Constructor: 004523F0 for "screen" objects (arg1=name), 00452580 for components (no arg). Destructor=0x4526B0
 	// In general, you should not modify these members directly. You are supposed to use methods (few are implemented in this solution).
 	// D8 4A 54 00 for this base (parent) class
-	// [EDX+C4] = uiComponent.setFocus(doFocus)
+	// +00 = uiComponent.destructor(do_free)
+	// +04 = long TPanel::setup(TDrawArea *,TPanel *,long,long,long,long,unsigned char)
+	// +08 = void TPanel::set_rect(minX, minY, sizeX, sizeY)
+	// +0C = void RGE_View::set_rect(long,long,long,long)
+	// +10 = void TPanel::set_color(unsigned char)
+	// +14 = void TPanel::set_active(bool)
+	// +18 = void TPanel::set_positioning(enum TPanel::PositionMode,long,long,long,long,long,long,long,long,TPanel *,TPanel *,TPanel *,TPanel *)
+	// +1C = void TPanel::set_fixed_position(hPos, vPos, hSize, vSize)
+	// +20 = anyUI.setRedraw(redrawMode) = refresh
+	// +24 = void TPanel::set_overlapped_redraw(TPanel *,TPanel *,enum TPanel::RedrawMode) ?
+	// +28 = void TPanel::draw_setup(int) ?
+	// +2C = void TPanel::draw_finish(void)
+	// +30 = void TPanel::draw(void)
+	// +34 = void TPanel::draw_rect(struct tagRECT *) ?
+	// +C4 = uiComponent.setFocus(doFocus)
 	// 0x451F20 = struct PanelNode * TPanelSystem::findPanelNode(char *panelName)
 	class STRUCT_ANY_UI {
 	public:
@@ -47,7 +61,7 @@ namespace AOE_STRUCTURES
 		char *screenName;
 		// 0x20
 		STRUCT_UI_DRAW_AREA *renderArea; // pointer. +04=hWnd +13C=evtStatus?? +1F6=objectIndex,+F4+objectIndex*4=ButtonId +17C=hObject?
-		long int minPosX; // +24. Min X position for this UI object. +24=a pRect object (4 position dwords)
+		long int minPosX; // +24. Min X position for this UI object. +24=a pRect object (4 position dwords) or "tagRECT".
 		long int minPosY; // +28
 		long int maxPosX; // +2C
 		// 0x30
@@ -103,7 +117,7 @@ namespace AOE_STRUCTURES
 		// 0xD0
 		unsigned long int unknown_0D0;
 		long int timeGetTimeValue; // +D4
-		long int unknown_0D8; // a flag ?
+		long int unknown_0D8; // a flag ? Error_code ?
 		unsigned long int unknown_0DC;
 		// 0xE0
 		unsigned long int unknown_0E0;

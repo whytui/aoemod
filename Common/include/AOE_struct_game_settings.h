@@ -241,11 +241,10 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_044;
 		unsigned long int *drawSystem; // +48. TDrawSystem
 		unsigned long int *unknown_04C; // +4C. basegame ?? Ptr to struct size>=478. TDrawArea ?
-		//char unknown_050[0xC];
 		unsigned long int unknown_050;
 		unsigned long int unknown_054;
 		long int infoSLPCount; // +58. Number of elements in ptrInfosSLP array.
-		STRUCT_SLP_INFO **ptrInfosSLP; // +5C. Pointer to array slpInfo, default size=3. index 0=shortcut numbers
+		STRUCT_SLP_INFO **ptrInfosSLP; // +5C. Pointer to array slpInfo, default size=3. index 0=shortcut numbers, 1=MoveStepFlag, 2=move red cross, see AoeInGameFlagsIconId
 		// 0x60
 		STRUCT_SOUND_DRIVER *pSoundDriver; // +60. Size 69C, see 41894B. Generally =NULL, only set while being used.
 		STRUCT_MAIN_MUSIC *pMusicStruct; // +64. Size 3F8, see 418B14. Generally =NULL, only set while being used.

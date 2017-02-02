@@ -662,44 +662,27 @@ bool CustomRORMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 
 
 // Manage right button release action on selected units for given player
-// Returns true if a red cross sign should be displayed (a relevant action occurred)
-bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameMain,
+// Returns true if ROR code should be skipped -----WRONG if a red cross sign should be displayed (a relevant action occurred)
+bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameZone,
 	AOE_STRUCTURES::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY) {
-	if (!UIGameMain || !UIGameMain->IsCheckSumValid()) { return false; }
-	assert(UIGameMain != NULL);
-	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = UIGameMain->controlledPlayer;
-	if (controlledPlayer == NULL) { return false; } // I suppose it shouldn't happen but I don't know all behaviours for this variable
+	if (!UIGameZone || !UIGameZone->IsCheckSumValid()) { return false; }
+	assert(UIGameZone != NULL);
+	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = UIGameZone->controlledPlayer;
+	assert(player == controlledPlayer);
+	if (controlledPlayer == NULL) { return false; } // it shouldn't happen
 	long int unitCount = controlledPlayer->selectedUnitCount;
 	if (unitCount == 0) { return false; }
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
 
-	if (!CUSTOMROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation) { return false; }
 	// Get relevant selected units array
-	bool result = false;
+	bool skipRORTreatments = false;
+	bool showRedCrossSign = false;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(controlledPlayer);
 
 	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO posInfos;
-	long int callResult;
-	// TODO use AOE_GetGameInfoUnderMouse ?
-	_asm {
-		LEA EAX, posInfos
-		PUSH 1
-		PUSH 0
-		PUSH EAX // STRUCT_TEMP_MAP_POSITION_INFO
-		PUSH mousePosY
-		PUSH mousePosX
-		PUSH 0
-		PUSH CST_MBA_RELEASE_CLICK //PUSH 0x28 // "click release"
-		MOV EAX, 0x51A650
-		MOV ECX, UIGameMain
-		CALL EAX // get map position from mouse pos
-		MOV callResult, EAX
-		MOV ECX, UIGameMain
-		LEA EAX, posInfos
-		PUSH EAX // arg1=posInfos
-		MOV EAX, 0x51B070
-		CALL EAX // Fit position in map bounds
-	}
-	// callResult== 0x33 if ok ? dont know the meaning
+	AOE_METHODS::GetGameInfoUnderMouse(4, mousePosX, mousePosY, &posInfos);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = AOE_METHODS::GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
 
 	// First loop to collect info on selected units. Not really necessary at this point.
 	bool hasSelectedBuildings = false;
@@ -712,59 +695,94 @@ bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURE
 		}
 	}
 
-	for (long int index = 0; index < unitCount; index++) {
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = selectedUnits[index];
-		// Make sure unit is valid, from MY player
-		if (unit && unit->IsCheckSumValidForAUnitClass() && (unit->ptrStructPlayer == controlledPlayer)) {
-			if (unit->unitType == GUT_BUILDING) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
-				assert(unitDef != NULL);
-				if (unitDef && (unitDef->unitType == GUT_BUILDING) && (unit->unitStatus == 2) &&
-					(!hasSelectedLivings) && // Do not apply auto-move when both livings and buildings are selected (building selection is probably unintentional)
-					(DoesBuildingTrainUnits(unitDef->DAT_ID1))) {
-					// Our right-click treatments are limited to buildings that can train units (not towers, houses...)
+	// Fix for right-clicking on deposit building (all hardcoded in ROR)
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = selectedUnits[0];
+	if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass() && 
+		targetUnit && targetUnit->IsCheckSumValidForAUnitClass() &&
+		(mainSelectedUnit->resourceValue > 0) && mainSelectedUnit->DerivesFromCommandable() &&
+		(targetUnit->ptrStructPlayer == player) && (controlledPlayer == player)) {
+		AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *mainSelectedUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)mainSelectedUnit->unitDefinition;
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = targetUnit->unitDefinition;
 
-					// If the player clicked ON the building itself, cancel auto-move.
-					if ((abs(posInfos.posX - unit->positionX) < 2) && (abs(posInfos.posY - unit->positionY) < 2)) {
-						UnitCustomInfo *u = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
-						if (u) {
-							u->ResetSpawnAutoTargetInfo();
-							CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unit->unitInstanceId);
-							AOE_METHODS::CallWriteText("Disabled auto-move for new units for selected building");
-						}
-					} else {
-						// For "valid clicks" (not on building itself), add building+click info (target unit or position) to list
+		bool isStandardHardcodedDropSite = ((targetUnitDef->DAT_ID1 == CST_UNITID_FORUM) || (targetUnitDef->DAT_ID1 == CST_UNITID_STORAGE_PIT) ||
+			(targetUnitDef->DAT_ID1 == CST_UNITID_GRANARY));
+		bool letRorCodeHandleThis = (isStandardHardcodedDropSite && (mainSelectedUnit->resourceTypeId >= 0) &&
+			(mainSelectedUnit->resourceTypeId <= CST_RES_ORDER_GOLD));
+		// Same for dock and fishing ships ?
 
-						// Is there a unit to interact with at this position ?
-						long int targetUnitId = -1;
-						AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-						assert(global && global->IsCheckSumValid());
-						if (!global || !global->IsCheckSumValid()) { return false; }
+		// TODO: exclude standard cases, already handled by ROR ? Filter on resource type cf unitDefCommand ?
+		// Check there is a unitDefCmd CST_IAI_GATHER_NO_ATTACK, trade or gather_attack ? Beware villager mode !
+		if (!letRorCodeHandleThis && (targetUnit->unitDefinition->DAT_ID1 == mainSelectedUnitDef->dropSite1) ||
+			(targetUnit->unitDefinition->DAT_ID1 == mainSelectedUnitDef->dropSite2)) {
+			if (GAME_COMMANDS::CreateCmd_RightClick(mainSelectedUnit->unitInstanceId, targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY)) {
+				AOE_METHODS::UI_BASE::DisplayGreenBlinkingOnUnit(UIGameZone, targetUnit->unitInstanceId, 1000);
+				skipRORTreatments = true;
+			}
+		}
+	}
 
-						AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = AOE_METHODS::GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
-						if (unitUnderMouse && unitUnderMouse->IsCheckSumValidForAUnitClass()) {
-							AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->unitDefinition;
-							if (unitDefUnderMouse && unitDefUnderMouse->IsCheckSumValidForAUnitClass() &&
-								(unitDefUnderMouse->interactionMode >= AOE_CONST_FUNC::INTERACTION_MODES::CST_IM_RESOURCES)
-								) {
-								targetUnitId = unitUnderMouse->unitInstanceId;
+	// TODO : move this
+	if (CUSTOMROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation) {
+		for (long int index = 0; index < unitCount; index++) {
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = selectedUnits[index];
+			// Make sure unit is valid, from MY player
+			if (unit && unit->IsCheckSumValidForAUnitClass() && (unit->ptrStructPlayer == controlledPlayer)) {
+				if (unit->unitType == GUT_BUILDING) {
+					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
+					assert(unitDef != NULL);
+					if (unitDef && (unitDef->unitType == GUT_BUILDING) && (unit->unitStatus == 2) &&
+						(!hasSelectedLivings) && // Do not apply auto-move when both livings and buildings are selected (building selection is probably unintentional)
+						(DoesBuildingTrainUnits(unitDef->DAT_ID1))) {
+						// Our right-click treatments are limited to buildings that can train units (not towers, houses...)
+
+						// If the player clicked ON the building itself, cancel auto-move.
+						if ((abs(posInfos.posX - unit->positionX) < 2) && (abs(posInfos.posY - unit->positionY) < 2)) {
+							UnitCustomInfo *u = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+							if (u) {
+								u->ResetSpawnAutoTargetInfo();
+								CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unit->unitInstanceId);
+								AOE_METHODS::CallWriteText("Disabled auto-move for new units for selected building");
 							}
-						}
+						} else {
+							// For "valid clicks" (not on building itself), add building+click info (target unit or position) to list
 
-						// Add to list (or update) to set new units target position/unit
-						UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unit->unitInstanceId);
-						if (unitInfo) {
-							unitInfo->spawnTargetUnitId = targetUnitId;
-							unitInfo->spawnUnitMoveToPosX = posInfos.posX;
-							unitInfo->spawnUnitMoveToPosY = posInfos.posY;
-							result = true;
+							// Is there a unit to interact with at this position ?
+							long int targetUnitId = -1;
+							AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+							assert(global && global->IsCheckSumValid());
+							if (!global || !global->IsCheckSumValid()) { return false; }
+
+							AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = AOE_METHODS::GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
+							if (unitUnderMouse && unitUnderMouse->IsCheckSumValidForAUnitClass()) {
+								AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefUnderMouse = unitUnderMouse->unitDefinition;
+								if (unitDefUnderMouse && unitDefUnderMouse->IsCheckSumValidForAUnitClass() &&
+									(unitDefUnderMouse->interactionMode >= AOE_CONST_FUNC::INTERACTION_MODES::CST_IM_RESOURCES)
+									) {
+									targetUnitId = unitUnderMouse->unitInstanceId;
+								}
+							}
+
+							// Add to list (or update) to set new units target position/unit
+							UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unit->unitInstanceId);
+							if (unitInfo) {
+								unitInfo->spawnTargetUnitId = targetUnitId;
+								unitInfo->spawnUnitMoveToPosX = posInfos.posX;
+								unitInfo->spawnUnitMoveToPosY = posInfos.posY;
+								showRedCrossSign = true;
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-	return result;
+	if (showRedCrossSign) {
+		long int mx = UIGameZone->unknown_130_mousePosX + mousePosX;
+		long int my = UIGameZone->unknown_134_mousePosY + mousePosY;
+		AOE_STRUCTURES::STRUCT_SLP_INFO *slp = settings->ptrInfosSLP[AOE_CONST_DRS::AoeInGameFlagsIconId::IGF_MOVETO_RED_CROSS];
+		AOE_METHODS::UI_BASE::DisplayInGameSign(UIGameZone, slp, mousePosX, mousePosY, 2);
+	}
+	return skipRORTreatments;
 }
 
 }

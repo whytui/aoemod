@@ -99,7 +99,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 123
+#define COUNT_ROR_API_10c 125
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 
@@ -2249,7 +2249,7 @@ void AOE_binData::InitOptions_10b() {
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10b.GetBinSeqDefinition(i),
 		InitSN188_SNAttackWinningPlayer,
-		"Sets if computer player prefers attacking human player",
+		"Sets if computer player prefers attacking winning player. If 0, AI players prefer attacking weakest player !",
 		0xCA19F,
 		(0x89, 0x90, 0xF4, 0x02, 0x00, 0x00), // default=yes
 		(0x89, 0x88, 0xF4, 0x02, 0x00, 0x00),
@@ -2269,7 +2269,7 @@ void AOE_binData::InitOptions_10b() {
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10b.GetBinSeqDefinition(i),
 		InitSN201_TrackPlayerHistory,
-		"Sets if computer player prefers attacking human players than computer mates",
+		"[OBSOLETE] Sets if computer player try to learn from human behaviour (not implemented !)",
 		0xF519A,
 		(0x6A, 0x01, 0x68, 0xC9, 0x00, 0x00, 0x00), // default=yes
 		(0x6A, 0x00, 0x68, 0xC9, 0x00, 0x00, 0x00),
@@ -2488,7 +2488,7 @@ Default = 04",
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
 		OBSOLETE_InitSN188_SNAttackWinningPlayer,
-		"[OBSOLETE] Sets if computer player prefers attacking human player",
+		"[OBSOLETE] Sets if computer player prefers attacking winning player.If 0, AI players prefer attacking weakest player !",
 		823871,
 		(0x89, 0x90, 0xF4, 0x02, 0x00, 0x00), // default=yes
 		(0x89, 0x88, 0xF4, 0x02, 0x00, 0x00),
@@ -2508,7 +2508,7 @@ Default = 04",
 
 	NEXT_INITSEQ_2_NOVAR(this->options_10c.GetBinSeqDefinition(i),
 		OBSOLETE_InitSN201_TrackPlayerHistory,
-		"[OBSOLETE] Sets if computer player prefers attacking human players than computer mates",
+		"[OBSOLETE] Sets if computer player try to learn from human behaviour (not implemented !)",
 		997813,
 		(0x6A, 0x01, 0x68, 0xC9, 0x00, 0x00, 0x00), // default=yes
 		(0x6A, 0x00, 0x68, 0xC9, 0x00, 0x00, 0x00),
@@ -4609,7 +4609,8 @@ void AOE_binData::InitROR_API_10c() {
 		FM_ON
 		);
 
-	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+	// OBSOLETE: red cross is now displayed directly in customROR code, which is better
+	/*NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
 		OnGameRightClickUpCustomRedCrossDisplay,
 		"Provides an entry point for displaying right-click red cross sign for custom actions.",
 		0x11A5CF,
@@ -4617,7 +4618,7 @@ void AOE_binData::InitROR_API_10c() {
 		(0xFF, 0x92, 0xA0, 0x00, 0x00, 0x00, 0xE8, 0x9A, 0xEF, 0xEF, 0xFF, 0x85, 0xC0, 0x74, 0x43),
 		FM_OFF,
 		FM_ON
-		);
+		);*/
 
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
 		PlayerCreationChecks_comp,
@@ -5320,6 +5321,36 @@ void AOE_binData::InitROR_API_10c() {
 		0x101640,
 		(0x8B, 0xC1, 0x8B, 0x88, 0x24, 0x0C, 0x00, 0x00, 0x85, 0xC9),
 		(0x8B, 0xC1, 0xE8, 0x2D, 0x7F, 0xF1, 0xFF, 0x90, 0x85, 0xC9),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		EntryPointUnitCanTradeWith,
+		"Entry point on unit.canTradeWith function",
+		0xAFB70,
+		(0x8B, 0x44, 0x24, 0x04, 0x83, 0xF8, 0x32, 0x74, 0x0A, 0x83, 0xF8, 0x2D),
+		(0x8B, 0x44, 0x24, 0x04, 0xE8, 0xFB, 0x99, 0xF6, 0xFF, 0x83, 0xF8, 0x2D),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		EntryPointDisplayBuildingInfoResource,
+		"Entry point to display the resource value for a building in unit info zone",
+		0xF8F04,
+		(0x8B, 0x47, 0x0C, 0x8B, 0x8D, 0x10, 0x01, 0x00, 0x00, 0x3B, 0xC1),
+		(0x8B, 0x47, 0x0C, 0xE8, 0x68, 0x06, 0xF2, 0xFF, 0x90, 0x3B, 0xC1),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		UnitInfoRefreshForTradeGoods,
+		"Entry point to refresh the trade goods value in unit info zone",
+		0xF9B7B,
+		(0x66, 0x83, 0x7B, 0x10, 0x2D, 0x0F, 0x84, 0xF5, 0x00, 0x00, 0x00, 0x8A, 0x43, 0x04),
+		(0x66, 0x83, 0x7B, 0x10, 0x2D, 0xE8, 0xEF, 0xF9, 0xF1, 0xFF, 0x90, 0x8A, 0x43, 0x04),
 		FM_OFF,
 		FM_ON
 		);

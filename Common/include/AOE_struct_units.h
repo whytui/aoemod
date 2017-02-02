@@ -147,6 +147,7 @@ namespace AOE_STRUCTURES {
 	// +0x120 = unit.FLDActionPosY()
 	// +0x124 = unit.FLDActionPosX()
 	// +0x128 = unit.FLDActionPosZ()
+	// +0x138 = unit.CanTradeWith(unitdefId). (in early versions, farms may have been gatherable by everyone?). For types70/80, see 0x4AFB70. All others="return false".
 	// +0x140 = unit.logMessage(?)?
 	// +0x14C = unit.attackPosition(fposY, fposX, arg3, arg4)
 	// +0x150 = unit.setAttackAction?(targetUnitId, force)
@@ -173,11 +174,11 @@ namespace AOE_STRUCTURES {
 	// +0x1D8 = bldUnit.readFromFile(internalFileId, global)
 	// +0x1DC = unit.init(unitDef, player)
 	// +0x1E0 = unit.createObjectList()
-	// +0x1E4 = unit.createSpriteList(ptrUnit)
-	// +0x1E8 = unit.initialize(defUnit, player, pos, pos, arg5)
+	// +0x1E4 = unit.createSpriteList(ptrUnit) [Last for base class]
+	// +0x1E8 = unitFlag.initialize(defUnit, player, pos, pos, arg5) [Last for class20=flag]
 	// +0x1EC = unit.stopMoving() just set currentSpeed to 0 ? Don't use ?
 	// +0x1F0 = unsigned char RGE_Moving_Object::turn_towards(RGE_Static_Object *,float,float)
-	// +0x1F4 = unitMovable.initialize(unitDef, player, fposY, fposX, fposZ) ?? For Type30+
+	// +0x1F4 = unit.initialize(unitDef, player, fposY, fposX, fposZ) [Last for class30=Movable]
 	// +0x1F8 = unit.work2(targetUnit, (float)posY, posX, posZ, force?).
 	// +0x1FC = unit.executeCommand(commandIndex) (set_task)
 	// +0x200 = void RGE_Action_Object::setTaskByTaskID(int) (executeCommand?)
@@ -186,23 +187,23 @@ namespace AOE_STRUCTURES {
 	// +0x20C = unit.addEndAction(action)
 	// +0x210 = unit.isIdle() to confirm. ex: 0x406610.
 	// +0x214 = unit.findMatchingCommandDef(targetUnit, posY, posX, posZ)
-	// +0x218 = unit.initialize(defUnit, player, posY, posX, posZ, arg6) (type 40)
-	// +0x21C = unit.createActionList() for type40+
+	// +0x218 = unit.initialize(defUnit, player, posY, posX, posZ, arg6)
+	// +0x21C = unit.createActionList() [Last for class40=Commandable(birds)]
 	// +0x220 = unit.ApplyMyBlastAttack??(posY, posX, posZ, impactedUnit, arg5)
 	// +0x224 = unsigned char RGE_Combat_Object::attack(RGE_Static_Object *,RGE_Combat_Object *)
 	// +0x228 = unit.startAttack?(targetUnit, actorUnit?)
 	// +0x22C = unit.applyMyEffectiveAttack(targetUnit, actorUnit, posY, posX, posZ)
-	// +0x230 = unit.getArmorForMelee(pOutArmorValue, pOutDisplayedArmor)
+	// +0x230 = unit.getArmorForMelee(pOutArmorTotalValue, pOutDisplayedArmor)
 	// +0x234 = unit.getAttackValue(pOutAttackValue, pOutDisplayedAttack)
 	// +0x238 = unit.getRange(pMaxRange, pDisplayedRange)
 	// +0x23C = unit.getReloadTime(pReloadTime1, pReloadTime2)
-	// +0x240 = unit.initialize(...) (unittype 50)
-	// +0x244 = unit.kill(). ex: 0x4ED6D0. Not for all unit types !
-	// +0x248 = unit.getPierceArmor(pArmorValue, pDisplayedArmor)
+	// +0x240 = unit.initialize(...) [Last for class50=attackable]
+	// +0x244 = unit.kill(). ex: 0x4ED6D0. For types 70+
+	// +0x248 = unit.getPierceArmor(pArmorTotalValue, pDisplayedArmor)
 	// +0x24C = ?
 	// +0x250 = unit.IsHigherThanIncludingCliffs(targetUnit)
 	// +0x254 = unit.createUnitActivity(). ("combatUnit.initUnitAI") Only called for living units only (types 70/80). Does not free previous activity, if any !
-	// +0x258 = livingUnit.init(...)
+	// +0x258 = livingUnit.init(...) [Last for class70=living]
 	// +0x25C = unit.handleResStorageWhenDeleted?
 	// +0x260 = unit.giveResStorageToOwner?()
 	// +0x264 [last] = bldUnit.init(...)

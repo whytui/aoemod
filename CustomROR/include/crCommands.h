@@ -298,7 +298,7 @@ public:
 
 	// Adds custom attributes (armor) in buildings' unit info zone.
 	// currentLine is incremented if lines are added.
-	void DisplayCustomBuildingAttributesInUnitInfo(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine);
+	void DisplayCustomBuildingAttackAttributesInUnitInfo(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine);
 
 
 	// Entry point when mouse hovers on a unit. foundInteraction and foundHintDllId values are IN/OUT, you are allowed to update them to overload ROR default behaviour.

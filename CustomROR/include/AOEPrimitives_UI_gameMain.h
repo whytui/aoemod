@@ -5,6 +5,7 @@
 #include <UI_components\AOE_struct_any_ui.h>
 #include <UI\AOE_struct_ui_scenario_editor_main.h>
 #include <UI\AOE_struct_ui_in_game_main.h>
+#include <UI\AOE_struct_ui_unit_info_zone.h>
 #include <AOE_const_internal.h>
 #include <AOE_offsets.h>
 #include <AOE_struct_game_settings.h>
@@ -17,6 +18,11 @@
 * ALL your findings about AOE/ROR structures
 * Please share knowledge for better modding experience !
 */
+
+
+namespace AOE_STRUCTURES {
+	extern AOE_STRUCTURES::STRUCT_GAME_SETTINGS* GetGameSettingsPtr();
+}
 
 
 namespace AOE_METHODS {
@@ -75,7 +81,7 @@ static void GameMainUI_writeTextDebugLines(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAI
 
 // DO NOT call this if current UI is not "in-game" screen
 static void CallWriteText(const char *txt) {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
 	assert(settings != NULL);
 	assert((settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) ||
 		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME));
@@ -96,7 +102,7 @@ static void CallWriteText(const char *txt) {
 static void CallWriteCenteredText(const char *txt, long int numLine = 1, long int color = 0x55, long int background = 0) {
 	long int addr = (long int)txt;
 	long int writeFct = 0x0482260;
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
 	if (settings == NULL) { return; }
 	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMain = settings->ptrGameUIStruct;
 	if (!gameMain) { return; }
@@ -130,6 +136,61 @@ static void DisplayGreenBlinkingOnUnit(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *g
 		PUSH unitId; // must NOT be <0
 		CALL addr;
 	}
+}
+
+
+// Show a in-game sign: movement red cross or step flag, or even other stuff !
+// displayMode: 0=no display? 1=loop (repeat), 2=show once and stop. Don't know how to stop a 'repeat' mode !
+static void DisplayInGameSign(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameZone, AOE_STRUCTURES::STRUCT_SLP_INFO *slp,
+	long int mousePosX, long int mousePosY, long int displayMode) {
+	const unsigned long int addr = 0x516050;
+	if (!UIGameZone || !UIGameZone->IsCheckSumValid() || !slp) { return; }
+	long int mx = UIGameZone->unknown_130_mousePosX + mousePosX;
+	long int my = UIGameZone->unknown_134_mousePosY + mousePosY;
+	_asm {
+		MOV ECX, UIGameZone;
+		PUSH 0x5A; // 5A=red cross, FA=move step 7D=red cross (attack zone)
+		PUSH 2; // arg8 = mode? 1=persist/replay, 2=play once
+		PUSH 0;
+		PUSH 0x0F;
+		PUSH 0;
+		PUSH my;
+		PUSH mx;
+		PUSH 0;
+		PUSH slp;
+		CALL addr;
+	}
+	AOE_METHODS::UI_BASE::RefreshUIObject(UIGameZone);
+}
+
+
+
+// Add a line with an attribute icon/value in game unit info zone (bottom left)
+// If a line is added, lineIndex is incremented.
+// displayType: 
+// - 0 = standard number "7"
+// - 1 = number with upgrade: "7+1"
+static void UnitInfoZoneAddAttributeLine(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone,
+	long int iconId, long int displayType, long int displayedValue, long int totalValue, long int &lineIndex) {
+	if (!unitInfoZone || !unitInfoZone->IsCheckSumValid()) {
+		return;
+	}
+	if (iconId < 0) { return; } // and zero ?
+	// Make sure we use correct stack data
+	totalValue = totalValue & 0xFFFF;
+	displayedValue = displayedValue & 0xFFFF;
+	long int line = lineIndex; // PUSH lineIndex would not push the VALUE !
+	_asm {
+		PUSH totalValue;
+		PUSH displayedValue;
+		PUSH displayType;
+		PUSH iconId;
+		PUSH line;
+		MOV ECX, unitInfoZone;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX + 0xE4]; // Add info line
+	}
+	lineIndex++;
 }
 
 

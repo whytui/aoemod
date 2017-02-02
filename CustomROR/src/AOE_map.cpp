@@ -216,7 +216,7 @@ void ForceRefreshOfGameZone() {
 
 // Collects info at mouse position : game position, underlying unit...
 // WARNING: does not return all units
-bool AOE_GetGameInfoUnderMouse(long int maxInteractionMode, long int mousePosX, long int mousePosY, AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO *posInfo) {
+bool GetGameInfoUnderMouse(long int maxInteractionMode, long int mousePosX, long int mousePosY, AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO *posInfo) {
 	STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
 	if ((posInfo == NULL) || (!gameZone || !gameZone->IsCheckSumValid())) { return false; }
 	const unsigned long int addr = 0x51A650;
@@ -261,7 +261,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitAtMousePosition(long int mousePosX, lon
 		MOV result, EAX;
 	}
 	if (!result) { return NULL; }
-	long int *foundUnitId = (long int*)0x7D1CF8;
+	long int *foundUnitId = (long int*)AOE_OFFSETS::AOE_VAR_FOUND_UNIT_ID_UNDER_MOUSE; // 0x7D1CF8 for ROR 1.0c
 	if ((*foundUnitId < 0) && (!i_allowTempUnits)) { return NULL; }
 	return GetUnitStruct(*foundUnitId);
 }

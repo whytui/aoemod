@@ -114,7 +114,7 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		// TODO: compute each lastComputedDislikeSubScore
 		// + other rules (current target, attacking me, enemy towers near my town, buildings IN my town? etc)
 		// player with lots of towers ?
-		// Attacking a allied player ?
+		// Attacking an allied player ?
 
 		if (this->militaryAIInfo) {
 			// Has player a tower in my town ?
@@ -299,7 +299,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 	int currentVillagerCount = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CIVILIAN_POPULATION);
 	int totalPopulation = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CURRENT_POPULATION);
 	if (totalPopulation - currentVillagerCount < 3) {
-		return -1; // Less than 3 military units: forget about targeting enemies
+		return -1; // Less than 3 military units: forget about targeting enemies (note: this does not prevent AI from attacking though)
 	}
 
 	bool hasStandardVictoryCondition = (global->generalVictoryCondition == GAME_GLOBAL_GENERAL_VICTORY_CONDITION::GGVC_STANDARD);
@@ -373,7 +373,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 				if (attackWinningPlayer && (attackWinningPlayerFactor > 0)) {
 					// Note: in game code, the formula is completely erroneous (DIVIDES by factor !)
 					// TODO: find a better formula ?
-					playerScoreFactor = loopPlayer->ptrScoreInformation->currentTotalScore * attackWinningPlayerFactor / 100;
+					playerScoreFactor = (loopPlayer->ptrScoreInformation->currentTotalScore * attackWinningPlayerFactor) / 100;
 					// Note: In game code, there is a "else" that does the opposite effect if attackWinningPlayer is false (factor is substracted !)
 				}
 
@@ -418,6 +418,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 
 				long int thisDislikeValue = diplAI->dislikeTable[loopPlayerId] + playerScoreFactor + otherDislikeAmount;
 				if (playerTargetInfo) {
+					// Add the sub-score that includes complex rules (taking into account recent attacks, etc)
 					thisDislikeValue += playerTargetInfo->lastComputedDislikeSubScore[loopPlayerId];
 				}
 				if (thisDislikeValue > bestDislikeValue) {
@@ -439,7 +440,8 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 }
 
 
-// Compute AI dislike values, taking care of customROR config (dislike human, all ruins, etc)
+// Compute AI dislike values, taking care of customROR config (dislike human, all relics/ruins, has wonder)
+// In standard game, dislike update is run when a unit is attacked (see 0x4D7B0F), which is disabled by "disable_dislike_human_player" change in AOE_binData.
 void PlayerTargeting::ComputeDislikeValues() {
 	if ((CUSTOMROR::crInfo.configInfo.dislike_allArtefacts <= 0) || (CUSTOMROR::crInfo.configInfo.dislike_humanPlayer <= 0)) { return; }
 

@@ -131,9 +131,6 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x00462E65:
 		this->OnTextBoxKeyPress(REG_values);
 		break;
-	case 0x051A5DA:
-		this->OnGameRightClickUpRedCrossDisplay(REG_values);
-		break;
 	case 0x004D098E:
 		this->ManageTacAIUpdate(REG_values);
 		break;
@@ -346,7 +343,7 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 		this->EntryPointAutoSearchTargetUnit(REG_values);
 		break;
 	case 0x4F8D92:
-		this->EntryPointOnBuildingInfoDisplay(REG_values);
+		this->EntryPointOnBuildingAttackInfoDisplay(REG_values);
 		break;
 #ifdef GAMEVERSION_AOE10b
 	case 0x4E6D5C:
@@ -394,6 +391,15 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 		break;
 	case 0x00501647:
 		this->OverrideShowF5DebugInfo(REG_values);
+		break;
+	case 0x004AFB79:
+		this->UnitCanTradeWith(REG_values);
+		break;
+	case 0x004F8F0C:
+		this->EntryPointDisplayBuildingInfoResource(REG_values);
+		break;
+	case 0x004F9B85:
+		this->EntryPointRefreshTradeGoodsInUnitInfoZone(REG_values);
 		break;
 	default:
 		break;
@@ -1530,12 +1536,14 @@ void CustomRORInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_
 }
 
 
-// Plugged on 0x51A203's call
+// Plugged on 0x51A508's call
 // Triggered when player releases right click in game screen, for default mouse action type only.
 void CustomRORInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 	unsigned long int myESP = REG_values->ESP_val;
 	const long int CST_OnGameRightClickUpEvent_IGNORE_CLICK = 0x0051A63D;
 	const long int CST_OnGameRightClickUpEvent_HANDLE_CLICK = 0x0051A50B;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **rorNewUnitList = *((AOE_STRUCTURES::STRUCT_UNIT_BASE ***)(myESP + 0x14)); // selected units, valid for action
+	short int numberOfUnitsInList = *((short*)(myESP + 0x12));
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		// Manage overwritten instruction
 		long int findSelectedUnitsPreviousResult = (REG_values->EAX_val & 0xFF); // only low byte (AL) is relevant !
@@ -1547,21 +1555,17 @@ void CustomRORInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 		// IMPORTANT warning: if we choose to jump away while REG_values->EAX_val == 1, we HAVE to free the list.
 		// We're lucky, the "CALL 005260F8" tests if argument is NULL. SO we can ALWAYS free the list here,
 		// So in all cases the list is freed and there is no error (if we jump back to normal location, it will attempt to free(0) and just do nothing.
-		if (findSelectedUnitsPreviousResult) {
+		if (findSelectedUnitsPreviousResult && (rorNewUnitList != NULL)) {
 			_asm {
-				MOV EAX, myESP
-				MOV ECX, DS:[EAX+0x14]
-				TEST ECX, ECX
-				JE nullValue // this really isnt supposed to be... But we try to have strong code.
-				PUSH ECX
-				MOV EAX, 0x005260F8 // Free
-				CALL EAX
-				ADD ESP, 4
+				MOV ECX, rorNewUnitList;
+				PUSH ECX;
+				MOV EAX, 0x005260F8; // Free
+				CALL EAX;
+				ADD ESP, 4;
 				// Update stack variable so that game code won't call free() with the same address (but 0 instead)
-				MOV EAX, myESP
-				XOR ECX, ECX
-				MOV DS:[EAX+0x14], ECX
-			nullValue:
+				MOV EAX, myESP;
+				XOR ECX, ECX;
+				MOV DS:[EAX+0x14], ECX;
 			}
 		}
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
@@ -1585,27 +1589,7 @@ void CustomRORInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 	long int mousePosX = *(long int *)(myESP + 0x34);
 	long int mousePosY = *(long int *)(myESP + 0x38);
 	if (CUSTOMROR::crMainInterface.ApplyRightClickReleaseOnSelectedUnits(UIGameMain, controlledPlayer, mousePosX, mousePosY)) {
-		REG_values->EAX_val = CST_OnGameRightClickUpEvent_HANDLE_CLICK; // Continue (no real jump)
-		short int *customLocalVar = (short int *)(REG_values->ESP_val + 0x12); // This local var is not used anymore in original code: we can use it for ourselves. See OnGameRightClickUpRedCrossDisplay.
-		*customLocalVar = 1;
-	}
-}
-
-
-// Entry point that allow forcing the display of "right click" red cross sign when normal game would not show it.
-// In ROR, it is part of the same method that calls OnGameRightClickUpEvent.
-// See customLocalVar (stack variable in ESP+0x12) that can be used by both methods to save information between the 2 entry points.
-void CustomRORInstance::OnGameRightClickUpRedCrossDisplay(REG_BACKUP *REG_values) {
-	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
-		REG_values->EAX_val = REG_values->EAX_val & 0xFF;
-		REG_values->EDI_val = REG_values->EAX_val;
-		REG_values->fixesForGameEXECompatibilityAreDone = true;
-	}
-	// This local var is not used anymore in original code: we can use it for ourselves. See OnGameRightClickUpEvent.
-	short int *customLocalVar = (short int *)(REG_values->ESP_val + 0x12);
-	if (*customLocalVar == 1) {
-		REG_values->EAX_val = 1;
-		REG_values->EDI_val = 1;
+		REG_values->EAX_val = CST_OnGameRightClickUpEvent_IGNORE_CLICK; // Force to ignore click in ROR code
 	}
 }
 
@@ -3485,8 +3469,8 @@ void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 }
 
 
-// From 004F8D87
-void CustomRORInstance::EntryPointOnBuildingInfoDisplay(REG_BACKUP *REG_values) {
+// From 004F8D87. Called only for buildings that have an attack value (towers !)
+void CustomRORInstance::EntryPointOnBuildingAttackInfoDisplay(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone = (AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *)REG_values->EBP_val;
 	ror_api_assert(REG_values, unitInfoZone && unitInfoZone->IsCheckSumValid());
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -3495,7 +3479,7 @@ void CustomRORInstance::EntryPointOnBuildingInfoDisplay(REG_BACKUP *REG_values) 
 	}
 	// Custom code
 	// This updates REG_values->ESI_val if necessary.
-	CUSTOMROR::crCommand.DisplayCustomBuildingAttributesInUnitInfo(unitInfoZone, REG_values->ESI_val);
+	CUSTOMROR::crCommand.DisplayCustomBuildingAttackAttributesInUnitInfo(unitInfoZone, REG_values->ESI_val);
 }
 
 
@@ -3862,6 +3846,125 @@ void CustomRORInstance::OverrideShowF5DebugInfo(REG_BACKUP *REG_values) {
 	// Do not modify below.
 	if (disableStandardDebugDisplay) {
 		REG_values->ECX_val = NULL;
+	}
+}
+
+
+// From unit.canTradeWith(unitDefId) in 0x4AFB70 (unit+0x138)
+// Set EAX = 0x2D (CST_UNITID_DOCK) to have ROR function return true, any other value = return false (can't trade with)
+void CustomRORInstance::UnitCanTradeWith(REG_BACKUP *REG_values) {
+	long int targetUnitDefId = REG_values->EAX_val;
+	bool resultCanTradeWith = (targetUnitDefId == CST_UNITID_FARM) /* Yes ! */ ||
+		(targetUnitDefId == CST_UNITID_DOCK);
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ECX_val;
+	ror_api_assert(REG_values, actorUnit && actorUnit->IsCheckSumValidForAUnitClass());
+
+	resultCanTradeWith = AOE_STRUCTURES::CanTradeWithUnitDef(actorUnit, targetUnitDefId);
+
+	if (resultCanTradeWith) {
+		REG_values->EAX_val = CST_UNITID_DOCK;
+	}
+}
+
+
+// From 0x4F8F04.
+// Always changes return address to 0x4F902A. We overload the necessary "add resource info line" for this portion of ROR code.
+// Note: displaying farm food has already been handled (same for "action in progress), we can exclude these cases to avoid showing both info.
+void CustomRORInstance::EntryPointDisplayBuildingInfoResource(REG_BACKUP *REG_values) {
+	// Change return address to 0x4F902A = do not show resource info using ROR code.
+	ChangeReturnAddress(REG_values, 0x4F902A);
+	// Collect context information
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
+	ror_api_assert(REG_values, unit && unit->IsCheckSumValidForAUnitClass());
+	AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone = (AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *)REG_values->EBP_val;
+	ror_api_assert(REG_values, unitInfoZone && unitInfoZone->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = unit->ptrStructPlayer;
+	ror_api_assert(REG_values, unitPlayer && unitPlayer->IsCheckSumValid());
+	REG_values->ECX_val = (unsigned long int)unitPlayer; // Instruction for EXE compatibility
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	
+	if (!unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) { return; }
+	UNIT_ACTION_ID currentAction = (UNIT_ACTION_ID)GetIntValueFromRORStack(REG_values, 0x1C); // Get "local_1C" = action type.
+	bool isMine = (unitPlayer == unitInfoZone->controlledPlayer);
+	bool inProgressInfoAlreadyDisplayed = (currentAction == CST_IAI_MAKE_OBJECT) || (currentAction == CST_IAI_MAKE_TECH);
+
+	if (!CUSTOMROR::crInfo.configInfo.useImprovedButtonBar && inProgressInfoAlreadyDisplayed) {
+		// If buttonbar improvement is OFF, do not show both progress and trade goods (original behaviour, for dock)
+		return;
+	}
+
+	// Custom code (original code would set unitOffersTradeGoods=(unit == DOCK))
+	bool unitOffersTradeGoods = AOE_STRUCTURES::UnitOffersTrading(unit);
+	
+	if (!isMine && !unitOffersTradeGoods) {
+		// Never show resource info on non-owned units, if resource is NOT trade goods.
+		return;
+	}
+	if (isMine && (unit->unitDefinition->DAT_ID1 == CST_UNITID_FARM) && !unitOffersTradeGoods) {
+		// Farm food amount has already been written. Return except if there are trade goods to display.
+		return;
+	}
+
+	if (!unitOffersTradeGoods && (unit->resourceValue <= 0)) {
+		// We don't want to show resource value (there is none !) and this is not a "trade building".
+		return;
+	}
+
+	// Overload the "add line" operation to handle correctly all cases (including trading)
+	long int iconId = -1;
+	long int amountToDisplay = (long int)unit->resourceValue;
+	// This switch could be in a primitive somewhere...
+	switch (unit->resourceTypeId) {
+	case RESOURCE_TYPES::CST_RES_ORDER_STONE:
+		iconId = AOE_CONST_DRS::RT_ICON_STONE; break;
+	case RESOURCE_TYPES::CST_RES_ORDER_GOLD:
+		iconId = AOE_CONST_DRS::RT_ICON_GOLD; break;
+	case RESOURCE_TYPES::CST_RES_ORDER_FOOD:
+	case RESOURCE_TYPES::CST_RES_ORDER_MEAT_STORAGE:
+	case RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE:
+	case RESOURCE_TYPES::CST_RES_ORDER_FISH_STORAGE:
+		iconId = AOE_CONST_DRS::UIZ_ICON_FOOD; break; // Food icon
+	case RESOURCE_TYPES::CST_RES_ORDER_WOOD:
+		iconId = AOE_CONST_DRS::UIZ_ICON_WOOD; break;
+	case RESOURCE_TYPES::CST_RES_ORDER_TRADE_GOODS:
+		iconId = AOE_CONST_DRS::UIZ_ICON_TRADE;
+		amountToDisplay = (long int)unitPlayer->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_TRADE_GOODS);
+		break;
+	default:
+		break;
+	}
+	if (iconId >= 0) {
+		// Note: this updates ESI value (current line index), which is expected.
+		AOE_METHODS::UnitInfoZoneAddAttributeLine(unitInfoZone, iconId, 0, amountToDisplay, amountToDisplay, REG_values->ESI_val);
+	}
+}
+
+
+// From 0x4F9B7B, in unitInfoZone.refreshIfNeeded().
+// Change return address to 0x4F9C7B if unit is a dock (standard code) or a trade building (custom fix)
+void CustomRORInstance::EntryPointRefreshTradeGoodsInUnitInfoZone(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ECX_val;
+	ror_api_assert(REG_values, unit && unit->IsCheckSumValidForAUnitClass());
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)REG_values->EBX_val;
+	ror_api_assert(REG_values, unitDef && unitDef->IsCheckSumValidForAUnitClass());
+	AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone = (AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *)REG_values->ESI_val;
+	ror_api_assert(REG_values, unitInfoZone && unitInfoZone->IsCheckSumValid());
+	bool refreshNeeded = false;
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		refreshNeeded = (unitDef && unitDef->DAT_ID1 == CST_UNITID_DOCK);
+	}
+
+	// Custom code
+	if (AOE_STRUCTURES::UnitDefOffersTrading(unitDef)) {
+		refreshNeeded = true;
+	}
+
+	// Do not modify below
+	if (refreshNeeded) {
+		ChangeReturnAddress(REG_values, 0x4F9C7B); // Force refresh
 	}
 }
 

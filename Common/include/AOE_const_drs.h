@@ -103,6 +103,12 @@ namespace AOE_CONST_DRS {
 		RT_ICON_GOLD = 3,
 	};
 
+	enum AoeInGameFlagsIconId : long int {
+		IGF_SHORTCUT_NUMBERS = 0,
+		IGF_MOVETO_INTERMEDIATE_STEP_FLAG = 1,
+		IGF_MOVETO_RED_CROSS = 2
+	};
+
 	// SLP 51000 = mouse cursors: see GAME_CURSOR in AOE_const_internal.
 
 	// Icon IDs for buildings. For SLPID=50704-50707 and 53005 (cf tileset)

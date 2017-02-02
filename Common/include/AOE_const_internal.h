@@ -317,7 +317,7 @@ namespace AOE_CONST_INTERNAL
 		CST_AS_04_GOTO2 = 5,
 		CST_AS_06_WORK = 6, // "start" in progress ? (analog to 3?). For gen. wonder victory, means timer has started? (a transitional state)
 		CST_AS_07_WORK2 = 7, // in progress ? (analog to 4?). For both attack, build, etc
-		CST_AS_08_RETURN = 8, // ???
+		CST_AS_08_RETURN = 8, // ??? E.g. return to deposit when fully loaded?
 		CST_AS_08_TURN = 9, // ???
 		CST_AS_0A_DELAY = 0x0A, // Seen on stuck villager (repairman that could not get to target)
 		CST_AS_0B_MOVE = 0x0B, // Seen when moving to bird location (after killing it)

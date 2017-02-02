@@ -103,7 +103,7 @@ namespace AOE_STRUCTURES {
 	public:
 		STRUCT_SLP_FILE_HEADER *slpData_00; // +0. Set to NULL after init ? A temp value ?
 		unsigned long int unknown_04; // +4. Same type as STRUCT_DRS_FILE_LINK+4
-		long int slpSize;
+		long int slpSize; // +08.
 		unsigned long int unknown_0C;
 		// 0x10
 		unsigned long int unknown_10;
