@@ -14,7 +14,8 @@ UnitSpawnShortcutInfo::UnitSpawnShortcutInfo() {
 
 // Constructor
 CustomRORConfig::CustomRORConfig() {
-	// Hardcoded initialization. If values are provided in config XML file, it will overload this.
+	// Hardcoded initialization (default values). If values are provided in config XML file, it will overload this.
+	this->doNotApplyFixes = false;
 	this->forceMPCompatibility = false;
 	this->autoFixMissingFeatures = false;
 	this->couldNotReadXMLConfig = false;
@@ -251,6 +252,9 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		if (elemName == "showWelcomeMessage") {
 			this->hideWelcomeMessage = !XML_GetBoolElement(elem, "enable"); // default is "enabled"
+		}
+		if (elemName == "applyFixes") {
+			this->doNotApplyFixes = !XML_GetBoolElement(elem, "enable"); // default is "enabled" => doNotApplyFixes=false
 		}
 		if (elemName == "empiresDat") {
 			this->customEmpiresDatRelativePath = this->XML_GetAttributeValue(elem, "filename");

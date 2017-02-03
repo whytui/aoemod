@@ -960,6 +960,7 @@ void CustomRORCommand::OnNewGame(bool isSavedGame) {
 	// Resets internal variables.
 	this->InitMyGameInfo();
 
+	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
 	// Manage game settings customization
 	this->ApplyCustomizationOnRandomGameSettings();
 }
@@ -1304,6 +1305,8 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 void CustomRORCommand::InitMyGameInfo() {
 	CUSTOMROR::crInfo.ResetVariables();
 	CUSTOM_AI::customAIHandler.ResetAllInfo(); // Reset all CusotmROR AI internal structures/info
+	
+	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
 	// Prevent 0% speed at game startup (occurs because of rounding in registry saved value)
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid() && (global->gameSpeed == 0)) {
@@ -1468,7 +1471,7 @@ bool CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 		return false; // Do not update players that are not playing anymore.
 	}
 	if (gameSettings->rgeGameOptions.isMultiPlayer || (!IsImproveAIEnabled(player->playerId))) { return true; }
-
+	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return true; }
 
 	// Only for the FIRST tactical update (last one's time is 0): one-shot initializations
 	if (tacAI->lastScalingUpdate <= 0) {
@@ -2810,11 +2813,11 @@ void CustomRORCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextP
 long int CustomRORCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *actorAsType50, long int *pathFindingArgs) {
 	AOE_STRUCTURES::STRUCT_PLAYER *player = actorAsType50->ptrStructPlayer;
 	assert(player && player->IsCheckSumValid());
-	bool doFix = true;
+	bool doFix = !CUSTOMROR::crInfo.configInfo.doNotApplyFixes; // *True* unless the "no fix" flag is set.
 
 #ifdef _DEBUG
 #pragma message("DEBUG trick path finding/gathering")
-	// DEBUG ONLY
+	// DEBUG ONLY : condition on player
 	doFix = doFix && player && IsImproveAIEnabled(player->playerId);
 	// END DEBUG
 #endif
@@ -3228,6 +3231,10 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UN
 
 	if (!IsValidInternalShortcutNumber(shortcutInternalValue) && (shortcutInternalValue <= 10)) {
 		return false; // shortcutNumber is NOT a shortcut NOR a group ID : do not display anything (exit)
+	}
+
+	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+		return false;
 	}
 
 	// Here: unit has a custom shortcut OR shortcut 10 (not displayed in standard game)

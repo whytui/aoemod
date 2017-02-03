@@ -106,6 +106,8 @@ public:
 	bool forceMPCompatibility; // If true, try to protect MP games from sync errors from customROR treatements ; some features might be restricted/disabled.
 	// Technical
 	bool autoFixMissingFeatures;
+	// If set (not recommended), all (...most) "generic" fixes (fixes without a specific config to enable/disable) won't be applied. Can be used for troubleshooting.
+	bool doNotApplyFixes;
 	long int gameTimerSlowDownFactor;
 	bool gameTimerSlowDownAutoFix;
 	long int collectRORDebugLogs; // 0=no, 1=yes, filtered, 2=yes, all
@@ -170,8 +172,8 @@ public:
 	//float cityPlanHouseDistanceFromOtherBld; // Preferred distance to build houses from other buildings (non-storage). Default 3.
 	long int cityPlanBerryBushWeightForGranary; // Weight for each bush unit in granary location computation. Default is 0x80 but it is too much (2 already reach maximum weight=0xFE)
 	// Map generation
-	long int randomMapRelicsCount;
-	long int randomMapRuinsCount;
+	long int randomMapRelicsCount; // Default 5.
+	long int randomMapRuinsCount; // Default 5.
 	bool useMapGenerationCustomElevationCalculation;
 	float mapGenerationCustomElevationFactor[AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT];
 	// Scenario editor
@@ -193,7 +195,7 @@ public:
 	bool enableAdditionalNumpadShortcuts; // If true, numpad 0-9 keys are additional unit shortcuts.
 	CUSTOMROR::CONFIG::AutoRebuildFarmConfig autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_TYPES_COUNT];
 	bool useImprovedButtonBar;
-	bool allowMultiQueueing;
+	bool allowMultiQueueing; // Allow queuing different unit types. Default is false.
 	bool useEnhancedRulesForAutoAttackTargetSelection;
 	AutoAttackPolicy autoAttackOptionForBlastMeleeUnits;
 	AutoAttackPolicy autoAttackOptionForBlastRangedUnits;
