@@ -91,7 +91,7 @@ namespace AOE_STRUCTURES
 #define CHECKSUM_UNIT_ACTIVITY_MILITARY 0x00549564 // Constructor 0x4E60F0. Archers, melee, war ships, (non-priest)heroes/cheat units. Classes 0,6,12,13,17,19,22,23,24,25,26,28 and >33 if classes are added.
 #define CHECKSUM_UNIT_ACTIVITY_TOWER 0x00549724 // Constructor 0x4E6D60. For hardcoded unitDefIDs. EXCLUDES Lazor tower (=military)
 #define CHECKSUM_UNIT_ACTIVITY_BUILDING 0x00549804 // For class 3 (excluding towers). constructor=0x4E6F40
-#define CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP 0x005492C4 // Constructor=0x4E56F0. Class=2
+#define CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP 0x005492C4 // Constructor=0x4E56F0. Class=2. Not really compatible with "generic" trade units (if using other units than trade boat/dock)
 #define CHECKSUM_UNIT_ACTIVITY_FISHING_SHIP 0x00549484 // Constructor=0x4E5DC0. Class=0x15
 #define CHECKSUM_UNIT_ACTIVITY_TRANSPORT_SHIP 0x005493A4 // Constructor=0x4E5B40. Class=0x14
 	// Unit artificial intelligence (not reserved to AI players !). "UnitAIModule"

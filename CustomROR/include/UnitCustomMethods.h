@@ -46,6 +46,14 @@ bool AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 // Occurs when a unit is killed by an attack (EXCLUDES suicide with DEL, transported units whose transport is destroyed, conversion)
 void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit);
 
+// Entry point when creating unit activity structure.
+// Returns true if ROR code can create unitAI (activity) on its own (default).
+// Returns false if we want to skip ROR code (so that it does not create unitAI)
+bool OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase);
+
+// Returns true if the unit specified can have a unit activity.
+bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase);
+
 
 }
 

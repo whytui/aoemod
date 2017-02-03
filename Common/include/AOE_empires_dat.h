@@ -283,7 +283,7 @@ namespace AOE_CONST_FUNC {
 		CST_IAI_EXPLORE = 4, // 
 		CST_IAI_GATHER_NO_ATTACK = 5, // Gathering with NO attack phase. Excludes fishing !
 		CST_IAI_UNKNOWN_06 = 6, // Natural wonders cheat??? attack or flee from (seen) unit ? Animal ability ?
-		CST_IAI_UNKNOWN_7 = 7, // Attack ?? unsure
+		CST_IAI_UNKNOWN_7 = 7, // Attack in unitDefCommands ?? unsure
 		CST_IAI_MISSILE = 8, // "projectile movement". 7C 26 54 00
 		CST_IAI_ATTACK = 9,
 		CST_IAI_FLY = 0x0A, // "Bird"

@@ -259,5 +259,106 @@ void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, 
 }
 
 
+
+// Entry point when creating unit activity structure
+// Returns true if ROR code can create unitAI (activity) on its own (default).
+// Returns false if we want to skip ROR code (so that it does not create unitAI)
+bool OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase) {
+	bool allowRorToCreateUnitActivity = AllowCreateActivityStructForUnit(unitBase);
+	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass() || !unitBase->ptrStructPlayer ||
+		!unitBase->unitDefinition || !unitBase->unitDefinition->IsCheckSumValidForAUnitClass()) {
+		return allowRorToCreateUnitActivity;
+	}
+	if (IsImproveAIEnabled(unitBase->ptrStructPlayer->playerId)) {
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unitBase->unitDefinition;
+		if (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupDomesticatedAnimal) {
+			// Create unit activity (example: trained_lion)
+			AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_PREDATOR_ANIMAL);
+		}
+		bool hasTradingAbility = false;
+		bool hasAttackAbility = false;
+		STRUCT_UNIT_COMMAND_DEF *tradeCommandDef = NULL;
+		if (unitDef->DerivesFromAttackable()) {
+			AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDefAtt = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDef;
+			if (unitDefAtt->ptrUnitCommandHeader && (unitDefAtt->attacksCount <= 0)) {
+				for (int i = 0; i < unitDefAtt->ptrUnitCommandHeader->commandCount; i++) {
+					if (unitDefAtt->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_TRADE) {
+						tradeCommandDef = unitDefAtt->ptrUnitCommandHeader->ptrCommandArray[i];
+						hasTradingAbility = true;
+					}
+					hasAttackAbility |= (unitDefAtt->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_UNKNOWN_7);
+				}
+			}
+		}
+		if ((unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeCart) || (hasTradingAbility && !hasAttackAbility)) {
+			// Trade activity class is hardcoded for trade boats, we can't use it for "custom" units.
+			// Using another class than ACTIVITY_BASE causes at least a bug: unit can't deposit to drop site (using right click) !
+			AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_BASE);
+			// Set important units = buildings (hardcoded). Should we keep this ? It's ok as long as drop site is a building...
+			if (unitBase->currentActivity) {
+				if (unitBase->currentActivity->listOfImportantUnitAITypes) { // Should not happen
+					assert(false && "Unexpected list of important units");
+					AOEFree(unitBase->currentActivity->listOfImportantUnitAITypes);
+					unitBase->currentActivity->listOfImportantUnitAITypesArraySize = 0;
+				}
+				unitBase->currentActivity->listOfImportantUnitAITypes = (long int *)AOEAlloc(0x4);
+				unitBase->currentActivity->listOfImportantUnitAITypes[0] = GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding;
+				unitBase->currentActivity->listOfImportantUnitAITypesArraySize = 1;
+			}
+			allowRorToCreateUnitActivity = false;
+		}
+		if (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat) {
+			if (unitDef->DerivesFromAttackable()) {
+				AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDefComm = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDef;
+				bool tradeTargetIsDock = (tradeCommandDef && (tradeCommandDef->unitId == CST_UNITID_DOCK));
+				bool tradeDropSiteIsDock = ((unitDefComm->dropSite1 = CST_UNITID_DOCK) || (unitDefComm->dropSite2 = CST_UNITID_DOCK));
+				if (!tradeTargetIsDock || !tradeDropSiteIsDock) {
+					// NOT standard trade boat case.
+					// We have a trade unit that do not trade "dock->dock": do NOT use TRADE activity because it wouldn't work
+					AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_BASE);
+					allowRorToCreateUnitActivity = false;
+				}
+			}
+		}
+	}
+
+	// A security:
+	if (unitBase->currentActivity && allowRorToCreateUnitActivity) {
+		assert(false && "Should not allow creating unitAI when there is already one");
+		allowRorToCreateUnitActivity = false;
+	}
+	return allowRorToCreateUnitActivity;
+}
+
+
+// Returns true if the unit specified can have a unit activity.
+bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase) {
+	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass() || !unitBase->unitDefinition) { return false; }
+	switch (unitBase->unitDefinition->unitAIType) {
+		// List of unit classes that can't have "unit AI" (unit activity)
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupBerryBush:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupFlag:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupGoldMine:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupOther_Dead_Projectile:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSeaFish:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupShoreFish:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnknownFish:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupTree:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupTreeStump:
+		// Those ones are not correctly handled in 0x4AFBE0=unit.createUnitActivity() (however, there is no bug because this is only called for living units)
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupBird:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupCliff:
+		// Any added custom class that shouldn't have unit AI should be added here...
+		return false;
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeCart:
+		// In original game, it is considered like a military unit ! It shouldn't.
+		return false;
+	default:
+		return true;
+	}
+}
+
+
+
 }
 }

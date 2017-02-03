@@ -322,11 +322,6 @@ public:
 	// Entry point when a unit activity stops.
 	void OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity);
 
-	// Entry point when creating unit activity structure
-	void OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase);
-
-	// Returns true if the unit specified can have a unit activity.
-	bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase);
 
 	// Handle the optional display of debug information (like F5 info)
 	// Returns true if standard game info (F5 zone) must NOT be executed.

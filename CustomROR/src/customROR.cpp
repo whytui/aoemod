@@ -3817,8 +3817,7 @@ void CustomRORInstance::EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_value
 		unit->currentActivity = NULL;
 	}
 
-	skipRORTreatments = !CUSTOMROR::crCommand.AllowCreateActivityStructForUnit(unit);
-	CUSTOMROR::crCommand.OnUnitCreateActivityStruct(unit);
+	skipRORTreatments = !CUSTOMROR::UNIT::OnUnitCreateActivityStruct(unit);
 
 	if (skipRORTreatments || (unit->currentActivity != NULL)) {
 		// Make sure to always skip ROR code if currentActivity exists.
