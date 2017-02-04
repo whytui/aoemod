@@ -3317,7 +3317,7 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 	if (!CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) { // TODO: use a dedicated config
 		return false;
 	}
-	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !controlledPlayer || !controlledPlayer->IsCheckSumValid() || unitPlayerId < 0) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !controlledPlayer || !controlledPlayer->IsCheckSumValid() || (unitPlayerId < 0)) {
 		return false;
 	}
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
@@ -3327,11 +3327,13 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 	PLAYER_DIPLOMACY_VALUES diplValue = controlledPlayer->diplomacyVSPlayers[unitPlayerId];
 	GLOBAL_UNIT_AI_TYPES actorAIType = TribeAINone; // controlled player's main selected unit AI type
 	bool actorIsVillager = false; // true if controlled player's main selected unit is a civilian (class 4)
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = NULL;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *selectedUnitDef = NULL;
 
 	if (unit->DerivesFromTrainable()) {
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = CUSTOMROR::crInfo.GetMainSelectedUnit(controlledPlayer);
+		mainSelectedUnit = CUSTOMROR::crInfo.GetMainSelectedUnit(controlledPlayer);
 		if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass() && mainSelectedUnit->DerivesFromTrainable()) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *selectedUnitDef = mainSelectedUnit->unitDefinition;
+			selectedUnitDef = mainSelectedUnit->unitDefinition;
 			if (selectedUnitDef && selectedUnitDef->IsCheckSumValidForAUnitClass()) {
 				actorIsVillager = (selectedUnitDef->unitAIType == TribeAIGroupCivilian);
 				actorAIType = selectedUnitDef->unitAIType;
@@ -3360,6 +3362,33 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 	if ((actorAIType == TribeAIGroupFishingBoat) || (actorAIType == TribeAIGroupCivilian)) {
 		if ((unitDef->unitAIType == TribeAIGroupSeaFish) || (unitDef->unitAIType == TribeAIGroupShoreFish) || (unitDef->unitAIType == TribeAIGroupUnknownFish)) {
 			foundHintDllId = LANG_ID_HINT_CLICK_TO_FISH_HERE; // "Click to fish here"
+			updatedValues = true;
+		}
+	}
+	// Trade units
+	if (selectedUnitDef && selectedUnitDef->DerivesFromCommandable()) {
+		AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *selUnitDefCmd = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)selectedUnitDef;
+		if (selUnitDefCmd->ptrUnitCommandHeader) {
+			for (int i = 0; i < selUnitDefCmd->ptrUnitCommandHeader->commandCount; i++) {
+				if (selUnitDefCmd->ptrUnitCommandHeader->ptrCommandArray[i] && (selUnitDefCmd->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_TRADE)) {
+					if ((selUnitDefCmd->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId == unit->unitDefinition->DAT_ID1) ||
+						(selUnitDefCmd->ptrUnitCommandHeader->ptrCommandArray[i]->classId == unit->unitDefinition->unitAIType)) {
+						foundInteraction = UNIT_INTERACTION_ID::UII_NO_INTERACTION;
+						cursorToForce = GAME_CURSOR::GC_HAND; // TODO: it would be great to have a dedicated cursor !
+						foundHintDllId = LANG_ID_HINT_TRADE_WITH;
+						updatedValues = true;
+					}
+				}
+			}
+		}
+	}
+	// Unit holding resource -> drop site
+	if (mainSelectedUnit && (mainSelectedUnit->resourceValue > 0) && selectedUnitDef && selectedUnitDef->DerivesFromCommandable()) {
+		AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *selUnitDefCmd = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)selectedUnitDef;
+		if ((selUnitDefCmd->dropSite1 == unit->unitDefinition->DAT_ID1) || (selUnitDefCmd->dropSite2 == unit->unitDefinition->DAT_ID1)) {
+			foundInteraction = UNIT_INTERACTION_ID::UII_NO_INTERACTION;
+			cursorToForce = GAME_CURSOR::GC_HAND; // TODO: it would be great to have a dedicated cursor !
+			foundHintDllId = -1;
 			updatedValues = true;
 		}
 	}

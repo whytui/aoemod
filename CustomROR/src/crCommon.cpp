@@ -714,8 +714,8 @@ bool AnalyzeEmpiresDatQuality() {
 						if ((commandable->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK) ||
 							(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
 							if ((commandable->ptrUnitCommandHeader->ptrCommandArray[i]->classId == -1) && 
-								(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitId >= 0) &&
-								(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitId != CST_UNITID_FARM) // Allow farm because they don't have a dedicated AI type (class)
+								(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId >= 0) &&
+								(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId != CST_UNITID_FARM) // Allow farm because they don't have a dedicated AI type (class)
 								) {
 								pair<short int, short int> p;
 								p.first = unitDefId;
@@ -726,7 +726,7 @@ bool AnalyzeEmpiresDatQuality() {
 									msg += ": command #";
 									msg += std::to_string(i);
 									msg += " should not use unitDefId (";
-									msg += std::to_string(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitId);
+									msg += std::to_string(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId);
 									msg += "). Please use unit class instead (civ #";
 									msg += std::to_string(civId);
 									msg += " - the message won't be repeated for other civs)";

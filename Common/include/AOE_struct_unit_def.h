@@ -49,7 +49,7 @@ namespace AOE_STRUCTURES
 		char unknown_05; // unused ?
 		AOE_CONST_FUNC::UNIT_ACTION_ID commandType; // +6
 		short int classId; // +08
-		short int unitId; // +0A.
+		short int unitDefId; // +0A. A unit definition id, or -1 if not specified.
 		char selectionEnabler; // +0C // combat_level?
 		char unknown_0D; // combat_level_flag?
 		short int terrainId; // +0E.

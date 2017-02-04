@@ -293,9 +293,10 @@ bool OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase) {
 		if ((unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeCart) || (hasTradingAbility && !hasAttackAbility)) {
 			// Trade activity class is hardcoded for trade boats, we can't use it for "custom" units.
 			// Using another class than ACTIVITY_BASE causes at least a bug: unit can't deposit to drop site (using right click) !
-			AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_BASE);
+			// activity Base causes the unit to auto-attack enemies (even if no attack, no attack graphic, etc). Same bug as archimedes !
+			//AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_BASE);
 			// Set important units = buildings (hardcoded). Should we keep this ? It's ok as long as drop site is a building...
-			if (unitBase->currentActivity) {
+			/*if (unitBase->currentActivity) {
 				if (unitBase->currentActivity->listOfImportantUnitAITypes) { // Should not happen
 					assert(false && "Unexpected list of important units");
 					AOEFree(unitBase->currentActivity->listOfImportantUnitAITypes);
@@ -304,19 +305,20 @@ bool OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase) {
 				unitBase->currentActivity->listOfImportantUnitAITypes = (long int *)AOEAlloc(0x4);
 				unitBase->currentActivity->listOfImportantUnitAITypes[0] = GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding;
 				unitBase->currentActivity->listOfImportantUnitAITypesArraySize = 1;
-			}
+			}*/
 			allowRorToCreateUnitActivity = false;
 		}
 		if (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat) {
 			if (unitDef->DerivesFromAttackable()) {
 				AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDefComm = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDef;
-				bool tradeTargetIsDock = (tradeCommandDef && (tradeCommandDef->unitId == CST_UNITID_DOCK));
+				bool tradeTargetIsDock = (tradeCommandDef && (tradeCommandDef->unitDefId == CST_UNITID_DOCK));
 				bool tradeDropSiteIsDock = ((unitDefComm->dropSite1 = CST_UNITID_DOCK) || (unitDefComm->dropSite2 = CST_UNITID_DOCK));
 				if (!tradeTargetIsDock || !tradeDropSiteIsDock) {
 					// NOT standard trade boat case.
 					// We have a trade unit that do not trade "dock->dock": do NOT use TRADE activity because it wouldn't work
-					AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_BASE);
-					allowRorToCreateUnitActivity = false;
+					// activity Base causes the unit to auto-attack enemies (even if no attack, no attack graphic, etc). Same bug as archimedes !
+					//AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_BASE);
+					//allowRorToCreateUnitActivity = false;
 				}
 			}
 		}
