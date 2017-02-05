@@ -40,7 +40,7 @@ namespace AOE_STRUCTURES {
 		long int myUnitsHPArray[STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT]; // +BC. 40 elements. Also used as myUnitsIdArray+0xA0.
 		long int unitCount; // +15C. Must correspond to valid unitIds count in unitIdArray. Warning: 4CCC90 method requires LucTieuPhung's fix to avoid breaking this assertion.
 		// 0x160
-		long int desiredUnitCount; // +160. If actual count is higher, units might be removed (and potentially, the groupe destroyed) 0x4DFC92.
+		long int desiredUnitCount; // +160. See 0x4DFC92.
 		long int commanderUnitId; // +164. group leader
 		long int initialTotalGroupHP; // +168. Total group HP when task was started (used to calculate percent health retreat, etc ?)
 		long int initialUnitCount; // +16C.  Total group unit count when task was started (set when resetOrg=1)

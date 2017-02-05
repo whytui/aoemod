@@ -78,4 +78,7 @@ bool UnitOffersTrading(STRUCT_UNIT_BASE *unit);
 // Returns true if it is possible to trade with this unit (it has trade goods in its resource storage)
 bool UnitDefOffersTrading(STRUCT_UNITDEF_BASE *unitDef);
 
+// Returns the "out" resource Id for trading with target unit, taking into account the correct unitDefCommand.
+long int GetTradeOutResourceId(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *targetUnit);
+
 }

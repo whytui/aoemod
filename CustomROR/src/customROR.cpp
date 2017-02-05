@@ -404,6 +404,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004C1AC5:
 		this->EntryPointInfAISearchTradeTargetElem(REG_values);
 		break;
+	case 0x004B6FAF:
+		this->AddRelevantResourceValueWhenTrading(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4192,6 +4195,41 @@ void CustomRORInstance::EntryPointInfAISearchTradeTargetElem(REG_BACKUP *REG_val
 
 	// Do not modify below
 	REG_values->EAX_val = (unsigned long int)foundTradeTargetElem;
+}
+
+
+// From 0x4B6FA8
+void CustomRORInstance::AddRelevantResourceValueWhenTrading(REG_BACKUP *REG_values) {
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	float resourceValue = *((float*)&REG_values->EDX_val); // cast... without conversion
+	unsigned long int checksumForCall = REG_values->EAX_val;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = (AOE_STRUCTURES::STRUCT_PLAYER *)REG_values->ECX_val;
+	ror_api_assert(REG_values, player && player->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_ACTION_TRADE *actionTrade = (AOE_STRUCTURES::STRUCT_ACTION_TRADE *)REG_values->ESI_val;
+	ror_api_assert(REG_values, actionTrade && actionTrade->IsCheckSumValid() && 
+		(actionTrade->actionTypeID == actionTrade->GetExpectedInternalActionId()));
+	long int outResourceId = CST_RES_ORDER_GOLD; // Game default (hardcoded).
+
+	// Custom code
+	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *actor = actionTrade->actor;
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *tradeTarget = actionTrade->targetUnit;
+		long int tmp = AOE_STRUCTURES::GetTradeOutResourceId(actor, tradeTarget);
+		if (tmp > -1) {
+			outResourceId = tmp;
+		}
+	}
+
+	// Do not modify below
+	long int updateGoldCounter = (outResourceId == CST_RES_ORDER_GOLD);
+	_asm {
+		MOV ECX, player;
+		MOV EAX, checksumForCall;
+		PUSH updateGoldCounter;
+		PUSH resourceValue;
+		PUSH outResourceId;
+		CALL DS:[EAX+0x78];
+	}
 }
 
 

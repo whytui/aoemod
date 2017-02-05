@@ -157,6 +157,7 @@ namespace CUSTOMROR {
 		void EntryPointDisplayBuildingInfoResource(REG_BACKUP *REG_values);
 		void EntryPointRefreshTradeGoodsInUnitInfoZone(REG_BACKUP *REG_values);
 		void EntryPointInfAISearchTradeTargetElem(REG_BACKUP *REG_values);
+		void AddRelevantResourceValueWhenTrading(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

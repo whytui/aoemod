@@ -269,4 +269,30 @@ bool UnitDefOffersTrading(STRUCT_UNITDEF_BASE *unitDef) {
 }
 
 
+// Returns the "out" resource Id for trading with target unit, taking into account the correct unitDefCommand.
+long int GetTradeOutResourceId(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *targetUnit) {
+	if (!actor || !actor->IsCheckSumValidForAUnitClass() ||
+		!targetUnit || !targetUnit->IsCheckSumValidForAUnitClass()) {
+		return -1;
+	}
+#ifdef _DEBUG
+	assert(UnitDefOffersTrading(targetUnit->unitDefinition));
+#endif
+	if (!actor->DerivesFromCommandable()) { return -1; }
+	STRUCT_UNITDEF_COMMANDABLE *unitDef = (STRUCT_UNITDEF_COMMANDABLE *)actor->unitDefinition;
+	STRUCT_UNITDEF_BASE *targetDef = targetUnit->unitDefinition;
+	assert(unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromCommandable());
+	assert(targetDef && targetDef->IsCheckSumValidForAUnitClass());
+	if (!unitDef || !unitDef->ptrUnitCommandHeader || !targetDef) { return -1; }
+	for (int i = 0; i < unitDef->ptrUnitCommandHeader->commandCount; i++) {
+		if ((unitDef->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_TRADE) &&
+			((targetDef->DAT_ID1 == unitDef->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId) || (targetDef->unitAIType == unitDef->ptrUnitCommandHeader->ptrCommandArray[i]->classId))
+			) {
+			return unitDef->ptrUnitCommandHeader->ptrCommandArray[i]->resourceTypeOut;
+		}
+	}
+	return -1;
+}
+
+
 }
