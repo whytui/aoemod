@@ -110,6 +110,7 @@ namespace AOE_STRUCTURES {
 
 	// size 0x10090 - constructor=0x4BA1C0. Offset is AI+0xCEC
 	// Checksums : 74 8B 54 00, parents=04 2C 54 00, 74 2B 54 00
+	// 0x4C1AC0 = infAI.searchTradeTarget?(actorUnitId)
 	// +0x00 = infAI.destructor(do_free)
 	// +0x30 = infAI.update(arg1)
 	class STRUCT_INF_AI {

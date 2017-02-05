@@ -129,7 +129,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unitGroupsCount; // +D08. This does NOT count fakeFirstUnitGroupElem (so it CAN be 0).
 		unsigned long int lastAttackTime_ms; // +D0C. Last attack time (not response time, unlesse SNLockAttackAndAttackResponse=1). Set in 0x4D457B.
 		// 0xD10
-		long int unknown_D10_ms; // +D10. A time value in ms
+		long int unknown_D10_ms; // +D10. A time value in ms. Last recomputation of unit groups ?
 		unsigned long int lastAttackResponseTime_ms; // +D14. Value in milliseconds. Used to compute +D24 ?
 		unsigned long int unknown_D18;
 		long int lastScalingUpdate; // +D1C. Value in milliseconds. See customROR config (tacticalAI/updateDelay) or SNScalingFrequency in standard game.
@@ -137,9 +137,9 @@ namespace AOE_STRUCTURES {
 		long int buildFrequencyCounter; // incremented until it reaches SNBuildFrequency
 		long int currentAttackSeparationTime_seconds; // +D24. Compared to SNAttackResponseSeparationTime,SNAttackSeparationTimeRandomness. See 4E0BC0,4E0C03.
 		STRUCT_MANAGED_ARRAY targetPlayers; // +D28. Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK? Always only 1 element (sometimes hardcoded?4D622C)
-		STRUCT_MANAGED_ARRAY likedPlayers; // +D38. allied playerIds ? "myself" IS in list ! In practise, always 2 elements? (me + most liked player) ?
-		STRUCT_MANAGED_ARRAY IdleOrInRangeMilitaryUnits; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960
-		STRUCT_MANAGED_ARRAY unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ? Unit that defend something ?
+		STRUCT_MANAGED_ARRAY likedPlayers; // +D38. allied playerIds ? "myself" IS in list ! In practice, always 2 elements? (me + most liked player) ?
+		STRUCT_MANAGED_ARRAY tmpUnitIdArrayForGroupSetup; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960. Includes fishing,trade ships? Units without a group ?
+		STRUCT_MANAGED_ARRAY unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ? Unit that defend something ? Trade ships also? Used when tasking?
 		unsigned long int gathererCount_actual[4]; // +D68. Index IS resource ID.
 		long int gathererCount_desired[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT]; // +D78. Villager count we want to assign to each type of resource (4). Index IS resource Type ID
 		long int extraResourceTypeNeededByPriority[4]; // +D88 First=most needed. Use extraResourceAmount with this index to get resource amount. <0 amount = I must collect

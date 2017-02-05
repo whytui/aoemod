@@ -47,6 +47,7 @@
 #include "autoRebuildFarmConfig.h"
 #include "UnitCustomMethods.h"
 #include "GameTriggerHandling.h"
+#include "PlayerCustomMethods.h"
 
 #pragma once
 
@@ -155,8 +156,6 @@ public:
 	// Return false if failed.
 	bool ApplyCustomizationOnRandomGameStart();
 
-	// Set a SN number value in both strategy AI and tac AI.
-	void SetSNNumberInStrategyAndTacAI(AOE_STRUCTURES::STRUCT_AI *ai, AOE_CONST_FUNC::SN_NUMBERS snNumber, long int value);
 
 	// Initialize internal game-specific variables (to call on each game start/load)
 	void InitMyGameInfo();

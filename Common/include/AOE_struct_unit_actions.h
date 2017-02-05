@@ -28,8 +28,9 @@ namespace AOE_STRUCTURES {
 	// Size=0x40 for parent class D8 29 54 00 (RGE_Action)
 	// constructor=406EA0(actor, arg2) / 407050. + 406E40?(fromFile)
 	// Note: (some) Actions are created from game commands in 0x4B4600 = unitActionInfo.createActionForCommand(unitDefCommand, arg2, posY, posX, posZ)
-	// EDX+28 = action.update()?
-	// EDX+5C = action.setStatus?(actionStatus)
+	// +0x18 = action.getTypeId() ?
+	// +0x28 = action.update()?
+	// +0x5C = action.setStatus?(actionStatus)
 	class STRUCT_ACTION_BASE {
 	public:
 		unsigned long int checksum;
@@ -40,7 +41,7 @@ namespace AOE_STRUCTURES {
 		char unused[3];
 		// 0x10
 		STRUCT_UNIT_BASE *targetUnit;
-		STRUCT_UNIT_BASE *targetUnit2; // +14. Secondary target pointer (used for missiles only ?)
+		STRUCT_UNIT_BASE *targetUnit2; // +14. Secondary target pointer (used for missiles, trade(=drop site))
 		long int targetUnitId; // +18
 		long int targetUnitId2; // +1C. A secondary target ? See 0x4073F0=action.setTargetUnit2(arg1). Used for missiles (only ?)
 		// 0x20
@@ -52,7 +53,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set.
 		STRUCT_UNIT_ACTION_INFO *requiredActionInfo; // +34. SubAction ? Link with unit/"actionLink"/action. Allows chaining actions ! This is NOT unit->actionInfo !
 		unsigned long int pGraphics; // ptr to graphics structure, consistent with unit+10 ? w_lumber, etc
-		char unknown_3C; // Flag 0/1, about graphics (about need to refresh graphics ?)
+		char unknown_3C; // Flag 0/1, about graphics? (about need to refresh graphics ?) ? "deposit after move end"?
 		char unknown_3D[3]; // Unused. Probably.
 		// 0x40: not in BASE class ; it has different type/role according to child classes. (seen float, word...)
 	};
@@ -312,8 +313,8 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_ACTION_TRADE 0x005489F0
 	class STRUCT_ACTION_TRADE : public STRUCT_ACTION_BASE {
 	public:
-		float unknown_40; // +40
-		float unknown_44; // +44
+		float tradePartnerPosY; // +40. Y position of "trade target" where current resource amount was obtained.
+		float tradePartnerPosX; // +44. X position of "trade target" where current resource amount was obtained. 
 		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_TRADE); }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_TRADE; }
 	};

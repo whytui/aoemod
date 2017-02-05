@@ -308,7 +308,7 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNITDEF_COMMANDABLE : public STRUCT_UNITDEF_MOVABLE {
 	public:
 		STRUCT_UNIT_COMMAND_DEF_HEADER *ptrUnitCommandHeader; // +D8
-		short int whenIdleCommandIndex; // +DC. Unit-command to execute when unit is idle (and status=2). Used for artefacts, discoveries, animals, farms... "convert herd" in AGE3 ?
+		short int whenIdleCommandIndex; // +DC. Unit-command to execute when unit is idle (and status=2). Used for artefacts, discoveries, animals, farms, trade units... "convert herd" in old AGE3 versions.
 		short int unknown_0DE;
 		// 0xE0
 		float searchRadius; // The distance unit will seek to auto-attack enemy units.

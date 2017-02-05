@@ -210,8 +210,8 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 		}
 		float x, y;
 		GetGamePositionUnderMouse(&x, &y);
-		bool expl = PLAYER::IsExploredForPlayer(player, (long)x, (long)y);
-		bool fogVis = PLAYER::IsFogVisibleForPlayer(player, (long)x, (long)y);
+		bool expl = AOE_STRUCTURES::PLAYER::IsExploredForPlayer(player, (long)x, (long)y);
+		bool fogVis = AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(player, (long)x, (long)y);
 
 		STRUCT_UNKNOWN_MAP_INFO_7D2058 *m = *ROR_unknown_mapInfo_7D2058;
 		STRUCT_VISIBLE_UNIT_INFO_SET *vs = m->GetUnknown_00_elem(player->playerId, GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian);

@@ -5,19 +5,48 @@ namespace AOE_METHODS {
 namespace UNIT_GROUP {
 ;
 
-bool RemoveUnitFromGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, STRUCT_UNIT_BASE *unit) {
+
+// Create a unit group with 1 unit (leader)
+STRUCT_UNIT_GROUP *CreateUnitGroup(STRUCT_AI *mainAI, AOE_CONST_INTERNAL::UNIT_GROUP_TYPES groupType, STRUCT_UNIT_BASE *leader) {
+	if (!mainAI || !mainAI->IsCheckSumValid() || !leader || !leader->IsCheckSumValidForAUnitClass()) { return NULL; }
+	STRUCT_TAC_AI *tacAI = &mainAI->structTacAI;
+	assert(tacAI->IsCheckSumValid());
+	STRUCT_UNIT_GROUP *unitGroup = NULL;
+	unsigned long int addrCreateGrp = 0x4E0400;
+	_asm {
+		PUSH 1; // use sequence for ID
+		MOV ECX, tacAI;
+		CALL addrCreateGrp;
+		MOV unitGroup, EAX;
+	}
+	if (!unitGroup) { return unitGroup; }
+	unitGroup->unitGroupType = groupType;
+	AddUnitToGroup(unitGroup, mainAI, leader->unitInstanceId);
+	SetNewGroupLeader(unitGroup, mainAI, leader->unitInstanceId);
+	unitGroup->posX = leader->positionX;
+	unitGroup->posY = leader->positionY;
+	unitGroup->posZ = leader->positionZ;
+	unitGroup->unknown_174_posX = leader->positionX;
+	unitGroup->unknown_170_posY = leader->positionY;
+	unitGroup->unknown_178_posZ = leader->positionZ;
+	unitGroup->retreatPosX = leader->positionX;
+	unitGroup->retreatPosY = leader->positionY;
+	unitGroup->retreatPosZ = leader->positionZ;
+	return unitGroup;
+}
+
+
+bool RemoveUnitFromGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, long int unitId) {
 	assert(unitGroup && unitGroup->IsCheckSumValid());
 	assert(mainAI && mainAI->IsCheckSumValid());
-	assert(unit && unit->IsCheckSumValidForAUnitClass());
 	if (!unitGroup || !unitGroup->IsCheckSumValid()) { return false; }
 	if (!mainAI || !mainAI->IsCheckSumValid()) { return false; }
-	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
 	unsigned long int addrRemoveFromGroup = 0x4CCD10;
 	long int result;
 	_asm {
 		MOV ECX, unitGroup;
 		PUSH mainAI;
-		PUSH unit;
+		PUSH unitId;
 		CALL addrRemoveFromGroup;
 		MOV result, EAX;
 	}
@@ -25,23 +54,38 @@ bool RemoveUnitFromGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, STRUCT
 }
 
 
-bool AddUnitToGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, STRUCT_UNIT_BASE *unit) {
+bool AddUnitToGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, long int unitId) {
 	assert(unitGroup && unitGroup->IsCheckSumValid());
 	assert(mainAI && mainAI->IsCheckSumValid());
-	assert(unit && unit->IsCheckSumValidForAUnitClass());
 	if (!unitGroup || !unitGroup->IsCheckSumValid()) { return false; }
 	if (!mainAI || !mainAI->IsCheckSumValid()) { return false; }
-	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
 	unsigned long int addrAddToGroup = 0x4CCC90;
 	long int result;
 	_asm {
 		MOV ECX, unitGroup;
 		PUSH mainAI;
-		PUSH unit;
+		PUSH unitId;
 		CALL addrAddToGroup;
 		MOV result, EAX;
 	}
 	return (result != 0);
+}
+
+
+// Sets a unit group's new leader.
+bool SetNewGroupLeader(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, long int unitId) {
+	assert(unitGroup && unitGroup->IsCheckSumValid());
+	assert(mainAI && mainAI->IsCheckSumValid());
+	if (!unitGroup || !unitGroup->IsCheckSumValid()) { return false; }
+	if (!mainAI || !mainAI->IsCheckSumValid()) { return false; }
+	unsigned long int addrSetGroupLeader = 0x4CCFE0;
+	_asm {
+		MOV ECX, unitGroup;
+		PUSH mainAI;
+		PUSH unitId;
+		CALL addrSetGroupLeader;
+	}
+	return true;
 }
 
 

@@ -401,6 +401,9 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004F9B85:
 		this->EntryPointRefreshTradeGoodsInUnitInfoZone(REG_values);
 		break;
+	case 0x004C1AC5:
+		this->EntryPointInfAISearchTradeTargetElem(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4175,6 +4178,20 @@ void CustomRORInstance::EntryPointRefreshTradeGoodsInUnitInfoZone(REG_BACKUP *RE
 	if (refreshNeeded) {
 		ChangeReturnAddress(REG_values, 0x4F9C7B); // Force refresh
 	}
+}
+
+
+// From 0x4C1ABF. Replaces the whole function infAI.searchTradeTargetElem(actorUnitId), returns pointer to infAIElem = trade target.
+void CustomRORInstance::EntryPointInfAISearchTradeTargetElem(REG_BACKUP *REG_values) {
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ECX_val;
+	long int actorUnitId = GetIntValueFromRORStack(REG_values, 4);
+
+	// This call takes into account CUSTOMROR::crInfo.configInfo.doNotApplyFixes
+	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *foundTradeTargetElem = CUSTOMROR::UNIT::FindTradeTargetElem(infAI, actorUnitId);
+
+	// Do not modify below
+	REG_values->EAX_val = (unsigned long int)foundTradeTargetElem;
 }
 
 

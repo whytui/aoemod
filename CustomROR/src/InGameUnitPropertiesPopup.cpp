@@ -332,7 +332,7 @@ bool InGameUnitPropertiesPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *
 		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkForceNotRebuildFarm, false);
 	}
 	if (sender == this->btnMakeMainUnitForShortcutSelection) {
-		PLAYER::MakeMainUnitForShortcutSelection(this->unitId);
+		AOE_STRUCTURES::PLAYER::MakeMainUnitForShortcutSelection(this->unitId);
 	}
 	return false; // Not one of our buttons; let ROR code be executed normally
 }

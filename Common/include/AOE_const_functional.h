@@ -66,14 +66,6 @@ namespace AOE_CONST_FUNC
 	const static int CST_AI_CONTROL_MODE_GAIA = 2;
 	const static int CST_AI_CONTROL_MODE_COMPUTER = 3;
 
-	// Diplomacy values (diplomacy struct)
-	const static int CST_DIPL_ALLIED = 0;
-	const static int CST_DIPL_NEUTRAL = 1;
-	const static int CST_DIPL_UNUSED = 2; // Do not use, game code seems not to use/support it.
-	const static int CST_DIPL_ENEMY = 3;
-	// Diplomacy values (flags)
-	//const static int CST_DIPLAI_FLAG_DIPL_ALLIED = 0;
-	//const static int CST_DIPLAI_FLAG_DIPL_ENEMY = 1;
 
 	// Like/Dislike initial values
 	const static int CST_DISLIKE_INITIAL_VALUE = 74; // "init2" hardcoded initial value for Dislike against non-allied player

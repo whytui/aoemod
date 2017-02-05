@@ -198,8 +198,8 @@ namespace AOE_STRUCTURES
 		// 0x100
 		long int unknown_100_baseForRandomSeed; // init 0xBB8=3000. Base for random seed calculation. The highest it is, the lowest are chances of "reacting" ? Lion=6000(low reaction %), gazelle=4000(high)
 		unsigned long int unknown_104_gameTime; // +104. Some game time (ms) in the *future* ? (next xxx) ? Or defenseBuffer ?? Or idleTimeout?
-		unsigned long int unknown_108; // int, consistent with +10C. Default 0 (NULL?)
-		unsigned long int unknown_10C; // int, consistent with +108. Default 0x3E8=1000?
+		unsigned long int unknown_108; // int, consistent with +10C. Default 0 (NULL?) Time since last autoFindTarget?
+		unsigned long int unknown_10C; // int, consistent with +108. Default 0x3E8=1000? Delay between 2 autoFindTarget ? 0x40FBA3
 		// 0x110
 		float currentPosY;
 		float currentPosX;

@@ -259,7 +259,6 @@ void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, 
 }
 
 
-
 // Entry point when creating unit activity structure
 // Returns true if ROR code can create unitAI (activity) on its own (default).
 // Returns false if we want to skip ROR code (so that it does not create unitAI)
@@ -270,6 +269,7 @@ bool OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase) {
 		return allowRorToCreateUnitActivity;
 	}
 	if (IsImproveAIEnabled(unitBase->ptrStructPlayer->playerId)) {
+		bool createTradeUnitGroup = false;
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unitBase->unitDefinition;
 		if (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupDomesticatedAnimal) {
 			// Create unit activity (example: trained_lion)
@@ -292,34 +292,28 @@ bool OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase) {
 		}
 		if ((unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeCart) || (hasTradingAbility && !hasAttackAbility)) {
 			// Trade activity class is hardcoded for trade boats, we can't use it for "custom" units.
-			// Using another class than ACTIVITY_BASE causes at least a bug: unit can't deposit to drop site (using right click) !
-			// activity Base causes the unit to auto-attack enemies (even if no attack, no attack graphic, etc). Same bug as archimedes !
-			//AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_BASE);
-			// Set important units = buildings (hardcoded). Should we keep this ? It's ok as long as drop site is a building...
-			/*if (unitBase->currentActivity) {
-				if (unitBase->currentActivity->listOfImportantUnitAITypes) { // Should not happen
-					assert(false && "Unexpected list of important units");
-					AOEFree(unitBase->currentActivity->listOfImportantUnitAITypes);
-					unitBase->currentActivity->listOfImportantUnitAITypesArraySize = 0;
-				}
-				unitBase->currentActivity->listOfImportantUnitAITypes = (long int *)AOEAlloc(0x4);
-				unitBase->currentActivity->listOfImportantUnitAITypes[0] = GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding;
-				unitBase->currentActivity->listOfImportantUnitAITypesArraySize = 1;
-			}*/
+			AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP);
 			allowRorToCreateUnitActivity = false;
+			createTradeUnitGroup = true;
 		}
 		if (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat) {
 			if (unitDef->DerivesFromAttackable()) {
 				AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDefComm = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDef;
 				bool tradeTargetIsDock = (tradeCommandDef && (tradeCommandDef->unitDefId == CST_UNITID_DOCK));
-				bool tradeDropSiteIsDock = ((unitDefComm->dropSite1 = CST_UNITID_DOCK) || (unitDefComm->dropSite2 = CST_UNITID_DOCK));
+				bool tradeDropSiteIsDock = ((unitDefComm->dropSite1 == CST_UNITID_DOCK) || (unitDefComm->dropSite2 == CST_UNITID_DOCK));
 				if (!tradeTargetIsDock || !tradeDropSiteIsDock) {
 					// NOT standard trade boat case.
-					// We have a trade unit that do not trade "dock->dock": do NOT use TRADE activity because it wouldn't work
-					// activity Base causes the unit to auto-attack enemies (even if no attack, no attack graphic, etc). Same bug as archimedes !
-					//AOE_METHODS::UNIT::CreateUnitActivity(unitBase, CHECKSUM_UNIT_ACTIVITY_BASE);
-					//allowRorToCreateUnitActivity = false;
+					// Let ROR create a UNIT_ACTIVITY_TRADE_SHIP.
+					createTradeUnitGroup = true;
 				}
+			}
+		}
+		if (createTradeUnitGroup) {
+			// Remark: player may NOT have a AI structure.
+			STRUCT_UNIT_GROUP *unitGroup = AOE_METHODS::UNIT_GROUP::CreateUnitGroup(unitBase->ptrStructPlayer->ptrAIStruct, UNIT_GROUP_TYPES::CST_UGT_TRADE_SHIP, unitBase);
+			if (unitGroup && unitGroup->IsCheckSumValid()) {
+				long int nbEscorts = unitBase->ptrStructPlayer->ptrAIStruct->structTacAI.SNNumber[SNDesiredNumberTradeEscorts];
+				unitGroup->desiredUnitCount = nbEscorts + 1; // Desired unit count : 1 trade unit + escorts. Note: this is not required to get AI handle the group correctly.
 			}
 		}
 	}
@@ -360,6 +354,47 @@ bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase
 	}
 }
 
+
+// Returns a "infAI elem list" pointer of a trade target if found, NULL if not found
+// By default (game code), this searches for the closest unit that does not belong to "me", is a dock, whose player has trade goods>0.
+AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindTradeTargetElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int actorUnitId) {
+	if (!infAI || !infAI->IsCheckSumValid() || (actorUnitId < 0) || !infAI->unitElemList) {
+		return NULL;
+	}
+	bool useOriginalCode = CUSTOMROR::crInfo.configInfo.doNotApplyFixes;
+	long int listTotalElemCount = infAI->unitElemListSize;
+	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *bestElem = NULL;
+	long int bestSqrDistance = 0;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return NULL; }
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = global->GetUnitFromId(actorUnitId);
+	if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass() || !actorUnit->ptrStructPlayer) { return NULL; }
+	long int myPlayerId = actorUnit->ptrStructPlayer->playerId;
+	bool playerHasTradeGoodsCache[9]; // Calc once and for all for each player if it has trade goods.
+	for (int i = 0; i < 9; i++) {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(i);
+		playerHasTradeGoodsCache[i] = player && (player->GetResourceValue(CST_RES_ORDER_TRADE_GOODS) > 0);
+	}
+
+	for (int curIndex = 0; curIndex < listTotalElemCount; curIndex++) {
+		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[curIndex];
+		if ((curElem->playerId != myPlayerId) && (curElem->unitId > -1) && (playerHasTradeGoodsCache[curElem->playerId])) {
+			// The fix on original method is here (depending on useOriginalCode variable)
+			if ((useOriginalCode && (curElem->unitDATID == CST_UNITID_DOCK)) ||
+				(!useOriginalCode && (AOE_STRUCTURES::CanTradeWithUnitDef(actorUnit, curElem->unitDATID)))) {
+				long int diffX = (long int)curElem->posX - (long int)actorUnit->positionX;
+				long int diffY = (long int)curElem->posY - (long int)actorUnit->positionY;
+				long int sqrDist = (diffX * diffX) + (diffY * diffY);
+				if ((sqrDist < bestSqrDistance) || (bestElem == NULL)) {
+					bestElem = curElem;
+					bestSqrDistance = sqrDist;
+				}
+			}
+		}
+	}
+
+	return bestElem;
+}
 
 
 }

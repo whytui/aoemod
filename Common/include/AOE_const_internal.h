@@ -131,7 +131,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ICE_NOT_ENOUGH_SPACE_TO_CREATE_UNIT = 0x3E8
 	};
 
-	// IDs for unit-command buttons under game zone. See 481445 switch for execution.
+	// IDs for unit-command buttons under game zone. See 0x481445 switch for execution.
 	enum INGAME_UI_COMMAND_ID : long int {
 		CST_IUC_WORK = 1, // And this works ! Hotkey=W. No suitable icon though :(
 		CST_IUC_MOVE = 2, // And this works ! Hotkey=M. And even has a suitable icon (id=1)
@@ -140,8 +140,8 @@ namespace AOE_CONST_INTERNAL
 		CST_IUC_STOP = 5, // iconId=3 (hand)
 		CST_IUC_CANCEL_SELECTION = 6, // icon = 0xA. Unselect unit
 		CST_IUC_UNLOAD_TRANSPORT = 7, // icon 5
-		CST_IUC_REGROUP = 8, // icon 7. cf 48260A.
-		CST_IUC_UNGROUP = 9, // cf icon 8(slp 50721). Ungroup
+		CST_IUC_REGROUP = 8, // icon 7. cf 0x48260A.
+		CST_IUC_UNGROUP = 9, // cf icon 8(slp 50721). Ungroup.
 		CST_IUC_FORMATION = 0x0A, // what is this?
 		CST_IUC_CANCEL_OR_BACK = 0x0B, // ESC key to cancel command or sub-menu(build, repair...)). icon 0x0A (always?)
 		CST_IUC_NEXT_PAGE = 0x0C, // in build menu. Effect in 0x485140.
@@ -336,8 +336,8 @@ namespace AOE_CONST_INTERNAL
 		CST_ICI_ADD_RESOURCE = 0x05, // Only used for AI "personality resource bonus" ? "add attribute"
 		CST_ICI_FORMATION = 0x06, // different from group ? Walk in formation ? // 0x42BB60
 		CST_ICI_GIVE_RESOURCE = 0x07, // Give a resource amount from a player to another. Tribute taxes are NOT supported here.
-		CST_ICI_CREATE_GROUP = 0x08, // group units 0x42BBE0
-		CST_ICI_REMOVE_GROUP = 0x09, // "destroy group".
+		CST_ICI_CREATE_GROUP = 0x08, // group units 0x42BBE0. Used by AI groups.
+		CST_ICI_REMOVE_GROUP = 0x09, // "destroy group". Used by AI groups.
 		CST_ICI_TASK_UNIT = 0x0A, // AI order.
 		CST_ICI_RESIGN = 0x0B, // Only for MP games when clicking resign in menu. See exec=42B290
 		CST_ICI_UNKNOWN_C = 0x0C, // Add target pos ?
@@ -469,7 +469,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_26E = 0x26E, // load ? see 0x412DF0
 		CST_ATI_UNKNOWN_26F = 0x26F, // see 0x412E60
 		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
-		CST_ATI_UNKNOWN_2BB = 0x2BB, // when target unit dies ? or "owned" projectile "dies" ? Example: targeted farm or enemy projectile dies ?
+		CST_ATI_UNKNOWN_2BB = 0x2BB, // Release being worked on ?? Example: targeted farm or enemy projectile dies ? 0x426B66.
 		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // React to agression but also "AI" attacks
 		CST_ATI_DEFEND_UNIT = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.defend/followUnit?(myUnitId, targetUnitId)
 		CST_ATI_UNKNOWN_2BE = 0x2BE, // build+0x64

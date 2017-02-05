@@ -223,17 +223,30 @@ bool CanTradeWithUnitDef(STRUCT_UNIT_BASE *unit, long int targetUnitDefId) {
 		// Note: in standard game, only trainable and building units can trade. For other unit types, DS:[EDX+0x138] points to a "return 0" function.
 		return false;
 	}
-	if (!unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid() || !unit->ptrStructPlayer->ptrStructDefUnitTable) {
+	if (!unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid() || !unit->ptrStructPlayer->ptrStructDefUnitTable ||
+		!unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
+	
+	AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDefCommandable = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unit->unitDefinition;
+	if (!unitDefCommandable->ptrUnitCommandHeader) { return false; }
+
 	STRUCT_PLAYER *player = unit->ptrStructPlayer;
 	// This requires unitDef to be the same for all players (which is a strong AOE requirement anyway)
 	STRUCT_UNITDEF_BASE *targetUnitDef = player->GetUnitDefBase((short int)targetUnitDefId);
 	if (!targetUnitDef || !targetUnitDef->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
-	// A unit that offers trading is a unit that has "trade goods" in its resource storage (typically, enable_mode=0).
-	return UnitDefOffersTrading(targetUnitDef);
+
+	// Does unit (def) have a command to trade with target unit (def) ?
+	for (int i = 0; i < unitDefCommandable->ptrUnitCommandHeader->commandCount; i++) {
+		if ((unitDefCommandable->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_TRADE) &&
+			((unitDefCommandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId == targetUnitDef->DAT_ID1) ||
+			(unitDefCommandable->ptrUnitCommandHeader->ptrCommandArray[i]->classId == targetUnitDef->unitAIType))) {
+			return UnitDefOffersTrading(targetUnitDef);
+		}
+	}
+	return false;
 }
 
 
@@ -245,7 +258,7 @@ bool UnitOffersTrading(STRUCT_UNIT_BASE *unit) {
 }
 
 
-// Returns true if it is possible to trade with this unit (it has trade goods in its resource storage)
+// Returns true if it is possible to trade with this unit (it has trade goods in its resource storage, typically with enableMode=0)
 bool UnitDefOffersTrading(STRUCT_UNITDEF_BASE *unitDef) {
 	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 		return false;

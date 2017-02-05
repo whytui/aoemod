@@ -599,7 +599,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (!player || !player->ptrAIStruct) { return; }
 		
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)PLAYER::FindUnitWithShortcutNumberForPlayer(player, 1);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)AOE_STRUCTURES::PLAYER::FindUnitWithShortcutNumberForPlayer(player, 1);
 		if (unitBase) {
 			unitBase->AOE_destructor(true);
 			return;
@@ -1155,16 +1155,6 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameSettings() {
 }
 
 
-// Set a SN number value in both strategy AI and tac AI.
-void CustomRORCommand::SetSNNumberInStrategyAndTacAI(AOE_STRUCTURES::STRUCT_AI *ai, AOE_CONST_FUNC::SN_NUMBERS snNumber, long int value) {
-	if (!ai || !ai->IsCheckSumValid()) { return; }
-	assert((snNumber >= 0) && (snNumber <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER));
-	if ((snNumber < 0) || (snNumber > AOE_CONST_FUNC::CST_LAST_SN_NUMBER)) { return; }
-	ai->structStrategyAI.SNNumber[snNumber] = value;
-	ai->structTacAI.SNNumber[snNumber] = value;
-}
-
-
 // Does all custom stuff on random maps / deathmatches at game start : custom personality values, strategy, initial resources, etc.
 // These are changes that are applied when game is loaded (do not interfere here with settings like map size, etc)
 // Does NOT apply to scenario/campaign/load saved game.
@@ -1177,9 +1167,26 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 	if (!global || !global->IsCheckSumValid()) { return false; }
 	
 	// Check game type : allow only random map & deathmatch
-	if (settings->isCampaign || settings->isSavedGame || settings->rgeGameOptions.isScenario) {
+	if (settings->isCampaign || settings->isSavedGame) {
+		return true;
+	}
+
+	if (settings->rgeGameOptions.isScenario) {
+		for (int i = 0; i <= settings->rgeGameOptions.playerCountWithoutGaia; i++) {
+			if (global->scenarioInformation && (global->scenarioInformation->personalityFileSize[i] <= 0)) {
+				// Player does not have a specified PERsonality, which means it is initialized as a Random Map.
+				// => We can apply fixes on PER numbers.
+				CUSTOMROR::PLAYER::ApplySNNumberCustomizationOnPlayer(global->GetPlayerStruct(i));
+			}
+			if (global->scenarioInformation && (global->scenarioInformation->strategyFileSize[i] <= 0)) {
+				// Player does not have a specified strategy, which means it is initialized as a Random Map.
+				// => We can apply custom strategy generation.
+				CUSTOMROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(i));
+			}
+		}
 		return false;
 	}
+
 #pragma message("Customization on random game start: MP not supported")
 	if (settings->rgeGameOptions.isMultiPlayer) {
 		return false;
@@ -1212,50 +1219,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 
 	// SN Numbers (update both strategyAI and tacAI)
 	for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
-		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
-		if (player && player->IsCheckSumValid() && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
-			AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
-			
-			if (isDM) {
-				// Deathmatch
-				for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
-					if (CUSTOMROR::crInfo.configInfo.defaultPerNumbers_DM_isSet[i]) {
-						this->SetSNNumberInStrategyAndTacAI(ai, (AOE_CONST_FUNC::SN_NUMBERS)i,
-							CUSTOMROR::crInfo.configInfo.defaultPerNumbers_DM[i]);
-					}
-				}
-			} else {
-				// Random map
-				for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
-					if (CUSTOMROR::crInfo.configInfo.defaultPerNumbers_RM_isSet[i]) {
-						this->SetSNNumberInStrategyAndTacAI(ai, (AOE_CONST_FUNC::SN_NUMBERS)i,
-							CUSTOMROR::crInfo.configInfo.defaultPerNumbers_RM[i]);
-					}
-				}
-			}
-
-			// Manage the 4 "hardest difficulty" SN numbers
-			if (settings->difficultyLevelChoice == 0) {
-				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialFood,
-					isDM ? CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD] :
-					CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_FOOD]);
-				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialWood,
-					isDM ? CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD] :
-					CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_WOOD]);
-				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialStone,
-					isDM ? CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE] :
-					CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_STONE]);
-				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialGold,
-					isDM ? CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD] :
-					CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
-			} else {
-				// Not hardest : disable the bonus for AI
-				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialFood, 0);
-				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialWood, 0);
-				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialStone, 0);
-				this->SetSNNumberInStrategyAndTacAI(ai, SNInitialGold, 0);
-			}
-		}
+		CUSTOMROR::PLAYER::ApplySNNumberCustomizationOnPlayer(global->GetPlayerStruct(playerId));
 	}
 
 	// Initial diplomacy (default=enemy, not neutral) - only if enabled in config
@@ -1282,19 +1246,8 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 	}
 
 	// Strategy
-	if ((!settings->isDeathMatch && CUSTOMROR::crInfo.configInfo.generateStrategyForRM) ||
-		(settings->isDeathMatch && CUSTOMROR::crInfo.configInfo.generateStrategyForDM)) {
-		if (settings->isDeathMatch) {
-			traceMessageHandler.WriteMessage("Strategy generation for deathmatch games is not supported yet");
-		} else {
-			for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
-				AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
-				if (player && player->IsCheckSumValid()) {
-					STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(&CUSTOMROR::crInfo, player);
-					sb.CreateStrategyFromScratch();
-				}
-			}
-		}
+	for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
+		CUSTOMROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(playerId));
 	}
 
 	return true;
@@ -1676,7 +1629,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 				AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *targetUnitDefFlag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *)targetUnitFlag->unitDefinition;
 				// For units that can move, check fog visibility
 				if (targetUnitDefFlag->speed > 0) {
-					canInteractWithTarget = canInteractWithTarget && PLAYER::IsFogVisibleForPlayer(player, (long)target->positionX, (long)target->positionY);
+					canInteractWithTarget = canInteractWithTarget && AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(player, (long)target->positionX, (long)target->positionY);
 				}
 			}
 		}
@@ -1984,7 +1937,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
 			FarmRebuildInfo *fInfo = CUSTOMROR::crInfo.myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
 			if (fInfo && (fInfo->playerId == player->playerId) && !fInfo->forceNotRebuild &&
-				(fInfo->villagerUnitId >= 0) && PLAYER::IsUnitAvailableForPlayer(CST_UNITID_FARM, player)) {
+				(fInfo->villagerUnitId >= 0) && AOE_STRUCTURES::PLAYER::IsUnitAvailableForPlayer(CST_UNITID_FARM, player)) {
 				// As long as we use a game command, it is compatible with multiplayer.
 				GAME_COMMANDS::CreateCmd_Build(fInfo->villagerUnitId, CST_UNITID_FARM, fInfo->posX, fInfo->posY);
 				fInfo->villagerUnitId = -1;
@@ -2859,10 +2812,10 @@ void CustomRORCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LAB
 	long int boatVillCount = -1;
 	// Try to get actual villager count (including fishing ships, etc...)
 	if (player && player->IsCheckSumValid()) {
-		villCount = PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupCivilian, 2, 2);
-		boatVillCount = PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupFishingBoat, 2, 2) +
-			PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupTradeBoat, 2, 2) +
-			PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupTransportBoat, 2, 2);
+		villCount = AOE_STRUCTURES::PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupCivilian, 2, 2);
+		boatVillCount = AOE_STRUCTURES::PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupFishingBoat, 2, 2) +
+			AOE_STRUCTURES::PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupTradeBoat, 2, 2) +
+			AOE_STRUCTURES::PLAYER::GetPlayerUnitCount(player, -1, TribeAIGroupTransportBoat, 2, 2);
 		//villCount = (long int)player->GetResourceValue(CST_RES_ORDER_CIVILIAN_POPULATION); // DONT DO THIS because resource is NOT always up to date
 	}
 	std::string res = localizedText;
@@ -2941,12 +2894,12 @@ void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_I
 	bool elementWasReset = false;
 	// Custom treatment: clean obsolete units
 	// If element "memorized" position is visible...
-	if (PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, currentUnitListElem->posX, currentUnitListElem->posY)) {
+	if (AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, currentUnitListElem->posX, currentUnitListElem->posY)) {
 		// Clean entry if: (we are in the case when "unit list" position is visible, so we can update it without cheating !)
 		// - unit no longer exist
 		// - unit moved to a position which is NO LONGER visible to me
 		if (!unitBase || !unitBase->ptrStructPlayer ||
-			(!PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, (long int)unitBase->positionX, (long int)unitBase->positionY))) {
+			(!AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, (long int)unitBase->positionX, (long int)unitBase->positionY))) {
 			if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs == 2) {
 				int noLongerExists = (unitBase == NULL) ? 1 : 0;
 				std::string s = "Removed unit #";

@@ -20,9 +20,16 @@ namespace AOE_METHODS {
 	namespace UNIT_GROUP {
 ;
 
-bool RemoveUnitFromGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, STRUCT_UNIT_BASE *unit);
 
-bool AddUnitToGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, STRUCT_UNIT_BASE *unit);
+// Create a unit group with 1 unit (leader)
+STRUCT_UNIT_GROUP *CreateUnitGroup(STRUCT_AI *mainAI, AOE_CONST_INTERNAL::UNIT_GROUP_TYPES groupType, STRUCT_UNIT_BASE *leader);
+
+bool RemoveUnitFromGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, long int unitId);
+
+bool AddUnitToGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, long int unitId);
+
+// Sets a unit group's new leader.
+bool SetNewGroupLeader(STRUCT_UNIT_GROUP *unitGroup, STRUCT_AI *mainAI, long int unitId);
 
 // Find unit's unit group, if any. NULL if not found
 STRUCT_UNIT_GROUP *FindUnitGroup(STRUCT_UNIT_BASE *unit);
