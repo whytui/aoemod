@@ -381,7 +381,7 @@ AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindTradeTargetElem(AOE_STRUCTURES
 		if ((curElem->playerId != myPlayerId) && (curElem->unitId > -1) && (playerHasTradeGoodsCache[curElem->playerId])) {
 			// The fix on original method is here (depending on useOriginalCode variable)
 			if ((useOriginalCode && (curElem->unitDATID == CST_UNITID_DOCK)) ||
-				(!useOriginalCode && (AOE_STRUCTURES::CanTradeWithUnitDef(actorUnit, curElem->unitDATID)))) {
+				(!useOriginalCode && (AOE_STRUCTURES::CanGetRenewableResourceFrom(actorUnit, curElem->unitDATID)))) {
 				long int diffX = (long int)curElem->posX - (long int)actorUnit->positionX;
 				long int diffY = (long int)curElem->posY - (long int)actorUnit->positionY;
 				long int sqrDist = (diffX * diffX) + (diffY * diffY);

@@ -153,7 +153,7 @@ namespace CUSTOMROR {
 		void EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values);
 		void EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_values);
 		void OverrideShowF5DebugInfo(REG_BACKUP *REG_values);
-		void UnitCanTradeWith(REG_BACKUP *REG_values);
+		void UnitDefProvidesRenewableResource(REG_BACKUP *REG_values);
 		void EntryPointDisplayBuildingInfoResource(REG_BACKUP *REG_values);
 		void EntryPointRefreshTradeGoodsInUnitInfoZone(REG_BACKUP *REG_values);
 		void EntryPointInfAISearchTradeTargetElem(REG_BACKUP *REG_values);

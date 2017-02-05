@@ -147,7 +147,7 @@ namespace AOE_STRUCTURES {
 	// +0x120 = unit.FLDActionPosY()
 	// +0x124 = unit.FLDActionPosX()
 	// +0x128 = unit.FLDActionPosZ()
-	// +0x138 = unit.CanTradeWith(unitdefId). (in early versions, farms may have been gatherable by everyone?). For types70/80, see 0x4AFB70. All others="return false".
+	// +0x138 = unit.UnitDefProvidesRenewableResource(unitdefId). True for units that "make" resource (farms, trade units like docks). For types70/80, see 0x4AFB70. All others="return false".
 	// +0x140 = unit.logMessage(?)?
 	// +0x14C = unit.attackPosition(fposY, fposX, arg3, arg4)
 	// +0x150 = unit.setAttackAction?(targetUnitId, force)

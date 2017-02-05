@@ -393,7 +393,7 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 		this->OverrideShowF5DebugInfo(REG_values);
 		break;
 	case 0x004AFB79:
-		this->UnitCanTradeWith(REG_values);
+		this->UnitDefProvidesRenewableResource(REG_values);
 		break;
 	case 0x004F8F0C:
 		this->EntryPointDisplayBuildingInfoResource(REG_values);
@@ -4060,9 +4060,9 @@ void CustomRORInstance::OverrideShowF5DebugInfo(REG_BACKUP *REG_values) {
 }
 
 
-// From unit.canTradeWith(unitDefId) in 0x4AFB70 (unit+0x138)
+// From unit.canTradeWith(unitDefId) in 0x4AFB70 (unit+0x138). Called from 0x40386E(farming), 0x4B6CDF(trading), etc
 // Set EAX = 0x2D (CST_UNITID_DOCK) to have ROR function return true, any other value = return false (can't trade with)
-void CustomRORInstance::UnitCanTradeWith(REG_BACKUP *REG_values) {
+void CustomRORInstance::UnitDefProvidesRenewableResource(REG_BACKUP *REG_values) {
 	long int targetUnitDefId = REG_values->EAX_val;
 	bool resultCanTradeWith = (targetUnitDefId == CST_UNITID_FARM) /* Yes ! */ ||
 		(targetUnitDefId == CST_UNITID_DOCK); // This init is game default.
@@ -4072,7 +4072,7 @@ void CustomRORInstance::UnitCanTradeWith(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, actorUnit && actorUnit->IsCheckSumValidForAUnitClass());
 
 	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
-		resultCanTradeWith = AOE_STRUCTURES::CanTradeWithUnitDef(actorUnit, targetUnitDefId);
+		resultCanTradeWith = AOE_STRUCTURES::CanGetRenewableResourceFrom(actorUnit, targetUnitDefId);
 	}
 
 	if (resultCanTradeWith) {

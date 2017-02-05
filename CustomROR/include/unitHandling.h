@@ -69,8 +69,10 @@ bool TellUnitToInteractWithTarget(STRUCT_UNIT_COMMANDABLE *actorUnit, STRUCT_UNI
 void MoveUnitToTargetOrPosition(STRUCT_UNIT_COMMANDABLE *unitToMove, STRUCT_UNIT_BASE *target, float posX, float posY);
 
 
-// Returns true if unit (typically, a trade boat) can trade with target unit (typically, a building like dock)
-bool CanTradeWithUnitDef(STRUCT_UNIT_BASE *unit, long int targetUnitDefId);
+// Returns true if targetUnitDefId creates renewable resource:
+// - farms (immediately available food is limited and increases progressively)
+// - docks or trade buildings (trade goods are unlimited, but need time to resplenish)
+bool CanGetRenewableResourceFrom(STRUCT_UNIT_BASE *unit, long int targetUnitDefId);
 
 // Returns true if it is possible to trade with this unit (it has trade goods in its resource storage)
 bool UnitOffersTrading(STRUCT_UNIT_BASE *unit);

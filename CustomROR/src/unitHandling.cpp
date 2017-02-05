@@ -217,8 +217,10 @@ void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToM
 }
 
 
-// Returns true if unit (typically, a trade boat) can trade with target unit (typically, a building like dock)
-bool CanTradeWithUnitDef(STRUCT_UNIT_BASE *unit, long int targetUnitDefId) {
+// Returns true if targetUnitDefId creates renewable resource:
+// - farms (immediately available food is limited and increases progressively)
+// - docks or trade buildings (trade goods are unlimited, but need time to resplenish)
+bool CanGetRenewableResourceFrom(STRUCT_UNIT_BASE *unit, long int targetUnitDefId) {
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->DerivesFromTrainable()) {
 		// Note: in standard game, only trainable and building units can trade. For other unit types, DS:[EDX+0x138] points to a "return 0" function.
 		return false;
@@ -244,6 +246,13 @@ bool CanTradeWithUnitDef(STRUCT_UNIT_BASE *unit, long int targetUnitDefId) {
 			((unitDefCommandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId == targetUnitDef->DAT_ID1) ||
 			(unitDefCommandable->ptrUnitCommandHeader->ptrCommandArray[i]->classId == targetUnitDef->unitAIType))) {
 			return UnitDefOffersTrading(targetUnitDef);
+		}
+		if ((unitDefCommandable->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK) &&
+			((unitDefCommandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId == targetUnitDef->DAT_ID1) ||
+			(unitDefCommandable->ptrUnitCommandHeader->ptrCommandArray[i]->classId == targetUnitDef->unitAIType))) {
+			// In theory, we should check if target unit def "produces" food (action 21="make").
+			// But anyway, the initial role of ROR method is unclear (mixing farming and trading is weird + it does not take care of actor unit !)
+			return true;
 		}
 	}
 	return false;
