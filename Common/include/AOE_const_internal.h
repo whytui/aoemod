@@ -194,7 +194,9 @@ namespace AOE_CONST_INTERNAL
 	// And player.NotifyEvent
 	// And player.handleEventInAI(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F34C0)
 	// And 0x413890 = UnitActivity.processNotify(struct NotifyEvent *, unsigned long)
-	// WARNING: to debug: not sure all values are the same enm. There might be separate enums for player/gameSettings notifyEvent...
+	// WARNING: to debug: not sure all values are the same enum. There might be separate enums for player/gameSettings notifyEvent...
+	// Is this the same as ACTIVITY_TASK_IDS ?
+	// See 0x4F34C0: arg3=eventidd IS a GAME_EVENT_TYPES
 	enum GAME_EVENT_TYPES : long int {
 		CST_GET_INVALID = -1, // For customROR internal usage
 		CST_GET_CANT_UNLOAD_NO_ROOM = 01,
@@ -229,8 +231,8 @@ namespace AOE_CONST_INTERNAL
 		CST_GET_ADD_REMOVE_IN_TRAIN_QUEUE = 0x7C,
 		CST_GET_NOT_ENOUGH_RESOURCES = 0x7D, // need houses, food/wood or maxPop reached (to build or train, NOT for repair)
 		CST_GET_FARM_DEPLETED = 0x7E, // Sound 0x10
-		CST_GET_UNKNOWN_1F9 = 0x1F9, // Unit death/loss ? see 0x4F3531(=if fishing ship then remove group)
-		CST_GET_UNKNOWN_1FA = 0x1FA, // Villager activity end, could not find nearby similar targets ? arg4=activityId
+		CST_GET_UNKNOWN_1F9 = 0x1F9, // Unit death/loss ? see 0x4F3531(=if fishing ship then remove group) Action failed ?
+		CST_GET_UNKNOWN_1FA = 0x1FA, // Villager activity end, could not find nearby similar targets ? arg4=activityId. Action completed ?
 		//CST_GET_SAW_ENEMY_UNIT = 0x1FF, // Unsure ?? possible confusion with activity tasks IDs
 		CST_GET_UNIT_ATTACKED = 0x201,
 		CST_GET_MOVEMENT_FINISHED = 0x202, // unsure
@@ -443,7 +445,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_1FE = 0x1FE, // Notify something...? See 0x41426A
 		CST_ATI_NOTIFY_SAW_ENEMY_UNIT = 0x1FF, // To confirm. See 0x4143B7 WRONG ? is it GAME_EVENT_TYPES instead ?
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
-		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted?
+		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted? Movement finished ?
 		CST_ATI_UNKNOWN_203 = 0x203, // ? See 0x4143B7
 		CST_ATI_UNKNOWN_209 = 0x209, // Related to notification when being attacked ? see 0x4E4769
 		CST_ATI_UNKNOWN_20B = 0x20B, // Used just after a unit is converted ? 0x4AEBDD
@@ -473,7 +475,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // React to agression but also "AI" attacks
 		CST_ATI_DEFEND_UNIT = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.defend/followUnit?(myUnitId, targetUnitId)
 		CST_ATI_UNKNOWN_2BE = 0x2BE, // build+0x64
-		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ??
+		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ?? Explore ?
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
 		CST_ATI_GATHERER_NOATT_REACTION_WHEN_ATTACKED = 0x2C5, // TO CONFIRM
 		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF... Used to retreat to position 4DA160. Used also in attacks grpType0x15? 4DA193

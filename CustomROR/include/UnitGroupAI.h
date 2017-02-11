@@ -15,6 +15,8 @@
 
 using namespace AOE_STRUCTURES;
 
+#define UNITGROUP_AI_LAST_TASK_TRACE_COUNT 5
+
 namespace CUSTOM_AI {
 
 	enum MILITARY_SITUATION { MS_UNKNOWN = -1,
@@ -25,6 +27,7 @@ namespace CUSTOM_AI {
 	};
 
 
+	// A temporary structure to store current detailed info about a unit group. Not stored in "static" object.
 	class UnitGroupDetailedInfo {
 	public:
 		UnitGroupDetailedInfo() {
@@ -118,6 +121,8 @@ namespace CUSTOM_AI {
 		inline bool BeenAttackedRecently() const { return (this->totalAttacksInPeriod > 0) || (this->totalPanicModesInPeriod > 0); }
 	};
 
+
+	// A "static" (has "current game" life span) object to handle unit groups AI.
 	class UnitGroupAI {
 	public:
 		UnitGroupAI();
@@ -125,11 +130,17 @@ namespace CUSTOM_AI {
 		CustomAIMilitaryInfo *militaryAIInfo;
 		GAME_DIFFICULTY_LEVEL gameDiffLevel; // Game difficulty level (copied from game settings at game init)
 		std::string lastDebugInfo;
+		// The last 5 "unit group tasking" operation executed by customROR's unit group AI.
+		// Tuple: 1=unitGroupId, 2=taskId (-1 if not tasked, just target change), 3=targetId, 4=gameTime_ms
+		std::list<std::tuple<long int, long int, long int, long int>> last5TaskingByUGAI;
 
 		void ResetAllInfo();
 
+		void AddTaskingByUGAITrace(long int unitGroupId, long int taskId, long int targetId, long int gameTime_ms);
+
 		// Sets unitGroup target* fields from provided target unit. Does not set task or run any treatment.
 		// targetUnit can be NULL.
+		// Logs an entry in last5TaskingByUGAI.
 		void SetUnitGroupTarget(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
 
 		// Computes internal variables about military situation
@@ -164,6 +175,13 @@ namespace CUSTOM_AI {
 		void OnUnitGroupAttacked(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *myUnit, STRUCT_UNIT_BASE *enemyUnit);
 
 	private:
+		// Sets unitGroup target* fields from provided target unit. Does not set task or run any treatment.
+		// targetUnit can be NULL.
+		// Does not add an entry in last5TaskingByUGAI
+		// Returns true if successful
+		bool SetUnitGroupTarget_internal(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
+
+
 		// "static" temporary information, only valid during the task active soliders loop.
 		// DO NOT access it from other methods.
 		ActiveUnitGroupTaskingContextInfo activeGroupsTaskingTempInfo;

@@ -178,11 +178,13 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 			STRUCT_UNIT_GROUP *curGrp = fakeGrp->next;
 			while (curGrp && (curGrp != fakeGrp)) {
 				STRUCT_UNIT_BASE *curLeader = global->GetUnitFromId(curGrp->commanderUnitId);
-				if (curLeader && curLeader->IsCheckSumValidForAUnitClass()) {
-					bool canChangeTarget = false;
+				if (curLeader && curLeader->IsCheckSumValidForAUnitClass() && 
+					(curGrp->unitGroupType <= UNIT_GROUP_TYPES::CST_UGT_BOAT_EXPLORE) /* Others are non-attack groups*/) {
+					bool canChangeTarget = (curGrp->currentTask <= UNIT_GROUP_TASK_IDS::CST_UGT_IDLE);
 					STRUCT_UNIT_BASE *curGroupTarget = global->GetUnitFromId(curGrp->targetUnitId);
+					
 					if (!curGroupTarget) { canChangeTarget = true; } else {
-						if (curGroupTarget->unitDefinition) {
+						if (!canChangeTarget && curGroupTarget->unitDefinition) {
 							// Note: do not interrupt allied units that are attacking villagers or wonders
 							canChangeTarget = (curGroupTarget->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian) &&
 								!UnitDefCanAttack(curGroupTarget->unitDefinition) && (curGroupTarget->unitDefinition->DAT_ID1 != CST_UNITID_WONDER);
@@ -195,7 +197,7 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 							// Do *not* task units (could conflict with other treatments, get units stuck, etc) but set group's target
 							this->unitGroupAI.SetUnitGroupTarget(curGrp, enemyUnit);
 
-							// Task idle units ?
+							// Task idle units
 							int remainingUnits = curGrp->unitCount;
 							for (int i = 0; i < STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT; i++) {
 								STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curGrp->GetMyUnitId(i));

@@ -148,7 +148,7 @@ namespace AOE_STRUCTURES
 		// 0x10
 		char unknown_10; // 1 byte. =arg6 in 42BCF0
 		char unknown_11[3]; // unused ?
-		float posY;
+		float posY; // +14.
 		float posX; // +18.
 		float posZ; // +1C.
 		// 0x20

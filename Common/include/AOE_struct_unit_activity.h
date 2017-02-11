@@ -27,7 +27,7 @@ namespace AOE_STRUCTURES
 		long int unknown_08; // related to activity+2C. A value 0-100 (or -1) ? See 0x41375C
 		long int targetUnitId;
 		// 0x10
-		long int targetPlayerId;
+		long int targetPlayerId; // Sometimes a BYTE (seen 0x000000FF) ?
 		float posY; // target position
 		float posX; // target position
 		float posZ; // target position
@@ -43,7 +43,7 @@ namespace AOE_STRUCTURES
 	public:
 		long int targetUnitId; // +0. Sometimes = actor?
 		long int actorUnitId; // +4. My unit id ?
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS activityId; // +8. Queued activity ID. Or event id ??? GAME_EVENT_TYPES?
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS activityId; // +8. Notified activity ID. GAME_EVENT_TYPES?
 		long int genericParam4; // +C. Can be different things ? Seen targetUnitId, activityId(...
 		long int genericParam5; // +10. Seen currentHP value.
 		long int genericParam6; // +14. Seen unitDefMaxHP value (int).

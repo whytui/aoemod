@@ -1731,12 +1731,12 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE 
 
 	if (targetPlayer && IsImproveAIEnabled(targetPlayer->playerId) && targetPlayer->ptrAIStruct && targetPlayer->ptrAIStruct->IsCheckSumValid()) {
 		// Notify custom AI that a conversion occurred.
-		if (CUSTOM_AI::customAIHandler.IsAliveAI(actorPlayer->playerId) && IsImproveAIEnabled(actorPlayer->playerId)) {
+		if (CUSTOM_AI::customAIHandler.IsAliveAI(targetPlayer->playerId) && IsImproveAIEnabled(targetPlayer->playerId)) {
 			if (IsArtefactOrFlag(targetUnitDef->unitAIType)) {
 				// TODO: actually this case never occurs yet, this method is not called in such event.
-				CUSTOM_AI::customAIHandler.GetCustomPlayerAI(actorPlayer->playerId)->OnArtefactControlLoss(targetUnit, actorPlayer);
+				CUSTOM_AI::customAIHandler.GetCustomPlayerAI(targetPlayer->playerId)->OnArtefactControlLoss(targetUnit, actorPlayer);
 			} else {
-				CUSTOM_AI::customAIHandler.GetCustomPlayerAI(actorPlayer->playerId)->OnUnitConverted(targetUnit, actorPlayer);
+				CUSTOM_AI::customAIHandler.GetCustomPlayerAI(targetPlayer->playerId)->OnUnitConverted(targetUnit, actorPlayer);
 			}
 		}
 	}
@@ -3547,22 +3547,40 @@ bool CustomRORCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTI
 		}
 		return true;
 	case CUSTOMROR::CONFIG::IDL_CUSTOM:
-		if (CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
-			AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, "Test debugging");
-		}
 		{
 			STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 			if (!global) { return false; }
 			std::string msg[9];
+			static bool showUnitGroups = true;
 			for (int i = 2; i <= 7; i++) {
-				CUSTOM_AI::AIPlayerTargetingInfo *info = CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i);
-				if (!info) { msg[i] = ""; continue; }
-				int curTargetPlayerId = info->GetCurrentTacAITargetPlayerId(global->GetPlayerStruct(i));
-				msg[i] = std::string("p#") + std::to_string(i) + std::string(" targt=") + std::to_string(curTargetPlayerId) +
-					std::string(" ; subdslk vs");
-				for (int j = 1; j < global->playerTotalCount; j++) {
-					msg[i] += std::string(" p") + std::to_string(j) + std::string("=");
-					msg[i] += to_string(info->lastComputedDislikeSubScore[i]);
+				if (!showUnitGroups) {
+					CUSTOM_AI::AIPlayerTargetingInfo *info = CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i);
+					if (!info) { msg[i] = ""; continue; }
+					int curTargetPlayerId = info->GetCurrentTacAITargetPlayerId(global->GetPlayerStruct(i));
+					msg[i] = std::string("p#") + std::to_string(i) + std::string(" targt=") + std::to_string(curTargetPlayerId) +
+						std::string(" ; subdslk vs");
+					for (int j = 1; j < global->playerTotalCount; j++) {
+						msg[i] += std::string(" p") + std::to_string(j) + std::string("=");
+						msg[i] += to_string(info->lastComputedDislikeSubScore[i]);
+					}
+				} else {
+					if (CUSTOM_AI::customAIHandler.IsAliveAI(i)) {
+						int cnt = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i)->unitGroupAI.last5TaskingByUGAI.size();
+						if (cnt > UNITGROUP_AI_LAST_TASK_TRACE_COUNT) { cnt = UNITGROUP_AI_LAST_TASK_TRACE_COUNT; }
+						msg[i] = std::string("[p") + std::to_string(i) + std::string("] grpId,tsk,targ,time ");
+						for (auto it = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i)->unitGroupAI.last5TaskingByUGAI.begin();
+							(it != CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i)->unitGroupAI.last5TaskingByUGAI.end()); it++) {
+							std::tuple<long int, long int, long int, long int> t = *it;
+							long int unitGrpId = std::get<0>(t);
+							long int taskId = std::get<1>(t);
+							long int targetId = std::get<2>(t);
+							long int time_ms = std::get<3>(t);
+							msg[i] += std::string(" ") + std::to_string(unitGrpId) +
+								std::string(",") + std::to_string(taskId) +
+								std::string(",") + std::to_string(targetId) +
+								std::string(",") + std::to_string(time_ms);
+						}
+					}
 				}
 			}
 			AOE_METHODS::UI_BASE::GameMainUI_writeTextDebugLines(settings->ptrGameUIStruct, msg[2].c_str(),
@@ -3572,6 +3590,9 @@ bool CustomRORCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTI
 				msg[6].c_str(),
 				msg[7].c_str()
 				);
+			if (CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
+				AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, showUnitGroups ? "CustomROR Unit group tasking" : "Player targeting");
+			}
 		}
 		return true;
 	default:
