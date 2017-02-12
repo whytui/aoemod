@@ -1,6 +1,49 @@
 #include "../include/InGameUnitPropertiesPopup.h"
 
 
+
+
+// Open the relevant "view/edit unit" popup for currently selected unit.
+// Returns true if successful.
+bool InGameUnitPropertiesPopup::OpenInGameUnitPropertiesPopup() {
+	AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
+	if (!humanPlayer || !humanPlayer->IsCheckSumValid()) {
+		return false;
+	}
+	if (humanPlayer->selectedUnitCount <= 0) {
+		return false;
+	}
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(humanPlayer);
+	assert(selectedUnits != NULL);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = selectedUnits[0];
+	if (!selectedUnit || !selectedUnit->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	if (!OpenInGameUnitPropertiesPopup(selectedUnit)) {
+		return false;
+	}
+
+	if (!IsMultiplayer()) {
+		AOE_METHODS::SetGamePause(true);
+	}
+	return true;
+}
+
+
+// Open the relevant "view/edit unit" popup for provided unit.
+// Returns true if successful.
+bool InGameUnitPropertiesPopup::OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	InGameUnitPropertiesPopup *popup = CUSTOMROR::customPopupSystem.OpenCustomGamePopup<InGameUnitPropertiesPopup>(600, 500, true);
+	if (popup == NULL) { return false; }
+	popup->AddPopupContent(unit->unitInstanceId);
+	return true;
+}
+
+
+
 // In-game unit properties popup
 
 InGameUnitPropertiesPopup::InGameUnitPropertiesPopup() {

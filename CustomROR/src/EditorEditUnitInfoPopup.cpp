@@ -2,6 +2,15 @@
 
 
 
+
+// Opens the custom "edit unit" in editor
+// Returns true if OK.
+bool EditorEditUnitInfoPopup::OpenCustomEditorEditUnitPopup() {
+	return (CUSTOMROR::customPopupSystem.OpenCustomGamePopup<EditorEditUnitInfoPopup>(500, 400, true) != NULL);
+}
+
+
+
 EditorEditUnitInfoPopup::EditorEditUnitInfoPopup() {
 	this->_ResetPointers();
 }

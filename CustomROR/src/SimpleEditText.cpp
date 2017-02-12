@@ -3,6 +3,36 @@
 #include "../include/SimpleEditText.h"
 
 
+
+
+// Opens the custom "simple edit text" popup in editor
+// outputBuffer is a pointer where the typed text will be copied when the popup is closed. Make sure its allocated size is >=maxLength
+// Returns true if OK.
+bool SimpleEditTextPopup::OpenCustomTextEditPopup(const char *title, char *initialValue, long int sizeX, long int sizeY,
+	long int maxLength, char *outputBuffer, bool readOnly, bool withCancelBtn) {
+	SimpleEditTextPopup *p = CUSTOMROR::customPopupSystem.OpenCustomGamePopup<SimpleEditTextPopup>(sizeX, sizeY, withCancelBtn);
+	if (p) {
+		p->AddPopupContent(title, initialValue, maxLength, outputBuffer, readOnly);
+	}
+	return (p != NULL);
+}
+
+
+// Open a popup with CustomROR (debug) messages
+bool SimpleEditTextPopup::OpenTraceMessagePopup() {
+	bool reverseOrder = CUSTOMROR::crInfo.configInfo.showLogsInReverseOrder;
+	// Double spaces are intended (to compensate weird-looking font)
+	char *title = "Show  debug  messages";
+	if (reverseOrder) {
+		title = "Show  debug  messages (reverse order)";
+	}
+	return SimpleEditTextPopup::OpenCustomTextEditPopup(title, (char*)traceMessageHandler.GetAllMessages(reverseOrder).c_str(),
+		780, 590,
+		0, NULL, false /* NOT read only so that scrollbar is active*/, false);
+}
+
+
+
 SimpleEditTextPopup::SimpleEditTextPopup() {
 	this->_ResetPointers();
 }

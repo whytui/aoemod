@@ -8,6 +8,7 @@
 #include "crLocalization.h"
 #include "AOE_const_language.h"
 #include "playerHandling.h"
+#include "CustomPopupSystem.h"
 
 
 class InGameUnitPropertiesPopup : public CustomPopupBase {
@@ -21,6 +22,15 @@ public:
 	void OnAfterClose(bool isCancel) override;
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 	bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) override;
+
+	// Open the relevant "view/edit unit" popup for currently selected unit.
+	// Returns true if successful.
+	static bool OpenInGameUnitPropertiesPopup();
+
+	// Open the relevant "view/edit unit" popup for provided unit.
+	// Returns true if successful.
+	static bool OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
+
 private:
 	long int unitId; // Warning: Storing pointer would be dangerous if game executions continues (MP ?): unit could be destroyed in the meanwhile.
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblTitle;

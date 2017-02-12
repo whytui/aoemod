@@ -1,6 +1,15 @@
 #include "../include/EditTerrainPopup.h"
 
 
+
+// Opens the custom "edit terrain" popup in editor
+// Returns true if OK.
+bool EditTerrainPopup::OpenCustomTerrainEditPopup() {
+	return (CUSTOMROR::customPopupSystem.OpenCustomGamePopup<EditTerrainPopup>(500, 300, true) != NULL);
+}
+
+
+
 EditTerrainPopup::EditTerrainPopup() {
 	this->_ResetPointers();
 	this->elevation = 0;

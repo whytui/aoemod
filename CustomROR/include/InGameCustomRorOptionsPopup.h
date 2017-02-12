@@ -10,6 +10,7 @@
 #include "AOE_const_language.h"
 #include "MapCopyPopup.h"
 #include "autoRebuildFarmConfig.h"
+#include "CustomPopupSystem.h"
 
 
 class InGameCustomRorOptionsPopup : public CustomPopupBase {
@@ -44,6 +45,9 @@ public:
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoRebuildFarmsMinWood;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtAutoRebuildFarmsMaxFarms;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoRebuildFarmsMaxFarms;
+
+	// Create in-game customROR options screen. Returns false if failed and if return address must be changed.
+	static bool CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup);
 
 private:
 	bool openTechTreeInfo;

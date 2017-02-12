@@ -2494,11 +2494,6 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	// Can we find a better place to dedicate customROR timer things ?
 	CUSTOMROR::crCommand.OnGameTimer();
 
-	// If there are pending messages, show them
-	if (traceMessageHandler.HasUnreadMessages() && CUSTOMROR::crInfo.configInfo.showCustomRORNotifications) {
-		traceMessageHandler.MarkAsRead(true);
-		CUSTOMROR::customPopupSystem.OpenTraceMessagePopup();
-	}
 }
 
 
@@ -2603,7 +2598,7 @@ void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
 	// Now manage the case when the clicked button is our custom button...
-	CUSTOMROR::customPopupSystem.CreateGameCustomRorOptionsPopup(previousPopup);
+	InGameCustomRorOptionsPopup::CreateGameCustomRorOptionsPopup(previousPopup);
 	ChangeReturnAddress(REG_values, 0x004342A7);
 }
 

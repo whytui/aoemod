@@ -8,15 +8,11 @@
 #include <AOE_struct_units.h>
 #include "CustomRORInfo.h"
 #include "CustomPopupBase.h"
-#include "EditMapSizeXYPopup.h"
-#include "EditTerrainPopup.h"
-#include "EditorScenarioInfoPopup.h"
-#include "InGameCustomRorOptionsPopup.h"
-#include "EditorEditUnitInfoPopup.h"
-#include "InGameUnitPropertiesPopup.h"
-#include "GenNewTriggerPopup.h"
-#include "MapCopyPopup.h"
 #include "traceMessage.h"
+
+// External dependency
+class InGameCustomRorOptionsPopup;
+
 
 namespace CUSTOMROR {
 ;
@@ -28,6 +24,8 @@ public:
 
 	CustomPopupBase *currentCustomPopup;
 
+	friend class ::InGameCustomRorOptionsPopup; // Hack to allow this class use directly CreateCustomPopupObject. For legacy reasons...
+	
 private:
 	// Returns NULL if failed (you can't create a custom popup object if previous one is still opened).
 	// If result is non-NULL, you can call [result]->OpenPopup() to actually open the popup.
@@ -80,9 +78,6 @@ public:
 	void FreeInGameCustomOptionsButton();
 
 
-	// Create in-game customROR options screen. Returns false if failed and if return address must be changed.
-	bool CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup);
-
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 	bool OnCustomButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender);
 
@@ -91,43 +86,6 @@ public:
 	// This just detects if the component is the popup's OK or Cancel button, and handles popup closing event if so.
 	// Returns true if the popup has been closed (and the event processed)
 	bool OnButtonClickClosePopupIfNecessary(unsigned long int objAddress);
-
-
-	/* ----- Open various specialized popups ----- */
-
-	// Opens the custom "edit unit" in editor
-	// Returns true if OK.
-	bool OpenCustomEditorEditUnitPopup();
-
-
-	// Opens the custom "simple edit text" popup in editor
-	// When closed, the popup updates outputBuffer if it is provided (not NULL)
-	// Returns true if OK.
-	bool OpenCustomTextEditPopup(const char *title, char *initialValue, long int sizeX, long int sizeY,
-		long int outputBufferSize = 0, char *outputBuffer = NULL, bool readOnly = false, bool withCancelBtn = false);
-
-	// Opens the custom "scenario info" popup in editor
-	// Returns true if OK.
-	bool OpenCustomEditorScenarioInfoPopup();
-
-	// Opens the custom "edit map size" popup in editor
-	// Returns true if OK.
-	bool OpenEditMapSizePopup();
-
-	// Opens the custom "edit terrain" popup in editor
-	// Returns true if OK.
-	bool OpenCustomTerrainEditPopup();
-
-	// Open a popup with CustomROR (debug) messages
-	bool OpenTraceMessagePopup();
-
-	// Open the relevant "view/edit unit" popup for currently selected unit.
-	// Returns true if successful.
-	bool OpenInGameUnitPropertiesPopup();
-
-	// Open the relevant "view/edit unit" popup for provided unit.
-	// Returns true if successful.
-	bool OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
 };
 

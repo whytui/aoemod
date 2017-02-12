@@ -4,9 +4,9 @@
 #include <mystrings.h>
 #include "CustomPopupBase.h"
 #include "crCommon.h"
-#include "crCommands.h"
 #include "crLocalization.h"
 #include "AOE_const_language.h"
+#include "CustomPopupSystem.h"
 
 
 class EditTerrainPopup : public CustomPopupBase {
@@ -16,6 +16,11 @@ public:
 	void _AddPopupContent() override;
 	void OnBeforeClose(bool isCancel) override;
 	bool isForTriggers;
+
+	// Opens the custom "edit terrain" popup in editor
+	// Returns true if OK.
+	static bool OpenCustomTerrainEditPopup();
+
 private:
 	long int mapSizeX, mapSizeY;
 	char terrainId;

@@ -92,7 +92,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 	// F2 in game: unit properties
 	if ((isInGame) && (!isMenuOpen) && (pressedKey == VK_F2)) {
-		CUSTOMROR::customPopupSystem.OpenInGameUnitPropertiesPopup();
+		InGameUnitPropertiesPopup::OpenInGameUnitPropertiesPopup();
 	}
 
 	// ESC (1B) - close custom dialog if opened
@@ -122,20 +122,20 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				char buffer[100];
 				const char *text = localizationHandler.GetTranslation(CRLANG_ID_MOUSE_POSITION, "Mouse position");
 				sprintf_s(buffer, "%.70s: X=%4.2f, y=%4.2f", text, posX, posY);
-				CUSTOMROR::customPopupSystem.OpenCustomTextEditPopup(text, buffer, 280, 110, sizeof(buffer), NULL, true, false);
+				SimpleEditTextPopup::OpenCustomTextEditPopup(text, buffer, 280, 110, sizeof(buffer), NULL, true, false);
 			}
 		} else {
-			CUSTOMROR::customPopupSystem.OpenCustomEditorEditUnitPopup();
+			EditorEditUnitInfoPopup::OpenCustomEditorEditUnitPopup();
 		}
 	}
 	// F3 in editor: scenario information
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F3) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
-		CUSTOMROR::customPopupSystem.OpenCustomEditorScenarioInfoPopup();
+		EditorScenarioInfoPopup::OpenCustomEditorScenarioInfoPopup();
 	}
 
 	// CTRL-F1 : display messages
 	if (!isMenuOpen && CTRL && (pressedKey == VK_F1)) {
-		CUSTOMROR::customPopupSystem.OpenTraceMessagePopup();
+		SimpleEditTextPopup::OpenTraceMessagePopup();
 	}
 
 	// F4 in editor: copy map
@@ -409,7 +409,7 @@ bool CustomRORMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 	// Here: custom map size
 	if (!CUSTOMROR::crInfo.configInfo.useCustomMapDimensions) { return false; }
 	// If result is true, WE generated the map ourselves => Disable standard generation code.
-	CUSTOMROR::customPopupSystem.OpenEditMapSizePopup();
+	EditMapSizeXYPopup::OpenEditMapSizePopup();
 	return true;
 }
 

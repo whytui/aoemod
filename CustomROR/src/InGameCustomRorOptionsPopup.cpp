@@ -1,6 +1,32 @@
 #include "../include/InGameCustomRorOptionsPopup.h"
 
 
+
+// Create in-game customROR options screen. Returns false if failed and if return address must be changed.
+bool InGameCustomRorOptionsPopup::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
+	assert(previousPopup != NULL);
+	if (!previousPopup) { return false; }
+
+	assert(!CUSTOMROR::crInfo.HasOpenedCustomGamePopup()); // Custom popup is not already open
+	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) { return true; } // do nothing, but not treated as alloc error
+
+	InGameCustomRorOptionsPopup *popupUIObject = CUSTOMROR::customPopupSystem.CreateCustomPopupObject<InGameCustomRorOptionsPopup>();
+	if (popupUIObject) {
+		popupUIObject->CloseMenuAndOpenPopup(previousPopup);
+	}
+
+	if (!popupUIObject) {
+		return false; // need to change return address
+	}
+	// Dirty workaround because custom options popup is not created using standard procedures :(
+	CUSTOMROR::crInfo.ForceSetCurrentGamePopup(popupUIObject->GetAOEPopupObject(), popupUIObject->customOptionButtonVar, NULL);
+
+	return true;
+}
+
+
+
+
 InGameCustomRorOptionsPopup::InGameCustomRorOptionsPopup() {
 	this->_ResetPointers();
 }

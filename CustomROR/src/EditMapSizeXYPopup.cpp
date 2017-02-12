@@ -1,6 +1,14 @@
 #include "../include/EditMapSizeXYPopup.h"
 
 
+
+// Opens the custom "edit map size" popup in editor
+// Returns true if OK.
+bool EditMapSizeXYPopup::OpenEditMapSizePopup() {
+	return (CUSTOMROR::customPopupSystem.OpenCustomGamePopup<EditMapSizeXYPopup>(320, 130, true) != NULL);
+}
+
+
 EditMapSizeXYPopup::EditMapSizeXYPopup() {
 	this->_ResetPointers();
 	this->sizeX = 0;
@@ -48,5 +56,6 @@ void EditMapSizeXYPopup::OnAfterClose(bool isCancel) {
 	long int x = atoi(textX);
 	long int y = atoi(textY);
 	if ((x <= 0) || (y <= 0) || (x > 255) || (y > 255)) { return; }
+	// TODO: move this method in a dedicated file (class) !
 	CUSTOMROR::crCommand.ScenarioEditor_customGenerateMap(x, y);
 }

@@ -3,7 +3,31 @@
 #include "../include/GenNewTriggerPopup.h"
 
 
+
+// Opens the custom "edit unit" in editor
+// Returns true if OK.
+bool EditorScenarioInfoPopup::OpenCustomEditorScenarioInfoPopup() {
+	EditorScenarioInfoPopup *popup = CUSTOMROR::customPopupSystem.OpenCustomGamePopup<EditorScenarioInfoPopup>(500, 400, false);
+	bool result = (popup != NULL);
+	if (popup) {
+		popup->SetVarToUpdate_allowUnitOverlapping(&CUSTOMROR::crInfo.configInfo.editor_allowUnitOverlapping);
+		popup->SetVarToUpdate_disableHillModeChecks(&CUSTOMROR::crInfo.configInfo.editor_disableHillModeChecks);
+		popup->SetVarToUpdate_disableTerrainRestrictionChecks(&CUSTOMROR::crInfo.configInfo.editor_disableTerrainRestrictions);
+		popup->SetVarToUpdate_lengthenCombatMode(NULL); // Default
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (global && global->IsCheckSumValid()) {
+			AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = global->scenarioInformation;
+			if (scInfo && scInfo->IsCheckSumValid()) {
+				popup->SetVarToUpdate_lengthenCombatMode(&scInfo->enableLengthenCombatMode);
+			}
+		}
+	}
+	return result;
+}
+
+
 // Scenario editor main custom popup
+
 
 EditorScenarioInfoPopup::EditorScenarioInfoPopup() {
 	this->_ResetPointers();

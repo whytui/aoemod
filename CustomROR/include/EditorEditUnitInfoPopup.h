@@ -6,10 +6,10 @@
 #include <UI_components\AOE_struct_ui_combobox.h>
 #include "CustomPopupBase.h"
 #include "crCommon.h"
-#include "crCommands.h"
 #include "crLocalization.h"
 #include "AOE_const_language.h"
-
+#include "CustomPopupSystem.h"
+#include "unitHandling.h"
 
 
 class EditorEditUnitInfoPopup : public CustomPopupBase {
@@ -21,6 +21,11 @@ public:
 	bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) override;
 	void OnBeforeClose(bool isCancel) override;
 	void OnAfterClose(bool isCancel) override;
+
+	// Opens the custom "edit unit" in editor
+	// Returns true if OK.
+	static bool OpenCustomEditorEditUnitPopup();
+
 private:
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit;
 	std::set<AOE_STRUCTURES::STRUCT_UNIT_BASE *>allSelectedUnits;

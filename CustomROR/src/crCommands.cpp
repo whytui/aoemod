@@ -1507,6 +1507,13 @@ void CustomRORCommand::OnGameTimer() {
 		}
 	}
 
+	// If there are pending messages, show them
+	if (traceMessageHandler.HasUnreadMessages() && CUSTOMROR::crInfo.configInfo.showCustomRORNotifications) {
+		bool isSuccess = SimpleEditTextPopup::OpenTraceMessagePopup();
+		// If popup couldn't be opened, maybe there is already another one... The message popup will show up when current one is closed (mark as unread).
+		traceMessageHandler.MarkAsRead(isSuccess);
+	}
+
 	// Other customROR "timer" treatments: do them only once every second maximum (for performance)
 	if (CUSTOMROR::crInfo.lastCustomRORTimeExecution_gameTime_s + 1 <= currentGameTime) {
 		CUSTOMROR::crInfo.lastCustomRORTimeExecution_gameTime_s = currentGameTime;

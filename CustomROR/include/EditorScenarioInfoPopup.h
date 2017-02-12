@@ -8,10 +8,9 @@
 #include "InputBox.h"
 #include "EditTerrainPopup.h"
 #include "crCommon.h"
-#include "crCommands.h"
 #include "crLocalization.h"
 #include "AOE_const_language.h"
-
+#include "CustomPopupSystem.h"
 
 
 enum SC_INFO_POPUP_TO_OPEN { PTO_NONE = 0, PTO_TRIGGER, PTO_AI, PTO_PER, PTO_TERRAIN_EDIT, PTO_VICTORY_CONDITION, PTO_COUNT };
@@ -30,6 +29,11 @@ public:
 	void SetVarToUpdate_disableHillModeChecks(bool *varToUpdate);
 	void SetVarToUpdate_disableTerrainRestrictionChecks(bool *varToUpdate);
 	void SetVarToUpdate_lengthenCombatMode(long int *varToUpdate);
+
+	// Opens the custom "scenario info" popup in editor
+	// Returns true if OK.
+	static bool OpenCustomEditorScenarioInfoPopup();
+
 private:
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblTitle;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtPlayerId;

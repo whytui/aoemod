@@ -11,7 +11,7 @@
 #include <UI_components\AOE_struct_ui_textbox.h>
 #include <mystrings.h>
 #include "crCommon.h"
-#include "crCommands.h"
+#include "CustomRORInfo.h"
 #include "crLocalization.h"
 #include "AOE_const_language.h"
 

@@ -48,6 +48,8 @@
 #include "UnitCustomMethods.h"
 #include "GameTriggerHandling.h"
 #include "PlayerCustomMethods.h"
+#include "CustomPopupSystem.h"
+#include "SimpleEditText.h"
 
 #pragma once
 

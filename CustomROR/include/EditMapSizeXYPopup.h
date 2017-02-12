@@ -7,6 +7,7 @@
 #include "crCommands.h"
 #include "crLocalization.h"
 #include "AOE_const_language.h"
+#include "CustomPopupSystem.h"
 
 
 class EditMapSizeXYPopup : public CustomPopupBase {
@@ -17,6 +18,11 @@ public:
 	void _AddPopupContent() override;
 	void OnAfterClose(bool isCancel) override;
 	bool isForTriggers;
+
+	// Opens the custom "edit map size" popup in editor
+	// Returns true if OK.
+	static bool OpenEditMapSizePopup();
+
 private:
 	long int sizeX;
 	long int sizeY;
