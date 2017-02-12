@@ -249,7 +249,7 @@ AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int hSize
 	if (currentScreen->sizeX < hSize) { hSize = currentScreen->sizeX - 10; }
 	if (currentScreen->sizeY < vSize) { vSize = currentScreen->sizeY - 10; }
 
-	SetGamePause(true);
+	AOE_METHODS::SetGamePause(true);
 	if (themeSlpId < 0) {
 		themeSlpId = currentScreen->themeSlpId;
 	}
@@ -367,7 +367,7 @@ void CustomRORInfo::CloseCustomGamePopup() {
 	if (popupUIObj != NULL) {
 		AOE_METHODS::CloseScreenFullTreatment(popupUIObj);
 	}
-	SetGamePause(false);
+	AOE_METHODS::SetGamePause(false);
 }
 
 

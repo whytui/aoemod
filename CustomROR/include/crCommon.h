@@ -20,6 +20,7 @@
 #include <ROR_global_variables.h>
 #include <basicFilesHandling.h>
 
+#include "AOEPrimitives_global.h"
 #include "mainStructuresHandling.h"
 #include "AOE_memory.h"
 #include "AOE_map.h"
@@ -65,18 +66,9 @@ void SortResourceTypes(const int resourceAmounts[], int resourceTypesOrder[]);
 /* ----------- "ACTIVE" methods ------------- */
 
 
-// Pause/unpause the game
-void SetGamePause(bool pauseOn);
-
-
 // If resourceTable has enough resources, returns true and deduces the cost from resourceTable.
 // If not, returns false and does not modify any value.
 bool ApplyCostIfPossible(float costTable[], float resourceTable[]);
-
-
-// Call AOE's Notify event method. Warning, the parameters can have different types.
-// Use the overload with pointers to make sure you don't have cast issues.
-void AOE_callNotifyEvent(long int eventId, long int playerId, long int variant_arg3, long int variant_arg4, long int variant_arg5);
 
 
 // Reset an element in infAI.unitElemList. The slot will be re-used later by ROR. cf 0x4BA401.
@@ -116,39 +108,4 @@ void AOE_InfAIBuildHistory_setStatus(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long 
 void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader, 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
-
-// Get a localized string using ROR method.
-// Returns true on success.
-bool AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES category, long int commandId, long int subParam, char *buffer, long int bufferSize);
-
-// Generate full creation text for a button (research, train) with costs and everything.
-// buffer size must be at least 0x200.
-// unitButtonInfo is allowed to be NULL.
-// Cost info come from unitButtonInfo.
-// elemLanguageCreationDllId is unit (or research) creationDllId (it includes shortcut key, if any)
-void AOE_GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BUTTON_INFO *unitButtonInfo,
-	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCmdId, long int elemLanguageCreationDllId);
-
-
-// ---------- Other
-
-// Automatically detects issues in empires.dat (requires to have been loaded already) and writes logs about errors in trace message handler.
-bool AnalyzeEmpiresDatQuality();
-
-
-// TO MOVE
-namespace AOE_METHODS {
-	
-
-	// ROR's method to get a pseudo-random value
-	static long int GetAndReCalcPseudoRandomValue() {
-		long int result;
-		_asm {
-			MOV EDX, 0x52605D;
-			CALL EDX; // Recalculate pseudo random
-			MOV result, EAX;
-		}
-		return result;
-	}
-}
 

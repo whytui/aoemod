@@ -243,5 +243,29 @@ static void UnitInfoZoneAddAttributeLine(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZON
 }
 
 
+// Generate full creation text for a button (research, train) with costs and everything.
+// buffer size must be at least 0x200.
+// unitButtonInfo is allowed to be NULL.
+// Cost info come from unitButtonInfo.
+// elemLanguageCreationDllId is unit (or research) creationDllId (it includes shortcut key, if any)
+static void GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BUTTON_INFO *unitButtonInfo,
+	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCmdId, long int elemLanguageCreationDllId) {
+	if (!buffer) {
+		return;
+	}
+	buffer[0] = 0;
+	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
+	unsigned long int addr = 0x4834F0;
+	_asm {
+		PUSH elemLanguageCreationDllId;
+		PUSH uiCmdId;
+		PUSH unitButtonInfo;
+		PUSH buffer;
+		CALL addr;
+	}
+}
+
+
+
 }
 }

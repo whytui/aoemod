@@ -9,6 +9,7 @@
 #include "crCommon.h"
 #include "CustomRORInfo.h"
 #include "AOEPrimitives_units.h"
+#include "AOEPrimitives_UI_gameMain.h"
 #include "unitHandling.h"
 #include "buttonBarCommon.h"
 #include "playerHandling.h"

@@ -57,6 +57,11 @@ void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char 
 // Displays debug info in F5 debug zone and/or in in-game bottom text lines.
 bool HandleCustomRORInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings);
 
+
+// Automatically detects issues in empires.dat (requires to have been loaded already) and writes logs about errors in trace message handler.
+bool AnalyzeEmpiresDatQuality();
+
+
 }
 
 #endif

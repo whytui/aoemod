@@ -528,7 +528,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 		this->DisplayTimerStats();
 	}
 	if (strcmp(command, "dat check") == 0) {
-		AnalyzeEmpiresDatQuality();
+		CR_DEBUG::AnalyzeEmpiresDatQuality();
 	}
 
 #ifdef _DEBUG
@@ -1735,7 +1735,7 @@ bool CustomRORCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetU
 	// Not handled: other events than conversion (is there any ?)
 
 	// Warning, for a conversion, arg2= actor playerId (priest), arg3=victim playerId
-	AOE_callNotifyEvent(notifyEvent, actorPlayer->playerId, oldOwner->playerId, (long int)targetUnit->positionY, (long int)targetUnit->positionX);
+	AOE_METHODS::CallGameSettingsNotifyEvent(notifyEvent, actorPlayer->playerId, oldOwner->playerId, (long int)targetUnit->positionY, (long int)targetUnit->positionX);
 	return true;
 }
 
@@ -3555,7 +3555,7 @@ bool CustomRORCommand::OpenCustomDialogMessage(const char *dialogText, long int 
 	AOE_STRUCTURES::STRUCT_ANY_UI *customDialogPtr = AOE_METHODS::GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
 	if (customDialogPtr != NULL) { return false; } // A CloseProgramDialog seems to be already open
 
-	SetGamePause(true);
+	AOE_METHODS::SetGamePause(true);
 	CUSTOMROR::crInfo.customYesNoDialogVar = (unsigned long int*) AOE_METHODS::AOE_CreateDialogPopup(dialogText, hSize, vSize);
 
 	return true;
@@ -3587,7 +3587,7 @@ long int CustomRORCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_PO
 
 	long int *Ihavenoideawhatthisis = (long int *)0x7C0338; // cf 0x481264
 	Ihavenoideawhatthisis = 0;
-	SetGamePause(false);
+	AOE_METHODS::SetGamePause(false);
 
 	return returnValue;
 }

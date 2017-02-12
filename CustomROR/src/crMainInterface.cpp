@@ -586,7 +586,7 @@ bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup() {
 	}
 	
 	if (!IsMultiplayer()) {
-		SetGamePause(true);
+		AOE_METHODS::SetGamePause(true);
 	}
 	return true;
 }

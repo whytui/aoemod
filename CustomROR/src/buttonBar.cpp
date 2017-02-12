@@ -585,7 +585,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 				//strcpy_s(disabledPrefix, "Disabled: ");
 			}
 		} else {
-			AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES::CST_IMC_UI_COMMANDS, UICmdId, 0, creationTextBuffer, sizeof(creationTextBuffer));
+			AOE_METHODS::ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES::CST_IMC_UI_COMMANDS, UICmdId, 0, creationTextBuffer, sizeof(creationTextBuffer));
 		}
 		creationTextIfMissing = std::string(creationTextBuffer) + std::string(" ");
 		creationTextBuffer[0] = 0; // reset buffer
@@ -632,7 +632,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 	if ((creationText == NULL) && ((UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_TRAIN) ||
 		(UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH))) {
 		// Note: some units have bad creationDllId, like some heroes.
-		AOE_GetUIButtonCreationText(creationTextBuffer, &btnInfoForMissingText, UICmdId, creationDllId_original);
+		AOE_METHODS::UI_BASE::GetUIButtonCreationText(creationTextBuffer, &btnInfoForMissingText, UICmdId, creationDllId_original);
 		creationTextIfMissing = disabledPrefix;
 		if (creationTextBuffer[0] == 0) {
 			creationTextIfMissing += pName; // Rock'n'roll build a custom string as dllId is invalid/missing

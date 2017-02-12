@@ -11,23 +11,6 @@ float GetDistance(float x1, float y1, float x2, float y2) {
 }
 
 
-
-// Pause/unpause the game
-void SetGamePause(bool pauseOn) {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (settings == NULL) { return; }
-	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) { return; } // Call should be robust enough, but we still check this
-	long int argPause = pauseOn ? 1 : 0;
-	_asm {
-		PUSH 0; // arg2 - what is this ?
-		PUSH argPause;
-		MOV EAX, 0x0419A60;
-		MOV ECX, settings;
-		CALL EAX;
-	}
-}
-
-
 // If resourceTable has enough resources, returns true and deduces the cost from resourceTable.
 // If not, returns false and does not modify any value.
 bool ApplyCostIfPossible(float costTable[], float resourceTable[]) {
@@ -93,24 +76,6 @@ void SortResourceTypes(const int resourceAmounts[], int resourceTypesOrder[]) {
 bool IsDockRelevantForMap(MAP_TYPE_INDEX mti) {
 	MAP_WATER_TYPE m = GetMapWaterType(mti);
 	return (m != MAP_WATER_TYPE::MWT_ALL_LAND_MAP) && (m != MAP_WATER_TYPE::MWT_MOSTLY_LAND_MAP);
-}
-
-
-// Call AOE's Notify event method. Warning, the parameters can have different types.
-// Use the overload with pointers to make sure you don't have cast issues.
-void AOE_callNotifyEvent(long int eventId, long int playerId, long int variant_arg3, long int variant_arg4, long int variant_arg5){
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || !settings->IsCheckSumValid()) { return; }
-	_asm {
-		MOV ECX, settings
-		PUSH variant_arg5
-		PUSH variant_arg4
-		PUSH variant_arg3
-		PUSH playerId
-		PUSH eventId
-		MOV EAX, 0x501980
-		CALL EAX
-	}
 }
 
 
@@ -297,12 +262,12 @@ void AOE_InfAIBuildHistory_setStatus(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long 
 	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 	const unsigned long int RORMethod = 0x4C34C0;
 	_asm {
-		MOV ECX, infAI
-		PUSH status_long
-		PUSH posX
-		PUSH posY
-		PUSH unitDefId
-		CALL RORMethod
+		MOV ECX, infAI;
+		PUSH status_long;
+		PUSH posX;
+		PUSH posY;
+		PUSH unitDefId;
+		CALL RORMethod;
 	}
 }
 
@@ -312,326 +277,12 @@ void AOE_playerBldHeader_RemoveBldFromArrays(AOE_STRUCTURES::STRUCT_PLAYER_BUILD
 	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 	if (buildingsHeader && unit && unit->IsCheckSumValidForAUnitClass()) {
 		_asm {
-			MOV ECX, buildingsHeader
-			MOV EDX, unit
-			PUSH EDX
-			MOV EAX, 0x00436980 // playerUnitsHeader.removeBuildingFromArrays(ptrUnit)
-			CALL EAX
+			MOV ECX, buildingsHeader;
+			MOV EDX, unit;
+			PUSH EDX;
+			MOV EAX, 0x00436980; // playerUnitsHeader.removeBuildingFromArrays(ptrUnit)
+			CALL EAX;
 		}
 	}
 }
 
-
-// Get a localized string using ROR method.
-// Returns true on success.
-bool AOE_ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES category, long int commandId, long int subParam, char *buffer, long int bufferSize) {
-	if (!buffer || (bufferSize <= 0)) {
-		return false;
-	}
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || !settings->IsCheckSumValid()) {
-		return false;
-	}
-	long int result = 0;
-	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
-	const unsigned long int addr = 0x4FF580;
-	_asm {
-		PUSH bufferSize;
-		PUSH buffer;
-		PUSH subParam;
-		PUSH commandId;
-		PUSH category;
-		MOV ECX, settings;
-		CALL addr;
-		MOV result, EAX;
-	}
-	return (result != 0);
-}
-
-
-// Generate full creation text for a button (research, train) with costs and everything.
-// buffer size must be at least 0x200.
-// unitButtonInfo is allowed to be NULL.
-// Cost info come from unitButtonInfo.
-// elemLanguageCreationDllId is unit (or research) creationDllId (it includes shortcut key, if any)
-void AOE_GetUIButtonCreationText(char *buffer, AOE_STRUCTURES::STRUCT_UI_UNIT_BUTTON_INFO *unitButtonInfo,
-	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCmdId, long int elemLanguageCreationDllId) {
-	if (!buffer) {
-		return;
-	}
-	buffer[0] = 0;
-	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
-	unsigned long int addr = 0x4834F0;
-	_asm {
-		PUSH elemLanguageCreationDllId;
-		PUSH uiCmdId;
-		PUSH unitButtonInfo;
-		PUSH buffer;
-		CALL addr;
-	}
-}
-
-
-
-// Automatically detects issues in empires.dat (requires to have been loaded already) and writes logs about errors in trace message handler.
-bool AnalyzeEmpiresDatQuality() {
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-	if (!global || !global->IsCheckSumValid()) { return false; }
-	if (!global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid()) {
-		traceMessageHandler.WriteMessage("ERROR: missing or invalid techInfo structure");
-	}
-	if (!global->researchDefInfo) {
-		traceMessageHandler.WriteMessage("ERROR: missing or invalid researchInfo structure");
-	}
-	std::string msg;
-	int civResCount = -1;
-	int civUnitDefCount = -1;
-	std::set<short int> techTreeIds; // stores all technology tree IDs
-	// CivDef
-#if 1
-	for (int civId = 0; civId < global->civCount; civId++) {
-		if (civResCount == -1) {
-			civResCount = global->civilizationDefinitions[civId]->civResourcesCount;
-		}
-		if (global->civilizationDefinitions[civId]->civResourcesCount != civResCount) {
-			msg = "Civilization ";
-			msg += std::to_string(civId);
-			msg += " has not the same resources count (";
-			msg += std::to_string(global->civilizationDefinitions[civId]->civResourcesCount);
-			msg += ") as previous civilizations (";
-			msg += std::to_string(civResCount);
-			msg += ")";
-			traceMessageHandler.WriteMessage(msg);
-		}
-		if (civUnitDefCount == -1) {
-			civUnitDefCount = global->civilizationDefinitions[civId]->civUnitDefCount;
-		}
-		if (global->civilizationDefinitions[civId]->civUnitDefCount != civUnitDefCount) {
-			msg = "Civilization ";
-			msg += std::to_string(civId);
-			msg += " has not the same unit definitions count (";
-			msg += std::to_string(global->civilizationDefinitions[civId]->civUnitDefCount);
-			msg += ") as previous civilizations (";
-			msg += std::to_string(civUnitDefCount);
-			msg += "). This can provoke crashes.";
-			traceMessageHandler.WriteMessage(msg);
-		}
-		if (global->civilizationDefinitions[civId]->techTreeId >= global->technologiesInfo->technologyCount) {
-			msg = "Civilization ";
-			msg += std::to_string(civId);
-			msg += " has an invalid tech tree ID (";
-			msg += std::to_string(global->civilizationDefinitions[civId]->techTreeId);
-			msg += ")";
-			traceMessageHandler.WriteMessage(msg);
-		}
-		if (global->civilizationDefinitions[civId]->techTreeId < 0) {
-			msg = "Civilization ";
-			msg += std::to_string(civId);
-			msg += " does not have a tech tree (tech tree id=-1). This is not an error and is acceptable.";
-			traceMessageHandler.WriteMessage(msg);
-		} else {
-			techTreeIds.insert(global->civilizationDefinitions[civId]->techTreeId);
-		}
-		if ((global->civilizationDefinitions[civId]->graphicSetId > 4) || (global->civilizationDefinitions[civId]->graphicSetId < 0)) {
-			msg = "Civilization ";
-			msg += std::to_string(civId);
-			msg += " has an invalid graphic set ID (";
-			msg += std::to_string(global->civilizationDefinitions[civId]->graphicSetId);
-			msg += ")";
-			traceMessageHandler.WriteMessage(msg);
-		}
-	}
-#endif
-	// Technologies
-#if 1
-	for (int techId = 0; techId < global->technologiesInfo->technologyCount; techId++) {
-		AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->technologiesInfo->GetTechDef(techId);
-		assert(techDef != NULL);
-		if (techDef) {
-			for (int effectId = 0; effectId < techDef->effectCount; effectId++) {
-				if (!techDef->ptrEffects[effectId].HasValidEffect()) {
-					msg = "Technology ";
-					msg += std::to_string(techId);
-					msg += "/effect #";
-					msg += std::to_string(effectId);
-					msg += " does not have an effective impact";
-					traceMessageHandler.WriteMessage(msg);
-				}
-				if (techTreeIds.find(techId) == techTreeIds.end()) {
-					if (techDef->ptrEffects[effectId].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) {
-						msg = "Technology ";
-						msg += std::to_string(techId);
-						msg += "/effect #";
-						msg += std::to_string(effectId);
-						msg += " has 'set attribute' type, which should not be used. Try to use add or multiply instead";
-						traceMessageHandler.WriteMessage(msg);
-					}
-					if ((techDef->ptrEffects[effectId].effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) &&
-						(techDef->ptrEffects[effectId].effectClass == 0)) { // mode = 0 = set
-						msg = "Technology ";
-						msg += std::to_string(techId);
-						msg += "/effect #";
-						msg += std::to_string(effectId);
-						msg += " has 'set resource' type, which should not be used. Try to use add or multiply instead";
-						traceMessageHandler.WriteMessage(msg);
-					}
-				}
-				// TODO: Negative tech effects should be avoided?
-			}
-			
-		}
-	}
-#endif
-	// Researches
-#if 1
-	for (int researchId = 0; researchId < global->researchDefInfo->researchCount; researchId++) {
-		STRUCT_RESEARCH_DEF *resDef = global->researchDefInfo->GetResearchDef(researchId);
-		if (!resDef) {
-			msg = "ERROR: Research #";
-			msg += std::to_string(researchId);
-			msg += " is NULL";
-			traceMessageHandler.WriteMessage(msg);
-			continue;
-		}
-		int remainingRequirementsCount = resDef->minRequiredResearchesCount;
-		if ((remainingRequirementsCount < 0) || (remainingRequirementsCount > 4)) {
-			msg = "Research #";
-			msg += std::to_string(researchId);
-			msg += " has an invalid requirements count (";
-			msg += std::to_string(remainingRequirementsCount);
-			msg += ")";
-			traceMessageHandler.WriteMessage(msg);
-			remainingRequirementsCount = 0;
-		}
-		int validReqResearchCount = 0;
-		for (int index = 0; index < 4; index++) {
-			short int reqResearchId = resDef->requiredResearchId[index];
-			if (reqResearchId >= 0) {
-				validReqResearchCount++; // found a valid required research id
-				if (reqResearchId >= global->researchDefInfo->researchCount) {
-					msg = "Research #";
-					msg += std::to_string(researchId);
-					msg += " has an invalid required research (id=";
-					msg += std::to_string(reqResearchId);
-					msg += ")";
-					traceMessageHandler.WriteMessage(msg);
-				}
-			}
-		}
-		if (validReqResearchCount > remainingRequirementsCount) {
-			msg = "Research #";
-			msg += std::to_string(researchId);
-			msg += " has optional requirements (more required researches than minRequiredResearch). This should be avoided (used in standard game for 'age' researches). You can set required research IDs to -1 to disable them.";
-			traceMessageHandler.WriteMessage(msg);
-		}
-		bool hasDuplicateRequirement = false;
-		for (int index = 0; index < 4; index++) {
-			short int reqResearchId = resDef->requiredResearchId[index];
-			if (reqResearchId >= 0) {
-				for (int index2 = index + 1; index2 < 4; index2++) {
-					if (reqResearchId == resDef->requiredResearchId[index2]) {
-						hasDuplicateRequirement = true;
-					}
-				}
-			}
-		}
-		if (hasDuplicateRequirement) {
-			msg = "Research #";
-			msg += std::to_string(researchId);
-			msg += " has duplicate requirements (other than -1).";
-			traceMessageHandler.WriteMessage(msg);
-		}
-		if (resDef->researchLocation >= 0) {
-			// If research is a shadow research, error
-			if ((resDef->researchTime <= 0) || (resDef->buttonId <= 0)) {
-				msg = "Research #";
-				msg += std::to_string(researchId);
-				msg += " is a shadow research but has a research location. If this really is a shadow research, you should set research location to -1.";
-				traceMessageHandler.WriteMessage(msg);
-			}
-		}
-	}
-#endif
-	// Units
-#if 1
-	std::set<short int> badBlastLevelUnits;
-	std::set<pair<short int, short int>> unitDefCommandAlreadyReported;
-	for (int civId = 0; civId < global->civCount; civId++) {
-		for (int unitDefId = 0; unitDefId < global->civilizationDefinitions[civId]->civUnitDefCount; unitDefId++) {
-			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = global->civilizationDefinitions[civId]->GetUnitDef(unitDefId);
-			if (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass()) {
-				if (unitDefBase->unitAIType < 0) {
-					msg = "UnitDef ";
-					msg += std::to_string(unitDefId);
-					msg += " is missing an AI type (class = -1)";
-					traceMessageHandler.WriteMessage(msg);
-				}
-			}
-			// Blast type / level consistency (tons of errors)
-			if (unitDefBase && unitDefBase->DerivesFromAttackable()) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *type50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDefBase;
-				if ((type50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (type50->blastRadius == 0)) {
-					badBlastLevelUnits.insert(unitDefId);
-					if (false) { // generates too many errors
-						msg = "UnitDef ";
-						msg += std::to_string(unitDefId);
-						msg += " has an inactive blast level set (";
-						msg += std::to_string((int)type50->blastLevel);
-						msg += ") because blast radius is 0 (no blast damage). You should set blast level to 3 when no blast damage is used.";
-						traceMessageHandler.WriteMessage(msg);
-					}
-				}
-			}
-			// Gather Commands using unitId instead of class (miners) => adding custom stone/gold mines wouldn't work
-			if (unitDefBase && unitDefBase->DerivesFromCommandable()) {
-				AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *commandable = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDefBase;
-				if (commandable->ptrUnitCommandHeader && commandable->ptrUnitCommandHeader->IsCheckSumValid()) {
-					for (int i = 0; i < commandable->ptrUnitCommandHeader->commandCount; i++) {
-						if ((commandable->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK) ||
-							(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
-							if ((commandable->ptrUnitCommandHeader->ptrCommandArray[i]->classId == -1) && 
-								(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId >= 0) &&
-								(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId != CST_UNITID_FARM) // Allow farm because they don't have a dedicated AI type (class)
-								) {
-								pair<short int, short int> p;
-								p.first = unitDefId;
-								p.second = i;
-								if (unitDefCommandAlreadyReported.find(p) == unitDefCommandAlreadyReported.end()) {
-									msg = "UnitDef ";
-									msg += std::to_string(unitDefId);
-									msg += ": command #";
-									msg += std::to_string(i);
-									msg += " should not use unitDefId (";
-									msg += std::to_string(commandable->ptrUnitCommandHeader->ptrCommandArray[i]->unitDefId);
-									msg += "). Please use unit class instead (civ #";
-									msg += std::to_string(civId);
-									msg += " - the message won't be repeated for other civs)";
-									traceMessageHandler.WriteMessage(msg);
-									unitDefCommandAlreadyReported.insert(p);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	if (badBlastLevelUnits.size() > 0) {
-		msg = "Those units have an inactive blast level set because blast radius is 0 (no blast damage). You should set blast level to 3 when no blast damage is used. ";
-		for each (short int unitDefId in badBlastLevelUnits)
-		{
-			msg += std::to_string(unitDefId);
-			msg += ", ";
-		}
-		traceMessageHandler.WriteMessage(msg);
-	}
-	
-#endif
-	// Search for techtree-unavailable researches
-	for (int civId = 0; civId < global->civCount; civId++)
-	{
-		DetectDatImpossibleResearches(global, civId);
-	}
-
-	return true;
-}
