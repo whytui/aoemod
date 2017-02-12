@@ -31,6 +31,7 @@
 #include "unitTargeting.h"
 #include "TileSetHandler.h"
 #include "combatAI.h"
+#include "CustomPopupSystem.h"
 
 
 namespace CUSTOMROR {

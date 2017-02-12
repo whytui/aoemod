@@ -308,6 +308,9 @@
     <ClInclude Include="include\AOEPrimitives_global.h">
       <Filter>Fichiers d%27en-tête\Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="include\CustomPopupSystem.h">
+      <Filter>Fichiers d%27en-tête\Technical</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -510,6 +513,9 @@
     </ClCompile>
     <ClCompile Include="src\AOEPrimitives_global.cpp">
       <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CustomPopupSystem.cpp">
+      <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

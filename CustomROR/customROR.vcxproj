@@ -136,6 +136,7 @@
     <ClInclude Include="include\customAIMilitaryInfo.h" />
     <ClInclude Include="include\customFuncRules.h" />
     <ClInclude Include="include\CustomPopupBase.h" />
+    <ClInclude Include="include\CustomPopupSystem.h" />
     <ClInclude Include="include\CustomRORInfo.h" />
     <ClInclude Include="include\CustomTilesetInfo.h" />
     <ClInclude Include="include\drsHandler.h" />
@@ -216,6 +217,7 @@
     <ClCompile Include="src\crTriggerSet.cpp" />
     <ClCompile Include="src\customAIMilitaryInfo.cpp" />
     <ClCompile Include="src\CustomPopupBase.cpp" />
+    <ClCompile Include="src\CustomPopupSystem.cpp" />
     <ClCompile Include="src\customROR.cpp" />
     <ClCompile Include="src\CustomRORInfo.cpp" />
     <ClCompile Include="src\CustomTilesetInfo.cpp" />

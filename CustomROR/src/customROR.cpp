@@ -461,7 +461,7 @@ void CustomRORInstance::OneShotInit() {
 void CustomRORInstance::WMCloseMessageEntryPoint(REG_BACKUP *REG_values) {
 	bool preventGameFromExiting = false;
 	// Do custom treatments NOW or never ;)
-	preventGameFromExiting = preventGameFromExiting || CUSTOMROR::crMainInterface.FixGamePopupIssuesBeforeGameClose();
+	preventGameFromExiting = preventGameFromExiting || CUSTOMROR::customPopupSystem.FixGamePopupIssuesBeforeGameClose();
 
 	if (preventGameFromExiting) {
 		REG_values->EAX_val = 0;
@@ -2497,7 +2497,7 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	// If there are pending messages, show them
 	if (traceMessageHandler.HasUnreadMessages() && CUSTOMROR::crInfo.configInfo.showCustomRORNotifications) {
 		traceMessageHandler.MarkAsRead(true);
-		CUSTOMROR::crMainInterface.OpenTraceMessagePopup();
+		CUSTOMROR::customPopupSystem.OpenTraceMessagePopup();
 	}
 }
 
@@ -2585,7 +2585,7 @@ void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 
 	if (CUSTOMROR::crInfo.configInfo.showCustomRORMenu && !CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
 		// Before returning, make sure we always "free" the "custom options" button (from game menu).
-		CUSTOMROR::crMainInterface.FreeInGameCustomOptionsButton();
+		CUSTOMROR::customPopupSystem.FreeInGameCustomOptionsButton();
 		// If it is another button than "custom options", we can free custom options button.
 		// Otherwise, custom popup will manage this (we already added the button in objects to free).
 		if (myEAX != AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS) {
@@ -2603,7 +2603,7 @@ void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
 	// Now manage the case when the clicked button is our custom button...
-	CUSTOMROR::crMainInterface.CreateGameCustomRorOptionsPopup(previousPopup);
+	CUSTOMROR::customPopupSystem.CreateGameCustomRorOptionsPopup(previousPopup);
 	ChangeReturnAddress(REG_values, 0x004342A7);
 }
 
@@ -2643,9 +2643,9 @@ void CustomRORInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 	
 	InGameCustomRorOptionsPopup *crOptionsPopup = NULL;
 	bool isCustomROROptionsPopupOpen = false;
-	if (CUSTOMROR::crMainInterface.currentCustomPopup != NULL) {
-		if (dynamic_cast<InGameCustomRorOptionsPopup*>(CUSTOMROR::crMainInterface.currentCustomPopup) != NULL) {
-			crOptionsPopup = (InGameCustomRorOptionsPopup*)CUSTOMROR::crMainInterface.currentCustomPopup;
+	if (CUSTOMROR::customPopupSystem.currentCustomPopup != NULL) {
+		if (dynamic_cast<InGameCustomRorOptionsPopup*>(CUSTOMROR::customPopupSystem.currentCustomPopup) != NULL) {
+			crOptionsPopup = (InGameCustomRorOptionsPopup*)CUSTOMROR::customPopupSystem.currentCustomPopup;
 			isCustomROROptionsPopupOpen = true;
 		} else {
 			traceMessageHandler.WriteMessage("Internal ERROR: bad popup object type");

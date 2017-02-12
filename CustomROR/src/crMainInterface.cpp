@@ -9,14 +9,9 @@ CustomRORMainInterface CUSTOMROR::crMainInterface;
 
 
 CustomRORMainInterface::CustomRORMainInterface() {
-	this->currentCustomPopup = NULL;
 }
 
 CustomRORMainInterface::~CustomRORMainInterface() {
-	if (this->currentCustomPopup) {
-		delete this->currentCustomPopup;
-		this->currentCustomPopup = NULL;
-	}
 }
 
 
@@ -97,12 +92,12 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 	// F2 in game: unit properties
 	if ((isInGame) && (!isMenuOpen) && (pressedKey == VK_F2)) {
-		this->OpenInGameUnitPropertiesPopup();
+		CUSTOMROR::customPopupSystem.OpenInGameUnitPropertiesPopup();
 	}
 
 	// ESC (1B) - close custom dialog if opened
 	if ((isInEditor || isInGame) && ((pressedKey == VK_ESCAPE) /*|| (pressedKey == VK_RETURN)*/) && (CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
-		this->CloseCustomGamePopup(true);
+		CUSTOMROR::customPopupSystem.CloseCustomGamePopup(true);
 	}
 
 	// F1 in editor : switch to unit selection
@@ -127,25 +122,25 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 				char buffer[100];
 				const char *text = localizationHandler.GetTranslation(CRLANG_ID_MOUSE_POSITION, "Mouse position");
 				sprintf_s(buffer, "%.70s: X=%4.2f, y=%4.2f", text, posX, posY);
-				this->OpenCustomTextEditPopup(text, buffer, 280, 110, sizeof(buffer), NULL, true, false);
+				CUSTOMROR::customPopupSystem.OpenCustomTextEditPopup(text, buffer, 280, 110, sizeof(buffer), NULL, true, false);
 			}
 		} else {
-			this->OpenCustomEditorEditUnitPopup();
+			CUSTOMROR::customPopupSystem.OpenCustomEditorEditUnitPopup();
 		}
 	}
 	// F3 in editor: scenario information
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F3) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
-		this->OpenCustomEditorScenarioInfoPopup();
+		CUSTOMROR::customPopupSystem.OpenCustomEditorScenarioInfoPopup();
 	}
 
 	// CTRL-F1 : display messages
 	if (!isMenuOpen && CTRL && (pressedKey == VK_F1)) {
-		this->OpenTraceMessagePopup();
+		CUSTOMROR::customPopupSystem.OpenTraceMessagePopup();
 	}
 
 	// F4 in editor: copy map
 	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F4) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
-		this->OpenCustomGamePopup<MapCopyPopup>(600, 450, false);
+		CUSTOMROR::customPopupSystem.OpenCustomGamePopup<MapCopyPopup>(600, 450, false);
 	}
 
 	// F5 in game: set debug info level
@@ -310,7 +305,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 			}
 		}
 
-		if (this->OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
+		if (CUSTOMROR::customPopupSystem.OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
 			unsigned long int *unused;
 			AOE_METHODS::UI_BASE::AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
 			if (!sTechTreeInfo.empty() && (techToShowCount > 0)) {
@@ -330,110 +325,10 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 }
 
 
-// Create in-game customROR options screen. Returns false if failed and if return address must be changed.
-bool CustomRORMainInterface::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
-	assert(previousPopup != NULL);
-	if (!previousPopup) { return false; }
-
-	assert(!CUSTOMROR::crInfo.HasOpenedCustomGamePopup()); // Custom popup is not already open
-	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) { return true; } // do nothing, but not treated as alloc error
-	
-	InGameCustomRorOptionsPopup *popupUIObject = this->CreateCustomPopupObject<InGameCustomRorOptionsPopup>();
-	if (popupUIObject) {
-		popupUIObject->CloseMenuAndOpenPopup(previousPopup);
-	}
-
-	if (!popupUIObject) {
-		return false; // need to change return address
-	}
-	// Dirty workaround because custom options popup is not created using standard procedures :(
-	CUSTOMROR::crInfo.ForceSetCurrentGamePopup(popupUIObject->GetAOEPopupObject(), popupUIObject->customOptionButtonVar, NULL);
-	
-	return true;
-}
-
-
-// Ensure exiting game won't crash due to UI pointer issues related to custom popup (occurs in scenario editor)
-// Returns true if we want NOT the game to exit
-bool CustomRORMainInterface::FixGamePopupIssuesBeforeGameClose() {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup() && settings &&
-		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
-		// In scenario editor, UI objects are not correctly freed and the game crashes if we have a custom popup opened...
-		// Closing the popup solves the issue !
-		this->CloseCustomGamePopup(true);
-		assert(!CUSTOMROR::crInfo.HasOpenedCustomGamePopup());
-		return true; // Do NOT exit game (if possible). We consider the ALT-F4 closed the popup (that's a choice...)
-	}
-	return false;
-}
-
-
-// Returns NULL if failed (you can't create a custom popup object if previous one is still opened).
-// If result is non-NULL, you can call [result]->OpenPopup() to actually open the popup.
-template<class popupType> popupType *CustomRORMainInterface::CreateCustomPopupObject() {
-	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) {
-		return NULL;
-	}
-	if (this->currentCustomPopup) {
-		// If previous popup object still exists but is marked as "closed", we can delete it.
-		if (this->currentCustomPopup->IsClosed()) {
-			delete this->currentCustomPopup;
-			this->currentCustomPopup = NULL;
-		} else {
-			return NULL;
-		}
-	}
-	this->currentCustomPopup = (CustomPopupBase*) new popupType();
-	return (popupType*)this->currentCustomPopup;
-}
-
-
-// Please use this API to open a custom game popup. Do not call crInfo's method directly.
-// Returns NULL if failed.
-// You can get AOE popup object with xxx->GetAOEPopupObject()
-template<class popupType> popupType *CustomRORMainInterface::OpenCustomGamePopup(long int hSize, long int vSize, bool withCancelBtn) {
-	popupType *result = this->CreateCustomPopupObject<popupType>();
-	if (result != NULL) {
-		if (!this->currentCustomPopup) { return result; } // Just a security
-		if (this->currentCustomPopup->OpenPopup(hSize, vSize, withCancelBtn) == NULL) {
-			// Open popup failed. Don't return an invalid/incomplete object: free it and return NULL.
-			delete result;
-			result = NULL;
-		}
-	}
-	return result;
-}
-
-
-// Please always use this API to close a custom game popup. Do not call crInfo's method directly.
-// set isCancel to true to indicate we don't want to save/apply changes.
-// this->currentCustomPopup is cleared/freed in this method.
-void CustomRORMainInterface::CloseCustomGamePopup(bool isCancel) {
-	if (this->currentCustomPopup) {
-		this->currentCustomPopup->ClosePopup(isCancel);
-		CustomPopupBase *next = this->currentCustomPopup->nextPopup;
-		delete this->currentCustomPopup;
-		this->currentCustomPopup = next; // Generally NULL unless closing the popup triggered a new one.
-
-		if ((next == NULL) && traceMessageHandler.HasUnreadMessages()) {
-			this->OpenTraceMessagePopup();
-		}
-	}
-}
-
-
 // Called for ALL button clicks in the game.
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
-	if (CUSTOMROR::crInfo.IsCustomGamePopupOKButton(objAddress)) {
-		// Close the custom popup when it is open and we just clicked on OK button.
-		this->CloseCustomGamePopup(false);
-		return true;
-	}
-	if (CUSTOMROR::crInfo.IsCustomGamePopupCancelButton(objAddress)) {
-		// Close the custom popup when it is open and we just clicked on Cancel button.
-		this->CloseCustomGamePopup(true);
+	if (CUSTOMROR::customPopupSystem.OnButtonClickClosePopupIfNecessary(objAddress)) {
 		return true;
 	}
 	AOE_STRUCTURES::STRUCT_ANY_UI *obj = (AOE_STRUCTURES::STRUCT_ANY_UI *)objAddress;
@@ -450,7 +345,7 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 		}
 	}
 
-	//Custom checkboxes: check/uncheck + manage custom buttons onclick
+	// Custom checkboxes: check/uncheck + manage custom buttons onclick
 	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) {
 		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsButton->IsCheckSumValid()) {
@@ -458,7 +353,7 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 				// We should NOT do this for standard buttons
 				AOE_METHODS::UI_BASE::CheckBox_SetChecked(objAsButton, !objAsButton->IsChecked());
 			}
-			return this->OnCustomButtonClick(objAsButton); // run for checkboxes also.
+			return CUSTOMROR::customPopupSystem.OnCustomButtonClick(objAsButton); // run for checkboxes also.
 		}
 		AOE_STRUCTURES::STRUCT_UI_BUTTON_COMBOBOX *objAsComboboxBtn = (AOE_STRUCTURES::STRUCT_UI_BUTTON_COMBOBOX *)objAddress;
 		if (objAsComboboxBtn->IsCheckSumValid()) {
@@ -489,155 +384,13 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_QUIT) ||
 				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_HELP);
 			if (btnEventNotCaughtByRORMenuBtnEvent) {
-				this->FreeInGameCustomOptionsButton(); // Free custom button if needed, for buttons not handled in ManageOptionButtonClickInMenu.
+				CUSTOMROR::customPopupSystem.FreeInGameCustomOptionsButton(); // Free custom button if needed, for buttons not handled in ManageOptionButtonClickInMenu.
 				CUSTOMROR::crInfo.ForceClearCustomMenuObjects(); // Here we CAN already free custom button because it's not in use (current event is about another button)
 			}
 		}
 	}
 
 	return false; // Normal case: let game handle event normally.
-}
-
-
-// Use this to properly free custom button from options menu. This should (always) be called when ingame menu is closed.
-void CustomRORMainInterface::FreeInGameCustomOptionsButton() {
-	if (CUSTOMROR::crInfo.configInfo.showCustomRORMenu) {
-		// Add "custom options" button (from game menu) to our "garbage collector" so that it is freed later.
-		if (CUSTOMROR::crInfo.customGameMenuOptionsBtnVar) {
-			CUSTOMROR::crInfo.AddObjectInPopupContentList(CUSTOMROR::crInfo.customGameMenuOptionsBtnVar);
-			CUSTOMROR::crInfo.customGameMenuOptionsBtnVar = NULL;
-		}
-	}
-}
-
-
-// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool CustomRORMainInterface::OnCustomButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
-	if (!sender || !sender->IsCheckSumValidForAChildClass()) { return false; }
-	bool doCloseCustomPopup = false;
-	if (!GetGameGlobalStructPtr()) { return false; }
-	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = GetGameGlobalStructPtr()->scenarioInformation;
-
-	if (this->currentCustomPopup) {
-		bool eventHandled = this->currentCustomPopup->OnButtonClick(sender);
-		if (this->currentCustomPopup->IsClosed()) {
-			CustomPopupBase *next = this->currentCustomPopup->nextPopup;
-			delete this->currentCustomPopup;
-			this->currentCustomPopup = next; // Generally NULL unless closing the popup triggered a new one.
-		}
-		return eventHandled;
-	}
-	return false;
-}
-
-
-// Opens the custom "edit unit" in editor
-// Returns true if OK.
-bool CustomRORMainInterface::OpenCustomEditorEditUnitPopup() {
-	return (this->OpenCustomGamePopup<EditorEditUnitInfoPopup>(500, 400, true) != NULL);
-}
-
-
-// Opens the custom "simple edit text" popup in editor
-// outputBuffer is a pointer where the typed text will be copied when the popup is closed. Make sure its allocated size is >=maxLength
-// Returns true if OK.
-bool CustomRORMainInterface::OpenCustomTextEditPopup(const char *title, char *initialValue, long int sizeX, long int sizeY, 
-	long int maxLength, char *outputBuffer, bool readOnly, bool withCancelBtn) {
-	SimpleEditTextPopup *p = this->OpenCustomGamePopup<SimpleEditTextPopup>(sizeX, sizeY, withCancelBtn);
-	if (p) {
-		p->AddPopupContent(title, initialValue, maxLength, outputBuffer, readOnly);
-	}
-	return (p != NULL);
-}
-
-
-// Open a popup with CustomROR (debug) messages
-bool CustomRORMainInterface::OpenTraceMessagePopup() {
-	bool reverseOrder = CUSTOMROR::crInfo.configInfo.showLogsInReverseOrder;
-	// Double spaces are intented (to compensate weird-looking font)
-	char *title = "Show  debug  messages";
-	if (reverseOrder) {
-		title = "Show  debug  messages (reverse order)";
-	}
-	return this->OpenCustomTextEditPopup(title, (char*)traceMessageHandler.GetAllMessages(reverseOrder).c_str(),
-		780, 590,
-		0, NULL, false /* NOT read only so that scrollbar is active*/, false);
-}
-
-
-// Open the relevant "view/edit unit" popup for currently selected unit.
-// Returns true if successful.
-bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup() {
-	AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
-	if (!humanPlayer || !humanPlayer->IsCheckSumValid()) {
-		return false;
-	}
-	if (humanPlayer->selectedUnitCount <= 0) {
-		return false;
-	}
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(humanPlayer);
-	assert(selectedUnits != NULL);
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = selectedUnits[0];
-	if (!selectedUnit || !selectedUnit->IsCheckSumValidForAUnitClass()) {
-		return false;
-	}
-	if (!this->OpenInGameUnitPropertiesPopup(selectedUnit)) {
-		return false;
-	}
-	
-	if (!IsMultiplayer()) {
-		AOE_METHODS::SetGamePause(true);
-	}
-	return true;
-}
-
-
-// Open the relevant "view/edit unit" popup for provided unit.
-// Returns true if successful.
-bool CustomRORMainInterface::OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
-	if (!unit || !unit->IsCheckSumValidForAUnitClass()) {
-		return false;
-	}
-	InGameUnitPropertiesPopup *popup = this->OpenCustomGamePopup<InGameUnitPropertiesPopup>(600, 500, true);
-	if (popup == NULL) { return false; }
-	popup->AddPopupContent(unit->unitInstanceId);
-	return true;
-}
-
-
-// Opens the custom "edit unit" in editor
-// Returns true if OK.
-bool CustomRORMainInterface::OpenCustomEditorScenarioInfoPopup() {
-	EditorScenarioInfoPopup *popup = this->OpenCustomGamePopup<EditorScenarioInfoPopup>(500, 400, false);
-	bool result = (popup != NULL);
-	if (popup) {
-		popup->SetVarToUpdate_allowUnitOverlapping(&CUSTOMROR::crInfo.configInfo.editor_allowUnitOverlapping);
-		popup->SetVarToUpdate_disableHillModeChecks(&CUSTOMROR::crInfo.configInfo.editor_disableHillModeChecks);
-		popup->SetVarToUpdate_disableTerrainRestrictionChecks(&CUSTOMROR::crInfo.configInfo.editor_disableTerrainRestrictions);
-		popup->SetVarToUpdate_lengthenCombatMode(NULL); // Default
-		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-		if (global && global->IsCheckSumValid()) {
-			AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = global->scenarioInformation;
-			if (scInfo && scInfo->IsCheckSumValid()) {
-				popup->SetVarToUpdate_lengthenCombatMode(&scInfo->enableLengthenCombatMode);
-			}
-		}
-	}
-	return result;
-}
-
-
-// Opens the custom "edit map size" popup in editor
-// Returns true if OK.
-bool CustomRORMainInterface::OpenEditMapSizePopup() {
-	return (this->OpenCustomGamePopup<EditMapSizeXYPopup>(320, 130, true) != NULL);
-}
-
-
-// Opens the custom "edit terrain" popup in editor
-// Returns true if OK.
-bool CustomRORMainInterface::OpenCustomTerrainEditPopup() {
-	return (this->OpenCustomGamePopup<EditTerrainPopup>(500, 300, true) != NULL);
 }
 
 
@@ -656,7 +409,7 @@ bool CustomRORMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 	// Here: custom map size
 	if (!CUSTOMROR::crInfo.configInfo.useCustomMapDimensions) { return false; }
 	// If result is true, WE generated the map ourselves => Disable standard generation code.
-	this->OpenEditMapSizePopup();
+	CUSTOMROR::customPopupSystem.OpenEditMapSizePopup();
 	return true;
 }
 
