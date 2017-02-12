@@ -120,7 +120,6 @@ public:
 	bool ExecuteCommand(char *command, char **output);
 	void HandleChatCommand(char *command);
 
-	void ShowF11_zone();
 
 	// This is called just after empires.dat is loaded.
 	// Warning: changes here are applied on civ definitions are done once and for all, and impact all games.

@@ -79,6 +79,35 @@ static void GameMainUI_writeTextDebugLines(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAI
 }
 
 
+static void ShowF11_zone() {
+	// Show "F11" information in top part of game zone
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid() || !settings->ptrGameUIStruct || !settings->ptrGameUIStruct->IsCheckSumValid()) {
+		return;
+	}
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = settings->ptrGameUIStruct;
+	AOE_STRUCTURES::STRUCT_ANY_UI *topleft = gameMainUI->topLeftInfoLabel;
+	AOE_STRUCTURES::STRUCT_ANY_UI *popInfo = gameMainUI->populationInfoPanel;
+	AOE_STRUCTURES::STRUCT_ANY_UI *playZone = gameMainUI->gamePlayUIZone;
+	assert(topleft && popInfo && playZone);
+	if (!topleft || !popInfo || !playZone) { return; }
+	const unsigned long int addr1 = 0x004FAF80;
+	const unsigned long int addr2 = 0x004839A0;
+	_asm {
+		MOV ECX, topleft;
+		PUSH 0;
+		PUSH 2;
+		CALL addr1;
+	}
+	AOE_METHODS::UI_BASE::ShowUIObject(popInfo, true);
+	_asm {
+		MOV ECX, gameMainUI;
+		CALL addr2;
+	}
+	AOE_METHODS::UI_BASE::RefreshUIObject(playZone, 1);
+}
+
+
 // DO NOT call this if current UI is not "in-game" screen
 static void CallWriteText(const char *txt) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
@@ -116,6 +145,26 @@ static void CallWriteCenteredText(const char *txt, long int numLine = 1, long in
 	}
 }
 
+
+// Show "F5" debug infos for communications (original - hidden - ROR behaviour)
+static bool ShowHiddenDebugComm(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings) {
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	_asm {
+		MOV ECX, settings;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX + 0x13C]; // gameSettings.showComm()
+	}
+}
+
+// Show "F5" debug infos for currently controlled AI player (original - hidden - ROR behaviour)
+static bool ShowHiddenDebugAIInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings) {
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	_asm {
+		MOV ECX, settings;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX + 0x140]; // gameSettings.showAI()
+	}
+}
 
 
 // Displays the green blinking around a unit (like in right-click)

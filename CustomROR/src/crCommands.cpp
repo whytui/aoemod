@@ -651,35 +651,6 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 }
 
 
-void CustomRORCommand::ShowF11_zone() {
-	// Show automatically "F11" information at game startup
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || !settings->IsCheckSumValid() || !settings->ptrGameUIStruct || !settings->ptrGameUIStruct->IsCheckSumValid()) {
-		return;
-	}
-	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = settings->ptrGameUIStruct;
-	AOE_STRUCTURES::STRUCT_ANY_UI *topleft = gameMainUI->topLeftInfoLabel;
-	AOE_STRUCTURES::STRUCT_ANY_UI *popInfo = gameMainUI->populationInfoPanel;
-	AOE_STRUCTURES::STRUCT_ANY_UI *playZone = gameMainUI->gamePlayUIZone;
-	assert(topleft && popInfo && playZone);
-	if (!topleft || !popInfo || !playZone) { return; }
-	const unsigned long int addr1 = 0x004FAF80;
-	const unsigned long int addr2 = 0x004839A0;
-	_asm {
-		MOV ECX, topleft;
-		PUSH 0;
-		PUSH 2;
-		CALL addr1;
-	}
-	AOE_METHODS::UI_BASE::ShowUIObject(popInfo, true);
-	_asm {
-		MOV ECX, gameMainUI;
-		CALL addr2;
-	}
-	AOE_METHODS::UI_BASE::RefreshUIObject(playZone, 1);
-}
-
-
 // UpdatedValue: if <0, it is ignored
 void CustomRORCommand::UpdateWorkRateWithMessage(short int DATID, float updatedValue) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
@@ -1097,7 +1068,7 @@ void CustomRORCommand::OnGameStart() {
 	CUSTOMROR::TRIGGER::ManageTriggerDisableUnitsForExceptions();
 
 	long int **p = (long int **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
-	if ((*p) && (**p != 0x0054679C)) {
+	if ((*p) && (**p != CHECKSUM_UI_IN_GAME_MAIN)) {
 		// This is NOT game screen, do not try to interact with it !
 		return;
 	}
@@ -1114,7 +1085,7 @@ void CustomRORCommand::OnGameStart() {
 
 	// Show automatically "F11" information at game startup
 	if (!settings->rgeGameOptions.isMultiPlayer) {
-		this->ShowF11_zone();
+		AOE_METHODS::UI_BASE::ShowF11_zone();
 	}
 
 	// Force shared exploration => always ON (if config says so and not in MP)
@@ -3533,68 +3504,11 @@ bool CustomRORCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTI
 
 	switch (*AOE_VAR_F5_DEBUG_INFO_TYPE) {
 	case CUSTOMROR::CONFIG::IDL_HIDDEN_COMM:
-		_asm {
-			MOV ECX, settings;
-			MOV EDX, DS:[ECX];
-			CALL DS:[EDX + 0x13C]; // gameSettings.showComm()
-		}
-		return true;
+		return AOE_METHODS::UI_BASE::ShowHiddenDebugComm(settings);
 	case CUSTOMROR::CONFIG::IDL_HIDDEN_AI:
-		_asm {
-			MOV ECX, settings;
-			MOV EDX, DS:[ECX];
-			CALL DS:[EDX + 0x140]; // gameSettings.showAI()
-		}
-		return true;
+		return AOE_METHODS::UI_BASE::ShowHiddenDebugAIInfo(settings);
 	case CUSTOMROR::CONFIG::IDL_CUSTOM:
-		{
-			STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-			if (!global) { return false; }
-			std::string msg[9];
-			static bool showUnitGroups = true;
-			for (int i = 2; i <= 7; i++) {
-				if (!showUnitGroups) {
-					CUSTOM_AI::AIPlayerTargetingInfo *info = CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i);
-					if (!info) { msg[i] = ""; continue; }
-					int curTargetPlayerId = info->GetCurrentTacAITargetPlayerId(global->GetPlayerStruct(i));
-					msg[i] = std::string("p#") + std::to_string(i) + std::string(" targt=") + std::to_string(curTargetPlayerId) +
-						std::string(" ; subdslk vs");
-					for (int j = 1; j < global->playerTotalCount; j++) {
-						msg[i] += std::string(" p") + std::to_string(j) + std::string("=");
-						msg[i] += to_string(info->lastComputedDislikeSubScore[i]);
-					}
-				} else {
-					if (CUSTOM_AI::customAIHandler.IsAliveAI(i)) {
-						int cnt = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i)->unitGroupAI.last5TaskingByUGAI.size();
-						if (cnt > UNITGROUP_AI_LAST_TASK_TRACE_COUNT) { cnt = UNITGROUP_AI_LAST_TASK_TRACE_COUNT; }
-						msg[i] = std::string("[p") + std::to_string(i) + std::string("] grpId,tsk,targ,time ");
-						for (auto it = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i)->unitGroupAI.last5TaskingByUGAI.begin();
-							(it != CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i)->unitGroupAI.last5TaskingByUGAI.end()); it++) {
-							std::tuple<long int, long int, long int, long int> t = *it;
-							long int unitGrpId = std::get<0>(t);
-							long int taskId = std::get<1>(t);
-							long int targetId = std::get<2>(t);
-							long int time_ms = std::get<3>(t);
-							msg[i] += std::string(" ") + std::to_string(unitGrpId) +
-								std::string(",") + std::to_string(taskId) +
-								std::string(",") + std::to_string(targetId) +
-								std::string(",") + std::to_string(time_ms);
-						}
-					}
-				}
-			}
-			AOE_METHODS::UI_BASE::GameMainUI_writeTextDebugLines(settings->ptrGameUIStruct, msg[2].c_str(),
-				msg[3].c_str(),
-				msg[4].c_str(),
-				msg[5].c_str(),
-				msg[6].c_str(),
-				msg[7].c_str()
-				);
-			if (CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
-				AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, showUnitGroups ? "CustomROR Unit group tasking" : "Player targeting");
-			}
-		}
-		return true;
+		return CR_DEBUG::HandleCustomRORInGameF5DebugInfo(settings);
 	default:
 		break;
 	}

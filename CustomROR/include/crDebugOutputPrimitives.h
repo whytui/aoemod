@@ -14,6 +14,9 @@
 #include "basicFilesHandling.h"
 #include "BitmapExporter.h"
 #include "palette.h"
+#include "mainCustomAI.h"
+#include "AOEPrimitives_UI_gameMain.h"
+
 
 /* This file contains various primitives for debugging */
 
@@ -50,6 +53,9 @@ extern bool debugSerialization;
 // This uses a buffer system, which is flushed when exiting game.
 void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char *buffer, long int bufferSize);
 
+
+// Displays debug info in F5 debug zone and/or in in-game bottom text lines.
+bool HandleCustomRORInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings);
 
 }
 
