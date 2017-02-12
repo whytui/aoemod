@@ -2,15 +2,18 @@
 #include <AOE_offsets.h>
 #include <ROR_global_variables.h>
 #include <AOE_struct_game_settings.h>
+#include <AOE_struct_game_global.h>
 #include <AOE_struct_unit_def.h>
 #include "AOE_memory.h"
 #include "traceMessage.h"
+#include "mainStructuresHandling.h"
 
 #pragma once
 
 /*
 This file contains primitives to manipulate unit definition objects.
 */
+
 
 namespace AOE_STRUCTURES {
 	// This adds an armor class to unitdef's armors list. This does NOT do any check on potential duplicates !
@@ -148,5 +151,11 @@ namespace AOE_STRUCTURES {
 
 	// Returns true if unit class is artefact or flag
 	bool IsArtefactOrFlag(GLOBAL_UNIT_AI_TYPES unitClass);
+
+
+	// Get a unit name from empires.dat data (read from civ 0)
+	// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
+	const char *GetUnitName(short int unitDefId);
+
 
 }

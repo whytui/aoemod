@@ -233,7 +233,7 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 			// This handles ALL MakeTech actions (both AI or human triggered)
 			currentActionDATID = currentActionAsMakeObject->targetUnitDAT_ID;
 			currentActionIsResearch = true;
-			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(controlledPlayer, currentActionAsMakeObject->targetUnitDAT_ID);
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = AOE_METHODS::PLAYER::GetResearchDef(controlledPlayer, currentActionAsMakeObject->targetUnitDAT_ID);
 			if (resDef) {
 				currentActionLangNameId = resDef->languageDLLName;
 				currentActionName = resDef->researchName;
@@ -274,7 +274,7 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 			}
 		}
 		if (curBtnCmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) {
-			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *tmpResearchDef = GetResearchDef(controlledPlayer,
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *tmpResearchDef = AOE_METHODS::PLAYER::GetResearchDef(controlledPlayer,
 				(short int)gameMainUI->unitCommandButtons[currentBtnId]->buttonInfoValue[0]);
 			if (tmpResearchDef && ((tmpResearchDef->buttonId >= minButtonIdNextPage) || (tmpResearchDef->buttonId < minButtonId))) {
 				currentButtonDoesNotBelongToThisPage[currentBtnId] = true;
@@ -613,7 +613,7 @@ bool AddInGameCommandButton(long int buttonIndex, AOE_CONST_INTERNAL::INGAME_UI_
 		}
 	}
 	if (UICmdId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_DO_RESEARCH) {
-		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *researchDef = GetResearchDef(player, (short int)DATID);
+		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *researchDef = AOE_METHODS::PLAYER::GetResearchDef(player, (short int)DATID);
 		if (researchDef == NULL) { return false; }
 		iconId = researchDef->iconId;
 		creationDllId_original = researchDef->languageDLLDescription; // languageDLLCreation;

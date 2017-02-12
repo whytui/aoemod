@@ -491,5 +491,18 @@ namespace AOE_STRUCTURES {
 		}
 	}
 
+
+	// Get a unit name from empires.dat data (read from civ 0)
+	// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
+	const char *GetUnitName(short int unitDefId) {
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (!global || !global->IsCheckSumValid()) { return NULL; }
+		if (global->civCount <= 0) { return NULL; }
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = global->civilizationDefinitions[0]->GetUnitDef(unitDefId);
+		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return NULL; }
+		return unitDef->ptrUnitName;
+	}
+
+
 }
 

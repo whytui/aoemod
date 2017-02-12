@@ -302,6 +302,9 @@
     <ClInclude Include="include\PlayerCustomMethods.h">
       <Filter>Fichiers d%27en-tête\CustomRorFeatures</Filter>
     </ClInclude>
+    <ClInclude Include="include\GameTriggerTechInterfacing.h">
+      <Filter>Fichiers d%27en-tête\Technical</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\customROR.cpp">
@@ -498,6 +501,9 @@
     </ClCompile>
     <ClCompile Include="src\PlayerCustomMethods.cpp">
       <Filter>Fichiers sources\CustomRorFeatures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameTriggerTechInterfacing.cpp">
+      <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

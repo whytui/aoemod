@@ -187,6 +187,55 @@ void ChangeControlledPlayer(int playerId, bool updateAIFlags) {
 }
 
 
+// Return NULL if one of the objects is NULL/missing
+AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId) {
+	if (!player || !player->IsCheckSumValid() || (researchId < 0)) {
+		return NULL;
+	}
+	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *ri = player->ptrResearchesStruct;
+	if (!ri || (researchId >= ri->researchCount)) {
+		return false;
+	}
+	return ri->ptrResearchDefInfo->GetResearchDef(researchId);
+}
+
+
+// Calls AOE's code mainAI.findUnit(DAT_Id)
+AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI *mainAI, long int DAT_ID) {
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit;
+	_asm {
+		// Search for a unit (given its def id) in MainAI list
+		PUSH -1;
+		PUSH -1;
+		PUSH -1;
+		PUSH -1;
+		PUSH -1;
+		PUSH -1;
+		PUSH -1;
+		PUSH -1;
+		PUSH DAT_ID;
+		PUSH -1;
+		MOV EAX, 0x0040BAD0;
+		MOV ECX, mainAI;
+		CALL EAX; // search for a unit in MainAI list
+		MOV unit, EAX; // Save the result in our variable. Can be NULL (not found)
+	}
+	return unit;
+}
+
+
+void GlobalSetNextManagedAIPlayer() {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return; }
+	unsigned long int addr = 0x5204D0;
+	_asm {
+		MOV ECX, global;
+		PUSH 3;
+		CALL addr;
+	}
+}
+
+
 }
 }
 

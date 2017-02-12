@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <AOE_empires_dat.h>
 #include <AOE_const_internal.h>
 
 /*

@@ -25,6 +25,15 @@ namespace CUSTOM_AI {
 }
 
 
+
+// Common function for panic mode unit searching.
+// Returns true if it is possible to train the unit. In such case, cost is decreased from remainingResources and actorCounter is decreased too.
+// Returns false and does not change values if it is not possible (warning: tempCost can be modified in all cases)
+bool PrepareUnitToAddIfPossible(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitId_toAdd, short int unitId_actor,
+	long int *actorCounter, short int *lastCostDAT_ID, float remainingResources[], float tempCost[]);
+
+
+
 namespace STRATEGY {
 
 	// Class that handles in-game strategy handling

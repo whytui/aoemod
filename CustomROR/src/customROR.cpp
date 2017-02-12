@@ -1742,7 +1742,7 @@ void CustomRORInstance::ManageTacAIUpdate(REG_BACKUP *REG_values) {
 
 	if (isDeadPlayer) {
 		ChangeReturnAddress(REG_values, 0x4D0EFE);
-		AOE_METHODS::GlobalSetNextManagedAIPlayer();
+		AOE_METHODS::PLAYER::GlobalSetNextManagedAIPlayer();
 
 		//ChangeReturnAddress(REG_values, 0x4D0EED); // Other solution that does not require calling GlobalSetNextManagedAIPlayer(). But more treatments are executed.
 	}

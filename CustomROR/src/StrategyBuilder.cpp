@@ -1926,7 +1926,7 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 			if (unitInfo->enabledByResearchId == -1) {
 				lowCostActivation = true;
 			} else {
-				AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(this->player, unitInfo->enabledByResearchId);
+				AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = AOE_METHODS::PLAYER::GetResearchDef(this->player, unitInfo->enabledByResearchId);
 				if (resDef) {
 					int totalCost = 0;
 					if (resDef->costUsed1) { totalCost += resDef->costAmount1; }
@@ -3604,7 +3604,7 @@ std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitD
 
 	for each (short int resDefId in allResearchesForUnit)
 	{
-		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = GetResearchDef(player, resDefId);
+		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = AOE_METHODS::PLAYER::GetResearchDef(player, resDefId);
 		if (resDef) {
 			PotentialResearchInfo *resInfo = this->GetResearchInfo(resDefId);
 			if (resInfo == NULL) {

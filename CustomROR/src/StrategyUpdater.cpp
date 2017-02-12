@@ -1,5 +1,29 @@
 #include "../include/StrategyUpdater.h"
 
+
+
+// Common function for panic mode unit searching.
+// Returns true if it is possible to train the unit. In such case, cost is decreased from remainingResources and actorCounter is decreased too.
+// Returns false and does not change values if it is not possible (warning: tempCost can be modified in all cases)
+bool PrepareUnitToAddIfPossible(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitId_toAdd, short int unitId_actor,
+	long int *actorCounter, short int *lastCostDAT_ID, float remainingResources[], float tempCost[]) {
+	// Check costs. If last loop already calculated the cost for the same DAT_ID, re-use tempCost. Otherwise, recompute it.
+	bool getCostIsOK = (*lastCostDAT_ID == unitId_toAdd);
+	if (!getCostIsOK) {
+		getCostIsOK = GetUnitCost(player, unitId_toAdd, tempCost);
+		if (!getCostIsOK) { *lastCostDAT_ID = -1; } // tempCost may have been modified, do NOT try to reuse it later !!!
+		else { *lastCostDAT_ID = unitId_toAdd; }
+	}
+	if (getCostIsOK && ApplyCostIfPossible(tempCost, remainingResources)) {
+		(*actorCounter)--; // Consider 1 as "used"
+		*lastCostDAT_ID = unitId_toAdd;
+		return true;
+	}
+	return false;
+}
+
+
+
 namespace STRATEGY {
 ;
 
@@ -357,7 +381,7 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 
 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *forumUnitStruct;
-	forumUnitStruct = AOE_MainAI_findUnit(mainAI, CST_UNITID_FORUM);
+	forumUnitStruct = AOE_METHODS::PLAYER::AOE_MainAI_findUnit(mainAI, CST_UNITID_FORUM);
 	if (forumUnitStruct == NULL) { return; } // TO DO: make special treatments if no town center (maybe we still have other buildings... Especially temple!)
 	assert(forumUnitStruct->IsCheckSumValidForAUnitClass());
 	// Add "fake" enemys "priestVictims" so that we create units to defend what's left and possibly convert a villager ! Use fake position ?

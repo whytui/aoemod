@@ -134,7 +134,7 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 	long int enemyPlayerId = enemyPlayer->playerId;
 	assert((enemyPlayerId >= 0) && (enemyPlayerId < 9) && (enemyPlayerId < global->playerTotalCount));
 	if ((enemyPlayerId < 0) || (enemyPlayerId > 8)) { return; } // Could cause overflows
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_MainAI_findUnit(this->mainAI, CST_UNITID_FORUM);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_METHODS::PLAYER::AOE_MainAI_findUnit(this->mainAI, CST_UNITID_FORUM);
 
 	// Record the attack. The analog treatment in ROR code is in 0x4D7AF0 (update TacAI.attacksByPlayerCount[enemyPlayerId]).
 	// Note: we also record gaia attacks (why wouldn't we?)

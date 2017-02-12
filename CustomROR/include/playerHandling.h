@@ -57,6 +57,14 @@ void SetAllAIFlags();
 // Change human control to another player and set AI flags accordingly (if updateAIFlags is true)
 void ChangeControlledPlayer(int playerId, bool updateAIFlags);
 
+// Return NULL if one of the objects is NULL/missing
+AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId);
+
+
+// Calls AOE's code mainAI.findUnit(DAT_Id)
+AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI *mainAI, long int DAT_ID);
+
+void GlobalSetNextManagedAIPlayer();
 
 }
 }

@@ -41,21 +41,11 @@
 
 // Methods in this file are simple primitives that don't depend on customROR configuration. They generally are calls to existing game methods.
 
-#define UNUSED_PLID_FOR_TRIGGERS 9
-static_assert((UNUSED_PLID_FOR_TRIGGERS >= 0) && (UNUSED_PLID_FOR_TRIGGERS < 16), "Bad player ID for UNUSED_PLID_FOR_TRIGGERS");
-
 
 
 
 /* ----------- GETTERS ------------- */
 
-
-// Get a unit name from empires.dat data (read from civ 0)
-// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
-const char *GetUnitName(short int unitDefId);
-
-// Return NULL if one of the objects is NULL/missing
-AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId);
 
 // Returns true for maps where AI does build a dock and boats. Warning: for unknown map type (custom), this returns true.
 bool IsDockRelevantForMap(MAP_TYPE_INDEX mti);
@@ -69,29 +59,6 @@ bool GetUnitCost(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID, float 
 
 // Fill resourceTypesOrder with ordered resource types: lower value in resourceAmounts = first position in (out) resourceTypesOrder
 void SortResourceTypes(const int resourceAmounts[], int resourceTypesOrder[]);
-
-// Common function for panic mode unit searching.
-// Returns true if it is possible to train the unit. In such case, cost is decreased from remainingResources and actorCounter is decreased too.
-// Returns false and does not change values if it is not possible (warning: tempCost can be modified in all cases)
-bool PrepareUnitToAddIfPossible(AOE_STRUCTURES::STRUCT_PLAYER *player, short int unitId_toAdd, short int unitId_actor,
-	long int *actorCounter, short int *lastCostDAT_ID, float remainingResources[], float tempCost[]);
-
-
-// Calls AOE's code mainAI.findUnit(DAT_Id)
-AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI *mainAI, long int DAT_ID);
-
-
-// Returns a pointer to trigger data
-char *GetTriggerDataPtr(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo);
-// Set trigger data pointer. Returns false if failed.
-bool SetTriggerDataPtr(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo, char *newDataPtr);
-// Returns trigger data size
-long int GetTriggerDataSize(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo);
-// Set trigger data size. Returns false if failed.
-bool SetTriggerDataSize(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo, long int sizeToSet);
-
-// Returns true if provided trigger text contains the END tag before any trigger information.
-bool TriggerTextContainsENDTagAtBeginning(char *triggerText);
 
 
 
@@ -171,16 +138,7 @@ bool AnalyzeEmpiresDatQuality();
 
 // TO MOVE
 namespace AOE_METHODS {
-	static void GlobalSetNextManagedAIPlayer() {
-		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-		if (!global || !global->IsCheckSumValid()) { return; }
-		unsigned long int addr = 0x5204D0;
-		_asm {
-			MOV ECX, global;
-			PUSH 3;
-			CALL addr;
-		}
-	}
+	
 
 	// ROR's method to get a pseudo-random value
 	static long int GetAndReCalcPseudoRandomValue() {

@@ -10,6 +10,7 @@
 #include "AOEPrimitives_gameCommand.h"
 #include "researches.h"
 #include "unitHandling.h"
+#include "GameTriggerTechInterfacing.h"
 
 
 using namespace AOE_STRUCTURES;

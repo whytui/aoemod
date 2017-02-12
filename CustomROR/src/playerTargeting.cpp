@@ -144,7 +144,7 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 	}
 
 
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_MainAI_findUnit(player->ptrAIStruct, CST_UNITID_FORUM);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *myTC = AOE_METHODS::PLAYER::AOE_MainAI_findUnit(player->ptrAIStruct, CST_UNITID_FORUM);
 	if (myTC && !myTC->IsCheckSumValidForAUnitClass()) { myTC = NULL; }
 
 	long int spottedEnemyUnits[9];
