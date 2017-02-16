@@ -1,0 +1,247 @@
+// Localized strings for RockNRor plugin
+// English
+
+[42000] RockNRor title
+RockNRor
+
+[42094]
+Yes
+[42095]
+No
+
+// *** Technical ***
+[42001]
+Debug message system initialized.
+[42002]
+WARNING: Some features are not enabled in game executable. See RockNRor.log file.
+[42003]
+ERROR: there are more civs in RockNRor_civs.xml than in empires.dat. This may cause game crashes !
+[42004] // Can't write to file
+ERROR: cannot write to
+[42005] // Can't read XML configuration file
+Warning: configuration could not be read from XML file (missing or incorrect file).
+[42006] // Can't read civilizations XML configuration file
+RockNRor_civs.xml could not be read (missing or incorrect file). This is not an error unless you want to use custom civilizations
+[42007]
+Running checks on active features in game executable.
+[42008] // Welcome message part 1
+Welcome. RockNRor
+[42009] // Welcome message part 2
+plugin is active.
+
+[42085] // "Custom"
+Custom
+[42089] // ERROR : "Could not find" (beginning of message)
+ERROR : Could not find
+[42090] // ERROR : "file. data2\\empires.dat will be used instead." (end of message)
+file. data2\empires.dat will be used instead.
+
+// *** RockNRor Options popup ***
+[42020] // RockNRor options popup title
+RockNRor Options
+[42021] // Tech tree info button
+Tech tree info
+[42028] // Tech tree popup title
+Technology tree that can still be researched
+[42029] // Mention for unavailable tech (but present in tech tree)
+not available yet
+[42022] // 
+Other commands (enter to validate)
+[42030]
+Dislike penalty for human player
+[42031]
+Game speed change factor*100 (125 for 1.25)
+[42032]
+Auto. rebuild farms
+[42033]
+Auto. rebuild farms max number
+[42034]
+Auto. rebuild farms max food
+[42035]
+Auto. rebuild farms min wood
+
+[42023] // Custom civilization without name in game settings combobox
+Custom civilization
+
+[42024] // Custom buttons
+Being researched:
+[42025] // Custom buttons
+Being trained:
+[42026] // AI flags recomputed
+AI flags have been recomputed
+[42027] // AI flags all set
+All players are now computer-managed.
+[42087] // Can't train at this point
+Can't be trained right now: 
+[42088] // Can't do research at this point
+Can't be researched right now: 
+[42116]
+Click to prevent unit from attacking villagers automatically
+[42117]
+Click to prevent unit from attacking buildings automatically
+[42118]
+Click to prevent unit from attacking other units automatically
+[42119]
+Click to restore normal auto-attack behaviour
+[42120]
+Protect a position/unit
+[42121] // Hotkey for "protect / defend"
+P
+[42122]
+Back
+[42123]
+Stop defending current position/unit
+[42124]
+Right-click to define the unit or the position to protect
+[42125]
+Make main unit for keyboard shortcut selection
+
+// *** Unit properties ***
+[42036] // Unit properties: Initial
+Initial
+[42037] // Unit properties: Not built
+Not built
+[42038] // Unit properties: Gatherable
+Gatherable
+[42039] // Unit properties: Dying
+Dying
+[42040] // Unit properties title
+Edit a unit
+[42041] // Unit properties: normal status
+Normal
+[42042] // Unit properties: "Unit" term
+Unit
+[42043] // Unit properties: "Shortcut" term
+Shortcut
+[42044] // "none" term
+none
+[42045] // "invalid" term
+invalid
+[42046] // Part of group
+part of a group
+[42047] // Building
+Building
+[42048] // Children units auto move to
+Child units auto-move to
+[42049] // Auto rebuild this farm when depleted
+Auto rebuild this farm when depleted
+[42050] // Technology ID abbreviation
+techId
+[42051] // Unit properties title (ingame)
+Unit properties
+[42052] // Disable auto move
+Disable auto-move
+[42053]
+Default
+[42054]
+Always
+[42055]
+Never
+[42056]
+Auto attack units:
+[42057]
+Towers
+[42058]
+Military
+[42059]
+Buildings
+[42060]
+Villagers
+[42061]
+Walls
+[42062]
+Future technologies, not available yet:
+[42083] // Unit properties: list of special attacks
+Attack bonuses for
+[42084] // Unit properties: list of special armors
+Armor weaknesses
+[42086] // Unit properties: conversion resistance
+Conversion resistance
+
+// *** Scenario editor ***
+[42063]
+Custom editor menu
+[42064]
+PlayerId
+[42065]
+Triggers
+[42066]
+Terrain edit
+[42067]
+Victory conditions
+[42068]
+Allow unit overlapping
+[42069]
+Allow buildings on elevation
+[42070]
+Disable terrain restrictions
+[42071]
+Lengthen combat mode
+[42072]
+Edit triggers
+[42073]
+Get Strategy (read only)
+[42074]
+Get Personality (read only)
+[42075]
+Gold victory condition
+[42076]
+If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select \"custom\" in general victory conditions tab.
+[42077]
+Please type X and Y map size
+[42078]
+Pos X (min/max)
+[42079]
+Pos Y (min/max)
+[42080]
+Terrain Id (0-31)
+[42081]
+Elevation (0-7)
+[42082]
+Tip: leave terrain/elevation empty to preserve current values.
+[42091] // Label for checkbox option to soften terrain borders
+Soften modified terrain borders
+[42092] // Mouse position
+Mouse position
+[42093] // Success
+Success
+[42096]
+Copy all map
+[42097]
+Copy map zone
+[42098]
+Paste map zone
+[42099] // Copy map units (for checkbox)
+Copy units
+[42100] // Title for copy paste map zones
+Copy/Paste map zones
+[42101]
+Copy from (x/y of bottom-left corner)
+[42102]
+Copy to (x/y of top-right corner)
+[42103]
+Paste to position (x/y of bottom-left corner)
+[42104]
+Current buffer: size=
+[42105]
+Contains units
+[42106]
+Generate trigger samples
+[42107]
+Save
+[42108]
+Reload
+[42109]
+Generate
+[42110] // trigger samples : choose event
+Choose an event
+[42111] // trigger samples : choose action
+Choose an action
+[42112]
+Run another trigger before execution
+[42113]
+Run another trigger after execution
+[42114]
+Difficulty level condition
+[42115]
+Please run RockNRorAdmin.exe to get full documentation on triggers.

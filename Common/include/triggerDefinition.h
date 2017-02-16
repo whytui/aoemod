@@ -79,7 +79,7 @@ namespace CR_TRIGGERS {
 
 	static const char *KEYWORDS_SPECIAL[] = {
 		// Special keywords
-		"", "//CustomROR_Trigger_file\r\n//Please do NOT remove the END line.\r\nEND\r\n", "END\r\n", "TRIGGER",
+		"", "//RockNRor_Trigger_file\r\n//Please do NOT remove the END line.\r\nEND\r\n", "END\r\n", "TRIGGER",
 		"disableUnitDefinitions_p1", "disableUnitDefinitions_p2",
 		"disableUnitDefinitions_p3", "disableUnitDefinitions_p4",
 		"disableUnitDefinitions_p5", "disableUnitDefinitions_p6",

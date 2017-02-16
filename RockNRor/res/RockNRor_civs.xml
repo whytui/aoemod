@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- Warning: tags are case-sensitive -->
+<!-- This XML file is dedicated to handle custom Civilizations in customROR -->
+<!-- If you deliver a mod with empires.dat containing additional civs (+ possibly dedicated AI files), deliver this file also. -->
+<RockNRor_civs>
+	<!-- civilizations.count represents the number of supported civs. Civs with ID above this value will be ignored.
+	Note: civID=0 is reserved for gaia and is not taken into account here. -->
+	<civilizations count="16"/>
+	<!-- allowPickingCustomCivsInRandomInit: if true, custom civs may be initially selected when starting a new random game. Default=false (only ROR civs can be selected by default) -->
+	<allowPickingCustomCivsInRandomInit enable="false"/>
+	
+	<!-- Additional civs -->
+	<!-- civ id MUST match AGE3 (empires.dat) civ_id. -->
+	<civ id="17">
+		<civ_name value="civ1"/>
+		<player_name index="1" value="Bob"/>
+		<player_name index="2" value="Peter"/>
+		<player_name index="3" value="James"/>
+		<player_name index="4" value=""/>
+		<player_name index="5" value=""/>
+		<player_name index="6" value=""/>
+		<player_name index="7" value=""/>
+		<player_name index="8" value=""/>
+		<player_name index="9" value=""/>
+		<!-- AI files for Random game / Deathmatch. -->
+		<deathmatch_aifile value="data2/ARCHERS FER.AI"/>
+		<deathmatch_aifile_water value="data2/ARCHERS FER.AI"/>
+		<!-- Map categories: no_water=hills/highland. much_water=small/large islands. some_water=others (moderate amount of water) -->
+		<rm_aifile mapCategory="no_water" value="data2/test.AI"/>
+		<rm_aifile mapCategory="some_water" value="data2/test1.AI"/>
+		<rm_aifile mapCategory="much_water" value="data2/test2.AI"/>
+	</civ>
+</RockNRor_civs>

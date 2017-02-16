@@ -111,7 +111,7 @@ static bool test_ror_structures() {
 	trs_assert(&ai, 0x12568, &ai.structTradeAI.ptrMainAI);
 	trs_assert(&ai, 0x1256C, &ai.player);
 
-	AOE_STRUCTURES::STRUCT_PATH_FINDING_INTERMEDIATE_STEP pstep;
+	AOE_STRUCTURES::STRUCT_WAYPOINT pstep;
 	assert(sizeof(pstep) == 0x10);
 	trs_assert(&pstep, 0x0C, &pstep.remainingSteps);
 	AOE_STRUCTURES::STRUCT_UNIT_MOVEMENT_INFO movinfo;
@@ -147,7 +147,7 @@ static bool test_ror_structures() {
 
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY uay;
 	trs_assert(&uay, 0x60, &uay.unitIDsThatAttackMe);
-	trs_assert(&uay, 0x74, &uay.unknown_074_posX);
+	trs_assert(&uay, 0xF0, &uay.unknown_0F0);
 	trs_assert(&uay, 0x114, &uay.currentPosX);
 	AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO uai;
 	trs_assert(&uai, 0x08, &uai.ptrActionLink);
@@ -178,7 +178,7 @@ static bool test_ror_structures() {
 	AOE_STRUCTURES::STRUCT_PLAYER_MAP_INFO pmapinfo;
 	assert(sizeof(pmapinfo) == 0x38);
 	trs_assert(&pmapinfo, 0x20, &pmapinfo.totalTilesCount);
-	assert(sizeof(AOE_STRUCTURES::STRUCT_MAPGEN_OBJECT_TO_PLACE) == 0x30);
+	assert(sizeof(AOE_STRUCTURES::STRUCT_MAPGEN_OBJECT_PLACER) == 0x30);
 	AOE_STRUCTURES::STRUCT_MAPGEN_BASE_ZONE_INFO mbzi;
 	assert(sizeof(AOE_STRUCTURES::STRUCT_MAPGEN_BASE_ZONE_INFO) == 0x2C);
 	trs_assert(&mbzi, 0x28, &mbzi.unknown_28);
@@ -236,9 +236,9 @@ static bool test_ror_structures() {
 	AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE uiunitinfozone;
 	trs_assert(&uiunitinfozone, 0x1E0, &uiunitinfozone.currentUnitPlayer);
 
-	AOE_STRUCTURES::STRUCT_MP_HOST_OPTIONS mpho;
-	trs_assert(&mpho, 0xCC, &mpho.unknown_CC);
-	trs_assert(&mpho, 0x105, &mpho.allTechnologies);
+	AOE_STRUCTURES::STRUCT_TRIBE_GAME_OPTIONS mpho;
+	trs_assert(&mpho, 0xCC, &mpho.tribeSpecificOptions.unknown_CC);
+	trs_assert(&mpho, 0x105, &mpho.tribeSpecificOptions.allTechnologies);
 
 #endif
 	return true;

@@ -280,7 +280,7 @@ namespace CR_TRIGGERS {
 	}
 
 	std::string TriggersDefinitionToHTML() {
-		std::string result = "<html><head><title>Trigger Events and Actions List - CustomizeAoE</title>\n"
+		std::string result = "<html><head><title>Trigger Events and Actions List - RockNRorAdmin</title>\n"
 			"<meta http-equiv=\"content-type\" content=\"text/html;charset=windows-1252\" />\n"
 			"<style type=\"text/css\">\n"
 "body {\n"
@@ -327,10 +327,10 @@ namespace CR_TRIGGERS {
 			"<h2>Instructions</h2>\n<hr/>\n"
 			"<table class=\"tg\">\n<tbody>\n<tr>\n"
 			"<td class=\"tg-1\">\n"
-			"Welcome to the instructions and the <a href=\"#list\"><b>trigger list</b></a> for the CustomizeAoE/RoR trigger system. "
+			"Welcome to the instructions and the <a href=\"#list\"><b>trigger list</b></a> for the RockNRorAdmin/RoR trigger system. "
 			"Before getting started, it is recommended that you download <b><a href=\"http://aoe.heavengames.com/dl-php/showfile.php?fileid=2544\">AGE3</a></b>, "
 			"which provides the necessary values needed for certain parameters, for example, a research ID or a resource ID.<br/>\n"
-			"You can use CustomizeAOE \"Triggers/Generate trigger sample\" menu to get started.\n"
+			"You can use RockNRorAdmin \"Triggers/Generate trigger sample\" menu to get started.\n"
 			"</td>\n</tr>\n"
 			"<tr>\n<td class=\"tg-1\">\n"
 			"<b><u>Here is a short explanation of how a Trigger works:</u></b><br><br>\n"
@@ -431,7 +431,7 @@ namespace CR_TRIGGERS {
 			"Example: disableUnitDefinitions_p1=0,12 to disable academy and barracks for player 1.\n<br/>"
 			"<b>Warning</b>: this is based on technologies/researches mechanisms.\n<br/>"
 			"Units that are enabled by a technology must be defined so that the technology has no other effect.\n<br/>"
-			"The existing units that do not respect this requirement are farm, house, villager, fishing&trade ships, but they are supported anyway (there is a hardcoded fix in customROR)</td>\n"
+			"The existing units that do not respect this requirement are farm, house, villager, fishing&trade ships, but they are supported anyway (there is a hardcoded fix in RockNRor)</td>\n"
 			"</tr><tr>\n"
 			"<td class=\"tg-1\">disableResearches_p#=(...)</td>\n"
 			"<td class=\"tg-1\">None. Replace # by a playerId 1-8</td>\n"
@@ -440,7 +440,7 @@ namespace CR_TRIGGERS {
 			"</tbody>\n"
 			"</table/>\n<hr/>\n"
 			"<p>This documentation was generated automatically by \n"
-			"<a href=\"http://aoe.heavengames.com/dl-php/showfile.php?fileid=2464\">CustomizeAOE</a> - author AOEModder</p>\n"
+			"<a href=\"http://aoe.heavengames.com/dl-php/showfile.php?fileid=2464\">RockNRorAdmin</a> - author AOEModder</p>\n"
 			"<a href=\"#top\"><b>Back to top</b></a>\n"
 			"</body></html>\n";
 		return result;

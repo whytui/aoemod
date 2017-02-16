@@ -87,7 +87,7 @@
     <ClCompile Include="src\ROR_API.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="res\CustomROR.rc" />
+    <ResourceCompile Include="res\ROR_API.rc" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ROR_API_README.txt" />

@@ -31,7 +31,7 @@ const static unsigned long int LANG_ID_HINT_TRADE_WITH = 4116;
 // Custom strings
 // *******************************************************
 
-const static unsigned long int CRLANG_ID_CUSTOMROR = 42000;
+const static unsigned long int CRLANG_ID_ROCKNROR = 42000;
 const static unsigned long int CRLANG_ID_DEBUG_INIT = 42001;
 const static unsigned long int CRLANG_ID_WARN_MISSING_FEATURE = 42002;
 const static unsigned long int CRLANG_ID_MISSING_CIVS_IN_EMPIRES_DAT = 42003;
@@ -47,8 +47,8 @@ const static unsigned long int CRLANG_ID_ERROR_EMPIRES_DAT_USED_INSTEAD = 42090;
 const static unsigned long int CRLANG_ID_YES = 42094;
 const static unsigned long int CRLANG_ID_NO = 42095;
 
-// CustomRor options
-const static unsigned long int CRLANG_ID_CUSTOMROR_OPTIONS_POPUP_TITLE = 42020;
+// RockNRor options
+const static unsigned long int CRLANG_ID_ROCKNROR_OPTIONS_POPUP_TITLE = 42020;
 const static unsigned long int CRLANG_ID_TECH_TREE = 42021;
 const static unsigned long int CRLANG_ID_TECH_TREE_CAN_BE_RESEARCHED_TITLE = 42028;
 const static unsigned long int CRLANG_ID_NOT_AVAILABLE_YET = 42029;
@@ -157,4 +157,4 @@ const static unsigned long int CRLANG_ID_TRG_CHOOSE_ACTION = 42111;
 const static unsigned long int CRLANG_ID_TRG_RUN_BEFORE = 42112;
 const static unsigned long int CRLANG_ID_TRG_RUN_AFTER = 42113;
 const static unsigned long int CRLANG_ID_TRG_DIFF_LEVEL_CONDITION = 42114;
-const static unsigned long int CRLANG_ID_TRG_REFER_TO_CUSTOMIZEAOE_FOR_DOC = 42115;
+const static unsigned long int CRLANG_ID_TRG_REFER_TO_ROCKNRORADMIN_FOR_DOC = 42115;

@@ -132,7 +132,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_D10_ms; // +D10. A time value in ms. Last recomputation of unit groups ?
 		unsigned long int lastAttackResponseTime_ms; // +D14. Value in milliseconds. Used to compute +D24 ?
 		unsigned long int unknown_D18;
-		long int lastScalingUpdate; // +D1C. Value in milliseconds. See customROR config (tacticalAI/updateDelay) or SNScalingFrequency in standard game.
+		long int lastScalingUpdate; // +D1C. Value in milliseconds. See RockNRor config (tacticalAI/updateDelay) or SNScalingFrequency in standard game.
 		// 0xD20
 		long int buildFrequencyCounter; // incremented until it reaches SNBuildFrequency
 		long int currentAttackSeparationTime_seconds; // +D24. Compared to SNAttackResponseSeparationTime,SNAttackSeparationTimeRandomness. See 4E0BC0,4E0C03.

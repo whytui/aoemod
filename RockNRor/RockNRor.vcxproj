@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{49FBBF1D-616F-4541-A3E4-241726119EF9}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>RockNRor</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120_xp</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros">
+    <AOE_include>D:\Dév\CPP\AOE\Common\include</AOE_include>
+    <AOE_lib>D:\Dév\CPP\AOE\Common\lib</AOE_lib>
+    <AOE_res>D:\Dév\CPP\AOE\Common\res</AOE_res>
+    <wxw_include>D:\Dév\CPP\wxwidgets\include</wxw_include>
+    <wxw_include_msvc>D:\Dév\CPP\wxwidgets\include\msvc</wxw_include_msvc>
+    <wxw_lib>D:\Dév\CPP\wxwidgets\lib\vc_lib</wxw_lib>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);$(AOE_lib);</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);$(AOE_lib);</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;CUSTOMROR_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(AOE_include)</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <TreatSpecificWarningsAsErrors>4715;%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);AOE_common_d.lib;AOE_DataPatcher_d.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CUSTOMROR_EXPORTS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(AOE_include)</AdditionalIncludeDirectories>
+      <Optimization>MaxSpeed</Optimization>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <OmitFramePointers>false</OmitFramePointers>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <TreatSpecificWarningsAsErrors>4715;%(TreatSpecificWarningsAsErrors)</TreatSpecificWarningsAsErrors>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies);AOE_common.lib;AOE_DataPatcher.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res\RockNRor.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\tinyxml\tinystr.h" />
+    <ClInclude Include="..\..\tinyxml\tinyxml.h" />
+    <ClInclude Include="include\AOEPrimitives_gameCommand.h" />
+    <ClInclude Include="include\AOEPrimitives_global.h" />
+    <ClInclude Include="include\AOEPrimitives_UI_components.h" />
+    <ClInclude Include="include\AOEPrimitives_UI_gameMain.h" />
+    <ClInclude Include="include\AOEPrimitives_UI_screens.h" />
+    <ClInclude Include="include\AOEPrimitives_unitGroup.h" />
+    <ClInclude Include="include\AOE_map.h" />
+    <ClInclude Include="include\AOE_memory.h" />
+    <ClInclude Include="include\AOEPrimitives_units.h" />
+    <ClInclude Include="include\AOE_time.h" />
+    <ClInclude Include="include\autoAttackPolicy.h" />
+    <ClInclude Include="include\autoRebuildFarmConfig.h" />
+    <ClInclude Include="include\buttonBar.h" />
+    <ClInclude Include="include\buttonBarCommon.h" />
+    <ClInclude Include="include\cityPlan.h" />
+    <ClInclude Include="include\civilizationInfo.h" />
+    <ClInclude Include="include\combatAI.h" />
+    <ClInclude Include="include\commonConfigEnums.h" />
+    <ClInclude Include="include\crCommands.h" />
+    <ClInclude Include="include\crCommon.h" />
+    <ClInclude Include="include\crConfig.h" />
+    <ClInclude Include="include\crDebugOutputPrimitives.h" />
+    <ClInclude Include="include\crGameObjects.h" />
+    <ClInclude Include="include\crLocalization.h" />
+    <ClInclude Include="include\crMainInterface.h" />
+    <ClInclude Include="include\crMapCopier.h" />
+    <ClInclude Include="include\crPatcher.h" />
+    <ClInclude Include="include\crRPGMode.h" />
+    <ClInclude Include="include\customAIMilitaryInfo.h" />
+    <ClInclude Include="include\customFuncRules.h" />
+    <ClInclude Include="include\CustomPopupBase.h" />
+    <ClInclude Include="include\CustomPopupSystem.h" />
+    <ClInclude Include="include\CustomRORInfo.h" />
+    <ClInclude Include="include\CustomTilesetInfo.h" />
+    <ClInclude Include="include\drsHandler.h" />
+    <ClInclude Include="include\EconomyAI.h" />
+    <ClInclude Include="include\EditMapSizeXYPopup.h" />
+    <ClInclude Include="include\EditorEditUnitInfoPopup.h" />
+    <ClInclude Include="include\EditorScenarioInfoPopup.h" />
+    <ClInclude Include="include\EditTerrainPopup.h" />
+    <ClInclude Include="include\BitmapExporter.h" />
+    <ClInclude Include="include\EnemyAttacksHistory.h" />
+    <ClInclude Include="include\GameHistoryIntervalsBase.h" />
+    <ClInclude Include="include\GameTriggerHandling.h" />
+    <ClInclude Include="include\GameTriggerTechInterfacing.h" />
+    <ClInclude Include="include\GenNewTriggerPopup.h" />
+    <ClInclude Include="include\InGameCustomRorOptionsPopup.h" />
+    <ClInclude Include="include\InGameUnitPropertiesPopup.h" />
+    <ClInclude Include="include\InputBox.h" />
+    <ClInclude Include="include\language.h" />
+    <ClInclude Include="include\mainCustomAI.h" />
+    <ClInclude Include="include\mainStructuresHandling.h" />
+    <ClInclude Include="include\palette.h" />
+    <ClInclude Include="include\PlayerCustomMethods.h" />
+    <ClInclude Include="include\playerHandling.h" />
+    <ClInclude Include="include\playerTargeting.h" />
+    <ClInclude Include="include\randomizer.h" />
+    <ClInclude Include="include\researches.h" />
+    <ClInclude Include="include\RORProcessEditor.h" />
+    <ClInclude Include="include\crTrigger.h" />
+    <ClInclude Include="include\crTriggerSet.h" />
+    <ClInclude Include="include\CustomROR.h" />
+    <ClInclude Include="include\EXESelfEditor.h" />
+    <ClInclude Include="include\MapCopyPopup.h" />
+    <ClInclude Include="include\interface.h" />
+    <ClInclude Include="include\AOE_strategy.h" />
+    <ClInclude Include="include\SimpleEditText.h" />
+    <ClInclude Include="include\StrategyBuilder.h" />
+    <ClInclude Include="include\StrategyPotentialElemInfo.h" />
+    <ClInclude Include="include\StrategyUpdater.h" />
+    <ClInclude Include="include\TechnologyFilter.h" />
+    <ClInclude Include="include\TileSetHandler.h" />
+    <ClInclude Include="include\traceMessage.h" />
+    <ClInclude Include="include\UI_utilities.h" />
+    <ClInclude Include="include\UnitCustomMethods.h" />
+    <ClInclude Include="include\unitDefHandling.h" />
+    <ClInclude Include="include\UnitGroupAI.h" />
+    <ClInclude Include="include\unitHandling.h" />
+    <ClInclude Include="include\unitShortcuts.h" />
+    <ClInclude Include="include\unitTargeting.h" />
+    <ClInclude Include="include\Version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\tinyxml\tinystr.cpp" />
+    <ClCompile Include="..\..\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="..\..\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="..\..\tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="src\AOEPrimitives_gameCommand.cpp" />
+    <ClCompile Include="src\AOEPrimitives_global.cpp" />
+    <ClCompile Include="src\AOEPrimitives_unitGroup.cpp" />
+    <ClCompile Include="src\AOE_map.cpp" />
+    <ClCompile Include="src\AOEPrimitives_units.cpp" />
+    <ClCompile Include="src\BitmapExporter.cpp" />
+    <ClCompile Include="src\buttonBar.cpp" />
+    <ClCompile Include="src\buttonBarCommon.cpp" />
+    <ClCompile Include="src\cityPlan.cpp" />
+    <ClCompile Include="src\civilizationInfo.cpp" />
+    <ClCompile Include="src\combatAI.cpp" />
+    <ClCompile Include="src\crCommands.cpp" />
+    <ClCompile Include="src\crCommon.cpp" />
+    <ClCompile Include="src\crConfig.cpp" />
+    <ClCompile Include="src\crDebugOutputPrimitives.cpp" />
+    <ClCompile Include="src\crGameObjects.cpp" />
+    <ClCompile Include="src\crLocalization.cpp" />
+    <ClCompile Include="src\crMainInterface.cpp" />
+    <ClCompile Include="src\crMapCopier.cpp" />
+    <ClCompile Include="src\crPatcher.cpp" />
+    <ClCompile Include="src\crRPGMode.cpp" />
+    <ClCompile Include="src\crTrigger.cpp" />
+    <ClCompile Include="src\crTriggerSet.cpp" />
+    <ClCompile Include="src\customAIMilitaryInfo.cpp" />
+    <ClCompile Include="src\CustomPopupBase.cpp" />
+    <ClCompile Include="src\CustomPopupSystem.cpp" />
+    <ClCompile Include="src\customROR.cpp" />
+    <ClCompile Include="src\CustomRORInfo.cpp" />
+    <ClCompile Include="src\CustomTilesetInfo.cpp" />
+    <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\drsHandler.cpp" />
+    <ClCompile Include="src\EconomyAI.cpp" />
+    <ClCompile Include="src\EditMapSizeXYPopup.cpp" />
+    <ClCompile Include="src\EditorEditUnitInfoPopup.cpp" />
+    <ClCompile Include="src\EditorScenarioInfoPopup.cpp" />
+    <ClCompile Include="src\EditTerrainPopup.cpp" />
+    <ClCompile Include="src\EXESelfEditor.cpp" />
+    <ClCompile Include="src\GameTriggerHandling.cpp" />
+    <ClCompile Include="src\GameTriggerTechInterfacing.cpp" />
+    <ClCompile Include="src\GenNewTriggerPopup.cpp" />
+    <ClCompile Include="src\InGameCustomRorOptionsPopup.cpp" />
+    <ClCompile Include="src\InGameUnitPropertiesPopup.cpp" />
+    <ClCompile Include="src\InputBox.cpp" />
+    <ClCompile Include="src\mainCustomAI.cpp" />
+    <ClCompile Include="src\mainStructuresHandling.cpp" />
+    <ClCompile Include="src\MapCopyPopup.cpp" />
+    <ClCompile Include="src\interface.cpp" />
+    <ClCompile Include="src\PlayerCustomMethods.cpp" />
+    <ClCompile Include="src\playerHandling.cpp" />
+    <ClCompile Include="src\playerTargeting.cpp" />
+    <ClCompile Include="src\researches.cpp" />
+    <ClCompile Include="src\RORProcessEditor.cpp" />
+    <ClCompile Include="src\AOE_strategy.cpp" />
+    <ClCompile Include="src\SimpleEditText.cpp" />
+    <ClCompile Include="src\StrategyBuilder.cpp" />
+    <ClCompile Include="src\StrategyPotentialElemInfo.cpp" />
+    <ClCompile Include="src\StrategyUpdater.cpp" />
+    <ClCompile Include="src\TilesetHandler.cpp" />
+    <ClCompile Include="src\traceMessages.cpp" />
+    <ClCompile Include="src\UnitCustomMethods.cpp" />
+    <ClCompile Include="src\unitDefHandling.cpp" />
+    <ClCompile Include="src\unitGroupAI.cpp" />
+    <ClCompile Include="src\unitHandling.cpp" />
+    <ClCompile Include="src\unitTargeting.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="RockNRor_README.txt" />
+    <Text Include="res\RockNRorStrings.txt" />
+    <Text Include="res\RockNRorStringsFR.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="res\RockNRor.xml">
+      <SubType>Designer</SubType>
+    </Xml>
+    <Xml Include="res\RockNRor_civs.xml" />
+    <Xml Include="res\RockNRor_tilesets.xml" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

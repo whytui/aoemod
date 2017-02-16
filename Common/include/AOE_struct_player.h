@@ -256,7 +256,7 @@ namespace AOE_STRUCTURES {
 		short int unknown_10A; // unused ?
 		unsigned long int ptrPlayerColorStruct; // quite unknown. +4=name(x.col), +26=color(word)? +28=sub_struct. See 0x45D400
 		// 0x110
-		short int techTreeId; // 45BA12 : DWORD ! Warning: NOT saved => wrong in loaded games (but fixed by customROR)
+		short int techTreeId; // 45BA12 : DWORD ! Warning: NOT saved => wrong in loaded games (but fixed by RockNRor)
 		short int unknown_112;
 		STRUCT_PLAYER_MOTIONLESS_SPOTTED_GATHERABLE *spottedResources; // +114. Contains info about resource units. Set in 0x4F1EF8. Related to +58 data. Not related to AI. Each time a tile is explored, underlying resources are added here.
 		float screenPositionY; // axis southwest-northeast like /
@@ -329,7 +329,7 @@ namespace AOE_STRUCTURES {
 			if ((resourceIndex < 0) || (resourceIndex > AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_ALL_RELICS)) { return; }
 			this->ptrResourceValues[resourceIndex] = value;
 		}
-		void SetCustomAIFlag(char value) { this->unused_customAIFlag = value; } // Sets customROR's AI flag.
+		void SetCustomAIFlag(char value) { this->unused_customAIFlag = value; } // Sets RockNRor's AI flag.
 		// Securely gets a unit definition pointer. Returns NULL if not found/invalid.
 		STRUCT_UNITDEF_BASE *GetUnitDefBase(short int unitDefId) const {
 			if ((unitDefId < 0) || (unitDefId >= this->structDefUnitArraySize)) { return NULL; }

@@ -1,11 +1,11 @@
 #include <assert.h>
 #include <tchar.h>
-#include "../../CustomROR/include/randomizer.h"
+#include "../../RockNRor/include/randomizer.h"
 
 #pragma once
 
 
-// Entry point to test customROR randomizer
+// Entry point to test RockNRor randomizer
 void test_randomizer();
 
 #pragma once

@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- Warning: tags are case-sensitive -->
+<RockNRor>
+	<alertOnMissingFeatures enable="1"/>
+	<autoFixMissingFeatures enable="1"/><!-- If 1, ROR_API features that are not installed are automaticalled added on the fly -->
+
+	<!-- Empires.dat file: set *relative* path to empires.dat file to use. Leave empty to use default (data2\empires.dat) -->
+	<empiresDat filename="data2\empires.dat"/>
+	
+	<!-- *** Graphics -->
+	<!-- drsFile : you can add 0, 1 or n "drsFile" tags. folder=folder name under AOE root directory. filename=DRS file name.-->
+	<drsFile folder="RockNRor" filename="RockNRor.drs"/>
+	
+	<!-- *** Localization - language -->
+	<!-- languageTxtFile you can add 0, 1 or n tags. filename=relative path+filename of txt file containing localized strings to use in game 
+	String from such text files have priority on languagex.dll and language.dll files : you can add strings or modify existing ones.
+	-->
+	<languageTxtFile filename="RockNRor\RockNRorStrings.txt"/>
+	
+	<!-- *** General -->
+	<!-- Bool 0/1 to hide/show RockNRor options entry in game menu -->
+	<showCustomRORMenu enable="1"/>
+	<!-- Bool 0/1 to show custom population information in "F11" text -->
+	<showCustomPopInfo enable="1"/>
+	<!-- Use improved game speeds. Factor is a multiplicative factor (>1). -->
+	<improvedGameSpeeds name="enable" value="1"/>
+	<improvedGameSpeeds name="factor" value="1.25"/>
+	<allyExplorationIsAlwaysShared enable="0"/><!-- NOT applied to scenario/campaigns -->
+	<populationLimit value="50"/> <!-- Maximum population for single player games. -->
+	
+	<!-- improvedButtonBar: Bool 0/1 to use enhanced button bar (show future researches/unit available in tech tree, 
+	Handle more than 1 page of buttons... -->
+	<improvedButtonBar enable="1"/>
+	<!-- allowMultiQueue: Bool 0/1 to allow queueing different units in buildings -->
+	<allowMultiQueue enable="1"/>
+	
+	<!-- Set collectRORDebugLogs=2 to collect all ROR debug logs, 1 to filter, 0 (default) not to collect them -->
+	<collectRORDebugLogs value="1"/>
+	<!-- If enabled (recommended), a popup will automatically show up when an error occurs, including trigger debug errors. 
+	Please disable this only if you're getting a lot of (abnormal) messages and report to developer. -->
+	<showCustomRORNotifications enable="1"/>
+
+	<!-- RPG mode: Set to 1 to make units collect XP when killing enemies, and get unique bonuses. Default=0.
+	scenario => impacts only scenario/campaigns. randomGames => impacts RM and DM games.
+	-->
+	<rpgMode scenario="0" randomGames="0"/>
+	
+	<!-- To fix timer bug on modern (fast) computers. Use value=0 to disable. -->
+	<gameTimerSlowDownFactor value="5"/>
+	<!-- Set a non-zero value to enable automatic calculation for gameTimerSlowDownFactor during game.
+	Automatic calculation will override gameTimerSlowDownFactor value from this file. -->
+	<gameTimerSlowDownAutoFix enable="1"/>
+	
+	<!-- Custom conversion resistance values (float). Standard units resistance is 1 -->
+	<conversionResistance name="warElephants" value="1.25"/><!-- game default=1-->
+	<conversionResistance name="warElephants_Persian" value="1.15"/><!-- game default=1 -->
+	<conversionResistance name="Macedonian" value="4"/><!-- game default=4 -->
+	<conversionResistance name="priests" value="2"/><!-- game default=2 -->
+	<conversionResistance name="chariots" value="8"/><!-- game default=8 -->
+	<conversionResistance name="boats" value="2"/><!-- game default=2 -->
+
+	<!-- *** EMPIRES.DAT related -->
+	<!-- fixVillagerWorkRates : if enabled, automatically fix erroneous work rate values for villagers in empires.dat-loaded data -->
+	<fixVillagerWorkRates enable="1"/>
+	
+	<!-- resourceAmounts : defines amount of resources in basic resource units (mines, etc). Use this to override empires.dat value
+	0 (or negative) values are ignored (so that empires.dat values are used = default behaviour) -->
+	<resourceAmounts goldMine="0" stoneMine="0" berryBush="0" gazelle="0" elephant="0" lion="0" alligator="0" tree="0" forestTree="0" fish="0"/>
+	
+	<!-- *** Map -->
+	<map name="randomMapRelicsCount" value="5"/>
+	<map name="randomMapRuinsCount" value="5"/>
+	<!-- Set to 0 to disable all map generation elevation options -->
+	<map name="useCustomElevationComputation" enable="1"/>
+	<!-- elevatedTerrainAmountMultiplyFactor: mapTypeId=map type index (0=small islands), 0 <= mapTypeId <= 9
+	value=float: multiply factor for "elevated terrain amount". Default value=1 for all map types. -->
+	<map name="elevatedTerrainAmountMultiplyFactor" mapTypeId="0" value="0.2"/><!--small islands: /5 -->
+	<map name="elevatedTerrainAmountMultiplyFactor" mapTypeId="7" value="0.02"/><!--hills: /50 -->
+	<!-- Fair no-water maps: disable dock in "mostly-land" maps where AI does NOT build docks. This makes such maps more fair in SP games. -->
+	<map name="noDockInMostlyLandMaps" enable="0"></map>
+
+	<!-- *** Scenario editor -->
+	<!-- showHiddenTerrain: set to 1 to display hidden terrains in scenario editor terrains list -->
+	<editor name="showHiddenTerrain" enable="1"></editor>
+	<!-- showHiddenUnits: 0=normal, 1=show hidden units except some annoying ones (wrong house, wrong barracks, etc)
+		2=display ALL "hidden" units in scenario editor -->
+	<editor name="showHiddenUnits" value="1"></editor>
+	<!-- UseCustomMapDimensions: set to 1 to allow using user-defined map sizes in scenario editor -->
+	<editor name="UseCustomMapDimensions" enable="1"></editor>
+
+	<!-- *** AI -->
+	<!-- Set to nonzero to enable AI improvements (an int value: in the future, we might define several improvement levels) -->
+	<improveAI value="1"/>
+	
+	<!-- tacticalAI.updateDelay replaces SNScalingFrequency but it is expressed in seconds, not minutes. An integer value. -->
+	<tacticalAI name="updateDelay" value="30"/>
+	<!-- tacticalAI.minPopulationBeforeOptionalItems is the population AI has to reach before triggering optional items (only added when player is strong enough).
+	Due to strategy item skips + parallelism, you should set a higher value than the REAL one you want (add around 8 ?).
+	For example, if you want AI to have 22 units before triggering optionals, set this value to 30 (this is an approximation)
+	Low values may lead to issues in tech order/requirements. It won't block AI but is not good for it. -->
+	<tacticalAI name="minPopulationBeforeOptionalItems" value="30"/>
+	
+	<!-- strategyAI.generateAutomaticStrategy : if enable=0, use game AI files (default) or AI files specified in RockNRor_civs.xml
+	If enable=1, RockNRor will generate a *random* strategies for each player, taking into account their tech trees/strengths. RockNRor_civs.xml AI file names will be ignored.
+	RockNRor can only generate strategies for random games (random map/deathmatch), not scenario/campaign
+	-->
+	<strategyAI name="generateAutomaticStrategy" gameType="RM" enable="0"/><!-- Random map -->
+	<strategyAI name="generateAutomaticStrategy" gameType="DM" enable="0"/><!-- Deathmatch: Not supported yet... -->
+	
+	<!-- *** Manage Panic mode (dynamic defence units) -->
+	<!-- Integer value=seconds between 2 checks -->
+	<panicMode name="delay" value="15"/>
+	<!-- Integer value=Maximum dynamic units to insert. High values may block normal AI units from being trained, including villagers ! -->
+	<panicMode name="maxUnitCount" value="8"/>
+	
+	<!-- fixLogisticsNoHouseBug: set a non-zero value to fix logistics bug:
+	Prevent AI from training infantry units when population headroom=0 -->
+	<fixLogisticsNoHouseBug enable="1"/>
+	<!-- Dynamically assigns (visible) tree graphics to the tree that is not visible (DATID=393) -->
+	<fixInvisibleTree enable="1"/>
+	<!-- Fix specific treatment when human player sees a unit (fix bugs for artefacts) -->
+	<fixHumanPlayer_specific_seeUnit enable="1"/>
+	
+	<!-- *** Dislike values: amounts to add to dislike values against a player under certain conditions -->
+	<!-- Interval in seconds between every computation of dislike values -->
+	<dislikeValues name="dislikeComputeInterval" value="10"/>
+	<!-- dislikeAllArtefacts: if a player has all relics/ruins or a standing wonder. Value 0-99 -->
+	<dislikeValues name="dislikeAllArtefacts" value="5"/>
+	<!-- dislikeAllArtefacts: Dislike amount to add against a player that is human-controlled. Value 0-99 -->
+	<dislikeValues name="dislikeHuman" value="2"/>
+	
+	<!-- *** City plan -->
+	<!-- all.enhanceLikeValues: set to 0 to disable city plan enhancements, 1 or other values to activate it (recommended) -->
+	<cityPlan building="all" name="enhanceLikeValues" enable="1"></cityPlan>
+	<!-- You can use float for City plan DISTANCES -->
+	<!-- house distances from...: avoid too high values because AI won't find any place to build then ;) -->
+	<!-- house.distanceFromTownCenter: ROR default=3. Higher values (like ~7) are better. -->
+	<!-- <cityPlan building="house" name="distanceFromTownCenter" value="3"></cityPlan> -->
+	<!-- house.distanceFromStorageBuildings: ROR default=3.
+	Higher values (like ~5) are better, but not too much because it may cause bad calculations. -->
+	<!-- <cityPlan building="house" name="distanceFromStorageBuildings" value="3"></cityPlan> -->
+	<!-- house.distanceFromOtherBuildings: ROR default=3. Leaving 3 seems fine. -->
+	<!-- <cityPlan building="house" name="distanceFromOtherBuildings" value="3"></cityPlan> -->
+	<!-- granary.berryBushUnitWeight (integer): ROR default=128 (not recommended).
+	Cumulated weights cap at 255 so you better use something like 30, 40, etc, so calculated weights will be more relevant
+	Strongly recommended: 10<x<80. A suggestion: 32 (0x20) -->
+	<cityPlan building="granary" name="berryBushUnitWeight" value="32"></cityPlan>
+	
+	<!-- *** Human interface/shortcuts -->
+	<!-- callIdleNearbyArmies: set to 0 to disable F9 key in game screen, 1 or other values to enable.
+	It will make move your IDLE military units to screen position when pressed. -->
+	<gameKey name="callIdleNearbyArmies" enable="1"></gameKey>
+	<!-- callIdleNearbyArmies_distance: maximum distance to "call" units in callIdleNearbyArmies feature (F9 key) -->
+	<gameKey name="callIdleNearbyArmies_distance" value="25"></gameKey>
+	<!-- useNumPadUnitShortcuts: set to 0 to use game default: numpad keys are inactive. Otherwise, 0-9 numpad keys are additional unit shortcuts.
+	Note: just like '0' shortcut in original game, shortcut number will not appear under unit when selected due to SLP limitation -->
+	<gameKey name="useNumPadUnitShortcuts" enable="1"></gameKey>
+	
+	<!-- Turn ON/OFF auto rebuild farms feature. -->
+	<autoRebuildFarms gameType="RM" enable="1" maxFarms="9" minWood="200" maxFood="2000"></autoRebuildFarms>
+	<autoRebuildFarms gameType="DM" enable="1" maxFarms="3" minWood="2000" maxFood="20000"></autoRebuildFarms>
+	
+	<!-- AutoMoveToLocation: Right-click from a building to define where new units should walk. 0=disable, 1=enable. -->
+	<unitSpawn name="autoMoveToLocation" enable="1"></unitSpawn>
+	<!-- AutoMoveToLocation: Right-click from a building to define a target for new units. 0=disable, 1=enable. -->
+	<unitSpawn name="autoTarget" enable="1"></unitSpawn>
+	<!-- autoRepairTC: spawned villagers will automatically repair their parent TC if it is damaged. 0=disable, 1=enable. -->
+	<unitSpawn name="autoRepairTC" enable="1"></unitSpawn>
+	
+	<!-- Idle military units automatic target selection (autoAttackUnits) -->
+	<!-- autoAttackUnits.useCustomRules: enable this to allow use of custom rules (looks like some enhanced "hold position" feature) -->
+	<autoAttackUnits name="useCustomRules" enable="1"/>
+	<!-- autoAttackUnits.unitType=rangedWithBlastDamage or meleeWithBlastDamage.
+	Set 0 (do not auto-attack) or 1 (auto-attack, default value for most categories) to these attributes:
+	- villagers
+	- military (includes all military units except towers)
+	- towers
+	- nontowerbuildings (includes all building units except towers and walls)
+	- walls (default value is 0)
+	-->
+	<autoAttackUnits unitType="rangedWithBlastDamage"
+		villagers="1" military="1" towers="1" nontowerbuildings="1" walls="0"/>
+	<autoAttackUnits unitType="meleeWithBlastDamage"
+		villagers="1" military="1" towers="1" nontowerbuildings="1" walls="0"/>
+	
+	<!-- Shortcut: For each spawn unit for which datid=xx, auto-assign shortcut=x. 
+	If onlyOneUnit is set (<>0), the shortcut is assigned only if still unused (no unit already has this shortcut)
+	Each shortcut number can be used only for 1 unitid (datid). See AGE3 to get unit DATIDs.
+	Always use non-upgraded unit's DATID (example: use cavalry's id, not Cataphract ; for villager, use 83 and not 293)
+	-->
+	<unitSpawn name="shortcut" shortcut="9" datid="83" onlyOneUnit="1"></unitSpawn>
+	<unitSpawn name="shortcut" shortcut="8" datid="83" onlyOneUnit="1"></unitSpawn>
+	<unitSpawn name="shortcut" shortcut="7" datid="83" onlyOneUnit="1"></unitSpawn>
+	<unitSpawn name="shortcut" shortcut="6" datid="83" onlyOneUnit="1"></unitSpawn>
+	<unitSpawn name="shortcut" shortcut="5" datid="83" onlyOneUnit="1"></unitSpawn>
+	<unitSpawn name="shortcut" shortcut="3" datid="125" onlyOneUnit="1"></unitSpawn>
+	<!-- When a unit spawns, the first matching shortcut is assigned to it
+	If shortcuts.reverseOrder=0, RockNRor will first try to assign shortcut 1, then 2, etc.
+	Otherwise it starts with 9, then 8, etc.
+	It only has an impact if you define several shortcut numbers for the same unit DATID and onlyOneUnit="1"
+	 -->
+	<unitSpawn name="shortcuts" reverseOrder="1"></unitSpawn>
+	
+	<!-- *** Random games settings -->
+	<!-- NoNeutralDiplomacy: if enabled, all no-team players start with enemy diplomacies.
+	AI players won't all become allied against human. Game default=0. -->
+	<noNeutralDiplomacy enable="1"></noNeutralDiplomacy>
+	<!-- Set noWalls to enable=1 to disable all walls in DM /RM games -->
+	<noWalls enable="0"/>
+	<!-- initialResources defines the amount of available resource at game start
+	GameType=DM (deathmatch) or RM (random map), choice (for RM only) corresponds to the "resources" user choice in game settings
+	choice=0 corresponds to Default
+	choice=1 corresponds to Small (hidden by default)
+	choice=2 corresponds to Medium
+	choice=3 corresponds to Large
+	-->
+	<initialResources gameType="RM" choice="0" food="200" wood="200" stone="150" gold="0"></initialResources><!--"default": default 200/200/150/0-->
+	<initialResources gameType="RM" choice="1" food="200" wood="200" stone="100" gold="0"></initialResources><!--small: default 200/200/100/0-->
+	<initialResources gameType="RM" choice="2" food="500" wood="500" stone="250" gold="0"></initialResources><!--medium: default 500/500/250/0-->
+	<initialResources gameType="RM" choice="3" food="1000" wood="1000" stone="750" gold="0"></initialResources><!--large: default 1000/1000/750/0-->
+	<initialResources gameType="DM" food="20000" wood="20000" stone="5000" gold="10000"></initialResources><!--deathmatch: default 20000/20000/5000/10000-->
+	<!-- InitialResourceAIBonus: additional resource amount for AI players in hardest difficulty.
+	GameType=DM (deathmatch) or RM (random map). -->
+	<initialResourceAIBonus gameType="RM" food="200" wood="200" stone="150" gold="250"></initialResourceAIBonus>
+	<initialResourceAIBonus gameType="DM" food="2000" wood="2000" stone="500" gold="2000"></initialResourceAIBonus>
+	<!-- per_number: force some values for SN numbers to random maps/deathmatches 
+	Warning: do not force too many values unless you are sure of its impact on the game.
+	Some values are computed dynamically at game init and will be lost if you force them ! -->
+	<!--<per_number gameType="RM" sn="215" value="0"></per_number>--><!--SNAllowDiplomacyChangeOnAllyAttack=0 to prevent unfortunate diplomacy changes-->
+	<!--<per_number gameType="DM" sn="215" value="0"></per_number>--><!--SNAllowDiplomacyChangeOnAllyAttack=0 to prevent unfortunate diplomacy changes-->
+	<per_number gameType="RM" sn="161" value="4"></per_number><!--SNRequiredFirstBuilding=4 in random map: build SP/granary first-->
+	<per_number gameType="DM" sn="161" value="0"></per_number><!--SNRequiredFirstBuilding=0 in random map: build quickly-->
+	<per_number gameType="DM" sn="220" value="3"></per_number><!--SNMaxFarms in deathmatch. Overwritten by maxFarmsInDeathMatch parameter-->
+	<per_number gameType="DM" sn="167" value="1"></per_number><!--SNInitialExplorationRequired in deathmatch. For faster town building-->
+	<per_number gameType="RM" sn="186" value="0"></per_number><!--SNCoopDemandTributeInterval: to disable tributes between AI players-->
+	<per_number gameType="DM" sn="186" value="0"></per_number><!--SNCoopDemandTributeInterval: to disable tributes between AI players-->
+	<per_number gameType="RM" sn="187" value="0"></per_number><!--SNCoopDemandTributeMaximum: to disable tributes between AI players-->
+	<per_number gameType="DM" sn="187" value="0"></per_number><!--SNCoopDemandTributeMaximum: to disable tributes between AI players-->
+	<!--<per_number gameType="RM" sn="188" value="1"></per_number>--><!--SNAttackWinningPlayer. In Game init, it has 33% chances to be set to 1-->
+	<!--<per_number gameType="DM" sn="188" value="1"></per_number>--><!--SNAttackWinningPlayer. In Game init, it has 33% chances to be set to 1-->
+</RockNRor>

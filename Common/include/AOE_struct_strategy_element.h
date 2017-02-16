@@ -44,8 +44,8 @@ namespace AOE_STRUCTURES {
 		long int buildAttempts; // +88. Used in ROR internal calculations. "bldAtt"
 		long int actor; // +8C. a unitId, or value for setGatherPercentage
 		// Identifies the unit itself. -1 if N/A. In standard game, it is only valued for "alive" units. 
-		// With customROR, we also value it for in-progress buildings => in-construction building already has its ID, use it
-		// With customROR, we also value it for in-progress living units => store actor's unitID. This way, if building is destroyed, we can cancel its strategy element (otherwise it remains stuck forever)
+		// With RockNRor, we also value it for in-progress buildings => in-construction building already has its ID, use it
+		// With RockNRor, we also value it for in-progress living units => store actor's unitID. This way, if building is destroyed, we can cancel its strategy element (otherwise it remains stuck forever)
 		// 0x90
 		long int unknown_090; // terrainSet[3] ?
 		long int unknown_094;

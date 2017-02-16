@@ -37,11 +37,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="res\CustomROR.rc">
-      <Filter>Fichiers de ressources</Filter>
-    </ResourceCompile>
+    <Text Include="ROR_API_README.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ROR_API_README.txt" />
+    <ResourceCompile Include="res\ROR_API.rc">
+      <Filter>Fichiers de ressources</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

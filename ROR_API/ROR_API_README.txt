@@ -6,17 +6,17 @@ ROR_API
 ROR_API is an unofficial extension for Age of Empires: Rise of Rome.
 It allows you to add any custom plug-in to Rise of Rome without having to modify the game itself.
 
-ROR_API requires CustomizeAOE >=2.0.1.2 but please use latest version (http://aoe.heavengames.com/dl-php/showfile.php?fileid=2464)
+ROR_API requires RockNRorAdmin >=2.0.1.2 but please use latest version (http://aoe.heavengames.com/dl-php/showfile.php?fileid=2464)
 
 
 ***********
 * INSTALL *
 ***********
 
-Run CustomizeAOE, click File/Install CustomROR menu entry. Then follow the indications.
+Run CustomizeAOE, click File/Install RockNRor menu entry. Then follow the indications.
 
 
-To install only ROR_API (without customROR):
+To install only ROR_API (without RockNRor):
 - Run CustomizeAOE, select empiresx.exe file and click File/Edit game file menu entry.
 - Then select ROR_API entry in treeview, check the "enable feature" box and click Save.
 - Put ROR_API.dll in your Age of Empires: Rise of Rome installation directory.
@@ -24,7 +24,7 @@ To install only ROR_API (without customROR):
 ...[Please note that this only has to be done once, now you can plug/unplug any DLL just by changing configuration]...
 - Open ROR_API.conf in a text editor and list the DLL plug-ins you want to add.
 - Write 1 DLL file name per line without spaces or any extra character. Invalid lines are ignored (see provided example).
-- Subdirectories are supported (example: CustomROR\customROR.dll)
+- Subdirectories are supported (example: RockNRor\RockNRor.dll)
 
 
 ***********
@@ -41,10 +41,10 @@ To use windowed mode in RoR:
 * CUSTOM PLUGIN DEMO *
 **********************
 
-- Requires to install CustomROR with CustomizeAOE
-- Add "customROR.dll" to ROR_API.conf if it is not already there.
-- Run a game, you should see a chat message from CustomROR.
-See the CustomROR_README.txt file for details about features.
+- Requires to install RockNRor with RockNRorAdmin
+- Add "RockNRor.dll" to ROR_API.conf if it is not already there.
+- Run a game, you should see a chat message from RockNRor.
+See the RockNRor_README.txt file for details about features.
 
 
 ***************

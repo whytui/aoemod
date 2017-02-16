@@ -22,7 +22,7 @@ inline void assertValueMoreThanPercentage(int value, int totalIterations, int re
 }
 
 
-// Entry point to test customROR randomizer
+// Entry point to test RockNRor randomizer
 void test_randomizer() {
 #define arraySize 20
 	int numberOf[arraySize];

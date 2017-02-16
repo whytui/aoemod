@@ -198,7 +198,7 @@ namespace AOE_CONST_INTERNAL
 	// Is this the same as ACTIVITY_TASK_IDS ?
 	// See 0x4F34C0: arg3=eventidd IS a GAME_EVENT_TYPES
 	enum GAME_EVENT_TYPES : long int {
-		CST_GET_INVALID = -1, // For customROR internal usage
+		CST_GET_INVALID = -1, // For RockNRor internal usage
 		CST_GET_CANT_UNLOAD_NO_ROOM = 01,
 		CST_GET_CANT_UNLOAD_TOO_FAR = 02,
 		CST_GET_CANT_TRADE_WITH_ENEMY = 03,

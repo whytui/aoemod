@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2013 for Windows Desktop
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CustomizeAOE", "CustomizeAOE\CustomizeAOE.vcxproj", "{DE98F891-CF3F-4499-8BA8-338FD601B12F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RockNRorAdmin", "RockNRorAdmin\RockNRorAdmin.vcxproj", "{DE98F891-CF3F-4499-8BA8-338FD601B12F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B} = {AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}
 		{06EE8482-2165-4F7B-A14A-A430664201E7} = {06EE8482-2165-4F7B-A14A-A430664201E7}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "customROR", "CustomROR\customROR.vcxproj", "{49FBBF1D-616F-4541-A3E4-241726119EF9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RockNRor", "RockNRor\RockNRor.vcxproj", "{49FBBF1D-616F-4541-A3E4-241726119EF9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B} = {AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}
 		{06EE8482-2165-4F7B-A14A-A430664201E7} = {06EE8482-2165-4F7B-A14A-A430664201E7}
@@ -21,6 +21,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ROR_API", "ROR_API\ROR_API.
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTestAOE", "Test\UnitTestAOE.vcxproj", "{187B1609-5737-4233-8A4D-C725009E590D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B} = {AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AOE_Common", "Common\AOE_Common.vcxproj", "{AD21471A-4D0D-4A1F-9C7B-536FA5BBBA4B}"
 EndProject

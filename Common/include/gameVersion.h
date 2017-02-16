@@ -1,7 +1,7 @@
 #pragma once
 
 /*
-This file allows to define with which game version CustomROR will be compatible.
+This file allows to define with which game version RockNRor will be compatible.
 */
 
 // Note: game version IDs must remain consecutive, starting at 1.
