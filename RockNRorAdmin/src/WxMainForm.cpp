@@ -278,7 +278,7 @@ void WxMainForm::ChangeInstallDirInRegistry() {
 // This automatically installs RockNRor : copies files from user-provided source dir and patches EXE file.
 void WxMainForm::InstallCustomROR() {
 	// Open UI for user choices
-	WxInstallCustomROR *wInstallCROR = new WxInstallCustomROR(this, _T("Select installation files for RockNRor"), wxSize(800, 580),
+	WxInstallRockNRor *wInstallCROR = new WxInstallRockNRor(this, _T("Select installation files for RockNRor"), wxSize(800, 580),
 		this->e_api->GetFileName());
 	int result = wInstallCROR->ShowModal();
 	std::wstring srcDirName = wInstallCROR->pathToResourceFiles;

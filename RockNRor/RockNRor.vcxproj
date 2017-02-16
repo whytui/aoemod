@@ -166,7 +166,7 @@
     <ClInclude Include="include\RORProcessEditor.h" />
     <ClInclude Include="include\crTrigger.h" />
     <ClInclude Include="include\crTriggerSet.h" />
-    <ClInclude Include="include\CustomROR.h" />
+    <ClInclude Include="include\RockNRorInstance.h" />
     <ClInclude Include="include\EXESelfEditor.h" />
     <ClInclude Include="include\MapCopyPopup.h" />
     <ClInclude Include="include\interface.h" />
@@ -218,7 +218,7 @@
     <ClCompile Include="src\customAIMilitaryInfo.cpp" />
     <ClCompile Include="src\CustomPopupBase.cpp" />
     <ClCompile Include="src\CustomPopupSystem.cpp" />
-    <ClCompile Include="src\customROR.cpp" />
+    <ClCompile Include="src\RockNRorInstance.cpp" />
     <ClCompile Include="src\CustomRORInfo.cpp" />
     <ClCompile Include="src\CustomTilesetInfo.cpp" />
     <ClCompile Include="src\dllmain.cpp" />

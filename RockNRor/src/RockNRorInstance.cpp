@@ -1,4 +1,4 @@
-#include "../include/CustomROR.h"
+#include "../include/RockNRorInstance.h"
 
 
 
@@ -8,10 +8,10 @@
 
 namespace CUSTOMROR {
 
-CustomRORInstance::CustomRORInstance() {}
+RockNRorInstance::RockNRorInstance() {}
 
 
-void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
+void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	assert(REG_values != NULL);
 	if ((REG_values->return_address < AOE_OFFSETS::ADDR_EXE_MIN) || (REG_values->return_address > AOE_OFFSETS::ADDR_EXE_MAX)) {
 		std::string msg = "Received a ROR_API call with invalid address (";
@@ -419,7 +419,7 @@ void CustomRORInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 #ifdef _DEBUG
 
 // This procedure is only for testing purpose.
-void CustomRORInstance::TemporaryEntryPoints(REG_BACKUP *REG_values) {
+void RockNRorInstance::TemporaryEntryPoints(REG_BACKUP *REG_values) {
 	if (REG_values->return_address == 0x46BA04) {
 		unsigned long int *p = (unsigned long int *)0x7BFAE8;
 		*p = REG_values->EAX_val; // Original instruction in 0046B9FF
@@ -436,7 +436,7 @@ void CustomRORInstance::TemporaryEntryPoints(REG_BACKUP *REG_values) {
 
 // Initializations done only once, at startup.
 // ROR UI has not been initialized yet, DRS files are not loaded, etc.
-void CustomRORInstance::OneShotInit() {
+void RockNRorInstance::OneShotInit() {
 	traceMessageHandler.WriteMessageNoNotification(localizationHandler.GetTranslation(CRLANG_ID_DEBUG_INIT, "Debug message system initialized."));
 	CUSTOMROR::crInfo.configInfo.ReadXMLConfigFile("RockNRor\\RockNRor.xml");
 	CUSTOMROR::crInfo.configInfo.ReadCivXMLConfigFile("RockNRor\\RockNRor_civs.xml");
@@ -458,7 +458,7 @@ void CustomRORInstance::OneShotInit() {
 
 // From 0x041AEF5
 // To cancel the close operation, change return address to 0x41AF29 and set EAX to 0 BEFORE calling DS:[EAX+0x12C].
-void CustomRORInstance::WMCloseMessageEntryPoint(REG_BACKUP *REG_values) {
+void RockNRorInstance::WMCloseMessageEntryPoint(REG_BACKUP *REG_values) {
 	bool preventGameFromExiting = false;
 	// Do custom treatments NOW or never ;)
 	preventGameFromExiting = preventGameFromExiting || CUSTOMROR::customPopupSystem.FixGamePopupIssuesBeforeGameClose();
@@ -491,7 +491,7 @@ void CustomRORInstance::WMCloseMessageEntryPoint(REG_BACKUP *REG_values) {
 
 
 // "From" 0x435F74
-void CustomRORInstance::ReadTextFromChat(REG_BACKUP *REG_values) {
+void RockNRorInstance::ReadTextFromChat(REG_BACKUP *REG_values) {
 	// Execute the code we removed in original code (overwritten to call ROR_API)
 	// 0x435F6F : CALL 0x480760
 	// The called function needs ECX to be set
@@ -519,7 +519,7 @@ void CustomRORInstance::ReadTextFromChat(REG_BACKUP *REG_values) {
 // Do some action each time a game starts, including "load game", scenario, campaign and also MP games.
 // Warning: for scenarios, if there is an introduction screen, this method is called at that moment
 // (game might not be displayed yet)
-void CustomRORInstance::ActionOnGameStart(REG_BACKUP *REG_values) {
+void RockNRorInstance::ActionOnGameStart(REG_BACKUP *REG_values) {
 	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
 		CUSTOMROR::crCommand.OnGameStart();
 	}
@@ -530,7 +530,7 @@ void CustomRORInstance::ActionOnGameStart(REG_BACKUP *REG_values) {
 // When loading a saved game, it is called from another address (0x502E25) than standard call (0x51D509)
 // When calling this method, game data has not been loaded yet.
 // This method should only do data reset and similar stuff.
-void CustomRORInstance::InitBeforeGameStart(REG_BACKUP *REG_values, bool isSavedGame) {
+void RockNRorInstance::InitBeforeGameStart(REG_BACKUP *REG_values, bool isSavedGame) {
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		if (!isSavedGame) {
@@ -547,7 +547,7 @@ void CustomRORInstance::InitBeforeGameStart(REG_BACKUP *REG_values, bool isSaved
 // Scenario texts (including players strategies) havealready been read, but not other information, be careful.
 // WARNING: this method can be called without a game to be started (in scenario menus, to preview scenario info and set options)
 // WARNING: at this point, global->scenarioInfo link has NOT bee set ! Use ESI value instead.
-void CustomRORInstance::InitScenarioInfoTextData(REG_BACKUP *REG_values) {
+void RockNRorInstance::InitScenarioInfoTextData(REG_BACKUP *REG_values) {
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		unsigned long int *p = (unsigned long int*)REG_values->ESI_val;
@@ -566,7 +566,7 @@ void CustomRORInstance::InitScenarioInfoTextData(REG_BACKUP *REG_values) {
 
 // From 0x04F16BB
 // Original (overwritten) code does a TEST AH, 1 + JNZ 004F16E4. We do this with a call to ChangeReturnAddress.
-void CustomRORInstance::CheckPopulationCostWithLogistics(REG_BACKUP *REG_values) {
+void RockNRorInstance::CheckPopulationCostWithLogistics(REG_BACKUP *REG_values) {
 	long int resourceId = REG_values->ECX_val;
 	//short int *costPointer = (short int *)REG_values->EDX_val;
 	AOE_STRUCTURES::STRUCT_COST *currentCost = (AOE_STRUCTURES::STRUCT_COST *)(REG_values->EDX_val - 2);
@@ -625,7 +625,7 @@ void CustomRORInstance::CheckPopulationCostWithLogistics(REG_BACKUP *REG_values)
 
 
 // 0x4B24F4
-void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
+void RockNRorInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	// Collect information
 	AOE_STRUCTURES::STRUCT_ACTION_CONVERSION *convAction = (AOE_STRUCTURES::STRUCT_ACTION_CONVERSION *)REG_values->ESI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *target = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
@@ -655,7 +655,7 @@ void CustomRORInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 
 
 // 0x04B2578 = address when randomness decided a conversion is successful = beginning of actual unit conversion process.
-void CustomRORInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
 	// Do overwritten instructions
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->EBX_val = (long int)(*ROR_gameSettings);
@@ -694,7 +694,7 @@ void CustomRORInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
 
 // 0x4F2AAB
 // This is called from player.AddUnit method
-void CustomRORInstance::ManageOnPlayerAddUnit(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageOnPlayerAddUnit(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_PLAYER *player = (AOE_STRUCTURES::STRUCT_PLAYER *)REG_values->ECX_val;
 	if (!player) { return; }
 	ror_api_assert(REG_values, player->IsCheckSumValid());
@@ -727,7 +727,7 @@ void CustomRORInstance::ManageOnPlayerAddUnit(REG_BACKUP *REG_values) {
 // Customize "pseudo-random" value that provides elevated terrain proportion in generated map.
 // In fact the number is not random, it only depends on map seed due to pseudo-random computation algorithm.
 // Warning: game code does a "*5" multiplication for Hills map type afterwards.
-void CustomRORInstance::MapGen_elevationProportionCalc(REG_BACKUP *REG_values) {
+void RockNRorInstance::MapGen_elevationProportionCalc(REG_BACKUP *REG_values) {
 	long int elevationBaseCalcValue;
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		_asm {
@@ -756,7 +756,7 @@ void CustomRORInstance::MapGen_elevationProportionCalc(REG_BACKUP *REG_values) {
 // 0046F5A8
 // Replace an ugly buggy method to add compatibility with non-square maps.
 // Moreover, it is possible this improves elevation management because there are some "uncertain" algorithms with X positions.
-void CustomRORInstance::MapGen_applyElevation(REG_BACKUP *REG_values) {
+void RockNRorInstance::MapGen_applyElevation(REG_BACKUP *REG_values) {
 	if (REG_values->fixesForGameEXECompatibilityAreDone) {
 		return;
 	}
@@ -783,7 +783,7 @@ void CustomRORInstance::MapGen_applyElevation(REG_BACKUP *REG_values) {
 // 0x0045E8D7
 // This is called from player.RemoveUnit method. Note: player.RemoveUnit is called BY unit.destructor.
 // Warning: this method is called in many situations, game might NOT be running.
-void CustomRORInstance::ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_PLAYER *player = (AOE_STRUCTURES::STRUCT_PLAYER *)REG_values->ECX_val;
 	if (!player) { return; }
 	ror_api_assert(REG_values, player->IsCheckSumValid());
@@ -812,7 +812,7 @@ void CustomRORInstance::ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values) {
 
 // Fills strategy element's unitId when construction begins (while in progress)
 // In method buildingUnit.initialize (0x4AC8A0)
-void CustomRORInstance::FixBuildingStratElemUnitID(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixBuildingStratElemUnitID(REG_BACKUP *REG_values) {
 	// TODO: separate compatibility code from "functional" code, and use CUSTOMROR::crInfo.configInfo.doNotApplyFixes parameter.
 	AOE_STRUCTURES::STRUCT_PLAYER *p = (AOE_STRUCTURES::STRUCT_PLAYER*) REG_values->EDI_val;
 	ror_api_assert(REG_values, p != NULL);
@@ -865,7 +865,7 @@ void CustomRORInstance::FixBuildingStratElemUnitID(REG_BACKUP *REG_values) {
 // Test if strategy element is alive for reset purpose (like original code). In addition, resets unitInstanceId if the strategy element is "in progress" (to be detected by next custom tactical update).
 // For the algorithm to work well, requires also "FixUnitIdForInProgressBuilding", "ManageTacticalAIUpdate"
 // Performance info: The loop first tests strategy element's unitInstanceId, so ROR_API is only called once in the loop, which is a good thing.
-void CustomRORInstance::OverloadIsStratElemUnitAlive_ResetElement(REG_BACKUP *REG_values) {
+void RockNRorInstance::OverloadIsStratElemUnitAlive_ResetElement(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentElement = (AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *) REG_values->ECX_val;
 	ror_api_assert(REG_values, currentElement != NULL);
 	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = (AOE_STRUCTURES::STRUCT_BUILD_AI *) REG_values->EDI_val;
@@ -885,7 +885,7 @@ void CustomRORInstance::OverloadIsStratElemUnitAlive_ResetElement(REG_BACKUP *RE
 // 0x00408F92
 // Called at the end of buildAI.AddElementsToStrategy(...) ROR method.
 // Be careful as it can be called by buildAI.addDynamicStrategyElements(...) which also triggers a ROR_API entry point (afterwards)
-void CustomRORInstance::AfterAddElementInStrategy(REG_BACKUP *REG_values) {
+void RockNRorInstance::AfterAddElementInStrategy(REG_BACKUP *REG_values) {
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		// Do overwritten ROR code:
 		REG_values->EAX_val = 1;
@@ -923,7 +923,7 @@ void CustomRORInstance::AfterAddElementInStrategy(REG_BACKUP *REG_values) {
 // 0x004B7D84
 // Fix a bug in buildAI.addDynamicStrategyElements()
 // Warships are never added because the code calls the wrong method (add research instead of add unit)
-void CustomRORInstance::FixAutoBuildWarships_addStratElem(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixAutoBuildWarships_addStratElem(REG_BACKUP *REG_values) {
 	if (REG_values->fixesForGameEXECompatibilityAreDone) {
 		return;
 	}
@@ -997,7 +997,7 @@ void CustomRORInstance::FixAutoBuildWarships_addStratElem(REG_BACKUP *REG_values
 
 // 0x004B7E1E
 // Returns strategy element DAT_ID. Returns Town center ID instead of house ID because only TC is supported in algorithm (count the 4-pop housage).
-void CustomRORInstance::FixAutoBuildHouse_countHouse(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixAutoBuildHouse_countHouse(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = (AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *) REG_values->ECX_val;
 	REG_values->EAX_val = stratElem->unitDAT_ID;
 	
@@ -1012,7 +1012,7 @@ void CustomRORInstance::FixAutoBuildHouse_countHouse(REG_BACKUP *REG_values) {
 
 
 // From 004B7E5E. (Always) Changes return address to 0x4B7E7E (continue loop - normal case) or 0x4B7E8C (exit loop)
-void CustomRORInstance::FixAutoBuildHouse_maxPopSignedCharLimitation(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixAutoBuildHouse_maxPopSignedCharLimitation(REG_BACKUP *REG_values) {
 	// Get context information
 	long int hostedPopulationAtCurrentPoint = REG_values->EBX_val;
 	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = (AOE_STRUCTURES::STRUCT_BUILD_AI *)REG_values->ESI_val;
@@ -1038,7 +1038,7 @@ void CustomRORInstance::FixAutoBuildHouse_maxPopSignedCharLimitation(REG_BACKUP 
 // 0x004B8017
 // This is called at the end of buildAI.addDynamicStrategyElements(). (which adds houses, docks, boats, setgather%)
 // This allow modifying/fixing what has just been added dynamically
-void CustomRORInstance::AfterAddDynamicStratElems(REG_BACKUP *REG_values) {
+void RockNRorInstance::AfterAddDynamicStratElems(REG_BACKUP *REG_values) {
 	unsigned long int myESP = REG_values->ESP_val;
 	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = (AOE_STRUCTURES::STRUCT_BUILD_AI *) REG_values->ESI_val;
 	unsigned long int myECX;
@@ -1059,7 +1059,7 @@ void CustomRORInstance::AfterAddDynamicStratElems(REG_BACKUP *REG_values) {
 
 
 // From 0051E0DC. Called just before starting to actually save a game to a gmx file.
-void CustomRORInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->ECX_val = (long int)*ROR_gameSettings;
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
@@ -1086,7 +1086,7 @@ void CustomRORInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 // WARNING: apparently, when a *building* is killed (final attack that makes HP<1), this is not triggered. However killing living units DOES trigger this.
 // WARNING: This method may change return address (only when forcing usage of ROR panic mode algorithm - not recommended)
 // MAKE SURE TacAIOnUnitAttacked entry point is active too
-void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 	// Collect context information/variables
 	long int timeSinceLastPanicMode_s = REG_values->EDX_val; // in seconds
 	long int currentGameTime_ms = REG_values->ESI_val; // in ms
@@ -1116,7 +1116,7 @@ void CustomRORInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 // From 0x4D7ADD. tacAI.reactToEvent(...) for event 0x201.
 // This is called each time one of "my" units is attacked (even by gaia).
 // MAKE SURE ManagePanicMode entry point is active too
-void CustomRORInstance::TacAIOnUnitAttacked(REG_BACKUP *REG_values) {
+void RockNRorInstance::TacAIOnUnitAttacked(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ESI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EBP_val;
 	long int myUnitId = REG_values->EBX_val;
@@ -1159,7 +1159,7 @@ void CustomRORInstance::TacAIOnUnitAttacked(REG_BACKUP *REG_values) {
 // and disables (0xFF) tiles that are occupied by buildings (and some nearby tiles)
 // This replaces a small portion of code that is only executed for building new houses (DATID=0x46)
 // This method is NO LONGER required. ManageCityMapLikeComputationCall1 will handle houses better than this.
-void CustomRORInstance::ManageCityPlanHouseDistanceFromBuildings(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageCityPlanHouseDistanceFromBuildings(REG_BACKUP *REG_values) {
 	if (REG_values->fixesForGameEXECompatibilityAreDone) {
 		return;
 	}
@@ -1205,7 +1205,7 @@ void CustomRORInstance::ManageCityPlanHouseDistanceFromBuildings(REG_BACKUP *REG
 
 // From 0x4BE8D8 call
 // Takes other building into account in temp map like info for city plan evaluation
-void CustomRORInstance::ManageCityMapLikeComputationCall1(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageCityMapLikeComputationCall1(REG_BACKUP *REG_values) {
 	long int *myESP = (long int *) REG_values->ESP_val;
 	long int myECX = GetIntValueFromRORStack(REG_values, 0x1C);
 	long int placementType = REG_values->EBX_val; // arg1
@@ -1248,7 +1248,7 @@ void CustomRORInstance::ManageCityMapLikeComputationCall1(REG_BACKUP *REG_values
 
 // From 0x4C1CAF call
 // Does nothing but normal behaviour yet...
-void CustomRORInstance::ManageCityMapLikeComputationCall2(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageCityMapLikeComputationCall2(REG_BACKUP *REG_values) {
 	long int *myESP = (long int *)REG_values->ESP_val;
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *) REG_values->EBP_val;
 	long int *TCPositionYX = *((long int **)myESP + 1);
@@ -1298,7 +1298,7 @@ void CustomRORInstance::ManageCityMapLikeComputationCall2(REG_BACKUP *REG_values
 
 
 // This manages the like value to add in a bush's neighborhood when trying to build a granary.
-void CustomRORInstance::ManageCityMapLikeValueAroundBushes(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageCityMapLikeValueAroundBushes(REG_BACKUP *REG_values) {
 	long int *likeValueToAdd = ((long int *)REG_values->ESP_val);
 
 	// Original overwritten code "MOV EAX,DWORD PTR SS:[ESP+0x34]"
@@ -1319,7 +1319,7 @@ void CustomRORInstance::ManageCityMapLikeValueAroundBushes(REG_BACKUP *REG_value
 // From 004C27D1 : this code is dedicated to farms placement mode.
 // Changing return address to 0x4C2A86 will make the loop continue, ignoring current (existing) building
 // REG_values->EAX_val (both input and output in this method) is influence distance for current existing building. We can set it to a custom value if we want to.
-void CustomRORInstance::ManageCityMapLikeValueFarmPlacement(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageCityMapLikeValueFarmPlacement(REG_BACKUP *REG_values) {
 	long int placementMode = REG_values->EBX_val;
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *) REG_values->ESI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitExistingBld_base = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
@@ -1352,7 +1352,7 @@ void CustomRORInstance::ManageCityMapLikeValueFarmPlacement(REG_BACKUP *REG_valu
 }
 
 
-void CustomRORInstance::OverloadSetInProgress(REG_BACKUP *REG_values) {
+void RockNRorInstance::OverloadSetInProgress(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = (AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *) REG_values->EBX_val;
 	ror_api_assert(REG_values, stratElem != NULL);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *actor = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) REG_values->EDI_val;
@@ -1371,7 +1371,7 @@ void CustomRORInstance::OverloadSetInProgress(REG_BACKUP *REG_values) {
 }
 
 
-void CustomRORInstance::OverloadResetInProgress(REG_BACKUP *REG_values) {
+void RockNRorInstance::OverloadResetInProgress(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = (AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *) REG_values->ECX_val;
 	ror_api_assert(REG_values, stratElem != NULL);
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -1387,7 +1387,7 @@ void CustomRORInstance::OverloadResetInProgress(REG_BACKUP *REG_values) {
 
 // This overloads a part of the unit destructor that removes references to deleted unit from strategy and infAI.
 // The goal is to add a loop to cancel "in progress" units that are trained in the building, if any.
-void CustomRORInstance::OverloadResetUnitInAI(REG_BACKUP *REG_values) {
+void RockNRorInstance::OverloadResetUnitInAI(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_AI *mainAI = (AOE_STRUCTURES::STRUCT_AI *) REG_values->ECX_val;
 	ror_api_assert(REG_values, mainAI != NULL); // mainAI must not be NULL because of TEST ECX,ECX on 4F2B35
 	long int unitId_toReset = REG_values->EAX_val;
@@ -1433,7 +1433,7 @@ void CustomRORInstance::OverloadResetUnitInAI(REG_BACKUP *REG_values) {
 // From 0x4B8BDA
 // This is called when a wonder construction is finished.
 // ROR code sets "my wonder is built" flag, but they forgot to reset "I am building my wonder" and AI gets kinda stuck.
-void CustomRORInstance::OnWonderConstructionCompleted(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnWonderConstructionCompleted(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_AI *mainAI = (AOE_STRUCTURES::STRUCT_AI *)REG_values->ECX_val;
 	ror_api_assert(REG_values, mainAI && mainAI->IsCheckSumValid());
 	if (!mainAI || !mainAI->IsCheckSumValid()) { return; }
@@ -1451,7 +1451,7 @@ void CustomRORInstance::OnWonderConstructionCompleted(REG_BACKUP *REG_values) {
 // We can add additional checks and possibly prevent the construction from being done.
 // To prevent the construction, change return address to 004D236C.
 // Otherwise, do nothing special and the execution will continue normally.
-void CustomRORInstance::AuditOnDoStrategyElementBuilding(REG_BACKUP *REG_values) {
+void RockNRorInstance::AuditOnDoStrategyElementBuilding(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = (AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *)REG_values->EAX_val;
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ESI_val;
 	ror_api_assert(REG_values, tacAI && tacAI->IsCheckSumValid());
@@ -1483,7 +1483,7 @@ void CustomRORInstance::AuditOnDoStrategyElementBuilding(REG_BACKUP *REG_values)
 // 0x04604C9
 // Intercepts ALL button OnClick events, including bitbuttons, checkboxes, dropdowns (just the "open to show list" click)
 // Note: Change return address to 0x460568 to disable standard treatments for this event.
-void CustomRORInstance::GlobalOnButtonClick(REG_BACKUP *REG_values) {
+void RockNRorInstance::GlobalOnButtonClick(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->ECX_val != 0);
 	unsigned long int objAddr = REG_values->ECX_val;
 	unsigned long int evtStatus;
@@ -1511,7 +1511,7 @@ void CustomRORInstance::GlobalOnButtonClick(REG_BACKUP *REG_values) {
 // Manage the KeyPress event - 0x0041A6C7
 // This is also called in "scenario info" in-game screen. NOT in diplomacy popup, menu, achievements, etc
 // If returned REG_values->EAX_val is == 0 then calling method will not be executed (will RETN immediatly). Can be used to disable some treatments.
-void CustomRORInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
+void RockNRorInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
 	long int myESP = REG_values->ESP_val;
 	long int pressedKey = *(long int *) (myESP + 0x14); // 0x12: ALT 0x73:F4
 	long int myECX = REG_values->ECX_val;
@@ -1557,7 +1557,7 @@ void CustomRORInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
 // Call from 0x04348D9
 // At beginning of function dialog.OnUserEvent(...)
 // Note: to disable "normal" treatments from dialog.OnUserEvent(...), change return address to 0x43498C and set REG_values->EAX_val to 1 (or 0)
-void CustomRORInstance::ManageOnDialogUserEvent(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageOnDialogUserEvent(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG *ptrDialog = (AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG*) REG_values->ECX_val;
 	ror_api_assert(REG_values, ptrDialog != NULL);
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -1593,7 +1593,7 @@ void CustomRORInstance::ManageOnDialogUserEvent(REG_BACKUP *REG_values) {
 
 // From 0x519FDC. May change return address to 0x51A0F4 (to replace original JNZ)
 // This is called in-game, when a right-click is performed.
-void CustomRORInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_values) {
 	MOUSE_ACTION_TYPES mouseActionType = (MOUSE_ACTION_TYPES)REG_values->EAX_val;
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	if (mouseActionType != MOUSE_ACTION_TYPES::CST_MAT_NORMAL) {
@@ -1620,7 +1620,7 @@ void CustomRORInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_
 
 // Plugged on 0x51A508's call
 // Triggered when player releases right click in game screen, for default mouse action type only.
-void CustomRORInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 	unsigned long int myESP = REG_values->ESP_val;
 	const long int CST_OnGameRightClickUpEvent_IGNORE_CLICK = 0x0051A63D;
 	const long int CST_OnGameRightClickUpEvent_HANDLE_CLICK = 0x0051A50B;
@@ -1681,7 +1681,7 @@ void CustomRORInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 
 // Manages key press on +/- in game to change game speed.
 // Also fixes the "6" key press bug on french keyboard
-void CustomRORInstance::ManageChangeGameSpeed(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageChangeGameSpeed(REG_BACKUP *REG_values) {
 	long int myESP = REG_values->ESP_val;
 	// Read arguments/local variables
 	float *gameSpeed = (float *)(myESP + 8);
@@ -1731,7 +1731,7 @@ void CustomRORInstance::ManageChangeGameSpeed(REG_BACKUP *REG_values) {
 // ... Note that underlying tacAI.update is also optimized in ManageDefeatedAIPlayerTacAIUpdate(...)
 // May change return address to 0x4D0EFE to skip the whole tacAI update process (dead players...)
 // ... => in this case, we must change managed AI player manually to avoid being stuck
-void CustomRORInstance::ManageTacAIUpdate(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageTacAIUpdate(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->ESI_val);
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ESI_val;
 	ror_api_assert(REG_values, tacAI && tacAI->IsCheckSumValid());
@@ -1753,7 +1753,7 @@ void CustomRORInstance::ManageTacAIUpdate(REG_BACKUP *REG_values) {
 // Change return address to 0x4D24E8 if AI update must be skipped (and set ECX=mainAI, in this case)
 // The code in 0x4D24E8 will change "currently managed AI player" so AIs won't get stuck.
 // Warning: for performance reasons, this method should NOT do too much treatments !
-void CustomRORInstance::ManageDefeatedAIPlayerTacAIUpdate(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageDefeatedAIPlayerTacAIUpdate(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ESI_val;
 	ror_api_assert(REG_values, tacAI && tacAI->IsCheckSumValid());
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -1781,7 +1781,7 @@ void CustomRORInstance::ManageDefeatedAIPlayerTacAIUpdate(REG_BACKUP *REG_values
 }
 
 // This is called just before calling empires.dat loading ([global]+0xB0), called from 0x501211.
-void CustomRORInstance::OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
 		REG_values->ECX_val = REG_values->ECX_val + 0x1F8;
@@ -1799,7 +1799,7 @@ void CustomRORInstance::OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values) {
 
 
 // This is called just after empires.dat is loaded.
-void CustomRORInstance::OnAfterLoadEmpires_DAT(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnAfterLoadEmpires_DAT(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true; // There is nothing special to do for this change to be compatible with ROR execution.
 	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
 		CUSTOMROR::crCommand.OnAfterLoadEmpires_DAT();
@@ -1809,7 +1809,7 @@ void CustomRORInstance::OnAfterLoadEmpires_DAT(REG_BACKUP *REG_values) {
 
 // From 0x51A3BA
 // This is called when user clicks to add a unit in scenario editor (NOT called when moving mouse in game zone).
-void CustomRORInstance::EditorCheckForUnitPlacement(REG_BACKUP *REG_values) {
+void RockNRorInstance::EditorCheckForUnitPlacement(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *) REG_values->ESI_val;
 	long int callResult = 0;
 	REG_values->ECX_val = REG_values->ESI_val; // in fact it is not necessary because we do the CALL ourselves
@@ -1868,7 +1868,7 @@ void CustomRORInstance::EditorCheckForUnitPlacement(REG_BACKUP *REG_values) {
 
 
 // From 0x051A700
-void CustomRORInstance::EntryPoint_UIUnitSelection(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPoint_UIUnitSelection(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true; // No action required in this case.
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
@@ -1896,7 +1896,7 @@ void CustomRORInstance::EntryPoint_UIUnitSelection(REG_BACKUP *REG_values) {
 // Specific code to handle gaia units conversion when found by human player.
 // Fix some special cases (artefacts).
 // Change return address to 0x426D19 if we want NOT to change unit owner.
-void CustomRORInstance::HumanSpecific_onCapturableUnitSeen(REG_BACKUP *REG_values) {
+void RockNRorInstance::HumanSpecific_onCapturableUnitSeen(REG_BACKUP *REG_values) {
 	long int actorPlayerId = REG_values->EDI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *beingSeenUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) REG_values->ESI_val;
 	ror_api_assert(REG_values, actorPlayerId >= 0 && actorPlayerId <= 8);
@@ -1926,7 +1926,7 @@ void CustomRORInstance::HumanSpecific_onCapturableUnitSeen(REG_BACKUP *REG_value
 
 
 // From 0x50B6C2
-void CustomRORInstance::ManageRelicsCount(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageRelicsCount(REG_BACKUP *REG_values) {
 	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
 		REG_values->EAX_val = 5;
 	} else {
@@ -1935,7 +1935,7 @@ void CustomRORInstance::ManageRelicsCount(REG_BACKUP *REG_values) {
 }
 
 
-void CustomRORInstance::ManageRuinsCount(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageRuinsCount(REG_BACKUP *REG_values) {
 	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
 		REG_values->EAX_val = 5;
 	} else {
@@ -1944,7 +1944,7 @@ void CustomRORInstance::ManageRuinsCount(REG_BACKUP *REG_values) {
 }
 
 
-void CustomRORInstance::ManageCivIdControlAfterGameSettingsSelection(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageCivIdControlAfterGameSettingsSelection(REG_BACKUP *REG_values) {
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		return;
 	}
@@ -1965,7 +1965,7 @@ void CustomRORInstance::ManageCivIdControlAfterGameSettingsSelection(REG_BACKUP 
 
 // Manage first call to gameSettings.getDLLCivNameIdOffset(civId)
 // For custom civs, returns 0 so the call we be made again later.
-void CustomRORInstance::ManageGetPlayerNameDLLStringIdOffset(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageGetPlayerNameDLLStringIdOffset(REG_BACKUP *REG_values) {
 	// TODO: not taking into account CUSTOMROR::crInfo.configInfo.doNotApplyFixes
 	long int civId = REG_values->EAX_val;
 	long int myECX = REG_values->ECX_val; // game settings addr
@@ -1993,7 +1993,7 @@ void CustomRORInstance::ManageGetPlayerNameDLLStringIdOffset(REG_BACKUP *REG_val
 // Manages 2nd call to gameSettings.getDLLPlayerNameIdOffset(civId)
 // For custom civs, returns a specific name taken from standard DLL strings.
 // WARNING: this changes ROR return address
-void CustomRORInstance::ManageGetPlayerNameDLLStringIdOffset2(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageGetPlayerNameDLLStringIdOffset2(REG_BACKUP *REG_values) {
 	long int civId = REG_values->EAX_val;
 	long int myECX = REG_values->ECX_val; // game settings addr
 	long int myEDX = REG_values->EDX_val;
@@ -2052,7 +2052,7 @@ void CustomRORInstance::ManageGetPlayerNameDLLStringIdOffset2(REG_BACKUP *REG_va
 // Fills game's buffer with an existing AI filename for given player. If nothing is found (or if file doesnt exist), a NULL string is used.
 // This method must NOT fill the buffer with an incorrect file name or the game will freeze.
 // Warning: this method may change ROR return address
-void CustomRORInstance::ManageAIFileSelectionForPlayer(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageAIFileSelectionForPlayer(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_PLAYER *p = (AOE_STRUCTURES::STRUCT_PLAYER *) REG_values->EBX_val;
 	if (!p) { return; }
 	if (!p->ptrAIStruct) {
@@ -2073,7 +2073,7 @@ void CustomRORInstance::ManageAIFileSelectionForPlayer(REG_BACKUP *REG_values) {
 }
 
 
-void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	long int myESI = REG_values->ESI_val;
 	ror_api_assert(REG_values, myESI != NULL);
 	if (!myESI) { return; }
@@ -2131,7 +2131,7 @@ void CustomRORInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 
 
 // Manages filling the civilization combobox in scenario editor UI. Overloads default behaviour.
-void CustomRORInstance::ManageCivsInEditorCombo(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageCivsInEditorCombo(REG_BACKUP *REG_values) {
 	long int myEDI = REG_values->EDI_val;
 	ror_api_assert(REG_values, myEDI != NULL);
 	if (!myEDI) { return; }
@@ -2168,7 +2168,7 @@ void CustomRORInstance::ManageCivsInEditorCombo(REG_BACKUP *REG_values) {
 
 
 // Overloads "default" case in in-game GetCivName method.
-void CustomRORInstance::GetInGameCustomCivName(REG_BACKUP *REG_values) {
+void RockNRorInstance::GetInGameCustomCivName(REG_BACKUP *REG_values) {
 	long int civId = REG_values->EDX_val;
 	long int bufferSize = REG_values->EDI_val;
 	char *buffer = (char *)REG_values->ESI_val;
@@ -2196,7 +2196,7 @@ void CustomRORInstance::GetInGameCustomCivName(REG_BACKUP *REG_values) {
 
 
 // From 0x50A56F and 0x50A5B2
-void CustomRORInstance::CheckPlayerCreationAtGameStartup(REG_BACKUP *REG_values) {
+void RockNRorInstance::CheckPlayerCreationAtGameStartup(REG_BACKUP *REG_values) {
 	bool isHumanPlayer = (REG_values->return_address == 0x0050A5B9);
 	unsigned long int myESI = REG_values->ESI_val;
 	unsigned long int myEBX = REG_values->EBX_val;
@@ -2216,7 +2216,7 @@ void CustomRORInstance::CheckPlayerCreationAtGameStartup(REG_BACKUP *REG_values)
 
 // From 0048D13C. Randomly picks civilizations for each player, at game settings screen init.
 // May change return address to 0x48D156
-void CustomRORInstance::PickRandomCivForPlayer(REG_BACKUP *REG_values) {
+void RockNRorInstance::PickRandomCivForPlayer(REG_BACKUP *REG_values) {
 	long int curPlayerIndex = REG_values->ESI_val; // = playerId-1 (beware)
 	
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -2246,7 +2246,7 @@ void CustomRORInstance::PickRandomCivForPlayer(REG_BACKUP *REG_values) {
 //     Also return 1 to keep current target (in that case, force EDI = <old_target_ptr>)
 // 2 = We prefer to change target unit. Use normal behaviour (let the original code decide) for this case in 00426F28 (cf original JNZ)
 // 3 = OBSOLETE (DO NOT USE) Custom jump to 00426FD1 to exit successfully the method, without changing target. Sometimes CAUSES stuck units bug !
-void CustomRORInstance::ManageAttackActionChange(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageAttackActionChange(REG_BACKUP *REG_values) {
 	assert(false && "ManageAttackActionChange is obsolete"); // This method is OBSOLETE
 	const float distanceToConsiderVeryClose = 1.5; // Please leave this > 0.
 	REG_values->EAX_val = 2; // Default: change action (let the original code decide)
@@ -2286,7 +2286,7 @@ void CustomRORInstance::ManageAttackActionChange(REG_BACKUP *REG_values) {
 // For compatibility with original code, if EBP != 0 then change return address to 0x411D64 (equivalent to the JNZ we overwrote).
 // It is possible to overwrite arg1 in stack to force another unitId (ESP+014) (ROR method code has not read it yet).
 // Warning: unitId in stack (ESP+014) should NOT be -1 (game bug). If this occurs, force change return address to 0x411DC7 (return 0 in ROR code)
-void CustomRORInstance::ManageAttackActivityChange1(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageAttackActivityChange1(REG_BACKUP *REG_values) {
 	long int arg_flag = REG_values->EBP_val;
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->ESI_val = REG_values->ECX_val; // MOV esi, ecx
@@ -2318,7 +2318,7 @@ void CustomRORInstance::ManageAttackActivityChange1(REG_BACKUP *REG_values) {
 // From 00411F26. For converting priests
 // For compatibility with original code, if EAX != 0 then change return address to 0x411F35 (equivalent to the JNZ we overwrote).
 // It is possible to overwrite arg1 in stack to force another unitId (ESP+014) (ROR method code has not read it yet).
-void CustomRORInstance::ManageAttackActivityChange_convert(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageAttackActivityChange_convert(REG_BACKUP *REG_values) {
 	long int arg_flag = REG_values->EAX_val;
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->ESI_val = REG_values->ECX_val; // MOV esi, ecx
@@ -2351,7 +2351,7 @@ void CustomRORInstance::ManageAttackActivityChange_convert(REG_BACKUP *REG_value
 // 1 = Change unit action to attack tower, to use when (activity.taskId != 0x258) (standard case). Will jump to 004E389A / 004D8388 just like in original code (see ROR modified code).
 // 2 = Change unit action to attack tower, to use when (activity.taskId == 0x258) (standard case). No jump, continue with normal code.
 // The JUMP addresses are in ROR modified code (we use some TEST EAX / CMP AL,1 + JE in modified code), that's why we can use this method for different CALL addresses.
-void CustomRORInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ECX_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *myUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EBX_val;
@@ -2410,7 +2410,7 @@ void CustomRORInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_value
 /* Called from 004E39D1. Replace ROR's loop to attack the tower with villagers so we can use uour own criteria.
 This does not take into account CUSTOMROR::crInfo.configInfo.doNotApplyFixes
 */
-void CustomRORInstance::ManageTowerPanicMode_villagers(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageTowerPanicMode_villagers(REG_BACKUP *REG_values) {
 	// ROR code context variables
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ESI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
@@ -2440,7 +2440,7 @@ void CustomRORInstance::ManageTowerPanicMode_villagers(REG_BACKUP *REG_values) {
 
 // Called from 0x4E5001
 // ROR's function canConvertUnit has a bug, it returns true when enemy unit is an unfinished building (status == 0).
-void CustomRORInstance::ManageBuildingStatus_canConvertUnit(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageBuildingStatus_canConvertUnit(REG_BACKUP *REG_values) {
 	long int unitId = REG_values->EAX_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = GetUnitStruct(unitId);
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -2463,7 +2463,7 @@ void CustomRORInstance::ManageBuildingStatus_canConvertUnit(REG_BACKUP *REG_valu
 // This method is used to slow down (skip timer occurences) for modern computers that are too fast.
 // The game does not supports too fast timer occurences.
 // In such cases, UI is still working but game time appears to be (almost) frozen.
-void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	long int myECX = REG_values->ECX_val;
 	long int myEDX = REG_values->EDX_val;
 	long int myESI = REG_values->ESI_val;
@@ -2500,7 +2500,7 @@ void CustomRORInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 // Collects information about last execution times and recomputes slow down factor if option is enabled.
 // Avoid doing too much treatments here.
 // 0x51D9EC
-void CustomRORInstance::CollectTimerStats(REG_BACKUP *REG_values) {
+void RockNRorInstance::CollectTimerStats(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *g = (AOE_STRUCTURES::STRUCT_GAME_GLOBAL *) REG_values->ESI_val;
 	ror_api_assert(REG_values, g && g->IsCheckSumValid());
 
@@ -2528,7 +2528,7 @@ void CustomRORInstance::CollectTimerStats(REG_BACKUP *REG_values) {
 
 // This overloads the original code that displays Option button in game menu.
 // Reads CUSTOMROR::crInfo.configInfo.showCustomRORMenu Parameter to display standard menu OR customized menu
-void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
+void RockNRorInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 	long int myESI = REG_values->ESI_val;
 	long int myEDI = REG_values->EDI_val;
 	long int myEBP = REG_values->EBP_val;
@@ -2573,7 +2573,7 @@ void CustomRORInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 // WARNING: this is NOT called when those buttons are clicked: quit game, load, save, help
 // Manage onclick on our custom button in menu.
 // Opens a custom popup (created like game's option menu)
-void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	long int myEAX = REG_values->EAX_val;
 	long int myESP = REG_values->ESP_val;
 	AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup = (AOE_STRUCTURES::STRUCT_ANY_UI *)REG_values->ESI_val;
@@ -2607,7 +2607,7 @@ void CustomRORInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 // For normal options menu, just does as in original game (gives back execution to standard code)
 // Custom treatments for "our" options popup...
 // 0x0043136D
-void CustomRORInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
+void RockNRorInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 	unsigned long int senderAddr = REG_values->EAX_val;
 	unsigned long int myEDI = REG_values->EDI_val;
 	unsigned long int myESP = REG_values->ESP_val;
@@ -2691,7 +2691,7 @@ void CustomRORInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 
 // From 0x499134
 // This is called at the end of scenario editor UI creation.
-void CustomRORInstance::AfterScenarioEditorCreation(REG_BACKUP *REG_values) {
+void RockNRorInstance::AfterScenarioEditorCreation(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)REG_values->ESI_val;
 	ror_api_assert(REG_values, scEditor != NULL);
 	ror_api_assert(REG_values, scEditor->IsCheckSumValid());
@@ -2706,7 +2706,7 @@ void CustomRORInstance::AfterScenarioEditorCreation(REG_BACKUP *REG_values) {
 
 
 // From 0x4926B0
-void CustomRORInstance::ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_values) {
+void RockNRorInstance::ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_values) {
 	long int arg1 = *(long int *)(REG_values->ESP_val + 4);
 	long int selectedIndex = arg1 & 0xFFFF;
 	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)REG_values->ECX_val;
@@ -2732,7 +2732,7 @@ void CustomRORInstance::ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_valu
 
 // From 0x451DCA
 // This is executed when a combobox' list loses focus (and hides), ONLY when the combobox has a "previous" capture UI object (unsure about exact role).
-void CustomRORInstance::OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->EDI_val == ADDR_VAR_PANEL_SYSTEM);
 	//AOE_STRUCTURES::STRUCT_UI_MAIN_INFO *uiMainInfo = (AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *)REG_values->EDI_val;
 	// EDI + 8 should point to combobox
@@ -2756,7 +2756,7 @@ void CustomRORInstance::OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *RE
 // Don't forget to check player (gaia?), unit type...
 // Warning: this is called by *scenario editor*, *game init* and *in-game unit spawn*
 // NOT called when loading a saved game...
-void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 	// Now get informations and check them
 	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)REG_values->EAX_val;
 	ror_api_assert(REG_values, unit != NULL); // TO DO: Could just return ? Leave that for testing purpose for now...
@@ -2802,7 +2802,7 @@ void CustomRORInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 // From 0x501980
 // In game code, this method has treatments for events 7E(farm depleted) 7C(trainQueue) 7D(missing house) 64 (researchDone) 66,69 (spawn/build complete)
 // 68,6B,1-3(errors) 4-6 (player lost/disconnect...) 7 (tribute) 8 (dipl change) 6C 6D 6E(wonders) 72-75(relics/ruins events) 76-7B (convert events).
-void CustomRORInstance::OnGameSettingsNotifyEvent(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnGameSettingsNotifyEvent(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = (AOE_STRUCTURES::STRUCT_GAME_SETTINGS *)REG_values->ECX_val;
 	ror_api_assert(REG_values, settings == GetGameSettingsPtr());
 	long int *myESP = (long int *)REG_values->ESP_val;
@@ -2828,7 +2828,7 @@ void CustomRORInstance::OnGameSettingsNotifyEvent(REG_BACKUP *REG_values) {
 
 // From 0x0507F75 (scenarioInfo.applyDisabledResearches(player))
 // This is only executed for scenarios, not DM/RM !
-void CustomRORInstance::OnGameInitDisableResearchesEvent(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnGameInitDisableResearchesEvent(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *playerResearchInfo = (AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *)REG_values->ECX_val;
 	ror_api_assert(REG_values, playerResearchInfo != NULL);
 	if (REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -2851,7 +2851,7 @@ void CustomRORInstance::OnGameInitDisableResearchesEvent(REG_BACKUP *REG_values)
 
 // From 0x507FC5
 // This is called in scenarioInfo.applyDisabledResearches(player) method.
-void CustomRORInstance::OnScenarioInitPlayerBadInitialAgeApplication(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnScenarioInitPlayerBadInitialAgeApplication(REG_BACKUP *REG_values) {
 	// There is nothing to do for compatibility
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	// Custom treatment is to disable call to player.applyStartingAge. This is done by overriding it by a call to ROR_API.
@@ -2865,7 +2865,7 @@ void CustomRORInstance::OnScenarioInitPlayerBadInitialAgeApplication(REG_BACKUP 
 // We use it to fix scenario player-specific starting age (technology tree has already been applied, here) in scenario.
 // It can be used as an entry point too.
 // Please note this is call for ALL game types (NOT for load game though)
-void CustomRORInstance::OnGameInitAfterSetInitialAge(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnGameInitAfterSetInitialAge(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	ror_api_assert(REG_values, settings && settings->IsCheckSumValid());
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -2886,7 +2886,7 @@ void CustomRORInstance::OnGameInitAfterSetInitialAge(REG_BACKUP *REG_values) {
 
 
 // 0x0462E60
-void CustomRORInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *textbox = (AOE_STRUCTURES::STRUCT_UI_TEXTBOX *)REG_values->ECX_val;
 	ror_api_assert(REG_values, textbox != NULL);
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -2910,7 +2910,7 @@ void CustomRORInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 // From 004EFF0F - in player.createUnit(f_posY, f_posX, f_posZ?, DAT_ID, status, f_orientation)
 // Called to create units from a scenario file (scenario editor or play scenario)
 // NOT called when loading a saved game, never called in-game, never called when creating units in scenario editor.
-void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
+void RockNRorInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
 	ror_api_assert(REG_values, unit != NULL);
 	REG_values->fixesForGameEXECompatibilityAreDone = true; // there is nothing to do for compatibility (CALL ROR_API is added instead of NOPs)
@@ -2954,7 +2954,7 @@ void CustomRORInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 // ROR method signature is f(void *obj, char *text, args...). obj is unused.
 // WARNING: (ROR) Compiler optimization is really a pain here, some calls to this method are NOT RELEVANT / not related to logs.
 // We must return (do nothing) for those calls.
-void CustomRORInstance::RORDebugLogHandler(REG_BACKUP *REG_values) {
+void RockNRorInstance::RORDebugLogHandler(REG_BACKUP *REG_values) {
 	// If disabled in config, exit and do nothing (default - corresponds to standard behaviour)
 	if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs <= 0) { return; }
 	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
@@ -2994,7 +2994,7 @@ void CustomRORInstance::RORDebugLogHandler(REG_BACKUP *REG_values) {
 
 // From 0x40C240. Corresponds to a trace method (disabled), signature is Method(pObject, message, [args]...) (printf-style)
 // Warning: do not use arg1 as it can be several different objects (often AI struct, but not always)
-void CustomRORInstance::CollectAOEDebugLogsInGame(REG_BACKUP *REG_values) {
+void RockNRorInstance::CollectAOEDebugLogsInGame(REG_BACKUP *REG_values) {
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->EAX_val = *(long int*)(0x554740); // For MOV EAX,DWORD PTR DS:[554740]
@@ -3019,7 +3019,7 @@ void CustomRORInstance::CollectAOEDebugLogsInGame(REG_BACKUP *REG_values) {
 // There is a call to "calcPathForMove" that sometimes fails for no apparent reason, especially on "back" movement calculation.
 // The fact that we simulate a movement where unit position <> start position causes the method to fail
 // Here we just make a workaround to help path finding method to succeed, so that most relevant gathering target can be selected
-void CustomRORInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_values) {
+void RockNRorInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_values) {
 	// As this method is compatible with 2 calls, we set 2 bools to know in which context we're running.
 	bool firstCall = (REG_values->return_address == 0x044DFC6); // first call = way from current pos to resource
 	bool secondCall = (REG_values->return_address == 0x044E02F); // second call = way back from resource to storage
@@ -3079,7 +3079,7 @@ void CustomRORInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_value
 // - JUMP to 4A792C (default) = do NOT show shortcut (managed in ROR modified code = no need to change return address)
 // - JUMP to 4A78DB = show standard shortcut(only for 1 - 9; will crash otherwise)
 // To show custom shortcut, do the CALL 516390 in customROR then JUMP to 4A792C.
-void CustomRORInstance::ShowUnitShortcutNumbers(REG_BACKUP *REG_values) {
+void RockNRorInstance::ShowUnitShortcutNumbers(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EBP_val;
 
 	const unsigned long int RA_showStandardShortcut = 0x4A78DB; // Return address for "standard shortcut" code.
@@ -3102,7 +3102,7 @@ void CustomRORInstance::ShowUnitShortcutNumbers(REG_BACKUP *REG_values) {
 
 // From 0x494C76
 // Change return address to 0x494CE5 (we replace loop by custom code)
-void CustomRORInstance::InitPlayersCivInScenarioEditor(REG_BACKUP *REG_values) {
+void RockNRorInstance::InitPlayersCivInScenarioEditor(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditorUIMain = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)REG_values->ECX_val;
 	char *filename = (char*)GetIntValueFromRORStack(REG_values, 0x7EC); // ROR method's arg1
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -3189,7 +3189,7 @@ void CustomRORInstance::InitPlayersCivInScenarioEditor(REG_BACKUP *REG_values) {
 
 
 // From 0x4978AF. The ROR-added code to support roman tileset in icons in editor does not work at all. Fix it.
-void CustomRORInstance::FixUnsupportedRomanTileSetInEditorIcons(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixUnsupportedRomanTileSetInEditorIcons(REG_BACKUP *REG_values) {
 	bool useStandardBehavior = CUSTOMROR::crInfo.configInfo.doNotApplyFixes; // *false* unless the "no fix" flag is set.
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	if (useStandardBehavior) {
@@ -3220,7 +3220,7 @@ void CustomRORInstance::FixUnsupportedRomanTileSetInEditorIcons(REG_BACKUP *REG_
 
 // From 0x48177A
 // Changes return address to 0x481E0A if custom treatments are used or to 0x481792 to use standard AOE code.
-void CustomRORInstance::OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *) REG_values->ESI_val;
 	ror_api_assert(REG_values, gameMainUI && gameMainUI->IsCheckSumValid());
 	long int sizeX_714 = REG_values->EDX_val;
@@ -3248,7 +3248,7 @@ void CustomRORInstance::OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_v
 
 
 // From 0x4F87F6. Change return address to 0x4F8801 for custom tilesets.
-void CustomRORInstance::OnDisplayBuildingIconInUnitInfoZone(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnDisplayBuildingIconInUnitInfoZone(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unitBld = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)REG_values->ECX_val;
 	// Remark: game code is a bit hazardous. It supposes that command attribute==2 makes that unit object IS a building, which may be wrong depending on empires.dat.
 	long int unitTileSet = 0;
@@ -3285,7 +3285,7 @@ void CustomRORInstance::OnDisplayBuildingIconInUnitInfoZone(REG_BACKUP *REG_valu
 
 
 // From 0x4A4402. In editorUnitInfoZone.setUnitDef(unitDef, player). Ensure SLPInfo is correct even for custom tilesets
-void CustomRORInstance::OnEditorSetBuildingIconInUnitInfoZone(REG_BACKUP *REG_values) {
+void RockNRorInstance::OnEditorSetBuildingIconInUnitInfoZone(REG_BACKUP *REG_values) {
 	long int currentTileset = REG_values->EDX_val;
 	AOE_STRUCTURES::STRUCT_UI_EDITOR_UNIT_INFO_ZONE *editorUnitInfoZone = (AOE_STRUCTURES::STRUCT_UI_EDITOR_UNIT_INFO_ZONE*)REG_values->EBP_val;
 	AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)REG_values->EAX_val;
@@ -3326,7 +3326,7 @@ void CustomRORInstance::OnEditorSetBuildingIconInUnitInfoZone(REG_BACKUP *REG_va
 
 
 // From 0x4824A9: display command bar icons (building icons for build menu)
-void CustomRORInstance::DisplayCommandBarGetSlpInfoForBuilding(REG_BACKUP *REG_values) {
+void RockNRorInstance::DisplayCommandBarGetSlpInfoForBuilding(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *)REG_values->ESI_val;
 	ror_api_assert(REG_values, gameMainUI && gameMainUI->IsCheckSumValid());
 	long int tilesetId_fixed = REG_values->EDX_val; // ROR code forced this value to 0 if >5.
@@ -3361,7 +3361,7 @@ void CustomRORInstance::DisplayCommandBarGetSlpInfoForBuilding(REG_BACKUP *REG_v
 
 
 // From 0x4FAA30. TODO: use CUSTOMROR::crInfo.configInfo.doNotApplyFixes ?
-void CustomRORInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
+void RockNRorInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *f11panel = (AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *)REG_values->ESI_val;
 	ror_api_assert(REG_values, f11panel && f11panel->IsCheckSumValid());
 	
@@ -3376,7 +3376,7 @@ void CustomRORInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
 // From 0x4C41B3 (in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID))
 // Change return address to 0x4C41C2 when unitId is invalid (-1) to force ignoring it.
 // Indeed, the GetUnitPtr(-1) call might find a unit (eg a doppleganger)
-void CustomRORInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ESI_val;
 	long int currentLoopOffset = REG_values->EDI_val;
 	long int currentUnitId = REG_values->ECX_val;
@@ -3406,7 +3406,7 @@ void CustomRORInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_va
 // Change return address to 0x414991 when unitId is invalid (-1) to force ignoring it.
 // Indeed, the GetUnitPtr(-1) call might find a unit (eg a doppleganger)
 // This method fixes the case when some unit (let's say an archer) keeps shooting at nothing, at a specific position on the map.
-void CustomRORInstance::FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
 	ror_api_assert(REG_values, activity && isAValidRORChecksum(activity->checksum));
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
@@ -3422,7 +3422,7 @@ void CustomRORInstance::FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values) 
 
 
 // From 0x412F2C
-void CustomRORInstance::SetActivityTargetUnitIdBug(REG_BACKUP *REG_values) {
+void RockNRorInstance::SetActivityTargetUnitIdBug(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EAX_val;
 	long int unitIdToSearch = GetIntValueFromRORStack(REG_values, 0);
@@ -3437,7 +3437,7 @@ void CustomRORInstance::SetActivityTargetUnitIdBug(REG_BACKUP *REG_values) {
 
 // From 0x4E64B2. May change return address to 0x4E64C7
 // Method = retreat after shooting.
-void CustomRORInstance::FixActivityTargetUnitIdBug_retreatAfterShooting(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixActivityTargetUnitIdBug_retreatAfterShooting(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EAX_val;
 	ror_api_assert(REG_values, actorUnit && actorUnit->IsCheckSumValidForAUnitClass());
@@ -3468,7 +3468,7 @@ void CustomRORInstance::FixActivityTargetUnitIdBug_retreatAfterShooting(REG_BACK
 // From 0x4E4796.
 // Get unit struct for "param" unitId and activity->targetUnitId to respectively EDI and EAX.
 // FIX: if unitId is -1, the unit pointer must be NULL.
-void CustomRORInstance::FixActivityTargetUnitIdBug_case1F4(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixActivityTargetUnitIdBug_case1F4(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
 	ror_api_assert(REG_values, activity && isAValidRORChecksum(activity->checksum));
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
@@ -3497,7 +3497,7 @@ void CustomRORInstance::FixActivityTargetUnitIdBug_case1F4(REG_BACKUP *REG_value
 
 // From 0x50CB64.
 // kill* cheat codes crash when player does not exist. This changes return address when player is invalid to force return.
-void CustomRORInstance::FixKillXCrashOnUnknownPlayer(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixKillXCrashOnUnknownPlayer(REG_BACKUP *REG_values) {
 	long int playerIdToKill = REG_values->EDI_val;
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = (AOE_STRUCTURES::STRUCT_GAME_GLOBAL *)REG_values->ESI_val;
 	ror_api_assert(REG_values, global && global->IsCheckSumValid());
@@ -3517,7 +3517,7 @@ void CustomRORInstance::FixKillXCrashOnUnknownPlayer(REG_BACKUP *REG_values) {
 
 
 // From 0x483489. end of ShowUnitComandButtons (in-game screen - begin=0x482290)
-void CustomRORInstance::EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->ESI_val);
 	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *)REG_values->ECX_val;
 	ror_api_assert(REG_values, gameMainUI && gameMainUI->IsCheckSumValid());
@@ -3541,7 +3541,7 @@ void CustomRORInstance::EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_
 // Forcing return address to 0x4815BE allows to skip ROR treatments (this button click will be ignored by ROR)
 // WARNING: This method may receive "OnKeyPress" events before the "OnKeyPress" method, for example pressing ESC when a unit is selected (ESC = button shortcut)
 // In such situations, the "GameAndEditor_ManageKeyPress" method never receives the event because THIS code already handled it.
-void CustomRORInstance::EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *)REG_values->ECX_val;
 	ror_api_assert(REG_values, gameMainUI && gameMainUI->IsCheckSumValid());
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -3567,7 +3567,7 @@ void CustomRORInstance::EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_value
 
 
 // From 0x483710. Fix the transformation of empires.dat button IDs to internal indexes to support more than 1 page
-void CustomRORInstance::ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_values) {
+void RockNRorInstance::ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_values) {
 	long int rawButtonId = GetIntValueFromRORStack(REG_values, 4);
 	long int result = BUTTONBAR::GetButtonInternalIndexFromDatBtnId((char)rawButtonId);
 	if (result < 0) {
@@ -3579,7 +3579,7 @@ void CustomRORInstance::ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_v
 
 
 // From 0x4EBB10. add missing check on techId (check it is >=0)
-void CustomRORInstance::FixPlayerNoTechTree_applyTech(REG_BACKUP *REG_values) {
+void RockNRorInstance::FixPlayerNoTechTree_applyTech(REG_BACKUP *REG_values) {
 	long int techId = GetIntValueFromRORStack(REG_values, 8); // Get arg1
 	techId = techId & 0xFFFF; // Because arg1 is a WORD ! (short int)
 	AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *tdi = (AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *)REG_values->ECX_val;
@@ -3593,7 +3593,7 @@ void CustomRORInstance::FixPlayerNoTechTree_applyTech(REG_BACKUP *REG_values) {
 
 
 // From 0x410E31 / 0x41124C : auto search target unit method.
-void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 	bool isFirstLoop = true;
 	unsigned long int returnAddress_ignoreThisTarget = 0;
 	unsigned long int returnAddress_thisTargetIsAcceptable = 0;
@@ -3660,7 +3660,7 @@ void CustomRORInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 
 
 // From 004F8D87. Called only for buildings that have an attack value (towers !)
-void CustomRORInstance::EntryPointOnBuildingAttackInfoDisplay(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointOnBuildingAttackInfoDisplay(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone = (AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *)REG_values->EBP_val;
 	ror_api_assert(REG_values, unitInfoZone && unitInfoZone->IsCheckSumValid());
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -3677,7 +3677,7 @@ void CustomRORInstance::EntryPointOnBuildingAttackInfoDisplay(REG_BACKUP *REG_va
 
 
 // From 0x4FF530 = GetLanguageDllString(stringId, buffer, size)
-void CustomRORInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 	unsigned long int *p = (unsigned long int *) ((ADDR_VAR_HINST_LANGUAGEX_DLL != 0) ? ADDR_VAR_HINST_LANGUAGEX_DLL : ADDR_VAR_HINST_LANGUAGE_DLL);
 #ifdef GAMEVERSION_AOE10b
 	unsigned long int returnAddress = 0x4E6D7D; // different code here (don't skip the 3 POP)
@@ -3725,7 +3725,7 @@ void CustomRORInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 
 
 // From 0x4ADB91. Normal code tests if number of queue items is > 0. If so, current queue is cancelled before adding a new item in queue.
-void CustomRORInstance::AllowMultiUnitTypeInQueue(REG_BACKUP *REG_values) {
+void RockNRorInstance::AllowMultiUnitTypeInQueue(REG_BACKUP *REG_values) {
 	short int elemCount = (REG_values->EAX_val & 0xFFFF); // AX / it is a word
 	bool forceKeepCurrentQueue = CUSTOMROR::crInfo.configInfo.allowMultiQueueing; // Game default = false
 	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
@@ -3745,7 +3745,7 @@ void CustomRORInstance::AllowMultiUnitTypeInQueue(REG_BACKUP *REG_values) {
 
 
 // From 0x4268F8. Occurs when a units receives damage from an attack and dies (HP<1 ; death did not occur yet, HP was just updated)
-void CustomRORInstance::EntryPointOnAttackableUnitKilled(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointOnAttackableUnitKilled(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)REG_values->ESI_val;
 	ror_api_assert(REG_values, targetUnit != NULL);
 	ror_api_assert(REG_values, targetUnit->IsCheckSumValidForAUnitClass());
@@ -3772,7 +3772,7 @@ void CustomRORInstance::EntryPointOnAttackableUnitKilled(REG_BACKUP *REG_values)
 
 // From 0x4F6F96 : player.HoverOnUnit(...).
 // May change return address to 0x4F7177 (force return NULL in ROR's method) or 0x4F7179 (return with EAX's current value)
-void CustomRORInstance::EntryPointOnHoverOnUnit(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointOnHoverOnUnit(REG_BACKUP *REG_values) {
 	// Get context and local variables from ROR method.
 	GAME_CURSOR *pOutputCursor = (GAME_CURSOR*)REG_values->EBP_val;
 	long int *pOutputDllId = (long int *)REG_values->EBX_val;
@@ -3812,7 +3812,7 @@ void CustomRORInstance::EntryPointOnHoverOnUnit(REG_BACKUP *REG_values) {
 
 
 // From 0x51339B
-void CustomRORInstance::EntryPointShowInGameDefaultCursor_noUnitUnderMouse(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointShowInGameDefaultCursor_noUnitUnderMouse(REG_BACKUP *REG_values) {
 	GAME_CURSOR cursorToSet = GAME_CURSOR::GC_NORMAL; // Game default behaviour
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
@@ -3833,7 +3833,7 @@ void CustomRORInstance::EntryPointShowInGameDefaultCursor_noUnitUnderMouse(REG_B
 
 
 // From 0x411D3A. Called on unitActivity.stop(bool)
-void CustomRORInstance::EntryPointAfterActivityStop(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointAfterActivityStop(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *unitActivity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ESI_val;
 	ror_api_assert(REG_values, unitActivity != NULL); // control checksums ? Not sure I have the whole list
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -3848,7 +3848,7 @@ void CustomRORInstance::EntryPointAfterActivityStop(REG_BACKUP *REG_values) {
 
 // From 0x40ACDA: diplAI.GetMostDislikedPlayerId(askTributeAmount, askTributePlayerId, bAttackWinningPlayer, attackWinningPlayerFactor)
 // This may change return address to 0x40AD8E to bypass standard treatments.
-void CustomRORInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_DIPLOMACY_AI *diplAI = (AOE_STRUCTURES::STRUCT_DIPLOMACY_AI *)REG_values->EDI_val;
 	AOE_STRUCTURES::STRUCT_PLAYER *player = (AOE_STRUCTURES::STRUCT_PLAYER *)REG_values->EAX_val;
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = (AOE_STRUCTURES::STRUCT_GAME_GLOBAL *)REG_values->ECX_val;
@@ -3887,7 +3887,7 @@ void CustomRORInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values
 // Can change return value to 0x4C0E3C if we chose to override ROR method (and NOT execute it)
 // This method searches for a target when AI player has an idle military situation (?)
 // Callers are 0x4D4348, 0x4D53F9, 0x4D5BF2 (parent method=0x4D3AB0=tacAITaskActiveGroups?)
-void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ESI_val;
 	ror_api_assert(REG_values, infAI && infAI->IsCheckSumValid());
 	long int targetPlayerId = GetIntValueFromRORStack(REG_values, 0x88); // arg1
@@ -3926,7 +3926,7 @@ void CustomRORInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_value
 
 // From 0x4D3ABA. tacAI.TaskActiveSoldiers(timeGetTime, allowedtime) before doing anything else
 // Can change return address to 0x4D6039 to exit procedure
-void CustomRORInstance::EntryPointTacAIHandleActiveGroupsBeforeLoop(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointTacAIHandleActiveGroupsBeforeLoop(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->EDI_val);
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->ECX_val;
 	ror_api_assert(REG_values, (tacAI != NULL) && tacAI->IsCheckSumValid());
@@ -3957,7 +3957,7 @@ void CustomRORInstance::EntryPointTacAIHandleActiveGroupsBeforeLoop(REG_BACKUP *
 // From 0x4D3B16. tacAI.TaskActiveSoldiers(timeGetTime, allowedtime) at begin of "for each group" loop
 // Can change return address to 0x4D6024 to ignore current group
 // EntryPointTacAIHandleActiveGroupsBeforeLoop is ALWAYS (once) called before this
-void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, REG_values->EBP_val == 0);
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *)REG_values->EDI_val;
 	AOE_STRUCTURES::STRUCT_UNIT_GROUP *unitGroup = (AOE_STRUCTURES::STRUCT_UNIT_GROUP *)REG_values->ESI_val;
@@ -4000,7 +4000,7 @@ void CustomRORInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values
 
 // From 0x4AFBDF=unit.createActivity. This is executed before the method actually starts.
 // Change return address to 0x4AFC6E to return and skip ROR treatments.
-void CustomRORInstance::EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_values) {
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		// Fix the 2 "PUSHs" values. Previous EAX and EDX values are unused, we use them to PUSH the correct values in ROR code.
@@ -4034,7 +4034,7 @@ void CustomRORInstance::EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_value
 
 // From 0x501640. In gameSettings.showTimings(). (show F5 debug info in game screen)
 // Does not change return address. It is possible to disable standard behaviour: just set ECX=NULL.
-void CustomRORInstance::OverrideShowF5DebugInfo(REG_BACKUP *REG_values) {
+void RockNRorInstance::OverrideShowF5DebugInfo(REG_BACKUP *REG_values) {
 	STRUCT_GAME_SETTINGS *settings = (STRUCT_GAME_SETTINGS *)REG_values->EAX_val;
 	ror_api_assert(REG_values, settings && settings->IsCheckSumValid());
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -4057,7 +4057,7 @@ void CustomRORInstance::OverrideShowF5DebugInfo(REG_BACKUP *REG_values) {
 
 // From unit.canTradeWith(unitDefId) in 0x4AFB70 (unit+0x138). Called from 0x40386E(farming), 0x4B6CDF(trading), etc
 // Set EAX = 0x2D (CST_UNITID_DOCK) to have ROR function return true, any other value = return false (can't trade with)
-void CustomRORInstance::UnitDefProvidesRenewableResource(REG_BACKUP *REG_values) {
+void RockNRorInstance::UnitDefProvidesRenewableResource(REG_BACKUP *REG_values) {
 	long int targetUnitDefId = REG_values->EAX_val;
 	bool resultCanTradeWith = (targetUnitDefId == CST_UNITID_FARM) /* Yes ! */ ||
 		(targetUnitDefId == CST_UNITID_DOCK); // This init is game default.
@@ -4079,7 +4079,7 @@ void CustomRORInstance::UnitDefProvidesRenewableResource(REG_BACKUP *REG_values)
 // From 0x4F8F04.
 // Always changes return address to 0x4F902A. We overload the necessary "add resource info line" for this portion of ROR code.
 // Note: displaying farm food has already been handled (same for "action in progress), we can exclude these cases to avoid showing both info.
-void CustomRORInstance::EntryPointDisplayBuildingInfoResource(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointDisplayBuildingInfoResource(REG_BACKUP *REG_values) {
 	// Change return address to 0x4F902A = do not show resource info using ROR code.
 	ChangeReturnAddress(REG_values, 0x4F902A);
 	// Collect context information
@@ -4152,7 +4152,7 @@ void CustomRORInstance::EntryPointDisplayBuildingInfoResource(REG_BACKUP *REG_va
 
 // From 0x4F9B7B, in unitInfoZone.refreshIfNeeded().
 // Change return address to 0x4F9C7B if unit is a dock (standard code) or a trade building (custom fix)
-void CustomRORInstance::EntryPointRefreshTradeGoodsInUnitInfoZone(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointRefreshTradeGoodsInUnitInfoZone(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ECX_val;
 	ror_api_assert(REG_values, unit && unit->IsCheckSumValidForAUnitClass());
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)REG_values->EBX_val;
@@ -4180,7 +4180,7 @@ void CustomRORInstance::EntryPointRefreshTradeGoodsInUnitInfoZone(REG_BACKUP *RE
 
 
 // From 0x4C1ABF. Replaces the whole function infAI.searchTradeTargetElem(actorUnitId), returns pointer to infAIElem = trade target.
-void CustomRORInstance::EntryPointInfAISearchTradeTargetElem(REG_BACKUP *REG_values) {
+void RockNRorInstance::EntryPointInfAISearchTradeTargetElem(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ECX_val;
 	long int actorUnitId = GetIntValueFromRORStack(REG_values, 4);
@@ -4194,7 +4194,7 @@ void CustomRORInstance::EntryPointInfAISearchTradeTargetElem(REG_BACKUP *REG_val
 
 
 // From 0x4B6FA8
-void CustomRORInstance::AddRelevantResourceValueWhenTrading(REG_BACKUP *REG_values) {
+void RockNRorInstance::AddRelevantResourceValueWhenTrading(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	float resourceValue = *((float*)&REG_values->EDX_val); // cast... without conversion
 	unsigned long int checksumForCall = REG_values->EAX_val;

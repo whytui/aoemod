@@ -9,7 +9,7 @@
 #include "WxEditFile.h"
 #include "FileSelector.h"
 #include "WxChangeResolution.h"
-#include "WxInstallCustomROR.h"
+#include "WxInstallRockNRor.h"
 #include "WxSampleTrigger.h"
 #include "WxDebugMainForm.h"
 #include "InstallManager.h"

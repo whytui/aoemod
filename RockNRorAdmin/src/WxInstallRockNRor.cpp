@@ -1,29 +1,29 @@
 
-#include "WxInstallCustomROR.h"
+#include "WxInstallRockNRor.h"
 
 
-wxBEGIN_EVENT_TABLE(WxInstallCustomROR, wxDialog)
+wxBEGIN_EVENT_TABLE(WxInstallRockNRor, wxDialog)
 //EVT_MENU(ID_CR_CANCEL, WxChangeResolution::OnCancel)
 wxEND_EVENT_TABLE()
 
 
-WxInstallCustomROR::WxInstallCustomROR(wxWindow *parent, const wxString& title, const wxSize& size) : wxDialog(parent, -1, title, wxDefaultPosition, size, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxNO_DEFAULT)
+WxInstallRockNRor::WxInstallRockNRor(wxWindow *parent, const wxString& title, const wxSize& size) : wxDialog(parent, -1, title, wxDefaultPosition, size, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxNO_DEFAULT)
 {
 	this->ConstructorInit(_T(""));
 }
 
 
-WxInstallCustomROR::WxInstallCustomROR(wxWindow *parent, const wxString& title, const wxSize& size, std::wstring EXEFileName) : wxDialog(parent, -1, title, wxDefaultPosition, size, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxNO_DEFAULT)
+WxInstallRockNRor::WxInstallRockNRor(wxWindow *parent, const wxString& title, const wxSize& size, std::wstring EXEFileName) : wxDialog(parent, -1, title, wxDefaultPosition, size, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxNO_DEFAULT)
 {
 	this->ConstructorInit(EXEFileName);
 }
 
 
-WxInstallCustomROR::~WxInstallCustomROR() {
+WxInstallRockNRor::~WxInstallRockNRor() {
 }
 
 
-void WxInstallCustomROR::ConstructorInit(std::wstring EXEFileName) {
+void WxInstallRockNRor::ConstructorInit(std::wstring EXEFileName) {
 	this->gameFileName = EXEFileName;
 	this->pathToResourceFiles = _T("");
 	this->hasMissingFile = true;
@@ -49,10 +49,10 @@ void WxInstallCustomROR::ConstructorInit(std::wstring EXEFileName) {
 	this->btnSelectRORAPI_DLL = new wxButton(this, ICR_Components_IDs::ID_ICR_SELECT_RORAPI_DLL, _T("Select ROR_API.dll"));
 	this->btnSelectRORAPI_DLL->SetBackgroundColour(wxColor("red"));
 
-	Connect(ICR_Components_IDs::ID_ICR_SELECT_GAME_FILE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallCustomROR::OnSelectGameEXE));
-	Connect(ICR_Components_IDs::ID_ICR_OK, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallCustomROR::OnOK));
-	Connect(ICR_Components_IDs::ID_ICR_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallCustomROR::OnCancel));
-	Connect(ICR_Components_IDs::ID_ICR_SELECT_RORAPI_DLL, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallCustomROR::OnSelectCustomROR_DLL));
+	Connect(ICR_Components_IDs::ID_ICR_SELECT_GAME_FILE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallRockNRor::OnSelectGameEXE));
+	Connect(ICR_Components_IDs::ID_ICR_OK, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallRockNRor::OnOK));
+	Connect(ICR_Components_IDs::ID_ICR_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallRockNRor::OnCancel));
+	Connect(ICR_Components_IDs::ID_ICR_SELECT_RORAPI_DLL, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallRockNRor::OnSelectCustomROR_DLL));
 
 	this->GameFileArea->Add(this->btnSelectGameFile, 0, wxALIGN_LEFT);
 	this->GameFileArea->Add(this->edtGameFileName, 1, wxEXPAND);
@@ -108,13 +108,13 @@ void WxInstallCustomROR::ConstructorInit(std::wstring EXEFileName) {
 }
 
 
-void WxInstallCustomROR::OnCancel(wxCommandEvent& event)
+void WxInstallRockNRor::OnCancel(wxCommandEvent& event)
 {
 	this->EndModal(wxCANCEL);
 }
 
 
-void WxInstallCustomROR::OnOK(wxCommandEvent& event)
+void WxInstallRockNRor::OnOK(wxCommandEvent& event)
 {
 	if (this->gameFileName.empty()) {
 		wxMessageBox(_T("Please first select game EXE file to patch."), _T("Install RockNRor"), wxICON_WARNING | wxOK, this);
@@ -133,7 +133,7 @@ void WxInstallCustomROR::OnOK(wxCommandEvent& event)
 }
 
 
-void WxInstallCustomROR::OnSelectGameEXE(wxCommandEvent& event) {
+void WxInstallRockNRor::OnSelectGameEXE(wxCommandEvent& event) {
 	wxFileDialog openFileDialog(this, _("Choose game file EXE to patch"), "", "", "EXE files (*.exe)|*.exe", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL) {
 		return;
@@ -145,7 +145,7 @@ void WxInstallCustomROR::OnSelectGameEXE(wxCommandEvent& event) {
 }
 
 
-void WxInstallCustomROR::OnSelectCustomROR_DLL(wxCommandEvent& event) {
+void WxInstallRockNRor::OnSelectCustomROR_DLL(wxCommandEvent& event) {
 	wxFileDialog openFileDialog(this, _("Choose ROR_API.dll file from installation directory"), "", "", "ROR_API.dll (ROR_API.dll)|ROR_API.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL) {
 		return;
@@ -172,7 +172,7 @@ void WxInstallCustomROR::OnSelectCustomROR_DLL(wxCommandEvent& event) {
 }
 
 
-bool WxInstallCustomROR::CheckTextCtrlPath(wxTextCtrl *edt) {
+bool WxInstallRockNRor::CheckTextCtrlPath(wxTextCtrl *edt) {
 	bool valid = CheckFileExistence(edt->GetValue().t_str());
 	if (!valid) {
 		edt->SetBackgroundColour(*wxRED);

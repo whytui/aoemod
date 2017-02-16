@@ -13,12 +13,12 @@
 #endif
 
 
-class WxInstallCustomROR : public wxDialog
+class WxInstallRockNRor : public wxDialog
 {
 public:
-	WxInstallCustomROR(wxWindow *parent, const wxString& title, const wxSize& size);
-	WxInstallCustomROR(wxWindow *parent, const wxString& title, const wxSize& size, std::wstring EXEFileName);
-	~WxInstallCustomROR();
+	WxInstallRockNRor(wxWindow *parent, const wxString& title, const wxSize& size);
+	WxInstallRockNRor(wxWindow *parent, const wxString& title, const wxSize& size, std::wstring EXEFileName);
+	~WxInstallRockNRor();
 	void ConstructorInit(std::wstring EXEFileName);
 
 	std::wstring gameFileName;

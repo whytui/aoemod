@@ -46,9 +46,9 @@ namespace CUSTOMROR {
 	Methods from this class should not do functional treatments, just call entry points/methods from other (more functional) classes.
 	*/
 
-	class CustomRORInstance {
+	class RockNRorInstance {
 	public:
-		CustomRORInstance();
+		RockNRorInstance();
 
 		// Entry point : Game code -> ROR_API -> CustomRORInstance.DispatchToCustomCode(...) -> customROR treatments
 		void DispatchToCustomCode(REG_BACKUP *REG_values);
@@ -192,7 +192,7 @@ namespace CUSTOMROR {
 	};
 
 	// Main object
-	static CustomRORInstance objCustomRORInstance;
+	static RockNRorInstance objCustomRORInstance;
 }
 
 // Technical interface method for ROR_API. Do not modify.
