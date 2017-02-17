@@ -3515,7 +3515,11 @@ bool CustomRORCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTI
 	case CUSTOMROR::CONFIG::IDL_HIDDEN_AI:
 		return AOE_METHODS::UI_BASE::ShowHiddenDebugAIInfo(settings);
 	case CUSTOMROR::CONFIG::IDL_CUSTOM:
+#ifdef _DEBUG
 		return CR_DEBUG::HandleCustomRORInGameF5DebugInfo(settings);
+#else
+		return true;
+#endif
 	default:
 		break;
 	}

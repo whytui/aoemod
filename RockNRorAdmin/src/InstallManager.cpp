@@ -26,7 +26,7 @@ bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeF
 	}
 
 	// Build all file names
-	std::wstring destCustomRorDir = destDirName + _T("\\RockNRor");
+	//std::wstring destCustomRorDir = destDirName + _T("\\RockNRor");
 	std::wstring srcRORAPI_DLL = sourceDirectory + _T("\\ROR_API.dll");
 	std::wstring srcRORAPI_CONF = sourceDirectory + _T("\\ROR_API.conf");
 	std::wstring srcWNDMODE_DLL = sourceDirectory + _T("\\wndmode.dll");
@@ -62,7 +62,8 @@ bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeF
 
 	logs += _T("Starting RockNRor installation...\n");
 	logs += _T("Creating RockNRor directory...\n");
-	CreateDirectory(destCustomRorDir.c_str(), NULL); // Returns 0 if failed
+	CreateDirectory(destCustomROR_dir.c_str(), NULL); // Returns 0 if failed
+	hasDestCustomRor_dir = DirectoryExists(destCustomROR_dir);
 	logs += _T("Copying files...\n");
 	// Warning for CopyFile: last param is failIfExists (opposite of overwrite). Return value = is_success (0=failed)
 	bool copyFailed = false;
@@ -94,8 +95,8 @@ bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeF
 	}
 	// Copy RockNRor directory and underlying files
 	if (!hasDestCustomRor_dir) {
-		if (CreateDirectory(destCustomRorDir.c_str(), NULL) != 0) {
-			message += _T("Created directory ") + destCustomRorDir + _T("\n");
+		if (CreateDirectory(destCustomROR_dir.c_str(), NULL) != 0) {
+			message += _T("Created directory ") + destCustomROR_dir + _T("\n");
 			logs += message;
 		} else {
 			copyFailed = true;
@@ -106,7 +107,7 @@ bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeF
 	{
 		if (overwriteFiles || !CheckFileExistence(filename)) {
 			std::wstring sourceFile = srcCustomROR_dir + std::wstring(_T("\\")) + filename;
-			std::wstring targetFile = destCustomRorDir + std::wstring(_T("\\")) + filename;
+			std::wstring targetFile = destCustomROR_dir + std::wstring(_T("\\")) + filename;
 			singleCopySuccess = CopyFile(sourceFile.c_str(), targetFile.c_str(), !overwriteFiles);
 			if (!singleCopySuccess) {
 				copyFailed = true;

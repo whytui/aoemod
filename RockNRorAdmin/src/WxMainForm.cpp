@@ -248,7 +248,7 @@ void WxMainForm::FixDDrawColorBug() {
 
 void WxMainForm::ChangeInstallDirInRegistry() {
 
-	std::wstring wTitle = _T("Please the direcotry to use as Age of Empires installation directory");
+	std::wstring wTitle = _T("Please select the directory to use as Age of Empires installation directory");
 	wxDirDialog *dirDialog = new wxDirDialog(this, wTitle, wxEmptyString);
 	dirDialog->SetPath(this->e_api->GetFileName());
 	bool success = dirDialog->ShowModal() == wxID_OK;
@@ -278,14 +278,14 @@ void WxMainForm::ChangeInstallDirInRegistry() {
 // This automatically installs RockNRor : copies files from user-provided source dir and patches EXE file.
 void WxMainForm::InstallCustomROR() {
 	// Open UI for user choices
-	WxInstallRockNRor *wInstallCROR = new WxInstallRockNRor(this, _T("Select installation files for RockNRor"), wxSize(800, 580),
+	WxInstallRockNRor *wInstallRnROR = new WxInstallRockNRor(this, _T("Select installation files for RockNRor"), wxSize(800, 580),
 		this->e_api->GetFileName());
-	int result = wInstallCROR->ShowModal();
-	std::wstring srcDirName = wInstallCROR->pathToResourceFiles;
-	std::wstring selectedGameEXE = wInstallCROR->gameFileName;
-	bool userWantsToOverwriteFiles = wInstallCROR->ReplaceFiles();
+	int result = wInstallRnROR->ShowModal();
+	std::wstring srcDirName = wInstallRnROR->pathToResourceFiles;
+	std::wstring selectedGameEXE = wInstallRnROR->gameFileName;
+	bool userWantsToOverwriteFiles = wInstallRnROR->ReplaceFiles();
 
-	delete wInstallCROR;
+	delete wInstallRnROR;
 	if (result != wxOK) {
 		SetStatusText(_T("Cancelled by user, did not proceed to installation."));
 		return;

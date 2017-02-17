@@ -1,5 +1,4 @@
 
-#ifdef _DEBUG
 #pragma once
 
 #include <assert.h>
@@ -25,6 +24,7 @@ using namespace AOE_STRUCTURES;
 
 namespace CR_DEBUG {
 
+#ifdef _DEBUG
 
 // Dumps useful information for debugging.
 void DumpDebugInfoToFile();
@@ -58,10 +58,11 @@ void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char 
 bool HandleCustomRORInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings);
 
 
+#endif
+
+
 // Automatically detects issues in empires.dat (requires to have been loaded already) and writes logs about errors in trace message handler.
 bool AnalyzeEmpiresDatQuality();
 
 
 }
-
-#endif

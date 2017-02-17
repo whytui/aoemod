@@ -1,5 +1,3 @@
-
-#ifdef _DEBUG
 #include "../include/crDebugOutputPrimitives.h"
 
 /* This file contains various primitives for debugging */
@@ -8,6 +6,9 @@
 using namespace AOE_STRUCTURES;
 
 namespace CR_DEBUG {
+
+
+#ifdef _DEBUG
 
 
 void DumpDebugInfoToFile() {
@@ -380,6 +381,10 @@ bool HandleCustomRORInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *sett
 }
 
 
+#endif
+
+
+
 // Automatically detects issues in empires.dat (requires to have been loaded already) and writes logs about errors in trace message handler.
 bool AnalyzeEmpiresDatQuality() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
@@ -645,4 +650,3 @@ bool AnalyzeEmpiresDatQuality() {
 
 }
 
-#endif
