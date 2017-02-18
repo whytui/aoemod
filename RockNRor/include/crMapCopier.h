@@ -10,7 +10,7 @@
 #include "UI_utilities.h"
 #include "traceMessage.h"
 #include "AOE_map.h"
-#include "crCommon.h"
+#include "RockNRorCommon.h"
 #include "AOEPrimitives_units.h"
 
 

@@ -3,7 +3,7 @@
 #include <AOE_struct_player.h>
 #include <AOE_struct_units.h>
 #include <triggerDefinition.h>
-#include "CustomRORInfo.h"
+#include "RockNRorInfo.h"
 #include "crTrigger.h"
 #include "mainStructuresHandling.h"
 #include "AOEPrimitives_UI_gameMain.h"

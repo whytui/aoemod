@@ -1,7 +1,7 @@
-#include "CAOE_Console.h"
+#include "RockNRorAdmin_Console.h"
 
 
-CAOE_Console::CAOE_Console()
+RockNRorAdmin_Console::RockNRorAdmin_Console()
 {
 	this->winput = NULL;
 	this->echo = false;
@@ -9,14 +9,14 @@ CAOE_Console::CAOE_Console()
 }
 
 
-CAOE_Console::CAOE_Console(std::wistream *inputStream) {
+RockNRorAdmin_Console::RockNRorAdmin_Console(std::wistream *inputStream) {
 	this->winput = inputStream;
 	this->echo = false;
 	this->hasError = false;
 }
 
 
-CAOE_Console::~CAOE_Console()
+RockNRorAdmin_Console::~RockNRorAdmin_Console()
 {
 }
 
@@ -24,13 +24,13 @@ CAOE_Console::~CAOE_Console()
 
 
 // Display a message to the console
-void CAOE_Console::DisplayMessage(std::wstring message) {
+void RockNRorAdmin_Console::DisplayMessage(std::wstring message) {
 	wprintf(message.c_str());
 }
 
 
 // Returns true if the user answered Y or y to the question
-bool CAOE_Console::AskForConfirmation(std::wstring question) {
+bool RockNRorAdmin_Console::AskForConfirmation(std::wstring question) {
 	std::wstring s_input;
 	this->DisplayMessage(question);
 	std::getline(*this->winput, s_input);
@@ -40,7 +40,7 @@ bool CAOE_Console::AskForConfirmation(std::wstring question) {
 
 
 // Program entry point
-bool CAOE_Console::Execute() {
+bool RockNRorAdmin_Console::Execute() {
 	wprintf(_T("RockNRor Admin %s. Type <help> for command list.\n"), widen(VER_FILE_VERSION_STR).c_str());
 	wprintf(_T("Warning: this console is stupid, do not write extra chars in commands (not even spaces).\n"));
 	return this->MainConsoleLoop();
@@ -48,7 +48,7 @@ bool CAOE_Console::Execute() {
 
 
 // Returns true if at least 1 command ended with errors. Useful for batch mode.
-bool CAOE_Console::HasError() {
+bool RockNRorAdmin_Console::HasError() {
 	return this->hasError;
 }
 
@@ -64,7 +64,7 @@ return true; \
 // --------------------------------------------
 // Own methods
 
-void CAOE_Console::ShowCommands() {
+void RockNRorAdmin_Console::ShowCommands() {
 	wprintf_s(_T("Commands are:\n"));
 	wprintf_s(_T("exit / quit        : exit the program. Pending changes will be lost.\n"));
 	wprintf_s(_T("#anything          : lines with leading # are ignored (comments)\n"));
@@ -105,7 +105,7 @@ void CAOE_Console::ShowCommands() {
 // Executes the provided command (wstring).
 // Displays a message if command is unknown.
 // Returns false if the command asks to exit the console
-bool CAOE_Console::ExecuteCommand(std::wstring cmd) {
+bool RockNRorAdmin_Console::ExecuteCommand(std::wstring cmd) {
 	std::wstring s_input;
 	bool open_file = false;
 	if ((cmd == _T("exit")) || (cmd == _T("quit"))) {
@@ -476,7 +476,7 @@ bool CAOE_Console::ExecuteCommand(std::wstring cmd) {
 }
 
 
-bool CAOE_Console::MainConsoleLoop() {
+bool RockNRorAdmin_Console::MainConsoleLoop() {
 	std::wstring s_input;
 	bool go_on = true;
 	bool silentCommand = false;

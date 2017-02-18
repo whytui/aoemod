@@ -25,7 +25,7 @@
 #include "AOE_memory.h"
 #include "AOE_map.h"
 #include "UI_utilities.h"
-#include "crConfig.h"
+#include "RockNRorConfig.h"
 #include "civilizationInfo.h"
 #include "crTrigger.h"
 #include "crTriggerSet.h"
@@ -33,7 +33,7 @@
 #include "interface.h" // SLP/icon ids...
 #include "language.h"
 #include "researches.h"
-#include "crLocalization.h"
+#include "RockNRorLocalization.h"
 #include "unitDefHandling.h"
 #include "buttonBarCommon.h"
 #include "AOEPrimitives_gameCommand.h"

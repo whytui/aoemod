@@ -6,8 +6,8 @@
 #include <AOE_struct_player.h>
 #include <UI_components\AOE_struct_ui_button_with_number.h>
 #include <UI\AOE_struct_ui_in_game_main.h>
-#include "crCommon.h"
-#include "CustomRORInfo.h"
+#include "RockNRorCommon.h"
+#include "RockNRorInfo.h"
 #include "AOEPrimitives_units.h"
 #include "AOEPrimitives_UI_gameMain.h"
 #include "unitHandling.h"

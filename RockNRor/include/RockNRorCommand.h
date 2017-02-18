@@ -17,8 +17,8 @@
 #include <AOE_hardcoded_unit_names.h>
 #include "Version.h"
 #include "AOE_map.h"
-#include "crCommon.h"
-#include "CustomRORInfo.h"
+#include "RockNRorCommon.h"
+#include "RockNRorInfo.h"
 #include "UI_utilities.h"
 #include "crTrigger.h"
 #include "crTriggerSet.h"
@@ -28,7 +28,7 @@
 #include "crPatcher.h"
 #include "unitShortcuts.h"
 #include "researches.h"
-#include "crLocalization.h"
+#include "RockNRorLocalization.h"
 #include "StrategyBuilder.h"
 #include "basicFilesHandling.h"
 #include "crMapCopier.h"
@@ -76,10 +76,10 @@ It contains all main "functional" methods whose behaviour depends on RockNRor co
 "static" common methods (whose behaviour does not depend on any configuration, eg. get a unit struct from its ID) do NOT belong to this class, see crCommon.h.
 */
 
-class CustomRORCommand {
+class RockNRorCommand {
 public:
-	CustomRORCommand();
-	~CustomRORCommand();
+	RockNRorCommand();
+	~RockNRorCommand();
 
 private:
 	//const float distanceToConsiderVeryClose = 1.0; // Distance (added to range) under which a target is considered "within range". Please leave this > 0.
@@ -351,6 +351,6 @@ public:
 };
 
 
-	// A unique global object for everyone
-	extern CustomRORCommand crCommand;
+// A unique global object for everyone
+extern RockNRorCommand crCommand;
 }

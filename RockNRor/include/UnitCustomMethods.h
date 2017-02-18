@@ -6,8 +6,8 @@
 #include "AOE_map.h"
 #include "AOEPrimitives_units.h"
 #include "unitHandling.h"
-#include "crCommon.h"
-#include "CustomRORInfo.h"
+#include "RockNRorCommon.h"
+#include "RockNRorInfo.h"
 #include "crRPGMode.h"
 #include "mainCustomAI.h"
 

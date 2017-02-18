@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <AOE_struct_units.h>
 #include <AOE_struct_player.h>
-#include "CustomRORInfo.h"
+#include "RockNRorInfo.h"
 #include "AOEPrimitives_units.h"
 #include "unitHandling.h"
 #include "AOEPrimitives_UI_gameMain.h"

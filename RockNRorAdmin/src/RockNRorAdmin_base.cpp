@@ -1,19 +1,19 @@
-#include "CustomizeAOE_base.h"
+#include "RockNRorAdmin_base.h"
 
 
-CustomizeAOE_base::CustomizeAOE_base()
+RockNRorAdmin_base::RockNRorAdmin_base()
 {
 	this->interactive = true;
 }
 
 
-CustomizeAOE_base::~CustomizeAOE_base()
+RockNRorAdmin_base::~RockNRorAdmin_base()
 {
 }
 
 
 // Returns true if successful
-bool CustomizeAOE_base::OpenEmpiresX(bool autoFixFile, bool noPromptBeforeFix) {
+bool RockNRorAdmin_base::OpenEmpiresX(bool autoFixFile, bool noPromptBeforeFix) {
 	if (!e_api.OpenEmpiresXFile()) {
 		return false;
 	}
@@ -30,7 +30,7 @@ bool CustomizeAOE_base::OpenEmpiresX(bool autoFixFile, bool noPromptBeforeFix) {
 
 // Automatically install technical fixes and remove obsolete changes.
 // Returns true if successful
-bool CustomizeAOE_base::CheckAndRunAutoFixes(bool noPromptBeforeFix) {
+bool RockNRorAdmin_base::CheckAndRunAutoFixes(bool noPromptBeforeFix) {
 	e_api.CancelPendingChanges();
 	int techFixesStatus = e_api.HasMissingTechFixes();
 	bool hasObsolete = e_api.HasObsoleteSequencesInstalled();

@@ -8,8 +8,8 @@
 #include <AOE_struct_unit_def.h>
 #include <AOE_const_functional.h>
 #include <basicFilesHandling.h>
-#include "crCommon.h"
-#include "CustomRORInfo.h"
+#include "RockNRorCommon.h"
+#include "RockNRorInfo.h"
 #include "researches.h"
 #include "randomizer.h"
 #include "AOE_strategy.h"
@@ -24,7 +24,7 @@ namespace STRATEGY {
 	// Class that handles the selection of military units for strategy creation.
 	class StrategyBuilder {
 	public:
-		StrategyBuilder(CustomRORInfo *crInfo, AOE_STRUCTURES::STRUCT_PLAYER *player) {
+		StrategyBuilder(RockNRorInfo *crInfo, AOE_STRUCTURES::STRUCT_PLAYER *player) {
 			this->crInfo = crInfo;
 			this->ai = NULL;
 			this->buildAI = NULL;
@@ -63,7 +63,7 @@ namespace STRATEGY {
 			}
 #endif
 		}
-		CustomRORInfo *crInfo;
+		RockNRorInfo *crInfo;
 
 		int GetRandomFactor() { return randomPercentFactor; }
 		void SetRandomFactor(int value) { if ((value >= 0) && (value <= 100)) { randomPercentFactor = value; } }

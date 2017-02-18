@@ -6,13 +6,13 @@
 Generic class that relies on EmpiresX_API.
 Inherit from this class to create your own API/Program.
 */
-class CustomizeAOE_base
+class RockNRorAdmin_base
 {
 // We define virtual methods...
 // ...so that calls from parent class methods will call child class' implementation
 public:
-	CustomizeAOE_base();
-	~CustomizeAOE_base();
+	RockNRorAdmin_base();
+	~RockNRorAdmin_base();
 
 	// Main entry point for the program. To be defined in child class. Returns true if successful.
 	virtual bool Execute() = 0; // abstract method

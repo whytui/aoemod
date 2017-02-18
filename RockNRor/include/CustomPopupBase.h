@@ -10,9 +10,9 @@
 #include <UI_components\AOE_struct_ui_scrollbar.h>
 #include <UI_components\AOE_struct_ui_textbox.h>
 #include <mystrings.h>
-#include "crCommon.h"
-#include "CustomRORInfo.h"
-#include "crLocalization.h"
+#include "RockNRorCommon.h"
+#include "RockNRorInfo.h"
+#include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
 
 

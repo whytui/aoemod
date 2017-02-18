@@ -6,12 +6,12 @@
 #include <UI\AOE_struct_ui_mp_setup_screen.h>
 #include <AOE_struct_unit_actions.h>
 #include <AOE_struct_units.h>
-#include "CustomRORInfo.h"
+#include "RockNRorInfo.h"
 #include "CustomPopupBase.h"
 #include "traceMessage.h"
 
 // External dependency
-class InGameCustomRorOptionsPopup;
+class InGameRockNRorOptionsPopup;
 
 
 namespace CUSTOMROR {
@@ -24,7 +24,7 @@ public:
 
 	CustomPopupBase *currentCustomPopup;
 
-	friend class ::InGameCustomRorOptionsPopup; // Hack to allow this class use directly CreateCustomPopupObject. For legacy reasons...
+	friend class ::InGameRockNRorOptionsPopup; // Hack to allow this class use directly CreateCustomPopupObject. For legacy reasons...
 	
 private:
 	// Returns NULL if failed (you can't create a custom popup object if previous one is still opened).

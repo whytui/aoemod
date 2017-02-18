@@ -3,7 +3,7 @@
 #include <AOE_const_functional.h>
 #include <AOE_struct_player.h>
 #include <AOE_struct_main_ai.h>
-#include "CustomRORInfo.h"
+#include "RockNRorInfo.h"
 #include "StrategyBuilder.h"
 
 

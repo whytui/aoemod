@@ -1,4 +1,4 @@
-#include "../include/crConfig.h"
+#include "../include/RockNRorConfig.h"
 
 namespace CUSTOMROR {
 namespace CONFIG {
@@ -13,7 +13,7 @@ UnitSpawnShortcutInfo::UnitSpawnShortcutInfo() {
 
 
 // Constructor
-CustomRORConfig::CustomRORConfig() {
+RockNRorConfig::RockNRorConfig() {
 	// Hardcoded initialization (default values). If values are provided in config XML file, it will overload this.
 	this->doNotApplyFixes = false;
 	this->forceMPCompatibility = false;
@@ -127,17 +127,17 @@ CustomRORConfig::CustomRORConfig() {
 
 
 // Destructor
-CustomRORConfig::~CustomRORConfig() {
+RockNRorConfig::~RockNRorConfig() {
 	for (int i = 0; i < 256; i++) {
-		if (allCivInfo[i]) {
-			delete allCivInfo[i];
-			allCivInfo[i] = NULL;
+		if (this->allCivInfo[i]) {
+			delete this->allCivInfo[i];
+			this->allCivInfo[i] = NULL;
 		}
 	}
 }
 
 
-void CustomRORConfig::InitializeDefaultResourceValues() {
+void RockNRorConfig::InitializeDefaultResourceValues() {
 	for (int i = 0; i < 4; i++) {
 		this->initialResourceHardestAIBonus_DM[i] = 2000; // Game default
 		this->initialResourceHardestAIBonus_RM[i] = 2000; // (stupid) Game default
@@ -174,7 +174,7 @@ void CustomRORConfig::InitializeDefaultResourceValues() {
 // If attribute is not found, returns false.
 // If attribute value is "0" or "false", returns false.
 // All other values = return true.
-bool CustomRORConfig::XML_GetBoolElement(TiXmlElement *elem, const char *attributeName) {
+bool RockNRorConfig::XML_GetBoolElement(TiXmlElement *elem, const char *attributeName) {
 	if (!elem) { return false; }
 	const char *attr = elem->Attribute(attributeName);
 	if (!attr) { return false; }
@@ -182,7 +182,7 @@ bool CustomRORConfig::XML_GetBoolElement(TiXmlElement *elem, const char *attribu
 }
 
 // Returns matching attribute value, if found, or "" if not found.
-const char * CustomRORConfig::XML_GetAttributeValue(TiXmlElement *elem, const char *attributeName) {
+const char * RockNRorConfig::XML_GetAttributeValue(TiXmlElement *elem, const char *attributeName) {
 	if (!elem) { return ""; }
 	const char *attr = elem->Attribute(attributeName);
 	if (!attr) { return ""; }
@@ -191,7 +191,7 @@ const char * CustomRORConfig::XML_GetAttributeValue(TiXmlElement *elem, const ch
 
 
 // Reads the gameType attribute and returns the result in ConfigGameType enum. Returns CFG_GAME_UNKNOWN if not found
-CUSTOMROR::ConfigGameType CustomRORConfig::XML_ReadGameTypeAttribute(TiXmlElement *elem) {
+CUSTOMROR::ConfigGameType RockNRorConfig::XML_ReadGameTypeAttribute(TiXmlElement *elem) {
 	if (!elem) { return CUSTOMROR::CFG_GAME_UNKNOWN; }
 	const char *attr = elem->Attribute("gameType");
 	if (!attr) { return CUSTOMROR::CFG_GAME_UNKNOWN; }
@@ -206,7 +206,7 @@ CUSTOMROR::ConfigGameType CustomRORConfig::XML_ReadGameTypeAttribute(TiXmlElemen
 }
 
 
-void CustomRORConfig::SetAutoAttackPolicyFromAttributes(AutoAttackPolicy *aap, TiXmlElement *elem) {
+void RockNRorConfig::SetAutoAttackPolicyFromAttributes(AutoAttackPolicy *aap, TiXmlElement *elem) {
 	if (!aap || !elem) { return; }
 	const char *attr = elem->Attribute("villagers");
 	aap->attackVillagers = (this->XML_GetBoolElement(elem, "villagers"));
@@ -219,7 +219,7 @@ void CustomRORConfig::SetAutoAttackPolicyFromAttributes(AutoAttackPolicy *aap, T
 
 
 // Get setup from XML file to this object variables.
-bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
+bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 	TiXmlDocument doc(fileName);
 	if (!doc.LoadFile()) {
 		this->couldNotReadXMLConfig = true;
@@ -783,7 +783,7 @@ bool CustomRORConfig::ReadXMLConfigFile(char *fileName) {
 }
 
 
-bool CustomRORConfig::ReadCivXMLConfigFile(char *fileName) {
+bool RockNRorConfig::ReadCivXMLConfigFile(char *fileName) {
 	TiXmlDocument doc(fileName);
 	if (!doc.LoadFile()) {
 		this->couldNotReadCivXMLConfig = true;
@@ -873,14 +873,14 @@ bool CustomRORConfig::ReadCivXMLConfigFile(char *fileName) {
 }
 
 
-CivilizationInfo *CustomRORConfig::GetCivInfo(int civId) {
+CivilizationInfo *RockNRorConfig::GetCivInfo(int civId) {
 	if ((civId < 0) || (civId >= CST_MAX_TOTAL_CIV_COUNT)) { return NULL; }
 	return this->allCivInfo[civId];
 }
 
 
 // Read tileset info XML file
-bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
+bool RockNRorConfig::ReadTilesetXMLConfigFile(char *fileName) {
 	TiXmlDocument doc(fileName);
 	if (!doc.LoadFile()) {
 		this->couldNotReadTilesetXMLConfig = true;
@@ -1014,7 +1014,7 @@ bool CustomRORConfig::ReadTilesetXMLConfigFile(char *fileName) {
 	return true;
 }
 
-CUSTOMROR::CONFIG::AutoRebuildFarmConfig *CustomRORConfig::GetAutoRebuildFarmConfig(long int isScenario, long int isDM) {
+CUSTOMROR::CONFIG::AutoRebuildFarmConfig *RockNRorConfig::GetAutoRebuildFarmConfig(long int isScenario, long int isDM) {
 	// NOT using scenario setting at this point ?
 	/*if (isScenario) {
 		return &this->autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_SCENARIO];

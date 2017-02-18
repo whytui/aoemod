@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <AOE_struct_units.h>
 #include "unitDefHandling.h"
-#include "CustomRORInfo.h"
+#include "RockNRorInfo.h"
 #include "AOEPrimitives_units.h"
 #include "unitHandling.h"
 

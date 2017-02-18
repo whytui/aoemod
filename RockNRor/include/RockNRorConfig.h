@@ -81,10 +81,10 @@ public:
 
 
 // This class manages all information read from RockNRor configuration files.
-class CustomRORConfig {
+class RockNRorConfig {
 public:
-	CustomRORConfig();
-	~CustomRORConfig();
+	RockNRorConfig();
+	~RockNRorConfig();
 
 	// Variables - RockNRor-specific
 	bool couldNotReadXMLConfig;

@@ -1,4 +1,4 @@
-#include "../include/crCommands.h"
+#include "../include/RockNRorCommand.h"
 
 
 namespace CUSTOMROR {
@@ -6,23 +6,23 @@ namespace CUSTOMROR {
 
 
 // Global static objects
-CustomRORCommand CUSTOMROR::crCommand;
+RockNRorCommand CUSTOMROR::crCommand;
 
 
 char outputBuffer[CRCMD_TEXT_BUFFER_SIZE];
 
 
 
-CustomRORCommand::CustomRORCommand() {
+RockNRorCommand::RockNRorCommand() {
 }
 
 
 
-CustomRORCommand::~CustomRORCommand() {
+RockNRorCommand::~RockNRorCommand() {
 }
 
 
-bool CustomRORCommand::CheckEnabledFeatures() {
+bool RockNRorCommand::CheckEnabledFeatures() {
 	char strNotEnabled[] = " NOT ENABLED !";
 	FILE *f;
 	int res = fopen_s(&f, "RockNRor\\RockNRor.log", "w+"); // overwrite if already existing
@@ -212,7 +212,7 @@ bool CustomRORCommand::CheckEnabledFeatures() {
 
 
 // Initialization that only takes place once, at executable startup.
-void CustomRORCommand::OneShotInit() {
+void RockNRorCommand::OneShotInit() {
 	// Collect information about EXE version
 	this->ReadIfCustomSelectedUnitsMemoryZoneIsUsed();
 	this->ReadIfManageAIIsOn();
@@ -240,25 +240,25 @@ void CustomRORCommand::OneShotInit() {
 
 
 // Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
-void CustomRORCommand::ReadIfCustomSelectedUnitsMemoryZoneIsUsed() {
+void RockNRorCommand::ReadIfCustomSelectedUnitsMemoryZoneIsUsed() {
 	// TO DO: check all sequences ?
 	CUSTOMROR::crInfo.hasCustomSelectedUnitsMemory = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_SELECTED_UNITS, "InitBuffer1");
 }
 
 // Reads game executable to determine if ManageAI is installed (does game use player->unused_customAIFlag ?)
-void CustomRORCommand::ReadIfManageAIIsOn() {
+void RockNRorCommand::ReadIfManageAIIsOn() {
 	CUSTOMROR::crInfo.hasManageAIFeatureON = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_MANAGE_AI, "Init_is_computer_for_AI_1");
 }
 
 
 // Reads game executable to determine if various sequences are installed or not
-void CustomRORCommand::ReadOtherSequencesStatus() {
+void RockNRorCommand::ReadOtherSequencesStatus() {
 	CUSTOMROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
 	CUSTOMROR::crInfo.hasFixForBuildingStratElemUnitId = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixUnitIdForInProgressBuilding");
 }
 
 // Load custom strings files
-void CustomRORCommand::LoadCustomLocalizationFiles() {
+void RockNRorCommand::LoadCustomLocalizationFiles() {
 	for each (std::string filename in CUSTOMROR::crInfo.configInfo.customStringsFilesList) {
 		std::string msg;
 		if (!localizationHandler.LoadTranslationsFromFile(filename)) {
@@ -272,7 +272,7 @@ void CustomRORCommand::LoadCustomLocalizationFiles() {
 }
 
 // Load custom DRS files
-void CustomRORCommand::LoadCustomDrsFiles() {
+void RockNRorCommand::LoadCustomDrsFiles() {
 	for each (CONFIG::DrsFileToLoad *drs in CUSTOMROR::crInfo.configInfo.customDrsFilesList)
 	{
 		AOE_METHODS::AddDrsFile(drs->filename.c_str(), drs->folder.c_str());
@@ -296,7 +296,7 @@ void CustomRORCommand::LoadCustomDrsFiles() {
 
 
 // Get custom empires.dat filename (with relative path)
-const char *CustomRORCommand::GetCustomEmpiresDatRelativeFileName(AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO *cmdLineInfo) {
+const char *RockNRorCommand::GetCustomEmpiresDatRelativeFileName(AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO *cmdLineInfo) {
 	if (!CUSTOMROR::crInfo.configInfo.customEmpiresDatRelativePath.empty()) { // TODO use dedicated/correct config
 		const char *filename = CUSTOMROR::crInfo.configInfo.customEmpiresDatRelativePath.c_str();
 		if (CheckFileExistence(filename)) {
@@ -321,7 +321,7 @@ const char *CustomRORCommand::GetCustomEmpiresDatRelativeFileName(AOE_STRUCTURES
 // Returns true if the provided command is valid (and executed)
 // After the call, output points to a char* string containing command's output, if any.
 // Do NOT free output variable, it uses an internal buffer.
-bool CustomRORCommand::ExecuteCommand(char *command, char **output) {
+bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
 	static const char *PREFIX_SET = "set ";
 	*output = outputBuffer;
 	outputBuffer[0] = 0;
@@ -495,7 +495,7 @@ fail:
 }
 
 
-void CustomRORCommand::HandleChatCommand(char *command) {
+void RockNRorCommand::HandleChatCommand(char *command) {
 	if (strcmp(command, "hi") == 0) {
 		AOE_METHODS::CallWriteText("Hello world !");
 	}
@@ -652,7 +652,7 @@ void CustomRORCommand::HandleChatCommand(char *command) {
 
 
 // UpdatedValue: if <0, it is ignored
-void CustomRORCommand::UpdateWorkRateWithMessage(short int DATID, float updatedValue) {
+void RockNRorCommand::UpdateWorkRateWithMessage(short int DATID, float updatedValue) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) {
 		return;
@@ -684,7 +684,7 @@ void CustomRORCommand::UpdateWorkRateWithMessage(short int DATID, float updatedV
 
 // Update a technology that increases work rate: change value used to increase.
 // UpdatedValue: if <0, it is ignored
-void CustomRORCommand::UpdateTechAddWorkRateWithMessage(short int techId, short int unitDefId, float updatedValue) {
+void RockNRorCommand::UpdateTechAddWorkRateWithMessage(short int techId, short int unitDefId, float updatedValue) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) {
 		return;
@@ -713,7 +713,7 @@ void CustomRORCommand::UpdateTechAddWorkRateWithMessage(short int techId, short 
 
 // This is called just after empires.dat is loaded.
 // Warning: changes here are applied on civ definitions are done once and for all, and impact all games.
-void CustomRORCommand::OnAfterLoadEmpires_DAT() {
+void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global);
 	if (!global || !global->IsCheckSumValid()) { return; }
@@ -927,7 +927,7 @@ void CustomRORCommand::OnAfterLoadEmpires_DAT() {
 // Called when launching a new game. Game info has NOT been loaded yet. Global structure already exists, but be careful with its data...
 // Most structures have not been initialized/loaded yet.
 // This method should only reset internal data
-void CustomRORCommand::OnNewGame(bool isSavedGame) {
+void RockNRorCommand::OnNewGame(bool isSavedGame) {
 	// Resets internal variables.
 	this->InitMyGameInfo();
 
@@ -942,7 +942,7 @@ void CustomRORCommand::OnNewGame(bool isSavedGame) {
 // Note: normally, OnNewGame(...) has always been called just before.
 // Warning: for scenarios, if there is an introduction screen, this method is called at that moment
 // (game might not be displayed yet - and some methods may not be used yet)
-void CustomRORCommand::OnGameStart() {
+void RockNRorCommand::OnGameStart() {
 	// Make sure human player(s) do NOT have AI flags ON at startup (due to ManageAI feature)
 	AOE_METHODS::PLAYER::DisableAIFlagsForHuman();
 
@@ -1112,7 +1112,7 @@ void CustomRORCommand::OnGameStart() {
 // Does NOT apply to scenario/campaign/load saved game.
 // Warning: most game structures are not available yet ! It is recommended to only work with STRUCT_GAME_SETTINGS, nothing else.
 // Return false if failed.
-bool CustomRORCommand::ApplyCustomizationOnRandomGameSettings() {
+bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
@@ -1130,7 +1130,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameSettings() {
 // These are changes that are applied when game is loaded (do not interfere here with settings like map size, etc)
 // Does NOT apply to scenario/campaign/load saved game.
 // Return false if failed.
-bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
+bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
@@ -1226,7 +1226,7 @@ bool CustomRORCommand::ApplyCustomizationOnRandomGameStart() {
 
 
 // Initialize internal game-specific variables (called on each game start/load)
-void CustomRORCommand::InitMyGameInfo() {
+void RockNRorCommand::InitMyGameInfo() {
 	CUSTOMROR::crInfo.ResetVariables();
 	CUSTOM_AI::customAIHandler.ResetAllInfo(); // Reset all CusotmROR AI internal structures/info
 	
@@ -1240,7 +1240,7 @@ void CustomRORCommand::InitMyGameInfo() {
 
 
 // This fixes nextStrategyAIExecutionCounter flag for all players (useful for loaded games)
-void CustomRORCommand::FixGameStartAIInitForPlayers() {
+void RockNRorCommand::FixGameStartAIInitForPlayers() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
@@ -1257,7 +1257,7 @@ void CustomRORCommand::FixGameStartAIInitForPlayers() {
 
 
 // Returns true if AI file selection was overriden (do NOT let normal code be executed), false to let normal code be executed
-bool CustomRORCommand::ManageAIFileSelectionForPlayer(char civilizationId, char *aiFileBuffer) {
+bool RockNRorCommand::ManageAIFileSelectionForPlayer(char civilizationId, char *aiFileBuffer) {
 	// Standard civ: continue "player.chooseAIFileName" function normally
 	if ((civilizationId > 0) && (civilizationId <= CIVILIZATIONS::CST_CIVID_STANDARD_MAX)) {
 		return false;
@@ -1327,7 +1327,7 @@ bool CustomRORCommand::ManageAIFileSelectionForPlayer(char civilizationId, char 
 // This happens only once ! Once an objects has been discovered, this event is never triggered again.
 // Return true if the unit must NOT be captured
 // Default: return false (normal ROR treatments)
-bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT_UNIT_BASE *beingSeenUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
+bool RockNRorCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT_UNIT_BASE *beingSeenUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
 	if (!beingSeenUnit || !beingSeenUnit->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
@@ -1359,7 +1359,7 @@ bool CustomRORCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT
 // Returns true if we think this init has been done. False otherwise.
 // Warning: this initialization adds resources (SN numbers 8A-8D) to the player, so it must not be run several times !
 // That's why when unsure this returns true (including invalid cases)
-bool CustomRORCommand::FindIfGameStartStrategyInitHasBeenDone(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+bool RockNRorCommand::FindIfGameStartStrategyInitHasBeenDone(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player) { return true; }
 	AOE_STRUCTURES::STRUCT_AI *mainAI = player->ptrAIStruct;
 	if (!mainAI) { return true; }
@@ -1375,7 +1375,7 @@ bool CustomRORCommand::FindIfGameStartStrategyInitHasBeenDone(AOE_STRUCTURES::ST
 // Overloads the "tactical AI update" event that occurs regularly for each AI player.
 // For the algorithm to work well, requires also "FixUnitIdForInProgressBuilding", "FixResetStratElemForUnitId"
 // Returns false is the player is dead/invalid. Returns true in most cases.
-bool CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
+bool RockNRorCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 	assert(ai && ai->IsCheckSumValid());
 	if (!ai || !ai->IsCheckSumValid()) { return false; }
 	assert(ai->structTacAI.IsCheckSumValid());
@@ -1414,7 +1414,7 @@ bool CustomRORCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 
 
 // Entry point aftre a strategy element has been added in buildAI
-void CustomRORCommand::AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, 
+void RockNRorCommand::AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, 
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *posToAdd, int countAdded) {
 	assert(posToAdd != NULL);
 	assert(posToAdd->IsCheckSumValid());
@@ -1443,7 +1443,7 @@ void CustomRORCommand::AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI
 }
 
 
-void CustomRORCommand::PrintDateTime() {
+void RockNRorCommand::PrintDateTime() {
 	time_t rawtime;
 	char timebuf[50];
 	char timebuf2[50];
@@ -1454,7 +1454,7 @@ void CustomRORCommand::PrintDateTime() {
 }
 
 
-void CustomRORCommand::PrintMapSeed() {
+void RockNRorCommand::PrintMapSeed() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
 	char text[50];
@@ -1464,7 +1464,7 @@ void CustomRORCommand::PrintMapSeed() {
 
 
 // This is called very frequently when game is running. Not called if game is paused or stuck.
-void CustomRORCommand::OnGameTimer() {
+void RockNRorCommand::OnGameTimer() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global != NULL);
 	if (!global) { return; }
@@ -1530,7 +1530,7 @@ void CustomRORCommand::OnGameTimer() {
 // This event is triggered during game but as well in scenario editor or during game creation.
 // actionStruct parameter can be NULL if it could not be determined
 // Note: we choose NOT to apply custom treatments when controlled player has an active playing AI (both controlled by human and AI)
-void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit,
+void RockNRorCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS UIStatus, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit,
 	AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT *actionStruct) {
 	assert(unit && unit->IsCheckSumValidForAUnitClass() && unit->IsTypeValid());
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->IsTypeValid()) { return; }
@@ -1648,7 +1648,7 @@ void CustomRORCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI
 // targetUnit is the "victim" (unit that changes owner), actorPlayer is the new owner (player)
 // Technical note: in ROR, unit.changeOwner(newplayer) is [EDX+0x44] call.
 // TODO: this is not called when relics/ruins are taken ?
-void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
+void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
 	if (!targetUnit || !actorPlayer) { return; }
 	assert(targetUnit->IsCheckSumValidForAUnitClass());
 	assert(actorPlayer->IsCheckSumValid());
@@ -1724,7 +1724,7 @@ void CustomRORCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE 
 // Change a unit's owner, for example like a conversion.
 // Capturing an artefact does NOT call this.
 // I don't see any other possible event than CST_ATI_CONVERT. Use CST_GET_INVALID to trigger NO notification.
-bool CustomRORCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer,
+bool RockNRorCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer,
 	AOE_CONST_INTERNAL::GAME_EVENT_TYPES notifyEvent) {
 	if (!targetUnit || !actorPlayer || !targetUnit->IsCheckSumValidForAUnitClass() || !actorPlayer->IsCheckSumValid()) {
 		return false;
@@ -1749,7 +1749,7 @@ bool CustomRORCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetU
 
 // Custom Fixes/features on player.addUnit calls.
 // Note for conversion : unit is currently (temporarily) unavailable in global->GetUnitStruct(unitId) !
-void CustomRORCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable) {
+void RockNRorCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable) {
 	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return; }
 	if (!player || !player->IsCheckSumValid()) { return; }
 
@@ -1813,7 +1813,7 @@ void CustomRORCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PL
 // Note: player.RemoveUnit is called BY unit.destructor.
 // Here unit status can be 2 (if conversion), 7 (quitting editor?), 8 (in-game dying unit) ? +maybe other values
 // Warning: this method is called in many situations, game might NOT be running.
-void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable) {
+void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable) {
 	if (!player || !unit) { return; }
 	assert(player->IsCheckSumValid() && unit->IsCheckSumValidForAUnitClass());
 	if (!player->IsCheckSumValid() || !unit->IsCheckSumValidForAUnitClass()) { return; }
@@ -1942,7 +1942,7 @@ void CustomRORCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player,
 // To be used when target unit is a tower in actor's town
 // Warning: try to keep this function fast and optimized as much as possible. It may be called quite often.
 // The improved algorithm is only used if ImproveAI config is ON.
-bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower) {
+bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower) {
 	if (CUSTOMROR::crInfo.configInfo.improveAILevel <= 0) {
 		return true; // improve AI is disabled. Return default value.
 	}
@@ -2173,7 +2173,7 @@ bool CustomRORCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_
 // assignedUnitsCounter is IN OUT: input value can be >0 (number of military units that have already been tasked). We should stop when assignedUnitsCounter reaches 6 (original code's behaviour)
 // In this method, we try to do "standard" treatments, and apply custom improvements only if improveAILevel is enabled in config.
 // The improved algorithm is only used if ImproveAI config is ON.
-void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower,
+void RockNRorCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower,
 	long int *pAssignedUnitsCount, AOE_STRUCTURES::STRUCT_POSITION_INFO *pTCPositionInfo) {
 	// Invalid/NULL objects ?
 	if (!tacAI || !enemyTower || !pTCPositionInfo || !tacAI->IsCheckSumValid() || !enemyTower->IsCheckSumValidForAUnitClass() || !tacAI->ptrMainAI) { return; }
@@ -2278,7 +2278,7 @@ void CustomRORCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI 
 
 
 // If fire galley iconId conflicts with catapult trireme, this will move it to a free location (trireme tech because now it's free)
-void CustomRORCommand::MoveFireGalleyIconIfNeeded(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+void RockNRorCommand::MoveFireGalleyIconIfNeeded(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player) { return; }
 	// Check fire galley unit exists for this player (it is a valid DAT_ID)
 	if (CST_UNITID_FIRE_GALLEY >= player->structDefUnitArraySize) { return; }
@@ -2306,7 +2306,7 @@ void CustomRORCommand::MoveFireGalleyIconIfNeeded(AOE_STRUCTURES::STRUCT_PLAYER 
 }
 // If fire galley iconId conflicts with catapult trireme, this will move it to a free location (trireme tech because now it's free)
 // If playerId is invalid, does nothing (no error).
-void CustomRORCommand::MoveFireGalleyIconIfNeeded(short int playerId) {
+void RockNRorCommand::MoveFireGalleyIconIfNeeded(short int playerId) {
 	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 	if (player != NULL) {
 		this->MoveFireGalleyIconIfNeeded(player);
@@ -2316,7 +2316,7 @@ void CustomRORCommand::MoveFireGalleyIconIfNeeded(short int playerId) {
 
 
 // Technical fix for a method about elevation application when generating map. Original method contains many bugs.
-void CustomRORCommand::Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo) {
+void RockNRorCommand::Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo) {
 	if ((distance <= 0) || (posX < 0) || (posY < 0)) { return; }
 	assert(elevInfo != NULL);
 	assert(elevInfo->IsCheckSumValid());
@@ -2349,7 +2349,7 @@ void CustomRORCommand::Fixed_MapGen_applyElevation(long int posX, long int posY,
 
 
 // Displays timer stats as a game chat.
-void CustomRORCommand::DisplayTimerStats() {
+void RockNRorCommand::DisplayTimerStats() {
 	long int result = 0;
 	for (int i = 0; i < CST_TIMER_STATS_ARRAY_SIZE; i++) {
 		result += CUSTOMROR::crInfo.CollectedTimerIntervals_ms[i];
@@ -2362,7 +2362,7 @@ void CustomRORCommand::DisplayTimerStats() {
 
 
 // This method automatically recalculates gameTimerSlowDownFactor
-void CustomRORCommand::AutoFixGameTimer() {
+void RockNRorCommand::AutoFixGameTimer() {
 	bool reset = false;
 	time_t t = time(0); // get current time
 	struct tm now;
@@ -2394,7 +2394,7 @@ void CustomRORCommand::AutoFixGameTimer() {
 
 
 // Generate map (overload) for scenario editor
-bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int sizeY) {
+bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int sizeY) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return false; }
@@ -2560,7 +2560,7 @@ bool CustomRORCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int
 
 
 // Handles all custom treatments at scenario editor UI creation (this is called at the end of standard UI creation).
-void CustomRORCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor) {
+void RockNRorCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor) {
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return; }
 
 	// Manage hidden terrains
@@ -2595,7 +2595,7 @@ void CustomRORCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_
 
 // This methods modifies provided variables that will be passed to "check unit placement" method before adding a unit in scenario editor.
 // For example, to allow creating several units at the same location, force checkConflictingUnits to 0.
-void CustomRORCommand::ApplyCustomizationOnEditorAddUnit(long int &checkVisibility, long int &checkHillMode, long int &editorMode, long int &checkAirModeAndHPBar, long int &checkConflictingUnits, bool &IgnoreTerrainRestrictions) {
+void RockNRorCommand::ApplyCustomizationOnEditorAddUnit(long int &checkVisibility, long int &checkHillMode, long int &editorMode, long int &checkAirModeAndHPBar, long int &checkConflictingUnits, bool &IgnoreTerrainRestrictions) {
 	checkConflictingUnits = !CUSTOMROR::crInfo.configInfo.editor_allowUnitOverlapping;
 	checkHillMode = !CUSTOMROR::crInfo.configInfo.editor_disableHillModeChecks;
 	IgnoreTerrainRestrictions = CUSTOMROR::crInfo.configInfo.editor_disableTerrainRestrictions;
@@ -2604,7 +2604,7 @@ void CustomRORCommand::ApplyCustomizationOnEditorAddUnit(long int &checkVisibili
 
 // Get matching terrainId when user selected a row in terrain list in scenario editor/terrain tab.
 // Returns a terrainId, returns -1 if we want to use default behaviour (no custom choice)
-long int CustomRORCommand::GetTerrainIdForSelectedTerrainIndex(AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor, long int selectedIndex) {
+long int RockNRorCommand::GetTerrainIdForSelectedTerrainIndex(AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor, long int selectedIndex) {
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return -1; }
 	// In default game, the terrain list contains 9 terrains (indexes 0-8).
 	// Standard available terrainIDs are 0=grass,10=forest,1=water,13=desert_palm,20=jungle,4=shallows,19=pine_forest,22=water_dark
@@ -2637,7 +2637,7 @@ long int CustomRORCommand::GetTerrainIdForSelectedTerrainIndex(AOE_STRUCTURES::S
 // (0x42C330 is used for other calls than log due to compiler optimizations)
 // firstRORCallTextParamAddress is the address in stack of the text argument "xxx".
 // Next potential arguments (%xxx) are next data in stack.
-void CustomRORCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextParamAddress) {
+void RockNRorCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextParamAddress) {
 	char **stackArgText = (char**)firstRORCallTextParamAddress;
 	std::string msgInitial = "";
 	if (*stackArgText) {
@@ -2741,7 +2741,7 @@ void CustomRORCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextP
 
 
 // Fix the check on path finding when trying to assign a task to a villager
-long int CustomRORCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *actorAsType50, long int *pathFindingArgs) {
+long int RockNRorCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *actorAsType50, long int *pathFindingArgs) {
 	AOE_STRUCTURES::STRUCT_PLAYER *player = actorAsType50->ptrStructPlayer;
 	assert(player && player->IsCheckSumValid());
 	bool doFix = !CUSTOMROR::crInfo.configInfo.doNotApplyFixes; // *True* unless the "no fix" flag is set.
@@ -2775,7 +2775,7 @@ long int CustomRORCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_
 
 // Write the F11 centered text (if displayed)
 // Warning, this is only refreshed when population changes ?
-void CustomRORCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *f11panel, char *bufferToWrite, char *defaultFormat,
+void RockNRorCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *f11panel, char *bufferToWrite, char *defaultFormat,
 	char *localizedText, long int currentPop, long int houseMaxPop) {
 	const int bufferSize = 200; // do not know for sure.
 	if (!CUSTOMROR::crInfo.configInfo.showCustomPopInfo) {
@@ -2814,7 +2814,7 @@ void CustomRORCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LAB
 
 
 // Disable dock for all players on maps where AI does NOT builds docks.
-void CustomRORCommand::DisableWaterUnitsIfNeeded() {
+void RockNRorCommand::DisableWaterUnitsIfNeeded() {
 	if (!CUSTOMROR::crInfo.configInfo.noDockInMostlyLandMaps) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
@@ -2837,7 +2837,7 @@ void CustomRORCommand::DisableWaterUnitsIfNeeded() {
 }
 
 // Disable all walls for current game.
-void CustomRORCommand::DisableWalls() {
+void RockNRorCommand::DisableWalls() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	assert(settings->IsCheckSumValid());
@@ -2864,7 +2864,7 @@ void CustomRORCommand::DisableWalls() {
 
 // Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
 // This is called quite often (only if improve AI is enabled in RockNRor configuration)
-void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem) {
+void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem) {
 	if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem || !infAI->ptrMainAI || !infAI->ptrMainAI->IsCheckSumValid()) { return; }
 	if (IsMultiplayer()) { return; }
 
@@ -2908,7 +2908,7 @@ void CustomRORCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_I
 
 
 // Called at the end of showUnitCommandButtons
-void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
+void RockNRorCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
 	assert(gameMainUI && gameMainUI->IsCheckSumValid());
 	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
 		return;
@@ -2927,7 +2927,7 @@ void CustomRORCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_
 // User interface command handler for 1 single unit.
 // isPanelUnit = true if unitBase is the main selected unit (the one visible in bottom-left unit info zone)
 // "Common" treatments (interface updates, etc) are only done when isPanelUnit = true
-bool CustomRORCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
+bool RockNRorCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase,
 	bool isPanelUnit) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -2970,7 +2970,7 @@ bool CustomRORCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 // Called when a game UI command button is clicked.
 // Returns true if event has been handled and must NOT be handle by ROR standard code.
 // Returns false by default (most cases) !
-bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
+bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue) {
 
 	if (!CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) {
@@ -3129,7 +3129,7 @@ bool CustomRORCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAM
 
 // Manages the display of a unit shortcut for non-standard shortcuts.
 // Returns true if we want to let standard game code execute the shortcut display operation. (default false)
-bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase,
+bool RockNRorCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase,
 	long int posX, long int posY, long int unknown_arg3) {
 	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) {
 		return false;
@@ -3210,7 +3210,7 @@ bool CustomRORCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UN
 
 // Adds custom attributes (armor) in buildings' unit info zone.
 // currentLine is incremented if lines are added.
-void CustomRORCommand::DisplayCustomBuildingAttackAttributesInUnitInfo(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine) {
+void RockNRorCommand::DisplayCustomBuildingAttackAttributesInUnitInfo(AOE_STRUCTURES::STRUCT_UI_UNIT_INFO_ZONE *unitInfoZone, long int &currentLine) {
 	if (!unitInfoZone || !unitInfoZone->IsCheckSumValid()) { return; }
 	AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *unit50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)unitInfoZone->currentUnit;
 	if (!unit50 || !unit50->IsCheckSumValidForAUnitClass()) {
@@ -3242,7 +3242,7 @@ void CustomRORCommand::DisplayCustomBuildingAttackAttributesInUnitInfo(AOE_STRUC
 // Note: this only impacts mouse displayed cursor and hint text, not which right-click actions are actually possible.
 // If returned cursorToForce is >= 0, then stop other treatments and use this value as new cursor.
 // Returns true if output values have been updated.
-bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
+bool RockNRorCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
 	UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId, GAME_CURSOR &cursorToForce) {
 	cursorToForce = (GAME_CURSOR)-1; // Default
 	if (!CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) { // TODO: use a dedicated config
@@ -3330,7 +3330,7 @@ bool CustomRORCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STR
 // Handles a right-click (in-game) when mouse action type is a custom one, for 1 single selected unit
 // posX and posY are game positions
 // mouseTargetUnit can be NULL
-void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE_STRUCTURES::STRUCT_UNIT_BASE *mouseTargetUnit,
+void RockNRorCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE_STRUCTURES::STRUCT_UNIT_BASE *mouseTargetUnit,
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit) {
 	if (!actorUnit || !actorUnit->IsCheckSumValidForAUnitClass()) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -3381,7 +3381,7 @@ void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AO
 
 // Handles a right-click (in-game) when mouse action type is a custom one.
 // mouseTargetUnit can be NULL
-void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE_STRUCTURES::STRUCT_UNIT_BASE *mouseTargetUnit) {
+void RockNRorCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE_STRUCTURES::STRUCT_UNIT_BASE *mouseTargetUnit) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	assert(settings->mouseActionType < 0); // here, we should only handle custom action types
@@ -3428,7 +3428,7 @@ void CustomRORCommand::OnInGameRightClickCustomAction(float posX, float posY, AO
 
 
 // Entry point when a unit activity stops.
-void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity) {
+void RockNRorCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity) {
 	AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit = (AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *)activity->ptrUnit;
 	if (!unit) { return; }
 	assert(unit->IsCheckSumValidForAUnitClass());
@@ -3502,7 +3502,7 @@ void CustomRORCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *
 
 // Handle the optional display of debug information (like F5 info)
 // Returns true if standard game info (F5 zone) must NOT be executed.
-bool CustomRORCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings) {
+bool RockNRorCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings) {
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
 	if (*AOE_VAR_F5_DEBUG_INFO_TYPE <= CUSTOMROR::CONFIG::IDL_STANDARD_MAX_ALLOWED_LEVEL) {
 		return false; // Do standard treatments.
@@ -3528,7 +3528,7 @@ bool CustomRORCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTI
 
 
 // Changes current in-game debug info level (F5)
-void CustomRORCommand::SetNextInGameDebugInfoLevel() {
+void RockNRorCommand::SetNextInGameDebugInfoLevel() {
 #ifdef GAMEVERSION_ROR10c
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) {
@@ -3560,7 +3560,7 @@ void CustomRORCommand::SetNextInGameDebugInfoLevel() {
 // Opens a custom dialog message (based on CloseProgramDialog) and pauses game execution (if running)
 // Return true if OK, false if failed - Fails if another custom dialog (or quit game dialog) is already open
 // Pauses the game if running (only if a dialog is successfully opened)
-bool CustomRORCommand::OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize) {
+bool RockNRorCommand::OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize) {
 	if (CUSTOMROR::crInfo.customYesNoDialogVar) { return false; } // Already an opened custom dialog
 
 	AOE_STRUCTURES::STRUCT_ANY_UI *customDialogPtr = AOE_METHODS::GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
@@ -3576,7 +3576,7 @@ bool CustomRORCommand::OpenCustomDialogMessage(const char *dialogText, long int 
 // Closes currently opened custom dialog message.
 // Returns -1 if an error occurred, including "no custom dialog is opened".
 // Other results are AOE_CONST_INTERNAL::DIALOG_BUTTON_IDS => Yes/No/Cancel
-long int CustomRORCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG *ptrDialog, unsigned long int ptrSender) {
+long int RockNRorCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG *ptrDialog, unsigned long int ptrSender) {
 	if (CUSTOMROR::crInfo.customYesNoDialogVar == NULL) { return -1; } // No opened custom dialog
 	long int returnValue = -1;
 	if (!ptrDialog) { return returnValue; }
@@ -3616,7 +3616,7 @@ CST_GET_BUILDING_COMPLETE => arg3=unitDATID, arg4/5=position of building
 All wonder events (start/finish/destroyed = 0x6C 6D 6E) => arg3=posY, arg4=posX
 Relics/ruins events => arg3/4/5 are unused ?
 */
-void CustomRORCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short int playerId, long int arg3, long int arg4, long int arg5) {
+void RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short int playerId, long int arg3, long int arg4, long int arg5) {
 	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_RESEARCH_COMPLETE) {
 		long int research_id = arg3;
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
@@ -3651,7 +3651,7 @@ void CustomRORCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, shor
 // This is called for each player at game initialization, after applying tech trees and starting age.
 // Resources and score info have not been initialized yet.
 // This is called for all game types (SP / MP, RM/DM/scenario) but NOT for load game.
-void CustomRORCommand::OnGameInitAfterApplyingTechTrees(long int playerId) {
+void RockNRorCommand::OnGameInitAfterApplyingTechTrees(long int playerId) {
 	this->ApplyScenarioSpecificPlayerStartingAge(playerId);
 
 	// For current player, disable the researches that can never be available
@@ -3660,7 +3660,7 @@ void CustomRORCommand::OnGameInitAfterApplyingTechTrees(long int playerId) {
 
 
 // Apply starting age to a player (only for scenarios). Player's specific starting age is read in STRUCT_SCENARIO_INFO
-void CustomRORCommand::ApplyScenarioSpecificPlayerStartingAge(long int playerId) {
+void RockNRorCommand::ApplyScenarioSpecificPlayerStartingAge(long int playerId) {
 	if (!CUSTOMROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit) {
 		return;
 	}

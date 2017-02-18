@@ -49,10 +49,10 @@ public:
 };
 
 
-class CrGameObjects {
+class RockNRorGameObjects {
 public:
-	CrGameObjects();
-	~CrGameObjects();
+	RockNRorGameObjects();
+	~RockNRorGameObjects();
 
 	void ResetObjects();
 	void FreeAllUnitCustomInfoList();

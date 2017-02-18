@@ -7,8 +7,8 @@
 #include "SimpleEditText.h"
 #include "InputBox.h"
 #include "EditTerrainPopup.h"
-#include "crCommon.h"
-#include "crLocalization.h"
+#include "RockNRorCommon.h"
+#include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
 #include "CustomPopupSystem.h"
 

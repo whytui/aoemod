@@ -5,7 +5,7 @@
 #include <AOE_struct_player.h>
 #include <AOE_struct_game_map_info.h>
 #include <AOE_struct_inf_ai.h>
-#include "CustomRORInfo.h"
+#include "RockNRorInfo.h"
 #include "EnemyAttacksHistory.h"
 
 using namespace AOE_STRUCTURES;

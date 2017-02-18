@@ -98,9 +98,9 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\CAOE_Console.cpp" />
-    <ClCompile Include="src\CAOE_UI.cpp" />
-    <ClCompile Include="src\CustomizeAOE_base.cpp" />
+    <ClCompile Include="src\RockNRorAdmin_Console.cpp" />
+    <ClCompile Include="src\RockNRorAdmin_UI.cpp" />
+    <ClCompile Include="src\RockNRorAdmin_base.cpp" />
     <ClCompile Include="src\EmpiresXFileManager.cpp" />
     <ClCompile Include="src\EmpiresX_API.cpp" />
     <ClCompile Include="src\FileEditor.cpp" />
@@ -117,9 +117,9 @@
     <ClCompile Include="src\WxSampleTrigger.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\CAOE_Console.h" />
-    <ClInclude Include="include\CAOE_UI.h" />
-    <ClInclude Include="include\CustomizeAOE_base.h" />
+    <ClInclude Include="include\RockNRorAdmin_Console.h" />
+    <ClInclude Include="include\RockNRorAdmin_UI.h" />
+    <ClInclude Include="include\RockNRorAdmin_base.h" />
     <ClInclude Include="include\ddraw_reg_colorFix.h" />
     <ClInclude Include="include\EmpiresXFileManager.h" />
     <ClInclude Include="include\EmpiresX_API.h" />

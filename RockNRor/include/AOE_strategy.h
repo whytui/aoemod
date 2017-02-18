@@ -9,7 +9,7 @@
 #include <AOE_struct_build_ai.h>
 #include <AOE_const_functional.h>
 #include <AOE_struct_unit_actions.h>
-#include "crCommon.h"
+#include "RockNRorCommon.h"
 #include "researches.h"
 #include "randomizer.h"
 #include "unitDefHandling.h"

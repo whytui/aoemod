@@ -18,14 +18,14 @@
 
 #include "mainStructuresHandling.h"
 #include "UI_utilities.h"
-#include "crConfig.h"
+#include "RockNRorConfig.h"
 #include "civilizationInfo.h"
 #include "traceMessage.h"
-#include "crGameObjects.h"
+#include "RockNRorGameObjects.h"
 #include "interface.h" // SLP/icon ids...
 #include "language.h"
-#include "crLocalization.h"
-#include "crCommon.h"
+#include "RockNRorLocalization.h"
+#include "RockNRorCommon.h"
 #include "unitDefHandling.h"
 
 
@@ -52,13 +52,13 @@ static char *txtAutoRebuildFarmsMinWood = "Auto. rebuild farms min wood";
 
 
 // Internal structures/variables for RockNRor that are not read from configuration
-class CustomRORInfo {
+class RockNRorInfo {
 public:
-	CustomRORInfo();
-	~CustomRORInfo();
+	RockNRorInfo();
+	~RockNRorInfo();
 
 	// RockNRor Configuration
-	static CONFIG::CustomRORConfig configInfo;
+	static CONFIG::RockNRorConfig configInfo;
 	bool hasFixForBuildingStratElemUnitId;
 	bool hasManageAIFeatureON; // Is "ManageAI" feature installed (use custom flag "isAI" in player struct)
 	bool hasCustomSelectedUnitsMemory; // Player struct size is extended to host more selected units
@@ -66,7 +66,7 @@ public:
 	// Internal variables
 	vector<short int> unitDefToDisable[9]; // List of unitDefIDs to disable because of triggers (for scenarios)
 	vector<short int> researchesToDisable[9]; // List of researchIDs to disable because of triggers (for scenarios)
-	CrGameObjects myGameObjects;
+	RockNRorGameObjects myGameObjects;
 	int gameTimerSlowDownCounter;
 	long int CollectedTimerIntervalsIndex;
 	long int CollectedTimerIntervals_ms[CST_TIMER_STATS_ARRAY_SIZE];
@@ -198,7 +198,7 @@ private:
 
 
 namespace CUSTOMROR {
-	extern CustomRORInfo crInfo;
+	extern RockNRorInfo crInfo;
 
 	// Use this API to get "do we improve AI" information. This takes care of RockNRor configuration + possible custom rules.
 	// So we can add custom rules for debugging

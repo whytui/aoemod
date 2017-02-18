@@ -4,7 +4,7 @@
 #include <string>
 #include <AOE_struct_main_ai.h>
 #include <AOE_struct_units.h>
-#include "CustomRORInfo.h"
+#include "RockNRorInfo.h"
 #include "crDebugOutputPrimitives.h"
 #include "BitmapExporter.h"
 #include "AOEPrimitives_units.h"

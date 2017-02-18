@@ -5,8 +5,8 @@
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_unit_def.h>
 #include <AOE_const_functional.h>
-#include "crCommon.h"
-#include "CustomRORInfo.h"
+#include "RockNRorCommon.h"
+#include "RockNRorInfo.h"
 #include "researches.h"
 #include "AOE_strategy.h"
 #include "playerHandling.h"

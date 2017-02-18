@@ -7,7 +7,7 @@
 #include "AOEPrimitives_units.h"
 #include "AOEPrimitives_unitGroup.h"
 #include "randomizer.h"
-#include "CustomRORInfo.h"
+#include "RockNRorInfo.h"
 #include "customAIMilitaryInfo.h"
 #include "unitHandling.h"
 #include "combatAI.h"

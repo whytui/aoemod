@@ -1,15 +1,15 @@
-#include "../include/CustomRORInfo.h"
+#include "../include/RockNRorInfo.h"
 
 static char _intDistanceValues[CST_INT_DISTANCE_VALUES_MAX_COORDINATE + 1][CST_INT_DISTANCE_VALUES_MAX_COORDINATE + 1] = { '\0' };
 
 
 // Global static objects
-CONFIG::CustomRORConfig CustomRORInfo::configInfo;
-CustomRORInfo CUSTOMROR::crInfo;
+CONFIG::RockNRorConfig RockNRorInfo::configInfo;
+RockNRorInfo CUSTOMROR::crInfo;
 
 
 
-CustomRORInfo::CustomRORInfo() {
+RockNRorInfo::RockNRorInfo() {
 	this->triggerSet = NULL;
 	this->hasFixForBuildingStratElemUnitId = false;
 	this->hasCustomSelectedUnitsMemory = false;
@@ -28,7 +28,7 @@ CustomRORInfo::CustomRORInfo() {
 
 // Fast-computes the integer distance for X and Y delta values (sqrt(X^2 + Y^2) as an integer).
 // Returns -1 if invalid (diffX and diffY values are capped at CST_INT_DISTANCE_VALUES_MAX_COORDINATE)
-char CustomRORInfo::GetIntDistance(char diffX, char diffY) {
+char RockNRorInfo::GetIntDistance(char diffX, char diffY) {
 	if (diffX < 0) {
 		diffX = -diffX;
 	}
@@ -41,7 +41,7 @@ char CustomRORInfo::GetIntDistance(char diffX, char diffY) {
 	return _intDistanceValues[diffX][diffY];
 }
 
-CustomRORInfo::~CustomRORInfo() {
+RockNRorInfo::~RockNRorInfo() {
 	if (this->triggerSet) {
 		this->triggerSet->Reset();
 		delete this->triggerSet;
@@ -54,7 +54,7 @@ CustomRORInfo::~CustomRORInfo() {
 // Reset variables that are used during game.
 // Only reset internal variables that are game-dependent !
 // This is called on each game start/load
-void CustomRORInfo::ResetVariables() {
+void RockNRorInfo::ResetVariables() {
 	if (this->triggerSet) {
 		this->triggerSet->Reset();
 		delete this->triggerSet;
@@ -96,7 +96,7 @@ void CustomRORInfo::ResetVariables() {
 // Private method: fill a vector from a list of numeric values (short int)
 // Separator is , or ;
 // Does not support spaces.
-void CustomRORInfo::FillIDVectorFromString(vector<short int> &v, long int playerId, const char *text) {
+void RockNRorInfo::FillIDVectorFromString(vector<short int> &v, long int playerId, const char *text) {
 	if (!text || (*text == 0)) { return; }
 	if ((playerId < 0) || (playerId > 8)) { return; }
 	char currentValue[10];
@@ -126,13 +126,13 @@ void CustomRORInfo::FillIDVectorFromString(vector<short int> &v, long int player
 }
 
 // Resets and fills the list of unitDefID to disable for a player from a comma-separated list.
-void CustomRORInfo::FillUnitDefToDisableFromString(long int playerId, const char *text) {
+void RockNRorInfo::FillUnitDefToDisableFromString(long int playerId, const char *text) {
 	if (!text || (*text == 0)) { return; }
 	if ((playerId < 0) || (playerId > 8)) { return; }
 	this->FillIDVectorFromString(this->unitDefToDisable[playerId], playerId, text);
 }
 // Resets and fills the list of researchID to disable for a player from a comma-separated list.
-void CustomRORInfo::FillResearchesToDisableFromString(long int playerId, const char *text) {
+void RockNRorInfo::FillResearchesToDisableFromString(long int playerId, const char *text) {
 	if (!text || (*text == 0)) { return; }
 	if ((playerId < 0) || (playerId > 8)) { return; }
 	this->FillIDVectorFromString(this->researchesToDisable[playerId], playerId, text);
@@ -141,7 +141,7 @@ void CustomRORInfo::FillResearchesToDisableFromString(long int playerId, const c
 
 // Function to calculate conversion resistance for a giver unit from a given civ.
 // This replaces game's algorithm.
-float CustomRORInfo::GetConversionResistance(char civId, short int unitClass) {
+float RockNRorInfo::GetConversionResistance(char civId, short int unitClass) {
 	// Standard resistances (original game)
 	// Macedonian
 	if (civId == CST_CIVID_MACEDONIAN) {
@@ -177,7 +177,7 @@ float CustomRORInfo::GetConversionResistance(char civId, short int unitClass) {
 // Applies an "auto-attack policy" on all player's selected units (only for owned units !)
 // flagsToApply is used to determine which flags have to be updated using values from autoAttackPolicyValues.
 // If flagsToApply.xxx is true, then update unit's auto_attack_policy.xxx to "autoAttackPolicyValues.xxx" value.
-void CustomRORInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player,
+void RockNRorInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player,
 	const AutoAttackPolicy &autoAttackPolicyValues, const AutoAttackPolicy &flagsToApply) {
 	if (!flagsToApply.attackMilitary &&
 		!flagsToApply.attackNonTowerBuildings &&
@@ -215,12 +215,12 @@ void CustomRORInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(AOE_STRUCTURES::S
 
 
 // Returns true if a CUSTOM game popup is opened (only for popups, not dialogs !)
-bool CustomRORInfo::HasOpenedCustomGamePopup() {
+bool RockNRorInfo::HasOpenedCustomGamePopup() {
 	return (this->customGamePopupButtonVar != NULL);
 }
 
 // Returns true if a custom dialog is opened (only for dialogs, not popups !)
-bool CustomRORInfo::HasOpenedCustomDialog() {
+bool RockNRorInfo::HasOpenedCustomDialog() {
 	return (this->customYesNoDialogVar != NULL);
 }
 
@@ -233,7 +233,7 @@ bool CustomRORInfo::HasOpenedCustomDialog() {
 // Pauses the game if running (only if a popup is successfully opened)
 // Technically, the created (AOE) popup object is based on game options popup.
 // themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
-AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn, long int themeSlpId) {
+AOE_STRUCTURES::STRUCT_ANY_UI *RockNRorInfo::OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn, long int themeSlpId) {
 	if (this->HasOpenedCustomGamePopup()) { return false; }
 	if ((hSize < 0xB0) || (vSize < 30)) { return false; }
 	if (!ROR_gameSettings) { return false; }
@@ -277,7 +277,7 @@ AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::OpenCustomGamePopup(long int hSize
 // Use it to list all UI components (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
 // The method is protected against duplicates, you can safely call it more than once.
 // Returns true if obj has actually been added to list.
-bool CustomRORInfo::AddObjectInPopupContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj) {
+bool RockNRorInfo::AddObjectInPopupContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj) {
 	if (obj == NULL) {
 		return false;
 	}
@@ -293,7 +293,7 @@ bool CustomRORInfo::AddObjectInPopupContentList(AOE_STRUCTURES::STRUCT_ANY_UI *o
 
 
 // Frees (destroys using AOE destructor) all popup's components
-void CustomRORInfo::FreePopupAddedObjects() {
+void RockNRorInfo::FreePopupAddedObjects() {
 	// at this point, our "garbage" collector contains objects from a previous popup
 	// which means we are now certain all of these components are NOT related to the "in progress" event (onclick, etc), if any.
 	// So we can free them. This way, we don't accumulate old components, but only keep those from "last" popup.
@@ -316,7 +316,7 @@ void CustomRORInfo::FreePopupAddedObjects() {
 // Free remaining UI components that could not be freed yet
 // The reason we don't free those immediatly is because they might be used in current event (button onclick, etc).
 // Warning: this must NOT be called at any moment, make sure none of the concerned object is currently being used (specially for onclick events...)
-void CustomRORInfo::FreeGarbagePopupComponents() {
+void RockNRorInfo::FreeGarbagePopupComponents() {
 	for (std::vector<AOE_STRUCTURES::STRUCT_ANY_UI *>::iterator it = this->garbageComponentsToFree.begin(); it != this->garbageComponentsToFree.end(); it++) {
 		AOE_STRUCTURES::STRUCT_ANY_UI *curObj = *it;
 		curObj->ptrParentObject = NULL; // do not try to free other related objects, just this one ! Remove link. Otherwise some objects would be destroyed more than once => crash
@@ -333,7 +333,7 @@ void CustomRORInfo::FreeGarbagePopupComponents() {
 
 // Use this to force values for "current custom popup". PLEASE AVOID using it !
 // Returns true if successful. Fails if a popup is already open.
-bool CustomRORInfo::ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_ANY_UI *customGamePopup, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel) {
+bool RockNRorInfo::ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_ANY_UI *customGamePopup, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel) {
 	if (this->HasOpenedCustomGamePopup()) { return false; }
 	this->customGamePopupVar = customGamePopup;
 	this->customGamePopupButtonVar = btnOK;
@@ -343,13 +343,13 @@ bool CustomRORInfo::ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_ANY_UI *cust
 
 
 // To be called when game menu is closed to free custom button
-void CustomRORInfo::ForceClearCustomMenuObjects() {
+void RockNRorInfo::ForceClearCustomMenuObjects() {
 	this->FreePopupAddedObjects();
 }
 
 
 // Closes currently opened custom popup window in game screen.
-void CustomRORInfo::CloseCustomGamePopup() {
+void RockNRorInfo::CloseCustomGamePopup() {
 	AOE_STRUCTURES::STRUCT_ANY_UI *UIObjButton = this->customGamePopupButtonVar;
 	if (UIObjButton == NULL) { return; }
 	AOE_STRUCTURES::STRUCT_ANY_UI *popupUIObj = UIObjButton->ptrParentObject;
@@ -372,26 +372,26 @@ void CustomRORInfo::CloseCustomGamePopup() {
 
 
 // Return true if provided memory address is our custom game popup (excluding custom options)
-bool CustomRORInfo::IsCustomGamePopupOKButton(unsigned long int UIObjectAddress) {
+bool RockNRorInfo::IsCustomGamePopupOKButton(unsigned long int UIObjectAddress) {
 	return UIObjectAddress == (unsigned long)this->customGamePopupButtonVar;
 }
 
 // Return true if provided memory address is our custom game popup Cancel button (excluding custom options)
-bool CustomRORInfo::IsCustomGamePopupCancelButton(unsigned long int UIObjectAddress) {
+bool RockNRorInfo::IsCustomGamePopupCancelButton(unsigned long int UIObjectAddress) {
 	return UIObjectAddress == (unsigned long)this->customGamePopupCancelBtnVar;
 }
 
 
 // Returns custom popup window in game screen (excluding RockNRor options popup).
 // Returns NULL if this popup is not open.
-AOE_STRUCTURES::STRUCT_ANY_UI *CustomRORInfo::GetCustomGamePopup() {
+AOE_STRUCTURES::STRUCT_ANY_UI *RockNRorInfo::GetCustomGamePopup() {
 	return this->customGamePopupVar;
 }
 
 
 // Get main (first) selected unit, or NULL if none is selected.
 // Works in-game and in editor.
-AOE_STRUCTURES::STRUCT_UNIT_BASE *CustomRORInfo::GetMainSelectedUnit(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+AOE_STRUCTURES::STRUCT_UNIT_BASE *RockNRorInfo::GetMainSelectedUnit(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	assert(player != NULL);
 	if (!player) { return NULL; }
 	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->GetRelevantSelectedUnitsPointer(player);
@@ -404,7 +404,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *CustomRORInfo::GetMainSelectedUnit(AOE_STRUCTU
 
 // Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
 // Please use this instead of playerStruct->selectedStructUnitTable
-AOE_STRUCTURES::STRUCT_UNIT_BASE **CustomRORInfo::GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+AOE_STRUCTURES::STRUCT_UNIT_BASE **RockNRorInfo::GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	assert(player != NULL);
 	if (!player) { return NULL; }
 	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits;
@@ -416,7 +416,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE **CustomRORInfo::GetRelevantSelectedUnitsPointe
 	assert(selectedUnits != NULL);
 	return selectedUnits;
 }
-AOE_STRUCTURES::STRUCT_UNIT_BASE **CustomRORInfo::GetRelevantSelectedUnitsBasePointer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+AOE_STRUCTURES::STRUCT_UNIT_BASE **RockNRorInfo::GetRelevantSelectedUnitsBasePointer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	return (AOE_STRUCTURES::STRUCT_UNIT_BASE **)this->GetRelevantSelectedUnitsPointer(player);
 }
 

@@ -80,7 +80,7 @@ int CAOEApp::RunSelectedMode()
 		return 1;
 	}
 
-	CAOE_Console objConsole;
+	RockNRorAdmin_Console objConsole;
 	std::wifstream stream;
 
 	switch (this->runMode) {

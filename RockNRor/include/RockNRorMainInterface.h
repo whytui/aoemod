@@ -5,13 +5,13 @@
 #include <UI\AOE_struct_ui_mp_setup_screen.h>
 #include <AOE_struct_unit_actions.h>
 #include <AOE_struct_units.h>
-#include "CustomRORInfo.h"
-#include "crCommands.h"
+#include "RockNRorInfo.h"
+#include "RockNRorCommand.h"
 #include "CustomPopupBase.h"
 #include "EditMapSizeXYPopup.h"
 #include "EditTerrainPopup.h"
 #include "EditorScenarioInfoPopup.h"
-#include "InGameCustomRorOptionsPopup.h"
+#include "InGameRockNRorOptionsPopup.h"
 #include "EditorEditUnitInfoPopup.h"
 #include "InGameUnitPropertiesPopup.h"
 #include "GenNewTriggerPopup.h"
@@ -28,10 +28,10 @@ namespace CUSTOMROR {
 /* This class manages main interactions between ROR (via CustomRORInstance class) and RockNRor commands
  * Especially, UI events are managed here as our UI objects need to access CustomRORCommand object.
 */
-class CustomRORMainInterface {
+class RockNRorMainInterface {
 public:
-	CustomRORMainInterface();
-	~CustomRORMainInterface();
+	RockNRorMainInterface();
+	~RockNRorMainInterface();
 
 
 	// Manage key press in game screen and editor.
@@ -53,6 +53,6 @@ public:
 };
 
 
-	// Global unique object
-	extern CustomRORMainInterface crMainInterface;
+// Global unique object
+extern RockNRorMainInterface crMainInterface;
 }

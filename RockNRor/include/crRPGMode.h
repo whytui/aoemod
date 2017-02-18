@@ -9,7 +9,7 @@
 #include <AOE_struct_player.h>
 #include "randomizer.h"
 #include "unitDefHandling.h"
-#include "crCommon.h"
+#include "RockNRorCommon.h"
 #include "AOEPrimitives_UI_gameMain.h"
 
 namespace RPG_MODE {

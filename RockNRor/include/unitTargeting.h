@@ -10,7 +10,7 @@
 #include "mainStructuresHandling.h"
 #include "randomizer.h"
 #include "AOE_time.h"
-#include "crCommon.h"
+#include "RockNRorCommon.h"
 #include "unitDefHandling.h"
 #include "AOEPrimitives_units.h"
 #include "playerTargeting.h"

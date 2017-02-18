@@ -4,18 +4,18 @@
 #include <mystrings.h>
 #include "CustomPopupBase.h"
 #include "SimpleEditText.h"
-#include "crCommon.h"
-#include "crCommands.h"
-#include "crLocalization.h"
+#include "RockNRorCommon.h"
+#include "RockNRorCommand.h"
+#include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
 #include "MapCopyPopup.h"
 #include "autoRebuildFarmConfig.h"
 #include "CustomPopupSystem.h"
 
 
-class InGameCustomRorOptionsPopup : public CustomPopupBase {
+class InGameRockNRorOptionsPopup : public CustomPopupBase {
 public:
-	InGameCustomRorOptionsPopup();
+	InGameRockNRorOptionsPopup();
 	void _ResetPointers() override;
 	void _AddPopupContent() override;
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)

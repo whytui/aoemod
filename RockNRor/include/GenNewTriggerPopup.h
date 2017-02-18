@@ -4,9 +4,9 @@
 #include <mystrings.h>
 #include <UI_components\AOE_struct_ui_button.h>
 #include "CustomPopupBase.h"
-#include "crCommon.h"
-#include "crCommands.h"
-#include "crLocalization.h"
+#include "RockNRorCommon.h"
+#include "RockNRorCommand.h"
+#include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
 
 

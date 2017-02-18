@@ -1,4 +1,4 @@
-#include "../include/crGameObjects.h"
+#include "../include/RockNRorGameObjects.h"
 
 
 
@@ -61,29 +61,29 @@ FarmRebuildInfo::FarmRebuildInfo() {
 
 
 
-CrGameObjects::CrGameObjects() {
+RockNRorGameObjects::RockNRorGameObjects() {
 
 }
 
-CrGameObjects::~CrGameObjects() {
+RockNRorGameObjects::~RockNRorGameObjects() {
 
 }
 
 
-void CrGameObjects::ResetObjects() {
+void RockNRorGameObjects::ResetObjects() {
 	this->FreeAllFarmRebuildInfoList();
 	this->FreeAllUnitCustomInfoList();
 }
 
 
-void CrGameObjects::FreeAllUnitCustomInfoList() {
+void RockNRorGameObjects::FreeAllUnitCustomInfoList() {
 	std::for_each(this->unitCustomInfoList.begin(), this->unitCustomInfoList.end(),
 		[](UnitCustomInfo *i) { delete i; }
 	);
 	this->unitCustomInfoList.clear();
 }
 
-void CrGameObjects::FreeAllFarmRebuildInfoList() {
+void RockNRorGameObjects::FreeAllFarmRebuildInfoList() {
 	std::for_each(this->farmRebuildInfoList.begin(), this->farmRebuildInfoList.end(),
 		[](FarmRebuildInfo *f) { delete f; }
 	);
@@ -93,7 +93,7 @@ void CrGameObjects::FreeAllFarmRebuildInfoList() {
 
 
 // Remove all information concerning a specific unit
-bool CrGameObjects::RemoveAllInfoForUnit(long int unitId, float posX, float posY) {
+bool RockNRorGameObjects::RemoveAllInfoForUnit(long int unitId, float posX, float posY) {
 	bool result = false;
 	if ((posX >= 0) && (posY >= 0)) {
 		result |= this->RemoveFarmRebuildInfo(posX, posX);
@@ -109,7 +109,7 @@ bool CrGameObjects::RemoveAllInfoForUnit(long int unitId, float posX, float posY
 // Returns a UnitCustomInfo pointer to matching element for given unitId.
 // Returns NULL if not found.
 // Asserts unitId > 0
-UnitCustomInfo *CrGameObjects::FindUnitCustomInfo(long int unitId) {
+UnitCustomInfo *RockNRorGameObjects::FindUnitCustomInfo(long int unitId) {
 	assert(unitId >= 0);
 	auto it = std::find_if(this->unitCustomInfoList.begin(), this->unitCustomInfoList.end(),
 		[unitId](UnitCustomInfo *unitInfo) {return unitInfo->unitId == unitId; }
@@ -123,7 +123,7 @@ UnitCustomInfo *CrGameObjects::FindUnitCustomInfo(long int unitId) {
 
 // Returns a UnitCustomInfo pointer to matching element for given unitId.
 // Asserts unitId >= 0
-UnitCustomInfo *CrGameObjects::FindOrAddUnitCustomInfo(long int unitId) {
+UnitCustomInfo *RockNRorGameObjects::FindOrAddUnitCustomInfo(long int unitId) {
 	assert(unitId >= 0);
 	auto it = std::find_if(this->unitCustomInfoList.begin(), this->unitCustomInfoList.end(),
 		[unitId](UnitCustomInfo *unitInfo) {return unitInfo->unitId == unitId; }
@@ -142,7 +142,7 @@ UnitCustomInfo *CrGameObjects::FindOrAddUnitCustomInfo(long int unitId) {
 
 // Remove custom information for a specific unit
 // Returns true if an element was found (and removed)
-bool CrGameObjects::RemoveUnitCustomInfo(long int unitId) {
+bool RockNRorGameObjects::RemoveUnitCustomInfo(long int unitId) {
 	auto it = std::remove_if(this->unitCustomInfoList.begin(), this->unitCustomInfoList.end(),
 		[unitId](UnitCustomInfo *unitInfo) { return unitInfo->unitId == unitId; }
 	);
@@ -153,7 +153,7 @@ bool CrGameObjects::RemoveUnitCustomInfo(long int unitId) {
 
 // Remove custom information for a specific unit, ONLY if it contains no relevant value (all parameters are not applicable/default)
 // Returns true if an element was removed
-bool CrGameObjects::RemoveUnitCustomInfoIfEmpty(long int unitId) {
+bool RockNRorGameObjects::RemoveUnitCustomInfoIfEmpty(long int unitId) {
 	UnitCustomInfo *u = this->FindUnitCustomInfo(unitId);
 	if (!u) { return false; }
 	if (u->CanBeRemoved()) {
@@ -165,7 +165,7 @@ bool CrGameObjects::RemoveUnitCustomInfoIfEmpty(long int unitId) {
 
 // Returns a FarmRebuildInfo pointer to matching element for given position
 // Returns NULL if not found.
-FarmRebuildInfo *CrGameObjects::FindFarmRebuildInfo(float posX, float posY) {
+FarmRebuildInfo *RockNRorGameObjects::FindFarmRebuildInfo(float posX, float posY) {
 	assert(posX >= 0);
 	assert(posY >= 0);
 	auto it = std::find_if(this->farmRebuildInfoList.begin(), this->farmRebuildInfoList.end(),
@@ -180,7 +180,7 @@ FarmRebuildInfo *CrGameObjects::FindFarmRebuildInfo(float posX, float posY) {
 }
 
 // Returns (and adds if not existing) a FarmRebuildInfo pointer for given position.
-FarmRebuildInfo *CrGameObjects::FindOrAddFarmRebuildInfo(float posX, float posY) {
+FarmRebuildInfo *RockNRorGameObjects::FindOrAddFarmRebuildInfo(float posX, float posY) {
 	FarmRebuildInfo *elem = this->FindFarmRebuildInfo(posX, posY);
 	if (elem != NULL) { return elem; }
 	elem = new FarmRebuildInfo(); // Inits all values to NULL / -1...
@@ -192,7 +192,7 @@ FarmRebuildInfo *CrGameObjects::FindOrAddFarmRebuildInfo(float posX, float posY)
 
 // Remove a FarmRebuildInfo element from list
 // Returns true if an element was found (and removed)
-bool CrGameObjects::RemoveFarmRebuildInfo(float posX, float posY) {
+bool RockNRorGameObjects::RemoveFarmRebuildInfo(float posX, float posY) {
 	auto it = std::remove_if(this->farmRebuildInfoList.begin(), this->farmRebuildInfoList.end(),
 		[posX, posY](FarmRebuildInfo *f) {
 			return (abs(f->posX - posX) <= REBUILD_FARMS_POSITION_THRESHOLD) && (abs(f->posY - posY) <= REBUILD_FARMS_POSITION_THRESHOLD);
@@ -205,7 +205,7 @@ bool CrGameObjects::RemoveFarmRebuildInfo(float posX, float posY) {
 
 
 // Remove "protect" info from all "unit info" objects that tell to protect a specific unit id
-bool CrGameObjects::RemoveProtectedUnit(long int protectedUnitId) {
+bool RockNRorGameObjects::RemoveProtectedUnit(long int protectedUnitId) {
 	if (protectedUnitId < 0) { return false; }
 	bool result = false;
 	std::vector<long int> modifiedUnitIdList;

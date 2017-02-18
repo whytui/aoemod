@@ -55,6 +55,12 @@
     <Filter Include="Fichiers sources\RockNRorFeatures">
       <UniqueIdentifier>{3bd80b5d-5764-404d-b040-b5e41a7a23f6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\RockNRorBase">
+      <UniqueIdentifier>{1840f6d5-55a7-435a-9ec1-b15d222d7c70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\RockNRorBase">
+      <UniqueIdentifier>{9360d88e-8f82-4a8d-af9e-4856b391d359}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\tinyxml\tinystr.h">
@@ -63,25 +69,7 @@
     <ClInclude Include="..\..\tinyxml\tinyxml.h">
       <Filter>Fichiers d%27en-tête\TinyXML</Filter>
     </ClInclude>
-    <ClInclude Include="include\crCommands.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\crConfig.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\crCommon.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\crMainInterface.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\crGameObjects.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\unitShortcuts.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\crLocalization.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\StrategyBuilder.h">
@@ -103,9 +91,6 @@
       <Filter>Fichiers d%27en-tête\customUI</Filter>
     </ClInclude>
     <ClInclude Include="include\InputBox.h">
-      <Filter>Fichiers d%27en-tête\customUI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\InGameCustomRorOptionsPopup.h">
       <Filter>Fichiers d%27en-tête\customUI</Filter>
     </ClInclude>
     <ClInclude Include="include\SimpleEditText.h">
@@ -133,9 +118,6 @@
       <Filter>Fichiers d%27en-tête\customUI</Filter>
     </ClInclude>
     <ClInclude Include="include\buttonBar.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\CustomRORInfo.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\StrategyUpdater.h">
@@ -303,8 +285,32 @@
     <ClInclude Include="include\CustomPopupSystem.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
+    <ClInclude Include="include\InGameRockNRorOptionsPopup.h">
+      <Filter>Fichiers d%27en-tête\customUI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RockNRorConfig.h">
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RockNRorGameObjects.h">
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RockNRorInfo.h">
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
+    </ClInclude>
     <ClInclude Include="include\RockNRorInstance.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RockNRorCommand.h">
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RockNRorCommon.h">
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RockNRorLocalization.h">
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RockNRorMainInterface.h">
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -320,24 +326,6 @@
     <ClCompile Include="..\..\tinyxml\tinyxmlparser.cpp">
       <Filter>Fichiers sources\TinyXML</Filter>
     </ClCompile>
-    <ClCompile Include="src\crCommands.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\crConfig.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\crCommon.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\crMainInterface.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\crGameObjects.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\crLocalization.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\StrategyBuilder.cpp">
       <Filter>Fichiers sources\Strategy</Filter>
     </ClCompile>
@@ -351,9 +339,6 @@
       <Filter>Fichiers sources\customUI</Filter>
     </ClCompile>
     <ClCompile Include="src\InputBox.cpp">
-      <Filter>Fichiers sources\customUI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\InGameCustomRorOptionsPopup.cpp">
       <Filter>Fichiers sources\customUI</Filter>
     </ClCompile>
     <ClCompile Include="src\SimpleEditText.cpp">
@@ -381,9 +366,6 @@
       <Filter>Fichiers sources\customUI</Filter>
     </ClCompile>
     <ClCompile Include="src\buttonBar.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CustomRORInfo.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\StrategyUpdater.cpp">
@@ -509,8 +491,32 @@
     <ClCompile Include="src\CustomPopupSystem.cpp">
       <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
+    <ClCompile Include="src\InGameRockNRorOptionsPopup.cpp">
+      <Filter>Fichiers sources\customUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RockNRorConfig.cpp">
+      <Filter>Fichiers sources\RockNRorBase</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RockNRorGameObjects.cpp">
+      <Filter>Fichiers sources\RockNRorBase</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RockNRorInfo.cpp">
+      <Filter>Fichiers sources\RockNRorBase</Filter>
+    </ClCompile>
     <ClCompile Include="src\RockNRorInstance.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Fichiers sources\RockNRorBase</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RockNRorCommand.cpp">
+      <Filter>Fichiers sources\RockNRorBase</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RockNRorCommon.cpp">
+      <Filter>Fichiers sources\RockNRorBase</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RockNRorLocalization.cpp">
+      <Filter>Fichiers sources\RockNRorBase</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RockNRorMainInterface.cpp">
+      <Filter>Fichiers sources\RockNRorBase</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

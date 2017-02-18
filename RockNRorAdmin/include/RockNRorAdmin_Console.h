@@ -9,18 +9,18 @@
 #include "../../AOE_DataPatcher/include/AOE_binData.h"
 #include "EmpiresX_API.h"
 #include "Version.h"
-#include "CustomizeAOE_base.h"
+#include "RockNRorAdmin_base.h"
 #include "InstallManager.h"
 #include "ddraw_reg_colorFix.h"
 
 // Note: use __super::mymethod(...) to call parent class implementation, if needed
 
-class CAOE_Console: public CustomizeAOE_base
+class RockNRorAdmin_Console : public RockNRorAdmin_base
 {
 public:
-	CAOE_Console();
-	CAOE_Console(std::wistream *inputStream);
-	~CAOE_Console();
+	RockNRorAdmin_Console();
+	RockNRorAdmin_Console(std::wistream *inputStream);
+	~RockNRorAdmin_Console();
 
 	void AssignInputStream(std::wistream *inputStream) { this->winput = inputStream; }
 	void SetEcho(bool value) { this->echo = value; }

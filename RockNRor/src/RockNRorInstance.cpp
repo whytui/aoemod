@@ -2598,7 +2598,7 @@ void RockNRorInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
 	// Now manage the case when the clicked button is our custom button...
-	InGameCustomRorOptionsPopup::CreateGameCustomRorOptionsPopup(previousPopup);
+	InGameRockNRorOptionsPopup::CreateGameCustomRorOptionsPopup(previousPopup);
 	ChangeReturnAddress(REG_values, 0x004342A7);
 }
 
@@ -2636,11 +2636,11 @@ void RockNRorInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 
 	char *typedText = "";
 	
-	InGameCustomRorOptionsPopup *crOptionsPopup = NULL;
+	InGameRockNRorOptionsPopup *crOptionsPopup = NULL;
 	bool isCustomROROptionsPopupOpen = false;
 	if (CUSTOMROR::customPopupSystem.currentCustomPopup != NULL) {
-		if (dynamic_cast<InGameCustomRorOptionsPopup*>(CUSTOMROR::customPopupSystem.currentCustomPopup) != NULL) {
-			crOptionsPopup = (InGameCustomRorOptionsPopup*)CUSTOMROR::customPopupSystem.currentCustomPopup;
+		if (dynamic_cast<InGameRockNRorOptionsPopup*>(CUSTOMROR::customPopupSystem.currentCustomPopup) != NULL) {
+			crOptionsPopup = (InGameRockNRorOptionsPopup*)CUSTOMROR::customPopupSystem.currentCustomPopup;
 			isCustomROROptionsPopupOpen = true;
 		} else {
 			traceMessageHandler.WriteMessage("Internal ERROR: bad popup object type");

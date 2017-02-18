@@ -1,14 +1,14 @@
-#include "CAOE_UI.h"
+#include "RockNRorAdmin_UI.h"
 
 
-CAOE_UI::CAOE_UI()
+RockNRorAdmin_UI::RockNRorAdmin_UI()
 {
 	messagesBuffer = _T("");
 	sendMessagesToBuffer = false;
 }
 
 
-CAOE_UI::~CAOE_UI()
+RockNRorAdmin_UI::~RockNRorAdmin_UI()
 {
 }
 
@@ -16,7 +16,7 @@ CAOE_UI::~CAOE_UI()
 
 
 // Display a message to the user
-void CAOE_UI::DisplayMessage(std::wstring message) {
+void RockNRorAdmin_UI::DisplayMessage(std::wstring message) {
 	if (this->sendMessagesToBuffer) {
 		this->messagesBuffer += message;
 	} else {
@@ -26,7 +26,7 @@ void CAOE_UI::DisplayMessage(std::wstring message) {
 
 
 // Returns true if the user answered Yes to the question
-bool CAOE_UI::AskForConfirmation(std::wstring question) {
+bool RockNRorAdmin_UI::AskForConfirmation(std::wstring question) {
 	// GetActiveWindow() makes the message modal. User MUST first answer the question before doing anything in the UI.
 	int answer = MessageBox(GetActiveWindow(), question.c_str(), _T("RockNRor Admin"), MB_YESNO);
 	return (answer == IDYES);
@@ -34,7 +34,7 @@ bool CAOE_UI::AskForConfirmation(std::wstring question) {
 
 
 // Unused: the main UI class runs itself what is needed...
-bool CAOE_UI::Execute() {
+bool RockNRorAdmin_UI::Execute() {
 	//CAOE_MainForm *mainForm = new CAOE_MainForm("RockNRor Admin", wxPoint(50, 50), wxSize(450, 340));
 	//mainForm->SetAPI(&this->e_api);
 	//mainForm->Show(true);

@@ -26,7 +26,7 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 {
 	// We MUST control that initializations do not raise errors or the UI won't show up and the process will freeze.
 	try {
-		this->objAOE = new CAOE_UI();
+		this->objAOE = new RockNRorAdmin_UI();
 		this->e_api = objAOE->GetAPI();
 	}
 	catch (std::exception &e) {

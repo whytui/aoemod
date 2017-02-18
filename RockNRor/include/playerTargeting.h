@@ -8,9 +8,9 @@
 #include <AOE_struct_main_ai.h>
 #include "mainStructuresHandling.h"
 #include "randomizer.h"
-#include "crCommon.h"
+#include "RockNRorCommon.h"
 #include "unitDefHandling.h"
-#include "CustomRORInfo.h"
+#include "RockNRorInfo.h"
 #include "customAIMilitaryInfo.h"
 
 using namespace std;

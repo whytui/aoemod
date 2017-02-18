@@ -11,7 +11,7 @@
 #include <AOE_const_language.h>
 #include "traceMessage.h"
 #include "language.h"
-#include "crLocalization.h"
+#include "RockNRorLocalization.h"
 #include "TechnologyFilter.h"
 #include "mainStructuresHandling.h"
 

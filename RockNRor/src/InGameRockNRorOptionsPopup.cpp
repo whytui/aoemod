@@ -1,16 +1,16 @@
-#include "../include/InGameCustomRorOptionsPopup.h"
+#include "../include/InGameRockNRorOptionsPopup.h"
 
 
 
 // Create in-game RockNRor options screen. Returns false if failed and if return address must be changed.
-bool InGameCustomRorOptionsPopup::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
+bool InGameRockNRorOptionsPopup::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
 	assert(previousPopup != NULL);
 	if (!previousPopup) { return false; }
 
 	assert(!CUSTOMROR::crInfo.HasOpenedCustomGamePopup()); // Custom popup is not already open
 	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) { return true; } // do nothing, but not treated as alloc error
 
-	InGameCustomRorOptionsPopup *popupUIObject = CUSTOMROR::customPopupSystem.CreateCustomPopupObject<InGameCustomRorOptionsPopup>();
+	InGameRockNRorOptionsPopup *popupUIObject = CUSTOMROR::customPopupSystem.CreateCustomPopupObject<InGameRockNRorOptionsPopup>();
 	if (popupUIObject) {
 		popupUIObject->CloseMenuAndOpenPopup(previousPopup);
 	}
@@ -27,12 +27,12 @@ bool InGameCustomRorOptionsPopup::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES
 
 
 
-InGameCustomRorOptionsPopup::InGameCustomRorOptionsPopup() {
+InGameRockNRorOptionsPopup::InGameRockNRorOptionsPopup() {
 	this->_ResetPointers();
 }
 
 
-void InGameCustomRorOptionsPopup::_ResetPointers() {
+void InGameRockNRorOptionsPopup::_ResetPointers() {
 	__super::_ResetPointers();
 	this->openTechTreeInfo = false;
 	this->autoRebuildFarmConfig = NULL;
@@ -57,7 +57,7 @@ void InGameCustomRorOptionsPopup::_ResetPointers() {
 	this->lblAutoRebuildFarmsMaxFarms = NULL;
 }
 
-void InGameCustomRorOptionsPopup::_AddPopupContent() {
+void InGameRockNRorOptionsPopup::_AddPopupContent() {
 	if (this->IsClosed() || (this->popup == NULL)) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
@@ -107,7 +107,7 @@ void InGameCustomRorOptionsPopup::_AddPopupContent() {
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool InGameCustomRorOptionsPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
+bool InGameRockNRorOptionsPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnTechTreeInfo) {
 		this->openTechTreeInfo = true;
 		this->ClosePopup(false);
@@ -121,7 +121,7 @@ bool InGameCustomRorOptionsPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON
 	return false;
 }
 
-void InGameCustomRorOptionsPopup::OnBeforeClose(bool isCancel) {
+void InGameRockNRorOptionsPopup::OnBeforeClose(bool isCancel) {
 	char *typedText;
 	if (this->customOptionHumanPenaltyTextVar) {
 		typedText = this->customOptionHumanPenaltyTextVar->pTypedText;
@@ -161,7 +161,7 @@ void InGameCustomRorOptionsPopup::OnBeforeClose(bool isCancel) {
 }
 
 
-void InGameCustomRorOptionsPopup::OnAfterClose(bool isCancel) {
+void InGameRockNRorOptionsPopup::OnAfterClose(bool isCancel) {
 	if (this->openTechTreeInfo) {
 		AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
 		assert(humanPlayer && humanPlayer->IsCheckSumValid());
@@ -182,7 +182,7 @@ void InGameCustomRorOptionsPopup::OnAfterClose(bool isCancel) {
 
 // Specific method to use instead of OpenPopup (special treatments for ingame RockNRor menu).
 // previousPopup should be game menu popup object.
-AOE_STRUCTURES::STRUCT_ANY_UI *InGameCustomRorOptionsPopup::CloseMenuAndOpenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
+AOE_STRUCTURES::STRUCT_ANY_UI *InGameRockNRorOptionsPopup::CloseMenuAndOpenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
 	assert(previousPopup != NULL);
 	if (!previousPopup) { return NULL; }
 	AOE_STRUCTURES::STRUCT_ANY_UI *MainGameUIObj = previousPopup->ptrParentObject;

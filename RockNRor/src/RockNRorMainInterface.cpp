@@ -1,17 +1,17 @@
-#include "../include/crMainInterface.h"
+#include "../include/RockNRorMainInterface.h"
 
 
 namespace CUSTOMROR {
 
 
 // Static global object
-CustomRORMainInterface CUSTOMROR::crMainInterface;
+RockNRorMainInterface CUSTOMROR::crMainInterface;
 
 
-CustomRORMainInterface::CustomRORMainInterface() {
+RockNRorMainInterface::RockNRorMainInterface() {
 }
 
-CustomRORMainInterface::~CustomRORMainInterface() {
+RockNRorMainInterface::~RockNRorMainInterface() {
 }
 
 
@@ -20,7 +20,7 @@ CustomRORMainInterface::~CustomRORMainInterface() {
 // Manage key press in game screen and editor.
 // Returns true if event has been handled AND we don't want original code to try to handle it.
 // Warning: UI components may catch and handle events before so this method is NOT called. See crCommand.OnGameCommandButtonClick.
-bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool CTRL, bool SHIFT, bool ALT) {
+bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool CTRL, bool SHIFT, bool ALT) {
 	AOE_STRUCTURES::STRUCT_ANY_UI **pCurrentUI = (AOE_STRUCTURES::STRUCT_ANY_UI **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
 	assert(pCurrentUI != NULL);
 	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = *pCurrentUI;
@@ -327,7 +327,7 @@ bool CustomRORMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool 
 
 // Called for ALL button clicks in the game.
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
+bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
 	if (CUSTOMROR::customPopupSystem.OnButtonClickClosePopupIfNecessary(objAddress)) {
 		return true;
 	}
@@ -395,7 +395,7 @@ bool CustomRORMainInterface::Global_OnButtonClick(unsigned long int objAddress) 
 
 
 // Returns true if custom map generation has been executed. False if we want to let original game code apply.
-bool CustomRORMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
+bool RockNRorMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return false; }
@@ -416,7 +416,7 @@ bool CustomRORMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 
 // Manage right button release action on selected units for given player
 // Returns true if ROR code should be skipped -----WRONG if a red cross sign should be displayed (a relevant action occurred)
-bool CustomRORMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameZone,
+bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameZone,
 	AOE_STRUCTURES::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY) {
 	if (!UIGameZone || !UIGameZone->IsCheckSumValid()) { return false; }
 	assert(UIGameZone != NULL);

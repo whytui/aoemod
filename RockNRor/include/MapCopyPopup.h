@@ -4,9 +4,9 @@
 #include <mystrings.h>
 #include "CustomPopupBase.h"
 #include "AOE_map.h"
-#include "crCommon.h"
-#include "crCommands.h"
-#include "crLocalization.h"
+#include "RockNRorCommon.h"
+#include "RockNRorCommand.h"
+#include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
 
 

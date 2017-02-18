@@ -5,8 +5,8 @@
 #include <mystrings.h>
 #include <UI_components\AOE_struct_ui_combobox.h>
 #include "CustomPopupBase.h"
-#include "crCommon.h"
-#include "crLocalization.h"
+#include "RockNRorCommon.h"
+#include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
 #include "CustomPopupSystem.h"
 #include "unitHandling.h"

@@ -4,7 +4,7 @@
 #include <AOE_struct_units.h>
 #include <AOE_struct_player.h>
 #include <AOE_struct_main_ai.h>
-#include "CustomRORInfo.h"
+#include "RockNRorInfo.h"
 #include "customAIMilitaryInfo.h"
 #include "UnitGroupAI.h"
 #include "EconomyAI.h"

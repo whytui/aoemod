@@ -4,7 +4,7 @@
 #include "Version.h"
 #include "mystrings.h"
 #include "EmpiresX_API.h"
-#include "CAOE_UI.h"
+#include "RockNRorAdmin_UI.h"
 #include "ddraw_reg_colorFix.h"
 #include "WxEditFile.h"
 #include "FileSelector.h"
@@ -32,11 +32,11 @@ public:
 	~WxMainForm();
 	void SetAPI(EmpiresX_API *value) { this->e_api = value; };
 	EmpiresX_API *GetAPI() { return this->e_api; }
-	void SetMainUIObject(CAOE_UI *value) { this->objAOE = value; }
-	CAOE_UI *GetMainUIObject() { return this->objAOE; }
+	void SetMainUIObject(RockNRorAdmin_UI *value) { this->objAOE = value; }
+	RockNRorAdmin_UI *GetMainUIObject() { return this->objAOE; }
 private:
 	EmpiresX_API *e_api;
-	CAOE_UI *objAOE;
+	RockNRorAdmin_UI *objAOE;
 
 	wxTextCtrl *txtLog;
 
