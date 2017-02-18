@@ -24,6 +24,30 @@ bool EmpiresX_API::SetInstallDirInRegistry(const std::wstring &newPath) {
 }
 
 
+// Create a new empiresx.exe (from currently opened one), dedicated to RockNRor mod.
+// Returns true if successful. If successful, the new file is opened instead of "current" file.
+bool EmpiresX_API::CreateAndOpenExeForRockNRor(const std::wstring &newExeFileName) {
+	std::wstring currentFileName = this->aoeFileSelector.getFileName();
+	if (currentFileName.empty()) {
+		return false;
+	}
+	if (CheckFileExistence(newExeFileName)) {
+		// Delete existing (target) file
+		if (DeleteFile(newExeFileName.c_str()) == 0) {
+			return false;
+		}
+	}
+	BOOL result = CopyFile(this->aoeFileSelector.getFileName().c_str(), newExeFileName.c_str(), (BOOL)true);
+	// GetLastError to retrieve error code
+	if (result == 0) {
+		return false;
+	}
+	this->CloseEmpiresXFile();
+	this->SetFileName(newExeFileName);
+	return this->OpenEmpiresXFile();
+}
+
+
 // Asks the user to select manually the target executable file
 // Returns true if the file exists
 bool EmpiresX_API::SetFileNameManually() {
@@ -47,6 +71,20 @@ std::wstring EmpiresX_API::GetFileName() {
 // Returns the wstring representation of current (exe) file version
 std::wstring EmpiresX_API::GetFileVersion() {
 	return AOEFileVersionLabel[this->aoeManager.GetFileVersion()];	
+}
+
+
+// Returns true if file version is ROR, false if file version is AOE.
+bool EmpiresX_API::IsROR() {
+	switch (this->aoeManager.GetFileVersion()) {
+	case AOE_FILE_VERSION::AOE_VERSION_ROR1_0B:
+	case AOE_FILE_VERSION::AOE_VERSION_ROR1_0C:
+	case AOE_FILE_VERSION::AOE_VERSION_UPATCH_1_1_HD:
+	case AOE_FILE_VERSION::AOE_VERSION_UPATCH_BETA:
+		return true;
+	default:
+		return false;
+	}
 }
 
 

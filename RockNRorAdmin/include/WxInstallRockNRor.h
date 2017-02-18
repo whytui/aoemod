@@ -26,6 +26,7 @@ public:
 	bool hasMissingFile; // true if at least one of the "source" files is missing (does not take game EXE into account)
 
 	bool ReplaceFiles() { return (chkOverwriteFiles != NULL) && chkOverwriteFiles->IsChecked(); };
+	bool CreateExeForRockNRor() { return (this->chkCreateExeForRockNRor != NULL) && (this->chkCreateExeForRockNRor->IsChecked()); }
 private:
 	wxBoxSizer *MainArea;
 	wxBoxSizer *GameFileArea;
@@ -37,6 +38,7 @@ private:
 	wxTextCtrl *edtWndMode_FilePath;
 	wxTextCtrl *edtCustomROR_DLL_FilePath;
 	wxCheckBox *chkOverwriteFiles;
+	wxCheckBox *chkCreateExeForRockNRor;
 	wxButton *btnSelectGameFile;
 	wxButton *btnSelectRORAPI_DLL;
 	wxButton *btnOK;

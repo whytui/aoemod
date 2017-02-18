@@ -64,6 +64,8 @@ void WxInstallRockNRor::ConstructorInit(std::wstring EXEFileName) {
 	this->edtWndMode_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->chkOverwriteFiles = new wxCheckBox(this, wxID_ANY, _T("Replace existing files"), wxDefaultPosition, wxDefaultSize, 0);
 	this->chkOverwriteFiles->Set3StateValue(wxCheckBoxState::wxCHK_CHECKED);
+	this->chkCreateExeForRockNRor = new wxCheckBox(this, wxID_ANY, _T("Create a dedicated EXE for RockNRor mod"), wxDefaultPosition, wxDefaultSize, 0);
+	this->chkCreateExeForRockNRor->Set3StateValue(wxCheckBoxState::wxCHK_CHECKED);
 
 	this->grdResourceFiles->Add(this->btnSelectRORAPI_DLL, 1, wxEXPAND);
 	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Click to select ROR_API.dll from the installation archive you downloaded (please first extract all files from archive)."),
@@ -80,6 +82,8 @@ void WxInstallRockNRor::ConstructorInit(std::wstring EXEFileName) {
 	this->grdResourceFiles->Add(this->edtWndMode_FilePath, 1, wxEXPAND);
 	this->grdResourceFiles->AddSpacer(20);
 	this->grdResourceFiles->Add(this->chkOverwriteFiles);
+	this->grdResourceFiles->AddSpacer(20);
+	this->grdResourceFiles->Add(this->chkCreateExeForRockNRor);
 
 	this->ButtonsArea->Add(this->btnOK, 0, wxALIGN_CENTER);
 	this->ButtonsArea->AddSpacer(10);

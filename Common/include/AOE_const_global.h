@@ -10,6 +10,8 @@ _T("ROR1.0b"), _T("ROR1.0c"), _T("UPatch Beta"), _T("UPatch 1.1HD") };
 #define GET_AOE_FILE_VERSION_LABEL(n) AOEFileVersionLabel[n]
 
 
+const static wchar_t *AOE_EXE_NAME_NOEXT = _T("Empires");
+const static wchar_t *ROR_EXE_NAME_NOEXT = _T("EmpiresX");
 const static wchar_t *AOE_EXE_NAME = _T("Empires.exe");
 const static wchar_t *ROR_EXE_NAME = _T("EmpiresX.exe");
 

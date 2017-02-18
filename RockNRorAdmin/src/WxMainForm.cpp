@@ -284,6 +284,7 @@ void WxMainForm::InstallCustomROR() {
 	std::wstring srcDirName = wInstallRnROR->pathToResourceFiles;
 	std::wstring selectedGameEXE = wInstallRnROR->gameFileName;
 	bool userWantsToOverwriteFiles = wInstallRnROR->ReplaceFiles();
+	bool userWantsDedicatedExe = wInstallRnROR->CreateExeForRockNRor();
 
 	delete wInstallRnROR;
 	if (result != wxOK) {
@@ -303,6 +304,24 @@ void WxMainForm::InstallCustomROR() {
 	}
 	std::wstring ROR_filename = this->e_api->GetFileName();
 	std::wstring shortMessage, logs;
+
+	if (userWantsDedicatedExe) {
+		// Create dedicated EXE file for RockNRor mod.
+		bool isROR = this->e_api->IsROR();
+		std::wstring ExeDir = extractDirectory(ROR_filename);
+		std::wstring baseName = isROR ? ROR_EXE_NAME_NOEXT : AOE_EXE_NAME_NOEXT;
+		selectedGameEXE = ExeDir + std::wstring(_T("\\")) + baseName + std::wstring(_T("_RockNRor.exe"));
+		openedSuccessfully = this->e_api->CreateAndOpenExeForRockNRor(selectedGameEXE);
+		if (!openedSuccessfully) {
+			wxMessageBox(_T("Could not create a new EXE for RockNRor mod."), "RockNRor Admin", wxOK | wxICON_INFORMATION);
+			SetStatusText(_T("Installation failed."));
+			return;
+		}
+		ROR_filename = this->e_api->GetFileName();
+		txtLog->AppendText(std::wstring(_T("Created ")) + ROR_filename);
+		txtLog->AppendText(std::wstring(_T("Run this EXE to use RockNRor mod, your original EXE file will remain unchanged.")));
+	}
+
 	// Install files
 	bool copyFilesSuccess = installCustomRORFiles(srcDirName, ROR_filename, userWantsToOverwriteFiles, shortMessage, logs);
 	txtLog->AppendText(logs);

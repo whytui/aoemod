@@ -16,11 +16,18 @@ public:
 	bool SetFileName(std::wstring fileName);
 	std::wstring GetFileName();
 	std::wstring GetFileVersion();
+
+	// Returns true if file version is ROR, false if file version is AOE.
+	bool IsROR();
 	bool IsFileOpen();
 	bool OpenEmpiresXFile();
 	bool CloseEmpiresXFile();
 	// Modifies Windows registry to set a new AOE isntallation directory
 	bool SetInstallDirInRegistry(const std::wstring &newPath);
+
+	// Create a new empiresx.exe (from currently opened one), dedicated to RockNRor mod.
+	// Returns true if successful. If successful, the new file is opened instead of "current" file.
+	bool CreateAndOpenExeForRockNRor(const std::wstring &newExeFileName);
 
 	bool CancelPendingChanges(bool onlyInvalids = false);
 	bool CancelPendingChanges(BINSEQ_CATEGORIES category, bool onlyInvalids = false);
