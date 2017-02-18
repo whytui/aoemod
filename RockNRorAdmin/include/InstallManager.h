@@ -7,10 +7,10 @@
 
 #pragma once
 
-// Manage file operations to install customROR (and ROR_API + wndmode.dll)
+// Manage file operations to install RockNRor (and ROR_API + wndmode.dll)
 // shortMessage and logs are OUT parameters.
 // Returns true if successful
-bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeFullPath, bool overwriteFiles,
+bool installRockNRorFiles(std::wstring sourceDirectory, std::wstring targetExeFullPath, bool overwriteFiles,
 	std::wstring &shortMessage, std::wstring &logs);
 
 // Manage file operations to install a custom resolution

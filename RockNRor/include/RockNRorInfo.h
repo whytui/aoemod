@@ -35,7 +35,7 @@
 
 using namespace AOE_CONST_FUNC;
 using namespace AOE_STRUCTURES;
-using namespace CUSTOMROR;
+using namespace ROCKNROR;
 
 
 // Constants
@@ -197,7 +197,7 @@ private:
 
 
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 	extern RockNRorInfo crInfo;
 
 	// Use this API to get "do we improve AI" information. This takes care of RockNRor configuration + possible custom rules.

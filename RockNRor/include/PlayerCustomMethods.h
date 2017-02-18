@@ -9,7 +9,7 @@
 
 using namespace AOE_STRUCTURES;
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 namespace PLAYER {
 ;
 

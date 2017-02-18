@@ -1,7 +1,7 @@
 
 #pragma once
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 
 	// Internal representation of game types (*NOT* AOE/ROR values)
 	enum ConfigGameType {

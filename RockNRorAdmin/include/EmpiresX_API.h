@@ -94,8 +94,8 @@ public:
 
 	// Non-critical/low priority functions
 	bool SetSuggestedOptions();
-	bool SetBasicCustomROROptions();
-	bool SetOtherCustomROROptions();
+	bool SetBasicRockNRorOptions();
+	bool SetOtherRockNRorOptions();
 
 	// More or less debug methods
 	void DumpAllNames(std::wstring separator = _T(", "));

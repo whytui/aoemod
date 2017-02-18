@@ -47,11 +47,11 @@ public:
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoRebuildFarmsMaxFarms;
 
 	// Create in-game RockNRor options screen. Returns false if failed and if return address must be changed.
-	static bool CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup);
+	static bool CreateGameRockNRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup);
 
 private:
 	bool openTechTreeInfo;
 	bool openMapCopyPopup;
-	CUSTOMROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig;
+	ROCKNROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig;
 };
 

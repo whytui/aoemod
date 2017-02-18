@@ -5,7 +5,7 @@ static char _intDistanceValues[CST_INT_DISTANCE_VALUES_MAX_COORDINATE + 1][CST_I
 
 // Global static objects
 CONFIG::RockNRorConfig RockNRorInfo::configInfo;
-RockNRorInfo CUSTOMROR::crInfo;
+RockNRorInfo ROCKNROR::crInfo;
 
 
 
@@ -447,17 +447,17 @@ static bool _DEBUG_improveThisPlayer(int playerId) {
 
 // Use this API to get "do we improve AI" information. This takes care of RockNRor configuration + possible custom rules.
 // So we can add custom rules for debugging
-bool CUSTOMROR::IsImproveAIEnabled(int playerId) {
+bool ROCKNROR::IsImproveAIEnabled(int playerId) {
 #ifdef _DEBUG
-	return (CUSTOMROR::crInfo.configInfo.improveAILevel > 0) && _DEBUG_improveThisPlayer(playerId);
+	return (ROCKNROR::crInfo.configInfo.improveAILevel > 0) && _DEBUG_improveThisPlayer(playerId);
 #else
-	return (CUSTOMROR::crInfo.configInfo.improveAILevel > 0);
+	return (ROCKNROR::crInfo.configInfo.improveAILevel > 0);
 #endif
 }
 
 
 // Returns true if RPG mode is active in current game
-bool CUSTOMROR::IsRpgModeEnabled() {
+bool ROCKNROR::IsRpgModeEnabled() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
@@ -465,23 +465,23 @@ bool CUSTOMROR::IsRpgModeEnabled() {
 	// Note: to work well on saved games, this requires RockNRor's fix on game's IsScenario information.
 	bool isScenario = (settings->isCampaign || settings->rgeGameOptions.isScenario);
 	if (isScenario) {
-		return CUSTOMROR::crInfo.configInfo.enableRPGModeInScenario;
+		return ROCKNROR::crInfo.configInfo.enableRPGModeInScenario;
 	} else {
-		return CUSTOMROR::crInfo.configInfo.enableRPGModeInRandomGames;
+		return ROCKNROR::crInfo.configInfo.enableRPGModeInRandomGames;
 	}
 }
 
 
 // Returns true if we want to use ROR's method to handle panic mode (not recommended): not optimized, and not very good
 // Returns false if we want to disable completely ROR's method, and use RockNRor methods for panic mode instead (recommended)
-bool CUSTOMROR::ShouldUseOriginalPanicModeMethod() {
-	return (CUSTOMROR::crInfo.configInfo.improveAILevel == 0);
+bool ROCKNROR::ShouldUseOriginalPanicModeMethod() {
+	return (ROCKNROR::crInfo.configInfo.improveAILevel == 0);
 }
 
 
 // Get a localized string to overload ROR's string localization system (language(x).dll)
 // Returns true if a (custom) localized string has been written into buffer.
-bool CUSTOMROR::GetLocalizedString(long int stringId, char *buffer, long int bufferSize) {
+bool ROCKNROR::GetLocalizedString(long int stringId, char *buffer, long int bufferSize) {
 	if (!buffer) { return false; }
 	return localizationHandler.ReadTranslation((short int)stringId, buffer, bufferSize);
 }

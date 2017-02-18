@@ -34,7 +34,7 @@
 #include "CustomPopupSystem.h"
 
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 
 	/* This class is the interface object between game code (through ROR_API call) and RockNRor plugin code.
 	In theory, methods from this class should only do the basic treatments that allow plugging in our code:
@@ -50,7 +50,7 @@ namespace CUSTOMROR {
 	public:
 		RockNRorInstance();
 
-		// Entry point : Game code -> ROR_API -> CustomRORInstance.DispatchToCustomCode(...) -> customROR treatments
+		// Entry point : Game code -> ROR_API -> RockNRorInstance.DispatchToCustomCode(...) -> RockNRor treatments
 		void DispatchToCustomCode(REG_BACKUP *REG_values);
 #ifdef _DEBUG
 		void TemporaryEntryPoints(REG_BACKUP *REG_values);
@@ -192,10 +192,10 @@ namespace CUSTOMROR {
 	};
 
 	// Main object
-	static RockNRorInstance objCustomRORInstance;
+	static RockNRorInstance objRockNRorInstance;
 }
 
 // Technical interface method for ROR_API. Do not modify.
 extern "C" void __declspec(dllexport) DispatchToCustomCode(REG_BACKUP *REG_values) {
-	CUSTOMROR::objCustomRORInstance.DispatchToCustomCode(REG_values);
+	ROCKNROR::objRockNRorInstance.DispatchToCustomCode(REG_values);
 }

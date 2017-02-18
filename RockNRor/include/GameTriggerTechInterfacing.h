@@ -9,7 +9,7 @@
 static_assert((UNUSED_PLID_FOR_TRIGGERS >= 0) && (UNUSED_PLID_FOR_TRIGGERS < 16), "Bad player ID for UNUSED_PLID_FOR_TRIGGERS");
 
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 namespace TRIGGER {
 ;
 

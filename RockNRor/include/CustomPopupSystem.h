@@ -14,7 +14,7 @@
 class InGameRockNRorOptionsPopup;
 
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 ;
 
 class CustomPopupSystem {
@@ -30,7 +30,7 @@ private:
 	// Returns NULL if failed (you can't create a custom popup object if previous one is still opened).
 	// If result is non-NULL, you can call [result]->OpenPopup() to actually open the popup.
 	template<class popupType> popupType *CreateCustomPopupObject() {
-		if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) {
+		if (ROCKNROR::crInfo.HasOpenedCustomGamePopup()) {
 			return NULL;
 		}
 		if (this->currentCustomPopup) {
@@ -62,10 +62,10 @@ public:
 	// Returns NULL if failed.
 	// You can get AOE popup object with xxx->GetAOEPopupObject()
 	template<class popupType> popupType *OpenCustomGamePopup(long int hSize, long int vSize, bool withCancelBtn) {
-		popupType *result = CUSTOMROR::customPopupSystem.CreateCustomPopupObject<popupType>();
+		popupType *result = ROCKNROR::customPopupSystem.CreateCustomPopupObject<popupType>();
 		if (result != NULL) {
-			if (!CUSTOMROR::customPopupSystem.currentCustomPopup) { return result; } // Just a security
-			if (CUSTOMROR::customPopupSystem.currentCustomPopup->OpenPopup(hSize, vSize, withCancelBtn) == NULL) {
+			if (!ROCKNROR::customPopupSystem.currentCustomPopup) { return result; } // Just a security
+			if (ROCKNROR::customPopupSystem.currentCustomPopup->OpenPopup(hSize, vSize, withCancelBtn) == NULL) {
 				// Open popup failed. Don't return an invalid/incomplete object: free it and return NULL.
 				delete result;
 				result = NULL;

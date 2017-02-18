@@ -3,14 +3,14 @@
 
 
 // Create in-game RockNRor options screen. Returns false if failed and if return address must be changed.
-bool InGameRockNRorOptionsPopup::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
+bool InGameRockNRorOptionsPopup::CreateGameRockNRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
 	assert(previousPopup != NULL);
 	if (!previousPopup) { return false; }
 
-	assert(!CUSTOMROR::crInfo.HasOpenedCustomGamePopup()); // Custom popup is not already open
-	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) { return true; } // do nothing, but not treated as alloc error
+	assert(!ROCKNROR::crInfo.HasOpenedCustomGamePopup()); // Custom popup is not already open
+	if (ROCKNROR::crInfo.HasOpenedCustomGamePopup()) { return true; } // do nothing, but not treated as alloc error
 
-	InGameRockNRorOptionsPopup *popupUIObject = CUSTOMROR::customPopupSystem.CreateCustomPopupObject<InGameRockNRorOptionsPopup>();
+	InGameRockNRorOptionsPopup *popupUIObject = ROCKNROR::customPopupSystem.CreateCustomPopupObject<InGameRockNRorOptionsPopup>();
 	if (popupUIObject) {
 		popupUIObject->CloseMenuAndOpenPopup(previousPopup);
 	}
@@ -19,7 +19,7 @@ bool InGameRockNRorOptionsPopup::CreateGameCustomRorOptionsPopup(AOE_STRUCTURES:
 		return false; // need to change return address
 	}
 	// Dirty workaround because custom options popup is not created using standard procedures :(
-	CUSTOMROR::crInfo.ForceSetCurrentGamePopup(popupUIObject->GetAOEPopupObject(), popupUIObject->customOptionButtonVar, NULL);
+	ROCKNROR::crInfo.ForceSetCurrentGamePopup(popupUIObject->GetAOEPopupObject(), popupUIObject->customOptionButtonVar, NULL);
 
 	return true;
 }
@@ -62,15 +62,15 @@ void InGameRockNRorOptionsPopup::_AddPopupContent() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
 
-	this->autoRebuildFarmConfig = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch);
+	this->autoRebuildFarmConfig = ROCKNROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch);
 	if (!this->autoRebuildFarmConfig) { return; } // ERROR !
 	char customOptionHumanPenaltyTextBuffer[12];
 	char customOptionGameSpeedFactorTextBuffer[12];
 	char maxFarmsTextBuffer[12];
 	char maxFoodTextBuffer[12];
 	char minWoodTextBuffer[12];
-	sprintf_s(customOptionHumanPenaltyTextBuffer, "%ld", CUSTOMROR::crInfo.configInfo.dislike_humanPlayer);
-	sprintf_s(customOptionGameSpeedFactorTextBuffer, "%d", (int)(CUSTOMROR::crInfo.configInfo.improvedGameSpeedFactor * (float)100));
+	sprintf_s(customOptionHumanPenaltyTextBuffer, "%ld", ROCKNROR::crInfo.configInfo.dislike_humanPlayer);
+	sprintf_s(customOptionGameSpeedFactorTextBuffer, "%d", (int)(ROCKNROR::crInfo.configInfo.improvedGameSpeedFactor * (float)100));
 	sprintf_s(maxFarmsTextBuffer, "%d", this->autoRebuildFarmConfig->autoRebuildFarms_maxFarms);
 	sprintf_s(maxFoodTextBuffer, "%d", this->autoRebuildFarmConfig->autoRebuildFarms_maxFood);
 	sprintf_s(minWoodTextBuffer, "%d", this->autoRebuildFarmConfig->autoRebuildFarms_minWood);
@@ -125,14 +125,14 @@ void InGameRockNRorOptionsPopup::OnBeforeClose(bool isCancel) {
 	char *typedText;
 	if (this->customOptionHumanPenaltyTextVar) {
 		typedText = this->customOptionHumanPenaltyTextVar->pTypedText;
-		CUSTOMROR::crInfo.configInfo.dislike_humanPlayer = atoi(typedText); // does not raise. Returns 0 if invalid.
+		ROCKNROR::crInfo.configInfo.dislike_humanPlayer = atoi(typedText); // does not raise. Returns 0 if invalid.
 	}
 
 	if (this->customOptionGameSpeedTextVar) {
 		typedText = this->customOptionGameSpeedTextVar->pTypedText;
 		float f = (float)(atof(typedText) / 100); // does not raise. Returns 0 if invalid.
 		if (f > 1) {
-			CUSTOMROR::crInfo.configInfo.improvedGameSpeedFactor = f;
+			ROCKNROR::crInfo.configInfo.improvedGameSpeedFactor = f;
 		}
 	}
 

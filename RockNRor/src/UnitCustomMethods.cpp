@@ -1,6 +1,6 @@
 #include "../include/UnitCustomMethods.h"
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 namespace UNIT {
 ;
 
@@ -70,7 +70,7 @@ void CallNearbyIdleMilitaryUnits() {
 	AOE_STRUCTURES::STRUCT_PLAYER **playerTable = globalStruct->GetPlayerStructPtrTable();
 	if (!playerTable || !playerTable[playerId]) { return; }
 	AOE_STRUCTURES::STRUCT_PLAYER *player = playerTable[playerId];
-	MoveIdleMilitaryUnitsToMousePosition(player, (float)CUSTOMROR::crInfo.configInfo.distanceToCallNearbyIdleMilitaryUnits);
+	MoveIdleMilitaryUnitsToMousePosition(player, (float)ROCKNROR::crInfo.configInfo.distanceToCallNearbyIdleMilitaryUnits);
 }
 
 
@@ -88,7 +88,7 @@ void SelectNextIdleMilitaryUnit() {
 	}
 	assert(player->ptrCreatableUnitsListLink->IsCheckSumValid());
 
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = CUSTOMROR::crInfo.GetMainSelectedUnit(player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = ROCKNROR::crInfo.GetMainSelectedUnit(player);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *firstIgnoredUnit = NULL; // in case seelcted unit = last from list, keep in memory first one to loop back
 	bool ignoreUntilSelectedUnitIsMet = false;
 	if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass()) {
@@ -148,7 +148,7 @@ void OnFarmDepleted(long int farmUnitId) {
 	// Is feature enabled ?
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
-	CUSTOMROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch);
+	ROCKNROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig = ROCKNROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch);
 	if (!autoRebuildFarmConfig->enableAutoRebuildFarms) { return; }
 
 	// Check auto-rebuild farms conditions (parameters)
@@ -177,7 +177,7 @@ void OnFarmDepleted(long int farmUnitId) {
 	}
 	if (farmerUnit) {
 		if (!farmCountConditionIsOK) {
-			FarmRebuildInfo *ftmp = CUSTOMROR::crInfo.myGameObjects.FindFarmRebuildInfo(farm->positionX, farm->positionY);
+			FarmRebuildInfo *ftmp = ROCKNROR::crInfo.myGameObjects.FindFarmRebuildInfo(farm->positionX, farm->positionY);
 			if (ftmp && ftmp->forceRebuild) {
 				farmCountConditionIsOK = true; // "Force rebuild" flag is stronger than farm number limitation.
 			}
@@ -185,7 +185,7 @@ void OnFarmDepleted(long int farmUnitId) {
 
 		if (farmCountConditionIsOK) {
 			// Add/Update farm rebuild info to trigger construction of a new farm when "this" one is actually removed.
-			FarmRebuildInfo *f = CUSTOMROR::crInfo.myGameObjects.FindOrAddFarmRebuildInfo(farm->positionX, farm->positionY);
+			FarmRebuildInfo *f = ROCKNROR::crInfo.myGameObjects.FindOrAddFarmRebuildInfo(farm->positionX, farm->positionY);
 			f->villagerUnitId = farmerUnit->unitInstanceId;
 			f->playerId = player->playerId;
 			f->posX = farm->positionX; // Only useful if just added (otherwise, unchanged)
@@ -210,14 +210,14 @@ bool AutoAssignShortcutToUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
 	assert(unitDef != NULL);
 	assert(unitDef->IsCheckSumValidForAUnitClass());
 
-	int shortcutId = CUSTOMROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder ? 9 : 1;
+	int shortcutId = ROCKNROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder ? 9 : 1;
 	for (int currentIndex = 1; currentIndex < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS; currentIndex++) {
-		if (CUSTOMROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder) {
+		if (ROCKNROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder) {
 			shortcutId = CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS - currentIndex;
 		}
 		assert(shortcutId < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS);
 		assert(shortcutId >= 0);
-		CONFIG::UnitSpawnShortcutInfo *shortcutInfo = &CUSTOMROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
+		CONFIG::UnitSpawnShortcutInfo *shortcutInfo = &ROCKNROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
 		if (shortcutInfo->DAT_ID == unitDef->DAT_ID1) {
 			// This rule matches our unit DAT ID.
 			// If "only 1 unit" is NOT enabled, always assign. Otherwise, check the shortcut number is still unused.
@@ -242,12 +242,12 @@ void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, 
 	assert(killedUnit->DerivesFromAttackable());
 	if (!killedUnit->DerivesFromAttackable()) { return; }
 
-	if (CUSTOMROR::IsRpgModeEnabled() && actorUnit->DerivesFromTrainable() && (killedUnit->ptrStructPlayer->playerId > 0)) {
+	if (ROCKNROR::IsRpgModeEnabled() && actorUnit->DerivesFromTrainable() && (killedUnit->ptrStructPlayer->playerId > 0)) {
 		RPG_MODE::OnUnitKill(killedUnit, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)actorUnit);
 	}
 
 	// Handle internal objects
-	CUSTOMROR::crInfo.myGameObjects.RemoveAllInfoForUnit(killedUnit->unitInstanceId, killedUnit->positionX, killedUnit->positionY);
+	ROCKNROR::crInfo.myGameObjects.RemoveAllInfoForUnit(killedUnit->unitInstanceId, killedUnit->positionX, killedUnit->positionY);
 	AOE_STRUCTURES::STRUCT_UNIT_BUILDING *killedUnitAsBld = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *) killedUnit;
 	if (killedUnitAsBld->IsCheckSumValid()) {
 		// When destroyed, buildings do not trigger "tacAI.reactToEvent" (they only do it when attacked, but still having HP left)
@@ -361,7 +361,7 @@ AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindTradeTargetElem(AOE_STRUCTURES
 	if (!infAI || !infAI->IsCheckSumValid() || (actorUnitId < 0) || !infAI->unitElemList) {
 		return NULL;
 	}
-	bool useOriginalCode = CUSTOMROR::crInfo.configInfo.doNotApplyFixes;
+	bool useOriginalCode = ROCKNROR::crInfo.configInfo.doNotApplyFixes;
 	long int listTotalElemCount = infAI->unitElemListSize;
 	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *bestElem = NULL;
 	long int bestSqrDistance = 0;

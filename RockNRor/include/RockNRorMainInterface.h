@@ -22,11 +22,11 @@
 #include "playerHandling.h"
 #include "CustomPopupSystem.h"
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 
 
-/* This class manages main interactions between ROR (via CustomRORInstance class) and RockNRor commands
- * Especially, UI events are managed here as our UI objects need to access CustomRORCommand object.
+/* This class manages main interactions between ROR (via RockNRorInstance class) and RockNRor commands
+ * Especially, UI events are managed here as our UI objects need to access RockNRorCommand object.
 */
 class RockNRorMainInterface {
 public:

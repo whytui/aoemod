@@ -9,8 +9,8 @@
 #include "crPatcher.h"
 
 // Warning: also set in XML config
-static const char *CST_CUSTOMROR_DRS_FILENAME = "RockNRor.drs";
-static const char *CST_CUSTOMROR_FOLDER = "RockNRor\\";
+static const char *CST_ROCKNROR_DRS_FILENAME = "RockNRor.drs";
+static const char *CST_ROCKNROR_FOLDER = "RockNRor\\";
 
 /* DRS object IDs usage in ROR:
 - 0 -> 810 ? : graphics.drs (data and data2)
@@ -29,14 +29,14 @@ Custom ROR uses 10000-14999.
 namespace AOE_CONST_DRS {
 ;
 
-static const long int CST_CUSTOMROR_CMD_ICONS_SLP_ID = 10000; // RockNRor command icons
-static const long int CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID = 10001; // Custom shortcuts (10-20)
+static const long int CST_ROCKNROR_CMD_ICONS_SLP_ID = 10000; // RockNRor command icons
+static const long int CST_ROCKNROR_UNIT_SHORTCUTS_SLP_ID = 10001; // Custom shortcuts (10-20)
 
 
-static const long int CST_CUSTOMROR_MAX_SLP_INDEX_IN_UNIT_SHORTCUTS_FILE = 12; // "10-20" + "G" bitmaps.
-static const long int CST_CUSTOMROR_MAX_SLP_INDEX_FOR_UNIT_SHORTCUTS = 11; // Max itemindex that corresponds to a valid shortcut, in "shortcuts SLP"
-static const long int CST_CUSTOMROR_SLP_INDEX_FOR_UNIT_SHORTCUT_10 = 1; // Other itemIndexes are (10+i) => (CST_CUSTOMROR_SLP_ID_FOR_UNIT_SHORTCUT_10+i)
-static const long int CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT = 12; // SLP.itemindex for "G" (group) icon
+static const long int CST_ROCKNROR_MAX_SLP_INDEX_IN_UNIT_SHORTCUTS_FILE = 12; // "10-20" + "G" bitmaps.
+static const long int CST_ROCKNROR_MAX_SLP_INDEX_FOR_UNIT_SHORTCUTS = 11; // Max itemindex that corresponds to a valid shortcut, in "shortcuts SLP"
+static const long int CST_ROCKNROR_SLP_INDEX_FOR_UNIT_SHORTCUT_10 = 1; // Other itemIndexes are (10+i) => (CST_ROCKNROR_SLP_ID_FOR_UNIT_SHORTCUT_10+i)
+static const long int CST_ROCKNROR_SLP_INDEX_FOR_GROUPED_UNIT = 12; // SLP.itemindex for "G" (group) icon
 
 
 // Button bar command icon IDs for RockNRor (cf RockNRor.drs). Must correspond to actual SLPIDs in DRS file !

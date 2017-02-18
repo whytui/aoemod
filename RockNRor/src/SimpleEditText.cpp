@@ -10,7 +10,7 @@
 // Returns true if OK.
 bool SimpleEditTextPopup::OpenCustomTextEditPopup(const char *title, char *initialValue, long int sizeX, long int sizeY,
 	long int maxLength, char *outputBuffer, bool readOnly, bool withCancelBtn) {
-	SimpleEditTextPopup *p = CUSTOMROR::customPopupSystem.OpenCustomGamePopup<SimpleEditTextPopup>(sizeX, sizeY, withCancelBtn);
+	SimpleEditTextPopup *p = ROCKNROR::customPopupSystem.OpenCustomGamePopup<SimpleEditTextPopup>(sizeX, sizeY, withCancelBtn);
 	if (p) {
 		p->AddPopupContent(title, initialValue, maxLength, outputBuffer, readOnly);
 	}
@@ -20,7 +20,7 @@ bool SimpleEditTextPopup::OpenCustomTextEditPopup(const char *title, char *initi
 
 // Open a popup with RockNRor (debug) messages
 bool SimpleEditTextPopup::OpenTraceMessagePopup() {
-	bool reverseOrder = CUSTOMROR::crInfo.configInfo.showLogsInReverseOrder;
+	bool reverseOrder = ROCKNROR::crInfo.configInfo.showLogsInReverseOrder;
 	// Double spaces are intended (to compensate weird-looking font)
 	char *title = "Show  debug  messages";
 	if (reverseOrder) {

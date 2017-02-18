@@ -1,12 +1,12 @@
 #include "../include/RockNRorCommand.h"
 
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 
 
 
 // Global static objects
-RockNRorCommand CUSTOMROR::crCommand;
+RockNRorCommand ROCKNROR::crCommand;
 
 
 char outputBuffer[CRCMD_TEXT_BUFFER_SIZE];
@@ -34,11 +34,11 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 		return false;
 	}
 	fprintf_s(f, MOD_NAME " %s\n", VER_FILE_VERSION_STR);
-	if (CUSTOMROR::crInfo.configInfo.couldNotReadXMLConfig) {
+	if (ROCKNROR::crInfo.configInfo.couldNotReadXMLConfig) {
 		fprintf_s(f, localizationHandler.GetTranslation(CRLANG_ID_CANT_READ_XML_CONFIG, "Warning: configuration could not be read from XML file (missing or incorrect file)."));
 		fprintf_s(f, "\n\n");
 	}
-	if (CUSTOMROR::crInfo.configInfo.couldNotReadCivXMLConfig) {
+	if (ROCKNROR::crInfo.configInfo.couldNotReadCivXMLConfig) {
 		fprintf_s(f, localizationHandler.GetTranslation(CRLANG_ID_CANT_READ_CIV_XML_CONFIG, "RockNRor_civs.xml could not be read (missing or incorrect file). This is not an error unless you want to use custom civilizations."));
 		fprintf_s(f, "\n\n");
 	}
@@ -47,163 +47,163 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "\nThis detects if some features from this version of " MOD_NAME " will not work because you need to enable them with \"RockNRorAdmin\".\n");
 	
 	// Analyze EXE memory and check all necessary ROR_API calls are enabled.
-	bool RORAPIFullyInstalled = CheckRorApiSequencesAreInstalled(f, CUSTOMROR::crInfo.configInfo.autoFixMissingFeatures);
+	bool RORAPIFullyInstalled = CheckRorApiSequencesAreInstalled(f, ROCKNROR::crInfo.configInfo.autoFixMissingFeatures);
 
 	fprintf_s(f, "\nEnd of checks.\n\nConfiguration:\n");
 	// General - not directly related to game
-	fprintf_s(f, "hideWelcomeMessage:                        %d\n", CUSTOMROR::crInfo.configInfo.hideWelcomeMessage);
-	fprintf_s(f, "showAlertOnMissingFeature:                 %d\n", CUSTOMROR::crInfo.configInfo.showAlertOnMissingFeature);
-	fprintf_s(f, "autoFixMissingFeatures:                    %d\n", CUSTOMROR::crInfo.configInfo.autoFixMissingFeatures);
-	fprintf_s(f, "empires.dat relative path to use:          %s\n", CUSTOMROR::crInfo.configInfo.customEmpiresDatRelativePath.c_str());
-	fprintf_s(f, "showRockNRorMenu:                          %d\n", CUSTOMROR::crInfo.configInfo.showRockNRorMenu);
-	fprintf_s(f, "showCustomPopulationInfo:                  %d\n", CUSTOMROR::crInfo.configInfo.showCustomPopInfo);
-	fprintf_s(f, "useImprovedGameSpeeds:                     %d\n", CUSTOMROR::crInfo.configInfo.useImprovedGameSpeeds);
-	fprintf_s(f, "collectRORDebugLogs:                       %d\n", CUSTOMROR::crInfo.configInfo.collectRORDebugLogs);
-	fprintf_s(f, "showRockNRorNotifications:                 %d\n", CUSTOMROR::crInfo.configInfo.showRockNRorNotifications);
-	fprintf_s(f, "enableRPGModeInRandomGames:                %d\n", CUSTOMROR::crInfo.configInfo.enableRPGModeInRandomGames);
-	fprintf_s(f, "enableRPGModeInScenario:                   %d\n", CUSTOMROR::crInfo.configInfo.enableRPGModeInScenario);
-	fprintf_s(f, "gameTimerSlowDownAutoFix:                  %d\n", CUSTOMROR::crInfo.configInfo.gameTimerSlowDownAutoFix);
-	fprintf_s(f, "gameTimerSlowDownFactor:                   %d\n", CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor);
-	fprintf_s(f, "fixInvisibleTree:                          %d\n", CUSTOMROR::crInfo.configInfo.fixInvisibleTree);
-	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", CUSTOMROR::crInfo.configInfo.fixHumanPlayer_specificSeeUnit);
-	fprintf_s(f, "useImprovedButtonBar:                      %d\n", CUSTOMROR::crInfo.configInfo.useImprovedButtonBar);
-	fprintf_s(f, "allowMultiQueueing:                        %d\n", CUSTOMROR::crInfo.configInfo.allowMultiQueueing);
+	fprintf_s(f, "hideWelcomeMessage:                        %d\n", ROCKNROR::crInfo.configInfo.hideWelcomeMessage);
+	fprintf_s(f, "showAlertOnMissingFeature:                 %d\n", ROCKNROR::crInfo.configInfo.showAlertOnMissingFeature);
+	fprintf_s(f, "autoFixMissingFeatures:                    %d\n", ROCKNROR::crInfo.configInfo.autoFixMissingFeatures);
+	fprintf_s(f, "empires.dat relative path to use:          %s\n", ROCKNROR::crInfo.configInfo.customEmpiresDatRelativePath.c_str());
+	fprintf_s(f, "showRockNRorMenu:                          %d\n", ROCKNROR::crInfo.configInfo.showRockNRorMenu);
+	fprintf_s(f, "showCustomPopulationInfo:                  %d\n", ROCKNROR::crInfo.configInfo.showCustomPopInfo);
+	fprintf_s(f, "useImprovedGameSpeeds:                     %d\n", ROCKNROR::crInfo.configInfo.useImprovedGameSpeeds);
+	fprintf_s(f, "collectRORDebugLogs:                       %d\n", ROCKNROR::crInfo.configInfo.collectRORDebugLogs);
+	fprintf_s(f, "showRockNRorNotifications:                 %d\n", ROCKNROR::crInfo.configInfo.showRockNRorNotifications);
+	fprintf_s(f, "enableRPGModeInRandomGames:                %d\n", ROCKNROR::crInfo.configInfo.enableRPGModeInRandomGames);
+	fprintf_s(f, "enableRPGModeInScenario:                   %d\n", ROCKNROR::crInfo.configInfo.enableRPGModeInScenario);
+	fprintf_s(f, "gameTimerSlowDownAutoFix:                  %d\n", ROCKNROR::crInfo.configInfo.gameTimerSlowDownAutoFix);
+	fprintf_s(f, "gameTimerSlowDownFactor:                   %d\n", ROCKNROR::crInfo.configInfo.gameTimerSlowDownFactor);
+	fprintf_s(f, "fixInvisibleTree:                          %d\n", ROCKNROR::crInfo.configInfo.fixInvisibleTree);
+	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", ROCKNROR::crInfo.configInfo.fixHumanPlayer_specificSeeUnit);
+	fprintf_s(f, "useImprovedButtonBar:                      %d\n", ROCKNROR::crInfo.configInfo.useImprovedButtonBar);
+	fprintf_s(f, "allowMultiQueueing:                        %d\n", ROCKNROR::crInfo.configInfo.allowMultiQueueing);
 	// General - related to game
 	fprintf_s(f, "unit resource amounts: alligator=%d bush=%d elephant=%d\n"
 		"...gazelle=%d gold=%d lion=%d stone=%d tree=%d forest=%d fish=%d\n",
-		CUSTOMROR::crInfo.configInfo.unitResourceAmountAlligator,
-		CUSTOMROR::crInfo.configInfo.unitResourceAmountBerryBush, 
-		CUSTOMROR::crInfo.configInfo.unitResourceAmountElephant, 
-		CUSTOMROR::crInfo.configInfo.unitResourceAmountGazelle, 
-		CUSTOMROR::crInfo.configInfo.unitResourceAmountGoldMine, 
-		CUSTOMROR::crInfo.configInfo.unitResourceAmountLion, 
-		CUSTOMROR::crInfo.configInfo.unitResourceAmountStoneMine, 
-		CUSTOMROR::crInfo.configInfo.unitResourceAmountTree, 
-		CUSTOMROR::crInfo.configInfo.unitResourceAmountTreeForest,
-		CUSTOMROR::crInfo.configInfo.unitResourceAmountFish);
+		ROCKNROR::crInfo.configInfo.unitResourceAmountAlligator,
+		ROCKNROR::crInfo.configInfo.unitResourceAmountBerryBush, 
+		ROCKNROR::crInfo.configInfo.unitResourceAmountElephant, 
+		ROCKNROR::crInfo.configInfo.unitResourceAmountGazelle, 
+		ROCKNROR::crInfo.configInfo.unitResourceAmountGoldMine, 
+		ROCKNROR::crInfo.configInfo.unitResourceAmountLion, 
+		ROCKNROR::crInfo.configInfo.unitResourceAmountStoneMine, 
+		ROCKNROR::crInfo.configInfo.unitResourceAmountTree, 
+		ROCKNROR::crInfo.configInfo.unitResourceAmountTreeForest,
+		ROCKNROR::crInfo.configInfo.unitResourceAmountFish);
 	// Random games settings
-	fprintf_s(f, "noWalls:                                   %ld\n", CUSTOMROR::crInfo.configInfo.noWalls);
-	fprintf_s(f, "noNeutralInitialDiplomacy:                 %d\n", CUSTOMROR::crInfo.configInfo.noNeutralInitialDiplomacy);
-	fprintf_s(f, "noWalls:                                   %d\n", CUSTOMROR::crInfo.configInfo.noWalls);
+	fprintf_s(f, "noWalls:                                   %ld\n", ROCKNROR::crInfo.configInfo.noWalls);
+	fprintf_s(f, "noNeutralInitialDiplomacy:                 %d\n", ROCKNROR::crInfo.configInfo.noNeutralInitialDiplomacy);
+	fprintf_s(f, "noWalls:                                   %d\n", ROCKNROR::crInfo.configInfo.noWalls);
 	fprintf_s(f, "[RM] initial food (default/small/med/large) : %ld/%ld/%ld/%ld\n",
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_FOOD]);
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_FOOD]);
 	fprintf_s(f, "[RM] initial wood (default/small/med/large) : %ld/%ld/%ld/%ld\n",
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_WOOD]);
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_WOOD]);
 	fprintf_s(f, "[RM] initial stone (default/small/med/large): %ld/%ld/%ld/%ld\n",
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_STONE]);
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_STONE]);
 	fprintf_s(f, "[RM] initial gold (default/small/med/large) : %ld/%ld/%ld/%ld\n",
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
-		CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[2][RESOURCE_TYPES::CST_RES_ORDER_GOLD],
+		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[3][RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
 	fprintf_s(f, "[DM] initial resources (food/wood/stone/gold): %ld/%ld/%ld/%ld\n",
-		CUSTOMROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		CUSTOMROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		CUSTOMROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		CUSTOMROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+		ROCKNROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		ROCKNROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		ROCKNROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		ROCKNROR::crInfo.configInfo.initialResources_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
 	fprintf_s(f, "[RM] initialBonus for AI (food/wood/stone/gold): %ld/%ld/%ld/%ld\n",
-		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+		ROCKNROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		ROCKNROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		ROCKNROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		ROCKNROR::crInfo.configInfo.initialResourceHardestAIBonus_RM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
 	fprintf_s(f, "[DM] initialBonus for AI (food/wood/stone/gold): %ld/%ld/%ld/%ld\n",
-		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
-		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
-		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
-		CUSTOMROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
+		ROCKNROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_FOOD],
+		ROCKNROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_WOOD],
+		ROCKNROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_STONE],
+		ROCKNROR::crInfo.configInfo.initialResourceHardestAIBonus_DM[RESOURCE_TYPES::CST_RES_ORDER_GOLD]);
 	for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
-		if (CUSTOMROR::crInfo.configInfo.defaultPerNumbers_RM_isSet[i]) {
-			fprintf_s(f, "[RM] Force PER number #%ld to %ld\n", i, CUSTOMROR::crInfo.configInfo.defaultPerNumbers_RM[i]);
+		if (ROCKNROR::crInfo.configInfo.defaultPerNumbers_RM_isSet[i]) {
+			fprintf_s(f, "[RM] Force PER number #%ld to %ld\n", i, ROCKNROR::crInfo.configInfo.defaultPerNumbers_RM[i]);
 		}
 	}
 	for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
-		if (CUSTOMROR::crInfo.configInfo.defaultPerNumbers_DM_isSet[i]) {
-			fprintf_s(f, "[DM] Force PER number #%ld to %ld\n", i, CUSTOMROR::crInfo.configInfo.defaultPerNumbers_DM[i]);
+		if (ROCKNROR::crInfo.configInfo.defaultPerNumbers_DM_isSet[i]) {
+			fprintf_s(f, "[DM] Force PER number #%ld to %ld\n", i, ROCKNROR::crInfo.configInfo.defaultPerNumbers_DM[i]);
 		}
 	}
 	// Human interface / shortcuts
-	fprintf_s(f, "useNumPadUnitShortcuts:                    %d\n", CUSTOMROR::crInfo.configInfo.enableAdditionalNumpadShortcuts);
-	fprintf_s(f, "enableCallNearbyIdleMilitaryUnits:         %d\n", CUSTOMROR::crInfo.configInfo.enableCallNearbyIdleMilitaryUnits);
-	fprintf_s(f, "distanceToCallNearbyIdleMilitaryUnits:     %ld\n", CUSTOMROR::crInfo.configInfo.distanceToCallNearbyIdleMilitaryUnits);
-	fprintf_s(f, "enableAutoMoveToLocation:                  %d\n", CUSTOMROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation);
-	fprintf_s(f, "enableSpawnUnitsAutoTarget:                %d\n", CUSTOMROR::crInfo.configInfo.enableSpawnUnitsAutoTarget);
-	fprintf_s(f, "enableSpawnUnitAutoRepairTC:               %d\n", CUSTOMROR::crInfo.configInfo.enableSpawnUnitAutoRepairTC);
-	fprintf_s(f, "unitSpawnShortcutReverseOrder:             %d\n", CUSTOMROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder);
+	fprintf_s(f, "useNumPadUnitShortcuts:                    %d\n", ROCKNROR::crInfo.configInfo.enableAdditionalNumpadShortcuts);
+	fprintf_s(f, "enableCallNearbyIdleMilitaryUnits:         %d\n", ROCKNROR::crInfo.configInfo.enableCallNearbyIdleMilitaryUnits);
+	fprintf_s(f, "distanceToCallNearbyIdleMilitaryUnits:     %ld\n", ROCKNROR::crInfo.configInfo.distanceToCallNearbyIdleMilitaryUnits);
+	fprintf_s(f, "enableAutoMoveToLocation:                  %d\n", ROCKNROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation);
+	fprintf_s(f, "enableSpawnUnitsAutoTarget:                %d\n", ROCKNROR::crInfo.configInfo.enableSpawnUnitsAutoTarget);
+	fprintf_s(f, "enableSpawnUnitAutoRepairTC:               %d\n", ROCKNROR::crInfo.configInfo.enableSpawnUnitAutoRepairTC);
+	fprintf_s(f, "unitSpawnShortcutReverseOrder:             %d\n", ROCKNROR::crInfo.configInfo.unitShortcutsPriorityReverseOrder);
 	for (int shortcutId = 1; shortcutId < CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS; shortcutId++) {
-		CONFIG::UnitSpawnShortcutInfo *sinfo = &CUSTOMROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
+		CONFIG::UnitSpawnShortcutInfo *sinfo = &ROCKNROR::crInfo.configInfo.unitShortcutsInformation[shortcutId];
 		if (sinfo->DAT_ID >= 0) {
 			fprintf_s(f, "unitSpawn shortcut %d: unit=%03d onlyOneUnit=%d (%.12s)\n", shortcutId, sinfo->DAT_ID, sinfo->onlyOneUnit,
 				GetHardcodedUnitName(sinfo->DAT_ID));
 		}
 	}
-	for (CUSTOMROR::ConfigGameType i = (CUSTOMROR::ConfigGameType)(CUSTOMROR::CFG_GAME_UNKNOWN + 1); i < CUSTOMROR::CFG_GAME_TYPES_COUNT; i = (CUSTOMROR::ConfigGameType)(i + 1)) {
-		const char *name = CUSTOMROR::ConfigGameTypeNames[i];
-		fprintf_s(f, "[%s] autoRebuildFarms:                %ld\n", name, CUSTOMROR::crInfo.configInfo.autoRebuildFarmsConfig[i].enableAutoRebuildFarms ? 1 : 0);
-		fprintf_s(f, "[%s] autoRebuildFarms_maxFarms:       %ld\n", name, CUSTOMROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_maxFarms);
-		fprintf_s(f, "[%s] autoRebuildFarms_maxFood:        %ld\n", name, CUSTOMROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_maxFood);
-		fprintf_s(f, "[%s] autoRebuildFarms_minWood:        %ld\n", name, CUSTOMROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_minWood);
+	for (ROCKNROR::ConfigGameType i = (ROCKNROR::ConfigGameType)(ROCKNROR::CFG_GAME_UNKNOWN + 1); i < ROCKNROR::CFG_GAME_TYPES_COUNT; i = (ROCKNROR::ConfigGameType)(i + 1)) {
+		const char *name = ROCKNROR::ConfigGameTypeNames[i];
+		fprintf_s(f, "[%s] autoRebuildFarms:                %ld\n", name, ROCKNROR::crInfo.configInfo.autoRebuildFarmsConfig[i].enableAutoRebuildFarms ? 1 : 0);
+		fprintf_s(f, "[%s] autoRebuildFarms_maxFarms:       %ld\n", name, ROCKNROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_maxFarms);
+		fprintf_s(f, "[%s] autoRebuildFarms_maxFood:        %ld\n", name, ROCKNROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_maxFood);
+		fprintf_s(f, "[%s] autoRebuildFarms_minWood:        %ld\n", name, ROCKNROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_minWood);
 	}
-	fprintf_s(f, "useEnhancedRulesForAutoAttack:             %ld\n", CUSTOMROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection);
+	fprintf_s(f, "useEnhancedRulesForAutoAttack:             %ld\n", ROCKNROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection);
 	fprintf_s(f, "autoAttackPolicy vs towers/military/buildings/villagers/walls\n");
-	fprintf_s(f, "- For Melee Units:  %d/%d/%d/%d/%d\n", CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackTowers,
-		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackMilitary, 
-		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackNonTowerBuildings, 
-		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackVillagers, 
-		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackWalls);
-	fprintf_s(f, "- For Ranged Units: %d/%d/%d/%d/%d\n", CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackTowers,
-		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackMilitary,
-		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackNonTowerBuildings,
-		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackVillagers,
-		CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackWalls);
+	fprintf_s(f, "- For Melee Units:  %d/%d/%d/%d/%d\n", ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackTowers,
+		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackMilitary, 
+		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackNonTowerBuildings, 
+		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackVillagers, 
+		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackWalls);
+	fprintf_s(f, "- For Ranged Units: %d/%d/%d/%d/%d\n", ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackTowers,
+		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackMilitary,
+		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackNonTowerBuildings,
+		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackVillagers,
+		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackWalls);
 
 	// Conversion
-	fprintf_s(f, "conversionResistance_Boats:                %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_Boats);
-	fprintf_s(f, "conversionResistance_Chariots:             %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_Chariots);
-	fprintf_s(f, "conversionResistance_Macedonian:           %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_Macedonian);
-	fprintf_s(f, "conversionResistance_Priests:              %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_Priests);
-	fprintf_s(f, "conversionResistance_WarElephants:         %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_WarElephants);
-	fprintf_s(f, "conversionResistance_WarElephants_Persian: %f\n", CUSTOMROR::crInfo.configInfo.conversionResistance_WarElephants_Persian);
+	fprintf_s(f, "conversionResistance_Boats:                %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Boats);
+	fprintf_s(f, "conversionResistance_Chariots:             %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Chariots);
+	fprintf_s(f, "conversionResistance_Macedonian:           %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Macedonian);
+	fprintf_s(f, "conversionResistance_Priests:              %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Priests);
+	fprintf_s(f, "conversionResistance_WarElephants:         %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_WarElephants);
+	fprintf_s(f, "conversionResistance_WarElephants_Persian: %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_WarElephants_Persian);
 	// Various AI
-	fprintf_s(f, "improveAILevel:                            %ld\n", CUSTOMROR::crInfo.configInfo.improveAILevel);
-	fprintf_s(f, "tacticalAIUpdateDelay:                     %ld\n", CUSTOMROR::crInfo.configInfo.tacticalAIUpdateDelay);
-	fprintf_s(f, "minPopulationBeforeOptionalItems:          %ld\n", CUSTOMROR::crInfo.configInfo.minPopulationBeforeBuildOptionalItems);
-	fprintf_s(f, "maxPanicUnitsCountToAddInStrategy:         %ld\n", CUSTOMROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy);
-	fprintf_s(f, "panicModeDelay:                            %ld\n", CUSTOMROR::crInfo.configInfo.panicModeDelay);
-	fprintf_s(f, "dislike computation interval:              %ld\n", CUSTOMROR::crInfo.configInfo.dislikeComputeInterval);
-	fprintf_s(f, "dislike value - all artefacts/wonder:      %ld\n", CUSTOMROR::crInfo.configInfo.dislike_allArtefacts);
-	fprintf_s(f, "dislike value - human player:              %ld\n", CUSTOMROR::crInfo.configInfo.dislike_humanPlayer);
-	fprintf_s(f, "fixLogisticsNoHouseBug:                    %d\n", CUSTOMROR::crInfo.configInfo.fixLogisticsNoHouseBug ? 1: 0);
-	fprintf_s(f, "fixVillagerWorkRates:                      %d\n", CUSTOMROR::crInfo.configInfo.fixVillagerWorkRates);
+	fprintf_s(f, "improveAILevel:                            %ld\n", ROCKNROR::crInfo.configInfo.improveAILevel);
+	fprintf_s(f, "tacticalAIUpdateDelay:                     %ld\n", ROCKNROR::crInfo.configInfo.tacticalAIUpdateDelay);
+	fprintf_s(f, "minPopulationBeforeOptionalItems:          %ld\n", ROCKNROR::crInfo.configInfo.minPopulationBeforeBuildOptionalItems);
+	fprintf_s(f, "maxPanicUnitsCountToAddInStrategy:         %ld\n", ROCKNROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy);
+	fprintf_s(f, "panicModeDelay:                            %ld\n", ROCKNROR::crInfo.configInfo.panicModeDelay);
+	fprintf_s(f, "dislike computation interval:              %ld\n", ROCKNROR::crInfo.configInfo.dislikeComputeInterval);
+	fprintf_s(f, "dislike value - all artefacts/wonder:      %ld\n", ROCKNROR::crInfo.configInfo.dislike_allArtefacts);
+	fprintf_s(f, "dislike value - human player:              %ld\n", ROCKNROR::crInfo.configInfo.dislike_humanPlayer);
+	fprintf_s(f, "fixLogisticsNoHouseBug:                    %d\n", ROCKNROR::crInfo.configInfo.fixLogisticsNoHouseBug ? 1: 0);
+	fprintf_s(f, "fixVillagerWorkRates:                      %d\n", ROCKNROR::crInfo.configInfo.fixVillagerWorkRates);
 	// City plan
-	fprintf_s(f, "cityPlanLikeValuesEnhancement:             %d\n", CUSTOMROR::crInfo.configInfo.cityPlanLikeValuesEnhancement);
-	//fprintf_s(f, "cityPlanHouseDistanceFromTownCenter:       %f\n", CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromTownCenter);
-	//fprintf_s(f, "cityPlanHouseDistanceFromStorageBld:       %f\n", CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromStorageBld);
-	//fprintf_s(f, "cityPlanHouseDistanceFromOtherBld:         %f\n", CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromOtherBld);
-	fprintf_s(f, "cityPlanBerryBushWeightForGranary:         %ld\n", CUSTOMROR::crInfo.configInfo.cityPlanBerryBushWeightForGranary);
+	fprintf_s(f, "cityPlanLikeValuesEnhancement:             %d\n", ROCKNROR::crInfo.configInfo.cityPlanLikeValuesEnhancement);
+	//fprintf_s(f, "cityPlanHouseDistanceFromTownCenter:       %f\n", ROCKNROR::crInfo.configInfo.cityPlanHouseDistanceFromTownCenter);
+	//fprintf_s(f, "cityPlanHouseDistanceFromStorageBld:       %f\n", ROCKNROR::crInfo.configInfo.cityPlanHouseDistanceFromStorageBld);
+	//fprintf_s(f, "cityPlanHouseDistanceFromOtherBld:         %f\n", ROCKNROR::crInfo.configInfo.cityPlanHouseDistanceFromOtherBld);
+	fprintf_s(f, "cityPlanBerryBushWeightForGranary:         %ld\n", ROCKNROR::crInfo.configInfo.cityPlanBerryBushWeightForGranary);
 	// Map generation
-	fprintf_s(f, "random map relics count:                   %ld\n", CUSTOMROR::crInfo.configInfo.randomMapRelicsCount);
-	fprintf_s(f, "random map ruins count:                    %ld\n", CUSTOMROR::crInfo.configInfo.randomMapRuinsCount);
-	fprintf_s(f, "use map gen. elevation customization:      %d\n", CUSTOMROR::crInfo.configInfo.useMapGenerationCustomElevationCalculation ? 1: 0);
+	fprintf_s(f, "random map relics count:                   %ld\n", ROCKNROR::crInfo.configInfo.randomMapRelicsCount);
+	fprintf_s(f, "random map ruins count:                    %ld\n", ROCKNROR::crInfo.configInfo.randomMapRuinsCount);
+	fprintf_s(f, "use map gen. elevation customization:      %d\n", ROCKNROR::crInfo.configInfo.useMapGenerationCustomElevationCalculation ? 1: 0);
 	for (int mapType = 0; mapType < 10; mapType++) {
-		fprintf_s(f, "map gen. elevation factor  mapType=%ld value=%f\n", mapType, CUSTOMROR::crInfo.configInfo.mapGenerationCustomElevationFactor[mapType]);
+		fprintf_s(f, "map gen. elevation factor  mapType=%ld value=%f\n", mapType, ROCKNROR::crInfo.configInfo.mapGenerationCustomElevationFactor[mapType]);
 	}
-	fprintf_s(f, "disable dock in mostly-land maps:          %ld\n", CUSTOMROR::crInfo.configInfo.noDockInMostlyLandMaps ? 1: 0);
+	fprintf_s(f, "disable dock in mostly-land maps:          %ld\n", ROCKNROR::crInfo.configInfo.noDockInMostlyLandMaps ? 1: 0);
 	// Scenario Editor
-	fprintf_s(f, "showHiddenTerrainInEditor:                 %d\n", CUSTOMROR::crInfo.configInfo.showHiddenTerrainsInEditor);
-	fprintf_s(f, "showHiddenUnitsInEditor:                   %ld\n", CUSTOMROR::crInfo.configInfo.showHiddenUnitsInEditor);
-	fprintf_s(f, "useCustomMapDimensionsInEditor:            %d\n", CUSTOMROR::crInfo.configInfo.useCustomMapDimensions);
+	fprintf_s(f, "showHiddenTerrainInEditor:                 %d\n", ROCKNROR::crInfo.configInfo.showHiddenTerrainsInEditor);
+	fprintf_s(f, "showHiddenUnitsInEditor:                   %ld\n", ROCKNROR::crInfo.configInfo.showHiddenUnitsInEditor);
+	fprintf_s(f, "useCustomMapDimensionsInEditor:            %d\n", ROCKNROR::crInfo.configInfo.useCustomMapDimensions);
 
 	// Other
-	fprintf_s(f, "civilizations count:                       %ld\n", CUSTOMROR::crInfo.configInfo.civCount);
+	fprintf_s(f, "civilizations count:                       %ld\n", ROCKNROR::crInfo.configInfo.civCount);
 
 	fprintf_s(f, "End of configuration.\n\n");
 	fclose(f);
@@ -228,7 +228,7 @@ void RockNRorCommand::OneShotInit() {
 	this->LoadCustomDrsFiles();
 
 	// Update "population limit getter" according to configuration
-	SetMaxPopulationGetterInSPGames(CUSTOMROR::crInfo.configInfo.singlePlayerMaxPopulation);
+	SetMaxPopulationGetterInSPGames(ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation);
 
 #ifdef _DEBUG
 	if (CR_DEBUG::debugSerialization) {
@@ -242,24 +242,24 @@ void RockNRorCommand::OneShotInit() {
 // Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 void RockNRorCommand::ReadIfCustomSelectedUnitsMemoryZoneIsUsed() {
 	// TO DO: check all sequences ?
-	CUSTOMROR::crInfo.hasCustomSelectedUnitsMemory = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_SELECTED_UNITS, "InitBuffer1");
+	ROCKNROR::crInfo.hasCustomSelectedUnitsMemory = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_SELECTED_UNITS, "InitBuffer1");
 }
 
 // Reads game executable to determine if ManageAI is installed (does game use player->unused_customAIFlag ?)
 void RockNRorCommand::ReadIfManageAIIsOn() {
-	CUSTOMROR::crInfo.hasManageAIFeatureON = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_MANAGE_AI, "Init_is_computer_for_AI_1");
+	ROCKNROR::crInfo.hasManageAIFeatureON = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_MANAGE_AI, "Init_is_computer_for_AI_1");
 }
 
 
 // Reads game executable to determine if various sequences are installed or not
 void RockNRorCommand::ReadOtherSequencesStatus() {
-	CUSTOMROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
-	CUSTOMROR::crInfo.hasFixForBuildingStratElemUnitId = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixUnitIdForInProgressBuilding");
+	ROCKNROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
+	ROCKNROR::crInfo.hasFixForBuildingStratElemUnitId = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixUnitIdForInProgressBuilding");
 }
 
 // Load custom strings files
 void RockNRorCommand::LoadCustomLocalizationFiles() {
-	for each (std::string filename in CUSTOMROR::crInfo.configInfo.customStringsFilesList) {
+	for each (std::string filename in ROCKNROR::crInfo.configInfo.customStringsFilesList) {
 		std::string msg;
 		if (!localizationHandler.LoadTranslationsFromFile(filename)) {
 			msg = "Failed to load strings from ";
@@ -273,7 +273,7 @@ void RockNRorCommand::LoadCustomLocalizationFiles() {
 
 // Load custom DRS files
 void RockNRorCommand::LoadCustomDrsFiles() {
-	for each (CONFIG::DrsFileToLoad *drs in CUSTOMROR::crInfo.configInfo.customDrsFilesList)
+	for each (CONFIG::DrsFileToLoad *drs in ROCKNROR::crInfo.configInfo.customDrsFilesList)
 	{
 		AOE_METHODS::AddDrsFile(drs->filename.c_str(), drs->folder.c_str());
 		if (FindDrsLinkForFile(drs->filename.c_str())) {
@@ -284,21 +284,21 @@ void RockNRorCommand::LoadCustomDrsFiles() {
 	}
 
 	// Prepare custom DRS data
-	if (CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) {
-		if (CUSTOMROR::crInfo.configInfo.showAlertOnMissingFeature && !FindDrsLinkForFile(CST_CUSTOMROR_DRS_FILENAME)) {
+	if (ROCKNROR::crInfo.configInfo.useImprovedButtonBar) {
+		if (ROCKNROR::crInfo.configInfo.showAlertOnMissingFeature && !FindDrsLinkForFile(CST_ROCKNROR_DRS_FILENAME)) {
 			MessageBoxA(0, "ERROR : Could not find RockNRor.drs or it is invalid.", MOD_NAME, MB_ICONWARNING);
 		}
 		// Initialize global variable so we can retrieve our button icons when needed
-		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.rockNRorIcons, AOE_CONST_DRS::CST_CUSTOMROR_CMD_ICONS_SLP_ID);
-		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.rockNRorUnitShortcuts, AOE_CONST_DRS::CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
+		AOE_METHODS::InitSlpInfoFromDrs(&ROCKNROR::crInfo.rockNRorIcons, AOE_CONST_DRS::CST_ROCKNROR_CMD_ICONS_SLP_ID);
+		AOE_METHODS::InitSlpInfoFromDrs(&ROCKNROR::crInfo.rockNRorUnitShortcuts, AOE_CONST_DRS::CST_ROCKNROR_UNIT_SHORTCUTS_SLP_ID);
 	}
 }
 
 
 // Get custom empires.dat filename (with relative path)
 const char *RockNRorCommand::GetCustomEmpiresDatRelativeFileName(AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO *cmdLineInfo) {
-	if (!CUSTOMROR::crInfo.configInfo.customEmpiresDatRelativePath.empty()) { // TODO use dedicated/correct config
-		const char *filename = CUSTOMROR::crInfo.configInfo.customEmpiresDatRelativePath.c_str();
+	if (!ROCKNROR::crInfo.configInfo.customEmpiresDatRelativePath.empty()) { // TODO use dedicated/correct config
+		const char *filename = ROCKNROR::crInfo.configInfo.customEmpiresDatRelativePath.c_str();
 		if (CheckFileExistence(filename)) {
 			return filename;
 		}
@@ -566,7 +566,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 		assert((player != NULL) && player->IsCheckSumValid());
 		if (!player || !player->IsCheckSumValid()) { return; }
-		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(player);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(player);
 		if (unitArray && unitArray[0] && unitArray[0]->IsCheckSumValidForAUnitClass()) {
 			if (unitArray[0]->DerivesFromTrainable()) {
 				GAME_COMMANDS::CreateCmd_KillUnit(unitArray[0]->unitInstanceId);
@@ -623,11 +623,11 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		assert(global != NULL);
 		for (int i = 1; i < global->playerTotalCount; i++) {
-			int FOR_attempt = CUSTOMROR::crInfo.activeConversionAttemptsCount[i];
-			int FOR_success = CUSTOMROR::crInfo.activeConversionSuccessfulAttemptsCount[i];
+			int FOR_attempt = ROCKNROR::crInfo.activeConversionAttemptsCount[i];
+			int FOR_success = ROCKNROR::crInfo.activeConversionSuccessfulAttemptsCount[i];
 			float FOR_pct = FOR_attempt == 0 ? 0 : ((float)FOR_success) / ((float)FOR_attempt);
-			int AGAINST_attempt = CUSTOMROR::crInfo.passiveConversionAttemptsCount[i];
-			int AGAINST_success = CUSTOMROR::crInfo.passiveConversionSuccessfulAttemptsCount[i];
+			int AGAINST_attempt = ROCKNROR::crInfo.passiveConversionAttemptsCount[i];
+			int AGAINST_success = ROCKNROR::crInfo.passiveConversionSuccessfulAttemptsCount[i];
 			float AGAINST_pct = AGAINST_attempt == 0 ? 0 : ((float)AGAINST_success) / ((float)AGAINST_attempt);
 			char buffer[200];
 			sprintf_s(buffer, "Conversions FOR p%d: %d/%d = %f%%   AGAINST p%d: %d/%d = %f%%.",
@@ -719,8 +719,8 @@ void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 	if (!global || !global->IsCheckSumValid()) { return; }
 	// Show hidden units in editor
 	assert(global->civCount < 256); // it is a short (2 bytes)
-	if (CUSTOMROR::crInfo.configInfo.showHiddenUnitsInEditor > 0) {
-		bool excludeAnnoyingUnits = (CUSTOMROR::crInfo.configInfo.showHiddenUnitsInEditor == 1);
+	if (ROCKNROR::crInfo.configInfo.showHiddenUnitsInEditor > 0) {
+		bool excludeAnnoyingUnits = (ROCKNROR::crInfo.configInfo.showHiddenUnitsInEditor == 1);
 		for (int civid = 0; civid < global->civCount; civid++) {
 			AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civid];
 			if (civDef && civDef->IsCheckSumValid()) {
@@ -749,7 +749,7 @@ void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 
 	// Assign graphics to the invisible tree.
 	// Note that adding this at game start does not work, it's too late.
-	if (CUSTOMROR::crInfo.configInfo.fixInvisibleTree) {
+	if (ROCKNROR::crInfo.configInfo.fixInvisibleTree) {
 		for (int civid = 0; civid < global->civCount; civid++) {
 			AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[civid];
 			if (civDef && civDef->IsCheckSumValid()) {
@@ -774,7 +774,7 @@ void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 	}
 
 	// Fix villager work rates
-	if (CUSTOMROR::crInfo.configInfo.fixVillagerWorkRates && (global->civCount > 1)) {
+	if (ROCKNROR::crInfo.configInfo.fixVillagerWorkRates && (global->civCount > 1)) {
 		traceMessageHandler.WriteMessageNoNotification("Fixing villager work rates");
 		this->UpdateWorkRateWithMessage(CST_UNITID_VILLAGER, -1); // Original=1
 		this->UpdateWorkRateWithMessage(CST_UNITID_VILLAGER2, -1); // Original=1
@@ -847,54 +847,54 @@ void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 				if (unitDef && unitDef->IsCheckSumValidForAUnitClass()) {
 					switch (unitDef->unitAIType) {
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupBerryBush:
-						if (CUSTOMROR::crInfo.configInfo.unitResourceAmountBerryBush > 0) {
-							unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountBerryBush;
+						if (ROCKNROR::crInfo.configInfo.unitResourceAmountBerryBush > 0) {
+							unitDef->resourceCapacity = ROCKNROR::crInfo.configInfo.unitResourceAmountBerryBush;
 							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 						}
 						break;
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSeaFish:
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupShoreFish:
-						if (CUSTOMROR::crInfo.configInfo.unitResourceAmountFish > 0) {
-							unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountFish;
+						if (ROCKNROR::crInfo.configInfo.unitResourceAmountFish > 0) {
+							unitDef->resourceCapacity = ROCKNROR::crInfo.configInfo.unitResourceAmountFish;
 							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 						}
 						break;
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupGoldMine:
-						if (CUSTOMROR::crInfo.configInfo.unitResourceAmountGoldMine > 0) {
-							unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountGoldMine;
+						if (ROCKNROR::crInfo.configInfo.unitResourceAmountGoldMine > 0) {
+							unitDef->resourceCapacity = ROCKNROR::crInfo.configInfo.unitResourceAmountGoldMine;
 							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 						}
 						break;
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupStoneMine:
-						if (CUSTOMROR::crInfo.configInfo.unitResourceAmountStoneMine > 0) {
-							unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountStoneMine;
+						if (ROCKNROR::crInfo.configInfo.unitResourceAmountStoneMine > 0) {
+							unitDef->resourceCapacity = ROCKNROR::crInfo.configInfo.unitResourceAmountStoneMine;
 							unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 						}
 						break;
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPreyAnimal:
 						if (unitDefId == CST_UNITID_GAZELLE) { // Exclude gazelle king, horse
-							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountGazelle > 0) {
-								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountGazelle;
+							if (ROCKNROR::crInfo.configInfo.unitResourceAmountGazelle > 0) {
+								unitDef->resourceCapacity = ROCKNROR::crInfo.configInfo.unitResourceAmountGazelle;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						}
 						break;
 					case GLOBAL_UNIT_AI_TYPES::TribeAIGroupPredatorAnimal:
 						if (unitDefId == CST_UNITID_LION) {
-							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountLion > 0) {
-								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountLion;
+							if (ROCKNROR::crInfo.configInfo.unitResourceAmountLion > 0) {
+								unitDef->resourceCapacity = ROCKNROR::crInfo.configInfo.unitResourceAmountLion;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						}
 						if (unitDefId == CST_UNITID_ALLIGATOR) {
-							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountAlligator > 0) {
-								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountAlligator;
+							if (ROCKNROR::crInfo.configInfo.unitResourceAmountAlligator > 0) {
+								unitDef->resourceCapacity = ROCKNROR::crInfo.configInfo.unitResourceAmountAlligator;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						}
 						if (unitDefId == CST_UNITID_ELEPHANT) {
-							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountElephant > 0) {
-								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountElephant;
+							if (ROCKNROR::crInfo.configInfo.unitResourceAmountElephant > 0) {
+								unitDef->resourceCapacity = ROCKNROR::crInfo.configInfo.unitResourceAmountElephant;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						}
@@ -903,14 +903,14 @@ void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 						// There is no way finding automatically if trees are "normal" or forest.
 						if (TreeUnitIsForest(unitDefId)) {
 							// Forest (default 40 wood)
-							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountTreeForest > 0) {
-								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountTreeForest;
+							if (ROCKNROR::crInfo.configInfo.unitResourceAmountTreeForest > 0) {
+								unitDef->resourceCapacity = ROCKNROR::crInfo.configInfo.unitResourceAmountTreeForest;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						} else {
 							// Basic trees (default 75 wood)
-							if (CUSTOMROR::crInfo.configInfo.unitResourceAmountTree > 0) {
-								unitDef->resourceCapacity = CUSTOMROR::crInfo.configInfo.unitResourceAmountTree;
+							if (ROCKNROR::crInfo.configInfo.unitResourceAmountTree > 0) {
+								unitDef->resourceCapacity = ROCKNROR::crInfo.configInfo.unitResourceAmountTree;
 								unitDef->resourceStorageAmount_1 = (float)unitDef->resourceCapacity;
 							}
 						}
@@ -931,7 +931,7 @@ void RockNRorCommand::OnNewGame(bool isSavedGame) {
 	// Resets internal variables.
 	this->InitMyGameInfo();
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 	// Manage game settings customization
 	this->ApplyCustomizationOnRandomGameSettings();
 }
@@ -1061,11 +1061,11 @@ void RockNRorCommand::OnGameStart() {
 	CUSTOM_AI::customAIHandler.GameStartInit();
 
 	// Triggers
-	CUSTOMROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_GAME_START);
+	ROCKNROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_GAME_START);
 
 	// Special trigger: disable units for house, villager, fishing ship, trade ship (exceptions that don't work because of techs that do several things)
 	// For farm, see notify event method (managed on market construction notification).
-	CUSTOMROR::TRIGGER::ManageTriggerDisableUnitsForExceptions();
+	ROCKNROR::TRIGGER::ManageTriggerDisableUnitsForExceptions();
 
 	long int **p = (long int **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
 	if ((*p) && (**p != CHECKSUM_UI_IN_GAME_MAIN)) {
@@ -1074,7 +1074,7 @@ void RockNRorCommand::OnGameStart() {
 	}
 
 	// REQUIRES game UI to be active
-	if (!CUSTOMROR::crInfo.configInfo.hideWelcomeMessage && !settings->rgeGameOptions.isMultiPlayer) {
+	if (!ROCKNROR::crInfo.configInfo.hideWelcomeMessage && !settings->rgeGameOptions.isMultiPlayer) {
 		std::string msg = localizationHandler.GetTranslation(CRLANG_ID_WELCOME1, "Welcome. " MOD_NAME);
 		msg += " "; 
 		msg += VER_FILE_VERSION_STR;
@@ -1092,7 +1092,7 @@ void RockNRorCommand::OnGameStart() {
 	// Does not impact scenarios
 	if (!settings->isCampaign && !settings->rgeGameOptions.isScenario) {
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
-		if (CUSTOMROR::crInfo.configInfo.allyExplorationIsAlwaysShared &&
+		if (ROCKNROR::crInfo.configInfo.allyExplorationIsAlwaysShared &&
 			!settings->rgeGameOptions.isMultiPlayer && global && global->IsCheckSumValid()) {
 			for (int i = 1; i < global->playerTotalCount; i++) {
 				SetPlayerSharedExploration_safe(i);
@@ -1147,12 +1147,12 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 			if (global->scenarioInformation && (global->scenarioInformation->personalityFileSize[i] <= 0)) {
 				// Player does not have a specified PERsonality, which means it is initialized as a Random Map.
 				// => We can apply fixes on PER numbers.
-				CUSTOMROR::PLAYER::ApplySNNumberCustomizationOnPlayer(global->GetPlayerStruct(i));
+				ROCKNROR::PLAYER::ApplySNNumberCustomizationOnPlayer(global->GetPlayerStruct(i));
 			}
 			if (global->scenarioInformation && (global->scenarioInformation->strategyFileSize[i] <= 0)) {
 				// Player does not have a specified strategy, which means it is initialized as a Random Map.
 				// => We can apply custom strategy generation.
-				CUSTOMROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(i));
+				ROCKNROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(i));
 			}
 		}
 		return false;
@@ -1164,7 +1164,7 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 	}
 	bool isDM = (settings->isDeathMatch != 0);
 
-	if (CUSTOMROR::crInfo.configInfo.noWalls) {
+	if (ROCKNROR::crInfo.configInfo.noWalls) {
 		this->DisableWalls();
 	}
 
@@ -1172,13 +1172,13 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 	long int initialResources[4] = { 200, 200, 150, 0 };
 	if (isDM) {
 		for (int i = 0; i < 4; i++) {
-			initialResources[i] = CUSTOMROR::crInfo.configInfo.initialResources_DM[i];
+			initialResources[i] = ROCKNROR::crInfo.configInfo.initialResources_DM[i];
 		}
 	} else {
 		int choice = settings->initialResourcesChoice;
 		if ((choice < 0) || (choice > 3)) { choice = 0; } // Make sure we have a valid choice 0-3
 		for (int i = 0; i < 4; i++) {
-			initialResources[i] = CUSTOMROR::crInfo.configInfo.initialResourcesByChoice_RM[choice][i];
+			initialResources[i] = ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[choice][i];
 		}
 	}
 	for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
@@ -1190,11 +1190,11 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 
 	// SN Numbers (update both strategyAI and tacAI)
 	for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
-		CUSTOMROR::PLAYER::ApplySNNumberCustomizationOnPlayer(global->GetPlayerStruct(playerId));
+		ROCKNROR::PLAYER::ApplySNNumberCustomizationOnPlayer(global->GetPlayerStruct(playerId));
 	}
 
 	// Initial diplomacy (default=enemy, not neutral) - only if enabled in config
-	if (CUSTOMROR::crInfo.configInfo.noNeutralInitialDiplomacy) {
+	if (ROCKNROR::crInfo.configInfo.noNeutralInitialDiplomacy) {
 		for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
 			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 			if (player && player->IsCheckSumValid()) {
@@ -1218,7 +1218,7 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 
 	// Strategy
 	for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
-		CUSTOMROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(playerId));
+		ROCKNROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(playerId));
 	}
 
 	return true;
@@ -1227,10 +1227,10 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 
 // Initialize internal game-specific variables (called on each game start/load)
 void RockNRorCommand::InitMyGameInfo() {
-	CUSTOMROR::crInfo.ResetVariables();
+	ROCKNROR::crInfo.ResetVariables();
 	CUSTOM_AI::customAIHandler.ResetAllInfo(); // Reset all CusotmROR AI internal structures/info
 	
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 	// Prevent 0% speed at game startup (occurs because of rounding in registry saved value)
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid() && (global->gameSpeed == 0)) {
@@ -1267,7 +1267,7 @@ bool RockNRorCommand::ManageAIFileSelectionForPlayer(char civilizationId, char *
 
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
 	assert(gameSettings != NULL);
-	CivilizationInfo *civ = CUSTOMROR::crInfo.configInfo.GetCivInfo(civilizationId);
+	CivilizationInfo *civ = ROCKNROR::crInfo.configInfo.GetCivInfo(civilizationId);
 	std::string s;
 	int size = 0;
 	int randomChoice = 0;
@@ -1339,9 +1339,9 @@ bool RockNRorCommand::HumanSpecific_onCapturableUnitSeen(AOE_STRUCTURES::STRUCT_
 	CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
 	evtInfo.unitId = beingSeenUnit->unitInstanceId;
 	evtInfo.playerId = actorPlayer->playerId;
-	CUSTOMROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES::EVENT_DISCOVER_GAIA_UNIT, evtInfo);
+	ROCKNROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES::EVENT_DISCOVER_GAIA_UNIT, evtInfo);
 
-	if (CUSTOMROR::crInfo.configInfo.fixHumanPlayer_specificSeeUnit &&
+	if (ROCKNROR::crInfo.configInfo.fixHumanPlayer_specificSeeUnit &&
 		(unitDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
 		// Do not capture artefacts in human-specific section, let "normal"/common code do it.
 		// This prevents human from capturing artefacts faster than AI players.
@@ -1395,7 +1395,7 @@ bool RockNRorCommand::ManageTacAIUpdate(AOE_STRUCTURES::STRUCT_AI *ai) {
 		return false; // Do not update players that are not playing anymore.
 	}
 	if (gameSettings->rgeGameOptions.isMultiPlayer || (!IsImproveAIEnabled(player->playerId))) { return true; }
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return true; }
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return true; }
 
 	// Only for the FIRST tactical update (last one's time is 0): one-shot initializations
 	if (tacAI->lastScalingUpdate <= 0) {
@@ -1469,21 +1469,21 @@ void RockNRorCommand::OnGameTimer() {
 	assert(global != NULL);
 	if (!global) { return; }
 	long int currentGameTime = global->currentGameTime / 1000;
-	if ((CUSTOMROR::crInfo.configInfo.dislikeComputeInterval > 0) &&
-		(currentGameTime >= (CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second + CUSTOMROR::crInfo.configInfo.dislikeComputeInterval))) {
-		CUSTOMROR::crInfo.LastDislikeValuesComputationTime_second = currentGameTime;
+	if ((ROCKNROR::crInfo.configInfo.dislikeComputeInterval > 0) &&
+		(currentGameTime >= (ROCKNROR::crInfo.LastDislikeValuesComputationTime_second + ROCKNROR::crInfo.configInfo.dislikeComputeInterval))) {
+		ROCKNROR::crInfo.LastDislikeValuesComputationTime_second = currentGameTime;
 		CUSTOM_AI::playerTargetingHandler.ComputeDislikeValues();
 	}
 
 	// Manage triggers
-	if (CUSTOMROR::crInfo.triggersLastCheckTime_s + 1 <= currentGameTime) {
-		CUSTOMROR::crInfo.triggersLastCheckTime_s = currentGameTime;
+	if (ROCKNROR::crInfo.triggersLastCheckTime_s + 1 <= currentGameTime) {
+		ROCKNROR::crInfo.triggersLastCheckTime_s = currentGameTime;
 
 		// Timer trigger
 		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
 		memset(&evtInfo, -1, sizeof(evtInfo));
 		evtInfo.currentGameTime_s = currentGameTime;
-		CUSTOMROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_TIMER, evtInfo);
+		ROCKNROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_TIMER, evtInfo);
 
 		// "Passive" triggers (we need to test their criteria regulary)
 
@@ -1500,23 +1500,23 @@ void RockNRorCommand::OnGameTimer() {
 					evtInfo.playerId = iPlayerId;
 					evtInfo.resourceId = currentResourceId;
 					evtInfo.resourceValue = value;
-					CUSTOMROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_MORE_THAN, evtInfo);
-					CUSTOMROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_LESS_THAN, evtInfo);
+					ROCKNROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_MORE_THAN, evtInfo);
+					ROCKNROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_RESOURCE_VALUE_LESS_THAN, evtInfo);
 				}
 			}
 		}
 	}
 
 	// If there are pending messages, show them
-	if (traceMessageHandler.HasUnreadMessages() && CUSTOMROR::crInfo.configInfo.showRockNRorNotifications) {
+	if (traceMessageHandler.HasUnreadMessages() && ROCKNROR::crInfo.configInfo.showRockNRorNotifications) {
 		bool isSuccess = SimpleEditTextPopup::OpenTraceMessagePopup();
 		// If popup couldn't be opened, maybe there is already another one... The message popup will show up when current one is closed (mark as unread).
 		traceMessageHandler.MarkAsRead(isSuccess);
 	}
 
 	// Other RockNRor "timer" treatments: do them only once every second maximum (for performance)
-	if (CUSTOMROR::crInfo.lastRockNRorTimeExecution_gameTime_s + 1 <= currentGameTime) {
-		CUSTOMROR::crInfo.lastRockNRorTimeExecution_gameTime_s = currentGameTime;
+	if (ROCKNROR::crInfo.lastRockNRorTimeExecution_gameTime_s + 1 <= currentGameTime) {
+		ROCKNROR::crInfo.lastRockNRorTimeExecution_gameTime_s = currentGameTime;
 	} else {
 		// No enough time has run since last execution.
 		return;
@@ -1554,7 +1554,7 @@ void RockNRorCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_
 	if (IsMultiplayer()) { return; } // can provoke out of sync errors
 
 	// RPG mode, if enabled
-	if (isInGameSpawnUnit && CUSTOMROR::IsRpgModeEnabled()) {
+	if (isInGameSpawnUnit && ROCKNROR::IsRpgModeEnabled()) {
 		assert(actionStruct->actor->IsCheckSumValidForAUnitClass());
 		if (!((AOE_STRUCTURES::STRUCT_UNIT_BUILDING*)actionStruct->actor)->IsTypeValid()) {
 			assert(false && "actor is not a building");
@@ -1572,8 +1572,8 @@ void RockNRorCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_
 	}
 
 	// Assign a shortcut to new unit if config says to - and only if AI is not active for this player
-	if (!player->IsAIActive(CUSTOMROR::crInfo.hasManageAIFeatureON)) {
-		CUSTOMROR::UNIT::AutoAssignShortcutToUnit(unit);
+	if (!player->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON)) {
+		ROCKNROR::UNIT::AutoAssignShortcutToUnit(unit);
 	}
 
 	// Get info on parent unit if possible
@@ -1590,13 +1590,13 @@ void RockNRorCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_
 
 	UnitCustomInfo *parentInfo = NULL;
 	if (parentUnitId >= 0) {
-		parentInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(parentUnitId); // Result can be NULL (not found)
+		parentInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(parentUnitId); // Result can be NULL (not found)
 	}
 
 	bool commandCreated = false; // To make sure we create only 1 command (or 0)
 
 	// Auto target
-	if (CUSTOMROR::crInfo.configInfo.enableSpawnUnitsAutoTarget && !player->IsAIActive(CUSTOMROR::crInfo.hasManageAIFeatureON) &&
+	if (ROCKNROR::crInfo.configInfo.enableSpawnUnitsAutoTarget && !player->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON) &&
 		parentInfo && (parentInfo->spawnTargetUnitId >= 0)) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *target = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(parentInfo->spawnTargetUnitId);
 		// Note: target may not exist (anymore)
@@ -1620,21 +1620,21 @@ void RockNRorCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_
 		} else {
 			if (parentInfo) { // double-check ;)  Here target no longer exists: remove auto-target
 				parentInfo->ResetSpawnAutoTargetInfo();
-				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(parentInfo->unitId);
+				ROCKNROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(parentInfo->unitId);
 			}
 		}
 	}
 
 	// Move spawned unit to building's target location if we have/found one. And if option is enabled.
-	if (!commandCreated && CUSTOMROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation && !player->IsAIActive(CUSTOMROR::crInfo.hasManageAIFeatureON) &&
+	if (!commandCreated && ROCKNROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation && !player->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON) &&
 		parentInfo && (parentInfo->spawnUnitMoveToPosX >= 0) && (parentInfo->spawnUnitMoveToPosY >= 0)) {
 		MoveUnitToTargetOrPosition(unit, NULL, parentInfo->spawnUnitMoveToPosX, parentInfo->spawnUnitMoveToPosY);
 		commandCreated = true;
 	}
 
 	// Auto-repair TC for villagers
-	if (!commandCreated && CUSTOMROR::crInfo.configInfo.enableSpawnUnitAutoRepairTC && IsVillager(unit->unitDefinition->DAT_ID1) &&
-		parentUnit && !player->IsAIActive(CUSTOMROR::crInfo.hasManageAIFeatureON)) {
+	if (!commandCreated && ROCKNROR::crInfo.configInfo.enableSpawnUnitAutoRepairTC && IsVillager(unit->unitDefinition->DAT_ID1) &&
+		parentUnit && !player->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON)) {
 		if (parentUnit->remainingHitPoints < (float)parentUnit->unitDefinition->totalHitPoints) {
 			TellUnitToInteractWithTarget(unit, parentUnit);
 			commandCreated = true;
@@ -1737,7 +1737,7 @@ bool RockNRorCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUn
 	}
 
 	// Handle internal structures
-	CUSTOMROR::crInfo.myGameObjects.RemoveAllInfoForUnit(targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY);
+	ROCKNROR::crInfo.myGameObjects.RemoveAllInfoForUnit(targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY);
 
 	// Not handled: other events than conversion (is there any ?)
 
@@ -1908,12 +1908,12 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 	}
 
 	// Auto rebuild farms
-	bool enableAutoRebuildFarms = CUSTOMROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch)->enableAutoRebuildFarms;
+	bool enableAutoRebuildFarms = ROCKNROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch)->enableAutoRebuildFarms;
 	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && isBuilding && enableAutoRebuildFarms) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 		// If this is a farm, and if I have "farm rebuild info" for this position (not in "not rebuild" mode), then trigger a rebuild.
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && (unitDef->DAT_ID1 == CST_UNITID_FARM) && player->ptrGlobalStruct) {
-			FarmRebuildInfo *fInfo = CUSTOMROR::crInfo.myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
+			FarmRebuildInfo *fInfo = ROCKNROR::crInfo.myGameObjects.FindFarmRebuildInfo(unit->positionX, unit->positionY);
 			if (fInfo && (fInfo->playerId == player->playerId) && !fInfo->forceNotRebuild &&
 				(fInfo->villagerUnitId >= 0) && AOE_STRUCTURES::PLAYER::IsUnitAvailableForPlayer(CST_UNITID_FARM, player)) {
 				// As long as we use a game command, it is compatible with multiplayer.
@@ -1922,7 +1922,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 			}
 			if (fInfo && !fInfo->forceNotRebuild && !fInfo->forceRebuild) {
 				// Remove farm rebuild info when it was added automatically (none of the force rebuild/not rebuild are set)
-				CUSTOMROR::crInfo.myGameObjects.RemoveFarmRebuildInfo(unit->positionX, unit->positionY);
+				ROCKNROR::crInfo.myGameObjects.RemoveFarmRebuildInfo(unit->positionX, unit->positionY);
 			}
 		}
 	}
@@ -1932,7 +1932,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 		!settings->rgeGameOptions.isMultiPlayer && (unit->unitInstanceId >= 0)) {
 		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
 		evtInfo.unitId = unit->unitInstanceId;
-		CUSTOMROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_UNIT_LOSS, evtInfo);
+		ROCKNROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_UNIT_LOSS, evtInfo);
 	}
 }
 
@@ -1943,7 +1943,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 // Warning: try to keep this function fast and optimized as much as possible. It may be called quite often.
 // The improved algorithm is only used if ImproveAI config is ON.
 bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower) {
-	if (CUSTOMROR::crInfo.configInfo.improveAILevel <= 0) {
+	if (ROCKNROR::crInfo.configInfo.improveAILevel <= 0) {
 		return true; // improve AI is disabled. Return default value.
 	}
 	
@@ -2352,11 +2352,11 @@ void RockNRorCommand::Fixed_MapGen_applyElevation(long int posX, long int posY, 
 void RockNRorCommand::DisplayTimerStats() {
 	long int result = 0;
 	for (int i = 0; i < CST_TIMER_STATS_ARRAY_SIZE; i++) {
-		result += CUSTOMROR::crInfo.CollectedTimerIntervals_ms[i];
+		result += ROCKNROR::crInfo.CollectedTimerIntervals_ms[i];
 	}
 	result = result / CST_TIMER_STATS_ARRAY_SIZE;
 	char buf[70];
-	sprintf_s(buf, "Avg timer interval is %ld ms - slow down factor is %ld", result, CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor);
+	sprintf_s(buf, "Avg timer interval is %ld ms - slow down factor is %ld", result, ROCKNROR::crInfo.configInfo.gameTimerSlowDownFactor);
 	AOE_METHODS::CallWriteText(buf);
 }
 
@@ -2367,27 +2367,27 @@ void RockNRorCommand::AutoFixGameTimer() {
 	time_t t = time(0); // get current time
 	struct tm now;
 	localtime_s(&now, &t);
-	if (CUSTOMROR::crInfo.LastGameTimerAutoFix_second == now.tm_sec) { return; } // Prevents from doing this more than once per second
+	if (ROCKNROR::crInfo.LastGameTimerAutoFix_second == now.tm_sec) { return; } // Prevents from doing this more than once per second
 	long int result = 0;
 	for (int i = 0; i < CST_TIMER_STATS_ARRAY_SIZE; i++) {
-		if (CUSTOMROR::crInfo.CollectedTimerIntervals_ms[i] < 0) { return; } // does not update if we did not collect enough stats (invalid values remain)
-		result += CUSTOMROR::crInfo.CollectedTimerIntervals_ms[i];
+		if (ROCKNROR::crInfo.CollectedTimerIntervals_ms[i] < 0) { return; } // does not update if we did not collect enough stats (invalid values remain)
+		result += ROCKNROR::crInfo.CollectedTimerIntervals_ms[i];
 	}
 	result = result / CST_TIMER_STATS_ARRAY_SIZE; // Get average
 	// Hardcoded limit. Choose a better value. A variable ?
-	if ((result < CST_TIMER_INTERVAL_TOO_FAST) && (CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor < CST_MAXIMUM_SLOW_DOWN_FACTOR)) {
-		CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor++;
+	if ((result < CST_TIMER_INTERVAL_TOO_FAST) && (ROCKNROR::crInfo.configInfo.gameTimerSlowDownFactor < CST_MAXIMUM_SLOW_DOWN_FACTOR)) {
+		ROCKNROR::crInfo.configInfo.gameTimerSlowDownFactor++;
 		reset = true;
 	}
-	if ((result > CST_TIMER_INTERVAL_TOO_SLOW) && (CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor > 1)) {
-		CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor--;
+	if ((result > CST_TIMER_INTERVAL_TOO_SLOW) && (ROCKNROR::crInfo.configInfo.gameTimerSlowDownFactor > 1)) {
+		ROCKNROR::crInfo.configInfo.gameTimerSlowDownFactor--;
 		reset = true;
 	}
-	CUSTOMROR::crInfo.LastGameTimerAutoFix_second = now.tm_sec;
+	ROCKNROR::crInfo.LastGameTimerAutoFix_second = now.tm_sec;
 
 	if (reset) {
 		for (int i = 0; i < CST_TIMER_STATS_ARRAY_SIZE; i++) {
-			CUSTOMROR::crInfo.CollectedTimerIntervals_ms[i] = -1; // Reset statistics
+			ROCKNROR::crInfo.CollectedTimerIntervals_ms[i] = -1; // Reset statistics
 		}
 	}
 }
@@ -2566,7 +2566,7 @@ void RockNRorCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_S
 	// Manage hidden terrains
 	AOE_STRUCTURES::STRUCT_UI_LISTBOX *listBox = scEditor->trn_lst_terrainList;
 	assert(listBox && listBox->IsCheckSumValid());
-	if (listBox && listBox->IsCheckSumValid() && CUSTOMROR::crInfo.configInfo.showHiddenTerrainsInEditor) {
+	if (listBox && listBox->IsCheckSumValid() && ROCKNROR::crInfo.configInfo.showHiddenTerrainsInEditor) {
 		// Note: unavailable terrainIDs are 2,3,5,7,8,9,11,12,14,15,16,17,18,21,23-31
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = scEditor->global;
 		assert(global && global->IsCheckSumValid());
@@ -2584,7 +2584,7 @@ void RockNRorCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_S
 	}
 
 	// Manage custom map dimensions
-	if (CUSTOMROR::crInfo.configInfo.useCustomMapDimensions &&
+	if (ROCKNROR::crInfo.configInfo.useCustomMapDimensions &&
 		scEditor->map_cbb_mapSize && scEditor->map_cbb_mapSize->IsCheckSumValid() &&
 		scEditor->map_cbb_mapSize->underlyingListBox && scEditor->map_cbb_mapSize->underlyingListBox->IsCheckSumValid()) {
 		AOE_METHODS::UI_BASE::Listbox_addItem(scEditor->map_cbb_mapSize->underlyingListBox,
@@ -2596,9 +2596,9 @@ void RockNRorCommand::CustomScenarioEditorUICreation(AOE_STRUCTURES::STRUCT_UI_S
 // This methods modifies provided variables that will be passed to "check unit placement" method before adding a unit in scenario editor.
 // For example, to allow creating several units at the same location, force checkConflictingUnits to 0.
 void RockNRorCommand::ApplyCustomizationOnEditorAddUnit(long int &checkVisibility, long int &checkHillMode, long int &editorMode, long int &checkAirModeAndHPBar, long int &checkConflictingUnits, bool &IgnoreTerrainRestrictions) {
-	checkConflictingUnits = !CUSTOMROR::crInfo.configInfo.editor_allowUnitOverlapping;
-	checkHillMode = !CUSTOMROR::crInfo.configInfo.editor_disableHillModeChecks;
-	IgnoreTerrainRestrictions = CUSTOMROR::crInfo.configInfo.editor_disableTerrainRestrictions;
+	checkConflictingUnits = !ROCKNROR::crInfo.configInfo.editor_allowUnitOverlapping;
+	checkHillMode = !ROCKNROR::crInfo.configInfo.editor_disableHillModeChecks;
+	IgnoreTerrainRestrictions = ROCKNROR::crInfo.configInfo.editor_disableTerrainRestrictions;
 }
 
 
@@ -2647,7 +2647,7 @@ void RockNRorCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextPa
 	if (msgInitial.length() <= 0) { return; }
 
 	// Filter some messages if option is set (param=1 means filtered)
-	if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs == 1) {
+	if (ROCKNROR::crInfo.configInfo.collectRORDebugLogs == 1) {
 		// Exclude some technical messages that are not very interesting.
 		if (msgInitial == "Resume requested") {
 			return;
@@ -2744,7 +2744,7 @@ void RockNRorCommand::HandleRORDebugLogCall(unsigned long int firstRORCallTextPa
 long int RockNRorCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *actorAsType50, long int *pathFindingArgs) {
 	AOE_STRUCTURES::STRUCT_PLAYER *player = actorAsType50->ptrStructPlayer;
 	assert(player && player->IsCheckSumValid());
-	bool doFix = !CUSTOMROR::crInfo.configInfo.doNotApplyFixes; // *True* unless the "no fix" flag is set.
+	bool doFix = !ROCKNROR::crInfo.configInfo.doNotApplyFixes; // *True* unless the "no fix" flag is set.
 
 #ifdef _DEBUG
 #pragma message("DEBUG trick path finding/gathering")
@@ -2778,7 +2778,7 @@ long int RockNRorCommand::GathererCheckPathFinding(AOE_STRUCTURES::STRUCT_UNIT_A
 void RockNRorCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *f11panel, char *bufferToWrite, char *defaultFormat,
 	char *localizedText, long int currentPop, long int houseMaxPop) {
 	const int bufferSize = 200; // do not know for sure.
-	if (!CUSTOMROR::crInfo.configInfo.showCustomPopInfo) {
+	if (!ROCKNROR::crInfo.configInfo.showCustomPopInfo) {
 		// Default behaviour
 		sprintf_s(bufferToWrite, 200, defaultFormat, localizedText, currentPop, houseMaxPop);
 		return;
@@ -2815,7 +2815,7 @@ void RockNRorCommand::WriteF11PopInfoText(AOE_STRUCTURES::STRUCT_UI_F11_POP_LABE
 
 // Disable dock for all players on maps where AI does NOT builds docks.
 void RockNRorCommand::DisableWaterUnitsIfNeeded() {
-	if (!CUSTOMROR::crInfo.configInfo.noDockInMostlyLandMaps) { return; }
+	if (!ROCKNROR::crInfo.configInfo.noDockInMostlyLandMaps) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	assert(settings->IsCheckSumValid());
@@ -2878,7 +2878,7 @@ void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_IN
 		// - unit moved to a position which is NO LONGER visible to me
 		if (!unitBase || !unitBase->ptrStructPlayer ||
 			(!AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, (long int)unitBase->positionX, (long int)unitBase->positionY))) {
-			if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs == 2) {
+			if (ROCKNROR::crInfo.configInfo.collectRORDebugLogs == 2) {
 				int noLongerExists = (unitBase == NULL) ? 1 : 0;
 				std::string s = "Removed unit #";
 				s += std::to_string(currentUnitListElem->unitId);
@@ -2894,7 +2894,7 @@ void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_IN
 	if (!elementWasReset && unitBase && unitBase->ptrStructPlayer && (unitBase->ptrStructPlayer->playerId != currentUnitListElem->playerId)) {
 		// If unit owner player does not match element's playerId (unit has been captured/converted) => important to fix, causes bad behaviors.
 		if (UpdateOrResetInfAIUnitListElem(infAI, currentUnitListElem)) {
-			if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs >= 2) {
+			if (ROCKNROR::crInfo.configInfo.collectRORDebugLogs >= 2) {
 				std::string s = "Updated unit #";
 				s += std::to_string(currentUnitListElem->unitId);
 				s += " owner from unitElemList (p#";
@@ -2916,7 +2916,7 @@ void RockNRorCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_G
 	if (gameMainUI->panelSelectedUnit == NULL) {
 		return;
 	}
-	if (!IsGameRunning() || !CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) {
+	if (!IsGameRunning() || !ROCKNROR::crInfo.configInfo.useImprovedButtonBar) {
 		return;
 	}
 
@@ -2946,10 +2946,10 @@ bool RockNRorCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_
 	}
 	if (uiCommandId == CST_IUC_CROR_DEFEND_STOP) {
 		if (unitIsMine && (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE)) {
-			UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
+			UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
 			if (unitInfo) {
 				unitInfo->ResetProtectInfo();
-				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
+				ROCKNROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitBase->unitInstanceId);
 #ifdef _DEBUG
 				if (isPanelUnit) { AOE_METHODS::CallWriteCenteredText("Removed protect info"); }
 #endif
@@ -2973,7 +2973,7 @@ bool RockNRorCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_
 bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue) {
 
-	if (!CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) {
+	if (!ROCKNROR::crInfo.configInfo.useImprovedButtonBar) {
 		return false;
 	}
 
@@ -3036,7 +3036,7 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 
 	// Unit-specific treatments
 	bool eventFullyHandled = false;
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsBasePointer(player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsBasePointer(player);
 	assert(selectedUnits != NULL);
 	for (int i = 0; i < player->selectedUnitCount; i++) {
 		// Run treatments for all selected units (except "panel unit", will be done last)
@@ -3060,7 +3060,7 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 	bool updateAutoAttackInfo = false;
 	AutoAttackPolicy flagsToApply = { false, false, false, false, false };
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS) {
-		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackVillagers = false;
 		flagsToApply.attackVillagers = true; // this flag has been updated
@@ -3068,7 +3068,7 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS) {
-		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
 		flagsToApply.attackNonTowerBuildings = true; // this flag has been updated
@@ -3076,7 +3076,7 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK) {
-		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackMilitary = false;
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
@@ -3090,20 +3090,20 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 		updateAutoAttackInfo = true;
 	}
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK) {
-		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = false;
 		unitInfo->autoAttackPolicy.SetDefaultValues();
 		flagsToApply.SetAllValues(true); // All flags have been updated.
-		CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(panelUnitBase->unitInstanceId);
+		ROCKNROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(panelUnitBase->unitInstanceId);
 		BUTTONBAR::RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
 		updateAutoAttackInfo = true;
 	}
 	// Apply changes on ALL compatible selected units
 	if (updateAutoAttackInfo) {
-		UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(panelUnitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(panelUnitBase->unitInstanceId);
 		assert(unitInfo != NULL); // Was just added
 		if (!unitInfo) { return false; } // this is an error case
-		CUSTOMROR::crInfo.ApplyAutoAttackPolicyToPlayerSelectedUnits(player, unitInfo->autoAttackPolicy, flagsToApply);
+		ROCKNROR::crInfo.ApplyAutoAttackPolicyToPlayerSelectedUnits(player, unitInfo->autoAttackPolicy, flagsToApply);
 	}
 
 	// Button "protect unit or protect zone" : set mouse custom cursor type
@@ -3114,7 +3114,7 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 			settings->mouseActionType = MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE;
 			AOE_METHODS::CallWriteCenteredText(localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_SET_PROTECT_OBJECT, "Right-click to define the unit or the position to protect"));
 			if (settings->ptrGameUIStruct && settings->ptrGameUIStruct->gamePlayUIZone) {
-				UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(panelUnitBase->unitInstanceId);
+				UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(panelUnitBase->unitInstanceId);
 				if (unitInfo && (unitInfo->protectUnitId > -1)) {
 					AOE_METHODS::DisplayGreenBlinkingOnUnit(settings->ptrGameUIStruct->gamePlayUIZone, unitInfo->protectUnitId, 1000);
 				}
@@ -3164,13 +3164,13 @@ bool RockNRorCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UNI
 		return false; // shortcutNumber is NOT a shortcut NOR a group ID : do not display anything (exit)
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return false;
 	}
 
 	// Here: unit has a custom shortcut OR shortcut 10 (not displayed in standard game)
 
-	if (CUSTOMROR::crInfo.rockNRorIcons.slpSize <= 0) {
+	if (ROCKNROR::crInfo.rockNRorIcons.slpSize <= 0) {
 		return false; // Error case: missing SLP data
 	}
 
@@ -3183,13 +3183,13 @@ bool RockNRorCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UNI
 			return false;
 		}
 		slpFileIndex = (shortcutDisplayValue - 10) + // get a "index" 0-10 instead of a value 10-20
-			AOE_CONST_DRS::CST_CUSTOMROR_SLP_INDEX_FOR_UNIT_SHORTCUT_10; // Add offset to position on "shortcut 10" index in SLP file
+			AOE_CONST_DRS::CST_ROCKNROR_SLP_INDEX_FOR_UNIT_SHORTCUT_10; // Add offset to position on "shortcut 10" index in SLP file
 	} else {
-		slpFileIndex = AOE_CONST_DRS::CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT; // shortcut corresponds to a unit group, not a shortcut
+		slpFileIndex = AOE_CONST_DRS::CST_ROCKNROR_SLP_INDEX_FOR_GROUPED_UNIT; // shortcut corresponds to a unit group, not a shortcut
 	}
 	slpArrayIndex = slpFileIndex - 1;
-	if ((slpFileIndex < 0) || (slpFileIndex > AOE_CONST_DRS::CST_CUSTOMROR_MAX_SLP_INDEX_IN_UNIT_SHORTCUTS_FILE) ||
-		((slpFileIndex > AOE_CONST_DRS::CST_CUSTOMROR_MAX_SLP_INDEX_FOR_UNIT_SHORTCUTS) && (slpFileIndex != AOE_CONST_DRS::CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT))
+	if ((slpFileIndex < 0) || (slpFileIndex > AOE_CONST_DRS::CST_ROCKNROR_MAX_SLP_INDEX_IN_UNIT_SHORTCUTS_FILE) ||
+		((slpFileIndex > AOE_CONST_DRS::CST_ROCKNROR_MAX_SLP_INDEX_FOR_UNIT_SHORTCUTS) && (slpFileIndex != AOE_CONST_DRS::CST_ROCKNROR_SLP_INDEX_FOR_GROUPED_UNIT))
 		) {
 		std::string msg = "ERROR: tried to use a wrong Slp.itemIndex: ";
 		msg += std::to_string(slpFileIndex);
@@ -3197,7 +3197,7 @@ bool RockNRorCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UNI
 		return false;
 	}
 
-	AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *slpHeader = CUSTOMROR::crInfo.rockNRorUnitShortcuts.slpFileHeader;
+	AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *slpHeader = ROCKNROR::crInfo.rockNRorUnitShortcuts.slpFileHeader;
 	// slpFrameHeaderBase = first array element (in slp frame headers array)
 	AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *slpFrameHeaderBase = (AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *)
 		(slpHeader + 1); // Dirty, but works because structs have same size (done like this in ROR code)
@@ -3245,7 +3245,7 @@ void RockNRorCommand::DisplayCustomBuildingAttackAttributesInUnitInfo(AOE_STRUCT
 bool RockNRorCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRUCT_PLAYER *controlledPlayer, long int unitPlayerId,
 	UNIT_INTERACTION_ID &foundInteraction, long int &foundHintDllId, GAME_CURSOR &cursorToForce) {
 	cursorToForce = (GAME_CURSOR)-1; // Default
-	if (!CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) { // TODO: use a dedicated config
+	if (!ROCKNROR::crInfo.configInfo.useImprovedButtonBar) { // TODO: use a dedicated config
 		return false;
 	}
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !controlledPlayer || !controlledPlayer->IsCheckSumValid() || (unitPlayerId < 0)) {
@@ -3262,7 +3262,7 @@ bool RockNRorCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRU
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *selectedUnitDef = NULL;
 
 	if (unit->DerivesFromTrainable()) {
-		mainSelectedUnit = CUSTOMROR::crInfo.GetMainSelectedUnit(controlledPlayer);
+		mainSelectedUnit = ROCKNROR::crInfo.GetMainSelectedUnit(controlledPlayer);
 		if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass() && mainSelectedUnit->DerivesFromTrainable()) {
 			selectedUnitDef = mainSelectedUnit->unitDefinition;
 			if (selectedUnitDef && selectedUnitDef->IsCheckSumValidForAUnitClass()) {
@@ -3338,15 +3338,15 @@ void RockNRorCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
 	assert(controlledPlayer && controlledPlayer->IsCheckSumValid());
 	bool actorIsMyUnit = (actorUnit->ptrStructPlayer == controlledPlayer);
-	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+	UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
 
 	switch (settings->mouseActionType) {
 	case CST_MAT_CR_PROTECT_UNIT_OR_ZONE:
 		if (actorIsMyUnit && (actorUnit == mouseTargetUnit)) {
-			unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+			unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
 			if (unitInfo) {
 				unitInfo->ResetProtectInfo();
-				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(actorUnit->unitInstanceId);
+				ROCKNROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(actorUnit->unitInstanceId);
 			}
 			AOE_METHODS::CallWriteCenteredText("Removed protect information for current unit.");
 			if (settings->ptrGameUIStruct && settings->ptrGameUIStruct->gamePlayUIZone) {
@@ -3357,7 +3357,7 @@ void RockNRorCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE
 		if (actorIsMyUnit && actorUnit && actorUnit->DerivesFromMovable()) {
 
 			if (!unitInfo) {
-				unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(actorUnit->unitInstanceId);
+				unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(actorUnit->unitInstanceId);
 			}
 			if (unitInfo) {
 				unitInfo->ResetProtectInfo();
@@ -3393,7 +3393,7 @@ void RockNRorCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
 	assert(controlledPlayer && controlledPlayer->IsCheckSumValid());
 
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = CUSTOMROR::crInfo.GetMainSelectedUnit(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = ROCKNROR::crInfo.GetMainSelectedUnit(controlledPlayer);
 	bool actorIsMyUnit = false;
 	if (actorUnit) {
 		assert(actorUnit->IsCheckSumValidForAUnitClass());
@@ -3402,7 +3402,7 @@ void RockNRorCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE
 	}
 	if (!actorIsMyUnit) { return; }
 	
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
 	assert(selectedUnits != NULL);
 	for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
 		// Run treatments for all selected units
@@ -3446,11 +3446,11 @@ void RockNRorCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *a
 			noNextActivity = false;
 		}
 	}
-	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+	UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 
 	// Auto-protect unit/zone (unit will go back to zone/unit to defend if its current activity is over).
 	if (noNextActivity && unitInfo && unitInfo->HasValidProtectInfo()
-		&& CUSTOMROR::crInfo.configInfo.useImprovedButtonBar /*enableCallNearbyIdleMilitaryUnits*/) { // TODO: specific config
+		&& ROCKNROR::crInfo.configInfo.useImprovedButtonBar /*enableCallNearbyIdleMilitaryUnits*/) { // TODO: specific config
 		float refX = unitInfo->protectPosX;
 		float refY = unitInfo->protectPosY;
 		AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unit->unitDefinition;
@@ -3474,7 +3474,7 @@ void RockNRorCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *a
 			} else {
 				// Unit is specified but invalid (maybe it died): remove obsolete info.
 				unitInfo->ResetProtectInfo();
-				CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitInfo->unitId);
+				ROCKNROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unitInfo->unitId);
 			}
 		}
 		if ((refX >= 0) || (refY >= 0)) {
@@ -3482,7 +3482,7 @@ void RockNRorCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *a
 				if (AOE_METHODS::UNIT::IsUnitIdle(unit) && unit->ptrActionInformation) {
 					if (!unit->ptrActionInformation->ptrActionLink || !unit->ptrActionInformation->ptrActionLink->actionStruct) {
 						// For MP compabitiliy; use a command
-						if (!CUSTOMROR::crInfo.configInfo.forceMPCompatibility) {
+						if (!ROCKNROR::crInfo.configInfo.forceMPCompatibility) {
 							AOE_STRUCTURES::STRUCT_ACTION_MOVE *move = (AOE_STRUCTURES::STRUCT_ACTION_MOVE *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_ACTION_MOVE));
 							move->Constructor(unit, NULL, distance, NULL);
 							move->targetUnitPositionX = refX;
@@ -3504,17 +3504,17 @@ void RockNRorCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *a
 // Returns true if standard game info (F5 zone) must NOT be executed.
 bool RockNRorCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings) {
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
-	if (*AOE_VAR_F5_DEBUG_INFO_TYPE <= CUSTOMROR::CONFIG::IDL_STANDARD_MAX_ALLOWED_LEVEL) {
+	if (*AOE_VAR_F5_DEBUG_INFO_TYPE <= ROCKNROR::CONFIG::IDL_STANDARD_MAX_ALLOWED_LEVEL) {
 		return false; // Do standard treatments.
 	}
 	// 2+ are custom debugging states. Here we are in such situation.
 
 	switch (*AOE_VAR_F5_DEBUG_INFO_TYPE) {
-	case CUSTOMROR::CONFIG::IDL_HIDDEN_COMM:
+	case ROCKNROR::CONFIG::IDL_HIDDEN_COMM:
 		return AOE_METHODS::UI_BASE::ShowHiddenDebugComm(settings);
-	case CUSTOMROR::CONFIG::IDL_HIDDEN_AI:
+	case ROCKNROR::CONFIG::IDL_HIDDEN_AI:
 		return AOE_METHODS::UI_BASE::ShowHiddenDebugAIInfo(settings);
-	case CUSTOMROR::CONFIG::IDL_CUSTOM:
+	case ROCKNROR::CONFIG::IDL_CUSTOM:
 #ifdef _DEBUG
 		return CR_DEBUG::HandleRockNRorInGameF5DebugInfo(settings);
 #else
@@ -3536,17 +3536,17 @@ void RockNRorCommand::SetNextInGameDebugInfoLevel() {
 	}
 	// Note: See 0x484BE0 = mainGameUI.OnF5() => is executed BEFORE this method ! So "debug level" has already been updated.
 	// Note: mainGameUI.OnF5() does NOT reset AOE_VAR_F5_DEBUG_INFO_TYPE when debugging is disabled: we can guess what what the last debugging level.
-	if (!settings->showDebugTimings && (*AOE_VAR_F5_DEBUG_INFO_TYPE >= CUSTOMROR::CONFIG::IDL_STANDARD_MAX_ALLOWED_LEVEL) &&
-		CUSTOMROR::crInfo.configInfo.enableInGameDisplayDebugInfo) {
-		assert(*AOE_VAR_F5_DEBUG_INFO_TYPE <= CUSTOMROR::CONFIG::IDL_COUNT);
+	if (!settings->showDebugTimings && (*AOE_VAR_F5_DEBUG_INFO_TYPE >= ROCKNROR::CONFIG::IDL_STANDARD_MAX_ALLOWED_LEVEL) &&
+		ROCKNROR::crInfo.configInfo.enableInGameDisplayDebugInfo) {
+		assert(*AOE_VAR_F5_DEBUG_INFO_TYPE <= ROCKNROR::CONFIG::IDL_COUNT);
 		// Force additional states of debugging (custom debug levels).
 		(*AOE_VAR_F5_DEBUG_INFO_TYPE)++;
-		if (*AOE_VAR_F5_DEBUG_INFO_TYPE < CUSTOMROR::CONFIG::IDL_COUNT) {
+		if (*AOE_VAR_F5_DEBUG_INFO_TYPE < ROCKNROR::CONFIG::IDL_COUNT) {
 			settings->showDebugTimings = 1;
 			// Restore debug label visibility instead of resources (optional: depends if we want to show stuff in there)
-			if (settings->ptrGameUIStruct && CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo &&
-				(*AOE_VAR_F5_DEBUG_INFO_TYPE != CUSTOMROR::CONFIG::IDL_HIDDEN_AI) && // This one does not use F5 debug text bar
-				(*AOE_VAR_F5_DEBUG_INFO_TYPE != CUSTOMROR::CONFIG::IDL_HIDDEN_COMM) // This one does not use F5 debug text bar
+			if (settings->ptrGameUIStruct && ROCKNROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo &&
+				(*AOE_VAR_F5_DEBUG_INFO_TYPE != ROCKNROR::CONFIG::IDL_HIDDEN_AI) && // This one does not use F5 debug text bar
+				(*AOE_VAR_F5_DEBUG_INFO_TYPE != ROCKNROR::CONFIG::IDL_HIDDEN_COMM) // This one does not use F5 debug text bar
 				) {
 				AOE_METHODS::UI_BASE::ShowUIObject(settings->ptrGameUIStruct->lblF5debugInfo, true);
 				AOE_METHODS::UI_BASE::ShowUIObject(settings->ptrGameUIStruct->resourceValuesIndicator, false);
@@ -3561,13 +3561,13 @@ void RockNRorCommand::SetNextInGameDebugInfoLevel() {
 // Return true if OK, false if failed - Fails if another custom dialog (or quit game dialog) is already open
 // Pauses the game if running (only if a dialog is successfully opened)
 bool RockNRorCommand::OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize) {
-	if (CUSTOMROR::crInfo.customYesNoDialogVar) { return false; } // Already an opened custom dialog
+	if (ROCKNROR::crInfo.customYesNoDialogVar) { return false; } // Already an opened custom dialog
 
 	AOE_STRUCTURES::STRUCT_ANY_UI *customDialogPtr = AOE_METHODS::GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
 	if (customDialogPtr != NULL) { return false; } // A CloseProgramDialog seems to be already open
 
 	AOE_METHODS::SetGamePause(true);
-	CUSTOMROR::crInfo.customYesNoDialogVar = (unsigned long int*) AOE_METHODS::AOE_CreateDialogPopup(dialogText, hSize, vSize);
+	ROCKNROR::crInfo.customYesNoDialogVar = (unsigned long int*) AOE_METHODS::AOE_CreateDialogPopup(dialogText, hSize, vSize);
 
 	return true;
 }
@@ -3577,7 +3577,7 @@ bool RockNRorCommand::OpenCustomDialogMessage(const char *dialogText, long int h
 // Returns -1 if an error occurred, including "no custom dialog is opened".
 // Other results are AOE_CONST_INTERNAL::DIALOG_BUTTON_IDS => Yes/No/Cancel
 long int RockNRorCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG *ptrDialog, unsigned long int ptrSender) {
-	if (CUSTOMROR::crInfo.customYesNoDialogVar == NULL) { return -1; } // No opened custom dialog
+	if (ROCKNROR::crInfo.customYesNoDialogVar == NULL) { return -1; } // No opened custom dialog
 	long int returnValue = -1;
 	if (!ptrDialog) { return returnValue; }
 	if (ptrSender == (unsigned long) ptrDialog->btnYes) {
@@ -3594,7 +3594,7 @@ long int RockNRorCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_POP
 	AOE_METHODS::RefreshScreen("Game Screen", 0);
 	assert(strcmp(ptrDialog->screenName, AOE_CONST_INTERNAL::customDialogScreenName) == 0);
 	AOE_METHODS::CloseScreenAndDestroy(AOE_CONST_INTERNAL::customDialogScreenName);
-	CUSTOMROR::crInfo.customYesNoDialogVar = NULL;
+	ROCKNROR::crInfo.customYesNoDialogVar = NULL;
 
 	long int *Ihavenoideawhatthisis = (long int *)0x7C0338; // cf 0x481264
 	Ihavenoideawhatthisis = 0;
@@ -3632,7 +3632,7 @@ void RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short
 			// Building a market (first one) enables farms.
 			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 			assert(player && player->IsCheckSumValid());
-			CUSTOMROR::TRIGGER::ManageDisableUnitsForFarms(player);
+			ROCKNROR::TRIGGER::ManageDisableUnitsForFarms(player);
 		}
 	}
 
@@ -3640,11 +3640,11 @@ void RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short
 		// This is called when a farm is fully depleted (and dies), NOT when a farm is destroyed/killed
 		// Warning: when this event is called, the farm is killed just after, so be careful about modifications done here !
 		long int farmUnitId = arg3;
-		CUSTOMROR::UNIT::OnFarmDepleted(farmUnitId);
+		ROCKNROR::UNIT::OnFarmDepleted(farmUnitId);
 	}
 
 	// Now manage triggers...
-	CUSTOMROR::TRIGGER::ManageTriggersOnGameNotifyEvent(eventId, playerId, arg3, arg4, arg5);
+	ROCKNROR::TRIGGER::ManageTriggersOnGameNotifyEvent(eventId, playerId, arg3, arg4, arg5);
 }
 
 
@@ -3661,7 +3661,7 @@ void RockNRorCommand::OnGameInitAfterApplyingTechTrees(long int playerId) {
 
 // Apply starting age to a player (only for scenarios). Player's specific starting age is read in STRUCT_SCENARIO_INFO
 void RockNRorCommand::ApplyScenarioSpecificPlayerStartingAge(long int playerId) {
-	if (!CUSTOMROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit) {
+	if (!ROCKNROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit) {
 		return;
 	}
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();

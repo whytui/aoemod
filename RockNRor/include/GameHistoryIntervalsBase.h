@@ -15,7 +15,7 @@ namespace CUSTOM_AI {
 
 using namespace CUSTOM_AI;
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 
 	// Represents a basic interval of game time (cf historyIntervalLength_ms)
 	// Can be derived to store specific information for time intervals.

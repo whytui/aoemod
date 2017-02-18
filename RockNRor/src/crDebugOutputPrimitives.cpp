@@ -374,7 +374,7 @@ bool HandleRockNRorInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *setti
 		msg[6].c_str(),
 		msg[7].c_str()
 		);
-	if (CUSTOMROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
+	if (ROCKNROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
 		AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, showUnitGroups ? "RockNRor Unit group tasking" : "Player targeting");
 	}
 	return true;

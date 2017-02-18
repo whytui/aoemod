@@ -24,7 +24,7 @@ using namespace std;
 
 #define CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS 10 // counts 0 that is unused (used for "no shortcut" in fact)
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 namespace CONFIG {
 ;
 
@@ -193,7 +193,7 @@ public:
 	bool unitShortcutsPriorityReverseOrder; // If true, try to set shortcut=9 before 8,7... 1
 	UnitSpawnShortcutInfo unitShortcutsInformation[CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS]; // index 0 is unused
 	bool enableAdditionalNumpadShortcuts; // If true, numpad 0-9 keys are additional unit shortcuts.
-	CUSTOMROR::CONFIG::AutoRebuildFarmConfig autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_TYPES_COUNT];
+	ROCKNROR::CONFIG::AutoRebuildFarmConfig autoRebuildFarmsConfig[ROCKNROR::CFG_GAME_TYPES_COUNT];
 	bool useImprovedButtonBar;
 	bool allowMultiQueueing; // Allow queuing different unit types. Default is false.
 	bool useEnhancedRulesForAutoAttackTargetSelection;
@@ -215,7 +215,7 @@ public:
 	const char * XML_GetAttributeValue(TiXmlElement *elem, const char *attributeName);
 
 	// Reads the gameType attribute and returns the result in ConfigGameType enum. Returns CFG_GAME_UNKNOWN if not found
-	CUSTOMROR::ConfigGameType XML_ReadGameTypeAttribute(TiXmlElement *elem);
+	ROCKNROR::ConfigGameType XML_ReadGameTypeAttribute(TiXmlElement *elem);
 
 	void SetAutoAttackPolicyFromAttributes(AutoAttackPolicy *aap, TiXmlElement *elem);
 	// Read civilizations info XML file
@@ -225,7 +225,7 @@ public:
 	// Read tileset info XML file
 	bool ReadTilesetXMLConfigFile(char *fileName);
 
-	CUSTOMROR::CONFIG::AutoRebuildFarmConfig *GetAutoRebuildFarmConfig(long int isScenario, long int isDM);
+	ROCKNROR::CONFIG::AutoRebuildFarmConfig *GetAutoRebuildFarmConfig(long int isScenario, long int isDM);
 
 
 	// Constants (not customizable)

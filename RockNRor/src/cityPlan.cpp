@@ -24,7 +24,7 @@ void FixCityPlanFarmPlacement(AOE_STRUCTURES::STRUCT_UNIT_BASE *existingBuilding
 	// Set some default values
 	existingBldInfluenceZone = (int)unitDef_base->lineOfSight; // Default (from ROR code: use existing bld LOS)
 	int difficultyLevel = settings->rgeGameOptions.difficultyLevel;
-	bool useEnhancedFeature = CUSTOMROR::crInfo.configInfo.cityPlanLikeValuesEnhancement;
+	bool useEnhancedFeature = ROCKNROR::crInfo.configInfo.cityPlanLikeValuesEnhancement;
 	bool isRelevantDropSite = (unitDef_base->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_GRANARY) ||
 		(unitDef_base->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FORUM); // Note: forager's storage sites are defined in empires.dat (Drop site in AGE3) => granary (68) and TC (109)
 
@@ -33,7 +33,7 @@ void FixCityPlanFarmPlacement(AOE_STRUCTURES::STRUCT_UNIT_BASE *existingBuilding
 	}
 
 	if (existingBuilding->ptrStructPlayer && existingBuilding->ptrStructPlayer->IsCheckSumValid() &&
-		!CUSTOMROR::IsImproveAIEnabled(existingBuilding->ptrStructPlayer->playerId)) {
+		!ROCKNROR::IsImproveAIEnabled(existingBuilding->ptrStructPlayer->playerId)) {
 		return; // Do not improve if config says no AI improvement
 	}
 
@@ -94,12 +94,12 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 	assert(TC_y >= 0);
 
 	// Stop here is feature is not enabled in configuration
-	if (!CUSTOMROR::crInfo.configInfo.cityPlanLikeValuesEnhancement) { return; }
+	if (!ROCKNROR::crInfo.configInfo.cityPlanLikeValuesEnhancement) { return; }
 
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return; }
-	if (!CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId) || (settings->rgeGameOptions.difficultyLevel >= GAME_DIFFICULTY_LEVEL::GDL_EASY)) {
+	if (!ROCKNROR::IsImproveAIEnabled(infAI->commonAIObject.playerId) || (settings->rgeGameOptions.difficultyLevel >= GAME_DIFFICULTY_LEVEL::GDL_EASY)) {
 		return;
 	}
 

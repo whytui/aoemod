@@ -34,7 +34,7 @@ namespace COMBAT {
 // Default result=false (on error cases)
 bool AutoSearchTargetShouldIgnoreUnit(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity,
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *potentialTargetUnit) {
-	assert(CUSTOMROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection); // should have been checked before calling this
+	assert(ROCKNROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection); // should have been checked before calling this
 	if (!activity || !potentialTargetUnit || !potentialTargetUnit->IsCheckSumValidForAUnitClass()) {
 		return false; // error case
 	}
@@ -68,10 +68,10 @@ bool AutoSearchTargetShouldIgnoreUnit(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *acti
 
 	// Custom rules
 	bool hasRuleAtUnitLevel = false;
-	AutoAttackPolicy *policy = isMelee ? &CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits :
-		&CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits;
+	AutoAttackPolicy *policy = isMelee ? &ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits :
+		&ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits;
 	// If there is a config at unit level, use it instead of global parameter.
-	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
+	UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(actorUnit->unitInstanceId);
 	if (unitInfo && unitInfo->autoAttackPolicyIsSet) {
 		policy = &unitInfo->autoAttackPolicy;
 		hasRuleAtUnitLevel = true;
@@ -207,7 +207,7 @@ bool ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity, long int
 	}
 
 	// Is AI Improvement feature ON ?
-	if (!CUSTOMROR::IsImproveAIEnabled(actorPlayer->playerId)) {
+	if (!ROCKNROR::IsImproveAIEnabled(actorPlayer->playerId)) {
 		return true; // AI improvement is disabled: let ROR original code do its normal behavior.
 	}
 	// Do not improve in easy levels
@@ -462,7 +462,7 @@ bool ShouldRetreatAfterShooting(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity) 
 	if (!actorUnitType50 || !actorUnitType50->IsCheckSumValidForAUnitClass() || !actorUnitType50->DerivesFromAttackable()) { return true; }
 	if (!actorUnitType50->ptrStructPlayer || !actorUnitType50->ptrStructPlayer->IsCheckSumValid()) { return true; }
 	// This feature is an AI improvement. Do it only if config says so.
-	if (!CUSTOMROR::IsImproveAIEnabled(actorUnitType50->ptrStructPlayer->playerId)) {
+	if (!ROCKNROR::IsImproveAIEnabled(actorUnitType50->ptrStructPlayer->playerId)) {
 		return true;
 	}
 	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)actorUnitType50->unitDefinition;

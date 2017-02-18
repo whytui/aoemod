@@ -413,7 +413,7 @@ bool RockNRorAdmin_Console::ExecuteCommand(std::wstring cmd) {
 		}
 		std::wstring shortMessage = _T("");
 		std::wstring installLogs = _T("");
-		bool success = installCustomRORFiles(noquotes, filename, true, shortMessage, installLogs);
+		bool success = installRockNRorFiles(noquotes, filename, true, shortMessage, installLogs);
 		if (!success) { this->hasError = true; }
 		wprintf_s(_T("%s\n"), installLogs.c_str());
 		wprintf_s(_T("Installation status summary:\n%s\n"), shortMessage.c_str());

@@ -7,7 +7,7 @@ EVT_MENU(ID_SelectFromReg, WxMainForm::OnSelectFromRegistry)
 EVT_MENU(ID_RunGame, WxMainForm::OnRunGame)
 EVT_MENU(ID_EditGameFile, WxMainForm::OnEditGameFile)
 EVT_MENU(ID_CloseGameFile, WxMainForm::OnCloseGameFile)
-EVT_MENU(ID_InstallCustomROR, WxMainForm::OnInstallCustomROR)
+EVT_MENU(ID_InstallRockNRor, WxMainForm::OnInstallRockNRor)
 EVT_MENU(ID_InstallCustomResolution, WxMainForm::OnInstallCustomResolution)
 EVT_MENU(ID_InstallSuggestedOptions, WxMainForm::OnInstallSuggestedOptions)
 EVT_MENU(ID_FixDDrawColorBug, WxMainForm::OnFixDDrawColorBug)
@@ -45,7 +45,7 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 	menuFile->Append(ID_EditGameFile, "Edit game file\tCtrl-E", "Open RockNRorAdmin file edition screen.");
 	menuFile->Append(ID_CloseGameFile, "Close game file\tCtrl-W", "Close currently selected file to unlock it.");
 	menuFile->AppendSeparator();
-	menuFile->Append(ID_InstallCustomROR, "Install RockNRor...", "Add RockNRor plugin to your AOE - ROR installation.");
+	menuFile->Append(ID_InstallRockNRor, "Install RockNRor...", "Add RockNRor plugin to your AOE - ROR installation.");
 	menuFile->Append(ID_InstallCustomResolution, "Change game resolution...", "Update game and add custom files to handle custom resolutions.");
 	menuFile->Append(ID_InstallSuggestedOptions, "Install Suggested Options", "Automatically patch currently selected file with suggested options, including 1920*1200 resolution.");
 	menuFile->Append(ID_FixDDrawColorBug, "Fix DirectDraw color bug", "Updates regitry to fix DirectDraw color bug on currently selected file.");
@@ -276,7 +276,7 @@ void WxMainForm::ChangeInstallDirInRegistry() {
 }
 
 // This automatically installs RockNRor : copies files from user-provided source dir and patches EXE file.
-void WxMainForm::InstallCustomROR() {
+void WxMainForm::InstallRockNRor() {
 	// Open UI for user choices
 	WxInstallRockNRor *wInstallRnROR = new WxInstallRockNRor(this, _T("Select installation files for RockNRor"), wxSize(800, 580),
 		this->e_api->GetFileName());
@@ -323,7 +323,7 @@ void WxMainForm::InstallCustomROR() {
 	}
 
 	// Install files
-	bool copyFilesSuccess = installCustomRORFiles(srcDirName, ROR_filename, userWantsToOverwriteFiles, shortMessage, logs);
+	bool copyFilesSuccess = installRockNRorFiles(srcDirName, ROR_filename, userWantsToOverwriteFiles, shortMessage, logs);
 	txtLog->AppendText(logs);
 	if (!copyFilesSuccess) {
 		wxMessageBox(shortMessage, "RockNRor Admin", wxOK | wxICON_INFORMATION);
@@ -368,7 +368,7 @@ void WxMainForm::InstallCustomROR() {
 	}
 	if (resultPatch) { // Technically this if is not necessary due to bool evaluation !
 		this->txtLog->AppendText(_T("...Installing features: ROR_API support, Windowed Mode, MaxSelectedUnits.\n"));
-		resultPatch = resultPatch && this->e_api->SetBasicCustomROROptions();
+		resultPatch = resultPatch && this->e_api->SetBasicRockNRorOptions();
 		writeCallResult = this->e_api->WriteChangesToFile();
 		if (writeCallResult < 0) {
 			resultPatch = false;
@@ -377,7 +377,7 @@ void WxMainForm::InstallCustomROR() {
 	}
 	if (resultPatch) { // Technically this if is not necessary due to bool evaluation !
 		this->txtLog->AppendText(_T("...Installing some other useful improvements (like additional game options).\n"));
-		bool patchedOtherOptions = this->e_api->SetOtherCustomROROptions();
+		bool patchedOtherOptions = this->e_api->SetOtherRockNRorOptions();
 		writeCallResult = this->e_api->WriteChangesToFile();
 		if (writeCallResult < 0) {
 			patchedOtherOptions = false;
@@ -499,8 +499,8 @@ void WxMainForm::ChooseCustomResolution() {
 }
 
 
-void WxMainForm::OnInstallCustomROR(wxCommandEvent& event) {
-	this->InstallCustomROR();
+void WxMainForm::OnInstallRockNRor(wxCommandEvent& event) {
+	this->InstallRockNRor();
 }
 
 

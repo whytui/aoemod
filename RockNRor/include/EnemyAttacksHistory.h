@@ -8,7 +8,7 @@ using namespace AOE_STRUCTURES;
 namespace CUSTOM_AI {
 
 	// Represents a game time interval and a number of attacks during this time frame.
-	class TimeIntervalAttackRecord : public CUSTOMROR::TimeIntervalRecordBase {
+	class TimeIntervalAttackRecord : public ROCKNROR::TimeIntervalRecordBase {
 	public:
 		long int attacksCount;
 		long int attacksCountInMyTown;
@@ -38,7 +38,7 @@ namespace CUSTOM_AI {
 		}
 	};
 	
-	template <typename T> class TimeIntervalAttacksRecordForPlayer : public CUSTOMROR::GameHistoryIntervalsBase<T> {
+	template <typename T> class TimeIntervalAttacksRecordForPlayer : public ROCKNROR::GameHistoryIntervalsBase<T> {
 	public:
 		TimeIntervalAttacksRecordForPlayer() {
 			this->lastAttackInMyTownPosX = -1;

@@ -2,7 +2,7 @@
 
 using namespace AOE_STRUCTURES;
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 namespace TRIGGER {
 ;
 
@@ -126,9 +126,9 @@ void Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 
 	if (trigger->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_DISABLE_TRIGGER) {
-		if (CUSTOMROR::crInfo.triggerSet) {
+		if (ROCKNROR::crInfo.triggerSet) {
 			char *targetTriggerName = trigger->GetParameterValue(CR_TRIGGERS::KW_TARGET_TRIGGER_NAME, "");
-			CR_TRIGGERS::crTrigger *otherTrigger = CUSTOMROR::crInfo.triggerSet->GetTrigger(targetTriggerName);
+			CR_TRIGGERS::crTrigger *otherTrigger = ROCKNROR::crInfo.triggerSet->GetTrigger(targetTriggerName);
 			if (otherTrigger) {
 				otherTrigger->enabled = false;
 			}
@@ -510,7 +510,7 @@ void Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		}
 
 		// Update other triggers with new unitDefId
-		CR_TRIGGERS::crTrigger *currentTrg = CUSTOMROR::crInfo.triggerSet->IteratorFirst();
+		CR_TRIGGERS::crTrigger *currentTrg = ROCKNROR::crInfo.triggerSet->IteratorFirst();
 		while (currentTrg) {
 			// Search for enabled triggers for same player, that want to spawn a unit...
 			if (currentTrg->enabled && (currentTrg->triggerActionType == CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_ADD_UNIT_INSTANCE)) {
@@ -521,7 +521,7 @@ void Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 					currentTrg->SetParameterValue(CR_TRIGGERS::KW_ACTION_UNIT_DEF_ID, newUnitDefId);
 				}
 			}
-			currentTrg = CUSTOMROR::crInfo.triggerSet->IteratorNext();
+			currentTrg = ROCKNROR::crInfo.triggerSet->IteratorNext();
 		}
 
 		trigger->enabled = false; // Creating unit def is not repeatable. Force disable.
@@ -756,8 +756,8 @@ void ExecuteTriggerAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 
 	// Common for all triggers types: manage trigger to run "before".
-	if (!trigger->triggerNameToRunBefore.empty() && CUSTOMROR::crInfo.triggerSet) {
-		CR_TRIGGERS::crTrigger *trBefore = CUSTOMROR::crInfo.triggerSet->GetTrigger(trigger->triggerNameToRunBefore);
+	if (!trigger->triggerNameToRunBefore.empty() && ROCKNROR::crInfo.triggerSet) {
+		CR_TRIGGERS::crTrigger *trBefore = ROCKNROR::crInfo.triggerSet->GetTrigger(trigger->triggerNameToRunBefore);
 		// Do not allow calling repeatable triggers: those triggers may remain enabled (because they are repeatable), which may lead to infinite dependencies.
 		if (trBefore && (trBefore->enabled) && (!trBefore->IsRepeatable())) {
 			ExecuteTriggerAction(trBefore);
@@ -765,11 +765,11 @@ void ExecuteTriggerAction(CR_TRIGGERS::crTrigger *trigger) {
 	}
 
 	// Use a dedicated routine to execute action.
-	CUSTOMROR::TRIGGER::Trigger_JustDoAction(trigger);
+	ROCKNROR::TRIGGER::Trigger_JustDoAction(trigger);
 
 	// Common for all triggers types: manage trigger to run "after".
-	if (!trigger->triggerNameToRunAfter.empty() && CUSTOMROR::crInfo.triggerSet) {
-		CR_TRIGGERS::crTrigger *trAfter = CUSTOMROR::crInfo.triggerSet->GetTrigger(trigger->triggerNameToRunAfter);
+	if (!trigger->triggerNameToRunAfter.empty() && ROCKNROR::crInfo.triggerSet) {
+		CR_TRIGGERS::crTrigger *trAfter = ROCKNROR::crInfo.triggerSet->GetTrigger(trigger->triggerNameToRunAfter);
 		// Do not allow calling repeatable triggers: those triggers may remain enabled (because they are repeatable), which may lead to infinite dependencies.
 		if (trAfter && (trAfter->enabled) && (!trAfter->IsRepeatable())) {
 			ExecuteTriggerAction(trAfter);
@@ -782,7 +782,7 @@ void ExecuteTriggerAction(CR_TRIGGERS::crTrigger *trigger) {
 void ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES evt) {
 	CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
 	memset(&evtInfo, -1, sizeof(evtInfo));
-	CUSTOMROR::TRIGGER::ExecuteTriggersForEvent(evt, evtInfo);
+	ROCKNROR::TRIGGER::ExecuteTriggersForEvent(evt, evtInfo);
 }
 
 
@@ -810,13 +810,13 @@ void ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES evt, CR_TRIGGERS::
 		evtInfo.currentGameTime_s = global->currentGameTime / 1000;
 	}
 	// Loop on triggers and execute those that are ready
-	if (CUSTOMROR::crInfo.triggerSet && (!CUSTOMROR::crInfo.triggerSet->IsEmpty())) {
-		CR_TRIGGERS::crTrigger *currentTrigger = CUSTOMROR::crInfo.triggerSet->IteratorFirst();
+	if (ROCKNROR::crInfo.triggerSet && (!ROCKNROR::crInfo.triggerSet->IsEmpty())) {
+		CR_TRIGGERS::crTrigger *currentTrigger = ROCKNROR::crInfo.triggerSet->IteratorFirst();
 		while (currentTrigger) {
 			if (currentTrigger->CanExecuteNow(evt, evtInfo)) {
-				CUSTOMROR::TRIGGER::ExecuteTriggerAction(currentTrigger);
+				ROCKNROR::TRIGGER::ExecuteTriggerAction(currentTrigger);
 			}
-			currentTrigger = CUSTOMROR::crInfo.triggerSet->IteratorNext();
+			currentTrigger = ROCKNROR::crInfo.triggerSet->IteratorNext();
 		}
 	}
 }
@@ -824,39 +824,39 @@ void ExecuteTriggersForEvent(CR_TRIGGERS::TRIGGER_EVENT_TYPES evt, CR_TRIGGERS::
 
 // Export RockNRor's internal data triggers to Trigger text format.
 std::string GetTriggerTextFromInternalData() {
-	if (!CUSTOMROR::crInfo.triggerSet) { return ""; }
-	return CUSTOMROR::crInfo.triggerSet->GetStringForScenarioInfo(false);
+	if (!ROCKNROR::crInfo.triggerSet) { return ""; }
+	return ROCKNROR::crInfo.triggerSet->GetStringForScenarioInfo(false);
 }
 
 
 void ReloadTriggersFromGameData(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scenarioInfo) {
-	if (CUSTOMROR::crInfo.triggerSet) {
-		delete CUSTOMROR::crInfo.triggerSet;
-		CUSTOMROR::crInfo.triggerSet = NULL;
+	if (ROCKNROR::crInfo.triggerSet) {
+		delete ROCKNROR::crInfo.triggerSet;
+		ROCKNROR::crInfo.triggerSet = NULL;
 	}
-	CUSTOMROR::crInfo.triggerSet = new CR_TRIGGERS::crTriggerSet();
+	ROCKNROR::crInfo.triggerSet = new CR_TRIGGERS::crTriggerSet();
 	if (!scenarioInfo || (!scenarioInfo->IsCheckSumValid())) { return; }
 
-	CUSTOMROR::crInfo.triggerSet->ReadFromFileContent(GetTriggerDataPtr(scenarioInfo));
+	ROCKNROR::crInfo.triggerSet->ReadFromFileContent(GetTriggerDataPtr(scenarioInfo));
 }
 
 void ReloadTriggersFromGameData() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
 	if (!global->scenarioInformation) { return; }
-	CUSTOMROR::TRIGGER::ReloadTriggersFromGameData(global->scenarioInformation);
+	ROCKNROR::TRIGGER::ReloadTriggersFromGameData(global->scenarioInformation);
 }
 
 
 // Write trigger to game data, using RockNRor internal data.
 bool WriteTriggersFromInternalToGameData(bool onlyEnabledTriggers) {
-	if (!CUSTOMROR::crInfo.triggerSet) { return false; }
+	if (!ROCKNROR::crInfo.triggerSet) { return false; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->scenarioInformation) { return false; }
 	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *sc_info = global->scenarioInformation; // Guaranteed non-NULL by previous "if"
 	assert(sc_info != NULL);
 	if (!sc_info) { return false; }
-	std::string tmpStr = CUSTOMROR::crInfo.triggerSet->GetStringForScenarioInfo(onlyEnabledTriggers);
+	std::string tmpStr = ROCKNROR::crInfo.triggerSet->GetStringForScenarioInfo(onlyEnabledTriggers);
 	char *trgData = GetTriggerDataPtr(sc_info);
 
 	// Free previous value, if any
@@ -865,7 +865,7 @@ bool WriteTriggersFromInternalToGameData(bool onlyEnabledTriggers) {
 		SetTriggerDataSize(sc_info, 0);
 	}
 	// Write triggers data in scenario information
-	return CUSTOMROR::TRIGGER::WriteTriggersInGameData((char *)tmpStr.c_str());
+	return ROCKNROR::TRIGGER::WriteTriggersInGameData((char *)tmpStr.c_str());
 }
 
 
@@ -944,7 +944,7 @@ void ManageTriggersOnGameNotifyEvent(long int eventId, short int playerId, long 
 		evtInfo.posY = arg3;
 	}
 	if (evtType != CR_TRIGGERS::TRIGGER_EVENT_TYPES::EVENT_NONE) {
-		CUSTOMROR::TRIGGER::ExecuteTriggersForEvent(evtType, evtInfo);
+		ROCKNROR::TRIGGER::ExecuteTriggersForEvent(evtType, evtInfo);
 	}
 }
 
@@ -956,7 +956,7 @@ void ManageTriggerDisableUnitsForExceptions() {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		if (player) {
 			std::vector<short int>::const_iterator it;
-			for (it = CUSTOMROR::crInfo.unitDefToDisable[player->playerId].begin(); it != CUSTOMROR::crInfo.unitDefToDisable[player->playerId].end(); it++) {
+			for (it = ROCKNROR::crInfo.unitDefToDisable[player->playerId].begin(); it != ROCKNROR::crInfo.unitDefToDisable[player->playerId].end(); it++) {
 				short int DAT_ID = *it;
 				if (
 					(DAT_ID == CST_UNITID_FARM) || // See also ManageDisableUnitsForFarms - it can be enabled during the game
@@ -980,7 +980,7 @@ void ManageTriggerDisableUnitsForExceptions() {
 // Farm is enabled by market construction, which may occur both "ingame" or at game loading (if a market exists, or if starting at bronze).
 void ManageDisableUnitsForFarms(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	std::vector<short int>::const_iterator it;
-	for (it = CUSTOMROR::crInfo.unitDefToDisable[player->playerId].begin(); it != CUSTOMROR::crInfo.unitDefToDisable[player->playerId].end(); it++) {
+	for (it = ROCKNROR::crInfo.unitDefToDisable[player->playerId].begin(); it != ROCKNROR::crInfo.unitDefToDisable[player->playerId].end(); it++) {
 		short int DAT_ID = *it;
 		if (DAT_ID == CST_UNITID_FARM) {
 			if ((DAT_ID < 0) || (DAT_ID >= player->structDefUnitArraySize)) { return; }
@@ -995,12 +995,12 @@ void ManageDisableUnitsForFarms(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 // This is called while scenarioInfo structure is read from a file
 // Scenario texts (including players strategies) have already been read, but not other information, be careful.
 void InitScenarioInfoTextData(AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scenarioInfo) {
-	CUSTOMROR::TRIGGER::ReloadTriggersFromGameData(scenarioInfo);
+	ROCKNROR::TRIGGER::ReloadTriggersFromGameData(scenarioInfo);
 
 	for (int playerId = 0; playerId < 9; playerId++) {
-		if (CUSTOMROR::crInfo.triggerSet != NULL) {
-			CUSTOMROR::crInfo.FillUnitDefToDisableFromString(playerId, CUSTOMROR::crInfo.triggerSet->disable_unitDefIDTextList[playerId].c_str());
-			CUSTOMROR::crInfo.FillResearchesToDisableFromString(playerId, CUSTOMROR::crInfo.triggerSet->disable_researchIDTextList[playerId].c_str());
+		if (ROCKNROR::crInfo.triggerSet != NULL) {
+			ROCKNROR::crInfo.FillUnitDefToDisableFromString(playerId, ROCKNROR::crInfo.triggerSet->disable_unitDefIDTextList[playerId].c_str());
+			ROCKNROR::crInfo.FillResearchesToDisableFromString(playerId, ROCKNROR::crInfo.triggerSet->disable_researchIDTextList[playerId].c_str());
 		}
 	}
 }
@@ -1022,7 +1022,7 @@ void OnGameInitDisableResearchesEvent(AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INF
 
 	// For current player, disable the units we have from trigger data.
 	std::vector<short int>::const_iterator it;
-	for (it = CUSTOMROR::crInfo.unitDefToDisable[player->playerId].begin(); it != CUSTOMROR::crInfo.unitDefToDisable[player->playerId].end(); it++) {
+	for (it = ROCKNROR::crInfo.unitDefToDisable[player->playerId].begin(); it != ROCKNROR::crInfo.unitDefToDisable[player->playerId].end(); it++) {
 		short int DAT_ID = *it;
 		if (PLAYER::DisableUnitForPlayer(player, DAT_ID)) {
 			// success
@@ -1033,7 +1033,7 @@ void OnGameInitDisableResearchesEvent(AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INF
 	}
 
 	// Disable researches from trigger data
-	for (it = CUSTOMROR::crInfo.researchesToDisable[player->playerId].begin(); it != CUSTOMROR::crInfo.researchesToDisable[player->playerId].end(); it++) {
+	for (it = ROCKNROR::crInfo.researchesToDisable[player->playerId].begin(); it != ROCKNROR::crInfo.researchesToDisable[player->playerId].end(); it++) {
 		short int researchId = *it;
 		AOE_METHODS::AOE_enableResearch(player, researchId, false);
 	}

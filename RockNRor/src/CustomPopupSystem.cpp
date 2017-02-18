@@ -1,6 +1,6 @@
 #include "../include/CustomPopupSystem.h"
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 ;
 // A common global object
 CustomPopupSystem customPopupSystem;
@@ -22,12 +22,12 @@ CustomPopupSystem::~CustomPopupSystem() {
 // Returns true if we want NOT the game to exit
 bool CustomPopupSystem::FixGamePopupIssuesBeforeGameClose() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup() && settings &&
+	if (ROCKNROR::crInfo.HasOpenedCustomGamePopup() && settings &&
 		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
 		// In scenario editor, UI objects are not correctly freed and the game crashes if we have a custom popup opened...
 		// Closing the popup solves the issue !
-		CUSTOMROR::customPopupSystem.CloseCustomGamePopup(true);
-		assert(!CUSTOMROR::crInfo.HasOpenedCustomGamePopup());
+		ROCKNROR::customPopupSystem.CloseCustomGamePopup(true);
+		assert(!ROCKNROR::crInfo.HasOpenedCustomGamePopup());
 		return true; // Do NOT exit game (if possible). We consider the ALT-F4 closed the popup (that's a choice...)
 	}
 	return false;
@@ -53,11 +53,11 @@ void CustomPopupSystem::CloseCustomGamePopup(bool isCancel) {
 
 // Use this to properly free custom button from options menu. This should (always) be called when ingame menu is closed.
 void CustomPopupSystem::FreeInGameCustomOptionsButton() {
-	if (CUSTOMROR::crInfo.configInfo.showRockNRorMenu) {
+	if (ROCKNROR::crInfo.configInfo.showRockNRorMenu) {
 		// Add "custom options" button (from game menu) to our "garbage collector" so that it is freed later.
-		if (CUSTOMROR::crInfo.customGameMenuOptionsBtnVar) {
-			CUSTOMROR::crInfo.AddObjectInPopupContentList(CUSTOMROR::crInfo.customGameMenuOptionsBtnVar);
-			CUSTOMROR::crInfo.customGameMenuOptionsBtnVar = NULL;
+		if (ROCKNROR::crInfo.customGameMenuOptionsBtnVar) {
+			ROCKNROR::crInfo.AddObjectInPopupContentList(ROCKNROR::crInfo.customGameMenuOptionsBtnVar);
+			ROCKNROR::crInfo.customGameMenuOptionsBtnVar = NULL;
 		}
 	}
 }
@@ -70,12 +70,12 @@ bool CustomPopupSystem::OnCustomButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *se
 	if (!GetGameGlobalStructPtr()) { return false; }
 	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = GetGameGlobalStructPtr()->scenarioInformation;
 
-	if (CUSTOMROR::customPopupSystem.currentCustomPopup) {
-		bool eventHandled = CUSTOMROR::customPopupSystem.currentCustomPopup->OnButtonClick(sender);
-		if (CUSTOMROR::customPopupSystem.currentCustomPopup->IsClosed()) {
-			CustomPopupBase *next = CUSTOMROR::customPopupSystem.currentCustomPopup->nextPopup;
-			delete CUSTOMROR::customPopupSystem.currentCustomPopup;
-			CUSTOMROR::customPopupSystem.currentCustomPopup = next; // Generally NULL unless closing the popup triggered a new one.
+	if (ROCKNROR::customPopupSystem.currentCustomPopup) {
+		bool eventHandled = ROCKNROR::customPopupSystem.currentCustomPopup->OnButtonClick(sender);
+		if (ROCKNROR::customPopupSystem.currentCustomPopup->IsClosed()) {
+			CustomPopupBase *next = ROCKNROR::customPopupSystem.currentCustomPopup->nextPopup;
+			delete ROCKNROR::customPopupSystem.currentCustomPopup;
+			ROCKNROR::customPopupSystem.currentCustomPopup = next; // Generally NULL unless closing the popup triggered a new one.
 		}
 		return eventHandled;
 	}
@@ -87,12 +87,12 @@ bool CustomPopupSystem::OnCustomButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *se
 // This just detects if the component is the popup's OK or Cancel button, and handles popup closing event if so.
 // Returns true if the popup has been closed (and the event processed)
 bool CustomPopupSystem::OnButtonClickClosePopupIfNecessary(unsigned long int objAddress) {
-	if (CUSTOMROR::crInfo.IsCustomGamePopupOKButton(objAddress)) {
+	if (ROCKNROR::crInfo.IsCustomGamePopupOKButton(objAddress)) {
 		// Close the custom popup when it is open and we just clicked on OK button.
 		this->CloseCustomGamePopup(false);
 		return true;
 	}
-	if (CUSTOMROR::crInfo.IsCustomGamePopupCancelButton(objAddress)) {
+	if (ROCKNROR::crInfo.IsCustomGamePopupCancelButton(objAddress)) {
 		// Close the custom popup when it is open and we just clicked on Cancel button.
 		this->CloseCustomGamePopup(true);
 		return true;

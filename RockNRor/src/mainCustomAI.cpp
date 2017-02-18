@@ -65,7 +65,7 @@ bool CustomPlayerAI::IsValidAIPlayer() {
 // Returns true if treatements were executed, false if not (not enough time has passed since last execution)
 bool CustomPlayerAI::RunStrategyUpdate(long int currentGameTime) {
 	if (!this->IsValidAIPlayer()) { return false; }
-	long int updateDelay_ms = CUSTOMROR::crInfo.configInfo.tacticalAIUpdateDelay * 1000;
+	long int updateDelay_ms = ROCKNROR::crInfo.configInfo.tacticalAIUpdateDelay * 1000;
 	if (this->isValidPlayer && this->isPlayerAlive &&
 		(currentGameTime - this->lastStrategyAnalysisTime > updateDelay_ms)) {
 		STRATEGY::AnalyzeStrategy(&this->mainAI->structBuildAI);
@@ -161,7 +161,7 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 		// More precise checks are run there, this is just an optimization !
 		bool panicModeIsEligible = CUSTOM_AI::CustomAIMilitaryInfo::IsPanicModeEligible(myTC, myUnit, enemyUnit);
 		long int timeSinceLastPanicMode_ms = (global->currentGameTime - tacAI->lastPanicModeStrategyUpdateTime);
-		panicModeIsEligible &= (timeSinceLastPanicMode_ms >= (CUSTOMROR::crInfo.configInfo.panicModeDelay * 1000));
+		panicModeIsEligible &= (timeSinceLastPanicMode_ms >= (ROCKNROR::crInfo.configInfo.panicModeDelay * 1000));
 		if (panicModeIsEligible) {
 			STRATEGY::ManagePanicMode(tacAI->ptrMainAI, enemyPlayerId, &this->militaryAIInfo);
 		}

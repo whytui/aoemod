@@ -6,7 +6,7 @@
 //#pragma warning(disable: 4731) // Allow modifying EBP in assembler code... Required for compliance with some AOE methods. Be careful !
 //#pragma warning(disable: 4733) // Allow modifying FS[0]... Required for compliance with some AOE methods. Be careful !
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 
 RockNRorInstance::RockNRorInstance() {}
 
@@ -438,21 +438,21 @@ void RockNRorInstance::TemporaryEntryPoints(REG_BACKUP *REG_values) {
 // ROR UI has not been initialized yet, DRS files are not loaded, etc.
 void RockNRorInstance::OneShotInit() {
 	traceMessageHandler.WriteMessageNoNotification(localizationHandler.GetTranslation(CRLANG_ID_DEBUG_INIT, "Debug message system initialized."));
-	CUSTOMROR::crInfo.configInfo.ReadXMLConfigFile("RockNRor\\RockNRor.xml");
-	CUSTOMROR::crInfo.configInfo.ReadCivXMLConfigFile("RockNRor\\RockNRor_civs.xml");
-	CUSTOMROR::crInfo.configInfo.ReadTilesetXMLConfigFile("RockNRor\\RockNRor_tilesets.xml");
+	ROCKNROR::crInfo.configInfo.ReadXMLConfigFile("RockNRor\\RockNRor.xml");
+	ROCKNROR::crInfo.configInfo.ReadCivXMLConfigFile("RockNRor\\RockNRor_civs.xml");
+	ROCKNROR::crInfo.configInfo.ReadTilesetXMLConfigFile("RockNRor\\RockNRor_tilesets.xml");
 
 	// Note: CheckEnabledFeatures writes to log file
-	if (!CUSTOMROR::crCommand.CheckEnabledFeatures()) {
+	if (!ROCKNROR::crCommand.CheckEnabledFeatures()) {
 		const char *msg = localizationHandler.GetTranslation(CRLANG_ID_WARN_MISSING_FEATURE, "WARNING: Some features are not enabled in game executable. See RockNRor\\RockNRor.log file.");
-		if (CUSTOMROR::crInfo.configInfo.showAlertOnMissingFeature) {
+		if (ROCKNROR::crInfo.configInfo.showAlertOnMissingFeature) {
 			MessageBoxA(0, msg, "ROR API", MB_ICONWARNING);
 		}
 		traceMessageHandler.WriteMessageNoNotification(msg);
 	}
 	
 	// Custom treatments for initialization
-	CUSTOMROR::crCommand.OneShotInit();
+	ROCKNROR::crCommand.OneShotInit();
 }
 
 
@@ -461,7 +461,7 @@ void RockNRorInstance::OneShotInit() {
 void RockNRorInstance::WMCloseMessageEntryPoint(REG_BACKUP *REG_values) {
 	bool preventGameFromExiting = false;
 	// Do custom treatments NOW or never ;)
-	preventGameFromExiting = preventGameFromExiting || CUSTOMROR::customPopupSystem.FixGamePopupIssuesBeforeGameClose();
+	preventGameFromExiting = preventGameFromExiting || ROCKNROR::customPopupSystem.FixGamePopupIssuesBeforeGameClose();
 
 	if (preventGameFromExiting) {
 		REG_values->EAX_val = 0;
@@ -510,8 +510,8 @@ void RockNRorInstance::ReadTextFromChat(REG_BACKUP *REG_values) {
 	}
 
 	// Now do our own treatments
-	if (IsMultiplayer() || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
-	CUSTOMROR::crCommand.HandleChatCommand(txt);
+	if (IsMultiplayer() || ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	ROCKNROR::crCommand.HandleChatCommand(txt);
 }
 
 
@@ -519,8 +519,8 @@ void RockNRorInstance::ReadTextFromChat(REG_BACKUP *REG_values) {
 // Warning: for scenarios, if there is an introduction screen, this method is called at that moment
 // (game might not be displayed yet)
 void RockNRorInstance::ActionOnGameStart(REG_BACKUP *REG_values) {
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
-		CUSTOMROR::crCommand.OnGameStart();
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		ROCKNROR::crCommand.OnGameStart();
 	}
 }
 
@@ -539,7 +539,7 @@ void RockNRorInstance::InitBeforeGameStart(REG_BACKUP *REG_values, bool isSavedG
 		}
 	}
 
-	CUSTOMROR::crCommand.OnNewGame(isSavedGame);
+	ROCKNROR::crCommand.OnNewGame(isSavedGame);
 }
 
 // This is called while scenarioInfo structure is read from a file (cf 0x506937)
@@ -554,11 +554,11 @@ void RockNRorInstance::InitScenarioInfoTextData(REG_BACKUP *REG_values) {
 		*p = 0x0054A3C8;
 	}
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scenarioInfo = (AOE_STRUCTURES::STRUCT_SCENARIO_INFO *)REG_values->ESI_val;
 		ror_api_assert(REG_values, scenarioInfo && scenarioInfo->IsCheckSumValid());
 
-		CUSTOMROR::TRIGGER::InitScenarioInfoTextData(scenarioInfo);
+		ROCKNROR::TRIGGER::InitScenarioInfoTextData(scenarioInfo);
 	}
 }
 
@@ -587,7 +587,7 @@ void RockNRorInstance::CheckPopulationCostWithLogistics(REG_BACKUP *REG_values) 
 	}
 
 	// Custom treatments
-	if (!CUSTOMROR::crInfo.configInfo.fixLogisticsNoHouseBug) { return; }
+	if (!ROCKNROR::crInfo.configInfo.fixLogisticsNoHouseBug) { return; }
 
 	bool trainUnitWasAskedByHuman = false;
 	// A bit dirty but there is no better way to do this. It seems "human-asked" train unit actions always come from the same method, let's take advantage of this:
@@ -637,7 +637,7 @@ void RockNRorInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = actor->ptrStructPlayer;
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = target->unitDefinition;
 	// Compute resistance
-	float resistance = CUSTOMROR::crInfo.GetConversionResistance(targetPlayer->civilizationId, targetUnitDef->unitAIType);
+	float resistance = ROCKNROR::crInfo.GetConversionResistance(targetPlayer->civilizationId, targetUnitDef->unitAIType);
 
 	// Save computed resistance to dedicated stack record
 	_asm {
@@ -648,8 +648,8 @@ void RockNRorInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 
 	// For monitoring
-	CUSTOMROR::crInfo.passiveConversionAttemptsCount[targetPlayer->playerId]++;
-	CUSTOMROR::crInfo.activeConversionAttemptsCount[actorPlayer->playerId]++;
+	ROCKNROR::crInfo.passiveConversionAttemptsCount[targetPlayer->playerId]++;
+	ROCKNROR::crInfo.activeConversionAttemptsCount[actorPlayer->playerId]++;
 }
 
 
@@ -661,7 +661,7 @@ void RockNRorInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -679,14 +679,14 @@ void RockNRorInstance::OnSuccessfulConversion(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, actorPlayer->IsCheckSumValid());
 
 	// Manage functional impacts / fixes about unit conversion
-	CUSTOMROR::crCommand.OnUnitChangeOwner_fixes((AOE_STRUCTURES::STRUCT_UNIT_BASE*)targetUnit, actorPlayer);
+	ROCKNROR::crCommand.OnUnitChangeOwner_fixes((AOE_STRUCTURES::STRUCT_UNIT_BASE*)targetUnit, actorPlayer);
 
 	// Conversions Monitoring:
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = targetUnit->ptrStructPlayer; // The victim (if unit has been converted)
 	assert(targetPlayer != NULL);
 	assert(targetPlayer->IsCheckSumValid());
-	CUSTOMROR::crInfo.passiveConversionSuccessfulAttemptsCount[targetPlayer->playerId]++;
-	CUSTOMROR::crInfo.activeConversionSuccessfulAttemptsCount[actorPlayer->playerId]++;
+	ROCKNROR::crInfo.passiveConversionSuccessfulAttemptsCount[targetPlayer->playerId]++;
+	ROCKNROR::crInfo.activeConversionSuccessfulAttemptsCount[actorPlayer->playerId]++;
 
 }
 
@@ -713,12 +713,12 @@ void RockNRorInstance::ManageOnPlayerAddUnit(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
 	// Now custom treatments
-	CUSTOMROR::crCommand.OnPlayerAddUnitCustomTreatments(player, unit, (isTempUnit!=0), (isNotCreatable!=0));
+	ROCKNROR::crCommand.OnPlayerAddUnitCustomTreatments(player, unit, (isTempUnit!=0), (isNotCreatable!=0));
 }
 
 
@@ -738,13 +738,13 @@ void RockNRorInstance::MapGen_elevationProportionCalc(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 	// Custom treatments
-	if (!CUSTOMROR::crInfo.configInfo.useMapGenerationCustomElevationCalculation) { return; }
+	if (!ROCKNROR::crInfo.configInfo.useMapGenerationCustomElevationCalculation) { return; }
 	long int *myECX = (long int *)REG_values->EBX_val;
 	long int mapType = myECX[0x34 / 4];
 	assert(mapType < AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT);
 	assert(mapType >= 0);
 	if ((mapType < 0) || (mapType >= AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT)) { return; }
-	float tmpValue = ((float)elevationBaseCalcValue) * CUSTOMROR::crInfo.configInfo.mapGenerationCustomElevationFactor[mapType];
+	float tmpValue = ((float)elevationBaseCalcValue) * ROCKNROR::crInfo.configInfo.mapGenerationCustomElevationFactor[mapType];
 	if (mapType == AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_HILLS) {
 		tmpValue = tmpValue / 5; // Because of hardcoded *5 in game code that will be applied afterwards.
 	}
@@ -761,7 +761,7 @@ void RockNRorInstance::MapGen_applyElevation(REG_BACKUP *REG_values) {
 	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -775,7 +775,7 @@ void RockNRorInstance::MapGen_applyElevation(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, posY >= 0);
 	if ((dist <= 0) || (posX < 0) || (posY < 0)) { return; }
 	AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo = (AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO*) REG_values->ECX_val;
-	CUSTOMROR::crCommand.Fixed_MapGen_applyElevation(posX, posY, dist, elevInfo);
+	ROCKNROR::crCommand.Fixed_MapGen_applyElevation(posX, posY, dist, elevInfo);
 }
 
 
@@ -802,17 +802,17 @@ void RockNRorInstance::ManageOnPlayerRemoveUnit(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
-	CUSTOMROR::crCommand.OnPlayerRemoveUnit(player, unit, isTempUnit != 0, isNotCreatable != 0);
+	ROCKNROR::crCommand.OnPlayerRemoveUnit(player, unit, isTempUnit != 0, isNotCreatable != 0);
 }
 
 
 // Fills strategy element's unitId when construction begins (while in progress)
 // In method buildingUnit.initialize (0x4AC8A0)
 void RockNRorInstance::FixBuildingStratElemUnitID(REG_BACKUP *REG_values) {
-	// TODO: separate compatibility code from "functional" code, and use CUSTOMROR::crInfo.configInfo.doNotApplyFixes parameter.
+	// TODO: separate compatibility code from "functional" code, and use ROCKNROR::crInfo.configInfo.doNotApplyFixes parameter.
 	AOE_STRUCTURES::STRUCT_PLAYER *p = (AOE_STRUCTURES::STRUCT_PLAYER*) REG_values->EDI_val;
 	ror_api_assert(REG_values, p != NULL);
 	AOE_STRUCTURES::STRUCT_AI *ai = p->ptrAIStruct;
@@ -871,7 +871,7 @@ void RockNRorInstance::OverloadIsStratElemUnitAlive_ResetElement(REG_BACKUP *REG
 	ror_api_assert(REG_values, buildAI != NULL);
 	ror_api_assert(REG_values, buildAI->IsCheckSumValid());
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Run technical fixes (even in improve AI is disabled)
 		STRATEGY::CheckStratElemAliveForReset(buildAI, currentElement);
 	}
@@ -891,7 +891,7 @@ void RockNRorInstance::AfterAddElementInStrategy(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -915,7 +915,7 @@ void RockNRorInstance::AfterAddElementInStrategy(REG_BACKUP *REG_values) {
 	long int retrains = args[5];
 	long int positionCounter = args[6]; // position in strategy list, NOT elemId !
 	
-	CUSTOMROR::crCommand.AfterAddElementInStrategy(buildAI, posToAdd, nbToCreate);
+	ROCKNROR::crCommand.AfterAddElementInStrategy(buildAI, posToAdd, nbToCreate);
 }
 
 
@@ -926,7 +926,7 @@ void RockNRorInstance::FixAutoBuildWarships_addStratElem(REG_BACKUP *REG_values)
 	if (REG_values->fixesForGameEXECompatibilityAreDone) {
 		return;
 	}
-	// TODO: separate compatibility code from "functional" code and use CUSTOMROR::crInfo.configInfo.doNotApplyFixes
+	// TODO: separate compatibility code from "functional" code and use ROCKNROR::crInfo.configInfo.doNotApplyFixes
 
 	long int insertPosition = REG_values->EDI_val;
 	long int unitDAT_ID = 0x13; // Also hardcoded in EXE
@@ -1000,7 +1000,7 @@ void RockNRorInstance::FixAutoBuildHouse_countHouse(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = (AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *) REG_values->ECX_val;
 	REG_values->EAX_val = stratElem->unitDAT_ID;
 	
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Workaround for houses: return TC's DAT_ID so that it will count a 4-population housage.
 		if (stratElem->unitDAT_ID == CST_UNITID_HOUSE) {
 			REG_values->EAX_val = CST_UNITID_FORUM;
@@ -1021,7 +1021,7 @@ void RockNRorInstance::FixAutoBuildHouse_maxPopSignedCharLimitation(REG_BACKUP *
 	ror_api_assert(REG_values, tacAI->IsCheckSumValid());
 	long int houseOverage = tacAI->SNNumber[SNHouseOverage]; // cf 0x4B7E72
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	if (hostedPopulationAtCurrentPoint > houseOverage + CUSTOMROR::crInfo.configInfo.singlePlayerMaxPopulation) {
+	if (hostedPopulationAtCurrentPoint > houseOverage + ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation) {
 		// Exit loop (enough houses)
 		// This can only happen if initial strategy contains (enough or too many) houses. "Normal" exit loop is when end of strategy is reached.
 		ChangeReturnAddress(REG_values, 0x4B7E8C);
@@ -1049,7 +1049,7 @@ void RockNRorInstance::AfterAddDynamicStratElems(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	// Custom treatments: run various fixes on added strategy elements
@@ -1070,13 +1070,13 @@ void RockNRorInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 	if (!global || !global->IsCheckSumValid()) { return; }
 	
 	// Custom code
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
 	// Update triggers data before saving, 
 	// so that when loading game we will have relevant trigger information (which have already been executed, etc)
-	CUSTOMROR::TRIGGER::WriteTriggersFromInternalToGameData(true);
+	ROCKNROR::TRIGGER::WriteTriggersFromInternalToGameData(true);
 }
 
 
@@ -1097,7 +1097,7 @@ void RockNRorInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 
-	if (CUSTOMROR::ShouldUseOriginalPanicModeMethod() || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::ShouldUseOriginalPanicModeMethod() || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// if it returns true, it means we want to force usage of ROR *original* (crappy) panic mode code.
 		// So let's do it by forcing return address (skip the JMP 004E254F)
 		// However, we first do the check on "last execution" (this test has been overriden by binary change, and is not done anymore in ROR code).
@@ -1107,7 +1107,7 @@ void RockNRorInstance::ManagePanicMode(REG_BACKUP *REG_values) {
 		}
 		// Delay till next execution is not finished. Do nothing right now;
 	}
-	// Other cases : use customROR (recommended)
+	// Other cases : use RockNRor (recommended)
 	// There is nothing to do here, there is another entry point just after (calls TacAIOnUnitAttacked)
 }
 
@@ -1135,19 +1135,19 @@ void RockNRorInstance::TacAIOnUnitAttacked(REG_BACKUP *REG_values) {
 		REG_values->EDX_val = tacAI->attacksByPlayerCount[enemyPlayerId]; // 0x4D7AE1
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
 	// Custom treatments
 
-	// ROR original method for panic mode is deactivated: call customROR treatments.
+	// ROR original method for panic mode is deactivated: call RockNRor treatments.
 	// Make sure to remain consistent about this !
-	bool usedRorPanicModeMethod = CUSTOMROR::ShouldUseOriginalPanicModeMethod();
+	bool usedRorPanicModeMethod = ROCKNROR::ShouldUseOriginalPanicModeMethod();
 
 	// Run custom AI treatments for "being attacked" event
 	// ...and runs custom panic mode treatments *if usedRorPanicModeMethod=true*.
-	if (CUSTOMROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
+	if (ROCKNROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
 		CUSTOM_AI::customAIHandler.OnUnitAttacked(tacAI, myUnit, enemyUnit, usedRorPanicModeMethod);
 	}
 }
@@ -1162,7 +1162,7 @@ void RockNRorInstance::ManageCityPlanHouseDistanceFromBuildings(REG_BACKUP *REG_
 	if (REG_values->fixesForGameEXECompatibilityAreDone) {
 		return;
 	}
-	// Note: not checking CUSTOMROR::crInfo.configInfo.doNotApplyFixes here
+	// Note: not checking ROCKNROR::crInfo.configInfo.doNotApplyFixes here
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *otherBuilding = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) REG_values->EDI_val;
 	ror_api_assert(REG_values, otherBuilding != NULL);
@@ -1178,13 +1178,13 @@ void RockNRorInstance::ManageCityPlanHouseDistanceFromBuildings(REG_BACKUP *REG_
 	ror_api_assert(REG_values, defOtherBuilding != NULL);
 	// Get relevant distance value according to "reference building" type (DAT_ID)
 	float distanceValue = 3; // From original code
-	/*float distanceValue = CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromOtherBld;
+	/*float distanceValue = ROCKNROR::crInfo.configInfo.cityPlanHouseDistanceFromOtherBld;
 	if (defOtherBuilding->DAT_ID1 == CST_UNITID_FORUM) {
-		distanceValue = CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromTownCenter;
+		distanceValue = ROCKNROR::crInfo.configInfo.cityPlanHouseDistanceFromTownCenter;
 	}
 	if ((defOtherBuilding->DAT_ID1 == CST_UNITID_GRANARY) ||
 		(defOtherBuilding->DAT_ID1 == CST_UNITID_STORAGE_PIT)) {
-		distanceValue = CUSTOMROR::crInfo.configInfo.cityPlanHouseDistanceFromStorageBld;
+		distanceValue = ROCKNROR::crInfo.configInfo.cityPlanHouseDistanceFromStorageBld;
 	}*/
 
 	// Do like original code but with a custom value (distanceValue)
@@ -1229,7 +1229,7 @@ void RockNRorInstance::ManageCityMapLikeComputationCall1(REG_BACKUP *REG_values)
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	//AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem = *(AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT **) (myESP + 0x1BC / 4);
@@ -1254,7 +1254,7 @@ void RockNRorInstance::ManageCityMapLikeComputationCall2(REG_BACKUP *REG_values)
 	long int *TownLowestPositionYX = *((long int **)myESP + 2);
 	long int *TownHighestPositionYX = *((long int **)myESP + 3);
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Sometimes AI has not correctly been initialized (when game was saved too quickly after game start ?).
 		// Bad data cause a crash in the call below, we can avoid this by returning without doing the call.
 		if ((infAI->XMapSize < 0) || (infAI->YMapSize < 0)) {
@@ -1307,11 +1307,11 @@ void RockNRorInstance::ManageCityMapLikeValueAroundBushes(REG_BACKUP *REG_values
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	// Set the "like value". A hardcoded value has been push'ed, now update with the real value we want to use
-	*likeValueToAdd = CUSTOMROR::crInfo.configInfo.cityPlanBerryBushWeightForGranary;
+	*likeValueToAdd = ROCKNROR::crInfo.configInfo.cityPlanBerryBushWeightForGranary;
 }
 
 
@@ -1339,7 +1339,7 @@ void RockNRorInstance::ManageCityMapLikeValueFarmPlacement(REG_BACKUP *REG_value
 
 	long int existingBldInfluenceZone = REG_values->EAX_val;
 	bool skipThisBuilding = false;
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		CITY_PLAN::FixCityPlanFarmPlacement(unitExistingBld_base, existingBldInfluenceZone, skipThisBuilding);
 		REG_values->EAX_val = existingBldInfluenceZone;
 	}
@@ -1360,7 +1360,7 @@ void RockNRorInstance::OverloadSetInProgress(REG_BACKUP *REG_values) {
 		stratElem->inProgressCount = 1; // What original (replaced) code used to do
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	if (stratElem->elementType != AOE_CONST_FUNC::TAIUnitClass::AIUCLivingUnit) { return; }
@@ -1377,10 +1377,10 @@ void RockNRorInstance::OverloadResetInProgress(REG_BACKUP *REG_values) {
 		stratElem->inProgressCount = 0; // What original (replaced) code used to do
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
-	stratElem->unitInstanceId = -1; // Added: reset instanceId (CustomROR uses it while in progress to retrieve actor)
+	stratElem->unitInstanceId = -1; // Added: reset instanceId (RockNRor uses it while in progress to retrieve actor)
 }
 
 
@@ -1405,7 +1405,7 @@ void RockNRorInstance::OverloadResetUnitInAI(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	// TODO: move in strategyUpdater
@@ -1439,7 +1439,7 @@ void RockNRorInstance::OnWonderConstructionCompleted(REG_BACKUP *REG_values) {
 	mainAI->structTacAI.myWonderIsBuiltFlag = 1;
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	// Always do the fix whatever config says (it's more a technical fix than an AI fix) - except in MP
-	if (!IsMultiplayer() && !CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!IsMultiplayer() && !ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		mainAI->structTacAI.myWonderBeingBuiltFlag = 0; // This instruction is missing in original game code.
 	}
 }
@@ -1468,7 +1468,7 @@ void RockNRorInstance::AuditOnDoStrategyElementBuilding(REG_BACKUP *REG_values) 
 	// Custom treatments
 	ror_api_assert(REG_values, stratElem->elementType == AIUCBuilding);
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		doNotRunConstruction = STRATEGY::ShouldNotTriggerConstruction(tacAI, stratElem);
 	}
 
@@ -1497,14 +1497,14 @@ void RockNRorInstance::GlobalOnButtonClick(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	// Custom treatments
-	if (CUSTOMROR::crMainInterface.Global_OnButtonClick(objAddr)) {
+	if (ROCKNROR::crMainInterface.Global_OnButtonClick(objAddr)) {
 		ChangeReturnAddress(REG_values, 0x460568);
 	}
-	CUSTOMROR::crMainInterface.ChangeWindowTitle(); // TODO: find the appropriate place so that it is called only once: need an entry point just after window is created.
+	ROCKNROR::crMainInterface.ChangeWindowTitle(); // TODO: find the appropriate place so that it is called only once: need an entry point just after window is created.
 }
 
 
@@ -1531,7 +1531,7 @@ void RockNRorInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
 		REG_values->EDI_val = myEDI;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	unsigned long int **ptrCurrentUI = (unsigned long int **) AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
@@ -1546,7 +1546,7 @@ void RockNRorInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
 	bool altIsOn = (GetKeyState(VK_MENU) < 0); // is ALT key pressed ?
 
 	// Call our dedicated event manager.
-	if (CUSTOMROR::crMainInterface.GameAndEditor_OnKeyPress(pressedKey, ctrlIsON, shiftIsON, altIsOn)) {
+	if (ROCKNROR::crMainInterface.GameAndEditor_OnKeyPress(pressedKey, ctrlIsON, shiftIsON, altIsOn)) {
 		REG_values->EAX_val = 0;
 		ChangeReturnAddress(REG_values, 0x41A7C5); // Will NEG EAX (still 0) and then ignore the key press event
 		return;
@@ -1573,16 +1573,16 @@ void RockNRorInstance::ManageOnDialogUserEvent(REG_BACKUP *REG_values) {
 	unsigned long int ptrSender = REG_values->EAX_val;
 	long int evtStatus = REG_values->EDX_val; // 1="real" button click
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
 	// Now do custom treatments
-	if ((unsigned long int *) ptrDialog == CUSTOMROR::crInfo.customYesNoDialogVar) {
+	if ((unsigned long int *) ptrDialog == ROCKNROR::crInfo.customYesNoDialogVar) {
 		ChangeReturnAddress(REG_values, 0x43498C); // Disable ROR's treatments for this call to dialog.OnUserEvent(...)
 		REG_values->EAX_val = 1;
 		if (evtStatus == 1) { // button has actually been clicked
-			long int returnValue = CUSTOMROR::crCommand.CloseCustomDialogMessage(ptrDialog, ptrSender);
+			long int returnValue = ROCKNROR::crCommand.CloseCustomDialogMessage(ptrDialog, ptrSender);
 			// Manage user choice
 			// ...
 		}
@@ -1604,7 +1604,7 @@ void RockNRorInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_v
 		return; // No custom treatments for standard mouse action types. Note there are other entry points in sub-calls. (OnGameRightClickUpEvent, etc)
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -1614,7 +1614,7 @@ void RockNRorInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_v
 	float posX, posY;
 	GetGamePositionUnderMouse(&posX, &posY);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = AOE_METHODS::GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_RESOURCES, false);
-	CUSTOMROR::crCommand.OnInGameRightClickCustomAction(posX, posY, unitUnderMouse);
+	ROCKNROR::crCommand.OnInGameRightClickCustomAction(posX, posY, unitUnderMouse);
 }
 
 
@@ -1655,7 +1655,7 @@ void RockNRorInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 	// Now we correctly plugged our method to game EXE. In all cases it's OK, the list is freed and won't be again (in ROR code)
 	// It is possible to change the "return address" (JMP, in fact) by setting REG_values->EAX_val. Do not change other values.
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -1673,7 +1673,7 @@ void RockNRorInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 
 	long int mousePosX = *(long int *)(myESP + 0x34);
 	long int mousePosY = *(long int *)(myESP + 0x38);
-	if (CUSTOMROR::crMainInterface.ApplyRightClickReleaseOnSelectedUnits(UIGameMain, controlledPlayer, mousePosX, mousePosY)) {
+	if (ROCKNROR::crMainInterface.ApplyRightClickReleaseOnSelectedUnits(UIGameMain, controlledPlayer, mousePosX, mousePosY)) {
 		REG_values->EAX_val = CST_OnGameRightClickUpEvent_IGNORE_CLICK; // Force to ignore click in ROR code
 	}
 }
@@ -1696,7 +1696,7 @@ void RockNRorInstance::ManageChangeGameSpeed(REG_BACKUP *REG_values) {
 	
 
 	// if custom game speeds are not enabled, use standard calculation
-	if (!CUSTOMROR::crInfo.configInfo.useImprovedGameSpeeds || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.useImprovedGameSpeeds || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Reimplement standard algorithm (use only 1.0, 1.5, 2.0 hardcoded values)
 		if (*bool_increaseSpeed) {
 			*gameSpeed = *gameSpeed + 0.5f;
@@ -1710,9 +1710,9 @@ void RockNRorInstance::ManageChangeGameSpeed(REG_BACKUP *REG_values) {
 
 	// Calculate new speed
 	if (*bool_increaseSpeed) {
-		*gameSpeed = (*gameSpeed) * CUSTOMROR::crInfo.configInfo.improvedGameSpeedFactor;
+		*gameSpeed = (*gameSpeed) * ROCKNROR::crInfo.configInfo.improvedGameSpeedFactor;
 	} else {
-		*gameSpeed = (*gameSpeed) / CUSTOMROR::crInfo.configInfo.improvedGameSpeedFactor;
+		*gameSpeed = (*gameSpeed) / ROCKNROR::crInfo.configInfo.improvedGameSpeedFactor;
 	}
 	// Fix value when ~1 (fix rounding issues)
 	if (abs(*gameSpeed - 1) <= 0.1) { *gameSpeed = 1; }
@@ -1737,8 +1737,8 @@ void RockNRorInstance::ManageTacAIUpdate(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, tacAI && tacAI->IsCheckSumValid());
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	REG_values->EDX_val = (unsigned long int) tacAI->ptrMainAI;
-	// Note: ManageTacAIUpdate takes into account CUSTOMROR::crInfo.configInfo.doNotApplyFixes.
-	bool isDeadPlayer = !CUSTOMROR::crCommand.ManageTacAIUpdate(tacAI->ptrMainAI);
+	// Note: ManageTacAIUpdate takes into account ROCKNROR::crInfo.configInfo.doNotApplyFixes.
+	bool isDeadPlayer = !ROCKNROR::crCommand.ManageTacAIUpdate(tacAI->ptrMainAI);
 
 	if (isDeadPlayer) {
 		ChangeReturnAddress(REG_values, 0x4D0EFE);
@@ -1764,7 +1764,7 @@ void RockNRorInstance::ManageDefeatedAIPlayerTacAIUpdate(REG_BACKUP *REG_values)
 	// In custom case (skip - JMP to 0x4D24E8), it is necessary that ECX=mainAI
 	REG_values->ECX_val = (unsigned long int) tacAI->ptrMainAI;
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -1783,12 +1783,12 @@ void RockNRorInstance::ManageDefeatedAIPlayerTacAIUpdate(REG_BACKUP *REG_values)
 // This is called just before calling empires.dat loading ([global]+0xB0), called from 0x501211.
 void RockNRorInstance::OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		REG_values->ECX_val = REG_values->ECX_val + 0x1F8;
 		return;
 	}
 	AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO *cmdLineInfo = (AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO *)REG_values->ECX_val;
-	const char *empiresDatRelativeFileName = CUSTOMROR::crCommand.GetCustomEmpiresDatRelativeFileName(cmdLineInfo);
+	const char *empiresDatRelativeFileName = ROCKNROR::crCommand.GetCustomEmpiresDatRelativeFileName(cmdLineInfo);
 #ifdef GAMEVERSION_AOE10b
 	REG_values->EAX_val = 
 #else
@@ -1801,8 +1801,8 @@ void RockNRorInstance::OnBeforeLoadEmpires_DAT(REG_BACKUP *REG_values) {
 // This is called just after empires.dat is loaded.
 void RockNRorInstance::OnAfterLoadEmpires_DAT(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true; // There is nothing special to do for this change to be compatible with ROR execution.
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
-		CUSTOMROR::crCommand.OnAfterLoadEmpires_DAT();
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		ROCKNROR::crCommand.OnAfterLoadEmpires_DAT();
 	}
 }
 
@@ -1835,9 +1835,9 @@ void RockNRorInstance::EditorCheckForUnitPlacement(REG_BACKUP *REG_values) {
 	long int checkConflictingUnits = argsAsInt[8];
 	bool ignoreTerrainRestrictionErrors = false;
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Let crCommand object customize the parameters according to configuration and user choices...
-		CUSTOMROR::crCommand.ApplyCustomizationOnEditorAddUnit(checkVisibility, checkHillMode, editorMode, checkAirModeAndHPBar, checkConflictingUnits, ignoreTerrainRestrictionErrors);
+		ROCKNROR::crCommand.ApplyCustomizationOnEditorAddUnit(checkVisibility, checkHillMode, editorMode, checkAirModeAndHPBar, checkConflictingUnits, ignoreTerrainRestrictionErrors);
 	}
 
 	// CALL defUnit.GetErrorForUnitCreationAtLocation(player, posY, posX, arg4, checkVisibility, hillMode, arg7, editorMode, checkAirModeAndHPBar?, checkConflictingUnits)
@@ -1859,7 +1859,7 @@ void RockNRorInstance::EditorCheckForUnitPlacement(REG_BACKUP *REG_values) {
 		MOV callResult, EAX;
 	}
 	REG_values->EAX_val = callResult;
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		if (ignoreTerrainRestrictionErrors && (callResult == AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION::CST_EUC_BAD_TERRAIN_RESTRICTION)) {
 			REG_values->EAX_val = AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION::CST_EUC_OK;
 		}
@@ -1874,7 +1874,7 @@ void RockNRorInstance::EntryPoint_UIUnitSelection(REG_BACKUP *REG_values) {
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return; }
 	
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -1913,9 +1913,9 @@ void RockNRorInstance::HumanSpecific_onCapturableUnitSeen(REG_BACKUP *REG_values
 	}
 	bool doNotCaptureUnit = false;
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Custom treatments here
-		doNotCaptureUnit = CUSTOMROR::crCommand.HumanSpecific_onCapturableUnitSeen(beingSeenUnit, actorPlayer);
+		doNotCaptureUnit = ROCKNROR::crCommand.HumanSpecific_onCapturableUnitSeen(beingSeenUnit, actorPlayer);
 	}
 
 	// Do not modify below.
@@ -1927,19 +1927,19 @@ void RockNRorInstance::HumanSpecific_onCapturableUnitSeen(REG_BACKUP *REG_values
 
 // From 0x50B6C2
 void RockNRorInstance::ManageRelicsCount(REG_BACKUP *REG_values) {
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		REG_values->EAX_val = 5;
 	} else {
-		REG_values->EAX_val = CUSTOMROR::crInfo.configInfo.randomMapRelicsCount;
+		REG_values->EAX_val = ROCKNROR::crInfo.configInfo.randomMapRelicsCount;
 	}
 }
 
 
 void RockNRorInstance::ManageRuinsCount(REG_BACKUP *REG_values) {
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		REG_values->EAX_val = 5;
 	} else {
-		REG_values->EAX_val = CUSTOMROR::crInfo.configInfo.randomMapRuinsCount;
+		REG_values->EAX_val = ROCKNROR::crInfo.configInfo.randomMapRuinsCount;
 	}
 }
 
@@ -1949,11 +1949,11 @@ void RockNRorInstance::ManageCivIdControlAfterGameSettingsSelection(REG_BACKUP *
 		return;
 	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		ChangeReturnAddress(REG_values, 0x00503451);
 	}
 
-	if ((REG_values->EAX_val < 0) || (REG_values->EAX_val > CUSTOMROR::crInfo.configInfo.civCount)) {
+	if ((REG_values->EAX_val < 0) || (REG_values->EAX_val > ROCKNROR::crInfo.configInfo.civCount)) {
 		// Bad civilization, jump to the code that randomly chooses one (normal behaviour with "random" option)
 		ChangeReturnAddress(REG_values, 0x00503423);
 	} else {
@@ -1966,7 +1966,7 @@ void RockNRorInstance::ManageCivIdControlAfterGameSettingsSelection(REG_BACKUP *
 // Manage first call to gameSettings.getDLLCivNameIdOffset(civId)
 // For custom civs, returns 0 so the call we be made again later.
 void RockNRorInstance::ManageGetPlayerNameDLLStringIdOffset(REG_BACKUP *REG_values) {
-	// TODO: not taking into account CUSTOMROR::crInfo.configInfo.doNotApplyFixes
+	// TODO: not taking into account ROCKNROR::crInfo.configInfo.doNotApplyFixes
 	long int civId = REG_values->EAX_val;
 	long int myECX = REG_values->ECX_val; // game settings addr
 	long int *stackPtr = (long int *)(REG_values->ESP_val);
@@ -2025,11 +2025,11 @@ void RockNRorInstance::ManageGetPlayerNameDLLStringIdOffset2(REG_BACKUP *REG_val
 	// Custom civ: we don't have names for them in language(x).dll
 
 	// Try to use player names provided in configuration file.
-	CivilizationInfo *c = CUSTOMROR::crInfo.configInfo.GetCivInfo(civId);
+	CivilizationInfo *c = ROCKNROR::crInfo.configInfo.GetCivInfo(civId);
 	if (c) {
 		if (playerId > 8) { playerId = 8; } // Would be nonsense but this will avoid writing out of nameIndexIsUsedByPlayer bounds
 		if (playerId < 0) { playerId = 0; } // Same thing
-		std::string s = c->ChooseRandomPlayerName(CUSTOMROR::crInfo.nameIndexIsUsedByPlayer[civId], playerId);
+		std::string s = c->ChooseRandomPlayerName(ROCKNROR::crInfo.nameIndexIsUsedByPlayer[civId], playerId);
 		if (!s.empty()) {
 			char **buffer = (char **)(myESP + 4); // arg2 that was pushed
 			long int *bufferSize = (long int *)(myESP + 8); // arg3 that was pushed
@@ -2065,7 +2065,7 @@ void RockNRorInstance::ManageAIFileSelectionForPlayer(REG_BACKUP *REG_values) {
 	char *buffer2 = stackPtr[2];
 
 	strcpy_s(buffer2, 22, "RandomGameSpecialized");
-	if (!CUSTOMROR::crCommand.ManageAIFileSelectionForPlayer(p->civilizationId, buffer1)) {
+	if (!ROCKNROR::crCommand.ManageAIFileSelectionForPlayer(p->civilizationId, buffer1)) {
 		ChangeReturnAddress(REG_values, 0x004F36F8); // continue "player.chooseAIFileName" function normally
 	}
 
@@ -2096,11 +2096,11 @@ void RockNRorInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	// Do we already have a global struct ? If Yes, check civ number in empires.dat (if not matching our config, it may crash)
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	if (globalStruct != NULL) {
-		if (globalStruct->civCount < CUSTOMROR::crInfo.configInfo.civCount) {
+		if (globalStruct->civCount < ROCKNROR::crInfo.configInfo.civCount) {
 			// This situation is quite bad. empires.dat contains less civs than XML config.
 			// We can only detect this when global struct already exists.
 			// On first time we run a game, settings are displayed BEFORE the global struct is created (and before empires.dat is loaded)
-			CUSTOMROR::crInfo.configInfo.civCount = globalStruct->civCount;
+			ROCKNROR::crInfo.configInfo.civCount = globalStruct->civCount;
 			const char *msg = localizationHandler.GetTranslation(CRLANG_ID_MISSING_CIVS_IN_EMPIRES_DAT, "ERROR: there are more civs in RockNRor_civs.xml than in empires.dat. This may cause game crashes !");
 			traceMessageHandler.WriteMessage(msg);
 			FILE *fileLog = NULL;
@@ -2115,8 +2115,8 @@ void RockNRorInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	}
 
 	// Manage custom civs
-	for (int civid = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civid <= CUSTOMROR::crInfo.configInfo.civCount; civid++) {
-		CivilizationInfo *civInfo = CUSTOMROR::crInfo.configInfo.GetCivInfo(civid);
+	for (int civid = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civid <= ROCKNROR::crInfo.configInfo.civCount; civid++) {
+		CivilizationInfo *civInfo = ROCKNROR::crInfo.configInfo.GetCivInfo(civid);
 		if (civInfo) {
 			AOE_METHODS::UI_BASE::AddEntryInCombo(ptrCombo, civid, civInfo->GetCivName().c_str());
 		} else {
@@ -2126,7 +2126,7 @@ void RockNRorInstance::ManageCivsInGameSettingsCombo(REG_BACKUP *REG_values) {
 	
 
 	// Add random entry
-	AOE_METHODS::UI_BASE::AddEntryInComboUsingDLLID(ptrCombo, CUSTOMROR::crInfo.configInfo.civCount + 1, 0x280A);
+	AOE_METHODS::UI_BASE::AddEntryInComboUsingDLLID(ptrCombo, ROCKNROR::crInfo.configInfo.civCount + 1, 0x280A);
 }
 
 
@@ -2154,8 +2154,8 @@ void RockNRorInstance::ManageCivsInEditorCombo(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 	// Manage custom civs
-	for (int civId = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civId <= CUSTOMROR::crInfo.configInfo.civCount; civId++) {
-		CivilizationInfo *civInfo = CUSTOMROR::crInfo.configInfo.GetCivInfo(civId);
+	for (int civId = CIVILIZATIONS::CST_CIVID_STANDARD_MAX + 1; civId <= ROCKNROR::crInfo.configInfo.civCount; civId++) {
+		CivilizationInfo *civInfo = ROCKNROR::crInfo.configInfo.GetCivInfo(civId);
 		if (civInfo) {
 			AOE_METHODS::UI_BASE::AddEntryInCombo(ptrCombo, 0, civInfo->GetCivName().c_str());
 		} else {
@@ -2173,9 +2173,9 @@ void RockNRorInstance::GetInGameCustomCivName(REG_BACKUP *REG_values) {
 	long int bufferSize = REG_values->EDI_val;
 	char *buffer = (char *)REG_values->ESI_val;
 
-	CivilizationInfo *civInfo = CUSTOMROR::crInfo.configInfo.GetCivInfo(civId);
-	if ((civId > CUSTOMROR::crInfo.configInfo.civCount) || (civId < 1) || (!civInfo)) {
-		// Unknown civ id (or not defined in customROR config). Use original (overwritten code)
+	CivilizationInfo *civInfo = ROCKNROR::crInfo.configInfo.GetCivInfo(civId);
+	if ((civId > ROCKNROR::crInfo.configInfo.civCount) || (civId < 1) || (!civInfo)) {
+		// Unknown civ id (or not defined in RockNRor config). Use original (overwritten code)
 		// Note: civ name is NOT displayed when controlling player 0 (gaia)
 		long int myEAX = REG_values->EAX_val;
 		long int gameSettings = REG_values->ECX_val;
@@ -2202,7 +2202,7 @@ void RockNRorInstance::CheckPlayerCreationAtGameStartup(REG_BACKUP *REG_values) 
 	unsigned long int myEBX = REG_values->EBX_val;
 	unsigned long int myEDX = REG_values->EDX_val;
 	unsigned char civId = *(unsigned char*)(myESI + myEBX + 0x251);
-	if (civId > CUSTOMROR::crInfo.configInfo.civCount) { civId = 1; } // Force value to avoid game crash
+	if (civId > ROCKNROR::crInfo.configInfo.civCount) { civId = 1; } // Force value to avoid game crash
 	myEDX = myEDX & 0xFFFFFF00; // Remove "DL" part (low byte)
 	myEDX = myEDX | civId; // Replace with civId
 	REG_values->EDX_val = myEDX;
@@ -2225,13 +2225,13 @@ void RockNRorInstance::PickRandomCivForPlayer(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 	
-	if (!CUSTOMROR::crInfo.configInfo.allowPickingCustomCivsInRandomInit || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.allowPickingCustomCivsInRandomInit || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
 	// Custom treatments
 	long int pseudoRandom = AOE_METHODS::GetAndReCalcPseudoRandomValue();
-	long int choice = pseudoRandom % CUSTOMROR::crInfo.configInfo.civCount; // civCount does not include "gaia" civ.
+	long int choice = pseudoRandom % ROCKNROR::crInfo.configInfo.civCount; // civCount does not include "gaia" civ.
 	choice++; // Because civ0 is "gaia" civ, we must ignore it. Now choice is in [1..n] interval.
 	REG_values->EAX_val = choice;
 	REG_values->ECX_val = (unsigned long int)GetGameSettingsPtr();
@@ -2298,7 +2298,7 @@ void RockNRorInstance::ManageAttackActivityChange1(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ECX_val;
 	long int *arg_targetUnitId = (long int*)(REG_values->ESP_val + 0x14); // Get arg1 (pointer, we may want to update it)
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -2330,7 +2330,7 @@ void RockNRorInstance::ManageAttackActivityChange_convert(REG_BACKUP *REG_values
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ECX_val;
 	long int *arg_targetUnitId = (long int*)(REG_values->ESP_val + 0x0C); // Get arg1 (pointer, we may want to update it)
 	
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -2380,9 +2380,9 @@ void RockNRorInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_values
 	// Custom treatments: compute "forceKeepCurrentActivity" variable in specific cases we want to improve.
 	// Warning: don't forget there is 2 possible contexts (tower in my town OR I was just attacked by enemyUnit)
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		if (contextIsTowerInMyTown) {
-			if (!CUSTOMROR::crCommand.ShouldAttackTower_towerPanic((STRUCT_UNIT_COMMANDABLE*)myUnit, enemyUnit)) {
+			if (!ROCKNROR::crCommand.ShouldAttackTower_towerPanic((STRUCT_UNIT_COMMANDABLE*)myUnit, enemyUnit)) {
 				forceKeepCurrentActivity = true;
 			}
 		}
@@ -2408,7 +2408,7 @@ void RockNRorInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_values
 
 
 /* Called from 004E39D1. Replace ROR's loop to attack the tower with villagers so we can use uour own criteria.
-This does not take into account CUSTOMROR::crInfo.configInfo.doNotApplyFixes
+This does not take into account ROCKNROR::crInfo.configInfo.doNotApplyFixes
 */
 void RockNRorInstance::ManageTowerPanicMode_villagers(REG_BACKUP *REG_values) {
 	// ROR code context variables
@@ -2434,7 +2434,7 @@ void RockNRorInstance::ManageTowerPanicMode_villagers(REG_BACKUP *REG_values) {
 	}
 
 	// Will handle loop on villager and task them to attack the tower (if conditions for that are met).
-	CUSTOMROR::crCommand.towerPanic_LoopOnVillagers(tacAI, enemyTower, pAssignedUnitsCount, pTCPositionInfo);
+	ROCKNROR::crCommand.towerPanic_LoopOnVillagers(tacAI, enemyTower, pAssignedUnitsCount, pTCPositionInfo);
 }
 
 
@@ -2448,7 +2448,7 @@ void RockNRorInstance::ManageBuildingStatus_canConvertUnit(REG_BACKUP *REG_value
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -2479,20 +2479,20 @@ void RockNRorInstance::ManageGameTimerSkips(REG_BACKUP *REG_values) {
 	REG_values->EDX_val = myEDX;
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
-	if (++CUSTOMROR::crInfo.gameTimerSlowDownCounter > CUSTOMROR::crInfo.configInfo.gameTimerSlowDownFactor) {
-		CUSTOMROR::crInfo.gameTimerSlowDownCounter = 0;
+	if (++ROCKNROR::crInfo.gameTimerSlowDownCounter > ROCKNROR::crInfo.configInfo.gameTimerSlowDownFactor) {
+		ROCKNROR::crInfo.gameTimerSlowDownCounter = 0;
 	}
 	else {
 		ChangeReturnAddress(REG_values, 0x51D940);
 	}
 
 	// TO DO: Not the best place to do that...
-	// Can we find a better place to dedicate customROR timer things ?
-	CUSTOMROR::crCommand.OnGameTimer();
+	// Can we find a better place to dedicate RockNRor timer things ?
+	ROCKNROR::crCommand.OnGameTimer();
 
 }
 
@@ -2511,23 +2511,23 @@ void RockNRorInstance::CollectTimerStats(REG_BACKUP *REG_values) {
 		g->currentGameTime = REG_values->EAX_val;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	
-	if (CUSTOMROR::crInfo.CollectedTimerIntervalsIndex >= CST_TIMER_STATS_ARRAY_SIZE) { CUSTOMROR::crInfo.CollectedTimerIntervalsIndex = 0; }
-	CUSTOMROR::crInfo.CollectedTimerIntervals_ms[CUSTOMROR::crInfo.CollectedTimerIntervalsIndex++] = interval_ms;
+	if (ROCKNROR::crInfo.CollectedTimerIntervalsIndex >= CST_TIMER_STATS_ARRAY_SIZE) { ROCKNROR::crInfo.CollectedTimerIntervalsIndex = 0; }
+	ROCKNROR::crInfo.CollectedTimerIntervals_ms[ROCKNROR::crInfo.CollectedTimerIntervalsIndex++] = interval_ms;
 
 	// Auto compute slow down factor if option is enabled and only once every CST_TIMER_STATS_ARRAY_SIZE
-	if (CUSTOMROR::crInfo.configInfo.gameTimerSlowDownAutoFix && (CUSTOMROR::crInfo.CollectedTimerIntervalsIndex == CST_TIMER_STATS_ARRAY_SIZE)) {
-		CUSTOMROR::crCommand.AutoFixGameTimer();
+	if (ROCKNROR::crInfo.configInfo.gameTimerSlowDownAutoFix && (ROCKNROR::crInfo.CollectedTimerIntervalsIndex == CST_TIMER_STATS_ARRAY_SIZE)) {
+		ROCKNROR::crCommand.AutoFixGameTimer();
 	}
 }
 
 
 
 // This overloads the original code that displays Option button in game menu.
-// Reads CUSTOMROR::crInfo.configInfo.showCustomRORMenu Parameter to display standard menu OR customized menu
+// Reads ROCKNROR::crInfo.configInfo.showRockNRorMenu Parameter to display standard menu OR customized menu
 void RockNRorInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 	long int myESI = REG_values->ESI_val;
 	long int myEDI = REG_values->EDI_val;
@@ -2540,27 +2540,27 @@ void RockNRorInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 		LEA EAX, DWORD PTR DS:[ESI+EDI*4+0x490];
 		MOV pOptionsBtn, EAX;
 	}
-	bool showCustomRORMenu = CUSTOMROR::crInfo.configInfo.showRockNRorMenu && !CUSTOMROR::crInfo.configInfo.doNotApplyFixes;
+	bool showRockNRorMenu = ROCKNROR::crInfo.configInfo.showRockNRorMenu && !ROCKNROR::crInfo.configInfo.doNotApplyFixes;
 
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		myEDI++;
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 
 		// Standard Options button
-		long int xSize = showCustomRORMenu ? 0xA0 : 0x168;
+		long int xSize = showRockNRorMenu ? 0xA0 : 0x168;
 		myEAX = AOE_METHODS::UI_BASE::AddButton((AOE_STRUCTURES::STRUCT_ANY_UI*) myESI, (AOE_STRUCTURES::STRUCT_UI_BUTTON**) pOptionsBtn,
 			LANG_ID_GAME_OPTIONS, 0x14, myEBP, xSize, 0x1E, 5, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	}
 	
 	// Limit to single player, causes crash on multi.
-	assert(CUSTOMROR::crInfo.customGameMenuOptionsBtnVar == NULL);
+	assert(ROCKNROR::crInfo.customGameMenuOptionsBtnVar == NULL);
 	long int dllIdToUse = LANG_ID_OPTIONS;
 	if (localizationHandler.StringExists(CRLANG_ID_ROCKNROR)) {
 		dllIdToUse = CRLANG_ID_ROCKNROR;
 	}
-	if (myEAX && showCustomRORMenu && !IsMultiplayer()) {
+	if (myEAX && showRockNRorMenu && !IsMultiplayer()) {
 		myEAX = AOE_METHODS::UI_BASE::AddButton((AOE_STRUCTURES::STRUCT_ANY_UI*)myESI,
-			(AOE_STRUCTURES::STRUCT_UI_BUTTON**)&CUSTOMROR::crInfo.customGameMenuOptionsBtnVar, 
+			(AOE_STRUCTURES::STRUCT_UI_BUTTON**)&ROCKNROR::crInfo.customGameMenuOptionsBtnVar, 
 			dllIdToUse, 0xD0, myEBP, 0xAC, 0x1E,
 			AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	}
@@ -2578,13 +2578,13 @@ void RockNRorInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	long int myESP = REG_values->ESP_val;
 	AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup = (AOE_STRUCTURES::STRUCT_ANY_UI *)REG_values->ESI_val;
 
-	if (CUSTOMROR::crInfo.configInfo.showRockNRorMenu && !CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.showRockNRorMenu && !ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Before returning, make sure we always "free" the "custom options" button (from game menu).
-		CUSTOMROR::customPopupSystem.FreeInGameCustomOptionsButton();
+		ROCKNROR::customPopupSystem.FreeInGameCustomOptionsButton();
 		// If it is another button than "custom options", we can free custom options button.
 		// Otherwise, custom popup will manage this (we already added the button in objects to free).
 		if (myEAX != AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS) {
-			CUSTOMROR::crInfo.ForceClearCustomMenuObjects();
+			ROCKNROR::crInfo.ForceClearCustomMenuObjects();
 		}
 	}
 
@@ -2594,11 +2594,11 @@ void RockNRorInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 
 	if (myEAX != AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS) { return; }
 
-	if (!CUSTOMROR::crInfo.configInfo.showRockNRorMenu) { return; } // In theory this should be useless because we shouldn't come here if it is disabled
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (!ROCKNROR::crInfo.configInfo.showRockNRorMenu) { return; } // In theory this should be useless because we shouldn't come here if it is disabled
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
 	// Now manage the case when the clicked button is our custom button...
-	InGameRockNRorOptionsPopup::CreateGameCustomRorOptionsPopup(previousPopup);
+	InGameRockNRorOptionsPopup::CreateGameRockNRorOptionsPopup(previousPopup);
 	ChangeReturnAddress(REG_values, 0x004342A7);
 }
 
@@ -2622,7 +2622,7 @@ void RockNRorInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 		return; // sender=cancel button (from original options menu), return normally and continue (original JNZ would not jump)
 	}
 	
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Force set focus to parent (popup) to validate currently typed text, if any. No effect in normal options menu.
 		AOE_METHODS::UI_BASE::SetFocus(parentAsGameOptions, NULL);
 	}
@@ -2637,27 +2637,27 @@ void RockNRorInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 	char *typedText = "";
 	
 	InGameRockNRorOptionsPopup *crOptionsPopup = NULL;
-	bool isCustomROROptionsPopupOpen = false;
-	if (CUSTOMROR::customPopupSystem.currentCustomPopup != NULL) {
-		if (dynamic_cast<InGameRockNRorOptionsPopup*>(CUSTOMROR::customPopupSystem.currentCustomPopup) != NULL) {
-			crOptionsPopup = (InGameRockNRorOptionsPopup*)CUSTOMROR::customPopupSystem.currentCustomPopup;
-			isCustomROROptionsPopupOpen = true;
+	bool isRockNRorOptionsPopupOpen = false;
+	if (ROCKNROR::customPopupSystem.currentCustomPopup != NULL) {
+		if (dynamic_cast<InGameRockNRorOptionsPopup*>(ROCKNROR::customPopupSystem.currentCustomPopup) != NULL) {
+			crOptionsPopup = (InGameRockNRorOptionsPopup*)ROCKNROR::customPopupSystem.currentCustomPopup;
+			isRockNRorOptionsPopupOpen = true;
 		} else {
 			traceMessageHandler.WriteMessage("Internal ERROR: bad popup object type");
 			return;
 		}
 	}
-	if (!crOptionsPopup || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!crOptionsPopup || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		ChangeReturnAddress(REG_values, 0x0043134A); // continue "original" method (compares sender to other "standard" buttons)
 		return;
 	}
 	
-	if ((arg2 == 0) && (CUSTOMROR::crInfo.configInfo.showRockNRorMenu) &&
+	if ((arg2 == 0) && (ROCKNROR::crInfo.configInfo.showRockNRorMenu) &&
 		(senderAddr == (unsigned long int) crOptionsPopup->customOptionFreeTextVar) && (crOptionsPopup->customOptionFreeTextVar != NULL)) {
 		typedText = crOptionsPopup->customOptionFreeTextVar->pTypedText;
 		char *answer;
 		unsigned long int h = crOptionsPopup->customOptionFreeTextAnswerVar->hWnd;
-		/*bool result =*/ CUSTOMROR::crCommand.ExecuteCommand(typedText, &answer);
+		/*bool result =*/ ROCKNROR::crCommand.ExecuteCommand(typedText, &answer);
 		SendMessageA((HWND)h, WM_SETTEXT, 0, (LPARAM)answer);
 		SendMessageA((HWND)h, EM_SETREADONLY, 1, 0);
 		//SendMessageA((HWND)h, WM_SETFOCUS, 0, 0);
@@ -2665,15 +2665,15 @@ void RockNRorInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 		// No need to free answer, because it points to an internal buffer[...] and is re-used each time.
 	}
 
-	// Return if the event is NOT a click on CustomROR in-game custom options OK button.
+	// Return if the event is NOT a click on RockNRor in-game custom options OK button.
 	// In that case, continue "original" method (compares sender to other "standard" buttons)
 	if ((!crOptionsPopup->customOptionButtonVar) || (senderAddr != (unsigned long int)crOptionsPopup->customOptionButtonVar) ||
-		!CUSTOMROR::crInfo.configInfo.showRockNRorMenu || (!isCustomROROptionsPopupOpen)) {
+		!ROCKNROR::crInfo.configInfo.showRockNRorMenu || (!isRockNRorOptionsPopupOpen)) {
 		ChangeReturnAddress(REG_values, 0x0043134A);
 		return;
 	}
-	// Here: CUSTOMROR::crInfo.configInfo.showCustomRORMenu is ON (previous if "returned" if not)
-	// Note that we are sure that current popup is customROR custom game options, and the event is a click on OK.
+	// Here: ROCKNROR::crInfo.configInfo.showRockNRorMenu is ON (previous if "returned" if not)
+	// Note that we are sure that current popup is RockNRor custom game options, and the event is a click on OK.
 
 	// Here: our custom options button has been clicked.
 	if (myEDI != 1) { // EDI is 1 when we did a "full" click (press+release) on the button
@@ -2699,9 +2699,9 @@ void RockNRorInstance::AfterScenarioEditorCreation(REG_BACKUP *REG_values) {
 		REG_values->ECX_val = *(long int*)(REG_values->ESP_val + 0x1CC);
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 	// Custom actions
-	CUSTOMROR::crCommand.CustomScenarioEditorUICreation(scEditor);
+	ROCKNROR::crCommand.CustomScenarioEditorUICreation(scEditor);
 }
 
 
@@ -2718,9 +2718,9 @@ void RockNRorInstance::ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_value
 	}
 	
 	// Custom treatments
-	if (!CUSTOMROR::crInfo.configInfo.showHiddenTerrainsInEditor || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (!ROCKNROR::crInfo.configInfo.showHiddenTerrainsInEditor || ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 	long int customTerrainIdToUse = -1;
-	customTerrainIdToUse = CUSTOMROR::crCommand.GetTerrainIdForSelectedTerrainIndex(scEditor, selectedIndex);
+	customTerrainIdToUse = ROCKNROR::crCommand.GetTerrainIdForSelectedTerrainIndex(scEditor, selectedIndex);
 
 	if (customTerrainIdToUse > -1) {
 		// Force terrainId to use / skip hardcoded switch from ROR original code
@@ -2790,12 +2790,12 @@ void RockNRorInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, settings->IsCheckSumValid());
 	AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentStatus = settings->currentUIStatus;
 	
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
 	// Now do custom code
-	CUSTOMROR::crCommand.OnLivingUnitCreation(currentStatus, unit, actionStruct);
+	ROCKNROR::crCommand.OnLivingUnitCreation(currentStatus, unit, actionStruct);
 }
 
 
@@ -2817,12 +2817,12 @@ void RockNRorInstance::OnGameSettingsNotifyEvent(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
 	// Custom code
-	CUSTOMROR::crCommand.EntryPoint_GameSettingsNotifyEvent(eventId, (short int)playerId, arg3, arg4, arg5);
+	ROCKNROR::crCommand.EntryPoint_GameSettingsNotifyEvent(eventId, (short int)playerId, arg3, arg4, arg5);
 }
 
 
@@ -2835,9 +2835,9 @@ void RockNRorInstance::OnGameInitDisableResearchesEvent(REG_BACKUP *REG_values) 
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Custom treatments
-		CUSTOMROR::TRIGGER::OnGameInitDisableResearchesEvent(playerResearchInfo);
+		ROCKNROR::TRIGGER::OnGameInitDisableResearchesEvent(playerResearchInfo);
 	}
 
 	// Do not modify below. Make sure this is always executed (do not RETURN before)
@@ -2879,9 +2879,9 @@ void RockNRorInstance::OnGameInitAfterSetInitialAge(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, currentPlayerId >= 0);
 	ror_api_assert(REG_values, currentPlayerId < playerTotalCount);
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 	// Custom treatments
-	CUSTOMROR::crCommand.OnGameInitAfterApplyingTechTrees(currentPlayerId);
+	ROCKNROR::crCommand.OnGameInitAfterApplyingTechTrees(currentPlayerId);
 }
 
 
@@ -2894,13 +2894,13 @@ void RockNRorInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
 	long int keyChar = *((unsigned long int*)(REG_values->ESP_val + 0x04)); // arg1
 	// In custom popups, RETURN in a textbox loses focus (so it is taken into account)
-	if ((CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) && (keyChar == VK_RETURN) && (textbox->IsCheckSumValid()) &&
+	if ((ROCKNROR::crInfo.HasOpenedCustomGamePopup()) && (keyChar == VK_RETURN) && (textbox->IsCheckSumValid()) &&
 		(textbox->inputType != 7)) {
 		AOE_METHODS::UI_BASE::SetFocus(textbox->ptrParentObject, NULL);
 	}
@@ -2915,7 +2915,7 @@ void RockNRorInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, unit != NULL);
 	REG_values->fixesForGameEXECompatibilityAreDone = true; // there is nothing to do for compatibility (CALL ROR_API is added instead of NOPs)
 	
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -2956,8 +2956,8 @@ void RockNRorInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 // We must return (do nothing) for those calls.
 void RockNRorInstance::RORDebugLogHandler(REG_BACKUP *REG_values) {
 	// If disabled in config, exit and do nothing (default - corresponds to standard behaviour)
-	if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs <= 0) { return; }
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (ROCKNROR::crInfo.configInfo.collectRORDebugLogs <= 0) { return; }
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
 #ifndef GAMEVERSION_ROR10c
 	return;
@@ -2991,7 +2991,7 @@ void RockNRorInstance::RORDebugLogHandler(REG_BACKUP *REG_values) {
 		return;
 	}
 
-	CUSTOMROR::crCommand.HandleRORDebugLogCall(textStackAddress);
+	ROCKNROR::crCommand.HandleRORDebugLogCall(textStackAddress);
 }
 
 
@@ -3002,10 +3002,10 @@ void RockNRorInstance::CollectAOEDebugLogsInGame(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->EAX_val = *(long int*)(0x554740); // For MOV EAX,DWORD PTR DS:[554740]
 	}
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
-	if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs < 2) {
+	if (ROCKNROR::crInfo.configInfo.collectRORDebugLogs < 2) {
 		return;
 	}
 	//AOE_STRUCTURES::STRUCT_AI *ai = *(AOE_STRUCTURES::STRUCT_AI **)(REG_values->ESP_val + 4);
@@ -3013,7 +3013,7 @@ void RockNRorInstance::CollectAOEDebugLogsInGame(REG_BACKUP *REG_values) {
 	char *message = *(char**)(REG_values->ESP_val + 8); // Method's arg2
 
 	unsigned long int textStackAddress = REG_values->ESP_val + 8;
-	CUSTOMROR::crCommand.HandleRORDebugLogCall(textStackAddress);
+	ROCKNROR::crCommand.HandleRORDebugLogCall(textStackAddress);
 }
 
 
@@ -3072,8 +3072,8 @@ void RockNRorInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_values
 	// For second call, there are lots of failure due to start position <> unit position.
 	// Use a trick to prevent that.
 	if (secondCall && actorAsType50) {
-		// Note: this takes into account CUSTOMROR::crInfo.configInfo.doNotApplyFixes
-		REG_values->EAX_val = CUSTOMROR::crCommand.GathererCheckPathFinding(actorAsType50, pathFindingArgs);
+		// Note: this takes into account ROCKNROR::crInfo.configInfo.doNotApplyFixes
+		REG_values->EAX_val = ROCKNROR::crCommand.GathererCheckPathFinding(actorAsType50, pathFindingArgs);
 	}
 }
 
@@ -3081,7 +3081,7 @@ void RockNRorInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_values
 // From 004A78C0 : in display unit method, where shortcut numbers are managed.
 // - JUMP to 4A792C (default) = do NOT show shortcut (managed in ROR modified code = no need to change return address)
 // - JUMP to 4A78DB = show standard shortcut(only for 1 - 9; will crash otherwise)
-// To show custom shortcut, do the CALL 516390 in customROR then JUMP to 4A792C.
+// To show custom shortcut, do the CALL 516390 in RockNRor then JUMP to 4A792C.
 void RockNRorInstance::ShowUnitShortcutNumbers(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EBP_val;
 
@@ -3096,8 +3096,8 @@ void RockNRorInstance::ShowUnitShortcutNumbers(REG_BACKUP *REG_values) {
 	long int stack1C = GetIntValueFromRORStack(REG_values, 0x1C);
 	stack1C = stack1C & 0xFFFF; // It is a word (MOVSX)
 	long int stack10 = GetIntValueFromRORStack(REG_values, 0x10);
-	// This call takes into account CUSTOMROR::crInfo.configInfo.doNotApplyFixes flag.
-	if (CUSTOMROR::crCommand.DisplayCustomUnitShortcutSymbol(unitBase, stack1C, stack20, stack10)) {
+	// This call takes into account ROCKNROR::crInfo.configInfo.doNotApplyFixes flag.
+	if (ROCKNROR::crCommand.DisplayCustomUnitShortcutSymbol(unitBase, stack1C, stack20, stack10)) {
 		ChangeReturnAddress(REG_values, RA_showStandardShortcut); // standard behaviour if call returned true
 	}
 }
@@ -3130,7 +3130,7 @@ void RockNRorInstance::InitPlayersCivInScenarioEditor(REG_BACKUP *REG_values) {
 	char *myESP = (char*)REG_values->ESP_val;
 
 	char civIdList[8] = { 1, 2, 3, 4, 5, 6, 7, 8 }; // Default values, for default behavior
-	bool useFix = !CUSTOMROR::crInfo.configInfo.doNotApplyFixes; // *true* unless the "no fix" flag is set
+	bool useFix = !ROCKNROR::crInfo.configInfo.doNotApplyFixes; // *true* unless the "no fix" flag is set
 
 	// Custom part : overload default civilization IDs (1-8) with scenario's ones when loading an existing scenario...
 	if (useFix && filename && (*filename != 0)) {
@@ -3193,7 +3193,7 @@ void RockNRorInstance::InitPlayersCivInScenarioEditor(REG_BACKUP *REG_values) {
 
 // From 0x4978AF. The ROR-added code to support roman tileset in icons in editor does not work at all. Fix it.
 void RockNRorInstance::FixUnsupportedRomanTileSetInEditorIcons(REG_BACKUP *REG_values) {
-	bool useStandardBehavior = CUSTOMROR::crInfo.configInfo.doNotApplyFixes; // *false* unless the "no fix" flag is set.
+	bool useStandardBehavior = ROCKNROR::crInfo.configInfo.doNotApplyFixes; // *false* unless the "no fix" flag is set.
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	if (useStandardBehavior) {
 		REG_values->EDI_val = 1; // This is exactly what original code does.
@@ -3241,7 +3241,7 @@ void RockNRorInstance::OnGameMainUiInitTilesetRelatedGraphics(REG_BACKUP *REG_va
 	}
 	bool useCustomTreatments = TILESET::allTilesetsInfo.usesCustomCivs; // Use standard code when no tileset customization is configured
 
-	if (!useCustomTreatments || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!useCustomTreatments || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	TILESET::tilesetHandler.InitGameMainUITilesetDependentGraphics(gameMainUI, tileset);
@@ -3270,7 +3270,7 @@ void RockNRorInstance::OnDisplayBuildingIconInUnitInfoZone(REG_BACKUP *REG_value
 	}
 	bool useCustomTreatments = TILESET::allTilesetsInfo.usesCustomCivs; // Use standard code when no tileset customization is configured
 
-	if (!useCustomTreatments || !TILESET::allTilesetsInfo.IsCustomized(unitTileSet) || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!useCustomTreatments || !TILESET::allTilesetsInfo.IsCustomized(unitTileSet) || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return; // Do not change return address. We're finished here (EDX has been set correctly).
 	}
 	// We have a custom tileset
@@ -3312,7 +3312,7 @@ void RockNRorInstance::OnEditorSetBuildingIconInUnitInfoZone(REG_BACKUP *REG_val
 	}
 	bool useCustomTreatments = TILESET::allTilesetsInfo.usesCustomCivs; // Use standard code when no tileset customization is configured
 
-	if (!useCustomTreatments || !TILESET::allTilesetsInfo.IsCustomized(currentTileset) || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!useCustomTreatments || !TILESET::allTilesetsInfo.IsCustomized(currentTileset) || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return; // Standard case: correctly handled by ROR code
 	}
 	
@@ -3337,7 +3337,7 @@ void RockNRorInstance::DisplayCommandBarGetSlpInfoForBuilding(REG_BACKUP *REG_va
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 
 	bool useStandardCode = !TILESET::allTilesetsInfo.usesCustomCivs ||
-		CUSTOMROR::crInfo.configInfo.doNotApplyFixes ||
+		ROCKNROR::crInfo.configInfo.doNotApplyFixes ||
 		(!TILESET::allTilesetsInfo.IsCustomized(tilesetId_fixed) && (tilesetId_fixed < 5));
 
 	if (useStandardCode) {
@@ -3363,7 +3363,7 @@ void RockNRorInstance::DisplayCommandBarGetSlpInfoForBuilding(REG_BACKUP *REG_va
 }
 
 
-// From 0x4FAA30. TODO: use CUSTOMROR::crInfo.configInfo.doNotApplyFixes ?
+// From 0x4FAA30. TODO: use ROCKNROR::crInfo.configInfo.doNotApplyFixes ?
 void RockNRorInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *f11panel = (AOE_STRUCTURES::STRUCT_UI_F11_POP_LABEL *)REG_values->ESI_val;
 	ror_api_assert(REG_values, f11panel && f11panel->IsCheckSumValid());
@@ -3373,7 +3373,7 @@ void RockNRorInstance::WriteF11PopInfoText(REG_BACKUP *REG_values) {
 	char *localizedText = (char *)GetIntValueFromRORStack(REG_values, 8);
 	long int currentPop = GetIntValueFromRORStack(REG_values, 0xC); // arg4
 	long int houseMaxPop = GetIntValueFromRORStack(REG_values, 0x10); // arg5
-	CUSTOMROR::crCommand.WriteF11PopInfoText(f11panel, bufferToWrite, format, localizedText, currentPop, houseMaxPop);
+	ROCKNROR::crCommand.WriteF11PopInfoText(f11panel, bufferToWrite, format, localizedText, currentPop, houseMaxPop);
 }
 
 // From 0x4C41B3 (in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID))
@@ -3394,13 +3394,13 @@ void RockNRorInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_val
 	REG_values->ECX_val = (unsigned long int) infAI->ptrMainAI; // Required for call 0x40BAB0
 	REG_values->EAX_val = currentUnitId; // modified ROR code PUSHes EAX, not ECX.
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
-	if ((currentUnitId >= 0) && CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
+	if ((currentUnitId >= 0) && ROCKNROR::IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
 		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *unitListElemBase = infAI->unitElemList;
 		if (!unitListElemBase || (loopIndex >= infAI->unitElemListSize)) { return; }
 		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem = &unitListElemBase[loopIndex];
-		CUSTOMROR::crCommand.OnFindEnemyUnitIdWithinRangeLoop(infAI, currentUnitListElem);
+		ROCKNROR::crCommand.OnFindEnemyUnitIdWithinRangeLoop(infAI, currentUnitListElem);
 	}
 }
 
@@ -3415,7 +3415,7 @@ void RockNRorInstance::FixUnitIdBugStuckAttackNoTarget(REG_BACKUP *REG_values) {
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	REG_values->EAX_val = activity->targetUnitId;
 	REG_values->ECX_val = REG_values->ESI_val;
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; } // not recommended !
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; } // not recommended !
 	if (activity->targetUnitId == -1) {
 		REG_values->EAX_val = NULL; // simulates that the GetUnitPtr(...) did not found a valid unit
 		ChangeReturnAddress(REG_values, 0x414991);
@@ -3457,7 +3457,7 @@ void RockNRorInstance::FixActivityTargetUnitIdBug_retreatAfterShooting(REG_BACKU
 		return; // No target = no need to continue with custom treatments
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	// Custom treatments
@@ -3481,7 +3481,7 @@ void RockNRorInstance::FixActivityTargetUnitIdBug_case1F4(REG_BACKUP *REG_values
 	ror_api_assert(REG_values, *pUnitId == unitIdFromStack);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *paramUnit = NULL;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *activityTargetUnit = NULL;
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { // Not recommended NOT to apply fix here !
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) { // Not recommended NOT to apply fix here !
 		if (unitIdFromStack != -1) {
 			// FIXED First "get unit struct" (0x4E4796)
 			paramUnit = GetUnitStruct(unitIdFromStack);
@@ -3505,7 +3505,7 @@ void RockNRorInstance::FixKillXCrashOnUnknownPlayer(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = (AOE_STRUCTURES::STRUCT_GAME_GLOBAL *)REG_values->ESI_val;
 	ror_api_assert(REG_values, global && global->IsCheckSumValid());
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { // not recommended NOT to do this fix !!
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) { // not recommended NOT to do this fix !!
 		if ((playerIdToKill < 1) || (playerIdToKill >= global->playerTotalCount)) {
 			// Invalid player : needs a fix
 			ChangeReturnAddress(REG_values, 0x50CB76);
@@ -3532,11 +3532,11 @@ void RockNRorInstance::EntryPointOnAfterShowUnitCommandButtons(REG_BACKUP *REG_v
 			CALL addr;
 		}
 	}
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	// Custom treatments:
-	CUSTOMROR::crCommand.AfterShowUnitCommandButtons(gameMainUI);
+	ROCKNROR::crCommand.AfterShowUnitCommandButtons(gameMainUI);
 }
 
 
@@ -3557,9 +3557,9 @@ void RockNRorInstance::EntryPointOnGameCommandButtonClick(REG_BACKUP *REG_values
 	long int arg3 = GetIntValueFromRORStack(REG_values, 0x0C);
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID eventCommandId = (AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID)arg1;
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Do custom treatments here
-		forceIgnoreThisEvent = CUSTOMROR::crCommand.OnGameCommandButtonClick(gameMainUI, eventCommandId, arg2);
+		forceIgnoreThisEvent = ROCKNROR::crCommand.OnGameCommandButtonClick(gameMainUI, eventCommandId, arg2);
 	}
 
 	// Do not modify below.
@@ -3632,7 +3632,7 @@ void RockNRorInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 
 	// Return here if we don't want custom rules. We will get standard behaviour.
 	// Standard behaviour is: ignore buildings with HP=1 for catapults, ignore walls unless arg1==1 and current target IS a wall too.
-	if (!CUSTOMROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -3670,12 +3670,12 @@ void RockNRorInstance::EntryPointOnBuildingAttackInfoDisplay(REG_BACKUP *REG_val
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->ESI_val++;
 	}
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	// Custom code
 	// This updates REG_values->ESI_val if necessary.
-	CUSTOMROR::crCommand.DisplayCustomBuildingAttackAttributesInUnitInfo(unitInfoZone, REG_values->ESI_val);
+	ROCKNROR::crCommand.DisplayCustomBuildingAttackAttributesInUnitInfo(unitInfoZone, REG_values->ESI_val);
 }
 
 
@@ -3707,7 +3707,7 @@ void RockNRorInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 #endif
 	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	bool useCustomLocalization = !CUSTOMROR::crInfo.configInfo.doNotApplyFixes; // *true* unless "no fix" option is set
+	bool useCustomLocalization = !ROCKNROR::crInfo.configInfo.doNotApplyFixes; // *true* unless "no fix" option is set
 	if (useCustomLocalization) {
 #ifdef GAMEVERSION_AOE10b // different code in this version
 		long int stringDllId = REG_values->EAX_val;
@@ -3719,7 +3719,7 @@ void RockNRorInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 		long int bufferSize = GetIntValueFromRORStack(REG_values, 0x0C);
 #endif
 		buffer[bufferSize - 1] = 0; // Just in case.
-		bool successfullyFoundString = CUSTOMROR::GetLocalizedString(stringDllId, buffer, bufferSize);
+		bool successfullyFoundString = ROCKNROR::GetLocalizedString(stringDllId, buffer, bufferSize);
 		if (successfullyFoundString) {
 			ChangeReturnAddress(REG_values, returnAddress); // (RETN 0x0C instruction) Prevent ROR from searching in language(x).dll
 		}
@@ -3730,8 +3730,8 @@ void RockNRorInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 // From 0x4ADB91. Normal code tests if number of queue items is > 0. If so, current queue is cancelled before adding a new item in queue.
 void RockNRorInstance::AllowMultiUnitTypeInQueue(REG_BACKUP *REG_values) {
 	short int elemCount = (REG_values->EAX_val & 0xFFFF); // AX / it is a word
-	bool forceKeepCurrentQueue = CUSTOMROR::crInfo.configInfo.allowMultiQueueing; // Game default = false
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	bool forceKeepCurrentQueue = ROCKNROR::crInfo.configInfo.allowMultiQueueing; // Game default = false
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		forceKeepCurrentQueue = false;
 	}
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
@@ -3767,9 +3767,9 @@ void RockNRorInstance::EntryPointOnAttackableUnitKilled(REG_BACKUP *REG_values) 
 	ror_api_assert(REG_values, !actorPlayer || actorPlayer->IsCheckSumValid()); // if provided, actor must be valid
 	ror_api_assert(REG_values, !actorUnit || actorUnit->IsCheckSumValidForAUnitClass()); // if provided, actor must be valid
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 	// Custom treatments
-	CUSTOMROR::UNIT::OnAttackableUnitKilled(targetUnit, actorUnit);
+	ROCKNROR::UNIT::OnAttackableUnitKilled(targetUnit, actorUnit);
 }
 
 
@@ -3796,12 +3796,12 @@ void RockNRorInstance::EntryPointOnHoverOnUnit(REG_BACKUP *REG_values) {
 		}
 	}
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	// Custom treatments
 	GAME_CURSOR forcedCursor = (GAME_CURSOR)-1;
-	if (CUSTOMROR::crCommand.OnHoverOnUnit(unit, controlledPlayer, unitPlayerId, foundInteraction, foundHintDllId, forcedCursor)) {
+	if (ROCKNROR::crCommand.OnHoverOnUnit(unit, controlledPlayer, unitPlayerId, foundInteraction, foundHintDllId, forcedCursor)) {
 		REG_values->ESI_val = foundHintDllId;
 		REG_values->EAX_val = foundInteraction;
 	}
@@ -3843,9 +3843,9 @@ void RockNRorInstance::EntryPointAfterActivityStop(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->EAX_val = 1;
 	}
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 	// Custom treatments
-	CUSTOMROR::crCommand.OnUnitActivityStop(unitActivity);
+	ROCKNROR::crCommand.OnUnitActivityStop(unitActivity);
 }
 
 
@@ -3872,7 +3872,7 @@ void RockNRorInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values)
 	long int mostDislikedPlayerId = -1; // Modify it to impact returned value and set target playerId
 
 	// Custom treatments
-	if (CUSTOMROR::IsImproveAIEnabled(player->playerId) && !CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::IsImproveAIEnabled(player->playerId) && !ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Override the calculation of target player Id (most disliked)
 		mostDislikedPlayerId = CUSTOM_AI::playerTargetingHandler.GetMostDislikedPlayer(player, diplAI, askTributeAmount, askTributePlayerId,
 			(attackWinningPlayerFlag != 0), attackWinningPlayerFactor);
@@ -3908,7 +3908,7 @@ void RockNRorInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_values
 		REG_values->EAX_val = unitGroup->commanderUnitId; // same as replaced instruction 0x4BFFC7
 	}
 	bool noCustomTreatment = false; // for debugging
-	if (noCustomTreatment || !CUSTOMROR::IsImproveAIEnabled(infAI->commonAIObject.playerId) || CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (noCustomTreatment || !ROCKNROR::IsImproveAIEnabled(infAI->commonAIObject.playerId) || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 
@@ -3921,7 +3921,7 @@ void RockNRorInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_values
 	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *resultInfAIUnitElem = NULL;
 
 	resultInfAIUnitElem = CUSTOM_AI::unitTargetingHandler.TestFindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
-	//resultInfAIUnitElem = CUSTOMROR::FindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
+	//resultInfAIUnitElem = ROCKNROR::FindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
 
 	REG_values->EAX_val = (unsigned long int)resultInfAIUnitElem;
 }
@@ -3945,7 +3945,7 @@ void RockNRorInstance::EntryPointTacAIHandleActiveGroupsBeforeLoop(REG_BACKUP *R
 
 	long int playerId = tacAI->commonAIObject.playerId;
 	assert(playerId >= 0);
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		forceExitProcedure = !CUSTOM_AI::customAIHandler.GetCustomPlayerAI(playerId)->unitGroupAI.OnTaskActiveGroupsBegin(tacAI, processStartTimeGetTimeValue, allowedTime);
 	}
 
@@ -3990,7 +3990,7 @@ void RockNRorInstance::EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values)
 	bool skipStandardTreatments = false; // Default
 	// Custom treatments
 	long int playerId = tacAI->commonAIObject.playerId;
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes && CUSTOMROR::IsImproveAIEnabled(playerId) && CUSTOM_AI::customAIHandler.IsAliveAI(playerId)) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes && ROCKNROR::IsImproveAIEnabled(playerId) && CUSTOM_AI::customAIHandler.IsAliveAI(playerId)) {
 		skipStandardTreatments = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(playerId)->unitGroupAI.TaskActiveUnitGroup(tacAI, unitGroup);
 	}
 
@@ -4017,7 +4017,7 @@ void RockNRorInstance::EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_values
 	if (!unit || !unit->IsCheckSumValidForAUnitClass()) {
 		return;
 	}
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// The method does not check for existing pointer (and does not free it if necessary). Do it now.
 		// Remark: this is not a bug in standard game as this situation never occurs. However, this is a necessary precaution if we want to add custom unitActivity structures.
 		if (unit->currentActivity) {
@@ -4025,7 +4025,7 @@ void RockNRorInstance::EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_values
 			unit->currentActivity = NULL;
 		}
 
-		skipRORTreatments = !CUSTOMROR::UNIT::OnUnitCreateActivityStruct(unit);
+		skipRORTreatments = !ROCKNROR::UNIT::OnUnitCreateActivityStruct(unit);
 	}
 
 	if (skipRORTreatments || (unit->currentActivity != NULL)) {
@@ -4047,8 +4047,8 @@ void RockNRorInstance::OverrideShowF5DebugInfo(REG_BACKUP *REG_values) {
 	bool disableStandardDebugDisplay = false; // Game default
 
 	// Custom code
-	if (settings->ptrGameUIStruct && !CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
-		disableStandardDebugDisplay = CUSTOMROR::crCommand.HandleShowDebugGameInfo(settings);
+	if (settings->ptrGameUIStruct && !ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		disableStandardDebugDisplay = ROCKNROR::crCommand.HandleShowDebugGameInfo(settings);
 	}
 
 	// Do not modify below.
@@ -4069,7 +4069,7 @@ void RockNRorInstance::UnitDefProvidesRenewableResource(REG_BACKUP *REG_values) 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *actorUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ECX_val;
 	ror_api_assert(REG_values, actorUnit && actorUnit->IsCheckSumValidForAUnitClass());
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		resultCanTradeWith = AOE_STRUCTURES::CanGetRenewableResourceFrom(actorUnit, targetUnitDefId);
 	}
 
@@ -4100,8 +4100,8 @@ void RockNRorInstance::EntryPointDisplayBuildingInfoResource(REG_BACKUP *REG_val
 	bool isMine = (unitPlayer == unitInfoZone->controlledPlayer);
 	bool inProgressInfoAlreadyDisplayed = (currentAction == CST_IAI_MAKE_OBJECT) || (currentAction == CST_IAI_MAKE_TECH);
 
-	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
-	if (!CUSTOMROR::crInfo.configInfo.useImprovedButtonBar && inProgressInfoAlreadyDisplayed) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
+	if (!ROCKNROR::crInfo.configInfo.useImprovedButtonBar && inProgressInfoAlreadyDisplayed) {
 		// If buttonbar improvement is OFF, do not show both progress and trade goods (original behaviour, for dock)
 		return;
 	}
@@ -4168,7 +4168,7 @@ void RockNRorInstance::EntryPointRefreshTradeGoodsInUnitInfoZone(REG_BACKUP *REG
 		refreshNeeded = (unitDef && unitDef->DAT_ID1 == CST_UNITID_DOCK); // Game default
 	}
 
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Custom code
 		if (AOE_STRUCTURES::UnitDefOffersTrading(unitDef)) {
 			refreshNeeded = true;
@@ -4188,8 +4188,8 @@ void RockNRorInstance::EntryPointInfAISearchTradeTargetElem(REG_BACKUP *REG_valu
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ECX_val;
 	long int actorUnitId = GetIntValueFromRORStack(REG_values, 4);
 
-	// This call takes into account CUSTOMROR::crInfo.configInfo.doNotApplyFixes
-	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *foundTradeTargetElem = CUSTOMROR::UNIT::FindTradeTargetElem(infAI, actorUnitId);
+	// This call takes into account ROCKNROR::crInfo.configInfo.doNotApplyFixes
+	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *foundTradeTargetElem = ROCKNROR::UNIT::FindTradeTargetElem(infAI, actorUnitId);
 
 	// Do not modify below
 	REG_values->EAX_val = (unsigned long int)foundTradeTargetElem;
@@ -4209,7 +4209,7 @@ void RockNRorInstance::AddRelevantResourceValueWhenTrading(REG_BACKUP *REG_value
 	long int outResourceId = CST_RES_ORDER_GOLD; // Game default (hardcoded).
 
 	// Custom code
-	if (!CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *actor = actionTrade->actor;
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *tradeTarget = actionTrade->targetUnit;
 		long int tmp = AOE_STRUCTURES::GetTradeOutResourceId(actor, tradeTarget);

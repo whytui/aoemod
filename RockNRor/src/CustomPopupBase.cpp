@@ -19,7 +19,7 @@ void CustomPopupBase::ResetPointers() {
 // Use it to list all UI objects (labels, buttons...) that are created(added) to popup content,
 // so they are automatically freed when popup is closed (using AOE destructor).
 void CustomPopupBase::AddObjectInContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj) {
-	CUSTOMROR::crInfo.AddObjectInPopupContentList(obj);
+	ROCKNROR::crInfo.AddObjectInPopupContentList(obj);
 }
 
 
@@ -102,10 +102,10 @@ bool CustomPopupBase::AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 AOE_STRUCTURES::STRUCT_ANY_UI *CustomPopupBase::OpenPopup(long int hSize, long int vSize, bool withCancelBtn, long int themeSlpId) {
 	this->hSize = hSize;
 	this->vSize = vSize;
-	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) {
+	if (ROCKNROR::crInfo.HasOpenedCustomGamePopup()) {
 		return NULL;
 	}
-	this->popup = CUSTOMROR::crInfo.OpenCustomGamePopup(hSize, vSize, withCancelBtn, themeSlpId);
+	this->popup = ROCKNROR::crInfo.OpenCustomGamePopup(hSize, vSize, withCancelBtn, themeSlpId);
 	if (this->popup != NULL) {
 		this->AddPopupContent();
 	}
@@ -117,7 +117,7 @@ AOE_STRUCTURES::STRUCT_ANY_UI *CustomPopupBase::OpenPopup(long int hSize, long i
 void CustomPopupBase::ClosePopup(bool isCancel) {
 	if (this->IsClosed()) { return; }
 	this->OnBeforeClose(isCancel);
-	CUSTOMROR::crInfo.CloseCustomGamePopup();
+	ROCKNROR::crInfo.CloseCustomGamePopup();
 	this->OnAfterClose(isCancel);
 	// NO because we may have opened a new one in post-actions ! // this->currentCustomGamePopup = CUSTOM_GAME_POPUP_TYPES::CGPT_NONE;
 	this->isClosed = true;

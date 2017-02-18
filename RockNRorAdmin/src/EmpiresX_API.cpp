@@ -889,10 +889,10 @@ bool EmpiresX_API::SetSuggestedOptions() {
 }
 
 
-// Set "RockNRor-recommended" changes ON (does NOT include changes from OPTIONS category. See also SetOtherCustomROROptions.
+// Set "RockNRor-recommended" changes ON (does NOT include changes from OPTIONS category. See also SetOtherRockNRorOptions.
 // Includes ROR_API (mandatory + optionals), MaxSelectedUnits, WindowedMode
 // Returns true if everything is OK
-bool EmpiresX_API::SetBasicCustomROROptions() {
+bool EmpiresX_API::SetBasicRockNRorOptions() {
 	bool result = true;
 	result = this->SetROR_API(true);
 	//result = result && this->SetAllROR_API_optionals(true); // Do not install optionals, RockNRor can install them dynamically
@@ -909,7 +909,7 @@ bool EmpiresX_API::SetBasicCustomROROptions() {
 // Set recommended "options" changes for RockNRor
 // Includes some additional options like additional map/resource/starting age choices
 // Returns true if everything is OK
-bool EmpiresX_API::SetOtherCustomROROptions() {
+bool EmpiresX_API::SetOtherRockNRorOptions() {
 	bool result = true;
 	try {
 		result = result && this->SetOptionSelection(_T("disable_dislike_human_player"), this->GetSeqIndexFromFuncMeaning(BC_OPTIONS, _T("disable_dislike_human_player"), FM_ON));

@@ -443,7 +443,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 // Compute AI dislike values, taking care of RockNRor config (dislike human, all relics/ruins, has wonder)
 // In standard game, dislike update is run when a unit is attacked (see 0x4D7B0F), which is disabled by "disable_dislike_human_player" change in AOE_binData.
 void PlayerTargeting::ComputeDislikeValues() {
-	if ((CUSTOMROR::crInfo.configInfo.dislike_allArtefacts <= 0) || (CUSTOMROR::crInfo.configInfo.dislike_humanPlayer <= 0)) { return; }
+	if ((ROCKNROR::crInfo.configInfo.dislike_allArtefacts <= 0) || (ROCKNROR::crInfo.configInfo.dislike_humanPlayer <= 0)) { return; }
 
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *globalStruct = GetGameGlobalStructPtr();
 	assert(globalStruct->GetPlayerStructPtrTable() != NULL);
@@ -455,10 +455,10 @@ void PlayerTargeting::ComputeDislikeValues() {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = globalStruct->GetPlayerStructPtrTable()[iPlayerId];
 		if (player && player->ptrAIStruct) {
 			float *resources = (float *)player->ptrResourceValues;
-			if (resources[CST_RES_ORDER_STANDING_WONDERS]) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_allArtefacts; }
-			if (resources[CST_RES_ORDER_ALL_RUINS]) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_allArtefacts; }
-			if (resources[CST_RES_ORDER_ALL_RELICS]) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_allArtefacts; }
-			if (player->isComputerControlled == 0) { newDislikeValues[iPlayerId] += CUSTOMROR::crInfo.configInfo.dislike_humanPlayer; }
+			if (resources[CST_RES_ORDER_STANDING_WONDERS]) { newDislikeValues[iPlayerId] += ROCKNROR::crInfo.configInfo.dislike_allArtefacts; }
+			if (resources[CST_RES_ORDER_ALL_RUINS]) { newDislikeValues[iPlayerId] += ROCKNROR::crInfo.configInfo.dislike_allArtefacts; }
+			if (resources[CST_RES_ORDER_ALL_RELICS]) { newDislikeValues[iPlayerId] += ROCKNROR::crInfo.configInfo.dislike_allArtefacts; }
+			if (player->isComputerControlled == 0) { newDislikeValues[iPlayerId] += ROCKNROR::crInfo.configInfo.dislike_humanPlayer; }
 		}
 	}
 

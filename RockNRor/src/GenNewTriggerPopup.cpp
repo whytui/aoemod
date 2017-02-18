@@ -148,11 +148,11 @@ void GenNewTriggerPopup::LoadTriggerTextFromGameInfo() {
 	if (!sc_info || !sc_info->IsCheckSumValid()) { return; }
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return; }
 
-	this->edtTriggerText->SetText(CUSTOMROR::TRIGGER::GetTriggerDataPtr(sc_info));
+	this->edtTriggerText->SetText(ROCKNROR::TRIGGER::GetTriggerDataPtr(sc_info));
 }
 
 
 void GenNewTriggerPopup::SaveTriggerTextToGameInfo() {
 	// Use dedicated API to update trigger information
-	CUSTOMROR::TRIGGER::WriteTriggersInGameData(this->edtTriggerText->pTypedText);
+	ROCKNROR::TRIGGER::WriteTriggersInGameData(this->edtTriggerText->pTypedText);
 }

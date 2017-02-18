@@ -1,6 +1,6 @@
 #include "../include/RockNRorConfig.h"
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 namespace CONFIG {
 ;
 
@@ -191,18 +191,18 @@ const char * RockNRorConfig::XML_GetAttributeValue(TiXmlElement *elem, const cha
 
 
 // Reads the gameType attribute and returns the result in ConfigGameType enum. Returns CFG_GAME_UNKNOWN if not found
-CUSTOMROR::ConfigGameType RockNRorConfig::XML_ReadGameTypeAttribute(TiXmlElement *elem) {
-	if (!elem) { return CUSTOMROR::CFG_GAME_UNKNOWN; }
+ROCKNROR::ConfigGameType RockNRorConfig::XML_ReadGameTypeAttribute(TiXmlElement *elem) {
+	if (!elem) { return ROCKNROR::CFG_GAME_UNKNOWN; }
 	const char *attr = elem->Attribute("gameType");
-	if (!attr) { return CUSTOMROR::CFG_GAME_UNKNOWN; }
+	if (!attr) { return ROCKNROR::CFG_GAME_UNKNOWN; }
 	if (_stricmp(attr, "DM") == 0) {
-		return CUSTOMROR::CFG_GAME_DEATHMATCH;
+		return ROCKNROR::CFG_GAME_DEATHMATCH;
 	}
 	if (_stricmp(attr, "RM") == 0) {
-		return CUSTOMROR::CFG_GAME_RANDOM_GAME;
+		return ROCKNROR::CFG_GAME_RANDOM_GAME;
 	}
 	// Other types: not handled yet
-	return CUSTOMROR::CFG_GAME_UNKNOWN;
+	return ROCKNROR::CFG_GAME_UNKNOWN;
 }
 
 
@@ -291,7 +291,7 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 				}
 			}
 		}
-		if (elemName == "showCustomRORMenu") {
+		if (elemName == "showRockNRorMenu") {
 			this->showRockNRorMenu = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "showCustomPopInfo") {
@@ -314,7 +314,7 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			callResult = elem->QueryIntAttribute("value", &intValue);
 			if (callResult == TIXML_SUCCESS) { this->collectRORDebugLogs = intValue; }
 		}
-		if (elemName == "showCustomRORNotifications") {
+		if (elemName == "showRockNRorNotifications") {
 			this->showRockNRorNotifications = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "rpgMode") {
@@ -381,13 +381,13 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			this->noWalls = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "initialResources") {
-			CUSTOMROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
+			ROCKNROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
 			int RMChoice = -1;
-			if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
+			if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {
 				callResult = elem->QueryIntAttribute("choice", &intValue);
 				if (callResult == TIXML_SUCCESS) { RMChoice = intValue; }
 			}
-			if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
+			if (gameType == ROCKNROR::CFG_GAME_DEATHMATCH) {
 				RMChoice = 0;
 			}
 			if (RMChoice > 3) {
@@ -397,44 +397,44 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			if (RMChoice >= 0) {
 				callResult = elem->QueryIntAttribute("food", &intValue);
 				if (callResult == TIXML_SUCCESS) {
-					if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
+					if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {
 						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
 					}
-					if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
+					if (gameType == ROCKNROR::CFG_GAME_DEATHMATCH) {
 						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
 					}
 				}
 				callResult = elem->QueryIntAttribute("wood", &intValue);
 				if (callResult == TIXML_SUCCESS) {
-					if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
+					if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {
 						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
 					}
-					if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
+					if (gameType == ROCKNROR::CFG_GAME_DEATHMATCH) {
 						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
 					}
 				}
 				callResult = elem->QueryIntAttribute("stone", &intValue);
 				if (callResult == TIXML_SUCCESS) {
-					if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
+					if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {
 						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
 					}
-					if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
+					if (gameType == ROCKNROR::CFG_GAME_DEATHMATCH) {
 						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
 					}
 				}
 				callResult = elem->QueryIntAttribute("gold", &intValue);
 				if (callResult == TIXML_SUCCESS) {
-					if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
+					if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {
 						this->initialResourcesByChoice_RM[RMChoice][AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
 					}
-					if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
+					if (gameType == ROCKNROR::CFG_GAME_DEATHMATCH) {
 						this->initialResources_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
 					}
 				}
 			}
 		}
 		if (elemName == "per_number") {
-			CUSTOMROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
+			ROCKNROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
 			int snNumber = -1;
 			int snValue = -1;
 			callResult = elem->QueryIntAttribute("sn", &intValue);
@@ -442,52 +442,52 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			callResult = elem->QueryIntAttribute("value", &intValue);
 			if (callResult == TIXML_SUCCESS) { snValue = intValue; }
 			if ((snNumber >= AOE_CONST_FUNC::CST_FIRST_SN_NUMBER) && (snNumber <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER) &&
-				(gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME)) {
+				(gameType == ROCKNROR::CFG_GAME_RANDOM_GAME)) {
 				this->defaultPerNumbers_RM[snNumber] = snValue;
 				this->defaultPerNumbers_RM_isSet[snNumber] = true;
 			}
 			if ((snNumber >= AOE_CONST_FUNC::CST_FIRST_SN_NUMBER) && (snNumber <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER) &&
-				(gameType == CUSTOMROR::CFG_GAME_DEATHMATCH)) {
+				(gameType == ROCKNROR::CFG_GAME_DEATHMATCH)) {
 				this->defaultPerNumbers_DM[snNumber] = snValue;
 				this->defaultPerNumbers_DM_isSet[snNumber] = true;
 			}
 		}
 
 		if (elemName == "initialResourceAIBonus") {
-			CUSTOMROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
+			ROCKNROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
 			callResult = elem->QueryIntAttribute("food", &intValue);
 			if (callResult == TIXML_SUCCESS) {
-				if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
+				if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {
 					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
 				}
-				if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
+				if (gameType == ROCKNROR::CFG_GAME_DEATHMATCH) {
 					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD] = intValue;
 				}
 			}
 			callResult = elem->QueryIntAttribute("wood", &intValue);
 			if (callResult == TIXML_SUCCESS) {
-				if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
+				if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {
 					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
 				}
-				if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
+				if (gameType == ROCKNROR::CFG_GAME_DEATHMATCH) {
 					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD] = intValue;
 				}
 			}
 			callResult = elem->QueryIntAttribute("stone", &intValue);
 			if (callResult == TIXML_SUCCESS) {
-				if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
+				if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {
 					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
 				}
-				if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
+				if (gameType == ROCKNROR::CFG_GAME_DEATHMATCH) {
 					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE] = intValue;
 				}
 			}
 			callResult = elem->QueryIntAttribute("gold", &intValue);
 			if (callResult == TIXML_SUCCESS) {
-				if (gameType == CUSTOMROR::CFG_GAME_RANDOM_GAME) {
+				if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {
 					this->initialResourceHardestAIBonus_RM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
 				}
-				if (gameType == CUSTOMROR::CFG_GAME_DEATHMATCH) {
+				if (gameType == ROCKNROR::CFG_GAME_DEATHMATCH) {
 					this->initialResourceHardestAIBonus_DM[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD] = intValue;
 				}
 			}
@@ -572,10 +572,10 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "generateAutomaticStrategy") {
 				switch (this->XML_ReadGameTypeAttribute(elem)) {
-				case CUSTOMROR::CFG_GAME_DEATHMATCH:
+				case ROCKNROR::CFG_GAME_DEATHMATCH:
 					this->generateStrategyForDM = this->XML_GetBoolElement(elem, "enable");
 					break;
-				case CUSTOMROR::CFG_GAME_RANDOM_GAME:
+				case ROCKNROR::CFG_GAME_RANDOM_GAME:
 					this->generateStrategyForRM = this->XML_GetBoolElement(elem, "enable");
 					break;
 				default:
@@ -669,8 +669,8 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		}
 
 		if (elemName == "autoRebuildFarms") {
-			CUSTOMROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
-			if ((gameType != CUSTOMROR::CFG_GAME_UNKNOWN) && (gameType < CUSTOMROR::CFG_GAME_TYPES_COUNT)) {
+			ROCKNROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
+			if ((gameType != ROCKNROR::CFG_GAME_UNKNOWN) && (gameType < ROCKNROR::CFG_GAME_TYPES_COUNT)) {
 				this->autoRebuildFarmsConfig[gameType].enableAutoRebuildFarms = XML_GetBoolElement(elem, "enable");
 				callResult = elem->QueryIntAttribute("maxFarms", &intValue);
 				if (callResult == TIXML_SUCCESS) { this->autoRebuildFarmsConfig[gameType].autoRebuildFarms_maxFarms = intValue; }
@@ -1014,15 +1014,15 @@ bool RockNRorConfig::ReadTilesetXMLConfigFile(char *fileName) {
 	return true;
 }
 
-CUSTOMROR::CONFIG::AutoRebuildFarmConfig *RockNRorConfig::GetAutoRebuildFarmConfig(long int isScenario, long int isDM) {
+ROCKNROR::CONFIG::AutoRebuildFarmConfig *RockNRorConfig::GetAutoRebuildFarmConfig(long int isScenario, long int isDM) {
 	// NOT using scenario setting at this point ?
 	/*if (isScenario) {
-		return &this->autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_SCENARIO];
+		return &this->autoRebuildFarmsConfig[ROCKNROR::CFG_GAME_SCENARIO];
 	}*/
 	if (isDM) {
-		return &this->autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_DEATHMATCH];
+		return &this->autoRebuildFarmsConfig[ROCKNROR::CFG_GAME_DEATHMATCH];
 	}
-	return &this->autoRebuildFarmsConfig[CUSTOMROR::CFG_GAME_RANDOM_GAME];
+	return &this->autoRebuildFarmsConfig[ROCKNROR::CFG_GAME_RANDOM_GAME];
 }
 
 }

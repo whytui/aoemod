@@ -2,7 +2,7 @@
 #pragma once
 #include "commonConfigEnums.h"
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 	namespace CONFIG {
 
 		// Configuration for farm automatic rebuilding

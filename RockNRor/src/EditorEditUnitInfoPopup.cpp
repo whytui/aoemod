@@ -6,7 +6,7 @@
 // Opens the custom "edit unit" in editor
 // Returns true if OK.
 bool EditorEditUnitInfoPopup::OpenCustomEditorEditUnitPopup() {
-	return (CUSTOMROR::customPopupSystem.OpenCustomGamePopup<EditorEditUnitInfoPopup>(500, 400, true) != NULL);
+	return (ROCKNROR::customPopupSystem.OpenCustomGamePopup<EditorEditUnitInfoPopup>(500, 400, true) != NULL);
 }
 
 
@@ -36,9 +36,9 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	if (!global) { return; }
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetPlayerStruct(global->humanPlayerId);
 	if (!controlledPlayer || !controlledPlayer->IsCheckSumValid() || (controlledPlayer->selectedUnitCount <= 0)) { return; }
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = CUSTOMROR::crInfo.GetMainSelectedUnit(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = ROCKNROR::crInfo.GetMainSelectedUnit(controlledPlayer);
 	if (!unit || (!unit->IsCheckSumValidForAUnitClass())) { return; }
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
 	for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *curUnit = selectedUnits[i];
 		if (curUnit && curUnit->IsCheckSumValidForAUnitClass()) {

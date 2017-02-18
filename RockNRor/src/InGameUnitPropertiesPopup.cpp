@@ -13,7 +13,7 @@ bool InGameUnitPropertiesPopup::OpenInGameUnitPropertiesPopup() {
 	if (humanPlayer->selectedUnitCount <= 0) {
 		return false;
 	}
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(humanPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(humanPlayer);
 	assert(selectedUnits != NULL);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = selectedUnits[0];
 	if (!selectedUnit || !selectedUnit->IsCheckSumValidForAUnitClass()) {
@@ -36,7 +36,7 @@ bool InGameUnitPropertiesPopup::OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::ST
 	if (!unit || !unit->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
-	InGameUnitPropertiesPopup *popup = CUSTOMROR::customPopupSystem.OpenCustomGamePopup<InGameUnitPropertiesPopup>(600, 500, true);
+	InGameUnitPropertiesPopup *popup = ROCKNROR::customPopupSystem.OpenCustomGamePopup<InGameUnitPropertiesPopup>(600, 500, true);
 	if (popup == NULL) { return false; }
 	popup->AddPopupContent(unit->unitInstanceId);
 	return true;
@@ -138,7 +138,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	}
 	// Automove infos
 	std::string autoMoveInfo = "";
-	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unitId);
+	UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(unitId);
 	if (isMyUnit && unitInfo && (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 		if (unitInfo->spawnTargetUnitId >= 0) {
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(unitInfo->spawnTargetUnitId);
@@ -175,7 +175,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	// Farm auto-rebuild
 	std::string farmInfo = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_AUTO_REBUILD_THIS_FARM_WHEN_DEPLETED, "Auto rebuild this farm when depleted");
 	farmInfo += ":";
-	FarmRebuildInfo *farmBldInfo = CUSTOMROR::crInfo.myGameObjects.FindFarmRebuildInfo(unitBase->positionX, unitBase->positionY);
+	FarmRebuildInfo *farmBldInfo = ROCKNROR::crInfo.myGameObjects.FindFarmRebuildInfo(unitBase->positionX, unitBase->positionY);
 
 	// Building : future potential techs/units
 	std::string buildingTechAndUnitInfo = "";
@@ -225,7 +225,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NEVER, "Never"), 470, currentYPos, 50, 20);
 		currentYPos += 20;
 
-		FarmRebuildInfo *fri = CUSTOMROR::crInfo.myGameObjects.FindFarmRebuildInfo(unitBase->positionX, unitBase->positionY);
+		FarmRebuildInfo *fri = ROCKNROR::crInfo.myGameObjects.FindFarmRebuildInfo(unitBase->positionX, unitBase->positionY);
 		if (!fri) {
 			AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkRebuildFarmNone, true);
 		} else {
@@ -260,9 +260,9 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		const AutoAttackPolicy *aap = NULL;
 		if (canHurtOtherUnits) {
 			if (isRangedUnit) {
-				aap = &CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits;
+				aap = &ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits;
 			} else {
-				aap = &CUSTOMROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits;
+				aap = &ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits;
 			}
 		}
 		// If there is a config at unit level, take it instead of global parameter.
@@ -271,7 +271,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 		if (!aap) {
 			// No unit-specific config, and unit does not fit user config (not a blast attack unit)
-			aap = &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
+			aap = &ROCKNROR::crInfo.configInfo.autoAttackOptionDefaultValues;
 		}
 		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkAutoAttackTowers, aap->attackTowers);
 		AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkAutoAttackMilitary, aap->attackMilitary);
@@ -324,7 +324,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 
 	// Conversion resistance : only for living/building (other units can't be converted)
 	if (unitBase->ptrStructPlayer && unitBase->ptrStructPlayer->IsCheckSumValid() && unitBase->DerivesFromTrainable()) {
-		float conversionResistance = CUSTOMROR::crInfo.GetConversionResistance(unitBase->ptrStructPlayer->civilizationId, unitDefBase->unitAIType);
+		float conversionResistance = ROCKNROR::crInfo.GetConversionResistance(unitBase->ptrStructPlayer->civilizationId, unitDefBase->unitAIType);
 		std::string convResistText = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_CONVERSION_RESISTANCE, "Conversion resistance");
 		convResistText += "=";
 		convResistText += std::to_string(conversionResistance);
@@ -352,10 +352,10 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool InGameUnitPropertiesPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnResetAutoMove) {
-		UnitCustomInfo *u = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(this->unitId);
+		UnitCustomInfo *u = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(this->unitId);
 		if (u) {
 			u->ResetSpawnAutoTargetInfo();
-			CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(this->unitId);
+			ROCKNROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(this->unitId);
 		}
 		// Auto-move has been reset, hide label and button.
 		AOE_METHODS::UI_BASE::ShowUIObject(this->btnResetAutoMove, false);
@@ -392,7 +392,7 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
 	bool isMyUnit = (controlledPlayer == unitPlayer);
-	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(this->unitId);
+	UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(this->unitId);
 	float posX = -1;
 	float posY = -1;
 	if (unit && unit->IsCheckSumValidForAUnitClass()) {
@@ -400,18 +400,18 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		posY = unit->positionY;
 	}
 	if (isMyUnit && this->chkRebuildFarmNone && this->chkRebuildFarmNone->checked) {
-		CUSTOMROR::crInfo.myGameObjects.RemoveFarmRebuildInfo(posX, posY);
+		ROCKNROR::crInfo.myGameObjects.RemoveFarmRebuildInfo(posX, posY);
 	}
 	if (isMyUnit && this->chkForceNotRebuildFarm && this->chkForceRebuildFarm &&
 		(this->chkForceNotRebuildFarm->checked || this->chkForceRebuildFarm->checked)) {
 		bool actionIsRebuild = (this->chkForceRebuildFarm->checked != 0); // If false, then it is force NOT rebuild.
-		AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
 		for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
 			if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() &&
 				(selectedUnits[i]->ptrStructPlayer == controlledPlayer)) {
 				AOE_STRUCTURES::STRUCT_UNITDEF_BASE *curUnitDefBase = selectedUnits[i]->unitDefinition;
 				if (curUnitDefBase && curUnitDefBase->IsCheckSumValidForAUnitClass() && (curUnitDefBase->DAT_ID1 == CST_UNITID_FARM)) {
-					FarmRebuildInfo *fri = CUSTOMROR::crInfo.myGameObjects.FindOrAddFarmRebuildInfo(selectedUnits[i]->positionX, selectedUnits[i]->positionY);
+					FarmRebuildInfo *fri = ROCKNROR::crInfo.myGameObjects.FindOrAddFarmRebuildInfo(selectedUnits[i]->positionX, selectedUnits[i]->positionY);
 					fri->forceNotRebuild = !actionIsRebuild;
 					fri->forceRebuild = actionIsRebuild;
 					fri->playerId = controlledPlayer->playerId;
@@ -424,7 +424,7 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	if (isMyUnit && this->chkAutoAttackMilitary && this->chkAutoAttackBuildings &&
 		this->chkAutoAttackTowers && this->chkAutoAttackVillagers && this->chkAutoAttackWalls) {
 		// Force create info object if not existing
-		unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(this->unitId);
+		unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(this->unitId);
 		assert(unitInfo != NULL); // Was just added if not already existing
 		unitInfo->autoAttackPolicy.attackTowers = (this->chkAutoAttackTowers->checked != 0);
 		unitInfo->autoAttackPolicy.attackMilitary = (this->chkAutoAttackMilitary->checked != 0);
@@ -434,7 +434,7 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		unitInfo->autoAttackPolicyIsSet = true;
 		// Apply changes on all selected units
 		AutoAttackPolicy flagsToApply = { true, true, true, true, true }; // All flags are relevant in popup.
-		CUSTOMROR::crInfo.ApplyAutoAttackPolicyToPlayerSelectedUnits(controlledPlayer, unitInfo->autoAttackPolicy, flagsToApply);
+		ROCKNROR::crInfo.ApplyAutoAttackPolicyToPlayerSelectedUnits(controlledPlayer, unitInfo->autoAttackPolicy, flagsToApply);
 	}
 }
 

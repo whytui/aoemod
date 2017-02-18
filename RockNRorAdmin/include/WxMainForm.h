@@ -49,7 +49,7 @@ private:
 	void OnCloseGameFile(wxCommandEvent& event);
 	void OnFixDDrawColorBug(wxCommandEvent& event);
 	void OnChangeInstallDirInRegistry(wxCommandEvent& event);
-	void OnInstallCustomROR(wxCommandEvent& event);
+	void OnInstallRockNRor(wxCommandEvent& event);
 	void OnInstallCustomResolution(wxCommandEvent& event);
 	void OnInstallSuggestedOptions(wxCommandEvent& event);
 	void OnExportTriggerHTMLDoc(wxCommandEvent& event);
@@ -64,7 +64,7 @@ private:
 	void RunGame();
 	void FixDDrawColorBug();
 	void ChangeInstallDirInRegistry();
-	void InstallCustomROR();
+	void InstallRockNRor();
 	void InstallSuggestedOptions();
 	void ChooseCustomResolution();
 	void ExportTriggerHTMLDocumentation();
@@ -78,7 +78,7 @@ enum
 	ID_SelectFromReg = 2,
 	ID_RunGame = 3,
 	ID_EditGameFile = 4,
-	ID_InstallCustomROR = 5,
+	ID_InstallRockNRor = 5,
 	ID_InstallCustomResolution = 6,
 	ID_InstallSuggestedOptions = 7,
 	ID_CloseGameFile = 8,

@@ -39,7 +39,7 @@ void RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *game
 		return;
 	}
 	if (!attackPolicy) {
-		attackPolicy = &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
+		attackPolicy = &ROCKNROR::crInfo.configInfo.autoAttackOptionDefaultValues;
 	}
 	int value = attackPolicy->attackVillagers ? 0 : 1;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS]->showNumber = value;
@@ -53,7 +53,7 @@ void RefreshCustomAutoAttackButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *game
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]->showNumber = value;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]->numberToDisplay = value;
 	AOE_METHODS::UI_BASE::RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED]);
-	value = (attackPolicy->Equals(CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues)) ? 1 : 0;
+	value = (attackPolicy->Equals(ROCKNROR::crInfo.configInfo.autoAttackOptionDefaultValues)) ? 1 : 0;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]->showNumber = value;
 	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]->numberToDisplay = value;
 	AOE_METHODS::UI_BASE::RefreshUIObject(gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT]);
@@ -115,20 +115,20 @@ void AddButtonsForLivingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 
 	if (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_NORMAL) {
 		if ((unitDef->blastLevel != BLAST_LEVELS::CST_BL_DAMAGE_TARGET_ONLY) && (unitDef->blastRadius > 0)) {
-			UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+			UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false,
 				localizationHandler.GetTranslation(CRLANG_ID_BTN_DONT_ATTACK_VILLAGER, "Click to prevent unit from attacking villagers automatically"),
-				&CUSTOMROR::crInfo.rockNRorIcons, true);
+				&ROCKNROR::crInfo.rockNRorIcons, true);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false,
 				localizationHandler.GetTranslation(CRLANG_ID_BTN_DONT_ATTACK_BUILDINGS, "Click to prevent unit from attacking buildings automatically"),
-				&CUSTOMROR::crInfo.rockNRorIcons, false);
+				&ROCKNROR::crInfo.rockNRorIcons, false);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, 
 				localizationHandler.GetTranslation(CRLANG_ID_BTN_DONT_ATTACK_OTHER, "Click to prevent unit from attacking other units automatically"),
-				&CUSTOMROR::crInfo.rockNRorIcons, false);
+				&ROCKNROR::crInfo.rockNRorIcons, false);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false,
 				localizationHandler.GetTranslation(CRLANG_ID_BTN_RESTORE_ATTACK_BEHAVIOUR, "Click to restore normal auto-attack behaviour"),
-				&CUSTOMROR::crInfo.rockNRorIcons, false);
-			const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
+				&ROCKNROR::crInfo.rockNRorIcons, false);
+			const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &ROCKNROR::crInfo.configInfo.autoAttackOptionDefaultValues;
 			RefreshCustomAutoAttackButtons(gameMainUI, aap);
 		}
 		const char *protectHotkey = localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_PROTECT_HOTKEY, "P");
@@ -136,7 +136,7 @@ void AddButtonsForLivingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 		protectText += " ";
 		protectText += protectHotkey[0]; // protectHotkey can't be NULL. Worst case, protectHotkey[0] = \0, but this will not cause any error.
 		AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, 
-			protectText.c_str(), NULL /*CUSTOMROR::crInfo.rockNRorIcons*/, false);
+			protectText.c_str(), NULL /*ROCKNROR::crInfo.rockNRorIcons*/, false);
 		gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT]->hotkey = protectHotkey[0]; // shortcut key for "defend/protect"
 		gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT]->unknown_29C = 0;
 	}
@@ -154,7 +154,7 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 	AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)unit->unitDefinition;
 	if (!unitDef || !unitDef->IsCheckSumValid()) { return; } // MUST be building type
 
-	bool multiQueueing = CUSTOMROR::crInfo.configInfo.allowMultiQueueing; // If true, a building can have >1 unit "def" in queue.
+	bool multiQueueing = ROCKNROR::crInfo.configInfo.allowMultiQueueing; // If true, a building can have >1 unit "def" in queue.
 	bool buttonIsVisible[12]; // Is button visible after standard buttons display.
 	bool forceRefresh[12]; // Used to force refresh of buttons : text or read-only status can be wrong when switching between 2 similar units that have different current actions.
 	bool currentButtonDoesNotBelongToThisPage[12];
@@ -527,7 +527,7 @@ void SetButtonBarForDefendUnitOrZone(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gam
 		localizationHandler.GetTranslation(CRLANG_ID_BTN_BACK, "Back"),
 		NULL, false);
 
-	UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+	UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 	if (unitInfo && unitInfo->HasValidProtectInfo()) {
 		AddInGameCommandButton(1, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND_STOP, 0, false,
 			localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_STOP_PROTECTING, "Stop defending current position/unit"),

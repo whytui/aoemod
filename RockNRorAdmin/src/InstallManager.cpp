@@ -3,7 +3,7 @@
 // Manage file operations to install RockNRor (and ROR_API + wndmode.dll)
 // shortMessage and logs are OUT parameters.
 // Returns true if successful
-bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeFullPath, bool overwriteFiles,
+bool installRockNRorFiles(std::wstring sourceDirectory, std::wstring targetExeFullPath, bool overwriteFiles,
 	std::wstring &shortMessage, std::wstring &logs) {
 	shortMessage = _T("");
 	logs = _T("");
@@ -26,35 +26,35 @@ bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeF
 	}
 
 	// Build all file names
-	//std::wstring destCustomRorDir = destDirName + _T("\\RockNRor");
+	//std::wstring destRockNRorDir = destDirName + _T("\\RockNRor");
 	std::wstring srcRORAPI_DLL = sourceDirectory + _T("\\ROR_API.dll");
 	std::wstring srcRORAPI_CONF = sourceDirectory + _T("\\ROR_API.conf");
 	std::wstring srcWNDMODE_DLL = sourceDirectory + _T("\\wndmode.dll");
-	std::wstring srcCustomROR_dir = sourceDirectory + _T("\\RockNRor\\");
-	std::wstring srcCustomROR_DLL = sourceDirectory + _T("\\RockNRor\\RockNRor.dll");
+	std::wstring srcRockNRor_dir = sourceDirectory + _T("\\RockNRor\\");
+	std::wstring srcRockNRor_DLL = sourceDirectory + _T("\\RockNRor\\RockNRor.dll");
 	std::wstring destRORAPI_DLL = destDirName + _T("\\ROR_API.dll");
 	std::wstring destRORAPI_CONF = destDirName + _T("\\ROR_API.conf");
 	std::wstring destWNDMODE_DLL = destDirName + _T("\\wndmode.dll");
-	std::wstring destCustomROR_dir = destDirName + _T("\\RockNRor\\");
-	std::wstring destCustomROR_DLL = destDirName + _T("\\RockNRor\\RockNRor.dll");
+	std::wstring destRockNRor_dir = destDirName + _T("\\RockNRor\\");
+	std::wstring destRockNRor_DLL = destDirName + _T("\\RockNRor\\RockNRor.dll");
 	// Get current files status (existing ?)
 	bool hasSrcRORAPI_DLL = CheckFileExistence(srcRORAPI_DLL);
 	bool hasSrcRORAPI_CONF = CheckFileExistence(srcRORAPI_CONF);
 	bool hasSrcWNDMODE_DLL = CheckFileExistence(srcWNDMODE_DLL);
-	bool hasSrcCustomRor_dir = DirectoryExists(srcCustomROR_dir);
-	bool hasSrcCustomRor_DLL = CheckFileExistence(srcCustomROR_DLL);
+	bool hasSrcRockNRor_dir = DirectoryExists(srcRockNRor_dir);
+	bool hasSrcRockNRor_DLL = CheckFileExistence(srcRockNRor_DLL);
 	bool hasDestRORAPI_DLL = CheckFileExistence(destRORAPI_DLL);
 	bool hasDestRORAPI_CONF = CheckFileExistence(destRORAPI_CONF);
 	bool hasDestWNDMODE_DLL = CheckFileExistence(destWNDMODE_DLL);
-	bool hasDestCustomRor_dir = DirectoryExists(destCustomROR_dir);
-	bool hasDestCustomRor_DLL = CheckFileExistence(destCustomROR_DLL);
+	bool hasDestRockNRor_dir = DirectoryExists(destRockNRor_dir);
+	bool hasDestRockNRor_DLL = CheckFileExistence(destRockNRor_DLL);
 	bool hasMissingFiles = false;
 	std::wstring message = _T("Missing files in source directory:");
 	if (!hasDestRORAPI_DLL && !hasSrcRORAPI_DLL) { message += _T(" ROR_API.dll"); hasMissingFiles = true; }
 	if (!hasDestRORAPI_CONF && !hasSrcRORAPI_CONF) { message += _T(" ROR_API.conf"); hasMissingFiles = true; }
 	if (!hasDestWNDMODE_DLL && !hasSrcWNDMODE_DLL) { message += _T(" wndmode.dll"); hasMissingFiles = true; }
-	if (!hasDestCustomRor_dir && !hasSrcCustomRor_dir) { message += _T(" RockNRor\\"); hasMissingFiles = true; }
-	if (!hasSrcCustomRor_DLL && !hasDestCustomRor_DLL) { message += _T(" RockNRor\\RockNRor.dll"); hasMissingFiles = true; }
+	if (!hasDestRockNRor_dir && !hasSrcRockNRor_dir) { message += _T(" RockNRor\\"); hasMissingFiles = true; }
+	if (!hasSrcRockNRor_DLL && !hasDestRockNRor_DLL) { message += _T(" RockNRor\\RockNRor.dll"); hasMissingFiles = true; }
 	if (hasMissingFiles) {
 		shortMessage = message;
 		return false;
@@ -62,8 +62,8 @@ bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeF
 
 	logs += _T("Starting RockNRor installation...\n");
 	logs += _T("Creating RockNRor directory...\n");
-	CreateDirectory(destCustomROR_dir.c_str(), NULL); // Returns 0 if failed
-	hasDestCustomRor_dir = DirectoryExists(destCustomROR_dir);
+	CreateDirectory(destRockNRor_dir.c_str(), NULL); // Returns 0 if failed
+	hasDestRockNRor_dir = DirectoryExists(destRockNRor_dir);
 	logs += _T("Copying files...\n");
 	// Warning for CopyFile: last param is failIfExists (opposite of overwrite). Return value = is_success (0=failed)
 	bool copyFailed = false;
@@ -94,20 +94,20 @@ bool installCustomRORFiles(std::wstring sourceDirectory, std::wstring targetExeF
 		logs += message;
 	}
 	// Copy RockNRor directory and underlying files
-	if (!hasDestCustomRor_dir) {
-		if (CreateDirectory(destCustomROR_dir.c_str(), NULL) != 0) {
-			message += _T("Created directory ") + destCustomROR_dir + _T("\n");
+	if (!hasDestRockNRor_dir) {
+		if (CreateDirectory(destRockNRor_dir.c_str(), NULL) != 0) {
+			message += _T("Created directory ") + destRockNRor_dir + _T("\n");
 			logs += message;
 		} else {
 			copyFailed = true;
 		}
 	}
-	std::vector<std::wstring> files = GetFileListFromFolder(srcCustomROR_dir);
+	std::vector<std::wstring> files = GetFileListFromFolder(srcRockNRor_dir);
 	for each (std::wstring filename in files)
 	{
 		if (overwriteFiles || !CheckFileExistence(filename)) {
-			std::wstring sourceFile = srcCustomROR_dir + std::wstring(_T("\\")) + filename;
-			std::wstring targetFile = destCustomROR_dir + std::wstring(_T("\\")) + filename;
+			std::wstring sourceFile = srcRockNRor_dir + std::wstring(_T("\\")) + filename;
+			std::wstring targetFile = destRockNRor_dir + std::wstring(_T("\\")) + filename;
 			singleCopySuccess = CopyFile(sourceFile.c_str(), targetFile.c_str(), !overwriteFiles);
 			if (!singleCopySuccess) {
 				copyFailed = true;

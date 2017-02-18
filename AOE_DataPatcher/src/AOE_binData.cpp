@@ -4399,7 +4399,7 @@ void AOE_binData::InitROR_API_10c() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
-		AddCustomRORInGameMenu,
+		AddRockNRorInGameMenu,
 		"Adds RockNRor in-game menu.",
 		0x033E74,
 		(0x83, 0xC5, 0x23, 0x6A, 0x05, 0x53, 0x53, 0x6A, 0x1E, 0x68, 0x68, 0x01, 0x00, 0x00, 0x55, 0x6A, 0x14), // default=no
@@ -4409,7 +4409,7 @@ void AOE_binData::InitROR_API_10c() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
-		ManageCustomRORInGameMenu,
+		ManageRockNRorInGameMenu,
 		"Manage RockNRor button click in in-game menu.",
 		0x034245,
 		(0xC2, 0x10, 0x00, 0x83, 0xF8, 0x05, 0x75, 0x62, 0x8B, 0x76, 0x40), // default=no

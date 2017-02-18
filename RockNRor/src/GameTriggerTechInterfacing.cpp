@@ -1,7 +1,7 @@
 #include "../include/GameTriggerTechInterfacing.h"
 
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 namespace TRIGGER {
 ;
 

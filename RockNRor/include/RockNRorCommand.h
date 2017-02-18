@@ -56,7 +56,7 @@
 #define CRCMD_TEXT_BUFFER_SIZE 256
 
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 
 
 

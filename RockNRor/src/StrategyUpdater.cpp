@@ -60,7 +60,7 @@ void CheckStratElemAliveForReset(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_S
 // Analyze strategy and fixes what's necessary. Called every <crInfo.configInfo.tacticalAIUpdateDelay> seconds.
 void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	// Exit if AI improvement is not enabled.
-	if (!CUSTOMROR::IsImproveAIEnabled(buildAI->commonAIObject.playerId)) { return; }
+	if (!ROCKNROR::IsImproveAIEnabled(buildAI->commonAIObject.playerId)) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	bool difficultyIsEasy = (settings->rgeGameOptions.difficultyLevel >= AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL::GDL_EASY); // True for easy / easiest
@@ -120,7 +120,7 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 		if ((currentStratElem->elementType == AIUCLivingUnit) && (currentStratElem->retrains == -1)) {
 			currentPopulation++;
 			// minPopulationBeforeBuildOptionalItems+1 : take next one and insert BEFORE (inserting BEFORE an given element preserves insert order consistency. After reverses all).
-			if (!goodDevelopmentPointElement && ironAgeResearched && (currentPopulation >= CUSTOMROR::crInfo.configInfo.minPopulationBeforeBuildOptionalItems + 1)) {
+			if (!goodDevelopmentPointElement && ironAgeResearched && (currentPopulation >= ROCKNROR::crInfo.configInfo.minPopulationBeforeBuildOptionalItems + 1)) {
 				// We store the location where player theoritically has a population=[minPopulationBeforeBuildOptionalItems] (we also ask for iron age).
 				// BUT AI can skip items so this strategy element is triggered BEFORE the [minPopulationBeforeBuildOptionalItems] units are really trained (alive).
 				// SO: Use a HIGHER value for the tested population amount than the value we really would like to use.
@@ -147,7 +147,7 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 		// Unblock "stuck buildings". We intentionally set unitInstanceId to -1 but keep "inprogress" when an unfinished building is destroyed.
 		// The goal is to wait (for THIS update) before trying to build it again.
 		// Warning: The 2 other "fixes" about destroyed buildings are absolutely required or AI will build, build and rebuild the same thing forever.
-		if (CUSTOMROR::crInfo.hasFixForBuildingStratElemUnitId && (currentStratElem->inProgressCount == 1) &&
+		if (ROCKNROR::crInfo.hasFixForBuildingStratElemUnitId && (currentStratElem->inProgressCount == 1) &&
 			(currentStratElem->elementType == AIUCBuilding) && (currentStratElem->unitInstanceId == -1)) {
 			long int lastDestructionTime = strategyUpdater[player->playerId].GetLastInProgressFailureGameTimeForBldStratElem(currentStratElem->elemId);
 			if ((lastDestructionTime < 0) ||
@@ -276,7 +276,7 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 		// Make sure new item is after watch tower tech
 		MoveStrategyElement_after_ifWrongOrder(buildAI, resWatchTower, optionalsLocation->previous);
 	}
-	// if (CUSTOMROR::crInfo.configInfo.improveAILevel <= ...) or IsImproveAIEnabled(player->playerId)
+	// if (ROCKNROR::crInfo.configInfo.improveAILevel <= ...) or IsImproveAIEnabled(player->playerId)
 	// then add only at a certain level of AI improvement ? (if implemented some day)
 	if (!resGuardTower && ironAgeResearched && (isVeryRich || isStrong) && IsResearchRelevantForStrategy(player, CST_RSID_GUARD_TOWER)) {
 		AddUnitInStrategy_before(buildAI, optionalsLocation, -1, CST_UNITID_GRANARY, AIUCTech, CST_RSID_GUARD_TOWER, player, "RockNRor-GuardTower");
@@ -346,7 +346,7 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 // This strategy is not supposed to impact combat or anything else than strategy (at least in standard game !)
 void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemyPlayerId, CUSTOM_AI::CustomAIMilitaryInfo *militaryAIInfo) {
 	// CONFIG
-	long int maxPanicModeUnitsInStrategy = CUSTOMROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy;
+	long int maxPanicModeUnitsInStrategy = ROCKNROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy;
 	long int maxPanicModeSeekEnemyDistance = CUSTOM_AI::AI_CONST::townSize; // Hardcoded in original code to 20 (0x14)
 	const long int maxPanicModeSeekEnemyDistanceIfFewResources = CUSTOM_AI::AI_CONST::townDefendSizeIfWeak; // Defend a smaller territory if weak
 #define PANIC_MODE_ARRAYS_MAX_SIZE 20 // technical limit to the number of panic mode units
@@ -1017,7 +1017,7 @@ bool STRATEGY::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI
 	if (!settings || !settings->IsCheckSumValid()) { return false; } // error: use default
 
 	// AI improvements are not enabled => return default value (like in normal ROR code)
-	if (!CUSTOMROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
+	if (!ROCKNROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId)) {
 		return false; // error: use default
 	}
 

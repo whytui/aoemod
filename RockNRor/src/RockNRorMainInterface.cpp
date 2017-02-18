@@ -1,11 +1,11 @@
 #include "../include/RockNRorMainInterface.h"
 
 
-namespace CUSTOMROR {
+namespace ROCKNROR {
 
 
 // Static global object
-RockNRorMainInterface CUSTOMROR::crMainInterface;
+RockNRorMainInterface ROCKNROR::crMainInterface;
 
 
 RockNRorMainInterface::RockNRorMainInterface() {
@@ -53,7 +53,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 	// Disable ALT-F4 when it would conflict with custom dialog
 	// (isInGame) condition is optional. If removed, ALT-F4 will be disabled in scenario editor when our dialog is on.
 	// WARNING: we can't prevent this to occur if user clicks on the top-right corner cross :(
-	if ((isInGame) && (ALT) && (pressedKey == VK_F4) && (CUSTOMROR::crInfo.customYesNoDialogVar != NULL)) {
+	if ((isInGame) && (ALT) && (pressedKey == VK_F4) && (ROCKNROR::crInfo.customYesNoDialogVar != NULL)) {
 		// Disable ALT-F4 when our custom dialog is ON (based on the same dialog, would provoke conflicts and our dialog would stay ON forever)
 		return true;
 	}
@@ -70,7 +70,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 
 	// If Key=F10 (0x79) and "current UI"=scenario editor then open menu. 
 	// Do NOT do this from other screens or when a popup is already opened !!! Never ! Or game will crash afterwards.
-	if ((pressedKey == VK_F10) && isInEditor && !isMenuOpen && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
+	if ((pressedKey == VK_F10) && isInEditor && !isMenuOpen && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
 		// Additional check
 		assert(GetGameSettingsPtr()->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
 		if (pCurrentUI) {
@@ -80,14 +80,14 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 
 	// ":"(FR) or "," (US) in game: select next idle military unit
 	if ((isInGame) && (!isMenuOpen) && (pressedKey == VK_OEM_2)) {
-		CUSTOMROR::UNIT::SelectNextIdleMilitaryUnit();
+		ROCKNROR::UNIT::SelectNextIdleMilitaryUnit();
 	}
 
 	// F9 in game: bring idle military units to current location (screen position).
 	// Requires ManageAI !
 	if ((pressedKey == VK_F9) && isInGame && !isMenuOpen) {
-		if (CUSTOMROR::crInfo.configInfo.enableCallNearbyIdleMilitaryUnits) {
-			CUSTOMROR::UNIT::CallNearbyIdleMilitaryUnits();
+		if (ROCKNROR::crInfo.configInfo.enableCallNearbyIdleMilitaryUnits) {
+			ROCKNROR::UNIT::CallNearbyIdleMilitaryUnits();
 		}
 	}
 
@@ -97,12 +97,12 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 	}
 
 	// ESC (1B) - close custom dialog if opened
-	if ((isInEditor || isInGame) && ((pressedKey == VK_ESCAPE) /*|| (pressedKey == VK_RETURN)*/) && (CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
-		CUSTOMROR::customPopupSystem.CloseCustomGamePopup(true);
+	if ((isInEditor || isInGame) && ((pressedKey == VK_ESCAPE) /*|| (pressedKey == VK_RETURN)*/) && (ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
+		ROCKNROR::customPopupSystem.CloseCustomGamePopup(true);
 	}
 
 	// F1 in editor : switch to unit selection
-	if (!isMenuOpen && (isInEditor) && !CTRL && (pressedKey == VK_F1) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
+	if (!isMenuOpen && (isInEditor) && !CTRL && (pressedKey == VK_F1) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
 		if (!SHIFT) {
 			settings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
 		} else {
@@ -115,8 +115,8 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 		}
 	}
 	// F2 in editor: edit selected unit or show game coordinates at mouse position
-	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F2) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
-		if (CUSTOMROR::crInfo.GetMainSelectedUnit(GetControlledPlayerStruct_Settings()) == NULL) {
+	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F2) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
+		if (ROCKNROR::crInfo.GetMainSelectedUnit(GetControlledPlayerStruct_Settings()) == NULL) {
 			float posX, posY;
 			GetGamePositionUnderMouse(&posX, &posY);
 			if ((posX > 0) && (posY > 0)) {
@@ -130,7 +130,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 		}
 	}
 	// F3 in editor: scenario information
-	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F3) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
+	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F3) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
 		EditorScenarioInfoPopup::OpenCustomEditorScenarioInfoPopup();
 	}
 
@@ -140,13 +140,13 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 	}
 
 	// F4 in editor: copy map
-	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F4) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
-		CUSTOMROR::customPopupSystem.OpenCustomGamePopup<MapCopyPopup>(600, 450, false);
+	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F4) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
+		ROCKNROR::customPopupSystem.OpenCustomGamePopup<MapCopyPopup>(600, 450, false);
 	}
 
 	// F5 in game: set debug info level
 	if (!isMenuOpen && isInGame && (pressedKey == VK_F5)) {
-		CUSTOMROR::crCommand.SetNextInGameDebugInfoLevel();
+		ROCKNROR::crCommand.SetNextInGameDebugInfoLevel();
 	}
 
 #ifdef _DEBUG
@@ -193,14 +193,14 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 	}
 
 	// TEST - F8 - show dialog
-	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F8) && (!CUSTOMROR::crInfo.HasOpenedCustomGamePopup())) {
+	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F8) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
 		std::string sTechTreeInfo = "";
 		int techToShowCount = 0;
 		static char buffer[1024] = "\0";
 		char *posInBuf = buffer;
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(global->humanPlayerId);
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = NULL;
-		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(player);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(player);
 		if (unitArray) {
 			selectedUnit = unitArray[0];
 		}
@@ -306,12 +306,12 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 			}
 		}
 
-		if (CUSTOMROR::customPopupSystem.OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
+		if (ROCKNROR::customPopupSystem.OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
 			unsigned long int *unused;
-			AOE_METHODS::UI_BASE::AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
+			AOE_METHODS::UI_BASE::AddLabel(ROCKNROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
 			if (!sTechTreeInfo.empty() && (techToShowCount > 0)) {
-				AOE_METHODS::UI_BASE::AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
-				AOE_METHODS::UI_BASE::AddLabel(CUSTOMROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount + 1));
+				AOE_METHODS::UI_BASE::AddLabel(ROCKNROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
+				AOE_METHODS::UI_BASE::AddLabel(ROCKNROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount + 1));
 			}
 		}
 	}
@@ -329,7 +329,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 // Called for ALL button clicks in the game.
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
-	if (CUSTOMROR::customPopupSystem.OnButtonClickClosePopupIfNecessary(objAddress)) {
+	if (ROCKNROR::customPopupSystem.OnButtonClickClosePopupIfNecessary(objAddress)) {
 		return true;
 	}
 	AOE_STRUCTURES::STRUCT_ANY_UI *obj = (AOE_STRUCTURES::STRUCT_ANY_UI *)objAddress;
@@ -347,14 +347,14 @@ bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
 	}
 
 	// Custom checkboxes: check/uncheck + manage custom buttons onclick
-	if (CUSTOMROR::crInfo.HasOpenedCustomGamePopup()) {
+	if (ROCKNROR::crInfo.HasOpenedCustomGamePopup()) {
 		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsButton->IsCheckSumValid()) {
 			if (objAsButton->IsACheckBox()) {
 				// We should NOT do this for standard buttons
 				AOE_METHODS::UI_BASE::CheckBox_SetChecked(objAsButton, !objAsButton->IsChecked());
 			}
-			return CUSTOMROR::customPopupSystem.OnCustomButtonClick(objAsButton); // run for checkboxes also.
+			return ROCKNROR::customPopupSystem.OnCustomButtonClick(objAsButton); // run for checkboxes also.
 		}
 		AOE_STRUCTURES::STRUCT_UI_BUTTON_COMBOBOX *objAsComboboxBtn = (AOE_STRUCTURES::STRUCT_UI_BUTTON_COMBOBOX *)objAddress;
 		if (objAsComboboxBtn->IsCheckSumValid()) {
@@ -385,8 +385,8 @@ bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
 				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_QUIT) ||
 				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_HELP);
 			if (btnEventNotCaughtByRORMenuBtnEvent) {
-				CUSTOMROR::customPopupSystem.FreeInGameCustomOptionsButton(); // Free custom button if needed, for buttons not handled in ManageOptionButtonClickInMenu.
-				CUSTOMROR::crInfo.ForceClearCustomMenuObjects(); // Here we CAN already free custom button because it's not in use (current event is about another button)
+				ROCKNROR::customPopupSystem.FreeInGameCustomOptionsButton(); // Free custom button if needed, for buttons not handled in ManageOptionButtonClickInMenu.
+				ROCKNROR::crInfo.ForceClearCustomMenuObjects(); // Here we CAN already free custom button because it's not in use (current event is about another button)
 			}
 		}
 	}
@@ -408,7 +408,7 @@ bool RockNRorMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 	long int mapSizeIndex = scEditor->map_cbb_mapSize->GetSelectedIndex();
 	if (mapSizeIndex != 6) { return false; }
 	// Here: custom map size
-	if (!CUSTOMROR::crInfo.configInfo.useCustomMapDimensions) { return false; }
+	if (!ROCKNROR::crInfo.configInfo.useCustomMapDimensions) { return false; }
 	// If result is true, WE generated the map ourselves => Disable standard generation code.
 	EditMapSizeXYPopup::OpenEditMapSizePopup();
 	return true;
@@ -432,7 +432,7 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 	// Get relevant selected units array
 	bool skipRORTreatments = false;
 	bool showRedCrossSign = false;
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = CUSTOMROR::crInfo.GetRelevantSelectedUnitsPointer(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(controlledPlayer);
 
 	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO posInfos;
 	AOE_METHODS::GetGameInfoUnderMouse(4, mousePosX, mousePosY, &posInfos);
@@ -476,7 +476,7 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 	}
 
 	// TODO : move this
-	if (CUSTOMROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation) {
+	if (ROCKNROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation) {
 		for (long int index = 0; index < unitCount; index++) {
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = selectedUnits[index];
 			// Make sure unit is valid, from MY player
@@ -491,10 +491,10 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 
 						// If the player clicked ON the building itself, cancel auto-move.
 						if ((abs(posInfos.posX - unit->positionX) < 2) && (abs(posInfos.posY - unit->positionY) < 2)) {
-							UnitCustomInfo *u = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+							UnitCustomInfo *u = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 							if (u) {
 								u->ResetSpawnAutoTargetInfo();
-								CUSTOMROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unit->unitInstanceId);
+								ROCKNROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(unit->unitInstanceId);
 								AOE_METHODS::CallWriteText("Disabled auto-move for new units for selected building");
 							}
 						} else {
@@ -517,7 +517,7 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 							}
 
 							// Add to list (or update) to set new units target position/unit
-							UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unit->unitInstanceId);
+							UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unit->unitInstanceId);
 							if (unitInfo) {
 								unitInfo->spawnTargetUnitId = targetUnitId;
 								unitInfo->spawnUnitMoveToPosX = posInfos.posX;

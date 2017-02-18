@@ -7,12 +7,12 @@
 // Opens the custom "edit unit" in editor
 // Returns true if OK.
 bool EditorScenarioInfoPopup::OpenCustomEditorScenarioInfoPopup() {
-	EditorScenarioInfoPopup *popup = CUSTOMROR::customPopupSystem.OpenCustomGamePopup<EditorScenarioInfoPopup>(500, 400, false);
+	EditorScenarioInfoPopup *popup = ROCKNROR::customPopupSystem.OpenCustomGamePopup<EditorScenarioInfoPopup>(500, 400, false);
 	bool result = (popup != NULL);
 	if (popup) {
-		popup->SetVarToUpdate_allowUnitOverlapping(&CUSTOMROR::crInfo.configInfo.editor_allowUnitOverlapping);
-		popup->SetVarToUpdate_disableHillModeChecks(&CUSTOMROR::crInfo.configInfo.editor_disableHillModeChecks);
-		popup->SetVarToUpdate_disableTerrainRestrictionChecks(&CUSTOMROR::crInfo.configInfo.editor_disableTerrainRestrictions);
+		popup->SetVarToUpdate_allowUnitOverlapping(&ROCKNROR::crInfo.configInfo.editor_allowUnitOverlapping);
+		popup->SetVarToUpdate_disableHillModeChecks(&ROCKNROR::crInfo.configInfo.editor_disableHillModeChecks);
+		popup->SetVarToUpdate_disableTerrainRestrictionChecks(&ROCKNROR::crInfo.configInfo.editor_disableTerrainRestrictions);
 		popup->SetVarToUpdate_lengthenCombatMode(NULL); // Default
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		if (global && global->IsCheckSumValid()) {
