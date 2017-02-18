@@ -92,7 +92,7 @@ public:
 	bool couldNotReadTilesetXMLConfig;
 	bool showAlertOnMissingFeature;
 	bool hideWelcomeMessage;
-	bool showCustomRORMenu;
+	bool showRockNRorMenu;
 	bool showCustomPopInfo;
 	bool useImprovedGameSpeeds;
 	float improvedGameSpeedFactor; // Value to multiply/divide when increasing/decreasing game speed
@@ -112,7 +112,7 @@ public:
 	bool gameTimerSlowDownAutoFix;
 	long int collectRORDebugLogs; // 0=no, 1=yes, filtered, 2=yes, all
 	bool showLogsInReverseOrder; // No input parameter for this (init in constructor only)
-	bool showCustomRORNotifications; // Use this to disable RockNRor message notifications (not recommended)
+	bool showRockNRorNotifications; // Use this to disable RockNRor message notifications (not recommended)
 	bool enableRPGModeInRandomGames; // Use "RPG" mode in DM/RM games
 	bool enableRPGModeInScenario; // Use "RPG" mode in scenario/campaign games
 	std::list<DrsFileToLoad*> customDrsFilesList; // List of DRS files to load at startup.

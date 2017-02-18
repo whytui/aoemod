@@ -52,13 +52,13 @@ void WxInstallRockNRor::ConstructorInit(std::wstring EXEFileName) {
 	Connect(ICR_Components_IDs::ID_ICR_SELECT_GAME_FILE, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallRockNRor::OnSelectGameEXE));
 	Connect(ICR_Components_IDs::ID_ICR_OK, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallRockNRor::OnOK));
 	Connect(ICR_Components_IDs::ID_ICR_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallRockNRor::OnCancel));
-	Connect(ICR_Components_IDs::ID_ICR_SELECT_RORAPI_DLL, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallRockNRor::OnSelectCustomROR_DLL));
+	Connect(ICR_Components_IDs::ID_ICR_SELECT_RORAPI_DLL, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxInstallRockNRor::OnSelectRockNRor_DLL));
 
 	this->GameFileArea->Add(this->btnSelectGameFile, 0, wxALIGN_LEFT);
 	this->GameFileArea->Add(this->edtGameFileName, 1, wxEXPAND);
 
 
-	this->edtCustomROR_DLL_FilePath = new wxTextCtrl(this, ICR_Components_IDs::ID_ICR_EDIT_CUSTOMROR_DLL_PATH, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+	this->edtRockNRor_DLL_FilePath = new wxTextCtrl(this, ICR_Components_IDs::ID_ICR_EDIT_ROCKNROR_DLL_PATH, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtROR_API_DLL_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtROR_API_conf_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 	this->edtWndMode_FilePath = new wxTextCtrl(this, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
@@ -73,7 +73,7 @@ void WxInstallRockNRor::ConstructorInit(std::wstring EXEFileName) {
 	this->grdResourceFiles->AddSpacer(20);
 	this->grdResourceFiles->AddSpacer(20);
 	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for RockNRor.dll")), 1, wxEXPAND);
-	this->grdResourceFiles->Add(this->edtCustomROR_DLL_FilePath, 1, wxEXPAND);
+	this->grdResourceFiles->Add(this->edtRockNRor_DLL_FilePath, 1, wxEXPAND);
 	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for ROR_API.dll")), 1, wxEXPAND);
 	this->grdResourceFiles->Add(this->edtROR_API_DLL_FilePath, 1, wxEXPAND);
 	this->grdResourceFiles->Add(new wxStaticText(this, wxID_ANY, _T("Path for ROR_API.conf")), 1, wxEXPAND);
@@ -149,7 +149,7 @@ void WxInstallRockNRor::OnSelectGameEXE(wxCommandEvent& event) {
 }
 
 
-void WxInstallRockNRor::OnSelectCustomROR_DLL(wxCommandEvent& event) {
+void WxInstallRockNRor::OnSelectRockNRor_DLL(wxCommandEvent& event) {
 	wxFileDialog openFileDialog(this, _("Choose ROR_API.dll file from installation directory"), "", "", "ROR_API.dll (ROR_API.dll)|ROR_API.dll", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	if (openFileDialog.ShowModal() == wxID_CANCEL) {
 		return;
@@ -157,13 +157,13 @@ void WxInstallRockNRor::OnSelectCustomROR_DLL(wxCommandEvent& event) {
 	
 	this->pathToResourceFiles = openFileDialog.GetDirectory();
 	// Fill text controls so that user sees source files path
-	this->edtCustomROR_DLL_FilePath->SetValue(this->pathToResourceFiles + _T("\\RockNRor\\RockNRor.dll"));
+	this->edtRockNRor_DLL_FilePath->SetValue(this->pathToResourceFiles + _T("\\RockNRor\\RockNRor.dll"));
 	this->edtROR_API_DLL_FilePath->SetValue(this->pathToResourceFiles + _T("\\ROR_API.dll"));
 	this->edtROR_API_conf_FilePath->SetValue(this->pathToResourceFiles + _T("\\ROR_API.conf"));
 	this->edtWndMode_FilePath->SetValue(this->pathToResourceFiles + _T("\\wndmode.dll"));
 
 	bool allFilesOK = true;
-	allFilesOK = this->CheckTextCtrlPath(this->edtCustomROR_DLL_FilePath) && allFilesOK;
+	allFilesOK = this->CheckTextCtrlPath(this->edtRockNRor_DLL_FilePath) && allFilesOK;
 	allFilesOK = this->CheckTextCtrlPath(edtROR_API_DLL_FilePath) && allFilesOK;
 	allFilesOK = this->CheckTextCtrlPath(edtROR_API_conf_FilePath) && allFilesOK;
 	allFilesOK = this->CheckTextCtrlPath(edtWndMode_FilePath) && allFilesOK;

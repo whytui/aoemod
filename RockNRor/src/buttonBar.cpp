@@ -118,16 +118,16 @@ void AddButtonsForLivingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 			UnitCustomInfo *unitInfo = CUSTOMROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_VILLAGERS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_VILLAGERS, 0, false,
 				localizationHandler.GetTranslation(CRLANG_ID_BTN_DONT_ATTACK_VILLAGER, "Click to prevent unit from attacking villagers automatically"),
-				&CUSTOMROR::crInfo.customRorIcons, true);
+				&CUSTOMROR::crInfo.rockNRorIcons, true);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_NOT_BUILDINGS, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DONT_ATTACK_BUILDINGS, 0, false,
 				localizationHandler.GetTranslation(CRLANG_ID_BTN_DONT_ATTACK_BUILDINGS, "Click to prevent unit from attacking buildings automatically"),
-				&CUSTOMROR::crInfo.customRorIcons, false);
+				&CUSTOMROR::crInfo.rockNRorIcons, false);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED, INGAME_UI_COMMAND_ID::CST_IUC_CROR_NO_AUTO_ATTACK, 0, false, 
 				localizationHandler.GetTranslation(CRLANG_ID_BTN_DONT_ATTACK_OTHER, "Click to prevent unit from attacking other units automatically"),
-				&CUSTOMROR::crInfo.customRorIcons, false);
+				&CUSTOMROR::crInfo.rockNRorIcons, false);
 			AddInGameCommandButton(CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_RESET_AUTO_ATTACK, 0, false,
 				localizationHandler.GetTranslation(CRLANG_ID_BTN_RESTORE_ATTACK_BEHAVIOUR, "Click to restore normal auto-attack behaviour"),
-				&CUSTOMROR::crInfo.customRorIcons, false);
+				&CUSTOMROR::crInfo.rockNRorIcons, false);
 			const AutoAttackPolicy *aap = (unitInfo && unitInfo->autoAttackPolicyIsSet) ? &unitInfo->autoAttackPolicy : &CUSTOMROR::crInfo.configInfo.autoAttackOptionDefaultValues;
 			RefreshCustomAutoAttackButtons(gameMainUI, aap);
 		}
@@ -136,7 +136,7 @@ void AddButtonsForLivingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 		protectText += " ";
 		protectText += protectHotkey[0]; // protectHotkey can't be NULL. Worst case, protectHotkey[0] = \0, but this will not cause any error.
 		AddInGameCommandButton(CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT, INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND, 0, false, 
-			protectText.c_str(), NULL /*CUSTOMROR::crInfo.customRorIcons*/, false);
+			protectText.c_str(), NULL /*CUSTOMROR::crInfo.rockNRorIcons*/, false);
 		gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT]->hotkey = protectHotkey[0]; // shortcut key for "defend/protect"
 		gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT]->unknown_29C = 0;
 	}

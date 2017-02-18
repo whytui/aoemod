@@ -807,10 +807,10 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	msg += " units.";
 	traceMessageHandler.WriteMessageNoNotification(msg);
 
-	if (GetCustomRorMaxPopulationBeginStratElem(buildAI) == NULL) {
+	if (GetRockNRorMaxPopulationBeginStratElem(buildAI) == NULL) {
 		// Add a fake element so we can find where is starting point of "added elements" in further calls / other methods.
 		AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, -1, AIUCTech,
-			CST_RSID_STORAGE_PIT/*storage pit, always (immediately) researched = no impact*/, player, CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN);
+			CST_RSID_STORAGE_PIT/*storage pit, always (immediately) researched = no impact*/, player, CST_ROCKNROR_FAKE_STRATELEM_MAXPOP_BEGIN);
 		elemToInsertBefore->previous->aliveCount = 1; // Make sure it does not impact AI.
 		elemToInsertBefore->previous->retrains = 1; // Make sure it does not impact AI.
 	}
@@ -958,7 +958,7 @@ bool IsStrategyCompleteForWonder(AOE_STRUCTURES::STRUCT_AI *ai) {
 
 	// Loop on strategy elements to see if there are missing "prerequisites" (in fact, we want almost all strategy elements to be done to build a wonder)
 	while ((currentElem != fakeFirstElem) && (currentElem != NULL) &&
-		(!IsCustomRorPopulationBeginStratElem(currentElem))) { // Ignore elements that are located AFTER RockNRor-added elements (to fit max population)
+		(!IsRockNRorPopulationBeginStratElem(currentElem))) { // Ignore elements that are located AFTER RockNRor-added elements (to fit max population)
 		if (currentElem->unitDAT_ID == CST_UNITID_WONDER) {
 			return true; // reached wonder element, ignore next ones (if any)
 		}
@@ -1338,22 +1338,22 @@ void ResetStrategyElementStatus(AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *elem) {
 
 
 // Returns true if the strategy element is the fake one added by RockNRor when it updated strategy to adapt to maximum population.
-bool IsCustomRorPopulationBeginStratElem(AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem) {
+bool IsRockNRorPopulationBeginStratElem(AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem) {
 	return (stratElem->elementType == TAIUnitClass::AIUCTech) &&
-		(strcmp(stratElem->unitName, CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN) == 0);
+		(strcmp(stratElem->unitName, CST_ROCKNROR_FAKE_STRATELEM_MAXPOP_BEGIN) == 0);
 }
 
 
 // Returns the fake strategy element added by RockNRor when it updated strategy to adapt to maximum population.
 // Returns NULL if not found.
-AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetCustomRorMaxPopulationBeginStratElem(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
+AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetRockNRorMaxPopulationBeginStratElem(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	if (!buildAI || !buildAI->IsCheckSumValid()) {
 		return NULL;
 	}
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &buildAI->fakeFirstStrategyElement;
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = fakeFirstElem->next;
 	while (curElem && (curElem != fakeFirstElem)) {
-		if (IsCustomRorPopulationBeginStratElem(curElem)) {
+		if (IsRockNRorPopulationBeginStratElem(curElem)) {
 			return curElem;
 		}
 		curElem = curElem->next;

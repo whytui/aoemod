@@ -40,7 +40,7 @@ static const long int CST_CUSTOMROR_SLP_INDEX_FOR_GROUPED_UNIT = 12; // SLP.item
 
 
 // Button bar command icon IDs for RockNRor (cf RockNRor.drs). Must correspond to actual SLPIDs in DRS file !
-enum CustomRorIconId : long int {
+enum RockNRorIconId : long int {
 	CR_ICON_DONT_ATTACK_VILLAGERS = 0,
 	CR_ICON_DONT_ATTACK_BUILDINGS = 1,
 	CR_ICON_RESTORE_AUTO_ATTACK = 2,

@@ -23,12 +23,12 @@ RockNRorConfig::RockNRorConfig() {
 	this->couldNotReadTilesetXMLConfig = false;
 	this->showAlertOnMissingFeature = true;
 	this->hideWelcomeMessage = false;
-	this->showCustomRORMenu = false;
+	this->showRockNRorMenu = false;
 	this->showCustomPopInfo = false;
 	this->useImprovedGameSpeeds = false;
 	this->allowMultiQueueing = false; // Game default
 	this->showLogsInReverseOrder = true;
-	this->showCustomRORNotifications = true; // Recommended
+	this->showRockNRorNotifications = true; // Recommended
 	this->enableRPGModeInRandomGames = false; // Game default
 	this->enableRPGModeInScenario = false; // Game default
 	this->collectRORDebugLogs = 0; // Game default (sort of): do not intercept not-implemented debug log calls.
@@ -292,7 +292,7 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			}
 		}
 		if (elemName == "showCustomRORMenu") {
-			this->showCustomRORMenu = XML_GetBoolElement(elem, "enable");
+			this->showRockNRorMenu = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "showCustomPopInfo") {
 			this->showCustomPopInfo = XML_GetBoolElement(elem, "enable");
@@ -315,7 +315,7 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			if (callResult == TIXML_SUCCESS) { this->collectRORDebugLogs = intValue; }
 		}
 		if (elemName == "showCustomRORNotifications") {
-			this->showCustomRORNotifications = XML_GetBoolElement(elem, "enable");
+			this->showRockNRorNotifications = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "rpgMode") {
 			this->enableRPGModeInScenario = XML_GetBoolElement(elem, "scenario");

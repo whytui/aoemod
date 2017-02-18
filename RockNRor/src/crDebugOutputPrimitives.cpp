@@ -331,7 +331,7 @@ void WriteDebugLogForDeserializedData(unsigned long int callAddr, unsigned char 
 
 
 // Displays debug info in F5 debug zone and/or in in-game bottom text lines.
-bool HandleCustomRORInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings) {
+bool HandleRockNRorInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return false; }
 	std::string msg[9];

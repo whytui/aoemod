@@ -478,15 +478,14 @@ void RockNRorInstance::WMCloseMessageEntryPoint(REG_BACKUP *REG_values) {
 		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = (AOE_STRUCTURES::STRUCT_GAME_SETTINGS *)myECX;
 		assert(settings->IsCheckSumValid());
 		_asm {
-			MOV EAX, myEAX
-			MOV ECX, myECX
-			CALL DWORD PTR DS:[EAX+0x12C]
-			MOV myEAX, EAX // result is used in ROR code after return...
+			MOV EAX, myEAX;
+			MOV ECX, myECX;
+			CALL DWORD PTR DS:[EAX+0x12C];
+			MOV myEAX, EAX; // result is used in ROR code after return...
 		}
 		REG_values->EAX_val = myEAX;
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
-
 }
 
 
@@ -1505,6 +1504,7 @@ void RockNRorInstance::GlobalOnButtonClick(REG_BACKUP *REG_values) {
 	if (CUSTOMROR::crMainInterface.Global_OnButtonClick(objAddr)) {
 		ChangeReturnAddress(REG_values, 0x460568);
 	}
+	CUSTOMROR::crMainInterface.ChangeWindowTitle(); // TODO: find the appropriate place so that it is called only once: need an entry point just after window is created.
 }
 
 
@@ -1513,7 +1513,7 @@ void RockNRorInstance::GlobalOnButtonClick(REG_BACKUP *REG_values) {
 // If returned REG_values->EAX_val is == 0 then calling method will not be executed (will RETN immediatly). Can be used to disable some treatments.
 void RockNRorInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
 	long int myESP = REG_values->ESP_val;
-	long int pressedKey = *(long int *) (myESP + 0x14); // 0x12: ALT 0x73:F4
+	long int pressedKey = *(long int *) (myESP + 0x14); // 0x12:ALT 0x73:F4
 	long int myECX = REG_values->ECX_val;
 	long int myEAX;
 	long int myEDI;
@@ -2540,7 +2540,7 @@ void RockNRorInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 		LEA EAX, DWORD PTR DS:[ESI+EDI*4+0x490];
 		MOV pOptionsBtn, EAX;
 	}
-	bool showCustomRORMenu = CUSTOMROR::crInfo.configInfo.showCustomRORMenu && !CUSTOMROR::crInfo.configInfo.doNotApplyFixes;
+	bool showCustomRORMenu = CUSTOMROR::crInfo.configInfo.showRockNRorMenu && !CUSTOMROR::crInfo.configInfo.doNotApplyFixes;
 
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		myEDI++;
@@ -2578,7 +2578,7 @@ void RockNRorInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	long int myESP = REG_values->ESP_val;
 	AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup = (AOE_STRUCTURES::STRUCT_ANY_UI *)REG_values->ESI_val;
 
-	if (CUSTOMROR::crInfo.configInfo.showCustomRORMenu && !CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
+	if (CUSTOMROR::crInfo.configInfo.showRockNRorMenu && !CUSTOMROR::crInfo.configInfo.doNotApplyFixes) {
 		// Before returning, make sure we always "free" the "custom options" button (from game menu).
 		CUSTOMROR::customPopupSystem.FreeInGameCustomOptionsButton();
 		// If it is another button than "custom options", we can free custom options button.
@@ -2594,7 +2594,7 @@ void RockNRorInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 
 	if (myEAX != AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS) { return; }
 
-	if (!CUSTOMROR::crInfo.configInfo.showCustomRORMenu) { return; } // In theory this should be useless because we shouldn't come here if it is disabled
+	if (!CUSTOMROR::crInfo.configInfo.showRockNRorMenu) { return; } // In theory this should be useless because we shouldn't come here if it is disabled
 	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
 	// Now manage the case when the clicked button is our custom button...
@@ -2652,7 +2652,7 @@ void RockNRorInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 		return;
 	}
 	
-	if ((arg2 == 0) && (CUSTOMROR::crInfo.configInfo.showCustomRORMenu) &&
+	if ((arg2 == 0) && (CUSTOMROR::crInfo.configInfo.showRockNRorMenu) &&
 		(senderAddr == (unsigned long int) crOptionsPopup->customOptionFreeTextVar) && (crOptionsPopup->customOptionFreeTextVar != NULL)) {
 		typedText = crOptionsPopup->customOptionFreeTextVar->pTypedText;
 		char *answer;
@@ -2668,7 +2668,7 @@ void RockNRorInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
 	// Return if the event is NOT a click on CustomROR in-game custom options OK button.
 	// In that case, continue "original" method (compares sender to other "standard" buttons)
 	if ((!crOptionsPopup->customOptionButtonVar) || (senderAddr != (unsigned long int)crOptionsPopup->customOptionButtonVar) ||
-		!CUSTOMROR::crInfo.configInfo.showCustomRORMenu || (!isCustomROROptionsPopupOpen)) {
+		!CUSTOMROR::crInfo.configInfo.showRockNRorMenu || (!isCustomROROptionsPopupOpen)) {
 		ChangeReturnAddress(REG_values, 0x0043134A);
 		return;
 	}
@@ -2959,6 +2959,9 @@ void RockNRorInstance::RORDebugLogHandler(REG_BACKUP *REG_values) {
 	if (CUSTOMROR::crInfo.configInfo.collectRORDebugLogs <= 0) { return; }
 	if (CUSTOMROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
+#ifndef GAMEVERSION_ROR10c
+	return;
+#endif
 	unsigned long int returnAddress = *(unsigned long int*)REG_values->ESP_val;
 
 	if ((returnAddress < AOE_OFFSETS::ADDR_EXE_MIN + 5) || (returnAddress > AOE_OFFSETS::ADDR_EXE_MAX)) {

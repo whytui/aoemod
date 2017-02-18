@@ -61,7 +61,7 @@ void RockNRorInfo::ResetVariables() {
 	}
 	this->triggerSet = NULL;
 	this->triggersLastCheckTime_s = 0;
-	this->lastCustomRORTimeExecution_gameTime_s = 0;
+	this->lastRockNRorTimeExecution_gameTime_s = 0;
 	this->customYesNoDialogVar = 0;
 	this->customGameMenuOptionsBtnVar = NULL;
 	this->customGamePopupButtonVar = NULL;

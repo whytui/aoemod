@@ -71,14 +71,14 @@ public:
 	long int CollectedTimerIntervalsIndex;
 	long int CollectedTimerIntervals_ms[CST_TIMER_STATS_ARRAY_SIZE];
 	int LastGameTimerAutoFix_second;
-	long int lastCustomRORTimeExecution_gameTime_s; // In seconds. Used to limit RockNRor treatments in ROR's timer execution.
+	long int lastRockNRorTimeExecution_gameTime_s; // In seconds. Used to limit RockNRor treatments in ROR's timer execution.
 	int LastDislikeValuesComputationTime_second; // Stores game time when we last computed players dislike values.
 	// To know which civ player names are already used when choosing names. Values: -1=unused, >=0=used by player #i
 	// Warning: playerName index are from 0 to 8 here instead of 1 to 9 ! Be careful.
 	char nameIndexIsUsedByPlayer[CST_MAX_TOTAL_CIV_COUNT][CST_MAX_NUMBER_OF_PLAYER_NAMES_PER_CIV];
 	// Own DRS objects
-	STRUCT_SLP_INFO customRorIcons; // RockNRor-specific icons
-	STRUCT_SLP_INFO customRorUnitShortcuts; // RockNRor-specific SLP for unit shortcuts (number displayed nearby unit selection white square)
+	STRUCT_SLP_INFO rockNRorIcons; // RockNRor-specific icons
+	STRUCT_SLP_INFO rockNRorUnitShortcuts; // RockNRor-specific SLP for unit shortcuts (number displayed nearby unit selection white square)
 
 	// Triggers
 	CR_TRIGGERS::crTriggerSet *triggerSet; // all information about custom triggers.

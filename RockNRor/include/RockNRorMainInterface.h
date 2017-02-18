@@ -50,6 +50,11 @@ public:
 	bool ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameZone,
 		AOE_STRUCTURES::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY);
 
+	// Change ROR's window title to add our mod name.
+	bool ChangeWindowTitle();
+
+private:
+	bool windowTitleChanged;
 };
 
 

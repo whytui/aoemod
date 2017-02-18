@@ -25,7 +25,7 @@ using namespace AOE_CONST_FUNC;
 
 namespace STRATEGY {
 
-const char CST_CUSTOMROR_FAKE_STRATELEM_MAXPOP_BEGIN[] = "CustomRORMaxPopulation";
+const char CST_ROCKNROR_FAKE_STRATELEM_MAXPOP_BEGIN[] = "RockNRorMaxPopulation";
 
 // Returns the element between elem1 and elem2 that comes first in strategy
 // Returns NULL if not found (elem1 & elem2 do not belong to buildAI's strategy)
@@ -155,11 +155,11 @@ AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetStrategyElementForActorBuilding(AOE_
 void ResetStrategyElementStatus(AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *elem);
 
 // Returns true if the strategy element is the fake one added by RockNRor when it updated strategy to adapt to maximum population.
-bool IsCustomRorPopulationBeginStratElem(AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem);
+bool IsRockNRorPopulationBeginStratElem(AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem);
 
 // Returns the fake strategy element added by RockNRor when it updated strategy to adapt to maximum population.
 // Returns NULL if not found.
-AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetCustomRorMaxPopulationBeginStratElem(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
+AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetRockNRorMaxPopulationBeginStratElem(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
 
 // Dumps strategy to text format, for debugging.
 std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);

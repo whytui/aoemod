@@ -53,7 +53,7 @@ void CustomPopupSystem::CloseCustomGamePopup(bool isCancel) {
 
 // Use this to properly free custom button from options menu. This should (always) be called when ingame menu is closed.
 void CustomPopupSystem::FreeInGameCustomOptionsButton() {
-	if (CUSTOMROR::crInfo.configInfo.showCustomRORMenu) {
+	if (CUSTOMROR::crInfo.configInfo.showRockNRorMenu) {
 		// Add "custom options" button (from game menu) to our "garbage collector" so that it is freed later.
 		if (CUSTOMROR::crInfo.customGameMenuOptionsBtnVar) {
 			CUSTOMROR::crInfo.AddObjectInPopupContentList(CUSTOMROR::crInfo.customGameMenuOptionsBtnVar);

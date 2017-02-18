@@ -25,15 +25,15 @@ RockNRorCommand::~RockNRorCommand() {
 bool RockNRorCommand::CheckEnabledFeatures() {
 	char strNotEnabled[] = " NOT ENABLED !";
 	FILE *f;
-	int res = fopen_s(&f, "RockNRor\\RockNRor.log", "w+"); // overwrite if already existing
+	int res = fopen_s(&f, "RockNRor\\" MOD_NAME ".log", "w+"); // overwrite if already existing
 	if (res) {
 		std::string msg = std::string(localizationHandler.GetTranslation(CRLANG_ID_CANT_WRITE_FILE, "ERROR: cannot write to"));
 		msg += " ";
-		msg += "RockNRor\\RockNRor.log";
+		msg += "RockNRor\\" MOD_NAME ".log";
 		traceMessageHandler.WriteMessage(msg);
 		return false;
 	}
-	fprintf_s(f, "RockNRor %s\n", VER_FILE_VERSION_STR);
+	fprintf_s(f, MOD_NAME " %s\n", VER_FILE_VERSION_STR);
 	if (CUSTOMROR::crInfo.configInfo.couldNotReadXMLConfig) {
 		fprintf_s(f, localizationHandler.GetTranslation(CRLANG_ID_CANT_READ_XML_CONFIG, "Warning: configuration could not be read from XML file (missing or incorrect file)."));
 		fprintf_s(f, "\n\n");
@@ -44,7 +44,7 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	}
 
 	fprintf_s(f, localizationHandler.GetTranslation(CRLANG_ID_RUN_EXE_CONFIG_CHECKS, "Running checks on active features in game executable."));
-	fprintf_s(f, "\nThis detects if some features from this version of RockNRor will not work because you need to enable them with \"RockNRorAdmin\".\n");
+	fprintf_s(f, "\nThis detects if some features from this version of " MOD_NAME " will not work because you need to enable them with \"RockNRorAdmin\".\n");
 	
 	// Analyze EXE memory and check all necessary ROR_API calls are enabled.
 	bool RORAPIFullyInstalled = CheckRorApiSequencesAreInstalled(f, CUSTOMROR::crInfo.configInfo.autoFixMissingFeatures);
@@ -55,11 +55,11 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "showAlertOnMissingFeature:                 %d\n", CUSTOMROR::crInfo.configInfo.showAlertOnMissingFeature);
 	fprintf_s(f, "autoFixMissingFeatures:                    %d\n", CUSTOMROR::crInfo.configInfo.autoFixMissingFeatures);
 	fprintf_s(f, "empires.dat relative path to use:          %s\n", CUSTOMROR::crInfo.configInfo.customEmpiresDatRelativePath.c_str());
-	fprintf_s(f, "showCustomRORMenu:                         %d\n", CUSTOMROR::crInfo.configInfo.showCustomRORMenu);
+	fprintf_s(f, "showRockNRorMenu:                          %d\n", CUSTOMROR::crInfo.configInfo.showRockNRorMenu);
 	fprintf_s(f, "showCustomPopulationInfo:                  %d\n", CUSTOMROR::crInfo.configInfo.showCustomPopInfo);
 	fprintf_s(f, "useImprovedGameSpeeds:                     %d\n", CUSTOMROR::crInfo.configInfo.useImprovedGameSpeeds);
 	fprintf_s(f, "collectRORDebugLogs:                       %d\n", CUSTOMROR::crInfo.configInfo.collectRORDebugLogs);
-	fprintf_s(f, "showCustomRORNotifications:                %d\n", CUSTOMROR::crInfo.configInfo.showCustomRORNotifications);
+	fprintf_s(f, "showRockNRorNotifications:                 %d\n", CUSTOMROR::crInfo.configInfo.showRockNRorNotifications);
 	fprintf_s(f, "enableRPGModeInRandomGames:                %d\n", CUSTOMROR::crInfo.configInfo.enableRPGModeInRandomGames);
 	fprintf_s(f, "enableRPGModeInScenario:                   %d\n", CUSTOMROR::crInfo.configInfo.enableRPGModeInScenario);
 	fprintf_s(f, "gameTimerSlowDownAutoFix:                  %d\n", CUSTOMROR::crInfo.configInfo.gameTimerSlowDownAutoFix);
@@ -286,11 +286,11 @@ void RockNRorCommand::LoadCustomDrsFiles() {
 	// Prepare custom DRS data
 	if (CUSTOMROR::crInfo.configInfo.useImprovedButtonBar) {
 		if (CUSTOMROR::crInfo.configInfo.showAlertOnMissingFeature && !FindDrsLinkForFile(CST_CUSTOMROR_DRS_FILENAME)) {
-			MessageBoxA(0, "ERROR : Could not find RockNRor.drs or it is invalid.", "RockNRor", MB_ICONWARNING);
+			MessageBoxA(0, "ERROR : Could not find RockNRor.drs or it is invalid.", MOD_NAME, MB_ICONWARNING);
 		}
 		// Initialize global variable so we can retrieve our button icons when needed
-		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorIcons, AOE_CONST_DRS::CST_CUSTOMROR_CMD_ICONS_SLP_ID);
-		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.customRorUnitShortcuts, AOE_CONST_DRS::CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
+		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.rockNRorIcons, AOE_CONST_DRS::CST_CUSTOMROR_CMD_ICONS_SLP_ID);
+		AOE_METHODS::InitSlpInfoFromDrs(&CUSTOMROR::crInfo.rockNRorUnitShortcuts, AOE_CONST_DRS::CST_CUSTOMROR_UNIT_SHORTCUTS_SLP_ID);
 	}
 }
 
@@ -308,7 +308,7 @@ const char *RockNRorCommand::GetCustomEmpiresDatRelativeFileName(AOE_STRUCTURES:
 			msg += filename;
 			msg += " ";
 			msg += localizationHandler.GetTranslation(CRLANG_ID_ERROR_EMPIRES_DAT_USED_INSTEAD, "file. data2\\empires.dat will be used instead.");
-			MessageBoxA(0, msg.c_str(), "RockNRor", MB_ICONWARNING);
+			MessageBoxA(0, msg.c_str(), MOD_NAME, MB_ICONWARNING);
 		}
 	}
 
@@ -519,7 +519,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 #endif
 	}
 	if (strcmp(command, "about") == 0) {
-		std::string s = localizationHandler.GetTranslation(CRLANG_ID_ROCKNROR, "RockNRor");
+		std::string s = localizationHandler.GetTranslation(CRLANG_ID_ROCKNROR, MOD_NAME);
 		s += " ";
 		s += VER_FILE_VERSION_STR;
 		AOE_METHODS::CallWriteText(s.c_str());
@@ -1075,7 +1075,7 @@ void RockNRorCommand::OnGameStart() {
 
 	// REQUIRES game UI to be active
 	if (!CUSTOMROR::crInfo.configInfo.hideWelcomeMessage && !settings->rgeGameOptions.isMultiPlayer) {
-		std::string msg = localizationHandler.GetTranslation(CRLANG_ID_WELCOME1, "Welcome. RockNRor");
+		std::string msg = localizationHandler.GetTranslation(CRLANG_ID_WELCOME1, "Welcome. " MOD_NAME);
 		msg += " "; 
 		msg += VER_FILE_VERSION_STR;
 		msg += " ";
@@ -1508,15 +1508,15 @@ void RockNRorCommand::OnGameTimer() {
 	}
 
 	// If there are pending messages, show them
-	if (traceMessageHandler.HasUnreadMessages() && CUSTOMROR::crInfo.configInfo.showCustomRORNotifications) {
+	if (traceMessageHandler.HasUnreadMessages() && CUSTOMROR::crInfo.configInfo.showRockNRorNotifications) {
 		bool isSuccess = SimpleEditTextPopup::OpenTraceMessagePopup();
 		// If popup couldn't be opened, maybe there is already another one... The message popup will show up when current one is closed (mark as unread).
 		traceMessageHandler.MarkAsRead(isSuccess);
 	}
 
 	// Other RockNRor "timer" treatments: do them only once every second maximum (for performance)
-	if (CUSTOMROR::crInfo.lastCustomRORTimeExecution_gameTime_s + 1 <= currentGameTime) {
-		CUSTOMROR::crInfo.lastCustomRORTimeExecution_gameTime_s = currentGameTime;
+	if (CUSTOMROR::crInfo.lastRockNRorTimeExecution_gameTime_s + 1 <= currentGameTime) {
+		CUSTOMROR::crInfo.lastRockNRorTimeExecution_gameTime_s = currentGameTime;
 	} else {
 		// No enough time has run since last execution.
 		return;
@@ -3170,7 +3170,7 @@ bool RockNRorCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UNI
 
 	// Here: unit has a custom shortcut OR shortcut 10 (not displayed in standard game)
 
-	if (CUSTOMROR::crInfo.customRorIcons.slpSize <= 0) {
+	if (CUSTOMROR::crInfo.rockNRorIcons.slpSize <= 0) {
 		return false; // Error case: missing SLP data
 	}
 
@@ -3197,7 +3197,7 @@ bool RockNRorCommand::DisplayCustomUnitShortcutSymbol(AOE_STRUCTURES::STRUCT_UNI
 		return false;
 	}
 
-	AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *slpHeader = CUSTOMROR::crInfo.customRorUnitShortcuts.slpFileHeader;
+	AOE_STRUCTURES::STRUCT_SLP_FILE_HEADER *slpHeader = CUSTOMROR::crInfo.rockNRorUnitShortcuts.slpFileHeader;
 	// slpFrameHeaderBase = first array element (in slp frame headers array)
 	AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *slpFrameHeaderBase = (AOE_STRUCTURES::STRUCT_SLP_FRAME_HEADER *)
 		(slpHeader + 1); // Dirty, but works because structs have same size (done like this in ROR code)
@@ -3516,7 +3516,7 @@ bool RockNRorCommand::HandleShowDebugGameInfo(AOE_STRUCTURES::STRUCT_GAME_SETTIN
 		return AOE_METHODS::UI_BASE::ShowHiddenDebugAIInfo(settings);
 	case CUSTOMROR::CONFIG::IDL_CUSTOM:
 #ifdef _DEBUG
-		return CR_DEBUG::HandleCustomRORInGameF5DebugInfo(settings);
+		return CR_DEBUG::HandleRockNRorInGameF5DebugInfo(settings);
 #else
 		return true;
 #endif

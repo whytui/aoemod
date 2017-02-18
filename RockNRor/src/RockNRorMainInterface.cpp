@@ -9,6 +9,7 @@ RockNRorMainInterface CUSTOMROR::crMainInterface;
 
 
 RockNRorMainInterface::RockNRorMainInterface() {
+	windowTitleChanged = false;
 }
 
 RockNRorMainInterface::~RockNRorMainInterface() {
@@ -537,5 +538,29 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 	}
 	return skipRORTreatments;
 }
+
+
+// Change ROR's window title to add our mod name.
+bool RockNRorMainInterface::ChangeWindowTitle() {
+	if (this->windowTitleChanged) { return false; }
+	HWND hWndTmp = FindWindow(NULL, _T("Age of Empires: The Rise of Rome"));
+	if (hWndTmp == NULL) {
+		hWndTmp = FindWindow(NULL, _T("Age of Empires Expansion"));
+		if (hWndTmp == NULL) {
+			return false;
+		}
+	}
+	wchar_t bufTitle[200];
+	if (GetWindowText(hWndTmp, bufTitle, sizeof(bufTitle)) == 0) {
+		return false;
+	}
+	std::wstring title = std::wstring(bufTitle) + std::wstring(_T(" - ") _T(MOD_NAME));
+	if (SetWindowText(hWndTmp, title.c_str()) != 0) {
+		this->windowTitleChanged = true;
+		return true;
+	}
+	return false;
+}
+
 
 }
