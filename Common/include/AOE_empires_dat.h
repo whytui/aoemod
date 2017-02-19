@@ -547,6 +547,36 @@ namespace AOE_CONST_FUNC {
 		CST_PPM_STOP_ON_ANY_UNIT = 2 // Projectile stops on the first encountered unit, even trees. However, own units can't be hit directly
 	};
 
+	// Defines the dopplegagner creation policy when a unit dies.
+	// This allows depleted mines/bushes/fishes + trees to remain visible for players that explored the tile, but don't see it (fog) when it becomes depleted/cut.
+	// Warning: this has nothing to do with buildings that remain visible for players that don't see it when it is destroyed !
+	enum UNIT_DEATH_DOPPLEGANGER_CREATION_MODE : char {
+		CST_DCM_NONE = 0, // Default: do not create a doppleganger when unit dies
+		CST_DCM_WHEN_RESOURCE_IS_DEPLETED = 1, // Create a doppleganger after unit dies AND its owned resource is depleted
+		CST_DCM_IMMEDIATE_AT_DEATH = 2, // Create a doppleganger immediately when unit dies (even if it still has resources)
+	};
+
+	enum UNITDEF_COMBAT_LEVEL : char {
+		CST_UCL_NONE = 0,
+		CST_UCL_BASE = 1,
+		CST_UCL_BUILDING = 2,
+		CST_UCL_CIVILIAN = 3,
+		CST_UCL_MILITARY = 4,
+		CST_UCL_PRIEST = 5
+	};
+
+	enum UNIT_SORT_NUMBER : char {
+		CST_ESN_CAN_PUT_ON_TOP_OF_OTHER_UNITS = 0,
+		CST_ESN_CANNOT_PUT_ON_TOP_OF_OTHER_UNITS = 5
+	};
+
+	enum UNIT_HILL_PLACEMENT_MODE : char {
+		CST_HPM_NO_RESTRICTION = 0,
+		CST_HPM_NOT_ON_HILL_CORNER = 1, // Not used in ROR ?
+		CST_HPM_FLAT_LAND_ONLY = 2, // Most buildings... And cliffs !
+		CST_HPM_ALLOW_ONE_ELEVATION_DIFFERENCE = 3 // Not used in ROR ?
+	};
+
 	enum TERRAIN_RESTRICTION : short int {
 		CST_TR_FLYING = 0, // projectiles, flags, dead units
 		CST_TR_DOMESTICATED_ANIMALS = 1, // Only lion_trained !!!

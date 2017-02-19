@@ -84,7 +84,6 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	// Random games settings
 	fprintf_s(f, "noWalls:                                   %ld\n", ROCKNROR::crInfo.configInfo.noWalls);
 	fprintf_s(f, "noNeutralInitialDiplomacy:                 %d\n", ROCKNROR::crInfo.configInfo.noNeutralInitialDiplomacy);
-	fprintf_s(f, "noWalls:                                   %d\n", ROCKNROR::crInfo.configInfo.noWalls);
 	fprintf_s(f, "[RM] initial food (default/small/med/large) : %ld/%ld/%ld/%ld\n",
 		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[0][RESOURCE_TYPES::CST_RES_ORDER_FOOD],
 		ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[1][RESOURCE_TYPES::CST_RES_ORDER_FOOD],

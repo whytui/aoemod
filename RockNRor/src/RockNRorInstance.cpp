@@ -407,6 +407,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004B6FAF:
 		this->AddRelevantResourceValueWhenTrading(REG_values);
 		break;
+	case 0x004AFB95:
+		this->ShouldPreserveOwnedResourceWhenKilledBy(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -3078,10 +3081,10 @@ void RockNRorInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_values
 }
 
 
-// From 004A78C0 : in display unit method, where shortcut numbers are managed.
-// - JUMP to 4A792C (default) = do NOT show shortcut (managed in ROR modified code = no need to change return address)
-// - JUMP to 4A78DB = show standard shortcut(only for 1 - 9; will crash otherwise)
-// To show custom shortcut, do the CALL 516390 in RockNRor then JUMP to 4A792C.
+// From 0x4A78C0 : in display unit method, where shortcut numbers are managed.
+// - JUMP to 0x4A792C (default) = do NOT show shortcut (managed in ROR modified code = no need to change return address)
+// - JUMP to 0x4A78DB = show standard shortcut(only for 1 - 9; will crash otherwise)
+// To show custom shortcut, do the CALL 0x516390 in RockNRor then JUMP to 0x4A792C.
 void RockNRorInstance::ShowUnitShortcutNumbers(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EBP_val;
 
@@ -4228,6 +4231,34 @@ void RockNRorInstance::AddRelevantResourceValueWhenTrading(REG_BACKUP *REG_value
 		PUSH outResourceId;
 		CALL DS:[EAX+0x78];
 	}
+}
+
+
+// From 0x4AFB90: unit.PreserveOwnedResourceWhenKilledBy(unitClass)
+// Returns (in REG_values->EAX) a bool, false if killed unit's owned resource should be reset, true otherwise (most cases)
+void RockNRorInstance::ShouldPreserveOwnedResourceWhenKilledBy(REG_BACKUP *REG_values) {
+	REG_values->EAX_val = 1; // Default result = true
+	GLOBAL_UNIT_AI_TYPES attackerUnitClass = (GLOBAL_UNIT_AI_TYPES) GetIntValueFromRORStack(REG_values, 4);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *killedUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ECX_val;
+	ror_api_assert(REG_values, killedUnit && killedUnit->IsCheckSumValidForAUnitClass());
+	if (!killedUnit || !killedUnit->IsCheckSumValidForAUnitClass()) { return; }
+	ror_api_assert(REG_values, killedUnit->unitDefinition && killedUnit->unitDefinition->IsCheckSumValidForAUnitClass());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+	bool result = true;
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		if ((killedUnit->unitDefinition->unitAIType == TribeAIGroupPreyAnimal) || (killedUnit->unitDefinition->unitAIType == TribeAIGroupPredatorAnimal)) {
+			result = (attackerUnitClass == TribeAIGroupCivilian) ||
+				(attackerUnitClass == TribeAIGroupOther_Dead_Projectile); /* Here is the bug in original code ! (unless there is a reason for this ???) */
+		}
+	} else {
+		// Custom code
+		result = AOE_STRUCTURES::ShouldKeepOwnedResourceWhenKilledByClass(killedUnit, attackerUnitClass);
+	}
+
+	// Do not modify below
+	REG_values->EAX_val = result ? 1 : 0;
 }
 
 

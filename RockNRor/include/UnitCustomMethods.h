@@ -51,7 +51,8 @@ void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, 
 // Returns false if we want to skip ROR code (so that it does not create unitAI)
 bool OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase);
 
-// Returns true if the unit specified can have a unit activity.
+// Returns true if the unit specified can have a unit activity (created by ROR code).
+// Returns false for units without unit activity, and for units whose unit activity is created by RockNRor itself.
 bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase);
 
 // Returns a "infAI elem list" pointer of a trade target if found, NULL if not found

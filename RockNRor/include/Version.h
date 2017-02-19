@@ -2,7 +2,7 @@
 #include "../../Common/include/gameVersion.h"
 //#include <gameVersion.h> // does not work because it's used by RockNRor.rc !!
 
-#define MOD_NAME "RockNRor"
+#define MOD_NAME "RockNRor" // Warning: duplicated in RockNRor & RockNRorAdmin projects
 
 #define MACRO_TO_STRING_INTERNAL(s) #s
 #define MACRO_TO_STRING(s) MACRO_TO_STRING_INTERNAL(s)

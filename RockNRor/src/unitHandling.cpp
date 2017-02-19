@@ -304,4 +304,22 @@ long int GetTradeOutResourceId(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target
 }
 
 
+// Returns true if killed unit should keep its owned resource (food for gazelle, etc) when killed = most cases (default)
+// Returns false if killed unit should lose its owned resource when killed = for example, gazelle killed by a military unit.
+bool ShouldKeepOwnedResourceWhenKilledByClass(STRUCT_UNIT_BASE *killedUnit, GLOBAL_UNIT_AI_TYPES attackerClass) {
+	if (!killedUnit || !killedUnit->IsCheckSumValidForAUnitClass()) { return true; }
+	if (!killedUnit->unitDefinition || !killedUnit->unitDefinition->IsCheckSumValidForAUnitClass()) { return true; }
+	GLOBAL_UNIT_AI_TYPES killedUnitClass = killedUnit->unitDefinition->unitAIType;
+	if ((killedUnitClass != TribeAIGroupPreyAnimal) && (killedUnitClass != TribeAIGroupPredatorAnimal)) {
+		return true; // Always "preserve resource" for non-animal units.
+	}
+	// Here killed unit is an animal
+	return (
+		(attackerClass == TribeAIGroupCivilian) || // standard
+		(attackerClass == TribeAIGroupPredatorAnimal) || // added instead of TribeAIGroupOther_Dead_Projectile (bug in original code ?)
+		(attackerClass == TribeAIGroupPreyAnimal) || // added (after all, a gazelle killing another one should not destroy underlying food).
+		(attackerClass == TribeAIGroupDomesticatedAnimal)); // added (seems logical)
+}
+
+
 }

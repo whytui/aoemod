@@ -96,11 +96,11 @@ namespace AOE_STRUCTURES {
 		long int gatherableUnitId;
 		char posY;
 		char posX;
-		char unknown_06;
+		char unknown_06; // default=0 ?
 		char unknown_07;
-		long int estimatedTotalTripLength; // +8. round trip estimated distance, including an arbitrary +10 value for detour (formula = distance*2 +10)
-		char unknown_0C;
-		char unknown_0D;
+		long int estimatedTotalTripWeight; // +8. round trip estimated (square) distance, including an arbitrary +10 value for detour (formula = distance*2 +10)
+		char unknown_0C; // default=0 ?
+		char unknown_0D; // default=0 ?
 		char distanceToStorageBuilding; // +E. Actual direct distance between resource unit and its closest storage building.
 		char resourceType; // +F. Always 0-3 (food wood stone gold).
 		long int storageBuildingUnitID; // +10. UnitID of the closest storage building.
@@ -128,7 +128,7 @@ namespace AOE_STRUCTURES {
 		long int unitElemListSize; // +110. Total allocated size of unitElemList (the array can contain some "-1")
 		// Unit lists : see 0x4BDD10. In those 4 unit lists, elements are never cleaned/removed !
 		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units that can be created by players + resources + artefacts. AddUpdate=0x4BD750.
-		STRUCT_MANAGED_ARRAY creatableAndGatherableUnits; // +118. units that can be created by players + resources (gazelle but not other animals) + artefacts
+		STRUCT_MANAGED_ARRAY creatableAndGatherableUnits; // +118. units that can be created by players + resources (gazelle but not other animals) + artefacts.
 		STRUCT_MANAGED_ARRAY playerCreatableUnits; // +128. All player-creatable units (villager, military, buildings...). NOT resources.
 		STRUCT_MANAGED_ARRAY artefactsAndFlags; // +138. Store the found flags/artefacts.
 		STRUCT_MANAGED_ARRAY elementsToDefend; // +148. Can be TC, dock, relic, ruin, mines+bushes. Related to SNxxxDefendPriority
@@ -154,7 +154,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int *unknown_4C8; // +4C8. Pointer to struct size=0x10. Array of 4 dwords.
 		unsigned long int *unknown_4CC; // +4CC. Pointer to struct size=0x10. Array of 4 dwords.
 		// 0x4D0
-		STRUCT_SPOTTED_RESOURCE_INFO *spottedGatherableUnitsByResourceTypeArrays[4]; // +4D0. Stores explored resources, their position and (closest) storage building
+		STRUCT_SPOTTED_RESOURCE_INFO *spottedGatherableUnitsByResourceTypeArrays[4]; // +4D0. Stores explored resources, their position and (closest) storage building. Eg 0x4BC7B0. Add=0x4C49C0.
 		long int spottedGatherableUnitsCountByResourceType[4]; // +4E0. Number of elements in +4D0+i array ? (i=resource type). Related to +540, +550
 		long int spottedGatherableUnitsByResourceTypeArraySizes[4]; // +4F0. 4 Array sizes (allocated sizes ?)
 		// 0x500

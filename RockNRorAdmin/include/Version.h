@@ -1,5 +1,7 @@
 #include "Windows.h"
 
+#define MOD_NAME "RockNRor" // Warning: duplicated in RockNRor & RockNRorAdmin projects
+
 #define MACRO_TO_STRING_INTERNAL(s) #s
 #define MACRO_TO_STRING(s) MACRO_TO_STRING_INTERNAL(s)
 #define VERSION_MAJOR     3

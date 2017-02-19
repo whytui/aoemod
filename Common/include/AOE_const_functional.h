@@ -103,6 +103,7 @@ namespace AOE_CONST_FUNC
 		CST_IM_LIVING_UNITS = 4 // Can select, attack, move. All living units/boats + some towers. NOT including animals.
 	};
 
+	// Represents the interface types for various units. Impacts the displayed buttons, etc.
 	enum COMMAND_ATTRIBUTES : char {
 		CST_CA_NONE = 0, // Eye candy, dead units, projectiles, flags...
 		CST_CA_GATHERABLE_TARGETS = 1, // Animals, trees, fish, mines, bushes.

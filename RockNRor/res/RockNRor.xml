@@ -125,9 +125,9 @@
 	<!-- Interval in seconds between every computation of dislike values -->
 	<dislikeValues name="dislikeComputeInterval" value="10"/>
 	<!-- dislikeAllArtefacts: if a player has all relics/ruins or a standing wonder. Value 0-99 -->
-	<dislikeValues name="dislikeAllArtefacts" value="5"/>
+	<dislikeValues name="dislikeAllArtefacts" value="6"/>
 	<!-- dislikeAllArtefacts: Dislike amount to add against a player that is human-controlled. Value 0-99 -->
-	<dislikeValues name="dislikeHuman" value="2"/>
+	<dislikeValues name="dislikeHuman" value="5"/>
 	
 	<!-- *** City plan -->
 	<!-- all.enhanceLikeValues: set to 0 to disable city plan enhancements, 1 or other values to activate it (recommended) -->

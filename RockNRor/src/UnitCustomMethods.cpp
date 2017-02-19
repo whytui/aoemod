@@ -242,6 +242,7 @@ void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, 
 	assert(killedUnit->DerivesFromAttackable());
 	if (!killedUnit->DerivesFromAttackable()) { return; }
 
+	// Handle RPG mode, if active
 	if (ROCKNROR::IsRpgModeEnabled() && actorUnit->DerivesFromTrainable() && (killedUnit->ptrStructPlayer->playerId > 0)) {
 		RPG_MODE::OnUnitKill(killedUnit, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)actorUnit);
 	}
@@ -254,6 +255,20 @@ void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, 
 		if (killedUnit->ptrStructPlayer && killedUnit->ptrStructPlayer->ptrAIStruct &&
 			IsImproveAIEnabled(killedUnit->ptrStructPlayer->playerId)) {
 			CUSTOM_AI::customAIHandler.OnUnitAttacked(&killedUnit->ptrStructPlayer->ptrAIStruct->structTacAI, killedUnit, actorUnit, false);
+		}
+	}
+
+	// Handle Gaia animals death
+	if ((killedUnit->ptrStructPlayer->playerId == 0) && killedUnit->unitDefinition && killedUnit->unitDefinition->IsCheckSumValidForAUnitClass()) {
+		if ((killedUnit->unitDefinition->unitAIType == TribeAIGroupPreyAnimal) ||
+			(killedUnit->unitDefinition->unitAIType == TribeAIGroupPredatorAnimal)) {
+			if (actorUnit->ptrStructPlayer && actorUnit->ptrStructPlayer->ptrAIStruct &&
+				IsImproveAIEnabled(actorUnit->ptrStructPlayer->playerId)) {
+				CUSTOM_AI::CustomPlayerAI *playerAI = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(actorUnit->ptrStructPlayer->playerId);
+				if (playerAI) {
+					playerAI->economyAI.OnGaiaAnimalKilled(actorUnit->ptrStructPlayer, killedUnit);
+				}
+			}
 		}
 	}
 }
@@ -327,9 +342,11 @@ bool OnUnitCreateActivityStruct(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase) {
 }
 
 
-// Returns true if the unit specified can have a unit activity.
+// Returns true if the unit specified can have a unit activity (created by ROR code).
+// Returns false for units without unit activity, and for units whose unit activity is created by RockNRor itself.
 bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase) {
 	if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass() || !unitBase->unitDefinition) { return false; }
+	// Remark: Units without activity = 0x4AFFA8 = Cases 5,7,8,B,E,F,10,1D,1E,1F,20,21 (+ potentially non-living unit classes)
 	switch (unitBase->unitDefinition->unitAIType) {
 		// List of unit classes that can't have "unit AI" (unit activity)
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupBerryBush:
@@ -341,6 +358,7 @@ bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnknownFish:
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupTree:
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupTreeStump:
+	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupDomesticatedAnimal: // note: for this one, RockNRor forces the creation of unitAI.
 		// Those ones are not correctly handled in 0x4AFBE0=unit.createUnitActivity() (however, there is no bug because this is only called for living units)
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupBird:
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupCliff:

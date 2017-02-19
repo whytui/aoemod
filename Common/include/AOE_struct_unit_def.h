@@ -148,7 +148,7 @@ namespace AOE_STRUCTURES
 		STRUCT_GRAPHICS *ptrDyingGraphic; // +1C. starts with SLP name.
 		// 0x20
 		STRUCT_GRAPHICS *ptrDyingGraphic2; // +20. Used only when deathMode = true ("undead")
-		short int deathMode; // +024. If 1, then unit status 6 is used. Otherwise, units die as soon as their own resources are depleted. ("undead flag")
+		short int useUndeadStatus; // +024. If 1, then unit status 6 is used. Otherwise, units die as soon as their own resources are depleted. ("undead flag")
 		short int totalHitPoints; // +026. Including upgrades !
 		float lineOfSight; // +028
 		char garrisonCapacity; // +02C
@@ -162,8 +162,8 @@ namespace AOE_STRUCTURES
 		STRUCT_DAT_SOUND *ptrTrainSound; // +40. "Created" sound
 		STRUCT_DAT_SOUND *ptrDyingSound; // +44
 		short int deadUnitId; // +48
-		char placementMode; // +4A. "sort_number"
-		char airMode; // +4B. "can_be_built_on"
+		UNIT_SORT_NUMBER placementSortNumber; // +4A. "sort_number". "Placement mode" in old AGE3 versions.
+		char canBeBuiltOn; // +4B. "Air mode" in old AGE3 versions.
 		short int iconId; // +4C
 		char hideInEditor;
 		char unknown_04F; // unused ?
@@ -178,7 +178,7 @@ namespace AOE_STRUCTURES
 		float editorRadiusY; // for Y axis "construction_radius". Used if placementTerrainId>=0, for example ?
 		// 0x60
 		float editorRadiusX; // for X axis "construction_radius". Used if placementTerrainId>=0, for example ?
-		char hillMode; // 0=no restriction, 2 for buildings ? "elevation_flag"
+		UNIT_HILL_PLACEMENT_MODE hillMode; //  +64. 0=no restriction, 2=flat land only. "elevation_flag"
 		char visibleInFog; // +65. Can be 0,1, 3 ("inverted visibility" in AGE3, but not exact. smoke has 3). >0 = always visible for others. Note: this never provides visibility, unit is not selectable, but is visible (greyed) through fog (like buildings)
 		short int terrainRestriction; // +66
 		char flyMode; // +68. "movement_type"
@@ -198,14 +198,14 @@ namespace AOE_STRUCTURES
 		char resourceStorageEnableMode_2;
 		char resourceStorageEnableMode_3; // +8A
 		char blastArmorLevel; // +8B. "area_effect_object_level"
-		char triggerType; // +8C. Same as class ? TribeAIGroupCivilian = 4, etc? "combat_level"
+		UNITDEF_COMBAT_LEVEL combatLevel; // +8C. "triggerType" in old AGE3 versions. 
 		AOE_CONST_FUNC::INTERACTION_MODES interactionMode; // +8D. 1-byte. "select_level"
 		char minimapMode; // +8E. "map_draw_level"
-		AOE_CONST_FUNC::COMMAND_ATTRIBUTES commandAttribute; // +8F. "unit_level"
+		AOE_CONST_FUNC::COMMAND_ATTRIBUTES commandAttribute; // +8F. "unit_level". "Interface kind" in AGE3.
 		// 0x90
 		char minimapColor;
-		char attackMode; // "attack_reaction"
-		char edibleMeat; // +92 "convert_terrain_flag" ?
+		char attackMode; // "attack_reaction". Flagged as obsolete in AGE3.
+		char convertTerrainFlag; // +92 "edible meat" in old AGE3 versions ? Obsolete too ?
 		char damageGraphicCount; // +93. Count for damageGraphicsArray.
 		STRUCT_DAMAGE_GRAPHIC *damageGraphicsArray; // +94. Point to an array of pointers to damage graphics (cf damageGraphicCount)
 		long int languageDLLHelp;
@@ -213,13 +213,13 @@ namespace AOE_STRUCTURES
 		// 0xA0
 		long int hotKey;
 		char unselectable; // +A4
-		char isSpottableResource; // +A5. 1 for resources other than animals and farms. Such units are added to some player list, but what for ?
-		char unknownSpottableResourceAttribute_A6; // +A6. 2 for trees? Is this used ?
-		PLAYER_GATHERABLE_RESOURCE_CATEGORIES spottableResourceCategory; // Unknown8 in AGE3. cf 517166.
+		char isSpottableResource; // +A5. 1 for resources other than animals and farms. Such units are added to some player list, but what for ? "Auto gatherable" in AGE3.
+		UNIT_DEATH_DOPPLEGANGER_CREATION_MODE createDopplegangerModeOnDeath; // +A6. If 1/2, create a doppleganger for ALL players (if explored & under fog) when dying. Values: 0=none, 1=afterResourceDepleted(fish, bushes, mines), 2=ImmediateAtDeath(trees).
+		PLAYER_GATHERABLE_RESOURCE_CATEGORIES spottableResourceCategory; // +A7. Related to isSpottableResource ? Gather group in AGE3. cf 0x517166.
 		char selectionEffect; // +A8
 		char editorSelectionColor; // +A9
-		char unknown_0AA;
-		char unknown_0AB;
+		char unknown_0AA; // Always 0 ?
+		char unknown_0AB; // Always 0 ?
 		float selectionRadiusY;
 		// 0xB0
 		float selectionRadiusX;

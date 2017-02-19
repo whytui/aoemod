@@ -83,4 +83,8 @@ bool UnitDefOffersTrading(STRUCT_UNITDEF_BASE *unitDef);
 // Returns the "out" resource Id for trading with target unit, taking into account the correct unitDefCommand.
 long int GetTradeOutResourceId(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *targetUnit);
 
+// Returns true if killed unit should keep its owned resource (food for gazelle, etc) when killed = most cases (default)
+// Returns false if killed unit should lose its owned resource when killed = for example, gazelle killed by a military unit.
+bool ShouldKeepOwnedResourceWhenKilledByClass(STRUCT_UNIT_BASE *killedUnit, GLOBAL_UNIT_AI_TYPES attackerClass);
+
 }

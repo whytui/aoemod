@@ -22,7 +22,13 @@ bool RORConnector::ConnectToROR() {
 	if (hWndTmp == NULL) {
 		hWndTmp = FindWindow(NULL, _T("Age of Empires Expansion"));
 		if (hWndTmp == NULL) {
-			return false;
+			hWndTmp = FindWindow(NULL, _T("Age of Empires: The Rise of Rome - ") _T(MOD_NAME));
+			if (hWndTmp == NULL) {
+				hWndTmp = FindWindow(NULL, _T("Age of Empires Expansion - ") _T(MOD_NAME));
+				if (hWndTmp == NULL) {
+					return false;
+				}
+			}
 		}
 	}
 	// Search for process id

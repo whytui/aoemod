@@ -832,7 +832,7 @@ std::string GetRemainingTechTreeText(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_
 	// Not relevant (functional reasons)
 	if ((bldDef->unitType != AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING) ||
 		(bldDef->hideInEditor != 0 /*exclude duplicates*/) || (bldDef->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding/*excludes walls*/) ||
-		(bldDef->interactionMode != 3/*exclude towers*/) || (bldDef->triggerType != 2)
+		(bldDef->interactionMode != 3/*exclude towers*/) || (bldDef->combatLevel != UNITDEF_COMBAT_LEVEL::CST_UCL_BUILDING /* this criterion might no be relevant*/)
 		) { return ""; }
 	std::string result = "";
 	char nameBuffer[50];

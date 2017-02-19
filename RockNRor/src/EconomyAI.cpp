@@ -126,4 +126,24 @@ void EconomyAI::FixStuckRepairmen(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	}
 }
 
+
+// Called when "player" kills a gaia animal
+void EconomyAI::OnGaiaAnimalKilled(STRUCT_PLAYER *player, STRUCT_UNIT_ATTACKABLE *killedAnimal) {
+	if (!player || !player->IsCheckSumValid() || !killedAnimal || !killedAnimal->IsCheckSumValidForAUnitClass()) { return; }
+	if (!player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) { return; }
+	AOE_STRUCTURES::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
+	assert(infAI->IsCheckSumValid());
+	if (killedAnimal->unitDefinition->unitAIType == TribeAIGroupPreyAnimal) {
+		return; // Gazelles are already handled correctly. The "add" method below checks unicity but it would be bad for performance.
+	}
+	if ((killedAnimal->resourceTypeId >= 0) && (killedAnimal->resourceValue > 0)) {
+		unsigned long int addr = 0x4C49C0; // add gatherable target in list
+		_asm {
+			MOV ECX, infAI;
+			PUSH killedAnimal; // parameter is gahterable unit pointer
+			CALL addr;
+		}
+	}
+}
+
 }

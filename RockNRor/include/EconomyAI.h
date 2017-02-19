@@ -30,14 +30,17 @@ namespace CUSTOM_AI {
 		void ResetAllInfo();
 
 		// Run various fixes on villager actions, provided that a sufficient delay has passed since last execution
-		void RunFixesOnVillagerActions(AOE_STRUCTURES::STRUCT_PLAYER *player, long int currentGameTime);
+		void RunFixesOnVillagerActions(STRUCT_PLAYER *player, long int currentGameTime);
+
+		// Called when "player" kills a gaia animal
+		void OnGaiaAnimalKilled(STRUCT_PLAYER *player, STRUCT_UNIT_ATTACKABLE *killedAnimal);
 
 	private:
 		// Remove farmers when more than 1 are assigned to the same farm.
-		void CheckForDuplicateFarmers(AOE_STRUCTURES::STRUCT_PLAYER *player);
+		void CheckForDuplicateFarmers(STRUCT_PLAYER *player);
 
 		// Fix repairment that are stuck in idle status because they got blocked at some point in their movement.
-		void FixStuckRepairmen(AOE_STRUCTURES::STRUCT_PLAYER *player);
+		void FixStuckRepairmen(STRUCT_PLAYER *player);
 
 	};
 	

@@ -298,13 +298,13 @@ namespace AOE_CONST_INTERNAL
 		GUS_1_UNKNOWN_1 = 1, // Not sure this status is really used/has a valid role ?
 		GUS_2_READY = 2, // Standard "alive" status for most units
 		
-		// Triggered when HP < 1. From here, unit can no longer have actions, no longer provides fog visibility.
+		// Triggered when HP < 1. From here, unit can no longer have actions, no longer provides fog visibility (except the tile itself?).
 		// Berry bushes, "cut" trees have this status ? Unit no longer receives damage except blast damage (trees/animals destroyed by catapults...)
 		// Unit's graphic is now dying graphic (unitDef+1C), dying sound is played when status becomes 3.
 		GUS_3_WAIT_RESOURCE_DEPLETION_NO_DYING_ANIMATION = 3, // Go to status=4 if unit has a dyingAnimation1. Otherwise, this status has the same role as status=5 (in this case, go directly to 6 or 7 once depleted).
 		GUS_4_DYING_ANIMATION = 4, // Dying animation is being run (?)
 		GUS_5_WAIT_RESOURCE_DEPLETION_AFTER_ANIMATION = 5, // Unit keeps this status until owned resources are depleted (down to 0), depending on resourceDecay and being gathered by some unit. Unit only produces visibility on its own tile ?
-		GUS_6_DYING_ANIMATION_2 = 6, //  Used only when deathMode=true (NOT used in standard game). This status uses dyingGraphic2.
+		GUS_6_DYING_ANIMATION_2 = 6, // "undead animation". Used only when useUndeadStatus=true (NOT used in standard game). This status uses dyingGraphic2.
 		GUS_7_UNKNOWN_7 = 7, // Unit actual death. Unit is no longer displayed at all and "dead unit" is created.
 		GUS_8_UNKNOWN_8 = 8 // Invalid, waiting to be freed (or already freed ?)
 	};
