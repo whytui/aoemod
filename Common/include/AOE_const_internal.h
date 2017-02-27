@@ -56,6 +56,7 @@ namespace AOE_CONST_INTERNAL
 		GPT_UNKNOWN_6 = 6 // "V" (viewing?)
 	};
 
+	// Represents game difficulty levels. Warning: lower level = harder !
 	enum GAME_DIFFICULTY_LEVEL : char {
 		GDL_HARDEST = 0,
 		GDL_HARD = 1,
@@ -445,7 +446,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_1FE = 0x1FE, // Notify something...? See 0x41426A
 		CST_ATI_NOTIFY_SAW_ENEMY_UNIT = 0x1FF, // To confirm. See 0x4143B7 WRONG ? is it GAME_EVENT_TYPES instead ?
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
-		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted? Movement finished ?
+		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
 		CST_ATI_UNKNOWN_203 = 0x203, // ? See 0x4143B7
 		CST_ATI_UNKNOWN_209 = 0x209, // Related to notification when being attacked ? see 0x4E4769
 		CST_ATI_UNKNOWN_20B = 0x20B, // Used just after a unit is converted ? 0x4AEBDD
@@ -470,19 +471,19 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_TRANSPORT = 0x26D, // unsure. Includes move+unload. Such unit can't be used as actor in strategy element.
 		CST_ATI_UNKNOWN_26E = 0x26E, // load ? see 0x412DF0
 		CST_ATI_UNKNOWN_26F = 0x26F, // see 0x412E60
-		// TO DO: "when attacked" values, =x+100 (x+0x64) ?
+		// ORDERs values, =x+100 (x+0x64) ?
 		CST_ATI_UNKNOWN_2BB = 0x2BB, // Release being worked on ?? Example: targeted farm or enemy projectile dies ? 0x426B66.
-		CST_ATI_UNKNOWN_2BC_ATTACKING = 0x2BC, // React to agression but also "AI" attacks
+		CST_ATI_ORDER_ATTACK = 0x2BC, // React to agression but also "AI" attacks.
 		CST_ATI_DEFEND_UNIT = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.defend/followUnit?(myUnitId, targetUnitId)
 		CST_ATI_UNKNOWN_2BE = 0x2BE, // build+0x64
 		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ?? Explore ?
 		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
-		CST_ATI_GATHERER_NOATT_REACTION_WHEN_ATTACKED = 0x2C5, // TO CONFIRM
-		CST_ATI_UNKNOWN_2C6 = 0x2C6, // Used for villagers ? 4DA2BF... Used to retreat to position 4DA160. Used also in attacks grpType0x15? 4DA193
+		CST_ATI_ORDER_GATHER_NOATTACK = 0x2C5, // TO CONFIRM
+		CST_ATI_UNKNOWN_2C6_ORDER_MOVE = 0x2C6, // Order move ? Used for villagers ? 4DA2BF... Used to retreat to position 4DA160. Used also in attacks grpType0x15? 4DA193
 		CST_ATI_UNKNOWN_2C8 = 0x2C8, // 264+64 see 0x41363F
-		CST_ATI_GATHERER_ATT_REACTION_WHEN_ATTACKED = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
-		CST_ATI_UNKNOWN_2CE = 0x2CE, // (26A+64) Repair?? see 0x413595
-		CST_ATI_UNKNOWN_2D1_UNLOAD = 0x2D1, // Unload "execution"? (26D+0x64?) see 0x4135A7, 0x4E942B(execCmdUnload)
+		CST_ATI_ORDER_GATHER_ATTACK = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
+		CST_ATI_ORDER_REPAIR = 0x2CE, // (26A+64) Repair?? see 0x413595
+		CST_ATI_ORDER_UNLOAD = 0x2D1, // Unload (26D+0x64?) see 0x4135A7, 0x4E942B(execCmdUnload)
 		CST_ATI_UNKNOWN_2D2 = 0x2D2,
 		CST_ATI_UNKNOWN_2D3 = 0x2D3,
 		CST_ATI_UNKNOWN_2D4 = 0x2D4,

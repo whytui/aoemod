@@ -81,6 +81,17 @@ namespace AOE_STRUCTURES {
 	};
 
 
+#define CHECKSUM_UNIT_BASE 0x00547DA8 // "Eye candy" - type 10
+#define CHECKSUM_UNIT_FLAG 0x00542E14 // "Flag" - type 20
+#define CHECKSUM_UNIT_DOPPLEGANGER 0x005441BC // "Doppleganger" - type 25
+#define CHECKSUM_UNIT_MOVABLE 0x00544838 // "Movable" - type 30
+#define CHECKSUM_UNIT_COMMANDABLE 0x00542748 // "Commandable" - type 40
+#define CHECKSUM_UNIT_ATTACKABLE 0x0054324C // "" - type 50
+#define CHECKSUM_UNIT_PROJECTILE 0x005445E8 // "Projectiles" - type 60
+#define CHECKSUM_UNIT_TRAINABLE 0x0054820C // "Trainable" - type 70
+#define CHECKSUM_UNIT_BUILDING 0x00547FA0 // "Building" - type 80
+#define CHECKSUM_UNIT_TREE 0x00548474 // "Tree" - type 90
+
 
 	// Eye candy (type10) / common (base) class for all units (unit instances). Name=RGE_Static_Object
 	// A8 7D 54 00. Size=0x88 (constructor 0x04A64B0)
@@ -112,7 +123,7 @@ namespace AOE_STRUCTURES {
 	// +0x70 = unit.applyDamageFrom(attkCount, pAttkList, f_altitudeFactor, actorPlayer, actorUnit) (EDX+70)
 	// +0x74 = unit.calcDamageFrom(attacksCount, pAttacksList, f_altitudeFactor, actorPlayer, actorUnit). Calculates only !
 	// +0x78 = unit.rotate(long)
-	// +0x7C = unit.readyToAttack?()
+	// +0x7C = unit.readyToAttack() = 0x4269F0 for all classes that derive from attackable (others=return 0).
 	// +0x80 = unit.setOwnedResource(resourceId, float_value)
 	// +0x84 = unit.setResourceValue(f_value, isAdd, checkResourceCapacity)
 	// +0x88 = unit.setHealAction(unitId, force)
@@ -258,45 +269,45 @@ namespace AOE_STRUCTURES {
 		char isBeingAttacked; // +86. For map blinking (+other treatments?). This is constantly reset and re-computed in "unit.timerUpdate(?)" 0x426BF0 treatments.
 		char unknown_087;
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x00547DA8); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNIT_BASE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_EYE_CANDY); }
 		// Returns true if checksum is valid for this class OR a child class
 		bool IsCheckSumValidForAUnitClass() const {
-			return (this->checksum == 0x00547DA8) || // eye candy (including cliffs...)
-				(this->checksum == 0x00542E14) || // Flag
-				(this->checksum == 0x005441BC) || // Doppleganger
-				(this->checksum == 0x00544838) || // Movable (Dead/fish)
-				(this->checksum == 0x00542748) || // Commandable (Birds)
-				(this->checksum == 0x0054324C) || // Type50
-				(this->checksum == 0x005445E8) || // Projectiles
-				(this->checksum == 0x0054820C) || // living
-				(this->checksum == 0x00547FA0) || // Building
-				(this->checksum == 0x00548474) // Tree
+			return (this->checksum == CHECKSUM_UNIT_BASE) || // eye candy (including cliffs...)
+				(this->checksum == CHECKSUM_UNIT_FLAG) || // Flag
+				(this->checksum == CHECKSUM_UNIT_DOPPLEGANGER) || // Doppleganger
+				(this->checksum == CHECKSUM_UNIT_MOVABLE) || // Movable (Dead/fish)
+				(this->checksum == CHECKSUM_UNIT_COMMANDABLE) || // Commandable (Birds)
+				(this->checksum == CHECKSUM_UNIT_ATTACKABLE) || // Type50
+				(this->checksum == CHECKSUM_UNIT_PROJECTILE) || // Projectiles
+				(this->checksum == CHECKSUM_UNIT_TRAINABLE) || // living
+				(this->checksum == CHECKSUM_UNIT_BUILDING) || // Building
+				(this->checksum == CHECKSUM_UNIT_TREE) // Tree
 				;
 		}
 		// Returns true if the unit is a flag (20) or a child class (all but eye candy and trees)
 		bool DerivesFromFlag() const {
-			return (this->IsCheckSumValidForAUnitClass() && (this->checksum != 0x00547DA8) && (this->checksum != 0x00548474)); // all but 10 and 90
+			return (this->IsCheckSumValidForAUnitClass() && (this->checksum != CHECKSUM_UNIT_BASE) && (this->checksum != CHECKSUM_UNIT_TREE)); // all but 10 and 90
 		}
 		// Returns true if the unit is movable (30 - deadfish in AGE3) or a child class
 		bool DerivesFromMovable() const {
-			return this->DerivesFromCommandable() || (this->checksum == 0x00544838);
+			return this->DerivesFromCommandable() || (this->checksum == CHECKSUM_UNIT_MOVABLE);
 		}
 		// Returns true if the unit is a commandable (40 - bird in AGE3) or a child class
 		bool DerivesFromCommandable() const {
-			return this->DerivesFromAttackable() || (this->checksum == 0x00542748);
+			return this->DerivesFromAttackable() || (this->checksum == CHECKSUM_UNIT_COMMANDABLE);
 		}
 		// Returns true if the unit is a living unit or a child class (building)
 		bool DerivesFromTrainable() const {
-			return (this->checksum == 0x0054820C) || // living
-				(this->checksum == 0x00547FA0); // Building
+			return (this->checksum == CHECKSUM_UNIT_TRAINABLE) || // living
+				(this->checksum == CHECKSUM_UNIT_BUILDING); // Building
 		}
 		// Returns true if the unit is type50 or one of its child classes (projectile, living/building).
 		bool DerivesFromAttackable() const {
-			return (this->checksum == 0x0054324C) || // Type50
-				(this->checksum == 0x005445E8) || // Projectiles
-				(this->checksum == 0x0054820C) || // living
-				(this->checksum == 0x00547FA0); // Building
+			return (this->checksum == CHECKSUM_UNIT_ATTACKABLE) || // Type50
+				(this->checksum == CHECKSUM_UNIT_PROJECTILE) || // Projectiles
+				(this->checksum == CHECKSUM_UNIT_TRAINABLE) || // living
+				(this->checksum == CHECKSUM_UNIT_BUILDING); // Building
 		}
 		// Deletes a units by calling destructor. You should provide freeMemory=true
 		// AOE destructor calls all necessary underlying updates of removing the unit (map, player, AI...)
@@ -308,7 +319,7 @@ namespace AOE_STRUCTURES {
 				MOV ECX, myaddr;
 				MOV EDX, DS:[ECX];
 				PUSH doFree;
-				CALL DS : [EDX];
+				CALL DS:[EDX];
 			}
 		}
 
@@ -345,12 +356,12 @@ namespace AOE_STRUCTURES {
 
 		// Get unit max range, returns 0 for types that do not derive from Type50 (attackable).
 		// This is analog to "EDX+0x10C" call
-		float GetMaxRange() const {
+		/*float GetMaxRange() const {
 			if (!this->DerivesFromAttackable()) {
 				return 0.f;
 			}
 			return ((STRUCT_UNITDEF_ATTACKABLE*)this->unitDefinition)->maxRange;
-		}
+		}*/
 
 		// Returns true if unit can move to target. Still not well known
 		long int CanMoveTo(long int targetUnitId, float maxRange, long int arg3, long int arg4, long int arg5, long int arg6) {
@@ -379,7 +390,7 @@ namespace AOE_STRUCTURES {
 	public:
 		float currentMovementSpeed; // +88. Unit is moving <=> currentMovementSpeed>0
 
-		bool IsCheckSumValid() { return (this->checksum == 0x00542E14); }
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_UNIT_FLAG); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_FLAGS); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_FLAG) == 0x8C, "STRUCT_UNIT_FLAG size");
@@ -397,7 +408,7 @@ namespace AOE_STRUCTURES {
 		char unknown_A9; // Seen 0xDF ?
 		char unknown_AA[0xB0 - 0xAA];
 
-		bool IsCheckSumValid() { return (this->checksum == 0x005441BC); }
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_UNIT_DOPPLEGANGER); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_DOPPLEGANGER); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_DOPPLEGANGER) == 0xB0, "STRUCT_UNIT_DOPPLEGANGER size");
@@ -455,7 +466,7 @@ namespace AOE_STRUCTURES {
 		char unknown_17D; // orientation index ?
 		char unknown_17E[2];
 
-		bool IsCheckSumValid() { return (this->checksum == 0x00544838); }
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_UNIT_MOVABLE); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_MOVABLE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_MOVABLE) == 0x180, "STRUCT_UNIT_MOVABLE size");
@@ -469,7 +480,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_ACTION_INFO *ptrActionInformation; // +184. Useful to retrieve unit's action.
 		long int rightClickActionCounter_unsure; // +188. Incremented each time a right-click action is done by player ?
 
-		bool IsCheckSumValid() { return (this->checksum == 0x00542748); }
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_UNIT_COMMANDABLE); }
 		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_COMMANDABLE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE) == 0x18C, "STRUCT_UNIT_COMMANDABLE size");
@@ -481,11 +492,11 @@ namespace AOE_STRUCTURES {
 		STRUCT_NEARBY_UNIT_INFO *myVisibilityToOtherPlayers_unsure[9]; // +18C. Provides visibility info from other player's point of view ?
 		// 0x1B0
 		STRUCT_MAP_VISIBILITY_INFO unknownVisibility_1B0; // Same "nature" object as +0x1E4. A mask for map visibility (visible for ...)?
-		float unknown_1B4; // Time till unit can give a shot ? (attack) ?
+		float pendingReloadTime; // +1B4. Time (in seconds) till unit can give an effective 'shot'. Init=unitDef.reloadTime1 at startup and after shooting/attacking.
 		char stillToBeDiscoveredByHuman; // +1B8. 1 for gaia units that have not been discovered yet (for gaia units capture system). Only non-AI players can capture gaia units.
 		char unknown_1B9[3]; // unused?
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x0054324C); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNIT_ATTACKABLE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_ATTACKABLE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE) == 0x1BC, "STRUCT_UNIT_ATTACKABLE size");
@@ -500,7 +511,7 @@ namespace AOE_STRUCTURES {
 		// 0x1C0
 		unsigned long int unknown_1C0;
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x005445E8); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNIT_PROJECTILE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_PROJECTILE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE) == 0x1C4, "STRUCT_UNIT_PROJECTILE size");
@@ -515,7 +526,7 @@ namespace AOE_STRUCTURES {
 		char unknown_1BD;
 		short int unknown_1BE;
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x0054820C); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNIT_TRAINABLE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TRAINABLE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE) == 0x1C0, "STRUCT_UNIT_TRAINABLE size");
@@ -555,7 +566,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_1F8;
 
 		// Returns true if checksum is valid FOR A BUILDING only.
-		bool IsCheckSumValid() const { return (this->checksum == 0x00547FA0); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNIT_BUILDING); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_BUILDING) == 0x1FC, "STRUCT_UNIT_BUILDING size");
@@ -564,7 +575,7 @@ namespace AOE_STRUCTURES {
 	// 74 84 54 00 = tree (type90). Size=0x88 (constructor=0x04B0D20) - Derives from type10
 	class STRUCT_UNIT_TREE : public STRUCT_UNIT_BASE {
 	public:
-		bool IsCheckSumValid() const { return (this->checksum == 0x00548474); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNIT_TREE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TREE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_TREE) == 0x88, "STRUCT_UNIT_TREE size");

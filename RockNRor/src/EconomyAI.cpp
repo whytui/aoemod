@@ -140,7 +140,7 @@ void EconomyAI::OnGaiaAnimalKilled(STRUCT_PLAYER *player, STRUCT_UNIT_ATTACKABLE
 		unsigned long int addr = 0x4C49C0; // add gatherable target in list
 		_asm {
 			MOV ECX, infAI;
-			PUSH killedAnimal; // parameter is gahterable unit pointer
+			PUSH killedAnimal; // parameter is gatherable unit pointer
 			CALL addr;
 		}
 	}

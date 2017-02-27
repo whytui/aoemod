@@ -2248,8 +2248,8 @@ void RockNRorCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI *
 			// This IF corresponds to original code: do NOT re-task villager that are currently attacking something ("whenattacked=2BC" or that...?(2C9))
 			// Corresponds to filter (exclude 2C9 and 2BC) in original game code
 			// Don't know why first loop does NOT exclude 2C9 (only excludes 2BC)
-			if ((activity->orderTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_UNKNOWN_2BC_ATTACKING) ||
-				(activity->orderTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_GATHERER_ATT_REACTION_WHEN_ATTACKED)) {
+			if ((activity->orderTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_ORDER_ATTACK) ||
+				(activity->orderTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_ORDER_GATHER_ATTACK)) {
 				attackTower = false;
 			}
 		}

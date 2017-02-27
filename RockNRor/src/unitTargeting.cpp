@@ -125,7 +125,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 			IsUnitPositionKnown(infAI->ptrMainAI->player, loopTargetUnit)) {
 			long int loopTargetPlayerId = loopTargetUnit->ptrStructPlayer->playerId;
 			if ((loopTargetPlayerId > 0) && (loopTargetUnit->unitStatus <= AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY)) {
-				long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, groupLeader->GetMaxRange(),
+				long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 					0, 1, -1, -1);
 				if (canMoveToTarget) {
 					// Additional conditions/checks ?
@@ -713,7 +713,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 				bool isEnemy = (targetUnitPlayerId > 0) &&
 					(player->ptrDiplomacyStances[targetPlayerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY);
 				if (isEnemy && (targetUnit->unitStatus <= AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY)) {
-					long int canMoveToTarget = groupLeader->CanMoveTo(targetUnit->unitInstanceId, groupLeader->GetMaxRange(),
+					long int canMoveToTarget = groupLeader->CanMoveTo(targetUnit->unitInstanceId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 						0, 1, -1, -1);
 					if (canMoveToTarget) {
 						unitGroup->targetUnitIdArrayUsedElemCount = 0; // Reset (no need to erase values from array)
@@ -735,7 +735,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 					long int isLoopUnitEnemy = (loopTargetPlayerId > 0) &&
 						(player->ptrDiplomacyStances[loopTargetPlayerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY);
 					if (isLoopUnitEnemy && (loopTargetUnit->unitStatus <= AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY)) {
-						long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, groupLeader->GetMaxRange(),
+						long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 							0, 1, -1, -1);
 						if (canMoveToTarget) {
 							return FindInfAIUnitElemInList(infAI, loopTargetUnit->unitInstanceId);
@@ -749,7 +749,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 			if (enemyWonderInfo) {
 				char wonderTerrainZoneId = groupLeader->GetTerrainZoneIdAtPos(enemyWonderInfo->posX, enemyWonderInfo->posY);
 				if ((wonderTerrainZoneId == leaderTerrainZoneId) || isBoat) {
-					long int canMoveToTarget = groupLeader->CanMoveTo(enemyWonderInfo->unitId, groupLeader->GetMaxRange(),
+					long int canMoveToTarget = groupLeader->CanMoveTo(enemyWonderInfo->unitId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 						0, 1, -1, -1);
 					if (canMoveToTarget) {
 						unitGroup->AddTargetUnitIdToArray(enemyWonderInfo->unitId);
@@ -757,7 +757,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 					}
 					STRUCT_MANAGED_ARRAY tempList;
 					// This call searches a path, even if enemy units block the way ? Unsure
-					bool success = AOE_METHODS::UNIT::MoveToTarget_1A0(groupLeader, enemyWonderInfo->unitId, groupLeader->GetMaxRange(),
+					bool success = AOE_METHODS::UNIT::MoveToTarget_1A0(groupLeader, enemyWonderInfo->unitId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 						0, 1, targetPlayerId, 0x1B, &tempList);
 					if (success) {
 						if (tempList.usedElements > 0) {
@@ -1006,10 +1006,10 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 			tempListForMove.unitIdArray = NULL;
 			tempListForMove.usedElements = 0;
 			if (leaderTerrainZoneId == curUnitTerrainZoneId) {
-				bool canMoveToTarget = (groupLeader->CanMoveTo(curElem->unitId, groupLeader->GetMaxRange(), 0, 1, -1, -1) != 0);
+				bool canMoveToTarget = (groupLeader->CanMoveTo(curElem->unitId, AOE_METHODS::UNIT::GetMaxRange(groupLeader), 0, 1, -1, -1) != 0);
 				if (!canMoveToTarget) {
 					bool canMoveToTargetIfKillingEnemies = AOE_METHODS::UNIT::MoveToTarget_1A0(groupLeader, curElem->unitId,
-						groupLeader->GetMaxRange(), 0, 1, targetPlayerId, unknown_EBP, &tempListForMove);
+						AOE_METHODS::UNIT::GetMaxRange(groupLeader), 0, 1, targetPlayerId, unknown_EBP, &tempListForMove);
 				}
 			}
 			unitGroup->targetUnitIdArrayUsedElemCount = 0; // reset targets array.
@@ -1136,7 +1136,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 					(player->ptrDiplomacyStances[targetPlayerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY);
 				if (isEnemy && (targetUnit->unitStatus <= AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY)) {
 					// 0x4C00C7-0x4C00FF
-					long int canMoveToTarget = groupLeader->CanMoveTo(targetUnit->unitInstanceId, groupLeader->GetMaxRange(),
+					long int canMoveToTarget = groupLeader->CanMoveTo(targetUnit->unitInstanceId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 						0, 1, -1, -1);
 					if (canMoveToTarget) {
 						// 0x4C010A
@@ -1161,7 +1161,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 						(player->ptrDiplomacyStances[loopTargetPlayerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY);
 					if (isLoopUnitEnemy && (loopTargetUnit->unitStatus <= AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY)) {
 						// 0x4C0199
-						long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, groupLeader->GetMaxRange(),
+						long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 							0, 1, -1, -1);
 						if (canMoveToTarget) {
 							return FindInfAIUnitElemInList(infAI, loopTargetUnit->unitInstanceId); // 0x4C0232 to 0x4C0246
@@ -1178,7 +1178,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 				char wonderTerrainZoneId = groupLeader->GetTerrainZoneIdAtPos(enemyWonderInfo->posX, enemyWonderInfo->posY);
 				if ((wonderTerrainZoneId == leaderTerrainZoneId) || isBoat) {
 					// 0x4C024B
-					long int canMoveToTarget = groupLeader->CanMoveTo(enemyWonderInfo->unitId, groupLeader->GetMaxRange(),
+					long int canMoveToTarget = groupLeader->CanMoveTo(enemyWonderInfo->unitId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 						0, 1, -1, -1); // 0x4C0272
 					if (canMoveToTarget) {
 						// 0x4C027D
@@ -1188,7 +1188,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 					// 0x4C02B6
 					STRUCT_MANAGED_ARRAY tempList;
 					// This call searches a path, even if enemy units block the way ? Unsure
-					bool success = AOE_METHODS::UNIT::MoveToTarget_1A0(groupLeader, enemyWonderInfo->unitId, groupLeader->GetMaxRange(),
+					bool success = AOE_METHODS::UNIT::MoveToTarget_1A0(groupLeader, enemyWonderInfo->unitId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 						0, 1, targetPlayerId, 0x1B, &tempList);
 					if (success) {
 						// 0x4C030F
@@ -1454,11 +1454,11 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 			tempListForMove.unitIdArray = NULL;
 			tempListForMove.usedElements = 0;
 			if (leaderTerrainZoneId == curUnitTerrainZoneId) {
-				bool canMoveToTarget = (groupLeader->CanMoveTo(curElem->unitId, groupLeader->GetMaxRange(), 0, 1, -1, -1) != 0);
+				bool canMoveToTarget = (groupLeader->CanMoveTo(curElem->unitId, AOE_METHODS::UNIT::GetMaxRange(groupLeader), 0, 1, -1, -1) != 0);
 				if (!canMoveToTarget) {
 					// 0x4C0B62
 					bool canMoveToTargetIfKillingEnemies = AOE_METHODS::UNIT::MoveToTarget_1A0(groupLeader, curElem->unitId,
-						groupLeader->GetMaxRange(), 0, 1, targetPlayerId, unknown_EBP, &tempListForMove);
+						AOE_METHODS::UNIT::GetMaxRange(groupLeader), 0, 1, targetPlayerId, unknown_EBP, &tempListForMove);
 				}
 			}
 			// 0x4C0BA2

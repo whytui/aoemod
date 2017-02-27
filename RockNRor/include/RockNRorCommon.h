@@ -51,7 +51,7 @@
 // Returns true for maps where AI does build a dock and boats. Warning: for unknown map type (custom), this returns true.
 bool IsDockRelevantForMap(MAP_TYPE_INDEX mti);
 
-// Calculate distance (without optimization)
+// Calculate distance between 2 points (without optimization)
 float GetDistance(float x1, float y1, float x2, float y2);
 
 // Returns true if the cost could be correctly computed.

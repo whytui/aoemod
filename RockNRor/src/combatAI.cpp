@@ -515,4 +515,135 @@ float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, S
 }
 
 
+// Handles "retreat after shooting" feature for hunters (non-native feature !)
+bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify) {
+	// This is restricted to "AI improvements ON" configuration.
+	if ((ROCKNROR::crInfo.configInfo.improveAILevel == 0) || !unitActivity || !unitActivity->IsCheckSumValid() ||
+		!notify) {
+		return false;
+	}
+	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	STRUCT_UNIT_BASE *unit = unitActivity->ptrUnit;
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
+	STRUCT_PLAYER *player = unit->ptrStructPlayer;
+	if (!player || !player->IsCheckSumValid()) { return false; }
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	if (settings->rgeGameOptions.difficultyLevel == GAME_DIFFICULTY_LEVEL::GDL_EASIEST) { return false; }
+	if (player->isComputerControlled == 0) { return false; } // cf 0x4E6476
+	if (unitActivity->targetUnitType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupPredatorAnimal) { return false; } // This is only used for hunting aggressive animals.
+	if ((unitActivity->currentActionId != ACTIVITY_TASK_IDS::CST_ATI_ATTACK) &&
+		(unitActivity->currentActionId != ACTIVITY_TASK_IDS::CST_ATI_GATHER_ATTACK)) {
+		return false;
+	} // cf 0x4E64B2
+	long int activityTargetUnitId = unitActivity->targetUnitId;
+	STRUCT_UNIT_BASE *targetUnit = GetUnitStruct(activityTargetUnitId);
+	if (targetUnit == NULL) { return false; } // No valid target: ignore notification
+
+	STRUCT_UNIT_BASE *targetsTarget = AOE_STRUCTURES::GetAttackTarget(targetUnit);
+	if ((targetsTarget != NULL) && (targetsTarget != unit)) { return false; } // Attacking someone else: I don't need to move away
+
+	float range = AOE_METHODS::UNIT::GetMaxRange(unit);
+	if (range < 1.f) { return false; } // note: this excludes non-hunter villagers.
+
+	float contactDist = AOE_METHODS::UNIT::GetContactDistanceTo(unit, targetUnit);
+	// dist is raw distance between the units (not counting unit radiuses). Original code takes radius into account. No need here for hunters (simplify).
+	float dist = GetDistance(unit->positionX, unit->positionY, targetUnit->positionX, targetUnit->positionY);
+	float allowedMovingRange = range - contactDist; // actor.maxRange - contactDistance
+	if (allowedMovingRange < 1) { return false; } // cf 0x4E64E9. Do nothing if too far or already at max shooting range
+
+	long int priority_unsure = unitActivity->unknown_2C;
+	float activityMaxDistance = unitActivity->maxDistance; // for arg8
+	float activityTargetPosX = unitActivity->targetPosX;
+	float activityTargetPosY = unitActivity->targetPosY;
+	float activityTargetPosZ = unitActivity->targetPosZ;
+	int attackTaskId = ACTIVITY_TASK_IDS::CST_ATI_ORDER_GATHER_ATTACK; //CST_ATI_ORDER_ATTACK for military units...
+	long int actorPlayerId = player->playerId;
+
+	_asm {
+		MOV ECX, unitActivity;
+		PUSH priority_unsure;
+		PUSH 1;
+		PUSH 0;
+		PUSH activityMaxDistance; // arg8
+		PUSH activityTargetPosZ;
+		PUSH activityTargetPosX;
+		PUSH activityTargetPosY; // arg5
+		PUSH -1; // target player id
+		PUSH activityTargetUnitId;
+		PUSH attackTaskId;
+		PUSH actorPlayerId;
+		MOV EDX, DWORD PTR DS : [ECX];
+		CALL DS:[EDX + 0x10]; // activity.order
+	}
+	if (unitActivity->unitIDsThatAttackMe.usedElements > 0) {
+		// A hunter wouldn't be hunting if being attacked (unless defending against a lion), so we may ignore "attacking" units here (otherwise, see 0x4E6547)
+	}
+
+	float diffX = targetUnit->positionX - unit->positionX;
+	float diffY = targetUnit->positionY - unit->positionY;
+	float relativeX = diffX / dist;
+	float relativeY = diffY / dist;
+	if ((unit == targetsTarget) && (settings->rgeGameOptions.difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD)) {
+		if (targetUnit->unitDefinition && targetUnit->unitDefinition->DerivesFromFlag() && unit->unitDefinition->DerivesFromFlag() &&
+			((STRUCT_UNITDEF_FLAG*)targetUnit->unitDefinition)->speed > ((STRUCT_UNITDEF_FLAG*)unit->unitDefinition)->speed) {
+			// Animal is faster than me, or equivalent: move far enough (if other units are helping me, that will buy more time for them to shoot)
+			allowedMovingRange += COMBAT_CONST::afterShootRetreatRangeForHunterFastAnimal; // Move further if "I" am animal's current target.
+		} else {
+			// Slow animal (alligator)
+			allowedMovingRange += COMBAT_CONST::afterShootRetreatRangeForHunterSlowAnimal; // Move further if "I" am animal's current target.
+		}
+	}
+	relativeX *= allowedMovingRange;
+	relativeY *= allowedMovingRange;
+	float newX = unit->positionX - relativeX;
+	float newY = unit->positionY - relativeY;
+	long int callResult;
+	// Move away from animal after shooting...
+	_asm {
+		PUSH 1;
+		PUSH 0;
+		PUSH activityTargetPosZ;
+		PUSH newX;
+		PUSH newY;
+		MOV ECX, unitActivity;
+		MOV EDX, DS:[ECX];
+		CALL DS : [EDX + 0xA0];
+		MOV callResult, EAX;
+	}
+	return (callResult == 1);
+}
+
+
+// Notify event (RockNRor) handler for civilians
+// Returns -1 if standard ROR treatments can be continued.
+// Returns >= 0 to return a specific value and bypass ROR treatments.
+long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify) {
+	// This is restricted to "AI improvements ON" configuration.
+	if ((ROCKNROR::crInfo.configInfo.improveAILevel == 0) || !unitActivity || !unitActivity->IsCheckSumValid() ||
+		!notify) {
+		return -1;
+	}
+
+	if (notify->activityId == ACTIVITY_TASK_IDS::CST_ATI_MOVE_BACK_AFTER_SHOOTING) {
+		return HunterMoveBackAfterShooting(unitActivity, notify) ? 3 : -1;
+	}
+	if (notify->activityId == ACTIVITY_TASK_IDS::CST_ATI_NOTIFY_BEING_ATTACKED) {
+		if (unitActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_MOVE) {
+			// Villager should not stop to strike back to animal when he's not ready to shoot
+			for (int i = 0; i < unitActivity->orderQueueUsedElemCount; i++) {
+				if ((unitActivity->orderQueue[i].targetUnitId == notify->targetUnitId) &&
+					(unitActivity->orderQueue[i].activityId == ACTIVITY_TASK_IDS::CST_ATI_ORDER_GATHER_ATTACK)) {
+					if (!AOE_METHODS::UNIT::IsReadyToAttack(unitActivity->ptrUnit)) {
+						AOE_METHODS::CallWriteCenteredText("can't strike back yet: ignore 1F4");
+						return 3; // Ignore the notification because a pending order already concerns this "attacker" unit and I am not ready yet to strike back.
+					}
+				}
+			}
+		}
+	}
+
+	return -1;
+}
+
+
 }

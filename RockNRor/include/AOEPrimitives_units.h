@@ -37,9 +37,19 @@ bool GetMeleeArmor(STRUCT_UNIT_ATTACKABLE *unit, short int &meleeDisplayedValue,
 // Returns NULL if unit type is incompatible (and sets values to 0).
 bool GetPierceArmor(STRUCT_UNIT_TRAINABLE *unit, short int &pierceDisplayedValue, short int &pierceTotalValue);
 
+// Securely gets maximum range (only applicable to attackable (type50))
+// This is analog to "EDX+0x10C" call on Unit.
+float GetMaxRange(STRUCT_UNIT_BASE *unit);
+
+// Returns if unit is ready to attack, regarding reload time and last attack execution.
+bool IsReadyToAttack(STRUCT_UNIT_BASE *unit);
 
 
 /* *** Other... *** */
+
+
+// Get distance between 2 units, taking into account unit radiuses
+float GetContactDistanceTo(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target);
 
 
 // Returns the number of queued units for a given DATID.

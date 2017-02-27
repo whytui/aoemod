@@ -32,6 +32,7 @@
 #include "TileSetHandler.h"
 #include "combatAI.h"
 #include "CustomPopupSystem.h"
+#include "combatAI.h"
 
 
 namespace ROCKNROR {
@@ -160,6 +161,7 @@ namespace ROCKNROR {
 		void EntryPointInfAISearchTradeTargetElem(REG_BACKUP *REG_values);
 		void AddRelevantResourceValueWhenTrading(REG_BACKUP *REG_values);
 		void ShouldPreserveOwnedResourceWhenKilledBy(REG_BACKUP *REG_values);
+		void VillagerActivityProcessNotify(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

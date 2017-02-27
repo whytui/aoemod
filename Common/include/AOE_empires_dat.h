@@ -283,11 +283,11 @@ namespace AOE_CONST_FUNC {
 		CST_IAI_EXPLORE = 4, // 
 		CST_IAI_GATHER_NO_ATTACK = 5, // Gathering with NO attack phase. Excludes fishing !
 		CST_IAI_UNKNOWN_06 = 6, // Natural wonders cheat??? attack or flee from (seen) unit ? Animal ability ?
-		CST_IAI_UNKNOWN_7 = 7, // Attack in unitDefCommands ?? unsure
+		CST_IAI_UNKNOWN_7 = 7, // Attack (combat) in unitDefCommands ?? unsure
 		CST_IAI_MISSILE = 8, // "projectile movement". 7C 26 54 00
 		CST_IAI_ATTACK = 9,
 		CST_IAI_FLY = 0x0A, // "Bird"
-		CST_IAI_SCARE_HUNT = 0x0B, // TO CONFIRM.
+		CST_IAI_SCARE_HUNT = 0x0B, // TO CONFIRM. Lion has this "action" on gazelle (id=65).
 		CST_IAI_TRANSPORT = 0x0C,
 		CST_IAI_GUARD = 0x0D, // TO CONFIRM or auto-attack ?
 		CST_IAI_RUNAWAY = 0x14, // "Escape" in AGE3

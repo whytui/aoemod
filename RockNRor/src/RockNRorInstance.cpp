@@ -410,6 +410,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004AFB95:
 		this->ShouldPreserveOwnedResourceWhenKilledBy(REG_values);
 		break;
+	case 0x004E4721:
+		this->VillagerActivityProcessNotify(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4259,6 +4262,32 @@ void RockNRorInstance::ShouldPreserveOwnedResourceWhenKilledBy(REG_BACKUP *REG_v
 
 	// Do not modify below
 	REG_values->EAX_val = result ? 1 : 0;
+}
+
+
+// From 0x4E471B: villagerActivity.ProcessNotify(TNotify, arg2).
+// ROR code already handles 0x20F (escape projectile), 0x1F4 (being attacked), 0x1F9,1FA
+// + see also 0x413890 (parent handler)
+// It is possible to change return address to 0x4E4784 to return 4, 0x4E49CA to return 3, 0x4E4DAC to return EAX's value
+void RockNRorInstance::VillagerActivityProcessNotify(REG_BACKUP *REG_values) {
+	AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS notifyTaskId = (AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS)REG_values->EAX_val;
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->EAX_val -= 0x1F4;
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || (ROCKNROR::crInfo.configInfo.improveAILevel == 0)) {
+		return;
+	}
+	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *unitActivity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ECX_val;
+	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *)REG_values->EBX_val;
+	ror_api_assert(REG_values, notify && (notifyTaskId == notify->activityId));
+
+	// Custom treatments
+	long int result = COMBAT::VillagerActivityNotify(unitActivity, notify);
+	if (result >= 0) {
+		REG_values->EAX_val = result;
+		ChangeReturnAddress(REG_values, 0x4E4DAC);
+	}
 }
 
 

@@ -4,6 +4,7 @@
 #include <AOE_struct_units.h>
 #include "unitDefHandling.h"
 #include "RockNRorInfo.h"
+#include "AOEPrimitives_UI_gameMain.h"
 #include "AOEPrimitives_units.h"
 #include "unitHandling.h"
 
@@ -22,6 +23,8 @@ namespace COMBAT {
 	namespace COMBAT_CONST {
 		const float distanceToConsiderVeryClose = 1.0; // Distance (added to range) under which a target is considered "within range". Please leave this > 0.
 		const long int distanceAlwaysTaskIdleMilitaryUnitsOnAttack = 6; // Max distance *idle* nearby units will always be tasked when "I" am attacked
+		const float afterShootRetreatRangeForHunterSlowAnimal = 1;
+		const float afterShootRetreatRangeForHunterFastAnimal = 3;
 	}
 
 	// Custom treatment to decide if a potential target unit should be ignored
@@ -43,5 +46,15 @@ namespace COMBAT {
 
 	// Computes the damage dealt by a group on a unit, cf 0x4C62F0.
 	float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
+
+
+	// Handles "retreat after shooting" feature for hunters (non-native feature !)
+	bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify);
+
+
+	// Notify event (RockNRor) handler for civilians
+	// Returns -1 if standard ROR treatments can be continued.
+	// Returns >= 0 to return a specific value and bypass ROR treatments.
+	long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify);
 
 }

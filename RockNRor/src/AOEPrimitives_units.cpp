@@ -16,8 +16,8 @@ float GetSpeed(STRUCT_UNIT_BASE *unit) {
 	_asm {
 		MOV ECX, unit;
 		MOV EDX, DS:[ECX];
-		CALL DS : [EDX + 0xFC]; // returns 0 for classes with no speed attribute
-		FSTP DS : [result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
+		CALL DS:[EDX + 0xFC]; // returns 0 for classes with no speed attribute
+		FSTP DS:[result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
 	}
 	return result;
 }
@@ -30,8 +30,8 @@ float GetReloadTime1(STRUCT_UNIT_BASE *unit) {
 	_asm {
 		MOV ECX, unit;
 		MOV EDX, DS:[ECX];
-		CALL DS : [EDX + 0x100]; // returns 0 for classes with no reload attribute
-		FSTP DS : [result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
+		CALL DS:[EDX + 0x100]; // returns 0 for classes with no reload attribute
+		FSTP DS:[result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
 	}
 	return result;
 }
@@ -72,6 +72,25 @@ bool GetPierceArmor(STRUCT_UNIT_TRAINABLE *unit, short int &pierceDisplayedValue
 	}
 	return true;
 }
+
+
+// Securely gets maximum range (only applicable to attackable (type50))
+// This is analog to "EDX+0x10C" call on Unit.
+float GetMaxRange(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->DerivesFromAttackable()) {
+		return 0.f;
+	}
+	return ((STRUCT_UNITDEF_ATTACKABLE*)unit->unitDefinition)->maxRange;
+}
+
+// Returns if unit is ready to attack, regarding reload time and last attack execution.
+bool IsReadyToAttack(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->DerivesFromAttackable()) {
+		return false;
+	}
+	return ((STRUCT_UNIT_ATTACKABLE*)unit)->pendingReloadTime <= 0; // cf 0x4269F6 (unit+0x7C call)
+}
+
 
 
 /* *** Other... *** */
@@ -401,6 +420,23 @@ long int SelectUnitsUsingShortcut(AOE_STRUCTURES::STRUCT_PLAYER *player, long in
 		MOV res, EAX;
 	}
 	return res;
+}
+
+
+// Get distance between 2 units, taking into account unit radiuses
+float GetContactDistanceTo(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target) {
+	if (!actor || !target || !actor->IsCheckSumValidForAUnitClass() || !target->IsCheckSumValidForAUnitClass()) {
+		return 0.f;
+	}
+	unsigned long int addr = 0x4AAEB0;
+	float result = 0;
+	_asm {
+		MOV ECX, actor;
+		PUSH target;
+		CALL addr;
+		FSTP DS:[result]; // REQUIRED to compensate the FLD from called method (for float stack consistency)
+	}
+	return result;
 }
 
 
