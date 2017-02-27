@@ -634,7 +634,6 @@ long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_
 				if ((unitActivity->orderQueue[i].targetUnitId == notify->targetUnitId) &&
 					(unitActivity->orderQueue[i].activityId == ACTIVITY_TASK_IDS::CST_ATI_ORDER_GATHER_ATTACK)) {
 					if (!AOE_METHODS::UNIT::IsReadyToAttack(unitActivity->ptrUnit)) {
-						AOE_METHODS::CallWriteCenteredText("can't strike back yet: ignore 1F4");
 						return 3; // Ignore the notification because a pending order already concerns this "attacker" unit and I am not ready yet to strike back.
 					}
 				}

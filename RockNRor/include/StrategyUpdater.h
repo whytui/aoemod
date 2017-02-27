@@ -14,7 +14,7 @@
 #include "customAIMilitaryInfo.h"
 
 using namespace AOE_CONST_FUNC;
-using namespace PLAYER;
+using namespace AOE_STRUCTURES::PLAYER;
 
 
 namespace CUSTOM_AI {

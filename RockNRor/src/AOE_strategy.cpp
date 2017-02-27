@@ -1419,14 +1419,24 @@ std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 		default:
 			break;
 		}
-		sprintf_s(buffer, "%03ld     %1c     %-3ld    %-30s %-3ld   %-6ld %-2ld         %-2ld    %-4ld     %-4ld     %-3ld"
+		sprintf_s(buffer,
+#ifdef _DEBUG
+			"%03ld     "
+#endif
+			"%1c     %-3ld    %-30s %-3ld   %-6ld %-2ld         %-2ld    %-4ld     %-4ld     %-3ld"
 #ifdef _DEBUG
 			"      0x%08lX"
 #endif
 			"%s",
-			currentStratElem->elemId, category, currentStratElem->unitDAT_ID,
+#ifdef _DEBUG
+			currentStratElem->elemId,
+#endif
+			category, currentStratElem->unitDAT_ID,
 			currentStratElem->unitName, currentStratElem->actor, currentStratElem->unitInstanceId, currentStratElem->inProgressCount,
-			currentStratElem->aliveCount, currentStratElem->buildAttempts, currentStratElem->totalCount, currentStratElem->retrains, (long int)currentStratElem,
+			currentStratElem->aliveCount, currentStratElem->buildAttempts, currentStratElem->totalCount, currentStratElem->retrains, 
+#ifdef _DEBUG
+			(unsigned long int)currentStratElem,
+#endif
 			newline
 			);
 		result += buffer;
