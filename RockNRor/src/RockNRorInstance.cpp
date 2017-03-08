@@ -416,6 +416,11 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004BDFC0:
 		this->IsTargetableResourceCallForInfAI(REG_values);
 		break;
+	case 0x4BBA15:
+	case 0x4BDD3C:
+	case 0x4C624C:
+		this->SeeUnitIsArtefactOrResourceOrFlagOrCreatable(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4325,6 +4330,65 @@ void RockNRorInstance::IsTargetableResourceCallForInfAI(REG_BACKUP *REG_values) 
 
 	// Do not modify below
 	REG_values->EAX_val = isResource ? 1 : 0;
+}
+
+
+// This method is shared for several entry points that are very similar.
+// From 0x4BBA11 (see unit in manage infAI)
+// From 0x4BDD2F (infAI.addUnitInLists(unitStruct, flagNotInElemUnitList?))
+// From 0x4C6248 method to analyze, related to diplomacy change ?
+// Note: this sets EAX = "bool" result for isArtefactOrTargetableResourceOrCreatable
+// The primary goal of this entry point is to add units in gather list in special cases that are not handled natively (alligators, etc)
+void RockNRorInstance::SeeUnitIsArtefactOrResourceOrFlagOrCreatable(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ECX_val; // Common to all cases
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = NULL;
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = NULL;
+	GLOBAL_UNIT_AI_TYPES unitClass = (GLOBAL_UNIT_AI_TYPES)-1;
+
+	// Init depends on calling address
+	if (REG_values->return_address == 0x4BBA15) {
+		unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ESI_val;
+		unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)REG_values->EAX_val;
+		unitClass = (GLOBAL_UNIT_AI_TYPES)REG_values->EBX_val;
+	}
+	if (REG_values->return_address == 0x4BDD3C) {
+		unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
+		unitClass = (GLOBAL_UNIT_AI_TYPES)REG_values->EAX_val;
+		if (unit) { unitDef = unit->unitDefinition; }
+	}
+	if (REG_values->return_address == 0x4C624C) {
+		// This case needs to be tested
+		unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EBX_val;
+		unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)REG_values->EDX_val;
+		unitClass = (GLOBAL_UNIT_AI_TYPES)REG_values->EBP_val;
+	}
+	
+	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->EBP_val);
+	ror_api_assert(REG_values, unit && unit->IsCheckSumValidForAUnitClass());
+	ror_api_assert(REG_values, unitDef && unitDef->IsCheckSumValidForAUnitClass());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || (ROCKNROR::crInfo.configInfo.improveAILevel == 0)) {
+		// Force original code
+		long int res = 0;
+		long int addr = 0x4BE100;
+		_asm {
+			MOV ECX, infAI; // Not necessary, actually
+			PUSH unitClass;
+			CALL addr;
+			MOV res, EAX;
+		}
+		REG_values->EAX_val = res;
+		return;
+	}
+
+	// Custom treatments
+	bool resultIsArtefactOrTargetableResourceOrCreatable = EconomyAI::IsArtefactOrTargetableResourceOrCreatable(unit);
+
+	// Do not modify below
+	REG_values->EAX_val = resultIsArtefactOrTargetableResourceOrCreatable ? 1 : 0;
 }
 
 
