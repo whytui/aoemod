@@ -48,6 +48,10 @@ bool IsReadyToAttack(STRUCT_UNIT_BASE *unit);
 /* *** Other... *** */
 
 
+// Update unit display
+void UpdateDisplay(STRUCT_UNIT_BASE *unit);
+
+
 // Get distance between 2 units, taking into account unit radiuses
 float GetContactDistanceTo(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target);
 

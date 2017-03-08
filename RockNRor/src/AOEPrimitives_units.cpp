@@ -423,6 +423,17 @@ long int SelectUnitsUsingShortcut(AOE_STRUCTURES::STRUCT_PLAYER *player, long in
 }
 
 
+// Update unit display
+void UpdateDisplay(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return; }
+	_asm {
+		MOV ECX, unit;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX+0x24]; // update
+	}
+}
+
+
 // Get distance between 2 units, taking into account unit radiuses
 float GetContactDistanceTo(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target) {
 	if (!actor || !target || !actor->IsCheckSumValidForAUnitClass() || !target->IsCheckSumValidForAUnitClass()) {

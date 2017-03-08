@@ -101,6 +101,36 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 		ROCKNROR::customPopupSystem.CloseCustomGamePopup(true);
 	}
 
+	if (isInGame && (pressedKey == VK_DELETE)) {
+		if (ROCKNROR::crInfo.configInfo.assassinMode) {
+			AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+			assert((player != NULL) && player->IsCheckSumValid());
+			AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = NULL;
+			if (player && player->IsCheckSumValid()) {
+				unitArray = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(player);
+			}
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = NULL;
+			if (unitArray) { unit = unitArray[0]; }
+			if (unit && unit->IsCheckSumValidForAUnitClass()) {
+				if (unit->DerivesFromTrainable() && (unit->unitStatus <= 2)) { // game command would crash for other types than trainable/buildings
+					GAME_COMMANDS::CreateCmd_KillUnit(unit->unitInstanceId);
+				} else {
+					if (!settings->rgeGameOptions.isMultiPlayer) {
+						unit->remainingHitPoints = 0;
+						if ((unit->unitStatus > 2) && (unit->resourceValue > 0)) {
+							unit->resourceValue = 0; // To kill units like mines, gazelle with remaining food, etc
+						}
+						if (unit->checksum == CHECKSUM_UNIT_TREE) {
+							// Refresh unit in display
+							AOE_METHODS::UNIT::UpdateDisplay(unit);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	// F1 in editor : switch to unit selection
 	if (!isMenuOpen && (isInEditor) && !CTRL && (pressedKey == VK_F1) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
 		if (!SHIFT) {

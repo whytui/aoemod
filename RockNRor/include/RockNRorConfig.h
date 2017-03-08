@@ -202,6 +202,7 @@ public:
 	const AutoAttackPolicy autoAttackOptionDefaultValues = AutoAttackPolicy(true, true, true, true, false);
 	bool enableInGameDisplayDebugInfo; // If true, allows more "F5 debug levels" in game screen.
 	bool useF5LabelZoneForCustomDebugInfo; // If true, resource info bar can be replaced by debug text.
+	bool assassinMode; // If true, player can kill any unit with DEL key (not for MP games). Enabled via a cheat code only
 
 	// Methods
 	// Read RockNRor main configuration XML file

@@ -4350,6 +4350,7 @@ void RockNRorInstance::SeeUnitIsArtefactOrResourceOrFlagOrCreatable(REG_BACKUP *
 		unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ESI_val;
 		unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *)REG_values->EAX_val;
 		unitClass = (GLOBAL_UNIT_AI_TYPES)REG_values->EBX_val;
+		ror_api_assert(REG_values, REG_values->ECX_val == REG_values->EBP_val);
 	}
 	if (REG_values->return_address == 0x4BDD3C) {
 		unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
@@ -4363,7 +4364,6 @@ void RockNRorInstance::SeeUnitIsArtefactOrResourceOrFlagOrCreatable(REG_BACKUP *
 		unitClass = (GLOBAL_UNIT_AI_TYPES)REG_values->EBP_val;
 	}
 	
-	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->EBP_val);
 	ror_api_assert(REG_values, unit && unit->IsCheckSumValidForAUnitClass());
 	ror_api_assert(REG_values, unitDef && unitDef->IsCheckSumValidForAUnitClass());
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {

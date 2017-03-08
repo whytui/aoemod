@@ -561,16 +561,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 	}
 
 	if (strcmp(command, "assassin") == 0) {
-		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
-		assert((player != NULL) && player->IsCheckSumValid());
-		if (!player || !player->IsCheckSumValid()) { return; }
-		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(player);
-		if (unitArray && unitArray[0] && unitArray[0]->IsCheckSumValidForAUnitClass()) {
-			if (unitArray[0]->DerivesFromTrainable()) {
-				GAME_COMMANDS::CreateCmd_KillUnit(unitArray[0]->unitInstanceId);
-			}
-		}
+		ROCKNROR::crInfo.configInfo.assassinMode = !ROCKNROR::crInfo.configInfo.assassinMode;
 	}
 #endif
 

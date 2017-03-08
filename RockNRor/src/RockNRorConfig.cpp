@@ -123,6 +123,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->enableInGameDisplayDebugInfo = true;
 	this->useF5LabelZoneForCustomDebugInfo = true;
 #endif
+	this->assassinMode = false; // Game default
 }
 
 
