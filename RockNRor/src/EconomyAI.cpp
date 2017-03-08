@@ -137,6 +137,7 @@ void EconomyAI::OnGaiaAnimalKilled(STRUCT_PLAYER *player, STRUCT_UNIT_ATTACKABLE
 		return; // Gazelles are already handled correctly. The "add" method below checks unicity but it would be bad for performance.
 	}
 	if ((killedAnimal->resourceTypeId >= 0) && (killedAnimal->resourceValue > 0)) {
+		// This is useful for animals that are not added to infAI lists (natively, predator animals)
 		unsigned long int addr = 0x4C49C0; // add gatherable target in list
 		_asm {
 			MOV ECX, infAI;
@@ -145,5 +146,68 @@ void EconomyAI::OnGaiaAnimalKilled(STRUCT_PLAYER *player, STRUCT_UNIT_ATTACKABLE
 		}
 	}
 }
+
+
+// Returns true if unit can be targeted as a resource by AI players
+bool EconomyAI::IsAITargetableResource(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) { return false; }
+	GLOBAL_UNIT_AI_TYPES unitClass = unit->unitDefinition->unitAIType;
+	// Standard classes, cf 0x4BE1C0
+	if (
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnknownFish) || // 1F
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupSeaFish) || // 5
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupShoreFish) || // 21
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBerryBush) || // 7
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPreyAnimal) || // 9
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupStoneMine) || // 8
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupGoldMine) || // 20
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTree) // 0F
+		) {
+		return true;
+	}
+	if (ROCKNROR::crInfo.configInfo.improveAILevel == 0) {
+		return false; // Standard case when AI improvements are OFF
+	}
+
+	// Custom cases (by default, here we should always return false)
+	if (unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPredatorAnimal) {
+		// Allow slow predator animals (can be hunted - almost - safely)
+		STRUCT_UNITDEF_FLAG *unitDef = (STRUCT_UNITDEF_FLAG *)unit->unitDefinition;
+		if (!unitDef->DerivesFromFlag()) { return false; }
+		return (unitDef->speed <= 1.0f);
+	}
+	return false;
+}
+
+
+// Returns true if unit is a flag/artefact (for AI). Original method=0x4BE200
+bool EconomyAI::IsArtefactOrFlag(GLOBAL_UNIT_AI_TYPES unitClass) {
+	return (unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact) ||
+		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupFlag);
+}
+
+
+// Returns true if unit is one of (artefact OR targetable resource OR creatable unit). For AI.
+// Original method= 0x4BE100, only depends on unit class.
+bool EconomyAI::IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit) {
+	long int rorBool = 0;
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
+	STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
+	if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return false; }
+	unsigned long int addrIsPlayerCreatable = 0x4BE140;
+	long int unitClassLong = (long int)unitDef->unitAIType;
+	_asm {
+		PUSH unitClassLong;
+		CALL addrIsPlayerCreatable;
+		MOV rorBool, EAX;
+	}
+	// 1st and 3rd conditions in original method
+	if ((rorBool != 0) || (EconomyAI::IsArtefactOrFlag(unitDef->unitAIType))) {
+		return true;
+	}
+	// More complex (adds specific treatments) for 2nd condition (targetable as resource)
+	return EconomyAI::IsAITargetableResource(unit);
+}
+
 
 }

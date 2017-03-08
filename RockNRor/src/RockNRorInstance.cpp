@@ -413,6 +413,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004E4721:
 		this->VillagerActivityProcessNotify(REG_values);
 		break;
+	case 0x004BDFC0:
+		this->IsTargetableResourceCallForInfAI(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4288,6 +4291,40 @@ void RockNRorInstance::VillagerActivityProcessNotify(REG_BACKUP *REG_values) {
 		REG_values->EAX_val = result;
 		ChangeReturnAddress(REG_values, 0x4E4DAC);
 	}
+}
+
+
+// From 0x4BDFB6, in infAI.addUnitInLists(unitStruct, flagNotInElemUnitList?)
+// Standard behaviour is to set EAX with result from call 0x4BE1C0=infAI.isUnitClassTargetableAsResource(unitClassId)
+void RockNRorInstance::IsTargetableResourceCallForInfAI(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
+	ror_api_assert(REG_values, targetUnit && targetUnit->IsCheckSumValidForAUnitClass());
+	GLOBAL_UNIT_AI_TYPES unitClass = (GLOBAL_UNIT_AI_TYPES)REG_values->EBX_val;
+	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ESI_val;
+	ror_api_assert(REG_values, infAI && infAI->IsCheckSumValid());
+	ror_api_assert(REG_values, (unitClass >= 0));
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || (ROCKNROR::crInfo.configInfo.improveAILevel == 0)) {
+		// This corresponds to overwritten code in ROR executable.
+		long int resBuffer;
+		const unsigned long int callAddr = 0x4BE1C0;
+		_asm {
+			MOV ECX, infAI;
+			PUSH unitClass;
+			CALL callAddr;
+			MOV resBuffer, EAX;
+		}
+		REG_values->EAX_val = resBuffer;
+		return;
+	}
+
+	// Custom treatment
+	bool isResource = EconomyAI::IsAITargetableResource(targetUnit);
+
+	// Do not modify below
+	REG_values->EAX_val = isResource ? 1 : 0;
 }
 
 

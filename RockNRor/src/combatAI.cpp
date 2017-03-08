@@ -607,7 +607,7 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 		PUSH newY;
 		MOV ECX, unitActivity;
 		MOV EDX, DS:[ECX];
-		CALL DS : [EDX + 0xA0];
+		CALL DS:[EDX + 0xA0];
 		MOV callResult, EAX;
 	}
 	return (callResult == 1);

@@ -27,6 +27,7 @@ namespace CUSTOM_AI {
 
 		long int lastVillagersFix_ms; // Last game time (milliseconds) when fix on villagers were run
 
+
 		void ResetAllInfo();
 
 		// Run various fixes on villager actions, provided that a sufficient delay has passed since last execution
@@ -35,6 +36,14 @@ namespace CUSTOM_AI {
 		// Called when "player" kills a gaia animal
 		void OnGaiaAnimalKilled(STRUCT_PLAYER *player, STRUCT_UNIT_ATTACKABLE *killedAnimal);
 
+		// Returns true if unit can be targeted as a resource by AI players
+		static bool IsAITargetableResource(STRUCT_UNIT_BASE *unit);
+
+		// Returns true if unit is a flag/artefact (for AI). Original method=0x4BE200
+		static bool IsArtefactOrFlag(GLOBAL_UNIT_AI_TYPES unitClass);
+
+		// Returns true if unit is one of (artefact OR targetable resource OR creatable unit). For AI.
+		static bool IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit);
 	private:
 		// Remove farmers when more than 1 are assigned to the same farm.
 		void CheckForDuplicateFarmers(STRUCT_PLAYER *player);
