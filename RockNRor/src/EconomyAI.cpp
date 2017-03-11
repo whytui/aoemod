@@ -174,7 +174,7 @@ bool EconomyAI::IsAITargetableResource(STRUCT_UNIT_BASE *unit) {
 		// Allow slow predator animals (can be hunted - almost - safely)
 		STRUCT_UNITDEF_FLAG *unitDef = (STRUCT_UNITDEF_FLAG *)unit->unitDefinition;
 		if (!unitDef->DerivesFromFlag()) { return false; }
-		return (unitDef->speed <= 1.0f);
+		return (unitDef->speed <= 1.0f) && (unitDef->resourceCapacity > 0); // ignore animals without food, like birds
 	}
 	return false;
 }

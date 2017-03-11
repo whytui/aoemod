@@ -523,6 +523,8 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 		return false;
 	}
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	// This is restricted to medium/hard/hardest levels
+	if (!settings || !settings->IsCheckSumValid() || (settings->rgeGameOptions.difficultyLevel > GAME_DIFFICULTY_LEVEL::GDL_MEDIUM)) { return false; }
 	STRUCT_UNIT_BASE *unit = unitActivity->ptrUnit;
 	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
 	STRUCT_PLAYER *player = unit->ptrStructPlayer;
