@@ -6,6 +6,7 @@
 #include <Windows.h>
 #include <AOE_offsets.h>
 #include <customResolution.h>
+#include "Version.h"
 #include "crPatcher.h"
 
 // Warning: also set in XML config

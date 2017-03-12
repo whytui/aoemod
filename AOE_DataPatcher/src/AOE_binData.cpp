@@ -99,7 +99,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 134
+#define COUNT_ROR_API_10c 133
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 
@@ -5435,7 +5435,7 @@ void AOE_binData::InitROR_API_10c() {
 		FM_ON
 		);
 
-	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+	/*NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
 		activityNotifyEvent,
 		"Entry point in activityNotifyEvent",
 		0x1389B,
@@ -5443,7 +5443,7 @@ void AOE_binData::InitROR_API_10c() {
 		(0x8B, 0x47, 0x08, 0xE8, 0xD1, 0x5C, 0x00, 0x00, 0x3D, 0xC7, 0x00, 0x00, 0x00),
 		FM_OFF,
 		FM_ON
-		);
+		);*/
 
 
 	//optional

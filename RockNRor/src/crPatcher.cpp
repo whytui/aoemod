@@ -2,6 +2,11 @@
 
 bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 	try {
+		if (autoFix) {
+			// Useful if some binary change modifies .rdata section (by default, it is read-only and would fail)
+			EnableWritingInRData(true);
+		}
+
 		RORProcessEditor pe;
 		aoeBinData.SetCurrentVersion(GetBuildVersion());
 		BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(GetBuildVersion(), BINSEQ_CATEGORIES::BC_ROR_API);
@@ -39,7 +44,7 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 							fprintf_s(logFile, "%sFeature is not installed: %s\n",
 								isOptionalSequence ? "[INFO] " : "[WARNING] ", seqDefName.c_str());
 							int writtenBytes = 0;
-							if (!isOptionalSequence) {
+							if (!isOptionalSequence && autoFix) {
 								fprintf_s(logFile, "Force installation of %s\n", seqDefName.c_str());
 								writtenBytes = pe.WriteFromSequence(seqDef, seqIndexON); // Force install missing sequence
 							}
@@ -59,11 +64,17 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 				}
 			}
 		}
+		if (autoFix) {
+			EnableWritingInRData(false);
+		}
 		return !hasMissingSequences;
 	}
 	catch (std::exception e) {
 		fprintf_s(logFile, "An error occurred: %s\n", e.what());
 		traceMessageHandler.WriteMessage(e.what());
+		if (autoFix) {
+			EnableWritingInRData(false);
+		}
 		return false;
 	}
 }

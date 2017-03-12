@@ -9,6 +9,8 @@
 #include <AOE_const_internal.h>
 #include <AOE_offsets.h>
 #include <AOE_struct_game_settings.h>
+#include "AOEPrimitives_UI_components.h"
+#include "AOEPrimitives_global.h"
 
 /*
 * This file provides useful (raw) basic methods to deal with AOE UI screens.

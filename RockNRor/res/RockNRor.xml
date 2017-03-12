@@ -3,7 +3,8 @@
 <RockNRor>
 	<alertOnMissingFeatures enable="1"/>
 	<autoFixMissingFeatures enable="1"/><!-- If 1, ROR_API features that are not installed are automaticalled added on the fly -->
-
+	<troubleshooting doNotUpdateVirtualMethods="false"/><!-- You should not change this unless you are experiencing game crash at startup -->
+	
 	<!-- Empires.dat file: set *relative* path to empires.dat file to use. Leave empty to use default (data2\empires.dat) -->
 	<empiresDat filename="data2\empires.dat"/>
 	

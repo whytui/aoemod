@@ -163,6 +163,7 @@
     <ClInclude Include="include\playerTargeting.h" />
     <ClInclude Include="include\randomizer.h" />
     <ClInclude Include="include\researches.h" />
+    <ClInclude Include="include\RockNRorOverloadedVirtualMethods.h" />
     <ClInclude Include="include\RORProcessEditor.h" />
     <ClInclude Include="include\crTrigger.h" />
     <ClInclude Include="include\crTriggerSet.h" />
@@ -186,6 +187,7 @@
     <ClInclude Include="include\unitShortcuts.h" />
     <ClInclude Include="include\unitTargeting.h" />
     <ClInclude Include="include\Version.h" />
+    <ClInclude Include="include\RORVirtualMethodHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\tinyxml\tinystr.cpp" />
@@ -243,6 +245,7 @@
     <ClCompile Include="src\playerHandling.cpp" />
     <ClCompile Include="src\playerTargeting.cpp" />
     <ClCompile Include="src\researches.cpp" />
+    <ClCompile Include="src\RockNRorOverloadedVirtualMethods.cpp" />
     <ClCompile Include="src\RORProcessEditor.cpp" />
     <ClCompile Include="src\AOE_strategy.cpp" />
     <ClCompile Include="src\SimpleEditText.cpp" />
@@ -256,6 +259,7 @@
     <ClCompile Include="src\unitGroupAI.cpp" />
     <ClCompile Include="src\unitHandling.cpp" />
     <ClCompile Include="src\unitTargeting.cpp" />
+    <ClCompile Include="src\RORVirtualMethodHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="RockNRor_README.txt" />

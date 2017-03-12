@@ -33,6 +33,7 @@
 #include "combatAI.h"
 #include "CustomPopupSystem.h"
 #include "combatAI.h"
+#include "RockNRorOverloadedVirtualMethods.h"
 
 
 namespace ROCKNROR {
@@ -164,7 +165,7 @@ namespace ROCKNROR {
 		void VillagerActivityProcessNotify(REG_BACKUP *REG_values);
 		void IsTargetableResourceCallForInfAI(REG_BACKUP *REG_values);
 		void SeeUnitIsArtefactOrResourceOrFlagOrCreatable(REG_BACKUP *REG_values);
-		void ActivityBaseProcessNotify(REG_BACKUP *REG_values);
+		//void ActivityBaseProcessNotify(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

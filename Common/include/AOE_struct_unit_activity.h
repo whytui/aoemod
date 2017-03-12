@@ -162,7 +162,7 @@ namespace AOE_STRUCTURES
 		unsigned long int checksum;
 		STRUCT_UNIT_BASE *ptrUnit; // +4. actor unit.
 		long int unknown_008; // default -1 ?
-		GLOBAL_UNIT_AI_TYPES unitAIType; // +0C. unit AI type (on 4 bytes, actually).
+		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType; // +0C. unit AI type (on 4 bytes, actually).
 	private:
 		short int unused_unitAIType; // +0E. Because unitAIType is 4-bytes here. Do not write on these bytes !
 	public:

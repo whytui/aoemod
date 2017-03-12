@@ -6,6 +6,22 @@
 using namespace AOE_STRUCTURES;
 
 namespace CR_DEBUG {
+;
+
+// Writes text to RockNRor log file (appends).
+// Returns true if successful
+bool AppendTextToLogFile(const char *text, bool addNewLineAfterwards) {
+	if (!text) { return true; }
+	FILE *f;
+	int res = fopen_s(&f, MOD_NAME "\\" MOD_NAME ".log", "a+"); // append (do not overwrite)
+	if (res) {
+		// Error
+		return false;
+	}
+	fprintf_s(f, "%s%s", text, addNewLineAfterwards ? "\n" : "");
+	fclose(f);
+	return true;
+}
 
 
 #ifdef _DEBUG

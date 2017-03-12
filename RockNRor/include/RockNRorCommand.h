@@ -92,6 +92,9 @@ private:
 	void UpdateTechAddWorkRateWithMessage(short int techId, short int unitDefId, float updatedValue);
 
 public:
+	// Empties RockNRor log file
+	void ResetLogFile();
+
 	// Returns true if all features for RockNRor are enabled in game executable code.
 	bool CheckEnabledFeatures();
 
@@ -346,6 +349,10 @@ public:
 
 	// This is called on GameSettings.NotifyEvent game method call.
 	void EntryPoint_GameSettingsNotifyEvent(long int eventId, short int playerId, long int arg3, long int arg4, long int arg5);
+
+	// UnitActivity.ProcessNotify event.
+	// outExecStandardCode is an output bool: if set to true, ROR standard code will be executed afterwards. If false, it will be skipped.
+	long int ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2, bool &outExecStandardCode);
 
 
 };

@@ -108,6 +108,7 @@ public:
 	bool autoFixMissingFeatures;
 	// If set (not recommended), all (...most) "generic" fixes (fixes without a specific config to enable/disable) won't be applied. Can be used for troubleshooting.
 	bool doNotApplyFixes;
+	bool doNotUpdateVirtualMethods; // default=false. Can be used for trobleshooting.
 	long int gameTimerSlowDownFactor;
 	bool gameTimerSlowDownAutoFix;
 	long int collectRORDebugLogs; // 0=no, 1=yes, filtered, 2=yes, all

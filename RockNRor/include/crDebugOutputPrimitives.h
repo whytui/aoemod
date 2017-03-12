@@ -24,6 +24,10 @@ using namespace AOE_STRUCTURES;
 
 namespace CR_DEBUG {
 
+// Writes text to RockNRor log file (appends).
+// Returns true if successful
+bool AppendTextToLogFile(const char *text, bool addNewLineAfterwards);
+
 #ifdef _DEBUG
 
 // Dumps useful information for debugging.

@@ -22,14 +22,21 @@ RockNRorCommand::~RockNRorCommand() {
 }
 
 
+// Empties RockNRor log file
+void RockNRorCommand::ResetLogFile() {
+	FILE *f;
+	int res = fopen_s(&f, MOD_NAME "\\" MOD_NAME ".log", "w+"); // overwrite if already existing
+	fclose(f);
+}
+
 bool RockNRorCommand::CheckEnabledFeatures() {
 	char strNotEnabled[] = " NOT ENABLED !";
 	FILE *f;
-	int res = fopen_s(&f, "RockNRor\\" MOD_NAME ".log", "w+"); // overwrite if already existing
+	int res = fopen_s(&f, MOD_NAME "\\" MOD_NAME ".log", "a+"); // append (do not overwrite)
 	if (res) {
 		std::string msg = std::string(localizationHandler.GetTranslation(CRLANG_ID_CANT_WRITE_FILE, "ERROR: cannot write to"));
 		msg += " ";
-		msg += "RockNRor\\" MOD_NAME ".log";
+		msg += MOD_NAME "\\" MOD_NAME ".log";
 		traceMessageHandler.WriteMessage(msg);
 		return false;
 	}
@@ -3650,6 +3657,126 @@ void RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short
 
 	// Now manage triggers...
 	ROCKNROR::TRIGGER::ManageTriggersOnGameNotifyEvent(eventId, playerId, arg3, arg4, arg5);
+}
+
+
+// UnitActivity.ProcessNotify event.
+// outExecStandardCode is an output bool: if set to true, ROR standard code will be executed afterwards. If false, it will be skipped.
+long int RockNRorCommand::ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2, bool &outExecStandardCode) {
+	outExecStandardCode = true;
+
+	/*std::string msg1 = "ActivityProcessNotify ";
+	msg1 += GetHexStringAddress(notifyEvent->activityId, 3);
+	AOE_METHODS::UI_BASE::CallWriteText(msg1.c_str());*/
+
+	// Custom treatments
+#ifndef _DEBUG
+	return;
+#endif;
+	static std::set<AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS> test;
+	AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS notificationTaskId = notifyEvent->activityId;
+	test.insert(notificationTaskId);
+	// TODO: CST_ATI_NOTIFY_TOO_CLOSE_TO_SHOOT : search another target or move away ?
+	/*if (argNotificationId == 0x20D) {
+	AOE_METHODS::CallWriteCenteredText("20D");
+	}*/
+	if (!activity || !activity->ptrUnit || !activity->ptrUnit->ptrStructPlayer) { return 3; } // value to return ??
+	std::string msg = "p#";
+	msg += std::to_string(activity->ptrUnit->ptrStructPlayer->playerId);
+	msg += " u#";
+	msg += std::to_string(activity->ptrUnit->unitInstanceId);
+	msg += " ";
+	if (activity->ptrUnit->unitDefinition) {
+		msg += activity->ptrUnit->unitDefinition->ptrUnitName;
+	}
+	msg += " ";
+	msg += GetHexStringAddress(notificationTaskId, 3);
+	//msg += std::to_string((int)notificationTaskId);
+
+	switch (notificationTaskId) {
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1FD: // See 0x4143B7
+		break;
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1FC: // Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
+		/*AOE_METHODS::CallWriteCenteredText(msg.c_str());
+		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
+		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);
+		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
+		AOE_METHODS::SetGamePause(true);*/
+		break;
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_BEING_ATTACKED: // 1f4
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ACTION_FAILED:
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ACTION_COMPLETED:
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ACTION_INVALIDATED:
+	case AOE_CONST_INTERNAL::CST_ATI_MOVE_BACK_AFTER_SHOOTING: // 200
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_202: // target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
+	case AOE_CONST_INTERNAL::CST_ATI_ESCAPE_ATTACK: // 20f
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2BB: // Release being worked on ?? Example: targeted farm or enemy projectile dies ? 0x426B66.
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_TOO_CLOSE_TO_SHOOT: // 1FE
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_UNIT_CAPTURED:
+		// Usual cases...
+		break;
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1F5:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1F6:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1F7:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1F8:
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_SAW_ENEMY_UNIT:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_203:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_209:
+	case AOE_CONST_INTERNAL::CST_ATI_ATTACK:
+	case AOE_CONST_INTERNAL::CST_ATI_DEFEND_OR_CAPTURE:
+	case AOE_CONST_INTERNAL::CST_ATI_BUILD:
+	case AOE_CONST_INTERNAL::CST_ATI_HEAL:
+	case AOE_CONST_INTERNAL::CST_ATI_CONVERT:
+	case AOE_CONST_INTERNAL::CST_ATI_EXPLORE:
+	case AOE_CONST_INTERNAL::CST_ATI_GATHER_NOATTACK:
+	case AOE_CONST_INTERNAL::CST_ATI_MOVE:
+	case AOE_CONST_INTERNAL::CST_ATI_FOLLOW_OBJECT:
+	case AOE_CONST_INTERNAL::CST_ATI_GATHER_ATTACK:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_266:
+	case AOE_CONST_INTERNAL::CST_ATI_TRADE_WITH_OBJECT:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_268:
+	case AOE_CONST_INTERNAL::CST_ATI_ENTER_TRANSPORT:
+	case AOE_CONST_INTERNAL::CST_ATI_REPAIR:
+	case AOE_CONST_INTERNAL::CST_ATI_HUMAN_TRAIN_UNIT:
+	case AOE_CONST_INTERNAL::CST_ATI_RESEARCH_TECH:
+	case AOE_CONST_INTERNAL::CST_ATI_TRANSPORT:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_26E:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_26F:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_ATTACK:
+	case AOE_CONST_INTERNAL::CST_ATI_DEFEND_UNIT:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2BE:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2C1:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2C2:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_GATHER_NOATTACK:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2C6_ORDER_MOVE:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2C8:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_GATHER_ATTACK:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_REPAIR:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNLOAD:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D2:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D3:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D4:
+	case AOE_CONST_INTERNAL::CST_ATI_HOLD_POSITION:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D6:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D7:
+	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D9:
+		msg += " (other)";
+		AOE_METHODS::CallWriteCenteredText(msg.c_str());
+		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
+		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);
+		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
+		AOE_METHODS::SetGamePause(true);
+		break;
+	default:
+		msg += " (unknown)";
+		AOE_METHODS::CallWriteCenteredText(msg.c_str());
+		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
+		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);
+		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
+		AOE_METHODS::SetGamePause(true);
+		break;
+	}
+	return 2;
 }
 
 

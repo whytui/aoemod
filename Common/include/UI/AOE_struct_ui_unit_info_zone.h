@@ -39,7 +39,7 @@ namespace AOE_STRUCTURES
 		short int currentUnitResourceTypeId; // +12C
 		short int unknown_12E;
 		float currentUnitResourceAmount; // +130
-		GAME_UNIT_STATUS unitStatus; // +134.
+		AOE_CONST_INTERNAL::GAME_UNIT_STATUS unitStatus; // +134.
 		char unknown_135[3]; // unused?
 		float unknown_138; // +138. trade goods (for dock) ??
 		unsigned long int *unknown_13C; // +13C. Pointer to ? First garrisoned unit ?
