@@ -141,10 +141,9 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_40; // Pointer to graphics ? "move_sprite_in"?
 		unsigned long int unknown_44; // "fight_sprite_in" ?
 		unsigned long int unknown_48; // "wait_sprite_in" ?
-		float unknown_4C; // max distance from target I can attack from ? // "min_range_in"?
+		float maxRange; // +4C. Maximum range (max distance from target I can attack from), cf unit definition.
 		// 0x50
-		// missile_id_in (short)? then fire_missile_at_frame_in (short) ?
-		long int unknown_50; // Dword
+		float minRange; // +50. Minimum required range to be able to attack, e.g. for siege weapons, cf unit definition.. ("min_range_in" ?)
 		short int unknown_54;
 		short int unknown_56;
 		char unknown_58; // set to 0 after attack effect is applied? 401FB7

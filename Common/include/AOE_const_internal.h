@@ -441,15 +441,15 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_NOTIFY_ACTION_FAILED = 0x1F9, // To confirm
 		CST_ATI_NOTIFY_ACTION_COMPLETED = 0x1FA, // Notify activity completed (normal completion)
 		CST_ATI_NOTIFY_ACTION_INVALIDATED = 0x1FB, // 410999
-		CST_ATI_UNKNOWN_1FC = 0x1FC, // Notify something... Target moved ? The "target is no longer visible" is a sub-case of this
-		CST_ATI_UNKNOWN_1FD = 0x1FD, // Notify something...? See 0x4143B7
-		CST_ATI_UNKNOWN_1FE = 0x1FE, // Notify something...? See 0x41426A
+		CST_ATI_UNKNOWN_1FC = 0x1FC, // Notify something... Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
+		CST_ATI_UNKNOWN_1FD = 0x1FD, // Notify something...? See 0x4143B7. Target becomes too far to be shot at ? (may still be visible)
+		CST_ATI_NOTIFY_TOO_CLOSE_TO_SHOOT = 0x1FE, // When distance is too low to attack (for siege...). Set in 0x401BCF,0x401E6F only. See 0x41426A.
 		CST_ATI_NOTIFY_SAW_ENEMY_UNIT = 0x1FF, // To confirm. See 0x4143B7 WRONG ? is it GAME_EVENT_TYPES instead ?
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
 		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
 		CST_ATI_UNKNOWN_203 = 0x203, // ? See 0x4143B7
 		CST_ATI_UNKNOWN_209 = 0x209, // Related to notification when being attacked ? see 0x4E4769
-		CST_ATI_UNKNOWN_20B = 0x20B, // Used just after a unit is converted ? 0x4AEBDD
+		CST_ATI_NOTIFY_UNIT_CAPTURED = 0x20B, // Unit captured (on actor=new owner side) : conversion+capture of artefacts/gaia units. 0x4A9FB7, 0x4AEBDD
 		CST_ATI_ESCAPE_ATTACK = 0x20F, // when someone shoots at me ? "escape attack"? 4E62F3
 		CST_ATI_ATTACK = 0x258,
 		CST_ATI_DEFEND_OR_CAPTURE = 0x259, // primary role is defend (position or object), but it is used to capture relics

@@ -135,19 +135,39 @@ void RestoreAllAIFlags() {
 
 
 // This enables AI flags for all players
-void SetAllAIFlags() {
+void SetAllAIFlags(bool enable) {
 	if (IsMultiplayer()) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
-		if (player->isComputerControlled == 0) {
-			// Player was NOT AI-controlled. We need to update its strategy with (potentially) human-created units
-			CheckAIWhenEnablingAIControl(player);
+		if (enable) {
+			if (player->isComputerControlled == 0) {
+				// Player was NOT AI-controlled. We need to update its strategy with (potentially) human-created units
+				CheckAIWhenEnablingAIControl(player);
+			}
 		}
-		player->isComputerControlled = 1;
-		player->SetCustomAIFlag(1);
+		player->isComputerControlled = enable ? 1 : 0;
+		player->SetCustomAIFlag(enable ? 1 : 0);
 	}
+}
+
+
+// Changes destination player id screen position from srcPlayerId's
+bool CopyScreenPosition(const AOE_STRUCTURES::STRUCT_PLAYER *srcPlayer, AOE_STRUCTURES::STRUCT_PLAYER *destPlayer)  {
+	if (!srcPlayer || !destPlayer || !srcPlayer->IsCheckSumValid() || !destPlayer->IsCheckSumValid()) { return false; }
+	destPlayer->screenPositionX = srcPlayer->screenPositionX;
+	destPlayer->screenPositionY = srcPlayer->screenPositionY;
+	destPlayer->unknown_122_posX = srcPlayer->unknown_122_posX;
+	destPlayer->unknown_120_posY = srcPlayer->unknown_120_posY;
+	return true;
+}
+bool CopyScreenPosition(int srcPlayerId, int destPlayerId) {
+	if ((srcPlayerId < 0) || (srcPlayerId > 8)) { return false; }
+	if ((destPlayerId < 0) || (destPlayerId > 8)) { return false; }
+	AOE_STRUCTURES::STRUCT_PLAYER *srcPlayer = GetPlayerStruct(srcPlayerId);
+	AOE_STRUCTURES::STRUCT_PLAYER *destPlayer = GetPlayerStruct(destPlayerId);
+	return CopyScreenPosition(srcPlayer, destPlayer);
 }
 
 

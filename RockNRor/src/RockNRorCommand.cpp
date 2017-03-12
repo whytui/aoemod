@@ -509,8 +509,12 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_RECOMPUTED, "AI flags have been recomputed"));
 	}
 	if ((strcmp(command, "allai") == 0) || (strcmp(command, "allAI") == 0)) {
-		AOE_METHODS::PLAYER::SetAllAIFlags();
+		AOE_METHODS::PLAYER::SetAllAIFlags(true);
 		AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_ALL_SET, "All players are now computer-managed."));
+	}
+	if ((strcmp(command, "noai") == 0) || (strcmp(command, "NOAI") == 0)) {
+		AOE_METHODS::PLAYER::SetAllAIFlags(false);
+		AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(-1 /*TODO*/, "AI is disabled for all players"));
 	}
 	if (strcmp(command, "dump") == 0) {
 #ifdef _DEBUG
@@ -536,8 +540,19 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		int playerId = *(command + 1) - '0';
 		AOE_METHODS::PLAYER::ChangeControlledPlayer(playerId, true);
 	}
+	// g0 to g8: quick player change + keep screen position
+	if ((*command == 'g') && (*(command + 1) >= '0') && (*(command + 1) < '9')) {
+		int playerId = *(command + 1) - '0';
+		AOE_STRUCTURES::STRUCT_PLAYER *oldPlayer = GetControlledPlayerStruct_Settings();
+		AOE_STRUCTURES::STRUCT_PLAYER *newPlayer = GetPlayerStruct(playerId);
+		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		if (oldPlayer && newPlayer && settings && settings->ptrGameUIStruct) {
+			AOE_METHODS::PLAYER::CopyScreenPosition(oldPlayer->playerId, playerId);
+			AOE_METHODS::PLAYER::ChangeControlledPlayer(playerId, false);
+		}
+	}
 
-	// analyze ustom unit groups AI
+	// analyze custom unit groups AI
 	if (strcmp(command, "group") == 0) {
 		std::string s = "";
 		for (int i = 0; i < GetGameGlobalStructPtr()->playerTotalCount; i++) {

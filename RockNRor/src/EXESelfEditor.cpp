@@ -7,12 +7,11 @@ bool WriteInMyMemory(unsigned long int address, char *buffer, int size) {
 	if (buffer == NULL) { return false; }
 	if (size <= 0) { return false; }
 
-	long int test = 0;
 	DWORD processId = GetCurrentProcessId();
 	if (processId == 0) { return false; }
 	//HANDLE hndl = OpenProcess(PROCESS_ALL_ACCESS, false, processId);
 	HANDLE hndl = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_WRITE, false, processId);
-	SIZE_T sizeWritten;
+	SIZE_T sizeWritten = 0;
 	BOOL success = WriteProcessMemory(hndl, (LPVOID)address, buffer, size, &sizeWritten);
 	DWORD e = GetLastError();
 	CloseHandle(hndl);

@@ -106,7 +106,7 @@ namespace AOE_STRUCTURES
 	// +0x08 = activity.load(internalFileId)
 	// +0x0C = activity.GetOwnerPlayer()
 	// +0x10 = activity.order(?, taskId, targetUnitId, targetPlayerId, posY, posX, posZ, maxRange, arg9, arg10, arg11)
-	// +0x14 = activity.notify(actorUnitId, targetUnitId, internalId, targetUnitClass, currentHP, maxHP)
+	// +0x14 = activity.notify(actorUnitId, targetUnitId, internalId, targetUnitClass, currentHP, maxHP) = add to notify queue.
 	// +0x18 = activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). Eg. 0x410A20
 	// +0x1C = activity.notifyCommander(NotifyEvent*). Eg. 0x4109F0 => calls [EDX+0x18]
 	// +0x20 = activity.prepareTmpMapInfo?(arg1) : collects info about nearby units (cf ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE)
@@ -151,7 +151,7 @@ namespace AOE_STRUCTURES
 	// +0xC0 = activity.GetResourceGatherType(AIType)
 	// +0xC4 = activity.canConvert(targetUnitId) ?
 	// +0xC8 = activity.processOrder(orderEvent, arg2)
-	// +0xCC = activity.ProcessNotify(notifyEvent). Returns some enum (3,4,5=do nothing special?,6=triggered an activity?..) "ProcessNotify" ? Ex:priest=0x4E5370, military=0x4E62D0, base=0x413890. Each class has a specific overload (except tower).
+	// +0xCC = activity.ProcessNotify(notifyEvent, arg2). Returns some enum (3,4,5=do nothing special?,6=triggered an activity?..) "ProcessNotify" ? Ex:priest=0x4E5370, military=0x4E62D0, base=0x413890. Each class has a specific overload (except tower).
 	// +0xD4 = activity.ProcessIdle(arg1)? 0x4145A0 (base proc, used by many children), priest=0x4E54E0. For example, auto-targeting of idle units.
 	// +0xD8 = activity.ProcessMisc(). ex. 0x414600. Find target? Returns some enum
 	// +0xDC = activity.processRetryableOrder() [Last for all except priest activity]. Returns some enum

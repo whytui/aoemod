@@ -161,6 +161,7 @@ namespace AOE_STRUCTURES {
 	// +0x138 = unit.UnitDefProvidesRenewableResource(unitdefId). True for units that "make" resource (farms, trade units like docks). For types70/80, see 0x4AFB70. All others="return false".
 	// +0x13C = unit.PreserveOwnedResourceWhenKilledBy(unitClass). This allows hunters (and lions) kill & "hunt" animals whereas military units "destroy" animals (not gatherable anymore)
 	// +0x140 = unit.logMessage(?)?
+	// +0x148 = unit.notify(actorUnitId?, impactedUnitId?, notifyTaskId, generic_4, generic_5, generic_6) = add to activity notify queue. E.g. 0x426DB0
 	// +0x14C = unit.attackPosition(fposY, fposX, arg3, arg4)
 	// +0x150 = unit.setAttackAction?(targetUnitId, force)
 	// +0x154 = unit.moveTo(fposY, fposX, arg3, arg4, force?) create action move ?

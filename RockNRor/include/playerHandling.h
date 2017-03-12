@@ -52,7 +52,11 @@ void CheckAIWhenEnablingAIControl(AOE_STRUCTURES::STRUCT_PLAYER *player);
 void DisableAIFlagsForHuman();
 // Restore AI flags based on human-controlled playerID (to be used in SP games only)
 void RestoreAllAIFlags();
-void SetAllAIFlags();
+void SetAllAIFlags(bool enable);
+
+// Changes destination player id screen position from srcPlayerId's
+bool CopyScreenPosition(const AOE_STRUCTURES::STRUCT_PLAYER *srcPlayer, AOE_STRUCTURES::STRUCT_PLAYER *destPlayer);
+bool CopyScreenPosition(int srcPlayerId, int destPlayerId);
 
 // Change human control to another player and set AI flags accordingly (if updateAIFlags is true)
 void ChangeControlledPlayer(int playerId, bool updateAIFlags);

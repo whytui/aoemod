@@ -85,7 +85,7 @@ static bool test_ror_structures() {
 	trs_assert(&aconv, 0x40, &aconv.unknown_040);
 	AOE_STRUCTURES::STRUCT_ACTION_ATTACK aa;
 	trs_assert(&aa, 0x030, &aa.command);
-	trs_assert(&aa, 0x050, &aa.unknown_50);
+	trs_assert(&aa, 0x050, &aa.minRange);
 	assert(sizeof(AOE_STRUCTURES::STRUCT_ACTION_MAKE_OBJECT) == 0x50);
 	assert(sizeof(AOE_STRUCTURES::STRUCT_ACTION_DISCOVERY_ARTEFACT) == 0x44);
 	// AI Struct
