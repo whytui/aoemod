@@ -255,7 +255,7 @@ namespace AOE_STRUCTURES {
 		char unknown_04B;
 		short int resourceTypeId; // A unit can hold only 1 resource. =0x22=34 for priest.
 		char unitType; // +4E. Warning: this value is often WRONG. See unitDef value instead. Only 1-byte here, whereas it is 4-bytes in unitDef struct. 70=living, etc. See GLOBAL_UNIT_TYPES
-		char unitCountThatAreTargetingMe; // +4F. Number of (other)units that have "me" as target (repairman, gatherer, attacker...). See 4AADB0. Warning: the count is not reliable: when moving to it, the other unit counts TWICE (and counts for 1 when actually doing the action)
+		char unitCountThatAreTargetingMe; // +4F. Number of (other)units that have "me" as target (repairman, gatherer, attacker...). See 4AADB0. Warning: the count is not reliable: when moving to it, the other unit counts TWICE (and counts for 1 when actually doing the action) + also counts projectiles !
 		// 0x50
 		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *ptrElemInPlayerUnitList; // +50. Link to corresponding reference in player's creatable units list. Can be NULL in saved games (if not "used" yet ?)
 		STRUCT_MANAGED_ARRAY unknown_054; // +54 a ptr. about movement ? objectCollisionList ? Units in same Formation ? A list of unitID.

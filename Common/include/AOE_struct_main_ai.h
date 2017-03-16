@@ -28,6 +28,7 @@ namespace AOE_STRUCTURES {
 	// +0x08 = save?
 	// +0x18 = AI.startAIHistoryFile(arg1)
 	// +0x30 = update(arg1)
+	// +0x48 = mainAI.getUnitClassFromTaskId(taskId), for tasks 25A 25D 261 265 26B 26C only
 	class STRUCT_AI {
 	public:
 		unsigned long int checksum;

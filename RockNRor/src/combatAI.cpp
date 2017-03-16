@@ -533,8 +533,8 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 	if (settings->rgeGameOptions.difficultyLevel == GAME_DIFFICULTY_LEVEL::GDL_EASIEST) { return false; }
 	if (player->isComputerControlled == 0) { return false; } // cf 0x4E6476
 	if (unitActivity->targetUnitType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupPredatorAnimal) { return false; } // This is only used for hunting aggressive animals.
-	if ((unitActivity->currentActionId != ACTIVITY_TASK_IDS::CST_ATI_ATTACK) &&
-		(unitActivity->currentActionId != ACTIVITY_TASK_IDS::CST_ATI_GATHER_ATTACK)) {
+	if ((unitActivity->currentActionId != ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK) &&
+		(unitActivity->currentActionId != ACTIVITY_TASK_IDS::CST_ATI_TASK_GATHER_ATTACK)) {
 		return false;
 	} // cf 0x4E64B2
 	long int activityTargetUnitId = unitActivity->targetUnitId;
@@ -626,11 +626,11 @@ long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_
 		return -1;
 	}
 
-	if (notify->activityId == ACTIVITY_TASK_IDS::CST_ATI_MOVE_BACK_AFTER_SHOOTING) {
+	if (notify->activityId == ACTIVITY_TASK_IDS::CST_ATI_NOTIFY_MOVE_BACK_AFTER_SHOOTING) {
 		return HunterMoveBackAfterShooting(unitActivity, notify) ? 3 : -1;
 	}
 	if (notify->activityId == ACTIVITY_TASK_IDS::CST_ATI_NOTIFY_BEING_ATTACKED) {
-		if (unitActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_MOVE) {
+		if (unitActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_TASK_MOVE) {
 			// Villager should not stop to strike back to animal when he's not ready to shoot
 			for (int i = 0; i < unitActivity->orderQueueUsedElemCount; i++) {
 				if ((unitActivity->orderQueue[i].targetUnitId == notify->targetUnitId) &&

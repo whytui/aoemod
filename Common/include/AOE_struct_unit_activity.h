@@ -64,7 +64,7 @@ namespace AOE_STRUCTURES
 		char unknown_07; // Unused ?
 	};
 	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM) == 0x8, "STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM size");
-	// Size=0x1C8. Constructor=0x40D2F0 (see other methods just after)
+	// Size=0x1C8. Constructor=0x40D2F0 (see other methods just after). Related to task 2D6 ??
 	class STRUCT_UNIT_ACTIVITY_UNKNOWN_12C {
 	public:
 		STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM unknown_00[50]; // +00.
@@ -133,9 +133,10 @@ namespace AOE_STRUCTURES
 	// +0x74 = activity.setRepairAction(targetUnitId, force)
 	// +0x78 = activity.setBuildAction(targetUnitId, force)
 	// +0x7C = activity.tradeWithObject(targetUnitId, force)
-	// +0x80 = activity.explore(int posY, int posX, posZ)
+	// +0x80 = activity.explore(int posY, int posX, posZ) -> task 0x25D
 	// +0x84 = activity.enterObject(targetUnitId, force)
 	// +0x88 = activity.transport(arg1, arg2, arg3)
+	// +0x8C = ? Related to 2CA ?
 	// +0x90 = activity.moveTo(fposY, fposX, arg3, arg4, force)
 	// +0x94 = activity.moveTo(targetUnitId, f_maxRange, force?)
 	// +0x98 = activity.moveTo(int,int)
@@ -145,7 +146,7 @@ namespace AOE_STRUCTURES
 	// +0xA8 = activity.followObject(targetUnitId, f_dist, force)
 	// +0xAC = activity.defendObject(targetUnitId, f_dist, force)
 	// +0xB0 = activity.defendPosition(float, float, float, force)
-	// +0xB4 = activity.  transport load ?
+	// +0xB4 = activity.  transport load ? for 2D2
 	// +0xB8 = activity. for 2D3
 	// +0xBC = activity.isImportantObject(AIType)
 	// +0xC0 = activity.GetResourceGatherType(AIType)

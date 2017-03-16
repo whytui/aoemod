@@ -559,6 +559,17 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		}
 	}
 
+	if (strcmp(command, "empty farm") == 0) {
+		// Sometimes we need to have almost empty farms for testing...
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		if (!player) { return; }
+		AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsBasePointer(player);
+		if (selectedUnits && selectedUnits[0] && ((STRUCT_UNIT_BUILDING*)(selectedUnits[0]))->IsCheckSumValid() &&
+			(selectedUnits[0]->ptrStructPlayer == player)) {
+			SetFarmCurrentTotalFood((STRUCT_UNIT_BUILDING*)(selectedUnits[0]), 2);
+		}
+	}
+
 	// analyze custom unit groups AI
 	if (strcmp(command, "group") == 0) {
 		std::string s = "";
@@ -1973,15 +1984,15 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 	assert(enemyTowerDef->DerivesFromAttackable());
 	if (!actorUnitDef->DerivesFromAttackable() || !enemyTowerDef->DerivesFromAttackable()) { return false; }
 
-	if (activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_CONVERT) {
+	if (activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT) {
 		return false; // Converting priest: let him proceed. TO DO: improve !
 	}
 
 	// Check if tower is mine or allied (it may have been converted)
 	if (actorUnit->ptrStructPlayer->ptrDiplomacyStances[enemyTower->ptrStructPlayer->playerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY) {
 		if ((activity->targetUnitId == enemyTower->unitInstanceId) &&
-			((activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_CONVERT) ||
-			(activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_ATTACK)
+			((activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT) ||
+			(activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK)
 			)) {
 			// Stop attacking/converting allied !
 			AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO * actionInfo = actorUnit->ptrActionInformation;
@@ -2033,7 +2044,7 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 	// Actor = catapult: always attack the tower... unless priest is very close AND being converting (not moving - can not escape my shot)
 	if (actorUnitDef->DAT_ID1 == CST_UNITID_STONE_THROWER) { // DAT_ID1 : also matches for catapult upgrades
 		if ((distanceToCurrentTarget < actorRange) && (currentTargetDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) &&
-			(currentTarget->currentActivity) && (currentTarget->currentActivity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_CONVERT)) {
+			(currentTarget->currentActivity) && (currentTarget->currentActivity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT)) {
 			return false; // In that specific case, attack current target (priest)
 		} else {
 			return true; // Otherwise, catapults just have to attack the tower
@@ -2049,7 +2060,7 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 		}
 		// Builder: keep for some critical constructions
 		STRUCT_UNIT_BUILDING *currentTargetAsBld = (STRUCT_UNIT_BUILDING *)currentTarget;
-		if (currentTargetAsBld->IsCheckSumValid() && (activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_BUILD) &&
+		if (currentTargetAsBld->IsCheckSumValid() && (activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_BUILD) &&
 			(currentTarget->ptrStructPlayer == actorUnit->ptrStructPlayer)// Just a check
 			) {
 			if (currentTargetDef->DAT_ID1 == CST_UNITID_FORUM) {
@@ -2063,7 +2074,7 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 			}
 		}
 		// Repairman: keep for some critical constructions
-		if ((activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_BUILD) &&
+		if ((activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_BUILD) &&
 			(currentTarget->ptrStructPlayer == actorUnit->ptrStructPlayer)// Just a check
 			) {
 			if ((currentTargetDef->DAT_ID1 == CST_UNITID_FORUM) && (currentTarget->remainingHitPoints < 400)) {
@@ -3703,16 +3714,16 @@ long int RockNRorCommand::ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, 
 		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
 		AOE_METHODS::SetGamePause(true);*/
 		break;
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_BEING_ATTACKED: // 1f4
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_BEING_ATTACKED: // 1f4 -> TODO: if attacker is under "min range": just move away if I am idle, ignore event otherwise
 	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ACTION_FAILED:
 	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ACTION_COMPLETED:
 	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ACTION_INVALIDATED:
-	case AOE_CONST_INTERNAL::CST_ATI_MOVE_BACK_AFTER_SHOOTING: // 200
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_MOVE_BACK_AFTER_SHOOTING: // 200
 	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_202: // target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
-	case AOE_CONST_INTERNAL::CST_ATI_ESCAPE_ATTACK: // 20f
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2BB: // Release being worked on ?? Example: targeted farm or enemy projectile dies ? 0x426B66.
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ESCAPE_ATTACK: // 20f
 	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_TOO_CLOSE_TO_SHOOT: // 1FE
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_UNIT_CAPTURED:
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_UNIT_CAPTURED: // 20B
+	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_RELEASE_BEING_WORKED_ON: // >0x258 but still a notification !
 		// Usual cases...
 		break;
 	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1F5:
@@ -3722,45 +3733,52 @@ long int RockNRorCommand::ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, 
 	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_SAW_ENEMY_UNIT:
 	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_203:
 	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_209:
-	case AOE_CONST_INTERNAL::CST_ATI_ATTACK:
-	case AOE_CONST_INTERNAL::CST_ATI_DEFEND_OR_CAPTURE:
-	case AOE_CONST_INTERNAL::CST_ATI_BUILD:
-	case AOE_CONST_INTERNAL::CST_ATI_HEAL:
-	case AOE_CONST_INTERNAL::CST_ATI_CONVERT:
-	case AOE_CONST_INTERNAL::CST_ATI_EXPLORE:
-	case AOE_CONST_INTERNAL::CST_ATI_GATHER_NOATTACK:
-	case AOE_CONST_INTERNAL::CST_ATI_MOVE:
-	case AOE_CONST_INTERNAL::CST_ATI_FOLLOW_OBJECT:
-	case AOE_CONST_INTERNAL::CST_ATI_GATHER_ATTACK:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_266:
-	case AOE_CONST_INTERNAL::CST_ATI_TRADE_WITH_OBJECT:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_268:
-	case AOE_CONST_INTERNAL::CST_ATI_ENTER_TRANSPORT:
-	case AOE_CONST_INTERNAL::CST_ATI_REPAIR:
-	case AOE_CONST_INTERNAL::CST_ATI_HUMAN_TRAIN_UNIT:
-	case AOE_CONST_INTERNAL::CST_ATI_RESEARCH_TECH:
-	case AOE_CONST_INTERNAL::CST_ATI_TRANSPORT:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_26E:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_26F:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_DEFEND_OR_CAPTURE:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_BUILD:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_HEAL:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_CONVERT:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_EXPLORE:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_GATHER_NOATTACK:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_MOVE:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_FOLLOW_OBJECT:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_GATHER_ATTACK:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_UNKNOWN_266:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_TRADE_WITH_OBJECT:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_UNKNOWN_268:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_ENTER_TRANSPORT:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_REPAIR:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_HUMAN_TRAIN_UNIT:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_RESEARCH_TECH:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_TRANSPORT:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_UNKNOWN_26E:
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_UNKNOWN_26F:
 	case AOE_CONST_INTERNAL::CST_ATI_ORDER_ATTACK:
-	case AOE_CONST_INTERNAL::CST_ATI_DEFEND_UNIT:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2BE:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2C1:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2C2:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_DEFEND_UNIT:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_BUILD:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_EXPLORE:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2C2:
 	case AOE_CONST_INTERNAL::CST_ATI_ORDER_GATHER_NOATTACK:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2C6_ORDER_MOVE:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2C8:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2C6_ORDER_MOVE:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_FOLLOW_OBJECT:
 	case AOE_CONST_INTERNAL::CST_ATI_ORDER_GATHER_ATTACK:
 	case AOE_CONST_INTERNAL::CST_ATI_ORDER_REPAIR:
 	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNLOAD:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D2:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D3:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D4:
-	case AOE_CONST_INTERNAL::CST_ATI_HOLD_POSITION:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D6:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D7:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_2D9:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_LOAD_TROOPS:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2D3:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2D4:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_HOLD_POSITION:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2D6:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2D7:
+	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2D9_POP_TARGET:
 		msg += " (other)";
+		AOE_METHODS::CallWriteCenteredText(msg.c_str());
+		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
+		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);
+		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
+		AOE_METHODS::SetGamePause(true);
+		break;
+	case AOE_CONST_INTERNAL::CST_ATI_TASK_ATTACK: //0x258 (should not be a notification?) There is code for this... dead (wrong?obsolete?)code ?
+		msg += " (task_attack)";
 		AOE_METHODS::CallWriteCenteredText(msg.c_str());
 		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
 		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);

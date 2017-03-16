@@ -191,61 +191,6 @@ namespace AOE_CONST_INTERNAL
 		CST_GES_FARM_DEPLETED = 0x10
 	};
 
-	// Those event IDs are used in gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX) = [EDX+0x40]=0x501980. Arguments may have different roles
-	// And player.NotifyEvent
-	// And player.handleEventInAI(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F34C0)
-	// And 0x413890 = UnitActivity.processNotify(struct NotifyEvent *, unsigned long)
-	// WARNING: to debug: not sure all values are the same enum. There might be separate enums for player/gameSettings notifyEvent...
-	// Is this the same as ACTIVITY_TASK_IDS ?
-	// See 0x4F34C0: arg3=eventidd IS a GAME_EVENT_TYPES
-	enum GAME_EVENT_TYPES : long int {
-		CST_GET_INVALID = -1, // For RockNRor internal usage
-		CST_GET_CANT_UNLOAD_NO_ROOM = 01,
-		CST_GET_CANT_UNLOAD_TOO_FAR = 02,
-		CST_GET_CANT_TRADE_WITH_ENEMY = 03,
-		CST_GET_UNKNOWN_04_PLAYER_DISCONNECTED = 04,
-		CST_GET_UNKNOWN_05_PLAYER_DISCONNECTED_ABANDONED = 05,
-		CST_GET_PLAYER_LOST = 06,
-		CST_GET_TRIBUTE_PAID = 07, // gameSettings.NotifyEvent: arg2=actorPlayerId, arg3=targetPlayerId, arg4=resourceId, arg5=resourceType
-		CST_GET_DIPLOMACY_CHANGED = 8,
-		CST_GET_RESEARCH_COMPLETE = 0x64,
-		CST_GET_CANCELED_RESEARCH = 0x65,
-		CST_GET_UNIT_SPAWNED = 0x66,
-		CST_GET_CANCEL_TRAIN_UNIT = 0x67,
-		CST_GET_CANNOT_SPAWN_NO_ROOM = 0x68,
-		CST_GET_BUILDING_COMPLETE = 0x69,
-		CST_GET_UNKNOWN_6A = 0x6A,
-		CST_GET_CANNOT_REPAIR_NO_RESOURCES = 0x6B, // See also CST_GET_NOT_ENOUGH_RESOURCES for train/build missing resources errors
-		CST_GET_WONDER_START_BUILDING = 0x6C,
-		CST_GET_WONDER_FINISHED = 0x6D,
-		CST_GET_WONDER_DESTROYED = 0x6E,
-		CST_GET_ALL_RELICS_CAPTURED = 0x72,
-		CST_GET_ALL_RELICS_LOST_CONTROL = 0x73,
-		CST_GET_ALL_RUINS_CAPTURED = 0x74,
-		CST_GET_ALL_RUINS_LOST_CONTROL = 0x75,
-		CST_GET_CANNOT_CONVERT_NO_FAITH = 0x76,
-		CST_GET_CANNOT_CONVERT_NEED_MONOTHEISM_PRIEST = 0x77,
-		CST_GET_CANNOT_CONVERT_NEED_MONOTHEISM_BUILDING = 0x78,
-		CST_GET_CANNOT_CONVERT_TC = 0x79,
-		CST_GET_CANNOT_CONVERT_WONDER = 0x7A,
-		CST_GET_SUCCESSFULLY_CONVERTED_UNIT = 0x7B, // NotifyEvent: arg2=actor player, arg3=victim player
-		CST_GET_ADD_REMOVE_IN_TRAIN_QUEUE = 0x7C,
-		CST_GET_NOT_ENOUGH_RESOURCES = 0x7D, // need houses, food/wood or maxPop reached (to build or train, NOT for repair)
-		CST_GET_FARM_DEPLETED = 0x7E, // Sound 0x10
-		CST_GET_UNKNOWN_1F9 = 0x1F9, // Unit death/loss ? see 0x4F3531(=if fishing ship then remove group) Action failed ?
-		CST_GET_UNKNOWN_1FA = 0x1FA, // Villager activity end, could not find nearby similar targets ? arg4=activityId. Action completed ?
-		//CST_GET_SAW_ENEMY_UNIT = 0x1FF, // Unsure ?? possible confusion with activity tasks IDs
-		CST_GET_UNIT_ATTACKED = 0x201,
-		CST_GET_MOVEMENT_FINISHED = 0x202, // unsure
-		CST_GET_TOO_FAR_FROM_LAND = 0x206, // to confirm [player notif]
-		CST_GET_CANNOT_UNLOAD = 0x207, // Not enough space to unload ? To confirm [player notif]
-		CST_GET_UNKOWN_208 = 0x208, // for early versions only ?
-		CST_GET_UNKOWN_209 = 0x209, // When triggered, AI player adds dislike for target player
-		CST_GET_TRIBUTE_RECEIVED = 0x20A, // [player notifications only?]
-		CST_GET_UNKOWN_20C = 0x20C,
-		CST_GET_SEE_UNIT = 0x20D
-	};
-
 	enum PLACEMENT_TYPES : long int {
 		CST_PT_STORAGE_PIT = 1,
 		CST_PT_GRANARY = 2,
@@ -325,8 +270,8 @@ namespace AOE_CONST_INTERNAL
 		CST_AS_0A_DELAY = 0x0A, // Seen on stuck villager (repairman that could not get to target)
 		CST_AS_0B_MOVE = 0x0B, // Seen when moving to bird location (after killing it)
 		CST_AS_0C_ATTACK = 0x0C, // waiting for requirement ? Really unsure
-		CST_AS_0D_FAILED = 0x0D, // Set when unit can't move (speed==0) ?? 405472. This status is an Idle status.
-		CST_AS_0E_INVALIDATED = 0x0E, // ? Considered idle.
+		CST_AS_0D_FAILED = 0x0D, // Set when unit can't move (speed==0) ?? 0x405472. This status is an Idle status. Related to notification 1F9(failed)
+		CST_AS_0E_INVALIDATED = 0x0E, // Considered idle. Related to notificationId 1FB.
 		CST_AS_0F_UNKNOWN = 0x0F // Seen while moving (just moving). This *really* is an "unknown" status.
 	};
 
@@ -429,10 +374,69 @@ namespace AOE_CONST_INTERNAL
 		CST_CHT_NO_FOG = 0xE7
 	};
 
+	// Those event IDs are used in gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX) = [EDX+0x40]=0x501980. Arguments may have different roles
+	// And player.NotifyEvent
+	// And player.handleEventInAI(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F34C0)
+	// And 0x413890 = UnitActivity.processNotify(struct NotifyEvent *, unsigned long)
+	// WARNING: to debug: not sure all values are the same enum. There might be separate enums for player/gameSettings notifyEvent...
+	// Is this the same as ACTIVITY_TASK_IDS ?
+	// See 0x4F34C0: arg3=eventidd IS a GAME_EVENT_TYPES
+	enum GAME_EVENT_TYPES : long int {
+		CST_GET_INVALID = -1, // For RockNRor internal usage
+		// 1-99 : basic events/errors (Tribe version?)
+		CST_GET_CANT_UNLOAD_NO_ROOM = 01,
+		CST_GET_CANT_UNLOAD_TOO_FAR = 02,
+		CST_GET_CANT_TRADE_WITH_ENEMY = 03,
+		CST_GET_UNKNOWN_04_PLAYER_DISCONNECTED = 04,
+		CST_GET_UNKNOWN_05_PLAYER_DISCONNECTED_ABANDONED = 05,
+		CST_GET_PLAYER_LOST = 06,
+		CST_GET_TRIBUTE_PAID = 07, // gameSettings.NotifyEvent: arg2=actorPlayerId, arg3=targetPlayerId, arg4=resourceId, arg5=resourceType
+		CST_GET_DIPLOMACY_CHANGED = 8,
+		// 100-499: global events/errors
+		CST_GET_RESEARCH_COMPLETE = 0x64,
+		CST_GET_CANCELED_RESEARCH = 0x65,
+		CST_GET_UNIT_SPAWNED = 0x66,
+		CST_GET_CANCEL_TRAIN_UNIT = 0x67,
+		CST_GET_CANNOT_SPAWN_NO_ROOM = 0x68,
+		CST_GET_BUILDING_COMPLETE = 0x69,
+		CST_GET_UNKNOWN_6A = 0x6A,
+		CST_GET_CANNOT_REPAIR_NO_RESOURCES = 0x6B, // See also CST_GET_NOT_ENOUGH_RESOURCES for train/build missing resources errors
+		CST_GET_WONDER_START_BUILDING = 0x6C,
+		CST_GET_WONDER_FINISHED = 0x6D,
+		CST_GET_WONDER_DESTROYED = 0x6E,
+		CST_GET_ALL_RELICS_CAPTURED = 0x72,
+		CST_GET_ALL_RELICS_LOST_CONTROL = 0x73,
+		CST_GET_ALL_RUINS_CAPTURED = 0x74,
+		CST_GET_ALL_RUINS_LOST_CONTROL = 0x75,
+		CST_GET_CANNOT_CONVERT_NO_FAITH = 0x76,
+		CST_GET_CANNOT_CONVERT_NEED_MONOTHEISM_PRIEST = 0x77,
+		CST_GET_CANNOT_CONVERT_NEED_MONOTHEISM_BUILDING = 0x78,
+		CST_GET_CANNOT_CONVERT_TC = 0x79,
+		CST_GET_CANNOT_CONVERT_WONDER = 0x7A,
+		CST_GET_SUCCESSFULLY_CONVERTED_UNIT = 0x7B, // NotifyEvent: arg2=actor player, arg3=victim player
+		CST_GET_ADD_REMOVE_IN_TRAIN_QUEUE = 0x7C,
+		CST_GET_NOT_ENOUGH_RESOURCES = 0x7D, // need houses, food/wood or maxPop reached (to build or train, NOT for repair)
+		CST_GET_FARM_DEPLETED = 0x7E, // Sound 0x10
+		// 500-? More specific events ?
+		CST_GET_UNKNOWN_1F9 = 0x1F9, // Unit death/loss ? see 0x4F3531(=if fishing ship then remove group) Action failed ?
+		CST_GET_UNKNOWN_1FA = 0x1FA, // Villager activity end, could not find nearby similar targets ? arg4=activityId. Action completed ?
+		//CST_GET_SAW_ENEMY_UNIT = 0x1FF, // Unsure ?? possible confusion with activity tasks IDs
+		CST_GET_UNIT_ATTACKED = 0x201,
+		CST_GET_MOVEMENT_FINISHED = 0x202, // unsure
+		CST_GET_TOO_FAR_FROM_LAND = 0x206, // to confirm [player notif]
+		CST_GET_CANNOT_UNLOAD = 0x207, // Not enough space to unload ? To confirm [player notif]
+		CST_GET_UNKOWN_208 = 0x208, // for early versions only ?
+		CST_GET_UNKOWN_209 = 0x209, // When triggered, AI player adds dislike for target player
+		CST_GET_TRIBUTE_RECEIVED = 0x20A, // [player notifications only?]
+		CST_GET_UNKOWN_20C = 0x20C,
+		CST_GET_SEE_UNIT = 0x20D // [player notifications only?]
+	};
+
 	// For activity.task IDs
-	// Those values seem to be the same enum as player's notify event id ??? cf 0x410A20 STRUCT_UNIT_ACTIVITY_QUEUE.activityId passed to player notify
+	// Those values seem to be the same enum as player's notify event id ??? cf 0x410A20 id passed to player notify
 	enum ACTIVITY_TASK_IDS : long int {
 		CST_ATI_NONE = -1, // Used a lot in game code
+		// 0x1F4-0x20F = notifications. For some reason, 0x2BB is also used as notifications + 0x258 but it seems to be dead code.
 		CST_ATI_NOTIFY_BEING_ATTACKED = 0x1F4, // (500) Notify(react) being attacked ? GenericArg4=actorUnitId ? Triggers a player.NotifyEvent with event 0x201
 		CST_ATI_UNKNOWN_1F5 = 0x1F5,
 		CST_ATI_UNKNOWN_1F6 = 0x1F6, // Notify something...? See 0x4143B7
@@ -440,57 +444,74 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_1F8 = 0x1F8, // Notify something...? See 0x4143B7
 		CST_ATI_NOTIFY_ACTION_FAILED = 0x1F9, // To confirm
 		CST_ATI_NOTIFY_ACTION_COMPLETED = 0x1FA, // Notify activity completed (normal completion)
-		CST_ATI_NOTIFY_ACTION_INVALIDATED = 0x1FB, // 410999
+		CST_ATI_NOTIFY_ACTION_INVALIDATED = 0x1FB, // 0x410999
 		CST_ATI_UNKNOWN_1FC = 0x1FC, // Notify something... Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
 		CST_ATI_UNKNOWN_1FD = 0x1FD, // Notify something...? See 0x4143B7. Target becomes too far to be shot at ? (may still be visible)
 		CST_ATI_NOTIFY_TOO_CLOSE_TO_SHOOT = 0x1FE, // When distance is too low to attack (for siege...). Set in 0x401BCF,0x401E6F only. See 0x41426A.
 		CST_ATI_NOTIFY_SAW_ENEMY_UNIT = 0x1FF, // To confirm. See 0x4143B7 WRONG ? is it GAME_EVENT_TYPES instead ? Used in early versions only ?
-		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
+		CST_ATI_NOTIFY_MOVE_BACK_AFTER_SHOOTING = 0x200, // Notify the unit should move back to my max range after shooting to a target. 0x4E646B. Generic_arg4=taskid(0x258)
 		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
 		CST_ATI_UNKNOWN_203 = 0x203, // ? See 0x4143B7
 		CST_ATI_UNKNOWN_209 = 0x209, // Related to notification when being attacked ? see 0x4E4769
 		CST_ATI_NOTIFY_UNIT_CAPTURED = 0x20B, // Unit captured (on actor=new owner side) : conversion+capture of artefacts/gaia units. 0x4A9FB7, 0x4AEBDD
-		CST_ATI_ESCAPE_ATTACK = 0x20F, // when someone shoots at me ? "escape attack"? 4E62F3
-		CST_ATI_ATTACK = 0x258,
-		CST_ATI_DEFEND_OR_CAPTURE = 0x259, // primary role is defend (position or object), but it is used to capture relics
-		CST_ATI_BUILD = 0x25A,
-		CST_ATI_HEAL = 0x25B,
-		CST_ATI_CONVERT = 0x25C,
-		CST_ATI_EXPLORE = 0x25D,
-		CST_ATI_GATHER_NOATTACK = 0x261, // Forager, farmer, miners (gathering that doesn't have an "attack" phase.
-		CST_ATI_MOVE = 0x262, // 
-		CST_ATI_FOLLOW_OBJECT = 0x264,
-		CST_ATI_GATHER_ATTACK = 0x265, // woodcutter, hunter, fisherman (gatherer that have an "attack" phase - not really true for fish, but anyway !)
-		CST_ATI_UNKNOWN_266 = 0x266, // regroup in unit group ??? Related to SNAttackGroupGatherSpacing in 4CD551? Group&wait for transport ?
-		CST_ATI_TRADE_WITH_OBJECT = 0x267,
-		CST_ATI_UNKNOWN_268 = 0x268, // some movement ?
-		CST_ATI_ENTER_TRANSPORT = 0x269, // Cf 0x412350.
-		CST_ATI_REPAIR = 0x26A,
-		CST_ATI_HUMAN_TRAIN_UNIT = 0x26B, // only when triggered by human ?
-		CST_ATI_RESEARCH_TECH = 0x26C, // includes train unit when triggered by AI.
-		CST_ATI_TRANSPORT = 0x26D, // unsure. Includes move+unload. Such unit can't be used as actor in strategy element.
-		CST_ATI_UNKNOWN_26E = 0x26E, // load ? see 0x412DF0
-		CST_ATI_UNKNOWN_26F = 0x26F, // see 0x412E60
-		// ORDERs values, =x+100 (x+0x64) ?
-		CST_ATI_UNKNOWN_2BB = 0x2BB, // Release being worked on ?? Example: targeted farm or enemy projectile dies ? 0x426B66.
+		CST_ATI_NOTIFY_ESCAPE_ATTACK = 0x20F, // Notification triggered when someone shoots a projectile at "me" ? "escape attack"? 0x4E62F3
+		// 0x258+ (600+) UnitAI tasks ?
+		CST_ATI_TASK_ATTACK = 0x258,
+		CST_ATI_TASK_DEFEND_OR_CAPTURE = 0x259, // primary role is defend (position or object), but it is used to capture relics
+		CST_ATI_TASK_BUILD = 0x25A,
+		CST_ATI_TASK_HEAL = 0x25B,
+		CST_ATI_TASK_CONVERT = 0x25C,
+		CST_ATI_TASK_EXPLORE = 0x25D,
+		CST_ATI_TASK_GATHER_NOATTACK = 0x261, // Forager, farmer, miners (gathering that doesn't have an "attack" phase.
+		CST_ATI_TASK_MOVE = 0x262, // 
+		// 263: unused
+		CST_ATI_TASK_FOLLOW_OBJECT = 0x264,
+		CST_ATI_TASK_GATHER_ATTACK = 0x265, // woodcutter, hunter, fisherman (gatherer that have an "attack" phase - not really true for fish, but anyway !)
+		CST_ATI_TASK_UNKNOWN_266 = 0x266, // regroup in unit group ??? Related to SNAttackGroupGatherSpacing in 4CD551? Group&wait for transport ?
+		CST_ATI_TASK_TRADE_WITH_OBJECT = 0x267,
+		CST_ATI_TASK_UNKNOWN_268 = 0x268, // some movement ?
+		CST_ATI_TASK_ENTER_TRANSPORT = 0x269, // Cf 0x412350.
+		CST_ATI_TASK_REPAIR = 0x26A,
+		CST_ATI_TASK_HUMAN_TRAIN_UNIT = 0x26B, // only when triggered by human ?
+		CST_ATI_TASK_RESEARCH_TECH = 0x26C, // includes train unit when triggered by AI.
+		CST_ATI_TASK_TRANSPORT = 0x26D, // unsure. Includes move+unload. Such unit can't be used as actor in strategy element.
+		CST_ATI_TASK_UNKNOWN_26E = 0x26E, // load troops ? see 0x412DF0
+		CST_ATI_TASK_UNKNOWN_26F = 0x26F, // see 0x412E60
+		CST_ATI_TASK_UNKNOWN_274 = 0x274, // Related to order 0x2D8
+		// (699) Stop being targeted by another unit (any action: repair,attack,heal,...).
+		// This occurs when the other unit (that targets "me") dies or changes target.
+		// Used as a *notification*. Generic_arg4=otherUnitClass. Related to update of unit.unitCountThatAreTargetingMe
+		// Some units do NOT raise this event: trees, mines, etc
+		CST_ATI_NOTIFY_RELEASE_BEING_WORKED_ON = 0x2BB,
+		// 0x2BC+ (700+) : unitAI ORDERS
 		CST_ATI_ORDER_ATTACK = 0x2BC, // React to agression but also "AI" attacks.
-		CST_ATI_DEFEND_UNIT = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.defend/followUnit?(myUnitId, targetUnitId)
-		CST_ATI_UNKNOWN_2BE = 0x2BE, // build+0x64
-		CST_ATI_UNKNOWN_2C1 = 0x2C1, // Task unit ?? Explore ?
-		CST_ATI_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
-		CST_ATI_ORDER_GATHER_NOATTACK = 0x2C5, // TO CONFIRM
-		CST_ATI_UNKNOWN_2C6_ORDER_MOVE = 0x2C6, // Order move ? Used for villagers ? 4DA2BF... Used to retreat to position 4DA160. Used also in attacks grpType0x15? 4DA193
-		CST_ATI_UNKNOWN_2C8 = 0x2C8, // 264+64 see 0x41363F
-		CST_ATI_ORDER_GATHER_ATTACK = 0x2C9, // (0x265+0x64) gatherer reaction => flee (military) or fight (animals)
-		CST_ATI_ORDER_REPAIR = 0x2CE, // (26A+64) Repair?? see 0x413595
-		CST_ATI_ORDER_UNLOAD = 0x2D1, // Unload (26D+0x64?) see 0x4135A7, 0x4E942B(execCmdUnload)
-		CST_ATI_UNKNOWN_2D2 = 0x2D2,
-		CST_ATI_UNKNOWN_2D3 = 0x2D3,
-		CST_ATI_UNKNOWN_2D4 = 0x2D4,
-		CST_ATI_HOLD_POSITION = 0x2D5, // Do not auto-attack. See 4E6740 for cats (don't search for target), 413F89 for other units (cancel attack if not at range?)
-		CST_ATI_UNKNOWN_2D6 = 0x2D6, // ? see 0x4133DC
-		CST_ATI_UNKNOWN_2D7 = 0x2D7, // ? see 0x4134F8
-		CST_ATI_UNKNOWN_2D9 = 0x2D9 // "pop" a target from array ? (switch back to previous target?)
+		CST_ATI_ORDER_DEFEND_UNIT = 0x2BD, // Defend unit (related to activity.unitIdToDefend) ? Do NOT auto-attack nearby units? See 4DB9F0=tacAI.defend/followUnit?(myUnitId, targetUnitId)
+		CST_ATI_ORDER_BUILD = 0x2BE, // Build a construction
+		CST_ATI_ORDER_HEAL = 0x2BF, // For priest: heal an allied unit
+		CST_ATI_ORDER_CONVERT = 0x2C0, // For priest: convert an enemy
+		CST_ATI_ORDER_EXPLORE = 0x2C1, // Explore the map
+		CST_ATI_ORDER_UNKNOWN_2C2 = 0x2C2, // DeTask unit ??
+		// 2C3, 2C4: unused ?
+		CST_ATI_ORDER_GATHER_NOATTACK = 0x2C5, // Gather a target that does not require an "attack" phase: bushes, mines...
+		CST_ATI_ORDER_UNKNOWN_2C6_ORDER_MOVE = 0x2C6, // Order move ? Used for villagers ? 4DA2BF... Used to retreat to position 4DA160. Used also in attacks grpType0x15? 4DA193
+		// 2C7: unused ?
+		CST_ATI_ORDER_FOLLOW_OBJECT = 0x2C8, // Follow object ? see 0x41363F
+		CST_ATI_ORDER_GATHER_ATTACK = 0x2C9, // Gather a target that requires an "attack" phase: trees, animals
+		CST_ATI_ORDER_UNKNOWN_2CA = 0x2CA, // cf activity+8C, 0x4136A0
+		// 2CB, 2CC: unused ?
+		CST_ATI_ORDER_ENTER_TRANSPORT = 0x2CD, // Enter a transport.
+		CST_ATI_ORDER_REPAIR = 0x2CE, // Repair. see 0x413595
+		// 2CF: unused ?
+		CST_ATI_ORDER_UNLOAD = 0x2D1, // Unload (=transport to...) see 0x4135A7, 0x4E942B(execCmdUnload).
+		CST_ATI_ORDER_LOAD_TROOPS = 0x2D2, // transport load (for transport unit) = go to meeting location and wait there ?
+		CST_ATI_ORDER_UNKNOWN_2D3 = 0x2D3, // 
+		CST_ATI_ORDER_UNKNOWN_2D4 = 0x2D4, // 0x41363F
+		CST_ATI_ORDER_HOLD_POSITION = 0x2D5, // Do not auto-attack. See 0x4E6740 for cats (don't search for target), 413F89 for other units (cancel attack if not at range?)
+		CST_ATI_ORDER_UNKNOWN_2D6 = 0x2D6, // ? see 0x4133DC
+		CST_ATI_ORDER_UNKNOWN_2D7 = 0x2D7, // ? see 0x4134F8
+		CST_ATI_ORDER_UNKNOWN_2D8 = 0x2D8, // ? see 0x4136E2. Related to task 0x274
+		CST_ATI_ORDER_UNKNOWN_2D9_POP_TARGET = 0x2D9 // "pop" a target from array ? (switch back to previous target?)
+		// 0x2D9 seems to be the last one
 	};
 
 
