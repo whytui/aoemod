@@ -444,7 +444,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_UNKNOWN_1FC = 0x1FC, // Notify something... Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
 		CST_ATI_UNKNOWN_1FD = 0x1FD, // Notify something...? See 0x4143B7. Target becomes too far to be shot at ? (may still be visible)
 		CST_ATI_NOTIFY_TOO_CLOSE_TO_SHOOT = 0x1FE, // When distance is too low to attack (for siege...). Set in 0x401BCF,0x401E6F only. See 0x41426A.
-		CST_ATI_NOTIFY_SAW_ENEMY_UNIT = 0x1FF, // To confirm. See 0x4143B7 WRONG ? is it GAME_EVENT_TYPES instead ?
+		CST_ATI_NOTIFY_SAW_ENEMY_UNIT = 0x1FF, // To confirm. See 0x4143B7 WRONG ? is it GAME_EVENT_TYPES instead ? Used in early versions only ?
 		CST_ATI_MOVE_BACK_AFTER_SHOOTING = 0x200, // Move back to my max range after shooting to a target. 0x4E646B
 		CST_ATI_UNKNOWN_202 = 0x202, // target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
 		CST_ATI_UNKNOWN_203 = 0x203, // ? See 0x4143B7

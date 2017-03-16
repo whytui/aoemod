@@ -1,6 +1,7 @@
 #pragma once
 #include <customResolution.h>
 #include <triggerDefinition.h>
+#include <windowsShortcut.h>
 #include "Version.h"
 #include "mystrings.h"
 #include "EmpiresX_API.h"

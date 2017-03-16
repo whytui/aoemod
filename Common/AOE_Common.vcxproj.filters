@@ -354,6 +354,9 @@
     <ClInclude Include="include\customResolution.h">
       <Filter>Fichiers d%27en-tête\AOE_tech</Filter>
     </ClInclude>
+    <ClInclude Include="include\windowsShortcut.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\triggerDefinition.cpp">

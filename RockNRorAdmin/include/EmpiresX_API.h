@@ -19,6 +19,8 @@ public:
 
 	// Returns true if file version is ROR, false if file version is AOE.
 	bool IsROR();
+
+	// Returns true if the EXE file is open (might be read, write...)
 	bool IsFileOpen();
 	bool OpenEmpiresXFile();
 	bool CloseEmpiresXFile();

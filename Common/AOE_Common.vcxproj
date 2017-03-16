@@ -195,6 +195,7 @@
     <ClInclude Include="include\UI_components\AOE_struct_ui_listbox.h" />
     <ClInclude Include="include\UI_components\AOE_struct_ui_scrollbar.h" />
     <ClInclude Include="include\UI_components\AOE_struct_ui_textbox.h" />
+    <ClInclude Include="include\windowsShortcut.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\basicFilesHandling.cpp" />

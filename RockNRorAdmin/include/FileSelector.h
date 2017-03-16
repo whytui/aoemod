@@ -30,6 +30,8 @@ public:
 	// Modifies registry to change AOE/ROR installation directory
 	bool SetInstallDirInRegistry(const std::wstring &newPath);
 
+	static std::wstring GetThisExeFullPath();
+
 protected:
 	bool m_isFileValid;
 	std::wstring m_fileName;

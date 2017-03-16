@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <mystrings.h>
 #include "FileSelector.h"
 
 
@@ -17,7 +18,7 @@ class WxInstallRockNRor : public wxDialog
 {
 public:
 	WxInstallRockNRor(wxWindow *parent, const wxString& title, const wxSize& size);
-	WxInstallRockNRor(wxWindow *parent, const wxString& title, const wxSize& size, std::wstring EXEFileName);
+	WxInstallRockNRor(wxWindow *parent, const wxString& title, const wxSize& size, std::wstring EXEFileName, std::wstring initialSrcDirectory);
 	~WxInstallRockNRor();
 	void ConstructorInit(std::wstring EXEFileName);
 
@@ -47,6 +48,8 @@ private:
 	// Returns true if the text control value is a valid path.
 	// Sets object background color to red/green according to result
 	bool CheckTextCtrlPath(wxTextCtrl *edt);
+	void SetSourceDirectory(std::wstring initialSrcDirectory);
+	void UpdateAfterSelectRockNRor_DLL();
 	void OnCancel(wxCommandEvent& event);
 	void OnOK(wxCommandEvent& event);
 	void OnSelectGameEXE(wxCommandEvent& event);

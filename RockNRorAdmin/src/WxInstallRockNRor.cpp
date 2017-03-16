@@ -13,9 +13,10 @@ WxInstallRockNRor::WxInstallRockNRor(wxWindow *parent, const wxString& title, co
 }
 
 
-WxInstallRockNRor::WxInstallRockNRor(wxWindow *parent, const wxString& title, const wxSize& size, std::wstring EXEFileName) : wxDialog(parent, -1, title, wxDefaultPosition, size, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxNO_DEFAULT)
+WxInstallRockNRor::WxInstallRockNRor(wxWindow *parent, const wxString& title, const wxSize& size, std::wstring EXEFileName, std::wstring initialSrcDirectory) : wxDialog(parent, -1, title, wxDefaultPosition, size, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER | wxNO_DEFAULT)
 {
 	this->ConstructorInit(EXEFileName);
+	this->SetSourceDirectory(initialSrcDirectory);
 }
 
 
@@ -156,6 +157,29 @@ void WxInstallRockNRor::OnSelectRockNRor_DLL(wxCommandEvent& event) {
 	}
 	
 	this->pathToResourceFiles = openFileDialog.GetDirectory();
+	this->UpdateAfterSelectRockNRor_DLL();
+}
+
+
+bool WxInstallRockNRor::CheckTextCtrlPath(wxTextCtrl *edt) {
+	bool valid = CheckFileExistence(edt->GetValue().t_str());
+	if (!valid) {
+		edt->SetBackgroundColour(*wxRED);
+	} else {
+		edt->SetBackgroundColour(*wxGREEN);
+	}
+	edt->Refresh(); // Another bug in wxwidgets... http://trac.wxwidgets.org/ticket/14560
+	return valid;
+}
+
+
+void WxInstallRockNRor::SetSourceDirectory(std::wstring initialSrcDirectory) {
+	this->pathToResourceFiles = initialSrcDirectory;
+	this->UpdateAfterSelectRockNRor_DLL();
+}
+
+
+void WxInstallRockNRor::UpdateAfterSelectRockNRor_DLL() {
 	// Fill text controls so that user sees source files path
 	this->edtRockNRor_DLL_FilePath->SetValue(this->pathToResourceFiles + _T("\\RockNRor\\RockNRor.dll"));
 	this->edtROR_API_DLL_FilePath->SetValue(this->pathToResourceFiles + _T("\\ROR_API.dll"));
@@ -173,17 +197,5 @@ void WxInstallRockNRor::OnSelectRockNRor_DLL(wxCommandEvent& event) {
 	} else {
 		this->btnSelectRORAPI_DLL->SetBackgroundColour(*wxGREEN);
 	}
-}
-
-
-bool WxInstallRockNRor::CheckTextCtrlPath(wxTextCtrl *edt) {
-	bool valid = CheckFileExistence(edt->GetValue().t_str());
-	if (!valid) {
-		edt->SetBackgroundColour(*wxRED);
-	} else {
-		edt->SetBackgroundColour(*wxGREEN);
-	}
-	edt->Refresh(); // Another bug in wxwidgets... http://trac.wxwidgets.org/ticket/14560
-	return valid;
 }
 

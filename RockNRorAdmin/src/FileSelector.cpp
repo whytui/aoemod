@@ -137,3 +137,14 @@ bool FileSelector::SetInstallDirInRegistry(const std::wstring &newPath) {
 	return true;
 }
 
+
+std::wstring FileSelector::GetThisExeFullPath() {
+	WCHAR szBuffer[MAX_PATH + 1];
+
+	int bytes = GetModuleFileName(NULL, szBuffer, MAX_PATH);
+	if (bytes == 0) {
+		return std::wstring(_T(""));
+	}
+	return std::wstring(szBuffer);
+}
+

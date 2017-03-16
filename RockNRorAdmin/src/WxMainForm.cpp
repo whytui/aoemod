@@ -45,7 +45,7 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 	menuFile->Append(ID_EditGameFile, "Edit game file\tCtrl-E", "Open RockNRorAdmin file edition screen.");
 	menuFile->Append(ID_CloseGameFile, "Close game file\tCtrl-W", "Close currently selected file to unlock it.");
 	menuFile->AppendSeparator();
-	menuFile->Append(ID_InstallRockNRor, "Install RockNRor...", "Add RockNRor plugin to your AOE - ROR installation.");
+	menuFile->Append(ID_InstallRockNRor, "Install RockNRor...\tCtrl-I", "Add RockNRor plugin to your AOE - ROR installation.");
 	menuFile->Append(ID_InstallCustomResolution, "Change game resolution...", "Update game and add custom files to handle custom resolutions.");
 	menuFile->Append(ID_InstallSuggestedOptions, "Install Suggested Options", "Automatically patch currently selected file with suggested options, including 1920*1200 resolution.");
 	menuFile->Append(ID_FixDDrawColorBug, "Fix DirectDraw color bug", "Updates regitry to fix DirectDraw color bug on currently selected file.");
@@ -277,9 +277,18 @@ void WxMainForm::ChangeInstallDirInRegistry() {
 
 // This automatically installs RockNRor : copies files from user-provided source dir and patches EXE file.
 void WxMainForm::InstallRockNRor() {
+	if (this->e_api->GetFileName().empty()) {
+		this->e_api->SetFileNameFromRegistry();
+		this->e_api->OpenEmpiresXFile();
+	}
+
+	// Set initial source directory
+	std::wstring myFullPath = FileSelector::GetThisExeFullPath();
+	std::wstring myDirectory = extractDirectory(myFullPath);
+	
 	// Open UI for user choices
 	WxInstallRockNRor *wInstallRnROR = new WxInstallRockNRor(this, _T("Select installation files for RockNRor"), wxSize(800, 580),
-		this->e_api->GetFileName());
+		this->e_api->GetFileName(), myDirectory);
 	int result = wInstallRnROR->ShowModal();
 	std::wstring srcDirName = wInstallRnROR->pathToResourceFiles;
 	std::wstring selectedGameEXE = wInstallRnROR->gameFileName;
@@ -403,6 +412,20 @@ void WxMainForm::InstallRockNRor() {
 		this->txtLog->AppendText(_T("RockNRor installation ended with errors/warnings.\n"));
 	} else {
 		this->txtLog->AppendText(_T("RockNRor has been successfully installed.\n"));
+		if (userWantsDedicatedExe) {
+			std::string destShortcut = getDesktopDirectory();
+			if (!destShortcut.empty()) {
+				destShortcut += std::string("\\test.lnk");
+				HRESULT hres = CreateWindowsShortcut(ROR_filename.c_str(), destShortcut.c_str(), _T("RockNRor mod for age of empires"));
+			}
+			std::wstring msg = _T("To run RockNRor mod, please run ");
+			msg += ROR_filename;
+			if (!destShortcut.empty()) {
+				msg += _T("\nA shortcut has been created on the desktop to run RockNRor.\n");
+			}
+			msg += _T("You can still run original game with the original EXE/shortcut.");
+			wxMessageBox(msg.c_str(), _T("RockNRor"));
+		}
 	}
 	SetStatusText(_T("End of RockNRor installation process"));
 }
