@@ -93,7 +93,9 @@
     <ClInclude Include="include\AOE_const_global.h" />
     <ClInclude Include="include\AOE_const_internal.h" />
     <ClInclude Include="include\AOE_const_language.h" />
+    <ClInclude Include="include\AOE_const_unit_ai.h" />
     <ClInclude Include="include\AOE_empires_dat.h" />
+    <ClInclude Include="include\AOE_const_game_events.h" />
     <ClInclude Include="include\AOE_hardcoded_unit_names.h" />
     <ClInclude Include="include\AOE_offsets.h" />
     <ClInclude Include="include\AOE_offsets_AOE10b.h" />

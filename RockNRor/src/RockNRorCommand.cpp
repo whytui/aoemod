@@ -1748,14 +1748,14 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 // Capturing an artefact does NOT call this.
 // I don't see any other possible event than CST_ATI_CONVERT. Use CST_GET_INVALID to trigger NO notification.
 bool RockNRorCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer,
-	AOE_CONST_INTERNAL::GAME_EVENT_TYPES notifyEvent) {
+	AOE_CONST_INTERNAL::GAME_EVENT_TYPE notifyEvent) {
 	if (!targetUnit || !actorPlayer || !targetUnit->IsCheckSumValidForAUnitClass() || !actorPlayer->IsCheckSumValid()) {
 		return false;
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *oldOwner = targetUnit->ptrStructPlayer;
 	this->OnUnitChangeOwner_fixes(targetUnit, actorPlayer);
 	AOE_METHODS::UNIT::ChangeUnitOwner(targetUnit, actorPlayer);
-	if ((notifyEvent == AOE_CONST_INTERNAL::CST_GET_INVALID) || (!oldOwner || !oldOwner->IsCheckSumValid())) {
+	if ((notifyEvent == GAME_EVENT_TYPE::EVENT_INVALID) || (!oldOwner || !oldOwner->IsCheckSumValid())) {
 		return true; // No notification to handle
 	}
 
@@ -2272,8 +2272,8 @@ void RockNRorCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI *
 			// This IF corresponds to original code: do NOT re-task villager that are currently attacking something ("whenattacked=2BC" or that...?(2C9))
 			// Corresponds to filter (exclude 2C9 and 2BC) in original game code
 			// Don't know why first loop does NOT exclude 2C9 (only excludes 2BC)
-			if ((activity->orderTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_ORDER_ATTACK) ||
-				(activity->orderTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_ORDER_GATHER_ATTACK)) {
+			if ((activity->orderId == AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_ATTACK) ||
+				(activity->orderId == AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_GATHER_ATTACK)) {
 				attackTower = false;
 			}
 		}
@@ -3464,8 +3464,8 @@ void RockNRorCommand::OnUnitActivityStop(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *a
 	bool noNextActivity = true;
 	// Remark: if manually stopped, activity->nextActivityQueueUsedElems == 0
 	for (int i = 0; i < activity->notifyQueueUsedElemCount; i++) {
-		ACTIVITY_TASK_IDS taskId = activity->notifyQueue[i].activityId;
-		if (taskId != ACTIVITY_TASK_IDS::CST_ATI_NOTIFY_ACTION_COMPLETED) {
+		GAME_EVENT_TYPE taskId = activity->notifyQueue[i].eventId;
+		if (taskId != GAME_EVENT_TYPE::EVENT_ACTION_COMPLETED) {
 			noNextActivity = false;
 		}
 	}
@@ -3640,7 +3640,7 @@ All wonder events (start/finish/destroyed = 0x6C 6D 6E) => arg3=posY, arg4=posX
 Relics/ruins events => arg3/4/5 are unused ?
 */
 void RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short int playerId, long int arg3, long int arg4, long int arg5) {
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_RESEARCH_COMPLETE) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_RESEARCH_COMPLETE) {
 		long int research_id = arg3;
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		assert(player && player->IsCheckSumValid());
@@ -3649,7 +3649,7 @@ void RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short
 		}
 	}
 
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_BUILDING_COMPLETE) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_BUILDING_COMPLETE) {
 		short int bldDAT_ID = (short int)arg3;
 		if (bldDAT_ID = CST_UNITID_MARKET) {
 			// Building a market (first one) enables farms.
@@ -3659,7 +3659,7 @@ void RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short
 		}
 	}
 
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_FARM_DEPLETED) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_FARM_DEPLETED) {
 		// This is called when a farm is fully depleted (and dies), NOT when a farm is destroyed/killed
 		// Warning: when this event is called, the farm is killed just after, so be careful about modifications done here !
 		long int farmUnitId = arg3;
@@ -3684,8 +3684,8 @@ long int RockNRorCommand::ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, 
 #ifndef _DEBUG
 	return;
 #endif;
-	static std::set<AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS> test;
-	AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS notificationTaskId = notifyEvent->activityId;
+	static std::set<AOE_CONST_INTERNAL::GAME_EVENT_TYPE> test;
+	AOE_CONST_INTERNAL::GAME_EVENT_TYPE notificationTaskId = notifyEvent->eventId;
 	test.insert(notificationTaskId);
 	// TODO: CST_ATI_NOTIFY_TOO_CLOSE_TO_SHOOT : search another target or move away ?
 	/*if (argNotificationId == 0x20D) {
@@ -3705,79 +3705,28 @@ long int RockNRorCommand::ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, 
 	//msg += std::to_string((int)notificationTaskId);
 
 	switch (notificationTaskId) {
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1FD: // See 0x4143B7
+	case GAME_EVENT_TYPE::EVENT_UNKNOWN_1FD: // See 0x4143B7
 		break;
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1FC: // Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
+	case GAME_EVENT_TYPE::EVENT_UNKNOWN_1FC: // Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
 		/*AOE_METHODS::CallWriteCenteredText(msg.c_str());
 		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
 		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);
 		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
 		AOE_METHODS::SetGamePause(true);*/
 		break;
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_BEING_ATTACKED: // 1f4 -> TODO: if attacker is under "min range": just move away if I am idle, ignore event otherwise
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ACTION_FAILED:
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ACTION_COMPLETED:
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ACTION_INVALIDATED:
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_MOVE_BACK_AFTER_SHOOTING: // 200
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_202: // target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_ESCAPE_ATTACK: // 20f
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_TOO_CLOSE_TO_SHOOT: // 1FE
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_UNIT_CAPTURED: // 20B
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_RELEASE_BEING_WORKED_ON: // >0x258 but still a notification !
+	case GAME_EVENT_TYPE::EVENT_BEING_ATTACKED: // 1f4 -> TODO: if attacker is under "min range": just move away if I am idle, ignore event otherwise
+	case GAME_EVENT_TYPE::EVENT_ACTION_FAILED: // 1F9
+	case GAME_EVENT_TYPE::EVENT_ACTION_COMPLETED:
+	case GAME_EVENT_TYPE::EVENT_ACTION_INVALIDATED:
+	case GAME_EVENT_TYPE::EVENT_SHOULD_MOVE_BACK_AFTER_SHOOTING: // 200
+	case GAME_EVENT_TYPE::EVENT_MOVEMENT_FINISHED_UNSURE: // target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
+	case GAME_EVENT_TYPE::EVENT_SHOULD_ESCAPE_ATTACK: // 20f
+	case GAME_EVENT_TYPE::EVENT_TOO_CLOSE_TO_SHOOT: // 1FE
+	case GAME_EVENT_TYPE::EVENT_UNIT_CAPTURED: // 20B
+	case GAME_EVENT_TYPE::EVENT_RELEASE_BEING_WORKED_ON: // >0x258 but still a notification !
 		// Usual cases...
 		break;
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1F5:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1F6:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1F7:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_1F8:
-	case AOE_CONST_INTERNAL::CST_ATI_NOTIFY_SAW_ENEMY_UNIT:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_203:
-	case AOE_CONST_INTERNAL::CST_ATI_UNKNOWN_209:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_DEFEND_OR_CAPTURE:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_BUILD:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_HEAL:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_CONVERT:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_EXPLORE:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_GATHER_NOATTACK:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_MOVE:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_FOLLOW_OBJECT:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_GATHER_ATTACK:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_UNKNOWN_266:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_TRADE_WITH_OBJECT:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_UNKNOWN_268:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_ENTER_TRANSPORT:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_REPAIR:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_HUMAN_TRAIN_UNIT:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_RESEARCH_TECH:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_TRANSPORT:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_UNKNOWN_26E:
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_UNKNOWN_26F:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_ATTACK:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_DEFEND_UNIT:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_BUILD:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_EXPLORE:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2C2:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_GATHER_NOATTACK:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2C6_ORDER_MOVE:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_FOLLOW_OBJECT:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_GATHER_ATTACK:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_REPAIR:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNLOAD:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_LOAD_TROOPS:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2D3:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2D4:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_HOLD_POSITION:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2D6:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2D7:
-	case AOE_CONST_INTERNAL::CST_ATI_ORDER_UNKNOWN_2D9_POP_TARGET:
-		msg += " (other)";
-		AOE_METHODS::CallWriteCenteredText(msg.c_str());
-		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
-		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);
-		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
-		AOE_METHODS::SetGamePause(true);
-		break;
-	case AOE_CONST_INTERNAL::CST_ATI_TASK_ATTACK: //0x258 (should not be a notification?) There is code for this... dead (wrong?obsolete?)code ?
+	case GAME_EVENT_TYPE::EVENT_UNSURE_ATTACK: //0x258 (should not be a notification?) There is code for this... dead (wrong?obsolete?)code ?
 		msg += " (task_attack)";
 		AOE_METHODS::CallWriteCenteredText(msg.c_str());
 		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);

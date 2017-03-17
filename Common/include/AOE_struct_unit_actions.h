@@ -30,6 +30,7 @@ namespace AOE_STRUCTURES {
 	// Note: (some) Actions are created from game commands in 0x4B4600 = unitActionInfo.createActionForCommand(unitDefCommand, arg2, posY, posX, posZ)
 	// +0x18 = action.getTypeId() ?
 	// +0x28 = action.update()?
+	// +0x34 = action.xxx(pUnit, fposY?, fposX?, arg4)
 	// +0x5C = action.setStatus?(actionStatus)
 	class STRUCT_ACTION_BASE {
 	public:

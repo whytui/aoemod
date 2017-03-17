@@ -294,7 +294,7 @@ namespace AOE_STRUCTURES {
 		res += GetHexStringAddress(obj->currentActionId, 3);
 		res += " [+28]=";
 		//res += std::to_string(obj->internalId_whenAttacked);
-		res += GetHexStringAddress(obj->orderTaskId, 3);
+		res += GetHexStringAddress(obj->orderId, 3);
 		res += " (backup: ";
 		//res += std::to_string(obj->previousActionId);
 		res += GetHexStringAddress(obj->previousActionId, 3);

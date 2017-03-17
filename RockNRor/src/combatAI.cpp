@@ -558,7 +558,7 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 	float activityTargetPosX = unitActivity->targetPosX;
 	float activityTargetPosY = unitActivity->targetPosY;
 	float activityTargetPosZ = unitActivity->targetPosZ;
-	int attackTaskId = ACTIVITY_TASK_IDS::CST_ATI_ORDER_GATHER_ATTACK; //CST_ATI_ORDER_ATTACK for military units...
+	int attackTaskId = UNIT_AI_ORDER::CST_ORDER_GATHER_ATTACK; // CST_ORDER_GATHER_ATTACK for military units...
 	long int actorPlayerId = player->playerId;
 
 	_asm {
@@ -626,15 +626,15 @@ long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_
 		return -1;
 	}
 
-	if (notify->activityId == ACTIVITY_TASK_IDS::CST_ATI_NOTIFY_MOVE_BACK_AFTER_SHOOTING) {
+	if (notify->eventId == GAME_EVENT_TYPE::EVENT_SHOULD_MOVE_BACK_AFTER_SHOOTING) {
 		return HunterMoveBackAfterShooting(unitActivity, notify) ? 3 : -1;
 	}
-	if (notify->activityId == ACTIVITY_TASK_IDS::CST_ATI_NOTIFY_BEING_ATTACKED) {
+	if (notify->eventId == GAME_EVENT_TYPE::EVENT_BEING_ATTACKED) {
 		if (unitActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_TASK_MOVE) {
 			// Villager should not stop to strike back to animal when he's not ready to shoot
 			for (int i = 0; i < unitActivity->orderQueueUsedElemCount; i++) {
 				if ((unitActivity->orderQueue[i].targetUnitId == notify->targetUnitId) &&
-					(unitActivity->orderQueue[i].activityId == ACTIVITY_TASK_IDS::CST_ATI_ORDER_GATHER_ATTACK)) {
+					(unitActivity->orderQueue[i].activityId == UNIT_AI_ORDER::CST_ORDER_GATHER_ATTACK)) {
 					if (!AOE_METHODS::UNIT::IsReadyToAttack(unitActivity->ptrUnit)) {
 						return 3; // Ignore the notification because a pending order already concerns this "attacker" unit and I am not ready yet to strike back.
 					}

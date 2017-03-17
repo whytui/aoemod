@@ -194,6 +194,7 @@ namespace AOE_STRUCTURES {
 	// +0xF0 = player.createScoreHeader? (from file?)
 	// +0xF4 = player.createScoreHeader?
 	// +0xFC = player.startConstruction(villagerUnitId, DATID_bld, f_posY, f_posX, stratElemId)
+	// +0x128 = player.handleEventInAI(...)
 	class STRUCT_PLAYER {
 	public:
 		unsigned long int checksum; // 0x00549B80 or 0x00549A44 (normal player) or 0x00544D18 (parent class RGE_player)

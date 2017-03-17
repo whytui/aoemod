@@ -4293,7 +4293,7 @@ void RockNRorInstance::VillagerActivityProcessNotify(REG_BACKUP *REG_values) {
 	}
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *unitActivity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ECX_val;
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *)REG_values->EBX_val;
-	ror_api_assert(REG_values, notify && (notifyTaskId == notify->activityId));
+	ror_api_assert(REG_values, notify && (notifyTaskId == notify->eventId));
 
 	// Custom treatments
 	long int result = COMBAT::VillagerActivityNotify(unitActivity, notify);

@@ -99,7 +99,8 @@ namespace AOE_STRUCTURES {
 
 	// Tactical AI. Lots of things are managed here !
 	// size 0x100C - Constructor=0x4CEBE0, Deserialize=0x4CEF10. Corresponds to MainAI+0x1146C
-	// [+0x30] mainUpdate(arg1 = always 0 ?). "Scaling" update, tributes/dipl/likes, runs tacAIUpdate(strategy, military, gathering... cf AI_UPDATE_TYPES). Called by 0x4C71A0=main AI update
+	// +0x30 = mainUpdate(arg1 = always 0 ?). "Scaling" update, tributes/dipl/likes, runs tacAIUpdate(strategy, military, gathering... cf AI_UPDATE_TYPES). Called by 0x4C71A0=main AI update
+	// +0x40 = tacAI.reactToEvent(unitId, arg2, eventId, arg4, arg5, arg6)
 	class STRUCT_TAC_AI {
 	public:
 		unsigned long int checksum;

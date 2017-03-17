@@ -7,6 +7,8 @@
 #include <mystrings.h>
 
 #include <AOE_const_language.h>
+#include <AOE_const_internal.h>
+#include <AOE_const_game_events.h>
 #include <AOE_struct_export.h>
 #include <AOE_SN_numbers.h>
 #include <AOE_empires_dat.h>
@@ -205,7 +207,7 @@ public:
 
 	// Change a unit's owner, for example like a conversion.
 	// I don't see any other possible event than CST_ATI_CONVERT. Use CST_GET_INVALID to trigger NO notification.
-	bool ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer, AOE_CONST_INTERNAL::GAME_EVENT_TYPES notifyEvent = AOE_CONST_INTERNAL::CST_GET_INVALID);
+	bool ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer, AOE_CONST_INTERNAL::GAME_EVENT_TYPE notifyEvent = GAME_EVENT_TYPE::EVENT_INVALID);
 
 	// Custom Fixes/features on player.addUnit calls.
 	void OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable);

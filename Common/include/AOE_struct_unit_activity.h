@@ -3,6 +3,7 @@
 
 #include <AOE_empires_dat.h>
 #include <AOE_const_internal.h>
+#include <AOE_const_game_events.h>
 #include <AOE_struct_managed_array.h>
 #include <AOE_struct_map_base_common.h>
 
@@ -39,14 +40,12 @@ namespace AOE_STRUCTURES
 
 	// Size = 0x18. No dedicated constructor? See 0x414D90 for init/adding to array. "NotifyEvent"
 	// Values remain in fields even when unit is idle: check "nextActivityQueueUsedElems".
-	// For activityId=0x1F4: genericParam4=attackerUnitId, genericParam5=? (not a unitid) genericParam6=? ; targetUnitId=attacker, actorUnitId=me
-	// For activityId=0x200: genericParam4=activityId to restore afterwards (attack...), genericParam5=targetUnitId ?
-	// For activityId=0x202: genericParam4=activityId(explore...)
+	// See GAME_EVENT_TYPE comments for genericParam roles
 	class STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT {
 	public:
 		long int targetUnitId; // +0. Sometimes = actor? "Other" unit id ?
 		long int actorUnitId; // +4. My unit id ? (always "me" ?)
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS activityId; // +8. Notified activity ID. GAME_EVENT_TYPES?
+		AOE_CONST_INTERNAL::GAME_EVENT_TYPE eventId; // +8. Notified activity ID. GAME_EVENT_TYPES?
 		long int genericParam4; // +C. Can be different things ? Seen targetUnitId, activityId(next?)...
 		long int genericParam5; // +10. Seen currentHP value.
 		long int genericParam6; // +14. Seen unitDefMaxHP value (int).
@@ -136,7 +135,7 @@ namespace AOE_STRUCTURES
 	// +0x80 = activity.explore(int posY, int posX, posZ) -> task 0x25D
 	// +0x84 = activity.enterObject(targetUnitId, force)
 	// +0x88 = activity.transport(arg1, arg2, arg3)
-	// +0x8C = ? Related to 2CA ?
+	// +0x8C = int UnitAIModule::transportObject(float,float,float,int) ?
 	// +0x90 = activity.moveTo(fposY, fposX, arg3, arg4, force)
 	// +0x94 = activity.moveTo(targetUnitId, f_maxRange, force?)
 	// +0x98 = activity.moveTo(int,int)
@@ -153,6 +152,7 @@ namespace AOE_STRUCTURES
 	// +0xC4 = activity.canConvert(targetUnitId) ?
 	// +0xC8 = activity.processOrder(orderEvent, arg2)
 	// +0xCC = activity.ProcessNotify(notifyEvent, arg2). Returns some enum (3,4,5=do nothing special?,6=triggered an activity?..) "ProcessNotify" ? Ex:priest=0x4E5370, military=0x4E62D0, base=0x413890. Each class has a specific overload (except tower).
+	// +0xD0 = activity.ProcessNotifyCommander(notifyEvent?). 0x4144C0.
 	// +0xD4 = activity.ProcessIdle(arg1)? 0x4145A0 (base proc, used by many children), priest=0x4E54E0. For example, auto-targeting of idle units.
 	// +0xD8 = activity.ProcessMisc(). ex. 0x414600. Find target? Returns some enum
 	// +0xDC = activity.processRetryableOrder() [Last for all except priest activity]. Returns some enum
@@ -173,7 +173,7 @@ namespace AOE_STRUCTURES
 		long int notifyQueueUsedElemCount; // +1C. Actually used elems in Notify queue
 		long int notifyQueueArraySize; // +20. Allocated array size (number of elements) for Notify queue.
 		STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyQueue; // +24. See 0x414D90(add)
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS orderTaskId; // +28. The current *explicit* order. If -1, then unit reacts to attack, see 414600.
+		AOE_CONST_INTERNAL::UNIT_AI_ORDER orderId; // +28. The current *explicit* order. If -1, then unit reacts to attack, see 0x414600.
 		long int unknown_2C; // +2C. 0x64 in 4DA4C9,4D841F. cf targetsInfoArray+08. CMP to enemySightedRespDist in 0x4D85B7. Updated in 0x40F8B1. Special values -1,100. Normal values 0-99. Distance to current target ? Reset to -1 when activity stops. Priority ?
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
 		long int targetUnitId; // +34. Current target unit instance ID.

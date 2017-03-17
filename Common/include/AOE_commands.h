@@ -141,7 +141,7 @@ namespace AOE_STRUCTURES
 		char playerId_2; // +2. Maybe for MP games with 2 human players for 1 "game" player ?
 		char unknown_03; // unused?
 		long int actorUnitId; // +4.
-		short int activityId; // +8, a word. Cf ACTIVITY_TASK_IDS (but on 2 bytes;).
+		short int orderId; // +8, a word. Cf UNIT_AI_ORDER (but on 2 bytes;).
 		char priority; // +A. =arg13 in 42BCF0, computed from ZeroPriorityDistance
 		char unknown_0B; // +B. Unused ?
 		long int targetUnitId; // DWORD.

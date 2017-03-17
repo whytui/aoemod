@@ -298,7 +298,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 						"target=%ld\nAction=%08X ActionTargetUnitId=%ld\n",
 						selectedUnit->unitInstanceId, selectedUnit->unitInstanceId, unitDefBase->DAT_ID1, unitDefBase->DAT_ID2, 
 						selectedUnit->positionX, selectedUnit->positionY, selectedUnit->unitStatus,
-						(long int)unitActivity, unitActivity->currentActionId, unitActivity->orderTaskId, unitActivity->targetUnitId,
+						(long int)unitActivity, unitActivity->currentActionId, unitActivity->orderId, unitActivity->targetUnitId,
 						addraction, actionTargetUnitId);
 				} else {
 					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X DATID=%d/%d  posX=%f posY=%f  status=%d\nActivityChecksum=None\nnActionTargetUnitId=%ld\n",

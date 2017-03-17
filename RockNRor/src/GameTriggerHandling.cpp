@@ -904,42 +904,42 @@ void ManageTriggersOnGameNotifyEvent(long int eventId, short int playerId, long 
 	evtInfo.playerId = playerId;
 
 	// Manage triggers
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_RESEARCH_COMPLETE) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_RESEARCH_COMPLETE) {
 		evtInfo.researchId = arg3;
 		evtInfo.posX = arg5;
 		evtInfo.posY = arg4;
 		evtType = CR_TRIGGERS::EVENT_RESEARCH_COMPLETED;
 	}
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_BUILDING_COMPLETE) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_BUILDING_COMPLETE) {
 		evtInfo.unitDefId = arg3;
 		evtInfo.posX = arg5;
 		evtInfo.posY = arg4;
 	}
-	/*if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_ALL_RELICS_CAPTURED) {
+	/*if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_ALL_RELICS_CAPTURED) {
 	}
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_ALL_RELICS_LOST_CONTROL) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_ALL_RELICS_LOST_CONTROL) {
 	}
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_ALL_RUINS_CAPTURED) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_ALL_RUINS_CAPTURED) {
 	}
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_ALL_RUINS_LOST_CONTROL) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_ALL_RUINS_LOST_CONTROL) {
 	}
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_PLAYER_LOST) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_PLAYER_LOST) {
 	}*/
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_UNIT_SPAWNED) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_UNIT_SPAWNED) {
 		evtInfo.unitDefId = arg3;
 		evtInfo.posX = arg5;
 		evtInfo.posY = arg4;
 	}
 	// Warning, for all 3 "wonder" events, position is arg3/4, not 4/5
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_WONDER_DESTROYED) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_WONDER_DESTROYED) {
 		evtInfo.posX = arg4;
 		evtInfo.posY = arg3;
 	}
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_WONDER_FINISHED) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_WONDER_FINISHED) {
 		evtInfo.posX = arg4;
 		evtInfo.posY = arg3;
 	}
-	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPES::CST_GET_WONDER_START_BUILDING) {
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_WONDER_START_BUILDING) {
 		evtInfo.posX = arg4;
 		evtInfo.posY = arg3;
 	}

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <assert.h>
+#include <AOE_const_game_events.h>
+#include <AOE_const_internal.h>
 #include <AOE_struct_units.h>
 #include "unitDefHandling.h"
 #include "RockNRorInfo.h"
