@@ -92,6 +92,7 @@
     <ClInclude Include="include\AOE_const_functional.h" />
     <ClInclude Include="include\AOE_const_global.h" />
     <ClInclude Include="include\AOE_const_internal.h" />
+    <ClInclude Include="include\AOE_const_internal_UI.h" />
     <ClInclude Include="include\AOE_const_language.h" />
     <ClInclude Include="include\AOE_const_unit_ai.h" />
     <ClInclude Include="include\AOE_empires_dat.h" />

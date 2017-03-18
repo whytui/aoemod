@@ -111,6 +111,7 @@ public:
 	bool doNotUpdateVirtualMethods; // default=false. Can be used for trobleshooting.
 	long int gameTimerSlowDownFactor;
 	bool gameTimerSlowDownAutoFix;
+	long int unitAIDetectNearbyUnitsMinimumDelay; // Default=4000. Minimum delay in milliseconds between each detection of nearby units. Affects AI/performance.
 	long int collectRORDebugLogs; // 0=no, 1=yes, filtered, 2=yes, all
 	bool showLogsInReverseOrder; // No input parameter for this (init in constructor only)
 	bool showRockNRorNotifications; // Use this to disable RockNRor message notifications (not recommended)
@@ -258,6 +259,8 @@ public:
 	const long int MINVALUE_resourceAmount = 0;
 	const long int MINVALUE_maxPopulation = 0;
 	const long int MAXVALUE_maxPopulation = 255;
+	const long int MINVALUE_unitAIDetectNearbyUnitsMinimumDelay = 300; // milliseconds
+	const long int MAXVALUE_unitAIDetectNearbyUnitsMinimumDelay = 20000; // milliseconds
 
 private:
 	CivilizationInfo *allCivInfo[CST_MAX_TOTAL_CIV_COUNT];

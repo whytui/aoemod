@@ -424,6 +424,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	/*case 0x4138A3:
 		this->ActivityBaseProcessNotify(REG_values);
 		break;*/
+	case 0x413182:
+		this->ActivityNearbyUnitDetectionDelayUpdate(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4413,6 +4416,25 @@ void RockNRorInstance::SeeUnitIsArtefactOrResourceOrFlagOrCreatable(REG_BACKUP *
 	}
 }
 */
+
+
+// From 0x41317B. Overload the update of delay until next "nearby unit detection" for current unit (activity)
+void RockNRorInstance::ActivityNearbyUnitDetectionDelayUpdate(REG_BACKUP *REG_values) {
+	const long int defaultBaseDelayInOriginalCode = 4000; // Minimum milliseconds delay in standard AOE/ROR game. (0xFA0)
+	long int randomPart = REG_values->EDX_val; // The random value between and 999 (milliseconds)
+	ror_api_assert(REG_values, (randomPart >= 0) && (randomPart < 1000));
+	if (REG_values->fixesForGameEXECompatibilityAreDone) {
+		return; // if EDX has already been updated, do nothing.
+	}
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		REG_values->EDX_val = randomPart + defaultBaseDelayInOriginalCode;
+	}
+
+	// Custom treatments: allow using custom delays (detect more often)
+	// Warning: this may greatly affect performance, especially because of adding/updating unit in infAI list (if not optimized bby RockNRor)
+	REG_values->EDX_val = randomPart + ROCKNROR::crInfo.configInfo.unitAIDetectNearbyUnitsMinimumDelay;
+}
 
 
 

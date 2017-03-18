@@ -31,21 +31,12 @@
     <Filter Include="Fichiers d%27en-tête\AOE_tech">
       <UniqueIdentifier>{691c4e1c-ee5c-4242-94bf-9c9af2343d53}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\AOE_const">
+      <UniqueIdentifier>{cd7006da-f26f-49d7-8b34-f3a066cf4904}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\triggerDefinition.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\AOE_const_functional.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\AOE_const_global.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\AOE_const_internal.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\AOE_const_language.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\mystrings.h">
@@ -58,9 +49,6 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\pointers.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="include\AOE_SN_numbers.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="include\ROR_global_variables.h">
@@ -294,9 +282,6 @@
     <ClInclude Include="include\UI\AOE_struct_ui_dialog_base.h">
       <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
     </ClInclude>
-    <ClInclude Include="include\AOE_const_drs.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="include\AOE_struct_campaign_info.h">
       <Filter>Fichiers d%27en-tête\AOE_model</Filter>
     </ClInclude>
@@ -357,11 +342,32 @@
     <ClInclude Include="include\windowsShortcut.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="include\AOE_const_drs.h">
+      <Filter>Fichiers d%27en-tête\AOE_const</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_const_functional.h">
+      <Filter>Fichiers d%27en-tête\AOE_const</Filter>
+    </ClInclude>
     <ClInclude Include="include\AOE_const_game_events.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers d%27en-tête\AOE_const</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_const_global.h">
+      <Filter>Fichiers d%27en-tête\AOE_const</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_const_internal.h">
+      <Filter>Fichiers d%27en-tête\AOE_const</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_const_language.h">
+      <Filter>Fichiers d%27en-tête\AOE_const</Filter>
     </ClInclude>
     <ClInclude Include="include\AOE_const_unit_ai.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+      <Filter>Fichiers d%27en-tête\AOE_const</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_SN_numbers.h">
+      <Filter>Fichiers d%27en-tête\AOE_const</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_const_internal_UI.h">
+      <Filter>Fichiers d%27en-tête\AOE_const</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

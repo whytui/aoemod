@@ -51,6 +51,11 @@
 	<!-- Set a non-zero value to enable automatic calculation for gameTimerSlowDownFactor during game.
 	Automatic calculation will override gameTimerSlowDownFactor value from this file. -->
 	<gameTimerSlowDownAutoFix enable="1"/>
+
+	<!-- baseDelayForDetectUnit: the minimum delay in milliseconds between 2 executions of "detect nearby units". Default=4000.
+	Recommended: 1000 or even less (depends on your computer), if you don't experience slowness or inactive AI.
+	Warning : changing this value may affect greatly AI and performance ! Minimum value=300 -->
+	<baseDelayForDetectUnit value="1000"/>
 	
 	<!-- Custom conversion resistance values (float). Standard units resistance is 1 -->
 	<conversionResistance name="warElephants" value="1.25"/><!-- game default=1-->
@@ -224,6 +229,7 @@
 	GameType=DM (deathmatch) or RM (random map). -->
 	<initialResourceAIBonus gameType="RM" food="200" wood="200" stone="150" gold="250"></initialResourceAIBonus>
 	<initialResourceAIBonus gameType="DM" food="2000" wood="2000" stone="500" gold="2000"></initialResourceAIBonus>
+	
 	<!-- per_number: force some values for SN numbers to random maps/deathmatches 
 	Warning: do not force too many values unless you are sure of its impact on the game.
 	Some values are computed dynamically at game init and will be lost if you force them ! -->

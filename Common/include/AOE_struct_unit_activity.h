@@ -108,7 +108,7 @@ namespace AOE_STRUCTURES
 	// +0x14 = activity.notify(actorUnitId, targetUnitId, internalId, targetUnitClass, currentHP, maxHP) = add to notify queue.
 	// +0x18 = activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). Eg. 0x410A20
 	// +0x1C = activity.notifyCommander(NotifyEvent*). Eg. 0x4109F0 => calls [EDX+0x18]
-	// +0x20 = activity.prepareTmpMapInfo?(arg1) : collects info about nearby units (cf ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE)
+	// +0x20 = activity.prepareTmpMapInfo?() : collects info about nearby units (cf ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE)
 	// +0x2C = activity.isRetryableOrder(internalId) : true for non-interruptible activities (repair, heal, convert, attack, defend/capture+0x264)
 	// +0x30 = activity.autoChooseTargetAtReach?(checkWallsIfCurrentTargetIsWall?, checkCalcPath?, arg3) BestUnitToAttack??
 	// ?int UnitAIModule::mostDangerousEnemy(float *)
@@ -202,8 +202,8 @@ namespace AOE_STRUCTURES
 		// 0x100
 		long int unknown_100_baseForRandomSeed; // init 0xBB8=3000. Base for random seed calculation. The highest it is, the lowest are chances of "reacting" ? Lion=6000(low reaction %), gazelle=4000(high)
 		unsigned long int unknown_104_gameTime; // +104. Some game time (ms) in the *future* ? (next xxx) ? Or defenseBuffer ?? Or idleTimeout?
-		unsigned long int unknown_108; // int, consistent with +10C. Default 0 (NULL?) Time since last autoFindTarget?
-		unsigned long int unknown_10C; // int, consistent with +108. Default 0x3E8=1000? Delay between 2 autoFindTarget ? 0x40FBA3
+		unsigned long int timeSinceLastDetectSeeUnits_ms; // +108. Milliseconds. Time since last autoFindTarget was executed.
+		unsigned long int delayBetweenDetectSeeUnits_ms; // +10C. Delay until next "detect nearby units". Default 0x3E8=1000, reset (each time) in 0x413183 using a random part(4000ms+random[0-999]). Used in 0x40FBA3.
 		// 0x110
 		float currentPosY;
 		float currentPosX;

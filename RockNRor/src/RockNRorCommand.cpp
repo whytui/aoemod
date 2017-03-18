@@ -65,12 +65,13 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "showRockNRorMenu:                          %d\n", ROCKNROR::crInfo.configInfo.showRockNRorMenu);
 	fprintf_s(f, "showCustomPopulationInfo:                  %d\n", ROCKNROR::crInfo.configInfo.showCustomPopInfo);
 	fprintf_s(f, "useImprovedGameSpeeds:                     %d\n", ROCKNROR::crInfo.configInfo.useImprovedGameSpeeds);
-	fprintf_s(f, "collectRORDebugLogs:                       %d\n", ROCKNROR::crInfo.configInfo.collectRORDebugLogs);
+	fprintf_s(f, "collectRORDebugLogs:                       %ld\n", ROCKNROR::crInfo.configInfo.collectRORDebugLogs);
 	fprintf_s(f, "showRockNRorNotifications:                 %d\n", ROCKNROR::crInfo.configInfo.showRockNRorNotifications);
 	fprintf_s(f, "enableRPGModeInRandomGames:                %d\n", ROCKNROR::crInfo.configInfo.enableRPGModeInRandomGames);
 	fprintf_s(f, "enableRPGModeInScenario:                   %d\n", ROCKNROR::crInfo.configInfo.enableRPGModeInScenario);
 	fprintf_s(f, "gameTimerSlowDownAutoFix:                  %d\n", ROCKNROR::crInfo.configInfo.gameTimerSlowDownAutoFix);
-	fprintf_s(f, "gameTimerSlowDownFactor:                   %d\n", ROCKNROR::crInfo.configInfo.gameTimerSlowDownFactor);
+	fprintf_s(f, "gameTimerSlowDownFactor:                   %ld\n", ROCKNROR::crInfo.configInfo.gameTimerSlowDownFactor);
+	fprintf_s(f, "baseDelayForDetectUnit:                    %ld\n", ROCKNROR::crInfo.configInfo.unitAIDetectNearbyUnitsMinimumDelay);
 	fprintf_s(f, "fixInvisibleTree:                          %d\n", ROCKNROR::crInfo.configInfo.fixInvisibleTree);
 	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", ROCKNROR::crInfo.configInfo.fixHumanPlayer_specificSeeUnit);
 	fprintf_s(f, "useImprovedButtonBar:                      %d\n", ROCKNROR::crInfo.configInfo.useImprovedButtonBar);
@@ -3705,9 +3706,9 @@ long int RockNRorCommand::ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, 
 	//msg += std::to_string((int)notificationTaskId);
 
 	switch (notificationTaskId) {
-	case GAME_EVENT_TYPE::EVENT_UNKNOWN_1FD: // See 0x4143B7
+	case GAME_EVENT_TYPE::EVENT_TOO_FAR_TO_SHOOT: // See 0x4143B7
 		break;
-	case GAME_EVENT_TYPE::EVENT_UNKNOWN_1FC: // Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
+	case GAME_EVENT_TYPE::EVENT_UNKNOWN_1FC_NEED_MOVE_AGAIN: // Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
 		/*AOE_METHODS::CallWriteCenteredText(msg.c_str());
 		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
 		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);

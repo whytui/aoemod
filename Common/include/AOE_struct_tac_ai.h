@@ -23,7 +23,7 @@ namespace AOE_STRUCTURES {
 
 
 	// Size = 0x18
-	// For gatheres tasks (not builder/repairman/explorer?)
+	// For gatherers tasks (not builder/repairman/explorer?)
 	class STRUCT_VILLAGER_TASKS_ELEM {
 	public:
 		long int unitId; // Villager unit id
@@ -38,6 +38,7 @@ namespace AOE_STRUCTURES {
 	};
 
 
+#define CHECKSUM_PLANNED_RESOURCE_NEEDS 0x00542C54
 	// Size = 0x70
 	// This struct is included in TacAI
 	class STRUCT_PLANNED_RESOURCE_NEEDS {
@@ -50,7 +51,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_4C[8]; // Only 4 are used, but there's room for 8 resource types. Init to -1 (a resource type?)
 		long int resourceTypesCount; // +0x6C ; is always 4
 
-		bool IsCheckSumValid() { return this->checksum == 0x00542C54; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_PLANNED_RESOURCE_NEEDS; }
 	};
 	static_assert(sizeof(STRUCT_PLANNED_RESOURCE_NEEDS) == 0x70, "STRUCT_PLANNED_RESOURCE_NEEDS size");
 
@@ -96,6 +97,7 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(STRUCT_TAC_AI_TARGET_INFO) == 0x2C, "STRUCT_TAC_AI_TARGET_INFO size");
 
+#define CHECKSUM_TAC_AI 0x00548CF4
 
 	// Tactical AI. Lots of things are managed here !
 	// size 0x100C - Constructor=0x4CEBE0, Deserialize=0x4CEF10. Corresponds to MainAI+0x1146C
@@ -176,7 +178,7 @@ namespace AOE_STRUCTURES {
 		long int calcAverageUpdateAITime_counter; // Maximum value = 20 = 0x14
 		long int lastAIUpdateTime_ms; // +1008. A timeGetTime value. (not a game time)
 
-		bool IsCheckSumValid() { return this->checksum == 0x00548CF4; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_TAC_AI; }
 	};
 	static_assert(sizeof(STRUCT_TAC_AI) == 0x100C, "STRUCT_TAC_AI size");
 

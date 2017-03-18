@@ -54,6 +54,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->conversionResistance_WarElephants = 1; // Game default
 	this->conversionResistance_WarElephants_Persian = 1; // Game default
 	this->improveAILevel = 0; // ROR Default (not active)
+	this->unitAIDetectNearbyUnitsMinimumDelay = 4000; // Game default = 4 seconds.
 	this->tacticalAIUpdateDelay = 30;
 	this->panicModeDelay = 20;
 	this->maxPanicUnitsCountToAddInStrategy = 7;
@@ -311,6 +312,10 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 				callResult = elem->QueryFloatAttribute("value", &floatValue);
 				if (callResult == TIXML_SUCCESS) { improvedGameSpeedFactor = floatValue; }
 			}
+		}
+		if (elemName == "baseDelayForDetectUnit") {
+			callResult = elem->QueryIntAttribute("value", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->unitAIDetectNearbyUnitsMinimumDelay = intValue; }
 		}
 		if (elemName == "allowMultiQueue") {
 			this->allowMultiQueueing = XML_GetBoolElement(elem, "enable");
@@ -769,6 +774,8 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 	if (this->randomMapRelicsCount > this->MAXVALUE_artefactCount) { this->randomMapRelicsCount = this->MAXVALUE_artefactCount; }
 	if (this->randomMapRuinsCount < this->MINVALUE_artefactCount) { this->randomMapRuinsCount = this->MINVALUE_artefactCount; }
 	if (this->randomMapRuinsCount > this->MAXVALUE_artefactCount) { this->randomMapRuinsCount = this->MAXVALUE_artefactCount; }
+	if (this->unitAIDetectNearbyUnitsMinimumDelay < MINVALUE_unitAIDetectNearbyUnitsMinimumDelay) { this->unitAIDetectNearbyUnitsMinimumDelay = MINVALUE_unitAIDetectNearbyUnitsMinimumDelay; }
+	if (this->unitAIDetectNearbyUnitsMinimumDelay > MAXVALUE_unitAIDetectNearbyUnitsMinimumDelay) { this->unitAIDetectNearbyUnitsMinimumDelay = MAXVALUE_unitAIDetectNearbyUnitsMinimumDelay; }
 	// No check on elevation factors
 	/*if (this->cityPlanHouseDistanceFromTownCenter < this->MINVALUE_cityPlanBuildingDistances) { this->cityPlanHouseDistanceFromTownCenter = this->MINVALUE_cityPlanBuildingDistances; }
 	if (this->cityPlanHouseDistanceFromTownCenter > this->MAXVALUE_cityPlanBuildingDistances) { this->cityPlanHouseDistanceFromTownCenter = this->MAXVALUE_cityPlanBuildingDistances; }

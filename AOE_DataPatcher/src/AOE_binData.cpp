@@ -99,7 +99,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 133
+#define COUNT_ROR_API_10c 134
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 
@@ -5435,6 +5435,7 @@ void AOE_binData::InitROR_API_10c() {
 		FM_ON
 		);
 
+	// obsolete:
 	/*NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
 		activityNotifyEvent,
 		"Entry point in activityNotifyEvent",
@@ -5445,6 +5446,15 @@ void AOE_binData::InitROR_API_10c() {
 		FM_ON
 		);*/
 
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		ActivityNearbyUnitDetectionDelayUpdate,
+		"Overload the unitAI nearby units detection delay update for better game experience",
+		0x1317B,
+		(0xF7, 0xF9, 0x81, 0xC2, 0xA0, 0x0F, 0x00, 0x00, 0x89, 0x96, 0x0C, 0x01, 0x00, 0x00),
+		(0xF7, 0xF9, 0xE8, 0xF2, 0x63, 0x00, 0x00, 0x90, 0x89, 0x96, 0x0C, 0x01, 0x00, 0x00),
+		FM_OFF,
+		FM_ON
+		);
 
 	//optional
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),

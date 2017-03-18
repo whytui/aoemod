@@ -42,7 +42,7 @@ namespace AOE_STRUCTURES {
 		char unused[3];
 		// 0x10
 		STRUCT_UNIT_BASE *targetUnit;
-		STRUCT_UNIT_BASE *targetUnit2; // +14. Secondary target pointer (used for missiles, trade(=drop site))
+		STRUCT_UNIT_BASE *targetUnit2; // +14. Secondary target pointer (used for missiles, trade,gather(=drop site))
 		long int targetUnitId; // +18
 		long int targetUnitId2; // +1C. A secondary target ? See 0x4073F0=action.setTargetUnit2(arg1). Used for missiles (only ?)
 		// 0x20
@@ -54,7 +54,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set.
 		STRUCT_UNIT_ACTION_INFO *requiredActionInfo; // +34. SubAction ? Link with unit/"actionLink"/action. Allows chaining actions ! This is NOT unit->actionInfo !
 		unsigned long int pGraphics; // ptr to graphics structure, consistent with unit+10 ? w_lumber, etc
-		char unknown_3C; // Flag 0/1, about graphics? (about need to refresh graphics ?) ? "deposit after move end"?
+		char unknown_3C; // Flag 0/1, about graphics? (about need to refresh graphics ?) ? "deposit after move end"? Ready to shoot?
 		char unknown_3D[3]; // Unused. Probably.
 		// 0x40: not in BASE class ; it has different type/role according to child classes. (seen float, word...)
 	};

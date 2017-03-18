@@ -25,9 +25,10 @@ namespace AOE_CONST_INTERNAL
 
 
 	// Those IDs are used in various methods that deal with game events
-	// - gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX) = [EDX+0x40]=0x501980. Arguments may have different roles
+	// - gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX) = [EDX+0x40]=0x501980. Arguments may have different roles. WARNING, here *arg1* is event ID !!!
 	// - player.notifyEvent(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F3350 / EDX+0xE8). Always calls player.handleEventInAI (if AI struct exists)
 	// - player.handleEventInAI(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F34C0)
+	// - unit.notify(actorUnitId?, impactedUnitId?, notifyTaskId, generic_4, generic_5, generic_6) (0x426DB0 / EDX+0x148): dispatch to activity.addToNotifyQueue or player.notify
 	// - activity.processNotify(struct NotifyEvent *, unsigned long) (0x413890 / EDX+0xCC)
 	// - activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). (0x410A20 / EDX+0x18)
 	// - tacAI.reactToEvent(unitId, arg2, eventId, arg4, arg5, arg6) (0x4D7880 / EDX+0x40) : treatments only for events 0x72,0x74,0x201
@@ -106,7 +107,7 @@ namespace AOE_CONST_INTERNAL
 		EVENT_CANNOT_CONVERT_WONDER = 0x7A,
 
 		// A unit was just converted from a player to another. Current player may be "actor" or "victim".
-		// NotifyEvent: arg2=actor player, arg3=victim player, arg4=posY, arg5=posX
+		// NotifyEvent: arg2=actor playerId, arg3=victim playerId, arg4=posY, arg5=posX
 		EVENT_SUCCESSFULLY_CONVERTED_UNIT = 0x7B,
 
 		// Added or Removed a unit in building train queue
@@ -125,21 +126,28 @@ namespace AOE_CONST_INTERNAL
 		// genericParam4=attackerUnitId, genericParam5=? (not a unitid) genericParam6=? ; targetUnitId=attacker, actorUnitId=me
 		EVENT_BEING_ATTACKED = 0x1F4,
 
-		EVENT_UNKNOWN_1F5 = 0x1F5,
-		EVENT_UNKNOWN_1F6 = 0x1F6, // See 0x4143B7
-		EVENT_UNKNOWN_1F7 = 0x1F7, // See 0x4143B7
-		EVENT_UNKNOWN_1F8 = 0x1F8, // See 0x4143B7
-		EVENT_ACTION_FAILED = 0x1F9, // 
+		EVENT_UNUSED_1F5 = 0x1F5, // Not used at all.
+		EVENT_UNUSED_1F6 = 0x1F6, // Not used at all.
+		EVENT_UNUSED_1F7 = 0x1F7, // Not used at all.
+		EVENT_UNUSED_1F8 = 0x1F8, // Not used at all.
+		EVENT_ACTION_FAILED = 0x1F9, // Triggered in 0x405786, ...
 		EVENT_ACTION_COMPLETED = 0x1FA, // Notify activity completed (normal completion). arg4=activityId
 		EVENT_ACTION_INVALIDATED = 0x1FB, // 0x410999
 
-		EVENT_UNKNOWN_1FC = 0x1FC, // Notify something... Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
-		EVENT_UNKNOWN_1FD = 0x1FD, // Notify something...? See 0x4143B7. Target becomes too far to be shot at ? (may still be visible)
+		// Source: 0x40580C in action.update().
+		// Action re-triggered.
+		// Cause=action's movement completed but target is still too far (target moved)
+		// The "target is no longer visible" is a sub-case of this. See 0x4E3FB8(for predator)
+		EVENT_UNKNOWN_1FC_NEED_MOVE_AGAIN = 0x1FC,
+
+		// Source: 0x401C7B. See 0x4143B7.
+		// Target becomes too far to be shot at ? (may still be visible, but out of reach)
+		EVENT_TOO_FAR_TO_SHOOT = 0x1FD,
 		
 		// When distance is too low to attack (for siege...). Set in 0x401BCF,0x401E6F only. See 0x41426A.
 		EVENT_TOO_CLOSE_TO_SHOOT = 0x1FE,
 		
-		// To confirm. See 0x4143B7. Used in early versions only ?
+		// To confirm. See 0x4143B7 (part of the "default" switch cases). Used in early versions only ? Never triggered.
 		EVENT_UNIT_SAW_ENEMY_UNIT = 0x1FF,
 
 		// Notify the unit should move back to its max range after shooting to a target. 0x4E646B. Generic_arg4=taskid(0x258)
@@ -153,25 +161,48 @@ namespace AOE_CONST_INTERNAL
 		// genericParam4=activityId(explore...)
 		EVENT_MOVEMENT_FINISHED_UNSURE = 0x202,
 
-		EVENT_UNKNOWN_203 = 0x203, // ? See 0x4143B7
+		// Source 0x403392, 0x4B38C1, 0x4B6A43
+		// Triggered when no drop site was found for a unit (with resource value to bring back)
+		// Both arg1/2 = unitId of gatherer or trading unit.
+		// Generic arg4=concerned task ID (trade, gather with/without attack)
+		EVENT_NO_DROP_SITE = 0x203,
+
 		// 204? 205?
 		EVENT_TOO_FAR_FROM_LAND = 0x206, // to confirm [player notif]
 		EVENT_CANNOT_UNLOAD = 0x207, // Not enough space to unload ? To confirm [player notif]
-		EVENT_UNKNOWN_208 = 0x208, // for early versions only ?
+		EVENT_UNKNOWN_208 = 0x208, // for early versions only ? Seems to be unused here.
 
 		// Related to notification when being attacked ? see 0x4E4769. When triggered, AI player adds 10 dislike for target player
 		// generic_arg4=unitId (attacker, to which add dislike)
 		EVENT_UNKNOWN_209 = 0x209,
 
-		EVENT_TRIBUTE_RECEIVED = 0x20A, // [player notifications only?]
-		EVENT_UNIT_CAPTURED = 0x20B, // Unit captured (on actor=new owner side) : conversion+capture of artefacts/gaia units. 0x4A9FB7, 0x4AEBDD
-		EVENT_UNKOWN_20C = 0x20C, // [player notifications only?]
+		// Source 0x42ADFC
+		// arg1=playerId that PAYS the tribute
+		// arg2=playerId that receives the tribute ("target")
+		// arg4=resource type
+		// Notification is sent at player level (to target player cf arg2)
+		EVENT_TRIBUTE_RECEIVED = 0x20A,
 
-		// [player notifications only?]. This one is used (1FF seems not).
-		// Handled in player.handleEventInAI
+		// Unit captured (on actor=new owner side) : conversion+capture of artefacts/gaia units. 0x4A9FB7, 0x4AEBDD
+		// arg1=arg2=captured unit id
+		// arg4=player Id (new owner="actor")
+		// Notification is sent to unit then falls back at player level
+		EVENT_UNIT_CAPTURED = 0x20B,
+
+		EVENT_UNUSED_20C = 0x20C, // Not used at all.
+
+		// Source 0x413143 in activity.triggerSeeUnitEvents()? (under activity's timerUpdate)
+		// This event is used whereas 1FF seems not.
+		// Important: Only units with a "UnitAI" can "see" other units (to trigger the event and update infAI)
+		// But ALL units with a UnitAI do run this detection (each "delayBetweenDetectSeeUnits" milliseconds).
+		// Detection frequency is quite poor (4 seconds+a random part 0x413183), units may move 5 or even 10 tiles (fast units) between 2 detections.
+		// Sent to player.notify and handled in player.handleEventInAI: adds unit in infAI list (this can be done a lot of times for the same unit, ok cause there won't be duplicates, but bad for perf)
+		// arg1=unitId that "sees" arg2=playerId, arg4=other unit Id
 		EVENT_PLAYER_SEE_UNIT = 0x20D,
 
+		// Source=0x426651 (in send projectile code)
 		// Notification triggered when someone shoots a projectile at "me". "escape attack" 0x4E62F3
+		// arg1=actor unitId (shooter), arg2=target unitId(the one that needs to escape), arg4=actor unitId (shooter), arg5=currentHP, arg6=maxHP
 		EVENT_SHOULD_ESCAPE_ATTACK = 0x20F,
 
 		// This one is not an event (it is a task), but this value is found in several places, and seems to be dead code.
@@ -180,6 +211,7 @@ namespace AOE_CONST_INTERNAL
 		// (699) Stop being targeted by another unit (any action: repair,attack,heal,...).
 		// This occurs when the other unit (that targets "me") dies or changes target.
 		// Used as a *notification*. Generic_arg4=otherUnitClass. Related to update of unit.unitCountThatAreTargetingMe
+		// arg1=unitID that stops targeting, arg2=unitID that is no longer targeted by the other one.
 		// Some units do NOT raise this event: trees, mines, etc
 		EVENT_RELEASE_BEING_WORKED_ON = 0x2BB
 		// 0x2BB is last (higher values are *orders*)
