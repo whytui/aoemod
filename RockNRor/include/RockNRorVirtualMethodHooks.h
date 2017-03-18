@@ -12,7 +12,7 @@
 
 namespace ROCKNROR {
 ;
-namespace OVERLOADED_VIRTUAL_METHODS {
+namespace VIRTUAL_METHOD_HOOKS {
 
 	// Patches ROR process (.rdata memory) to connect RockNRor method (rnrorMethodName) to ROR class's method,
 	// ROR class identified by "baseChecksum" and ROR class' method identified by "methodOffset" (should be a multiple of 4 !)
@@ -23,11 +23,26 @@ namespace OVERLOADED_VIRTUAL_METHODS {
 	*(unsigned long int*)(baseChecksum + methodOffset) = (unsigned long)VIRTUAL_METHOD_HANDLER_NAME(rnrorMethodName);
 
 
+	/*
+	SECTION: declare specific hook methods. Always declare as "__stdcall".
+	Hook methods must return void or a 4-bytes type (DWORD)
+	*/
 
-	long int __stdcall TESTFN1(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity, unsigned long int arg1, unsigned long int arg2);
 
+	// Return value is an unknown enum. 2=ok, processed.
+	long int __stdcall ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2);
+
+	// Returns void. This hook handles player's notifications.
+	void __stdcall PlayerProcessNotify(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT notifyEvent);
+
+
+
+	/*
+	SECTION: declare initialization method that installs patches in ROR executable
+	*/
 
 	// Patches ROR process (.rdata section) to connect overloaded virtual methods
+	// Don't forget to declare RockNRor entry point methods as "__stdcall"
 	bool InstallVirtualMethodsPatches();
 
 }

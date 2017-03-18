@@ -33,7 +33,7 @@
 #include "combatAI.h"
 #include "CustomPopupSystem.h"
 #include "combatAI.h"
-#include "RockNRorOverloadedVirtualMethods.h"
+#include "RockNRorVirtualMethodHooks.h"
 
 
 namespace ROCKNROR {

@@ -465,7 +465,7 @@ void RockNRorInstance::OneShotInit() {
 	ROCKNROR::crCommand.ResetLogFile();
 
 	// Note: CheckEnabledFeatures writes to log file
-	if (!ROCKNROR::crCommand.CheckEnabledFeatures() || !ROCKNROR::OVERLOADED_VIRTUAL_METHODS::InstallVirtualMethodsPatches()) {
+	if (!ROCKNROR::crCommand.CheckEnabledFeatures() || !ROCKNROR::VIRTUAL_METHOD_HOOKS::InstallVirtualMethodsPatches()) {
 		const char *msg = localizationHandler.GetTranslation(CRLANG_ID_WARN_MISSING_FEATURE, "WARNING: Some features are not enabled in game executable. See " MOD_NAME "\\" MOD_NAME ".log file.");
 		if (ROCKNROR::crInfo.configInfo.showAlertOnMissingFeature) {
 			MessageBoxA(0, msg, "ROR API", MB_ICONWARNING);

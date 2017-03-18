@@ -150,9 +150,9 @@ namespace AOE_STRUCTURES {
 
 
 
-#define CHECKSUM_STRUCT_RGE_PLAYER 0x00544D18 // Base class. Size=0x224 cf 0x51CF39?
-#define CHECKSUM_STRUCT_PLAYER 0x00549A44 // Normal player (non-gaia)
-#define CHECKSUM_STRUCT_GAIA_PLAYER 0x00549B80
+#define CHECKSUM_RGE_PLAYER 0x00544D18 // Base class. Size=0x224 cf 0x51CF39?
+#define CHECKSUM_PLAYER 0x00549A44 // Normal player (non-gaia)
+#define CHECKSUM_GAIA_PLAYER 0x00549B80
 	// PLAYER. Constructor=0x4EFB00. RGE_Player ccor=0x45B6A0
 	// Standard player struct sizes are 0x85C (gaia) or 0x84C (non-gaia).
 	// If selected units features is installed, size is increased to host selected unit pointers at the end of the structure.
@@ -311,8 +311,8 @@ namespace AOE_STRUCTURES {
 			return (STRUCT_GAME_GLOBAL*) this->ptrGlobalStruct;
 		}
 		bool IsCheckSumValid() const {
-			return (this->checksum == CHECKSUM_STRUCT_PLAYER) || (this->checksum == CHECKSUM_STRUCT_GAIA_PLAYER) ||
-				(this->checksum == CHECKSUM_STRUCT_RGE_PLAYER); // parent class checksum
+			return (this->checksum == CHECKSUM_PLAYER) || (this->checksum == CHECKSUM_GAIA_PLAYER) ||
+				(this->checksum == CHECKSUM_RGE_PLAYER); // parent class checksum
 		}
 		// Returns true if AI "economy" control is active for the player, depending on game EXE (is "ManageAI" feature installed ?)
 		bool IsAIActive(bool hasManageAIFeatureON) {

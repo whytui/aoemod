@@ -315,7 +315,7 @@
     <ClInclude Include="include\RORVirtualMethodHelper.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
-    <ClInclude Include="include\RockNRorOverloadedVirtualMethods.h">
+    <ClInclude Include="include\RockNRorVirtualMethodHooks.h">
       <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
     </ClInclude>
   </ItemGroup>
@@ -527,7 +527,7 @@
     <ClCompile Include="src\RORVirtualMethodHelper.cpp">
       <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
-    <ClCompile Include="src\RockNRorOverloadedVirtualMethods.cpp">
+    <ClCompile Include="src\RockNRorVirtualMethodHooks.cpp">
       <Filter>Fichiers sources\RockNRorBase</Filter>
     </ClCompile>
   </ItemGroup>

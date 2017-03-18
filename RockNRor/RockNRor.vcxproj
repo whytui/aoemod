@@ -163,7 +163,7 @@
     <ClInclude Include="include\playerTargeting.h" />
     <ClInclude Include="include\randomizer.h" />
     <ClInclude Include="include\researches.h" />
-    <ClInclude Include="include\RockNRorOverloadedVirtualMethods.h" />
+    <ClInclude Include="include\RockNRorVirtualMethodHooks.h" />
     <ClInclude Include="include\RORProcessEditor.h" />
     <ClInclude Include="include\crTrigger.h" />
     <ClInclude Include="include\crTriggerSet.h" />
@@ -245,7 +245,7 @@
     <ClCompile Include="src\playerHandling.cpp" />
     <ClCompile Include="src\playerTargeting.cpp" />
     <ClCompile Include="src\researches.cpp" />
-    <ClCompile Include="src\RockNRorOverloadedVirtualMethods.cpp" />
+    <ClCompile Include="src\RockNRorVirtualMethodHooks.cpp" />
     <ClCompile Include="src\RORProcessEditor.cpp" />
     <ClCompile Include="src\AOE_strategy.cpp" />
     <ClCompile Include="src\SimpleEditText.cpp" />
