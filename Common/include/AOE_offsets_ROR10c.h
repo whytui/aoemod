@@ -49,10 +49,9 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7BFAC4; // type= STRUCT_DRS_FILE_LINK*
 	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x7C04A0;
 	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x580DA8;
-	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2024;
-	// 0x7D2030 and 7D2034 : pointers to arrays used for "see unit" events, cf 0x413108
-	static const unsigned long int ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2038; // array of ptr to arrays of STRUCT_NEARBY_UNIT_INFO
-	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x7D2058;
+	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2024; // array of 5 ints (elem count in ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE) indexed by PLAYER_DIPLOMACY_VALUES (0-4)
+	static const unsigned long int ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2038; // array of 5 arrays of STRUCT_NEARBY_UNIT_INFO indexed by PLAYER_DIPLOMACY_VALUES (0-4)
+	static const unsigned long int ADDR_VAR_STRUCT_VISIBLE_UNITS_HELPER = 0x7D2058;
 	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7D205C;
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55873C;
 	static const unsigned long int ADDR_GLOBAL_UNIT_POINTERS_ARRAY = 0x7D2054; // Variable = pointer to array of unit pointers (unit**). Also found in game global structure.

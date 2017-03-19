@@ -60,6 +60,10 @@ namespace COMBAT {
 	long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify);
 
 	// Triggered when a unit sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
+	// Remark: feeding infAI list is handled in parent calls.
 	void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit);
+
+	// Triggered when a priest sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
+	void OnPriestSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit);
 
 }

@@ -108,7 +108,7 @@ namespace AOE_STRUCTURES
 	// +0x14 = activity.notify(actorUnitId, targetUnitId, internalId, targetUnitClass, currentHP, maxHP) = add to notify queue.
 	// +0x18 = activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). Eg. 0x410A20
 	// +0x1C = activity.notifyCommander(NotifyEvent*). Eg. 0x4109F0 => calls [EDX+0x18]
-	// +0x20 = activity.prepareTmpMapInfo?() : collects info about nearby units (cf ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE)
+	// +0x20 = activity.CollectNearbyImportantUnitsInTempResults() fills ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE, ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE
 	// +0x2C = activity.isRetryableOrder(internalId) : true for non-interruptible activities (repair, heal, convert, attack, defend/capture+0x264)
 	// +0x30 = activity.autoChooseTargetAtReach?(checkWallsIfCurrentTargetIsWall?, checkCalcPath?, arg3) BestUnitToAttack??
 	// ?int UnitAIModule::mostDangerousEnemy(float *)
@@ -211,7 +211,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_11C;
 		// 0x120
 		float unitLineOfSight; // init 1. To confirm (read from unitDef.lineOfSight?)
-		long int *listOfImportantUnitAITypes; // +124. List size/content is hardcoded, depends on activity type.
+		long int *listOfImportantUnitAITypes; // +124. List size/content is hardcoded, depends on activity type. This filters the unit classes to include when searching for nearby units.
 		long int listOfImportantUnitAITypesArraySize; // +128. number of elements in +124.
 		STRUCT_UNIT_ACTIVITY_UNKNOWN_12C *unknown_12C; // +12C. Can be NULL.
 		// 0x130

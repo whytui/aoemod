@@ -76,7 +76,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_GAME_GLOBAL *globalStruct; // +8DC0
 		STRUCT_MAP_TERRAIN_ZONES_INFO_LINK *terrainZonesInfoLink; // +8DC4.
 		STRUCT_MAP_VISIBILITY_LINK *mapVisibilityLink; // +8DC8. Link to an array with visibility masks tile by tile. Data array is the same as 0x7D205C
-		STRUCT_UNKNOWN_MAP_INFO_7D2058 *unknown_8DCC;
+		STRUCT_VISIBLE_UNITS_HELPER *visibleUnitsHelper; // +8DCC. Used to search for visible units from a specific player perspective
 		// Parent class ends here
 		char unknown_8DD0[0x8DE4 - 0x8DD0];
 		unsigned long int unknown_8DE4; // init -1

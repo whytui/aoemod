@@ -92,7 +92,7 @@ namespace AOE_CONST_FUNC {
 		TribeAIGroupFlag = 30, // 0x1E. no unitAI
 		TribeAIGroupCliff = 34, // 0x22
 		TribeAIGroupBird = 38,
-		TribeAIGroupHorse = 61,
+		TribeAIGroupHorse = 61, // The last one. In ROR executable, AI Type indexes are capped at 64 (0x40) in 0x4448B4
 		TribeAIGroupDomesticatedAnimal = 29 // Lion_trained (unit 60). no unitAI (!)
 		//37=smoke? (dolphin??)
 	};

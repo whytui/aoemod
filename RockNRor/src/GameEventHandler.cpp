@@ -8,14 +8,23 @@ namespace GAME_EVENTS {
 
 // Returns true if event is handled and ROR code must NOT be executed
 // Returns false if ROR code should be executed normally (default case)
+// Cf 0x413108: only neutral/enemy units may trigger this event. Also, only the unit classes declared as 'important' in unitAI can trigger this.
 bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT notifyEvent) {
 	assert(player && player->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid()) { return false; }
 
-	// TODO: determines the conditions under which units are detected. Not gaia units ? status=2...
-
 	if (notifyEvent.eventId == AOE_CONST_INTERNAL::EVENT_PLAYER_SEE_UNIT) {
+		// Note: the units that are detected via this event are limited:
+		// - unit.status <=2 (the temp results contains other units(?), but this is filtered in 0x41312B before sending EVENT_PLAYER_SEE_UNIT.
+		// - neutral and enemy units only (so, not gaia !)
+		// - unit.definition.unitAIType is one of the "important" AItypes defined in actorUnit.activity.importantAITypes
+		// Which means, according to the unit that "sees", some units may be ignored ! Especially all gaia units.
+
 		// TODO: overwrite the "insert in infai" treatment
+
+		// Remark: here the "temp results" arrays contain nearby units (caller is looping on it)
+		/*int n = GetElemCountInUnitListTempSearchResult(PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY);
+		STRUCT_NEARBY_UNIT_INFO *e = GetUnitListTempSearchResult(PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY, (resultIndex));*/
 
 		long int myUnitId = notifyEvent.targetUnitId;
 		long int seenUnitId = notifyEvent.genericParam4;

@@ -15,6 +15,7 @@ namespace GAME_EVENTS {
 
 // Returns true if event is handled and ROR code must NOT be executed
 // Returns false if ROR code should be executed normally (default case)
+// Cf 0x413108: only neutral/enemy units may trigger this event. Also, only the unit classes declared as 'important' in unitAI can trigger this.
 bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT notifyEvent);
 
 

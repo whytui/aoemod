@@ -648,14 +648,21 @@ long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_
 
 
 // Triggered when a unit sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
+// Remark: feeding infAI list is handled in parent calls.
 void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit) {
 	if (!actorUnit || !seenUnit || !player) { return; }
 	if ((actorUnit->unitStatus != GAME_UNIT_STATUS::GUS_2_READY) || (seenUnit->unitStatus > GAME_UNIT_STATUS::GUS_2_READY)) { return; }
 	STRUCT_PLAYER *otherPlayer = seenUnit->ptrStructPlayer;
 	STRUCT_UNITDEF_BASE *seenUnitDef = seenUnit->unitDefinition;
 	
+	if (seenUnitDef->unitAIType == TribeAIGroupPriest) {
+		// Priests have a specific behaviour...
+		OnPriestSeeNearbyUnit(player, actorUnit, seenUnit);
+		return;
+	}
+
 	// Not applicable to priests/siege weapons (let siege attack buildings ?)
-	if ((seenUnitDef->unitAIType == TribeAIGroupSiegeWeapon) || (seenUnitDef->unitAIType == TribeAIGroupSiegeWeapon)) { return; }
+	if (seenUnitDef->unitAIType == TribeAIGroupSiegeWeapon) { return; }
 
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	// Easy and easiest levels: do not use this improvement.
@@ -749,5 +756,13 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 		}
 	}
 }
+
+
+// Triggered when a priest sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
+void OnPriestSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit) {
+	// TODO: evasive manoeuvre if faith is <100%.. Complex (take into account all allies and enemies)
+	// TODO: heal immobile allied nearby target ?
+}
+
 
 }

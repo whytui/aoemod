@@ -30,35 +30,41 @@ namespace AOE_STRUCTURES {
 
 
 	// Referenced in global variable 0x7D2058 and also from STRUCT_GAME_MAP_INFO+8DCC
-	// Size = 0x24. Constructor = 0x516800
-	class STRUCT_UNKNOWN_MAP_INFO_7D2058 {
+	// Size = 0x24. Constructor = 0x516800 = [7D2058].constructor(totalPlayerCount, maxAITypeIndex)
+	// Supplies an up-to-date list of visible units for each player perspective (separated by unit AI type)
+	// Contains arrays used to store temporary results for specific searches
+	// Warning: search results are limited to 255 results and to a distance of 15 (0xF).
+	class STRUCT_VISIBLE_UNITS_HELPER {
 	public:
-		STRUCT_VISIBLE_UNIT_INFO_SET **visibleUnitsByPlayerAndUnitAIType; // 2-dims array. Index are playerId then unitAIType. List of visible units (including mine) by unit class.
-		char *unknown_04; // Array size = 0x800 bytes.
-		char *unknown_08; // Array size = 0x800 bytes.
-		char *unknown_0C; // Array size = 0x800 bytes.
-		// 0x10
-		char *unknown_10; // Array size = 0x800 bytes.
-		char *unknown_14; // Array size = 0x800 bytes.
-		long int totalPlayerCount; // +18. Including gaia. It is also the size (number of dwords) of unknown_00 array.
-		long int unknown_00_elemCount; // +1C. Number of elements in unknown_00[x]. See 0x516A50
+		STRUCT_VISIBLE_UNIT_INFO_SET **visibleUnitsByPlayerAndUnitAIType; // 2-dims array. Index are playerId (0-n) then unitAIType. List of visible units (including mine) by unit class.
+		// +04. Index1=PLAYER_DIPLOMACY_VALUES(0-4), index2=elemIndex. Each results array=0x800 bytes=0x100 entries (sizeof(STRUCT_NEARBY_UNIT_INFO)=8)
+		// Note: Those 5 pointers are the same as ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE (you better use the global variable directly)
+		// Note: The "actual elem count" are in corresponding global array ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE (indexed by PLAYER_DIPLOMACY_VALUES)
+		// See also GetElemCountInUnitListTempSearchResult and GetUnitListTempSearchResult.
+		STRUCT_NEARBY_UNIT_INFO *tempSearchResultsByDiplValue[5];
+		long int totalPlayerCount; // +18. Including gaia. It is also the size (number of dwords) of visibleUnitsByPlayerAndUnitAIType array.
+		long int unitAITypesCountForVisibleUnitInfoSetArray; // +1C. Number of elements in visibleUnitsByPlayerAndUnitAIType[x].
 		// 0x20
 		unsigned char *sqrtTable_distanceFromDiffXY; // ptr to array of 0x10*0x10 bytes. to get a distance for diffX/Y: array[diffX*0x10 + diffY]. X,Y < 0x10.
 		// Returns distance(int, int) as an integer result. Returns -1 if failed or result>0x10. Works only for x,y <= 15 (0x0F)
-		unsigned char GetIntDistance(unsigned char x, unsigned char y) {
+		unsigned char GetIntDistance(unsigned char x, unsigned char y) const {
+			if (x < 0) { x = -x; }
+			if (y < 0) { y = -y; }
 			if ((x >= 16) || (y >= 16)) {
 				return -1;
 			}
 			return this->sqrtTable_distanceFromDiffXY[x * 0x10 + y];
 		}
-		STRUCT_VISIBLE_UNIT_INFO_SET *GetUnknown_00_elem(long int playerId, long int unitAIType) const {
-			if ((playerId < 0) || (playerId > this->totalPlayerCount) || (unitAIType < 0) || (unitAIType >= unknown_00_elemCount)) {
+		// Get the "collection" of units seen by "playerId" and whose type is unitAIType
+		// Returns NULL if some argument is invalid.
+		STRUCT_VISIBLE_UNIT_INFO_SET *GetVisibleUnitInfoSet(long int playerId, long int unitAIType) const {
+			if ((playerId < 0) || (playerId > this->totalPlayerCount) || (unitAIType < 0) || (unitAIType >= this->unitAITypesCountForVisibleUnitInfoSetArray)) {
 				return NULL;
 			}
-			return &visibleUnitsByPlayerAndUnitAIType[playerId][unitAIType];
+			return &this->visibleUnitsByPlayerAndUnitAIType[playerId][unitAIType];
 		}
 	};
-	static_assert(sizeof(STRUCT_UNKNOWN_MAP_INFO_7D2058) == 0x24, "STRUCT_UNKNOWN_MAP_INFO_7D2058 size");
+	static_assert(sizeof(STRUCT_VISIBLE_UNITS_HELPER) == 0x24, "STRUCT_VISIBLE_UNITS_HELPER size");
 
 
 

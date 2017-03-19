@@ -50,9 +50,9 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7C4B24; // type= STRUCT_DRS_FILE_LINK*
 	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x7C5508;
 	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x585DF8;
-	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D7088;
-	static const unsigned long int ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D70A0; // array of ptr to arrays of STRUCT_NEARBY_UNIT_INFO
-	static const unsigned long int ADDR_STRUCT_UNKNOWN_MAP_INFO_7D2058 = 0x7D70C0;
+	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D7088; // array of 5 ints (elem count in ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE) indexed by PLAYER_DIPLOMACY_VALUES (0-4)
+	static const unsigned long int ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D70A0; // array of 5 arrays of STRUCT_NEARBY_UNIT_INFO indexed by PLAYER_DIPLOMACY_VALUES (0-4)
+	static const unsigned long int ADDR_VAR_STRUCT_VISIBLE_UNITS_HELPER = 0x7D70C0;
 	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7D70C8;
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55B734;
 	static const long int *AOE_CURRENT_OFFSET_IN_FILE_DESERIALIZATION = (long int *)0x7C4B38; // Pointer to the variable that contains offset of current position in file
