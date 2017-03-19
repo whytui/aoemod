@@ -279,13 +279,15 @@ bool UnitGroupAI::OnTaskActiveGroupsBegin(STRUCT_TAC_AI *tacAI, long int process
 			if (loopUnitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_ATTACK) { this->activeGroupsTaskingTempInfo.totalLandAttackGroupCount++; }
 			if (loopUnitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_DEFEND) { this->activeGroupsTaskingTempInfo.totalLandDefendGroupCount++; }
 			if (loopUnitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) { this->activeGroupsTaskingTempInfo.totalLandExploreGroupCount++; }
-			float diffX = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX - loopUnitCommander->positionX;
-			float diffY = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY - loopUnitCommander->positionY;
-			float loopGrpSquareDist = (diffX*diffX) + (diffY*diffY);
-			if (loopGrpSquareDist < AI_CONST::townSizeSquare) {
-				if (loopUnitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_ATTACK) { this->activeGroupsTaskingTempInfo.townLandAttackGroupCount++; }
-				if (loopUnitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_DEFEND) { this->activeGroupsTaskingTempInfo.townLandDefendGroupCount++; }
-				if (loopUnitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) { this->activeGroupsTaskingTempInfo.townLandExploreGroupCount++; }
+			if (this->activeGroupsTaskingTempInfo.myMainCentralUnit != NULL) {
+				float diffX = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX - loopUnitCommander->positionX;
+				float diffY = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY - loopUnitCommander->positionY;
+				float loopGrpSquareDist = (diffX*diffX) + (diffY*diffY);
+				if (loopGrpSquareDist < AI_CONST::townSizeSquare) {
+					if (loopUnitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_ATTACK) { this->activeGroupsTaskingTempInfo.townLandAttackGroupCount++; }
+					if (loopUnitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_DEFEND) { this->activeGroupsTaskingTempInfo.townLandDefendGroupCount++; }
+					if (loopUnitGroup->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE) { this->activeGroupsTaskingTempInfo.townLandExploreGroupCount++; }
+				}
 			}
 		}
 		loopUnitGroup = loopUnitGroup->next;
