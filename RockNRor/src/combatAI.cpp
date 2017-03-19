@@ -533,8 +533,8 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 	if (settings->rgeGameOptions.difficultyLevel == GAME_DIFFICULTY_LEVEL::GDL_EASIEST) { return false; }
 	if (player->isComputerControlled == 0) { return false; } // cf 0x4E6476
 	if (unitActivity->targetUnitType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupPredatorAnimal) { return false; } // This is only used for hunting aggressive animals.
-	if ((unitActivity->currentTaskId != ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK) &&
-		(unitActivity->currentTaskId != ACTIVITY_TASK_IDS::CST_ATI_TASK_GATHER_ATTACK)) {
+	if ((unitActivity->currentTaskId != ACTIVITY_TASK_ID::CST_ATI_TASK_ATTACK) &&
+		(unitActivity->currentTaskId != ACTIVITY_TASK_ID::CST_ATI_TASK_GATHER_ATTACK)) {
 		return false;
 	} // cf 0x4E64B2
 	long int activityTargetUnitId = unitActivity->targetUnitId;
@@ -630,7 +630,7 @@ long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_
 		return HunterMoveBackAfterShooting(unitActivity, notify) ? 3 : -1;
 	}
 	if (notify->eventId == GAME_EVENT_TYPE::EVENT_BEING_ATTACKED) {
-		if (unitActivity->currentTaskId == ACTIVITY_TASK_IDS::CST_ATI_TASK_MOVE) {
+		if (unitActivity->currentTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_MOVE) {
 			// Villager should not stop to strike back to animal when he's not ready to shoot
 			for (int i = 0; i < unitActivity->orderQueueUsedElemCount; i++) {
 				if ((unitActivity->orderQueue[i].targetUnitId == notify->targetUnitId) &&
@@ -657,6 +657,11 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 	// Not applicable to priests/siege weapons (let siege attack buildings ?)
 	if ((seenUnitDef->unitAIType == TribeAIGroupSiegeWeapon) || (seenUnitDef->unitAIType == TribeAIGroupSiegeWeapon)) { return; }
 
+	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	// Easy and easiest levels: do not use this improvement.
+	if (!settings || !settings->IsCheckSumValid() || (settings->rgeGameOptions.difficultyLevel > GAME_DIFFICULTY_LEVEL::GDL_HARD)) { return; }
+
+	// The goal here is to take into account 'seen' unit and possible change target if necessary
 	bool isNeutralOrEnemy = (player->ptrDiplomacyStances[otherPlayer->playerId] != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY);
 	bool seenUnitCanAttack = UnitDefCanAttack(seenUnitDef);
 	bool isWeakBuilding = (seenUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) && (seenUnit->remainingHitPoints < 2); // So that my unit will try to destroy new buildings with 1 HP
@@ -677,7 +682,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 			nextOrderTargetId = activity->orderQueue[0].targetUnitId;
 		}
 		bool canInterrupt = (nextOrder == UNIT_AI_ORDER::CST_ORDER_NONE) || (nextOrder == UNIT_AI_ORDER::CST_ORDER_ATTACK);
-		if (canInterrupt && (activity->currentTaskId == ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK)) {
+		if (canInterrupt && (activity->currentTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_ATTACK)) {
 			// If attacking a low-priority target (non-tower building) and military unit/villager is around, switch
 			bool currentTargetIsImportant = false;
 			STRUCT_ACTION_ATTACK *action = (STRUCT_ACTION_ATTACK*)GetUnitAction(actorUnit);
@@ -724,7 +729,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 					// Force refresh (that will occur afterwards, when all the "see units" events are handled... normally)
 					activity->targetUnitId = seenUnit->unitInstanceId;
 					activity->targetUnitType = seenUnitDef->unitAIType;
-					activity->currentTaskId = ACTIVITY_TASK_IDS::CST_ATI_NONE;
+					activity->currentTaskId = ACTIVITY_TASK_ID::CST_ATI_NONE;
 					activity->orderId = UNIT_AI_ORDER::CST_ORDER_NONE;
 
 					if (activity->orderQueueUsedElemCount == 0) {

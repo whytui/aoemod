@@ -1985,15 +1985,15 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 	assert(enemyTowerDef->DerivesFromAttackable());
 	if (!actorUnitDef->DerivesFromAttackable() || !enemyTowerDef->DerivesFromAttackable()) { return false; }
 
-	if (activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT) {
+	if (activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_ID::CST_ATI_TASK_CONVERT) {
 		return false; // Converting priest: let him proceed. TO DO: improve !
 	}
 
 	// Check if tower is mine or allied (it may have been converted)
 	if (actorUnit->ptrStructPlayer->ptrDiplomacyStances[enemyTower->ptrStructPlayer->playerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY) {
 		if ((activity->targetUnitId == enemyTower->unitInstanceId) &&
-			((activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT) ||
-			(activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK)
+			((activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_ID::CST_ATI_TASK_CONVERT) ||
+			(activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_ID::CST_ATI_TASK_ATTACK)
 			)) {
 			// Stop attacking/converting allied !
 			AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO * actionInfo = actorUnit->ptrActionInformation;
@@ -2045,7 +2045,7 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 	// Actor = catapult: always attack the tower... unless priest is very close AND being converting (not moving - can not escape my shot)
 	if (actorUnitDef->DAT_ID1 == CST_UNITID_STONE_THROWER) { // DAT_ID1 : also matches for catapult upgrades
 		if ((distanceToCurrentTarget < actorRange) && (currentTargetDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) &&
-			(currentTarget->currentActivity) && (currentTarget->currentActivity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT)) {
+			(currentTarget->currentActivity) && (currentTarget->currentActivity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_ID::CST_ATI_TASK_CONVERT)) {
 			return false; // In that specific case, attack current target (priest)
 		} else {
 			return true; // Otherwise, catapults just have to attack the tower
@@ -2061,7 +2061,7 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 		}
 		// Builder: keep for some critical constructions
 		STRUCT_UNIT_BUILDING *currentTargetAsBld = (STRUCT_UNIT_BUILDING *)currentTarget;
-		if (currentTargetAsBld->IsCheckSumValid() && (activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_BUILD) &&
+		if (currentTargetAsBld->IsCheckSumValid() && (activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_ID::CST_ATI_TASK_BUILD) &&
 			(currentTarget->ptrStructPlayer == actorUnit->ptrStructPlayer)// Just a check
 			) {
 			if (currentTargetDef->DAT_ID1 == CST_UNITID_FORUM) {
@@ -2075,7 +2075,7 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 			}
 		}
 		// Repairman: keep for some critical constructions
-		if ((activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_BUILD) &&
+		if ((activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_ID::CST_ATI_TASK_BUILD) &&
 			(currentTarget->ptrStructPlayer == actorUnit->ptrStructPlayer)// Just a check
 			) {
 			if ((currentTargetDef->DAT_ID1 == CST_UNITID_FORUM) && (currentTarget->remainingHitPoints < 400)) {

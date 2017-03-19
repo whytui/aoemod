@@ -300,7 +300,7 @@ namespace AOE_STRUCTURES {
 		res += GetHexStringAddress(obj->previousActionId, 3);
 		res += " - ";
 		//res += std::to_string(obj->previous_whenAttackedInternalId);
-		res += GetHexStringAddress(obj->previous_whenAttackedInternalId, 3);
+		res += GetHexStringAddress(obj->previousOrderId, 3);
 		res += ") curPos X=";
 		res += std::to_string(obj->currentPosX);
 		res += " Y=";

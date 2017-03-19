@@ -10,7 +10,7 @@ namespace AOE_CONST_INTERNAL
 
 
 	// For activity.task IDs (unit AI tasks)
-	enum ACTIVITY_TASK_IDS : long int {
+	enum ACTIVITY_TASK_ID : long int {
 		CST_ATI_NONE = -1, // Used a lot in game code
 		CST_ATI_TASK_ATTACK = 0x258, // Why does this value also appear in *notify* methods (as an event) ?
 		CST_ATI_TASK_DEFEND_OR_CAPTURE = 0x259, // primary role is defend (position or object), but it is used to capture relics

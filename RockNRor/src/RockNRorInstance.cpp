@@ -2390,7 +2390,7 @@ void RockNRorInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_values
 	bool is_attack_activity = false;
 	bool forceKeepCurrentActivity = false; // Default: do NOT skip ! (attack the tower/enemy)
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
-		if (activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK) {
+		if (activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_ID::CST_ATI_TASK_ATTACK) {
 			is_attack_activity = true;
 		}
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
@@ -4286,7 +4286,7 @@ void RockNRorInstance::ShouldPreserveOwnedResourceWhenKilledBy(REG_BACKUP *REG_v
 // + see also 0x413890 (parent handler)
 // It is possible to change return address to 0x4E4784 to return 4, 0x4E49CA to return 3, 0x4E4DAC to return EAX's value
 void RockNRorInstance::VillagerActivityProcessNotify(REG_BACKUP *REG_values) {
-	AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS notifyTaskId = (AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS)REG_values->EAX_val;
+	AOE_CONST_INTERNAL::ACTIVITY_TASK_ID notifyTaskId = (AOE_CONST_INTERNAL::ACTIVITY_TASK_ID)REG_values->EAX_val;
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->EAX_val -= 0x1F4;
 		REG_values->fixesForGameEXECompatibilityAreDone = true;

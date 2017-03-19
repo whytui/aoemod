@@ -175,7 +175,7 @@ namespace AOE_STRUCTURES
 		STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyQueue; // +24. See 0x414D90(add)
 		AOE_CONST_INTERNAL::UNIT_AI_ORDER orderId; // +28. The current *explicit* order. If -1, then unit reacts to attack, see 0x414600.
 		long int unknown_2C; // +2C. 0x64 in 4DA4C9,4D841F. cf targetsInfoArray+08. CMP to enemySightedRespDist in 0x4D85B7. Updated in 0x40F8B1. Special values -1,100. Normal values 0-99. Distance to current target ? Reset to -1 when activity stops. Priority ?
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentTaskId; // +30. Current activity type.
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_ID currentTaskId; // +30. Current activity type.
 		long int targetUnitId; // +34. Current target unit instance ID.
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // +38. Target AI type (3=building...).
 		float targetPosY; // +3C
@@ -183,8 +183,8 @@ namespace AOE_STRUCTURES
 		float targetPosZ; // +44
 		float maxDistance; // +48. "Desired target distance". Default 2 ?
 		long int unitIdToDefend; // +4C. Unit ID to capture or defend ?
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS previous_whenAttackedInternalId; // +50. Backup for +28. "lastOrder?"
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS previousActionId; // +54. Backup for currentActionId. set in 40F6D0 method, 411D00. "lastAction"
+		AOE_CONST_INTERNAL::UNIT_AI_ORDER previousOrderId; // +50. Backup for +28. "lastOrder?"
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_ID previousActionId; // +54. Backup for currentActionId. set in 40F6D0 method, 411D00. "lastAction"
 		long int previousTargetUnitId; // +58. Previous target class
 		 AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES previousTargetUnitType; // +5C. Type=GLOBAL_UNIT_AI_TYPES but as a dword.
 		// 0x60
