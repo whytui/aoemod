@@ -19,12 +19,18 @@ namespace AOE_STRUCTURES {
 
 
 	// Size = 8
-	// Contains information about visible units.
+	// Contains information about visible units. Only Attackable (type50 and child classes) are handled by this system.
 	class STRUCT_VISIBLE_UNIT_INFO_SET {
 	public:
-		STRUCT_NEARBY_UNIT_INFO *nearbyUnitInfoArray; // +00. Represents a list of visible units
+		// +00. Represents a list of visible units. 
+		// Entries are always kept consecutive, there are no empty slots.
+		// When an entry is removed, the last entry is moved in its place and usedCount is decreased
+		// Entries are removed <=> visibility is lost for the concerned player
+		// Very important: each slot is pointed by unit.myVisibleInfoSetEntryForPlayers[i] where unit="seen unit" and i=playerId that sees.
+		// Be careful : distance is meaningless here but position IS correct = updated in real-time (by unit.teleport 0x427C60)
+		STRUCT_NEARBY_UNIT_INFO *nearbyUnitInfoArray;
 		short int arraySize; // +4
-		short int numberUsed; // +6
+		short int numberUsed; // +6. Also corresponds to Next (free slot) index
 	};
 	static_assert(sizeof(STRUCT_VISIBLE_UNIT_INFO_SET) == 8, "STRUCT_VISIBLE_UNIT_INFO_SET size");
 
@@ -36,6 +42,8 @@ namespace AOE_STRUCTURES {
 	// Warning: search results are limited to 255 results and to a distance of 15 (0xF).
 	class STRUCT_VISIBLE_UNITS_HELPER {
 	public:
+		// 0x516A50 = visibleUnitsHelper.updateUnitVisibilityForAllPlayers(unitId, ownerPlayerId, posY, posX, unitAIType, oldVisibMask, newVisibMask, myVisibilityInfoPtr)
+		// Warning: only the units that derive from ATTACKABLE (type50) are handled in visibility info set.
 		STRUCT_VISIBLE_UNIT_INFO_SET **visibleUnitsByPlayerAndUnitAIType; // 2-dims array. Index are playerId (0-n) then unitAIType. List of visible units (including mine) by unit class.
 		// +04. Index1=PLAYER_DIPLOMACY_VALUES(0-4), index2=elemIndex. Each results array=0x800 bytes=0x100 entries (sizeof(STRUCT_NEARBY_UNIT_INFO)=8)
 		// Note: Those 5 pointers are the same as ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE (you better use the global variable directly)

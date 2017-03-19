@@ -107,7 +107,7 @@ namespace AOE_STRUCTURES {
 	// +0x28 = void RGE_Static_Object::check_damage_sprites(void)
 	// +0x2C = void RGE_Static_Object::rehook(void)
 	// +0x30 = void RGE_Static_Object::save(int)
-	// +0x34 = float unit.teleport(f_posY, f_posX, fPosZ)
+	// +0x34 = float unit.teleport(f_posY, f_posX, fPosZ). Types>=Attackable(type50) have a different overload to handle "visibilityInfo".
 	// +0x38 = void RGE_Static_Object::new_sprite(RGE_Sprite *)
 	// +0x3C = void RGE_Static_Object::add_overlay_sprite(RGE_Sprite *,unsigned char)
 	// +0x40 = void RGE_Static_Object::remove_overlay_sprite(RGE_Sprite *)
@@ -490,7 +490,10 @@ namespace AOE_STRUCTURES {
 	// 4C 32 54 00 = attackable (type50). Size=0x1BC (constructor=00425F30) - Derives from type40
 	class STRUCT_UNIT_ATTACKABLE : public STRUCT_UNIT_COMMANDABLE {
 	public:
-		STRUCT_NEARBY_UNIT_INFO *myVisibilityToOtherPlayers_unsure[9]; // +18C. Provides visibility info from other player's point of view ?
+		// +18C. "back"pointer to visibleUnitsHelper.visibleUnitInfoSet entry for each player. Is NULL if "I" am not visible to that player.
+		// Those pointers are VERY important, they are used to find the slot to update when unit visibility change for some player in 0x516A50 = visibleUnitsHelper.updateUnitVisibilityForAllPlayers(unitId, ownerPlayerId, posY, posX, unitAIType, oldVisibMask, newVisibMask, myVisibilityInfoPtr)
+		// This slots always contain the correct position values but do not trust the distance (which makes no sense here)
+		STRUCT_NEARBY_UNIT_INFO *myVisibleInfoSetEntryForPlayers[9];
 		// 0x1B0
 		STRUCT_MAP_VISIBILITY_INFO unknownVisibility_1B0; // Same "nature" object as +0x1E4. A mask for map visibility (visible for ...)?
 		float pendingReloadTime; // +1B4. Time (in seconds) till unit can give an effective 'shot'. Init=unitDef.reloadTime1 at startup and after shooting/attacking.
