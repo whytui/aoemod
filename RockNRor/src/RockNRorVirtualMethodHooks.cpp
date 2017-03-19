@@ -21,7 +21,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 		bool runStandardMethod = true;
 
 		// Custom treatments
-		int result = ROCKNROR::crCommand.ActivityProcessNotify(activity, notifyEvent, arg2, runStandardMethod); // updates runStandardMethod
+		int result = ROCKNROR::GAME_EVENTS::ActivityProcessNotify(activity, notifyEvent, arg2, runStandardMethod); // updates runStandardMethod
 
 		if (runStandardMethod && (originalCallAddr != 0)) {
 			_asm {
@@ -46,7 +46,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 		bool runStandardMethod = true;
 
 		// Custom treatments
-		// runStandardMethod = ...
+		runStandardMethod = !ROCKNROR::GAME_EVENTS::PlayerNotifyEvent(player, notifyEvent);
 
 		if (runStandardMethod) {
 			unsigned long int arg1 = notifyEvent.targetUnitId;
@@ -73,7 +73,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 
 
-	// Technical declaration for Hook methods (creates small asm hook methods to dispatch to specific methods
+	// Technical declarations for Hook methods (creates small asm hook methods to dispatch to specific methods
 
 	DECLARE_VIRTUAL_METHOD_HANDLER(ActivityProcessNotify)
 	DECLARE_VIRTUAL_METHOD_HANDLER(PlayerProcessNotify)

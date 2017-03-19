@@ -533,8 +533,8 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 	if (settings->rgeGameOptions.difficultyLevel == GAME_DIFFICULTY_LEVEL::GDL_EASIEST) { return false; }
 	if (player->isComputerControlled == 0) { return false; } // cf 0x4E6476
 	if (unitActivity->targetUnitType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupPredatorAnimal) { return false; } // This is only used for hunting aggressive animals.
-	if ((unitActivity->currentActionId != ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK) &&
-		(unitActivity->currentActionId != ACTIVITY_TASK_IDS::CST_ATI_TASK_GATHER_ATTACK)) {
+	if ((unitActivity->currentTaskId != ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK) &&
+		(unitActivity->currentTaskId != ACTIVITY_TASK_IDS::CST_ATI_TASK_GATHER_ATTACK)) {
 		return false;
 	} // cf 0x4E64B2
 	long int activityTargetUnitId = unitActivity->targetUnitId;
@@ -630,11 +630,11 @@ long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_
 		return HunterMoveBackAfterShooting(unitActivity, notify) ? 3 : -1;
 	}
 	if (notify->eventId == GAME_EVENT_TYPE::EVENT_BEING_ATTACKED) {
-		if (unitActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_TASK_MOVE) {
+		if (unitActivity->currentTaskId == ACTIVITY_TASK_IDS::CST_ATI_TASK_MOVE) {
 			// Villager should not stop to strike back to animal when he's not ready to shoot
 			for (int i = 0; i < unitActivity->orderQueueUsedElemCount; i++) {
 				if ((unitActivity->orderQueue[i].targetUnitId == notify->targetUnitId) &&
-					(unitActivity->orderQueue[i].activityId == UNIT_AI_ORDER::CST_ORDER_GATHER_ATTACK)) {
+					(unitActivity->orderQueue[i].orderId == UNIT_AI_ORDER::CST_ORDER_GATHER_ATTACK)) {
 					if (!AOE_METHODS::UNIT::IsReadyToAttack(unitActivity->ptrUnit)) {
 						return 3; // Ignore the notification because a pending order already concerns this "attacker" unit and I am not ready yet to strike back.
 					}
@@ -646,5 +646,103 @@ long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_
 	return -1;
 }
 
+
+// Triggered when a unit sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
+void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit) {
+	if (!actorUnit || !seenUnit || !player) { return; }
+	if ((actorUnit->unitStatus != GAME_UNIT_STATUS::GUS_2_READY) || (seenUnit->unitStatus > GAME_UNIT_STATUS::GUS_2_READY)) { return; }
+	STRUCT_PLAYER *otherPlayer = seenUnit->ptrStructPlayer;
+	STRUCT_UNITDEF_BASE *seenUnitDef = seenUnit->unitDefinition;
+	
+	// Not applicable to priests/siege weapons (let siege attack buildings ?)
+	if ((seenUnitDef->unitAIType == TribeAIGroupSiegeWeapon) || (seenUnitDef->unitAIType == TribeAIGroupSiegeWeapon)) { return; }
+
+	bool isNeutralOrEnemy = (player->ptrDiplomacyStances[otherPlayer->playerId] != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY);
+	bool seenUnitCanAttack = UnitDefCanAttack(seenUnitDef);
+	bool isWeakBuilding = (seenUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) && (seenUnit->remainingHitPoints < 2); // So that my unit will try to destroy new buildings with 1 HP
+	bool isImmobileLivingUnit = false;
+	if (seenUnit->DerivesFromAttackable() && (seenUnitDef->unitAIType != TribeAIGroupBuilding)) { // Exclude buildings !
+		STRUCT_UNIT_ATTACKABLE *seenUnitAttackable = (STRUCT_UNIT_ATTACKABLE *)seenUnit;
+		isImmobileLivingUnit = (seenUnitAttackable->currentMovementSpeed == 0);
+	}
+	bool seenUnitIsImportant = seenUnitCanAttack || isWeakBuilding || isImmobileLivingUnit;
+
+	STRUCT_UNITDEF_BASE *myUnitDef = actorUnit->unitDefinition;
+	if (isNeutralOrEnemy && seenUnitIsImportant && UnitDefCanAttack(myUnitDef) && actorUnit->currentActivity && actorUnit->currentActivity->IsCheckSumValid()) {
+		STRUCT_UNIT_ACTIVITY *activity = actorUnit->currentActivity;
+		AOE_CONST_INTERNAL::UNIT_AI_ORDER nextOrder = UNIT_AI_ORDER::CST_ORDER_NONE;
+		long int nextOrderTargetId = -1;
+		if (activity->orderQueueUsedElemCount > 0) {
+			nextOrder = activity->orderQueue[0].orderId; // Note: if "attack", we might update this pending order if we wish to change target
+			nextOrderTargetId = activity->orderQueue[0].targetUnitId;
+		}
+		bool canInterrupt = (nextOrder == UNIT_AI_ORDER::CST_ORDER_NONE) || (nextOrder == UNIT_AI_ORDER::CST_ORDER_ATTACK);
+		if (canInterrupt && (activity->currentTaskId == ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK)) {
+			// If attacking a low-priority target (non-tower building) and military unit/villager is around, switch
+			bool currentTargetIsImportant = false;
+			STRUCT_ACTION_ATTACK *action = (STRUCT_ACTION_ATTACK*)GetUnitAction(actorUnit);
+			if (action && action->IsCheckSumValid() && (action->actionTypeID == action->GetExpectedInternalActionId())) {
+				STRUCT_UNIT_BASE *currentTarget = action->targetUnit;
+				if (!currentTarget) {
+					currentTarget = GetUnitStruct(action->targetUnitId);
+				}
+				if (currentTarget && currentTarget->unitDefinition) {
+					currentTargetIsImportant = (currentTarget->unitDefinition->DAT_ID1 == CST_UNITID_WONDER) ||
+						UnitDefCanAttack(currentTarget->unitDefinition) ||
+						(currentTarget->remainingHitPoints < 2);
+				}
+				if (currentTarget == seenUnit) {
+					currentTargetIsImportant = false;
+				}
+			}
+			if (!currentTargetIsImportant) {
+				if (activity->orderQueueSize == 0) {
+					// This should not happen as order queue is generally initialized with non-empty array !
+					if (activity->orderQueue != NULL) {
+						AOEFree(activity->orderQueue);
+						activity->orderQueue = NULL;
+					}
+					const long int allocatedElemCount = 2;
+					activity->orderQueue = (STRUCT_UNIT_ACTIVITY_ORDER_EVENT*)AOEAllocZeroMemory(allocatedElemCount, sizeof(STRUCT_UNIT_ACTIVITY_ORDER_EVENT));
+					activity->orderQueueSize = allocatedElemCount;
+				}
+				
+				bool doNotUpdateOrder = false;
+				if ((nextOrderTargetId >= 0) && // If another "see unit" event already set an "next order target", choose which one is better
+					(nextOrderTargetId != seenUnit->unitInstanceId) // make sure we call ShouldChangeTarget for distinct units !
+					) {
+					// Hack to use should change target: set actitivy's target temporarily
+					long int backupActivityTargetId = activity->targetUnitId;
+					activity->targetUnitId = nextOrderTargetId;
+					// If "should not change target", then do NOT update pending order
+					doNotUpdateOrder = !ShouldChangeTarget(activity, seenUnit->unitInstanceId);
+					activity->targetUnitId = backupActivityTargetId; // (hack) restore correct target id
+				}
+
+				// Insert/update our "attack" order (unless we have decided NOT to change target)
+				if (!doNotUpdateOrder) {
+					// Force refresh (that will occur afterwards, when all the "see units" events are handled... normally)
+					activity->targetUnitId = seenUnit->unitInstanceId;
+					activity->targetUnitType = seenUnitDef->unitAIType;
+					activity->currentTaskId = ACTIVITY_TASK_IDS::CST_ATI_NONE;
+					activity->orderId = UNIT_AI_ORDER::CST_ORDER_NONE;
+
+					if (activity->orderQueueUsedElemCount == 0) {
+						activity->orderQueueUsedElemCount = 1;
+					}
+					activity->orderQueue[0].actorUnitId = actorUnit->unitInstanceId;
+					activity->orderQueue[0].orderId = UNIT_AI_ORDER::CST_ORDER_ATTACK;
+					activity->orderQueue[0].targetUnitId = seenUnit->unitInstanceId;
+					activity->orderQueue[0].targetPlayerId = otherPlayer->playerId;
+					activity->orderQueue[0].unknown_08 = -1; // ?
+					activity->orderQueue[0].maxRange = myUnitDef->lineOfSight;
+					activity->orderQueue[0].posX = seenUnit->positionX;
+					activity->orderQueue[0].posY = seenUnit->positionY;
+					activity->orderQueue[0].posZ = seenUnit->positionZ;
+				}
+			}
+		}
+	}
+}
 
 }

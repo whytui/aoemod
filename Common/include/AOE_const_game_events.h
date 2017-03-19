@@ -197,7 +197,7 @@ namespace AOE_CONST_INTERNAL
 		// But ALL units with a UnitAI do run this detection (each "delayBetweenDetectSeeUnits" milliseconds).
 		// Detection frequency is quite poor (4 seconds+a random part 0x413183), units may move 5 or even 10 tiles (fast units) between 2 detections.
 		// Sent to player.notify and handled in player.handleEventInAI: adds unit in infAI list (this can be done a lot of times for the same unit, ok cause there won't be duplicates, but bad for perf)
-		// arg1=unitId that "sees" arg2=playerId, arg4=other unit Id
+		// arg1=unitId that "sees" arg2=playerId (actor=that "sees"), arg4=other unit Id
 		EVENT_PLAYER_SEE_UNIT = 0x20D,
 
 		// Source=0x426651 (in send projectile code)

@@ -974,8 +974,8 @@ void UnitGroupAI::CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 							}
 						}
 
-						bool hasAttackActivity = (unitAttackable->currentActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK) ||
-							(unitAttackable->currentActivity->currentActionId == ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT);
+						bool hasAttackActivity = (unitAttackable->currentActivity->currentTaskId == ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK) ||
+							(unitAttackable->currentActivity->currentTaskId == ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT);
 						STRUCT_ACTION_BASE *unitAction = AOE_STRUCTURES::GetUnitAction(curUnit);
 						bool actionIsAgressive = unitAction && (
 							(unitAction->actionTypeID == UNIT_ACTION_ID::CST_IAI_CONVERT) ||

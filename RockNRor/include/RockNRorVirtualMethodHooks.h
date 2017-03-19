@@ -7,7 +7,7 @@
 #include "EXESelfEditor.h"
 #include "crDebugOutputPrimitives.h"
 #include "RORVirtualMethodHelper.h"
-#include "RockNRorCommand.h"
+#include "GameEventHandler.h"
 
 
 namespace ROCKNROR {

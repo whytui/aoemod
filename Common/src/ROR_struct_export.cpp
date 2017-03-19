@@ -290,8 +290,8 @@ namespace AOE_STRUCTURES {
 		if (!obj) { return "NULL"; }
 		std::string res;
 		res += "Activity id=";
-		//res += std::to_string(obj->currentActionId);
-		res += GetHexStringAddress(obj->currentActionId, 3);
+		//res += std::to_string(obj->currentTaskId);
+		res += GetHexStringAddress(obj->currentTaskId, 3);
 		res += " [+28]=";
 		//res += std::to_string(obj->internalId_whenAttacked);
 		res += GetHexStringAddress(obj->orderId, 3);
@@ -342,7 +342,7 @@ namespace AOE_STRUCTURES {
 		res += " atk p";
 		res += std::to_string(obj->targetPlayerId);
 		res += "] internalId=";
-		res += GetHexStringAddress(obj->activityId, 3);
+		res += GetHexStringAddress(obj->orderId, 3);
 		res += " target=";
 		res += std::to_string(obj->targetUnitId);
 		return res;

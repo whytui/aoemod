@@ -1985,15 +1985,15 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 	assert(enemyTowerDef->DerivesFromAttackable());
 	if (!actorUnitDef->DerivesFromAttackable() || !enemyTowerDef->DerivesFromAttackable()) { return false; }
 
-	if (activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT) {
+	if (activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT) {
 		return false; // Converting priest: let him proceed. TO DO: improve !
 	}
 
 	// Check if tower is mine or allied (it may have been converted)
 	if (actorUnit->ptrStructPlayer->ptrDiplomacyStances[enemyTower->ptrStructPlayer->playerId] == AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY) {
 		if ((activity->targetUnitId == enemyTower->unitInstanceId) &&
-			((activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT) ||
-			(activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK)
+			((activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT) ||
+			(activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK)
 			)) {
 			// Stop attacking/converting allied !
 			AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO * actionInfo = actorUnit->ptrActionInformation;
@@ -2045,7 +2045,7 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 	// Actor = catapult: always attack the tower... unless priest is very close AND being converting (not moving - can not escape my shot)
 	if (actorUnitDef->DAT_ID1 == CST_UNITID_STONE_THROWER) { // DAT_ID1 : also matches for catapult upgrades
 		if ((distanceToCurrentTarget < actorRange) && (currentTargetDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) &&
-			(currentTarget->currentActivity) && (currentTarget->currentActivity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT)) {
+			(currentTarget->currentActivity) && (currentTarget->currentActivity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_CONVERT)) {
 			return false; // In that specific case, attack current target (priest)
 		} else {
 			return true; // Otherwise, catapults just have to attack the tower
@@ -2061,7 +2061,7 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 		}
 		// Builder: keep for some critical constructions
 		STRUCT_UNIT_BUILDING *currentTargetAsBld = (STRUCT_UNIT_BUILDING *)currentTarget;
-		if (currentTargetAsBld->IsCheckSumValid() && (activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_BUILD) &&
+		if (currentTargetAsBld->IsCheckSumValid() && (activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_BUILD) &&
 			(currentTarget->ptrStructPlayer == actorUnit->ptrStructPlayer)// Just a check
 			) {
 			if (currentTargetDef->DAT_ID1 == CST_UNITID_FORUM) {
@@ -2075,7 +2075,7 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 			}
 		}
 		// Repairman: keep for some critical constructions
-		if ((activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_BUILD) &&
+		if ((activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_BUILD) &&
 			(currentTarget->ptrStructPlayer == actorUnit->ptrStructPlayer)// Just a check
 			) {
 			if ((currentTargetDef->DAT_ID1 == CST_UNITID_FORUM) && (currentTarget->remainingHitPoints < 400)) {
@@ -3669,82 +3669,6 @@ void RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short
 
 	// Now manage triggers...
 	ROCKNROR::TRIGGER::ManageTriggersOnGameNotifyEvent(eventId, playerId, arg3, arg4, arg5);
-}
-
-
-// UnitActivity.ProcessNotify event.
-// outExecStandardCode is an output bool: if set to true, ROR standard code will be executed afterwards. If false, it will be skipped.
-long int RockNRorCommand::ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2, bool &outExecStandardCode) {
-	outExecStandardCode = true;
-
-	/*std::string msg1 = "ActivityProcessNotify ";
-	msg1 += GetHexStringAddress(notifyEvent->activityId, 3);
-	AOE_METHODS::UI_BASE::CallWriteText(msg1.c_str());*/
-
-	// Custom treatments
-#ifndef _DEBUG
-	return;
-#endif;
-	static std::set<AOE_CONST_INTERNAL::GAME_EVENT_TYPE> test;
-	AOE_CONST_INTERNAL::GAME_EVENT_TYPE notificationTaskId = notifyEvent->eventId;
-	test.insert(notificationTaskId);
-	// TODO: CST_ATI_NOTIFY_TOO_CLOSE_TO_SHOOT : search another target or move away ?
-	/*if (argNotificationId == 0x20D) {
-	AOE_METHODS::CallWriteCenteredText("20D");
-	}*/
-	if (!activity || !activity->ptrUnit || !activity->ptrUnit->ptrStructPlayer) { return 3; } // value to return ??
-	std::string msg = "p#";
-	msg += std::to_string(activity->ptrUnit->ptrStructPlayer->playerId);
-	msg += " u#";
-	msg += std::to_string(activity->ptrUnit->unitInstanceId);
-	msg += " ";
-	if (activity->ptrUnit->unitDefinition) {
-		msg += activity->ptrUnit->unitDefinition->ptrUnitName;
-	}
-	msg += " ";
-	msg += GetHexStringAddress(notificationTaskId, 3);
-	//msg += std::to_string((int)notificationTaskId);
-
-	switch (notificationTaskId) {
-	case GAME_EVENT_TYPE::EVENT_TOO_FAR_TO_SHOOT: // See 0x4143B7
-		break;
-	case GAME_EVENT_TYPE::EVENT_UNKNOWN_1FC_NEED_MOVE_AGAIN: // Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
-		/*AOE_METHODS::CallWriteCenteredText(msg.c_str());
-		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
-		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);
-		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
-		AOE_METHODS::SetGamePause(true);*/
-		break;
-	case GAME_EVENT_TYPE::EVENT_BEING_ATTACKED: // 1f4 -> TODO: if attacker is under "min range": just move away if I am idle, ignore event otherwise
-	case GAME_EVENT_TYPE::EVENT_ACTION_FAILED: // 1F9
-	case GAME_EVENT_TYPE::EVENT_ACTION_COMPLETED:
-	case GAME_EVENT_TYPE::EVENT_ACTION_INVALIDATED:
-	case GAME_EVENT_TYPE::EVENT_SHOULD_MOVE_BACK_AFTER_SHOOTING: // 200
-	case GAME_EVENT_TYPE::EVENT_MOVEMENT_FINISHED_UNSURE: // target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
-	case GAME_EVENT_TYPE::EVENT_SHOULD_ESCAPE_ATTACK: // 20f
-	case GAME_EVENT_TYPE::EVENT_TOO_CLOSE_TO_SHOOT: // 1FE
-	case GAME_EVENT_TYPE::EVENT_UNIT_CAPTURED: // 20B
-	case GAME_EVENT_TYPE::EVENT_RELEASE_BEING_WORKED_ON: // >0x258 but still a notification !
-		// Usual cases...
-		break;
-	case GAME_EVENT_TYPE::EVENT_UNSURE_ATTACK: //0x258 (should not be a notification?) There is code for this... dead (wrong?obsolete?)code ?
-		msg += " (task_attack)";
-		AOE_METHODS::CallWriteCenteredText(msg.c_str());
-		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
-		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);
-		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
-		AOE_METHODS::SetGamePause(true);
-		break;
-	default:
-		msg += " (unknown)";
-		AOE_METHODS::CallWriteCenteredText(msg.c_str());
-		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
-		AOE_METHODS::PLAYER::ChangeControlledPlayer(activity->ptrUnit->ptrStructPlayer->playerId, false);
-		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
-		AOE_METHODS::SetGamePause(true);
-		break;
-	}
-	return 2;
 }
 
 

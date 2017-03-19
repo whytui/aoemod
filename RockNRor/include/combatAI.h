@@ -59,4 +59,7 @@ namespace COMBAT {
 	// Returns >= 0 to return a specific value and bypass ROR treatments.
 	long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify);
 
+	// Triggered when a unit sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
+	void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit);
+
 }

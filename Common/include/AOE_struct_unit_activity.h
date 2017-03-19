@@ -24,7 +24,7 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNIT_ACTIVITY_ORDER_EVENT {
 	public:
 		long int actorUnitId;
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS activityId;
+		AOE_CONST_INTERNAL::UNIT_AI_ORDER orderId;
 		long int unknown_08; // related to activity+2C. A value 0-100 (or -1) ? See 0x41375C
 		long int targetUnitId;
 		// 0x10
@@ -175,7 +175,7 @@ namespace AOE_STRUCTURES
 		STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyQueue; // +24. See 0x414D90(add)
 		AOE_CONST_INTERNAL::UNIT_AI_ORDER orderId; // +28. The current *explicit* order. If -1, then unit reacts to attack, see 0x414600.
 		long int unknown_2C; // +2C. 0x64 in 4DA4C9,4D841F. cf targetsInfoArray+08. CMP to enemySightedRespDist in 0x4D85B7. Updated in 0x40F8B1. Special values -1,100. Normal values 0-99. Distance to current target ? Reset to -1 when activity stops. Priority ?
-		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentActionId; // +30. Current activity type.
+		AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS currentTaskId; // +30. Current activity type.
 		long int targetUnitId; // +34. Current target unit instance ID.
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // +38. Target AI type (3=building...).
 		float targetPosY; // +3C

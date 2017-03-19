@@ -2390,7 +2390,7 @@ void RockNRorInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_values
 	bool is_attack_activity = false;
 	bool forceKeepCurrentActivity = false; // Default: do NOT skip ! (attack the tower/enemy)
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
-		if (activity->currentActionId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK) {
+		if (activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_IDS::CST_ATI_TASK_ATTACK) {
 			is_attack_activity = true;
 		}
 		REG_values->fixesForGameEXECompatibilityAreDone = true;

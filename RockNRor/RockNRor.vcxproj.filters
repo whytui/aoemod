@@ -318,6 +318,9 @@
     <ClInclude Include="include\RockNRorVirtualMethodHooks.h">
       <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
     </ClInclude>
+    <ClInclude Include="include\GameEventHandler.h">
+      <Filter>Fichiers d%27en-tête\RockNRorFeatures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\tinyxml\tinystr.cpp">
@@ -529,6 +532,9 @@
     </ClCompile>
     <ClCompile Include="src\RockNRorVirtualMethodHooks.cpp">
       <Filter>Fichiers sources\RockNRorBase</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameEventHandler.cpp">
+      <Filter>Fichiers sources\RockNRorFeatures</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
