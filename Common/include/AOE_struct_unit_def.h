@@ -286,7 +286,7 @@ namespace AOE_STRUCTURES
 		char unknown_0C8;
 		char unknown_0C9;
 		short int trackingUnit; // +CA. Used to define the "smoke" unit to leave behind "me". Used for "flame bolts", etc.
-		char trackingUnitUsed; // +CC. 0=disable, 1=?, 2=?
+		char trackingUnitUsed; // +CC. 0=disable, 1=appears at game start+when moving, 2=appears when moving only (cf AGE3)
 		char unknown_0CD;
 		char unknown_0CE;
 		char unknown_0CF;

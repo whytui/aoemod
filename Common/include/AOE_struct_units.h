@@ -95,7 +95,6 @@ namespace AOE_STRUCTURES {
 
 	// Eye candy (type10) / common (base) class for all units (unit instances). Name=RGE_Static_Object
 	// A8 7D 54 00. Size=0x88 (constructor 0x04A64B0)
-	// 0x4CD2D0 = unitGroupElem.task(tacAI, mainAI, unitGrpTaskId, resetOrg, arg5=oCA)
 	// Methods:
 	// +0x0C = unit.draw(pDrawArea, arg2, arg3, ptrColorForMap?)
 	// +0x10 = void RGE_Static_Object::shadow_draw(TDrawArea *,short,short,unsigned char)
@@ -103,7 +102,7 @@ namespace AOE_STRUCTURES {
 	// +0x18 = void RGE_Static_Object::draw_front_frame(TDrawArea *,short,short)
 	// +0x1C = void RGE_Static_Object::draw_back_frame(TDrawArea *,short,short)
 	// +0x20 = void RGE_Static_Object::draw_frame(TDrawArea *,short,short)
-	// +0x24 = unsigned char RGE_Static_Object::update(void)
+	// +0x24 = unit.timerUpdate() or "update()". Update status +timer things (reload, etc), execute actions, update visibility info+some activity treatment IF player = currently managed AI player
 	// +0x28 = void RGE_Static_Object::check_damage_sprites(void)
 	// +0x2C = void RGE_Static_Object::rehook(void)
 	// +0x30 = void RGE_Static_Object::save(int)
@@ -495,7 +494,7 @@ namespace AOE_STRUCTURES {
 		// This slots always contain the correct position values but do not trust the distance (which makes no sense here)
 		STRUCT_NEARBY_UNIT_INFO *myVisibleInfoSetEntryForPlayers[9];
 		// 0x1B0
-		STRUCT_MAP_VISIBILITY_INFO unknownVisibility_1B0; // Same "nature" object as +0x1E4. A mask for map visibility (visible for ...)?
+		STRUCT_MAP_VISIBILITY_INFO myTileVisibilityForAllPlayers; // +1B0. My tile's visibility mask for all players (0-8). Used to detect when I become visible (or no longer visible) to another player. 0x426C80.
 		float pendingReloadTime; // +1B4. Time (in seconds) till unit can give an effective 'shot'. Init=unitDef.reloadTime1 at startup and after shooting/attacking.
 		char stillToBeDiscoveredByHuman; // +1B8. 1 for gaia units that have not been discovered yet (for gaia units capture system). Only non-AI players can capture gaia units.
 		char unknown_1B9[3]; // unused?

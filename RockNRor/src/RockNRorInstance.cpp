@@ -427,6 +427,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x413182:
 		this->ActivityNearbyUnitDetectionDelayUpdate(REG_values);
 		break;
+	case 0x00426C91:
+		this->OnAttackableUnitUpdateVisibility(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4434,6 +4437,27 @@ void RockNRorInstance::ActivityNearbyUnitDetectionDelayUpdate(REG_BACKUP *REG_va
 	// Custom treatments: allow using custom delays (detect more often)
 	// Warning: this may greatly affect performance, especially because of adding/updating unit in infAI list (if not optimized bby RockNRor)
 	REG_values->EDX_val = randomPart + ROCKNROR::crInfo.configInfo.unitAIDetectNearbyUnitsMinimumDelay;
+}
+
+
+// From 0x426C86 : in unit50+.update(), when visibility to other players changed.
+// Make sure that this method does not run too much treatments !!!
+void RockNRorInstance::OnAttackableUnitUpdateVisibility(REG_BACKUP *REG_values) {
+	STRUCT_UNIT_ATTACKABLE *unit = (STRUCT_UNIT_ATTACKABLE *)REG_values->ESI_val;
+	long int posX = REG_values->EAX_val;
+	long int posY = REG_values->EDI_val;
+	STRUCT_MAP_VISIBILITY_INFO oldVisibilityInfo = *((STRUCT_MAP_VISIBILITY_INFO*)&REG_values->ECX_val);
+	STRUCT_MAP_VISIBILITY_INFO newVisibilityInfo = *((STRUCT_MAP_VISIBILITY_INFO*)&REG_values->EBP_val);
+#ifdef _DEBUG
+	ror_api_assert(REG_values, unit && unit->IsCheckSumValidForAUnitClass() && unit->DerivesFromAttackable());
+#endif
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->EDX_val = (unsigned long int)(&unit->myVisibleInfoSetEntryForPlayers);
+	}
+	// Custom treatments
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
+
 }
 
 
