@@ -96,6 +96,11 @@ namespace AOE_STRUCTURES {
 	// WARNING: this does not take care of villager mode (for example, will return false for a farmer !)
 	bool UnitDefCanAttack(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
 
+	// Returns true if a unit is capable of attacking (conversion or physical attack)
+	// Returns "returnValueForCivilian" if unitdef class is 4 (civilian)
+	// WARNING: this does not take care of villager mode (for example, will return false for a farmer !)
+	bool UnitDefCanAttack(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef, bool returnValueForCivilian);
+
 	// Returns 0 for classes that do NOT have a speed !
 	float GetUnitDefSpeed(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef);
 

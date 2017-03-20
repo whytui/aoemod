@@ -670,7 +670,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 
 	// The goal here is to take into account 'seen' unit and possible change target if necessary
 	bool isNeutralOrEnemy = (player->ptrDiplomacyStances[otherPlayer->playerId] != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY);
-	bool seenUnitCanAttack = UnitDefCanAttack(seenUnitDef);
+	bool seenUnitCanAttack = UnitDefCanAttack(seenUnitDef, false);
 	bool isWeakBuilding = (seenUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) && (seenUnit->remainingHitPoints < 2); // So that my unit will try to destroy new buildings with 1 HP
 	bool isImmobileLivingUnit = false;
 	if (seenUnit->DerivesFromAttackable() && (seenUnitDef->unitAIType != TribeAIGroupBuilding)) { // Exclude buildings !
@@ -680,7 +680,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 	bool seenUnitIsImportant = seenUnitCanAttack || isWeakBuilding || isImmobileLivingUnit;
 
 	STRUCT_UNITDEF_BASE *myUnitDef = actorUnit->unitDefinition;
-	if (isNeutralOrEnemy && seenUnitIsImportant && UnitDefCanAttack(myUnitDef) && actorUnit->currentActivity && actorUnit->currentActivity->IsCheckSumValid()) {
+	if (isNeutralOrEnemy && seenUnitIsImportant && UnitDefCanAttack(myUnitDef, false) && actorUnit->currentActivity && actorUnit->currentActivity->IsCheckSumValid()) {
 		STRUCT_UNIT_ACTIVITY *activity = actorUnit->currentActivity;
 		AOE_CONST_INTERNAL::UNIT_AI_ORDER nextOrder = UNIT_AI_ORDER::CST_ORDER_NONE;
 		long int nextOrderTargetId = -1;

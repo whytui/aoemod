@@ -303,6 +303,20 @@ namespace AOE_STRUCTURES {
 		return (unitDef50->attacksCount > 0);
 	}
 
+	// Returns true if a unit is capable of attacking (conversion or physical attack)
+	// Returns "returnValueForCivilian" if unitdef class is 4 (civilian)
+	// WARNING: this does not take care of villager mode (for example, will return false for a farmer !)
+	bool UnitDefCanAttack(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef, bool returnValueForCivilian) {
+		// Non-commandable (type 40) units can't attack
+		if (!unitDef || !unitDef->DerivesFromCommandable()) {
+			return false;
+		}
+		if (unitDef->unitAIType == TribeAIGroupCivilian) {
+			return returnValueForCivilian;
+		}
+		return UnitDefCanAttack(unitDef);
+	}
+
 	// Returns 0 for classes that do NOT have a speed !
 	float GetUnitDefSpeed(AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
 		// Non-flag (type 20) units can't move and have no speed
