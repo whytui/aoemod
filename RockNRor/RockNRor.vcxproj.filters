@@ -327,6 +327,9 @@
     <ClInclude Include="include\UnitExtensionHandler.h">
       <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
     </ClInclude>
+    <ClInclude Include="include\AOEPrimitives_lists.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\tinyxml\tinystr.cpp">
@@ -547,6 +550,9 @@
     </ClCompile>
     <ClCompile Include="src\UnitExtensionHandler.cpp">
       <Filter>Fichiers sources\RockNRorBase</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AOEPrimitives_lists.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

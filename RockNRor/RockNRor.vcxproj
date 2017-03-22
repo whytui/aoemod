@@ -107,6 +107,7 @@
     <ClInclude Include="..\..\tinyxml\tinyxml.h" />
     <ClInclude Include="include\AOEPrimitives_gameCommand.h" />
     <ClInclude Include="include\AOEPrimitives_global.h" />
+    <ClInclude Include="include\AOEPrimitives_lists.h" />
     <ClInclude Include="include\AOEPrimitives_UI_components.h" />
     <ClInclude Include="include\AOEPrimitives_UI_gameMain.h" />
     <ClInclude Include="include\AOEPrimitives_UI_screens.h" />
@@ -199,6 +200,7 @@
     <ClCompile Include="..\..\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="src\AOEPrimitives_gameCommand.cpp" />
     <ClCompile Include="src\AOEPrimitives_global.cpp" />
+    <ClCompile Include="src\AOEPrimitives_lists.cpp" />
     <ClCompile Include="src\AOEPrimitives_unitGroup.cpp" />
     <ClCompile Include="src\AOE_map.cpp" />
     <ClCompile Include="src\AOEPrimitives_units.cpp" />

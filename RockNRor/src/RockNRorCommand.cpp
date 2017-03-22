@@ -1729,7 +1729,7 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 			assert(loopInfAI->IsCheckSumValid());
 			// Fix (or remove) unit from list for each player. We MUST NOT let a bad playerId be stored in unit elem list.
 #pragma message("OnUnitChangeOwner_fixes: FIX THIS and use unitExtension instead !")
-			UpdateOrResetInfAIUnitListElem(loopInfAI, FindInfAIUnitElemInList(loopInfAI, targetUnit->unitInstanceId));
+			UpdateOrResetInfAIUnitListElem(loopInfAI, AOE_METHODS::LISTS::FindInfAIUnitElemInList(loopInfAI, targetUnit->unitInstanceId));
 		}
 	}
 
@@ -1876,7 +1876,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 			// Remove building from player buildings list (bug in original game), this is done in unit destructor but NOT at unit conversion
 			// Note that because of this call, the remove operation is done twice (will be done again in destructor). But the 2nd time, it will just do nothing.
 			AOE_STRUCTURES::STRUCT_PLAYER_BUILDINGS_HEADER *buildingsHeader = player->ptrBuildingsListHeader;
-			AOE_playerBldHeader_RemoveBldFromArrays(buildingsHeader, (STRUCT_UNIT_BASE*)unit);
+			AOE_METHODS::LISTS::PlayerBldHeader_RemoveBldFromArrays(buildingsHeader, (STRUCT_UNIT_BASE*)unit);
 		}
 
 		// Fix constructions history array
@@ -1895,7 +1895,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 					// Setting status to "reset" (3 / =removed) will unblock further construction of same kind of buildings, especially granary/SP.
 					// This could also fix the bad farms placement after some game time (because "existing" farms apply a negative likee value on nearby tiles) ? To verify
 					// Moreover, it allows the array data to be valid !
-					AOE_InfAIBuildHistory_setStatus(infAI, posX, posY, unitDef->DAT_ID1, AOE_CONST_INTERNAL::INFAI_BLD_HISTORY_STATUS::CST_BHS_REMOVED);
+					AOE_METHODS::LISTS::InfAIBuildHistory_setStatus(infAI, posX, posY, unitDef->DAT_ID1, AOE_CONST_INTERNAL::INFAI_BLD_HISTORY_STATUS::CST_BHS_REMOVED);
 				}
 			}
 		}
@@ -2915,7 +2915,7 @@ void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_IN
 				s += std::to_string(noLongerExists);
 				traceMessageHandler.WriteMessageNoNotification(s.c_str());
 			}
-			elementWasReset = ResetInfAIUnitListElem(currentUnitListElem);
+			elementWasReset = AOE_METHODS::LISTS::ResetInfAIUnitListElem(currentUnitListElem);
 		}
 	}
 	if (!elementWasReset && unitBase && unitBase->ptrStructPlayer && (unitBase->ptrStructPlayer->playerId != currentUnitListElem->playerId)) {

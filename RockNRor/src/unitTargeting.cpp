@@ -137,7 +137,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 						// Optimization; if we already have this pointer, just use it (don't loop on all elem list)
 						return &infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex];
 					}
-					return FindInfAIUnitElemInList(infAI, loopTargetId);
+					return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, loopTargetId);
 				}
 			}
 		}
@@ -444,7 +444,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearPriorityLocation(
 						(curUnit->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) && (curUnit->remainingHitPoints > 0) &&
 						curUnit->unitDefinition && 
 						(curUnit->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
-						return FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
+						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
 					}
 					curListElem = curListElem->next;
 				}
@@ -457,7 +457,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearPriorityLocation(
 					if (curUnit && curUnit->IsCheckSumValidForAUnitClass() && (curUnit->ptrStructPlayer == targetPlayer) &&
 						(curUnit->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) && (curUnit->remainingHitPoints > 0) &&
 						curUnit->unitDefinition && (curUnit->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
-						return FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
+						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
 					}
 					curListElem = curListElem->next;
 				}
@@ -474,7 +474,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearPriorityLocation(
 					if (curUnit && curUnit->IsCheckSumValidForAUnitClass() && (curUnit->ptrStructPlayer == targetPlayer) &&
 						(curUnit->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) && (curUnit->remainingHitPoints > 0) &&
 						curUnit->unitDefinition && (curUnit->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
-						return FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
+						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
 					}
 					curListElem = curListElem->next;
 				}
@@ -487,7 +487,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearPriorityLocation(
 					if (curUnit && curUnit->IsCheckSumValidForAUnitClass() && (curUnit->ptrStructPlayer == targetPlayer) &&
 						(curUnit->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) && (curUnit->remainingHitPoints > 0) &&
 						curUnit->unitDefinition && (curUnit->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
-						return FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
+						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
 					}
 					curListElem = curListElem->next;
 				}
@@ -718,7 +718,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 					if (canMoveToTarget) {
 						unitGroup->targetUnitIdArrayUsedElemCount = 0; // Reset (no need to erase values from array)
 						unitGroup->AddTargetUnitIdToArray(targetUnit->unitInstanceId);
-						return FindInfAIUnitElemInList(infAI, targetUnit->unitInstanceId);
+						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, targetUnit->unitInstanceId);
 					}
 				}
 			}
@@ -738,7 +738,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 						long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 							0, 1, -1, -1);
 						if (canMoveToTarget) {
-							return FindInfAIUnitElemInList(infAI, loopTargetUnit->unitInstanceId);
+							return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, loopTargetUnit->unitInstanceId);
 						}
 					}
 				}
@@ -1074,7 +1074,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 	infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].attackAttempts++; // 0x4C0DEF. WARNING: also done by caller but only in 0x4D4376
 #ifdef _DEBUG
 	// Just to make *really* sure this is always true. To remove later.
-	assert(&infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex] == FindInfAIUnitElemInList(infAI, unitGroup->GetTargetUnitIdFromArray(0)));
+	assert(&infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex] == AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitGroup->GetTargetUnitIdFromArray(0)));
 #endif
 	return &infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex];
 }
@@ -1142,7 +1142,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 						// 0x4C010A
 						unitGroup->targetUnitIdArrayUsedElemCount = 0; // Reset (no need to erase values from array)
 						unitGroup->AddTargetUnitIdToArray(targetUnit->unitInstanceId);
-						return FindInfAIUnitElemInList(infAI, targetUnit->unitInstanceId); // 0x4C0135
+						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, targetUnit->unitInstanceId); // 0x4C0135
 					}
 				}
 			}
@@ -1164,7 +1164,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 						long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 							0, 1, -1, -1);
 						if (canMoveToTarget) {
-							return FindInfAIUnitElemInList(infAI, loopTargetUnit->unitInstanceId); // 0x4C0232 to 0x4C0246
+							return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, loopTargetUnit->unitInstanceId); // 0x4C0232 to 0x4C0246
 						}
 					}
 				}
@@ -1529,7 +1529,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 	infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].attackAttempts++; // 0x4C0DEF. WARNING: also done by caller but only in 0x4D4376
 	// 0x4C0E00
 	// Extremely NOT optimized (lol) ! Doing a whole loop to find something we already have = &infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex]
-	STRUCT_INF_AI_UNIT_LIST_ELEM *result = FindInfAIUnitElemInList(infAI, unitGroup->GetTargetUnitIdFromArray(0));
+	STRUCT_INF_AI_UNIT_LIST_ELEM *result = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitGroup->GetTargetUnitIdFromArray(0));
 	assert(&infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex] == result); // TEST for optimization (TODO)
 	return result;
 }

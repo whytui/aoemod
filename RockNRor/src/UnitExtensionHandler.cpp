@@ -125,11 +125,11 @@ bool UnitExtensionHandler::AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int i
 	// Here: not found in infAI list: add it
 	if (indexOfAFreeSlot < 0) {
 		// May append at the end of the list... or reuse an existing slot (should not as we already tried)
-		if (!AddUpdateInfAIElemList(infAI, unit)) {
+		if (!AOE_METHODS::LISTS::AddUpdateInfAIElemList(infAI, unit)) {
 			return false;
 		}
 		// Find index of new elem.
-		STRUCT_INF_AI_UNIT_LIST_ELEM *elem = FindInfAIUnitElemInList(infAI, unitId);
+		STRUCT_INF_AI_UNIT_LIST_ELEM *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitId);
 		long int elemIndex = (((unsigned long int)elem) - (unsigned long int)(infAI->unitElemList)) / sizeof(STRUCT_INF_AI_UNIT_LIST_ELEM);
 		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = elemIndex;
 		return true;

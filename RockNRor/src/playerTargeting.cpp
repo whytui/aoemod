@@ -123,7 +123,7 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 				if (global->GetUnitFromId(this->militaryAIInfo->enemyTowerInMyTown->unitId)) {
 					this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreHasTowerInMyTown;
 				} else {
-					ResetInfAIUnitListElem(this->militaryAIInfo->enemyTowerInMyTown);
+					AOE_METHODS::LISTS::ResetInfAIUnitListElem(this->militaryAIInfo->enemyTowerInMyTown);
 					this->militaryAIInfo->enemyTowerInMyTown = NULL;
 				}
 			}
