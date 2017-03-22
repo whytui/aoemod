@@ -3411,7 +3411,7 @@ void RockNRorInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_val
 	long int loopIndex = GetIntValueFromRORStack(REG_values, 0x10);
 	ror_api_assert(REG_values, currentLoopOffset == loopIndex*0x24);
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	if (currentUnitId == -1) { // This corresponds to bugged case in standard game.
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes && (currentUnitId == -1)) { // This corresponds to bugged case in standard game ==> main ADDED fix.
 		REG_values->EAX_val = NULL; // simulates that the GetUnitPtr(...) did not found a valid unit
 		ChangeReturnAddress(REG_values, 0x4C41C2);
 		return;
@@ -3421,14 +3421,16 @@ void RockNRorInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_val
 
 	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
-	if ((currentUnitId >= 0) && ROCKNROR::IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
-#pragma message("FixGetUnitStructInTargetSelectionLoop : this part should be removed (and OnFindEnemyUnitIdWithinRangeLoop too) cf unitExtensionHandler")
-		return; //TEST
+	// Optional custom treatments
+
+	// This was commented out because such updates are now handle on unit visibility changes in unitExtensions (restricted to type50+ though)
+	// Moreover, this place was not especially relevant for infAI elem updates...
+	/*if ((currentUnitId >= 0) && ROCKNROR::IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
 		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *unitListElemBase = infAI->unitElemList;
 		if (!unitListElemBase || (loopIndex >= infAI->unitElemListSize)) { return; }
 		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem = &unitListElemBase[loopIndex];
 		ROCKNROR::crCommand.OnFindEnemyUnitIdWithinRangeLoop(infAI, currentUnitListElem);
-	}
+	}*/
 }
 
 

@@ -57,6 +57,7 @@ float GetDistance(float x1, float y1, float x2, float y2);
 
 // Returns true if the cost could be correctly computed.
 // Returns false if not. costTable content may have been modified though.
+// Make sure costTable is large enough (cf MAX_RESOURCE_TYPE_ID)
 bool GetUnitCost(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID, float costTable[]);
 
 // Fill resourceTypesOrder with ordered resource types: lower value in resourceAmounts = first position in (out) resourceTypesOrder
@@ -76,10 +77,10 @@ bool ApplyCostIfPossible(float costTable[], float resourceTable[]);
 // Reset the element otherwise.
 // If the element is reset, it is ALSO REMOVED from infAI lists.
 // Return true if the element was updated/reset.
-bool UpdateOrResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
+//bool UpdateOrResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
 
 // Change unit owner in InfAI unitListElem according to unit visibility.
 // Return true if updated.
-bool UpdateUnitOwnerInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, long int newPlayerId);
+//bool UpdateUnitOwnerInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, long int newPlayerId);
 
 

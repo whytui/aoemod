@@ -29,6 +29,9 @@ bool ApplyCostIfPossible(float costTable[], float resourceTable[]) {
 }
 
 
+// Returns true if the cost could be correctly computed.
+// Returns false if not. costTable content may have been modified though.
+// Make sure costTable is large enough (cf MAX_RESOURCE_TYPE_ID)
 bool GetUnitCost(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID, float costTable[]) {
 	if (!player || !player->IsCheckSumValid()) { return false; }
 	if ((DAT_ID < 0) || (DAT_ID >= player->structDefUnitArraySize)) { return false; }

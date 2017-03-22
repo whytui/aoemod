@@ -1719,7 +1719,7 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 
 	// Update all players' infAI.unitElemList because it would contain an erroneous playerId, and this would never be fixed/updated
 	// This leads to incorrect behaviours (unit groups stuck because they try to attack their own units...)
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = actorPlayer->ptrGlobalStruct;
+	/*AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = actorPlayer->ptrGlobalStruct;
 	assert(global && global->IsCheckSumValid());
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *loopPlayer = GetPlayerStruct(loopPlayerId);
@@ -1731,7 +1731,7 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 #pragma message("OnUnitChangeOwner_fixes: FIX THIS and use unitExtension instead !")
 			UpdateOrResetInfAIUnitListElem(loopInfAI, AOE_METHODS::LISTS::FindInfAIUnitElemInList(loopInfAI, targetUnit->unitInstanceId));
 		}
-	}
+	}*/
 
 	if (targetPlayer && IsImproveAIEnabled(targetPlayer->playerId) && targetPlayer->ptrAIStruct && targetPlayer->ptrAIStruct->IsCheckSumValid()) {
 		// Notify custom AI that a conversion occurred.
@@ -1802,20 +1802,21 @@ void RockNRorCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLA
 			unit->ptrStructPlayer = player;
 
 			_asm {
-				MOV EAX, pMapInfo
-				MOV ECX, buildingsHeader
-				MOV EDX, unit
-				PUSH EAX // arg2 = pMapVisibilityInfo
-				PUSH EDX // arg1 = unit
-				MOV EAX, 0x004368F0 // playerUnitsHeader.addBuildingToArrays(ptrUnit, arg2_mapinfo)
-				CALL EAX
+				MOV EAX, pMapInfo;
+				MOV ECX, buildingsHeader;
+				MOV EDX, unit;
+				PUSH EAX; // arg2 = pMapVisibilityInfo
+				PUSH EDX; // arg1 = unit
+				MOV EAX, 0x004368F0; // playerUnitsHeader.addBuildingToArrays(ptrUnit, arg2_mapinfo)
+				CALL EAX;
 			}
 
 			unit->ptrStructPlayer = oldUnitPlayer; // Restore player (for conversion, it will be updated a bit later)
 		}
 	}
 
-	// Update unit owner in players' unit list if it is visible to them (useful for conversion / unit capture)
+	// Force update infAI elem (owner attribute) for players that currently SEE the unit (because unit visibility may not change = no update)
+	// For other players, this will be updated when the see it.
 	// This is very important for artefacts. Probably useful for other units (avoid having wrong playerId in list), but impacts are to be analyzed.
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
@@ -1826,9 +1827,9 @@ void RockNRorCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLA
 		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING)) {
 		for (int curPlayerId = 1; curPlayerId < playerTotalCount; curPlayerId++) {
 			AOE_STRUCTURES::STRUCT_PLAYER *curPlayer = GetPlayerStruct(curPlayerId);
-			AOE_STRUCTURES::STRUCT_AI *curAI = curPlayer->ptrAIStruct;
-			if (curAI && curAI->IsCheckSumValid() && curAI->structInfAI.IsCheckSumValid()) {
-				UpdateUnitOwnerInfAIUnitListElem(&curAI->structInfAI, (AOE_STRUCTURES::STRUCT_UNIT_BASE*)unit, player->playerId);
+			if (IsImproveAIEnabled(curPlayerId) && 
+				AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(curPlayer, (long int)unit->positionX, (long int)unit->positionY)) {
+				ROCKNROR::unitExtensionHandler.AddUpdateInfAIElem(unit, curPlayerId);
 			}
 		}
 	}
@@ -1854,20 +1855,14 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	bool isInGame = (settings->currentUIStatus == AOE_CONST_INTERNAL::GSUS_PLAYING) || (settings->currentUIStatus == AOE_CONST_INTERNAL::GSUS_GAME_OVER_BUT_STILL_IN_GAME);
+	bool unitIsDying = isInGame && (unit->unitStatus > 2);
 
 	// Update AI struct unit lists that are never updated by ROR (we choose to do this only if AI improvement is enabled).
-	if (isInGame && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() && (unit->unitInstanceId >= 0) && IsImproveAIEnabled(player->playerId)) {
-		AOE_STRUCTURES::STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
-		assert(infAI->IsCheckSumValid());
-		// Update infAI lists (those that are not updated by ROR)
-		long int size = infAI->unitElemListSize;
-		for (long int i = 0; i < size; i++) {
-			AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[i];
-			if (curElem->unitId == unit->unitInstanceId) {
-#pragma message("OnPlayerRemoveUnit : Remove this part cf unitExtension")
-				UpdateOrResetInfAIUnitListElem(infAI, curElem);
-			}
-		}
+	if (isInGame && unitIsDying && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid() && (unit->unitInstanceId >= 0)) {
+		// If unit is dying, remove it from all players infAI elem list
+		// Critical for unitExtensions because the unit pointer will become obsolete ! => do this even if improveAI is currently disabled
+		// Remark: this is not necessary for conversion, the entry will be updated as soon as the unit is seen again.
+		ROCKNROR::unitExtensionHandler.RemoveAllInfAIElemForUnit(unit->unitInstanceId);
 	}
 
 	if (!isNotCreatable && !isTempUnit) {
@@ -1904,7 +1899,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 		// This allows to avoid getting very large UnitID arrays (especially creatableAndGatherableUnits that can contain thousand of elements without this optimization)
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		assert(global && global->IsCheckSumValid());
-		if (isInGame && global && global->IsCheckSumValid() && (unit->unitStatus > 2)) {
+		if (isInGame && global && global->IsCheckSumValid() && unitIsDying) {
 			// For all valid players, remove unitId from AI lists...
 			for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 				AOE_STRUCTURES::STRUCT_PLAYER *loopPlayer = GetPlayerStruct(loopPlayerId);
@@ -2891,8 +2886,9 @@ void RockNRorCommand::DisableWalls() {
 
 // Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
 // This is called quite often (only if improve AI is enabled in RockNRor configuration)
+// *** OBSOLETE !!! ***
 void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem) {
-	if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem || !infAI->ptrMainAI || !infAI->ptrMainAI->IsCheckSumValid()) { return; }
+	/*if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem || !infAI->ptrMainAI || !infAI->ptrMainAI->IsCheckSumValid()) { return; }
 	if (IsMultiplayer()) { return; }
 
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(currentUnitListElem->unitId);
@@ -2930,7 +2926,7 @@ void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_IN
 				traceMessageHandler.WriteMessage(s.c_str());
 			}
 		}
-	}
+	}*/
 }
 
 

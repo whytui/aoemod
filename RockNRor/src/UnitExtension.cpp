@@ -34,6 +34,16 @@ void UnitExtension::Init(STRUCT_UNIT_BASE *unit) {
 }
 
 
+// Init this object, considering the unit no longer exists (DEAD unit).
+// If "this" extension is already initialized, this will set the flag "unitDied" to true.
+void UnitExtension::InitForDeadUnit(long int unitId) {
+	this->isInitialized = true;
+	this->pUnit = NULL;
+	this->unitDied = true;
+	this->unitId = unitId;
+}
+
+
 // Updates the specified infAI element with "this" unit information.
 // Returns true if successful
 bool UnitExtension::WriteAllInfAIElemInfo(STRUCT_INF_AI_UNIT_LIST_ELEM *elemToUpdate) {

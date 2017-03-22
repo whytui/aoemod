@@ -67,7 +67,8 @@ bool UnitExtensionHandler::ReallocArrayUsingGameGlobal() {
 bool UnitExtensionHandler::AddUnitExtension(STRUCT_UNIT_BASE *unit) {
 	if (!unit) { return false; }
 	long int unitId = unit->unitInstanceId;
-	if ((unitId < 0) || (unitId >= this->currentAllocatedElemCount)) {
+	if (unitId < 0) { return false; }
+	if (unitId >= this->currentAllocatedElemCount) {
 		if (!this->ReallocArrayUsingGameGlobal()) {
 			return false;
 		}
@@ -78,6 +79,38 @@ bool UnitExtensionHandler::AddUnitExtension(STRUCT_UNIT_BASE *unit) {
 	}
 	this->allUnitExtensions[unitId].Init(unit);
 	return true;
+}
+
+
+// Add/initialize extension data for the unitId specified
+// If the unit extension is already initialized, this does nothing (does NOT overwrite previous information)
+// If the unit does NOT exist AND 0 <= unitId < global.seqUnitId, the extension IS created with NULL pointer and marked as "dead" unit.
+// Returns true if successful (including the case when unit is already initialized)
+bool UnitExtensionHandler::AddUnitExtension(long int unitId) {
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global) { return false; }
+	assert(global->IsCheckSumValid());
+	STRUCT_UNIT_BASE *unit = global->GetUnitFromId(unitId);
+	if (unit) {
+		return this->AddUnitExtension(unit);
+	} else {
+		if ((unitId < 0) || (unitId >= global->seqUnitId)) {
+			return false; // Unknown unit id regarding possible IDs. This unit can't be a dead unit ! Error case.
+		}
+		// Here we have a valid unitId but no matching unit: consider it existED but died
+		if (unitId >= this->currentAllocatedElemCount) {
+			// Make sure the array can handle this new unitId
+			if (!this->ReallocArrayUsingGameGlobal()) {
+				return false;
+			}
+		}
+		if (this->allUnitExtensions[unitId].isInitialized) {
+			// This unit is already known/initialized. Considered successful.
+			return true;
+		}
+		this->allUnitExtensions[unitId].InitForDeadUnit(unitId);
+		return true;
+	}
 }
 
 
@@ -140,5 +173,78 @@ bool UnitExtensionHandler::AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int i
 	STRUCT_INF_AI_UNIT_LIST_ELEM *elem = &infAI->unitElemList[indexOfAFreeSlot];
 	return this->allUnitExtensions[unitId].WriteAllInfAIElemInfo(elem);
 }
+
+
+// Remove element for provided unitId in specified player's InfAI elem list.
+// This does NOT use optimization from unitExtensions
+// For security, if unitExtension contains a pointer for the unit specified, the pointer is set to NULL and unitExtension invalidated.
+// To be used when improveAI is false.
+// Returns false in error cases only
+bool UnitExtensionHandler::RemoveInfAIElemForUnitWithoutOptimization(long int unitId, long int infAIPlayerId) {
+	// This mode is NOT optimized ! Uses classical search.
+	if (this->allUnitExtensions[unitId].isInitialized) {
+		this->allUnitExtensions[unitId].isInitialized = false;
+		this->allUnitExtensions[unitId].pUnit = NULL; // To make sure we don't keep an obsolete pointer
+	}
+	STRUCT_PLAYER *playerToUpdate = GetPlayerStruct(infAIPlayerId);
+	STRUCT_INF_AI *infAI = NULL;
+	if (playerToUpdate && playerToUpdate->IsCheckSumValid() && playerToUpdate->ptrAIStruct && playerToUpdate->ptrAIStruct->IsCheckSumValid()) {
+		infAI = &playerToUpdate->ptrAIStruct->structInfAI;
+	}
+
+	if (!infAI) { return true; }
+	STRUCT_INF_AI_UNIT_LIST_ELEM *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitId);
+	if (!elem) { return true; } // no elem to update: not an error case
+	return AOE_METHODS::LISTS::ResetInfAIUnitListElem(elem);
+}
+
+
+// Remove element for provided unitId in specified player's InfAI elem list.
+// This uses optimization from unitExtensions (if info is available)
+// You can use this even if improveAI is false
+// Returns false in error cases only
+bool UnitExtensionHandler::RemoveInfAIElemForUnit(long int unitId, long int infAIPlayerId) {
+	if ((unitId < 0) || (unitId >= this->currentAllocatedElemCount)) { return false; }
+	if (infAIPlayerId < 0) { return false; }
+
+	if (!ROCKNROR::IsImproveAIEnabled(infAIPlayerId)) {
+		// Restricted mode: only remove from infAI list, do not use unit extensions (just remove unit pointer if existing, in case this corresponds to unit death)
+		return this->RemoveInfAIElemForUnitWithoutOptimization(unitId, infAIPlayerId);
+	}
+
+	if (!this->allUnitExtensions[unitId].isInitialized) {
+		if (!this->AddUnitExtension(unitId)) {
+			// Error case (this overload should create the extension even if unit is dead and no longer exists)
+			return false;
+		}
+	}
+	
+	STRUCT_PLAYER *playerToUpdate = GetPlayerStruct(infAIPlayerId);
+	STRUCT_INF_AI *infAI = NULL;
+	if (playerToUpdate && playerToUpdate->IsCheckSumValid() && playerToUpdate->ptrAIStruct && playerToUpdate->ptrAIStruct->IsCheckSumValid()) {
+		infAI = &playerToUpdate->ptrAIStruct->structInfAI;
+	}
+	if (infAI) {
+		int index = this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId];
+		if ((index >= 0) && (index < infAI->unitElemListSize)) {
+			return AOE_METHODS::LISTS::ResetInfAIUnitListElem(&infAI->unitElemList[index]);
+		}
+	}
+	return true; // nothing to do here
+}
+
+
+// Remove element for provided unitId in all players' InfAI elem list.
+// This uses optimization from unitExtensions (if info is available)
+// You can use this even if improveAI is false
+// Returns true if successful for all players
+bool UnitExtensionHandler::RemoveAllInfAIElemForUnit(long int unitId) {
+	bool result = true;
+	for (int i = 0; i < 9; i++) {
+		result &= this->RemoveInfAIElemForUnit(unitId, i);
+	}
+	return result;
+}
+
 
 }

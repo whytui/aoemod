@@ -16,7 +16,7 @@ using namespace AOE_STRUCTURES;
 
 namespace CUSTOM_AI {
 
-
+	// RockNRor's specific AI class for a player
 	class CustomPlayerAI {
 	public:
 		CustomPlayerAI();

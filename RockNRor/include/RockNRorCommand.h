@@ -279,6 +279,7 @@ public:
 	void DisableWalls();
 
 	// Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
+	// *** OBSOLETE !!! ***
 	void OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem);
 
 	// Called at the end of showUnitCommandButtons

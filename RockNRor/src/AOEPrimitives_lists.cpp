@@ -9,7 +9,8 @@ namespace LISTS {
 
 
 // Reset an element in infAI.unitElemList. The slot will be re-used later by ROR. cf 0x4BA401.
-// Return true if the element was updated.
+// Return true if the element was updated (reset).
+// Please DO NOT USE directly. See unitExtensionHandler
 bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) {
 	if (!elem) { return false; }
 	elem->unitId = -1;
@@ -30,6 +31,7 @@ bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) 
 
 
 // Find a unitElem in infAI list, returns NULL if not found. Similar to 0x4BD710.
+// Please DO NOT USE directly. See unitExtensionHandler
 AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId) {
 	if (!infAI || !infAI->IsCheckSumValid() || (unitId < 0)) { return NULL; }
 	for (int i = 0; i < infAI->unitElemListSize; i++) {
@@ -45,6 +47,7 @@ AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(AOE_STRUCT
 // Please check for visibility to avoid "cheating"
 // Returns true if successful
 // This executes ROR's code
+// Please DO NOT USE directly. See unitExtensionHandler
 bool AddUpdateInfAIElemList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
 	if (!infAI || !infAI->IsCheckSumValid() || !unit || !unit->IsCheckSumValidForAUnitClass()) {
 		return false;
@@ -66,6 +69,7 @@ bool AddUpdateInfAIElemList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES
 // This does NOT manage "all my units" and "my buildings" lists. This does NOT manage unitElemList neither.
 // DATID and unitAIType (unitClass) are used for optimisation. You can provide -1 if you don't have the information.
 // Returns false if failed.
+// Please DO NOT USE directly. See unitExtensionHandler
 bool RemoveFromInfAIInfoList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId, short int DATID, AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType) {
 	if (!infAI || !infAI->IsCheckSumValid() || (unitId < 0)) { return false; }
 

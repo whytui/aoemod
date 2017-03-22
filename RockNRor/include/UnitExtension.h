@@ -21,7 +21,7 @@ class UnitExtension {
 public:
 	UnitExtension();
 
-	bool isInitialized;
+	bool isInitialized; // True if this unitExtension has been initialized with correct unit data == unit is "known" by extension system.
 	bool unitDied; // True if unit existed at some point (in this game), and is no longer. Do NOT set this when unit is converted !
 	long int unitId; // same as pUnit->unitInstanceId, -1 if not set/not known.
 	STRUCT_UNIT_BASE *pUnit; // pointer to actual unit structure
@@ -39,6 +39,10 @@ public:
 	// Init this object using provided unit.
 	// Does nothing if "this" was already initialized (asserts that unit pointer IS the same as the one already known)
 	void Init(STRUCT_UNIT_BASE *unit);
+
+	// Init this object, considering the unit no longer exists (DEAD unit).
+	// If "this" extension is already initialized, this will set the flag "unitDied" to true.
+	void InitForDeadUnit(long int unitId);
 
 	// Updates the specified infAI element with "this" unit information.
 	// Returns true if successful
