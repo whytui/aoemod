@@ -178,7 +178,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_BASE **ptrUnitPointersList; // +88. pointer to Array of unit struct pointers. Similar to 0x7D2054 global variable.
 		unsigned long int unknown_08C;
 		// +0x90
-		long int unitPointersListSize; // Size of the ptrUnitPointersList Array
+		long int unitPointersListSize; // Size (elem count) of the ptrUnitPointersList Array
 		unsigned long int *unknown_094; // +94. array of DWORDS
 		unsigned long int unknown_098;
 		long int unknown_094_ListSize; // Size of x+0x94 array. Default=1000.

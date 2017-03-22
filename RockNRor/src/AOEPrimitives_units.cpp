@@ -83,6 +83,24 @@ float GetMaxRange(STRUCT_UNIT_BASE *unit) {
 	return ((STRUCT_UNITDEF_ATTACKABLE*)unit->unitDefinition)->maxRange;
 }
 
+// Securely gets attack amount (only applicable to attackable (type50))
+// This is analog to "EDX+0x108" call on Unit (but "EDX+0x108" call returns a float in ST, even if attack data are INTs)
+long int GetAttacksAmount(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->DerivesFromAttackable()) {
+		return 0;
+	}
+	STRUCT_UNITDEF_ATTACKABLE *unitDef = (STRUCT_UNITDEF_ATTACKABLE*)unit->unitDefinition;
+	int atkCount = unitDef->attacksCount;
+	long int result = 0;
+	for (int i = 0; i < atkCount; i++) {
+		short int thisAmount = unitDef->ptrAttacksList[i].amount;
+		if (thisAmount > 0) {
+			result += thisAmount;
+		}
+	}
+	return result;
+}
+
 // Returns if unit is ready to attack, regarding reload time and last attack execution.
 bool IsReadyToAttack(STRUCT_UNIT_BASE *unit) {
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->DerivesFromAttackable()) {

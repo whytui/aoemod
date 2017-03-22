@@ -1253,6 +1253,7 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 void RockNRorCommand::InitMyGameInfo() {
 	ROCKNROR::crInfo.ResetVariables();
 	CUSTOM_AI::customAIHandler.ResetAllInfo(); // Reset all CusotmROR AI internal structures/info
+	ROCKNROR::unitExtensionHandler.ResetAllInfo();
 	
 	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 	// Prevent 0% speed at game startup (occurs because of rounding in registry saved value)
@@ -1727,6 +1728,7 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 			AOE_STRUCTURES::STRUCT_INF_AI *loopInfAI = &loopPlayer->ptrAIStruct->structInfAI;
 			assert(loopInfAI->IsCheckSumValid());
 			// Fix (or remove) unit from list for each player. We MUST NOT let a bad playerId be stored in unit elem list.
+#pragma message("OnUnitChangeOwner_fixes: FIX THIS and use unitExtension instead !")
 			UpdateOrResetInfAIUnitListElem(loopInfAI, FindInfAIUnitElemInList(loopInfAI, targetUnit->unitInstanceId));
 		}
 	}
@@ -1862,6 +1864,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 		for (long int i = 0; i < size; i++) {
 			AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[i];
 			if (curElem->unitId == unit->unitInstanceId) {
+#pragma message("OnPlayerRemoveUnit : Remove this part cf unitExtension")
 				UpdateOrResetInfAIUnitListElem(infAI, curElem);
 			}
 		}

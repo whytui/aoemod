@@ -38,7 +38,7 @@ namespace AOE_STRUCTURES {
 		short int unused_0E;
 		// 0x10
 		long int attackAttempts; // +10. Number of time the unit has been selected as "main target".
-		char unknown_14;
+		char unknown_14; // Default 0 ? Never seen this set to anything else !
 		char unused_15;
 		short int unused_16;
 		float attack;

@@ -183,6 +183,8 @@
     <ClInclude Include="include\UI_utilities.h" />
     <ClInclude Include="include\UnitCustomMethods.h" />
     <ClInclude Include="include\unitDefHandling.h" />
+    <ClInclude Include="include\UnitExtension.h" />
+    <ClInclude Include="include\UnitExtensionHandler.h" />
     <ClInclude Include="include\UnitGroupAI.h" />
     <ClInclude Include="include\unitHandling.h" />
     <ClInclude Include="include\unitShortcuts.h" />
@@ -258,6 +260,8 @@
     <ClCompile Include="src\traceMessages.cpp" />
     <ClCompile Include="src\UnitCustomMethods.cpp" />
     <ClCompile Include="src\unitDefHandling.cpp" />
+    <ClCompile Include="src\UnitExtension.cpp" />
+    <ClCompile Include="src\UnitExtensionHandler.cpp" />
     <ClCompile Include="src\unitGroupAI.cpp" />
     <ClCompile Include="src\unitHandling.cpp" />
     <ClCompile Include="src\unitTargeting.cpp" />

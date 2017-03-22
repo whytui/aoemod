@@ -52,6 +52,7 @@
 #include "PlayerCustomMethods.h"
 #include "CustomPopupSystem.h"
 #include "SimpleEditText.h"
+#include "UnitExtensionHandler.h"
 
 #pragma once
 

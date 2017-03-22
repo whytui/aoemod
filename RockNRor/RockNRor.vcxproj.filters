@@ -321,6 +321,12 @@
     <ClInclude Include="include\GameEventHandler.h">
       <Filter>Fichiers d%27en-tête\RockNRorFeatures</Filter>
     </ClInclude>
+    <ClInclude Include="include\UnitExtension.h">
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UnitExtensionHandler.h">
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\tinyxml\tinystr.cpp">
@@ -535,6 +541,12 @@
     </ClCompile>
     <ClCompile Include="src\GameEventHandler.cpp">
       <Filter>Fichiers sources\RockNRorFeatures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UnitExtension.cpp">
+      <Filter>Fichiers sources\RockNRorBase</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UnitExtensionHandler.cpp">
+      <Filter>Fichiers sources\RockNRorBase</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

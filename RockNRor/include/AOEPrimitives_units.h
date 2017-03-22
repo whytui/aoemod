@@ -41,6 +41,10 @@ bool GetPierceArmor(STRUCT_UNIT_TRAINABLE *unit, short int &pierceDisplayedValue
 // This is analog to "EDX+0x10C" call on Unit.
 float GetMaxRange(STRUCT_UNIT_BASE *unit);
 
+// Securely gets attack amount (only applicable to attackable (type50))
+// This is analog to "EDX+0x108" call on Unit (but "EDX+0x108" call returns a float in ST, even if attack data are INTs)
+long int GetAttacksAmount(STRUCT_UNIT_BASE *unit);
+
 // Returns if unit is ready to attack, regarding reload time and last attack execution.
 bool IsReadyToAttack(STRUCT_UNIT_BASE *unit);
 

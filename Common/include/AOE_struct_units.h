@@ -137,7 +137,7 @@ namespace AOE_STRUCTURES {
 	// +0xC4 = unit.releaseBeingWorkedOn(pUnit)
 	// +0xC8 = unit.isMoving()
 	// +0xCC = unit.getActionTarget()
-	// +0xD0 = ?? 
+	// +0xD0 = unit.doEnterInTransport(pTransportUnit). ("enter_obj") Actually enters a transport: "disappear", add in transport's transported units... Base->commandable=0x4AA940. Attackable=0x426B80.
 	// +0xD8 = unit.addVisibilityTo(playerToImpact, flagAboutSizeRadius???, (int)distance). Distance=-1=>use_LOS
 	// +0xDC = unit.removeVisibilityFor(playerToImpact, flagAboutSizeRadius???, (int)distance). To modify a unit LOS, call this, change LOS, then call unit.addVisibilityTo, see 0x4ACC81.
 	// +0xE8 = unit.isUnderAttack()
@@ -225,13 +225,11 @@ namespace AOE_STRUCTURES {
 		long int unitInstanceId; // Can be negative (temporary units like smoke). Can be something else (or unused?) (seen for flare, type=10)
 		STRUCT_UNITDEF_BASE *unitDefinition; // +8. Unit definition (model). Living units can have a dedicated unit definition.
 		STRUCT_PLAYER *ptrStructPlayer;
-		// 0x10
 		STRUCT_GRAPHICS *pCurrentGraphics; // +10. Note: contains speed multiplier to handle altitude change !
 		unsigned long int unknown_014;
 		STRUCT_ACTIVE_SPRITE_LIST *spriteList; // ptr to struct 00 30 54 00 - size=0x0C Related to graphics
-		STRUCT_GAME_MAP_TILE_INFO *myTile; // +1C. To confirm. +5=byte=altitude&terrain bits, see TERRAIN_BYTE class
-		// 0x20
-		STRUCT_UNIT_BASE *transporterUnit; // Transport boat the unit is in
+		STRUCT_GAME_MAP_TILE_INFO *myTile; // +1C. See TERRAIN_BYTE class. Can be NULL when unit is inside a transport.
+		STRUCT_UNIT_BASE *transporterUnit; // +20. Transport boat the unit is in
 		STRUCT_PER_TYPE_UNIT_LIST_LINK *transportedUnits; // +24. List of units in the transport (if "this" is a transport)
 		short int unknown_028;
 		short int unknown_02A; // for graphics ?
@@ -264,9 +262,9 @@ namespace AOE_STRUCTURES {
 		long int terrainZoneInfoIndex; // +7C. Index of terrainZoneInfo in terrainZoneInfoLink array. -1 means not initialized yet.
 		// 0x80
 		float unknown_080;
-		char unknown_084; // related to movement ? "isMapInfoUpToDateForThisUnit" ?
-		char unknown_085; // related to movement ? Previous value of +84 ?
-		char isBeingAttacked; // +86. For map blinking (+other treatments?). This is constantly reset and re-computed in "unit.timerUpdate(?)" 0x426BF0 treatments.
+		char unknown_084; // "isMapInfoUpToDateForThisUnit" ?
+		char unknown_085; // Previous value of +84.
+		char isBeingAttacked; // +86. For map blinking (+other treatments?). This is constantly reset and re-computed in "unit.timerUpdate()" 0x426BF0 treatments.
 		char unknown_087;
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNIT_BASE); }
@@ -466,8 +464,8 @@ namespace AOE_STRUCTURES {
 		char unknown_17D; // orientation index ?
 		char unknown_17E[2];
 
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_UNIT_MOVABLE); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_MOVABLE); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNIT_MOVABLE); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_MOVABLE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_MOVABLE) == 0x180, "STRUCT_UNIT_MOVABLE size");
 
@@ -480,8 +478,8 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_ACTION_INFO *ptrActionInformation; // +184. Useful to retrieve unit's action.
 		long int rightClickActionCounter_unsure; // +188. Incremented each time a right-click action is done by player ?
 
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_UNIT_COMMANDABLE); }
-		bool IsTypeValid() { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_COMMANDABLE); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNIT_COMMANDABLE); }
+		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_COMMANDABLE); }
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE) == 0x18C, "STRUCT_UNIT_COMMANDABLE size");
 

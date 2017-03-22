@@ -151,7 +151,7 @@ namespace AOE_STRUCTURES
 		short int useUndeadStatus; // +024. If 1, then unit status 6 is used. Otherwise, units die as soon as their own resources are depleted. ("undead flag")
 		short int totalHitPoints; // +026. Including upgrades !
 		float lineOfSight; // +028
-		char garrisonCapacity; // +02C
+		char garrisonCapacity; // +02C. Total number of units this unit can contain (transport).
 		char unused_02D[3];
 		// 0x30
 		float sizeRadiusY; // For Y axis
