@@ -24,27 +24,26 @@ namespace AOE_STRUCTURES {
 	// Organized as a (big, initially 0x1F4 elements) array in infAI structure
 	// Empty slots are re-used when adding an entry.
 	// In standard games, entries are NEVER reset !!!! which leads to some very bad behavior (for example, to evaluate if panic mode is needed)
+	// See unitExtensions for optimizations/fixes.
 	class STRUCT_INF_AI_UNIT_LIST_ELEM {
 	public:
-		long int unitId; // -1 means free (empty) slot. Bug in 4C41BD ?
-		short int unitDATID; // +04
+		long int unitId; // -1 means free (empty) slot. Bug in 0x4C41BD, fixed by RockNRor (FixGetUnitStructInTargetSelectionLoop).
+		short int unitDATID; // +04. Unit definition ID.
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitClass; // +06 - short int
-		unsigned char posY; // +08
-		unsigned char posX; // +09
-		unsigned char posZ;
+		unsigned char posY; // +08. Last known Y position
+		unsigned char posX; // +09. Last known X position
+		unsigned char posZ; // +0A.
 		char playerId; // 0x0B
-		//float HP; // +C. unit health points
-		short int HP; // +C. unit health points
+		short int HP; // +C. unit health points (last known)
 		short int unused_0E;
 		// 0x10
 		long int attackAttempts; // +10. Number of time the unit has been selected as "main target".
-		char unknown_14; // Default 0 ? Never seen this set to anything else !
+		char unknown_14; // Default 0 ? Never seen this set to anything else ! Some unused information ?
 		char unused_15;
 		short int unused_16;
-		float attack;
-		float reloadTime1;
-		// 0x20
-		float maxRange;
+		float attack; // +18. Float, but computed from INTs (from unit definition)
+		float reloadTime1; // +1C
+		float maxRange; // +20
 	};
 
 

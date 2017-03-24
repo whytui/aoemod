@@ -50,7 +50,7 @@ namespace AOE_STRUCTURES
 		AOE_CONST_FUNC::UNIT_ACTION_ID commandType; // +6
 		short int classId; // +08
 		short int unitDefId; // +0A. A unit definition id, or -1 if not specified.
-		char selectionEnabler; // +0C // combat_level?
+		char selectionEnabler; // +0C. combat_level? Used in alpha version to allow unit to select its target ?
 		char unknown_0D; // combat_level_flag?
 		short int terrainId; // +0E.
 		// 0x10
@@ -70,15 +70,15 @@ namespace AOE_STRUCTURES
 		char unknown_29; // unused ? "search_wait_time" ?
 		char unknown_2A; // unused ? "work_flag" ?
 		char unknown_2B; // unused ? " work_flag2" ?
-		float unknown_2C;
+		float scaringRadius; // +2C. Search wait time ??
+
 		// 0x30
 		short int plunderSource; // What is this ? 0=from resource, 1=from player (AGE3 tooltip)
 		short int unknown_32;
-		unsigned long int *ptrToolGraphic; // graphics NOT carrying resource "move_sprite"
-		unsigned long int *ptrProceedingGraphic; // +38. "work_sprite"
-		unsigned long int *ptrActionGraphic; // +3C. "work_sprite2"
-		// 0x40
-		unsigned long int ptrCarryingGraphic; // graphics carrying resource
+		STRUCT_GRAPHICS *ptrMovingGraphic; // +34. Moving and NOT carrying resource graphics ("move_sprite")
+		STRUCT_GRAPHICS *ptrProceedingGraphic; // +38. "work_sprite"
+		STRUCT_GRAPHICS *ptrActionGraphic; // +3C. "work_sprite2"
+		STRUCT_GRAPHICS *ptrCarryingGraphic; // +40. graphics carrying resource
 		STRUCT_DAT_SOUND *executionSound; // +44 "work_sound"
 		STRUCT_DAT_SOUND *resourceDepositSound; // +48 "work_sound2"
 		// END of structure
@@ -179,7 +179,7 @@ namespace AOE_STRUCTURES
 		// 0x60
 		float editorRadiusX; // for X axis "construction_radius". Used if placementTerrainId>=0, for example ?
 		UNIT_HILL_PLACEMENT_MODE hillMode; //  +64. 0=no restriction, 2=flat land only. "elevation_flag"
-		char visibleInFog; // +65. Can be 0,1, 3 ("inverted visibility" in AGE3, but not exact. smoke has 3). >0 = always visible for others. Note: this never provides visibility, unit is not selectable, but is visible (greyed) through fog (like buildings)
+		char visibleInFog; // +65. Can be 0,1, 3 ("inverted visibility" in AGE3, but not exact. smoke has 3). >0 = always visible for others. Note: this never provides visibility, unit is not selectable, but is visible (greyed) through fog (like artefacts). Warning: buildings use another system (dopplegangers)
 		short int terrainRestriction; // +66
 		char flyMode; // +68. "movement_type"
 		char unknown_069;

@@ -15,6 +15,7 @@ namespace CUSTOM_AI {
 
 	namespace AI_CONST {
 		const unsigned long int delayForVillagerFixes_ms = 3000; // Interval in milliseconds between 2 executions of villager fixes (stuck villagers, etc)
+		const float maxAllowedPredatorAnimalSpeedForHunting = 1.1f; // Maximum animal speed (including "attack move" speed) AI villagers are allowed to hunt deliberately.
 	}
 
 

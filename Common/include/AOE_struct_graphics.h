@@ -44,18 +44,18 @@ namespace AOE_STRUCTURES
 	public:
 		char slpName[0x0D];
 		char unused_0D[3];
-		long int slpId; // 0x10
-		char unknown_14; // AGE3 "unknown1"
+		long int slpId; // +10
+		char unknown_14; // +14.?
 		char unknown_15;
 		short int unknown_16; // type?
-		unsigned long int *unknown_18;
+		unsigned long int *unknown_18; // Backpointer Unit???
 		unsigned long int unknown_1C;
 		unsigned long int *unknown_20;
 		unsigned long int *unknown_24;
 		char unknown_28; // age3 "unknown2". Priority ?
 		char layer; // +29
 		short int playerColor; // +2A. Read as a WORD, but actually 2 (byte) values ?
-		char replayMode; // +2C. A boolean value. If true, the graphic animation loops ?
+		char transparentPickMode; // +2C. 0=can't select. 1=select on pixels. 2=select on box.
 		char unknown_2D;
 		short int coordinates[4]; // +2E/30/32/34.
 		short int deltaCount; // +36
@@ -66,11 +66,12 @@ namespace AOE_STRUCTURES
 		short int unknown_42; // type?
 		STRUCT_GRAPHIC_ATTACK_SOUND_INFO *attackSoundsArray; // +44. Number of elements is angleCount ! It is only set if attackSoundUsed is true (NULL otherwise)
 		char graphicName[0x15]; // +48. Long name
-		char unused_5D[3];
+		char unused_5D;
+		short int framesPerAngle; // +5E.
 		short int angleCount; // +60. Defines number of elements in attackSoundsArray (if attackSoundUsed=1). angleCount must be >=8 to allow valid movement. Otherwise, possible unit movement orientations will be limited !
 		short int unknown_62;
 		float speedMultiplier; // +64. This is used to make unit walk faster when descending altitude, etc
-		float frameRate; // +68
+		float frameDuration; // +68
 		float replayDelay; // +6C
 		char sequenceType; // +70
 		char unknown_71;

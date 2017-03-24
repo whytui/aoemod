@@ -23,7 +23,7 @@ namespace UNIT {
 
 /* *** some basic getters *** */
 
-// All unit-classes-compatible getter for speed.
+// All unit-classes-compatible getter for (maximum) speed cf unit definition. NOT current speed !
 float GetSpeed(STRUCT_UNIT_BASE *unit);
 
 // All unit-classes-compatible getter for reload time.

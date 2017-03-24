@@ -681,7 +681,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 	STRUCT_AI *mainAI = infAI->ptrMainAI;
 	assert(mainAI && mainAI->IsCheckSumValid());
 	if (!mainAI || !mainAI->IsCheckSumValid()) { targetInfo->targetSearchInProgress = 0; return NULL; }
-	STRUCT_PLAYER *player = mainAI->player;
+	STRUCT_PLAYER *player = mainAI->player; // "actor" player
 	assert(player && player->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid()) { targetInfo->targetSearchInProgress = 0; return NULL; }
 	STRUCT_UNIT_BASE *groupLeader = global->GetUnitFromId(unitGroup->commanderUnitId);
@@ -842,7 +842,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 				}
 			}
 			STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[curIndex];
-#pragma message("We should check that playerId is correct: may have changed due to a conversion. Beware fog-visibility too")
+			// curElem->playerId should be always correct (at least for type50+) thanks to RockNRor fixes (update on conversion if visible + updates when visibility changes)
 			if (curElem->playerId != targetPlayerId) {
 				continue;
 			}
@@ -854,12 +854,12 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 				continue;
 			}
 			assert(curUnit->unitDefinition && curUnit->unitDefinition->IsCheckSumValidForAUnitClass());
+			
 			// 0x4C05D1
 			if (!isBoat && IsWaterUnit(curUnit->unitDefinition->unitAIType)) {
 				continue; // do not attack boats with non-water unit groups
 			}
 			// 0x4C05EA
-			// CHEATING : unit may not be visible
 			long int curUnitTerrainZoneId = groupLeader->GetTerrainZoneIdAtPos((long int)curUnit->positionX, (long int)curUnit->positionY);
 			// 0x4C060D. Is the !isBoat condition correct here ?
 			if (!isBoat && (curElem->unitDATID == CST_UNITID_DOCK) && (leaderTerrainZoneId != curUnitTerrainZoneId)) {
@@ -870,20 +870,35 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 			if (curElem->unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall) {
 				continue;
 			}
-			// 0x4C0669
-			long int diffX = curElem->posX - (long int)curUnit->positionX;
-			long int diffY = curElem->posY - (long int)curUnit->positionY;
-			if (diffX < 0) { diffX = -diffX; }
-			if (diffY < 0) { diffY = -diffY; }
-			bool consideredVisible = false;
-			if ((diffX <= 5) && (diffY <= 5)) {
-				consideredVisible = true; // ah!!! cheating
+
+			bool useOriginalCodeWithSmallCheat = true;
+
+			if (useOriginalCodeWithSmallCheat) {
+				// 0x4C0669 = code that checks visibility with a bit of cheating (original code)
+				long int diffX = curElem->posX - (long int)curUnit->positionX;
+				long int diffY = curElem->posY - (long int)curUnit->positionY;
+				if (diffX < 0) { diffX = -diffX; }
+				if (diffY < 0) { diffY = -diffY; }
+				bool consideredVisible = false;
+				if ((diffX <= 5) && (diffY <= 5)) {
+					consideredVisible = true; // ah!!! cheating
+				} else {
+					consideredVisible = PLAYER::IsFogVisibleForPlayer(player, (long int)curUnit->positionX, (long int)curUnit->positionY);
+				}
+				if (!consideredVisible) {
+					continue;
+				}
 			} else {
-				consideredVisible = PLAYER::IsFogVisibleForPlayer(player, (long int)curUnit->positionX, (long int)curUnit->positionY);
+				// Code that checks visibility without cheating :
+				bool unitCantMove = (AOE_METHODS::UNIT::GetSpeed(curUnit) == 0);
+				bool elemIsVisibleNow = (curUnit->unitDefinition->visibleInFog > 0) ||
+					unitCantMove ||
+					((curElem->posX >= 0) && (curElem->posY >= 0) && PLAYER::IsFogVisibleForPlayer(player, curElem->posX, curElem->posY));
+				if (!elemIsVisibleNow) {
+					continue; // removes cheating from original game !
+				}
 			}
-			if (!consideredVisible) {
-				continue;
-			}
+
 			// 0x4C06D6
 			if (isPriest && !AOE_METHODS::UNIT::CanConvert(groupLeader, curElem->unitId)) {
 				continue;
@@ -1087,6 +1102,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 // If successful, returns a pointer to the selected STRUCT_INF_AI_UNIT_LIST_ELEM element.
 // If successful, unitGroup targets array contains only 1 target (in most cases... to check in case when units block the way to main target)
 // Returns false if found nothing OR if search could not be completed in time.
+// *********** DO NOT MODIFY THIS METHOD *****************
 #ifdef _DEBUG
 STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
@@ -1284,7 +1300,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 			}
 			// 0x4C0576
 			STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[curIndex];
-#pragma message("We should check that playerId is correct: may have changed due to a conversion. Beware fog-visibility too")
+//#pragma message("We should check that playerId is correct: may have changed due to a conversion. Beware fog-visibility too")
 			if (curElem->playerId != targetPlayerId) {
 				continue;
 			}

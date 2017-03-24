@@ -20,9 +20,7 @@ bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT 
 		// - unit.definition.unitAIType is one of the "important" AItypes defined in actorUnit.activity.importantAITypes
 		// Which means, according to the unit that "sees", some units may be ignored ! Especially all gaia units.
 
-		// TODO: overwrite the "insert in infai" treatment
-
-		// Remark: here the "temp results" arrays contain nearby units (caller is looping on it)
+		// Remark: here the "temp results" arrays contain nearby units (caller is looping on it) ; but you should NO use it ;)
 		/*int n = GetElemCountInUnitListTempSearchResult(PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY);
 		STRUCT_NEARBY_UNIT_INFO *e = GetUnitListTempSearchResult(PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY, (resultIndex));*/
 
@@ -36,6 +34,17 @@ bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT 
 			return false;
 		}
 		COMBAT::OnSeeNearbyUnit(player, myUnit, seenUnit);
+		if (seenUnit->unitDefinition && seenUnit->DerivesFromAttackable()) {
+			// This is an optimization
+			// Prevent ROR from updating infAI list: unitExtensions+visibility change hooks handle this (and are better)
+			return true;
+		} else {
+			return false; // Non-type50 are not handled by visibility change hooks (as those units do NOT have the visibility back-pointer updates).
+		}
+	}
+
+	if (notifyEvent.eventId == AOE_CONST_INTERNAL::EVENT_TOO_CLOSE_TO_SHOOT) {
+		// TODO
 	}
 
 	return false; // default: let ROR code be run
@@ -58,10 +67,7 @@ long int ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIV
 	static std::set<AOE_CONST_INTERNAL::GAME_EVENT_TYPE> test;
 	AOE_CONST_INTERNAL::GAME_EVENT_TYPE notificationTaskId = notifyEvent->eventId;
 	test.insert(notificationTaskId);
-	// TODO: CST_ATI_NOTIFY_TOO_CLOSE_TO_SHOOT : search another target or move away ?
-	/*if (argNotificationId == 0x20D) {
-	AOE_METHODS::CallWriteCenteredText("20D");
-	}*/
+
 	if (!activity || !activity->ptrUnit || !activity->ptrUnit->ptrStructPlayer) { return 3; } // value to return ??
 	std::string msg = "p#";
 	msg += std::to_string(activity->ptrUnit->ptrStructPlayer->playerId);
@@ -95,6 +101,7 @@ long int ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIV
 	case GAME_EVENT_TYPE::EVENT_TOO_CLOSE_TO_SHOOT: // 1FE
 	case GAME_EVENT_TYPE::EVENT_UNIT_CAPTURED: // 20B
 	case GAME_EVENT_TYPE::EVENT_RELEASE_BEING_WORKED_ON: // >0x258 but still a notification !
+	case GAME_EVENT_TYPE::EVENT_NO_DROP_SITE:
 		// Usual cases...
 		break;
 	case GAME_EVENT_TYPE::EVENT_UNSURE_ATTACK: //0x258 (should not be a notification?) There is code for this... dead (wrong?obsolete?)code ?

@@ -172,9 +172,29 @@ bool EconomyAI::IsAITargetableResource(STRUCT_UNIT_BASE *unit) {
 	// Custom cases (by default, here we should always return false)
 	if (unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPredatorAnimal) {
 		// Allow slow predator animals (can be hunted - almost - safely)
-		STRUCT_UNITDEF_FLAG *unitDef = (STRUCT_UNITDEF_FLAG *)unit->unitDefinition;
-		if (!unitDef->DerivesFromFlag()) { return false; }
-		return (unitDef->speed <= 1.0f) && (unitDef->resourceCapacity > 0); // ignore animals without food, like birds
+
+		STRUCT_UNITDEF_ATTACKABLE *unitDef = (STRUCT_UNITDEF_ATTACKABLE *)unit->unitDefinition;
+		// Animals that can't attack (not type50+ / weird for predators) and no-food animals (birds) = NOT targetable as resource
+		if (!unitDef->DerivesFromAttackable() || (unitDef->resourceCapacity <= 0)) {
+			return false;
+		}
+		float baseSpeed = unitDef->speed;
+		float maxSpeed = unitDef->speed;
+		if (unitDef->ptrUnitCommandHeader && unitDef->ptrUnitCommandHeader->IsCheckSumValid()) {
+			for (int i = 0; i < unitDef->ptrUnitCommandHeader->commandCount; i++) {
+				if (unitDef->ptrUnitCommandHeader->ptrCommandArray[i]->commandType == UNIT_ACTION_ID::CST_IAI_UNKNOWN_7) {
+					STRUCT_UNIT_COMMAND_DEF *cmd = unitDef->ptrUnitCommandHeader->ptrCommandArray[i];
+					if (cmd->ptrMovingGraphic) {
+						float tmpSpeed = baseSpeed * cmd->ptrMovingGraphic->speedMultiplier;
+						if (tmpSpeed > maxSpeed) {
+							maxSpeed = tmpSpeed;
+						}
+					}
+				}
+			}
+		}
+
+		return (maxSpeed < AI_CONST::maxAllowedPredatorAnimalSpeedForHunting) && (unitDef->resourceCapacity > 0); // ignore animals without food, like birds
 	}
 	return false;
 }
