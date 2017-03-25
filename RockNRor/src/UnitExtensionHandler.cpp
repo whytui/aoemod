@@ -227,6 +227,8 @@ bool UnitExtensionHandler::RemoveInfAIElemForUnit(long int unitId, long int infA
 	if (infAI) {
 		int index = this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId];
 		if ((index >= 0) && (index < infAI->unitElemListSize)) {
+			// don't forget to remove the "cached" index because ROR will re-use the slot for another unit
+			this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = -1;
 			return AOE_METHODS::LISTS::ResetInfAIUnitListElem(&infAI->unitElemList[index]);
 		}
 	}

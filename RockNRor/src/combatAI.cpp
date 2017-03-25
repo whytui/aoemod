@@ -689,6 +689,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 			nextOrderTargetId = activity->orderQueue[0].targetUnitId;
 		}
 		bool canInterrupt = (nextOrder == UNIT_AI_ORDER::CST_ORDER_NONE) || (nextOrder == UNIT_AI_ORDER::CST_ORDER_ATTACK);
+		// TODO: found cases where task is -1 but currently attacking...
 		if (canInterrupt && (activity->currentTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_ATTACK)) {
 			// If attacking a low-priority target (non-tower building) and military unit/villager is around, switch
 			bool currentTargetIsImportant = false;
