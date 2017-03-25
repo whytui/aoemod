@@ -670,6 +670,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 
 	// The goal here is to take into account 'seen' unit and possible change target if necessary
 	bool isNeutralOrEnemy = (player->ptrDiplomacyStances[otherPlayer->playerId] != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY);
+	assert(isNeutralOrEnemy); // because ROR's EVENT_PLAYER_SEE_UNIT handler collect neutral/enemy units only
 	bool seenUnitCanAttack = UnitDefCanAttack(seenUnitDef, false);
 	bool isWeakBuilding = (seenUnitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) && (seenUnit->remainingHitPoints < 2); // So that my unit will try to destroy new buildings with 1 HP
 	bool isImmobileLivingUnit = false;
@@ -678,6 +679,8 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 		isImmobileLivingUnit = (seenUnitAttackable->currentMovementSpeed == 0);
 	}
 	bool seenUnitIsImportant = seenUnitCanAttack || isWeakBuilding || isImmobileLivingUnit;
+	STRUCT_ACTION_ATTACK *action = (STRUCT_ACTION_ATTACK*)GetUnitAction(actorUnit);
+	if (action && !action->IsCheckSumValid()) { action = NULL; } // not an *attack* action: ignore
 
 	STRUCT_UNITDEF_BASE *myUnitDef = actorUnit->unitDefinition;
 	if (isNeutralOrEnemy && seenUnitIsImportant && UnitDefCanAttack(myUnitDef, false) && actorUnit->currentActivity && actorUnit->currentActivity->IsCheckSumValid()) {
@@ -690,10 +693,10 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 		}
 		bool canInterrupt = (nextOrder == UNIT_AI_ORDER::CST_ORDER_NONE) || (nextOrder == UNIT_AI_ORDER::CST_ORDER_ATTACK);
 		// TODO: found cases where task is -1 but currently attacking...
-		if (canInterrupt && (activity->currentTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_ATTACK)) {
+		if (canInterrupt && action && (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK)) {
 			// If attacking a low-priority target (non-tower building) and military unit/villager is around, switch
 			bool currentTargetIsImportant = false;
-			STRUCT_ACTION_ATTACK *action = (STRUCT_ACTION_ATTACK*)GetUnitAction(actorUnit);
+			
 			if (action && action->IsCheckSumValid() && (action->actionTypeID == action->GetExpectedInternalActionId())) {
 				STRUCT_UNIT_BASE *currentTarget = action->targetUnit;
 				if (!currentTarget) {

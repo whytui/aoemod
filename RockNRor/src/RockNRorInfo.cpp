@@ -446,7 +446,8 @@ static bool _DEBUG_improveThisPlayer(int playerId) {
 
 
 // Use this API to get "do we improve AI" information. This takes care of RockNRor configuration + possible custom rules.
-// So we can add custom rules for debugging
+// Remark: AI can be currently disabled for a player, but "improved AI" will still remain true.
+// Useful to add custom rules for debugging
 bool ROCKNROR::IsImproveAIEnabled(int playerId) {
 #ifdef _DEBUG
 	return (ROCKNROR::crInfo.configInfo.improveAILevel > 0) && _DEBUG_improveThisPlayer(playerId);

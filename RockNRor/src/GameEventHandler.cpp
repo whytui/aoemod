@@ -6,41 +6,18 @@ namespace ROCKNROR {
 namespace GAME_EVENTS {
 ;
 
+// This method is called for each player.NotifyEvent(...) call = it receives all event notifications at player level.
 // Returns true if event is handled and ROR code must NOT be executed
 // Returns false if ROR code should be executed normally (default case)
-// Cf 0x413108: only neutral/enemy units may trigger this event. Also, only the unit classes declared as 'important' in unitAI can trigger this.
 bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT notifyEvent) {
 	assert(player && player->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid()) { return false; }
 
 	if (notifyEvent.eventId == AOE_CONST_INTERNAL::EVENT_PLAYER_SEE_UNIT) {
-		// Note: the units that are detected via this event are limited:
-		// - unit.status <=2 (the temp results contains other units(?), but this is filtered in 0x41312B before sending EVENT_PLAYER_SEE_UNIT.
-		// - neutral and enemy units only (so, not gaia !)
-		// - unit.definition.unitAIType is one of the "important" AItypes defined in actorUnit.activity.importantAITypes
-		// Which means, according to the unit that "sees", some units may be ignored ! Especially all gaia units.
-
-		// Remark: here the "temp results" arrays contain nearby units (caller is looping on it) ; but you should NO use it ;)
-		/*int n = GetElemCountInUnitListTempSearchResult(PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY);
-		STRUCT_NEARBY_UNIT_INFO *e = GetUnitListTempSearchResult(PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY, (resultIndex));*/
-
 		long int myUnitId = notifyEvent.targetUnitId;
 		long int seenUnitId = notifyEvent.genericParam4;
-		//long int argPlayerId = notifyEvent.actorUnitId;
-		//long int myPlayerId = player->playerId;
-		STRUCT_UNIT_BASE *seenUnit = GetUnitStruct(seenUnitId);
-		STRUCT_UNIT_BASE *myUnit = GetUnitStruct(myUnitId);
-		if (!seenUnit || !myUnit || !seenUnit->IsCheckSumValidForAUnitClass() || !myUnit->IsCheckSumValidForAUnitClass()) {
-			return false;
-		}
-		COMBAT::OnSeeNearbyUnit(player, myUnit, seenUnit);
-		if (seenUnit->unitDefinition && seenUnit->DerivesFromAttackable()) {
-			// This is an optimization
-			// Prevent ROR from updating infAI list: unitExtensions+visibility change hooks handle this (and are better)
-			return true;
-		} else {
-			return false; // Non-type50 are not handled by visibility change hooks (as those units do NOT have the visibility back-pointer updates).
-		}
+		// long int argPlayerId = notifyEvent.actorUnitId; // Not sure of the role of this value
+		PlayerNotifySeeUnit(player, myUnitId, seenUnitId);
 	}
 
 	if (notifyEvent.eventId == AOE_CONST_INTERNAL::EVENT_TOO_CLOSE_TO_SHOOT) {
@@ -122,6 +99,45 @@ long int ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIV
 		break;
 	}
 	return 2;
+}
+
+
+// Handler for EVENT_PLAYER_SEE_UNIT event.
+// Returns true if event is handled and ROR code must NOT be executed
+// Returns false if ROR code should be executed normally (default case)
+bool PlayerNotifySeeUnit(STRUCT_PLAYER *player, long int myUnitId, long int seenUnitId) {
+	// Note: the units that are detected via this event are limited (cf 0x413108)
+	// - unit.status <=2 (the temp results contains other units(?), but this is filtered in 0x41312B before sending EVENT_PLAYER_SEE_UNIT.
+	// - neutral and enemy units only (so, not gaia !)
+	// - unit.definition.unitAIType is one of the "important" AItypes defined in actorUnit.activity.importantAITypes
+	// Which means, according to the unit that "sees", some units may be ignored ! Especially all gaia units.
+
+	// Remark: here the "temp results" arrays contain nearby units (caller is looping on it) ; but you should NO use it ;)
+	/*int n = GetElemCountInUnitListTempSearchResult(PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY);
+	STRUCT_NEARBY_UNIT_INFO *e = GetUnitListTempSearchResult(PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY, (resultIndex));*/
+
+	if (!IsImproveAIEnabled(player->playerId)) {
+		return false; // Let standard ROR code be executed. Don't use optimizations/improvements
+	}
+	// Note: this does not required AI to be active, just AI structures to exist.
+	// It is useful (*vital*) to maintain infAI data if AI is temporarily disabled
+
+	STRUCT_UNIT_BASE *seenUnit = GetUnitStruct(seenUnitId);
+	STRUCT_UNIT_BASE *myUnit = GetUnitStruct(myUnitId);
+	if (!seenUnit || !myUnit || !seenUnit->IsCheckSumValidForAUnitClass() || !myUnit->IsCheckSumValidForAUnitClass()) {
+		return false;
+	}
+	COMBAT::OnSeeNearbyUnit(player, myUnit, seenUnit);
+	if (seenUnit->unitDefinition && seenUnit->DerivesFromAttackable()) {
+		// Prevent ROR from updating infAI list: unitExtensions+visibility change hooks handle this (and are better)
+		// Use quick-update instead (retrieve infAI elem index from cache)
+		ROCKNROR::unitExtensionHandler.AddUpdateInfAIElem(seenUnit, player->playerId);
+		return true;
+	} else {
+		// Non-type50 are not handled by visibility change hooks (as those units do NOT have the visibility back-pointer updates).
+		// Let standard code be executed...
+		return false;
+	}
 }
 
 

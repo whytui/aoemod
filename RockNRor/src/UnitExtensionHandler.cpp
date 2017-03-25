@@ -115,6 +115,7 @@ bool UnitExtensionHandler::AddUnitExtension(long int unitId) {
 
 
 // Add/update infAI element for current unit (we consider it is visible for the player specified)
+// Remark: this method is called only if improveAI is true.
 bool UnitExtensionHandler::AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int infAIPlayerId) {
 	if (!unit || infAIPlayerId < 0) { return false; }
 	STRUCT_PLAYER *AIPlayer = GetPlayerStruct(infAIPlayerId);
@@ -127,8 +128,11 @@ bool UnitExtensionHandler::AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int i
 	long int unitId = unit->unitInstanceId;
 	if (unitId < 0) { return false; }
 	if (!this->AddUnitExtension(unit)) { // does nothing if already known
+		std::string msg = "Error adding unit extension for id=";
+		msg += std::to_string(unit->unitInstanceId);
+		traceMessageHandler.WriteMessage(msg.c_str());
 		return false; // Error case
-	};
+	}
 	// Now we can safely use this->allUnitExtensions[unitId]
 	if (this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] >= 0) {
 		// InfAI index is already known for that player
@@ -138,6 +142,9 @@ bool UnitExtensionHandler::AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int i
 			return true;
 		}
 		// Failed: maybe the index was wrong ? Reset it.
+		std::string msg = "Incorrect cache index in unit extension/id=";
+		msg += std::to_string(unit->unitInstanceId);
+		traceMessageHandler.WriteMessage(msg.c_str());
 		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = -1;
 	}
 

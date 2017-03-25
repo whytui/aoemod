@@ -47,6 +47,7 @@ public:
 	bool AddUnitExtension(long int unitId);
 
 	// Add/update infAI element for current unit (we consider it is visible for the player specified)
+	// Remark: this method is called only if improveAI is true.
 	bool AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int infAIPlayerId);
 
 	// Remove element for provided unitId in specified player's InfAI elem list.

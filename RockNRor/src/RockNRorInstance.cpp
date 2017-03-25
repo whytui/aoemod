@@ -4463,18 +4463,20 @@ void RockNRorInstance::OnAttackableUnitUpdateVisibility(REG_BACKUP *REG_values) 
 	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
 	for (int iPlayerId = 0; iPlayerId < 9; iPlayerId++) {
-		unsigned short int thisPlayerBit = (1 << iPlayerId);
-		bool isVisibleNow = (newVisibilityInfo.fogVisibilityMask & thisPlayerBit) != 0; // bit-and !!!
-		bool wasVisibleBefore = (oldVisibilityInfo.fogVisibilityMask & thisPlayerBit) != 0; // bit-and !!!
-		
-		// TODO: take care of visibleInFog ? Maybe in unitExtensionHandler (could save the information?)
+		if (IsImproveAIEnabled(iPlayerId)) {
+			unsigned short int thisPlayerBit = (1 << iPlayerId);
+			bool isVisibleNow = (newVisibilityInfo.fogVisibilityMask & thisPlayerBit) != 0; // bit-and !!!
+			bool wasVisibleBefore = (oldVisibilityInfo.fogVisibilityMask & thisPlayerBit) != 0; // bit-and !!!
 
-		if (isVisibleNow && !wasVisibleBefore) {
-			ROCKNROR::unitExtensionHandler.AddUpdateInfAIElem(unit, iPlayerId);
-		}
-		if (wasVisibleBefore && !isVisibleNow) {
-			// TODO: what if not visible ? Leave it (we can check easily if tile is visible :)
-			// BUT we still should clean infAI list(s) when unit is deleted ? That would be cheating ? Need to think about this
+			// TODO: take care of visibleInFog ? Maybe in unitExtensionHandler (could save the information?)
+
+			if (isVisibleNow && !wasVisibleBefore) {
+				ROCKNROR::unitExtensionHandler.AddUpdateInfAIElem(unit, iPlayerId);
+			}
+			if (wasVisibleBefore && !isVisibleNow) {
+				// TODO: what if not visible ? Leave it (we can check easily if tile is visible :)
+				// BUT we still should clean infAI list(s) when unit is deleted ? That would be cheating ? Need to think about this
+			}
 		}
 	}
 }
