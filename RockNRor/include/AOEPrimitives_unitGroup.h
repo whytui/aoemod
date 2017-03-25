@@ -37,6 +37,7 @@ STRUCT_UNIT_GROUP *FindUnitGroup(STRUCT_UNIT_BASE *unit);
 
 // Apply a task a unit group (will probably give commands to units)
 // Warning: this does NOT set unitGroup.currentTask/resetOrg, you have to set it before (and set target, ..., if necessary)
+// If force=true, give the order even for units that are busy with a non-wall attack
 bool ApplyTaskToUnitGroup(STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI *tacAI, AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS taskId,
 	long int resetOrg, bool force);
 

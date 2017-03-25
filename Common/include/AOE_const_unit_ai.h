@@ -67,7 +67,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ORDER_UNLOAD = 0x2D1, // Unload??? (=transport to...) see 0x4135A7, 0x4E942B(execCmdUnload). When unload manually ????
 		CST_ORDER_LOAD_TROOPS = 0x2D2, // transport load (for transport unit) = go to meeting location and wait there ?
 		CST_ORDER_UNKNOWN_2D3 = 0x2D3, // 
-		CST_ORDER_UNKNOWN_2D4 = 0x2D4, // 0x41363F. Move to TC for artefacts, regroup and/or regroup to transport meeting location ?
+		CST_ORDER_REGROUP_2D4 = 0x2D4, // 0x41363F. Move to TC for artefacts, regroup and/or regroup to transport meeting location ? Used for unit group's regroup task.
 		CST_ORDER_HOLD_POSITION = 0x2D5, // Do not auto-attack. See 0x4E6740 for cats (don't search for target), 413F89 for other units (cancel attack if not at range?)
 		CST_ORDER_UNKNOWN_2D6 = 0x2D6, // ? see 0x4133DC
 		CST_ORDER_UNKNOWN_2D7 = 0x2D7, // ? see 0x4134F8

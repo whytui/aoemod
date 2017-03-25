@@ -367,12 +367,23 @@ namespace AOE_CONST_INTERNAL
 		CST_UGT_UNKNOWN_06 = 6, // "add up HPs of my units" ?
 		CST_UGT_EXTERMINATE = 7, // This is used to set an "explore" attack mode without a specific target. Leader=explorer, others=defenders. This explores from current position, does not use target pos ? 0x4CD7A9. Set in 0x4D50AB, 0x4D5DD7 See 0x4D535D
 		CST_UGT_EXPLORE = 8, // 4CD977. For boats too. NOT for civilians/fishing ships.
-		CST_UGT_REGROUP = 9, // 4CD425. Uses SNAttackGroupGatherSpacing or artefact return distance. Assigned to idle groups when some units are far from leader.
+		
+		// 0x4CD425. Uses SNAttackGroupGatherSpacing or artefact return distance. See also CST_UGT_REGROUP_NO_SPACING.
+		// Assigned to idle groups when some units are far from leader.
+		// The "regroup" location is unitGroup.posX/Y.
+		// Uses unit ORDER 0x2D4 to operate regrouping.
+		CST_UGT_REGROUP = 9,
 		CST_UGT_GO_FISHING = 0x0A, // (10) Active fishing ships may also have an idle (1) group task ! See 0x4CE4AB
 		CST_UGT_TRADE = 0x0B, // (11) 0x4CE651. targetUnitId is (always) other player's dock.
 		CST_UGT_TRANSPORT_UNITS = 0x0C, // (12) transport units, includes: go to rally point, wait/load, transport and unload phases. See 0x4D5130. Group has no target unit/player, but a target destination
 		CST_UGT_UNKNOWN_0D = 0x0D, // (13) See 4D4729,4D5F32. Waiting for a free transport ? really unsure
-		CST_UGT_UNKNOWN_0E = 0x0E, // (14) 0x4CD425, 0x4D3DAC,4D3F95,4D44E0. Similar to regroup, but does not use SNAttackGroupGatherSpacing. Always(?) followed by task 0xD?
+		
+		// (14) 0x4CD425, 0x4D3DAC,4D3F95,4D44E0.
+		// Similar to regroup, but does not use SNAttackGroupGatherSpacing. Always(?) followed by task 0xD?
+		// The "regroup" location is unitGroup.posX/Y.
+		// Uses unit ORDER 0x2D4 to operate regrouping.
+		CST_UGT_REGROUP_NO_SPACING = 0x0E,
+
 		CST_UGT_LOAD_INTO_TRANSPORT = 0x0F, // (15) Go to transport. When transport is full, remaining units are excluded from group (?). 0x4D484F,0x4D48EE.
 		CST_UGT_IN_TRANSPORT = 0x10, // (16) In a transport/waiting to be unloaded. See 0x4D4D03.
 		CST_UGT_UNKNOWN_11 = 0x11, //

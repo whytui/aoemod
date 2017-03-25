@@ -97,7 +97,7 @@
 	<!-- *** AI -->
 	<!-- Set to nonzero to enable AI improvements (an int value: in the future, we might define several improvement levels) -->
 	<improveAI value="1"/>
-	<!-- For debugging purpose only. Only useful when improveAI>0.
+	<!-- Default=0. Set to 1 for debugging purpose only. Only useful when improveAI>0.
 	If set, players 5-8 benefit from AI improvements, players 1-4 will use standard game behaviour. Run games with 8 players to compare ! -->
 	<testCompareAI enable="0"/>
 

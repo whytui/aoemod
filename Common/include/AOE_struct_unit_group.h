@@ -48,7 +48,7 @@ namespace AOE_STRUCTURES {
 		float unknown_170_posY;
 		float unknown_174_posX;
 		float unknown_178_posZ;
-		unsigned long int unknown_17C; // unknown type
+		long int unknown_17C; // +17C. Seen -1.
 		// 0x180
 		AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS currentTask; // TaskId, see 4CD339. Values in 0-0x15
 		long int targetUnitId; // +184. including defended unit case ?
@@ -58,10 +58,9 @@ namespace AOE_STRUCTURES {
 		float targetPosX;
 		float targetPosZ;
 		unsigned long int unknown_198; // seems int. DWORD?
-		float posY; // not sure what this is exactly, NOT group "supposed" position ? Leader pos ?
-		// 0x1A0
-		float posX;
-		float posZ;
+		float posY; // +19C. not sure what this is exactly, NOT group "supposed" position ? Leader pos ? Used for "regroup" task.
+		float posX; // +1A0.
+		float posZ; // +1A4.
 		long int unknown_1A8;
 		float retreatPosY; // +1AC. 0x4CD65E. Only for retreat ?
 		// 0x1B0
@@ -72,7 +71,7 @@ namespace AOE_STRUCTURES {
 		// 0x1C0
 		long int unknown_1C0;
 		long int transportUnitGroupId; // +1C4. Unit group ID of the transport that does transport "me".
-		unsigned long int unknown_1C8;
+		long int unknown_1C8; // +1C8. Some int value (seen -1)
 		long int lastTaskingTime_ms; // +1CC. Last game time of "task active soldier" execution for the group ? Compared to SNTacticalUpdateFrequency (default 3 seconds)
 		// 0x1D0
 		long int attackPlayId; // attackId that is being played. -1=Non-Play-based attack
@@ -81,7 +80,7 @@ namespace AOE_STRUCTURES {
 		short int unknown_1D6; // check type (2 bytes ?)
 		float *unknown_1D8; // +1D8. Array of struct size=0x10, +0/+4=float pos? INCLUDED array ? Related to attacking ? Intermediate movement steps to go to target ?
 		char unknown_1DC[0x2C8 - 0x1DC];
-		char regroupAttempts; // +2C8. Unsure. When reaches 10, the group is considered regrouped ? 0x4CD42F, 0x4D37B4
+		char consecutiveRegroupAttempts; // +2C8. INC on each regroup(9,0xE), reset on all other tasking. When reaches 10, the group is considered regrouped ? 0x4CD42F, 0x4D37B4
 		char unknown_2C9;
 		char unknown_2CA; // ?
 		char unknown_2CB; // ?

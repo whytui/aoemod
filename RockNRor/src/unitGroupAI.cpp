@@ -142,7 +142,7 @@ void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROU
 	} else {
 		unitGroup->currentTask = taskId;
 	}
-	AOE_METHODS::UNIT_GROUP::ApplyTaskToUnitGroup(unitGroup, tacAI, taskId, resetOrg, force);
+	bool rorResult = AOE_METHODS::UNIT_GROUP::ApplyTaskToUnitGroup(unitGroup, tacAI, taskId, resetOrg, force);
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid()) {
 		unitGroup->lastTaskingTime_ms = global->currentGameTime;
@@ -208,7 +208,7 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 				// Tasking "CST_UGT_ATTACK_02" many times in a row is dangerous if if sees other targets (unit constantly changes action and is stuck)
 				return UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 			}
-			result = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02; // units may change target (and very quickly) if  they are challenged or see targets
+			result = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02; // units may change target (and very quickly) if they are challenged or see targets
 		}
 		if (targetUnit->ptrStructPlayer) { // should always be true !
 			unitGroup->targetPlayerId = targetUnit->ptrStructPlayer->playerId;
@@ -222,8 +222,17 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 	this->SetUnitGroupTarget_internal(unitGroup, NULL);
 	unitGroup->retreatPosX = targetPosX;
 	unitGroup->retreatPosY = targetPosY;
-	// TODO: do not retreat to exact target position, stop before, especially range units !
-	result = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02; // attack with no target still works: operate a troop movement. Do not use CST_UGT_RETREAT.
+	unitGroup->targetPosX = targetPosX; // useful if using CST_UGT_ATTACK_02
+	unitGroup->targetPosY = targetPosY; // useful if using CST_UGT_ATTACK_02
+	// CST_UGT_ATTACK_02: needs to set target pos, will record an attack in tacAI history (which is unfortunate/irrelevant)
+	//result = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02; // attack with no target still works: operate a troop movement. Do not use CST_UGT_RETREAT.
+	// CST_UGT_RETREAT: Why not ? Will move to exact target pos (which is not desired). I think there was another drawback ?
+	//this->SetUnitGroupCurrentTask(tacAI, unitGroup, result, 1, forceTasking);
+	//result = UNIT_GROUP_TASK_IDS::CST_UGT_RETREAT;
+	// CST_UGT_REGROUP: Good point is that it handles spacing (if using 9, not 0xE). But needs to update grp.posX/Y. But it isn't a problem ?
+	unitGroup->posX = targetPosX; // useful if using regroup
+	unitGroup->posY = targetPosY; // useful if using regroup
+	result = UNIT_GROUP_TASK_IDS::CST_UGT_REGROUP;
 	this->SetUnitGroupCurrentTask(tacAI, unitGroup, result, 1, forceTasking);
 	return result;
 }
