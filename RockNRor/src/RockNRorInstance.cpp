@@ -4330,9 +4330,10 @@ void RockNRorInstance::IsTargetableResourceCallForInfAI(REG_BACKUP *REG_values) 
 		// This corresponds to overwritten code in ROR executable.
 		long int resBuffer;
 		const unsigned long int callAddr = 0x4BE1C0;
+		long int dword_unitClass = unitClass;
 		_asm {
 			MOV ECX, infAI;
-			PUSH unitClass;
+			PUSH dword_unitClass;
 			CALL callAddr;
 			MOV resBuffer, EAX;
 		}
@@ -4389,9 +4390,10 @@ void RockNRorInstance::SeeUnitIsArtefactOrResourceOrFlagOrCreatable(REG_BACKUP *
 		// Force original code
 		long int res = 0;
 		long int addr = 0x4BE100;
+		long int dword_unitClass = unitClass;
 		_asm {
 			MOV ECX, infAI; // Not necessary, actually
-			PUSH unitClass;
+			PUSH dword_unitClass;
 			CALL addr;
 			MOV res, EAX;
 		}
