@@ -4306,7 +4306,7 @@ void RockNRorInstance::VillagerActivityProcessNotify(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, notify && (notifyTaskId == notify->eventId));
 
 	// Custom treatments
-	long int result = COMBAT::VillagerActivityNotify(unitActivity, notify);
+	long int result = COMBAT::VillagerActivityNotify(unitActivity, notify); // does nothing if IsImproveAIEnabled(<playerId>) is false
 	if (result >= 0) {
 		REG_values->EAX_val = result;
 		ChangeReturnAddress(REG_values, 0x4E4DAC);
@@ -4326,7 +4326,7 @@ void RockNRorInstance::IsTargetableResourceCallForInfAI(REG_BACKUP *REG_values) 
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
-	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || (ROCKNROR::crInfo.configInfo.improveAILevel == 0)) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || !IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
 		// This corresponds to overwritten code in ROR executable.
 		long int resBuffer;
 		const unsigned long int callAddr = 0x4BE1C0;
@@ -4385,7 +4385,7 @@ void RockNRorInstance::SeeUnitIsArtefactOrResourceOrFlagOrCreatable(REG_BACKUP *
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
-	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || (ROCKNROR::crInfo.configInfo.improveAILevel == 0)) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || !IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
 		// Force original code
 		long int res = 0;
 		long int addr = 0x4BE100;

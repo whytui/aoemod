@@ -61,6 +61,7 @@ namespace COMBAT {
 
 	// Triggered when a unit sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
 	// Remark: feeding infAI list is handled in parent calls.
+	// This method is called only if IsImproveAIEnabled(...) is true.
 	void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit);
 
 	// Triggered when a priest sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle

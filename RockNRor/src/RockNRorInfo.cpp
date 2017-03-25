@@ -449,11 +449,14 @@ static bool _DEBUG_improveThisPlayer(int playerId) {
 // Remark: AI can be currently disabled for a player, but "improved AI" will still remain true.
 // Useful to add custom rules for debugging
 bool ROCKNROR::IsImproveAIEnabled(int playerId) {
+	bool useImprovement = (ROCKNROR::crInfo.configInfo.improveAILevel > 0);
+	if (ROCKNROR::crInfo.configInfo.enableTestCompareAI) {
+		useImprovement &= (playerId >= 5);
+	}
 #ifdef _DEBUG
-	return (ROCKNROR::crInfo.configInfo.improveAILevel > 0) && _DEBUG_improveThisPlayer(playerId);
-#else
-	return (ROCKNROR::crInfo.configInfo.improveAILevel > 0);
+	useImprovement &= _DEBUG_improveThisPlayer(playerId);
 #endif
+	return useImprovement;
 }
 
 

@@ -518,10 +518,7 @@ float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, S
 // Handles "retreat after shooting" feature for hunters (non-native feature !)
 bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify) {
 	// This is restricted to "AI improvements ON" configuration.
-	if ((ROCKNROR::crInfo.configInfo.improveAILevel == 0) || !unitActivity || !unitActivity->IsCheckSumValid() ||
-		!notify) {
-		return false;
-	}
+	if (!unitActivity || !unitActivity->IsCheckSumValid() || !notify) { return false; }
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	// This is restricted to medium/hard/hardest levels
 	if (!settings || !settings->IsCheckSumValid() || (settings->rgeGameOptions.difficultyLevel > GAME_DIFFICULTY_LEVEL::GDL_MEDIUM)) { return false; }
@@ -529,6 +526,7 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }
 	STRUCT_PLAYER *player = unit->ptrStructPlayer;
 	if (!player || !player->IsCheckSumValid()) { return false; }
+	if (!IsImproveAIEnabled(player->playerId)) { return false; } // This feature is an AI improvement. Do it only if config says so.
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
 	if (settings->rgeGameOptions.difficultyLevel == GAME_DIFFICULTY_LEVEL::GDL_EASIEST) { return false; }
 	if (player->isComputerControlled == 0) { return false; } // cf 0x4E6476
@@ -621,8 +619,8 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 // Returns >= 0 to return a specific value and bypass ROR treatments.
 long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify) {
 	// This is restricted to "AI improvements ON" configuration.
-	if ((ROCKNROR::crInfo.configInfo.improveAILevel == 0) || !unitActivity || !unitActivity->IsCheckSumValid() ||
-		!notify) {
+	if (!unitActivity || !unitActivity->IsCheckSumValid() || !notify || !unitActivity->ptrUnit || 
+		!unitActivity->ptrUnit->ptrStructPlayer || !IsImproveAIEnabled(unitActivity->ptrUnit->ptrStructPlayer->playerId)) {
 		return -1;
 	}
 
@@ -649,6 +647,7 @@ long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_
 
 // Triggered when a unit sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
 // Remark: feeding infAI list is handled in parent calls.
+// This method is called only if IsImproveAIEnabled(...) is true.
 void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit) {
 	if (!actorUnit || !seenUnit || !player) { return; }
 	if ((actorUnit->unitStatus != GAME_UNIT_STATUS::GUS_2_READY) || (seenUnit->unitStatus > GAME_UNIT_STATUS::GUS_2_READY)) { return; }

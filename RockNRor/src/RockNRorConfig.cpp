@@ -54,6 +54,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->conversionResistance_WarElephants = 1; // Game default
 	this->conversionResistance_WarElephants_Persian = 1; // Game default
 	this->improveAILevel = 0; // ROR Default (not active)
+	this->enableTestCompareAI = false; // ROR default
 	this->unitAIDetectNearbyUnitsMinimumDelay = 4000; // Game default = 4 seconds.
 	this->tacticalAIUpdateDelay = 30;
 	this->panicModeDelay = 20;
@@ -576,6 +577,9 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "improveAI") {
 			callResult = elem->QueryIntAttribute("value", &intValue);
 			if (callResult == TIXML_SUCCESS) { this->improveAILevel = intValue; }
+		}
+		if (elemName == "testCompareAI") {
+			this->enableTestCompareAI = XML_GetBoolElement(elem, "enable");
 		}
 		// AI : generate strategy
 		if (elemName == "strategyAI") {

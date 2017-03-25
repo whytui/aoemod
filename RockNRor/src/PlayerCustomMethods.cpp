@@ -74,6 +74,10 @@ void ApplyStrategyGenerationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) {
 		return;
 	}
+	if (ROCKNROR::crInfo.configInfo.enableTestCompareAI) {
+		// For "AI comparison" mode, consider strategy generation is an AI improvement.
+		if (!IsImproveAIEnabled(player->playerId)) { return; }
+	}
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
 	bool isDM = (settings->isDeathMatch != 0);

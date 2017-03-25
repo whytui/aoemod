@@ -181,6 +181,7 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "conversionResistance_WarElephants_Persian: %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_WarElephants_Persian);
 	// Various AI
 	fprintf_s(f, "improveAILevel:                            %ld\n", ROCKNROR::crInfo.configInfo.improveAILevel);
+	fprintf_s(f, "testCompareAI:                             %ld\n", ROCKNROR::crInfo.configInfo.enableTestCompareAI ? 1: 0);
 	fprintf_s(f, "tacticalAIUpdateDelay:                     %ld\n", ROCKNROR::crInfo.configInfo.tacticalAIUpdateDelay);
 	fprintf_s(f, "minPopulationBeforeOptionalItems:          %ld\n", ROCKNROR::crInfo.configInfo.minPopulationBeforeBuildOptionalItems);
 	fprintf_s(f, "maxPanicUnitsCountToAddInStrategy:         %ld\n", ROCKNROR::crInfo.configInfo.maxPanicUnitsCountToAddInStrategy);
@@ -1965,23 +1966,20 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 // Warning: try to keep this function fast and optimized as much as possible. It may be called quite often.
 // The improved algorithm is only used if ImproveAI config is ON.
 bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower) {
-	if (ROCKNROR::crInfo.configInfo.improveAILevel <= 0) {
-		return true; // improve AI is disabled. Return default value.
-	}
-	
 	// Run various consistency checks
 	assert(COMBAT::COMBAT_CONST::distanceToConsiderVeryClose > 0);
-	if (!actorUnit || !enemyTower) { return false; }
+	if (!actorUnit || !enemyTower || !actorUnit->ptrStructPlayer) { return true; }
+	if (!IsImproveAIEnabled(actorUnit->ptrStructPlayer->playerId)) { return true; } // improve AI is disabled. Return default value.
 	assert(actorUnit->currentActivity != NULL);
 	assert(actorUnit->unitDefinition != NULL);
 	assert(enemyTower->unitDefinition != NULL);
-	if ((!actorUnit->currentActivity) || (!actorUnit->unitDefinition) || (!enemyTower->unitDefinition)) { return false; }
+	if ((!actorUnit->currentActivity) || (!actorUnit->unitDefinition) || (!enemyTower->unitDefinition)) { return true; }
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity = actorUnit->currentActivity; // Guaranteed non-NULL
 	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *actorUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)actorUnit->unitDefinition; // Guaranteed non-NULL
 	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *enemyTowerDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)enemyTower->unitDefinition; // Guaranteed non-NULL
 	assert(actorUnitDef->DerivesFromAttackable());
 	assert(enemyTowerDef->DerivesFromAttackable());
-	if (!actorUnitDef->DerivesFromAttackable() || !enemyTowerDef->DerivesFromAttackable()) { return false; }
+	if (!actorUnitDef->DerivesFromAttackable() || !enemyTowerDef->DerivesFromAttackable()) { return true; }
 
 	if (activity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_ID::CST_ATI_TASK_CONVERT) {
 		return false; // Converting priest: let him proceed. TO DO: improve !

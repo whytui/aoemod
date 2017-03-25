@@ -165,7 +165,7 @@ bool EconomyAI::IsAITargetableResource(STRUCT_UNIT_BASE *unit) {
 		) {
 		return true;
 	}
-	if (ROCKNROR::crInfo.configInfo.improveAILevel == 0) {
+	if (!unit->ptrStructPlayer || !IsImproveAIEnabled(unit->ptrStructPlayer->playerId)) {
 		return false; // Standard case when AI improvements are OFF
 	}
 
