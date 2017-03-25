@@ -58,6 +58,7 @@ namespace CUSTOM_AI {
 		// Get the number of attacks from a player during the specified interval (game times in milliseconds)
 		int GetAttacksCountInPeriod(long int startGameTime, long int endGameTime) {
 			if (endGameTime <= startGameTime) { return 0; }
+			if (startGameTime < 0) { startGameTime = 0; }
 			CUSTOM_AI::TimeIntervalAttackRecord *interval = this->GetIntervalForGameTime(startGameTime);
 			if (interval == NULL) {
 				interval = this->GetOldestValidInterval();
