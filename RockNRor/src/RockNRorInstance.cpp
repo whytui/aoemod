@@ -4442,6 +4442,9 @@ void RockNRorInstance::ActivityNearbyUnitDetectionDelayUpdate(REG_BACKUP *REG_va
 
 	// Custom treatments: allow using custom delays (detect more often)
 	// Warning: this may greatly affect performance, especially because of adding/updating unit in infAI list (if not optimized bby RockNRor)
+	if (ROCKNROR::crInfo.configInfo.unitAIDetectNearbyUnitsMinimumDelay < 1000) {
+		randomPart = randomPart / 2; // Force random part in 0-499 when config's delay is low.
+	}
 	REG_values->EDX_val = randomPart + ROCKNROR::crInfo.configInfo.unitAIDetectNearbyUnitsMinimumDelay;
 }
 

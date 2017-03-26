@@ -102,17 +102,17 @@ long int ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIV
 }
 
 
-// Handler for EVENT_PLAYER_SEE_UNIT event.
+// Handler for EVENT_PLAYER_SEE_UNIT event, which is triggered from activity.update() execution every x milliseconds.
 // Returns true if event is handled and ROR code must NOT be executed
 // Returns false if ROR code should be executed normally (default case)
+// Note: the units that are detected via this event are limited (cf 0x413108)
+// - unit.status <=2 (the temp results contains other units(?), but this is filtered in 0x41312B before sending EVENT_PLAYER_SEE_UNIT.
+// - neutral and enemy units only (so, not gaia !)
+// - unit.definition.unitAIType is one of the "important" AItypes defined in actorUnit.activity.importantAITypes
+// Which means, according to the unit that "sees", some units may be ignored ! Especially all gaia units.
+// Remark: See also RockNRorInstance::OnAttackableUnitUpdateVisibility = entry point that adds/updates infAI elements for type50+ units.
 bool PlayerNotifySeeUnit(STRUCT_PLAYER *player, long int myUnitId, long int seenUnitId) {
-	// Note: the units that are detected via this event are limited (cf 0x413108)
-	// - unit.status <=2 (the temp results contains other units(?), but this is filtered in 0x41312B before sending EVENT_PLAYER_SEE_UNIT.
-	// - neutral and enemy units only (so, not gaia !)
-	// - unit.definition.unitAIType is one of the "important" AItypes defined in actorUnit.activity.importantAITypes
-	// Which means, according to the unit that "sees", some units may be ignored ! Especially all gaia units.
-
-	// Remark: here the "temp results" arrays contain nearby units (caller is looping on it) ; but you should NO use it ;)
+	// Remark: here the "temp results" arrays contain nearby units (caller is looping on it) ; but you should NOT use it ;)
 	/*int n = GetElemCountInUnitListTempSearchResult(PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY);
 	STRUCT_NEARBY_UNIT_INFO *e = GetUnitListTempSearchResult(PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY, (resultIndex));*/
 

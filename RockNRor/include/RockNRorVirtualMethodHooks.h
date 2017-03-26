@@ -29,10 +29,10 @@ namespace VIRTUAL_METHOD_HOOKS {
 	*/
 
 
-	// Return value is an unknown enum. 2=ok, processed.
+	// Return value is an unknown enum. 2=ok, processed. (unitAI: EDX+0xCC call).
 	long int __stdcall ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2);
 
-	// Returns void. This hook handles player's notifications.
+	// Returns void. This hook handles player's notifications (EDX+0xE8 call).
 	void __stdcall PlayerProcessNotify(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT notifyEvent);
 
 
