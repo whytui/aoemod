@@ -30,7 +30,7 @@ bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT 
 
 // UnitActivity.ProcessNotify event.
 // outExecStandardCode is an output bool: if set to true, ROR standard code will be executed afterwards. If false, it will be skipped.
-long int ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2, bool &outExecStandardCode) {
+ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2, bool &outExecStandardCode) {
 	outExecStandardCode = true;
 
 	/*std::string msg1 = "ActivityProcessNotify ";
@@ -45,7 +45,9 @@ long int ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIV
 	AOE_CONST_INTERNAL::GAME_EVENT_TYPE notificationTaskId = notifyEvent->eventId;
 	test.insert(notificationTaskId);
 
-	if (!activity || !activity->ptrUnit || !activity->ptrUnit->ptrStructPlayer) { return 3; } // value to return ??
+	if (!activity || !activity->ptrUnit || !activity->ptrUnit->ptrStructPlayer) {
+		return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
+	}
 	std::string msg = "p#";
 	msg += std::to_string(activity->ptrUnit->ptrStructPlayer->playerId);
 	msg += " u#";
@@ -81,7 +83,7 @@ long int ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIV
 	case GAME_EVENT_TYPE::EVENT_NO_DROP_SITE:
 		// Usual cases...
 		break;
-	case GAME_EVENT_TYPE::EVENT_UNSURE_ATTACK: //0x258 (should not be a notification?) There is code for this... dead (wrong?obsolete?)code ?
+	case GAME_EVENT_TYPE::EVENT_INVALID_VALUE__ATTACK: //0x258 (should not be a notification?) There is code for this... dead (wrong?obsolete?)code ?
 		msg += " (task_attack)";
 		AOE_METHODS::CallWriteCenteredText(msg.c_str());
 		AOE_METHODS::PLAYER::CopyScreenPosition(GetControlledPlayerStruct_Settings(), activity->ptrUnit->ptrStructPlayer);
@@ -98,7 +100,7 @@ long int ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIV
 		AOE_METHODS::SetGamePause(true);
 		break;
 	}
-	return 2;
+	return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
 }
 
 

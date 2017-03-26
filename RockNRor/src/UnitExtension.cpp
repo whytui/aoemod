@@ -8,6 +8,7 @@ UnitExtension::UnitExtension() {
 }
 
 
+// Reset/cleans up all data, including unit id/ptr. Call this once to initialize a new object.
 void UnitExtension::Reset() {
 	this->pUnit = NULL;
 	this->unitId = -1;

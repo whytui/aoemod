@@ -25,13 +25,13 @@ namespace AOE_CONST_INTERNAL
 
 
 	// Those IDs are used in various methods that deal with game events
-	// - gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX) = [EDX+0x40]=0x501980. Arguments may have different roles. WARNING, here *arg1* is event ID !!!
-	// - player.notifyEvent(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F3350 / EDX+0xE8). Always calls player.handleEventInAI (if AI struct exists)
-	// - player.handleEventInAI(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F34C0)
-	// - unit.notify(actorUnitId?, impactedUnitId?, notifyTaskId, generic_4, generic_5, generic_6) (0x426DB0 / EDX+0x148): dispatch to activity.addToNotifyQueue or player.notify
+	// - void(?) gameSettings.NotifyEvent(eventId, playerId, DATID, posY, posX) = [EDX+0x40]=0x501980. Arguments may have different roles. WARNING, here *arg1* is event ID !!!
+	// - void(?) player.notifyEvent(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F3350 / EDX+0xE8). Always calls player.handleEventInAI (if AI struct exists)
+	// - void(?) player.handleEventInAI(unitId, arg2, eventId, arg4, arg5, arg6) (0x4F34C0)
+	// - void(?) unit.notify(actorUnitId?, impactedUnitId?, notifyTaskId, generic_4, generic_5, generic_6) (0x426DB0 / EDX+0x148): dispatch to activity.addToNotifyQueue or player.notify
 	// - activity.processNotify(struct NotifyEvent *, unsigned long) (0x413890 / EDX+0xCC)
-	// - activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). (0x410A20 / EDX+0x18)
-	// - tacAI.reactToEvent(unitId, arg2, eventId, arg4, arg5, arg6) (0x4D7880 / EDX+0x40) : treatments only for events 0x72,0x74,0x201
+	// - activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). (0x410A20 / EDX+0x18). Returns 1 (unused)
+	// - void tacAI.reactToEvent(unitId, arg2, eventId, arg4, arg5, arg6) (0x4D7880 / EDX+0x40) : treatments only for events 0x72,0x74,0x201
 	// 1-99 (0x63) : basic events/errors at game settings level
 	// 100-499 (0x64-0x1F3): global events/errors (game settings level + player level for 0x72+ ?)
 	// 500+ (0x1F4): More specific events (mostly handled at unitAI level, possibly player level ?)
@@ -123,7 +123,10 @@ namespace AOE_CONST_INTERNAL
 
 		
 		// Notify being attacked. Triggers a player.NotifyEvent with event 0x201
-		// genericParam4=attackerUnitId, genericParam5=? (not a unitid) genericParam6=? ; targetUnitId=attacker, actorUnitId=me
+		// targetUnitId=attacker, actorUnitId=me
+		// genericParam4=attackerUnitId
+		// genericParam5=(int) remaining HP (target unit)
+		// genericParam6=(int) max HP (target unit) from unitDef
 		EVENT_BEING_ATTACKED = 0x1F4,
 
 		EVENT_UNUSED_1F5 = 0x1F5, // Not used at all.
@@ -173,6 +176,7 @@ namespace AOE_CONST_INTERNAL
 		EVENT_UNKNOWN_208 = 0x208, // for early versions only ? Seems to be unused here.
 
 		// Related to notification when being attacked ? see 0x4E4769. When triggered, AI player adds 10 dislike for target player
+		// Seen in 0x4E58D7 (trade ship attacked but has no more HP)
 		// generic_arg4=unitId (attacker, to which add dislike)
 		EVENT_UNKNOWN_209 = 0x209,
 
@@ -195,18 +199,21 @@ namespace AOE_CONST_INTERNAL
 		// This event is used whereas 1FF seems not.
 		// Important: Only units with a "UnitAI" can "see" other units (to trigger the event and update infAI)
 		// But ALL units with a UnitAI do run this detection (each "delayBetweenDetectSeeUnits" milliseconds).
-		// Detection frequency is quite poor (4 seconds+a random part 0x413183), units may move 5 or even 10 tiles (fast units) between 2 detections.
+		// By default, detection frequency is quite poor (4 seconds+a random part 0x413183), units may move 5 or even 10 tiles (fast units) between 2 detections.
 		// Sent to player.notify and handled in player.handleEventInAI: adds unit in infAI list (this can be done a lot of times for the same unit, ok cause there won't be duplicates, but bad for perf)
 		// arg1=unitId that "sees" arg2=playerId (actor=that "sees"), arg4=other unit Id
 		EVENT_PLAYER_SEE_UNIT = 0x20D,
 
 		// Source=0x426651 (in send projectile code)
 		// Notification triggered when someone shoots a projectile at "me". "escape attack" 0x4E62F3
-		// arg1=actor unitId (shooter), arg2=target unitId(the one that needs to escape), arg4=actor unitId (shooter), arg5=currentHP, arg6=maxHP
+		// arg1=actor unitId (shooter), arg2=target unitId(the one that needs to escape)
+		// arg4=actor unitId (shooter = aggressor)
+		// arg5=currentHP (int)
+		// arg6=maxHP (int)
 		EVENT_SHOULD_ESCAPE_ATTACK = 0x20F,
 
 		// This one is not an event (it is a task), but this value is found in several places, and seems to be dead code.
-		EVENT_UNSURE_ATTACK = 0x258,
+		EVENT_INVALID_VALUE__ATTACK = 0x258,
 
 		// (699) Stop being targeted by another unit (any action: repair,attack,heal,...).
 		// This occurs when the other unit (that targets "me") dies or changes target.
@@ -215,6 +222,44 @@ namespace AOE_CONST_INTERNAL
 		// Some units do NOT raise this event: trees, mines, etc
 		EVENT_RELEASE_BEING_WORKED_ON = 0x2BB
 		// 0x2BB is last (higher values are *orders*)
+	};
+
+
+	// Result values for activity.processNotify functions.
+	// Used in 0x40FA82 (only?).
+	enum ACTIVITY_EVENT_HANDLER_RESULT : long int {
+		// Unused ?
+		EVT_RES_UNKNOWN_00 = 0,
+
+		// Unused ?
+		EVT_RES_UNKNOWN_01 = 1,
+
+		// 2 = event has been processed but no action was ordered (except STOPPING current action).
+		// (activity.processNotify) 0x413D78,0x413EF5,0x413F11,0x413F5D,0x413F7F,0x413FB0,0x414192,0x414260,0x414342
+		// (activity.processNotify) 0x4E669C
+		// (activity.processNotify) 0x4E3CC8
+		// (activity.processNotify) 0x4E4B2B = notify activity end?
+		EVT_RES_EVENT_PROCESSED_NO_ACTION = 2,
+
+		// 3 = an action was taken as a reaction to event
+		// Returning 3 loses all "next" events in queue (0x40FAA0) ! Not sure this is a good choice but there can be many impacts in changing this !
+		// (activity.processNotify) 0x413A8A;0x413B1C,0x413B3E,0x413BDD,0x413E15,0x413E66,0x41416D,0x414201
+		// (activity.processNotify) 0x4E645F
+		// (activity.processNotify) 0x4E66BB = successfully reacted (flee accordingly)
+		// (activity.processNotify) villager: 0x4E49CD,0x4E49E6,0x4E4A4F,etc
+		EVT_RES_EVENT_HANDLED_WITH_AN_ACTION = 3,
+
+		// 4 = Can't process (no more HP). Runs a purge notify queue.
+		// (activity.processNotify) 0x4E3CE4,0x4E5F5A,0x4E5C5A,0x4E4787
+		// (activity.processNotify) 0x4E58F3 (trade ship with no more hp)
+		EVT_RES_CANT_NOTIFY_DYING = 4,
+
+		// Unused ?
+		EVT_RES_UNKNOWN_05 = 5,
+
+		// 6 = seen for trade ship ? Successfully triggered trading ?
+		// (activity.processNotify) 0x4E5804,0x4E5833
+		EVT_RES_UNKNOWN_06 = 6
 	};
 
 }

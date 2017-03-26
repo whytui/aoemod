@@ -33,7 +33,7 @@ public:
 	// Flag to indicate when "this" unit has been added to other players infAI lists, so that this treatment is run only once.
 	bool hasBeenAddedToOtherPlayersInfAILists[9];
 
-	// Reset/cleans up all data, including unit id/ptr
+	// Reset/cleans up all data, including unit id/ptr. Call this once to initialize a new object.
 	void Reset();
 
 	// Init this object using provided unit.
