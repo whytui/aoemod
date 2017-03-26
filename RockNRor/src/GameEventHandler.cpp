@@ -42,6 +42,10 @@ ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activi
 
 	if (notifyEvent->eventId == AOE_CONST_INTERNAL::EVENT_BECOME_TOO_FAR_TO_SHOOT) {
 	}
+	if (notifyEvent->eventId == AOE_CONST_INTERNAL::EVENT_NO_DROP_SITE) {
+		// If a drop site is being built, go help in construction (if reachable)
+		// Otherwise, try to build one ?
+	}
 
 
 	/*std::string msg1 = "ActivityProcessNotify ";
@@ -144,7 +148,7 @@ bool PlayerNotifySeeUnit(STRUCT_PLAYER *player, long int myUnitId, long int seen
 	if (seenUnit->unitDefinition && seenUnit->DerivesFromAttackable()) {
 		// Prevent ROR from updating infAI list: unitExtensions+visibility change hooks handle this (and are better)
 		// Use quick-update instead (retrieve infAI elem index from cache)
-		ROCKNROR::unitExtensionHandler.AddUpdateInfAIElem(seenUnit, player->playerId);
+		ROCKNROR::unitExtensionHandler.AddUpdateUnitInInfAILists(seenUnit, player->playerId);
 		result = true;
 	} else {
 		// Non-type50 are not handled by visibility change hooks (as those units do NOT have the visibility back-pointer updates).

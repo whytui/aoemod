@@ -1830,7 +1830,7 @@ void RockNRorCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLA
 			AOE_STRUCTURES::STRUCT_PLAYER *curPlayer = GetPlayerStruct(curPlayerId);
 			if (IsImproveAIEnabled(curPlayerId) && 
 				AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(curPlayer, (long int)unit->positionX, (long int)unit->positionY)) {
-				ROCKNROR::unitExtensionHandler.AddUpdateInfAIElem(unit, curPlayerId);
+				ROCKNROR::unitExtensionHandler.AddUpdateUnitInInfAILists(unit, curPlayerId);
 			}
 		}
 	}

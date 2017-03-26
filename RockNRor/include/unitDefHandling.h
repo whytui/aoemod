@@ -146,12 +146,14 @@ namespace AOE_STRUCTURES {
 	// - Artefact/flag
 	// - Gatherable unit (mine, tree, gazelle - but not other animals, bushes...)
 	// - Units that can be created by players: buildings, living units
+	// WARNING: this does not includes bugfixes, see EconomyAI method !
 	bool IsClassArtefactOrGatherableOrCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
 
 	// Returns true if unit class corresponds to units that can be created by players: buildings, living units
 	bool IsClassPlayerCreatable(GLOBAL_UNIT_AI_TYPES unitClass);
 
 	// Returns true if unit class is targetable as a resource from AI point of view: fish, gazelle, bush, trees, mines
+	// WARNING: this does not includes bugfixes, see EconomyAI method !
 	bool IsClassTargetableAsResource(GLOBAL_UNIT_AI_TYPES unitClass);
 
 	// Returns true if unit class is artefact or flag

@@ -114,71 +114,19 @@ bool UnitExtensionHandler::AddUnitExtension(long int unitId) {
 }
 
 
-// Add/update infAI element for current unit (we consider it is visible for the player specified)
+// Add/update specified unit in infAI lists (we consider it is visible for the player specified)
 // Remark: this method is called only if improveAI is true.
-bool UnitExtensionHandler::AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int infAIPlayerId) {
+bool UnitExtensionHandler::AddUpdateUnitInInfAILists(STRUCT_UNIT_BASE *unit, long int infAIPlayerId) {
 	if (!unit || infAIPlayerId < 0) { return false; }
 	STRUCT_PLAYER *AIPlayer = GetPlayerStruct(infAIPlayerId);
 	if (!AIPlayer) { return false; } // Player does not exist
 	assert(AIPlayer->IsCheckSumValid());
 	if (AIPlayer->aliveStatus == 2) { return true; } // Ignore defeated players (not an error)
 	if (AIPlayer->ptrAIStruct == NULL) { return false; } // No AI for the player specified
-	STRUCT_INF_AI *infAI = &AIPlayer->ptrAIStruct->structInfAI;
 
-	long int unitId = unit->unitInstanceId;
-	if (unitId < 0) { return false; }
-	if (!this->AddUnitExtension(unit)) { // does nothing if already known
-		std::string msg = "Error adding unit extension for id=";
-		msg += std::to_string(unit->unitInstanceId);
-		traceMessageHandler.WriteMessage(msg.c_str());
-		return false; // Error case
-	}
-	// Now we can safely use this->allUnitExtensions[unitId]
-	if (this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] >= 0) {
-		// InfAI index is already known for that player
-		assert(this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] < infAI->detailedSpottedUnitInfoListSize);
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = &infAI->detailedSpottedUnitInfoList[this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId]];
-		if (this->allUnitExtensions[unitId].UpdateInfAIElemInfo(elem)) {
-			return true;
-		}
-		// Failed: maybe the index was wrong ? Reset it.
-		std::string msg = "Incorrect cache index in unit extension/id=";
-		msg += std::to_string(unit->unitInstanceId);
-		traceMessageHandler.WriteMessage(msg.c_str());
-		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = -1;
-	}
-
-	// Here index in infAI elem list is unknown. Search for it
-	
-	long int indexOfAFreeSlot = -1;
-	for (int curIndex = 0; curIndex < infAI->detailedSpottedUnitInfoListSize; curIndex++) {
-		if (infAI->detailedSpottedUnitInfoList[curIndex].unitId == unitId) {
-			// Found: save index, update info and return
-			this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = curIndex;
-			return this->allUnitExtensions[unitId].UpdateInfAIElemInfo(&infAI->detailedSpottedUnitInfoList[curIndex]);
-		} else {
-			if ((indexOfAFreeSlot < 0) && (infAI->detailedSpottedUnitInfoList[curIndex].unitId < 0)) {
-				indexOfAFreeSlot = curIndex; // Save index of a free slot for later (may be useful)
-			}
-		}
-	}
-	// Here: not found in infAI list: add it
-	if (indexOfAFreeSlot < 0) {
-		// May append at the end of the list... or reuse an existing slot (should not as we already tried)
-		if (!AOE_METHODS::LISTS::AddUpdateInfAIElemList(infAI, unit)) {
-			return false;
-		}
-		// Find index of new elem.
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitId);
-		long int elemIndex = (((unsigned long int)elem) - (unsigned long int)(infAI->detailedSpottedUnitInfoList)) / sizeof(STRUCT_INF_AI_DETAILED_UNIT_INFO);
-		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = elemIndex;
-		return true;
-	}
-
-	// Here: use the free slot we found
-	this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = indexOfAFreeSlot;
-	STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = &infAI->detailedSpottedUnitInfoList[indexOfAFreeSlot];
-	return this->allUnitExtensions[unitId].WriteAllInfAIElemInfo(elem);
+	bool result = this->AddUpdateInfAIDetailedUnitInfo(unit, &AIPlayer->ptrAIStruct->structInfAI);
+	result &= this->AddUnitInOtherInfAILists(unit, &AIPlayer->ptrAIStruct->structInfAI);
+	return result;
 }
 
 
@@ -253,6 +201,141 @@ bool UnitExtensionHandler::RemoveAllInfAIElemForUnit(long int unitId) {
 		result &= this->RemoveInfAIElemForUnit(unitId, i);
 	}
 	return result;
+}
+
+
+// Add/update infAI element for current unit (we consider it is visible for the player specified)
+// Remark: this method is called only if improveAI is true.
+bool UnitExtensionHandler::AddUpdateInfAIDetailedUnitInfo(STRUCT_UNIT_BASE *unit, STRUCT_INF_AI *infAI) {
+	if (!unit || !infAI) { return false; }
+	long int myPlayerId = infAI->commonAIObject.playerId;
+	long int unitId = unit->unitInstanceId;
+	if (unitId < 0) { return false; }
+	if (!this->AddUnitExtension(unit)) { // does nothing if already known
+		std::string msg = "Error adding unit extension for id=";
+		msg += std::to_string(unit->unitInstanceId);
+		traceMessageHandler.WriteMessage(msg.c_str());
+		return false; // Error case
+	}
+	// Now we can safely use this->allUnitExtensions[unitId]
+	if (this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] >= 0) {
+		// InfAI index is already known for that player
+		assert(this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] < infAI->detailedSpottedUnitInfoListSize);
+		STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = &infAI->detailedSpottedUnitInfoList[this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId]];
+		if (this->allUnitExtensions[unitId].UpdateInfAIElemInfo(elem)) {
+			return true;
+		}
+		// Failed: maybe the index was wrong ? Reset it.
+		std::string msg = "Incorrect cache index in unit extension/id=";
+		msg += std::to_string(unit->unitInstanceId);
+		traceMessageHandler.WriteMessage(msg.c_str());
+		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] = -1;
+	}
+
+	// Here index in infAI elem list is unknown. Search for it
+
+	long int indexOfAFreeSlot = -1;
+	for (int curIndex = 0; curIndex < infAI->detailedSpottedUnitInfoListSize; curIndex++) {
+		if (infAI->detailedSpottedUnitInfoList[curIndex].unitId == unitId) {
+			// Found: save index, update info and return
+			this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] = curIndex;
+			return this->allUnitExtensions[unitId].UpdateInfAIElemInfo(&infAI->detailedSpottedUnitInfoList[curIndex]);
+		} else {
+			if ((indexOfAFreeSlot < 0) && (infAI->detailedSpottedUnitInfoList[curIndex].unitId < 0)) {
+				indexOfAFreeSlot = curIndex; // Save index of a free slot for later (may be useful)
+			}
+		}
+	}
+	// Here: not found in infAI list: add it
+	if (indexOfAFreeSlot < 0) {
+		// May append at the end of the list... or reuse an existing slot (should not as we already tried)
+		if (!AOE_METHODS::LISTS::AddUpdateInfAIElemList(infAI, unit)) {
+			return false;
+		}
+		// Find index of new elem.
+		STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitId);
+		long int elemIndex = (((unsigned long int)elem) - (unsigned long int)(infAI->detailedSpottedUnitInfoList)) / sizeof(STRUCT_INF_AI_DETAILED_UNIT_INFO);
+		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] = elemIndex;
+		return true;
+	}
+
+	// Here: use the free slot we found
+	this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] = indexOfAFreeSlot;
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = &infAI->detailedSpottedUnitInfoList[indexOfAFreeSlot];
+	return this->allUnitExtensions[unitId].WriteAllInfAIElemInfo(elem);
+}
+
+
+// Adds (if necessary) unit in infAI lists (other than "spotted units detailed info)
+// This is optimized (using unit extension) so that "adding" operation is done only once.
+// Returns false if an error occurred
+bool UnitExtensionHandler::AddUnitInOtherInfAILists(STRUCT_UNIT_BASE *unit, STRUCT_INF_AI *infAI) {
+	if (!unit || !infAI) { return false; }
+	long int myPlayerId = infAI->commonAIObject.playerId;
+	long int unitId = unit->unitInstanceId;
+	if (unitId < 0) { return true; } // Ignore temp units
+	if (!this->AddUnitExtension(unit)) { // does nothing if already known
+		std::string msg = "Error adding unit extension for id=";
+		msg += std::to_string(unit->unitInstanceId);
+		traceMessageHandler.WriteMessage(msg.c_str());
+		return false; // Error case
+	}
+	// Now we can safely use this->allUnitExtensions[unitId]
+	if (this->allUnitExtensions[unitId].hasBeenAddedToOtherPlayersInfAILists[myPlayerId]) {
+		return true; // Nothing to do / but not an error ;)
+	}
+	
+	// Here this is the first time we request adding this unit in infAI info.
+	this->allUnitExtensions[unitId].hasBeenAddedToOtherPlayersInfAILists[myPlayerId] = true;
+
+	// Remark: this code looks like 0x4BDD10 (removing some parts)
+	// TODO: how about coopShareInfo...?
+
+	bool isArtefactOrTargetableOrCreatable = CUSTOM_AI::EconomyAI::IsArtefactOrTargetableResourceOrCreatable(unit);
+	if (!isArtefactOrTargetableOrCreatable || !unit->unitDefinition) {
+		return true; // Nothing to do for such a unit
+	}
+
+	// addrHandleAddToElemsToDefend: Adds a unit to infAI resources arrays. Does nothing and returns 1 if already in list.
+	// Returns 0 if not added. Does NOT add to defend list if corresponding SNxxxDefendPriority is 0.
+	unsigned long int addrHandleAddToElemsToDefend = 0x4C1730; // cf call in 0x4BDE32
+	long int longIsUnitToDefend = 0;
+	// This handles adding (if relevant) into infAI->elementsToDefend. This checks for duplicates (ok).
+	bool isUnitToDefend = false;
+	_asm {
+		MOV ECX, infAI;
+		PUSH unit;
+		CALL addrHandleAddToElemsToDefend;
+		MOV longIsUnitToDefend, EAX;
+	}
+	isUnitToDefend = (longIsUnitToDefend != 0);
+
+	// Here we know that isArtefactOrTargetableOrCreatable is true: always add in artefactsCreatableGatherableUnits
+	bool addedInArtefactsCreatableGatherable = infAI->artefactsCreatableGatherableUnits.Add(unitId);
+
+	// Possible optimization: if !addedInArtefactsCreatableGatherable, return because it must have already been added in all lists (where relevant)
+
+	GLOBAL_UNIT_AI_TYPES unitClass = unit->unitDefinition->unitAIType;
+	bool isPlayerCreatable = AOE_STRUCTURES::IsClassPlayerCreatable(unitClass);
+	if (isPlayerCreatable) {
+		infAI->playerCreatableUnits.Add(unitId);
+	} else {
+		// Not player-creatable
+		if (CUSTOM_AI::EconomyAI::IsAITargetableResource(unit)) {
+			// Add in infAI resource lists
+			const unsigned long int addrAddGatherable = 0x4C49C0;
+			_asm {
+				MOV ECX, infAI;
+				PUSH unit;
+				CALL addrAddGatherable;
+			}
+		} else {
+			if (CUSTOM_AI::EconomyAI::IsArtefactOrFlag(unitClass)) {
+				infAI->artefactsAndFlags.Add(unitId);
+			}
+		}
+	}
+	return true;
 }
 
 

@@ -413,6 +413,7 @@ namespace AOE_STRUCTURES {
 	// - Artefact/flag
 	// - Gatherable unit (mine, tree, gazelle - but not other animals, bushes...)
 	// - Units that can be created by players: buildings, living units
+	// WARNING: this does not includes bugfixes, see EconomyAI method !
 	bool IsClassArtefactOrGatherableOrCreatable(GLOBAL_UNIT_AI_TYPES unitClass) {
 		/*AOE_STRUCTURES::STRUCT_INF_AI fakeInfAI; // unused, ROR method must be static (not using members)
 		const unsigned long int addr = 0x4BE100;
@@ -477,6 +478,7 @@ namespace AOE_STRUCTURES {
 	}
 
 	// Returns true if unit class is targetable as a resource from AI point of view: fish, gazelle, bush, trees, mines
+	// WARNING: this does not includes bugfixes, see EconomyAI method !
 	bool IsClassTargetableAsResource(GLOBAL_UNIT_AI_TYPES unitClass) {
 		switch (unitClass) {
 		case GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnknownFish:

@@ -4476,7 +4476,7 @@ void RockNRorInstance::OnAttackableUnitUpdateVisibility(REG_BACKUP *REG_values) 
 			// TODO: take care of visibleInFog ? Maybe in unitExtensionHandler (could save the information?)
 
 			if (isVisibleNow && !wasVisibleBefore) {
-				ROCKNROR::unitExtensionHandler.AddUpdateInfAIElem(unit, iPlayerId);
+				ROCKNROR::unitExtensionHandler.AddUpdateUnitInInfAILists(unit, iPlayerId);
 			}
 			if (wasVisibleBefore && !isVisibleNow) {
 				// TODO: what if not visible ? Leave it (we can check easily if tile is visible :)

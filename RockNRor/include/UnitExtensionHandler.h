@@ -10,6 +10,7 @@
 #include "UnitExtension.h"
 #include "RockNRorCommon.h"
 #include "RockNRorInfo.h"
+#include "EconomyAI.h"
 
 /*
 This file defines the class that handles units extension data for current game
@@ -46,9 +47,9 @@ public:
 	// Returns true if successful (including the case when unit is already initialized)
 	bool AddUnitExtension(long int unitId);
 
-	// Add/update infAI element for current unit (we consider it is visible for the player specified)
+	// Add/update specified unit in infAI lists (we consider it is visible for the player specified)
 	// Remark: this method is called only if improveAI is true.
-	bool AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int infAIPlayerId);
+	bool AddUpdateUnitInInfAILists(STRUCT_UNIT_BASE *unit, long int infAIPlayerId);
 
 	// Remove element for provided unitId in specified player's InfAI elem list.
 	// This does NOT use optimization from unitExtensions
@@ -68,6 +69,17 @@ public:
 	// You can use this even if improveAI is false
 	// Returns true if successful for all players
 	bool RemoveAllInfAIElemForUnit(long int unitId);
+
+
+private:
+	// Adds (if necessary) unit in infAI lists (other than "spotted units detailed info)
+	// This is optimized (using unit extension) so that "adding" operation is done only once.
+	// Returns false if an error occurred
+	bool AddUnitInOtherInfAILists(STRUCT_UNIT_BASE *unit, STRUCT_INF_AI *infAI);
+
+	// Add/update infAI element for current unit (we consider it is visible for the player specified)
+	// Remark: this method is called only if improveAI is true.
+	bool AddUpdateInfAIDetailedUnitInfo(STRUCT_UNIT_BASE *unit, STRUCT_INF_AI *infAI);
 
 };
 

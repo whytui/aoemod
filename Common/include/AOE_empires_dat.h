@@ -116,7 +116,7 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_TRADE_GOODS = 9, // The trade goods amount we can see in docks. Only impacts other players (that trade) ! Cf 0x4F8FC2.
 		CST_RES_ORDER_TRADE_PRODUCTION = 10, // Default 1 ?
 		CST_RES_ORDER_CURRENT_POPULATION = 11,
-		CST_RES_ORDER_CORPSE_DECAY_TIME = 12, // TO CONFIRM. Remains 0 in game ?
+		CST_RES_ORDER_CORPSE_DECAY_TIME_SECONDS = 12, // Number of seconds for decay, used for flare (unitDef 112). Always 0 for players, used at unit level only ?
 		CST_RES_ORDER_DISCOVERIES = 13, // Number of found discoveries (a player flag is set on such discoveries)
 		CST_RES_ORDER_RUINS = 14, // Number of owned ruins
 		CST_RES_ORDER_MEAT_STORAGE = 15, // TO CONFIRM. Remains 0 in game ?

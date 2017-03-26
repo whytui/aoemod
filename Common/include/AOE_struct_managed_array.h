@@ -23,6 +23,7 @@ namespace AOE_STRUCTURES {
 		long int maxElementCount; // +8. Max or desired value ? Generally unused (0)
 		long int arraySize; // +C. Number of allocated elements in array
 
+		// Returns true if unitId is in the list
 		bool ContainsUnitId(long int unitId) {
 			const unsigned long int addr = 0x4C6880;
 			long int res;
@@ -34,6 +35,8 @@ namespace AOE_STRUCTURES {
 			}
 			return (res != 0);
 		}
+		// Returns true if an element was removed (found)
+		// Returns false if nothing was done (unitId was not in the list)
 		bool Remove(long int unitId) {
 			const unsigned long int addr = 0x4E3AF0;
 			long int res;
@@ -45,7 +48,11 @@ namespace AOE_STRUCTURES {
 			}
 			return (res != 0);
 		}
-		bool Add(long int unitId) { // returns true if elem was added.
+		// Add a unitId to the list if it is not already there.
+		// Returns true if an element has been added.
+		// Returns false if unitId was already in list
+		// Automatically handles realloc if necessary.
+		bool Add(long int unitId) {
 			const unsigned long int addr = 0x4C68C0;
 			long int res;
 			_asm {
