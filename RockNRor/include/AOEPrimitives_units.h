@@ -64,6 +64,9 @@ float GetContactDistanceTo(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target);
 long int GetTotalQueueNumberForUnit(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld, short int unitDefId);
 
 
+// Update an action's status
+void UnitActionSetStatus(STRUCT_ACTION_BASE *action, ACTION_STATUS newStatus);
+
 
 // Exact role to confirm.
 // MAYBE this method allows finding path with enemy units blocking the way. Such units are added to path finding struct's unitid array (unknown_11DCE4) ?

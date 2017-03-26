@@ -7,6 +7,7 @@
 #include "RORVirtualMethodHelper.h"
 #include "mainStructuresHandling.h"
 #include "RockNRorCommand.h"
+#include "AOEPrimitives_gameCommand.h"
 
 
 namespace ROCKNROR {
@@ -19,7 +20,7 @@ namespace GAME_EVENTS {
 bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT notifyEvent);
 
 
-// UnitActivity.ProcessNotify event.
+// UnitActivity.ProcessNotify event for ALL activity classes (base+children)
 // outExecStandardCode is an output bool: if set to true, ROR standard code will be executed afterwards. If false, it will be skipped.
 ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2, bool &outExecStandardCode);
 

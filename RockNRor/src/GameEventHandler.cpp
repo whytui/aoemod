@@ -20,18 +20,29 @@ bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT 
 		PlayerNotifySeeUnit(player, myUnitId, seenUnitId);
 	}
 
-	if (notifyEvent.eventId == AOE_CONST_INTERNAL::EVENT_TOO_CLOSE_TO_SHOOT) {
-		// TODO
-	}
+	/*if (notifyEvent.eventId == AOE_CONST_INTERNAL::EVENT_TOO_CLOSE_TO_SHOOT) {
+		// Handled in ActivityProcessNotify
+	}*/
 
 	return false; // default: let ROR code be run
 }
 
 
-// UnitActivity.ProcessNotify event.
+// UnitActivity.ProcessNotify event for ALL activity classes (base+children)
 // outExecStandardCode is an output bool: if set to true, ROR standard code will be executed afterwards. If false, it will be skipped.
 ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2, bool &outExecStandardCode) {
 	outExecStandardCode = true;
+	if (!notifyEvent || !activity || !activity->IsCheckSumValid()) {
+		return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
+	}
+
+	if (notifyEvent->eventId == AOE_CONST_INTERNAL::EVENT_TOO_CLOSE_TO_SHOOT) {
+		// TODO
+	}
+
+	if (notifyEvent->eventId == AOE_CONST_INTERNAL::EVENT_BECOME_TOO_FAR_TO_SHOOT) {
+	}
+
 
 	/*std::string msg1 = "ActivityProcessNotify ";
 	msg1 += GetHexStringAddress(notifyEvent->activityId, 3);
@@ -61,7 +72,7 @@ ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activi
 	//msg += std::to_string((int)notificationTaskId);
 
 	switch (notificationTaskId) {
-	case GAME_EVENT_TYPE::EVENT_TOO_FAR_TO_SHOOT: // See 0x4143B7
+	case GAME_EVENT_TYPE::EVENT_BECOME_TOO_FAR_TO_SHOOT: // See 0x4143B7
 		break;
 	case GAME_EVENT_TYPE::EVENT_UNKNOWN_1FC_NEED_MOVE_AGAIN: // Target moved ? The "target is no longer visible" is a sub-case of this. See 4E3FB8(for predator)
 		/*AOE_METHODS::CallWriteCenteredText(msg.c_str());
@@ -129,17 +140,19 @@ bool PlayerNotifySeeUnit(STRUCT_PLAYER *player, long int myUnitId, long int seen
 	if (!seenUnit || !myUnit || !seenUnit->IsCheckSumValidForAUnitClass() || !myUnit->IsCheckSumValidForAUnitClass()) {
 		return false;
 	}
-	COMBAT::OnSeeNearbyUnit(player, myUnit, seenUnit);
+	bool result = false; // Default (for non-type50+ units): Let standard code be executed...
 	if (seenUnit->unitDefinition && seenUnit->DerivesFromAttackable()) {
 		// Prevent ROR from updating infAI list: unitExtensions+visibility change hooks handle this (and are better)
 		// Use quick-update instead (retrieve infAI elem index from cache)
 		ROCKNROR::unitExtensionHandler.AddUpdateInfAIElem(seenUnit, player->playerId);
-		return true;
+		result = true;
 	} else {
 		// Non-type50 are not handled by visibility change hooks (as those units do NOT have the visibility back-pointer updates).
 		// Let standard code be executed...
-		return false;
+		// result = false;
 	}
+	COMBAT::OnSeeNearbyUnit(player, myUnit, seenUnit);
+	return result;
 }
 
 

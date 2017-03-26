@@ -69,6 +69,10 @@ bool TellUnitToInteractWithTarget(STRUCT_UNIT_COMMANDABLE *actorUnit, STRUCT_UNI
 void MoveUnitToTargetOrPosition(STRUCT_UNIT_COMMANDABLE *unitToMove, STRUCT_UNIT_BASE *target, float posX, float posY);
 
 
+// Update current action's status to "search" so that it will search for another target (if any)
+void ForceUnitChangeTarget(STRUCT_UNIT_BASE *unit);
+
+
 // Returns true if targetUnitDefId creates renewable resource:
 // - farms (immediately available food is limited and increases progressively)
 // - docks or trade buildings (trade goods are unlimited, but need time to resplenish)

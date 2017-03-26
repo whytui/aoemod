@@ -313,11 +313,11 @@ void ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURE
 		return;
 	}
 	_asm {
-		MOV ECX, targetUnit
-			MOV EAX, actorPlayer
-			MOV EDX, DS:[ECX]
-			PUSH EAX
-			CALL DS : [EDX + 0x44] // unit.convertToPlayer(ptrPlayer)
+		MOV ECX, targetUnit;
+		MOV EAX, actorPlayer;
+		MOV EDX, DS:[ECX];
+		PUSH EAX;
+		CALL DS:[EDX + 0x44]; // unit.convertToPlayer(ptrPlayer)
 	}
 }
 
@@ -332,15 +332,15 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *CreateUnitNoMapCheck(AOE_STRUCTURES::STRUCT_PL
 	}
 	long int res;
 	_asm {
-		MOV ECX, player
-			PUSH 0 // arg5=unused ?
-			PUSH posZ
-			PUSH posX
-			PUSH posY
-			PUSH DAT_ID
-			MOV EAX, 0x4F0B50 // does not check if there is free space to accept the new unit nor terrain restriction... (check it first)
-			CALL EAX
-			MOV res, EAX
+		MOV ECX, player;
+		PUSH 0; // arg5=unused ?
+		PUSH posZ;
+		PUSH posX;
+		PUSH posY;
+		PUSH DAT_ID;
+		MOV EAX, 0x4F0B50; // does not check if there is free space to accept the new unit nor terrain restriction... (check it first)
+		CALL EAX;
+		MOV res, EAX;
 	}
 	return (AOE_STRUCTURES::STRUCT_UNIT_BASE *) res;
 }
@@ -480,6 +480,19 @@ long int GetTotalQueueNumberForUnit(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld, s
 		}
 	}
 	return result;
+}
+
+
+// Update an action's status
+void UnitActionSetStatus(STRUCT_ACTION_BASE *action, ACTION_STATUS newStatus) {
+	if (!action) { return; }
+	long int dwordStatus = newStatus;
+	_asm {
+		MOV ECX, action;
+		PUSH dwordStatus;
+		MOV EDX, DS:[ECX];
+		CALL DS:[EDX+0x5C]; // update status
+	}
 }
 
 

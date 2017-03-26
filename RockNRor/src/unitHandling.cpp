@@ -217,6 +217,20 @@ void MoveUnitToTargetOrPosition(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unitToM
 }
 
 
+// Update current action's status to "search" so that it will search for another target (if any)
+void ForceUnitChangeTarget(STRUCT_UNIT_BASE *unit) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return; }
+	STRUCT_UNIT_ACTIVITY *activity = unit->currentActivity;
+	STRUCT_ACTION_BASE *action = GetUnitAction(unit);
+	if (!activity || !action) { return; }
+	activity->targetUnitId = -1;
+	activity->targetUnitType = GLOBAL_UNIT_AI_TYPES::TribeAINone;
+	action->targetUnit = NULL;
+	action->targetUnitId = NULL;
+	AOE_METHODS::UNIT::UnitActionSetStatus(action, ACTION_STATUS::CST_AS_03_SEARCH);
+}
+
+
 // Returns true if targetUnitDefId creates renewable resource:
 // - farms (immediately available food is limited and increases progressively)
 // - docks or trade buildings (trade goods are unlimited, but need time to resplenish)

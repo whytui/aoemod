@@ -654,6 +654,8 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 	STRUCT_PLAYER *otherPlayer = seenUnit->ptrStructPlayer;
 	STRUCT_UNITDEF_BASE *seenUnitDef = seenUnit->unitDefinition;
 	
+	if (!player->isComputerControlled) { return; } // should not happen
+
 	if (seenUnitDef->unitAIType == TribeAIGroupPriest) {
 		// Priests have a specific behaviour...
 		OnPriestSeeNearbyUnit(player, actorUnit, seenUnit);
@@ -664,7 +666,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 	if (seenUnitDef->unitAIType == TribeAIGroupSiegeWeapon) { return; }
 
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	// Easy and easiest levels: do not use this improvement.
+	// Medium/Easy/easiest levels: do not use this improvement.
 	if (!settings || !settings->IsCheckSumValid() || (settings->rgeGameOptions.difficultyLevel > GAME_DIFFICULTY_LEVEL::GDL_HARD)) { return; }
 
 	// The goal here is to take into account 'seen' unit and possible change target if necessary
@@ -694,20 +696,37 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 		// TODO: found cases where task is -1 but currently attacking...
 		if (canInterrupt && action && (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_ATTACK)) {
 			// If attacking a low-priority target (non-tower building) and military unit/villager is around, switch
+			// If attacking a *civilian* that is out of reach AND running faster, allow switching
 			bool currentTargetIsImportant = false;
 			
 			if (action && action->IsCheckSumValid() && (action->actionTypeID == action->GetExpectedInternalActionId())) {
-				STRUCT_UNIT_BASE *currentTarget = action->targetUnit;
+				STRUCT_UNIT_BASE *currentTarget = action->targetUnit; // "this" unit's action current target
+				STRUCT_UNIT_FLAG *currentTargetFlag = (STRUCT_UNIT_FLAG *)action->targetUnit;
 				if (!currentTarget) {
 					currentTarget = GetUnitStruct(action->targetUnitId);
 				}
 				if (currentTarget && currentTarget->unitDefinition) {
 					currentTargetIsImportant = (currentTarget->unitDefinition->DAT_ID1 == CST_UNITID_WONDER) ||
+						(currentTarget->unitDefinition->unitAIType == TribeAIGroupCivilian) ||
 						UnitDefCanAttack(currentTarget->unitDefinition) ||
 						(currentTarget->remainingHitPoints < 2);
+					// Special: faster & fleeing & out of reach civilian (hardest only)
+					if ((settings->rgeGameOptions.difficultyLevel == GAME_DIFFICULTY_LEVEL::GDL_HARDEST) &&
+						(currentTarget->unitDefinition->unitAIType == TribeAIGroupCivilian) &&
+						currentTargetFlag->DerivesFromFlag() &&
+						(currentTargetFlag->currentMovementSpeed > 0) && // currently moving
+						((action->actionStatus == ACTION_STATUS::CST_AS_04_GOTO) || (action->actionStatus == ACTION_STATUS::CST_AS_05_GOTO2))
+						) {
+						float targetSpeed = AOE_METHODS::UNIT::GetSpeed(currentTarget);
+						float mySpeed = AOE_METHODS::UNIT::GetSpeed(activity->ptrUnit);
+						if (mySpeed * COMBAT_CONST::minimumSpeedProportionToFollowFleeingVillager <= targetSpeed) {
+							currentTargetIsImportant = false; // Faster out of reach villager: let him run if there is another target around
+						}
+					}
 				}
 				if (currentTarget == seenUnit) {
-					currentTargetIsImportant = false;
+					//currentTargetIsImportant = false; // TO DEBUG: find out for which situation I needed that ??
+					currentTargetIsImportant = true;
 				}
 			}
 			if (!currentTargetIsImportant) {

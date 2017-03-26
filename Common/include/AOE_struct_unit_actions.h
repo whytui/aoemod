@@ -136,12 +136,9 @@ namespace AOE_STRUCTURES {
 	// This action corresponds to giving 1 shot, then action status comes to 1 and a new attack action is created (to confirm)
 	class STRUCT_ACTION_ATTACK : public STRUCT_ACTION_BASE { // F8 23 54 00
 	public:
-		// 0x40
-		//short int targetDATID;
-		//short int unknown_42;
-		unsigned long int unknown_40; // Pointer to graphics ? "move_sprite_in"?
-		unsigned long int unknown_44; // "fight_sprite_in" ?
-		unsigned long int unknown_48; // "wait_sprite_in" ?
+		STRUCT_GRAPHICS *moveSpriteIn; // +40. Graphics for "walk" ("move_sprite_in")
+		STRUCT_GRAPHICS *fightSpriteIn; // +44. Graphics for battle ("fight_sprite_in").
+		STRUCT_GRAPHICS *waitSpriteIn; // +48. Graphics for idle or "waiting reload" ?? ("wait_sprite_in")
 		float maxRange; // +4C. Maximum range (max distance from target I can attack from), cf unit definition.
 		// 0x50
 		float minRange; // +50. Minimum required range to be able to attack, e.g. for siege weapons, cf unit definition.. ("min_range_in" ?)
@@ -151,7 +148,7 @@ namespace AOE_STRUCTURES {
 		char unknown_59; // +59. Init=1 in 4011F1 or 0 in 4011F7
 		char unknown_5A; // a counter (decremented...)?
 		char unknown_5B; // +5B. unused ?
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_ATTACK; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_ACTION_ATTACK; }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ATTACK; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_ATTACK) == 0x5C, "STRUCT_ACTION_ATTACK size");

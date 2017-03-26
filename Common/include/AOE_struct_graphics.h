@@ -75,7 +75,7 @@ namespace AOE_STRUCTURES
 		float replayDelay; // +6C
 		char sequenceType; // +70
 		char unknown_71;
-		short int unknown_id; // +72
+		short int graphicId; // +72. Graphic ID, the same as AGE3's graphics tab. This is NOT SlpId.
 		char mirroringMode; // +74
 		char unused_75[3]; // +75
 

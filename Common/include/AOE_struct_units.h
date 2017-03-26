@@ -130,7 +130,7 @@ namespace AOE_STRUCTURES {
 	// +0x98 = unit.executeRightClick(targetUnit, float posY, posX, posZ) (do_command)
 	// +0x9C = unit.createMoveToAction(targetUnitStruct, pos, pos, fposZ)
 	// +0xA0 = unit.work(targetUnit, float_posY, posX, posZ)
-	// +0xA4 = void unit.stop()
+	// +0xA4 = void unit.stop(). Warning: when calling this, you better update unitAI too...
 	// +0xB4 = unit.setOrientation(float) "newAngle"
 	// +0xB8 = unit.spawnDeadUnit()
 	// +0xC0 = unit.setBeingWorkedOn(pUnit, short, unsigned char)

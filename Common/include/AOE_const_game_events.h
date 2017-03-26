@@ -144,10 +144,13 @@ namespace AOE_CONST_INTERNAL
 		EVENT_UNKNOWN_1FC_NEED_MOVE_AGAIN = 0x1FC,
 
 		// Source: 0x401C7B. See 0x4143B7.
-		// Target becomes too far to be shot at ? (may still be visible, but out of reach)
-		EVENT_TOO_FAR_TO_SHOOT = 0x1FD,
+		// Target *becomes* too far to be shot at (may still be visible, but out of reach), for both range and melee units.
+		// This is only raised at the moment when the unit "I" was attacking becomes out of reach for an attack.
+		// Handled at activity level (then player, if not handled
+		EVENT_BECOME_TOO_FAR_TO_SHOOT = 0x1FD,
 		
 		// When distance is too low to attack (for siege...). Set in 0x401BCF,0x401E6F only. See 0x41426A.
+		// Handled at activity level (then player, if not handled)
 		EVENT_TOO_CLOSE_TO_SHOOT = 0x1FE,
 		
 		// To confirm. See 0x4143B7 (part of the "default" switch cases). Used in early versions only ? Never triggered.

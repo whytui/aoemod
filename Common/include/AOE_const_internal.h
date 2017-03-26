@@ -155,11 +155,11 @@ namespace AOE_CONST_INTERNAL
 		CST_AS_02_DONE = 2, // Seen when moving was finished? (idle). For gen. wonder victory, means wonder is unfinished?
 		CST_AS_03_SEARCH = 3, // Can start moving to action location (temporary state) ? 40547F. Considered idle !
 		CST_AS_04_GOTO = 4, // Moving to action location ? (a transitional state)
-		CST_AS_04_GOTO2 = 5,
+		CST_AS_05_GOTO2 = 5,
 		CST_AS_06_WORK = 6, // "start" in progress ? (analog to 3?). For gen. wonder victory, means timer has started? (a transitional state)
 		CST_AS_07_WORK2 = 7, // in progress ? (analog to 4?). For both attack, build, etc
 		CST_AS_08_RETURN = 8, // Return to deposit when fully loaded (cf action.target2): gathering,trading. Projectiles use it too ?
-		CST_AS_08_TURN = 9, // ???
+		CST_AS_09_TURN = 9, // ???
 		CST_AS_0A_DELAY = 0x0A, // Seen on stuck villager (repairman that could not get to target)
 		CST_AS_0B_MOVE = 0x0B, // Seen when moving to bird location (after killing it). For transport too in some case ?
 		CST_AS_0C_ATTACK = 0x0C, // waiting for requirement ? Really unsure

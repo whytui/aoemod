@@ -27,6 +27,10 @@ namespace COMBAT {
 		const long int distanceAlwaysTaskIdleMilitaryUnitsOnAttack = 6; // Max distance *idle* nearby units will always be tasked when "I" am attacked
 		const float afterShootRetreatRangeForHunterSlowAnimal = 1;
 		const float afterShootRetreatRangeForHunterFastAnimal = 3;
+
+		// Speed factor to apply on actor unit speed that runs after a civilian. If fixed speed is slower than villager, let him run (if another target is out there).
+		// E.g. 1.1 = 110% (real speed+10%). If actor is more than 10% faster than villager, he will continue to chase the villager. Otherwise, actor may change target.
+		const float minimumSpeedProportionToFollowFleeingVillager = 1.1f;
 	}
 
 	// Custom treatment to decide if a potential target unit should be ignored
