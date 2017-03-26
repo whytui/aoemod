@@ -154,15 +154,15 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 
 	// Analyze known enemy units ?
 	// TODO: this should be done along the game when "I" receive alerts from attacks, and reset it at each re-computation
-	for (int i = 0; i < player->ptrAIStruct->structInfAI.unitElemListSize; i++) {
-		long int unitPlayerId = player->ptrAIStruct->structInfAI.unitElemList[i].playerId;
+	for (int i = 0; i < player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoListSize; i++) {
+		long int unitPlayerId = player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[i].playerId;
 		bool ignoreThisUnit = ignoreThisPlayer[unitPlayerId];
-		long int unitPosX = player->ptrAIStruct->structInfAI.unitElemList[i].posX;
-		long int unitPosY = player->ptrAIStruct->structInfAI.unitElemList[i].posY;
+		long int unitPosX = player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[i].posX;
+		long int unitPosY = player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[i].posY;
 		if (!ignoreThisUnit && (unitPosX >= 0) && (unitPosY >= 0)) {
 			bool isVisible = PLAYER::IsFogVisibleForPlayer(player, unitPosX, unitPosY); // fast operation: ok with performance
 			if (isVisible) {
-				STRUCT_UNIT_BASE *unit = global->GetUnitFromId(player->ptrAIStruct->structInfAI.unitElemList[i].unitId);
+				STRUCT_UNIT_BASE *unit = global->GetUnitFromId(player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[i].unitId);
 				if (!unit) {
 					// Remove from list ? (no cheating: position is fog-visible)
 					// Do not remove during the loop, do it afterwards
@@ -170,8 +170,8 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 					// By the way, update unit position in infAI list (it is often NOT up to date)
 					long int unitPosX = (long int)unit->positionX;
 					long int unitPosY = (long int)unit->positionY;
-					player->ptrAIStruct->structInfAI.unitElemList[i].posX = (char)unitPosX;
-					player->ptrAIStruct->structInfAI.unitElemList[i].posY = (char)unitPosY;
+					player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[i].posX = (char)unitPosX;
+					player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[i].posY = (char)unitPosY;
 				}
 			} else {
 				// Remove from list (can be added back later) ? Warning, might impact severely AI as it cheats a bit in attack phases. Fix/improve AI attack first ?
@@ -179,10 +179,10 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 			}
 				
 			STRUCT_PLAYER *targetPlayer = global->GetPlayerStruct(unitPlayerId);
-			bool isAggressive = IsNonTowerMilitaryUnit(player->ptrAIStruct->structInfAI.unitElemList[i].unitClass);
+			bool isAggressive = IsNonTowerMilitaryUnit(player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[i].unitClass);
 			if (targetPlayer && targetPlayer->IsCheckSumValid()) {
 				// Using the "unitDef*" overload is better than "unitDefId" overload (which is hardcoded).
-				isAggressive |= IsTower(targetPlayer->GetUnitDefBase(player->ptrAIStruct->structInfAI.unitElemList[i].unitDATID));
+				isAggressive |= IsTower(targetPlayer->GetUnitDefBase(player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[i].unitDefId));
 			}
 				
 			ignoreThisUnit = ignoreThisUnit || !isVisible || !isAggressive;

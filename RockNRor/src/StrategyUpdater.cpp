@@ -446,72 +446,72 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 			square_maxPanicModeSeekEnemyDistance = maxPanicModeSeekEnemyDistance * maxPanicModeSeekEnemyDistance;
 		}
 	}
-	long int unitListElementCount = infAI->unitElemListSize;
-	long int unitListBase = (long int)infAI->unitElemList;
-	assert((unitListElementCount == 0) || (infAI->unitElemList != NULL));
+	long int unitListElementCount = infAI->detailedSpottedUnitInfoListSize;
+	long int unitListBase = (long int)infAI->detailedSpottedUnitInfoList;
+	assert((unitListElementCount == 0) || (infAI->detailedSpottedUnitInfoList != NULL));
 	// Collect info about ATTACKER's units in my town. Note: the unit list we use may not be up to date depending on "my" exploration and what happened to involved units
-	// In standard game, infAI->unitElemList contains many obsolete information (never cleaned up !). This is improved in RockNRor.
+	// In standard game, infAI->detailedSpottedUnitInfoList contains many obsolete information (never cleaned up !). This is improved in RockNRor.
 	for (int i = 0; i < unitListElementCount; i++) {
 		// We could count "my" buildings from this list but it is incomplete ! Original game searches there but it's bad. We will search directly in player.building_list list.
-		if (infAI->unitElemList[i].playerId == enemyPlayerId) {
+		if (infAI->detailedSpottedUnitInfoList[i].playerId == enemyPlayerId) {
 			// Count enemy units in my town
-			long int diffX = (forumPosX - infAI->unitElemList[i].posX);
-			long int diffY = (forumPosY - infAI->unitElemList[i].posY);
+			long int diffX = (forumPosX - infAI->detailedSpottedUnitInfoList[i].posX);
+			long int diffY = (forumPosY - infAI->detailedSpottedUnitInfoList[i].posY);
 			if ((diffX * diffX) + (diffY * diffY) <= square_maxPanicModeSeekEnemyDistance) {
 				totalEnemyCount++;
-				if (infAI->unitElemList[i].unitDATID == CST_UNITID_PRIEST) { enemyPriestCount++; }
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_CAVALRY) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HEAVY_CAVALRY) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CATAPHRACT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HORSE_ARCHER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HEAVY_HORSE_ARCHER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CHARIOT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CHARIOT_ARCHER)) {
+				if (infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_PRIEST) { enemyPriestCount++; }
+				if ((infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_CAVALRY) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_HEAVY_CAVALRY) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_CATAPHRACT) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_HORSE_ARCHER) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_HEAVY_HORSE_ARCHER) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_CHARIOT) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_CHARIOT_ARCHER)) {
 					enemyCamelVictimsCount++;
 				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_SCOUT_SHIP) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_WAR_GALLEY) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_TRIREME) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CATAPULT_TRIREME) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_JUGGERNAUGHT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_FIRE_GALLEY)) {
+				if ((infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_SCOUT_SHIP) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_WAR_GALLEY) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_TRIREME) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_CATAPULT_TRIREME) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_JUGGERNAUGHT) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_FIRE_GALLEY)) {
 					hasBoats = true;
 				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_BOWMAN) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_IMPROVED_BOWMAN) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_COMPOSITE_BOWMAN) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CHARIOT_ARCHER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HORSE_ARCHER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HEAVY_HORSE_ARCHER) // ||
+				if ((infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_BOWMAN) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_IMPROVED_BOWMAN) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_COMPOSITE_BOWMAN) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_CHARIOT_ARCHER) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_HORSE_ARCHER) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_HEAVY_HORSE_ARCHER) // ||
 					// Remove elephant archer ? His slowness makes him quite different for defence strategy (he won't make my slow units run after him)
-					//(infAI->unitElemList[i].unitDATID == CST_UNITID_ELEPHANT_ARCHER)
+					//(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_ELEPHANT_ARCHER)
 					) {
 					enemySlingerVictimsCount++;
 				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_BALLISTA) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HELEPOLIS) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_STONE_THROWER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CATAPULT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HEAVY_CATAPULT)) {
+				if ((infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_BALLISTA) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_HELEPOLIS) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_STONE_THROWER) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_CATAPULT) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_HEAVY_CATAPULT)) {
 					enemySiegeWeaponsCount++;
 				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_ELEPHANT_ARCHER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_WAR_ELEPHANT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_ARMORED_ELEPHANT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_HOPLITE) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_PHALANX) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CENTURION)) {
+				if ((infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_ELEPHANT_ARCHER) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_WAR_ELEPHANT) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_ARMORED_ELEPHANT) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_HOPLITE) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_PHALANX) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_CENTURION)) {
 					enemyPriestVictimsCount++;
 				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_HEAVY_CHARIOT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CHARIOT) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_CHARIOT_ARCHER)) {
+				if ((infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_HEAVY_CHARIOT) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_CHARIOT) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_CHARIOT_ARCHER)) {
 					enemyChariotsCount++;
 				}
-				if ((infAI->unitElemList[i].unitDATID == CST_UNITID_WATCH_TOWER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_SENTRY_TOWER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_GUARD_TOWER) ||
-					(infAI->unitElemList[i].unitDATID == CST_UNITID_BALLISTA_TOWER)) {
+				if ((infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_WATCH_TOWER) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_SENTRY_TOWER) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_GUARD_TOWER) ||
+					(infAI->detailedSpottedUnitInfoList[i].unitDefId == CST_UNITID_BALLISTA_TOWER)) {
 					enemyTowersCount++;
 				}
 			}

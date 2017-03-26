@@ -44,13 +44,13 @@ namespace AOE_CONST_FUNC {
 		SNAttackCoordination = 47,
 		SNAttackResponseSeparationTime = 48,
 		SNRetreatAfterTargetDestroyed = 49,
-		SNGoldDefendPriority = 50,
-		SNStoneDefendPriority = 51,
-		SNForageDefendPriority = 52,
+		SNGoldDefendPriority = 50, // If >0, gold mines are added in "units to defend" list in infAI.
+		SNStoneDefendPriority = 51, // If >0, stone mines are added in "units to defend" list in infAI.
+		SNForageDefendPriority = 52, // If >0, berry bushes are added in "units to defend" list in infAI.
 		SNChokePointDefendPriority = 53,
-		SNRuinsDefendPriority = 54,
-		SNArtifactDefendPriority = 55,
-		SNTownDefendPriority = 56,
+		SNRuinsDefendPriority = 54, // If >0, ruins are added in "units to defend" list in infAI.
+		SNArtifactDefendPriority = 55, // If >0, relics are added in "units to defend" list in infAI.
+		SNTownDefendPriority = 56, // If >0, Town center is added in "units to defend" list in infAI.
 		SNDefenseDistance = 57, // Sets the distance at which items (town excluded) are defended.  Must be >= 0
 		SNNumberBoatAttackGroups = 58,
 		SNMinimumBoatAttackGroupSize = 59,
@@ -64,7 +64,7 @@ namespace AOE_CONST_FUNC {
 		SNNumberBoatDefendGroups = 67,
 		SNMinimumBoatDefendGroupSize = 68,
 		SNMaximumBoatDefendGroupSize = 69,
-		SNDockDefendPriority = 70,
+		SNDockDefendPriority = 70, // If >0, Docks are added in "units to defend" list in infAI.
 		SNLockAttackAndAttackResponse = 71,
 		SNSentryDistanceVariation = 72,
 		SNMinimumTownSize = 73,
@@ -188,7 +188,7 @@ namespace AOE_CONST_FUNC {
 		SNMaximumWood = 191,
 		SNMaximumStone = 192,
 		SNMaximumGold = 193,
-		SNCoopShareInformation = 194,
+		SNCoopShareInformation = 194, // 0xC2. If set (1), when some AI players see an enemy unit, all allied AI players see it too (add to AI unit lists in infAI)
 		SNAttackWinningPlayerFactor = 195,
 		SNCoopShareAttacking = 196,
 		SNCoopShareAttackingInterval = 197,

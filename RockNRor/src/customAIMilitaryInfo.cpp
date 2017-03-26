@@ -257,8 +257,8 @@ namespace CUSTOM_AI {
 		global->gameMapInfo->FixPositionToGetInMapBounds(&maxPosX, &maxPosY);
 		
 		if (startIndex < 0) { startIndex = 0; }
-		for (int i = startIndex; i < player->ptrAIStruct->structInfAI.unitElemListSize; i++) {
-			STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &player->ptrAIStruct->structInfAI.unitElemList[i];
+		for (int i = startIndex; i < player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoListSize; i++) {
+			STRUCT_INF_AI_DETAILED_UNIT_INFO *curElem = &player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[i];
 			bool enemyOrNeutral = (player->diplomacyVSPlayers[curElem->playerId] > PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY);
 			enemyOrNeutral &= (curElem->unitId > -1);
 			STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curElem->unitId);

@@ -46,11 +46,11 @@ public:
 
 	// Updates the specified infAI element with "this" unit information.
 	// Returns true if successful
-	bool WriteAllInfAIElemInfo(STRUCT_INF_AI_UNIT_LIST_ELEM *elemToUpdate);
+	bool WriteAllInfAIElemInfo(STRUCT_INF_AI_DETAILED_UNIT_INFO *elemToUpdate);
 
 	// Updates some infAI element information with "this" unit information: position, owner playerId...
 	// Returns true if successful
-	bool UpdateInfAIElemInfo(STRUCT_INF_AI_UNIT_LIST_ELEM *elemToUpdate);
+	bool UpdateInfAIElemInfo(STRUCT_INF_AI_DETAILED_UNIT_INFO *elemToUpdate);
 
 };
 

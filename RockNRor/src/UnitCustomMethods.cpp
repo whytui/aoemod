@@ -375,13 +375,13 @@ bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase
 
 // Returns a "infAI elem list" pointer of a trade target if found, NULL if not found
 // By default (game code), this searches for the closest unit that does not belong to "me", is a dock, whose player has trade goods>0.
-AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindTradeTargetElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int actorUnitId) {
-	if (!infAI || !infAI->IsCheckSumValid() || (actorUnitId < 0) || !infAI->unitElemList) {
+AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *FindTradeTargetElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int actorUnitId) {
+	if (!infAI || !infAI->IsCheckSumValid() || (actorUnitId < 0) || !infAI->detailedSpottedUnitInfoList) {
 		return NULL;
 	}
 	bool useOriginalCode = ROCKNROR::crInfo.configInfo.doNotApplyFixes;
-	long int listTotalElemCount = infAI->unitElemListSize;
-	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *bestElem = NULL;
+	long int listTotalElemCount = infAI->detailedSpottedUnitInfoListSize;
+	AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *bestElem = NULL;
 	long int bestSqrDistance = 0;
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) { return NULL; }
@@ -395,11 +395,11 @@ AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindTradeTargetElem(AOE_STRUCTURES
 	}
 
 	for (int curIndex = 0; curIndex < listTotalElemCount; curIndex++) {
-		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[curIndex];
+		AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *curElem = &infAI->detailedSpottedUnitInfoList[curIndex];
 		if ((curElem->playerId != myPlayerId) && (curElem->unitId > -1) && (playerHasTradeGoodsCache[curElem->playerId])) {
 			// The fix on original method is here (depending on useOriginalCode variable)
-			if ((useOriginalCode && (curElem->unitDATID == CST_UNITID_DOCK)) ||
-				(!useOriginalCode && (AOE_STRUCTURES::CanGetRenewableResourceFrom(actorUnit, curElem->unitDATID)))) {
+			if ((useOriginalCode && (curElem->unitDefId == CST_UNITID_DOCK)) ||
+				(!useOriginalCode && (AOE_STRUCTURES::CanGetRenewableResourceFrom(actorUnit, curElem->unitDefId)))) {
 				long int diffX = (long int)curElem->posX - (long int)actorUnit->positionX;
 				long int diffY = (long int)curElem->posY - (long int)actorUnit->positionY;
 				long int sqrDist = (diffX * diffX) + (diffY * diffY);

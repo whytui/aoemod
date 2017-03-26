@@ -51,18 +51,18 @@ namespace CUSTOM_AI {
 		// Returns the enemy wonder with higher attack priority. Does not return wonders from allied/neutral players
 		// playerId can be a joker (if -1)
 		// Returns NULL if not found
-		STRUCT_INF_AI_UNIT_LIST_ELEM *FindWonderToAttackInfAIElemPtr(STRUCT_INF_AI *infAI, long int playerId);
+		STRUCT_INF_AI_DETAILED_UNIT_INFO *FindWonderToAttackInfAIElemPtr(STRUCT_INF_AI *infAI, long int playerId);
 
 		// If current target is still a valid target - and its position is known -, return its pointer in InfAI elem list.
 		// Returns NULL otherwise
-		STRUCT_INF_AI_UNIT_LIST_ELEM *GetInfAIElemForCurrentTargetIfStillEligible(STRUCT_INF_AI *infAI, long int targetPlayerId,
+		STRUCT_INF_AI_DETAILED_UNIT_INFO *GetInfAIElemForCurrentTargetIfStillEligible(STRUCT_INF_AI *infAI, long int targetPlayerId,
 			STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 
 
-		STRUCT_INF_AI_UNIT_LIST_ELEM *ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
+		STRUCT_INF_AI_DETAILED_UNIT_INFO *ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
 			STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 
-		STRUCT_INF_AI_UNIT_LIST_ELEM *TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
+		STRUCT_INF_AI_DETAILED_UNIT_INFO *TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 			STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 		
 	private:
@@ -74,13 +74,13 @@ namespace CUSTOM_AI {
 
 		// Set target in unitGroup, in internal data, in targetInfo.
 		void SetTarget(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo,
-			STRUCT_INF_AI_UNIT_LIST_ELEM *targetInfAIElem, long int leaderTerrainZoneId, float targetEvaluation);
+			STRUCT_INF_AI_DETAILED_UNIT_INFO *targetInfAIElem, long int leaderTerrainZoneId, float targetEvaluation);
 
 		// If target player has all relics/ruins, finds the location to attack to capture one.
 		bool SetPriorityTargetLocation(STRUCT_INF_AI *infAI, long int targetPlayerId,
 			STRUCT_UNIT_BASE *groupLeader, STRUCT_TAC_AI_TARGET_INFO *targetInfo);
 
-		STRUCT_INF_AI_UNIT_LIST_ELEM* FindTargetUnitNearPriorityLocation(STRUCT_INF_AI *infAI, long int targetPlayerId);
+		STRUCT_INF_AI_DETAILED_UNIT_INFO* FindTargetUnitNearPriorityLocation(STRUCT_INF_AI *infAI, long int targetPlayerId);
 
 	};
 
@@ -97,7 +97,7 @@ namespace CUSTOM_AI {
 	// If successful, returns a pointer to the selected STRUCT_INF_AI_UNIT_LIST_ELEM element.
 	// If successful, unitGroup targets array contains only 1 target (in most cases... to check in case when units block the way to main target)
 	// Returns false if found nothing OR if search could not be completed in time.
-	STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 		STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 
 
@@ -108,7 +108,7 @@ namespace CUSTOM_AI {
 	// If successful, unitGroup targets array contains only 1 target (in most cases... to check in case when units block the way to main target)
 	// Returns false if found nothing OR if search could not be completed in time.
 #ifdef _DEBUG
-	STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 		STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 #endif
 

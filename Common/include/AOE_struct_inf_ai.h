@@ -21,20 +21,21 @@ namespace AOE_STRUCTURES {
 
 
 	// Size = 0x24. Update_Add=0x4BD750/0x4BD7E0
-	// Organized as a (big, initially 0x1F4 elements) array in infAI structure
+	// Organized as a (big, initially 0x1F4 elements) array in infAI structure.
+	// Represents (spotted) *creatable* units for me/other players + "units to defend" (artefacts, ruins, possibly mines, bushes, depending on SN numbers).
 	// Empty slots are re-used when adding an entry.
 	// In standard games, entries are NEVER reset !!!! which leads to some very bad behavior (for example, to evaluate if panic mode is needed)
 	// See unitExtensions for optimizations/fixes.
-	class STRUCT_INF_AI_UNIT_LIST_ELEM {
+	class STRUCT_INF_AI_DETAILED_UNIT_INFO {
 	public:
 		long int unitId; // -1 means free (empty) slot. Bug in 0x4C41BD, fixed by RockNRor (FixGetUnitStructInTargetSelectionLoop).
-		short int unitDATID; // +04. Unit definition ID.
+		short int unitDefId; // +04. Unit definition ID.
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitClass; // +06 - short int
 		unsigned char posY; // +08. Last known Y position
 		unsigned char posX; // +09. Last known X position
 		unsigned char posZ; // +0A.
 		char playerId; // 0x0B
-		short int HP; // +C. unit health points (last known)
+		short int HP; // +0x0C. unit health points (last known)
 		short int unused_0E;
 		// 0x10
 		long int attackAttempts; // +10. Number of time the unit has been selected as "main target".
@@ -45,6 +46,7 @@ namespace AOE_STRUCTURES {
 		float reloadTime1; // +1C
 		float maxRange; // +20
 	};
+	static_assert(sizeof(STRUCT_INF_AI_DETAILED_UNIT_INFO) == 0x24, "STRUCT_INF_AI_DETAILED_UNIT_INFO size");
 
 
 	// Size = 0x08. Used in InfAI+1F8 array.
@@ -107,6 +109,8 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_SPOTTED_RESOURCE_INFO) == 0x14, "STRUCT_SPOTTED_RESOURCE_INFO size");
 
 
+#define CHECKSUM_INF_AI 0x00548B74
+
 	// size 0x10090 - constructor=0x4BA1C0. Offset is AI+0xCEC
 	// Checksums : 74 8B 54 00, parents=04 2C 54 00, 74 2B 54 00
 	// 0x4C1AC0 = infAI.searchTradeTarget?(actorUnitId)
@@ -115,22 +119,45 @@ namespace AOE_STRUCTURES {
 	class STRUCT_INF_AI {
 	public:
 		unsigned long int checksum;
-		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1005
+		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1005 for infAI.
 		// 0xF0
 		STRUCT_MANAGED_ARRAY unknown_0F0; // Unused ?? See 0x4DB4E2.
 		// 0x100
 		STRUCT_AI *ptrMainAI;
-		long int YMapSize; // +104. Warning: this might NOT be initialized
-		long int XMapSize; // +108. Warning: this might NOT be initialized
+		long int YMapSize; // +104. Warning: this might NOT be initialized (-1).
+		long int XMapSize; // +108. Warning: this might NOT be initialized (-1).
 		unsigned long int unknown_10C;
-		// 0x110
-		long int unitElemListSize; // +110. Total allocated size of unitElemList (the array can contain some "-1")
-		// Unit lists : see 0x4BDD10. In those 4 unit lists, elements are never cleaned/removed !
-		STRUCT_INF_AI_UNIT_LIST_ELEM *unitElemList; // +114. Contains info about units that can be created by players + resources + artefacts. AddUpdate=0x4BD750.
-		STRUCT_MANAGED_ARRAY creatableAndGatherableUnits; // +118. units that can be created by players + resources (gazelle but not other animals) + artefacts.
-		STRUCT_MANAGED_ARRAY playerCreatableUnits; // +128. All player-creatable units (villager, military, buildings...). NOT resources.
-		STRUCT_MANAGED_ARRAY artefactsAndFlags; // +138. Store the found flags/artefacts.
-		STRUCT_MANAGED_ARRAY elementsToDefend; // +148. Can be TC, dock, relic, ruin, mines+bushes. Related to SNxxxDefendPriority
+
+		// Unit lists (from detailed... to elementsToDefend) : see 0x4BDD10. In those 4 unit lists, elements are never cleaned/removed !
+
+		// +110. Total allocated size of detailedSpottedUnitInfoList (the array can contain -many- empty slots with "id=-1")
+		long int detailedSpottedUnitInfoListSize;
+
+		// +114. Contains detailed info about (spotted) units that have a military importance: typically creatable+artefacts + some others
+		// Contains all playerCreatable units => 0x4BE140=infAI.isPlayerCreatable(unitClass) : based on a (long) list of AITypes (which is good)
+		// Contains also "units to defend" cf 0x4C1730=infAI.AddUnitToDefend(unitStruct) which adds relic=6F, ruin=158,163, mines+bushes(using AIType)
+		// => Warning: if SNxxxDefendPriority<=0, the unit is NOT added here (same as elementsToDefend list)
+		// AddUpdate=0x4BD750 (param=pUnit). Units are never removed in standard game ?
+		STRUCT_INF_AI_DETAILED_UNIT_INFO *detailedSpottedUnitInfoList;
+		
+		// +118. units that can be created by players + resources (gazelle but not other animals - in standard game) + artefacts.
+		// Cf 0x4BE100=infAI.isArtefactOrTargetableResourceOrCreatable(unitClass)
+		STRUCT_MANAGED_ARRAY artefactsCreatableGatherableUnits;
+
+		// +128. All player-creatable units (villager, military, buildings...). NOT resources.
+		// Cf 0x4BE140=infAI.isPlayerCreatable(unitClass) : based on a (long) list of AITypes (which is good)
+		STRUCT_MANAGED_ARRAY playerCreatableUnits;
+
+		// +138. Store the found flags/artefacts.
+		// Does not store player-creatable nor gatherable resources.
+		// cf 0x4BE200=isArtefactOrFlag(unitClass)
+		STRUCT_MANAGED_ARRAY artefactsAndFlags;
+
+		// +148. Stores (hardcoded IDs) TownCenter=6D, dock=2D, relic=6F, ruin=158,163, mines+bushes(using AIType)
+		// Cf 0x4C1730=infAI.AddUnitToDefend(unitStruct)
+		// Related to the corresponding SNxxxDefendPriority values (if 0 : not added in list)
+		STRUCT_MANAGED_ARRAY elementsToDefend;
+
 		STRUCT_MAP_TILE_VALUES mapExplorationInfo; // +158. Values = INFAI_TILE_EXPLORATION_STATUS
 		// Remove unit from allMyUnits & buildingUnits: 0x4BF440.
 		STRUCT_MANAGED_ARRAY allMyUnits; // +180. To confirm.
@@ -152,7 +179,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_408[4 * 4 * 3];
 		unsigned long int *unknown_4C8; // +4C8. Pointer to struct size=0x10. Array of 4 dwords.
 		unsigned long int *unknown_4CC; // +4CC. Pointer to struct size=0x10. Array of 4 dwords.
-		// 0x4D0
+		// 0x4D0 : spotted resource lists : insert in 0x4C49C0=infAI.addGatherableInUnitList(unit). Also update bestXxxUnitId/distance
 		STRUCT_SPOTTED_RESOURCE_INFO *spottedGatherableUnitsByResourceTypeArrays[4]; // +4D0. Stores explored resources, their position and (closest) storage building. Eg 0x4BC7B0. Add=0x4C49C0.
 		long int spottedGatherableUnitsCountByResourceType[4]; // +4E0. Number of elements in +4D0+i array ? (i=resource type). Related to +540, +550
 		long int spottedGatherableUnitsByResourceTypeArraySizes[4]; // +4F0. 4 Array sizes (allocated sizes ?)
@@ -161,25 +188,23 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_510[4];
 		unsigned long int unknown_520[4];
 		unsigned long int unknown_530[4];
-		// 0x540
 		long int bestForageDropSiteDistance; // +540. Best distance from forage/farm to storage (granary or TC)
 		long int bestWoodDropSiteDistance; // +544. Best distance from tree to storage (SP or TC)
 		long int bestStoneDropSiteDistance; // +548. Best distance from stone mine to storage (SP or TC)
 		long int bestGoldDropSiteDistance; // +54C. Best distance from gold mine to storage (SP or TC)
-		// 0x550
-		long int bestForageUnitId; // closest target unitId for food (farms & forage only, not hunting)
+		long int bestForageUnitId; // +550. closest target unitId for food (farms & forage only, not hunting)
 		long int bestWoodUnitId; // +554. closest target unitId for wood
 		long int bestStoneUnitId; // +558. closest target unitId for stone
 		long int bestGoldUnitId; // +55C. closest target unitId for gold
-		// 0x560
-		long int foundForestTiles;
+		long int foundForestTiles; // +560. Used at game start to know when storage pit construction can be triggered ?
 		char unknown_564[0xFF64 - 0x564];
 		long int humanPlayer_militaryUnitCountByType[AOE_CONST_INTERNAL::INTERNAL_MILITARY_UNIT_TYPES::CST_IMUT_COUNT]; // 0xFF64 - used only if TrackHumanHistory is ON
 		char learnUHFileName[0x100]; // +0xFF90. Name of xxx.uh file. Not sure this is really used.
 		// 0x10090: end
 
-		bool IsCheckSumValid() const { return this->checksum == 0x00548B74; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_INF_AI; }
 
+		// Get AI's exploration status of a specific tile
 		AOE_CONST_INTERNAL::INFAI_TILE_EXPLORATION_STATUS GetExplorationStatus(long int posX, long int posY) const {
 			return (AOE_CONST_INTERNAL::INFAI_TILE_EXPLORATION_STATUS)this->mapExplorationInfo.GetTileValue(posX, posX, 0xFF);
 		}

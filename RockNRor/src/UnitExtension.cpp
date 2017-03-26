@@ -46,7 +46,7 @@ void UnitExtension::InitForDeadUnit(long int unitId) {
 
 // Updates the specified infAI element with "this" unit information.
 // Returns true if successful
-bool UnitExtension::WriteAllInfAIElemInfo(STRUCT_INF_AI_UNIT_LIST_ELEM *elemToUpdate) {
+bool UnitExtension::WriteAllInfAIElemInfo(STRUCT_INF_AI_DETAILED_UNIT_INFO *elemToUpdate) {
 	if (!this->pUnit || !elemToUpdate) { return false; }
 	elemToUpdate->unitId = this->pUnit->unitInstanceId;
 	elemToUpdate->posX = (unsigned char)this->pUnit->positionX;
@@ -56,7 +56,7 @@ bool UnitExtension::WriteAllInfAIElemInfo(STRUCT_INF_AI_UNIT_LIST_ELEM *elemToUp
 	elemToUpdate->attackAttempts = 0;
 	elemToUpdate->HP = (short int)this->pUnit->remainingHitPoints;
 	STRUCT_UNITDEF_BASE *unitDef = this->pUnit->unitDefinition;
-	elemToUpdate->unitDATID = unitDef->DAT_ID1;
+	elemToUpdate->unitDefId = unitDef->DAT_ID1;
 	elemToUpdate->unitClass = unitDef->unitAIType;
 	elemToUpdate->maxRange = AOE_METHODS::UNIT::GetMaxRange(this->pUnit);
 	elemToUpdate->reloadTime1 = AOE_METHODS::UNIT::GetReloadTime1(this->pUnit);
@@ -67,7 +67,7 @@ bool UnitExtension::WriteAllInfAIElemInfo(STRUCT_INF_AI_UNIT_LIST_ELEM *elemToUp
 
 // Updates some infAI element information with "this" unit information: position, owner playerId...
 // Returns true if successful
-bool UnitExtension::UpdateInfAIElemInfo(STRUCT_INF_AI_UNIT_LIST_ELEM *elemToUpdate) {
+bool UnitExtension::UpdateInfAIElemInfo(STRUCT_INF_AI_DETAILED_UNIT_INFO *elemToUpdate) {
 	if (!this->pUnit || !elemToUpdate) { return false; }
 #ifdef _DEBUG
 	if (elemToUpdate->unitId != this->pUnit->unitInstanceId) {

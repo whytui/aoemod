@@ -1909,7 +1909,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 					AOE_STRUCTURES::STRUCT_INF_AI *loopInfAI = &loopPlayer->ptrAIStruct->structInfAI;
 					assert(loopInfAI->IsCheckSumValid());
 					if (IsClassArtefactOrGatherableOrCreatable(unitDefBase->unitAIType)) {
-						loopInfAI->creatableAndGatherableUnits.Remove(unit->unitInstanceId);
+						loopInfAI->artefactsCreatableGatherableUnits.Remove(unit->unitInstanceId);
 					}
 					if (IsClassPlayerCreatable(unitDefBase->unitAIType)) {
 						loopInfAI->playerCreatableUnits.Remove(unit->unitInstanceId);
@@ -2885,7 +2885,7 @@ void RockNRorCommand::DisableWalls() {
 // Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
 // This is called quite often (only if improve AI is enabled in RockNRor configuration)
 // *** OBSOLETE !!! ***
-void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem) {
+void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *currentUnitListElem) {
 	/*if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem || !infAI->ptrMainAI || !infAI->ptrMainAI->IsCheckSumValid()) { return; }
 	if (IsMultiplayer()) { return; }
 

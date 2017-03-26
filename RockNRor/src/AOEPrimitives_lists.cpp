@@ -11,10 +11,10 @@ namespace LISTS {
 // Reset an element in infAI.unitElemList. The slot will be re-used later by ROR. cf 0x4BA401.
 // Return true if the element was updated (reset).
 // Please DO NOT USE directly. See unitExtensionHandler
-bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) {
+bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *elem) {
 	if (!elem) { return false; }
 	elem->unitId = -1;
-	elem->unitDATID = -1;
+	elem->unitDefId = -1;
 	elem->unitClass = (AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES) - 1;
 	elem->posX = 0;
 	elem->posY = 0;
@@ -32,11 +32,11 @@ bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem) 
 
 // Find a unitElem in infAI list, returns NULL if not found. Similar to 0x4BD710.
 // Please DO NOT USE directly. See unitExtensionHandler
-AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId) {
+AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *FindInfAIUnitElemInList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId) {
 	if (!infAI || !infAI->IsCheckSumValid() || (unitId < 0)) { return NULL; }
-	for (int i = 0; i < infAI->unitElemListSize; i++) {
-		if (infAI->unitElemList[i].unitId == unitId) {
-			return &infAI->unitElemList[i];
+	for (int i = 0; i < infAI->detailedSpottedUnitInfoListSize; i++) {
+		if (infAI->detailedSpottedUnitInfoList[i].unitId == unitId) {
+			return &infAI->detailedSpottedUnitInfoList[i];
 		}
 	}
 	return NULL;
@@ -74,7 +74,7 @@ bool RemoveFromInfAIInfoList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unit
 	if (!infAI || !infAI->IsCheckSumValid() || (unitId < 0)) { return false; }
 
 	if ((unitAIType == -1) || IsClassArtefactOrGatherableOrCreatable(unitAIType)) {
-		infAI->creatableAndGatherableUnits.Remove(unitId);
+		infAI->artefactsCreatableGatherableUnits.Remove(unitId);
 	}
 	if ((unitAIType == -1) || IsClassPlayerCreatable(unitAIType)) {
 		infAI->playerCreatableUnits.Remove(unitId);

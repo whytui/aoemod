@@ -3426,9 +3426,9 @@ void RockNRorInstance::FixGetUnitStructInTargetSelectionLoop(REG_BACKUP *REG_val
 	// This was commented out because such updates are now handle on unit visibility changes in unitExtensions (restricted to type50+ though)
 	// Moreover, this place was not especially relevant for infAI elem updates...
 	/*if ((currentUnitId >= 0) && ROCKNROR::IsImproveAIEnabled(infAI->commonAIObject.playerId)) {
-		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *unitListElemBase = infAI->unitElemList;
+		AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *unitListElemBase = infAI->unitElemList;
 		if (!unitListElemBase || (loopIndex >= infAI->unitElemListSize)) { return; }
-		AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *currentUnitListElem = &unitListElemBase[loopIndex];
+		AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *currentUnitListElem = &unitListElemBase[loopIndex];
 		ROCKNROR::crCommand.OnFindEnemyUnitIdWithinRangeLoop(infAI, currentUnitListElem);
 	}*/
 }
@@ -3947,7 +3947,7 @@ void RockNRorInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_values
 
 	// Here, custom treatments are enabled
 	ChangeReturnAddress(REG_values, 0x4C0E3C);
-	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *resultInfAIUnitElem = NULL;
+	AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *resultInfAIUnitElem = NULL;
 
 	resultInfAIUnitElem = CUSTOM_AI::unitTargetingHandler.TestFindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
 	//resultInfAIUnitElem = ROCKNROR::FindGroupMainTarget(infAI, targetPlayerId, unitGroup, targetInfo, argTimeGetTimeValue);
@@ -4218,7 +4218,7 @@ void RockNRorInstance::EntryPointInfAISearchTradeTargetElem(REG_BACKUP *REG_valu
 	long int actorUnitId = GetIntValueFromRORStack(REG_values, 4);
 
 	// This call takes into account ROCKNROR::crInfo.configInfo.doNotApplyFixes
-	AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *foundTradeTargetElem = ROCKNROR::UNIT::FindTradeTargetElem(infAI, actorUnitId);
+	AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *foundTradeTargetElem = ROCKNROR::UNIT::FindTradeTargetElem(infAI, actorUnitId);
 
 	// Do not modify below
 	REG_values->EAX_val = (unsigned long int)foundTradeTargetElem;

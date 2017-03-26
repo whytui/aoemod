@@ -57,7 +57,7 @@ bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase
 
 // Returns a "infAI elem list" pointer of a trade target if found, NULL if not found
 // By default (game code), this searches for the closest unit that does not belong to "me", is a dock, whose player has trade goods>0.
-AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindTradeTargetElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int actorUnitId);
+AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *FindTradeTargetElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int actorUnitId);
 
 
 }

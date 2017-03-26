@@ -136,8 +136,8 @@ bool UnitExtensionHandler::AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int i
 	// Now we can safely use this->allUnitExtensions[unitId]
 	if (this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] >= 0) {
 		// InfAI index is already known for that player
-		assert(this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] < infAI->unitElemListSize);
-		STRUCT_INF_AI_UNIT_LIST_ELEM *elem = &infAI->unitElemList[this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId]];
+		assert(this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] < infAI->detailedSpottedUnitInfoListSize);
+		STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = &infAI->detailedSpottedUnitInfoList[this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId]];
 		if (this->allUnitExtensions[unitId].UpdateInfAIElemInfo(elem)) {
 			return true;
 		}
@@ -151,13 +151,13 @@ bool UnitExtensionHandler::AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int i
 	// Here index in infAI elem list is unknown. Search for it
 	
 	long int indexOfAFreeSlot = -1;
-	for (int curIndex = 0; curIndex < infAI->unitElemListSize; curIndex++) {
-		if (infAI->unitElemList[curIndex].unitId == unitId) {
+	for (int curIndex = 0; curIndex < infAI->detailedSpottedUnitInfoListSize; curIndex++) {
+		if (infAI->detailedSpottedUnitInfoList[curIndex].unitId == unitId) {
 			// Found: save index, update info and return
 			this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = curIndex;
-			return this->allUnitExtensions[unitId].UpdateInfAIElemInfo(&infAI->unitElemList[curIndex]);
+			return this->allUnitExtensions[unitId].UpdateInfAIElemInfo(&infAI->detailedSpottedUnitInfoList[curIndex]);
 		} else {
-			if ((indexOfAFreeSlot < 0) && (infAI->unitElemList[curIndex].unitId < 0)) {
+			if ((indexOfAFreeSlot < 0) && (infAI->detailedSpottedUnitInfoList[curIndex].unitId < 0)) {
 				indexOfAFreeSlot = curIndex; // Save index of a free slot for later (may be useful)
 			}
 		}
@@ -169,15 +169,15 @@ bool UnitExtensionHandler::AddUpdateInfAIElem(STRUCT_UNIT_BASE *unit, long int i
 			return false;
 		}
 		// Find index of new elem.
-		STRUCT_INF_AI_UNIT_LIST_ELEM *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitId);
-		long int elemIndex = (((unsigned long int)elem) - (unsigned long int)(infAI->unitElemList)) / sizeof(STRUCT_INF_AI_UNIT_LIST_ELEM);
+		STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitId);
+		long int elemIndex = (((unsigned long int)elem) - (unsigned long int)(infAI->detailedSpottedUnitInfoList)) / sizeof(STRUCT_INF_AI_DETAILED_UNIT_INFO);
 		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = elemIndex;
 		return true;
 	}
 
 	// Here: use the free slot we found
 	this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = indexOfAFreeSlot;
-	STRUCT_INF_AI_UNIT_LIST_ELEM *elem = &infAI->unitElemList[indexOfAFreeSlot];
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = &infAI->detailedSpottedUnitInfoList[indexOfAFreeSlot];
 	return this->allUnitExtensions[unitId].WriteAllInfAIElemInfo(elem);
 }
 
@@ -200,7 +200,7 @@ bool UnitExtensionHandler::RemoveInfAIElemForUnitWithoutOptimization(long int un
 	}
 
 	if (!infAI) { return true; }
-	STRUCT_INF_AI_UNIT_LIST_ELEM *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitId);
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitId);
 	if (!elem) { return true; } // no elem to update: not an error case
 	return AOE_METHODS::LISTS::ResetInfAIUnitListElem(elem);
 }
@@ -233,10 +233,10 @@ bool UnitExtensionHandler::RemoveInfAIElemForUnit(long int unitId, long int infA
 	}
 	if (infAI) {
 		int index = this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId];
-		if ((index >= 0) && (index < infAI->unitElemListSize)) {
+		if ((index >= 0) && (index < infAI->detailedSpottedUnitInfoListSize)) {
 			// don't forget to remove the "cached" index because ROR will re-use the slot for another unit
 			this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = -1;
-			return AOE_METHODS::LISTS::ResetInfAIUnitListElem(&infAI->unitElemList[index]);
+			return AOE_METHODS::LISTS::ResetInfAIUnitListElem(&infAI->detailedSpottedUnitInfoList[index]);
 		}
 	}
 	return true; // nothing to do here

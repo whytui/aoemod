@@ -21,11 +21,11 @@ namespace LISTS {
 // Reset an element in infAI.unitElemList. The slot will be re-used later by ROR. cf 0x4BA401.
 // Return true if the element was updated (reset).
 // Please DO NOT USE directly. See unitExtensionHandler
-bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *elem);
+bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *elem);
 
 
 // Find a unitElem in infAI list, returns NULL if not found.
-AOE_STRUCTURES::STRUCT_INF_AI_UNIT_LIST_ELEM *FindInfAIUnitElemInList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId);
+AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *FindInfAIUnitElemInList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId);
 
 
 // Add a unit in infAI elem list, or update if existing. Warning: this uses unit structure's info, even if it is not visible !

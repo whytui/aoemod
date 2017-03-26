@@ -53,13 +53,13 @@ void UnitTargeting::ResetTargetInfo(STRUCT_TAC_AI_TARGET_INFO *targetInfo) {
 // Set target in unitGroup, in internal data, in targetInfo, in infAIElem.
 // Private method: we do not check input pointers here (be careful)
 void UnitTargeting::SetTarget(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo,
-	STRUCT_INF_AI_UNIT_LIST_ELEM *targetInfAIElem, long int leaderTerrainZoneId, float targetEvaluation) {
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *targetInfAIElem, long int leaderTerrainZoneId, float targetEvaluation) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
 	// Trick to get index without having to loop on all elements
-	int index = (targetInfAIElem - infAI->unitElemList);
+	int index = (targetInfAIElem - infAI->detailedSpottedUnitInfoList);
 	assert(index >= 0);
-	assert(index < infAI->unitElemListSize);
+	assert(index < infAI->detailedSpottedUnitInfoListSize);
 	unitGroup->targetUnitIdArrayUsedElemCount = 0;
 	unitGroup->AddTargetUnitIdToArray(targetInfAIElem->unitId);
 	unitGroup->targetPlayerId = targetInfAIElem->playerId;
@@ -81,11 +81,11 @@ void UnitTargeting::SetTarget(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup
 // Returns the enemy wonder with higher attack priority. Does not return wonders from allied/neutral players
 // playerId can be a joker (if -1)
 // Returns NULL if not found
-STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::FindWonderToAttackInfAIElemPtr(STRUCT_INF_AI *infAI, long int playerId) {
+STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::FindWonderToAttackInfAIElemPtr(STRUCT_INF_AI *infAI, long int playerId) {
 	assert(infAI && infAI->IsCheckSumValid());
 	if (!infAI || !infAI->IsCheckSumValid()) { return NULL; }
 	assert((playerId >= -1) && (playerId <= 8));
-	STRUCT_INF_AI_UNIT_LIST_ELEM *result;
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *result;
 	unsigned long int addr = 0x4C5980;
 	_asm{
 		MOV ECX, infAI;
@@ -99,7 +99,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::FindWonderToAttackInfAIElemPtr(STRU
 
 // If current target is still a valid target - and its position is known -, return its pointer in InfAI elem list.
 // Returns NULL otherwise
-STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStillEligible(STRUCT_INF_AI *infAI, long int targetPlayerId,
+STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::GetInfAIElemForCurrentTargetIfStillEligible(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
@@ -135,7 +135,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 					unitGroup->AddTargetUnitIdToArray(loopTargetId);
 					if ((targetInfo->targetUnitId == loopTargetId) && (targetInfo->targetInfAIUnitElemListIndex >= 0)) {
 						// Optimization; if we already have this pointer, just use it (don't loop on all elem list)
-						return &infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex];
+						return &infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex];
 					}
 					return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, loopTargetId);
 				}
@@ -146,7 +146,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::GetInfAIElemForCurrentTargetIfStill
 }
 
 
-STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
+STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 	// exclude villager explorers (run too fast) ?
 	// TOOD: if too much time spent, return NULL (keep inprogress=1)
@@ -183,21 +183,21 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 	}
 	
 	char leaderTerrainZoneId = groupLeader->GetMyTerrainZoneId();
-	STRUCT_INF_AI_UNIT_LIST_ELEM *militaryTargetsByDistance[3]; // Military targets. index 0=close=priority, index2=far
-	STRUCT_INF_AI_UNIT_LIST_ELEM *buildingTargetsByDistance[3]; // Building targets. index 0=close=priority, index2=far
-	STRUCT_INF_AI_UNIT_LIST_ELEM *otherLivingTargetsByDistance[3]; // Civilians, etc. index 0=close=priority, index2=far
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *militaryTargetsByDistance[3]; // Military targets. index 0=close=priority, index2=far
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *buildingTargetsByDistance[3]; // Building targets. index 0=close=priority, index2=far
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *otherLivingTargetsByDistance[3]; // Civilians, etc. index 0=close=priority, index2=far
 	for (int i = 0; i < 3; i++) { // init
 		buildingTargetsByDistance[i] = militaryTargetsByDistance[i] = otherLivingTargetsByDistance[i] = NULL;
 	}
 
-	for (int i = 0; i < infAI->unitElemListSize; i++) {
-		if (infAI->unitElemList[i].playerId == targetPlayerId) {
-			GLOBAL_UNIT_AI_TYPES curAIType = infAI->unitElemList[i].unitClass;
+	for (int i = 0; i < infAI->detailedSpottedUnitInfoListSize; i++) {
+		if (infAI->detailedSpottedUnitInfoList[i].playerId == targetPlayerId) {
+			GLOBAL_UNIT_AI_TYPES curAIType = infAI->detailedSpottedUnitInfoList[i].unitClass;
 			int distanceLevel = 0;
-			STRUCT_INF_AI_UNIT_LIST_ELEM **targetToUpdate = &militaryTargetsByDistance[0];
+			STRUCT_INF_AI_DETAILED_UNIT_INFO **targetToUpdate = &militaryTargetsByDistance[0];
 			if (usePriorityPos) {
-				long int diffX = infAI->unitElemList[i].posX - priorityPosX;
-				long int diffY = infAI->unitElemList[i].posY - priorityPosY;
+				long int diffX = infAI->detailedSpottedUnitInfoList[i].posX - priorityPosX;
+				long int diffY = infAI->detailedSpottedUnitInfoList[i].posY - priorityPosY;
 				long int diffsqr = diffX * diffX + diffY * diffY;
 				if (diffsqr <= losToUse * losToUse) {
 					distanceLevel = 0;
@@ -209,8 +209,8 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 					}
 				}
 			}
-			bool curIsMilitaryUnitOrTower = ((infAI->unitElemList[i].attack > 0) && (infAI->unitElemList[i].unitClass != TribeAIGroupCivilian));
-			bool curIsBuilding = !curIsMilitaryUnitOrTower && (infAI->unitElemList[i].unitClass != TribeAIGroupBuilding);
+			bool curIsMilitaryUnitOrTower = ((infAI->detailedSpottedUnitInfoList[i].attack > 0) && (infAI->detailedSpottedUnitInfoList[i].unitClass != TribeAIGroupCivilian));
+			bool curIsBuilding = !curIsMilitaryUnitOrTower && (infAI->detailedSpottedUnitInfoList[i].unitClass != TribeAIGroupBuilding);
 			if (curIsMilitaryUnitOrTower) {
 				targetToUpdate = &militaryTargetsByDistance[distanceLevel];
 			} else {
@@ -221,14 +221,14 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::ContinueFindGroupMainTargetInProgre
 				}
 			}
 
-			if ((infAI->unitElemList[i].unitClass != TribeAIGroupArtefact) &&
-				(GetUnitStruct(infAI->unitElemList[i].unitId) != NULL)) {
+			if ((infAI->detailedSpottedUnitInfoList[i].unitClass != TribeAIGroupArtefact) &&
+				(GetUnitStruct(infAI->detailedSpottedUnitInfoList[i].unitId) != NULL)) {
 				bool curElemIsBetter = (*targetToUpdate == NULL);
 				if (*targetToUpdate != NULL) {
 					curElemIsBetter = ((*targetToUpdate)->attack <= 0) && curIsMilitaryUnitOrTower;
 				}
 
-				*targetToUpdate = &infAI->unitElemList[i];
+				*targetToUpdate = &infAI->detailedSpottedUnitInfoList[i];
 			}
 		}
 	}
@@ -396,9 +396,9 @@ bool UnitTargeting::SetPriorityTargetLocation(STRUCT_INF_AI *infAI, long int tar
 			this->priorityLocation[myPlayerId].posX = (long int)bestArtefactTarget->positionX;
 			this->priorityLocation[myPlayerId].posY = (long int)bestArtefactTarget->positionY;
 			if (targetInfo->targetInfAIUnitElemListIndex >= 0) {
-				if (infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].playerId == targetPlayerId) {
-					long int diffX = infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].posX - this->priorityLocation[myPlayerId].posX;
-					long int diffY = infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].posY - this->priorityLocation[myPlayerId].posY;
+				if (infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex].playerId == targetPlayerId) {
+					long int diffX = infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex].posX - this->priorityLocation[myPlayerId].posX;
+					long int diffY = infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex].posY - this->priorityLocation[myPlayerId].posY;
 					if ((diffX*diffX) + (diffY*diffY) > TARGETING_CONST::squareDistanceAboveWhichRecomputeTargetOnAllArtefacts) {
 						targetInfo->targetUnitId = -1;
 						targetInfo->targetEvaluation = -1.f;
@@ -413,7 +413,7 @@ bool UnitTargeting::SetPriorityTargetLocation(STRUCT_INF_AI *infAI, long int tar
 }
 
 
-STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearPriorityLocation(STRUCT_INF_AI *infAI, long int targetPlayerId) {
+STRUCT_INF_AI_DETAILED_UNIT_INFO* UnitTargeting::FindTargetUnitNearPriorityLocation(STRUCT_INF_AI *infAI, long int targetPlayerId) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
 	STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
@@ -498,7 +498,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM* UnitTargeting::FindTargetUnitNearPriorityLocation(
 }
 
 
-STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
+STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 	// Collect info / Check parameters
 	assert(targetInfo != NULL);
@@ -559,12 +559,12 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 		STRUCT_UNIT_BASE *currentTarget = global->GetUnitFromId(targetInfo->targetUnitId);
 		if (currentTarget && (currentTarget->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY)) {
 			// Do NOT update target selection time !
-			return &infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex];
+			return &infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex];
 		}
 	}
 
 	// Highest priority rules: wonders, all artefacts...
-	STRUCT_INF_AI_UNIT_LIST_ELEM *enemyWonderInfo = this->FindWonderToAttackInfAIElemPtr(infAI, -1);
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *enemyWonderInfo = this->FindWonderToAttackInfAIElemPtr(infAI, -1);
 	if (enemyWonderInfo) {
 		// To get remaining time: settings->playerWondersVictoryDelays[targetPlayerId];
 		this->SetTarget(infAI, unitGroup, targetInfo, enemyWonderInfo, leaderTerrainZoneId, TARGETING_CONST::evaluationForPriorityTargetWonder);
@@ -574,7 +574,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 	// Target has all relics or all ruins: find location (into class member)
 	if (this->SetPriorityTargetLocation(infAI, targetPlayerId, groupLeader, targetInfo)) {
 		// Before looping on infAI elem list, try a quick look at target position: maybe there are units guarding this place !
-		STRUCT_INF_AI_UNIT_LIST_ELEM *targetNearArtefact = this->FindTargetUnitNearPriorityLocation(infAI, targetPlayerId);
+		STRUCT_INF_AI_DETAILED_UNIT_INFO *targetNearArtefact = this->FindTargetUnitNearPriorityLocation(infAI, targetPlayerId);
 		if (targetNearArtefact != NULL) {
 			this->SetTarget(infAI, unitGroup, targetInfo, targetNearArtefact, leaderTerrainZoneId, 1); // Low score: we have no clue if unit is moving or gonna move away from our true target.
 			return targetNearArtefact;
@@ -584,7 +584,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 	STRUCT_PLAYER *targetPlayer = global->GetPlayerStruct(targetPlayerId);
 	if (!targetPlayer || !targetPlayer->IsCheckSumValid()) { targetInfo->targetSearchInProgress = 0; return NULL; }
 
-	STRUCT_INF_AI_UNIT_LIST_ELEM *currentTarget = this->GetInfAIElemForCurrentTargetIfStillEligible(infAI, targetPlayerId, unitGroup, targetInfo, baseTimeGetTimeValue);
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *currentTarget = this->GetInfAIElemForCurrentTargetIfStillEligible(infAI, targetPlayerId, unitGroup, targetInfo, baseTimeGetTimeValue);
 	if (currentTarget) {
 		if ((currentTarget->attack > 0) || (currentTarget->unitClass != GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding)) {
 			// if current target is not a building, keep it (villager, military units...
@@ -664,11 +664,11 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_
 
 
 // baseTimeGetTimeValue = TimeGetTime() value (ms) for total AI treatment process time calculation. We must not go over global->tmp_allowedTimeForAITreatment
-// If successful, returns a pointer to the selected STRUCT_INF_AI_UNIT_LIST_ELEM element.
+// If successful, returns a pointer to the selected STRUCT_INF_AI_DETAILED_UNIT_INFO element.
 // If successful, unitGroup targets array contains only 1 target (in most cases... to check in case when units block the way to main target)
 // Returns false if found nothing OR if search could not be completed in time.
 // Note: set targetInfo->targetSearchInProgress=0 when search is finished (even if failed)
-STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
+STRUCT_INF_AI_DETAILED_UNIT_INFO *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 
 	// Collect info / Check parameters
@@ -745,7 +745,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 			}
 		}
 		if (!targetInfo->targetSearchInProgress) { // always true: same condition as parent if
-			STRUCT_INF_AI_UNIT_LIST_ELEM *enemyWonderInfo = unitTargetingHandler.FindWonderToAttackInfAIElemPtr(infAI, -1);
+			STRUCT_INF_AI_DETAILED_UNIT_INFO *enemyWonderInfo = unitTargetingHandler.FindWonderToAttackInfAIElemPtr(infAI, -1);
 			if (enemyWonderInfo) {
 				char wonderTerrainZoneId = groupLeader->GetTerrainZoneIdAtPos(enemyWonderInfo->posX, enemyWonderInfo->posY);
 				if ((wonderTerrainZoneId == leaderTerrainZoneId) || isBoat) {
@@ -830,9 +830,9 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 	}
 
 	// main part
-	if (targetInfo->currentSearchInfAIUnitElemListIndex < infAI->unitElemListSize) {
+	if (targetInfo->currentSearchInfAIUnitElemListIndex < infAI->detailedSpottedUnitInfoListSize) {
 		// Loop from 0x4C053C to 0x4C0DBD. Loop on infAI.unitElems...
-		for (int curIndex = targetInfo->currentSearchInfAIUnitElemListIndex; curIndex < infAI->unitElemListSize; curIndex++) {
+		for (int curIndex = targetInfo->currentSearchInfAIUnitElemListIndex; curIndex < infAI->detailedSpottedUnitInfoListSize; curIndex++) {
 			if (curIndex > targetInfo->currentSearchInfAIUnitElemListIndex) {
 				// For all case EXCEPT first loop: check the time spent
 				long int t = AOE_METHODS::TimeGetTime();
@@ -841,7 +841,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 					return NULL; // Unfinished business. Note that "in progress" is still 1, to finish (continue) next time.
 				}
 			}
-			STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[curIndex];
+			STRUCT_INF_AI_DETAILED_UNIT_INFO *curElem = &infAI->detailedSpottedUnitInfoList[curIndex];
 			// curElem->playerId should be always correct (at least for type50+) thanks to RockNRor fixes (update on conversion if visible + updates when visibility changes)
 			if (curElem->playerId != targetPlayerId) {
 				continue;
@@ -862,7 +862,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 			// 0x4C05EA
 			long int curUnitTerrainZoneId = groupLeader->GetTerrainZoneIdAtPos((long int)curUnit->positionX, (long int)curUnit->positionY);
 			// 0x4C060D. Is the !isBoat condition correct here ?
-			if (!isBoat && (curElem->unitDATID == CST_UNITID_DOCK) && (leaderTerrainZoneId != curUnitTerrainZoneId)) {
+			if (!isBoat && (curElem->unitDefId == CST_UNITID_DOCK) && (leaderTerrainZoneId != curUnitTerrainZoneId)) {
 				continue;
 			}
 			// 0x4C062B
@@ -958,8 +958,8 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 
 			float evalDistanceBetweenLoopElemAndUnknown24Elem = 0; // local_1C
 			if ((targetInfo->currentSearchIsBuildings) && (targetInfo->buildingTargetUnitId != -1)) {
-				long int unknown24_posX = infAI->unitElemList[targetInfo->buildingTargetInfAIUnitElemListIndex].posX;
-				long int unknown24_posY = infAI->unitElemList[targetInfo->buildingTargetInfAIUnitElemListIndex].posY;
+				long int unknown24_posX = infAI->detailedSpottedUnitInfoList[targetInfo->buildingTargetInfAIUnitElemListIndex].posX;
+				long int unknown24_posY = infAI->detailedSpottedUnitInfoList[targetInfo->buildingTargetInfAIUnitElemListIndex].posY;
 				long int elemsDiffX = curElem->posX - unknown24_posX;
 				long int elemsDiffY = curElem->posY - unknown24_posY;
 				float elemsDistance = (float)((elemsDiffX*elemsDiffX) + (elemsDiffY*elemsDiffY));
@@ -1084,14 +1084,14 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 		return NULL; // Not found
 	}
 	assert(targetInfo->targetInfAIUnitElemListIndex >= 0);
-	assert(targetInfo->targetInfAIUnitElemListIndex < infAI->unitElemListSize);
+	assert(targetInfo->targetInfAIUnitElemListIndex < infAI->detailedSpottedUnitInfoListSize);
 	targetInfo->targetSearchInProgress = 0; // 0x4C0DF1
-	infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].attackAttempts++; // 0x4C0DEF. WARNING: also done by caller but only in 0x4D4376
+	infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex].attackAttempts++; // 0x4C0DEF. WARNING: also done by caller but only in 0x4D4376
 #ifdef _DEBUG
 	// Just to make *really* sure this is always true. To remove later.
-	assert(&infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex] == AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitGroup->GetTargetUnitIdFromArray(0)));
+	assert(&infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex] == AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitGroup->GetTargetUnitIdFromArray(0)));
 #endif
-	return &infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex];
+	return &infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex];
 }
 
 
@@ -1099,12 +1099,12 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int
 
 // NOTE: this corresponds to original AOE method, kept for backup/information/debugging. Do not use this method
 // baseTimeGetTimeValue = TimeGetTime() value (ms) for total AI treatment process time calculation. We must not go over global->tmp_allowedTimeForAITreatment
-// If successful, returns a pointer to the selected STRUCT_INF_AI_UNIT_LIST_ELEM element.
+// If successful, returns a pointer to the selected STRUCT_INF_AI_DETAILED_UNIT_INFO element.
 // If successful, unitGroup targets array contains only 1 target (in most cases... to check in case when units block the way to main target)
 // Returns false if found nothing OR if search could not be completed in time.
 // *********** DO NOT MODIFY THIS METHOD *****************
 #ifdef _DEBUG
-STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
+STRUCT_INF_AI_DETAILED_UNIT_INFO *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 	// Collect info / Check parameters
 	if (!targetInfo) { return NULL; }
@@ -1188,7 +1188,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 		}
 		// 0x4C01E8
 		if (!targetInfo->targetSearchInProgress) { // always true: same condition as parent if
-			STRUCT_INF_AI_UNIT_LIST_ELEM *enemyWonderInfo = unitTargetingHandler.FindWonderToAttackInfAIElemPtr(infAI, -1);
+			STRUCT_INF_AI_DETAILED_UNIT_INFO *enemyWonderInfo = unitTargetingHandler.FindWonderToAttackInfAIElemPtr(infAI, -1);
 			if (enemyWonderInfo) {
 				// 0x4C0208
 				char wonderTerrainZoneId = groupLeader->GetTerrainZoneIdAtPos(enemyWonderInfo->posX, enemyWonderInfo->posY);
@@ -1286,9 +1286,9 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 	}
 
 	// 0x4C0517 : main part
-	if (targetInfo->currentSearchInfAIUnitElemListIndex < infAI->unitElemListSize) {
+	if (targetInfo->currentSearchInfAIUnitElemListIndex < infAI->detailedSpottedUnitInfoListSize) {
 		// Loop from 0x4C053C to 0x4C0DBD. Loop on infAI.unitElems...
-		for (int curIndex = targetInfo->currentSearchInfAIUnitElemListIndex; curIndex < infAI->unitElemListSize; curIndex++) {
+		for (int curIndex = targetInfo->currentSearchInfAIUnitElemListIndex; curIndex < infAI->detailedSpottedUnitInfoListSize; curIndex++) {
 			if (curIndex > targetInfo->currentSearchInfAIUnitElemListIndex) {
 				// For all case EXCEPT first loop: check the time spent
 				long int t = AOE_METHODS::TimeGetTime();
@@ -1299,7 +1299,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 				}
 			}
 			// 0x4C0576
-			STRUCT_INF_AI_UNIT_LIST_ELEM *curElem = &infAI->unitElemList[curIndex];
+			STRUCT_INF_AI_DETAILED_UNIT_INFO *curElem = &infAI->detailedSpottedUnitInfoList[curIndex];
 //#pragma message("We should check that playerId is correct: may have changed due to a conversion. Beware fog-visibility too")
 			if (curElem->playerId != targetPlayerId) {
 				continue;
@@ -1320,7 +1320,7 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 			// CHEATING : unit may not be visible
 			long int curUnitTerrainZoneId = groupLeader->GetTerrainZoneIdAtPos((long int)curUnit->positionX, (long int)curUnit->positionY);
 			// 0x4C060D. Is the !isBoat condition correct here ?
-			if (!isBoat && (curElem->unitDATID == CST_UNITID_DOCK) && (leaderTerrainZoneId != curUnitTerrainZoneId)) {
+			if (!isBoat && (curElem->unitDefId == CST_UNITID_DOCK) && (leaderTerrainZoneId != curUnitTerrainZoneId)) {
 				continue;
 			}
 			// 0x4C062B
@@ -1406,8 +1406,8 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 			float evalDistanceBetweenLoopElemAndUnknown24Elem = 0; // local_1C
 			if ((targetInfo->currentSearchIsBuildings) && (targetInfo->buildingTargetUnitId != -1)) {
 				// 0x4C095A
-				long int unknown24_posX = infAI->unitElemList[targetInfo->buildingTargetInfAIUnitElemListIndex].posX;
-				long int unknown24_posY = infAI->unitElemList[targetInfo->buildingTargetInfAIUnitElemListIndex].posY;
+				long int unknown24_posX = infAI->detailedSpottedUnitInfoList[targetInfo->buildingTargetInfAIUnitElemListIndex].posX;
+				long int unknown24_posY = infAI->detailedSpottedUnitInfoList[targetInfo->buildingTargetInfAIUnitElemListIndex].posY;
 				long int elemsDiffX = curElem->posX - unknown24_posX;
 				long int elemsDiffY = curElem->posY - unknown24_posY;
 				float elemsDistance = (float)((elemsDiffX*elemsDiffX) + (elemsDiffY*elemsDiffY));
@@ -1540,13 +1540,13 @@ STRUCT_INF_AI_UNIT_LIST_ELEM *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, l
 	}
 	// 0x4C0DD6
 	assert(targetInfo->targetInfAIUnitElemListIndex >= 0);
-	assert(targetInfo->targetInfAIUnitElemListIndex < infAI->unitElemListSize);
+	assert(targetInfo->targetInfAIUnitElemListIndex < infAI->detailedSpottedUnitInfoListSize);
 	targetInfo->targetSearchInProgress = 0; // 0x4C0DF1
-	infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex].attackAttempts++; // 0x4C0DEF. WARNING: also done by caller but only in 0x4D4376
+	infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex].attackAttempts++; // 0x4C0DEF. WARNING: also done by caller but only in 0x4D4376
 	// 0x4C0E00
-	// Extremely NOT optimized (lol) ! Doing a whole loop to find something we already have = &infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex]
-	STRUCT_INF_AI_UNIT_LIST_ELEM *result = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitGroup->GetTargetUnitIdFromArray(0));
-	assert(&infAI->unitElemList[targetInfo->targetInfAIUnitElemListIndex] == result); // TEST for optimization (TODO)
+	// Extremely NOT optimized (lol) ! Doing a whole loop to find something we already have = &infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex]
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *result = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitGroup->GetTargetUnitIdFromArray(0));
+	assert(&infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex] == result); // TEST for optimization (TODO)
 	return result;
 }
 #endif

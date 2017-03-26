@@ -293,9 +293,9 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += "\nForestTiles = ";
 		s += std::to_string(ai->structInfAI.foundForestTiles);
 		s += "\nUnitElem Lists...\n+114: count = ";
-		s += std::to_string(ai->structInfAI.unitElemListSize); // unitElemListSize (array size)
+		s += std::to_string(ai->structInfAI.detailedSpottedUnitInfoListSize); // unitElemListSize (array size)
 		s += "\nCreatableGatherable count = ";
-		s += std::to_string(ai->structInfAI.creatableAndGatherableUnits.usedElements);
+		s += std::to_string(ai->structInfAI.artefactsCreatableGatherableUnits.usedElements);
 		s += "\nPlayerCreatable count = ";
 		s += std::to_string(ai->structInfAI.playerCreatableUnits.usedElements);
 		s += "\nArtefactsFlags	 count = ";
@@ -306,7 +306,7 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		s += std::to_string(ai->structInfAI.buildingUnits.usedElements);
 
 		s += "\n\nCreatableGatherable= ";
-		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.creatableAndGatherableUnits.unitIdArray, ai->structInfAI.creatableAndGatherableUnits.usedElements);
+		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.artefactsCreatableGatherableUnits.unitIdArray, ai->structInfAI.artefactsCreatableGatherableUnits.usedElements);
 		s += "\n\nPlayerCreatable= ";
 		s += rd->GetUnitNamesFromArrayOfID((long)ai->structInfAI.playerCreatableUnits.unitIdArray, ai->structInfAI.playerCreatableUnits.usedElements);
 		s += "\n\nBuildings= ";
