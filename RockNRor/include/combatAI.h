@@ -58,11 +58,6 @@ namespace COMBAT {
 	bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify);
 
 
-	// Notify event (RockNRor) handler for civilians
-	// Returns -1 if standard ROR treatments can be continued.
-	// Returns >= 0 to return a specific value and bypass ROR treatments.
-	long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify);
-
 	// Triggered when a unit sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
 	// Remark: feeding infAI list is handled in parent calls.
 	// This method is called only if IsImproveAIEnabled(...) is true.

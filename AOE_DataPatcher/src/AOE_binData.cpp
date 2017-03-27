@@ -99,7 +99,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 135
+#define COUNT_ROR_API_10c 134
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 
@@ -5385,7 +5385,7 @@ void AOE_binData::InitROR_API_10c() {
 		FM_ON
 		);
 
-	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+	/*Now Using virtual method hooks instead of this entry point NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
 		VillagerActivityProcessNotify,
 		"Process notify in civilian unit activity",
 		0xE471B,
@@ -5393,7 +5393,7 @@ void AOE_binData::InitROR_API_10c() {
 		(0x57, 0xE8, 0x53, 0x4E, 0xF3, 0xFF, 0x8B, 0xF1),
 		FM_OFF,
 		FM_ON
-		);
+		);*/
 
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
 		IsTargetableResourceCallForInfAI,

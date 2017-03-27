@@ -36,6 +36,10 @@ ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activi
 		return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
 	}
 
+	if (activity->checksum == CHECKSUM_UNIT_ACTIVITY_CIVILIAN) {
+		return CivilianActivityProcessNotify(activity, notifyEvent, arg2, outExecStandardCode);
+	}
+
 	if (notifyEvent->eventId == AOE_CONST_INTERNAL::EVENT_TOO_CLOSE_TO_SHOOT) {
 		// TODO
 	}
@@ -114,6 +118,45 @@ ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activi
 		SelectOneUnit(GetControlledPlayerStruct_Settings(), activity->ptrUnit, true);
 		AOE_METHODS::SetGamePause(true);
 		break;
+	}
+	return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
+}
+
+
+// UnitActivity.ProcessNotify event for ALL activity classes (base+children)
+// outExecStandardCode is an output bool: if set to true, ROR standard code will be executed afterwards. If false, it will be skipped.
+ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2, bool &outExecStandardCode) {
+	outExecStandardCode = true;
+	if (!notifyEvent || !activity || !activity->IsCheckSumValid()) {
+		return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
+	}
+	// This is restricted to "AI improvements ON" configuration.
+	if (!activity || !activity->IsCheckSumValid() || !notifyEvent || !activity->ptrUnit ||
+		!activity->ptrUnit->ptrStructPlayer || !IsImproveAIEnabled(activity->ptrUnit->ptrStructPlayer->playerId)) {
+		return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
+	}
+
+	if (notifyEvent->eventId == GAME_EVENT_TYPE::EVENT_SHOULD_MOVE_BACK_AFTER_SHOOTING) {
+		if (COMBAT::HunterMoveBackAfterShooting(activity, notifyEvent)) {
+			outExecStandardCode = false;
+			return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION;
+		} else {
+			return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
+		}
+	}
+	if (notifyEvent->eventId == GAME_EVENT_TYPE::EVENT_BEING_ATTACKED) {
+		if (activity->currentTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_MOVE) {
+			// Villager should not stop moving (to strike back to animal) when he's not ready to shoot
+			for (int i = 0; i < activity->orderQueueUsedElemCount; i++) {
+				if ((activity->orderQueue[i].targetUnitId == notifyEvent->targetUnitId) &&
+					(activity->orderQueue[i].orderId == UNIT_AI_ORDER::CST_ORDER_GATHER_ATTACK)) {
+					if (!AOE_METHODS::UNIT::IsReadyToAttack(activity->ptrUnit)) {
+						outExecStandardCode = false;
+						return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION; // Ignore the notification because a pending order already concerns this "attacker" unit and I am not ready yet to strike back.
+					}
+				}
+			}
+		}
 	}
 	return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
 }

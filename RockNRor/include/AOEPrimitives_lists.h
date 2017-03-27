@@ -9,7 +9,9 @@
 #include "unitDefHandling.h"
 
 
-/* This file contains AOE primitives about units handling */
+/* This file contains AOE primitives about units handling
+For Managed Arrays, see class' member methods too.
+*/
 
 using namespace AOE_STRUCTURES;
 

@@ -614,37 +614,6 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 }
 
 
-// Notify event (RockNRor) handler for civilians
-// Returns -1 if standard ROR treatments can be continued.
-// Returns >= 0 to return a specific value and bypass ROR treatments.
-long int VillagerActivityNotify(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify) {
-	// This is restricted to "AI improvements ON" configuration.
-	if (!unitActivity || !unitActivity->IsCheckSumValid() || !notify || !unitActivity->ptrUnit || 
-		!unitActivity->ptrUnit->ptrStructPlayer || !IsImproveAIEnabled(unitActivity->ptrUnit->ptrStructPlayer->playerId)) {
-		return -1;
-	}
-
-	if (notify->eventId == GAME_EVENT_TYPE::EVENT_SHOULD_MOVE_BACK_AFTER_SHOOTING) {
-		return HunterMoveBackAfterShooting(unitActivity, notify) ? 3 : -1;
-	}
-	if (notify->eventId == GAME_EVENT_TYPE::EVENT_BEING_ATTACKED) {
-		if (unitActivity->currentTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_MOVE) {
-			// Villager should not stop to strike back to animal when he's not ready to shoot
-			for (int i = 0; i < unitActivity->orderQueueUsedElemCount; i++) {
-				if ((unitActivity->orderQueue[i].targetUnitId == notify->targetUnitId) &&
-					(unitActivity->orderQueue[i].orderId == UNIT_AI_ORDER::CST_ORDER_GATHER_ATTACK)) {
-					if (!AOE_METHODS::UNIT::IsReadyToAttack(unitActivity->ptrUnit)) {
-						return 3; // Ignore the notification because a pending order already concerns this "attacker" unit and I am not ready yet to strike back.
-					}
-				}
-			}
-		}
-	}
-
-	return -1;
-}
-
-
 // Triggered when a unit sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
 // Remark: feeding infAI list is handled in parent calls.
 // This method is called only if IsImproveAIEnabled(...) is true.
