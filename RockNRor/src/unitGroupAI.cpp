@@ -96,7 +96,7 @@ void UnitGroupAI::EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI) {
 			return;
 		}
 		// Under some circumstances, situation is no longer weak
-		// Ex: if enemies in my town were killed and I have many defence now, some DM situations (fast army re-trainining), some unit groups retreated successfully and crushed enemies, etc
+		// Ex: if enemies in my town were killed and I have many defence now, some DM situations (fast army re-training), some unit groups retreated successfully and crushed enemies, etc
 		// TODO
 		return;
 	}

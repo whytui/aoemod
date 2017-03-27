@@ -3334,8 +3334,9 @@ bool RockNRorCommand::OnHoverOnUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, STRU
 			}
 		}
 	}
-	// Unit holding resource -> drop site
-	if (mainSelectedUnit && (mainSelectedUnit->resourceValue > 0) && selectedUnitDef && selectedUnitDef->DerivesFromCommandable()) {
+	// Unit holding resource -> drop site (exclude priest ! They have own a resource=faith !)
+	if (mainSelectedUnit && (mainSelectedUnit->resourceValue > 0) && (actorAIType != TribeAIGroupPriest) &&
+		selectedUnitDef && selectedUnitDef->DerivesFromCommandable()) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *selUnitDefCmd = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)selectedUnitDef;
 		if ((selUnitDefCmd->dropSite1 == unit->unitDefinition->DAT_ID1) || (selUnitDefCmd->dropSite2 == unit->unitDefinition->DAT_ID1)) {
 			foundInteraction = UNIT_INTERACTION_ID::UII_NO_INTERACTION;

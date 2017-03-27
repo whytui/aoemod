@@ -3917,8 +3917,8 @@ void RockNRorInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values)
 
 // From 0x4BFFC5. infAI.findAttackTarget(targetPlayerId, unitGroup, pTacAI_targetInfo, timeGetTimeValue)
 // Can change return value to 0x4C0E3C if we chose to override ROR method (and NOT execute it)
-// This method searches for a target when AI player has an idle military situation (?)
-// Callers are 0x4D4348, 0x4D53F9, 0x4D5BF2 (parent method=0x4D3AB0=tacAITaskActiveGroups?)
+// This method searches for a target when AI player has an idle military situation (?) => output is *pTacAI_targetInfo
+// Callers are 0x4D4348, 0x4D53F9, 0x4D5BF2 (common parent method=0x4D3AB0=tacAITaskActiveGroups)
 void RockNRorInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ESI_val;
 	ror_api_assert(REG_values, infAI && infAI->IsCheckSumValid());
@@ -3936,7 +3936,7 @@ void RockNRorInstance::EntryPointInfAIGroupFindMainTarget(REG_BACKUP *REG_values
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->EAX_val = unitGroup->commanderUnitId; // same as replaced instruction 0x4BFFC7
 	}
-	bool noCustomTreatment = false; // for debugging
+	bool noCustomTreatment = false; // set true for debugging (to force DO NOT use custom code)
 	if (noCustomTreatment || !ROCKNROR::IsImproveAIEnabled(infAI->commonAIObject.playerId) || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}

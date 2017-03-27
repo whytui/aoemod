@@ -493,6 +493,9 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 			(targetUnitDef->DAT_ID1 == CST_UNITID_GRANARY));
 		bool letRorCodeHandleThis = (isStandardHardcodedDropSite && (mainSelectedUnit->resourceTypeId >= 0) &&
 			(mainSelectedUnit->resourceTypeId <= CST_RES_ORDER_GOLD));
+		if ((mainSelectedUnit->unitDefinition->unitAIType == TribeAIGroupPriest) && (targetUnitDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
+			letRorCodeHandleThis = true; // Special case for priest(resource=faith!)+right click on building
+		}
 		// Same for dock and fishing ships ?
 
 		// TODO: exclude standard cases, already handled by ROR ? Filter on resource type cf unitDefCommand ?
