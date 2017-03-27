@@ -55,6 +55,8 @@ namespace COMBAT {
 
 
 	// Handles "retreat after shooting" feature for hunters (non-native feature !)
+	// Returns true if an action (movement) could be triggered
+	// Returns false if error or no movement triggered
 	bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify);
 
 

@@ -138,9 +138,10 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 
 	if (notifyEvent->eventId == GAME_EVENT_TYPE::EVENT_SHOULD_MOVE_BACK_AFTER_SHOOTING) {
 		if (COMBAT::HunterMoveBackAfterShooting(activity, notifyEvent)) {
-			outExecStandardCode = false;
+			outExecStandardCode = false; // Event has been processed with an action. We don't want to run ROR handler.
 			return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION;
 		} else {
+			// Normal execution (actually, ROR won't do much with this event)
 			return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
 		}
 	}
@@ -151,7 +152,7 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 				if ((activity->orderQueue[i].targetUnitId == notifyEvent->targetUnitId) &&
 					(activity->orderQueue[i].orderId == UNIT_AI_ORDER::CST_ORDER_GATHER_ATTACK)) {
 					if (!AOE_METHODS::UNIT::IsReadyToAttack(activity->ptrUnit)) {
-						outExecStandardCode = false;
+						outExecStandardCode = false; // We don't want to run ROR handler in this case.
 						return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION; // Ignore the notification because a pending order already concerns this "attacker" unit and I am not ready yet to strike back.
 					}
 				}

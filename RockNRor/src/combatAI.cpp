@@ -516,6 +516,8 @@ float GetGroupDamageOnUnit(STRUCT_INF_AI *infAI, STRUCT_UNIT_GROUP *unitGroup, S
 
 
 // Handles "retreat after shooting" feature for hunters (non-native feature !)
+// Returns true if an action (movement) could be triggered
+// Returns false if error or no movement triggered
 bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notify) {
 	// This is restricted to "AI improvements ON" configuration.
 	if (!unitActivity || !unitActivity->IsCheckSumValid() || !notify) { return false; }

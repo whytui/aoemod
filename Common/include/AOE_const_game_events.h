@@ -122,7 +122,8 @@ namespace AOE_CONST_INTERNAL
 		
 
 		
-		// Notify being attacked. Triggers a player.NotifyEvent with event 0x201
+		// Notify being attacked (unitAI level). Triggered (for example) in 0x4268D6, 0x4B2489, ...
+		// This triggers a player.NotifyEvent with event 0x201: for this reason, do not prevent ROR execution in virtual method hooks !
 		// targetUnitId=attacker, actorUnitId=me
 		// genericParam4=attackerUnitId
 		// genericParam5=(int) remaining HP (target unit)
