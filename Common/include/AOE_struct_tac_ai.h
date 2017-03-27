@@ -34,7 +34,7 @@ namespace AOE_STRUCTURES {
 		long int targetUnitId; // building to build, gazelle to hunt, etc
 		unsigned long int timeGetTimeValue; // Last evaluation system time in milliseconds. Task changes are evaluated if > 5 seconds ?
 
-		AOE_CONST_FUNC::RESOURCE_TYPES GetResourceType() { return (AOE_CONST_FUNC::RESOURCE_TYPES)this->resourceType; };
+		AOE_CONST_FUNC::RESOURCE_TYPES GetResourceType() const { return (AOE_CONST_FUNC::RESOURCE_TYPES)this->resourceType; };
 	};
 
 
@@ -110,70 +110,73 @@ namespace AOE_STRUCTURES {
 		// 0xF0
 		STRUCT_AI *ptrMainAI;
 		STRUCT_MANAGED_ARRAY allVillagers; // +F4. All *my* villagers. Array can contain empty values (-1). Does NOT contain any boat ! 
-		// 0x100
-		STRUCT_MANAGED_ARRAY villagerExplorers; // +104.
-		STRUCT_MANAGED_ARRAY landMilitaryUnits; // +114. All land military unitIds (cf AI type - 0x4D277A), EXCLUDING towers, boats
+		STRUCT_MANAGED_ARRAY villagerExplorers; // +104. All my villagers tasked to exploration.
+		STRUCT_MANAGED_ARRAY landMilitaryUnits; // +114. All my land military unitIds (cf AI type - 0x4D277A), EXCLUDING towers, boats
 		STRUCT_MANAGED_ARRAY unknown_124; // NOT SURE it is a STRUCT_MANAGED_ARRAY
-		STRUCT_MANAGED_ARRAY allBoats; // +134. Includes trade/fishing/transport/war boat AI type units.
-		STRUCT_MANAGED_ARRAY warShips; // +144
-		STRUCT_MANAGED_ARRAY fishingShips; // +154
-		STRUCT_MANAGED_ARRAY tradeShips; // +164
-		STRUCT_MANAGED_ARRAY transportShips; // +174
-		STRUCT_MANAGED_ARRAY relics; // +184. Relics only ? What is sure is that is does NOT include ruins.
+		STRUCT_MANAGED_ARRAY allBoats; // +134. All my boats, including trade/fishing/transport/war boat AI type units.
+		STRUCT_MANAGED_ARRAY warShips; // +144. All my war ships.
+		STRUCT_MANAGED_ARRAY fishingShips; // +154. All my fishing ships.
+		STRUCT_MANAGED_ARRAY tradeShips; // +164. All my trade ships.
+		STRUCT_MANAGED_ARRAY transportShips; // +174. All my transport ships.
+		STRUCT_MANAGED_ARRAY relics; // +184. all my relics (only) ? What is sure is that it does NOT include ruins.
 		long int SNNumber[0xE2]; // +194. In game, we use this one (not strategyAI's). Total size=0x388 (4*0xE2). index from 0 to E1. (missing 1 SN?)
 		// 0x51C
-		// Here: a list of small structures size=0x18 (0x32 elems?) = gatherers and their tasks (excluding explorers). builders/repairmen NOT in this array?
+		// Here: a list of small structures size=0x18 (0x32 elems?) = gatherers and their tasks (excluding explorers).
+		// builders/repairmen are NOT in this array?
 		AOE_STRUCTURES::STRUCT_VILLAGER_TASKS_ELEM gatherersTasks[0x32];
 		unsigned long int villagerTasksRelevantElemCount; // +9CC. Number of RELEVANT element count in villagerTasks array (array size is fixed, it's included in this structure !)
-		// 0x9D0
 		long int nonExplorerVillagersCount; // +9D0. Counts all villagers BUT explorers
 		AOE_STRUCTURES::STRUCT_UNIT_GROUP fakeFirstUnitGroupElem; // +9D4. Organized as a circular list (each elem is a group) ? This one = "fake" elem (like in strategy)
 		unsigned long int seqUnitGroupId; // +D04. Is = next group's ID.
 		unsigned long int unitGroupsCount; // +D08. This does NOT count fakeFirstUnitGroupElem (so it CAN be 0).
 		unsigned long int lastAttackTime_ms; // +D0C. Last attack time (not response time, unlesse SNLockAttackAndAttackResponse=1). Set in 0x4D457B.
-		// 0xD10
 		long int unknown_D10_ms; // +D10. A time value in ms. Last recomputation of unit groups ?
 		unsigned long int lastAttackResponseTime_ms; // +D14. Value in milliseconds. Used to compute +D24 ?
-		unsigned long int unknown_D18;
+		unsigned long int unknown_D18; // +D18.
 		long int lastScalingUpdate; // +D1C. Value in milliseconds. See RockNRor config (tacticalAI/updateDelay) or SNScalingFrequency in standard game.
-		// 0xD20
-		long int buildFrequencyCounter; // incremented until it reaches SNBuildFrequency
+		long int buildFrequencyCounter; // +D20. incremented until it reaches SNBuildFrequency
 		long int currentAttackSeparationTime_seconds; // +D24. Compared to SNAttackResponseSeparationTime,SNAttackSeparationTimeRandomness. See 4E0BC0,4E0C03.
-		STRUCT_MANAGED_ARRAY targetPlayers; // +D28. Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK? Always only 1 element (sometimes hardcoded?4D622C)
+		
+		// +D28. Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK?
+		// In practice, there is always only 1 (or 0) element (hardcoded in several places like 0x4D622C)
+		// This is set/used in 
+		// - TaskActiveSoldiers
+		// - 0x4D6060 = tacAI.doPlayAttacking ? (arg1, playerId)
+		// - 0x4D7880=tacAI.reactToEvent(myUnitId, arg2_unitId, eventId, arg4, arg5, arg6) when event=0x201(attacked)
+		// - 0x4E0A70=tacAI.GetTargetPlayerUnitCountInInfAIList() => from taskIdleSoldiers
+		// - 0x4E3560=tacAI.attackTowerInMyTown(unitId)
+		STRUCT_MANAGED_ARRAY targetPlayers;
 		STRUCT_MANAGED_ARRAY likedPlayers; // +D38. allied playerIds ? "myself" IS in list ! In practice, always 2 elements? (me + most liked player) ?
 		STRUCT_MANAGED_ARRAY tmpUnitIdArrayForGroupSetup; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960. Includes fishing,trade ships? Units without a group ?
-		STRUCT_MANAGED_ARRAY unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ? Unit that defend something ? Trade ships also? Used when tasking?
+		STRUCT_MANAGED_ARRAY unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ? Unit that defend something ? Trade ships also? Used when tasking? Temp ?
 		unsigned long int gathererCount_actual[4]; // +D68. Index IS resource ID.
 		long int gathererCount_desired[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT]; // +D78. Villager count we want to assign to each type of resource (4). Index IS resource Type ID
 		long int extraResourceTypeNeededByPriority[4]; // +D88 First=most needed. Use extraResourceAmount with this index to get resource amount. <0 amount = I must collect
 		long int extraResourceAmount[4]; // +D98. Index is always the same (0=food, 1=food...) <0 amount = I need to collect some. "resDiff"
 		STRUCT_PLANNED_RESOURCE_NEEDS plannedResourceNeeds; // +DA8, size=0x70. Related to //SNMostNeededResourceLookAhead (number of stratElem to take into account)
 		// 0xE18
-		long int attackEnabled; // +E18. Starts with 0, Once set to 1, AI can attack.
+		long int attackEnabled; // +E18. Starts with 0, Once set to 1, AI can attack. Set in 0x4E15F0.
 		AOE_CONST_INTERNAL::AI_UPDATE_TYPES currentAIUpdateType; // +E1C. loop ID for TacAI treatments types.
-		// 0xE20
-		long int unknown_E20; // a dword, a flag - related to villagers/gathering ?
+		long int unknown_E20; // +E20. A dword, a flag - related to villagers/gathering ?
 		char unknown_E24[0xE44 - 0xE24];
 		long int myWonderBeingBuiltFlag; // +E44. true(1) or false(0) value.
 		long int myWonderIsBuiltFlag; // +E48. true(1) or false(0) value.
 		STRUCT_TAC_AI_BUILD_TO_TRIGGER constructionToTrigger; // E4C : an included temporary struct (=>F78 or F80?) about building currently analyzed for being built. +0=DATID to build. +108=actorUnitId?
-		long int currentAIUpdateVillagerId; // Currently evaluated villager unitId (from allVillagers array). Set to -1 when I have no villager or out of loop ?
+		long int currentAIUpdateVillagerId; // +F7C. Currently evaluated villager unitId (from allVillagers array). Set to -1 when I have no villager or out of loop ?
 		long int unknown_F80; // +F80. signed dword. A group id ? Last group id that was tasked ?
 		long int currentlyProcessedUnitGroupId; // +F84. Id of "next" group to process in active group tasking (just technical, to continue work when has not enough time to finish in 1 execution)
 		long int storagePitAddedToStrategy; // +F88. 1 when a SP has been inserted into strategy.
 		long int granaryAddedToStrategy; // +F8C. 1 when a granary has been inserted into strategy.
-		// 0xF90
-		long int unknown_F90_someTimeValue; // 4D2245,4D242A...
+		long int unknown_F90_someTimeValue; // +F90. 4D2245,4D242A...
 		long int lastPanicModeStrategyUpdateTime; // +F94. In milliseconds. Updated with game time when "panic mode" units are added to strategy.
-		long int unknown_F98_timeAboutTributes; // Related to SNCoopDemandTributeInterval
+		long int unknown_F98_timeAboutTributes; // +F98. Related to SNCoopDemandTributeInterval
 		unsigned long int unknown_F9C;
-		// 0xFA0
-		long int lastCoopSharAttackTime_ms; // Only used if SNCoopShareAttacking=1 (0x4E2CD7). In milliseconds. Updated when an group is tasked to attack some target?
+		long int lastCoopSharAttackTime_ms; // +FA0. Only used if SNCoopShareAttacking=1 (0x4E2CD7). In milliseconds. Updated when an group is tasked to attack some target?
 		unsigned long int unknown_FA4; // flag ? about exploration ? Used in gatherer affectation methods
-		unsigned long int unknown_FA8;
+		unsigned long int unknown_FA8; // +FA8.
 		STRUCT_TAC_AI_TARGET_INFO targetInfo; // +FAC. This is only used in "group.FindAttackTarget". Values only make sense when inProgress=1 (unused otherwise).
 		long int attacksByPlayerCount[9]; // +FD8. number of times this player attacked me. Updated in 0x4D7AF0 (tacAI.reactToEvent 0x201), never used in standard code ?
-		long int lastUAms; // +FFC. "LastUAms" (UpdateAI). Time spent in last updateAI execution
+		long int lastUAms; // +FFC. "LastUAms" (UpdateAI milliseconds). Time spent in last updateAI execution
 		long int averageUpdateAITime_ms; // +1000. Updated each time unknown_1004_time_counter reaches 20 and is reset. "Average UAms" ?
 		long int calcAverageUpdateAITime_counter; // Maximum value = 20 = 0x14
 		long int lastAIUpdateTime_ms; // +1008. A timeGetTime value. (not a game time)

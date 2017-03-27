@@ -3880,6 +3880,7 @@ void RockNRorInstance::EntryPointAfterActivityStop(REG_BACKUP *REG_values) {
 
 // From 0x40ACDA: diplAI.GetMostDislikedPlayerId(askTributeAmount, askTributePlayerId, bAttackWinningPlayer, attackWinningPlayerFactor)
 // This may change return address to 0x40AD8E to bypass standard treatments.
+// The returned value (via EDX) is used to ask tribute(?) and is also set in tacAI.targetPlayers = impacts which player "I" will attack.
 void RockNRorInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_DIPLOMACY_AI *diplAI = (AOE_STRUCTURES::STRUCT_DIPLOMACY_AI *)REG_values->EDI_val;
 	AOE_STRUCTURES::STRUCT_PLAYER *player = (AOE_STRUCTURES::STRUCT_PLAYER *)REG_values->EAX_val;
