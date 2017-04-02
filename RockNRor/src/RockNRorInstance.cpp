@@ -3894,21 +3894,23 @@ void RockNRorInstance::EntryPointGetMostDislikedPlayerId(REG_BACKUP *REG_values)
 			ChangeReturnAddress(REG_values, 0x40AD8E);
 		}
 	}
-	long int askTributeAmount = GetIntValueFromRORStack(REG_values, 0x14);
-	long int askTributePlayerId = GetIntValueFromRORStack(REG_values, 0x18);
+	long int snAskTributeAmount = GetIntValueFromRORStack(REG_values, 0x14);
+	long int snAskTributePlayerId = GetIntValueFromRORStack(REG_values, 0x18);
 	long int attackWinningPlayerFlag = GetIntValueFromRORStack(REG_values, 0x1C);
 	long int attackWinningPlayerFactor = GetIntValueFromRORStack(REG_values, 0x20);
 	bool skipStandardTreatment = false; // Set it to true to bypass standard ROR calculations of target playerId
 	long int mostDislikedPlayerId = -1; // Modify it to impact returned value and set target playerId
 
 	// Custom treatments
-	if (ROCKNROR::IsImproveAIEnabled(player->playerId) && !ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+	if (ROCKNROR::IsImproveAIEnabled(player->playerId) && !ROCKNROR::crInfo.configInfo.doNotApplyFixes &&
+		!CUSTOM_AI::playerTargetingHandler.ForceUseStandardRorTargetPlayerSelection()) {
 		// Override the calculation of target player Id (most disliked)
-		mostDislikedPlayerId = CUSTOM_AI::playerTargetingHandler.GetMostDislikedPlayer(player, diplAI, askTributeAmount, askTributePlayerId,
+		mostDislikedPlayerId = CUSTOM_AI::playerTargetingHandler.GetMostDislikedPlayer(player, diplAI, snAskTributeAmount, snAskTributePlayerId,
 			(attackWinningPlayerFlag != 0), attackWinningPlayerFactor);
 		skipStandardTreatment = true;
 	}
 
+	// Do not modify below
 	if (skipStandardTreatment) {
 		REG_values->EDX_val = mostDislikedPlayerId; // no impact if we do NOT change return address.
 		ChangeReturnAddress(REG_values, 0x40AD8E); // Exit and return EDX' value (default -1)

@@ -42,6 +42,8 @@ namespace CUSTOM_AI {
 		const long int dislikeSubScoreMostSpottedUnitsMyTown = 3;
 		const long int dislikeSubScoreHasTowerInMyTown = 20;
 
+		// For debugging
+		const bool alwaysForceUseStandardRorPlayerTargetSelection = true;
 	}
 
 	class AIPlayerTargetingInfo {
@@ -81,7 +83,11 @@ namespace CUSTOM_AI {
 		// yearsDelay should be >=0
 		static long int GetPercentFactorFromVictoryConditionDelay(long int yearsDelay);
 
-		// Returns the most disliked playerIdn, impacting which player "I" will attack.
+		// Returns true if we should use ROR's standard treatments for target player selection: e.g. in scenario
+		bool ForceUseStandardRorTargetPlayerSelection();
+
+		// Returns the most disliked playerId for TacAI, impacting which player "I" will attack.
+		// Note: standard ROR code (0x40ACDA) is total crap : applies "score/factor" instead of "score*factor/100", and when attackWinningPlayerFactor=false, the score factor is substracted (instead of ignored)
 		long int GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DIPLOMACY_AI *diplAI,
 			long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor);
 

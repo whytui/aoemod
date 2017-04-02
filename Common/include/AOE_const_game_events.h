@@ -162,6 +162,9 @@ namespace AOE_CONST_INTERNAL
 		EVENT_SHOULD_MOVE_BACK_AFTER_SHOOTING = 0x200,
 
 		// Player notification: some unit was attacked. See also 0x1F4
+		// arg1=arg2 = unitId (attackED)
+		// Generic arg4 = attacker unit ID
+		// Generic arg5/6 = 0 (unused)
 		EVENT_PLAYER_UNIT_ATTACKED = 0x201,
 
 		// target gatherable unit is depleted? Movement finished, including "exploration basic move" ?

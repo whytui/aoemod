@@ -61,10 +61,10 @@ namespace AOE_STRUCTURES {
 
 	std::string AOE_STRUCT_EXPORTER::ExportStruct_internal(STRUCT_AI *obj, unsigned long int RORAddress) {
 		if (!obj) { return "NULL"; }
-		std::string res = "targetPlayer=";
-		int targetPlayersUsedElem = obj->structTacAI.targetPlayers.usedElements;
+		std::string res = "dislikedPlayers=";
+		int targetPlayersUsedElem = obj->structTacAI.mostDislikedPlayers.usedElements;
 		if (targetPlayersUsedElem > 0) {
-			long int firstArrayValue = this->GetDwordFromRORData((unsigned long)obj->structTacAI.targetPlayers.unitIdArray);
+			long int firstArrayValue = this->GetDwordFromRORData((unsigned long)obj->structTacAI.mostDislikedPlayers.unitIdArray);
 			res += std::to_string(firstArrayValue);
 		}
 		return res;

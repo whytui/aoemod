@@ -413,10 +413,10 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		}
 
 		s += "\n*** Attacking *** Target player=";
-		int tpCount = ai->structTacAI.targetPlayers.usedElements;
+		int tpCount = ai->structTacAI.mostDislikedPlayers.usedElements;
 		long int targetPlayer0 = -1;
 		if (tpCount > 0) {
-			AOE_STRUCTURES::GetObjectFromRORData(rd->handleROR, ai->structTacAI.targetPlayers.unitIdArray, &targetPlayer0, 4 /*DWORD*/);
+			AOE_STRUCTURES::GetObjectFromRORData(rd->handleROR, ai->structTacAI.mostDislikedPlayers.unitIdArray, &targetPlayer0, 4 /*DWORD*/);
 		}
 		s += std::to_string(targetPlayer0);
 		s += ". tacAI.targetInfo [";

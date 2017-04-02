@@ -137,16 +137,24 @@ namespace AOE_STRUCTURES {
 		long int buildFrequencyCounter; // +D20. incremented until it reaches SNBuildFrequency
 		long int currentAttackSeparationTime_seconds; // +D24. Compared to SNAttackResponseSeparationTime,SNAttackSeparationTimeRandomness. See 4E0BC0,4E0C03.
 		
-		// +D28. Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK?
-		// In practice, there is always only 1 (or 0) element (hardcoded in several places like 0x4D622C)
-		// This is set/used in 
-		// - TaskActiveSoldiers
-		// - 0x4D6060 = tacAI.doPlayAttacking ? (arg1, playerId)
-		// - 0x4D7880=tacAI.reactToEvent(myUnitId, arg2_unitId, eventId, arg4, arg5, arg6) when event=0x201(attacked)
-		// - 0x4E0A70=tacAI.GetTargetPlayerUnitCountInInfAIList() => from taskIdleSoldiers
+		// +D28. "MostDislikedPlayers". Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK?
+		// In practice, there is always only 1 (or 0 at startup) element (hardcoded in several places like 0x4D622C)
+		// This is set in 0x4D0980=tacAI.mainUpdate(arg1): set target from 0x40ACB0 call=diplAI.GetMostDislikedPlayerId(SNaskTributeAmount, SNaskTributePlayerId, bAttackWinningPlayer, attackWinningPlayerFactor)
+		// This is used ("Get" only) in
+		// - 0x4D3AB0=tacAI.TaskActiveSoldiers(timeGetTime, allowedtime).
+		// - 0x4D6060=tacAI.doPlayAttacking ? (arg1, playerId).
+		// - 0x4D7880=tacAI.reactToEvent(myUnitId, arg2_unitId, eventId, arg4, arg5, arg6) when event=0x201(attacked). (0x4D8309).
+		// - 0x4E0A70=tacAI.GetTargetPlayerUnitCountInInfAIList() => from taskIdleSoldiers. 
 		// - 0x4E3560=tacAI.attackTowerInMyTown(unitId)
-		STRUCT_MANAGED_ARRAY targetPlayers;
-		STRUCT_MANAGED_ARRAY likedPlayers; // +D38. allied playerIds ? "myself" IS in list ! In practice, always 2 elements? (me + most liked player) ?
+		// If neutral and dislike>74, most disliked player becomes enemy.
+		STRUCT_MANAGED_ARRAY mostDislikedPlayers;
+
+		// +D38. Most liked player IDs. "myself" IS in list (0x4D0CA7) ! In practice, always 2 elements? (me + most liked player) ?
+		// Contains 1 playerID ("me") when most liked=most disliked (e.g. in 2-players games).
+		// Contains 2 playerIDs (me+most liked other player) in other situations
+		// Re-filled in 0x4D0BF7. If neutral and like>74, most liked player becomes ally.
+		STRUCT_MANAGED_ARRAY mostLikedPlayers;
+
 		STRUCT_MANAGED_ARRAY tmpUnitIdArrayForGroupSetup; // +D48. available military units (idle OR in range from TC?) for temp treatments ? See 4D8960. Includes fishing,trade ships? Units without a group ?
 		STRUCT_MANAGED_ARRAY unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ? Unit that defend something ? Trade ships also? Used when tasking? Temp ?
 		unsigned long int gathererCount_actual[4]; // +D68. Index IS resource ID.

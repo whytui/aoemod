@@ -29,10 +29,10 @@ long int AIPlayerTargetingInfo::GetCurrentTacAITargetPlayerId(STRUCT_PLAYER *pla
 	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) {
 		return -1;
 	}
-	if (player->ptrAIStruct->structTacAI.targetPlayers.usedElements <= 0) { 
+	if (player->ptrAIStruct->structTacAI.mostDislikedPlayers.usedElements <= 0) {
 		return -1;
 	}
-	return player->ptrAIStruct->structTacAI.targetPlayers.unitIdArray[0];
+	return player->ptrAIStruct->structTacAI.mostDislikedPlayers.unitIdArray[0];
 }
 
 
@@ -270,10 +270,22 @@ long int PlayerTargeting::GetPercentFactorFromVictoryConditionDelay(long int yea
 }
 
 
-// Returns the most disliked playerId, impacting which player "I" will attack.
+// Returns true if we should use ROR's standard treatments for target player selection: e.g. in scenario
+bool PlayerTargeting::ForceUseStandardRorTargetPlayerSelection() {
+	if (CUSTOM_AI::TARGETING_CONST::alwaysForceUseStandardRorPlayerTargetSelection) {
+		return true;
+	}
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return true; }
+	return !settings->isCampaign && !settings->rgeGameOptions.isScenario && settings->rgeGameOptions.isSinglePlayer;
+}
+
+
+// Returns the most disliked playerId for TacAI, impacting which player "I" will attack.
 // Note: standard ROR code (0x40ACDA) is total crap : applies "score/factor" instead of "score*factor/100", and when attackWinningPlayerFactor=false, the score factor is substracted (instead of ignored)
 long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DIPLOMACY_AI *diplAI,
 	long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor) {
+	// TODO: askTributePlayerId (corresponds to SN number, for scenarios)
 	assert(player && player->IsCheckSumValid());
 	assert(diplAI && diplAI->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid() || !diplAI || !diplAI->IsCheckSumValid()) { return -1; }
@@ -344,7 +356,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 							break;
 						case GAME_UNIT_STATUS::GUS_2_READY:
 							// This loop is not supposed to detect built wonders (already found in resource).
-							assert(false && "Inconsistentcy: a wonder was not detected in resources");
+							assert(false && "Inconsistency: a wonder was not detected in resources");
 							hasBuiltWonder[loopPlayerId] = true;
 							break;
 						default:
@@ -430,8 +442,8 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 	}
 
 	if (player->ptrAIStruct) {
-		if ((player->ptrAIStruct->structTacAI.targetPlayers.usedElements == 0) ||
-			(mostDislikedPlayerId != player->ptrAIStruct->structTacAI.targetPlayers.unitIdArray[0])) {
+		if ((player->ptrAIStruct->structTacAI.mostDislikedPlayers.usedElements == 0) ||
+			(mostDislikedPlayerId != player->ptrAIStruct->structTacAI.mostDislikedPlayers.unitIdArray[0])) {
 			// Target player changed: save game time
 			playerTargetInfo->lastTargetPlayerChangeGameTime = global->currentGameTime;
 		}
