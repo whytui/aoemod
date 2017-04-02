@@ -285,6 +285,14 @@ bool PlayerTargeting::ForceUseStandardRorTargetPlayerSelection() {
 // Note: standard ROR code (0x40ACDA) is total crap : applies "score/factor" instead of "score*factor/100", and when attackWinningPlayerFactor=false, the score factor is substracted (instead of ignored)
 long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DIPLOMACY_AI *diplAI,
 	long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor) {
+	
+	/* Original method: consider only *alive* non-gaia players.
+	Ignore player (can't be most disliked) if ally&SNTributePlayer&SNTribute>0
+	If attack winning player: dislike "score"=dislike+(player.score/SNAtkWinningPlayerFactor)
+	If NOT attack winning player: dislike "score"=dislike-(player.score/SNAtkWinningPlayerFactor)
+	Note: original code may choose an allied player as target !
+	*/
+	
 	// TODO: askTributePlayerId (corresponds to SN number, for scenarios)
 	assert(player && player->IsCheckSumValid());
 	assert(diplAI && diplAI->IsCheckSumValid());
@@ -374,69 +382,78 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 
 
 	// Loop on all non-gaia players
+	bool watchForAskTributePlayer = (askTributeAmount > 0);
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 		STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(loopPlayerId);
-		if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) &&
+		if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) && // Ignore "myself"
 			loopPlayer->ptrScoreInformation && loopPlayer->ptrScoreInformation->IsCheckSumValid() &&
 			(loopPlayer->aliveStatus != 2)) { // Cf 0x40ACFA: exclude defeated players
 			assert((loopPlayerId >= 1) && (loopPlayerId < global->playerTotalCount) && (loopPlayerId <= 8));
-			if (player->ptrDiplomacyStances[loopPlayerId] != 0) { // Not allied, cf call in 0x40AD14)
-				long int playerScoreFactor = 0; // default: no impact
-				if (attackWinningPlayer && (attackWinningPlayerFactor > 0)) {
-					// Note: in game code, the formula is completely erroneous (DIVIDES by factor !)
-					// TODO: find a better formula ?
-					playerScoreFactor = (loopPlayer->ptrScoreInformation->currentTotalScore * attackWinningPlayerFactor) / 100;
-					// Note: In game code, there is a "else" that does the opposite effect if attackWinningPlayer is false (factor is substracted !)
+			bool isAllied = (player->ptrDiplomacyStances[loopPlayerId] != PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY);
+			if (watchForAskTributePlayer && (loopPlayerId == askTributePlayerId) && isAllied) {
+				// Similar as original code: "SN target tribute player" can't be most disliked.
+				continue;
+			}
+			if (isAllied) {
+				// Added: always ignore allied players, unlike original code... 
+				// which may explain cases (in original game) when AI sends troops to (allied) human player and does nothing
+				continue;
+			}
+			long int playerScoreFactor = 0; // default: no impact
+			if (attackWinningPlayer && (attackWinningPlayerFactor > 0)) {
+				// Note: in game code, the formula is completely erroneous (DIVIDES by factor !)
+				// TODO: find a better formula ?
+				playerScoreFactor = (loopPlayer->ptrScoreInformation->currentTotalScore * attackWinningPlayerFactor) / 100;
+				// Note: In game code, there is a "else" that does the opposite effect if attackWinningPlayer is false (factor is substracted !)
+			}
+
+			// Handle some priority rules (NOT in standard game)
+
+			long int otherDislikeAmount = 0;
+			if (hasStandardVictoryCondition) {
+				// Wonders/relics/ruins can trigger victory in standard conditions
+				if (hasInProgressWonder[loopPlayerId]) {
+					// Building a wonder: victory timer is not launched yet, but this is critical though.
+					otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningWonderInConstruction;
 				}
-
-				// Handle some priority rules (NOT in standard game)
-
-				long int otherDislikeAmount = 0;
-				if (hasStandardVictoryCondition) {
-					// Wonders/relics/ruins can trigger victory in standard conditions
-					if (hasInProgressWonder[loopPlayerId]) {
-						// Building a wonder: victory timer is not launched yet, but this is critical though.
-						otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningWonderInConstruction;
-					}
-					if (hasBuiltWonder[loopPlayerId]) {
-						// Player has a standing wonder (which leads to victory)
-						int wonderVictoryDelay = settings->playerWondersVictoryDelays[loopPlayerId];
-						assert(wonderVictoryDelay > -1); // standard victory condition + player has a wonder = delay should be set
+				if (hasBuiltWonder[loopPlayerId]) {
+					// Player has a standing wonder (which leads to victory)
+					int wonderVictoryDelay = settings->playerWondersVictoryDelays[loopPlayerId];
+					assert(wonderVictoryDelay > -1); // standard victory condition + player has a wonder = delay should be set
 							
-						int wonderDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay(wonderVictoryDelay);
-						otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningWonderBuilt + wonderDelayProportion; // Very top priority ! However other criteria can still make the decision between 2 players having a wonder.
-					}
-
-					if (player->remainingTimeToAllRelicsVictory > -1) {
-						// Player has all relics (which leads to victory)
-						int relicsDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay((int)player->remainingTimeToAllRelicsVictory);
-						otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningAllArtefacts + relicsDelayProportion;
-					}
-					if (player->remainingTimeToAllRuinsVictory > -1) {
-						// Player has all ruins (which leads to victory)
-						int ruinsDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay((int)player->remainingTimeToAllRuinsVictory);
-						otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningAllArtefacts + ruinsDelayProportion;
-					}
-				} else {
-					// Wonders/relics/ruins are not (direct) victory conditions. Impact is reduced.
-					if (hasInProgressWonder[loopPlayerId]) {
-						otherDislikeAmount += TARGETING_CONST::dislikeAmountNoWinningWonderInConstruction;
-					}
-					if (hasBuiltWonder[loopPlayerId]) {
-						otherDislikeAmount += TARGETING_CONST::dislikeAmountNoWinningWonderBuilt;
-					}
-					otherDislikeAmount += allRelicsOrRuinsCounter[loopPlayerId] * TARGETING_CONST::dislikeAmountNoWinningAllArtefacts;
+					int wonderDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay(wonderVictoryDelay);
+					otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningWonderBuilt + wonderDelayProportion; // Very top priority ! However other criteria can still make the decision between 2 players having a wonder.
 				}
 
-				long int thisDislikeValue = diplAI->dislikeTable[loopPlayerId] + playerScoreFactor + otherDislikeAmount;
-				if (playerTargetInfo) {
-					// Add the sub-score that includes complex rules (taking into account recent attacks, etc)
-					thisDislikeValue += playerTargetInfo->lastComputedDislikeSubScore[loopPlayerId];
+				if (player->remainingTimeToAllRelicsVictory > -1) {
+					// Player has all relics (which leads to victory)
+					int relicsDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay((int)player->remainingTimeToAllRelicsVictory);
+					otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningAllArtefacts + relicsDelayProportion;
 				}
-				if (thisDislikeValue > bestDislikeValue) {
-					bestDislikeValue = thisDislikeValue;
-					mostDislikedPlayerId = loopPlayerId;
+				if (player->remainingTimeToAllRuinsVictory > -1) {
+					// Player has all ruins (which leads to victory)
+					int ruinsDelayProportion = PlayerTargeting::GetPercentFactorFromVictoryConditionDelay((int)player->remainingTimeToAllRuinsVictory);
+					otherDislikeAmount += TARGETING_CONST::dislikeAmountWinningAllArtefacts + ruinsDelayProportion;
 				}
+			} else {
+				// Wonders/relics/ruins are not (direct) victory conditions. Impact is reduced.
+				if (hasInProgressWonder[loopPlayerId]) {
+					otherDislikeAmount += TARGETING_CONST::dislikeAmountNoWinningWonderInConstruction;
+				}
+				if (hasBuiltWonder[loopPlayerId]) {
+					otherDislikeAmount += TARGETING_CONST::dislikeAmountNoWinningWonderBuilt;
+				}
+				otherDislikeAmount += allRelicsOrRuinsCounter[loopPlayerId] * TARGETING_CONST::dislikeAmountNoWinningAllArtefacts;
+			}
+
+			long int thisDislikeValue = diplAI->dislikeTable[loopPlayerId] + playerScoreFactor + otherDislikeAmount;
+			if (playerTargetInfo) {
+				// Add the sub-score that includes complex CUSTOM rules (taking into account recent attacks, etc)
+				thisDislikeValue += playerTargetInfo->lastComputedDislikeSubScore[loopPlayerId];
+			}
+			if (thisDislikeValue > bestDislikeValue) {
+				bestDislikeValue = thisDislikeValue;
+				mostDislikedPlayerId = loopPlayerId;
 			}
 		}
 	}
