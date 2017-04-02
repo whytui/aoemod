@@ -36,14 +36,18 @@ namespace CUSTOM_AI {
 		const long int extraValueForCurrentTargetDecayBy100SecondsPeriod = 10; // (fake) dislike value added to current target that is decreased (decay) during 100 seconds.
 
 		// Dislike score "sub" values + parameters
+		const bool useRandomInDislikeSubScore = true;
 		const long int dislikeSubScoreRandomFactor = 10;
 		const long int dislikeSubScoreAttackedMeMoreThanAverage = 5;
 		const long int dislikeSubScoreAttackedMyTown = 12;
 		const long int dislikeSubScoreMostSpottedUnitsMyTown = 3;
 		const long int dislikeSubScoreHasTowerInMyTown = 20;
+		const long int dislikeSubScorePlayerScoreFinalImpact = 50; // 0-100 impact of "player score" on global "dislike score" calculation. Note: attackWinningPlayerFactor percentage is alreday applied before (which reduces the impact)
+		const long int dislikeSubScorePriorityRulesFinalImpact = 75; // 0-100 impact of "priority rules" (winning conditions...) on global "dislike score" calculation
+		const long int dislikeSubScoreCustomRulesFinalImpact = 30; // 0-100 impact of "custom rules" on global "dislike score" calculation
 
 		// For debugging
-		const bool alwaysForceUseStandardRorPlayerTargetSelection = true;
+		const bool alwaysForceUseStandardRorPlayerTargetSelection = false; // When true, never use RockNRor rules for 'target player' selection
 	}
 
 	class AIPlayerTargetingInfo {
@@ -55,14 +59,17 @@ namespace CUSTOM_AI {
 		long int lastUpdateGameTime; // milliseconds since last update of AIPlayer targeting info.
 		long int nextUpdateGameTime; // milliseconds
 		long int lastTargetPlayerChangeGameTime; // milliseconds
-		long int lastComputedDislikeSubScore[9]; // A Dislike score for each player, taking into account complex rules (players that attacked me, etc) + a random part.
+		
+		// A Dislike score for each player, taking into account complex rules (players that attacked me, etc) + a random part.
+		// Expected values in 0-100.
+		long int lastComputedDislikeSubScore[9];
 
 		// Reset all underlying info (useful at game start, etc)
 		void ResetInfo();
 
 		void GameStartInit();
 
-		// Recompute information (only) if refresh delay has been reached
+		// Recompute Custom information (only) if refresh delay has been reached
 		// Returns true if information have been recomputed (false is not necessarily an error)
 		bool RecomputeInfo(STRUCT_PLAYER *player);
 
@@ -87,6 +94,7 @@ namespace CUSTOM_AI {
 		bool ForceUseStandardRorTargetPlayerSelection();
 
 		// Returns the most disliked playerId for TacAI, impacting which player "I" will attack.
+		// Uses playerTargetInfo->lastComputedDislikeSubScore[...] values (they are not computed each time)
 		// Note: standard ROR code (0x40ACDA) is total crap : applies "score/factor" instead of "score*factor/100", and when attackWinningPlayerFactor=false, the score factor is substracted (instead of ignored)
 		long int GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DIPLOMACY_AI *diplAI,
 			long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor);

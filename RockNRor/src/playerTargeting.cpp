@@ -36,7 +36,7 @@ long int AIPlayerTargetingInfo::GetCurrentTacAITargetPlayerId(STRUCT_PLAYER *pla
 }
 
 
-// Recompute information (only) if refresh delay has been reached (cf updateDetailedDislikeInfoMaxDelay)
+// Recompute Custom information (only) if refresh delay has been reached (cf updateDetailedDislikeInfoMaxDelay)
 // Returns true if information have been recomputed (false is not necessarily an error)
 bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 	assert(player && player->IsCheckSumValid());
@@ -139,7 +139,10 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 			}
 		}
 
-		int randomFactor = randomizer.GetRandomValue_normal_moderate(0, TARGETING_CONST::dislikeSubScoreRandomFactor);
+		int randomFactor = 0;
+		if (TARGETING_CONST::useRandomInDislikeSubScore) {
+			randomFactor = randomizer.GetRandomValue_normal_moderate(0, TARGETING_CONST::dislikeSubScoreRandomFactor);
+		}
 		this->lastComputedDislikeSubScore[targetPlayerId] += randomFactor;
 	}
 
@@ -167,7 +170,7 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 					// Remove from list ? (no cheating: position is fog-visible)
 					// Do not remove during the loop, do it afterwards
 				} else {
-					// By the way, update unit position in infAI list (it is often NOT up to date)
+					// By the way, update unit position in infAI list (it is often NOT up to date) - no longer required with other RockNRor improvements.
 					long int unitPosX = (long int)unit->positionX;
 					long int unitPosY = (long int)unit->positionY;
 					player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[i].posX = (char)unitPosX;
@@ -221,18 +224,24 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 	if (curDelay < 0) { curDelay = 0; }
 	if (this->lastTargetPlayerChangeGameTime <= 0) { curDelay = 1000000; }
 	long int currentTargetPlayerId = this->GetCurrentTacAITargetPlayerId(player);
+	long int highestDislikeSubScore = 0;
 	if (currentTargetPlayerId >= 0)
 	{
 		long int extraValueDecay = ((curDelay / 1000) * TARGETING_CONST::extraValueForCurrentTargetDecayBy100SecondsPeriod) / 100;
 		long int extraValue = TARGETING_CONST::extraValueForCurrentTarget - extraValueDecay;
 		if (extraValue < 0) { extraValue = 0; }
 		this->lastComputedDislikeSubScore[currentTargetPlayerId] += extraValue;
+		if (highestDislikeSubScore < this->lastComputedDislikeSubScore[currentTargetPlayerId]) {
+			highestDislikeSubScore = this->lastComputedDislikeSubScore[currentTargetPlayerId];
+		}
 	}
 
 	for (int i = 0; i < 9; i++) {
 		if (this->lastComputedDislikeSubScore[i] < 0) {
 			this->lastComputedDislikeSubScore[i] = 0; // Make sure to avoid negative values.
 		}
+		// Make all subscores be in 0-100 interval.
+		this->lastComputedDislikeSubScore[i] = this->lastComputedDislikeSubScore[i] * 100 / highestDislikeSubScore;
 	}
 
 	return true;
@@ -277,11 +286,13 @@ bool PlayerTargeting::ForceUseStandardRorTargetPlayerSelection() {
 	}
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return true; }
-	return !settings->isCampaign && !settings->rgeGameOptions.isScenario && settings->rgeGameOptions.isSinglePlayer;
+	// Campaign/Scenario/MP: use ROR's target player selection.
+	return settings->isCampaign || settings->rgeGameOptions.isScenario || !settings->rgeGameOptions.isSinglePlayer;
 }
 
 
 // Returns the most disliked playerId for TacAI, impacting which player "I" will attack.
+// Uses playerTargetInfo->lastComputedDislikeSubScore[...] values (they are not computed each time)
 // Note: standard ROR code (0x40ACDA) is total crap : applies "score/factor" instead of "score*factor/100", and when attackWinningPlayerFactor=false, the score factor is substracted (instead of ignored)
 long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DIPLOMACY_AI *diplAI,
 	long int askTributeAmount, long int askTributePlayerId, bool attackWinningPlayer, long int attackWinningPlayerFactor) {
@@ -292,8 +303,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 	If NOT attack winning player: dislike "score"=dislike-(player.score/SNAtkWinningPlayerFactor)
 	Note: original code may choose an allied player as target !
 	*/
-	
-	// TODO: askTributePlayerId (corresponds to SN number, for scenarios)
+
 	assert(player && player->IsCheckSumValid());
 	assert(diplAI && diplAI->IsCheckSumValid());
 	if (!player || !player->IsCheckSumValid() || !diplAI || !diplAI->IsCheckSumValid()) { return -1; }
@@ -326,6 +336,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 
 	long int mostDislikedPlayerId = -1;
 	long int bestDislikeValue = -1;
+	long int highestPlayerScore = 0; // Highest score among (alive) other players
 
 	bool hasBuiltWonder[9];
 	bool hasInProgressWonder[9];
@@ -340,7 +351,13 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 		STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(loopPlayerId);
 		if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) && (loopPlayer->aliveStatus != 2) &&
-			(player->ptrDiplomacyStances[loopPlayerId] != 0) && loopPlayer->ptrBuildingsListHeader) {
+			(player->ptrDiplomacyStances[loopPlayerId] != 0) && loopPlayer->ptrBuildingsListHeader && loopPlayer->ptrScoreInformation) {
+			// Save highest player score...
+			long loopPlayerScore = loopPlayer->ptrScoreInformation->currentTotalScore;
+			if (loopPlayerScore > highestPlayerScore) {
+				highestPlayerScore = loopPlayerScore;
+			}
+
 			// Getting those 3 specific resources is no cheating (whereas getting food amount would be !)
 			if (loopPlayer->GetResourceValue(CST_RES_ORDER_ALL_RUINS) > 0) {
 				allRelicsOrRuinsCounter[loopPlayerId]++;
@@ -389,7 +406,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 			loopPlayer->ptrScoreInformation && loopPlayer->ptrScoreInformation->IsCheckSumValid() &&
 			(loopPlayer->aliveStatus != 2)) { // Cf 0x40ACFA: exclude defeated players
 			assert((loopPlayerId >= 1) && (loopPlayerId < global->playerTotalCount) && (loopPlayerId <= 8));
-			bool isAllied = (player->ptrDiplomacyStances[loopPlayerId] != PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY);
+			bool isAllied = (player->ptrDiplomacyStances[loopPlayerId] == PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY);
 			if (watchForAskTributePlayer && (loopPlayerId == askTributePlayerId) && isAllied) {
 				// Similar as original code: "SN target tribute player" can't be most disliked.
 				continue;
@@ -399,11 +416,15 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 				// which may explain cases (in original game) when AI sends troops to (allied) human player and does nothing
 				continue;
 			}
-			long int playerScoreFactor = 0; // default: no impact
+			long int playerScoreFactor = 0; // default: no impact. Always in [0,100] interval.
 			if (attackWinningPlayer && (attackWinningPlayerFactor > 0)) {
 				// Note: in game code, the formula is completely erroneous (DIVIDES by factor !)
-				// TODO: find a better formula ?
-				playerScoreFactor = (loopPlayer->ptrScoreInformation->currentTotalScore * attackWinningPlayerFactor) / 100;
+				// Here we use a custom formula to have a better control on "score" impact: use a % value (0-100).
+				int tmpScorePercentage = loopPlayer->ptrScoreInformation->currentTotalScore * 100 / highestPlayerScore; // a 0-100 value representing loop player's score
+				playerScoreFactor = tmpScorePercentage * attackWinningPlayerFactor / 100; // /100 because attackWinningPlayerFactor is a 1-100 "percentage" value.
+				
+				// Obsolete:
+				// playerScoreFactor = (loopPlayer->ptrScoreInformation->currentTotalScore * attackWinningPlayerFactor) / 100;
 				// Note: In game code, there is a "else" that does the opposite effect if attackWinningPlayer is false (factor is substracted !)
 			}
 
@@ -446,10 +467,19 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 				otherDislikeAmount += allRelicsOrRuinsCounter[loopPlayerId] * TARGETING_CONST::dislikeAmountNoWinningAllArtefacts;
 			}
 
-			long int thisDislikeValue = diplAI->dislikeTable[loopPlayerId] + playerScoreFactor + otherDislikeAmount;
+			// Calculate final dislike score
+			// Note: 10000*10000 is OK regarding long int type overflow.
+			long int scoreValueToApply = 10000 + (playerScoreFactor * TARGETING_CONST::dislikeSubScorePlayerScoreFinalImpact); // In [10000;20000]
+			long int intermediateValueMax10000 = (diplAI->dislikeTable[loopPlayerId] * scoreValueToApply) / 100; // For precision, 0-10000 interval instead of 100
+
+			long int priorityRulesToApply = 10000 + (otherDislikeAmount * TARGETING_CONST::dislikeSubScorePriorityRulesFinalImpact); // In [10000;20000]
+			long int otherDislikeAmountMax10000 = (diplAI->dislikeTable[loopPlayerId] * priorityRulesToApply) / 100; // For precision, 0-10000 interval instead of 100
+
+			long int thisDislikeValue = (intermediateValueMax10000 + otherDislikeAmountMax10000) / 2; // In 0-10000 interval
 			if (playerTargetInfo) {
-				// Add the sub-score that includes complex CUSTOM rules (taking into account recent attacks, etc)
-				thisDislikeValue += playerTargetInfo->lastComputedDislikeSubScore[loopPlayerId];
+				// Apply the sub-score (0-100) that includes complex CUSTOM rules (taking into account recent attacks, etc)
+				long int customRulesToApply = 10000 + (playerTargetInfo->lastComputedDislikeSubScore[loopPlayerId] * TARGETING_CONST::dislikeSubScoreCustomRulesFinalImpact); // In [10000;20000]
+				thisDislikeValue = (thisDislikeValue* customRulesToApply) / 10000;
 			}
 			if (thisDislikeValue > bestDislikeValue) {
 				bestDislikeValue = thisDislikeValue;
