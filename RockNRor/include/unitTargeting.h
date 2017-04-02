@@ -18,6 +18,7 @@
 #include "AOEPrimitives_units.h"
 #include "customAIMilitaryInfo.h"
 #include "combatAI.h"
+#include "UnitExtensionHandler.h"
 
 using namespace std;
 using namespace AOE_STRUCTURES;

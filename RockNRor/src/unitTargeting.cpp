@@ -137,7 +137,16 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::GetInfAIElemForCurrentTargetIfS
 						// Optimization; if we already have this pointer, just use it (don't loop on all elem list)
 						return &infAI->detailedSpottedUnitInfoList[targetInfo->targetInfAIUnitElemListIndex];
 					}
-					return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, loopTargetId);
+
+					long int indexInList = unitExtensionHandler.GetUnitIndexInInfAIDetailedInf(loopTargetId, infAI->commonAIObject.playerId);
+					if (indexInList >= 0) {
+#ifdef _DEBUG
+						assert(infAI->detailedSpottedUnitInfoList[indexInList].unitId == loopTargetId);
+#endif
+						return &infAI->detailedSpottedUnitInfoList[indexInList];
+					} else {
+						return NULL;
+					}
 				}
 			}
 		}
@@ -444,7 +453,8 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO* UnitTargeting::FindTargetUnitNearPriorityLocat
 						(curUnit->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) && (curUnit->remainingHitPoints > 0) &&
 						curUnit->unitDefinition && 
 						(curUnit->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
-						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
+						return ROCKNROR::unitExtensionHandler.GetInfAIUnitDetailedInf(curUnit->unitInstanceId, infAI);
+						//return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
 					}
 					curListElem = curListElem->next;
 				}
@@ -457,7 +467,8 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO* UnitTargeting::FindTargetUnitNearPriorityLocat
 					if (curUnit && curUnit->IsCheckSumValidForAUnitClass() && (curUnit->ptrStructPlayer == targetPlayer) &&
 						(curUnit->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) && (curUnit->remainingHitPoints > 0) &&
 						curUnit->unitDefinition && (curUnit->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
-						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
+						return ROCKNROR::unitExtensionHandler.GetInfAIUnitDetailedInf(curUnit->unitInstanceId, infAI);
+						//return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
 					}
 					curListElem = curListElem->next;
 				}
@@ -474,7 +485,8 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO* UnitTargeting::FindTargetUnitNearPriorityLocat
 					if (curUnit && curUnit->IsCheckSumValidForAUnitClass() && (curUnit->ptrStructPlayer == targetPlayer) &&
 						(curUnit->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) && (curUnit->remainingHitPoints > 0) &&
 						curUnit->unitDefinition && (curUnit->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
-						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
+						return ROCKNROR::unitExtensionHandler.GetInfAIUnitDetailedInf(curUnit->unitInstanceId, infAI); 
+						//return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
 					}
 					curListElem = curListElem->next;
 				}
@@ -487,7 +499,8 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO* UnitTargeting::FindTargetUnitNearPriorityLocat
 					if (curUnit && curUnit->IsCheckSumValidForAUnitClass() && (curUnit->ptrStructPlayer == targetPlayer) &&
 						(curUnit->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) && (curUnit->remainingHitPoints > 0) &&
 						curUnit->unitDefinition && (curUnit->unitDefinition->unitAIType != GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact)) {
-						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
+						return ROCKNROR::unitExtensionHandler.GetInfAIUnitDetailedInf(curUnit->unitInstanceId, infAI); 
+						//return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, curUnit->unitInstanceId);
 					}
 					curListElem = curListElem->next;
 				}
@@ -718,7 +731,8 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO *FindGroupMainTarget(STRUCT_INF_AI *infAI, long
 					if (canMoveToTarget) {
 						unitGroup->targetUnitIdArrayUsedElemCount = 0; // Reset (no need to erase values from array)
 						unitGroup->AddTargetUnitIdToArray(targetUnit->unitInstanceId);
-						return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, targetUnit->unitInstanceId);
+						return ROCKNROR::unitExtensionHandler.GetInfAIUnitDetailedInf(targetUnit->unitInstanceId, infAI); 
+						//return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, targetUnit->unitInstanceId);
 					}
 				}
 			}
@@ -738,7 +752,8 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO *FindGroupMainTarget(STRUCT_INF_AI *infAI, long
 						long int canMoveToTarget = groupLeader->CanMoveTo(loopTargetId, AOE_METHODS::UNIT::GetMaxRange(groupLeader),
 							0, 1, -1, -1);
 						if (canMoveToTarget) {
-							return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, loopTargetUnit->unitInstanceId);
+							return ROCKNROR::unitExtensionHandler.GetInfAIUnitDetailedInf(loopTargetUnit->unitInstanceId, infAI);
+							//return AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, loopTargetUnit->unitInstanceId);
 						}
 					}
 				}

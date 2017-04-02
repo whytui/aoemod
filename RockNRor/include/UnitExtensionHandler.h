@@ -43,13 +43,30 @@ public:
 
 	// Add/initialize extension data for the unitId specified
 	// If the unit extension is already initialized, this does nothing (does NOT overwrite previous information)
-	// If the unit does NOT exist AND 0 <= unitId <= global.seqUnitId, the extension IS created with NULL pointer and marked as "dead" unit.
+	// If the unit does NOT exist AND 0 <= unitId < global.seqUnitId, the extension IS created with NULL pointer and marked as "dead" unit.
 	// Returns true if successful (including the case when unit is already initialized)
+	// You can call this at any time with no restriction (unitId better be valid though)
 	bool AddUnitExtension(long int unitId);
 
 	// Add/update specified unit in infAI lists (we consider it is visible for the player specified)
+	// DO NOT USE this if unit is not visible !!!
 	// Remark: this method is called only if improveAI is true.
 	bool AddUpdateUnitInInfAILists(STRUCT_UNIT_BASE *unit, long int infAIPlayerId);
+
+	// Get the index in "InfAI" detailed unit info list for provided unit ID.
+	// Returns -1 if not found
+	// This method is faster than basic search because it uses 'cached' index (if possible)
+	long int GetUnitIndexInInfAIDetailedInf(long int unitIdToSearch, long int infAIPlayerId);
+
+	// Get the index in "InfAI" detailed unit info list for provided unit ID.
+	// Returns -1 if not found
+	// This method is faster than basic search because it uses 'cached' index (if possible)
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitExtensionHandler::GetInfAIUnitDetailedInf(long int unitIdToSearch, STRUCT_INF_AI *infAI);
+
+	
+	// Returns NULL if not found
+	// This method is faster than basic search because it uses 'cached' index (if possible)
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *GetInfAIUnitDetailedInf(long int unitIdToSearch, long int infAIPlayerId);
 
 	// Remove element for provided unitId in specified player's InfAI elem list.
 	// This does NOT use optimization from unitExtensions

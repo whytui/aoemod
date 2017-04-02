@@ -86,6 +86,7 @@ bool UnitExtensionHandler::AddUnitExtension(STRUCT_UNIT_BASE *unit) {
 // If the unit extension is already initialized, this does nothing (does NOT overwrite previous information)
 // If the unit does NOT exist AND 0 <= unitId < global.seqUnitId, the extension IS created with NULL pointer and marked as "dead" unit.
 // Returns true if successful (including the case when unit is already initialized)
+// You can call this at any time with no restriction (unitId better be valid though)
 bool UnitExtensionHandler::AddUnitExtension(long int unitId) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return false; }
@@ -115,6 +116,7 @@ bool UnitExtensionHandler::AddUnitExtension(long int unitId) {
 
 
 // Add/update specified unit in infAI lists (we consider it is visible for the player specified)
+// DO NOT USE this if unit is not visible !!!
 // Remark: this method is called only if improveAI is true.
 bool UnitExtensionHandler::AddUpdateUnitInInfAILists(STRUCT_UNIT_BASE *unit, long int infAIPlayerId) {
 	if (!unit || infAIPlayerId < 0) { return false; }
@@ -127,6 +129,54 @@ bool UnitExtensionHandler::AddUpdateUnitInInfAILists(STRUCT_UNIT_BASE *unit, lon
 	bool result = this->AddUpdateInfAIDetailedUnitInfo(unit, &AIPlayer->ptrAIStruct->structInfAI);
 	result &= this->AddUnitInOtherInfAILists(unit, &AIPlayer->ptrAIStruct->structInfAI);
 	return result;
+}
+
+
+// Get the index in "InfAI" detailed unit info list for provided unit ID.
+// Returns -1 if not found
+// This method is faster than basic search because it uses 'cached' index (if possible)
+long int UnitExtensionHandler::GetUnitIndexInInfAIDetailedInf(long int unitIdToSearch, long int infAIPlayerId) {
+	if ((unitIdToSearch < 0) || (unitIdToSearch >= this->currentAllocatedElemCount)) { return -1; }
+	if (infAIPlayerId < 0) { return -1; }
+
+	if (!this->allUnitExtensions[unitIdToSearch].isInitialized) {
+		if (!this->AddUnitExtension(unitIdToSearch)) {
+			// Error case (this overload should create the extension even if unit is dead and no longer exists)
+			return -1;
+		}
+	}
+	return this->allUnitExtensions[unitIdToSearch].myIndexInOtherPlayerInfAIList[infAIPlayerId];
+}
+
+
+// Returns NULL if not found
+// This method is faster than basic search because it uses 'cached' index (if possible)
+STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitExtensionHandler::GetInfAIUnitDetailedInf(long int unitIdToSearch, long int infAIPlayerId) {
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = NULL;
+	long int index = this->GetUnitIndexInInfAIDetailedInf(unitIdToSearch, infAIPlayerId);
+	if (index < 0) { return NULL; }
+	STRUCT_PLAYER *player = GetPlayerStruct(infAIPlayerId);
+	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct) {
+		return NULL;
+	}
+#ifdef _DEBUG
+	assert(index < player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoListSize);
+#endif
+	return &player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[index];
+}
+
+// Get the index in "InfAI" detailed unit info list for provided unit ID.
+// Returns -1 if not found
+// This method is faster than basic search because it uses 'cached' index (if possible)
+STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitExtensionHandler::GetInfAIUnitDetailedInf(long int unitIdToSearch, STRUCT_INF_AI *infAI) {
+	if (!infAI || !infAI->IsCheckSumValid()) { return NULL; }
+	STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = NULL;
+	long int index = this->GetUnitIndexInInfAIDetailedInf(unitIdToSearch, infAI->commonAIObject.playerId);
+	if (index < 0) { return NULL; }
+#ifdef _DEBUG
+	assert(index < infAI->detailedSpottedUnitInfoListSize);
+#endif
+	return &infAI->detailedSpottedUnitInfoList[index];
 }
 
 

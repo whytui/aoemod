@@ -11,6 +11,7 @@
 #include "customAIMilitaryInfo.h"
 #include "unitHandling.h"
 #include "combatAI.h"
+#include "UnitExtensionHandler.h"
 
 
 using namespace AOE_STRUCTURES;

@@ -849,7 +849,7 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 			}
 			// Commander has no target. Continue attacking "non-visible" one = go to last known position using infAI elem.
 			// Find infAI elem for currentTargetUnit
-			AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(&tacAI->ptrMainAI->structInfAI, currentTargetUnit->unitInstanceId);
+			AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = ROCKNROR::unitExtensionHandler.GetInfAIUnitDetailedInf(currentTargetUnit->unitInstanceId, &tacAI->ptrMainAI->structInfAI);
 			if (elem) {
 				this->AttackOrRetreat(tacAI, unitGroup, NULL, elem->posX, elem->posY, false);
 				return true;

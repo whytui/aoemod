@@ -231,15 +231,17 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		long int extraValue = TARGETING_CONST::extraValueForCurrentTarget - extraValueDecay;
 		if (extraValue < 0) { extraValue = 0; }
 		this->lastComputedDislikeSubScore[currentTargetPlayerId] += extraValue;
-		if (highestDislikeSubScore < this->lastComputedDislikeSubScore[currentTargetPlayerId]) {
-			highestDislikeSubScore = this->lastComputedDislikeSubScore[currentTargetPlayerId];
-		}
 	}
 
 	for (int i = 0; i < 9; i++) {
 		if (this->lastComputedDislikeSubScore[i] < 0) {
 			this->lastComputedDislikeSubScore[i] = 0; // Make sure to avoid negative values.
 		}
+		if (highestDislikeSubScore < this->lastComputedDislikeSubScore[i]) {
+			highestDislikeSubScore = this->lastComputedDislikeSubScore[i];
+		}
+	}
+	for (int i = 0; i < 9; i++) {
 		// Make all subscores be in 0-100 interval.
 		this->lastComputedDislikeSubScore[i] = this->lastComputedDislikeSubScore[i] * 100 / highestDislikeSubScore;
 	}
