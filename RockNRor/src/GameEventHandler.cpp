@@ -58,7 +58,7 @@ ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activi
 
 	// Custom treatments
 #ifndef _DEBUG
-	return;
+	return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
 #endif;
 	static std::set<AOE_CONST_INTERNAL::GAME_EVENT_TYPE> test;
 	AOE_CONST_INTERNAL::GAME_EVENT_TYPE notificationTaskId = notifyEvent->eventId;

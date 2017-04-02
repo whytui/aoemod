@@ -7,6 +7,39 @@ namespace ROCKNROR {
 
 namespace VIRTUAL_METHOD_HOOKS {
 
+#ifdef _DEBUG
+	// 'Private' objects for internal usage
+	static unsigned long int execBeginTime_ms = 0;
+	static int checkPerfCallConsistency = 0;
+
+	void RecordPerfBegin(unsigned long int callAddress) {
+		execBeginTime_ms = AOE_METHODS::TimeGetTime();
+		checkPerfCallConsistency++;
+	}
+	void RecordPerfEnd(unsigned long int callAddress) {
+		long int endTime = AOE_METHODS::TimeGetTime();
+		long int timeSpent = endTime - execBeginTime_ms;
+		long int n = ROCKNROR::crInfo.executionCounts[callAddress]; // returns 0 when not set yet (which is good)
+		ROCKNROR::crInfo.executionCounts[callAddress] = n + 1;
+		long int prevValue = ROCKNROR::crInfo.longestTimes_ms[callAddress]; // returns 0 when not set yet (which is good)
+		if (timeSpent > prevValue) {
+			ROCKNROR::crInfo.longestTimes_ms[callAddress] = timeSpent;
+		}
+		checkPerfCallConsistency--;
+		assert(checkPerfCallConsistency == 0);
+	}
+#endif
+
+#ifdef _DEBUG
+#define RECORD_PERF_BEGIN(addr) RecordPerfBegin(addr); // BEGIN statement to collect execution stats
+#define RECORD_PERF_END(addr) RecordPerfEnd(addr); // END statement to collect execution stats
+#else
+#define RECORD_PERF_BEGIN(addr) ;
+#define RECORD_PERF_END(addr) ;
+#endif
+
+
+
 	// Maps to store ORIGINAL call addresses. Index=class checksum, value=original method call address
 	std::map<unsigned long int, unsigned long int> activityProcessNotifyCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> playerProcessNotifyCheckSumAndOriginalAddress;
@@ -14,10 +47,15 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 	// Return value is an unknown enum. 2=ok, processed. (unitAI: EDX+0xCC call).
 	long int __stdcall ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2) {
-		assert(activity && activity->IsCheckSumValid() && notifyEvent);
-		if (!activity || !activity->IsCheckSumValid() || !notifyEvent) { return 3; } // TODO: return which value ? Meaning?
-		
 		unsigned long int originalCallAddr = activityProcessNotifyCheckSumAndOriginalAddress[activity->checksum];
+		assert(activity && activity->IsCheckSumValid() && notifyEvent);
+		RECORD_PERF_BEGIN(originalCallAddr);
+
+		if (!activity || !activity->IsCheckSumValid() || !notifyEvent) {
+			RECORD_PERF_END(originalCallAddr);
+			return AOE_CONST_INTERNAL::ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION; // TODO: return which value ?
+		}
+		
 		bool runStandardMethod = true;
 
 		// Custom treatments
@@ -34,6 +72,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 				MOV result, EAX;
 			}
 		}
+		RECORD_PERF_END(originalCallAddr);
 		return result;
 	}
 

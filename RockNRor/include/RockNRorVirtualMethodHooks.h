@@ -8,11 +8,13 @@
 #include "crDebugOutputPrimitives.h"
 #include "RORVirtualMethodHelper.h"
 #include "GameEventHandler.h"
+#include "RockNRorInfo.h" // to measure execution times
 
 
 namespace ROCKNROR {
 ;
 namespace VIRTUAL_METHOD_HOOKS {
+
 
 	// Patches ROR process (.rdata memory) to connect RockNRor method (rnrorMethodName) to ROR class's method,
 	// ROR class identified by "baseChecksum" and ROR class' method identified by "methodOffset" (should be a multiple of 4 !)
