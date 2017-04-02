@@ -12,7 +12,10 @@ RockNRorInstance::RockNRorInstance() {}
 
 
 void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
+#ifdef _DEBUG
 	assert(REG_values != NULL);
+	long int thisStartTime = AOE_METHODS::TimeGetTime();
+#endif
 	if ((REG_values->return_address < AOE_OFFSETS::ADDR_EXE_MIN) || (REG_values->return_address > AOE_OFFSETS::ADDR_EXE_MAX)) {
 		std::string msg = "Received a ROR_API call with invalid address (";
 		msg += GetHexStringAddress(REG_values->return_address);
@@ -435,6 +438,14 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	}
 #ifdef _DEBUG
 	TemporaryEntryPoints(REG_values);
+	long int thisEndTime = AOE_METHODS::TimeGetTime();
+	long int timeSpent = thisEndTime - thisStartTime;
+	long int prevValue = ROCKNROR::crInfo.longestTimes_ms[REG_values->return_address]; // returns 0 when not set yet (which is good)
+	if (timeSpent > prevValue) {
+		ROCKNROR::crInfo.longestTimes_ms[REG_values->return_address] = timeSpent;
+	}
+	int n = ROCKNROR::crInfo.executionCounts[REG_values->return_address]; // returns 0 when not set yet (which is good)
+	ROCKNROR::crInfo.executionCounts[REG_values->return_address] = n + 1;
 #endif;
 }
 

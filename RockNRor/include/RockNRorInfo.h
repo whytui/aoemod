@@ -67,6 +67,8 @@ public:
 	vector<short int> unitDefToDisable[9]; // List of unitDefIDs to disable because of triggers (for scenarios)
 	vector<short int> researchesToDisable[9]; // List of researchIDs to disable because of triggers (for scenarios)
 	RockNRorGameObjects myGameObjects;
+	std::map<unsigned long int, long int> longestTimes_ms; // Collects longest RockNRor treatment times for each entry point.
+	std::map<unsigned long int, long int> executionCounts; // Collects RockNRor execution count for each entry point.
 	int gameTimerSlowDownCounter;
 	long int CollectedTimerIntervalsIndex;
 	long int CollectedTimerIntervals_ms[CST_TIMER_STATS_ARRAY_SIZE];

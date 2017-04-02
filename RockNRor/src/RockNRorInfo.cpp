@@ -23,7 +23,7 @@ RockNRorInfo::RockNRorInfo() {
 			assert(v < 127); // make sure there is no overflow !
 			_intDistanceValues[x][y] = v;
 		}
-	}	
+	}
 }
 
 // Fast-computes the integer distance for X and Y delta values (sqrt(X^2 + Y^2) as an integer).

@@ -2378,6 +2378,31 @@ void RockNRorCommand::DisplayTimerStats() {
 	char buf[70];
 	sprintf_s(buf, "Avg timer interval is %ld ms - slow down factor is %ld", result, ROCKNROR::crInfo.configInfo.gameTimerSlowDownFactor);
 	AOE_METHODS::CallWriteText(buf);
+#ifdef _DEBUG
+	// Write in log window ALL execution times
+	long int curExecCount = 0;
+	long int highestTimeSpent = 0;
+	unsigned long int curHighest = 0;
+	for each (auto var in ROCKNROR::crInfo.longestTimes_ms)
+	{
+		if ((var.second > highestTimeSpent) && (var.first != AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS)) {
+			highestTimeSpent = var.second;
+			curHighest = var.first;
+			curExecCount = ROCKNROR::crInfo.executionCounts[var.first];
+		}
+		std::string msg = "EntryPoint ";
+		msg += GetHexStringAddress(var.first);
+		msg += "  exec_count=";
+		msg += std::to_string(ROCKNROR::crInfo.executionCounts[var.first]);
+		msg += "  longest=";
+		msg += std::to_string(ROCKNROR::crInfo.longestTimes_ms[var.first]);
+		traceMessageHandler.WriteMessageNoNotification(msg);
+	}
+	if (curHighest > 0) {
+		sprintf_s(buf, "Longest RnR treatment in 0x%08X with %ld ms (total %ld exec)", curHighest, highestTimeSpent, curExecCount);
+		AOE_METHODS::CallWriteText(buf);
+	}
+#endif
 }
 
 
