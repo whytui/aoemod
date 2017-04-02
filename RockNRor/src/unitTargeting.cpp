@@ -547,7 +547,8 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::TestFindGroupMainTarget(STRUCT_
 		long int evalGameTime_ms = playerTargetingInfo->militaryAIInfo->lastKnownMilitarySituationComputationGameTime;
 		long int timeDiff_ms = global->currentGameTime - evalGameTime_ms;
 		//if ((timeDiff_ms < 5000) && (militarySituation == MILITARY_SITUATION::MS_CRITICAL)) {
-		if ((timeDiff_ms < 5000) && (militarySituation <= MILITARY_SITUATION::MS_WEAK)) {
+		if ((timeDiff_ms < 5000) && 
+			((militarySituation == MILITARY_SITUATION::MS_CRITICAL) || (militarySituation == MILITARY_SITUATION::MS_WEAK))) {
 			// Critical situation: do not attack. Weak also ?
 			// Note: this method is only called from "task active groups": this won't prevent from defending. Custom "task active groups" code may also give a target.
 			return NULL;
