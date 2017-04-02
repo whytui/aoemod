@@ -79,9 +79,13 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 	// Returns void. This hook handles player's notifications (EDX+0xE8 call).
 	void __stdcall PlayerProcessNotify(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT notifyEvent) {
-		assert(player && player->IsCheckSumValid());
-		if (!player || !player->IsCheckSumValid()) { return; }
 		unsigned long int originalCallAddr = playerProcessNotifyCheckSumAndOriginalAddress[player->checksum];
+		RECORD_PERF_BEGIN(originalCallAddr);
+		assert(player && player->IsCheckSumValid());
+		if (!player || !player->IsCheckSumValid()) {
+			RECORD_PERF_END(originalCallAddr);
+			return; 
+		}
 		bool runStandardMethod = true;
 
 		// Custom treatments
@@ -107,6 +111,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 				CALL originalCallAddr;
 			}
 		}
+		RECORD_PERF_END(originalCallAddr);
 	}
 
 
