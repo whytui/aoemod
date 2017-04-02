@@ -20,13 +20,6 @@ using namespace AOE_STRUCTURES;
 
 namespace CUSTOM_AI {
 
-	enum MILITARY_SITUATION { MS_UNKNOWN = -1,
-		MS_CRITICAL, // {few resources and few military and recent panic modes} or {very few resources and recently attacked}
-		MS_WEAK, // {recent panic modes} or {very few resources}
-		MS_NORMAL, 
-		MS_STRONG // Large military numbers, with at least 2 land (military) unit groups
-	};
-
 
 	// A temporary structure to store current detailed info about a unit group. Not stored in "static" object.
 	class UnitGroupDetailedInfo {
@@ -183,7 +176,7 @@ namespace CUSTOM_AI {
 		bool SetUnitGroupTarget_internal(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_BASE *targetUnit);
 
 
-		// "static" temporary information, only valid during the task active soliders loop.
+		// "static" temporary information, only valid during the task active soldiers loop.
 		// DO NOT access it from other methods.
 		ActiveUnitGroupTaskingContextInfo activeGroupsTaskingTempInfo;
 		float curGroupDistanceToMainUnit; // Distance between group and "my main" unit. Only relevant in "task active solider" methods

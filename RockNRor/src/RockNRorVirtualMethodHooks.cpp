@@ -11,12 +11,21 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// 'Private' objects for internal usage
 	static unsigned long int execBeginTime_ms = 0;
 	static int checkPerfCallConsistency = 0;
+	static int skippedRecursiveCalls = 0;
 
 	void RecordPerfBegin(unsigned long int callAddress) {
+		if (checkPerfCallConsistency > 0) {
+			skippedRecursiveCalls++; // we measure only 1 hook at once (there is already a pending perf record). Skip this "recursive" call
+			return; // Ignore
+		}
 		execBeginTime_ms = AOE_METHODS::TimeGetTime();
 		checkPerfCallConsistency++;
 	}
 	void RecordPerfEnd(unsigned long int callAddress) {
+		if (skippedRecursiveCalls > 0) {
+			skippedRecursiveCalls--;
+			return;
+		}
 		long int endTime = AOE_METHODS::TimeGetTime();
 		long int timeSpent = endTime - execBeginTime_ms;
 		long int n = ROCKNROR::crInfo.executionCounts[callAddress]; // returns 0 when not set yet (which is good)

@@ -63,6 +63,8 @@ namespace CUSTOM_AI {
 		STRUCT_INF_AI_DETAILED_UNIT_INFO *ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
 			STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 
+		// (TEST) find a target for an active unit group, called from "task active groups" method.
+		// This method is used for "attack" phases, not really for defensive situations.
 		STRUCT_INF_AI_DETAILED_UNIT_INFO *TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 			STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue);
 		

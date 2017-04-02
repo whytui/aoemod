@@ -314,6 +314,8 @@ bool UnitGroupAI::OnTaskActiveGroupsBegin(STRUCT_TAC_AI *tacAI, long int process
 	}
 
 	this->EvaluateMilitarySituation(tacAI);
+	// Save the military situation evaluation in military AI object.
+	this->militaryAIInfo->SetLastKnownMilitarySituation(this->activeGroupsTaskingTempInfo.militarySituation, global->currentGameTime);
 	this->CollectEnemyUnitsNearMyMainUnit(player);
 
 	this->activeGroupsTaskingTempInfo.mainUnitSearchZoneRadius = 5;

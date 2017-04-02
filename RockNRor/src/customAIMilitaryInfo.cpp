@@ -12,6 +12,8 @@ namespace CUSTOM_AI {
 		this->enemyBuildingInMyTown = NULL;
 		this->enemyTowerInMyTown = NULL;
 		this->recentAttacksByPlayer->ResetAllInfo();
+		this->lastKnownMilitarySituation = MILITARY_SITUATION::MS_UNKNOWN;
+		this->lastKnownMilitarySituationComputationGameTime = 0;
 	}
 
 
@@ -26,6 +28,14 @@ namespace CUSTOM_AI {
 		TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> *intervalsForPlayer = this->GetAttackInfoForPlayer(attackerPlayerId);
 		if (intervalsForPlayer == NULL) { return NULL; }
 		return intervalsForPlayer->GetIntervalForGameTime(currentGameTime);
+	}
+
+
+	// Sets the "last known military situation" variables
+	void CustomAIMilitaryInfo::SetLastKnownMilitarySituation(MILITARY_SITUATION situation, unsigned long int gameTime_ms) {
+		assert(gameTime_ms >= 0);
+		this->lastKnownMilitarySituation = situation;
+		this->lastKnownMilitarySituationComputationGameTime = gameTime_ms;
 	}
 
 	// Returns true if successful

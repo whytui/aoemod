@@ -25,6 +25,15 @@ namespace CUSTOM_AI {
 	}
 
 
+	enum MILITARY_SITUATION {
+		MS_UNKNOWN = -1,
+		MS_CRITICAL, // {few resources and few military and recent panic modes} or {very few resources and recently attacked}
+		MS_WEAK, // {recent panic modes} or {very few resources}
+		MS_NORMAL,
+		MS_STRONG // Large military numbers, with at least 2 land (military) unit groups
+	};
+
+
 	// Stores information about military topics for custom AI (for a specific player)
 	class CustomAIMilitaryInfo {
 	public:
@@ -32,9 +41,14 @@ namespace CUSTOM_AI {
 			this->ResetAllInfo();
 		}
 
+		MILITARY_SITUATION lastKnownMilitarySituation;
+		unsigned long int lastKnownMilitarySituationComputationGameTime;
+
 		// Stores information about recent history of being attacked by other players
 		TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> recentAttacksByPlayer[9];
 		
+#pragma message("TODO REMOVE pointers here (dangerous)")
+		// TODO: REMOVE pointers here (dangerous): use indexes instead or even unitId (now we can retrieve index easily with unit extensions)
 		// Refers to information in InfAI list of an enemy building spotted in my town (potential target for idle units or in-town groups)
 		STRUCT_INF_AI_DETAILED_UNIT_INFO *enemyBuildingInMyTown;
 		// Refers to information in InfAI list of an enemy tower spotted in my town
@@ -46,6 +60,9 @@ namespace CUSTOM_AI {
 		TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> *GetAttackInfoForPlayer(long int attackerPlayerId);
 
 		TimeIntervalAttackRecord *GetAttackInfoForCurrentTimeInterval(long int attackerPlayerId, long int currentGameTime);
+
+		// Sets the "last known military situation" variables
+		void SetLastKnownMilitarySituation(MILITARY_SITUATION situation, unsigned long int gameTime_ms);
 
 		// Returns true if successful
 		// myTownCenter is used to evaluate my town position, it is NOT the target of the attack. myTownCenter may be NULL !

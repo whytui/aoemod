@@ -158,7 +158,7 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::GetInfAIElemForCurrentTargetIfS
 STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::ContinueFindGroupMainTargetInProgress(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 	// exclude villager explorers (run too fast) ?
-	// TOOD: if too much time spent, return NULL (keep inprogress=1)
+	// TODO: if too much time spent, return NULL (keep inprogress=1)
 
 	long int priorityPosX = this->priorityLocation[infAI->commonAIObject.playerId].posX;
 	long int priorityPosY = this->priorityLocation[infAI->commonAIObject.playerId].posY;
@@ -511,6 +511,8 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO* UnitTargeting::FindTargetUnitNearPriorityLocat
 }
 
 
+// (TEST) find a target for an active unit group, called from "task active groups" method.
+// This method is used for "attack" phases, not really for defensive situations.
 STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPlayerId,
 	STRUCT_UNIT_GROUP *unitGroup, STRUCT_TAC_AI_TARGET_INFO *targetInfo, long int baseTimeGetTimeValue) {
 	// Collect info / Check parameters
@@ -537,6 +539,19 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::TestFindGroupMainTarget(STRUCT_
 	if (groupLeader->ptrStructPlayer->ptrDiplomacyStances[targetPlayerId] != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY) {
 		assert(false && "Trying to find a target for a non-enemy player");
 		targetInfo->targetSearchInProgress = 0; return NULL;
+	}
+
+	CUSTOM_AI::AIPlayerTargetingInfo *playerTargetingInfo = CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(player->playerId);
+	if (playerTargetingInfo && playerTargetingInfo->militaryAIInfo) {
+		MILITARY_SITUATION militarySituation = playerTargetingInfo->militaryAIInfo->lastKnownMilitarySituation;
+		long int evalGameTime_ms = playerTargetingInfo->militaryAIInfo->lastKnownMilitarySituationComputationGameTime;
+		long int timeDiff_ms = global->currentGameTime - evalGameTime_ms;
+		//if ((timeDiff_ms < 5000) && (militarySituation == MILITARY_SITUATION::MS_CRITICAL)) {
+		if ((timeDiff_ms < 5000) && (militarySituation <= MILITARY_SITUATION::MS_WEAK)) {
+			// Critical situation: do not attack. Weak also ?
+			// Note: this method is only called from "task active groups": this won't prevent from defending. Custom "task active groups" code may also give a target.
+			return NULL;
+		}
 	}
 
 	// Already initialized: continue...
