@@ -69,9 +69,6 @@
     <ClInclude Include="include\AOE_struct_export_remote.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\AOE_structures_drs.h">
-      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
-    </ClInclude>
     <ClInclude Include="include\AOE_struct_civilization_def.h">
       <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
     </ClInclude>
@@ -368,6 +365,9 @@
     </ClInclude>
     <ClInclude Include="include\AOE_const_internal_UI.h">
       <Filter>Fichiers d%27en-tête\AOE_const</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_structures_drs.h">
+      <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -140,11 +140,10 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_020;
 		unsigned long int unknown_024;
 		STRUCT_GAME_MAP_INFO *gameMapInfo; // +28. Map related data. (F4 99 54 00)
-		short int soundsArrayElemCount;
+		short int soundsArrayElemCount; // +2C.
 		short int unknown_02E; // maybe 2 bytes, not 1 word
-		// +0x30
-		STRUCT_DAT_SOUND **ptrSoundsArray;
-		unsigned long int unknown_034; // Sprites count ?
+		STRUCT_DAT_SOUND **ptrSoundsArray; // +30.
+		unsigned long int graphicsArrayElemCount; // +34. Sprites count
 		STRUCT_GRAPHICS **ptrGraphicsArray; // +38. "Sprites". ptr to list of elements (size=0x48) starting by a unit name?
 		short int playerTotalCount; // +3C. Player count including gaia = real player count + 1
 		short int unknown_03E;
@@ -163,7 +162,7 @@ namespace AOE_STRUCTURES {
 		// +0x60
 		short int colorCount; // +60. Number of colors (size of colors table)
 		unsigned short int unknown_062;
-		COLOR_DEF **colorsTable; // +64. Color table. The table size in bytes is colorCount*4. Each DWORD is a pointer to color definition;
+		STRUCT_COLOR_DEF **colorsTable; // +64. Color table. The table size in bytes is colorCount*4. Each DWORD is a pointer to color definition;
 		long int seqUnitId; // +68. Sequence for unit instance IDs (for creatable only ?). *Next* object ID.
 		unsigned long int unknown_06C_unitIdSeqForTempUnits; // Unsure
 		// +0x70

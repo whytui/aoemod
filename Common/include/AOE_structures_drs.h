@@ -67,7 +67,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_04; // +04. File open call result ?
 		STRUCT_DRS_FILE *drsFileContent; // +08. It seems better to use this pointer.
 		STRUCT_DRS_FILE_LINK *nextDrsFile; // +0C.
-		char drsFileName[0x104]; // Unknown size. Includes file extension (.drs)
+		char drsFileName[0x104]; // +10. Unknown size. Includes file extension (.drs)
 	};
 	static_assert(sizeof(STRUCT_DRS_FILE_LINK) == 0x114, "STRUCT_DRS_FILE_LINK size");
 

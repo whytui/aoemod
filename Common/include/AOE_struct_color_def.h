@@ -15,19 +15,19 @@ namespace AOE_STRUCTURES
 	// "RGE_Color_Table" (bad naming, this is a table *element* ?)
 	// Used in global struct, and also in UI structs
 #define CHECKSUM_COLOR_DEF 0x0054320C
-	class COLOR_DEF {
+	class STRUCT_COLOR_DEF {
 	public:
 		unsigned long int checksum;
-		char blueColorName[0x1E]; // (30 char)
-		short int colorId;
-		char unknown_24;
-		char color; // +25. Index in palette for this color.
-		short int unknown_26;
-		char unknown_28[0x100]; // This is really an array of 0x100 bytes (palette or such thing ?)
+		char colorName[0x1E]; // (30 char)
+		short int unusedDrsResource; // +22. Unsure ? Always 0.
+		char unknown_type; // +24. 1 in most cases, 2 for "shadow" ?
+		char paletteColorIndex; // +25. Index in palette for this color.
+		short int colorId; // +26. color ID ? Index in array ?
+		char unknown_28[0x100]; // +28. This is really an array of 0x100 bytes (palette or such thing ?). Used by "shadow" color (and paletteColorIndex=0).
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_COLOR_DEF); }
 	};
-	static_assert(sizeof(COLOR_DEF) == 0x128, "COLOR_DEF size");
+	static_assert(sizeof(STRUCT_COLOR_DEF) == 0x128, "STRUCT_COLOR_DEF size");
 
 }
 

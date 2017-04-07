@@ -2,6 +2,7 @@
 #pragma once
 
 #include <AOE_struct_dat_sound.h>
+#include <AOE_struct_color_def.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -18,8 +19,7 @@ namespace AOE_STRUCTURES
 	public:
 		short int graphicId;
 		short int unknown_02;
-		short int unknown_04;
-		short int unknown_06;
+		char *ptrName; // +04. Slp graphic name, like R_acadmy ?
 		short int directionY; // +08
 		short int directionX; // +0A
 		short int displayAngle; // +0C
@@ -45,18 +45,18 @@ namespace AOE_STRUCTURES
 		char slpName[0x0D];
 		char unused_0D[3];
 		long int slpId; // +10
-		char unknown_14; // +14.?
+		char unknown_14; // +14. Status?
 		char unknown_15;
 		short int unknown_16; // type?
-		unsigned long int *unknown_18; // Backpointer Unit???
-		unsigned long int unknown_1C;
+		STRUCT_COLOR_DEF **colorsArray; // +18. Pointer to array of color definitions
+		unsigned long int *unknown_1C; // Resource ptr ? To confirm (even the ptr thing)
 		unsigned long int *unknown_20;
 		unsigned long int *unknown_24;
 		char unknown_28; // age3 "unknown2". Priority ?
 		char layer; // +29
 		short int playerColor; // +2A. Read as a WORD, but actually 2 (byte) values ?
 		char transparentPickMode; // +2C. 0=can't select. 1=select on pixels. 2=select on box.
-		char unknown_2D;
+		char unknown_2D; // replay???
 		short int coordinates[4]; // +2E/30/32/34.
 		short int deltaCount; // +36
 		STRUCT_GRAPHIC_DELTA *deltasArray; // +38.
@@ -78,8 +78,6 @@ namespace AOE_STRUCTURES
 		short int graphicId; // +72. Graphic ID, the same as AGE3's graphics tab. This is NOT SlpId.
 		char mirroringMode; // +74
 		char unused_75[3]; // +75
-
-		// +48 name 0x15
 	};
 	static_assert(sizeof(STRUCT_GRAPHICS) == 0x78, "STRUCT_GRAPHICS size");
 

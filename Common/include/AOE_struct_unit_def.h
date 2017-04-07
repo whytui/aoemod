@@ -64,7 +64,7 @@ namespace AOE_STRUCTURES
 		short int resource;
 		float workRateMultiplier; // or quantity ? "work_val1"
 		// 0x20
-		float executionRadius; // "work_val2"
+		float executionRadius; // "work_val2" ? Range alert ?
 		float extraRange; // "work_range"
 		char unknown_28; // "search_flag"
 		char unknown_29; // unused ? "search_wait_time" ?
@@ -162,15 +162,15 @@ namespace AOE_STRUCTURES
 		STRUCT_DAT_SOUND *ptrTrainSound; // +40. "Created" sound
 		STRUCT_DAT_SOUND *ptrDyingSound; // +44
 		short int deadUnitId; // +48
-		UNIT_SORT_NUMBER placementSortNumber; // +4A. "sort_number". "Placement mode" in old AGE3 versions.
-		char canBeBuiltOn; // +4B. "Air mode" in old AGE3 versions.
+		UNIT_SORT_NUMBER placementSortNumber; // +4A. "sort_number". "Placement mode" in old AGE3 versions. Editor layer ?
+		char canBeBuiltOn; // +4B. "Air mode" in old AGE3 versions. Hovering ?
 		short int iconId; // +4C
-		char hideInEditor;
+		char hideInEditor; // +4E.
 		char unknown_04F; // unused ?
 		// 0x50
 		short int unknown_050; // unknown1 in AGE3. It IS a word value (0x4414D2) "portrait_pict" ?
 		char availableForPlayer; // +52. according to tree+researches (+requires enable in empires.dat?). 1="can be trained". 0 does not prevent from having one (scenario, conversion)
-		char unknown_053;
+		char unknown_053; // +53.
 		short int placementBypassTerrain1; // +54. Side terrain id ? "tile_req1"
 		short int placementBypassTerrain2; // +56. Side terrain id ? "tile_req2"
 		short int placementTerrain1; // +58 "center_tile_req1"
@@ -202,9 +202,8 @@ namespace AOE_STRUCTURES
 		AOE_CONST_FUNC::INTERACTION_MODES interactionMode; // +8D. 1-byte. "select_level"
 		char minimapMode; // +8E. "map_draw_level"
 		AOE_CONST_FUNC::COMMAND_ATTRIBUTES commandAttribute; // +8F. "unit_level". "Interface kind" in AGE3.
-		// 0x90
-		char minimapColor;
-		char attackMode; // "attack_reaction". Flagged as obsolete in AGE3.
+		char minimapColor; // +90
+		char attackMode; // +91. "attack_reaction". Flagged as obsolete in AGE3.
 		char convertTerrainFlag; // +92 "edible meat" in old AGE3 versions ? Obsolete too ?
 		char damageGraphicCount; // +93. Count for damageGraphicsArray.
 		STRUCT_DAMAGE_GRAPHIC *damageGraphicsArray; // +94. Point to an array of pointers to damage graphics (cf damageGraphicCount)
@@ -264,6 +263,7 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_FLAG) == 0xBC, "STRUCT_UNITDEF_FLAG size");
 
+
 	// 84 44 54 00 = Doppleganger - size 0xBC. Constructor(createCopy)=0x4402C0. Max method=+0x38
 	// +0x38 = unitDefDoppleganger.xxx(player, f_pos, pos, pos)? create unit?
 	class STRUCT_UNITDEF_DOPPLEGANGER : public STRUCT_UNITDEF_FLAG {
@@ -279,14 +279,13 @@ namespace AOE_STRUCTURES
 	// FC 44 54 00 = Movable (type30 - dead/fish in AGE3) - size=0xD8 - Constructor 0x440990. Max method=+0x34. "MasterMovingObject"
 	class STRUCT_UNITDEF_MOVABLE : public STRUCT_UNITDEF_FLAG {
 	public:
-		STRUCT_GRAPHICS *ptrWalkingGraphic1;
-		// 0xC0
-		STRUCT_GRAPHICS *ptrWalkingGraphic2;
+		STRUCT_GRAPHICS *ptrWalkingGraphic1; // +BC. Main walking graphics
+		STRUCT_GRAPHICS *ptrWalkingGraphic2; // +C0. Running ?
 		float rotationSpeed; // +C4
 		char unknown_0C8;
 		char unknown_0C9;
 		short int trackingUnit; // +CA. Used to define the "smoke" unit to leave behind "me". Used for "flame bolts", etc.
-		char trackingUnitUsed; // +CC. 0=disable, 1=appears at game start+when moving, 2=appears when moving only (cf AGE3)
+		char trackingUnitMode; // +CC. 0=disable, 1=appears at game start+when moving, 2=appears when moving only (cf AGE3)
 		char unknown_0CD;
 		char unknown_0CE;
 		char unknown_0CF;
@@ -310,9 +309,8 @@ namespace AOE_STRUCTURES
 		STRUCT_UNIT_COMMAND_DEF_HEADER *ptrUnitCommandHeader; // +D8
 		short int whenIdleCommandIndex; // +DC. Unit-command to execute when unit is idle (and status=2). Used for artefacts, discoveries, animals, farms, trade units... "convert herd" in old AGE3 versions.
 		short int unknown_0DE;
-		// 0xE0
-		float searchRadius; // The distance unit will seek to auto-attack enemy units.
-		float workRate; // including upgrades. Ex for priest: base = 1, with astrology = 1.3
+		float searchRadius; // +E0. The distance unit will seek to auto-attack enemy units.
+		float workRate; // +E4. including upgrades. Ex for priest: base = 1, with astrology = 1.3
 		short int dropSite1; // +E8. Storage building/deposit unit 1.
 		short int dropSite2; // +EA. Storage building/deposit unit 2.
 		char unitDefinitionSwitchGroupId; // +EC. 0=none. An id for "group" of units that can switch definition. id=1 for villagers (builder, forager, etc).
@@ -320,8 +318,8 @@ namespace AOE_STRUCTURES
 		char unknown_0EE;
 		char unknown_0EF;
 		// 0xF0
-		STRUCT_DAT_SOUND *attackSound; // +F0.
-		STRUCT_DAT_SOUND *moveSound; // +F4. Unknown struct
+		STRUCT_DAT_SOUND *actionSound; // +F0. Attack/stop (order) sound.
+		STRUCT_DAT_SOUND *moveSound; // +F4. Move (order) sound.
 		char animalMode; // +F8.
 		char unknown_0F9;
 		char unknown_0FA;
@@ -347,8 +345,7 @@ namespace AOE_STRUCTURES
 		short int attacksCount; // +108
 		short int unknown_10A;
 		STRUCT_ARMOR_OR_ATTACK *ptrAttacksList; // +10C. ElemSize=0x04. +0=class,+2=amount. The greatest attack value from list is the total displayed attack in unit info zone.
-		// 0x110
-		TERRAIN_RESTRICTION armorTerrainRestriction; // Provide a multiplier for each terrain
+		TERRAIN_RESTRICTION armorTerrainRestriction; // +110. Provide a multiplier for each terrain
 		short int unknown_112;
 		float maxRange; // +114. Total range (8 if 7+1 is displayed). displayed range is the number before the "+" (7 in the example). "Weapon range"
 		float blastRadius; // +118. Distance blast damage applies. 0 means there is no blast damage.
@@ -358,20 +355,19 @@ namespace AOE_STRUCTURES
 		char unknown_11F;
 		float reloadTime1; // +0x120. Rate of fire.
 		short int projectileUnitId; // +124. Can be used to determine if a military unit is melee (<0) or ranged (>=0). Warning: priests would be "melee" with such criteria.
-		short int accuracyPercent;
+		short int accuracyPercent; // +126.
 		char towerMode; // +128
 		char unknown_129; // unused ?
 		short int frameDelay;
-		float graphicDisplacement1;
+		float graphicDisplacementY;
 		// 0x130
-		float graphicDisplacement2;
-		float graphicDisplacement3;
+		float graphicDisplacementX;
+		float graphicDisplacementZ;
 		unsigned long int minRange; // +138.
-		short int displayedArmor; // The number before the "+". For a total 6 armor which is 2+4, displayedArmor=2. total armor is guessed from default armor ?
-		short int displayedAttack; // The number before the "+". For a total 6 attack which is 2+4, displayedAttack=2. total attack is the greatest attack value from attacks list
-		// 0x140
-		float displayedRange; // The number before the "+". See also maxRange(=total range)
-		float reloadTime2;
+		short int displayedArmor; // +13C. The number before the "+". For a total 6 armor which is 2+4, displayedArmor=2. total armor is guessed from default armor ?
+		short int displayedAttack; // +13E. The number before the "+". For a total 6 attack which is 2+4, displayedAttack=2. total attack is the greatest attack value from attacks list
+		float displayedRange; // +140. The number before the "+". See also maxRange(=total range)
+		float reloadTime2; // +144. Displayed reload (NOT actually displayed ! Other usage ?)
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00544444); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_ATTACKABLE); }
@@ -425,15 +421,15 @@ namespace AOE_STRUCTURES
 	public:
 		STRUCT_DAT_SOUND *ptrConstructionSound; // +164.
 		STRUCT_GRAPHICS *ptrConstructionGraphic; // +168. Graphics while building is under construction
-		char multiplePlacement; // +16C. For building placement (put several at once)
+		char multiplePlacement; // +16C. For building placement (put several at once, like walls)
 		char unknown_16D;
 		short int graphicsAngle; // +16E. constructionStep (for unfinished) or "angle" (different standing graphic frame?)
 		char dieWhenBuilt; // +170. If true, unit is killed (by unit.killAndHandleSacrifice()) immediately when fully built.
 		char unknown_171;
 		short int stackUnitId; // +172. Additional building added on top on this one ?
 		short int placementTerrainId; // +174.
-		short int oldTerrainId; // Obsolete information ? Used to build roads in early versions (according to AGE3 tooltip)
-		short int initiatesResearch;
+		short int oldTerrainId; // +176. Obsolete information ? Used to build roads in early versions (according to AGE3 tooltip) ? Resource ?
+		short int initiatesResearch; // +178.
 		short int unknown_17A; // unused ?
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00549930); }

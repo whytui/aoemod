@@ -248,7 +248,7 @@ namespace AOE_STRUCTURES {
 		float resourceValue; // See resourceValue. Faith (0-100) for priests, food for hunter...
 		AOE_CONST_INTERNAL::GAME_UNIT_STATUS unitStatus; // 0=being_built, 2=ready, at least for buildings... Values=0,1,2,3,5,7,8=max? 5=waitingForResourceDepletion.
 		char isNotCreatable; // +49. 1 if the unit is a "not-creatable" unit, like cliffs, etc. Always 1 in parent constructors, set to 0 in "creatable-level" constructor.
-		char isDoppleGanger; // +4A. Is temp unit ? Not 100% sure.
+		char isDoppleGanger; // +4A. 1 if unit is a doppleganger.
 		char unknown_04B;
 		short int resourceTypeId; // A unit can hold only 1 resource. =0x22=34 for priest.
 		char unitType; // +4E. Warning: this value is often WRONG. See unitDef value instead. Only 1-byte here, whereas it is 4-bytes in unitDef struct. 70=living, etc. See GLOBAL_UNIT_TYPES

@@ -58,14 +58,21 @@ namespace AOE_STRUCTURES {
 		STRUCT_BORDER_DEF borderDefinitions[0x10]; // +338C. Array of 0x10 elements.
 		STRUCT_GAME_MAP_TILE_INFO **pTileInfoCols; // 0x8D8C. Please use GetTileInfo(...)
 		short int terrainCount; // +8D90. Default = 0x17 = 23 different terrains in empires.dat
-		short int unknown_8D92;
-		unsigned short int unknown_8D94;
-		unsigned short int unknown_8D96; // init 0x40 . for Y tile size ?
-		unsigned short int unknown_8D98; // init 0x20 . for X tile size ?
-		unsigned short int unknown_8D9A; // init 0x10. (posX-posY)*unknown_8D9A - (altitude*[unknown_8D9E or unknown_8D9E-1]) = tile.displayY
-		unsigned short int unknown_8D9C; // init 0x20. (posX+posY)*unknown_8D9C = tile.displayX
-		unsigned short int unknown_8D9E; // init 0x10. Use "unknown_8D9E+1" for tile.elevationGraphicIndex in (2,6,8,A,E,F,10), see 0x444B7B.
-		char unknown_8DA0[0x8DB0 - 0x8DA0];
+		short int unknown_8D92; // +8D92. Borders count ?
+		unsigned short int unknown_8D94; // Max terrains ????
+		unsigned short int tileSizeY; // +8D96. init 0x40. for Y tile size ?
+		unsigned short int tileSizeX; // +8D98. init 0x20. for X tile size ?
+		unsigned short int tileHalfSizeY_unsure; // +8D9A. init 0x10. (posX-posY)*unknown_8D9A - (altitude*[unknown_8D9E or unknown_8D9E-1]) = tile.displayY
+		unsigned short int tileHalfSizeX_unsure; // +8D9C. init 0x20. (posX+posY)*unknown_8D9C = tile.displayX
+		unsigned short int tileSizeZ; // +8D9E. init 0x10. Use "unknown_8D9E+1" for tile.elevationGraphicIndex in (2,6,8,A,E,F,10), see 0x444B7B.
+		short int unknown_8DA0_curPosY; // +8DA0
+		short int unknown_8DA2_curPosX; // +8DA2
+		short int unknown_8DA4; // block0 Y ?
+		short int unknown_8DA6; // block1 Y ?
+		short int unknown_8DA8; // block0 X ?
+		short int unknown_8DAA; // block1 X ?
+		short int unknown_8DAC; // searchMapY ??
+		short int unknown_8DAE; // searchMapX ??
 		char *unknown_8DB0; // ptr, map data also. Size= sizeX*sizeY*1 (x*y bytes)
 		unsigned long int unknown_8DB4; // ptr, map data also ? Size=(sizeX+1)*4 bytes (ptrs ?) = rows for +8DB0
 		char revealMap; // 0x8DB8
@@ -109,9 +116,9 @@ namespace AOE_STRUCTURES {
 			if ((x < 0) || (x >= this->mapArraySizeX) || (y < 0) || (y >= this->mapArraySizeY)) { return false; }
 			STRUCT_GAME_MAP_TILE_INFO *tile = this->GetTileInfo(x, y);
 			if (!tile) { return false; }
-			tile->displayX = (x + y) * this->unknown_8D9C;
-			tile->displayY = (x - y) * this->unknown_8D9A;
-			tile->displayY -= tile->terrainData.GetAltitude() * this->unknown_8D9E;
+			tile->displayX = (x + y) * this->tileHalfSizeX_unsure;
+			tile->displayY = (x - y) * this->tileHalfSizeY_unsure;
+			tile->displayY -= tile->terrainData.GetAltitude() * this->tileSizeZ;
 			switch (tile->elevationGraphicsIndex) {
 			case 2:
 			case 6:
@@ -120,7 +127,7 @@ namespace AOE_STRUCTURES {
 			case 0xE:
 			case 0xF:
 			case 0x10:
-				tile->displayY -= this->unknown_8D9E;
+				tile->displayY -= this->tileSizeZ;
 				break;
 			default:
 				break;

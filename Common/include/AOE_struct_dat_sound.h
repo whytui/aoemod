@@ -30,7 +30,7 @@ namespace AOE_STRUCTURES {
 	// 0x4A2510=stop()
 	class STRUCT_DAT_SOUND {
 	public:
-		short int unknown_00;
+		short int unknown_00; // status ?
 		short int filesCount; // +2
 		STRUCT_DAT_SOUND_FILE_INFO *fileInfoArray; // +04. Array of sound file info, count=filesCount
 		long int cacheTime; // +08. (300000, etc)

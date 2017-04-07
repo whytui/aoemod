@@ -133,7 +133,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int mapTypesCount; // +4F54.
 		STRUCT_MAPGEN_MAP_TYPE *mapGenMapTypesInfoArray; // +4F58.
 
-		bool IsCheckSumValid() {
+		bool IsCheckSumValid() const {
 			return (this->checksum == CHECKSUM_TRIBE_LAND_MAKER) || //(this->checksum == CHECKSUM_MAPGEN_BASE) ||
 				(this->checksum == CHECKSUM_CONTROLER_OF_LANDSCAPE);
 		}
