@@ -14,6 +14,7 @@ EVT_MENU(ID_FixDDrawColorBug, WxMainForm::OnFixDDrawColorBug)
 EVT_MENU(ID_ChangeInstallDirInRegistry, WxMainForm::OnChangeInstallDirInRegistry)
 EVT_MENU(ID_GenTriggerDoc, WxMainForm::OnExportTriggerHTMLDoc)
 EVT_MENU(ID_GenTriggerSample, WxMainForm::OnSampleTrigger)
+EVT_MENU(ID_OpenDrsFile, WxMainForm::OnMenuOpenDrs)
 #ifdef _DEBUG
 EVT_MENU(ID_Debug, WxMainForm::OnMenuDebug)
 #endif
@@ -50,6 +51,7 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 	menuFile->Append(ID_InstallSuggestedOptions, "Install Suggested Options", "Automatically patch currently selected file with suggested options, including 1920*1200 resolution.");
 	menuFile->Append(ID_FixDDrawColorBug, "Fix DirectDraw color bug", "Updates regitry to fix DirectDraw color bug on currently selected file.");
 	menuFile->Append(ID_ChangeInstallDirInRegistry, "Change AOE install dir", "Updates regitry to set a new installation directory for AOE.");
+	menuFile->Append(ID_OpenDrsFile, "Open DRS file", "Open a DRS file.");
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
 	wxMenu *menuTriggers = new wxMenu;
@@ -548,6 +550,10 @@ void WxMainForm::OnMenuDebug(wxCommandEvent& event) {
 	this->OpenDebugWindow();
 }
 
+void WxMainForm::OnMenuOpenDrs(wxCommandEvent& event) {
+	this->OpenDrs();
+}
+
 void WxMainForm::ExportTriggerHTMLDocumentation() {
 	std::wstring wTitle = _T("Please choose a directory to export triggers documentation");
 	wxDirDialog *dirDialog = new wxDirDialog(this, wTitle, wxEmptyString);
@@ -585,3 +591,14 @@ void WxMainForm::OpenDebugWindow() {
 	WxDebugMainForm *wDebugForm = new WxDebugMainForm(this, _T("hey"), wxSize(800, 600));
 	wDebugForm->Show(true);
 }
+
+void WxMainForm::OpenDrs() {
+	std::wstring wfilename = openfilename(_T("DRS Files (*.drs)\0*.drs\0"));
+	std::string filename = narrow(wfilename);
+	DrsFileHelper drsHelper;
+	std::string msg = drsHelper.GetDrsMainObjectsList(filename);
+	this->txtLog->AppendText(std::string("\r\nDRS file: ") + filename + std::string("\r\n"));
+	this->txtLog->AppendText(drsHelper.GetLastErrors());
+	this->txtLog->AppendText(msg);
+}
+

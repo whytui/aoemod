@@ -151,6 +151,7 @@
     <ClInclude Include="include\AOE_struct_unit_group.h" />
     <ClInclude Include="include\basicFilesHandling.h" />
     <ClInclude Include="include\customResolution.h" />
+    <ClInclude Include="include\DrsFileHelper.h" />
     <ClInclude Include="include\gameVersion.h" />
     <ClInclude Include="include\AOE_structures_drs.h" />
     <ClInclude Include="include\mystrings.h" />
@@ -202,6 +203,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\basicFilesHandling.cpp" />
+    <ClCompile Include="src\DrsFileHelper.cpp" />
     <ClCompile Include="src\ROR_struct_debugging.cpp" />
     <ClCompile Include="src\ROR_struct_export.cpp" />
     <ClCompile Include="src\TileSetDefinition.cpp" />

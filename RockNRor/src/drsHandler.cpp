@@ -41,6 +41,7 @@ namespace AOE_METHODS {
 			return NULL;
 		}
 		long int pFileOpenValue = 0;
+		assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 		unsigned long int callAddr = 0x46B360;
 		unsigned long int nameAsDword = *((unsigned long int*)objTypeName);
 		void *res = NULL;
@@ -52,12 +53,12 @@ namespace AOE_METHODS {
 			PUSH nameAsDword;
 			CALL callAddr;
 			MOV res, EAX;
-			ADD ESP, 0x10
+			ADD ESP, 0x10;
 		}
 		return res;
 	}
 
-	// unused, too technical, please see AOE_GetDrsObject
+	// unused, too technical, please see GetDrsObject
 	bool GetDrsObjectInfos(long int objectId, AOE_STRUCTURES::STRUCT_DRS_FILE **outDrsFile,
 		long int *offsetInDrsFile, long int *outSize) {
 		unsigned long int arg6 = (unsigned long int)outSize;
@@ -65,6 +66,7 @@ namespace AOE_METHODS {
 		unsigned long int arg4 = (unsigned long int)offsetInDrsFile;
 		long int arg3 = 0;
 		unsigned long int _pls = 0x736C7020; // "slp " as an DWORD.
+		assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 		unsigned long int callAddr = 0x46B280;
 		long int res = 0;
 		_asm {
@@ -129,7 +131,7 @@ namespace AOE_STRUCTURES {
 					AOE_STRUCTURES::STRUCT_DRS_TABLE *dt = &lnk->drsFileContent->includedTables[itable];
 					for (long int curFile = 0; curFile < dt->filesCount; curFile++) {
 						AOE_STRUCTURES::STRUCT_DRS_TABLE_DATA *dtData =
-							drsFile->getDrsTableData(dt->offsetInDrsFile, curFile);
+							drsFile->getDrsTableData(dt->fileInfoOffsetInDrsFile, curFile);
 						allIds.push_back(dtData->objectId);
 					}
 				}

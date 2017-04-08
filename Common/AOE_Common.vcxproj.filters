@@ -369,6 +369,9 @@
     <ClInclude Include="include\AOE_structures_drs.h">
       <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
     </ClInclude>
+    <ClInclude Include="include\DrsFileHelper.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\triggerDefinition.cpp">
@@ -384,6 +387,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="src\TileSetDefinition.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DrsFileHelper.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

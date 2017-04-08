@@ -22,23 +22,23 @@ namespace AOE_STRUCTURES {
 	// Size 0x0C
 	class STRUCT_DRS_TABLE {
 	public:
-		char typeName[4]; // " wav", " pls" ... ?
-		long int offsetInDrsFile; // +04. Offset to be added to STRUCT_DRS_FILE object, to retrieve table data (STRUCT_DRS_TABLE_DATA)
-		long int filesCount; // +08: number of included files (wav, slp, shp, bina...)
+		char typeName[4]; // " wav", " pls"... Chars 1-3=reversed extension. First char='a' if extension is "bin" (to indicate when it is Text?), ' ' otherwise.
+		long int fileInfoOffsetInDrsFile; // +04. Offset to be added to STRUCT_DRS_FILE object, to retrieve table data (STRUCT_DRS_TABLE_DATA)
+		long int filesCount; // +08: number of included files for this type (wav, slp, shp, bina...)
 	};
 	static_assert(sizeof(STRUCT_DRS_TABLE) == 0xC, "STRUCT_DRS_TABLE Size");
 
 	// Size 0x0C
-	// Represents a table of DRS-included objects info (bina, slp, wav...) => id + offset/size in DRS file.
+	// Represents a table of DRS-included objects ("file") info (bina, slp, wav...) => id + offset/size in DRS file.
 	class STRUCT_DRS_TABLE_DATA {
 	public:
 		long int objectId; // Corresponds to id visible in DRS editor (slpId, etc)
 		long int offsetInDrsFile; // +04. Offset to be added to STRUCT_DRS_FILE object, to retrieve file data (binary)
-		long int objectSize; // +08.
+		long int objectSize; // +08. File binary data size in bytes.
 	};
 	static_assert(sizeof(STRUCT_DRS_TABLE_DATA) == 0xC, "STRUCT_DRS_TABLE_DATA Size");
 
-	// Size ?
+	// Size 0x40 + tableCount*0x0C.
 	// Note: This is the merged result of data/xxx.drs and data2/xxx.drs (when both exist)
 	// Useful method: 0x46B280=getObjFromInterfacDrs(objTypeName, objId, pvar, pOutOffsetInDrsFile, pOutDrsFileContent, pOutObjSize)
 	// Useful method: 0x46AFC0=addDrsFile(fileName, "tribe", folder)
@@ -48,16 +48,17 @@ namespace AOE_STRUCTURES {
 		char version[4]; // +28. Like 1.00
 		char fileType[0x0C]; // +2C. // "tribe"...
 		long int includedTableCount; // +38. Number of element in +40 (includedTables)
-		long int headerOffset; // +3C. unsure
+		long int firstFileDataOffset; // +3C. unsure
 		// 0x40
 		STRUCT_DRS_TABLE includedTables[1]; // number of element is tableCount
 		// STRUCT_DRS_TABLE_DATA includedTableData[]? total offset: cf includedTables[i].offsetInDrsFile
-		// Actual files data ? using offsets from STRUCT_DRS_TABLE_DATA. Not debugged yet...
+		// This corresponds to file info object, with actual file content offset and size.
 		STRUCT_DRS_TABLE_DATA *getDrsTableData(unsigned long int offsetInDrsFile, long int fileIndex) const {
 			STRUCT_DRS_TABLE_DATA *arrayBase = (STRUCT_DRS_TABLE_DATA *)(((unsigned long int)this) + offsetInDrsFile);
 			return &arrayBase[fileIndex];
 		}
 	};
+
 
 	// 0x7BFAC4 = first DRS link element (STRUCT_DRS_FILE_LINK*)
 	// Size=0x114 (cf 46B090) - no constructor ?
@@ -74,8 +75,8 @@ namespace AOE_STRUCTURES {
 	// Header size=0x20
 	class STRUCT_SLP_FILE_HEADER {
 	public:
-		char version[4];
-		long int shapeCount; // +4
+		char version[4]; // +0. Generally "2.0N"
+		long int shapeCount; // +4. The number of "SLP_FRAME_HEADER" following this header.
 		char description[0x18]; // +08.
 		// Does it always continues with SLP file data ?
 		// char fileData[1] // Unknown size
@@ -84,17 +85,29 @@ namespace AOE_STRUCTURES {
 
 
 	// Slp frame header, Size=0x20. An array of this is located just after STRUCT_SLP_FILE_HEADER in file.
+	// 1 frame = 1 shape in the SLP file.
 	class STRUCT_SLP_FRAME_HEADER {
 	public:
-		long int unknown_00_offset;
-		long int unknown_04_offset;
-		long int unknown_08;
-		long int unknown_0C;
-		long int xSize;
-		long int ySize;
-		long int unknown_18;
-		long int unknown_1C;
+		long int commandTableOffset;
+		long int outlineTableOffset; // +04. Refers to an array of SLP_OUTLINE_INFO ?
+		long int paletteOffset; // +08.
+		long int properties; // +0C. Unsure. 0x10=game default palette ?
+		long int xSize; // +10.
+		long int ySize; // +14.
+		long int xCenterPos; // +18. Relative position of sprite's center
+		long int yCenterPos; // +1C. Relative position of sprite's center
 	};
+	static_assert(sizeof(STRUCT_SLP_FRAME_HEADER) == 0x20, "STRUCT_SLP_FRAME_HEADER size");
+
+
+	// Represents the definition of side transparent pixels for a shape.
+	class STRUCT_SLP_OUTLINE_INFO {
+	public:
+		short int leftSpace; // +00. Number of transparent pixels on left side for current row ?
+		short int rightSpace; // +04. Number of transparent pixels on right side for current row ?
+	};
+	static_assert(sizeof(STRUCT_SLP_OUTLINE_INFO) == 0x04, "STRUCT_SLP_OUTLINE_INFO size");
+
 
 	// Size = 0x20. Constructor = 0x49F5F0. "TShape".
 	// Destructor? = 0x49F840 (does NOT free).

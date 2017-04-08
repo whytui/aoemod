@@ -2,6 +2,7 @@
 #include <customResolution.h>
 #include <triggerDefinition.h>
 #include <windowsShortcut.h>
+#include <DrsFileHelper.h>
 #include "Version.h"
 #include "mystrings.h"
 #include "EmpiresX_API.h"
@@ -56,6 +57,7 @@ private:
 	void OnExportTriggerHTMLDoc(wxCommandEvent& event);
 	void OnSampleTrigger(wxCommandEvent& event);
 	void OnMenuDebug(wxCommandEvent& event);
+	void OnMenuOpenDrs(wxCommandEvent& event);
 	wxDECLARE_EVENT_TABLE();
 
 	// Open empiresx.exe file. If force=true, then tech fixes will be installed without asking the user.
@@ -71,6 +73,7 @@ private:
 	void ExportTriggerHTMLDocumentation();
 	void OpenSampleTriggerWindow();
 	void OpenDebugWindow();
+	void OpenDrs();
 };
 
 enum
@@ -85,6 +88,7 @@ enum
 	ID_CloseGameFile = 8,
 	ID_FixDDrawColorBug = 9,
 	ID_ChangeInstallDirInRegistry = 10,
+	ID_OpenDrsFile = 11,
 	ID_GenTriggerDoc = 100,
 	ID_GenTriggerSample = 101,
 	ID_Debug = 200

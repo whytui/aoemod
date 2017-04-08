@@ -21,7 +21,7 @@ namespace AOE_METHODS {
 	// A very technical primitive to retrieve objects from DRS files.
 	void *GetDrsObject(char objTypeName[4], long int objectId, long int *objectSize);
 
-	// unused, too technical, please see AOE_GetDrsObject
+	// unused, too technical, please see GetDrsObject
 	bool GetDrsObjectInfos(long int objectId, AOE_STRUCTURES::STRUCT_DRS_FILE **outDrsFile,
 		long int *offsetInDrsFile, long int *outSize);
 
