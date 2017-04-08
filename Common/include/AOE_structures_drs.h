@@ -19,12 +19,28 @@ namespace AOE_STRUCTURES {
 	class STRUCT_SLP_INFO;
 
 
+	static const char DrsTableTribeType[] = "tribe";
+	static unsigned long int SlpTypeNameAsDword = 0x736C7020; // "slp " as a DWORD.
+
 	// Size 0x0C
 	class STRUCT_DRS_TABLE {
 	public:
 		char typeName[4]; // " wav", " pls"... Chars 1-3=reversed extension. First char='a' if extension is "bin" (to indicate when it is Text?), ' ' otherwise.
 		long int fileInfoOffsetInDrsFile; // +04. Offset to be added to STRUCT_DRS_FILE object, to retrieve table data (STRUCT_DRS_TABLE_DATA)
 		long int filesCount; // +08: number of included files for this type (wav, slp, shp, bina...)
+
+		bool IsSlp() const {
+			return *((unsigned long int*)&this->typeName) == SlpTypeNameAsDword; // optimized comparison (DWORD)
+		}
+		bool IsShp() const {
+			return (typeName[0] == ' ') && (typeName[1] == 'p') && (typeName[2] == 'h') && (typeName[3] == 's');
+		}
+		bool IsBina() const {
+			return (typeName[0] == 'a') && (typeName[1] == 'n') && (typeName[2] == 'i') && (typeName[3] == 'b');
+		}
+		bool IsWav() const {
+			return (typeName[0] == ' ') && (typeName[1] == 'v') && (typeName[2] == 'a') && (typeName[3] == 'w');
+		}
 	};
 	static_assert(sizeof(STRUCT_DRS_TABLE) == 0xC, "STRUCT_DRS_TABLE Size");
 
@@ -89,7 +105,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_SLP_FRAME_HEADER {
 	public:
 		long int commandTableOffset;
-		long int outlineTableOffset; // +04. Refers to an array of SLP_OUTLINE_INFO ?
+		long int outlineTableOffset; // +04. Refers to an array of STRUCT_SLP_FRAME_ROW_EDGE ?
 		long int paletteOffset; // +08.
 		long int properties; // +0C. Unsure. 0x10=game default palette ?
 		long int xSize; // +10.
@@ -101,12 +117,12 @@ namespace AOE_STRUCTURES {
 
 
 	// Represents the definition of side transparent pixels for a shape.
-	class STRUCT_SLP_OUTLINE_INFO {
+	class STRUCT_SLP_FRAME_ROW_EDGE {
 	public:
 		short int leftSpace; // +00. Number of transparent pixels on left side for current row ?
 		short int rightSpace; // +04. Number of transparent pixels on right side for current row ?
 	};
-	static_assert(sizeof(STRUCT_SLP_OUTLINE_INFO) == 0x04, "STRUCT_SLP_OUTLINE_INFO size");
+	static_assert(sizeof(STRUCT_SLP_FRAME_ROW_EDGE) == 0x04, "STRUCT_SLP_FRAME_ROW_EDGE size");
 
 
 	// Size = 0x20. Constructor = 0x49F5F0. "TShape".
