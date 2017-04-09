@@ -26,11 +26,11 @@ void DrsFileHelper::ResetCurrentWorkingSet() {
 }
 
 // Add file type, if not already present
-DrsSetOfIncludedFiles *DrsFileHelper::AddFileType(AOE_STRUCTURES::DRS_FILE_TYPE_DWORD fileType) {
+DrsSetOfIncludedFiles *DrsFileHelper::AddFileType(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType) {
 	DrsSetOfIncludedFiles *existing = this->GetFileTypeInfo(fileType);
 	if (existing != NULL) { return existing; }
 	DrsSetOfIncludedFiles *s = new DrsSetOfIncludedFiles();
-	s->fileTypeAsDword = fileType;
+	s->fileType = fileType;
 	long int maxExistingIndex = -1;
 	for (auto it = this->currentDrsWorkingSet.begin(); it != this->currentDrsWorkingSet.end(); it++) {
 		if ((maxExistingIndex < 0) || (maxExistingIndex < (*it)->myOrderIndex)) {
@@ -43,9 +43,9 @@ DrsSetOfIncludedFiles *DrsFileHelper::AddFileType(AOE_STRUCTURES::DRS_FILE_TYPE_
 }
 
 
-DrsSetOfIncludedFiles *DrsFileHelper::GetFileTypeInfo(AOE_STRUCTURES::DRS_FILE_TYPE_DWORD fileType) {
+DrsSetOfIncludedFiles *DrsFileHelper::GetFileTypeInfo(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType) {
 	auto it = std::find_if(this->currentDrsWorkingSet.begin(), this->currentDrsWorkingSet.end(),
-		[fileType](DrsSetOfIncludedFiles *s){ return s->fileTypeAsDword == fileType; }
+		[fileType](DrsSetOfIncludedFiles *s){ return s->fileType.GetAsDword() == fileType.GetAsDword(); }
 	);
 	if (it != this->currentDrsWorkingSet.end()) {
 		return *it; // found in list
@@ -55,7 +55,7 @@ DrsSetOfIncludedFiles *DrsFileHelper::GetFileTypeInfo(AOE_STRUCTURES::DRS_FILE_T
 
 
 // Add a file (and file type if necessary)
-DrsIncludedFile *DrsFileHelper::AddFile(AOE_STRUCTURES::DRS_FILE_TYPE_DWORD fileType, long int fileId, string filename) {
+DrsIncludedFile *DrsFileHelper::AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId, string filename) {
 	DrsSetOfIncludedFiles *s = this->AddFileType(fileType);
 	auto it = std::find_if(s->myFiles.begin(), s->myFiles.end(),
 		[fileId](DrsIncludedFile *s){ return s->fileId == fileId; }
@@ -97,6 +97,70 @@ DrsIncludedFile *DrsFileHelper::AddFile(AOE_STRUCTURES::DRS_FILE_TYPE_DWORD file
 	fclose(tmpFile);
 	s->myFiles.push_back(f);
 	return f;
+}
+
+
+// Remove a file type *if it is unused* (no file in it)
+// Returns true if a file type was removed.
+bool DrsFileHelper::RemoveFileType(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType) {
+	int matchCount = 0;
+	//bool foundOneContainingFiles = false;
+	DrsSetOfIncludedFiles *firstFound = NULL;
+	for (auto it = this->currentDrsWorkingSet.begin(); it != this->currentDrsWorkingSet.end(); it++) {
+		DrsSetOfIncludedFiles *cur = *it;
+		if (cur->fileType.GetAsDword() == fileType.GetAsDword()) {
+			matchCount++;
+			if (firstFound == NULL) {
+				firstFound = cur;
+			}
+			if (cur->myFiles.size() > 0) {
+				//foundOneContainingFiles = true;
+				return false; // We don't even need to go further. Forbidden: can't delete a "set" containing files
+			}
+		}
+	}
+
+	if ((matchCount == 0) || (firstFound == NULL)) {
+		return false; // Not found = nothing to delete
+	}
+	if (firstFound->myFiles.size() > 0) { // Redundant check
+		return false; // Forbidden: can't delete a "set" containing files
+	}
+
+	// Note: remove_if deletes all matches, but we checked there is only 1.
+	auto it = std::remove_if(this->currentDrsWorkingSet.begin(), this->currentDrsWorkingSet.end(),
+		[fileType](DrsSetOfIncludedFiles *s){ return s->fileType.GetAsDword() == fileType.GetAsDword(); }
+	);
+	bool found = (it != this->currentDrsWorkingSet.end());
+	this->currentDrsWorkingSet.erase(it, this->currentDrsWorkingSet.end());
+	return found;
+}
+
+
+// Remove the all files that corresponds to type and ID.
+// Returns true if one file (or more) was removed.
+bool DrsFileHelper::RemoveFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId) {
+	DrsSetOfIncludedFiles *s = this->GetFileTypeInfo(fileType);
+	if (s == NULL) { return false; }
+	std::list<DrsIncludedFile*> objectsToDelete;
+	auto it = std::remove_if(s->myFiles.begin(), s->myFiles.end(),
+		[&objectsToDelete, fileId](DrsIncludedFile *s){
+		if (s->fileId == fileId) {
+			objectsToDelete.push_back(s); // save pointer !
+			return true; // can delete
+		}
+		return false;
+	}
+	);
+	bool found = (it != s->myFiles.end());
+	s->myFiles.erase(it, s->myFiles.end());
+	// Now: delete all the orphan objects (files that were referenced by deleted list pointers)
+	for each (auto s in objectsToDelete)
+	{
+		delete s;
+	}
+	objectsToDelete.clear();
+	return found;
 }
 
 
@@ -221,10 +285,7 @@ string DrsFileHelper::GetDrsMainObjectsList(string filename) {
 			result += "DRS.table#";
 			result += std::to_string(i);
 			result += " type=";
-			result += drsTablesArray[i].typeName[3];
-			result += drsTablesArray[i].typeName[2];
-			result += drsTablesArray[i].typeName[1];
-			result += drsTablesArray[i].typeName[0];
+			result += drsTablesArray[i].typeName.Get4LettersExtension().GetAsCharPtr();
 			result += " info_offset=";
 			result += std::to_string(drsTablesArray[i].fileInfoOffsetInDrsFile);
 			result += " file_count=";
@@ -358,25 +419,29 @@ string DrsFileHelper::GetDrsMainObjectsList(string filename) {
 void DrsFileHelper::TestCreateDrs(string filename) {
 	this->errorLog = "";
 	if (CheckFileExistence(filename.c_str())) {
-		this->errorLog += "File already exist\r\n";
+		this->errorLog += "File already exists\r\n";
 		return;
 	}
 
 
 	//TEST data
 	this->ResetCurrentWorkingSet();
+	STRUCT_DRS_FILE_TYPE slpType;
+	slpType.SetFromDword(DRS_FILE_TYPE_DWORD::DFT_SLP);
 	//this->AddFile(DRS_FILE_TYPE_DWORD::DFT_SLP, 42, "F:\\tmpaoe\\output\\CROR_NB.SLP");
 	//this->AddFile(DRS_FILE_TYPE_DWORD::DFT_SLP, 43, "F:\\tmpaoe\\output\\CROR_NB2.SLP");
-	this->AddFile(DRS_FILE_TYPE_DWORD::DFT_SLP, 15000, "F:\\tmpaoe\\output\\_\\15000.slp");
-	this->AddFile(DRS_FILE_TYPE_DWORD::DFT_SLP, 15001, "F:\\tmpaoe\\output\\_\\15001.slp");
-	this->AddFile(DRS_FILE_TYPE_DWORD::DFT_SLP, 15002, "F:\\tmpaoe\\output\\_\\15002.slp");
-	this->AddFile(DRS_FILE_TYPE_DWORD::DFT_SLP, 15003, "F:\\tmpaoe\\output\\_\\15003.slp");
-	this->AddFile(DRS_FILE_TYPE_DWORD::DFT_SLP, 12345, "F:\\tmpaoe\\output\\_\\12345.slp");
+	this->AddFile(slpType, 15000, "F:\\tmpaoe\\output\\_\\15000.slp")->myOrderIndex = 2;
+	this->AddFile(slpType, 15001, "F:\\tmpaoe\\output\\_\\15001.slp")->myOrderIndex = 4;
+	this->AddFile(slpType, 15002, "F:\\tmpaoe\\output\\_\\15002.slp")->myOrderIndex = 3;
+	this->AddFile(slpType, 15003, "F:\\tmpaoe\\output\\_\\15003.slp")->myOrderIndex = 5;
+	this->AddFile(slpType, 12345, "F:\\tmpaoe\\output\\_\\12345.slp")->myOrderIndex = 1;
 
 	//DrsSetOfIncludedFiles *slpFilesSet = this->GetFileTypeInfo(DRS_FILE_TYPE_DWORD::DFT_SLP);
 
 	// TEST sort
 	//this->currentDrsWorkingSet.sort(DrsSetOfFilesHasLowerRankThan);
+	//this->GetFileTypeInfo(DRS_FILE_TYPE_DWORD::DFT_SLP)->myFiles.sort(DrsIncludedFileHasLowerRankThan);
+
 
 
 	try {
@@ -409,13 +474,15 @@ void DrsFileHelper::TestCreateDrs(string filename) {
 
 	try {
 		if (drsTabCount <= 0) {
-			// ERROR
 			throw exception("drsTabCount <= 0");
 		}
 
 		STRUCT_DRS_FILE myDrsObj;
-		//memcpy_s(myDrsObj.copyrightHeader, sizeof(myDrsObj.copyrightHeader), "RockNRor", 9);
-		memcpy_s(myDrsObj.copyrightHeader, sizeof(myDrsObj.copyrightHeader), DrsFileDefaultCopyright, sizeof(DrsFileDefaultCopyright));
+		if (useDefaultCopyright) {
+			memcpy_s(myDrsObj.copyrightHeader, sizeof(myDrsObj.copyrightHeader), DrsFileDefaultCopyright, sizeof(DrsFileDefaultCopyright));
+		} else {
+			memcpy_s(myDrsObj.copyrightHeader, sizeof(myDrsObj.copyrightHeader), "RockNRor", 9);
+		}
 		memcpy_s(myDrsObj.fileType, sizeof(myDrsObj.fileType), AOE_STRUCTURES::DrsTableTribeType, sizeof(AOE_STRUCTURES::DrsTableTribeType));
 		myDrsObj.version[0] = '1';
 		myDrsObj.version[1] = '.';
@@ -426,7 +493,6 @@ void DrsFileHelper::TestCreateDrs(string filename) {
 
 
 		// Loop to fill drsTablesArray and drsTablesInfo (in memory)
-
 		long int drsTabIndex = 0;
 		long int curFileIndexInGlobalArray = 0; // index, including ALL files from all types
 		long int curOffsetForFileRawData = offsetOfFirstFileData;
@@ -434,7 +500,7 @@ void DrsFileHelper::TestCreateDrs(string filename) {
 			DrsSetOfIncludedFiles *fileSet = *it_fs;
 			drsTablesArray[drsTabIndex].filesCount = fileSet->myFiles.size();
 			drsTablesArray[drsTabIndex].fileInfoOffsetInDrsFile = offsetOfFirstFileInfo + sizeof(STRUCT_DRS_TABLE_DATA)*drsTabIndex;
-			drsTablesArray[drsTabIndex].SetTypeNameFromDword(fileSet->fileTypeAsDword);
+			drsTablesArray[drsTabIndex].typeName = fileSet->fileType;
 
 			// Included files for current type...
 			for (auto it_f = fileSet->myFiles.begin(); it_f != fileSet->myFiles.end(); it_f++) {
@@ -469,7 +535,7 @@ void DrsFileHelper::TestCreateDrs(string filename) {
 				DrsIncludedFile *curFileInfo = *it_f;
 
 				if (curFileInfo->tmpOffsetInFile != curOffsetForFileRawData) {
-					this->errorLog += "Error with offsets";
+					this->errorLog += "Error with calculated offsets in file writing";
 				}
 
 				fwrite(curFileInfo->rawData, 1, curFileInfo->dataSize, this->myFile);
@@ -483,8 +549,6 @@ void DrsFileHelper::TestCreateDrs(string filename) {
 		this->errorLog += ex.what();
 		this->errorLog += "\r\n";
 	}
-	//STRUCT_SLP_FRAME_HEADER *frameHeaderArray = NULL;
-	//STRUCT_SLP_FRAME_ROW_EDGE *curEdgesArray = NULL;
 
 	if (drsTablesArray) { free(drsTablesArray); drsTablesArray = NULL; }
 	if (drsTablesInfo) { free(drsTablesInfo); drsTablesInfo = NULL; }

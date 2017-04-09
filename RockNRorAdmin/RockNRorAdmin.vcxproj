@@ -111,6 +111,7 @@
     <ClCompile Include="src\WxBinSeqWindow.cpp" />
     <ClCompile Include="src\WxChangeResolution.cpp" />
     <ClCompile Include="src\WxDebugMainForm.cpp" />
+    <ClCompile Include="src\WxDrsEditor.cpp" />
     <ClCompile Include="src\WxInstallRockNRor.cpp" />
     <ClCompile Include="src\WxMainForm.cpp" />
     <ClCompile Include="src\WxEditFile.cpp" />
@@ -132,6 +133,7 @@
     <ClInclude Include="include\WxBinSeqWindow.h" />
     <ClInclude Include="include\WxChangeResolution.h" />
     <ClInclude Include="include\WxDebugMainForm.h" />
+    <ClInclude Include="include\WxDrsEditor.h" />
     <ClInclude Include="include\WxInstallRockNRor.h" />
     <ClInclude Include="include\WxMainForm.h" />
     <ClInclude Include="include\Version.h" />

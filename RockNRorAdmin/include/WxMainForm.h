@@ -15,6 +15,7 @@
 #include "WxSampleTrigger.h"
 #include "WxDebugMainForm.h"
 #include "InstallManager.h"
+#include "WxDrsEditor.h"
 
 
 //#define _CRT_SECURE_NO_WARNINGS 1

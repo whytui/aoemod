@@ -29,12 +29,22 @@ namespace AOE_STRUCTURES {
 	Offset y to end: files raw data put one after another. y="firstFileDataOffset" from header. Use offsets/size from previous tables to get each file.
 	*/
 
+	// Represents a 4-characters type (+ ending \0) for DRS file types. 3 chars for extension, 1 for "type": ' '=binary, 'a'=text ?
+	struct drs_file_type_name {
+	public:
+		char rawName[5];
+
+		// Returns this object cast as a (char*), useful for "strings" manipulations.
+		char *GetAsCharPtr() const {
+			return (char*)this;
+		}
+	};
 
 	static const long int DrsHeaderSize = 0x40;
 	static const char DrsTableTribeType[] = "tribe";
 	static const char DrsFileDefaultCopyright[] = "Copyright (c) 1997 Ensemble Studios.\x01A";
 	
-	// DWORD representation of DRS file types "slp ", "bina", etc.
+	// DWORD representation of DRS file types "slp ", "bina", etc. Size=4.
 	enum DRS_FILE_TYPE_DWORD : unsigned long int {
 		DFT_SLP = 0x736C7020, // "slp "
 		DFT_SHP = 0x73687020, // "shp "
@@ -43,11 +53,73 @@ namespace AOE_STRUCTURES {
 	};
 
 
+	// Weird representation in DRS files to indicate file type: 1 byte for datatype(?), 3 *reversed* bytes for extension.
+	class STRUCT_DRS_FILE_TYPE {
+	public:
+		char dataType; // ' ' (0x20) for binary, 'a' for text ?
+		char reverseExtension[3];
+
+		void SetFromDword(unsigned long int value) {
+			*((unsigned long int *)&this->dataType) = value;
+		}
+		// Set data from a char[4] like " pls" (input is *already* reversed). Make sure value contains at least 4 chars.
+		void SetFromReverse4Chars(const char *value) {
+			if (!value) { return; }
+			*((unsigned long int *)&this->dataType) = *((unsigned long int *)value);
+		}
+		// Set data from a char[4] like "slp " (input is in "normal" order)
+		// Make sure value contains at least 4 chars.
+		void SetFrom4Chars(const char *value) {
+			if (!value) { return; }
+			this->dataType = value[3];
+			this->reverseExtension[0] = value[2];
+			this->reverseExtension[1] = value[1];
+			this->reverseExtension[2] = value[0];
+		}
+
+		// Get 4-bytes "numeric" representation (useful for equality comparison)
+		unsigned long int GetAsDword() const {
+			return *((unsigned long int *)this);
+		}
+
+		// Get normal-order extension in 3 chars + \0, like "slp"
+		drs_file_type_name Get3LettersExtension() const {
+			drs_file_type_name res;
+			res.rawName[0] = this->reverseExtension[2];
+			res.rawName[1] = this->reverseExtension[1];
+			res.rawName[2] = this->reverseExtension[0];
+			res.rawName[3] = 0;
+			res.rawName[4] = 0;
+			return res;
+		}
+
+		// Get 4-chars typeName string in normal order, like "slp " or "bina".
+		drs_file_type_name Get4LettersExtension() const {
+			drs_file_type_name res;
+			res.rawName[0] = this->reverseExtension[2];
+			res.rawName[1] = this->reverseExtension[1];
+			res.rawName[2] = this->reverseExtension[0];
+			res.rawName[3] = this->dataType;
+			res.rawName[4] = 0;
+			return res;
+		}
+
+		// Get raw typeName, reversed, like "anib" or " pls".
+		drs_file_type_name GetRaw4LettersReverseExtension() const {
+			drs_file_type_name res;
+			*((unsigned long int *)&res.rawName) = *((unsigned long int*)&this->dataType); // Copy dword in 1 operation
+			res.rawName[3] = 0;
+			return res;
+		}
+	};
+	static_assert(sizeof(STRUCT_DRS_FILE_TYPE) == 4, "STRUCT_DRS_FILE_TYPE size");
+
+
 	// Size 0x0C
 	// Represents the "declaration" of 1 file type in a DRS file (wav, slp, shp, bina...)
 	class STRUCT_DRS_TABLE {
 	public:
-		char typeName[4]; // " wav", " pls"... Chars 1-3=reversed extension. First char='a' if extension is "bin" (to indicate when it is Text?), ' ' otherwise.
+		STRUCT_DRS_FILE_TYPE typeName; // " wav", " pls"... Chars 1-3=reversed extension. First char='a' if extension is "bin" (to indicate when it is Text?), ' ' otherwise.
 		long int fileInfoOffsetInDrsFile; // +04. Offset to be added to STRUCT_DRS_FILE object, to retrieve table data (STRUCT_DRS_TABLE_DATA)
 		long int filesCount; // +08: number of included files for this type (wav, slp, shp, bina...). 0 is allowed (if so, ignore this entry) !
 

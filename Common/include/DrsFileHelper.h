@@ -16,8 +16,8 @@ using namespace std;
 
 class DrsIncludedFile {
 public:
-	DrsIncludedFile(AOE_STRUCTURES::DRS_FILE_TYPE_DWORD fileTypeAsDword) {
-		this->fileTypeAsDword = fileTypeAsDword;
+	DrsIncludedFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType) {
+		this->fileType = fileType;
 		this->fileId = -1;
 		this->dataSize = 0;
 		this->rawData = NULL;
@@ -36,26 +36,26 @@ public:
 	std::string localFileName;
 	unsigned char *rawData;
 	long int dataSize;
-	long int myOrderIndex; // -1=unknown
+	long int myOrderIndex; // -1=not set
 	long int tmpOffsetInFile; // Used during file generation
 private:
-	AOE_STRUCTURES::DRS_FILE_TYPE_DWORD fileTypeAsDword;
+	AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType;
 };
 
 
 class DrsSetOfIncludedFiles {
 public:
 	DrsSetOfIncludedFiles() {
-		this->fileTypeAsDword = (AOE_STRUCTURES::DRS_FILE_TYPE_DWORD)0;
+		this->fileType.SetFromDword(0);
 		this->myOrderIndex = -1;
 	}
 	~DrsSetOfIncludedFiles() {
 		this->ClearFiles();
 	}
 
-	AOE_STRUCTURES::DRS_FILE_TYPE_DWORD fileTypeAsDword;
+	AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType;
 	std::list<DrsIncludedFile*> myFiles;
-	long int myOrderIndex; // -1=unknown
+	long int myOrderIndex; // -1=not set
 
 	void ClearFiles() {
 		for each (DrsIncludedFile *f in this->myFiles)
@@ -100,18 +100,28 @@ public:
 	~DrsFileHelper();
 
 	const int maxAllowedTableCount = 20; // Higher value will raise an exception
+	const bool useDefaultCopyright = true; // Use standard DRS files copyright string. Turtle pack does not support other strings.
 
 
 	// Removes all files/file types from current working set
 	void ResetCurrentWorkingSet();
 
 	// Add file type, if not already present
-	DrsSetOfIncludedFiles *AddFileType(AOE_STRUCTURES::DRS_FILE_TYPE_DWORD fileType);
+	DrsSetOfIncludedFiles *AddFileType(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType);
 
-	DrsSetOfIncludedFiles *GetFileTypeInfo(AOE_STRUCTURES::DRS_FILE_TYPE_DWORD fileType);
+	// Returns tyoe info, or NULL if not found
+	DrsSetOfIncludedFiles *GetFileTypeInfo(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType);
 
 	// Add a file (and file type if necessary)
-	DrsIncludedFile *AddFile(AOE_STRUCTURES::DRS_FILE_TYPE_DWORD fileType, long int fileId, string filename);
+	DrsIncludedFile *AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId, string filename);
+
+	// Remove a file type *if it is unused* (no file in it)
+	// Returns true if a file type was removed.
+	bool RemoveFileType(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType);
+
+	// Remove the all files that corresponds to type and ID.
+	// Returns true if one file (or more) was removed.
+	bool RemoveFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId);
 
 	string GetDrsMainObjectsList(string filename);
 

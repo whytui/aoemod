@@ -69,7 +69,7 @@ static std::string GetHexStringAddress(unsigned long int address, int hexDigits)
 }
 
 // Returns int value from str, or defaultValue if str is not a valid number
-static int StrToInt(char *str, int defaultValue) {
+static int StrToInt(const char *str, int defaultValue) {
 	if (str == NULL) {
 		return defaultValue;
 	}
@@ -77,7 +77,7 @@ static int StrToInt(char *str, int defaultValue) {
 	if (val != 0) {
 		return val;
 	}
-	char *tmp = str;
+	const char *tmp = str;
 	bool onlyZeros = true;
 	while ((*tmp != 0) && onlyZeros) {
 		if (*tmp != '0') { onlyZeros = false; }

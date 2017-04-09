@@ -15,6 +15,7 @@ EVT_MENU(ID_ChangeInstallDirInRegistry, WxMainForm::OnChangeInstallDirInRegistry
 EVT_MENU(ID_GenTriggerDoc, WxMainForm::OnExportTriggerHTMLDoc)
 EVT_MENU(ID_GenTriggerSample, WxMainForm::OnSampleTrigger)
 EVT_MENU(ID_OpenDrsFile, WxMainForm::OnMenuOpenDrs)
+EVT_MENU(ID_CreateDrsFile, WxMainForm::OnMenuCreateDrs)
 #ifdef _DEBUG
 EVT_MENU(ID_Debug, WxMainForm::OnMenuDebug)
 #endif
@@ -51,12 +52,14 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 	menuFile->Append(ID_InstallSuggestedOptions, "Install Suggested Options", "Automatically patch currently selected file with suggested options, including 1920*1200 resolution.");
 	menuFile->Append(ID_FixDDrawColorBug, "Fix DirectDraw color bug", "Updates regitry to fix DirectDraw color bug on currently selected file.");
 	menuFile->Append(ID_ChangeInstallDirInRegistry, "Change AOE install dir", "Updates regitry to set a new installation directory for AOE.");
-	menuFile->Append(ID_OpenDrsFile, "Open DRS file", "Open a DRS file.");
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
 	wxMenu *menuTriggers = new wxMenu;
 	menuTriggers->Append(ID_GenTriggerDoc, "Get triggers HTML documentation");
 	menuTriggers->Append(ID_GenTriggerSample, "Generate trigger samples");
+	wxMenu *menuDrs = new wxMenu;
+	menuDrs->Append(ID_OpenDrsFile, "Open DRS file", "Open a DRS file.");
+	menuDrs->Append(ID_CreateDrsFile, "Create DRS file", "Create a new DRS file from scratch.");
 	wxMenu *menuHelp = new wxMenu;
 	menuHelp->Append(wxID_ABOUT);
 	wxMenuBar *menuBar = new wxMenuBar;
@@ -66,6 +69,9 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 	wxMenu *menuDebug = new wxMenu;
 	menuDebug->Append(ID_Debug, "Debug Rise of Rome\tF1");
 	menuBar->Append(menuDebug, "&Debug");
+	menuBar->Append(menuDrs, "D&rs");
+#else
+	menuBar->Append(menuDrs, "&Drs");
 #endif
 	menuBar->Append(menuHelp, "&Help");
 	SetMenuBar(menuBar);
@@ -249,7 +255,6 @@ void WxMainForm::FixDDrawColorBug() {
 
 
 void WxMainForm::ChangeInstallDirInRegistry() {
-
 	std::wstring wTitle = _T("Please select the directory to use as Age of Empires installation directory");
 	wxDirDialog *dirDialog = new wxDirDialog(this, wTitle, wxEmptyString);
 	dirDialog->SetPath(this->e_api->GetFileName());
@@ -608,9 +613,34 @@ void WxMainForm::OpenDrs() {
 }
 
 void WxMainForm::CreateDrs() {
-	// TODO: here we want to CREATE a non-existing file ! Need another primitive
-	std::wstring wfilename = openfilename(_T("DRS Files (*.drs)\0*.drs\0"));
-	if (wfilename.empty()) { return; }
+	WxDrsEditor *e = new WxDrsEditor(this, _T("DRS editor"), wxSize(800, 600));
+	//e->SetOutputDrsFilename();
+	e->Show(true);
+	return;
+
+	std::wstring wTitle = _T("Please select the directory where to create a DRS file");
+	wxDirDialog *dirDialog = new wxDirDialog(this, wTitle, wxEmptyString);
+	dirDialog->SetPath(this->e_api->GetFileName());
+	bool success = dirDialog->ShowModal() == wxID_OK;
+	wxString dir = dirDialog->GetPath();
+	success = success && !dir.empty();
+	delete dirDialog;
+	if (!success) { 
+		SetStatusText(_T("DRS file creation cancelled")); 
+		return;
+	}
+
+	std::wstring dirname = dir;
+
+	wxString response = wxGetTextFromUser(_T("Please type the file name (with .drs extension) to create"), _T("Create DRS file"), _T(".drs"), this);
+	if (response.IsEmpty()) { return; }
+	std::wstring wresponse = response;
+	std::wstring wfilename = dirname + std::wstring(_T("\\")) + wresponse;
+	if (CheckFileExistence(wfilename)) {
+		wxMessageBox(_T("The file already exists, please try again with another file name"), _T("Create DRS file"), wxOK | wxICON_WARNING, this);
+		SetStatusText(_T("DRS file creation cancelled"));
+		return;
+	}
 	std::string filename = narrow(wfilename);
 	DrsFileHelper drsHelper;
 	drsHelper.TestCreateDrs(filename);
