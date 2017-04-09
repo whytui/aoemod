@@ -19,27 +19,56 @@ namespace AOE_STRUCTURES {
 	class STRUCT_SLP_INFO;
 
 
+	/*
+	Structure of a DRS file:
+	Offset 0 to 0x40: header (STRUCT_DRS_FILE)
+	Offset 0x40 to x-1: Array of 'n1' STRUCT_DRS_TABLE where 'n1' is the number of file types (slp, bina...)
+	Offset x to y-1: Array (2 dimensions) of STRUCT_DRS_TABLE_DATA (gives the number of files for each type, etc)
+	- Read 'n2' STRUCT_DRS_TABLE_DATA consecutive elements where n2=fileCount for current file type
+	- Loop with next file type (another block of STRUCT_DRS_TABLE_DATA elements), etc
+	Offset y to end: files raw data put one after another. y="firstFileDataOffset" from header. Use offsets/size from previous tables to get each file.
+	*/
+
+
+	static const long int DrsHeaderSize = 0x40;
 	static const char DrsTableTribeType[] = "tribe";
-	static unsigned long int SlpTypeNameAsDword = 0x736C7020; // "slp " as a DWORD.
+	static const char DrsFileDefaultCopyright[] = "Copyright (c) 1997 Ensemble Studios.\x01A";
+	
+	// DWORD representation of DRS file types "slp ", "bina", etc.
+	enum DRS_FILE_TYPE_DWORD : unsigned long int {
+		DFT_SLP = 0x736C7020, // "slp "
+		DFT_SHP = 0x73687020, // "shp "
+		DFT_WAV = 0x77617620, // "wav "
+		DFT_BINA = 0x62696E61 // "bina". "a" probably represents the fact that binary data is text, actually.
+	};
+
 
 	// Size 0x0C
+	// Represents the "declaration" of 1 file type in a DRS file (wav, slp, shp, bina...)
 	class STRUCT_DRS_TABLE {
 	public:
 		char typeName[4]; // " wav", " pls"... Chars 1-3=reversed extension. First char='a' if extension is "bin" (to indicate when it is Text?), ' ' otherwise.
 		long int fileInfoOffsetInDrsFile; // +04. Offset to be added to STRUCT_DRS_FILE object, to retrieve table data (STRUCT_DRS_TABLE_DATA)
-		long int filesCount; // +08: number of included files for this type (wav, slp, shp, bina...)
+		long int filesCount; // +08: number of included files for this type (wav, slp, shp, bina...). 0 is allowed (if so, ignore this entry) !
 
+		unsigned long int GetTypeNameAsDword() const {
+			return *((unsigned long int*)&this->typeName);
+		}
 		bool IsSlp() const {
-			return *((unsigned long int*)&this->typeName) == SlpTypeNameAsDword; // optimized comparison (DWORD)
+			return *((unsigned long int*)&this->typeName) == DRS_FILE_TYPE_DWORD::DFT_SLP; // optimized comparison (DWORD)
 		}
 		bool IsShp() const {
-			return (typeName[0] == ' ') && (typeName[1] == 'p') && (typeName[2] == 'h') && (typeName[3] == 's');
+			return *((unsigned long int*)&this->typeName) == DRS_FILE_TYPE_DWORD::DFT_SHP; // optimized comparison (DWORD)
 		}
 		bool IsBina() const {
-			return (typeName[0] == 'a') && (typeName[1] == 'n') && (typeName[2] == 'i') && (typeName[3] == 'b');
+			return *((unsigned long int*)&this->typeName) == DRS_FILE_TYPE_DWORD::DFT_BINA; // optimized comparison (DWORD)
 		}
 		bool IsWav() const {
-			return (typeName[0] == ' ') && (typeName[1] == 'v') && (typeName[2] == 'a') && (typeName[3] == 'w');
+			return *((unsigned long int*)&this->typeName) == DRS_FILE_TYPE_DWORD::DFT_WAV; // optimized comparison (DWORD)
+		}
+		// Set type name from its (int) DWORD representation
+		void SetTypeNameFromDword(unsigned long int value) {
+			*((unsigned long int*)&this->typeName) = value;
 		}
 	};
 	static_assert(sizeof(STRUCT_DRS_TABLE) == 0xC, "STRUCT_DRS_TABLE Size");
@@ -64,9 +93,8 @@ namespace AOE_STRUCTURES {
 		char version[4]; // +28. Like 1.00
 		char fileType[0x0C]; // +2C. // "tribe"...
 		long int includedTableCount; // +38. Number of element in +40 (includedTables)
-		long int firstFileDataOffset; // +3C. unsure
-		// 0x40
-		STRUCT_DRS_TABLE includedTables[1]; // number of element is tableCount
+		long int firstFileDataOffset; // +3C. Indicates the offset of the first "file raw data byte" in DRS file (after headers/tables).
+		STRUCT_DRS_TABLE includedTables[1]; // +40. number of element is tableCount
 		// STRUCT_DRS_TABLE_DATA includedTableData[]? total offset: cf includedTables[i].offsetInDrsFile
 		// This corresponds to file info object, with actual file content offset and size.
 		STRUCT_DRS_TABLE_DATA *getDrsTableData(unsigned long int offsetInDrsFile, long int fileIndex) const {

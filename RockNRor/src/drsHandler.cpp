@@ -65,7 +65,7 @@ namespace AOE_METHODS {
 		unsigned long int arg5 = (unsigned long int)outDrsFile;
 		unsigned long int arg4 = (unsigned long int)offsetInDrsFile;
 		long int arg3 = 0;
-		unsigned long int _pls = AOE_STRUCTURES::SlpTypeNameAsDword; // "slp " as a DWORD.
+		unsigned long int _pls = AOE_STRUCTURES::DRS_FILE_TYPE_DWORD::DFT_SLP; // "slp " as a DWORD.
 		assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 		unsigned long int callAddr = 0x46B280;
 		long int res = 0;

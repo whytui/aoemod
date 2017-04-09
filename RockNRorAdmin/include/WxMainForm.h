@@ -58,6 +58,7 @@ private:
 	void OnSampleTrigger(wxCommandEvent& event);
 	void OnMenuDebug(wxCommandEvent& event);
 	void OnMenuOpenDrs(wxCommandEvent& event);
+	void OnMenuCreateDrs(wxCommandEvent& event);
 	wxDECLARE_EVENT_TABLE();
 
 	// Open empiresx.exe file. If force=true, then tech fixes will be installed without asking the user.
@@ -74,6 +75,7 @@ private:
 	void OpenSampleTriggerWindow();
 	void OpenDebugWindow();
 	void OpenDrs();
+	void CreateDrs();
 };
 
 enum
@@ -89,6 +91,7 @@ enum
 	ID_FixDDrawColorBug = 9,
 	ID_ChangeInstallDirInRegistry = 10,
 	ID_OpenDrsFile = 11,
+	ID_CreateDrsFile = 12,
 	ID_GenTriggerDoc = 100,
 	ID_GenTriggerSample = 101,
 	ID_Debug = 200

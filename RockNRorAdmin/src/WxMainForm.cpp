@@ -554,6 +554,10 @@ void WxMainForm::OnMenuOpenDrs(wxCommandEvent& event) {
 	this->OpenDrs();
 }
 
+void WxMainForm::OnMenuCreateDrs(wxCommandEvent& event) {
+	this->CreateDrs();
+}
+
 void WxMainForm::ExportTriggerHTMLDocumentation() {
 	std::wstring wTitle = _T("Please choose a directory to export triggers documentation");
 	wxDirDialog *dirDialog = new wxDirDialog(this, wTitle, wxEmptyString);
@@ -594,11 +598,22 @@ void WxMainForm::OpenDebugWindow() {
 
 void WxMainForm::OpenDrs() {
 	std::wstring wfilename = openfilename(_T("DRS Files (*.drs)\0*.drs\0"));
+	if (wfilename.empty()) { return; }
 	std::string filename = narrow(wfilename);
 	DrsFileHelper drsHelper;
 	std::string msg = drsHelper.GetDrsMainObjectsList(filename);
 	this->txtLog->AppendText(std::string("\r\nDRS file: ") + filename + std::string("\r\n"));
 	this->txtLog->AppendText(drsHelper.GetLastErrors());
 	this->txtLog->AppendText(msg);
+}
+
+void WxMainForm::CreateDrs() {
+	// TODO: here we want to CREATE a non-existing file ! Need another primitive
+	std::wstring wfilename = openfilename(_T("DRS Files (*.drs)\0*.drs\0"));
+	if (wfilename.empty()) { return; }
+	std::string filename = narrow(wfilename);
+	DrsFileHelper drsHelper;
+	drsHelper.TestCreateDrs(filename);
+	this->txtLog->AppendText(drsHelper.GetLastErrors());
 }
 
