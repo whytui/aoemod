@@ -1,10 +1,9 @@
 #pragma once
 #include <DrsFileHelper.h>
-#include "Version.h"
 #include "mystrings.h"
-#include "EmpiresX_API.h"
 #include "RockNRorAdmin_UI.h"
 #include "FileSelector.h"
+#include "WxDrsEditorFileEdit.h"
 
 
 //#define _CRT_SECURE_NO_WARNINGS 1
@@ -22,7 +21,7 @@
 class WxDrsEditor : public wxFrame
 {
 public:
-	WxDrsEditor(wxWindow *parent, const wxString& title, const wxSize& size);
+	WxDrsEditor(wxWindow *parent, const wxString& title, const wxSize& size, string inputFilename);
 	~WxDrsEditor();
 	//void SetMainUIObject(RockNRorAdmin_UI *value) { this->objAOE = value; }
 	//RockNRorAdmin_UI *GetMainUIObject() { return this->objAOE; }
@@ -41,12 +40,18 @@ private:
 	wxGrid *fileTypesGrid;
 	wxGrid *filesGrid;
 	wxButton *btnAddFile;
+	wxButton *btnModifyFileInfo;
 	wxButton *btnRemoveFile;
 
 
 	void ConstructorInit();
 	void CreateFilesGrid();
+	void OpenDrsFile(string filename);
+	void RefillGrid();
+	// Returns true if valid info was provided
+	bool AskFileInfo(long int &inOutFileId, AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE &inOutSlpType);
 	void OnBtnAddFile(wxCommandEvent& event);
+	void OnBtnModifyFileInfo(wxCommandEvent& event);
 	void OnBtnRemoveFile(wxCommandEvent& event);
 	wxDECLARE_EVENT_TABLE();
 
@@ -55,7 +60,8 @@ private:
 enum
 {
 	ID_BtnAddFile = 1,
-	ID_BtnRemoveFile = 2
+	ID_BtnRemoveFile,
+	ID_BtnModifyFileInfo
 };
 
 

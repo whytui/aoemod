@@ -3,6 +3,7 @@
 #include <string>
 #include <assert.h>
 #include <list>
+#include <set>
 #include <algorithm>
 #include "basicFilesHandling.h"
 #include "AOE_structures_drs.h"
@@ -102,6 +103,9 @@ public:
 	const int maxAllowedTableCount = 20; // Higher value will raise an exception
 	const bool useDefaultCopyright = true; // Use standard DRS files copyright string. Turtle pack does not support other strings.
 
+	// Internal data representing a (virtual) DRS file content
+	std::list<DrsSetOfIncludedFiles*> currentDrsWorkingSet;
+
 
 	// Removes all files/file types from current working set
 	void ResetCurrentWorkingSet();
@@ -111,6 +115,12 @@ public:
 
 	// Returns tyoe info, or NULL if not found
 	DrsSetOfIncludedFiles *GetFileTypeInfo(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType);
+
+	// Returns the first file whose ID matches specified one
+	DrsIncludedFile *FindFileWithId(long int fileId);
+
+	// Add a file (and file type if necessary)
+	DrsIncludedFile *AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId, void *buffer, long int size);
 
 	// Add a file (and file type if necessary)
 	DrsIncludedFile *AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId, string filename);
@@ -123,18 +133,23 @@ public:
 	// Returns true if one file (or more) was removed.
 	bool RemoveFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId);
 
-	string GetDrsMainObjectsList(string filename);
+	// Read a DRS file. All internal data from previous file/previous manipulations is lost
+	// Returns true if successful
+	// Use GetLastErrors and GetLastInfos to retrieve errors & info log from this operation 
+	bool ReadDrsFile(string filename);
 
 	// Get string representation of errors that happened in last operation
 	string GetLastErrors() const { return this->errorLog; }
+
+	string GetLastInfos() const { return this->infoLog; }
 
 	void TestCreateDrs(string filename);
 
 private:
 	size_t fileTotalSize;
 	FILE *myFile;
+	string infoLog;
 	string errorLog;
-	std::list<DrsSetOfIncludedFiles*> currentDrsWorkingSet;
 
 	// Open a file. Throw an exception if failed. Fails if a file is already open.
 	void FileOpen(string filename, bool readOnly);

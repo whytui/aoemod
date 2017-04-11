@@ -10,6 +10,7 @@ DrsFileHelper::DrsFileHelper() {
 	this->myFile = NULL;
 	this->fileTotalSize = 0;
 	this->errorLog = "";
+	this->infoLog = "";
 }
 
 DrsFileHelper::~DrsFileHelper() {
@@ -51,6 +52,52 @@ DrsSetOfIncludedFiles *DrsFileHelper::GetFileTypeInfo(AOE_STRUCTURES::STRUCT_DRS
 		return *it; // found in list
 	}
 	return NULL;
+}
+
+
+// Returns the first file whose ID matches specified one
+DrsIncludedFile *DrsFileHelper::FindFileWithId(long int fileId) {
+	DrsSetOfIncludedFiles *firstFound = NULL;
+	for (auto it = this->currentDrsWorkingSet.begin(); it != this->currentDrsWorkingSet.end(); it++) {
+		DrsSetOfIncludedFiles *cur = *it;
+		for (auto it_f = cur->myFiles.begin(); it_f != cur->myFiles.end(); it_f++) {
+			if ((*it_f)->fileId == fileId) {
+				return *it_f;
+			}
+		}
+	}
+	return NULL;
+}
+
+
+// Add a file (and file type if necessary)
+DrsIncludedFile *DrsFileHelper::AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId, void *buffer, long int size) {
+	if (!buffer || (size <= 0)) {
+		return NULL;
+	}
+	DrsSetOfIncludedFiles *s = this->AddFileType(fileType);
+	auto it = std::find_if(s->myFiles.begin(), s->myFiles.end(),
+		[fileId](DrsIncludedFile *s){ return s->fileId == fileId; }
+	);
+	if (it != s->myFiles.end()) {
+		return *it; // already in list
+	}
+
+	DrsIncludedFile *f = new DrsIncludedFile(fileType);
+	f->fileId = fileId;
+	f->localFileName = "";
+	long int maxExistingIndex = -1;
+	for (auto it = s->myFiles.begin(); it != s->myFiles.end(); it++) {
+		if ((maxExistingIndex < 0) || (maxExistingIndex < (*it)->myOrderIndex)) {
+			maxExistingIndex = (*it)->myOrderIndex;
+		}
+	}
+	f->myOrderIndex = maxExistingIndex + 1;
+	f->dataSize = size;
+	f->rawData = (unsigned char *)malloc(size);
+	memcpy_s(f->rawData, size, buffer, size);
+	s->myFiles.push_back(f);
+	return f;
 }
 
 
@@ -214,11 +261,16 @@ void DrsFileHelper::ReadCheck(size_t offset, void *dest, size_t destSize, size_t
 }
 
 
-string DrsFileHelper::GetDrsMainObjectsList(string filename) {
+// Read a DRS file. All internal data from previous file/previous manipulations is lost
+// Returns true if successful
+// Use GetLastErrors and GetLastInfos to retrieve errors & info log from this operation 
+bool DrsFileHelper::ReadDrsFile(string filename) {
 	this->errorLog = "";
+	this->infoLog = "";
+	this->ResetCurrentWorkingSet();
 	if (!CheckFileExistence(filename.c_str())) {
 		this->errorLog += "File does not exist\r\n";
-		return "";
+		return false;
 	}
 	
 	try {
@@ -227,9 +279,8 @@ string DrsFileHelper::GetDrsMainObjectsList(string filename) {
 	catch (exception ex) {
 		this->errorLog += ex.what();
 		this->errorLog += "\r\n";
-		return ex.what();
+		return false;
 	}
-	string result = "";
 	
 	STRUCT_DRS_FILE myDrsObj;
 	memset(&myDrsObj, 0, AOE_STRUCTURES::DrsHeaderSize);
@@ -237,9 +288,10 @@ string DrsFileHelper::GetDrsMainObjectsList(string filename) {
 		// ERROR
 		this->FileClose();
 		this->errorLog += "File size is too small to read header section\r\n";
-		return "";
+		return false;
 	}
 
+	std::set<long int> allObjectIDs;
 	STRUCT_DRS_TABLE *drsTablesArray = NULL;
 	STRUCT_DRS_TABLE_DATA *drsTablesData = NULL;
 	STRUCT_SLP_FRAME_HEADER *frameHeaderArray = NULL;
@@ -271,8 +323,8 @@ string DrsFileHelper::GetDrsMainObjectsList(string filename) {
 		if (myDrsObj.firstFileDataOffset <= AOE_STRUCTURES::DrsHeaderSize) {
 			throw exception("First file offset is below header size, file must be corrupted");
 		}
-		result += "FirstFileOffset=";
-		result += to_string(myDrsObj.firstFileDataOffset);
+		this->infoLog += "FirstFileOffset=";
+		this->infoLog += to_string(myDrsObj.firstFileDataOffset);
 
 		// DRS table is just after header (list of file types)
 		drsTablesArray = (STRUCT_DRS_TABLE*)malloc(sizeof(STRUCT_DRS_TABLE) * drsTabCount);
@@ -280,17 +332,18 @@ string DrsFileHelper::GetDrsMainObjectsList(string filename) {
 
 		// Loop on DRS tables (file types details)
 		unsigned long int lowestFileOffset = 0;
+		long int numberOfAddedFiles = 0;
 		for (int i = 0; i < drsTabCount; i++) {
-			result += "\r\n";
-			result += "DRS.table#";
-			result += std::to_string(i);
-			result += " type=";
-			result += drsTablesArray[i].typeName.Get4LettersExtension().GetAsCharPtr();
-			result += " info_offset=";
-			result += std::to_string(drsTablesArray[i].fileInfoOffsetInDrsFile);
-			result += " file_count=";
-			result += std::to_string(drsTablesArray[i].filesCount);
-			result += "\r\n";
+			this->infoLog += "\r\n";
+			this->infoLog += "DRS.table#";
+			this->infoLog += std::to_string(i);
+			this->infoLog += " type=";
+			this->infoLog += drsTablesArray[i].typeName.Get4LettersExtension().GetAsCharPtr();
+			this->infoLog += " info_offset=";
+			this->infoLog += std::to_string(drsTablesArray[i].fileInfoOffsetInDrsFile);
+			this->infoLog += " file_count=";
+			this->infoLog += std::to_string(drsTablesArray[i].filesCount);
+			this->infoLog += "\r\n";
 			bool isSlp = drsTablesArray[i].IsSlp();
 
 			if (drsTablesArray[i].filesCount > 0) {
@@ -304,19 +357,41 @@ string DrsFileHelper::GetDrsMainObjectsList(string filename) {
 
 				for (int j = 0; j < drsTablesArray[i].filesCount; j++) {
 					unsigned long int curObjOffset = drsTablesData[j].offsetInDrsFile;
+					long int curObjectSize = drsTablesData[j].objectSize;
 					if ((curObjOffset < lowestFileOffset) || (lowestFileOffset == 0)) {
 						lowestFileOffset = curObjOffset;
 					}
-					if (j > 0) { result += "\r\n"; }
-					result += std::to_string(j);
-					result += " objId=";
-					result += std::to_string(drsTablesData[j].objectId);
-					result += " dataOffset=";
-					result += std::to_string(curObjOffset);
-					result += " dataSize=";
-					result += std::to_string(drsTablesData[j].objectSize);
+					if (j > 0) { this->infoLog += "\r\n"; }
+					long int objectId = drsTablesData[j].objectId;
+					this->infoLog += std::to_string(j);
+					this->infoLog += " objId=";
+					this->infoLog += std::to_string(objectId);
+					this->infoLog += " dataOffset=";
+					this->infoLog += std::to_string(curObjOffset);
+					this->infoLog += " dataSize=";
+					this->infoLog += std::to_string(drsTablesData[j].objectSize);
+
+					if (allObjectIDs.find(objectId) != allObjectIDs.end()) {
+						this->errorLog += "ID #";
+						this->errorLog += to_string(objectId);
+						this->errorLog += " is used by more than 1 object\r\n";
+					}
+					allObjectIDs.insert(objectId);
+
+					if (drsTablesData[j].objectSize > 0) {
+						// TODO optim: add a primitive that "AddFile" directly from input file, without using this temporary buffer.
+						void *tempBuffer = malloc(curObjectSize);
+						this->ReadCheck(curObjOffset, tempBuffer, curObjectSize, 1, curObjectSize);
+						DrsIncludedFile *curFile = this->AddFile(drsTablesArray[i].typeName, objectId, tempBuffer, curObjectSize);
+						if (curFile) {
+							curFile->myOrderIndex = numberOfAddedFiles;
+							numberOfAddedFiles++;
+						}
+						free(tempBuffer); tempBuffer = NULL;
+					}
 
 					if (isSlp) {
+						// TO REMOVE/move somewhere else (was for testing purpose)
 						// SLP file format...
 						STRUCT_SLP_FILE_HEADER slpHeader;
 						this->ReadCheck(curObjOffset, &slpHeader, sizeof(STRUCT_SLP_FILE_HEADER), sizeof(STRUCT_SLP_FILE_HEADER), 1);
@@ -328,10 +403,10 @@ string DrsFileHelper::GetDrsMainObjectsList(string filename) {
 							this->errorLog += "\r\n";
 						}
 						int shapeCount = slpHeader.shapeCount;
-						result += " SLP_desc=";
-						result += slpHeader.description;
-						result += " shpCount=";
-						result += to_string(shapeCount);
+						this->infoLog += " SLP_desc=";
+						this->infoLog += slpHeader.description;
+						this->infoLog += " shpCount=";
+						this->infoLog += to_string(shapeCount);
 
 						// After header: frame header table
 						STRUCT_SLP_FRAME_HEADER *frameHeaderArray = (STRUCT_SLP_FRAME_HEADER *)malloc(sizeof(STRUCT_SLP_FRAME_HEADER) * shapeCount);
@@ -379,7 +454,7 @@ string DrsFileHelper::GetDrsMainObjectsList(string filename) {
 					}
 				}
 			}
-			result += "\r\n";
+			this->infoLog += "\r\n";
 			if (drsTablesData != NULL) { free(drsTablesData); drsTablesData = NULL; }
 		}
 
@@ -410,9 +485,10 @@ string DrsFileHelper::GetDrsMainObjectsList(string filename) {
 		if (curCommandOffsetsArray != NULL) {
 			free(curCommandOffsetsArray); curCommandOffsetsArray = NULL;
 		}
+		return false;
 	}
 	this->FileClose();
-	return result;
+	return true;
 }
 
 

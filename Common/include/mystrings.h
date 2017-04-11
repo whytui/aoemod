@@ -28,10 +28,18 @@ static std::wstring widen(const std::string& s)
 	return std::wstring(&buffer[0], buffer.size());
 }
 
+// Converts supplied string to lowercase
+static void tolower(std::string &s) {
+	for (std::string::iterator it = s.begin(); it != s.end(); it++) {
+		*it = tolower(*it);
+	}
+}
+
 // Converts supplied wstring to lowercase
 static void towlower(std::wstring &s) {
-	for (std::wstring::iterator it = s.begin(); it != s.end(); it++)
+	for (std::wstring::iterator it = s.begin(); it != s.end(); it++) {
 		*it = towlower(*it);
+	}
 }
 
 
@@ -45,6 +53,18 @@ static std::wstring extractDirectory(std::wstring fullPath) {
 static std::wstring extractFileName(std::wstring fullPath) {
 	if (fullPath.empty()) { return L""; }
 	return fullPath.substr(fullPath.find_last_of(L"/\\") + 1);
+}
+
+// Get file extension from a full path or a file name
+static std::string extractFileExtension(std::string fullPath) {
+	if (fullPath.empty()) { return ""; }
+	return fullPath.substr(fullPath.find_last_of(".") + 1);
+}
+
+// Get file extension from a full path or a file name
+static std::wstring extractFileExtension(std::wstring fullPath) {
+	if (fullPath.empty()) { return L""; }
+	return fullPath.substr(fullPath.find_last_of(L".") + 1);
 }
 
 // Get an hexadecimal address as a string of (2+)8 characters (capital letters, if any). Like 0x1234ABCD.

@@ -35,7 +35,7 @@ namespace AOE_STRUCTURES {
 		char rawName[5];
 
 		// Returns this object cast as a (char*), useful for "strings" manipulations.
-		char *GetAsCharPtr() const {
+		const char *GetAsCharPtr() const {
 			return (char*)this;
 		}
 	};
