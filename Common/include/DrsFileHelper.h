@@ -39,6 +39,8 @@ public:
 	long int dataSize;
 	long int myOrderIndex; // -1=not set
 	long int tmpOffsetInFile; // Used during file generation
+
+	AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE GetFileType() const { return this->fileType; }
 private:
 	AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType;
 };
@@ -120,9 +122,12 @@ public:
 	DrsIncludedFile *FindFileWithId(long int fileId);
 
 	// Add a file (and file type if necessary)
+	// Does not add if the ID is already used (returns NULL)
+	// buffer is copied into a new buffer (you probably should free it after the call)
 	DrsIncludedFile *AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId, void *buffer, long int size);
 
 	// Add a file (and file type if necessary)
+	// Does not add if the ID is already used (returns NULL)
 	DrsIncludedFile *AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId, string filename);
 
 	// Remove a file type *if it is unused* (no file in it)
@@ -132,6 +137,10 @@ public:
 	// Remove the all files that corresponds to type and ID.
 	// Returns true if one file (or more) was removed.
 	bool RemoveFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId);
+
+	// Set a new file category
+	// Returns true if successful
+	bool ChangeFileCategory(long int fileId, AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE newFileType);
 
 	// Read a DRS file. All internal data from previous file/previous manipulations is lost
 	// Returns true if successful

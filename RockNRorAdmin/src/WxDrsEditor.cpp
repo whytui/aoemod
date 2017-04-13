@@ -119,7 +119,7 @@ bool WxDrsEditor::AskFileInfo(long int &inOutFileId, AOE_STRUCTURES::STRUCT_DRS_
 	string typedFileType = "";
 	while (!inputIsValid) {
 		int workFileId = inOutFileId;
-		WxDrsEditorFileEdit *fileEdit = new WxDrsEditorFileEdit(this, _T("Add file"), wxSize(400, 180), -1, initialFileExt);
+		WxDrsEditorFileEdit *fileEdit = new WxDrsEditorFileEdit(this, _T("Add file"), wxSize(400, 180), inOutFileId, initialFileExt);
 		fileEdit->ShowModal();
 		if (fileEdit->cancelled) {
 			inOutSlpType.SetFromDword(0);
@@ -218,9 +218,9 @@ void WxDrsEditor::OnBtnModifyFileInfo(wxCommandEvent& event) {
 		inputFileExt.append("    "); // Make sure length is at least 4 because of SetFrom4Chars(...)
 	}
 	long int typedFileId = oldFileId;
-	AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE slpType;
-	slpType.SetFrom4Chars(inputFileExt.c_str());
-	if (!this->AskFileInfo(typedFileId, slpType)) {
+	AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType;
+	fileType.SetFrom4Chars(inputFileExt.c_str());
+	if (!this->AskFileInfo(typedFileId, fileType)) {
 		return;
 	}
 
@@ -231,10 +231,11 @@ void WxDrsEditor::OnBtnModifyFileInfo(wxCommandEvent& event) {
 		return;
 	}
 	objFile->fileId = typedFileId;
-	// TODO: change file type !
+	// Change file type in internal data
+	this->drsFileHelper.ChangeFileCategory(objFile->fileId, fileType);
 
 	// Update grid
-	this->filesGrid->SetCellValue(selRow, 0, slpType.Get4LettersExtension().GetAsCharPtr());
+	this->filesGrid->SetCellValue(selRow, 0, fileType.Get4LettersExtension().GetAsCharPtr());
 	this->filesGrid->SetCellValue(selRow, 1, std::to_wstring(typedFileId));
 }
 

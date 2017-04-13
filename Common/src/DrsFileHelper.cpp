@@ -71,6 +71,8 @@ DrsIncludedFile *DrsFileHelper::FindFileWithId(long int fileId) {
 
 
 // Add a file (and file type if necessary)
+// Does not add if the ID is already used (returns NULL)
+// buffer is copied into a new buffer (you probably should free it after the call)
 DrsIncludedFile *DrsFileHelper::AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId, void *buffer, long int size) {
 	if (!buffer || (size <= 0)) {
 		return NULL;
@@ -80,7 +82,7 @@ DrsIncludedFile *DrsFileHelper::AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fil
 		[fileId](DrsIncludedFile *s){ return s->fileId == fileId; }
 	);
 	if (it != s->myFiles.end()) {
-		return *it; // already in list
+		return NULL; // already in list - do not add
 	}
 
 	DrsIncludedFile *f = new DrsIncludedFile(fileType);
@@ -102,13 +104,14 @@ DrsIncludedFile *DrsFileHelper::AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fil
 
 
 // Add a file (and file type if necessary)
+// Does not add if the ID is already used (returns NULL)
 DrsIncludedFile *DrsFileHelper::AddFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, long int fileId, string filename) {
 	DrsSetOfIncludedFiles *s = this->AddFileType(fileType);
 	auto it = std::find_if(s->myFiles.begin(), s->myFiles.end(),
 		[fileId](DrsIncludedFile *s){ return s->fileId == fileId; }
 	);
 	if (it != s->myFiles.end()) {
-		return *it; // already in list
+		return NULL; // already in list - do not add.
 	}
 	
 	if (!CheckFileExistence(filename.c_str())) {
@@ -208,6 +211,31 @@ bool DrsFileHelper::RemoveFile(AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE fileType, lo
 	}
 	objectsToDelete.clear();
 	return found;
+}
+
+
+// Set a new file category
+// Returns true if successful
+bool DrsFileHelper::ChangeFileCategory(long int fileId, AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE newFileType) {
+	DrsIncludedFile *oldFile = this->FindFileWithId(fileId);
+	if (!oldFile) {
+		return false;
+	}
+	if (oldFile->GetFileType().GetAsDword() == newFileType.GetAsDword()) {
+		return true; // Nothing to do
+	}
+
+	void *buffer = oldFile->rawData;
+	long int bufferSize = oldFile->dataSize;
+	// Trick to preserve buffer while old file object is destroyed: detach file from the object (and keep pointer)
+	oldFile->dataSize = 0;
+	oldFile->rawData = NULL;
+	this->RemoveFile(oldFile->GetFileType(), fileId);
+	oldFile = NULL;
+	this->AddFile(newFileType, fileId, buffer, bufferSize);
+	free(buffer);
+	buffer = NULL;
+	return true;
 }
 
 
