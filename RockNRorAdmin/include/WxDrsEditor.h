@@ -16,6 +16,7 @@
 #endif
 
 #include <wx/grid.h>
+#include <wx/filedlg.h>
 
 
 class WxDrsEditor : public wxFrame
@@ -37,11 +38,14 @@ private:
 	wxBoxSizer *filesArea;
 	wxBoxSizer *filesButtonsArea;
 	wxBoxSizer *filesGridArea;
+	wxBoxSizer *bottomArea;
 	wxGrid *fileTypesGrid;
 	wxGrid *filesGrid;
 	wxButton *btnAddFile;
 	wxButton *btnModifyFileInfo;
 	wxButton *btnRemoveFile;
+	wxButton *btnExportFile;
+	wxButton *btnSaveAsDrs;
 
 
 	void ConstructorInit();
@@ -53,6 +57,8 @@ private:
 	void OnBtnAddFile(wxCommandEvent& event);
 	void OnBtnModifyFileInfo(wxCommandEvent& event);
 	void OnBtnRemoveFile(wxCommandEvent& event);
+	void OnBtnExportFile(wxCommandEvent& event);
+	void OnBtnSaveAsDrs(wxCommandEvent& event);
 	wxDECLARE_EVENT_TABLE();
 
 };
@@ -61,7 +67,9 @@ enum
 {
 	ID_BtnAddFile = 1,
 	ID_BtnRemoveFile,
-	ID_BtnModifyFileInfo
+	ID_BtnModifyFileInfo,
+	ID_BtnExportFile,
+	ID_BtnSaveAsDrs
 };
 
 

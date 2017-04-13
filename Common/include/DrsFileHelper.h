@@ -97,12 +97,15 @@ static bool DrsSetOfFilesHasLowerRankThan(DrsSetOfIncludedFiles *first, DrsSetOf
 }
 
 
+// Main handler to manipulate DRS files.
+// Only 1 DRS file can be handled at once by 1 DrsFileHelper object.
+// fileId is unique: DrsFileHelper does not allow to contain duplicate IDs.
 class DrsFileHelper {
 public:
 	DrsFileHelper();
 	~DrsFileHelper();
 
-	const int maxAllowedTableCount = 20; // Higher value will raise an exception
+	const int maxAllowedTableCount = 20; // Max number of file types. Higher value will raise an exception
 	const bool useDefaultCopyright = true; // Use standard DRS files copyright string. Turtle pack does not support other strings.
 
 	// Internal data representing a (virtual) DRS file content
@@ -150,9 +153,14 @@ public:
 	// Get string representation of errors that happened in last operation
 	string GetLastErrors() const { return this->errorLog; }
 
+	// Get string representation of information messages from last operation
 	string GetLastInfos() const { return this->infoLog; }
 
-	void TestCreateDrs(string filename);
+	// Save internal data as a DRS file
+	void ExportToDrsFile(string filename);
+
+	// Save an included file as...
+	bool ExportIncludedFile(long int fileId, string filename);
 
 private:
 	size_t fileTotalSize;

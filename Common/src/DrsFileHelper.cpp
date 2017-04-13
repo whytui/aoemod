@@ -520,33 +520,13 @@ bool DrsFileHelper::ReadDrsFile(string filename) {
 }
 
 
-void DrsFileHelper::TestCreateDrs(string filename) {
+// Save internal data as a DRS file
+void DrsFileHelper::ExportToDrsFile(string filename) {
 	this->errorLog = "";
-	if (CheckFileExistence(filename.c_str())) {
-		this->errorLog += "File already exists\r\n";
-		return;
-	}
-
-
-	//TEST data
-	this->ResetCurrentWorkingSet();
-	STRUCT_DRS_FILE_TYPE slpType;
-	slpType.SetFromDword(DRS_FILE_TYPE_DWORD::DFT_SLP);
-	//this->AddFile(DRS_FILE_TYPE_DWORD::DFT_SLP, 42, "F:\\tmpaoe\\output\\CROR_NB.SLP");
-	//this->AddFile(DRS_FILE_TYPE_DWORD::DFT_SLP, 43, "F:\\tmpaoe\\output\\CROR_NB2.SLP");
-	this->AddFile(slpType, 15000, "F:\\tmpaoe\\output\\_\\15000.slp")->myOrderIndex = 2;
-	this->AddFile(slpType, 15001, "F:\\tmpaoe\\output\\_\\15001.slp")->myOrderIndex = 4;
-	this->AddFile(slpType, 15002, "F:\\tmpaoe\\output\\_\\15002.slp")->myOrderIndex = 3;
-	this->AddFile(slpType, 15003, "F:\\tmpaoe\\output\\_\\15003.slp")->myOrderIndex = 5;
-	this->AddFile(slpType, 12345, "F:\\tmpaoe\\output\\_\\12345.slp")->myOrderIndex = 1;
-
-	//DrsSetOfIncludedFiles *slpFilesSet = this->GetFileTypeInfo(DRS_FILE_TYPE_DWORD::DFT_SLP);
-
-	// TEST sort
-	//this->currentDrsWorkingSet.sort(DrsSetOfFilesHasLowerRankThan);
-	//this->GetFileTypeInfo(DRS_FILE_TYPE_DWORD::DFT_SLP)->myFiles.sort(DrsIncludedFileHasLowerRankThan);
-
-
+	//if (CheckFileExistence(filename.c_str())) {
+		//this->errorLog += "File already exists\r\n";
+		//return;
+	//}
 
 	try {
 		this->FileOpen(filename, false);
@@ -556,8 +536,8 @@ void DrsFileHelper::TestCreateDrs(string filename) {
 	}
 	string result = "";
 
-	/* Pre-compute some sizes/offsets */
-	int drsTableSizeOf = sizeof(STRUCT_DRS_TABLE);
+	// Pre-compute some sizes/offsets
+	int drsTableSizeOf = sizeof(STRUCT_DRS_TABLE); // sizeof(STRUCT_DRS_TABLE)
 	int drsTablesInfoSizeOf = sizeof(STRUCT_DRS_TABLE_DATA);
 	int drsTabCount = this->currentDrsWorkingSet.size(); // Nb of file types
 	long int drsTablesSizeInBytes = drsTableSizeOf * drsTabCount;
@@ -659,3 +639,18 @@ void DrsFileHelper::TestCreateDrs(string filename) {
 	this->FileClose();
 }
 
+
+// Save an included file as...
+bool DrsFileHelper::ExportIncludedFile(long int fileId, string filename) {
+	DrsIncludedFile *fileObj = this->FindFileWithId(fileId);
+	if (!fileObj) { return false; }
+	if ((fileObj->dataSize <= 0) || (fileObj->rawData == NULL)) { return false; }
+	if (filename.empty()) { return false; }
+	FILE *file;
+	if (fopen_s(&file, filename.c_str(), "wb") != 0) {
+		return false;
+	}
+	size_t writtenBytes = fwrite(fileObj->rawData, 1, fileObj->dataSize, file);
+	fclose(file);
+	return (writtenBytes == fileObj->dataSize);
+}

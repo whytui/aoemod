@@ -622,36 +622,6 @@ void WxMainForm::OpenDrs() {
 
 void WxMainForm::CreateDrs() {
 	WxDrsEditor *e = new WxDrsEditor(this, _T("DRS editor"), wxSize(800, 600), "");
-	//e->SetOutputDrsFilename();
 	e->Show(true);
-	return;
-
-	std::wstring wTitle = _T("Please select the directory where to create a DRS file");
-	wxDirDialog *dirDialog = new wxDirDialog(this, wTitle, wxEmptyString);
-	dirDialog->SetPath(this->e_api->GetFileName());
-	bool success = dirDialog->ShowModal() == wxID_OK;
-	wxString dir = dirDialog->GetPath();
-	success = success && !dir.empty();
-	delete dirDialog;
-	if (!success) { 
-		SetStatusText(_T("DRS file creation cancelled")); 
-		return;
-	}
-
-	std::wstring dirname = dir;
-
-	wxString response = wxGetTextFromUser(_T("Please type the file name (with .drs extension) to create"), _T("Create DRS file"), _T(".drs"), this);
-	if (response.IsEmpty()) { return; }
-	std::wstring wresponse = response;
-	std::wstring wfilename = dirname + std::wstring(_T("\\")) + wresponse;
-	if (CheckFileExistence(wfilename)) {
-		wxMessageBox(_T("The file already exists, please try again with another file name"), _T("Create DRS file"), wxOK | wxICON_WARNING, this);
-		SetStatusText(_T("DRS file creation cancelled"));
-		return;
-	}
-	std::string filename = narrow(wfilename);
-	DrsFileHelper drsHelper;
-	drsHelper.TestCreateDrs(filename);
-	this->txtLog->AppendText(drsHelper.GetLastErrors());
 }
 

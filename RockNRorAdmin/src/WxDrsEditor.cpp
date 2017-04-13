@@ -24,6 +24,7 @@ void WxDrsEditor::ConstructorInit() {
 	this->filesArea = new wxBoxSizer(wxHORIZONTAL);
 	this->filesGridArea = new wxBoxSizer(wxVERTICAL);
 	this->filesButtonsArea = new wxBoxSizer(wxVERTICAL);
+	this->bottomArea = new wxBoxSizer(wxHORIZONTAL);
 
 	/*this->fileTypesGrid = new wxGrid(this, -1, wxPoint(), wxSize(500, 200));
 	this->fileTypesGrid->CreateGrid(5, 3, wxGrid::wxGridSelectCells);
@@ -37,28 +38,36 @@ void WxDrsEditor::ConstructorInit() {
 	this->btnAddFile = new wxButton(this, ID_BtnAddFile, _T("Add a file"));
 	this->btnModifyFileInfo = new wxButton(this, ID_BtnModifyFileInfo, _T("Modify file info"));
 	this->btnRemoveFile = new wxButton(this, ID_BtnRemoveFile, _T("Remove file"));
+	this->btnExportFile = new wxButton(this, ID_BtnExportFile, _T("Export file (save as)"));
+	this->btnSaveAsDrs = new wxButton(this, ID_BtnSaveAsDrs, _T("Save as DRS file"));
 	Connect(ID_BtnAddFile, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnAddFile));
 	Connect(ID_BtnModifyFileInfo, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnModifyFileInfo));
 	Connect(ID_BtnRemoveFile, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnRemoveFile));
+	Connect(ID_BtnExportFile, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnExportFile));
+	Connect(ID_BtnSaveAsDrs, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnSaveAsDrs));
 
 	this->filesGridArea->Add(this->filesGrid);
 
 	this->filesButtonsArea->Add(this->btnAddFile);
 	this->filesButtonsArea->Add(this->btnModifyFileInfo);
 	this->filesButtonsArea->Add(this->btnRemoveFile);
+	this->filesButtonsArea->Add(this->btnExportFile);
 
 	this->filesArea->Add(this->filesGridArea);
 	this->filesArea->Add(this->filesButtonsArea);
 
+	this->bottomArea->Add(this->btnSaveAsDrs);
+
 	this->MainArea->Add(this->TopArea);
 	this->MainArea->Add(this->filesArea);
+	this->MainArea->Add(this->bottomArea, 0, wxALIGN_CENTER);
 
 	this->SetSizer(this->MainArea);
 }
 
 
 void WxDrsEditor::CreateFilesGrid() {
-	this->filesGrid->CreateGrid(0, 4, wxGrid::wxGridSelectionModes::wxGridSelectCells);
+	this->filesGrid->CreateGrid(0, 4, wxGrid::wxGridSelectionModes::wxGridSelectRows);
 	this->filesGrid->SetColLabelValue(0, _T("File Type")); // Set header label for column
 	this->filesGrid->SetColLabelValue(1, _T("File ID")); // Set header label for column
 	this->filesGrid->SetColLabelValue(2, _T("File size")); // Set header label for column
@@ -279,4 +288,44 @@ void WxDrsEditor::OnBtnRemoveFile(wxCommandEvent& event) {
 
 // Useful stuff: GoToCell(row, col)
 //this->filesGrid->GetCellValue();
+
+
+void WxDrsEditor::OnBtnExportFile(wxCommandEvent& event) {
+	int selRow = this->filesGrid->GetCursorRow();
+	if (selRow < 0) { return; }
+	
+	std::wstring wvalueFileId = this->filesGrid->GetCellValue(selRow, 1);
+	std::string valueFileId = narrow(wvalueFileId);
+	int fileId = StrToInt(valueFileId.c_str(), -1);
+
+	DrsIncludedFile *file = this->drsFileHelper.FindFileWithId(fileId);
+	if (!file) { return; }
+	if (!file->rawData || (file->dataSize <= 0)) { return; }
+
+	const char *ext =file->GetFileType().Get3LettersExtension().GetAsCharPtr();
+	wstring filter = _T("All files (*.*)|*.*|*.");
+	filter += widen(ext);
+	filter += _T("|*.");
+	filter += widen(ext);
+
+	wxFileDialog saveFileSel(this, _T("Save as"), wxEmptyString, wxEmptyString, filter.c_str(), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rs = saveFileSel.ShowModal();
+	if (rs != wxID_OK) { return; }
+	string fullPath = saveFileSel.GetPath();
+	if (fullPath.empty()) { return; }
+
+	// Actually save file
+	this->drsFileHelper.ExportIncludedFile(fileId, fullPath);
+}
+
+void WxDrsEditor::OnBtnSaveAsDrs(wxCommandEvent& event) {
+	int rowCount = this->filesGrid->GetRows();
+	if (rowCount <= 0) { return; }
+	wxFileDialog saveFileSel(this, _T("Save as"), wxEmptyString, wxEmptyString, _T("*.drs"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rs = saveFileSel.ShowModal();
+	if (rs != wxID_OK) { return; }
+	string fullPath = saveFileSel.GetPath();
+	if (fullPath.empty()) { return; }
+	this->drsFileHelper.ExportToDrsFile(fullPath);
+}
 
