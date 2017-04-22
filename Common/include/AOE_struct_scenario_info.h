@@ -94,13 +94,13 @@ namespace AOE_STRUCTURES {
 		//char unknown_1028[0x12C8 - 0x1028]; // 475C55
 		char fullPath_tmpBuildList[0xE0];
 		char unknown_1108[0x12C8 - 0x1108];
-		char *strategyFileNames[0x10]; // +12C8. Index=(playerId-1). Size = 0xE0.
+		char *strategyFileNames[0x10]; // +12C8. Index=(playerId-1). Size = 0xE0. Warning: file name is NOT empty when no explicit strategy has been set, because this name is "Random" or "Aléatoire"... Refer to content size==0.
 		char *cityPlanFileNames[0x10]; // +1308. Index=(playerId-1). Size = 0xE0.
 		char *personalityFileNames[0x10]; // +1348. Index=(playerId-1). Size = 0xE0.
 		char *strategyFileContent[0x10]; // +1388. pointer to AI file content. See in 408948 (read from a temp file, not from THIS). Is size limited to ~32ko ? Not sure
 		char *cityPlanFileContent[0x10]; // +13C8. Pointer to an array of bytes.
 		char *personalityFileContent[0x10]; // +1408. Pointer to an array of bytes. Note: The "END" keyword actually stops reading the file.
-		long int strategyFileSize[0x10]; // +1448.
+		long int strategyFileSize[0x10]; // +1448. If 0, then no "explicit" strategy has been set. The game will choose one (for RM) randomly at game start.
 		long int cityPlanFileSize[0x10]; // +1488.
 		long int personalityFileSize[0x10]; // +14C8.
 		char scenarioBeginningAnimationFileName[0xE0]; // +1508

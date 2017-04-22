@@ -80,6 +80,18 @@ void ApplyStrategyGenerationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	}
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
+	if (settings->isCampaign || settings->rgeGameOptions.isScenario && settings->ptrGlobalStruct) {
+		// Check if scenario provides an explicit strategy
+		AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = settings->ptrGlobalStruct->scenarioInformation;
+		long int playerIndex = player->playerId - 1;
+		if (scInfo->strategyFileSize[playerIndex] != 0) {
+			std::string msg = "Player #";
+			msg += std::to_string(player->playerId);
+			msg += " has an explicit strategy from scenario information.";
+			traceMessageHandler.WriteMessageNoNotification(msg.c_str());
+			return;
+		}
+	}
 	bool isDM = (settings->isDeathMatch != 0);
 	if ((!isDM && ROCKNROR::crInfo.configInfo.generateStrategyForRM) ||
 		(isDM && ROCKNROR::crInfo.configInfo.generateStrategyForDM)) {
