@@ -162,7 +162,8 @@ bool IsRockNRorPopulationBeginStratElem(AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT 
 AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetRockNRorMaxPopulationBeginStratElem(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
 
 // Dumps strategy to text format, for debugging.
-std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
+// If toAIFileFormat is true, output format is AI file format. Otherwise, it contains more information (for debugging)
+std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, bool toAIFileFormat);
 
 
 }

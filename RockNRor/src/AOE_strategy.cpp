@@ -1361,8 +1361,10 @@ AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetRockNRorMaxPopulationBeginStratElem(
 	return NULL;
 }
 
+
 // Dumps strategy to text format, for debugging.
-std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
+// If toAIFileFormat is true, output format is AI file format. Otherwise, it contains more information (for debugging)
+std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, bool toAIFileFormat) {
 	std::string result = "";
 	if (!buildAI || !buildAI->IsCheckSumValid()) {
 		return NULL;
@@ -1376,6 +1378,9 @@ std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	result += ") : ";
 	result += buildAI->strategyFileName;
 	result += newline;
+	if (toAIFileFormat) {
+		result += "// ";
+	}
 	result += "elemId Ctgry DAT_ID Name                           Actor Unitid InProgress Alive Attempts #created Retrains"
 #ifdef _DEBUG
 	" ptr"
@@ -1385,6 +1390,7 @@ std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &buildAI->fakeFirstStrategyElement;
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentStratElem = fakeFirstElem->next;
 	while (currentStratElem && (currentStratElem != fakeFirstElem)) {
+		bool lineToIgnore = false;
 		char category = ' ';
 		switch (currentStratElem->elementType) {
 		case TAIUnitClass::AIUCBuilding:
@@ -1419,27 +1425,64 @@ std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 		default:
 			break;
 		}
-		sprintf_s(buffer,
+		if (toAIFileFormat) {
+			if ((currentStratElem->elementType == TAIUnitClass::AIUCEnableAttack) ||
+				(currentStratElem->elementType == TAIUnitClass::AIUCLoadNewStrategy) ||
+				(currentStratElem->elementType == TAIUnitClass::AIUCStrategyCmd)) {
+				lineToIgnore = true;
+			}
+			long int retrains = currentStratElem->retrains;
+			char nameNoSpace[64];
+			strcpy_s(nameNoSpace, currentStratElem->unitName);
+			for (int i = 0; i < 64; i++) {
+				if (nameNoSpace[i] == ' ') {
+					nameNoSpace[i] = '_';
+				}
+				if (nameNoSpace[i] == 0) { break; }
+			}
+			if (retrains >= 1) {
+				sprintf_s(buffer, "%1c%-3ld      %-30s 1      %-3ld     %ld%s",
+					category, currentStratElem->unitDAT_ID,
+					// Note: amount = 1 hardcoded (do not regroup)
+					nameNoSpace,
+					currentStratElem->actor, // actor
+					retrains,
+					newline
+					);
+			} else {
+				sprintf_s(buffer, "%1c%-3ld      %-30s 1      %ld%s",
+					category, currentStratElem->unitDAT_ID,
+					nameNoSpace,
+					// Note: amount = 1 hardcoded (do not regroup)
+					currentStratElem->actor, // actor
+					newline
+					);
+			}
+		} else {
+			sprintf_s(buffer,
 #ifdef _DEBUG
-			"%03ld     "
+				"%03ld     "
 #endif
-			"%1c     %-3ld    %-30s %-3ld   %-6ld %-2ld         %-2ld    %-4ld     %-4ld     %-3ld"
+				"%1c     %-3ld    %-30s %-3ld   %-6ld %-2ld         %-2ld    %-4ld     %-4ld     %-3ld"
 #ifdef _DEBUG
-			"      0x%08lX"
+				"      0x%08lX"
 #endif
-			"%s",
+				"%s",
 #ifdef _DEBUG
-			currentStratElem->elemId,
+				currentStratElem->elemId,
 #endif
-			category, currentStratElem->unitDAT_ID,
-			currentStratElem->unitName, currentStratElem->actor, currentStratElem->unitInstanceId, currentStratElem->inProgressCount,
-			currentStratElem->aliveCount, currentStratElem->buildAttempts, currentStratElem->totalCount, currentStratElem->retrains, 
+				category, currentStratElem->unitDAT_ID,
+				currentStratElem->unitName, currentStratElem->actor, currentStratElem->unitInstanceId, currentStratElem->inProgressCount,
+				currentStratElem->aliveCount, currentStratElem->buildAttempts, currentStratElem->totalCount, currentStratElem->retrains,
 #ifdef _DEBUG
-			(unsigned long int)currentStratElem,
+				(unsigned long int)currentStratElem,
 #endif
-			newline
-			);
-		result += buffer;
+				newline
+				);
+		}
+		if (!lineToIgnore) {
+			result += buffer;
+		}
 		currentStratElem = currentStratElem->next;
 	}
 	return result;

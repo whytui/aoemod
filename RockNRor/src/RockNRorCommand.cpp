@@ -427,21 +427,36 @@ bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
 	}
 
 	if (!_strnicmp(command, "strat", 5)) {
-		command += 5;
-		int playerId = atoi(command);
-		if ((playerId == 0) && (*command != '0')) { playerId = -1; }
-		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
-		if (global && global->IsCheckSumValid() && (playerId > 0) && (playerId < global->playerTotalCount)) {
-			player = GetPlayerStruct(playerId);
+		bool useStandardAIFormat = false;
+		char firstCharAfter = command[5];
+		bool isValid = (firstCharAfter == 0) || ((firstCharAfter >= '0') && (firstCharAfter <= '9'));
+		if (!isValid && (firstCharAfter == ' ')) {
+			isValid = (!_strnicmp(command, "strat export", 12));
+			if (isValid) {
+				useStandardAIFormat = true;
+				firstCharAfter = command[12];
+				isValid = (firstCharAfter == 0) || ((firstCharAfter >= '0') && (firstCharAfter <= '9'));
+				command += 12;
+			}
+		} else {
+			command += 5;
 		}
-		if (player && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
-			std::string s = STRATEGY::ExportStrategyToText(&player->ptrAIStruct->structBuildAI);
-			traceMessageHandler.WriteMessage(s);
-			//this->OpenCustomDialogMessage(s.c_str(), 700, 550);
-			sprintf_s(outputBuffer, "Close this window to see strategy.");
+		if (isValid) {
+			int playerId = atoi(command);
+			if ((playerId == 0) && (*command != '0')) { playerId = -1; }
+			AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+			if (global && global->IsCheckSumValid() && (playerId > 0) && (playerId < global->playerTotalCount)) {
+				player = GetPlayerStruct(playerId);
+			}
+			if (player && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
+				std::string s = STRATEGY::ExportStrategyToText(&player->ptrAIStruct->structBuildAI, useStandardAIFormat);
+				traceMessageHandler.WriteMessage(s);
+				//this->OpenCustomDialogMessage(s.c_str(), 700, 550);
+				sprintf_s(outputBuffer, "Close this window to see strategy.");
+			}
+			return true;
 		}
-		return true;
 	}
 #ifdef _DEBUG
 
