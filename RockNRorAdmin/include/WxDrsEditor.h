@@ -45,20 +45,30 @@ private:
 	wxButton *btnModifyFileInfo;
 	wxButton *btnRemoveFile;
 	wxButton *btnExportFile;
+	wxButton *btnSortItemsById;
+	wxButton *btnMoveUp;
+	wxButton *btnMoveDown;
 	wxButton *btnSaveAsDrs;
+	wxButton *btnExitWithoutSaving;
 
 
 	void ConstructorInit();
 	void CreateFilesGrid();
 	void OpenDrsFile(string filename);
 	void RefillGrid();
+	// rowIndex must be in [0;rowcount]
+	void SetGridCursorPosition(int rowIndex);
 	// Returns true if valid info was provided
 	bool AskFileInfo(long int &inOutFileId, AOE_STRUCTURES::STRUCT_DRS_FILE_TYPE &inOutSlpType);
 	void OnBtnAddFile(wxCommandEvent& event);
 	void OnBtnModifyFileInfo(wxCommandEvent& event);
 	void OnBtnRemoveFile(wxCommandEvent& event);
 	void OnBtnExportFile(wxCommandEvent& event);
+	void OnBtnSortItemsById(wxCommandEvent& event);
 	void OnBtnSaveAsDrs(wxCommandEvent& event);
+	void OnBtnMoveUp(wxCommandEvent& event);
+	void OnBtnMoveDown(wxCommandEvent& event);
+	void OnBtnExitNoSave(wxCommandEvent& event);
 	wxDECLARE_EVENT_TABLE();
 
 };
@@ -69,7 +79,11 @@ enum
 	ID_BtnRemoveFile,
 	ID_BtnModifyFileInfo,
 	ID_BtnExportFile,
-	ID_BtnSaveAsDrs
+	ID_BtnSaveAsDrs,
+	ID_BtnExitNoSave,
+	ID_BtnSortItemsById,
+	ID_BtnMoveUp,
+	ID_BtnMoveDown
 };
 
 

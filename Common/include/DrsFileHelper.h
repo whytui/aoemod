@@ -162,6 +162,15 @@ public:
 	// Save an included file as...
 	bool ExportIncludedFile(long int fileId, string filename);
 
+	// Sort all files using IDs
+	void SortFilesUsingId();
+
+	// Move up a file in files list (updates index and position in list)
+	bool FileOrderMoveUp(long int fileId);
+
+	// Move down a file in files list (updates index and position in list)
+	bool FileOrderMoveDown(long int fileId);
+
 private:
 	size_t fileTotalSize;
 	FILE *myFile;

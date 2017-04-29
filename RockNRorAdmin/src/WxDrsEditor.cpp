@@ -39,12 +39,20 @@ void WxDrsEditor::ConstructorInit() {
 	this->btnModifyFileInfo = new wxButton(this, ID_BtnModifyFileInfo, _T("Modify file info"));
 	this->btnRemoveFile = new wxButton(this, ID_BtnRemoveFile, _T("Remove file"));
 	this->btnExportFile = new wxButton(this, ID_BtnExportFile, _T("Export file (save as)"));
+	this->btnMoveUp = new wxButton(this, ID_BtnMoveUp, _T("Move up selected file"));
+	this->btnMoveDown = new wxButton(this, ID_BtnMoveDown, _T("Move down selected file"));
+	this->btnSortItemsById = new wxButton(this, ID_BtnSortItemsById, _T("Sort files using IDs"));
 	this->btnSaveAsDrs = new wxButton(this, ID_BtnSaveAsDrs, _T("Save as DRS file"));
+	this->btnExitWithoutSaving = new wxButton(this, ID_BtnExitNoSave, _T("Exit without saving"));
 	Connect(ID_BtnAddFile, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnAddFile));
 	Connect(ID_BtnModifyFileInfo, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnModifyFileInfo));
 	Connect(ID_BtnRemoveFile, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnRemoveFile));
 	Connect(ID_BtnExportFile, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnExportFile));
+	Connect(ID_BtnMoveUp, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnMoveUp));
+	Connect(ID_BtnMoveDown, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnMoveDown));
+	Connect(ID_BtnSortItemsById, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnSortItemsById));
 	Connect(ID_BtnSaveAsDrs, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnSaveAsDrs));
+	Connect(ID_BtnExitNoSave, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnExitNoSave));
 
 	this->filesGridArea->Add(this->filesGrid);
 
@@ -52,11 +60,15 @@ void WxDrsEditor::ConstructorInit() {
 	this->filesButtonsArea->Add(this->btnModifyFileInfo);
 	this->filesButtonsArea->Add(this->btnRemoveFile);
 	this->filesButtonsArea->Add(this->btnExportFile);
+	this->filesButtonsArea->Add(this->btnMoveUp);
+	this->filesButtonsArea->Add(this->btnMoveDown);
+	this->filesButtonsArea->Add(this->btnSortItemsById);
 
 	this->filesArea->Add(this->filesGridArea);
 	this->filesArea->Add(this->filesButtonsArea);
 
 	this->bottomArea->Add(this->btnSaveAsDrs);
+	this->bottomArea->Add(this->btnExitWithoutSaving);
 
 	this->MainArea->Add(this->TopArea);
 	this->MainArea->Add(this->filesArea);
@@ -81,7 +93,12 @@ void WxDrsEditor::CreateFilesGrid() {
 
 
 void WxDrsEditor::RefillGrid() {
+	int selRow = this->filesGrid->GetCursorRow();
 	this->filesGrid->ClearGrid();
+	int oldRowIndex = this->filesGrid->GetRows(); // Note: header does not count
+	if (oldRowIndex > 0) {
+		this->filesGrid->DeleteRows(0, oldRowIndex, true);
+	}
 	for (auto it = this->drsFileHelper.currentDrsWorkingSet.begin(); it != this->drsFileHelper.currentDrsWorkingSet.end(); it++) {
 		DrsSetOfIncludedFiles *curSet = *it;
 		const char *extName = curSet->fileType.Get4LettersExtension().GetAsCharPtr();
@@ -96,6 +113,18 @@ void WxDrsEditor::RefillGrid() {
 			this->filesGrid->SetCellValue(newRowIndex, 3, curFile->localFileName);
 		}
 	}
+	this->SetGridCursorPosition(selRow);
+}
+
+
+// rowIndex must be in [0;rowcount]
+void WxDrsEditor::SetGridCursorPosition(int rowIndex) {
+	int rowCount = this->filesGrid->GetRows();
+	if (rowIndex < 0) { rowIndex = 0; }
+	if (rowIndex >= rowCount) { rowIndex = rowCount - 1; }
+	int selCol = this->filesGrid->GetCursorColumn();
+	this->filesGrid->SetGridCursor(rowIndex, selCol); // for actual "internal" position
+	this->filesGrid->SelectRow(rowIndex, false); // for display
 }
 
 
@@ -316,6 +345,47 @@ void WxDrsEditor::OnBtnExportFile(wxCommandEvent& event) {
 
 	// Actually save file
 	this->drsFileHelper.ExportIncludedFile(fileId, fullPath);
+}
+
+void WxDrsEditor::OnBtnExitNoSave(wxCommandEvent& event) {
+	this->Close();
+}
+
+void WxDrsEditor::OnBtnSortItemsById(wxCommandEvent& event) {
+	this->drsFileHelper.SortFilesUsingId();
+	this->RefillGrid();
+}
+
+void WxDrsEditor::OnBtnMoveUp(wxCommandEvent& event) {
+	int selRow = this->filesGrid->GetCursorRow();
+	if (selRow < 0) { return; }
+
+	// Retrieve data from grid
+	std::wstring wvalueFileId = this->filesGrid->GetCellValue(selRow, 1);
+	std::string valueFileId = narrow(wvalueFileId);
+	long int fileId = StrToInt(valueFileId.c_str(), -1);
+	if (fileId < 0) { return; }
+	if (this->drsFileHelper.FileOrderMoveUp(fileId)) {
+		this->RefillGrid();
+		selRow--;
+		this->SetGridCursorPosition(selRow);
+	}
+}
+
+void WxDrsEditor::OnBtnMoveDown(wxCommandEvent& event) {
+	int selRow = this->filesGrid->GetCursorRow();
+	if (selRow < 0) { return; }
+
+	// Retrieve data from grid
+	std::wstring wvalueFileId = this->filesGrid->GetCellValue(selRow, 1);
+	std::string valueFileId = narrow(wvalueFileId);
+	long int fileId = StrToInt(valueFileId.c_str(), -1);
+	if (fileId < 0) { return; }
+	if (this->drsFileHelper.FileOrderMoveDown(fileId)) {
+		this->RefillGrid();
+		selRow++;
+		this->SetGridCursorPosition(selRow);
+	}
 }
 
 void WxDrsEditor::OnBtnSaveAsDrs(wxCommandEvent& event) {

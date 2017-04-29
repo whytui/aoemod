@@ -654,3 +654,115 @@ bool DrsFileHelper::ExportIncludedFile(long int fileId, string filename) {
 	fclose(file);
 	return (writtenBytes == fileObj->dataSize);
 }
+
+// Sort all files using IDs
+void DrsFileHelper::SortFilesUsingId() {
+	// Collect pointers to all files
+	list<DrsIncludedFile*> allFiles;
+	for each (DrsSetOfIncludedFiles *ws in this->currentDrsWorkingSet)
+	{
+		for each (DrsIncludedFile *f in ws->myFiles)
+		{
+			allFiles.push_back(f);
+			f->myOrderIndex = f->fileId;
+		}
+	}
+	allFiles.sort(DrsIncludedFileHasLowerRankThan);
+	// Recompute consecutive ranks 1->n
+	int curIndex = 1;
+	for (auto it = allFiles.begin(); it != allFiles.end(); it++) {
+		(*it)->myOrderIndex = curIndex;
+		curIndex++;
+	}
+	// Now sort (update) each list (in each file category)
+	for each (DrsSetOfIncludedFiles *ws in this->currentDrsWorkingSet)
+	{
+		ws->myFiles.sort(DrsIncludedFileHasLowerRankThan);
+	}
+}
+
+
+// Move up a file in files list (updates index and position in list)
+bool DrsFileHelper::FileOrderMoveUp(long int fileId) {
+	DrsIncludedFile *f = this->FindFileWithId(fileId);
+	if (!f) { return false; }
+	DrsSetOfIncludedFiles *drsSet = this->GetFileTypeInfo(f->GetFileType());
+	if (!drsSet) { return false; }
+	DrsIncludedFile *previous = NULL;
+	for (auto it = drsSet->myFiles.begin(); it != drsSet->myFiles.end(); it++) {
+		if ((*it)->fileId == fileId) {
+			DrsIncludedFile *curToExchange = *it;
+			if (previous == NULL) {
+				return false; // Can't move up, it is already first
+			}
+			// Exchange positions (and indexes)
+			long int tmpIndex = previous->myOrderIndex;
+			previous->myOrderIndex = curToExchange->myOrderIndex;
+			curToExchange->myOrderIndex = tmpIndex;
+			// exchange positions: in fact, keep pointers, exchange data so we don't have to modify the list
+			DrsIncludedFile tmpSwap = DrsIncludedFile(*previous);
+			previous->dataSize = curToExchange->dataSize;
+			previous->fileId = curToExchange->fileId;
+			previous->localFileName = curToExchange->localFileName;
+			previous->myOrderIndex = curToExchange->myOrderIndex;
+			previous->rawData = curToExchange->rawData;
+			previous->tmpOffsetInFile = curToExchange->tmpOffsetInFile;
+			curToExchange->dataSize = tmpSwap.dataSize;
+			curToExchange->fileId = tmpSwap.fileId;
+			curToExchange->localFileName = tmpSwap.localFileName;
+			curToExchange->myOrderIndex = tmpSwap.myOrderIndex;
+			curToExchange->rawData = tmpSwap.rawData;
+			curToExchange->tmpOffsetInFile = tmpSwap.tmpOffsetInFile;
+			tmpSwap.rawData = NULL; // Make sure destructor won't free the memory !!! We only used it as a temporary container.
+			tmpSwap.dataSize = 0;
+			tmpSwap.fileId = -1;
+			return true;
+		}
+		previous = *it;
+	}
+	return false;
+}
+
+
+// Move down a file in files list (updates index and position in list)
+bool DrsFileHelper::FileOrderMoveDown(long int fileId) {
+	DrsIncludedFile *f = this->FindFileWithId(fileId);
+	if (!f) { return false; }
+	DrsSetOfIncludedFiles *drsSet = this->GetFileTypeInfo(f->GetFileType());
+	if (!drsSet) { return false; }
+	DrsIncludedFile *previousIfMatching = NULL;
+	for (auto it = drsSet->myFiles.begin(); it != drsSet->myFiles.end(); it++) {
+		// If previous "matching" one is set, then current file is "next" file, the one to exchange with "previousIfMatching"
+		if (previousIfMatching != NULL) {
+			DrsIncludedFile *previous = previousIfMatching;
+			DrsIncludedFile *curToExchange = *it;
+			// Exchange positions (and indexes)
+			long int tmpIndex = previous->myOrderIndex;
+			previous->myOrderIndex = curToExchange->myOrderIndex;
+			curToExchange->myOrderIndex = tmpIndex;
+			// exchange positions: in fact, keep pointers, exchange data so we don't have to modify the list
+			DrsIncludedFile tmpSwap = DrsIncludedFile(*previous);
+			previous->dataSize = curToExchange->dataSize;
+			previous->fileId = curToExchange->fileId;
+			previous->localFileName = curToExchange->localFileName;
+			previous->myOrderIndex = curToExchange->myOrderIndex;
+			previous->rawData = curToExchange->rawData;
+			previous->tmpOffsetInFile = curToExchange->tmpOffsetInFile;
+			curToExchange->dataSize = tmpSwap.dataSize;
+			curToExchange->fileId = tmpSwap.fileId;
+			curToExchange->localFileName = tmpSwap.localFileName;
+			curToExchange->myOrderIndex = tmpSwap.myOrderIndex;
+			curToExchange->rawData = tmpSwap.rawData;
+			curToExchange->tmpOffsetInFile = tmpSwap.tmpOffsetInFile;
+			tmpSwap.rawData = NULL; // Make sure destructor won't free the memory !!! We only used it as a temporary container.
+			tmpSwap.dataSize = 0;
+			tmpSwap.fileId = -1;
+			return true;
+		}
+		if ((*it)->fileId == fileId) {
+			previousIfMatching = *it;
+		}
+	}
+	return false;
+}
+
