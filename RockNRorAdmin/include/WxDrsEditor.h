@@ -28,10 +28,15 @@ public:
 	//RockNRorAdmin_UI *GetMainUIObject() { return this->objAOE; }
 
 	void SetOutputDrsFilename(std::string filename);
+
+	std::string GetOpenDrsOutputInfo() const { return this->openDrsOutputInfo; }
+	std::string GetOpenDrsOutputError() const { return this->openDrsOutputError; }
 private:
 	//RockNRorAdmin_UI *objAOE;
 	DrsFileHelper drsFileHelper;
 	std::string outputDrsFilename;
+	std::string openDrsOutputInfo;
+	std::string openDrsOutputError;
 
 	wxBoxSizer *MainArea;
 	wxBoxSizer *TopArea;

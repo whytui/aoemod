@@ -17,6 +17,8 @@ WxDrsEditor::~WxDrsEditor() {
 
 void WxDrsEditor::ConstructorInit() {
 	this->outputDrsFilename = "";
+	this->openDrsOutputError = "";
+	this->openDrsOutputInfo = "";
 
 	//this->SetWindowStyle(wxDEFAULT_DIALOG_STYLE | wxMAXIMIZE_BOX | wxRESIZE_BORDER | wxMINIMIZE_BOX); // wxDIALOG_EX_CONTEXTHELP
 	this->MainArea = new wxBoxSizer(wxVERTICAL);
@@ -131,9 +133,11 @@ void WxDrsEditor::SetGridCursorPosition(int rowIndex) {
 void WxDrsEditor::OpenDrsFile(string filename) {
 	if (filename.empty()) { return; }
 	bool res = this->drsFileHelper.ReadDrsFile(filename);
-	//std::string msg = drsHelper.GetLastInfos();
+	this->openDrsOutputInfo = this->drsFileHelper.GetLastInfos();
 	if (!res) {
-		// drsHelper.GetLastErrors()
+		this->openDrsOutputError = this->drsFileHelper.GetLastErrors();
+	} else {
+		this->openDrsOutputError = "";
 	}
 	this->RefillGrid();
 }

@@ -605,18 +605,11 @@ void WxMainForm::OpenDrs() {
 	std::wstring wfilename = openfilename(_T("DRS Files (*.drs)\0*.drs\0"));
 	if (wfilename.empty()) { return; }
 	std::string filename = narrow(wfilename);
-	// TEST 1
-	DrsFileHelper drsHelper;
-	bool res = drsHelper.ReadDrsFile(filename);
-	std::string msg = drsHelper.GetLastInfos();
-	this->txtLog->AppendText(std::string("\r\nDRS file: ") + filename + std::string("\r\n"));
-	if (!res) {
-		this->txtLog->AppendText(drsHelper.GetLastErrors());
-	}
-	this->txtLog->AppendText(msg);
 
-	// TEST 2
 	WxDrsEditor *e = new WxDrsEditor(this, _T("DRS editor"), wxSize(800, 600), filename);
+	this->txtLog->AppendText(std::string("\r\nDRS file: ") + filename + std::string("\r\n"));
+	this->txtLog->AppendText(e->GetOpenDrsOutputError());
+	this->txtLog->AppendText(e->GetOpenDrsOutputInfo());
 	e->Show(true);
 }
 
