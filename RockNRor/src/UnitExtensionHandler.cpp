@@ -45,7 +45,7 @@ bool UnitExtensionHandler::ReallocArrayUsingGameGlobal() {
 	if ((this->currentAllocatedElemCount > 0) && (this->allUnitExtensions != NULL)) {
 		// Copy old array to new one. New one is bigger so we are safe here.
 		// Warning: constructor is not called here !
-		memcpy_s(newArray, newElemCount * sizeof(UnitExtension), this->allUnitExtensions, this->currentAllocatedElemCount);
+		memcpy_s(newArray, newElemCount * sizeof(UnitExtension), this->allUnitExtensions, this->currentAllocatedElemCount * sizeof(UnitExtension));
 	}
 	// Call constructor (reset, actually) on *new* slots (only)
 	for (int i = this->currentAllocatedElemCount; i < newElemCount; i++) {

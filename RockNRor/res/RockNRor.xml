@@ -98,7 +98,7 @@
 	<!-- Set to nonzero to enable AI improvements (an int value: in the future, we might define several improvement levels) -->
 	<improveAI value="1"/>
 	<!-- Default=0. Set to 1 for debugging purpose only. Only useful when improveAI>0.
-	If set, players 5-8 benefit from AI improvements, players 1-4 will use standard game behaviour. Run games with 8 players to compare ! -->
+	If set, players 1,3,5,7 benefit from AI improvements, players 2,4,6,8 will use standard game behaviour. You can use "allai" cheat code to test it ! -->
 	<testCompareAI enable="0"/>
 
 	<!-- tacticalAI.updateDelay replaces SNScalingFrequency but it is expressed in seconds, not minutes. An integer value. -->

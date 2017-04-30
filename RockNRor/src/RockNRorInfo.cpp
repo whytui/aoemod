@@ -451,7 +451,7 @@ static bool _DEBUG_improveThisPlayer(int playerId) {
 bool ROCKNROR::IsImproveAIEnabled(int playerId) {
 	bool useImprovement = (ROCKNROR::crInfo.configInfo.improveAILevel > 0);
 	if (ROCKNROR::crInfo.configInfo.enableTestCompareAI) {
-		useImprovement &= (playerId >= 5);
+		useImprovement &= ((playerId & 1) == 1);
 	}
 #ifdef _DEBUG
 	useImprovement &= _DEBUG_improveThisPlayer(playerId);
