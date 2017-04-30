@@ -99,6 +99,12 @@ void LocalizationHandler::SetString(unsigned short int stringId, const char *tex
 	int length = strlen(text);
 	char *s = (char*)malloc(length + 1);
 	strcpy_s(s, length + 1, text);
+	for (int i = 0; i < length - 1; i++) {
+		if ((s[i] == '\\') && (s[i + 1] == 'n')) {
+			s[i] = '\r';
+			s[i+1] = '\n';
+		}
+	}
 	this->localizedStrings[stringId] = s;
 }
 

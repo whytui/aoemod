@@ -10,7 +10,7 @@ Installation
 Notes:
 - Several options can be configured in RockNRor\RockNRor.xml, like conversion resistances.
 - Select a different empires.dat file to use in RockNRor\RockNRor.xml.
-- Custom civilizations can be configured in RockNRor\RockNRor.xml.
+- Custom civilizations can be configured in RockNRor\RockNRor_civs.xml.
 => Edit XML files with a text editor (with syntax coloration if possible, for example Notepad++)
 - Use RockNRorAdmin to change other options if you want. Ths installation process should already have patched RockNRor-required options (including ROR_API).
 - RockNRor will also work if the EXE you patch is not named EmpiresX.exe (for example, Copy of EmpiresX.exe).
@@ -156,7 +156,7 @@ Troubleshooting:
 RockNRor on other AOE versions:
 The fully supported version is ROR 1.0a. However, some features are supported in AOE1.0b, AOE1.0c, ROR1.0b too. ROR_API 1.0.1.0 or above is required.
 
-RockNRor on Linux:
+RockNRor on Linux (not guaranteed !!!):
 Before running RockNRorAdmin/RockNRor on linux using wine, some configuration is needed.
 Install and run winetricks
 Select the default wineprefix

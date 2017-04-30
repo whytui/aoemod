@@ -162,7 +162,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unused_3FC; // +3FC. Always BAADFOOD ?
 		unsigned long int unused_400; // +400. Always BAADFOOD ?
 		char *landAndWaterIdentifiersArray; // +404: array of mapSizeX*mapSizeY bytes. -1=not initialized. Value=continent/island/lake/sea identifier for current tile. Each ID represents a zone of the map.
-		char **landAndWaterIdentifiersCols; // +408: pointers to cols from +404 array. Array size = mapSizeX*4 (dwords). the array[x] = position in bytesarray
+		char **landAndWaterIdentifiersCols; // +408: pointers to cols from +404 array. Array size = mapSizeX*4 (dwords). the array[x] = position in bytesarray (+404)
 		char unknown_40C[0xFF]; // +40C. Default values=-1
 		char unknown_50B; // unused ?
 		unsigned long int unknown_50C; // +50C. Always BAADFOOD ?

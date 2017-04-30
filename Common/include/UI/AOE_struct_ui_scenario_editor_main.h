@@ -31,7 +31,8 @@ namespace AOE_STRUCTURES
 		long int unknown_04AC; // default 2
 		unsigned long int unknown_04B0;
 		unsigned long int unknown_04B4;
-		long int selectedPlayerId; // +4B8. Default 1
+		short int selectedPlayerId; // +4B8. Default 1
+		short int unkknown_04BA;
 		unsigned long int unknown_04BC;
 		// 0x4C0
 		char unknown_04C0; // default 0

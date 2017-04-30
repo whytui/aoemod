@@ -33,7 +33,7 @@ plugin is active.
 Custom
 [42089] // ERROR : "Could not find" (beginning of message)
 ERROR : Could not find
-[42090] // ERROR : "file. data2\\empires.dat will be used instead." (end of message)
+[42090] // ERROR : "file. data2\empires.dat will be used instead." (end of message)
 file. data2\empires.dat will be used instead.
 
 // *** RockNRor Options popup ***
@@ -186,7 +186,7 @@ Get Personality (read only)
 [42075]
 Gold victory condition
 [42076]
-If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select \"custom\" in general victory conditions tab.
+If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select "custom" in general victory conditions tab.
 [42077]
 Please type X and Y map size
 [42078]

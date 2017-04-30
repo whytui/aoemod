@@ -2537,22 +2537,22 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 			assert(player && player->IsCheckSumValid());
 			if (player && player->IsCheckSumValid()) {
 				_asm {
-					MOV ECX, player
-					MOV EDX, 0x45DB40 // clearSelectedUnits
-					CALL EDX
+					MOV ECX, player;
+					MOV EDX, 0x45DB40; // clearSelectedUnits
+					CALL EDX;
 				}
 			}
 		}
 		// Generate "random" map (with or without seed)
 		_asm {
-			PUSH playerCount
-			PUSH mapType
-			PUSH sizeX
-			PUSH sizeY
-			PUSH global
-			MOV ECX, mapInfo
-			MOV EDX, DS:[ECX]
-			CALL DS:[EDX+0x28]
+			PUSH playerCount;
+			PUSH mapType;
+			PUSH sizeX;
+			PUSH sizeY;
+			PUSH global;
+			MOV ECX, mapInfo;
+			MOV EDX, DS:[ECX];
+			CALL DS:[EDX+0x28];
 		}
 
 		settings->scenarioMapSeed = previousScenarioSeed;
@@ -2562,8 +2562,8 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 		bool test = scEditor->map_edt_seed_whenReadOnly->IsCheckSumValid();
 		AOE_METHODS::UI_BASE::SetLabelText(scEditor->map_edt_seed_whenReadOnly, bufferSeed);
 		_asm {
-			MOV EDX, 0x52605D
-			CALL EDX // Recalculate pseudo random
+			MOV EDX, 0x52605D;
+			CALL EDX; // Recalculate pseudo random
 		}
 	}
 
@@ -2572,22 +2572,22 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 	long int posY = sizeY / 2;
 	float fposX = (float)posX;
 	float fposY = (float)posY;
-	// Mange player screen position
+	// Manage player screen position
 	for (int playerId = 0; playerId < 9; playerId++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		assert(player && player->IsCheckSumValid());
 		if (player && player->IsCheckSumValid()) {
 			_asm {
-				PUSH posX
-				PUSH posY
-				MOV EDX, 0x45D310
-				MOV ECX, player
-				CALL EDX
-				PUSH fposX
-				PUSH fposY
-				MOV EDX, 0x45D330
-				MOV ECX, player
-				CALL EDX
+				PUSH posX;
+				PUSH posY;
+				MOV EDX, 0x45D310;
+				MOV ECX, player;
+				CALL EDX;
+				PUSH fposX;
+				PUSH fposY;
+				MOV EDX, 0x45D330;
+				MOV ECX, player;
+				CALL EDX;
 			}
 		}
 	}
@@ -2598,21 +2598,21 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 		if (player && player->IsCheckSumValid()) {
 			AOE_STRUCTURES::STRUCT_PLAYER_NEW_EXPLORED_TILES *unknown_struct = &player->newExploredTilesForInfAI;
 			_asm {
-				MOV EDX, 0x45EB40 // resetArray()
-				MOV ECX, unknown_struct
-				CALL EDX
-				MOV EDX, 0x45E940 // player.SetVisibilityInfoOn?()
-				MOV ECX, player
-				CALL EDX
+				MOV EDX, 0x45EB40; // resetArray()
+				MOV ECX, unknown_struct;
+				CALL EDX;
+				MOV EDX, 0x45E940; // player.SetVisibilityInfoOn?()
+				MOV ECX, player;
+				CALL EDX;
 			}
 		}
 	}
 	AOE_STRUCTURES::STRUCT_UI_LABEL *bigLbl = scEditor->map_lbl_bigGeneratingMapNotification;
 	assert(bigLbl && bigLbl->IsCheckSumValid());
 	_asm {
-		MOV EDX, 0x4901B0 // UIscenarioEditor.refreshDiamondMap()
-		MOV ECX, scEditor
-		CALL EDX
+		MOV EDX, 0x4901B0; // UIscenarioEditor.refreshDiamondMap()
+		MOV ECX, scEditor;
+		CALL EDX;
 	}
 	AOE_METHODS::UI_BASE::ShowUIObject(bigLbl, false); // Remove the "generating" label
 	return true;
