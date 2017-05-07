@@ -619,6 +619,10 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 // Triggered when a unit sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
 // Remark: feeding infAI list is handled in parent calls.
 // This method is called only if IsImproveAIEnabled(...) is true.
+// Note: the units that are detected via this event are limited (cf 0x413108)
+// - unit.status <=2 (the temp results contains other units(?), but this is filtered in 0x41312B before sending EVENT_PLAYER_SEE_UNIT.
+// - neutral and enemy units only (so, not gaia !)
+// - unit.definition.unitAIType is one of the "important" AItypes defined in actorUnit.activity.importantAITypes
 void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit) {
 	if (!actorUnit || !seenUnit || !player) { return; }
 	if ((actorUnit->unitStatus != GAME_UNIT_STATUS::GUS_2_READY) || (seenUnit->unitStatus > GAME_UNIT_STATUS::GUS_2_READY)) { return; }
@@ -633,7 +637,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 		return;
 	}
 
-	// Not applicable to priests/siege weapons (let siege attack buildings ?)
+	// Not applicable to siege weapons (let siege attack buildings ?)
 	if (seenUnitDef->unitAIType == TribeAIGroupSiegeWeapon) { return; }
 
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -700,6 +704,13 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 					currentTargetIsImportant = true;
 				}
 			}
+			// A last validation : is the unit reachable ? We check this last because it uses pathfinding
+			if (!currentTargetIsImportant) {
+				float actorMaxRange = AOE_METHODS::UNIT::GetMaxRange(activity->ptrUnit);
+				// set currentTargetIsImportant to true if seen unit can't be reached (force ignore seen unit)
+				currentTargetIsImportant = !AOE_METHODS::UNIT::CanMoveToTarget(activity->ptrUnit, seenUnit->unitInstanceId, actorMaxRange, false);
+			}
+
 			if (!currentTargetIsImportant) {
 				if (activity->orderQueueSize == 0) {
 					// This should not happen as order queue is generally initialized with non-empty array !
@@ -755,6 +766,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 void OnPriestSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit) {
 	// TODO: evasive manoeuvre if faith is <100%.. Complex (take into account all allies and enemies)
 	// TODO: heal immobile allied nearby target ?
+	// TODO: other unit being heled: do not move away (using same event ?)
 }
 
 

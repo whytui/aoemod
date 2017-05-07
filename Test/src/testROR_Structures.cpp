@@ -25,7 +25,7 @@ static void _assert_member_offset(void *objPtr, int offset, void *memberPtr, wch
 
 
 // This is too big to be used in stack
-static AOE_STRUCTURES::STRUCT_UNKNOWN_MAP_DATA_F04C umapF04C;
+static AOE_STRUCTURES::STRUCT_UNKNOWN_PATH_FINDING umapF04C;
 static AOE_STRUCTURES::STRUCT_GAME_MAP_INFO gmapinfo;
 static AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN scEditorUI;
 

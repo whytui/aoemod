@@ -63,6 +63,10 @@ namespace COMBAT {
 	// Triggered when a unit sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
 	// Remark: feeding infAI list is handled in parent calls.
 	// This method is called only if IsImproveAIEnabled(...) is true.
+	// Note: the units that are detected via this event are limited (cf 0x413108)
+	// - unit.status <=2 (the temp results contains other units(?), but this is filtered in 0x41312B before sending EVENT_PLAYER_SEE_UNIT.
+	// - neutral and enemy units only (so, not gaia !)
+	// - unit.definition.unitAIType is one of the "important" AItypes defined in actorUnit.activity.importantAITypes
 	void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit);
 
 	// Triggered when a priest sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle

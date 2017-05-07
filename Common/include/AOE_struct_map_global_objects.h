@@ -76,13 +76,18 @@ namespace AOE_STRUCTURES {
 
 
 
+#define CHECKSUM_UNKNOWN_PATH_FINDING 0x00544CF0
 	// Included structure in addresses 0x583BC8 and 0x6A1CC0 (open paths and traversed paths ?)
-	// Constuctor 00458570
+	// 0x583BC8 seems to be used for "group" methods (tacAI, infAI), 0x6A1CC0 for individual (unit/activity methods) ?? For perf/cache reasons? Other?
+	// For canMoveTo(unit+194): one of the few that use 583BC0=>0x4C00D3, 0x4C019F,4C0272,4C0B35 in infAI.findattacktarget + calls in tacai.taskactivesoldiers(eg 0x4D4E85) + tacai.reactevent(eg 0x4D8823) + findgathertarget. why ? Arg5-6 always -1. arg3=0?
+	// for activity (unit-level) methods, uses arg4=0=>6A1CC0
+	// Constuctor 0x458570
 	// This structure is for path finding.
 	// Note: it seems map is split into tiles (1 unit of position = 1 tile) but tiles are split into 4 "quarters".
 	// In this struct, arrays indices are "quarter tiles". (use posX*4 for example).
 	// Arrays value are binary (1 bit of one elementary position), which adds more precision under tile/quarter tile level ?
-	class STRUCT_UNKNOWN_MAP_DATA_F04C {
+	// 0x458930 = xxx.calcPathForMove?(srcPosY, srcPosX, destPosY, destPosX, ptrActorUnit, f_range, targetUnitId, doActualMove(=!justCheck),arg9... , arg13, playerId???, unitClass???)
+	class STRUCT_UNKNOWN_PATH_FINDING {
 	public:
 		unsigned long int checksum; // F0 4C 54 00
 		long int mapArraySizeY;
@@ -130,13 +135,14 @@ namespace AOE_STRUCTURES {
 		long int actorMinPosX_offset; // +11DC98. (actorPosX - sizeRadius)*4 ?
 		long int actorMaxPosY_offset; // +11DC9C. (actorPosY + sizeRadius)*4 ?
 		long int actorMaxPosX_offset; // +11DCA0. (actorPosX + sizeRadius)*4 ?
-		char unknown_11DCA4[0x11DCC4 - 0x11DCA4];
+		char unknown_11DCA4[0x11DCC0 - 0x11DCA4];
+		long int unknown_11DCC0_counter; // +11DCC0. INC in 0x45A4D0
 		long int unknown_11DCC4_counter; // +11DCC4. INC in 0x45A4E0
 		long int unknown_11DCC8_distance_offset; // Init=-1. Distance*4 between ? Total distance*4 (in straight line) between src and dest ?
 		char unknown_11DCCC[0x11DCD8 - 0x11DCCC];
 		char unknown_11DCD8_resetCounter; // +11DCD8. A counter, +=8 at each pathFinding. When 0xF0 (30 iterations), reset and resets mapData. Value is similar to +C array
 		char unknown_11DCD9[3];
-		long int unknown_11DCDC_unitClass; // +11DCDC. arg15 of 00458930 call. Seen 0x1B (walls????). Used in 459AD4
+		long int unknown_11DCDC_unitClass; // +11DCDC. arg15 of 00458930 call. Seen 0x1B (walls????). Used in 0x459AD4
 		// 0x11DCE0
 		long int unknown_11DCE0; // arg14 of 00458930 call. A playerId ?
 		STRUCT_MANAGED_ARRAY unknown_11DCE4; // +11DCE4 = array of unit IDs
@@ -147,7 +153,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_11DCF0; // +11DCF0 = allocated number of elems in unknown_11DCE4*/
 		long int unknown_11DCF4; // seen 1
 		// ...
-		bool IsCheckSumValid() { return this->checksum == 0x00544CF0; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UNKNOWN_PATH_FINDING; }
 	};
 
 

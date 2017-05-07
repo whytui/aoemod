@@ -178,7 +178,7 @@ namespace AOE_STRUCTURES {
 	// +0x184 =? unit.transport(float posY, posX, posZ, force?)
 	// +0x188 =? unit.transport(float posY, posX, posZ, force?)
 	// +0x18C = unit.stopAction()
-	// +0x194 = unit.CanAttackUnit???(targetUnitId, fRange, arg3, arg4, arg5, arg6)
+	// +0x194 = unit.CanMoveTo(targetUnitId, fRange, arg3, arg4, arg5, arg6) arg4=(0=use0x6A1CC0, 1=use0x583BC8). For types non-movable(non 30+), returns 0 !
 	// +0x198 = CanMoveTo(posY,posX,posZ,fMaxRange,targetUnitId,pArg6_float,arg7_size?,targetPlayerId,someUnitClass) ? returns 1 if ok. someUnitClass=1B=walls
 	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
 	// +0x1A4 = DoMove?(posY,posX,posZ,fMaxRange,targetUnitId, pArg6_float,arg7_size,arg8,arg9,targetPlayerId,someUnitClass)
@@ -362,7 +362,9 @@ namespace AOE_STRUCTURES {
 		}*/
 
 		// Returns true if unit can move to target. Still not well known
-		long int CanMoveTo(long int targetUnitId, float maxRange, long int arg3, long int arg4, long int arg5, long int arg6) {
+		// arg3 is always 0, arg5/6 are always -1 (?)
+		// arg4=0 for "individual" methods (unit/activity calls) => path finding 0x6A1CC0, arg4=1 for "group" methods (AI methods) => path finding 0x583BC8. Cf STRUCT_UNKNOWN_PATH_FINDING
+		/*long int CanMoveTo(long int targetUnitId, float maxRange, long int arg3, long int arg4, long int arg5, long int arg6) {
 			long int result;
 			_asm {
 				MOV ECX, this;
@@ -377,7 +379,7 @@ namespace AOE_STRUCTURES {
 				MOV result, EAX;
 			}
 			return result;
-		}
+		}*/
 	};
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_BASE) == 0x88, "STRUCT_UNIT_BASE size");
 

@@ -68,7 +68,15 @@ long int GetTotalQueueNumberForUnit(AOE_STRUCTURES::STRUCT_UNIT_BUILDING *bld, s
 void UnitActionSetStatus(STRUCT_ACTION_BASE *action, ACTION_STATUS newStatus);
 
 
-// Exact role to confirm.
+// Returns true if unit can move as close to target as specified by range (for example, for attacking).
+// Usually called with maxRange=unit.getMaxRange() to check if unit can attack the target.
+// isGroupAlgorithm : false for "individual" methods (unit/activity calls) => path finding 0x6A1CC0
+// isGroupAlgorithm : true for "group" methods (AI methods) => path finding 0x583BC8. Cf STRUCT_UNKNOWN_PATH_FINDING
+// This does NOT triggers a movement action (check only)
+bool CanMoveToTarget(STRUCT_UNIT_BASE *unit, long int targetUnitId, float maxRange, bool isGroupAlgorithm);
+
+
+// Exact role to confirm. What is sure: if successful, triggers an *actual* movement action.
 // MAYBE this method allows finding path with enemy units blocking the way. Such units are added to path finding struct's unitid array (unknown_11DCE4) ?
 // arg6: seen 0x1B (hardcoded)
 // tempList should be empty in input, filled by this method. Please free the array (if non-NULL) afterwards !
@@ -81,6 +89,7 @@ bool MoveToTarget_1A0(STRUCT_UNIT_BASE *unit, long int targetUnitId, float range
 bool AddUnitInInfAILists(STRUCT_INF_AI *infAI, long int unitId);
 
 // Returns true if unit can attack (or convert) target, taking into account faith for priests, etc.
+// This is about unit "compatibility", it does not take care of unit positions !!!
 bool CanAttackTarget(AOE_STRUCTURES::STRUCT_UNIT_BASE *actor, AOE_STRUCTURES::STRUCT_UNIT_BASE *target);
 
 // Returns true if a unit can convert another (actually, for priests)

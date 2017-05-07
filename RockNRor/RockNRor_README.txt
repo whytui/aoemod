@@ -1,4 +1,5 @@
 ﻿RockNRor is a plugin for Rise of Rome. It requires ROR_API.
+See also https://aoemodder.wixsite.com/rocknror
 
 Installation
 - Extract all files to a directory of your choice (example C:\temp\RockNRor\): ROR_API.dll, ROR_API.conf, RockNRor subdirectory, etc.

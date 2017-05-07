@@ -114,8 +114,29 @@ bool IsReadyToAttack(STRUCT_UNIT_BASE *unit) {
 /* *** Other... *** */
 
 
+// Returns true if unit can move as close to target as specified by range (for example, for attacking).
+// Usually called with maxRange=unit.getMaxRange() to check if unit can attack the target.
+// isGroupAlgorithm : false for "individual" methods (unit/activity calls) => path finding 0x6A1CC0
+// isGroupAlgorithm : true for "group" methods (AI methods) => path finding 0x583BC8. Cf STRUCT_UNKNOWN_PATH_FINDING
+// This does NOT triggers a movement action (check only)
+bool CanMoveToTarget(STRUCT_UNIT_BASE *unit, long int targetUnitId, float maxRange, bool isGroupAlgorithm) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || (targetUnitId < 0)) { return false; }
+	long int argGroupAlgo = isGroupAlgorithm ? 1 : 0;
+	_asm {
+		MOV ECX, unit;
+		PUSH - 1; // Did not see any call using another value in game code
+		PUSH - 1; // Did not see any call using another value in game code
+		PUSH argGroupAlgo;
+		PUSH 0; // Did not see any call using another value in game code
+		PUSH maxRange;
+		PUSH targetUnitId;
+		MOV EDX, [ECX];
+		CALL[EDX + 0x194];
+	}
+}
 
-// Exact role to confirm.
+
+// Exact role to confirm. What is sure: if successful, triggers an *actual* movement action.
 // MAYBE this method allows finding path with enemy units blocking the way. Such units are added to path finding struct's unitid array (unknown_11DCE4) ?
 // arg6: seen -1 or 0x1B (hardcoded). Could be a AI unit class (walls) ?
 // tempList should be empty in input, filled by this method. Please free the array (if non-NULL) afterwards !
@@ -178,6 +199,7 @@ bool CanConvert(STRUCT_UNIT_BASE *unit, long int targetUnitId) {
 
 
 // Returns true if unit can attack target, taking into account faith for priests, etc.
+// This is about unit "compatibility", it does not take care of unit positions !!!
 bool CanAttackTarget(AOE_STRUCTURES::STRUCT_UNIT_BASE *actor, AOE_STRUCTURES::STRUCT_UNIT_BASE *target) {
 	if (!actor || !target || !actor->IsCheckSumValidForAUnitClass() || !target->IsCheckSumValidForAUnitClass()) {
 		return false;
