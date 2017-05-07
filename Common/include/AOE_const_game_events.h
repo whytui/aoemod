@@ -66,7 +66,7 @@ namespace AOE_CONST_INTERNAL
 
 		EVENT_UNKNOWN_6A = 0x6A,
 
-		// Reparing is no longer possible because resources are depleted.
+		// Reparing is no longer possible because resources are depleted. Cf 0x501B8C.
 		// See also EVENT_NOT_ENOUGH_RESOURCES for train/build missing resources errors
 		EVENT_CANNOT_REPAIR_NO_RESOURCES = 0x6B,
 

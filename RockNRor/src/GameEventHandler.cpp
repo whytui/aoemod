@@ -24,6 +24,10 @@ bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT 
 		// Handled in ActivityProcessNotify
 	}*/
 
+	/*if (notifyEvent.eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_CANNOT_REPAIR_NO_RESOURCES) {
+		// This event is NOT sent here (which is bad because AI players don't get it)
+	}*/
+
 	return false; // default: let ROR code be run
 }
 
@@ -137,6 +141,7 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 	}
 
 	if (notifyEvent->eventId == GAME_EVENT_TYPE::EVENT_SHOULD_MOVE_BACK_AFTER_SHOOTING) {
+		// Retreat after shooting is not handled in ROR original code for civilians. It should (for hunters) !
 		if (COMBAT::HunterMoveBackAfterShooting(activity, notifyEvent)) {
 			outExecStandardCode = false; // Event has been processed with an action. We don't want to run ROR handler.
 			return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION;
@@ -154,6 +159,31 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 					if (!AOE_METHODS::UNIT::IsReadyToAttack(activity->ptrUnit)) {
 						outExecStandardCode = false; // We don't want to run ROR handler in this case.
 						return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION; // Ignore the notification because a pending order already concerns this "attacker" unit and I am not ready yet to strike back.
+					}
+				}
+			}
+		}
+	}
+	if (notifyEvent->eventId == GAME_EVENT_TYPE::EVENT_ACTION_INVALIDATED) {
+		if (activity->currentTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_REPAIR) {
+			STRUCT_UNIT_ATTACKABLE *villager = (STRUCT_UNIT_ATTACKABLE *)activity->ptrUnit;
+			STRUCT_PLAYER *player = villager->ptrStructPlayer;
+			if (!villager->DerivesFromAttackable()) { return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION; }
+			STRUCT_ACTION_BASE *action = GetUnitAction(villager);
+			if (!action->targetUnit || (action->targetUnit->unitDefinition == NULL) ||
+				(action->targetUnit->checksum != CHECKSUM_UNIT_BUILDING)) { return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION; }
+			STRUCT_UNITDEF_BUILDING *bldDef = (STRUCT_UNITDEF_BUILDING*)action->targetUnit->unitDefinition;
+			for (int i = 0; i < 3; i++) {
+				RESOURCE_TYPES reqResourceId = bldDef->costs[i].costType;
+				if ((reqResourceId >= 0) && (reqResourceId <= 3) && (bldDef->costs[i].costPaid != 0) && (bldDef->costs[i].costAmount > 0)) {
+					// This resource is used to repair.
+					float remainingRes = player->GetResourceValue(reqResourceId);
+					if (remainingRes < 0.1) {
+						// This resource is missing. Go find some ! (TOD: go gather the correct resource if possible)
+						// At least, stop trying to repair (AI villagers tend to get stuck). Seems not so bad for now (AI will give another task)
+						if (GAME_COMMANDS::CreateCmd_Stop(villager->unitInstanceId)) {
+							return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION; // Event has been processed with an action. We don't want to run ROR handler.
+						}
 					}
 				}
 			}

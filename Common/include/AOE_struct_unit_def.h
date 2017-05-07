@@ -24,8 +24,11 @@ namespace AOE_STRUCTURES
 	class STRUCT_COST {
 	public:
 		AOE_CONST_FUNC::RESOURCE_TYPES costType; // 2-bytes (word)
-		short int costAmount;
-		short int costPaid; // sometimes used as a byte. Warning: pop headroom is a non paid cost, but used anyway !
+		short int costAmount; //+02. 
+
+		// +04. sometimes used as a byte.
+		// If costPaid=0 but costAmount>0, the cost is required but not paid. E.g. Population headroom or building count.
+		short int costPaid;
 	};
 	static_assert(sizeof(STRUCT_COST) == 6, "STRUCT_COST size");
 

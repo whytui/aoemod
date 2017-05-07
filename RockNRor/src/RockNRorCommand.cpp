@@ -570,7 +570,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		AOE_STRUCTURES::STRUCT_PLAYER *oldPlayer = GetControlledPlayerStruct_Settings();
 		AOE_STRUCTURES::STRUCT_PLAYER *newPlayer = GetPlayerStruct(playerId);
 		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-		if (oldPlayer && newPlayer && settings && settings->ptrGameUIStruct) {
+		if (oldPlayer && newPlayer && settings && settings->ptrGameUIStruct && (newPlayer->aliveStatus != 2)) {
 			AOE_METHODS::PLAYER::CopyScreenPosition(oldPlayer->playerId, playerId);
 			AOE_METHODS::PLAYER::ChangeControlledPlayer(playerId, false);
 		}
