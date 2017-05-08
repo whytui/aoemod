@@ -536,7 +536,8 @@ STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitTargeting::TestFindGroupMainTarget(STRUCT_
 	assert(tacAI && tacAI->IsCheckSumValid());
 	if (!tacAI || !tacAI->IsCheckSumValid()) { targetInfo->targetSearchInProgress = 0; return NULL; }
 
-	if (groupLeader->ptrStructPlayer->ptrDiplomacyStances[targetPlayerId] != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY) {
+	PLAYER_DIPLOMACY_STANCES diplVsTarget = groupLeader->ptrStructPlayer->ptrDiplomacyStances[targetPlayerId];
+	if ((diplVsTarget != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY) && (diplVsTarget != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_NEUTRAL)) {
 		assert(false && "Trying to find a target for a non-enemy player");
 		targetInfo->targetSearchInProgress = 0; return NULL;
 	}
