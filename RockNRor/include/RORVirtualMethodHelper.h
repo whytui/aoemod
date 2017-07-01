@@ -15,7 +15,16 @@ namespace ROCKNROR {
 	// arg2 = ROR method "this" object (ECX)
 	// arg3+ = ROR method optional arguments. There can be 0 to n parameters.
 	void CommonVirtualMethodAPI();
+
 	
+	// Represents ESP register value when (last) ROR virtual method was handled by a hook.
+	// Please only use this in Virtual method hooks !
+	extern unsigned long int ESPValueOnLastVirtualMethodHandledCall;
+
+	// Get return address for virtual method hooks.
+	// Please only use this from virtual method hooks !
+	unsigned long int GetLastVirtualMethodCallReturnAddress();
+
 
 	// Here is an example of what the macros below do:
 	// ExampleMethod is the "functional" method with the treatments we want to do. 

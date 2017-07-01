@@ -184,7 +184,7 @@ void RockNRorInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(AOE_STRUCTURES::ST
 		!flagsToApply.attackTowers &&
 		!flagsToApply.attackVillagers &&
 		!flagsToApply.attackWalls) { return; }
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->GetRelevantSelectedUnitsBasePointer(player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->GetRelevantSelectedUnitsPointer(player);
 	assert(selectedUnits != NULL);
 	for (int i = 0; i < player->selectedUnitCount; i++) {
 		if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() &&
@@ -391,6 +391,7 @@ AOE_STRUCTURES::STRUCT_ANY_UI *RockNRorInfo::GetCustomGamePopup() {
 
 // Get main (first) selected unit, or NULL if none is selected.
 // Works in-game and in editor.
+// See SelectOneUnit (in playerHandling) for unit selection + AOE_selectUnit, AOE_clearSelectedUnits
 AOE_STRUCTURES::STRUCT_UNIT_BASE *RockNRorInfo::GetMainSelectedUnit(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	assert(player != NULL);
 	if (!player) { return NULL; }
@@ -415,9 +416,6 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE **RockNRorInfo::GetRelevantSelectedUnitsPointer
 	}
 	assert(selectedUnits != NULL);
 	return selectedUnits;
-}
-AOE_STRUCTURES::STRUCT_UNIT_BASE **RockNRorInfo::GetRelevantSelectedUnitsBasePointer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
-	return (AOE_STRUCTURES::STRUCT_UNIT_BASE **)this->GetRelevantSelectedUnitsPointer(player);
 }
 
 

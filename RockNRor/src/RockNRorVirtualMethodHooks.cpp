@@ -52,6 +52,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// Maps to store ORIGINAL call addresses. Index=class checksum, value=original method call address
 	std::map<unsigned long int, unsigned long int> activityProcessNotifyCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> playerProcessNotifyCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress;
 
 
 	// Return value is an unknown enum. 2=ok, processed. (unitAI: EDX+0xCC call).
@@ -124,13 +125,59 @@ namespace VIRTUAL_METHOD_HOOKS {
 	}
 
 
+	// unit.addPositionToTargetPosArray(pDword_posYXZ, arg2) for ALL unit classes (base+children). Method offset=+1BC.
+	// Returns 1 on success, 0 on failure
+	long int __stdcall UnitAddPositionToTargetPosArray(STRUCT_UNIT_BASE *unit, STRUCT_UNIT_TARGET_POS *targetPos, long int arg2) {
+		unsigned long int originalCallAddr = unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[unit->checksum];
+		RECORD_PERF_BEGIN(originalCallAddr);
+		bool runStandardMethod = true;
+		long int result = 0;
+		assert(unit && unit->IsCheckSumValidForAUnitClass());
+		assert(targetPos != NULL);
+		assert(unit->ptrStructPlayer != NULL);
+
+		// Custom treatments
+		// TODO check with largest map size if this can happen
+		if ((targetPos->posX == 0xFF) || (targetPos->posY == 0xFF)) {
+			std::string msg = "Error with targetPos in UnitAddPositionToTargetPosArray. Unit=";
+			msg += std::to_string(unit->unitInstanceId);
+			msg += ". @ret=";
+			msg += GetHexStringAddress(GetLastVirtualMethodCallReturnAddress());
+			traceMessageHandler.WriteMessageNoNotification(msg.c_str());
+			if (unit->ptrStructPlayer) {
+				AOE_STRUCTURES::STRUCT_PLAYER *player = AOE_METHODS::PLAYER::ChangeControlledPlayer(unit->ptrStructPlayer->playerId, false);
+				assert(player && player->IsCheckSumValid());
+				AOE_STRUCTURES::PLAYER::SelectOneUnit(player, unit, true);
+			}
+			AOE_METHODS::CallWriteText(msg.c_str());
+			AOE_METHODS::SetGamePause(true); // seems better for stability.
+			ROCKNROR::SYSTEM::StopExecution(_T("An error occurred. *FIRST* close this message, then attach a debugger or press ESC to continue."), true, true);
+		}
+
+		if (runStandardMethod) {
+			unsigned long int arg1 = (unsigned int)targetPos;
+			_asm {
+				MOV ECX, unit;
+				PUSH arg2;
+				PUSH targetPos;
+				CALL originalCallAddr;
+				MOV result, EAX;
+			}
+		}
+
+		RECORD_PERF_END(originalCallAddr);
+		return result;
+	}
+
+
+
 
 
 	// Technical declarations for Hook methods (creates small asm hook methods to dispatch to specific methods
 
 	DECLARE_VIRTUAL_METHOD_HANDLER(ActivityProcessNotify)
 	DECLARE_VIRTUAL_METHOD_HANDLER(PlayerProcessNotify)
-
+	DECLARE_VIRTUAL_METHOD_HANDLER(UnitAddPositionToTargetPosArray)
 
 
 
@@ -168,6 +215,18 @@ namespace VIRTUAL_METHOD_HOOKS {
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_RGE_PLAYER, 0xE8, PlayerProcessNotify, playerProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_RGE_PLAYER]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_GAIA_PLAYER, 0xE8, PlayerProcessNotify, playerProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_GAIA_PLAYER]);
 
+			// Unit
+			//unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_BASE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_BASE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ATTACKABLE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_ATTACKABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_BUILDING, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_BUILDING]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_COMMANDABLE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_COMMANDABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_DOPPLEGANGER, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_DOPPLEGANGER]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_FLAG, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_FLAG]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_MOVABLE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_MOVABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_PROJECTILE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_PROJECTILE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TRAINABLE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_TRAINABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TREE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_TREE]);
 
 			CR_DEBUG::AppendTextToLogFile("Virtual methods APIs have been written", true);
 

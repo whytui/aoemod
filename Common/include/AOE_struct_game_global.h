@@ -178,7 +178,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_08C;
 		// +0x90
 		long int unitPointersListSize; // Size (elem count) of the ptrUnitPointersList Array
-		unsigned long int *unknown_094; // +94. array of DWORDS
+		unsigned long int *unknown_094; // +94. array of DWORDS. Temporary units array (units with negative IDs) ?
 		unsigned long int unknown_098;
 		long int unknown_094_ListSize; // Size of x+0x94 array. Default=1000.
 		// +0xA0

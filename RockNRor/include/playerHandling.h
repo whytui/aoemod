@@ -59,7 +59,7 @@ bool CopyScreenPosition(const AOE_STRUCTURES::STRUCT_PLAYER *srcPlayer, AOE_STRU
 bool CopyScreenPosition(int srcPlayerId, int destPlayerId);
 
 // Change human control to another player and set AI flags accordingly (if updateAIFlags is true)
-void ChangeControlledPlayer(int playerId, bool updateAIFlags);
+AOE_STRUCTURES::STRUCT_PLAYER *ChangeControlledPlayer(int playerId, bool updateAIFlags);
 
 // Return NULL if one of the objects is NULL/missing
 AOE_STRUCTURES::STRUCT_RESEARCH_DEF *GetResearchDef(const AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId);

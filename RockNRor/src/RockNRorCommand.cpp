@@ -580,7 +580,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		// Sometimes we need to have almost empty farms for testing...
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 		if (!player) { return; }
-		AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsBasePointer(player);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(player);
 		if (selectedUnits && selectedUnits[0] && ((STRUCT_UNIT_BUILDING*)(selectedUnits[0]))->IsCheckSumValid() &&
 			(selectedUnits[0]->ptrStructPlayer == player)) {
 			SetFarmCurrentTotalFood((STRUCT_UNIT_BUILDING*)(selectedUnits[0]), 2);
@@ -3097,7 +3097,7 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 
 	// Unit-specific treatments
 	bool eventFullyHandled = false;
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsBasePointer(player);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(player);
 	assert(selectedUnits != NULL);
 	for (int i = 0; i < player->selectedUnitCount; i++) {
 		// Run treatments for all selected units (except "panel unit", will be done last)
@@ -3464,7 +3464,7 @@ void RockNRorCommand::OnInGameRightClickCustomAction(float posX, float posY, AOE
 	}
 	if (!actorIsMyUnit) { return; }
 	
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(controlledPlayer);
 	assert(selectedUnits != NULL);
 	for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
 		// Run treatments for all selected units

@@ -178,12 +178,11 @@ public:
 
 	// Get main (first) selected unit, or NULL if none is selected.
 	// Works in-game and in editor.
-	// See SelectOneUnit for unit selection + AOE_selectUnit, AOE_clearSelectedUnits
+	// See SelectOneUnit (in playerHandling) for unit selection + AOE_selectUnit, AOE_clearSelectedUnits
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *GetMainSelectedUnit(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 	// Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
 	AOE_STRUCTURES::STRUCT_UNIT_BASE **GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **GetRelevantSelectedUnitsBasePointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 	// Fast-computes the integer distance for X and Y delta values (sqrt(X^2 + Y^2) as an integer).
 	// Returns -1 if invalid (diffX and diffY values are capped at CST_INT_DISTANCE_VALUES_MAX_COORDINATE)

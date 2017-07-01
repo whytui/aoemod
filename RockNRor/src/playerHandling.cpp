@@ -172,17 +172,17 @@ bool CopyScreenPosition(int srcPlayerId, int destPlayerId) {
 
 
 // Change human control to another player and set AI flags accordingly (if updateAIFlags is true)
-void ChangeControlledPlayer(int playerId, bool updateAIFlags) {
-	if ((playerId < 0) || (playerId > 8)) { return; }
+AOE_STRUCTURES::STRUCT_PLAYER *ChangeControlledPlayer(int playerId, bool updateAIFlags) {
+	if ((playerId < 0) || (playerId > 8)) { return NULL; }
 	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 	// Do not switch to defeated (or invalid) player
-	if (!player || !player->IsCheckSumValid() || (player->aliveStatus == 2)) { return; }
+	if (!player || !player->IsCheckSumValid() || (player->aliveStatus == 2)) { return NULL; }
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (!settings || !settings->IsCheckSumValid()) { return; }
+	if (!settings || !settings->IsCheckSumValid()) { return NULL; }
 	STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
-	if (!global || !global->IsCheckSumValid()) { return; }
+	if (!global || !global->IsCheckSumValid()) { return NULL; }
 	STRUCT_PLAYER *previousPlayer = global->GetPlayerStruct(global->humanPlayerId);
-	if (!previousPlayer || !previousPlayer->IsCheckSumValid()) { return; }
+	if (!previousPlayer || !previousPlayer->IsCheckSumValid()) { return NULL; }
 	ClearSelectedUnits(previousPlayer);
 	if ((settings->mouseActionType == AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_VILLAGER_BUILD_MENU) &&
 		(settings->gameModeSub == 1)) {
@@ -204,6 +204,7 @@ void ChangeControlledPlayer(int playerId, bool updateAIFlags) {
 	if (updateAIFlags) {
 		AOE_METHODS::PLAYER::RestoreAllAIFlags();
 	}
+	return player;
 }
 
 

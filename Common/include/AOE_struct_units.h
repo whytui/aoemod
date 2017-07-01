@@ -182,6 +182,7 @@ namespace AOE_STRUCTURES {
 	// +0x198 = CanMoveTo(posY,posX,posZ,fMaxRange,targetUnitId,pArg6_float,arg7_size?,targetPlayerId,someUnitClass) ? returns 1 if ok. someUnitClass=1B=walls
 	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
 	// +0x1A4 = DoMove?(posY,posX,posZ,fMaxRange,targetUnitId, pArg6_float,arg7_size,arg8,arg9,targetPlayerId,someUnitClass)
+	// +0x1BC = unit.addPositionToTargetPosArray(pDword_posYXZ, arg2). Does not check pos is valid. Causes some (rare) bugs?
 	// +0x1CC = unit.xxx(pPosYXZ_target, fRange, targetUnitId) for intelligent attack ?
 	// +0x1D8 = bldUnit.readFromFile(internalFileId, global)
 	// +0x1DC = unit.init(unitDef, player)
@@ -453,11 +454,11 @@ namespace AOE_STRUCTURES {
 		long int unknown_15C_posX1;
 		long int unknown_160_posY2;
 		long int unknown_164_posX2;
-		STRUCT_UNIT_TARGET_POS *targetPositionsArray; // +168. ptr to list of 3-bytes elements posYXZ, related to movement. See 44EB70 (add pos in array)
+		STRUCT_UNIT_TARGET_POS *targetPositionsArray; // +168. ptr to list of 3-bytes elements posYXZ, related to movement. See 44EB70 (add pos in array). 1st=start, 2nd=next ? cf 44C57D. Only for AI ? Not ALL movements.
 		long int targetPositionsArrayUsedElements; // size of unknown_168_ptrList
 		// 0x170
 		unsigned long int targetPositionsArrayTotalSize; // allocated number of elements (elemSize=3, warning, it is unusual).
-		char isInMovement; // +174. Not sure
+		char isInMovement; // +174. Not sure. Set On in 0x44EDD0.
 		char unknown_175;
 		char unknown_176; // ?
 		char unknown_177; // ?

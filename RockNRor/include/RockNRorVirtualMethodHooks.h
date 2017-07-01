@@ -9,6 +9,7 @@
 #include "RORVirtualMethodHelper.h"
 #include "GameEventHandler.h"
 #include "RockNRorInfo.h" // to measure execution times
+#include "interruption.h"
 
 
 namespace ROCKNROR {
@@ -18,7 +19,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 	// Patches ROR process (.rdata memory) to connect RockNRor method (rnrorMethodName) to ROR class's method,
 	// ROR class identified by "baseChecksum" and ROR class' method identified by "methodOffset" (should be a multiple of 4 !)
-	// varPreviousAddress is a variable name that will be updated with previous address (unsigned long int)
+	// varPreviousAddress is a variable name that will be updated with previous (original) call address (unsigned long int)
 #define INSTALL_VIRTUAL_METHOD_PATCH(baseChecksum, methodOffset, rnrorMethodName, varPreviousAddress) \
 	assert(methodOffset % 4 == 0); \
 	varPreviousAddress = *(unsigned long int*)(baseChecksum + methodOffset); \
@@ -36,6 +37,10 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 	// Returns void. This hook handles player's notifications (EDX+0xE8 call).
 	void __stdcall PlayerProcessNotify(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT notifyEvent);
+
+	// unit.addPositionToTargetPosArray(pDword_posYXZ, arg2) for ALL unit classes (base+children). Method offset=+1BC.
+	// Returns 1 on success, 0 on failure
+	long int __stdcall UnitAddPositionToTargetPosArray(STRUCT_UNIT_BASE *unit, STRUCT_UNIT_TARGET_POS *targetPos, long int arg2);
 
 
 

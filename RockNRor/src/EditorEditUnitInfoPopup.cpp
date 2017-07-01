@@ -38,7 +38,7 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	if (!controlledPlayer || !controlledPlayer->IsCheckSumValid() || (controlledPlayer->selectedUnitCount <= 0)) { return; }
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = ROCKNROR::crInfo.GetMainSelectedUnit(controlledPlayer);
 	if (!unit || (!unit->IsCheckSumValidForAUnitClass())) { return; }
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(controlledPlayer);
 	for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *curUnit = selectedUnits[i];
 		if (curUnit && curUnit->IsCheckSumValidForAUnitClass()) {

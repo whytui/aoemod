@@ -405,7 +405,7 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 	if (isMyUnit && this->chkForceNotRebuildFarm && this->chkForceRebuildFarm &&
 		(this->chkForceNotRebuildFarm->checked || this->chkForceRebuildFarm->checked)) {
 		bool actionIsRebuild = (this->chkForceRebuildFarm->checked != 0); // If false, then it is force NOT rebuild.
-		AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsBasePointer(controlledPlayer);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(controlledPlayer);
 		for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
 			if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() &&
 				(selectedUnits[i]->ptrStructPlayer == controlledPlayer)) {

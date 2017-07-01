@@ -330,6 +330,9 @@
     <ClInclude Include="include\AOEPrimitives_lists.h">
       <Filter>Fichiers d%27en-tête\Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="include\interruption.h">
+      <Filter>Fichiers d%27en-tête\Technical</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\tinyxml\tinystr.cpp">
@@ -553,6 +556,9 @@
     </ClCompile>
     <ClCompile Include="src\AOEPrimitives_lists.cpp">
       <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\interruption.cpp">
+      <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
