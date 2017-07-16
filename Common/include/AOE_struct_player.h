@@ -138,6 +138,7 @@ namespace AOE_STRUCTURES {
 
 	// Size 0x14. Constructor = 0x516DA0
 	// Stores explored resource units (that can NOT move = other than animal and farms)
+	// 0x517220 = motionlessSpottedResource.xxx(...)
 	class STRUCT_PLAYER_MOTIONLESS_SPOTTED_GATHERABLE {
 	public:
 		STRUCT_NEARBY_UNIT_INFO **arrayNearbyUnitInfos;
@@ -166,6 +167,7 @@ namespace AOE_STRUCTURES {
 	// +0x30 = player.sendAIOrderToUnit(playerId, unitId, activityId, targetUnitId, arg5, fposY, fposX, arg8, f_range, arg10, arg11, priorityRegardingDistance?)
 	// +0x34 = player.processAIOrder(playerId, unitId, actionId, arg4, arg5_byte, fposY, fposX, fposZ, f_maxRange?, arg10, arg11, arg12)
 	// +0x38 = 
+	// +0x7C = player.update??
 	// +0x80 = player.save?
 	// +0x84 = player.save2?
 	// +0x88 = player.save_info?
@@ -186,8 +188,8 @@ namespace AOE_STRUCTURES {
 	// +0xD0 = player.createCmdRemoveGroup?(...) => 0x45E7B0 (cmd 9). Called on unit death?
 	// +0xD4 = player.createCommandB ? => 0x45E7D0
 	// +0xD8 = player.createCmdAddIntermediateMovementStep => 0x45E800
-	// +0xDC = player.AddUnit(unitStruct, isNotCreatable, isTempUnit) - get arg2
-	// +0xE0 = player.RemoveUnit(ptrUnit, isNotCreatable, isTempUnit, arg4=unit+50?)
+	// +0xDC = player.AddUnit(unitStruct, isNotCreatable, isTempUnit) : returns STRUCT_PER_TYPE_UNIT_LIST_LINK link to unit
+	// +0xE0 = player.RemoveUnitFromList(ptrUnit, isNotCreatable, isTempUnit, PER_TYPE_UNIT_LIST_LINK=unit+50)
 	// +0xE4 = player.logMessage(...)
 	// +0xE8 = player.notifyEvent(unitId, arg2, eventId, arg4, arg5, arg6). Eg. 0x4F3350. Args: see NotifyEvent struct.
 	// +0xEC = player.pseudoScoreTxtInfo?
@@ -202,7 +204,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_008; // value is from [55473C] ? "numberGroupsValue" ?
 		long int unknown_00C; // "maxNumberGroupsValue" ?
 		// 0x10
-		long int unknown_010; // Used in-game, not initialized in editor.
+		long int unknown_010; // Used in-game, not initialized in editor. Reset in DoUpdates(0x45D040)
 		unsigned long int unknown_014;
 		unsigned long int unknown_018; // Unused ?
 		unsigned long int unknown_01C; // Unused ?

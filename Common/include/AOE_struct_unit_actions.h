@@ -32,6 +32,8 @@ namespace AOE_STRUCTURES {
 	// +0x28 = action.update()?
 	// +0x34 = action.xxx(pUnit, fposY?, fposX?, arg4)
 	// +0x5C = action.setStatus?(actionStatus)
+	// +0xC4 = action.RemoveTargetUnit(pUnit)? wrong?
+	// +0xC8 = action.GetTargetUnit()?
 	class STRUCT_ACTION_BASE {
 	public:
 		unsigned long int checksum;
@@ -53,7 +55,7 @@ namespace AOE_STRUCTURES {
 		// 0x30
 		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set.
 		STRUCT_UNIT_ACTION_INFO *requiredActionInfo; // +34. SubAction ? Link with unit/"actionLink"/action. Allows chaining actions ! This is NOT unit->actionInfo !
-		unsigned long int pGraphics; // ptr to graphics structure, consistent with unit+10 ? w_lumber, etc
+		STRUCT_GRAPHICS *pGraphics; // +38. ptr to graphics structure. w_lumber, etc
 		char unknown_3C; // Flag 0/1, about graphics? (about need to refresh graphics ?) ? "deposit after move end"? Ready to shoot?
 		char unknown_3D[3]; // Unused. Probably.
 		// 0x40: not in BASE class ; it has different type/role according to child classes. (seen float, word...)
@@ -61,7 +63,8 @@ namespace AOE_STRUCTURES {
 
 #define CHECKSUM_ACTION_MOVE 0x005426DC
 	// [id 1] Size = 0x44
-	// Constructor 0x4052D0: actionMove.constructor(actor, target, maxTargetDistance, pGraphic), 0x4051C0
+	// Constructor 0x4052D0: actionMove.constructor(actor, target, maxTargetDistance, pGraphic), 0x4051C0(from file)
+	// Constructor 0x405250: actionMove.constructor(unit, fposY, posX, posZ, arg5, ptrGraphic)
 	class STRUCT_ACTION_MOVE : public STRUCT_ACTION_BASE { // DC 26 54 00
 	public:
 		// 0x40

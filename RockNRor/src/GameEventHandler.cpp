@@ -170,7 +170,7 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 			STRUCT_PLAYER *player = villager->ptrStructPlayer;
 			if (!villager->DerivesFromAttackable()) { return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION; }
 			STRUCT_ACTION_BASE *action = GetUnitAction(villager);
-			if (!action->targetUnit || (action->targetUnit->unitDefinition == NULL) ||
+			if (!action || !action->targetUnit || (action->targetUnit->unitDefinition == NULL) ||
 				(action->targetUnit->checksum != CHECKSUM_UNIT_BUILDING)) { return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION; }
 			STRUCT_UNITDEF_BUILDING *bldDef = (STRUCT_UNITDEF_BUILDING*)action->targetUnit->unitDefinition;
 			for (int i = 0; i < 3; i++) {

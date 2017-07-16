@@ -61,6 +61,20 @@ bool UnitExtensionHandler::ReallocArrayUsingGameGlobal() {
 }
 
 
+// Returns a unit extension IF it has already been initialized, NULL otherwise.
+// This may return NULL even if the unit exists in game !
+UnitExtension *UnitExtensionHandler::GetUnitExtension(long int unitId) {
+	if (unitId < 0) { return NULL; }
+	if (unitId >= this->currentAllocatedElemCount) {
+		return NULL;
+	}
+	if (this->allUnitExtensions[unitId].isInitialized) {
+		return &this->allUnitExtensions[unitId];
+	}
+	return NULL;
+}
+
+
 // Add/initialize extension data for the unit specified
 // If the unit extension is already initialized, this does nothing (does NOT overwrite previous information)
 // Returns true if successful (including the case when unit is already initialized)

@@ -134,9 +134,16 @@ namespace AOE_CONST_INTERNAL
 		EVENT_UNUSED_1F6 = 0x1F6, // Not used at all.
 		EVENT_UNUSED_1F7 = 0x1F7, // Not used at all.
 		EVENT_UNUSED_1F8 = 0x1F8, // Not used at all.
-		EVENT_ACTION_FAILED = 0x1F9, // Triggered in 0x405786, ...
+
+		// Triggered in 0x405786, ...
+		// genericParam4=taskId that failed
+		EVENT_ACTION_FAILED = 0x1F9,
+
 		EVENT_ACTION_COMPLETED = 0x1FA, // Notify activity completed (normal completion). arg4=activityId
-		EVENT_ACTION_INVALIDATED = 0x1FB, // 0x410999
+
+		// 0x410999. Notify 0x41401D
+		// genericParam4=taskId that failed
+		EVENT_ACTION_INVALIDATED = 0x1FB,
 
 		// Source: 0x40580C in action.update().
 		// Action re-triggered.
@@ -261,12 +268,19 @@ namespace AOE_CONST_INTERNAL
 		// (activity.processNotify) 0x4E58F3 (trade ship with no more hp)
 		EVT_RES_CANT_NOTIFY_DYING = 4,
 
-		// Unused ?
+		// 5 = No action found ?. 0x4E68F1 (auto-search target)
+		// (activity.processNotify) 0x41403D
 		EVT_RES_UNKNOWN_05 = 5,
 
-		// 6 = seen for trade ship ? Successfully triggered trading ?
-		// (activity.processNotify) 0x4E5804,0x4E5833
-		EVT_RES_UNKNOWN_06 = 6
+		// 6 = seen for trade ship ? Successfully triggered trading ? Successfully auto-found target at reach ?
+		// (activity.processNotify) 0x4E5804,0x4E5833,0x4E67A7
+		EVT_RES_UNKNOWN_06 = 6,
+
+		// 7 = false for retryable order ??? in activity.processRetryableOrder() ? 0x414A50
+		EVT_RES_UNKNOWN_07 = 7,
+
+		// 8 = true (found) for retryable order ??? in activity.processRetryableOrder() ? 0x414A50
+		EVT_RES_UNKNOWN_08 = 8
 	};
 
 }

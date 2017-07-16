@@ -145,7 +145,7 @@ namespace AOE_CONST_INTERNAL
 		GUS_5_WAIT_RESOURCE_DEPLETION_AFTER_ANIMATION = 5, // Unit keeps this status until owned resources are depleted (down to 0), depending on resourceDecay and being gathered by some unit. Unit only produces visibility on its own tile ?
 		GUS_6_DYING_ANIMATION_2 = 6, // "undead animation". Used only when useUndeadStatus=true (NOT used in standard game). This status uses dyingGraphic2.
 		GUS_7_UNKNOWN_7 = 7, // Unit actual death. Unit is no longer displayed at all and "dead unit" is created.
-		GUS_8_UNKNOWN_8 = 8 // Invalid, waiting to be freed (or already freed ?)
+		GUS_8_INVALID_TO_DESTROY = 8 // Invalid, waiting to be actually removed. In unit.Update() in 0x4A91E0, this status returns 1 so that unit is destroyed in 0x451292.
 	};
 
 
@@ -157,7 +157,7 @@ namespace AOE_CONST_INTERNAL
 		CST_AS_04_GOTO = 4, // Moving to action location ? (a transitional state)
 		CST_AS_05_GOTO2 = 5,
 		CST_AS_06_WORK = 6, // "start" in progress ? (analog to 3?). For gen. wonder victory, means timer has started? (a transitional state)
-		CST_AS_07_WORK2 = 7, // in progress ? (analog to 4?). For both attack, build, etc
+		CST_AS_07_WORK2 = 7, // in progress ? (analog to 4?). For both attack, build, etc. Corresponds to the moment reload timer is reset.
 		CST_AS_08_RETURN = 8, // Return to deposit when fully loaded (cf action.target2): gathering,trading. Projectiles use it too ?
 		CST_AS_09_TURN = 9, // ???
 		CST_AS_0A_DELAY = 0x0A, // Seen on stuck villager (repairman that could not get to target)
@@ -165,7 +165,7 @@ namespace AOE_CONST_INTERNAL
 		CST_AS_0C_ATTACK = 0x0C, // waiting for requirement ? Really unsure
 		CST_AS_0D_FAILED = 0x0D, // Set when unit can't move (speed==0) ?? 0x405472. This status is an Idle status. Related to notification 1F9(failed)
 		CST_AS_0E_INVALIDATED = 0x0E, // Considered idle. Related to notificationId 1FB.
-		CST_AS_0F_UNKNOWN = 0x0F // Seen while moving (just moving). This *really* is an "unknown" status.
+		CST_AS_0F_MOVE_NO_SEARCH = 0x0F // Seen while moving (just moving). 0x4075D6.
 	};
 
 	/* Action update return values

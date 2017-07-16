@@ -22,7 +22,7 @@ public:
 	UnitExtension();
 
 	bool isInitialized; // True if this unitExtension has been initialized with correct unit data == unit is "known" by extension system.
-	bool unitDied; // True if unit existed at some point (in this game), and is no longer. Do NOT set this when unit is converted !
+	bool unitDied; // True if unit existed at some point (in this game), and is no longer. Do NOT set this when unit is converted ! Be careful with temp units too (negative IDs)
 	long int unitId; // same as pUnit->unitInstanceId, -1 if not set/not known.
 	STRUCT_UNIT_BASE *pUnit; // pointer to actual unit structure
 

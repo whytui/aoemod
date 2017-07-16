@@ -136,7 +136,7 @@ namespace AOE_STRUCTURES
 	// +0x84 = activity.enterObject(targetUnitId, force)
 	// +0x88 = activity.transport(arg1, arg2, arg3)
 	// +0x8C = int UnitAIModule::transportObject(float,float,float,int) ?
-	// +0x90 = activity.moveTo(fposY, fposX, arg3, arg4, force)
+	// +0x90 = activity.moveTo(fposY, fposX, arg3, arg4, force) moveAwayFrom ?
 	// +0x94 = activity.moveTo(targetUnitId, f_maxRange, force?)
 	// +0x98 = activity.moveTo(int,int)
 	// +0x9C = activity.evasiveMoveTo(arg1, arg2, arg3, force). Eg 0x412650
@@ -153,9 +153,9 @@ namespace AOE_STRUCTURES
 	// +0xC8 = activity.processOrder(orderEvent, arg2)
 	// +0xCC = activity.ProcessNotify(notifyEvent, arg2). Returns some enum (3,4,5=do nothing special?,6=triggered an activity?..) "ProcessNotify" ? Ex:priest=0x4E5370, military=0x4E62D0, base=0x413890. Each class has a specific overload (except tower).
 	// +0xD0 = activity.ProcessNotifyCommander(notifyEvent?). 0x4144C0.
-	// +0xD4 = activity.ProcessIdle(arg1)? 0x4145A0 (base proc, used by many children), priest=0x4E54E0. For example, auto-targeting of idle units.
+	// +0xD4 = activity.ProcessIdle(arg1)? 0x4145A0 (base proc, used by many children), priest=0x4E54E0. For example, auto-targeting of idle units. "activity.manageAutoAttackNearbyUnit(arg1)". Contains hardcoded catapult IDs
 	// +0xD8 = activity.ProcessMisc(). ex. 0x414600. Find target? Returns some enum
-	// +0xDC = activity.processRetryableOrder() [Last for all except priest activity]. Returns some enum
+	// +0xDC = activity.processRetryableOrder() [Last for all except priest activity]. Returns ACTIVITY_EVENT_HANDLER_RESULT? eg 0x414A50
 	// PriestActivity+0xE0
 	// PriestActivity+0xE4 [Last]
 	class STRUCT_UNIT_ACTIVITY {

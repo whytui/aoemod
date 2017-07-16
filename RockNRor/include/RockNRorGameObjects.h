@@ -59,6 +59,7 @@ public:
 	void FreeAllFarmRebuildInfoList();
 
 	// Remove all information concerning a specific unit
+	// Does not impact unitExtensions though
 	bool RemoveAllInfoForUnit(long int unitId, float posX, float posY);
 
 	// Returns a UnitCustomInfo pointer to matching element for given unitId.

@@ -106,7 +106,7 @@ namespace AOE_STRUCTURES {
 	// +0xAC = global.quickLoad(empiresDatRelativePath, tr_wrld.txt) = unsigned char RGE_Game_World::data_load(char *,char *)?
 	// +0xB0 = globalStruct.LoadEmpiresDat(empiresDAT_filename, pSoundStruct, pMPInfo) = unsigned char TRIBE_World::init(char *,TSound_Driver *,TCommunications_Handler *)
 	// +0xB4 = void RGE_Game_World::turn_sound_off(void)
-	// +0xB8 = void RGE_Game_World::del_game_info(void) (reset)
+	// +0xB8 = void RGE_Game_World::del_game_info(void) (reset) Called at init in 1-player games ?
 	// +0xBC = unsigned char RGE_Game_World::update(void) ("main timer")
 	// +0xC0 = unsigned char RGE_Game_World::get_game_state(void)
 	// +0xC4 = unsigned char RGE_Game_World::check_game_state(void)
@@ -123,7 +123,7 @@ namespace AOE_STRUCTURES {
 	// +0xF0 = global.createScenarioInfo?(arg1)
 	// +0xF4 = global.createScenarioInfo(internalFileId, globalStruct)
 	// +0xF8 = global.addUnit(unit)
-	// +0xFC = int RGE_Game_World::removeObject(unitId)
+	// +0xFC = int RGE_Game_World::removeObject(unitId) = remove a unit from array of ids->pointers. Does not destroy unit itself.
 	class STRUCT_GAME_GLOBAL {
 	public:
 		unsigned long int checksum;
@@ -189,15 +189,15 @@ namespace AOE_STRUCTURES {
 		// +0xB0
 		unsigned long int unknown_0B0_playerId; // currently managed playerid?
 		unsigned long int unknownPlayerVar[0x09]; // 9 variables for each player, including gaia
-		// +0xD8
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unitList_type10; // +D8. For unit type = eye candy
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unitList_type20; // +DC. For unit type = flag
+		// +0xD8. "unused cached units" = "removed" units that were not freed (so that memory is reused). Typically for flares, dead units.
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type10; // +D8. Allocated but unused units for unit type = eye candy
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type20; // +DC. Allocated but unused units for unit type = flag
 		// +0xE0
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unitList_type30; // +E0. For unit type = movable
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unitList_type40; // +E4. For unit type = birds
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unitList_type50; // +E8. For unit type = type50
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unitList_type60; // +EC. For unit type = projectiles. 0x520BD0
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unitList_doppleganger; // +F0. list of all dopplegangers ?
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type30; // +E0. Allocated but unused units for unit type = movable
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type40; // +E4. Allocated but unused units for unit type = birds
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type50; // +E8. Allocated but unused units for unit type = type50
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type60; // +EC. Allocated but unused units for unit type = projectiles. 0x520BD0
+		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_doppleganger; // +F0. list of all dopplegangers ?
 		long int global_allowedTimeForAITreatment_ms; // +F4. Time to allocate for AI treatments
 		long int tmp_allowedTimeForAITreatment; // +F8. For internal treatments (temporary, reset to 0 when finished). This is a time (ms) value allowed for AI treatments.
 		long int currentlyManagedAIPlayer; // +FC. A player id. "currentUpdateComputerPlayer"
@@ -218,7 +218,7 @@ namespace AOE_STRUCTURES {
 		// 0x120
 		long int unknown_120;
 
-		AOE_STRUCTURES::STRUCT_PLAYER ** GetPlayerStructPtrTable() const{
+		AOE_STRUCTURES::STRUCT_PLAYER ** GetPlayerStructPtrTable() const {
 			return (AOE_STRUCTURES::STRUCT_PLAYER **) this->ptrPlayerStructPtrTable;
 		}
 		// Returns player structure corresponding to supplied ID. Returns NULL if not found

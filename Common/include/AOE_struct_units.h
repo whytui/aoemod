@@ -35,6 +35,7 @@ namespace AOE_STRUCTURES {
 
 	// Size 0x10
 	// Represents a list of units of the same kind (typically, createable units, etc)
+	// A unit should always belong to ONLY one player ! (but other "unit lists" may reference the unit too, e.g. tile's units)
 	class STRUCT_PER_TYPE_UNIT_LIST_ELEMENT {
 	public:
 		STRUCT_UNIT_BASE *unit;
@@ -43,8 +44,14 @@ namespace AOE_STRUCTURES {
 		unsigned long int unused_0C; // SEEMS to be unused
 	};
 
-	// Player's unit-per-type list. Intermediate structure to a list of all units of a given type (example: createables)
-	// Size 0x0C. Constructor=0x450FF0(0x00544AD4). "Tribe_Object_List"
+#define CHECKSUM_PER_TYPE_UNIT_LIST_LINK_BASE 0x00544AD4
+#define CHECKSUM_PER_TYPE_UNIT_LIST_LINK_CHILD 0x00549B70
+	// Handler of a list of all units of a given type (example: createables)
+	// Can be used to store players units (a list of creatables, etc), units on a tile, "cached" units in global structure, etc)
+	// Size 0x0C. Constructor=0x450EF0(0x00544AD4). "Tribe_Object_List"
+	// Child (0x00549B70): no constructor, see 0x4EFC20/0x4EFC51/0x4EFC82/0x4F0605/0x4F0639. Need to determine the usage of each class
+	// 0x450FE0 = unitListLink.removeUnitListElem(ptrUnit, ptrElemInPlayerUnitList) : removes the link (not the unit !)
+	// 0x451270 = unitListLink.doUpdates() : run unit.Update() on each unit, and unit.ActualRemove if necessary.
 	class STRUCT_PER_TYPE_UNIT_LIST_LINK {
 	public:
 		unsigned long int checksum; // 70 9B 54 00 or D4 4A 54 00
@@ -52,7 +59,7 @@ namespace AOE_STRUCTURES {
 		short int listElemCount; // +08
 		short int unused_0A;
 
-		bool IsCheckSumValid() { return (this->checksum == 0x00549B70) || (this->checksum == 0x00544AD4); }
+		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_PER_TYPE_UNIT_LIST_LINK_CHILD) || (this->checksum == CHECKSUM_PER_TYPE_UNIT_LIST_LINK_BASE); }
 	};
 	static_assert(sizeof(STRUCT_PER_TYPE_UNIT_LIST_LINK) == 0x0C, "STRUCT_PER_TYPE_UNIT_LIST_LINK size");
 
@@ -96,25 +103,26 @@ namespace AOE_STRUCTURES {
 	// Eye candy (type10) / common (base) class for all units (unit instances). Name=RGE_Static_Object
 	// A8 7D 54 00. Size=0x88 (constructor 0x04A64B0)
 	// Methods:
+	// +0x08 = unit.ActualRemove?() called when Update() returns 1 (when status=8)
 	// +0x0C = unit.draw(pDrawArea, arg2, arg3, ptrColorForMap?)
 	// +0x10 = void RGE_Static_Object::shadow_draw(TDrawArea *,short,short,unsigned char)
 	// +0x14 = void RGE_Static_Object::normal_draw(TDrawArea *,short,short)
 	// +0x18 = void RGE_Static_Object::draw_front_frame(TDrawArea *,short,short)
 	// +0x1C = void RGE_Static_Object::draw_back_frame(TDrawArea *,short,short)
 	// +0x20 = void RGE_Static_Object::draw_frame(TDrawArea *,short,short)
-	// +0x24 = unit.timerUpdate() or "update()". Update status +timer things (reload, etc), execute actions, update visibility info+some activity treatment IF player = currently managed AI player
-	// +0x28 = void RGE_Static_Object::check_damage_sprites(void)
+	// +0x24 = unit.timerUpdate() or "update()". Update status +timer things (reload, etc), execute actions, update visibility info+some activity treatment IF player = currently managed AI player. Returns 1=unit to remove
+	// +0x28 = void RGE_Static_Object::check_damage_sprites(void) : eg for buildings & flames
 	// +0x2C = void RGE_Static_Object::rehook(void)
 	// +0x30 = void RGE_Static_Object::save(int)
 	// +0x34 = float unit.teleport(f_posY, f_posX, fPosZ). Types>=Attackable(type50) have a different overload to handle "visibilityInfo".
 	// +0x38 = void RGE_Static_Object::new_sprite(RGE_Sprite *)
 	// +0x3C = void RGE_Static_Object::add_overlay_sprite(RGE_Sprite *,unsigned char)
 	// +0x40 = void RGE_Static_Object::remove_overlay_sprite(RGE_Sprite *)
-	// +0x44 = unit.changeOwner(pPlayer)
+	// +0x44 = unit.changeOwner(pPlayer) or "convertToPlayer". Used for conversion, artefacts, gaia unit found by human
 	// +0x48 = void RGE_Static_Object::modify(float,unsigned char)
 	// +0x4C = void RGE_Static_Object::modify_delta(attribute, float_value) (add attribute)
 	// +0x50 = unitBuilding.applyMultEffect(f_value, attribute) (multiply by percentage)
-	// +0x54 = void RGE_Static_Object::transform(unitDef*)
+	// +0x54 = void RGE_Static_Object::transform(unitDef*) "changeUpdateUnitDef". Used to switch villager type, to assign a dedicated unitDef (conversion)
 	// +0x58 = unit.createDedicatedUnitDef(unitDef*)
 	// +0x5C = unit.setStatus(newStatus). Contains a hack to revive relics/ruins because of relics in a dying transport boat.
 	// +0x68 = void RGE_Static_Object::destroy_obj(void) = set status=7
@@ -133,7 +141,7 @@ namespace AOE_STRUCTURES {
 	// +0xA4 = void unit.stop(). Warning: when calling this, you better update unitAI too...
 	// +0xB4 = unit.setOrientation(float) "newAngle"
 	// +0xB8 = unit.spawnDeadUnit()
-	// +0xC0 = unit.setBeingWorkedOn(pUnit, short, unsigned char)
+	// +0xC0 = unit.setBeingWorkedOn(pUnit, (short)actionTypeId, unsigned char)
 	// +0xC4 = unit.releaseBeingWorkedOn(pUnit)
 	// +0xC8 = unit.isMoving()
 	// +0xCC = unit.getActionTarget()
@@ -163,7 +171,7 @@ namespace AOE_STRUCTURES {
 	// +0x148 = unit.notify(actorUnitId?, impactedUnitId?, notifyTaskId, generic_4, generic_5, generic_6) = add to activity notify queue or fall back to player.notify(...). E.g. 0x426DB0
 	// +0x14C = unit.attackPosition(fposY, fposX, arg3, arg4)
 	// +0x150 = unit.setAttackAction?(targetUnitId, force)
-	// +0x154 = unit.moveTo(fposY, fposX, arg3, arg4, force?) create action move ?
+	// +0x154 = unit.moveTo(fposY, fposX, arg3, arg4, force?) create action move ? MoveAwayFrom?
 	// +0x158 = unit.MoveTo(targetUnitId, maxRange, force)
 	// +0x15C = unit.MoveTo(targetUnitId, force?)
 	// +0x160 = ?? Does nothing and returns 0 for all classes ?
@@ -255,7 +263,7 @@ namespace AOE_STRUCTURES {
 		char unitType; // +4E. Warning: this value is often WRONG. See unitDef value instead. Only 1-byte here, whereas it is 4-bytes in unitDef struct. 70=living, etc. See GLOBAL_UNIT_TYPES
 		char unitCountThatAreTargetingMe; // +4F. Number of (other)units that have "me" as target (repairman, gatherer, attacker...). See 4AADB0. Warning: the count is not reliable: when moving to it, the other unit counts TWICE (and counts for 1 when actually doing the action) + also counts projectiles !
 		// 0x50
-		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *ptrElemInPlayerUnitList; // +50. Link to corresponding reference in player's creatable units list. Can be NULL in saved games (if not "used" yet ?)
+		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *ptrElemInPlayerUnitList; // +50. Link to corresponding reference in player's creatable units list. Can be NULL in loaded games (if not "used" yet = used as a cache)
 		STRUCT_MANAGED_ARRAY unknown_054; // +54 a ptr. about movement ? objectCollisionList ? Units in same Formation ? A list of unitID.
 		STRUCT_MANAGED_ARRAY unitIDsInMyGroup; // +64. list of IDs of the units in same group as me. A limit to 25 in 0x4ABEC8 (beware stack overflow)
 		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code. Warning: some unit don't have one (e.g. lion tame)

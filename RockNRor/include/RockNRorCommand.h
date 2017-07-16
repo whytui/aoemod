@@ -53,6 +53,7 @@
 #include "CustomPopupSystem.h"
 #include "SimpleEditText.h"
 #include "UnitExtensionHandler.h"
+#include "interruption.h"
 
 #pragma once
 

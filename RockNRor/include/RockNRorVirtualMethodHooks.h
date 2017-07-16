@@ -35,6 +35,9 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// Return value is an unknown enum. 2=ok, processed. (unitAI: EDX+0xCC call).
 	long int __stdcall ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2);
 
+	// Return value = 1 on success, 0 if failed
+	long int __stdcall ActivityMoveToMoveAwayFrom(STRUCT_UNIT_ACTIVITY *activity, float posY, float posX, unsigned long int arg3, unsigned long int arg4, long int force);
+
 	// Returns void. This hook handles player's notifications (EDX+0xE8 call).
 	void __stdcall PlayerProcessNotify(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT notifyEvent);
 
@@ -42,6 +45,11 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// Returns 1 on success, 0 on failure
 	long int __stdcall UnitAddPositionToTargetPosArray(STRUCT_UNIT_BASE *unit, STRUCT_UNIT_TARGET_POS *targetPos, long int arg2);
 
+	// Transform a unit from its current "unit definition" to provided "unit definition" (EDX+0x54 call).
+	// Typically used to switch tasks (villagers) : in such case, newUnitDef is player's unitDefinition for the target unitDefId (repair_man, etc)
+	// Also used to assign a dedicated "unit definition" in conversion process: unit will have its own "unitDefinition" (with its own specs)
+	// This is only allowed if unit.status <= 2 (ready) because BASE method fails if status>2 (unit->unitDefinition is NOT updated).
+	void __stdcall UnitTransform(STRUCT_UNIT_BASE *unit, STRUCT_UNITDEF_BASE *newUnitDef);
 
 
 	/*

@@ -51,8 +51,10 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 	// Maps to store ORIGINAL call addresses. Index=class checksum, value=original method call address
 	std::map<unsigned long int, unsigned long int> activityProcessNotifyCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> activityMoveToCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> playerProcessNotifyCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> unitTransformCheckSumAndOriginalAddress;
 
 
 	// Return value is an unknown enum. 2=ok, processed. (unitAI: EDX+0xCC call).
@@ -82,6 +84,63 @@ namespace VIRTUAL_METHOD_HOOKS {
 				MOV result, EAX;
 			}
 		}
+		RECORD_PERF_END(originalCallAddr);
+		return result;
+	}
+
+
+	// Return value = 1 on success, 0 if failed
+	long int __stdcall ActivityMoveToMoveAwayFrom(STRUCT_UNIT_ACTIVITY *activity, float posY, float posX, unsigned long int arg3, unsigned long int arg4, long int force) {
+		unsigned long int originalCallAddr = activityMoveToCheckSumAndOriginalAddress[activity->checksum];
+		assert(activity && activity->IsCheckSumValid());
+		RECORD_PERF_BEGIN(originalCallAddr);
+		long int result = 0;
+		bool runStandardMethod = true;
+
+		// Custom treatments
+		if ((posX < 0) || (posY < 0)) {
+#ifdef __DEBUG // restore to troubleshoot
+#pragma message(__FILE__ " TEMP TROUBLESHOOTING")
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = activity->ptrUnit;
+			assert(unit && unit->IsCheckSumValidForAUnitClass() && unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass());
+			std::string msg = "Canceled invalid activity.MoveTo with negative position for ";
+			msg += unit->unitDefinition->ptrUnitName;
+			msg += " id=";
+			msg += std::to_string(unit->unitInstanceId);
+			traceMessageHandler.WriteMessageNoNotification(msg.c_str());
+			if (unit->unitDefinition->DerivesFromTrainable()) {
+				AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unit->unitDefinition;
+				if ((unitDef->speed > 0) && (unitDef->unitAIType != TribeAIGroupPredatorAnimal)) {
+					if (unit->ptrStructPlayer) {
+						AOE_STRUCTURES::STRUCT_PLAYER *player = AOE_METHODS::PLAYER::ChangeControlledPlayer(unit->ptrStructPlayer->playerId, false);
+						assert(player && player->IsCheckSumValid());
+						AOE_STRUCTURES::PLAYER::SelectOneUnit(player, unit, true);
+					}
+					AOE_METHODS::SetGamePause(true); // seems better for stability.
+					ROCKNROR::SYSTEM::StopExecution(widen(msg).c_str(), true, true);
+				}
+			}
+#else
+			traceMessageHandler.WriteMessageNoNotification("Canceled invalid activity.MoveTo with negative position");
+#endif
+			runStandardMethod = false;
+			result = 0; // failed
+		}
+
+		if (runStandardMethod && (originalCallAddr != 0)) {
+			_asm {
+				MOV ECX, activity;
+				MOV EDX, DS:[ECX];
+				PUSH force;
+				PUSH arg4;
+				PUSH arg3;
+				PUSH posX;
+				PUSH posY;
+				CALL originalCallAddr;
+				MOV result, EAX;
+			}
+		}
+
 		RECORD_PERF_END(originalCallAddr);
 		return result;
 	}
@@ -139,6 +198,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 		// Custom treatments
 		// TODO check with largest map size if this can happen
 		if ((targetPos->posX == 0xFF) || (targetPos->posY == 0xFF)) {
+			runStandardMethod = false; // Prevent game crash
 			std::string msg = "Error with targetPos in UnitAddPositionToTargetPosArray. Unit=";
 			msg += std::to_string(unit->unitInstanceId);
 			msg += ". @ret=";
@@ -152,6 +212,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 			AOE_METHODS::CallWriteText(msg.c_str());
 			AOE_METHODS::SetGamePause(true); // seems better for stability.
 			ROCKNROR::SYSTEM::StopExecution(_T("An error occurred. *FIRST* close this message, then attach a debugger or press ESC to continue."), true, true);
+			// this seems to happen on priests whose MOVE action has NULL target and -1,-1 target pos. Need to find out why.
 		}
 
 		if (runStandardMethod) {
@@ -170,15 +231,50 @@ namespace VIRTUAL_METHOD_HOOKS {
 	}
 
 
+	// Transform a unit from its current "unit definition" to provided "unit definition" (EDX+0x54 call).
+	// Typically used to switch tasks (villagers) : in such case, newUnitDef is player's unitDefinition for the target unitDefId (repair_man, etc)
+	// Also used to assign a dedicated "unit definition" in conversion process: unit will have its own "unitDefinition" (with its own specs)
+	// This is only allowed if unit.status <= 2 (ready) because BASE method fails if status>2 (unit->unitDefinition is NOT updated).
+	void __stdcall UnitTransform(STRUCT_UNIT_BASE *unit, STRUCT_UNITDEF_BASE *newUnitDef) {
+		unsigned long int originalCallAddr = unitTransformCheckSumAndOriginalAddress[unit->checksum];
+		assert(unit && unit->IsCheckSumValidForAUnitClass());
+		RECORD_PERF_BEGIN(originalCallAddr);
+		bool runStandardMethod = true;
+
+		// Fix a game crash (that occurs later) : if status>2, base method does NOT update unit->unitDefinition
+		// but TRAINABLE-level transform method would free "old" unitDefinition anyway => unit->unitDefinition would then refer to invalid memory
+		// Remark: this fix is only needed for TRAINABLE override of "transform" method. Note that BUILDING class also uses this overload.
+		if (unit->unitStatus > GAME_UNIT_STATUS::GUS_2_READY) {
+			std::string msg = "Unit->transform bug tried to use invalid memory. RockNRor prevented the game from crashing. (id=";
+			msg += std::to_string(unit->unitInstanceId);
+			msg += " with status ";
+			msg += std::to_string(unit->unitStatus);
+			msg += ")";
+			traceMessageHandler.WriteMessageNoNotification(msg.c_str());
+			runStandardMethod = false;
+		}
+
+		if (runStandardMethod && (originalCallAddr != 0)) {
+			_asm {
+				MOV ECX, unit;
+				MOV EDX, DS:[ECX];
+				PUSH newUnitDef;
+				CALL originalCallAddr;
+			}
+		}
+
+		RECORD_PERF_END(originalCallAddr);
+	}
 
 
 
 	// Technical declarations for Hook methods (creates small asm hook methods to dispatch to specific methods
 
 	DECLARE_VIRTUAL_METHOD_HANDLER(ActivityProcessNotify)
+	DECLARE_VIRTUAL_METHOD_HANDLER(ActivityMoveToMoveAwayFrom)
 	DECLARE_VIRTUAL_METHOD_HANDLER(PlayerProcessNotify)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitAddPositionToTargetPosArray)
-
+	DECLARE_VIRTUAL_METHOD_HANDLER(UnitTransform)
 
 
 	// Patches ROR process (.rdata section) to connect overloaded virtual methods
@@ -210,13 +306,27 @@ namespace VIRTUAL_METHOD_HOOKS {
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP, 0xCC, ActivityProcessNotify, activityProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_TRANSPORT_SHIP, 0xCC, ActivityProcessNotify, activityProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_TRANSPORT_SHIP]);
 
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_BASE, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_BASE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_BUILDING, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_BUILDING]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_CIVILIAN, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_CIVILIAN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_FISHING_SHIP, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_FISHING_SHIP]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_GAIA_ELEPHANT, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_GAIA_ELEPHANT]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_LION, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_LION]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_MILITARY, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_MILITARY]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_NON_DISCOVERY_ARTEFACT, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_NON_DISCOVERY_ARTEFACT]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_PREDATOR_ANIMAL, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_PREDATOR_ANIMAL]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_PREY_ANIMAL, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_PREY_ANIMAL]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_PRIEST, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_PRIEST]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_TOWER, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_TOWER]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_TRADE_SHIP]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ACTIVITY_TRANSPORT_SHIP, 0x90, ActivityMoveToMoveAwayFrom, activityMoveToCheckSumAndOriginalAddress[CHECKSUM_UNIT_ACTIVITY_TRANSPORT_SHIP]);
+
 			// Player
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_PLAYER, 0xE8, PlayerProcessNotify, playerProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_PLAYER]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_RGE_PLAYER, 0xE8, PlayerProcessNotify, playerProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_RGE_PLAYER]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_GAIA_PLAYER, 0xE8, PlayerProcessNotify, playerProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_GAIA_PLAYER]);
 
 			// Unit
-			//unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_BASE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_BASE]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_ATTACKABLE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_ATTACKABLE]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_BUILDING, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_BUILDING]);
@@ -227,6 +337,8 @@ namespace VIRTUAL_METHOD_HOOKS {
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_PROJECTILE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_PROJECTILE]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TRAINABLE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_TRAINABLE]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TREE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_TREE]);
+
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TRAINABLE, 0x54, UnitTransform, unitTransformCheckSumAndOriginalAddress[CHECKSUM_UNIT_TRAINABLE]); // unit->tranform only needs to be fixed for TRAINABLE class
 
 			CR_DEBUG::AppendTextToLogFile("Virtual methods APIs have been written", true);
 

@@ -1687,6 +1687,7 @@ void RockNRorCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_
 // Fixes missing treatments when a unit changes owner (eg. unit conversion)
 // This is called BEFORE the actual unit owner change process is called. (this is called at the very beginning of unit conversion process)
 // targetUnit is the "victim" (unit that changes owner), actorPlayer is the new owner (player)
+// Target (converted) unit may have 0 HP, and be gonna die: this happens rarely, but is not an error.
 // Technical note: in ROR, unit.changeOwner(newplayer) is [EDX+0x44] call.
 // TODO: this is not called when relics/ruins are taken ?
 void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer) {
@@ -1867,6 +1868,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unit->unitDefinition;
 	assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
 	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return; }
+
 	bool isBuilding = (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING); // Warning: using unit->unitType is risky (not always correct?)
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());

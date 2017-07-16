@@ -93,6 +93,7 @@ void RockNRorGameObjects::FreeAllFarmRebuildInfoList() {
 
 
 // Remove all information concerning a specific unit
+// Does not impact unitExtensions though
 bool RockNRorGameObjects::RemoveAllInfoForUnit(long int unitId, float posX, float posY) {
 	bool result = false;
 	if ((posX >= 0) && (posY >= 0)) {
