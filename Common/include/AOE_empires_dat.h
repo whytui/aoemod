@@ -52,7 +52,7 @@ namespace AOE_CONST_FUNC {
 		TribeAIGroupArcher = 0, // bowman + improved/composite
 		TribeAIGroupBuilding = 3, // All buildings, including towers, wonders, farms, excluding walls.
 		TribeAIGroupCivilian = 4, // All villagers excluding boats !
-		TribeAIGroupFootSoldier = 6, // Barracks infantry
+		TribeAIGroupFootSoldier = 6, // Barracks infantry, excluding slinger
 		TribeAIGroupMountedSoldier = 12, // 0xC ; cavalry
 		TribeAIGroupSiegeWeapon = 13, // 0x0D
 		TribeAIGroupPriest = 18, // 0x12
@@ -226,18 +226,19 @@ namespace AOE_CONST_FUNC {
 		return attackClassNames[a];
 	}
 
+	// Refer to 0x4EBB10 to view implementation
 	enum TECH_DEF_EFFECTS : char {
 		TDE_INVALID = -1,
 		TDE_ATTRIBUTE_MODIFIER_SET = 0, // Warning: For attribute 17 (icon), the effect is ADD, not SET (?)
-		TDE_RESOURCE_MODIFIER_ADD_SET = 1, // add or set value (according to "mode" = effectClass field: 0=set, 1=add)
+		TDE_RESOURCE_MODIFIER_ADD_SET = 1, // add or set value (according to "mode" = effectClass field: 0=set, 1=add) to resource #(effectUnit). Don't mess with "technical" resources... EffectAttribute=unused.
 		TDE_ENABLE_DISABLE_UNIT = 2, // effect class is "enable": 0=disable, 1=enable
 		TDE_UPGRADE_UNIT = 3, // "source" unit = effectUnit, "target" (upgraded) unit = effectClass
 		TDE_ATTRIBUTE_MODIFIER_ADD = 4, // add value
 		TDE_ATTRIBUTE_MODIFIER_MULT = 5, // multiply by a value
 		TDE_RESOURCE_MODIFIER_MULT = 6, // multiply by a value
-		TDE_RESEARCH_COST_MODIFIER = 101,
+		TDE_RESEARCH_COST_MODIFIER = 101, // Not supported by AOE/ROR
 		TDE_DISABLE_RESEARCH = 102, // "value" contains researchId (as float), other fields unused.
-		TDE_RESEARCH_TIME_MODIFIER = 103
+		TDE_RESEARCH_TIME_MODIFIER = 103 // Not supported by AOE/ROR
 	};
 
 	/* Attributes for technology effects

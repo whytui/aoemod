@@ -26,6 +26,7 @@
 #include "drsHandler.h"
 #include "RockNRorLocalization.h"
 #include "CustomPopupBase.h"
+#include "StrategyUpdater.h"
 #include "InGameRockNRorOptionsPopup.h"
 #include "cityPlan.h"
 #include "unitTargeting.h"

@@ -19,6 +19,7 @@ public:
 	CivilizationInfo(int civId);
 	// Variables
 	int civId;
+	bool isDynamicCiv; // True for dynamically-generated civs
 	vector<string> deathmatch_AI_file;
 	vector<string> deathmatch_water_AI_file;
 	vector<string> RM_AI_file_no_water;
@@ -30,7 +31,9 @@ public:
 	void SetCivName(std::string name);
 	void SetCivName(char *name);
 	std::string GetPlayerName(int i) const;
+	// Index 1-9. Returns true if successful (correct index)
 	bool SetPlayerName(int i, std::string name);
+	// Index 1-9. Returns true if successful (correct index)
 	bool SetPlayerName(int i, char *name);
 	bool IsStandard() const;
 	// Returns a randomly-picked player name, empty string if none was found.

@@ -252,7 +252,7 @@ namespace AOE_STRUCTURES
 		bool DerivesFromTrainable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_TRAINABLE) || (this->unitType == (char)AOE_CONST_FUNC::GUT_BUILDING); }
 		// Returns true if the unit definition is type50 or one of its child classes (projectile, living/building). This does not control the checksum.
 		bool DerivesFromAttackable() { return (this->unitType == (char)AOE_CONST_FUNC::GUT_ATTACKABLE) || (this->unitType == (char)AOE_CONST_FUNC::GUT_PROJECTILE) || (this->DerivesFromTrainable()); }
-		unsigned long int GetCopyConstructorAddress() { return 0x440FF0; } // Address of AOE method to create a copy
+		unsigned long int GetCopyConstructorAddress() const { return 0x440FF0; } // Address of AOE method to create a copy
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_BASE) == 0xB8, "STRUCT_UNITDEF_BASE size");
 
@@ -262,7 +262,7 @@ namespace AOE_STRUCTURES
 		float speed; // 0xB8. Unit movement speed.
 		bool IsCheckSumValid() const { return (this->checksum == 0x0054440C); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_FLAGS); }
-		unsigned long int GetCopyConstructorAddress() { return 0x43E930; } // Address of AOE method to create a copy.
+		unsigned long int GetCopyConstructorAddress() const { return 0x43E930; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_FLAG) == 0xBC, "STRUCT_UNITDEF_FLAG size");
 
@@ -274,7 +274,8 @@ namespace AOE_STRUCTURES
 		// 0xBC - no additional fields ?
 		bool IsCheckSumValid() const { return (this->checksum == 0x00544484); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_DOPPLEGANGER); }
-		unsigned long int GetCopyConstructorAddress() { return 0x43EC40; } // Address of AOE method to create a copy.
+		//unsigned long int GetCopyConstructorAddress() const { return 0x43EC40; } // Address of AOE method to create a copy.
+		unsigned long int GetCopyConstructorAddress() const { return 0x43E930; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_DOPPLEGANGER) == 0xBC, "STRUCT_UNITDEF_DOPPLEGANGER size");
 
@@ -299,7 +300,7 @@ namespace AOE_STRUCTURES
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x005444FC); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_MOVABLE); }
-		unsigned long int GetCopyConstructorAddress() { return 0x440910; } // Address of AOE method to create a copy.
+		unsigned long int GetCopyConstructorAddress() const { return 0x440910; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_MOVABLE) == 0xD8, "STRUCT_UNITDEF_MOVABLE size");
 
@@ -330,7 +331,7 @@ namespace AOE_STRUCTURES
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x005443CC); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_COMMANDABLE); }
-		unsigned long int GetCopyConstructorAddress() { return 0x43E010; } // Address of AOE method to create a copy.
+		unsigned long int GetCopyConstructorAddress() const { return 0x43E010; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_COMMANDABLE) == 0xFC, "STRUCT_UNITDEF_COMMANDABLE size");
 
@@ -432,12 +433,12 @@ namespace AOE_STRUCTURES
 		short int stackUnitId; // +172. Additional building added on top on this one ?
 		short int placementTerrainId; // +174.
 		short int oldTerrainId; // +176. Obsolete information ? Used to build roads in early versions (according to AGE3 tooltip) ? Resource ?
-		short int initiatesResearch; // +178.
+		short int initiatesResearch; // +178. A research ID that is triggered when constructing (for the first time) this building.
 		short int unknown_17A; // unused ?
 
 		bool IsCheckSumValid() const { return (this->checksum == 0x00549930); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING); }
-		unsigned long int GetCopyConstructorAddress() { return 0x4EC100; } // Address of AOE method to create a copy.
+		unsigned long int GetCopyConstructorAddress() const { return 0x4EC100; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_BUILDING) == 0x17C, "STRUCT_UNITDEF_BUILDING size");
 
@@ -446,7 +447,7 @@ namespace AOE_STRUCTURES
 	public:
 		bool IsCheckSumValid() const { return (this->checksum == 0x005499BC); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TREE); }
-		unsigned long int GetCopyConstructorAddress() { return 0x4ED220; } // Address of AOE method to create a copy.
+		unsigned long int GetCopyConstructorAddress() const { return 0x4ED220; } // Address of AOE method to create a copy.
 	};
 	static_assert(sizeof(STRUCT_UNITDEF_TREE) == 0xB8, "STRUCT_UNITDEF_TREE size");
 

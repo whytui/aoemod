@@ -63,6 +63,7 @@ public:
 };
 
 
+namespace ROCKNROR {
 namespace STRATEGY {
 
 
@@ -228,7 +229,7 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_PLAYER *
 	AOE_STRUCTURES::STRUCT_AI *mainAI = player->ptrAIStruct;
 	if (!mainAI) { return; }
 	// Call generic method
-	UpdateStrategyWithUnreferencedExistingUnits(&mainAI->structBuildAI, -1, TAIUnitClass::AIUCNone);
+	ROCKNROR::STRATEGY::UpdateStrategyWithUnreferencedExistingUnits(&mainAI->structBuildAI, -1, TAIUnitClass::AIUCNone);
 }
 
 
@@ -1489,4 +1490,5 @@ std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, bool 
 }
 
 
+}
 }

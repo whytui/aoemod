@@ -18,7 +18,7 @@ CustomPlayerAI::CustomPlayerAI() {
 void CustomPlayerAI::ResetAllInfo() {
 	this->ResetOwnFields();
 	for (int i = 0; i < 9; i++) {
-		STRATEGY::strategyUpdater[i].ResetAllInfo();
+		ROCKNROR::STRATEGY::strategyUpdater[i].ResetAllInfo();
 	}
 	this->militaryAIInfo.ResetAllInfo();
 	this->unitGroupAI.ResetAllInfo();
@@ -68,7 +68,7 @@ bool CustomPlayerAI::RunStrategyUpdate(long int currentGameTime) {
 	long int updateDelay_ms = ROCKNROR::crInfo.configInfo.tacticalAIUpdateDelay * 1000;
 	if (this->isValidPlayer && this->isPlayerAlive &&
 		(currentGameTime - this->lastStrategyAnalysisTime > updateDelay_ms)) {
-		STRATEGY::AnalyzeStrategy(&this->mainAI->structBuildAI);
+		ROCKNROR::STRATEGY::AnalyzeStrategy(&this->mainAI->structBuildAI);
 		return true;
 	}
 	return false;
@@ -83,11 +83,11 @@ void CustomPlayerAI::RunInitialStrategyAnalysis() {
 	if (!gameSettings || !gameSettings->IsCheckSumValid()) { return; }
 	if (gameSettings->rgeGameOptions.difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD) {
 		// Hard/hardest: Search for techs that can be added to strategy and would improve my military units
-		STRATEGY::AddUsefulMilitaryTechsToStrategy(this->myPlayer);
+		ROCKNROR::STRATEGY::AddUsefulMilitaryTechsToStrategy(this->myPlayer);
 	}
 	if (gameSettings->rgeGameOptions.difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_EASY) {
 		// All levels except easiest
-		STRATEGY::AdaptStrategyToMaxPopulation(this->myPlayer);
+		ROCKNROR::STRATEGY::AdaptStrategyToMaxPopulation(this->myPlayer);
 	}
 }
 
@@ -163,7 +163,7 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 		long int timeSinceLastPanicMode_ms = (global->currentGameTime - tacAI->lastPanicModeStrategyUpdateTime);
 		panicModeIsEligible &= (timeSinceLastPanicMode_ms >= (ROCKNROR::crInfo.configInfo.panicModeDelay * 1000));
 		if (panicModeIsEligible) {
-			STRATEGY::ManagePanicMode(tacAI->ptrMainAI, enemyPlayerId, &this->militaryAIInfo);
+			ROCKNROR::STRATEGY::ManagePanicMode(tacAI->ptrMainAI, enemyPlayerId, &this->militaryAIInfo);
 		}
 	}
 

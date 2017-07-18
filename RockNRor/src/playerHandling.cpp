@@ -74,7 +74,7 @@ void CheckAIWhenEnablingAIControl(int playerId) {
 // This will run various actions to fix strategy, etc (example: do not build buildings human already built).
 // The method will do nothing if player is NULL or if its AI structure is NULL.
 void CheckAIWhenEnablingAIControl(AOE_STRUCTURES::STRUCT_PLAYER *player) {
-	STRATEGY::UpdateStrategyWithUnreferencedExistingUnits(player);
+	ROCKNROR::STRATEGY::UpdateStrategyWithUnreferencedExistingUnits(player);
 }
 
 

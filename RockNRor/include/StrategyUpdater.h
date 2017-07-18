@@ -33,7 +33,7 @@ bool PrepareUnitToAddIfPossible(AOE_STRUCTURES::STRUCT_PLAYER *player, short int
 	long int *actorCounter, short int *lastCostDAT_ID, float remainingResources[], float tempCost[]);
 
 
-
+namespace ROCKNROR {
 namespace STRATEGY {
 
 	// Class that handles in-game strategy handling
@@ -95,4 +95,5 @@ namespace STRATEGY {
 	// Default result is false, this returns true only for specific (custom) cases.
 	bool ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem);
 
+}
 }

@@ -98,7 +98,7 @@ void ApplyStrategyGenerationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 		if (isDM) {
 			traceMessageHandler.WriteMessage("Strategy generation for deathmatch games is not supported yet");
 		} else {
-			STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(&ROCKNROR::crInfo, player);
+			ROCKNROR::STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(&ROCKNROR::crInfo, player);
 			sb.CreateStrategyFromScratch();
 		}
 	}

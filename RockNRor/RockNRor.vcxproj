@@ -121,9 +121,11 @@
     <ClInclude Include="include\buttonBar.h" />
     <ClInclude Include="include\buttonBarCommon.h" />
     <ClInclude Include="include\cityPlan.h" />
+    <ClInclude Include="include\civHandling.h" />
     <ClInclude Include="include\civilizationInfo.h" />
     <ClInclude Include="include\combatAI.h" />
     <ClInclude Include="include\commonConfigEnums.h" />
+    <ClInclude Include="include\CustomCiv.h" />
     <ClInclude Include="include\GameEventHandler.h" />
     <ClInclude Include="include\interruption.h" />
     <ClInclude Include="include\RockNRorCommand.h" />
@@ -179,7 +181,9 @@
     <ClInclude Include="include\StrategyBuilder.h" />
     <ClInclude Include="include\StrategyPotentialElemInfo.h" />
     <ClInclude Include="include\StrategyUpdater.h" />
+    <ClInclude Include="include\techDefHandling.h" />
     <ClInclude Include="include\TechnologyFilter.h" />
+    <ClInclude Include="include\TechTreeAnalyzer.h" />
     <ClInclude Include="include\TileSetHandler.h" />
     <ClInclude Include="include\traceMessage.h" />
     <ClInclude Include="include\UI_utilities.h" />
@@ -209,8 +213,10 @@
     <ClCompile Include="src\buttonBar.cpp" />
     <ClCompile Include="src\buttonBarCommon.cpp" />
     <ClCompile Include="src\cityPlan.cpp" />
+    <ClCompile Include="src\civHandling.cpp" />
     <ClCompile Include="src\civilizationInfo.cpp" />
     <ClCompile Include="src\combatAI.cpp" />
+    <ClCompile Include="src\CustomCiv.cpp" />
     <ClCompile Include="src\GameEventHandler.cpp" />
     <ClCompile Include="src\interruption.cpp" />
     <ClCompile Include="src\RockNRorCommand.cpp" />
@@ -260,6 +266,8 @@
     <ClCompile Include="src\StrategyBuilder.cpp" />
     <ClCompile Include="src\StrategyPotentialElemInfo.cpp" />
     <ClCompile Include="src\StrategyUpdater.cpp" />
+    <ClCompile Include="src\techDefHandling.cpp" />
+    <ClCompile Include="src\TechTreeAnalyzer.cpp" />
     <ClCompile Include="src\TilesetHandler.cpp" />
     <ClCompile Include="src\traceMessages.cpp" />
     <ClCompile Include="src\UnitCustomMethods.cpp" />

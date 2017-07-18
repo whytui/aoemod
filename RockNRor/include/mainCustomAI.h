@@ -42,10 +42,10 @@ namespace CUSTOM_AI {
 
 		// Safely get strategyUpdater for the specified player.
 		// Returns NULL if player is invalid
-		STRATEGY::StrategyUpdater *GetStrategyUpdater(long int playerId) {
+		ROCKNROR::STRATEGY::StrategyUpdater *GetStrategyUpdater(long int playerId) {
 			assert((playerId >= 0) && (playerId < 9));
 			if ((playerId < 0) || (playerId >= 9)) { return NULL; }
-			return &STRATEGY::strategyUpdater[playerId];
+			return &ROCKNROR::STRATEGY::strategyUpdater[playerId];
 		}
 
 

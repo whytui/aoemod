@@ -23,6 +23,7 @@
 
 using namespace AOE_CONST_FUNC;
 
+namespace ROCKNROR {
 namespace STRATEGY {
 
 const char CST_ROCKNROR_FAKE_STRATELEM_MAXPOP_BEGIN[] = "RockNRorMaxPopulation";
@@ -166,4 +167,5 @@ AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetRockNRorMaxPopulationBeginStratElem(
 std::string ExportStrategyToText(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, bool toAIFileFormat);
 
 
+}
 }

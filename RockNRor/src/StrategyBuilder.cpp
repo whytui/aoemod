@@ -1,6 +1,6 @@
 #include "../include/StrategyBuilder.h"
 
-using namespace STRATEGY;
+using namespace ROCKNROR::STRATEGY;
 
 // Set default value for random factor (a %)
 int StrategyBuilder::randomPercentFactor = 30;

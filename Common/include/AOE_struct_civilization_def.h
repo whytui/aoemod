@@ -23,20 +23,18 @@ namespace AOE_STRUCTURES
 	public:
 		unsigned long int checksum; // 28 9A 54 00
 		char civilizationName[0x14];
-		short int civUnitDefCount; // a civilization has its own unit definitions...
+		short int civUnitDefCount; // a civilization has its own unit definitions... But please always keep the same count for ALL civs (or the game will crash because of unit conversions)
 		short int unused_1A; // probably unused.
-	private:
 		STRUCT_UNITDEF_BASE **ptrUnitDefArray; // Warning: when reading empires.dat, values are temporarily 0/1 (isUnitEnabledForCiv). Array size is civUnitDefCount
-	public:
 		// 0x20
 		short int civResourcesCount;
 		short int unused_22; // probably unused.
 		float *ptrResourceValues;  // List element count is civResourcesCount
 		char graphicSetId; // +28 = tileset.
 		char alwaysOne; // +29. Set (hardcoded) in 4EF503
-		short int techTreeId;
+		short int techTreeId; // +2A. A technology ID or -1 (none).
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_CIVILIZATION_DEF; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_CIVILIZATION_DEF; }
 		// Safely get a unit definition. Returns NULL if the unit does not exist.
 		STRUCT_UNITDEF_BASE *GetUnitDef(short int DAT_ID) const {
 			if ((DAT_ID < 0) || (DAT_ID >= this->civUnitDefCount)) { return NULL; }

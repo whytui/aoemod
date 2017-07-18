@@ -84,10 +84,11 @@ namespace AOE_CONST_FUNC
 
 
 	// Researches status (EXE internal values)
+	// See also the comments on STRUCT_RESEARCH_DEF
 	enum RESEARCH_STATUSES : short int {
 		CST_RESEARCH_STATUS_DISABLED = -1, // The research is disabled for this player
 		CST_RESEARCH_STATUS_WAITING_REQUIREMENT = 0, // The research exists in the tech tree but is not visible yet. A requirement is missing.
-		CST_RESEARCH_STATUS_AVAILABLE = 1, // The research is available and can be researched now
+		CST_RESEARCH_STATUS_AVAILABLE = 1, // The research is available and can be researched now. If researchTime=0, then it is automatically developed !
 		CST_RESEARCH_STATUS_BEING_RESEARCHED = 2, // The research is currently being researched
 		CST_RESEARCH_STATUS_DONE_OR_INVALID = 3 // The research has been researched or is invalid. It has no more role/interaction (effect is active)
 	};

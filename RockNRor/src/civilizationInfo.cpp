@@ -16,6 +16,7 @@ CivilizationInfo::CivilizationInfo(int civId) {
 void CivilizationInfo::ConstructorInit() {
 	this->civId = -1;
 	this->SetCivName("");
+	this->isDynamicCiv = false;
 	for (int i = 1; i <= 9; i++) {
 		this->SetPlayerName(i, "");
 	}

@@ -17,6 +17,10 @@ RockNRorInfo::RockNRorInfo() {
 	this->hasRemovePlayerInitialAgeInScenarioInit = false;
 	this->ResetVariables();
 
+	// empires.dat variables are NOT game-dependent: do not initialize them in ResetVariables().
+	this->empiresDatCivCount = 0;
+	this->empiresDatTechDefCount = 0;
+
 	for (int x = 0; x <= CST_INT_DISTANCE_VALUES_MAX_COORDINATE; x++) {
 		for (int y = 0; y <= CST_INT_DISTANCE_VALUES_MAX_COORDINATE; y++) {
 			int v = (int)sqrtf((float)(x*x + y*y)); // Intermediate values can be higher than 127...

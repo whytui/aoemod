@@ -23,7 +23,7 @@ bool PrepareUnitToAddIfPossible(AOE_STRUCTURES::STRUCT_PLAYER *player, short int
 }
 
 
-
+namespace ROCKNROR {
 namespace STRATEGY {
 ;
 
@@ -100,7 +100,7 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *lastNonTowerElement = fakeFirstStratElem;
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *goodDevelopmentPointElement = NULL; // Represents the location in strategy where we can assume player is strong enough to insert optional researches. Be careful, AI can skip a certain number of items (10 according to SN numbers)
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem_bronzeAge = NULL;
-	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *rockNRorMaxPopBegin = GetRockNRorMaxPopulationBeginStratElem(buildAI);
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *rockNRorMaxPopBegin = ROCKNROR::STRATEGY::GetRockNRorMaxPopulationBeginStratElem(buildAI);
 	float *resources = (float *)player->ptrResourceValues;
 
 	// Do only 1 loop on strategy and collect all necessary information.
@@ -977,7 +977,7 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 				}
 			} else {
 				// Insert new
-				STRATEGY::AddUnitInStrategy((AOE_STRUCTURES::STRUCT_BUILD_AI *) buildAI, 0, 1, unitId_actor, AIUCLivingUnit, unitId_toAdd, player);
+				ROCKNROR::STRATEGY::AddUnitInStrategy((AOE_STRUCTURES::STRUCT_BUILD_AI *) buildAI, 0, 1, unitId_actor, AIUCLivingUnit, unitId_toAdd, player);
 			}
 
 			totalPanicModeElemCount++;
@@ -1039,7 +1039,7 @@ bool STRATEGY::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI
 	if (stratElem->unitDAT_ID == CST_UNITID_WONDER) {
 		// *****
 		// Make sure all researches from my strategy are already done before starting a wonder
-		if (!STRATEGY::IsStrategyCompleteForWonder(ai)) {
+		if (!ROCKNROR::STRATEGY::IsStrategyCompleteForWonder(ai)) {
 			return true;
 		}
 
@@ -1133,4 +1133,5 @@ bool STRATEGY::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI
 }
 
 
+}
 }

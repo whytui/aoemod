@@ -10,6 +10,7 @@
 
 using namespace AOE_CONST_FUNC;
 
+namespace ROCKNROR {
 namespace STRATEGY {
 	
 	// Represents various military categories used to help strategy building decisions
@@ -104,7 +105,7 @@ namespace STRATEGY {
 	public:
 		PotentialResearchInfo();
 		short int researchId;
-		short int requiredAge; // The age research that is required (direct or indirect requirement). -1 means no age requirement.
+		short int requiredAge; // The age research ID that is required (direct or indirect requirement). -1 means no age requirement, 100=stone, etc.
 		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *researchDef;
 		AOE_STRUCTURES::STRUCT_TECH_DEF *techDef;
 		bool hasOptionalRequirements;
@@ -146,4 +147,5 @@ namespace STRATEGY {
 		int unitsToBeTrained; // Number of (always retrainable) units that are trained in such buildings
 	};
 	
+}
 }

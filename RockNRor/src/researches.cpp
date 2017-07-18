@@ -96,7 +96,7 @@ bool ResearchHasOptionalRequirements(STRUCT_RESEARCH_DEF *resDef) {
 short int GetAgeResearchFromDirectRequirement(STRUCT_RESEARCH_DEF *researchDef) {
 	if (researchDef == NULL) { return -1; }
 	for (int iReq = 0; iReq < 4; iReq++) {
-		// Age researches are consecutive. Republic age w ould be next one (104) if enabled
+		// Age researches are consecutive. Republic age would be next one (104) if enabled
 		if ((researchDef->requiredResearchId[iReq] >= CST_RSID_STONE_AGE) &&
 			(researchDef->requiredResearchId[iReq] <= CST_RSID_IRON_AGE)) {
 			return researchDef->requiredResearchId[iReq]; // does not support more than 1 age in dependencies (ok, it is stupid)

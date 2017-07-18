@@ -23,8 +23,10 @@ using namespace AOE_STRUCTURES;
 
 
 // External dependency because RockNRor fixes some bugs in player handling primitives
+namespace ROCKNROR {
 namespace STRATEGY {
 	extern void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_PLAYER *player);
+}
 }
 
 namespace AOE_METHODS {

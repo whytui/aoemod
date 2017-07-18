@@ -11,6 +11,11 @@
 namespace AOE_STRUCTURES {
 
 	// size = 0x3C. "Player tech" ?
+	// Remark: a research is automatically triggered (developed)
+	// when (number of "done" requiredResearchId >= minRequiredResearchesCount) AND researchTime==0 (trick in 0x4EB4C0: non-BEING_RESEARCHED researches have "progress time=0)
+	// when a building is constructed for the first time (if building.unitDef.initiateResearch is set)
+	// Otherwise, research status must be CST_RESEARCH_STATUS_AVAILABLE (1), and player has to run development in appropriate building.
+	// See 0x4EB38D = playerResearchInfo.updateResearchStatusesWithRequirements
 	class STRUCT_RESEARCH_DEF {
 	public:
 		char *researchName;

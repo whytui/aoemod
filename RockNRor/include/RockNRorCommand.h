@@ -54,6 +54,8 @@
 #include "SimpleEditText.h"
 #include "UnitExtensionHandler.h"
 #include "interruption.h"
+#include "CustomCiv.h"
+#include "TechTreeAnalyzer.h"
 
 #pragma once
 
@@ -155,12 +157,14 @@ public:
 	// Does all custom stuff on random maps / deathmatches before game start : changes on game settings (map type/size, etc)
 	// Does NOT apply to scenario/campaign/load saved game.
 	// Warning: most game structures are not available yet ! It is recommended to only work with STRUCT_GAME_SETTINGS, nothing else.
+	// However GLOBAL structure (always) already exists and DAT file HAS (always) already been loaded into internal data.
 	// Return false if failed.
 	bool ApplyCustomizationOnRandomGameSettings();
 
 	// Does all custom stuff on random maps / deathmatches at game start : custom personnality values, strategy, etc.
 	// These are changes that are applied when game is loaded (do not interfere here with settings like map size, etc)
 	// Does NOT apply to scenario/campaign/load saved game.
+	// Note: when this is called, TECH tree/initial age researches have ALREADY been applied.
 	// Return false if failed.
 	bool ApplyCustomizationOnRandomGameStart();
 
@@ -169,7 +173,7 @@ public:
 	void InitMyGameInfo();
 
 
-	// This fixes nextStrategyAIExecutionCounter flag for all players (useful for loaded games)
+	// This fixes needGameStartAIInit flag for all players (useful for loaded games)
 	void FixGameStartAIInitForPlayers();
 
 	// Returns true if AI file selection was overriden (do NOT let normal code be executed), false to let normal code be executed

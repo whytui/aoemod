@@ -92,6 +92,10 @@ public:
 	long int passiveConversionAttemptsCount[9]; // Per playerId
 	long int passiveConversionSuccessfulAttemptsCount[9]; // Per playerId
 
+	// Info about DAT file and its data
+	short int empiresDatCivCount; // Number of civilizations in empires.dat, INCLUDING gaia
+	long int empiresDatTechDefCount; // Number of tech def in empires.dat
+
 	// UI Variables : RockNRor yes/no dialog
 	unsigned long int *customYesNoDialogVar;  // RockNRor's dialog struct. NULL means dialog does not exist.
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGameMenuOptionsBtnVar;

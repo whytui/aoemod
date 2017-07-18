@@ -100,21 +100,21 @@ namespace AOE_STRUCTURES {
 		char techName[0x22]; // +02. Almost never valued ?
 		short int effectCount; // +24
 		short int unknown_26; // probably unused
-		STRUCT_TECH_DEF_EFFECT *ptrEffects; // +28. Array of effects. Count = effectCount.
+		STRUCT_TECH_DEF_EFFECT *ptrEffects; // +28. Array of effects. Count = effectCount. NULL when effectCount==0.
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF) == 0x2C, "STRUCT_TECH_DEF size");
 
 
 #define CHECKSUM_RGE_EFFECT 0x005443BC // Parent class. Constructor=0x43B480(fromFile),0x43B5F0(fromFileName), destructor 0x43B7D0
 #define CHECKSUM_TECH_DEF_INFO 0x00549920 // Child class (tribe)
-	// Size = 0x0C. Constructor=0x4EBAC0
+	// Size = 0x0C. Constructor=0x4EBAC0 = ccor(internalFileId), parent ccor=0x43B480.
 	// "RGE_effects" (parent) or "Tribe_Effects"
+	// Container for technology definitions (effects)
+	// +0x08 = techDefInfo.applyTech((word)technologyId, playerStruct), 0x4EBB10 for "tribe" class (child)
 	class STRUCT_TECH_DEF_INFO {
 	public:
 		unsigned long int checksum; // 20 99 54 00 (TribeEffects: use this one) or BC 43 54 00 (RGE_Effects)
-	private:
-		STRUCT_TECH_DEF *ptrTechDefArray;
-	public:
+		STRUCT_TECH_DEF *ptrTechDefArray; // +04. Please use GetTechDef if possible.
 		long int technologyCount;
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_RGE_EFFECT) || (this->checksum == CHECKSUM_TECH_DEF_INFO); }
@@ -145,10 +145,10 @@ namespace AOE_STRUCTURES {
 		case AOE_CONST_FUNC::TUA_DEFAULT_ARMOR:
 		case AOE_CONST_FUNC::TUA_INTELLIGENT_PROJECTILE: // 1 is better than 0 (not completely true for slow projectiles ?)
 			return 1;
-		case AOE_CONST_FUNC::TUA_ATTACK_RELOAD_TIME: // Longer reload time = shoots less
+		case AOE_CONST_FUNC::TUA_ATTACK_RELOAD_TIME: // Longer reload time = shoots less often
 		case AOE_CONST_FUNC::TUA_SIZE_RADIUS1: // Bigger = not an advantage (generally)
 		case AOE_CONST_FUNC::TUA_SIZE_RADIUS2: // Bigger = not an advantage (generally)
-		case AOE_CONST_FUNC::TUA_ROTATION_SPEED: // most units have 0. other values are worst (bigdaddy): have more difficulties to move (turn)
+		case AOE_CONST_FUNC::TUA_ROTATION_SPEED: // most units have 0. other values are worse (bigdaddy): have more difficulties to move (turn)
 		case AOE_CONST_FUNC::TUA_POPULATION_COST: // For logistics: decreasing the cost is better
 		case AOE_CONST_FUNC::TUA_ADD_COST_AMOUNT:
 			return -1;

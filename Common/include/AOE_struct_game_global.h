@@ -149,7 +149,7 @@ namespace AOE_STRUCTURES {
 		short int unknown_03E;
 		// +0x40
 		STRUCT_PLAYER **ptrPlayerStructPtrTable; // points to table of player struct addresses (pointers)
-		short int civCount; // +44. Number of civilizations.
+		short int civCount; // +44. Number of civilizations, including gaia (index 0).
 		short int unknown_046;
 		STRUCT_CIVILIZATION_DEF **civilizationDefinitions; // +48. A pointer to the array of pointers to civ definitions. Array size is civCount
 		STRUCT_TECH_DEF_INFO *technologiesInfo; // +4C. 20 99 54 00 or BC 34 54 00 (parent?)
@@ -231,6 +231,11 @@ namespace AOE_STRUCTURES {
 		AOE_STRUCTURES::STRUCT_TECH_DEF *GetTechDef(short int techDefId) const {
 			if (!this->technologiesInfo || !this->technologiesInfo->IsCheckSumValid()) { return NULL; }
 			return this->technologiesInfo->GetTechDef(techDefId);
+		}
+		// Get a civilization definition, or NULL if not found
+		AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *GetCivDef(short int civDefId) const {
+			if (!this->civilizationDefinitions || (this->civCount < civDefId)) { return NULL; }
+			return this->civilizationDefinitions[civDefId];
 		}
 		// Returns the array of (float) values for demanded terrain restriction.
 		// 0 = not accessible, >0 means accessible and is the value for armor damage multiplier

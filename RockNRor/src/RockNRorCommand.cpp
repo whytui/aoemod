@@ -752,11 +752,16 @@ void RockNRorCommand::UpdateTechAddWorkRateWithMessage(short int techId, short i
 
 
 // This is called just after empires.dat is loaded.
-// Warning: changes here are applied on civ definitions are done once and for all, and impact all games.
+// Warning: any change done here is applied on civ definitions are done once and for all, and impact all games.
 void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global);
 	if (!global || !global->IsCheckSumValid()) { return; }
+
+	// Save some original values before they (possibly) change
+	ROCKNROR::crInfo.empiresDatTechDefCount = (global->technologiesInfo == NULL) ? 0 : global->technologiesInfo->technologyCount;
+	ROCKNROR::crInfo.empiresDatCivCount = global->civCount;
+
 	// Show hidden units in editor
 	assert(global->civCount < 256); // it is a short (2 bytes)
 	if (ROCKNROR::crInfo.configInfo.showHiddenUnitsInEditor > 0) {
@@ -1005,8 +1010,8 @@ void RockNRorCommand::OnGameStart() {
 		}
 	}
 
-	// Fix IsScenario flag to correct value (not set when a game is loaded)
 	if (settings->isSavedGame) {
+		// Fix IsScenario flag to correct value (not set when a game is loaded)
 		settings->rgeGameOptions.isScenario = 0; // Default: consider it is not a scenario
 		// Guess if it is a scenario from scenario information
 		if (scInfo && scInfo->IsCheckSumValid()) {
@@ -1039,7 +1044,7 @@ void RockNRorCommand::OnGameStart() {
 		}
 	} else {
 		if (scInfo && settings->allTechs) {
-			scInfo->fullTechTree = 1;
+			scInfo->fullTechTree = 1; // this field is saved, but not initialized in standard code, so we do the init here.
 			for (int i = 0; i < _countof(scInfo->playersStartingAge); i++) {
 				switch (settings->initialAgeChoice) {
 					// Warning: scInfo->playersStartingAge values are a different enum (0-4)
@@ -1151,6 +1156,7 @@ void RockNRorCommand::OnGameStart() {
 // Does all custom stuff on random maps / deathmatches before game start : changes on game settings (map type/size, etc)
 // Does NOT apply to scenario/campaign/load saved game.
 // Warning: most game structures are not available yet ! It is recommended to only work with STRUCT_GAME_SETTINGS, nothing else.
+// However GLOBAL structure (always) already exists and DAT file HAS (always) already been loaded into internal data.
 // Return false if failed.
 bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -1162,6 +1168,17 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 
 	// Do custom stuff on "settings" here...
 
+	// TEST
+#ifdef _DEBUG
+	bool useFakeCiv = true;
+	if (useFakeCiv) {
+		ROCKNROR::STRATEGY::TechTreeAnalyzer tta;
+		bool res = tta.AnalyzeTechTree();
+		//ROCKNROR::CUSTOMCIV::CustomCivHandler h;
+		//h.CreateFakeRandomCivsForAllPlayers();
+	}
+#endif
+
 	return true;
 }
 
@@ -1169,6 +1186,7 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 // Does all custom stuff on random maps / deathmatches at game start : custom personality values, strategy, initial resources, etc.
 // These are changes that are applied when game is loaded (do not interfere here with settings like map size, etc)
 // Does NOT apply to scenario/campaign/load saved game.
+// Note: when this is called, TECH tree/initial age researches have ALREADY been applied.
 // Return false if failed.
 bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -1280,7 +1298,7 @@ void RockNRorCommand::InitMyGameInfo() {
 }
 
 
-// This fixes nextStrategyAIExecutionCounter flag for all players (useful for loaded games)
+// This fixes needGameStartAIInit flag for all players (useful for loaded games)
 void RockNRorCommand::FixGameStartAIInitForPlayers() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
@@ -1356,7 +1374,7 @@ bool RockNRorCommand::ManageAIFileSelectionForPlayer(char civilizationId, char *
 	char bufFileName[512];
 	sprintf_s(bufFileName, "%s\\%s", gameSettings->gameDirFullPath, aiFileBuffer);
 	if (!CheckFileExistence(bufFileName)) {
-		std::string msg = std::string("Error: Could not find file: ") + bufFileName;
+		std::string msg = std::string("Error (strategy): Could not find file: ") + bufFileName;
 		traceMessageHandler.WriteMessage(msg);
 		*aiFileBuffer = 0; // clear filename because it's invalid.
 	}
@@ -1472,12 +1490,12 @@ void RockNRorCommand::AfterAddElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI 
 	for (int i = 0; i < countAdded; i++) {
 		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *newElem = curElem->next;
 		// Try to update strategy if there is an "unreferenced" existing unit that match newly-added element
-		STRATEGY::UpdateStrategyWithUnreferencedExistingUnits(buildAI, newElem->unitDAT_ID, newElem->elementType);
+		ROCKNROR::STRATEGY::UpdateStrategyWithUnreferencedExistingUnits(buildAI, newElem->unitDAT_ID, newElem->elementType);
 
 		// Granary / SP that are inserted at very beginning of strategy: move it after first house.
 		if (((newElem->unitDAT_ID == CST_UNITID_GRANARY) || (newElem->unitDAT_ID == CST_UNITID_STORAGE_PIT)) && (insertionPos < 2)) {
 			// Warning: this may move strategy element !
-			STRATEGY::MoveStrategyElement_after_ifWrongOrder(buildAI, CST_UNITID_HOUSE, TAIUnitClass::AIUCBuilding, newElem->unitDAT_ID, TAIUnitClass::AIUCNone);
+			ROCKNROR::STRATEGY::MoveStrategyElement_after_ifWrongOrder(buildAI, CST_UNITID_HOUSE, TAIUnitClass::AIUCBuilding, newElem->unitDAT_ID, TAIUnitClass::AIUCNone);
 		}
 		curElem = curElem->next; // We are sure curElem did not move, use this (newElem may have been moved forward in strategy)
 	}

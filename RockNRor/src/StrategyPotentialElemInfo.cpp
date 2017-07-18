@@ -1,6 +1,6 @@
 #include "../include/StrategyBuilder.h"
 
-using namespace STRATEGY;
+using namespace ROCKNROR::STRATEGY;
 
 
 PotentialUnitInfo::PotentialUnitInfo() {

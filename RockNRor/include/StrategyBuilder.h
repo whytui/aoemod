@@ -19,6 +19,7 @@
 
 using namespace AOE_CONST_FUNC;
 
+namespace ROCKNROR {
 namespace STRATEGY {
 
 	// Class that handles the selection of military units for strategy creation.
@@ -311,4 +312,5 @@ namespace STRATEGY {
 		int CreateSecondaryBuildingStrategyElements();
 	};
 
+}
 }

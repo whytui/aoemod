@@ -909,7 +909,7 @@ void RockNRorInstance::OverloadIsStratElemUnitAlive_ResetElement(REG_BACKUP *REG
 
 	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Run technical fixes (even in improve AI is disabled)
-		STRATEGY::CheckStratElemAliveForReset(buildAI, currentElement);
+		ROCKNROR::STRATEGY::CheckStratElemAliveForReset(buildAI, currentElement);
 	}
 
 	// This corresponds to original code we overloaded to call ROR_API: return alive_count. If >0, the strategy element will be reset.
