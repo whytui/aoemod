@@ -126,6 +126,7 @@
     <ClInclude Include="include\combatAI.h" />
     <ClInclude Include="include\commonConfigEnums.h" />
     <ClInclude Include="include\CustomCiv.h" />
+    <ClInclude Include="include\DetailedResearchDef.h" />
     <ClInclude Include="include\GameEventHandler.h" />
     <ClInclude Include="include\interruption.h" />
     <ClInclude Include="include\RockNRorCommand.h" />
@@ -217,6 +218,7 @@
     <ClCompile Include="src\civilizationInfo.cpp" />
     <ClCompile Include="src\combatAI.cpp" />
     <ClCompile Include="src\CustomCiv.cpp" />
+    <ClCompile Include="src\DetailedResearchDef.cpp" />
     <ClCompile Include="src\GameEventHandler.cpp" />
     <ClCompile Include="src\interruption.cpp" />
     <ClCompile Include="src\RockNRorCommand.cpp" />

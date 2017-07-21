@@ -345,6 +345,9 @@
     <ClInclude Include="include\TechTreeAnalyzer.h">
       <Filter>Fichiers d%27en-tête\Strategy</Filter>
     </ClInclude>
+    <ClInclude Include="include\DetailedResearchDef.h">
+      <Filter>Fichiers d%27en-tête\Strategy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\tinyxml\tinystr.cpp">
@@ -582,6 +585,9 @@
       <Filter>Fichiers sources\RockNRorFeatures</Filter>
     </ClCompile>
     <ClCompile Include="src\TechTreeAnalyzer.cpp">
+      <Filter>Fichiers sources\Strategy</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DetailedResearchDef.cpp">
       <Filter>Fichiers sources\Strategy</Filter>
     </ClCompile>
   </ItemGroup>
