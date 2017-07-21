@@ -27,6 +27,7 @@
 #include "RockNRorLocalization.h"
 #include "RockNRorCommon.h"
 #include "unitDefHandling.h"
+#include "TechTreeAnalyzer.h"
 
 
 // Defines common objects/variables/methods for RockNRor
@@ -85,6 +86,9 @@ public:
 	// Triggers
 	CR_TRIGGERS::crTriggerSet *triggerSet; // all information about custom triggers.
 	long int triggersLastCheckTime_s; // In seconds. Last game time when triggers have been checked (for "timer" trigger types)
+
+	// Tech tree handler: analysis is run when empires.dat is loaded: do not use features before this (cf IsReady method).
+	ROCKNROR::STRATEGY::TechTreeAnalyzer techTreeAnalyzer;
 
 	// To monitor conversion efficiency
 	long int activeConversionAttemptsCount[9]; // Per playerId

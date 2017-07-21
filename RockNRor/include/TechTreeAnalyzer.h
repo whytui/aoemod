@@ -5,8 +5,6 @@
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_game_global.h>
 #include <basicFilesHandling.h>
-#include "RockNRorConfig.h"
-#include "RockNRorInfo.h"
 #include "AOE_memory.h"
 #include "traceMessage.h"
 #include "mainStructuresHandling.h"
@@ -30,7 +28,6 @@ public:
 		this->detailedBuildings = NULL;
 		this->analyzeComplete = false;
 		this->myLog = "";
-		this->myLog.reserve(1000);
 	}
 	~TechTreeAnalyzer() {
 #ifdef _DEBUG
@@ -46,6 +43,9 @@ public:
 	std::string myLog;
 
 	// Methods
+
+	// Returns true if analysis has been run and if this object can be used
+	bool IsReady() const { return this->analyzeComplete; }
 
 	// Safely get a DetailedResearchDefobject
 	DetailedResearchDef *GetDetailedResearchDef(int researchId) const {

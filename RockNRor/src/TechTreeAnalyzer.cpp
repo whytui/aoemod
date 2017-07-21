@@ -32,7 +32,7 @@ bool TechTreeAnalyzer::ReadRawDataFromDat() {
 		DetailedResearchDef *detail = this->GetDetailedResearchDef(resId);
 		assert(detail != NULL);
 		if (resDef) {
-			detail->internalName = string((resDef->researchName != NULL) ? resDef->researchName : "");
+			detail->internalName = std::string((resDef->researchName != NULL) ? resDef->researchName : "");
 			detail->researchDef = resDef;
 			detail->techDef = global->GetTechDef(resDef->technologyId);
 			detail->allRequirementsAreKnown = false;

@@ -967,10 +967,10 @@ void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 		}
 	}
 
-#ifdef _DEBUG
-	ROCKNROR::STRATEGY::TechTreeAnalyzer tta;
-	bool res = tta.AnalyzeTechTree();
-#endif
+	if (!ROCKNROR::crInfo.techTreeAnalyzer.AnalyzeTechTree()) {
+		traceMessageHandler.WriteMessage("Failed to analyze tech tree");
+	}
+	assert(ROCKNROR::crInfo.techTreeAnalyzer.IsReady());
 }
 
 
