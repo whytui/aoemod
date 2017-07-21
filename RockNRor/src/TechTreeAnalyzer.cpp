@@ -115,6 +115,7 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 				DetailedBuildingDef *detailBuilding = this->GetDetailedBuildingDef(enabledUnitId);
 				if ((detailBuilding != NULL) && (detailBuilding->unitDef != NULL)) {
 					detailBuilding->researchIdsThatEnableMe.insert(resDefId);
+					detailRes->enableBuildings.insert(detailBuilding);
 				}
 			}
 			
@@ -125,6 +126,7 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 				DetailedBuildingDef *detailBuilding = this->GetDetailedBuildingDef(upgradedUnitId);
 				if ((detailBuilding != NULL) && (detailBuilding->unitDef != NULL)) {
 					detailBuilding->researchIdsThatEnableMe.insert(resDefId);
+					detailRes->enableBuildings.insert(detailBuilding);
 					detailBuilding->possibleAncestorUnitIDs.insert(parentUnitId);
 				}
 
@@ -309,6 +311,26 @@ int TechTreeAnalyzer::CollectUnreachableResearches() {
 }
 
 
+// Update allChildResearches for each research info
+void TechTreeAnalyzer::UpdateChildResearchDependencies() {
+	for (int resDefId = 0; resDefId < this->researchCount; resDefId++) {
+		DetailedResearchDef *detail = this->GetDetailedResearchDef(resDefId);
+		if (!detail || !detail->active) { continue; }
+
+		for (int childId = 0; childId < this->researchCount; childId++) {
+			DetailedResearchDef *child = this->GetDetailedResearchDef(childId);
+			if (child && child->active && (child != detail)) {
+				auto x = std::find(child->allRequirementsExcludingAges.begin(), child->allRequirementsExcludingAges.end(), detail);
+				if (x != child->allRequirementsExcludingAges.end()) {
+					// Found
+					detail->allChildResearches.insert(child);
+				}
+			}
+		}
+	}
+}
+
+
 // Analyze tech tree and fill internal data
 bool TechTreeAnalyzer::AnalyzeTechTree() {
 	if (this->analyzeComplete) { return true; }
@@ -329,6 +351,9 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 
 	// Fill "unreachableResearches"
 	this->CollectUnreachableResearches();
+
+	// Update the "child" dependencies so each research know its children
+	this->UpdateChildResearchDependencies();
 	
 	// Debugging
 	for (int researchId = 0; researchId < this->researchCount; researchId++) {

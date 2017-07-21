@@ -139,6 +139,9 @@ private:
 	// Fill "unreachableResearches" from detailed research info (requirements must have been computed)
 	int CollectUnreachableResearches();
 
+	// Update allChildResearches for each research info
+	void UpdateChildResearchDependencies();
+
 };
 
 

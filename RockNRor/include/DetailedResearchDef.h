@@ -63,6 +63,9 @@ public:
 		this->hasValidEffect = false;
 	}
 
+private:
+	long int researchDefId; // Id of "this" research definition. Do not modify.
+public:
 	std::string internalName; // Research internal name, read from research definition.
 	bool active; // True if initialized and if researchDef is valid.
 	bool hasValidEffect; // True if the research has a valid effect. Warning, an "empty" research is still useful to handle dependencies !
@@ -75,8 +78,10 @@ public:
 	std::set<DetailedResearchDef*> directRequirements; // Direct required researches, INCLUDING the research that enables the building that "initiates" me, if any.
 	std::set<DetailedResearchDef*> allRequirements; // all required researches, which can make a lot especially for iron-age researches.
 	std::set<DetailedResearchDef*> allRequirementsExcludingAges; // all required from same age, direct or indirect
-	//std::set<long int> triggeredByBuildingId; // All building unitDefId that triggers the research
 	std::set<DetailedBuildingDef*> triggeredByBuilding; // Detailed info for all buildings that triggers the research
+
+	std::set<DetailedResearchDef*> allChildResearches; // all researches that have a dependency on me (reverse info from allRequirementsExcludingAges)
+	std::set<DetailedBuildingDef*> enableBuildings; // The buildings that are enabled thanks to "this" research.
 
 	// Methods
 
@@ -84,9 +89,6 @@ public:
 	long int GetResearchDefId() const { return this->researchDefId; }
 	// Copy all direct/indirect requirements from "other" to this->allRequirementsExcludingAges
 	void AddAllRequirementsFrom(DetailedResearchDef *other);
-
-private:
-	long int researchDefId; // Id of "this" research definition. Do not modify.
 
 };
 
