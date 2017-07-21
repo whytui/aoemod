@@ -24,22 +24,24 @@ namespace STRATEGY {
 class DetailedBuildingDef {
 public:
 	DetailedBuildingDef(STRUCT_UNITDEF_BUILDING *unitDef) {
+		this->internalName = "";
+		this->isAvailableInCurrentState = false;
 		if (unitDef == NULL) {
 			this->unitDefId = -1;
 			this->unitDef = NULL;
 			this->isAvailableImmediately = false;
-			this->isAvailableInCurrentState = false;
 			this->initiatesResearch = -1;
 			return;
 		}
 		this->unitDefId = unitDef->DAT_ID1;
 		this->unitDef = unitDef;
+		if (unitDef->ptrUnitName) { this->internalName = unitDef->ptrUnitName; }
 		this->isAvailableImmediately = (unitDef->availableForPlayer != 0);
-		this->isAvailableInCurrentState = false; // let tech tree analysis set it to true
 		this->initiatesResearch = unitDef->initiatesResearch;
 	}
 
 	long int unitDefId;
+	std::string internalName;
 	bool isAvailableImmediately; // True if building is available at game start.
 	bool isAvailableInCurrentState; // Reserved for analysis phase: set to true when a "researchIdsThatEnableMe" is ready (building can be built at this stage).
 	STRUCT_UNITDEF_BUILDING *unitDef;
@@ -75,6 +77,7 @@ public:
 	bool allRequirementsAreKnown; // true when allRequirementsExcludingAges is fully filled with required researches (research is considered "done" in tech tree analysis)
 
 	std::set<DetailedResearchDef*> directRequirements; // Direct required researches, INCLUDING the research that enables the building that "initiates" me, if any.
+	std::set<DetailedResearchDef*> allRequirements; // all required researches, which can make a lot especially for iron-age researches.
 	std::set<DetailedResearchDef*> allRequirementsExcludingAges; // all required from same age, direct or indirect
 	//std::set<long int> triggeredByBuildingId; // All building unitDefId that triggers the research
 	std::set<DetailedBuildingDef*> triggeredByBuilding; // Detailed info for all buildings that triggers the research
@@ -115,11 +118,6 @@ public:
 		this->FreeArrays();
 	}
 
-	bool analyzeComplete;
-	long int researchCount;
-	long int unitDefCount;
-	DetailedResearchDef **detailedResearches;
-	DetailedBuildingDef **detailedBuildings;
 	std::string myLog;
 
 	// Methods
@@ -151,6 +149,14 @@ public:
 	bool AnalyzeTechTree();
 
 private:
+	DetailedResearchDef **detailedResearches; // Array of all research detailed info, size=researchCount
+	DetailedBuildingDef **detailedBuildings; // Array of all research buildings info, size=unitDefCount. May contain (many) NULLs.
+	std::set<DetailedResearchDef*> unreachableResearches; // Impossible researched (could not be reached during analysis)
+	bool analyzeComplete;
+	long int researchCount;
+	long int unitDefCount;
+
+
 	// AllocArray needs researchCount and totalUnitDefCount to be set (>0) to work (needs empires.dat data to be loaded in global struct)
 	bool AllocArrays() {
 		if (this->detailedResearches) { return false; }
@@ -197,13 +203,16 @@ private:
 	// Update this->detailedBuildings with researches that enable the buildings (if not available at start)
 	void FindResearchesThatEnableKnownBuildings();
 
-	void EvaluateRequiredAge();
-	
+	void MarkBuildingAsAvailable(long int unitDefId);
+
 	// Update required researches for researches whose direct dependencies are all satisfied (all required researches are known)
 	// Returns the number of researches that are now "satisfied"
 	int EvaluateRequiredResearchesSimple();
 
 	void EvaluateRequiredResearches();
+
+	// Fill "unreachableResearches" from detailed research info (requirements must have been computed)
+	int CollectUnreachableResearches();
 
 };
 

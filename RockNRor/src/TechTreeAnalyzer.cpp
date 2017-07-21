@@ -11,17 +11,54 @@ namespace STRATEGY {
 ;
 
 
-// Copy all direct/indirect requirements from "other" to this->allRequirementsExcludingAges
+// Copy all direct/indirect requirements from "other" to this->allRequirementsExcludingAges and this->allRequirements
 void DetailedResearchDef::AddAllRequirementsFrom(DetailedResearchDef *other) {
 	if (!other) { return; }
-	for each (DetailedResearchDef *requirement in other->allRequirementsExcludingAges)
+	// "all requirements": just copy everything, don't think too much...
+	for each (DetailedResearchDef *requirement in other->allRequirements)
 	{
-		this->allRequirementsExcludingAges.insert(requirement);
+		this->allRequirements.insert(requirement);
 	}
 	for each (DetailedResearchDef *requirement in other->directRequirements)
 	{
-		this->allRequirementsExcludingAges.insert(requirement);
+		this->allRequirements.insert(requirement);
 	}
+
+	// allRequirementsExcludingAges: "recursively" ensure at each level not to copy Ages' requirements.
+	long int otherResDefId = other->researchDefId;
+	bool otherIsAge = (otherResDefId == CST_RSID_STONE_AGE) || (otherResDefId == CST_RSID_TOOL_AGE) || 
+		(otherResDefId == CST_RSID_BRONZE_AGE) || (otherResDefId == CST_RSID_IRON_AGE);
+	long int maxRequiredAge = CST_RSID_STONE_AGE;
+	if (this->requiredAge > maxRequiredAge) { maxRequiredAge = this->requiredAge; }
+	for each (DetailedResearchDef *requirement in other->allRequirementsExcludingAges)
+	{
+		long int resDefId = requirement->researchDefId;
+		if ((resDefId > maxRequiredAge) && (resDefId <= CST_RSID_IRON_AGE)) { // Modify this if you want to support a republic age
+			maxRequiredAge = resDefId;
+		}
+		if (requirement->requiredAge > maxRequiredAge) {
+			maxRequiredAge = requirement->requiredAge;
+		}
+		if (!otherIsAge && (resDefId != CST_RSID_STONE_AGE) && (resDefId != CST_RSID_TOOL_AGE) &&
+			(resDefId != CST_RSID_BRONZE_AGE) && (resDefId != CST_RSID_IRON_AGE)) {
+			this->allRequirementsExcludingAges.insert(requirement);
+		}
+	}
+	for each (DetailedResearchDef *requirement in other->directRequirements)
+	{
+		long int resDefId = requirement->researchDefId;
+		if ((resDefId > maxRequiredAge) && (resDefId <= CST_RSID_IRON_AGE)) { // Modify this if you want to support a republic age
+			maxRequiredAge = resDefId;
+		}
+		if (requirement->requiredAge > maxRequiredAge) {
+			maxRequiredAge = requirement->requiredAge;
+		}
+		if (!otherIsAge && (resDefId != CST_RSID_STONE_AGE) && (resDefId != CST_RSID_TOOL_AGE) &&
+			(resDefId != CST_RSID_BRONZE_AGE) && (resDefId != CST_RSID_IRON_AGE)) {
+			this->allRequirementsExcludingAges.insert(requirement);
+		}
+	}
+	this->requiredAge = (short int)maxRequiredAge;
 }
 
 
@@ -104,8 +141,8 @@ void TechTreeAnalyzer::FindBuildingThatTriggerResearches() {
 		STRUCT_UNITDEF_BUILDING *unitDef = (STRUCT_UNITDEF_BUILDING*)civDef1->GetUnitDef(unitDefId);
 		if (unitDef && (unitDef->unitType == GUT_BUILDING) && unitDef->IsCheckSumValid()) {
 			DetailedResearchDef *detail = this->GetDetailedResearchDef(unitDef->initiatesResearch);
+			this->InitGetDetailedBuildingDef(unitDef); // required to create internal data about this building
 			if (detail) {
-				this->InitGetDetailedBuildingDef(unitDef); // required to create internal data about this building
 				detail->triggeredByBuilding.insert(this->GetDetailedBuildingDef(unitDefId));
 			}
 		}
@@ -153,9 +190,58 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 }
 
 
-void TechTreeAnalyzer::EvaluateRequiredAge() {
-	for (int i = 0; i < this->researchCount; i++) {
+void TechTreeAnalyzer::MarkBuildingAsAvailable(long int unitDefId) {
+	DetailedBuildingDef *detailBld = this->detailedBuildings[unitDefId];
+	if (!detailBld || !detailBld->unitDef) { return; }
+	if (detailBld->isAvailableInCurrentState) { return; } // Already marked as available.
+	detailBld->isAvailableInCurrentState = true;
+	// Building just became ready : simulate the "initiate research" effect (if there is an "initiate research")
+	DetailedResearchDef *initiateResearchDetail = this->GetDetailedResearchDef(detailBld->initiatesResearch); // may return NULL as ID may be -1
+	if (initiateResearchDetail && initiateResearchDetail->active) {
+		if (initiateResearchDetail->directRequirements.size() > 0) {
+			this->myLog.append("[INFO] Research #");
+			this->myLog.append(std::to_string(initiateResearchDetail->GetResearchDefId()));
+			this->myLog.append(" (");
+			this->myLog.append(initiateResearchDetail->internalName);
+			this->myLog.append(") is triggered by building '");
+			this->myLog.append(detailBld->internalName);
+			this->myLog.append("' but has requirements. This is normal for building enablers (also enabled by bld of same kind)." NEWLINE);
+		}
 
+		// Note: this can happen more than once if several buildings trigger the same research (e.g. TC_std(109) and TC_upgrade(71))
+		if (!initiateResearchDetail->allRequirementsAreKnown) {
+			initiateResearchDetail->allRequirementsAreKnown = true;
+
+			int i = detailBld->researchIdsThatEnableMe.size();
+			if (i > 1) {
+				this->myLog.append("Warning: building #");
+				this->myLog.append(std::to_string(detailBld->unitDefId));
+				this->myLog.append(" has more than one enabling research" NEWLINE);
+			}
+			for each (long int parentResDefId in detailBld->researchIdsThatEnableMe)
+			{
+				DetailedResearchDef *parentResDetail = this->GetDetailedResearchDef(parentResDefId);
+				if (parentResDetail && parentResDetail->active) {
+					initiateResearchDetail->directRequirements.insert(parentResDetail); // research that enable building is considered DIRECT requirement for building's initiate research.
+					initiateResearchDetail->AddAllRequirementsFrom(parentResDetail);
+				}
+			}
+
+			this->myLog.append("Research #");
+			this->myLog.append(std::to_string(initiateResearchDetail->GetResearchDefId()));
+			this->myLog.append(" / ");
+			this->myLog.append(initiateResearchDetail->internalName);
+			this->myLog.append(" : all requirements are known (from building #");
+			this->myLog.append(std::to_string(detailBld->unitDefId));
+			this->myLog.append(")" NEWLINE);
+		}
+	}
+	if (detailBld->initiatesResearch == -1) {
+		this->myLog.append("Building #");
+		this->myLog.append(std::to_string(detailBld->unitDefId));
+		this->myLog.append(" / ");
+		this->myLog.append(detailBld->internalName);
+		this->myLog.append(" is now available." NEWLINE);
 	}
 }
 
@@ -182,45 +268,7 @@ int TechTreeAnalyzer::EvaluateRequiredResearchesSimple() {
 			}
 
 			if (buildingIsReady && !detailBld->isAvailableInCurrentState) {
-				detailBld->isAvailableInCurrentState = true;
-				// Building just became ready : simulate the "initiate research" effect (if there is an "initiate research")
-				DetailedResearchDef *initiateResearchDetail = this->GetDetailedResearchDef(detailBld->initiatesResearch); // may return NULL as ID may be -1
-				if (initiateResearchDetail && initiateResearchDetail->active) {
-					if (initiateResearchDetail->directRequirements.size() > 0) {
-						this->myLog.append("Warning: research #");
-						this->myLog.append(std::to_string(initiateResearchDetail->GetResearchDefId()));
-						this->myLog.append(" is triggered by building but has requirements" NEWLINE);
-					}
-
-					// Note: this can happen more than once if several buildings trigger the same research (e.g. TC_std(109) and TC_upgrade(71))
-					if (!initiateResearchDetail->allRequirementsAreKnown) {
-						initiateResearchDetail->allRequirementsAreKnown = true;
-
-						int i = detailBld->researchIdsThatEnableMe.size();
-						if (i > 1) {
-							this->myLog.append("Warning: building #");
-							this->myLog.append(std::to_string(detailBld->unitDefId));
-							this->myLog.append(" has more than one enabling research" NEWLINE);
-						}
-						for each (long int parentResDefId in detailBld->researchIdsThatEnableMe)
-						{
-							DetailedResearchDef *parentResDetail = this->GetDetailedResearchDef(parentResDefId);
-							if (parentResDetail && parentResDetail->active) {
-								initiateResearchDetail->directRequirements.insert(parentResDetail); // research that enable building is considered DIRECT requirement for building's initiate research.
-								initiateResearchDetail->AddAllRequirementsFrom(parentResDetail);
-							}
-						}
-						
-
-						this->myLog.append("Research #");
-						this->myLog.append(std::to_string(initiateResearchDetail->GetResearchDefId()));
-						this->myLog.append(" / ");
-						this->myLog.append(initiateResearchDetail->internalName);
-						this->myLog.append(" : all requirements are known (from building #");
-						this->myLog.append(std::to_string(detailBld->unitDefId));
-						this->myLog.append(")" NEWLINE);
-					}
-				}
+				this->MarkBuildingAsAvailable(bldDefId);
 			}
 		}
 	}
@@ -287,6 +335,32 @@ void TechTreeAnalyzer::EvaluateRequiredResearches() {
 }
 
 
+// Fill "unreachableResearches" from detailed research info (requirements must have been computed)
+int TechTreeAnalyzer::CollectUnreachableResearches() {
+	int count = 0;
+	for (int researchId = 0; researchId < this->researchCount; researchId++) {
+		DetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
+		if (!detail || !detail->active) { continue; }
+		if (detail->allRequirementsAreKnown) { continue; }
+		this->unreachableResearches.insert(detail);
+		count++;
+		this->myLog.append("Warning: unreachable research #");
+		this->myLog.append(std::to_string(researchId));
+		this->myLog.append(" / ");
+		this->myLog.append(detail->internalName);
+		this->myLog.append(" dep=> [");
+		for each (auto req in detail->directRequirements)
+		{
+			this->myLog.append(" ");
+			this->myLog.append(std::to_string(req->GetResearchDefId()));
+		}
+		this->myLog.append("]");
+		this->myLog.append(NEWLINE);
+	}
+	return count;
+}
+
+
 // Analyze tech tree and fill internal data
 bool TechTreeAnalyzer::AnalyzeTechTree() {
 	if (this->analyzeComplete) { return true; }
@@ -299,27 +373,16 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 	this->FindBuildingThatTriggerResearches();
 	this->FindResearchesThatEnableKnownBuildings();
 
-	DetailedBuildingDef *townCenterDetail = this->GetDetailedBuildingDef(CST_UNITID_FORUM);
-	if (townCenterDetail) {
-		this->myLog.append("Adding Town Center (#109) to available buildings to match game behavior." NEWLINE);
-		townCenterDetail->isAvailableImmediately = true; // Hack that corresponds... To the game hack (TC can be build at any time - if not already built - event when not enabled yet by research 115)
-	}
+	// In game, TC is always aither built or available in build menu (even... if unitDef is not available)
+	// We need to do the equivalent here, or tech tree can't completely expand (can't reach tool age, because research location is unavailable).
+	this->MarkBuildingAsAvailable(CST_UNITID_FORUM);
 
 	this->EvaluateRequiredResearches();
 
-	// Debug: log missing research (there should be none ; with standard empires.dat, there IS none !)
-	for (int researchId = 0; researchId < this->researchCount; researchId++) {
-		DetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
-		if (!detail || !detail->active) { continue; }
-		if (detail->allRequirementsAreKnown) { continue; }
-		this->myLog.append("Remaining research #");
-		this->myLog.append(std::to_string(researchId));
-		this->myLog.append(" / ");
-		this->myLog.append(detail->internalName);
-		this->myLog.append(NEWLINE);
-	}
+	// Fill "unreachableResearches"
+	this->CollectUnreachableResearches();
 	
-	// TEST
+	// Debugging
 	for (int researchId = 0; researchId < this->researchCount; researchId++) {
 		DetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
 		if (!detail || !detail->active) { continue; }
@@ -328,7 +391,9 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 		this->myLog.append(std::to_string(researchId));
 		this->myLog.append(" / ");
 		this->myLog.append(detail->internalName);
-		this->myLog.append(" dep=> [");
+		this->myLog.append(" {age ");
+		this->myLog.append(std::to_string(detail->requiredAge));
+		this->myLog.append("} dep=> [");
 		for each (auto req in detail->directRequirements)
 		{
 			this->myLog.append(" ");
@@ -343,7 +408,7 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 		this->myLog.append(NEWLINE);
 	}
 
-
+	this->analyzeComplete = true;
 	return true;
 }
 

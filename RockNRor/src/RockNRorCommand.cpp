@@ -966,6 +966,11 @@ void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 			}
 		}
 	}
+
+#ifdef _DEBUG
+	ROCKNROR::STRATEGY::TechTreeAnalyzer tta;
+	bool res = tta.AnalyzeTechTree();
+#endif
 }
 
 
@@ -1170,10 +1175,8 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 
 	// TEST
 #ifdef _DEBUG
-	bool useFakeCiv = true;
+	bool useFakeCiv = false;
 	if (useFakeCiv) {
-		ROCKNROR::STRATEGY::TechTreeAnalyzer tta;
-		bool res = tta.AnalyzeTechTree();
 		//ROCKNROR::CUSTOMCIV::CustomCivHandler h;
 		//h.CreateFakeRandomCivsForAllPlayers();
 	}
