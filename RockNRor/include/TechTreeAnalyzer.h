@@ -142,6 +142,9 @@ private:
 	// Update allChildResearches for each research info
 	void UpdateChildResearchDependencies();
 
+	// Update baseUnitDefId for all known buildings to identify root buildings
+	void UpdateBuildingsBaseId();
+
 };
 
 

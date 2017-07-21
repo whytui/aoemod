@@ -27,6 +27,7 @@ public:
 			this->unitDef = NULL;
 			this->isAvailableImmediately = false;
 			this->initiatesResearch = -1;
+			this->baseUnitId = -1;
 			return;
 		}
 		this->unitDefId = unitDef->DAT_ID1;
@@ -34,6 +35,7 @@ public:
 		if (unitDef->ptrUnitName) { this->internalName = unitDef->ptrUnitName; }
 		this->isAvailableImmediately = (unitDef->availableForPlayer != 0);
 		this->initiatesResearch = unitDef->initiatesResearch;
+		this->baseUnitId = this->unitDefId;
 	}
 
 	long int unitDefId;
@@ -44,7 +46,9 @@ public:
 	short int initiatesResearch; // ID of research that is triggered when "this" building is constructed. Can be -1 (none).
 	std::set<long int> researchIdsThatEnableMe; // It is expected to have 0 (if available at start) or 1 value here, no more.
 	std::set<long int> possibleUpgradedUnitIDs; // UnitDefIds of buildings that are "upgrades" of me.
-	std::set<long int> possibleAncestorUnitIDs; // UnitDefIds of buildings that can be upgraded into "me".
+	std::set<long int> possibleAncestorUnitIDs; // UnitDefIds of buildings that can be upgraded into "me". See "baseUnitId" to find THE root unitDefId.
+
+	long int baseUnitId; // UnitDefId of the (root) base unitdef I am a descendent of. =this->unitDefId if I have no ancestor.
 };
 
 
@@ -82,6 +86,8 @@ public:
 
 	std::set<DetailedResearchDef*> allChildResearches; // all researches that have a dependency on me (reverse info from allRequirementsExcludingAges)
 	std::set<DetailedBuildingDef*> enableBuildings; // The buildings that are enabled thanks to "this" research.
+	std::set<long int> enableUnitDefId; // Non-building unitDef IDs that are enabled by this research
+	std::set<std::pair<long int, long int>> upgradedUnitDefId; // Non-building unitDef IDs that are upgraded by this research (pair: first=from, second=to)
 
 	// Methods
 

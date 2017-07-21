@@ -116,6 +116,8 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 				if ((detailBuilding != NULL) && (detailBuilding->unitDef != NULL)) {
 					detailBuilding->researchIdsThatEnableMe.insert(resDefId);
 					detailRes->enableBuildings.insert(detailBuilding);
+				} else {
+					detailRes->enableUnitDefId.insert(enabledUnitId);
 				}
 			}
 			
@@ -128,6 +130,8 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 					detailBuilding->researchIdsThatEnableMe.insert(resDefId);
 					detailRes->enableBuildings.insert(detailBuilding);
 					detailBuilding->possibleAncestorUnitIDs.insert(parentUnitId);
+				} else {
+					detailRes->upgradedUnitDefId.insert(std::pair<long int, long int>(parentUnitId, upgradedUnitId));
 				}
 
 				DetailedBuildingDef *detailBuildingParent = this->GetDetailedBuildingDef(parentUnitId);
@@ -331,6 +335,25 @@ void TechTreeAnalyzer::UpdateChildResearchDependencies() {
 }
 
 
+// Update baseUnitDefId for all known buildings to identify root buildings
+void TechTreeAnalyzer::UpdateBuildingsBaseId() {
+	for (int bldDefId = 0; bldDefId < this->unitDefCount; bldDefId++) {
+		DetailedBuildingDef *detailBld = this->detailedBuildings[bldDefId];
+		if (detailBld && detailBld->unitDef) {
+			// To avoid recursive stuff, we consider that root ancestor is THE possible ancestor that has NO ancestor itself (there should be only one)
+			// This may fail if some mod uses separate ways to reach some unit ! (but in that case, anyway, detailBld->baseUnitId would have no real meaning).
+			for each (auto ancestorId in detailBld->possibleAncestorUnitIDs)
+			{
+				DetailedBuildingDef *ancestor = this->detailedBuildings[ancestorId];
+				if (ancestor && ancestor->unitDef && (ancestor->possibleAncestorUnitIDs.size() == 0)) {
+					detailBld->baseUnitId = ancestorId;
+				}
+			}
+		}
+	}
+}
+
+
 // Analyze tech tree and fill internal data
 bool TechTreeAnalyzer::AnalyzeTechTree() {
 	if (this->analyzeComplete) { return true; }
@@ -354,6 +377,8 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 
 	// Update the "child" dependencies so each research know its children
 	this->UpdateChildResearchDependencies();
+
+	this->UpdateBuildingsBaseId();
 	
 	// Debugging
 	for (int researchId = 0; researchId < this->researchCount; researchId++) {
