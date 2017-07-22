@@ -23,13 +23,13 @@ public:
 		this->unitDefId = -1;
 		this->internalName = "";
 		this->isAvailableImmediately = false;
-		this->isAvailableInCurrentState = false;
+		this->isAvailableAfterAnalysis = false;
 		this->baseUnitId = -1;
 	}
 	long int unitDefId;
 	std::string internalName;
 	bool isAvailableImmediately; // True if building is available at game start.
-	bool isAvailableInCurrentState; // Reserved for analysis phase: set to true when a "researchIdsThatEnableMe" is ready (building can be built at this stage).
+	bool isAvailableAfterAnalysis; // Used in analysis phase: set to true when a "researchIdsThatEnableMe" is ready (building can be built at this stage).
 	std::set<long int> researchIdsThatEnableMe; // It is expected to have 0 (if available at start) or 1 value here, no more.
 	std::set<long int> possibleUpgradedUnitIDs; // UnitDefIds of buildings that are "upgrades" of me.
 	std::set<long int> possibleAncestorUnitIDs; // UnitDefIds of buildings that can be upgraded into "me". See "baseUnitId" to find THE root unitDefId.
@@ -43,6 +43,11 @@ public:
 		} else { 
 			this->internalName = "";
 		}
+	}
+
+	// Returns true if unit is a hero or scenario unit: heroes, cheat code units, unused units, etc
+	bool IsHeroOrScenarioUnit() const {
+		return (!this->isAvailableAfterAnalysis && !this->isAvailableImmediately);
 	}
 };
 
@@ -125,7 +130,7 @@ public:
 
 	std::set<TTDetailedResearchDef*> allChildResearches; // all researches that have a dependency on me (reverse info from allRequirementsExcludingAges)
 	std::set<TTDetailedBuildingDef*> enableBuildings; // The buildings that are enabled thanks to "this" research.
-	std::set<long int> enableUnitDefId; // Non-building unitDef IDs that are enabled by this research
+	std::set<TTDetailedTrainableUnitDef*> enableTrainables; // The Non-building unitDefs that are enabled thanks to "this" research.
 	std::set<std::pair<long int, long int>> upgradedUnitDefId; // Non-building unitDef IDs that are upgraded by this research (pair: first=from, second=to)
 
 	// Methods

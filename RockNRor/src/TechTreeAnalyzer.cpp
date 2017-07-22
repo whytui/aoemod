@@ -80,6 +80,7 @@ bool TechTreeAnalyzer::ReadRawDataFromDat() {
 
 // Update detailedResearches info to find buildings that trigger researches
 // Finds (and create in this->detailedBuildings) all buildings that trigger a research.
+// Also feeds this->detailedTrainables
 void TechTreeAnalyzer::FindBuildingThatTriggerResearches() {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) { return; }
@@ -87,10 +88,14 @@ void TechTreeAnalyzer::FindBuildingThatTriggerResearches() {
 	STRUCT_CIVILIZATION_DEF *civDef1 = global->civilizationDefinitions[1];
 	
 	for (int unitDefId = 0; unitDefId < civDef1->civUnitDefCount; unitDefId++) {
-		STRUCT_UNITDEF_BUILDING *unitDef = (STRUCT_UNITDEF_BUILDING*)civDef1->GetUnitDef(unitDefId);
-		if (unitDef && (unitDef->unitType == GUT_BUILDING) && unitDef->IsCheckSumValid()) {
-			TTDetailedResearchDef *detail = this->GetDetailedResearchDef(unitDef->initiatesResearch);
-			this->InitGetDetailedBuildingDef(unitDef); // required to create internal data about this building
+		STRUCT_UNITDEF_TRAINABLE *unitDefTrainable = (STRUCT_UNITDEF_TRAINABLE*)civDef1->GetUnitDef(unitDefId);
+		STRUCT_UNITDEF_BUILDING *unitDefBld = (STRUCT_UNITDEF_BUILDING*)civDef1->GetUnitDef(unitDefId);
+		if (unitDefTrainable && (unitDefTrainable->unitType == GUT_TRAINABLE) && unitDefTrainable->IsCheckSumValid()) {
+			this->InitGetDetailedTrainableUnitDef(unitDefTrainable); // required to create internal data about this building
+		}
+		if (unitDefBld && (unitDefBld->unitType == GUT_BUILDING) && unitDefBld->IsCheckSumValid()) {
+			TTDetailedResearchDef *detail = this->GetDetailedResearchDef(unitDefBld->initiatesResearch);
+			this->InitGetDetailedBuildingDef(unitDefBld); // required to create internal data about this building
 			if (detail) {
 				detail->triggeredByBuilding.insert(this->GetDetailedBuildingDef(unitDefId));
 			}
@@ -117,8 +122,11 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 				if ((detailBuilding != NULL) && (detailBuilding->unitDef != NULL)) {
 					detailBuilding->researchIdsThatEnableMe.insert(resDefId);
 					detailRes->enableBuildings.insert(detailBuilding);
-				} else {
-					detailRes->enableUnitDefId.insert(enabledUnitId);
+				}
+				TTDetailedTrainableUnitDef *detailTrainable = this->GetDetailedTrainableUnitDef(enabledUnitId);
+				if ((detailTrainable != NULL) && (detailTrainable->unitDef != NULL)) {
+					detailTrainable->researchIdsThatEnableMe.insert(resDefId);
+					detailRes->enableTrainables.insert(detailTrainable);
 				}
 			}
 			
@@ -131,13 +139,23 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 					detailBuilding->researchIdsThatEnableMe.insert(resDefId);
 					detailRes->enableBuildings.insert(detailBuilding);
 					detailBuilding->possibleAncestorUnitIDs.insert(parentUnitId);
-				} else {
-					detailRes->upgradedUnitDefId.insert(std::pair<long int, long int>(parentUnitId, upgradedUnitId));
-				}
 
-				TTDetailedBuildingDef *detailBuildingParent = this->GetDetailedBuildingDef(parentUnitId);
-				if ((detailBuildingParent != NULL) && (detailBuildingParent->unitDef != NULL)) {
-					detailBuildingParent->possibleUpgradedUnitIDs.insert(upgradedUnitId);
+					TTDetailedBuildingDef *detailBuildingParent = this->GetDetailedBuildingDef(parentUnitId);
+					if ((detailBuildingParent != NULL) && (detailBuildingParent->unitDef != NULL)) {
+						detailBuildingParent->possibleUpgradedUnitIDs.insert(upgradedUnitId);
+					}
+				}
+				TTDetailedTrainableUnitDef *detailTrainable = this->GetDetailedTrainableUnitDef(upgradedUnitId);
+				if ((detailTrainable != NULL) && (detailTrainable->unitDef != NULL)) {
+					detailTrainable->researchIdsThatEnableMe.insert(resDefId);
+					detailRes->enableTrainables.insert(detailTrainable);
+					detailTrainable->possibleAncestorUnitIDs.insert(parentUnitId);
+					detailRes->upgradedUnitDefId.insert(std::pair<long int, long int>(parentUnitId, upgradedUnitId));
+
+					TTDetailedTrainableUnitDef *detailTrainableParent = this->GetDetailedTrainableUnitDef(parentUnitId);
+					if ((detailTrainableParent != NULL) && (detailTrainableParent->unitDef != NULL)) {
+						detailTrainableParent->possibleUpgradedUnitIDs.insert(upgradedUnitId);
+					}
 				}
 			}
 		}
@@ -148,8 +166,8 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 void TechTreeAnalyzer::MarkBuildingAsAvailable(long int unitDefId) {
 	TTDetailedBuildingDef *detailBld = this->detailedBuildings[unitDefId];
 	if (!detailBld || !detailBld->unitDef) { return; }
-	if (detailBld->isAvailableInCurrentState) { return; } // Already marked as available.
-	detailBld->isAvailableInCurrentState = true;
+	if (detailBld->isAvailableAfterAnalysis) { return; } // Already marked as available.
+	detailBld->isAvailableAfterAnalysis = true;
 	// Building just became ready : simulate the "initiate research" effect (if there is an "initiate research")
 	TTDetailedResearchDef *initiateResearchDetail = this->GetDetailedResearchDef(detailBld->initiatesResearch); // may return NULL as ID may be -1
 	if (initiateResearchDetail && initiateResearchDetail->active) {
@@ -201,13 +219,27 @@ void TechTreeAnalyzer::MarkBuildingAsAvailable(long int unitDefId) {
 }
 
 
+void TechTreeAnalyzer::MarkTrainableUnitAsAvailable(long int unitDefId) {
+	TTDetailedTrainableUnitDef *detailTrainable = this->GetDetailedTrainableUnitDef(unitDefId);
+	if (!detailTrainable || !detailTrainable->unitDef) { return; }
+	if (detailTrainable->isAvailableAfterAnalysis) { return; } // Already marked as available.
+	detailTrainable->isAvailableAfterAnalysis = true;
+
+	this->myLog.append("Unit #");
+	this->myLog.append(std::to_string(detailTrainable->unitDefId));
+	this->myLog.append(" / ");
+	this->myLog.append(detailTrainable->internalName);
+	this->myLog.append(" is now available." NEWLINE);
+}
+
+
 // Update required researches for researches whose direct dependencies are all satisfied (all required researches are known)
 // Returns the number of researches that are now "satisfied"
 int TechTreeAnalyzer::EvaluateRequiredResearchesSimple() {
 	int updatedResearches = 0;
 	this->myLog.append("New evaluation of research triggered by available buildings." NEWLINE);
-	for (int bldDefId = 0; bldDefId < this->unitDefCount; bldDefId++) {
-		TTDetailedBuildingDef *detailBld = this->detailedBuildings[bldDefId];
+	for (int unitDefId = 0; unitDefId < this->unitDefCount; unitDefId++) {
+		TTDetailedBuildingDef *detailBld = this->detailedBuildings[unitDefId];
 		if (detailBld && detailBld->unitDef) {
 			bool buildingIsReady = detailBld->isAvailableImmediately;
 			if (!buildingIsReady) {
@@ -222,10 +254,29 @@ int TechTreeAnalyzer::EvaluateRequiredResearchesSimple() {
 				}
 			}
 
-			if (buildingIsReady && !detailBld->isAvailableInCurrentState) {
-				this->MarkBuildingAsAvailable(bldDefId);
+			if (buildingIsReady && !detailBld->isAvailableAfterAnalysis) {
+				this->MarkBuildingAsAvailable(unitDefId);
 			}
 		}
+		TTDetailedTrainableUnitDef *detailTrainable = this->GetDetailedTrainableUnitDef(unitDefId);
+		if (detailTrainable && detailTrainable->unitDef) {
+			bool trainableIsReady = detailTrainable->isAvailableImmediately;
+			if (!trainableIsReady) {
+				auto it = std::find_if(detailTrainable->researchIdsThatEnableMe.begin(), detailTrainable->researchIdsThatEnableMe.end(),
+					[this](long int lambdaDefId) {
+					TTDetailedResearchDef *detailResDef = this->GetDetailedResearchDef(lambdaDefId);
+					return (detailResDef != NULL) && detailResDef->allRequirementsAreKnown;
+				});
+				if (it != detailTrainable->researchIdsThatEnableMe.end()) {
+					// Found at least 1 "ready" research that enables the building
+					trainableIsReady = true;
+				}
+			}
+			if (trainableIsReady && !detailTrainable->isAvailableAfterAnalysis) {
+				this->MarkTrainableUnitAsAvailable(unitDefId);
+			}
+		}
+
 	}
 
 	this->myLog.append("New evaluation of trivial research dependencies." NEWLINE);
@@ -245,7 +296,7 @@ int TechTreeAnalyzer::EvaluateRequiredResearchesSimple() {
 		long int researchLocation = detail->researchDef->researchLocation;
 		TTDetailedBuildingDef *researchLocDetail = this->GetDetailedBuildingDef(researchLocation);
 		std::string additionalLogInfo = "";
-		if (researchLocDetail && researchLocDetail->isAvailableInCurrentState) {
+		if (researchLocDetail && researchLocDetail->isAvailableAfterAnalysis) {
 			allowedResearch = true;
 			if (allReqSatisfied) {
 				additionalLogInfo = " thanks to building #";

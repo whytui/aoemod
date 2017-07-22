@@ -47,6 +47,15 @@ public:
 	// Returns true if analysis has been run and if this object can be used
 	bool IsReady() const { return this->analyzeComplete; }
 
+	// Get research count, 0 if not loaded yet
+	long int GetResearchCount() const {
+		return this->researchCount;
+	}
+	// Get unitDef count, 0 if not loaded yet
+	long int GetUnitDefCount() const {
+		return this->unitDefCount;
+	}
+
 	// Safely get a DetailedResearchDefobject
 	TTDetailedResearchDef *GetDetailedResearchDef(int researchId) const {
 		if ((researchId < 0) || (researchId >= this->researchCount) || (this->detailedResearches == NULL)) { return NULL; }
@@ -59,7 +68,7 @@ public:
 		return this->detailedBuildings[unitDefId];
 	}
 
-	// Adds (if not already there) building unit definition in internal data. Required to use the corresponding DetailedBuildingDef.
+	// Adds (if not already there) building unit definition in internal data. Required to use the corresponding TTDetailedBuildingDef.
 	TTDetailedBuildingDef *InitGetDetailedBuildingDef(STRUCT_UNITDEF_BUILDING *unitDef) {
 		if (!unitDef) { return NULL; }
 		TTDetailedBuildingDef *result = this->GetDetailedBuildingDef(unitDef->DAT_ID1);
@@ -70,12 +79,30 @@ public:
 		return result;
 	}
 
+	// Safely get a DetailedResearchDefobject
+	TTDetailedTrainableUnitDef *GetDetailedTrainableUnitDef(int unitDefId) const {
+		if ((unitDefId < 0) || (unitDefId >= this->unitDefCount) || (this->detailedTrainables == NULL)) { return NULL; }
+		return this->detailedTrainables[unitDefId];
+	}
+
+	// Adds (if not already there) trainable unit definition in internal data. Required to use the corresponding TTDetailedTrainableUnitDef.
+	TTDetailedTrainableUnitDef *InitGetDetailedTrainableUnitDef(STRUCT_UNITDEF_TRAINABLE *unitDef) {
+		if (!unitDef) { return NULL; }
+		TTDetailedTrainableUnitDef *result = this->GetDetailedTrainableUnitDef(unitDef->DAT_ID1);
+		if (result) { return result; }
+		if ((unitDef->DAT_ID1 < 0) || (unitDef->DAT_ID1 >= this->unitDefCount)) { return NULL; } // Should not happen
+		result = new TTDetailedTrainableUnitDef(unitDef);
+		this->detailedTrainables[unitDef->DAT_ID1] = result;
+		return result;
+	}
+
 	// Analyze tech tree and fill internal data
 	bool AnalyzeTechTree();
 
 private:
 	TTDetailedResearchDef **detailedResearches; // Array of all research detailed info, size=researchCount
-	TTDetailedBuildingDef **detailedBuildings; // Array of all research buildings info, size=unitDefCount. May contain (many) NULLs.
+	TTDetailedBuildingDef **detailedBuildings; // Array of all (tech tree) buildings info, size=unitDefCount. May contain (many) NULLs.
+	TTDetailedTrainableUnitDef **detailedTrainables; // Array of all (tech tree) trainable units info, size=unitDefCount. May contain (many) NULLs.
 	std::set<TTDetailedResearchDef*> unreachableResearches; // Impossible researched (could not be reached during analysis)
 	bool analyzeComplete;
 	long int researchCount;
@@ -93,6 +120,10 @@ private:
 		this->detailedBuildings = (TTDetailedBuildingDef**)malloc(sizeof(TTDetailedBuildingDef*) * this->unitDefCount);
 		for (int i = 0; i < this->unitDefCount; i++) {
 			this->detailedBuildings[i] = NULL;
+		}
+		this->detailedTrainables = (TTDetailedTrainableUnitDef**)malloc(sizeof(TTDetailedTrainableUnitDef*) * this->unitDefCount);
+		for (int i = 0; i < this->unitDefCount; i++) {
+			this->detailedTrainables[i] = NULL;
 		}
 		return true;
 	}
@@ -113,6 +144,15 @@ private:
 			}
 			this->detailedBuildings = NULL;
 		}
+		if (this->detailedTrainables != NULL) {
+			for (int i = 0; i < this->unitDefCount; i++) {
+				if (this->detailedTrainables[i]) {
+					delete this->detailedTrainables[i];
+					this->detailedTrainables[i] = NULL;
+				}
+			}
+			this->detailedTrainables = NULL;
+		}
 	}
 
 
@@ -123,12 +163,14 @@ private:
 
 	// Update detailedResearches info to find buildings that trigger researches
 	// Finds (and create in this->detailedBuildings) all buildings that trigger a research.
+	// Also feeds this->detailedTrainables
 	void FindBuildingThatTriggerResearches();
 
 	// Update this->detailedBuildings with researches that enable the buildings (if not available at start)
 	void FindResearchesThatEnableKnownBuildings();
 
 	void MarkBuildingAsAvailable(long int unitDefId);
+	void MarkTrainableUnitAsAvailable(long int unitDefId);
 
 	// Update required researches for researches whose direct dependencies are all satisfied (all required researches are known)
 	// Returns the number of researches that are now "satisfied"
