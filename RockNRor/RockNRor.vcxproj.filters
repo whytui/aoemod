@@ -345,7 +345,7 @@
     <ClInclude Include="include\TechTreeAnalyzer.h">
       <Filter>Fichiers d%27en-tête\Strategy</Filter>
     </ClInclude>
-    <ClInclude Include="include\DetailedResearchDef.h">
+    <ClInclude Include="include\TTDetailedResearchDef.h">
       <Filter>Fichiers d%27en-tête\Strategy</Filter>
     </ClInclude>
   </ItemGroup>
@@ -587,7 +587,7 @@
     <ClCompile Include="src\TechTreeAnalyzer.cpp">
       <Filter>Fichiers sources\Strategy</Filter>
     </ClCompile>
-    <ClCompile Include="src\DetailedResearchDef.cpp">
+    <ClCompile Include="src\TTDetailedResearchDef.cpp">
       <Filter>Fichiers sources\Strategy</Filter>
     </ClCompile>
   </ItemGroup>

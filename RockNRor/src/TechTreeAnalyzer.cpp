@@ -30,7 +30,7 @@ bool TechTreeAnalyzer::ReadRawDataFromDat() {
 	this->AllocArrays();
 	for (int resId = 0; resId < this->researchCount; resId++) {
 		STRUCT_RESEARCH_DEF *resDef = global->researchDefInfo->GetResearchDef(resId);
-		DetailedResearchDef *detail = this->GetDetailedResearchDef(resId);
+		TTDetailedResearchDef *detail = this->GetDetailedResearchDef(resId);
 		assert(detail != NULL);
 		if (resDef) {
 			detail->internalName = std::string((resDef->researchName != NULL) ? resDef->researchName : "");
@@ -89,7 +89,7 @@ void TechTreeAnalyzer::FindBuildingThatTriggerResearches() {
 	for (int unitDefId = 0; unitDefId < civDef1->civUnitDefCount; unitDefId++) {
 		STRUCT_UNITDEF_BUILDING *unitDef = (STRUCT_UNITDEF_BUILDING*)civDef1->GetUnitDef(unitDefId);
 		if (unitDef && (unitDef->unitType == GUT_BUILDING) && unitDef->IsCheckSumValid()) {
-			DetailedResearchDef *detail = this->GetDetailedResearchDef(unitDef->initiatesResearch);
+			TTDetailedResearchDef *detail = this->GetDetailedResearchDef(unitDef->initiatesResearch);
 			this->InitGetDetailedBuildingDef(unitDef); // required to create internal data about this building
 			if (detail) {
 				detail->triggeredByBuilding.insert(this->GetDetailedBuildingDef(unitDefId));
@@ -103,7 +103,7 @@ void TechTreeAnalyzer::FindBuildingThatTriggerResearches() {
 // Also fills possibleUpgradedUnitIDs / possibleParentUnitIDs
 void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 	for (int resDefId = 0; resDefId < this->researchCount; resDefId++) {
-		DetailedResearchDef *detailRes = this->detailedResearches[resDefId];
+		TTDetailedResearchDef *detailRes = this->detailedResearches[resDefId];
 		STRUCT_TECH_DEF *techDef = detailRes->techDef;
 		if (!techDef) { 
 			continue;
@@ -113,7 +113,7 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 			// Case 1 : Enable unit
 			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (techEffect->effectClass == 1)/*enable*/) {
 				long int enabledUnitId = techEffect->effectUnit;
-				DetailedBuildingDef *detailBuilding = this->GetDetailedBuildingDef(enabledUnitId);
+				TTDetailedBuildingDef *detailBuilding = this->GetDetailedBuildingDef(enabledUnitId);
 				if ((detailBuilding != NULL) && (detailBuilding->unitDef != NULL)) {
 					detailBuilding->researchIdsThatEnableMe.insert(resDefId);
 					detailRes->enableBuildings.insert(detailBuilding);
@@ -126,7 +126,7 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 			if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) {
 				long int upgradedUnitId = techEffect->effectClass;
 				long int parentUnitId = techEffect->effectUnit;
-				DetailedBuildingDef *detailBuilding = this->GetDetailedBuildingDef(upgradedUnitId);
+				TTDetailedBuildingDef *detailBuilding = this->GetDetailedBuildingDef(upgradedUnitId);
 				if ((detailBuilding != NULL) && (detailBuilding->unitDef != NULL)) {
 					detailBuilding->researchIdsThatEnableMe.insert(resDefId);
 					detailRes->enableBuildings.insert(detailBuilding);
@@ -135,7 +135,7 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 					detailRes->upgradedUnitDefId.insert(std::pair<long int, long int>(parentUnitId, upgradedUnitId));
 				}
 
-				DetailedBuildingDef *detailBuildingParent = this->GetDetailedBuildingDef(parentUnitId);
+				TTDetailedBuildingDef *detailBuildingParent = this->GetDetailedBuildingDef(parentUnitId);
 				if ((detailBuildingParent != NULL) && (detailBuildingParent->unitDef != NULL)) {
 					detailBuildingParent->possibleUpgradedUnitIDs.insert(upgradedUnitId);
 				}
@@ -146,12 +146,12 @@ void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
 
 
 void TechTreeAnalyzer::MarkBuildingAsAvailable(long int unitDefId) {
-	DetailedBuildingDef *detailBld = this->detailedBuildings[unitDefId];
+	TTDetailedBuildingDef *detailBld = this->detailedBuildings[unitDefId];
 	if (!detailBld || !detailBld->unitDef) { return; }
 	if (detailBld->isAvailableInCurrentState) { return; } // Already marked as available.
 	detailBld->isAvailableInCurrentState = true;
 	// Building just became ready : simulate the "initiate research" effect (if there is an "initiate research")
-	DetailedResearchDef *initiateResearchDetail = this->GetDetailedResearchDef(detailBld->initiatesResearch); // may return NULL as ID may be -1
+	TTDetailedResearchDef *initiateResearchDetail = this->GetDetailedResearchDef(detailBld->initiatesResearch); // may return NULL as ID may be -1
 	if (initiateResearchDetail && initiateResearchDetail->active) {
 		if (initiateResearchDetail->directRequirements.size() > 0) {
 			this->myLog.append("[INFO] Research #");
@@ -175,7 +175,7 @@ void TechTreeAnalyzer::MarkBuildingAsAvailable(long int unitDefId) {
 			}
 			for each (long int parentResDefId in detailBld->researchIdsThatEnableMe)
 			{
-				DetailedResearchDef *parentResDetail = this->GetDetailedResearchDef(parentResDefId);
+				TTDetailedResearchDef *parentResDetail = this->GetDetailedResearchDef(parentResDefId);
 				if (parentResDetail && parentResDetail->active) {
 					initiateResearchDetail->directRequirements.insert(parentResDetail); // research that enable building is considered DIRECT requirement for building's initiate research.
 					initiateResearchDetail->AddAllRequirementsFrom(parentResDetail);
@@ -207,13 +207,13 @@ int TechTreeAnalyzer::EvaluateRequiredResearchesSimple() {
 	int updatedResearches = 0;
 	this->myLog.append("New evaluation of research triggered by available buildings." NEWLINE);
 	for (int bldDefId = 0; bldDefId < this->unitDefCount; bldDefId++) {
-		DetailedBuildingDef *detailBld = this->detailedBuildings[bldDefId];
+		TTDetailedBuildingDef *detailBld = this->detailedBuildings[bldDefId];
 		if (detailBld && detailBld->unitDef) {
 			bool buildingIsReady = detailBld->isAvailableImmediately;
 			if (!buildingIsReady) {
 				auto it = std::find_if(detailBld->researchIdsThatEnableMe.begin(), detailBld->researchIdsThatEnableMe.end(),
 					[this](long int lambdaDefId) {
-					DetailedResearchDef *detailResDef = this->GetDetailedResearchDef(lambdaDefId);
+					TTDetailedResearchDef *detailResDef = this->GetDetailedResearchDef(lambdaDefId);
 					return (detailResDef != NULL) && detailResDef->allRequirementsAreKnown;
 				});
 				if (it != detailBld->researchIdsThatEnableMe.end()) {
@@ -230,11 +230,11 @@ int TechTreeAnalyzer::EvaluateRequiredResearchesSimple() {
 
 	this->myLog.append("New evaluation of trivial research dependencies." NEWLINE);
 	for (int researchId = 0; researchId < this->researchCount; researchId++) {
-		DetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
+		TTDetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
 		if (!detail || !detail->active) { continue; }
 		if (detail->allRequirementsAreKnown) { continue; }
 		bool allReqSatisfied = true;
-		for each (DetailedResearchDef *reqDetail in detail->directRequirements)
+		for each (TTDetailedResearchDef *reqDetail in detail->directRequirements)
 		{
 			allReqSatisfied &= reqDetail->allRequirementsAreKnown;
 		}
@@ -243,7 +243,7 @@ int TechTreeAnalyzer::EvaluateRequiredResearchesSimple() {
 		// Otherwise, the research needs to be triggered by a building ?
 		bool allowedResearch = (detail->researchDef->researchTime == 0);
 		long int researchLocation = detail->researchDef->researchLocation;
-		DetailedBuildingDef *researchLocDetail = this->GetDetailedBuildingDef(researchLocation);
+		TTDetailedBuildingDef *researchLocDetail = this->GetDetailedBuildingDef(researchLocation);
 		std::string additionalLogInfo = "";
 		if (researchLocDetail && researchLocDetail->isAvailableInCurrentState) {
 			allowedResearch = true;
@@ -257,7 +257,7 @@ int TechTreeAnalyzer::EvaluateRequiredResearchesSimple() {
 		if (allReqSatisfied && allowedResearch) {
 			updatedResearches++;
 			detail->allRequirementsAreKnown = true;
-			for each (DetailedResearchDef *reqDetail in detail->directRequirements)
+			for each (TTDetailedResearchDef *reqDetail in detail->directRequirements)
 			{
 				detail->allRequirementsExcludingAges.insert(reqDetail);
 				detail->AddAllRequirementsFrom(reqDetail); // inherit required research's requirements
@@ -267,7 +267,7 @@ int TechTreeAnalyzer::EvaluateRequiredResearchesSimple() {
 			this->myLog.append(" / ");
 			this->myLog.append(detail->internalName);
 			this->myLog.append(" : all requirements are known =>");
-			for each (DetailedResearchDef *reqDetail in detail->allRequirementsExcludingAges)
+			for each (TTDetailedResearchDef *reqDetail in detail->allRequirementsExcludingAges)
 			{
 				this->myLog.append(" ");
 				this->myLog.append(std::to_string(reqDetail->GetResearchDefId()));
@@ -294,7 +294,7 @@ void TechTreeAnalyzer::EvaluateRequiredResearches() {
 int TechTreeAnalyzer::CollectUnreachableResearches() {
 	int count = 0;
 	for (int researchId = 0; researchId < this->researchCount; researchId++) {
-		DetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
+		TTDetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
 		if (!detail || !detail->active) { continue; }
 		if (detail->allRequirementsAreKnown) { continue; }
 		this->unreachableResearches.insert(detail);
@@ -319,11 +319,11 @@ int TechTreeAnalyzer::CollectUnreachableResearches() {
 // Update allChildResearches for each research info
 void TechTreeAnalyzer::UpdateChildResearchDependencies() {
 	for (int resDefId = 0; resDefId < this->researchCount; resDefId++) {
-		DetailedResearchDef *detail = this->GetDetailedResearchDef(resDefId);
+		TTDetailedResearchDef *detail = this->GetDetailedResearchDef(resDefId);
 		if (!detail || !detail->active) { continue; }
 
 		for (int childId = 0; childId < this->researchCount; childId++) {
-			DetailedResearchDef *child = this->GetDetailedResearchDef(childId);
+			TTDetailedResearchDef *child = this->GetDetailedResearchDef(childId);
 			if (child && child->active && (child != detail)) {
 				auto x = std::find(child->allRequirementsExcludingAges.begin(), child->allRequirementsExcludingAges.end(), detail);
 				if (x != child->allRequirementsExcludingAges.end()) {
@@ -339,13 +339,13 @@ void TechTreeAnalyzer::UpdateChildResearchDependencies() {
 // Update baseUnitDefId for all known buildings to identify root buildings
 void TechTreeAnalyzer::UpdateBuildingsBaseId() {
 	for (int bldDefId = 0; bldDefId < this->unitDefCount; bldDefId++) {
-		DetailedBuildingDef *detailBld = this->detailedBuildings[bldDefId];
+		TTDetailedBuildingDef *detailBld = this->detailedBuildings[bldDefId];
 		if (detailBld && detailBld->unitDef) {
 			// To avoid recursive stuff, we consider that root ancestor is THE possible ancestor that has NO ancestor itself (there should be only one)
 			// This may fail if some mod uses separate ways to reach some unit ! (but in that case, anyway, detailBld->baseUnitId would have no real meaning).
 			for each (auto ancestorId in detailBld->possibleAncestorUnitIDs)
 			{
-				DetailedBuildingDef *ancestor = this->detailedBuildings[ancestorId];
+				TTDetailedBuildingDef *ancestor = this->detailedBuildings[ancestorId];
 				if (ancestor && ancestor->unitDef && (ancestor->possibleAncestorUnitIDs.size() == 0)) {
 					detailBld->baseUnitId = ancestorId;
 				}
@@ -383,7 +383,7 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 	
 	// Debugging
 	for (int researchId = 0; researchId < this->researchCount; researchId++) {
-		DetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
+		TTDetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
 		if (!detail || !detail->active) { continue; }
 		if (!detail->allRequirementsAreKnown) { continue; }
 		this->myLog.append("Research #");

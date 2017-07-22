@@ -16,46 +16,85 @@ namespace STRATEGY {
 ;
 
 
-// Represents detailed information about a building definition (unit definition), including information related to tech tree.
-class DetailedBuildingDef {
+// Generic parent to describe Tech tree detailed info for a unit. See child classes for strong typing.
+class TTDetailedUnitDef {
 public:
-	DetailedBuildingDef(STRUCT_UNITDEF_BUILDING *unitDef) {
+	TTDetailedUnitDef() {
+		this->unitDefId = -1;
 		this->internalName = "";
+		this->isAvailableImmediately = false;
 		this->isAvailableInCurrentState = false;
-		if (unitDef == NULL) {
-			this->unitDefId = -1;
-			this->unitDef = NULL;
-			this->isAvailableImmediately = false;
-			this->initiatesResearch = -1;
-			this->baseUnitId = -1;
-			return;
-		}
-		this->unitDefId = unitDef->DAT_ID1;
-		this->unitDef = unitDef;
-		if (unitDef->ptrUnitName) { this->internalName = unitDef->ptrUnitName; }
-		this->isAvailableImmediately = (unitDef->availableForPlayer != 0);
-		this->initiatesResearch = unitDef->initiatesResearch;
-		this->baseUnitId = this->unitDefId;
+		this->baseUnitId = -1;
 	}
-
 	long int unitDefId;
 	std::string internalName;
 	bool isAvailableImmediately; // True if building is available at game start.
 	bool isAvailableInCurrentState; // Reserved for analysis phase: set to true when a "researchIdsThatEnableMe" is ready (building can be built at this stage).
-	STRUCT_UNITDEF_BUILDING *unitDef;
-	short int initiatesResearch; // ID of research that is triggered when "this" building is constructed. Can be -1 (none).
 	std::set<long int> researchIdsThatEnableMe; // It is expected to have 0 (if available at start) or 1 value here, no more.
 	std::set<long int> possibleUpgradedUnitIDs; // UnitDefIds of buildings that are "upgrades" of me.
 	std::set<long int> possibleAncestorUnitIDs; // UnitDefIds of buildings that can be upgraded into "me". See "baseUnitId" to find THE root unitDefId.
 
 	long int baseUnitId; // UnitDefId of the (root) base unitdef I am a descendent of. =this->unitDefId if I have no ancestor.
+
+	// Safely sets internal name from unit definition.
+	void SetNameFromDefinition(STRUCT_UNITDEF_BASE *unitDef) {
+		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->ptrUnitName) {
+			this->internalName = unitDef->ptrUnitName; 
+		} else { 
+			this->internalName = "";
+		}
+	}
 };
 
 
-// Represents detailed information about a research definition, including information related to tech tree.
-class DetailedResearchDef {
+class TTDetailedTrainableUnitDef : public TTDetailedUnitDef {
 public:
-	DetailedResearchDef(long int researchDefId) {
+	TTDetailedTrainableUnitDef(STRUCT_UNITDEF_TRAINABLE *unitDef) {
+		__super::TTDetailedUnitDef();
+		this->unitDef = unitDef;
+		if (!unitDef || !unitDef->IsCheckSumValid()) { return; }
+		// Init for valid case
+		this->unitDefId = unitDef->DAT_ID1;
+		this->unitDef = unitDef;
+		this->SetNameFromDefinition(this->unitDef);
+		this->isAvailableImmediately = (unitDef->availableForPlayer != 0);
+		this->baseUnitId = this->unitDefId;
+	}
+	STRUCT_UNITDEF_TRAINABLE *unitDef;
+
+	long int GetTrainLocation() const {
+		if (!this->unitDef) { return -1; }
+		return this->unitDef->trainLocation;
+	}
+};
+
+
+// Represents Tech tree detailed information about a building definition (unit definition).
+class TTDetailedBuildingDef : public TTDetailedUnitDef {
+public:
+	TTDetailedBuildingDef(STRUCT_UNITDEF_BUILDING *unitDef) {
+		__super::TTDetailedUnitDef();
+		this->unitDef = unitDef;
+		this->initiatesResearch = -1;
+		if (!unitDef || !unitDef->IsCheckSumValid()) { return; }
+		// Init for valid case
+		this->unitDefId = unitDef->DAT_ID1;
+		this->unitDef = unitDef;
+		this->SetNameFromDefinition(this->unitDef);
+		this->isAvailableImmediately = (unitDef->availableForPlayer != 0);
+		this->initiatesResearch = unitDef->initiatesResearch;
+		this->baseUnitId = this->unitDefId;
+	}
+
+	STRUCT_UNITDEF_BUILDING *unitDef;
+	short int initiatesResearch; // ID of research that is triggered when "this" building is constructed. Can be -1 (none).
+};
+
+
+// Represents Tech tree detailed information about a research definition.
+class TTDetailedResearchDef {
+public:
+	TTDetailedResearchDef(long int researchDefId) {
 		this->active = false;
 		this->researchDefId = researchDefId;
 		this->internalName = "";
@@ -79,13 +118,13 @@ public:
 	bool hasOptionalRequirements; // true if minimum required research count is < required researches count. Only AGE research should have this.
 	bool allRequirementsAreKnown; // true when allRequirementsExcludingAges is fully filled with required researches (research is considered "done" in tech tree analysis)
 
-	std::set<DetailedResearchDef*> directRequirements; // Direct required researches, INCLUDING the research that enables the building that "initiates" me, if any.
-	std::set<DetailedResearchDef*> allRequirements; // all required researches, which can make a lot especially for iron-age researches.
-	std::set<DetailedResearchDef*> allRequirementsExcludingAges; // all required from same age, direct or indirect
-	std::set<DetailedBuildingDef*> triggeredByBuilding; // Detailed info for all buildings that triggers the research
+	std::set<TTDetailedResearchDef*> directRequirements; // Direct required researches, INCLUDING the research that enables the building that "initiates" me, if any.
+	std::set<TTDetailedResearchDef*> allRequirements; // all required researches, which can make a lot especially for iron-age researches.
+	std::set<TTDetailedResearchDef*> allRequirementsExcludingAges; // all required from same age, direct or indirect
+	std::set<TTDetailedBuildingDef*> triggeredByBuilding; // Detailed info for all buildings that triggers the research
 
-	std::set<DetailedResearchDef*> allChildResearches; // all researches that have a dependency on me (reverse info from allRequirementsExcludingAges)
-	std::set<DetailedBuildingDef*> enableBuildings; // The buildings that are enabled thanks to "this" research.
+	std::set<TTDetailedResearchDef*> allChildResearches; // all researches that have a dependency on me (reverse info from allRequirementsExcludingAges)
+	std::set<TTDetailedBuildingDef*> enableBuildings; // The buildings that are enabled thanks to "this" research.
 	std::set<long int> enableUnitDefId; // Non-building unitDef IDs that are enabled by this research
 	std::set<std::pair<long int, long int>> upgradedUnitDefId; // Non-building unitDef IDs that are upgraded by this research (pair: first=from, second=to)
 
@@ -98,7 +137,7 @@ public:
 	bool IsShadowResearch() const;
 
 	// Copy all direct/indirect requirements from "other" to this->allRequirementsExcludingAges
-	void AddAllRequirementsFrom(DetailedResearchDef *other);
+	void AddAllRequirementsFrom(TTDetailedResearchDef *other);
 
 };
 

@@ -10,7 +10,7 @@
 #include "mainStructuresHandling.h"
 #include "techDefHandling.h"
 #include "researches.h"
-#include "DetailedResearchDef.h"
+#include "TTDetailedResearchDef.h"
 
 #pragma once
 
@@ -48,24 +48,24 @@ public:
 	bool IsReady() const { return this->analyzeComplete; }
 
 	// Safely get a DetailedResearchDefobject
-	DetailedResearchDef *GetDetailedResearchDef(int researchId) const {
+	TTDetailedResearchDef *GetDetailedResearchDef(int researchId) const {
 		if ((researchId < 0) || (researchId >= this->researchCount) || (this->detailedResearches == NULL)) { return NULL; }
 		return this->detailedResearches[researchId];
 	}
 
 	// Safely get a DetailedResearchDefobject
-	DetailedBuildingDef *GetDetailedBuildingDef(int unitDefId) const {
+	TTDetailedBuildingDef *GetDetailedBuildingDef(int unitDefId) const {
 		if ((unitDefId < 0) || (unitDefId >= this->unitDefCount) || (this->detailedBuildings == NULL)) { return NULL; }
 		return this->detailedBuildings[unitDefId];
 	}
 
 	// Adds (if not already there) building unit definition in internal data. Required to use the corresponding DetailedBuildingDef.
-	DetailedBuildingDef *InitGetDetailedBuildingDef(STRUCT_UNITDEF_BUILDING *unitDef) {
+	TTDetailedBuildingDef *InitGetDetailedBuildingDef(STRUCT_UNITDEF_BUILDING *unitDef) {
 		if (!unitDef) { return NULL; }
-		DetailedBuildingDef *result = this->GetDetailedBuildingDef(unitDef->DAT_ID1);
+		TTDetailedBuildingDef *result = this->GetDetailedBuildingDef(unitDef->DAT_ID1);
 		if (result) { return result; }
 		if ((unitDef->DAT_ID1 < 0) || (unitDef->DAT_ID1 >= this->unitDefCount)) { return NULL; } // Should not happen
-		result = new DetailedBuildingDef(unitDef);
+		result = new TTDetailedBuildingDef(unitDef);
 		this->detailedBuildings[unitDef->DAT_ID1] = result;
 		return result;
 	}
@@ -74,9 +74,9 @@ public:
 	bool AnalyzeTechTree();
 
 private:
-	DetailedResearchDef **detailedResearches; // Array of all research detailed info, size=researchCount
-	DetailedBuildingDef **detailedBuildings; // Array of all research buildings info, size=unitDefCount. May contain (many) NULLs.
-	std::set<DetailedResearchDef*> unreachableResearches; // Impossible researched (could not be reached during analysis)
+	TTDetailedResearchDef **detailedResearches; // Array of all research detailed info, size=researchCount
+	TTDetailedBuildingDef **detailedBuildings; // Array of all research buildings info, size=unitDefCount. May contain (many) NULLs.
+	std::set<TTDetailedResearchDef*> unreachableResearches; // Impossible researched (could not be reached during analysis)
 	bool analyzeComplete;
 	long int researchCount;
 	long int unitDefCount;
@@ -86,11 +86,11 @@ private:
 	bool AllocArrays() {
 		if (this->detailedResearches) { return false; }
 		if ((this->researchCount <= 0) || (this->unitDefCount <= 0)) { return false; }
-		this->detailedResearches = (DetailedResearchDef**)malloc(sizeof(DetailedResearchDef*) * this->researchCount);
+		this->detailedResearches = (TTDetailedResearchDef**)malloc(sizeof(TTDetailedResearchDef*) * this->researchCount);
 		for (int i = 0; i < this->researchCount; i++) {
-			this->detailedResearches[i] = new DetailedResearchDef(i);
+			this->detailedResearches[i] = new TTDetailedResearchDef(i);
 		}
-		this->detailedBuildings = (DetailedBuildingDef**)malloc(sizeof(DetailedBuildingDef*) * this->unitDefCount);
+		this->detailedBuildings = (TTDetailedBuildingDef**)malloc(sizeof(TTDetailedBuildingDef*) * this->unitDefCount);
 		for (int i = 0; i < this->unitDefCount; i++) {
 			this->detailedBuildings[i] = NULL;
 		}
