@@ -79,7 +79,7 @@ int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, AOE_S
 	bool forceNotInsert = (resInfo->researchId >= CST_RSID_STONE_AGE) && (resInfo->researchId <= CST_RSID_IRON_AGE); // +104 for republic age
 	// Do not insert ages as they are added in dedicated method.
 	if (!forceNotInsert) {
-		if (resInfo->researchDef->researchLocation >= 0) { // shadow research without a location must not be actually added to strategy
+		if (!resInfo->researchDef->IsShadowResearch()) { // shadow research without a location must not be actually added to strategy
 			AddUnitInStrategy_before(this->buildAI, insertionPoint, -1, resInfo->researchDef->researchLocation, TAIUnitClass::AIUCTech, resInfo->researchId, player,
 				GetResearchLocalizedName(resInfo->researchId).c_str());
 			res++;
@@ -1526,7 +1526,7 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 	{
 		resInfo->unitInstanceScoreForOptionalResearch = 0;
 		// Filter: exclude research already added/marked for add, shadow researches, etc
-		if (resInfo->researchDef && (resInfo->researchDef->researchLocation > -1) && !resInfo->isInStrategy && !resInfo->markedForAdd) {
+		if (resInfo->researchDef && !resInfo->researchDef->IsShadowResearch() && !resInfo->isInStrategy && !resInfo->markedForAdd) {
 			for each (short int impactedUnitDefId in resInfo->impactedUnitDefIds) {
 				for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
 				{
@@ -2238,7 +2238,7 @@ void StrategyBuilder::ChooseOptionalResearches() {
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		resInfo->unitInstanceScoreForOptionalResearch = 0;
-		if (resInfo->researchDef && (resInfo->researchDef->researchLocation >= 0)) { // small optim: exclude shadow researches
+		if (resInfo->researchDef && !resInfo->researchDef->IsShadowResearch()) { // small optim: exclude shadow researches
 			for each (short int impactedUnitDefId in resInfo->impactedUnitDefIds)
 			{
 				for each (PotentialUnitInfo *unitInfo in unitsThatNeedMoreAttack) {
@@ -2968,7 +2968,7 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 			STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(resId);
 			if (resDef && (resId != CST_RSID_STONE_AGE) && (resId != CST_RSID_TOOL_AGE) && 
 				(resId != CST_RSID_BRONZE_AGE) && (resId != CST_RSID_IRON_AGE) /*&& (resId != 104) for republic age*/) {
-				if (resDef->researchLocation >= 0) { // ignore shadow techs : not to be put in strategy, and we won't get too many dependencies
+				if (!resDef->IsShadowResearch()) { // ignore shadow techs : not to be put in strategy, and we won't get too many dependencies
 					unitInfo->requiredResearchesForBaseUnit.insert(resId);
 				}
 			}
