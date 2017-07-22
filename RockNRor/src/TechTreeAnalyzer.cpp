@@ -4,6 +4,7 @@
 #define NEWLINE "\r\n"
 
 using namespace AOE_STRUCTURES;
+using namespace AOE_CONST_FUNC;
 
 namespace ROCKNROR {
 namespace STRATEGY {

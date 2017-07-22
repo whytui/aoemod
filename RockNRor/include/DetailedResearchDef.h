@@ -93,6 +93,10 @@ public:
 
 	// Get "my" research definition ID
 	long int GetResearchDefId() const { return this->researchDefId; }
+	
+	// Returns true if the research is a shadow research = research NOT triggered 'manually' by player
+	bool IsShadowResearch() const;
+
 	// Copy all direct/indirect requirements from "other" to this->allRequirementsExcludingAges
 	void AddAllRequirementsFrom(DetailedResearchDef *other);
 

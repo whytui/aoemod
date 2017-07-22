@@ -47,6 +47,20 @@ namespace AOE_STRUCTURES {
 		long int languageDLLCreation;
 		long int languageDLLHelp; // +34
 		unsigned long int unknown_38;
+
+		// Returns true if the research is a shadow research = research NOT triggered 'manually' by player
+		bool IsShadowResearch() const {
+			return (this->researchLocation == -1) ||
+				(this->researchTime == 0) || // Researches with time=0 are developed automatically once requirements are OK. E.g. Small War Ship(id=3).
+				// Trick to identify bad configuration (invalid researches with everything=0), there are plenty of them in original empires.dat
+				// Especially, having requiredResearchId[...] values >=0 when requiredResearchId==0 is suspicious.
+				// Please not that for many fields, 0 does not mean None (-1 does)
+				((this->requiredResearchId == 0) && (this->requiredResearchId == 0) &&
+				(this->researchTime == 0) && (this->technologyId == 0) && (this->iconId == 0) &&
+				(this->requiredResearchId[0] == 0) && (this->requiredResearchId[1] == 0) &&
+				(this->requiredResearchId[2] == 0) && (this->requiredResearchId[3] == 0)
+				);
+		}
 	};
 	static_assert(sizeof(STRUCT_RESEARCH_DEF) == 0x3C, "STRUCT_RESEARCH_DEF size");
 

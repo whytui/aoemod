@@ -8,6 +8,13 @@ namespace STRATEGY {
 ;
 
 
+// Returns true if the research is a shadow research = research NOT triggered 'manually' by player
+bool DetailedResearchDef::IsShadowResearch() const {
+	if (!this->active || !this->researchDef) { return false; }
+	return this->researchDef->IsShadowResearch();
+}
+
+
 // Copy all direct/indirect requirements from "other" to this->allRequirementsExcludingAges and this->allRequirements
 void DetailedResearchDef::AddAllRequirementsFrom(DetailedResearchDef *other) {
 	if (!other) { return; }
