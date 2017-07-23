@@ -25,16 +25,21 @@ public:
 		this->isAvailableImmediately = false;
 		this->isAvailableAfterAnalysis = false;
 		this->baseUnitId = -1;
+		this->requiredAge = -1;
 	}
 	long int unitDefId;
 	std::string internalName;
 	bool isAvailableImmediately; // True if building is available at game start.
 	bool isAvailableAfterAnalysis; // Used in analysis phase: set to true when a "researchIdsThatEnableMe" is ready (building can be built at this stage).
+	short int requiredAge; // -1 or an "age" research ID
 	std::set<long int> researchIdsThatEnableMe; // It is expected to have 0 (if available at start) or 1 value here, no more.
 	std::set<long int> possibleUpgradedUnitIDs; // UnitDefIds of buildings that are "upgrades" of me.
 	std::set<long int> possibleAncestorUnitIDs; // UnitDefIds of buildings that can be upgraded into "me". See "baseUnitId" to find THE root unitDefId.
 
 	long int baseUnitId; // UnitDefId of the (root) base unitdef I am a descendent of. =this->unitDefId if I have no ancestor.
+
+	// True if unitdef is valid and underlying data can be used safely
+	virtual bool IsValid() const { return this->unitDefId >= 0; }
 
 	// Safely sets internal name from unit definition.
 	void SetNameFromDefinition(STRUCT_UNITDEF_BASE *unitDef) {
@@ -67,6 +72,8 @@ public:
 	}
 	STRUCT_UNITDEF_TRAINABLE *unitDef;
 
+	bool IsValid() const override { return __super::IsValid() && (this->unitDef != NULL); }
+
 	long int GetTrainLocation() const {
 		if (!this->unitDef) { return -1; }
 		return this->unitDef->trainLocation;
@@ -93,6 +100,8 @@ public:
 
 	STRUCT_UNITDEF_BUILDING *unitDef;
 	short int initiatesResearch; // ID of research that is triggered when "this" building is constructed. Can be -1 (none).
+
+	bool IsValid() const override { return __super::IsValid() && (this->unitDef != NULL); }
 };
 
 

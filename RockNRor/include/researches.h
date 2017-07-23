@@ -36,6 +36,32 @@ namespace AOE_METHODS {
 }
 
 
+namespace AOE_STRUCTURES {
+namespace RESEARCH {
+;
+
+// Returns true if technology enables at least one unit (including upgrade a unit into another one).
+bool DoesTechEnableSomeUnit(STRUCT_TECH_DEF *techDef);
+
+// Returns true if technology disables at least one unit (generally, tech tree effects).
+bool DoesTechDisableSomeUnit(STRUCT_TECH_DEF *techDef);
+
+// Returns true if technology disables at least one research (generally, tech tree effects).
+bool DoesTechDisableSomeResearch(STRUCT_TECH_DEF *techDef);
+
+// Returns the first found armor class that is improved by a technology. Returns CST_AC_NONE(-1) if the tech does not improve any armor.
+// Generally, even if it has many effects, a technology should improve only 1 armor type, so the result is deterministic as long as this hypothesis is correct.
+// Warning: "default armor" is ignored here
+AOE_CONST_FUNC::ATTACK_CLASS DoesImproveSomeArmor(STRUCT_TECH_DEF *techDef);
+
+// Returns the first found attack class that is improved by a technology. Returns CST_AC_NONE(-1) if the tech does not improve any attack.
+// Generally, even if it has many effects, a technology should improve only 1 attack type, so the result is deterministic as long as this hypothesis is correct.
+AOE_CONST_FUNC::ATTACK_CLASS DoesImproveSomeAttack(STRUCT_TECH_DEF *techDef);
+
+}
+}
+
+
 // Get a technology name from languagex.dll or language.dll.
 // Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
 std::string GetTechnologyLocalizedName(short int techId);

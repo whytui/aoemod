@@ -202,6 +202,7 @@ namespace AOE_CONST_FUNC {
 	// http://agecommunity.wikia.com/wiki/Attack_Data
 	// For both attack and armor types.
 	enum ATTACK_CLASS: short int {
+		CST_AC_NONE = -1,
 		CST_AC_BALLISTA_ON_BUILDINGS = 0,
 		CST_AC_SLINGER_ON_ARCHERS = 1, // And on towers/walls too
 		CST_AC_BASE_PIERCE = 3, // Common archers attack class
@@ -258,8 +259,8 @@ namespace AOE_CONST_FUNC {
 		TUA_SPEED = 5,
 		TUA_ROTATION_SPEED = 6,
 		TUA_UNKNOWN_07 = 7, // seems to be unused.
-		TUA_ARMOR = 8, // Warning: value contains 2 informations
-		TUA_ATTACK = 9, // Warning: value contains 2 informations
+		TUA_ARMOR = 8, // Warning: value contains 2 informations using a modulo 256
+		TUA_ATTACK = 9, // Warning: value contains 2 informations using a modulo 256
 		TUA_ATTACK_RELOAD_TIME = 10, // reload time 1
 		TUA_ACCURACY_PERCENT = 11,
 		TUA_RANGE = 12, // Updates maxRange

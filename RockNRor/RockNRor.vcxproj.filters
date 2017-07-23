@@ -593,6 +593,9 @@
     <ClCompile Include="src\TTDetailedResearchDef.cpp">
       <Filter>Fichiers sources\Strategy</Filter>
     </ClCompile>
+    <ClCompile Include="src\PlayerTechTree.cpp">
+      <Filter>Fichiers sources\Strategy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="RockNRor_README.txt" />

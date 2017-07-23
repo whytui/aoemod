@@ -219,6 +219,7 @@
     <ClCompile Include="src\civilizationInfo.cpp" />
     <ClCompile Include="src\combatAI.cpp" />
     <ClCompile Include="src\CustomCiv.cpp" />
+    <ClCompile Include="src\PlayerTechTree.cpp" />
     <ClCompile Include="src\TTDetailedResearchDef.cpp" />
     <ClCompile Include="src\GameEventHandler.cpp" />
     <ClCompile Include="src\interruption.cpp" />

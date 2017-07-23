@@ -225,6 +225,16 @@ void TechTreeAnalyzer::MarkTrainableUnitAsAvailable(long int unitDefId) {
 	if (detailTrainable->isAvailableAfterAnalysis) { return; } // Already marked as available.
 	detailTrainable->isAvailableAfterAnalysis = true;
 
+	for each (long int reqResId in detailTrainable->researchIdsThatEnableMe) {
+		TTDetailedResearchDef *reqRes = this->GetDetailedResearchDef(reqResId);
+		if (reqRes && reqRes->active && (detailTrainable->requiredAge < reqRes->requiredAge)) {
+			detailTrainable->requiredAge = reqRes->requiredAge;
+		}
+	}
+	if (detailTrainable->requiredAge == -1) {
+		detailTrainable->requiredAge = AOE_CONST_FUNC::CST_RSID_STONE_AGE;
+	}
+
 	this->myLog.append("Unit #");
 	this->myLog.append(std::to_string(detailTrainable->unitDefId));
 	this->myLog.append(" / ");
@@ -390,7 +400,7 @@ void TechTreeAnalyzer::UpdateChildResearchDependencies() {
 // Update baseUnitDefId for all known buildings to identify root buildings
 void TechTreeAnalyzer::UpdateBuildingsBaseId() {
 	for (int bldDefId = 0; bldDefId < this->unitDefCount; bldDefId++) {
-		TTDetailedBuildingDef *detailBld = this->detailedBuildings[bldDefId];
+		/*TTDetailedBuildingDef *detailBld = this->detailedBuildings[bldDefId];
 		if (detailBld && detailBld->unitDef) {
 			// To avoid recursive stuff, we consider that root ancestor is THE possible ancestor that has NO ancestor itself (there should be only one)
 			// This may fail if some mod uses separate ways to reach some unit ! (but in that case, anyway, detailBld->baseUnitId would have no real meaning).
@@ -399,6 +409,31 @@ void TechTreeAnalyzer::UpdateBuildingsBaseId() {
 				TTDetailedBuildingDef *ancestor = this->detailedBuildings[ancestorId];
 				if (ancestor && ancestor->unitDef && (ancestor->possibleAncestorUnitIDs.size() == 0)) {
 					detailBld->baseUnitId = ancestorId;
+				}
+			}
+		}*/
+
+		TTDetailedUnitDef *detail = this->GetDetailedBuildingDef(bldDefId);
+		bool isBuilding = (detail != NULL);
+		if (!isBuilding) {
+			detail = this->GetDetailedTrainableUnitDef(bldDefId);
+		}
+
+		if (detail && detail->IsValid()) {
+			// To avoid recursive stuff, we consider that root ancestor is THE possible ancestor that has NO ancestor itself (there should be only one)
+			// This may fail if some mod uses separate ways to reach some unit ! (but in that case, anyway, detailBld->baseUnitId would have no real meaning).
+			for each (auto ancestorId in detail->possibleAncestorUnitIDs)
+			{
+				TTDetailedUnitDef *ancestor;
+				if (isBuilding) { // Bug in C++ syntax (!): can't use a ? b : c syntax here
+					ancestor = this->GetDetailedBuildingDef(ancestorId);
+				} else {
+					ancestor = this->GetDetailedTrainableUnitDef(ancestorId);
+				}
+
+				//TTDetailedBuildingDef *ancestor = this->detailedBuildings[ancestorId];
+				if (ancestor && ancestor->IsValid() && (ancestor->possibleAncestorUnitIDs.size() == 0)) {
+					detail->baseUnitId = ancestorId;
 				}
 			}
 		}

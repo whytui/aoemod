@@ -89,6 +89,13 @@ namespace AOE_STRUCTURES {
 			if (this->effectType != TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) { return -1; }
 			return this->effectClass;
 		}
+		// If effect is "attribute modifier" and attribute is armor or attack, then return armor/attack type.
+		// Returns NONE (-1) otherwise
+		AOE_CONST_FUNC::ATTACK_CLASS GetAttackOrArmorType() const {
+			if (!this->IsAttributeModifier()) { return AOE_CONST_FUNC::ATTACK_CLASS::CST_AC_NONE; }
+			AOE_CONST_FUNC::ATTACK_CLASS attackClass = (AOE_CONST_FUNC::ATTACK_CLASS)(((long int)this->effectValue) / 256);
+			return attackClass;
+		}
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");
 

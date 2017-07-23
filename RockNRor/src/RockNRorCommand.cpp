@@ -1176,9 +1176,11 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 	// TEST
 #ifdef _DEBUG
 	bool useFakeCiv = true;
+	ROCKNROR::CUSTOMCIV::CustomCivHandler h;
 	if (useFakeCiv) {
-		ROCKNROR::CUSTOMCIV::CustomCivHandler h;
 		h.CreateFakeRandomCivsForAllPlayers();
+	} else {
+		h.CreateInternalDataForGameWithStandardCivs();
 	}
 #endif
 

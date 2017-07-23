@@ -24,6 +24,93 @@ void AOE_METHODS::AOE_enableResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, long
 }
 
 
+namespace AOE_STRUCTURES {
+namespace RESEARCH {
+;
+
+// Returns true if technology enables at least one unit (including upgrade a unit into another one).
+bool DoesTechEnableSomeUnit(STRUCT_TECH_DEF *techDef) {
+	if (!techDef) { return false; }
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect) {
+			// Enable unit
+			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (techEffect->effectClass == 1)) {
+				return true;
+			}
+			
+			// Upgrade some unit TO THIS unit
+			if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) && (techEffect->effectUnit > -1) && (techEffect->effectClass > -1)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+// Returns true if technology disables at least one unit (generally, tech tree effects).
+bool DoesTechDisableSomeUnit(STRUCT_TECH_DEF *techDef) {
+	if (!techDef) { return false; }
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_ENABLE_DISABLE_UNIT) && (techEffect->effectClass == 0)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+// Returns true if technology disables at least one research (generally, tech tree effects).
+bool DoesTechDisableSomeResearch(STRUCT_TECH_DEF *techDef) {
+	if (!techDef) { return false; }
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+// Returns the first found armor class that is improved by a technology. Returns CST_AC_NONE(-1) if the tech does not improve any armor.
+// Generally, even if it has many effects, a technology should improve only 1 armor type, so the result is deterministic as long as this hypothesis is correct.
+// Warning: "default armor" is ignored here
+AOE_CONST_FUNC::ATTACK_CLASS DoesImproveSomeArmor(STRUCT_TECH_DEF *techDef) {
+	if (!techDef) { return AOE_CONST_FUNC::CST_AC_NONE; }
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect->IsAttributeModifier() && (techEffect->effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_ARMOR)) {
+			AOE_CONST_FUNC::ATTACK_CLASS armorClass = techEffect->GetAttackOrArmorType();
+			return armorClass;
+		}
+	}
+	return AOE_CONST_FUNC::CST_AC_NONE;
+}
+
+
+// Returns the first found attack class that is improved by a technology. Returns CST_AC_NONE(-1) if the tech does not improve any attack.
+// Generally, even if it has many effects, a technology should improve only 1 attack type, so the result is deterministic as long as this hypothesis is correct.
+AOE_CONST_FUNC::ATTACK_CLASS DoesImproveSomeAttack(STRUCT_TECH_DEF *techDef) {
+	if (!techDef) { return AOE_CONST_FUNC::CST_AC_NONE; }
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect->IsAttributeModifier() && (techEffect->effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_ATTACK)) {
+			AOE_CONST_FUNC::ATTACK_CLASS attackClass = techEffect->GetAttackOrArmorType();
+			return attackClass;
+		}
+	}
+	return AOE_CONST_FUNC::CST_AC_NONE;
+}
+
+
+}
+}
+
+
+
 // Get a technology name from languagex.dll or language.dll.
 // Technologies don't really have a name, we use matching research to find it. Works in many cases, not all.
 std::string GetTechnologyLocalizedName(short int techId) {
