@@ -5,7 +5,7 @@ namespace STRATEGY {
 ;
 
 
-// Fill enabledXxx/disabledXxx collections according to player's tech tree (myTechTreeId).
+// Fill eligibleDisableXxx collections according to player's tech tree (myTechTreeId).
 void CustomPlayerInfo::CollectInfoFromExistingTechTree() {
 	if (!this->isActive || (this->myTechTreeId < 0)) { return; }
 	if (!ROCKNROR::crInfo.techTreeAnalyzer.IsReady()) { return; }
@@ -126,6 +126,7 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	if (!techDef || (techDef->effectCount > 0)) { return; }
 	if (!ROCKNROR::crInfo.techTreeAnalyzer.IsReady()) { return; }
 
+	this->techDefForTechTree = techDef;
 	this->arrayResearchCount = ROCKNROR::crInfo.techTreeAnalyzer.GetResearchCount();
 	this->arrayUnitDefCount = ROCKNROR::crInfo.techTreeAnalyzer.GetUnitDefCount();
 
@@ -140,9 +141,14 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	int eligibleDisableUnitDefIdIronCount = this->eligibleDisableUnitDefIdIron.size();
 
 
-	// DISABLE RESEARCH
+	// Init base probabilities, also create research/unit internal info objects.
 	this->SetResearchBaseProbabilities();
+	this->SetUnitBaseProbabilities();
+	
+	// DISABLE RESEARCH
 	this->CalcResearchesDisableScore();
+	this->CreateDisableResearchesEffects();
+	this->AddEffectsToTechDef();
 
 	// main parts:
 	// 1) disable some researches (consequence: may cascade other researches + disable some units)
@@ -270,6 +276,7 @@ void TechTreeCreator::CollectUnitInfo() {
 
 
 // Set initial (base) probabilities for all researches. Does not take care of dependencies/impact on other researches/units.
+// Creates the TTCreatorResearchInfo objects into allCreatorResearchInfo list.
 void TechTreeCreator::SetResearchBaseProbabilities() {
 	// INIT: create object for each eligible research.
 	for each (long int resDefId in this->eligibleDisableResearchIdBronze) {
@@ -298,6 +305,7 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 	}
 
 	// 1 - set probability for "hardcoded" groups:  eg. storage pit iron-armors (3) should remain together
+	// WTF this implementation is poor (and won't work)
 	double randomProbaForArmors = RES_PROBA_STANDARD_RESEARCH;
 	const double weightForArmors = RES_WEIGHT_STANDARD_RESEARCH;
 	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
@@ -310,6 +318,9 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 			crResInfo->disableWeight = weightForArmors;
 		}
 	}
+
+
+#pragma message("TODO: tower shield higher proba, even iron shied ? use armor type and ancestor/child count to determine")
 
 
 	// 2 - set probability for friendly researches (temple...)
@@ -392,6 +403,65 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 }
 
 
+// Set initial (base) probabilities for all units. Does not take care of dependencies/impact on other researches/units.
+// Creates the TTCreatorUnitInfo objects into allCreatorUnitInfo list.
+void TechTreeCreator::SetUnitBaseProbabilities() {
+	// INIT: create object for each eligible unit.
+	for each (long int resUnitId in this->eligibleDisableUnitDefIdBronze) {
+		TTCreatorUnitInfo *ttcUnitInfo = new TTCreatorUnitInfo();
+		ttcUnitInfo->unitDefId = resUnitId;
+		TTDetailedTrainableUnitDef *trainableDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(resUnitId);
+		if (trainableDetail) {
+			ttcUnitInfo->unitDetail = trainableDetail;
+			ttcUnitInfo->trainLocation = trainableDetail->GetTrainLocation();
+			for each (long int srcResDefId in trainableDetail->researchIdsThatEnableMe)
+			{
+				if (ttcUnitInfo->sourceResearchId == -1) {
+					ttcUnitInfo->sourceResearchId = srcResDefId;
+				} else {
+					assert(false && "non-unique source research id for unit");
+				}
+			}
+		} else {
+			ttcUnitInfo->unitDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(resUnitId);
+		} 
+		assert(ttcUnitInfo->unitDetail);
+		this->allCreatorUnitInfo.push_back(ttcUnitInfo);
+	}
+	for each (long int resUnitId in this->eligibleDisableUnitDefIdIron) {
+		TTCreatorUnitInfo *ttcUnitInfo = new TTCreatorUnitInfo();
+		ttcUnitInfo->unitDefId = resUnitId;
+		TTDetailedTrainableUnitDef *trainableDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(resUnitId);
+		if (trainableDetail) {
+			ttcUnitInfo->unitDetail = trainableDetail;
+			ttcUnitInfo->trainLocation = trainableDetail->GetTrainLocation();
+			for each (long int srcResDefId in trainableDetail->researchIdsThatEnableMe)
+			{
+				if (ttcUnitInfo->sourceResearchId == -1) {
+					ttcUnitInfo->sourceResearchId = srcResDefId;
+				} else {
+					assert(false && "non-unique source research id for unit");
+				}
+			}
+		} else {
+			ttcUnitInfo->unitDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(resUnitId);
+		}
+		this->allCreatorUnitInfo.push_back(ttcUnitInfo);
+	}
+
+	// TODO...
+
+	// Set probability for remaining units
+	for each (TTCreatorUnitInfo *crUnitInfo in this->allCreatorUnitInfo)
+	{
+		if (crUnitInfo->disableProbability < 0) {
+			crUnitInfo->disableProbability = RES_PROBA_STANDARD_UNIT;
+			crUnitInfo->disableWeight = RES_WEIGHT_STANDARD_UNIT;
+		}
+	}
+}
+
+
 void TechTreeCreator::UpdateResearchProbabilitiesWithImpacts() {
 	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo) {
 		assert(crResInfo->researchDetail->enableBuildings.size() == 0);
@@ -431,7 +501,194 @@ void TechTreeCreator::CalcResearchesDisableScore() {
 			myrand * (1 - RES_PROBA_IMPACT_ON_RANDOM); // Now tmpCompute is in 0-100
 
 		crResInfo->disableScore = tmpCompute;
+	}
+}
 
+
+void TechTreeCreator::CreateDisableResearchesEffects() {
+	int preferredDisableResearchCount = randomizer.GetRandomValue_normal_moreFlat(5, 12);
+	int curDisableCount = 0;
+	// disabled researches in temple count for maximum xxx in curDisableCount.
+	// Prevents temple disable researches to count too much in number in disable researches (after all, they all only concern one single unit)
+	int templeResearchesDoNotCountMoreThan = 3; 
+	while (curDisableCount < preferredDisableResearchCount) {
+		double bestScore = -1;
+		TTCreatorResearchInfo *bestElem = NULL;
+		std::for_each(this->allCreatorResearchInfo.begin(), this->allCreatorResearchInfo.end(),
+			[&bestElem, &bestScore](TTCreatorResearchInfo *curInfo) {
+			if (!curInfo->hasBeenDisabled && (curInfo->disableScore > bestScore)) { bestScore = curInfo->disableScore; bestElem = curInfo; }
+		}
+		);
+		if (bestScore < 0) { break; }
+
+		std::list<TTCreatorResearchInfo*> disabledChildren = this->CreateDisableEffectOnResearch(bestElem);
+		int addedCount = 1; // Corresponds to "bestElem"
+		addedCount += disabledChildren.size();
+
+		if (bestElem->researchLocation == AOE_CONST_FUNC::CST_UNITID_TEMPLE) {
+			if (templeResearchesDoNotCountMoreThan > 0) {
+				templeResearchesDoNotCountMoreThan--;
+			} else {
+				addedCount--; // compensate: do not count this researches (too many temple researches have been disabled, do not count them anymore)
+			}
+		}
+		// Count the underlying disabled researches too
+		for each (TTCreatorResearchInfo *child in disabledChildren)
+		{
+			if (child->researchLocation == AOE_CONST_FUNC::CST_UNITID_TEMPLE) {
+				if (templeResearchesDoNotCountMoreThan > 0) {
+					templeResearchesDoNotCountMoreThan--;
+				} else {
+					addedCount--; // compensate: do not count this researches (too many temple researches have been disabled, do not count them anymore)
+				}
+			}
+		}
+		curDisableCount += addedCount;
+	}
+}
+
+
+// Disable (cascade) child researches for parentResearch
+// Returns the *child* disabled researches (not the parent research itself)
+std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnResearch(TTCreatorResearchInfo *resInfo) {
+	// Disable myself
+	STRUCT_TECH_DEF_EFFECT newEffect;
+	newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH;
+	newEffect.effectAttribute = 0;
+	newEffect.effectClass = 0;
+	newEffect.effectUnit = 0;
+	newEffect.effectValue = (float)resInfo->researchId;
+	techTreeEffects.push_back(newEffect);
+	resInfo->hasBeenDisabled = true;
+
+	// Does provided research enable units (should not for allCreatorResearchInfo reseearches, as we filter out such researches)
+	for each (TTDetailedTrainableUnitDef *trainableDetail in resInfo->researchDetail->enableTrainables) {
+		assert(trainableDetail->IsValid());
+		this->CreateDisableEffectOnUnit(trainableDetail);
+	}
+
+	std::list<TTCreatorResearchInfo*> result;
+	// Handle children researches (from provided research) that get impossible (includes indirect children)
+	for each (TTDetailedResearchDef *childDetail in resInfo->researchDetail->allChildResearches)
+	{
+		TTCreatorResearchInfo *child = NULL;
+		auto it = std::find_if(this->allCreatorResearchInfo.begin(), this->allCreatorResearchInfo.end(), 
+			[childDetail](TTCreatorResearchInfo *lambdaInfo){ return lambdaInfo->researchId == childDetail->GetResearchDefId(); }
+			);
+		if (it == this->allCreatorResearchInfo.end()) {
+			// Not found: either the *child* research is a "unit disable" tech or it is a research we do NOT want to disable
+			for each (TTDetailedTrainableUnitDef *enTrainable in childDetail->enableTrainables)
+			{
+				this->CreateDisableEffectOnUnit(enTrainable); // Can happen, for example legion (when fanaticism is disabled)
+			}
+		} else {
+			child = *it; // we know this research
+		}
+		if (child && !child->hasBeenDisabled) {
+			// This is done for all children
+			STRUCT_TECH_DEF_EFFECT newEffect;
+			newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH;
+			newEffect.effectAttribute = 0;
+			newEffect.effectClass = 0;
+			newEffect.effectUnit = 0;
+			newEffect.effectValue = (float)child->researchId;
+			techTreeEffects.push_back(newEffect);
+			child->hasBeenDisabled = true;
+			result.push_back(child);
+
+			for each (TTDetailedTrainableUnitDef *trainableDetail in child->researchDetail->enableTrainables) {
+				assert(trainableDetail->IsValid());
+				// Note: unit's parent research is "child" and we just marked it as disabled, so this call won't disable any research recursively.
+				this->CreateDisableEffectOnUnit(trainableDetail); // can happen, for example
+			}
+		}
+	}
+	return result;
+}
+
+
+// Returns the list of "recursive" TTCreatorResearchInfo that have been disabled (does not include unitInfo)
+std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnUnit(TTCreatorUnitInfo *unitInfo) {
+	std::list<TTCreatorResearchInfo*> result;
+	if (!unitInfo) { return result; }
+	if (unitInfo->hasBeenDisabled) { return result; } // already done
+	unitInfo->hasBeenDisabled = true;
+	
+	STRUCT_TECH_DEF_EFFECT newEffect;
+	newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH;
+	newEffect.effectAttribute = 0;
+	newEffect.effectClass = 0;
+	newEffect.effectUnit = 0;
+	newEffect.effectValue = (float)unitInfo->sourceResearchId;
+	techTreeEffects.push_back(newEffect);
+
+	for each (long int resDefId in unitInfo->unitDetail->researchIdsThatEnableMe)
+	{
+		// Remember there should be only 1 "source" research in researchIdsThatEnableMe
+		auto it = std::find_if(this->allCreatorResearchInfo.begin(), this->allCreatorResearchInfo.end(),
+			[resDefId](TTCreatorResearchInfo *lambdaInfo){return lambdaInfo->researchId == resDefId; }
+		);
+		if (it != this->allCreatorResearchInfo.end()) {
+			TTCreatorResearchInfo *srcResInfo = *it;
+			if (!srcResInfo->hasBeenDisabled) {
+				std::list<TTCreatorResearchInfo*> recurList = this->CreateDisableEffectOnResearch(srcResInfo);
+				for each (TTCreatorResearchInfo *elem in recurList)
+				{
+					result.push_back(elem);
+				}
+			}
+		} else {
+			// Not found. Is it an "available at start" unit or a unit we do NOT want to disable ?
+			if (unitInfo->unitDetail->isAvailableImmediately) {
+				// Create an effect that disables unit. This does not exist in standard game (because almost no unit is available at start, only villagers actually)
+				traceMessageHandler.WriteMessageNoNotification("NOT IMPLEMENTED: disable a unit which is available at start");
+			}
+		}
+	}
+	
+	// unitInfo->unitDetail->possibleUpgradedUnitIDs handling:
+	// Do not take care of this, it sohuld be handled by research dependencies.
+
+	return result;
+}
+
+
+// Returns the list of "recursive" TTCreatorResearchInfo that have been disabled (does not include unitInfo)
+std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnUnit(TTDetailedUnitDef *unitDetail) {
+	std::list<TTCreatorResearchInfo*> result;
+	if (!unitDetail) { return result; }
+	long int unitDefId = unitDetail->unitDefId;
+	auto it = std::find_if(this->allCreatorUnitInfo.begin(), this->allCreatorUnitInfo.end(),
+		[unitDefId](TTCreatorUnitInfo *lambdaInfo){return lambdaInfo->unitDefId == unitDefId; }
+	);
+	if (it != this->allCreatorUnitInfo.end()) {
+		// Found
+		TTCreatorUnitInfo *unitElem = *it;
+		return this->CreateDisableEffectOnUnit(unitElem);
+	} else {
+		assert(false && "non-allowed unit ?");
+	}
+	return result;
+}
+
+
+void TechTreeCreator::AddEffectsToTechDef() {
+	int effectCount = this->techTreeEffects.size();
+	if (effectCount <= 0) { return; }
+	this->techDefForTechTree->effectCount = effectCount;
+	if (this->techDefForTechTree->ptrEffects) {
+		AOEFree(this->techDefForTechTree->ptrEffects);
+	}
+	this->techDefForTechTree->ptrEffects = (STRUCT_TECH_DEF_EFFECT*)AOEAllocZeroMemory(effectCount, sizeof(STRUCT_TECH_DEF_EFFECT));
+
+	int curIndex = 0;
+	for each(STRUCT_TECH_DEF_EFFECT effect in this->techTreeEffects) {
+		this->techDefForTechTree->ptrEffects[curIndex].effectType = effect.effectType;
+		this->techDefForTechTree->ptrEffects[curIndex].effectAttribute = effect.effectAttribute;
+		this->techDefForTechTree->ptrEffects[curIndex].effectClass = effect.effectClass;
+		this->techDefForTechTree->ptrEffects[curIndex].effectUnit = effect.effectUnit;
+		this->techDefForTechTree->ptrEffects[curIndex].effectValue = effect.effectValue;
+		curIndex++;
 	}
 }
 

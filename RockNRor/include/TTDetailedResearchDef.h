@@ -30,7 +30,7 @@ public:
 	}
 	long int unitDefId;
 	std::string internalName;
-	bool isAvailableImmediately; // True if building is available at game start.
+	bool isAvailableImmediately; // True if unit is available at game start.
 	bool isAvailableAfterAnalysis; // Used in analysis phase: set to true when a "researchIdsThatEnableMe" is ready (building can be built at this stage).
 	short int requiredAge; // -1 or an "age" research ID
 	std::set<long int> researchIdsThatEnableMe; // It is expected to have 0 (if available at start) or 1 value here, no more.

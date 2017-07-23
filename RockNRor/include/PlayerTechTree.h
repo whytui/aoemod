@@ -45,7 +45,7 @@ public:
 		this->disabledResearchesInfo.clear();
 	}
 
-	// Fill enabledXxx/disabledXxx collections according to player's tech tree (myTechTreeId).
+	// Fill eligibleDisableXxx collections according to player's tech tree (myTechTreeId).
 	void CollectInfoFromExistingTechTree();
 };
 
@@ -58,22 +58,44 @@ public:
 		this->researchId = -1;
 		this->disableProbability = -1;
 		this->disableWeight = 0;
-		this->affinityGroupId = -1;
 		this->updatedArmorClass = ATTACK_CLASS::CST_AC_NONE;
 		this->updatedAttackClass = ATTACK_CLASS::CST_AC_NONE;
 		this->techImpactsReligion = false;
 		this->disableScore = 0;
+		this->hasBeenDisabled = false;
 	}
 	long int researchId;
 	double disableProbability; // 0-1 score. -1 means "not set"
 	double disableWeight; // 0-1 score. The weight (impact) if this research gets disabled
 	double disableScore; // Used to decide which research to disable in tech tree
 	TTDetailedResearchDef *researchDetail;
-	long int affinityGroupId;
 	long int researchLocation;
 	AOE_CONST_FUNC::ATTACK_CLASS updatedArmorClass; // Armor class the tech upgrades. None (-1) in most cases.
 	AOE_CONST_FUNC::ATTACK_CLASS updatedAttackClass; // Attack class the tech upgrades. None (-1) in most cases.
 	bool techImpactsReligion;
+	bool hasBeenDisabled;
+};
+
+class TTCreatorUnitInfo {
+public:
+	TTCreatorUnitInfo() {
+		this->unitDefId = -1;
+		this->unitDetail = NULL;
+		this->disableProbability = -1;
+		this->disableWeight = 0;
+		this->disableScore = 0;
+		this->trainLocation = -1;
+		this->sourceResearchId = -1;
+		this->hasBeenDisabled = false;
+	}
+	long int unitDefId;
+	double disableProbability; // 0-1 score. -1 means "not set"
+	double disableWeight; // 0-1 score. The weight (impact) if this research gets disabled
+	double disableScore; // Used to decide which research to disable in tech tree
+	TTDetailedUnitDef *unitDetail;
+	long int trainLocation;
+	long int sourceResearchId; // ID of the research that enables me, if it exists and is unique
+	bool hasBeenDisabled;
 };
 
 
@@ -83,6 +105,8 @@ static const double RES_WEIGHT_MIN = 0;
 static const double RES_WEIGHT_MAX = 1;
 static const double RES_PROBA_STANDARD_RESEARCH = 0.5; // "disable probability" for a standard research
 static const double RES_WEIGHT_STANDARD_RESEARCH = 0.1; // "disable weight" for a standard research
+static const double RES_PROBA_STANDARD_UNIT = 0.5; // "disable probability" for a standard unit
+static const double RES_WEIGHT_STANDARD_UNIT = 0.1; // "disable weight" for a standard unit
 static const double RES_PROBA_WHEEL = 0.05; // "disable probability" for Wheel research
 static const double RES_WEIGHT_WHEEL = 0.9; // "disable weight" for Wheel research
 static const double RES_PROBA_IMPACT_ON_RANDOM = 0.3; // computed probability counts as much as xxx% vs random.
@@ -95,6 +119,7 @@ public:
 	}
 	long int arrayUnitDefCount;
 	long int arrayResearchCount;
+	STRUCT_TECH_DEF *techDefForTechTree;
 	int religionLevel; // 0=low(high disable proba), 3=high(low disable temple research proba)
 	int economyLevel; // 0=low(high disable proba), 3=high(low disable economy techs proba)
 	std::set<long int> eligibleDisableResearchIdBronze;
@@ -102,15 +127,20 @@ public:
 	std::set<long int> eligibleDisableUnitDefIdBronze;
 	std::set<long int> eligibleDisableUnitDefIdIron;
 	std::list<TTCreatorResearchInfo*> allCreatorResearchInfo;
-
+	std::list<TTCreatorUnitInfo*> allCreatorUnitInfo;
+	std::list<STRUCT_TECH_DEF_EFFECT> techTreeEffects;
 
 	void Reset() {
+		this->techDefForTechTree = NULL;
+		this->techTreeEffects.clear();
 		this->arrayResearchCount = 0;
 		this->arrayUnitDefCount = 0;
 		this->eligibleDisableResearchIdBronze.clear();
 		this->eligibleDisableResearchIdIron.clear();
 		this->eligibleDisableUnitDefIdBronze.clear();
 		this->eligibleDisableUnitDefIdIron.clear();
+		this->allCreatorResearchInfo.clear();
+		this->allCreatorUnitInfo.clear();
 		this->economyLevel = 0;
 		this->religionLevel = 0;
 	}
@@ -124,10 +154,25 @@ private:
 	void CollectUnitInfo();
 
 	// Set initial (base) probabilities for all researches. Does not take care of dependencies/impact on other researches/units.
+	// Creates the TTCreatorResearchInfo objects into allCreatorResearchInfo list.
 	void SetResearchBaseProbabilities();
+	// Set initial (base) probabilities for all units. Does not take care of dependencies/impact on other researches/units.
+	// Creates the TTCreatorUnitInfo objects into allCreatorUnitInfo list.
+	void SetUnitBaseProbabilities();
+
 	void UpdateResearchProbabilitiesWithImpacts();
 
 	void CalcResearchesDisableScore();
+	void CreateDisableResearchesEffects();
+	// Disable (cascade) child researches for parentResearch
+	// Returns the *child* disabled researches (not the parent research itself)
+	std::list<TTCreatorResearchInfo*> CreateDisableEffectOnResearch(TTCreatorResearchInfo *resInfo);
+
+	// Returns the list of "recursive" TTCreatorResearchInfo that have been disabled (does not include unitInfo)
+	std::list<TTCreatorResearchInfo*> CreateDisableEffectOnUnit(TTCreatorUnitInfo *unitInfo);
+	std::list<TTCreatorResearchInfo*> CreateDisableEffectOnUnit(TTDetailedUnitDef *unitDetail);
+
+	void AddEffectsToTechDef();
 
 };
 
