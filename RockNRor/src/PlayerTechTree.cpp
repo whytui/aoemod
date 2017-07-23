@@ -145,18 +145,18 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	this->SetResearchBaseProbabilities();
 	this->SetUnitBaseProbabilities();
 	
-	// DISABLE RESEARCH
+	// DISABLE RESEARCH (may cascade on other researches + units)
 	this->CalcResearchesDisableScore();
 	this->CreateDisableResearchesEffects();
-	this->AddEffectsToTechDef();
 
-	// main parts:
-	// 1) disable some researches (consequence: may cascade other researches + disable some units)
-	// 2) disable some units/upgrade
-	// 3) add some bonuses
+	// DISABLE UNITS/upgrades (via research)
+	this->CalcUnitsDisableScore();
+	this->CreateDisableUnitsEffects();
 
+	// CIV BONUS
 	int bonusCount = randomizer.GetRandomValue_normal_moderate(2, 4);
 
+	this->AddEffectsToTechDef();
 
 	// TODO: protect at least 1 (2?) super unit in tech tree
 	// Ex: 65 techs bronze/iron
@@ -283,6 +283,9 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 		TTCreatorResearchInfo *ttcResearchInfo = new TTCreatorResearchInfo();
 		ttcResearchInfo->researchId = resDefId;
 		ttcResearchInfo->researchDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(resDefId);
+		if (ttcResearchInfo->researchDetail) {
+			ttcResearchInfo->internalName = ttcResearchInfo->researchDetail->internalName;
+		}
 		// ttcResearchInfo->researchDetail should always be valid: all IDs from this->eligible* collections should be valid
 		this->allCreatorResearchInfo.push_back(ttcResearchInfo);
 	}
@@ -290,6 +293,9 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 		TTCreatorResearchInfo *ttcResearchInfo = new TTCreatorResearchInfo();
 		ttcResearchInfo->researchId = resDefId;
 		ttcResearchInfo->researchDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(resDefId);
+		if (ttcResearchInfo->researchDetail) {
+			ttcResearchInfo->internalName = ttcResearchInfo->researchDetail->internalName;
+		}
 		// ttcResearchInfo->researchDetail should always be valid: all IDs from this->eligible* collections should be valid
 		this->allCreatorResearchInfo.push_back(ttcResearchInfo);
 	}
@@ -414,6 +420,7 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 		if (trainableDetail) {
 			ttcUnitInfo->unitDetail = trainableDetail;
 			ttcUnitInfo->trainLocation = trainableDetail->GetTrainLocation();
+			ttcUnitInfo->internalName = trainableDetail->internalName;
 			for each (long int srcResDefId in trainableDetail->researchIdsThatEnableMe)
 			{
 				if (ttcUnitInfo->sourceResearchId == -1) {
@@ -423,7 +430,11 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 				}
 			}
 		} else {
-			ttcUnitInfo->unitDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(resUnitId);
+			TTDetailedBuildingDef *ttcBldInfo = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(resUnitId);
+			ttcUnitInfo->unitDetail = ttcBldInfo;
+			if (ttcBldInfo) {
+				ttcUnitInfo->internalName = ttcBldInfo->internalName;
+			}
 		} 
 		assert(ttcUnitInfo->unitDetail);
 		this->allCreatorUnitInfo.push_back(ttcUnitInfo);
@@ -435,6 +446,7 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 		if (trainableDetail) {
 			ttcUnitInfo->unitDetail = trainableDetail;
 			ttcUnitInfo->trainLocation = trainableDetail->GetTrainLocation();
+			ttcUnitInfo->internalName = trainableDetail->internalName;
 			for each (long int srcResDefId in trainableDetail->researchIdsThatEnableMe)
 			{
 				if (ttcUnitInfo->sourceResearchId == -1) {
@@ -444,7 +456,11 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 				}
 			}
 		} else {
-			ttcUnitInfo->unitDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(resUnitId);
+			TTDetailedBuildingDef *ttcBldInfo = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(resUnitId);
+			ttcUnitInfo->unitDetail = ttcBldInfo;
+			if (ttcBldInfo) {
+				ttcUnitInfo->internalName = ttcBldInfo->internalName;
+			}
 		}
 		this->allCreatorUnitInfo.push_back(ttcUnitInfo);
 	}
@@ -505,6 +521,19 @@ void TechTreeCreator::CalcResearchesDisableScore() {
 }
 
 
+void TechTreeCreator::CalcUnitsDisableScore() {
+	for each (TTCreatorUnitInfo *crUnitInfo in this->allCreatorUnitInfo) {
+		int imyrand = randomizer.GetRandomNonZeroPercentageValue();
+		double myrand = (double)imyrand;
+
+		double tmpCompute = crUnitInfo->disableProbability * myrand * RES_PROBA_IMPACT_ON_RANDOM +
+			myrand * (1 - RES_PROBA_IMPACT_ON_RANDOM); // Now tmpCompute is in 0-100
+
+		crUnitInfo->disableScore = tmpCompute;
+	}
+}
+
+
 void TechTreeCreator::CreateDisableResearchesEffects() {
 	int preferredDisableResearchCount = randomizer.GetRandomValue_normal_moreFlat(5, 12);
 	int curDisableCount = 0;
@@ -523,8 +552,7 @@ void TechTreeCreator::CreateDisableResearchesEffects() {
 
 		std::list<TTCreatorResearchInfo*> disabledChildren = this->CreateDisableEffectOnResearch(bestElem);
 		int addedCount = 1; // Corresponds to "bestElem"
-		addedCount += disabledChildren.size();
-
+		
 		if (bestElem->researchLocation == AOE_CONST_FUNC::CST_UNITID_TEMPLE) {
 			if (templeResearchesDoNotCountMoreThan > 0) {
 				templeResearchesDoNotCountMoreThan--;
@@ -533,6 +561,7 @@ void TechTreeCreator::CreateDisableResearchesEffects() {
 			}
 		}
 		// Count the underlying disabled researches too
+		addedCount += disabledChildren.size();
 		for each (TTCreatorResearchInfo *child in disabledChildren)
 		{
 			if (child->researchLocation == AOE_CONST_FUNC::CST_UNITID_TEMPLE) {
@@ -543,6 +572,28 @@ void TechTreeCreator::CreateDisableResearchesEffects() {
 				}
 			}
 		}
+		curDisableCount += addedCount;
+	}
+}
+
+
+void TechTreeCreator::CreateDisableUnitsEffects() {
+	int preferredDisableUnitCount = randomizer.GetRandomValue_normal_moreFlat(9, 16);
+	int curDisableCount = 0;
+	while (curDisableCount < preferredDisableUnitCount) {
+		double bestScore = -1;
+		TTCreatorUnitInfo *bestElem = NULL;
+		std::for_each(this->allCreatorUnitInfo.begin(), this->allCreatorUnitInfo.end(),
+			[&bestElem, &bestScore](TTCreatorUnitInfo *curInfo) {
+			if (!curInfo->hasBeenDisabled && (curInfo->disableScore > bestScore)) { bestScore = curInfo->disableScore; bestElem = curInfo; }
+		}
+		);
+		if (bestScore < 0) { break; }
+		std::list<TTCreatorResearchInfo*> disabledChildren = this->CreateDisableEffectOnUnit(bestElem);
+		bestElem->hasBeenDisabledDirectly = true;
+		int addedCount = 1; // Corresponds to "bestElem"
+		addedCount += disabledChildren.size();
+
 		curDisableCount += addedCount;
 	}
 }
@@ -599,7 +650,7 @@ std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnResearch
 			for each (TTDetailedTrainableUnitDef *trainableDetail in child->researchDetail->enableTrainables) {
 				assert(trainableDetail->IsValid());
 				// Note: unit's parent research is "child" and we just marked it as disabled, so this call won't disable any research recursively.
-				this->CreateDisableEffectOnUnit(trainableDetail); // can happen, for example
+				this->CreateDisableEffectOnUnit(trainableDetail); // can happen, for example ..?
 			}
 		}
 	}

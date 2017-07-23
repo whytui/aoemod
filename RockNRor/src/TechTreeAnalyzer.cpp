@@ -105,8 +105,8 @@ void TechTreeAnalyzer::FindBuildingThatTriggerResearches() {
 
 
 // Update this->detailedBuildings with researches that enable the buildings (if not available at start)
-// Also fills possibleUpgradedUnitIDs / possibleParentUnitIDs
-void TechTreeAnalyzer::FindResearchesThatEnableKnownBuildings() {
+// Also fills possibleUpgradedUnitIDs / possibleParentUnitIDs for links with base unit (only)
+void TechTreeAnalyzer::FindResearchesThatEnableUnits() {
 	for (int resDefId = 0; resDefId < this->researchCount; resDefId++) {
 		TTDetailedResearchDef *detailRes = this->detailedResearches[resDefId];
 		STRUCT_TECH_DEF *techDef = detailRes->techDef;
@@ -398,6 +398,7 @@ void TechTreeAnalyzer::UpdateChildResearchDependencies() {
 
 
 // Update baseUnitDefId for all known buildings/trainable units to identify root units
+// Also update all dependencies between units from a same treeline (eg. swordsman-broad-long-legion)
 void TechTreeAnalyzer::UpdateUnitsBaseId() {
 	for (int bldDefId = 0; bldDefId < this->unitDefCount; bldDefId++) {
 		TTDetailedUnitDef *detail = this->GetDetailedBuildingDef(bldDefId);
@@ -421,6 +422,82 @@ void TechTreeAnalyzer::UpdateUnitsBaseId() {
 				//TTDetailedBuildingDef *ancestor = this->detailedBuildings[ancestorId];
 				if (ancestor && ancestor->IsValid() && (ancestor->possibleAncestorUnitIDs.size() == 0)) {
 					detail->baseUnitId = ancestorId;
+				}
+			}
+		}
+	}
+
+
+	// Update links for the whole tree line (only base unit has all correct links at this point, because techs always links baseUnit to upgrades)
+	for (int unitDefId = 0; unitDefId < this->unitDefCount; unitDefId++) {
+		TTDetailedUnitDef *detail = this->GetDetailedTrainableUnitDef(unitDefId);
+		if (!detail) {
+			detail = this->GetDetailedBuildingDef(unitDefId);
+		}
+		if (!detail || !detail->IsValid()) { continue; }
+		long int myUnitDefId = detail->unitDefId;
+		long int myBaseId = detail->baseUnitId;
+		if (myBaseId != myUnitDefId) { continue; } // We're only interested in base units here
+		if (detail->possibleUpgradedUnitIDs.size() == 0) { continue; } // No treeline here
+
+		// Build a list of all children (no need for base unit, all links are already correctly handled)
+		std::set<TTDetailedUnitDef*> allTreeLine;
+		for each (long int treeLineUnitId in detail->possibleUpgradedUnitIDs) {
+			TTDetailedUnitDef *treeLineUnitDtl = this->GetDetailedTrainableUnitDef(treeLineUnitId);
+			if (!treeLineUnitDtl) {
+				treeLineUnitDtl = this->GetDetailedBuildingDef(treeLineUnitId);
+			}
+			if (treeLineUnitDtl && treeLineUnitDtl->IsValid()) {
+				allTreeLine.insert(treeLineUnitDtl);
+			}
+		}
+
+		for each (long int treeLineUnitId1 in detail->possibleUpgradedUnitIDs) {
+			TTDetailedUnitDef *treeLineUnitDtl1 = this->GetDetailedTrainableUnitDef(treeLineUnitId1);
+			if (!treeLineUnitDtl1) {
+				treeLineUnitDtl1 = this->GetDetailedBuildingDef(treeLineUnitId1);
+			}
+			if (!treeLineUnitDtl1 || !treeLineUnitDtl1->IsValid()) { continue; } // Should not happen
+
+			long int unit1srcResId = -1; // research that enables "me"
+			for each (long int loopId in treeLineUnitDtl1->researchIdsThatEnableMe)
+			{
+				unit1srcResId = loopId; // there should be 1 loop max in theory
+			}
+			TTDetailedResearchDef *unit1srcRes = this->GetDetailedResearchDef(unit1srcResId);
+
+			for each (TTDetailedUnitDef* treeLineUnitDtl2 in allTreeLine)
+			{
+				if (treeLineUnitDtl2->unitDefId == treeLineUnitId1) { continue; } // same as me: skip
+				if (treeLineUnitDtl2->unitDefId < treeLineUnitId1) { continue; } // so we run this only once for a combination instead of {a,b} and {b,a}
+				// Determine if other is my child or my parent
+				long int unit2srcResId = -1;
+				for each (long int otherSrcResIdLoop in treeLineUnitDtl2->researchIdsThatEnableMe)
+				{
+					unit2srcResId = otherSrcResIdLoop; // there should be 1 loop max in theory
+				}
+				TTDetailedResearchDef *unit2srcRes = this->GetDetailedResearchDef(unit2srcResId);
+				if (unit1srcRes && unit2srcRes && unit1srcRes->active && unit2srcRes->active) {
+					auto it = std::find(unit1srcRes->allRequirementsExcludingAges.begin(),
+						unit1srcRes->allRequirementsExcludingAges.end(),
+						unit2srcRes);
+					if (it != unit1srcRes->allRequirementsExcludingAges.end()) {
+						// found: u2 is a requirement (parent) of u1
+						treeLineUnitDtl1->possibleAncestorUnitIDs.insert(treeLineUnitDtl2->unitDefId);
+						treeLineUnitDtl2->possibleUpgradedUnitIDs.insert(treeLineUnitId1);
+					} else {
+						// Make sure u1 is a requirement (parent) of u2
+						auto it2 = std::find(unit2srcRes->allRequirementsExcludingAges.begin(),
+							unit2srcRes->allRequirementsExcludingAges.end(),
+							unit1srcRes);
+						if (it2 != unit2srcRes->allRequirementsExcludingAges.end()) {
+							// Found: u2 is a requirement (parent) of u1
+							treeLineUnitDtl1->possibleUpgradedUnitIDs.insert(treeLineUnitDtl2->unitDefId);
+							treeLineUnitDtl2->possibleAncestorUnitIDs.insert(treeLineUnitId1);
+						} else {
+							assert(false && "units should not be unrelated here");
+						}
+					}
 				}
 			}
 		}
@@ -470,7 +547,7 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 	}
 	// If we reach this we are sure that global struct is initialized, and that DAT info has been loaded already.
 	this->FindBuildingThatTriggerResearches();
-	this->FindResearchesThatEnableKnownBuildings();
+	this->FindResearchesThatEnableUnits();
 
 	// In game, TC is always aither built or available in build menu (even... if unitDef is not available)
 	// We need to do the equivalent here, or tech tree can't completely expand (can't reach tool age, because research location is unavailable).

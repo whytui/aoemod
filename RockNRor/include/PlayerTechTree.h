@@ -63,8 +63,10 @@ public:
 		this->techImpactsReligion = false;
 		this->disableScore = 0;
 		this->hasBeenDisabled = false;
+		this->internalName = "";
 	}
 	long int researchId;
+	std::string internalName;
 	double disableProbability; // 0-1 score. -1 means "not set"
 	double disableWeight; // 0-1 score. The weight (impact) if this research gets disabled
 	double disableScore; // Used to decide which research to disable in tech tree
@@ -87,8 +89,11 @@ public:
 		this->trainLocation = -1;
 		this->sourceResearchId = -1;
 		this->hasBeenDisabled = false;
+		this->hasBeenDisabledDirectly = false;
+		this->internalName = "";
 	}
 	long int unitDefId;
+	std::string internalName;
 	double disableProbability; // 0-1 score. -1 means "not set"
 	double disableWeight; // 0-1 score. The weight (impact) if this research gets disabled
 	double disableScore; // Used to decide which research to disable in tech tree
@@ -96,6 +101,7 @@ public:
 	long int trainLocation;
 	long int sourceResearchId; // ID of the research that enables me, if it exists and is unique
 	bool hasBeenDisabled;
+	bool hasBeenDisabledDirectly; // True when the unit was disabled by direct choice (not just a consequence of another research being disabled)
 };
 
 
@@ -163,7 +169,10 @@ private:
 	void UpdateResearchProbabilitiesWithImpacts();
 
 	void CalcResearchesDisableScore();
+	void CalcUnitsDisableScore();
 	void CreateDisableResearchesEffects();
+	void CreateDisableUnitsEffects();
+
 	// Disable (cascade) child researches for parentResearch
 	// Returns the *child* disabled researches (not the parent research itself)
 	std::list<TTCreatorResearchInfo*> CreateDisableEffectOnResearch(TTCreatorResearchInfo *resInfo);

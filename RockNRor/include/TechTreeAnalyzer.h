@@ -174,7 +174,7 @@ private:
 	void FindBuildingThatTriggerResearches();
 
 	// Update this->detailedBuildings with researches that enable the buildings (if not available at start)
-	void FindResearchesThatEnableKnownBuildings();
+	void FindResearchesThatEnableUnits();
 
 	void MarkBuildingAsAvailable(long int unitDefId);
 	void MarkTrainableUnitAsAvailable(long int unitDefId);
