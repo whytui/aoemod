@@ -18,6 +18,10 @@ namespace ROCKNROR {
 namespace STRATEGY {
 ;
 
+namespace STRATEGY_CONST {
+	const long int MIN_COST_FOR_SUPER_UNIT_UPGRADE = 1000;
+}
+
 
 class TechTreeAnalyzer {
 public:
@@ -98,6 +102,9 @@ public:
 
 	// Analyze tech tree and fill internal data
 	bool AnalyzeTechTree();
+
+	// Please, please call this if TechDef pointers have changed in global->technologyInfos (when array has been re-allocated)
+	void RefreshTechDefPointers();
 
 private:
 	TTDetailedResearchDef **detailedResearches; // Array of all research detailed info, size=researchCount
@@ -184,8 +191,12 @@ private:
 	// Update allChildResearches for each research info
 	void UpdateChildResearchDependencies();
 
-	// Update baseUnitDefId for all known buildings to identify root buildings
-	void UpdateBuildingsBaseId();
+	// Update baseUnitDefId for all known buildings/trainable units to identify root units
+	void UpdateUnitsBaseId();
+
+	// Find out which trainable units are "super units" (cataphracts, armored elephants, massive catapults, etc)
+	// Priest canNOT be super units here.
+	void DetectSuperUnits();
 
 };
 

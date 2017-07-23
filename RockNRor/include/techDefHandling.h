@@ -21,7 +21,7 @@ namespace AOE_STRUCTURES {
 	// Re-alloc array of technology definitions in Global structure to add some techs.
 	// Requirement: Global structure must have been initialized and DAT file must have been read
 	// Added technology definition pointers will be NULL (this does not create any structure)
-	// This updates global->
+	// This updates global->technologiesInfo->{ptrTechDefArray and technologyCount}
 	bool ReallocTechDefArray(long int newTechDefCount);
 
 

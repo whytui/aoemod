@@ -54,6 +54,7 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 	long int initialTechDefCount = ROCKNROR::crInfo.empiresDatTechDefCount;
 	if (initialTechDefCount <= 0) { return false; } // maybe empires.dat has not been read yet.
 	AOE_STRUCTURES::ReallocTechDefArray(initialTechDefCount + 8);
+	ROCKNROR::crInfo.techTreeAnalyzer.RefreshTechDefPointers(); // Replace obsolete pointers by correct ones
 
 	for (int playerId = 1; playerId <= playerCount; playerId++) {
 		int techTreeIndex = initialTechDefCount + playerId - 1;
@@ -66,7 +67,8 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 
 		//TEST1
 		STRUCT_TECH_DEF *techDef = global->technologiesInfo->GetTechDef(techTreeIndex);
-		ROCKNROR::STRATEGY::CreateRandomTechTree(techDef);
+		ROCKNROR::STRATEGY::TechTreeCreator ttc;
+		ttc.CreateRandomTechTree(techDef);
 
 		//TEST
 		techDef->effectCount = 3;

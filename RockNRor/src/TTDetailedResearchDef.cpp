@@ -66,5 +66,21 @@ void TTDetailedResearchDef::AddAllRequirementsFrom(TTDetailedResearchDef *other)
 }
 
 
+// Returns true if this research is wheel. We try to be as much generic as possible.
+bool TTDetailedResearchDef::IsWheel() const {
+	if (!this->active) { return false; }
+	if (this->requiredAge != AOE_CONST_FUNC::CST_RSID_BRONZE_AGE) { return false; } // should exclude jihad
+	if (!AOE_STRUCTURES::RESEARCH::DoesTechAffectCivilianSpeed(this->techDef)) { return false; }
+	// Ensure to exclude jihad
+	if (!this->techDef) { return false; }
+	for (int effectIndex = 0; effectIndex < this->techDef->effectCount; effectIndex++) {
+		// Jihad increases villager's attack
+		if (this->techDef->ptrEffects[effectIndex].GetAttackOrArmorType() != ATTACK_CLASS::CST_AC_NONE) { return false; }
+		// We could also exclude if "decrease carry capacity"
+	}
+	return true;
+}
+
+
 }
 }

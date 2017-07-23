@@ -52,11 +52,22 @@ bool DoesTechDisableSomeResearch(STRUCT_TECH_DEF *techDef);
 // Returns the first found armor class that is improved by a technology. Returns CST_AC_NONE(-1) if the tech does not improve any armor.
 // Generally, even if it has many effects, a technology should improve only 1 armor type, so the result is deterministic as long as this hypothesis is correct.
 // Warning: "default armor" is ignored here
-AOE_CONST_FUNC::ATTACK_CLASS DoesImproveSomeArmor(STRUCT_TECH_DEF *techDef);
+AOE_CONST_FUNC::ATTACK_CLASS DoesTechImproveSomeArmor(STRUCT_TECH_DEF *techDef);
 
 // Returns the first found attack class that is improved by a technology. Returns CST_AC_NONE(-1) if the tech does not improve any attack.
 // Generally, even if it has many effects, a technology should improve only 1 attack type, so the result is deterministic as long as this hypothesis is correct.
-AOE_CONST_FUNC::ATTACK_CLASS DoesImproveSomeAttack(STRUCT_TECH_DEF *techDef);
+AOE_CONST_FUNC::ATTACK_CLASS DoesTechImproveSomeAttack(STRUCT_TECH_DEF *techDef);
+
+// Returns true for technologies that affect "Shared exploration" resource (#50).
+// Can be use to identify writing tech (*not* hardcoded Id)
+bool DoesTechRevealAlly(STRUCT_TECH_DEF *techDef);
+
+// Returns true if technology improves priest in some way (includes medecine, fanatism or martydom, but not jihad !)
+bool DoesTechImpactReligion(STRUCT_TECH_DEF *techDef);
+
+// Returns true if technology affects villager speed. Wheel and Jihad should do ! (+some tech trees)
+bool DoesTechAffectCivilianSpeed(STRUCT_TECH_DEF *techDef);
+
 
 }
 }

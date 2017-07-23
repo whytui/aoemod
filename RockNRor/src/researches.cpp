@@ -78,7 +78,7 @@ bool DoesTechDisableSomeResearch(STRUCT_TECH_DEF *techDef) {
 // Returns the first found armor class that is improved by a technology. Returns CST_AC_NONE(-1) if the tech does not improve any armor.
 // Generally, even if it has many effects, a technology should improve only 1 armor type, so the result is deterministic as long as this hypothesis is correct.
 // Warning: "default armor" is ignored here
-AOE_CONST_FUNC::ATTACK_CLASS DoesImproveSomeArmor(STRUCT_TECH_DEF *techDef) {
+AOE_CONST_FUNC::ATTACK_CLASS DoesTechImproveSomeArmor(STRUCT_TECH_DEF *techDef) {
 	if (!techDef) { return AOE_CONST_FUNC::CST_AC_NONE; }
 	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
 		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
@@ -93,7 +93,7 @@ AOE_CONST_FUNC::ATTACK_CLASS DoesImproveSomeArmor(STRUCT_TECH_DEF *techDef) {
 
 // Returns the first found attack class that is improved by a technology. Returns CST_AC_NONE(-1) if the tech does not improve any attack.
 // Generally, even if it has many effects, a technology should improve only 1 attack type, so the result is deterministic as long as this hypothesis is correct.
-AOE_CONST_FUNC::ATTACK_CLASS DoesImproveSomeAttack(STRUCT_TECH_DEF *techDef) {
+AOE_CONST_FUNC::ATTACK_CLASS DoesTechImproveSomeAttack(STRUCT_TECH_DEF *techDef) {
 	if (!techDef) { return AOE_CONST_FUNC::CST_AC_NONE; }
 	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
 		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
@@ -103,6 +103,62 @@ AOE_CONST_FUNC::ATTACK_CLASS DoesImproveSomeAttack(STRUCT_TECH_DEF *techDef) {
 		}
 	}
 	return AOE_CONST_FUNC::CST_AC_NONE;
+}
+
+
+// Returns true for technologies that affect "Shared exploration" resource (#50).
+// Can be use to identify writing tech (*not* hardcoded Id)
+bool DoesTechRevealAlly(STRUCT_TECH_DEF *techDef) {
+	if (!techDef) { return false; }
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect->IsResourceModifier() && (techEffect->effectUnit == AOE_CONST_FUNC::CST_RES_ORDER_SHARED_EXPLORATION)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+// Returns true if technology improves priest in some way (includes medecine, fanatism or martydom, but not jihad !)
+bool DoesTechImpactReligion(STRUCT_TECH_DEF *techDef) {
+	if (!techDef) { return false; }
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		
+		// Classical: modify priest attributes (HP, speed, range, work rate, etc)
+		if (techEffect->IsAttributeModifier()) {
+			if ((techEffect->effectClass == AOE_CONST_FUNC::TribeAIGroupPriest) ||
+				(techEffect->effectUnit == AOE_CONST_FUNC::CST_UNITID_PRIEST)) {
+				return true;
+			}
+		}
+
+		// Martyrdom, fanaticism, monotheism...
+		if (techEffect->IsResourceModifier()) {
+			if ((techEffect->effectUnit == AOE_CONST_FUNC::CST_RES_ORDER_CAN_CONVERT_BUILDING) ||
+				(techEffect->effectUnit == AOE_CONST_FUNC::CST_RES_ORDER_CAN_CONVERT_PRIEST) ||
+				(techEffect->effectUnit == AOE_CONST_FUNC::CST_RES_ORDER_FAITH_RECHARGING_RATE) ||
+				(techEffect->effectUnit == AOE_CONST_FUNC::CST_RES_ORDER_HEALING) ||
+				(techEffect->effectUnit == AOE_CONST_FUNC::CST_RES_ORDER_PRIEST_SACRIFICE))
+				return true;
+		}
+	}
+	return false;
+}
+
+
+// Returns true if technology affects villager speed. Wheel and Jihad should do ! (+some tech trees)
+bool DoesTechAffectCivilianSpeed(STRUCT_TECH_DEF *techDef) {
+	if (!techDef) { return false; }
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect->IsAttributeModifier() && (techEffect->effectClass == TribeAIGroupCivilian) &&
+			(techEffect->effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_SPEED)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 

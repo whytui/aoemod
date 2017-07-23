@@ -122,23 +122,64 @@ void CustomPlayerInfo::CollectInfoFromExistingTechTree() {
 
 
 // Create a random tech tree (list of effects) on provided TechDef (should be initially empty).
-void CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
+void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	if (!techDef || (techDef->effectCount > 0)) { return; }
 	if (!ROCKNROR::crInfo.techTreeAnalyzer.IsReady()) { return; }
 
-	long int arrayResearchCount = ROCKNROR::crInfo.techTreeAnalyzer.GetResearchCount();
-	long int arrayUnitDefCount = ROCKNROR::crInfo.techTreeAnalyzer.GetUnitDefCount();
+	this->arrayResearchCount = ROCKNROR::crInfo.techTreeAnalyzer.GetResearchCount();
+	this->arrayUnitDefCount = ROCKNROR::crInfo.techTreeAnalyzer.GetUnitDefCount();
 
 	// Get non-shadow researches
-	std::set<long int> eligibleDisableResearchIdBronze;
-	std::set<long int> eligibleDisableResearchIdIron;
-	for (int resDefId = 0; resDefId < arrayResearchCount; resDefId++) {
+	this->CollectResearchInfo();
+	int researchCountBronze = this->eligibleDisableResearchIdBronze.size();
+	int researchCountIron = this->eligibleDisableResearchIdIron.size();
+
+	// Get eligible units that may be disabled (or receive bonus). Note: some unit excluded here may receive bonus via "unit class" bonuses.
+	this->CollectUnitInfo();
+	int eligibleDisableUnitDefIdBronzeCount = this->eligibleDisableUnitDefIdBronze.size();
+	int eligibleDisableUnitDefIdIronCount = this->eligibleDisableUnitDefIdIron.size();
+
+
+	// DISABLE RESEARCH
+	this->SetResearchBaseProbabilities();
+	this->CalcResearchesDisableScore();
+
+	// main parts:
+	// 1) disable some researches (consequence: may cascade other researches + disable some units)
+	// 2) disable some units/upgrade
+	// 3) add some bonuses
+
+	int bonusCount = randomizer.GetRandomValue_normal_moderate(2, 4);
+
+
+	// TODO: protect at least 1 (2?) super unit in tech tree
+	// Ex: 65 techs bronze/iron
+	// range disable : 15-26
+	// egypt 16 disable unit/upgrade, 5 disable tech
+	// greek 15 disable unit/upgrade, 5 disable tech
+	// assy 13 disable unit/upgrade, 11 disable tech
+	// bab 13 disable unit/upgrade, 6 disable tech
+	// yama 14 disable unit/upgrade, 8 disable tech mainly temple + towers/wall not counted
+	// rome 11 disable unit/upgrade, 4 disable tech ! (2 temple, 1 market 1 gov)
+	// palmy 9 disable unit/upgrade, 13 disable tech (bad temple, market...)
+	// carth 11 disable unit/upgrade, 8 disable tech (temple, sp...)
+	// cho 17 disable unit/upgrade, 9 disable tech (sp, ov, dock...)
+
+	// disable units: make a list of "base ids", choose an id in it, then choose an "upgrade level" to disable. So big families (infantry...) don't get higher chances of being disabled(?)
+	// Do not allow disable building at this point (except iron age towers)
+	// Set a probability of being disabled + a score (weight of being disabled) ?
+}
+
+
+void TechTreeCreator::CollectResearchInfo() {
+	for (int resDefId = 0; resDefId < this->arrayResearchCount; resDefId++) {
 		TTDetailedResearchDef *detail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(resDefId);
 		if (!detail || !detail->active || detail->IsShadowResearch()) { continue; }
-		if (!detail->techDef) { continue; }
+		if (!detail->techDef || !detail->researchDef) { continue; }
 		if (!detail->hasValidEffect) { continue; }
 		if (detail->requiredAge < CST_RSID_BRONZE_AGE) { continue; } // pre-bronze researches can't be disabled by tech tree
-		// Exclude research that enable/upgrade units
+		
+		// Exclude research that enable/upgrade units (we handle those in "disable unit" stuff)
 		bool doesEnableOrUpgradeUnit = false;
 		for (int effectId = 0; effectId < detail->techDef->effectCount; effectId++) {
 			switch (detail->techDef->ptrEffects[effectId].effectType) {
@@ -158,21 +199,39 @@ void CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 		if (doesEnableOrUpgradeUnit) {
 			continue;
 		}
-		// TODO: add custom filters, eg pre-iron storage pit researches never disabled except shields, etc
+		
+		AOE_CONST_FUNC::ATTACK_CLASS armorClass = AOE_STRUCTURES::RESEARCH::DoesTechImproveSomeArmor(detail->techDef);
+		AOE_CONST_FUNC::ATTACK_CLASS attackClass = AOE_STRUCTURES::RESEARCH::DoesTechImproveSomeAttack(detail->techDef);
+		if ((armorClass == ATTACK_CLASS::CST_AC_BASE_MELEE) && (detail->requiredAge < AOE_CONST_FUNC::CST_RSID_IRON_AGE) &&
+			(detail->researchDef->researchLocation == AOE_CONST_FUNC::CST_UNITID_STORAGE_PIT)) {
+			continue; // Never disable pre-iron *melee* armor researches in storage pit (however shields can be disabled)
+		}
+		if ((attackClass == ATTACK_CLASS::CST_AC_BASE_MELEE) && (detail->requiredAge < AOE_CONST_FUNC::CST_RSID_IRON_AGE) &&
+			(detail->researchDef->researchLocation == AOE_CONST_FUNC::CST_UNITID_STORAGE_PIT)) {
+			continue; // Never disable pre-iron attack researches in storage pit
+		}
+
+		if ((detail->GetResearchDefId() >= AOE_CONST_FUNC::CST_RSID_STONE_AGE) &&
+			(detail->GetResearchDefId() <= AOE_CONST_FUNC::CST_RSID_IRON_AGE)) {
+			continue; // Never disable ages (!!!)
+		}
+
+		if (AOE_STRUCTURES::RESEARCH::DoesTechRevealAlly(detail->techDef)) {
+			continue; // Never disable writing
+		}
+
 		if (detail->requiredAge == AOE_CONST_FUNC::CST_RSID_BRONZE_AGE) {
-			eligibleDisableResearchIdBronze.insert(resDefId);
+			this->eligibleDisableResearchIdBronze.insert(resDefId);
 		}
 		if (detail->requiredAge == AOE_CONST_FUNC::CST_RSID_IRON_AGE) {
-			eligibleDisableResearchIdIron.insert(resDefId);
+			this->eligibleDisableResearchIdIron.insert(resDefId);
 		}
 	}
-	int researchCountBronze = eligibleDisableResearchIdBronze.size();
-	int researchCountIron = eligibleDisableResearchIdIron.size();
+}
 
-	// Get eligible units that may be disabled (or receive bonus). Note: some unit excluded here may receive bonus via "unit class" bonuses.
-	std::set<long int> eligibleDisableUnitDefIdBronze;
-	std::set<long int> eligibleDisableUnitDefIdIron;
-	for (int unitDefId = 0; unitDefId < arrayUnitDefCount; unitDefId++) {
+
+void TechTreeCreator::CollectUnitInfo() {
+	for (int unitDefId = 0; unitDefId < this->arrayUnitDefCount; unitDefId++) {
 		// Remark: excluding buildings here
 		TTDetailedTrainableUnitDef *detail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(unitDefId);
 		if (!detail || detail->IsHeroOrScenarioUnit() || !detail->unitDef) { continue; }
@@ -201,34 +260,179 @@ void CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 		// TODO add other custom rules (units that can't be disabled)
 
 		if (detail->requiredAge <= AOE_CONST_FUNC::CST_RSID_BRONZE_AGE) {
-			eligibleDisableUnitDefIdBronze.insert(unitDefId); // include tool age units (only slinger !)
+			this->eligibleDisableUnitDefIdBronze.insert(unitDefId); // include tool age units (only slinger !)
 		}
 		if (detail->requiredAge == AOE_CONST_FUNC::CST_RSID_IRON_AGE) {
-			eligibleDisableUnitDefIdIron.insert(unitDefId);
+			this->eligibleDisableUnitDefIdIron.insert(unitDefId);
 		}
 	}
-	int eligibleDisableUnitDefIdBronzeCount = eligibleDisableUnitDefIdBronze.size();
-	int eligibleDisableUnitDefIdIronCount = eligibleDisableUnitDefIdIron.size();
+}
 
 
-	// main parts:
-	// 1) disable some researches (consequence: may cascade other researches + disable some units)
-	// 2) disable some units/upgrade
-	// 3) add some bonuses
+// Set initial (base) probabilities for all researches. Does not take care of dependencies/impact on other researches/units.
+void TechTreeCreator::SetResearchBaseProbabilities() {
+	// INIT: create object for each eligible research.
+	for each (long int resDefId in this->eligibleDisableResearchIdBronze) {
+		TTCreatorResearchInfo *ttcResearchInfo = new TTCreatorResearchInfo();
+		ttcResearchInfo->researchId = resDefId;
+		ttcResearchInfo->researchDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(resDefId);
+		// ttcResearchInfo->researchDetail should always be valid: all IDs from this->eligible* collections should be valid
+		this->allCreatorResearchInfo.push_back(ttcResearchInfo);
+	}
+	for each (long int resDefId in this->eligibleDisableResearchIdIron) {
+		TTCreatorResearchInfo *ttcResearchInfo = new TTCreatorResearchInfo();
+		ttcResearchInfo->researchId = resDefId;
+		ttcResearchInfo->researchDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(resDefId);
+		// ttcResearchInfo->researchDetail should always be valid: all IDs from this->eligible* collections should be valid
+		this->allCreatorResearchInfo.push_back(ttcResearchInfo);
+	}
+	
+	// Collect general info
+	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
+	{
+		assert(crResInfo->researchDetail != NULL);
+		crResInfo->researchLocation = crResInfo->researchDetail->researchDef->researchLocation;
+		AOE_CONST_FUNC::ATTACK_CLASS armorClass = AOE_STRUCTURES::RESEARCH::DoesTechImproveSomeArmor(crResInfo->researchDetail->techDef);
+		AOE_CONST_FUNC::ATTACK_CLASS attackClass = AOE_STRUCTURES::RESEARCH::DoesTechImproveSomeAttack(crResInfo->researchDetail->techDef);
+		crResInfo->techImpactsReligion = AOE_STRUCTURES::RESEARCH::DoesTechImpactReligion(crResInfo->researchDetail->techDef);
+	}
 
-	int bonusCount = randomizer.GetRandomValue_normal_moderate(2, 4);
+	// 1 - set probability for "hardcoded" groups:  eg. storage pit iron-armors (3) should remain together
+	double randomProbaForArmors = RES_PROBA_STANDARD_RESEARCH;
+	const double weightForArmors = RES_WEIGHT_STANDARD_RESEARCH;
+	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
+	{
+		TTDetailedResearchDef *detail = crResInfo->researchDetail;
+		if ((crResInfo->updatedArmorClass == ATTACK_CLASS::CST_AC_BASE_MELEE) &&
+			(detail->requiredAge == AOE_CONST_FUNC::CST_RSID_IRON_AGE) &&
+			(detail->researchDef->researchLocation != AOE_CONST_FUNC::CST_UNITID_STORAGE_PIT)) {
+			crResInfo->disableProbability = randomProbaForArmors;
+			crResInfo->disableWeight = weightForArmors;
+		}
+	}
 
 
-	// Ex: 65 techs bronze/iron
-	// egypt 16 disable unit/upgrade, 5 disable tech
-	// greek 15 disable unit/upgrade, 5 disable tech
-	// assy 13 disable unit/upgrade, 11 disable tech
-	// bab 13 disable unit/upgrade, 6 disable tech
-	// yama 14 disable unit/upgrade, 8 disable tech mainly temple + towers/wall not counted
+	// 2 - set probability for friendly researches (temple...)
+	// Temple: choose "religion level" : low/moderate/high. All temple techs proba. will be chosen in the same probability range, according to this level.
+	this->religionLevel = randomizer.GetRandomValue(0, 5);
+	double minReligionProbaRange = RES_PROBA_MIN;
+	double maxReligionProbaRange = RES_PROBA_MAX;
+	double weightForReligion = RES_WEIGHT_STANDARD_RESEARCH;
+	double religionBronzeFactor = 1;
+	switch (this->religionLevel) {
+	case 0: // level 0 (min): being disable is VERY likely to happen for those techs
+		minReligionProbaRange = 0.7;
+		maxReligionProbaRange = RES_PROBA_MAX;
+		break;
+	case 5: // level 5 (max): player is likely to have access to all techs (good temple civ)
+		minReligionProbaRange = RES_PROBA_MIN;
+		maxReligionProbaRange = 0.3;
+		religionBronzeFactor = 1.1;
+		break;
+	case 1:
+	case 2: // 1-2 (quite poor temple)
+		minReligionProbaRange = 0.33;
+		maxReligionProbaRange = 0.8;
+		break;
+	default: // 3-4 (quite good temple)
+		minReligionProbaRange = 0.2;
+		maxReligionProbaRange = 0.66;
+		religionBronzeFactor = 1.05;
+	}
+	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
+	{
+		if (crResInfo->techImpactsReligion && (crResInfo->disableProbability < 0)) {
+			// TODO
+			crResInfo->disableProbability = maxReligionProbaRange;
+			crResInfo->disableWeight = weightForReligion;
+			if (crResInfo->researchDetail->requiredAge < AOE_CONST_FUNC::CST_RSID_IRON_AGE) {
+				crResInfo->disableWeight = crResInfo->disableWeight * religionBronzeFactor;
+				crResInfo->disableProbability = crResInfo->disableProbability * (2 - religionBronzeFactor);
+			}
+			if (crResInfo->disableWeight > 1) { crResInfo->disableWeight = 1; }
+			if (crResInfo->disableProbability > 1) { crResInfo->disableProbability = 1; }
+		}
+	}
 
-	// disable units: make a list of "base ids", choose an id in it, then choose an "upgrade level" to disable. So big families (infantry...) don't get higher chances of being disabled(?)
-	// Do not allow disable building at this point (except iron age towers)
-	// Set a probability of being disabled + a score (weight of being disabled) ?
+	// Government center + market techs
+	this->economyLevel = randomizer.GetRandomValue(0, 3);
+	double randomProbaForEconomy = RES_PROBA_STANDARD_RESEARCH;
+	double weightForEconomy = RES_WEIGHT_STANDARD_RESEARCH;
+	double economyBronzeFactor = 1.25;
+	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
+	{
+		bool isMarketOrGov = (crResInfo->researchLocation == AOE_CONST_FUNC::CST_UNITID_MARKET) ||
+			(crResInfo->researchLocation == AOE_CONST_FUNC::CST_UNITID_GOVERNMENT_CENTER);
+		if ((crResInfo->disableProbability < 0) && isMarketOrGov) {
+			if (crResInfo->researchDetail->IsWheel()) {
+				crResInfo->disableProbability = RES_PROBA_WHEEL;
+				crResInfo->disableWeight = RES_WEIGHT_WHEEL;
+				continue;
+			}
+
+			crResInfo->disableProbability = randomProbaForEconomy;
+			crResInfo->disableWeight = weightForEconomy;
+			if (crResInfo->researchDetail->requiredAge < AOE_CONST_FUNC::CST_RSID_IRON_AGE) {
+				crResInfo->disableWeight = crResInfo->disableWeight * economyBronzeFactor;
+				crResInfo->disableProbability = crResInfo->disableProbability * (2 - economyBronzeFactor);
+			}
+			if (crResInfo->disableWeight > 1) { crResInfo->disableWeight = 1; }
+			if (crResInfo->disableProbability > 1) { crResInfo->disableProbability = 1; }
+		}
+	}
+
+	// 3 - set probability for remaining researches
+	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
+	{
+		if (crResInfo->disableProbability < 0) {
+			crResInfo->disableProbability = RES_PROBA_STANDARD_RESEARCH;
+			crResInfo->disableWeight = RES_WEIGHT_STANDARD_RESEARCH;
+		}
+	}
+}
+
+
+void TechTreeCreator::UpdateResearchProbabilitiesWithImpacts() {
+	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo) {
+		assert(crResInfo->researchDetail->enableBuildings.size() == 0);
+		int nonShadowChildrenCount = std::count_if(crResInfo->researchDetail->allChildResearches.begin(), 
+			crResInfo->researchDetail->allChildResearches.end(),
+			[](TTDetailedResearchDef *childDetail){ return !childDetail->IsShadowResearch(); }
+		);
+		if (nonShadowChildrenCount > 10) { nonShadowChildrenCount = 10; }
+		crResInfo->disableWeight *= (1 + nonShadowChildrenCount*0.05); // Add 5% weight per dependency
+
+		// underlying "disable units": add a lot of weight as this part is supposed to deal with techs that do NOT impact units activation.
+		int directEnableTrainableCount = crResInfo->researchDetail->enableTrainables.size();
+		crResInfo->disableWeight *= (1 + directEnableTrainableCount*0.05); // Add 10% weight per dependency
+
+		int indirectEnableTrainableCount = 0;
+		std::for_each(crResInfo->researchDetail->allChildResearches.begin(),
+			crResInfo->researchDetail->allChildResearches.end(),
+			[&indirectEnableTrainableCount](TTDetailedResearchDef *childDetail){
+			indirectEnableTrainableCount += childDetail->enableTrainables.size();
+		}
+		);
+		crResInfo->disableWeight *= (1 + directEnableTrainableCount*0.02); // Add 5% weight per indirect dependency
+
+		// Effects on unit (attributes, etc). Add weight if many units (take care of unit classes !)
+		// TODO
+#pragma message("TODO: effects on units : update weight")
+	}
+}
+
+
+void TechTreeCreator::CalcResearchesDisableScore() {
+	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo) {
+		int imyrand = randomizer.GetRandomNonZeroPercentageValue();
+		double myrand = (double)imyrand;
+		
+		double tmpCompute = crResInfo->disableProbability * myrand * RES_PROBA_IMPACT_ON_RANDOM +
+			myrand * (1 - RES_PROBA_IMPACT_ON_RANDOM); // Now tmpCompute is in 0-100
+
+		crResInfo->disableScore = tmpCompute;
+
+	}
 }
 
 

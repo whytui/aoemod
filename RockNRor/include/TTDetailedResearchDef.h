@@ -5,6 +5,7 @@
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_research_def.h>
 #include <AOE_struct_tech_def.h>
+#include "researches.h"
 
 
 #pragma once
@@ -62,6 +63,7 @@ public:
 	TTDetailedTrainableUnitDef(STRUCT_UNITDEF_TRAINABLE *unitDef) {
 		__super::TTDetailedUnitDef();
 		this->unitDef = unitDef;
+		this->isSuperUnit = false;
 		if (!unitDef || !unitDef->IsCheckSumValid()) { return; }
 		// Init for valid case
 		this->unitDefId = unitDef->DAT_ID1;
@@ -71,6 +73,7 @@ public:
 		this->baseUnitId = this->unitDefId;
 	}
 	STRUCT_UNITDEF_TRAINABLE *unitDef;
+	bool isSuperUnit; // True if this is a "super" unit like heavy cat/helepolis/legion/etc: Iron age unit with no more upgrades, and huge cost.
 
 	bool IsValid() const override { return __super::IsValid() && (this->unitDef != NULL); }
 
@@ -153,6 +156,8 @@ public:
 	// Copy all direct/indirect requirements from "other" to this->allRequirementsExcludingAges
 	void AddAllRequirementsFrom(TTDetailedResearchDef *other);
 
+	// Returns true if this research is wheel. We try to be as much generic as possible.
+	bool IsWheel() const;
 };
 
 

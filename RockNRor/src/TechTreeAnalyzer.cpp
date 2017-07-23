@@ -397,22 +397,9 @@ void TechTreeAnalyzer::UpdateChildResearchDependencies() {
 }
 
 
-// Update baseUnitDefId for all known buildings to identify root buildings
-void TechTreeAnalyzer::UpdateBuildingsBaseId() {
+// Update baseUnitDefId for all known buildings/trainable units to identify root units
+void TechTreeAnalyzer::UpdateUnitsBaseId() {
 	for (int bldDefId = 0; bldDefId < this->unitDefCount; bldDefId++) {
-		/*TTDetailedBuildingDef *detailBld = this->detailedBuildings[bldDefId];
-		if (detailBld && detailBld->unitDef) {
-			// To avoid recursive stuff, we consider that root ancestor is THE possible ancestor that has NO ancestor itself (there should be only one)
-			// This may fail if some mod uses separate ways to reach some unit ! (but in that case, anyway, detailBld->baseUnitId would have no real meaning).
-			for each (auto ancestorId in detailBld->possibleAncestorUnitIDs)
-			{
-				TTDetailedBuildingDef *ancestor = this->detailedBuildings[ancestorId];
-				if (ancestor && ancestor->unitDef && (ancestor->possibleAncestorUnitIDs.size() == 0)) {
-					detailBld->baseUnitId = ancestorId;
-				}
-			}
-		}*/
-
 		TTDetailedUnitDef *detail = this->GetDetailedBuildingDef(bldDefId);
 		bool isBuilding = (detail != NULL);
 		if (!isBuilding) {
@@ -434,6 +421,38 @@ void TechTreeAnalyzer::UpdateBuildingsBaseId() {
 				//TTDetailedBuildingDef *ancestor = this->detailedBuildings[ancestorId];
 				if (ancestor && ancestor->IsValid() && (ancestor->possibleAncestorUnitIDs.size() == 0)) {
 					detail->baseUnitId = ancestorId;
+				}
+			}
+		}
+	}
+}
+
+
+// Find out which trainable units are "super units" (cataphracts, armored elephants, massive catapults, etc)
+// Priest canNOT be super units here.
+void TechTreeAnalyzer::DetectSuperUnits() {
+	for (int bldDefId = 0; bldDefId < this->unitDefCount; bldDefId++) {
+		TTDetailedTrainableUnitDef *detail = this->GetDetailedTrainableUnitDef(bldDefId);
+		if (!detail || !detail->IsValid()) { continue; }
+		if (detail->possibleUpgradedUnitIDs.size() > 0) { continue; } // Super units don't have more upgrades
+		if (detail->IsHeroOrScenarioUnit()) { continue; }
+		if (detail->requiredAge < AOE_CONST_FUNC::CST_RSID_IRON_AGE) { continue; } // Super units are iron age units (excludes priest)
+		for each (long int enableResId in detail->researchIdsThatEnableMe) {
+			// There should be only one, actually
+			TTDetailedResearchDef *enableResDetail = this->GetDetailedResearchDef(enableResId);
+			if (enableResDetail && enableResDetail->active) {
+				long int totalCost = 0;
+				if (enableResDetail->researchDef->costUsed1 != 0) {
+					totalCost += enableResDetail->researchDef->costAmount1;
+				}
+				if (enableResDetail->researchDef->costUsed2 != 0) {
+					totalCost += enableResDetail->researchDef->costAmount2;
+				}
+				if (enableResDetail->researchDef->costUsed3 != 0) {
+					totalCost += enableResDetail->researchDef->costAmount3;
+				}
+				if (totalCost >= STRATEGY_CONST::MIN_COST_FOR_SUPER_UNIT_UPGRADE) {
+					detail->isSuperUnit = true;
 				}
 			}
 		}
@@ -465,7 +484,9 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 	// Update the "child" dependencies so each research know its children
 	this->UpdateChildResearchDependencies();
 
-	this->UpdateBuildingsBaseId();
+	// Collect additional info
+	this->UpdateUnitsBaseId();
+	this->DetectSuperUnits();
 	
 	// Debugging
 	for (int researchId = 0; researchId < this->researchCount; researchId++) {
@@ -495,6 +516,22 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 
 	this->analyzeComplete = true;
 	return true;
+}
+
+
+// Please, please call this if TechDef pointers have changed in global->technologyInfos (when array has been re-allocated)
+void TechTreeAnalyzer::RefreshTechDefPointers() {
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	bool canUseNewPtr = (global && global->IsCheckSumValid() && global->technologiesInfo);
+	for (int resDefId = 0; resDefId < this->researchCount; resDefId++) {
+		TTDetailedResearchDef *detail = this->GetDetailedResearchDef(resDefId);
+		if (detail && detail->techDef && detail->researchDef) {
+			detail->techDef = NULL;
+			if (canUseNewPtr) {
+				detail->techDef = global->technologiesInfo->GetTechDef(detail->researchDef->technologyId);
+			}
+		}
+	}
 }
 
 

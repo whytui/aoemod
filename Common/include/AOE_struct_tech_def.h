@@ -84,6 +84,10 @@ namespace AOE_STRUCTURES {
 		bool IsAttributeModifier() const {
 			return (this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) || (this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) || (this->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT);
 		}
+		// Returns true if effect is a resource modifier (multiply or add/set)
+		bool IsResourceModifier() const {
+			return (this->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET) || (this->effectType == TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT);
+		}
 		// Return target unit ("TO") for "upgrade unit" effects. Returns -1 if invalid (not an upgrade unit effect)
 		short int UpgradeUnitGetTargetUnit() const {
 			if (this->effectType != TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) { return -1; }
