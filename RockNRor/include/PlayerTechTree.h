@@ -117,21 +117,27 @@ public:
 };
 
 
-static const double RES_PROBA_MIN = 0;
-static const double RES_PROBA_MAX = 1;
-static const double RES_WEIGHT_MIN = 0;
-static const double RES_WEIGHT_MAX = 1;
-static const double RES_PROBA_STANDARD_RESEARCH = 0.5; // "disable probability" for a standard research
-static const double RES_WEIGHT_STANDARD_RESEARCH = 0.1; // "disable weight" for a standard research
-static const double RES_PROBA_STANDARD_UNIT = 0.5; // "disable probability" for a standard unit
-static const double RES_WEIGHT_STANDARD_UNIT = 0.1; // "disable weight" for a standard unit
-static const double RES_PROBA_SPECIALIZED_UNIT = 0.6; // "disable probability" for a unit which is slighly more rare than standard, like ballista (quite often disabled).
-static const double RES_PROBA_WHEEL = 0.05; // "disable probability" for Wheel research
-static const double RES_WEIGHT_WHEEL = 0.9; // "disable weight" for Wheel research
-static const double RES_PROBA_IMPACT_ON_RANDOM = 0.3; // computed probability counts as much as xxx% vs random.
-static const double RES_PROBA_VERY_RARE = 0.08; // Disable probability for unit that must be disabled on very rare occasions: priests, stone thrower, hoplite...
-static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.8; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
+namespace TT_CONST {
+	static const double RES_PROBA_MIN = 0;
+	static const double RES_PROBA_MAX = 1;
+	static const double RES_WEIGHT_MIN = 0;
+	static const double RES_WEIGHT_MAX = 1;
+	static const double RES_PROBA_STANDARD_RESEARCH = 0.5; // "disable probability" for a standard research
+	static const double RES_WEIGHT_STANDARD_RESEARCH = 0.1; // "disable weight" for a standard research
+	static const double RES_PROBA_STANDARD_UNIT = 0.5; // "disable probability" for a standard unit
+	static const double RES_WEIGHT_STANDARD_UNIT = 0.1; // "disable weight" for a standard unit
+	static const double RES_PROBA_SPECIALIZED_UNIT = 0.6; // "disable probability" for a unit which is slighly more rare than standard, like ballista (quite often disabled).
+	static const double RES_PROBA_WHEEL = 0.05; // "disable probability" for Wheel research
+	static const double RES_WEIGHT_WHEEL = 0.9; // "disable weight" for Wheel research
+	static const double RES_PROBA_VERY_RARE = 0.08; // Disable probability for unit that must be disabled on very rare occasions: priests, stone thrower, hoplite...
+	static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.8; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
 
+	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.3; // computed probability counts as much as xxx% vs random.
+	static const int MIN_DISABLE_UNITLINE_COUNT = 6;
+	static const int MAX_DISABLE_UNITLINE_COUNT = 12;
+	static const int MIN_DISABLE_RESEARCH_COUNT = 6;
+	static const int MAX_DISABLE_RESEARCH_COUNT = 13;
+}
 
 
 class TechTreeCreator {
@@ -201,7 +207,7 @@ private:
 	// Returns the *child* disabled researches (not the parent research itself)
 	std::list<TTCreatorResearchInfo*> CreateDisableEffectOnResearch(TTCreatorResearchInfo *resInfo);
 
-	// Returns the list of "recursive" TTCreatorResearchInfo that have been disabled (does not include unitInfo)
+	// Returns the list of "recursive" TTCreatorResearchInfo that have been disabled, including the research that enables unitInfo.
 	std::list<TTCreatorResearchInfo*> CreateDisableEffectOnUnit(TTCreatorUnitInfo *unitInfo);
 	std::list<TTCreatorResearchInfo*> CreateDisableEffectOnUnit(TTDetailedUnitDef *unitDetail);
 
