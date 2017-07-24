@@ -86,7 +86,8 @@ void TechTreeAnalyzer::FindBuildingThatTriggerResearches() {
 	if (!global || !global->IsCheckSumValid()) { return; }
 	if (global->civCount < 2) { return; }
 	STRUCT_CIVILIZATION_DEF *civDef1 = global->civilizationDefinitions[1];
-	
+	assert(civDef1 && (this->unitDefCount == civDef1->civUnitDefCount));
+
 	for (int unitDefId = 0; unitDefId < civDef1->civUnitDefCount; unitDefId++) {
 		STRUCT_UNITDEF_TRAINABLE *unitDefTrainable = (STRUCT_UNITDEF_TRAINABLE*)civDef1->GetUnitDef(unitDefId);
 		STRUCT_UNITDEF_BUILDING *unitDefBld = (STRUCT_UNITDEF_BUILDING*)civDef1->GetUnitDef(unitDefId);
@@ -109,6 +110,16 @@ void TechTreeAnalyzer::FindBuildingThatTriggerResearches() {
 void TechTreeAnalyzer::FindResearchesThatEnableUnits() {
 	for (int resDefId = 0; resDefId < this->researchCount; resDefId++) {
 		TTDetailedResearchDef *detailRes = this->detailedResearches[resDefId];
+
+		// Take the occasion to feed TTDetailedBuildingDef->researchesDevelopedHere
+		if (!detailRes->researchDef) { continue; }
+		if (detailRes->researchDef->researchLocation >= 0) {
+			TTDetailedBuildingDef *trainLocDetail = this->GetDetailedBuildingDef(detailRes->researchDef->researchLocation);
+			if (trainLocDetail && trainLocDetail->IsValid() && !detailRes->IsShadowResearch()) {
+				trainLocDetail->researchesDevelopedHere.insert(resDefId);
+			}
+		}
+
 		STRUCT_TECH_DEF *techDef = detailRes->techDef;
 		if (!techDef) { 
 			continue;
@@ -157,6 +168,21 @@ void TechTreeAnalyzer::FindResearchesThatEnableUnits() {
 						detailTrainableParent->possibleUpgradedUnitIDs.insert(upgradedUnitId);
 					}
 				}
+			}
+		}
+	}
+}
+
+
+// this->detailedBuildings with units (trainable) that are trained there
+void TechTreeAnalyzer::CollectTrainLocations() {
+	for (int unitDefId = 0; unitDefId < this->unitDefCount; unitDefId++) {
+		TTDetailedTrainableUnitDef *trainableDetail = this->GetDetailedTrainableUnitDef(unitDefId);
+		if (trainableDetail && trainableDetail->IsValid() && (trainableDetail->GetTrainLocation() >= 0)) {
+			long int trainLocation = trainableDetail->GetTrainLocation();
+			TTDetailedBuildingDef *bldDetail = this->GetDetailedBuildingDef(trainLocation);
+			if (bldDetail && bldDetail->IsValid() && !trainableDetail->IsHeroOrScenarioUnit()) {
+				bldDetail->unitsTrainedHere.insert(trainableDetail->unitDef);
 			}
 		}
 	}
@@ -546,6 +572,8 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 		return false;
 	}
 	// If we reach this we are sure that global struct is initialized, and that DAT info has been loaded already.
+
+	// Create trainable & buildings detailed info objects
 	this->FindBuildingThatTriggerResearches();
 	this->FindResearchesThatEnableUnits();
 
@@ -564,7 +592,8 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 	// Collect additional info
 	this->UpdateUnitsBaseId();
 	this->DetectSuperUnits();
-	
+	this->CollectTrainLocations(); // Requires dependencies/analysis to be complete because it uses IsHeroOrScenarioUnit() method.
+
 	// Debugging
 	for (int researchId = 0; researchId < this->researchCount; researchId++) {
 		TTDetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);

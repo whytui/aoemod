@@ -12,6 +12,14 @@ namespace STRATEGY {
 ;
 
 
+enum TTCreatorBaseUnitDisableBehavior {
+	TTBUDisableNever = 0, // Never disable root unit of a given unit line
+	TTBUDisableVeryRare, // Almost never disable root unit of a given unit line
+	TTBUDisableNormal, // Root unit of unit line might be disabled just like any other one
+	TTBUDisableMostlyExclusiveSameClassIron // In most cases, only 1 *iron age* root unit of same class is left available. E.g. fireGalley vs catTrireme
+};
+
+
 class CustomPlayerInfo {
 public:
 	CustomPlayerInfo() {
@@ -90,7 +98,9 @@ public:
 		this->sourceResearchId = -1;
 		this->hasBeenDisabled = false;
 		this->hasBeenDisabledDirectly = false;
+		this->hasADisabledChild = false;
 		this->internalName = "";
+		this->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableNormal;
 	}
 	long int unitDefId;
 	std::string internalName;
@@ -102,6 +112,8 @@ public:
 	long int sourceResearchId; // ID of the research that enables me, if it exists and is unique
 	bool hasBeenDisabled;
 	bool hasBeenDisabledDirectly; // True when the unit was disabled by direct choice (not just a consequence of another research being disabled)
+	bool hasADisabledChild; // True when a child unit (an upgrade) was disabled by direct choice
+	TTCreatorBaseUnitDisableBehavior rootUnitDisablePolicy;
 };
 
 
@@ -113,9 +125,13 @@ static const double RES_PROBA_STANDARD_RESEARCH = 0.5; // "disable probability" 
 static const double RES_WEIGHT_STANDARD_RESEARCH = 0.1; // "disable weight" for a standard research
 static const double RES_PROBA_STANDARD_UNIT = 0.5; // "disable probability" for a standard unit
 static const double RES_WEIGHT_STANDARD_UNIT = 0.1; // "disable weight" for a standard unit
+static const double RES_PROBA_SPECIALIZED_UNIT = 0.6; // "disable probability" for a unit which is slighly more rare than standard, like ballista (quite often disabled).
 static const double RES_PROBA_WHEEL = 0.05; // "disable probability" for Wheel research
 static const double RES_WEIGHT_WHEEL = 0.9; // "disable weight" for Wheel research
 static const double RES_PROBA_IMPACT_ON_RANDOM = 0.3; // computed probability counts as much as xxx% vs random.
+static const double RES_PROBA_VERY_RARE = 0.08; // Disable probability for unit that must be disabled on very rare occasions: priests, stone thrower, hoplite...
+static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.8; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
+
 
 
 class TechTreeCreator {
@@ -168,10 +184,18 @@ private:
 
 	void UpdateResearchProbabilitiesWithImpacts();
 
+	// Use each research's probability to compute its "disable score"
 	void CalcResearchesDisableScore();
+	// Use each *root* unit's probability to compute its "disable score".
 	void CalcUnitsDisableScore();
+	// Creates disable research effects according to disable scores that have been computed (on all researches)
 	void CreateDisableResearchesEffects();
+	// Creates disable unit effects according to disable scores that have been computed (on root units)
+	// If a unit(line) is selected for being disabled, then this method chooses at which level (which upgrade) the unitline becomes unavailable.
 	void CreateDisableUnitsEffects();
+
+	// Choose one of the upgrade of rootUnitInfo (or rootUnitInfo) that will be the first unit from the lineage to be unavailable.
+	TTCreatorUnitInfo *PickUnitUpgradeToDisableInUnitLine(TTCreatorUnitInfo *rootUnitInfo);
 
 	// Disable (cascade) child researches for parentResearch
 	// Returns the *child* disabled researches (not the parent research itself)

@@ -176,6 +176,9 @@ private:
 	// Update this->detailedBuildings with researches that enable the buildings (if not available at start)
 	void FindResearchesThatEnableUnits();
 
+	// this->detailedBuildings with units (trainable) that are trained there
+	void CollectTrainLocations();
+
 	void MarkBuildingAsAvailable(long int unitDefId);
 	void MarkTrainableUnitAsAvailable(long int unitDefId);
 

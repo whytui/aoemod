@@ -27,6 +27,7 @@ public:
 		this->isAvailableAfterAnalysis = false;
 		this->baseUnitId = -1;
 		this->requiredAge = -1;
+		this->unitClass = AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAINone;
 	}
 	long int unitDefId;
 	std::string internalName;
@@ -38,6 +39,7 @@ public:
 	std::set<long int> possibleAncestorUnitIDs; // UnitDefIds of buildings that can be upgraded into "me". See "baseUnitId" to find THE root unitDefId.
 
 	long int baseUnitId; // UnitDefId of the (root) base unitdef I am a descendent of. =this->unitDefId if I have no ancestor.
+	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitClass;
 
 	// True if unitdef is valid and underlying data can be used safely
 	virtual bool IsValid() const { return this->unitDefId >= 0; }
@@ -52,6 +54,7 @@ public:
 	}
 
 	// Returns true if unit is a hero or scenario unit: heroes, cheat code units, unused units, etc
+	// Do not call this before the analysis is complete !
 	bool IsHeroOrScenarioUnit() const {
 		return (!this->isAvailableAfterAnalysis && !this->isAvailableImmediately);
 	}
@@ -71,6 +74,7 @@ public:
 		this->SetNameFromDefinition(this->unitDef);
 		this->isAvailableImmediately = (unitDef->availableForPlayer != 0);
 		this->baseUnitId = this->unitDefId;
+		this->unitClass = unitDef->unitAIType;
 	}
 	STRUCT_UNITDEF_TRAINABLE *unitDef;
 	bool isSuperUnit; // True if this is a "super" unit like heavy cat/helepolis/legion/etc: Iron age unit with no more upgrades, and huge cost.
@@ -99,10 +103,13 @@ public:
 		this->isAvailableImmediately = (unitDef->availableForPlayer != 0);
 		this->initiatesResearch = unitDef->initiatesResearch;
 		this->baseUnitId = this->unitDefId;
+		this->unitClass = unitDef->unitAIType;
 	}
 
 	STRUCT_UNITDEF_BUILDING *unitDef;
 	short int initiatesResearch; // ID of research that is triggered when "this" building is constructed. Can be -1 (none).
+	std::set<STRUCT_UNITDEF_TRAINABLE*> unitsTrainedHere; // List of unit definitions that are trained in this building (excluding heroes)
+	std::set<long int> researchesDevelopedHere; // List of researches (IDs) that are developed in this building. Excludes shadow researches.
 
 	bool IsValid() const override { return __super::IsValid() && (this->unitDef != NULL); }
 };

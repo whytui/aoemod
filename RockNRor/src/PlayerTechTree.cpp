@@ -312,7 +312,7 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 
 	// 1 - set probability for "hardcoded" groups:  eg. storage pit iron-armors (3) should remain together
 	// WTF this implementation is poor (and won't work)
-	double randomProbaForArmors = RES_PROBA_STANDARD_RESEARCH;
+	/*double randomProbaForArmors = RES_PROBA_STANDARD_RESEARCH;
 	const double weightForArmors = RES_WEIGHT_STANDARD_RESEARCH;
 	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
 	{
@@ -323,7 +323,7 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 			crResInfo->disableProbability = randomProbaForArmors;
 			crResInfo->disableWeight = weightForArmors;
 		}
-	}
+	}*/
 
 
 #pragma message("TODO: tower shield higher proba, even iron shied ? use armor type and ancestor/child count to determine")
@@ -465,7 +465,69 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 		this->allCreatorUnitInfo.push_back(ttcUnitInfo);
 	}
 
-	// TODO...
+	// We run 1 evaluation for each "unit line" (same base id) : e.g. common evaluation for clubman+axeman
+	for each (TTCreatorUnitInfo *crUnitInfo in this->allCreatorUnitInfo)
+	{
+		if (!crUnitInfo->unitDetail->IsValid()) { continue; }
+		if (crUnitInfo->unitDefId != crUnitInfo->unitDetail->baseUnitId) { continue; } // Only treat base units => 1 evaluation for each unitline
+		// Special: priest. Disable probability is extremely low, and only possible if religion level is already poor.
+		if (crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupPriest) {
+			if (this->religionLevel > 0) {
+				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableNever;
+				crUnitInfo->disableProbability = RES_PROBA_MIN;
+				crUnitInfo->disableWeight = RES_WEIGHT_STANDARD_UNIT;
+			} else {
+				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
+				crUnitInfo->disableProbability = RES_PROBA_VERY_RARE;
+				crUnitInfo->disableWeight = RES_WEIGHT_HIGH_IMPACT_UNIT;
+			}
+			continue;
+		}
+		// Special: iron age "root" boats (note: pre-iron war boats can't be disabled, cf CollectUnitInfo) => fire galley, cat.trireme
+		if ((crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupWarBoat) &&
+			(crUnitInfo->unitDetail->requiredAge == AOE_CONST_FUNC::CST_RSID_IRON_AGE)) {
+			crUnitInfo->disableWeight = RES_WEIGHT_STANDARD_UNIT;
+			crUnitInfo->disableProbability = RES_PROBA_STANDARD_UNIT; // Useful for other upgrades (catapult trireme)
+			// Will force to choose among iron-age root units of same class (warboats here)
+			crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableMostlyExclusiveSameClassIron;
+			continue;
+		}
+
+		// Special: stone thrower and siege
+		if (crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupSiegeWeapon) {
+			crUnitInfo->disableWeight = RES_WEIGHT_STANDARD_UNIT;
+			if (crUnitInfo->unitDefId == AOE_CONST_FUNC::CST_UNITID_STONE_THROWER) {
+				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
+				crUnitInfo->disableProbability = RES_PROBA_STANDARD_UNIT; // Useful for other upgrades (catapults)
+			} else {
+				crUnitInfo->disableProbability = RES_PROBA_SPECIALIZED_UNIT;
+			}
+		}
+
+		// Special: unit that is only unit in given train location (may depend on mods, in standard game: hoplite)
+		TTDetailedBuildingDef *bld = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(crUnitInfo->trainLocation);
+		assert(bld && bld->IsValid());
+		if (bld && bld->IsValid()) {
+			long int uniqueRootId = -1;
+			bool uniqueRootUnitId = true;
+			for each (auto oneUnit in bld->unitsTrainedHere)
+			{
+				TTDetailedTrainableUnitDef *oneUnitDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(oneUnit->DAT_ID1);
+				if (uniqueRootId < 0) {
+					uniqueRootId = oneUnitDetail->baseUnitId;
+				} else {
+					uniqueRootUnitId &= (uniqueRootId == oneUnitDetail->baseUnitId);
+				}
+			}
+			// TODO: count "military" researches only ? Only those that apply to THE unit ? TODO EXCLUDE unit upgrades !
+			//int researchCountThere = bld->researchesDevelopedHere.size();
+			if (uniqueRootUnitId /*&& (researchCountThere == 0)*/) {
+				crUnitInfo->disableProbability = RES_PROBA_SPECIALIZED_UNIT;
+				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
+				crUnitInfo->disableWeight = RES_WEIGHT_STANDARD_UNIT; // Useful for unit upgrades
+			}
+		}
+	}
 
 	// Set probability for remaining units
 	for each (TTCreatorUnitInfo *crUnitInfo in this->allCreatorUnitInfo)
@@ -508,6 +570,7 @@ void TechTreeCreator::UpdateResearchProbabilitiesWithImpacts() {
 }
 
 
+// Use each research's probability to compute its "disable score"
 void TechTreeCreator::CalcResearchesDisableScore() {
 	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo) {
 		int imyrand = randomizer.GetRandomNonZeroPercentageValue();
@@ -521,8 +584,13 @@ void TechTreeCreator::CalcResearchesDisableScore() {
 }
 
 
+// Use each *root* unit's probability to compute its "disable score".
 void TechTreeCreator::CalcUnitsDisableScore() {
 	for each (TTCreatorUnitInfo *crUnitInfo in this->allCreatorUnitInfo) {
+		if (!crUnitInfo->unitDetail->IsValid()) { continue; }
+		if (crUnitInfo->unitDefId != crUnitInfo->unitDetail->baseUnitId) { continue; } // Only treat base units => 1 evaluation for each unitline
+
+		// Random will decide if the unitline should be disabled (partially or fully)
 		int imyrand = randomizer.GetRandomNonZeroPercentageValue();
 		double myrand = (double)imyrand;
 
@@ -534,6 +602,7 @@ void TechTreeCreator::CalcUnitsDisableScore() {
 }
 
 
+// Creates disable research effects according to disable scores that have been computed (on all researches)
 void TechTreeCreator::CreateDisableResearchesEffects() {
 	int preferredDisableResearchCount = randomizer.GetRandomValue_normal_moreFlat(5, 12);
 	int curDisableCount = 0;
@@ -577,25 +646,142 @@ void TechTreeCreator::CreateDisableResearchesEffects() {
 }
 
 
+// Creates disable unit effects according to disable scores that have been computed (on root units)
+// If a unit(line) is selected for being disabled, then this method chooses at which level (which upgrade) the unitline becomes unavailable.
 void TechTreeCreator::CreateDisableUnitsEffects() {
-	int preferredDisableUnitCount = randomizer.GetRandomValue_normal_moreFlat(9, 16);
+	int preferredDisableUnitCount = randomizer.GetRandomValue_normal_moreFlat(8, 15);
 	int curDisableCount = 0;
 	while (curDisableCount < preferredDisableUnitCount) {
 		double bestScore = -1;
-		TTCreatorUnitInfo *bestElem = NULL;
+		TTCreatorUnitInfo *rootUnitToDisable = NULL;
 		std::for_each(this->allCreatorUnitInfo.begin(), this->allCreatorUnitInfo.end(),
-			[&bestElem, &bestScore](TTCreatorUnitInfo *curInfo) {
-			if (!curInfo->hasBeenDisabled && (curInfo->disableScore > bestScore)) { bestScore = curInfo->disableScore; bestElem = curInfo; }
+			[&rootUnitToDisable, &bestScore](TTCreatorUnitInfo *curInfo) {
+			if (!curInfo->hasADisabledChild && (curInfo->disableScore > bestScore)) { bestScore = curInfo->disableScore; rootUnitToDisable = curInfo; }
 		}
 		);
 		if (bestScore < 0) { break; }
-		std::list<TTCreatorResearchInfo*> disabledChildren = this->CreateDisableEffectOnUnit(bestElem);
-		bestElem->hasBeenDisabledDirectly = true;
-		int addedCount = 1; // Corresponds to "bestElem"
+
+		// Here we have a unit to disable
+		TTCreatorUnitInfo *unitToActuallyDisable = this->PickUnitUpgradeToDisableInUnitLine(rootUnitToDisable);
+
+		std::list<TTCreatorResearchInfo*> disabledChildren = this->CreateDisableEffectOnUnit(unitToActuallyDisable);
+		unitToActuallyDisable->hasBeenDisabledDirectly = true;
+		rootUnitToDisable->hasADisabledChild = true;
+		int addedCount = 1; // Corresponds to "unitToActuallyDisable"
 		addedCount += disabledChildren.size();
 
 		curDisableCount += addedCount;
 	}
+}
+
+
+// Choose one of the upgrade of rootUnitInfo (or rootUnitInfo) that will be the first unit from the lineage to be unavailable.
+TTCreatorUnitInfo *TechTreeCreator::PickUnitUpgradeToDisableInUnitLine(TTCreatorUnitInfo *rootUnitInfo) {
+	int totalUpgradesCount = rootUnitInfo->unitDetail->possibleUpgradedUnitIDs.size() + 1; // including root unit
+	if (totalUpgradesCount <= 1) {
+		return rootUnitInfo;
+	}
+
+	// For unit with upgrades, we need to choose which upgrade becomes unavailable.
+	
+	// Special : check if all units are still enabled (maybe some required research has already become disabled)
+	TTCreatorUnitInfo *firstDisabledUpgrade = NULL;
+	for each (long int upgradeId in rootUnitInfo->unitDetail->possibleUpgradedUnitIDs)
+	{
+		auto it = std::find_if(this->allCreatorUnitInfo.begin(), this->allCreatorUnitInfo.end(),
+			[upgradeId](TTCreatorUnitInfo *lambdaInfo){return lambdaInfo->unitDefId == upgradeId; }
+		);
+		if (it == this->allCreatorUnitInfo.end()) {
+			// Not found
+			continue;
+		}
+		TTCreatorUnitInfo *unitUpgradeInfo = *it;
+		if (!unitUpgradeInfo || !unitUpgradeInfo->unitDetail->IsValid()) { continue; }
+		if (unitUpgradeInfo->hasBeenDisabled) {
+			if (!firstDisabledUpgrade) {
+				firstDisabledUpgrade = unitUpgradeInfo;
+			} else {
+				// Keep the "earliest" disabled upgrade
+				long int currentResultId = firstDisabledUpgrade->unitDefId;
+				auto it = std::find_if(unitUpgradeInfo->unitDetail->possibleAncestorUnitIDs.begin(),
+					unitUpgradeInfo->unitDetail->possibleAncestorUnitIDs.end(),
+					[currentResultId](long int ancestorId){ return ancestorId == currentResultId; }
+				);
+				if (it == unitUpgradeInfo->unitDetail->possibleAncestorUnitIDs.end()) {
+					// Not found: firstDisabledUpgrade is NOT an ancestor of unitUpgradeInfo => unitUpgradeInfo is the ancestor
+					firstDisabledUpgrade = unitUpgradeInfo;
+				}
+			}
+		}
+	}
+	if (firstDisabledUpgrade == rootUnitInfo) {
+		return firstDisabledUpgrade; // No need to go further...
+	}
+
+	// Get the list of upgrades we still CAN disabled (not children of already disabled ones)
+	std::list<TTCreatorUnitInfo*>unitInfoThatCanBeDisabled;
+	if (firstDisabledUpgrade) {
+		unitInfoThatCanBeDisabled.push_back(firstDisabledUpgrade);
+	}
+	for each (long int curId in rootUnitInfo->unitDetail->possibleUpgradedUnitIDs)
+	{
+		auto it = std::find_if(this->allCreatorUnitInfo.begin(), this->allCreatorUnitInfo.end(),
+			[curId](TTCreatorUnitInfo *lambdaInfo){return lambdaInfo->unitDefId == curId; }
+		);
+		if (it == this->allCreatorUnitInfo.end()) {
+			// Not found
+			continue;
+		}
+		TTCreatorUnitInfo *curElem = *it;
+
+		if (firstDisabledUpgrade) {
+			long int firstDisabledId = firstDisabledUpgrade->unitDefId;
+			auto it2 = std::find_if(curElem->unitDetail->possibleAncestorUnitIDs.begin(),
+				curElem->unitDetail->possibleAncestorUnitIDs.end(),
+				[firstDisabledId](long int ancestorId){ return ancestorId == firstDisabledId; }
+			);
+			if (it2 == curElem->unitDetail->possibleAncestorUnitIDs.end()) {
+				// Not found: firstDisabledUpgrade is NOT an ancestor of curElem => curElem is parent => eligible for "can be disabled" list
+				unitInfoThatCanBeDisabled.push_back(curElem);
+			}
+		} else {
+			unitInfoThatCanBeDisabled.push_back(curElem); // when all units are still available, they are all eligible for "can be disabled" list
+		}
+	}
+
+	// Handle special cases described by "disable policy"
+	bool removeBaseUnit = (rootUnitInfo->rootUnitDisablePolicy == TTCreatorBaseUnitDisableBehavior::TTBUDisableNever);
+	if (rootUnitInfo->rootUnitDisablePolicy == TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare) {
+		if (randomizer.GetRandomNonZeroPercentageValue() < 10) {
+			removeBaseUnit = true;
+		}
+	}
+	// Root unit has not been added to list yet. Do it now unless "remove base unit" is set.
+	if (!removeBaseUnit) {
+		unitInfoThatCanBeDisabled.push_back(rootUnitInfo);
+	}
+
+	if (rootUnitInfo->rootUnitDisablePolicy == TTCreatorBaseUnitDisableBehavior::TTBUDisableMostlyExclusiveSameClassIron) {
+#pragma message("TTBUDisableMostlyExclusiveSameClassIron not implemented")
+		// TODO
+	}
+
+	// TODO: for long lineage >=3 (legion, cats, cavalry...), do not disable "only" last one when required researches are ok ?
+
+	int countForRandomChoice = unitInfoThatCanBeDisabled.size();
+	int randomLevelChoice = randomizer.GetRandomValue(1, countForRandomChoice);
+	for (int i = 1; i < randomLevelChoice; i++) {
+		assert(unitInfoThatCanBeDisabled.size() > 0);
+		if (unitInfoThatCanBeDisabled.size() == 0) {
+			return rootUnitInfo;
+		}
+		unitInfoThatCanBeDisabled.pop_front();
+	}
+	assert(unitInfoThatCanBeDisabled.size() > 0);
+	if (unitInfoThatCanBeDisabled.size() == 0) {
+		return rootUnitInfo;
+	}
+	return unitInfoThatCanBeDisabled.front();
 }
 
 
