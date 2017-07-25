@@ -152,6 +152,9 @@ public:
 	std::set<TTDetailedTrainableUnitDef*> enableTrainables; // The Non-building unitDefs that are enabled thanks to "this" research.
 	std::set<std::pair<long int, long int>> upgradedUnitDefId; // Non-building unitDef IDs that are upgraded by this research (pair: first=from, second=to)
 
+	std::set<TTDetailedResearchDef*> researchLinePredecessors; // All researches from same "line" (location+buttonId) and come before me. E.g tool&bronze age if "me"=iron age
+	std::set<TTDetailedResearchDef*> researchLineSuccessors; // All researches from same "line" (location+buttonId) and come after me. E.g iron age if "me"=bronze age
+
 	// Methods
 
 	// Get "my" research definition ID

@@ -23,6 +23,50 @@ namespace STRATEGY_CONST {
 }
 
 
+
+const int AGES_COUNT = 4;
+// Store statistics about tech tree
+class TechTreeStatistics {
+public:
+	TechTreeStatistics() {
+		this->Reset();
+	}
+	int validNonShadowResearchesCount; // Number of non-shadow researches the player can manually develop
+	int validRootNonShadowResearchesCount; // Number of "root" researches = number of research series. tool/bronze/iron are 1 series of researches, axeman is 1, short+broad+longsw.+legion is 1 too, etc.
+	int inaccessibleResearchesCount; // Number of researches that could not be reached during analysis. Should be 0 if empires.dat is correctly done. Does not include "empty" researches as they have no requirement !
+
+	int allTrainableUnitsCount; // all BUT heroes
+	int allBuildingUnitsCount; // all BUT heroes
+	int rootTrainableUnitsCount; // excludes heroes
+	int rootBuildingUnitsCount; // excludes heroes
+	int heroesCount; // all heroes count (including towers)
+	int allTrainablesCountByAge[AGES_COUNT]; // age index in 0-3
+	int allBuildingsCountByAge[AGES_COUNT]; // age index in 0-3
+	int rootTrainablesCountByAge[AGES_COUNT]; // age index in 0-3
+	int rootBuildingsCountByAge[AGES_COUNT]; // age index in 0-3
+	int villagerCount; // each villager (civilian) unit (builder, farmer...) is a root unit: this has a strong impact on totals !
+
+	void Reset() {
+		this->validNonShadowResearchesCount = 0;
+		this->validRootNonShadowResearchesCount = 0;
+		this->inaccessibleResearchesCount = 0;
+
+		for (int i = 0; i < AGES_COUNT; i++) {
+			this->allTrainablesCountByAge[i] = 0;
+			this->allBuildingsCountByAge[i] = 0;
+			this->rootTrainablesCountByAge[i] = 0;
+			this->rootBuildingsCountByAge[i] = 0;
+		}
+		this->allTrainableUnitsCount = 0;
+		this->allBuildingUnitsCount = 0;
+		this->rootBuildingUnitsCount = 0;
+		this->rootTrainableUnitsCount = 0;
+		this->heroesCount = 0;
+		this->villagerCount = 0;
+	}
+};
+
+
 class TechTreeAnalyzer {
 public:
 	TechTreeAnalyzer() {
@@ -44,6 +88,7 @@ public:
 		this->FreeArrays();
 	}
 
+	TechTreeStatistics statistics;
 	std::string myLog;
 
 	// Methods
@@ -192,6 +237,7 @@ private:
 	int CollectUnreachableResearches();
 
 	// Update allChildResearches for each research info
+	// Also updates "researchLine" predecessors/successors
 	void UpdateChildResearchDependencies();
 
 	// Update baseUnitDefId for all known buildings/trainable units to identify root units
@@ -200,6 +246,9 @@ private:
 	// Find out which trainable units are "super units" (cataphracts, armored elephants, massive catapults, etc)
 	// Priest canNOT be super units here.
 	void DetectSuperUnits();
+
+	// Calculate additional statistics, one tech tree has been analysed
+	void CalculateStatistics();
 
 };
 

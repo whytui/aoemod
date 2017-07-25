@@ -242,6 +242,16 @@ void TechTreeAnalyzer::MarkBuildingAsAvailable(long int unitDefId) {
 		this->myLog.append(detailBld->internalName);
 		this->myLog.append(" is now available." NEWLINE);
 	}
+
+	for each (long int reqResId in detailBld->researchIdsThatEnableMe) {
+		TTDetailedResearchDef *reqRes = this->GetDetailedResearchDef(reqResId);
+		if (reqRes && reqRes->active && (detailBld->requiredAge < reqRes->requiredAge)) {
+			detailBld->requiredAge = reqRes->requiredAge;
+		}
+	}
+	if (detailBld->requiredAge == -1) {
+		detailBld->requiredAge = AOE_CONST_FUNC::CST_RSID_STONE_AGE;
+	}
 }
 
 
@@ -404,7 +414,9 @@ int TechTreeAnalyzer::CollectUnreachableResearches() {
 
 
 // Update allChildResearches for each research info
+// Also updates "researchLine" predecessors/successors
 void TechTreeAnalyzer::UpdateChildResearchDependencies() {
+	// Update child researches
 	for (int resDefId = 0; resDefId < this->researchCount; resDefId++) {
 		TTDetailedResearchDef *detail = this->GetDetailedResearchDef(resDefId);
 		if (!detail || !detail->active) { continue; }
@@ -416,6 +428,34 @@ void TechTreeAnalyzer::UpdateChildResearchDependencies() {
 				if (x != child->allRequirementsExcludingAges.end()) {
 					// Found
 					detail->allChildResearches.insert(child);
+				}
+			}
+		}
+	}
+	// Handle "research lines" = series of researches on a same location/button
+	for (int res1Id = 0; res1Id < this->researchCount; res1Id++) {
+		TTDetailedResearchDef *res1dtl = this->GetDetailedResearchDef(res1Id);
+		if (!res1dtl || !res1dtl->active || res1dtl->IsShadowResearch()) { continue; }
+		for (int res2Id = 0; res2Id < this->researchCount; res2Id++) {
+			TTDetailedResearchDef *res2dtl = this->GetDetailedResearchDef(res2Id);
+			if (res2dtl && res2dtl->active && (res2dtl != res1dtl) && !res2dtl->IsShadowResearch()) {
+				STRUCT_RESEARCH_DEF *res1 = res1dtl->researchDef;
+				STRUCT_RESEARCH_DEF *res2 = res2dtl->researchDef;
+				if (res1 && res2 && (res1->researchLocation == res2->researchLocation) && (res1->researchLocation >= 0) &&
+					(res1->buttonId == res2->buttonId)) {
+					// We got 2 (different) researches, non-shadow, in same building & buttonId => same lineage
+					auto it = std::find(res1dtl->allRequirements.begin(), res1dtl->allRequirements.end(), res2dtl);
+					//auto it = std::find_if(res1dtl->allRequirements.begin(), res1dtl->allRequirements.end(),
+						//[res2dtl](TTDetailedResearchDef *lambdaDtl) {return lambdaDtl == res2dtl; });
+					if (it == res1dtl->allRequirements.end()) {
+						// Res2 not found in res1's requirements => res1 comes BEFORE res2
+						res1dtl->researchLineSuccessors.insert(res2dtl);
+						res2dtl->researchLinePredecessors.insert(res1dtl);
+					} else {
+						// Res2 found in res1's requirements => res2 comes BEFORE res1
+						res2dtl->researchLineSuccessors.insert(res1dtl);
+						res1dtl->researchLinePredecessors.insert(res2dtl);
+					}
 				}
 			}
 		}
@@ -563,6 +603,114 @@ void TechTreeAnalyzer::DetectSuperUnits() {
 }
 
 
+// Calculate additional statistics, one tech tree has been analysed
+void TechTreeAnalyzer::CalculateStatistics() {
+	this->statistics.Reset();
+
+	for (int researchId = 0; researchId < this->researchCount; researchId++) {
+		TTDetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
+		if (!detail || !detail->active) { continue; }
+		if (!detail->allRequirementsAreKnown) {
+			this->statistics.inaccessibleResearchesCount++;
+		}
+		if (!detail->IsShadowResearch() && detail->allRequirementsAreKnown) {
+			this->statistics.validNonShadowResearchesCount++;
+			if (detail->researchLinePredecessors.size() == 0) {
+				// No predecessors = we have a "root" research (regarding our research lineage concept)
+				this->statistics.validRootNonShadowResearchesCount++;
+			}
+		}
+	}
+
+	for (int unitDefId = 0; unitDefId < this->unitDefCount; unitDefId++) {
+		bool isBuilding = false;
+		TTDetailedUnitDef *unitDetail = this->GetDetailedTrainableUnitDef(unitDefId);
+		if (!unitDetail) {
+			unitDetail = this->GetDetailedBuildingDef(unitDefId);
+			if (unitDetail) { isBuilding = true; }
+		}
+		if (unitDetail && unitDetail->IsValid()) {
+			int ageIndex = unitDetail->requiredAge - AOE_CONST_FUNC::CST_RSID_STONE_AGE; // TODO: WRONG for buildings
+			if (ageIndex < 0) { ageIndex = 0; }
+			if (ageIndex >= AGES_COUNT) { ageIndex = AGES_COUNT - 1; }
+			if (unitDetail->IsHeroOrScenarioUnit()) {
+				this->statistics.heroesCount++;
+			} else {
+				// Non-heroes
+				if (unitDetail->baseUnitId == unitDefId) { // root unit
+					if (isBuilding) {
+						this->statistics.rootBuildingUnitsCount++;
+						this->statistics.rootBuildingsCountByAge[ageIndex]++;
+					} else {
+						this->statistics.rootTrainableUnitsCount++;
+						this->statistics.rootTrainablesCountByAge[ageIndex]++;
+					}
+				}
+				if (isBuilding) {
+					this->statistics.allBuildingsCountByAge[ageIndex]++;
+					this->statistics.allBuildingUnitsCount++;
+				} else {
+					this->statistics.allTrainablesCountByAge[ageIndex]++;
+					this->statistics.allTrainableUnitsCount++;
+				}
+				if (unitDetail->unitClass == TribeAIGroupCivilian) {
+					this->statistics.villagerCount++;
+				}
+			}
+		}
+	}
+	this->myLog.append("*** Researches ***" NEWLINE);
+	this->myLog.append("- Inaccessible researches count = ");
+	this->myLog.append(std::to_string(this->statistics.inaccessibleResearchesCount));
+	this->myLog.append(NEWLINE "- Researches : number of research lineages = ");
+	this->myLog.append(std::to_string(this->statistics.validRootNonShadowResearchesCount));
+	this->myLog.append(NEWLINE "- Researches : number of valid non-shadow researches = ");
+	this->myLog.append(std::to_string(this->statistics.validRootNonShadowResearchesCount));
+	this->myLog.append(NEWLINE "*** Units ***");
+	this->myLog.append(NEWLINE "- Total number of hero units = ");
+	this->myLog.append(std::to_string(this->statistics.heroesCount));
+	this->myLog.append(" (heroes are excluded in next figures)" NEWLINE "- Total number of villager units = ");
+	this->myLog.append(std::to_string(this->statistics.villagerCount));
+	this->myLog.append(NEWLINE "- Total number of trainable units = ");
+	this->myLog.append(std::to_string(this->statistics.allTrainableUnitsCount));
+	this->myLog.append(NEWLINE "- ... By age : ");
+	for (int i = 0; i < AGES_COUNT; i++) {
+		this->myLog.append(std::to_string(this->statistics.allTrainablesCountByAge[i]));
+		if (i < AGES_COUNT - 1) {
+			this->myLog.append(", ");
+		}
+	}
+	this->myLog.append(NEWLINE "- Number of unit lineages = ");
+	this->myLog.append(std::to_string(this->statistics.rootTrainableUnitsCount));
+	this->myLog.append(NEWLINE "- ... By age : ");
+	for (int i = 0; i < AGES_COUNT; i++) {
+		this->myLog.append(std::to_string(this->statistics.rootTrainablesCountByAge[i]));
+		if (i < AGES_COUNT - 1) {
+			this->myLog.append(", ");
+		}
+	}
+	this->myLog.append(NEWLINE "- Total number of building units = ");
+	this->myLog.append(std::to_string(this->statistics.allBuildingUnitsCount));
+	this->myLog.append(NEWLINE "- ... By age : ");
+	for (int i = 0; i < AGES_COUNT; i++) {
+		this->myLog.append(std::to_string(this->statistics.allBuildingsCountByAge[i]));
+		if (i < AGES_COUNT - 1) {
+			this->myLog.append(", ");
+		}
+	}
+	this->myLog.append(NEWLINE "- Number of building lineages = ");
+	this->myLog.append(std::to_string(this->statistics.rootBuildingUnitsCount));
+	this->myLog.append(NEWLINE "- ... By age : ");
+	for (int i = 0; i < AGES_COUNT; i++) {
+		this->myLog.append(std::to_string(this->statistics.rootBuildingsCountByAge[i]));
+		if (i < AGES_COUNT - 1) {
+			this->myLog.append(", ");
+		}
+	}
+	this->myLog.append(NEWLINE "End of statistics" NEWLINE);
+}
+
+
 // Analyze tech tree and fill internal data
 bool TechTreeAnalyzer::AnalyzeTechTree() {
 	if (this->analyzeComplete) { return true; }
@@ -595,6 +743,7 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 	this->CollectTrainLocations(); // Requires dependencies/analysis to be complete because it uses IsHeroOrScenarioUnit() method.
 
 	// Debugging
+#ifdef _DEBUG
 	for (int researchId = 0; researchId < this->researchCount; researchId++) {
 		TTDetailedResearchDef *detail = this->GetDetailedResearchDef(researchId);
 		if (!detail || !detail->active) { continue; }
@@ -619,7 +768,9 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 		}
 		this->myLog.append(NEWLINE);
 	}
+#endif
 
+	this->CalculateStatistics();
 	this->analyzeComplete = true;
 	return true;
 }

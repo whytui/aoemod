@@ -810,7 +810,8 @@ std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnResearch
 	for each (TTDetailedResearchDef *childDetail in resInfo->researchDetail->allChildResearches)
 	{
 		long int childDetailResId = childDetail->GetResearchDefId();
-		if ((childDetailResId >= AOE_CONST_FUNC::CST_RSID_STONE_AGE) && (childDetailResId <= AOE_CONST_FUNC::CST_RSID_STONE_AGE)) {
+		if (childDetail->IsShadowResearch()) { continue; }
+		if ((childDetailResId >= AOE_CONST_FUNC::CST_RSID_STONE_AGE) && (childDetailResId <= AOE_CONST_FUNC::CST_RSID_IRON_AGE)) {
 			continue; // don't mess with ages
 		}
 		TTCreatorResearchInfo *child = NULL;
