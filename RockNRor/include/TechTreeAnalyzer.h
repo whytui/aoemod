@@ -31,9 +31,13 @@ public:
 	TechTreeStatistics() {
 		this->Reset();
 	}
-	int validNonShadowResearchesCount; // Number of non-shadow researches the player can manually develop
-	int validRootNonShadowResearchesCount; // Number of "root" researches = number of research series. tool/bronze/iron are 1 series of researches, axeman is 1, short+broad+longsw.+legion is 1 too, etc.
+	int nonShadowResearchesCount; // Number of non-shadow researches the player can manually develop
+	int rootNonShadowResearchesCount; // Number of "root" researches = number of research series. tool/bronze/iron are 1 series of researches, axeman is 1, short+broad+longsw.+legion is 1 too, etc.
+	int nonShadowResearchesWithoutLineageCount; // Number of researches without any predecessor/successor (like wheel, heavy transport...)
 	int inaccessibleResearchesCount; // Number of researches that could not be reached during analysis. Should be 0 if empires.dat is correctly done. Does not include "empty" researches as they have no requirement !
+	int nonShadowResearchesCountByAge[AGES_COUNT]; // age index in 0-3
+	int rootNonShadowResearchesCountByAge[AGES_COUNT]; // age index in 0-3
+	int nonShadowResearchesWithoutLineageCountByAge[AGES_COUNT]; // age index in 0-3
 
 	int allTrainableUnitsCount; // all BUT heroes
 	int allBuildingUnitsCount; // all BUT heroes
@@ -47,11 +51,15 @@ public:
 	int villagerCount; // each villager (civilian) unit (builder, farmer...) is a root unit: this has a strong impact on totals !
 
 	void Reset() {
-		this->validNonShadowResearchesCount = 0;
-		this->validRootNonShadowResearchesCount = 0;
+		this->nonShadowResearchesCount = 0;
+		this->rootNonShadowResearchesCount = 0;
+		this->nonShadowResearchesWithoutLineageCount = 0;
 		this->inaccessibleResearchesCount = 0;
 
 		for (int i = 0; i < AGES_COUNT; i++) {
+			this->nonShadowResearchesCountByAge[i] = 0;
+			this->rootNonShadowResearchesCountByAge[i] = 0;
+			this->nonShadowResearchesWithoutLineageCountByAge[i] = 0;
 			this->allTrainablesCountByAge[i] = 0;
 			this->allBuildingsCountByAge[i] = 0;
 			this->rootTrainablesCountByAge[i] = 0;

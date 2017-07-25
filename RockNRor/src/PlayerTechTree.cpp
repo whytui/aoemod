@@ -177,6 +177,20 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 }
 
 
+
+void TechTreeCreator::SetConfigFromStatistics() {
+	//ROCKNROR::crInfo.techTreeAnalyzer.statistics;
+	/* Unitlines in bronze/iron 9 6 (+slinger) (18 others from stone/tool). Only warboat is acceptable in iron but we never disable it.
+	researchlines total: 27
+	*/
+	/*	static int MIN_DISABLE_UNITLINE_COUNT = 6;
+	static int MAX_DISABLE_UNITLINE_COUNT = 12;
+	static int MIN_DISABLE_RESEARCH_COUNT = 6;
+	static int MAX_DISABLE_RESEARCH_COUNT = 13;*/
+
+}
+
+
 void TechTreeCreator::CollectResearchInfo() {
 	for (int resDefId = 0; resDefId < this->arrayResearchCount; resDefId++) {
 		TTDetailedResearchDef *detail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(resDefId);
@@ -310,39 +324,24 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 		crResInfo->techImpactsReligion = AOE_STRUCTURES::RESEARCH::DoesTechImpactReligion(crResInfo->researchDetail->techDef);
 	}
 
-	// 1 - set probability for "hardcoded" groups:  eg. storage pit iron-armors (3) should remain together
-	// WTF this implementation is poor (and won't work)
-	/*double randomProbaForArmors = RES_PROBA_STANDARD_RESEARCH;
-	const double weightForArmors = RES_WEIGHT_STANDARD_RESEARCH;
-	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
-	{
-		TTDetailedResearchDef *detail = crResInfo->researchDetail;
-		if ((crResInfo->updatedArmorClass == ATTACK_CLASS::CST_AC_BASE_MELEE) &&
-			(detail->requiredAge == AOE_CONST_FUNC::CST_RSID_IRON_AGE) &&
-			(detail->researchDef->researchLocation != AOE_CONST_FUNC::CST_UNITID_STORAGE_PIT)) {
-			crResInfo->disableProbability = randomProbaForArmors;
-			crResInfo->disableWeight = weightForArmors;
-		}
-	}*/
-
 
 #pragma message("TODO: tower shield higher proba, even iron shied ? use armor type and ancestor/child count to determine")
 
 
-	// 2 - set probability for friendly researches (temple...)
+	// Set probability for friendly researches (temple...)
 	// Temple: choose "religion level" : low/moderate/high. All temple techs proba. will be chosen in the same probability range, according to this level.
 	this->religionLevel = randomizer.GetRandomValue(0, 5);
-	double minReligionProbaRange = TT_CONST::RES_PROBA_MIN;
-	double maxReligionProbaRange = TT_CONST::RES_PROBA_MAX;
-	double weightForReligion = TT_CONST::RES_WEIGHT_STANDARD_RESEARCH;
+	double minReligionProbaRange = TT_CONFIG::RES_PROBA_MIN;
+	double maxReligionProbaRange = TT_CONFIG::RES_PROBA_MAX;
+	double weightForReligion = TT_CONFIG::RES_WEIGHT_STANDARD_RESEARCH;
 	double religionBronzeFactor = 1;
 	switch (this->religionLevel) {
 	case 0: // level 0 (min): being disable is VERY likely to happen for those techs
 		minReligionProbaRange = 0.7;
-		maxReligionProbaRange = TT_CONST::RES_PROBA_MAX;
+		maxReligionProbaRange = TT_CONFIG::RES_PROBA_MAX;
 		break;
 	case 5: // level 5 (max): player is likely to have access to all techs (good temple civ)
-		minReligionProbaRange = TT_CONST::RES_PROBA_MIN;
+		minReligionProbaRange = TT_CONFIG::RES_PROBA_MIN;
 		maxReligionProbaRange = 0.3;
 		religionBronzeFactor = 1.1;
 		break;
@@ -373,8 +372,8 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 
 	// Government center + market techs
 	this->economyLevel = randomizer.GetRandomValue(0, 3);
-	double randomProbaForEconomy = TT_CONST::RES_PROBA_STANDARD_RESEARCH;
-	double weightForEconomy = TT_CONST::RES_WEIGHT_STANDARD_RESEARCH;
+	double randomProbaForEconomy = TT_CONFIG::RES_PROBA_STANDARD_RESEARCH;
+	double weightForEconomy = TT_CONFIG::RES_WEIGHT_STANDARD_RESEARCH;
 	double economyBronzeFactor = 1.25;
 	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
 	{
@@ -382,8 +381,8 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 			(crResInfo->researchLocation == AOE_CONST_FUNC::CST_UNITID_GOVERNMENT_CENTER);
 		if ((crResInfo->disableProbability < 0) && isMarketOrGov) {
 			if (crResInfo->researchDetail->IsWheel()) {
-				crResInfo->disableProbability = TT_CONST::RES_PROBA_WHEEL;
-				crResInfo->disableWeight = TT_CONST::RES_WEIGHT_WHEEL;
+				crResInfo->disableProbability = TT_CONFIG::RES_PROBA_WHEEL;
+				crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_WHEEL;
 				continue;
 			}
 
@@ -398,12 +397,12 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 		}
 	}
 
-	// 3 - set probability for remaining researches
+	// Set probability for remaining researches
 	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
 	{
 		if (crResInfo->disableProbability < 0) {
-			crResInfo->disableProbability = TT_CONST::RES_PROBA_STANDARD_RESEARCH;
-			crResInfo->disableWeight = TT_CONST::RES_WEIGHT_STANDARD_RESEARCH;
+			crResInfo->disableProbability = TT_CONFIG::RES_PROBA_STANDARD_RESEARCH;
+			crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_RESEARCH;
 		}
 	}
 }
@@ -474,20 +473,20 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 		if (crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupPriest) {
 			if (this->religionLevel > 0) {
 				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableNever;
-				crUnitInfo->disableProbability = TT_CONST::RES_PROBA_MIN;
-				crUnitInfo->disableWeight = TT_CONST::RES_WEIGHT_STANDARD_UNIT;
+				crUnitInfo->disableProbability = TT_CONFIG::RES_PROBA_MIN;
+				crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_UNIT;
 			} else {
 				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
-				crUnitInfo->disableProbability = TT_CONST::RES_PROBA_VERY_RARE;
-				crUnitInfo->disableWeight = TT_CONST::RES_WEIGHT_HIGH_IMPACT_UNIT;
+				crUnitInfo->disableProbability = TT_CONFIG::RES_PROBA_VERY_RARE;
+				crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_HIGH_IMPACT_UNIT;
 			}
 			continue;
 		}
 		// Special: iron age "root" boats (note: pre-iron war boats can't be disabled, cf CollectUnitInfo) => fire galley, cat.trireme
 		if ((crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupWarBoat) &&
 			(crUnitInfo->unitDetail->requiredAge == AOE_CONST_FUNC::CST_RSID_IRON_AGE)) {
-			crUnitInfo->disableWeight = TT_CONST::RES_WEIGHT_STANDARD_UNIT;
-			crUnitInfo->disableProbability = TT_CONST::RES_PROBA_STANDARD_UNIT; // Useful for other upgrades (catapult trireme)
+			crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_UNIT;
+			crUnitInfo->disableProbability = TT_CONFIG::RES_PROBA_STANDARD_UNIT; // Useful for other upgrades (catapult trireme)
 			// Will force to choose among iron-age root units of same class (warboats here)
 			crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableMostlyExclusiveSameClassIron;
 			continue;
@@ -495,12 +494,12 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 
 		// Special: stone thrower and siege
 		if (crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupSiegeWeapon) {
-			crUnitInfo->disableWeight = TT_CONST::RES_WEIGHT_STANDARD_UNIT;
+			crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_UNIT;
 			if (crUnitInfo->unitDefId == AOE_CONST_FUNC::CST_UNITID_STONE_THROWER) {
 				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
-				crUnitInfo->disableProbability = TT_CONST::RES_PROBA_STANDARD_UNIT; // Useful for other upgrades (catapults)
+				crUnitInfo->disableProbability = TT_CONFIG::RES_PROBA_STANDARD_UNIT; // Useful for other upgrades (catapults)
 			} else {
-				crUnitInfo->disableProbability = TT_CONST::RES_PROBA_SPECIALIZED_UNIT;
+				crUnitInfo->disableProbability = TT_CONFIG::RES_PROBA_SPECIALIZED_UNIT;
 			}
 		}
 
@@ -522,9 +521,9 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 			// TODO: count "military" researches only ? Only those that apply to THE unit ? TODO EXCLUDE unit upgrades !
 			//int researchCountThere = bld->researchesDevelopedHere.size();
 			if (uniqueRootUnitId /*&& (researchCountThere == 0)*/) {
-				crUnitInfo->disableProbability = TT_CONST::RES_PROBA_SPECIALIZED_UNIT;
+				crUnitInfo->disableProbability = TT_CONFIG::RES_PROBA_SPECIALIZED_UNIT;
 				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
-				crUnitInfo->disableWeight = TT_CONST::RES_WEIGHT_STANDARD_UNIT; // Useful for unit upgrades
+				crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_UNIT; // Useful for unit upgrades
 			}
 		}
 	}
@@ -533,8 +532,8 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 	for each (TTCreatorUnitInfo *crUnitInfo in this->allCreatorUnitInfo)
 	{
 		if (crUnitInfo->disableProbability < 0) {
-			crUnitInfo->disableProbability = TT_CONST::RES_PROBA_STANDARD_UNIT;
-			crUnitInfo->disableWeight = TT_CONST::RES_WEIGHT_STANDARD_UNIT;
+			crUnitInfo->disableProbability = TT_CONFIG::RES_PROBA_STANDARD_UNIT;
+			crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_UNIT;
 		}
 	}
 }
@@ -576,8 +575,8 @@ void TechTreeCreator::CalcResearchesDisableScore() {
 		int imyrand = randomizer.GetRandomNonZeroPercentageValue();
 		double myrand = (double)imyrand;
 		
-		double tmpCompute = crResInfo->disableProbability * myrand * TT_CONST::RES_PROBA_IMPACT_ON_RANDOM +
-			myrand * (1 - TT_CONST::RES_PROBA_IMPACT_ON_RANDOM); // Now tmpCompute is in 0-100
+		double tmpCompute = crResInfo->disableProbability * myrand * TT_CONFIG::RES_PROBA_IMPACT_ON_RANDOM +
+			myrand * (1 - TT_CONFIG::RES_PROBA_IMPACT_ON_RANDOM); // Now tmpCompute is in 0-100
 
 		crResInfo->disableScore = tmpCompute;
 	}
@@ -594,8 +593,8 @@ void TechTreeCreator::CalcUnitsDisableScore() {
 		int imyrand = randomizer.GetRandomNonZeroPercentageValue();
 		double myrand = (double)imyrand;
 
-		double tmpCompute = crUnitInfo->disableProbability * myrand * TT_CONST::RES_PROBA_IMPACT_ON_RANDOM +
-			myrand * (1 - TT_CONST::RES_PROBA_IMPACT_ON_RANDOM); // Now tmpCompute is in 0-100
+		double tmpCompute = crUnitInfo->disableProbability * myrand * TT_CONFIG::RES_PROBA_IMPACT_ON_RANDOM +
+			myrand * (1 - TT_CONFIG::RES_PROBA_IMPACT_ON_RANDOM); // Now tmpCompute is in 0-100
 
 		crUnitInfo->disableScore = tmpCompute;
 	}
@@ -604,7 +603,7 @@ void TechTreeCreator::CalcUnitsDisableScore() {
 
 // Creates disable research effects according to disable scores that have been computed (on all researches)
 void TechTreeCreator::CreateDisableResearchesEffects() {
-	int preferredDisableResearchCount = randomizer.GetRandomValue_normal_moreFlat(TT_CONST::MIN_DISABLE_RESEARCH_COUNT, TT_CONST::MAX_DISABLE_RESEARCH_COUNT);
+	int preferredDisableResearchCount = randomizer.GetRandomValue_normal_moreFlat(TT_CONFIG::MIN_DISABLE_RESEARCH_COUNT, TT_CONFIG::MAX_DISABLE_RESEARCH_COUNT);
 	int curDisableCount = 0;
 	// disabled researches in temple count for maximum xxx in curDisableCount.
 	// Prevents temple disable researches to count too much in number in disable researches (after all, they all only concern one single unit)
@@ -649,7 +648,7 @@ void TechTreeCreator::CreateDisableResearchesEffects() {
 // Creates disable unit effects according to disable scores that have been computed (on root units)
 // If a unit(line) is selected for being disabled, then this method chooses at which level (which upgrade) the unitline becomes unavailable.
 void TechTreeCreator::CreateDisableUnitsEffects() {
-	int preferredDisableUnitCount = randomizer.GetRandomValue_normal_moreFlat(TT_CONST::MIN_DISABLE_UNITLINE_COUNT, TT_CONST::MAX_DISABLE_UNITLINE_COUNT);
+	int preferredDisableUnitCount = randomizer.GetRandomValue_normal_moreFlat(TT_CONFIG::MIN_DISABLE_UNITLINE_COUNT, TT_CONFIG::MAX_DISABLE_UNITLINE_COUNT);
 	int curDisableCount = 0;
 	while (curDisableCount < preferredDisableUnitCount) {
 		double bestScore = -1;
@@ -929,6 +928,7 @@ std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnUnit(TTD
 }
 
 
+// Copy (add) effects from internal collection (techTreeEffects) to actual tech tree object (techDef)
 void TechTreeCreator::AddEffectsToTechDef() {
 	int effectCount = this->techTreeEffects.size();
 	if (effectCount <= 0) { return; }

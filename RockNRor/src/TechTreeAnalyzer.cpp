@@ -614,10 +614,19 @@ void TechTreeAnalyzer::CalculateStatistics() {
 			this->statistics.inaccessibleResearchesCount++;
 		}
 		if (!detail->IsShadowResearch() && detail->allRequirementsAreKnown) {
-			this->statistics.validNonShadowResearchesCount++;
+			int ageIndex = detail->requiredAge - AOE_CONST_FUNC::CST_RSID_STONE_AGE; // TODO: WRONG for buildings
+			if (ageIndex < 0) { ageIndex = 0; }
+			if (ageIndex >= AGES_COUNT) { ageIndex = AGES_COUNT - 1; }
+			this->statistics.nonShadowResearchesCount++;
+			this->statistics.nonShadowResearchesCountByAge[ageIndex]++;
 			if (detail->researchLinePredecessors.size() == 0) {
 				// No predecessors = we have a "root" research (regarding our research lineage concept)
-				this->statistics.validRootNonShadowResearchesCount++;
+				this->statistics.rootNonShadowResearchesCount++;
+				this->statistics.rootNonShadowResearchesCountByAge[ageIndex]++;
+				if (detail->researchLineSuccessors.size() == 0) {
+					this->statistics.nonShadowResearchesWithoutLineageCount++; // this research is lonely (no lineage). Eg wheel, heavy transport...
+					this->statistics.nonShadowResearchesWithoutLineageCountByAge[ageIndex]++;
+				}
 			}
 		}
 	}
@@ -662,10 +671,34 @@ void TechTreeAnalyzer::CalculateStatistics() {
 	this->myLog.append("*** Researches ***" NEWLINE);
 	this->myLog.append("- Inaccessible researches count = ");
 	this->myLog.append(std::to_string(this->statistics.inaccessibleResearchesCount));
-	this->myLog.append(NEWLINE "- Researches : number of research lineages = ");
-	this->myLog.append(std::to_string(this->statistics.validRootNonShadowResearchesCount));
 	this->myLog.append(NEWLINE "- Researches : number of valid non-shadow researches = ");
-	this->myLog.append(std::to_string(this->statistics.validRootNonShadowResearchesCount));
+	this->myLog.append(std::to_string(this->statistics.nonShadowResearchesCount));
+	this->myLog.append(NEWLINE "- ... By age : ");
+	for (int i = 0; i < AGES_COUNT; i++) {
+		this->myLog.append(std::to_string(this->statistics.nonShadowResearchesCountByAge[i]));
+		if (i < AGES_COUNT - 1) {
+			this->myLog.append(", ");
+		}
+	}
+	this->myLog.append(NEWLINE "- Researches : number of research lineages (including lonely researches) = ");
+	this->myLog.append(std::to_string(this->statistics.rootNonShadowResearchesCount));
+	this->myLog.append(NEWLINE "- ... By age : ");
+	for (int i = 0; i < AGES_COUNT; i++) {
+		this->myLog.append(std::to_string(this->statistics.rootNonShadowResearchesCountByAge[i]));
+		if (i < AGES_COUNT - 1) {
+			this->myLog.append(", ");
+		}
+	}
+	this->myLog.append(NEWLINE "- Researches : number of researches without predecessor/successor = ");
+	this->myLog.append(std::to_string(this->statistics.nonShadowResearchesWithoutLineageCount));
+	this->myLog.append(NEWLINE "- ... By age : ");
+	for (int i = 0; i < AGES_COUNT; i++) {
+		this->myLog.append(std::to_string(this->statistics.nonShadowResearchesWithoutLineageCountByAge[i]));
+		if (i < AGES_COUNT - 1) {
+			this->myLog.append(", ");
+		}
+	}
+
 	this->myLog.append(NEWLINE "*** Units ***");
 	this->myLog.append(NEWLINE "- Total number of hero units = ");
 	this->myLog.append(std::to_string(this->statistics.heroesCount));

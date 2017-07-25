@@ -19,6 +19,7 @@ bool TTDetailedResearchDef::IsShadowResearch() const {
 void TTDetailedResearchDef::AddAllRequirementsFrom(TTDetailedResearchDef *other) {
 	if (!other) { return; }
 	// "all requirements": just copy everything, don't think too much...
+	this->allRequirements.insert(other);
 	for each (TTDetailedResearchDef *requirement in other->allRequirements)
 	{
 		this->allRequirements.insert(requirement);

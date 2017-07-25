@@ -58,7 +58,7 @@ public:
 };
 
 
-
+// Research-information for tech tree generator
 class TTCreatorResearchInfo {
 public:
 	TTCreatorResearchInfo() {
@@ -86,6 +86,8 @@ public:
 	bool hasBeenDisabled;
 };
 
+
+// Unit-information for tech tree generator
 class TTCreatorUnitInfo {
 public:
 	TTCreatorUnitInfo() {
@@ -117,7 +119,8 @@ public:
 };
 
 
-namespace TT_CONST {
+// Configuration for tech tree generation
+namespace TT_CONFIG {
 	static const double RES_PROBA_MIN = 0;
 	static const double RES_PROBA_MAX = 1;
 	static const double RES_WEIGHT_MIN = 0;
@@ -133,13 +136,14 @@ namespace TT_CONST {
 	static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.8; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
 
 	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.3; // computed probability counts as much as xxx% vs random.
-	static const int MIN_DISABLE_UNITLINE_COUNT = 6;
-	static const int MAX_DISABLE_UNITLINE_COUNT = 12;
-	static const int MIN_DISABLE_RESEARCH_COUNT = 6;
-	static const int MAX_DISABLE_RESEARCH_COUNT = 13;
+	static int MIN_DISABLE_UNITLINE_COUNT = 6;
+	static int MAX_DISABLE_UNITLINE_COUNT = 12;
+	static int MIN_DISABLE_RESEARCH_COUNT = 6;
+	static int MAX_DISABLE_RESEARCH_COUNT = 13;
 }
 
 
+// Class that allows creating dynamic tech tree, based on tech tree analyzer
 class TechTreeCreator {
 public:
 	TechTreeCreator() {
@@ -177,6 +181,8 @@ public:
 	void CreateRandomTechTree(STRUCT_TECH_DEF *techDef);
 
 private:
+	void SetConfigFromStatistics();
+
 	void CollectResearchInfo();
 
 	void CollectUnitInfo();
@@ -211,6 +217,7 @@ private:
 	std::list<TTCreatorResearchInfo*> CreateDisableEffectOnUnit(TTCreatorUnitInfo *unitInfo);
 	std::list<TTCreatorResearchInfo*> CreateDisableEffectOnUnit(TTDetailedUnitDef *unitDetail);
 
+	// Copy (add) effects from internal collection (techTreeEffects) to actual tech tree object (techDef)
 	void AddEffectsToTechDef();
 
 };
