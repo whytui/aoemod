@@ -20,7 +20,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_RGE_GAME_OPTIONS {
 	public:
 		float gameSpeed;
-		char isScenario; // +04
+		char isScenario; // +04. Used for new games. For other games, refer to scenarioInfo structure.
 		char scenarioName[0x80]; // +05. Scenario name, if relevant (or "").
 		char isSinglePlayer; // +85
 		char isMultiPlayer; // +86

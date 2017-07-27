@@ -145,6 +145,7 @@ void RockNRorInfo::FillResearchesToDisableFromString(long int playerId, const ch
 
 // Function to calculate conversion resistance for a giver unit from a given civ.
 // This replaces game's algorithm.
+// Use civId=0 (same as "gaia" civ) to exclude any civ bonus/malus from calculation
 float RockNRorInfo::GetConversionResistance(char civId, short int unitClass) {
 	// Standard resistances (original game)
 	// Macedonian

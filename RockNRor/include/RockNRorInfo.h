@@ -126,7 +126,9 @@ public:
 	// Resets and fills the list of researchID to disable for a player from a comma-separated list.
 	void FillResearchesToDisableFromString(long int playerId, const char *text);
 
-	// Compute conversion resistance
+	// Function to calculate conversion resistance for a giver unit from a given civ.
+	// This replaces game's algorithm.
+	// Use civId=0 (same as "gaia" civ) to exclude any civ bonus/malus from calculation
 	float GetConversionResistance(char civId, short int unitClass);
 
 	// Applies an "auto-attack policy" on all player's selected units (only for owned units !)

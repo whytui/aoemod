@@ -672,8 +672,12 @@ void RockNRorInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_PLAYER *targetPlayer = target->ptrStructPlayer;
 	AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer = actor->ptrStructPlayer;
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = target->unitDefinition;
+	
+	bool allTechs = (actorPlayer && (actorPlayer->techTreeId < 0));
+	char civIdToUse = allTechs ? 0 : targetPlayer->civilizationId; // If all techs, do NOT apply hardcoded civ bonuses
+
 	// Compute resistance
-	float resistance = ROCKNROR::crInfo.GetConversionResistance(targetPlayer->civilizationId, targetUnitDef->unitAIType);
+	float resistance = ROCKNROR::crInfo.GetConversionResistance(civIdToUse, targetUnitDef->unitAIType);
 
 	// Save computed resistance to dedicated stack record
 	_asm {
