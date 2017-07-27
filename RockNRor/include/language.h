@@ -3,7 +3,8 @@
 
 #include <string.h>
 
-// Get a text from languagex.dll or language.dll, using ROR method. See also GetLanguageDllText.
+// Uses ROR method to get a text from languagex.dll or language.dll, using ROR method. See also GetLanguageDllText.
+// As RockNRor overloads this, the stringID is searched in custom strings in priority, then in languagex/language.dll
 static void AOE_LoadStringLanguage(long int stringID, char *buffer, long int bufferSize) {
 	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 	_asm {
@@ -15,7 +16,8 @@ static void AOE_LoadStringLanguage(long int stringID, char *buffer, long int buf
 	}
 }
 
-// Get a text from languagex.dll or language.dll. If not found, uses defaultText.
+// Get a text from Custom strings, then languagex.dll or language.dll. If not found, uses defaultText.
+// Uses ROR's method, which itself is overloaded by RockNRor (which is why "custom" strings are used in priority)
 static void GetLanguageDllText(long int stringID, char *buffer, long int bufferSize, char *defaultText) {
 	*buffer = 0;
 	if (stringID < 100) { return; } // First valid string is 101
@@ -25,7 +27,8 @@ static void GetLanguageDllText(long int stringID, char *buffer, long int bufferS
 	}
 }
 
-// Get a text from languagex.dll or language.dll. If not found, returns "".
+// Get a text from Custom strings, then languagex.dll or language.dll. If not found, returns "".
+// Uses ROR's method, which itself is overloaded by RockNRor (which is why "custom" strings are used in priority)
 static std::string GetLanguageDllText(long int stringID) {
 	char buffer[100];
 	buffer[0] = 0;

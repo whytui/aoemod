@@ -299,6 +299,7 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 		ttcResearchInfo->researchDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(resDefId);
 		if (ttcResearchInfo->researchDetail) {
 			ttcResearchInfo->internalName = ttcResearchInfo->researchDetail->internalName;
+			ttcResearchInfo->langName = ttcResearchInfo->researchDetail->langName;
 		}
 		// ttcResearchInfo->researchDetail should always be valid: all IDs from this->eligible* collections should be valid
 		this->allCreatorResearchInfo.push_back(ttcResearchInfo);
@@ -309,6 +310,7 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 		ttcResearchInfo->researchDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(resDefId);
 		if (ttcResearchInfo->researchDetail) {
 			ttcResearchInfo->internalName = ttcResearchInfo->researchDetail->internalName;
+			ttcResearchInfo->langName = ttcResearchInfo->researchDetail->langName;
 		}
 		// ttcResearchInfo->researchDetail should always be valid: all IDs from this->eligible* collections should be valid
 		this->allCreatorResearchInfo.push_back(ttcResearchInfo);
@@ -420,6 +422,7 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 			ttcUnitInfo->unitDetail = trainableDetail;
 			ttcUnitInfo->trainLocation = trainableDetail->GetTrainLocation();
 			ttcUnitInfo->internalName = trainableDetail->internalName;
+			ttcUnitInfo->langName = trainableDetail->langName;
 			for each (long int srcResDefId in trainableDetail->researchIdsThatEnableMe)
 			{
 				if (ttcUnitInfo->sourceResearchId == -1) {
@@ -433,6 +436,7 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 			ttcUnitInfo->unitDetail = ttcBldInfo;
 			if (ttcBldInfo) {
 				ttcUnitInfo->internalName = ttcBldInfo->internalName;
+				ttcUnitInfo->langName = ttcBldInfo->langName;
 			}
 		} 
 		assert(ttcUnitInfo->unitDetail);
@@ -446,6 +450,7 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 			ttcUnitInfo->unitDetail = trainableDetail;
 			ttcUnitInfo->trainLocation = trainableDetail->GetTrainLocation();
 			ttcUnitInfo->internalName = trainableDetail->internalName;
+			ttcUnitInfo->langName = trainableDetail->langName;
 			for each (long int srcResDefId in trainableDetail->researchIdsThatEnableMe)
 			{
 				if (ttcUnitInfo->sourceResearchId == -1) {
@@ -459,6 +464,7 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 			ttcUnitInfo->unitDetail = ttcBldInfo;
 			if (ttcBldInfo) {
 				ttcUnitInfo->internalName = ttcBldInfo->internalName;
+				ttcUnitInfo->langName = ttcBldInfo->langName;
 			}
 		}
 		this->allCreatorUnitInfo.push_back(ttcUnitInfo);
@@ -889,6 +895,7 @@ std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnUnit(TTC
 		srcResInfo->researchDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(sourceResearchId);
 		if (srcResInfo->researchDetail) {
 			srcResInfo->internalName = srcResInfo->researchDetail->internalName;
+			srcResInfo->langName = srcResInfo->researchDetail->langName;
 		}
 		// newInfo->researchDetail should always be valid: all IDs from this->eligible* collections should be valid
 		this->allCreatorResearchInfo.push_back(srcResInfo);

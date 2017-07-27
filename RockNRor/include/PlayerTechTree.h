@@ -72,9 +72,11 @@ public:
 		this->disableScore = 0;
 		this->hasBeenDisabled = false;
 		this->internalName = "";
+		this->langName = "";
 	}
 	long int researchId;
 	std::string internalName;
+	std::string langName;
 	double disableProbability; // 0-1 score. -1 means "not set"
 	double disableWeight; // 0-1 score. The weight (impact) if this research gets disabled
 	double disableScore; // Used to decide which research to disable in tech tree
@@ -102,10 +104,12 @@ public:
 		this->hasBeenDisabledDirectly = false;
 		this->hasADisabledChild = false;
 		this->internalName = "";
+		this->langName = "";
 		this->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableNormal;
 	}
 	long int unitDefId;
 	std::string internalName;
+	std::string langName;
 	double disableProbability; // 0-1 score. -1 means "not set"
 	double disableWeight; // 0-1 score. The weight (impact) if this research gets disabled
 	double disableScore; // Used to decide which research to disable in tech tree

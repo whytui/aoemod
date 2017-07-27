@@ -34,6 +34,10 @@ bool TechTreeAnalyzer::ReadRawDataFromDat() {
 		assert(detail != NULL);
 		if (resDef) {
 			detail->internalName = std::string((resDef->researchName != NULL) ? resDef->researchName : "");
+			detail->langName = GetResearchLocalizedName((short int)detail->GetResearchDefId());
+			if (detail->langName.empty()) {
+				detail->langName = detail->internalName;
+			}
 			detail->researchDef = resDef;
 			detail->techDef = global->GetTechDef(resDef->technologyId);
 			detail->allRequirementsAreKnown = false;
@@ -201,9 +205,9 @@ void TechTreeAnalyzer::MarkBuildingAsAvailable(long int unitDefId) {
 			this->myLog.append("[INFO] Research #");
 			this->myLog.append(std::to_string(initiateResearchDetail->GetResearchDefId()));
 			this->myLog.append(" (");
-			this->myLog.append(initiateResearchDetail->internalName);
+			this->myLog.append(initiateResearchDetail->langName);
 			this->myLog.append(") is triggered by building '");
-			this->myLog.append(detailBld->internalName);
+			this->myLog.append(detailBld->langName);
 			this->myLog.append("' but has requirements. This is normal for building enablers (also enabled by bld of same kind)." NEWLINE);
 		}
 
@@ -229,7 +233,7 @@ void TechTreeAnalyzer::MarkBuildingAsAvailable(long int unitDefId) {
 			this->myLog.append("Research #");
 			this->myLog.append(std::to_string(initiateResearchDetail->GetResearchDefId()));
 			this->myLog.append(" / ");
-			this->myLog.append(initiateResearchDetail->internalName);
+			this->myLog.append(initiateResearchDetail->langName);
 			this->myLog.append(" : all requirements are known (from building #");
 			this->myLog.append(std::to_string(detailBld->unitDefId));
 			this->myLog.append(")" NEWLINE);
@@ -239,7 +243,7 @@ void TechTreeAnalyzer::MarkBuildingAsAvailable(long int unitDefId) {
 		this->myLog.append("Building #");
 		this->myLog.append(std::to_string(detailBld->unitDefId));
 		this->myLog.append(" / ");
-		this->myLog.append(detailBld->internalName);
+		this->myLog.append(detailBld->langName);
 		this->myLog.append(" is now available." NEWLINE);
 	}
 
@@ -274,7 +278,7 @@ void TechTreeAnalyzer::MarkTrainableUnitAsAvailable(long int unitDefId) {
 	this->myLog.append("Unit #");
 	this->myLog.append(std::to_string(detailTrainable->unitDefId));
 	this->myLog.append(" / ");
-	this->myLog.append(detailTrainable->internalName);
+	this->myLog.append(detailTrainable->langName);
 	this->myLog.append(" is now available." NEWLINE);
 }
 
@@ -362,7 +366,7 @@ int TechTreeAnalyzer::EvaluateRequiredResearchesSimple() {
 			this->myLog.append("Research #");
 			this->myLog.append(std::to_string(detail->GetResearchDefId()));
 			this->myLog.append(" / ");
-			this->myLog.append(detail->internalName);
+			this->myLog.append(detail->langName);
 			this->myLog.append(" : all requirements are known =>");
 			for each (TTDetailedResearchDef *reqDetail in detail->allRequirementsExcludingAges)
 			{
@@ -399,7 +403,7 @@ int TechTreeAnalyzer::CollectUnreachableResearches() {
 		this->myLog.append("Warning: unreachable research #");
 		this->myLog.append(std::to_string(researchId));
 		this->myLog.append(" / ");
-		this->myLog.append(detail->internalName);
+		this->myLog.append(detail->langName);
 		this->myLog.append(" dep=> [");
 		for each (auto req in detail->directRequirements)
 		{
@@ -784,7 +788,7 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 		this->myLog.append("Research #");
 		this->myLog.append(std::to_string(researchId));
 		this->myLog.append(" / ");
-		this->myLog.append(detail->internalName);
+		this->myLog.append(detail->langName);
 		this->myLog.append(" {age ");
 		this->myLog.append(std::to_string(detail->requiredAge));
 		this->myLog.append("} dep=> [");

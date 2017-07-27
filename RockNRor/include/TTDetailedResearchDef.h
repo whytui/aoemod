@@ -6,6 +6,7 @@
 #include <AOE_struct_research_def.h>
 #include <AOE_struct_tech_def.h>
 #include "researches.h"
+#include "language.h"
 
 
 #pragma once
@@ -23,6 +24,7 @@ public:
 	TTDetailedUnitDef() {
 		this->unitDefId = -1;
 		this->internalName = "";
+		this->langName = "";
 		this->isAvailableImmediately = false;
 		this->isAvailableAfterAnalysis = false;
 		this->baseUnitId = -1;
@@ -31,6 +33,7 @@ public:
 	}
 	long int unitDefId;
 	std::string internalName;
+	std::string langName;
 	bool isAvailableImmediately; // True if unit is available at game start.
 	bool isAvailableAfterAnalysis; // Used in analysis phase: set to true when a "researchIdsThatEnableMe" is ready (building can be built at this stage).
 	short int requiredAge; // -1 or an "age" research ID
@@ -47,7 +50,8 @@ public:
 	// Safely sets internal name from unit definition.
 	void SetNameFromDefinition(STRUCT_UNITDEF_BASE *unitDef) {
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->ptrUnitName) {
-			this->internalName = unitDef->ptrUnitName; 
+			this->internalName = unitDef->ptrUnitName;
+			this->langName = GetLanguageDllText(unitDef->languageDLLID_Name);
 		} else { 
 			this->internalName = "";
 		}
@@ -122,6 +126,7 @@ public:
 		this->active = false;
 		this->researchDefId = researchDefId;
 		this->internalName = "";
+		this->langName = "";
 		this->requiredAge = (AOE_CONST_FUNC::TECHNOLOGIES) - 1;
 		this->researchDef = NULL;
 		this->techDef = NULL;
@@ -134,6 +139,7 @@ private:
 	long int researchDefId; // Id of "this" research definition. Do not modify.
 public:
 	std::string internalName; // Research internal name, read from research definition.
+	std::string langName; // Name from language file
 	bool active; // True if initialized and if researchDef is valid.
 	bool hasValidEffect; // True if the research has a valid effect. Warning, an "empty" research is still useful to handle dependencies !
 	short int requiredAge; // -1 or an "age" research ID

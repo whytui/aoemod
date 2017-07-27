@@ -2,6 +2,12 @@
 // French
 // Screens are developed for english language, some label may not display well in other languages (if strings are too long)
 
+
+[7045] Fix a translation error in original language file
+Travail des métaux
+
+
+
 [42000] RockNRor title
 RockNRor
 
@@ -16,7 +22,7 @@ Debug message system initialized.
 [42002]
 WARNING: Some features are not enabled in game executable. See RockNRor.log file.
 [42003]
-ERROR: there are more civs in RockNRor_civs.xml than in empires.dat. This may cause game crashes !
+ERREUR: Il y a plus de civilisations dans RockNRor_civs.xml que dans empires.dat. Cela peut causer des plantages !
 [42004] // Can't write to file
 ERROR: cannot write to
 [42005] // Can't read XML configuration file
