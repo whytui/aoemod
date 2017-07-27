@@ -1,5 +1,8 @@
 #include "../include/PlayerTechTree.h"
 
+// \r is required to display correctly in ROR editable text components
+#define NEWLINE "\r\n"
+
 namespace ROCKNROR {
 namespace STRATEGY {
 ;
@@ -126,6 +129,8 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	if (!techDef || (techDef->effectCount > 0)) { return; }
 	if (!ROCKNROR::crInfo.techTreeAnalyzer.IsReady()) { return; }
 
+	this->SetConfigFromStatistics();
+
 	this->techDefForTechTree = techDef;
 	this->arrayResearchCount = ROCKNROR::crInfo.techTreeAnalyzer.GetResearchCount();
 	this->arrayUnitDefCount = ROCKNROR::crInfo.techTreeAnalyzer.GetUnitDefCount();
@@ -171,23 +176,39 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	// carth 11 disable unit/upgrade, 8 disable tech (temple, sp...)
 	// cho 17 disable unit/upgrade, 9 disable tech (sp, ov, dock...)
 
-	// disable units: make a list of "base ids", choose an id in it, then choose an "upgrade level" to disable. So big families (infantry...) don't get higher chances of being disabled(?)
 	// Do not allow disable building at this point (except iron age towers)
-	// Set a probability of being disabled + a score (weight of being disabled) ?
 }
 
 
 
 void TechTreeCreator::SetConfigFromStatistics() {
-	//ROCKNROR::crInfo.techTreeAnalyzer.statistics;
-	/* Unitlines in bronze/iron 9 6 (+slinger) (18 others from stone/tool). Only warboat is acceptable in iron but we never disable it.
-	researchlines total: 27
-	*/
-	/*	static int MIN_DISABLE_UNITLINE_COUNT = 6;
-	static int MAX_DISABLE_UNITLINE_COUNT = 12;
-	static int MIN_DISABLE_RESEARCH_COUNT = 6;
-	static int MAX_DISABLE_RESEARCH_COUNT = 13;*/
+	if (!ROCKNROR::crInfo.techTreeAnalyzer.IsReady()) { return; }
+	// Units
+	int bronzeIronTrainableLinesCount = ROCKNROR::crInfo.techTreeAnalyzer.statistics.rootTrainablesCountByAge[2] + ROCKNROR::crInfo.techTreeAnalyzer.statistics.rootTrainablesCountByAge[3];
+	bronzeIronTrainableLinesCount++; // For slinger as we allow disabling it
+	int minDisableUnitLines = (bronzeIronTrainableLinesCount * TT_CONFIG::CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT) / 100;
+	int maxDisableUnitLines = (bronzeIronTrainableLinesCount * TT_CONFIG::CALC_MAX_DISABLE_UNITLINE_COUNT_PERCENT) / 100;
+	if (bronzeIronTrainableLinesCount < 10) {
+		minDisableUnitLines = min(3, bronzeIronTrainableLinesCount - 2);
+		maxDisableUnitLines = max(bronzeIronTrainableLinesCount - 3, 0);
+	}
+	
+	// Researches
+	// *** WARNING : at this point we disable researches individually, not using research lines !!! ***
+	int bronzeIronResearchLinesCount = ROCKNROR::crInfo.techTreeAnalyzer.statistics.rootNonShadowResearchesCountByAge[2] + ROCKNROR::crInfo.techTreeAnalyzer.statistics.rootNonShadowResearchesCountByAge[3];
+	bronzeIronResearchLinesCount -= 3; // Exclude bronze/iron age, wheel TODO should be more geenric
+	bronzeIronResearchLinesCount -= 2; // Exclude walls TODO should be more geenric
+	int minDisableResearchLines = (bronzeIronResearchLinesCount * TT_CONFIG::CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT) / 100;
+	int maxDisableResearchLines = (bronzeIronResearchLinesCount * TT_CONFIG::CALC_MAX_DISABLE_RESEARCH_COUNT_PERCENT) / 100;
+	if (bronzeIronResearchLinesCount < 10) {
+		minDisableResearchLines = min(2, bronzeIronResearchLinesCount - 3);
+		maxDisableResearchLines = max(bronzeIronResearchLinesCount - 4, 0);
+	}
 
+	TT_CONFIG::MIN_DISABLE_UNITLINE_COUNT = minDisableUnitLines;
+	TT_CONFIG::MAX_DISABLE_UNITLINE_COUNT = maxDisableUnitLines;
+	TT_CONFIG::MIN_DISABLE_RESEARCH_COUNT = minDisableResearchLines;
+	TT_CONFIG::MAX_DISABLE_RESEARCH_COUNT = maxDisableResearchLines;
 }
 
 
@@ -259,7 +280,7 @@ void TechTreeCreator::CollectUnitInfo() {
 			continue;
 		}
 		bool isPreIron = (detail->requiredAge < AOE_CONST_FUNC::CST_RSID_IRON_AGE);
-		bool isRootUnit = detail->baseUnitId == detail->unitDefId; // WRONG !
+		bool isRootUnit = detail->baseUnitId == detail->unitDefId;
 		isRootUnit = (detail->baseUnitId == detail->possibleAncestorUnitIDs.size() == 0);
 		if (isRootUnit &&
 			((detail->unitDef->unitAIType == AOE_CONST_FUNC::TribeAIGroupTradeBoat) ||
@@ -897,6 +918,7 @@ std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnUnit(TTC
 			srcResInfo->internalName = srcResInfo->researchDetail->internalName;
 			srcResInfo->langName = srcResInfo->researchDetail->langName;
 		}
+		srcResInfo->isFakeForDisableUnit = true;
 		// newInfo->researchDetail should always be valid: all IDs from this->eligible* collections should be valid
 		this->allCreatorResearchInfo.push_back(srcResInfo);
 		srcResInfo->disableProbability = 0;
@@ -954,6 +976,105 @@ void TechTreeCreator::AddEffectsToTechDef() {
 		this->techDefForTechTree->ptrEffects[curIndex].effectValue = effect.effectValue;
 		curIndex++;
 	}
+}
+
+
+std::string TechTreeCreator::GetDisabledUnitsText() const {
+	std::string result = "";
+	std::list<TTCreatorUnitInfo*> disabledUnits;
+	auto lambdaIsDisabled = [](TTCreatorUnitInfo *lambdaInfo){return lambdaInfo->hasBeenDisabled; };
+	auto it = std::find_if(this->allCreatorUnitInfo.begin(), this->allCreatorUnitInfo.end(), lambdaIsDisabled);
+	while (it != allCreatorUnitInfo.end()) {
+		TTCreatorUnitInfo *curUnit = *it;
+		disabledUnits.push_back(curUnit);
+		it = std::find_if(++it, this->allCreatorUnitInfo.end(), lambdaIsDisabled);
+	}
+
+	disabledUnits.sort([](TTCreatorUnitInfo *elem, TTCreatorUnitInfo *elem2) {
+		if (elem->trainLocation != elem2->trainLocation) { return elem->trainLocation < elem2->trainLocation; }
+		if (elem->unitDetail->baseUnitId != elem2->unitDetail->baseUnitId) { return elem->unitDetail->baseUnitId < elem2->unitDetail->baseUnitId; }
+		if (elem->unitDetail->requiredAge != elem2->unitDetail->requiredAge) { return elem->unitDetail->requiredAge < elem2->unitDetail->requiredAge; }
+		if (elem->unitDetail->possibleAncestorUnitIDs.size() != elem2->unitDetail->possibleAncestorUnitIDs.size()) { return elem->unitDetail->possibleAncestorUnitIDs.size() < elem2->unitDetail->possibleAncestorUnitIDs.size(); }
+		return elem->unitDefId < elem2->unitDefId;
+	});
+
+	int curTrainLocation = -1;
+	bool isFirst = true;
+	for (auto it2 = disabledUnits.begin(); it2 != disabledUnits.end(); it2++) {
+		TTCreatorUnitInfo *curElem = *it2;
+		if (curElem->trainLocation != curTrainLocation) {
+			if (!result.empty()) {
+				result.append(NEWLINE);
+			}
+			result += "[";
+			curTrainLocation = curElem->trainLocation;
+			TTDetailedBuildingDef *locationDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(curTrainLocation);
+			if (locationDtl && locationDtl->IsValid()) {
+				result += locationDtl->langName;
+			} else {
+				result += "Unknown";
+			}
+			result += "] => ";
+			isFirst = true;
+		}
+		if (!isFirst) {
+			result += ", ";
+		}
+		isFirst = false;
+		result += curElem->langName;
+	}
+
+	return result;
+}
+
+std::string TechTreeCreator::GetDisabledResearchesText() const {
+	std::string result = "";
+	std::list<TTCreatorResearchInfo*> disabledResearches;
+	auto lambdaIsDisabled = [](TTCreatorResearchInfo *lambdaInfo){
+		return lambdaInfo->hasBeenDisabled && !lambdaInfo->isFakeForDisableUnit && !lambdaInfo->researchDetail->IsShadowResearch();
+	};
+	auto it = std::find_if(this->allCreatorResearchInfo.begin(), this->allCreatorResearchInfo.end(), lambdaIsDisabled);
+	while (it != allCreatorResearchInfo.end()) {
+		TTCreatorResearchInfo *curResearch = *it;
+		disabledResearches.push_back(curResearch);
+		it = std::find_if(++it, this->allCreatorResearchInfo.end(), lambdaIsDisabled);
+	}
+
+	disabledResearches.sort([](TTCreatorResearchInfo *elem, TTCreatorResearchInfo *elem2) {
+		if (elem->researchLocation != elem2->researchLocation) { return elem->researchLocation < elem2->researchLocation; }
+		if (elem->researchDetail->researchDef->buttonId != elem2->researchDetail->researchDef->buttonId) { return elem->researchDetail->researchDef->buttonId < elem2->researchDetail->researchDef->buttonId; }
+		if (elem->researchDetail->requiredAge != elem2->researchDetail->requiredAge) { return elem->researchDetail->requiredAge < elem2->researchDetail->requiredAge; }
+		if (elem->researchDetail->allRequirementsExcludingAges.size() != elem2->researchDetail->allRequirementsExcludingAges.size()) { return elem->researchDetail->allRequirementsExcludingAges.size() < elem2->researchDetail->allRequirementsExcludingAges.size(); }
+		return elem->researchId < elem2->researchId;
+	});
+
+	int curResLocation = -1;
+	bool isFirst = true;
+	for (auto it2 = disabledResearches.begin(); it2 != disabledResearches.end(); it2++) {
+		TTCreatorResearchInfo *curElem = *it2;
+		if (curElem->researchLocation != curResLocation) {
+			if (!result.empty()) {
+				result.append(NEWLINE);
+			}
+			result += "[";
+			curResLocation = curElem->researchLocation;
+			TTDetailedBuildingDef *locationDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(curResLocation);
+			if (locationDtl && locationDtl->IsValid()) {
+				result += locationDtl->langName;
+			} else {
+				result += "Unknown";
+			}
+			result += "] => ";
+			isFirst = true;
+		}
+		if (!isFirst) {
+			result += ", ";
+		}
+		isFirst = false;
+		result += curElem->langName;
+	}
+
+	return result;
 }
 
 

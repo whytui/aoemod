@@ -41,6 +41,7 @@ bool CustomCivHandler::CreateInternalDataForGameWithStandardCivs() {
 
 // Init data and create tech tree for custom-civ games
 bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
+	std::string summary;
 	this->InitForCurrentGame();
 
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -68,6 +69,11 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 		STRUCT_TECH_DEF *techDef = global->technologiesInfo->GetTechDef(techTreeIndex);
 		ROCKNROR::STRATEGY::TechTreeCreator ttc;
 		ttc.CreateRandomTechTree(techDef);
+		summary += ttc.GetDisabledUnitsText();
+		summary += "\r\n";
+		summary += ttc.GetDisabledResearchesText();
+		summary += "\r\n";
+		summary += "\r\n";
 	}
 
 

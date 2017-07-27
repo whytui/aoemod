@@ -71,6 +71,7 @@ public:
 		this->techImpactsReligion = false;
 		this->disableScore = 0;
 		this->hasBeenDisabled = false;
+		this->isFakeForDisableUnit = false;
 		this->internalName = "";
 		this->langName = "";
 	}
@@ -86,6 +87,7 @@ public:
 	AOE_CONST_FUNC::ATTACK_CLASS updatedAttackClass; // Attack class the tech upgrades. None (-1) in most cases.
 	bool techImpactsReligion;
 	bool hasBeenDisabled;
+	bool isFakeForDisableUnit;
 };
 
 
@@ -118,7 +120,7 @@ public:
 	long int sourceResearchId; // ID of the research that enables me, if it exists and is unique
 	bool hasBeenDisabled;
 	bool hasBeenDisabledDirectly; // True when the unit was disabled by direct choice (not just a consequence of another research being disabled)
-	bool hasADisabledChild; // True when a child unit (an upgrade) was disabled by direct choice
+	bool hasADisabledChild; // True when a child unit (an upgrade) was disabled by direct choice. WARNING: this is only set for root units.
 	TTCreatorBaseUnitDisableBehavior rootUnitDisablePolicy;
 };
 
@@ -140,10 +142,14 @@ namespace TT_CONFIG {
 	static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.8; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
 
 	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.3; // computed probability counts as much as xxx% vs random.
-	static int MIN_DISABLE_UNITLINE_COUNT = 6;
-	static int MAX_DISABLE_UNITLINE_COUNT = 12;
-	static int MIN_DISABLE_RESEARCH_COUNT = 6;
-	static int MAX_DISABLE_RESEARCH_COUNT = 13;
+	static const int CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT = 40;
+	static const int CALC_MAX_DISABLE_UNITLINE_COUNT_PERCENT = 70;
+	static const int CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT = 20;
+	static const int CALC_MAX_DISABLE_RESEARCH_COUNT_PERCENT = 45;
+	static int MIN_DISABLE_UNITLINE_COUNT = 6; // default value, recomputed according to CALC_*
+	static int MAX_DISABLE_UNITLINE_COUNT = 12; // default value, recomputed according to CALC_*
+	static int MIN_DISABLE_RESEARCH_COUNT = 6; // default value, recomputed according to CALC_*
+	static int MAX_DISABLE_RESEARCH_COUNT = 13; // default value, recomputed according to CALC_*
 }
 
 
@@ -183,6 +189,10 @@ public:
 
 	// Create a random tech tree (list of effects) on provided TechDef (should be initially empty).
 	void CreateRandomTechTree(STRUCT_TECH_DEF *techDef);
+
+	std::string GetDisabledUnitsText() const;
+
+	std::string GetDisabledResearchesText() const;
 
 private:
 	void SetConfigFromStatistics();
