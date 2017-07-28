@@ -138,7 +138,7 @@ namespace TT_CONFIG {
 	static const double RES_PROBA_SPECIALIZED_UNIT = 0.6; // "disable probability" for a unit which is slighly more rare than standard, like ballista (quite often disabled).
 	static const double RES_PROBA_WHEEL = 0.05; // "disable probability" for Wheel research
 	static const double RES_WEIGHT_WHEEL = 0.9; // "disable weight" for Wheel research
-	static const double RES_PROBA_VERY_RARE = 0.08; // Disable probability for unit that must be disabled on very rare occasions: priests, stone thrower, hoplite...
+	static const double RES_PROBA_VERY_RARE = 0.07; // Disable probability for unit that must be disabled on very rare occasions: priests, stone thrower, hoplite...
 	static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.8; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
 
 	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.3; // computed probability counts as much as xxx% vs random.
@@ -193,6 +193,8 @@ public:
 	std::string GetDisabledUnitsText() const;
 
 	std::string GetDisabledResearchesText() const;
+
+	std::string GetCivBonusText() const;
 
 private:
 	void SetConfigFromStatistics();

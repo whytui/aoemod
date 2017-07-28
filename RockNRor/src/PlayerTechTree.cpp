@@ -365,7 +365,7 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 		break;
 	case 5: // level 5 (max): player is likely to have access to all techs (good temple civ)
 		minReligionProbaRange = TT_CONFIG::RES_PROBA_MIN;
-		maxReligionProbaRange = 0.3;
+		maxReligionProbaRange = 0.2;
 		religionBronzeFactor = 1.1;
 		break;
 	case 1:
@@ -1074,6 +1074,11 @@ std::string TechTreeCreator::GetDisabledResearchesText() const {
 		result += curElem->langName;
 	}
 
+	return result;
+}
+
+std::string TechTreeCreator::GetCivBonusText() const {
+	std::string result = "";
 	return result;
 }
 

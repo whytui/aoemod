@@ -27,6 +27,8 @@ public:
 		this->ResetPlayers();
 	}
 
+	std::string lastGenerationSummary;
+
 	// Init data for standard games (using standard civs/tech tree)
 	bool CreateInternalDataForGameWithStandardCivs();
 
@@ -42,6 +44,7 @@ public:
 
 	// Reset all players data
 	void ResetPlayers() {
+		this->lastGenerationSummary.clear();
 		for (int i = 0; i < 9; i++) {
 			this->playersInfo[i].ResetAndInit(i, -1, -1);
 		}
@@ -57,6 +60,8 @@ public:
 	// Initialize each player data for current (or new) game
 	// Sets various info such as civId, techTreeId, isActive
 	void InitForCurrentGame();
+
+	void WriteSummaryToScenarioInstructions();
 
 private:
 	ROCKNROR::STRATEGY::CustomPlayerInfo playersInfo[9];

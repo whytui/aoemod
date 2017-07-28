@@ -1176,11 +1176,10 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 	// TEST
 #ifdef _DEBUG
 	bool useFakeCiv = true;
-	ROCKNROR::CUSTOMCIV::CustomCivHandler h;
 	if (useFakeCiv) {
-		h.CreateFakeRandomCivsForAllPlayers();
+		this->customCivHandler.CreateFakeRandomCivsForAllPlayers();
 	} else {
-		h.CreateInternalDataForGameWithStandardCivs();
+		this->customCivHandler.CreateInternalDataForGameWithStandardCivs();
 	}
 #endif
 
@@ -1282,6 +1281,11 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 	// Strategy
 	for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
 		ROCKNROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(playerId));
+	}
+
+	// Custom civs
+	if (!this->customCivHandler.lastGenerationSummary.empty()) {
+		this->customCivHandler.WriteSummaryToScenarioInstructions();
 	}
 
 	return true;

@@ -1,6 +1,10 @@
 #include "../include/CustomCiv.h"
 
 
+// \r is required to display correctly in ROR editable text components
+#define NEWLINE "\r\n"
+
+
 namespace ROCKNROR {
 	namespace CUSTOMCIV {
 ;
@@ -41,7 +45,6 @@ bool CustomCivHandler::CreateInternalDataForGameWithStandardCivs() {
 
 // Init data and create tech tree for custom-civ games
 bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
-	std::string summary;
 	this->InitForCurrentGame();
 
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -69,15 +72,41 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 		STRUCT_TECH_DEF *techDef = global->technologiesInfo->GetTechDef(techTreeIndex);
 		ROCKNROR::STRATEGY::TechTreeCreator ttc;
 		ttc.CreateRandomTechTree(techDef);
-		summary += ttc.GetDisabledUnitsText();
-		summary += "\r\n";
-		summary += ttc.GetDisabledResearchesText();
-		summary += "\r\n";
-		summary += "\r\n";
+		this->lastGenerationSummary += "Pl#";
+		this->lastGenerationSummary += std::to_string(playerId);
+		this->lastGenerationSummary += " (";
+		this->lastGenerationSummary += player->playerName_length16max;
+		this->lastGenerationSummary += ")" NEWLINE "Unavailable units:" NEWLINE;
+		this->lastGenerationSummary += ttc.GetDisabledUnitsText();
+		this->lastGenerationSummary += NEWLINE "Unavailable researches:" NEWLINE;
+		this->lastGenerationSummary += ttc.GetDisabledResearchesText();
+		this->lastGenerationSummary += NEWLINE NEWLINE;
 	}
 
-
 	return true;
+}
+
+
+void CustomCivHandler::WriteSummaryToScenarioInstructions() {
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return; }
+
+	char **ptrToUse = &global->scenarioInformation->scenarioTips;
+
+	if (global->scenarioInformation && global->scenarioInformation->IsCheckSumValidForAScenarioInfoClass()) {
+		std::string instructions = "";
+		if (*ptrToUse) {
+			instructions = std::string(*ptrToUse);
+			instructions.append(NEWLINE NEWLINE);
+			AOEFree(*ptrToUse);
+			*ptrToUse = NULL;
+		}
+		instructions.append(this->lastGenerationSummary);
+		long int size = instructions.size() + 1;
+		*ptrToUse = (char*)AOEAlloc(size);
+		(*ptrToUse)[size - 1] = 0;
+		strcpy_s(*ptrToUse, size, instructions.c_str());
+	}
 }
 
 

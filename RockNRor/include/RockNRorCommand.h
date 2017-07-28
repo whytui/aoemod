@@ -88,7 +88,7 @@ public:
 	~RockNRorCommand();
 
 private:
-	//const float distanceToConsiderVeryClose = 1.0; // Distance (added to range) under which a target is considered "within range". Please leave this > 0.
+	ROCKNROR::CUSTOMCIV::CustomCivHandler customCivHandler;
 
 	// UpdatedValue: if <0, it is ignored
 	void UpdateWorkRateWithMessage(short int DATID, float updatedValue);
