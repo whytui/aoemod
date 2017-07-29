@@ -178,6 +178,7 @@ public:
 	std::list<TTCreatorResearchInfo*> allCreatorResearchInfo;
 	std::list<TTCreatorUnitInfo*> allCreatorUnitInfo;
 	std::list<STRUCT_TECH_DEF_EFFECT> techTreeEffects;
+	std::set<GLOBAL_UNIT_AI_TYPES> classesWithBonus; // Unit classes that benefit from a civ bonus
 
 	void Reset() {
 		this->techDefForTechTree = NULL;
@@ -195,6 +196,7 @@ public:
 		this->totalDisableWeight = 0;
 		this->computedMeanWeight = 0;
 		this->bonusText = "";
+		this->classesWithBonus.clear();
 	}
 
 	// Create a random tech tree (list of effects) on provided TechDef (should be initially empty).

@@ -766,12 +766,14 @@ void TechTreeCreator::CalcRandomCivBonus() {
 	this->computedMeanWeight = weightMean;
 
 	// TODO fix and use weight evaluation
-
 	int bonusCount = randomizer.GetRandomValue_normal_moderate(2, 4);
 	this->bonusText.clear();
 	double bonusWeight = 0;
 	for (int i = 0; i < bonusCount; i++) {
 		bonusWeight += this->CreateOneBonus();
+		if (bonusWeight > this->totalDisableWeight) { 
+			break; // TEST
+		}
 	}
 }
 
@@ -779,10 +781,28 @@ void TechTreeCreator::CalcRandomCivBonus() {
 // Create one civ bonus
 double TechTreeCreator::CreateOneBonus() {
 	double result = 0;
+	std::map<GLOBAL_UNIT_AI_TYPES, int> unitLinesByUnitClass;
+	for (int i = 0; i <= GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorse; i++) {
+		unitLinesByUnitClass[(GLOBAL_UNIT_AI_TYPES)i] = 0;
+	}
+
+	// Get total number of units for each class
+	for (int unitDefId = 0; unitDefId < this->arrayUnitDefCount; unitDefId++) {
+		// Remark: excluding buildings here
+		TTDetailedTrainableUnitDef *detail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(unitDefId);
+		if (!detail || detail->IsHeroOrScenarioUnit() || !detail->unitDef) { continue; }
+		TTCreatorUnitInfo *crUnitInfo = this->GetCrUnitInfo(unitDefId);
+		if (crUnitInfo && crUnitInfo->hasBeenDisabled) { continue; }
+		// crUnitInfo may be NULL for non-eligible units: e.g. clubman...
+		if ((detail->baseUnitId == detail->unitDefId) && (detail->unitClass >= 0)) {
+			unitLinesByUnitClass[detail->unitClass]++;
+		}
+	}
+
+	
 	std::map<GLOBAL_UNIT_AI_TYPES, double> weightByUnitClass;
-	// TODO check units are available for each class
 	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, 0.35));
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.1));
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.2));
 	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, 0.55));
 	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, 0.4));
 	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.)); //?
@@ -790,7 +810,8 @@ double TechTreeCreator::CreateOneBonus() {
 	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, 0.4));
 	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier, 0.55));
 	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher, 0.7));
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier, 0.4)); // cavalry
+	// TODO: for TribeAIGroupMountedSoldier, treat unit by unit ?
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier, 0.4)); // cavalry+scout+camel
 	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx, 0.5));
 	if (this->religionLevel > 3) {
 		// Exclude bonus for priest for civs with bad temple. For religion levels 4-5 only.
@@ -806,6 +827,21 @@ double TechTreeCreator::CreateOneBonus() {
 	
 	// TribeAIGroupUnusedHealer => just to improve medecine ?
 	// TribeAIGroupUnused_Farm => just to improve production ?
+
+	// Remove from list classes that already benefit from a civ bonus
+	// Also remove classes with no unit (might have been disabled)
+	for (auto iter = weightByUnitClass.begin(); iter != weightByUnitClass.end();) {
+		GLOBAL_UNIT_AI_TYPES curClass = (*iter).first;
+		auto ittmp = std::find(this->classesWithBonus.begin(), this->classesWithBonus.end(), curClass);
+		bool toRemove = (ittmp != this->classesWithBonus.end()); // If already a bonus, remove
+		toRemove |= (unitLinesByUnitClass[curClass] == 0); // If no impacted unit, remove too
+		if (toRemove) {
+			// Found: current unit class already got a bonus, exclude from "eligible" for this round
+			weightByUnitClass.erase(iter++);
+		} else {
+			iter++;
+		}
+	}
 
 	int bestRandom = -1;
 	std::pair<GLOBAL_UNIT_AI_TYPES, double> bestElem;
@@ -836,8 +872,8 @@ double TechTreeCreator::CreateOneBonus() {
 		(chosenClass == TribeAIGroupFootSoldier) || (chosenClass == TribeAIGroupMountedSoldier) ||
 		(chosenClass == TribeAIGroupPhalanx);
 
-	bool isMilitary = (isRanged || isMelee);
 	bool isPriest = (chosenClass == TribeAIGroupPriest);
+	bool isMilitary = (isRanged || isMelee ||isPriest);
 
 
 	std::map<TECH_UNIT_ATTRIBUTES, double> weightByAttribute;
@@ -845,15 +881,17 @@ double TechTreeCreator::CreateOneBonus() {
 	// TODO: complex, must be unit-per unit
 	//weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ADD_COST_AMOUNT, 0.5));
 	if (isMilitary) {
-		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ARMOR, 0.5));
+		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ARMOR, 0.55));
 		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ATTACK, 0.5));
 		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ATTACK_RELOAD_TIME, 0.5));
 	}
 	if (isRanged) {
 		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_RANGE, 0.5)); // + LOS
-		// TUA_INTELLIGENT_PROJECTILE ??
 	}
-	if ((chosenClass != TribeAIGroupBuilding) && (chosenClass != TribeAIGroupUnused_Tower)) {
+	// add TUA_INTELLIGENT_PROJECTILE ??
+	// Note: avoid speed bonus on fast archers
+	if ((chosenClass != TribeAIGroupBuilding) && (chosenClass != TribeAIGroupUnused_Tower) &&
+		(chosenClass != TribeAIGroupHorseArcher) && (chosenClass != TribeAIGroupChariotArcher)) {
 		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_SPEED, 0.6));
 	}
 	if ((chosenClass == TribeAIGroupCivilian) || (chosenClass == TribeAIGroupFishingBoat)) {
@@ -872,9 +910,9 @@ double TechTreeCreator::CreateOneBonus() {
 	}
 	TECH_UNIT_ATTRIBUTES chosenAttr = bestAttrElem.first;
 	double chosenAttrWeight = bestAttrElem.second;
-	result = (chosenWeight + chosenAttrWeight) / 2;
 	weightByAttribute.clear();
 	const char *className = GetUnitClassName(chosenClass);
+	this->classesWithBonus.insert(chosenClass);
 
 	float rndMultiplier = 1 + (((float)randomizer.GetRandomValue_normal_moderate(10, 25)) / 100.0f);
 
@@ -896,6 +934,7 @@ double TechTreeCreator::CreateOneBonus() {
 		this->bonusText += className;
 		this->bonusText += NEWLINE;
 	}
+
 	if (chosenAttr == TUA_RANGE) { // Range and line of sight
 		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 		newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD;
@@ -906,6 +945,7 @@ double TechTreeCreator::CreateOneBonus() {
 		if ((chosenClass == TribeAIGroupSiegeWeapon) || (chosenClass == TribeAIGroupPriest)) {
 			if (rndMultiplier > 1.175) {
 				newEffect.effectValue = 2;
+				chosenAttrWeight += 0.1;
 			}
 		}
 		techTreeEffects.push_back(newEffect);
@@ -930,10 +970,6 @@ double TechTreeCreator::CreateOneBonus() {
 			}
 		}
 		techTreeEffects.push_back(newEffect2);
-	}
-
-	if (chosenAttr == TUA_RESOURCE_CAPACITY) { // fishing ships, villager (pick one only !)
-		// TODO
 	}
 
 	if (chosenAttr == TUA_ARMOR) {
@@ -968,6 +1004,7 @@ double TechTreeCreator::CreateOneBonus() {
 			this->bonusText += className;
 			this->bonusText += NEWLINE;
 		} else {
+			int attackValue = 1;
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 			newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD;
 			newEffect.effectAttribute = chosenAttr;
@@ -979,21 +1016,24 @@ double TechTreeCreator::CreateOneBonus() {
 				newEffect.effectClass = -1;
 				newEffect.effectUnit = CST_UNITID_STONE_THROWER; // TODO (hardcoded)
 				useMeleeAttack = true; // should guess from unitdef
+				attackValue = 5; // +1 would be ridiculous for siege.
 			}
 			if (useMeleeAttack) {
-				newEffect.SetAttackOrArmor(ATTACK_CLASS::CST_AC_BASE_MELEE, 1);
+				newEffect.SetAttackOrArmor(ATTACK_CLASS::CST_AC_BASE_MELEE, attackValue);
 				assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_MELEE);
-				assert(newEffect.GetValue() == 1);
+				assert(newEffect.GetValue() == attackValue);
 			} else {
 				if (chosenClass != TribeAIGroupSiegeWeapon) {
 					// TODO: add weight when improving attack for non-siege range unit
 				}
-				newEffect.SetAttackOrArmor(ATTACK_CLASS::CST_AC_BASE_PIERCE, 1);
+				newEffect.SetAttackOrArmor(ATTACK_CLASS::CST_AC_BASE_PIERCE, attackValue);
 				assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_PIERCE);
-				assert(newEffect.GetValue() == 1);
+				assert(newEffect.GetValue() == attackValue);
 			}
 			techTreeEffects.push_back(newEffect);
-			this->bonusText += "+1 ";
+			this->bonusText += "+";
+			this->bonusText += std::to_string(attackValue);
+			this->bonusText += " ";
 			this->bonusText += GetTechUnitAttributeName(chosenAttr);
 			this->bonusText += " for class ";
 			this->bonusText += className;
@@ -1031,13 +1071,17 @@ double TechTreeCreator::CreateOneBonus() {
 			this->bonusText += NEWLINE;
 		}
 	}
-	if (chosenAttr == TUA_RESOURCE_CAPACITY) {
+
+	if (chosenAttr == TUA_RESOURCE_CAPACITY) { // fishing ships, villager (pick one only !)
+		// Improve work rate too
 		// TODO
 	}
+
 	if (chosenAttr == TUA_ADD_COST_AMOUNT) {
 		// TODO
 	}
 
+	result = (chosenWeight + chosenAttrWeight) / 2;
 	return result;
 }
 
