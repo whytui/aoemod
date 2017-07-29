@@ -68,6 +68,11 @@ bool DoesTechImpactReligion(STRUCT_TECH_DEF *techDef);
 // Returns true if technology affects villager speed. Wheel and Jihad should do ! (+some tech trees)
 bool DoesTechAffectCivilianSpeed(STRUCT_TECH_DEF *techDef);
 
+// Returns true if technology appears to be 'architecture' (improve buildings and walls HP, builder work rate)
+bool HasArchitectureEffects(STRUCT_TECH_DEF *techDef);
+
+// Returns true if technology improves lumberjacks AND improves range/LOS for almost all range units (=woodworking-like tech)
+bool HasWoodWorkingAndImproveRangeEffects(STRUCT_TECH_DEF *techDef);
 
 }
 }

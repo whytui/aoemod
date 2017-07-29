@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <string.h>
 #include <mystrings.h>
+#include <AOE_empires_dat_concept_names.h>
 #include "CustomPopupBase.h"
 #include "RockNRorCommon.h"
 #include "RockNRorCommand.h"

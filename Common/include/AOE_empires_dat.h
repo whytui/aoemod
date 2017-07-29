@@ -110,7 +110,7 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_POPULATION_HEADROOM = 4,
 		CST_RES_BASIC_RESOURCE_COUNT = 4, // many locations use these 4 resources, including AI structures. Put after pop headroom for practical debugging display.
 		CST_RES_ORDER_UNKNOWN_05 = 5, // ?
-		CST_RES_ORDER_CURRENT_AGE = 6, // TO CONFIRM
+		CST_RES_ORDER_CURRENT_AGE = 6, // Set (NOT increased) in each xxx age technology. Stone=1, Iron=4
 		CST_RES_ORDER_RELICS = 7, // Number of owned relics
 		CST_RES_ORDER_UNKNOWN_08_TRADE_BONUS = 8, // Trade bonus ? Supposed to have an impact on trading (trade workshop gives 10 of this !)
 		CST_RES_ORDER_TRADE_GOODS = 9, // The trade goods amount we can see in docks. Only impacts other players (that trade) ! Cf 0x4F8FC2.
@@ -216,15 +216,9 @@ namespace AOE_CONST_FUNC {
 		CST_AC_COUNT
 	};
 
-	static const char *attackClassNames[] = { "BallistaVsBuildings", "ArchersWeakness", "", "Pierce", "Melee", "" /*5*/,
-		"CatapultsVsBuildings", "PriestWeakness", "CavalryWeakness", "InfantryWeakness", "Siegecraft", "", "AnimalAttack"};
 	// Returns true if attack class is a standard one (like base melee/piercee + "standard" siege weapons attacks), false if it represents some bonus/malus
 	static bool IsStandardAttack(ATTACK_CLASS a) {
 		return (a == CST_AC_BASE_PIERCE) || (a == CST_AC_BASE_MELEE) || (a == CST_AC_BALLISTA_ON_BUILDINGS) || (a == CST_AC_CATAPULTS_ON_BUILDINGS);
-	}
-	static const char * GetAttackClassName(ATTACK_CLASS a) {
-		if ((a < 0) || (a >= CST_AC_COUNT)) { return ""; }
-		return attackClassNames[a];
 	}
 
 	// Refer to 0x4EBB10 to view implementation

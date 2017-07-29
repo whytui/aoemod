@@ -174,6 +174,12 @@ public:
 
 	// Returns true if this research is wheel. We try to be as much generic as possible.
 	bool IsWheel() const;
+
+	// Returns true if this research is architecture. We try to be as much generic as possible.
+	bool IsArchitecture() const;
+
+	// Returns true if the research is a "wood working"-like tech: improves lumberjack carry capacity+work rate + improves range/LOS for almost all range units.
+	bool IsWoodWorkingAndRange() const;
 };
 
 

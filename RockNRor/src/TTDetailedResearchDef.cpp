@@ -83,5 +83,23 @@ bool TTDetailedResearchDef::IsWheel() const {
 }
 
 
+// Returns true if this research is architecture. We try to be as much generic as possible.
+bool TTDetailedResearchDef::IsArchitecture() const {
+	if (!this->active) { return false; }
+	if (this->requiredAge != AOE_CONST_FUNC::CST_RSID_BRONZE_AGE) { return false; }
+	if (!this->techDef) { return false; }
+	
+	return AOE_STRUCTURES::RESEARCH::HasArchitectureEffects(this->techDef);
+}
+
+
+// Returns true if the research is a "wood working"-like tech: improves lumberjack carry capacity+work rate + improves range/LOS for almost all range units.
+bool TTDetailedResearchDef::IsWoodWorkingAndRange() const {
+	if (!this->active) { return false; }
+	if (!this->techDef) { return false; }
+	return AOE_STRUCTURES::RESEARCH::HasWoodWorkingAndImproveRangeEffects(this->techDef);
+}
+
+
 }
 }

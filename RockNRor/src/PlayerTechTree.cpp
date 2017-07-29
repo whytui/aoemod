@@ -159,7 +159,7 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	this->CreateDisableUnitsEffects();
 
 	// CIV BONUS
-	int bonusCount = randomizer.GetRandomValue_normal_moderate(2, 4);
+	this->CalcRandomCivBonus();
 
 	this->AddEffectsToTechDef();
 
@@ -179,6 +179,30 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	// Do not allow disable building at this point (except iron age towers)
 }
 
+
+
+// Get a TTCreatorResearchInfo from this->allCreatorResearchInfo for given ID. NULL if not found
+TTCreatorResearchInfo *TechTreeCreator::GetCrResearchInfo(long int researchId) const {
+	auto it = std::find_if(this->allCreatorResearchInfo.begin(), this->allCreatorResearchInfo.end(),
+		[researchId](TTCreatorResearchInfo *lambdaInfo){return lambdaInfo->researchId == researchId; }
+	);
+	if (it == this->allCreatorResearchInfo.end()) {
+		return NULL;
+	}
+	return *it;
+}
+
+
+// Get a TTCreatorUnitInfo from this->allCreatorUnitInfo for given ID. NULL if not found
+TTCreatorUnitInfo *TechTreeCreator::GetCrUnitInfo(long int unitDefId) const {
+	auto it = std::find_if(this->allCreatorUnitInfo.begin(), this->allCreatorUnitInfo.end(),
+		[unitDefId](TTCreatorUnitInfo *lambdaInfo){return lambdaInfo->unitDefId == unitDefId; }
+	);
+	if (it == this->allCreatorUnitInfo.end()) {
+		return NULL;
+	}
+	return *it;
+}
 
 
 void TechTreeCreator::SetConfigFromStatistics() {
@@ -337,7 +361,8 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 		this->allCreatorResearchInfo.push_back(ttcResearchInfo);
 	}
 	
-	// Collect general info
+
+	// Collect general info and handle some specific cases
 	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
 	{
 		assert(crResInfo->researchDetail != NULL);
@@ -345,44 +370,34 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 		AOE_CONST_FUNC::ATTACK_CLASS armorClass = AOE_STRUCTURES::RESEARCH::DoesTechImproveSomeArmor(crResInfo->researchDetail->techDef);
 		AOE_CONST_FUNC::ATTACK_CLASS attackClass = AOE_STRUCTURES::RESEARCH::DoesTechImproveSomeAttack(crResInfo->researchDetail->techDef);
 		crResInfo->techImpactsReligion = AOE_STRUCTURES::RESEARCH::DoesTechImpactReligion(crResInfo->researchDetail->techDef);
+
+		if ((crResInfo->disableProbability < 0) && (armorClass == ATTACK_CLASS::CST_AC_BASE_PIERCE)) {
+			if (crResInfo->researchDetail->researchLinePredecessors.size() == 0) {
+				crResInfo->disableProbability = TT_CONFIG::RES_PROBA_STANDARD_RESEARCH;
+				crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_RESEARCH;
+			} else {
+				crResInfo->disableProbability = TT_CONFIG::RES_PROBA_SPECIALIZED_RESEARCH;
+				crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_RESEARCH;
+			}
+		}
 	}
-
-
-#pragma message("TODO: tower shield higher proba, even iron shied ? use armor type and ancestor/child count to determine")
 
 
 	// Set probability for friendly researches (temple...)
 	// Temple: choose "religion level" : low/moderate/high. All temple techs proba. will be chosen in the same probability range, according to this level.
+	//  level 0 (min): being disable is VERY likely to happen for those techs ; level 5 (max): player is likely to have access to all techs (good temple civ)
 	this->religionLevel = randomizer.GetRandomValue(0, 5);
-	double minReligionProbaRange = TT_CONFIG::RES_PROBA_MIN;
-	double maxReligionProbaRange = TT_CONFIG::RES_PROBA_MAX;
+	double religionProba= TT_CONFIG::RES_PROBA_SPECIALIZED_RESEARCH;
 	double weightForReligion = TT_CONFIG::RES_WEIGHT_STANDARD_RESEARCH;
-	double religionBronzeFactor = 1;
-	switch (this->religionLevel) {
-	case 0: // level 0 (min): being disable is VERY likely to happen for those techs
-		minReligionProbaRange = 0.7;
-		maxReligionProbaRange = TT_CONFIG::RES_PROBA_MAX;
-		break;
-	case 5: // level 5 (max): player is likely to have access to all techs (good temple civ)
-		minReligionProbaRange = TT_CONFIG::RES_PROBA_MIN;
-		maxReligionProbaRange = 0.2;
-		religionBronzeFactor = 1.1;
-		break;
-	case 1:
-	case 2: // 1-2 (quite poor temple)
-		minReligionProbaRange = 0.33;
-		maxReligionProbaRange = 0.8;
-		break;
-	default: // 3-4 (quite good temple)
-		minReligionProbaRange = 0.2;
-		maxReligionProbaRange = 0.66;
-		religionBronzeFactor = 1.05;
-	}
+	double religionBronzeFactor = 1; // applied to probas for bronze age religion techs. >1 means less disable proba (protect bronze age techs)
+	religionProba = 0.05 + (5 - this->religionLevel) * 0.15; // max 0.05+0.75=0.8 for min religion level
+	religionBronzeFactor = 1 + 0.03 *this->religionLevel; // max 1.15 "protection %" for bronze techs
+
 	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
 	{
 		if (crResInfo->techImpactsReligion && (crResInfo->disableProbability < 0)) {
-			// TODO
-			crResInfo->disableProbability = maxReligionProbaRange;
+			// TODO: higher proba for jihad, martyrdom ?
+			crResInfo->disableProbability = religionProba;
 			crResInfo->disableWeight = weightForReligion;
 			if (crResInfo->researchDetail->requiredAge < AOE_CONST_FUNC::CST_RSID_IRON_AGE) {
 				crResInfo->disableWeight = crResInfo->disableWeight * religionBronzeFactor;
@@ -403,9 +418,20 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 		bool isMarketOrGov = (crResInfo->researchLocation == AOE_CONST_FUNC::CST_UNITID_MARKET) ||
 			(crResInfo->researchLocation == AOE_CONST_FUNC::CST_UNITID_GOVERNMENT_CENTER);
 		if ((crResInfo->disableProbability < 0) && isMarketOrGov) {
+			// Protect key techs like wheel, architecture, woodworking+range => reduce their probabilities
 			if (crResInfo->researchDetail->IsWheel()) {
 				crResInfo->disableProbability = TT_CONFIG::RES_PROBA_WHEEL;
 				crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_WHEEL;
+				continue;
+			}
+			if (crResInfo->researchDetail->IsArchitecture()) {
+				crResInfo->disableProbability = TT_CONFIG::RES_PROBA_COMMON_USEFUL_RESEARCH;
+				crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_COMMON_USEFUL_RESEARCH;
+				continue;
+			}
+			if (crResInfo->researchDetail->IsWoodWorkingAndRange()) {
+				crResInfo->disableProbability = TT_CONFIG::RES_PROBA_COMMON_USEFUL_RESEARCH;
+				crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_COMMON_USEFUL_RESEARCH;
 				continue;
 			}
 
@@ -496,6 +522,15 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 	{
 		if (!crUnitInfo->unitDetail->IsValid()) { continue; }
 		if (crUnitInfo->unitDefId != crUnitInfo->unitDetail->baseUnitId) { continue; } // Only treat base units => 1 evaluation for each unitline
+
+		// By default, all child units have default weight
+		for each (long int childId in crUnitInfo->unitDetail->possibleUpgradedUnitIDs)
+		{
+			TTCreatorUnitInfo *child = this->GetCrUnitInfo(childId);
+			if (!child) { continue; }
+			child->disableWeight = TT_CONFIG::RES_PROBA_STANDARD_UNIT;
+		}
+
 		// Special: priest. Disable probability is extremely low, and only possible if religion level is already poor.
 		if (crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupPriest) {
 			if (this->religionLevel > 0) {
@@ -521,7 +556,7 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 
 		// Special: stone thrower and siege
 		if (crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupSiegeWeapon) {
-			crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_UNIT;
+			crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_HIGH_IMPACT_UNIT;
 			if (crUnitInfo->unitDefId == AOE_CONST_FUNC::CST_UNITID_STONE_THROWER) {
 				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
 				crUnitInfo->disableProbability = TT_CONFIG::RES_PROBA_STANDARD_UNIT; // Useful for other upgrades (catapults)
@@ -550,7 +585,7 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 			if (uniqueRootUnitId /*&& (researchCountThere == 0)*/) {
 				crUnitInfo->disableProbability = TT_CONFIG::RES_PROBA_SPECIALIZED_UNIT;
 				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
-				crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_UNIT; // Useful for unit upgrades
+				crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_HIGH_IMPACT_UNIT;
 			}
 		}
 	}
@@ -700,6 +735,313 @@ void TechTreeCreator::CreateDisableUnitsEffects() {
 }
 
 
+// Creates random civ bonuses
+void TechTreeCreator::CalcRandomCivBonus() {
+	this->totalDisableWeight = 0;
+	double totalWeightAll = 0; // For ALL units and ALL researches, even not-disabled ones (ignore shadow and "fake" researches though)
+
+	for each (TTCreatorUnitInfo *curUnit in this->allCreatorUnitInfo)
+	{
+		totalWeightAll += curUnit->disableWeight;
+		if (curUnit->hasBeenDisabled) {
+			this->totalDisableWeight += curUnit->disableWeight;
+		}
+	}
+
+	for each (TTCreatorResearchInfo *curResearch in this->allCreatorResearchInfo)
+	{
+		if (curResearch->researchDetail->IsShadowResearch() || curResearch->isFakeForDisableUnit) { continue; }
+		totalWeightAll += curResearch->disableWeight;
+		if (curResearch->hasBeenDisabled) {
+			this->totalDisableWeight += curResearch->disableWeight;
+		}
+	}
+
+	// What is the "median" weight ?
+	double disabledUnitMedian = ((double)TT_CONFIG::MAX_DISABLE_UNITLINE_COUNT) - ((double)TT_CONFIG::MIN_DISABLE_UNITLINE_COUNT);
+	double disabledResearchMedian = ((double)TT_CONFIG::MAX_DISABLE_RESEARCH_COUNT) - ((double)TT_CONFIG::MIN_DISABLE_RESEARCH_COUNT);
+	double weightMean = totalWeightAll / (disabledUnitMedian + disabledResearchMedian);
+
+	this->relativeDisableWeight = this->totalDisableWeight - weightMean;
+	this->computedMeanWeight = weightMean;
+
+	// TODO fix and use weight evaluation
+
+	int bonusCount = randomizer.GetRandomValue_normal_moderate(2, 4);
+	this->bonusText.clear();
+	double bonusWeight = 0;
+	for (int i = 0; i < bonusCount; i++) {
+		bonusWeight += this->CreateOneBonus();
+	}
+}
+
+
+// Create one civ bonus
+double TechTreeCreator::CreateOneBonus() {
+	double result = 0;
+	std::map<GLOBAL_UNIT_AI_TYPES, double> weightByUnitClass;
+	// TODO check units are available for each class
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, 0.35));
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.1));
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, 0.55));
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, 0.4));
+	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.)); //?
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, 0.35));
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, 0.4));
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier, 0.55));
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher, 0.7));
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier, 0.4)); // cavalry
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx, 0.5));
+	if (this->religionLevel > 3) {
+		// Exclude bonus for priest for civs with bad temple. For religion levels 4-5 only.
+		weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, 0.65));
+	}
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon, 0.7));
+	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger, 0.2));
+	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWarBoat, 0.2)); // is water map ? 0 else
+	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall, 0.)); // walls suck
+	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat, 0.05));
+	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTransportBoat, 0.05));
+	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower, 0.45)); // do not use as is
+	
+	// TribeAIGroupUnusedHealer => just to improve medecine ?
+	// TribeAIGroupUnused_Farm => just to improve production ?
+
+	int bestRandom = -1;
+	std::pair<GLOBAL_UNIT_AI_TYPES, double> bestElem;
+	for each (std::pair<GLOBAL_UNIT_AI_TYPES, double> elem in weightByUnitClass)
+	{
+		int curRnd = randomizer.GetRandomValue(0, 100000);
+		if (curRnd > bestRandom) {
+			bestRandom = curRnd;
+			bestElem = elem;
+		}
+	}
+	GLOBAL_UNIT_AI_TYPES chosenClass = bestElem.first;
+	double chosenWeight = bestElem.second;
+	// Remove chosen one from list
+	for (auto iter = weightByUnitClass.begin(); iter != weightByUnitClass.end();) {
+		if ((*iter).first == chosenClass) {
+			weightByUnitClass.erase(iter++);
+		} else {
+			iter++;
+		}
+	}
+	bool isRanged = (chosenClass == TribeAIGroupArcher) || (chosenClass == TribeAIGroupChariotArcher) || 
+		(chosenClass == TribeAIGroupElephantArcher) || (chosenClass == TribeAIGroupHorseArcher) ||
+		(chosenClass == TribeAIGroupPriest) || (chosenClass == TribeAIGroupSiegeWeapon) ||
+		(chosenClass == TribeAIGroupSlinger) || (chosenClass == TribeAIGroupUnused_Tower) || (chosenClass == TribeAIGroupWarBoat); // Warning: wrong for filre galley
+
+	bool isMelee = (chosenClass == TribeAIGroupChariot) || (chosenClass == TribeAIGroupElephantRider) ||
+		(chosenClass == TribeAIGroupFootSoldier) || (chosenClass == TribeAIGroupMountedSoldier) ||
+		(chosenClass == TribeAIGroupPhalanx);
+
+	bool isMilitary = (isRanged || isMelee);
+	bool isPriest = (chosenClass == TribeAIGroupPriest);
+
+
+	std::map<TECH_UNIT_ATTRIBUTES, double> weightByAttribute;
+	weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_HP, 0.5));
+	// TODO: complex, must be unit-per unit
+	//weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ADD_COST_AMOUNT, 0.5));
+	if (isMilitary) {
+		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ARMOR, 0.5));
+		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ATTACK, 0.5));
+		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ATTACK_RELOAD_TIME, 0.5));
+	}
+	if (isRanged) {
+		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_RANGE, 0.5)); // + LOS
+		// TUA_INTELLIGENT_PROJECTILE ??
+	}
+	if ((chosenClass != TribeAIGroupBuilding) && (chosenClass != TribeAIGroupUnused_Tower)) {
+		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_SPEED, 0.6));
+	}
+	if ((chosenClass == TribeAIGroupCivilian) || (chosenClass == TribeAIGroupFishingBoat)) {
+		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, 0.4)); // for villagers/fishing ships + work rate ?
+	}
+	
+	int bestAttrRandom = -1;
+	std::pair<TECH_UNIT_ATTRIBUTES, double> bestAttrElem;
+	for each (auto elem in weightByAttribute)
+	{
+		int curRnd = randomizer.GetRandomValue(0, 100000);
+		if (curRnd > bestAttrRandom) {
+			bestAttrRandom = curRnd;
+			bestAttrElem = elem;
+		}
+	}
+	TECH_UNIT_ATTRIBUTES chosenAttr = bestAttrElem.first;
+	double chosenAttrWeight = bestAttrElem.second;
+	result = (chosenWeight + chosenAttrWeight) / 2;
+	weightByAttribute.clear();
+	const char *className = GetUnitClassName(chosenClass);
+
+	float rndMultiplier = 1 + (((float)randomizer.GetRandomValue_normal_moderate(10, 25)) / 100.0f);
+
+	// Create bonus
+
+	if ((chosenAttr == TUA_HP) || (chosenAttr == TUA_SPEED)) {
+		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
+		newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT;
+		newEffect.effectAttribute = chosenAttr;
+		newEffect.effectClass = chosenClass;
+		newEffect.effectUnit = -1;
+		newEffect.effectValue = rndMultiplier;
+		techTreeEffects.push_back(newEffect);
+		this->bonusText += "Increase ";
+		this->bonusText += GetTechUnitAttributeName(chosenAttr);
+		this->bonusText += " by ";
+		this->bonusText += std::to_string((int)(rndMultiplier*100) - 100);
+		this->bonusText += "% for class ";
+		this->bonusText += className;
+		this->bonusText += NEWLINE;
+	}
+	if (chosenAttr == TUA_RANGE) { // Range and line of sight
+		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
+		newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD;
+		newEffect.effectAttribute = TUA_RANGE;
+		newEffect.effectClass = chosenClass;
+		newEffect.effectUnit = -1;
+		newEffect.effectValue = 1;
+		if ((chosenClass == TribeAIGroupSiegeWeapon) || (chosenClass == TribeAIGroupPriest)) {
+			if (rndMultiplier > 1.175) {
+				newEffect.effectValue = 2;
+			}
+		}
+		techTreeEffects.push_back(newEffect);
+
+		this->bonusText += "+";
+		this->bonusText += std::to_string(((int)newEffect.effectValue));
+		this->bonusText += " ";
+		this->bonusText += GetTechUnitAttributeName(TUA_RANGE);
+		this->bonusText += " to class ";
+		this->bonusText += className;
+		this->bonusText += NEWLINE;
+
+		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect2;
+		newEffect2.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD;
+		newEffect2.effectAttribute = TUA_LOS;
+		newEffect2.effectClass = chosenClass;
+		newEffect2.effectUnit = -1;
+		newEffect2.effectValue = 1;
+		if ((chosenClass == TribeAIGroupSiegeWeapon) || (chosenClass == TribeAIGroupPriest) || (chosenClass == TribeAIGroupUnused_Tower)) {
+			if (rndMultiplier > 1.175) {
+				newEffect.effectValue = 2;
+			}
+		}
+		techTreeEffects.push_back(newEffect2);
+	}
+
+	if (chosenAttr == TUA_RESOURCE_CAPACITY) { // fishing ships, villager (pick one only !)
+		// TODO
+	}
+
+	if (chosenAttr == TUA_ARMOR) {
+		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
+		newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD;
+		newEffect.effectAttribute = chosenAttr;
+		newEffect.effectClass = chosenClass;
+		newEffect.effectUnit = -1;
+		newEffect.SetAttackOrArmor(ATTACK_CLASS::CST_AC_BASE_MELEE, 1);
+		assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_MELEE);
+		assert(newEffect.GetValue() == 1);
+		techTreeEffects.push_back(newEffect);
+		this->bonusText += "+1 ";
+		this->bonusText += GetTechUnitAttributeName(chosenAttr);
+		this->bonusText += " to class ";
+		this->bonusText += className;
+		this->bonusText += NEWLINE;
+	}
+
+	if (chosenAttr == TUA_ATTACK) {
+		if (isPriest) {
+			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
+			newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT;
+			newEffect.effectAttribute = TUA_WORK_RATE;
+			newEffect.effectClass = chosenClass;
+			newEffect.effectUnit = -1;
+			newEffect.effectValue = rndMultiplier;
+			techTreeEffects.push_back(newEffect);
+			this->bonusText += "Increase conversion efficiency by ";
+			this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
+			this->bonusText += "% for class ";
+			this->bonusText += className;
+			this->bonusText += NEWLINE;
+		} else {
+			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
+			newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD;
+			newEffect.effectAttribute = chosenAttr;
+			newEffect.effectClass = chosenClass;
+			newEffect.effectUnit = -1;
+			// TODO: if siege, choose a unit (in standard, ballista or cat). If so, set effectClass=-1 and effectUnit=...
+			bool useMeleeAttack = isMelee;
+			if (chosenClass == TribeAIGroupSiegeWeapon) {
+				newEffect.effectClass = -1;
+				newEffect.effectUnit = CST_UNITID_STONE_THROWER; // TODO (hardcoded)
+				useMeleeAttack = true; // should guess from unitdef
+			}
+			if (useMeleeAttack) {
+				newEffect.SetAttackOrArmor(ATTACK_CLASS::CST_AC_BASE_MELEE, 1);
+				assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_MELEE);
+				assert(newEffect.GetValue() == 1);
+			} else {
+				if (chosenClass != TribeAIGroupSiegeWeapon) {
+					// TODO: add weight when improving attack for non-siege range unit
+				}
+				newEffect.SetAttackOrArmor(ATTACK_CLASS::CST_AC_BASE_PIERCE, 1);
+				assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_PIERCE);
+				assert(newEffect.GetValue() == 1);
+			}
+			techTreeEffects.push_back(newEffect);
+			this->bonusText += "+1 ";
+			this->bonusText += GetTechUnitAttributeName(chosenAttr);
+			this->bonusText += " for class ";
+			this->bonusText += className;
+			this->bonusText += NEWLINE;
+		}
+	}
+
+	if (chosenAttr == TUA_ATTACK_RELOAD_TIME) {
+		if (!isPriest) {
+			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
+			newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT;
+			newEffect.effectAttribute = chosenAttr;
+			newEffect.effectClass = chosenClass;
+			newEffect.effectUnit = -1;
+			newEffect.effectValue = 1 / rndMultiplier; // Diminish reload time to improve attack efficiency
+			techTreeEffects.push_back(newEffect);
+			this->bonusText += "Increase attack speed by ";
+			this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
+			this->bonusText += "% for class ";
+			this->bonusText += className;
+			this->bonusText += NEWLINE;
+		} else {
+			// Priest recharging rate is a player resource
+			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
+			newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT;
+			newEffect.effectAttribute = -1;// unused
+			newEffect.effectClass = -1; // unused
+			newEffect.effectUnit = CST_RES_ORDER_FAITH_RECHARGING_RATE;
+			newEffect.effectValue = rndMultiplier; 
+			techTreeEffects.push_back(newEffect);
+			this->bonusText += "Increase priest recharging speed by ";
+			this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
+			this->bonusText += "% for class ";
+			this->bonusText += className;
+			this->bonusText += NEWLINE;
+		}
+	}
+	if (chosenAttr == TUA_RESOURCE_CAPACITY) {
+		// TODO
+	}
+	if (chosenAttr == TUA_ADD_COST_AMOUNT) {
+		// TODO
+	}
+
+	return result;
+}
+
+
 // Choose one of the upgrade of rootUnitInfo (or rootUnitInfo) that will be the first unit from the lineage to be unavailable.
 TTCreatorUnitInfo *TechTreeCreator::PickUnitUpgradeToDisableInUnitLine(TTCreatorUnitInfo *rootUnitInfo) {
 	int totalUpgradesCount = rootUnitInfo->unitDetail->possibleUpgradedUnitIDs.size() + 1; // including root unit
@@ -750,14 +1092,8 @@ TTCreatorUnitInfo *TechTreeCreator::PickUnitUpgradeToDisableInUnitLine(TTCreator
 	}
 	for each (long int curId in rootUnitInfo->unitDetail->possibleUpgradedUnitIDs)
 	{
-		auto it = std::find_if(this->allCreatorUnitInfo.begin(), this->allCreatorUnitInfo.end(),
-			[curId](TTCreatorUnitInfo *lambdaInfo){return lambdaInfo->unitDefId == curId; }
-		);
-		if (it == this->allCreatorUnitInfo.end()) {
-			// Not found
-			continue;
-		}
-		TTCreatorUnitInfo *curElem = *it;
+		TTCreatorUnitInfo *curElem = this->GetCrUnitInfo(curId);
+		if (!curElem) { continue; }
 
 		if (firstDisabledUpgrade) {
 			long int firstDisabledId = firstDisabledUpgrade->unitDefId;
@@ -1023,7 +1359,7 @@ std::string TechTreeCreator::GetDisabledUnitsText() const {
 		isFirst = false;
 		result += curElem->langName;
 	}
-
+	result += NEWLINE;
 	return result;
 }
 
@@ -1073,12 +1409,29 @@ std::string TechTreeCreator::GetDisabledResearchesText() const {
 		isFirst = false;
 		result += curElem->langName;
 	}
+#ifdef _DEBUG
+	result += NEWLINE "Religion level=";
+	result += std::to_string(this->religionLevel);
+	result += NEWLINE;
+#endif
 
 	return result;
 }
 
 std::string TechTreeCreator::GetCivBonusText() const {
 	std::string result = "";
+#ifdef _DEBUG
+	result += "Tech tree Weight=";
+	result += std::to_string(this->totalDisableWeight);
+	result += "   /   needForBonusWeight=";
+	result += std::to_string(this->relativeDisableWeight);
+	result += "   /   median=";
+	result += std::to_string(this->computedMeanWeight);
+	result += NEWLINE;
+#endif
+	
+	result += this->bonusText;
+	//result += NEWLINE;
 	return result;
 }
 

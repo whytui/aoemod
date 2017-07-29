@@ -100,6 +100,12 @@ namespace AOE_STRUCTURES {
 			AOE_CONST_FUNC::ATTACK_CLASS attackClass = (AOE_CONST_FUNC::ATTACK_CLASS)(((long int)this->effectValue) / 256);
 			return attackClass;
 		}
+		// Set armor/attack class and amount if effect is "attribute modifier" and attribute is armor or attack. Amount must be < 256
+		void SetAttackOrArmor(AOE_CONST_FUNC::ATTACK_CLASS attackOrArmorType, long int value) {
+			if (!this->IsAttributeModifier()) { return; }
+			this->effectValue = ((float)attackOrArmorType) * 256;
+			this->effectValue += value % 256; // amount must be < 256
+		}
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");
 

@@ -286,7 +286,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	if (isValidType50) {
 		for (int i = 0; i < unitDef50->attacksCount; i++) {
 			if (!IsStandardAttack(unitDef50->ptrAttacksList[i].classId) && (unitDef50->ptrAttacksList[i].amount >= 0)) {
-				const char *attackName = GetAttackClassName(unitDef50->ptrAttacksList[i].classId);
+				const char *attackName = GetAttackOrArmorClassName(unitDef50->ptrAttacksList[i].classId);
 				attackStrengths += attackName;
 				// Do not display "bonus" attack amounts, they generally are 0 (a malus is set on armors instead)
 				//attackStrengths += "=";
@@ -296,7 +296,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 		for (int i = 0; i < unitDef50->armorsCount; i++) {
 			if (!IsStandardAttack(unitDef50->ptrArmorsList[i].classId)) {
-				const char *attackName = GetAttackClassName(unitDef50->ptrArmorsList[i].classId);
+				const char *attackName = GetAttackOrArmorClassName(unitDef50->ptrArmorsList[i].classId);
 				armorWeaknesses += attackName;
 				armorWeaknesses += "=";
 				armorWeaknesses += std::to_string(unitDef50->ptrArmorsList[i].amount);

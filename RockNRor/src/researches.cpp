@@ -162,6 +162,53 @@ bool DoesTechAffectCivilianSpeed(STRUCT_TECH_DEF *techDef) {
 }
 
 
+// Returns true if technology appears to be 'architecture' (improve buildings and walls HP, builder work rate)
+bool HasArchitectureEffects(STRUCT_TECH_DEF *techDef) {
+	if (!techDef) { return false; }
+	bool foundBuilderWorkRate = false;
+	bool foundBuildingHP = false;
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect->IsAttributeModifier() && (techEffect->effectClass == TribeAIGroupBuilding) &&
+			(techEffect->effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_HP)) {
+			foundBuildingHP = true;
+		}
+		if (techEffect->IsAttributeModifier() && (techEffect->effectClass == TribeAIGroupCivilian) &&
+			(techEffect->effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_WORK_RATE)) {
+			foundBuilderWorkRate = true;
+		}
+	}
+	return foundBuilderWorkRate && foundBuildingHP;
+}
+
+
+// Returns true if technology improves lumberjacks AND improves range/LOS for almost all range units (=woodworking-like tech)
+bool HasWoodWorkingAndImproveRangeEffects(STRUCT_TECH_DEF *techDef) {
+	if (!techDef) { return false; }
+	bool foundLumberjackEffect = false;
+	int foundLOSEffectCount = 0;
+	int foundRangeEffectCount = 0;
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect->IsAttributeModifier() && (techEffect->effectUnit == CST_UNITID_LUMBERJACK) &&
+			((techEffect->effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY) || (techEffect->effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_WORK_RATE))
+			) {
+			foundLumberjackEffect = true;
+		}
+		if (techEffect->IsAttributeModifier() &&
+			(techEffect->effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_RANGE)) {
+			foundRangeEffectCount++;
+		}
+		if (techEffect->IsAttributeModifier() &&
+			(techEffect->effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_LOS)) {
+			foundRangeEffectCount++;
+		}
+	}
+	// True if improves lumberjack (at least work rate or capacity) and improves LOS/range for at least 2 units or 2 classes
+	return foundLumberjackEffect && (foundLOSEffectCount >= 2) && (foundRangeEffectCount >= 2);
+}
+
+
 }
 }
 

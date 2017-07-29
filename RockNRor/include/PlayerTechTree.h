@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <set>
+#include <AOE_empires_dat_concept_names.h>
 #include "randomizer.h"
 #include "TTDetailedResearchDef.h"
 #include "TechTreeAnalyzer.h"
@@ -133,15 +134,18 @@ namespace TT_CONFIG {
 	static const double RES_WEIGHT_MAX = 1;
 	static const double RES_PROBA_STANDARD_RESEARCH = 0.5; // "disable probability" for a standard research
 	static const double RES_WEIGHT_STANDARD_RESEARCH = 0.1; // "disable weight" for a standard research
+	static const double RES_PROBA_SPECIALIZED_RESEARCH = 0.6; // "disable probability" for "specialized" research: a bit more rare than standard. E.g. shields.
+	static const double RES_PROBA_COMMON_USEFUL_RESEARCH = 0.35; // "disable probability" for a very common/useful research like architecture
+	static const double RES_WEIGHT_COMMON_USEFUL_RESEARCH = 0.75; // "disable weight" for a very common/useful research like architecture
+	static const double RES_PROBA_WHEEL = 0.05; // "disable probability" for Wheel research
+	static const double RES_WEIGHT_WHEEL = 0.9; // "disable weight" for Wheel research
 	static const double RES_PROBA_STANDARD_UNIT = 0.5; // "disable probability" for a standard unit
 	static const double RES_WEIGHT_STANDARD_UNIT = 0.1; // "disable weight" for a standard unit
 	static const double RES_PROBA_SPECIALIZED_UNIT = 0.6; // "disable probability" for a unit which is slighly more rare than standard, like ballista (quite often disabled).
-	static const double RES_PROBA_WHEEL = 0.05; // "disable probability" for Wheel research
-	static const double RES_WEIGHT_WHEEL = 0.9; // "disable weight" for Wheel research
-	static const double RES_PROBA_VERY_RARE = 0.07; // Disable probability for unit that must be disabled on very rare occasions: priests, stone thrower, hoplite...
+	static const double RES_PROBA_VERY_RARE = 0.05; // Disable probability for unit that must be disabled on very rare occasions: priests, stone thrower, hoplite...
 	static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.8; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
 
-	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.3; // computed probability counts as much as xxx% vs random.
+	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.4; // computed probability counts as much as xxx% vs random.
 	static const int CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT = 40;
 	static const int CALC_MAX_DISABLE_UNITLINE_COUNT_PERCENT = 70;
 	static const int CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT = 20;
@@ -164,6 +168,9 @@ public:
 	STRUCT_TECH_DEF *techDefForTechTree;
 	int religionLevel; // 0=low(high disable proba), 3=high(low disable temple research proba)
 	int economyLevel; // 0=low(high disable proba), 3=high(low disable economy techs proba)
+	double totalDisableWeight; // Evaluated "weight" of disabled units/researches
+	double relativeDisableWeight; // If >0 then civ is unlucky regarding disabled techs/units and better civ bonus would be welcome
+	double computedMeanWeight;
 	std::set<long int> eligibleDisableResearchIdBronze;
 	std::set<long int> eligibleDisableResearchIdIron;
 	std::set<long int> eligibleDisableUnitDefIdBronze;
@@ -185,6 +192,9 @@ public:
 		this->allCreatorUnitInfo.clear();
 		this->economyLevel = 0;
 		this->religionLevel = 0;
+		this->totalDisableWeight = 0;
+		this->computedMeanWeight = 0;
+		this->bonusText = "";
 	}
 
 	// Create a random tech tree (list of effects) on provided TechDef (should be initially empty).
@@ -197,6 +207,13 @@ public:
 	std::string GetCivBonusText() const;
 
 private:
+	std::string bonusText;
+
+	// Get a TTCreatorResearchInfo from this->allCreatorResearchInfo for given ID. NULL if not found
+	TTCreatorResearchInfo *GetCrResearchInfo(long int researchId) const;
+	// Get a TTCreatorUnitInfo from this->allCreatorUnitInfo for given ID. NULL if not found
+	TTCreatorUnitInfo *GetCrUnitInfo(long int unitDefId) const;
+
 	void SetConfigFromStatistics();
 
 	void CollectResearchInfo();
@@ -221,6 +238,12 @@ private:
 	// Creates disable unit effects according to disable scores that have been computed (on root units)
 	// If a unit(line) is selected for being disabled, then this method chooses at which level (which upgrade) the unitline becomes unavailable.
 	void CreateDisableUnitsEffects();
+
+	// Creates random civ bonuses
+	void CalcRandomCivBonus();
+
+	// Create one civ bonus
+	double CreateOneBonus();
 
 	// Choose one of the upgrade of rootUnitInfo (or rootUnitInfo) that will be the first unit from the lineage to be unavailable.
 	TTCreatorUnitInfo *PickUnitUpgradeToDisableInUnitLine(TTCreatorUnitInfo *rootUnitInfo);

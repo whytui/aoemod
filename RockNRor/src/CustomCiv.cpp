@@ -78,9 +78,11 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 		this->lastGenerationSummary += player->playerName_length16max;
 		this->lastGenerationSummary += ")" NEWLINE "Unavailable units:" NEWLINE;
 		this->lastGenerationSummary += ttc.GetDisabledUnitsText();
-		this->lastGenerationSummary += NEWLINE "Unavailable researches:" NEWLINE;
+		this->lastGenerationSummary += "Unavailable researches:" NEWLINE;
 		this->lastGenerationSummary += ttc.GetDisabledResearchesText();
-		this->lastGenerationSummary += NEWLINE NEWLINE;
+		this->lastGenerationSummary += "Civilization bonuses:" NEWLINE;
+		this->lastGenerationSummary += ttc.GetCivBonusText();
+		this->lastGenerationSummary += NEWLINE;
 	}
 
 	return true;
@@ -92,6 +94,7 @@ void CustomCivHandler::WriteSummaryToScenarioInstructions() {
 	if (!global || !global->IsCheckSumValid()) { return; }
 
 	char **ptrToUse = &global->scenarioInformation->scenarioTips;
+	assert(ptrToUse != NULL);
 
 	if (global->scenarioInformation && global->scenarioInformation->IsCheckSumValidForAScenarioInfoClass()) {
 		std::string instructions = "";
