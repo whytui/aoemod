@@ -154,6 +154,13 @@ namespace TT_CONFIG {
 	static int MAX_DISABLE_UNITLINE_COUNT = 12; // default value, recomputed according to CALC_*
 	static int MIN_DISABLE_RESEARCH_COUNT = 6; // default value, recomputed according to CALC_*
 	static int MAX_DISABLE_RESEARCH_COUNT = 13; // default value, recomputed according to CALC_*
+
+	static const int GEN_BONUS_MIN_RATE_BASE = 10; // "Base" minimum % improvement for generated bonus (can be adjusted)
+	static const int GEN_BONUS_MAX_RATE_BASE = 25; // "Base" maximum % improvement for generated bonus (can be adjusted)
+	static const int GEN_BONUS_MIN_RATE_QUITE_GOOD = 20; // Min % improvement for bonus that needs a decent value to be useful: e.g. HP (buildings)
+	static const int GEN_BONUS_MAX_RATE_QUITE_GOOD = 35; // Max % improvement for bonus that needs a decent value to be useful: e.g. HP (buildings)
+	static const int GEN_BONUS_MIN_RATE_GOOD = 25; // Min % improvement for bonus that needs a decent value to be useful: e.g. speed, HP
+	static const int GEN_BONUS_MAX_RATE_GOOD = 40; // Max % improvement for bonus that needs a decent value to be useful: e.g. speed, HP
 }
 
 
@@ -261,6 +268,9 @@ private:
 	// Copy (add) effects from internal collection (techTreeEffects) to actual tech tree object (techDef)
 	void AddEffectsToTechDef();
 
+	// Randomly selects 1 non-disabled root unit in provided unit class. NULL if not found.
+	// Use minimumRequiredAgeResearchId to filter on units >= provided age. E.g. CST_RSID_TOOL_AGE
+	TTDetailedUnitDef *PickOneRandomRootUnitIdAmongUnitClass(GLOBAL_UNIT_AI_TYPES unitClass, int minimumRequiredAgeResearchId);
 };
 
 

@@ -351,6 +351,9 @@
     <ClInclude Include="include\PlayerTechTree.h">
       <Filter>Fichiers d%27en-tête\Strategy</Filter>
     </ClInclude>
+    <ClInclude Include="include\TTDetailedUnitClass.h">
+      <Filter>Fichiers d%27en-tête\Strategy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\tinyxml\tinystr.cpp">

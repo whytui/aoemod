@@ -188,6 +188,7 @@
     <ClInclude Include="include\TechTreeAnalyzer.h" />
     <ClInclude Include="include\TileSetHandler.h" />
     <ClInclude Include="include\traceMessage.h" />
+    <ClInclude Include="include\TTDetailedUnitClass.h" />
     <ClInclude Include="include\UI_utilities.h" />
     <ClInclude Include="include\UnitCustomMethods.h" />
     <ClInclude Include="include\unitDefHandling.h" />

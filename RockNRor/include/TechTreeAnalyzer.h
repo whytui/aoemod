@@ -11,6 +11,7 @@
 #include "techDefHandling.h"
 #include "researches.h"
 #include "TTDetailedResearchDef.h"
+#include "TTDetailedUnitClass.h"
 
 #pragma once
 
@@ -98,6 +99,7 @@ public:
 
 	TechTreeStatistics statistics;
 	std::string myLog;
+	const int unitClassCount = AOE_CONST_FUNC::TribeAIGroupStandardCount;
 
 	// Methods
 
@@ -112,6 +114,13 @@ public:
 	long int GetUnitDefCount() const {
 		return this->unitDefCount;
 	}
+
+	// Safely get a TTDetailedUnitClass object
+	TTDetailedUnitClass *GetDetailedUnitClass(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitClassId) {
+		if ((unitClassId < 0) || (unitClassId >= AOE_CONST_FUNC::TribeAIGroupStandardCount)) { return NULL; }
+		return &this->detailUnitClasses[unitClassId];
+	}
+	TTDetailedUnitClass *GetDetailedUnitClass(int unitClassId) { return this->GetDetailedUnitClass((AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES)unitClassId); }
 
 	// Safely get a DetailedResearchDefobject
 	TTDetailedResearchDef *GetDetailedResearchDef(int researchId) const {
@@ -160,6 +169,7 @@ public:
 	void RefreshTechDefPointers();
 
 private:
+	TTDetailedUnitClass detailUnitClasses[AOE_CONST_FUNC::TribeAIGroupStandardCount];
 	TTDetailedResearchDef **detailedResearches; // Array of all research detailed info, size=researchCount
 	TTDetailedBuildingDef **detailedBuildings; // Array of all (tech tree) buildings info, size=unitDefCount. May contain (many) NULLs.
 	TTDetailedTrainableUnitDef **detailedTrainables; // Array of all (tech tree) trainable units info, size=unitDefCount. May contain (many) NULLs.
@@ -171,6 +181,9 @@ private:
 
 	// AllocArray needs researchCount and totalUnitDefCount to be set (>0) to work (needs empires.dat data to be loaded in global struct)
 	bool AllocArrays() {
+		for (int i = 0; i < AOE_CONST_FUNC::TribeAIGroupStandardCount; i++) {
+			this->detailUnitClasses[i].Init((AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES)i);
+		}
 		if (this->detailedResearches) { return false; }
 		if ((this->researchCount <= 0) || (this->unitDefCount <= 0)) { return false; }
 		this->detailedResearches = (TTDetailedResearchDef**)malloc(sizeof(TTDetailedResearchDef*) * this->researchCount);
@@ -254,6 +267,8 @@ private:
 	// Find out which trainable units are "super units" (cataphracts, armored elephants, massive catapults, etc)
 	// Priest canNOT be super units here.
 	void DetectSuperUnits();
+
+	void UpdateUnitClassesData();
 
 	// Calculate additional statistics, one tech tree has been analysed
 	void CalculateStatistics();

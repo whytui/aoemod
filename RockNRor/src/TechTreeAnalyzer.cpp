@@ -607,6 +607,51 @@ void TechTreeAnalyzer::DetectSuperUnits() {
 }
 
 
+void TechTreeAnalyzer::UpdateUnitClassesData() {
+	for (int unitClassIndex = 0; unitClassIndex < this->unitClassCount; unitClassIndex++) {
+		GLOBAL_UNIT_AI_TYPES curUnitClassId = (GLOBAL_UNIT_AI_TYPES)unitClassIndex;
+		TTDetailedUnitClass *unitClassDetail = this->GetDetailedUnitClass(unitClassIndex);
+		if (!unitClassDetail) { continue; }
+		unitClassDetail->Init(curUnitClassId);
+		// Buildings
+		for (int unitDefId = 0; unitDefId < this->unitDefCount; unitDefId++) {
+			TTDetailedBuildingDef *bldDetail = this->GetDetailedBuildingDef(unitDefId);
+			if (!bldDetail || !bldDetail->IsValid()) { continue; }
+			if (bldDetail->unitClass == curUnitClassId) {
+				unitClassDetail->allClassUnits.insert(bldDetail);
+				assert((curUnitClassId == TribeAIGroupBuilding) || (curUnitClassId == TribeAIGroupWall));
+			}
+		}
+		// Trainables
+		for (int unitDefId = 0; unitDefId < this->unitDefCount; unitDefId++) {
+			TTDetailedTrainableUnitDef *unitDetail = this->GetDetailedTrainableUnitDef(unitDefId);
+			if (!unitDetail || !unitDetail->IsValid()) { continue; }
+			if (unitDetail->unitClass == curUnitClassId) {
+				unitClassDetail->allClassUnits.insert(unitDetail);
+				assert((curUnitClassId != TribeAIGroupBuilding) && (curUnitClassId != TribeAIGroupWall));
+			}
+			if (unitDetail->isSuperUnit) {
+				unitClassDetail->includesSuperUnit = true;
+			}
+		}
+		// Common (uses previously collected data)
+		for each (TTDetailedUnitDef *unitDetail in unitClassDetail->allClassUnits)
+		{
+			if (!unitDetail->IsHeroOrScenarioUnit()) {
+				unitClassDetail->allClassUnitsNoHero.insert(unitDetail);
+				if (unitDetail->baseUnitId == unitDetail->unitDefId) {
+					unitClassDetail->rootUnits.insert(unitDetail);
+				}
+			}
+			if (unitDetail->requiredAge <= CST_RSID_STONE_AGE) { unitClassDetail->stoneAgeUnitCount++; }
+			if (unitDetail->requiredAge == CST_RSID_TOOL_AGE) { unitClassDetail->toolAgeUnitCount++; }
+			if (unitDetail->requiredAge == CST_RSID_BRONZE_AGE) { unitClassDetail->bronzeAgeUnitCount++; }
+			if (unitDetail->requiredAge == CST_RSID_IRON_AGE) { unitClassDetail->ironAgeUnitCount++; }
+		}
+	}
+}
+
+
 // Calculate additional statistics, one tech tree has been analysed
 void TechTreeAnalyzer::CalculateStatistics() {
 	this->statistics.Reset();
@@ -807,6 +852,7 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 	}
 #endif
 
+	this->UpdateUnitClassesData();
 	this->CalculateStatistics();
 	this->analyzeComplete = true;
 	return true;

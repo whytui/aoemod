@@ -7,6 +7,7 @@
 #include "AOE_memory.h"
 #include "traceMessage.h"
 #include "mainStructuresHandling.h"
+#include "language.h"
 
 #pragma once
 
@@ -160,9 +161,12 @@ namespace AOE_STRUCTURES {
 	bool IsArtefactOrFlag(GLOBAL_UNIT_AI_TYPES unitClass);
 
 
+	// Get a unit *internal* name from empires.dat data (read from civ 0)
+	// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
+	const char *GetUnitInternalName(short int unitDefId);
+
 	// Get a unit name from empires.dat data (read from civ 0)
 	// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
-	const char *GetUnitName(short int unitDefId);
-
+	std::string GetUnitName(short int unitDefId);
 
 }

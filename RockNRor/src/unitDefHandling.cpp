@@ -508,15 +508,36 @@ namespace AOE_STRUCTURES {
 	}
 
 
-	// Get a unit name from empires.dat data (read from civ 0)
+	// Get a unit *internal* name from empires.dat data (read from civ 0)
 	// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
-	const char *GetUnitName(short int unitDefId) {
+	const char *GetUnitInternalName(short int unitDefId) {
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 		if (!global || !global->IsCheckSumValid()) { return NULL; }
 		if (global->civCount <= 0) { return NULL; }
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = global->civilizationDefinitions[0]->GetUnitDef(unitDefId);
 		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return NULL; }
 		return unitDef->ptrUnitName;
+	}
+
+
+	// Get a unit name from empires.dat data (read from civ 0)
+	// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
+	std::string GetUnitName(short int unitDefId) {
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (!global || !global->IsCheckSumValid()) { return ""; }
+		if (global->civCount <= 0) { return ""; }
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = global->civilizationDefinitions[0]->GetUnitDef(unitDefId);
+		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { 
+			// Some units (like specialized villagers) do not exist in gaia civ
+			if (global->civCount <= 1) { return ""; }
+			unitDef = global->civilizationDefinitions[1]->GetUnitDef(unitDefId);
+			if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) { return ""; }
+		}
+		std::string result = GetLanguageDllText(unitDef->languageDLLID_Name);
+		if (result.empty()) {
+			result = unitDef->ptrUnitName;
+		}
+		return result;
 	}
 
 

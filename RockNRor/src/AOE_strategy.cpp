@@ -826,7 +826,7 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 			//if (!defUnit) { return; }
 			assert(defUnit != NULL);
 			assert(defUnit->DerivesFromTrainable());
-			strcpy_s(buf, GetUnitName(DAT_ID));
+			strcpy_s(buf, GetUnitInternalName(DAT_ID));
 			AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, defUnit->trainLocation,
 				AIUCLivingUnit, DAT_ID, player, buf);
 			return;
@@ -886,7 +886,7 @@ void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 			//if (!defUnit) { return; }
 			assert(defUnit != NULL);
 			assert(defUnit->DerivesFromTrainable());
-			strcpy_s(buf, GetUnitName(DAT_ID));
+			strcpy_s(buf, GetUnitInternalName(DAT_ID));
 			AddUnitInStrategy_before(buildAI, elemToInsertBefore, -1, defUnit->trainLocation,
 				AIUCLivingUnit, DAT_ID, player, buf);
 
