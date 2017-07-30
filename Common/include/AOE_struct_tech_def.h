@@ -101,7 +101,7 @@ namespace AOE_STRUCTURES {
 			return attackClass;
 		}
 		// Set armor/attack class and amount if effect is "attribute modifier" and attribute is armor or attack. Amount must be < 256
-		void SetAttackOrArmor(AOE_CONST_FUNC::ATTACK_CLASS attackOrArmorType, long int value) {
+		void SetAttackOrArmorTypeValue(AOE_CONST_FUNC::ATTACK_CLASS attackOrArmorType, long int value) {
 			if (!this->IsAttributeModifier()) { return; }
 			this->effectValue = ((float)attackOrArmorType) * 256;
 			this->effectValue += value % 256; // amount must be < 256

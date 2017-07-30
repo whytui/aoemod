@@ -57,6 +57,9 @@ public:
 		}
 	}
 
+	// Warning: according to child class, it may be trainable or building
+	virtual STRUCT_UNITDEF_TRAINABLE *GetUnitDef() const { return NULL; }
+
 	// Returns true if unit is a hero or scenario unit: heroes, cheat code units, unused units, etc
 	// Do not call this before the analysis is complete !
 	bool IsHeroOrScenarioUnit() const {
@@ -84,6 +87,8 @@ public:
 	bool isSuperUnit; // True if this is a "super" unit like heavy cat/helepolis/legion/etc: Iron age unit with no more upgrades, and huge cost.
 
 	bool IsValid() const override { return __super::IsValid() && (this->unitDef != NULL); }
+	
+	STRUCT_UNITDEF_TRAINABLE *GetUnitDef() const override { return this->unitDef; }
 
 	long int GetTrainLocation() const {
 		if (!this->unitDef) { return -1; }
@@ -116,6 +121,9 @@ public:
 	std::set<long int> researchesDevelopedHere; // List of researches (IDs) that are developed in this building. Excludes shadow researches.
 
 	bool IsValid() const override { return __super::IsValid() && (this->unitDef != NULL); }
+
+	// Warning: returned object is actually a building
+	STRUCT_UNITDEF_TRAINABLE *GetUnitDef() const override { return this->unitDef; }
 };
 
 

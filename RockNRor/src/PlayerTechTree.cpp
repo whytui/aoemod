@@ -812,7 +812,7 @@ double TechTreeCreator::CreateOneBonus() {
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, { 0.2, 0.85 }));
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, { 0.55, 1 }));
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, { 0.4, 0.95 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, { 0.20, 0.80 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, { 0.20, 0.88 }));
 	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, { 0.10, 0.70 })); // is water map
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, { 0.35, 1 }));
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, { 0.4, 1 }));
@@ -824,14 +824,14 @@ double TechTreeCreator::CreateOneBonus() {
 	if (this->religionLevel > 3) {
 		// Exclude bonus for priest for civs with bad temple. For religion levels 4-5 only.
 		if (this->religionLevel == 4) {
-			propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, { 0.65, 0.9 }));
+			propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, { 0.65, 0.95 }));
 		} else {
 			// Temple bonus is likely to happen on very-good temple civs
 			propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, { 0.65, 1.1 }));
 		}
 	}
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon, { 0.7, 1 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger, { 0.2, 0.75 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger, { 0.2, 0.80 }));
 	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWarBoat, { 0.3, 1 })); // is water map ?
 	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall, { 0., 1 })); // walls suck
 	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat, { 0.05, 0.7 }));
@@ -1048,15 +1048,24 @@ double TechTreeCreator::CreateOneBonus() {
 	}
 
 	if (chosenAttr == TUA_ARMOR) {
+		ATTACK_CLASS armorToImprove = ATTACK_CLASS::CST_AC_BASE_MELEE;
+		int tmpRnd = randomizer.GetRandomNonZeroPercentageValue();
+		std::string armorTypeText = "melee";
+		if (tmpRnd > 85) {
+			armorToImprove = ATTACK_CLASS::CST_AC_BASE_PIERCE;
+			armorTypeText = "pierce";
+		}
 		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
-		newEffect.SetAttributeAdd(chosenAttr, applyToClass, applyToUnit, 0); // need to set value using SetAttackOrArmor
-		newEffect.SetAttackOrArmor(ATTACK_CLASS::CST_AC_BASE_MELEE, 1);
-		assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_MELEE);
+		newEffect.SetAttributeAdd(chosenAttr, applyToClass, applyToUnit, 0); // need to set value using SetAttackOrArmorTypeValue
+		newEffect.SetAttackOrArmorTypeValue(armorToImprove, 1);
+		assert(newEffect.GetAttackOrArmorType() == armorToImprove);
 		assert(newEffect.GetValue() == 1);
 		techTreeEffects.push_back(newEffect);
 		this->bonusText += "+1 ";
 		this->bonusText += GetTechUnitAttributeName(chosenAttr);
-		this->bonusText += " for ";
+		this->bonusText += " (";
+		this->bonusText += armorTypeText;
+		this->bonusText += ") for ";
 		this->bonusText += applyToNameString.c_str();
 		this->bonusText += NEWLINE;
 	}
@@ -1104,13 +1113,13 @@ double TechTreeCreator::CreateOneBonus() {
 			}
 
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
-			newEffect.SetAttributeAdd(chosenAttr, applyToClass, applyToUnit, 0); // need to set value using SetAttackOrArmor
+			newEffect.SetAttributeAdd(chosenAttr, applyToClass, applyToUnit, 0); // need to set value using SetAttackOrArmorTypeValue
 			if (useMeleeAttack) {
-				newEffect.SetAttackOrArmor(ATTACK_CLASS::CST_AC_BASE_MELEE, attackValue);
+				newEffect.SetAttackOrArmorTypeValue(ATTACK_CLASS::CST_AC_BASE_MELEE, attackValue);
 				assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_MELEE);
 				assert(newEffect.GetValue() == attackValue);
 			} else {
-				newEffect.SetAttackOrArmor(ATTACK_CLASS::CST_AC_BASE_PIERCE, attackValue);
+				newEffect.SetAttackOrArmorTypeValue(ATTACK_CLASS::CST_AC_BASE_PIERCE, attackValue);
 				assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_PIERCE);
 				assert(newEffect.GetValue() == attackValue);
 			}
@@ -1523,7 +1532,6 @@ TTDetailedUnitDef *TechTreeCreator::PickOneRandomRootUnitIdAmongUnitClass(GLOBAL
 
 
 std::string TechTreeCreator::GetDisabledUnitsText() const {
-	std::string result = "";
 	std::list<TTCreatorUnitInfo*> disabledUnits;
 	auto lambdaIsDisabled = [](TTCreatorUnitInfo *lambdaInfo){return lambdaInfo->hasBeenDisabled; };
 	auto it = std::find_if(this->allCreatorUnitInfo.begin(), this->allCreatorUnitInfo.end(), lambdaIsDisabled);
@@ -1532,9 +1540,15 @@ std::string TechTreeCreator::GetDisabledUnitsText() const {
 		disabledUnits.push_back(curUnit);
 		it = std::find_if(++it, this->allCreatorUnitInfo.end(), lambdaIsDisabled);
 	}
-
+	
+	std::string result = "";
 	disabledUnits.sort([](TTCreatorUnitInfo *elem, TTCreatorUnitInfo *elem2) {
 		if (elem->trainLocation != elem2->trainLocation) { return elem->trainLocation < elem2->trainLocation; }
+		STRUCT_UNITDEF_TRAINABLE *ud1 = elem->unitDetail->GetUnitDef();
+		STRUCT_UNITDEF_TRAINABLE *ud2 = elem2->unitDetail->GetUnitDef();
+		if (ud1 && ud2 && ud1->IsCheckSumValidForAUnitClass() && ud2->IsCheckSumValidForAUnitClass()) {
+			if (ud1->trainButton != ud2->trainButton) { return ud1->trainButton < ud2->trainButton; }
+		}
 		if (elem->unitDetail->baseUnitId != elem2->unitDetail->baseUnitId) { return elem->unitDetail->baseUnitId < elem2->unitDetail->baseUnitId; }
 		if (elem->unitDetail->requiredAge != elem2->unitDetail->requiredAge) { return elem->unitDetail->requiredAge < elem2->unitDetail->requiredAge; }
 		if (elem->unitDetail->possibleAncestorUnitIDs.size() != elem2->unitDetail->possibleAncestorUnitIDs.size()) { return elem->unitDetail->possibleAncestorUnitIDs.size() < elem2->unitDetail->possibleAncestorUnitIDs.size(); }
