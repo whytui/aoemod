@@ -106,6 +106,30 @@ namespace AOE_STRUCTURES {
 			this->effectValue = ((float)attackOrArmorType) * 256;
 			this->effectValue += value % 256; // amount must be < 256
 		}
+		// Set all fields for Attribute Modifier (multiply) effect. If attribute is armor or attack, please set "value" using SetAttackOrArmor afterwards
+		void SetAttributeMultiply(TECH_UNIT_ATTRIBUTES attribute, GLOBAL_UNIT_AI_TYPES unitClass, short int unitDefId, float multiplierValue) {
+			this->effectType = TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT;
+			this->effectAttribute = attribute;
+			this->effectClass = unitClass;
+			this->effectUnit = unitDefId;
+			this->effectValue = multiplierValue;
+		}
+		// Set all fields for Attribute Modifier (add) effect. If attribute is armor or attack, please set "value" using SetAttackOrArmor afterwards
+		void SetAttributeAdd(TECH_UNIT_ATTRIBUTES attribute, GLOBAL_UNIT_AI_TYPES unitClass, short int unitDefId, float multiplierValue) {
+			this->effectType = TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD;
+			this->effectAttribute = attribute;
+			this->effectClass = unitClass;
+			this->effectUnit = unitDefId;
+			this->effectValue = multiplierValue;
+		}
+		// Set all fields for a Resource Multiply effect
+		void SetResourceMultiply(short int resourceId, float multiplierValue) {
+			this->effectType = TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT;
+			this->effectAttribute = -1;// unused
+			this->effectClass = -1; // unused
+			this->effectUnit = resourceId;
+			this->effectValue = multiplierValue;
+		}
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");
 

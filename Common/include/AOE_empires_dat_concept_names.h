@@ -12,7 +12,7 @@ namespace AOE_CONST_FUNC {
 		"Artefact",
 		"Trade Boat",
 		"Building",
-		"TribeAIGroupCivilian",
+		"Civilian",
 		"Sea Fish",
 		"Barracks Infantry", // TribeAIGroupFootSoldier
 		"Berry Bush",
