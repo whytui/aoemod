@@ -929,7 +929,7 @@ double TechTreeCreator::CreateOneBonus() {
 	TECH_UNIT_ATTRIBUTES chosenAttr = bestAttrElem.first;
 	double chosenAttrWeight = bestAttrElem.second.weight;
 	propsByAttribute.clear();
-	const char *className = GetUnitClassName(chosenClass);
+	//const char *className = GetUnitClassName(chosenClass);
 	this->classesWithBonus.insert(chosenClass);
 
 
@@ -979,19 +979,36 @@ double TechTreeCreator::CreateOneBonus() {
 
 	if (maxBonusRate < 0) { maxBonusRate = 0; }
 	if (minBonusRate > maxBonusRate) { minBonusRate = maxBonusRate; }
+	
+	this->CreateOneBonusEffect(chosenClass, chosenAttr, minBonusRate, maxBonusRate);
+
+	result = (chosenWeight + chosenAttrWeight) / 2;
+	return result;
+}
+
+
+void TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES bonusUnitClass,
+	TECH_UNIT_ATTRIBUTES unitAttr, int minBonusRate, int maxBonusRate) {
+	const char *className = GetUnitClassName(bonusUnitClass);
+	bool isPriest = (bonusUnitClass == TribeAIGroupPriest);
+	bool isMelee = (bonusUnitClass == TribeAIGroupChariot) || (bonusUnitClass == TribeAIGroupElephantRider) ||
+		(bonusUnitClass == TribeAIGroupFootSoldier) || (bonusUnitClass == TribeAIGroupMountedSoldier) ||
+		(bonusUnitClass == TribeAIGroupPhalanx); // true if chosen class represents military melee units
+
 	float rndMultiplier = 1 + (((float)randomizer.GetRandomValue_normal_moderate(minBonusRate, maxBonusRate)) / 100.0f);
 
 	// Create bonus
-	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES applyToClass = chosenClass; // dest tech effect class id
+	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES applyToClass = bonusUnitClass; // dest tech effect class id
 	short int applyToUnit = -1; // dest tech effect unit id
 
 	// Cases when we apply to restricted units
-	if (unitLinesByUnitClass[chosenClass] == 1) {
+#pragma message("WARNING: FIXME (uncomment)" __FILE__ ":" __LINE__)
+	/*if (unitLinesByUnitClass[bonusUnitClass] == 1) {
 		// apply to unit specifically. Avoids having bonus on "cavalry" class when only available unit is scout !
-		TTDetailedUnitDef *theUnit = this->PickOneRandomRootUnitIdAmongUnitClass(chosenClass, -1);
+		TTDetailedUnitDef *theUnit = this->PickOneRandomRootUnitIdAmongUnitClass(bonusUnitClass, -1);
 		applyToUnit = (short int)theUnit->unitDefId;
 		applyToClass = AOE_CONST_FUNC::TribeAINone;
-	}
+	}*/
 
 	std::string applyToNameString = "class "; // localized name of affected class/unit
 	applyToNameString += className;
@@ -1005,26 +1022,27 @@ double TechTreeCreator::CreateOneBonus() {
 		}
 	}
 
-	if ((chosenAttr == TUA_HP) || (chosenAttr == TUA_SPEED)) {
+	if ((unitAttr == TUA_HP) || (unitAttr == TUA_SPEED)) {
 		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
-		newEffect.SetAttributeMultiply(chosenAttr, applyToClass, applyToUnit, rndMultiplier);
+		newEffect.SetAttributeMultiply(unitAttr, applyToClass, applyToUnit, rndMultiplier);
 		techTreeEffects.push_back(newEffect);
 		this->bonusText += "Increase ";
-		this->bonusText += GetTechUnitAttributeName(chosenAttr);
+		this->bonusText += GetTechUnitAttributeName(unitAttr);
 		this->bonusText += " by ";
-		this->bonusText += std::to_string((int)(rndMultiplier*100) - 100);
+		this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
 		this->bonusText += "% for ";
 		this->bonusText += applyToNameString.c_str();
 		this->bonusText += NEWLINE;
 	}
 
-	if (chosenAttr == TUA_RANGE) { // Range and line of sight
+	if (unitAttr == TUA_RANGE) { // Range and line of sight
 		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 		newEffect.SetAttributeAdd(TUA_RANGE, applyToClass, applyToUnit, 1.0f);
-		if ((chosenClass == TribeAIGroupSiegeWeapon) || (chosenClass == TribeAIGroupPriest)) {
+		if ((bonusUnitClass == TribeAIGroupSiegeWeapon) || (bonusUnitClass == TribeAIGroupPriest)) {
 			if (rndMultiplier > 1.175) {
 				newEffect.effectValue = 2;
-				chosenAttrWeight += 0.1;
+#pragma message("WARNING: FIXME (uncomment)" __FILE__ ":" __LINE__)
+				//chosenAttrWeight += 0.1; // TODO pass variable ?
 			}
 		}
 		techTreeEffects.push_back(newEffect);
@@ -1039,7 +1057,7 @@ double TechTreeCreator::CreateOneBonus() {
 
 		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect2;
 		newEffect2.SetAttributeAdd(TUA_LOS, applyToClass, applyToUnit, 1);
-		if ((chosenClass == TribeAIGroupSiegeWeapon) || (chosenClass == TribeAIGroupPriest) || (chosenClass == TribeAIGroupUnused_Tower)) {
+		if ((bonusUnitClass == TribeAIGroupSiegeWeapon) || (bonusUnitClass == TribeAIGroupPriest) || (bonusUnitClass == TribeAIGroupUnused_Tower)) {
 			if (rndMultiplier > 1.175) {
 				newEffect.effectValue = 2;
 			}
@@ -1047,7 +1065,7 @@ double TechTreeCreator::CreateOneBonus() {
 		techTreeEffects.push_back(newEffect2);
 	}
 
-	if (chosenAttr == TUA_ARMOR) {
+	if (unitAttr == TUA_ARMOR) {
 		ATTACK_CLASS armorToImprove = ATTACK_CLASS::CST_AC_BASE_MELEE;
 		int tmpRnd = randomizer.GetRandomNonZeroPercentageValue();
 		std::string armorTypeText = "melee";
@@ -1056,13 +1074,13 @@ double TechTreeCreator::CreateOneBonus() {
 			armorTypeText = "pierce";
 		}
 		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
-		newEffect.SetAttributeAdd(chosenAttr, applyToClass, applyToUnit, 0); // need to set value using SetAttackOrArmorTypeValue
+		newEffect.SetAttributeAdd(unitAttr, applyToClass, applyToUnit, 0); // need to set value using SetAttackOrArmorTypeValue
 		newEffect.SetAttackOrArmorTypeValue(armorToImprove, 1);
 		assert(newEffect.GetAttackOrArmorType() == armorToImprove);
 		assert(newEffect.GetValue() == 1);
 		techTreeEffects.push_back(newEffect);
 		this->bonusText += "+1 ";
-		this->bonusText += GetTechUnitAttributeName(chosenAttr);
+		this->bonusText += GetTechUnitAttributeName(unitAttr);
 		this->bonusText += " (";
 		this->bonusText += armorTypeText;
 		this->bonusText += ") for ";
@@ -1070,7 +1088,7 @@ double TechTreeCreator::CreateOneBonus() {
 		this->bonusText += NEWLINE;
 	}
 
-	if (chosenAttr == TUA_ATTACK) {
+	if (unitAttr == TUA_ATTACK) {
 		if (isPriest) {
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 			newEffect.SetAttributeMultiply(TUA_WORK_RATE, applyToClass, applyToUnit, rndMultiplier);
@@ -1084,8 +1102,8 @@ double TechTreeCreator::CreateOneBonus() {
 			int attackValue = 1;
 			bool useMeleeAttack = isMelee;
 
-			if (chosenClass == TribeAIGroupSiegeWeapon) {
-				TTDetailedUnitDef *pickedUnitDtl = this->PickOneRandomRootUnitIdAmongUnitClass(chosenClass, -1);
+			if (bonusUnitClass == TribeAIGroupSiegeWeapon) {
+				TTDetailedUnitDef *pickedUnitDtl = this->PickOneRandomRootUnitIdAmongUnitClass(bonusUnitClass, -1);
 				applyToUnit = (short int)pickedUnitDtl->unitDefId;
 				applyToClass = AOE_CONST_FUNC::TribeAINone;
 				if (applyToUnit >= 0) {
@@ -1113,7 +1131,7 @@ double TechTreeCreator::CreateOneBonus() {
 			}
 
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
-			newEffect.SetAttributeAdd(chosenAttr, applyToClass, applyToUnit, 0); // need to set value using SetAttackOrArmorTypeValue
+			newEffect.SetAttributeAdd(unitAttr, applyToClass, applyToUnit, 0); // need to set value using SetAttackOrArmorTypeValue
 			if (useMeleeAttack) {
 				newEffect.SetAttackOrArmorTypeValue(ATTACK_CLASS::CST_AC_BASE_MELEE, attackValue);
 				assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_MELEE);
@@ -1127,18 +1145,18 @@ double TechTreeCreator::CreateOneBonus() {
 			this->bonusText += "+";
 			this->bonusText += std::to_string(attackValue);
 			this->bonusText += " ";
-			this->bonusText += GetTechUnitAttributeName(chosenAttr);
+			this->bonusText += GetTechUnitAttributeName(unitAttr);
 			this->bonusText += " for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
 		}
 	}
 
-	if (chosenAttr == TUA_ATTACK_RELOAD_TIME) {
+	if (unitAttr == TUA_ATTACK_RELOAD_TIME) {
 		if (!isPriest) {
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 			float fixedMult = (2.f - rndMultiplier); // Is calculated bonus is 25% (1.25), then use (2-1.25)=0.75 factor on reload time (-25%)
-			newEffect.SetAttributeMultiply(chosenAttr, applyToClass, applyToUnit, fixedMult); // Diminish reload time to improve attack efficiency
+			newEffect.SetAttributeMultiply(unitAttr, applyToClass, applyToUnit, fixedMult); // Diminish reload time to improve attack efficiency
 			techTreeEffects.push_back(newEffect);
 			this->bonusText += "Increase attack speed by ";
 			this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
@@ -1158,18 +1176,18 @@ double TechTreeCreator::CreateOneBonus() {
 		}
 	}
 
-	if (chosenAttr == TUA_RESOURCE_CAPACITY) { // fishing ships, villager (pick one only !)
-		if (chosenClass == TribeAIGroupTradeBoat) {
+	if (unitAttr == TUA_RESOURCE_CAPACITY) { // fishing ships, villager (pick one only !)
+		if (bonusUnitClass == TribeAIGroupTradeBoat) {
 			applyToClass = TribeAIGroupTradeBoat;
 		}
-		if (chosenClass == TribeAIGroupTransportBoat) {
+		if (bonusUnitClass == TribeAIGroupTransportBoat) {
 			applyToClass = TribeAIGroupTransportBoat;
 		}
 
-		if (chosenClass == TribeAIGroupFishingBoat) {
+		if (bonusUnitClass == TribeAIGroupFishingBoat) {
 			applyToClass = TribeAIGroupFishingBoat;
-		} 
-		if (chosenClass == TribeAIGroupCivilian) {
+		}
+		if (bonusUnitClass == TribeAIGroupCivilian) {
 			int villagerRnd = randomizer.GetRandomValue(1, 6);
 			switch (villagerRnd) {
 			case 1:applyToUnit = CST_UNITID_MINERGOLD; break;
@@ -1189,7 +1207,7 @@ double TechTreeCreator::CreateOneBonus() {
 				}
 			}
 		}
-		
+
 		if ((applyToUnit >= 0) || (applyToClass >= 0)) {
 			float tmpHalf = ((maxBonusRate - minBonusRate) / 2.f) + minBonusRate;
 			float carryCapacityAdd = 2;
@@ -1204,19 +1222,19 @@ double TechTreeCreator::CreateOneBonus() {
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffectWR;
 			newEffectWR.SetAttributeMultiply(TUA_WORK_RATE, applyToClass, applyToUnit, rndMultiplier);
 			techTreeEffects.push_back(newEffectWR);
-			
+
 			this->bonusText += "+";
 			this->bonusText += std::to_string((int)carryCapacityAdd);
 			this->bonusText += " carry amount for ";
-			this->bonusText += applyToNameString.c_str();			
+			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
 		}
 	}
 
-	if (chosenAttr == TUA_ADD_COST_AMOUNT) {
+	if (unitAttr == TUA_ADD_COST_AMOUNT) {
 		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 		float fixedMult = (2.f - rndMultiplier); // Is calculated bonus is 25% (1.25), then use (2-1.25)=0.75 factor on costs
-		newEffect.SetAttributeMultiply(chosenAttr, applyToClass, applyToUnit, fixedMult);
+		newEffect.SetAttributeMultiply(unitAttr, applyToClass, applyToUnit, fixedMult);
 		techTreeEffects.push_back(newEffect);
 		this->bonusText += "Decrease cost by ";
 		this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
@@ -1224,9 +1242,6 @@ double TechTreeCreator::CreateOneBonus() {
 		this->bonusText += className;
 		this->bonusText += NEWLINE;
 	}
-
-	result = (chosenWeight + chosenAttrWeight) / 2;
-	return result;
 }
 
 

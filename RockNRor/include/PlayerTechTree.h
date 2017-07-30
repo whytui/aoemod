@@ -262,6 +262,9 @@ private:
 	// Create one civ bonus
 	double CreateOneBonus();
 
+	void CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES bonusUnitClass, TECH_UNIT_ATTRIBUTES unitAttr, 
+		int minBonusRate, int maxBonusRate);
+
 	// Choose one of the upgrade of rootUnitInfo (or rootUnitInfo) that will be the first unit from the lineage to be unavailable.
 	TTCreatorUnitInfo *PickUnitUpgradeToDisableInUnitLine(TTCreatorUnitInfo *rootUnitInfo);
 
@@ -279,6 +282,7 @@ private:
 	// Randomly selects 1 non-disabled root unit in provided unit class. NULL if not found.
 	// Use minimumRequiredAgeResearchId to filter on units >= provided age. E.g. CST_RSID_TOOL_AGE
 	TTDetailedUnitDef *PickOneRandomRootUnitIdAmongUnitClass(GLOBAL_UNIT_AI_TYPES unitClass, int minimumRequiredAgeResearchId);
+
 };
 
 
