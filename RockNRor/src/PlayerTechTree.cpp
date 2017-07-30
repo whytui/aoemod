@@ -694,11 +694,15 @@ void TechTreeCreator::CreateDisableResearchesEffects() {
 		addedCount += disabledChildren.size();
 		for each (TTCreatorResearchInfo *child in disabledChildren)
 		{
+			if (child->isFakeForDisableUnit) {
+				addedCount--; // compensate: do not count this research (ignore shadow researches)
+				continue; 
+			}
 			if (child->researchLocation == AOE_CONST_FUNC::CST_UNITID_TEMPLE) {
 				if (templeResearchesDoNotCountMoreThan > 0) {
 					templeResearchesDoNotCountMoreThan--;
 				} else {
-					addedCount--; // compensate: do not count this researches (too many temple researches have been disabled, do not count them anymore)
+					addedCount--; // compensate: do not count this research (too many temple researches have been disabled, do not count them anymore)
 				}
 			}
 		}
@@ -802,67 +806,74 @@ double TechTreeCreator::CreateOneBonus() {
 		}
 	}
 	
-	
-	std::map<GLOBAL_UNIT_AI_TYPES, double> weightByUnitClass;
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, 0.35));
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.2));
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, 0.55));
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, 0.4));
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.15));
-	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, 0.10)); // is water map
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, 0.35));
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, 0.4));
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier, 0.55));
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher, 0.7));
+	std::map<GLOBAL_UNIT_AI_TYPES, BonusGenProperties> propsByUnitClass;
+	// propsByUnitClass.insert => Unit class, { weight, probabilityCoeff }
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, { 0.35, 0.9 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, { 0.2, 0.85 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, { 0.55, 1 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, { 0.4, 0.95 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, { 0.20, 0.80 }));
+	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, { 0.10, 0.70 })); // is water map
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, { 0.35, 1 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, { 0.4, 1 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier, { 0.55, 1 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher, { 0.7, 1 }));
 	// TODO: for TribeAIGroupMountedSoldier, treat unit by unit ?
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier, 0.4)); // cavalry+scout+camel
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx, 0.5));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier, { 0.4, 1 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx, { 0.5, 1 }));
 	if (this->religionLevel > 3) {
 		// Exclude bonus for priest for civs with bad temple. For religion levels 4-5 only.
-		weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, 0.65));
+		if (this->religionLevel == 4) {
+			propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, { 0.65, 0.9 }));
+		} else {
+			// Temple bonus is likely to happen on very-good temple civs
+			propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, { 0.65, 1.1 }));
+		}
 	}
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon, 0.7));
-	weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger, 0.2));
-	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWarBoat, 0.3)); // is water map ?
-	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall, 0.)); // walls suck
-	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat, 0.05));
-	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTransportBoat, 0.05));
-	//weightByUnitClass.insert(std::pair<GLOBAL_UNIT_AI_TYPES, double>(GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower, 0.45)); // do not use as is
-	
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon, { 0.7, 1 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger, { 0.2, 0.75 }));
+	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWarBoat, { 0.3, 1 })); // is water map ?
+	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall, { 0., 1 })); // walls suck
+	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat, { 0.05, 0.7 }));
+	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTransportBoat, { 0.05, 0.7 }));
+	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower, { 0.45, 1 })); // do not use class as is
 	// TribeAIGroupUnusedHealer => just to improve medecine ?
 	// TribeAIGroupUnused_Farm => just to improve production ?
 
+	
+	// TODO: modify probacoeff according to super unit availability ?
+
 	// Remove from list classes that already benefit from a civ bonus
 	// Also remove classes with no unit (might have been disabled)
-	for (auto iter = weightByUnitClass.begin(); iter != weightByUnitClass.end();) {
+	for (auto iter = propsByUnitClass.begin(); iter != propsByUnitClass.end();) {
 		GLOBAL_UNIT_AI_TYPES curClass = (*iter).first;
 		auto ittmp = std::find(this->classesWithBonus.begin(), this->classesWithBonus.end(), curClass);
 		bool toRemove = (ittmp != this->classesWithBonus.end()); // If already a bonus, remove
 		toRemove |= (unitLinesByUnitClass[curClass] == 0); // If no impacted unit, remove too
 		if (toRemove) {
 			// Found: current unit class already got a bonus, exclude from "eligible" for this round
-			weightByUnitClass.erase(iter++);
+			propsByUnitClass.erase(iter++);
 		} else {
 			iter++;
 		}
 	}
 
 	int bestRandom = -1;
-	std::pair<GLOBAL_UNIT_AI_TYPES, double> bestElem;
-	for each (std::pair<GLOBAL_UNIT_AI_TYPES, double> elem in weightByUnitClass)
+	BonusGenUCPPair bestElem;
+	for each (BonusGenUCPPair elem in propsByUnitClass)
 	{
-		int curRnd = randomizer.GetRandomValue(0, 100000);
+		int curRnd = randomizer.GetRandomValue(0, (int)trunc(100000. * elem.second.probabilityCoeff));
 		if (curRnd > bestRandom) {
 			bestRandom = curRnd;
 			bestElem = elem;
 		}
 	}
 	GLOBAL_UNIT_AI_TYPES chosenClass = bestElem.first;
-	double chosenWeight = bestElem.second;
+	double chosenWeight = bestElem.second.weight;
 	// Remove chosen one from list
-	for (auto iter = weightByUnitClass.begin(); iter != weightByUnitClass.end();) {
+	for (auto iter = propsByUnitClass.begin(); iter != propsByUnitClass.end();) {
 		if ((*iter).first == chosenClass) {
-			weightByUnitClass.erase(iter++);
+			propsByUnitClass.erase(iter++);
 		} else {
 			iter++;
 		}
@@ -880,42 +891,44 @@ double TechTreeCreator::CreateOneBonus() {
 	bool isMilitary = (isRanged || isMelee ||isPriest);
 
 
-	std::map<TECH_UNIT_ATTRIBUTES, double> weightByAttribute;
-	weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_HP, 0.5));
+	std::map<TECH_UNIT_ATTRIBUTES, BonusGenProperties> propsByAttribute;
+	propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_HP, { 0.5, 1.1 }));
+	
 	if (chosenClass != TribeAIGroupCivilian) {
-		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ADD_COST_AMOUNT, 0.5));
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_ADD_COST_AMOUNT, { 0.5, 1.1 }));
 	}
 	if (isMilitary) {
-		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ARMOR, 0.55));
-		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ATTACK, 0.5));
-		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_ATTACK_RELOAD_TIME, 0.5));
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_ARMOR, { 0.55, 0.9 }));
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_ATTACK, { 0.5, 1 }));
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_ATTACK_RELOAD_TIME, { 0.5, 0.85 }));
 	}
 	if (isRanged) {
-		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_RANGE, 0.5)); // + LOS
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RANGE, { 0.5, 1 })); // + LOS
 	}
 	// add TUA_INTELLIGENT_PROJECTILE ??
 	// Note: avoid speed bonus on fast archers
 	if ((chosenClass != TribeAIGroupBuilding) && (chosenClass != TribeAIGroupUnused_Tower) &&
+		(chosenClass != TribeAIGroupUnused_Farm) && (chosenClass != TribeAIGroupWall) &&
 		(chosenClass != TribeAIGroupHorseArcher) && (chosenClass != TribeAIGroupChariotArcher)) {
-		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_SPEED, 0.6));
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_SPEED, { 0.6, 1 }));
 	}
 	if ((chosenClass == TribeAIGroupCivilian) || (chosenClass == TribeAIGroupFishingBoat)) {
-		weightByAttribute.insert(std::pair<TECH_UNIT_ATTRIBUTES, double>(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, 0.4)); // for villagers/fishing ships + work rate ?
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, { 0.5, 1.2 }));
 	}
 	
 	int bestAttrRandom = -1;
-	std::pair<TECH_UNIT_ATTRIBUTES, double> bestAttrElem;
-	for each (auto elem in weightByAttribute)
+	BonusGenAttrPPair bestAttrElem;
+	for each (auto elem in propsByAttribute)
 	{
-		int curRnd = randomizer.GetRandomValue(0, 100000);
+		int curRnd = randomizer.GetRandomValue(0, (int)trunc(100000. * elem.second.probabilityCoeff));
 		if (curRnd > bestAttrRandom) {
 			bestAttrRandom = curRnd;
 			bestAttrElem = elem;
 		}
 	}
 	TECH_UNIT_ATTRIBUTES chosenAttr = bestAttrElem.first;
-	double chosenAttrWeight = bestAttrElem.second;
-	weightByAttribute.clear();
+	double chosenAttrWeight = bestAttrElem.second.weight;
+	propsByAttribute.clear();
 	const char *className = GetUnitClassName(chosenClass);
 	this->classesWithBonus.insert(chosenClass);
 
@@ -925,28 +938,47 @@ double TechTreeCreator::CreateOneBonus() {
 	if (chosenAttr == TUA_HP) {
 		if ((chosenClass == TribeAIGroupBuilding) || (chosenClass == TribeAIGroupUnused_Tower) || 
 			(chosenClass == TribeAIGroupUnused_Farm) || (chosenClass == TribeAIGroupWall)) {
-			minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_QUITE_GOOD; // So that bonus is in [+20%, +35%] (a bit less for buildings/towers/walls)
-			maxBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MAX_RATE_QUITE_GOOD;
+			minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_BETTER;
+			maxBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MAX_RATE_BASE;
 		} else {
-			minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_GOOD; // So that bonus is in [+25%, +40%]
-			maxBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MAX_RATE_GOOD;
+			if ((chosenClass == TribeAIGroupElephantArcher) || (chosenClass == TribeAIGroupElephantRider)) {
+				minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_BASE;
+				maxBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MAX_RATE_BASE; // no more than +25% HP for elephants, already a lot
+			} else {
+				minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_GOOD; // So that bonus is in [+25%, +40%]
+				maxBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MAX_RATE_GOOD;
+			}
 		}
 	}
 	if (chosenAttr == TUA_SPEED) { // Increase speed: allow higher bonus (not too much for 'already fast' units though)
-		if ((chosenClass != TribeAIGroupChariot) &&
-			(chosenClass != TribeAIGroupChariotArcher) &&
-			(chosenClass != TribeAIGroupCivilian) &&
-			(chosenClass != TribeAIGroupHorseArcher) &&
-			(chosenClass != TribeAIGroupMountedSoldier)) {
-			minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_QUITE_GOOD; // So that bonus is in [+20%, +35%]
-			maxBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MAX_RATE_QUITE_GOOD;
-		} else {
-			minBonusRate += 5; // So that bonus is in [+15%, +25%]
+		if ((chosenClass == TribeAIGroupElephantArcher) ||
+			(chosenClass == TribeAIGroupElephantRider) ||
+			(chosenClass == TribeAIGroupPhalanx) ||
+			(chosenClass == TribeAIGroupSiegeWeapon) ||
+			(chosenClass == TribeAIGroupFootSoldier) ||
+			(chosenClass == TribeAIGroupWarBoat)) {
+			minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_BETTER;
+			maxBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MAX_RATE_BETTER;
 		}
 	}
 	if (chosenAttr == TUA_ADD_COST_AMOUNT) {
-		minBonusRate += 5; // So that bonus is in [-15%, -25%]
+		if ((chosenClass == TribeAIGroupArcher) ||
+			(chosenClass == TribeAIGroupCivilian) ||
+			(chosenClass == TribeAIGroupFishingBoat) ||
+			(chosenClass == TribeAIGroupFootSoldier) ||
+			(chosenClass == TribeAIGroupSlinger) ||
+			(chosenClass == TribeAIGroupBuilding) ||
+			(chosenClass == TribeAIGroupUnused_Farm)
+			) {
+			// Buildings and low-cost units: limit the cost drop !
+			maxBonusRate -= 5;
+		} else {
+			minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_BETTER;; // So that bonus is in [-15%, -25%]
+		}
 	}
+
+	if (maxBonusRate < 0) { maxBonusRate = 0; }
+	if (minBonusRate > maxBonusRate) { minBonusRate = maxBonusRate; }
 	float rndMultiplier = 1 + (((float)randomizer.GetRandomValue_normal_moderate(minBonusRate, maxBonusRate)) / 100.0f);
 
 	// Create bonus
@@ -1319,7 +1351,6 @@ std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnResearch
 	for each (TTDetailedResearchDef *childDetail in resInfo->researchDetail->allChildResearches)
 	{
 		long int childDetailResId = childDetail->GetResearchDefId();
-		if (childDetail->IsShadowResearch()) { continue; }
 		if ((childDetailResId >= AOE_CONST_FUNC::CST_RSID_STONE_AGE) && (childDetailResId <= AOE_CONST_FUNC::CST_RSID_IRON_AGE)) {
 			continue; // don't mess with ages
 		}
@@ -1331,7 +1362,7 @@ std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnResearch
 			// Not found: either the *child* research is a "unit disable" tech or it is a research we do NOT want to disable
 			for each (TTDetailedTrainableUnitDef *enTrainable in childDetail->enableTrainables)
 			{
-				std::list<TTCreatorResearchInfo*> tmpRes = this->CreateDisableEffectOnUnit(enTrainable); // Can happen, for example legion (when fanaticism is disabled)
+				std::list<TTCreatorResearchInfo*> tmpRes = this->CreateDisableEffectOnUnit(enTrainable); // Can happen, for example legion (when fanaticism is disabled), chariot(wheel)...
 				for each (auto x in tmpRes)
 				{
 					result.push_back(x);
@@ -1340,7 +1371,7 @@ std::list<TTCreatorResearchInfo*> TechTreeCreator::CreateDisableEffectOnResearch
 		} else {
 			child = *it; // we know this research
 		}
-		if (child && !child->hasBeenDisabled) {
+		if (child && !child->hasBeenDisabled && !childDetail->IsShadowResearch()) {
 			// This is done for all children
 			STRUCT_TECH_DEF_EFFECT newEffect;
 			newEffect.effectType = AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH;

@@ -157,11 +157,19 @@ namespace TT_CONFIG {
 
 	static const int GEN_BONUS_MIN_RATE_BASE = 10; // "Base" minimum % improvement for generated bonus (can be adjusted)
 	static const int GEN_BONUS_MAX_RATE_BASE = 25; // "Base" maximum % improvement for generated bonus (can be adjusted)
-	static const int GEN_BONUS_MIN_RATE_QUITE_GOOD = 20; // Min % improvement for bonus that needs a decent value to be useful: e.g. HP (buildings)
-	static const int GEN_BONUS_MAX_RATE_QUITE_GOOD = 35; // Max % improvement for bonus that needs a decent value to be useful: e.g. HP (buildings)
+	static const int GEN_BONUS_MIN_RATE_BETTER = 15; // Min % improvement for bonus that needs a decent value to be useful: e.g. HP (buildings)
+	static const int GEN_BONUS_MAX_RATE_BETTER = 30; // Max % improvement for bonus that needs a decent value to be useful: e.g. HP (buildings)
 	static const int GEN_BONUS_MIN_RATE_GOOD = 25; // Min % improvement for bonus that needs a decent value to be useful: e.g. speed, HP
 	static const int GEN_BONUS_MAX_RATE_GOOD = 40; // Max % improvement for bonus that needs a decent value to be useful: e.g. speed, HP
 }
+
+
+struct BonusGenProperties {
+	double weight;
+	double probabilityCoeff; // Coefficient 0-1 that affects probability of choosing this class for a bonus. Default=1. Use values like 1.20 or 0.80 to add/drop 20% chances, etc
+};
+typedef std::pair<GLOBAL_UNIT_AI_TYPES, BonusGenProperties> BonusGenUCPPair; // For unitClass-genProperties pair
+typedef std::pair<TECH_UNIT_ATTRIBUTES, BonusGenProperties> BonusGenAttrPPair; // For unitAttribute-genProperties pair
 
 
 // Class that allows creating dynamic tech tree, based on tech tree analyzer
