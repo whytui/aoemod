@@ -674,6 +674,7 @@ void RockNRorInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetUnitDef = target->unitDefinition;
 	
 	bool allTechs = (actorPlayer && (actorPlayer->techTreeId < 0));
+	allTechs |= ROCKNROR::crInfo.myGameObjects.doNotApplyHardcodedCivBonus;
 	char civIdToUse = allTechs ? 0 : targetPlayer->civilizationId; // If all techs, do NOT apply hardcoded civ bonuses
 
 	// Compute resistance

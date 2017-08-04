@@ -1015,8 +1015,9 @@ void RockNRorCommand::OnGameStart() {
 		}
 	}
 
+	// This block fixes some flags if needed: isScenario, isDeathMatch, player->techTreeId, scInfo->fullTechTree
 	if (settings->isSavedGame) {
-		// Fix IsScenario flag to correct value (not set when a game is loaded)
+		// Fix IsScenario flag to correct value (not set when a game is *loaded*)
 		settings->rgeGameOptions.isScenario = 0; // Default: consider it is not a scenario
 		// Guess if it is a scenario from scenario information
 		if (scInfo && scInfo->IsCheckSumValid()) {
@@ -1047,9 +1048,11 @@ void RockNRorCommand::OnGameStart() {
 				}
 			}
 		}
-	} else {
+	}
+	// For new games (RM/DM) = exclude saved games, exclude campaign/scenario : put some info in scenarioInfo so that they get saved in savegame files.
+	if (!settings->isSavedGame && !settings->rgeGameOptions.isScenario && !settings->isCampaign) {
 		if (scInfo && settings->allTechs) {
-			scInfo->fullTechTree = 1; // this field is saved, but not initialized in standard code, so we do the init here.
+			scInfo->fullTechTree = 1; // this field is saved, but not initialized in standard code (always 0), so we do the init here.
 			for (int i = 0; i < _countof(scInfo->playersStartingAge); i++) {
 				switch (settings->initialAgeChoice) {
 					// Warning: scInfo->playersStartingAge values are a different enum (0-4)
@@ -1073,6 +1076,48 @@ void RockNRorCommand::OnGameStart() {
 		}
 	}
 
+	// Warning: settings->allTechs only makes sense for "new game" (RM/DM). settings->allTechs is set to 0 for scenarios (which is good).
+	bool allTechs = settings->allTechs || (scInfo && scInfo->fullTechTree);
+	ROCKNROR::crInfo.myGameObjects.currentGameHasAllTechs = allTechs; // guarantees that this flag is always consistent with current game.
+	if (allTechs) {
+		ROCKNROR::crInfo.myGameObjects.doNotApplyHardcodedCivBonus = true; // indicates we must not apply Macedonian conversion resistance, palmyra free trade, etc.
+	}
+	if (ROCKNROR::crInfo.myGameObjects.doNotApplyHardcodedCivBonus) {
+		// If "generate tech tree/civ bonus" option is on, flag the game as "full tech tree"
+		// - Tech trees (and other options) have already been applied, so this has no impact on game init
+		// - This information will be saved and available in "load game", so that loaded games will know they must NOT apply hardcoded civ bonuses (macedonian conversion resistance, etc)
+		scInfo->fullTechTree = 1;
+		// We could also set player->techTreeId to -1 so it is consistent for "new games" and "loaded games".
+	}
+
+	if (ROCKNROR::crInfo.myGameObjects.doNotApplyHardcodedCivBonus) {
+		// Make sure hardcoded stuff for civs is disabled when running "all techs" games (or "generated tech tree/civ bonus" games)
+		// Some of those hardcoded values are handled by ROR code in "all techs" games, but NOT in "generated tech tree/civ bonus" games so we need to check it here.
+		int playerTotalCount = global ? global->playerTotalCount : 0;
+		for (int i = 0; i < playerTotalCount; i++) {
+			AOE_STRUCTURES::STRUCT_PLAYER *curPlayer = global->GetPlayerStruct(i);
+			assert(curPlayer && curPlayer->IsCheckSumValid());
+			if (curPlayer->civilizationId == CST_CIVID_PHOENICIAN) {
+				// Lumberjack work rate -0.15 adjustment is NOT applied in when all techs flag is ON (already OK in original code)
+				// TODO: re-read value from empires.dat ? WARNING: this would cancel bonus from tech tree, which would be very unfortunate if "generated tech tree/civ bonus" is ON.
+			}
+			if (curPlayer->civilizationId == CST_CIVID_PALMYRA) {
+				// Free tribute cost bonus is "canceled" in 0x45B975 when all techs flag is ON (already OK in original code)
+				// TODO 004B6F68 no trade tax: hardcoded in method (we can't do anything here - in init)
+				// TODO using crInfo.myGameObjects.doNotApplyHardcodedCivBonus
+			}
+			if (curPlayer->civilizationId == CST_CIVID_MACEDONIAN) {
+				// We CAN'T fix hardcoded conversion resistance here - but RockNRor will use crInfo.myGameObjects.doNotApplyHardcodedCivBonus flag.
+			}
+			if (curPlayer->civilizationId == CST_CIVID_SHANG) {
+				// reduced cost for villager is NOT applied when all techs flag is ON (already OK in original code)
+				// initial food penalty (to compensate villager cost bonus) is NOT applied when all techs flag is ON (already OK in original code)
+			}
+		}
+	} else {
+		// For shang, ensure the -40 initial food value effect is applied => done in ApplyCustomizationOnRandomGameStart method
+	}
+
 	// Check AI initialization for loaded games (fix a saved game bug)
 	this->FixGameStartAIInitForPlayers();
 
@@ -1093,16 +1138,14 @@ void RockNRorCommand::OnGameStart() {
 	// Fix Initial resources in Scenario information (after applying customization, because it includes setting initial resource values.
 	if (!settings->isSavedGame && global) {
 		if (scInfo && scInfo->IsCheckSumValid()) {
-			AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(1);
-			if (!player) {
-				player = global->GetPlayerStruct(0);
-				assert(false && "Could not find player 1");
-			}
-			for (int i = 0; i < _countof(scInfo->startingResources); i++) {
-				scInfo->startingResources[i][CST_RES_ORDER_FOOD] = (long int)player->GetResourceValue(CST_RES_ORDER_FOOD);
-				scInfo->startingResources[i][CST_RES_ORDER_WOOD] = (long int)player->GetResourceValue(CST_RES_ORDER_WOOD);
-				scInfo->startingResources[i][CST_RES_ORDER_STONE] = (long int)player->GetResourceValue(CST_RES_ORDER_STONE);
-				scInfo->startingResources[i][CST_RES_ORDER_GOLD] = (long int)player->GetResourceValue(CST_RES_ORDER_GOLD);
+			for (int playerIndex = 0; playerIndex < _countof(scInfo->startingResources); playerIndex++) {
+				AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(playerIndex + 1);
+				if (player && player->IsCheckSumValid()) {
+					scInfo->startingResources[playerIndex][SCENARIO_INFO_RESOURCE_TYPE::WRT_FOOD] = (long int)player->GetResourceValue(CST_RES_ORDER_FOOD);
+					scInfo->startingResources[playerIndex][SCENARIO_INFO_RESOURCE_TYPE::WRT_WOOD] = (long int)player->GetResourceValue(CST_RES_ORDER_WOOD);
+					scInfo->startingResources[playerIndex][SCENARIO_INFO_RESOURCE_TYPE::WRT_STONE] = (long int)player->GetResourceValue(CST_RES_ORDER_STONE);
+					scInfo->startingResources[playerIndex][SCENARIO_INFO_RESOURCE_TYPE::WRT_GOLD] = (long int)player->GetResourceValue(CST_RES_ORDER_GOLD);
+				}
 			}
 		}
 	}
@@ -1247,6 +1290,13 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
 		for (int rt = 0; rt < 4; rt++) {
 			player->SetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES) rt, (float)initialResources[rt]);
+		}
+		if (!ROCKNROR::crInfo.myGameObjects.doNotApplyHardcodedCivBonus && !isDM) {
+			// After setting initial resources, re-apply shang food penalty to match original code (RM only, if NOT all techs)
+			if (player->civilizationId == CST_CIVID_SHANG) {
+				player->SetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD,
+					player->GetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD) - 40);
+			}
 		}
 	}
 

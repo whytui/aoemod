@@ -54,6 +54,9 @@ public:
 	RockNRorGameObjects();
 	~RockNRorGameObjects();
 
+	bool currentGameHasAllTechs; // Indicates if current game has "all techs" option. Always set, even for saved games.
+	bool doNotApplyHardcodedCivBonus; // Indicates if "hardcoded civilization bonuses" should NOT be applied in current game, eg Macedonian conversion resistance. True if all techs, or if using "generated tech trees".
+
 	void ResetObjects();
 	void FreeAllUnitCustomInfoList();
 	void FreeAllFarmRebuildInfoList();

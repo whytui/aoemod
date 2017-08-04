@@ -73,6 +73,8 @@ RockNRorGameObjects::~RockNRorGameObjects() {
 void RockNRorGameObjects::ResetObjects() {
 	this->FreeAllFarmRebuildInfoList();
 	this->FreeAllUnitCustomInfoList();
+	this->currentGameHasAllTechs = false;
+	this->doNotApplyHardcodedCivBonus = false;
 }
 
 

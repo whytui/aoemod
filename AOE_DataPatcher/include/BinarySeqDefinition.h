@@ -1,5 +1,6 @@
 #include <tchar.h>
 #include <string>
+#include <macroUtil.h>
 
 #pragma once
 
@@ -86,9 +87,6 @@ typedef struct T_COMMON_VAR_BUFFER { unsigned char x[MAX_VAR_SIZE]; } COMMON_VAR
 	SECURE_WriteSequence(binSeqDef, 0, constRootName_prefix##constRootName##_SEQ0); \
 	SECURE_WriteSequence(binSeqDef, 1, constRootName_prefix##constRootName##_SEQ1);
 
-
-// Used in other macros
-#define NOPAREN(...) __VA_ARGS__
 
 
 // Complete set-up of a BinarySeqDefinition that has 1 sequence, without variable

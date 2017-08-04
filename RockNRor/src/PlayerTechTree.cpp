@@ -626,7 +626,7 @@ void TechTreeCreator::UpdateResearchProbabilitiesWithImpacts() {
 
 		// Effects on unit (attributes, etc). Add weight if many units (take care of unit classes !)
 		// TODO
-#pragma message("TODO: effects on units : update weight")
+#pragma TODO("effects on units : update weight")
 	}
 }
 
@@ -1002,7 +1002,7 @@ void TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES 
 	short int applyToUnit = -1; // dest tech effect unit id
 
 	// Cases when we apply to restricted units
-#pragma message("WARNING: FIXME (uncomment)" __FILE__ ":" __LINE__)
+#pragma WARNING("FIXME (uncomment)")
 	/*if (unitLinesByUnitClass[bonusUnitClass] == 1) {
 		// apply to unit specifically. Avoids having bonus on "cavalry" class when only available unit is scout !
 		TTDetailedUnitDef *theUnit = this->PickOneRandomRootUnitIdAmongUnitClass(bonusUnitClass, -1);
@@ -1041,7 +1041,7 @@ void TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES 
 		if ((bonusUnitClass == TribeAIGroupSiegeWeapon) || (bonusUnitClass == TribeAIGroupPriest)) {
 			if (rndMultiplier > 1.175) {
 				newEffect.effectValue = 2;
-#pragma message("WARNING: FIXME (uncomment)" __FILE__ ":" __LINE__)
+#pragma WARNING("FIXME (uncomment)")
 				//chosenAttrWeight += 0.1; // TODO pass variable ?
 			}
 		}
@@ -1328,7 +1328,7 @@ TTCreatorUnitInfo *TechTreeCreator::PickUnitUpgradeToDisableInUnitLine(TTCreator
 	}
 
 	if (rootUnitInfo->rootUnitDisablePolicy == TTCreatorBaseUnitDisableBehavior::TTBUDisableMostlyExclusiveSameClassIron) {
-#pragma message("TTBUDisableMostlyExclusiveSameClassIron not implemented")
+#pragma WARNING("TTBUDisableMostlyExclusiveSameClassIron not implemented")
 		// TODO
 	}
 

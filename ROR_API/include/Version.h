@@ -1,10 +1,9 @@
 #pragma once
 #include <Windows.h>
+#include "../../Common/include/macroUtil.h"
 #include "../../Common/include/gameVersion.h"
 //#include <gameVersion.h> // does not work because it's used by ROR_API.rc !!
 
-#define MACRO_TO_STRING_INTERNAL(s) #s
-#define MACRO_TO_STRING(s) MACRO_TO_STRING_INTERNAL(s)
 #define VERSION_MAJOR     1
 #define VERSION_MINOR     0
 #define VERSION_REVISION  1

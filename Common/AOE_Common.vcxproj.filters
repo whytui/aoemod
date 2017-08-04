@@ -375,6 +375,9 @@
     <ClInclude Include="include\AOE_empires_dat_concept_names.h">
       <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
     </ClInclude>
+    <ClInclude Include="include\macroUtil.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\triggerDefinition.cpp">

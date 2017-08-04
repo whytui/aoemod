@@ -124,7 +124,7 @@ namespace AOE_STRUCTURES {
 	// Warning: all arrays[0x10] are indexed by playerId-1, which means tribeNames[0] is player1's name.
 	class STRUCT_SCENARIO_INFO : public STRUCT_SCENARIO_INFO_BASE {
 	public:
-		long int startingResources[0x10][4]; // +1990. WARNING: resource order = gold/wood/food/stone here !!! Use SCENARIO_INFO_RESOURCE_TYPE as index.
+		long int startingResources[0x10][4]; // +1990. Index=(playerId-1). WARNING: resource order = gold/wood/food/stone here !!! Use SCENARIO_INFO_RESOURCE_TYPE as index.
 		// 0x1A90 - probably a sub-structure of size=0x3160 (last 4 bytes are unused) for victory conditions settings.
 		// Those generalVictory_* are only relevant if generalVictory_mainCondition==4 (custom)
 		long int generalVictory_conquest; // 1 = Standard, Conquest, Score, Time Limit, Custom if Conquest is enabled. ; 0=others. Duplicate with base class ?
@@ -139,11 +139,12 @@ namespace AOE_STRUCTURES {
 		long int hasAlliedVictory[0x10]; // +4BA8. 1=option is checked for that player
 		long int artefactsRequireAll; // +4BE8. 0="at least one", 1="all". Applies to relics, ruins, discoveries ?
 		unsigned long int unknown_4BEC; // +4BEC0. Unused, it seems.
-		long int currentPlayerIdMinusOne; // +4BF0. PlayerId-1 being selected in scenario editor.
+		long int currentPlayerIdMinusOne; // +4BF0. PlayerId-1 being selected in scenario editor (player tab, etc).
 		long int disableTechnologyFlags[0x10][AOE_CONST_INTERNAL::SC_ED_DISABLE_TECHNOLOGY_INDICES::CST_DTI_COUNT]; // +4BF4. Total Size =0x500 bytes. Used in 0x507E50=scenarioInfo.applyDisabledResearches(player)
+		// +50F4 is an array of 3 long int. Index 0=lengthenCombat, 1=?, 2=allTechs. Cf Getter in 0x5076A0 (getter is only used with index 2, beware direct accesses too).
 		long int enableLengthenCombatMode; // +50F4. A flag 0/1. If 1, lengthen combat mode is ON (most units get *3 HP, it is technology 0x64)
-		long int unknown_50F8; // +50F8 ? Unused ?
-		long int fullTechTree; // +50FC. Stored in savegame files, but not initialized in RM/DM games ! (fixed by RockNRor)
+		long int unusedGameMode_50F8; // +50F8. Supposedly another "game mode" option, unused (sure at 99%)
+		long int fullTechTree; // +50FC. Stored in savegame files, but always 0 (fixed by RockNRor) in RM/DM games. Initially supposed to indicate if scenario uses all techs. We extend this to all games in RockNRor.
 		// 0x5100
 		long int playersStartingAge[0x10]; // 1=Tool, 4=post iron (SCENARIO_INFO_AGE_ID). Warning, this does not correspond to CST_AGE_TOOL, etc. Index is playerId-1. Not initialized in RM/DM games ! (fixed by RockNRor)
 		// 0x5140

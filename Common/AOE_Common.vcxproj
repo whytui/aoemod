@@ -155,6 +155,7 @@
     <ClInclude Include="include\DrsFileHelper.h" />
     <ClInclude Include="include\gameVersion.h" />
     <ClInclude Include="include\AOE_structures_drs.h" />
+    <ClInclude Include="include\macroUtil.h" />
     <ClInclude Include="include\mystrings.h" />
     <ClInclude Include="include\pointers.h" />
     <ClInclude Include="include\ROR_API_assert.h" />

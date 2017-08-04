@@ -54,6 +54,9 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 	}
 	if (!global->technologiesInfo) { return false; }
 	int playerCount = global->playerTotalCount - 1; // do not include gaia here.
+	
+	// Indicate to RockNRor that all hardcoded civ bonuses must be disabled for current game (eg macedonian conversion resistance).
+	crInfo.myGameObjects.doNotApplyHardcodedCivBonus = true;
 
 	long int initialTechDefCount = ROCKNROR::crInfo.empiresDatTechDefCount;
 	if (initialTechDefCount <= 0) { return false; } // maybe empires.dat has not been read yet.

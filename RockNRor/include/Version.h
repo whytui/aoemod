@@ -1,11 +1,9 @@
-#include "Windows.h"
+#pragma once
+#include <Windows.h>
+#include "../../Common/include/macroUtil.h"
 #include "../../Common/include/gameVersion.h"
 //#include <gameVersion.h> // does not work because it's used by RockNRor.rc !!
 
-#define MOD_NAME "RockNRor" // Warning: duplicated in RockNRor & RockNRorAdmin projects
-
-#define MACRO_TO_STRING_INTERNAL(s) #s
-#define MACRO_TO_STRING(s) MACRO_TO_STRING_INTERNAL(s)
 #define VERSION_MAJOR     2
 #define VERSION_MINOR     0
 #define VERSION_REVISION  0

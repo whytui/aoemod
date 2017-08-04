@@ -140,7 +140,7 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_FARM_FOOD_AMOUNT = 36, // default 250 ?
 		CST_RES_ORDER_CIVILIAN_POPULATION = 37, // Current number of villagers. Counts TribeAIGroupCivilian, TribeAIGroupFishingBoat, TribeAIGroupTradeBoat
 		CST_RES_ORDER_UNKNOWN_38 = 38, // is this even used ?
-		CST_RES_ORDER_ALL_TECHNOLOGIES = 39,
+		CST_RES_ORDER_ALL_TECHNOLOGIES = 39, // Unused ???
 		// Current number of military units, including towers, living units except (TribeAIGroupPriest, TribeAIGroupCivilian, TribeAIGroupFishingBoat, TribeAIGroupTradeBoat).
 		// All units count as 1 here, even infantry with logistics.
 		CST_RES_ORDER_MILITARY_POPULATION = 40,

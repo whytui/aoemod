@@ -4,6 +4,7 @@
 #include <vector>
 #include <list>
 #include <algorithm>
+#include <macroUtil.h>
 #include <mystrings.h>
 
 #include <AOE_const_language.h>
