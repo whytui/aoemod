@@ -433,6 +433,10 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x00426C91:
 		this->OnAttackableUnitUpdateVisibility(REG_values);
 		break;
+	case 0x4B6F6D:
+	case 0x4F909E:
+		this->ShouldNotApplyPalmyraTradingBonus(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4499,6 +4503,24 @@ void RockNRorInstance::OnAttackableUnitUpdateVisibility(REG_BACKUP *REG_values) 
 			}
 		}
 	}
+}
+
+
+// From 0x4B6F65, 0x4F9097. Test if player should benefit from palmyran trading bonus
+// (*2 on evaluated distance that serves to estimate the amount of gold received)
+// Return: set EAX=0 for default case : all techs OR not palmyra
+// Return: set EAX=1 for palmyra if NOT all techs (originally, this case is hardcoded to "civ=palmyra", which is incorrect in all techs games)
+void RockNRorInstance::ShouldNotApplyPalmyraTradingBonus(REG_BACKUP *REG_values) {
+	bool isFromDockDisplay = (REG_values->return_address == 0x4F909E);
+	
+	AOE_STRUCTURES::STRUCT_PLAYER *player = (AOE_STRUCTURES::STRUCT_PLAYER *)(isFromDockDisplay ? REG_values->EAX_val : REG_values->ECX_val);
+	assert(player && player->IsCheckSumValid());
+	bool applyPalmyraBonus = false;
+
+	if (!ROCKNROR::crInfo.myGameObjects.currentGameHasAllTechs && !ROCKNROR::crInfo.myGameObjects.doNotApplyHardcodedCivBonus) {
+		applyPalmyraBonus = (player->civilizationId == CST_CIVID_PALMYRA);
+	}
+	REG_values->EAX_val = applyPalmyraBonus ? 0 : 1;
 }
 
 

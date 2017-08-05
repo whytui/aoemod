@@ -538,7 +538,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 	}
 	if ((strcmp(command, "noai") == 0) || (strcmp(command, "NOAI") == 0)) {
 		AOE_METHODS::PLAYER::SetAllAIFlags(false);
-		AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(-1 /*TODO*/, "AI is disabled for all players"));
+		AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(42010, "AI is disabled for all players"));
 	}
 	if (strcmp(command, "dump") == 0) {
 #ifdef _DEBUG
@@ -835,6 +835,7 @@ void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 		this->UpdateWorkRateWithMessage(CST_UNITID_FARMER, -1); // Original=0.45
 		// Note for upgrades (techs): if using another value than 0.15, also fix egypt/baby tech trees ! (+palmyra, see below)
 		// Mining: could use +0.09 (would be +20%) ?
+#pragma TODO("Use config for gathering bonus adjustment values")
 		const float miningBonus = 0.15f;
 		const float lumberjackBonus = 0.11f;
 		const float palmyraWorkRateBonus = 0.15f; // enough, even better than tech bonuses. Original = 0.20 for all gatherer types
@@ -843,10 +844,11 @@ void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_GOLD_MINING, CST_UNITID_MINERGOLD, miningBonus); // +33% instead of +67% (was +0.3 / 0.45 initial)
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_SIEGECRAFT, CST_UNITID_MINERSTONE, miningBonus); // +33% instead of +67% (was +0.3 / 0.45 initial). 2nd tech for stone mining (iron age)
 		// Wood cutting work rate improvements :
-		// WARNING: there is a hardcoded addition of -0.15 (decrease, actually) to phoenician to compensate too big bonus on lumberjack ! See 0x50B883.
+		// WARNING: there is a hardcoded addition of -0.15 (decrease, actually) to phoenician to compensate too big bonus on lumberjack ! See 0x50B883, disabled by RemoveHardcodedCivBonusInit BinarySequence.
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_WOODWORKING, CST_UNITID_LUMBERJACK, lumberjackBonus); // +20% instead of +36% (+0.2 / 0.55 initial)
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_ARTISANSHIP, CST_UNITID_LUMBERJACK, lumberjackBonus); // +20% instead of +36% (+0.2 / 0.55 initial)
 		this->UpdateTechAddWorkRateWithMessage(CST_TCH_CRAFTSMANSHIP, CST_UNITID_LUMBERJACK, lumberjackBonus); // +20% instead of +36% (+0.2 / 0.55 initial)
+		this->UpdateTechAddWorkRateWithMessage(CST_TCH_TECH_TREE_PHOENICIAN, CST_UNITID_LUMBERJACK, lumberjackBonus); // +20% instead of +36% (+0.2 / 0.55 initial)
 		// Palmyra tech tree: adjust villager work rate bonuses
 		AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *techDefInfo = global->technologiesInfo;
 		if (techDefInfo && techDefInfo->IsCheckSumValid() && (techDefInfo->technologyCount > CST_TCH_TECH_TREE_PALMYRA)) {
@@ -1098,20 +1100,21 @@ void RockNRorCommand::OnGameStart() {
 			AOE_STRUCTURES::STRUCT_PLAYER *curPlayer = global->GetPlayerStruct(i);
 			assert(curPlayer && curPlayer->IsCheckSumValid());
 			if (curPlayer->civilizationId == CST_CIVID_PHOENICIAN) {
-				// Lumberjack work rate -0.15 adjustment is NOT applied in when all techs flag is ON (already OK in original code)
-				// TODO: re-read value from empires.dat ? WARNING: this would cancel bonus from tech tree, which would be very unfortunate if "generated tech tree/civ bonus" is ON.
+				// Lumberjack work rate -0.15 *harcoded* adjustment has been disabled (binary sequence RemoveHardcodedCivBonusInit)
+				// Nothing to do here (see also OnAfterLoadEmpires_DAT for work rates adjustments)
 			}
 			if (curPlayer->civilizationId == CST_CIVID_PALMYRA) {
 				// Free tribute cost bonus is "canceled" in 0x45B975 when all techs flag is ON (already OK in original code)
-				// TODO 004B6F68 no trade tax: hardcoded in method (we can't do anything here - in init)
-				// TODO using crInfo.myGameObjects.doNotApplyHardcodedCivBonus
+				// This cancellation is useless if empires.dat is fixed: set palmyra civ resource46 to 0.25 like others (an effect exists in palmyra tech tree to set this to 0)
+				// Hardcoded bonus on trading efficiency is fixed in ShouldNotApplyPalmyraTradingBonus using crInfo.myGameObjects.doNotApplyHardcodedCivBonus
 			}
 			if (curPlayer->civilizationId == CST_CIVID_MACEDONIAN) {
 				// We CAN'T fix hardcoded conversion resistance here - but RockNRor will use crInfo.myGameObjects.doNotApplyHardcodedCivBonus flag.
 			}
 			if (curPlayer->civilizationId == CST_CIVID_SHANG) {
-				// reduced cost for villager is NOT applied when all techs flag is ON (already OK in original code)
+				// reduced cost for villager is handled by a tech tree effect from emipres.dat, the hardcoded part has been disabled (binary sequence RemoveHardcodedCivBonusInit) 
 				// initial food penalty (to compensate villager cost bonus) is NOT applied when all techs flag is ON (already OK in original code)
+				// initial food penalty in scenario : we must NOT apply it ! (already ok in original code)
 			}
 		}
 	} else {
@@ -1218,7 +1221,7 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 
 	// TEST
 #ifdef _DEBUG
-	bool useFakeCiv = true;
+	bool useFakeCiv = false;
 	if (useFakeCiv) {
 		this->customCivHandler.CreateFakeRandomCivsForAllPlayers();
 	} else {

@@ -99,7 +99,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 134
+#define COUNT_ROR_API_10c 137
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 
@@ -5475,6 +5475,37 @@ void AOE_binData::InitROR_API_10c() {
 		FM_OFF,
 		FM_ON
 		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		RemoveHardcodedCivBonusInit,
+		"Remove hardcoded Shang villager cost and Phoenician lumberjack work rate changes from game init",
+		0x10B878,
+		(0x80, 0xB9, 0x09, 0x01, 0x00, 0x00, 0x07, 0x75, 0x10, 0x6A, 0x0D),
+		(0x80, 0xB9, 0x09, 0x01, 0x00, 0x00, 0x07, 0xEB, 0x2F, 0x6A, 0x0D),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		PalmyraHardcodedBonusTradingApply,
+		"Fix handling of hardcoded Palmyran bonus on trading efficiency",
+		0xB6F65,
+		(0x8B, 0x4A, 0x0C, 0x80, 0xB9, 0x09, 0x01, 0x00, 0x00, 0x0F, 0x75, 0x02),
+		(0x8B, 0x4A, 0x0C, 0xE8, 0x07, 0x26, 0xF6, 0xFF, 0x85, 0xC0, 0x75, 0x02),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		PalmyraHardcodedBonusTradingDisplayDock,
+		"Fix handling of hardcoded Palmyran bonus on trading efficiency (display)",
+		0xF9097,
+		(0xD8, 0xCB, 0x80, 0xB8, 0x09, 0x01, 0x00, 0x00, 0x0F, 0xDE, 0xC1),
+		(0xD8, 0xCB, 0xE8, 0xD6, 0x04, 0xF2, 0xFF, 0x85, 0xC0, 0xDE, 0xC1),
+		FM_OFF,
+		FM_ON
+		);
+
 
 	//optional
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),

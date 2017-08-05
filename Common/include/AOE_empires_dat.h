@@ -204,22 +204,25 @@ namespace AOE_CONST_FUNC {
 	// For both attack and armor types.
 	enum ATTACK_CLASS: short int {
 		CST_AC_NONE = -1,
-		CST_AC_BALLISTA_ON_BUILDINGS = 0,
+		CST_AC_BALLISTA_ON_BUILDINGS = 0, // Ballista, Helepolis on buildings
 		CST_AC_SLINGER_ON_ARCHERS = 1, // And on towers/walls too
+		CST_AC_CHEAT_UNITS = 2, // Bigdadday, photon man, mirror tower... Units 248,372,383,386,397
 		CST_AC_BASE_PIERCE = 3, // Common archers attack class
-		CST_AC_BASE_MELEE = 4, // The most common attack type
+		CST_AC_BASE_MELEE = 4, // The most common attack type. Melee + catapults.
 		CST_AC_CATAPULTS_ON_BUILDINGS = 6,
 		CST_AC_CHARIOTS_ON_PRIESTS = 7, // Attack class for additional damage on priests
-		CST_AC_CAMEL_ON_CAVALRY = 8, // And on chariots too
+		CST_AC_CAMEL_ON_CAVALRY = 8, // On cavalry/horse archer/chariots
 		CST_AC_CAVALRY_ON_INFANTRY = 9, // on clubmen/short sword + upgrades, NOT on slingers, hoplites...
 		CST_AC_VILLAGER_SIEGECRAFT = 10, // Siegecraft effect: villagers bonus against towers/walls
 		CST_AC_AGGRESSIVE_ANIMAL = 12, // Animal attacks (lion/lion king + alligator king). Only gazelles have armor against this.
 		CST_AC_COUNT
 	};
 
-	// Returns true if attack class is a standard one (like base melee/piercee + "standard" siege weapons attacks), false if it represents some bonus/malus
+	// Returns true if attack class is a standard one (like base melee/piercee + "standard" siege weapons attacks)
+	// Returns false if it represents some bonus/malus over specific units.
 	static bool IsStandardAttack(ATTACK_CLASS a) {
-		return (a == CST_AC_BASE_PIERCE) || (a == CST_AC_BASE_MELEE) || (a == CST_AC_BALLISTA_ON_BUILDINGS) || (a == CST_AC_CATAPULTS_ON_BUILDINGS);
+		return (a == CST_AC_BASE_PIERCE) || (a == CST_AC_BASE_MELEE) || (a == CST_AC_BALLISTA_ON_BUILDINGS) || 
+			(a == CST_AC_CATAPULTS_ON_BUILDINGS) || (a == CST_AC_CHEAT_UNITS);
 	}
 
 	// Refer to 0x4EBB10 to view implementation

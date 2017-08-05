@@ -35,6 +35,8 @@ Running checks on active features in game executable.
 Bienvenue, le plugin RockNRor
 [42009] // Welcome message part 2
 est actif.
+[42010] // AI is disabled for all players
+L'IA a été désactivée pour tous les joueurs
 
 [42085] // "Custom"
 Personnalisé
