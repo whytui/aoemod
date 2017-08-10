@@ -364,6 +364,7 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(AOE_STRUCTURES::
 					if (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_TRAINABLE) {
 						unitClass = TAIUnitClass::AIUCLivingUnit;
 					}
+					if (unitDefBase->unitAIType == TribeAIGroupCivilian) { continue; } // ignore villager so we won't force the research BEFORE villagers ! (nonsense)
 				}
 				AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstElemThisUnit = FindFirstElementInStrategy(fakeFirst, unitClass, unitDefId);
 				if (firstElemThisUnit && firstElemThisUnit->IsCheckSumValid()) {

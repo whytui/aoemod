@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <AOE_struct_game_settings.h>
+#include <UI\AOE_struct_ui_in_game_main.h>
 #include "mainStructuresHandling.h"
 
 
@@ -23,6 +24,10 @@ long int GetAndReCalcPseudoRandomValue();
 
 // Pause/unpause the game
 void SetGamePause(bool pauseOn);
+
+
+// Show/Hide scores (F4 key)
+void ShowScores(bool show);
 
 
 // Get a localized string using ROR method.

@@ -595,6 +595,13 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, 
 			return false; // If technology contains 1 effect "to ignore", ignore the whole thing (example: jihad contains both "good" and undesirable effects)
 		}
 	}
+
+	short int projectileUnitId = -1;
+	if (unitDef->DerivesFromAttackable()) {
+		STRUCT_UNITDEF_ATTACKABLE *attackableDef = (STRUCT_UNITDEF_ATTACKABLE*)unitDef;
+		projectileUnitId = attackableDef->projectileUnitId;
+	}
+
 	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
 		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
 		// Does this affect affect units ?
@@ -605,13 +612,15 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, 
 			)) {
 			if (techEffect->effectUnit == unitDef->DAT_ID1) { return true; }
 			if (techEffect->effectClass == unitDef->unitAIType) { return true; }
+			if (techEffect->effectUnit == projectileUnitId) { return true; }
 		}
 		if (techEffect->IsEnableUnit(unitDef->DAT_ID1)) {
 			return true;
 		}
 		if ((techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT)) {
 			// Upgrade unit : effectClass field is "TO" unit
-			if ((techEffect->effectUnit == unitDef->DAT_ID1) || (techEffect->effectClass == unitDef->DAT_ID1)) {
+			if ((techEffect->effectUnit == unitDef->DAT_ID1) || (techEffect->effectClass == unitDef->DAT_ID1) ||
+				((techEffect->effectUnit == projectileUnitId) && (projectileUnitId >= 0))) {
 				return true;
 			}
 		}

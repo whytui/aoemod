@@ -32,6 +32,32 @@ void SetGamePause(bool pauseOn) {
 }
 
 
+// Show/Hide scores (F4 key)
+void ShowScores(bool show) {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (settings == NULL) { return; }
+	if ((settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) &&
+		(settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_GAME_OVER_BUT_STILL_IN_GAME)) { return; }
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
+	if (!global || !global->IsCheckSumValid()) { return; }
+
+#ifdef GAMEVERSION_ROR10c
+	long int argShow = show ? 1 : 0;
+	STRUCT_UI_IN_GAME_MAIN *gameMainUi = settings->ptrGameUIStruct;
+	if (gameMainUi && gameMainUi->IsCheckSumValid()) {
+		_asm {
+			PUSH argShow;
+			MOV EAX, 0x484F90;
+			MOV ECX, gameMainUi;
+			CALL EAX;
+		}
+	}
+#else
+	global->showScores = argShow;
+#endif
+}
+
+
 // Get a localized string using ROR method.
 // Returns true on success.
 bool ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES category, long int commandId, long int subParam, char *buffer, long int bufferSize) {

@@ -1182,6 +1182,7 @@ void RockNRorCommand::OnGameStart() {
 	// Show automatically "F11" information at game startup
 	if (!settings->rgeGameOptions.isMultiPlayer) {
 		AOE_METHODS::UI_BASE::ShowF11_zone();
+		AOE_METHODS::ShowScores(true);
 	}
 
 	// Force shared exploration => always ON (if config says so and not in MP)
@@ -1219,9 +1220,9 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 
 	// Do custom stuff on "settings" here...
 
-	// TEST
+	// Unfinished
 #ifdef _DEBUG
-	bool useFakeCiv = false;
+	bool useFakeCiv = true;
 	if (useFakeCiv) {
 		this->customCivHandler.CreateFakeRandomCivsForAllPlayers();
 	} else {
