@@ -1,6 +1,7 @@
 #pragma once
 
 #include <assert.h>
+#include <macroUtil.h>
 #include <AOE_struct_units.h>
 #include <AOE_struct_player.h>
 #include <AOE_struct_game_map_info.h>
@@ -47,7 +48,7 @@ namespace CUSTOM_AI {
 		// Stores information about recent history of being attacked by other players
 		TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> recentAttacksByPlayer[9];
 		
-#pragma message("TODO REMOVE pointers here (dangerous)")
+#pragma TODO("REMOVE pointers here (dangerous)")
 		// TODO: REMOVE pointers here (dangerous): use indexes instead or even unitId (now we can retrieve index easily with unit extensions)
 		// Refers to information in InfAI list of an enemy building spotted in my town (potential target for idle units or in-town groups)
 		STRUCT_INF_AI_DETAILED_UNIT_INFO *enemyBuildingInMyTown;

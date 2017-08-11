@@ -1,6 +1,70 @@
 #include "../include/StrategyUpdater.h"
 
 
+// Private struct/class
+struct StrategyUnitInfo {
+	StrategyUnitInfo(short int unitDefId) {
+		this->unitDefId = unitDefId;
+		this->countWithUnlimitedRetrains = 0;
+		this->countWithLimitedRetrains = 0;
+		this->totalCount = 0;
+	}
+	short int unitDefId;
+	int countWithUnlimitedRetrains;
+	int countWithLimitedRetrains;
+	int totalCount;
+};
+
+class StrategyUnitsInfo {
+public:
+	~StrategyUnitsInfo() {
+		for each (StrategyUnitInfo *unitInfo in this->unitsInfo)
+		{
+			delete unitInfo;
+		}
+		this->unitsInfo.clear();
+	}
+	StrategyUnitInfo *AddUnitInfo(short int unitDefId) {
+		StrategyUnitInfo *unitInfo = new StrategyUnitInfo(unitDefId);
+		this->unitsInfo.push_back(unitInfo);
+		return unitInfo;
+	}
+	StrategyUnitInfo *GetUnitInfo(short int unitDefId) {
+		for each (StrategyUnitInfo *unitInfo in this->unitsInfo)
+		{
+			if (unitInfo->unitDefId == unitDefId) { return unitInfo; }
+		}
+		return NULL;
+	}
+	StrategyUnitInfo *GetOrAddUnitInfo(short int unitDefId) {
+		StrategyUnitInfo *u = GetUnitInfo(unitDefId);
+		if (u) { return u; }
+		return this->AddUnitInfo(unitDefId);
+	}
+	// collectMilitaryUnits: if true, collect only military units, otherwise, collect only villager units
+	void CollectUnitInfosFromStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, bool collectMilitaryUnits) {
+		if (!buildAI || !buildAI->IsCheckSumValid()) { return; }
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstElem = &buildAI->fakeFirstStrategyElement;
+		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentElem = fakeFirstElem->next;
+		while (currentElem && (currentElem != fakeFirstElem)) {
+			bool isVillager = IsVillager_includingShips((unsigned short int)currentElem->unitDAT_ID);
+			if ((currentElem->elementType == AIUCLivingUnit) &&
+				((isVillager && !collectMilitaryUnits) || (!isVillager && collectMilitaryUnits))) {
+				StrategyUnitInfo *uInfo = this->GetOrAddUnitInfo((short int)currentElem->unitDAT_ID);
+				uInfo->totalCount++;
+				if (currentElem->retrains == -1) {
+					uInfo->countWithUnlimitedRetrains++;
+				} else {
+					uInfo->countWithLimitedRetrains++;
+				}
+			}
+			currentElem = currentElem->next;
+		}
+	}
+	std::vector<StrategyUnitInfo*> unitsInfo;
+};
+
+
 
 // Common function for panic mode unit searching.
 // Returns true if it is possible to train the unit. In such case, cost is decreased from remainingResources and actorCounter is decreased too.
@@ -1130,6 +1194,258 @@ bool STRATEGY::ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI
 
 	// [General] We found no reason to cancel construction, so... let's proceed !
 	return false;
+}
+
+
+
+
+
+
+
+
+// Adds in strategy all available researches that improve provided unit
+// Returns the number of inserted researches in strategy
+// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
+// nextElement: if non-NULL, newly-added strategy elements will be inserted BEFORE nextElement. Otherwise, insertion point will be computed automatically.
+int AddResearchesInStrategyForUnit(AOE_STRUCTURES::STRUCT_AI *ai, short int unitDefId, bool allUpgrades,
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *nextElement) {
+	if (!ai || !ai->IsCheckSumValid()) { return 0; }
+	AOE_STRUCTURES::STRUCT_PLAYER *player = ai->ptrStructPlayer;
+	if (!player || !player->IsCheckSumValid()) { return 0; }
+	if (!player->ptrResearchesStruct || !player->ptrResearchesStruct->ptrResearchDefInfo) {
+		return 0;
+	}
+	if (nextElement && !nextElement->IsCheckSumValid()) { nextElement = NULL; }
+	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return 0; }
+	std::vector<short int> researchesForUnit;
+	if (allUpgrades) {
+		researchesForUnit = ROCKNROR::crInfo.techTreeAnalyzer.GetAllResearchesThatAffectUnit(player, unitDefId, true);
+	} else {
+		short int researchId = FindResearchThatEnableUnit(player, unitDefId, 0);
+		if (researchId == -1) { return 0; }
+		researchesForUnit.push_back(researchId);
+	}
+	std::vector<short int> allResearchesForUnit = GetValidOrderedResearchesListWithDependencies(player, researchesForUnit);
+	// Important note: for "shadow" researches with optional requirements (buildings for ages, etc), requirements are not analyzed yet.
+	// We'll have to manage them ourselves.
+
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstElement = &ai->structBuildAI.fakeFirstStrategyElement;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentElem = fakeFirstElement->previous;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *elemToInsert = nextElement;
+	// Search for wonder, if any (NOT executed if nextElement is supplied)
+	while (currentElem && (currentElem != fakeFirstElement) && !elemToInsert) {
+		if ((currentElem->unitDAT_ID == CST_UNITID_WONDER) && (currentElem->elementType == AOE_CONST_FUNC::AIUCBuilding)) {
+			elemToInsert = currentElem;
+		}
+		currentElem = currentElem->previous; // reverse loop because wonder is generally at the end !
+	}
+	if (!elemToInsert) {
+		elemToInsert = fakeFirstElement;
+	}
+	// elemToInsert = position to insert at stategy end OR just before wonder, if any.
+
+	int addedItems = 0;
+	// allResearchesForUnit is ordered by dependency, so we're adding the requirements first and strategy order is OK.
+	// However inserted elements are not optimized for development speed and there is no priority other than dependencies.
+	for each (short int researchId in allResearchesForUnit)
+	{
+		STRUCT_PLAYER_RESEARCH_STATUS *status = player->GetResearchStatus(researchId);
+		if ((researchId >= 0) &&
+			(status != NULL) && (status->currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DONE_OR_INVALID) && // If already done, no need to add in strategy !
+			(researchId < player->ptrResearchesStruct->ptrResearchDefInfo->researchCount)) {
+			AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = player->ptrResearchesStruct->ptrResearchDefInfo->GetResearchDef(researchId);
+
+			if (ResearchHasOptionalRequirements(resDef)) {
+				// Handle optional requirements. This DOES have importance. eg. in DM, yamato build a temple just to go iron !
+				std::set<short int> optionalResearches; // List of researches we *can* add to satisfy the requirements
+				int actualRequiredResearchCount = 0; // total number of required researches (other than -1)
+				int requiredResearchAlreadyInStrategy = 0; // number of "optionals" that are already present in strategy
+				// Collect information on requirements
+				for (int i = 0; i < 4; i++) {
+					if (resDef->requiredResearchId[i] != -1) {
+						actualRequiredResearchCount++;
+						AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDefBuilding = FindBuildingDefThatEnablesResearch(player, resDef->requiredResearchId[i]);
+						bool foundElementInStrategy = false;
+						if (unitDefBuilding) {
+							assert(unitDefBuilding->IsCheckSumValid()); // check BUILDING checksum
+							if (unitDefBuilding->IsCheckSumValid()) {
+								foundElementInStrategy = (FindElementInStrategy(player, TAIUnitClass::AIUCBuilding, unitDefBuilding->DAT_ID1) != -1);
+							}
+						} else {
+							foundElementInStrategy = (FindElementInStrategy(player, TAIUnitClass::AIUCTech, resDef->requiredResearchId[i]) != -1) ||
+								(FindElementInStrategy(player, TAIUnitClass::AIUCCritical, resDef->requiredResearchId[i]) != -1);
+						}
+
+						if (!foundElementInStrategy) {
+							optionalResearches.insert(resDef->requiredResearchId[i]);
+						} else {
+							if (std::count(allResearchesForUnit.begin(), allResearchesForUnit.end(), resDef->requiredResearchId[i]) > 0) {
+								// Not in strategy yet, but will be added soon. We have a dependency issue here :-/
+								// This case should not occur if dependencies are correct.
+								//traceMessageHandler.WriteMessage("Warning: a research dependency issue has been found");
+								// But this actually occurs because of "optional" dependencies (like this one) => they are not treated in good order
+							}
+							requiredResearchAlreadyInStrategy++;
+						}
+					}
+				}
+				int missingRequiredResearchCount = resDef->minRequiredResearchesCount - requiredResearchAlreadyInStrategy;
+				while (missingRequiredResearchCount > 0) {
+					// Find the best element in optionalResearches to add in strategy
+					// Criteria: available in tech tree, cost, ...? temple=good, dock=bad
+					short int bestResearchId = -1;
+					bool bestElemIsWaitingRequirement = true;
+					float bestElemTotalCost = 999999;
+					int bestElemBuildingBonus = 1;
+					short int bestElemBuildingDatId = -1; // Only for "building shadow" researches : in strategy, add building, not research.
+					for each (short int reqResearchId in optionalResearches)
+					{
+						// unitDefBuilding = the building corresponding to shadow research, NULL if this is not a "building shadow" research.
+						AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDefBuilding = FindBuildingDefThatEnablesResearch(player, reqResearchId);
+						AOE_STRUCTURES::STRUCT_RESEARCH_DEF *reqResearch = player->GetResearchDef(reqResearchId);
+						AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_STATUS *reqResearchStatus = player->GetResearchStatus(reqResearchId);
+						float currentTotalCost = (float)(reqResearch->costUsed1 ? reqResearch->costAmount1 : 0);
+						currentTotalCost += (float)(reqResearch->costUsed2 ? reqResearch->costAmount2 : 0);
+						currentTotalCost += (float)(reqResearch->costUsed3 ? reqResearch->costAmount3 : 0);
+						int currentBuildingBonus = 1;
+						if (unitDefBuilding && unitDefBuilding->IsTypeValid()) {
+							// For "building shadow" research, the research itself has no meaning. Cost is building's
+							currentTotalCost = (float)(unitDefBuilding->costs[0].costPaid ? unitDefBuilding->costs[0].costAmount : 0);
+							currentTotalCost += (float)(unitDefBuilding->costs[1].costPaid ? unitDefBuilding->costs[1].costAmount : 0);
+							currentTotalCost += (float)(unitDefBuilding->costs[2].costPaid ? unitDefBuilding->costs[2].costAmount : 0);
+							if (unitDefBuilding->DAT_ID1 == CST_UNITID_TEMPLE) {
+								currentBuildingBonus = 2;
+							}
+							if (unitDefBuilding->DAT_ID1 == CST_UNITID_DOCK) {
+								currentBuildingBonus = 0;
+							}
+						}
+						if ((reqResearch != NULL) && (reqResearchStatus->currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED)) {
+							bool currentIsBetter = false;
+							if (bestResearchId == -1) {
+								currentIsBetter = true;
+							} else {
+								// Need to compare "best" and "current one"
+								if (!currentIsBetter && (bestElemBuildingBonus < currentBuildingBonus)) {
+									currentIsBetter = true; // Allows adding a temple rather something else, or adding anything rather than a dock (if useful, it would already be in strategy)
+								}
+								if (!currentIsBetter && (bestElemIsWaitingRequirement && (reqResearchStatus->currentStatus > RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT))) {
+									currentIsBetter = true; // if a research is already available while the other is not yet: prefer (could avoid requirement issues)
+								}
+								if (!currentIsBetter && (bestElemTotalCost > currentTotalCost)) {
+									currentIsBetter = true; // Pick the cheaper one
+								}
+								// Add criteria: building with potential useful units for panic mode ? (chariots?)
+							}
+							if (currentIsBetter) {
+								bestResearchId = reqResearchId;
+								bestElemIsWaitingRequirement = (reqResearchStatus->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT);
+								bestElemTotalCost = currentTotalCost;
+								bestElemBuildingBonus = currentBuildingBonus;
+								bestElemBuildingDatId = -1;
+								if (unitDefBuilding && unitDefBuilding->IsTypeValid()) {
+									bestElemBuildingDatId = unitDefBuilding->DAT_ID1;
+								}
+							}
+						}
+					}
+					// Add best item in strategy...
+					addedItems += AddStrategyElementForResearch(player, elemToInsert, bestResearchId);
+					missingRequiredResearchCount--;
+					optionalResearches.erase(bestResearchId);
+				}
+			} else { // this research has no optionals (all requirements are necessary)
+				addedItems += AddStrategyElementForResearch(player, elemToInsert, researchId);
+			}
+		}
+	}
+	return addedItems;
+}
+
+
+// Inserts one or many new strategy elements before nextElement.
+// New strategy elements corresponds to resDef (not always a research: can be a building !) + requirements
+// Returns the number of added elements just before nextElement.
+int AddStrategyElementForResearch(AOE_STRUCTURES::STRUCT_PLAYER *player,
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *nextElement, short int researchId) {
+	if (!player || !player->IsCheckSumValid()) { return 0; }
+	if (!player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) { return 0; }
+	AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
+	AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = player->GetResearchDef(researchId);
+	if (!nextElement || !nextElement->IsCheckSumValid() || !resDef) { return 0; }
+	int addedElementsCount = 0;
+	char nameBuffer[0x50]; // stratelem.name size is 0x40
+	char namePrefix[] = "RockNRor_";
+	strcpy_s(nameBuffer, namePrefix);
+
+	if ((resDef->researchLocation == -1) || (resDef->buttonId == 0)) {
+		// Shadow research (automatically researched): do not add in strategy
+		// However, it may directly correspond to a required building (temple for fanaticism...)
+		AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDefBuilding = FindBuildingDefThatEnablesResearch(player, researchId);
+		if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
+			// Make sure this building is built in strategy
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *previousElement = nextElement->previous;
+			if (AddStrategyElementForBuildingIfNotExisting(player, nextElement, unitDefBuilding)) {
+				addedElementsCount++;
+				addedElementsCount += AddResearchesInStrategyForUnit(ai, unitDefBuilding->DAT_ID1, false, previousElement->next);
+			}
+		}
+	} else {
+		// Standard "player-triggered" research (has a train location & a button)
+		AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDefBuilding = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)player->GetUnitDefBase(resDef->researchLocation);
+		if (unitDefBuilding && unitDefBuilding->IsCheckSumValid()) {
+			// Add "action" building if there is none in strategy
+			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *previousElement = nextElement->previous;
+			if (AddStrategyElementForBuildingIfNotExisting(player, nextElement, unitDefBuilding)) {
+				addedElementsCount++;
+				addedElementsCount += AddResearchesInStrategyForUnit(ai, unitDefBuilding->DAT_ID1, false, previousElement->next);
+			}
+		}
+
+		// Add the research itself
+		if ((FindElementInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCTech, researchId) == -1) &&
+			(FindElementInStrategy(player, AOE_CONST_FUNC::TAIUnitClass::AIUCCritical, researchId) == -1)) {
+			strcpy_s(nameBuffer + sizeof(namePrefix) - 1, sizeof(nameBuffer) - sizeof(namePrefix) + 1, resDef->researchName);
+			if (AddUnitInStrategy_before(&ai->structBuildAI, nextElement, -1, resDef->researchLocation,
+				TAIUnitClass::AIUCTech, researchId, player, nameBuffer)) {
+				addedElementsCount++;
+			}
+		}
+	}
+	return addedElementsCount;
+}
+
+// Add relevant researches to strategy for current strategy's military units
+void AddUsefulMilitaryTechsToStrategy(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) {
+		return;
+	}
+	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &player->ptrAIStruct->structBuildAI;
+	StrategyUnitsInfo unitsInfoObj;
+	unitsInfoObj.CollectUnitInfosFromStrategy(buildAI, true);
+
+	for each (StrategyUnitInfo *unitInfo in unitsInfoObj.unitsInfo)
+	{
+		bool notAllTechs = false;
+		if (unitInfo->countWithUnlimitedRetrains > 4) {
+			// Dirty trick until better algorithms are written: dont add all upgrades to intermediate specialized units (camels, slinger)
+			notAllTechs = ((unitInfo->unitDefId == CST_UNITID_CAMEL) || (unitInfo->unitDefId == CST_UNITID_SLINGER));
+			// Dirty trick until better algorithms are written: dont add all upgrades to weak units (not necessary as we already protect thanks to "retrains" number in strategy)
+#pragma TODO("Temporary: does not support custom units - TODO: remove call to GetUnitWeight")
+			notAllTechs = notAllTechs || (GetUnitWeight(unitInfo->unitDefId) < 20);
+			int addedCount = AddResearchesInStrategyForUnit(player->ptrAIStruct, unitInfo->unitDefId, !notAllTechs, NULL);
+			if (addedCount > 0) {
+				std::string msg = "Added ";
+				msg += std::to_string(addedCount);
+				msg += " researches/requirements to improve ";
+				msg += player->playerName_length16max;
+				msg += "'s strategy (target=";
+				msg += std::to_string(unitInfo->unitDefId);
+				msg += ")";
+				traceMessageHandler.WriteMessageNoNotification(msg);
+			}
+		}
+	}
 }
 
 

@@ -17,7 +17,8 @@ namespace STRATEGY {
 bool TechTreeAnalyzer::ReadRawDataFromDat() {
 	this->FreeArrays(); // clean previous data, if any
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-	if (!global || !global->IsCheckSumValid()) { return false; }
+	if (!global || !global->IsCheckSumValid() || !global->technologiesInfo || 
+		!global->technologiesInfo->IsCheckSumValid()) { return false; }
 	assert(global->researchDefInfo != NULL);
 	if (!global->researchDefInfo) { return false; }
 	if (global->civCount < 2) { return false; }
@@ -25,6 +26,14 @@ bool TechTreeAnalyzer::ReadRawDataFromDat() {
 
 	this->researchCount = global->researchDefInfo->researchCount;
 	this->unitDefCount = civDef1->civUnitDefCount;
+	this->technologyCount = global->technologiesInfo->technologyCount;
+
+	// Collect tech tree IDs
+	this->techTreeTechIDs.clear();
+	for (int i = 0; i < global->civCount; i++) {
+		STRUCT_CIVILIZATION_DEF *civDef = global->civilizationDefinitions[i];
+		this->techTreeTechIDs.insert(civDef->techTreeId);
+	}
 
 	if ((this->researchCount <= 0) || (this->unitDefCount <= 0)) { return false; }
 	this->AllocArrays();
@@ -44,10 +53,22 @@ bool TechTreeAnalyzer::ReadRawDataFromDat() {
 			detail->active = true;
 			if (detail->techDef != NULL) { // some shadow researches have effect=-1 (they are useful for dependencies)
 				bool hasValidEffect = false;
-				for (int effectIndex = 0; (effectIndex < detail->techDef->effectCount) && !hasValidEffect; effectIndex++) {
+				for (int effectIndex = 0; effectIndex < detail->techDef->effectCount; effectIndex++) {
 					hasValidEffect = detail->techDef->ptrEffects[effectIndex].HasValidEffect();
+
+					// Special: is AI-supported effect
+					if (detail->techDef->ptrEffects[effectIndex].IsResourceModifier()) {
+						if ((detail->techDef->ptrEffects[effectIndex].effectUnit == CST_RES_ORDER_PRIEST_SACRIFICE) ||
+							(detail->techDef->ptrEffects[effectIndex].effectUnit == CST_RES_ORDER_SHARED_EXPLORATION)) {
+							detail->isAiUnsupported = true;
+						}
+					}
 				}
 				detail->hasValidEffect = hasValidEffect;
+				// Special: has negative side effect (jihad, etc)
+				if (HasTechNegativeSideEffect(detail->techDef)) {
+					detail->hasNegativeSideEffect = true;
+				}
 			}
 			
 			if (resDef->minRequiredResearchesCount > 0) {
@@ -652,6 +673,30 @@ void TechTreeAnalyzer::UpdateUnitClassesData() {
 }
 
 
+
+
+// Update links between researches and units that are affected by them
+void TechTreeAnalyzer::UpdateResearchAffectingUnitsLinks() {
+	AOE_TECHNOLOGIES::TechnologyFilterBase filter; // TechnologyFilterBase does not filter out any tech
+	for (int resId = 0; resId < this->researchCount; resId++) {
+		TTDetailedResearchDef *resInfo = this->GetDetailedResearchDef(resId);
+		if (!resInfo || !resInfo->active || !resInfo->techDef) { continue; }
+		for (int unitDefId = 0; unitDefId < this->unitDefCount; unitDefId++) {
+			TTDetailedUnitDef *unitDetail = this->GetDetailedTrainableUnitDef(unitDefId);
+			if (!unitDetail) {
+				unitDetail = this->GetDetailedBuildingDef(unitDefId);
+			}
+			if (unitDetail && unitDetail->IsValid()) {
+				if (DoesTechAffectUnit(resInfo->techDef, unitDetail->GetUnitDef(), &filter)) {
+					unitDetail->affectedByResearches.insert(resInfo);
+					resInfo->affectsUnits.insert(unitDetail);
+				}
+			}
+		}
+	}
+}
+
+
 // Calculate additional statistics, one tech tree has been analysed
 void TechTreeAnalyzer::CalculateStatistics() {
 	this->statistics.Reset();
@@ -824,6 +869,9 @@ bool TechTreeAnalyzer::AnalyzeTechTree() {
 	this->DetectSuperUnits();
 	this->CollectTrainLocations(); // Requires dependencies/analysis to be complete because it uses IsHeroOrScenarioUnit() method.
 
+	// Update unit-research links (researches *affecting* units)
+	this->UpdateResearchAffectingUnitsLinks();
+
 	// Debugging
 #ifdef _DEBUG
 	for (int researchId = 0; researchId < this->researchCount; researchId++) {
@@ -872,6 +920,64 @@ void TechTreeAnalyzer::RefreshTechDefPointers() {
 			}
 		}
 	}
+}
+
+
+// Returns true if provided technologyId corresponds to a technology tree
+bool TechTreeAnalyzer::IsTechTree(short int technologyId) {
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!this->IsReady() || !global) { return false; }
+	for each (short int i in this->techTreeTechIDs)
+	{
+		if (i == technologyId) { return true; }
+	}
+	return false;
+}
+
+
+
+// Returns true if a research affects some unit
+bool TechTreeAnalyzer::DoesResearchAffectUnit(short int researchId, short int unitDefId) {
+	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	TTDetailedUnitDef *unitDetails = this->GetDetailedUnitDef(unitDefId);
+	TTDetailedResearchDef *resDetails = this->GetDetailedResearchDef(researchId);
+	if (!unitDetails || !unitDetails->IsValid() || !resDetails || !resDetails->active) { return false; }
+	auto it = std::find(unitDetails->affectedByResearches.begin(), unitDetails->affectedByResearches.end(), resDetails);
+	if (it != unitDetails->affectedByResearches.end()) {
+		TTDetailedResearchDef *r = *it;
+		if ((!settings->isDeathMatch && !r->CanExcludeInRandomMapAI()) ||
+			(settings->isDeathMatch && !r->CanExcludeInDeathMatchAI())) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
+// Returns a vector of all non-disabled researches that affect the provided unit definition (ID)
+// useFilter: if true, exclude researches with drawbacks for current game type (DM/RM)
+std::vector<short int> TechTreeAnalyzer::GetAllResearchesThatAffectUnit(STRUCT_PLAYER *player, short int unitDefId, bool useFilter) {
+	std::vector<short int> result;
+	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!player || !player->IsCheckSumValid() || !settings || !settings->IsCheckSumValid()) { return result; }
+	std::vector<short int> allResearchesForUnit;
+	TTDetailedUnitDef *details = this->GetDetailedUnitDef(unitDefId);
+	if (!details || !details->IsValid()) { return allResearchesForUnit; }
+	STRUCT_PLAYER_RESEARCH_INFO *rinfo = player->ptrResearchesStruct;
+	if (!rinfo) { return allResearchesForUnit; }
+	STRUCT_PLAYER_RESEARCH_STATUS *statuses = rinfo->researchStatusesArray;
+	if (!statuses) { return allResearchesForUnit; }
+	for each (TTDetailedResearchDef *resDetail in details->affectedByResearches) {
+		if (!resDetail->active || resDetail->IsShadowResearch()) { continue; }
+		// Ignore techs that are no use to AI & techs with drawbacks like jihad/ballista tower
+		if (resDetail->CanExcludeInRandomMapAI()) { continue; }
+		short int resDefId = (short int)resDetail->GetResearchDefId();
+		if (statuses[resDefId].currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) {
+			allResearchesForUnit.push_back(resDefId);
+		}
+	}
+	return allResearchesForUnit;
 }
 
 

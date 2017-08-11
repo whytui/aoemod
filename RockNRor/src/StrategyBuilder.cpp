@@ -201,8 +201,16 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 	AOE_TECHNOLOGIES::TechFilterExcludeTechsWithDrawbacks filter;
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
 	{
-		if (DoesTechAffectUnit(this->global->GetTechDef(resInfo->researchDef->technologyId), unitInfo->baseUnitDefLiving, &filter)) {
-			resInfo->impactedUnitDefIds.insert(unitInfo->unitDefId);
+		TTDetailedUnitDef *unitDetails = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedUnitDef(unitInfo->unitDefId);
+		TTDetailedResearchDef *resDetails = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(resInfo->researchId);
+		if (!unitDetails || !unitDetails->IsValid() || !resDetails || !resDetails->active) { continue; }
+		auto it = std::find(unitDetails->affectedByResearches.begin(), unitDetails->affectedByResearches.end(), resDetails);
+		if (it != unitDetails->affectedByResearches.end()) {
+			TTDetailedResearchDef *r = *it;
+			if ((!settings->isDeathMatch && !r->CanExcludeInRandomMapAI()) ||
+				(settings->isDeathMatch && !r->CanExcludeInDeathMatchAI())) {
+				resInfo->impactedUnitDefIds.insert(unitInfo->unitDefId);
+			}
 		}
 	}
 	// Special treatments
@@ -413,11 +421,9 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(AOE_STRUCTURES::
 				if (resDef) {
 					AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = player->ptrGlobalStruct->GetTechDef(resDef->technologyId);
 					if (techDef) {
-						static AOE_TECHNOLOGIES::TechnologyFilterBase filter;
 						for each (short int unitDefId in this->impactedUnitDefIds)
 						{
-							AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->GetUnitDefBase(unitDefId);
-							foundStratElem = foundStratElem || DoesTechAffectUnit(techDef, unitDef, &filter);
+							foundStratElem |= ROCKNROR::crInfo.techTreeAnalyzer.DoesResearchAffectUnit(resDefId, unitDefId);
 						}
 					}
 				}
@@ -475,9 +481,6 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 		}
 	}
 
-	// Filter for tech tree effects analysis: ignore techs with drawbacks, techs "not used" by AI, effects that do not provide a real specific advantage for current unit (macedonian's LOS)
-	AOE_TECHNOLOGIES::TechFilterExcludeDrawbacksAndDistributedEffects filter;
-	
 	for (int curUnitDefID = 0; curUnitDefID < player->structDefUnitArraySize; curUnitDefID++) {
 		STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(curUnitDefID);
 		bool validUnit = (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
@@ -529,6 +532,8 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 		}
 		validUnit = validUnit && availableForPlayer;
 
+		// Filter for tech tree effects analysis: ignore techs with drawbacks, techs "not used" by AI, effects that do not provide a real specific advantage for current unit (macedonian's LOS)
+		static AOE_TECHNOLOGIES::TechFilterExcludeDrawbacksAndDistributedEffects filter;
 		bool techTreeAffectsCurrentUnit = (techDefTechTree != NULL) && DoesTechAffectUnit(techDefTechTree, unitDefBase, &filter);
 		bool currentUnitHasTechTreeBonus = false;
 		if (validUnit && techTreeAffectsCurrentUnit) {
@@ -562,7 +567,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 					}
 				}
 				if (techDef && techDef->ptrEffects) {
-					if (DoesTechAffectUnit(techDef, unitDefLiving, &filter)) {
+					if (ROCKNROR::crInfo.techTreeAnalyzer.DoesResearchAffectUnit(curResearchId, curUnitDefID)) {
 						for (int i = 0; i < techDef->effectCount; i++) {
 							short int upgradeTargetUnitDefId = techDef->ptrEffects[i].UpgradeUnitGetTargetUnit();
 							if ((upgradeTargetUnitDefId >= 0) && (techDef->ptrEffects[i].effectUnit == unitDefLiving->DAT_ID1)) {
@@ -662,7 +667,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 					}
 				}
 				if (techDef && techDef->ptrEffects) {
-					if (DoesTechAffectUnit(techDef, unitDefLiving, &filter)) {
+					if (ROCKNROR::crInfo.techTreeAnalyzer.DoesResearchAffectUnit(curResearchId, curUnitDefID)) {
 						unitInfo->unavailableRelatedResearchesCount++;
 						for (int i = 0; i < techDef->effectCount; i++) {
 							short int upgradeTargetUnitDefId = techDef->ptrEffects[i].UpgradeUnitGetTargetUnit();
@@ -687,7 +692,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 					}
 				}
 				if (techDef && techDef->ptrEffects) {
-					if (DoesTechAffectUnit(techDef, unitDefLiving, &filter)) {
+					if (ROCKNROR::crInfo.techTreeAnalyzer.DoesResearchAffectUnit(curResearchId, curUnitDefID)) {
 						unitInfo->availableRelatedResearchesCount++;
 						for (int i = 0; i < techDef->effectCount; i++) {
 							bool isAttrModifier = ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
@@ -1377,7 +1382,7 @@ int StrategyBuilder::GetCostScoreRegardingCurrentSelection(PotentialUnitInfo *un
 // Does not recompute unit strengths (but computes it using the correct strength values)
 // Does not recompute global score
 // upgradedUnit: if true, consider upgraded unit. if false, consider base unit
-#pragma message("No very relevant for boats, do a specific method ?")
+#pragma WARNING("No very relevant for boats, do a specific method ?")
 void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> selectedUnits, bool waterUnit, bool upgradedUnit,
 	short int maxAgeResearchId) {
 	int totalStrengthVsWithSelected[MC_COUNT];
@@ -1758,7 +1763,7 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 						}
 						if (unitInfo->hasSpecificAttackBonus) {
 							// Does attack bonus concern a category against which I need more strength ?
-#pragma message("TODO attack bonus: compare to selected units abilities / weaknesses ?")
+#pragma TODO("attack bonus: compare to selected units abilities / weaknesses ?")
 							percentageToApply += 5; // Reduce (a bit) penalty for units that have some special bonus
 						}
 						if (percentageToApply > 100) { percentageToApply = 100; }
@@ -1890,7 +1895,7 @@ void StrategyBuilder::SelectStrategyUnitsForLandOrWater(bool waterUnits) {
 	this->SelectStrategyUnitsFromPreSelection(preSelectedUnits, waterUnits);
 
 	// Consider adding units with special bonus like camel/chariot if it helps for a specific need
-#pragma message("TODO early ages")
+#pragma TODO("early ages")
 	// Take care of early ages : add archers, axemen, slingers or scout (according to already available techs). TODO later (not in this method) ?
 }
 
@@ -1919,7 +1924,7 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 					tmpScore = (tmpScore * 105) / 100; // ballista-like siege vs towers
 				}
 			}
-#pragma message("Should recompute scores using BASE units (without costly upgrades)")
+#pragma TODO("Should recompute scores using BASE units (without costly upgrades)")
 			// Important: units may have a low score (<10) and % couldnt apply well: check this
 			// TODO take care of relative cost ! Create a dedicated method GetRelativeCostScore with existing code above (in another method)
 			// Units available without cost (or low research cost)
@@ -2418,6 +2423,13 @@ void StrategyBuilder::AddResearchesForEconomy() {
 }
 
 
+// Returns a vector of all non-disabled researches that affect the provided unit definition (ID)
+// useFilter: if true, exclude researches with drawbacks for current game type (DM/RM)
+std::vector<short int> StrategyBuilder::GetAllResearchesThatAffectUnit(short int unitDefId, bool useFilter) {
+	return ROCKNROR::crInfo.techTreeAnalyzer.GetAllResearchesThatAffectUnit(this->player, unitDefId, useFilter);
+}
+
+
 // Add tower upgrades to internal objects (and mark them as priority items)
 // Does not add upgrades that slow projectiles down (ballista tower)
 // Only adds unit upgrades (sentry, watch tower) + "enable unit" (watch tower) researches, not others researches.
@@ -2434,8 +2446,9 @@ void StrategyBuilder::AddTowerResearches() {
 	if (!watchTower || !watchTower->IsCheckSumValidForAUnitClass() || !watchTower->DerivesFromAttackable()) { return; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *projectileDefInitial = (AOE_STRUCTURES::STRUCT_UNITDEF_PROJECTILE *)this->player->GetUnitDefBase(watchTower->projectileUnitId);
 
-	std::vector<short int> allResearchesForUnit = FindResearchesThatAffectUnit(player, CST_UNITID_WATCH_TOWER, true);
-	// Add the available upgrades (except ballista tower), ignore other techs
+	std::vector<short int> allResearchesForUnit = this->GetAllResearchesThatAffectUnit(CST_UNITID_WATCH_TOWER, true);
+
+	// Add the available upgrades (except ballista tower, detected thanks to projectile speed), ignore other techs
 	for each (short int researchId in allResearchesForUnit)
 	{
 		bool newProjectileIsMuchSlower = false;
@@ -2634,8 +2647,8 @@ void StrategyBuilder::CreateVillagerStrategyElements() {
 	int totalVillagersCount = this->villagerCount_alwaysRetrain + this->villagerCount_limitedRetrains;
 	assert(this->villagerCount_alwaysRetrain + this->villagerCount_limitedRetrains > 0);
 
-#pragma message("TODO: boats")
-#pragma message("TODO: add a random part in repartition")
+#pragma TODO("boats")
+#pragma TODO("add a random part in repartition")
 	int currentCount_fixed = 0;
 	int currentCount_retrains = 0;
 
@@ -2935,7 +2948,7 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 	}
 	orderedUnitsToAdd.clear();
 
-#pragma message("TODO: unfinished")
+#pragma TODO("unfinished")
 	// TODO: we inserted everything after iron age.
 	// If units are available before, move some... and test if temp units are needed if only a part of units was moved?
 }
@@ -3578,14 +3591,13 @@ std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitD
 	if ((unitDefId < 0) || (unitDefId >= player->structDefUnitArraySize)) { return result; }
 	std::vector<short int> researchesForUnit;
 	if (allUpgrades) {
-		researchesForUnit = FindResearchesThatAffectUnit(player, unitDefId, true);
+		researchesForUnit = this->GetAllResearchesThatAffectUnit(unitDefId, true);
 	} else {
 		short int researchId = FindResearchThatEnableUnit(player, unitDefId, 0);
 		if (researchId == -1) { return result; }
 		researchesForUnit.push_back(researchId);
 	}
 	// Consider unit's train location too !
-#pragma message("TODO: Add this missing part in original method in strategy.cpp")
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(unitDefId);
 	AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDefBase;
 	if (unitDefLiving && unitDefLiving->IsCheckSumValidForAUnitClass() && unitDefLiving->DerivesFromTrainable()) {
@@ -3634,7 +3646,7 @@ std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitD
 	}
 	if (!allUpgrades) {
 		// Get All related researches, even optional ones (NOT for adding)
-		std::vector<short int> allResearchesImpactingUnit = FindResearchesThatAffectUnit(player, unitDefId, true); // Get ALL related researches...
+		std::vector<short int> allResearchesImpactingUnit = this->GetAllResearchesThatAffectUnit(unitDefId, true);
 		for each (short int resDefId in allResearchesImpactingUnit)
 		{
 			PotentialResearchInfo *resInfo = this->GetResearchInfo(resDefId);

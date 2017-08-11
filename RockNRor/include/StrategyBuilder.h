@@ -310,6 +310,11 @@ namespace STRATEGY {
 		int CreateFirstBuildingsStrategyElements();
 		// Create secondary (optional) occurrences of buildings. E.g. 2nd TC, or additional military buildings to train army faster and do researches while another building is training units
 		int CreateSecondaryBuildingStrategyElements();
+
+		// Returns a vector of all non-disabled researches that affect the provided unit definition (ID)
+		// useFilter: if true, exclude researches with drawbacks for current game type (DM/RM)
+		std::vector<short int> GetAllResearchesThatAffectUnit(short int unitDefId, bool useFilter);
+
 	};
 
 }

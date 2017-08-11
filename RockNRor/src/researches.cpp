@@ -585,6 +585,7 @@ int DisableImpossibleResearches() {
 // Returns true if technology has at least one effect on provided unit definition.
 // Effect can be negative too.
 // Use filter argument to exclude techs like martyrdom or negative effects
+// /!\ Be careful with villager effects (eg. effects on lumberjack only VS effects on all villagers like jihad)
 bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, const AOE_TECHNOLOGIES::TechnologyFilterBase *filter) {
 	if (!techDef || !unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 		return false;
@@ -612,7 +613,7 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, 
 			)) {
 			if (techEffect->effectUnit == unitDef->DAT_ID1) { return true; }
 			if (techEffect->effectClass == unitDef->unitAIType) { return true; }
-			if (techEffect->effectUnit == projectileUnitId) { return true; }
+			if ((projectileUnitId > -1) && (techEffect->effectUnit == projectileUnitId)) { return true; }
 		}
 		if (techEffect->IsEnableUnit(unitDef->DAT_ID1)) {
 			return true;
@@ -636,6 +637,14 @@ bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, 
 				(techEffect->effectUnit == CST_RES_ORDER_PRIEST_SACRIFICE) // AI will never use it. It can be ignored using filter.
 				)) {
 				return true; // Priest & building/priest conversion + faith recharging rate
+			}
+		}
+		if (unitDef->unitAIType == TribeAIGroupUnusedHealer) {
+			if (isResourceModifier && (
+				(techEffect->effectUnit == CST_RES_ORDER_FAITH_RECHARGING_RATE) ||
+				(techEffect->effectUnit == CST_RES_ORDER_HEALING) // (medecine tech)
+				)) {
+				return true; // Healer (not used in standard game)
 			}
 		}
 		if (IsVillager(unitDef->DAT_ID1)) { // excluding boats
@@ -716,6 +725,83 @@ bool DoesTechDisableResearch(STRUCT_TECH_DEF *techDef, short int researchId) {
 }
 
 
+// Returns true if the technology has some negative side effect (slower projectile, less-efficient villagers, etc)
+// In standard game, this can be trireme/ballista tower (slower projectile), jihad
+bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef) {
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!techDef || !global || !global->IsCheckSumValid()) {
+		return false;
+	}
+	STRUCT_CIVILIZATION_DEF *civdef1 = global->GetCivDef(1);
+	if (!civdef1 || !civdef1->IsCheckSumValid()) { return false; }
+	for (int effectIndex = 0; effectIndex < techDef->effectCount; effectIndex++) {
+		STRUCT_TECH_DEF_EFFECT *techEffect = &techDef->ptrEffects[effectIndex];
+		if (techEffect->HasValidEffect()) {
+			// Init
+			STRUCT_UNITDEF_BASE *baseUnitDef = civdef1->GetUnitDef(techEffect->effectUnit);
+			STRUCT_UNITDEF_ATTACKABLE *baseAtk = NULL;
+			if (baseUnitDef && baseUnitDef->DerivesFromAttackable()) {
+				baseAtk = (STRUCT_UNITDEF_ATTACKABLE*)baseUnitDef;
+			}
+			short int oldProjId = -1;
+			short int newProjId = -1;
+			float effectValue = techEffect->GetValue();
+			if (baseAtk) {
+				oldProjId = baseAtk->projectileUnitId; // might be -1
+			}
+			bool newProjectileIsMuchSlower = false;
+			bool newReloadTimeIsMuchSlower = false;
+
+			// Unit attribute modification (handles most cases)
+			if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) {
+				if (((effectValue > 0) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) < 0)) ||
+					((effectValue < 0) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) > 0))) {
+					return true;
+				}
+			}
+			if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT) {
+				if (((effectValue > 1) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) < 0)) ||
+					((effectValue < 1) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) > 0))) {
+					return true;
+				}
+			}
+			if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) {
+				// ?
+				if (techEffect->effectAttribute == TUA_PROJECTILE_UNIT) {
+					newProjId = (short int)effectValue;
+				}
+			}
+
+			short int upgradedUnitId = techEffect->UpgradeUnitGetTargetUnit();
+			if (upgradedUnitId >= 0) {
+				STRUCT_UNITDEF_BASE *upgradedUnitDef = civdef1->GetUnitDef(upgradedUnitId);
+				STRUCT_UNITDEF_ATTACKABLE *upAtk = (STRUCT_UNITDEF_ATTACKABLE *)upgradedUnitDef;
+				if (upAtk && upAtk->DerivesFromAttackable()) {
+					newProjId = upAtk->projectileUnitId; // might be -1
+					float oldDamagePerTimeUnit = baseAtk->displayedAttack / baseAtk->reloadTime1;
+					float newDamagePerTimeUnit = upAtk->displayedAttack / upAtk->reloadTime1;
+					newReloadTimeIsMuchSlower = (newDamagePerTimeUnit < oldDamagePerTimeUnit);
+				}
+			}
+
+			if ((oldProjId >= 0) && (newProjId >= 0)) {
+				STRUCT_UNITDEF_PROJECTILE *oldProj = (STRUCT_UNITDEF_PROJECTILE*)civdef1->GetUnitDef(oldProjId);
+				STRUCT_UNITDEF_PROJECTILE *newProj = (STRUCT_UNITDEF_PROJECTILE*)civdef1->GetUnitDef(newProjId);
+				if (oldProj && oldProj && newProj->IsCheckSumValid() && newProj->IsCheckSumValid()) {
+					float speedInitial = oldProj->speed;
+					float speedAfter = newProj->speed;
+					newProjectileIsMuchSlower = (speedAfter < speedInitial * 0.9);
+				}
+			}
+			if (newProjectileIsMuchSlower || newReloadTimeIsMuchSlower) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+
 // Returns true if a unit (DATID) is disabled by player's tech tree
 bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
@@ -751,51 +837,6 @@ bool IsResearchDisabledInTechTree(short int playerId, short int researchId) {
 		return false;
 	}
 	return DoesTechDisableResearch(techDef, researchId);
-}
-
-
-// Finds all (non disabled) researches that affect a unit (definition)
-// If ignoreUndesirableTechs==true, techs with drawbacks are ignored (jihad, etc)
-// Returns a list of research IDs.
-std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long int unitDefId, bool ignoreUndesirableTechs) {
-	std::vector<short int> result;
-	if (!player || !player->IsCheckSumValid() || (player->structDefUnitArraySize < unitDefId)) { return result; }
-	STRUCT_UNITDEF_BASE *unitDefBase = (STRUCT_UNITDEF_BASE *)player->ptrStructDefUnitTable[unitDefId];
-	STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
-	if (!global || !global->IsCheckSumValid() || !global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid()) { return result; }
-	if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return result; }
-
-	STRUCT_PLAYER_RESEARCH_INFO *rinfo = player->ptrResearchesStruct;
-	if (!rinfo) { return result; }
-	int resCount = rinfo->researchCount;
-	STRUCT_PLAYER_RESEARCH_STATUS *statuses = rinfo->researchStatusesArray;
-	STRUCT_RESEARCH_DEF_INFO *resInfoArray = rinfo->ptrResearchDefInfo;
-	if (!resInfoArray) { return result; }
-
-	for (int researchId = 0; researchId < resCount; researchId++) {
-		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = resInfoArray->GetResearchDef(researchId);
-		assert(resDef);
-		if (resDef && (statuses[researchId].currentStatus != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED) &&
-			(resDef->researchName != NULL)) { // to filter out "New research" (invalid researches have no name)
-			bool added = false;
-			short int techId = resDef->technologyId;
-			if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount) &&
-				(global->technologiesInfo->GetTechDef(techId)->effectCount > 0)) {
-				// We have a valid technology id. Add to result if it affects our unit.
-				AOE_TECHNOLOGIES::TechnologyFilterBase emptyFilter;
-				AOE_TECHNOLOGIES::TechnologyFilterBase *filter = &emptyFilter;
-				AOE_TECHNOLOGIES::TechFilterExcludeTechsWithDrawbacks filterDrawbacks;
-				if (ignoreUndesirableTechs) {
-					filter = &filterDrawbacks;
-				}
-				if (!added && DoesTechAffectUnit(global->technologiesInfo->GetTechDef(techId), unitDefBase, filter)) {
-					result.push_back(researchId);
-					added = true;
-				}
-			}
-		}
-	}
-	return result;
 }
 
 

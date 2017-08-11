@@ -122,22 +122,8 @@ void ClearStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
 // Add units if maximum population is >50
 void AdaptStrategyToMaxPopulation(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
-// Add relevant researches to strategy for current strategy's military units
-void AddUsefulMilitaryTechsToStrategy(AOE_STRUCTURES::STRUCT_PLAYER *player);
-
 // Returns true if current strategy status allows triggering a wonder construction
 bool IsStrategyCompleteForWonder(AOE_STRUCTURES::STRUCT_AI *ai);
-
-// Adds in strategy all available researches that improve provided unit
-// Returns the number of inserted researches in strategy
-// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
-// nextElement: if non-NULL, newly-added strategy elements will be inserted BEFORE nextElement. Otherwise, insertion point will be computed automatically.
-int AddResearchesInStrategyForUnit(AOE_STRUCTURES::STRUCT_AI *ai, short int unitDefId, bool allUpgrades, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *nextElement);
-
-// Inserts one or many new strategy elements before nextElement.
-// New strategy elements corresponds to resDef (not always a research: can be a building !) + requirements
-// Returns the number of added elements just before nextElement.
-int AddStrategyElementForResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *nextElement, short int researchId);
 
 // Adds a strategy element (building) only if there are none already.
 // Does not perform adding for buildings that are automatically build in AI (regarding player's PERsonality)

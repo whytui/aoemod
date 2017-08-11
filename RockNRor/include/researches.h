@@ -109,6 +109,7 @@ int DetectDatImpossibleResearches(STRUCT_GAME_GLOBAL *global, short int civId);
 // Returns true if technology has at least one effect on provided unit definition.
 // Effect can be negative too.
 // Use filter argument to exclude techs like martyrdom or negative effects
+// /!\ Be careful with villager effects (eg. effects on lumberjack only VS effects on all villagers like jihad)
 bool DoesTechAffectUnit(STRUCT_TECH_DEF *techDef, STRUCT_UNITDEF_BASE *unitDef, const AOE_TECHNOLOGIES::TechnologyFilterBase *filter);
 
 // Returns "destination" unit ID if technology upgrades provided unit definition ID into another unit
@@ -124,6 +125,10 @@ bool DoesTechDisableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId);
 // Returns true if technology disables provided research (generally, tech tree effects).
 bool DoesTechDisableResearch(STRUCT_TECH_DEF *techDef, short int researchId);
 
+// Returns true if the technology has some negative side effect (slower projectile, less-efficient villagers, etc)
+// In standard game, this can be trireme/ballista tower (slower projectile), jihad
+bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef);
+
 // Returns true if a unit (DATID) is disabled by player's tech tree
 bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId);
 
@@ -134,11 +139,6 @@ bool IsResearchDisabledInTechTree(short int playerId, short int researchId);
 // Returns the age research id of research's required age, from direct dependencies or recursively, if necessary.
 // Returns -1 if there is no required age (always available)
 short int FindResearchRequiredAge(STRUCT_PLAYER *player, short int researchId);
-
-
-// Finds all (non disabled) researches that affect a unit (definition)
-// If ignoreUndesirableTechs==true, techs from LST_TECHS_TO_IGNORE are ignored (jihad, etc)
-std::vector<short int> FindResearchesThatAffectUnit(STRUCT_PLAYER *player, long int unitDefId, bool ignoreUndesirableTechs);
 
 // Returns the first (non disabled) research ID found that enables a unit. Returns -1 if not found.
 // startAtResearchId : -1=ignored (joker). If >=0, than the search will start at this index and ignore previous researches.

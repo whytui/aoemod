@@ -95,5 +95,21 @@ namespace STRATEGY {
 	// Default result is false, this returns true only for specific (custom) cases.
 	bool ShouldNotTriggerConstruction(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem);
 
+
+
+	// Adds in strategy all available researches that improve provided unit
+	// Returns the number of inserted researches in strategy
+	// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
+	// nextElement: if non-NULL, newly-added strategy elements will be inserted BEFORE nextElement. Otherwise, insertion point will be computed automatically.
+	int AddResearchesInStrategyForUnit(AOE_STRUCTURES::STRUCT_AI *ai, short int unitDefId, bool allUpgrades, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *nextElement);
+
+	// Inserts one or many new strategy elements before nextElement.
+	// New strategy elements corresponds to resDef (not always a research: can be a building !) + requirements
+	// Returns the number of added elements just before nextElement.
+	int AddStrategyElementForResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *nextElement, short int researchId);
+
+	// Add relevant researches to strategy for current strategy's military units
+	void AddUsefulMilitaryTechsToStrategy(AOE_STRUCTURES::STRUCT_PLAYER *player);
+
 }
 }

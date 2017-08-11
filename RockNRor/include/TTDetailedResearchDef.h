@@ -18,6 +18,9 @@ namespace STRATEGY {
 ;
 
 
+class TTDetailedResearchDef;
+
+
 // Generic parent to describe Tech tree detailed info for a unit. See child classes for strong typing.
 class TTDetailedUnitDef {
 public:
@@ -40,6 +43,7 @@ public:
 	std::set<long int> researchIdsThatEnableMe; // It is expected to have 0 (if available at start) or 1 value here, no more.
 	std::set<long int> possibleUpgradedUnitIDs; // UnitDefIds of buildings that are "upgrades" of me. WARNING: missing values for intermediate units !!!
 	std::set<long int> possibleAncestorUnitIDs; // UnitDefIds of buildings that can be upgraded into "me". See "baseUnitId" to find THE root unitDefId.
+	std::set<TTDetailedResearchDef*> affectedByResearches; // Research IDs that affect this unit (add HP, speed, etc, or even indirectly like ballistics for range units...)
 
 	long int baseUnitId; // UnitDefId of the (root) base unitdef I am a descendent of. =this->unitDefId if I have no ancestor.
 	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitClass;
@@ -57,7 +61,7 @@ public:
 		}
 	}
 
-	// Warning: according to child class, it may be trainable or building
+	// Warning: according to child class, it may be trainable or building. See derived methods.
 	virtual STRUCT_UNITDEF_TRAINABLE *GetUnitDef() const { return NULL; }
 
 	// Returns true if unit is a hero or scenario unit: heroes, cheat code units, unused units, etc
@@ -141,6 +145,8 @@ public:
 		this->hasOptionalRequirements = false;
 		this->allRequirementsAreKnown = false;
 		this->hasValidEffect = false;
+		this->hasNegativeSideEffect = false;
+		this->isAiUnsupported = false;
 	}
 
 private:
@@ -165,9 +171,13 @@ public:
 	std::set<TTDetailedBuildingDef*> enableBuildings; // The buildings that are enabled thanks to "this" research.
 	std::set<TTDetailedTrainableUnitDef*> enableTrainables; // The Non-building unitDefs that are enabled thanks to "this" research.
 	std::set<std::pair<long int, long int>> upgradedUnitDefId; // Non-building unitDef IDs that are upgraded by this research (pair: first=from, second=to)
+	std::set<TTDetailedUnitDef*> affectsUnits; // All units (buildings/trainable) affected by this research
 
 	std::set<TTDetailedResearchDef*> researchLinePredecessors; // All researches from same "line" (location+buttonId) and come before me. E.g tool&bronze age if "me"=iron age
 	std::set<TTDetailedResearchDef*> researchLineSuccessors; // All researches from same "line" (location+buttonId) and come after me. E.g iron age if "me"=bronze age
+	
+	bool hasNegativeSideEffect; // True for a research that has some negative side effects. E.g. ballista tower upgrade has much slower projectile. Jihad decreases villagers gathering abilities, etc. Warning: includes trireme !
+	bool isAiUnsupported; // True for a research that is not supported by AI (no use to AI players), like martyrdom (priest sacrifice), writing (shared exploration).
 
 	// Methods
 
@@ -188,6 +198,25 @@ public:
 
 	// Returns true if the research is a "wood working"-like tech: improves lumberjack carry capacity+work rate + improves range/LOS for almost all range units.
 	bool IsWoodWorkingAndRange() const;
+
+	// Returns true if research must be ignored by AI in random map games
+	bool CanExcludeInRandomMapAI() const {
+		if (this->isAiUnsupported) { return true; }
+		if (!this->hasNegativeSideEffect) { return false; }
+		// If "this" has negative side effects: return true except for war boats (allow trireme upgrade in all games !)
+		for each(auto x in this->affectsUnits) {
+			if (x->unitClass == TribeAIGroupWarBoat) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// Returns true if research must be ignored by AI in deathmatch games
+	bool CanExcludeInDeathMatchAI() const {
+		// In DM, all all techs (even jihad...) except those that AI doesn't/can't use (martyrdom...)
+		return (this->isAiUnsupported);
+	}
 };
 
 
