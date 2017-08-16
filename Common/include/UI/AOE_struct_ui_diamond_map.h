@@ -23,12 +23,12 @@ namespace AOE_STRUCTURES
 		short int mapSizeY; // unsure
 
 
-		bool IsCheckSumValid() { return this->checksum == 0x0054A3F4; }
+		bool IsCheckSumValid() const { return this->checksum == 0x0054A3F4; }
 	};
 
 
 
-	// Size ?
+	// Size ? Constructor=0x42C360(parent=RGE)
 	// 0x42CD60 = diamMap.mainDraw() ? Main draw entry point ?
 	// 0x42CF30 = diamMap.clearImage()
 	// 0x42D0C0 = diamMap.drawAllTiles()
@@ -36,6 +36,7 @@ namespace AOE_STRUCTURES
 	// 0x42D670 = diamMap.drawSelectedArea()
 	// 0x42D710 = diamMap.drawObjects()
 	// 0x42DC10 = diamMap.draw() (EDX+F4)
+#define CHECKSUM_UI_RGE_DIAMOND_MAP 0x005434B4 // parent / ccor 0x42C360
 #define CHECKSUM_UI_DIAMOND_MAP 0x0054A73C
 	class STRUCT_UI_DIAMOND_MAP : public STRUCT_ANY_UI { // 3C A7 54 00 (editor). Also F4 A3 54 00(game) ?
 	public:

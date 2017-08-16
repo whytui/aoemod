@@ -33,13 +33,13 @@ namespace AOE_STRUCTURES
 	// Size=0x28. Constructor = 0x415D80 (fromFile)
 	class STRUCT_ACTIVE_ANIMATED_SPRITE : STRUCT_ACTIVE_SPRITE {
 	public:
-		short int unknown_14;
+		short int frame; // +14. Current frame index (starts at 0) ?
 		short int unknown_16; // unused ?
 		unsigned long int unknown_18;
 		unsigned long int unknown_1C;
-		short int unknown_20;
+		short int unknown_20; // presvious frame ???
 		char unknown_22;
-		char unknown_23;
+		char isLooped; // +23.
 		char unknown_24;
 		char unused[3];
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTIVE_ANIMATED_SPRITE; }

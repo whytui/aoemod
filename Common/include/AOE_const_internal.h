@@ -190,12 +190,12 @@ namespace AOE_CONST_INTERNAL
 		CST_ICI_REMOVE_GROUP = 0x09, // "destroy group". Used by AI groups.
 		CST_ICI_TASK_UNIT = 0x0A, // AI order.
 		CST_ICI_RESIGN = 0x0B, // Only for MP games when clicking resign in menu. See exec=42B290
-		CST_ICI_UNKNOWN_C = 0x0C, // Add target pos ?
+		CST_ICI_ADD_ONE_INTERMEDIATE_MOVEMENT_STEP = 0x0C, // Unused ?
 		CST_ICI_UNKNOWN_D = 0x0D, // unused ?
-		CST_ICI_UNKNOWN_E = 0x0E, // exec=0x42B4A0
-		CST_ICI_UNKNOWN_F = 0x0F, // exec=0x42B4E0 0x42BC80 guard/protect unit ?
-		CST_ICI_ADD_INTERMEDIATE_MOVEMENT_STEP = 0x10, // When shift-right clicking to specify intermediate movement step
-		CST_ICI_HOLD_POSITION = 0x11, // To confirm
+		CST_ICI_UNKNOWN_E = 0x0E, // exec=0x42B4A0. Add to group ?
+		CST_ICI_UNKNOWN_F = 0x0F, // exec=0x42B4E0 0x42BC80. Remove from group ?
+		CST_ICI_ADD_GRP_INTERMEDIATE_MOVEMENT_STEP = 0x10, // When shift-right clicking to specify intermediate movement step
+		CST_ICI_GROUP_AI_TASK = 0x11, // To confirm (old: hold position was probably wrong)
 		CST_ICI_TRIGGER_TRAIN_UNIT = 0x64, // unsure, when AI triggers a train unit action ? + some cheats?
 		CST_ICI_RESEARCH = 0x65,
 		CST_ICI_BUILD = 0x66,

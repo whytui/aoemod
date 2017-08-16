@@ -57,7 +57,7 @@ namespace AOE_STRUCTURES {
 
 
 #define CHECKSUM_MAPGEN_BASE 0x00545CC8 // Common parent to more classes ? Ccor 0x46BD00
-	// Size = 0x30. Constructor=0x46BD00
+	// Size = 0x30. Constructor=0x46BD00. "Random_Map_Module"
 	class STRUCT_MAPGEN_BASE {
 	public:
 		unsigned long int checksum; // C8 5C 54 00
@@ -103,8 +103,8 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_TRIBE_LAND_MAKER 0x00545D18 // Child class, corresponds to Tribe_Map (the one to use)
 #define CHECKSUM_CONTROLER_OF_LANDSCAPE 0x00545CDC // This intermediate class corresponds to RGE_Map level
 
-	// size=0x4F5C, constructor=471D20,0x46DA10(fromFile).
-	// Base="ControlerOfLandscape", child="TribeLandMaker"
+	// size=0x4F5C, constructor=0x471D20,0x46DA10(fromFile).
+	// "RMM_Database_Controller" (old names Base="ControlerOfLandscape", child="TribeLandMaker" ?)
 	class STRUCT_MAP_GENERATION_INFO : public STRUCT_MAPGEN_BASE {
 	public:
 		// 0x30

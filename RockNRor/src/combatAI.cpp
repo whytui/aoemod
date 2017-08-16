@@ -553,8 +553,8 @@ bool HunterMoveBackAfterShooting(STRUCT_UNIT_ACTIVITY *unitActivity, STRUCT_UNIT
 	float allowedMovingRange = range - contactDist; // actor.maxRange - contactDistance
 	if (allowedMovingRange < 1) { return false; } // cf 0x4E64E9. Do nothing if too far or already at max shooting range
 
-	long int priority_unsure = unitActivity->unknown_2C;
-	float activityMaxDistance = unitActivity->maxDistance; // for arg8
+	long int priority_unsure = unitActivity->currentOrderPriority;
+	float activityMaxDistance = unitActivity->desiredTargetDistance; // for arg8
 	float activityTargetPosX = unitActivity->targetPosX;
 	float activityTargetPosY = unitActivity->targetPosY;
 	float activityTargetPosZ = unitActivity->targetPosZ;
@@ -750,7 +750,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 					activity->orderQueue[0].orderId = UNIT_AI_ORDER::CST_ORDER_ATTACK;
 					activity->orderQueue[0].targetUnitId = seenUnit->unitInstanceId;
 					activity->orderQueue[0].targetPlayerId = otherPlayer->playerId;
-					activity->orderQueue[0].unknown_08 = -1; // ?
+					activity->orderQueue[0].priority = -1; // ?
 					activity->orderQueue[0].maxRange = myUnitDef->lineOfSight;
 					activity->orderQueue[0].posX = seenUnit->positionX;
 					activity->orderQueue[0].posY = seenUnit->positionY;

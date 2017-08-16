@@ -275,7 +275,7 @@ namespace AOE_CONST_FUNC {
 
 
 	// For "action" structures.
-	// AOE 2.4.97: see 0x4BD23A
+	// AOE 2.4.97: see 0x4BD23A - ROR03.01.0717: see 0x403FC0
 	enum UNIT_ACTION_ID : short int {
 		CST_IAI_MOVE_TO = 1, // Used as sub-action to move to target ? Used to capture relics
 		CST_IAI_FOLLOW = 2, // TO CONFIRM (AGE3)

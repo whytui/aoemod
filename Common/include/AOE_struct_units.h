@@ -44,32 +44,32 @@ namespace AOE_STRUCTURES {
 		unsigned long int unused_0C; // SEEMS to be unused
 	};
 
-#define CHECKSUM_PER_TYPE_UNIT_LIST_LINK_BASE 0x00544AD4
-#define CHECKSUM_PER_TYPE_UNIT_LIST_LINK_CHILD 0x00549B70
+#define CHECKSUM_OBJECT_LIST_BASE 0x00544AD4
+#define CHECKSUM_OBJECT_LIST_CHILD 0x00549B70
 	// Handler of a list of all units of a given type (example: createables)
 	// Can be used to store players units (a list of creatables, etc), units on a tile, "cached" units in global structure, etc)
 	// Size 0x0C. Constructor=0x450EF0(0x00544AD4). "Tribe_Object_List"
 	// Child (0x00549B70): no constructor, see 0x4EFC20/0x4EFC51/0x4EFC82/0x4F0605/0x4F0639. Need to determine the usage of each class
 	// 0x450FE0 = unitListLink.removeUnitListElem(ptrUnit, ptrElemInPlayerUnitList) : removes the link (not the unit !)
 	// 0x451270 = unitListLink.doUpdates() : run unit.Update() on each unit, and unit.ActualRemove if necessary.
-	class STRUCT_PER_TYPE_UNIT_LIST_LINK {
+	class STRUCT_OBJECT_LIST {
 	public:
 		unsigned long int checksum; // 70 9B 54 00 or D4 4A 54 00
 		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *lastListElement; // NULL if empty. To loop, use "previous" pointer at each iteration and stop when NULL is found.
 		short int listElemCount; // +08
 		short int unused_0A;
 
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_PER_TYPE_UNIT_LIST_LINK_CHILD) || (this->checksum == CHECKSUM_PER_TYPE_UNIT_LIST_LINK_BASE); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_OBJECT_LIST_BASE) || (this->checksum == CHECKSUM_OBJECT_LIST_CHILD); }
 	};
-	static_assert(sizeof(STRUCT_PER_TYPE_UNIT_LIST_LINK) == 0x0C, "STRUCT_PER_TYPE_UNIT_LIST_LINK size");
+	static_assert(sizeof(STRUCT_OBJECT_LIST) == 0x0C, "STRUCT_OBJECT_LIST size");
 
 
-	// Size = 0x34. Name=InfluenceMap or "Path" ? Constructor=0x457FE0 ?
+	// Size = 0x34. Name="Path". Constructor=0x457FE0.
 	// (free=0x4580A0). An interesting method: 0x4581B0=moveInfo.replaceByNewDestination(STRUCT_POSITION_INFO*)
 	// About movement/path finding
 	class STRUCT_UNIT_MOVEMENT_INFO {
 	public:
-		unsigned long int unknown_00;
+		unsigned long int timestamp; // +00
 		unsigned long int unknown_04; // targetPosY (float) ?
 		unsigned long int unknown_08; // targetPosX (float) ?
 		unsigned long int unknown_0C; // targetPosZ (float) ?
@@ -171,8 +171,8 @@ namespace AOE_STRUCTURES {
 	// +0x148 = unit.notify(actorUnitId?, impactedUnitId?, notifyTaskId, generic_4, generic_5, generic_6) = add to activity notify queue or fall back to player.notify(...). E.g. 0x426DB0
 	// +0x14C = unit.attackPosition(fposY, fposX, arg3, arg4)
 	// +0x150 = unit.setAttackAction?(targetUnitId, force)
-	// +0x154 = unit.moveTo(fposY, fposX, arg3, arg4, force?) create action move ? MoveAwayFrom?
-	// +0x158 = unit.MoveTo(targetUnitId, maxRange, force)
+	// +0x154 = unit.moveTo(fposY, fposX, fPosZ, range, force) create action move.
+	// +0x158 = unit.MoveTo(targetUnitId, minRange, force)
 	// +0x15C = unit.MoveTo(targetUnitId, force?)
 	// +0x160 = ?? Does nothing and returns 0 for all classes ?
 	// +0x164 = unit.goGather(targetUnitId, force?) returns 1 on success. "hunt"
@@ -186,12 +186,17 @@ namespace AOE_STRUCTURES {
 	// +0x184 =? unit.transport(float posY, posX, posZ, force?)
 	// +0x188 =? unit.transport(float posY, posX, posZ, force?)
 	// +0x18C = unit.stopAction()
-	// +0x194 = unit.CanMoveTo(targetUnitId, fRange, arg3, arg4, arg5, arg6) arg4=(0=use0x6A1CC0, 1=use0x583BC8). For types non-movable(non 30+), returns 0 !
-	// +0x198 = CanMoveTo(posY,posX,posZ,fMaxRange,targetUnitId,pArg6_float,arg7_size?,targetPlayerId,someUnitClass) ? returns 1 if ok. someUnitClass=1B=walls
-	// +0x1A0 = MoveToTarget?(targetUnitId,fMaxRange,arg3,arg4,arg5,arg6,arg7) ? arg6=value for UNKNOWN_MAP_DATA_F04C+0x11DCDC arg4=(0=use0x6A1CC0, 1=use0x583BC8) arg5=unitGroup??
-	// +0x1A4 = DoMove?(posY,posX,posZ,fMaxRange,targetUnitId, pArg6_float,arg7_size,arg8,arg9,targetPlayerId,someUnitClass)
+	// +0x194 = unit.CanMoveTo(targetUnitId, fRange, pathDistance, aiCheck, unobstructiblePlayerID, unobstructibleUnitClass) arg4=(0=use0x6A1CC0, 1=use0x583BC8). For types non-movable(non 30+), returns 0 !
+	// +0x198 = unit.CanMoveTo(posY,posX,posZ,fMaxRange,targetUnitId,pArg6_float,arg7_size?, targetPlayerId, someUnitClass) ? returns 1 if ok. someUnitClass=1B=walls "canPath"
+	// +0x19C = unit.canBidirectionPath(targetId, depositTargetId, f_range, pathDistance, aiCheck, unobstructiblePlayerID, unobstructibleUnitClass)
+	// +0x1A0 = unit.canPathWithObstructions(targetId, f_range, pathDistance, aiCheck, unobstructiblePlayerID, unobstructibleUnitClass, obstructions) arg4=(0=use0x6A1CC0, 1=use0x583BC8). 0x44E130.
+	// +0x1A4 = unit.canMoveToWithAdditionalPassability(posY,posX, posZ, fMaxRange, targetUnitId, pArg6_f,arg7_size?, arg8=doMove?, arg9, unobstrPlayerId, unobstrUnitClass)
+	// +0x1A8 = unit.findFirstTerrainAlongExceptionPath(eTerrain, rY, rX)
+	// +0x1AC = INT unit.canLinePath(sY, sX, dY, dX, range, aiCheck)
+	// +0x1B0 = INT unit.canLinePath(s, d, range, rPoint, aiCheck)
+	// +0x1B4 = INT unit.firstTileAlongLine(s, d, rPoint, tType1, tType2, checkPassability)
 	// +0x1BC = unit.addPositionToTargetPosArray(pDword_posYXZ, arg2). Does not check pos is valid. Causes some (rare) bugs?
-	// +0x1CC = unit.xxx(pPosYXZ_target, fRange, targetUnitId) for intelligent attack ?
+	// +0x1CC = unit.findAvoidancePath(pPosYXZ_target, fRange, targetUnitId). for intelligent attack ?
 	// +0x1D8 = bldUnit.readFromFile(internalFileId, global)
 	// +0x1DC = unit.init(unitDef, player)
 	// +0x1E0 = unit.createObjectList()
@@ -239,7 +244,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_ACTIVE_SPRITE_LIST *spriteList; // ptr to struct 00 30 54 00 - size=0x0C Related to graphics
 		STRUCT_GAME_MAP_TILE_INFO *myTile; // +1C. See TERRAIN_BYTE class. Can be NULL when unit is inside a transport.
 		STRUCT_UNIT_BASE *transporterUnit; // +20. Transport boat the unit is in
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *transportedUnits; // +24. List of units in the transport (if "this" is a transport)
+		STRUCT_OBJECT_LIST *transportedUnits; // +24. List of units in the transport (if "this" is a transport)
 		short int unknown_028;
 		short int unknown_02A; // for graphics ?
 		short int unknown_02C; // for graphics ?
@@ -256,7 +261,7 @@ namespace AOE_STRUCTURES {
 		float positionZ; // Read only, because it's updated automatically according to map position(X,Y)
 		float resourceValue; // See resourceValue. Faith (0-100) for priests, food for hunter...
 		AOE_CONST_INTERNAL::GAME_UNIT_STATUS unitStatus; // 0=being_built, 2=ready, at least for buildings... Values=0,1,2,3,5,7,8=max? 5=waitingForResourceDepletion.
-		char isNotCreatable; // +49. 1 if the unit is a "not-creatable" unit, like cliffs, etc. Always 1 in parent constructors, set to 0 in "creatable-level" constructor.
+		char isNotCreatable; // +49. 1 if the unit is a "not-creatable" unit, like cliffs, etc. Always 1 in parent constructors, set to 0 in "creatable-level" constructor. "sleep" flag.
 		char isDoppleGanger; // +4A. 1 if unit is a doppleganger.
 		char unknown_04B;
 		short int resourceTypeId; // A unit can hold only 1 resource. =0x22=34 for priest.
@@ -264,8 +269,8 @@ namespace AOE_STRUCTURES {
 		char unitCountThatAreTargetingMe; // +4F. Number of (other)units that have "me" as target (repairman, gatherer, attacker...). See 4AADB0. Warning: the count is not reliable: when moving to it, the other unit counts TWICE (and counts for 1 when actually doing the action) + also counts projectiles !
 		// 0x50
 		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *ptrElemInPlayerUnitList; // +50. Link to corresponding reference in player's creatable units list. Can be NULL in loaded games (if not "used" yet = used as a cache)
-		STRUCT_MANAGED_ARRAY unknown_054; // +54 a ptr. about movement ? objectCollisionList ? Units in same Formation ? A list of unitID.
-		STRUCT_MANAGED_ARRAY unitIDsInMyGroup; // +64. list of IDs of the units in same group as me. A limit to 25 in 0x4ABEC8 (beware stack overflow)
+		STRUCT_MANAGED_ARRAY pathingGroup; // +54 a ptr. about movement ? objectCollisionList ? Units in same Formation ? A list of unitID.
+		STRUCT_MANAGED_ARRAY unitIDsInMyGroup; // +64. list of IDs of the units in same group as me. A limit to 25 in 0x4ABEC8 (beware stack overflow). If empty, then I belong to no group.
 		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code. Warning: some unit don't have one (e.g. lion tame)
 		long int groupLeaderUnitId; // +78. Unit Id of my group's leader. -1 when unitIDsInMyGroup is empty.
 		long int terrainZoneInfoIndex; // +7C. Index of terrainZoneInfo in terrainZoneInfoLink array. -1 means not initialized yet.
@@ -433,22 +438,21 @@ namespace AOE_STRUCTURES {
 		float velocityZ; // +98.
 		float orientationAngle; // +9C. unit orientation angle. Updating this impacts unit.orientationIndex (+0x35). Angle [0, 2*PI[. 0=heading to northEast (increasing Y). Warning: walking graphics need to have 8 angles to allow valid movement.
 		unsigned long int unknown_0A0; // +A0. "turn_towards_time" ?
-		STRUCT_UNIT_MOVEMENT_INFO movementInfo; // +A4. Movement info / path finding.
+		STRUCT_UNIT_MOVEMENT_INFO movementInfo; // +A4. Movement info / path finding. "Path".
 		STRUCT_UNIT_MOVEMENT_INFO temp_AI_movementInfo; // +D8. Only used in AI treatments(?) to make checks before assigning tasks ? Used when unknown_154_tempFlag_calculatingPath=1
 		float unknown_10C; // +10C.
 		// 0x110
 		float move_initialPosX; // wrong ?
 		float move_initialPosZ; // wrong ?
 		unsigned long int unknown_118;
-		float move_targetPosY; // updated from action struct on action updates. Set in 0x44BE90
-		// 0x120
-		float move_targetPosX;
+		float move_targetPosY; // +11C. updated from action struct on action updates. Set in 0x44BE90
+		float move_targetPosX; // +120.
 		float move_targetPosZ;
 		unsigned long int unknown_128;
 		unsigned long int unknown_12C;
 		// 0x130
 		unsigned long int unknown_130;
-		float move_distanceFromTargetToReach; // +134. The maximum distance to target to reach before movement is considered done. "Action range"
+		float actionRange; // +134. The maximum distance to target to reach before movement is considered done.
 		long int move_targetUnitId; // +138. Set in 0x44BED0
 		float targetSizeRadiusY; // +13C. Set in 0x44BEE0
 		// 0x140
@@ -456,17 +460,17 @@ namespace AOE_STRUCTURES {
 		long int unknown_144; // =targetPositionsArrayUsedElements+0xF ?
 		char unknown_148[0x154 - 0x148];
 		char unknown_154_tempFlag_calculatingPath; // 1 while in treatment (computing a move path ?). If 1, use temp_AI_movementInfo instead of movementInfo ?
-		char unknown_155; // Related to action, consistent with action+0xC ? (used when action+C=0 or no action?)
+		char isWaitingToMove; // Related to action, consistent with action+0xC ? (used when action+C=0 or no action?)
 		short int unknown_156; // or 2 bytes ?
-		long int unknown_158_posY1;
-		long int unknown_15C_posX1;
-		long int unknown_160_posY2;
-		long int unknown_164_posX2;
-		STRUCT_UNIT_TARGET_POS *targetPositionsArray; // +168. ptr to list of 3-bytes elements posYXZ, related to movement. See 44EB70 (add pos in array). 1st=start, 2nd=next ? cf 44C57D. Only for AI ? Not ALL movements.
-		long int targetPositionsArrayUsedElements; // size of unknown_168_ptrList
+		long int moveInitialPosY; // +158
+		long int moveInitialPosX; // +15C
+		long int moveFinalPosY; // +160
+		long int moveFinalPosX; // +164
+		STRUCT_UNIT_TARGET_POS *userDefinedWaypoints; // +168. ptr to list of 3-bytes elements posYXZ, related to movement. See 0x44EB70 (add pos in array). 1st=start, 2nd=next ? cf 44C57D. Only for AI ? Not ALL movements.
+		long int userDefinedWaypointsUsedElements; // size of definedWaypoints. "NumberUsedDefinedWaypoints()". Get in 0x405A30
 		// 0x170
 		unsigned long int targetPositionsArrayTotalSize; // allocated number of elements (elemSize=3, warning, it is unusual).
-		char isInMovement; // +174. Not sure. Set On in 0x44EDD0.
+		char isInMovement; // +174. Not sure. Set On in 0x44EDD0=unit.setFinalUserDefinedWaypoint()
 		char unknown_175;
 		char unknown_176; // ?
 		char unknown_177; // ?
@@ -481,13 +485,13 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_MOVABLE) == 0x180, "STRUCT_UNIT_MOVABLE size");
 
 
-	// 48 27 54 00 = commandable (type40 - bird in AGE3). Size=0x18C (constructor=0x04058A0) - Derives from type30
+	// 48 27 54 00 = commandable (type40 "action obj" - bird in AGE3). Size=0x18C (constructor=0x04058A0) - Derives from type30
 	class STRUCT_UNIT_COMMANDABLE : public STRUCT_UNIT_MOVABLE {
 	public:
 		// 0x180
-		unsigned long int unknown_180;
+		unsigned long int unknown_180; // +180. 1 when "recycled" (out of game but stull allocated, to be re-used) ? Unsure
 		STRUCT_UNIT_ACTION_INFO *ptrActionInformation; // +184. Useful to retrieve unit's action.
-		long int rightClickActionCounter_unsure; // +188. Incremented each time a right-click action is done by player ?
+		long int workCounter; // +188. Incremented each time a right-click action ("work" method) is done by player ?
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNIT_COMMANDABLE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_COMMANDABLE); }

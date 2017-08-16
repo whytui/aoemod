@@ -63,7 +63,7 @@ static bool test_ror_structures() {
 	trs_assert(&scoreHeader, 0x1C, &scoreHeader.currentTotalScore);
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT se;
 	assert(sizeof(se) == 0xB0);
-	trs_assert(&se, 0xAC, &se.canSkip);
+	trs_assert(&se, 0xAC, &se.permanentSkip);
 	AOE_STRUCTURES::STRUCT_VILLAGER_TASKS_ELEM vte;
 	assert(sizeof(vte) == 0x18);
 	trs_assert(&vte, 0x14, &vte.timeGetTimeValue);
@@ -147,7 +147,7 @@ static bool test_ror_structures() {
 
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY uay;
 	trs_assert(&uay, 0x60, &uay.unitIDsThatAttackMe);
-	trs_assert(&uay, 0xF0, &uay.unknown_0F0);
+	trs_assert(&uay, 0xF0, &uay.wayPointQueueSize);
 	trs_assert(&uay, 0x114, &uay.currentPosX);
 	AOE_STRUCTURES::STRUCT_UNIT_ACTION_INFO uai;
 	trs_assert(&uai, 0x08, &uai.ptrActionLink);

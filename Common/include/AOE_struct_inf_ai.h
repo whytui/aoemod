@@ -158,7 +158,7 @@ namespace AOE_STRUCTURES {
 		// Related to the corresponding SNxxxDefendPriority values (if 0 : not added in list)
 		STRUCT_MANAGED_ARRAY elementsToDefend;
 
-		STRUCT_MAP_TILE_VALUES mapExplorationInfo; // +158. Values = INFAI_TILE_EXPLORATION_STATUS
+		STRUCT_INFLUENCE_MAP mapExplorationInfo; // +158. Values = INFAI_TILE_EXPLORATION_STATUS
 		// Remove unit from allMyUnits & buildingUnits: 0x4BF440.
 		STRUCT_MANAGED_ARRAY allMyUnits; // +180. To confirm.
 		STRUCT_MANAGED_ARRAY buildingUnits; // +190

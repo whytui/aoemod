@@ -52,7 +52,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_MAP_VISIBILITY_INFO) == 4, "STRUCT_MAP_VISIBILITY_INFO size");
 
 
-	// Size 0x0C. Constructor = 0x517E30
+	// Size 0x0C. Constructor = 0x517E30. "RGE_Unified_Visible_Map"
 	class STRUCT_MAP_VISIBILITY_LINK {
 	public:
 		long int mapSizeY;

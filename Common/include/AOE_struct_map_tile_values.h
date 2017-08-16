@@ -13,14 +13,15 @@ namespace AOE_STRUCTURES {
 	static const unsigned char CST_MAP_BUILD_LIKE_DISABLED = (unsigned char)0xFF;
 	static const unsigned char CST_MAP_BUILD_LIKE_MAX_VALUE = (unsigned char)CST_MAP_BUILD_LIKE_DISABLED - 1;
 
-#define CHECKSUM_MAP_TILE_VALUES 0x005443C8
+#define CHECKSUM_INFLUENCE_MAP 0x005443C8
+	// "Influence Map"
 	// One is included in 0x7C04A0 address, other in each infAI (stores exploration info)
 	// Size= 0x28. Constructor = 0x43D420 mapInfo.constructor(sizeY, sizeX, defaultValue)
 	// Describes a structure that stores information for currently-AI-managed player's build position priorities (for a given building to be constructed).
 	// Other usages: in infAI: explored map info. -1=not explored, 0=explored, 1= ? 2=to re-explore??
 	// Note about coordinates: (posX,posY)=(i,j) is the tile where i<x<i+1 and i<y<i+1
 	// So coordinates go from 0 to ("size"-1).
-	class STRUCT_MAP_TILE_VALUES {
+	class STRUCT_INFLUENCE_MAP {
 	public:
 		unsigned long int checksum; // C8 43 54 00
 		long int arraySizeY; // +04. This can differ from actual map size !
@@ -36,10 +37,10 @@ namespace AOE_STRUCTURES {
 		unsigned char **ptrColsPtr; // +18. The list of pointers to each row (X dimension) in mapLikeValues. ptrColsPtr[X]=mapData+(X*mapsizeY) is a pointer to the column X.
 		long int unknown_1C; // +1C. Not always initialized !
 		long int unknown_matchCount; // +20. Not always initialized !
-		unsigned char maxValue; // +24. Not always initialized !. 0xFE for build "like" values (always ?). FF is a NO, 0->0xFE are "like values"
+		unsigned char maxValue; // +24. Not always initialized !. 0xFE for build "like" values (always ?). FF is a NO, 0->0xFE are "like values". "unchangeableLimit"
 		char unknown_25[3];
 
-		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_MAP_TILE_VALUES; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_INFLUENCE_MAP; }
 
 		// Easy-to-use methods
 
@@ -246,7 +247,7 @@ namespace AOE_STRUCTURES {
 			// If a corner tile if disabled, do we disable diagonal-opposed corner tile ?
 		}
 	};
-	static_assert(sizeof(STRUCT_MAP_TILE_VALUES) == 0x28, "STRUCT_MAP_TILE_VALUES size");
+	static_assert(sizeof(STRUCT_INFLUENCE_MAP) == 0x28, "STRUCT_INFLUENCE_MAP size");
 
 
 }

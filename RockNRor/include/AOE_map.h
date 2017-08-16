@@ -6,6 +6,7 @@
 #include <string>
 #include <set>
 #include <mystrings.h>
+#include <macroUtil.h>
 #include <AOE_offsets.h>
 #include <AOE_const_functional.h>
 #include <AOE_struct_game_settings.h>
@@ -32,7 +33,7 @@ namespace AOE_METHODS {
 		long int srcPosY, long int srcPosX, long int destPosY, long int destPosX,
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *ptrActorUnit, float maxRange, long int targetUnitId, long int updateUnitPathInfo,
 		long int arg9, long int arg10, long int arg11, long int arg12,
-		long int distance_unsure, long int targetPlayerId, long int unknown_unitClass);
+		long int distance_unsure, long int unobstructiblePlayerId, long int unobstructibleUnitClass);
 
 
 	// Calls AOE's path finding method, using 0x583BC8 (not 0x6A1CC0)

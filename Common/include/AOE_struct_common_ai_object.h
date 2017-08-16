@@ -11,26 +11,30 @@
 namespace AOE_STRUCTURES {
 
 #define CHECKSUM_COMMON_AI_OBJECT 0x00542C00
-	// The common object included in each AI section (with xxxAI text)
-	// Size = 0xEC
+	// The common object included in each AI section (with xxxAI text). "AIModuleId"
+	// Size = 0xEC. Constructor=0x40BFD0
 	class STRUCT_COMMON_AI_OBJECT { // 00 2C 54 00 in 1.0c
 	public:
 		unsigned long int checksum;
+		// Here starts "AIModule" object
 		unsigned long int AITypeId; // 1000=MainDecisionAI, 1001=BuildAI, 1002=ConAI... Not really used.
 		char AIType_text[0x38]; // Exact size ?
 		// 0x40
 		unsigned long int unknown_040;
 		unsigned long int unknown_044;
-		long int playerId;
-		char playerName[0x40]; // size=64
-		unsigned long int unknown_08C; // (3 bytes + 1 unused?)
+		long int playerId; // +48
+		char playerName[0x40]; // +4C. size=64
+		long int unknown_08C; // +8C. started ?
 		// 0x90
-		char unknown_090[0x10];
+		long int unknown_90; // +90. paused ?
+		long int unknown_94; // +94. logging history (debug) ?
+		long int unknown_98; // +98. logging common history (debug) ?
+		long int unknown_9C;
 		// 0xA0
 		char unknown_0A0[0x40];
 		// 0xE0
-		unsigned long unknown_0E0; // init = 5 ?
-		unsigned long unknown_0E4; // maximum population ?
+		long int intelligenceLevel; // +E0. init = 5.
+		long int priority; // +E4. Default 50. Range 0-100.
 		unsigned long unknown_0E8;
 		// 0xEC: end
 

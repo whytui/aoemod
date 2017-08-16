@@ -1323,7 +1323,7 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 							player->diplomacyVSPlayers[otherPlayerId] = AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES::CST_PDV_ENEMY;
 							if (player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
 								// It's crucial to update AI structure (remove the "is neutral" status), otherwise AI might update diplomacy back to neutral
-								player->ptrAIStruct->structDiplAI.isNeutral[otherPlayerId] = 0;
+								player->ptrAIStruct->structDiplAI.isChangeable[otherPlayerId] = 0;
 							}
 						}
 					}

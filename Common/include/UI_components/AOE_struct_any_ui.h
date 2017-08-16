@@ -26,10 +26,13 @@ namespace AOE_STRUCTURES
 	};
 
 
+// TPanel checksum (base class)
 #define CHECKSUM_ANY_UI 0x00544AD8
+
 	// Parent class for UI objects (both screens and UI components) = TPanel
 	// Size=0xF4 for this class, but all child classes are larger !
 	// Constructor: 004523F0 for "screen" objects (arg1=name), 00452580 for components (no arg). Destructor=0x4526B0
+	// 0x452750=Panel.setup(renderArea, parent, x, y, width, height, color)
 	// In general, you should not modify these members directly. You are supposed to use methods (few are implemented in this solution).
 	// D8 4A 54 00 for this base (parent) class
 	// +00 = uiComponent.destructor(do_free)
@@ -52,13 +55,13 @@ namespace AOE_STRUCTURES
 	public:
 		unsigned long int checksum; // Depends on UI object type
 		STRUCT_ANY_UI *previousPanel; // +04.
-		STRUCT_ANY_UI *previousPopup; // +08. Really really unsure. Previous modal panel ?
+		STRUCT_ANY_UI *previousPopup; // +08. "Previous modal panel".
 		long int posX; // +0x0C. Absolute posX
 		// 0x10
-		long int posY; // +x010. Absolute posY
-		long int sizeX;
-		long int sizeY;
-		char *screenName;
+		long int posY; // +0x10. Absolute posY
+		long int sizeX; // +0x14. Width
+		long int sizeY; // +0x18. Height
+		char *screenName; // +0x1C. "PanelName"
 		// 0x20
 		STRUCT_UI_DRAW_AREA *renderArea; // pointer. +04=hWnd +13C=evtStatus?? +1F6=objectIndex,+F4+objectIndex*4=ButtonId +17C=hObject?
 		long int minPosX; // +24. Min X position for this UI object. +24=a pRect object (4 position dwords) or "tagRECT".
@@ -93,11 +96,11 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_080; // Related to "!readonly" ??? But it is NOT "enabled"
 		unsigned long int unknown_084; // type ?
 		unsigned long int unknown_088;
-		long int unknown_08C_minPosX; // MinPosX ? similar to +24 ?
+		long int trueRenderRect_minPosX; // +8C. MinPosX ? similar to +24 ?
 		// 0x90
-		long int unknown_090_minPosY; // minPosY ? similar to +28 ? Example 0x14 (size of top banner, with resources, current age, menu)
-		long int unknown_094_maxPosX; // maxPosX ? similar to +2C
-		long int unknown_098_maxPosY; // maxPosY ? similar to +30
+		long int trueRenderRect_minPosY; // +90. minPosY ? similar to +28 ? Example 0x14 (size of top banner, with resources, current age, menu)
+		long int trueRenderRect_maxPosX; // maxPosX ? similar to +2C
+		long int trueRenderRect_maxPosY; // +98. maxPosY ? similar to +30
 		unsigned long int unknown_09C; // similar to +24, +8C ?
 		// 0xA0
 		unsigned long int unknown_0A0; // similar to +28, +90 ?
@@ -121,7 +124,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_0DC;
 		// 0xE0
 		unsigned long int unknown_0E0;
-		long int helpDllId; // +E4. Dll string Id for help (or tooltip?) ?
+		long int helpDllId; // +E4. Dll string Id for help (or tooltip?) = help message.
 		long int winHelpDataDllId; // +E8. a DllID, used when clicking on help/(object)/details = data for winHelp call.
 		char unknown_0EC; // a "status" for event handling ? 1, 2... 1 for left click, 2 for right-click ??
 		char unknown_0ED; // a "status" for event handling ? 1, 2...
@@ -136,7 +139,7 @@ namespace AOE_STRUCTURES
 		// Screens: F4, F8 are dwords (some X/Y size/pos). classes Size = 0x478/0x490 ? See 454B60/460730
 		// Components: F4 is 2 words...?
 
-		long int GetHWnd() {
+		long int GetHWnd() const {
 			if (!this->renderArea) { return 0; }
 			return this->renderArea->hWnd;
 		}

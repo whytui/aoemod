@@ -47,7 +47,7 @@ bool exportVisibilityToBitmap(bool fogVisibility, long int playerIdFilter);
 void DebugDumpAllUnits();
 
 // Writes in a text buffer the content of a "temp map like info" zone.
-char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_MAP_TILE_VALUES *mapInfosStruct, long int posX, long int posY, int radius);
+char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_INFLUENCE_MAP *mapInfosStruct, long int posX, long int posY, int radius);
 
 
 static const char serializationLogFilename[] = "D:\\AOESrlz.txt";

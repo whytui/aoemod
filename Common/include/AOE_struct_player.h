@@ -69,7 +69,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_PLAYER_RESEARCH_INFO) == 0x10, "STRUCT_PLAYER_RESEARCH_INFO size");
 
 
-	// Player's buildings unit list header (only buildings)
+	// Player's buildings unit list header (only buildings) => to handle dopplegangers, in theory
 	// Size 0x1C. Constructor=0x436850
 	class STRUCT_PLAYER_BUILDINGS_HEADER {
 	public:
@@ -109,9 +109,9 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_PLAYER_MAP_INFO) == 0x38, "STRUCT_PLAYER_MAP_INFO size");
 
 
-	// Size = 0x14. "RGE_Tile_List" ? Constructor=0x45EB80
+	// Size = 0x14. "RGE_Tile_List". Constructor=0x45EB80
 	// Newly explored tiles positions, stored in a temporary array (flushed once taken into account)
-	// 0x45EAC0 = addElement(posY, posX)
+	// 0x45EAC0 = addElement(posY, posX) "AddNode"
 	// 0x45EB40 = resetArray() : if needRealloc==1, frees then allocates a new positionsArray
 	class STRUCT_PLAYER_NEW_EXPLORED_TILES {
 	public:
@@ -139,7 +139,8 @@ namespace AOE_STRUCTURES {
 	// Size 0x14. Constructor = 0x516DA0
 	// Stores explored resource units (that can NOT move = other than animal and farms)
 	// 0x517220 = motionlessSpottedResource.xxx(...)
-	class STRUCT_PLAYER_MOTIONLESS_SPOTTED_GATHERABLE {
+	// 0x517290 = visibleResourceManager.getClosestResource(y, x, terrainZoneId, resType, excList, elSize)
+	class STRUCT_PLAYER_VISIBLE_RESOURCE_MANAGER {
 	public:
 		STRUCT_NEARBY_UNIT_INFO **arrayNearbyUnitInfos;
 		long int *arrayArraySizeInNearbyUnitInfos; // +04. elem[i] represents array size of arrayNearbyUnitInfos[i]
@@ -147,7 +148,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_PLAYER *player; // Parent player
 		long int arraySize; // +10. Number of (both used/alloc) elements in each array. Cf PLAYER_GATHERABLE_RESOURCE_CATEGORIES.
 	};
-	static_assert(sizeof(STRUCT_PLAYER_MOTIONLESS_SPOTTED_GATHERABLE) == 0x14, "STRUCT_PLAYER_UNKNOWN_118 size");
+	static_assert(sizeof(STRUCT_PLAYER_VISIBLE_RESOURCE_MANAGER) == 0x14, "STRUCT_PLAYER_VISIBLE_RESOURCE_MANAGER size");
 
 
 
@@ -201,21 +202,22 @@ namespace AOE_STRUCTURES {
 	public:
 		unsigned long int checksum; // 0x00549B80 or 0x00549A44 (normal player) or 0x00544D18 (parent class RGE_player)
 		long int isComputerControlled; // 0/1. Mostly for "military" behaviours, not for MainAI-related behaviours.
-		long int unknown_008; // value is from [55473C] ? "numberGroupsValue" ?
-		long int unknown_00C; // "maxNumberGroupsValue" ?
+		long int pathingAttemptCap; // +08. Unsure. value is from [55473C] ? "numberGroupsValue" ?
+		long int pathingDelayCap; // +0C. Unsure. "maxNumberGroupsValue" ? See 0x45C180
 		// 0x10
-		long int unknown_010; // Used in-game, not initialized in editor. Reset in DoUpdates(0x45D040)
-		unsigned long int unknown_014;
+		long int currentUpdatePathingAttempts; // Used in-game, not initialized in editor. Reset in DoUpdates(0x45D040). Inc in 0x45C1C0
+		long int playerChecksumValue; // +14. Used to check sync in MP games ? Cf 0x45CE70.
 		unsigned long int unknown_018; // Unused ?
 		unsigned long int unknown_01C; // Unused ?
 		// 0x20
-		short int unknown_020;
+		char playerHasChecksum; // +20. Used to check sync in MP games ? Cf 0x45CE70.
+		char unknown_021;
 		short int structDefUnitArraySize; // +22. Number of elements in ptrStructDefUnitTable array = number of "unit definitions" for this player.
 		STRUCT_UNITDEF_BASE **ptrStructDefUnitTable; // ptr to Array containing pointers to all player unitDefs (index=DATID). They can be NULL (not available/invalid). See also structDefUnitArraySize.
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrCreatableUnitsListLink; // +28. Only building/living + smoke, dead units...?
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrNonCreatableUnitsListLink; // Others than building/living ?
+		STRUCT_OBJECT_LIST *ptrCreatableUnitsListLink; // +28. Only building/living + smoke, dead units...?
+		STRUCT_OBJECT_LIST *ptrNonCreatableUnitsListLink; // Others than building/living ?
 		// 0x30
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *ptrTempUnitsListLink; // ptr to list of temporary units (with <0 id)
+		STRUCT_OBJECT_LIST *ptrTempUnitsListLink; // ptr to list of temporary units (with <0 id)
 		STRUCT_SCORE_HEADER *ptrScoreInformation; // +34. 
 		STRUCT_PLAYER_MAP_INFO *myMapInfo;
 		STRUCT_GAME_GLOBAL *ptrGlobalStruct;
@@ -240,7 +242,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_PLAYER_NEW_EXPLORED_TILES newExploredTilesForDiamMap; // +6C. For diamond map (for human-controlled). It is non-empty only temporarily ! 0x5179A9: JMP to prevent from refreshing diamMap.
 		// 0x80
 		char aliveStatus; //0=alive, 1=win 2=lost.
-		char isInactive; // +81. 1 for resigned/disconnected ? 45BBE3
+		char isInactive; // +81. 1 for resigned/disconnected ? 0x45BBE3. "isResigned"
 		short int unknown_082; // unused ?
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // +84. [pointer+iPlayerId] = diplomacy value: 0=ally,1=neutral, 3=enemy. gaia&self are neutral !
 		char unknown_088;
@@ -261,14 +263,16 @@ namespace AOE_STRUCTURES {
 		// 0x110
 		short int techTreeId; // 0x45BA12 : DWORD ! -1 for 'no tech tree'. Warning: NOT saved => wrong in loaded games (but fixed by RockNRor)
 		short int unknown_112;
-		STRUCT_PLAYER_MOTIONLESS_SPOTTED_GATHERABLE *spottedResources; // +114. Contains info about resource units. Set in 0x4F1EF8. Related to +58 data. Not related to AI. Each time a tile is explored, underlying resources are added here.
+		STRUCT_PLAYER_VISIBLE_RESOURCE_MANAGER *spottedResources; // +114. Contains info about resource units. Set in 0x4F1EF8. Related to +58 data. Not related to AI. Each time a tile is explored, underlying resources are added here.
 		float screenPositionY; // axis southwest-northeast like /
 		float screenPositionX; // axis northwest-southeast like \   [origin is left corner - max(X,Y) is right corner]
 		// 0x120
-		short int unknown_120_posY; // screen pos ?
-		short int unknown_122_posX; // screen pos ?
-		long int unknown_124;
-		long int unknown_128; // split ; +0x129=?
+		short int mapLocationPosY; // screen pos ?
+		short int mapLocationPosX; // screen pos ?
+		short int unsure_selectionMinY; // +124
+		short int unsure_selectionMinX; // +126
+		short int unsure_selectionMaxY; // +128
+		short int unsure_selectionMaxX; // +12A
 		long int unknown_12C;
 		// 0x130
 		short int unknown_130;

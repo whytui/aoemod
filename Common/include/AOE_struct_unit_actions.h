@@ -26,11 +26,17 @@ namespace AOE_STRUCTURES {
 
 #define CHECKSUM_ACTION_BASE 0x005429D8
 	// Size=0x40 for parent class D8 29 54 00 (RGE_Action)
-	// constructor=406EA0(actor, arg2) / 407050. + 406E40?(fromFile)
+	// constructor=406EA0(actor, do_setup) / 407050. + 406E40?(fromFile), 0x401290?
+	// destructor=0x406ED0
+	// save(arg1)=0x407160
 	// Note: (some) Actions are created from game commands in 0x4B4600 = unitActionInfo.createActionForCommand(unitDefCommand, arg2, posY, posX, posZ)
+	// 0x407380 = setActionObj(pObj) (RGE_Action.set_target_obj)
 	// +0x18 = action.getTypeId() ?
 	// +0x28 = action.update()?
-	// +0x34 = action.xxx(pUnit, fposY?, fposX?, arg4)
+	// +0x30 = action.isMoveTo?(pUnit, fposY?, fposX?, fposZ) (to re-use same action ???)
+	// +0x34 = action.work?(pUnit, fposY?, fposX?, fposZ)
+	// +0x38 = action.attackResponse?(pUnit, fposY?, fposX?, fposZ)
+	// +0x38 = action.relationResponse?(pUnit, fposY?, fposX?, fposZ)
 	// +0x5C = action.setStatus?(actionStatus)
 	// +0xC4 = action.RemoveTargetUnit(pUnit)? wrong?
 	// +0xC8 = action.GetTargetUnit()?
@@ -53,10 +59,10 @@ namespace AOE_STRUCTURES {
 		float targetUnitPositionZ;
 		float timer; // +2C. For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
 		// 0x30
-		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set.
+		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set. Called "task".
 		STRUCT_UNIT_ACTION_INFO *requiredActionInfo; // +34. SubAction ? Link with unit/"actionLink"/action. Allows chaining actions ! This is NOT unit->actionInfo !
 		STRUCT_GRAPHICS *pGraphics; // +38. ptr to graphics structure. w_lumber, etc
-		char unknown_3C; // Flag 0/1, about graphics? (about need to refresh graphics ?) ? "deposit after move end"? Ready to shoot?
+		char subAction; // Flag 0/1, about graphics? (about need to refresh graphics ?) May mean "deposit after move end", "Ready to shoot" ?
 		char unknown_3D[3]; // Unused. Probably.
 		// 0x40: not in BASE class ; it has different type/role according to child classes. (seen float, word...)
 	};
@@ -135,7 +141,7 @@ namespace AOE_STRUCTURES {
 
 #define CHECKSUM_ACTION_ATTACK 0x005423F8
 	// [id 9] Size 0x5C
-	// Constructor 0x401150 = actionAttack.construct(pUnitActor, pUnitTarget, arg3/4/5, blastRadius, minRange, projectileUnit), 0x401000
+	// Constructor 0x401150 = actionAttack.construct(pUnitActor, pUnitTarget, moveGraphics, fightGraphics, waitGraphics, range, minRange, projectileUnitId, fireMissileAtFrame), 0x401000
 	// This action corresponds to giving 1 shot, then action status comes to 1 and a new attack action is created (to confirm)
 	class STRUCT_ACTION_ATTACK : public STRUCT_ACTION_BASE { // F8 23 54 00
 	public:
@@ -344,7 +350,7 @@ namespace AOE_STRUCTURES {
 	};
 
 	// Accessed via unit+0x184 pointer or from action itself
-	// Size = 0x0C. Constructor=0x4B4180. Name=TRIBE_Action_List ?
+	// Size = 0x0C. Constructor=0x4B4180. Name=TRIBE_Action_List/RGE_Action_List
 	// Warning: there are 2 usages ("from unit" or "from action")
 	// Example: action cut tree has an action.actionLink = "attack tree" (before it can be gathered)
 	// Chain example: action hunt elephant => subaction attack elephant => subaction move (close enough) to elephant

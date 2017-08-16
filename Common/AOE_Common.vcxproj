@@ -105,6 +105,7 @@
     <ClInclude Include="include\AOE_offsets_ROR10b.h" />
     <ClInclude Include="include\AOE_offsets_ROR10c.h" />
     <ClInclude Include="include\AOE_SN_numbers.h" />
+    <ClInclude Include="include\AOE_struct_AI_play_status.h" />
     <ClInclude Include="include\AOE_struct_border_def.h" />
     <ClInclude Include="include\AOE_struct_build_ai.h" />
     <ClInclude Include="include\AOE_struct_campaign_info.h" />

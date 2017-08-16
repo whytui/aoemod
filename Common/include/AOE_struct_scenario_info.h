@@ -85,7 +85,7 @@ namespace AOE_STRUCTURES {
 		char unknown_100F; // unused?
 		// 0x10
 		char *scenarioFileName; // +1010. Actually reset to "" when loading a non-scenario saved game. Loading a scenario saved game correctly sets this name, very useful !
-		char *scenarioInstructions; // +1014
+		char *scenarioInstructions; // +1014. "description"
 		char *scenarioTips;
 		char *scenarioVictoryText;
 		// 0x1020

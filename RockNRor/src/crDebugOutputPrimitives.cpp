@@ -242,7 +242,7 @@ void DebugDumpAllUnits() {
 // For testing purpose
 #define thisbufSize 20000
 static char buffer[thisbufSize];
-char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_MAP_TILE_VALUES *mapInfosStruct, long int posX, long int posY, int radius) {
+char *DumpPosToTextBuffer(AOE_STRUCTURES::STRUCT_INFLUENCE_MAP *mapInfosStruct, long int posX, long int posY, int radius) {
 	if (((radius * 2 + 1) * (radius * 2 + 1) * 3) >= thisbufSize) { return "Buffer is not large enough for this radius."; }
 	int pos = 0;
 	for (long int i = -radius; i <= radius; i++) {

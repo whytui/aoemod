@@ -31,8 +31,8 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_TASK_HUMAN_TRAIN_UNIT = 0x26B, // only when triggered by human ?
 		CST_ATI_TASK_RESEARCH_TECH = 0x26C, // includes train unit when triggered by AI.
 		CST_ATI_TASK_TRANSPORT = 0x26D, // unsure. Includes move+unload. Such unit can't be used as actor in strategy element.
-		CST_ATI_TASK_UNKNOWN_26E = 0x26E, // load troops ? see 0x412DF0
-		CST_ATI_TASK_UNKNOWN_26F = 0x26F, // see 0x412E60
+		CST_ATI_TASK_SEEK_AND_DESTROY = 0x26E, // See 0x412DF0
+		CST_ATI_TASK_EXPLORE_AND_DESTROY = 0x26F, // see 0x412E60
 		CST_ATI_TASK_UNKNOWN_274 = 0x274, // Related to order 0x2D8
 		// (699) Stop being targeted by another unit (any action: repair,attack,heal,...).
 		// This occurs when the other unit (that targets "me") dies or changes target.

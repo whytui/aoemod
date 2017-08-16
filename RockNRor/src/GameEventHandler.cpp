@@ -14,7 +14,7 @@ bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT 
 	if (!player || !player->IsCheckSumValid()) { return false; }
 
 	if (notifyEvent.eventId == AOE_CONST_INTERNAL::EVENT_PLAYER_SEE_UNIT) {
-		long int myUnitId = notifyEvent.targetUnitId;
+		long int myUnitId = notifyEvent.callerUnitId;
 		long int seenUnitId = notifyEvent.genericParam4;
 		// long int argPlayerId = notifyEvent.actorUnitId; // Not sure of the role of this value
 		PlayerNotifySeeUnit(player, myUnitId, seenUnitId);
@@ -154,7 +154,7 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 		if (activity->currentTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_MOVE) {
 			// Villager should not stop moving (to strike back to animal) when he's not ready to shoot
 			for (int i = 0; i < activity->orderQueueUsedElemCount; i++) {
-				if ((activity->orderQueue[i].targetUnitId == notifyEvent->targetUnitId) &&
+				if ((activity->orderQueue[i].targetUnitId == notifyEvent->callerUnitId) &&
 					(activity->orderQueue[i].orderId == UNIT_AI_ORDER::CST_ORDER_GATHER_ATTACK)) {
 					if (!AOE_METHODS::UNIT::IsReadyToAttack(activity->ptrUnit)) {
 						outExecStandardCode = false; // We don't want to run ROR handler in this case.

@@ -6,6 +6,7 @@
 #include <AOE_const_game_events.h>
 #include <AOE_struct_managed_array.h>
 #include <AOE_struct_map_base_common.h>
+#include <AOE_struct_AI_play_status.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -25,7 +26,7 @@ namespace AOE_STRUCTURES
 	public:
 		long int actorUnitId;
 		AOE_CONST_INTERNAL::UNIT_AI_ORDER orderId;
-		long int unknown_08; // related to activity+2C. A value 0-100 (or -1) ? See 0x41375C
+		long int priority; // +08. Related to activity+2C. A value 0-100 (or -1) ? See 0x41375C
 		long int targetUnitId;
 		// 0x10
 		long int targetPlayerId; // Sometimes a BYTE (seen 0x000000FF) ?
@@ -43,8 +44,8 @@ namespace AOE_STRUCTURES
 	// See GAME_EVENT_TYPE comments for genericParam roles
 	class STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT {
 	public:
-		long int targetUnitId; // +0. Sometimes = actor? "Other" unit id ?
-		long int actorUnitId; // +4. My unit id ? (always "me" ?)
+		long int callerUnitId; // +0. (old name=targetUnitId)
+		long int recipientUnitId; // +4. My unit id ? (always "me" ?)
 		AOE_CONST_INTERNAL::GAME_EVENT_TYPE eventId; // +8. Notified activity ID. GAME_EVENT_TYPES?
 		long int genericParam4; // +C. Can be different things ? Seen targetUnitId, activityId(next?)...
 		long int genericParam5; // +10. Seen currentHP value.
@@ -52,34 +53,6 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT) == 0x18, "STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT size");
 
-
-	// Size=0x8. Is it STRUCT_NEARBY_UNIT_INFO ??? Maybe not as +6/+7 fields seem to be unused here ?
-	class STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM {
-	public:
-		long int unitId;
-		char unknown_04; // +04. -1=invalid or N/A
-		char unknown_05; // +05. -1=invalid or N/A
-		char unknown_06; // Unused ?
-		char unknown_07; // Unused ?
-	};
-	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM) == 0x8, "STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM size");
-	// Size=0x1C8. Constructor=0x40D2F0 (see other methods just after). Related to task 2D6 ??
-	class STRUCT_UNIT_ACTIVITY_UNKNOWN_12C {
-	public:
-		STRUCT_UNIT_ACTIVITY_UNKNOWN_12C_ELEM unknown_00[50]; // +00.
-		unsigned long int unknown_190;
-		unsigned long int unknown_194;
-		unsigned long int unknown_198; // A struct size=0x0C, ccor(init?)=0x46A7E0
-		unsigned long int unknown_19C;
-		unsigned long int unknown_1A0; // end of struct...
-		unsigned long int unknown_1A4[5]; // +1A4. Cf 0x40D390. (index can be 0-4)
-		char unknown_1B8; // +1B8. Default=0xFD=253
-		char unused_1B9[3];
-		unsigned long int unknown_1BC;
-		unsigned long int unknown_1C0;
-		unsigned long int unknown_1C4;
-	};
-	static_assert(sizeof(STRUCT_UNIT_ACTIVITY_UNKNOWN_12C) == 0x1C8, "STRUCT_UNIT_ACTIVITY_UNKNOWN_12C size");
 
 
 #define CHECKSUM_UNIT_ACTIVITY_BASE 0x00542D10 // Base class (not used directly?). Constructor=0x40EDF0.
@@ -109,7 +82,7 @@ namespace AOE_STRUCTURES
 	// +0x18 = activity.notifyCommander(arg1, arg2, arg3, generic_4, generic_5, generic_6?). Eg. 0x410A20
 	// +0x1C = activity.notifyCommander(NotifyEvent*). Eg. 0x4109F0 => calls [EDX+0x18]
 	// +0x20 = activity.CollectNearbyImportantUnitsInTempResults() fills ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE, ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE
-	// +0x2C = activity.isRetryableOrder(internalId) : true for non-interruptible activities (repair, heal, convert, attack, defend/capture+0x264)
+	// +0x2C = activity.isRetryableOrder(internalId) : true for non-interruptible activities (repair, heal, convert, attack, defend/capture+0x264) WRONG? activity.taskRequiresLiveTarget(internalId)
 	// +0x30 = activity.autoChooseTargetAtReach?(checkWallsIfCurrentTargetIsWall?, checkCalcPath?, arg3) BestUnitToAttack??
 	// ?int UnitAIModule::mostDangerousEnemy(float *)
 	// ?int UnitAIModule::weakestEnemy(float *)
@@ -162,7 +135,7 @@ namespace AOE_STRUCTURES
 	public:
 		unsigned long int checksum;
 		STRUCT_UNIT_BASE *ptrUnit; // +4. actor unit.
-		long int unknown_008; // default -1 ?
+		long int mood; // +08. Default -1 ?
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType; // +0C. unit AI type (on 4 bytes, actually).
 	private:
 		short int unused_unitAIType; // +0E. Because unitAIType is 4-bytes here. Do not write on these bytes !
@@ -174,14 +147,14 @@ namespace AOE_STRUCTURES
 		long int notifyQueueArraySize; // +20. Allocated array size (number of elements) for Notify queue.
 		STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyQueue; // +24. See 0x414D90(add)
 		AOE_CONST_INTERNAL::UNIT_AI_ORDER orderId; // +28. The current *explicit* order. If -1, then unit reacts to attack, see 0x414600.
-		long int unknown_2C; // +2C. 0x64 in 4DA4C9,4D841F. cf targetsInfoArray+08. CMP to enemySightedRespDist in 0x4D85B7. Updated in 0x40F8B1. Special values -1,100. Normal values 0-99. Distance to current target ? Reset to -1 when activity stops. Priority ?
+		long int currentOrderPriority; // +2C. 0x64 in 4DA4C9,4D841F. CMP to enemySightedRespDist in 0x4D85B7. Updated in 0x40F8B1. Special values -1,100. Normal values 0-99. Reset to -1 when activity stops.
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_ID currentTaskId; // +30. Current activity type.
 		long int targetUnitId; // +34. Current target unit instance ID.
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES targetUnitType; // +38. Target AI type (3=building...).
 		float targetPosY; // +3C
 		float targetPosX; // +40
 		float targetPosZ; // +44
-		float maxDistance; // +48. "Desired target distance". Default 2 ?
+		float desiredTargetDistance; // +48. "Desired target distance". Default 2 ?
 		long int unitIdToDefend; // +4C. Unit ID to capture or defend ?
 		AOE_CONST_INTERNAL::UNIT_AI_ORDER previousOrderId; // +50. Backup for +28. "lastOrder?"
 		AOE_CONST_INTERNAL::ACTIVITY_TASK_ID previousActionId; // +54. Backup for currentActionId. set in 40F6D0 method, 411D00. "lastAction"
@@ -195,13 +168,12 @@ namespace AOE_STRUCTURES
 		STRUCT_MANAGED_ARRAY unitIDsThatAttackMe;
 		STRUCT_WAYPOINT waypointQueue[8]; // +70.
 		// 0xF0
-		unsigned long int unknown_0F0; // wayPointQueueSize ???
-		unsigned long int lastUpdateTime; // +F4. To confirm
-		unsigned long int unknown_0F8; // +F8.
-		long int unknown_0FC; // int, consistent with +0F8 and global.playerVar ? Init=random+(unknown_100*3/4)
-		// 0x100
-		long int unknown_100_baseForRandomSeed; // init 0xBB8=3000. Base for random seed calculation. The highest it is, the lowest are chances of "reacting" ? Lion=6000(low reaction %), gazelle=4000(high)
-		unsigned long int unknown_104_gameTime; // +104. Some game time (ms) in the *future* ? (next xxx) ? Or defenseBuffer ?? Or idleTimeout?
+		unsigned long int wayPointQueueSize; // +F0. Max 8.
+		unsigned long int lastUpdateTime; // +F4.
+		unsigned long int idleTimer; // +F8.
+		long int adjustedIdleTimeout; // +FC. int, consistent with +0F8 and global.playerVar ? Init=random+(unknown_100*3/4) in 0x413010.
+		long int idleTimeout; // +100. init 0xBB8=3000. Base for random seed calculation. The highest it is, the lowest are chances of "reacting" ? Lion=6000(low reaction time), gazelle=4000(high)
+		unsigned long int secondaryTimer; // +104. Some game time (ms) in the *future* ? (next xxx) ? Or defenseBuffer ?? Or idleTimeout?
 		unsigned long int timeSinceLastDetectSeeUnits_ms; // +108. Milliseconds. Time since last autoFindTarget was executed.
 		unsigned long int delayBetweenDetectSeeUnits_ms; // +10C. Delay until next "detect nearby units". Default 0x3E8=1000, reset (each time) in 0x413183 using a random part(4000ms+random[0-999]). Used in 0x40FBA3.
 		// 0x110
@@ -210,10 +182,10 @@ namespace AOE_STRUCTURES
 		float currentPosZ; // To confirm
 		unsigned long int unknown_11C;
 		// 0x120
-		float unitLineOfSight; // init 1. To confirm (read from unitDef.lineOfSight?)
+		float defenseBuffer; // init 1. To confirm (read from unitDef.lineOfSight?). (Old name=unitLineOfSight)
 		long int *listOfImportantUnitAITypes; // +124. List size/content is hardcoded, depends on activity type. This filters the unit classes to include when searching for nearby units.
 		long int listOfImportantUnitAITypesArraySize; // +128. number of elements in +124.
-		STRUCT_UNIT_ACTIVITY_UNKNOWN_12C *unknown_12C; // +12C. Can be NULL.
+		STRUCT_AI_PLAY_STATUS *aiPlayStatus; // +12C. Can be NULL.
 		// 0x130
 		char unknown_130_switchBackFromHunter_unsure; // A flag ? 410C00. 4E49C3: set when activity changed to hunt to defend against an animal?
 		char unknown_131; // unused ?

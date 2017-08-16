@@ -112,7 +112,7 @@ static bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 		PUSH DLL_STRING_ID;
 		PUSH ptrObjToCreate;
 		PUSH ECX;
-		MOV EAX, 0x00455D10; // addbutton
+		MOV EAX, 0x00455D10; // easyPanel.addButton(parent, button, IDStringDLL, textId2, hPos,vPos, hSize,vSize, font, soundNum, actionId)
 		CALL EAX;
 		MOV result, EAX;
 	}

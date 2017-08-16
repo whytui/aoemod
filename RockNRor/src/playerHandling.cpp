@@ -158,8 +158,8 @@ bool CopyScreenPosition(const AOE_STRUCTURES::STRUCT_PLAYER *srcPlayer, AOE_STRU
 	if (!srcPlayer || !destPlayer || !srcPlayer->IsCheckSumValid() || !destPlayer->IsCheckSumValid()) { return false; }
 	destPlayer->screenPositionX = srcPlayer->screenPositionX;
 	destPlayer->screenPositionY = srcPlayer->screenPositionY;
-	destPlayer->unknown_122_posX = srcPlayer->unknown_122_posX;
-	destPlayer->unknown_120_posY = srcPlayer->unknown_120_posY;
+	destPlayer->mapLocationPosX = srcPlayer->mapLocationPosX;
+	destPlayer->mapLocationPosY = srcPlayer->mapLocationPosY;
 	return true;
 }
 bool CopyScreenPosition(int srcPlayerId, int destPlayerId) {
@@ -384,7 +384,7 @@ long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, AOE_STRUCTURES::STR
 // Returns NULL if not found
 AOE_STRUCTURES::STRUCT_UNIT_BASE *FindUnitWithShortcutNumberForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, char shortcutNumber) {
 	assert(player != NULL);
-	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_LINK *units = player->ptrCreatableUnitsListLink;
+	AOE_STRUCTURES::STRUCT_OBJECT_LIST *units = player->ptrCreatableUnitsListLink;
 	assert(units != NULL);
 	if (units->listElemCount == 0) {
 		return NULL;
@@ -408,7 +408,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *FindUnitWithShortcutNumberForPlayer(AOE_STRUCT
 long int GetPlayerUnitCount(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID,
 	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType, char minUnitStatus, char maxUnitStatus) {
 	assert(player != NULL);
-	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_LINK *units = player->ptrCreatableUnitsListLink;
+	AOE_STRUCTURES::STRUCT_OBJECT_LIST *units = player->ptrCreatableUnitsListLink;
 	assert(units != NULL);
 	if (units->listElemCount == 0) {
 		return 0;
@@ -511,8 +511,8 @@ void SelectOneUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT
 	if (centerScreen) {
 		player->screenPositionX = unitBase->positionX;
 		player->screenPositionY = unitBase->positionY;
-		player->unknown_122_posX = (short int)unitBase->positionX;
-		player->unknown_120_posY = (short int)unitBase->positionY;
+		player->mapLocationPosX = (short int)unitBase->positionX;
+		player->mapLocationPosY = (short int)unitBase->positionY;
 	}
 	if (!settings || !settings->IsCheckSumValid() || !settings->ptrGameUIStruct ||
 		!settings->ptrGameUIStruct->IsCheckSumValid() || !settings->ptrGameUIStruct->gamePlayUIZone ||

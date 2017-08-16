@@ -18,7 +18,7 @@
 */
 namespace AOE_STRUCTURES {
 
-	// Size 0x208
+	// Size 0x208.
 	class SCENARIO_FILE_INFO {
 		unsigned long int unknown_000;
 		unsigned long int unknown_004;
@@ -28,15 +28,18 @@ namespace AOE_STRUCTURES {
 	};
 	static_assert(sizeof(SCENARIO_FILE_INFO) == 0x208, "SCENARIO_FILE_INFO size");
 
+	// RGE_Campaign (to confirm). Size0x20C, ccor=0x41C2D0,0x41C3D0
 	class CAMPAIGN_FILE_INFO {
 	public:
-		char campaignName[0x100];
-		unsigned long int unknown_100;
-		unsigned long int unknown_104;
+		unsigned long int unknown_004;
+		char campaignName[0x100]; // Get in 0x41C780
+		unsigned long int scenarioNumber; // +104.
 		SCENARIO_FILE_INFO *scenarioInfo; // +108. Array of (available?) scenarios
-		char filename[0x100]; // Unknown size
+		char filename[0x100]; // +10C. Unknown size
 	};
 
+	// Information about a campaign "user" (account) = "RGE_CampaignInfo"
+	// Constructor=0x43BB40, 0x43BD10
 	class CAMPAIGN_USER_STATUS {
 	public:
 		char campaignName[0x100];
@@ -47,12 +50,12 @@ namespace AOE_STRUCTURES {
 		CAMPAIGN_FILE_INFO *campaignInfo; // +110
 	};
 
-	// Information about a campaign "user" (account)
+	// Constructor=0x43C190. "RGE_PersonInfo"
 	class CAMPAIGN_USER_INFO {
 	public:
 		char userName[0x100];
 		long int selectedCampaignIndex; // +100. Unsure
-		long int numberOfxxx_104; // +104
+		long int numberOfXxx; // +104
 		CAMPAIGN_USER_STATUS **userCampaignStatus; // +108. Array of campaign statuses for user ?
 		long int campaignsCount; // +10C. Array size for +110
 		CAMPAIGN_FILE_INFO *campaignInfo; // +110.

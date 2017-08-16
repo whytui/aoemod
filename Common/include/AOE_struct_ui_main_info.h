@@ -14,19 +14,28 @@ namespace AOE_STRUCTURES
 {
 
 	// Structure included in 0x5830E8 address (ROR 1.0c) => see ADDR_VAR_UI_MAIN_INFO
-	// Size > 0xAD0?. Constructor = 0x451990?
+	// Size > 0xAD4?. Constructor = 0x451990
 	// Name=TPanelSystem
+	// 0x451AE0 = panelSystem.getPanel(name)
+	// 0x451B00 = panelSystem.addPanel(panel, makeCurrent, makeModal)
+	// 0x451DF0 = panelSystem::destroyPanel(name) = close screen
 	class STRUCT_UI_PANEL_SYSTEM {
 	public:
-		STRUCT_ANY_UI *uiObjectReceivingEvents; // +00. If non-NULL, this object will intercept all UI events (other components will be unreactive)
-		STRUCT_ANY_UI *unknown_004;
-		STRUCT_ANY_UI *unknown_008;
-		STRUCT_ANY_UI *currentScreen; // +0C. Current screen. If a popup is opened, currentScreen still refers to its parent screen.
+		STRUCT_ANY_UI *mouseOwner; // +00. If non-NULL, this object will intercept all mouse events (other components will be unreactive)
+		STRUCT_ANY_UI *keyboardOwner; // +04
+		STRUCT_ANY_UI *modalPanel; // +08
+		STRUCT_ANY_UI *currentScreen; // +0C. Current screen. If a popup is opened, currentScreen still refers to its parent screen. "currentPanel"
 		unsigned long int unknown_010;
-		long int openedScreensCount; // +14, unsure.
+		long int openedScreensCount; // +14. "activePanels"
 		STRUCT_ANY_UI *previousFocusedObject; // +18. unsure
 		char unknown_01C[0x48 - 0x1C];
 		STRUCT_ANY_UI *scenarioEditor; // +48. TO CONFIRM
+
+		// +AC0 = IMEenabled
+		// +AC4 = isIMEOn
+		// +AC8 = inputEnabled
+		// +AD0 = color_window before ?
+		// +AD4 = color_windowtext before ?
 	};
 
 }

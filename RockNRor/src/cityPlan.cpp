@@ -113,7 +113,7 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 	assert(globalStruct != NULL);
 	assert(globalStruct->IsCheckSumValid());
 
-	AOE_STRUCTURES::STRUCT_MAP_TILE_VALUES *mapInfosStruct = ROR_pTempMapBuildLikeInfos;
+	AOE_STRUCTURES::STRUCT_INFLUENCE_MAP *mapInfosStruct = ROR_pTempMapBuildLikeInfos;
 	assert(mapInfosStruct != NULL);
 	assert(mapInfosStruct->IsCheckSumValid());
 

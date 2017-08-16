@@ -268,12 +268,12 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 void TilesetHandler::SetBorderColors(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, unsigned char *argColor) {
 	assert(argColor != NULL);
 	// Cf code in 0x481890 (and pushes just above)
-	gameMainUI->unknown_colorForBtnBorderOutTopRight = argColor[0]; // cf call 0x455950
-	gameMainUI->unknown_colorForBtnBorderMidTopRight = argColor[1];
-	gameMainUI->unknown_colorForBtnBorderInTopRight = argColor[2];
-	gameMainUI->unknown_colorForBtnBorderInBottomLeft = argColor[3];
-	gameMainUI->unknown_colorForBtnBorderMidBottomLeft = argColor[4];
-	gameMainUI->unknown_colorForBtnBorderOutBottomLeft = argColor[5];
+	gameMainUI->colorForBtnBorderOutTopRight = argColor[0]; // cf call 0x455950
+	gameMainUI->colorForBtnBorderMidTopRight = argColor[1];
+	gameMainUI->colorForBtnBorderInTopRight = argColor[2];
+	gameMainUI->colorForBtnBorderInBottomLeft = argColor[3];
+	gameMainUI->colorForBtnBorderMidBottomLeft = argColor[4];
+	gameMainUI->colorForBtnBorderOutBottomLeft = argColor[5];
 	assert(gameMainUI->btnChat != NULL);
 	gameMainUI->btnChat->unknown_2A0_borderSize = 3;
 	gameMainUI->btnChat->borderColorOutTopRight = argColor[0];

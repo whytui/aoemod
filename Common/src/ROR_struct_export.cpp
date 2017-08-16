@@ -305,8 +305,8 @@ namespace AOE_STRUCTURES {
 		res += std::to_string(obj->currentPosX);
 		res += " Y=";
 		res += std::to_string(obj->currentPosY);
-		res += " maxDist=";
-		res += std::to_string(obj->maxDistance);
+		res += " desiredTargetDistance=";
+		res += std::to_string(obj->desiredTargetDistance);
 		res += "\nPos X=";
 		res += std::to_string(obj->targetPosX);
 		res += " Y=";

@@ -184,7 +184,7 @@ void UpdateStrategyWithUnreferencedExistingUnits(AOE_STRUCTURES::STRUCT_BUILD_AI
 	AOE_STRUCTURES::STRUCT_PLAYER *player = mainAI->ptrStructPlayer;
 	if (!player) { return; }
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = &mainAI->structTacAI;
-	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_LINK *creatableListLink = player->ptrCreatableUnitsListLink;
+	AOE_STRUCTURES::STRUCT_OBJECT_LIST *creatableListLink = player->ptrCreatableUnitsListLink;
 	assert(creatableListLink != NULL);
 	if (creatableListLink == NULL) { return; }
 	AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *creatableListElem = creatableListLink->lastListElement;

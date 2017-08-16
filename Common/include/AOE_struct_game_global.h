@@ -190,14 +190,14 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_0B0_playerId; // currently managed playerid?
 		unsigned long int unknownPlayerVar[0x09]; // 9 variables for each player, including gaia
 		// +0xD8. "unused cached units" = "removed" units that were not freed (so that memory is reused). Typically for flares, dead units.
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type10; // +D8. Allocated but unused units for unit type = eye candy
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type20; // +DC. Allocated but unused units for unit type = flag
+		STRUCT_OBJECT_LIST *unusedCachedUnits_type10; // +D8. Allocated but unused units for unit type = eye candy
+		STRUCT_OBJECT_LIST *unusedCachedUnits_type20; // +DC. Allocated but unused units for unit type = flag
 		// +0xE0
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type30; // +E0. Allocated but unused units for unit type = movable
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type40; // +E4. Allocated but unused units for unit type = birds
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type50; // +E8. Allocated but unused units for unit type = type50
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_type60; // +EC. Allocated but unused units for unit type = projectiles. 0x520BD0
-		STRUCT_PER_TYPE_UNIT_LIST_LINK *unusedCachedUnits_doppleganger; // +F0. list of all dopplegangers ?
+		STRUCT_OBJECT_LIST *unusedCachedUnits_type30; // +E0. Allocated but unused units for unit type = movable
+		STRUCT_OBJECT_LIST *unusedCachedUnits_type40; // +E4. Allocated but unused units for unit type = birds
+		STRUCT_OBJECT_LIST *unusedCachedUnits_type50; // +E8. Allocated but unused units for unit type = type50
+		STRUCT_OBJECT_LIST *unusedCachedUnits_type60; // +EC. Allocated but unused units for unit type = projectiles. 0x520BD0
+		STRUCT_OBJECT_LIST *unusedCachedUnits_doppleganger; // +F0. list of all dopplegangers ?
 		long int global_allowedTimeForAITreatment_ms; // +F4. Time to allocate for AI treatments
 		long int tmp_allowedTimeForAITreatment; // +F8. For internal treatments (temporary, reset to 0 when finished). This is a time (ms) value allowed for AI treatments.
 		long int currentlyManagedAIPlayer; // +FC. A player id. "currentUpdateComputerPlayer"

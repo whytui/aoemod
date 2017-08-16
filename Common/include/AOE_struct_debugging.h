@@ -60,7 +60,7 @@ namespace AOE_STRUCTURES
 		AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *mapVisibilityInfoRows[255];
 		AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO mapVisibilityInfo[255][255];
 		// Copy of map build like info (tmp)
-		AOE_STRUCTURES::STRUCT_MAP_TILE_VALUES tempMapBuildLikeInfo;
+		AOE_STRUCTURES::STRUCT_INFLUENCE_MAP tempMapBuildLikeInfo;
 		// Copy of active UI struct (base class info only)
 		AOE_STRUCTURES::STRUCT_ANY_UI currentUIStruct;
 		// Copies of player structures

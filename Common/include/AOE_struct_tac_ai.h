@@ -110,7 +110,7 @@ namespace AOE_STRUCTURES {
 		// 0xF0
 		STRUCT_AI *ptrMainAI;
 		STRUCT_MANAGED_ARRAY allVillagers; // +F4. All *my* villagers. Array can contain empty values (-1). Does NOT contain any boat ! 
-		STRUCT_MANAGED_ARRAY villagerExplorers; // +104. All my villagers tasked to exploration.
+		STRUCT_MANAGED_ARRAY villagerExplorers; // +104. All my villagers tasked to exploration. Size=desired explorers count.
 		STRUCT_MANAGED_ARRAY landMilitaryUnits; // +114. All my land military unitIds (cf AI type - 0x4D277A), EXCLUDING towers, boats
 		STRUCT_MANAGED_ARRAY unknown_124; // NOT SURE it is a STRUCT_MANAGED_ARRAY
 		STRUCT_MANAGED_ARRAY allBoats; // +134. All my boats, including trade/fishing/transport/war boat AI type units.
@@ -124,8 +124,8 @@ namespace AOE_STRUCTURES {
 		// Here: a list of small structures size=0x18 (0x32 elems?) = gatherers and their tasks (excluding explorers).
 		// builders/repairmen are NOT in this array?
 		AOE_STRUCTURES::STRUCT_VILLAGER_TASKS_ELEM gatherersTasks[0x32];
-		unsigned long int villagerTasksRelevantElemCount; // +9CC. Number of RELEVANT element count in villagerTasks array (array size is fixed, it's included in this structure !)
-		long int nonExplorerVillagersCount; // +9D0. Counts all villagers BUT explorers
+		unsigned long int villagerTasksRelevantElemCount; // +9CC. Number of RELEVANT element count in villagerTasks array (array size is fixed, it's included in this structure !) "villager gatherers".
+		long int nonExplorerVillagersCount; // +9D0. Counts all villagers BUT explorers = "desired gatherers count".
 		AOE_STRUCTURES::STRUCT_UNIT_GROUP fakeFirstUnitGroupElem; // +9D4. Organized as a circular list (each elem is a group) ? This one = "fake" elem (like in strategy)
 		unsigned long int seqUnitGroupId; // +D04. Is = next group's ID.
 		unsigned long int unitGroupsCount; // +D08. This does NOT count fakeFirstUnitGroupElem (so it CAN be 0).

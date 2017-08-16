@@ -54,7 +54,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int *unknown004;
 		unsigned long int *unknown008;
 		unsigned long int *unknown00C;
-		long int unknown010;
+		long int shapeCount; // +10
 		long int unknown014;
 		unsigned long int *unknown018;
 		unsigned long int *unknown01C;
@@ -66,14 +66,27 @@ namespace AOE_STRUCTURES {
 		unsigned long int *unknown034;
 		unsigned long int *unknown038;
 		unsigned long int *unknown03C;
-		char unknown_040[0x58 - 0x40];
+		char unknown_040[0x5C - 0x40];
 		STRUCT_SLP_INFO *currentSlpInfo; // +5C
-		char unknown_05C[0x8C - 0x5C];
+		long int unknown_060;
+		long int unknown_064;
+		char unknown_068[0x8C - 0x68];
 		long int currentCursorId; // +8C : mouse cursor id
-		char unknown_090[0x14C - 0x90];
+		char unknown_090[0x10C - 0x90];
+		long int gameWindowLeft; // +10C
+		long int gameWindowTop; // +110
+		long int gameWindowRight; // +114
+		long int gameWindowBottom; // +118
+		char unknown_11C[0x138 - 0x11C];
+		long int gameMode; // +138
+		long int gameEnable; // +13C. Set in 0x449B00
+		unsigned long int unknown_140;
+		unsigned long int unknown_144;
+		unsigned long int unknown_148;
 		char currentSlpName[0x104]; // +14C : "mcursors.slp"
 		long int currentSlpCount; // +250
 	};
+	static_assert(sizeof(STRUCT_CURSOR_SLP_INFO) == 0x254, "STRUCT_CURSOR_SLP_INFO size");
 
 
 	// Size=0x110. Constructor=0x46AD60.
@@ -103,19 +116,19 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_TCHAT) == 0x100, "STRUCT_TCHAT size");
 
 
-	// Not sure this really is a structure. Seems so ?
-	class STRUCT_GAME_SETTINGS_UNKNOWN_UI_INFO {
+	// Not sure this really is a structure. Seems so ? Cf 0x417310.
+	class STRUCT_GAME_SETTINGS_TIMINGS_UI_INFO {
 	public:
-		unsigned long int unknown_timeGetTime_00; // About time refreshing ?
-		unsigned long int unknown_averageViewTime_04; // +04. Average view time ?
+		unsigned long int accumulatedTime;
+		unsigned long int lastTime; // +04.
 		unsigned long int unknown_08;
 		unsigned long int unknown_0C;
 		unsigned long int unknown_10;
-		unsigned long int unknown_14;
-		unsigned long int unknown_18;
-		unsigned long int unknown_max_1C; // +1C. Max view time ???
+		unsigned long int unknown_14; // "last single time" ?
+		unsigned long int maxTime;
+		unsigned long int lastMaxTime; // +1C.
 	};
-	static_assert(sizeof(STRUCT_GAME_SETTINGS_UNKNOWN_UI_INFO) == 0x20, "STRUCT_GAME_SETTINGS_UNKNOWN_UI_INFO size");
+	static_assert(sizeof(STRUCT_GAME_SETTINGS_TIMINGS_UI_INFO) == 0x20, "STRUCT_GAME_SETTINGS_TIMINGS_UI_INFO size");
 
 
 #ifdef GAMEVERSION_AOE10b
@@ -273,12 +286,12 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_1A8; // +1A8. Related to logger.
 		STRUCT_TREGISTRY *unknown_1AC_registry; // related to registry ?
 		// 0x1B0
-		AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentUIStatus; // 0=loading,2=inMenu,4=playing,7=editor
+		AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentUIStatus; // 0=loading,2=inMenu,4=playing,7=editor "programMode".
 		AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES mouseActionType; // +1B4. "Game mode". Set this during game, you'll be able to edit the map !! userSelected* fields
 		long int gameModeSub; // +1B8. Values 1,4,6,... ? SubMouseActionType ? Used when mouseActionType=6 (villager build menu) or in editor. Seen 1=editor_moveUnit?, 3, 4(editor_putunit?). Unsure !
 		long int unknown_1BC;
 		// 0x1C0
-		STRUCT_CURSOR_SLP_INFO *mousePointer; // +1C0. Pointer to something about mouse cursors ? Same as *(0x582EDC)
+		STRUCT_CURSOR_SLP_INFO *mousePointer; // +1C0. Pointer to something about mouse cursors ? Same as *(0x582EDC). "mouseFacet".
 		char unknown_1C4[0xC];
 		// 0x1D0
 		unsigned long int unknown_1D0;
@@ -293,7 +306,7 @@ namespace AOE_STRUCTURES {
 		char unknown_3F2; // unused ?
 		char unknown_3F3; // unused ?
 		STRUCT_GAME_GLOBAL *ptrGlobalStruct; // +3F4
-		unsigned long int unknown_3F8;
+		long int unknown_3F8_renderAll; // See 0x41C290
 		short int editorUserSelectedUnitDefId; // +3FC: the unitDefID that user selected in "units" tab.
 		short int editorUserSelectedTerrainId; // Can be changed in editor/terrain tab
 		// 0x400
@@ -301,14 +314,17 @@ namespace AOE_STRUCTURES {
 		short int editorTerrainPencilSize; // +402. in editor/terrain tab
 		char debugStringTimings[0x508 - 0x404]; // +404. Timings text. "Avg view time"... See 0x41B390.
 		// +4F0 : pointer ? +100=Affects DisableMapSizeSetting
-		long int unknown_508;
-		unsigned long int unknown_50C; // a counter
-		char unknown_510[0x520 - 0x510];
+		long int worldUpdateCount; // +508.
+		unsigned long int viewUpdateCount; // +50C.
+		unsigned long int unknown_510;
+		long int lastWorldUpdateCount; // +514
+		long int lastViewUpdateCount; // +518
+		unsigned long int unknown_51C;
 		unsigned long int unknown_520; // first value in "t%lu,f%lu,max(r(v%lu,m%lu,o%lu),s%lu,u%lu,c%lu,ls%lu,lg%lu,p%lu,o%lu)"
 		unsigned long int unknown_524; // second value in "t%lu,f%lu,max(r(v%lu,m%lu,o%lu),s%lu,u%lu,c%lu,ls%lu,lg%lu,p%lu,o%lu)"
 		// +528. elemSize=0x20; getter=417430. See 4190B0=setupTimings. Not really an array (in fact, indexes correspond to specific objects and are hardcoded)
 		// Index correspondance in debug strings: 0=? 1=u%lu 2=? 3=? 4=o%lu(last) 5=? 6=v%lu 7=m%lu 8=? 9=? 10=ls%lu 11=? 12=lg%lu 13=p%lu
-		STRUCT_GAME_SETTINGS_UNKNOWN_UI_INFO unknown_UI_info_array[16]; // actual number is unknown !!!
+		STRUCT_GAME_SETTINGS_TIMINGS_UI_INFO timingsInfo[16]; // actual number is unknown !!!
 		char unknown_5A8[0x8E0 - 0x728]; // etc
 		// 0x8E0
 		long int screenSizeX; // To confirm + confirm type
@@ -324,7 +340,7 @@ namespace AOE_STRUCTURES {
 		long int hasSteroidsCheatCode; // +9A8. set in 50CA2B, 4E90B6. Can be cancelled !!!
 		long int has_CD; //see 4169D7
 		// 0x9B0
-		unsigned long int chosenPlayerIndex[9]; // index in 0-8 (playerId, including gaia)
+		long int chosenPlayerIndex[9]; // index in 0-8 (playerId, including gaia)
 		// to 9D4...
 		unsigned long int unknown_9D4;
 		long int playerWondersVictoryDelays[9]; // +9D8. index in 0-8 (playerId, including gaia). Remaining "years" for each player's wonder victory trigger. See 0x41C100. If a wonder is destroyed but player has still another one, the counter is NOT reset. -1=not relevant.
@@ -334,7 +350,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_A00; // +A00. 1 if timer is stopped ?
 		long int unknown_A04; // +A04. Related with timer status too ?
 		unsigned long int unknown_A08;
-		float unknown_A0C;
+		float gameSpeed; // +A0C. Get in 0x41C170.
 		AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL difficultyLevelChoice; // +A10. Get in 41C190. Copied into +993=rgeGameOptions.
 		char unknown_A11;
 		char unknown_A12;

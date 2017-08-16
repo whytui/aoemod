@@ -15,8 +15,9 @@ namespace AOE_STRUCTURES
 {
 
 
+#define CHECKSUM_CIVILIZATION_DEF_PARENT 0x00544AB0
 #define CHECKSUM_CIVILIZATION_DEF 0x00549A28
-	// Size 0x2C. Constructor = 0x4EF4F0 = civDef.constructor(internalFileId)
+	// Size 0x2C. Constructor = 0x4EF4F0, 0x44F2A0 = civDef.constructor(internalFileId) "MasterPlayer"
 	// Destructor 0x4EF4D0 = civDef.destructor(do_free)
 	// Parent struct is B0 4A 54 00
 	class STRUCT_CIVILIZATION_DEF {
@@ -34,7 +35,7 @@ namespace AOE_STRUCTURES
 		char alwaysOne; // +29. Set (hardcoded) in 4EF503
 		short int techTreeId; // +2A. A technology ID or -1 (none).
 
-		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_CIVILIZATION_DEF; }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_CIVILIZATION_DEF) || (this->checksum == CHECKSUM_CIVILIZATION_DEF_PARENT); }
 		// Safely get a unit definition. Returns NULL if the unit does not exist.
 		STRUCT_UNITDEF_BASE *GetUnitDef(short int DAT_ID) const {
 			if ((DAT_ID < 0) || (DAT_ID >= this->civUnitDefCount)) { return NULL; }

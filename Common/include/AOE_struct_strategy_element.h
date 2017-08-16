@@ -13,6 +13,8 @@
 */
 namespace AOE_STRUCTURES {
 
+#define CHECKSUM_STRATEGY_ELEMENT 0x00542A3C
+
 	// Size=0xB0 - Constructor = ?
 	// aiblditm.obj (BuildItem)
 	class STRUCT_STRATEGY_ELEMENT {
@@ -30,14 +32,14 @@ namespace AOE_STRUCTURES {
 		float sizeRadius1;
 		// 0x60
 		float sizeRadius2;
-		float unknown_064;
+		float sizeRadiusZ;
 		unsigned long int unknown68_skipCount; // Unsure. "skip" term found in 408891
 		STRUCT_STRATEGY_ELEMENT *next;
 		// 0x70
 		STRUCT_STRATEGY_ELEMENT *previous;
-		AOE_CONST_FUNC::TAIUnitClass elementType; // 4-bytes. 0=building, 1=research,2=unit,4=critical_tech. "cat" (category) term found in 408891
-		unsigned long int unknown_078; // +78. number ?
-		unsigned long int unknown_07C; // +7C. priority ?
+		AOE_CONST_FUNC::TAIUnitClass elementType; // 4-bytes. 0=building, 1=research,2=unit,4=critical_tech. "category" (cf 0x408891)
+		unsigned long int unknown_078; // +78. number (unused?)
+		unsigned long int unknown_07C; // +7C. priority (unused?)
 		// 0x80
 		long int inProgressCount; // Unit count that are currently being created for this element. Can only be 0 or 1.
 		long int aliveCount; // +84. Unit count that are currently alive for this element. Can only be 0 or 1.
@@ -46,20 +48,19 @@ namespace AOE_STRUCTURES {
 		// Identifies the unit itself. -1 if N/A. In standard game, it is only valued for "alive" units. 
 		// With RockNRor, we also value it for in-progress buildings => in-construction building already has its ID, use it
 		// With RockNRor, we also value it for in-progress living units => store actor's unitID. This way, if building is destroyed, we can cancel its strategy element (otherwise it remains stuck forever)
-		// 0x90
-		long int unknown_090; // terrainSet[3] ?
-		long int unknown_094;
-		long int unknown_098;
-		long int unknown_09C; // +9C. placeOnElevation
+		long int terrainSet; // +90. terrainSet
+		long int unknown_094; // terrainOne for adjacency
+		long int unknown_098; // terrainTwo for adjacency
+		long int placeOnElevation; // +9C.
 		// 0xA0
 		long int totalCount; // Total number of created units. "#blds"
-		long int retrains; // Number of times the unit will be created. Then, strategy element is inactive (will never be done again). "cap" in game terminology ?
-		unsigned long int unknown_0A8_skipCy; // "skipCy" term found in 408891
-		char canSkip; // +AC. "permSkip" term found in 408891
+		long int retrains; // Number of times the unit will be created. Then, strategy element is inactive (will never be done again). "build cap" in game terminology.
+		long int skipCycles; // "skipCycles" term found in 0x408891
+		char permanentSkip; // +AC. "permSkip" term found in 0x408891
 		char unused_0AD;
 		short int unused_0AE;
 
-		bool IsCheckSumValid() { return this->checksum == 0x00542A3C; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_STRATEGY_ELEMENT; }
 	};
 	static_assert(sizeof(STRUCT_STRATEGY_ELEMENT) == 0xB0, "STRUCT_STRATEGY_ELEMENT size");
 

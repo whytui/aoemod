@@ -44,7 +44,7 @@ namespace AOE_STRUCTURES {
 	// Init: see 0x418920
 	class STRUCT_SOUND_DRIVER {
 	public:
-		char isDSoundInitialized;
+		char isSoundActive;
 		char unknown_001; // Related to soundDataArray
 		short int unknown_002;
 		long int hWndToNotify;
@@ -105,7 +105,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_SOUND_DRIVER) == 0x69C, "STRUCT_SOUND_DRIVER Size");
 
 
-	// Size = 0x3F8
+	// Size = 0x3F8. Constructor=0x44FAD0. "TMusicSystem".
 	class STRUCT_MAIN_MUSIC {
 	public:
 		char soundPath[0x104];
@@ -143,12 +143,12 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_25C; // related to Pause Music
 		// 0x260
 		unsigned long int unknown_260; // related to Pause Music
-		unsigned long int unknown_264;
-		unsigned long int unknown_268;
+		long int fadeOutValue; // +264.
+		long int fadeOutTime; // +268.
 		long int isMusicVolumeStored; // indicates if music volume is stored
 		// 0x270
 		long int currentMusicVolume; // ?
-		long int lastMusicVolumeStorageTime; // a timeGetTime value
+		long int lastMusicVolumeStorageTime; // a timeGetTime value when fade out started ?
 		long int hasMusicVolumeCtrl; // 0/1 flag
 		long int hMixer; // to change volume of an audio line.
 		// 0x280 - MIXERLINE: 0xA8 bytes

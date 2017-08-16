@@ -22,6 +22,9 @@
 namespace AOE_STRUCTURES {
 	class STRUCT_PLAYER;
 
+#define CHECKSUM_AI_PARENT 0x00542C04
+#define CHECKSUM_AI 0x00548BF0
+
 	// The main AI object. Total size = 0x125C8. Constructor = 0x4C6960.
 	// Checksums: F0 8B 54 00 (normal) + parents 04 2C 54 00, B0 2B 54 00
 	// +0x00 = destructor(do_free)
@@ -67,7 +70,7 @@ namespace AOE_STRUCTURES {
 		long int receivedTributeFromPlayer[9]; // +125A4. Total tribute received from a player (no distinction on resource type). See 4C83B5
 
 
-		bool IsCheckSumValid() const { return this->checksum == 0x00548BF0; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_AI; }
 	};
 	static_assert(sizeof(STRUCT_AI) == 0x125C8, "STRUCT_AI size");
 

@@ -24,7 +24,7 @@ namespace AOE_STRUCTURES
 
 	// Size 0x948. Constructor 0x48FC40. Inherits from 9C 57 54 00, then screen_base
 	// This is the parent UI object of in-game screen.
-	class STRUCT_UI_SCENARIO_EDITOR_MAIN : public STRUCT_UI_SCREEN_BASE { // 60 73 54 00
+	class STRUCT_UI_SCENARIO_EDITOR_MAIN : public STRUCT_UI_EASY_PANEL { // 60 73 54 00
 	public:
 		char unknown_478[0x4A8 - 0x478];
 		long int currentMapGenerationChoice; // +4A8. 1=empty, 2=random, 3=from seed
@@ -35,7 +35,7 @@ namespace AOE_STRUCTURES
 		short int unkknown_04BA;
 		unsigned long int unknown_04BC;
 		// 0x4C0
-		char unknown_04C0; // default 0
+		char needToSave; // default 0
 		char unknown_04C1; // default 0
 		short int unknown_04C2; // unused??
 		unsigned long int unknown_04C4;

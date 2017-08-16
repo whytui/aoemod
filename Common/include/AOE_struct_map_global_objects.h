@@ -75,6 +75,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_VISIBLE_UNITS_HELPER) == 0x24, "STRUCT_VISIBLE_UNITS_HELPER size");
 
 
+//PathingSystem::findTilePath(startX, startY, goalX, goalY, unit, actionRange, cTargetID, copyPathWhenDone, pathLength, checkPathingIterations, checkTerrainFirstTime, checkCollisions, stepSize, unobstructiblePlayerID, unobstructibleGroupID)
 
 #define CHECKSUM_UNKNOWN_PATH_FINDING 0x00544CF0
 	// Included structure in addresses 0x583BC8 and 0x6A1CC0 (open paths and traversed paths ?)
@@ -86,7 +87,7 @@ namespace AOE_STRUCTURES {
 	// Note: it seems map is split into tiles (1 unit of position = 1 tile) but tiles are split into 4 "quarters".
 	// In this struct, arrays indices are "quarter tiles". (use posX*4 for example).
 	// Arrays value are binary (1 bit of one elementary position), which adds more precision under tile/quarter tile level ?
-	// 0x458930 = xxx.calcPathForMove?(srcPosY, srcPosX, destPosY, destPosX, ptrActorUnit, f_range, targetUnitId, doActualMove(=!justCheck),arg9... , arg13, playerId???, unitClass???)
+	// 0x458930 = pathingSystem.findTilePath(srcPosY, srcPosX, destPosY, destPosX, ptrActorUnit, f_range, targetUnitId, copyPathWhenDone, pathLength, checkPathingIterations, checkTerrainFirstTime, checkCollisions, stepSize, unobstructiblePlayerID, unobstructibleUnitClass)
 	class STRUCT_UNKNOWN_PATH_FINDING {
 	public:
 		unsigned long int checksum; // F0 4C 54 00
@@ -136,15 +137,16 @@ namespace AOE_STRUCTURES {
 		long int actorMaxPosY_offset; // +11DC9C. (actorPosY + sizeRadius)*4 ?
 		long int actorMaxPosX_offset; // +11DCA0. (actorPosX + sizeRadius)*4 ?
 		char unknown_11DCA4[0x11DCC0 - 0x11DCA4];
-		long int unknown_11DCC0_counter; // +11DCC0. INC in 0x45A4D0
-		long int unknown_11DCC4_counter; // +11DCC4. INC in 0x45A4E0
+		long int initialPathsCount; // +11DCBC. Inc in 0x45A4C0.
+		long int continuePathsCount; // +11DCC0. INC in 0x45A4D0
+		long int canPathsCount; // +11DCC4. INC in 0x45A4E0
 		long int unknown_11DCC8_distance_offset; // Init=-1. Distance*4 between ? Total distance*4 (in straight line) between src and dest ?
 		char unknown_11DCCC[0x11DCD8 - 0x11DCCC];
 		char unknown_11DCD8_resetCounter; // +11DCD8. A counter, +=8 at each pathFinding. When 0xF0 (30 iterations), reset and resets mapData. Value is similar to +C array
 		char unknown_11DCD9[3];
-		long int unknown_11DCDC_unitClass; // +11DCDC. arg15 of 00458930 call. Seen 0x1B (walls????). Used in 0x459AD4
+		long int unobstructibleUnitClass; // +11DCDC. arg15 of 00458930 call. Seen 0x1B (walls????). Used in 0x459AD4
 		// 0x11DCE0
-		long int unknown_11DCE0; // arg14 of 00458930 call. A playerId ?
+		long int unobstructiblePlayerId; // arg14 of 0x458930 call.
 		STRUCT_MANAGED_ARRAY unknown_11DCE4; // +11DCE4 = array of unit IDs
 		/*long int *unknown_11DCE4; // +11DCE4 = array of unit IDs
 		long int unknown_11DCE8; // +11DCE8 = used count in unknown_11DCE4
@@ -210,7 +212,7 @@ namespace AOE_STRUCTURES {
 	};
 
 
-	// Size = 0x0C. Constructor = 0x5219C0
+	// Size = 0x0C. Constructor = 0x5219C0. "RGE_Zone_Map_List"
 	// Provides the terrain zones info for each set of "terrain restriction accessibility values" (taken as bool).
 	// An entry in ptrTerrainZoneInfoArray is identified by 1) number of terrains (in terrain restriction values array)
 	// and 2) set of "bool" accessibility values in terrain restriction array.

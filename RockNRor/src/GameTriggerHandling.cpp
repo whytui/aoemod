@@ -690,7 +690,7 @@ void Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		if (!gaia || !gaia->IsCheckSumValid()) {
 			return;
 		}
-		AOE_STRUCTURES::STRUCT_PER_TYPE_UNIT_LIST_LINK *creatablesLink = gaia->ptrCreatableUnitsListLink;
+		AOE_STRUCTURES::STRUCT_OBJECT_LIST *creatablesLink = gaia->ptrCreatableUnitsListLink;
 		if (!creatablesLink || !creatablesLink->IsCheckSumValid()) {
 			return;
 		}

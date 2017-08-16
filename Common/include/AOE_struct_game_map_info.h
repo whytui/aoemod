@@ -24,9 +24,9 @@ namespace AOE_STRUCTURES {
 	// Size=0x06. For tile position/size display
 	class STRUCT_ELEVATION_TILE_SIZE_INFO {
 	public:
-		short int unknown_00_Y_tile_size;
-		short int unknown_02_X_tile_size;
-		short int unknown_04_Z_tile_offset; // +04. A signed value.
+		short int tile_sizeY; // +00. "width"
+		short int tile_sizeX; // +02. "height"
+		short int yDelta; // +04. A signed value.
 	};
 	static_assert(sizeof(STRUCT_ELEVATION_TILE_SIZE_INFO) == 0x06, "STRUCT_ELEVATION_TILE_SIZE_INFO size");
 
@@ -35,7 +35,8 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_GAME_MAP 0x005499F4
 	// Parent size=0x88D0. Constructor=0x443CE0(fromFile), 0x443D80
 	// Size = 0xB5F8. Init in 0x4445E0. Constructor=0x4ED4B0(fromFile), 0x4ED800.
-	// "Tribe_Map"
+	// "RGE_Map" / "Tribe_Map"
+	// 0x447DE0 = gameMapInfo.getTerrain(col=y, row=x)
 	// +00 = destructor(do_free)
 	// +04 = gameMapInfo.init(internalFileId?)?
 	// +14 = gameMapInfo.setRawAltitudeValueNoCalc(posYstart, posXstart, size?; altitude)

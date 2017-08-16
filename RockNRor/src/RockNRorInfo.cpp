@@ -247,7 +247,7 @@ AOE_STRUCTURES::STRUCT_ANY_UI *RockNRorInfo::OpenCustomGamePopup(long int hSize,
 		(GetGameSettingsPtr()->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING)) {
 		return false;
 	}
-	AOE_STRUCTURES::STRUCT_UI_SCREEN_BASE *currentScreen = (AOE_STRUCTURES::STRUCT_UI_SCREEN_BASE *)GetCurrentUIStruct();
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *currentScreen = (AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *)GetCurrentUIStruct();
 	assert(currentScreen && currentScreen->IsCheckSumValidForAChildClass());
 	if (!currentScreen || !currentScreen->IsCheckSumValidForAChildClass()) { return false; }
 	// Make sure provided dimensions fit in screen

@@ -36,9 +36,9 @@ namespace AOE_STRUCTURES {
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1004
 		// 0xF0
 		STRUCT_AI *mainAI;
-		long int attitudeValues[EMOTIONAL_AI_ATTITUDE::CST_EMO_COUNT]; // +F4
+		long int attitudeValues[EMOTIONAL_AI_ATTITUDE::CST_EMO_COUNT]; // +F4. "states". Some int value (not a bool). See 0x40B2D0: 6 possible sets of values.
 		char attitudeNames[EMOTIONAL_AI_ATTITUDE::CST_EMO_COUNT][0x1E];
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_EMOTIONAL_AI; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_EMOTIONAL_AI; }
 	};
 	static_assert(sizeof(STRUCT_EMOTIONAL_AI) == 0x1C0, "STRUCT_EMOTIONAL_AI size");
 

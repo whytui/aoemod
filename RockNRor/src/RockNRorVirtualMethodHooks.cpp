@@ -161,8 +161,8 @@ namespace VIRTUAL_METHOD_HOOKS {
 		runStandardMethod = !ROCKNROR::GAME_EVENTS::PlayerNotifyEvent(player, notifyEvent);
 
 		if (runStandardMethod) {
-			unsigned long int arg1 = notifyEvent.targetUnitId;
-			unsigned long int arg2 = notifyEvent.actorUnitId;
+			unsigned long int arg1 = notifyEvent.callerUnitId;
+			unsigned long int arg2 = notifyEvent.recipientUnitId;
 			unsigned long int arg3 = notifyEvent.eventId;
 			unsigned long int arg4 = notifyEvent.genericParam4;
 			unsigned long int arg5 = notifyEvent.genericParam5;

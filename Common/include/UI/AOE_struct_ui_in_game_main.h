@@ -49,7 +49,7 @@ namespace AOE_STRUCTURES
 	// Size 0x7C8 - Constructor = 0x47D440. parent object = 9C 57 54 00, common with scenario editor
 	// This is the parent UI object of in-game screen.
 	// Pointed by 005830F4
-	class STRUCT_UI_IN_GAME_MAIN : public STRUCT_UI_SCREEN_BASE { // "Game Screen"
+	class STRUCT_UI_IN_GAME_MAIN : public STRUCT_UI_EASY_PANEL { // "Game Screen"
 	public:
 		STRUCT_SLP_INFO *gameTopAndBottomFriezes; // +478. Top and down friezes, depending on both resolution and tileset. gameX.shp (X=a/b or c)
 		STRUCT_SLP_INFO *buttonBoardResolutionA; // +47C. btnbrda%d.shp. For lowest resolution.

@@ -26,7 +26,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int dislikeTable[10]; // +F4. The 0-100 dislike values against each player. Why is there a "player9" value ?
 		unsigned long int likeTable[10]; // +11C. The 0-100 like values against each players. Why is there a "player9" value ?
 		// 0x144
-		char isNeutral[9]; // 0 or 1. To confirm
+		char isChangeable[9]; // 0 or 1. "changeable": diplomacy may still change
 		char unused_14D; // An unused "player9" value ?
 		short int unused;
 		// 0x150: end

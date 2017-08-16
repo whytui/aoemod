@@ -162,8 +162,8 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(COMMAND_TASK_UNIT) == 0x28, "COMMAND_TASK_UNIT size");
 
 	// Type 0x0C. Size = 0x9 + x*3 ? Create=0x42BE90. Exec=0x42B3B0
-	// Set target position ?
-	struct COMMAND_UNKNOWN_C {
+	// Set intermediate movement target position (one unit only ?). Unused ?
+	struct COMMAND_ADD_SINGLE_INTERMEDIATE_MOVEMENT_STEP {
 	public:
 		char cmdId;
 		char playerId;
@@ -172,10 +172,10 @@ namespace AOE_STRUCTURES
 		unsigned char positionsCount; // +08. Number of elements in positionsArray (also gives structure size)
 		STRUCT_UNIT_TARGET_POS positionsArray[1]; // +09. Array size is only known dynamically.
 
-		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_UNKNOWN_C; }
+		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_ADD_ONE_INTERMEDIATE_MOVEMENT_STEP; }
 		long int MySizeInBytes() const { return 0x09 + 3 * this->positionsCount; }
 	};
-	static_assert(sizeof(COMMAND_UNKNOWN_C) == 0x09 + 3, "COMMAND_UNKNOWN_C size");
+	static_assert(sizeof(COMMAND_ADD_SINGLE_INTERMEDIATE_MOVEMENT_STEP) == 0x09 + 3, "COMMAND_ADD_SINGLE_INTERMEDIATE_MOVEMENT_STEP size");
 
 
 	// Type 0x0E. Size = 0x10. Create=0x42BC40. exec=0x42B4A0
@@ -216,7 +216,7 @@ namespace AOE_STRUCTURES
 		unsigned char posX; // +03
 		long int unitIdArray[1]; // +04. Array size is only known dynamically.
 
-		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_ADD_INTERMEDIATE_MOVEMENT_STEP; }
+		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_ADD_GRP_INTERMEDIATE_MOVEMENT_STEP; }
 		long int MySizeInBytes() const { return 0x04 + 3 * this->unitCount; }
 	};
 	static_assert(sizeof(COMMAND_ADD_INTERMEDIATE_MOVEMENT_STEP) == 0x04 + 4, "COMMAND_ADD_INTERMEDIATE_MOVEMENT_STEP size");
@@ -224,7 +224,7 @@ namespace AOE_STRUCTURES
 
 	// Type 0x11. Size = 0x24+x*4. Create=. Execute=0042B1A0
 	// For AI (only) ?
-	struct COMMAND_HOLD_POSITION {
+	struct COMMAND_GROUP_AI_TASK {
 	public:
 		char cmdId;
 		char playerId; // +1. (player index, like settings.chosenPlayerIndex)
@@ -249,9 +249,9 @@ namespace AOE_STRUCTURES
 		char unknown_22;
 		char unknown_23;
 		long int actorUnitIdArray[1]; // +24. Array size is only known dynamically.
-		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_HOLD_POSITION; }
+		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_GROUP_AI_TASK; }
 	};
-	static_assert(sizeof(COMMAND_HOLD_POSITION) >= 0x24, "COMMAND_HOLD_POSITION size");
+	static_assert(sizeof(COMMAND_GROUP_AI_TASK) >= 0x24, "COMMAND_GROUP_AI_TASK size");
 
 
 	// Type 0x64. Size = 0x10 ? Create=0x4E9490, 0x4E94E0

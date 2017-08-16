@@ -2,14 +2,15 @@
 
 namespace AOE_METHODS {
 
-// pathFindingStruct can be 0x583BC8 or 0x6A1CC0. Don't know the specific roles yet :(
+// pathFindingStruct can be 0x583BC8 or 0x6A1CC0 (for AI?).
 // updateUnitPathInfo = "do move". If false, this just checks if movement is possible.
 // arg15 : seen 0x1B hardcoded
 	long int CalcPathForMove(STRUCT_UNKNOWN_PATH_FINDING *pathFindingStruct,
 	long int srcPosY, long int srcPosX, long int destPosY, long int destPosX,
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *ptrActorUnit, float maxRange, long int targetUnitId, long int updateUnitPathInfo,
 	long int arg9, long int arg10, long int arg11, long int arg12,
-	long int distance_unsure, long int targetPlayerId, long int unknown_unitClass) {
+	long int distance_unsure, long int unobstructiblePlayerId, long int unobstructibleUnitClass) {
+#pragma TODO("use virtual method, not hardcoded address")
 	const unsigned long int callAddr = 0x458930;
 #ifdef _DEBUG
 	// DEBUG: run some data quality checks
@@ -23,8 +24,8 @@ namespace AOE_METHODS {
 	long int result = 0;
 	_asm {
 		MOV ECX, pathFindingStruct;
-		PUSH unknown_unitClass;
-		PUSH targetPlayerId;
+		PUSH unobstructibleUnitClass;
+		PUSH unobstructiblePlayerId;
 		PUSH distance_unsure;
 		PUSH arg12;
 		PUSH arg11;
@@ -368,8 +369,8 @@ AOE_STRUCTURES::STRUCT_POSITION_INFO GetMousePosition(AOE_STRUCTURES::STRUCT_ANY
 	POINT pt;
 	GetCursorPos(&pt);
 	ScreenToClient((HWND)currentUI->GetHWnd(), &pt); // Returns false if failed
-	pt.x += currentUI->unknown_08C_minPosX;
-	pt.y += currentUI->unknown_090_minPosY;
+	pt.x += currentUI->trueRenderRect_minPosX;
+	pt.y += currentUI->trueRenderRect_minPosY;
 	result.posX = pt.x;
 	result.posY = pt.y;
 	return result;
@@ -390,8 +391,8 @@ AOE_STRUCTURES::STRUCT_POSITION_INFO GetMousePosition() {
 		return result;
 	}
 	result = GetMousePosition(gameZone);
-	result.posX = result.posX - gameZone->unknown_08C_minPosX;
-	result.posY = result.posY - gameZone->unknown_090_minPosY;
+	result.posX = result.posX - gameZone->trueRenderRect_minPosX;
+	result.posY = result.posY - gameZone->trueRenderRect_minPosY;
 	return result;
 }
 
@@ -410,12 +411,12 @@ bool GetGamePositionUnderMouse(float *posX, float *posY) {
 	AOE_STRUCTURES::STRUCT_POSITION_INFO mousePos = GetMousePosition(gameZone);
 
 	// Analog to 0x5145D1
-	if (mousePos.posX < gameZone->unknown_08C_minPosX) { return false; }
-	if (mousePos.posX > gameZone->unknown_094_maxPosX) { return false; }
-	if (mousePos.posY < gameZone->unknown_090_minPosY) { return false; }
-	if (mousePos.posY > gameZone->unknown_098_maxPosY) { return false; }
-	long int relativeMousePosX = mousePos.posX - gameZone->unknown_08C_minPosX;
-	long int relativeMousePosY = mousePos.posY - gameZone->unknown_090_minPosY;
+	if (mousePos.posX < gameZone->trueRenderRect_minPosX) { return false; }
+	if (mousePos.posX > gameZone->trueRenderRect_maxPosX) { return false; }
+	if (mousePos.posY < gameZone->trueRenderRect_minPosY) { return false; }
+	if (mousePos.posY > gameZone->trueRenderRect_maxPosY) { return false; }
+	long int relativeMousePosX = mousePos.posX - gameZone->trueRenderRect_minPosX;
+	long int relativeMousePosY = mousePos.posY - gameZone->trueRenderRect_minPosY;
 
 	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO gamePos;
 	long int unknown_res = AOE_METHODS::AOE_GetGamePosFromMousePos(gameZone, &gamePos, relativeMousePosX, relativeMousePosY);

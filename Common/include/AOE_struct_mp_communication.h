@@ -19,7 +19,7 @@ namespace AOE_STRUCTURES {
 	// See 0x504FD0 = MPComm.copyHostOptionsFrom(tempOptionsStruct, size)
 	class STRUCT_RGE_GAME_OPTIONS {
 	public:
-		float gameSpeed;
+		float gameVersion; // +00. (old name=gameSpeed)
 		char isScenario; // +04. Used for new games. For other games, refer to scenarioInfo structure.
 		char scenarioName[0x80]; // +05. Scenario name, if relevant (or "").
 		char isSinglePlayer; // +85
@@ -28,14 +28,14 @@ namespace AOE_STRUCTURES {
 		unsigned char mapSizeY; // +88
 		char unknown_89_maxPlayerCount; // +89. Maximum allowed player count for map ?
 		char enableCheatMode; // +8A
-		char pathFindingMPChoice; // +8B. To confirm
-		char unknown_8C; // +8C. Cf unknown_984.
+		char pathFindingMPChoice; // +8B. (settigns+983)
+		char cheatNotification; // +8C.
 		char hasRevealMapAtStartup; // +8D
 		char hasNoFogAtStartup; // +8E
 		char enableColoredChat; // +8F. To confirm
 		char playerCountWithoutGaia; // +90
-		char unknown_91_enableDeveloperOptions; // +91. Not sure
-		char playerGameVersion[9]; // +92 to +9A included. 0="", 1="1.0", 2="1.0a", etc. Index is playerId
+		char unknown_91_enableDeveloperOptions; // +91. (settings+0x989)
+		char playerGameVersion[9]; // +92 to +9A included. 0="", 1="1.0", 2="1.0a", etc. Index is playerId. Lowest bit=hasCD.
 		AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL difficultyLevel; // +9B. 1-byte.
 		char teamNumber[9]; // +9C. Index is playerId
 		char unknown_A5[3]; // unused ?		
@@ -80,6 +80,24 @@ namespace AOE_STRUCTURES {
 #pragma pack(pop)
 
 
+	// Size=8. Constructor 0x41D6A0
+	class STRUCT_COMM_ERROR {
+	public:
+		unsigned long int unknown_00;
+		unsigned long int unknown_04;
+	};
+	static_assert(sizeof(STRUCT_COMM_ERROR) == 8, "STRUCT_COMM_ERROR size");
+
+
+	// ?
+	// AddItem in 0x428090
+	class STRUCT_COMM_QUEUE {
+	public:
+		char *unknown_000[0x114];
+		long int *unknownPlayerQueue; // +114.
+	};
+
+
 	// Size=0x7EC. Constructor=0x429330.
 	class STRUCT_COMM_SYNCHRONIZE {
 	public:
@@ -88,6 +106,12 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_008;
 		long int stopIfSyncFail1; // +0C (see 0x41E0C0)
 		long int stopIfSyncFail2; // +10 (see 0x41E0C0)
+		unsigned long int unknown_014;
+		unsigned long int unknown_018;
+		unsigned long int unknown_01C;
+		unsigned long int unknown_020;
+		unsigned long int unknown_024;
+		unsigned long int lastWorldRandom; // +28
 	};
 
 	// Size=0x240. Constructor=0x428990.
@@ -98,15 +122,17 @@ namespace AOE_STRUCTURES {
 		long int enableSpeedControl; // +118. Set in 0x428BF0
 		unsigned long int unknown_11C; // +11C. Impacts lag when clicking ?! (multiplier for "turn" ?)
 		unsigned long int unknown_120; // +120. Related to +11C (previous or next value ?)
-		unsigned long int unknown_124;
+		unsigned long int bufferFramesRemaining; // +124
 		unsigned long int unknown_128;
-		long int unknown_12C; // +12C. A divider for highest "unknown_148". Seen 0x0A (10)
+		long int bufferGranularity; // +12C. A divider for highest "unknown_148". Seen 0x0A (10)
 		long int unknown_130; // +130. Related to +12C. (previous or next value ?)
-		char unknown_134[0x148 - 0x134];
-		long int unknown_148[9]; // +148. Index is playerId-1. Latency, or something like that?
+		char unknown_134[0x144 - 0x134];
+		long int unknown_144[10]; // +148. Index is playerId. Latency
 		char unknown_16C[0x214 - 0x16C];
 		long int unknown_214; // +214. = 1+max(unknown_148)/unknown_12C, but the minimal value is 4+1 (0x4290D9)
-		char unknown_218[0x240 - 0x218];
+		char unknown_218[0x238 - 0x218];
+		long int adjustmentCount; // +238
+		unsigned long int unknown_23C;
 	};
 	static_assert(sizeof(STRUCT_COMM_SPEED) == 0x240, "STRUCT_COMM_SPEED size");
 
@@ -135,15 +161,16 @@ namespace AOE_STRUCTURES {
 		char unknown_1000[0x10C8 - 0x1000];
 		unsigned long int unknown_10C8_time; // +10C8. Value for "player: T#%d". Response time or similar thing ??? Allowed time ?
 		char unknown_10CC[0x10E0 - 0x10CC];
-		long int localControlPlayerId; // +10E0. "local" playerId for MP.
+		long int localControlPlayerId; // +10E0. "local" playerId for MP. "whoami".
 		long int isMPGame; // +10E4. See 0x41EBEC. If 0, then it is a single player game (0x423E36).
 		unsigned long int unknown_10E8;
 		unsigned long int unknown_10EC;
 		float unknown_10F0_RX;
 		float unknown_10F4_TX;
-		char unknown_10F8[0x1100 - 0x10F8];
+		unsigned long int unknown_10F8[10];
 		// +1179= byte
-		char unknown_1100[0x12A0 - 0x1100];
+		// +11FA: char*, game title?
+		char unknown_1100[0x12A0 - 0x1120];
 		unsigned long int unknown_12A0;
 		unsigned long int unknown_12A4;
 		unsigned long int unknown_12A8;
@@ -160,12 +187,17 @@ namespace AOE_STRUCTURES {
 		AOE_CONST_INTERNAL::COMM_LINK_LEVEL commLinkLevel; // +12D4. "Link Level".
 		short int maximumPlayerCount; // +12D8. Is 8
 		short int unknown_12DA;
-		//char unknown_12DC[0x13C0 - 0x12DC];
-		char unknown_12DC[0x1344 - 0x12DC];
+		long int serviceGUID; // +12DC.
+		char unknown_12E0[0x12FC - 0x12E0];
+		long int sessionGUID; // +12FC.
+		char unknown_1300[0x130C - 0x1300];
+		long int hWnd; // +130C. Set in 0x4244F0.
+		char unknown_1310[0x1344 - 0x1310];
 		unsigned long int lastCommTime[10]; // +1348. some timeGettime (difference) value for each player
 		unsigned long int unknown_136C[10]; // +136C. 1 per (COMM) playerId (0 and 9 unused). TO VERIFY
-		char unknown_1394[0x13C0 - 0x1394];
-		unsigned long int unknown_13C0[10]; // +13C0. 1 per (COMM) playerId (0 and 9 unused)
+		char unknown_1394[0x13BC - 0x1394];
+		unsigned long int playerStopTurn[10]; // +13BC. 1 per (COMM) playerId (0 and 9 unused)
+		unsigned long int unknown_13E4;
 		char unknown_13E8[0x1484 - 0x13E8];
 		unsigned long int unknown_1484;
 		unsigned long int unknown_1488;
@@ -173,16 +205,22 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_1490;
 		unsigned long int unknown_1494;
 		unsigned long int unknown_1498;
-		char unknown_149C[0x14C4 - 0x149C];
-		long int *communicationQueue; // +14C4. Related to players communication. +114=ptr (player queue)? AddItem in 0x428090
-		char unknown_14C8[0x14D4 - 0x14C8];
+		long int hasKicked[10]; // +149C.
+		STRUCT_COMM_QUEUE *communicationQueue; // +14C4. Related to players communication.
+		unsigned long int unknown_14C8;
+		long int lobbyLaunched; // +14CC. Cf 0x4241E0.
+		unsigned long int unknown_14D0;
 		STRUCT_COMM_SPEED *commSpeedControl; // +14D4.
 		STRUCT_COMM_SYNCHRONIZE *commSynchronize; // +14D8.
 		char unknown_14DC[0x14E0 - 0x14DC];
-		long int *unknown_14E0; // +14E0. Some class related to players communication.
-		char unknown_14E4[0x1528 - 0x14E4];
+		STRUCT_COMM_ERROR *commErrors; // +14E0.
+		char unknown_14E4[0x1518 - 0x14E4];
+		unsigned long int dropPacketsIntentionally; // +1518
+		unsigned long int unknown_151C;
+		unsigned long int unknown_1520;
+		unsigned long int unknown_1524;
 		unsigned long int unknown_1528[10]; // +1528. 1 per (COMM) playerId (0 and 9 unused)
-		char unknown_1550;
+		char unknown_1550; // release settings <=> set this to 0
 		char unknown_1551[3];
 		unsigned long int unknown_1554;
 		unsigned long int unknown_1558; // +1558. Timer status ? 3=not_initialized, 4=paused, 5=running.
@@ -193,7 +231,7 @@ namespace AOE_STRUCTURES {
 		// 0x1590
 		char unknown_1590;
 		char unknown_1591[3]; // Probably unused
-		long int unknown_1594_isComputerControlled[10]; // 1 per (COMM) playerId (0 and 9 unused). 1 if AI ? Or playerId of host, or smthing else ?
+		long int isPlayerReady[10]; // +1594. 1 per (COMM) playerId (0 and 9 unused).
 		unsigned long int unknown_15BC[10]; // +15BC. 1 per (COMM) playerId (0 and 9 unused)
 		unsigned long int unknown_15E4[10]; // 1 per (COMM) playerId (0 and 9 unused)
 		unsigned long int unknown_160C[10]; // 1 per (COMM) playerId (0 and 9 unused)
@@ -208,7 +246,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_1708;
 		unsigned long int sharedRandomSeed; // +170C. Set in 0x423B90.
 		unsigned long int unknown_1710;
-		unsigned long int unknown_1714;
+		unsigned long int hostPlayerNumber; // +1714
 		unsigned long int unknown_1718;
 		long int MPGameOptionsStructSize; // +171C. Game options struct size (cf +04). Set in 0x425848. Is 0x114 in ROR 1.0a version.
 		unsigned long int unknown_1720[10]; // +1720. 1 per (COMM) playerId (0 and 9 unused). "Response time" for player i, or similar thing ? Compared to +10C8.

@@ -16,7 +16,7 @@ namespace AOE_STRUCTURES
 	static STRUCT_DRS_FILE_LINK **ROR_firstDrsFileLink = (STRUCT_DRS_FILE_LINK **)AOE_OFFSETS::ADDR_DRS_LINK_FIRST_ELEM;
 	static STRUCT_GAME_SETTINGS **ROR_gameSettings = (STRUCT_GAME_SETTINGS**)ADDR_VAR_GAME_SETTINGS_STRUCT;
 	static STRUCT_UI_PANEL_SYSTEM *ROR_pUIMainInfo = (STRUCT_UI_PANEL_SYSTEM *)ADDR_VAR_PANEL_SYSTEM;
-	static STRUCT_MAP_TILE_VALUES* ROR_pTempMapBuildLikeInfos = (STRUCT_MAP_TILE_VALUES *)AOE_OFFSETS::ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS;
+	static STRUCT_INFLUENCE_MAP* ROR_pTempMapBuildLikeInfos = (STRUCT_INFLUENCE_MAP *)AOE_OFFSETS::ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS;
 	static STRUCT_ANY_UI *ROR_pCurrentUIObject = (STRUCT_ANY_UI *)AOE_OFFSETS::ADDR_VAR_CURRENT_UI_OBJECT;
 	static long int *ROR_elemCountsInUnitTempSearchResults = (long int *)ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE;
 	static STRUCT_NEARBY_UNIT_INFO **ROR_unitTempSearchResults = (STRUCT_NEARBY_UNIT_INFO**)ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE;
@@ -28,7 +28,7 @@ namespace AOE_STRUCTURES
 	// Get result count (for diplomacy value) in temporary arrays. For example, after calling 0x516C10=[7D2058].collectVisibleUnitsToTempResults(posY, posX, distance, playerId, ptrArrayOfUnitAITypes, AITypesCount, diplomacyTable)
 	static long int GetElemCountInUnitListTempSearchResult(AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES diplValue) {
 		if ((diplValue < 0) || (diplValue > AOE_CONST_INTERNAL::CST_PDV_ENEMY)) { return 0; }
-		return ROR_elemCountsInUnitTempSearchResults[diplValue]; // Reads long int from 0x7D2024+dipl*4
+		return ROR_elemCountsInUnitTempSearchResults[diplValue]; // Reads long int from 0x7D2024+dipl*4. "visibleUnitsListSize"
 	}
 	// Get result element, collected in temporary arrays. For example, after calling 0x516C10=[7D2058].collectVisibleUnitsToTempResults(posY, posX, distance, playerId, ptrArrayOfUnitAITypes, AITypesCount, diplomacyTable)
 	// Returns NULL if no data or invalid arguments

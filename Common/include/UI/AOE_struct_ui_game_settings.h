@@ -15,10 +15,10 @@
 namespace AOE_STRUCTURES
 {
 
-	// Size = 0x560. 10 78 54 00. Parent=9C 57 54 00 then BC 4B 54 00.
+	// Size = 0x560. 10 78 54 00. Parent=9C 57 54 00 then BC 4B 54 00 (easyPanel).
 	// The screen before starting game to choose map type, etc ("advanced" options like map size, etc).
 	// Constructor:0x49BF40
-	class STRUCT_UI_GAME_SETTINGS : public STRUCT_UI_SCREEN_BASE {
+	class STRUCT_UI_GAME_SETTINGS : public STRUCT_UI_EASY_PANEL {
 	public:
 		STRUCT_ANY_UI *lblScenarioSettings; // +478
 		unsigned long int unknown_47C;

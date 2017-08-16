@@ -16,7 +16,7 @@ namespace AOE_STRUCTURES
 	// Size=0x490. A base class for all popups ("dialogs"), excluding "screens".
 	// Constructor = 0x460730, Init (own fields) 0x.
 #define CHECKSUM_UI_DIALOG_BASE 0x00544F1C
-	class STRUCT_UI_DIALOG_BASE : public STRUCT_UI_SCREEN_BASE {
+	class STRUCT_UI_DIALOG_BASE : public STRUCT_UI_EASY_PANEL {
 	public:
 		unsigned long int unknown_478;
 		unsigned long int unknown_47C;
