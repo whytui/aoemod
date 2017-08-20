@@ -144,7 +144,7 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 	if (infAI && infAI->IsCheckSumValid()) {
 		// Make sure attacker IS in my unit elem list (infAI).
 		// Until I figure out how this list is valued (and why it is so... wrong!), let's use this hack to make sure attackers are found in panic mode analysis.
-		AOE_METHODS::LISTS::AddUpdateInfAIElemList(infAI, enemyUnit);
+		AOE_METHODS::LISTS::AddUpdateInfAIMemoryList(infAI, enemyUnit);
 	}
 
 	if (myUnit->remainingHitPoints < 1) {

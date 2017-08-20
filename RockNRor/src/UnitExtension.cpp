@@ -15,7 +15,7 @@ void UnitExtension::Reset() {
 	this->isInitialized = false;
 	this->unitDied = false;
 	for (int i = 0; i < 9; i++) {
-		this->myIndexInOtherPlayerInfAIList[i] = -1;
+		this->myIndexInOtherPlayerInfAIMemory[i] = -1;
 		this->hasBeenAddedToOtherPlayersInfAILists[i] = false;
 	}
 }
@@ -45,9 +45,9 @@ void UnitExtension::InitForDeadUnit(long int unitId) {
 }
 
 
-// Updates the specified infAI element with "this" unit information.
+// Updates the specified infAI "unit memory" element with "this" unit information.
 // Returns true if successful
-bool UnitExtension::WriteAllInfAIElemInfo(STRUCT_INF_AI_DETAILED_UNIT_INFO *elemToUpdate) {
+bool UnitExtension::WriteAllInfAIUnitMemory(STRUCT_UNIT_MEMORY *elemToUpdate) {
 	if (!this->pUnit || !elemToUpdate) { return false; }
 	elemToUpdate->unitId = this->pUnit->unitInstanceId;
 	elemToUpdate->posX = (unsigned char)this->pUnit->positionX;
@@ -66,9 +66,9 @@ bool UnitExtension::WriteAllInfAIElemInfo(STRUCT_INF_AI_DETAILED_UNIT_INFO *elem
 	return true;
 }
 
-// Updates some infAI element information with "this" unit information: position, owner playerId...
+// Updates some infAI unit memory element with "this" unit information: position, owner playerId...
 // Returns true if successful
-bool UnitExtension::UpdateInfAIElemInfo(STRUCT_INF_AI_DETAILED_UNIT_INFO *elemToUpdate) {
+bool UnitExtension::UpdateInfAIUnitMemoryElem(STRUCT_UNIT_MEMORY *elemToUpdate) {
 	if (!this->pUnit || !elemToUpdate) { return false; }
 #ifdef _DEBUG
 	if (elemToUpdate->unitId != this->pUnit->unitInstanceId) {

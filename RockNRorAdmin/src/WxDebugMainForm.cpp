@@ -292,8 +292,8 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		}
 		s += "\nForestTiles = ";
 		s += std::to_string(ai->structInfAI.foundForestTiles);
-		s += "\nUnitElem Lists...\n+114: count = ";
-		s += std::to_string(ai->structInfAI.detailedSpottedUnitInfoListSize); // unitElemListSize (array size)
+		s += "\nUnitMemory\n: count = ";
+		s += std::to_string(ai->structInfAI.unitMemoryListSize); // unitElemListSize (array size)
 		s += "\nCreatableGatherable count = ";
 		s += std::to_string(ai->structInfAI.artefactsCreatableGatherableUnits.usedElements);
 		s += "\nPlayerCreatable count = ";

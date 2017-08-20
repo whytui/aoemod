@@ -225,8 +225,8 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 		}
 
 		// 3) Is there enemy units around that could destroy the building before I build it ?
-		assert(infAI->detailedSpottedUnitInfoList != NULL);
-		if (infAI->detailedSpottedUnitInfoList && (settings->rgeGameOptions.difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD)) {
+		assert(infAI->unitMemoryList != NULL);
+		if (infAI->unitMemoryList && (settings->rgeGameOptions.difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD)) {
 			// Hard/Hardest levels only
 			long int mapSizeX = infAI->XMapSize;
 			long int mapSizeY = infAI->YMapSize;
@@ -234,21 +234,21 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 				mapSizeX = globalStruct->gameMapInfo->mapArraySizeX;
 				mapSizeY = globalStruct->gameMapInfo->mapArraySizeY;
 			}
-			for (int i = 0; i < infAI->detailedSpottedUnitInfoListSize; i++) {
-				int unitPlayerId = infAI->detailedSpottedUnitInfoList[i].playerId;
-				int posX = infAI->detailedSpottedUnitInfoList[i].posX;
-				int posY = infAI->detailedSpottedUnitInfoList[i].posY;
+			for (int i = 0; i < infAI->unitMemoryListSize; i++) {
+				int unitPlayerId = infAI->unitMemoryList[i].playerId;
+				int posX = infAI->unitMemoryList[i].posX;
+				int posY = infAI->unitMemoryList[i].posY;
 				if ((unitPlayerId > 0) && (unitPlayerId <= globalStruct->playerTotalCount) &&
 					(player->diplomacyVSPlayers[unitPlayerId] >= PLAYER_DIPLOMACY_VALUES::CST_PDV_NEUTRAL) && // Neutral or enemy
 					((posX >= 0) && (posX < mapSizeX) && (posY >= 0) && (posY < mapSizeY)) && // Valid position
-					(infAI->detailedSpottedUnitInfoList[i].unitId >= 0) && (unitPlayerId != player->playerId)) {
-					AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = globalStruct->GetPlayerStruct(infAI->detailedSpottedUnitInfoList[i].playerId);
-					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unitPlayer->GetUnitDefBase(infAI->detailedSpottedUnitInfoList[i].unitDefId);
+					(infAI->unitMemoryList[i].unitId >= 0) && (unitPlayerId != player->playerId)) {
+					AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = globalStruct->GetPlayerStruct(infAI->unitMemoryList[i].playerId);
+					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unitPlayer->GetUnitDefBase(infAI->unitMemoryList[i].unitDefId);
 					bool isTower = IsTower(unitDef);
 					bool posIsVisible = PLAYER::IsFogVisibleForPlayer(player, posX, posY);
 					bool isAggressive = isTower || IsNonTowerMilitaryUnit(unitDef->unitAIType);
 					if (isAggressive && (posIsVisible || (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) || (unitDef->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower))) {
-						AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *unitAttackable = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)globalStruct->GetUnitFromId(infAI->detailedSpottedUnitInfoList[i].unitId);
+						AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *unitAttackable = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)globalStruct->GetUnitFromId(infAI->unitMemoryList[i].unitId);
 						assert(!unitAttackable || unitAttackable->IsCheckSumValidForAUnitClass());
 						AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDefAtk = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDef;
 						if (unitAttackable && unitAttackable->DerivesFromAttackable()) {

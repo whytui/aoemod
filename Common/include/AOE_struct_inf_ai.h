@@ -26,7 +26,7 @@ namespace AOE_STRUCTURES {
 	// Empty slots are re-used when adding an entry.
 	// In standard games, entries are NEVER reset !!!! which leads to some very bad behavior (for example, to evaluate if panic mode is needed)
 	// See unitExtensions for optimizations/fixes.
-	class STRUCT_INF_AI_DETAILED_UNIT_INFO {
+	class STRUCT_UNIT_MEMORY {
 	public:
 		long int unitId; // -1 means free (empty) slot. Bug in 0x4C41BD, fixed by RockNRor (FixGetUnitStructInTargetSelectionLoop).
 		short int unitDefId; // +04. Unit definition ID.
@@ -46,7 +46,7 @@ namespace AOE_STRUCTURES {
 		float reloadTime1; // +1C
 		float maxRange; // +20
 	};
-	static_assert(sizeof(STRUCT_INF_AI_DETAILED_UNIT_INFO) == 0x24, "STRUCT_INF_AI_DETAILED_UNIT_INFO size");
+	static_assert(sizeof(STRUCT_UNIT_MEMORY) == 0x24, "STRUCT_UNIT_MEMORY size");
 
 
 	// Size = 0x08. Used in InfAI+1F8 array.
@@ -120,25 +120,23 @@ namespace AOE_STRUCTURES {
 	public:
 		unsigned long int checksum;
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1005 for infAI.
-		// 0xF0
-		STRUCT_MANAGED_ARRAY unknown_0F0; // Unused ?? See 0x4DB4E2.
-		// 0x100
-		STRUCT_AI *ptrMainAI;
+		STRUCT_MANAGED_ARRAY unknown_0F0; // +F0. Unused ?? See 0x4DB4E2.
+		STRUCT_AI *ptrMainAI; // +100. Backpointer to main AI object.
 		long int YMapSize; // +104. Warning: this might NOT be initialized (-1).
 		long int XMapSize; // +108. Warning: this might NOT be initialized (-1).
 		unsigned long int unknown_10C;
 
 		// Unit lists (from detailed... to elementsToDefend) : see 0x4BDD10. In those 4 unit lists, elements are never cleaned/removed !
 
-		// +110. Total allocated size of detailedSpottedUnitInfoList (the array can contain -many- empty slots with "id=-1")
-		long int detailedSpottedUnitInfoListSize;
+		// +110. Total allocated size of unitMemoryList (the array can contain -many- empty slots with "id=-1")
+		long int unitMemoryListSize;
 
 		// "ObjectMemory". +114. Contains detailed info about (spotted) units that have a military importance: typically creatable+artefacts + some others
 		// Contains all playerCreatable units => 0x4BE140=infAI.isPlayerCreatable(unitClass) : based on a (long) list of AITypes (which is good)
 		// Contains also "units to defend" cf 0x4C1730=infAI.AddUnitToDefend(unitStruct) which adds relic=6F, ruin=158,163, mines+bushes(using AIType)
 		// => Warning: if SNxxxDefendPriority<=0, the unit is NOT added here (same as elementsToDefend list)
 		// AddUpdate=0x4BD750 (param=pUnit). Units are never removed in standard game ?
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *detailedSpottedUnitInfoList;
+		STRUCT_UNIT_MEMORY *unitMemoryList;
 		
 		// +118. units that can be created by players + resources (gazelle but not other animals - in standard game) + artefacts.
 		// Cf 0x4BE100=infAI.isArtefactOrTargetableResourceOrCreatable(unitClass)

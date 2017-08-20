@@ -80,9 +80,9 @@ namespace CUSTOM_AI {
 		bool mainCentralUnitIsVital;
 		long int mainUnitSearchZoneRadius;
 		long int mainUnitProtectionRadius;
-		std::list<STRUCT_INF_AI_DETAILED_UNIT_INFO *> enemiesNearMyMainUnit; // A list of enemies close to my main unit, valued from InfAI list.
+		std::list<STRUCT_UNIT_MEMORY *> enemiesNearMyMainUnit; // A list of enemies close to my main unit, valued from InfAI list.
 		STRUCT_UNIT_BASE *enemyUnitNearMyMainUnit = NULL; // Enemy unit that is located near my 'main central unit'. Can be NULL.
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *enemyUnitNearMyMainUnitInfAIElem = NULL; // infAI elem of enemy unit near my main central unit. Can be NULL
+		STRUCT_UNIT_MEMORY *enemyUnitNearMyMainUnitInfAIMemoryElem = NULL; // infAI elem of enemy unit near my main central unit. Can be NULL
 		bool enemyUnitNearMyMainUnitIsCurrentlyVisible; // True if enemyUnitNearMyMainUnit is currently visible
 
 		void ResetAllInfo() {
@@ -104,7 +104,7 @@ namespace CUSTOM_AI {
 			this->townLandExploreGroupCount = 0;
 			this->mainCentralUnitIsVital = false;
 			this->enemyUnitNearMyMainUnit = NULL;
-			this->enemyUnitNearMyMainUnitInfAIElem = NULL;
+			this->enemyUnitNearMyMainUnitInfAIMemoryElem = NULL;
 			this->enemyUnitNearMyMainUnitIsCurrentlyVisible = false;
 			this->mainUnitProtectionRadius = 5;
 			this->mainUnitSearchZoneRadius = 5;
@@ -151,7 +151,7 @@ namespace CUSTOM_AI {
 		// Updates unitGroup->lastAttackTaskingTime_ms is an attack task is assigned.
 		// If target is not found and no default retreat position if provided (-1), the group is NOT tasked
 		// Returns the used task id.
-		UNIT_GROUP_TASK_IDS AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_INF_AI_DETAILED_UNIT_INFO *targetInfo,
+		UNIT_GROUP_TASK_IDS AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_MEMORY *targetInfo,
 			float defaultRetreatPosX, float defaultRetreatPosY, bool forceTasking);
 
 		// Called once before the "task active groups loop on unit groups". Can be used for initializations, common treatments, etc.
@@ -208,7 +208,7 @@ namespace CUSTOM_AI {
 		void CollectEnemyUnitsNearMyMainUnit(STRUCT_PLAYER *player);
 
 		// Returns the element from "list of enemies near my main unit" that is closest to a specified position.
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *GetInfElemEnemyUnitCloserToPosition(STRUCT_PLAYER *player, long int posX, long int posY);
+		STRUCT_UNIT_MEMORY *GetUnitMemoryElemEnemyUnitCloserToPosition(STRUCT_PLAYER *player, long int posX, long int posY);
 
 
 	};

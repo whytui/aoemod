@@ -26,9 +26,9 @@ public:
 	long int unitId; // same as pUnit->unitInstanceId, -1 if not set/not known.
 	STRUCT_UNIT_BASE *pUnit; // pointer to actual unit structure
 
-	// Index of "infAI list" element in other players' infAI.
+	// Index of "infAI unit memory" element in other players' infAI.
 	// -1 if index is still unknown: unit may not be known in infAI elem list OR this index has not been retrieved yet
-	long int myIndexInOtherPlayerInfAIList[9];
+	long int myIndexInOtherPlayerInfAIMemory[9];
 
 	// Flag to indicate when "this" unit has been added to other players infAI lists, so that this treatment is run only once.
 	bool hasBeenAddedToOtherPlayersInfAILists[9];
@@ -44,13 +44,13 @@ public:
 	// If "this" extension is already initialized, this will set the flag "unitDied" to true.
 	void InitForDeadUnit(long int unitId);
 
-	// Updates the specified infAI element with "this" unit information.
+	// Updates the specified infAI "unit memory" element with "this" unit information.
 	// Returns true if successful
-	bool WriteAllInfAIElemInfo(STRUCT_INF_AI_DETAILED_UNIT_INFO *elemToUpdate);
+	bool WriteAllInfAIUnitMemory(STRUCT_UNIT_MEMORY *elemToUpdate);
 
-	// Updates some infAI element information with "this" unit information: position, owner playerId...
+	// Updates some infAI unit memory element with "this" unit information: position, owner playerId...
 	// Returns true if successful
-	bool UpdateInfAIElemInfo(STRUCT_INF_AI_DETAILED_UNIT_INFO *elemToUpdate);
+	bool UpdateInfAIUnitMemoryElem(STRUCT_UNIT_MEMORY *elemToUpdate);
 
 };
 

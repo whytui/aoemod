@@ -57,39 +57,39 @@ public:
 	// Remark: this method is called only if improveAI is true.
 	bool AddUpdateUnitInInfAILists(STRUCT_UNIT_BASE *unit, long int infAIPlayerId);
 
-	// Get the index in "InfAI" detailed unit info list for provided unit ID.
+	// Get the index in "InfAI" unit memory list for provided unit ID.
 	// Returns -1 if not found
 	// This method is faster than basic search because it uses 'cached' index (if possible)
-	long int GetUnitIndexInInfAIDetailedInf(long int unitIdToSearch, long int infAIPlayerId);
+	long int GetIndexForUnitInInfAIUnitMemory(long int unitIdToSearch, long int infAIPlayerId);
 
 	// Get the index in "InfAI" detailed unit info list for provided unit ID.
 	// Returns -1 if not found
 	// This method is faster than basic search because it uses 'cached' index (if possible)
-	STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitExtensionHandler::GetInfAIUnitDetailedInf(long int unitIdToSearch, STRUCT_INF_AI *infAI);
+	STRUCT_UNIT_MEMORY *UnitExtensionHandler::GetInfAIUnitMemory(long int unitIdToSearch, STRUCT_INF_AI *infAI);
 
 	
 	// Returns NULL if not found
 	// This method is faster than basic search because it uses 'cached' index (if possible)
-	STRUCT_INF_AI_DETAILED_UNIT_INFO *GetInfAIUnitDetailedInf(long int unitIdToSearch, long int infAIPlayerId);
+	STRUCT_UNIT_MEMORY *GetInfAIUnitMemory(long int unitIdToSearch, long int infAIPlayerId);
 
-	// Remove element for provided unitId in specified player's InfAI elem list.
+	// Remove element for provided unitId in specified player's InfAI unit memory list.
 	// This does NOT use optimization from unitExtensions
 	// For security, if unitExtension contains a pointer for the unit specified, the pointer is set to NULL and unitExtension invalidated.
 	// To be used when improveAI is false.
 	// Returns false in error cases only
-	bool RemoveInfAIElemForUnitWithoutOptimization(long int unitId, long int infAIPlayerId);
+	bool RemoveInfAIUnitMemoryWithoutOptimization(long int unitId, long int infAIPlayerId);
 
-	// Remove element for provided unitId in specified player's InfAI elem list.
+	// Remove element for provided unitId in specified player's InfAI unit memory list.
 	// This uses optimization from unitExtensions (if info is available)
 	// You can use this even if improveAI is false
 	// Returns false in error cases only
-	bool RemoveInfAIElemForUnit(long int unitId, long int infAIPlayerId);
+	bool RemoveInfAIUnitMemoryForUnit(long int unitId, long int infAIPlayerId);
 
-	// Remove element for provided unitId in all players' InfAI elem list.
+	// Remove element for provided unitId in all players' InfAI unit memory list.
 	// This uses optimization from unitExtensions (if info is available)
 	// You can use this even if improveAI is false
 	// Returns true if successful for all players
-	bool RemoveAllInfAIElemForUnit(long int unitId);
+	bool RemoveAllInfAIUnitMemoryForUnit(long int unitId);
 
 
 private:
@@ -98,9 +98,9 @@ private:
 	// Returns false if an error occurred
 	bool AddUnitInOtherInfAILists(STRUCT_UNIT_BASE *unit, STRUCT_INF_AI *infAI);
 
-	// Add/update infAI element for current unit (we consider it is visible for the player specified)
+	// Add/update infAI unit memory for current unit (we consider it is visible for the player specified)
 	// Remark: this method is called only if improveAI is true.
-	bool AddUpdateInfAIDetailedUnitInfo(STRUCT_UNIT_BASE *unit, STRUCT_INF_AI *infAI);
+	bool AddUpdateInfAIUnitMemory(STRUCT_UNIT_BASE *unit, STRUCT_INF_AI *infAI);
 
 };
 

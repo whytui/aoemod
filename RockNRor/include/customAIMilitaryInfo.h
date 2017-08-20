@@ -51,9 +51,9 @@ namespace CUSTOM_AI {
 #pragma TODO("REMOVE pointers here (dangerous)")
 		// TODO: REMOVE pointers here (dangerous): use indexes instead or even unitId (now we can retrieve index easily with unit extensions)
 		// Refers to information in InfAI list of an enemy building spotted in my town (potential target for idle units or in-town groups)
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *enemyBuildingInMyTown;
+		STRUCT_UNIT_MEMORY *enemyBuildingInMyTown;
 		// Refers to information in InfAI list of an enemy tower spotted in my town
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *enemyTowerInMyTown;
+		STRUCT_UNIT_MEMORY *enemyTowerInMyTown;
 
 		void ResetAllInfo();
 

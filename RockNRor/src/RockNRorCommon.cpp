@@ -83,12 +83,12 @@ bool IsDockRelevantForMap(MAP_TYPE_INDEX mti) {
 
 
 
-// Update an element in infAI.detailedSpottedUnitInfoList if the unit is visible.
+// Update an element in infAI.unitMemoryList if the unit is visible.
 // Reset the element otherwise.
 // If the element is reset, it is ALSO REMOVED from infAI lists.
 // Return true if the element was updated/reset.
 #pragma message("UpdateOrResetInfAIUnitListElem should no longer be useful for unit 50+ if unitExtension works ?")
-bool UpdateOrResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *elem) {
+bool UpdateOrResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_MEMORY *elem) {
 	if (!infAI || !infAI->IsCheckSumValid() || !elem || !infAI->ptrMainAI) { return false; }
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(elem->unitId);
 	assert((unitBase == NULL) || (unitBase->IsCheckSumValidForAUnitClass()));
@@ -130,10 +130,10 @@ bool UpdateOrResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_ST
 		return true;
 	} else { // No longer visible
 		// First remove from infAI lists, if needed. (do it while elem has not been reset... yet)
-		AOE_METHODS::LISTS::RemoveFromInfAIInfoList(infAI, elem->unitId, elem->unitDefId, elem->unitClass);
+		AOE_METHODS::LISTS::RemoveFromInfAIMemoryList(infAI, elem->unitId, elem->unitDefId, elem->unitClass);
 
 		// Reset the element
-		return AOE_METHODS::LISTS::ResetInfAIUnitListElem(elem);
+		return AOE_METHODS::LISTS::ResetInfAIUnitMemoryListElem(elem);
 	}
 	return false;
 }
@@ -156,9 +156,9 @@ bool UpdateUnitOwnerInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_
 		isVisible = PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, (long int)unit->positionX, (long int)unit->positionY);
 	}
 	// Search for unit in infAI unit elem list
-	long int size = infAI->detailedSpottedUnitInfoListSize;
+	long int size = infAI->unitMemoryListSize;
 	for (long int i = 0; i < size; i++) {
-		AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *curElem = &infAI->detailedSpottedUnitInfoList[i];
+		AOE_STRUCTURES::STRUCT_UNIT_MEMORY *curElem = &infAI->unitMemoryList[i];
 		if (curElem->unitId == unit->unitInstanceId) {
 			if (isVisible) {
 				curElem->playerId = (char)newPlayerId;

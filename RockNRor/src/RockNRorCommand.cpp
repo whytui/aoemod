@@ -1961,7 +1961,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 		// If unit is dying, remove it from all players infAI elem list
 		// Critical for unitExtensions because the unit pointer will become obsolete ! => do this even if improveAI is currently disabled
 		// Remark: this is not necessary for conversion, the entry will be updated as soon as the unit is seen again.
-		ROCKNROR::unitExtensionHandler.RemoveAllInfAIElemForUnit(unit->unitInstanceId);
+		ROCKNROR::unitExtensionHandler.RemoveAllInfAIUnitMemoryForUnit(unit->unitInstanceId);
 	}
 
 	if (!isNotCreatable && !isTempUnit) {
@@ -3008,7 +3008,7 @@ void RockNRorCommand::DisableWalls() {
 // Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
 // This is called quite often (only if improve AI is enabled in RockNRor configuration)
 // *** OBSOLETE !!! ***
-void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *currentUnitListElem) {
+void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_MEMORY *currentUnitListElem) {
 	/*if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem || !infAI->ptrMainAI || !infAI->ptrMainAI->IsCheckSumValid()) { return; }
 	if (IsMultiplayer()) { return; }
 

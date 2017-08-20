@@ -74,7 +74,7 @@ static bool test_ror_structures() {
 	assert(sizeof(uge) == 0x330);
 	trs_assert(&uge, 0x1D8, &uge.unknown_1D8);
 	trs_assert(&uge, 0x32C, &uge.unknown_gameTime_ms);
-	assert(sizeof(AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO) == 0x24);
+	assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_MEMORY) == 0x24);
 
 	// Actions
 	AOE_STRUCTURES::STRUCT_ACTION_BASE actionbase;

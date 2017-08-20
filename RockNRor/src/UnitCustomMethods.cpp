@@ -373,15 +373,15 @@ bool AllowCreateActivityStructForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase
 }
 
 
-// Returns a "infAI elem list" pointer of a trade target if found, NULL if not found
+// Returns a "infAI unit memory elem" pointer of a trade target if found, NULL if not found
 // By default (game code), this searches for the closest unit that does not belong to "me", is a dock, whose player has trade goods>0.
-AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *FindTradeTargetElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int actorUnitId) {
-	if (!infAI || !infAI->IsCheckSumValid() || (actorUnitId < 0) || !infAI->detailedSpottedUnitInfoList) {
+AOE_STRUCTURES::STRUCT_UNIT_MEMORY *FindTradeTargetUnitMemoryElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int actorUnitId) {
+	if (!infAI || !infAI->IsCheckSumValid() || (actorUnitId < 0) || !infAI->unitMemoryList) {
 		return NULL;
 	}
 	bool useOriginalCode = ROCKNROR::crInfo.configInfo.doNotApplyFixes;
-	long int listTotalElemCount = infAI->detailedSpottedUnitInfoListSize;
-	AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *bestElem = NULL;
+	long int listTotalElemCount = infAI->unitMemoryListSize;
+	AOE_STRUCTURES::STRUCT_UNIT_MEMORY *bestElem = NULL;
 	long int bestSqrDistance = 0;
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) { return NULL; }
@@ -395,7 +395,7 @@ AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *FindTradeTargetElem(AOE_STRUCT
 	}
 
 	for (int curIndex = 0; curIndex < listTotalElemCount; curIndex++) {
-		AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *curElem = &infAI->detailedSpottedUnitInfoList[curIndex];
+		AOE_STRUCTURES::STRUCT_UNIT_MEMORY *curElem = &infAI->unitMemoryList[curIndex];
 		if ((curElem->playerId != myPlayerId) && (curElem->unitId > -1) && (playerHasTradeGoodsCache[curElem->playerId])) {
 			// The fix on original method is here (depending on useOriginalCode variable)
 			if ((useOriginalCode && (curElem->unitDefId == CST_UNITID_DOCK)) ||

@@ -158,7 +158,7 @@ void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROU
 // Updates unitGroup->lastAttackTaskingTime_ms is an attack task is assigned.
 // If target is not found and no default retreat position if provided (-1), the group is NOT tasked
 // Returns the used task id.
-UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_INF_AI_DETAILED_UNIT_INFO *targetInfo,
+UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_MEMORY *targetInfo,
 	float defaultRetreatPosX, float defaultRetreatPosY, bool forceTasking) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) { return UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET; }
@@ -606,12 +606,12 @@ bool UnitGroupAI::TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *
 		targetPosX = myMainCentralUnit->positionX + (mainUnitProtectionRadius * unitGroupOrientationXFromMainUnit);
 		targetPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
 		}*/
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *targetElem = this->GetInfElemEnemyUnitCloserToPosition(player, (long int)targetPosX, (long int)targetPosY);
+		STRUCT_UNIT_MEMORY *targetElem = this->GetUnitMemoryElemEnemyUnitCloserToPosition(player, (long int)targetPosX, (long int)targetPosY);
 		UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 		if (targetElem) {
 			result = this->AttackOrRetreat(&player->ptrAIStruct->structTacAI, unitGroup, targetElem, targetPosX, targetPosY, true);
 		} else {
-			UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(&player->ptrAIStruct->structTacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem,
+			UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(&player->ptrAIStruct->structTacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIMemoryElem,
 				targetPosX, targetPosY, true);
 		}
 		if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
@@ -627,13 +627,13 @@ bool UnitGroupAI::TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *
 	} else {
 		// Unit group is already in (or near) town
 		if (global->currentGameTime - unitGroup->lastTaskingTime_ms > (1000 * tacAI->SNNumber[SNTacticalUpdateFrequency])) {
-			STRUCT_INF_AI_DETAILED_UNIT_INFO *targetElem = this->GetInfElemEnemyUnitCloserToPosition(player, (long int)commander->positionX, (long int)commander->positionY);
+			STRUCT_UNIT_MEMORY *targetElem = this->GetUnitMemoryElemEnemyUnitCloserToPosition(player, (long int)commander->positionX, (long int)commander->positionY);
 			UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 			// Attack enemy if visible/if we know a recent location. Otherwise, do nothing (we don't set a retreat position in AttackOrRetreat call)
 			if (targetElem) {
 				result = this->AttackOrRetreat(tacAI, unitGroup, targetElem, -1, -1, true);
 			} else {
-				result = this->AttackOrRetreat(tacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem, -1, -1, false);
+				result = this->AttackOrRetreat(tacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIMemoryElem, -1, -1, false);
 			}
 			if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
 #ifdef _DEBUG
@@ -739,7 +739,7 @@ bool UnitGroupAI::TaskActiveAttackGroupWeakWithVitalMainUnit(STRUCT_PLAYER *play
 		assert(this->activeGroupsTaskingTempInfo.myMainCentralUnit != NULL); // guaranteed by top "if" condition
 
 		// If group is idle and there is some enemy building in my town, attack it (be careful with towers if I am too weak ?)
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *targetInTown = this->militaryAIInfo->enemyTowerInMyTown;
+		STRUCT_UNIT_MEMORY *targetInTown = this->militaryAIInfo->enemyTowerInMyTown;
 		if (!targetInTown) {
 			targetInTown = this->militaryAIInfo->enemyBuildingInMyTown;
 		}
@@ -851,7 +851,7 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 			}
 			// Commander has no target. Continue attacking "non-visible" one = go to last known position using infAI elem.
 			// Find infAI elem for currentTargetUnit
-			AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = ROCKNROR::unitExtensionHandler.GetInfAIUnitDetailedInf(currentTargetUnit->unitInstanceId, &tacAI->ptrMainAI->structInfAI);
+			AOE_STRUCTURES::STRUCT_UNIT_MEMORY *elem = ROCKNROR::unitExtensionHandler.GetInfAIUnitMemory(currentTargetUnit->unitInstanceId, &tacAI->ptrMainAI->structInfAI);
 			if (elem) {
 				this->AttackOrRetreat(tacAI, unitGroup, NULL, elem->posX, elem->posY, false);
 				return true;
@@ -871,7 +871,7 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 	// No target, group in town, commander is idle
 	if (!currentTargetUnit && !groupIsAway && AOE_METHODS::UNIT::IsUnitIdle(commanderUnit)) {
 		// If group is idle and there is some enemy building in my town, attack it (be careful with towers if I am too weak ?)
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *targetInTown = this->militaryAIInfo->enemyTowerInMyTown;
+		STRUCT_UNIT_MEMORY *targetInTown = this->militaryAIInfo->enemyTowerInMyTown;
 		if (!targetInTown) {
 			targetInTown = this->militaryAIInfo->enemyBuildingInMyTown;
 		}
@@ -924,12 +924,12 @@ bool UnitGroupAI::TaskActiveExploreGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROU
 			targetPosX = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationXFromMainUnit);
 			targetPosY = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationYFromMainUnit);
 		}
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *targetElem = this->GetInfElemEnemyUnitCloserToPosition(player, (long int)targetPosX, (long int)targetPosY);
+		STRUCT_UNIT_MEMORY *targetElem = this->GetUnitMemoryElemEnemyUnitCloserToPosition(player, (long int)targetPosX, (long int)targetPosY);
 		UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 		if (targetElem) {
 			result = this->AttackOrRetreat(tacAI, unitGroup, targetElem, targetPosX, targetPosY, true);
 		} else {
-			result = this->AttackOrRetreat(tacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem,
+			result = this->AttackOrRetreat(tacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIMemoryElem,
 				targetPosX, targetPosY, true);
 		}
 		if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
@@ -1020,10 +1020,10 @@ void UnitGroupAI::CollectEnemyUnitsNearMyMainUnit(STRUCT_PLAYER *player) {
 
 	this->militaryAIInfo->enemyBuildingInMyTown = NULL;
 	this->militaryAIInfo->enemyTowerInMyTown = NULL;
-	STRUCT_INF_AI_DETAILED_UNIT_INFO *curElem = NULL;
+	STRUCT_UNIT_MEMORY *curElem = NULL;
 
 	this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit = NULL;
-	this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem = NULL;
+	this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIMemoryElem = NULL;
 	this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitIsCurrentlyVisible = false;
 	if (this->activeGroupsTaskingTempInfo.myMainCentralUnit) {
 		long int searchDistance = 7;
@@ -1040,7 +1040,7 @@ void UnitGroupAI::CollectEnemyUnitsNearMyMainUnit(STRUCT_PLAYER *player) {
 				(long int)this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX, (long int)this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY, searchDistance, true, currentIndex);
 			STRUCT_UNIT_BASE *curUnit = NULL;
 			if (currentIndex >= 0) { // found
-				curElem = &mainAI->structInfAI.detailedSpottedUnitInfoList[currentIndex];
+				curElem = &mainAI->structInfAI.unitMemoryList[currentIndex];
 				this->activeGroupsTaskingTempInfo.enemiesNearMyMainUnit.push_back(curElem);
 				// By the way, store (first) enemy building/tower in my town (militaryAI)
 				if (curElem->unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding) {
@@ -1062,12 +1062,12 @@ void UnitGroupAI::CollectEnemyUnitsNearMyMainUnit(STRUCT_PLAYER *player) {
 			if (currentIndex > -1) { currentIndex++; } // So next search starts at "next" element.
 		}
 		if (bestIndexEnemy > -1) {
-			this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem = &mainAI->structInfAI.detailedSpottedUnitInfoList[bestIndexEnemy];
+			this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIMemoryElem = &mainAI->structInfAI.unitMemoryList[bestIndexEnemy];
 			this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit = bestEnemy;
 		}
 
-		if (this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem) {
-			this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit = global->GetUnitFromId(this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIElem->unitId);
+		if (this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIMemoryElem) {
+			this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit = global->GetUnitFromId(this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIMemoryElem->unitId);
 		}
 		if (this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit && !this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit->IsCheckSumValidForAUnitClass()) {
 			this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit = NULL; // Security check only.
@@ -1081,11 +1081,11 @@ void UnitGroupAI::CollectEnemyUnitsNearMyMainUnit(STRUCT_PLAYER *player) {
 
 
 // Returns the element from "list of enemies near my main unit" that is closest to a specified position.
-STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitGroupAI::GetInfElemEnemyUnitCloserToPosition(STRUCT_PLAYER *player, long int posX, long int posY) {
+STRUCT_UNIT_MEMORY *UnitGroupAI::GetUnitMemoryElemEnemyUnitCloserToPosition(STRUCT_PLAYER *player, long int posX, long int posY) {
 	long int bestSquareDist = 999999;
-	STRUCT_INF_AI_DETAILED_UNIT_INFO *bestElem = NULL;
+	STRUCT_UNIT_MEMORY *bestElem = NULL;
 	bool bestElemIsVisible = false;
-	for each (STRUCT_INF_AI_DETAILED_UNIT_INFO *e in this->activeGroupsTaskingTempInfo.enemiesNearMyMainUnit) {
+	for each (STRUCT_UNIT_MEMORY *e in this->activeGroupsTaskingTempInfo.enemiesNearMyMainUnit) {
 		if (!bestElem) {
 			bestElem = e;
 			bestSquareDist = (e->posX - posX) * (e->posX - posX) + (e->posX - posY) * (e->posX - posY);

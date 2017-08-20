@@ -140,16 +140,16 @@ bool UnitExtensionHandler::AddUpdateUnitInInfAILists(STRUCT_UNIT_BASE *unit, lon
 	if (AIPlayer->aliveStatus == 2) { return true; } // Ignore defeated players (not an error)
 	if (AIPlayer->ptrAIStruct == NULL) { return false; } // No AI for the player specified
 
-	bool result = this->AddUpdateInfAIDetailedUnitInfo(unit, &AIPlayer->ptrAIStruct->structInfAI);
+	bool result = this->AddUpdateInfAIUnitMemory(unit, &AIPlayer->ptrAIStruct->structInfAI);
 	result &= this->AddUnitInOtherInfAILists(unit, &AIPlayer->ptrAIStruct->structInfAI);
 	return result;
 }
 
 
-// Get the index in "InfAI" detailed unit info list for provided unit ID.
+// Get the index in "InfAI" unit memory list for provided unit ID.
 // Returns -1 if not found
 // This method is faster than basic search because it uses 'cached' index (if possible)
-long int UnitExtensionHandler::GetUnitIndexInInfAIDetailedInf(long int unitIdToSearch, long int infAIPlayerId) {
+long int UnitExtensionHandler::GetIndexForUnitInInfAIUnitMemory(long int unitIdToSearch, long int infAIPlayerId) {
 	if ((unitIdToSearch < 0) || (unitIdToSearch >= this->currentAllocatedElemCount)) { return -1; }
 	if (infAIPlayerId < 0) { return -1; }
 
@@ -159,47 +159,47 @@ long int UnitExtensionHandler::GetUnitIndexInInfAIDetailedInf(long int unitIdToS
 			return -1;
 		}
 	}
-	return this->allUnitExtensions[unitIdToSearch].myIndexInOtherPlayerInfAIList[infAIPlayerId];
+	return this->allUnitExtensions[unitIdToSearch].myIndexInOtherPlayerInfAIMemory[infAIPlayerId];
 }
 
 
 // Returns NULL if not found
 // This method is faster than basic search because it uses 'cached' index (if possible)
-STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitExtensionHandler::GetInfAIUnitDetailedInf(long int unitIdToSearch, long int infAIPlayerId) {
-	STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = NULL;
-	long int index = this->GetUnitIndexInInfAIDetailedInf(unitIdToSearch, infAIPlayerId);
+STRUCT_UNIT_MEMORY *UnitExtensionHandler::GetInfAIUnitMemory(long int unitIdToSearch, long int infAIPlayerId) {
+	STRUCT_UNIT_MEMORY *elem = NULL;
+	long int index = this->GetIndexForUnitInInfAIUnitMemory(unitIdToSearch, infAIPlayerId);
 	if (index < 0) { return NULL; }
 	STRUCT_PLAYER *player = GetPlayerStruct(infAIPlayerId);
 	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct) {
 		return NULL;
 	}
 #ifdef _DEBUG
-	assert(index < player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoListSize);
+	assert(index < player->ptrAIStruct->structInfAI.unitMemoryListSize);
 #endif
-	return &player->ptrAIStruct->structInfAI.detailedSpottedUnitInfoList[index];
+	return &player->ptrAIStruct->structInfAI.unitMemoryList[index];
 }
 
 // Get the index in "InfAI" detailed unit info list for provided unit ID.
 // Returns -1 if not found
 // This method is faster than basic search because it uses 'cached' index (if possible)
-STRUCT_INF_AI_DETAILED_UNIT_INFO *UnitExtensionHandler::GetInfAIUnitDetailedInf(long int unitIdToSearch, STRUCT_INF_AI *infAI) {
+STRUCT_UNIT_MEMORY *UnitExtensionHandler::GetInfAIUnitMemory(long int unitIdToSearch, STRUCT_INF_AI *infAI) {
 	if (!infAI || !infAI->IsCheckSumValid()) { return NULL; }
-	STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = NULL;
-	long int index = this->GetUnitIndexInInfAIDetailedInf(unitIdToSearch, infAI->commonAIObject.playerId);
+	STRUCT_UNIT_MEMORY *elem = NULL;
+	long int index = this->GetIndexForUnitInInfAIUnitMemory(unitIdToSearch, infAI->commonAIObject.playerId);
 	if (index < 0) { return NULL; }
 #ifdef _DEBUG
-	assert(index < infAI->detailedSpottedUnitInfoListSize);
+	assert(index < infAI->unitMemoryListSize);
 #endif
-	return &infAI->detailedSpottedUnitInfoList[index];
+	return &infAI->unitMemoryList[index];
 }
 
 
-// Remove element for provided unitId in specified player's InfAI elem list.
+// Remove element for provided unitId in specified player's InfAI unit memory list.
 // This does NOT use optimization from unitExtensions
 // For security, if unitExtension contains a pointer for the unit specified, the pointer is set to NULL and unitExtension invalidated.
 // To be used when improveAI is false.
 // Returns false in error cases only
-bool UnitExtensionHandler::RemoveInfAIElemForUnitWithoutOptimization(long int unitId, long int infAIPlayerId) {
+bool UnitExtensionHandler::RemoveInfAIUnitMemoryWithoutOptimization(long int unitId, long int infAIPlayerId) {
 	// This mode is NOT optimized ! Uses classical search.
 	if (this->allUnitExtensions[unitId].isInitialized) {
 		this->allUnitExtensions[unitId].isInitialized = false;
@@ -212,23 +212,23 @@ bool UnitExtensionHandler::RemoveInfAIElemForUnitWithoutOptimization(long int un
 	}
 
 	if (!infAI) { return true; }
-	STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitId);
+	STRUCT_UNIT_MEMORY *elem = AOE_METHODS::LISTS::FindInfAIUnitMemoryElem(infAI, unitId);
 	if (!elem) { return true; } // no elem to update: not an error case
-	return AOE_METHODS::LISTS::ResetInfAIUnitListElem(elem);
+	return AOE_METHODS::LISTS::ResetInfAIUnitMemoryListElem(elem);
 }
 
 
-// Remove element for provided unitId in specified player's InfAI elem list.
+// Remove element for provided unitId in all players' InfAI unit memory list.
 // This uses optimization from unitExtensions (if info is available)
 // You can use this even if improveAI is false
 // Returns false in error cases only
-bool UnitExtensionHandler::RemoveInfAIElemForUnit(long int unitId, long int infAIPlayerId) {
+bool UnitExtensionHandler::RemoveInfAIUnitMemoryForUnit(long int unitId, long int infAIPlayerId) {
 	if ((unitId < 0) || (unitId >= this->currentAllocatedElemCount)) { return false; }
 	if (infAIPlayerId < 0) { return false; }
 
 	if (!ROCKNROR::IsImproveAIEnabled(infAIPlayerId)) {
 		// Restricted mode: only remove from infAI list, do not use unit extensions (just remove unit pointer if existing, in case this corresponds to unit death)
-		return this->RemoveInfAIElemForUnitWithoutOptimization(unitId, infAIPlayerId);
+		return this->RemoveInfAIUnitMemoryWithoutOptimization(unitId, infAIPlayerId);
 	}
 
 	if (!this->allUnitExtensions[unitId].isInitialized) {
@@ -244,33 +244,33 @@ bool UnitExtensionHandler::RemoveInfAIElemForUnit(long int unitId, long int infA
 		infAI = &playerToUpdate->ptrAIStruct->structInfAI;
 	}
 	if (infAI) {
-		int index = this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId];
-		if ((index >= 0) && (index < infAI->detailedSpottedUnitInfoListSize)) {
+		int index = this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIMemory[infAIPlayerId];
+		if ((index >= 0) && (index < infAI->unitMemoryListSize)) {
 			// don't forget to remove the "cached" index because ROR will re-use the slot for another unit
-			this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[infAIPlayerId] = -1;
-			return AOE_METHODS::LISTS::ResetInfAIUnitListElem(&infAI->detailedSpottedUnitInfoList[index]);
+			this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIMemory[infAIPlayerId] = -1;
+			return AOE_METHODS::LISTS::ResetInfAIUnitMemoryListElem(&infAI->unitMemoryList[index]);
 		}
 	}
 	return true; // nothing to do here
 }
 
 
-// Remove element for provided unitId in all players' InfAI elem list.
+// Remove element for provided unitId in all players' InfAI unit memory list.
 // This uses optimization from unitExtensions (if info is available)
 // You can use this even if improveAI is false
 // Returns true if successful for all players
-bool UnitExtensionHandler::RemoveAllInfAIElemForUnit(long int unitId) {
+bool UnitExtensionHandler::RemoveAllInfAIUnitMemoryForUnit(long int unitId) {
 	bool result = true;
 	for (int i = 0; i < 9; i++) {
-		result &= this->RemoveInfAIElemForUnit(unitId, i);
+		result &= this->RemoveInfAIUnitMemoryForUnit(unitId, i);
 	}
 	return result;
 }
 
 
-// Add/update infAI element for current unit (we consider it is visible for the player specified)
+// Add/update infAI unit memory for current unit (we consider it is visible for the player specified)
 // Remark: this method is called only if improveAI is true.
-bool UnitExtensionHandler::AddUpdateInfAIDetailedUnitInfo(STRUCT_UNIT_BASE *unit, STRUCT_INF_AI *infAI) {
+bool UnitExtensionHandler::AddUpdateInfAIUnitMemory(STRUCT_UNIT_BASE *unit, STRUCT_INF_AI *infAI) {
 	if (!unit || !infAI) { return false; }
 	long int myPlayerId = infAI->commonAIObject.playerId;
 	long int unitId = unit->unitInstanceId;
@@ -282,30 +282,30 @@ bool UnitExtensionHandler::AddUpdateInfAIDetailedUnitInfo(STRUCT_UNIT_BASE *unit
 		return false; // Error case
 	}
 	// Now we can safely use this->allUnitExtensions[unitId]
-	if (this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] >= 0) {
+	if (this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIMemory[myPlayerId] >= 0) {
 		// InfAI index is already known for that player
-		assert(this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] < infAI->detailedSpottedUnitInfoListSize);
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = &infAI->detailedSpottedUnitInfoList[this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId]];
-		if (this->allUnitExtensions[unitId].UpdateInfAIElemInfo(elem)) {
+		assert(this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIMemory[myPlayerId] < infAI->unitMemoryListSize);
+		STRUCT_UNIT_MEMORY *elem = &infAI->unitMemoryList[this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIMemory[myPlayerId]];
+		if (this->allUnitExtensions[unitId].UpdateInfAIUnitMemoryElem(elem)) {
 			return true;
 		}
 		// Failed: maybe the index was wrong ? Reset it.
 		std::string msg = "Incorrect cache index in unit extension/id=";
 		msg += std::to_string(unit->unitInstanceId);
 		traceMessageHandler.WriteMessage(msg.c_str());
-		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] = -1;
+		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIMemory[myPlayerId] = -1;
 	}
 
 	// Here index in infAI elem list is unknown. Search for it
 
 	long int indexOfAFreeSlot = -1;
-	for (int curIndex = 0; curIndex < infAI->detailedSpottedUnitInfoListSize; curIndex++) {
-		if (infAI->detailedSpottedUnitInfoList[curIndex].unitId == unitId) {
+	for (int curIndex = 0; curIndex < infAI->unitMemoryListSize; curIndex++) {
+		if (infAI->unitMemoryList[curIndex].unitId == unitId) {
 			// Found: save index, update info and return
-			this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] = curIndex;
-			return this->allUnitExtensions[unitId].UpdateInfAIElemInfo(&infAI->detailedSpottedUnitInfoList[curIndex]);
+			this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIMemory[myPlayerId] = curIndex;
+			return this->allUnitExtensions[unitId].UpdateInfAIUnitMemoryElem(&infAI->unitMemoryList[curIndex]);
 		} else {
-			if ((indexOfAFreeSlot < 0) && (infAI->detailedSpottedUnitInfoList[curIndex].unitId < 0)) {
+			if ((indexOfAFreeSlot < 0) && (infAI->unitMemoryList[curIndex].unitId < 0)) {
 				indexOfAFreeSlot = curIndex; // Save index of a free slot for later (may be useful)
 			}
 		}
@@ -313,20 +313,20 @@ bool UnitExtensionHandler::AddUpdateInfAIDetailedUnitInfo(STRUCT_UNIT_BASE *unit
 	// Here: not found in infAI list: add it
 	if (indexOfAFreeSlot < 0) {
 		// May append at the end of the list... or reuse an existing slot (should not as we already tried)
-		if (!AOE_METHODS::LISTS::AddUpdateInfAIElemList(infAI, unit)) {
+		if (!AOE_METHODS::LISTS::AddUpdateInfAIMemoryList(infAI, unit)) {
 			return false;
 		}
 		// Find index of new elem.
-		STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = AOE_METHODS::LISTS::FindInfAIUnitElemInList(infAI, unitId);
-		long int elemIndex = (((unsigned long int)elem) - (unsigned long int)(infAI->detailedSpottedUnitInfoList)) / sizeof(STRUCT_INF_AI_DETAILED_UNIT_INFO);
-		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] = elemIndex;
+		STRUCT_UNIT_MEMORY *elem = AOE_METHODS::LISTS::FindInfAIUnitMemoryElem(infAI, unitId);
+		long int elemIndex = (((unsigned long int)elem) - (unsigned long int)(infAI->unitMemoryList)) / sizeof(STRUCT_UNIT_MEMORY);
+		this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIMemory[myPlayerId] = elemIndex;
 		return true;
 	}
 
 	// Here: use the free slot we found
-	this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIList[myPlayerId] = indexOfAFreeSlot;
-	STRUCT_INF_AI_DETAILED_UNIT_INFO *elem = &infAI->detailedSpottedUnitInfoList[indexOfAFreeSlot];
-	return this->allUnitExtensions[unitId].WriteAllInfAIElemInfo(elem);
+	this->allUnitExtensions[unitId].myIndexInOtherPlayerInfAIMemory[myPlayerId] = indexOfAFreeSlot;
+	STRUCT_UNIT_MEMORY *elem = &infAI->unitMemoryList[indexOfAFreeSlot];
+	return this->allUnitExtensions[unitId].WriteAllInfAIUnitMemory(elem);
 }
 
 

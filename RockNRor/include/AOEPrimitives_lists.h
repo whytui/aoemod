@@ -20,14 +20,14 @@ namespace LISTS {
 ;
 
 
-// Reset an element in infAI.unitElemList. The slot will be re-used later by ROR. cf 0x4BA401.
+// Reset an element in infAI.unitMemory list. The slot will be re-used later by ROR. cf 0x4BA401.
 // Return true if the element was updated (reset).
 // Please DO NOT USE directly. See unitExtensionHandler
-bool ResetInfAIUnitListElem(AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *elem);
+bool ResetInfAIUnitMemoryListElem(AOE_STRUCTURES::STRUCT_UNIT_MEMORY *elem);
 
 
 // Find a unitElem in infAI list, returns NULL if not found.
-AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *FindInfAIUnitElemInList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId);
+AOE_STRUCTURES::STRUCT_UNIT_MEMORY *FindInfAIUnitMemoryElem(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId);
 
 
 // Add a unit in infAI elem list, or update if existing. Warning: this uses unit structure's info, even if it is not visible !
@@ -35,7 +35,7 @@ AOE_STRUCTURES::STRUCT_INF_AI_DETAILED_UNIT_INFO *FindInfAIUnitElemInList(AOE_ST
 // Returns true if successful.
 // This executes ROR's code
 // Please DO NOT USE directly. See unitExtensionHandler
-bool AddUpdateInfAIElemList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
+bool AddUpdateInfAIMemoryList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
 
 
 // Remove a unitId from infAI "info" lists (creatable, gatherable, "defendable", artefact units).
@@ -43,7 +43,7 @@ bool AddUpdateInfAIElemList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES
 // DATID and unitAIType (unitClass) are used for optimisation. You can provide -1 if you don't have the information.
 // Returns false if failed.
 // Please DO NOT USE directly. See unitExtensionHandler
-bool RemoveFromInfAIInfoList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId, short int DATID, AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType);
+bool RemoveFromInfAIMemoryList(AOE_STRUCTURES::STRUCT_INF_AI *infAI, long int unitId, short int DATID, AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType);
 
 
 
