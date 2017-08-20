@@ -71,6 +71,16 @@ namespace AOE_OFFSETS
 	static const short int *AOE_VAR_FOUND_UNIT_AI_TYPE_UNDER_MOUSE = (const short int*)0x7D1CFC;
 	static const unsigned long int ADDR_NUMBER_DIFFERENT_PLAYER_OBJECTS_VISIBLE = 0x561464;
 
+	// Files. Cf 0x46B550
+	static const unsigned long int ADDR_IO_ENABLE_COMPRESSION = 0x558094;
+	static const unsigned long int ADDR_IO_CURRENT_BUFFER = 0x7BFAD0;
+	static const unsigned long int ADDR_IO_FLAGS = 0x7BFAD4;
+	static const unsigned long int ADDR_IO_POINT = 0x7BFAD8;
+	static const unsigned long int ADDR_IO_COMPRESSION_BUFFER = 0x7BFADC;
+	static const unsigned long int ADDR_IO_BUFFERS = 0x7BFAE0;
+	static const unsigned long int ADDR_IO_CURRENT = 0x7BFAE8;
+	static const unsigned long int ADDR_IO_FILE_SIZE = 0x7BFAEC;
+	static const unsigned long int ADDR_IO_FILE_BUFFERS = 0x7BFAF0;
 
 	// Game executable interface procedure address (ROR_API call)
 	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x419574;

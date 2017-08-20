@@ -126,7 +126,7 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool EditorEditUnitInfoPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
-	if (sender->checked) {
+	if (sender->currentState) {
 		if (sender == this->chkbox_s0) {
 			AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkbox_s2, false);
 			AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkbox_s4, false);
@@ -150,15 +150,15 @@ void EditorEditUnitInfoPopup::OnBeforeClose(bool isCancel) {
 	if (this->chkbox_s0 && this->chkbox_s2 && this->chkbox_s4) {
 		for each (auto curUnit in this->allSelectedUnits)
 		{
-			if (this->chkbox_s0 && (this->chkbox_s0->checked)) {
+			if (this->chkbox_s0 && (this->chkbox_s0->currentState)) {
 				curUnit->unitStatus = AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_0_NOT_BUILT;
 				curUnit->shortcutNumber = 1;
 			}
-			if (this->chkbox_s2 && (this->chkbox_s2->checked)) {
+			if (this->chkbox_s2 && (this->chkbox_s2->currentState)) {
 				curUnit->unitStatus = AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY;
 				curUnit->shortcutNumber = 0;
 			}
-			if (this->chkbox_s4 && (this->chkbox_s4->checked)) {
+			if (this->chkbox_s4 && (this->chkbox_s4->currentState)) {
 				curUnit->unitStatus = AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_4_DYING_ANIMATION;
 				curUnit->shortcutNumber = 3;
 			}

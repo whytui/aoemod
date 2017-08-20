@@ -44,5 +44,20 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(STRUCT_TIMELINE_COLUMN_INFO) == 0xB0, "STRUCT_TIMELINE_COLUMN_INFO size");
 
+
+	// Constructor=0x45AF10, 0x45AF60. Size=0x20. Used for diamond map (temporarily?)?
+	class STRUCT_PICTURE {
+	public:
+		unsigned long int unknown_00;
+		unsigned long int unknown_04;
+		unsigned long int unknown_08;
+		unsigned long int unknown_0C;
+		unsigned long int unknown_10;
+		long int alignedWidth; // +14
+		unsigned long int unknown_18;
+		unsigned long int unknown_1C;
+	};
+	static_assert(sizeof(STRUCT_PICTURE) == 0x20, "STRUCT_PICTURE size");
+
 }
 

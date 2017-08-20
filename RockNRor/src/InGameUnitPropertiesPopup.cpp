@@ -399,12 +399,12 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		posX = unit->positionX;
 		posY = unit->positionY;
 	}
-	if (isMyUnit && this->chkRebuildFarmNone && this->chkRebuildFarmNone->checked) {
+	if (isMyUnit && this->chkRebuildFarmNone && this->chkRebuildFarmNone->currentState) {
 		ROCKNROR::crInfo.myGameObjects.RemoveFarmRebuildInfo(posX, posY);
 	}
 	if (isMyUnit && this->chkForceNotRebuildFarm && this->chkForceRebuildFarm &&
-		(this->chkForceNotRebuildFarm->checked || this->chkForceRebuildFarm->checked)) {
-		bool actionIsRebuild = (this->chkForceRebuildFarm->checked != 0); // If false, then it is force NOT rebuild.
+		(this->chkForceNotRebuildFarm->currentState || this->chkForceRebuildFarm->currentState)) {
+		bool actionIsRebuild = (this->chkForceRebuildFarm->currentState != 0); // If false, then it is force NOT rebuild.
 		AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(controlledPlayer);
 		for (int i = 0; i < controlledPlayer->selectedUnitCount; i++) {
 			if (selectedUnits[i] && selectedUnits[i]->IsCheckSumValidForAUnitClass() &&
@@ -426,11 +426,11 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		// Force create info object if not existing
 		unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(this->unitId);
 		assert(unitInfo != NULL); // Was just added if not already existing
-		unitInfo->autoAttackPolicy.attackTowers = (this->chkAutoAttackTowers->checked != 0);
-		unitInfo->autoAttackPolicy.attackMilitary = (this->chkAutoAttackMilitary->checked != 0);
-		unitInfo->autoAttackPolicy.attackNonTowerBuildings = (this->chkAutoAttackBuildings->checked != 0);
-		unitInfo->autoAttackPolicy.attackVillagers = (this->chkAutoAttackVillagers->checked != 0);
-		unitInfo->autoAttackPolicy.attackWalls = (this->chkAutoAttackWalls->checked != 0);
+		unitInfo->autoAttackPolicy.attackTowers = (this->chkAutoAttackTowers->currentState != 0);
+		unitInfo->autoAttackPolicy.attackMilitary = (this->chkAutoAttackMilitary->currentState != 0);
+		unitInfo->autoAttackPolicy.attackNonTowerBuildings = (this->chkAutoAttackBuildings->currentState != 0);
+		unitInfo->autoAttackPolicy.attackVillagers = (this->chkAutoAttackVillagers->currentState != 0);
+		unitInfo->autoAttackPolicy.attackWalls = (this->chkAutoAttackWalls->currentState != 0);
 		unitInfo->autoAttackPolicyIsSet = true;
 		// Apply changes on all selected units
 		AutoAttackPolicy flagsToApply = { true, true, true, true, true }; // All flags are relevant in popup.

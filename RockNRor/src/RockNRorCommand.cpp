@@ -2434,7 +2434,7 @@ void RockNRorCommand::MoveFireGalleyIconIfNeeded(short int playerId) {
 
 
 // Technical fix for a method about elevation application when generating map. Original method contains many bugs.
-void RockNRorCommand::Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo) {
+void RockNRorCommand::Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, AOE_STRUCTURES::STRUCT_RMM_ELEVATION_GENERATOR *elevInfo) {
 	if ((distance <= 0) || (posX < 0) || (posY < 0)) { return; }
 	assert(elevInfo != NULL);
 	assert(elevInfo->IsCheckSumValid());

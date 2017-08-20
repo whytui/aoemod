@@ -225,7 +225,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_SLP_FRAME_ROW_EDGE) == 0x04, "STRUCT_SLP_FRAME_ROW_EDGE size");
 
 
-	// Size = 0x20. Constructor = 0x49F5F0. "TShape".
+	// Size = 0x20. Constructor=0x49F5F0. "TShape". (see 0x4B8B30 in 03.01.0717)
 	// Destructor? = 0x49F840 (does NOT free).
 	// 0x49FA90=slpInfo.GetShapeCount() : info taken from slpFileHeader
 	class STRUCT_SLP_INFO {

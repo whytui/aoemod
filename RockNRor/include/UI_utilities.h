@@ -177,7 +177,7 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateCustomOptionsPopupFromMenu(AOE_S
 		CALL EAX
 		PUSH EAX
 		MOV ECX, ESI
-		MOV EAX, 0x004607A0 // UIObj.createPopupAndFocus(arg1, parentUI, hSize, vSize, dlgName?, arg6, arg7)?
+		MOV EAX, 0x004607A0 // dialog.setup(renderArea, parentUI, hSize, vSize, dlgName?, resourceFileId, allowShadowArea)
 		CALL EAX
 		TEST EAX,EAX
 		JE failed

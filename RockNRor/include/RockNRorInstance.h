@@ -12,7 +12,7 @@
 #include <AOE_empires_dat.h>
 #include <AOE_struct_game_settings.h>
 #include <UI\AOE_struct_ui_in_game_options.h>
-#include <AOE_struct_ui_main_info.h>
+#include <AOE_struct_ui_panel_system.h>
 
 #include <Windows.h> // for messagebox
 #include "RockNRorCommon.h"

@@ -77,7 +77,7 @@ namespace AOE_STRUCTURES {
 
 //PathingSystem::findTilePath(startX, startY, goalX, goalY, unit, actionRange, cTargetID, copyPathWhenDone, pathLength, checkPathingIterations, checkTerrainFirstTime, checkCollisions, stepSize, unobstructiblePlayerID, unobstructibleGroupID)
 
-#define CHECKSUM_UNKNOWN_PATH_FINDING 0x00544CF0
+#define CHECKSUM_PATHING_SYSTEM 0x00544CF0
 	// Included structure in addresses 0x583BC8 and 0x6A1CC0 (open paths and traversed paths ?)
 	// 0x583BC8 seems to be used for "group" methods (tacAI, infAI), 0x6A1CC0 for individual (unit/activity methods) ?? For perf/cache reasons? Other?
 	// For canMoveTo(unit+194): one of the few that use 583BC0=>0x4C00D3, 0x4C019F,4C0272,4C0B35 in infAI.findattacktarget + calls in tacai.taskactivesoldiers(eg 0x4D4E85) + tacai.reactevent(eg 0x4D8823) + findgathertarget. why ? Arg5-6 always -1. arg3=0?
@@ -88,7 +88,8 @@ namespace AOE_STRUCTURES {
 	// In this struct, arrays indices are "quarter tiles". (use posX*4 for example).
 	// Arrays value are binary (1 bit of one elementary position), which adds more precision under tile/quarter tile level ?
 	// 0x458930 = pathingSystem.findTilePath(srcPosY, srcPosX, destPosY, destPosX, ptrActorUnit, f_range, targetUnitId, copyPathWhenDone, pathLength, checkPathingIterations, checkTerrainFirstTime, checkCollisions, stepSize, unobstructiblePlayerID, unobstructibleUnitClass)
-	class STRUCT_UNKNOWN_PATH_FINDING {
+	// 0x45A970 = INT PathingSystem::copyPath(stepSize) => apply current path to current unit (DO move)
+	class STRUCT_PATHING_SYSTEM {
 	public:
 		unsigned long int checksum; // F0 4C 54 00
 		long int mapArraySizeY;
@@ -99,11 +100,11 @@ namespace AOE_STRUCTURES {
 		STRUCT_PATH_FINDING_UNKNOWN_POS_INFO unknown_4F614[0xFF * 0xFF]; // +4F614. Size 7F008. NOT indexed by coordinates ? Sort of list? Steps for short path finding??
 		unsigned long int unknown_0CE61C;
 		// 0x4F620
-		unsigned long int unknown_0CE620;
+		unsigned long int unknown_0CE620; // +CE620.
 		// 458870: set "has unit" at position?
-		long int unknown_0CE624_mapUnitOccupiedGrid[0xFF * 0xFF]; // index posY*4*0xFF+x. Its value is a bits mask ?? STRUCT_MAP_VISIBILITY_MASK?
-		// 0x10DE28 ?
-		char unknown_010DE28[0x11DC2C - 0x10DE28];
+		long int unitObstructionMap[0xFF * 0xFF]; // +CE624. index posY*4*0xFF+x. Its value is a bits mask ?? STRUCT_MAP_VISIBILITY_MASK? Array size 0xFE01, reset=0x458850.
+		char unknown_010DE28_misc[0xFE00]; // +10DE28. Size=0xFE00. "Misc" ??? Access: y*0xFF+x
+		unsigned long int unknown_11DC28;
 		long int unknown_011DC2C_index; // an index to access +4F614 + index*8 (byte)?
 		char unknown_011DC30_posY; // current step posY ?
 		char unknown_011DC31_posX; // current step posX ?
@@ -136,7 +137,7 @@ namespace AOE_STRUCTURES {
 		long int actorMinPosX_offset; // +11DC98. (actorPosX - sizeRadius)*4 ?
 		long int actorMaxPosY_offset; // +11DC9C. (actorPosY + sizeRadius)*4 ?
 		long int actorMaxPosX_offset; // +11DCA0. (actorPosX + sizeRadius)*4 ?
-		char unknown_11DCA4[0x11DCC0 - 0x11DCA4];
+		char unknown_11DCA0[0x11DCBC - 0x11DCA4];
 		long int initialPathsCount; // +11DCBC. Inc in 0x45A4C0.
 		long int continuePathsCount; // +11DCC0. INC in 0x45A4D0
 		long int canPathsCount; // +11DCC4. INC in 0x45A4E0
@@ -145,18 +146,18 @@ namespace AOE_STRUCTURES {
 		char unknown_11DCD8_resetCounter; // +11DCD8. A counter, +=8 at each pathFinding. When 0xF0 (30 iterations), reset and resets mapData. Value is similar to +C array
 		char unknown_11DCD9[3];
 		long int unobstructibleUnitClass; // +11DCDC. arg15 of 00458930 call. Seen 0x1B (walls????). Used in 0x459AD4
-		// 0x11DCE0
-		long int unobstructiblePlayerId; // arg14 of 0x458930 call.
+		long int unobstructiblePlayerId; // +11DCE0. arg14 of 0x458930 call.
 		STRUCT_MANAGED_ARRAY unknown_11DCE4; // +11DCE4 = array of unit IDs
 		/*long int *unknown_11DCE4; // +11DCE4 = array of unit IDs
 		long int unknown_11DCE8; // +11DCE8 = used count in unknown_11DCE4
 		long int unknown_11DCEC;
 		// 0x11DCF0
 		long int unknown_11DCF0; // +11DCF0 = allocated number of elems in unknown_11DCE4*/
-		long int unknown_11DCF4; // seen 1
+		long int isAIPathingSystem; // +11DCF4. 1 if "I" am "AI" pathing system (0x583BC8), 0 otherwise (0x6A1CC0)
 		// ...
-		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UNKNOWN_PATH_FINDING; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_PATHING_SYSTEM; }
 	};
+	static_assert(sizeof(STRUCT_PATHING_SYSTEM) == 0x11DCF8, "STRUCT_PATHING_SYSTEM size (incomplete)");
 
 
 	// Size = 0x51C. Constructor = 0x521060 (gameMapInfo, terrainRestrictionValues, layer)

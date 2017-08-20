@@ -32,8 +32,8 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 	if (isInEditor) {
 		// Consistency check.
 		assert((currentUI->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MAIN) ||
-			(currentUI->checksum == CHECKSUM_UI_SAVE_AS) ||
-			(currentUI->checksum == CHECKSUM_UI_LOAD));
+			(currentUI->checksum == CHECKSUM_UI_SAVE_AS_SCREEN) ||
+			(currentUI->checksum == CHECKSUM_UI_SC_EDITOR_OPEN));
 		if (currentUI->checksum != CHECKSUM_UI_SCENARIO_EDITOR_MAIN) { return false; }
 	}
 	bool isInGame = (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) && (currentUI->checksum == CHECKSUM_UI_IN_GAME_MAIN); // True if game is running (and has focus)
@@ -185,26 +185,26 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 #ifdef GAMEVERSION_ROR10c
 		unsigned long int *marray = (unsigned long int *)AOE_OFFSETS::UNKNOWN_ARRAY_6A18C0;
 #endif
-		AOE_STRUCTURES::STRUCT_UNKNOWN_PATH_FINDING *md1 = (AOE_STRUCTURES::STRUCT_UNKNOWN_PATH_FINDING *) 0x583BC8;
-		AOE_STRUCTURES::STRUCT_UNKNOWN_PATH_FINDING *md2 = (AOE_STRUCTURES::STRUCT_UNKNOWN_PATH_FINDING *) 0x6A1CC0;
+		AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *md1 = (AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *) 0x583BC8;
+		AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *md2 = (AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *) 0x6A1CC0;
 		char txt[1000];
 		memset(txt, 0, 900);
-		long int v = md1->unknown_0CE624_mapUnitOccupiedGrid[0];
+		long int v = md1->unitObstructionMap[0];
 		for (int i = 0; i < 64; i++) {
 			int bit = v & (1 << i);
 			txt[i] = bit ? '1' : '0';
 		}
-		v = md1->unknown_0CE624_mapUnitOccupiedGrid[0x40];
+		v = md1->unitObstructionMap[0x40];
 		for (int i = 0; i < 64; i++) {
 			int bit = v & (1 << i);
 			txt[64 + i] = bit ? '1' : '0';
 		}
-		v = md1->unknown_0CE624_mapUnitOccupiedGrid[0x80];
+		v = md1->unitObstructionMap[0x80];
 		for (int i = 0; i < 64; i++) {
 			int bit = v & (1 << i);
 			txt[128 + i] = bit ? '1' : '0';
 		}
-		v = md1->unknown_0CE624_mapUnitOccupiedGrid[0xC0];
+		v = md1->unitObstructionMap[0xC0];
 		for (int i = 0; i < 64; i++) {
 			int bit = v & (1 << i);
 			txt[128 + 64 + i] = bit ? '1' : '0';
@@ -387,7 +387,7 @@ bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
 			}
 			return ROCKNROR::customPopupSystem.OnCustomButtonClick(objAsButton); // run for checkboxes also.
 		}
-		AOE_STRUCTURES::STRUCT_UI_BUTTON_COMBOBOX *objAsComboboxBtn = (AOE_STRUCTURES::STRUCT_UI_BUTTON_COMBOBOX *)objAddress;
+		AOE_STRUCTURES::STRUCT_UI_DROPDOWN_BUTTON *objAsComboboxBtn = (AOE_STRUCTURES::STRUCT_UI_DROPDOWN_BUTTON *)objAddress;
 		if (objAsComboboxBtn->IsCheckSumValid()) {
 			// Is there something to do here to get those comboboxes work properly ?
 			

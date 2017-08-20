@@ -15,17 +15,17 @@ namespace AOE_STRUCTURES
 	// External dependencies
 	class STRUCT_UI_COMBOBOX;
 
-	// Size 0x2BC. Derives from standard button. Button attached to a combobox (?)
-	// Can be created in 0x0461F20
-	class STRUCT_UI_BUTTON_COMBOBOX : public STRUCT_UI_BUTTON {
+	// Size 0x2BC. Derives from standard button. Button dedicated to a dropdown.
+	// Costructor=0x0461F20
+	class STRUCT_UI_DROPDOWN_BUTTON : public STRUCT_UI_BUTTON {
 	public:
 		
 		STRUCT_UI_COMBOBOX *combobox; // +2B8. The combobox it is attached to
 		bool IsCheckSumValid() const {
-			return (this->checksum == CHECKSUM_UI_BUTTON_COMBOBOX);
+			return (this->checksum == CHECKSUM_UI_DROPDOWN_BUTTON);
 		}
 	};
-	static_assert(sizeof(STRUCT_UI_BUTTON_COMBOBOX) == 0x2BC, "STRUCT_UI_BUTTON_COMBOBOX size");
+	static_assert(sizeof(STRUCT_UI_DROPDOWN_BUTTON) == 0x2BC, "STRUCT_UI_DROPDOWN_BUTTON size");
 
 }
 

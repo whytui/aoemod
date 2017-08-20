@@ -124,13 +124,13 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_PLAYER_NEW_EXPLORED_TILES) == 0x14, "Size of STRUCT_PLAYER_NEW_EXPLORED_TILES");
 
 
-	// Size = 0x14 - Constructor = 0x4B09F0
+	// "TribeHistoryInfo". Size=0x14 - Constructor = 0x4B09F0
 	class STRUCT_PLAYER_POP_HIST_INFO {
 	public:
 		char *populationCountByTimeIndex; // Pointer to array of bytes = my population at a given moment.
 		long int *unknown_04; // Ptr to ? +4=dword(int) +C=ptr=next
 		long int unknown_08; // Min index ???
-		long int currentTimeIndex; // +0C. Corresponds to current "maxTimeIndex" !
+		long int currentTimeIndex; // +0C. Corresponds to current "maxTimeIndex" ! Current "entry" index.
 		long int arraySize;
 	};
 	static_assert(sizeof(STRUCT_PLAYER_POP_HIST_INFO) == 0x14, "Size of STRUCT_PLAYER_POP_HIST_INFO");
@@ -155,7 +155,7 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_RGE_PLAYER 0x00544D18 // Base class. Size=0x224 cf 0x51CF39?
 #define CHECKSUM_PLAYER 0x00549A44 // Normal player (non-gaia)
 #define CHECKSUM_GAIA_PLAYER 0x00549B80
-	// PLAYER. Constructor=0x4EFB00. RGE_Player ccor=0x45B6A0
+	// PLAYER. Constructor=0x4EFB00. RGE_Player ccor=0x45B410, 0x45B6A0
 	// Standard player struct sizes are 0x85C (gaia) or 0x84C (non-gaia).
 	// If selected units features is installed, size is increased to host selected unit pointers at the end of the structure.
 	// Size will depend on how many maximum selected units it has been set.
@@ -168,12 +168,13 @@ namespace AOE_STRUCTURES {
 	// +0x30 = player.sendAIOrderToUnit(playerId, unitId, activityId, targetUnitId, arg5, fposY, fposX, arg8, f_range, arg10, arg11, priorityRegardingDistance?)
 	// +0x34 = player.processAIOrder(playerId, unitId, actionId, arg4, arg5_byte, fposY, fposX, fposZ, f_maxRange?, arg10, arg11, arg12)
 	// +0x38 = 
+	// +0x60 = VOIDPTR RGE_Player::make_scenario_obj(world_x,world_y,world_z,master_id,state,new_angle)
 	// +0x7C = player.update??
 	// +0x80 = player.save?
 	// +0x84 = player.save2?
 	// +0x88 = player.save_info?
 	// +0x90 = player.setInitialScreenPos???(arg1, arg2, global, arg4, arg5, arg6)
-	// +0x94 = player.createUnit(DATID, posY, posX, posZ, arg5). Used to place initial units (cf objectPlacer), add unit in editor
+	// +0x94 = Player.createUnit(DAT_ID, posY, posX, posZ, buildAllTheWay). Used to place initial units (cf objectPlacer), add unit in editor
 	// +0xA0 = player.CreateCmdMoveForSelectedUnits(arg1,posY,posX)
 	// +0xA4 = unsigned char RGE_Player::command_make_work(RGE_Static_Object *,float,float)
 	// +0xA8 = player.createGenericOrderCommandForSelectedUnits(targetUnit, f_posY, f_posX)
@@ -184,7 +185,7 @@ namespace AOE_STRUCTURES {
 	// +0xBC = player.createCmdFormation(formationId)
 	// +0xC0 = player.createCmdHoldPosition()
 	// +0xC4 = player.createCmdCreateGroup()
-	// +0xC8 = (unused) player.createCommandE ? => 0x45E760
+	// +0xC8 = (unused) player.createCommandE ? => 0x45E760 HEX RGE_Player::command_add_to_group(commander,unitID,range)
 	// +0xCC = (unused) player.createCommandF ? => 0x45E790
 	// +0xD0 = player.createCmdRemoveGroup?(...) => 0x45E7B0 (cmd 9). Called on unit death?
 	// +0xD4 = player.createCommandB ? => 0x45E7D0
@@ -244,7 +245,7 @@ namespace AOE_STRUCTURES {
 		char aliveStatus; //0=alive, 1=win 2=lost.
 		char isInactive; // +81. 1 for resigned/disconnected ? 0x45BBE3. "isResigned"
 		short int unknown_082; // unused ?
-		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // +84. [pointer+iPlayerId] = diplomacy value: 0=ally,1=neutral, 3=enemy. gaia&self are neutral !
+		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // +84. [pointer+iPlayerId] = diplomacy value: 0=ally,1=neutral, 3=enemy. gaia&self are neutral ! "relation"
 		char unknown_088;
 		char unknown_089[3]; // unused ?
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES diplomacyVSPlayers[9]; // +8C. Diplomacy against gaia(p0), p1, p2... 1=self, 2=allied, 3=neutral, 4=enemy. Long ints (4bytes each)
@@ -264,15 +265,15 @@ namespace AOE_STRUCTURES {
 		short int techTreeId; // 0x45BA12 : DWORD ! -1 for 'no tech tree'. Warning: NOT saved => wrong in loaded games (but fixed by RockNRor)
 		short int unknown_112;
 		STRUCT_PLAYER_VISIBLE_RESOURCE_MANAGER *spottedResources; // +114. Contains info about resource units. Set in 0x4F1EF8. Related to +58 data. Not related to AI. Each time a tile is explored, underlying resources are added here.
-		float screenPositionY; // axis southwest-northeast like /
+		float screenPositionY; // axis southwest-northeast like /   "view location"
 		float screenPositionX; // axis northwest-southeast like \   [origin is left corner - max(X,Y) is right corner]
 		// 0x120
-		short int mapLocationPosY; // screen pos ?
-		short int mapLocationPosX; // screen pos ?
-		short int unsure_selectionMinY; // +124
-		short int unsure_selectionMinX; // +126
-		short int unsure_selectionMaxY; // +128
-		short int unsure_selectionMaxX; // +12A
+		short int mapLocationPosY; // difference with screen pos ?
+		short int mapLocationPosX; // difference with screen pos ?
+		short int selectionMinY; // +124. For select Area
+		short int selectionMinX; // +126. For select Area
+		short int selectionMaxY; // +128. For select Area
+		short int selectionMaxX; // +12A. For select Area
 		long int unknown_12C;
 		// 0x130
 		short int unknown_130;

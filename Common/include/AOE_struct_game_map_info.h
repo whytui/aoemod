@@ -80,7 +80,7 @@ namespace AOE_STRUCTURES {
 		char hasFog; // 0x8DB9
 		char unknown_8DBA;
 		char unknown_8DBB;
-		STRUCT_MAP_GENERATION_INFO *mapgenInfos; // +8DBC.
+		STRUCT_RMM_DB_CONTROLLER *mapgenInfos; // +8DBC.
 		STRUCT_GAME_GLOBAL *globalStruct; // +8DC0
 		STRUCT_MAP_TERRAIN_ZONES_INFO_LINK *terrainZonesInfoLink; // +8DC4.
 		STRUCT_MAP_VISIBILITY_LINK *mapVisibilityLink; // +8DC8. Link to an array with visibility masks tile by tile. Data array is the same as 0x7D205C

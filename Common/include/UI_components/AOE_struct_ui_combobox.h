@@ -17,20 +17,19 @@
 namespace AOE_STRUCTURES
 {
 
-	// Size = 0x144 - 50 50 54 00. Direct parent is STRUCT_ANY_UI
-	// Constructor = 0x460A00. Comboboxes are not intended to be used in popups and don't work well in native ROR code.
-	// 461DA0 : addEntry(text, index) ?
+	// Size = 0x144 - 50 50 54 00. Direct parent is STRUCT_ANY_UI. "DropDownPanel"
+	// Constructor = 0x460A00. Comboboxes are not intended to be used in popups and don't work well in such case in native ROR code.
 	// 461D50 : setSelectedIndex
 	// 0x4542C0 set hint dll string(dllid, -1) ?
+	// 0x461DA0 = combobox.appendLine(text, index)
 #define CHECKSUM_UI_COMBOBOX 0x00545050
 	class STRUCT_UI_COMBOBOX : public STRUCT_ANY_UI {
 	public:
 		STRUCT_UI_LABEL *displayedLabel; // +F4.
-		STRUCT_UI_BUTTON_COMBOBOX *btnShowList; // +F8. 34 51 54 00
+		STRUCT_UI_DROPDOWN_BUTTON *btnShowList; // +F8. 34 51 54 00
 		STRUCT_UI_LISTBOX *underlyingListBox; // +FC.
-		// 0x100
 		STRUCT_UI_SCROLLBAR *scrollbar; // +100. Scrollbar to apply on listbox.
-		long int unknown_104; // Status ? 1=normal, 0=list_shown ? unclear and unsure
+		long int dropDownMode; // +104. Status ? 1=normal, 0=list_shown ? unclear and unsure
 		short int selectedIndex; // +108. Index in list of current selection (0 to n-1).
 		unsigned short int unknown_10A;
 		long int labelSizeX; // +10C
@@ -47,9 +46,8 @@ namespace AOE_STRUCTURES
 		long int unknown_134; // 
 		char unknown_138;
 		char unknown_139[3]; // unknown type
-		long int unknown_13C_lbl_btn_relativePosOrder; // +13C. 0=text on left, 1=text on right
-		// 0x140
-		long int drawBorderAroundText; // init=1. Set in 0x461180 (do not update directly)
+		long int drawStyle; // +13C. 0=text on left, 1=text on right
+		long int drawBorderAroundText; // +140. init=1. Set in 0x461180 (do not update directly)
 
 		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_COMBOBOX; }
 		// Returns index (0 to n-1) of selected entry

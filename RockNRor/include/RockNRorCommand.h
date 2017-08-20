@@ -246,7 +246,7 @@ public:
 
 
 	// Technical fix for a method about elevation application when generating map. Original method contains many bugs.
-	void Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo);
+	void Fixed_MapGen_applyElevation(long int posX, long int posY, long int distance, AOE_STRUCTURES::STRUCT_RMM_ELEVATION_GENERATOR *elevInfo);
 
 	void DisplayTimerStats();
 	void AutoFixGameTimer();

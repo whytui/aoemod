@@ -78,13 +78,13 @@ namespace AOE_STRUCTURES {
 
 	// Size=0x10C. Constructor=0x476CD0.
 	// Scenario.inf path + other data ?
-	class STRUCT_SCENARIO_INF_DATA {
+	class STRUCT_SCENARIO_FILE_INFO {
 	public:
 		char unknown_00[0x104]; // unknown size
 		unsigned long int unknown_104; // +104. A DWORD.
 		unsigned long int *unknown_108; // +108. Array of elems, size=0x10C
 	};
-	static_assert(sizeof(STRUCT_SCENARIO_INF_DATA) == 0x10C, "STRUCT_SCENARIO_INF_DATA size");
+	static_assert(sizeof(STRUCT_SCENARIO_FILE_INFO) == 0x10C, "STRUCT_SCENARIO_FILE_INFO size");
 
 
 }

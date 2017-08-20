@@ -70,7 +70,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ORDER_REGROUP_2D4 = 0x2D4, // 0x41363F. Move to TC for artefacts, regroup and/or regroup to transport meeting location ? Used for unit group's regroup task.
 		CST_ORDER_HOLD_POSITION = 0x2D5, // Do not auto-attack. See 0x4E6740 for cats (don't search for target), 413F89 for other units (cancel attack if not at range?)
 		CST_ORDER_UNKNOWN_2D6 = 0x2D6, // ? see 0x4133DC
-		CST_ORDER_UNKNOWN_2D7 = 0x2D7, // ? see 0x4134F8
+		CST_ORDER_UNKNOWN_2D7_AI_PLAY = 0x2D7, // ? see 0x4134F8. "Play" (from AI playbook)
 		CST_ORDER_UNKNOWN_2D8 = 0x2D8, // ? see 0x4136E2. Related to task 0x274
 		CST_ORDER_UNKNOWN_2D9_POP_TARGET = 0x2D9 // Similar to attack(2BC). "pop" a target from array ? Used for "attack roundup target" only, cf 0x4DBEF1.
 		// 0x2D9 seems to be the last one

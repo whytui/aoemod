@@ -21,8 +21,6 @@ namespace AOE_STRUCTURES
 #define CHECKSUM_UI_IN_GAME_MAIN 0x0054679C
 #define CHECKSUM_UI_SCENARIO_EDITOR_MAIN 0x00547360
 #define CHECKSUM_UI_GAME_SETTINGS 0x00547810
-#define CHECKSUM_UI_SAVE_AS 0x00547234 // TODO. "Save Game Screen" (to save scenario also)
-#define CHECKSUM_UI_LOAD 0x005475B8 // TODO.
 
 	// Size=0x478. A base class for all screens and popups (not UI components). Directly derives from base UI class. "EasyPanel".
 	// Constructor = 0x454430 (0x468150 for intermediate class), Init (own fields) 0x454B60.
@@ -84,6 +82,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_454;
 		long int enableIME; // +458
 		char unknown_45C[0x478 - 0x45C];
+
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UI_EASY_PANEL); }
 		bool IsCheckSumValidForAChildClass() const {
 			return (this->checksum == CHECKSUM_UI_EASY_PANEL) || (this->checksum == CHECKSUM_UI_SCREEN_PANEL) ||
@@ -92,5 +91,15 @@ namespace AOE_STRUCTURES
 		}
 	};
 	static_assert(sizeof(STRUCT_UI_EASY_PANEL) == 0x478, "STRUCT_UI_EASY_PANEL size");
+
+
+	// Size=0x478 Constructor=0x468150
+	class STRUCT_UI_SCREEN_PANEL : public STRUCT_UI_EASY_PANEL {
+	public:
+
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UI_SCREEN_PANEL); }
+	};
+	static_assert(sizeof(STRUCT_UI_SCREEN_PANEL) == 0x478, "STRUCT_UI_SCREEN_PANEL size");
+
 }
 

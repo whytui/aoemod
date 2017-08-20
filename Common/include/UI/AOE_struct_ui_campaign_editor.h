@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <UI_components\AOE_struct_any_ui.h>
+#include <UI\AOE_struct_ui_screen_base.h>
 #include <UI_components\AOE_struct_ui_button.h>
 
 /*
@@ -14,11 +14,14 @@
 namespace AOE_STRUCTURES
 {
 
-	// Size ?
-	class STRUCT_UI_CAMPAIGN_EDITOR : public STRUCT_ANY_UI {
+#define CHECKSUM_UI_CAMPAIGN_EDITOR 0x00545FB0
+
+	// Size=0x4C4. Constructor=0x479360
+	class STRUCT_UI_CAMPAIGN_EDITOR : public STRUCT_UI_SCREEN_PANEL {
 	public:
-		char unknown_0F4[0x47C - 0x0F4];
-		STRUCT_ANY_UI *lblCampaignEditor;
+		/*char unknown_0F4[0x47C - 0x0F4];*/
+		unsigned long int unknown_478;
+		STRUCT_ANY_UI *lblCampaignEditor; // +47C.
 		// 0x480
 		STRUCT_ANY_UI *lblCampaignFilename;
 		STRUCT_ANY_UI *lblScenarios;
@@ -38,9 +41,12 @@ namespace AOE_STRUCTURES
 		STRUCT_UI_BUTTON *btnRemove;
 		STRUCT_UI_BUTTON *btnUp;
 		STRUCT_UI_BUTTON *btnDown;
+		unsigned long int unknown_4BC;
+		unsigned long int unknown_4C0;
 
-		//bool IsCheckSumValid() { return this->checksum == 0x0054xxxx; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_CAMPAIGN_EDITOR; }
 	};
+	static_assert(sizeof(STRUCT_UI_CAMPAIGN_EDITOR ) = 0x4C4, "STRUCT_UI_CAMPAIGN_EDITOR size");
 
 }
 

@@ -819,7 +819,7 @@ void RockNRorInstance::MapGen_applyElevation(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, posX >= 0);
 	ror_api_assert(REG_values, posY >= 0);
 	if ((dist <= 0) || (posX < 0) || (posY < 0)) { return; }
-	AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO *elevInfo = (AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO*) REG_values->ECX_val;
+	AOE_STRUCTURES::STRUCT_RMM_ELEVATION_GENERATOR *elevInfo = (AOE_STRUCTURES::STRUCT_RMM_ELEVATION_GENERATOR*) REG_values->ECX_val;
 	ROCKNROR::crCommand.Fixed_MapGen_applyElevation(posX, posY, dist, elevInfo);
 }
 
@@ -3086,7 +3086,7 @@ void RockNRorInstance::GathererPathFindingReturnToDeposit(REG_BACKUP *REG_values
 
 	AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *actorAsType50 = NULL;
 	if (actorUnit->DerivesFromAttackable()) { actorAsType50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)actorUnit; }
-	AOE_STRUCTURES::STRUCT_UNIT_MOVEMENT_INFO *movInfo = NULL;
+	AOE_STRUCTURES::STRUCT_PATH *movInfo = NULL;
 	assert(actorAsType50 != NULL);
 
 	// This series of checks is for DEBUG compilation mode only

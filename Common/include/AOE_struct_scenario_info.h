@@ -73,7 +73,7 @@ namespace AOE_STRUCTURES {
 
 #define CHECKSUM_SCENARIO_INFO_BASE 0x00545E3C
 #define CHECKSUM_SCENARIO_INFO 0x0054A3C8
-	// Size = 0x1990. Constructor=0x474C90. "RGE_Scenario"
+	// Size = 0x1990. Constructor=0x474C90, 0x474D40. "RGE_Scenario". Please use child class.
 	class STRUCT_SCENARIO_INFO_BASE {
 	public:
 		unsigned long int checksum; // C8 A3 54 00 ; parent struct = 3C 5E 54 00
@@ -109,7 +109,7 @@ namespace AOE_STRUCTURES {
 		char scenarioBitmapFileName[0xE0]; // +17A8
 		float scenarioVersion; // +1888. Corresponds to .scn/.scx version, like 1.02, 1.03, 1.04, 1.05, 1.13, 1.15(=ROR 1.0a). Not always reset (when loading a non-scenario game)
 		long int player_unknown_188C_posture[0x10]; // +188C. Often referred to as +18CC-40. Default = 4 ? Player posture ?
-		long int playerIsHumanPlayable[0x10]; // +18CC. 0 if computer player only (cannot be played as human)
+		long int playerIsHumanPlayable[0x10]; // +18CC. 0 if computer player only (cannot be played as human). "Player type"
 		long int playerCivilizationId[0x10]; // +190C. Often referred to as +18CC+40.
 		long int playerIsActive[0x10]; // +194C. 1 if player is active. Often referred to as +18CC+80.
 		long int *unknown_198C; // +198C. ptr to struct size=0x20, constructor 45AF60. TO DO.

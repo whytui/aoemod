@@ -5,7 +5,7 @@
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_map_tile_values.h>
-#include <AOE_struct_ui_main_info.h>
+#include <AOE_struct_ui_panel_system.h>
 #include <AOE_offsets.h>
 #include <UI_components\AOE_struct_any_ui.h>
 

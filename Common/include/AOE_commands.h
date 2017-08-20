@@ -178,6 +178,23 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(COMMAND_ADD_SINGLE_INTERMEDIATE_MOVEMENT_STEP) == 0x09 + 3, "COMMAND_ADD_SINGLE_INTERMEDIATE_MOVEMENT_STEP size");
 
 
+	// Type 0x0E. Size = 0x74. Create=0x42BBE0. exec=
+	// WARNING there is no check to prevent overflow: max 25 units
+	struct COMMAND_CREATE_GROUP {
+	public:
+		char cmdId;
+		char playerId; // +01. Player must be unit owner
+		short int unknown_02;
+		long int commanderUnitId; // +04. Main unit in group
+		float range; // +08. Float ?
+		long int unitIdList[25]; // +0C.
+		char unitCount;
+		char unused[3];
+
+		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CREATE_GROUP; }
+	};
+
+
 	// Type 0x0E. Size = 0x10. Create=0x42BC40. exec=0x42B4A0
 	struct COMMAND_UNKNOWN_E {
 	public:
@@ -188,7 +205,7 @@ namespace AOE_STRUCTURES
 		float unknown_08; // +08. For unit+80 ?
 		long int unknown_0C; // +0C. A unit id to add in group ?
 
-		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_UNKNOWN_E; }
+		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_ADD_TO_GROUP; }
 	};
 	static_assert(sizeof(COMMAND_UNKNOWN_E) == 0x10, "COMMAND_UNKNOWN_E size");
 
@@ -201,7 +218,7 @@ namespace AOE_STRUCTURES
 		short int unknown_02;
 		long int unitId; // +04
 		long int unknown_08; // +08
-		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_UNKNOWN_F; }
+		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_REMOVE_FROM_GROUP; }
 	};
 	static_assert(sizeof(COMMAND_UNKNOWN_F) == 0x0C, "COMMAND_UNKNOWN_F size");
 
@@ -584,7 +601,7 @@ namespace AOE_STRUCTURES
 		long int actorUnitId; // +4.
 		short int DATID;
 		short int enqueueCount; // +A. Can be <0 (remove from queue)
-		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_QUEUE_UNQUEUE_UNIT; }
+		bool IsCmdIdValid() const { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_QUEUE_UNQUEUE_UNIT; }
 	};
 	static_assert(sizeof(COMMAND_QUEUE_UNIT) == 0xC, "COMMAND_QUEUE_UNIT size");
 

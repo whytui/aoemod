@@ -237,7 +237,7 @@ void TilesetHandler::InitGameMainUITilesetDependentGraphics(AOE_STRUCTURES::STRU
 	}
 	STRUCT_UI_BUTTON_WITH_NUMBER *cancelBtn = gameMainUI->unitCommandButtons[11]; // last button
 	assert(cancelBtn != NULL);
-	long int value = cancelBtn->commandIDs[cancelBtn->checked];
+	long int value = cancelBtn->commandIDs[cancelBtn->currentState];
 	long int arg3_iconid = 0;
 	if (value == 6) {
 		arg3_iconid = gameMainUI->unknown_4B4;

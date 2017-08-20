@@ -10,6 +10,7 @@
 #include <AOE_struct_map_base_common.h>
 #include <AOE_struct_map_visibility_info.h>
 #include <AOE_struct_managed_array.h>
+#include <AOE_struct_path.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -62,30 +63,6 @@ namespace AOE_STRUCTURES {
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_OBJECT_LIST_BASE) || (this->checksum == CHECKSUM_OBJECT_LIST_CHILD); }
 	};
 	static_assert(sizeof(STRUCT_OBJECT_LIST) == 0x0C, "STRUCT_OBJECT_LIST size");
-
-
-	// Size = 0x34. Name="Path". Constructor=0x457FE0.
-	// (free=0x4580A0). An interesting method: 0x4581B0=moveInfo.replaceByNewDestination(STRUCT_POSITION_INFO*)
-	// About movement/path finding
-	class STRUCT_UNIT_MOVEMENT_INFO {
-	public:
-		unsigned long int timestamp; // +00
-		unsigned long int unknown_04; // targetPosY (float) ?
-		unsigned long int unknown_08; // targetPosX (float) ?
-		unsigned long int unknown_0C; // targetPosZ (float) ?
-		// 0x10
-		unsigned long int unknown_10; // unknown type/size
-		unsigned long int unknown_14;
-		unsigned long int unknown_18;
-		unsigned long int unknown_1C;
-		// 0x20
-		unsigned long int unknown_20; // unknown type/size
-		STRUCT_WAYPOINT *intermediatePositions; // +24
-		long int intermediatePositionsArraySize; // +28
-		long int intermediatePositionsUsedElementsCount; // +2C
-		// 0x30
-		long int intermediatePositionsCurrentIndex; // +30. To confirm. See 4583D0
-	};
 
 
 #define CHECKSUM_UNIT_BASE 0x00547DA8 // "Eye candy" - type 10
@@ -276,7 +253,7 @@ namespace AOE_STRUCTURES {
 		long int terrainZoneInfoIndex; // +7C. Index of terrainZoneInfo in terrainZoneInfoLink array. -1 means not initialized yet.
 		// 0x80
 		float unknown_080;
-		char unknown_084; // "isMapInfoUpToDateForThisUnit" ?
+		char unknown_084; // "is obstruction map up to date for this unit" ?
 		char unknown_085; // Previous value of +84.
 		char isBeingAttacked; // +86. For map blinking (+other treatments?). This is constantly reset and re-computed in "unit.timerUpdate()" 0x426BF0 treatments.
 		char unknown_087;
@@ -438,8 +415,8 @@ namespace AOE_STRUCTURES {
 		float velocityZ; // +98.
 		float orientationAngle; // +9C. unit orientation angle. Updating this impacts unit.orientationIndex (+0x35). Angle [0, 2*PI[. 0=heading to northEast (increasing Y). Warning: walking graphics need to have 8 angles to allow valid movement.
 		unsigned long int unknown_0A0; // +A0. "turn_towards_time" ?
-		STRUCT_UNIT_MOVEMENT_INFO movementInfo; // +A4. Movement info / path finding. "Path".
-		STRUCT_UNIT_MOVEMENT_INFO temp_AI_movementInfo; // +D8. Only used in AI treatments(?) to make checks before assigning tasks ? Used when unknown_154_tempFlag_calculatingPath=1
+		STRUCT_PATH movementInfo; // +A4. Movement info / path finding. "Path".
+		STRUCT_PATH temp_AI_movementInfo; // +D8. Only used in AI treatments(?) to make checks before assigning tasks ? Used when unknown_154_tempFlag_calculatingPath=1
 		float unknown_10C; // +10C.
 		// 0x110
 		float move_initialPosX; // wrong ?
@@ -533,7 +510,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_PROJECTILE) == 0x1C4, "STRUCT_UNIT_PROJECTILE size");
 
 
-	// 0C 82 54 00 = trainable (type70 - living in AGE3). Size=0x1C0 - Derives from type50
+	// "TribeCombatObject". 0C 82 54 00 = trainable (type70 - living in AGE3). Size=0x1C0 - Derives from type50
 	// Constructor=0x4AE2D0=livingUnit.constructor(UnitDef, player, posY, posX, posZ?,arg6)
 	// Constructor=0x4AE380 (internalFileId, global, isLeafClass), uses 0x4AE5C0=livingUnit.readFromFile(internalFileId, global)
 	class STRUCT_UNIT_TRAINABLE : public STRUCT_UNIT_ATTACKABLE {

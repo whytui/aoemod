@@ -56,7 +56,7 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *CreateGameScreenPopup(AOE_STRUCTURES::STRU
 		PUSH 0x00557204; // Config Dialog
 		CALL EAX;
 		// Create popup + show + focus
-		MOV EDX, 0x004607A0;
+		MOV EDX, 0x004607A0; // dialog.setup(renderArea, parentUI, hSize, vSize, dlgName?, resourceFileId, allowShadowArea)
 		MOV ECX, newObj;
 		PUSH 1; // arg7
 		PUSH arg6;

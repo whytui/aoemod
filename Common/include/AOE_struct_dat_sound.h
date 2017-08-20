@@ -25,7 +25,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_DAT_SOUND_FILE_INFO) == 0x24, "STRUCT_DAT_SOUND_FILE_INFO size");
 
 
-	// Size 0x10. Constructor = 0x4A2000(fromFile) = datSound.read(internalFileId, pSounds, pMPInfo). "RGE_Sound" ?
+	// "RGE_Sound". Size 0x10. Constructor = 0x4A2000(fromFile) = datSound.ccor(internalFileId, pSound). arg2=soundDriver?
 	// 0x4A2370=play(arg1)
 	// 0x4A2510=stop()
 	class STRUCT_DAT_SOUND {

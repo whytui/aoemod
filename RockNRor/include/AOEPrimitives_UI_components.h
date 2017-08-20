@@ -252,8 +252,8 @@ static bool AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 static void CheckBox_SetChecked(AOE_STRUCTURES::STRUCT_UI_BUTTON *checkBox, bool checked) {
 	if (!checkBox) { return; }
-	checkBox->checked = checked ? 1 : 0;
-	int arg = checkBox->checked;
+	checkBox->currentState = checked ? 1 : 0;
+	int arg = checkBox->currentState;
 	_asm {
 		MOV ECX, checkBox;
 		PUSH arg;

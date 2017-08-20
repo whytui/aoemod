@@ -22,7 +22,7 @@
 namespace AOE_STRUCTURES
 {
 
-	// Size 0x948. Constructor 0x48FC40. Inherits from 9C 57 54 00, then screen_base
+	// "Screen_sed". Size 0x948. Constructor 0x48FC40. Inherits from 9C 57 54 00, then screen_base
 	// This is the parent UI object of in-game screen.
 	class STRUCT_UI_SCENARIO_EDITOR_MAIN : public STRUCT_UI_EASY_PANEL { // 60 73 54 00
 	public:

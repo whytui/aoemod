@@ -16,6 +16,7 @@ namespace AOE_STRUCTURES
 	// Size 0x4B4 - Constructor = 0x4349A0 - 20 3E 54 00
 	// "Scenario Menu Dialog"
 #define CHECKSUM_UI_SCENARIO_EDITOR_MENU 0x00543E20
+
 	class STRUCT_UI_SCENARIO_EDITOR_MENU : public STRUCT_ANY_UI {
 	public:
 		// +F4...

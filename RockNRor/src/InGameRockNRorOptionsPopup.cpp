@@ -143,7 +143,7 @@ void InGameRockNRorOptionsPopup::OnBeforeClose(bool isCancel) {
 
 	if (this->autoRebuildFarmConfig) {
 		if (this->chkAutoRebuildFarms) {
-			this->autoRebuildFarmConfig->enableAutoRebuildFarms = (this->chkAutoRebuildFarms->checked != 0);
+			this->autoRebuildFarmConfig->enableAutoRebuildFarms = (this->chkAutoRebuildFarms->currentState != 0);
 		}
 		if (this->edtAutoRebuildFarmsMaxFarms) {
 			typedText = this->edtAutoRebuildFarmsMaxFarms->pTypedText;

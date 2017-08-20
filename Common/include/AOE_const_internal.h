@@ -192,8 +192,8 @@ namespace AOE_CONST_INTERNAL
 		CST_ICI_RESIGN = 0x0B, // Only for MP games when clicking resign in menu. See exec=42B290
 		CST_ICI_ADD_ONE_INTERMEDIATE_MOVEMENT_STEP = 0x0C, // Unused ?
 		CST_ICI_UNKNOWN_D = 0x0D, // unused ?
-		CST_ICI_UNKNOWN_E = 0x0E, // exec=0x42B4A0. Add to group ?
-		CST_ICI_UNKNOWN_F = 0x0F, // exec=0x42B4E0 0x42BC80. Remove from group ?
+		CST_ICI_ADD_TO_GROUP = 0x0E, // exec=0x42B4A0. Add to group (cf numeric shortcuts?)
+		CST_ICI_REMOVE_FROM_GROUP = 0x0F, // exec=0x42B4E0 0x42BC80. Remove from group (cf numeric shortcuts?)
 		CST_ICI_ADD_GRP_INTERMEDIATE_MOVEMENT_STEP = 0x10, // When shift-right clicking to specify intermediate movement step
 		CST_ICI_GROUP_AI_TASK = 0x11, // To confirm (old: hold position was probably wrong)
 		CST_ICI_TRIGGER_TRAIN_UNIT = 0x64, // unsure, when AI triggers a train unit action ? + some cheats?

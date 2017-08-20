@@ -312,9 +312,6 @@
     <ClInclude Include="include\AOE_struct_color_def.h">
       <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
     </ClInclude>
-    <ClInclude Include="include\AOE_struct_ui_main_info.h">
-      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
-    </ClInclude>
     <ClInclude Include="include\AOE_struct_border_def.h">
       <Filter>Fichiers d%27en-tête\AOE_genie</Filter>
     </ClInclude>
@@ -380,6 +377,21 @@
     </ClInclude>
     <ClInclude Include="include\AOE_struct_AI_play_status.h">
       <Filter>Fichiers d%27en-tête\AOE_model\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_path.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI_components\AOE_struct_ui_message_panel.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI_components</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_achievements_screen.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UI\AOE_struct_ui_campaign_selection.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\AOE_struct_ui_panel_system.h">
+      <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

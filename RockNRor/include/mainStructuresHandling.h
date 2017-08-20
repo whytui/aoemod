@@ -2,7 +2,7 @@
 #include <AOE_offsets.h>
 #include <ROR_global_variables.h>
 #include <AOE_struct_game_settings.h>
-#include <AOE_struct_ui_main_info.h>
+#include <AOE_struct_ui_panel_system.h>
 
 #pragma once
 

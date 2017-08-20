@@ -17,7 +17,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_GAME_MAP_TILE_INFO;
 
 	// Pre-declaration (circular dependencies in objects)
-	class STRUCT_MAP_GENERATION_INFO;
+	//class STRUCT_RMM_DB_CONTROLLER;
 
 
 	// Size = 0x34
@@ -56,56 +56,119 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_MAPGEN_ELEVATION_DATA) == 0xF80, "STRUCT_MAPGEN_ELEVATION_DATA size");
 
 
-#define CHECKSUM_MAPGEN_BASE 0x00545CC8 // Common parent to more classes ? Ccor 0x46BD00
-	// Size = 0x30. Constructor=0x46BD00. "Random_Map_Module"
+#define CHECKSUM_MAPGEN_BASE 0x00545CC8 // Common parent.
+#define CHECKSUM_RMM_DB_CONTROLLER 0x00545CDC // Please use TRIBE_RMM_DB_CONTROLLER. This intermediate class corresponds to RGE_Map level
+#define CHECKSUM_TRIBE_RMM_DB_CONTROLLER 0x00545D18 // Child class, corresponds to Tribe_Map (the one to use)
+#define CHECKSUM_RMM_CLIFF_GENERATOR 0x00545CD8
+#define CHECKSUM_RMM_TERRAIN_GENERATOR 0x00545D4C
+#define CHECKSUM_RMM_LAND_CONTROLLER 0x00545D04
+#define CHECKSUM_RMM_OBJECT_GENERATOR 0x00545D10
+#define CHECKSUM_RMM_ELEVATION_GENERATOR 0x00545D00
+#define CHECKSUM_RMM_SHALLOWS_GENERATOR 0x00545D14
+
+
+	// "Random_Map_Module". Size = 0x30. Constructor=0x46BD00.
 	class STRUCT_MAPGEN_BASE {
 	public:
 		unsigned long int checksum; // C8 5C 54 00
 		STRUCT_MAPGEN_BASE *parentMapGenObject; // +04
 		STRUCT_MAPGEN_BASE *unknown_08; // +08. represents a list of elevation info objects ? Old name = elevationInfoFirstLinkElem
 		STRUCT_GAME_MAP_INFO *gameMapInfo;
-		STRUCT_GAME_MAP_TILE_INFO **pTileInfoRows; // same as gameMapInfo+8D8C
+		STRUCT_GAME_MAP_TILE_INFO **pTileInfoRows; // +10. same as gameMapInfo+8D8C
 		long int mapSizeY;
 		long int mapSizeX;
-		float unknown_01C; // Default value = 1.5
+		float schedule; // Default value = 1.5
 		STRUCT_GAME_MAP_TILE_INFO **unknown_020; // pointer 1 from mapGenInfo
 		STRUCT_GAME_MAP_TILE_INFO **unknown_024; // pointer 2 from mapGenInfo
 		STRUCT_GAME_MAP_TILE_INFO **unknown_028; // pointer 3 from mapGenInfo
 		STRUCT_GAME_MAP_TILE_INFO **unknown_02C; // pointer 4 from mapGenInfo
+
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_MAPGEN_BASE; }
 	};
 	static_assert(sizeof(STRUCT_MAPGEN_BASE) == 0x30, "STRUCT_MAPGEN_BASE size");
 
 
 	// Size = 0xFB0, constructor=0x46F030
-	// TO DO: there are also checksums 00545D04, 00545D10(ccor=0x4704D0,size=0x1920), 00545D14, 00545D4C, 00545CD8 that have the same parent ?
-	class STRUCT_MAPGEN_ELEVATION_INFO : public STRUCT_MAPGEN_BASE {
+	class STRUCT_RMM_ELEVATION_GENERATOR : public STRUCT_MAPGEN_BASE {
 	public:
-		// unsigned long int checksum; // 00 5D 54 00, parent=C8 5C 54 00 (same parent as STRUCT_MAP_GENERATION_INFO ?)
-		STRUCT_MAPGEN_ELEVATION_DATA elevationData; // Size = 0xF80. Copied from mapGenInfo.unknown_3FD4 ?
+		// unsigned long int checksum; // 00 5D 54 00
+		STRUCT_MAPGEN_ELEVATION_DATA elevationData; // +30. Size = 0xF80. Copied from mapGenInfo.unknown_3FD4 ?
 
-		bool IsCheckSumValid() {
-			return (this->checksum == 0x00545CC8) || (this->checksum == 0x00545D00);
-		}
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_RMM_ELEVATION_GENERATOR); }
 	};
-	static_assert(sizeof(STRUCT_MAPGEN_ELEVATION_INFO) == 0xFB0, "STRUCT_MAPGEN_ELEVATION_INFO size");
+	static_assert(sizeof(STRUCT_RMM_ELEVATION_GENERATOR) == 0xFB0, "STRUCT_RMM_ELEVATION_GENERATOR size");
 
 
-	// Size = 8. Used to manage a list of STRUCT_MAPGEN_ELEVATION_INFO for a STRUCT_MAP_GENERATION_INFO object
+	// Size = 8. Used to manage a list of STRUCT_MAPGEN_ELEVATION_INFO for a STRUCT_RMM_DB_CONTROLLER object
 	// First created is last of the list (we always insert in first position... I believe.)
 	class STRUCT_MAPGEN_ELEVATION_LINK {
 	public:
-		STRUCT_MAPGEN_ELEVATION_INFO *mapGenElevationInfo;
+		STRUCT_RMM_ELEVATION_GENERATOR *mapGenElevationInfo;
 		STRUCT_MAPGEN_ELEVATION_LINK *next; // Last element as a NULL next value.
 	};
 	static_assert(sizeof(STRUCT_MAPGEN_ELEVATION_LINK) == 8, "STRUCT_MAPGEN_ELEVATION_LINK size");
 
 
-#define CHECKSUM_TRIBE_LAND_MAKER 0x00545D18 // Child class, corresponds to Tribe_Map (the one to use)
-#define CHECKSUM_CONTROLER_OF_LANDSCAPE 0x00545CDC // This intermediate class corresponds to RGE_Map level
+	// size=0x508, constructor=0x46CDB0.
+	// "RMM_Database_Controller" (old names Base="ControlerOfLandscape", child="TribeLandMaker" ?). RMM=RandomMapModule
+	class STRUCT_RMM_CLIFF_GENERATOR : public STRUCT_MAPGEN_BASE {
+	public:
+		char unknown_30[0x508 - 0x30];
 
-	// size=0x4F5C, constructor=0x471D20,0x46DA10(fromFile).
-	// "RMM_Database_Controller" (old names Base="ControlerOfLandscape", child="TribeLandMaker" ?)
-	class STRUCT_MAP_GENERATION_INFO : public STRUCT_MAPGEN_BASE {
+		bool IsCheckSumValid() const {
+			return (this->checksum == 0x00545CD8);
+		}
+	};
+	static_assert(sizeof(STRUCT_RMM_CLIFF_GENERATOR) == 0x508, "STRUCT_RMM_CLIFF_GENERATOR size");
+
+
+	// size=0x12CC, constructor=0x472DF0.
+	class STRUCT_RMM_TERRAIN_GENERATOR : public STRUCT_MAPGEN_BASE {
+	public:
+		char unknown_30[0x12CC - 0x30];
+
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_RMM_TERRAIN_GENERATOR);}
+	};
+	static_assert(sizeof(STRUCT_RMM_TERRAIN_GENERATOR) == 0x12CC, "STRUCT_RMM_TERRAIN_GENERATOR size");
+
+
+	// size=0x1468, constructor=0x46FAE0.
+	class STRUCT_RMM_LAND_CONTROLLER : public STRUCT_MAPGEN_BASE {
+	public:
+		char unknown_30[0x1468 - 0x30];
+
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_RMM_LAND_CONTROLLER); }
+	};
+	static_assert(sizeof(STRUCT_RMM_LAND_CONTROLLER) == 0x1468, "STRUCT_RMM_LAND_CONTROLLER size");
+
+
+	// size=0x1920, constructor=0x4704D0.
+	class STRUCT_RMM_OBJECT_GENERATOR : public STRUCT_MAPGEN_BASE {
+	public:
+		char unknown_30[0x1920 - 0x30];
+
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_RMM_OBJECT_GENERATOR); }
+	};
+	static_assert(sizeof(STRUCT_RMM_OBJECT_GENERATOR) == 0x1920, "STRUCT_RMM_OBJECT_GENERATOR size");
+
+
+	// size=0x34C, constructor=0x4716D0.
+	class STRUCT_RMM_SHALLOWS_GENERATOR : public STRUCT_MAPGEN_BASE {
+	public:
+		char unknown_30[0x34C - 0x30];
+
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_RMM_SHALLOWS_GENERATOR); }
+	};
+	static_assert(sizeof(STRUCT_RMM_SHALLOWS_GENERATOR) == 0x34C, "STRUCT_RMM_SHALLOWS_GENERATOR size");
+
+
+
+
+	// size=0x4F5C (both classes), constructors=0x471D20+0x46DA10 for intermediate class, 0x471CF0+0x471D20 for TRIBE_RMM_DB_CONTROLLER.
+	// "RMM_Database_Controller/TribeRMMDatabaseController". RMM=RandomMapModule
+	// Main class for random map generation.
+	// 0x471D40=RMMDBController.init(gameMapInfo, globalStruct, mapType, playerCount, fixedPositions)
+	class STRUCT_RMM_DB_CONTROLLER : public STRUCT_MAPGEN_BASE {
 	public:
 		// 0x30
 		unsigned long int unknown_0030;
@@ -134,11 +197,11 @@ namespace AOE_STRUCTURES {
 		STRUCT_MAPGEN_MAP_TYPE *mapGenMapTypesInfoArray; // +4F58.
 
 		bool IsCheckSumValid() const {
-			return (this->checksum == CHECKSUM_TRIBE_LAND_MAKER) || //(this->checksum == CHECKSUM_MAPGEN_BASE) ||
-				(this->checksum == CHECKSUM_CONTROLER_OF_LANDSCAPE);
+			return (this->checksum == CHECKSUM_TRIBE_RMM_DB_CONTROLLER) || //(this->checksum == CHECKSUM_MAPGEN_BASE) ||
+				(this->checksum == CHECKSUM_RMM_DB_CONTROLLER);
 		}
 	};
-	static_assert(sizeof(STRUCT_MAP_GENERATION_INFO) == 0x4F5C, "STRUCT_MAP_GENERATION_INFO size");
+	static_assert(sizeof(STRUCT_RMM_DB_CONTROLLER) == 0x4F5C, "STRUCT_RMM_DB_CONTROLLER size");
 
 
 }

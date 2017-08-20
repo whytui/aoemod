@@ -5,7 +5,7 @@ namespace AOE_METHODS {
 // pathFindingStruct can be 0x583BC8 or 0x6A1CC0 (for AI?).
 // updateUnitPathInfo = "do move". If false, this just checks if movement is possible.
 // arg15 : seen 0x1B hardcoded
-	long int CalcPathForMove(STRUCT_UNKNOWN_PATH_FINDING *pathFindingStruct,
+	long int CalcPathForMove(STRUCT_PATHING_SYSTEM *pathFindingStruct,
 	long int srcPosY, long int srcPosX, long int destPosY, long int destPosX,
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *ptrActorUnit, float maxRange, long int targetUnitId, long int updateUnitPathInfo,
 	long int arg9, long int arg10, long int arg11, long int arg12,

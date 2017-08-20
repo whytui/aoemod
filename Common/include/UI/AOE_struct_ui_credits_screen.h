@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <UI_components\AOE_struct_any_ui.h>
+#include <UI\AOE_struct_ui_screen_base.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -13,11 +13,13 @@
 namespace AOE_STRUCTURES
 {
 
+#define CHECKSUM_UI_CREDITS_SCREEN 0x00546468
+
 	// Size = 0x8B8. Constructor = 0x47C510. 68 64 54 00
-	class STRUCT_UI_CREDITS_SCREEN : public STRUCT_ANY_UI {
+	class STRUCT_UI_CREDITS_SCREEN : public STRUCT_UI_SCREEN_PANEL {
 	public:
 		// unknown...
-		bool IsCheckSumValid() { return this->checksum == 0x00546468; }
+		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_CREDITS_SCREEN; }
 	};
 
 }

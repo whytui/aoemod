@@ -29,6 +29,21 @@ namespace AOE_STRUCTURES
 // TPanel checksum (base class)
 #define CHECKSUM_ANY_UI 0x00544AD8
 
+// Other classes to define
+#define CHECKSUM_UI_LOAD_SAVED_GAME 0x005468CC // ccor 0x485FC90
+#define CHECKSUM_UI_MAIN_ERROR_SCREEN 0x00546B24 // ccor 0x486FD0
+#define CHECKSUM_UI_MP_STARTUP_SCREEN 0x00546C50 // ccor 0x487250
+#define CHECKSUM_UI_MP_WAIT_SCREEN 0x00546EA8 // ccor 0x48DA30
+#define CHECKSUM_UI_NAME_SELECTION 0x00546FD4 // ccor 0x48DEC0
+#define CHECKSUM_UI_NAME_DIALOG 0x00547100 // ccor 0x48E800
+#define CHECKSUM_UI_SAVE_AS_SCREEN 0x00547234 // ccor 0x48ECA0. "Save Game Screen" (to save scenario also)
+#define CHECKSUM_UI_SC_EDITOR_OPEN 0x005475B8 // ccor 0x49AAA0. "Scenario editor open"
+#define CHECKSUM_UI_SELECT_SCENARIO_SCREEN 0x005476E4 // ccor 0x49B360. "Select scenario screen"
+#define CHECKSUM_UI_SP_MENU_SCREEN 0x0054793C // ccor 0x49E040. "SPMenuScreen"
+#define CHECKSUM_UI_STATUS_MESSAGE 0x00547A68 // ccor 0x49E7A0, 0x49E9A0.
+#define CHECKSUM_UI_MISSION_SCREEN 0x00547B94 // ccor 0x49EC00.
+
+
 	// Parent class for UI objects (both screens and UI components) = TPanel
 	// Size=0xF4 for this class, but all child classes are larger !
 	// Constructor: 004523F0 for "screen" objects (arg1=name), 00452580 for components (no arg). Destructor=0x4526B0
@@ -49,10 +64,23 @@ namespace AOE_STRUCTURES
 	// +2C = void TPanel::draw_finish(void)
 	// +30 = void TPanel::draw(void)
 	// +34 = void TPanel::draw_rect(struct tagRECT *) ?
+	// +B8 = OnEvent(ptrSender, evtStatus, objId, btnInfoValue) ?? really unsure
 	// +C4 = uiComponent.setFocus(doFocus)
 	// 0x451F20 = struct PanelNode * TPanelSystem::findPanelNode(char *panelName)
 	class STRUCT_ANY_UI {
 	public:
+
+		enum OBJECT_TYPE : char {
+			OT_PANEL_BASE = 0,
+			OT_TEXT_PANEL = 1,
+			OT_UNKNOWN_2 = 2, // 0x5455D4
+			OT_BUTTON = 3,
+			OT_LISTBOX = 4,
+			OT_SCROLLBAR = 5,
+			OT_DROPDOWN = 6,
+			OT_UNKNOWN_7 = 7 // 00545304
+		};
+
 		unsigned long int checksum; // Depends on UI object type
 		STRUCT_ANY_UI *previousPanel; // +04.
 		STRUCT_ANY_UI *previousPopup; // +08. "Previous modal panel".
@@ -128,7 +156,7 @@ namespace AOE_STRUCTURES
 		long int winHelpDataDllId; // +E8. a DllID, used when clicking on help/(object)/details = data for winHelp call.
 		char unknown_0EC; // a "status" for event handling ? 1, 2... 1 for left click, 2 for right-click ??
 		char unknown_0ED; // a "status" for event handling ? 1, 2...
-		char unknown_0EE;
+		OBJECT_TYPE baseObjectType; // +EE. Set in constructors.
 		char unknown_0EF;
 		// 0xF0
 		char unknown_0F0;
@@ -145,6 +173,37 @@ namespace AOE_STRUCTURES
 		}
 	};
 	static_assert(sizeof(STRUCT_ANY_UI) == 0xF4, "STRUCT_ANY_UI size");
+
+
+#define CHECKSUM_UI_PICTURE_PANEL 0x005455D4
+	// Constructor=0x466950. Size=0x11C
+	class STRUCT_UI_PICTURE_PANEL : public STRUCT_ANY_UI {
+	public:
+		unsigned long int unknown_0F4;
+		unsigned long int unknown_0F8;
+		unsigned long int unknown_0FC;
+		long int resInfoId; // +100
+		unsigned long int unknown_104;
+		unsigned long int unknown_108;
+		unsigned long int unknown_10C;
+		unsigned long int unknown_110;
+		unsigned long int *unknown_114; // +114: TPicture
+		unsigned long int *picture; // +118
+		
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_PICTURE_PANEL; }
+	};
+	static_assert(sizeof(STRUCT_UI_PICTURE_PANEL) == 0x11C, "STRUCT_UI_PICTURE_PANEL size");
+
+
+#define CHECKSUM_UI_PANEL_TOOL_BOX 0x00545D50
+	// "PanelToolBox". Constructor=0x473D70. Size=0x120.
+	// Part of scenario editor ?
+	class STRUCT_UI_PANEL_TOOL_BOX : public STRUCT_ANY_UI {
+	public:
+		char unknown_0F4[0x120 - 0xF4];
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_PANEL_TOOL_BOX; }
+	};
+	static_assert(sizeof(STRUCT_UI_PANEL_TOOL_BOX) == 0x120, "STRUCT_UI_PANEL_TOOL_BOX size");
 
 }
 

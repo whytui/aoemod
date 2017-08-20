@@ -38,8 +38,7 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_GRAPHIC_ATTACK_SOUND_INFO) == 0x14, "STRUCT_GRAPHIC_ATTACK_SOUND_INFO size");
 
 
-	// Size = 0x78. Constructor = 0x4A4C40 = graphic.readFromFile(internalFileId, pSoundStruct, pMPInfo?)
-	// "RGE_Sprite"
+	// "RGE_Sprite". Size = 0x78. Constructor = 0x4A4BD0, 0x4A4C40
 	class STRUCT_GRAPHICS {
 	public:
 		char slpName[0x0D];

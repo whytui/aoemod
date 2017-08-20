@@ -13,15 +13,15 @@
 namespace AOE_STRUCTURES
 {
 
-#define CHECKSUM_UI_WELCOME_MAIN_SCREEN 0x005469F8
+#define CHECKSUM_UI_CREDITS_SCREEN 0x00545E84
 
-	// Size = 0x4B8. Constructor = 0x486600. F8 69 54 00
-	// OnKeyDown = 0x486C10
-	class STRUCT_UI_WELCOME_MAIN_SCREEN : public STRUCT_UI_SCREEN_PANEL {
+	// Size = 0x5F8. Constructor = 0x477340
+	class STRUCT_UI_CREDITS_SCREEN : public STRUCT_UI_SCREEN_PANEL {
 	public:
-		// unknown...
-		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_WELCOME_MAIN_SCREEN; }
+		char unknownu_478[0x5F8 - 0x478];
+		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_CREDITS_SCREEN; }
 	};
+	static_assert(sizeof(STRUCT_UI_CREDITS_SCREEN) == 0x5F8, "STRUCT_UI_CREDITS_SCREEN size");
 
 }
 

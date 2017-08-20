@@ -130,6 +130,7 @@
     <ClInclude Include="include\AOE_struct_map_tile_info.h" />
     <ClInclude Include="include\AOE_struct_map_visibility_info.h" />
     <ClInclude Include="include\AOE_struct_mp_communication.h" />
+    <ClInclude Include="include\AOE_struct_path.h" />
     <ClInclude Include="include\AOE_struct_player.h" />
     <ClInclude Include="include\AOE_struct_research_def.h" />
     <ClInclude Include="include\AOE_struct_resource_ai.h" />
@@ -145,7 +146,7 @@
     <ClInclude Include="include\AOE_struct_map_tile_values.h" />
     <ClInclude Include="include\AOE_struct_terrain_def.h" />
     <ClInclude Include="include\AOE_struct_trade_ai.h" />
-    <ClInclude Include="include\AOE_struct_ui_main_info.h" />
+    <ClInclude Include="include\AOE_struct_ui_panel_system.h" />
     <ClInclude Include="include\AOE_struct_units.h" />
     <ClInclude Include="include\AOE_struct_unit_actions.h" />
     <ClInclude Include="include\AOE_struct_unit_activity.h" />
@@ -169,7 +170,9 @@
     <ClInclude Include="include\AOE_struct_export_remote.h" />
     <ClInclude Include="include\TileSetDefinition.h" />
     <ClInclude Include="include\triggerDefinition.h" />
+    <ClInclude Include="include\UI\AOE_struct_ui_achievements_screen.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_campaign_editor.h" />
+    <ClInclude Include="include\UI\AOE_struct_ui_campaign_selection.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_credits_screen.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_dialog_base.h" />
     <ClInclude Include="include\UI\AOE_struct_ui_diamond_map.h" />
@@ -200,6 +203,7 @@
     <ClInclude Include="include\UI_components\AOE_struct_ui_gameColoredInfoLabel.h" />
     <ClInclude Include="include\UI_components\AOE_struct_ui_label.h" />
     <ClInclude Include="include\UI_components\AOE_struct_ui_listbox.h" />
+    <ClInclude Include="include\UI_components\AOE_struct_ui_message_panel.h" />
     <ClInclude Include="include\UI_components\AOE_struct_ui_scrollbar.h" />
     <ClInclude Include="include\UI_components\AOE_struct_ui_textbox.h" />
     <ClInclude Include="include\windowsShortcut.h" />

@@ -17,7 +17,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_SOUND_DRIVER;
 
 
-	// Size = 0x3C?. Constructor=0x4A2BE0 (to confirm). "TDigital"
+	// "TDigital". Size = 0x3C. Constructor=0x4A2BE0.
 	class STRUCT_SOUND_TDIGITAL {
 	public:
 		STRUCT_SOUND_DRIVER *pSoundStruct;
@@ -28,9 +28,9 @@ namespace AOE_STRUCTURES {
 		long int unknown_18;
 		long int lVolume; // +1C
 		// 0x20
-		long int dwFrequency;
+		long int dwFrequency; // +20. pitch?
 		long int lPan;
-		unsigned long int unknown_28;
+		unsigned long int loop; // +28
 		unsigned long int unknown_2C;
 		// 0x30
 		unsigned long int unknown_30;
@@ -40,7 +40,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_SOUND_TDIGITAL) == 0x3C, "STRUCT_SOUND_TDIGITAL Size");
 
 
-	// Size 0x69C. Constructor=0x4A2560. "TSoundDriver"
+	// "TSoundDriver". Size 0x69C. Constructor=0x4A2560.
 	// Init: see 0x418920
 	class STRUCT_SOUND_DRIVER {
 	public:

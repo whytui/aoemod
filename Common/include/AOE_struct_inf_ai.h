@@ -133,7 +133,7 @@ namespace AOE_STRUCTURES {
 		// +110. Total allocated size of detailedSpottedUnitInfoList (the array can contain -many- empty slots with "id=-1")
 		long int detailedSpottedUnitInfoListSize;
 
-		// +114. Contains detailed info about (spotted) units that have a military importance: typically creatable+artefacts + some others
+		// "ObjectMemory". +114. Contains detailed info about (spotted) units that have a military importance: typically creatable+artefacts + some others
 		// Contains all playerCreatable units => 0x4BE140=infAI.isPlayerCreatable(unitClass) : based on a (long) list of AITypes (which is good)
 		// Contains also "units to defend" cf 0x4C1730=infAI.AddUnitToDefend(unitStruct) which adds relic=6F, ruin=158,163, mines+bushes(using AIType)
 		// => Warning: if SNxxxDefendPriority<=0, the unit is NOT added here (same as elementsToDefend list)

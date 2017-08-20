@@ -15,11 +15,11 @@
 namespace AOE_STRUCTURES
 {
 	
-#define CHECKSUM_UI_UNIT_INFO_ZONE 0x00549E7C
-#define CHECKSUM_UI_IN_GAME_UNIT_INFO_ZONE 0x00547CC0
-	// Size=0x214. Constructor=0x4F83D0 = unitInfoZone.constructor(arg1, mainGameUI, arg3, arg4, arg5, iconsForTrainUnit, iconsForBuildings, controlledPlayer)
+#define CHECKSUM_UI_UNIT_INFO_ZONE_PARENT 0x00549E7C // parent, used in-game(?), ccor=0x4F83D0
+#define CHECKSUM_UI_EDITOR_UNIT_INFO_ZONE 0x00547CC0 // ccor=0x4A42A0. "Scenario editor panel object"
+	// "TribePanelObject". Size=0x214. Constructor=0x4F83D0
 	// Methods: 0x4F9970=unitInfoZone.refreshIfNeeded(), 0x4F8740=UnitInfoZone.showInfos(self?, mainGameZone?)
-	class STRUCT_UI_UNIT_INFO_ZONE : public STRUCT_ANY_UI {
+	class STRUCT_UI_UNIT_INFO_ZONE : public STRUCT_ANY_UI { // actually inherits from panelBase
 	public:
 		unsigned long int unknown_0F4; // +F4 : font info. (=fontObj+0)
 		unsigned long int unknown_0F8; // +F8 : font info. (=fontObj+4)
@@ -76,12 +76,10 @@ namespace AOE_STRUCTURES
 		STRUCT_SLP_INFO *unknown_1EC_SLP[9]; // +1EC.
 		long int unknown_210; // +210
 
-		bool IsCheckSumValid() {
-			return
-				(this->checksum == CHECKSUM_UI_UNIT_INFO_ZONE) || (this->checksum == CHECKSUM_UI_IN_GAME_UNIT_INFO_ZONE);
-		}
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UI_UNIT_INFO_ZONE_PARENT) || (this->checksum == CHECKSUM_UI_EDITOR_UNIT_INFO_ZONE); }
 	};
 	static_assert(sizeof(STRUCT_UI_UNIT_INFO_ZONE) == 0x214, "STRUCT_UI_UNIT_INFO_ZONE size");
+
 
 }
 

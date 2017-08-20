@@ -25,7 +25,7 @@ static void _assert_member_offset(void *objPtr, int offset, void *memberPtr, wch
 
 
 // This is too big to be used in stack
-static AOE_STRUCTURES::STRUCT_UNKNOWN_PATH_FINDING umapF04C;
+static AOE_STRUCTURES::STRUCT_PATHING_SYSTEM umapF04C;
 static AOE_STRUCTURES::STRUCT_GAME_MAP_INFO gmapinfo;
 static AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN scEditorUI;
 
@@ -114,7 +114,7 @@ static bool test_ror_structures() {
 	AOE_STRUCTURES::STRUCT_WAYPOINT pstep;
 	assert(sizeof(pstep) == 0x10);
 	trs_assert(&pstep, 0x0C, &pstep.remainingSteps);
-	AOE_STRUCTURES::STRUCT_UNIT_MOVEMENT_INFO movinfo;
+	AOE_STRUCTURES::STRUCT_PATH movinfo;
 	assert(sizeof(movinfo) == 0x34);
 	trs_assert(&movinfo, 0x30, &movinfo.intermediatePositionsCurrentIndex);
 	AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF duc;
@@ -167,10 +167,11 @@ static bool test_ror_structures() {
 	// MAP
 	assert(sizeof(AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_DATA) == 0xF80);
 	assert(sizeof(AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_LINK) == 0x8);
-	assert(sizeof(AOE_STRUCTURES::STRUCT_MAPGEN_ELEVATION_INFO) == 0xFB0);
+	assert(sizeof(AOE_STRUCTURES::STRUCT_RMM_ELEVATION_GENERATOR) == 0xFB0);
 	assert(sizeof(AOE_STRUCTURES::STRUCT_TERRAIN_DEF) == 0x198);
-	trs_assert(&umapF04C, 0xCE624, &umapF04C.unknown_0CE624_mapUnitOccupiedGrid);
-	trs_assert(&umapF04C, 0x10DE28, &umapF04C.unknown_010DE28);
+	trs_assert(&umapF04C, 0xCE624, &umapF04C.unitObstructionMap);
+	trs_assert(&umapF04C, 0x10DE28, &umapF04C.unknown_010DE28_misc);
+	trs_assert(&umapF04C, 0x11DC28, &umapF04C.unknown_11DC28);
 	trs_assert(&umapF04C, 0x11DCE4, &umapF04C.unknown_11DCE4);
 	assert(sizeof(AOE_STRUCTURES::STRUCT_GAME_MAP_TILE_INFO) == 0x18);
 	assert(sizeof(gmapinfo) == 0xB5F8);
@@ -184,9 +185,8 @@ static bool test_ror_structures() {
 	trs_assert(&mbzi, 0x28, &mbzi.unknown_28);
 	assert(sizeof(AOE_STRUCTURES::STRUCT_MAPGEN_PLAYER_BASE_INFO) == 0x34);
 	assert(sizeof(AOE_STRUCTURES::STRUCT_MAPGEN_MAP_TYPE) == 0x48);
-	AOE_STRUCTURES::STRUCT_MAP_GENERATION_INFO obj185D5400;
+	AOE_STRUCTURES::STRUCT_RMM_DB_CONTROLLER obj185D5400;
 	trs_assert(&obj185D5400, 0x1470, &obj185D5400.borderUsagePercentage);
-	assert(sizeof(AOE_STRUCTURES::STRUCT_MAP_GENERATION_INFO) == 0x4F5C);
 
 	// UI
 	AOE_STRUCTURES::STRUCT_ANY_UI anyUI;
