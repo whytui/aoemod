@@ -52,18 +52,18 @@ namespace AOE_STRUCTURES
 		short int unknown_10E; // some value for X
 		unsigned long int unknown_110;
 		short int unknown_114;
-		short int unknown_116;
-		short int unknown_118;
-		short int unknown_11A;
-		short int unknown_11C; //?
+		short int maxGameSizeY; // +116.
+		short int maxGameSizeX; // +118
+		short int centerScreenMousePosX; // +11A
+		short int centerScreenMousePosY; // +11C
 		short int unknown_11E; //?
 		short int unknown_120;
-		short int unknown_122_screenGamePosY_word; // +122. From player.screenPosY
-		short int unknown_124_screenGamePosX_word; // +124. From player.screenPosX
-		short int unknown_126;
-		short int unknown_128;
-		short int unknown_12A;
-		short int unknown_12C;
+		short int centerScreenGamePosY; // +122. From player.screenPosY
+		short int centerScreenGamePosX; // +124. From player.screenPosX
+		short int startScreenMousePosX; // +126
+		short int startScreenMousePosY; // +128
+		short int startScreenGamePosY; // +12A
+		short int startScreenGamePosX; // +12C
 		short int unknown_12E;
 		long int unknown_130_mousePosX; // +130. A relative mouse pos X.
 		long int unknown_134_mousePosY; // +134. A relative mouse pos Y.
@@ -104,6 +104,7 @@ namespace AOE_STRUCTURES
 	// 88 66 54 00 (inline constructor), parent = 40 A8 54 00 (ccor 0x518690)
 	// 0x50F8D0 = gameZone.displayGreenBlinkingUnitReclangle()
 	// 0x50F970 = gamePlayZone.setGreenUnitBlinking(unitId, time_ms, arg3, arg4)
+	// 0x51A650 = gameZone.getUnitFromMousePos(pickMode, maxInteractionMode, mousePosX, mousePosY, ptrPosInfo, lastPickedObj, pickDopples)
 	// +D0 = int RGE_View::do_paint(long,long,long,long,int) ??
 	// +E4 = gameZone.canAlwaysBeSelected(pUnit) : 1 for dock (selectable even under fog)
 	// +E8 = gameZone.getInfoAboutCommand?(pUnit, unitAIType) ? Hardcoded for towers.

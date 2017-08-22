@@ -69,4 +69,7 @@ bool HandleRockNRorInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *setti
 bool AnalyzeEmpiresDatQuality();
 
 
+// A method to do various dirty testing. Does nothing in RELEASE mode.
+void CurrentTestMethod();
+
 }

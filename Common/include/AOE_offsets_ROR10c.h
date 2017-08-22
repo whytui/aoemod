@@ -47,6 +47,7 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGE_DLL = 0x580D8C;
 	static const unsigned long int ADDR_VAR_HINST_LANGUAGEX_DLL = 0x7C0634;
 	static const unsigned long int ADDR_DRS_LINK_FIRST_ELEM = 0x7BFAC4; // type= STRUCT_DRS_FILE_LINK*
+	static const unsigned long int ADDR_LOS_MAP = 0x7C0478; // Type?
 	static const unsigned long int ADDR_STRUCT_TEMP_MAP_BUILD_LIKE_INFOS = 0x7C04A0;
 	static const unsigned long int ADDR_MP_COMM_STRUCT = 0x580DA8;
 	static const unsigned long int ADDR_ELEMCOUNT_TEMP_NEARBY_UNITS_PER_DIPLVALUE = 0x7D2024; // array of 5 ints (elem count in ADDR_ARRAYS_TEMP_NEARBY_UNITS_PER_DIPLVALUE) indexed by PLAYER_DIPLOMACY_VALUES (0-4) "visibleUnitsListSize"
@@ -55,11 +56,6 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_MAP_VISIBILITY_INFO = 0x7D205C; // "unified map offsets"
 	static const unsigned long int ADDR_GAME_ACTIONS_ALLOWED = 0x55873C;
 	static const unsigned long int ADDR_GLOBAL_UNIT_POINTERS_ARRAY = 0x7D2054; // Variable = pointer to array of unit pointers (unit**). Also found in game global structure.
-	static const long int *AOE_CURRENT_OFFSET_IN_FILE_DESERIALIZATION = (long int *)0x7BFAD8; // Pointer to the variable that contains offset of current position in file
-	static const unsigned char **AOE_TEMP_SERIALIZATION_BUFFER = (const unsigned char **)0x7BFADC;
-	static const unsigned char **AOE_CURRENT_POSITION_IN_FILE_DESERIALIZATION = (const unsigned char **)0x7BFAE8; // Pointer to current position in file content buffer
-	static const long int *AOE_CURRENTLY_OPENED_FILE_SIZE = (long int *)0x7BFAEC;
-	static const unsigned char *AOE_CURRENTLY_OPENED_FILE_BUFFER = (const unsigned char*)0x7BFAF0;
 	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0x55BDC8; // Array of 40 mask values for unit interactions (for each AI unit type - "class" in AGE3)
 	static const unsigned long int AOE_VAR_CURSORS_INFO = 0x582EDC; // Pointer to STRUCT_CURSOR_SLP_INFO = TMousePointer
 	static const unsigned long int *AOE_LNK_TIMEGETTIME = (unsigned long int *)0x5423BC;
@@ -75,12 +71,12 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_IO_ENABLE_COMPRESSION = 0x558094;
 	static const unsigned long int ADDR_IO_CURRENT_BUFFER = 0x7BFAD0;
 	static const unsigned long int ADDR_IO_FLAGS = 0x7BFAD4;
-	static const unsigned long int ADDR_IO_POINT = 0x7BFAD8;
-	static const unsigned long int ADDR_IO_COMPRESSION_BUFFER = 0x7BFADC;
+	static const long int *AOE_CURRENT_OFFSET_IN_FILE_DESERIALIZATION = (long int *)0x7BFAD8; // Pointer to the variable that contains offset of current position in file. "Point"
+	static const unsigned char **AOE_TEMP_SERIALIZATION_BUFFER = (const unsigned char **)0x7BFADC; // "compression buffer"
 	static const unsigned long int ADDR_IO_BUFFERS = 0x7BFAE0;
-	static const unsigned long int ADDR_IO_CURRENT = 0x7BFAE8;
-	static const unsigned long int ADDR_IO_FILE_SIZE = 0x7BFAEC;
-	static const unsigned long int ADDR_IO_FILE_BUFFERS = 0x7BFAF0;
+	static const unsigned char **AOE_CURRENT_POSITION_IN_FILE_DESERIALIZATION = (const unsigned char **)0x7BFAE8; // Pointer to current position in file content buffer. "Current"
+	static const long int *AOE_IO_CURRENTLY_OPENED_FILE_SIZE = (long int *)0x7BFAEC;
+	static const unsigned char *AOE_CURRENTLY_OPENED_FILE_BUFFER = (const unsigned char*)0x7BFAF0; // "File buffers" ?
 
 	// Game executable interface procedure address (ROR_API call)
 	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x419574;

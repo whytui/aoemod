@@ -38,12 +38,16 @@ namespace CUSTOM_AI {
 		void OnGaiaAnimalKilled(STRUCT_PLAYER *player, STRUCT_UNIT_ATTACKABLE *killedAnimal);
 
 		// Returns true if unit can be targeted as a resource by AI players
+		// At infAI level, role = "is important resource"
 		static bool IsAITargetableResource(STRUCT_UNIT_BASE *unit);
 
 		// Returns true if unit is a flag/artefact (for AI). Original method=0x4BE200
+		// At infAI level, role = "is important misc"
 		static bool IsArtefactOrFlag(GLOBAL_UNIT_AI_TYPES unitClass);
 
 		// Returns true if unit is one of (artefact OR targetable resource OR creatable unit). For AI.
+		// Original method= 0x4BE100, only depends on unit class.
+		// Game role = "is important object" at infAI level
 		static bool IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit);
 	private:
 		// Remove farmers when more than 1 are assigned to the same farm.

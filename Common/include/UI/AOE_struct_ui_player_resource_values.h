@@ -14,7 +14,7 @@
 namespace AOE_STRUCTURES
 {
 
-	// Size=0x118. Constructor=0x4F7C00 = uiPlayerResValues.constructor(arg1, gameMainUi, font?, controlledPlayer)
+	// "TribePanelInven". Size=0x118. Constructor=0x4F7C00 = uiPlayerResValues.constructor(arg1, gameMainUi, font?, controlledPlayer)
 	// This is a component (parent constructor 0x452580), not a screen.
 #define CHECKSUM_UI_PLAYER_RESOURCE_VALUES 0x00549D98
 	class STRUCT_UI_PLAYER_RESOURCE_VALUES : public STRUCT_ANY_UI {
@@ -30,7 +30,7 @@ namespace AOE_STRUCTURES
 		unsigned long int textColor; // +110. RGB. 4th byte is always 0. Taken as char[4], x[0]=red, x[1]=green, x[2]=blue. 000000=black
 		unsigned long int textShadowColor; // +114. RGB. 4th byte is always 0. Taken as char[4], x[0]=red, x[1]=green, x[2]=blue. 000000=black
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_PLAYER_RESOURCE_VALUES; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_PLAYER_RESOURCE_VALUES; }
 	};
 	static_assert(sizeof(STRUCT_UI_PLAYER_RESOURCE_VALUES) == 0x118, "STRUCT_UI_PLAYER_RESOURCE_VALUES size");
 

@@ -17,7 +17,7 @@ using namespace AOE_CONST_FUNC;
 namespace AOE_STRUCTURES {
 
 
-	// Size =  0x0C
+	// Size=0x0C.
 	class STRUCT_TECH_DEF_EFFECT {
 	public:
 		TECH_DEF_EFFECTS effectType; // 1 byte.
@@ -148,7 +148,7 @@ namespace AOE_STRUCTURES {
 
 #define CHECKSUM_RGE_EFFECT 0x005443BC // Parent class. Constructor=0x43B480(fromFile),0x43B5F0(fromFileName), destructor 0x43B7D0
 #define CHECKSUM_TECH_DEF_INFO 0x00549920 // Child class (tribe)
-	// Size = 0x0C. Constructor=0x4EBAC0 = ccor(internalFileId), parent ccor=0x43B480.
+	// Size=0x0C. Constructor=0x4EBAC0 = ccor(internalFileId), parent ccor=0x43B480.
 	// "RGE_effects" (parent) or "Tribe_Effects"
 	// Container for technology definitions (effects)
 	// +0x08 = techDefInfo.applyTech((word)technologyId, playerStruct), 0x4EBB10 for "tribe" class (child)

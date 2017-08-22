@@ -27,7 +27,7 @@ namespace AOE_STRUCTURES
 
 
 #define CHECKSUM_GAME_COLORED_INFO_LABEL 0x0054A050
-	// "TribePanelTime". Size=0x174. Constructor = 0x4FAC10 timerInfoGameLabel.constructor(arg1=parentUI.unknown_020, gameUIZone)
+	// "TribePanelTime". Size=0x174. Constructor=0x4FAC10 timerInfoGameLabel.constructor(arg1=parentUI.unknown_020, gameUIZone)
 	// Destructor = 0x4FAD30
 	// +0x50: SetPosition(x, y) ?
 	class STRUCT_GAME_COLORED_INFO_LABEL : public STRUCT_ANY_UI {
@@ -35,13 +35,13 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_0F4;
 		unsigned long int unknown_0F8;
 		unsigned long int unknown_0FC;
-		GAME_COLORED_INFO_LABEL_INFO_TYPE currentInformationType; // +100.
+		GAME_COLORED_INFO_LABEL_INFO_TYPE currentInformationType; // +100. "clockType"
 		unsigned long int unknown_104;
 		long int unknown_108; // Values 2 (for info types 1,2), 1 (other)
 		unsigned long int *unknown_10C;
 		unsigned long int unknown_110;
 		STRUCT_GAME_GLOBAL *globalStruct; // +114
-		STRUCT_PLAYER *currentPlayer; // +118. Can be 0 (game time/speed info) or a real player Id (victory timer info)
+		STRUCT_PLAYER *currentPlayer; // +118. Can be gaia (game time/speed info) or a real player (victory timer info)
 		long int lastUpdateTimeGetTimeValue; // +11C
 		long int newTimeInformationValue; // +120. Can represent game time (type2), number of remaining years (types 4, 5,6)
 		long int previousTimeInformationValue; // +124. Can represent game time (type2), number of remaining years (types 4, 5,6)

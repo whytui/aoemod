@@ -11,7 +11,7 @@
 namespace AOE_STRUCTURES
 {
 
-	// Size = 0xB0. Added (created) in 4FC5A0.
+	// Size=0xB0. Added (created) in 4FC5A0.
 	// Represents population info at one precise given moment of the game. (used to draw timeline graphic)
 	// Referenced by timelineUI+518 (last elem?)
 	class STRUCT_TIMELINE_COLUMN_INFO {

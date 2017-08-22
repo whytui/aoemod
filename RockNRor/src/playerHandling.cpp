@@ -41,7 +41,7 @@ bool SelectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UN
 // Warning: May return NULL.
 AOE_STRUCTURES::STRUCT_SCORE_ELEM *FindScoreElement(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_FUNC::SCORE_CATEGORIES category, AOE_CONST_FUNC::RESOURCE_TYPES resourceId) {
 	if (!player) { return NULL; }
-	AOE_STRUCTURES::STRUCT_SCORE_HEADER *header = player->ptrScoreInformation;
+	AOE_STRUCTURES::STRUCT_VICTORY_CONDITIONS *header = player->ptrVictoryConditions;
 	assert(header != NULL); // Should never happen (or maybe for gaia?)
 	if (!header) { return NULL; }
 	assert(header->IsCheckSumValid());

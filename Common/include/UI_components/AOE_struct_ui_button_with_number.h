@@ -14,7 +14,7 @@
 namespace AOE_STRUCTURES
 {
 
-	// Size 0x3D4. Constructor=0x4F7420
+	// "TribePanelButton". Size 0x3D4. Constructor=0x4F7420
 	class STRUCT_UI_BUTTON_WITH_NUMBER : public STRUCT_UI_BUTTON {
 	public:
 		// Starts at +2B8
@@ -28,9 +28,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_2CC;
 		char contextHelpText[0x100]; // +2D0.
 		long int unknown_3D0; // see 483785
-		bool IsCheckSumValid() {
-			return (this->checksum == CHECKSUM_UI_BUTTON_WITH_NUMBER);
-		}
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UI_BUTTON_WITH_NUMBER); }
 	};
 	static_assert(sizeof(STRUCT_UI_BUTTON_WITH_NUMBER) == 0x3D4, "STRUCT_UI_BUTTON_WITH_NUMBER size");
 

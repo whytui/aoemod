@@ -49,12 +49,12 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_UNIT_MEMORY) == 0x24, "STRUCT_UNIT_MEMORY size");
 
 
-	// Size = 0x08. Used in InfAI+1F8 array.
+	// "Lot". Size = 0x08. Used in InfAI+1F8 array.
 	// Elements are never reset when a building is destroyed ?
 	// Exact role ? When trying to build a deposit bld, it is used to check there is not another one of same kind in same zone.
 	// BUG ? status is not checked (and not up to date) when doing this !
 	// Methods: 0x4C3300: infAI.addOrUpdateBldHistory(unitDefId, posY, posX, status)
-	// 0x4C34C0: infAI.array1F8_setStatus(unitDefId, posY, posX, status)
+	// 0x4C34C0: infAI.bldHistory_setStatus(unitDefId, posY, posX, status). "removeLot"
 	// 0x4C3550: infAI.getAddrOfUnusedElemIn1F8List(DAT_ID)
 	// 0x4C3590: infAI.hasBuildingIn1F8(DAT_ID, pos, pos, allowedDistance). This is bugged in standard game because status always remains=1, even if building no longer exists! This may prevent some constructions from being started
 	class STRUCT_INF_AI_BUILDS_HISTORY {
@@ -74,19 +74,19 @@ namespace AOE_STRUCTURES {
 	class STRUCT_INF_AI_ATTACK_HISTORY {
 	public:
 		long int myIndex; // Index in InfaAI array ?
-		char unknown_04;
+		char attackType; // +04.
 		unsigned char minPosY; // +05
 		unsigned char minPosX; // +06
 		unsigned char maxPosY; // +07
 		unsigned char maxPosX; // +08
 		char attackerPlayerId; // +09. Records both my attacks and me being attacked.
 		char targetPlayerId; // +0A. Records both my attacks and me being attacked.
-		char unknown_0B;
-		short int unknown_0C;
-		char unknown_0E;
-		char unknown_0F;
+		char unknown_0B; // +0B. Unused ?
+		short int killsCount; // +0C.
+		char attackSuccess; // +0E. From which point of view ?
+		char unknown_0F; // +0F. Unused ?
 		long int attackGameTime;
-		long int unknown_14;
+		long int play; // +14. "attack play" used for the attack ?
 	};
 	static_assert(sizeof(STRUCT_INF_AI_ATTACK_HISTORY) == 0x18, "STRUCT_INF_AI_ATTACK_HISTORY size");
 
@@ -100,7 +100,7 @@ namespace AOE_STRUCTURES {
 		char unknown_06; // default=0 ?
 		char unknown_07;
 		long int estimatedTotalTripWeight; // +8. round trip estimated (square) distance, including an arbitrary +10 value for detour (formula = distance*2 +10)
-		char unknown_0C; // default=0 ?
+		char valid; // +C. default=0. Set in 0x4C5560.
 		char unknown_0D; // default=0 ?
 		char distanceToStorageBuilding; // +E. Actual direct distance between resource unit and its closest storage building.
 		char resourceType; // +F. Always 0-3 (food wood stone gold).
@@ -111,7 +111,7 @@ namespace AOE_STRUCTURES {
 
 #define CHECKSUM_INF_AI 0x00548B74
 
-	// size 0x10090 - constructor=0x4BA1C0. Offset is AI+0xCEC
+	// "TribeInformationAIModule". size 0x10090 - constructor=0x4BA1C0. Offset is AI+0xCEC
 	// Checksums : 74 8B 54 00, parents=04 2C 54 00, 74 2B 54 00
 	// 0x4C1AC0 = infAI.searchTradeTarget?(actorUnitId)
 	// +0x00 = infAI.destructor(do_free)
@@ -169,14 +169,14 @@ namespace AOE_STRUCTURES {
 		long int attacksHistoryAllocatedSize; // +1FC. Element count in attacksHistory array. Init=25
 		// 0x200
 		STRUCT_INF_AI_ATTACK_HISTORY *attacksHistory; // +200. Element size = 0x18
-		long int unknown_204;
+		long int doSaveLearnInfo; // +204. Save collected info into learn file
 		char unknown_208[0x100]; // +208. Unused, not even initialized ?
 		char terrainZoneFullyExplored[0xFF]; // +308. Index=terrainZoneId. Get=4BC690 Set=4BC6E0. Zone fully explored? Not sure this works well as terrainZone IDs depend on terrain restrictions ! (not the same for all units)
 		char unused_407; // +407.
 		// +408: included array of 4*4 elems size=0xC (3 dwords?). Total size in bytes=0xC0. Index corresponds to each quarter of the map ?? Represents number of explored tiles by map zone ?
 		long int unknown_408[4 * 4 * 3];
-		unsigned long int *unknown_4C8; // +4C8. Pointer to struct size=0x10. Array of 4 dwords.
-		unsigned long int *unknown_4CC; // +4CC. Pointer to struct size=0x10. Array of 4 dwords.
+		long int *resourceTypesUnitDefIdArrays; // +4C8. Pointer to struct size=0x10. Array of 4 dwords(index=resourceType0-3). Each value=a unitDefId to gather for given resource id.
+		long int *resourceTypesArraySizes; // +4CC. Pointer to struct size=0x10. Array of 4 dwords: index=resourceType0-3.
 		// 0x4D0 : spotted resource lists : insert in 0x4C49C0=infAI.addGatherableInUnitList(unit). Also update bestXxxUnitId/distance
 		STRUCT_SPOTTED_RESOURCE_INFO *spottedGatherableUnitsByResourceTypeArrays[4]; // +4D0. Stores explored resources, their position and (closest) storage building. Eg 0x4BC7B0. Add=0x4C49C0.
 		long int spottedGatherableUnitsCountByResourceType[4]; // +4E0. Number of elements in +4D0+i array ? (i=resource type). Related to +540, +550
@@ -195,7 +195,7 @@ namespace AOE_STRUCTURES {
 		long int bestStoneUnitId; // +558. closest target unitId for stone
 		long int bestGoldUnitId; // +55C. closest target unitId for gold
 		long int foundForestTiles; // +560. Used at game start to know when storage pit construction can be triggered ?
-		char unknown_564[0xFF64 - 0x564];
+		char unknown_564[0xFF64 - 0x564]; // +564: used for "play" attack?
 		long int humanPlayer_militaryUnitCountByType[AOE_CONST_INTERNAL::INTERNAL_MILITARY_UNIT_TYPES::CST_IMUT_COUNT]; // 0xFF64 - used only if TrackHumanHistory is ON
 		char learnUHFileName[0x100]; // +0xFF90. Name of xxx.uh file. Not sure this is really used.
 		// 0x10090: end

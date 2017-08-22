@@ -164,10 +164,11 @@ namespace AOE_STRUCTURES {
 		unsigned short int unknown_062;
 		STRUCT_COLOR_DEF **colorsTable; // +64. Color table. The table size in bytes is colorCount*4. Each DWORD is a pointer to color definition;
 		long int seqUnitId; // +68. Sequence for unit instance IDs (for creatable only ?). *Next* object ID.
-		unsigned long int unknown_06C_unitIdSeqForTempUnits; // Unsure
+		long int unitIdSeqForTempUnits; // +6C. Used for "negative" units.
 		// +0x70
 		long int forcedNextUnitId; // Unsure. Forced when loading a scenario.
-		long int forceUseSpecifiedUnitId; // +74. If set (temporarily), use "+70" as next unitInstanceId instead of reading sequence.
+		char forceUseSpecifiedUnitId; // +74. If set (temporarily), use "+70" as next unitInstanceId instead of reading sequence.
+		char unknown_75[3]; // +75. unused ?
 		unsigned long int unknown_078; // random value for seed ?
 		short int humanPlayerId; // +7C. PlayerId that is human controlled (controlledPlayerId)
 		short int unknown_07E;
@@ -175,20 +176,20 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_080; // list of unit data??
 		float timerInterval; // +84. Unit is *half* a "game year" (like the 2000 years for wonder victory) ?
 		STRUCT_UNIT_BASE **ptrUnitPointersList; // +88. pointer to Array of unit struct pointers. Similar to 0x7D2054 global variable.
-		unsigned long int unknown_08C;
+		long int numberObjects; // +8C
 		// +0x90
-		long int unitPointersListSize; // Size (elem count) of the ptrUnitPointersList Array
-		unsigned long int *unknown_094; // +94. array of DWORDS. Temporary units array (units with negative IDs) ?
-		unsigned long int unknown_098;
-		long int unknown_094_ListSize; // Size of x+0x94 array. Default=1000.
+		long int unitPointersListSize; // Size (elem count) of the ptrUnitPointersList Array. "MaxNumberObjects"
+		STRUCT_UNIT_BASE **negativeUnitPointersList; // +94. array of DWORDS. Temporary units array (units with negative IDs) ?
+		long int numberNegativeObjects; // +98
+		long int negativeUnitPointersListSize; // +9C. Size of x+0x94 array. Default=1000. "MaxNumberNegativeObjects".
 		// +0xA0
 		unsigned long int unknown_0A0; // A0: related to aoe.ply ?
 		long int currentCampaignIndex; // +A4. Identifies the campaign being played. Values are 0-(n-1), but serialized to file as a "1-(n-1)" value ? With a bug handling "-1" in 0051CC92.
 		long int currentCampaignUserIndex; // +A8. Identifies the campaign user ("account")
 		long int currentCampaignScenarioIndex; // +AC. Identifies the scenario index in campaign being played
 		// +0xB0
-		unsigned long int unknown_0B0_playerId; // currently managed playerid?
-		unsigned long int unknownPlayerVar[0x09]; // 9 variables for each player, including gaia
+		unsigned long int currentlyHandledPlayerId; // +B0. currently managed playerid. Cf 0x51DD10.
+		unsigned long int accumulatedTimeDelta[0x09]; // +B4. 9 variables for each player, including gaia (really unsigned int)
 		// +0xD8. "unused cached units" = "removed" units that were not freed (so that memory is reused). Typically for flares, dead units.
 		STRUCT_OBJECT_LIST *unusedCachedUnits_type10; // +D8. Allocated but unused units for unit type = eye candy
 		STRUCT_OBJECT_LIST *unusedCachedUnits_type20; // +DC. Allocated but unused units for unit type = flag

@@ -22,8 +22,8 @@ namespace AOE_STRUCTURES {
 		unsigned long int checksum;
 		STRUCT_COMMON_AI_OBJECT commonAIObject; // size 0xEC - id=1007
 		// 0xF0
-		STRUCT_AI *ptrMainAI;
-		unsigned long int resourceTypeCount; // = 4
+		STRUCT_AI *ptrMainAI; // +F0
+		unsigned long int resourceTypeCount; // +F4. always 4
 	};
 	static_assert(sizeof(STRUCT_RESOURCE_AI) == 0xF8, "STRUCT_RESOURCE_AI size");
 

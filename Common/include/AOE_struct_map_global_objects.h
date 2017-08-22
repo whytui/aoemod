@@ -35,11 +35,12 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_VISIBLE_UNIT_INFO_SET) == 8, "STRUCT_VISIBLE_UNIT_INFO_SET size");
 
 
-	// Referenced in global variable 0x7D2058 and also from STRUCT_GAME_MAP_INFO+8DCC
+	// "VisibleUnitManager". Referenced in global variable 0x7D2058 and also from STRUCT_GAME_MAP_INFO+8DCC
 	// Size = 0x24. Constructor = 0x516800 = [7D2058].constructor(totalPlayerCount, maxAITypeIndex)
 	// Supplies an up-to-date list of visible units for each player perspective (separated by unit AI type)
 	// Contains arrays used to store temporary results for specific searches
 	// Warning: search results are limited to 255 results and to a distance of 15 (0xF).
+	// 0x516C10=INT Visible_Unit_Manager::GetVisibleUnits(Xpos,Ypos,LOS,player,DesiredTypes,DesiredCount,PlayerListMap)
 	class STRUCT_VISIBLE_UNITS_HELPER {
 	public:
 		// 0x516A50 = visibleUnitsHelper.updateUnitVisibilityForAllPlayers(unitId, ownerPlayerId, posY, posX, unitAIType, oldVisibMask, newVisibMask, myVisibilityInfoPtr)
@@ -160,7 +161,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_PATHING_SYSTEM) == 0x11DCF8, "STRUCT_PATHING_SYSTEM size (incomplete)");
 
 
-	// Size = 0x51C. Constructor = 0x521060 (gameMapInfo, terrainRestrictionValues, layer)
+	// "RGEZoneMap". Size = 0x51C. Constructor=0x520F60,0x521060
 	// Contains information about terrain zones, for a specific set of terrain restriction accessibility
 	// The map terrain zones repartition depends on terrain restriction sets (ex: shallows can split 2 islands from lion/gazelle perspective (terrRest=1), but not for a villager (terrRest=7))
 	// What identifies this object is 1) number of terrain per restriction
@@ -213,7 +214,7 @@ namespace AOE_STRUCTURES {
 	};
 
 
-	// Size = 0x0C. Constructor = 0x5219C0. "RGE_Zone_Map_List"
+	// "RGE_Zone_Map_List". Size = 0x0C. Constructor = 0x5219C0.
 	// Provides the terrain zones info for each set of "terrain restriction accessibility values" (taken as bool).
 	// An entry in ptrTerrainZoneInfoArray is identified by 1) number of terrains (in terrain restriction values array)
 	// and 2) set of "bool" accessibility values in terrain restriction array.

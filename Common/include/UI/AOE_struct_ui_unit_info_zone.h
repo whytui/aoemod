@@ -32,7 +32,7 @@ namespace AOE_STRUCTURES
 		STRUCT_UNIT_BASE *currentUnit; // +114
 		long int unknown_118;
 		long int unknown_11C; // Init = 0x1F4.
-		char unknown_120; // +120. 0,1, 2 (enum ?)
+		char mode; // +120. 0,1, 2 (enum ?)
 		char unknown_121[3]; // unused?
 		STRUCT_UNITDEF_BASE *currentUnitDef; // +124. Unit definition of selected unit
 		unsigned long int unknown_128;

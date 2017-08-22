@@ -30,7 +30,7 @@ namespace AOE_STRUCTURES {
 	// +0x00 = destructor(do_free)
 	// +0x08 = save?
 	// +0x18 = AI.startAIHistoryFile(arg1)
-	// +0x30 = update(arg1)
+	// +0x30 = update(timeLimit) : 0x4C71A0
 	// +0x48 = mainAI.getUnitClassFromTaskId(taskId), for tasks 25A 25D 261 265 26B 26C only
 	class STRUCT_AI {
 	public:

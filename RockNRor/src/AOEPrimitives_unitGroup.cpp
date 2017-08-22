@@ -23,12 +23,12 @@ STRUCT_UNIT_GROUP *CreateUnitGroup(STRUCT_AI *mainAI, AOE_CONST_INTERNAL::UNIT_G
 	unitGroup->unitGroupType = groupType;
 	AddUnitToGroup(unitGroup, mainAI, leader->unitInstanceId);
 	SetNewGroupLeader(unitGroup, mainAI, leader->unitInstanceId);
-	unitGroup->posX = leader->positionX;
-	unitGroup->posY = leader->positionY;
-	unitGroup->posZ = leader->positionZ;
-	unitGroup->unknown_174_posX = leader->positionX;
-	unitGroup->unknown_170_posY = leader->positionY;
-	unitGroup->unknown_178_posZ = leader->positionZ;
+	unitGroup->regroupPosX = leader->positionX;
+	unitGroup->regroupPosY = leader->positionY;
+	unitGroup->regroupPosZ = leader->positionZ;
+	unitGroup->currentPosX = leader->positionX;
+	unitGroup->currentPosY = leader->positionY;
+	unitGroup->currentPosZ = leader->positionZ;
 	unitGroup->retreatPosX = leader->positionX;
 	unitGroup->retreatPosY = leader->positionY;
 	unitGroup->retreatPosZ = leader->positionZ;

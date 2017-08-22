@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <AOE_empires_dat.h>
 #include <AOE_const_internal.h>
+#include <AOE_struct_map_base_common.h>
 
 
 /*
@@ -18,7 +19,7 @@ namespace AOE_STRUCTURES {
 	const long int STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT = 40; // 0x28
 	const long int STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT = 20;
 
-	// Size = 0x330. Constructor()=0x4CC630
+	// "TacticalAIGroup". Size = 0x330. Constructor()=0x4CC630
 	// tacAI.createGroup(useSequence)=0x4E0400 ; tacAI.removeUnitGroup(unitGroupId)=0x4E04B0
 	// tacAI.RemoveAllGroups(unitGroupType)=0x4E0520, -1=joker
 	// Organized as a loop chained list. See TacAI (first elem is included in TacAI).
@@ -32,7 +33,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_GROUP *previous;
 		long int unitGroupId; // A unique ID. Set in 0x4CCC50.
 		// 0x10
-		long int isTasked; // +10. Set to 0 when task changes or when idle, 1 when "init" for task has been done ??
+		long int isTasked; // +10. Set to 0 when task changes or when idle, 1 when "init" for task has been done. "inUse".
 		AOE_CONST_INTERNAL::UNIT_GROUP_TYPES unitGroupType; // +14. Set in 0x4CCC70.
 		long int taskSubTypeId; // +18. -1=default. 0,4 = capture?
 		long int myUnitsIdArray[STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT]; // +1C. 40 elements, can be non-consecutive (ignore -1 values).
@@ -44,53 +45,49 @@ namespace AOE_STRUCTURES {
 		long int commanderUnitId; // +164. group leader
 		long int initialTotalGroupHP; // +168. Total group HP when task was started (used to calculate percent health retreat, etc ?)
 		long int initialUnitCount; // +16C.  Total group unit count when task was started (set when resetOrg=1)
-		// 0x170
-		float unknown_170_posY;
-		float unknown_174_posX;
-		float unknown_178_posZ;
+		float currentPosY; // +170. Set in 0x4CD0D0. "Location".
+		float currentPosX; // +174
+		float currentPosZ;
 		long int unknown_17C; // +17C. Seen -1.
-		// 0x180
-		AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS currentTask; // TaskId, see 4CD339. Values in 0-0x15
+		AOE_CONST_INTERNAL::UNIT_GROUP_TASK_IDS currentTask; // +180. TaskId, see 4CD339. Values in 0-0x15. "action".
 		long int targetUnitId; // +184. including defended unit case ?
 		long int targetDAT_ID; // +188. unitDefId of target unit.
-		float targetPosY;
-		// 0x190
-		float targetPosX;
+		float targetPosY; // +18C
+		float targetPosX; // +190
 		float targetPosZ;
 		unsigned long int unknown_198; // seems int. DWORD?
-		float posY; // +19C. not sure what this is exactly, NOT group "supposed" position ? Leader pos ? Used for "regroup" task.
-		float posX; // +1A0.
-		float posZ; // +1A4.
+		float regroupPosY; // +19C. Used for "regroup" task.
+		float regroupPosX; // +1A0.
+		float regroupPosZ; // +1A4.
 		long int unknown_1A8;
-		float retreatPosY; // +1AC. 0x4CD65E. Only for retreat ?
-		// 0x1B0
-		float retreatPosX;
+		float retreatPosY; // +1AC. 0x4CD65E. Only for retreat.
+		float retreatPosX; // +1B0
 		float retreatPosZ;
 		float unknown_1B8; // type: unsure
-		float unknown_1BC; // type: unsure
-		// 0x1C0
-		long int unknown_1C0;
-		long int transportUnitGroupId; // +1C4. Unit group ID of the transport that does transport "me".
-		long int unknown_1C8; // +1C8. Some int value (seen -1)
-		long int lastTaskingTime_ms; // +1CC. Last game time of "task active soldier" execution for the group ? Compared to SNTacticalUpdateFrequency (default 3 seconds)
+		float priority; // +1BC. Type: unsure
+		long int waitCode; // +1C0
+		long int assistGroupId; // +1C4. Group I need to help ? Unit group ID of the transport that does transport "me" ?
+		long int assistGroupType; // +1C8. Some int value (seen -1)
+		long int consecutiveIdleUnitCount; // +1CC. Last game time of "task active soldier" execution for the group ? Compared to SNTacticalUpdateFrequency (default 3 seconds). old wrong:"lastTaskingTime_ms"
 		// 0x1D0
 		long int attackPlayId; // attackId that is being played. -1=Non-Play-based attack
-		char unknown_1D4; // +1D4. Number of elements in +1D8 ?
-		char unknown_1D5;
+		char numberAttackwaypoints; // +1D4. Number of elements in +1D8 ? Max 0xE ?
+		char currentAttackWaypoint; // +1D5.
 		short int unknown_1D6; // check type (2 bytes ?)
-		float *unknown_1D8; // +1D8. Array of struct size=0x10, +0/+4=float pos? INCLUDED array ? Related to attacking ? Intermediate movement steps to go to target ?
-		char unknown_1DC[0x2C8 - 0x1DC];
+		STRUCT_WAYPOINT attackWaypoints[0x0E]; // +1D8. INCLUDED array. Intermediate movement steps to go to target ?
+		char unknown_2B8[0x2C8 - 0x2B8];
 		char consecutiveRegroupAttempts; // +2C8. INC on each regroup(9,0xE), reset on all other tasking. When reaches 10, the group is considered regrouped ? 0x4CD42F, 0x4D37B4
 		char unknown_2C9;
 		char unknown_2CA; // ?
 		char unknown_2CB; // ?
 		long int targetUnitIdArrayUsedElemCount; // +2CC. Index of first UNused element in targetUnitIdArray (=> values 0-19). See 0x4CEBB6
-		long int targetUnitIdArray[STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT]; // +2D0. Array of unitIDs. Total size 0x50 bytes (0x14*4). Get=0x4CEB90
+		long int targetUnitIdArray[STRUCT_UNIT_GROUP_TARGET_SLOTS_COUNT]; // +2D0. "ObjectsToDestroy". Array of unitIDs. Total size 0x50 bytes (0x14*4). Get=0x4CEB90
 		long int targetPlayerId; // +320. Related to targetUnitIdArray unit's playerId (last inserted? All the same player?)
 		long int terrainZoneId; // +324. TerrainZoneId (to identify the island/lake/sea the group is in)
 		long int lastAttackTaskingTime_ms; // Last ATTACK (2,0x14,0x15) tasking time (milliseconds). Attack roundup (0x14) require to wait 10 seconds (0x4CDAFC).
 		unsigned long int unknown_gameTime_ms; // +0x32C. To confirm
 		// End (0x330)
+
 		bool IsCheckSumValid() const { return this->checksum == 0x00548CE0; }
 		// Safely get a unit id from targets array. Limited to 20 slots !
 		long int GetTargetUnitIdFromArray(long int index) const {
@@ -124,6 +121,7 @@ namespace AOE_STRUCTURES {
 			return this->myUnitsHPArray[index];
 		}
 	};
+	static_assert(sizeof(STRUCT_UNIT_GROUP) == 0x330, "STRUCT_UNIT_GROUP size");
 
 
 }

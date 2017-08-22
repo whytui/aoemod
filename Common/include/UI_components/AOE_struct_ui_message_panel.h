@@ -17,10 +17,11 @@ namespace AOE_STRUCTURES
 
 	// Message panel (=>ingame chat message...). Size=0x380
 	// Constructor=0x465730
+	// old name=STRUCT_UI_IN_GAME_TEXT_ZONE. Class for chat text lines (1 for each chat line), yellow/orange centered in-game error messages
 	class STRUCT_UI_MESSAGE_PANEL : public STRUCT_ANY_UI {
 	public:
 		unsigned long int unknown_0F4;
-		char unknown_0F8[0x304 - 0xF4];
+		char unknown_0F8[0x304 - 0xF4]; // F8: text?
 		long int font; // +304
 		long int fontWidth;
 		long int fontHeight; // +30C

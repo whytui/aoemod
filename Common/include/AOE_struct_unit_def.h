@@ -89,7 +89,7 @@ namespace AOE_STRUCTURES
 
 
 
-	// Size = 0x0C (for both parent/child classes). Constructor=0x4E7AB0 (no parameter).
+	// "TaskList". Size = 0x0C (for both parent/child classes). Constructor=0x4E7AB0 (no parameter).
 	// Parent class checksum=E4 98 54 00, for birds/type50/projectiles
 	// Child class checksum=AC 99 54 00 for living/building
 	// 0x4E7B60=unitCommandHeader.readFromFile(fileId, arg2, arg3)
@@ -399,7 +399,8 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_UNITDEF_PROJECTILE) == 0x154, "STRUCT_UNITDEF_PROJECTILE size");
 
 
-	// 70 99 54 00 = Trainable (type70 - living in AGE3) - size=0x164. Constructor = 0x4ECA90. Max method=+0x38. "TribeMasterCombatObject"
+	// "TribeMasterCombatObject". 70 99 54 00 = Trainable (type70 - living in AGE3)
+	// Size=0x164. Constructor = 0x4ECA90. Max method=+0x38.
 	class STRUCT_UNITDEF_TRAINABLE : public STRUCT_UNITDEF_ATTACKABLE {
 	public:
 		STRUCT_COST costs[3]; // +148, 3*6 bytes (3 words each)

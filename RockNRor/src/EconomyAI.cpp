@@ -149,6 +149,7 @@ void EconomyAI::OnGaiaAnimalKilled(STRUCT_PLAYER *player, STRUCT_UNIT_ATTACKABLE
 
 
 // Returns true if unit can be targeted as a resource by AI players
+// At infAI level, role = "is important resource"
 bool EconomyAI::IsAITargetableResource(STRUCT_UNIT_BASE *unit) {
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->unitDefinition || !unit->unitDefinition->IsCheckSumValidForAUnitClass()) { return false; }
 	GLOBAL_UNIT_AI_TYPES unitClass = unit->unitDefinition->unitAIType;
@@ -201,6 +202,7 @@ bool EconomyAI::IsAITargetableResource(STRUCT_UNIT_BASE *unit) {
 
 
 // Returns true if unit is a flag/artefact (for AI). Original method=0x4BE200
+// At infAI level, role = "is important misc"
 bool EconomyAI::IsArtefactOrFlag(GLOBAL_UNIT_AI_TYPES unitClass) {
 	return (unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupArtefact) ||
 		(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupFlag);
@@ -209,6 +211,7 @@ bool EconomyAI::IsArtefactOrFlag(GLOBAL_UNIT_AI_TYPES unitClass) {
 
 // Returns true if unit is one of (artefact OR targetable resource OR creatable unit). For AI.
 // Original method= 0x4BE100, only depends on unit class.
+// Game role = "is important object" at infAI level
 bool EconomyAI::IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit) {
 	long int rorBool = 0;
 	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return false; }

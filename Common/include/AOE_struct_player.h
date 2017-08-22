@@ -124,6 +124,7 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_PLAYER_NEW_EXPLORED_TILES) == 0x14, "Size of STRUCT_PLAYER_NEW_EXPLORED_TILES");
 
 
+	// TO DO: special history event type: 0=tool age, 1=bronze?, 2=iron age, 3=show_game_time
 	// "TribeHistoryInfo". Size=0x14 - Constructor = 0x4B09F0
 	class STRUCT_PLAYER_POP_HIST_INFO {
 	public:
@@ -154,7 +155,7 @@ namespace AOE_STRUCTURES {
 
 #define CHECKSUM_RGE_PLAYER 0x00544D18 // Base class. Size=0x224 cf 0x51CF39?
 #define CHECKSUM_PLAYER 0x00549A44 // Normal player (non-gaia)
-#define CHECKSUM_GAIA_PLAYER 0x00549B80
+#define CHECKSUM_GAIA_PLAYER 0x00549B80 // ccor=0x4F71C0
 	// PLAYER. Constructor=0x4EFB00. RGE_Player ccor=0x45B410, 0x45B6A0
 	// Standard player struct sizes are 0x85C (gaia) or 0x84C (non-gaia).
 	// If selected units features is installed, size is increased to host selected unit pointers at the end of the structure.
@@ -219,7 +220,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_OBJECT_LIST *ptrNonCreatableUnitsListLink; // Others than building/living ?
 		// 0x30
 		STRUCT_OBJECT_LIST *ptrTempUnitsListLink; // ptr to list of temporary units (with <0 id)
-		STRUCT_SCORE_HEADER *ptrScoreInformation; // +34. 
+		STRUCT_VICTORY_CONDITIONS *ptrVictoryConditions; // +34.
 		STRUCT_PLAYER_MAP_INFO *myMapInfo;
 		STRUCT_GAME_GLOBAL *ptrGlobalStruct;
 		// 0x40

@@ -212,9 +212,9 @@ namespace AOE_STRUCTURES {
 		res += " totalGroupHP=";
 		res += std::to_string(obj->initialTotalGroupHP);
 		res += "\n\tposX=";
-		res += std::to_string(obj->posX);
+		res += std::to_string(obj->currentPosX);
 		res += " posY=";
-		res += std::to_string(obj->posY);
+		res += std::to_string(obj->currentPosY);
 		res += " - retreatPosX=";
 		res += std::to_string(obj->retreatPosX);
 		res += " retreatPosY=";
@@ -240,9 +240,9 @@ namespace AOE_STRUCTURES {
 		res += " unknown_1B8=";
 		res += std::to_string(obj->unknown_1B8);
 		res += " unknown_1BC=";
-		res += std::to_string(obj->unknown_1BC);
-		res += " lastTaskTime_ms=";
-		res += std::to_string(obj->lastTaskingTime_ms);
+		res += std::to_string(obj->priority);
+		res += " consecutiveIdleUnitCount=";
+		res += std::to_string(obj->consecutiveIdleUnitCount);
 		return res;
 	}
 

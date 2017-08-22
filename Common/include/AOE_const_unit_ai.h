@@ -42,6 +42,7 @@ namespace AOE_CONST_INTERNAL
 	};
 
 	// Represents explicit orders given to units (unitAI).
+	// The villager-retryable orders are 2C1,2C5,2C9 (explore, gather)
 	enum UNIT_AI_ORDER : long int {
 		CST_ORDER_NONE = -1, // Used a lot in game code
 		// Starts at 700 (0x2BC)
@@ -72,7 +73,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ORDER_UNKNOWN_2D6 = 0x2D6, // ? see 0x4133DC
 		CST_ORDER_UNKNOWN_2D7_AI_PLAY = 0x2D7, // ? see 0x4134F8. "Play" (from AI playbook)
 		CST_ORDER_UNKNOWN_2D8 = 0x2D8, // ? see 0x4136E2. Related to task 0x274
-		CST_ORDER_UNKNOWN_2D9_POP_TARGET = 0x2D9 // Similar to attack(2BC). "pop" a target from array ? Used for "attack roundup target" only, cf 0x4DBEF1.
+		CST_ORDER_UNKNOWN_2D9_POP_TARGET = 0x2D9 // Similar to attack(2BC). "pop" a target from array ? Used for "attack roundup target" only, cf 0x4DBEF1. related to "idleAttackRoundup"?
 		// 0x2D9 seems to be the last one
 	};
 

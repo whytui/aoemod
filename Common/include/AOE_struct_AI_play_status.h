@@ -120,7 +120,8 @@ namespace AOE_STRUCTURES
 
 
 #define CHECKSUM_AI_PLAYBOOK 0x00542C40
-	// Constructor=0x40D7D0
+#define CHECKSUM_AI_PLAYBOOK_CHILD 0x00548C48
+	// Constructor=0x40D7D0(parent), 0x4C88C0("tribe"=child). Size=0x50 for both classes.
 	// Load from file=0x40D840 (aoe.ply !)
 	// "types": 1=Any (only type)
 	// target characteristics: Stationary=1, Moving=2, Slow=3, Fast=4, Any=5
@@ -131,7 +132,7 @@ namespace AOE_STRUCTURES
 		char unknown_08[0x4C - 0x08];
 		unsigned long int *unknown_4C;
 
-		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_AI_PLAYBOOK; }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_AI_PLAYBOOK) || (this->checksum == CHECKSUM_AI_PLAYBOOK_CHILD); }
 	};
 	static_assert(sizeof(STRUCT_AI_PLAYBOOK) == 0x50, "STRUCT_AI_PLAYBOOK size");
 

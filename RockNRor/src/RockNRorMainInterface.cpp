@@ -182,6 +182,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 #ifdef _DEBUG
 	// TEST - F7 - debug only
 	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F7)) {
+		CR_DEBUG::CurrentTestMethod();
 #ifdef GAMEVERSION_ROR10c
 		unsigned long int *marray = (unsigned long int *)AOE_OFFSETS::UNKNOWN_ARRAY_6A18C0;
 #endif
@@ -314,10 +315,10 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 					//ai->structTacAI.plannedResourceNeeds.resourceAmount[0];
 					sprintf_s(posInBuf, 200, "Player %i:\nresId priority order = %ld  %ld  %ld  %ld\nnb gatherers         = %ld  %ld  %ld  %ld\nResources = %ld  %ld  %ld  %ld\n",
 						player->playerId,
-						ai->structTacAI.extraResourceTypeNeededByPriority[0],
-						ai->structTacAI.extraResourceTypeNeededByPriority[1],
-						ai->structTacAI.extraResourceTypeNeededByPriority[2],
-						ai->structTacAI.extraResourceTypeNeededByPriority[3],
+						ai->structTacAI.NeededResourceTypesByPriority[0],
+						ai->structTacAI.NeededResourceTypesByPriority[1],
+						ai->structTacAI.NeededResourceTypesByPriority[2],
+						ai->structTacAI.NeededResourceTypesByPriority[3],
 						ai->structTacAI.gathererCount_desired[0],
 						ai->structTacAI.gathererCount_desired[1],
 						ai->structTacAI.gathererCount_desired[2],

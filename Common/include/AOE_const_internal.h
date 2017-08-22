@@ -202,7 +202,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ICI_CHANGE_SETTING = 0x67, // Includes cheats(6), game speed change(1), diplomacy change(0)
 		CST_ICI_EXPLORE = 0x68, // Not sure this does more than just moving to the specified position
 		CST_ICI_BUILD_MULTIPLE = 0x69,// Build wall-like construction (many contiguous building units)
-		CST_ICI_KILL_UNIT = 0x6A,
+		CST_ICI_KILL_UNIT = 0x6A, // "Cancel build"
 		CST_ICI_ATTACK_POSITION = 0x6B, // For example, used for catapults...
 		CST_ICI_PAY_TRIBUTE = 0x6C,
 		CST_ICI_SET_TRADE_RESOURCE_TYPE = 0x6D, // Set resource to trade in a trade ship.
@@ -214,12 +214,12 @@ namespace AOE_CONST_INTERNAL
 	enum INTERNAL_COMMAND67_SUBTYPE : char {
 		CST_IC67_CHANGE_DIPLOMACY = 0,
 		CST_IC67_CHANGE_GAME_SPEED = 1,
-		CST_IC67_ADD_RESOURCE = 2,
+		CST_IC67_ADD_RESOURCE = 2, // "inventory"
 		CST_IC67_UPGRADE_TOWN = 3, // Unused
 		CST_IC67_SET_STEROIDS_MODE = 4, // "quick build"
 		CST_IC67_SET_ALLY_VICTORY = 5,
 		CST_IC67_CHEAT = 6,
-		CST_IC67_APPLY_WRITING_TECH = 7,
+		CST_IC67_APPLY_WRITING_TECH = 7, // set shared exploration
 		CST_IC67_SYNC_ERROR = 8 // Save game to syncerr?.gam (!) and quit game + sync error message. Saved game seems NOT to be playable
 	};
 

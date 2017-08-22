@@ -59,7 +59,7 @@ static bool test_ror_structures() {
 	AOE_STRUCTURES::STRUCT_SCORE_ELEM scoreElem;
 	assert(sizeof(scoreElem) == 0x20);
 	trs_assert(&scoreElem, 0x1C, &scoreElem.unknown_1C);
-	AOE_STRUCTURES::STRUCT_SCORE_HEADER scoreHeader;
+	AOE_STRUCTURES::STRUCT_VICTORY_CONDITIONS scoreHeader;
 	trs_assert(&scoreHeader, 0x1C, &scoreHeader.currentTotalScore);
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT se;
 	assert(sizeof(se) == 0xB0);
@@ -72,7 +72,7 @@ static bool test_ror_structures() {
 	trs_assert(&prn, 0x6C, &prn.resourceTypesCount);
 	AOE_STRUCTURES::STRUCT_UNIT_GROUP uge;
 	assert(sizeof(uge) == 0x330);
-	trs_assert(&uge, 0x1D8, &uge.unknown_1D8);
+	trs_assert(&uge, 0x1D6, &uge.unknown_1D6);
 	trs_assert(&uge, 0x32C, &uge.unknown_gameTime_ms);
 	assert(sizeof(AOE_STRUCTURES::STRUCT_UNIT_MEMORY) == 0x24);
 
@@ -161,7 +161,7 @@ static bool test_ror_structures() {
 	assert(sizeof(g) == 0x124);
 	trs_assert(&g, 0x11E, &g.unknown_11E);
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS s;
-	trs_assert(&s, 0xAC4, &s.chosenPlayerNum);
+	trs_assert(&s, 0xAC4, &s.chosenPlayerColor);
 	trs_assert(&s, 0x1198, &s.civPlayerNameIsUsed);
 
 	// MAP

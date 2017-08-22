@@ -353,9 +353,9 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 		STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(loopPlayerId);
 		if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) && (loopPlayer->aliveStatus != 2) &&
-			(player->ptrDiplomacyStances[loopPlayerId] != 0) && loopPlayer->ptrBuildingsListHeader && loopPlayer->ptrScoreInformation) {
+			(player->ptrDiplomacyStances[loopPlayerId] != 0) && loopPlayer->ptrBuildingsListHeader && loopPlayer->ptrVictoryConditions) {
 			// Save highest player score...
-			long loopPlayerScore = loopPlayer->ptrScoreInformation->currentTotalScore;
+			long loopPlayerScore = loopPlayer->ptrVictoryConditions->currentTotalScore;
 			if (loopPlayerScore > highestPlayerScore) {
 				highestPlayerScore = loopPlayerScore;
 			}
@@ -405,7 +405,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 		STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(loopPlayerId);
 		if (loopPlayer && loopPlayer->IsCheckSumValid() && (loopPlayerId != player->playerId) && // Ignore "myself"
-			loopPlayer->ptrScoreInformation && loopPlayer->ptrScoreInformation->IsCheckSumValid() &&
+			loopPlayer->ptrVictoryConditions && loopPlayer->ptrVictoryConditions->IsCheckSumValid() &&
 			(loopPlayer->aliveStatus != 2)) { // Cf 0x40ACFA: exclude defeated players
 			assert((loopPlayerId >= 1) && (loopPlayerId < global->playerTotalCount) && (loopPlayerId <= 8));
 			bool isAllied = (player->ptrDiplomacyStances[loopPlayerId] == PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY);
@@ -422,7 +422,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 			if (attackWinningPlayer && (attackWinningPlayerFactor > 0)) {
 				// Note: in game code, the formula is completely erroneous (DIVIDES by factor !)
 				// Here we use a custom formula to have a better control on "score" impact: use a % value (0-100).
-				int tmpScorePercentage = loopPlayer->ptrScoreInformation->currentTotalScore * 100 / highestPlayerScore; // a 0-100 value representing loop player's score
+				int tmpScorePercentage = loopPlayer->ptrVictoryConditions->currentTotalScore * 100 / highestPlayerScore; // a 0-100 value representing loop player's score
 				playerScoreFactor = tmpScorePercentage * attackWinningPlayerFactor / 100; // /100 because attackWinningPlayerFactor is a 1-100 "percentage" value.
 				
 				// Obsolete:

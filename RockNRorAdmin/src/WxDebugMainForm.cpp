@@ -336,7 +336,7 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		}
 		s += " resTypesOrder=";
 		for (int i = 0; i < 4; i++) {
-			s += std::to_string(ai->structTacAI.extraResourceTypeNeededByPriority[i]);
+			s += std::to_string(ai->structTacAI.NeededResourceTypesByPriority[i]);
 			s += " ";
 		}
 		/*s += " +D58=";
@@ -347,8 +347,8 @@ void WxDebugMainForm::ShowGatheringInfo() {
 
 		s += "\nvillagerTasksRelevantCount=";
 		s += std::to_string(ai->structTacAI.villagerTasksRelevantElemCount);
-		s += " nonExplorerVillagerCount=";
-		s += std::to_string(ai->structTacAI.nonExplorerVillagersCount);
+		s += " desiredGathererVillagersCount=";
+		s += std::to_string(ai->structTacAI.desiredGathererVillagersCount);
 		s += " otherVillagerTableCount10C=";
 		s += std::to_string(ai->structTacAI.villagerExplorers.maxElementCount);
 		s += " otherVillagerTableCount110=";

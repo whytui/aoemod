@@ -17,6 +17,7 @@
 
 #include <wx/grid.h>
 #include <wx/filedlg.h>
+#include <wx/dirdlg.h>
 
 
 class WxDrsEditor : public wxFrame
@@ -50,6 +51,7 @@ private:
 	wxButton *btnModifyFileInfo;
 	wxButton *btnRemoveFile;
 	wxButton *btnExportFile;
+	wxButton *btnExportAllFiles;
 	wxButton *btnSortItemsById;
 	wxButton *btnMoveUp;
 	wxButton *btnMoveDown;
@@ -69,6 +71,7 @@ private:
 	void OnBtnModifyFileInfo(wxCommandEvent& event);
 	void OnBtnRemoveFile(wxCommandEvent& event);
 	void OnBtnExportFile(wxCommandEvent& event);
+	void OnBtnExportAllFiles(wxCommandEvent& event);
 	void OnBtnSortItemsById(wxCommandEvent& event);
 	void OnBtnSaveAsDrs(wxCommandEvent& event);
 	void OnBtnMoveUp(wxCommandEvent& event);
@@ -84,6 +87,7 @@ enum
 	ID_BtnRemoveFile,
 	ID_BtnModifyFileInfo,
 	ID_BtnExportFile,
+	ID_BtnExportAllFiles,
 	ID_BtnSaveAsDrs,
 	ID_BtnExitNoSave,
 	ID_BtnSortItemsById,

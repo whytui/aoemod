@@ -166,8 +166,8 @@ STRUCT_UNIT_MEMORY *UnitTargeting::ContinueFindGroupMainTargetInProgress(STRUCT_
 	if ((priorityPosX < 0) || (priorityPosY < 0)) {
 		if (!this->groupIsInMyTown[infAI->commonAIObject.playerId]) {
 			// Group is already on a military campaign: search targets near current position. Don't cross the whole map each time we change target ! (which is default behaviour !)
-			priorityPosX = (long int)unitGroup->posX;
-			priorityPosY = (long int)unitGroup->posY;
+			priorityPosX = (long int)unitGroup->currentPosX;
+			priorityPosY = (long int)unitGroup->currentPosY;
 		} else {
 			// Group is in town: no restriction on target position. Allow attacking enemy towns, which may be far from my town.
 			priorityPosX = -1;

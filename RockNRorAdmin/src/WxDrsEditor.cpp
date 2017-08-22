@@ -41,6 +41,7 @@ void WxDrsEditor::ConstructorInit() {
 	this->btnModifyFileInfo = new wxButton(this, ID_BtnModifyFileInfo, _T("Modify file info"));
 	this->btnRemoveFile = new wxButton(this, ID_BtnRemoveFile, _T("Remove file"));
 	this->btnExportFile = new wxButton(this, ID_BtnExportFile, _T("Export file (save as)"));
+	this->btnExportAllFiles = new wxButton(this, ID_BtnExportAllFiles, _T("Export all files"));
 	this->btnMoveUp = new wxButton(this, ID_BtnMoveUp, _T("Move up selected file"));
 	this->btnMoveDown = new wxButton(this, ID_BtnMoveDown, _T("Move down selected file"));
 	this->btnSortItemsById = new wxButton(this, ID_BtnSortItemsById, _T("Sort files using IDs"));
@@ -50,6 +51,7 @@ void WxDrsEditor::ConstructorInit() {
 	Connect(ID_BtnModifyFileInfo, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnModifyFileInfo));
 	Connect(ID_BtnRemoveFile, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnRemoveFile));
 	Connect(ID_BtnExportFile, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnExportFile));
+	Connect(ID_BtnExportAllFiles, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnExportAllFiles));
 	Connect(ID_BtnMoveUp, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnMoveUp));
 	Connect(ID_BtnMoveDown, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnMoveDown));
 	Connect(ID_BtnSortItemsById, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnSortItemsById));
@@ -62,6 +64,7 @@ void WxDrsEditor::ConstructorInit() {
 	this->filesButtonsArea->Add(this->btnModifyFileInfo);
 	this->filesButtonsArea->Add(this->btnRemoveFile);
 	this->filesButtonsArea->Add(this->btnExportFile);
+	this->filesButtonsArea->Add(this->btnExportAllFiles);
 	this->filesButtonsArea->Add(this->btnMoveUp);
 	this->filesButtonsArea->Add(this->btnMoveDown);
 	this->filesButtonsArea->Add(this->btnSortItemsById);
@@ -350,6 +353,33 @@ void WxDrsEditor::OnBtnExportFile(wxCommandEvent& event) {
 	// Actually save file
 	this->drsFileHelper.ExportIncludedFile(fileId, fullPath);
 }
+
+
+void WxDrsEditor::OnBtnExportAllFiles(wxCommandEvent& event) {
+	int rowCount = this->filesGrid->GetRows();
+	if (rowCount <= 0) { return; }
+	wxDirDialog saveToDir(this, _T("Select export directory"));
+	int rs = saveToDir.ShowModal();
+	if (rs != wxID_OK) { return; }
+	string exportDirPath = saveToDir.GetPath();
+	if (exportDirPath.empty()) { return; }
+	exportDirPath += "\\";
+	
+	for (int curRow = 0; curRow < rowCount; curRow++) {
+		std::wstring wvalueFileId = this->filesGrid->GetCellValue(curRow, 1);
+		std::string valueFileId = narrow(wvalueFileId);
+		int fileId = StrToInt(valueFileId.c_str(), -1);
+		DrsIncludedFile *file = this->drsFileHelper.FindFileWithId(fileId);
+		if (!file) { continue; }
+		if (!file->rawData || (file->dataSize <= 0)) { continue; }
+		const char *ext = file->GetFileType().Get3LettersExtension().GetAsCharPtr();
+		std::string filename = exportDirPath + std::to_string(file->fileId);
+		filename += ".";
+		filename += ext;
+		this->drsFileHelper.ExportIncludedFile(fileId, filename);
+	}
+}
+
 
 void WxDrsEditor::OnBtnExitNoSave(wxCommandEvent& event) {
 	this->Close();

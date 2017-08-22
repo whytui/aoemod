@@ -42,6 +42,7 @@ namespace AOE_STRUCTURES
 #define CHECKSUM_UI_SP_MENU_SCREEN 0x0054793C // ccor 0x49E040. "SPMenuScreen"
 #define CHECKSUM_UI_STATUS_MESSAGE 0x00547A68 // ccor 0x49E7A0, 0x49E9A0.
 #define CHECKSUM_UI_MISSION_SCREEN 0x00547B94 // ccor 0x49EC00.
+#define CHECKSUM_UI_TIMELINE_PANEL 0x0054A134 // ccor 0x4FBAA0.
 
 
 	// Parent class for UI objects (both screens and UI components) = TPanel

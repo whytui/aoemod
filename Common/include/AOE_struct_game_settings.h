@@ -232,6 +232,13 @@ namespace AOE_STRUCTURES {
 	// +0x148 = [Last for both classes]
 	class STRUCT_GAME_SETTINGS {
 	public:
+		enum GAME_UNITS_OUTLINE_MODE : char {
+			OUTLINE_RECTANGLE = 0, // Draws a white rectangle around selected unit. Quite good for scenario editor ! Fishes are always "outlined" in scEditor.
+			OUTLINE_NONE = 1, // No visible effect on selected unit
+			OUTLINE_NORMAL = 2, // White square under selected unit
+			OUTLINE_EXTENDED = 3 // Normal + show a light square under all (most) units, cf CTRL-A in scenario editor
+		};
+
 		unsigned long int checksum;
 		GAME_NFO_DATA *game_nfo_data; // +04. no checksum
 		STRUCT_SCENARIO_FILE_INFO *scenarioInfData; // +08. scenario.inf path... +other data?
@@ -254,7 +261,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_044;
 		unsigned long int *drawSystem; // +48. TDrawSystem
 		unsigned long int *unknown_04C; // +4C. basegame ?? Ptr to struct size>=478. TDrawArea ?
-		char outline; // +50. Values 0-3. to test
+		GAME_UNITS_OUTLINE_MODE outline; // +50. Values 0-3. to test
 		char unknown_051[3];
 		unsigned long int unknown_054;
 		long int infoSLPCount; // +58. Number of elements in ptrInfosSLP array.
@@ -371,33 +378,33 @@ namespace AOE_STRUCTURES {
 		unsigned long int mapSizeChoice; // +A7C
 		// 0xA80
 		AOE_CONST_FUNC::MAP_TYPE_INDEX mapTypeChoice; // 0=small islands, 1=large islands... See empires.dat
-		unsigned long int unknownA84; // +A84. set in 505340. Default=1. Unused in SP RM ?
-		unsigned long int unknownA88; // +A88. set in 505360. Default=1. Unused in SP RM ?
-		unsigned long int victoryConditionChoice; // 0=standard, 1=conquest, 7=time limit, 8=score
+		long int unused_animals; // +A84. set in 0x505340. Default=1. Unused.
+		long int unused_predators; // +A88. set in 0x505360. Default=1. Unused.
+		long int victoryConditionChoice; // 0=standard, 1=conquest, 7=time limit, 8=score
 		// 0xA90
-		unsigned long int victoryConditionChoice_parameter; // or float ?
+		long int victoryConditionChoice_parameter; // or float ?
 		unsigned char chosenCivs[9]; // +A94. Selected civ ID for each player (in game settings screen). Index is playerId-1. Set in 0x5053C0. See also 0x48D13E for random picking
 		unsigned char unknownA9D[3]; // +A9D. unused
 		// 0xAA0
-		long int unknown_AA0[9]; // +AA0. Limits player # ? 8 Players: [0,1,2,3,4,5,6,7] 4 Players: [0,1,2,3,0,1,2,3] 2 Players: [0,1,0,1,0,1,0,1]
-		char chosenPlayerNum[9]; // +AC4. Corresponds to the colored number in game settings screen
-		// 0xACD
-		char playerNameCivDLLID_Offset[9]; // per player. 4400+x=language_dll_id of a civ (player) name.
-		char unknown_AD6; // +AD6. Set in 505520.
-		char unknown_AD7; // +AD7. Set in 505530.
-		char fixedPositions; // +AD8. Set in 505540
+		long int scenarioPlayerChoices[9]; // +AA0. Limits player # ? 8 Players: [0,1,2,3,4,5,6,7] 4 Players: [0,1,2,3,0,1,2,3] 2 Players: [0,1,0,1,0,1,0,1]
+		char chosenPlayerColor[9]; // +AC4. Corresponds to the colored number in game settings screen
+		char playerNameCivDLLID_Offset[9]; // +ACD. per player. 4400+x=language_dll_id of a civ (player) name.
+		char unused_allowTrading; // +AD6. Set in 0x505520. Seems unused.
+		char lengthenCombat; // +AD7. Set in 505530.
+		char fixedPositions; // +AD8. Set in 505540. "RandomizePositions"
 		char allTechs; // +AD9. Set in 0x505550. Used for new games. For other games, refer to scenarioInfo structure (fullTechTree value is fixed by RockNRor). "Used" in 0x50B833 to apply techtree=0xD2=210.
 		char unknown_ADA;
 		char unknown_ADB;
-		long int initialResourcesChoice; // +ADC. 0=default, 3=large. Set in 505560.
+		long int initialResourcesChoice; // +ADC. 0=default, 3=large. Set in 505560. "ResourceLevel".
 		// 0xAE0
 		AOE_CONST_INTERNAL::GAME_INITIAL_AGES initialAgeChoice; // 0=default, 1=nomad, 2=stone, 3=tool 4=bronze, 5=iron, 6=post-iron. Set in 505570
-		char unknown_AE4; // +AE4. Set in 505580
-		char isDeathMatch; // +AE5. Set in 505590. NOT correct when loading a saved game (but fixed by RockNRor)
-		char maxPopulation; // +AE6. For MP games. Set in 5055A0, Get in 5054F0. [+A9E in aoe10b]
-		char unknown_AE7[0x09];
-		// 0xAF0
-		char unknown_AF0[0xC20 - 0xAF0];
+		char unused_startingUnits; // +AE4. Set in 0x505580. Unused ?
+		char isDeathMatch; // +AE5. Set in 0x505590. NOT correct when loading a saved game (but fixed by RockNRor)
+		char maxPopulation; // +AE6. For MP games. Set in 0x5055A0, Get in 0x5054F0. [+A9E in aoe10b]
+		char unknown_AE7;
+		char unknown_scenarioAutoSaveFileName[0x104]; // +AE8. Used in 0x502A55
+		// 0xBEC
+		char unknown_BEC[0xC20 - 0xBEC];
 		// 0xC20
 		unsigned long int unknown_C20;
 		STRUCT_UI_IN_GAME_MAIN *ptrGameUIStruct; // +C24.
@@ -408,14 +415,16 @@ namespace AOE_STRUCTURES {
 		long int lastEventIndex; // +C50. -1=no "last event". Or a 0-4 value
 		long int lastAccessedEventIndex; // +C54. -1=no "last event". Or a 0-4 value. To remember which index was used in last "home key" press.
 		// 0xC58
-		char unknown_C58[0x106C - 0xC58];
-		char debugString[0x1190 - 0x106C]; // +106C. Unknown_ size
+		char unknown_C58[0xE64 - 0xC58];
+		char saveGameName[0x104]; // +E64.
+		char loadGameName[0x104]; // +F68.
+		char debugString[0x1190 - 0x106C]; // +106C. Unknown size
 		// 0x1190
-		char isInitMPScreen; // +1190. Set in 5055B0. ??? to confirm. is MP game ?
+		char isInitMPScreen; // +1190. Set in 0x5055B0. ??? to confirm. is MP game ? "quickStartGame"
 		char unknown_1191;
 		char unknown_1192;
 		char unknown_1193;
-		char unknown_1194; // default -1 ?
+		char unused_randomStartValue; // +1194. default -1. Does not seem to be used at all.
 		char unknown_1195;
 		char unknown_1196;
 		char unknown_1197;

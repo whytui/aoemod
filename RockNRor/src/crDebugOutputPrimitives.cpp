@@ -664,5 +664,17 @@ bool AnalyzeEmpiresDatQuality() {
 }
 
 
+// A method to do various dirty testing. Does nothing in RELEASE mode.
+void CurrentTestMethod() {
+#ifdef _DEBUG
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return; }
+	//settings->outline = STRUCT_GAME_SETTINGS::GAME_UNITS_OUTLINE_MODE::OUTLINE_RECTANGLE;
+	
+#endif
+}
+
 }
 

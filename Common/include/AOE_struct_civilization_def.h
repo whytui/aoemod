@@ -17,9 +17,8 @@ namespace AOE_STRUCTURES
 
 #define CHECKSUM_CIVILIZATION_DEF_PARENT 0x00544AB0
 #define CHECKSUM_CIVILIZATION_DEF 0x00549A28
-	// Size 0x2C. Constructor = 0x4EF4F0, 0x44F2A0 = civDef.constructor(internalFileId) "MasterPlayer"
-	// Destructor 0x4EF4D0 = civDef.destructor(do_free)
-	// Parent struct is B0 4A 54 00
+	// "Tribe/RGE_MasterPlayer". Size 0x2C. Constructor=0x4EF4B0, 0x4EF4F0, 0x44F2A0
+	// Parent (RGE) struct is B0 4A 54 00 => ccor=0x44F1B0
 	class STRUCT_CIVILIZATION_DEF {
 	public:
 		unsigned long int checksum; // 28 9A 54 00

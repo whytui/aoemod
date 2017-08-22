@@ -14,21 +14,7 @@
 namespace AOE_STRUCTURES
 {
 
-	// duplicate to remove:
-	class STRUCT_UI_DIAM_MAP : public STRUCT_ANY_UI { // F4 A3 54 00
-	public:
-		char unknown_0F4[0x130 - 0x0F4];
-		// 0x130
-		short int mapSizeX; // unsure
-		short int mapSizeY; // unsure
-
-
-		bool IsCheckSumValid() const { return this->checksum == 0x0054A3F4; }
-	};
-
-
-
-	// Size ? Constructor=0x42C360(parent=RGE)
+	// Size=0x16C. Constructor=0x42C360(parent=RGE), 0x518010(intermediate, editor), 0x5085A0(child, in-game)
 	// 0x42CD60 = diamMap.mainDraw() ? Main draw entry point ?
 	// 0x42CF30 = diamMap.clearImage()
 	// 0x42D0C0 = diamMap.drawAllTiles()
@@ -37,7 +23,8 @@ namespace AOE_STRUCTURES
 	// 0x42D710 = diamMap.drawObjects()
 	// 0x42DC10 = diamMap.draw() (EDX+F4)
 #define CHECKSUM_UI_RGE_DIAMOND_MAP 0x005434B4 // parent / ccor 0x42C360
-#define CHECKSUM_UI_DIAMOND_MAP 0x0054A73C
+#define CHECKSUM_UI_DIAM_MAP_VIEW_EDITOR 0x0054A73C // RGE_DiamondMapView. Intermediate class (editor)
+#define CHECKSUM_UI_DIAM_MAP_VIEW 0x0054A3F4 // "Tribe_DiamondMapView". Child class (in-game). ccor=0x5085A0
 	class STRUCT_UI_DIAMOND_MAP : public STRUCT_ANY_UI { // 3C A7 54 00 (editor). Also F4 A3 54 00(game) ?
 	public:
 		STRUCT_GAME_GLOBAL *global; // +F4
@@ -58,16 +45,10 @@ namespace AOE_STRUCTURES
 		char *unknown_140[0x168 - 0x140];
 		unsigned long int unknown_168; // ptr to diamMap data ? (color to display...) ? +8=ptr to array[byte=index]=colorPerPixel
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_DIAMOND_MAP; }
-	};
-
-	// Size 0x380. Constructor=0x465730
-	// class for chat text lines (1 for each chat line), yellow/orange centered in-game error messages
-	class STRUCT_UI_IN_GAME_TEXT_ZONE : public STRUCT_ANY_UI {
-	public:
-		//unsigned long int checksum; // EC 54 54 00
-		// F8 : text?
-		bool IsCheckSumValid() { return this->checksum == 0x005454EC; }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UI_DIAM_MAP_VIEW_EDITOR) ||
+			(this->checksum == CHECKSUM_UI_DIAM_MAP_VIEW) || 
+			(this->checksum == CHECKSUM_UI_RGE_DIAMOND_MAP);
+		}
 	};
 
 }

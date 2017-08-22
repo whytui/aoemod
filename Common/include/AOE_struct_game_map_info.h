@@ -33,8 +33,8 @@ namespace AOE_STRUCTURES {
 
 #define CHECKSUM_RGE_MAP 0x005445A0 // Base class
 #define CHECKSUM_GAME_MAP 0x005499F4
-	// Parent size=0x88D0. Constructor=0x443CE0(fromFile), 0x443D80
-	// Size = 0xB5F8. Init in 0x4445E0. Constructor=0x4ED4B0(fromFile), 0x4ED800.
+	// *Parent* size=0x88D0. Constructor=0x443CE0(fromFile), 0x443D80
+	// Size=0xB5F8. Init in 0x4445E0. Constructor=0x4ED4B0(fromFile), 0x4ED800.
 	// "RGE_Map" / "Tribe_Map"
 	// 0x447DE0 = gameMapInfo.getTerrain(col=y, row=x)
 	// +00 = destructor(do_free)

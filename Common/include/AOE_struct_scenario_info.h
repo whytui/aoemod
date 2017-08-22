@@ -18,7 +18,7 @@ namespace AOE_STRUCTURES {
 
 
 #define CHECKSUM_GAME_TIMELINE 0x0054992C
-	// Size = 0x14. "RGE_Timeline"
+	// "RGE_Timeline". Size=0x14
 	// Constructor : 0x4EBBF0 (readFromFile), 0x4EBDC0
 	class STRUCT_GAME_TIMELINE {
 	public:
