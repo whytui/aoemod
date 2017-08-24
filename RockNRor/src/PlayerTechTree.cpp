@@ -651,14 +651,19 @@ void TechTreeCreator::CalcUnitsDisableScore() {
 		if (!crUnitInfo->unitDetail->IsValid()) { continue; }
 		if (crUnitInfo->unitDefId != crUnitInfo->unitDetail->baseUnitId) { continue; } // Only treat base units => 1 evaluation for each unitline
 
-		// Random will decide if the unitline should be disabled (partially or fully)
-		int imyrand = randomizer.GetRandomNonZeroPercentageValue();
-		double myrand = (double)imyrand;
+		if ((crUnitInfo->rootUnitDisablePolicy == TTCreatorBaseUnitDisableBehavior::TTBUDisableNever) &&
+			(crUnitInfo->unitDetail->possibleUpgradedUnitIDs.size() == 0)) {
+			crUnitInfo->disableScore = 0;
+		} else {
+			// Random will decide if the unitline should be disabled (partially or fully)
+			int imyrand = randomizer.GetRandomNonZeroPercentageValue();
+			double myrand = (double)imyrand;
 
-		double tmpCompute = crUnitInfo->disableProbability * myrand * TT_CONFIG::RES_PROBA_IMPACT_ON_RANDOM +
-			myrand * (1 - TT_CONFIG::RES_PROBA_IMPACT_ON_RANDOM); // Now tmpCompute is in 0-100
+			double tmpCompute = crUnitInfo->disableProbability * myrand * TT_CONFIG::RES_PROBA_IMPACT_ON_RANDOM +
+				myrand * (1 - TT_CONFIG::RES_PROBA_IMPACT_ON_RANDOM); // Now tmpCompute is in 0-100
 
-		crUnitInfo->disableScore = tmpCompute;
+			crUnitInfo->disableScore = tmpCompute;
+		}
 	}
 }
 
