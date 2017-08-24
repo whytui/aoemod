@@ -724,12 +724,13 @@ void TechTreeCreator::CreateDisableUnitsEffects() {
 	while (curDisableCount < preferredDisableUnitCount) {
 		double bestScore = -1;
 		TTCreatorUnitInfo *rootUnitToDisable = NULL;
-		std::for_each(this->allCreatorUnitInfo.begin(), this->allCreatorUnitInfo.end(),
-			[&rootUnitToDisable, &bestScore](TTCreatorUnitInfo *curInfo) {
-			if (!curInfo->hasADisabledChild && (curInfo->disableScore > bestScore)) { bestScore = curInfo->disableScore; rootUnitToDisable = curInfo; }
-		}
-		);
-		if (bestScore < 0) { break; }
+
+		rootUnitToDisable = randomizer.PickRandomElementWithWeight<std::list, TTCreatorUnitInfo>
+			(this->allCreatorUnitInfo, [](TTCreatorUnitInfo *curInfo){
+			if (curInfo->hasADisabledChild) { return -1.; }
+			return curInfo->disableScore;
+		});
+		if (rootUnitToDisable == NULL) { break; }
 
 		// Here we have a unit to disable
 		TTCreatorUnitInfo *unitToActuallyDisable = this->PickUnitUpgradeToDisableInUnitLine(rootUnitToDisable);

@@ -3,6 +3,7 @@
 
 #include <random>
 #include <string>
+#include <list>
 
 #undef max
 
@@ -14,6 +15,11 @@ public:
 		static std::default_random_engine generator(rd()); // construct at startup to get a random seed.
 		this->generator = &generator;
 	};
+
+	// Returns a real (double) value between 0 and 1.
+	double GetRandomZeroOneValue() {
+		return this->distribution_0_1(*this->generator);
+	}
 
 	// Returns a random value 0-100
 	int GetRandomPercentageValue() {
@@ -81,6 +87,69 @@ public:
 	}
 
 
+	template <template <typename, typename> class CollectionType,
+	class ITEM,
+	class Allocator = std::allocator<ITEM*> >
+		// Randomly selects one item from a list, each item's chances being provided by weightPredicate.
+		// Each item chance is proportional to provided "weight".
+		// Practical example : Let's use 3 items "A, B, C" having 1,2 and 3 of "weight" => we get a global interval of 6= "ABBCCC".
+		// We pick a value between 1 and 6. The corresponding letter (given the position) wins ! Which makes C actually has 3 times more chances to win than A.
+		// The function returns a pointer to selected item (return type=ITEM*). May be NULL if no item could be chosen.
+		// PARAMETERS: 
+		// - collection must allow using "iterator" with "->begin()" and "->end()", collection items must be pointer to objects (ITEM*)
+		// - the predicate must take collection items' type (ITEM*) as input parameter (pointer to some object)
+		// Example of calling syntax
+		// resultObj = randomizer.PickRandomElementWithWeight<std::list, MyType>(myListOfObjPtr, [](MyType *item){return item->myWeightValue(); });
+		ITEM *PickRandomElementWithWeight(CollectionType<ITEM*, std::allocator<ITEM*>> collection, double(*weightPredicate) (ITEM *item)) {
+		double total = 0;
+		for (auto it = collection.begin(); it != collection.end(); it++) {
+			ITEM *i = *it;
+			double curVal = weightPredicate(i);
+			if (curVal > 0) {
+				total += curVal;
+			}
+		}
+		double choice = this->GetRandomZeroOneValue() * total;
+		for (auto it = collection.begin(); it != collection.end(); it++) {
+			ITEM *i = *it;
+			double curVal = weightPredicate(i);
+			if (curVal > 0) {
+				choice -= curVal;
+				if (choice <= 0) {
+					return i;
+				}
+			}
+		}
+		return NULL; // Should only happen if there is no item (with valid weight)
+	}
+
+	// Randomly selects one item from a list, each item's chances being provided by weightPredicate.
+	// Calling example: X *chosenItem = PickRandomElementWithWeight<X>(list_of_Xptr, [](X *x){ return x->someValue;});
+	// Hardcoded for list. Do not use.
+	template<typename ITEM> ITEM *PickRandomElementWithWeight_old(const std::list<ITEM*> &collection, double(*weightPredicate) (ITEM *x)) {
+		// First loop to evaluate total
+		double total = 0;
+		for (auto it = collection.begin(); it != collection.end(); it++) {
+			ITEM *i = *it;
+			double curVal = weightPredicate(i);
+			if (curVal > 0) {
+				total += curVal;
+			}
+		}
+		double choice = this->GetRandomZeroOneValue() * total;
+		for (auto it = collection.begin(); it != collection.end(); it++) {
+			ITEM *i = *it;
+			double curVal = weightPredicate(i);
+			if (curVal > 0) {
+				choice -= curVal;
+				if (choice <= 0) {
+					return i;
+				}
+			}
+		}
+		return NULL; // Should only happen when there is no (valid) item
+	}
+
 	std::string testRepartition() {
 		const int nrolls = 10000;  // number of experiments
 		const int nstars = 100;    // maximum number of stars to distribute
@@ -113,6 +182,7 @@ private:
 	std::uniform_int_distribution<int> distribution_large = std::uniform_int_distribution<int>(1, std::numeric_limits<int>::max());
 	std::normal_distribution<float> normalDistrib_sigma2 = std::normal_distribution<float>(5, 2);
 	std::normal_distribution<float> normalDistrib_sigma4 = std::normal_distribution<float>(5, 4);
+	std::uniform_real_distribution<double> distribution_0_1 = std::uniform_real_distribution<double>(0, 1);
 };
 
 
