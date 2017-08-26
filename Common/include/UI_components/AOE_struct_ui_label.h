@@ -37,8 +37,7 @@ namespace AOE_STRUCTURES
 #define CHECKSUM_UI_LISTBOX 0x005453F8
 #define CHECKSUM_UI_SCROLL_LABEL 0x00546594 // scroll text panel
 
-	// Size 0x188. Constructor=0x4685B0 (no arg)
-	// "TextPanel"
+	// "TextPanel". Size 0x188. Constructor=0x4685B0 (no arg)
 	// +0xEC = label.setText???(text)
 	class STRUCT_UI_LABEL : public STRUCT_ANY_UI {
 	public:

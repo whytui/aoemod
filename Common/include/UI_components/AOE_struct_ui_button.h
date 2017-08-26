@@ -34,7 +34,7 @@ namespace AOE_STRUCTURES
 		long int commandIDs[9]; // +F4. "id1" = a free value. Index="state". Various types (enums) (GAME_SCREEN_BUTTON_IDS, INGAME_UI_COMMAND_ID, etc)
 		long int buttonInfoValue[9]; // +118. "id2" = a free value. Index="state". For example, a DATID. Free values.
 		BUTTON_TYPE buttonType; // +13C.
-		long int drawType; // +140. 3 for standard buttons, 2 or 6 for checkboxes/combobox-buttons ?
+		long int drawType; // +140. 3 for standard/radio buttons?, 2 for ?, 6 checkboxes/combobox-buttons ?
 		long int notifyTypeId; // +144.
 		unsigned long int* buttonSound; // +148. NULL if not playing a sound. "TDigital".
 		unsigned long int* pictureByState[9]; // +14C. Picture for each "state".
@@ -52,7 +52,7 @@ namespace AOE_STRUCTURES
 		unsigned long int font; // +1E8. type ?
 		long int fontWidth;
 		long int fontHeight; // +1F0
-		short int numberOfStates; // +1F4. For checkbox (type 3), see 0x45EF20.
+		short int numberOfStates; // +1F4. 2 for checkbox (type 3), see 0x4560F0.
 		short int currentState; // +1F6. value 0-8. To update value, see AOE_CheckBox_SetChecked. Index for commandIDs and buttonInfoValue. For button, =1 when has focus (text color is highlighted)
 		long int unknown_1F8_isRadioButton; // +1F8. Set to 1 for drawTypes 3&5 in 0x45F2D1, when set as a radiobutton and grouped (?)
 		STRUCT_ANY_UI **groupedObjects; // +1FC. For radioButtons
@@ -88,8 +88,12 @@ namespace AOE_STRUCTURES
 			return (this->checksum == CHECKSUM_UI_BUTTON_WITH_NUMBER) || (this->checksum == CHECKSUM_UI_BUTTON_PANEL) ||
 				(this->checksum == CHECKSUM_UI_DROPDOWN_BUTTON);
 		}
-#pragma TODO("use button type instead ?")
-		bool IsACheckBox() const { return this->drawType != 3; } // Absolutely unsure, but I've got nothing else at this point
+		bool IsACheckBox() const {
+			return this->buttonType == BUTTON_TYPE::BT_CHECKBOX;
+		}
+		bool IsACheckBoxOrRadio() const {
+			return (this->buttonType == BUTTON_TYPE::BT_CHECKBOX) || (this->buttonType == BUTTON_TYPE::BT_RADIO);
+		}
 	};
 	static_assert(sizeof(STRUCT_UI_BUTTON) == 0x2B8, "STRUCT_UI_BUTTON size");
 

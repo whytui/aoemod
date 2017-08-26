@@ -382,16 +382,7 @@ bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
 	if (ROCKNROR::crInfo.HasOpenedCustomGamePopup()) {
 		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsButton->IsCheckSumValid()) {
-			if (objAsButton->IsACheckBox()) {
-				// We should NOT do this for standard buttons
-				AOE_METHODS::UI_BASE::CheckBox_SetChecked(objAsButton, !objAsButton->IsChecked());
-			}
 			return ROCKNROR::customPopupSystem.OnCustomButtonClick(objAsButton); // run for checkboxes also.
-		}
-		AOE_STRUCTURES::STRUCT_UI_DROPDOWN_BUTTON *objAsComboboxBtn = (AOE_STRUCTURES::STRUCT_UI_DROPDOWN_BUTTON *)objAddress;
-		if (objAsComboboxBtn->IsCheckSumValid()) {
-			// Is there something to do here to get those comboboxes work properly ?
-			
 		}
 	}
 

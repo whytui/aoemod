@@ -177,7 +177,7 @@ static bool AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 }
 
 
-// Create a textbox using ROR methods.
+// Create an editable textbox using ROR methods.
 // If maxTextLength==0, it is replaced by initialText's length.
 // Note: The font used seems to be 14 pixels high (?)
 static bool AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
@@ -192,57 +192,77 @@ static bool AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	if (maxTextLength <= 0) {
 		maxTextLength = strlen(initialText);
 	}
-	if (maxTextLength >= 0x8000 - 2) { maxTextLength = 0x8000 - 2; } // AOE does not support longer textarea length (will not be work correctly)
+	if (maxTextLength >= 0x8000 - 2) { maxTextLength = 0x8000 - 2; } // AOE does not support longer textarea length (would not work correctly)
 	long int result;
 	_asm {
 		MOV ECX, parent;
-		PUSH 0;
-		PUSH 0; // arg11
+		PUSH 0; // turn_ime_on
+		PUSH 0; // arg11 = enable_ime
 		PUSH font;
 		PUSH vSize;
 		PUSH hSize;
 		PUSH vPos;
 		PUSH hPos;
-		PUSH inputType; // arg5
+		PUSH inputType; // arg5 (format_type)
 		PUSH maxTextLength;
 		MOV EAX, initialText;
 		PUSH EAX; // initial value
 		PUSH ptrObjToCreate;
 		PUSH ECX; // parent
-		MOV EAX, 0x00456A30;
+		MOV EAX, 0x00456A30; // easyPanel.createTextbox(parent, ptrForNewObject, value, max_len, format_type, x, y, width, height, font_num, enable_ime, turn_ime_on)
 		CALL EAX;
 		MOV result, EAX;
 	}
-	if (!readOnly && result) {
-		_asm {
-			// Make writeable
-			MOV EAX, ptrObjToCreate;
-			MOV EAX, DS:[EAX];
-			MOV DS : [EAX + 0x074], 1;
-		}
+	if (!readOnly && result && ptrObjToCreate && *ptrObjToCreate) {
+		(*ptrObjToCreate)->editable = 1; // Make writeable
 	}
 	return result != 0;
 }
 
 
-// Create a "AOE" checkbox (same type as buttons)
+// Create a "AOE" checkbox (same object type as buttons)
 // You need to create a label if you want some text aside the checkbox
 static bool AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
-	if (!parent) { return false; }
+	if (!parent || !ptrObjToCreate) { return false; }
 	long int result;
 	_asm {
 		MOV ECX, parent;
-		PUSH 0; // arg8
-		PUSH 0; // arg7
+		PUSH 0; // arg8 = action ID
+		PUSH 0; // arg7 = soundNum
 		PUSH vSize;
 		PUSH hSize;
 		PUSH vPos;
 		PUSH hPos;
 		PUSH ptrObjToCreate;
 		PUSH ECX; // parent
-		MOV EAX, 0x00456240; // create checkbox
+		MOV EAX, 0x00455FE0; // easyPanel.createCheckBox(parent, button, x, y, width, height, sound_num, action_id)
+		CALL EAX;
+		MOV result, EAX;
+	}
+	return result != 0;
+}
+
+
+// Create a "AOE" radiobutton (same object type as buttons)
+// You need to create a label if you want some text aside the checkbox
+static bool AddRadioButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
+	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
+	if (!parent || !ptrObjToCreate) { return false; }
+	long int result;
+	_asm {
+		MOV ECX, parent;
+		PUSH 0; // arg8 = action ID
+		PUSH 0; // arg7 = soundNum
+		PUSH vSize;
+		PUSH hSize;
+		PUSH vPos;
+		PUSH hPos;
+		PUSH ptrObjToCreate;
+		PUSH ECX; // parent
+		MOV EAX, 0x00456240; // easyPanel.createRadioButton(parent, ptrForNewObject, hPos, vPos, xSize, ySize, soundNum, actionId)
 		CALL EAX;
 		MOV result, EAX;
 	}
@@ -252,6 +272,7 @@ static bool AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 static void CheckBox_SetChecked(AOE_STRUCTURES::STRUCT_UI_BUTTON *checkBox, bool checked) {
 	if (!checkBox) { return; }
+	assert(checkBox->IsACheckBoxOrRadio());
 	checkBox->currentState = checked ? 1 : 0;
 	int arg = checkBox->currentState;
 	_asm {
