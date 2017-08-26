@@ -65,12 +65,11 @@ public:
 	TTCreatorResearchInfo() {
 		this->researchDetail = NULL;
 		this->researchId = -1;
-		this->disableProbability = -1;
+		this->rawDisableProbability = -1;
 		this->disableWeight = 0;
 		this->updatedArmorClass = ATTACK_CLASS::CST_AC_NONE;
 		this->updatedAttackClass = ATTACK_CLASS::CST_AC_NONE;
 		this->techImpactsReligion = false;
-		this->disableScore = 0;
 		this->hasBeenDisabled = false;
 		this->isFakeForDisableUnit = false;
 		this->internalName = "";
@@ -79,9 +78,8 @@ public:
 	long int researchId;
 	std::string internalName;
 	std::string langName;
-	double disableProbability; // 0-1 score. -1 means "not set"
+	double rawDisableProbability; // 0-1 score. -1 means "not set"
 	double disableWeight; // 0-1 score. The weight (impact) if this research gets disabled
-	double disableScore; // Used to decide which research to disable in tech tree
 	TTDetailedResearchDef *researchDetail;
 	long int researchLocation;
 	AOE_CONST_FUNC::ATTACK_CLASS updatedArmorClass; // Armor class the tech upgrades. None (-1) in most cases.
@@ -89,6 +87,10 @@ public:
 	bool techImpactsReligion;
 	bool hasBeenDisabled;
 	bool isFakeForDisableUnit;
+
+	// Returns the final "disable probability" for this research.
+	// Returns <=0 if the unit must not be disable OR must not be disabled directly (handled by "unit line")
+	double GetDisableProbability() const;
 };
 
 
@@ -98,9 +100,8 @@ public:
 	TTCreatorUnitInfo() {
 		this->unitDefId = -1;
 		this->unitDetail = NULL;
-		this->disableProbability = -1;
+		this->rawDisableProbability = -1;
 		this->disableWeight = 0;
-		this->disableScore = 0;
 		this->trainLocation = -1;
 		this->sourceResearchId = -1;
 		this->hasBeenDisabled = false;
@@ -113,9 +114,8 @@ public:
 	long int unitDefId;
 	std::string internalName;
 	std::string langName;
-	double disableProbability; // 0-1 score. -1 means "not set"
+	double rawDisableProbability; // 0-1 score. -1 means "not set"
 	double disableWeight; // 0-1 score. The weight (impact) if this research gets disabled
-	double disableScore; // Used to decide which research to disable in tech tree
 	TTDetailedUnitDef *unitDetail;
 	long int trainLocation;
 	long int sourceResearchId; // ID of the research that enables me, if it exists and is unique
@@ -123,6 +123,10 @@ public:
 	bool hasBeenDisabledDirectly; // True when the unit was disabled by direct choice (not just a consequence of another research being disabled)
 	bool hasADisabledChild; // True when a child unit (an upgrade) was disabled by direct choice. WARNING: this is only set for root units.
 	TTCreatorBaseUnitDisableBehavior rootUnitDisablePolicy;
+
+	// Returns the final "disable probability" for this unit.
+	// Returns <=0 if the unit must not be disable OR must not be disabled directly (handled by "unit line")
+	double GetDisableProbability() const;
 };
 
 
@@ -145,7 +149,7 @@ namespace TT_CONFIG {
 	static const double RES_PROBA_VERY_RARE = 0.05; // Disable probability for unit that must be disabled on very rare occasions: priests, stone thrower, hoplite...
 	static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.8; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
 
-	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.4; // computed probability counts as much as xxx% vs random.
+	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.9; // computed probability counts as much as xxx% vs random. 1=100%=apply probability normally. Do not set to 0.
 	static const int CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT = 40;
 	static const int CALC_MAX_DISABLE_UNITLINE_COUNT_PERCENT = 70;
 	static const int CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT = 20;
@@ -246,10 +250,6 @@ private:
 
 	void UpdateResearchProbabilitiesWithImpacts();
 
-	// Use each research's probability to compute its "disable score"
-	void CalcResearchesDisableScore();
-	// Use each *root* unit's probability to compute its "disable score".
-	void CalcUnitsDisableScore();
 	// Creates disable research effects according to disable scores that have been computed (on all researches)
 	void CreateDisableResearchesEffects();
 	// Creates disable unit effects according to disable scores that have been computed (on root units)

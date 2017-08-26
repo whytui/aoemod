@@ -97,8 +97,11 @@ public:
 		// The function returns a pointer to selected item (return type=ITEM*). May be NULL if no item could be chosen.
 		// PARAMETERS: 
 		// - collection must allow using "iterator" with "->begin()" and "->end()", collection items must be pointer to objects (ITEM*)
-		// - the predicate must take collection items' type (ITEM*) as input parameter (pointer to some object)
-		// Example of calling syntax
+		// - the predicate must take collection items' type (ITEM*) as input parameter (pointer to some object) and return a weigth (if <0, item is ignored)
+		// TEMPLATE types to provide:
+		// - Collection type (list, vector...) without underlying object type
+		// - Item type="MyType" (NOT the pointer). Collection's object type is "pointer to MyType".
+		// SYNTAX example.
 		// resultObj = randomizer.PickRandomElementWithWeight<std::list, MyType>(myListOfObjPtr, [](MyType *item){return item->myWeightValue(); });
 		ITEM *PickRandomElementWithWeight(CollectionType<ITEM*, std::allocator<ITEM*>> collection, double(*weightPredicate) (ITEM *item)) {
 		double total = 0;
