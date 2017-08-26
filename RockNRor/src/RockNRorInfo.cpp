@@ -238,7 +238,7 @@ bool RockNRorInfo::HasOpenedCustomDialog() {
 // Pauses the game if running (only if a popup is successfully opened)
 // Technically, the created (AOE) popup object is based on game options popup.
 // themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
-AOE_STRUCTURES::STRUCT_ANY_UI *RockNRorInfo::OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn, long int themeSlpId) {
+AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *RockNRorInfo::OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn, long int themeSlpId) {
 	if (this->HasOpenedCustomGamePopup()) { return false; }
 	if ((hSize < 0xB0) || (vSize < 30)) { return false; }
 	if (!ROR_gameSettings) { return false; }
@@ -338,7 +338,7 @@ void RockNRorInfo::FreeGarbagePopupComponents() {
 
 // Use this to force values for "current custom popup". PLEASE AVOID using it !
 // Returns true if successful. Fails if a popup is already open.
-bool RockNRorInfo::ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_ANY_UI *customGamePopup, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel) {
+bool RockNRorInfo::ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *customGamePopup, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel) {
 	if (this->HasOpenedCustomGamePopup()) { return false; }
 	this->customGamePopupVar = customGamePopup;
 	this->customGamePopupButtonVar = btnOK;
@@ -389,7 +389,7 @@ bool RockNRorInfo::IsCustomGamePopupCancelButton(unsigned long int UIObjectAddre
 
 // Returns custom popup window in game screen (excluding RockNRor options popup).
 // Returns NULL if this popup is not open.
-AOE_STRUCTURES::STRUCT_ANY_UI *RockNRorInfo::GetCustomGamePopup() {
+AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *RockNRorInfo::GetCustomGamePopup() {
 	return this->customGamePopupVar;
 }
 

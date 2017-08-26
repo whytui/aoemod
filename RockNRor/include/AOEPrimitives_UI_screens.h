@@ -25,13 +25,13 @@ namespace UI_BASE {
 
 // Create a popup from game screen (from Options original model)
 // Must be called when game screen is active (no other popup)
-static AOE_STRUCTURES::STRUCT_ANY_UI *CreateGameScreenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *parent, long int hSize, long int vSize,
+static AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *CreateGameScreenPopup(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent, long int hSize, long int vSize,
 	long int backgroundSlpId) {
 	if (!parent) { return NULL; }
 	char dlgName[] = "dlg6_3";
 	long int arg1;
 	long int arg6;
-	AOE_STRUCTURES::STRUCT_ANY_UI *newObj = 0;
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *newObj = 0;
 	// Alloc
 	_asm {
 		PUSH 0x564;

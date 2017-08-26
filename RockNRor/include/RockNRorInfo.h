@@ -109,7 +109,7 @@ private:
 	// Never affect this variable manually, let the open/close methods do it.
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGamePopupButtonVar;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGamePopupCancelBtnVar;
-	AOE_STRUCTURES::STRUCT_ANY_UI *customGamePopupVar; // Pointer to our custom game popup object when open. Should be NULL <=> customGamePopupButtonVar==NULL
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *customGamePopupVar; // Pointer to our custom game popup object when open. Should be NULL <=> customGamePopupButtonVar==NULL
 	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> objectsToFree; // Popup's UI components list. Useful to destroy all of them automatically
 	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> garbageComponentsToFree; // Popup's UI components that are waiting to be destroyed (objects that could not be destroyed at popup closing)
 	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> garbageComponentsToFree_older; // Popup's UI components that are waiting to be destroyed and that are no longer related the current events (now ready to be destroyed)
@@ -149,7 +149,7 @@ public:
 	// Pauses the game if running (only if a popup is successfully opened)
 	// Technically, the created (AOE) popup object is based on game options popup.
 	// themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
-	AOE_STRUCTURES::STRUCT_ANY_UI *OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn = false,
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn = false,
 		long int themeSlpId = -1);
 
 	// Use it to list all UI components (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
@@ -168,7 +168,7 @@ private:
 public:
 	// Use this to force values for "current custom popup". PLEASE AVOID using it !
 	// Returns true if successful. Fails if a popup is already open.
-	bool ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_ANY_UI *customGamePopup, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel);
+	bool ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *customGamePopup, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel);
 	// To be called when game menu is closed to free custom button
 	void ForceClearCustomMenuObjects();
 
@@ -184,7 +184,7 @@ public:
 	// Returns NULL if this popup is not open.
 	// This information is useful to add UI components to the popup.
 	// When adding components, it is not necessary to store component pointers unless we need them to catch events (buttonClick) or get values (input objects)
-	AOE_STRUCTURES::STRUCT_ANY_UI *GetCustomGamePopup();
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *GetCustomGamePopup();
 
 	// Get main (first) selected unit, or NULL if none is selected.
 	// Works in-game and in editor.

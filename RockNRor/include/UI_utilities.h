@@ -37,7 +37,7 @@ using namespace UI_BASE;
 // Return pointer (address) to new object.
 // Compatible with scenario editor screen and in-game screen
 // Note that settings->currentUIStatus is unchanged when showing such dialog message.
-static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, long int hSize, long int vSize) {
+static AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *AOE_CreateDialogPopup(const char *text, long int hSize, long int vSize) {
 	char *dlgName = (char *)AOE_CONST_INTERNAL::customDialogScreenName;
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
 	if (settings == NULL) { return 0; }
@@ -49,14 +49,14 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, lo
 		AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *p = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *)currentUI;
 		assert(p->visible);
 		if (!p->IsCheckSumValid()) { return NULL; }
-		fct = 0x00457A80;
+		fct = 0x00457A80; // yesno
 	}
 	if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
 		if (currentUI->checksum != CHECKSUM_UI_SCENARIO_EDITOR_MAIN) { return 0; }
-		fct = 0x00457B90;
+		fct = 0x00457B90; // yesnocancel
 	}
 	if (!fct) { return 0; }
-	AOE_STRUCTURES::STRUCT_ANY_UI *obj = NULL;
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *obj = NULL;
 	// Now call relevant function
 	_asm {
 		PUSH vSize;
@@ -66,7 +66,7 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, lo
 		MOV EAX, text;
 		PUSH EAX;
 		MOV ECX, currentUI;
-		MOV EAX, fct;
+		MOV EAX, fct; // creates an easyPanel (even a messageDialog, actually)
 		CALL EAX; // showDialog(ptrText, dlgName, hSize, vSize)
 		MOV ECX, currentUI;
 		MOV EAX, DS:[ECX + 0x3C]; // Focused object = new popup
@@ -78,13 +78,13 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateDialogPopup(const char *text, lo
 
 // Create a popup (from Options original model) and returns the new UI object's address as an unsigned long int
 // This must be called when menu is opened
-static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateCustomOptionsPopupFromMenu(AOE_STRUCTURES::STRUCT_ANY_UI *parent) {
+static AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *AOE_CreateCustomOptionsPopupFromMenu(AOE_STRUCTURES::STRUCT_ANY_UI *parent) {
 	if (!parent) { return NULL; }
 
 	// Analog to 0x43424D
 	CloseScreenAndDestroy("Menu Dialog");
 	RefreshScreen("Game Screen", 0);
-	AOE_STRUCTURES::STRUCT_ANY_UI *newPtr = (AOE_STRUCTURES::STRUCT_ANY_UI *)AOEAlloc(0x564);
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *newPtr = (AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *)AOEAlloc(0x564);
 	if (!newPtr) { return NULL; }
 
 	_asm {
@@ -92,7 +92,7 @@ static AOE_STRUCTURES::STRUCT_ANY_UI *AOE_CreateCustomOptionsPopupFromMenu(AOE_S
 		MOV ECX, newPtr // Now ECX is the new popup object (parent for other new objects)
 		MOV ESI, ECX // Now and for all the code below ESI is the popup object (parent for other new objects)
 		PUSH 0x00557204
-		MOV EAX, 0x00460730 // UIObj.genericUIConstructor(ScreenName) ?
+		MOV EAX, 0x00460730 // dialogPanel.genericUIConstructor(ScreenName) ?
 		CALL EAX
 		MOV EAX, 0
 		LEA EDX,DWORD PTR DS:[ESI+0x498]

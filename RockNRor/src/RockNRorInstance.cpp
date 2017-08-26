@@ -2593,7 +2593,7 @@ void RockNRorInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 
 		// Standard Options button
 		long int xSize = showRockNRorMenu ? 0xA0 : 0x168;
-		myEAX = AOE_METHODS::UI_BASE::AddButton((AOE_STRUCTURES::STRUCT_ANY_UI*) myESI, (AOE_STRUCTURES::STRUCT_UI_BUTTON**) pOptionsBtn,
+		myEAX = AOE_METHODS::UI_BASE::AddButton((AOE_STRUCTURES::STRUCT_UI_EASY_PANEL*) myESI, (AOE_STRUCTURES::STRUCT_UI_BUTTON**) pOptionsBtn,
 			LANG_ID_GAME_OPTIONS, 0x14, myEBP, xSize, 0x1E, 5, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	}
 	
@@ -2604,7 +2604,7 @@ void RockNRorInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 		dllIdToUse = CRLANG_ID_ROCKNROR;
 	}
 	if (myEAX && showRockNRorMenu && !IsMultiplayer()) {
-		myEAX = AOE_METHODS::UI_BASE::AddButton((AOE_STRUCTURES::STRUCT_ANY_UI*)myESI,
+		myEAX = AOE_METHODS::UI_BASE::AddButton((AOE_STRUCTURES::STRUCT_UI_EASY_PANEL*)myESI,
 			(AOE_STRUCTURES::STRUCT_UI_BUTTON**)&ROCKNROR::crInfo.customGameMenuOptionsBtnVar, 
 			dllIdToUse, 0xD0, myEBP, 0xAC, 0x1E,
 			AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS, AOE_FONTS::AOE_FONT_BIG_LABEL);

@@ -24,7 +24,7 @@ void CustomPopupBase::AddObjectInContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj)
 
 
 // API to add UI components and add them automatically in "objects to free" list.
-bool CustomPopupBase::AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+bool CustomPopupBase::AddLabel(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	AOE_FONTS font) {
@@ -36,7 +36,7 @@ bool CustomPopupBase::AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	return res;
 }
 
-bool CustomPopupBase::AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+bool CustomPopupBase::AddTextBox(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	bool readOnly, bool multiline, bool onlyNumbers, unsigned long int font) {
@@ -49,7 +49,7 @@ bool CustomPopupBase::AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 		return res;
 }
 
-bool CustomPopupBase::AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+bool CustomPopupBase::AddCheckBox(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
 	bool res;
@@ -60,7 +60,7 @@ bool CustomPopupBase::AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	return res;
 }
 
-bool CustomPopupBase::AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+bool CustomPopupBase::AddButton(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId, AOE_FONTS font) {
@@ -72,7 +72,7 @@ bool CustomPopupBase::AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 	return res;
 }
 
-bool CustomPopupBase::AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+bool CustomPopupBase::AddButton(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId, AOE_FONTS font) {
@@ -85,7 +85,7 @@ bool CustomPopupBase::AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 }
 
 
-bool CustomPopupBase::AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+bool CustomPopupBase::AddComboBox(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_COMBOBOX **ptrObjToCreate, long int posX, long int posY,
 	long int listSizeX, long int listSizeY, long int lblSizeX, long int lblSizeY, AOE_FONTS font) {
 	bool res;
@@ -99,7 +99,7 @@ bool CustomPopupBase::AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 // Call this to open a new popup (=>this)
 // themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
-AOE_STRUCTURES::STRUCT_ANY_UI *CustomPopupBase::OpenPopup(long int hSize, long int vSize, bool withCancelBtn, long int themeSlpId) {
+AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *CustomPopupBase::OpenPopup(long int hSize, long int vSize, bool withCancelBtn, long int themeSlpId) {
 	this->hSize = hSize;
 	this->vSize = vSize;
 	if (ROCKNROR::crInfo.HasOpenedCustomGamePopup()) {

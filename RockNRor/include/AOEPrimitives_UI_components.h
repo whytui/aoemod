@@ -93,7 +93,7 @@ static void RefreshUIObject(AOE_STRUCTURES::STRUCT_ANY_UI *object, long int forc
 
 
 // Note: basic size (eg OK button) is 0x?? / 0x1E
-static bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddButton(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
@@ -121,7 +121,7 @@ static bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 
 // Note: basic size (eg OK button) is 0x?? / 0x1E
-static bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddButton(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
@@ -149,7 +149,7 @@ static bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 
 // For fonts, see AOE_FONTS enum
-static bool AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddLabel(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT
@@ -180,7 +180,7 @@ static bool AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 // Create an editable textbox using ROR methods.
 // If maxTextLength==0, it is replaced by initialText's length.
 // Note: The font used seems to be 14 pixels high (?)
-static bool AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddTextBox(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	bool readOnly = false, bool multiline = false, bool onlyNumbers = false, unsigned long int font = AOE_FONTS::AOE_FONT_STANDARD_TEXT) {
@@ -222,7 +222,7 @@ static bool AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 // Create a "AOE" checkbox (same object type as buttons)
 // You need to create a label if you want some text aside the checkbox
-static bool AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddCheckBox(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
 	if (!parent || !ptrObjToCreate) { return false; }
@@ -247,7 +247,7 @@ static bool AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
 
 // Create a "AOE" radiobutton (same object type as buttons)
 // You need to create a label if you want some text aside the checkbox
-static bool AddRadioButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+static bool AddRadioButton(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 	AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
 	if (!parent || !ptrObjToCreate) { return false; }

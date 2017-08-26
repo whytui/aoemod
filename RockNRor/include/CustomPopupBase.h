@@ -32,19 +32,19 @@ public:
 	void ResetPointers();
 	// Call this to open a new popup (=>this)
 	// themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
-	AOE_STRUCTURES::STRUCT_ANY_UI *OpenPopup(long int hSize, long int vSize, bool withCancelBtn, long int themeSlpId = -1);
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *OpenPopup(long int hSize, long int vSize, bool withCancelBtn, long int themeSlpId = -1);
 	// Call this to close the popup. This will handle pre/post close events.
 	void ClosePopup(bool isCancel);
 	// Indicates this popup object has been closed and can be deleted safely.
 	bool IsClosed() { return this->isClosed; }
 	// Get the (AOE) popup object
-	AOE_STRUCTURES::STRUCT_ANY_UI *GetAOEPopupObject() { return this->popup; }
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *GetAOEPopupObject() { return this->popup; }
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 	virtual bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) { return false; };
 
 protected:
-	AOE_STRUCTURES::STRUCT_ANY_UI *popup;
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *popup;
 	bool isClosed; // Indicates this popup object has been closed and can be deleted safely.
 	long int hSize, vSize;
 
@@ -61,31 +61,31 @@ protected:
 	inline void AddObjectInContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj);
 
 	// API to add UI components and add them automatically in "objects to free" list.
-	bool AddLabel(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	bool AddLabel(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 		AOE_STRUCTURES::STRUCT_UI_LABEL **ptrObjToCreate, const char *label,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
-	bool AddTextBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	bool AddTextBox(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 		AOE_STRUCTURES::STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *initialText, long int maxTextLength,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		bool readOnly = false, bool multiline = false, bool onlyNumbers = false, unsigned long int font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
-	bool AddCheckBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	bool AddCheckBox(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 		AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize);
 
-	bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	bool AddButton(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 		AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, const char *caption,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
-	bool AddButton(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	bool AddButton(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 		AOE_STRUCTURES::STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long int DLL_STRING_ID,
 		unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 		long int buttonId = 0, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
-	bool AddComboBox(AOE_STRUCTURES::STRUCT_ANY_UI *parent,
+	bool AddComboBox(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *parent,
 		AOE_STRUCTURES::STRUCT_UI_COMBOBOX **ptrObjToCreate, long int posX, long int posY,
 		long int listSizeX, long int listSizeY, long int lblSizeX, long int lblSizeY, AOE_FONTS font = AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 
