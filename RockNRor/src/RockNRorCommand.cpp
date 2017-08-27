@@ -67,6 +67,7 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "useImprovedGameSpeeds:                     %d\n", ROCKNROR::crInfo.configInfo.useImprovedGameSpeeds);
 	fprintf_s(f, "collectRORDebugLogs:                       %ld\n", ROCKNROR::crInfo.configInfo.collectRORDebugLogs);
 	fprintf_s(f, "showRockNRorNotifications:                 %d\n", ROCKNROR::crInfo.configInfo.showRockNRorNotifications);
+	fprintf_s(f, "randomTechTreeForRMGames:                  %d\n", ROCKNROR::crInfo.configInfo.randomTechTreeForRMGames);
 	fprintf_s(f, "enableRPGModeInRandomGames:                %d\n", ROCKNROR::crInfo.configInfo.enableRPGModeInRandomGames);
 	fprintf_s(f, "enableRPGModeInScenario:                   %d\n", ROCKNROR::crInfo.configInfo.enableRPGModeInScenario);
 	fprintf_s(f, "gameTimerSlowDownAutoFix:                  %d\n", ROCKNROR::crInfo.configInfo.gameTimerSlowDownAutoFix);
@@ -1220,15 +1221,14 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 
 	// Do custom stuff on "settings" here...
 
-	// Unfinished
-#ifdef _DEBUG
-	bool useFakeCiv = true;
-	if (useFakeCiv) {
+	if (ROCKNROR::crInfo.configInfo.randomTechTreeForRMGames && !settings->isDeathMatch &&
+		!settings->isSavedGame && !settings->isCampaign && !settings->rgeGameOptions.isScenario && !settings->rgeGameOptions.isMultiPlayer) {
+		// Generate random tech tree and civ bonus for each player
 		this->customCivHandler.CreateFakeRandomCivsForAllPlayers();
 	} else {
+		// Collect info about (standard) tech trees
 		this->customCivHandler.CreateInternalDataForGameWithStandardCivs();
 	}
-#endif
 
 	return true;
 }

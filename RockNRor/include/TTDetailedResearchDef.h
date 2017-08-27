@@ -41,8 +41,8 @@ public:
 	bool isAvailableAfterAnalysis; // Used in analysis phase: set to true when a "researchIdsThatEnableMe" is ready (building can be built at this stage).
 	short int requiredAge; // -1 or an "age" research ID
 	std::set<long int> researchIdsThatEnableMe; // It is expected to have 0 (if available at start) or 1 value here, no more.
-	std::set<long int> possibleUpgradedUnitIDs; // UnitDefIds of buildings that are "upgrades" of me. WARNING: missing values for intermediate units !!!
-	std::set<long int> possibleAncestorUnitIDs; // UnitDefIds of buildings that can be upgraded into "me". See "baseUnitId" to find THE root unitDefId.
+	std::set<long int> possibleUpgradedUnitIDs; // UnitDefIds of units that are "upgrades" of me. Does NOT include "myself".
+	std::set<long int> possibleAncestorUnitIDs; // UnitDefIds of units that can be upgraded into "me". See "baseUnitId" to find THE root unitDefId. Does NOT include "myself".
 	std::set<TTDetailedResearchDef*> affectedByResearches; // Research IDs that affect this unit (add HP, speed, etc, or even indirectly like ballistics for range units...)
 
 	long int baseUnitId; // UnitDefId of the (root) base unitdef I am a descendent of. =this->unitDefId if I have no ancestor.
@@ -217,6 +217,13 @@ public:
 		// In DM, all all techs (even jihad...) except those that AI doesn't/can't use (martyrdom...)
 		return (this->isAiUnsupported);
 	}
+
+	// Returns true if the research is an age (stone/tool/bronze/iron)
+	bool IsAgeResearch() const {
+		return (this->researchDefId >= AOE_CONST_FUNC::CST_RSID_STONE_AGE) &&
+			(this->researchDefId <= AOE_CONST_FUNC::CST_RSID_IRON_AGE);
+	}
+
 };
 
 

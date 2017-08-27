@@ -138,7 +138,8 @@ namespace TT_CONFIG {
 	static const double RES_WEIGHT_MAX = 1;
 	static const double RES_PROBA_STANDARD_RESEARCH = 0.5; // "disable probability" for a standard research
 	static const double RES_WEIGHT_STANDARD_RESEARCH = 0.1; // "disable weight" for a standard research
-	static const double RES_PROBA_SPECIALIZED_RESEARCH = 0.6; // "disable probability" for "specialized" research: a bit more rare than standard. E.g. shields.
+	static const double RES_PROBA_SPECIALIZED_RESEARCH = 0.6; // "disable probability" for "specialized" research: availability=a bit more rare than standard. E.g. shields.
+	static const double RES_PROBA_OFTEN_DISABLED = 0.7; // "disable probability" for researches that are disabled in many cases
 	static const double RES_PROBA_COMMON_USEFUL_RESEARCH = 0.35; // "disable probability" for a very common/useful research like architecture
 	static const double RES_WEIGHT_COMMON_USEFUL_RESEARCH = 0.75; // "disable weight" for a very common/useful research like architecture
 	static const double RES_PROBA_WHEEL = 0.05; // "disable probability" for Wheel research
@@ -194,8 +195,8 @@ public:
 	std::set<long int> eligibleDisableResearchIdIron;
 	std::set<long int> eligibleDisableUnitDefIdBronze;
 	std::set<long int> eligibleDisableUnitDefIdIron;
-	std::list<TTCreatorResearchInfo*> allCreatorResearchInfo;
-	std::list<TTCreatorUnitInfo*> allCreatorUnitInfo;
+	std::list<TTCreatorResearchInfo*> allCreatorResearchInfo; // All *eligible* (that may be disabled) research info. May exclude researches that enable units (see allCreatorUnitInfo instead)
+	std::list<TTCreatorUnitInfo*> allCreatorUnitInfo; // All *eligible* units info (units that may be disabled).
 	std::list<STRUCT_TECH_DEF_EFFECT> techTreeEffects;
 	std::set<GLOBAL_UNIT_AI_TYPES> classesWithBonus; // Unit classes that benefit from a civ bonus
 
@@ -262,8 +263,9 @@ private:
 	// Create one civ bonus
 	double CreateOneBonus();
 
-	void CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES bonusUnitClass, TECH_UNIT_ATTRIBUTES unitAttr, 
-		int minBonusRate, int maxBonusRate);
+	// Returns the weight to be added. 0 in most cases, !=0 for special cases
+	double CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES bonusUnitClass, TECH_UNIT_ATTRIBUTES unitAttr,
+		int minBonusRate, int maxBonusRate, int availableAffectedUnits);
 
 	// Choose one of the upgrade of rootUnitInfo (or rootUnitInfo) that will be the first unit from the lineage to be unavailable.
 	TTCreatorUnitInfo *PickUnitUpgradeToDisableInUnitLine(TTCreatorUnitInfo *rootUnitInfo);

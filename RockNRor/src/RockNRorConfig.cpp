@@ -70,6 +70,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->cityPlanBerryBushWeightForGranary = 0x28; // NOT game default (0x80) because it doesn't work well.
 	this->civCount = AOE_CONST_FUNC::CIVILIZATIONS::CST_CIVID_STANDARD_MAX;
 	this->allowPickingCustomCivsInRandomInit = false; // Game default
+	this->randomTechTreeForRMGames = false; // Game default
 	for (int i = 0; i < 256; i++) {
 		allCivInfo[i] = NULL;
 	}
@@ -327,6 +328,9 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		if (elemName == "showRockNRorNotifications") {
 			this->showRockNRorNotifications = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "generateRandomTechTree") {
+			this->randomTechTreeForRMGames = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "rpgMode") {
 			this->enableRPGModeInScenario = XML_GetBoolElement(elem, "scenario");
@@ -981,6 +985,7 @@ bool RockNRorConfig::ReadTilesetXMLConfigFile(char *fileName) {
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->slpIdGameScreenHigh = intValue; }
 					}
 					if (subElemName == "button_border_colors") {
+						// "Bevels" ?
 						callResult = subElem->QueryIntAttribute("out_top_right", &intValue);
 						if (callResult == TIXML_SUCCESS) { tilesetInfo->btnBorderColors[0] = intValue; }
 						callResult = subElem->QueryIntAttribute("mid_top_right", &intValue);

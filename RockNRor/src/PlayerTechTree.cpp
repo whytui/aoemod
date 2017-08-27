@@ -181,6 +181,7 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	// Init base probabilities, also create research/unit internal info objects.
 	this->SetResearchBaseProbabilities();
 	this->SetUnitBaseProbabilities();
+	this->UpdateResearchProbabilitiesWithImpacts();
 	
 	// DISABLE RESEARCH (may cascade on other researches + units)
 	this->CreateDisableResearchesEffects();
@@ -194,19 +195,7 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	this->AddEffectsToTechDef();
 
 	// TODO: protect at least 1 (2?) super unit in tech tree
-	// Ex: 65 techs bronze/iron
-	// range disable : 15-26
-	// egypt 16 disable unit/upgrade, 5 disable tech
-	// greek 15 disable unit/upgrade, 5 disable tech
-	// assy 13 disable unit/upgrade, 11 disable tech
-	// bab 13 disable unit/upgrade, 6 disable tech
-	// yama 14 disable unit/upgrade, 8 disable tech mainly temple + towers/wall not counted
-	// rome 11 disable unit/upgrade, 4 disable tech ! (2 temple, 1 market 1 gov)
-	// palmy 9 disable unit/upgrade, 13 disable tech (bad temple, market...)
-	// carth 11 disable unit/upgrade, 8 disable tech (temple, sp...)
-	// cho 17 disable unit/upgrade, 9 disable tech (sp, ov, dock...)
-
-	// Do not allow disable building at this point (except iron age towers)
+	// Do not allow disable building at this point (except iron age towers) + temple ?
 }
 
 
@@ -426,13 +415,17 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 	for each (TTCreatorResearchInfo *crResInfo in this->allCreatorResearchInfo)
 	{
 		if (crResInfo->techImpactsReligion && (crResInfo->rawDisableProbability < 0)) {
-			// TODO: higher proba for jihad, martyrdom ?
 			crResInfo->rawDisableProbability = religionProba;
 			crResInfo->disableWeight = weightForReligion;
 			if (crResInfo->researchDetail->requiredAge < AOE_CONST_FUNC::CST_RSID_IRON_AGE) {
 				crResInfo->disableWeight = crResInfo->disableWeight * religionBronzeFactor;
 				crResInfo->rawDisableProbability = crResInfo->rawDisableProbability * (2 - religionBronzeFactor);
 			}
+			// Higher proba for jihad, martyrdom
+			if (crResInfo->researchDetail->hasNegativeSideEffect || crResInfo->researchDetail->isAiUnsupported) {
+				crResInfo->rawDisableProbability += 0.05;
+			}
+
 			if (crResInfo->disableWeight > 1) { crResInfo->disableWeight = 1; }
 			if (crResInfo->rawDisableProbability > 1) { crResInfo->rawDisableProbability = 1; }
 		}
@@ -643,7 +636,7 @@ void TechTreeCreator::UpdateResearchProbabilitiesWithImpacts() {
 
 		// underlying "disable units": add a lot of weight as this part is supposed to deal with techs that do NOT impact units activation.
 		int directEnableTrainableCount = crResInfo->researchDetail->enableTrainables.size();
-		crResInfo->disableWeight *= (1 + directEnableTrainableCount*0.05); // Add 10% weight per dependency
+		crResInfo->disableWeight *= (1 + directEnableTrainableCount*0.05); // Add 5% weight per dependency
 
 		int indirectEnableTrainableCount = 0;
 		std::for_each(crResInfo->researchDetail->allChildResearches.begin(),
@@ -652,11 +645,14 @@ void TechTreeCreator::UpdateResearchProbabilitiesWithImpacts() {
 			indirectEnableTrainableCount += childDetail->enableTrainables.size();
 		}
 		);
-		crResInfo->disableWeight *= (1 + directEnableTrainableCount*0.02); // Add 5% weight per indirect dependency
+		crResInfo->disableWeight *= (1 + directEnableTrainableCount*0.02); // Add 2% weight per indirect dependency
 
 		// Effects on unit (attributes, etc). Add weight if many units (take care of unit classes !)
-		// TODO
-#pragma TODO("effects on units : update weight")
+		int affectedUnitImpact = crResInfo->researchDetail->affectsUnits.size() / 3;
+		if (affectedUnitImpact > 8) { affectedUnitImpact = 8; } // More than 24 units affected, stop counting
+		crResInfo->disableWeight *= (1 + affectedUnitImpact*0.01);
+
+		if (crResInfo->disableWeight > 1) { crResInfo->disableWeight = 1; } // should not be necessary
 	}
 }
 
@@ -670,6 +666,7 @@ void TechTreeCreator::CreateDisableResearchesEffects() {
 	int templeResearchesDoNotCountMoreThan = 3; 
 	while (curDisableCount < preferredDisableResearchCount) {
 		double bestScore = -1;
+		// Randomly choose a research to disable
 		TTCreatorResearchInfo *bestElem = randomizer.PickRandomElementWithWeight<std::list, TTCreatorResearchInfo>
 			(this->allCreatorResearchInfo, [](TTCreatorResearchInfo *curInfo) {
 			return curInfo->GetDisableProbability();
@@ -716,6 +713,7 @@ void TechTreeCreator::CreateDisableUnitsEffects() {
 		double bestScore = -1;
 		TTCreatorUnitInfo *rootUnitToDisable = NULL;
 
+		// Randomly choose a unit to disable
 		rootUnitToDisable = randomizer.PickRandomElementWithWeight<std::list, TTCreatorUnitInfo>
 			(this->allCreatorUnitInfo, [](TTCreatorUnitInfo *curInfo){
 			return curInfo->GetDisableProbability();
@@ -806,9 +804,9 @@ double TechTreeCreator::CreateOneBonus() {
 	// propsByUnitClass.insert => Unit class, { weight, probabilityCoeff }
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, { 0.35, 0.9 }));
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, { 0.2, 0.85 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, { 0.55, 1 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, { 0.55, 0.98 }));
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, { 0.4, 0.95 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, { 0.20, 0.88 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, { 0.20, 0.89 }));
 	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, { 0.10, 0.70 })); // is water map
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, { 0.35, 1 }));
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, { 0.4, 1 }));
@@ -976,15 +974,17 @@ double TechTreeCreator::CreateOneBonus() {
 	if (maxBonusRate < 0) { maxBonusRate = 0; }
 	if (minBonusRate > maxBonusRate) { minBonusRate = maxBonusRate; }
 	
-	this->CreateOneBonusEffect(chosenClass, chosenAttr, minBonusRate, maxBonusRate);
+	chosenWeight += this->CreateOneBonusEffect(chosenClass, chosenAttr, minBonusRate, maxBonusRate, unitLinesByUnitClass[chosenClass]);
 
-	result = (chosenWeight + chosenAttrWeight) / 2;
+	result = (chosenWeight + chosenWeight) / 2;
 	return result;
 }
 
 
-void TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES bonusUnitClass,
-	TECH_UNIT_ATTRIBUTES unitAttr, int minBonusRate, int maxBonusRate) {
+// Returns the weight to be added. 0 in most cases, !=0 for special cases
+double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES bonusUnitClass,
+	TECH_UNIT_ATTRIBUTES unitAttr, int minBonusRate, int maxBonusRate, int availableAffectedUnits) {
+	double resultAdditionalWeight = 0.;
 	const char *className = GetUnitClassName(bonusUnitClass);
 	bool isPriest = (bonusUnitClass == TribeAIGroupPriest);
 	bool isMelee = (bonusUnitClass == TribeAIGroupChariot) || (bonusUnitClass == TribeAIGroupElephantRider) ||
@@ -998,13 +998,12 @@ void TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES 
 	short int applyToUnit = -1; // dest tech effect unit id
 
 	// Cases when we apply to restricted units
-#pragma WARNING("FIXME (uncomment)")
-	/*if (unitLinesByUnitClass[bonusUnitClass] == 1) {
+	if (availableAffectedUnits == 1) {
 		// apply to unit specifically. Avoids having bonus on "cavalry" class when only available unit is scout !
 		TTDetailedUnitDef *theUnit = this->PickOneRandomRootUnitIdAmongUnitClass(bonusUnitClass, -1);
 		applyToUnit = (short int)theUnit->unitDefId;
 		applyToClass = AOE_CONST_FUNC::TribeAINone;
-	}*/
+	}
 
 	std::string applyToNameString = "class "; // localized name of affected class/unit
 	applyToNameString += className;
@@ -1037,8 +1036,7 @@ void TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES 
 		if ((bonusUnitClass == TribeAIGroupSiegeWeapon) || (bonusUnitClass == TribeAIGroupPriest)) {
 			if (rndMultiplier > 1.175) {
 				newEffect.effectValue = 2;
-#pragma WARNING("FIXME (uncomment)")
-				//chosenAttrWeight += 0.1; // TODO pass variable ?
+				resultAdditionalWeight += 0.1;
 			}
 		}
 		techTreeEffects.push_back(newEffect);
@@ -1238,6 +1236,7 @@ void TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES 
 		this->bonusText += className;
 		this->bonusText += NEWLINE;
 	}
+	return resultAdditionalWeight;
 }
 
 
@@ -1325,25 +1324,58 @@ TTCreatorUnitInfo *TechTreeCreator::PickUnitUpgradeToDisableInUnitLine(TTCreator
 
 	if (rootUnitInfo->rootUnitDisablePolicy == TTCreatorBaseUnitDisableBehavior::TTBUDisableMostlyExclusiveSameClassIron) {
 #pragma WARNING("TTBUDisableMostlyExclusiveSameClassIron not implemented")
-		// TODO
 	}
 
 	// TODO: for long lineage >=3 (legion, cats, cavalry...), do not disable "only" last one when required researches are ok ?
-
-	int countForRandomChoice = unitInfoThatCanBeDisabled.size();
-	int randomLevelChoice = randomizer.GetRandomValue(1, countForRandomChoice);
-	for (int i = 1; i < randomLevelChoice; i++) {
-		assert(unitInfoThatCanBeDisabled.size() > 0);
-		if (unitInfoThatCanBeDisabled.size() == 0) {
-			return rootUnitInfo;
+	// Note: Even when only 2 "upgrade levels", almost all "last unit upgrades" depend on an "external" research, except composite bowman (who's NOT a super unit...), trireme. Oh, and axeman ;)
+	int childrenCount = rootUnitInfo->unitDetail->possibleUpgradedUnitIDs.size();
+	const int minNumberOfUpgradeLevelsForLastUnitRequirementCheck = 3; // counting root unit as an upgrade.
+	if (childrenCount >= minNumberOfUpgradeLevelsForLastUnitRequirementCheck) {
+		long int myLocation = rootUnitInfo->unitDetail->GetUnitDef()->trainLocation;
+		// Find last upgrade
+		int securityCounter = childrenCount;
+		long int curChildId = *rootUnitInfo->unitDetail->possibleUpgradedUnitIDs.begin();
+		TTCreatorUnitInfo *lastUpgradedUnitInfo = this->GetCrUnitInfo(curChildId);
+		while (lastUpgradedUnitInfo && (securityCounter > 0)) {
+			securityCounter--;
+			if (lastUpgradedUnitInfo && (lastUpgradedUnitInfo->unitDetail->possibleUpgradedUnitIDs.size() > 0)) {
+				curChildId = *lastUpgradedUnitInfo->unitDetail->possibleUpgradedUnitIDs.begin();
+				lastUpgradedUnitInfo = this->GetCrUnitInfo(curChildId);
+			}
 		}
-		unitInfoThatCanBeDisabled.pop_front();
+		if (lastUpgradedUnitInfo) {
+			bool isIronAgeUpgrade = (lastUpgradedUnitInfo->unitDetail->requiredAge == AOE_CONST_FUNC::CST_RSID_IRON_AGE);
+			long int enablerResId = *lastUpgradedUnitInfo->unitDetail->researchIdsThatEnableMe.begin();
+			auto lastUpgradeResearchInfo = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(enablerResId);
+			if (lastUpgradeResearchInfo && lastUpgradeResearchInfo->active && isIronAgeUpgrade) { // only for iron-age upgrades
+				bool hasRequirementFromOtherBuilding = false;
+				for each (auto req in lastUpgradeResearchInfo->directRequirements)  {
+					if (!req->active) { continue; }
+					if (req->IsAgeResearch()) { continue; } // Ignore age requirement
+					if (req->IsWheel()) { continue; } // heavy chariot can be disabled while chariot is available
+					if ((myLocation != req->researchDef->researchLocation) && (req->researchDef->researchLocation >= 0)) {
+						hasRequirementFromOtherBuilding = true;
+						break;
+					}
+				}
+				if (hasRequirementFromOtherBuilding) {
+					// Do not allow the last upgrade to be the *first* one being NON-available
+					auto it = std::find(unitInfoThatCanBeDisabled.begin(), unitInfoThatCanBeDisabled.end(), lastUpgradedUnitInfo);
+					if (it != unitInfoThatCanBeDisabled.end()) {
+						unitInfoThatCanBeDisabled.erase(it++);
+					}
+				}
+			}
+		}
+
 	}
-	assert(unitInfoThatCanBeDisabled.size() > 0);
-	if (unitInfoThatCanBeDisabled.size() == 0) {
-		return rootUnitInfo;
+
+	TTCreatorUnitInfo *chosen = randomizer.PickRandomElementWithWeight<std::list, TTCreatorUnitInfo>(
+		unitInfoThatCanBeDisabled, [](TTCreatorUnitInfo *u) { return u->rawDisableProbability; } );
+	if (!chosen) {
+		chosen = rootUnitInfo;
 	}
-	return unitInfoThatCanBeDisabled.front();
+	return chosen;
 }
 
 

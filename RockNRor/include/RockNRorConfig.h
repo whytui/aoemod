@@ -187,6 +187,7 @@ public:
 	// Civilizations
 	long int civCount; // Does NOT count gaia (index=0)
 	bool allowPickingCustomCivsInRandomInit;
+	bool randomTechTreeForRMGames;
 	// Human interface
 	bool enableCallNearbyIdleMilitaryUnits;
 	long int distanceToCallNearbyIdleMilitaryUnits;
