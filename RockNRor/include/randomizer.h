@@ -101,8 +101,7 @@ public:
 		// TEMPLATE types to provide:
 		// - Collection type (list, vector...) without underlying object type
 		// - Item type="MyType" (NOT the pointer). Collection's object type is "pointer to MyType".
-		// SYNTAX example.
-		// resultObj = randomizer.PickRandomElementWithWeight<std::list, MyType>(myListOfObjPtr, [](MyType *item){return item->myWeightValue(); });
+		// SYNTAX example: resultObj = randomizer.PickRandomElementWithWeight<std::list, MyType>(myListOfObjPtr, [](MyType *item){return item->myWeightValue(); });
 		ITEM *PickRandomElementWithWeight(CollectionType<ITEM*, std::allocator<ITEM*>> collection, double(*weightPredicate) (ITEM *item)) {
 		double total = 0;
 		for (auto it = collection.begin(); it != collection.end(); it++) {

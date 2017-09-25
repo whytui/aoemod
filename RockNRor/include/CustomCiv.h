@@ -28,6 +28,7 @@ public:
 	}
 
 	std::string lastGenerationSummary;
+	std::list<std::string> lastGenerationBonusLinesForHumanPlayer;
 
 	// Init data for standard games (using standard civs/tech tree)
 	bool CreateInternalDataForGameWithStandardCivs();
@@ -45,6 +46,7 @@ public:
 	// Reset all players data
 	void ResetPlayers() {
 		this->lastGenerationSummary.clear();
+		this->lastGenerationBonusLinesForHumanPlayer.clear();
 		for (int i = 0; i < 9; i++) {
 			this->playersInfo[i].ResetAndInit(i, -1, -1);
 		}

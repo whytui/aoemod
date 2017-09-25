@@ -129,7 +129,7 @@ void UnitGroupAI::EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI) {
 
 
 // Set unitGroup.currentTask and call ApplyTask for the group (creates underlying unit commands, etc).
-// unitGroup.consecutiveIdleUnitCount is updated
+// unitGroup.lastUpdateTime_ms is updated
 // unitGroup->lastAttackTaskingTime_ms is updated if taskId is an attack task.
 void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, UNIT_GROUP_TASK_IDS taskId,
 	long int resetOrg, bool force) {
@@ -145,17 +145,16 @@ void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROU
 	bool rorResult = AOE_METHODS::UNIT_GROUP::ApplyTaskToUnitGroup(unitGroup, tacAI, taskId, resetOrg, force);
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid()) {
-#pragma WARNING("Erroneous code here, used a bad interpretation ? Many impacts !!! Fix other occurences too of consecutiveIdleUnitCount") // lastTaskingTime_ms became consecutiveIdleUnitCount
-		unitGroup->consecutiveIdleUnitCount = global->currentGameTime;
+		unitGroup->lastUpdateTime_ms = global->currentGameTime;
 		if (unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02) {
 			unitGroup->lastAttackTaskingTime_ms = global->currentGameTime;
 		}
 	}
-	this->AddTaskingByUGAITrace(unitGroup->unitGroupId, unitGroup->currentTask, unitGroup->targetUnitId, unitGroup->consecutiveIdleUnitCount);
+	this->AddTaskingByUGAITrace(unitGroup->unitGroupId, unitGroup->currentTask, unitGroup->targetUnitId, unitGroup->lastUpdateTime_ms);
 }
 
 
-// Attack a target or approaches a zone to defend/attack. Updates unitGroup->consecutiveIdleUnitCount if tasked.
+// Attack a target or approaches a zone to defend/attack. Updates unitGroup->lastUpdateTime_ms if tasked.
 // Updates unitGroup->lastAttackTaskingTime_ms is an attack task is assigned.
 // If target is not found and no default retreat position if provided (-1), the group is NOT tasked
 // Returns the used task id.
@@ -205,7 +204,7 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 		if (forceTasking && (this->gameDiffLevel <= GAME_DIFFICULTY_LEVEL::GDL_MEDIUM)) {
 			result = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_ROUNDUP_TARGET; // units will avoid being distracted by other targets
 		} else {
-			if (global->currentGameTime - unitGroup->consecutiveIdleUnitCount < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms) {
+			if (global->currentGameTime - unitGroup->lastUpdateTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms) {
 				// Tasking "CST_UGT_ATTACK_02" many times in a row is dangerous if if sees other targets (unit constantly changes action and is stuck)
 				return UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 			}
@@ -534,7 +533,7 @@ void UnitGroupAI::OnUnitGroupAttacked(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_
 
 	// Make sure unit group has not already been tasked very recently (to avoid accumulation of orders/counter-orders)
 	if (unitGroup &&
-		(global->currentGameTime - unitGroup->consecutiveIdleUnitCount >= AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
+		(global->currentGameTime - unitGroup->lastUpdateTime_ms >= AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
 		// Unit is part of a group. Check if other members can help
 		for (int i = 0; i < myUnit->unitIDsInMyGroup.usedElements; i++) {
 			long int alliedUnitId = myUnit->unitIDsInMyGroup.unitIdArray[i];
@@ -554,7 +553,7 @@ void UnitGroupAI::OnUnitGroupAttacked(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_
 					if (sqrdist < COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack * COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack) {
 						GAME_COMMANDS::CreateCmd_RightClick(alliedUnit->unitInstanceId, enemyUnit->unitInstanceId,
 							enemyUnit->positionX, enemyUnit->positionY);
-						unitGroup->consecutiveIdleUnitCount = global->currentGameTime;
+						unitGroup->lastUpdateTime_ms = global->currentGameTime;
 					}
 				}
 			}
@@ -587,7 +586,7 @@ bool UnitGroupAI::TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *
 	}
 	bool doNotRetaskCommander = commanderHasMilitaryTarget || commanderTargetIsInTown;
 	if (doNotRetaskCommander && unitGroup->isTasked &&
-		(global->currentGameTime - unitGroup->consecutiveIdleUnitCount < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
+		(global->currentGameTime - unitGroup->lastUpdateTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
 		return false;
 	}
 
@@ -627,7 +626,7 @@ bool UnitGroupAI::TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *
 		}
 	} else {
 		// Unit group is already in (or near) town
-		if (global->currentGameTime - unitGroup->consecutiveIdleUnitCount > (1000 * tacAI->SNNumber[SNTacticalUpdateFrequency])) {
+		if (global->currentGameTime - unitGroup->lastUpdateTime_ms > (1000 * tacAI->SNNumber[SNTacticalUpdateFrequency])) {
 			STRUCT_UNIT_MEMORY *targetElem = this->GetUnitMemoryElemEnemyUnitCloserToPosition(player, (long int)commander->positionX, (long int)commander->positionY);
 			UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 			// Attack enemy if visible/if we know a recent location. Otherwise, do nothing (we don't set a retreat position in AttackOrRetreat call)
@@ -674,7 +673,7 @@ bool UnitGroupAI::TaskActiveAttackGroupWeakWithVitalMainUnit(STRUCT_PLAYER *play
 	bool commanderHasMilitaryTarget = HasVisibleMilitaryTarget(commander);
 	if (unitGroup->isTasked &&
 		// TODO: could use a longer delay than minimumDelayBetweenBasicUnitGroupAttackTasking_ms
-		(global->currentGameTime - unitGroup->consecutiveIdleUnitCount < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
+		(global->currentGameTime - unitGroup->lastUpdateTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms)) {
 		return false;
 	}
 
@@ -796,8 +795,9 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 	STRUCT_UNIT_BASE *commanderUnit = global->GetUnitFromId(unitGroup->commanderUnitId);
 	if (!commanderUnit || !commanderUnit->IsCheckSumValidForAUnitClass()) { return false; }
 	STRUCT_TAC_AI *tacAI = &player->ptrAIStruct->structTacAI;
-	assert(tacAI && tacAI->IsCheckSumValid());
-	if (!tacAI || !tacAI->IsCheckSumValid()) { return false; }
+	STRUCT_INF_AI *infAI = &player->ptrAIStruct->structInfAI;
+	assert(tacAI && tacAI->IsCheckSumValid() && infAI && infAI->IsCheckSumValid());
+	if (!tacAI || !tacAI->IsCheckSumValid() || !infAI || !infAI->IsCheckSumValid()) { return false; }
 
 	float distanceToMyMainUnit = -1;
 	if (this->activeGroupsTaskingTempInfo.myMainCentralUnit && this->activeGroupsTaskingTempInfo.myMainCentralUnit->IsCheckSumValidForAUnitClass()) {
@@ -847,7 +847,7 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 				this->SetUnitGroupCurrentTask(&player->ptrAIStruct->structTacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02, 1, false);
 				return true;
 			}
-			if (global->currentGameTime - unitGroup->consecutiveIdleUnitCount < AI_CONST::delayBetweenUnitGroupAttackTasking_ms) {
+			if (global->currentGameTime - unitGroup->lastAttackTaskingTime_ms < AI_CONST::delayBetweenUnitGroupAttackTasking_ms) {
 				return true;
 			}
 			// Commander has no target. Continue attacking "non-visible" one = go to last known position using infAI elem.
@@ -865,7 +865,7 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 		// TODO
 	}
 
-	if (global->currentGameTime - unitGroup->consecutiveIdleUnitCount < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms) {
+	if (global->currentGameTime - unitGroup->lastAttackTaskingTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms) {
 		return false;
 	}
 
@@ -888,6 +888,48 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 			}
 		}
 	}
+
+	if (this->gameDiffLevel > GAME_DIFFICULTY_LEVEL::GDL_HARD) {
+		return false;
+	}
+
+	// Idle group: assist active units, if any (attacking something OR being attacked)
+	// Otherwise, enter "exterminate" mode (explore to find a target)
+	for (int curIndex = 0; curIndex < STRUCT_UNIT_GROUP_UNIT_SLOTS_COUNT; curIndex++) {
+		long int curUnitId = unitGroup->GetMyUnitId(curIndex);
+		STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curUnitId);
+		if (!curUnit || !curUnit->IsCheckSumValidForAUnitClass() || !curUnit->currentActivity) { continue; }
+		long int unitIdToTarget = -1;
+		// Is this group unit being attacked ?
+		int attackingMeCount = curUnit->currentActivity->unitIDsThatAttackMe.usedElements;
+		if (attackingMeCount > 0) {
+			unitIdToTarget = curUnit->currentActivity->unitIDsThatAttackMe.unitIdArray[0];
+		}
+		// Is this group unit attacking some target ?
+		if ((unitIdToTarget == -1) && (curUnit->currentActivity->targetUnitId >= 0)) {
+			STRUCT_UNIT_BASE *curTarget = global->GetUnitFromId(curUnit->currentActivity->targetUnitId);
+			if (curTarget && curTarget->IsCheckSumValidForAUnitClass() && curTarget->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) {
+				unitIdToTarget = curUnit->currentActivity->targetUnitId;
+			}
+		}
+		// If we found a target, assign it to other group units
+		if (unitIdToTarget >= 0) {
+			AOE_STRUCTURES::STRUCT_UNIT_MEMORY *elem = ROCKNROR::unitExtensionHandler.GetInfAIUnitMemory(unitIdToTarget, infAI);
+			if (elem) {
+				UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, elem, -1, -1, false);
+				if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
+#ifdef _DEBUG
+					std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" : idle => assist other group unit, wkn=");
+					msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCntTwn=") + std::to_string(this->activeGroupsTaskingTempInfo.townLandAttackGroupCount + this->activeGroupsTaskingTempInfo.townLandDefendGroupCount + this->activeGroupsTaskingTempInfo.townLandExploreGroupCount);
+					this->lastDebugInfo += msg + std::string("\n");
+#endif
+					return true; // Unit group has been tasked
+				}
+			}
+		}
+	}
+	
+	this->SetUnitGroupCurrentTask(tacAI, unitGroup, UNIT_GROUP_TASK_IDS::CST_UGT_EXTERMINATE, 0, 0);
 
 	return false;
 }

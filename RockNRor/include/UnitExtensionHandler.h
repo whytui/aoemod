@@ -62,8 +62,8 @@ public:
 	// This method is faster than basic search because it uses 'cached' index (if possible)
 	long int GetIndexForUnitInInfAIUnitMemory(long int unitIdToSearch, long int infAIPlayerId);
 
-	// Get the index in "InfAI" detailed unit info list for provided unit ID.
-	// Returns -1 if not found
+	// Get the pointer to "InfAI" unit mmory object for provided unit ID.
+	// Returns NULL if not found
 	// This method is faster than basic search because it uses 'cached' index (if possible)
 	STRUCT_UNIT_MEMORY *UnitExtensionHandler::GetInfAIUnitMemory(long int unitIdToSearch, STRUCT_INF_AI *infAI);
 

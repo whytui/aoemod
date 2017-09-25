@@ -140,9 +140,9 @@ namespace TT_CONFIG {
 	static const double RES_WEIGHT_STANDARD_RESEARCH = 0.1; // "disable weight" for a standard research
 	static const double RES_PROBA_SPECIALIZED_RESEARCH = 0.6; // "disable probability" for "specialized" research: availability=a bit more rare than standard. E.g. shields.
 	static const double RES_PROBA_OFTEN_DISABLED = 0.7; // "disable probability" for researches that are disabled in many cases
-	static const double RES_PROBA_COMMON_USEFUL_RESEARCH = 0.35; // "disable probability" for a very common/useful research like architecture
+	static const double RES_PROBA_COMMON_USEFUL_RESEARCH = 0.25; // "disable probability" for a very common/useful research like architecture
 	static const double RES_WEIGHT_COMMON_USEFUL_RESEARCH = 0.75; // "disable weight" for a very common/useful research like architecture
-	static const double RES_PROBA_WHEEL = 0.05; // "disable probability" for Wheel research
+	static const double RES_PROBA_WHEEL = 0.015; // "disable probability" for Wheel research
 	static const double RES_WEIGHT_WHEEL = 0.9; // "disable weight" for Wheel research
 	static const double RES_PROBA_STANDARD_UNIT = 0.5; // "disable probability" for a standard unit
 	static const double RES_WEIGHT_STANDARD_UNIT = 0.1; // "disable weight" for a standard unit
@@ -152,7 +152,7 @@ namespace TT_CONFIG {
 
 	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.9; // computed probability counts as much as xxx% vs random. 1=100%=apply probability normally. Do not set to 0.
 	static const int CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT = 40;
-	static const int CALC_MAX_DISABLE_UNITLINE_COUNT_PERCENT = 70;
+	static const int CALC_MAX_DISABLE_UNITLINE_COUNT_PERCENT = 66;
 	static const int CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT = 20;
 	static const int CALC_MAX_DISABLE_RESEARCH_COUNT_PERCENT = 45;
 	static int MIN_DISABLE_UNITLINE_COUNT = 6; // default value, recomputed according to CALC_*
@@ -228,6 +228,8 @@ public:
 
 	std::string GetCivBonusText() const;
 
+	std::list<std::string> GetHumanBonusTextLines() const;
+
 private:
 	std::string bonusText;
 
@@ -265,7 +267,7 @@ private:
 
 	// Returns the weight to be added. 0 in most cases, !=0 for special cases
 	double CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES bonusUnitClass, TECH_UNIT_ATTRIBUTES unitAttr,
-		int minBonusRate, int maxBonusRate, int availableAffectedUnits);
+		int minBonusRate, int maxBonusRate, int availableAffectedUnitLines);
 
 	// Choose one of the upgrade of rootUnitInfo (or rootUnitInfo) that will be the first unit from the lineage to be unavailable.
 	TTCreatorUnitInfo *PickUnitUpgradeToDisableInUnitLine(TTCreatorUnitInfo *rootUnitInfo);
@@ -280,6 +282,10 @@ private:
 
 	// Copy (add) effects from internal collection (techTreeEffects) to actual tech tree object (techDef)
 	void AddEffectsToTechDef();
+
+	// Add an effect into internal collection (techTreeEffects) for EACH unitDefId provided in the parameter collection
+	// Useful to copy an effect from root unit to its upgrades
+	void AddSameEffectForUnitDefIDs(AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT *srcEffect, const std::set<long int> &unitDefIDs);
 
 	// Randomly selects 1 non-disabled root unit in provided unit class. NULL if not found.
 	// Use minimumRequiredAgeResearchId to filter on units >= provided age. E.g. CST_RSID_TOOL_AGE

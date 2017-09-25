@@ -142,7 +142,7 @@ namespace CUSTOM_AI {
 		void EvaluateMilitarySituation(STRUCT_TAC_AI *tacAI);
 
 		// Set unitGroup.currentTask and call ApplyTask for the group (creates underlying unit commands, etc).
-		// unitGroup.lastTaskingTime_ms is updated
+		// unitGroup.lastUpdateTime_ms is updated
 		// unitGroup->lastAttackTaskingTime_ms is updated if taskId is an attack task.
 		void SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *unitGroup, UNIT_GROUP_TASK_IDS taskId,
 			long int resetOrg, bool force);

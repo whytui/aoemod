@@ -242,7 +242,7 @@ namespace AOE_STRUCTURES {
 		res += " unknown_1BC=";
 		res += std::to_string(obj->priority);
 		res += " consecutiveIdleUnitCount=";
-		res += std::to_string(obj->consecutiveIdleUnitCount);
+		res += std::to_string(obj->lastUpdateTime_ms);
 		return res;
 	}
 

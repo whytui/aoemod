@@ -68,7 +68,7 @@ namespace AOE_STRUCTURES {
 		long int waitCode; // +1C0
 		long int assistGroupId; // +1C4. Group I need to help ? Unit group ID of the transport that does transport "me" ?
 		long int assistGroupType; // +1C8. Some int value (seen -1)
-		long int consecutiveIdleUnitCount; // +1CC. Last game time of "task active soldier" execution for the group ? Compared to SNTacticalUpdateFrequency (default 3 seconds). old wrong:"lastTaskingTime_ms"
+		long int lastUpdateTime_ms; // +1CC. Last game time of "task active soldier" execution for the group. Compared to SNTacticalUpdateFrequency (default 3 seconds), SNConsecutiveIdleUnitLimit(0x4D5201). Cf 0x4CEB10/20.
 		// 0x1D0
 		long int attackPlayId; // attackId that is being played. -1=Non-Play-based attack
 		char numberAttackwaypoints; // +1D4. Number of elements in +1D8 ? Max 0xE ?

@@ -86,8 +86,11 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 		this->lastGenerationSummary += "Civilization bonuses:" NEWLINE;
 		this->lastGenerationSummary += ttc.GetCivBonusText();
 		this->lastGenerationSummary += NEWLINE;
+		if ((global->humanPlayerId >= 0) && (global->humanPlayerId == playerId)) {
+			this->lastGenerationBonusLinesForHumanPlayer = ttc.GetHumanBonusTextLines();
+		}
 	}
-
+	
 	return true;
 }
 

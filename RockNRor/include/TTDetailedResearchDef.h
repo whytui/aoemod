@@ -49,7 +49,7 @@ public:
 	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitClass;
 
 	// True if unitdef is valid and underlying data can be used safely
-	virtual bool IsValid() const { return this->unitDefId >= 0; }
+	virtual bool IsValid() const { return (this->unitDefId >= 0) && (this->GetUnitDef() != NULL); }
 
 	// Safely sets internal name from unit definition.
 	void SetNameFromDefinition(STRUCT_UNITDEF_BASE *unitDef) {

@@ -18,7 +18,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_TASK_HEAL = 0x25B,
 		CST_ATI_TASK_CONVERT = 0x25C,
 		CST_ATI_TASK_EXPLORE = 0x25D,
-		CST_ATI_TASK_GATHER_NOATTACK = 0x261, // Forager, farmer, miners (gathering that doesn't have an "attack" phase.
+		CST_ATI_TASK_GATHER_NOATTACK = 0x261, // Forager, farmer, miners (gathering that doesn't have an "attack" phase).
 		CST_ATI_TASK_MOVE = 0x262, // 
 		// 263: unused
 		CST_ATI_TASK_FOLLOW_OBJECT = 0x264, // Follow an object ?

@@ -981,6 +981,11 @@ void RockNRorCommand::OnAfterLoadEmpires_DAT() {
 // Most structures have not been initialized/loaded yet.
 // This method should only reset internal data
 void RockNRorCommand::OnNewGame(bool isSavedGame) {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (settings && settings->IsCheckSumValid()) {
+		settings->isSavedGame = isSavedGame; // ensure this information is correctly set for the methods called below
+	}
+
 	// Resets internal variables.
 	this->InitMyGameInfo();
 
@@ -1178,6 +1183,16 @@ void RockNRorCommand::OnGameStart() {
 		msg += " ";
 		msg += localizationHandler.GetTranslation(CRLANG_ID_WELCOME2, "plugin is active.");
 		AOE_METHODS::CallWriteText(msg.c_str());
+	}
+
+	// Display civilization bonus if using random civ bonus/tech tree
+	if (ROCKNROR::crInfo.configInfo.randomTechTreeForRMGames && !settings->rgeGameOptions.isMultiPlayer &&
+		!settings->rgeGameOptions.isScenario && !settings->isCampaign && !settings->isSavedGame &&
+		!this->customCivHandler.lastGenerationBonusLinesForHumanPlayer.empty()) {
+		for (auto it = this->customCivHandler.lastGenerationBonusLinesForHumanPlayer.begin();
+			it != this->customCivHandler.lastGenerationBonusLinesForHumanPlayer.end(); it++) {
+			AOE_METHODS::CallWriteText((*it).c_str());
+		}
 	}
 
 	// Show automatically "F11" information at game startup

@@ -239,7 +239,7 @@ void TechTreeCreator::SetConfigFromStatistics() {
 	// Researches
 	// *** WARNING : at this point we disable researches individually, not using research lines !!! ***
 	int bronzeIronResearchLinesCount = ROCKNROR::crInfo.techTreeAnalyzer.statistics.rootNonShadowResearchesCountByAge[2] + ROCKNROR::crInfo.techTreeAnalyzer.statistics.rootNonShadowResearchesCountByAge[3];
-	bronzeIronResearchLinesCount -= 3; // Exclude bronze/iron age, wheel TODO should be more geenric
+	bronzeIronResearchLinesCount -= 3; // Exclude bronze/iron age, wheel TODO should be more generic
 	bronzeIronResearchLinesCount -= 2; // Exclude walls TODO should be more geenric
 	int minDisableResearchLines = (bronzeIronResearchLinesCount * TT_CONFIG::CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT) / 100;
 	int maxDisableResearchLines = (bronzeIronResearchLinesCount * TT_CONFIG::CALC_MAX_DISABLE_RESEARCH_COUNT_PERCENT) / 100;
@@ -806,10 +806,10 @@ double TechTreeCreator::CreateOneBonus() {
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, { 0.2, 0.85 }));
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, { 0.55, 0.98 }));
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, { 0.4, 0.95 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, { 0.20, 0.89 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, { 0.20, 0.91 }));
 	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, { 0.10, 0.70 })); // is water map
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, { 0.35, 1 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, { 0.4, 1 }));
+	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, { 0.4, 0.98 }));
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier, { 0.55, 1 }));
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher, { 0.7, 1 }));
 	// TODO: for TribeAIGroupMountedSoldier, treat unit by unit ?
@@ -983,7 +983,7 @@ double TechTreeCreator::CreateOneBonus() {
 
 // Returns the weight to be added. 0 in most cases, !=0 for special cases
 double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES bonusUnitClass,
-	TECH_UNIT_ATTRIBUTES unitAttr, int minBonusRate, int maxBonusRate, int availableAffectedUnits) {
+	TECH_UNIT_ATTRIBUTES unitAttr, int minBonusRate, int maxBonusRate, int availableAffectedUnitLines) {
 	double resultAdditionalWeight = 0.;
 	const char *className = GetUnitClassName(bonusUnitClass);
 	bool isPriest = (bonusUnitClass == TribeAIGroupPriest);
@@ -998,12 +998,14 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 	short int applyToUnit = -1; // dest tech effect unit id
 
 	// Cases when we apply to restricted units
-	if (availableAffectedUnits == 1) {
+	/*COMMENTED because unit upgrades would NOT get bonus !!! if (availableAffectedUnitLines == 1) {
 		// apply to unit specifically. Avoids having bonus on "cavalry" class when only available unit is scout !
 		TTDetailedUnitDef *theUnit = this->PickOneRandomRootUnitIdAmongUnitClass(bonusUnitClass, -1);
 		applyToUnit = (short int)theUnit->unitDefId;
 		applyToClass = AOE_CONST_FUNC::TribeAINone;
-	}
+		// Could use TTDetailedUnitDef *rootUnitDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(applyToUnit);
+		// + this->AddSameEffectForUnitDefIDs(&newEffect, rootUnitDtl->possibleUpgradedUnitIDs);
+	}*/
 
 	std::string applyToNameString = "class "; // localized name of affected class/unit
 	applyToNameString += className;
@@ -1110,6 +1112,8 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 					}
 				}
 				attackValue = 5; // +1 would be ridiculous for siege.
+
+				// Just find out if attack to use is melee
 				TTDetailedTrainableUnitDef * asTrainable = (TTDetailedTrainableUnitDef *)pickedUnitDtl; // can cast as here we have siege unit (trainable)
 				if (asTrainable->unitDef) {
 					for (int i = 0; i < asTrainable->unitDef->attacksCount; i++) { // only 1, generally
@@ -1124,6 +1128,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 				}
 			}
 
+			// Apply effect on root unit
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 			newEffect.SetAttributeAdd(unitAttr, applyToClass, applyToUnit, 0); // need to set value using SetAttackOrArmorTypeValue
 			if (useMeleeAttack) {
@@ -1135,7 +1140,13 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 				assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_PIERCE);
 				assert(newEffect.GetValue() == attackValue);
 			}
-			techTreeEffects.push_back(newEffect);
+			this->techTreeEffects.push_back(newEffect);
+			// Apply effect on children (upgrades)
+			if (applyToUnit >= 0) {
+				TTDetailedUnitDef *rootUnitDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(applyToUnit);
+				this->AddSameEffectForUnitDefIDs(&newEffect, rootUnitDtl->possibleUpgradedUnitIDs);
+			}
+
 			this->bonusText += "+";
 			this->bonusText += std::to_string(attackValue);
 			this->bonusText += " ";
@@ -1544,6 +1555,24 @@ void TechTreeCreator::AddEffectsToTechDef() {
 }
 
 
+// Add an effect into internal collection (techTreeEffects) for EACH unitDefId provided in the parameter collection
+// Useful to copy an effect from root unit to its upgrades
+void TechTreeCreator::AddSameEffectForUnitDefIDs(AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT *srcEffect, const std::set<long int> &unitDefIDs) {
+	if (!srcEffect) { return; }
+	// Create a copy of source effect. Note that push_back will copy it in each loop (we're NOT passing pointers)
+	AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT curEffect;
+	curEffect.effectAttribute = srcEffect->effectAttribute;
+	curEffect.effectClass = srcEffect->effectClass;
+	curEffect.effectType = srcEffect->effectType;
+	curEffect.effectValue = srcEffect->effectValue;
+	for each (long int curUnitDefId in unitDefIDs)
+	{
+		curEffect.effectUnit = (short int) curUnitDefId; // The only thing that changes is unitDefId it applies to
+		this->techTreeEffects.push_back(curEffect);
+	}
+}
+
+
 // Randomly selects 1 non-disabled root unit in provided unit class. -1 is not found
 // Use minimumRequiredAgeResearchId to filter on units >= provided age. E.g. CST_RSID_TOOL_AGE
 TTDetailedUnitDef *TechTreeCreator::PickOneRandomRootUnitIdAmongUnitClass(GLOBAL_UNIT_AI_TYPES unitClass, int minimumRequiredAgeResearchId) {
@@ -1695,6 +1724,24 @@ std::string TechTreeCreator::GetCivBonusText() const {
 	
 	result += this->bonusText;
 	//result += NEWLINE;
+	return result;
+}
+
+
+std::list<std::string> TechTreeCreator::GetHumanBonusTextLines() const {
+	std::list<std::string> result;
+	std::string curLine = "";
+	for (auto it = this->bonusText.begin(); it != this->bonusText.end(); it++) {
+		char c = *it;
+		if (c == '\n') {
+			if (!curLine.empty()) {
+				result.push_back(curLine);
+			}
+			curLine = "";
+		} else {
+			curLine += c;
+		}
+	}
 	return result;
 }
 

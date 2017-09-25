@@ -766,7 +766,7 @@ void OnSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_
 void OnPriestSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit) {
 	// TODO: evasive manoeuvre if faith is <100%.. Complex (take into account all allies and enemies)
 	// TODO: heal immobile allied nearby target ?
-	// TODO: other unit being heled: do not move away (using same event ?)
+	// TODO: other unit being healed: do not move away (using same event ?)
 }
 
 
