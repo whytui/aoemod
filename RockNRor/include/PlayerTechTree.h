@@ -173,8 +173,8 @@ struct BonusGenProperties {
 	double weight;
 	double probabilityCoeff; // Coefficient 0-1 that affects probability of choosing this class for a bonus. Default=1. Use values like 1.20 or 0.80 to add/drop 20% chances, etc
 };
-typedef std::pair<GLOBAL_UNIT_AI_TYPES, BonusGenProperties> BonusGenUCPPair; // For unitClass-genProperties pair
-typedef std::pair<TECH_UNIT_ATTRIBUTES, BonusGenProperties> BonusGenAttrPPair; // For unitAttribute-genProperties pair
+typedef std::pair<const GLOBAL_UNIT_AI_TYPES, BonusGenProperties> BonusGenUCPPair; // For unitClass-genProperties pair
+typedef std::pair<const TECH_UNIT_ATTRIBUTES, BonusGenProperties> BonusGenAttrPPair; // For unitAttribute-genProperties pair
 
 
 // Class that allows creating dynamic tech tree, based on tech tree analyzer

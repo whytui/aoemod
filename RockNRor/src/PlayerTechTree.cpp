@@ -667,7 +667,7 @@ void TechTreeCreator::CreateDisableResearchesEffects() {
 	while (curDisableCount < preferredDisableResearchCount) {
 		double bestScore = -1;
 		// Randomly choose a research to disable
-		TTCreatorResearchInfo *bestElem = randomizer.PickRandomElementWithWeight<std::list, TTCreatorResearchInfo>
+		TTCreatorResearchInfo *bestElem = randomizer.PickRandomElementWithWeight_ptrCollection<std::list, TTCreatorResearchInfo>
 			(this->allCreatorResearchInfo, [](TTCreatorResearchInfo *curInfo) {
 			return curInfo->GetDisableProbability();
 		});
@@ -714,7 +714,7 @@ void TechTreeCreator::CreateDisableUnitsEffects() {
 		TTCreatorUnitInfo *rootUnitToDisable = NULL;
 
 		// Randomly choose a unit to disable
-		rootUnitToDisable = randomizer.PickRandomElementWithWeight<std::list, TTCreatorUnitInfo>
+		rootUnitToDisable = randomizer.PickRandomElementWithWeight_ptrCollection<std::list, TTCreatorUnitInfo>
 			(this->allCreatorUnitInfo, [](TTCreatorUnitInfo *curInfo){
 			return curInfo->GetDisableProbability();
 		});
@@ -799,7 +799,7 @@ double TechTreeCreator::CreateOneBonus() {
 			}
 		}
 	}
-	
+
 	std::map<GLOBAL_UNIT_AI_TYPES, BonusGenProperties> propsByUnitClass;
 	// propsByUnitClass.insert => Unit class, { weight, probabilityCoeff }
 	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, { 0.35, 0.9 }));
@@ -834,7 +834,7 @@ double TechTreeCreator::CreateOneBonus() {
 	// TribeAIGroupUnusedHealer => just to improve medecine ?
 	// TribeAIGroupUnused_Farm => just to improve production ?
 
-	
+
 	// TODO: modify probacoeff according to super unit availability ?
 
 	// Remove from list classes that already benefit from a civ bonus
@@ -852,18 +852,11 @@ double TechTreeCreator::CreateOneBonus() {
 		}
 	}
 
-	int bestRandom = -1;
-	BonusGenUCPPair bestElem;
-	for each (BonusGenUCPPair elem in propsByUnitClass)
-	{
-		int curRnd = randomizer.GetRandomValue(0, (int)trunc(100000. * elem.second.probabilityCoeff));
-		if (curRnd > bestRandom) {
-			bestRandom = curRnd;
-			bestElem = elem;
-		}
-	}
-	GLOBAL_UNIT_AI_TYPES chosenClass = bestElem.first;
-	double chosenWeight = bestElem.second.weight;
+	BonusGenUCPPair *bestElem = randomizer.PickRandomElementWithWeight_objectMap<GLOBAL_UNIT_AI_TYPES, BonusGenProperties>(
+		propsByUnitClass, [](BonusGenUCPPair argPair){return argPair.second.probabilityCoeff; });
+
+	GLOBAL_UNIT_AI_TYPES chosenClass = bestElem->first;
+	double chosenWeight = bestElem->second.weight;
 	// Remove chosen one from list
 	for (auto iter = propsByUnitClass.begin(); iter != propsByUnitClass.end();) {
 		if ((*iter).first == chosenClass) {
@@ -872,7 +865,7 @@ double TechTreeCreator::CreateOneBonus() {
 			iter++;
 		}
 	}
-	bool isRanged = (chosenClass == TribeAIGroupArcher) || (chosenClass == TribeAIGroupChariotArcher) || 
+	bool isRanged = (chosenClass == TribeAIGroupArcher) || (chosenClass == TribeAIGroupChariotArcher) ||
 		(chosenClass == TribeAIGroupElephantArcher) || (chosenClass == TribeAIGroupHorseArcher) ||
 		(chosenClass == TribeAIGroupPriest) || (chosenClass == TribeAIGroupSiegeWeapon) ||
 		(chosenClass == TribeAIGroupSlinger) || (chosenClass == TribeAIGroupUnused_Tower) || (chosenClass == TribeAIGroupWarBoat); // Warning: wrong for filre galley
@@ -882,12 +875,12 @@ double TechTreeCreator::CreateOneBonus() {
 		(chosenClass == TribeAIGroupPhalanx); // true if chosen class represents military melee units
 
 	bool isPriest = (chosenClass == TribeAIGroupPriest);
-	bool isMilitary = (isRanged || isMelee ||isPriest);
+	bool isMilitary = (isRanged || isMelee || isPriest);
 
 
 	std::map<TECH_UNIT_ATTRIBUTES, BonusGenProperties> propsByAttribute;
 	propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_HP, { 0.5, 1.1 }));
-	
+
 	if (chosenClass != TribeAIGroupCivilian) {
 		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_ADD_COST_AMOUNT, { 0.5, 1.1 }));
 	}
@@ -909,19 +902,11 @@ double TechTreeCreator::CreateOneBonus() {
 	if ((chosenClass == TribeAIGroupCivilian) || (chosenClass == TribeAIGroupFishingBoat)) {
 		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, { 0.5, 1.2 }));
 	}
-	
-	int bestAttrRandom = -1;
-	BonusGenAttrPPair bestAttrElem;
-	for each (auto elem in propsByAttribute)
-	{
-		int curRnd = randomizer.GetRandomValue(0, (int)trunc(100000. * elem.second.probabilityCoeff));
-		if (curRnd > bestAttrRandom) {
-			bestAttrRandom = curRnd;
-			bestAttrElem = elem;
-		}
-	}
-	TECH_UNIT_ATTRIBUTES chosenAttr = bestAttrElem.first;
-	double chosenAttrWeight = bestAttrElem.second.weight;
+
+	BonusGenAttrPPair *bestAttrElem = randomizer.PickRandomElementWithWeight_objectMap<TECH_UNIT_ATTRIBUTES, BonusGenProperties>(
+		propsByAttribute, [](BonusGenAttrPPair argPair){return argPair.second.probabilityCoeff; });
+	TECH_UNIT_ATTRIBUTES chosenAttr = bestAttrElem->first;
+	double chosenAttrWeight = bestAttrElem->second.weight;
 	propsByAttribute.clear();
 	//const char *className = GetUnitClassName(chosenClass);
 	this->classesWithBonus.insert(chosenClass);
@@ -1381,7 +1366,7 @@ TTCreatorUnitInfo *TechTreeCreator::PickUnitUpgradeToDisableInUnitLine(TTCreator
 
 	}
 
-	TTCreatorUnitInfo *chosen = randomizer.PickRandomElementWithWeight<std::list, TTCreatorUnitInfo>(
+	TTCreatorUnitInfo *chosen = randomizer.PickRandomElementWithWeight_ptrCollection<std::list, TTCreatorUnitInfo>(
 		unitInfoThatCanBeDisabled, [](TTCreatorUnitInfo *u) { return u->rawDisableProbability; } );
 	if (!chosen) {
 		chosen = rootUnitInfo;
