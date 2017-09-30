@@ -174,28 +174,39 @@ void TechTreeAnalyzer::FindResearchesThatEnableUnits() {
 				if ((detailBuilding != NULL) && (detailBuilding->unitDef != NULL)) {
 					detailBuilding->researchIdsThatEnableMe.insert(resDefId);
 					detailRes->enableBuildings.insert(detailBuilding);
-					detailBuilding->possibleAncestorUnitIDs.insert(parentUnitId);
+					if (std::find(detailBuilding->possibleAncestorUnitIDs.cbegin(), detailBuilding->possibleAncestorUnitIDs.cend(), parentUnitId) == detailBuilding->possibleAncestorUnitIDs.cend()) {
+						detailBuilding->possibleAncestorUnitIDs.push_back(parentUnitId);
+					}
 
 					TTDetailedBuildingDef *detailBuildingParent = this->GetDetailedBuildingDef(parentUnitId);
 					if ((detailBuildingParent != NULL) && (detailBuildingParent->unitDef != NULL)) {
-						detailBuildingParent->possibleUpgradedUnitIDs.insert(upgradedUnitId);
+						if (std::find(detailBuildingParent->possibleUpgradedUnitIDs.cbegin(), 
+							detailBuildingParent->possibleUpgradedUnitIDs.cend(), upgradedUnitId) == detailBuildingParent->possibleUpgradedUnitIDs.end()) {
+							detailBuildingParent->possibleUpgradedUnitIDs.push_back(upgradedUnitId);
+						}
 					}
 				}
 				TTDetailedTrainableUnitDef *detailTrainable = this->GetDetailedTrainableUnitDef(upgradedUnitId);
 				if ((detailTrainable != NULL) && (detailTrainable->unitDef != NULL)) {
 					detailTrainable->researchIdsThatEnableMe.insert(resDefId);
 					detailRes->enableTrainables.insert(detailTrainable);
-					detailTrainable->possibleAncestorUnitIDs.insert(parentUnitId);
+					if (std::find(detailTrainable->possibleAncestorUnitIDs.cbegin(), detailTrainable->possibleAncestorUnitIDs.cend(), parentUnitId) == detailTrainable->possibleAncestorUnitIDs.cend()) {
+						detailTrainable->possibleAncestorUnitIDs.push_back(parentUnitId);
+					}
 					detailRes->upgradedUnitDefId.insert(std::pair<long int, long int>(parentUnitId, upgradedUnitId));
 
 					TTDetailedTrainableUnitDef *detailTrainableParent = this->GetDetailedTrainableUnitDef(parentUnitId);
 					if ((detailTrainableParent != NULL) && (detailTrainableParent->unitDef != NULL)) {
-						detailTrainableParent->possibleUpgradedUnitIDs.insert(upgradedUnitId);
+						if (std::find(detailTrainableParent->possibleUpgradedUnitIDs.cbegin(), detailTrainableParent->possibleUpgradedUnitIDs.cend(), upgradedUnitId) == detailTrainableParent->possibleUpgradedUnitIDs.cend()) {
+							detailTrainableParent->possibleUpgradedUnitIDs.push_back(upgradedUnitId);
+						}
 					}
 				}
 			}
 		}
 	}
+
+	// We'll sort possibleUpgradedUnitIDs and possibleAncestorUnitIDs later
 }
 
 
@@ -474,16 +485,35 @@ void TechTreeAnalyzer::UpdateChildResearchDependencies() {
 						//[res2dtl](TTDetailedResearchDef *lambdaDtl) {return lambdaDtl == res2dtl; });
 					if (it == res1dtl->allRequirements.end()) {
 						// Res2 not found in res1's requirements => res1 comes BEFORE res2
-						res1dtl->researchLineSuccessors.insert(res2dtl);
-						res2dtl->researchLinePredecessors.insert(res1dtl);
+						if (std::find(res1dtl->researchLineSuccessors.cbegin(), res1dtl->researchLineSuccessors.cend(), res2dtl) == res1dtl->researchLineSuccessors.end()) {
+							res1dtl->researchLineSuccessors.push_back(res2dtl);
+						}
+						if (std::find(res2dtl->researchLinePredecessors.cbegin(), res2dtl->researchLinePredecessors.cend(), res1dtl) == res2dtl->researchLinePredecessors.end()) {
+							res2dtl->researchLinePredecessors.push_back(res1dtl);
+						}
 					} else {
 						// Res2 found in res1's requirements => res2 comes BEFORE res1
-						res2dtl->researchLineSuccessors.insert(res1dtl);
-						res1dtl->researchLinePredecessors.insert(res2dtl);
+						if (std::find(res2dtl->researchLineSuccessors.cbegin(), res2dtl->researchLineSuccessors.cend(), res1dtl) == res2dtl->researchLineSuccessors.end()) {
+							res2dtl->researchLineSuccessors.push_back(res1dtl);
+						}
+						if (std::find(res1dtl->researchLinePredecessors.cbegin(), res1dtl->researchLinePredecessors.cend(), res2dtl) == res1dtl->researchLinePredecessors.end()) {
+							res1dtl->researchLinePredecessors.push_back(res2dtl);
+						}
 					}
 				}
 			}
 		}
+	}
+	// Sort research lines, now the lists are fully fed
+	for (int resId = 0; resId < this->researchCount; resId++) {
+		TTDetailedResearchDef *resDtl = this->GetDetailedResearchDef(resId);
+		if (!resDtl || !resDtl->active || resDtl->IsShadowResearch()) { continue; }
+		resDtl->researchLineSuccessors.sort([](TTDetailedResearchDef *left, TTDetailedResearchDef *right) {
+			return *left < *right;
+		});
+		resDtl->researchLinePredecessors.sort([](TTDetailedResearchDef *left, TTDetailedResearchDef *right) {
+			return *left < *right;
+		});
 	}
 }
 
@@ -574,8 +604,12 @@ void TechTreeAnalyzer::UpdateUnitsBaseId() {
 						unit2srcRes);
 					if (it != unit1srcRes->allRequirementsExcludingAges.end()) {
 						// found: u2 is a requirement (parent) of u1
-						treeLineUnitDtl1->possibleAncestorUnitIDs.insert(treeLineUnitDtl2->unitDefId);
-						treeLineUnitDtl2->possibleUpgradedUnitIDs.insert(treeLineUnitId1);
+						if (std::find(treeLineUnitDtl1->possibleAncestorUnitIDs.cbegin(), treeLineUnitDtl1->possibleAncestorUnitIDs.cend(), treeLineUnitDtl2->unitDefId) == treeLineUnitDtl1->possibleAncestorUnitIDs.cend()) {
+							treeLineUnitDtl1->possibleAncestorUnitIDs.push_back(treeLineUnitDtl2->unitDefId);
+						}
+						if (std::find(treeLineUnitDtl2->possibleUpgradedUnitIDs.cbegin(), treeLineUnitDtl2->possibleUpgradedUnitIDs.cend(), treeLineUnitId1) == treeLineUnitDtl2->possibleUpgradedUnitIDs.cend()) {
+							treeLineUnitDtl2->possibleUpgradedUnitIDs.push_back(treeLineUnitId1);
+						}
 					} else {
 						// Make sure u1 is a requirement (parent) of u2
 						auto it2 = std::find(unit2srcRes->allRequirementsExcludingAges.begin(),
@@ -583,8 +617,13 @@ void TechTreeAnalyzer::UpdateUnitsBaseId() {
 							unit1srcRes);
 						if (it2 != unit2srcRes->allRequirementsExcludingAges.end()) {
 							// Found: u2 is a requirement (parent) of u1
-							treeLineUnitDtl1->possibleUpgradedUnitIDs.insert(treeLineUnitDtl2->unitDefId);
-							treeLineUnitDtl2->possibleAncestorUnitIDs.insert(treeLineUnitId1);
+							if (std::find(treeLineUnitDtl1->possibleUpgradedUnitIDs.cbegin(), treeLineUnitDtl1->possibleUpgradedUnitIDs.cend(), treeLineUnitDtl2->unitDefId) == treeLineUnitDtl1->possibleUpgradedUnitIDs.cend()) {
+								treeLineUnitDtl1->possibleUpgradedUnitIDs.push_back(treeLineUnitDtl2->unitDefId);
+							}
+							if (std::find(treeLineUnitDtl2->possibleAncestorUnitIDs.cbegin(), treeLineUnitDtl2->possibleAncestorUnitIDs.cend(), treeLineUnitId1) == treeLineUnitDtl2->possibleAncestorUnitIDs.cend()) {
+								treeLineUnitDtl2->possibleAncestorUnitIDs.push_back(treeLineUnitId1);
+							}
+
 						} else {
 							assert(false && "units should not be unrelated here");
 						}
@@ -592,6 +631,20 @@ void TechTreeAnalyzer::UpdateUnitsBaseId() {
 				}
 			}
 		}
+	}
+
+	// Now sort possibleUpgradedUnitIDs and possibleAncestorUnitIDs for unit detailed info
+	// Note: we just fixed baseUnitId values so the requirements for "<" operator are met.
+	for (int unitDefId = 0; unitDefId < this->unitDefCount; unitDefId++) {
+		TTDetailedUnitDef *unitDetail = this->GetDetailedUnitDef(unitDefId);
+		if (!unitDetail || !unitDetail->IsValid()) { continue; }
+		unitDetail->possibleAncestorUnitIDs.sort([&](long int left, long int right) {
+			auto l = this->GetDetailedUnitDef(left);
+			auto r = this->GetDetailedUnitDef(right);
+			if (!l) { return true; }
+			if (!r) { return false; }
+			return *l < *r;
+		});
 	}
 }
 
@@ -659,6 +712,16 @@ void TechTreeAnalyzer::UpdateUnitClassesData() {
 		for each (TTDetailedUnitDef *unitDetail in unitClassDetail->allClassUnits)
 		{
 			if (!unitDetail->IsHeroOrScenarioUnit()) {
+				// Save train location... if unique among class units (ignoring hero units because train location is both irrelevant and unreliable)
+				bool nonUniqueTrainLocation = false; 
+				long int curTrainLocation = unitDetail->GetTrainLocation();
+				if ((curTrainLocation >= 0) && !unitDetail->IsHeroOrScenarioUnit()) {
+					nonUniqueTrainLocation |= ((unitClassDetail->trainLocationIfUnique >= 0) && (unitClassDetail->trainLocationIfUnique != curTrainLocation));
+					if (!nonUniqueTrainLocation) {
+						unitClassDetail->trainLocationIfUnique = curTrainLocation;
+					}
+				}
+				// Non-hero units: save in a specific collection
 				unitClassDetail->allClassUnitsNoHero.insert(unitDetail);
 				if (unitDetail->baseUnitId == unitDetail->unitDefId) {
 					unitClassDetail->rootUnits.insert(unitDetail);

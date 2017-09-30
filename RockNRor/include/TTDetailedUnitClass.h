@@ -31,12 +31,14 @@ public:
 	int toolAgeUnitCount; // Number of tool age units in this unit class, including unit upgrades
 	int bronzeAgeUnitCount; // Number of bronze age units in this unit class, including unit upgrades
 	int ironAgeUnitCount; // Number of iron age units in this unit class, including unit upgrades
+	long int trainLocationIfUnique; // Train location if all non-hero units from this class have the same one.
 
 	// Returns the total number of units for this unit class
 	int GetClassUnitCount() const { return this->allClassUnits.size(); }
 
 	bool IsValidClass() const { return (this->unitClassId >= 0) && (this->unitClassId < AOE_CONST_FUNC::TribeAIGroupStandardCount); }
 
+	// Reset underlying information to default values (and set unitClassId)
 	void Init(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitClassId) {
 		this->unitClassId = unitClassId;
 		this->allClassUnits.clear();
@@ -46,6 +48,7 @@ public:
 		this->toolAgeUnitCount = 0;
 		this->bronzeAgeUnitCount = 0;
 		this->ironAgeUnitCount = 0;
+		this->trainLocationIfUnique = -1;
 	}
 
 	// Returns true if unit class is one of the "water" unit classes (including fish)

@@ -199,6 +199,7 @@ public:
 	std::list<TTCreatorUnitInfo*> allCreatorUnitInfo; // All *eligible* units info (units that may be disabled).
 	std::list<STRUCT_TECH_DEF_EFFECT> techTreeEffects;
 	std::set<GLOBAL_UNIT_AI_TYPES> classesWithBonus; // Unit classes that benefit from a civ bonus
+	std::set<long int> trainLocationsWithBonus; // All buildings where at least 1 trainable unit benefits from some civ bonus
 
 	void Reset() {
 		this->techDefForTechTree = NULL;
@@ -285,7 +286,7 @@ private:
 
 	// Add an effect into internal collection (techTreeEffects) for EACH unitDefId provided in the parameter collection
 	// Useful to copy an effect from root unit to its upgrades
-	void AddSameEffectForUnitDefIDs(AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT *srcEffect, const std::set<long int> &unitDefIDs);
+	void AddSameEffectForUnitDefIDs(AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT *srcEffect, const std::list<long int> &unitDefIDs);
 
 	// Randomly selects 1 non-disabled root unit in provided unit class. NULL if not found.
 	// Use minimumRequiredAgeResearchId to filter on units >= provided age. E.g. CST_RSID_TOOL_AGE

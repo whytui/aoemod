@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <set>
+#include <list>
 #include <AOE_offsets.h>
 #include <AOE_empires_dat.h>
 #include <AOE_struct_unit_def.h>
@@ -41,8 +42,8 @@ public:
 	bool isAvailableAfterAnalysis; // Used in analysis phase: set to true when a "researchIdsThatEnableMe" is ready (building can be built at this stage).
 	short int requiredAge; // -1 or an "age" research ID
 	std::set<long int> researchIdsThatEnableMe; // It is expected to have 0 (if available at start) or 1 value here, no more.
-	std::set<long int> possibleUpgradedUnitIDs; // UnitDefIds of units that are "upgrades" of me. Does NOT include "myself".
-	std::set<long int> possibleAncestorUnitIDs; // UnitDefIds of units that can be upgraded into "me". See "baseUnitId" to find THE root unitDefId. Does NOT include "myself".
+	std::list<long int> possibleUpgradedUnitIDs; // Ordered UnitDefIds of units that are "upgrades" of me. Does NOT include "myself".
+	std::list<long int> possibleAncestorUnitIDs; // Ordered UnitDefIds of units that can be upgraded into "me". See "baseUnitId" to find THE root unitDefId. Does NOT include "myself".
 	std::set<TTDetailedResearchDef*> affectedByResearches; // Research IDs that affect this unit (add HP, speed, etc, or even indirectly like ballistics for range units...)
 
 	long int baseUnitId; // UnitDefId of the (root) base unitdef I am a descendent of. =this->unitDefId if I have no ancestor.
@@ -70,9 +71,9 @@ public:
 		return (!this->isAvailableAfterAnalysis && !this->isAvailableImmediately);
 	}
 
-	// Returns unit's train location
+	// Returns unit's train location. -1 if not set/invalid.
 	virtual long int GetTrainLocation() const { return -1; }
-	// Returns unit's train button
+	// Returns unit's train button: 1-10 for first page, etc.
 	virtual long int GetTrainButton() const { return -1; }
 };
 
@@ -99,6 +100,7 @@ public:
 	
 	STRUCT_UNITDEF_TRAINABLE *GetUnitDef() const override { return this->unitDef; }
 
+	// Returns unit's train location. -1 if not set/invalid.
 	long int GetTrainLocation() const override  {
 		if (!this->unitDef) { return -1; }
 		return this->unitDef->trainLocation;
@@ -183,8 +185,8 @@ public:
 	std::set<std::pair<long int, long int>> upgradedUnitDefId; // Non-building unitDef IDs that are upgraded by this research (pair: first=from, second=to)
 	std::set<TTDetailedUnitDef*> affectsUnits; // All units (buildings/trainable) affected by this research
 
-	std::set<TTDetailedResearchDef*> researchLinePredecessors; // All researches from same "line" (location+buttonId) and come before me. E.g tool&bronze age if "me"=iron age
-	std::set<TTDetailedResearchDef*> researchLineSuccessors; // All researches from same "line" (location+buttonId) and come after me. E.g iron age if "me"=bronze age
+	std::list<TTDetailedResearchDef*> researchLinePredecessors; // All (ordered) researches from same "line" (location+buttonId) and come before me. E.g tool&bronze age if "me"=iron age
+	std::list<TTDetailedResearchDef*> researchLineSuccessors; // All (ordered) researches from same "line" (location+buttonId) and come after me. E.g iron age if "me"=bronze age
 	
 	bool hasNegativeSideEffect; // True for a research that has some negative side effects. E.g. ballista tower upgrade has much slower projectile. Jihad decreases villagers gathering abilities, etc. Warning: includes trireme !
 	bool isAiUnsupported; // True for a research that is not supported by AI (no use to AI players), like martyrdom (priest sacrifice), writing (shared exploration).
@@ -237,6 +239,8 @@ public:
 };
 
 
+// Provides a deterministic order for TTDetailedUnitDef elements.
+// Warning: requires baseUnitId to be correctly valued
 static bool operator< (const TTDetailedUnitDef &left, const TTDetailedUnitDef &right) {
 	// 1) Train location
 	long int lefttl = left.GetTrainLocation();

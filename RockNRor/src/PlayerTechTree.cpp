@@ -800,37 +800,58 @@ double TechTreeCreator::CreateOneBonus() {
 		}
 	}
 
+	bool alreadyHasArcherBonus = (std::find_if(this->classesWithBonus.cbegin(), this->classesWithBonus.cend(),
+		[](AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES classValue) { 
+		return (classValue == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher) ||
+			(classValue == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher) ||
+			(classValue == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher) ||
+			(classValue == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher);
+	}) != this->classesWithBonus.cend());
+
 	std::map<GLOBAL_UNIT_AI_TYPES, BonusGenProperties> propsByUnitClass;
+	// Add a class with specific "weight" and probability
+	auto _addClass = [&](GLOBAL_UNIT_AI_TYPES unitClass, double weight, double proba){
+		bool alreadyABonusThere = false;
+		TTDetailedUnitClass *tmpUcDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedUnitClass(unitClass);
+		if (tmpUcDetail && (tmpUcDetail->trainLocationIfUnique >= 0)) {
+			alreadyABonusThere = std::find(this->trainLocationsWithBonus.cbegin(),
+				this->trainLocationsWithBonus.cend(), tmpUcDetail->trainLocationIfUnique) != this->trainLocationsWithBonus.cend();
+		}
+		if (alreadyABonusThere) { proba -= 0.5; }
+		if (proba < 0) { proba = 0; }
+		propsByUnitClass.insert(BonusGenUCPPair(unitClass, { weight, proba}));
+	};
 	// propsByUnitClass.insert => Unit class, { weight, probabilityCoeff }
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, { 0.35, 0.9 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, { 0.2, 0.85 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, { 0.55, 0.98 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, { 0.4, 0.95 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, { 0.20, 0.91 }));
-	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, { 0.10, 0.70 })); // is water map
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, { 0.35, 1 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, { 0.4, 0.98 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier, { 0.55, 1 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher, { 0.7, 1 }));
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, 0.35, 0.9);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.2, 0.82);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, 0.55, 0.97);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, 0.4, 0.9);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.2, 0.95);
+	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, 0.1, 0.70);// is water map
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, 0.35, 1);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, 0.4, 0.98);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier, 0.55, 1);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher, 0.7, 1);
 	// TODO: for TribeAIGroupMountedSoldier, treat unit by unit ?
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier, { 0.4, 1 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx, { 0.5, 1 }));
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier, 0.4, 1);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx, 0.5, 1);
+
 	if (this->religionLevel > 3) {
 		// Exclude bonus for priest for civs with bad temple. For religion levels 4-5 only.
 		if (this->religionLevel == 4) {
-			propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, { 0.65, 0.95 }));
+			_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, 0.65, 1.2); // we want a "not too high" proba, but don't forget this case is already filtered by "religion level=4"
 		} else {
 			// Temple bonus is likely to happen on very-good temple civs
-			propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, { 0.65, 1.1 }));
+			_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, 0.65, 2); // Higher proba, to compensate the preliminary filter (only religion level=5 is allowed here)
 		}
 	}
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon, { 0.7, 1 }));
-	propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger, { 0.2, 0.80 }));
-	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWarBoat, { 0.3, 1 })); // is water map ?
-	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall, { 0., 1 })); // walls suck
-	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat, { 0.05, 0.7 }));
-	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTransportBoat, { 0.05, 0.7 }));
-	//propsByUnitClass.insert(BonusGenUCPPair(GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower, { 0.45, 1 })); // do not use class as is
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon, 0.7, 1);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger, 0.2, 0.78);
+	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWarBoat, 0.3, 1); // is water map ?
+	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall, 0.1, 1); // walls suck
+	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat, 0.05, 0.7);
+	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTransportBoat, 0.05, 0.7);
+	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower, 0.45, 1); // do not use class as is. Use it to separate towers from other buildings (like babylon/choson, unlike rome) ?
 	// TribeAIGroupUnusedHealer => just to improve medecine ?
 	// TribeAIGroupUnused_Farm => just to improve production ?
 
@@ -902,7 +923,7 @@ double TechTreeCreator::CreateOneBonus() {
 	}
 	if ((chosenClass == TribeAIGroupCivilian) || (chosenClass == TribeAIGroupFishingBoat)) {
 		// Remark: for civilians, TUA_RESOURCE_CAPACITY bonus applies also on work rate.
-		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, { 0.35, 2 })); // High probability... Because resource capacity regroups several possible bonus
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, { 0.35, 4 })); // High probability... Because resource capacity regroups several possible bonus
 	}
 
 	BonusGenAttrPPair *bestAttrElem = randomizer.PickRandomElementWithWeight_objectMap<TECH_UNIT_ATTRIBUTES, BonusGenProperties>(
@@ -912,6 +933,10 @@ double TechTreeCreator::CreateOneBonus() {
 	propsByAttribute.clear();
 	//const char *className = GetUnitClassName(chosenClass);
 	this->classesWithBonus.insert(chosenClass);
+	TTDetailedUnitClass *ucDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedUnitClass(chosenClass);
+	if (ucDetail && (ucDetail->trainLocationIfUnique >= 0)) {
+		this->trainLocationsWithBonus.insert(ucDetail->trainLocationIfUnique);
+	}
 
 
 	int minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_BASE;
@@ -1544,7 +1569,7 @@ void TechTreeCreator::AddEffectsToTechDef() {
 
 // Add an effect into internal collection (techTreeEffects) for EACH unitDefId provided in the parameter collection
 // Useful to copy an effect from root unit to its upgrades
-void TechTreeCreator::AddSameEffectForUnitDefIDs(AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT *srcEffect, const std::set<long int> &unitDefIDs) {
+void TechTreeCreator::AddSameEffectForUnitDefIDs(AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT *srcEffect, const std::list<long int> &unitDefIDs) {
 	if (!srcEffect) { return; }
 	// Create a copy of source effect. Note that push_back will copy it in each loop (we're NOT passing pointers)
 	AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT curEffect;
