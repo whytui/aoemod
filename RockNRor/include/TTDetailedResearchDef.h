@@ -34,7 +34,7 @@ public:
 		this->requiredAge = -1;
 		this->unitClass = AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAINone;
 	}
-	long int unitDefId;
+	long int unitDefId; // This unit's definition ID
 	std::string internalName;
 	std::string langName;
 	bool isAvailableImmediately; // True if unit is available at game start.
@@ -69,6 +69,11 @@ public:
 	bool IsHeroOrScenarioUnit() const {
 		return (!this->isAvailableAfterAnalysis && !this->isAvailableImmediately);
 	}
+
+	// Returns unit's train location
+	virtual long int GetTrainLocation() const { return -1; }
+	// Returns unit's train button
+	virtual long int GetTrainButton() const { return -1; }
 };
 
 
@@ -94,9 +99,14 @@ public:
 	
 	STRUCT_UNITDEF_TRAINABLE *GetUnitDef() const override { return this->unitDef; }
 
-	long int GetTrainLocation() const {
+	long int GetTrainLocation() const override  {
 		if (!this->unitDef) { return -1; }
 		return this->unitDef->trainLocation;
+	}
+	// Returns unit's train button: 1-10 for first page, etc.
+	long int GetTrainButton() const override {
+		if (!this->unitDef) { return -1; }
+		return this->unitDef->trainButton;
 	}
 };
 
@@ -225,6 +235,42 @@ public:
 	}
 
 };
+
+
+static bool operator< (const TTDetailedUnitDef &left, const TTDetailedUnitDef &right) {
+	// 1) Train location
+	long int lefttl = left.GetTrainLocation();
+	long int righttl = right.GetTrainLocation();
+	if (lefttl != righttl) {
+		return lefttl < righttl;
+	}
+	// 2) Train button
+	long int leftb = left.GetTrainButton();
+	long int rightb = right.GetTrainButton();
+	if (leftb != rightb) {
+		return leftb < rightb;
+	}
+	// 3) Same location/button but different base unit id (unexpected case for non-hero units)
+	if (left.baseUnitId != right.baseUnitId) {
+		return left.baseUnitId < right.baseUnitId;
+	}
+	// {now we have 2 units of same "unit line" }
+	// 4) Required age
+	if (left.requiredAge != right.requiredAge) {
+		return left.requiredAge < right.requiredAge;
+	}
+	// 5) Number of ancestors
+	int lefta = left.possibleAncestorUnitIDs.size();
+	int righta = right.possibleAncestorUnitIDs.size();
+	if (lefta != righta) {
+		return lefta < righta;
+	}
+	// 6) ... Unit definition ID. For desperate cases.
+	return left.unitDefId < right.unitDefId;
+}
+static bool operator> (const TTDetailedUnitDef &left, const TTDetailedUnitDef &right) {
+	return !(left < right);
+}
 
 
 }

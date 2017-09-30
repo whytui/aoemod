@@ -406,7 +406,7 @@ namespace AOE_STRUCTURES
 		STRUCT_COST costs[3]; // +148, 3*6 bytes (3 words each)
 		short int trainTime; // +15A.
 		short int trainLocation; // (for buildings it is builder=0x76)
-		char trainButton; // +15E.
+		char trainButton; // +15E. Valid values are 1-n. First page 1-10, second page 11-20, etc.
 		char unknown_15F; // +15F. Unused ?
 		// 0x160
 		short int displayedPierceArmor;

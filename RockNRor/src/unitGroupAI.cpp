@@ -739,9 +739,9 @@ bool UnitGroupAI::TaskActiveAttackGroupWeakWithVitalMainUnit(STRUCT_PLAYER *play
 		assert(this->activeGroupsTaskingTempInfo.myMainCentralUnit != NULL); // guaranteed by top "if" condition
 
 		// If group is idle and there is some enemy building in my town, attack it (be careful with towers if I am too weak ?)
-		STRUCT_UNIT_MEMORY *targetInTown = this->militaryAIInfo->enemyTowerInMyTown;
+		AOE_STRUCTURES::STRUCT_UNIT_MEMORY *targetInTown = ROCKNROR::unitExtensionHandler.GetInfAIUnitMemory(this->militaryAIInfo->unitIdEnemyTowerInMyTown, player->playerId);
 		if (!targetInTown) {
-			targetInTown = this->militaryAIInfo->enemyBuildingInMyTown;
+			targetInTown = ROCKNROR::unitExtensionHandler.GetInfAIUnitMemory(this->militaryAIInfo->unitIdEnemyBuildingInMyTown, player->playerId);
 		}
 		if (targetInTown) {
 			UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, targetInTown, -1, -1, false);
@@ -872,9 +872,9 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 	// No target, group in town, commander is idle
 	if (!currentTargetUnit && !groupIsAway && AOE_METHODS::UNIT::IsUnitIdle(commanderUnit)) {
 		// If group is idle and there is some enemy building in my town, attack it (be careful with towers if I am too weak ?)
-		STRUCT_UNIT_MEMORY *targetInTown = this->militaryAIInfo->enemyTowerInMyTown;
+		AOE_STRUCTURES::STRUCT_UNIT_MEMORY *targetInTown = ROCKNROR::unitExtensionHandler.GetInfAIUnitMemory(this->militaryAIInfo->unitIdEnemyTowerInMyTown, player->playerId);
 		if (!targetInTown) {
-			targetInTown = this->militaryAIInfo->enemyBuildingInMyTown;
+			targetInTown = ROCKNROR::unitExtensionHandler.GetInfAIUnitMemory(this->militaryAIInfo->unitIdEnemyBuildingInMyTown, player->playerId);
 		}
 		if (targetInTown) {
 			UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, targetInTown, -1, -1, false);
@@ -1061,8 +1061,8 @@ void UnitGroupAI::CollectEnemyUnitsNearMyMainUnit(STRUCT_PLAYER *player) {
 	STRUCT_AI *mainAI = player->ptrAIStruct;
 	if (!mainAI || !mainAI->IsCheckSumValid()) { return; }
 
-	this->militaryAIInfo->enemyBuildingInMyTown = NULL;
-	this->militaryAIInfo->enemyTowerInMyTown = NULL;
+	this->militaryAIInfo->unitIdEnemyBuildingInMyTown = -1;
+	this->militaryAIInfo->unitIdEnemyTowerInMyTown = -1;
 	STRUCT_UNIT_MEMORY *curElem = NULL;
 
 	this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnit = NULL;
@@ -1091,12 +1091,12 @@ void UnitGroupAI::CollectEnemyUnitsNearMyMainUnit(STRUCT_PLAYER *player) {
 					STRUCT_PLAYER *elemPlayer = global->GetPlayerStruct(curElem->playerId);
 					if (elemPlayer) {
 						if (UnitDefCanAttack(player->GetUnitDefBase(curElem->unitDefId))) {
-							if (this->militaryAIInfo->enemyTowerInMyTown == NULL) {
-								this->militaryAIInfo->enemyTowerInMyTown = curElem;
+							if (this->militaryAIInfo->unitIdEnemyTowerInMyTown == -1) {
+								this->militaryAIInfo->unitIdEnemyTowerInMyTown = curElem->unitId;
 							}
 						} else {
-							if (this->militaryAIInfo->enemyBuildingInMyTown == NULL) {
-								this->militaryAIInfo->enemyBuildingInMyTown = curElem;
+							if (this->militaryAIInfo->unitIdEnemyBuildingInMyTown == -1) {
+								this->militaryAIInfo->unitIdEnemyBuildingInMyTown = curElem->unitId;
 							}
 						}
 					}

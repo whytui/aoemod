@@ -836,6 +836,7 @@ double TechTreeCreator::CreateOneBonus() {
 
 
 	// TODO: modify probacoeff according to super unit availability ?
+	// TODO: if possible decrease probability when there is already a bonus on a "same building" unit ?
 
 	// Remove from list classes that already benefit from a civ bonus
 	// Also remove classes with no unit (might have been disabled)
@@ -900,7 +901,8 @@ double TechTreeCreator::CreateOneBonus() {
 		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_SPEED, { 0.6, 1 }));
 	}
 	if ((chosenClass == TribeAIGroupCivilian) || (chosenClass == TribeAIGroupFishingBoat)) {
-		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, { 0.5, 1.2 }));
+		// Remark: for civilians, TUA_RESOURCE_CAPACITY bonus applies also on work rate.
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, { 0.35, 2 })); // High probability... Because resource capacity regroups several possible bonus
 	}
 
 	BonusGenAttrPPair *bestAttrElem = randomizer.PickRandomElementWithWeight_objectMap<TECH_UNIT_ATTRIBUTES, BonusGenProperties>(
@@ -1599,16 +1601,7 @@ std::string TechTreeCreator::GetDisabledUnitsText() const {
 	
 	std::string result = "";
 	disabledUnits.sort([](TTCreatorUnitInfo *elem, TTCreatorUnitInfo *elem2) {
-		if (elem->trainLocation != elem2->trainLocation) { return elem->trainLocation < elem2->trainLocation; }
-		STRUCT_UNITDEF_TRAINABLE *ud1 = elem->unitDetail->GetUnitDef();
-		STRUCT_UNITDEF_TRAINABLE *ud2 = elem2->unitDetail->GetUnitDef();
-		if (ud1 && ud2 && ud1->IsCheckSumValidForAUnitClass() && ud2->IsCheckSumValidForAUnitClass()) {
-			if (ud1->trainButton != ud2->trainButton) { return ud1->trainButton < ud2->trainButton; }
-		}
-		if (elem->unitDetail->baseUnitId != elem2->unitDetail->baseUnitId) { return elem->unitDetail->baseUnitId < elem2->unitDetail->baseUnitId; }
-		if (elem->unitDetail->requiredAge != elem2->unitDetail->requiredAge) { return elem->unitDetail->requiredAge < elem2->unitDetail->requiredAge; }
-		if (elem->unitDetail->possibleAncestorUnitIDs.size() != elem2->unitDetail->possibleAncestorUnitIDs.size()) { return elem->unitDetail->possibleAncestorUnitIDs.size() < elem2->unitDetail->possibleAncestorUnitIDs.size(); }
-		return elem->unitDefId < elem2->unitDefId;
+		return (*elem->unitDetail < *elem2->unitDetail);
 	});
 
 	int curTrainLocation = -1;

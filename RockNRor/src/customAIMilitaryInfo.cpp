@@ -9,8 +9,8 @@ namespace CUSTOM_AI {
 			this->recentAttacksByPlayer[i].ResetAllInfo();
 			this->recentAttacksByPlayer[i].attackerPlayerId = i;
 		}
-		this->enemyBuildingInMyTown = NULL;
-		this->enemyTowerInMyTown = NULL;
+		this->unitIdEnemyBuildingInMyTown = -1;
+		this->unitIdEnemyTowerInMyTown = -1;
 		this->recentAttacksByPlayer->ResetAllInfo();
 		this->lastKnownMilitarySituation = MILITARY_SITUATION::MS_UNKNOWN;
 		this->lastKnownMilitarySituationComputationGameTime = 0;

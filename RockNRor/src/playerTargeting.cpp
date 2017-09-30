@@ -118,13 +118,15 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 
 		if (this->militaryAIInfo) {
 			// Has player a tower in my town ?
-			if (this->militaryAIInfo->enemyTowerInMyTown && (this->militaryAIInfo->enemyTowerInMyTown->unitId > -1) &&
-				(this->militaryAIInfo->enemyTowerInMyTown->playerId == targetPlayerId)) {
-				if (global->GetUnitFromId(this->militaryAIInfo->enemyTowerInMyTown->unitId)) {
-					this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreHasTowerInMyTown;
-				} else {
-					AOE_METHODS::LISTS::ResetInfAIUnitMemoryListElem(this->militaryAIInfo->enemyTowerInMyTown);
-					this->militaryAIInfo->enemyTowerInMyTown = NULL;
+			if (this->militaryAIInfo->unitIdEnemyTowerInMyTown > -1) {
+				AOE_STRUCTURES::STRUCT_UNIT_MEMORY *unitMemory = ROCKNROR::unitExtensionHandler.GetInfAIUnitMemory(this->militaryAIInfo->unitIdEnemyTowerInMyTown, player->playerId);
+				if (unitMemory && (unitMemory->playerId == targetPlayerId)) {
+					if (global->GetUnitFromId(unitMemory->unitId)) {
+						this->lastComputedDislikeSubScore[targetPlayerId] += TARGETING_CONST::dislikeSubScoreHasTowerInMyTown;
+					} else {
+						AOE_METHODS::LISTS::ResetInfAIUnitMemoryListElem(unitMemory);
+						this->militaryAIInfo->unitIdEnemyTowerInMyTown = -1;
+					}
 				}
 			}
 

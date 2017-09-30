@@ -48,12 +48,10 @@ namespace CUSTOM_AI {
 		// Stores information about recent history of being attacked by other players
 		TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> recentAttacksByPlayer[9];
 		
-#pragma TODO("REMOVE pointers here (dangerous)")
-		// TODO: REMOVE pointers here (dangerous): use indexes instead or even unitId (now we can retrieve index easily with unit extensions)
-		// Refers to information in InfAI list of an enemy building spotted in my town (potential target for idle units or in-town groups)
-		STRUCT_UNIT_MEMORY *enemyBuildingInMyTown;
-		// Refers to information in InfAI list of an enemy tower spotted in my town
-		STRUCT_UNIT_MEMORY *enemyTowerInMyTown;
+		// Refers to an enemy building spotted in my town (potential target for idle units or in-town groups) (unit id)
+		long int unitIdEnemyBuildingInMyTown;
+		// Refers to an enemy tower spotted in my town (unit id)
+		long int unitIdEnemyTowerInMyTown;
 
 		void ResetAllInfo();
 

@@ -12,6 +12,7 @@
 #include "unitDefHandling.h"
 #include "RockNRorInfo.h"
 #include "customAIMilitaryInfo.h"
+#include "UnitExtensionHandler.h"
 
 using namespace std;
 using namespace AOE_STRUCTURES;
