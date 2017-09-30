@@ -272,6 +272,34 @@ static bool operator> (const TTDetailedUnitDef &left, const TTDetailedUnitDef &r
 	return !(left < right);
 }
 
+static bool operator< (const TTDetailedResearchDef &left, const TTDetailedResearchDef &right) {
+	// 1) 'Invalid' is 'lower' than anything...
+	if (!left.active) { return true; }
+	if (!right.active) { return false; }
+	// 2) Research location
+	if (left.researchDef->researchLocation != right.researchDef->researchLocation) {
+		return left.researchDef->researchLocation < right.researchDef->researchLocation;
+	}
+	// 3) Research button
+	if (left.researchDef->buttonId != right.researchDef->buttonId) {
+		return left.researchDef->buttonId < right.researchDef->buttonId;
+	}
+	// 4) Required age
+	if (left.requiredAge != right.requiredAge) {
+		return left.requiredAge < right.requiredAge;
+	}
+	// 5) Number of ancestors (both are part of same research line)
+	int leftp = left.researchLinePredecessors.size();
+	int rightp = right.researchLinePredecessors.size();
+	if (leftp != rightp) {
+		return leftp < rightp;
+	}
+	// 6) Desperate case: research definition ID
+	return left.GetResearchDefId() < right.GetResearchDefId();
+}
+static bool operator> (const TTDetailedResearchDef &left, const TTDetailedResearchDef &right) {
+	return !(left < right);
+}
 
 }
 }
