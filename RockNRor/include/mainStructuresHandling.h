@@ -24,11 +24,11 @@ AOE_STRUCTURES::STRUCT_GAME_SETTINGS* GetGameSettingsPtr();
 
 // Returns the UI main information object
 AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *GetUIMainInfoStruct();
+// Returns the UI system object - synonym to GetUIMainInfoStruct()
+AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *GetUIPanelSystem();
 
-
-// Returns a pointer to current active UI (?)
-// ASSERTS that the pointer is non-NULL
-AOE_STRUCTURES::STRUCT_ANY_UI *GetCurrentUIStruct();
+// Return current screen, using UI panel system
+STRUCT_UI_EASY_PANEL *GetCurrentScreen();
 
 // Returns currently human-controlled player struct according to game settings struct
 AOE_STRUCTURES::STRUCT_PLAYER *GetControlledPlayerStruct_Settings();

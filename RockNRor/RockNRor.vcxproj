@@ -209,6 +209,7 @@
     <ClCompile Include="src\AOEPrimitives_gameCommand.cpp" />
     <ClCompile Include="src\AOEPrimitives_global.cpp" />
     <ClCompile Include="src\AOEPrimitives_lists.cpp" />
+    <ClCompile Include="src\AOEPrimitives_UI_screens.cpp" />
     <ClCompile Include="src\AOEPrimitives_unitGroup.cpp" />
     <ClCompile Include="src\AOE_map.cpp" />
     <ClCompile Include="src\AOEPrimitives_units.cpp" />

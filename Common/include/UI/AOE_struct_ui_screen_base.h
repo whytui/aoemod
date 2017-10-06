@@ -20,10 +20,29 @@ namespace AOE_STRUCTURES
 #define CHECKSUM_UI_SCREEN_PANEL 0x0054579C // Some mysterious intermediate (child) class with no own member (TScreenPanel)
 #define CHECKSUM_UI_IN_GAME_MAIN 0x0054679C
 #define CHECKSUM_UI_SCENARIO_EDITOR_MAIN 0x00547360
-#define CHECKSUM_UI_GAME_SETTINGS 0x00547810
+#define CHECKSUM_UI_GAME_SETTINGS 0x00547810 // scenario options (under RM/DM/scenario setting screens)
+#define CHECKSUM_UI_WELCOME_MAIN_SCREEN 0x005469F8
+#define CHECKSUM_UI_SP_MENU_SCREEN 0x0054793C // ccor 0x49E040. "SPMenuScreen" (SP menu after welcome screen). Parent=screenPanel
+#define CHECKSUM_UI_MP_SETUP_SCREEN 0x00546D7C // includes RM/DM (main) settings screens
+#define CHECKSUM_UI_CAMPAIGN_EDITOR 0x00545FB0
+#define CHECKSUM_UI_CAMPAIGN_SELECTION 0x005460DC // SP menu->campaign->choose a name-> choose a campaign screen. Parent=screenPanel.
+#define CHECKSUM_UI_SELECT_SCENARIO_SCREEN 0x005476E4 // ccor 0x49B360. "Select scenario screen". Parent=screenPanel
+#define CHECKSUM_UI_MP_STARTUP_SCREEN 0x00546C50 // ccor 0x487250. Parent=screenPanel. First MP screen (choose name and cnx type)
+#define CHECKSUM_UI_JOIN_SCREEN 0x00546208 // ccor 0x47B440. Parent=screenPanel?
+#define CHECKSUM_UI_SCENARIO_EDITOR_MAIN_MENU 0x0054748C // parent=screenPanel
+#define CHECKSUM_UI_ACHIEVEMENTS_SCREEN 0x00545E84 // parent=screenPanel
+#define CHECKSUM_UI_CREDITS_SCREEN 0x00546468 // parent=screenPanel
+
+#define CHECKSUM_UI_DIALOG_PANEL 0x00544F1C // parent=easyPanel.Intermediate class for dialogs.
+#define CHECKSUM_UI_POPUP_DIALOG 0x00543CEC // parent=dialogPanel.
+
 
 	// Size=0x478. A base class for all screens and popups (not UI components). Directly derives from base UI class. "EasyPanel".
-	// Constructor = 0x454430 (0x468150 for intermediate class), Init (own fields) 0x454B60.
+	// Events are not overriden in this class: refer to STRUCT_ANY_UI methods.
+	// Constructor = 0x454430, 0x454B10. Init (own fields) 0x454B60. After ccor, you should call setup(...)
+	// 2 "main" direct child classes are screenPanel and DialogPanel. Both are "intermediate" generic classes.
+	// Other direct child classes are timelinePanel (using 0x454B10 ccor).
+	// 0x4544A0 = easyPanel.setup(renderArea, parentUI, dlgName, slpidbackground, fullScreen, hPos, vPos, hSize, vSize, allowShadowArea). Sizes: leave 0 if fullscreen. slpidbackground can be -1 or AOE_CONST_DRS::AoeScreenTheme.
 	// 0x455D10=easyPanel.addButton(parent, ptrForNewObject, textId1, textId2, hPos,vPos, hSize,vSize, font, soundNum, actionId)
 	// EDX+F0=easyPanel.addButton(parent, pVarNewObj, text1, text2, hPos, vPos, hSize, vSize, font, soundNum, btnActionId)
 	// 0x455FE0=INT TEasy_Panel::create_check_box(parent, ptrForNewObject,x,y,width,height,sound_num,action_id)
@@ -84,10 +103,51 @@ namespace AOE_STRUCTURES
 		char unknown_45C[0x478 - 0x45C];
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UI_EASY_PANEL); }
+	protected:
+		// Returns true if checksum is valid for a screen panel class (or one of its child classes)
+		bool IsCheckSumValidForScreenPanel() const {
+			return (this->checksum == CHECKSUM_UI_SCREEN_PANEL) ||
+				// Main welcome screen
+				(this->checksum == CHECKSUM_UI_WELCOME_MAIN_SCREEN) ||
+				// SP menu and sub-menus
+				(this->checksum == CHECKSUM_UI_SP_MENU_SCREEN) || // Main menu for single player
+				(this->checksum == CHECKSUM_UI_MP_SETUP_SCREEN) || // Game configuratio for RM/DM/scenario/MP
+				(this->checksum == CHECKSUM_UI_GAME_SETTINGS) || // Advanced game settings for RM/DM/scenario/MP
+				(this->checksum == CHECKSUM_UI_CAMPAIGN_SELECTION) || // Choose a campaign screen
+				(this->checksum == CHECKSUM_UI_SELECT_SCENARIO_SCREEN) || // Choose a scenario screen
+				(this->checksum == CHECKSUM_UI_LOAD_SAVED_GAME) ||
+				(this->checksum == CHECKSUM_UI_CREDITS_SCREEN) ||
+				// MP screens
+				(this->checksum == CHECKSUM_UI_MP_STARTUP_SCREEN) || // First MP screen: choose name, connection type
+				(this->checksum == CHECKSUM_UI_JOIN_SCREEN) || // Find or create a MP game
+				// Scenario editor menus/screens
+				(this->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MAIN) || (this->checksum == CHECKSUM_UI_CAMPAIGN_EDITOR) ||
+				(this->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MAIN_MENU) || (this->checksum == CHECKSUM_UI_SC_EDITOR_OPEN) ||
+				// In-game
+				(this->checksum == CHECKSUM_UI_IN_GAME_MAIN) ||
+				(this->checksum == CHECKSUM_UI_MISSION_SCREEN) || // In-game "scenario info" screen (scenario pre-game, also)
+				(this->checksum == CHECKSUM_UI_SAVE_AS_SCREEN) ||
+				(this->checksum == CHECKSUM_UI_ACHIEVEMENTS_SCREEN) || // Achievements screen, (also for timeline main screen as it is a dialog)
+				// Other
+				(this->checksum == CHECKSUM_UI_MP_WAIT_SCREEN) || 
+				(this->checksum == CHECKSUM_UI_MAIN_ERROR_SCREEN) || // When is this used ?
+				(this->checksum == CHECKSUM_UI_STATUS_MESSAGE) // When is this used ?
+				;
+		}
+		// Returns true if checksum is valid for a dialog panel class (or one of its child classes)
+		bool IsCheckSumValidForDialog() const {
+			return (this->checksum == CHECKSUM_UI_DIALOG_PANEL) ||
+				(this->checksum == CHECKSUM_UI_POPUP_DIALOG) ||
+				(this->checksum == CHECKSUM_UI_NAME_DIALOG);
+		}
+	public:
+		// Returns true if checksum corresponds to a known Screen class, including EasyPanel common ancestor.
 		bool IsCheckSumValidForAChildClass() const {
-			return (this->checksum == CHECKSUM_UI_EASY_PANEL) || (this->checksum == CHECKSUM_UI_SCREEN_PANEL) ||
-				(this->checksum == CHECKSUM_UI_IN_GAME_MAIN) || (this->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MAIN) || 
-				(this->checksum == CHECKSUM_UI_GAME_SETTINGS);
+			return (this->checksum == CHECKSUM_UI_EASY_PANEL) || // Actually easyPanel
+				this->IsCheckSumValidForScreenPanel() ||
+				this->IsCheckSumValidForDialog() ||
+				// Directly under easyPanel:
+				(this->checksum == CHECKSUM_UI_TIMELINE_PANEL);
 		}
 	};
 	static_assert(sizeof(STRUCT_UI_EASY_PANEL) == 0x478, "STRUCT_UI_EASY_PANEL size");
@@ -98,6 +158,10 @@ namespace AOE_STRUCTURES
 	public:
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UI_SCREEN_PANEL); }
+
+		bool IsCheckSumValidForAChildClass() const {
+			return this->IsCheckSumValidForScreenPanel();
+		}
 	};
 	static_assert(sizeof(STRUCT_UI_SCREEN_PANEL) == 0x478, "STRUCT_UI_SCREEN_PANEL size");
 

@@ -6,6 +6,8 @@ namespace AOE_CONST_DRS {
 
 	enum AoeScreenTheme
 	{
+		None_Invalid = -1, // -1 might be used as "None" in some places.
+
 		RedTheme = 50002, // Weird looking but not so bad !
 		SalmonWeirdTheme = 50003, // The background design is really weird, but font and UI components are nice (checkbox are special but ok)
 		LightOrangeBrownTheme = 50004, // No background image (which can be useful), working well. Brown on top to light brown in the bottom (with yellow/orange touch). The white font is looking weird sometimes.

@@ -14,7 +14,6 @@
 namespace AOE_STRUCTURES
 {
 
-#define CHECKSUM_UI_CAMPAIGN_SELECTION 0x005460DC
 
 	// Size=0x4CC. Constructor=0x47A7C0
 	// 0x47B140=TRIBE_Screen_Campaign_Selection::startGame(void)

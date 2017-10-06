@@ -25,14 +25,17 @@ STRUCT_GAME_SETTINGS* GetGameSettingsPtr() {
 AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *GetUIMainInfoStruct() {
 	return ROR_pUIMainInfo;
 }
+// Returns the UI system object - synonym to GetUIMainInfoStruct()
+AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *GetUIPanelSystem() {
+	return ROR_pUIMainInfo;
+}
 
 
-// Returns a pointer to current active UI (?)
-// ASSERTS that the pointer is non-NULL
-STRUCT_ANY_UI *GetCurrentUIStruct() {
-	STRUCT_ANY_UI **p = (STRUCT_ANY_UI **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
-	assert(*p != NULL);
-	return *p;
+// Return current screen, using UI panel system
+STRUCT_UI_EASY_PANEL *GetCurrentScreen() {
+	STRUCT_UI_PANEL_SYSTEM  *ps = GetUIPanelSystem();
+	if (!ps) { return NULL; }
+	return ps->currentScreen;
 }
 
 

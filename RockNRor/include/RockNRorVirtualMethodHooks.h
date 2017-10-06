@@ -4,6 +4,8 @@
 #include <string>
 #include <mystrings.h>
 #include <AOE_struct_unit_activity.h>
+#include <UI\AOE_struct_ui_welcome_main_screen.h>
+#include <UI\AOE_struct_ui_screen_base.h>
 #include "EXESelfEditor.h"
 #include "crDebugOutputPrimitives.h"
 #include "RORVirtualMethodHelper.h"
@@ -50,6 +52,11 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// Also used to assign a dedicated "unit definition" in conversion process: unit will have its own "unitDefinition" (with its own specs)
 	// This is only allowed if unit.status <= 2 (ready) because BASE method fails if status>2 (unit->unitDefinition is NOT updated).
 	void __stdcall UnitTransform(STRUCT_UNIT_BASE *unit, STRUCT_UNITDEF_BASE *newUnitDef);
+
+	// OnKeyDown event on a UI component/panel.
+	// Returns 1 if event has been handled and must not be transferred to parent object.
+	// Warning: repeatCount is a word (or 2 words?)
+	long int __stdcall UIObjOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT);
 
 
 	/*

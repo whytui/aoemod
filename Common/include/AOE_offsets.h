@@ -35,8 +35,7 @@ namespace AOE_OFFSETS
 #endif
 
 
-	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = ADDR_VAR_PANEL_SYSTEM + 0x0C; // part of a bigger struct, +C
-	static const unsigned long int ADDR_VAR_CURRENT_UI_OBJECT = ADDR_VAR_PANEL_SYSTEM + 0x0C; // part of a bigger struct, +C
+	static const unsigned long int ADDR_VAR_ACTIVE_UI_STRUCT = ADDR_VAR_PANEL_SYSTEM + 0x0C; // part of UI panel system (+0x0C)
 
 
 };

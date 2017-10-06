@@ -18,13 +18,12 @@ RockNRorMainInterface::~RockNRorMainInterface() {
 
 
 
-// Manage key press in game screen and editor.
+// Manage key press in game screen and editor. (when UI components/screens themselves did not handle the event ?)
 // Returns true if event has been handled AND we don't want original code to try to handle it.
 // Warning: UI components may catch and handle events before so this method is NOT called. See crCommand.OnGameCommandButtonClick.
 bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool CTRL, bool SHIFT, bool ALT) {
-	AOE_STRUCTURES::STRUCT_ANY_UI **pCurrentUI = (AOE_STRUCTURES::STRUCT_ANY_UI **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
-	assert(pCurrentUI != NULL);
-	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = *pCurrentUI;
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *currentUI = AOE_STRUCTURES::GetCurrentScreen();
+	assert(currentUI);
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
 	if (!settings) { return false; }
@@ -73,8 +72,8 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 	if ((pressedKey == VK_F10) && isInEditor && !isMenuOpen && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
 		// Additional check
 		assert(GetGameSettingsPtr()->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
-		if (pCurrentUI) {
-			AOE_METHODS::AOE_EditorOpenMenu((AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)*pCurrentUI);
+		if (currentUI && (currentUI->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MAIN)) {
+			AOE_METHODS::AOE_EditorOpenMenu((AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)currentUI);
 		}
 	}
 

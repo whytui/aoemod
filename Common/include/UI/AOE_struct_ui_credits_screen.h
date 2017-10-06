@@ -13,8 +13,6 @@
 namespace AOE_STRUCTURES
 {
 
-#define CHECKSUM_UI_CREDITS_SCREEN 0x00546468
-
 	// Size = 0x8B8. Constructor = 0x47C510. 68 64 54 00
 	class STRUCT_UI_CREDITS_SCREEN : public STRUCT_UI_SCREEN_PANEL {
 	public:

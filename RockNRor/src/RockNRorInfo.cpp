@@ -247,7 +247,7 @@ AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *RockNRorInfo::OpenCustomGamePopup(long int
 		(GetGameSettingsPtr()->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING)) {
 		return false;
 	}
-	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *currentScreen = (AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *)GetCurrentUIStruct();
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *currentScreen = (AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *)AOE_STRUCTURES::GetCurrentScreen();
 	assert(currentScreen && currentScreen->IsCheckSumValidForAChildClass());
 	if (!currentScreen || !currentScreen->IsCheckSumValidForAChildClass()) { return false; }
 	// Make sure provided dimensions fit in screen
@@ -364,7 +364,7 @@ void RockNRorInfo::CloseCustomGamePopup() {
 	}
 
 	CallAOEDestructor((unsigned long **)&this->customGamePopupButtonVar); // also sets var to NULL
-	UIObjButton = NULL; // DO NOT use UIObj anymore !
+	UIObjButton = NULL; // DO NOT use UIObjButton anymore !
 	// Free user-created popup content (underlying UI components)
 	this->FreePopupAddedObjects();
 

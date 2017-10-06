@@ -13,15 +13,13 @@
 namespace AOE_STRUCTURES
 {
 
-#define CHECKSUM_UI_CREDITS_SCREEN 0x00545E84
-
 	// Size = 0x5F8. Constructor = 0x477340
-	class STRUCT_UI_CREDITS_SCREEN : public STRUCT_UI_SCREEN_PANEL {
+	class STRUCT_UI_ACHIEVEMENTS_SCREEN : public STRUCT_UI_SCREEN_PANEL {
 	public:
 		char unknownu_478[0x5F8 - 0x478];
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_CREDITS_SCREEN; }
+		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_ACHIEVEMENTS_SCREEN; }
 	};
-	static_assert(sizeof(STRUCT_UI_CREDITS_SCREEN) == 0x5F8, "STRUCT_UI_CREDITS_SCREEN size");
+	static_assert(sizeof(STRUCT_UI_ACHIEVEMENTS_SCREEN) == 0x5F8, "STRUCT_UI_ACHIEVEMENTS_SCREEN size");
 
 }
 

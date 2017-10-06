@@ -55,6 +55,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 	std::map<unsigned long int, unsigned long int> playerProcessNotifyCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitTransformCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> uiOnKeyDownCheckSumAndOriginalAddress;
 
 
 	// Return value is an unknown enum. 2=ok, processed. (unitAI: EDX+0xCC call).
@@ -257,13 +258,47 @@ namespace VIRTUAL_METHOD_HOOKS {
 		if (runStandardMethod && (originalCallAddr != 0)) {
 			_asm {
 				MOV ECX, unit;
-				MOV EDX, DS:[ECX];
 				PUSH newUnitDef;
 				CALL originalCallAddr;
 			}
 		}
 
 		RECORD_PERF_END(originalCallAddr);
+	}
+
+
+	// OnKeyDown event on a UI component/panel.
+	// Returns 1 if event has been handled and must not be transferred to parent object.
+	// Warning: repeatCount is a word (or 2 words?)
+	long int __stdcall UIObjOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
+		unsigned long int originalCallAddr = uiOnKeyDownCheckSumAndOriginalAddress[uiObj->checksum];
+		assert(uiObj && isAValidRORChecksum(uiObj->checksum));
+		RECORD_PERF_BEGIN(originalCallAddr);
+		bool runStandardMethod = true;
+		long int result = 0;
+
+		if (uiObj->checksum == CHECKSUM_UI_EASY_PANEL) {
+			//runStandardMethod = false;
+		}
+		if (uiObj->checksum == CHECKSUM_UI_WELCOME_MAIN_SCREEN) {
+			//runStandardMethod = false;
+		}
+
+		if (runStandardMethod && (originalCallAddr != 0)) {
+			_asm {
+				MOV ECX, uiObj;
+				PUSH SHIFT;
+				PUSH CTRL;
+				PUSH ALT;
+				PUSH repeatCount;
+				PUSH keyCode;
+				CALL originalCallAddr;
+				MOV result, EAX;
+			}
+		}
+
+		RECORD_PERF_END(originalCallAddr);
+		return result;
 	}
 
 
@@ -275,6 +310,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 	DECLARE_VIRTUAL_METHOD_HANDLER(PlayerProcessNotify)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitAddPositionToTargetPosArray)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitTransform)
+	DECLARE_VIRTUAL_METHOD_HANDLER(UIObjOnKeyDown)
 
 
 	// Patches ROR process (.rdata section) to connect overloaded virtual methods
@@ -339,6 +375,16 @@ namespace VIRTUAL_METHOD_HOOKS {
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TREE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_TREE]);
 
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TRAINABLE, 0x54, UnitTransform, unitTransformCheckSumAndOriginalAddress[CHECKSUM_UNIT_TRAINABLE]); // unit->tranform only needs to be fixed for TRAINABLE class
+
+			// UI
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_EASY_PANEL, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_EASY_PANEL]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SCREEN_PANEL, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SCREEN_PANEL]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_GAME_SETTINGS, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_GAME_SETTINGS]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_MESSAGE_PANEL, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_MESSAGE_PANEL]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_IN_GAME_MENU, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_IN_GAME_MENU]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SP_MENU_SCREEN, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SP_MENU_SCREEN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SCENARIO_EDITOR_MENU, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SCENARIO_EDITOR_MENU]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_WELCOME_MAIN_SCREEN, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_WELCOME_MAIN_SCREEN]);
 
 			CR_DEBUG::AppendTextToLogFile("Virtual methods APIs have been written", true);
 

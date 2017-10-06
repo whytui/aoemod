@@ -2,6 +2,7 @@
 #pragma once
 
 #include <UI_components\AOE_struct_any_ui.h>
+#include <UI\AOE_struct_ui_screen_base.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -15,10 +16,10 @@ namespace AOE_STRUCTURES
 
 	// Size = 0x4B0. Constructor = 0x47B440. 08 62 54 00
 	// "Join Screen" = MP search game screen.
-	class STRUCT_UI_JOIN_SCREEN : public STRUCT_ANY_UI {
+	class STRUCT_UI_JOIN_SCREEN : public STRUCT_UI_SCREEN_PANEL {
 	public:
 		// unknown...
-		bool IsCheckSumValid() { return this->checksum == 0x00546208; }
+		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_JOIN_SCREEN; }
 	};
 
 }

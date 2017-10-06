@@ -14,8 +14,6 @@
 namespace AOE_STRUCTURES
 {
 
-#define CHECKSUM_UI_SCENARIO_EDITOR_MAIN_MENU 0x0054748C // parent=screenPanel
-
 	// Size=0x490 - Constructor = 0x49A5F0
 	// This is the "welcome" screen with 3 buttons (NOT menu in scenario editor screen)
 	class STRUCT_UI_SCENARIO_EDITOR_MAIN_MENU : public STRUCT_UI_SCREEN_PANEL {

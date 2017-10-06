@@ -42,7 +42,7 @@ static AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *AOE_CreateDialogPopup(const char *t
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
 	if (settings == NULL) { return 0; }
 	unsigned long int fct = 0;
-	AOE_STRUCTURES::STRUCT_ANY_UI *currentUI = *(AOE_STRUCTURES::STRUCT_ANY_UI **) AOE_OFFSETS::ADDR_VAR_CURRENT_UI_OBJECT;
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *currentUI = AOE_STRUCTURES::GetCurrentScreen();
 	if (currentUI == NULL) { return NULL; }
 	// Get correct call values according to active screen
 	if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) {
@@ -83,7 +83,7 @@ static AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *AOE_CreateCustomOptionsPopupFromMen
 
 	// Analog to 0x43424D
 	CloseScreenAndDestroy("Menu Dialog");
-	RefreshScreen("Game Screen", 0);
+	SetCurrentPanel("Game Screen", 0);
 	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *newPtr = (AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *)AOEAlloc(0x564);
 	if (!newPtr) { return NULL; }
 

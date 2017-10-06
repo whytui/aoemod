@@ -14,8 +14,6 @@
 namespace AOE_STRUCTURES
 {
 
-#define CHECKSUM_UI_CAMPAIGN_EDITOR 0x00545FB0
-
 	// Size=0x4C4. Constructor=0x479360
 	class STRUCT_UI_CAMPAIGN_EDITOR : public STRUCT_UI_SCREEN_PANEL {
 	public:

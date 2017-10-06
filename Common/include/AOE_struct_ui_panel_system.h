@@ -2,6 +2,7 @@
 #pragma once
 
 #include <UI_components\AOE_struct_any_ui.h>
+#include <UI\AOE_struct_ui_screen_base.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -23,8 +24,8 @@ namespace AOE_STRUCTURES
 	public:
 		STRUCT_ANY_UI *mouseOwner; // +00. If non-NULL, this object will intercept all mouse events (other components will be unreactive)
 		STRUCT_ANY_UI *keyboardOwner; // +04
-		STRUCT_ANY_UI *modalPanel; // +08
-		STRUCT_ANY_UI *currentScreen; // +0C. Current screen. If a popup is opened, currentScreen still refers to its parent screen. "currentPanel"
+		STRUCT_ANY_UI *modalPanel; // +08.
+		STRUCT_UI_EASY_PANEL *currentScreen; // +0C. Current screen. If a popup is opened, currentScreen still refers to its parent screen. "currentPanel"
 		unsigned long int unknown_010;
 		long int openedScreensCount; // +14. "activePanels"
 		STRUCT_ANY_UI *previousFocusedObject; // +18. unsure

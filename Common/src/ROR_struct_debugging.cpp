@@ -463,7 +463,7 @@ namespace AOE_STRUCTURES {
 			return false;
 		}
 		unsigned long int p = NULL;
-		if (!GetObjectFromRORData(this->handleROR, AOE_OFFSETS::ADDR_VAR_CURRENT_UI_OBJECT, &p)) {
+		if (!GetObjectFromRORData(this->handleROR, AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT, &p)) {
 			return false;
 		}
 		if (!GetObjectFromRORData(this->handleROR, p, &this->currentUIStruct)) {

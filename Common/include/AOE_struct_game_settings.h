@@ -24,6 +24,8 @@ namespace AOE_STRUCTURES {
 	// External dependencies
 	class STRUCT_UI_IN_GAME_MAIN;
 	class STRUCT_ANY_UI;
+	class STRUCT_UI_DRAW_SYSTEM;
+	class STRUCT_UI_DRAW_AREA;
 
 	// Size 0x2C. Used in 0x4F6D7E
 	// Provides interaction mode information for an AI type (considering unit=potential target of a right-click)
@@ -259,8 +261,8 @@ namespace AOE_STRUCTURES {
 		// 0x40
 		unsigned long int errorCode; // +40. Get in 0x417460.
 		unsigned long int unknown_044;
-		unsigned long int *drawSystem; // +48. TDrawSystem
-		unsigned long int *unknown_04C; // +4C. basegame ?? Ptr to struct size>=478. TDrawArea ?
+		STRUCT_UI_DRAW_SYSTEM *drawSystem; // +48. TDrawSystem. Init 0x41829B.
+		STRUCT_UI_DRAW_AREA *renderArea; // +4C. basegame ?? Ptr to struct size>=478. Corresponds to TDrawSystem+0x0C
 		GAME_UNITS_OUTLINE_MODE outline; // +50. Values 0-3. to test
 		char unknown_051[3];
 		unsigned long int unknown_054;

@@ -11,7 +11,7 @@
 */
 namespace AOE_STRUCTURES
 {
-
+	// Size=0x100. Ccor=0x4382A0
 	class STRUCT_UI_DRAW_AREA {
 	public:
 		unsigned long int unknown_00; // A pointer
@@ -23,6 +23,15 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_14;
 		long int screenSizeX;
 		long int screenSizeY;
+		// ...
+	};
+
+	// Size=0x47C. Constructor=0x436C30 (no argument). No checksum.
+	class STRUCT_UI_DRAW_SYSTEM {
+	public:
+		unsigned long int unknown_000[3];
+		STRUCT_UI_DRAW_AREA *renderArea; // +0x0C.
+		// ...
 	};
 
 
@@ -31,18 +40,15 @@ namespace AOE_STRUCTURES
 
 // Other classes to define
 #define CHECKSUM_UI_LOAD_SAVED_GAME 0x005468CC // ccor 0x485FC90
-#define CHECKSUM_UI_MAIN_ERROR_SCREEN 0x00546B24 // ccor 0x486FD0
-#define CHECKSUM_UI_MP_STARTUP_SCREEN 0x00546C50 // ccor 0x487250
-#define CHECKSUM_UI_MP_WAIT_SCREEN 0x00546EA8 // ccor 0x48DA30
-#define CHECKSUM_UI_NAME_SELECTION 0x00546FD4 // ccor 0x48DEC0
-#define CHECKSUM_UI_NAME_DIALOG 0x00547100 // ccor 0x48E800
-#define CHECKSUM_UI_SAVE_AS_SCREEN 0x00547234 // ccor 0x48ECA0. "Save Game Screen" (to save scenario also)
-#define CHECKSUM_UI_SC_EDITOR_OPEN 0x005475B8 // ccor 0x49AAA0. "Scenario editor open"
-#define CHECKSUM_UI_SELECT_SCENARIO_SCREEN 0x005476E4 // ccor 0x49B360. "Select scenario screen"
-#define CHECKSUM_UI_SP_MENU_SCREEN 0x0054793C // ccor 0x49E040. "SPMenuScreen"
-#define CHECKSUM_UI_STATUS_MESSAGE 0x00547A68 // ccor 0x49E7A0, 0x49E9A0.
-#define CHECKSUM_UI_MISSION_SCREEN 0x00547B94 // ccor 0x49EC00.
-#define CHECKSUM_UI_TIMELINE_PANEL 0x0054A134 // ccor 0x4FBAA0.
+#define CHECKSUM_UI_MAIN_ERROR_SCREEN 0x00546B24 // ccor 0x486FD0. Parent=screenPanel
+#define CHECKSUM_UI_MP_WAIT_SCREEN 0x00546EA8 // ccor 0x48D3A0. Parent=screenPanel
+#define CHECKSUM_UI_NAME_SELECTION 0x00546FD4 // ccor 0x48DEC0. Parent=screenPanel
+#define CHECKSUM_UI_NAME_DIALOG 0x00547100 // ccor 0x48E800. Parent=dialogPanel (then easyPanel). "New name dialog".
+#define CHECKSUM_UI_SAVE_AS_SCREEN 0x00547234 // ccor 0x48ECA0. "Save Game Screen" (to save scenario also). Parent=screenPanel
+#define CHECKSUM_UI_SC_EDITOR_OPEN 0x005475B8 // ccor 0x49AAA0. "Scenario editor open". Parent=screenPanel
+#define CHECKSUM_UI_STATUS_MESSAGE 0x00547A68 // ccor 0x49E7A0, 0x49E9A0. Parent=screenPanel
+#define CHECKSUM_UI_MISSION_SCREEN 0x00547B94 // ccor 0x49EC00. Parent=screenPanel
+#define CHECKSUM_UI_TIMELINE_PANEL 0x0054A134 // ccor 0x4FBAA0. Parent=easyPanel
 
 
 	// Parent class for UI objects (both screens and UI components) = TPanel
@@ -65,8 +71,29 @@ namespace AOE_STRUCTURES
 	// +2C = void TPanel::draw_finish(void)
 	// +30 = void TPanel::draw(void)
 	// +34 = void TPanel::draw_rect(struct tagRECT *) ?
-	// +B8 = OnEvent(ptrSender, evtStatus, objId, btnInfoValue) ?? really unsure
+	// +3C = panel.draw_rect(arg1)
+	// +40 = panel.drawOffset(arg1, arg2, arg3)
+	// +44 = void TPanel::paint(void)
+	// +48 = panel.wnd_proc(hWnd, WM_msg, wParam, lParam)
+	// +4C = panel.handleIdle()
+	// +50 = panel.setPosition(sizeX, sizeY)
+	// +54 = TPanel::handle_paint(void)
+	// +58 = panel.keyDown(keyCode, repeatCount, ALT, CTRL, SHIFT)
+	// +5C = panel.handle_char(key,count)
+	// +70 = panel.handleMouseDown(mouseBtn, x, y, CTRL, SHIFT)
+	// +74 = panel.handleMouseMove(mouseBtn, x, y, CTRL, SHIFT)
+	// +78 = UI.onMouseButtonUp(btnId, mousePosX, mousePosY, CTRL, SHIFT)
+	// +7C = panel.mouseUp(mouseBtn, x, y, CTRL, SHIFT)
+	// +B8 = panel.action(ptrSender, evtStatus, objBtnId, objBtnVal2)
+	// +BC = panel.getTrueRenderRect(arg)
+	// +C0 = panel.isInside(mousePosX, mousePosY)
 	// +C4 = uiComponent.setFocus(doFocus)
+	// +C8 = void TPanel::set_tab_order(prevPanel, nextPanel)
+	// +CC = void TPanel::set_tab_order(panelList, panelCount)
+	// +D0 = HEX TPanel::get_help_info(string,page,x,y)
+	// +D4 = TPanel::stop_sound_system(void)
+	// +D8 = INT TPanel::restart_sound_system(void)
+	// +E0 = TPanel::handle_reactivate(void) (LAST)
 	// 0x451F20 = struct PanelNode * TPanelSystem::findPanelNode(char *panelName)
 	class STRUCT_ANY_UI {
 	public:
@@ -105,7 +132,7 @@ namespace AOE_STRUCTURES
 		STRUCT_ANY_UI *ptrParentObject; // +40
 		unsigned long int unknown_044;
 		unsigned long int unknown_048;
-		unsigned long int unknown_04C;
+		unsigned long int unknown_04C; // STRUCT_UI_DRAW_AREA*???
 		// 0x50
 		unsigned long int unknown_050;
 		unsigned long int *unknown_054; // ptr struct size 0x0C. +0=backptr,

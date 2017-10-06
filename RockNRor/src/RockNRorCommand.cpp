@@ -1169,8 +1169,8 @@ void RockNRorCommand::OnGameStart() {
 	// For farm, see notify event method (managed on market construction notification).
 	ROCKNROR::TRIGGER::ManageTriggerDisableUnitsForExceptions();
 
-	long int **p = (long int **)AOE_OFFSETS::ADDR_VAR_ACTIVE_UI_STRUCT;
-	if ((*p) && (**p != CHECKSUM_UI_IN_GAME_MAIN)) {
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *currentPanel = AOE_STRUCTURES::GetCurrentScreen();
+	if (currentPanel && (currentPanel->checksum != CHECKSUM_UI_IN_GAME_MAIN)) {
 		// This is NOT game screen, do not try to interact with it !
 		return;
 	}
@@ -3751,7 +3751,7 @@ long int RockNRorCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_POP
 	}
 	// Close the dialog
 	// TO DO: use CloseScreenFullTreatment(..) instead
-	AOE_METHODS::RefreshScreen("Game Screen", 0);
+	AOE_METHODS::SetCurrentPanel("Game Screen", 0);
 	assert(strcmp(ptrDialog->screenName, AOE_CONST_INTERNAL::customDialogScreenName) == 0);
 	AOE_METHODS::CloseScreenAndDestroy(AOE_CONST_INTERNAL::customDialogScreenName);
 	ROCKNROR::crInfo.customYesNoDialogVar = NULL;

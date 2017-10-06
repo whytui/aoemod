@@ -34,8 +34,9 @@ public:
 	~RockNRorMainInterface();
 
 
-	// Manage key press in game screen and editor.
+	// Manage key press in game screen and editor. (when UI components/screens themselves did not handle the event ?)
 	// Returns true if event has been handled AND we don't want original code to try to handle it.
+	// Warning: UI components may catch and handle events before so this method is NOT called. See crCommand.OnGameCommandButtonClick.
 	bool GameAndEditor_OnKeyPress(long int pressedKey, bool CTRL, bool SHIFT, bool ALT);
 
 	// Called for ALL button clicks in the game.

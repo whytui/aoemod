@@ -5,6 +5,7 @@
 #include <UI_components\AOE_struct_ui_button.h>
 #include <UI_components\AOE_struct_ui_combobox.h>
 #include <UI_components\AOE_struct_ui_label.h>
+#include <UI\AOE_struct_ui_screen_base.h>
 
 
 /*
@@ -18,14 +19,12 @@ namespace AOE_STRUCTURES
 {
 
 
-	// Size = 0x898 . 7C 6D 54 00.
+	// Size = 0x898 . 7C 6D 54 00. Parent=screenPanel.
 	// Main screen for game settings (MP or SP)
 	// Constructor: 0x487F40
 	// 0x48B640: mpSetupScreen.InitPlayers?(?)
-#define CHECKSUM_UI_MP_SETUP_SCREEN 0x00546D7C
-	class STRUCT_UI_MP_SETUP_SCREEN : public STRUCT_ANY_UI {
+	class STRUCT_UI_MP_SETUP_SCREEN : public STRUCT_UI_SCREEN_PANEL {
 	public:
-		char unknown_0F4[0x478 - 0xF4];
 		STRUCT_UI_LABEL *unknown_478;
 		STRUCT_UI_LABEL *unknown_47C;
 		STRUCT_UI_LABEL *unknown_480;
@@ -101,7 +100,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_890;
 		unsigned long int unknown_894;
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_MP_SETUP_SCREEN; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_MP_SETUP_SCREEN; }
 	};
 	static_assert(sizeof(STRUCT_UI_MP_SETUP_SCREEN) == 0x898, "STRUCT_UI_MP_SETUP_SCREEN size");
 
