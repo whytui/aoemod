@@ -22,6 +22,7 @@ public:
 		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::InGameOptionsTheme);
 		this->sizeX = 0;
 		this->sizeY = 0;
+		this->ResetClassPointers();
 	}
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)

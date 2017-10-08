@@ -43,7 +43,7 @@ public:
 
 	// Called for ALL button clicks in the game.
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool Global_OnButtonClick(unsigned long int objAddress);
+	bool Global_OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *object);
 
 	// Returns true if custom map generation has been executed. False if we want to let original game code apply.
 	bool ScenarioEditor_callMyGenerateMapIfRelevant();

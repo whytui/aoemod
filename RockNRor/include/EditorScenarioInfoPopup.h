@@ -15,26 +15,36 @@
 
 enum SC_INFO_POPUP_TO_OPEN { PTO_NONE = 0, PTO_TRIGGER, PTO_AI, PTO_PER, PTO_TERRAIN_EDIT, PTO_VICTORY_CONDITION, PTO_COUNT };
 
-class EditorScenarioInfoPopup : public CustomPopupBase {
+
+namespace ROCKNROR {
+namespace UI {
+;
+
+class EditorScenarioInfoPopup : public RnrScreenBase {
 public:
-	EditorScenarioInfoPopup();
-	void _ResetPointers() override;
-	void _AddPopupContent() override;
+	EditorScenarioInfoPopup() : RnrScreenBase("editor unit info") {
+		this->SetWindowed(100, 100, 500, 400); // will always work (default values)
+		this->SetCenteredForSize(500, 400); // May fail if game settings can't be retrieved
+		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::InGameOptionsTheme);
+		this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_NONE;
+		this->ResetClassPointers();
+	}
+
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) override;
-	void OnAfterClose(bool isCancel) override;
+	virtual bool OnButtonClick(STRUCT_UI_BUTTON *sender) override;
 
-	// Provide the pointer to the boolean that will be updated according to user choice.
-	void SetVarToUpdate_allowUnitOverlapping(bool *varToUpdate);
-	void SetVarToUpdate_disableHillModeChecks(bool *varToUpdate);
-	void SetVarToUpdate_disableTerrainRestrictionChecks(bool *varToUpdate);
-	void SetVarToUpdate_lengthenCombatMode(long int *varToUpdate);
+	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+	bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) override;
 
-	// Opens the custom "scenario info" popup in editor
-	// Returns true if OK.
-	static bool OpenCustomEditorScenarioInfoPopup();
+protected:
+	// Reset various pointers for this class level (to override)
+	virtual void ResetClassPointers() override;
+
+	// Create screen content: buttons, etc. Called by CreateScreen(...) method.
+	void CreateScreenComponents() override;
 
 private:
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblTitle;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtPlayerId;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnTriggers;
@@ -48,8 +58,10 @@ private:
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkLengthenCombatMode;
 	SC_INFO_POPUP_TO_OPEN popupToOpen;
 	int playerId;
-	bool *varToUpdate_allowUnitOverlapping;
-	bool *varToUpdate_disableHillModeChecks;
-	bool *varToUpdate_disableTerrainRestrictionChecks;
-	long int *varToUpdate_lengthenCombatMode;
+
 };
+
+
+}
+}
+

@@ -116,7 +116,7 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004F2B4F:
 		this->OverloadResetUnitInAI(REG_values);
 		break;
-	case 0x004604C9:
+	case 0x00460519:
 		this->GlobalOnButtonClick(REG_values);
 		break;
 	case 0x0041A6C7:
@@ -1530,26 +1530,20 @@ void RockNRorInstance::AuditOnDoStrategyElementBuilding(REG_BACKUP *REG_values) 
 // Intercepts ALL button OnClick events, including bitbuttons, checkboxes, dropdowns (just the "open to show list" click)
 // Note: Change return address to 0x460568 to disable standard treatments for this event.
 void RockNRorInstance::GlobalOnButtonClick(REG_BACKUP *REG_values) {
-	ror_api_assert(REG_values, REG_values->ECX_val != 0);
-	unsigned long int objAddr = REG_values->ECX_val;
-	unsigned long int evtStatus;
-	// Note: at this moment, ECX and ESI are the same. Let's use ECX.
-	_asm {
-		MOV ECX, objAddr;
-		MOV EAX, DS:[ECX + 0x13C];
-		MOV evtStatus, EAX;
-	}
-	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
-		REG_values->EAX_val = evtStatus;
-		REG_values->fixesForGameEXECompatibilityAreDone = true;
-	}
+	ror_api_assert(REG_values, REG_values->ESI_val != 0);
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *button = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)REG_values->ESI_val;
+	ror_api_assert(REG_values, button && button->IsCheckSumValidForAChildClass());
+
+	// Compatibility with EXE
+	REG_values->EAX_val = (unsigned long int)button->currentState; // +1F6
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
 
 	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	// Custom treatments
-	if (ROCKNROR::crMainInterface.Global_OnButtonClick(objAddr)) {
-		ChangeReturnAddress(REG_values, 0x460568);
+	if (ROCKNROR::crMainInterface.Global_OnButtonClick(button)) {
+		ChangeReturnAddress(REG_values, 0x460568); // goes to end of ROR method
 	}
 	static bool done = false;
 	if (!done) {
@@ -2951,8 +2945,8 @@ void RockNRorInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 	}
 
 	long int keyChar = *((unsigned long int*)(REG_values->ESP_val + 0x04)); // arg1
-	// In custom popups, RETURN in a textbox loses focus (so it is taken into account)
-	if ((ROCKNROR::crInfo.HasOpenedCustomGamePopup()) && (keyChar == VK_RETURN) && (textbox->IsCheckSumValid()) &&
+	// (In custom popups)(why restrict?), RETURN in a textbox loses focus (so it is taken into account)
+	if (/*(ROCKNROR::crInfo.HasOpenedCustomGamePopup()) &&*/ (keyChar == VK_RETURN) && (textbox->IsCheckSumValid()) &&
 		(textbox->inputType != 7)) {
 		AOE_METHODS::UI_BASE::SetFocus(textbox->ptrParentObject, NULL);
 	}

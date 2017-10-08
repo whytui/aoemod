@@ -83,6 +83,7 @@ namespace AOE_STRUCTURES
 	// 0x457A80=TEasy_Panel::popupYesNoDialog(text,panel_title,wid,hgt)
 	// 0x457B40=TEasy_Panel::popupYesNoCancelDialog(text_id,panel_title,wid,hgt)
 	// 0x457B90=TEasy_Panel::popupYesNoCancelDialog(text,panel_title,wid,hgt)
+	// +B8 = easyPanel.OnObjectUserEvent(sender, evtStatus, objBtnCmdId, InfoValue)
 	class STRUCT_UI_EASY_PANEL : public STRUCT_ANY_UI {
 	public:
 		long int screenSizeX; // +F4. Default 640. "IdealSize"

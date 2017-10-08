@@ -117,10 +117,10 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_038; // init = 2
 		STRUCT_ANY_UI *focusedComponent; // +3C. Underlying (child) focused component. A parent AND its child can both have focus (?)
 		// 0x40
-		STRUCT_ANY_UI *ptrParentObject; // +40
+		STRUCT_ANY_UI *ptrParentObject; // +40. Always an EasyPanel ?
 		unsigned long int unknown_044;
 		unsigned long int unknown_048;
-		unsigned long int unknown_04C; // STRUCT_UI_DRAW_AREA*???
+		unsigned long int *unknown_04C; // STRUCT_UI_DRAW_AREA*???
 		// 0x50
 		unsigned long int unknown_050;
 		unsigned long int *unknown_054; // ptr struct size 0x0C. +0=backptr,

@@ -21,6 +21,7 @@ public:
 		this->SetWindowed(100, 100, 500, 400); // will always work (default values)
 		this->SetCenteredForSize(500, 400); // May fail if game settings can't be retrieved
 		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::InGameOptionsTheme);
+		this->ResetClassPointers();
 	}
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)

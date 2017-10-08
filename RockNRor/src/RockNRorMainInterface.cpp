@@ -32,7 +32,8 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 		// Consistency check.
 		assert((currentUI->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MAIN) ||
 			(currentUI->checksum == CHECKSUM_UI_SAVE_AS_SCREEN) ||
-			(currentUI->checksum == CHECKSUM_UI_SC_EDITOR_OPEN));
+			(currentUI->checksum == CHECKSUM_UI_SC_EDITOR_OPEN) ||
+			(currentUI->checksum == CHECKSUM_UI_EASY_PANEL)); // custom screens...
 		if (currentUI->checksum != CHECKSUM_UI_SCENARIO_EDITOR_MAIN) { return false; }
 	}
 	bool isInGame = (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) && (currentUI->checksum == CHECKSUM_UI_IN_GAME_MAIN); // True if game is running (and has focus)
@@ -169,7 +170,9 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 	}
 	// F3 in editor: scenario information
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F3) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
-		EditorScenarioInfoPopup::OpenCustomEditorScenarioInfoPopup();
+		//EditorScenarioInfoPopup::OpenCustomEditorScenarioInfoPopup();
+		ROCKNROR::UI::EditorScenarioInfoPopup *popup = new ROCKNROR::UI::EditorScenarioInfoPopup();
+		popup->CreateScreen(GetCurrentScreen());
 	}
 
 	// CTRL-F1 : display messages
@@ -368,11 +371,11 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 
 // Called for ALL button clicks in the game.
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
-	if (ROCKNROR::customPopupSystem.OnButtonClickClosePopupIfNecessary(objAddress)) {
+bool RockNRorMainInterface::Global_OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *object) {
+	unsigned long int objAddress = (unsigned long int)object;
+	if (ROCKNROR::customPopupSystem.OnButtonClickClosePopupIfNecessary((unsigned long int)object)) {
 		return true;
 	}
-	AOE_STRUCTURES::STRUCT_ANY_UI *obj = (AOE_STRUCTURES::STRUCT_ANY_UI *)objAddress;
 
 	AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *uiMainInfo = GetUIMainInfoStruct();
 	if (uiMainInfo && uiMainInfo->previousFocusedObject) {
@@ -388,10 +391,9 @@ bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
 
 	// New RockNRor screens system
 	ROCKNROR::UI::RnrScreenBase *curRnrScreen = ROCKNROR::crInfo.rnrUIHelper->GetCurrentRnrScreen();
-	STRUCT_UI_BUTTON *objAsButton = (STRUCT_UI_BUTTON *)obj;
-	if (curRnrScreen && objAsButton->IsCheckSumValidForAChildClass()) {
+	if (curRnrScreen && object->IsCheckSumValidForAChildClass()) {
 		// If current screen is a custom one, first run custom handlers for this event
-		if (curRnrScreen->OnButtonClick(objAsButton)) {
+		if (curRnrScreen->OnButtonClick(object)) {
 			ROCKNROR::crInfo.rnrUIHelper->PurgeClosedScreens();
 			return true;
 		}
@@ -411,14 +413,14 @@ bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
 	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_METHODS::GetScreenFromName(scenarioEditorScreenName);
 	if ((se != NULL) && settings && (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR)) {
 		// Manage (overload) scenario editor buttons
-		if (obj == se->map_btn_generateMap) {
+		if (object == se->map_btn_generateMap) {
 			return this->ScenarioEditor_callMyGenerateMapIfRelevant();
 		}
 	}
 
 	// Game menu
 	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MENU *menu = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MENU *)AOE_METHODS::GetScreenFromName(menuDialogScreenName);
-	if (menu && menu->IsCheckSumValid() && settings && (obj->ptrParentObject == menu)) {
+	if (menu && menu->IsCheckSumValid() && settings && (object->ptrParentObject == menu)) {
 		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
 		if (objAsButton->IsCheckSumValid()) {
 			// True for buttons that do not trigger a call to ManageOptionButtonClickInMenu
