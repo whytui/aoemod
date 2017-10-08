@@ -1,58 +1,17 @@
 #include "../include/InGameUnitPropertiesPopup.h"
 
 
-
-
-// Open the relevant "view/edit unit" popup for currently selected unit.
-// Returns true if successful.
-bool InGameUnitPropertiesPopup::OpenInGameUnitPropertiesPopup() {
-	AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
-	if (!humanPlayer || !humanPlayer->IsCheckSumValid()) {
-		return false;
-	}
-	if (humanPlayer->selectedUnitCount <= 0) {
-		return false;
-	}
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(humanPlayer);
-	assert(selectedUnits != NULL);
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = selectedUnits[0];
-	if (!selectedUnit || !selectedUnit->IsCheckSumValidForAUnitClass()) {
-		return false;
-	}
-	if (!OpenInGameUnitPropertiesPopup(selectedUnit)) {
-		return false;
-	}
-
-	if (!IsMultiplayer()) {
-		AOE_METHODS::SetGamePause(true);
-	}
-	return true;
-}
-
-
-// Open the relevant "view/edit unit" popup for provided unit.
-// Returns true if successful.
-bool InGameUnitPropertiesPopup::OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
-	if (!unit || !unit->IsCheckSumValidForAUnitClass()) {
-		return false;
-	}
-	InGameUnitPropertiesPopup *popup = ROCKNROR::customPopupSystem.OpenCustomGamePopup<InGameUnitPropertiesPopup>(600, 500, true);
-	if (popup == NULL) { return false; }
-	popup->AddPopupContent(unit->unitInstanceId);
-	return true;
-}
+namespace ROCKNROR {
+namespace UI {
+;
 
 
 
-// In-game unit properties popup
-
-InGameUnitPropertiesPopup::InGameUnitPropertiesPopup() {
-	this->_ResetPointers();
-}
-
-void InGameUnitPropertiesPopup::_ResetPointers() {
-	__super::_ResetPointers();
+// Reset various pointers for this class level (to override)
+void InGameUnitPropertiesPopup::ResetClassPointers() {
+	__super::ResetClassPointers();
 	this->unitId = -1;
+	this->btnOK = NULL;
 	this->lblMainInfos = NULL;
 	this->lblTitle = NULL;
 	this->lblChildUnitsAutoMove = NULL;
@@ -74,12 +33,14 @@ void InGameUnitPropertiesPopup::_ResetPointers() {
 	this->btnMakeMainUnitForShortcutSelection = NULL;
 }
 
-// Create popup content for unit properties
-void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
-	if (this->IsClosed() || (this->popup == NULL) || (unitId < 0)) { return; }
+
+// Create screen content: buttons, etc. Called by CreateScreen(...) method.
+void InGameUnitPropertiesPopup::CreateScreenComponents() {
+	STRUCT_UI_EASY_PANEL *popup = this->GetAoeScreenObject();
+	if ((this->GetScreenStatus() == CLOSED) || (popup == NULL) || (this->unitId < 0)) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) GetUnitStruct(unitId);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *) GetUnitStruct(this->unitId);
 	AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = unitBase->ptrStructPlayer;
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetControlledPlayerStruct_Settings();
 	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = unitBase->unitDefinition;
@@ -88,7 +49,6 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
 		return;
 	}
-	this->unitId = unitId; // Store it once we checked it is valid.
 	AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDef50 = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)unitDefBase;
 	bool isValidType50 = unitDef50->DerivesFromAttackable();
 	bool isMyUnit = (controlledPlayer == unitPlayer);
@@ -104,7 +64,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	mainInfos += " ";
 #ifdef _DEBUG
 	mainInfos += "id=";
-	mainInfos += std::to_string(unitId);
+	mainInfos += std::to_string(this->unitId);
 	mainInfos += " ";
 #endif
 	mainInfos += "\"";
@@ -138,7 +98,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	}
 	// Automove infos
 	std::string autoMoveInfo = "";
-	UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(unitId);
+	UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(this->unitId);
 	if (isMyUnit && unitInfo && (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 		if (unitInfo->spawnTargetUnitId >= 0) {
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(unitInfo->spawnTargetUnitId);
@@ -221,27 +181,28 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		}
 	}
 
-	this->AddLabel(popup, &this->lblTitle, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_INGAME_TITLE, "Unit properties"), (hSize - lblTitleHSize) / 2, currentYPos, lblTitleHSize, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
+	this->AddLabel(&this->lblTitle, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_INGAME_TITLE, "Unit properties"),
+		(this->GetScreenSizeX() - lblTitleHSize) / 2, currentYPos, lblTitleHSize, 30, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	currentYPos += 50;
-	this->AddLabel(popup, &this->lblMainInfos, (char*)mainInfos.c_str(), (hSize - lblMainInfoHSize) / 2, currentYPos, lblMainInfoHSize, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(&this->lblMainInfos, (char*)mainInfos.c_str(), (this->GetScreenSizeX() - lblMainInfoHSize) / 2, currentYPos, lblMainInfoHSize, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 	currentYPos += 40;
 	// Note: auto-move and farm info have same Y position because they can't be displayed simultaneously.
 	if (!autoMoveInfo.empty()) {
-		this->AddLabel(popup, &this->lblChildUnitsAutoMove, (char*)autoMoveInfo.c_str(), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddButton(popup, &this->btnResetAutoMove, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DISABLE_AUTO_MOVE, "Disable auto-move"), 340, currentYPos, btnSize, 22, 0);
+		this->AddLabel(&this->lblChildUnitsAutoMove, (char*)autoMoveInfo.c_str(), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddButton(&this->btnResetAutoMove, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DISABLE_AUTO_MOVE, "Disable auto-move"), 340, currentYPos, btnSize, 22, 0);
 		currentYPos += 30;
 	}
 	// Auto rebuild farm
 	if (isMyUnit && (unitDefBase->DAT_ID1 == AOE_CONST_FUNC::CST_UNITID_FARM)) {
-		this->AddLabel(popup, &this->lblFarmAutoRebuild, (char*)farmInfo.c_str(), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		
+		this->AddLabel(&this->lblFarmAutoRebuild, (char*)farmInfo.c_str(), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+
 		AOE_STRUCTURES::STRUCT_UI_LABEL *unusedLabel;
-		this->AddCheckBox(popup, &this->chkRebuildFarmNone, 330, currentYPos - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkForceRebuildFarm, 430, currentYPos - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkForceNotRebuildFarm, 530, currentYPos - 4, 24, 24);
-		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DEFAULT, "Default"), 270, currentYPos, 50, 20);
-		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_ALWAYS, "Always"), 370, currentYPos, 50, 20);
-		this->AddLabel(popup, &unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NEVER, "Never"), 470, currentYPos, 50, 20);
+		this->AddCheckBox(&this->chkRebuildFarmNone, 330, currentYPos - 4, 24, 24);
+		this->AddCheckBox(&this->chkForceRebuildFarm, 430, currentYPos - 4, 24, 24);
+		this->AddCheckBox(&this->chkForceNotRebuildFarm, 530, currentYPos - 4, 24, 24);
+		this->AddLabel(&unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DEFAULT, "Default"), 270, currentYPos, 50, 20);
+		this->AddLabel(&unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_ALWAYS, "Always"), 370, currentYPos, 50, 20);
+		this->AddLabel(&unusedLabel, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NEVER, "Never"), 470, currentYPos, 50, 20);
 		currentYPos += 20;
 
 		FarmRebuildInfo *fri = ROCKNROR::crInfo.myGameObjects.FindFarmRebuildInfo(unitBase->positionX, unitBase->positionY);
@@ -263,18 +224,18 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 	// Military : guard location ?
 	if (isMilitary && isMyUnit) {
 		bool canHurtOtherUnits = (unitDef50->blastLevel != CST_BL_DAMAGE_TARGET_ONLY) && (unitDef50->blastRadius > 0);
-		this->AddLabel(popup, &this->lblAutoAttackUnits, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_AUTO_ATTACK_UNITS, "Auto attack units:"), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackTowers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TOWERS, "Towers"), 180, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackMilitary, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_MILITARY, "Military"), 250, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackBuildings, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_BUILDINGS, "Buildings"), 320, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackVillagers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_VILLAGERS, "Villagers"), 390, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-		this->AddLabel(popup, &this->lblAutoAttackWalls, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_WALLS, "Walls"), 460, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(&this->lblAutoAttackUnits, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_AUTO_ATTACK_UNITS, "Auto attack units:"), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(&this->lblAutoAttackTowers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TOWERS, "Towers"), 180, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(&this->lblAutoAttackMilitary, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_MILITARY, "Military"), 250, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(&this->lblAutoAttackBuildings, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_BUILDINGS, "Buildings"), 320, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(&this->lblAutoAttackVillagers, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_VILLAGERS, "Villagers"), 390, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(&this->lblAutoAttackWalls, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_WALLS, "Walls"), 460, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 		currentYPos += 30;
-		this->AddCheckBox(popup, &this->chkAutoAttackTowers, 195, currentYPos - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkAutoAttackMilitary, 265, currentYPos - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkAutoAttackBuildings, 335, currentYPos - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkAutoAttackVillagers, 405, currentYPos - 4, 24, 24);
-		this->AddCheckBox(popup, &this->chkAutoAttackWalls, 475, currentYPos - 4, 24, 24);
+		this->AddCheckBox(&this->chkAutoAttackTowers, 195, currentYPos - 4, 24, 24);
+		this->AddCheckBox(&this->chkAutoAttackMilitary, 265, currentYPos - 4, 24, 24);
+		this->AddCheckBox(&this->chkAutoAttackBuildings, 335, currentYPos - 4, 24, 24);
+		this->AddCheckBox(&this->chkAutoAttackVillagers, 405, currentYPos - 4, 24, 24);
+		this->AddCheckBox(&this->chkAutoAttackWalls, 475, currentYPos - 4, 24, 24);
 		currentYPos += 30;
 		const AutoAttackPolicy *aap = NULL;
 		if (canHurtOtherUnits) {
@@ -337,7 +298,7 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		} else {
 			wholeText += armorWeaknesses;
 		}
-		this->AddTextBox(popup, &this->edtStrengthWeakness, wholeText.c_str(), 0, 30, currentYPos, 450, 36, true, true, false, AOE_FONTS::AOE_FONT_SMALL_TEXT_10);
+		this->AddTextBox(&this->edtStrengthWeakness, wholeText.c_str(), 0, 30, currentYPos, 450, 36, true, true, false, AOE_FONTS::AOE_FONT_SMALL_TEXT_10);
 		currentYPos += 40;
 	}
 
@@ -347,29 +308,38 @@ void InGameUnitPropertiesPopup::AddPopupContent(long int unitId) {
 		std::string convResistText = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_CONVERSION_RESISTANCE, "Conversion resistance");
 		convResistText += "=";
 		convResistText += std::to_string(conversionResistance);
-		this->AddLabel(popup, &this->lblConversionResistance, convResistText.c_str(), 30, currentYPos, 300, 16);
+		this->AddLabel(&this->lblConversionResistance, convResistText.c_str(), 30, currentYPos, 300, 16);
 		currentYPos += 20;
 	}
 
 	// Building : future potential techs/units
 	if (!buildingTechAndUnitInfo.empty() && (techToShowCount > 0) && isMyUnit) {
-		this->AddLabel(popup, &this->lblBuildingTechsMessage, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_FUTURE_UNAVAILABLE_TECHS, "Future technologies, not available yet:"), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddLabel(&this->lblBuildingTechsMessage, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_FUTURE_UNAVAILABLE_TECHS, "Future technologies, not available yet:"), 30, currentYPos, 300, 20, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
 		currentYPos += 20;
-		this->AddTextBox(popup, &this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, currentYPos, 450, 20 + techToShowCount * 14, true, true);
+		this->AddTextBox(&this->edtBuildingTechs, buildingTechAndUnitInfo.c_str(), 0, 30, currentYPos, 450, 20 + techToShowCount * 14, true, true);
 		currentYPos += 20 + techToShowCount * 14 + 20;
 	}
 
 	if (isMyUnit) {
-		this->AddButton(popup, &this->btnMakeMainUnitForShortcutSelection,
+		this->AddButton(&this->btnMakeMainUnitForShortcutSelection,
 			localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_MAKE_MAIN_FOR_KEY_SHORTCUT_SELECTION, "Make main unit for keyboard shortcut selection"),
 			30, currentYPos, 400, 22);
 		currentYPos += 30;
 	}
+
+	// OK button
+	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(80), 
+		this->GetScreenSizeY() - 30, 80, 22, 0);
 }
 
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool InGameUnitPropertiesPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
+bool InGameUnitPropertiesPopup::OnButtonClick(STRUCT_ANY_UI *sender) {
+	if (sender == this->btnOK) {
+		this->Validate();
+		this->CloseScreen(false);
+		return true;
+	}
 	if (sender == this->btnResetAutoMove) {
 		UnitCustomInfo *u = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(this->unitId);
 		if (u) {
@@ -400,10 +370,19 @@ bool InGameUnitPropertiesPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *
 }
 
 
-void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
-	if (isCancel) {
-		return;
+// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+bool InGameUnitPropertiesPopup::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
+	if (keyCode == VK_ESCAPE) {
+		this->CloseScreen(false);
+		AOE_METHODS::SetGamePause(false);
+		return true;
 	}
+	return false;
+}
+
+
+// Save changes
+void InGameUnitPropertiesPopup::Validate() {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = GetUnitStruct(this->unitId); // Might be NULL
 	AOE_STRUCTURES::STRUCT_PLAYER *unitPlayer = NULL;
 	if (unit && unit->IsCheckSumValidForAUnitClass()) {
@@ -455,7 +434,10 @@ void InGameUnitPropertiesPopup::OnBeforeClose(bool isCancel) {
 		AutoAttackPolicy flagsToApply = { true, true, true, true, true }; // All flags are relevant in popup.
 		ROCKNROR::crInfo.ApplyAutoAttackPolicyToPlayerSelectedUnits(controlledPlayer, unitInfo->autoAttackPolicy, flagsToApply);
 	}
+	AOE_METHODS::SetGamePause(false);
 }
 
-void InGameUnitPropertiesPopup::OnAfterClose(bool isCancel) {}
+
+}
+}
 

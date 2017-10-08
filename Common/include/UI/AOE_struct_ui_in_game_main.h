@@ -125,7 +125,7 @@ namespace AOE_STRUCTURES
 		char shortcutKeyT[4]; // +79C. = 'T'
 		char shortcutKeyI[4]; // +7A0. = 'I'
 		char unknown_7A4[0x7C4 - 0x7A4];
-		long int panelSelectedUnitId; // +7C4. Selected unit ID (in unit details zone)
+		long int panelSelectedUnitId_WRONG; // +7C4. Selected unit ID (in unit details zone). WRONG ??
 
 		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_IN_GAME_MAIN; }
 	};

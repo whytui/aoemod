@@ -92,7 +92,15 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 
 	// F2 in game: unit properties
 	if ((isInGame) && (!isMenuOpen) && (pressedKey == VK_F2)) {
-		InGameUnitPropertiesPopup::OpenInGameUnitPropertiesPopup();
+		if (!settings || !settings->ptrGameUIStruct || !settings->ptrGameUIStruct->panelSelectedUnit) {
+			return false;
+		}
+		ROCKNROR::UI::InGameUnitPropertiesPopup *popup = new ROCKNROR::UI::InGameUnitPropertiesPopup(settings->ptrGameUIStruct->panelSelectedUnit->unitInstanceId);
+		if (popup->CreateScreen(GetCurrentScreen())) {
+			if (!IsMultiplayer()) {
+				AOE_METHODS::SetGamePause(true);
+			}
+		}
 	}
 
 	// ESC (1B) - close custom dialog if opened

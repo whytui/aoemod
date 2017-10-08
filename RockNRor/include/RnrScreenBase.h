@@ -27,6 +27,7 @@ class RnrScreenBase {
 public:
 	enum ScreenStatus { NOT_CREATED, CREATED, CLOSED };
 	
+	// Constructor for a custom screen, that will be automatically added to custom UI helper.
 	RnrScreenBase(const char *screenName);
 	~RnrScreenBase();
 
@@ -43,6 +44,10 @@ public:
 	bool SetFullscreen();
 	// Only allowed when screen has not been opened yet.
 	bool SetWindowed(unsigned long int posX, unsigned long int posY, unsigned long int sizeX, unsigned long int sizeY);
+	// Only allowed when screen has not been opened yet.
+	bool SetCenteredForSize(unsigned long int sizeX, unsigned long int sizeY);
+	unsigned long int GetScreenSizeX() const { return this->screenSizeX; }
+	unsigned long int GetScreenSizeY() const { return this->screenSizeY; }
 
 	// Actually create and show the screen in ROR UI.
 	// parentScreen can be NULL.
@@ -89,13 +94,21 @@ public:
 	virtual bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT);
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	virtual bool OnButtonClick(STRUCT_ANY_UI *button);
+	virtual bool OnButtonClick(STRUCT_ANY_UI *sender);
 
+	// Returns left position for a centered element with desired size.
+	unsigned long int GetLeftCenteredPositionX(long int desiredSize) const;
 
 protected:
 	std::list<STRUCT_ANY_UI*> componentsToFree;
 
 	void FreeComponents();
+
+	// Create screen content: buttons, etc. Called by CreateScreen(...) method.
+	virtual void CreateScreenComponents() {}
+
+	// Reset various pointers for this class level (to override)
+	virtual void ResetClassPointers() {}
 
 private:
 	RnrScreenBase();
@@ -116,12 +129,20 @@ private:
 		return false;
 	}
 
+	// Reset internal pointers
+	void ResetPointers() {
+		this->ResetClassPointers();
+	}
+
 };
 
 
 class RnrScreenBaseTest : public RnrScreenBase {
 public:
 	RnrScreenBaseTest(const char *screenName) : RnrScreenBase(screenName) {	}
+
+	// Create screen content: buttons, etc. Called by CreateScreen(...) method.
+	void CreateScreenComponents() override;
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 	bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) override;

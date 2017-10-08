@@ -49,6 +49,7 @@ STRUCT_UI_EASY_PANEL *GetScreenFromName(const char *screenName);
 
 
 // Calls 0x451BE0
+// Set makeModal=1 for dialogs, not for screens.
 void SetCurrentPanel(const char *screenName, unsigned long int makeModal);
 
 // (cf 0x451DF0)

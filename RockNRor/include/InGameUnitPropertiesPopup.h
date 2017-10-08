@@ -9,28 +9,38 @@
 #include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
 #include "playerHandling.h"
-#include "CustomPopupSystem.h"
+#include "CustomPopupSystem.h" // TO REMOVE
+#include "RnrScreenBase.h"
 
 
-class InGameUnitPropertiesPopup : public CustomPopupBase {
+namespace ROCKNROR {
+namespace UI {
+;
+
+
+class InGameUnitPropertiesPopup : public RnrScreenBase {
 public:
-	InGameUnitPropertiesPopup();
-	void _ResetPointers() override;
-	// This class needs parameters to create content. Call this after calling OpenPopup().
-	void AddPopupContent(long int unitId);
-	//void _AddPopupContent() override;
-	void OnBeforeClose(bool isCancel) override;
-	void OnAfterClose(bool isCancel) override;
+	InGameUnitPropertiesPopup(long int unitId) : RnrScreenBase("ingame unit properties") {
+		this->SetWindowed(100, 100, 600, 500); // will always work (default)
+		this->SetCenteredForSize(600, 500); // May fail if game settings can't be retrieved
+		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::InGameOptionsTheme);
+		this->unitId = unitId;
+	}
+
+
+	// Create screen content: buttons, etc. Called by CreateScreen(...) method.
+	void CreateScreenComponents() override;
+
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) override;
+	virtual bool OnButtonClick(STRUCT_ANY_UI *sender) override;
 
-	// Open the relevant "view/edit unit" popup for currently selected unit.
-	// Returns true if successful.
-	static bool OpenInGameUnitPropertiesPopup();
+	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+	bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) override;
 
-	// Open the relevant "view/edit unit" popup for provided unit.
-	// Returns true if successful.
-	static bool OpenInGameUnitPropertiesPopup(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
+
+protected:
+	// Reset various pointers for this class level (to override)
+	virtual void ResetClassPointers() override;
 
 private:
 	long int unitId; // Warning: Storing pointer would be dangerous if game executions continues (MP ?): unit could be destroyed in the meanwhile.
@@ -38,6 +48,7 @@ private:
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblMainInfos;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblChildUnitsAutoMove;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblFarmAutoRebuild;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkRebuildFarmNone; // "default"
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkForceRebuildFarm;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkForceNotRebuildFarm;
@@ -58,4 +69,13 @@ private:
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtStrengthWeakness;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblConversionResistance;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnMakeMainUnitForShortcutSelection;
+
+
+	// Save changes
+	void Validate();
+
 };
+
+
+}
+}

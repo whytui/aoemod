@@ -2,8 +2,11 @@
 
 namespace ROCKNROR {
 namespace UI {
+;
 
+// Constructor for a custom screen, that will be automatically added to custom UI helper.
 RnrScreenBase::RnrScreenBase(const char *screenName) {
+	this->ResetPointers();
 	this->screenName = std::string(screenName);
 	this->rorScreenStatus = NOT_CREATED;
 	this->rorScreenType = AOE_METHODS::UI_BASE::EASY_PANEL;
@@ -72,6 +75,28 @@ bool RnrScreenBase::SetWindowed(unsigned long int posX, unsigned long int posY, 
 	return true;
 }
 
+// Only allowed when screen has not been opened yet.
+bool RnrScreenBase::SetCenteredForSize(unsigned long int sizeX, unsigned long int sizeY) {
+	if (this->rorScreenStatus != NOT_CREATED) { return false; }
+	if ((sizeX <= 0) || (sizeY <= 0)) { return false; }
+	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	assert(settings->renderArea);
+	if (!settings->renderArea) { return false; }
+	this->isFullscreen = false;
+	this->screenSizeX = sizeX;
+	this->screenSizeY = sizeY;
+	long int halfRemainingX = settings->renderArea->screenSizeX - this->screenSizeX;
+	long int halfRemainingY = settings->renderArea->screenSizeY - this->screenSizeY;
+	if (halfRemainingX < 0) { halfRemainingX = 0; }
+	if (halfRemainingY < 0) { halfRemainingY = 0; }
+	halfRemainingX = halfRemainingX / 2;
+	halfRemainingY = halfRemainingY / 2;
+	this->screenPosX = halfRemainingX;
+	this->screenPosY = halfRemainingY;
+	return true;
+}
+
 
 // Actually create and show the screen in ROR UI.
 // parentScreen can be NULL.
@@ -81,18 +106,25 @@ bool RnrScreenBase::CreateScreen(STRUCT_UI_EASY_PANEL *parentScreen) {
 	if (this->rorScreenStatus != NOT_CREATED) {
 		return false;
 	}
+	auto sys = GetUIPanelSystem(); // TEST
 	STRUCT_UI_EASY_PANEL *screenObject = AOE_METHODS::UI_BASE::CreateModalScreen(this->screenName.c_str(), parentScreen,
 		this->isFullscreen, this->screenPosX, this->screenPosY, this->screenSizeX, this->screenSizeY, true, this->backgroundSlpTheme, this->rorScreenType);
 	if (!screenObject) {
 		return false;
 	}
+	// Adjust real size/position in internal variables
+	this->screenSizeX = screenObject->sizeX;
+	this->screenSizeY = screenObject->sizeY;
+	this->screenPosX = screenObject->posX;
+	this->screenPosY = screenObject->posY;
 	this->rorScreenStatus = CREATED;
+	this->CreateScreenComponents();
 	return true;
 }
 
 
 // Close (and frees) screen in ROR UI.
-// Do not close if there are underlying screens !
+// Do not close if there are children screens !
 // You can call this from "this" class.
 bool RnrScreenBase::CloseScreen(bool ignoreErrors) {
 	if (!ignoreErrors) { assert(this->rorScreenStatus == CREATED); }
@@ -110,7 +142,7 @@ bool RnrScreenBase::CloseScreen(bool ignoreErrors) {
 		STRUCT_UI_EASY_PANEL *currentUI = GetCurrentScreen();
 		// Make sure a screen is set. If the one we closed was set (focused), then set its parent.
 		if ((currentUI == NULL) && (previous != NULL)) {
-			AOE_METHODS::UI_BASE::SetCurrentPanel(previous->screenName, 1);
+			AOE_METHODS::UI_BASE::SetCurrentPanel(previous->screenName, 0);
 		}
 	} else {
 		if (!ignoreErrors) {
@@ -160,6 +192,8 @@ bool RnrScreenBase::AddLabel(STRUCT_UI_LABEL **ptrObjToCreate, const char *label
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	AOE_FONTS font) {
 	STRUCT_UI_EASY_PANEL *parent = this->GetAoeScreenObject();
+	assert(parent);
+	assert(ptrObjToCreate);
 	if (!parent) { return false; }
 	bool res;
 	res = AOE_METHODS::UI_BASE::AddLabel(parent, ptrObjToCreate, label, hPos, vPos, hSize, vSize, font);
@@ -173,6 +207,8 @@ bool RnrScreenBase::AddTextBox(STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *i
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	bool readOnly, bool multiline, bool onlyNumbers, unsigned long int font) {
 	STRUCT_UI_EASY_PANEL *parent = this->GetAoeScreenObject();
+	assert(parent);
+	assert(ptrObjToCreate);
 	if (!parent) { return false; }
 	bool res;
 	res = AOE_METHODS::UI_BASE::AddTextBox(parent, ptrObjToCreate, initialText, maxTextLength, hPos, vPos, hSize, vSize,
@@ -186,6 +222,8 @@ bool RnrScreenBase::AddTextBox(STRUCT_UI_TEXTBOX **ptrObjToCreate, const char *i
 bool RnrScreenBase::AddCheckBox(STRUCT_UI_BUTTON **ptrObjToCreate,
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize) {
 	STRUCT_UI_EASY_PANEL *parent = this->GetAoeScreenObject();
+	assert(parent);
+	assert(ptrObjToCreate);
 	if (!parent) { return false; }
 	bool res;
 	res = AOE_METHODS::UI_BASE::AddCheckBox(parent, ptrObjToCreate, hPos, vPos, hSize, vSize);
@@ -199,6 +237,8 @@ bool RnrScreenBase::AddButton(STRUCT_UI_BUTTON **ptrObjToCreate, const char *cap
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId, AOE_FONTS font) {
 	STRUCT_UI_EASY_PANEL *parent = this->GetAoeScreenObject();
+	assert(parent);
+	assert(ptrObjToCreate);
 	if (!parent) { return false; }
 	bool res;
 	res = AOE_METHODS::UI_BASE::AddButton(parent, ptrObjToCreate, caption, hPos, vPos, hSize, vSize, buttonId, font);
@@ -212,6 +252,8 @@ bool RnrScreenBase::AddButton(STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long i
 	unsigned long int hPos, unsigned long int vPos, unsigned long int hSize, unsigned long int vSize,
 	long int buttonId, AOE_FONTS font) {
 	STRUCT_UI_EASY_PANEL *parent = this->GetAoeScreenObject();
+	assert(parent);
+	assert(ptrObjToCreate);
 	if (!parent) { return false; }
 	bool res;
 	res = AOE_METHODS::UI_BASE::AddButton(parent, ptrObjToCreate, DLL_STRING_ID, hPos, vPos, hSize, vSize, buttonId, font);
@@ -225,6 +267,8 @@ bool RnrScreenBase::AddButton(STRUCT_UI_BUTTON **ptrObjToCreate, unsigned long i
 bool RnrScreenBase::AddComboBox(STRUCT_UI_COMBOBOX **ptrObjToCreate, long int posX, long int posY,
 	long int listSizeX, long int listSizeY, long int lblSizeX, long int lblSizeY, AOE_FONTS font) {
 	STRUCT_UI_EASY_PANEL *parent = this->GetAoeScreenObject();
+	assert(parent);
+	assert(ptrObjToCreate);
 	if (!parent) { return false; }
 	bool res;
 	res = AOE_METHODS::UI_BASE::AddComboBox(parent, ptrObjToCreate, posX, posY, listSizeX, listSizeY, lblSizeX, lblSizeY, font);
@@ -241,12 +285,33 @@ bool RnrScreenBase::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int r
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool RnrScreenBase::OnButtonClick(STRUCT_ANY_UI *button) {
+bool RnrScreenBase::OnButtonClick(STRUCT_ANY_UI *sender) {
 	return false;
 }
 
 
+// Returns left position for a centered element with desired size.
+unsigned long int RnrScreenBase::GetLeftCenteredPositionX(long int desiredSize) const {
+	if (desiredSize <= 0) { return 0; }
+	long int halfRemainingSize = (this->screenSizeX - desiredSize) / 2;
+	if (halfRemainingSize + desiredSize > (long int)this->screenSizeX) {
+		halfRemainingSize = this->screenSizeX - desiredSize;
+	}
+	if (halfRemainingSize < 0) { halfRemainingSize = 0; }
+	return halfRemainingSize;
+}
 
+
+
+
+
+
+
+// Create screen content: buttons, etc. Called by CreateScreen(...) method.
+void RnrScreenBaseTest::CreateScreenComponents() {
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btn = NULL;
+	this->AddButton(&btn, "rrr", 120, 100, 120, 24, 0);
+}
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool RnrScreenBaseTest::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {

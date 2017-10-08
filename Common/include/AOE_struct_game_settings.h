@@ -337,8 +337,8 @@ namespace AOE_STRUCTURES {
 		STRUCT_GAME_SETTINGS_TIMINGS_UI_INFO timingsInfo[16]; // actual number is unknown !!!
 		char unknown_5A8[0x8E0 - 0x728]; // etc
 		// 0x8E0
-		long int screenSizeX; // To confirm + confirm type
-		long int screenSizeY; // To confirm + confirm type
+		long int screenSizeX; // To confirm + confirm type WRONG ?
+		long int screenSizeY; // To confirm + confirm type WRONG ?
 		long int showDebugTimings; // +8E8. Show debug timings instead of resource icon/values in top-left section. See also AOE_VAR_F5_DEBUG_INFO_TYPE.
 		unsigned long int unknown_8EC;
 		unsigned long int unknown_8F0;
