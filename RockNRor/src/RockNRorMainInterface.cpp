@@ -450,7 +450,8 @@ bool RockNRorMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 	// Here: custom map size
 	if (!ROCKNROR::crInfo.configInfo.useCustomMapDimensions) { return false; }
 	// If result is true, WE generated the map ourselves => Disable standard generation code.
-	EditMapSizeXYPopup::OpenEditMapSizePopup();
+	ROCKNROR::UI::EditMapSizeXYPopup *popup = new ROCKNROR::UI::EditMapSizeXYPopup();
+	popup->CreateScreen(GetCurrentScreen());
 	return true;
 }
 

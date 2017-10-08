@@ -3,13 +3,11 @@
 #include <string.h>
 #include <mystrings.h>
 #include <AOE_empires_dat_concept_names.h>
-#include "CustomPopupBase.h"
 #include "RockNRorCommon.h"
 #include "RockNRorCommand.h"
 #include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
 #include "playerHandling.h"
-#include "CustomPopupSystem.h" // TO REMOVE
 #include "RnrScreenBase.h"
 
 
@@ -21,7 +19,7 @@ namespace UI {
 class InGameUnitPropertiesPopup : public RnrScreenBase {
 public:
 	InGameUnitPropertiesPopup(long int unitId) : RnrScreenBase("ingame unit properties") {
-		this->SetWindowed(100, 100, 600, 500); // will always work (default)
+		this->SetWindowed(100, 100, 600, 500); // will always work (default values)
 		this->SetCenteredForSize(600, 500); // May fail if game settings can't be retrieved
 		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::InGameOptionsTheme);
 		this->unitId = unitId;
