@@ -41,6 +41,9 @@ namespace ROCKNROR {
 			// Do not call this if you don't actually delete the object !
 			void NotifyDeleteRnrScreen(RnrScreenBase *screenToDestroy);
 
+			// Delete objects for closed screens. You can only run this when you are sure the objects are no longer needed
+			void PurgeClosedScreens();
+
 		private:
 			// All RockNRor screen objects. The actual UI may not be currently open in ROR process !
 			std::list<RnrScreenBase*> rnrScreens;

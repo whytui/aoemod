@@ -65,7 +65,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// Warning: repeatCount is a word (or 2 words?)
 	long int __stdcall UIGameEditorOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT);
 
-	// OnKeyDown event handler for dialogs
+	// OnKeyDown event handler for dialogs (excluding generic dialog class)
 	// Returns 1 if event has been handled and must not be transferred to parent object.
 	// Warning: repeatCount is a word (or 2 words?)
 	long int __stdcall UIDialogOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT);

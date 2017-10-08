@@ -92,6 +92,7 @@ bool RnrScreenBase::CreateScreen(STRUCT_UI_EASY_PANEL *forcedParentScreen) {
 
 // Close (and frees) screen in ROR UI.
 // Do not close if there are underlying screens !
+// You can call this from "this" class.
 bool RnrScreenBase::CloseScreen(bool ignoreErrors) {
 	if (!ignoreErrors) { assert(this->rorScreenStatus == CREATED); }
 	if (this->rorScreenStatus != CREATED) {
@@ -101,13 +102,14 @@ bool RnrScreenBase::CloseScreen(bool ignoreErrors) {
 	bool result = false;
 	STRUCT_UI_EASY_PANEL *screen = this->GetAoeScreenObject();
 	if (screen && screen->IsCheckSumValidForAChildClass()) {
-		STRUCT_ANY_UI *parent = screen->ptrParentObject;
+		STRUCT_ANY_UI *previous = screen->previousPanel;
+		if (!previous) { previous = screen->ptrParentObject; }
 		result = AOE_METHODS::UI_BASE::CloseScreenAndDestroy(this->screenName.c_str());
 		this->rorScreenStatus = CLOSED;
 		STRUCT_UI_EASY_PANEL *currentUI = GetCurrentScreen();
 		// Make sure a screen is set. If the one we closed was set (focused), then set its parent.
-		if ((currentUI == NULL) && (parent != NULL)) {
-			AOE_METHODS::UI_BASE::SetCurrentPanel(parent->screenName, 1);
+		if ((currentUI == NULL) && (previous != NULL)) {
+			AOE_METHODS::UI_BASE::SetCurrentPanel(previous->screenName, 1);
 		}
 	} else {
 		if (!ignoreErrors) {
@@ -216,6 +218,35 @@ bool RnrScreenBase::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int r
 bool RnrScreenBase::OnButtonClick(STRUCT_ANY_UI *button) {
 	return false;
 }
+
+
+
+
+// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+bool RnrScreenBaseTest::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
+	if (keyCode == VK_ESCAPE) {
+		this->CloseScreen(false);
+		return true;
+	}
+	if (keyCode == VK_F3) {
+		ROCKNROR::UI::RnrScreenBase *testScreen2 = ROCKNROR::crInfo.rnrUIHelper->FindRnrScreen("testscreen2");
+		if (!testScreen2) {
+			testScreen2 = new ROCKNROR::UI::RnrScreenBaseTest("testscreen2");
+			testScreen2->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::BabylonNeutralScreensGreyBricks);
+			testScreen2->SetWindowed(50, 100, 400, 300);
+			//testScreen2->SetScreenType(AOE_METHODS::UI_BASE::ScreenType::DIALOG_PANEL);
+			STRUCT_UI_EASY_PANEL *curScreen = this->GetAoeScreenObject();
+			assert(curScreen);
+			if (testScreen2->CreateScreen((STRUCT_UI_EASY_PANEL*)curScreen->ptrParentObject)) {
+				//testScreen2->GetAoeScreenObject()->previousPanel = curScreen;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+
 
 }
 }

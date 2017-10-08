@@ -150,7 +150,14 @@ STRUCT_UI_EASY_PANEL *CreateModalScreen(const char *screenName, STRUCT_UI_EASY_P
 		return NULL;
 	}
 
-	// Dialog: check no other dialog is open ?
+	// Dialog: check no other dialog is open
+	if (screenType == ScreenType::DIALOG_PANEL) {
+		STRUCT_UI_PANEL_SYSTEM *uiMainInfo = GetUIMainInfoStruct();
+		if (!uiMainInfo || uiMainInfo->modalPanel) {
+			ROCKNROR::SYSTEM::ShowMessageModal(_T("Error"), _T("Can't create a dialog in CreateModalScreen"));
+			return NULL;
+		}
+	}
 
 	const unsigned long int ADDR_easyPanelCcor = 0x454430;
 	const unsigned long int ADDR_dialogPanelCcor = 0x460730;

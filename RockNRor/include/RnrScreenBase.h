@@ -50,6 +50,7 @@ public:
 
 	// Close (and frees) screen in ROR UI.
 	// Do not close if there are underlying screens !
+	// You can call this from "this" class.
 	bool CloseScreen(bool ignoreErrors);
 
 	STRUCT_UI_EASY_PANEL *GetAoeScreenObject() const;
@@ -93,6 +94,7 @@ protected:
 	void FreeComponents();
 
 private:
+	RnrScreenBase();
 	ScreenStatus rorScreenStatus;
 	AOE_METHODS::UI_BASE::ScreenType rorScreenType;
 	AOE_CONST_DRS::AoeScreenTheme backgroundSlpTheme;
@@ -116,6 +118,16 @@ private:
 // And return 1 if it is an event (onkeydown...) to prevent other event handling on destroyed object
 
 
+
+
+class RnrScreenBaseTest : public RnrScreenBase {
+public:
+	RnrScreenBaseTest(const char *screenName) : RnrScreenBase(screenName) {	}
+
+	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+	bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) override;
+
+};
 
 
 

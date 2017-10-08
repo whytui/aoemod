@@ -382,6 +382,7 @@ bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
 	if (curRnrScreen) {
 		// If current screen is a custom one, first run custom handlers for this event
 		if (curRnrScreen->OnButtonClick(obj)) {
+			ROCKNROR::crInfo.rnrUIHelper->PurgeClosedScreens();
 			return true;
 		}
 	}

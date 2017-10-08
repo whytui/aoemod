@@ -92,5 +92,21 @@ void RnrUIHelper::NotifyDeleteRnrScreen(RnrScreenBase *screenToDestroy) {
 }
 
 
+// Delete objects for closed screens. You can only run this when you are sure the objects are no longer needed
+void RnrUIHelper::PurgeClosedScreens() {
+	//std::list<RnrScreenBase*> closedScreens;
+	for (auto it = this->rnrScreens.begin(); it != this->rnrScreens.end();) {
+		RnrScreenBase *curScreen = *it;
+		if (curScreen->GetScreenStatus() == RnrScreenBase::CLOSED) {
+			// Remove from list and destroy object
+			this->rnrScreens.erase(it++);
+			delete curScreen;
+		} else {
+			it++;
+		}
+	}
+}
+
+
 }
 }
