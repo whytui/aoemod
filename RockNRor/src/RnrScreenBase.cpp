@@ -74,13 +74,14 @@ bool RnrScreenBase::SetWindowed(unsigned long int posX, unsigned long int posY, 
 
 
 // Actually create and show the screen in ROR UI.
-// forcedParentScreen can be NULL in most cases. Use it to create the screen under a specific parent (when NOT current screen)
-bool RnrScreenBase::CreateScreen(STRUCT_UI_EASY_PANEL *forcedParentScreen) {
+// parentScreen can be NULL.
+bool RnrScreenBase::CreateScreen(STRUCT_UI_EASY_PANEL *parentScreen) {
+	// Note: example of screen close+open other in 0x486dbc
 	assert(this->rorScreenStatus == NOT_CREATED);
 	if (this->rorScreenStatus != NOT_CREATED) {
 		return false;
 	}
-	STRUCT_UI_EASY_PANEL *screenObject = AOE_METHODS::UI_BASE::CreateModalScreen(this->screenName.c_str(), forcedParentScreen, 
+	STRUCT_UI_EASY_PANEL *screenObject = AOE_METHODS::UI_BASE::CreateModalScreen(this->screenName.c_str(), parentScreen,
 		this->isFullscreen, this->screenPosX, this->screenPosY, this->screenSizeX, this->screenSizeY, true, this->backgroundSlpTheme, this->rorScreenType);
 	if (!screenObject) {
 		return false;
@@ -118,6 +119,31 @@ bool RnrScreenBase::CloseScreen(bool ignoreErrors) {
 		result = false;
 	}
 	return result;
+}
+
+
+// Close "this" screen in ROR UI, and opens "otherScreen" instead.
+// "this" must be CREATED and otherScreen must be NOT_CREATED.
+bool RnrScreenBase::OpenOtherScreenAndCloseThisOne(RnrScreenBase *otherScreen, STRUCT_UI_EASY_PANEL *parentForNewScreen) {
+	if (this->GetScreenStatus() != RnrScreenBase::CREATED) {
+		return false;
+	}
+	if (otherScreen->GetScreenStatus() != RnrScreenBase::NOT_CREATED) {
+		return false;
+	}
+
+	STRUCT_UI_EASY_PANEL *myScreenObject = this->GetAoeScreenObject();
+	if (!myScreenObject) { return false; }
+
+	if (otherScreen->CreateScreen(parentForNewScreen)) {
+		STRUCT_UI_EASY_PANEL *newScreenObject = otherScreen->GetAoeScreenObject();
+		if (!newScreenObject) { return false; }
+		// I don't understand how it works in original game. There is no such affectation ?
+		// What is sure is we must make sure previousPanel is a valid pointer... to a valid "previous" UI.
+		newScreenObject->previousPanel = myScreenObject->previousPanel;
+		this->CloseScreen(false);
+	}
+	return true;
 }
 
 
@@ -234,13 +260,7 @@ bool RnrScreenBaseTest::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long i
 			testScreen2 = new ROCKNROR::UI::RnrScreenBaseTest("testscreen2");
 			testScreen2->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::BabylonNeutralScreensGreyBricks);
 			testScreen2->SetWindowed(50, 100, 400, 300);
-			//testScreen2->SetScreenType(AOE_METHODS::UI_BASE::ScreenType::DIALOG_PANEL);
-			STRUCT_UI_EASY_PANEL *curScreen = this->GetAoeScreenObject();
-			assert(curScreen);
-			if (testScreen2->CreateScreen((STRUCT_UI_EASY_PANEL*)curScreen->ptrParentObject)) {
-				//testScreen2->GetAoeScreenObject()->previousPanel = curScreen;
-			}
-			return true;
+			return this->OpenOtherScreenAndCloseThisOne(testScreen2, NULL);
 		}
 	}
 	return false;

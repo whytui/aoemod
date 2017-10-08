@@ -132,13 +132,7 @@ STRUCT_UI_EASY_PANEL *CreateModalScreen(const char *screenName, STRUCT_UI_EASY_P
 	long int argAllowShadowArea = allowShadowArea ? 1 : 0;
 	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return NULL; }
-	STRUCT_UI_EASY_PANEL *parentScreenToUse = parent;
-	if (!parent) {
-		parentScreenToUse = GetCurrentScreen();
-	}
-	if (!parentScreenToUse) { return NULL; }
-	assert(parentScreenToUse->IsCheckSumValidForAChildClass());
-	if (!parentScreenToUse->IsCheckSumValidForAChildClass()) { return NULL; }
+
 	// We refuse to open simultaneously two screens with the same name
 	if (GetScreenFromName(screenName) != NULL) {
 		return NULL; // or return existing one ? Warning: may not be modal, etc
@@ -203,7 +197,7 @@ STRUCT_UI_EASY_PANEL *CreateModalScreen(const char *screenName, STRUCT_UI_EASY_P
 			PUSH argFullScreen;
 			PUSH backgroundTheme; // slpid background
 			PUSH screenName;
-			PUSH parentScreenToUse; // parent
+			PUSH parent; // parent
 			PUSH renderArea;
 			call setupCallAddress;
 		}
@@ -216,7 +210,7 @@ STRUCT_UI_EASY_PANEL *CreateModalScreen(const char *screenName, STRUCT_UI_EASY_P
 			PUSH screenName;
 			PUSH vSize;
 			PUSH hSize;
-			PUSH parentScreenToUse; // parent
+			PUSH parent; // parent
 			PUSH renderArea;
 			call setupCallAddress;
 			// For dialogs, the setup call also "shows" the dialog

@@ -45,13 +45,17 @@ public:
 	bool SetWindowed(unsigned long int posX, unsigned long int posY, unsigned long int sizeX, unsigned long int sizeY);
 
 	// Actually create and show the screen in ROR UI.
-	// forcedParentScreen can be NULL in most cases. Use it to create the screen under a specific parent (when NOT current screen)
-	bool CreateScreen(STRUCT_UI_EASY_PANEL *forcedParentScreen);
+	// parentScreen can be NULL.
+	bool CreateScreen(STRUCT_UI_EASY_PANEL *parentScreen);
 
 	// Close (and frees) screen in ROR UI.
 	// Do not close if there are underlying screens !
 	// You can call this from "this" class.
 	bool CloseScreen(bool ignoreErrors);
+
+	// Close "this" screen in ROR UI, and opens "otherScreen" instead.
+	// "this" must be CREATED and otherScreen must be NOT_CREATED.
+	bool OpenOtherScreenAndCloseThisOne(RnrScreenBase *otherScreen, STRUCT_UI_EASY_PANEL *parentForNewScreen);
 
 	STRUCT_UI_EASY_PANEL *GetAoeScreenObject() const;
 
@@ -113,11 +117,6 @@ private:
 	}
 
 };
-
-// Note: to open another screen: create other screen(and show), setcurrentpanel(newscr), closescreen(this) eg 486dbc
-// And return 1 if it is an event (onkeydown...) to prevent other event handling on destroyed object
-
-
 
 
 class RnrScreenBaseTest : public RnrScreenBase {
