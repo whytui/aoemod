@@ -63,9 +63,9 @@ if (!ptrObj || (*ptrObj == NULL)) { return; }
 CallAOEDestructor(ptrObj);
 }*/
 
-// Calls AOE's class destructor and also sets the variable (ptrObj) to NULL.
+// Calls AOE's class destructor and also sets the variable (ptrObj) to NULL. For dialogs.
 // ASSERTS that the provided pointer is non-NULL (so don't call this with NULL itself or a NULL pointer)
-static void CallAOEDestructor(unsigned long int **ptrObj) {
+static void CallAOEDeleteDialog(unsigned long int **ptrObj) {
 	assert(ptrObj != NULL);
 	assert(*ptrObj != NULL);
 	_asm {

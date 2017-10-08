@@ -19,7 +19,6 @@
 #include "RockNRorInfo.h"
 #include "RockNRorConfig.h"
 #include "RockNRorCommand.h"
-#include "RockNRorMainInterface.h"
 #include "UI_utilities.h"
 #include "interface.h"
 #include "EXESelfEditor.h"
@@ -33,7 +32,7 @@
 #include "TileSetHandler.h"
 #include "combatAI.h"
 #include "CustomPopupSystem.h"
-#include "combatAI.h"
+#include "RockNRorMainInterface.h"
 #include "RockNRorVirtualMethodHooks.h"
 
 

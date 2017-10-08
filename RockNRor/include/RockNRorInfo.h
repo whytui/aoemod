@@ -15,6 +15,7 @@
 #include <mystrings.h>
 #include <Windows.h>
 #include <ROR_global_variables.h>
+#include <macroUtil.h>
 
 #include "mainStructuresHandling.h"
 #include "UI_utilities.h"
@@ -28,6 +29,7 @@
 #include "RockNRorCommon.h"
 #include "unitDefHandling.h"
 #include "TechTreeAnalyzer.h"
+#include "RockNRorUIHelper.h"
 
 
 // Defines common objects/variables/methods for RockNRor
@@ -50,6 +52,14 @@ static char *txtAutoRebuildFarmsMinWood = "Auto. rebuild farms min wood";
 
 // Max X/Y value we can quick-calculate distances on.
 #define CST_INT_DISTANCE_VALUES_MAX_COORDINATE 30
+
+
+// External classes
+namespace ROCKNROR {
+	namespace UI {
+		class RnrUIHelper;
+	}
+}
 
 
 // Internal structures/variables for RockNRor that are not read from configuration
@@ -100,6 +110,9 @@ public:
 	short int empiresDatCivCount; // Number of civilizations in empires.dat, INCLUDING gaia
 	long int empiresDatTechDefCount; // Number of tech def in empires.dat
 
+	// UI : new system
+	ROCKNROR::UI::RnrUIHelper *rnrUIHelper;
+#pragma TODO("Remove old variables and old UI system")
 	// UI Variables : RockNRor yes/no dialog
 	unsigned long int *customYesNoDialogVar;  // RockNRor's dialog struct. NULL means dialog does not exist.
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGameMenuOptionsBtnVar;

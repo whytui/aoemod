@@ -17,7 +17,6 @@ namespace AOE_STRUCTURES
 
 	// Size=0x564. In-game Options popup. Parents 1C 4F 54 00, BC 4B 54 00(easyPanel), D8 A4 54 00 (any_ui = base class)
 	// Constructor = 0x4300D0
-#define CHECKSUM_UI_IN_GAME_OPTIONS 0x005436E0
 	class STRUCT_UI_IN_GAME_OPTIONS : public STRUCT_UI_DIALOG_BASE {
 	public:
 		// 0x490

@@ -55,7 +55,10 @@ namespace VIRTUAL_METHOD_HOOKS {
 	std::map<unsigned long int, unsigned long int> playerProcessNotifyCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitTransformCheckSumAndOriginalAddress;
-	std::map<unsigned long int, unsigned long int> uiOnKeyDownCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> uiMenuOnKeyDownCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> uiGameEditorOnKeyDownCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> uiDialogsOnKeyDownCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> uiGenericOnKeyDownCheckSumAndOriginalAddress;
 
 
 	// Return value is an unknown enum. 2=ok, processed. (unitAI: EDX+0xCC call).
@@ -267,21 +270,105 @@ namespace VIRTUAL_METHOD_HOOKS {
 	}
 
 
-	// OnKeyDown event on a UI component/panel.
+	// OnKeyDown event handler for menus, excluding in-game and scenario editor menus
 	// Returns 1 if event has been handled and must not be transferred to parent object.
 	// Warning: repeatCount is a word (or 2 words?)
-	long int __stdcall UIObjOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
-		unsigned long int originalCallAddr = uiOnKeyDownCheckSumAndOriginalAddress[uiObj->checksum];
+	long int __stdcall UIMenuOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
+		unsigned long int originalCallAddr = uiMenuOnKeyDownCheckSumAndOriginalAddress[uiObj->checksum];
 		assert(uiObj && isAValidRORChecksum(uiObj->checksum));
 		RECORD_PERF_BEGIN(originalCallAddr);
 		bool runStandardMethod = true;
 		long int result = 0;
 
-		if (uiObj->checksum == CHECKSUM_UI_EASY_PANEL) {
-			//runStandardMethod = false;
+		if (runStandardMethod && (originalCallAddr != 0)) {
+			_asm {
+				MOV ECX, uiObj;
+				PUSH SHIFT;
+				PUSH CTRL;
+				PUSH ALT;
+				PUSH repeatCount;
+				PUSH keyCode;
+				CALL originalCallAddr;
+				MOV result, EAX;
+			}
 		}
-		if (uiObj->checksum == CHECKSUM_UI_WELCOME_MAIN_SCREEN) {
-			//runStandardMethod = false;
+
+		RECORD_PERF_END(originalCallAddr);
+		return result;
+	}
+
+
+	// OnKeyDown event handler for in-game and scenario editor screens, excluding dialogs
+	// Returns 1 if event has been handled and must not be transferred to parent object.
+	// Warning: repeatCount is a word (or 2 words?)
+	long int __stdcall UIGameEditorOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
+		unsigned long int originalCallAddr = uiGameEditorOnKeyDownCheckSumAndOriginalAddress[uiObj->checksum];
+		assert(uiObj && isAValidRORChecksum(uiObj->checksum));
+		RECORD_PERF_BEGIN(originalCallAddr);
+		bool runStandardMethod = true;
+		long int result = 0;
+
+		if (runStandardMethod && (originalCallAddr != 0)) {
+			_asm {
+				MOV ECX, uiObj;
+				PUSH SHIFT;
+				PUSH CTRL;
+				PUSH ALT;
+				PUSH repeatCount;
+				PUSH keyCode;
+				CALL originalCallAddr;
+				MOV result, EAX;
+			}
+		}
+
+		RECORD_PERF_END(originalCallAddr);
+		return result;
+	}
+
+
+	// OnKeyDown event handler for dialogs
+	// Returns 1 if event has been handled and must not be transferred to parent object.
+	// Warning: repeatCount is a word (or 2 words?)
+	long int __stdcall UIDialogOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
+		unsigned long int originalCallAddr = uiDialogsOnKeyDownCheckSumAndOriginalAddress[uiObj->checksum];
+		assert(uiObj && isAValidRORChecksum(uiObj->checksum));
+		RECORD_PERF_BEGIN(originalCallAddr);
+		bool runStandardMethod = true;
+		long int result = 0;
+
+		if (runStandardMethod && (originalCallAddr != 0)) {
+			_asm {
+				MOV ECX, uiObj;
+				PUSH SHIFT;
+				PUSH CTRL;
+				PUSH ALT;
+				PUSH repeatCount;
+				PUSH keyCode;
+				CALL originalCallAddr;
+				MOV result, EAX;
+			}
+		}
+
+		RECORD_PERF_END(originalCallAddr);
+		return result;
+	}
+
+
+	// OnKeyDown event handler for generic classes (easyPanel, dialogPanel)
+	// Returns 1 if event has been handled and must not be transferred to parent object.
+	// Warning: repeatCount is a word (or 2 words?)
+	// Can be used for custom screens and ALSO for unhandled events from child classes
+	long int __stdcall UIGenericOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
+		unsigned long int originalCallAddr = uiGenericOnKeyDownCheckSumAndOriginalAddress[uiObj->checksum];
+		assert(uiObj && isAValidRORChecksum(uiObj->checksum));
+		RECORD_PERF_BEGIN(originalCallAddr);
+		bool runStandardMethod = true;
+		long int result = 0;
+
+		// If current screen is a custom one, first run custom handlers for this event
+		ROCKNROR::UI::RnrScreenBase *rnrScreen = ROCKNROR::crInfo.rnrUIHelper->GetCurrentRnrScreen();
+		if (rnrScreen) {
+			runStandardMethod = !rnrScreen->OnKeyDown(uiObj, keyCode, repeatCount, ALT, CTRL, SHIFT);
 		}
 
 		if (runStandardMethod && (originalCallAddr != 0)) {
@@ -303,6 +390,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 
 
+
 	// Technical declarations for Hook methods (creates small asm hook methods to dispatch to specific methods
 
 	DECLARE_VIRTUAL_METHOD_HANDLER(ActivityProcessNotify)
@@ -310,7 +398,10 @@ namespace VIRTUAL_METHOD_HOOKS {
 	DECLARE_VIRTUAL_METHOD_HANDLER(PlayerProcessNotify)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitAddPositionToTargetPosArray)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitTransform)
-	DECLARE_VIRTUAL_METHOD_HANDLER(UIObjOnKeyDown)
+	DECLARE_VIRTUAL_METHOD_HANDLER(UIMenuOnKeyDown)
+	DECLARE_VIRTUAL_METHOD_HANDLER(UIGameEditorOnKeyDown)
+	DECLARE_VIRTUAL_METHOD_HANDLER(UIDialogOnKeyDown)
+	DECLARE_VIRTUAL_METHOD_HANDLER(UIGenericOnKeyDown)
 
 
 	// Patches ROR process (.rdata section) to connect overloaded virtual methods
@@ -376,15 +467,45 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TRAINABLE, 0x54, UnitTransform, unitTransformCheckSumAndOriginalAddress[CHECKSUM_UNIT_TRAINABLE]); // unit->tranform only needs to be fixed for TRAINABLE class
 
-			// UI
-			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_EASY_PANEL, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_EASY_PANEL]);
-			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SCREEN_PANEL, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SCREEN_PANEL]);
-			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_GAME_SETTINGS, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_GAME_SETTINGS]);
-			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_MESSAGE_PANEL, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_MESSAGE_PANEL]);
-			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_IN_GAME_MENU, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_IN_GAME_MENU]);
-			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SP_MENU_SCREEN, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SP_MENU_SCREEN]);
-			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SCENARIO_EDITOR_MENU, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SCENARIO_EDITOR_MENU]);
-			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_WELCOME_MAIN_SCREEN, 0x58, UIObjOnKeyDown, uiOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_WELCOME_MAIN_SCREEN]);
+			// ----- UI -----
+			// Key down in parent screen classes
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_EASY_PANEL, 0x58, UIGenericOnKeyDown, uiGenericOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_EASY_PANEL]);
+			//INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SCREEN_PANEL, 0x58, UIGenericOnKeyDown, uiGenericOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SCREEN_PANEL]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_DIALOG_BASE, 0x58, UIGenericOnKeyDown, uiGenericOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_DIALOG_BASE]);
+			// Key down in menus
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_WELCOME_MAIN_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_WELCOME_MAIN_SCREEN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SP_MENU_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SP_MENU_SCREEN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_MP_SETUP_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_MP_SETUP_SCREEN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_GAME_SETTINGS, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_GAME_SETTINGS]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_CAMPAIGN_EDITOR, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_CAMPAIGN_EDITOR]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_CAMPAIGN_SELECTION, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_CAMPAIGN_SELECTION]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SELECT_SCENARIO_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SELECT_SCENARIO_SCREEN]);
+			//INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_MP_STARTUP_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_MP_STARTUP_SCREEN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_JOIN_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_JOIN_SCREEN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SCENARIO_EDITOR_MAIN_MENU, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SCENARIO_EDITOR_MAIN_MENU]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_ACHIEVEMENTS_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_ACHIEVEMENTS_SCREEN]); // In-game or menu ?
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_CREDITS_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_CREDITS_SCREEN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_LOAD_SAVED_GAME, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_LOAD_SAVED_GAME]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_MAIN_ERROR_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_MAIN_ERROR_SCREEN]);
+			//INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_MP_WAIT_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_MP_WAIT_SCREEN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_NAME_SELECTION, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_NAME_SELECTION]);
+			//INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SAVE_AS_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SAVE_AS_SCREEN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SC_EDITOR_OPEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SC_EDITOR_OPEN]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_STATUS_MESSAGE, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_STATUS_MESSAGE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_MISSION_SCREEN, 0x58, UIMenuOnKeyDown, uiMenuOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_MISSION_SCREEN]);
+
+			// Key down in game or editor
+			//INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_IN_GAME_MAIN, 0x58, UIGameEditorOnKeyDown, uiGameEditorOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_IN_GAME_MAIN]);
+			//INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SCENARIO_EDITOR_MAIN, 0x58, UIGameEditorOnKeyDown, uiGameEditorOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SCENARIO_EDITOR_MAIN]);
+
+			// Key down in dialogs
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_IN_GAME_MENU, 0x58, UIDialogOnKeyDown, uiDialogsOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_IN_GAME_MENU]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_SCENARIO_EDITOR_MENU, 0x58, UIDialogOnKeyDown, uiDialogsOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_SCENARIO_EDITOR_MENU]);
+			//INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_TLISTDIALOG, 0x58, UIDialogOnKeyDown, uiDialogsOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_TLISTDIALOG]);
+			//INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_RGE_DIALOG_LIST, 0x58, UIDialogOnKeyDown, uiDialogsOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_RGE_DIALOG_LIST]);
+			//INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_MESSAGE_DIALOG, 0x58, UIDialogOnKeyDown, uiDialogsOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_MESSAGE_DIALOG]);
+			//INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UI_NAME_DIALOG, 0x58, UIDialogOnKeyDown, uiDialogsOnKeyDownCheckSumAndOriginalAddress[CHECKSUM_UI_NAME_DIALOG]);
+
 
 			CR_DEBUG::AppendTextToLogFile("Virtual methods APIs have been written", true);
 

@@ -4,6 +4,7 @@
 #include <UI_components\AOE_struct_any_ui.h>
 #include <UI_components\AOE_struct_ui_button.h>
 #include <UI_components\AOE_struct_ui_label.h>
+#include <UI\AOE_struct_ui_dialog_base.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -14,12 +15,10 @@
 */
 namespace AOE_STRUCTURES
 {
-	// In-game diplomacy menu
-	// Size = 0x6B8
-#define CHECKSUM_UI_DIPLOMACY_DIALOG 0x00543814
-	class STRUCT_UI_DIPLOMACY_DIALOG : public STRUCT_ANY_UI {
+	// In-game diplomacy menu (dialog)
+	// Size = 0x6B8, ccor=0x431470
+	class STRUCT_UI_DIPLOMACY_DIALOG : public STRUCT_UI_DIALOG_BASE {
 	public:
-		char unknown_0F4[0x490 - 0x0F4];
 		// 0x490
 		STRUCT_ANY_UI *lblDiplomacy;
 		STRUCT_ANY_UI *lblName;
@@ -52,6 +51,7 @@ namespace AOE_STRUCTURES
 
 		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_DIPLOMACY_DIALOG; }
 	};
+	static_assert(sizeof(STRUCT_UI_DIPLOMACY_DIALOG) == 0x6B8, "STRUCT_UI_DIPLOMACY_DIALOG size");
 
 }
 

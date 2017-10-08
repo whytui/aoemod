@@ -15,8 +15,8 @@ namespace AOE_STRUCTURES
 	
 #define CHECKSUM_UI_MESSAGE_PANEL 0x005454EC
 
-	// Message panel (=>ingame chat message...). Size=0x380
-	// Constructor=0x465730
+	// Message panel (=>ingame chat message...). Size=0x380. Constructor=0x465730
+	// Parent=TPanel (directly)
 	// old name=STRUCT_UI_IN_GAME_TEXT_ZONE. Class for chat text lines (1 for each chat line), yellow/orange centered in-game error messages
 	class STRUCT_UI_MESSAGE_PANEL : public STRUCT_ANY_UI {
 	public:

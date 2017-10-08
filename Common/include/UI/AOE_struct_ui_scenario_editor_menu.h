@@ -2,6 +2,7 @@
 #pragma once
 
 #include <UI_components\AOE_struct_any_ui.h>
+#include <UI\AOE_struct_ui_dialog_base.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -15,12 +16,11 @@ namespace AOE_STRUCTURES
 
 	// Size 0x4B4 - Constructor = 0x4349A0 - 20 3E 54 00
 	// "Scenario Menu Dialog"
-#define CHECKSUM_UI_SCENARIO_EDITOR_MENU 0x00543E20
 
-	class STRUCT_UI_SCENARIO_EDITOR_MENU : public STRUCT_ANY_UI {
+	class STRUCT_UI_SCENARIO_EDITOR_MENU : public STRUCT_UI_DIALOG_BASE {
 	public:
-		// +F4...
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MENU; }
+		// +490...
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MENU; }
 	};
 
 }

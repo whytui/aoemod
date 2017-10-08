@@ -5,6 +5,7 @@
 #include <UI_components\AOE_struct_any_ui.h>
 #include <UI\AOE_struct_ui_scenario_editor_main.h>
 #include <UI\AOE_struct_ui_in_game_main.h>
+#include <UI\AOE_struct_ui_dialog_base.h>
 #include <AOE_const_internal.h>
 #include <AOE_offsets.h>
 #include <AOE_const_drs.h>
@@ -44,15 +45,15 @@ STRUCT_UI_EASY_PANEL *GetCurrentScreen();
 
 // Returns a pointer to a UI object that matches screenName.
 // Can return NULL if no matching screen was found
-STRUCT_ANY_UI *GetScreenFromName(const char *screenName);
+STRUCT_UI_EASY_PANEL *GetScreenFromName(const char *screenName);
 
 
 // Calls 0x451BE0
 void SetCurrentPanel(const char *screenName, unsigned long int makeModal);
 
 // (cf 0x451DF0)
-// ROR code first (not always, sometimes after?) calls RefreshScreen on the parent and then CloseScreenAndDestroy.
-void CloseScreenAndDestroy(const char *screenName);
+// ROR code first (not always, sometimes after?) calls SetCurrentScreen on the parent or new screen and then CloseScreenAndDestroy.
+bool CloseScreenAndDestroy(const char *screenName);
 
 
 // Close screen+destroy it, and set main screen = destroyed screen's parent (if any)
@@ -60,11 +61,16 @@ void CloseScreenAndDestroy(const char *screenName);
 void CloseScreenFullTreatment(STRUCT_ANY_UI *UIObj);
 
 
+enum ScreenType { EASY_PANEL, SCREEN_PANEL, DIALOG_PANEL };
+
 // Open a new modal screen (popup or fullscreen)
+// parent can be null: if so current screen is used
 // pos/size arguments can be 0 if isFullscreen=true, otherwise sizes must be >0.
-// backgroundTheme can be -1 (needs a cast)
-STRUCT_UI_EASY_PANEL *CreateModalScreen(const char *screenName, bool isFullscreen, long int hPos, long int vPos, long int hSize, long int vSize,
-	bool allowShadowArea, AOE_CONST_DRS::AoeScreenTheme backgroundTheme);
+// backgroundTheme can be -1
+// allowShadowArea : unknown effect. unused ?
+// ScreenType: Dialog seems to only work well in game screen or scenario editor ?
+STRUCT_UI_EASY_PANEL *CreateModalScreen(const char *screenName, STRUCT_UI_EASY_PANEL *parent, bool isFullscreen, long int hPos, long int vPos, long int hSize, long int vSize,
+	bool allowShadowArea, AOE_CONST_DRS::AoeScreenTheme backgroundTheme, ScreenType screenType);
 
 }
 }

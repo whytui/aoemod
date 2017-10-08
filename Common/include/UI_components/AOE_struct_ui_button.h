@@ -18,6 +18,7 @@ namespace AOE_STRUCTURES
 	// Can be created in 0x0456240
 	// 0x45EDC0 = button.setup(renderArea, parent, x, y, sizeX, sizeY, drawType, sound, notifyType, btnId)
 	// 0x45FCD0 = button.onButtonDown(mouseBtnId, mouseposX, mouseposY, CTRL, SHIFT)
+	// 0x4604C0 = button.doAction()
 #define CHECKSUM_UI_BUTTON_PANEL 0x00544E30 // parent button class
 #define CHECKSUM_UI_BUTTON_WITH_NUMBER 0x00549CAC
 #define CHECKSUM_UI_DROPDOWN_BUTTON 0x00545134 // button for dropdown

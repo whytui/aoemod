@@ -1,3 +1,5 @@
+#pragma once
+
 #include <AOE_struct_game_settings.h>
 #include <UI\AOE_struct_ui_in_game_menu.h>
 #include <UI\AOE_struct_ui_diplomacy_dialog.h>

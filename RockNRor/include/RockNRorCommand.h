@@ -354,7 +354,7 @@ public:
 	// Closes currently opened custom dialog message.
 	// Returns -1 if an error occurred, including "no custom dialog is opened".
 	// Other results are 0=Yes/OK, 1=No, 2=Cancel
-	long int CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG *ptrDialog, unsigned long int ptrSender);
+	long int CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_MESSAGE_DIALOG *ptrDialog, unsigned long int ptrSender);
 
 
 	// This is called on GameSettings.NotifyEvent game method call.

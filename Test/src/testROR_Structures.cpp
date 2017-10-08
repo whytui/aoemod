@@ -213,7 +213,7 @@ static bool test_ror_structures() {
 	trs_assert(&uiigm, 0x5E0, &uiigm.panelDisplayedButtonCount);
 	trs_assert(&uiigm, 0x7C4, &uiigm.panelSelectedUnitId);
 
-	AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG uidialog;
+	AOE_STRUCTURES::STRUCT_UI_MESSAGE_DIALOG uidialog;
 	assert(sizeof(uidialog) == 0x4A4);
 	trs_assert(&uidialog, 0x4A0, &uidialog.btnCancel);
 

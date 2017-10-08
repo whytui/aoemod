@@ -32,9 +32,26 @@ namespace AOE_STRUCTURES
 #define CHECKSUM_UI_SCENARIO_EDITOR_MAIN_MENU 0x0054748C // parent=screenPanel
 #define CHECKSUM_UI_ACHIEVEMENTS_SCREEN 0x00545E84 // parent=screenPanel
 #define CHECKSUM_UI_CREDITS_SCREEN 0x00546468 // parent=screenPanel
+#define CHECKSUM_UI_LOAD_SAVED_GAME 0x005468CC // ccor 0x485FC90
+#define CHECKSUM_UI_MAIN_ERROR_SCREEN 0x00546B24 // ccor 0x486FD0. Parent=screenPanel
+#define CHECKSUM_UI_MP_WAIT_SCREEN 0x00546EA8 // ccor 0x48D3A0. Parent=screenPanel
+#define CHECKSUM_UI_NAME_SELECTION 0x00546FD4 // ccor 0x48DEC0. Parent=screenPanel
+#define CHECKSUM_UI_SAVE_AS_SCREEN 0x00547234 // ccor 0x48ECA0. "Save Game Screen" (to save scenario also). Parent=screenPanel
+#define CHECKSUM_UI_SC_EDITOR_OPEN 0x005475B8 // ccor 0x49AAA0. "Scenario editor open". Parent=screenPanel
+#define CHECKSUM_UI_STATUS_MESSAGE 0x00547A68 // ccor 0x49E7A0, 0x49E9A0. Parent=screenPanel
+#define CHECKSUM_UI_MISSION_SCREEN 0x00547B94 // ccor 0x49EC00. Parent=screenPanel
 
-#define CHECKSUM_UI_DIALOG_PANEL 0x00544F1C // parent=easyPanel.Intermediate class for dialogs.
-#define CHECKSUM_UI_POPUP_DIALOG 0x00543CEC // parent=dialogPanel.
+#define CHECKSUM_UI_DIALOG_BASE 0x00544F1C // Base class for dialogs, parent=screenPanel
+#define CHECKSUM_UI_TLISTDIALOG 0x00543A7C // parent=dialogPanel.
+#define CHECKSUM_UI_RGE_DIALOG_LIST 0x00545B84 // parent=TListDialog.
+#define CHECKSUM_UI_MESSAGE_DIALOG 0x00543CEC // parent=dialogPanel.
+#define CHECKSUM_UI_NAME_DIALOG 0x00547100 // ccor 0x48E800. Parent=dialogPanel (then easyPanel). "New name dialog".
+#define CHECKSUM_UI_SCENARIO_EDITOR_MENU 0x00543E20 // "Scenario Menu Dialog"
+#define CHECKSUM_UI_IN_GAME_MENU 0x00543BB8 // in-game menu, parent=dialogBase
+#define CHECKSUM_UI_IN_GAME_OPTIONS 0x005436E0 // in-game options popup
+#define CHECKSUM_UI_DIPLOMACY_DIALOG 0x00543814
+
+#define CHECKSUM_UI_TIMELINE_PANEL 0x0054A134 // ccor 0x4FBAA0. Parent=easyPanel
 
 
 	// Size=0x478. A base class for all screens and popups (not UI components). Directly derives from base UI class. "EasyPanel".
@@ -100,7 +117,9 @@ namespace AOE_STRUCTURES
 		long int shadowAmount; // +450.
 		unsigned long int unknown_454;
 		long int enableIME; // +458
-		char unknown_45C[0x478 - 0x45C];
+		char unknown_45C[0x470 - 0x45C];
+		long int allowShadowArea; // +470. Not sure what it really does. Seems unused ?
+		unsigned long int unknown_474;
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UI_EASY_PANEL); }
 	protected:
@@ -111,12 +130,13 @@ namespace AOE_STRUCTURES
 				(this->checksum == CHECKSUM_UI_WELCOME_MAIN_SCREEN) ||
 				// SP menu and sub-menus
 				(this->checksum == CHECKSUM_UI_SP_MENU_SCREEN) || // Main menu for single player
-				(this->checksum == CHECKSUM_UI_MP_SETUP_SCREEN) || // Game configuratio for RM/DM/scenario/MP
+				(this->checksum == CHECKSUM_UI_MP_SETUP_SCREEN) || // Game configuration for RM/DM/scenario/MP
 				(this->checksum == CHECKSUM_UI_GAME_SETTINGS) || // Advanced game settings for RM/DM/scenario/MP
 				(this->checksum == CHECKSUM_UI_CAMPAIGN_SELECTION) || // Choose a campaign screen
 				(this->checksum == CHECKSUM_UI_SELECT_SCENARIO_SCREEN) || // Choose a scenario screen
 				(this->checksum == CHECKSUM_UI_LOAD_SAVED_GAME) ||
 				(this->checksum == CHECKSUM_UI_CREDITS_SCREEN) ||
+				(this->checksum == CHECKSUM_UI_NAME_SELECTION) || // Choose a player "account" for campaign
 				// MP screens
 				(this->checksum == CHECKSUM_UI_MP_STARTUP_SCREEN) || // First MP screen: choose name, connection type
 				(this->checksum == CHECKSUM_UI_JOIN_SCREEN) || // Find or create a MP game
@@ -136,8 +156,14 @@ namespace AOE_STRUCTURES
 		}
 		// Returns true if checksum is valid for a dialog panel class (or one of its child classes)
 		bool IsCheckSumValidForDialog() const {
-			return (this->checksum == CHECKSUM_UI_DIALOG_PANEL) ||
-				(this->checksum == CHECKSUM_UI_POPUP_DIALOG) ||
+			return (this->checksum == CHECKSUM_UI_DIALOG_BASE) ||
+				(this->checksum == CHECKSUM_UI_SCENARIO_EDITOR_MENU) ||
+				(this->checksum == CHECKSUM_UI_IN_GAME_MENU) ||
+				(this->checksum == CHECKSUM_UI_IN_GAME_OPTIONS) ||
+				(this->checksum == CHECKSUM_UI_DIPLOMACY_DIALOG) ||
+				(this->checksum == CHECKSUM_UI_MESSAGE_DIALOG) ||
+				(this->checksum == CHECKSUM_UI_RGE_DIALOG_LIST) ||
+				(this->checksum == CHECKSUM_UI_TLISTDIALOG) ||
 				(this->checksum == CHECKSUM_UI_NAME_DIALOG);
 		}
 	public:
@@ -154,6 +180,8 @@ namespace AOE_STRUCTURES
 
 
 	// Size=0x478 Constructor=0x468150
+	// Setup=0x468180
+	// Type for screens whose characteristics come from text information from DRS file
 	class STRUCT_UI_SCREEN_PANEL : public STRUCT_UI_EASY_PANEL {
 	public:
 

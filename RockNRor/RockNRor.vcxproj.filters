@@ -354,6 +354,12 @@
     <ClInclude Include="include\TTDetailedUnitClass.h">
       <Filter>Fichiers d%27en-tête\Strategy</Filter>
     </ClInclude>
+    <ClInclude Include="include\RnrScreenBase.h">
+      <Filter>Fichiers d%27en-tête\customUI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\RockNRorUIHelper.h">
+      <Filter>Fichiers d%27en-tête\customUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\tinyxml\tinystr.cpp">
@@ -601,6 +607,12 @@
     </ClCompile>
     <ClCompile Include="src\AOEPrimitives_UI_screens.cpp">
       <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RnrScreenBase.cpp">
+      <Filter>Fichiers sources\customUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RockNRorUIHelper.cpp">
+      <Filter>Fichiers sources\customUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

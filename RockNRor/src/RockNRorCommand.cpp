@@ -3736,7 +3736,7 @@ bool RockNRorCommand::OpenCustomDialogMessage(const char *dialogText, long int h
 // Closes currently opened custom dialog message.
 // Returns -1 if an error occurred, including "no custom dialog is opened".
 // Other results are AOE_CONST_INTERNAL::DIALOG_BUTTON_IDS => Yes/No/Cancel
-long int RockNRorCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG *ptrDialog, unsigned long int ptrSender) {
+long int RockNRorCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_MESSAGE_DIALOG *ptrDialog, unsigned long int ptrSender) {
 	if (ROCKNROR::crInfo.customYesNoDialogVar == NULL) { return -1; } // No opened custom dialog
 	long int returnValue = -1;
 	if (!ptrDialog) { return returnValue; }

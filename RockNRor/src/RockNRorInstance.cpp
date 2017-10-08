@@ -510,6 +510,8 @@ void RockNRorInstance::WMCloseMessageEntryPoint(REG_BACKUP *REG_values) {
 	}
 
 	// Do this only if we choose to actually exit program !
+	ROCKNROR::crInfo.rnrUIHelper->DestroyAllScreens(); // Make sure to close all custom screens before ROR tries to (important to keep our pointers correct)
+
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		unsigned long int myEAX = REG_values->EAX_val;
 		unsigned long int myECX = REG_values->ECX_val;
@@ -1549,7 +1551,12 @@ void RockNRorInstance::GlobalOnButtonClick(REG_BACKUP *REG_values) {
 	if (ROCKNROR::crMainInterface.Global_OnButtonClick(objAddr)) {
 		ChangeReturnAddress(REG_values, 0x460568);
 	}
-	ROCKNROR::crMainInterface.ChangeWindowTitle(); // TODO: find the appropriate place so that it is called only once: need an entry point just after window is created.
+	static bool done = false;
+	if (!done) {
+		// TODO: find the appropriate place so that it is called only once: need an entry point just after window is created.
+		ROCKNROR::crMainInterface.ChangeWindowTitle();
+		done = true;
+	}
 }
 
 
@@ -1603,7 +1610,7 @@ void RockNRorInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
 // At beginning of function dialog.OnUserEvent(...)
 // Note: to disable "normal" treatments from dialog.OnUserEvent(...), change return address to 0x43498C and set REG_values->EAX_val to 1 (or 0)
 void RockNRorInstance::ManageOnDialogUserEvent(REG_BACKUP *REG_values) {
-	AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG *ptrDialog = (AOE_STRUCTURES::STRUCT_UI_POPUP_DIALOG*) REG_values->ECX_val;
+	AOE_STRUCTURES::STRUCT_UI_MESSAGE_DIALOG *ptrDialog = (AOE_STRUCTURES::STRUCT_UI_MESSAGE_DIALOG*) REG_values->ECX_val;
 	ror_api_assert(REG_values, ptrDialog != NULL);
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		// Do the code we overwrote to call ROR_API

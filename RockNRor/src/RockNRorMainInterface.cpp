@@ -377,6 +377,15 @@ bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
 		}
 	}
 
+	// New RockNRor screens system
+	ROCKNROR::UI::RnrScreenBase *curRnrScreen = ROCKNROR::crInfo.rnrUIHelper->GetCurrentRnrScreen();
+	if (curRnrScreen) {
+		// If current screen is a custom one, first run custom handlers for this event
+		if (curRnrScreen->OnButtonClick(obj)) {
+			return true;
+		}
+	}
+
 	// Custom checkboxes: check/uncheck + manage custom buttons onclick
 	if (ROCKNROR::crInfo.HasOpenedCustomGamePopup()) {
 		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;

@@ -12,6 +12,8 @@
 #include "GameEventHandler.h"
 #include "RockNRorInfo.h" // to measure execution times
 #include "interruption.h"
+//#include "RockNRorMainInterface.h"
+#include "RnrScreenBase.h"
 
 
 namespace ROCKNROR {
@@ -53,10 +55,27 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// This is only allowed if unit.status <= 2 (ready) because BASE method fails if status>2 (unit->unitDefinition is NOT updated).
 	void __stdcall UnitTransform(STRUCT_UNIT_BASE *unit, STRUCT_UNITDEF_BASE *newUnitDef);
 
-	// OnKeyDown event on a UI component/panel.
+	// OnKeyDown event handler for menus, excluding in-game and scenario editor menus
 	// Returns 1 if event has been handled and must not be transferred to parent object.
 	// Warning: repeatCount is a word (or 2 words?)
-	long int __stdcall UIObjOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT);
+	long int __stdcall UIMenuOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT);
+
+	// OnKeyDown event handler for in-game and scenario editor screens, excluding dialogs
+	// Returns 1 if event has been handled and must not be transferred to parent object.
+	// Warning: repeatCount is a word (or 2 words?)
+	long int __stdcall UIGameEditorOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT);
+
+	// OnKeyDown event handler for dialogs
+	// Returns 1 if event has been handled and must not be transferred to parent object.
+	// Warning: repeatCount is a word (or 2 words?)
+	long int __stdcall UIDialogOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT);
+
+	// OnKeyDown event handler for generic classes (easyPanel, dialogPanel)
+	// Returns 1 if event has been handled and must not be transferred to parent object.
+	// Warning: repeatCount is a word (or 2 words?)
+	// Can be used for custom screens and ALSO for unhandled events from child classes
+	long int __stdcall UIGenericOnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT);
+
 
 
 	/*

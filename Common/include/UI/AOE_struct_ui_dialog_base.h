@@ -13,10 +13,6 @@
 namespace AOE_STRUCTURES
 {
 
-#define CHECKSUM_UI_DIALOG_BASE 0x00544F1C
-#define CHECKSUM_UI_TLISTDIALOG 0x00543A7C
-#define CHECKSUM_UI_RGE_DIALOG_LIST 0x00545B84
-
 
 	// Size=0x490. "DialogPanel". A base class for all dialog popups ("dialogs"), excluding "screens".
 	// Constructor = 0x460730, Init (own fields) 0x.
@@ -53,9 +49,5 @@ namespace AOE_STRUCTURES
 	};
 	//static_assert(sizeof(STRUCT_UI_RGE_DIALOG_LIST) == 0x, "STRUCT_UI_RGE_DIALOG_LIST size");
 
-
-	// Note : some child dialogs:
-	// diplomacy : 14 38 54 00, 0x431470
-	// Menu Dialog : B8 38 54 00, 0x433C30
 }
 

@@ -38,18 +38,6 @@ namespace AOE_STRUCTURES
 // TPanel checksum (base class)
 #define CHECKSUM_ANY_UI 0x00544AD8
 
-// Other classes to define
-#define CHECKSUM_UI_LOAD_SAVED_GAME 0x005468CC // ccor 0x485FC90
-#define CHECKSUM_UI_MAIN_ERROR_SCREEN 0x00546B24 // ccor 0x486FD0. Parent=screenPanel
-#define CHECKSUM_UI_MP_WAIT_SCREEN 0x00546EA8 // ccor 0x48D3A0. Parent=screenPanel
-#define CHECKSUM_UI_NAME_SELECTION 0x00546FD4 // ccor 0x48DEC0. Parent=screenPanel
-#define CHECKSUM_UI_NAME_DIALOG 0x00547100 // ccor 0x48E800. Parent=dialogPanel (then easyPanel). "New name dialog".
-#define CHECKSUM_UI_SAVE_AS_SCREEN 0x00547234 // ccor 0x48ECA0. "Save Game Screen" (to save scenario also). Parent=screenPanel
-#define CHECKSUM_UI_SC_EDITOR_OPEN 0x005475B8 // ccor 0x49AAA0. "Scenario editor open". Parent=screenPanel
-#define CHECKSUM_UI_STATUS_MESSAGE 0x00547A68 // ccor 0x49E7A0, 0x49E9A0. Parent=screenPanel
-#define CHECKSUM_UI_MISSION_SCREEN 0x00547B94 // ccor 0x49EC00. Parent=screenPanel
-#define CHECKSUM_UI_TIMELINE_PANEL 0x0054A134 // ccor 0x4FBAA0. Parent=easyPanel
-
 
 	// Parent class for UI objects (both screens and UI components) = TPanel
 	// Size=0xF4 for this class, but all child classes are larger !

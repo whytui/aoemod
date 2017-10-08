@@ -16,6 +16,7 @@ RockNRorInfo::RockNRorInfo() {
 	this->hasManageAIFeatureON = false;
 	this->hasRemovePlayerInitialAgeInScenarioInit = false;
 	this->ResetVariables();
+	this->rnrUIHelper = new ROCKNROR::UI::RnrUIHelper();
 
 	// empires.dat variables are NOT game-dependent: do not initialize them in ResetVariables().
 	this->empiresDatCivCount = 0;
@@ -50,6 +51,10 @@ RockNRorInfo::~RockNRorInfo() {
 		this->triggerSet->Reset();
 		delete this->triggerSet;
 		this->triggerSet = NULL;
+	}
+	if (this->rnrUIHelper) {
+		delete this->rnrUIHelper;
+		this->rnrUIHelper = NULL;
 	}
 	this->FreeGarbagePopupComponents();
 }
@@ -312,7 +317,7 @@ void RockNRorInfo::FreePopupAddedObjects() {
 			// buttons might be event's sender, do not free them now... Our garbage system will manage them correctly.
 			this->garbageComponentsToFree.push_back(curObj);
 		} else {
-			CallAOEDestructor((unsigned long **)&curObj);
+			CallAOEDeleteDialog((unsigned long **)&curObj);
 		}
 	}
 	this->objectsToFree.clear();
@@ -327,7 +332,7 @@ void RockNRorInfo::FreeGarbagePopupComponents() {
 		curObj->ptrParentObject = NULL; // do not try to free other related objects, just this one ! Remove link. Otherwise some objects would be destroyed more than once => crash
 		assert(isAValidRORChecksum(curObj->checksum)); // if failed, this means the object had already been freed, and memory been re-used for something else
 		if (isAValidRORChecksum(curObj->checksum)) {
-			CallAOEDestructor((unsigned long **)&curObj);
+			CallAOEDeleteDialog((unsigned long **)&curObj);
 		} else {
 			traceMessageHandler.WriteMessageNoNotification("FreeGarbagePopupComponents: Invalid checksum !");
 		}
@@ -360,10 +365,10 @@ void RockNRorInfo::CloseCustomGamePopup() {
 	AOE_STRUCTURES::STRUCT_ANY_UI *popupUIObj = UIObjButton->ptrParentObject;
 
 	if (this->customGamePopupCancelBtnVar) { // If a cancel button had been created, free it.
-		CallAOEDestructor((unsigned long **)&this->customGamePopupCancelBtnVar); // also sets var to NULL
+		CallAOEDeleteDialog((unsigned long **)&this->customGamePopupCancelBtnVar); // also sets var to NULL
 	}
 
-	CallAOEDestructor((unsigned long **)&this->customGamePopupButtonVar); // also sets var to NULL
+	CallAOEDeleteDialog((unsigned long **)&this->customGamePopupButtonVar); // also sets var to NULL
 	UIObjButton = NULL; // DO NOT use UIObjButton anymore !
 	// Free user-created popup content (underlying UI components)
 	this->FreePopupAddedObjects();
