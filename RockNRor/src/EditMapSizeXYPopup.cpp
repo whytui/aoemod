@@ -47,7 +47,7 @@ void EditMapSizeXYPopup::CreateScreenComponents() {
 
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool EditMapSizeXYPopup::OnButtonClick(STRUCT_ANY_UI *sender) {
+bool EditMapSizeXYPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnOK) {
 		this->Validate();
 		this->CloseScreen(false);
@@ -61,7 +61,6 @@ bool EditMapSizeXYPopup::OnButtonClick(STRUCT_ANY_UI *sender) {
 bool EditMapSizeXYPopup::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
 	if (keyCode == VK_ESCAPE) {
 		this->CloseScreen(false);
-		AOE_METHODS::SetGamePause(false);
 		return true;
 	}
 	return false;

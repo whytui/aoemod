@@ -94,7 +94,7 @@ public:
 	virtual bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT);
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	virtual bool OnButtonClick(STRUCT_ANY_UI *sender);
+	virtual bool OnButtonClick(STRUCT_UI_BUTTON *sender);
 
 	// Returns left position for a centered element with desired size.
 	unsigned long int GetLeftCenteredPositionX(long int desiredSize) const;

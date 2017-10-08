@@ -163,7 +163,8 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 				SimpleEditTextPopup::OpenCustomTextEditPopup(text, buffer, 280, 110, sizeof(buffer), NULL, true, false);
 			}
 		} else {
-			EditorEditUnitInfoPopup::OpenCustomEditorEditUnitPopup();
+			ROCKNROR::UI::EditorEditUnitInfoPopup *popup = new ROCKNROR::UI::EditorEditUnitInfoPopup();
+			popup->CreateScreen(GetCurrentScreen());
 		}
 	}
 	// F3 in editor: scenario information
@@ -387,9 +388,10 @@ bool RockNRorMainInterface::Global_OnButtonClick(unsigned long int objAddress) {
 
 	// New RockNRor screens system
 	ROCKNROR::UI::RnrScreenBase *curRnrScreen = ROCKNROR::crInfo.rnrUIHelper->GetCurrentRnrScreen();
-	if (curRnrScreen) {
+	STRUCT_UI_BUTTON *objAsButton = (STRUCT_UI_BUTTON *)obj;
+	if (curRnrScreen && objAsButton->IsCheckSumValidForAChildClass()) {
 		// If current screen is a custom one, first run custom handlers for this event
-		if (curRnrScreen->OnButtonClick(obj)) {
+		if (curRnrScreen->OnButtonClick(objAsButton)) {
 			ROCKNROR::crInfo.rnrUIHelper->PurgeClosedScreens();
 			return true;
 		}

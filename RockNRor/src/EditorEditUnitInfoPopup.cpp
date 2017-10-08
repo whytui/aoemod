@@ -1,24 +1,18 @@
 #include "../include/EditorEditUnitInfoPopup.h"
 
 
-
-
-// Opens the custom "edit unit" in editor
-// Returns true if OK.
-bool EditorEditUnitInfoPopup::OpenCustomEditorEditUnitPopup() {
-	return (ROCKNROR::customPopupSystem.OpenCustomGamePopup<EditorEditUnitInfoPopup>(500, 400, true) != NULL);
-}
+namespace ROCKNROR {
+namespace UI {
+;
 
 
 
-EditorEditUnitInfoPopup::EditorEditUnitInfoPopup() {
-	this->_ResetPointers();
-}
-
-void EditorEditUnitInfoPopup::_ResetPointers() {
-	__super::_ResetPointers();
+// Reset various pointers for this class level (to override)
+void EditorEditUnitInfoPopup::ResetClassPointers() {
+	__super::ResetClassPointers();
 	this->unit = NULL;
 	this->allSelectedUnits.clear();
+	this->btnOK = NULL;
 	this->edtStatus = NULL;
 	this->chkbox_s0 = NULL;
 	this->chkbox_s2 = NULL;
@@ -30,8 +24,9 @@ void EditorEditUnitInfoPopup::_ResetPointers() {
 }
 
 
-void EditorEditUnitInfoPopup::_AddPopupContent() {
-	if (this->IsClosed() || (this->popup == NULL)) { return; }
+// Create screen content: buttons, etc. Called by CreateScreen(...) method.
+void EditorEditUnitInfoPopup::CreateScreenComponents() {
+	if ((this->GetScreenStatus() != CREATED) || (this->GetAoeScreenObject() == NULL)) { return; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = GetPlayerStruct(global->humanPlayerId);
@@ -53,7 +48,7 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	this->unit = unit;
 	this->initialOwner = unitPlayer->playerId;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblUnusedPtr = NULL;
-	this->AddLabel(this->popup, &lblUnusedPtr, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TITLE, "Edit a unit"),
+	this->AddLabel(&lblUnusedPtr, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_TITLE, "Edit a unit"),
 		180, 10, 200, 24, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	char *name = "";
 	short int DATID = -1;
@@ -63,8 +58,8 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 	}
 	char buffer[200];
 	sprintf_s(buffer, "Unit ID = %ld - name=%s (DATID=%d). Pos(x,y)=%.1f, %.1f", unit->unitInstanceId, name, DATID, unit->positionX, unit->positionY);
-	this->AddLabel(this->popup, &lblUnusedPtr, buffer, 50, 50, 400, 24, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	
+	this->AddLabel(&lblUnusedPtr, buffer, 50, 50, 400, 24, AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+
 	const char *labelText0 = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_INITIAL, "Initial");
 	const char *labelText4 = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_DYING, "Dying");
 	bool disableInitial = true;
@@ -81,12 +76,12 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 		labelText4 = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_GATHERABLE, "Gatherable");
 	}
 
-	this->AddLabel(this->popup, &this->lbl_s0, labelText0, 160, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(this->popup, &this->lbl_s2, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NORMAL_STATUS, "Normal"), 230, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
-	this->AddLabel(this->popup, &this->lbl_s4, labelText4, 300, 80, 70, 24, AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(this->popup, &this->chkbox_s0, 170, 110, 24, 24);
-	this->AddCheckBox(this->popup, &this->chkbox_s2, 240, 110, 24, 24);
-	this->AddCheckBox(this->popup, &this->chkbox_s4, 310, 110, 24, 24);
+	this->AddLabel(&this->lbl_s0, labelText0, 160, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(&this->lbl_s2, localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_NORMAL_STATUS, "Normal"), 230, 80, 60, 24, AOE_FONT_STANDARD_TEXT);
+	this->AddLabel(&this->lbl_s4, labelText4, 300, 80, 70, 24, AOE_FONT_STANDARD_TEXT);
+	this->AddCheckBox(&this->chkbox_s0, 170, 110, 24, 24);
+	this->AddCheckBox(&this->chkbox_s2, 240, 110, 24, 24);
+	this->AddCheckBox(&this->chkbox_s4, 310, 110, 24, 24);
 	// Check current status' box
 	switch (unit->unitStatus) {
 	case 0:
@@ -104,7 +99,7 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 		AOE_METHODS::UI_BASE::RefreshUIObject(this->chkbox_s0);
 	}
 	// Player that owns the unit
-	this->AddComboBox(this->popup, &this->cbxPlayerOwner, 20, 20, 120, 20, 120, 20);
+	this->AddComboBox(&this->cbxPlayerOwner, 20, 20, 120, 20, 120, 20);
 	if (this->cbxPlayerOwner) {
 		this->cbxPlayerOwner->Clear();
 		AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_METHODS::GetScreenFromName(scenarioEditorScreenName);
@@ -121,11 +116,20 @@ void EditorEditUnitInfoPopup::_AddPopupContent() {
 		}
 		this->cbxPlayerOwner->SetSelectedIndex(this->initialOwner);
 	}
+	// OK button
+	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(80),
+		this->GetScreenSizeY() - 30, 80, 22, 0);
 }
 
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool EditorEditUnitInfoPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
+bool EditorEditUnitInfoPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
+	if (sender == this->btnOK) {
+		this->Validate();
+		this->CloseScreen(false);
+		this->RestoreCursor();
+		return true;
+	}
 	if (sender->currentState) {
 		if (sender == this->chkbox_s0) {
 			AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkbox_s2, false);
@@ -140,12 +144,23 @@ bool EditorEditUnitInfoPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *se
 			AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkbox_s0, false);
 		}
 	}
+	return false; // Not one of our buttons; let ROR code be executed normally
+}
+
+
+// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+bool EditorEditUnitInfoPopup::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
+	if (keyCode == VK_ESCAPE) {
+		this->CloseScreen(false);
+		this->RestoreCursor();
+		return true;
+	}
 	return false;
 }
 
 
-void EditorEditUnitInfoPopup::OnBeforeClose(bool isCancel) {
-	if (isCancel) { return; }
+// Save changes
+void EditorEditUnitInfoPopup::Validate() {
 	// Note: setting shortcutNumber can show the unit's status, but only works for player #1. Fix in 0x4A78D9 to allow other players
 	if (this->chkbox_s0 && this->chkbox_s2 && this->chkbox_s4) {
 		for each (auto curUnit in this->allSelectedUnits)
@@ -174,15 +189,17 @@ void EditorEditUnitInfoPopup::OnBeforeClose(bool isCancel) {
 			}
 		}
 	}
-	this->ResetPointers();
 }
 
 
-void EditorEditUnitInfoPopup::OnAfterClose(bool isCancel) {
+void EditorEditUnitInfoPopup::RestoreCursor() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return; }
-	// When closing "edit unit" popup, restore unit selection mouse cursor (more practical).
 	settings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
+}
+
+
+}
 }
 

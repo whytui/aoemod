@@ -285,7 +285,7 @@ bool RnrScreenBase::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int r
 }
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool RnrScreenBase::OnButtonClick(STRUCT_ANY_UI *sender) {
+bool RnrScreenBase::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	return false;
 }
 

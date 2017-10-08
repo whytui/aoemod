@@ -334,7 +334,7 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 
 
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool InGameUnitPropertiesPopup::OnButtonClick(STRUCT_ANY_UI *sender) {
+bool InGameUnitPropertiesPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnOK) {
 		this->Validate();
 		this->CloseScreen(false);
