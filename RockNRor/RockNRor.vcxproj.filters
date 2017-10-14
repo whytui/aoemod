@@ -354,6 +354,9 @@
     <ClInclude Include="include\RockNRorUIHelper.h">
       <Filter>Fichiers d%27en-tête\customUI</Filter>
     </ClInclude>
+    <ClInclude Include="include\RockNRorSettingsScreen.h">
+      <Filter>Fichiers d%27en-tête\customUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\tinyxml\tinystr.cpp">
@@ -600,6 +603,9 @@
       <Filter>Fichiers sources\customUI</Filter>
     </ClCompile>
     <ClCompile Include="src\RockNRorUIHelper.cpp">
+      <Filter>Fichiers sources\customUI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RockNRorSettingsScreen.cpp">
       <Filter>Fichiers sources\customUI</Filter>
     </ClCompile>
   </ItemGroup>

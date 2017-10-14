@@ -45,6 +45,45 @@ ERROR : Impossible de trouver le fichier
 [42090] // ERROR : "file. data2\empires.dat will be used instead." (end of message)
 . data2\empires.dat sera utilisé à la place.
 
+// *** RockNRor main settings ***
+[42126]
+Fermer
+[42127] // RockNRor settings title
+Options de RockNRor
+[42128] // RockNRor settings introduction text
+Liste complète des options dans RockNRor\RockNRor.xml file. Il faut relancer le jeu si vous modifiez ce fichier.
+[42129]
+Modes de jeu RockNRor
+[42130]
+Générer des civilisations avec des bonus/technologies aléatoires  pour les cartes aléatoires/combat à mort
+[42131]
+Activer le mode RPG (Age Of Might And Magic) dans les cartes aléatoires/combat à mort
+[42132]
+Activer le mode RPG (Age Of Might And Magic) dans les scénarios
+[42133]
+Générer des stratégies aléatoirement pour l'ordinateur dans les cartes aléatoires
+[42134]
+Générer des stratégies aléatoirement pour l'ordinateur dans les combats à mort
+[42135]
+Désactiver les murailles dans les cartes aléatoires/combats à mort
+[42136]
+Pas de diplomacie neutre dans les cartes aléatoires/combats à mort
+[42137]
+Désactiver le port lorsque les joueurs 'ordinateur' ne le supportent pas
+[42138]
+Toujours activer l'exploration partagée dans les cartes aléatoires/combats à mort
+[42139]
+Options RockNRor d'intelligence artificielle
+[42140]
+Activer les améliorations de RockNRor pour les joueurs de type Ordinateur
+[42141]
+Activer les améliorations de plan de ville pour les joueurs de type Ordinateur
+[42142]
+Corriger le bug de logistique: les joueurs ordinateurs ne peuvent plus créer d'infantrie sans avoir d'habitations.
+[42143]
+Configurez une résolution d'écran plus grande avant d'ouvrir cet écran !
+
+
 // *** RockNRor Options popup ***
 [42020] // RockNRor options popup title
 Options de RockNRor
@@ -255,3 +294,23 @@ Lancer un autre trigger après celui-ci
 Condition sur le niveau de difficulté
 [42115]
 Lancez RockNRorAdmin.exe pour obtenir l'aide complète à propos des triggers.
+[42116]
+Cliquez pour que l'unité cesse d'attaquer les villageois automatiquement
+[42117]
+Cliquez pour que l'unité cesse d'attaquer les bâtiments automatiquement
+[42118]
+Cliquez pour que l'unité cesse d'attaquer les autres types d'unités automatiquement
+[42119]
+Cliquez pour que restaurer le comportement normal d'attaque automatique
+[42120]
+Protéger une position/unité
+[42121] // Hotkey for protect unit command
+P
+[42122] // Back (in unit buttons menu for protect command)
+Retour
+[42123]
+Ne plus défendre la position/unité
+[42124]
+Cliquez avec le bouton droit pour définir l'unité ou l'emplacement à protéger
+[42125] // Make main unit for keyboard shortcut selection
+Cliquer pour que cette unité soit prioritaire lors de l'utilisation de raccourci clavier

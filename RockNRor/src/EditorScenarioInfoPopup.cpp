@@ -77,8 +77,8 @@ void EditorScenarioInfoPopup::CreateScreenComponents() {
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkDisableTerrainRestrictions, ROCKNROR::crInfo.configInfo.editor_disableTerrainRestrictions);
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkLengthenCombatMode, enableLengthenCombatMode != 0);
 
-	// OK button
-	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(80),
+	// Close button
+	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(CRLANG_ID_CLOSE, "Close"), this->GetLeftCenteredPositionX(80),
 		this->GetScreenSizeY() - 30, 80, 22, 0);
 }
 

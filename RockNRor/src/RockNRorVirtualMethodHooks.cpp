@@ -293,6 +293,12 @@ namespace VIRTUAL_METHOD_HOOKS {
 			}
 		}
 
+		if ((keyCode == VK_F1) && (ROCKNROR::crInfo.rnrUIHelper->GetCurrentRnrScreen() == NULL)) {
+			// F1 in menus: Show RockNRor main settings screen
+			ROCKNROR::UI::RockNRorSettingsScreen *settingsScreen = new ROCKNROR::UI::RockNRorSettingsScreen();
+			settingsScreen->CreateScreen(GetCurrentScreen());
+		}
+
 		RECORD_PERF_END(originalCallAddr);
 		return result;
 	}

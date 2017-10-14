@@ -34,7 +34,7 @@ void SimpleEditTextPopup::CreateScreenComponents() {
 		this->AddButton(&this->btnCancel, localizationHandler.GetTranslation(LANG_ID_CANCEL, "Cancel"), this->GetLeftCenteredPositionX(172) + 86,
 			this->GetScreenSizeY() - 30, 80, 22, 0);
 	} else {
-		this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(80),
+		this->AddButton(&this->btnOK, localizationHandler.GetTranslation(CRLANG_ID_CLOSE, "Close"), this->GetLeftCenteredPositionX(80),
 			this->GetScreenSizeY() - 30, 80, 22, 0);
 	}
 }

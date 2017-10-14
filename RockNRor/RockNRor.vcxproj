@@ -128,6 +128,7 @@
     <ClInclude Include="include\CustomCiv.h" />
     <ClInclude Include="include\PlayerTechTree.h" />
     <ClInclude Include="include\RnrScreenBase.h" />
+    <ClInclude Include="include\RockNRorSettingsScreen.h" />
     <ClInclude Include="include\RockNRorUIHelper.h" />
     <ClInclude Include="include\TTDetailedResearchDef.h" />
     <ClInclude Include="include\GameEventHandler.h" />
@@ -223,6 +224,7 @@
     <ClCompile Include="src\CustomCiv.cpp" />
     <ClCompile Include="src\PlayerTechTree.cpp" />
     <ClCompile Include="src\RnrScreenBase.cpp" />
+    <ClCompile Include="src\RockNRorSettingsScreen.cpp" />
     <ClCompile Include="src\RockNRorUIHelper.cpp" />
     <ClCompile Include="src\TTDetailedResearchDef.cpp" />
     <ClCompile Include="src\GameEventHandler.cpp" />

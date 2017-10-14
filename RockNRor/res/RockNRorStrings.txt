@@ -38,6 +38,44 @@ ERROR : Could not find
 [42090] // ERROR : "file. data2\empires.dat will be used instead." (end of message)
 file. data2\empires.dat will be used instead.
 
+// *** RockNRor main settings ***
+[42126]
+Close
+[42127] // RockNRor settings title
+RockNRor Settings
+[42128] // RockNRor settings introduction text
+Please find the full list of options in RockNRor\RockNRor.xml file. You'll need to restart the game if you modify this file.
+[42129]
+RockNRor mods
+[42130]
+Generate random tech trees/bonuses in Random Map games
+[42131]
+RPG mode - Age Of Might And Magic - in random games
+[42132]
+RPG mode - Age Of Might And Magic - in scenario games
+[42133]
+Generate random strategies in Random Map games
+[42134]
+Generate random strategies in Deathmatch Games
+[42135]
+No walls in Random Games/Deathmatch games
+[42136]
+No neutral diplomacy in Random Maps/Deathmatch games
+[42137]
+No dock RM/DM on land maps where AI does not handle docks
+[42138]
+Always share ally exploration in random games
+[42139]
+RockNRor AI options
+[42140]
+Allow RockNRor to improve AI
+[42141]
+Allow RockNRor to improve AI city plan handling
+[42142]
+Fix logistics bug (AI no longer trains units without houses)
+[42143]
+Please set a higher resolution to open this screen !
+
 // *** RockNRor Options popup ***
 [42020] // RockNRor options popup title
 RockNRor Options
@@ -247,3 +285,23 @@ Run another trigger after execution
 Difficulty level condition
 [42115]
 Please run RockNRorAdmin.exe to get full documentation on triggers.
+[42116]
+Click to prevent unit from attacking villagers automatically
+[42117]
+Click to prevent unit from attacking buildings automatically
+[42118]
+Click to prevent unit from attacking other units automatically
+[42119]
+Click to restore normal auto-attack behaviour
+[42120]
+Protect a position/unit
+[42121] // Hotkey for protect unit command
+P
+[42122] // Back (in unit buttons menu for protect command)
+Back
+[42123]
+Stop defending current position/unit
+[42124]
+Right-click to define the unit or the position to protect
+[42125]
+Make main unit for keyboard shortcut selection

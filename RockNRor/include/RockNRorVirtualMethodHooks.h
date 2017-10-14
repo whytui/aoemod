@@ -14,6 +14,7 @@
 #include "interruption.h"
 //#include "RockNRorMainInterface.h"
 #include "RnrScreenBase.h"
+#include "RockNRorSettingsScreen.h"
 
 
 namespace ROCKNROR {

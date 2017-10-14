@@ -47,6 +47,26 @@ const static unsigned long int CRLANG_ID_ERROR_EMPIRES_DAT_USED_INSTEAD = 42090;
 const static unsigned long int CRLANG_ID_YES = 42094;
 const static unsigned long int CRLANG_ID_NO = 42095;
 
+// RockNRor main settings
+const static unsigned long int CRLANG_ID_CLOSE = 42126;
+const static unsigned long int CRLANG_ID_ROCKNROR_SETTINGS_TITLE = 42127;
+const static unsigned long int CRLANG_ID_RNR_STTGS_INTRO_TEXT = 42128;
+const static unsigned long int CRLANG_ID_RNR_STTGS_MODS_SECTION = 42129;
+const static unsigned long int CRLANG_ID_RNR_STTGS_GEN_RANDOM_TECH_TREES_RM = 42130;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RPG_MODE_RANDOM_GAMES = 42131;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RPG_MODE_SCENARIO = 42132;
+const static unsigned long int CRLANG_ID_RNR_STTGS_GEN_STRATEGY_RM = 42133;
+const static unsigned long int CRLANG_ID_RNR_STTGS_GEN_STRATEGY_DM = 42134;
+const static unsigned long int CRLANG_ID_RNR_STTGS_NO_WALLS_RANDOM_GAMES = 42135;
+const static unsigned long int CRLANG_ID_RNR_STTGS_NO_NEUTRAL_DIPL_RANDOM_GAMES = 42136;
+const static unsigned long int CRLANG_ID_RNR_STTGS_NO_WALL_RANDOM_GAMES = 42137;
+const static unsigned long int CRLANG_ID_RNR_STTGS_SHARE_ALLY_EXPLORATION_IN_RANDOM_GAMES = 42138;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RNR_AI_OPTIONS_SECTION = 42139;
+const static unsigned long int CRLANG_ID_RNR_STTGS_IMPROVE_AI = 42140;
+const static unsigned long int CRLANG_ID_RNR_STTGS_IMPROVE_CITY_PLAN_AI = 42141;
+const static unsigned long int CRLANG_ID_RNR_STTGS_FIX_LOGISTICS_BUG = 42142;
+const static unsigned long int CRLANG_ID_RNR_STTGS_NEED_HIGHER_RESOLUTION = 42143;
+
 // RockNRor options
 const static unsigned long int CRLANG_ID_ROCKNROR_OPTIONS_POPUP_TITLE = 42020;
 const static unsigned long int CRLANG_ID_TECH_TREE = 42021;

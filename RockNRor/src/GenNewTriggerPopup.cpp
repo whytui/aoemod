@@ -91,9 +91,8 @@ void GenNewTriggerPopup::CreateScreenComponents() {
 	}
 	this->LoadTriggerTextFromGameInfo();
 
-	// OK button
-#pragma TODO("Close instead of OK")
-	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(80),
+	// Close button
+	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(CRLANG_ID_CLOSE, "Close"), this->GetLeftCenteredPositionX(80),
 		this->GetScreenSizeY() - 30, 80, 22, 0);
 }
 

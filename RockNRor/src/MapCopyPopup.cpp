@@ -76,7 +76,7 @@ void MapCopyPopup::CreateScreenComponents() {
 	this->AddTextBox(&this->edtResultMessage, "", 200, 30, currentVPos, 450, 30, true, true, false);
 
 	// OK button
-	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(80),
+	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(CRLANG_ID_CLOSE, "Close"), this->GetLeftCenteredPositionX(80),
 		this->GetScreenSizeY() - 30, 80, 22, 0);
 }
 

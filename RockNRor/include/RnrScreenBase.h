@@ -48,6 +48,8 @@ public:
 	bool SetWindowed(unsigned long int posX, unsigned long int posY, unsigned long int sizeX, unsigned long int sizeY);
 	// Only allowed when screen has not been opened yet.
 	bool SetCenteredForSize(unsigned long int sizeX, unsigned long int sizeY);
+	// Get X position for a centered object of provided size
+	unsigned long int GetCenteredPositionX(unsigned long int objSizeX) const;
 	unsigned long int GetScreenSizeX() const { return this->screenSizeX; }
 	unsigned long int GetScreenSizeY() const { return this->screenSizeY; }
 

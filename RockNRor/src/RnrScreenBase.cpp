@@ -98,6 +98,15 @@ bool RnrScreenBase::SetCenteredForSize(unsigned long int sizeX, unsigned long in
 }
 
 
+// Get X position for a centered object of provided size
+unsigned long int RnrScreenBase::GetCenteredPositionX(unsigned long int objSizeX) const {
+	if ((objSizeX < 0) || (objSizeX >= this->screenSizeX)) { return 0; }
+	long int halfRemainingX = this->screenSizeX - objSizeX;
+	halfRemainingX = halfRemainingX / 2;
+	return halfRemainingX;
+}
+
+
 // Actually create and show the screen in ROR UI.
 // parentScreen can be NULL.
 bool RnrScreenBase::CreateScreen(STRUCT_UI_EASY_PANEL *parentScreen) {
