@@ -82,6 +82,18 @@ Activer les améliorations de plan de ville pour les joueurs de type Ordinateur
 Corriger le bug de logistique: les joueurs ordinateurs ne peuvent plus créer d'infantrie sans avoir d'habitations.
 [42143]
 Configurez une résolution d'écran plus grande avant d'ouvrir cet écran !
+[42144]
+Changer la résolution d'écran (beta)
+[42145]
+Petit
+[42146]
+Moyen
+[42147]
+Grand
+[42148] // Error title for message
+Erreur
+[42149]
+Utilisez le menu d'options standard pour changer la résolution si le jeu est en cours.
 
 
 // *** RockNRor Options popup ***

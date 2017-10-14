@@ -326,4 +326,23 @@ static void SetGameCursor(AOE_CONST_INTERNAL::GAME_CURSOR cursorId) {
 }
 
 
+// Change screen resolution.
+// WARNING: this can be unstable
+static void SetScreenResolution(unsigned long int x, unsigned long int y) {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) {
+		return;
+	}
+	assert(x > 100);
+	assert(y > 100);
+	if ((x == 0) || (y == 0)) { return; } // A security.
+	unsigned long int callAddr = 0x41BE20;
+	_asm {
+		MOV ECX, settings;
+		PUSH y;
+		PUSH x;
+		CALL callAddr;
+	}
+}
+
 }

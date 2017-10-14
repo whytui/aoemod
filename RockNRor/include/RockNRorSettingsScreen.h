@@ -7,6 +7,8 @@
 #include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
 #include "RnrScreenBase.h"
+#include "SimpleEditText.h"
+#include "interface.h"
 
 using namespace AOE_STRUCTURES;
 
@@ -50,11 +52,13 @@ private:
 	STRUCT_UI_BUTTON *chkImproveAI;
 	STRUCT_UI_BUTTON *chkFixLogisticsBug;
 	STRUCT_UI_BUTTON *chkImproveCityPlan;
-
+	STRUCT_UI_BUTTON *btnResolution1;
+	STRUCT_UI_BUTTON *btnResolution2;
+	STRUCT_UI_BUTTON *btnResolution3;
 
 	void InitInputs();
 	void UpdateConfigFromCheckbox(STRUCT_UI_BUTTON *checkbox);
-
+	void ChangeResolution(unsigned long int x, unsigned long int y);
 };
 
 }

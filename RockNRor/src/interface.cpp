@@ -1,6 +1,16 @@
 #include "../include/interface.h"
 
 
+// Retrieve the highest resolution sizes (x/y)
+// Returns true if the variables were successfully updated
+bool AOE_CONST_DRS::GetHighestResolutionValues(long int &x, long int &y) {
+	x = GetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_RESOLUTION, "HSize1", 0);
+	y = GetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_RESOLUTION, "VSize1", 0);
+	if ((x == 0) || (y == 0)) { return false; }
+	return true;
+}
+
+
 // This method makes necessary checks to know if it is relevant to modify interfac.drs filename to use our custom one
 // If the game uses a custom resolution and if they are available, makes so ROR will use custom interfac.drs files (see CST_INTERFAC_DRS_CUSTOM_FILE_NAME)
 void AOE_CONST_DRS::ChangeItfDRS_file() {

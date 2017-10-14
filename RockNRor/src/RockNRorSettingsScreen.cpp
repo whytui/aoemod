@@ -22,6 +22,9 @@ void RockNRorSettingsScreen::ResetClassPointers() {
 	this->chkImproveAI = NULL;
 	this->chkImproveCityPlan = NULL;
 	this->chkFixLogisticsBug = NULL;
+	this->btnResolution1 = NULL;
+	this->btnResolution2 = NULL;
+	this->btnResolution3 = NULL;
 }
 
 
@@ -37,9 +40,33 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 	const unsigned long int checkboxSizeX = 24;
 	const unsigned long int checkboxSizeY = 24;
 	const unsigned long int checkboxLabelSizeX = 640;
+	const unsigned long int buttonSizeX = 100;
 	unsigned long int currentPosY = 20;
 	STRUCT_UI_LABEL *fooLabel = NULL;
 
+	// Title
+	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_ROCKNROR_SETTINGS_TITLE, "RockNRor settings"),
+		this->GetCenteredPositionX(titleSizeX), currentPosY, titleSizeX, titleSizeY,
+		AOE_FONTS::AOE_FONT_VERY_BIG_LABEL_1);
+	currentPosY += titleSizeY + defaultSpaceVertical;
+
+	// Change resolution
+	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_CHANGE_SCREEN_RESOLUTION, "Change screen resolution"),
+		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	this->AddButton(&this->btnResolution1, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RESOLUTION_SMALL, "Small"),
+		defaultMarginLeft + defaultSpaceHorizontal,
+		currentPosY, buttonSizeX, checkboxSizeY);
+	this->AddButton(&this->btnResolution2, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RESOLUTION_MEDIUM, "Medium"),
+		defaultMarginLeft + defaultSpaceHorizontal * 2 + buttonSizeX,
+		currentPosY, buttonSizeX, checkboxSizeY);
+	this->AddButton(&this->btnResolution3, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RESOLUTION_HIGH, "High"),
+		defaultMarginLeft + defaultSpaceHorizontal * 3 + buttonSizeX * 2,
+		currentPosY, buttonSizeX, checkboxSizeY);
+	currentPosY += checkboxSizeY + defaultSpaceVertical;
+
+	// Is the screen large enough ?
 	if (this->GetScreenSizeX() <= checkboxLabelSizeX + defaultMarginLeft) {
 		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_NEED_HIGHER_RESOLUTION, "Please set a higher resolution to open this screen !"),
 			defaultMarginLeft, currentPosY, this->GetScreenSizeX() - defaultMarginLeft, titleSizeY,
@@ -49,12 +76,6 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 			this->GetScreenSizeY() - 30, 80, 22, 0);
 		return;
 	}
-
-	// Title
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_ROCKNROR_SETTINGS_TITLE, "RockNRor settings"),
-		this->GetCenteredPositionX(titleSizeX), currentPosY, titleSizeX, titleSizeY,
-		AOE_FONTS::AOE_FONT_VERY_BIG_LABEL_1);
-	currentPosY += titleSizeY + defaultSpaceVertical;
 
 	// Introduction
 	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_INTRO_TEXT, "Please find the full list of options in RockNRor\\RockNRor.xml file. You'll need to restart the game if you modify this file."),
@@ -193,6 +214,7 @@ void RockNRorSettingsScreen::InitInputs() {
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkAlwaysShareExplorationInRandomGames, ROCKNROR::crInfo.configInfo.allyExplorationIsAlwaysShared);
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkImproveAI, ROCKNROR::crInfo.configInfo.improveAILevel > 0);
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkImproveCityPlan, ROCKNROR::crInfo.configInfo.cityPlanLikeValuesEnhancement);
+	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkFixLogisticsBug, ROCKNROR::crInfo.configInfo.fixLogisticsNoHouseBug);
 }
 
 
@@ -245,6 +267,41 @@ void RockNRorSettingsScreen::UpdateConfigFromCheckbox(STRUCT_UI_BUTTON *checkbox
 		ROCKNROR::crInfo.configInfo.cityPlanLikeValuesEnhancement = checkbox->IsChecked();
 		return;
 	}
+	if (checkbox == this->chkFixLogisticsBug) {
+		ROCKNROR::crInfo.configInfo.fixLogisticsNoHouseBug = checkbox->IsChecked();
+		return;
+	}
+}
+
+
+void RockNRorSettingsScreen::ChangeResolution(unsigned long int x, unsigned long int y) {
+	if (AOE_METHODS::GetScreenFromName(gameScreenName) != NULL) {
+		// Unstable. If game screen is open, use standard options menu to change resolution
+		ROCKNROR::UI::SimpleEditTextPopup *message = new ROCKNROR::UI::SimpleEditTextPopup(
+			localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_ERROR_MSG_TITLE, "Error"),
+			localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RESOLUTION_USE_STD_OPTIONS, "Please use standard options to change resolution when game is running"),
+			0, NULL, true, false);
+		message->SetCenteredForSize(400, 250);
+		message->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::RedTheme);
+		this->OpenOtherScreenAndCloseThisOne(message, false);
+		return;
+	}
+	STRUCT_UI_EASY_PANEL *myScreen = this->GetAoeScreenObject();
+	STRUCT_UI_EASY_PANEL *parent = NULL;
+	if (myScreen) {
+		parent = (STRUCT_UI_EASY_PANEL*)myScreen->ptrParentObject;
+	}
+	AOE_METHODS::SetScreenResolution(x, y);
+	this->CloseScreen(false);
+	if (parent && parent->IsCheckSumValidForAChildClass()) {
+		_asm {
+			MOV ECX, parent;
+			MOV EDX, [ECX];
+			PUSH y;
+			PUSH x;
+			CALL[EDX + 0x50]; // handle size. Does not seem sufficient to update parent screen :(
+		}
+	}
 }
 
 
@@ -252,6 +309,22 @@ void RockNRorSettingsScreen::UpdateConfigFromCheckbox(STRUCT_UI_BUTTON *checkbox
 bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnOK) {
 		this->CloseScreen(false);
+		return true;
+	}
+	if (sender == this->btnResolution1) {
+		this->ChangeResolution(640, 480);
+
+		return true;
+	}
+	if (sender == this->btnResolution2) {
+		this->ChangeResolution(800, 600);
+		return true;
+	}
+	if (sender == this->btnResolution3) {
+		long int x, y;
+		if (AOE_CONST_DRS::GetHighestResolutionValues(x, y)) {
+			this->ChangeResolution(x, y);
+		}
 		return true;
 	}
 	this->UpdateConfigFromCheckbox(sender);

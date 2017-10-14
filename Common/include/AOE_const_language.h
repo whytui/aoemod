@@ -66,6 +66,12 @@ const static unsigned long int CRLANG_ID_RNR_STTGS_IMPROVE_AI = 42140;
 const static unsigned long int CRLANG_ID_RNR_STTGS_IMPROVE_CITY_PLAN_AI = 42141;
 const static unsigned long int CRLANG_ID_RNR_STTGS_FIX_LOGISTICS_BUG = 42142;
 const static unsigned long int CRLANG_ID_RNR_STTGS_NEED_HIGHER_RESOLUTION = 42143;
+const static unsigned long int CRLANG_ID_RNR_STTGS_CHANGE_SCREEN_RESOLUTION = 42144;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RESOLUTION_SMALL = 42145;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RESOLUTION_MEDIUM = 42146;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RESOLUTION_HIGH = 42147;
+const static unsigned long int CRLANG_ID_RNR_STTGS_ERROR_MSG_TITLE = 42148;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RESOLUTION_USE_STD_OPTIONS = 42149;
 
 // RockNRor options
 const static unsigned long int CRLANG_ID_ROCKNROR_OPTIONS_POPUP_TITLE = 42020;

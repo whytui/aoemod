@@ -64,7 +64,7 @@ namespace AOE_STRUCTURES
 	// +44 = void TPanel::paint(void)
 	// +48 = panel.wnd_proc(hWnd, WM_msg, wParam, lParam)
 	// +4C = panel.handleIdle()
-	// +50 = panel.setPosition(sizeX, sizeY)
+	// +50 = panel.handleSize(sizeX, sizeY)
 	// +54 = TPanel::handle_paint(void)
 	// +58 = panel.keyDown(keyCode, repeatCount, ALT, CTRL, SHIFT)
 	// +5C = panel.handle_char(key,count)

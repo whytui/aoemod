@@ -75,6 +75,19 @@ Allow RockNRor to improve AI city plan handling
 Fix logistics bug (AI no longer trains units without houses)
 [42143]
 Please set a higher resolution to open this screen !
+[42144]
+Change screen resolution (beta)
+[42145]
+Small
+[42146]
+Medium
+[42147]
+High
+[42148] // Error title for message
+Error
+[42149]
+Please use standard options to change resolution when game is running
+
 
 // *** RockNRor Options popup ***
 [42020] // RockNRor options popup title

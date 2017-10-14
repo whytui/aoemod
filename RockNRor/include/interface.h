@@ -61,6 +61,10 @@ enum RockNRorIconId : long int {
 #define CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT 8
 
 
+// Retrieve the highest resolution sizes (x/y)
+// Returns true if the variables were successfully updated
+bool GetHighestResolutionValues(long int &x, long int &y);
+
 // Manage Resolution
 void ChangeItfDRS_file(); // Change interfac.drs filename to manage custom resolutions
 
