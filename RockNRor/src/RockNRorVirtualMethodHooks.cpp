@@ -280,37 +280,6 @@ namespace VIRTUAL_METHOD_HOOKS {
 		bool runStandardMethod = true;
 		long int result = 0;
 
-#ifdef _DEBUG
-
-		ROCKNROR::UI::RnrScreenBase *curRnrScreen = ROCKNROR::crInfo.rnrUIHelper->FindRnrScreen(uiObj->screenName);
-		if (curRnrScreen) {
-			// We have a custom screen
-		}
-
-		// TEST
-		ROCKNROR::UI::RnrScreenBase *testScreen1 = ROCKNROR::crInfo.rnrUIHelper->FindRnrScreen("testscreen");
-		ROCKNROR::UI::RnrScreenBase *testScreen2 = ROCKNROR::crInfo.rnrUIHelper->FindRnrScreen("testscreen2");
-		if (testScreen1 && testScreen1->GetScreenStatus() == ROCKNROR::UI::RnrScreenBase::CLOSED) {
-			delete testScreen1;
-			testScreen1 = NULL;
-		}
-		if (testScreen2 && testScreen2->GetScreenStatus() == ROCKNROR::UI::RnrScreenBase::CLOSED) {
-			delete testScreen2;
-			testScreen2 = NULL;
-		}
-
-		if (keyCode == VK_F2) {
-			if (testScreen1 == NULL) {
-				testScreen1 = new ROCKNROR::UI::RnrScreenBaseTest("testscreen");
-				testScreen1->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::RedTheme);
-				//testScreen1->SetWindowed(50, 100, 400, 300);
-				//testScreen1->SetScreenType(AOE_METHODS::UI_BASE::ScreenType::DIALOG_PANEL);
-				testScreen1->CreateScreen(NULL);
-			}
-			runStandardMethod = false;
-		}
-#endif
-
 		if (runStandardMethod && (originalCallAddr != 0)) {
 			_asm {
 				MOV ECX, uiObj;
@@ -402,7 +371,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 			if (rnrScreen) {
 				runStandardMethod = !rnrScreen->OnKeyDown(uiObj, keyCode, repeatCount, ALT, CTRL, SHIFT);
 				ROCKNROR::crInfo.rnrUIHelper->PurgeClosedScreens();
-				// No longer use rnrScreen ! (in case it's been closed/deleted)
+				rnrScreen = NULL; // No longer use rnrScreen ! (in case it's been closed/deleted)
 			}
 		}
 

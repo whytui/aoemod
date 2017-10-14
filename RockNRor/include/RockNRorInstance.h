@@ -12,7 +12,6 @@
 #include <AOE_empires_dat.h>
 #include <AOE_struct_game_settings.h>
 #include <UI\AOE_struct_ui_in_game_options.h>
-#include <AOE_struct_ui_panel_system.h>
 
 #include <Windows.h> // for messagebox
 #include "RockNRorCommon.h"
@@ -24,14 +23,12 @@
 #include "EXESelfEditor.h"
 #include "drsHandler.h"
 #include "RockNRorLocalization.h"
-#include "CustomPopupBase.h"
 #include "StrategyUpdater.h"
 #include "InGameRockNRorOptionsPopup.h"
 #include "cityPlan.h"
 #include "unitTargeting.h"
 #include "TileSetHandler.h"
 #include "combatAI.h"
-#include "CustomPopupSystem.h"
 #include "RockNRorMainInterface.h"
 #include "RockNRorVirtualMethodHooks.h"
 
@@ -88,7 +85,6 @@ namespace ROCKNROR {
 		void AfterAddDynamicStratElems(REG_BACKUP *REG_values);
 		void GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values);
 		void GlobalOnButtonClick(REG_BACKUP *REG_values);
-		void ManageOnDialogUserEvent(REG_BACKUP *REG_values);
 		void ManageChangeGameSpeed(REG_BACKUP *REG_values);
 		void ManageTacAIUpdate(REG_BACKUP *REG_values);
 		void ManageDefeatedAIPlayerTacAIUpdate(REG_BACKUP *REG_values);
@@ -195,10 +191,10 @@ namespace ROCKNROR {
 		//void ShowOKDialog(char *message, char *title, long int hSize, long int vSize);
 		void DisplayOptionButtonInMenu(REG_BACKUP *REG_values);
 		void ManageOptionButtonClickInMenu(REG_BACKUP *REG_values);
-		void ManageKeyPressInOptions(REG_BACKUP *REG_values);
 		void AfterScenarioEditorCreation(REG_BACKUP *REG_values);
 		void ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_values);
 		void OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *REG_values);
+		void DialogPanelDestructor(REG_BACKUP *REG_values);
 	};
 
 	// Main object

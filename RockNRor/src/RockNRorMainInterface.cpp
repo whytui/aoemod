@@ -53,10 +53,10 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 	// Disable ALT-F4 when it would conflict with custom dialog
 	// (isInGame) condition is optional. If removed, ALT-F4 will be disabled in scenario editor when our dialog is on.
 	// WARNING: we can't prevent this to occur if user clicks on the top-right corner cross :(
-	if ((isInGame) && (ALT) && (pressedKey == VK_F4) && (ROCKNROR::crInfo.customYesNoDialogVar != NULL)) {
+	//if ((isInGame) && (ALT) && (pressedKey == VK_F4)) {
 		// Disable ALT-F4 when our custom dialog is ON (based on the same dialog, would provoke conflicts and our dialog would stay ON forever)
-		return true;
-	}
+		//return true;
+	//}
 
 	// Handle more Units shortcuts using numpad keys 0-9
 	if ((isInGame) && (!isMenuOpen) && (pressedKey >= VK_NUMPAD0) && (pressedKey <= VK_NUMPAD9)) {
@@ -97,16 +97,15 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 			return false;
 		}
 		ROCKNROR::UI::InGameUnitPropertiesPopup *popup = new ROCKNROR::UI::InGameUnitPropertiesPopup(settings->ptrGameUIStruct->panelSelectedUnit->unitInstanceId);
+		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		if (settings && settings->IsCheckSumValid() && settings->ptrGameUIStruct && settings->ptrGameUIStruct->IsCheckSumValid()) {
+			popup->SetBackgroundTheme((AOE_CONST_DRS::AoeScreenTheme)settings->ptrGameUIStruct->themeSlpId);
+		}
 		if (popup->CreateScreen(GetCurrentScreen())) {
 			if (!IsMultiplayer()) {
 				AOE_METHODS::SetGamePause(true);
 			}
 		}
-	}
-
-	// ESC (1B) - close custom dialog if opened
-	if ((isInEditor || isInGame) && ((pressedKey == VK_ESCAPE) /*|| (pressedKey == VK_RETURN)*/) && (ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
-		ROCKNROR::customPopupSystem.CloseCustomGamePopup(true);
 	}
 
 	if (isInGame && (pressedKey == VK_DELETE)) {
@@ -161,7 +160,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 				char buffer[100];
 				const char *text = localizationHandler.GetTranslation(CRLANG_ID_MOUSE_POSITION, "Mouse position");
 				sprintf_s(buffer, "%.70s: X=%4.2f, y=%4.2f", text, posX, posY);
-				SimpleEditTextPopup::OpenCustomTextEditPopup(text, buffer, 280, 110, sizeof(buffer), NULL, true, false);
+				ROCKNROR::UI::SimpleEditTextPopup::OpenCustomTextEditPopup(text, buffer, 280, 110, sizeof(buffer), NULL, true, false);
 			}
 		} else {
 			ROCKNROR::UI::EditorEditUnitInfoPopup *popup = new ROCKNROR::UI::EditorEditUnitInfoPopup();
@@ -177,12 +176,14 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 
 	// CTRL-F1 : display messages
 	if (!isMenuOpen && CTRL && (pressedKey == VK_F1)) {
-		SimpleEditTextPopup::OpenTraceMessagePopup();
+		ROCKNROR::UI::SimpleEditTextPopup::OpenTraceMessagePopup();
 	}
 
 	// F4 in editor: copy map
 	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F4) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
-		ROCKNROR::customPopupSystem.OpenCustomGamePopup<MapCopyPopup>(600, 450, false);
+		ROCKNROR::UI::MapCopyPopup *popup = new ROCKNROR::UI::MapCopyPopup();
+		popup->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::ScenarioEditorTheme);
+		popup->CreateScreen(GetCurrentScreen());
 	}
 
 	// F5 in game: set debug info level
@@ -348,15 +349,15 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 				assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
 			}
 		}
-
-		if (ROCKNROR::customPopupSystem.OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
+		// display buffer
+		/*if (ROCKNROR::customPopupSystem.OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
 			unsigned long int *unused;
-			AOE_METHODS::UI_BASE::AddLabel(ROCKNROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
+			AOE_METHODS::UI_BASE::AddLabel(, (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
 			if (!sTechTreeInfo.empty() && (techToShowCount > 0)) {
-				AOE_METHODS::UI_BASE::AddLabel(ROCKNROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
-				AOE_METHODS::UI_BASE::AddLabel(ROCKNROR::crInfo.GetCustomGamePopup(), (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount + 1));
+				AOE_METHODS::UI_BASE::AddLabel(, (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
+				AOE_METHODS::UI_BASE::AddLabel(, (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount + 1));
 			}
-		}
+		}*/
 	}
 #endif
 
@@ -373,9 +374,6 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool RockNRorMainInterface::Global_OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *object) {
 	unsigned long int objAddress = (unsigned long int)object;
-	if (ROCKNROR::customPopupSystem.OnButtonClickClosePopupIfNecessary((unsigned long int)object)) {
-		return true;
-	}
 
 	AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *uiMainInfo = GetUIMainInfoStruct();
 	if (uiMainInfo && uiMainInfo->previousFocusedObject) {
@@ -399,14 +397,6 @@ bool RockNRorMainInterface::Global_OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTO
 		}
 	}
 
-	// Custom checkboxes: check/uncheck + manage custom buttons onclick
-	if (ROCKNROR::crInfo.HasOpenedCustomGamePopup()) {
-		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
-		if (objAsButton->IsCheckSumValid()) {
-			return ROCKNROR::customPopupSystem.OnCustomButtonClick(objAsButton); // run for checkboxes also.
-		}
-	}
-
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 
 	// Scenario editor
@@ -415,23 +405,6 @@ bool RockNRorMainInterface::Global_OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTO
 		// Manage (overload) scenario editor buttons
 		if (object == se->map_btn_generateMap) {
 			return this->ScenarioEditor_callMyGenerateMapIfRelevant();
-		}
-	}
-
-	// Game menu
-	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MENU *menu = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_MENU *)AOE_METHODS::GetScreenFromName(menuDialogScreenName);
-	if (menu && menu->IsCheckSumValid() && settings && (object->ptrParentObject == menu)) {
-		AOE_STRUCTURES::STRUCT_UI_BUTTON *objAsButton = (AOE_STRUCTURES::STRUCT_UI_BUTTON *)objAddress;
-		if (objAsButton->IsCheckSumValid()) {
-			// True for buttons that do not trigger a call to ManageOptionButtonClickInMenu
-			bool btnEventNotCaughtByRORMenuBtnEvent = (objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_SAVE) ||
-				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_LOAD) ||
-				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_QUIT) ||
-				(objAsButton->commandIDs[0] == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_HELP);
-			if (btnEventNotCaughtByRORMenuBtnEvent) {
-				ROCKNROR::customPopupSystem.FreeInGameCustomOptionsButton(); // Free custom button if needed, for buttons not handled in ManageOptionButtonClickInMenu.
-				ROCKNROR::crInfo.ForceClearCustomMenuObjects(); // Here we CAN already free custom button because it's not in use (current event is about another button)
-			}
 		}
 	}
 

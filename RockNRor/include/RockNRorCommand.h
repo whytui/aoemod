@@ -51,7 +51,6 @@
 #include "UnitCustomMethods.h"
 #include "GameTriggerHandling.h"
 #include "PlayerCustomMethods.h"
-#include "CustomPopupSystem.h"
 #include "SimpleEditText.h"
 #include "UnitExtensionHandler.h"
 #include "interruption.h"
@@ -342,19 +341,6 @@ public:
 
 	// Changes current in-game debug info level (F5)
 	void SetNextInGameDebugInfoLevel();
-
-	// ----------------------------------
-	// Methods about internal UI framework
-
-	// Opens a custom dialog message (based on CloseProgramDialog)
-	// Return true if OK, false if failed
-	// Fails if another custom dialog is already open
-	bool OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize);
-
-	// Closes currently opened custom dialog message.
-	// Returns -1 if an error occurred, including "no custom dialog is opened".
-	// Other results are 0=Yes/OK, 1=No, 2=Cancel
-	long int CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_MESSAGE_DIALOG *ptrDialog, unsigned long int ptrSender);
 
 
 	// This is called on GameSettings.NotifyEvent game method call.

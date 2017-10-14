@@ -63,15 +63,15 @@ if (!ptrObj || (*ptrObj == NULL)) { return; }
 CallAOEDestructor(ptrObj);
 }*/
 
-// Calls AOE's class destructor and also sets the variable (ptrObj) to NULL. For dialogs.
+// Calls AOE's class destructor and also sets the variable (ptrObj) to NULL. Can be used with any UI component (ANY_UI).
 // ASSERTS that the provided pointer is non-NULL (so don't call this with NULL itself or a NULL pointer)
 static void CallAOEDeleteDialog(unsigned long int **ptrObj) {
 	assert(ptrObj != NULL);
 	assert(*ptrObj != NULL);
 	_asm {
-		PUSH ptrObj
-		MOV EAX, 0x419950
-		CALL EAX
+		PUSH ptrObj;
+		MOV EAX, 0x419950;
+		CALL EAX;
 	}
 }
 

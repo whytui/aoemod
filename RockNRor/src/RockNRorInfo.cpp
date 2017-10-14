@@ -56,7 +56,6 @@ RockNRorInfo::~RockNRorInfo() {
 		delete this->rnrUIHelper;
 		this->rnrUIHelper = NULL;
 	}
-	this->FreeGarbagePopupComponents();
 }
 
 
@@ -71,11 +70,7 @@ void RockNRorInfo::ResetVariables() {
 	this->triggerSet = NULL;
 	this->triggersLastCheckTime_s = 0;
 	this->lastRockNRorTimeExecution_gameTime_s = 0;
-	this->customYesNoDialogVar = 0;
 	this->customGameMenuOptionsBtnVar = NULL;
-	this->customGamePopupButtonVar = NULL;
-	this->customGamePopupCancelBtnVar = NULL;
-	this->customGamePopupVar = 0;
 	this->gameTimerSlowDownCounter = 0;
 	this->CollectedTimerIntervalsIndex = 0;
 	this->LastGameTimerAutoFix_second = 0;
@@ -226,176 +221,7 @@ void RockNRorInfo::ApplyAutoAttackPolicyToPlayerSelectedUnits(AOE_STRUCTURES::ST
 
 // Returns true if a CUSTOM game popup is opened (only for popups, not dialogs !)
 bool RockNRorInfo::HasOpenedCustomGamePopup() {
-	return (this->customGamePopupButtonVar != NULL);
-}
-
-// Returns true if a custom dialog is opened (only for dialogs, not popups !)
-bool RockNRorInfo::HasOpenedCustomDialog() {
-	return (this->customYesNoDialogVar != NULL);
-}
-
-
-
-// Opens a custom popup window in game screen/editor. The created popup window only contains a "OK" button.
-// You have to add UI elements afterwards (use GetCustomGamePopup() to get parent object=popup).
-// Return popup UI object if OK, NULL if failed
-// Fails if another game popup (including options) is already open. Fails if dimensions are too small.
-// Pauses the game if running (only if a popup is successfully opened)
-// Technically, the created (AOE) popup object is based on game options popup.
-// themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
-AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *RockNRorInfo::OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn, long int themeSlpId) {
-	if (this->HasOpenedCustomGamePopup()) { return false; }
-	if ((hSize < 0xB0) || (vSize < 30)) { return false; }
-	if (!ROR_gameSettings) { return false; }
-
-	if ((GetGameSettingsPtr()->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) &&
-		(GetGameSettingsPtr()->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING)) {
-		return false;
-	}
-	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *currentScreen = (AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *)AOE_STRUCTURES::GetCurrentScreen();
-	assert(currentScreen && currentScreen->IsCheckSumValidForAChildClass());
-	if (!currentScreen || !currentScreen->IsCheckSumValidForAChildClass()) { return false; }
-	// Make sure provided dimensions fit in screen
-	if (currentScreen->sizeX < hSize) { hSize = currentScreen->sizeX - 10; }
-	if (currentScreen->sizeY < vSize) { vSize = currentScreen->sizeY - 10; }
-
-	AOE_METHODS::SetGamePause(true);
-	if (themeSlpId < 0) {
-		themeSlpId = currentScreen->themeSlpId;
-	}
-	this->customGamePopupVar = AOE_METHODS::CreateGameScreenPopup(currentScreen, hSize, vSize, themeSlpId);
-
-	// OK button. It is this->customGamePopupButtonVar that identifies the popup (+ the fact it is open)
-	long int btnhPos = (hSize - 0xAC) / 2;
-	long int btnvPos = vSize - 38;
-	long int btnHSize = 0xAC; // 172
-	if (hasCancelBtn) {
-		btnhPos = (hSize - 0xAC - 20) / 2;
-		btnHSize = 0x50;
-	}
-
-	AOE_METHODS::UI_BASE::AddButton(this->customGamePopupVar, &this->customGamePopupButtonVar, LANG_ID_OK, btnhPos, btnvPos, btnHSize, 30);
-	if (hasCancelBtn) {
-		AOE_METHODS::UI_BASE::AddButton(this->customGamePopupVar, &this->customGamePopupCancelBtnVar, LANG_ID_CANCEL, btnhPos + btnHSize + 32, btnvPos, btnHSize, 30);
-	}
-	assert(this->objectsToFree.empty()); // there shouldn't be remaining components from a previous popup.
-
-	return this->customGamePopupVar;
-}
-
-
-// Use it to list all UI components (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
-// The method is protected against duplicates, you can safely call it more than once.
-// Returns true if obj has actually been added to list.
-bool RockNRorInfo::AddObjectInPopupContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj) {
-	if (obj == NULL) {
-		return false;
-	}
-	for (std::vector<AOE_STRUCTURES::STRUCT_ANY_UI *>::iterator it = this->objectsToFree.begin(); it != this->objectsToFree.end(); it++) {
-		AOE_STRUCTURES::STRUCT_ANY_UI *o = *it;
-		if (o == obj) {
-			return false; // duplicate: do not insert again
-		}
-	}
-	this->objectsToFree.push_back(obj);
-	return true;
-}
-
-
-// Frees (destroys using AOE destructor) all popup's components
-void RockNRorInfo::FreePopupAddedObjects() {
-	// at this point, our "garbage" collector contains objects from a previous popup
-	// which means we are now certain all of these components are NOT related to the "in progress" event (onclick, etc), if any.
-	// So we can free them. This way, we don't accumulate old components, but only keep those from "last" popup.
-	this->FreeGarbagePopupComponents();
-
-	for (std::vector<AOE_STRUCTURES::STRUCT_ANY_UI *>::iterator it = this->objectsToFree.begin(); it != this->objectsToFree.end(); it++) {
-		AOE_STRUCTURES::STRUCT_ANY_UI *curObj = *it;
-		curObj->ptrParentObject = NULL; // do not try to free other related objects, just this one ! Remove link. Otherwise some objects would be destroyed more than once => crash
-		assert(isAValidRORChecksum(curObj->checksum)); // if failed, this means the object had already been freed, and memory been re-used for something else
-		if (static_cast<AOE_STRUCTURES::STRUCT_UI_BUTTON*>(curObj) != NULL) {
-			// buttons might be event's sender, do not free them now... Our garbage system will manage them correctly.
-			this->garbageComponentsToFree.push_back(curObj);
-		} else {
-			CallAOEDeleteDialog((unsigned long **)&curObj);
-		}
-	}
-	this->objectsToFree.clear();
-}
-
-// Free remaining UI components that could not be freed yet
-// The reason we don't free those immediatly is because they might be used in current event (button onclick, etc).
-// Warning: this must NOT be called at any moment, make sure none of the concerned object is currently being used (specially for onclick events...)
-void RockNRorInfo::FreeGarbagePopupComponents() {
-	for (std::vector<AOE_STRUCTURES::STRUCT_ANY_UI *>::iterator it = this->garbageComponentsToFree.begin(); it != this->garbageComponentsToFree.end(); it++) {
-		AOE_STRUCTURES::STRUCT_ANY_UI *curObj = *it;
-		curObj->ptrParentObject = NULL; // do not try to free other related objects, just this one ! Remove link. Otherwise some objects would be destroyed more than once => crash
-		assert(isAValidRORChecksum(curObj->checksum)); // if failed, this means the object had already been freed, and memory been re-used for something else
-		if (isAValidRORChecksum(curObj->checksum)) {
-			CallAOEDeleteDialog((unsigned long **)&curObj);
-		} else {
-			traceMessageHandler.WriteMessageNoNotification("FreeGarbagePopupComponents: Invalid checksum !");
-		}
-	}
-	this->garbageComponentsToFree.clear();
-}
-
-
-// Use this to force values for "current custom popup". PLEASE AVOID using it !
-// Returns true if successful. Fails if a popup is already open.
-bool RockNRorInfo::ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *customGamePopup, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel) {
-	if (this->HasOpenedCustomGamePopup()) { return false; }
-	this->customGamePopupVar = customGamePopup;
-	this->customGamePopupButtonVar = btnOK;
-	this->customGamePopupCancelBtnVar = btnCancel;
-	return true;
-}
-
-
-// To be called when game menu is closed to free custom button
-void RockNRorInfo::ForceClearCustomMenuObjects() {
-	this->FreePopupAddedObjects();
-}
-
-
-// Closes currently opened custom popup window in game screen.
-void RockNRorInfo::CloseCustomGamePopup() {
-	AOE_STRUCTURES::STRUCT_ANY_UI *UIObjButton = this->customGamePopupButtonVar;
-	if (UIObjButton == NULL) { return; }
-	AOE_STRUCTURES::STRUCT_ANY_UI *popupUIObj = UIObjButton->ptrParentObject;
-
-	if (this->customGamePopupCancelBtnVar) { // If a cancel button had been created, free it.
-		CallAOEDeleteDialog((unsigned long **)&this->customGamePopupCancelBtnVar); // also sets var to NULL
-	}
-
-	CallAOEDeleteDialog((unsigned long **)&this->customGamePopupButtonVar); // also sets var to NULL
-	UIObjButton = NULL; // DO NOT use UIObjButton anymore !
-	// Free user-created popup content (underlying UI components)
-	this->FreePopupAddedObjects();
-
-	assert(popupUIObj != NULL);
-	if (popupUIObj != NULL) {
-		AOE_METHODS::CloseScreenFullTreatment(popupUIObj);
-	}
-	AOE_METHODS::SetGamePause(false);
-}
-
-
-// Return true if provided memory address is our custom game popup (excluding custom options)
-bool RockNRorInfo::IsCustomGamePopupOKButton(unsigned long int UIObjectAddress) {
-	return UIObjectAddress == (unsigned long)this->customGamePopupButtonVar;
-}
-
-// Return true if provided memory address is our custom game popup Cancel button (excluding custom options)
-bool RockNRorInfo::IsCustomGamePopupCancelButton(unsigned long int UIObjectAddress) {
-	return UIObjectAddress == (unsigned long)this->customGamePopupCancelBtnVar;
-}
-
-
-// Returns custom popup window in game screen (excluding RockNRor options popup).
-// Returns NULL if this popup is not open.
-AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *RockNRorInfo::GetCustomGamePopup() {
-	return this->customGamePopupVar;
+	return this->rnrUIHelper->GetCurrentRnrScreen() != NULL;
 }
 
 

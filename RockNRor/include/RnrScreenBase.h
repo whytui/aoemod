@@ -39,6 +39,8 @@ public:
 	ScreenStatus GetScreenStatus() const { return this->rorScreenStatus; }
 	// Get screen name (read only)
 	const std::string GetScreenName() const { return this->screenName; }
+	// Get background theme
+	AOE_CONST_DRS::AoeScreenTheme GetBackgroundSlpTheme() const { return this->backgroundSlpTheme; }
 
 	// Only allowed when screen has not been opened yet.
 	bool SetFullscreen();
@@ -60,7 +62,7 @@ public:
 
 	// Close "this" screen in ROR UI, and opens "otherScreen" instead.
 	// "this" must be CREATED and otherScreen must be NOT_CREATED.
-	bool OpenOtherScreenAndCloseThisOne(RnrScreenBase *otherScreen, STRUCT_UI_EASY_PANEL *parentForNewScreen);
+	bool OpenOtherScreenAndCloseThisOne(RnrScreenBase *otherScreen, bool nullParent);
 
 	STRUCT_UI_EASY_PANEL *GetAoeScreenObject() const;
 
@@ -135,20 +137,6 @@ private:
 	}
 
 };
-
-
-class RnrScreenBaseTest : public RnrScreenBase {
-public:
-	RnrScreenBaseTest(const char *screenName) : RnrScreenBase(screenName) {	}
-
-	// Create screen content: buttons, etc. Called by CreateScreen(...) method.
-	void CreateScreenComponents() override;
-
-	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) override;
-
-};
-
 
 
 }

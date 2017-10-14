@@ -44,12 +44,17 @@ namespace AOE_STRUCTURES
 #define CHECKSUM_UI_DIALOG_BASE 0x00544F1C // Base class for dialogs, parent=screenPanel
 #define CHECKSUM_UI_TLISTDIALOG 0x00543A7C // parent=dialogPanel.
 #define CHECKSUM_UI_RGE_DIALOG_LIST 0x00545B84 // parent=TListDialog.
-#define CHECKSUM_UI_MESSAGE_DIALOG 0x00543CEC // parent=dialogPanel.
+#define CHECKSUM_UI_MESSAGE_DIALOG 0x00543CEC // parent=dialogPanel. Eg confirmation before restart game, before opening help...
 #define CHECKSUM_UI_NAME_DIALOG 0x00547100 // ccor 0x48E800. Parent=dialogPanel (then easyPanel). "New name dialog".
 #define CHECKSUM_UI_SCENARIO_EDITOR_MENU 0x00543E20 // "Scenario Menu Dialog"
 #define CHECKSUM_UI_IN_GAME_MENU 0x00543BB8 // in-game menu, parent=dialogBase
 #define CHECKSUM_UI_IN_GAME_OPTIONS 0x005436E0 // in-game options popup
 #define CHECKSUM_UI_DIPLOMACY_DIALOG 0x00543814
+#define CHECKSUM_UI_QUICK_CHAT_DIALOG 0x00544088 // in-game small quick-chat dialog
+#define CHECKSUM_UI_CONTEXT_HELP_DIALOG 0x00543948 // after clicking on ? then on something interesting... Ingame, also in MP menus
+#define CHECKSUM_UI_ABOUT_DIALOG 0x005435AC // Menu->about in game screen
+#define CHECKSUM_UI_CREATE_MP_GAME_DIALOG 0x00546334
+#define CHECKSUM_UI_MP_CHAT_DIALOG 0x00543F54 // Chat menu in MP games
 
 #define CHECKSUM_UI_TIMELINE_PANEL 0x0054A134 // ccor 0x4FBAA0. Parent=easyPanel
 
@@ -162,6 +167,11 @@ namespace AOE_STRUCTURES
 				(this->checksum == CHECKSUM_UI_IN_GAME_MENU) ||
 				(this->checksum == CHECKSUM_UI_IN_GAME_OPTIONS) ||
 				(this->checksum == CHECKSUM_UI_DIPLOMACY_DIALOG) ||
+				(this->checksum == CHECKSUM_UI_QUICK_CHAT_DIALOG) ||
+				(this->checksum == CHECKSUM_UI_CONTEXT_HELP_DIALOG) ||
+				(this->checksum == CHECKSUM_UI_ABOUT_DIALOG) ||
+				(this->checksum == CHECKSUM_UI_CREATE_MP_GAME_DIALOG) ||
+				(this->checksum == CHECKSUM_UI_MP_CHAT_DIALOG) ||
 				(this->checksum == CHECKSUM_UI_MESSAGE_DIALOG) ||
 				(this->checksum == CHECKSUM_UI_RGE_DIALOG_LIST) ||
 				(this->checksum == CHECKSUM_UI_TLISTDIALOG) ||

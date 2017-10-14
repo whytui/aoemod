@@ -156,7 +156,7 @@ bool RnrScreenBase::CloseScreen(bool ignoreErrors) {
 
 // Close "this" screen in ROR UI, and opens "otherScreen" instead.
 // "this" must be CREATED and otherScreen must be NOT_CREATED.
-bool RnrScreenBase::OpenOtherScreenAndCloseThisOne(RnrScreenBase *otherScreen, STRUCT_UI_EASY_PANEL *parentForNewScreen) {
+bool RnrScreenBase::OpenOtherScreenAndCloseThisOne(RnrScreenBase *otherScreen, bool nullParent) {
 	if (this->GetScreenStatus() != RnrScreenBase::CREATED) {
 		return false;
 	}
@@ -165,9 +165,18 @@ bool RnrScreenBase::OpenOtherScreenAndCloseThisOne(RnrScreenBase *otherScreen, S
 	}
 
 	STRUCT_UI_EASY_PANEL *myScreenObject = this->GetAoeScreenObject();
+	STRUCT_UI_EASY_PANEL *parentToUse = NULL;
+	if (myScreenObject && !nullParent) {
+		parentToUse = (STRUCT_UI_EASY_PANEL *)myScreenObject->ptrParentObject;
+	}
 	if (!myScreenObject) { return false; }
+#ifdef _DEBUG
+	if (parentToUse && !parentToUse->IsCheckSumValidForAChildClass()) {
+		SYSTEM::StopExecution(_T("Bad parent checksum in OpenOtherScreenAndCloseThisOne"), true, true);
+	}
+#endif
 
-	if (otherScreen->CreateScreen(parentForNewScreen)) {
+	if (otherScreen->CreateScreen(parentToUse)) {
 		STRUCT_UI_EASY_PANEL *newScreenObject = otherScreen->GetAoeScreenObject();
 		if (!newScreenObject) { return false; }
 		// I don't understand how it works in original game. There is no such affectation ?
@@ -300,37 +309,6 @@ unsigned long int RnrScreenBase::GetLeftCenteredPositionX(long int desiredSize) 
 	if (halfRemainingSize < 0) { halfRemainingSize = 0; }
 	return halfRemainingSize;
 }
-
-
-
-
-
-
-
-// Create screen content: buttons, etc. Called by CreateScreen(...) method.
-void RnrScreenBaseTest::CreateScreenComponents() {
-	AOE_STRUCTURES::STRUCT_UI_BUTTON *btn = NULL;
-	this->AddButton(&btn, "rrr", 120, 100, 120, 24, 0);
-}
-
-// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool RnrScreenBaseTest::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
-	if (keyCode == VK_ESCAPE) {
-		this->CloseScreen(false);
-		return true;
-	}
-	if (keyCode == VK_F3) {
-		ROCKNROR::UI::RnrScreenBase *testScreen2 = ROCKNROR::crInfo.rnrUIHelper->FindRnrScreen("testscreen2");
-		if (!testScreen2) {
-			testScreen2 = new ROCKNROR::UI::RnrScreenBaseTest("testscreen2");
-			testScreen2->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::BabylonNeutralScreensGreyBricks);
-			testScreen2->SetWindowed(50, 100, 400, 300);
-			return this->OpenOtherScreenAndCloseThisOne(testScreen2, NULL);
-		}
-	}
-	return false;
-}
-
 
 
 }

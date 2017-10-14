@@ -13,7 +13,7 @@
 #define _LINE_ MACRO_TO_STRING(__LINE__)
 
 // A macro that expands into "file:line" quoted string.
-#define __FILE_LINE__ __FILE__ ":" _LINE_
+#define __FILE_LINE__ __FILE__ "(" _LINE_ ")"
 
 // Please do not use. Internal usage.
 #define ___PRAGMA_BLDMSG_INTERNAL(strMsg) message(__FILE_LINE__ ": " strMsg)

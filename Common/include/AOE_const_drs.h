@@ -11,7 +11,7 @@ namespace AOE_CONST_DRS {
 		RedTheme = 50002, // Weird looking but not so bad !
 		SalmonWeirdTheme = 50003, // The background design is really weird, but font and UI components are nice (checkbox are special but ok)
 		LightOrangeBrownTheme = 50004, // No background image (which can be useful), working well. Brown on top to light brown in the bottom (with yellow/orange touch). The white font is looking weird sometimes.
-		FullBlackTheme = 50005, // Completely black background, very effective. All UI components are working well/well supported. A nice alternative.
+		FullBlackTheme = 50005, // Completely black background, very effective. All UI components are working well/well supported. A nice alternative (for fullscreen).
 		EgyptNeutralScreensLightOrangeGrandmasWallpaper = 50006, // An imitation of my grandma's home wallpaper. Used for egypt tileset in save/load dialogs
 		GreekNeutralScreensGreyTheme = 50007, // A quite simple - but very nice - theme. Used for greek tileset in save/load dialogs
 		BabylonNeutralScreensGreyBricks = 50008, // A slightly darker grey theme, with kind of bricks in the background. Nice too but we don't really see the checkboxes. Used for babylon tileset in save/load dialogs
@@ -26,7 +26,7 @@ namespace AOE_CONST_DRS {
 		GameSettingsTheme = 50052,
 		MpSettingsTheme = 50053,
 		UnknownTheme54 = 50054, // Scenario editor menus ? Nice but background image went through the washing machine
-		InGameOptionsTheme = 50055, // clear-sand colored ; warning, this may not support high resolutions unless you fix the DRS file
+		ScenarioEditorTheme = 50055, // clear-sand colored ; warning, this may not support high resolutions unless you fix the DRS file
 		UnknownTheme56 = 50056, // Black with unreadable font and unsupported checkboxes, to be avoided (many IDs are -1 in this "bina")
 		VictoryAchievementTheme = 50057, // Using this for custom screens might look weird ;)
 		LostAchievementTheme = 50058, // Using this for custom screens might look weird ;)

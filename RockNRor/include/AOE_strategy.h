@@ -7,8 +7,10 @@
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_strategy_element.h>
 #include <AOE_struct_build_ai.h>
+#include <AOE_struct_main_ai.h>
 #include <AOE_const_functional.h>
 #include <AOE_struct_unit_actions.h>
+#include <AOE_SN_numbers.h>
 #include "RockNRorCommon.h"
 #include "researches.h"
 #include "randomizer.h"

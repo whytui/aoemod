@@ -19,21 +19,21 @@ public:
 	EditMapSizeXYPopup() : RnrScreenBase("edit map sizexy") {
 		this->SetWindowed(100, 100, 320, 130); // will always work (default values)
 		this->SetCenteredForSize(320, 130); // May fail if game settings can't be retrieved
-		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::InGameOptionsTheme);
+		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::FullBlackTheme);
 		this->sizeX = 0;
 		this->sizeY = 0;
 		this->ResetClassPointers();
 	}
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	virtual bool OnButtonClick(STRUCT_UI_BUTTON *sender) override;
+	bool OnButtonClick(STRUCT_UI_BUTTON *sender) override;
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 	bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) override;
 
 protected:
 	// Reset various pointers for this class level (to override)
-	virtual void ResetClassPointers() override;
+	void ResetClassPointers() override;
 
 	// Create screen content: buttons, etc. Called by CreateScreen(...) method.
 	void CreateScreenComponents() override;

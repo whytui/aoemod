@@ -122,9 +122,6 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x0041A6C7:
 		this->GameAndEditor_ManageKeyPress(REG_values);
 		break;
-	case 0x004348DE:
-		this->ManageOnDialogUserEvent(REG_values);
-		break;
 	case 0x00519FE3:
 		this->OnGameRightClickUpInGameCheckActionType(REG_values);
 		break;
@@ -166,8 +163,8 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x0043424D:
 		this->ManageOptionButtonClickInMenu(REG_values);
 		break;
-	case 0x0043136D:
-		this->ManageKeyPressInOptions(REG_values);
+	case 0x00460992:
+		this->DialogPanelDestructor(REG_values);
 		break;
 	case 0x51D91A:
 		this->ManageGameTimerSkips(REG_values);
@@ -501,7 +498,6 @@ void RockNRorInstance::OneShotInit() {
 void RockNRorInstance::WMCloseMessageEntryPoint(REG_BACKUP *REG_values) {
 	bool preventGameFromExiting = false;
 	// Do custom treatments NOW or never ;)
-	preventGameFromExiting = preventGameFromExiting || ROCKNROR::customPopupSystem.FixGamePopupIssuesBeforeGameClose();
 
 	if (preventGameFromExiting) {
 		REG_values->EAX_val = 0;
@@ -1600,42 +1596,6 @@ void RockNRorInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
 }
 
 
-// Call from 0x04348D9
-// At beginning of function dialog.OnUserEvent(...)
-// Note: to disable "normal" treatments from dialog.OnUserEvent(...), change return address to 0x43498C and set REG_values->EAX_val to 1 (or 0)
-void RockNRorInstance::ManageOnDialogUserEvent(REG_BACKUP *REG_values) {
-	AOE_STRUCTURES::STRUCT_UI_MESSAGE_DIALOG *ptrDialog = (AOE_STRUCTURES::STRUCT_UI_MESSAGE_DIALOG*) REG_values->ECX_val;
-	ror_api_assert(REG_values, ptrDialog != NULL);
-	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
-		// Do the code we overwrote to call ROR_API
-		REG_values->ESI_val = REG_values->ECX_val; // MOV ESI, ECX
-		REG_values->ECX_val = (long) ptrDialog->ptrParentObject; // MOV ECX,DWORD PTR DS:[ESI+40]
-		REG_values->fixesForGameEXECompatibilityAreDone = true;
-	}
-	if (!ptrDialog->IsCheckSumValid()) {
-		return; // Seems to be called for another UI object. This is unexpected (but possible?), return before doing any harm.
-	}
-	// Get (some) function arguments that have already been read into registers
-	unsigned long int ptrSender = REG_values->EAX_val;
-	long int evtStatus = REG_values->EDX_val; // 1="real" button click
-
-	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
-		return;
-	}
-
-	// Now do custom treatments
-	if ((unsigned long int *) ptrDialog == ROCKNROR::crInfo.customYesNoDialogVar) {
-		ChangeReturnAddress(REG_values, 0x43498C); // Disable ROR's treatments for this call to dialog.OnUserEvent(...)
-		REG_values->EAX_val = 1;
-		if (evtStatus == 1) { // button has actually been clicked
-			long int returnValue = ROCKNROR::crCommand.CloseCustomDialogMessage(ptrDialog, ptrSender);
-			// Manage user choice
-			// ...
-		}
-	}
-
-}
-
 
 // From 0x519FDC. May change return address to 0x51A0F4 (to replace original JNZ)
 // This is called in-game, when a right-click is performed.
@@ -2605,8 +2565,8 @@ void RockNRorInstance::DisplayOptionButtonInMenu(REG_BACKUP *REG_values) {
 		dllIdToUse = CRLANG_ID_ROCKNROR;
 	}
 	if (myEAX && showRockNRorMenu && !IsMultiplayer()) {
-		myEAX = AOE_METHODS::UI_BASE::AddButton((AOE_STRUCTURES::STRUCT_UI_EASY_PANEL*)myESI,
-			(AOE_STRUCTURES::STRUCT_UI_BUTTON**)&ROCKNROR::crInfo.customGameMenuOptionsBtnVar, 
+		myEAX = AOE_METHODS::UI_BASE::AddButton((AOE_STRUCTURES::STRUCT_UI_EASY_PANEL*)myESI, 
+			&ROCKNROR::crInfo.customGameMenuOptionsBtnVar, 
 			dllIdToUse, 0xD0, myEBP, 0xAC, 0x1E,
 			AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS, AOE_FONTS::AOE_FONT_BIG_LABEL);
 	}
@@ -2624,16 +2584,7 @@ void RockNRorInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	long int myESP = REG_values->ESP_val;
 	AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup = (AOE_STRUCTURES::STRUCT_ANY_UI *)REG_values->ESI_val;
 
-	if (ROCKNROR::crInfo.configInfo.showRockNRorMenu && !ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
-		// Before returning, make sure we always "free" the "custom options" button (from game menu).
-		ROCKNROR::customPopupSystem.FreeInGameCustomOptionsButton();
-		// If it is another button than "custom options", we can free custom options button.
-		// Otherwise, custom popup will manage this (we already added the button in objects to free).
-		if (myEAX != AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_CUSTOM_OPTIONS) {
-			ROCKNROR::crInfo.ForceClearCustomMenuObjects();
-		}
-	}
-
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	if (myEAX == AOE_CONST_INTERNAL::GAME_SCREEN_BUTTON_IDS::CST_GSBI_MENU_OPTIONS) { return; } // Corresponds to original code (click on original options menu)
 
 	ChangeReturnAddress(REG_values, 0x004342AF); // Corresponds to the JNZ we removed in original code
@@ -2643,95 +2594,42 @@ void RockNRorInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	if (!ROCKNROR::crInfo.configInfo.showRockNRorMenu) { return; } // In theory this should be useless because we shouldn't come here if it is disabled
 	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
-	// Now manage the case when the clicked button is our custom button...
-	InGameRockNRorOptionsPopup::CreateGameRockNRorOptionsPopup(previousPopup);
 	ChangeReturnAddress(REG_values, 0x004342A7);
+
+	// Now manage the case when the clicked button is our custom button...
+	if (!AOE_METHODS::UI_BASE::CloseScreenAndDestroy("Menu Dialog")) {
+		return;
+	}
+	AOE_METHODS::UI_BASE::SetCurrentPanel("Game Screen", 0);
+	ROCKNROR::UI::InGameRockNRorOptionsPopup *popup = new ROCKNROR::UI::InGameRockNRorOptionsPopup();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (settings && settings->IsCheckSumValid() && settings->ptrGameUIStruct && settings->ptrGameUIStruct->IsCheckSumValid()) {
+		popup->SetBackgroundTheme((AOE_CONST_DRS::AoeScreenTheme)settings->ptrGameUIStruct->themeSlpId);
+	}
+	popup->CreateScreen(AOE_METHODS::UI_BASE::GetCurrentScreen());
 }
 
 
-// Intercepts key press (click) events in options / custom options menu.
-// For normal options menu, just does as in original game (gives back execution to standard code)
-// Custom treatments for "our" options popup...
-// 0x0043136D
-void RockNRorInstance::ManageKeyPressInOptions(REG_BACKUP *REG_values) {
-	unsigned long int senderAddr = REG_values->EAX_val;
-	unsigned long int myEDI = REG_values->EDI_val;
-	unsigned long int myESP = REG_values->ESP_val;
-	long int myESI = REG_values->ESI_val;
-
-	//AOE_STRUCTURES::STRUCT_ANY_UI *parent = (AOE_STRUCTURES::STRUCT_ANY_UI *)myESI;
-	AOE_STRUCTURES::STRUCT_UI_IN_GAME_OPTIONS *parentAsGameOptions = (AOE_STRUCTURES::STRUCT_UI_IN_GAME_OPTIONS *)myESI;
-	if (!parentAsGameOptions->IsCheckSumValid()) {
-		return; // Unknown situation: we have unexpected data.
-	}
-	if (senderAddr == (long int)parentAsGameOptions->btnCancel) {
-		return; // sender=cancel button (from original options menu), return normally and continue (original JNZ would not jump)
-	}
-	
-	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
-		// Force set focus to parent (popup) to validate currently typed text, if any. No effect in normal options menu.
-		AOE_METHODS::UI_BASE::SetFocus(parentAsGameOptions, NULL);
+// From 0x460989. Does not change return address
+// DialogPanel.destructor() => called for all dialogPanel children, at destruction time.
+void RockNRorInstance::DialogPanelDestructor(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_UI_DIALOG_BASE *dialog = (AOE_STRUCTURES::STRUCT_UI_DIALOG_BASE *)REG_values->ESI_val;
+	ror_api_assert(REG_values, dialog && dialog->IsCheckSumValidForAChildClass());
+	unsigned long int previousChecksum = dialog->checksum; // useful to identify the dialog type
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		dialog->checksum = CHECKSUM_UI_DIALOG_BASE; // Original instruction
 	}
 
-	// Note: myESP + 0x110 is return address of original code method... So arg1 is +0x114, arg2 0x118...
-	unsigned long int arg2 = *((unsigned long int*) (myESP + 0x118)); // For textBox, 1 means ESC or click away
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) { return; }
 
-	unsigned long int UIObjHWnd = *((unsigned long int*) (senderAddr + 0xF4));
-	SendMessageA((HWND)UIObjHWnd, EM_EMPTYUNDOBUFFER, 0, 0); // avoids bad behaviours when pressing ESC (restoring an old value when re-entering the text box !)
-	//ShowWindow((HWND)UIObjHWnd, SW_SHOW);
-
-	char *typedText = "";
-	
-	InGameRockNRorOptionsPopup *crOptionsPopup = NULL;
-	bool isRockNRorOptionsPopupOpen = false;
-	if (ROCKNROR::customPopupSystem.currentCustomPopup != NULL) {
-		if (dynamic_cast<InGameRockNRorOptionsPopup*>(ROCKNROR::customPopupSystem.currentCustomPopup) != NULL) {
-			crOptionsPopup = (InGameRockNRorOptionsPopup*)ROCKNROR::customPopupSystem.currentCustomPopup;
-			isRockNRorOptionsPopupOpen = true;
-		} else {
-			traceMessageHandler.WriteMessage("Internal ERROR: bad popup object type");
-			return;
-		}
+	// Make sure to always free the custom "rocknror options" button when closing a dialog. 
+	// In theory, this can only happen when closing ingame menu.
+	// As the menu dialog destructor WILL be called, we are sure to free the button in all possible cases.
+	if (ROCKNROR::crInfo.customGameMenuOptionsBtnVar != NULL) {
+		CallAOEDeleteDialog((unsigned long int **)&ROCKNROR::crInfo.customGameMenuOptionsBtnVar);
+		assert(ROCKNROR::crInfo.customGameMenuOptionsBtnVar == NULL);
 	}
-	if (!crOptionsPopup || ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
-		ChangeReturnAddress(REG_values, 0x0043134A); // continue "original" method (compares sender to other "standard" buttons)
-		return;
-	}
-	
-	if ((arg2 == 0) && (ROCKNROR::crInfo.configInfo.showRockNRorMenu) &&
-		(senderAddr == (unsigned long int) crOptionsPopup->customOptionFreeTextVar) && (crOptionsPopup->customOptionFreeTextVar != NULL)) {
-		typedText = crOptionsPopup->customOptionFreeTextVar->pTypedText;
-		char *answer;
-		unsigned long int h = crOptionsPopup->customOptionFreeTextAnswerVar->hWnd;
-		/*bool result =*/ ROCKNROR::crCommand.ExecuteCommand(typedText, &answer);
-		SendMessageA((HWND)h, WM_SETTEXT, 0, (LPARAM)answer);
-		SendMessageA((HWND)h, EM_SETREADONLY, 1, 0);
-		//SendMessageA((HWND)h, WM_SETFOCUS, 0, 0);
-		ShowWindow((HWND)h, SW_SHOW);
-		// No need to free answer, because it points to an internal buffer[...] and is re-used each time.
-	}
-
-	// Return if the event is NOT a click on RockNRor in-game custom options OK button.
-	// In that case, continue "original" method (compares sender to other "standard" buttons)
-	if ((!crOptionsPopup->customOptionButtonVar) || (senderAddr != (unsigned long int)crOptionsPopup->customOptionButtonVar) ||
-		!ROCKNROR::crInfo.configInfo.showRockNRorMenu || (!isRockNRorOptionsPopupOpen)) {
-		ChangeReturnAddress(REG_values, 0x0043134A);
-		return;
-	}
-	// Here: ROCKNROR::crInfo.configInfo.showRockNRorMenu is ON (previous if "returned" if not)
-	// Note that we are sure that current popup is RockNRor custom game options, and the event is a click on OK.
-
-	// Here: our custom options button has been clicked.
-	if (myEDI != 1) { // EDI is 1 when we did a "full" click (press+release) on the button
-		ChangeReturnAddress(REG_values, 0x0043134A);
-		return;
-	}
-
-	// Now do our treatments: close custom options when OK has been clicked
-	crOptionsPopup->ClosePopup(false);
-
-	ChangeReturnAddress(REG_values, 0x0043141B); // Almost same as original options' cancel button
-	// But DO NOT restore settings values like volume... As we didnt initialize those values, it would set irrelevant random values
 }
 
 
@@ -2931,7 +2829,7 @@ void RockNRorInstance::OnGameInitAfterSetInitialAge(REG_BACKUP *REG_values) {
 }
 
 
-// 0x0462E60
+// 0x0462E60. An important entry point as textboxes "keypress" events can't be trapped using standard methods
 void RockNRorInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *textbox = (AOE_STRUCTURES::STRUCT_UI_TEXTBOX *)REG_values->ECX_val;
 	ror_api_assert(REG_values, textbox != NULL);
@@ -2947,8 +2845,15 @@ void RockNRorInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 	long int keyChar = *((unsigned long int*)(REG_values->ESP_val + 0x04)); // arg1
 	// (In custom popups)(why restrict?), RETURN in a textbox loses focus (so it is taken into account)
 	if (/*(ROCKNROR::crInfo.HasOpenedCustomGamePopup()) &&*/ (keyChar == VK_RETURN) && (textbox->IsCheckSumValid()) &&
-		(textbox->inputType != 7)) {
+		(textbox->inputType != 7)) { // excludes multiline textboxes
 		AOE_METHODS::UI_BASE::SetFocus(textbox->ptrParentObject, NULL);
+	}
+	// Send notification to custom screen - if any - as standard "keypress" events won't be raised.
+	ROCKNROR::UI::RnrScreenBase *rnrScreen = ROCKNROR::crInfo.rnrUIHelper->GetCurrentRnrScreen();
+	if (rnrScreen) {
+		rnrScreen->OnKeyDown(textbox, keyChar, 1, 0, 0, 0);
+		ROCKNROR::crInfo.rnrUIHelper->PurgeClosedScreens();
+		rnrScreen = NULL; // No longer use rnrScreen ! (in case it's been closed/deleted)
 	}
 }
 

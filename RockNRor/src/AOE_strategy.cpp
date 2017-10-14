@@ -885,7 +885,7 @@ bool IsStrategyCompleteForWonder(AOE_STRUCTURES::STRUCT_AI *ai) {
 				// Just try to see if it's not available in tech tree (then ignore it) = this may happen when strategy is not adapted to civ - this case is possible
 				if ((currentElem->inProgressCount == 0) && !IsResearchRelevantForStrategy(player, (short)currentElem->unitDAT_ID)) {
 					std::string s = "Strategy error: research is not in tech tree: p#";
-					s += to_string(player->playerId);
+					s += std::to_string(player->playerId);
 					s += ", research=";
 					s += currentElem->unitName;
 					traceMessageHandler.WriteMessage(s); // TO DO : remove notification

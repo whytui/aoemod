@@ -9,20 +9,16 @@
 #include <AOE_struct_units.h>
 #include "RockNRorInfo.h"
 #include "RockNRorCommand.h"
-#include "CustomPopupBase.h"
 #include "EditMapSizeXYPopup.h"
-#include "EditTerrainPopup.h"
 #include "EditorScenarioInfoPopup.h"
 #include "InGameRockNRorOptionsPopup.h"
 #include "EditorEditUnitInfoPopup.h"
 #include "InGameUnitPropertiesPopup.h"
-#include "GenNewTriggerPopup.h"
 #include "MapCopyPopup.h"
 #include "traceMessage.h"
 #include "unitShortcuts.h"
 #include "crDebugOutputPrimitives.h"
 #include "playerHandling.h"
-#include "CustomPopupSystem.h"
 
 namespace ROCKNROR {
 

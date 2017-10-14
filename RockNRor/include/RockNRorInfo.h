@@ -30,6 +30,7 @@
 #include "unitDefHandling.h"
 #include "TechTreeAnalyzer.h"
 #include "RockNRorUIHelper.h"
+#include "crTriggerSet.h"
 
 
 // Defines common objects/variables/methods for RockNRor
@@ -110,22 +111,8 @@ public:
 	short int empiresDatCivCount; // Number of civilizations in empires.dat, INCLUDING gaia
 	long int empiresDatTechDefCount; // Number of tech def in empires.dat
 
-	// UI : new system
-	ROCKNROR::UI::RnrUIHelper *rnrUIHelper;
-#pragma TODO("Remove old variables and old UI system")
-	// UI Variables : RockNRor yes/no dialog
-	unsigned long int *customYesNoDialogVar;  // RockNRor's dialog struct. NULL means dialog does not exist.
-	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGameMenuOptionsBtnVar;
-private:
-	// "OK" button of RockNRor's game popup. NULL means popup does not exist. See HasOpenedCustomGamePopup.
-	// It is CRUCIAL that this variable is always correctly set (reset).
-	// Never affect this variable manually, let the open/close methods do it.
-	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGamePopupButtonVar;
-	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGamePopupCancelBtnVar;
-	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *customGamePopupVar; // Pointer to our custom game popup object when open. Should be NULL <=> customGamePopupButtonVar==NULL
-	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> objectsToFree; // Popup's UI components list. Useful to destroy all of them automatically
-	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> garbageComponentsToFree; // Popup's UI components that are waiting to be destroyed (objects that could not be destroyed at popup closing)
-	std::vector<AOE_STRUCTURES::STRUCT_ANY_UI*> garbageComponentsToFree_older; // Popup's UI components that are waiting to be destroyed and that are no longer related the current events (now ready to be destroyed)
+	ROCKNROR::UI::RnrUIHelper *rnrUIHelper; // Main handler for custom UI
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *customGameMenuOptionsBtnVar; // References the "Rocknror options" button in game menu, if currently displayed
 
 public:
 
@@ -152,52 +139,6 @@ public:
 
 	// Returns true if a custom game popup is opened (only for popups, not dialogs !)
 	bool HasOpenedCustomGamePopup();
-	// Returns true if a custom dialog is opened (only for dialogs, not popups !)
-	bool HasOpenedCustomDialog();
-
-	// Opens a custom popup window in game screen/editor. The created popup window only contains a "OK" button.
-	// You have to add UI elements afterwards (use GetCustomGamePopup() to get parent object=popup).
-	// Return popup UI object if OK, NULL if failed
-	// Fails if another game popup (including options) is already open. Fails if dimensions are too small.
-	// Pauses the game if running (only if a popup is successfully opened)
-	// Technically, the created (AOE) popup object is based on game options popup.
-	// themeSlpId is a "bina" slpid from interfac.drs with references to colors and slpids to use for buttons, etc. Basically 50051 to 50061.
-	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *OpenCustomGamePopup(long int hSize, long int vSize, bool hasCancelBtn = false,
-		long int themeSlpId = -1);
-
-	// Use it to list all UI components (labels, buttons...) that are created(added) to popup content, so they are automatically freed when popup is closed.
-	// The method is protected against duplicates, you can safely call it more than once.
-	// Returns true if obj has actually been added to list.
-	bool AddObjectInPopupContentList(AOE_STRUCTURES::STRUCT_ANY_UI *obj);
-
-private:
-	// Free (destroys using AOE destructor) all popup's components
-	// The reason we don't free those immediatly is because they might be used in current event (button onclick, etc).
-	// Warning: this must NOT be called at any moment, make sure none of the concerned object is currently being used (specially for onclick events...)
-	void FreePopupAddedObjects();
-	// Free remaining UI components that could not be freed yet
-	void FreeGarbagePopupComponents();
-
-public:
-	// Use this to force values for "current custom popup". PLEASE AVOID using it !
-	// Returns true if successful. Fails if a popup is already open.
-	bool ForceSetCurrentGamePopup(AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *customGamePopup, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK, AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel);
-	// To be called when game menu is closed to free custom button
-	void ForceClearCustomMenuObjects();
-
-	// Closes currently opened custom popup window in game screen.
-	void CloseCustomGamePopup();
-
-	// Return true if provided memory address is our custom game popup OK button (excluding custom options)
-	bool IsCustomGamePopupOKButton(unsigned long int UIObjectAddress);
-	// Return true if provided memory address is our custom game popup Cancel button (excluding custom options)
-	bool IsCustomGamePopupCancelButton(unsigned long int UIObjectAddress);
-
-	// Returns custom popup window in game screen (excluding RockNRor options popup).
-	// Returns NULL if this popup is not open.
-	// This information is useful to add UI components to the popup.
-	// When adding components, it is not necessary to store component pointers unless we need them to catch events (buttonClick) or get values (input objects)
-	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *GetCustomGamePopup();
 
 	// Get main (first) selected unit, or NULL if none is selected.
 	// Works in-game and in editor.

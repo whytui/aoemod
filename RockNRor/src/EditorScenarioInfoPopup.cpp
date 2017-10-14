@@ -115,67 +115,56 @@ bool EditorScenarioInfoPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 		if (scInfo->strategyFileSize[this->playerId - 1] <= 0) { return false; }
 		this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_AI;
 
-		/*if ((this->playerId < 1) || (this->playerId > 8)) { return; }
+		if ((this->playerId < 1) || (this->playerId > 8)) { return false; }
 		if (settings->ptrGlobalStruct && settings->ptrGlobalStruct->scenarioInformation &&
 			(settings->ptrGlobalStruct->scenarioInformation->strategyFileSize[this->playerId - 1] > 0)) {
-			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup();
-			nextPopup->OpenPopup(700, 580, false);
-			nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_GET_STRATEGY, "Get Strategy (read only)"), settings->ptrGlobalStruct->scenarioInformation->strategyFileContent[this->playerId - 1],
-				settings->ptrGlobalStruct->scenarioInformation->strategyFileSize[this->playerId - 1], NULL, false);
-			this->nextPopup = nextPopup;
-		}*/
+			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup(localizationHandler.GetTranslation(CRLANG_ID_GET_STRATEGY, "Get Strategy (read only)"),
+				settings->ptrGlobalStruct->scenarioInformation->strategyFileContent[this->playerId - 1],
+				settings->ptrGlobalStruct->scenarioInformation->strategyFileSize[this->playerId - 1], NULL, false, false);
+			nextPopup->SetFullscreen();
+			nextPopup->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::GreyDarkGreenTheme);
+			this->OpenOtherScreenAndCloseThisOne(nextPopup, false);
+			return true;
+		}
 
 		doCloseCustomPopup = true;
 	}
 	if (sender == this->btnPER) {
 		if (scInfo->personalityFileSize[this->playerId - 1] <= 0) { return false; }
 
-		/*if ((this->playerId < 1) || (this->playerId > 8)) { return; }
+		if ((this->playerId < 1) || (this->playerId > 8)) { return false; }
 		if (settings->ptrGlobalStruct && settings->ptrGlobalStruct->scenarioInformation &&
 			(settings->ptrGlobalStruct->scenarioInformation->personalityFileSize[this->playerId - 1] > 0)) {
-			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup();
-			nextPopup->OpenPopup(700, 580, false);
-			nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_GET_PERSONALITY, "Get Personality (read only)"), settings->ptrGlobalStruct->scenarioInformation->personalityFileContent[this->playerId - 1],
-				settings->ptrGlobalStruct->scenarioInformation->personalityFileSize[this->playerId - 1], NULL, false);
-			this->nextPopup = nextPopup;
-		}*/
+			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup(localizationHandler.GetTranslation(CRLANG_ID_GET_PERSONALITY, "Get Personality (read only)"),
+				settings->ptrGlobalStruct->scenarioInformation->personalityFileContent[this->playerId - 1],
+				settings->ptrGlobalStruct->scenarioInformation->personalityFileSize[this->playerId - 1], NULL, false, false);
+			nextPopup->SetFullscreen();
+			nextPopup->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::GreyDarkGreenTheme);
+			this->OpenOtherScreenAndCloseThisOne(nextPopup, false);
+			return true;
+		}
 
 		this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_PER;
 		doCloseCustomPopup = true;
 	}
 	if (sender == this->btnTriggers) {
-
-		/*
-		if (!this->nextPopup) {
-			STRUCT_ANY_UI *currentScreen = AOE_METHODS::GetCurrentScreen();
-			if (currentScreen) {
-				GenNewTriggerPopup *nextPopup = new GenNewTriggerPopup();
-				nextPopup->OpenPopup(currentScreen->sizeX - 2, currentScreen->sizeY - 2, false, AOE_CONST_DRS::LightOrangeTheme);
-				this->nextPopup = nextPopup;
-			}
-		}*/
-
-		this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_TRIGGER;
-		doCloseCustomPopup = true;
+		GenNewTriggerPopup *trgPopup = new GenNewTriggerPopup();
+		this->OpenOtherScreenAndCloseThisOne(trgPopup, false);
+		return true;
 	}
 	if (sender == this->btnTerrainEdit) {
-		/*EditTerrainPopup *nextPopup = new EditTerrainPopup();
-		nextPopup->OpenPopup(500, 300, true);
-		this->nextPopup = nextPopup;*/
-
-		this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_TERRAIN_EDIT;
-		doCloseCustomPopup = true;
+		ROCKNROR::UI::EditTerrainPopup *terrainPopup = new ROCKNROR::UI::EditTerrainPopup();
+		terrainPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		this->OpenOtherScreenAndCloseThisOne(terrainPopup, false);
+		return true;
 	}
 	if (sender == this->btnVictoryCondition) {
-		/*InputBox_int<long int> *nextPopup = new InputBox_int<long int>();
-		nextPopup->OpenPopup(450, 200, true);
-		nextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_GOLD_VICT_CONDITION, "Gold victory condition"),
+		InputBox_int<long int> *inputPopup = new InputBox_int<long int>(localizationHandler.GetTranslation(CRLANG_ID_GOLD_VICT_CONDITION, "Gold victory condition"),
 			localizationHandler.GetTranslation(CRLANG_ID_GOLD_VICT_CONDITION_DETAILS, "If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select \"custom\" in general victory conditions tab."),
 			settings->ptrGlobalStruct->scenarioInformation->generalVictory_goldAmount, 0, 999999, &settings->ptrGlobalStruct->scenarioInformation->generalVictory_goldAmount, false);
-		this->nextPopup = nextPopup;*/
-
-		this->popupToOpen = SC_INFO_POPUP_TO_OPEN::PTO_VICTORY_CONDITION;
-		doCloseCustomPopup = true;
+		inputPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		this->OpenOtherScreenAndCloseThisOne(inputPopup, false);
+		return true;
 	}
 
 	if (sender == this->chkAllowUnitOverlapping) {

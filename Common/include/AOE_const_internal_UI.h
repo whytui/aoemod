@@ -135,9 +135,7 @@ namespace AOE_CONST_INTERNAL
 		CST_GSBI_BUTTONBAR_HEAL = 0x1C,
 		CST_GSBI_BUTTONBAR_CONVERT = 0x1D,
 		// Custom button IDs
-		CST_GSBI_CUSTOM_OPTIONS = 0x20,
-		CST_GSBI_CUSTOM_EXITDLG_YES = 0x21,
-		CST_GSBI_CUSTOM_EXITDLG_NO = 0x22
+		CST_GSBI_CUSTOM_OPTIONS = 0x20
 	};
 
 	// Button IDs in dialog messages. Also used for UI components events

@@ -11,6 +11,7 @@
 #include "StrategyUpdater.h"
 #include "unitTargeting.h"
 #include "playerTargeting.h"
+#include "AOEPrimitives_lists.h"
 
 using namespace AOE_STRUCTURES;
 

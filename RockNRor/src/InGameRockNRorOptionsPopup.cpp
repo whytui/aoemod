@@ -1,40 +1,16 @@
 #include "../include/InGameRockNRorOptionsPopup.h"
 
 
-
-// Create in-game RockNRor options screen. Returns false if failed and if return address must be changed.
-bool InGameRockNRorOptionsPopup::CreateGameRockNRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
-	assert(previousPopup != NULL);
-	if (!previousPopup) { return false; }
-
-	assert(!ROCKNROR::crInfo.HasOpenedCustomGamePopup()); // Custom popup is not already open
-	if (ROCKNROR::crInfo.HasOpenedCustomGamePopup()) { return true; } // do nothing, but not treated as alloc error
-
-	InGameRockNRorOptionsPopup *popupUIObject = ROCKNROR::customPopupSystem.CreateCustomPopupObject<InGameRockNRorOptionsPopup>();
-	if (popupUIObject) {
-		popupUIObject->CloseMenuAndOpenPopup(previousPopup);
-	}
-
-	if (!popupUIObject) {
-		return false; // need to change return address
-	}
-	// Dirty workaround because custom options popup is not created using standard procedures :(
-	ROCKNROR::crInfo.ForceSetCurrentGamePopup(popupUIObject->GetAOEPopupObject(), popupUIObject->customOptionButtonVar, NULL);
-
-	return true;
-}
+namespace ROCKNROR {
+namespace UI {
+;
 
 
-
-
-InGameRockNRorOptionsPopup::InGameRockNRorOptionsPopup() {
-	this->_ResetPointers();
-}
-
-
-void InGameRockNRorOptionsPopup::_ResetPointers() {
-	__super::_ResetPointers();
-	this->openTechTreeInfo = false;
+// Reset various pointers for this class level (to override)
+void InGameRockNRorOptionsPopup::ResetClassPointers() {
+	__super::ResetClassPointers();
+	this->btnOK = NULL;
+	this->btnCancel = NULL;
 	this->autoRebuildFarmConfig = NULL;
 	this->btnTechTreeInfo = NULL;
 	this->btnMapCopy = NULL;
@@ -57,82 +33,129 @@ void InGameRockNRorOptionsPopup::_ResetPointers() {
 	this->lblAutoRebuildFarmsMaxFarms = NULL;
 }
 
-void InGameRockNRorOptionsPopup::_AddPopupContent() {
-	if (this->IsClosed() || (this->popup == NULL)) { return; }
+
+// Create screen content: buttons, etc. Called by CreateScreen(...) method.
+void InGameRockNRorOptionsPopup::CreateScreenComponents() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) { return; }
 
-	this->autoRebuildFarmConfig = ROCKNROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch);
+	this->autoRebuildFarmConfig = ::ROCKNROR::crInfo.configInfo.GetAutoRebuildFarmConfig(settings->rgeGameOptions.isScenario || settings->isCampaign, settings->isDeathMatch);
 	if (!this->autoRebuildFarmConfig) { return; } // ERROR !
 	char customOptionHumanPenaltyTextBuffer[12];
 	char customOptionGameSpeedFactorTextBuffer[12];
 	char maxFarmsTextBuffer[12];
 	char maxFoodTextBuffer[12];
 	char minWoodTextBuffer[12];
-	sprintf_s(customOptionHumanPenaltyTextBuffer, "%ld", ROCKNROR::crInfo.configInfo.dislike_humanPlayer);
-	sprintf_s(customOptionGameSpeedFactorTextBuffer, "%d", (int)(ROCKNROR::crInfo.configInfo.improvedGameSpeedFactor * (float)100));
+	sprintf_s(customOptionHumanPenaltyTextBuffer, "%ld", ::ROCKNROR::crInfo.configInfo.dislike_humanPlayer);
+	sprintf_s(customOptionGameSpeedFactorTextBuffer, "%d", (int)(::ROCKNROR::crInfo.configInfo.improvedGameSpeedFactor * (float)100));
 	sprintf_s(maxFarmsTextBuffer, "%d", this->autoRebuildFarmConfig->autoRebuildFarms_maxFarms);
 	sprintf_s(maxFoodTextBuffer, "%d", this->autoRebuildFarmConfig->autoRebuildFarms_maxFood);
 	sprintf_s(minWoodTextBuffer, "%d", this->autoRebuildFarmConfig->autoRebuildFarms_minWood);
 
 
-	//this->customGamePopupButtonVar
-	this->AddLabel(this->popup, &this->customOptionHeaderLabelVar, 
+	this->AddLabel(&this->customOptionHeaderLabelVar,
 		localizationHandler.GetTranslation(CRLANG_ID_ROCKNROR_OPTIONS_POPUP_TITLE, "RockNRor Options"), 0xD0, 0x0A, 0x100, 0x1E, AOE_FONTS::AOE_FONT_BIG_LABEL); // Title
-	
+
 	// human dislike penalty
-	this->AddTextBox(this->popup, &this->customOptionHumanPenaltyTextVar, customOptionHumanPenaltyTextBuffer, 2, 0x120, 0x34, 0x30, 0x16, false, false);
-	this->AddLabel(this->popup, &this->customOptionHumanPenaltyLabelVar, localizationHandler.GetTranslation(CRLANG_ID_DISLIKE_PENALTY, txtHumanPenalty), 0x10, 0x30, 0x100, 0x1E);
+	this->AddTextBox(&this->customOptionHumanPenaltyTextVar, customOptionHumanPenaltyTextBuffer, 2, 0x120, 0x34, 0x30, 0x16, false, false);
+	this->AddLabel(&this->customOptionHumanPenaltyLabelVar, localizationHandler.GetTranslation(CRLANG_ID_DISLIKE_PENALTY, txtHumanPenalty), 0x10, 0x30, 0x100, 0x1E);
 	// Game speeds config
-	this->AddTextBox(this->popup, &this->customOptionGameSpeedTextVar, customOptionGameSpeedFactorTextBuffer, 4, 0x120, 0x4C, 0x30, 0x16, false, false);
-	this->AddLabel(this->popup, &this->customOptionGameSpeedLabelVar, localizationHandler.GetTranslation(CRLANG_ID_GAME_SPEED_CHANGE_FACTOR, txtGameSpeedFactor), 0x10, 0x48, 0x100, 0x1E);
+	this->AddTextBox(&this->customOptionGameSpeedTextVar, customOptionGameSpeedFactorTextBuffer, 4, 0x120, 0x4C, 0x30, 0x16, false, false);
+	this->AddLabel(&this->customOptionGameSpeedLabelVar, localizationHandler.GetTranslation(CRLANG_ID_GAME_SPEED_CHANGE_FACTOR, txtGameSpeedFactor), 0x10, 0x48, 0x100, 0x1E);
 	// Farms autorebuild
-	this->AddLabel(this->popup, &this->lblAutoRebuildFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS, txtAutoRebuildFarms), 0x10, 0x64, 0x100, 0x1E);
-	this->AddCheckBox(this->popup, &this->chkAutoRebuildFarms, 0x120, 0x64, 0x1E, 0x1E);
+	this->AddLabel(&this->lblAutoRebuildFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS, txtAutoRebuildFarms), 0x10, 0x64, 0x100, 0x1E);
+	this->AddCheckBox(&this->chkAutoRebuildFarms, 0x120, 0x64, 0x1E, 0x1E);
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkAutoRebuildFarms, autoRebuildFarmConfig->enableAutoRebuildFarms);
-	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_FOOD, txtAutoRebuildFarmsMaxFood), 0x10, 0x80, 0x100, 0x1E);
-	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMinWood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MIN_WOOD, txtAutoRebuildFarmsMinWood), 0x10, 0x98, 0x100, 0x1E);
-	this->AddLabel(this->popup, &this->lblAutoRebuildFarmsMaxFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_NUMBER, txtAutoRebuildFarmsMaxNumber), 0x10, 0xB0, 0x100, 0x1E);
-	this->AddTextBox(this->popup, &this->edtAutoRebuildFarmsMaxFood, maxFoodTextBuffer, 5, 0x120, 0x84, 0x34, 0x16, false, false);
-	this->AddTextBox(this->popup, &this->edtAutoRebuildFarmsMinWood, minWoodTextBuffer, 5, 0x120, 0x9C, 0x34, 0x16, false, false);
-	this->AddTextBox(this->popup, &this->edtAutoRebuildFarmsMaxFarms, maxFarmsTextBuffer, 2, 0x120, 0xB4, 0x34, 0x16, false, false);
-	
+	this->AddLabel(&this->lblAutoRebuildFarmsMaxFood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_FOOD, txtAutoRebuildFarmsMaxFood), 0x10, 0x80, 0x100, 0x1E);
+	this->AddLabel(&this->lblAutoRebuildFarmsMinWood, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MIN_WOOD, txtAutoRebuildFarmsMinWood), 0x10, 0x98, 0x100, 0x1E);
+	this->AddLabel(&this->lblAutoRebuildFarmsMaxFarms, localizationHandler.GetTranslation(CRLANG_ID_AUTO_REBUILD_FARMS_MAX_NUMBER, txtAutoRebuildFarmsMaxNumber), 0x10, 0xB0, 0x100, 0x1E);
+	this->AddTextBox(&this->edtAutoRebuildFarmsMaxFood, maxFoodTextBuffer, 5, 0x120, 0x84, 0x34, 0x16, false, false);
+	this->AddTextBox(&this->edtAutoRebuildFarmsMinWood, minWoodTextBuffer, 5, 0x120, 0x9C, 0x34, 0x16, false, false);
+	this->AddTextBox(&this->edtAutoRebuildFarmsMaxFarms, maxFarmsTextBuffer, 2, 0x120, 0xB4, 0x34, 0x16, false, false);
+
 	// Free text zone
-	this->AddLabel(this->popup, &this->customOptionFreeTextLabelVar, localizationHandler.GetTranslation(CRLANG_ID_OTHER_COMMANDS_LABEL, "Other commands (enter to validate)"), 0x10, 0x120, 0x100, 0x1E);
-	this->AddTextBox(this->popup, &this->customOptionFreeTextVar, "", 100, 0x100, 0x120, 0xB0, 0x16, false, false);
-	this->AddTextBox(this->popup, &this->customOptionFreeTextAnswerVar, "", 100, 0x1C0, 0x120, 0x80, 0x16, true, false);
+	this->AddLabel(&this->customOptionFreeTextLabelVar, localizationHandler.GetTranslation(CRLANG_ID_OTHER_COMMANDS_LABEL, "Other commands (enter to validate)"), 0x10, 0x120, 0x100, 0x1E);
+	this->AddTextBox(&this->customOptionFreeTextVar, "", 100, 0x100, 0x120, 0xB0, 0x16, false, false);
+	this->AddTextBox(&this->customOptionFreeTextAnswerVar, "", 100, 0x1C0, 0x120, 0x80, 0x16, true, false);
+
+	this->AddButton(&this->btnTechTreeInfo, localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE, "Tech tree info"), 0x170, 0x34, 0xAC, 0x1E);
+	this->AddButton(&this->btnMapCopy, localizationHandler.GetTranslation(-1, "Map copy"), 0x170, 0x50, 0xAC, 0x1E);
 	
-	this->AddButton(this->popup, &this->btnTechTreeInfo, localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE, "Tech tree info"), 0x170, 0x34, 0xAC, 0x1E);
-	this->AddButton(this->popup, &this->btnMapCopy, localizationHandler.GetTranslation(-1, "Map copy"), 0x170, 0x50, 0xAC, 0x1E);
+	// OK Cancel buttons
+	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(172),
+		this->GetScreenSizeY() - 30, 80, 22, 0);
+	this->AddButton(&this->btnCancel, localizationHandler.GetTranslation(LANG_ID_CANCEL, "Cancel"), this->GetLeftCenteredPositionX(172) + 86,
+		this->GetScreenSizeY() - 30, 80, 22, 0);
 }
 
+
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-bool InGameRockNRorOptionsPopup::OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) {
+bool InGameRockNRorOptionsPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnTechTreeInfo) {
-		this->openTechTreeInfo = true;
-		this->ClosePopup(false);
+		AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
+		assert(humanPlayer && humanPlayer->IsCheckSumValid());
+
+		SimpleEditTextPopup *tmpNextPopup = new SimpleEditTextPopup(localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE_CAN_BE_RESEARCHED_TITLE, "Technology tree that can still be researched"), 
+			GetRemainingTechTreeText(humanPlayer).c_str(), 10000, NULL, false, false);
+		tmpNextPopup->SetFullscreen();
+		tmpNextPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		this->OpenOtherScreenAndCloseThisOne(tmpNextPopup, false);
 		return true;
 	}
 	if (sender == this->btnMapCopy) {
-		this->openMapCopyPopup = true;
-		this->ClosePopup(false);
+		MapCopyPopup *tmpNextPopup = new MapCopyPopup();
+		tmpNextPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		this->OpenOtherScreenAndCloseThisOne(tmpNextPopup, false);
+		return true;
+	}
+	if (sender == this->btnOK) {
+		this->Validate();
+		this->CloseScreen(false);
+		return true;
+	}
+	if (sender == this->btnCancel) {
+		this->CloseScreen(false);
 		return true;
 	}
 	return false;
 }
 
-void InGameRockNRorOptionsPopup::OnBeforeClose(bool isCancel) {
+
+// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+bool InGameRockNRorOptionsPopup::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
+	if (keyCode == VK_ESCAPE) {
+		this->CloseScreen(false);
+		return true;
+	}
+	if (uiObj == this->customOptionFreeTextVar) {
+		if (keyCode == VK_RETURN) {
+			char *typedText = this->customOptionFreeTextVar->pTypedText;
+			char *answer;
+			unsigned long int h = this->customOptionFreeTextAnswerVar->hWnd;
+			/*bool result =*/ ROCKNROR::crCommand.ExecuteCommand(typedText, &answer);
+			SendMessageA((HWND)h, WM_SETTEXT, 0, (LPARAM)answer);
+			SendMessageA((HWND)h, EM_SETREADONLY, 1, 0);
+			//SendMessageA((HWND)h, WM_SETFOCUS, 0, 0);
+			ShowWindow((HWND)h, SW_SHOW);
+			// No need to free answer, because it points to an internal buffer[...] and is re-used each time.
+		}
+	}
+	return false;
+}
+
+
+void InGameRockNRorOptionsPopup::Validate() {
 	char *typedText;
 	if (this->customOptionHumanPenaltyTextVar) {
 		typedText = this->customOptionHumanPenaltyTextVar->pTypedText;
-		ROCKNROR::crInfo.configInfo.dislike_humanPlayer = atoi(typedText); // does not raise. Returns 0 if invalid.
+		::ROCKNROR::crInfo.configInfo.dislike_humanPlayer = atoi(typedText); // does not raise. Returns 0 if invalid.
 	}
 
 	if (this->customOptionGameSpeedTextVar) {
 		typedText = this->customOptionGameSpeedTextVar->pTypedText;
 		float f = (float)(atof(typedText) / 100); // does not raise. Returns 0 if invalid.
 		if (f > 1) {
-			ROCKNROR::crInfo.configInfo.improvedGameSpeedFactor = f;
+			::ROCKNROR::crInfo.configInfo.improvedGameSpeedFactor = f;
 		}
 	}
 
@@ -161,40 +184,5 @@ void InGameRockNRorOptionsPopup::OnBeforeClose(bool isCancel) {
 }
 
 
-void InGameRockNRorOptionsPopup::OnAfterClose(bool isCancel) {
-	if (this->openTechTreeInfo) {
-		AOE_STRUCTURES::STRUCT_PLAYER *humanPlayer = GetControlledPlayerStruct_Settings();
-		assert(humanPlayer && humanPlayer->IsCheckSumValid());
-
-		SimpleEditTextPopup *tmpNextPopup = new SimpleEditTextPopup();
-		tmpNextPopup->OpenPopup(700, 580, false);
-		tmpNextPopup->AddPopupContent(localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE_CAN_BE_RESEARCHED_TITLE, "Technology tree that can still be researched"),
-			GetRemainingTechTreeText(humanPlayer).c_str(), 10000, NULL, false);
-		this->nextPopup = tmpNextPopup;
-	}
-	if (this->openMapCopyPopup) {
-		MapCopyPopup *tmpNextPopup = new MapCopyPopup();
-		tmpNextPopup->OpenPopup(600, 450, false);
-		this->nextPopup = tmpNextPopup;
-	}
 }
-
-
-// Specific method to use instead of OpenPopup (special treatments for ingame RockNRor menu).
-// previousPopup should be game menu popup object.
-AOE_STRUCTURES::STRUCT_ANY_UI *InGameRockNRorOptionsPopup::CloseMenuAndOpenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup) {
-	assert(previousPopup != NULL);
-	if (!previousPopup) { return NULL; }
-	AOE_STRUCTURES::STRUCT_ANY_UI *MainGameUIObj = previousPopup->ptrParentObject;
-	this->popup = AOE_METHODS::AOE_CreateCustomOptionsPopupFromMenu(MainGameUIObj);
-	if ((this->popup != NULL) && (!this->IsClosed())) {
-		// WARNING: here we are adding manually the "standard"/"common" OK button.
-		// Normally, this button is created by our popups API (and freed automatically).
-		// So we MUST NOT call AddObjectInContentList on this->customOptionButtonVar ! Or the game will crash (trying to free it twice)
-		AOE_METHODS::UI_BASE::AddButton(this->popup, &this->customOptionButtonVar, LANG_ID_OK, 0xD8, 0x160, 0xAC, 0x1E); // OK button
-
-		this->_AddPopupContent();
-	}
-	return this->popup;
 }
-

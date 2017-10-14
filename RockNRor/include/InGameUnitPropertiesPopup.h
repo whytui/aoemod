@@ -21,7 +21,7 @@ public:
 	InGameUnitPropertiesPopup(long int unitId) : RnrScreenBase("ingame unit properties") {
 		this->SetWindowed(100, 100, 600, 500); // will always work (default values)
 		this->SetCenteredForSize(600, 500); // May fail if game settings can't be retrieved
-		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::InGameOptionsTheme);
+		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::FullBlackTheme);
 		this->unitId = unitId;
 	}
 

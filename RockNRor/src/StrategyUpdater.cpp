@@ -636,7 +636,6 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 
 				//sprintf_s(buffer, "An error occurred. RockNRor could prevent game crash. See error log file on c:\\ (or C:\\Users\\...\\AppData\\Local\\VirtualStore) and report to developer.");
 				traceMessageHandler.WriteMessage("An error occurred. RockNRor could prevent game crash. Please report to developer.");
-				//this->OpenCustomDialogMessage(buffer, 450, 250);
 			}
 		}
 	}

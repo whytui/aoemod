@@ -87,9 +87,6 @@
     <ClInclude Include="include\customFuncRules.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="include\CustomPopupBase.h">
-      <Filter>Fichiers d%27en-tête\customUI</Filter>
-    </ClInclude>
     <ClInclude Include="include\InputBox.h">
       <Filter>Fichiers d%27en-tête\customUI</Filter>
     </ClInclude>
@@ -282,9 +279,6 @@
     <ClInclude Include="include\AOEPrimitives_global.h">
       <Filter>Fichiers d%27en-tête\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="include\CustomPopupSystem.h">
-      <Filter>Fichiers d%27en-tête\Technical</Filter>
-    </ClInclude>
     <ClInclude Include="include\InGameRockNRorOptionsPopup.h">
       <Filter>Fichiers d%27en-tête\customUI</Filter>
     </ClInclude>
@@ -382,9 +376,6 @@
     </ClCompile>
     <ClCompile Include="src\AOE_strategy.cpp">
       <Filter>Fichiers sources\Strategy</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CustomPopupBase.cpp">
-      <Filter>Fichiers sources\customUI</Filter>
     </ClCompile>
     <ClCompile Include="src\InputBox.cpp">
       <Filter>Fichiers sources\customUI</Filter>
@@ -535,9 +526,6 @@
     </ClCompile>
     <ClCompile Include="src\AOEPrimitives_global.cpp">
       <Filter>Fichiers sources\Primitives</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CustomPopupSystem.cpp">
-      <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
     <ClCompile Include="src\InGameRockNRorOptionsPopup.cpp">
       <Filter>Fichiers sources\customUI</Filter>

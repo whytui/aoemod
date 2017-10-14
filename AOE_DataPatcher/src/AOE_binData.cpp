@@ -95,11 +95,11 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_windowedMode_10c 3
 #define COUNT_VEG_windowedMode_10c 21
 #define COUNT_selectedUnits_10c 87
-#define COUNT_obsoletes_10c 26
+#define COUNT_obsoletes_10c 28
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 137
+#define COUNT_ROR_API_10c 136
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 
@@ -4429,26 +4429,6 @@ void AOE_binData::InitROR_API_10c() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
-		ManageCustomOptionsOKOnClick,
-		"Code to manage RockNRor menu button click.",
-		0x0031365,
-		(0xC2, 0x10, 0x00, 0x3B, 0x86, 0x48, 0x05, 0x00, 0x00, 0x75, 0xDA, 0x83, 0xFF, 0x01), // default=no
-		(0xC2, 0x10, 0x00, 0xE8, 0x07, 0x82, 0xFE, 0xFF, 0x90, 0x90, 0x90, 0x83, 0xFF, 0x01),
-		FM_OFF,
-		FM_ON
-		);
-
-	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
-		ManageOnDialogUserEvent,
-		"Code to manage keyboard/mouse events in dialog messages.",
-		0x00348D8,
-		(0x56, 0x8B, 0xF1, 0x8B, 0x4E, 0x40, 0x85, 0xC9), // default=no
-		(0x56, 0xE8, 0x96, 0x4C, 0xFE, 0xFF, 0x85, 0xC9),
-		FM_OFF,
-		FM_ON
-		);
-
-	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
 		ManageAllOnButtonClickEvents,
 		"Entry point to manage OnClick events in entire game for (bit)buttons, checkboxes, DropDown.Open.",
 		0x0060512,
@@ -5506,6 +5486,17 @@ void AOE_binData::InitROR_API_10c() {
 		FM_ON
 		);
 
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		DialogPanelDestructor,
+		"Destructor for Dialog panels. Used for technical tasks.",
+		0x60989,
+		(0x89, 0x74, 0x24, 0x04, 0xC7, 0x06, 0x1C, 0x4F, 0x54, 0x00, 0xB9, 0xE8, 0x30, 0x58, 0x00),
+		(0x89, 0x74, 0x24, 0x04, 0xE8, 0xE2, 0x8B, 0xFB, 0xFF, 0x90, 0xB9, 0xE8, 0x30, 0x58, 0x00),
+		FM_OFF,
+		FM_ON
+		);
+
+
 
 	//optional
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
@@ -6055,6 +6046,26 @@ void AOE_binData::InitObsoletes() {
 		0x00604C3,
 		(0x57, 0x8B, 0x86, 0x3C, 0x01, 0x00, 0x00, 0x83, 0xF8, 0x03), // default=no
 		(0x57, 0xE8, 0xAB, 0x90, 0xFB, 0xFF, 0x90, 0x83, 0xF8, 0x03),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->obsoletes_10c.GetBinSeqDefinition(i),
+		OBSOLETE_ManageCustomOptionsOKOnClick,
+		"Obsolete code to manage RockNRor menu button click.",
+		0x0031365,
+		(0xC2, 0x10, 0x00, 0x3B, 0x86, 0x48, 0x05, 0x00, 0x00, 0x75, 0xDA, 0x83, 0xFF, 0x01), // default=no
+		(0xC2, 0x10, 0x00, 0xE8, 0x07, 0x82, 0xFE, 0xFF, 0x90, 0x90, 0x90, 0x83, 0xFF, 0x01),
+		FM_OFF,
+		FM_ON
+		);
+
+	NEXT_INITSEQ_2_NOVAR(this->obsoletes_10c.GetBinSeqDefinition(i),
+		ManageOnDialogUserEvent,
+		"Code to manage keyboard/mouse events in dialog messages.",
+		0x00348D8,
+		(0x56, 0x8B, 0xF1, 0x8B, 0x4E, 0x40, 0x85, 0xC9), // default=no
+		(0x56, 0xE8, 0x96, 0x4C, 0xFE, 0xFF, 0x85, 0xC9),
 		FM_OFF,
 		FM_ON
 		);

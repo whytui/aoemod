@@ -453,7 +453,6 @@ bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
 			if (player && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
 				std::string s = STRATEGY::ExportStrategyToText(&player->ptrAIStruct->structBuildAI, useStandardAIFormat);
 				traceMessageHandler.WriteMessage(s);
-				//this->OpenCustomDialogMessage(s.c_str(), 700, 550);
 				sprintf_s(outputBuffer, "Close this window to see strategy.");
 			}
 			return true;
@@ -1646,7 +1645,7 @@ void RockNRorCommand::OnGameTimer() {
 
 	// If there are pending messages, show them
 	if (traceMessageHandler.HasUnreadMessages() && ROCKNROR::crInfo.configInfo.showRockNRorNotifications) {
-		bool isSuccess = SimpleEditTextPopup::OpenTraceMessagePopup();
+		bool isSuccess = ROCKNROR::UI::SimpleEditTextPopup::OpenTraceMessagePopup();
 		// If popup couldn't be opened, maybe there is already another one... The message popup will show up when current one is closed (mark as unread).
 		traceMessageHandler.MarkAsRead(isSuccess);
 	}
@@ -3716,52 +3715,6 @@ void RockNRorCommand::SetNextInGameDebugInfoLevel() {
 #endif
 }
 
-
-// Opens a custom dialog message (based on CloseProgramDialog) and pauses game execution (if running)
-// Return true if OK, false if failed - Fails if another custom dialog (or quit game dialog) is already open
-// Pauses the game if running (only if a dialog is successfully opened)
-bool RockNRorCommand::OpenCustomDialogMessage(const char *dialogText, long int hSize, long int vSize) {
-	if (ROCKNROR::crInfo.customYesNoDialogVar) { return false; } // Already an opened custom dialog
-
-	AOE_STRUCTURES::STRUCT_ANY_UI *customDialogPtr = AOE_METHODS::GetScreenFromName(AOE_CONST_INTERNAL::customDialogScreenName);
-	if (customDialogPtr != NULL) { return false; } // A CloseProgramDialog seems to be already open
-
-	AOE_METHODS::SetGamePause(true);
-	ROCKNROR::crInfo.customYesNoDialogVar = (unsigned long int*) AOE_METHODS::AOE_CreateDialogPopup(dialogText, hSize, vSize);
-
-	return true;
-}
-
-
-// Closes currently opened custom dialog message.
-// Returns -1 if an error occurred, including "no custom dialog is opened".
-// Other results are AOE_CONST_INTERNAL::DIALOG_BUTTON_IDS => Yes/No/Cancel
-long int RockNRorCommand::CloseCustomDialogMessage(AOE_STRUCTURES::STRUCT_UI_MESSAGE_DIALOG *ptrDialog, unsigned long int ptrSender) {
-	if (ROCKNROR::crInfo.customYesNoDialogVar == NULL) { return -1; } // No opened custom dialog
-	long int returnValue = -1;
-	if (!ptrDialog) { return returnValue; }
-	if (ptrSender == (unsigned long) ptrDialog->btnYes) {
-		returnValue = AOE_CONST_INTERNAL::DIALOG_BUTTON_IDS::CST_DBI_YES;
-	}
-	if (ptrSender == (unsigned long) ptrDialog->btnNo) {
-		returnValue = AOE_CONST_INTERNAL::DIALOG_BUTTON_IDS::CST_DBI_NO;
-	}
-	if (ptrSender == (unsigned long) ptrDialog->btnCancel) {
-		returnValue = AOE_CONST_INTERNAL::DIALOG_BUTTON_IDS::CST_DBI_CANCEL;
-	}
-	// Close the dialog
-	// TO DO: use CloseScreenFullTreatment(..) instead
-	AOE_METHODS::SetCurrentPanel("Game Screen", 0);
-	assert(strcmp(ptrDialog->screenName, AOE_CONST_INTERNAL::customDialogScreenName) == 0);
-	AOE_METHODS::CloseScreenAndDestroy(AOE_CONST_INTERNAL::customDialogScreenName);
-	ROCKNROR::crInfo.customYesNoDialogVar = NULL;
-
-	long int *Ihavenoideawhatthisis = (long int *)0x7C0338; // cf 0x481264
-	Ihavenoideawhatthisis = 0;
-	AOE_METHODS::SetGamePause(false);
-
-	return returnValue;
-}
 
 
 /* This is called on GameSettings.NotifyEvent game method call (0x501980).

@@ -11,6 +11,7 @@
 #include "RockNRorCommon.h"
 #include "RockNRorInfo.h"
 #include "EconomyAI.h"
+#include "AOEPrimitives_lists.h"
 
 /*
 This file defines the class that handles units extension data for current game

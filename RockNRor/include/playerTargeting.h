@@ -13,6 +13,7 @@
 #include "RockNRorInfo.h"
 #include "customAIMilitaryInfo.h"
 #include "UnitExtensionHandler.h"
+#include "AOEPrimitives_lists.h"
 
 using namespace std;
 using namespace AOE_STRUCTURES;

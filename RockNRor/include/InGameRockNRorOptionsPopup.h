@@ -2,30 +2,48 @@
 #include <assert.h>
 #include <string.h>
 #include <mystrings.h>
-#include "CustomPopupBase.h"
 #include "SimpleEditText.h"
 #include "RockNRorCommon.h"
 #include "RockNRorCommand.h"
+#include "RockNRorInfo.h"
 #include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
 #include "MapCopyPopup.h"
 #include "autoRebuildFarmConfig.h"
-#include "CustomPopupSystem.h"
+#include "RnrScreenBase.h"
 
 
-class InGameRockNRorOptionsPopup : public CustomPopupBase {
+
+namespace ROCKNROR {
+namespace UI {
+;
+
+
+class InGameRockNRorOptionsPopup : public RnrScreenBase {
 public:
-	InGameRockNRorOptionsPopup();
-	void _ResetPointers() override;
-	void _AddPopupContent() override;
+	InGameRockNRorOptionsPopup() : RnrScreenBase("ingame rnr options") {
+		this->SetWindowed(100, 100, 500, 450); // will always work (default values)
+		this->SetCenteredForSize(600, 450); // May fail if game settings can't be retrieved
+		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::FullBlackTheme);
+		this->ResetClassPointers();
+	}
+
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
-	bool OnButtonClick(AOE_STRUCTURES::STRUCT_UI_BUTTON *sender) override;
-	void OnBeforeClose(bool isCancel) override;
-	void OnAfterClose(bool isCancel) override;
-	// Specific method to use instead of OpenPopup (special treatments for ingame RockNRor menu).
-	// previousPopup should be game menu popup object.
-	AOE_STRUCTURES::STRUCT_ANY_UI * CloseMenuAndOpenPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup);
-	// Popup content objects
+	bool OnButtonClick(STRUCT_UI_BUTTON *sender) override;
+
+	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+	bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) override;
+
+protected:
+	// Reset various pointers for this class level (to override)
+	void ResetClassPointers() override;
+
+	// Create screen content: buttons, etc. Called by CreateScreen(...) method.
+	void CreateScreenComponents() override;
+
+private:
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *customOptionButtonVar; // "OK" button of RockNRor's options popup. NULL means popup does not exist. See HasOpenedCustomGamePopup.
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *customOptionHumanPenaltyTextVar;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *customOptionHumanPenaltyLabelVar;
@@ -46,12 +64,10 @@ public:
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtAutoRebuildFarmsMaxFarms;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoRebuildFarmsMaxFarms;
 
-	// Create in-game RockNRor options screen. Returns false if failed and if return address must be changed.
-	static bool CreateGameRockNRorOptionsPopup(AOE_STRUCTURES::STRUCT_ANY_UI *previousPopup);
+	::ROCKNROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig;
 
-private:
-	bool openTechTreeInfo;
-	bool openMapCopyPopup;
-	ROCKNROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig;
+	void Validate();
 };
 
+}
+}

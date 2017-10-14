@@ -2,64 +2,103 @@
 #include <assert.h>
 #include <string.h>
 #include <mystrings.h>
-#include "CustomPopupBase.h"
 #include "RockNRorCommon.h"
 #include "RockNRorCommand.h"
 #include "RockNRorLocalization.h"
 #include "AOE_const_language.h"
+#include "RnrScreenBase.h"
 
 
 
-// A common base class to implement input boxes.
-class InputBox : public CustomPopupBase {
+namespace ROCKNROR {
+namespace UI {
+;
+
+class InputBox : public RnrScreenBase {
 public:
-	InputBox();
-	void _ResetPointers() override;
-	// This class needs parameters to create content. Call this after calling OpenPopup().
-	void AddPopupContent(const char *title, const char *desc, const char *initialInputValue, long int maxLength, bool readOnly);
-	void OnBeforeClose(bool isCancel) override;
+	InputBox(const char *title, const char *desc, const char *initialInputValue, long int maxLength, bool readOnly) : RnrScreenBase("input box") {
+		this->SetWindowed(100, 100, 450, 200); // will always work (default values)
+		this->SetCenteredForSize(450, 200); // May fail if game settings can't be retrieved
+		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::FullBlackTheme);
+		this->ResetClassPointers();
+		this->readOnly = readOnly;
+		this->maxLength = maxLength;
+		if (initialInputValue) { this->initialInputValue = initialInputValue; }
+		this->title = title;
+		this->description = desc;
+	}
+
+	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+	bool OnButtonClick(STRUCT_UI_BUTTON *sender) override;
+
+	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+	bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) override;
+
 protected:
+	// Reset various pointers for this class level (to override)
+	void ResetClassPointers() override;
+
+	// Create screen content: buttons, etc. Called by CreateScreen(...) method.
+	void CreateScreenComponents() override;
+
+protected:
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtInput;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblTitle;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtDescription;
 	long int maxLength;
 	bool readOnly;
+	std::string initialInputValue;
+	std::string title;
+	std::string description;
 };
+
 
 
 // Generic input box for integers. For float, please use InputBox_float instead (and specify maxLength).
 // Invalid values are replaced by 0.
 template<typename inttype> class InputBox_int : public InputBox {
 public:
-	InputBox_int() { this->_ResetPointers(); }
-	void _ResetPointers() override {
+	InputBox_int(const char *title, const char *text, inttype initialValue, inttype minValue, inttype maxValue, inttype *outputBuffer, bool readOnly)
+		: InputBox(title, text, 0, 0, readOnly)
+	{
 		this->bufferToWrite = NULL;
-		this->minValue = 0;
-		this->maxValue = 0;
+		this->minValue = minValue;
+		this->maxValue = maxValue;
 		this->forcedMaxLength = 0;
-	}
-	// This class needs parameters to create content. Call this after calling OpenPopup().
-	void AddPopupContent(const char *title, const char *text, inttype initialValue, inttype minValue, inttype maxValue, inttype *outputBuffer, bool readOnly) {
 		this->bufferToWrite = outputBuffer;
-		long int maxLength = 0;
 		std::string sFoo;
-		if (this->forcedMaxLength > 0) { maxLength = this->forcedMaxLength; } else {
+		if (this->forcedMaxLength > 0) { this->maxLength = this->forcedMaxLength; } else {
 			// Calculate max length
 			sFoo = to_string(minValue);
-			maxLength = sFoo.size();
+			this->maxLength = sFoo.size();
 			sFoo = to_string(maxValue);
 			long int otherSize = sFoo.size();
-			if (otherSize > maxLength) { maxLength = otherSize; }
+			if (otherSize > this->maxLength) { this->maxLength = otherSize; }
 		}
-		sFoo = to_string(initialValue);
-		InputBox::AddPopupContent(title, text, sFoo.c_str(), maxLength, readOnly);
+		this->initialInputValue = std::to_string(initialValue);
 	}
-	void OnBeforeClose(bool isCancel) override {
-		if (isCancel || !this->edtInput || this->readOnly || !this->bufferToWrite) { return; }
-		AOE_METHODS::UI_BASE::SetFocus(this->edtInput->ptrParentObject, NULL); // "validate" typed value.
-		inttype value = atoi(this->edtInput->pTypedText); // atoi returns 0 if invalid, we use that behaviour too
-		*this->bufferToWrite = value;
+
+
+	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+	bool OnButtonClick(STRUCT_UI_BUTTON *sender) override {
+		if (sender == this->btnCancel) {
+			this->CloseScreen(false);
+			return true;
+		}
+		if (sender == this->btnOK) {
+			if (!this->edtInput || this->readOnly || !this->bufferToWrite) { return false; }
+			AOE_METHODS::UI_BASE::SetFocus(this->edtInput->ptrParentObject, NULL); // "validate" typed value.
+			inttype value = atoi(this->edtInput->pTypedText); // atoi returns 0 if invalid, we use that behaviour too
+			*this->bufferToWrite = value;
+			this->CloseScreen(false);
+			return true;
+		}
+		return false;
 	}
+
+
 protected:
 	long int forcedMaxLength;
 private:
@@ -67,20 +106,32 @@ private:
 	inttype *bufferToWrite;
 };
 
+
 // A specific implementation for float (use atof).
-void InputBox_int<float>::OnBeforeClose(bool isCancel) {
-	if (isCancel || !this->edtInput || this->readOnly || !this->bufferToWrite) { return; }
+bool InputBox_int<float>::OnButtonClick(STRUCT_UI_BUTTON *sender) {
+	if (sender == this->btnCancel) {
+		this->CloseScreen(false);
+		return true;
+	}
+	if (!this->edtInput || this->readOnly || !this->bufferToWrite) { return false; }
 	AOE_METHODS::UI_BASE::SetFocus(this->edtInput->ptrParentObject, NULL); // "validate" typed value.
 	float value = (float)atof(this->edtInput->pTypedText); // atof returns 0 if invalid, we use that behaviour too
 	*this->bufferToWrite = value;
 }
 
+
 // Please use this derived class for float messagebox, and specify input text max length.
 class InputBox_float : public InputBox_int<float> {
-	void AddPopupContent(char *title, char *text, float initialValue, float minValue, float maxValue, long int maxLength, float *outputBuffer, bool readOnly) {
+	InputBox_float(const char *title, const char *text, float initialValue, float minValue, float maxValue, float *outputBuffer, bool readOnly)
+		: InputBox_int(title, text, initialValue, minValue, maxValue, outputBuffer, readOnly) {
 		if (maxLength < 1) { maxLength = 1; }
 		this->forcedMaxLength = maxLength;
-		InputBox_int::AddPopupContent(title, text, initialValue, minValue, maxValue, outputBuffer, readOnly);
 	}
+
 };
+
+
+
+}
+}
 
