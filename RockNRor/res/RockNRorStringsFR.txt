@@ -100,6 +100,19 @@ Population maximale
 Entrez une valeur pour la population maximale pour les parties un joueur
 [42152]
 Population maximale pour les parties un joueur
+[42153]
+Nombre de reliques
+[42154]
+Nombre de ruines
+[42155]
+Nombre de reliques
+[42156]
+Nombre de ruines
+[42157]
+Entrez le nombre de reliques pour les cartes aléatoires/combats à mort. Notez que les cartes peuvent aussi ne pas avoir de reliques du tout.
+[42158]
+Entrez le nombre de ruines pour les cartes aléatoires/combats à mort. Notez que les cartes peuvent aussi ne pas avoir de ruines du tout.
+
 
 
 // *** RockNRor Options popup ***

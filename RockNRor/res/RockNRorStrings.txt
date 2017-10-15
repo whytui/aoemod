@@ -93,6 +93,18 @@ Maximum population
 Set a new value for Single Player games population limit
 [42152]
 Single player games maximum population
+[42153]
+Set relics count in random games
+[42154]
+Set ruins count in random games
+[42155]
+Relics count
+[42156]
+Ruins count
+[42157]
+Enter the desired number of relics for random games. Please note that the game may randomly choose NOT to place relics at all.
+[42158]
+Enter the desired number of ruins for random games. Please note that the game may randomly choose NOT to place ruins at all.
 
 
 // *** RockNRor Options popup ***

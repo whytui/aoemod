@@ -175,9 +175,9 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY);
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
 
-	this->AddButton(&this->btnRelicsCount, localizationHandler.GetTranslation(0, "Set relics count in random games"),
+	this->AddButton(&this->btnRelicsCount, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RELICS_COUNT_LINK, "Set relics count in random games"),
 		defaultMarginLeft, currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
-	this->AddButton(&this->btnRuinsCount, localizationHandler.GetTranslation(0, "Set ruins count in random games"),
+	this->AddButton(&this->btnRuinsCount, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RUINS_COUNT_LINK, "Set ruins count in random games"),
 		defaultMarginLeft + checkboxLabelSizeX / 2 + defaultSpaceHorizontal, currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
 
@@ -364,8 +364,8 @@ bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	}
 	if (sender == this->btnRelicsCount) {
 		ROCKNROR::UI::InputBox_int<long int> *maxPopulationPopup = new ROCKNROR::UI::InputBox_int<long int>(
-			localizationHandler.GetTranslation(0, "Relics count"),
-			localizationHandler.GetTranslation(0, "Enter the desired number of relics for random games. Please note that the game may randomly choose NOT to place relics at all."),
+			localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RELICS_COUNT_TITLE, "Relics count"),
+			localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_ENTER_VALUE_RANDOM_GAMES_RELICS_COUNT, "Enter the desired number of relics for random games. Please note that the game may randomly choose NOT to place relics at all."),
 			ROCKNROR::crInfo.configInfo.randomMapRelicsCount,
 			0, 999, &ROCKNROR::crInfo.configInfo.randomMapRelicsCount, false);
 		maxPopulationPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
@@ -374,8 +374,8 @@ bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	}
 	if (sender == this->btnRuinsCount) {
 		ROCKNROR::UI::InputBox_int<long int> *maxPopulationPopup = new ROCKNROR::UI::InputBox_int<long int>(
-			localizationHandler.GetTranslation(0, "Ruins count"),
-			localizationHandler.GetTranslation(0, "Enter the desired number of ruins for random games. Please note that the game may randomly choose NOT to place ruins at all."),
+			localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RUINS_COUNT_TITLE, "Ruins count"),
+			localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_ENTER_VALUE_RANDOM_GAMES_RUINS_COUNT, "Enter the desired number of ruins for random games. Please note that the game may randomly choose NOT to place ruins at all."),
 			ROCKNROR::crInfo.configInfo.randomMapRuinsCount,
 			0, 999, &ROCKNROR::crInfo.configInfo.randomMapRuinsCount, false);
 		maxPopulationPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());

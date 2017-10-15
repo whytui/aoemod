@@ -75,6 +75,12 @@ const static unsigned long int CRLANG_ID_RNR_STTGS_RESOLUTION_USE_STD_OPTIONS = 
 const static unsigned long int CRLANG_ID_RNR_STTGS_SP_MAXIMUM_POPULATION = 42150;
 const static unsigned long int CRLANG_ID_RNR_STTGS_ENTER_VALUE_SP_MAX_POP = 42151;
 const static unsigned long int CRLANG_ID_RNR_STTGS_SP_MAX_POP_LINK = 42152;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RELICS_COUNT_LINK = 42153;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RUINS_COUNT_LINK = 42154;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RELICS_COUNT_TITLE = 42155;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RUINS_COUNT_TITLE = 42156;
+const static unsigned long int CRLANG_ID_RNR_STTGS_ENTER_VALUE_RANDOM_GAMES_RELICS_COUNT = 42157;
+const static unsigned long int CRLANG_ID_RNR_STTGS_ENTER_VALUE_RANDOM_GAMES_RUINS_COUNT = 42158;
 
 // RockNRor options
 const static unsigned long int CRLANG_ID_ROCKNROR_OPTIONS_POPUP_TITLE = 42020;
