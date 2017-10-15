@@ -51,6 +51,15 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 	if (!global) { return false; } // May occur when a key is pressed and the game just opened
 
 	// Disable ALT-F4 when it would conflict with custom dialog
+	if (ALT && (pressedKey == VK_F4)) {
+		ROCKNROR::UI::RnrScreenBase *curScreen = ROCKNROR::crInfo.rnrUIHelper->GetCurrentRnrScreen();
+		//if (curScreen && (curScreen->GetScreenType() == AOE_METHODS::UI_BASE::ScreenType::DIALOG_PANEL)) {
+		if (curScreen) {
+			// Disable ALT-F4 when our custom dialog is ON (based on the same dialog, would provoke conflicts and our dialog would stay ON forever)
+			curScreen->CloseScreen(false);
+			return true;
+		}
+	}
 	// (isInGame) condition is optional. If removed, ALT-F4 will be disabled in scenario editor when our dialog is on.
 	// WARNING: we can't prevent this to occur if user clicks on the top-right corner cross :(
 	//if ((isInGame) && (ALT) && (pressedKey == VK_F4)) {

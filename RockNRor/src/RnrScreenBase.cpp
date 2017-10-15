@@ -321,5 +321,13 @@ unsigned long int RnrScreenBase::GetLeftCenteredPositionX(long int desiredSize) 
 }
 
 
+// Returns true if behavior on "ALT-F4" event is to close this screen only
+// Warning: returning false may cause unstability under some circumstances (because this will have the game shut down while a custom screen is open).
+bool RnrScreenBase::CloseOnlyThisScreenOnAltF4() const {
+	return !this->isFullscreen;
+	//return true; // Might be more prudent
+}
+
+
 }
 }

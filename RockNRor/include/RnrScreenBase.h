@@ -40,6 +40,8 @@ public:
 	ScreenStatus GetScreenStatus() const { return this->rorScreenStatus; }
 	// Get screen name (read only)
 	const std::string GetScreenName() const { return this->screenName; }
+	// Get screen type
+	AOE_METHODS::UI_BASE::ScreenType GetScreenType() const { return this->rorScreenType; }
 	// Get background theme
 	AOE_CONST_DRS::AoeScreenTheme GetBackgroundSlpTheme() const { return this->backgroundSlpTheme; }
 
@@ -103,6 +105,10 @@ public:
 
 	// Returns left position for a centered element with desired size.
 	unsigned long int GetLeftCenteredPositionX(long int desiredSize) const;
+
+	// Returns true if behavior on "ALT-F4" event is to close this screen only
+	// Warning: returning false may cause unstability under some circumstances (because this will have the game shut down while a custom screen is open).
+	virtual bool CloseOnlyThisScreenOnAltF4() const;
 
 protected:
 	std::list<STRUCT_ANY_UI*> componentsToFree;

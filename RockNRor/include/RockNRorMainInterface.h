@@ -19,6 +19,7 @@
 #include "unitShortcuts.h"
 #include "crDebugOutputPrimitives.h"
 #include "playerHandling.h"
+#include "RnrScreenBase.h"
 
 namespace ROCKNROR {
 

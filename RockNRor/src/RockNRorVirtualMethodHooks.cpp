@@ -375,9 +375,20 @@ namespace VIRTUAL_METHOD_HOOKS {
 		{ // fake scope to ensure rnrScreen is not used afterwards
 			ROCKNROR::UI::RnrScreenBase *rnrScreen = ROCKNROR::crInfo.rnrUIHelper->GetCurrentRnrScreen();
 			if (rnrScreen) {
-				runStandardMethod = !rnrScreen->OnKeyDown(uiObj, keyCode, repeatCount, ALT, CTRL, SHIFT);
-				ROCKNROR::crInfo.rnrUIHelper->PurgeClosedScreens();
-				rnrScreen = NULL; // No longer use rnrScreen ! (in case it's been closed/deleted)
+				if (ALT && (keyCode == VK_F4) && rnrScreen->CloseOnlyThisScreenOnAltF4()) {
+					runStandardMethod = false;
+					result = 1;
+					rnrScreen->CloseScreen(false);
+					ROCKNROR::crInfo.rnrUIHelper->PurgeClosedScreens();
+					rnrScreen = NULL; // No longer use rnrScreen ! (in case it's been closed/deleted)
+				} else {
+					runStandardMethod = !rnrScreen->OnKeyDown(uiObj, keyCode, repeatCount, ALT, CTRL, SHIFT);
+					if (!runStandardMethod) {
+						result = 1;
+					}
+					ROCKNROR::crInfo.rnrUIHelper->PurgeClosedScreens();
+					rnrScreen = NULL; // No longer use rnrScreen ! (in case it's been closed/deleted)
+				}
 			}
 		}
 
