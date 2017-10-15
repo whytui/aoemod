@@ -6,9 +6,25 @@ namespace ROCKNROR {
 namespace UI {
 ;
 
+
+RockNRorSettingsScreen::RockNRorSettingsScreen() : RnrScreenBase("RockNRor settings") {
+	this->SetFullscreen();
+	this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::GameSettingsTheme);
+	this->ResetClassPointers();
+}
+
+
+RockNRorSettingsScreen::~RockNRorSettingsScreen() {
+	if (needToApplyChanges) {
+		SetMaxPopulationGetterInSPGames(ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation);
+	}
+}
+
+
 // Reset various pointers for this class level (to override)
 void RockNRorSettingsScreen::ResetClassPointers() {
 	__super::ResetClassPointers();
+	this->needToApplyChanges = false;
 	this->btnOK = NULL;
 	this->chkGenRandomTechTreeRMGames = NULL;
 	this->chkRPGGameModeInRandomGames = NULL;
@@ -25,6 +41,9 @@ void RockNRorSettingsScreen::ResetClassPointers() {
 	this->btnResolution1 = NULL;
 	this->btnResolution2 = NULL;
 	this->btnResolution3 = NULL;
+	this->btnChangeSPMaxPopulation = NULL;
+	this->btnRelicsCount = NULL;
+	this->btnRuinsCount = NULL;
 }
 
 
@@ -35,7 +54,7 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 	const unsigned long int defaultSpaceHorizontal = 20;
 	const unsigned long int defaultSpaceVertical = 10;
 	const unsigned long int defaultMarginLeft = 40;
-	const unsigned long int sectionTitleSizeX = 400;
+	const unsigned long int sectionTitleSizeX = 500;
 	const unsigned long int sectionTitleSizeY = 24;
 	const unsigned long int checkboxSizeX = 24;
 	const unsigned long int checkboxSizeY = 24;
@@ -152,9 +171,15 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 		currentPosY, checkboxSizeX, checkboxSizeY);
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
 
-#pragma TODO("Max population")
-//#pragma TODO("Initial resources (?)")
-#pragma TODO("Relic/ruins count")
+	this->AddButton(&this->btnChangeSPMaxPopulation, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_SP_MAX_POP_LINK, "Single player games maximum population"),
+		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY);
+	currentPosY += checkboxSizeY + defaultSpaceVertical;
+
+	this->AddButton(&this->btnRelicsCount, localizationHandler.GetTranslation(0, "Set relics count in random games"),
+		defaultMarginLeft, currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
+	this->AddButton(&this->btnRuinsCount, localizationHandler.GetTranslation(0, "Set ruins count in random games"),
+		defaultMarginLeft + checkboxLabelSizeX / 2 + defaultSpaceHorizontal, currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
+	currentPosY += checkboxSizeY + defaultSpaceVertical;
 
 	// Section: RockNRor AI options
 	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RNR_AI_OPTIONS_SECTION, "RockNRor AI options"),
@@ -189,7 +214,6 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 
 	// Interface
 	// auto rebuild farms, autoattack?, auto repair TC, game speed, invisible tree
-	// Change resolution
 
 	// Scenario editor
 
@@ -325,6 +349,37 @@ bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 		if (AOE_CONST_DRS::GetHighestResolutionValues(x, y)) {
 			this->ChangeResolution(x, y);
 		}
+		return true;
+	}
+	if (sender == this->btnChangeSPMaxPopulation) {
+		ROCKNROR::UI::InputBox_int<long int> *maxPopulationPopup = new ROCKNROR::UI::InputBox_int<long int>(
+			localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_SP_MAXIMUM_POPULATION, "Maximum population"),
+			localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_ENTER_VALUE_SP_MAX_POP, "Set a new value for Single Player games population limit"),
+			ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation,
+			0, AOE_CONST_INTERNAL::TECH_LIMIT_MAXIMUM_POPULATION, &ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation, false);
+		maxPopulationPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		maxPopulationPopup->CreateScreen(this->GetAoeScreenObject());
+		this->needToApplyChanges = true;
+		return true;
+	}
+	if (sender == this->btnRelicsCount) {
+		ROCKNROR::UI::InputBox_int<long int> *maxPopulationPopup = new ROCKNROR::UI::InputBox_int<long int>(
+			localizationHandler.GetTranslation(0, "Relics count"),
+			localizationHandler.GetTranslation(0, "Enter the desired number of relics for random games. Please note that the game may randomly choose NOT to place relics at all."),
+			ROCKNROR::crInfo.configInfo.randomMapRelicsCount,
+			0, 999, &ROCKNROR::crInfo.configInfo.randomMapRelicsCount, false);
+		maxPopulationPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		maxPopulationPopup->CreateScreen(this->GetAoeScreenObject());
+		return true;
+	}
+	if (sender == this->btnRuinsCount) {
+		ROCKNROR::UI::InputBox_int<long int> *maxPopulationPopup = new ROCKNROR::UI::InputBox_int<long int>(
+			localizationHandler.GetTranslation(0, "Ruins count"),
+			localizationHandler.GetTranslation(0, "Enter the desired number of ruins for random games. Please note that the game may randomly choose NOT to place ruins at all."),
+			ROCKNROR::crInfo.configInfo.randomMapRuinsCount,
+			0, 999, &ROCKNROR::crInfo.configInfo.randomMapRuinsCount, false);
+		maxPopulationPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		maxPopulationPopup->CreateScreen(this->GetAoeScreenObject());
 		return true;
 	}
 	this->UpdateConfigFromCheckbox(sender);

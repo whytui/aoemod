@@ -20,6 +20,7 @@ RnrScreenBase::RnrScreenBase(const char *screenName) {
 }
 
 
+// Destructor. Being virtual is crucial to allow child classes to be deleted correctly even if calling "delete ptr_as_base_class"
 RnrScreenBase::~RnrScreenBase() {
 	this->FreeComponents();
 	this->CloseScreen(true);

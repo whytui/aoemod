@@ -29,7 +29,8 @@ public:
 	
 	// Constructor for a custom screen, that will be automatically added to custom UI helper.
 	RnrScreenBase(const char *screenName);
-	~RnrScreenBase();
+	// Destructor. Being virtual is crucial to allow child classes to be deleted correctly even if calling "delete ptr_as_base_class"
+	virtual ~RnrScreenBase();
 
 	// Set screen type. Only allowed when screen has not been opened yet.
 	bool SetScreenType(AOE_METHODS::UI_BASE::ScreenType newType);

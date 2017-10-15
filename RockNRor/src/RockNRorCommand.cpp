@@ -613,6 +613,15 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 	if (strcmp(command, "assassin") == 0) {
 		ROCKNROR::crInfo.configInfo.assassinMode = !ROCKNROR::crInfo.configInfo.assassinMode;
 	}
+	if (strcmp(command, "rich") == 0) {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		if (player && player->IsCheckSumValid()) {
+			player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_FOOD, 50000);
+			player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_WOOD, 50000);
+			player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_GOLD, 20000);
+			player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_STONE, 10000);
+		}
+	}
 #endif
 
 #ifdef _DEBUG

@@ -72,6 +72,9 @@ const static unsigned long int CRLANG_ID_RNR_STTGS_RESOLUTION_MEDIUM = 42146;
 const static unsigned long int CRLANG_ID_RNR_STTGS_RESOLUTION_HIGH = 42147;
 const static unsigned long int CRLANG_ID_RNR_STTGS_ERROR_MSG_TITLE = 42148;
 const static unsigned long int CRLANG_ID_RNR_STTGS_RESOLUTION_USE_STD_OPTIONS = 42149;
+const static unsigned long int CRLANG_ID_RNR_STTGS_SP_MAXIMUM_POPULATION = 42150;
+const static unsigned long int CRLANG_ID_RNR_STTGS_ENTER_VALUE_SP_MAX_POP = 42151;
+const static unsigned long int CRLANG_ID_RNR_STTGS_SP_MAX_POP_LINK = 42152;
 
 // RockNRor options
 const static unsigned long int CRLANG_ID_ROCKNROR_OPTIONS_POPUP_TITLE = 42020;

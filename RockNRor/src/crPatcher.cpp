@@ -85,7 +85,7 @@ bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 // If you wish to change in-game maximum population, you'll probably have to modify all player "max pop" resource.
 bool SetMaxPopulationGetterInSPGames(long int newMaxPopulationValue) {
 	try {
-		if ((newMaxPopulationValue < 0) || (newMaxPopulationValue > 255)) { return false; }
+		if ((newMaxPopulationValue < 0) || (newMaxPopulationValue > AOE_CONST_INTERNAL::TECH_LIMIT_MAXIMUM_POPULATION)) { return false; }
 		bool success;
 		success = SetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_OPTIONS, "SetSinglePlayerMaxPop", 0, newMaxPopulationValue);
 		success = success && SetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_OPTIONS, "SetAIHousesMaxPop", 0, newMaxPopulationValue);

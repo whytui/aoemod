@@ -260,7 +260,7 @@ public:
 	const long int MAXVALUE_distanceToCallNearbyIdleMilitaryUnits = 254;
 	const long int MINVALUE_resourceAmount = 0;
 	const long int MINVALUE_maxPopulation = 0;
-	const long int MAXVALUE_maxPopulation = 255;
+	const long int MAXVALUE_maxPopulation = AOE_CONST_INTERNAL::TECH_LIMIT_MAXIMUM_POPULATION;
 	const long int MINVALUE_unitAIDetectNearbyUnitsMinimumDelay = 300; // milliseconds
 	const long int MAXVALUE_unitAIDetectNearbyUnitsMinimumDelay = 20000; // milliseconds
 

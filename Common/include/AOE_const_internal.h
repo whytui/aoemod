@@ -8,6 +8,9 @@
 
 namespace AOE_CONST_INTERNAL
 {
+	// The maximum possible value for "population limit" regarding technical considerations.
+	const long int TECH_LIMIT_MAXIMUM_POPULATION = 255;
+
 
 	// Avoid confusion with diplomacy values (PLAYER_DIPLOMACY_VALUES) !
 	enum PLAYER_DIPLOMACY_STANCES : char {

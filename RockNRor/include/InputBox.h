@@ -88,35 +88,60 @@ public:
 			return true;
 		}
 		if (sender == this->btnOK) {
-			if (!this->edtInput || this->readOnly || !this->bufferToWrite) { return false; }
-			AOE_METHODS::UI_BASE::SetFocus(this->edtInput->ptrParentObject, NULL); // "validate" typed value.
-			inttype value = atoi(this->edtInput->pTypedText); // atoi returns 0 if invalid, we use that behaviour too
-			*this->bufferToWrite = value;
-			this->CloseScreen(false);
-			return true;
+			if (this->ValidateInput()) {
+				this->CloseScreen(false);
+				return true;
+			}
 		}
 		return false;
+	}
+
+	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
+	bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) override {
+		if ((keyCode == VK_RETURN) && (uiObj != this->btnCancel)) {
+			if (this->ValidateInput()) {
+				this->CloseScreen(false);
+				return true;
+			}
+		}
+		return __super::OnKeyDown(uiObj, keyCode, repeatCount, ALT, CTRL, SHIFT);
+	}
+
+	bool ValidateInput() {
+		if (!this->edtInput || this->readOnly || !this->bufferToWrite) { return false; }
+		AOE_METHODS::UI_BASE::SetFocus(this->edtInput->ptrParentObject, NULL); // "validate" typed value.
+		inttype value = atoi(this->edtInput->pTypedText); // atoi returns 0 if invalid, we use that behaviour too
+		if (value < this->minValue) {
+			value = this->minValue;
+		}
+		if (value > this->maxValue) {
+			value = this->maxValue;
+		}
+		*this->bufferToWrite = value;
+		return true;
 	}
 
 
 protected:
 	long int forcedMaxLength;
-private:
 	inttype minValue, maxValue;
 	inttype *bufferToWrite;
 };
 
 
 // A specific implementation for float (use atof).
-bool InputBox_int<float>::OnButtonClick(STRUCT_UI_BUTTON *sender) {
-	if (sender == this->btnCancel) {
-		this->CloseScreen(false);
-		return true;
-	}
+bool InputBox_int<float>::ValidateInput() {
 	if (!this->edtInput || this->readOnly || !this->bufferToWrite) { return false; }
 	AOE_METHODS::UI_BASE::SetFocus(this->edtInput->ptrParentObject, NULL); // "validate" typed value.
 	float value = (float)atof(this->edtInput->pTypedText); // atof returns 0 if invalid, we use that behaviour too
+	if (value < this->minValue) {
+		value = this->minValue;
+	}
+	if (value > this->maxValue) {
+		value = this->maxValue;
+	}
 	*this->bufferToWrite = value;
+	return true;
 }
 
 
@@ -127,7 +152,6 @@ class InputBox_float : public InputBox_int<float> {
 		if (maxLength < 1) { maxLength = 1; }
 		this->forcedMaxLength = maxLength;
 	}
-
 };
 
 

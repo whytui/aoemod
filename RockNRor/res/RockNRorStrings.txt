@@ -87,6 +87,12 @@ High
 Error
 [42149]
 Please use standard options to change resolution when game is running
+[42150]
+Maximum population
+[42151]
+Set a new value for Single Player games population limit
+[42152]
+Single player games maximum population
 
 
 // *** RockNRor Options popup ***

@@ -9,6 +9,8 @@
 #include "RnrScreenBase.h"
 #include "SimpleEditText.h"
 #include "interface.h"
+#include "InputBox.h"
+#include "crPatcher.h"
 
 using namespace AOE_STRUCTURES;
 
@@ -19,11 +21,8 @@ namespace UI {
 
 class RockNRorSettingsScreen : public RnrScreenBase {
 public:
-	RockNRorSettingsScreen() : RnrScreenBase("RockNRor settings") {
-		this->SetFullscreen();
-		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::GameSettingsTheme);
-		this->ResetClassPointers();
-	}
+	RockNRorSettingsScreen();
+	~RockNRorSettingsScreen() override;
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 	bool OnButtonClick(STRUCT_UI_BUTTON *sender) override;
@@ -39,6 +38,7 @@ protected:
 	void CreateScreenComponents() override;
 
 private:
+	bool needToApplyChanges;
 	STRUCT_UI_BUTTON *btnOK;
 	STRUCT_UI_BUTTON *chkGenRandomTechTreeRMGames;
 	STRUCT_UI_BUTTON *chkRPGGameModeInRandomGames;
@@ -55,6 +55,9 @@ private:
 	STRUCT_UI_BUTTON *btnResolution1;
 	STRUCT_UI_BUTTON *btnResolution2;
 	STRUCT_UI_BUTTON *btnResolution3;
+	STRUCT_UI_BUTTON *btnChangeSPMaxPopulation;
+	STRUCT_UI_BUTTON *btnRelicsCount;
+	STRUCT_UI_BUTTON *btnRuinsCount;
 
 	void InitInputs();
 	void UpdateConfigFromCheckbox(STRUCT_UI_BUTTON *checkbox);

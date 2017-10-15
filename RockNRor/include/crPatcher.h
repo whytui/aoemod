@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <AOE_offsets.h>
 #include <mystrings.h>
+#include <AOE_const_internal.h>
 #include "../../AOE_DataPatcher/include/AOE_binData.h"
 #include "../../AOE_DataPatcher/include/BinarySeqDefinition.h"
 #include "EXESelfEditor.h"
