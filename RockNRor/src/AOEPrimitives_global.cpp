@@ -53,7 +53,7 @@ void ShowScores(bool show) {
 		}
 	}
 #else
-	global->showScores = argShow;
+	global->showScores = show ? 1 : 0;
 #endif
 }
 

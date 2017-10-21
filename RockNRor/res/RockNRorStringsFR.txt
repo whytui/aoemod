@@ -67,7 +67,7 @@ Générer des stratégies aléatoirement pour l'ordinateur dans les combats à mort
 [42135]
 Désactiver les murailles dans les cartes aléatoires/combats à mort
 [42136]
-Pas de diplomacie neutre dans les cartes aléatoires/combats à mort
+Pas de diplomatie neutre dans les cartes aléatoires/combats à mort
 [42137]
 Désactiver le port lorsque les joueurs 'ordinateur' ne le supportent pas
 [42138]
