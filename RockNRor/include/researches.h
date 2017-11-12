@@ -5,6 +5,7 @@
 #include <set>
 #include <algorithm>
 #include <assert.h>
+#include <macroUtil.h>
 #include <AOE_struct_game_global.h>
 #include <ROR_global_variables.h>
 #include <AOE_const_functional.h>
@@ -130,9 +131,11 @@ bool DoesTechDisableResearch(STRUCT_TECH_DEF *techDef, short int researchId);
 bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef);
 
 // Returns true if a unit (DATID) is disabled by player's tech tree
+// Do not use this when player tech tree IDs are custom ! (cf randomly-generated tech trees)
 bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId);
 
 // Returns true if a research (research ID) is disabled by player's tech tree
+// Do not use this when player tech tree IDs are custom ! (cf randomly-generated tech trees)
 bool IsResearchDisabledInTechTree(short int playerId, short int researchId);
 
 
@@ -174,7 +177,7 @@ bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int rese
 
 
 // Returns true if a research has been researched for a given player
-bool IsTechResearched(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
+bool IsResearchResearched(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);
 
 // Returns current status of a research for given player.
 AOE_CONST_FUNC::RESEARCH_STATUSES GetResearchStatus(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id);

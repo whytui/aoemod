@@ -266,6 +266,11 @@ namespace STRATEGY {
 		// Add researches for villagers/economy (does not mark them for add : optional researches)
 		void AddResearchesForEconomy();
 
+		// Add user-defined "forced" researches (always develop... if possible)
+		void AddUserDefinedForcedResearches();
+		// Add one user-defined "forced" researches (always develop... if possible)
+		void AddUserDefinedForcedResearches(short int oneResearchId);
+
 		// Add tower upgrades to internal objects (and mark them as priority items)
 		// Does not add upgrades that slow projectiles down (ballista tower)
 		// Only adds unit upgrades (sentry, watch tower) + "enable unit" (watch tower) researches, not others researches.

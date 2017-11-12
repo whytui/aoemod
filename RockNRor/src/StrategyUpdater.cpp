@@ -147,9 +147,9 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	bool foundCounter_one = false; // set to true if we passed the "counter=1" element. Allow us to identify "panic units" from normal strategy units
 	int currentPopulation = 0; // Does not count limited-retrains units
 
-	int toolAgeResearched = IsTechResearched(player, CST_RSID_TOOL_AGE);
-	int bronzeAgeResearched = IsTechResearched(player, CST_RSID_BRONZE_AGE);
-	int ironAgeResearched = IsTechResearched(player, CST_RSID_IRON_AGE);
+	int toolAgeResearched = IsResearchResearched(player, CST_RSID_TOOL_AGE);
+	int bronzeAgeResearched = IsResearchResearched(player, CST_RSID_BRONZE_AGE);
+	int ironAgeResearched = IsResearchResearched(player, CST_RSID_IRON_AGE);
 	bool canGoToBronzeAge = (bronzeAgeResearched != 0); // Useful to detect strategies that do NOT have bronze (scenarios ?)
 	bool canGoToIronAge = (ironAgeResearched != 0); // Useful to detect strategies that do NOT have iron (scenarios ?)
 	bool foundWheel = false;
@@ -679,20 +679,20 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 
 	// Upgraded units (DATID1 <> DATID2) => do not search in unit_def array but search if tech has been researched
 	// The canTrainxxx && clause is useful for performance, we check the prerequisite first as we already have this information
-	int canTrainLegion = canTrainSwordsman && IsTechResearched(player, CST_RSID_LEGION);
-	int canTrainHeavyCavalry = canTrainCavalry && IsTechResearched(player, CST_RSID_HEAVY_CAVALRY);
-	int canTrainCataphract = canTrainHeavyCavalry && IsTechResearched(player, CST_RSID_CATAPHRACT);
-	int canTrainHeavyChariot = canTrainChariot && IsTechResearched(player, CST_RSID_HEAVY_CHARIOT);
-	int canTrainArmoredElephant = canTrainWarElephant && IsTechResearched(player, CST_RSID_ARMORED_ELEPHANT);
-	int canTrainPhalanx = canTrainHoplite && IsTechResearched(player, CST_RSID_PHALANX);
-	int canTrainCenturion = canTrainPhalanx && IsTechResearched(player, CST_RSID_CENTURION);
-	int canTrainHelepolis = canTrainBallista && IsTechResearched(player, CST_RSID_HELEPOLIS);
-	int canTrainCatapult = canTrainStoneThrower && IsTechResearched(player, CST_RSID_CATAPULT);
-	int canTrainHeavyCatapult = canTrainCatapult && IsTechResearched(player, CST_RSID_HEAVY_CATAPULT);
-	int canTrainHeavyHorseArcher = canTrainHorseArcher && IsTechResearched(player, CST_RSID_HEAVY_HORSE_ARCHER);
+	int canTrainLegion = canTrainSwordsman && IsResearchResearched(player, CST_RSID_LEGION);
+	int canTrainHeavyCavalry = canTrainCavalry && IsResearchResearched(player, CST_RSID_HEAVY_CAVALRY);
+	int canTrainCataphract = canTrainHeavyCavalry && IsResearchResearched(player, CST_RSID_CATAPHRACT);
+	int canTrainHeavyChariot = canTrainChariot && IsResearchResearched(player, CST_RSID_HEAVY_CHARIOT);
+	int canTrainArmoredElephant = canTrainWarElephant && IsResearchResearched(player, CST_RSID_ARMORED_ELEPHANT);
+	int canTrainPhalanx = canTrainHoplite && IsResearchResearched(player, CST_RSID_PHALANX);
+	int canTrainCenturion = canTrainPhalanx && IsResearchResearched(player, CST_RSID_CENTURION);
+	int canTrainHelepolis = canTrainBallista && IsResearchResearched(player, CST_RSID_HELEPOLIS);
+	int canTrainCatapult = canTrainStoneThrower && IsResearchResearched(player, CST_RSID_CATAPULT);
+	int canTrainHeavyCatapult = canTrainCatapult && IsResearchResearched(player, CST_RSID_HEAVY_CATAPULT);
+	int canTrainHeavyHorseArcher = canTrainHorseArcher && IsResearchResearched(player, CST_RSID_HEAVY_HORSE_ARCHER);
 
 	// Other info about researches
-	int hasAristocracy = IsTechResearched(player, CST_RSID_ARISTOCRACY);
+	int hasAristocracy = IsResearchResearched(player, CST_RSID_ARISTOCRACY);
 
 	// Collect info on current strategy status (panic mode elements, if any).
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentStratElem = &buildAI->fakeFirstStrategyElement;
@@ -1447,6 +1447,110 @@ void AddUsefulMilitaryTechsToStrategy(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	}
 }
 
+
+// Add one research to strategy
+void AddUserDefinedForcedResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId, bool isWaterMap) {
+	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct) { return; }
+	ROCKNROR::STRATEGY::TTDetailedResearchDef *resDefDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(researchId);
+	if (!resDefDtl || !resDefDtl->active || resDefDtl->IsShadowResearch()) {
+		return;
+	}
+	// Handle water-map techs
+	if (!isWaterMap) {
+		if (resDefDtl->researchDef->researchLocation == CST_UNITID_DOCK) {
+			return; // Ignore "water map" techs on no-water maps.
+		}
+	}
+
+	if (!AOE_STRUCTURES::PLAYER::IsResearchEnabledForPlayer(player, researchId)) {
+		return;
+	}
+	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &player->ptrAIStruct->structBuildAI;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeFirstStrategyElement = &buildAI->fakeFirstStrategyElement;
+
+	long int existingElemId = FindElementInStrategy(player, TAIUnitClass::AIUCTech, researchId);
+	if (existingElemId == -1) {
+		existingElemId = FindElementInStrategy(player, TAIUnitClass::AIUCCritical, researchId);
+	}
+	if (existingElemId >= 0) { return; } // The strategy already includes the research (and dependencies, in theory)
+
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint = NULL;
+
+	short int ageToUse = -1;
+	if (resDefDtl->requiredAge <= CST_RSID_STONE_AGE) {
+		ageToUse = CST_RSID_TOOL_AGE; // required age = none or stone age: do it before developing tool age
+	}
+	if (resDefDtl->requiredAge == CST_RSID_TOOL_AGE) {
+		ageToUse = CST_RSID_BRONZE_AGE; // required age = tool age: do it before developing bronze age
+	}
+	if (resDefDtl->requiredAge == CST_RSID_BRONZE_AGE) {
+		ageToUse = CST_RSID_IRON_AGE; // required age = bronze age: do it before developing iron age
+	}
+	if (ageToUse >= 0) {
+		insertionPoint = FindFirstElementInStrategy(fakeFirstStrategyElement, TAIUnitClass::AIUCCritical, ageToUse);
+		if (!insertionPoint) {
+			insertionPoint = FindFirstElementInStrategy(fakeFirstStrategyElement, TAIUnitClass::AIUCTech, ageToUse);
+		}
+	}
+	if (!insertionPoint) {
+		// Default: just before wonder
+		insertionPoint = FindFirstElementInStrategy(fakeFirstStrategyElement, TAIUnitClass::AIUCBuilding, CST_UNITID_WONDER);
+	}
+	if (!insertionPoint) {
+		// Default if still not found: last
+		insertionPoint = fakeFirstStrategyElement->previous;
+	}
+	if (insertionPoint) {
+		std::string tmpName = "RnR_" + resDefDtl->internalName;
+		if (AddUnitInStrategy_before(buildAI, insertionPoint, -1, resDefDtl->researchDef->researchLocation,
+			TAIUnitClass::AIUCTech, researchId, player, tmpName.c_str())) {
+			insertionPoint = insertionPoint->previous; // set to the element we just inserted (so the other elements we add will be before this one)
+		}
+	}
+
+	// We need to add requirements too (before "researchId")
+	// Remark: if "researchId" is available (not disabled for this player), then its requirements have no reason for being disabled: don't check them.
+	for each (ROCKNROR::STRATEGY::TTDetailedResearchDef *reqRes in resDefDtl->allRequirementsExcludingAges)
+	{
+		short int reqResId = (short int)reqRes->GetResearchDefId();
+		if (!reqRes->active || reqRes->IsShadowResearch()) { continue; }
+		long int existingReqElemId = FindElementInStrategy(player, TAIUnitClass::AIUCTech, reqResId);
+		if (existingReqElemId == -1) {
+			existingReqElemId = FindElementInStrategy(player, TAIUnitClass::AIUCCritical, reqResId);
+		}
+		if (existingReqElemId == -1) {
+			// Need to add
+			std::string tmpName2 = "RnR_" + reqRes->internalName;
+			AddUnitInStrategy_before(buildAI, insertionPoint, -1, reqRes->researchDef->researchLocation,
+				TAIUnitClass::AIUCTech, reqResId, player, tmpName2.c_str());
+		}
+	}
+}
+
+
+// Add researches specified in configuration according to game type (DM/RM)
+void AddUserDefinedForcedResearches(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) {
+		return;
+	}
+	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &player->ptrAIStruct->structBuildAI;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
+	assert(gameSettings && gameSettings->IsCheckSumValid());
+	if (!gameSettings || !gameSettings->IsCheckSumValid()) { return; }
+	bool isDM = (gameSettings->isDeathMatch != 0);
+	bool isWaterMap = IsDockRelevantForMap(gameSettings->mapTypeChoice);
+
+	std::list<short int> *listToUse = NULL;
+	if (isDM) {
+		listToUse = &ROCKNROR::crInfo.configInfo.dmAIForcedResearches;
+	} else {
+		listToUse = &ROCKNROR::crInfo.configInfo.rmAIForcedResearches;
+	}
+	for each (short int curResId in *listToUse)
+	{
+		AddUserDefinedForcedResearch(player, curResId, isWaterMap);
+	}
+}
 
 }
 }

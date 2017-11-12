@@ -379,6 +379,16 @@ long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, AOE_STRUCTURES::STR
 }
 
 
+// Returns true if the specified research is enabled for given player.
+// True if the research is waiting requirement, available, in progress, done.
+// False if the research is disabled (or invalid ID).
+bool IsResearchEnabledForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId) {
+	if (!player || !player->IsCheckSumValid()) { return false; }
+	if (player->GetResearchDef(researchId) == NULL) { return false; }
+	return GetResearchStatus(player, researchId) != RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED;
+}
+
+
 // Searches (at least) a unit with provided shortcut number for given player.
 // The first matching unit is returned (arbitrary), even if there are several.
 // Returns NULL if not found

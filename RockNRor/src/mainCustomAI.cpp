@@ -89,6 +89,7 @@ void CustomPlayerAI::RunInitialStrategyAnalysis() {
 		// All levels except easiest
 		ROCKNROR::STRATEGY::AdaptStrategyToMaxPopulation(this->myPlayer);
 	}
+	ROCKNROR::STRATEGY::AddUserDefinedForcedResearches(this->myPlayer);
 }
 
 

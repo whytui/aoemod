@@ -111,5 +111,11 @@ namespace STRATEGY {
 	// Add relevant researches to strategy for current strategy's military units
 	void AddUsefulMilitaryTechsToStrategy(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
+	// Add one research to strategy
+	void AddUserDefinedForcedResearch(AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId, bool isWaterMap);
+
+	// Add researches specified in configuration according to game type (DM/RM)
+	void AddUserDefinedForcedResearches(AOE_STRUCTURES::STRUCT_PLAYER *player);
+
 }
 }

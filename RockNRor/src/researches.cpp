@@ -803,6 +803,7 @@ bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef) {
 
 
 // Returns true if a unit (DATID) is disabled by player's tech tree
+// Do not use this when player tech tree IDs are custom ! (cf randomly-generated tech trees)
 bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
@@ -813,6 +814,7 @@ bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId) {
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
 	if (!player || !player->IsCheckSumValid()) { return false; }
+#pragma WARNING("Not compatible with custom civs !")
 	AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->GetTechDef(player->techTreeId);
 	if (!techDef) {
 		return false;
@@ -822,6 +824,7 @@ bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId) {
 
 
 // Returns true if a research (research ID) is disabled by player's tech tree
+// Do not use this when player tech tree IDs are custom ! (cf randomly-generated tech trees)
 bool IsResearchDisabledInTechTree(short int playerId, short int researchId) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings != NULL);
@@ -832,6 +835,7 @@ bool IsResearchDisabledInTechTree(short int playerId, short int researchId) {
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
 	if (!player || !player->IsCheckSumValid()) { return false; }
+#pragma WARNING("Not compatible with custom civs !")
 	AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->GetTechDef(player->techTreeId);
 	if (!techDef) {
 		return false;
@@ -1224,7 +1228,7 @@ bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int rese
 
 
 // Returns true if a research has been researched for a given player
-bool IsTechResearched(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id) {
+bool IsResearchResearched(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id) {
 	assert(player != NULL);
 	assert(player->ptrResearchesStruct != NULL);
 	if (player->ptrResearchesStruct == NULL) { return false; }

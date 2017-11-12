@@ -155,7 +155,7 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 	}
 	PotentialResearchInfo *resInfo = this->GetResearchInfo(resDef);
 	if (resInfo != NULL) {
-		return NULL;
+		return NULL; // already in list: do not add
 	}
 	resInfo = new PotentialResearchInfo();
 	resInfo->researchDef = resDef;
@@ -2423,6 +2423,70 @@ void StrategyBuilder::AddResearchesForEconomy() {
 }
 
 
+// Add user-defined "forced" researches (always develop... if possible)
+void StrategyBuilder::AddUserDefinedForcedResearches() {
+	std::list<short int> *listToUse = NULL;
+	if (settings->isDeathMatch) {
+		listToUse = &ROCKNROR::crInfo.configInfo.dmAIForcedResearches;
+	} else {
+		listToUse = &ROCKNROR::crInfo.configInfo.rmAIForcedResearches;
+	}
+	for each (short int curResId in *listToUse)
+	{
+		this->AddUserDefinedForcedResearches(curResId);
+	}
+}
+
+
+// Add one user-defined "forced" researches (always develop... if possible)
+void StrategyBuilder::AddUserDefinedForcedResearches(short int oneResearchId) {
+	ROCKNROR::STRATEGY::TTDetailedResearchDef *resDefDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(oneResearchId);
+	if (!resDefDtl || !resDefDtl->active) {
+		return;
+	}
+	// Handle water-map techs
+	if (!this->isWaterMap) {
+		if (resDefDtl->researchDef->researchLocation == CST_UNITID_DOCK) {
+			this->log += "Ignored a \"forced\" research because this map is a no-water map: id=";
+			this->log += std::to_string(oneResearchId);
+			this->log += newline;
+			return; // Ignore "water map" techs on no-water maps.
+		}
+	}
+
+	PotentialResearchInfo *resInfo = this->GetResearchInfo(oneResearchId);
+	if (resInfo) {
+		resInfo->markedForAdd = true;
+	} else {
+		if (this->IsResearchInTechTree(oneResearchId)) {
+			resInfo = this->AddPotentialResearchInfoToList(oneResearchId);
+			resInfo->forcePutAsEarlyAsPossible = false;
+		}
+	}
+	if (!resInfo) {
+		return;
+	}
+	// We need to add requirements too
+	for each (ROCKNROR::STRATEGY::TTDetailedResearchDef *reqRes in resDefDtl->allRequirementsExcludingAges)
+	{
+		if (reqRes->active && !reqRes->IsShadowResearch()) {
+			short int reqResId = (short int)reqRes->GetResearchDefId();
+			auto tmp = this->AddPotentialResearchInfoToList(reqResId);
+			if (tmp) {
+				tmp->markedForAdd = true;
+			} else {
+				PotentialResearchInfo *tmpResInfo = this->GetResearchInfo(reqResId);
+				if (tmpResInfo) {
+					// If it was already in list, make sure the requirement is marked for add (at this point it my be an "optional" and could not be actually included in strategy).
+					tmpResInfo->markedForAdd = true;
+				}
+			}
+		}
+	}
+	resInfo->markedForAdd = true;
+}
+
+
 // Returns a vector of all non-disabled researches that affect the provided unit definition (ID)
 // useFilter: if true, exclude researches with drawbacks for current game type (DM/RM)
 std::vector<short int> StrategyBuilder::GetAllResearchesThatAffectUnit(short int unitDefId, bool useFilter) {
@@ -3493,6 +3557,9 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 
 	// Get optional researches for economy (NOT marked for add at this point)
 	this->AddResearchesForEconomy();
+
+	// Add user-defined "forced" researches (always developed unless unavailable)
+	this->AddUserDefinedForcedResearches();
 	
 	// Finalize exact list of trained units => add units
 	this->AddMilitaryUnitsForEarlyAges();

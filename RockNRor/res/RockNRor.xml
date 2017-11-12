@@ -119,6 +119,20 @@
 	<strategyAI name="generateAutomaticStrategy" gameType="RM" enable="0"/><!-- Random map -->
 	<strategyAI name="generateAutomaticStrategy" gameType="DM" enable="0"/><!-- Deathmatch: Not supported yet... -->
 	
+	<!-- strategyAI.alwaysDevelopResearch : you can specify researches ("Techs" tab in AGE3) that AI player 
+	should always try to develop (if available). Please use "Techs" IDs, not "Effects" -->
+	<strategyAI name="alwaysDevelopResearch" gameType="RM" value="28"/><!-- Always develop wheel when available -->
+	<strategyAI name="alwaysDevelopResearch" gameType="DM" value="28"/><!-- Always develop wheel when available -->
+	<strategyAI name="alwaysDevelopResearch" gameType="RM" value="112"/><!-- Always develop architecture when available -->
+	<strategyAI name="alwaysDevelopResearch" gameType="DM" value="112"/><!-- Always develop architecture when available -->
+	<strategyAI name="alwaysDevelopResearch" gameType="RM" value="107"/><!-- RM: woodworking is always useful for a reasonable cost -->
+	<strategyAI name="alwaysDevelopResearch" gameType="DM" value="107"/><!-- DM: woodworking is always useful for towers -->
+	<strategyAI name="alwaysDevelopResearch" gameType="DM" value="32"/><!-- DM: artisanship is always useful for towers -->
+	<strategyAI name="alwaysDevelopResearch" gameType="DM" value="110"/><!-- DM: craftsmanship is always useful for towers -->
+	<strategyAI name="alwaysDevelopResearch" gameType="RM" value="4"/><!-- RM: Fishing ship (small cost big effect) -->
+	<strategyAI name="alwaysDevelopResearch" gameType="DM" value="4"/><!-- DM: Fishing ship (small cost big effect) -->
+	<!-- Other examples: 46 in DM (+2 attack for melee units): useful in desperate or end-game combats -->
+	
 	<!-- *** Manage Panic mode (dynamic defence units) -->
 	<!-- Integer value=seconds between 2 checks -->
 	<panicMode name="delay" value="15"/>

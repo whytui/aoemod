@@ -131,6 +131,8 @@ public:
 	bool defaultPerNumbers_RM_isSet[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1]; // set to true to indicate when corresponding defaultPerNumbers_RM value is relevant
 	long int defaultPerNumbers_DM[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1];
 	bool defaultPerNumbers_DM_isSet[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1]; // set to true to indicate when corresponding defaultPerNumbers_DM value is relevant
+	std::list<short int> rmAIForcedResearches; // (AI) Random map: researches to always develop if possible
+	std::list<short int> dmAIForcedResearches; // (AI) Random map: researches to always develop if possible
 
 	// Related to empires.dat loaded data
 	bool fixVillagerWorkRates;

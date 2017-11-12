@@ -198,6 +198,25 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	//fprintf_s(f, "cityPlanHouseDistanceFromStorageBld:       %f\n", ROCKNROR::crInfo.configInfo.cityPlanHouseDistanceFromStorageBld);
 	//fprintf_s(f, "cityPlanHouseDistanceFromOtherBld:         %f\n", ROCKNROR::crInfo.configInfo.cityPlanHouseDistanceFromOtherBld);
 	fprintf_s(f, "cityPlanBerryBushWeightForGranary:         %ld\n", ROCKNROR::crInfo.configInfo.cityPlanBerryBushWeightForGranary);
+	// Forced researches
+	std::string tmpMsg = "";
+	for each (auto oneResearchId in ROCKNROR::crInfo.configInfo.rmAIForcedResearches)
+	{
+		if (!tmpMsg.empty()) {
+			tmpMsg += ", ";
+		}
+		tmpMsg += std::to_string(oneResearchId);
+	}
+	fprintf_s(f, "strategy/RM/forced researches: %s\n", tmpMsg.c_str());
+	tmpMsg.clear();
+	for each (auto oneResearchId in ROCKNROR::crInfo.configInfo.dmAIForcedResearches)
+	{
+		if (!tmpMsg.empty()) {
+			tmpMsg += ", ";
+		}
+		tmpMsg += std::to_string(oneResearchId);
+	}
+	fprintf_s(f, "strategy/DM/forced researches: %s\n", tmpMsg.c_str());
 	// Map generation
 	fprintf_s(f, "random map relics count:                   %ld\n", ROCKNROR::crInfo.configInfo.randomMapRelicsCount);
 	fprintf_s(f, "random map ruins count:                    %ld\n", ROCKNROR::crInfo.configInfo.randomMapRuinsCount);
@@ -620,6 +639,17 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 			player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_WOOD, 50000);
 			player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_GOLD, 20000);
 			player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_STONE, 10000);
+		}
+	}
+	if (strcmp(command, "allrich") == 0) {
+		for (int i = 0; i < 9; i++) {
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(i);
+			if (player && player->IsCheckSumValid()) {
+				player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_FOOD, 50000);
+				player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_WOOD, 50000);
+				player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_GOLD, 20000);
+				player->SetResourceValue(AOE_CONST_FUNC::CST_RES_ORDER_STONE, 10000);
+			}
 		}
 	}
 #endif

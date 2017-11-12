@@ -600,6 +600,21 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 					break;
 				}
 			}
+			if (categoryName == "alwaysDevelopResearch") {
+				callResult = elem->QueryIntAttribute("value", &intValue);
+				if (callResult == TIXML_SUCCESS) {
+					switch (this->XML_ReadGameTypeAttribute(elem)) {
+					case ROCKNROR::CFG_GAME_DEATHMATCH:
+						this->dmAIForcedResearches.push_back((short int)intValue);
+						break;
+					case ROCKNROR::CFG_GAME_RANDOM_GAME:
+						this->rmAIForcedResearches.push_back((short int)intValue);
+						break;
+					default:
+						break;
+					}
+				}
+			}
 		}
 		// Tactical AI options
 		if (elemName == "tacticalAI") {
