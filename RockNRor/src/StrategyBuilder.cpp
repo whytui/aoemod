@@ -475,7 +475,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 				researchIsDisabled = true;
 			}
 		}
-		if (researchIsDisabled) {
+		if (researchIsDisabled /*to TEST specific limitations || (curRsId==AOE_CONST_FUNC::CST_RSID_HELEPOLIS)*/) {
 			allDisabledResearches.push_back(curRsId);
 		} else {
 			allAvailableResearches.push_back(curRsId);
@@ -1845,6 +1845,18 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 // Select which units are to be added in strategy, based on potentialUnitsList
 // Requires that this->potentialUnitsList has already been filled
 void StrategyBuilder::SelectStrategyUnitsForLandOrWater(bool waterUnits) {
+#ifdef _DEBUG
+	/*for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
+		if (!unitInfo->isSelected) {
+			if ((unitInfo->unitDefId == CST_UNITID_SHORT_SWORDSMAN) ||
+				(unitInfo->unitDefId == CST_UNITID_BALLISTA)) {
+				this->AddUnitIntoToSelection(unitInfo);
+			}
+		}
+	}
+	return;*/
+#endif
+
 	std::list<PotentialUnitInfo*> preSelectedUnits; // PotentialUnitInfo pointers are "shortcuts", do not free them here
 
 	// First selection based on "global" scores = Fill preSelectedUnits
@@ -1895,10 +1907,9 @@ void StrategyBuilder::SelectStrategyUnitsForLandOrWater(bool waterUnits) {
 
 	this->SelectStrategyUnitsFromPreSelection(preSelectedUnits, waterUnits);
 
-	// Consider adding units with special bonus like camel/chariot if it helps for a specific need
-#pragma TODO("early ages")
-	// Take care of early ages : add archers, axemen, slingers or scout (according to already available techs). TODO later (not in this method) ?
+	// Addi units with special bonus like camel/chariot if it helps for a specific need: done in SelectStrategyUnitsFromPreSelection
 }
+
 
 // Search for a unit that can be added to strategy as "optional" (without full upgrades) to fight a detected weakness.
 // waterUnits: if true, manage water units only. If false, manage land units only
