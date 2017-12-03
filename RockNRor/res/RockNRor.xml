@@ -256,7 +256,7 @@
 	<!--<per_number gameType="RM" sn="215" value="0"></per_number>--><!--SNAllowDiplomacyChangeOnAllyAttack=0 to prevent unfortunate diplomacy changes-->
 	<!--<per_number gameType="DM" sn="215" value="0"></per_number>--><!--SNAllowDiplomacyChangeOnAllyAttack=0 to prevent unfortunate diplomacy changes-->
 	<per_number gameType="RM" sn="161" value="4"></per_number><!--SNRequiredFirstBuilding=4 in random map: build SP/granary first-->
-	<per_number gameType="DM" sn="161" value="0"></per_number><!--SNRequiredFirstBuilding=0 in random map: build quickly-->
+	<per_number gameType="DM" sn="161" value="0"></per_number><!--SNRequiredFirstBuilding=0 in deathmatch: build quickly-->
 	<per_number gameType="DM" sn="220" value="3"></per_number><!--SNMaxFarms in deathmatch. Overwritten by maxFarmsInDeathMatch parameter-->
 	<per_number gameType="DM" sn="167" value="1"></per_number><!--SNInitialExplorationRequired in deathmatch. For faster town building-->
 	<per_number gameType="RM" sn="186" value="0"></per_number><!--SNCoopDemandTributeInterval: to disable tributes between AI players-->
