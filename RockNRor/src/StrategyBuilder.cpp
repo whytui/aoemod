@@ -352,7 +352,7 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(AOE_STRUCTURES::
 		assert(player && player->IsCheckSumValid());
 		if (!player || !player->IsCheckSumValid()) { return; }
 		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *bestFirstElem = this->mustBeAfterThisElem; // use previous calculations for initial position
-		if (bestFirstElem) {
+		if (bestFirstElem && (bestFirstElem->next != &buildAI->fakeFirstStrategyElement)) {
 			bestFirstElem = bestFirstElem->next;
 		}
 		int maxValueForMaxElemCount = 7;
@@ -387,7 +387,8 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(AOE_STRUCTURES::
 			int elemCount = 0;
 			int maxElemCount = randomizer.GetRandomValue_normal_moreFlat(2, maxValueForMaxElemCount); // Do not add further than x "elems" away from base calculated point
 			AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = bestFirstElem;
-			while (curElem && (elemCount < maxElemCount)) { // Just move a bit further
+			// Just move a bit further - except if reaching strategy end !
+			while (curElem && (elemCount < maxElemCount) && (curElem->next != &buildAI->fakeFirstStrategyElement)) {
 				if (curElem->elementType == TAIUnitClass::AIUCCritical) { elemCount = maxElemCount; } // Force "don't go further" / probably an age upgrade
 				elemCount++;
 				curElem = curElem->next;
@@ -456,7 +457,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 	// Retrieve player tech tree
 	assert(player->techTreeId < global->technologiesInfo->technologyCount);
 	STRUCT_TECH_DEF *techDefTechTree = NULL;
-	if (player->techTreeId >= 0) { // a player *might* not have a tech tree.
+	if (!ROCKNROR::crInfo.myGameObjects.currentGameHasAllTechs && (player->techTreeId >= 0)) { // a player *might* not have a tech tree.
 		techDefTechTree = global->technologiesInfo->GetTechDef(player->techTreeId);
 		if (techDefTechTree->effectCount <= 0) { techDefTechTree = NULL; }
 	}
