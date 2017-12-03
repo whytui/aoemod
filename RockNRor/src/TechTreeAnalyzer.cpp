@@ -645,6 +645,13 @@ void TechTreeAnalyzer::UpdateUnitsBaseId() {
 			if (!r) { return false; }
 			return *l < *r;
 		});
+		unitDetail->possibleUpgradedUnitIDs.sort([&](long int left, long int right) {
+			auto l = this->GetDetailedUnitDef(left);
+			auto r = this->GetDetailedUnitDef(right);
+			if (!l) { return true; }
+			if (!r) { return false; }
+			return *l < *r;
+		});
 	}
 }
 
