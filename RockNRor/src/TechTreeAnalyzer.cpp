@@ -993,7 +993,7 @@ void TechTreeAnalyzer::RefreshTechDefPointers() {
 }
 
 
-// Returns true if provided technologyId corresponds to a technology tree
+// Returns true if provided technologyId corresponds to a technology tree (excludes "dynamic" tech trees !)
 bool TechTreeAnalyzer::IsTechTree(short int technologyId) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!this->IsReady() || !global) { return false; }

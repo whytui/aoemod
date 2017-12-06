@@ -7,6 +7,7 @@
 #include <AOE_struct_tech_def.h>
 #include <AOE_struct_research_def.h>
 #include <AOE_empires_dat.h>
+#include "TTDetailedResearchDef.h"
 
 using namespace AOE_CONST_FUNC;
 
@@ -30,24 +31,26 @@ namespace STRATEGY {
 	public:
 		PotentialUnitInfo();
 		short int unitDefId; // DATID1 (base unit ID = without upgrades)
-		char *unitName; // For debug
+		string langName; // For debug
+		const char *unitName; // For debug
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *baseUnitDefLiving; // (DATID1) Unit definition of base unit, without upgrade
-		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *upgradedUnitDefLiving; // (DATID2) Unit definition of best upgraded unit (this is not base unit = could differ from unitDefId)
-		short int baseUnitDefId; // non-upgraded unit that can be upgraded to "this" one, if any. -1 in most cases. PLEASE use unitDefId instead.
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *upgradedUnitDefLiving; // (DATID2) Unit definition of best (available) upgraded unit (this is not base unit = could differ from unitDefId)
 		std::list<short int> upgradesUnitDefId; // List of all available unitDefId this unit can be upgraded to
 		short int strongestUpgradeUnitDefId; // Unit definition ID of best available upgraded unit
 		short int enabledByResearchId; // research ID that enables the unit, if any. -1 if no such research (unit is always available)
+		short int strongestUpgradeUnitEnabledByResearchId; // research ID that enables the BEST available upgraded unit, if any. -1 if no such research (unit is always available)
 		bool hasUnavailableUpgrade; // Some unit upgrade are unavailable in my tech tree (which means I'm missing super unit, or at least full upgraded unit)
-		long int unavailableRelatedResearchesCount;
-		long int availableRelatedResearchesCount;
+		std::set<TTDetailedResearchDef*> unavailableRelatedResearchDetail; // List of detailed info on related UNavailable researches
+		std::set<TTDetailedResearchDef*> availableRelatedResearchDetail; // List of detailed info on related available researches
 		short int ageResearchId; // ResearchId of the age (stone/tool/bronze/iron) where the unit can be enabled first. -1=always available
-		std::set<short int> requiredResearchesForBaseUnit;
+		std::set<short int> requiredResearchesForBaseUnit; // ALL required researches for same age, excluding "enabledByResearchId", for base unit. Includes researches initiated by required buildings !
+		std::set<short int> requiredResearchesForStrongestUpgrade; // Required researches for same age, excluding "strongestUpgradeUnitEnabledByResearchId", for best upgraded unit. Includes researches initiated by required buildings !
 		bool isBoat; // true for water units, false for land units
 		float speedBase;
 		float speedUpgraded;
-		float range;
+		float range; // Range for best upgrade
 		bool isMelee; // Might be simpler that manipulating range everywhere... We consider range<2 means melee (normally, range=0 for melee, but beware exceptions like fire galley)
-		short int hitPoints;
+		short int hitPoints; // Hit points of the best upgraded unit
 		short int displayedAttack; // displayedAttack from unitDef is reliable (always matches default attack without bonuses, never 0 for units with an attack). displayedAttack=number before the "+" (constant even after upgrade)
 		AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES unitAIType;
 		bool hasCivBonus;
@@ -75,6 +78,7 @@ namespace STRATEGY {
 		float scoreForUnitCount; // Used in temporary treatments to compute number of units to add in strategy
 		float scoreForEarlyAge; // A temporary score for early age unit choices
 		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstStratElem; // First strategy element that trains such a unit
+		ROCKNROR::STRATEGY::TTDetailedUnitDef *unitDefDetailedInfo;
 		
 
 		// Returns localized name of base unit
@@ -105,10 +109,11 @@ namespace STRATEGY {
 	public:
 		PotentialResearchInfo();
 		short int researchId;
+		string langName; // For debug
 		short int requiredAge; // The age research ID that is required (direct or indirect requirement). -1 means no age requirement, 100=stone, etc.
 		AOE_STRUCTURES::STRUCT_RESEARCH_DEF *researchDef;
 		AOE_STRUCTURES::STRUCT_TECH_DEF *techDef;
-		bool hasOptionalRequirements;
+		bool hasOptionalRequirements; // True if the research has a "choice" on its requirements (less needed than available), like ages
 		bool directRequirementsAreSatisfied;
 		short int missingRequiredResearches[4]; // -1 = empty slot. Other value = a required research ID that is not satisfied yet
 		bool markedForAdd; // If true, the research has to be added to strategy (or HAS been added, see isInStrategy)
@@ -127,6 +132,7 @@ namespace STRATEGY {
 		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *requiredAgeResearch; // Age research strategy element of my required age.
 		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *actualStrategyElement;
 		int totalCosts; // Sum of all raw costs (not weighted)
+		ROCKNROR::STRATEGY::TTDetailedResearchDef *detailedResInfo;
 
 		// Updates this->mustBeBeforeThisElem and this->mustBeAfterThisElem according to known dependencies on other unit/researches
 		// Previous values of mustBeBeforeThisElem  and mustBeAfterThisElem are reset (lost)
@@ -137,7 +143,9 @@ namespace STRATEGY {
 	public:
 		PotentialBuildingInfo();
 		short int unitDefId;
+		string langName; // For debug
 		AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef;
+		bool markedForAdd;
 		short int enabledByResearchId;
 		short int enabledInAge;
 		int addedInStrategyCount;
@@ -145,6 +153,7 @@ namespace STRATEGY {
 		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstAddedInStrategy; // The first of such buildings that was put in strategy
 		bool highPriority; // If true, start construction of (first) this building ASAP. E.g. market (to enable farming)
 		int unitsToBeTrained; // Number of (always retrainable) units that are trained in such buildings
+		ROCKNROR::STRATEGY::TTDetailedBuildingDef *unitDefDetailedInfo;
 	};
 	
 }

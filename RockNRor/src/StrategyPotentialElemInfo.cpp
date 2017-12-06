@@ -7,9 +7,9 @@ PotentialUnitInfo::PotentialUnitInfo() {
 	this->baseUnitDefLiving = NULL;
 	this->upgradedUnitDefLiving = NULL;
 	this->unitDefId = -1;
-	this->baseUnitDefId = -1;
 	this->enabledByResearchId = -1;
 	this->strongestUpgradeUnitDefId = -1;
+	this->strongestUpgradeUnitEnabledByResearchId = -1;
 	this->hasUnavailableUpgrade = false;
 	this->hasCivBonus = false;
 	this->hasSpecificAttackBonus = false;
@@ -20,8 +20,6 @@ PotentialUnitInfo::PotentialUnitInfo() {
 	this->speedUpgraded = 0;
 	this->displayedAttack = 0;
 	this->unitAIType = GLOBAL_UNIT_AI_TYPES::TribeAINone;
-	this->unavailableRelatedResearchesCount = 0;
-	this->availableRelatedResearchesCount = 0;
 	this->ageResearchId = -1;
 	this->conversionResistance = 1; // Default value
 	this->totalResourceCost = 0;
@@ -42,6 +40,7 @@ PotentialUnitInfo::PotentialUnitInfo() {
 	this->addedCount = 0;
 	this->scoreForEarlyAge = 0;
 	this->firstStratElem = NULL;
+	this->unitDefDetailedInfo = NULL;
 }
 
 PotentialResearchInfo::PotentialResearchInfo() {
@@ -62,11 +61,13 @@ PotentialResearchInfo::PotentialResearchInfo() {
 	this->forcePutAsEarlyAsPossible = false;
 	this->forcePutAfterOtherResearches = false;
 	this->actualStrategyElement = NULL;
+	this->detailedResInfo = NULL;
 }
 
 PotentialBuildingInfo::PotentialBuildingInfo() {
 	this->unitDef = NULL;
 	this->unitDefId = -1;
+	this->markedForAdd = false;
 	this->enabledByResearchId = -1;
 	this->enabledInAge = -1; // ResearchId of age where the building becomes available
 	this->addedInStrategyCount = 0;
@@ -74,5 +75,6 @@ PotentialBuildingInfo::PotentialBuildingInfo() {
 	this->highPriority = false;
 	this->firstAddedInStrategy = NULL;
 	this->unitsToBeTrained = 0;
+	this->unitDefDetailedInfo = NULL;
 }
 

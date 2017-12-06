@@ -127,6 +127,8 @@ bool DoesTechDisableUnit(STRUCT_TECH_DEF *techDef, short int unitDefId);
 bool DoesTechDisableResearch(STRUCT_TECH_DEF *techDef, short int researchId);
 
 // Returns true if the technology has some negative side effect (slower projectile, less-efficient villagers, etc)
+// Evaluates unit attribute changes, upgraded units (slower projectile, lower damage rate, etc)
+// Does not take into account "disable unit" or "disable research" effects
 // In standard game, this can be trireme/ballista tower (slower projectile), jihad
 bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef);
 

@@ -154,7 +154,7 @@ public:
 	// Please, please call this if TechDef pointers have changed in global->technologyInfos (when array has been re-allocated)
 	void RefreshTechDefPointers();
 
-	// Returns true if provided technologyId corresponds to a technology tree
+	// Returns true if provided technologyId corresponds to a technology tree (excludes "dynamic" tech trees !)
 	bool IsTechTree(short int technologyId);
 
 	// Returns true if a research affects some unit

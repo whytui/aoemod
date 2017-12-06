@@ -726,6 +726,8 @@ bool DoesTechDisableResearch(STRUCT_TECH_DEF *techDef, short int researchId) {
 
 
 // Returns true if the technology has some negative side effect (slower projectile, less-efficient villagers, etc)
+// Evaluates unit attribute changes, upgraded units (slower projectile, lower damage rate, etc)
+// Does not take into account "disable unit" or "disable research" effects
 // In standard game, this can be trireme/ballista tower (slower projectile), jihad
 bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef) {
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
@@ -756,13 +758,13 @@ bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef) {
 			if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) {
 				if (((effectValue > 0) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) < 0)) ||
 					((effectValue < 0) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) > 0))) {
-					return true;
+					return true; // "negative" attribute value change
 				}
 			}
 			if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT) {
 				if (((effectValue > 1) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) < 0)) ||
 					((effectValue < 1) && (AttributeValueHasPositiveEffect((TECH_UNIT_ATTRIBUTES)techEffect->effectAttribute) > 0))) {
-					return true;
+					return true; // "negative" attribute value change
 				}
 			}
 			if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) {
@@ -772,6 +774,7 @@ bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef) {
 				}
 			}
 
+			// Evaluate unit upgrade
 			short int upgradedUnitId = techEffect->UpgradeUnitGetTargetUnit();
 			if (upgradedUnitId >= 0) {
 				STRUCT_UNITDEF_BASE *upgradedUnitDef = civdef1->GetUnitDef(upgradedUnitId);
@@ -784,6 +787,7 @@ bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef) {
 				}
 			}
 
+			// Evaluate projectile unit upgrade
 			if ((oldProjId >= 0) && (newProjId >= 0)) {
 				STRUCT_UNITDEF_PROJECTILE *oldProj = (STRUCT_UNITDEF_PROJECTILE*)civdef1->GetUnitDef(oldProjId);
 				STRUCT_UNITDEF_PROJECTILE *newProj = (STRUCT_UNITDEF_PROJECTILE*)civdef1->GetUnitDef(newProjId);

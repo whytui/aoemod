@@ -52,7 +52,7 @@ AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *StrategyBuilder::GetAgeStrategyElement(
 }
 
 
-// Add a unit to selection and updates some internal variables accordingly
+// Add a unit to selection (actuallySelectedUnits) and updates some internal variables accordingly
 // Return total unit count in selection
 int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
 	unitInfo->isSelected = true;
@@ -140,9 +140,11 @@ PotentialResearchInfo *StrategyBuilder::GetResearchInfo(AOE_STRUCTURES::STRUCT_R
 	}
 	return NULL;
 }
-// Add building to potential buildings list and initializes underlying info.
-// Returns NULL if not added, or pointer to object if successful
-PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int researchId) {
+
+// Add research to potential researches list and initializes underlying info.
+// Returns NULL if not added (error), or pointer to object if successful OR ALREADY existing
+// Adds all requirements too (researches, buildings)
+PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int researchId, bool markForAdd) {
 	AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(researchId);
 	if (!resDef || !this->global || !this->player) { return NULL; }
 	// Check availability (tech tree)
@@ -155,11 +157,29 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 	}
 	PotentialResearchInfo *resInfo = this->GetResearchInfo(resDef);
 	if (resInfo != NULL) {
-		return NULL; // already in list: do not add
+		if (markForAdd) {
+			resInfo->markedForAdd = true;
+		}
+		return resInfo; // already in list: do not add
 	}
+	TTDetailedResearchDef *resDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(researchId);
+	// Do not exclude shadow research, let us analyze their requirements. We won't add shadow res. in strategy anyway.
+
 	resInfo = new PotentialResearchInfo();
 	resInfo->researchDef = resDef;
 	resInfo->researchId = researchId;
+	resInfo->markedForAdd = markForAdd;
+	resInfo->detailedResInfo = resDtl;
+	if (resDtl && resDtl->active) {
+		resInfo->langName = resDtl->langName;
+	} else {
+		if (resDef->researchName) {
+			resInfo->langName = resDef->researchName;
+		}
+		if (resDef->languageDLLName >= 0) {
+			resInfo->langName = GetLanguageDllText(resDef->languageDLLName);
+		}
+	}
 	resInfo->hasOptionalRequirements = ResearchHasOptionalRequirements(resDef);
 	resInfo->directRequirementsAreSatisfied = !resInfo->hasOptionalRequirements;
 	potentialResearchesList.push_back(resInfo);
@@ -167,6 +187,43 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 	if (resDef->costUsed1 > 0) { resInfo->totalCosts += resDef->costAmount1; }
 	if (resDef->costUsed2 > 0) { resInfo->totalCosts += resDef->costAmount2; }
 	if (resDef->costUsed3 > 0) { resInfo->totalCosts += resDef->costAmount3; }
+
+
+	// *********************************
+	// Add research's own requirements !
+	if (!resDtl->hasOptionalRequirements && !resDtl->IsAgeResearch()) { // Don't handle age requirements like this, especially because of optional requirements !
+		for each(TTDetailedResearchDef *resDtlReqDtl in resDtl->allRequirementsExcludingAges) {
+			if (resDtlReqDtl && (this->GetResearchInfo(resDtlReqDtl->researchDef) == NULL)) {
+				if (resDtlReqDtl->hasOptionalRequirements || resDtlReqDtl->IsAgeResearch()) {
+					continue; // Don't handle age requirements like this, especially because of optional requirements !
+				}
+				// Need to add a requirement -> recursive call
+				this->AddPotentialResearchInfoToList((short int)resDtlReqDtl->GetResearchDefId(), markForAdd);
+			}
+		}
+	}
+
+	// Check that building that enable "this" research is available and its requirements too
+	for each (TTDetailedBuildingDef *bld in resDtl->triggeredByBuilding) {
+		if (!bld->IsValid() || (bld->possibleAncestorUnitIDs.size() > 0)) {
+			continue; // Ignore invalid and "non-root" buildings 
+		}
+		auto search = std::find_if(this->potentialBuildingsList.cbegin(), this->potentialBuildingsList.cend(),
+			[bld](PotentialBuildingInfo *info){ return bld->baseUnitId == info->unitDefId; });
+		if (search == this->potentialBuildingsList.cend()) {
+			if (resDtl->hasOptionalRequirements || resDtl->IsAgeResearch()) {
+				continue; // Don't handle age requirements like this, especially because of optional requirements !
+			}
+			// This building is not known yet in potential buildings list
+			this->AddPotentialBuildingInfoToList(bld->unitDef, markForAdd); // does not handle any dependency
+			if (bld->researchIdsThatEnableMe.size() > 0) {
+				short int bldReqResId = (short int)*bld->researchIdsThatEnableMe.begin();
+				this->AddPotentialResearchInfoToList(bldReqResId, markForAdd); // This will add the necessary requirements
+			}
+		}
+	}
+	// *********************************
+
 
 	AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->GetTechDef(resDef->technologyId);
 	resInfo->techDef = techDef;
@@ -181,17 +238,13 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *tmpUnitDef = FindBuildingDefThatEnablesResearch(this->player, curReqResId);
 			if (tmpUnitDef && tmpUnitDef->IsCheckSumValidForAUnitClass()) {
 				resInfo->unitsThatMustBePutBeforeMe.insert(tmpUnitDef->DAT_ID1);
-				if (resInfo->directRequirementsAreSatisfied) {
-					// We "validated" this research, but we have to make sure requirements are satisfied => those from "building's initiate research" aren't yet.
-					this->AddPotentialBuildingInfoToList(tmpUnitDef->DAT_ID1);
-				}
 			}
 		}
 	}
 	// Search for required age
 	resInfo->requiredAge = FindResearchRequiredAge(this->player, resInfo->researchId);
 	// Ages are added to strategy at the very beginning of the process, so we can already retrieve "my age" strategy element
-	if (resInfo->requiredAge > 0) {
+	if (resInfo->requiredAge >= 0) {
 		resInfo->requiredAgeResearch = FindFirstElementInStrategy(&this->buildAI->fakeFirstStrategyElement, AIUCCritical, resInfo->requiredAge);
 		if (resInfo->requiredAgeResearch == NULL) {
 			resInfo->requiredAgeResearch = FindFirstElementInStrategy(&this->buildAI->fakeFirstStrategyElement, AIUCTech, resInfo->requiredAge);
@@ -245,25 +298,32 @@ PotentialBuildingInfo *StrategyBuilder::GetBuildingInfo(AOE_STRUCTURES::STRUCT_U
 }
 // Add building to potential buildings list and initilizes underlying info.
 // Returns true if actually added
-bool StrategyBuilder::AddPotentialBuildingInfoToList(short int unitDefId) {
+bool StrategyBuilder::AddPotentialBuildingInfoToList(short int unitDefId, bool markForAdd) {
 	if (unitDefId < 0) { return false; }
 	AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)player->GetUnitDefBase(unitDefId);
 	if (unitDef && unitDef->IsTypeValid()) {
-		return AddPotentialBuildingInfoToList(unitDef);
+		return AddPotentialBuildingInfoToList(unitDef, markForAdd);
 	}
 	return false;
 }
-bool StrategyBuilder::AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef) {
+bool StrategyBuilder::AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef, bool markForAdd) {
 	if (!unitDef || !unitDef->IsTypeValid()) { return false; }
 	PotentialBuildingInfo *bldInfo = this->GetBuildingInfo(unitDef->DAT_ID1);
 	if (bldInfo != NULL) {
+		if (markForAdd) { bldInfo->markedForAdd = true; }
 		return false;
 	}
 	bldInfo = new PotentialBuildingInfo();
 	bldInfo->unitDef = unitDef;
 	bldInfo->unitDefId = unitDef->DAT_ID1;
+	bldInfo->langName = unitDef->ptrUnitName;
+	bldInfo->unitDefDetailedInfo = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(unitDef->DAT_ID1);
+	if (bldInfo->unitDefDetailedInfo && bldInfo->unitDefDetailedInfo->IsValid()) {
+		bldInfo->langName = bldInfo->unitDefDetailedInfo->langName;
+	}
 	bldInfo->enabledByResearchId = FindResearchThatEnableUnit(this->player, unitDef->DAT_ID1, 0);
 	bldInfo->desiredCount = 1;
+	bldInfo->markedForAdd = markForAdd;
 	AOE_STRUCTURES::STRUCT_RESEARCH_DEF *parentResDef = player->GetResearchDef(bldInfo->enabledByResearchId);
 	if (parentResDef && (bldInfo->enabledByResearchId >= 0)) {
 		bldInfo->enabledInAge = GetAgeResearchFromDirectRequirement(parentResDef);
@@ -296,6 +356,10 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNIT
 bool StrategyBuilder::IsResearchInTechTree(short int researchId) {
 	if ((this->player->techTreeId < 0) || (this->global->scenarioInformation && this->global->scenarioInformation->fullTechTree)
 		|| (this->settings->allTechs)) {
+		return (researchId >= 0);
+	}
+	if (ROCKNROR::crInfo.myGameObjects.currentGameHasAllTechs) {
+		assert(false && "incorrect scenarioInformation->fullTechTree value ?");
 		return (researchId >= 0);
 	}
 	AOE_STRUCTURES::STRUCT_TECH_DEF *techTreeDef = this->global->GetTechDef(this->player->techTreeId);
@@ -443,7 +507,7 @@ void PotentialResearchInfo::ComputeStratElemPositionConstraints(AOE_STRUCTURES::
 /*** Units selection methods ***/
 
 
-// Fills unitInfos with all available military units from tech tree.
+// Fills unitInfos with ALL available military units from tech tree (only "root" units are listed).
 // Towers are ignored (not added to list). Boats are ignored on non-water maps.
 // *** Make sure to delete all PotentialUnitInfo from list when you're finished with the list ***
 void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *player) {
@@ -454,284 +518,188 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid()) { return; }
 	if (!global->technologiesInfo || !global->technologiesInfo->IsCheckSumValid()) { return; }
-	// Retrieve player tech tree
-	assert(player->techTreeId < global->technologiesInfo->technologyCount);
-	STRUCT_TECH_DEF *techDefTechTree = NULL;
-	if (!ROCKNROR::crInfo.myGameObjects.currentGameHasAllTechs && (player->techTreeId >= 0)) { // a player *might* not have a tech tree.
-		techDefTechTree = global->technologiesInfo->GetTechDef(player->techTreeId);
-		if (techDefTechTree->effectCount <= 0) { techDefTechTree = NULL; }
-	}
 	this->player = player;
 
-	// Store list of available research (not disabled in tech tree) to avoid having to recompute it more than once
-	std::list<short int> allAvailableResearches;
-	std::list<short int> allDisabledResearches; // analog: full list of tech tree-disable researches
-	for (int curRsId = 0; curRsId < player->ptrResearchesStruct->researchCount; curRsId++) {
-		STRUCT_RESEARCH_DEF *curResDef = player->GetResearchDef(curRsId);
-		bool researchIsDisabled = false;
-		for (int i = 0; (techDefTechTree != NULL) && (i < techDefTechTree->effectCount) && !researchIsDisabled; i++) {
-			if ((techDefTechTree->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_DISABLE_RESEARCH) &&
-				(techDefTechTree->ptrEffects[i].GetValue() == curRsId)) {
-				researchIsDisabled = true;
-			}
-		}
-		if (researchIsDisabled /*to TEST specific limitations || (curRsId==AOE_CONST_FUNC::CST_RSID_HELEPOLIS)*/) {
-			allDisabledResearches.push_back(curRsId);
-		} else {
-			allAvailableResearches.push_back(curRsId);
-		}
+	if (!ROCKNROR::crInfo.techTreeAnalyzer.IsReady()) {
+		this->log += "ERROR: Tech tree analyzer is not ready !";
+		this->log += newline;
+		return;
 	}
+	
+	for (int unitDefId = 0; unitDefId < ROCKNROR::crInfo.techTreeAnalyzer.GetUnitDefCount(); unitDefId++) {
+		ROCKNROR::STRATEGY::TTDetailedTrainableUnitDef *unitDetailTrainable = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(unitDefId);
+		if (!unitDetailTrainable || !unitDetailTrainable->IsValid() || unitDetailTrainable->IsHeroOrScenarioUnit()) { continue; }
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = unitDetailTrainable->GetUnitDef();
+		if (!unitDef || !unitDef->DerivesFromTrainable()) { continue; }
+		if (!IsNonTowerMilitaryUnit(unitDef->unitAIType)) { continue; } // Exclude villagers, towers...
+		
+		// Intentionally exclude "upgrades": we only get the list of "root" units
+		if (unitDetailTrainable->possibleAncestorUnitIDs.size() > 0) { continue; }
 
-	for (int curUnitDefID = 0; curUnitDefID < player->structDefUnitArraySize; curUnitDefID++) {
-		STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(curUnitDefID);
-		bool validUnit = (unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
-		validUnit = validUnit && unitDefBase->DerivesFromTrainable();
-		validUnit = validUnit && IsNonTowerMilitaryUnit(unitDefBase->unitAIType);
-		STRUCT_UNITDEF_TRAINABLE *unitDefLiving = (STRUCT_UNITDEF_TRAINABLE *)unitDefBase;
-		assert(!validUnit || unitDefLiving->IsCheckSumValidForAUnitClass());
-		validUnit = validUnit && (unitDefLiving->towerMode == 0) && (unitDefLiving->speed > 0) &&
-			(unitDefLiving->trainButton > 0) && (unitDefLiving->trainLocation >= 0); // both exclude some heroes/cheats/non-standard units, but not all of them
+		// Is unit available in my tech tree ?
+		auto searchDisableUnit = std::find_if(this->playerTechTreeInfo->disabledTrainableUnitInfos.cbegin(),
+			this->playerTechTreeInfo->disabledTrainableUnitInfos.cend(), [unitDef](TTDetailedUnitDef *curDtl){ return curDtl->unitDefId == unitDef->DAT_ID1; });
+		if (searchDisableUnit != this->playerTechTreeInfo->disabledTrainableUnitInfos.cend()) {
+			continue; // unit is disabled (unavailable in tech tree)
+		}
 
+		// Find best available upgrade
+		bool hasUnavailableUpgrade = false;
+		TTDetailedTrainableUnitDef *bestUpgradedDetail = unitDetailTrainable; // default: best upgrade = self
+		for each (auto curUpgradedId in unitDetailTrainable->possibleUpgradedUnitIDs)
+		{
+			// possibleUpgradedUnitIDs are ordered: each loop should provide a "better" upgrade than previous one
+			auto searchDisableUpgrade = std::find_if(this->playerTechTreeInfo->disabledTrainableUnitInfos.cbegin(),
+				this->playerTechTreeInfo->disabledTrainableUnitInfos.cend(), [curUpgradedId](TTDetailedUnitDef *curDtl)
+			{ return curDtl->unitDefId == curUpgradedId; }); // finds an element if curUpgradedId is unavailable
+			if (searchDisableUpgrade != this->playerTechTreeInfo->disabledTrainableUnitInfos.cend()) {
+				hasUnavailableUpgrade = true; // Found a disabled upgrade of our unit
+				break; // If this upgrade is disabled, next ones will too
+			}
+			bestUpgradedDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(curUpgradedId);
+			assert(bestUpgradedDetail && bestUpgradedDetail->IsValid());
+		}
 
-		bool availableForPlayer = validUnit && (unitDefLiving->availableForPlayer != 0); // Warning: this excludes units that are enabled by researches
-		short int researchIdThatEnablesUnit = -1; // Store the researchId that enables current unit... If any
-		short int ageResearchIdThatEnablesUnit = -1; // Age (identified by research id) where unit can become available
+		PotentialUnitInfo *unitInfo = new PotentialUnitInfo();
+		unitInfo->ageResearchId = unitDetailTrainable->requiredAge;
+		unitInfo->unitDefId = (short int)unitDetailTrainable->baseUnitId;
+		unitInfo->baseUnitDefLiving = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE*) player->GetUnitDefBase((short int)unitDetailTrainable->baseUnitId);
+		unitInfo->isBoat = IsWaterUnit(unitDef->unitAIType);
+		unitInfo->enabledByResearchId = -1;
+		if (unitDetailTrainable->researchIdsThatEnableMe.size() > 0) {
+			unitInfo->enabledByResearchId = (short int)*unitDetailTrainable->researchIdsThatEnableMe.begin();
+			// By the way, save all requirements to requiredResearchesForBaseUnit. Do not add "enabledByResearchId" to "requiredResearchesForBaseUnit"
+			TTDetailedResearchDef *reqDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(unitInfo->enabledByResearchId);
+			if (reqDtl && reqDtl->active) {
+				for each(TTDetailedResearchDef *r in reqDtl->allRequirementsExcludingAges) {
+					if (!r->IsShadowResearch() && !r->IsAgeResearch()) { // ignore ages and shadow reearches...
+						unitInfo->requiredResearchesForBaseUnit.insert((short int)r->GetResearchDefId());
+					}
+				}
+			}
+		}
+		unitInfo->strongestUpgradeUnitEnabledByResearchId = -1;
+		if (bestUpgradedDetail->researchIdsThatEnableMe.size() > 0) {
+			unitInfo->strongestUpgradeUnitEnabledByResearchId = (short int)*bestUpgradedDetail->researchIdsThatEnableMe.begin();
+			// Find required researches for best upgraded unit
+			TTDetailedResearchDef *reqUpgrDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(unitInfo->strongestUpgradeUnitEnabledByResearchId);
+			if (reqUpgrDtl && reqUpgrDtl->active) {
+				for each(TTDetailedResearchDef *r in reqUpgrDtl->allRequirementsExcludingAges) {
+					if (!r->IsShadowResearch() && !r->IsAgeResearch()) { // ignore ages and shadow reearches...
+						unitInfo->requiredResearchesForStrongestUpgrade.insert((short int)r->GetResearchDefId());
+					}
+				}
+			}
+		}
 
-		// Search for a research (available in my tech tree) that enables unit
-		if (!availableForPlayer && validUnit) {
-			short int enableUnitResearchId = FindResearchThatEnableUnit(player, unitDefBase->DAT_ID1, 0);
-			while ((enableUnitResearchId >= 0) && !availableForPlayer) {
-				STRUCT_RESEARCH_DEF *enableUnitResearchDef = player->GetResearchDef(enableUnitResearchId);
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *bestUnitDef = bestUpgradedDetail->GetUnitDef();
+		unitInfo->hitPoints = bestUnitDef->totalHitPoints;
+		unitInfo->displayedAttack = bestUnitDef->displayedAttack;
+		unitInfo->range = bestUnitDef->maxRange;
+		unitInfo->isMelee = !IsRangedUnit(unitDef); // melee=not priest/not ranged(projectile), not st francis(melee with range)
+		unitInfo->speedBase = unitDef->speed; // base speed value
+		unitInfo->speedUpgraded = bestUnitDef->speed; // updated speed value
+		unitInfo->upgradedUnitDefLiving = bestUnitDef;
+		unitInfo->strongestUpgradeUnitDefId = (short int)bestUpgradedDetail->unitDefId;
+		unitInfo->unitAIType = unitDef->unitAIType;
+		unitInfo->unitName = bestUpgradedDetail->internalName.c_str();
+		unitInfo->langName = bestUpgradedDetail->langName;
+		unitInfo->conversionResistance = this->crInfo->GetConversionResistance(player->civilizationId, unitDef->unitAIType);
+		unitInfo->hasUnavailableUpgrade = hasUnavailableUpgrade;
+		unitInfo->unavailableRelatedResearchDetail.clear();
+		unitInfo->availableRelatedResearchDetail.clear();
+		unitInfo->isSuperUnit = bestUpgradedDetail->isSuperUnit;
+		
+		if (bestUpgradedDetail->GetUnitDef()->HasBlastDamage()) {
+			unitInfo->displayedAttack = (unitInfo->displayedAttack * 115) / 100; // Give a "fake" attack bonus for units with blast damage (15% ?)
+		}
 
-				if (enableUnitResearchDef && (enableUnitResearchDef->technologyId >= 0) && (enableUnitResearchDef->technologyId < global->technologiesInfo->technologyCount)) {
-					// Is this research disabled by my tech tree ?
-					auto it = std::find_if(allDisabledResearches.begin(), allDisabledResearches.end(),
-						[enableUnitResearchId](short int availableResId) { return enableUnitResearchId == availableResId; }
-					);
-					bool researchIsDisabled = (it != allDisabledResearches.end()); // If found, then the research IS disabled
-					STRUCT_TECH_DEF *enableUnitTechDef = global->technologiesInfo->GetTechDef(enableUnitResearchDef->technologyId);
-					if (enableUnitTechDef && !researchIsDisabled) { // if research object is found AND available in my tech tree (not disabled)
-						for (int i = 0; i < enableUnitTechDef->effectCount; i++) {
-							if (enableUnitTechDef->ptrEffects[i].IsEnableUnit(unitDefBase->DAT_ID1)) {
-								availableForPlayer = true;
-								researchIdThatEnablesUnit = enableUnitResearchId;
-								// By the way, find which age is required. If we're lucky, it's a direct requirement in research
-								ageResearchIdThatEnablesUnit = GetAgeResearchFromDirectRequirement(enableUnitResearchDef);
-								// If we're unlucky, requirement is missing in empires.dat (example: priest). Find train location (ex:temple)'s required age from research that enabled is
-								if ((ageResearchIdThatEnablesUnit < 0) && (unitDefLiving->trainLocation >= 0)) {
-									short int bldEnabler = FindResearchThatEnableUnit(player, unitDefLiving->trainLocation, 0);
-									STRUCT_RESEARCH_DEF *bldEnablerResearchDef = player->GetResearchDef(bldEnabler);
-									ageResearchIdThatEnablesUnit = GetAgeResearchFromDirectRequirement(bldEnablerResearchDef);
-								}
+		// (un)available researches
+		for each (TTDetailedResearchDef *curRes in unitDetailTrainable->affectedByResearches)
+		{
+			if (!curRes->active || curRes->isAiUnsupported) { continue; }
+			long int curResId = curRes->GetResearchDefId();
+			auto searchDisableRes = std::find_if(this->playerTechTreeInfo->disabledResearchesInfo.cbegin(),
+				this->playerTechTreeInfo->disabledResearchesInfo.cend(), [curResId](TTDetailedResearchDef *curDtl){ return curDtl->GetResearchDefId() == curResId; });
+			if (searchDisableRes != this->playerTechTreeInfo->disabledResearchesInfo.cend()) {
+				unitInfo->unavailableRelatedResearchDetail.insert(curRes);
+			} else {
+				unitInfo->availableRelatedResearchDetail.insert(curRes);
+				// Take the occasion to apply effect on "best unit", for some specific attributes (speed...)
+				for (int i = 0; (curRes->techDef && i < curRes->techDef->effectCount); i++) {
+					if (curRes->techDef->ptrEffects[i].IsAttributeModifier()) {
+						bool affectsMe = ((curRes->techDef->ptrEffects[i].effectUnit == unitDef->DAT_ID1) ||
+							(curRes->techDef->ptrEffects[i].effectClass == unitDef->unitAIType));
+						if (affectsMe && (curRes->techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_SPEED)) {
+							float value = curRes->techDef->ptrEffects[i].GetValue();
+							if (curRes->techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) {
+								unitInfo->speedUpgraded += value;
+							}
+							if (curRes->techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) {
+								unitInfo->speedUpgraded = value;
+							}
+							if (curRes->techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT) {
+								unitInfo->speedUpgraded = unitInfo->speedUpgraded * value;
 							}
 						}
 					}
 				}
-				// Several researches might enable a same unit (for example if tech trees enable some units). Not standard, but possible.
-				enableUnitResearchId = FindResearchThatEnableUnit(player, unitDefBase->DAT_ID1, enableUnitResearchId + 1); // Search next
 			}
 		}
-		validUnit = validUnit && availableForPlayer;
 
-		// Filter for tech tree effects analysis: ignore techs with drawbacks, techs "not used" by AI, effects that do not provide a real specific advantage for current unit (macedonian's LOS)
-		static AOE_TECHNOLOGIES::TechFilterExcludeDrawbacksAndDistributedEffects filter;
-		bool techTreeAffectsCurrentUnit = (techDefTechTree != NULL) && DoesTechAffectUnit(techDefTechTree, unitDefBase, &filter);
+		// Analyze costs
+		unitInfo->costsGold = false;
+		for (int i = 0; i < 3; i++) {
+			if ((unitDef->costs[i].costType >= AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD) &&
+				(unitDef->costs[i].costType <= AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD) &&
+				(unitDef->costs[i].costPaid)) {
+				unitInfo->totalResourceCost += unitDef->costs[i].costAmount;
+				if (unitDef->costs[i].costType == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD) {
+					unitInfo->costsGold = true;
+				}
+				unitInfo->trainCosts[unitDef->costs[i].costType] = unitDef->costs[i].costAmount;
+			}
+		}
+		unitInfo->weightedCost = 0;
+		for (int i = 0; i < 4; i++) {
+			unitInfo->weightedCost += GetWeightedCostValue(unitInfo->trainCosts[i], (RESOURCE_TYPES)i);
+		}
+		// Has special attack bonus ?
+		unitInfo->hasSpecificAttackBonus = false;
+		if (unitInfo->upgradedUnitDefLiving && unitInfo->upgradedUnitDefLiving->ptrAttacksList) {
+			for (int i = 0; i < unitInfo->upgradedUnitDefLiving->attacksCount; i++) {
+				if ((unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CAMEL_ON_CAVALRY) ||
+					(unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_SLINGER_ON_ARCHERS) ||
+					(unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CAVALRY_ON_INFANTRY) ||
+					(unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CHARIOTS_ON_PRIESTS)
+					) {
+					unitInfo->hasSpecificAttackBonus = true;
+				}
+			}
+		}
+
+		// Retrieve player tech tree
+		assert(player->techTreeId < global->technologiesInfo->technologyCount);
+		STRUCT_TECH_DEF *techDefTechTree = NULL;
 		bool currentUnitHasTechTreeBonus = false;
-		if (validUnit && techTreeAffectsCurrentUnit) {
-			for (int i = 0; i < techDefTechTree->effectCount; i++) {
-				if (techDefTechTree->ptrEffects[i].IsDisableUnit(unitDefBase->DAT_ID1)) {
-					validUnit = false;
+		if (!ROCKNROR::crInfo.myGameObjects.currentGameHasAllTechs && (player->techTreeId >= 0)) { // a player *might* not have a tech tree.
+			techDefTechTree = global->technologiesInfo->GetTechDef(player->techTreeId);
+			static AOE_TECHNOLOGIES::TechFilterExcludeDrawbacksAndDistributedEffects filter;
+			bool techTreeAffectsCurrentUnit = (techDefTechTree != NULL) && DoesTechAffectUnit(techDefTechTree, unitDef, &filter);
+			bool techTreeHasNegativeEffectOnUnit = HasTechNegativeSideEffect(techDefTechTree);
+			if (techTreeAffectsCurrentUnit && !techTreeHasNegativeEffectOnUnit) {
+				for (int i = 0; i < techDefTechTree->effectCount; i++) {
+					if (techDefTechTree->ptrEffects[i].IsDisableUnit(unitDef->DAT_ID1)) {
+						assert(false && "unexpected disable unit"); // If unit is disabled, this should have been detected before and we wouldn't be here
+					}
 				}
+				currentUnitHasTechTreeBonus = true; // If not a "disable unit" effect, consider it is a positive effect
 			}
-			currentUnitHasTechTreeBonus = validUnit; // If there is no effect "disable unit", consider it is a positive effect
 		}
-		if (validUnit) {
-			PotentialUnitInfo *unitInfo = new PotentialUnitInfo();
-			unitInfo->hasUnavailableUpgrade = false; // updated below
-			unitInfo->availableRelatedResearchesCount = 0; // updated below
-			unitInfo->unavailableRelatedResearchesCount = 0; // updated below
-			unitInfo->baseUnitDefLiving = unitDefLiving;
-			unitInfo->upgradedUnitDefLiving = unitDefLiving; // Default: base unit. We'll update this later if necessary
-			unitInfo->unitDefId = unitDefLiving->DAT_ID1;
-			unitInfo->isBoat = IsWaterUnit(unitDefLiving->unitAIType);
+		unitInfo->hasCivBonus = currentUnitHasTechTreeBonus;
 
-			// (just) Get list of (available) upgraded units + base unit
-			for each (short int curResearchId in allAvailableResearches)
-			{
-				STRUCT_RESEARCH_DEF *curResearchDef = player->GetResearchDef(curResearchId);
-				short int techId = -1;
-				STRUCT_TECH_DEF *techDef = NULL;
-				if (curResearchDef) {
-					techId = curResearchDef->technologyId;
-					if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
-						techDef = global->technologiesInfo->GetTechDef(techId);
-					}
-				}
-				if (techDef && techDef->ptrEffects) {
-					if (ROCKNROR::crInfo.techTreeAnalyzer.DoesResearchAffectUnit(curResearchId, curUnitDefID)) {
-						for (int i = 0; i < techDef->effectCount; i++) {
-							short int upgradeTargetUnitDefId = techDef->ptrEffects[i].UpgradeUnitGetTargetUnit();
-							if ((upgradeTargetUnitDefId >= 0) && (techDef->ptrEffects[i].effectUnit == unitDefLiving->DAT_ID1)) {
-								// We found an upgrade for our unit
-								unitInfo->upgradesUnitDefId.push_back(upgradeTargetUnitDefId);
-								int totalCost = 0;
-								if (curResearchDef->costUsed1) { totalCost += curResearchDef->costAmount1; }
-								if (curResearchDef->costUsed2) { totalCost += curResearchDef->costAmount2; }
-								if (curResearchDef->costUsed3) { totalCost += curResearchDef->costAmount3; }
-								if (totalCost >= 1000) { unitInfo->isSuperUnit = true; } // Is there any better criteria ? not sure
-							}
-							if (upgradeTargetUnitDefId == unitDefLiving->DAT_ID1) {
-								// We found the base unit of our unit (our unit is an upgrade for some other unit)
-								unitInfo->baseUnitDefId = techDef->ptrEffects[i].effectUnit;
-							}
-						}
-					}
-				}
-			}
-			// Determine best upgraded unit (now we have the list of available unit upgrades)
-			short int bestUnitDefId = unitDefLiving->DAT_ID1;
-			short int bestHP = unitDefLiving->totalHitPoints;
-			float bestRange = unitDefLiving->displayedRange;
-			short int bestAttack = unitDefLiving->displayedAttack;
-			short int bestArmor = unitDefLiving->displayedArmor;
-			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *bestUpgradedUnit = unitDefLiving;
-			float bestSpeed = unitDefLiving->speed;
-			for each (short int upgradedUnitDefId in unitInfo->upgradesUnitDefId)
-			{
-				AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *upgradedDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)GetUnitDefStruct(player, upgradedUnitDefId);
-				bool currentIsBetter = false;
-				if (upgradedDef && upgradedDef->IsCheckSumValidForAUnitClass() && upgradedDef->DerivesFromTrainable()) {
-					if ((upgradedDef->totalHitPoints > bestHP) || (upgradedDef->displayedAttack > bestAttack) ||
-						(upgradedDef->displayedArmor > bestArmor) || (upgradedDef->displayedRange > bestRange)) {
-						currentIsBetter = true;
-					} else {
-						// If previous criterion are all equals, try speed (we're careful, some upgrade could make a unit stronger but a bit slower => use this as last resort)
-						currentIsBetter = (upgradedDef->speed > bestSpeed);
-					}
-					if (currentIsBetter) {
-						bestAttack = upgradedDef->displayedAttack;
-						bestArmor = upgradedDef->displayedArmor;
-						bestHP = upgradedDef->totalHitPoints;
-						bestRange = upgradedDef->displayedRange;
-						bestSpeed = upgradedDef->speed;
-						bestUnitDefId = upgradedUnitDefId;
-						bestUpgradedUnit = upgradedDef;
-					}
-				}
-			}
-			// Value various info with upgraded unit data (not base unit).
-			unitInfo->strongestUpgradeUnitDefId = bestUnitDefId;
-			unitInfo->upgradedUnitDefLiving = bestUpgradedUnit;
-			unitInfo->hitPoints = bestUpgradedUnit->totalHitPoints;
-			unitInfo->range = bestUpgradedUnit->maxRange;
-			unitInfo->isMelee = (unitInfo->range < 2);
-			unitInfo->speedBase = unitInfo->baseUnitDefLiving->speed; // base speed value
-			unitInfo->speedUpgraded = bestUpgradedUnit->speed; // updated speed value
-			unitInfo->unitAIType = bestUpgradedUnit->unitAIType;
-			unitInfo->hasCivBonus = currentUnitHasTechTreeBonus;
-			unitInfo->enabledByResearchId = researchIdThatEnablesUnit;
-			unitInfo->ageResearchId = ageResearchIdThatEnablesUnit;
-			unitInfo->unitName = bestUpgradedUnit->ptrUnitName;
-			unitInfo->displayedAttack = bestUpgradedUnit->displayedAttack;
-			if (bestUpgradedUnit->HasBlastDamage()) {
-				unitInfo->displayedAttack = (unitInfo->displayedAttack * 115) / 100; // Give a "fake" attack bonus for units with blast damage (15% ?)
-			}
-			unitInfo->conversionResistance = this->crInfo->GetConversionResistance(player->civilizationId, bestUpgradedUnit->unitAIType);
-
-			// Analyze costs
-			for (int i = 0; i < 3; i++) {
-				if ((unitDefLiving->costs[i].costType >= AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD) &&
-					(unitDefLiving->costs[i].costType <= AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD) &&
-					(unitDefLiving->costs[i].costPaid)) {
-					unitInfo->totalResourceCost += unitDefLiving->costs[i].costAmount;
-					if (unitDefLiving->costs[i].costType == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD) {
-						unitInfo->costsGold = true;
-					}
-					unitInfo->trainCosts[unitDefLiving->costs[i].costType] = unitDefLiving->costs[i].costAmount;
-				}
-			}
-			unitInfo->weightedCost = 0;
-			for (int i = 0; i < 4; i++) {
-				unitInfo->weightedCost += GetWeightedCostValue(unitInfo->trainCosts[i], (RESOURCE_TYPES)i);
-			}
-
-			// Collect research info for this unit (available/unavailable, unit upgrades info, speed updates).
-			for each (short int curResearchId in allDisabledResearches)
-			{
-				STRUCT_RESEARCH_DEF *curResearchDef = player->GetResearchDef(curResearchId);
-				short int techId = -1;
-				STRUCT_TECH_DEF *techDef = NULL;
-				if (curResearchDef) {
-					techId = curResearchDef->technologyId;
-					if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
-						techDef = global->technologiesInfo->GetTechDef(techId);
-					}
-				}
-				if (techDef && techDef->ptrEffects) {
-					if (ROCKNROR::crInfo.techTreeAnalyzer.DoesResearchAffectUnit(curResearchId, curUnitDefID)) {
-						unitInfo->unavailableRelatedResearchesCount++;
-						for (int i = 0; i < techDef->effectCount; i++) {
-							short int upgradeTargetUnitDefId = techDef->ptrEffects[i].UpgradeUnitGetTargetUnit();
-							if ((upgradeTargetUnitDefId >= 0) && (techDef->ptrEffects[i].effectUnit == unitDefLiving->DAT_ID1)) {
-								// We found an upgrade for our unit (... which is disabled by tech tree)
-								unitInfo->hasUnavailableUpgrade = true;
-							}
-						}
-					}
-				}
-			}
-			// Collect some info on techs that improve the unit (speed...)
-			for each (short int curResearchId in allAvailableResearches)
-			{
-				STRUCT_RESEARCH_DEF *curResearchDef = player->GetResearchDef(curResearchId);
-				short int techId = -1;
-				STRUCT_TECH_DEF *techDef = NULL;
-				if (curResearchDef) {
-					techId = curResearchDef->technologyId;
-					if ((techId >= 0) && (techId < global->technologiesInfo->technologyCount)) {
-						techDef = global->technologiesInfo->GetTechDef(techId);
-					}
-				}
-				if (techDef && techDef->ptrEffects) {
-					if (ROCKNROR::crInfo.techTreeAnalyzer.DoesResearchAffectUnit(curResearchId, curUnitDefID)) {
-						unitInfo->availableRelatedResearchesCount++;
-						for (int i = 0; i < techDef->effectCount; i++) {
-							bool isAttrModifier = ((techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) ||
-								(techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) ||
-								(techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT));
-							bool affectsMe = ((techDef->ptrEffects[i].effectUnit == unitDefLiving->DAT_ID1) ||
-								(techDef->ptrEffects[i].effectClass == unitDefLiving->unitAIType));
-							if (isAttrModifier && affectsMe && (techDef->ptrEffects[i].effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_SPEED)) {
-								float value = techDef->ptrEffects[i].GetValue();
-								if (techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD) {
-									unitInfo->speedUpgraded += value;
-								}
-								if (techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_SET) {
-									unitInfo->speedUpgraded = value;
-								}
-								if (techDef->ptrEffects[i].effectType == TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT) {
-									unitInfo->speedUpgraded = unitInfo->speedUpgraded * value;
-								}
-							}
-						}
-					}
-				}
-			}
-			// Has special bonus ?
-			if (unitInfo->upgradedUnitDefLiving && unitInfo->upgradedUnitDefLiving->ptrAttacksList) {
-				for (int i = 0; i < unitInfo->upgradedUnitDefLiving->attacksCount; i++) {
-					if ((unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CAMEL_ON_CAVALRY) ||
-						(unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_SLINGER_ON_ARCHERS) ||
-						(unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CAVALRY_ON_INFANTRY) ||
-						(unitInfo->upgradedUnitDefLiving->ptrAttacksList[i].classId == ATTACK_CLASS::CST_AC_CHARIOTS_ON_PRIESTS)
-						) {
-						unitInfo->hasSpecificAttackBonus = true;
-					}
-				}
-			}
-			// Save unit infos in list
-			this->potentialUnitsList.push_back(unitInfo);
-		}
+		// Save unit infos in list
+		this->potentialUnitsList.push_back(unitInfo);
 	}
 }
 
@@ -747,8 +715,8 @@ void StrategyBuilder::ComputeStrengthsForPotentialUnits() {
 
 		// availableRelatedResearchesProportion is a % value (0-100)
 		int availableRelatedResearchesProportion = 100;
-		if (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount != 0) {
-			availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount);
+		if (unitInfo->unavailableRelatedResearchDetail.size() + unitInfo->availableRelatedResearchDetail.size() != 0) {
+			availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchDetail.size() * 100) / (unitInfo->unavailableRelatedResearchDetail.size() + unitInfo->availableRelatedResearchDetail.size());
 		}
 		// A combination of speed and hit points
 		float adjustedSpeed = unitInfo->speedUpgraded - 0.4f;
@@ -1035,7 +1003,7 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 	unitInfo->strengthVs[MC_PRIEST] = 20; // Default base strength value
 	if (unitInfo->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) {
 		// availableRelatedResearchesProportion is a % value (0-100)
-		int availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->unavailableRelatedResearchesCount + unitInfo->availableRelatedResearchesCount);
+		int availableRelatedResearchesProportion = (unitInfo->availableRelatedResearchDetail.size() * 100) / (unitInfo->unavailableRelatedResearchDetail.size() + unitInfo->availableRelatedResearchDetail.size());
 		int scoreForPriestResearches = (availableRelatedResearchesProportion < 80) ? 35 : 95;
 		// Well-developed priests are good against priests (at least, allows converting back my units OR converting enemy units - the goal is not necessarily to convert enemy priests)
 		unitInfo->strengthVs[MC_PRIEST] = scoreForPriestResearches;
@@ -1171,8 +1139,8 @@ void StrategyBuilder::ComputeScoresVsPriests(PotentialUnitInfo *unitInfo) {
 void StrategyBuilder::ComputeScoresVsTower(PotentialUnitInfo *unitInfo) {
 	unitInfo->strengthVs[MC_TOWER] = 0;
 	int proportion = 100;
-	if (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount != 0) {
-		proportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount);
+	if (unitInfo->availableRelatedResearchDetail.size() + unitInfo->unavailableRelatedResearchDetail.size() != 0) {
+		proportion = (unitInfo->availableRelatedResearchDetail.size()* 100) / (unitInfo->availableRelatedResearchDetail.size() + unitInfo->unavailableRelatedResearchDetail.size());
 	}
 	switch (unitInfo->unitAIType) {
 	case GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon:
@@ -1262,8 +1230,8 @@ void StrategyBuilder::ComputeGlobalScores() {
 		int numberOfAvailableUpgrades = unitInfo->upgradesUnitDefId.size();
 		// TODO: example: assyrian cat is super unit (all unit upgrades) but missing 2 techs/5 => not selected
 		int proportion = 100;
-		if (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount != 0) {
-			proportion = (unitInfo->availableRelatedResearchesCount * 100) / (unitInfo->availableRelatedResearchesCount + unitInfo->unavailableRelatedResearchesCount);
+		if (unitInfo->availableRelatedResearchDetail.size() + unitInfo->unavailableRelatedResearchDetail.size() != 0) {
+			proportion = (unitInfo->availableRelatedResearchDetail.size() * 100) / (unitInfo->availableRelatedResearchDetail.size() + unitInfo->unavailableRelatedResearchDetail.size());
 		}
 		// Reduce proportion impact:
 		int missingTechProportionWeight = 70; // Importance (a % value) of missing techs.
@@ -1844,6 +1812,7 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 
 // Select which units are to be added in strategy, based on potentialUnitsList
 // Requires that this->potentialUnitsList has already been filled
+// Only consider water units (waterUnits=true) or only consider land units (waterUnits=false)
 void StrategyBuilder::SelectStrategyUnitsForLandOrWater(bool waterUnits) {
 #ifdef _DEBUG
 	/*for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
@@ -1905,9 +1874,10 @@ void StrategyBuilder::SelectStrategyUnitsForLandOrWater(bool waterUnits) {
 		}
 	}
 
+	// Choose and add 'main' units to selection (add to actuallySelectedUnits, set "isSelected" to true)
 	this->SelectStrategyUnitsFromPreSelection(preSelectedUnits, waterUnits);
 
-	// Addi units with special bonus like camel/chariot if it helps for a specific need: done in SelectStrategyUnitsFromPreSelection
+	// Add units with special bonus like camel/chariot if it helps for a specific need: done in SelectStrategyUnitsFromPreSelection
 }
 
 
@@ -1982,7 +1952,8 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 	}
 }
 
-// Select which units are to be added in strategy, based on potentialUnitsList
+// Select the main (military) units are to be added in strategy, chosen in potentialUnitsList
+// This only interacts with potentialUnitsList (may set isSelected=true) and feeds actuallySelectedUnits with "main" non-tower military units
 void StrategyBuilder::SelectStrategyUnits() {
 	// Compute individual global scores (no comparison between units). Done once and for all
 	this->ComputeGlobalScores();
@@ -2044,7 +2015,7 @@ void StrategyBuilder::SelectStrategyUnits() {
 
 // age = age to take care (ignore units that are only available in later ages)
 // hasAlreadyUnits = true if provided age already has some military units
-// Returns number of added units (0/1)
+// Returns number of added units (0/1). Added units are marked for add (and WILL actually be written in strategy).
 int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlreadyUnits) {
 	// Recalculate bonus for rare strength taking into account specific limitation on age.
 	this->RecomputeComparisonBonuses(this->potentialUnitsList, false, false, age);
@@ -2162,20 +2133,14 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 		this->log += " earlyscore=";
 		this->log += std::to_string((int)bestUnit->scoreForEarlyAge);
 		this->log += newline;
-		std::list<short int> addedStuff = this->CollectResearchInfoForUnit(bestUnit->unitDefId, false); // Add requirements for this unit (only requirements)
-		for each (short int addedResearchId in addedStuff)
-		{
-			PotentialResearchInfo *resInfo = this->GetResearchInfo(addedResearchId);
-			if (resInfo) {
-				resInfo->markedForAdd = true;
-			}
-		}
+		//std::list<short int> addedStuff = this->CollectResearchInfoForUnit(bestUnit->unitDefId, false); // Add requirements for this unit (only requirements)
+		this->CollectResearchInfoForUnit2(bestUnit, false, true); // Add requirements for this unit (only requirements)
 		return 1; // return unitInfo instead ?
 	}
 	return 0;
 }
 
-// Add some military to selection, to fill gaps in strategy in early ages (if any)
+// Add (and mark for add) some military to selection, to fill gaps in strategy in early ages (if any)
 void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 	int strengths[4][MC_COUNT]; // First index=age 0-3
 	// Note: ignore stone age, priority is to go Tool (and not much military at this age)
@@ -2240,7 +2205,7 @@ void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 // All villagers and military units must have already been added to strategy.
 // This method only updates flags, does not actually add anything to strategy
 void StrategyBuilder::ChooseOptionalResearches() {
-
+#pragma TODO("DM: force some researches ?")
 	std::list<PotentialUnitInfo*> unitsThatNeedMoreAttack;
 	// Special: selected melee units with low attack (like scouts, clubmen)
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
@@ -2411,7 +2376,7 @@ void StrategyBuilder::ChooseOptionalResearches() {
 }
 
 
-// Add researches for villagers/economy (does not mark them for add : optional researches)
+// Collect all researches info for villagers/economy (does NOT mark them for add : optional researches)
 void StrategyBuilder::AddResearchesForEconomy() {
 	for (int unitDefId = 0; unitDefId < this->player->structDefUnitArraySize; unitDefId++) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = this->player->GetUnitDefBase(unitDefId);
@@ -2471,8 +2436,8 @@ void StrategyBuilder::AddUserDefinedForcedResearches(short int oneResearchId) {
 		resInfo->markedForAdd = true;
 	} else {
 		if (this->IsResearchInTechTree(oneResearchId)) {
-			resInfo = this->AddPotentialResearchInfoToList(oneResearchId);
-			resInfo->forcePutAsEarlyAsPossible = false;
+			resInfo = this->AddPotentialResearchInfoToList(oneResearchId, true);
+			if (resInfo) { resInfo->forcePutAsEarlyAsPossible = false; }
 		}
 	}
 	if (!resInfo) {
@@ -2483,10 +2448,9 @@ void StrategyBuilder::AddUserDefinedForcedResearches(short int oneResearchId) {
 	{
 		if (reqRes->active && !reqRes->IsShadowResearch()) {
 			short int reqResId = (short int)reqRes->GetResearchDefId();
-			auto tmp = this->AddPotentialResearchInfoToList(reqResId);
-			if (tmp) {
-				tmp->markedForAdd = true;
-			} else {
+			auto tmp = this->AddPotentialResearchInfoToList(reqResId, true);
+			if (!tmp) {
+#pragma TODO("Normally we can remove this code. Make sure this works (optional gets marked for add")
 				PotentialResearchInfo *tmpResInfo = this->GetResearchInfo(reqResId);
 				if (tmpResInfo) {
 					// If it was already in list, make sure the requirement is marked for add (at this point it my be an "optional" and could not be actually included in strategy).
@@ -2509,12 +2473,13 @@ std::vector<short int> StrategyBuilder::GetAllResearchesThatAffectUnit(short int
 // Add tower upgrades to internal objects (and mark them as priority items)
 // Does not add upgrades that slow projectiles down (ballista tower)
 // Only adds unit upgrades (sentry, watch tower) + "enable unit" (watch tower) researches, not others researches.
+// Added researches (unit upgrades) are automatically marked for add (will actually be included in strategy)
 void StrategyBuilder::AddTowerResearches() {
 	short int enableWatchTower = FindResearchThatEnableUnit(this->player, CST_UNITID_WATCH_TOWER, -1);
 	if ((enableWatchTower < 0) || !this->IsResearchInTechTree(enableWatchTower)) {
 		return;
 	}
-	PotentialResearchInfo *watchTowerInfo = this->AddPotentialResearchInfoToList(CST_RSID_WATCH_TOWER);
+	PotentialResearchInfo *watchTowerInfo = this->AddPotentialResearchInfoToList(CST_RSID_WATCH_TOWER, true);
 	watchTowerInfo->forcePutAsEarlyAsPossible = true;
 	this->CollectResearchInfoForUnit(CST_UNITID_WATCH_TOWER, false);
 
@@ -2525,6 +2490,7 @@ void StrategyBuilder::AddTowerResearches() {
 	std::vector<short int> allResearchesForUnit = this->GetAllResearchesThatAffectUnit(CST_UNITID_WATCH_TOWER, true);
 
 	// Add the available upgrades (except ballista tower, detected thanks to projectile speed), ignore other techs
+	// Could use CanExcludeInRandomMapAI() ?
 	for each (short int researchId in allResearchesForUnit)
 	{
 		bool newProjectileIsMuchSlower = false;
@@ -2550,7 +2516,7 @@ void StrategyBuilder::AddTowerResearches() {
 			}
 		}
 		if (isUpgradeUnit && !newProjectileIsMuchSlower && !newReloadTimeIsMuchSlower) {
-			PotentialResearchInfo *resInfo = this->AddPotentialResearchInfoToList(researchId);
+			PotentialResearchInfo *resInfo = this->AddPotentialResearchInfoToList(researchId, true);
 			if (resInfo && this->settings && this->settings->IsCheckSumValid() && (this->settings->rgeGameOptions.difficultyLevel < 2) &&
 				this->IsResearchInTechTree(resInfo->researchId)) { // this check is not necessary: if not available, it won't be in allResearchesForUnit
 				resInfo->forcePutAsEarlyAsPossible = true; // Force tower upgrades to be researched quickly
@@ -2565,13 +2531,19 @@ void StrategyBuilder::AddTowerResearches() {
 }
 
 
-// Adds non-military researches that should always be included, for example wheel - if available in tech tree.
-void StrategyBuilder::AddMandatoryNonMilitaryResearches() {
+// Handle farm building/research info/desired count
+void StrategyBuilder::HandleFarmsInfo() {
+	if (this->settings->isDeathMatch) {
+		this->log += "Deathmatch: do not add farms";
+		this->log += newline;
+		this->CollectResearchInfoForUnit(CST_UNITID_MARKET, false); // add market anyway
+		return;
+	}
 	// Always add wheel => now done automatically (and NOT hardcoded !) in optional researches part
 
 	// Make sure farm requirements are met
 	this->CollectResearchInfoForUnit(CST_UNITID_FARM, false); // Will add market...
-	this->AddPotentialBuildingInfoToList(CST_UNITID_FARM); // Add if not already present
+	this->AddPotentialBuildingInfoToList(CST_UNITID_FARM, true); // Add if not already present
 	PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
 	// Set desired number of farms
 	bool normalOrEasy = (this->settings->rgeGameOptions.difficultyLevel >= 2);
@@ -2591,6 +2563,7 @@ void StrategyBuilder::AddMandatoryNonMilitaryResearches() {
 		this->log += "Desired number of farms: ";
 		this->log += std::to_string(farmInfo->desiredCount);
 		this->log += newline;
+		farmInfo->markedForAdd = true;
 	}
 }
 
@@ -2644,8 +2617,7 @@ void StrategyBuilder::CollectGlobalStrategyGenerationInfo(AOE_STRUCTURES::STRUCT
 
 	}
 
-	// Select the military units to train (including ships)
-
+	// Select the "main" military units to train (including ships - excluding towers)
 	this->CollectPotentialUnitsInfo(player);
 	this->ComputeStrengthsForPotentialUnits();
 	this->SelectStrategyUnits();
@@ -3051,18 +3023,10 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 		if (unitInfo->enabledByResearchId >= 0) {
 			tmpResIdAsVector.push_back(unitInfo->enabledByResearchId);
 		}
+#pragma TODO("Use collected requirements, remove that call !")
+		//unitInfo->requiredResearchesForBaseUnit if unitInfo->earlyAgeUnit or unitInfo->isOptionalUnit ?
+		//unitInfo->requiredResearchesForStrongestUpgrade		
 		std::vector<short int> requiredResearches = GetValidOrderedResearchesListWithDependencies(this->player, tmpResIdAsVector);
-		// Copy to unitInfo's set once and for all... And apply some filtering
-		for each (short int resId in requiredResearches)
-		{
-			STRUCT_RESEARCH_DEF *resDef = this->player->GetResearchDef(resId);
-			if (resDef && (resId != CST_RSID_STONE_AGE) && (resId != CST_RSID_TOOL_AGE) && 
-				(resId != CST_RSID_BRONZE_AGE) && (resId != CST_RSID_IRON_AGE) /*&& (resId != 104) for republic age*/) {
-				if (!resDef->IsShadowResearch()) { // ignore shadow techs : not to be put in strategy, and we won't get too many dependencies
-					unitInfo->requiredResearchesForBaseUnit.insert(resId);
-				}
-			}
-		}
 		for each (short int reqResId in requiredResearches)
 		{
 			for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
@@ -3086,7 +3050,7 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 			PotentialResearchInfo *resInfo = this->GetResearchInfo(resId);
 			if (!resInfo) {
 				// Some dependency has not been correctly handled !
-				this->AddPotentialResearchInfoToList(resId);
+				this->AddPotentialResearchInfoToList(resId, true);
 				resInfo = this->GetResearchInfo(resId);
 				this->log += "Missing research in dependencies: ";
 				this->log += std::to_string(resId);
@@ -3144,7 +3108,8 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 	}
 
 	// Add "unit upgrade" researches whose cost is quite low, compared to unit itself
-	// => add as early as possible
+	// => add as early as possible (if not, we will add them later anyway, don't worry)
+#pragma TODO("We could do this analysis BEFORE starting adding strategy elems.")
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList) {
 		if (resInfo->markedForAdd && !resInfo->isInStrategy && (resInfo->researchDef->researchLocation >= 0) && resInfo->techDef &&
 			!resInfo->forcePutAfterOtherResearches) {
@@ -3371,7 +3336,7 @@ void StrategyBuilder::CreateFarmStrategyElements() {
 
 // Add strategy elements for towers (buildings - not researches)
 void StrategyBuilder::CreateTowerBuildingsStrategyElements() {
-	this->AddPotentialBuildingInfoToList(CST_UNITID_WATCH_TOWER);
+	this->AddPotentialBuildingInfoToList(CST_UNITID_WATCH_TOWER, true);
 	PotentialBuildingInfo *towerInfo = this->GetBuildingInfo(CST_UNITID_WATCH_TOWER);
 	if (!towerInfo) { return; }
 	// TODO : compute number of towers (use a random part)
@@ -3530,6 +3495,172 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 }
 
 
+void StrategyBuilder::CreateStrategyFromScratch2() {
+	if (!this->buildAI || !this->buildAI->IsCheckSumValid() || !this->buildAI->mainAI || !this->buildAI->mainAI->IsCheckSumValid()) { return; }
+	if (!this->player || !this->player->IsCheckSumValid()) { return; }
+	if (!this->global || !this->global->IsCheckSumValid()) { return; }
+	// Clear previous strategy
+	ClearStrategy(this->buildAI);
+	strcpy_s(this->buildAI->strategyFileName, 0x3F, "Dynamic RockNRor strategy");
+	this->log += "Start Strategy creation (2) for p#";
+	this->log += std::to_string(this->player->playerId);
+	this->log += " = ";
+	this->log += this->player->playerName_length16max;
+	this->log += newline;
+
+	// WARNING : take care if map is naval (=> villager count, land military units count + all non-war boats thing)
+	// + max pop criterion
+	// Feed potential unit info (all possible units), mark "main" chosen ones as selected (only non-tower military units)
+	this->CollectGlobalStrategyGenerationInfo(player);
+
+	// Initialize strategy with TC + ages (no villager yet)
+	this->CreateTCAndAgesStrategyElements();
+	// Add villagers
+	this->CreateVillagerStrategyElements();
+
+	// Select researches to add in strategy
+	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+	{
+		this->CollectResearchInfoForUnit2(unitInfo, !unitInfo->isOptionalUnit, true);
+	}
+	// Add towers, farms, mark them for add
+	this->AddTowerResearches(); // Do not use standard algorithm for towers (because of ballista tower specificity.
+	this->HandleFarmsInfo();
+	
+	// Just make sure ages exist and are marked for add/marked as created, for consistency
+	for (short int ageResId = AOE_CONST_FUNC::CST_RSID_STONE_AGE; ageResId <= AOE_CONST_FUNC::CST_RSID_IRON_AGE; ageResId++) {
+		PotentialResearchInfo *ageResInfo = this->AddPotentialResearchInfoToList(ageResId, true); // add if not already existing
+		if (ageResInfo) {
+			ageResInfo->markedForAdd = true;
+			ageResInfo->isInStrategy = true;
+			switch (ageResId) {
+			case AOE_CONST_FUNC::CST_RSID_TOOL_AGE:
+				ageResInfo->actualStrategyElement = this->seToolAge;
+				break;
+			case AOE_CONST_FUNC::CST_RSID_BRONZE_AGE:
+				ageResInfo->actualStrategyElement = this->seBronzeAge;
+				break;
+			case AOE_CONST_FUNC::CST_RSID_IRON_AGE:
+				ageResInfo->actualStrategyElement = this->seIronAge;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+#ifdef _DEBUG
+	// Debug check : at this point, all added researches are required and should be marked for add (ignore shadow researches)
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		if (!resInfo->markedForAdd && resInfo->detailedResInfo && !resInfo->detailedResInfo->IsShadowResearch()) {
+			this->log += resInfo->langName;
+			this->log += " should be marked for add";
+			this->log += newline;
+		}
+	}
+#endif
+
+	// Add to potentials all the optional researches for economy (NOT marked for add at this point)
+	this->AddResearchesForEconomy();
+
+	// Add user-defined "forced" researches (always developed unless unavailable) and mark them for add
+	this->AddUserDefinedForcedResearches();
+
+	if (!this->settings->isDeathMatch) {
+		// Finalize exact list of trained units => add units and mark them for add (+ collects/mark for add required researches, if any)
+		this->AddMilitaryUnitsForEarlyAges();
+	}
+
+	// Unit selection is finished. Check the buildings : collects and marks for add missing required buildings, if any
+	this->UpdateRequiredBuildingsFromValidatedResearches();
+
+	// Update internal info in "potential buildings"
+	this->UpdateMissingResearchRequirementsInResearchInfo();
+
+	// Add backup TC in internal info
+	PotentialBuildingInfo *tcInfo = this->GetBuildingInfo(CST_UNITID_FORUM);
+	if (tcInfo && (tcInfo->desiredCount == 1)) {
+		tcInfo->desiredCount++;  // Add a backup TC
+	}
+
+	// If required buildings have not been added to strategy yet, do it now: mark for add the building and also updates "potential research" requirement ready flags.
+	this->AddMissingBuildings();
+
+	// Check on requirements
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		if (!resInfo->directRequirementsAreSatisfied) {
+			std::string msg = std::string("WARNING: some requirements are not satisfied/") + GetResearchLocalizedName(resInfo->researchId);
+			traceMessageHandler.WriteMessage(msg);
+			this->log += msg;
+			this->log += newline;
+#ifdef _DEBUG
+			SYSTEM::StopExecution(_T("Issue with requirements"), true, true); // temporary
+#endif
+		}
+	}
+
+#pragma TODO("More buildings in DM for main military units ?")
+
+	// Actually create strategy items
+
+	// Add (and organize) items to strategy : military units (main ones)
+	this->CreateMainMilitaryUnitsElements();
+	if (!this->settings->isDeathMatch) {
+		// Add optional military units (early ages units)
+		this->CreateEarlyMilitaryUnitsElements();
+	}
+
+	// Choose additional (cheap & useful) researches for "retrains" units - optional
+	// Choose additional (cheap & useful) researches for villagers/economy
+	this->ChooseOptionalResearches();
+
+	// Add military units requirements (only necessary techs)
+	this->CreateMilitaryRequiredResearchesStrategyElements();
+	// Add other researches
+	this->CreateOtherResearchesStrategyElements();
+
+	// Add buildings to strategy (first building of each kind)
+	this->CreateFirstBuildingsStrategyElements();
+	this->CreateSecondaryBuildingStrategyElements();
+	this->CreateTowerBuildingsStrategyElements();
+
+	if (buildAI->mainAI->needGameStartAIInit) {
+		// Warning: automatic element insertions WILL be triggered
+	} else {
+		// TODO : trigger dynamic element insertions ? Houses, (dock+boats?), setGather%... farms?
+	}
+
+	// If game is running, search matching units for strategy elements ?
+
+	// Ending check
+	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
+	{
+		if (resInfo->markedForAdd && !resInfo->isInStrategy && resInfo->researchDef && (resInfo->researchDef->researchLocation >= 0)) {
+			this->log += "Warning: Not added: research=";
+			this->log += GetResearchLocalizedName(resInfo->researchId);
+			this->log += newline;
+		}
+	}
+	for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
+	{
+		if (bldInfo->addedInStrategyCount == 0) {
+			this->log += "Warning: Not added: building=";
+			this->log += bldInfo->unitDef->ptrUnitName;
+			this->log += newline;
+		}
+	}
+	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
+	{
+		if (unitInfo->isSelected && (unitInfo->firstStratElem == NULL)) {
+			this->log += "Warning: Not added: unit=";
+			this->log += unitInfo->unitName;
+			this->log += newline;
+		}
+	}
+}
+
 // Create a brand new dynamic strategy for player.
 void StrategyBuilder::CreateStrategyFromScratch() {
 	if (!this->buildAI || !this->buildAI->IsCheckSumValid() || !this->buildAI->mainAI || !this->buildAI->mainAI->IsCheckSumValid()) { return; }
@@ -3560,7 +3691,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 		this->CollectResearchInfoForUnit(unitInfo->unitDefId, !unitInfo->isOptionalUnit);
 	}
 	this->AddTowerResearches(); // Do not use standard algorithm for towers (because of ballista tower specificity)
-	this->AddMandatoryNonMilitaryResearches();
+	this->HandleFarmsInfo();
 	// Mark for add: all researches added previously are "validated" / "necessary"
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
@@ -3576,7 +3707,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	// Finalize exact list of trained units => add units
 	this->AddMilitaryUnitsForEarlyAges();
 	this->UpdateRequiredBuildingsFromValidatedResearches();
-	this->UpdateMissingResearchRequirements();
+	this->UpdateMissingResearchRequirementsInResearchInfo();
 	// Add backup TC in internal info
 	PotentialBuildingInfo *tcInfo = this->GetBuildingInfo(CST_UNITID_FORUM);
 	if (tcInfo && (tcInfo->desiredCount == 1)) {
@@ -3655,12 +3786,78 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 }
 
 
+void StrategyBuilder::CollectResearchInfoForUnit2(PotentialUnitInfo *unitInfo, bool allUpgrades, bool markForSelection) {
+	if (!unitInfo || !ai || !ai->IsCheckSumValid()) { return; }
+	if (!player || !player->IsCheckSumValid()) { return; }
+	if (!player->ptrResearchesStruct || !player->ptrResearchesStruct->ptrResearchDefInfo) {
+		return;
+	}
+
+	long int unitDefIdToUse = unitInfo->strongestUpgradeUnitDefId;
+	std::set<short int> *allRequiredResearches = NULL;
+	if (unitInfo->isOptionalUnit) {
+		// just consider base unit (not upgraded unit)
+		unitDefIdToUse = unitInfo->unitDefId;
+		PotentialResearchInfo *newPotentialRes = this->AddPotentialResearchInfoToList(unitInfo->enabledByResearchId, markForSelection);
+		allRequiredResearches = &unitInfo->requiredResearchesForBaseUnit;
+	} else {
+		this->AddPotentialResearchInfoToList(unitInfo->strongestUpgradeUnitEnabledByResearchId, markForSelection);
+		allRequiredResearches = &unitInfo->requiredResearchesForStrongestUpgrade;
+	}
+
+	// Add all requirements
+	for each (short int oneReqResDefId in *allRequiredResearches)
+	{
+		TTDetailedResearchDef *oneResDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(oneReqResDefId);
+		if (!oneResDtl || !oneResDtl->active || oneResDtl->IsShadowResearch()) { continue; }
+		if (oneResDtl ->hasOptionalRequirements || oneResDtl->IsAgeResearch()) {
+			continue; // Don't handle age requirements like this, especially because of optional requirements !
+		}
+		for each (TTDetailedBuildingDef *reqBldDtl in oneResDtl->triggeredByBuilding) {
+			if (reqBldDtl->possibleAncestorUnitIDs.size() > 0) { continue; } // Ignore non-root buildings
+			// We have a required building.
+			this->AddPotentialBuildingInfoToList(reqBldDtl->unitDef, markForSelection);
+			// Make sure building is enabled, this will add underlying requirements.
+			for each (short int tmpId in reqBldDtl->researchIdsThatEnableMe) {
+				this->AddPotentialResearchInfoToList(tmpId, markForSelection);
+			}
+		}
+
+		if (!this->AddPotentialResearchInfoToList(oneReqResDefId, markForSelection)) {
+			this->log += "Warning: could not add research ";
+			this->log += oneResDtl->langName;
+			this->log += newline;
+		}
+	}
+
+	if (allUpgrades) {
+		for each (TTDetailedResearchDef *resDtl in unitInfo->availableRelatedResearchDetail) {
+			if (resDtl->IsShadowResearch()) { continue; }
+			if (this->settings->isDeathMatch && resDtl->CanExcludeInDeathMatchAI()) {
+				continue; // DM exclusions: AI unsupported (martyrdom...)
+			}
+			if (!this->settings->isDeathMatch && resDtl->CanExcludeInRandomMapAI()) {
+				continue; // RM exclusions : jihad, ballista tower... (all with negative effects except warboats = for trireme)
+			}
+			// This will add the potential research and the necessary building + requirements
+			if (!this->AddPotentialResearchInfoToList((short int)resDtl->GetResearchDefId(), markForSelection)) {
+				this->log += "Warning: could not add ";
+				this->log += resDtl->langName;
+				this->log += newline;
+			}
+		}
+	}
+	// To return a number, we could count the number of potential researches/buildings before and after ?
+}
+
+
 // Searches researches that impact a specific unit and add them to internal list of potential researches.
 // Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.
 // allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
 // Returns a list of research IDs that were actually added to list (some others might already have been in list before)
 // You may need to call UpdateRequiredBuildingsFromValidatedResearches, UpdateMissingResearchRequirements and AddMissingBuildings() afterwards
 std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitDefId, bool allUpgrades) {
+#pragma TODO("Remove this and use new proc...")
 	std::list<short int> result;
 	if (!ai || !ai->IsCheckSumValid()) { return result; }
 	if (!player || !player->IsCheckSumValid()) { return result; }
@@ -3700,7 +3897,7 @@ std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitD
 		if (resDef) {
 			PotentialResearchInfo *resInfo = this->GetResearchInfo(resDefId);
 			if (resInfo == NULL) {
-				if (AddPotentialResearchInfoToList(resDefId)) {
+				if (AddPotentialResearchInfoToList(resDefId, false)) {
 					result.push_back(resDefId);
 					resInfo = this->GetResearchInfo(resDefId);
 				}
@@ -3743,7 +3940,7 @@ std::list<short int> StrategyBuilder::CollectResearchInfoForUnit(short int unitD
 }
 
 
-// Adds all necessary buildings for "validated" researches to buildings ID list.
+// Adds (and marks for add) all necessary buildings for "validated" researches to buildings ID list.
 // Returns number of building IDs added to internal list
 int StrategyBuilder::UpdateRequiredBuildingsFromValidatedResearches() {
 	int addedElements = 0;
@@ -3754,14 +3951,14 @@ int StrategyBuilder::UpdateRequiredBuildingsFromValidatedResearches() {
 			if ((resInfo->researchDef->researchLocation >= 0) &&
 				(!IsUnitDisabledInTechTree(this->player->playerId, resInfo->researchDef->researchLocation))) {
 				// This only adds if not already in list
-				if (this->AddPotentialBuildingInfoToList(resInfo->researchDef->researchLocation)) {
+				if (this->AddPotentialBuildingInfoToList(resInfo->researchDef->researchLocation, true)) {
 					addedElements++;
 				}
 			}
 			// Building that enables research
 			AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *parentBld = FindBuildingDefThatEnablesResearch(this->player, resInfo->researchId);
 			if (parentBld) {
-				if (this->AddPotentialBuildingInfoToList(parentBld->DAT_ID1)) {
+				if (this->AddPotentialBuildingInfoToList(parentBld->DAT_ID1, true)) {
 					addedElements++;
 				}
 			}
@@ -3773,7 +3970,7 @@ int StrategyBuilder::UpdateRequiredBuildingsFromValidatedResearches() {
 // Update all researches requirement statuses and set directRequirementsAreSatisfied if OK.
 // Takes into account "confirmed" researches from list and also buildings ("initiates research").
 // This does not add anything to our lists.
-void StrategyBuilder::UpdateMissingResearchRequirements() {
+void StrategyBuilder::UpdateMissingResearchRequirementsInResearchInfo() {
 	assert(player);
 	if (!player) { return; }
 	// Update using building's "initiate research" field (for buildings that actually ARE in my list)
@@ -3836,7 +4033,8 @@ void StrategyBuilder::UpdatePotentialResearchStatusFromMissingRequirements(Poten
 	}
 }
 
-// Add missing buildings - if any - that block some research requirements
+// Add missing buildings - if any - that block some research requirements, also mark them for add
+// Potential research info "requirements" flags are updated to take into account the new building (in case it unlocks some dependencies).
 void StrategyBuilder::AddMissingBuildings() {
 	assert(this->global && this->player);
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
@@ -3854,6 +4052,9 @@ void StrategyBuilder::AddMissingBuildings() {
 						for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
 						{
 							if (bldInfo->unitDefId == bldDef->DAT_ID1) {
+								if (!bldInfo->markedForAdd) {
+									SYSTEM::StopExecution(_T("Possible bug: building is known but not marked for add => considered as present in strategy !"), true, true);
+								}
 								found = true;
 							}
 						}
@@ -3892,7 +4093,7 @@ void StrategyBuilder::AddMissingBuildings() {
 				}
 				if (!IsUnitDisabledInTechTree(this->player->playerId, bldDef->DAT_ID1)) {
 					this->log.append("Added building #" + std::to_string(bldDef->DAT_ID1) + " (" + bldDef->ptrUnitName + ") to list due to missing requirements.\n");
-					this->AddPotentialBuildingInfoToList(bldDef);
+					this->AddPotentialBuildingInfoToList(bldDef, true);
 					for (int i = 0; i < 4; i++) {
 						if (resInfo->missingRequiredResearches[i] == bldDef->initiatesResearch) {
 							resInfo->missingRequiredResearches[i] = -1; // Update requirement as we just satisfied it.

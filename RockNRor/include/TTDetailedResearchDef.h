@@ -175,7 +175,7 @@ public:
 	bool allRequirementsAreKnown; // true when allRequirementsExcludingAges is fully filled with required researches (research is considered "done" in tech tree analysis)
 
 	std::set<TTDetailedResearchDef*> directRequirements; // Direct required researches, INCLUDING the research that enables the building that "initiates" me, if any.
-	std::set<TTDetailedResearchDef*> allRequirements; // all required researches, which can make a lot especially for iron-age researches.
+	std::set<TTDetailedResearchDef*> allRequirements; // ALL required researches, which can make a lot especially for iron-age researches. Includes researches initiated by buildings (so this gives us required buildings)
 	std::set<TTDetailedResearchDef*> allRequirementsExcludingAges; // all required from same age, direct or indirect
 	std::set<TTDetailedBuildingDef*> triggeredByBuilding; // Detailed info for all buildings that triggers the research
 

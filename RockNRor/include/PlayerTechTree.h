@@ -35,7 +35,7 @@ public:
 	std::set<ROCKNROR::STRATEGY::TTDetailedBuildingDef*>enabledBuildingsInfo;
 	std::set<ROCKNROR::STRATEGY::TTDetailedBuildingDef*>disabledBuildingsInfo; // techtree BuildingDef info for non-available buildings. Most commonly disabled buildings are walls, sometimes temple, academy, ballista tower... (+hero buildings)
 	std::set<ROCKNROR::STRATEGY::TTDetailedUnitDef*>enabledTrainableUnitInfos;
-	std::set<ROCKNROR::STRATEGY::TTDetailedUnitDef*>disabledTrainableUnitInfos;
+	std::set<ROCKNROR::STRATEGY::TTDetailedUnitDef*>disabledTrainableUnitInfos; // All disabled trainable units, including "intermediate" upgrades
 	std::set<ROCKNROR::STRATEGY::TTDetailedResearchDef*>enabledResearchesInfoAll; // All non-disabled (by tech tree) researches, including shadow researches
 	std::set<ROCKNROR::STRATEGY::TTDetailedResearchDef*>enabledResearchesInfo; // All non-disabled (by tech tree) researches, excluding shadow researches
 	std::set<ROCKNROR::STRATEGY::TTDetailedResearchDef*>disabledResearchesInfo;
@@ -54,7 +54,7 @@ public:
 		this->disabledResearchesInfo.clear();
 	}
 
-	// Fill eligibleDisableXxx collections according to player's tech tree (myTechTreeId).
+	// Fill eligibleDisableXxx, disabledResearchIds, disabledUnitDefIds collections (etc) according to player's tech tree (myTechTreeId).
 	void CollectInfoFromExistingTechTree();
 };
 

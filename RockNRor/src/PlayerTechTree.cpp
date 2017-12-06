@@ -8,7 +8,7 @@ namespace STRATEGY {
 ;
 
 
-// Fill eligibleDisableXxx collections according to player's tech tree (myTechTreeId).
+// Fill eligibleDisableXxx, disabledResearchIds, disabledUnitDefIds collections (etc) according to player's tech tree (myTechTreeId).
 void CustomPlayerInfo::CollectInfoFromExistingTechTree() {
 	if (!this->isActive || (this->myTechTreeId < 0)) { return; }
 	if (!ROCKNROR::crInfo.techTreeAnalyzer.IsReady()) { return; }

@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include <memory>
+#include <macroUtil.h>
 #include <AOE_struct_game_settings.h>
 #include <AOE_struct_unit_def.h>
 #include <AOE_const_functional.h>
@@ -15,6 +16,7 @@
 #include "AOE_strategy.h"
 #include "StrategyPotentialElemInfo.h"
 #include "customFuncRules.h"
+#include "PlayerTechTree.h"
 
 
 using namespace AOE_CONST_FUNC;
@@ -31,6 +33,7 @@ namespace STRATEGY {
 			this->buildAI = NULL;
 			this->player = NULL;
 			this->global = NULL;
+			this->playerTechTreeInfo = NULL;
 			this->selectedLandUnitsCount = 0;
 			this->selectedWaterUnitsCount = 0;
 			for (int i = 0; i < 4; i++) { this->totalTrainUnitCosts[i] = 0; }
@@ -66,13 +69,14 @@ namespace STRATEGY {
 		}
 		RockNRorInfo *crInfo;
 
-		int GetRandomFactor() { return randomPercentFactor; }
-		void SetRandomFactor(int value) { if ((value >= 0) && (value <= 100)) { randomPercentFactor = value; } }
+		int GetRandomFactor() { return this->randomPercentFactor; }
+		void SetRandomFactor(int value) { if ((value >= 0) && (value <= 100)) { this->randomPercentFactor = value; } }
 
 		const std::string GetLog() const { return this->log; }
 
 		// Create a brand new dynamic strategy for player.
 		void CreateStrategyFromScratch();
+		void CreateStrategyFromScratch2();
 
 		// Searches researches that impact a specific unit and add them to internal list of potential researches.
 		// Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.
@@ -80,20 +84,22 @@ namespace STRATEGY {
 		// Returns a list of research IDs that were actually added to list (some others might already have been in list before)
 		// You may need to call UpdateRequiredBuildingsFromValidatedResearches, UpdateMissingResearchRequirements and AddMissingBuildings() afterwards
 		std::list<short int> CollectResearchInfoForUnit(short int unitDefId, bool allUpgrades);
+		void CollectResearchInfoForUnit2(PotentialUnitInfo *unitInfo, bool allUpgrades, bool markForSelection);
 
-		// Adds all necessary buildings for "validated" researches to buildings ID list.
+		// Adds (and marks for add) all necessary buildings for "validated" researches to buildings ID list.
 		// Returns number of building IDs added to internal list
 		int UpdateRequiredBuildingsFromValidatedResearches();
 
 		// Update all researches requirement statuses and set directRequirementsAreSatisfied if OK.
 		// Takes into account "confirmed" researches from list and also buildings ("initiates research").
 		// This does not add anything to our lists.
-		void UpdateMissingResearchRequirements();
+		void UpdateMissingResearchRequirementsInResearchInfo();
 
 		// Set resInfo->directRequirementsAreSatisfied=true and resInfo->missingRequiredResearches[...]=-1 if (minimum) requirements are satisfied
 		void UpdatePotentialResearchStatusFromMissingRequirements(PotentialResearchInfo *resInfo);
 
-		// Add missing buildings - if any - that block some research requirements
+		// Add missing buildings - if any - that block some research requirements, also mark them for add
+		// Potential research info "requirements" flags are updated to take into account the new building (in case it unlocks some dependencies).
 		void AddMissingBuildings();
 
 		// Get the strategy element that correspond to an Age Id. researchId must correspond to an age upgrade !
@@ -109,6 +115,7 @@ namespace STRATEGY {
 		AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI; // automatically set from player (SetPlayerAndAIStructs)
 		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global;
 		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings;
+		ROCKNROR::STRATEGY::CustomPlayerInfo *playerTechTreeInfo; // contains tech tree information for current player
 		short int civId;
 		bool isWaterMap;
 		long int maxPopulation;
@@ -158,12 +165,16 @@ namespace STRATEGY {
 			if (this->crInfo && this->settings && (this->settings->rgeGameOptions.isSinglePlayer)) {
 				this->maxPopulation = this->crInfo->configInfo.singlePlayerMaxPopulation;
 			}
+			this->playerTechTreeInfo = new CustomPlayerInfo();
+			this->playerTechTreeInfo->ResetAndInit(player->playerId, player->civilizationId, player->techTreeId);
+			this->playerTechTreeInfo->isActive = true;
+			this->playerTechTreeInfo->CollectInfoFromExistingTechTree();
 		}
 
 		// Clears potential units list and free each underlying PotentialUnitInfo object.
 		void FreePotentialElementsList();
 
-		// Add a unit to selection and updates some internal variables accordingly
+		// Add a unit to selection (actuallySelectedUnits) and updates some internal variables accordingly
 		// Return total unit count in selection
 		int AddUnitIntoToSelection(PotentialUnitInfo *unitInfo);
 
@@ -182,9 +193,10 @@ namespace STRATEGY {
 		PotentialResearchInfo *GetResearchInfo(short int researchId) const;
 		// Returns a pointer to the PotentialResearchInfo object for a research, or NULL if not found.
 		PotentialResearchInfo *GetResearchInfo(AOE_STRUCTURES::STRUCT_RESEARCH_DEF *resDef) const;
-		// Add building to potential buildings list and initializes underlying info.
-		// Returns NULL if not added, or pointer to object if successful
-		PotentialResearchInfo *AddPotentialResearchInfoToList(short int researchId);
+		// Add research to potential researches list and initializes underlying info.
+		// Returns NULL if not added (error), or pointer to object if successful OR ALREADY existing
+		// Adds all requirements too (researches, buildings)
+		PotentialResearchInfo *AddPotentialResearchInfoToList(short int researchId, bool markForAdd);
 
 		// Returns a pointer to the PotentialBuildingInfo object for a research, or NULL if not found.
 		PotentialBuildingInfo *GetBuildingInfo(short int unitDefId) const;
@@ -192,8 +204,8 @@ namespace STRATEGY {
 		PotentialBuildingInfo *GetBuildingInfo(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef) const;
 		// Add building to potential buildings list and initializes underlying info.
 		// Returns true if actually added
-		bool AddPotentialBuildingInfoToList(short int unitDefId);
-		bool AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef);
+		bool AddPotentialBuildingInfoToList(short int unitDefId, bool markForAdd);
+		bool AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef, bool markForAdd);
 
 		// Returns true if a research is available in tech tree
 		bool IsResearchInTechTree(short int researchId);
@@ -201,7 +213,7 @@ namespace STRATEGY {
 
 		/*** Units selection methods ***/
 
-		// Fills unitInfos with all available military units from tech tree.
+		// Fills unitInfos with ALL available military units from tech tree (only "root" units are listed).
 		// Towers are ignored (not added to list). Boats are ignored on non-water maps.
 		// *** Make sure to delete all PotentialUnitInfo from list when you're finished with the list ***
 		void CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *player);
@@ -241,21 +253,23 @@ namespace STRATEGY {
 
 		// Select which units are to be added in strategy, based on potentialUnitsList
 		// Requires that this->potentialUnitsList has already been filled
+		// Only consider water units (waterUnits=true) or only consider land units (waterUnits=false)
 		void SelectStrategyUnitsForLandOrWater(bool waterUnits);
 
 		// Search for a unit that can be added to strategy as "optional" (without full upgrades) to fight a detected weakness.
 		// waterUnits: if true, manage water units only. If false, manage land units only
 		void AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessCategory, bool waterUnits);
 
-		// Select which units are to be added in strategy, based on potentialUnitsList
+		// Select the main (military) units are to be added in strategy, chosen in potentialUnitsList
+		// This only interacts with potentialUnitsList (may set isSelected=true) and feeds actuallySelectedUnits with "main" non-tower military units
 		void SelectStrategyUnits();
 
 		// age = age to take care (ignore units that are only available in later ages)
 		// hasAlreadyUnits = true if provided age already has some military units
-		// Returns number of added units (0/1)
+		// Returns number of added units (0/1). Added units are marked for add (and WILL actually be written in strategy).
 		int AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlreadyUnits);
 
-		// Add some military to selection, to fille gaps in strategy in early ages (if any)
+		// Add (and mark for add) some military to selection, to fill gaps in strategy in early ages (if any)
 		void AddMilitaryUnitsForEarlyAges();
 
 		// Selects optional researches to add to strategy
@@ -263,7 +277,7 @@ namespace STRATEGY {
 		// This method only updates flags, does not actually add anything to strategy
 		void ChooseOptionalResearches();
 
-		// Add researches for villagers/economy (does not mark them for add : optional researches)
+		// Collect all researches info for villagers/economy (does NOT mark them for add : optional researches)
 		void AddResearchesForEconomy();
 
 		// Add user-defined "forced" researches (always develop... if possible)
@@ -274,10 +288,11 @@ namespace STRATEGY {
 		// Add tower upgrades to internal objects (and mark them as priority items)
 		// Does not add upgrades that slow projectiles down (ballista tower)
 		// Only adds unit upgrades (sentry, watch tower) + "enable unit" (watch tower) researches, not others researches.
+		// Added researches (unit upgrades) are automatically marked for add (will actually be included in strategy)
 		void AddTowerResearches();
 
-		// Adds non-military researches that should always be included, for example wheel - if available in tech tree.
-		void AddMandatoryNonMilitaryResearches();
+		// Handle farm building/research info/desired count
+		void HandleFarmsInfo();
 
 		/*** Strategy writing methods ***/
 
