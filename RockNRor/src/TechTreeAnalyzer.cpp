@@ -170,37 +170,24 @@ void TechTreeAnalyzer::FindResearchesThatEnableUnits() {
 			if (techEffect->effectType == TECH_DEF_EFFECTS::TDE_UPGRADE_UNIT) {
 				long int upgradedUnitId = techEffect->effectClass;
 				long int parentUnitId = techEffect->effectUnit;
-				TTDetailedBuildingDef *detailBuilding = this->GetDetailedBuildingDef(upgradedUnitId);
-				if ((detailBuilding != NULL) && (detailBuilding->unitDef != NULL)) {
-					detailBuilding->researchIdsThatEnableMe.insert(resDefId);
-					detailRes->enableBuildings.insert(detailBuilding);
-					if (std::find(detailBuilding->possibleAncestorUnitIDs.cbegin(), detailBuilding->possibleAncestorUnitIDs.cend(), parentUnitId) == detailBuilding->possibleAncestorUnitIDs.cend()) {
-						detailBuilding->possibleAncestorUnitIDs.push_back(parentUnitId);
+				TTDetailedUnitDef *detailUpgradedUnit = this->GetDetailedUnitDef(upgradedUnitId);
+				if ((detailUpgradedUnit != NULL) && (detailUpgradedUnit->GetUnitDef() != NULL)) {
+					detailUpgradedUnit->researchIdsThatEnableMe.insert(resDefId);
+					if (std::find(detailUpgradedUnit->possibleAncestorUnitIDs.cbegin(), detailUpgradedUnit->possibleAncestorUnitIDs.cend(), parentUnitId) == detailUpgradedUnit->possibleAncestorUnitIDs.cend()) {
+						detailUpgradedUnit->possibleAncestorUnitIDs.push_back(parentUnitId);
 					}
+					detailRes->upgradedUnitDefId.insert(std::pair<long int, long int>(parentUnitId, upgradedUnitId));
 
-					TTDetailedBuildingDef *detailBuildingParent = this->GetDetailedBuildingDef(parentUnitId);
-					if ((detailBuildingParent != NULL) && (detailBuildingParent->unitDef != NULL)) {
-						if (std::find(detailBuildingParent->possibleUpgradedUnitIDs.cbegin(), 
-							detailBuildingParent->possibleUpgradedUnitIDs.cend(), upgradedUnitId) == detailBuildingParent->possibleUpgradedUnitIDs.end()) {
-							detailBuildingParent->possibleUpgradedUnitIDs.push_back(upgradedUnitId);
+					TTDetailedUnitDef *detailParent = this->GetDetailedTrainableUnitDef(parentUnitId);
+					if ((detailParent != NULL) && (detailParent->GetUnitDef() != NULL)) {
+						if (std::find(detailParent->possibleUpgradedUnitIDs.cbegin(), detailParent->possibleUpgradedUnitIDs.cend(), upgradedUnitId) == detailParent->possibleUpgradedUnitIDs.cend()) {
+							detailParent->possibleUpgradedUnitIDs.push_back(upgradedUnitId);
 						}
 					}
 				}
 				TTDetailedTrainableUnitDef *detailTrainable = this->GetDetailedTrainableUnitDef(upgradedUnitId);
-				if ((detailTrainable != NULL) && (detailTrainable->unitDef != NULL)) {
-					detailTrainable->researchIdsThatEnableMe.insert(resDefId);
+				if (detailTrainable != NULL) {
 					detailRes->enableTrainables.insert(detailTrainable);
-					if (std::find(detailTrainable->possibleAncestorUnitIDs.cbegin(), detailTrainable->possibleAncestorUnitIDs.cend(), parentUnitId) == detailTrainable->possibleAncestorUnitIDs.cend()) {
-						detailTrainable->possibleAncestorUnitIDs.push_back(parentUnitId);
-					}
-					detailRes->upgradedUnitDefId.insert(std::pair<long int, long int>(parentUnitId, upgradedUnitId));
-
-					TTDetailedTrainableUnitDef *detailTrainableParent = this->GetDetailedTrainableUnitDef(parentUnitId);
-					if ((detailTrainableParent != NULL) && (detailTrainableParent->unitDef != NULL)) {
-						if (std::find(detailTrainableParent->possibleUpgradedUnitIDs.cbegin(), detailTrainableParent->possibleUpgradedUnitIDs.cend(), upgradedUnitId) == detailTrainableParent->possibleUpgradedUnitIDs.cend()) {
-							detailTrainableParent->possibleUpgradedUnitIDs.push_back(upgradedUnitId);
-						}
-					}
 				}
 			}
 		}
