@@ -63,7 +63,6 @@ bool SimpleEditTextPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool SimpleEditTextPopup::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
 	if (keyCode == VK_ESCAPE) {
-#pragma TODO("Fix bug here")
 		this->CloseScreen(false);
 		return true;
 	}

@@ -236,6 +236,16 @@ public:
 			(this->researchDefId <= AOE_CONST_FUNC::CST_RSID_IRON_AGE);
 	}
 
+	// Returns true if the research does affect provided unit (def) id
+	bool DoesAffectUnit(long int unitDefId) const {
+		for each (auto a in this->affectsUnits) {
+			if (a->unitDefId == unitDefId) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 };
 
 

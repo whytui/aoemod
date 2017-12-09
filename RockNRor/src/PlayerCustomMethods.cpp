@@ -95,12 +95,8 @@ void ApplyStrategyGenerationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	bool isDM = (settings->isDeathMatch != 0);
 	if ((!isDM && ROCKNROR::crInfo.configInfo.generateStrategyForRM) ||
 		(isDM && ROCKNROR::crInfo.configInfo.generateStrategyForDM)) {
-		if (isDM) {
-			traceMessageHandler.WriteMessage("Strategy generation for deathmatch games is not supported yet");
-		} else {
-			ROCKNROR::STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(&ROCKNROR::crInfo, player);
-			sb.CreateStrategyFromScratch();
-		}
+		ROCKNROR::STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(&ROCKNROR::crInfo, player);
+		sb.CreateStrategyFromScratch();
 	}
 }
 

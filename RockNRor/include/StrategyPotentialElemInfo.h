@@ -70,7 +70,7 @@ namespace STRATEGY {
 		int bonusForRareStrength; // 0-100
 		int bonusForUsedResourceTypes; // 0-100
 		int bonusForTechsSimilarity; // 0-100
-		bool isSelected;
+		bool isSelected; // True if we validate the fact that unit will be actually added to strategy. See also desiredCount.
 		bool isOptionalUnit; // True for "retrains" units and/or units added specifically against a weakness (ex: chariot vs priest is strategy has elephants). Such units don't need full upgrades
 		bool earlyAgeUnit; // If true, this unit is just for early ages. It is NOT a main unit (not even optional from main choice) and must have limited retrains.
 		float desiredCount;
@@ -154,6 +154,7 @@ namespace STRATEGY {
 		bool highPriority; // If true, start construction of (first) this building ASAP. E.g. market (to enable farming)
 		int unitsToBeTrained; // Number of (always retrainable) units that are trained in such buildings
 		ROCKNROR::STRATEGY::TTDetailedBuildingDef *unitDefDetailedInfo;
+		std::set<short int> requiredResearchesForBaseUnit; // ALL required researches for same age, excluding "enabledByResearchId", for base unit. Includes researches initiated by required buildings !
 	};
 	
 }

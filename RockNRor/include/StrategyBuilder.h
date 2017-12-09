@@ -76,15 +76,20 @@ namespace STRATEGY {
 
 		// Create a brand new dynamic strategy for player.
 		void CreateStrategyFromScratch();
-		void CreateStrategyFromScratch2();
 
-		// Searches researches that impact a specific unit and add them to internal list of potential researches.
+		// Searches researches that impact a specific living unit and add them to internal list of potential researches.
 		// Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.
 		// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
 		// Returns a list of research IDs that were actually added to list (some others might already have been in list before)
 		// You may need to call UpdateRequiredBuildingsFromValidatedResearches, UpdateMissingResearchRequirements and AddMissingBuildings() afterwards
-		std::list<short int> CollectResearchInfoForUnit(short int unitDefId, bool allUpgrades);
-		void CollectResearchInfoForUnit2(PotentialUnitInfo *unitInfo, bool allUpgrades, bool markForSelection);
+		void CollectResearchInfoForUnit(PotentialUnitInfo *unitInfo, bool allUpgrades, bool markForSelection);
+		
+		// Searches researches that impact a specific building and add them to internal list of potential researches.
+		// Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.
+		// allUpgrades: if true, all related upgrades will be added. Otherwise, only requirements will be added.
+		// Returns a list of research IDs that were actually added to list (some others might already have been in list before)
+		// You may need to call UpdateRequiredBuildingsFromValidatedResearches, UpdateMissingResearchRequirements and AddMissingBuildings() afterwards
+		void CollectResearchInfoForUnit(PotentialBuildingInfo *bldInfo, bool allUpgrades, bool markForSelection);
 
 		// Adds (and marks for add) all necessary buildings for "validated" researches to buildings ID list.
 		// Returns number of building IDs added to internal list
