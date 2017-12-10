@@ -44,7 +44,7 @@ private:
 	STRUCT_UI_BUTTON *chkRPGGameModeInRandomGames;
 	STRUCT_UI_BUTTON *chkRPGGameModeInScenario;
 	STRUCT_UI_BUTTON *chkGenStrategyInRM;
-	//STRUCT_UI_BUTTON *chkGenStrategyInDM;
+	STRUCT_UI_BUTTON *chkGenStrategyInDM;
 	STRUCT_UI_BUTTON *chkNoWallsInRMDM;
 	STRUCT_UI_BUTTON *chkNoNeutralDiplomacy;
 	STRUCT_UI_BUTTON *chkNoDockInLandMaps;

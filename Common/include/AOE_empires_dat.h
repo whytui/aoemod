@@ -475,6 +475,7 @@ namespace AOE_CONST_FUNC {
 	const short int CST_RSID_MONOTHEISM = 19;
 	const short int CST_RSID_FANATICISM = 20;
 	const short int CST_RSID_MEDECINE = 119;
+	const short int CST_RSID_LOGISTICS = 121; // barracks units (classes 6 and 39) count as half a unit in population
 	// Research IDs: economy/general
 	const short int CST_RSID_WHEEL = 28;
 	const short int CST_RSID_ARCHITECTURE = 112; // Bronze age

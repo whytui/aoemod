@@ -27,13 +27,14 @@ namespace STRATEGY {
 	// Class that handles the selection of military units for strategy creation.
 	class StrategyBuilder {
 	public:
-		StrategyBuilder(RockNRorInfo *crInfo, AOE_STRUCTURES::STRUCT_PLAYER *player) {
+		StrategyBuilder(RockNRorInfo *crInfo, AOE_STRUCTURES::STRUCT_PLAYER *player, ROCKNROR::STRATEGY::CustomPlayerInfo *customPlayerInfo) {
 			this->crInfo = crInfo;
 			this->ai = NULL;
 			this->buildAI = NULL;
 			this->player = NULL;
 			this->global = NULL;
 			this->playerTechTreeInfo = NULL;
+			this->customPlayerInfo = customPlayerInfo;
 			this->selectedLandUnitsCount = 0;
 			this->selectedWaterUnitsCount = 0;
 			for (int i = 0; i < 4; i++) { this->totalTrainUnitCosts[i] = 0; }
@@ -113,6 +114,7 @@ namespace STRATEGY {
 		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetAgeStrategyElement(short int researchId);
 
 	private:
+		ROCKNROR::STRATEGY::CustomPlayerInfo *customPlayerInfo;
 		std::string log;
 		static int randomPercentFactor;
 		AOE_STRUCTURES::STRUCT_PLAYER *player;
@@ -298,6 +300,9 @@ namespace STRATEGY {
 
 		// Handle farm building/research info/desired count
 		void HandleFarmsInfo();
+
+		// Handle desired units count if logistics is part of included researches.
+		void HandleLogistics();
 
 		/*** Strategy writing methods ***/
 

@@ -1290,6 +1290,15 @@ void StrategyBuilder::ComputeGlobalScores() {
 		unitInfo->globalScore = unitInfo->globalScore * costProportion / 100;
 		unitInfo->globalScoreEarlyAge = unitInfo->globalScoreEarlyAge * costProportion / 100;
 
+		// Adjustments for deathmatch
+		if (this->settings->isDeathMatch) {
+			// Exclude tool age units like scouts
+			TTDetailedTrainableUnitDef *upgradeDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(unitInfo->strongestUpgradeUnitDefId);
+			if (upgradeDtl && (upgradeDtl->requiredAge < AOE_CONST_FUNC::CST_RSID_BRONZE_AGE)) {
+				unitInfo->globalScore = 1;
+			}
+		}
+
 		if (unitInfo->globalScore < 0) { unitInfo->globalScore = 0; }
 		if (unitInfo->globalScore > 100) { unitInfo->globalScore = 100; }
 		if (unitInfo->globalScoreEarlyAge < 0) { unitInfo->globalScoreEarlyAge = 0; }
@@ -2222,7 +2231,7 @@ void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 // All villagers and military units must have already been added to strategy.
 // This method only updates flags, does not actually add anything to strategy
 void StrategyBuilder::ChooseOptionalResearches() {
-#pragma TODO("DM: force some researches ?")
+#pragma TODO("DM: force some researches ? Exclude others (all?)...") // add jihad if available & if temple ?
 	std::list<PotentialUnitInfo*> unitsThatNeedMoreAttack;
 	// Special: selected melee units with low attack (like scouts, clubmen)
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
@@ -2615,6 +2624,45 @@ void StrategyBuilder::HandleFarmsInfo() {
 	}
 }
 
+
+// Handle desired units count if logistics is part of included researches.
+void StrategyBuilder::HandleLogistics() {
+	PotentialResearchInfo *logisticsInfo = this->GetResearchInfo(CST_RSID_LOGISTICS);
+	if (!logisticsInfo || !logisticsInfo->markedForAdd) {
+		return;
+	}
+	if (this->isWaterMap) {} // How to handle the fact that ROR will add boats ?
+	int totalPop = this->villagerCount_alwaysRetrain;
+	std::list<PotentialUnitInfo*> involvedUnits;
+	for each (auto oneUnit in this->actuallySelectedUnits) {
+		if ((oneUnit->unitAIType == AOE_CONST_FUNC::TribeAIGroupSlinger) || (oneUnit->unitAIType == AOE_CONST_FUNC::TribeAIGroupFootSoldier)) {
+			totalPop += oneUnit->desiredCount / 2;
+			if (!oneUnit->isOptionalUnit || !oneUnit->earlyAgeUnit) {
+				involvedUnits.push_back(oneUnit); // we'll only add "main" military units
+			}
+		} else {
+			totalPop += oneUnit->desiredCount;
+		}
+	}
+	int remainingRoom = totalPop - this->maxPopulation;
+	if (remainingRoom <= 0) { return; }
+	if (involvedUnits.size() <= 0) { return; }
+	int countPerUnit = remainingRoom / involvedUnits.size();
+	this->log += "Logistics => add ";
+	this->log += std::to_string(remainingRoom);
+	this->log += " units from ";
+	this->log += std::to_string(involvedUnits.size());
+	this->log += " kinds";
+	this->log += newline;
+	assert(remainingRoom < 500);
+	while (remainingRoom > 0) {
+		for each (PotentialUnitInfo *curUnit in involvedUnits)
+		{
+			curUnit->desiredCount++;
+			remainingRoom--;
+		}
+	}
+}
 
 
 /*** Strategy writing methods ***/
@@ -3020,6 +3068,9 @@ void StrategyBuilder::CreateMainMilitaryUnitsElements() {
 			this->log += newline;
 		}
 	}
+
+	// A bit dirty: if using logistics, add units to use extra room in population
+	this->HandleLogistics();
 
 	// For the moment, insert all in iron age
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint = &this->buildAI->fakeFirstStrategyElement;
@@ -3687,8 +3738,8 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 		}
 	}
 
-#pragma TODO("More buildings in DM for main military units ?")
-#pragma TODO("Handle logistics ! Count free room and add infantry. not too far if DM")
+#pragma TODO("Handle logistics ! Count free room and add more infantry.")
+
 
 	// Actually create strategy items
 

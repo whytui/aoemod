@@ -1274,14 +1274,13 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 
 	// Do custom stuff on "settings" here...
 
-	if (ROCKNROR::crInfo.configInfo.randomTechTreeForRMGames && !settings->isDeathMatch &&
+	if (ROCKNROR::crInfo.configInfo.randomTechTreeForRMGames &&
 		!settings->isSavedGame && !settings->isCampaign && !settings->rgeGameOptions.isScenario && !settings->rgeGameOptions.isMultiPlayer) {
 		// Generate random tech tree and civ bonus for each player
 		this->customCivHandler.CreateFakeRandomCivsForAllPlayers();
-	} else {
-		// Collect info about (standard) tech trees
-		this->customCivHandler.CreateInternalDataForGameWithStandardCivs();
 	}
+	// Collect info about (standard) tech trees
+	this->customCivHandler.CreateInternalDataForGameWithStandardCivs();
 
 	return true;
 }
@@ -1314,7 +1313,7 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 			if (global->scenarioInformation && (global->scenarioInformation->strategyFileSize[i] <= 0)) {
 				// Player does not have a specified strategy, which means it is initialized as a Random Map.
 				// => We can apply custom strategy generation.
-				ROCKNROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(i));
+				ROCKNROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(i), this->customCivHandler.GetCustomPlayerInfo(i));
 			}
 		}
 		return false;
@@ -1387,7 +1386,7 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 
 	// Strategy
 	for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
-		ROCKNROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(playerId));
+		ROCKNROR::PLAYER::ApplyStrategyGenerationOnPlayer(GetPlayerStruct(playerId), this->customCivHandler.GetCustomPlayerInfo(playerId));
 	}
 
 	// Custom civs

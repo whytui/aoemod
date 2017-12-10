@@ -88,6 +88,7 @@ public:
 	~RockNRorCommand();
 
 private:
+	// Handler that contains information about current players civilization data (available tech tree...)
 	ROCKNROR::CUSTOMCIV::CustomCivHandler customCivHandler;
 
 	// UpdatedValue: if <0, it is ignored

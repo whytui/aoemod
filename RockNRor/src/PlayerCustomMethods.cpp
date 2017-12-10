@@ -70,7 +70,7 @@ void ApplySNNumberCustomizationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 
 
 // Generates a dynamic strategy for the specified player, if configuration allows it.
-void ApplyStrategyGenerationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+void ApplyStrategyGenerationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, ROCKNROR::STRATEGY::CustomPlayerInfo *customPlayerInfo) {
 	if (!player || !player->IsCheckSumValid() || !player->ptrAIStruct || !player->ptrAIStruct->IsCheckSumValid()) {
 		return;
 	}
@@ -95,7 +95,7 @@ void ApplyStrategyGenerationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	bool isDM = (settings->isDeathMatch != 0);
 	if ((!isDM && ROCKNROR::crInfo.configInfo.generateStrategyForRM) ||
 		(isDM && ROCKNROR::crInfo.configInfo.generateStrategyForDM)) {
-		ROCKNROR::STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(&ROCKNROR::crInfo, player);
+		ROCKNROR::STRATEGY::StrategyBuilder sb = STRATEGY::StrategyBuilder(&ROCKNROR::crInfo, player, customPlayerInfo);
 		sb.CreateStrategyFromScratch();
 	}
 }

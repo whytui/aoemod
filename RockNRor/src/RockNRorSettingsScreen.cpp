@@ -30,7 +30,7 @@ void RockNRorSettingsScreen::ResetClassPointers() {
 	this->chkRPGGameModeInRandomGames = NULL;
 	this->chkRPGGameModeInScenario = NULL;
 	this->chkGenStrategyInRM = NULL;
-	//this->chkGenStrategyInDM = NULL;
+	this->chkGenStrategyInDM = NULL;
 	this->chkNoWallsInRMDM = NULL;
 	this->chkNoNeutralDiplomacy = NULL;
 	this->chkNoDockInLandMaps = NULL;
@@ -139,8 +139,8 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_GEN_STRATEGY_DM, "Generate random strategies in Deathmatch Games"),
 		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
 		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	/*this->AddCheckBox(&this->chkGenStrategyInDM, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);*/
+	this->AddCheckBox(&this->chkGenStrategyInDM, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+		currentPosY, checkboxSizeX, checkboxSizeY);
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
 
 	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_NO_WALLS_RANDOM_GAMES, "No walls in Random Games/Deathmatch games"),
@@ -229,7 +229,7 @@ void RockNRorSettingsScreen::InitInputs() {
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkGenRandomTechTreeRMGames, ROCKNROR::crInfo.configInfo.randomTechTreeForRMGames);
 	//AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkGenRandomTechTreeDMGames, ROCKNROR::crInfo.configInfo.randomTechTreeForDMGames);
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkGenStrategyInRM, ROCKNROR::crInfo.configInfo.generateStrategyForRM);
-	//AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkGenStrategyInDM, ROCKNROR::crInfo.configInfo.generateStrategyForDM);
+	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkGenStrategyInDM, ROCKNROR::crInfo.configInfo.generateStrategyForDM);
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkNoDockInLandMaps, ROCKNROR::crInfo.configInfo.noDockInMostlyLandMaps);
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkNoNeutralDiplomacy, ROCKNROR::crInfo.configInfo.noNeutralInitialDiplomacy);
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkNoWallsInRMDM, ROCKNROR::crInfo.configInfo.noWalls);
@@ -255,10 +255,10 @@ void RockNRorSettingsScreen::UpdateConfigFromCheckbox(STRUCT_UI_BUTTON *checkbox
 		ROCKNROR::crInfo.configInfo.generateStrategyForRM = checkbox->IsChecked();
 		return;
 	}
-	/*if (checkbox == this->chkGenStrategyInDM) {
+	if (checkbox == this->chkGenStrategyInDM) {
 		ROCKNROR::crInfo.configInfo.generateStrategyForDM = checkbox->IsChecked();
 		return;
-	}*/
+	}
 	if (checkbox == this->chkNoDockInLandMaps) {
 		ROCKNROR::crInfo.configInfo.noDockInMostlyLandMaps = checkbox->IsChecked();
 		return;

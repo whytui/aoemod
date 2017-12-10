@@ -5,6 +5,7 @@
 #include <AOE_struct_main_ai.h>
 #include "RockNRorInfo.h"
 #include "StrategyBuilder.h"
+#include "PlayerTechTree.h"
 
 
 using namespace AOE_STRUCTURES;
@@ -22,7 +23,7 @@ void ApplySNNumberCustomizationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
 
 // Generates a dynamic strategy for the specified player, if configuration allows it.
-void ApplyStrategyGenerationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player);
+void ApplyStrategyGenerationOnPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, ROCKNROR::STRATEGY::CustomPlayerInfo *customPlayerInfo);
 
 
 }
