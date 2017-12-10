@@ -31,7 +31,7 @@ public:
 	std::list<std::string> lastGenerationBonusLinesForHumanPlayer;
 
 	// Init data for standard games (using standard civs/tech tree)
-	bool CreateInternalDataForGameWithStandardCivs();
+	bool CreateInternalDataForGameWithStandardCivs(bool resetInternalData);
 
 	// Init data and create tech tree for custom-civ games
 	bool CreateFakeRandomCivsForAllPlayers();

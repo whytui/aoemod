@@ -1274,13 +1274,15 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 
 	// Do custom stuff on "settings" here...
 
+	bool resetCustomCivInfo = true;
 	if (ROCKNROR::crInfo.configInfo.randomTechTreeForRMGames &&
 		!settings->isSavedGame && !settings->isCampaign && !settings->rgeGameOptions.isScenario && !settings->rgeGameOptions.isMultiPlayer) {
 		// Generate random tech tree and civ bonus for each player
 		this->customCivHandler.CreateFakeRandomCivsForAllPlayers();
+		resetCustomCivInfo = false;
 	}
 	// Collect info about (standard) tech trees
-	this->customCivHandler.CreateInternalDataForGameWithStandardCivs();
+	this->customCivHandler.CreateInternalDataForGameWithStandardCivs(resetCustomCivInfo);
 
 	return true;
 }

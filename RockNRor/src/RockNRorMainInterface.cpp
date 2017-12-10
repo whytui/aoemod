@@ -60,12 +60,6 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 			return true;
 		}
 	}
-	// (isInGame) condition is optional. If removed, ALT-F4 will be disabled in scenario editor when our dialog is on.
-	// WARNING: we can't prevent this to occur if user clicks on the top-right corner cross :(
-	//if ((isInGame) && (ALT) && (pressedKey == VK_F4)) {
-		// Disable ALT-F4 when our custom dialog is ON (based on the same dialog, would provoke conflicts and our dialog would stay ON forever)
-		//return true;
-	//}
 
 	// Handle more Units shortcuts using numpad keys 0-9
 	if ((isInGame) && (!isMenuOpen) && (pressedKey >= VK_NUMPAD0) && (pressedKey <= VK_NUMPAD9)) {

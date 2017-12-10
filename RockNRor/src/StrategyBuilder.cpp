@@ -2,7 +2,7 @@
 
 using namespace ROCKNROR::STRATEGY;
 
-// Set default value for random factor (a %)
+// Set default value for random factor (a %). Re-initialized in the beginning of each generation
 int StrategyBuilder::randomPercentFactor = 30;
 
 const char *newline = "\r\n";
@@ -1809,6 +1809,10 @@ void StrategyBuilder::SelectStrategyUnitsFromPreSelection(std::list<PotentialUni
 		}
 	}
 
+	if (this->settings->isDeathMatch) {
+		return; // ignore optional units in DM
+	}
+
 	// add "bonus" units to fill weaknesses, ex stone thrower vs towers, camel vs cavalry...
 	MILITARY_CATEGORY firstAddedCategory = MC_NONE;
 	for (int step = 1; step <= 2; step++) {
@@ -2636,12 +2640,12 @@ void StrategyBuilder::HandleLogistics() {
 	std::list<PotentialUnitInfo*> involvedUnits;
 	for each (auto oneUnit in this->actuallySelectedUnits) {
 		if ((oneUnit->unitAIType == AOE_CONST_FUNC::TribeAIGroupSlinger) || (oneUnit->unitAIType == AOE_CONST_FUNC::TribeAIGroupFootSoldier)) {
-			totalPop += oneUnit->desiredCount / 2;
+			totalPop += (int)(oneUnit->desiredCount / 2);
 			if (!oneUnit->isOptionalUnit || !oneUnit->earlyAgeUnit) {
 				involvedUnits.push_back(oneUnit); // we'll only add "main" military units
 			}
 		} else {
-			totalPop += oneUnit->desiredCount;
+			totalPop += (int)oneUnit->desiredCount;
 		}
 	}
 	int remainingRoom = totalPop - this->maxPopulation;
@@ -3290,6 +3294,37 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 	// => add quite early
 	// TODO
 
+
+	// Find the strategy location where population reaches "popLimitToPutResearches"
+	int popLimitToPutResearches = 50; // the population before which ALL researches must be placed
+	if (this->settings->isDeathMatch) {
+		popLimitToPutResearches = 30;
+	}
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *fakeElem = &this->buildAI->fakeFirstStrategyElement;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *endLimitForResearchesElem = fakeElem->next;
+	int retrainablePop = 0;
+	int posAfterIron = 0; // number of strategy elements read since iron age
+	bool seenIron = false;
+	while (endLimitForResearchesElem && (endLimitForResearchesElem != fakeElem) && (retrainablePop < popLimitToPutResearches)) {
+		if ((endLimitForResearchesElem->elementType == AIUCLivingUnit) && (endLimitForResearchesElem->retrains < 0)) {
+			retrainablePop++;
+		}
+		if (seenIron) {
+			posAfterIron++;
+		}
+		if (((endLimitForResearchesElem->elementType == AIUCCritical) || (endLimitForResearchesElem->elementType == AIUCTech)) &&
+			(endLimitForResearchesElem->unitDAT_ID == CST_RSID_IRON_AGE)) {
+			seenIron = true;
+			assert(endLimitForResearchesElem == this->seIronAge);
+		}
+		endLimitForResearchesElem = endLimitForResearchesElem->next;
+	}
+	if (!seenIron) {
+		// Invalid case: too much population before iron ! We can't force researches before iron !
+		endLimitForResearchesElem = fakeElem;
+	}
+
+
 	// Other researches
 	int totalResearchesToUse = 0; // Get total count of (remaining) researches to add
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
@@ -3316,17 +3351,31 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 						requirementsAreReady = requirementsAreReady && (reqResInfo->isInStrategy || (reqResInfo->researchDef && reqResInfo->researchDef->researchLocation < 0));
 					}
 				}
+				if (resInfo->detailedResInfo->IsShadowResearch()) {
+					resInfo->isInStrategy = true;
+					addedResearchesThisLoop++;
+					continue;
+				}
 				if (requirementsAreReady) {
 					resInfo->ComputeStratElemPositionConstraints(this->buildAI); // update dependencies on strategy elements
 					// Add to strategy at correct location
 					AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
+					if (this->seIronAge != NULL) {
+						insertionPoint = this->seIronAge;
+					}
+					int maxRandomSteps = 25;
 					if (resInfo->mustBeAfterThisElem != NULL) {
 						insertionPoint = resInfo->mustBeAfterThisElem->next;
+						maxRandomSteps -= 10;
 					}
-					int moveFurther = randomizer.GetRandomValue(1, 24);
+					if ((endLimitForResearchesElem != fakeElem) && (endLimitForResearchesElem == this->seIronAge)) {
+						maxRandomSteps = posAfterIron;
+					}
+					int moveFurther = randomizer.GetRandomValue(1, maxRandomSteps);
 					while (insertionPoint && insertionPoint->next && (moveFurther > 0)) {
 						if (insertionPoint->elemId == -1) { break; } // Reached empty element (end of strategy)
 						if (insertionPoint == resInfo->mustBeBeforeThisElem) { break; } //  Ensure dependencies are respected
+						if (insertionPoint == endLimitForResearchesElem) { break; } // Ensure going no further than a specified population
 						insertionPoint = insertionPoint->next;
 						moveFurther--;
 					}
@@ -3617,7 +3666,7 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 void StrategyBuilder::CreateStrategyFromScratch() {
 	if (!this->buildAI || !this->buildAI->IsCheckSumValid() || !this->buildAI->mainAI || !this->buildAI->mainAI->IsCheckSumValid()) { return; }
 	if (!this->player || !this->player->IsCheckSumValid()) { return; }
-	if (!this->global || !this->global->IsCheckSumValid()) { return; }
+	if (!this->global || !this->global->IsCheckSumValid() || !this->settings) { return; }
 	// Clear previous strategy
 	ClearStrategy(this->buildAI);
 	strcpy_s(this->buildAI->strategyFileName, 0x3F, "Dynamic RockNRor strategy");
@@ -3626,6 +3675,12 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	this->log += " = ";
 	this->log += this->player->playerName_length16max;
 	this->log += newline;
+
+	if (this->settings->isDeathMatch) {
+		StrategyBuilder::randomPercentFactor = 25;
+	} else {
+		StrategyBuilder::randomPercentFactor = 30;
+	}
 
 	// WARNING : take care if map is naval (=> villager count, land military units count + all non-war boats thing)
 	// + max pop criterion
@@ -3737,8 +3792,6 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 #endif
 		}
 	}
-
-#pragma TODO("Handle logistics ! Count free room and add more infantry.")
 
 
 	// Actually create strategy items
@@ -4041,9 +4094,89 @@ void StrategyBuilder::UpdatePotentialResearchStatusFromMissingRequirements(Poten
 }
 
 // Add missing buildings - if any - that block some research requirements, also mark them for add
-// Potential research info "requirements" flags are updated to take into account the new building (in case it unlocks some dependencies).
+// WRONG(removed): Potential research info "requirements" flags are updated to take into account the new building (in case it unlocks some dependencies).
 void StrategyBuilder::AddMissingBuildings() {
-	assert(this->global && this->player);
+#pragma WARNING("Dirty handling of missing requirements. We should store info about all shadow research?")
+	TTDetailedResearchDef *ironDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(AOE_CONST_FUNC::CST_RSID_IRON_AGE);
+	auto it = std::find_if(ironDtl->allRequirements.cbegin(), ironDtl->allRequirements.cend(), 
+		[](TTDetailedResearchDef *dtl){ return dtl->hasOptionalRequirements; }
+	);
+	for (; it != ironDtl->allRequirements.cend(); it++) {
+		// We are looping on all iron age requirements that include optional requirements (the *** shadow researches that allow choosing between several buildings)
+		TTDetailedResearchDef *shadow = *it;
+		if (!shadow || !shadow->active || !shadow->researchDef) { continue; }
+		int requiredCount = shadow->researchDef->minRequiredResearchesCount;
+		int foundCount = 0;
+		for (int i = 0; i < 4; i++) {
+			short int curReqId = shadow->researchDef->requiredResearchId[i];
+			TTDetailedResearchDef *curDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(curReqId);
+			
+			bool isInStrategy = false;
+			if (curDtl) {
+				auto searchSPGranary = std::find_if(curDtl->triggeredByBuilding.begin(), curDtl->triggeredByBuilding.end(),
+					[](TTDetailedBuildingDef *bDtl){ return (bDtl != NULL) && (bDtl->unitDefId == CST_UNITID_STORAGE_PIT) || (bDtl->unitDefId == CST_UNITID_GRANARY); }
+				);
+				isInStrategy = (searchSPGranary != curDtl->triggeredByBuilding.end()); // SP/granary will be added by AI. Consider they're OK.
+			}
+			PotentialResearchInfo *potentialRes = this->GetResearchInfo(curReqId);
+			if (potentialRes && potentialRes->markedForAdd) {
+				isInStrategy = true;
+			} else {
+				if ((curReqId >= AOE_CONST_FUNC::CST_RSID_STONE_AGE) && (curReqId <= AOE_CONST_FUNC::CST_RSID_IRON_AGE)) {
+					isInStrategy = true; // ages : we always include them in strategy !
+				}
+			}
+			if (isInStrategy) {
+				foundCount++;
+			}
+		}
+		if (foundCount < requiredCount) {
+			this->log += "Need to add stuff for shadow research #";
+			this->log += std::to_string(shadow->GetResearchDefId());
+			this->log += newline;
+
+			std::list<AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*> missingBuildingsDef;
+			missingBuildingsDef.clear();
+			foundCount = 0;
+			for each (auto v in shadow->directRequirements)
+			{
+				for each (auto vv in v->triggeredByBuilding)
+				{
+					if (vv->possibleAncestorUnitIDs.size() > 0) {
+						continue; // ignore non-base buildings
+					}
+					AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)vv->GetUnitDef();
+					if (unitDef->IsCheckSumValid()) {
+						PotentialBuildingInfo *potentialBld = this->GetBuildingInfo(unitDef);
+						if (potentialBld) {
+							if (potentialBld->markedForAdd) {
+								foundCount++;
+							} else {
+								potentialBld->markedForAdd = true;
+								foundCount++;
+							}
+						} else {
+							missingBuildingsDef.push_back(unitDef);
+						}
+					}
+					if (foundCount >= requiredCount) { break; }
+				}
+			}
+			while ((foundCount < requiredCount) && (missingBuildingsDef.size() > 0)) {
+				AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *bldDef = missingBuildingsDef.front();
+				missingBuildingsDef.pop_front();
+				if (!IsUnitDisabledInTechTree(this->player->playerId, bldDef->DAT_ID1)) {
+					this->log.append("Added building #" + std::to_string(bldDef->DAT_ID1) + " (" + bldDef->ptrUnitName + ") to list due to missing requirements.\n");
+					this->AddPotentialBuildingInfoToList(bldDef, true);
+					foundCount++;
+				}
+			}
+
+		}
+	}
+
+
+	/*assert(this->global && this->player);
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		std::list<AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*> missingBuildingsDef;
@@ -4111,5 +4244,5 @@ void StrategyBuilder::AddMissingBuildings() {
 				loopCount++;
 			}
 		}
-	}
+	}*/
 }

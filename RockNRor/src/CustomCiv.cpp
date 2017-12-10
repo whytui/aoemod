@@ -27,8 +27,10 @@ void CustomCivHandler::InitForCurrentGame() {
 
 
 // Init data for standard games (using standard civs/tech tree)
-bool CustomCivHandler::CreateInternalDataForGameWithStandardCivs() {
-	this->InitForCurrentGame();
+bool CustomCivHandler::CreateInternalDataForGameWithStandardCivs(bool resetInternalData) {
+	if (resetInternalData) {
+		this->InitForCurrentGame();
+	}
 
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) { return false; }
