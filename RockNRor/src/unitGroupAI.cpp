@@ -368,6 +368,31 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 	}
 #endif
 
+	// To prevent "stuck groups": incomplete groups sometimes remain stuck in "regroup" task and are not reorganized using idle units.
+	// Actually, the issue might rather be in group handling TacAI phases, not here...
+	if ((unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_REGROUP) ||
+		(unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_REGROUP_NO_SPACING)) {
+		long int totalSoldiersCount = tacAI->landMilitaryUnits.usedElements;
+		STRUCT_UNIT_GROUP *fake = &tacAI->fakeFirstUnitGroupElem;
+		STRUCT_UNIT_GROUP *cur = fake->next;
+		long int curCount = 0;
+		while (cur && (cur->next != fake)) {
+			if ((cur->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_ATTACK) ||
+				(cur->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_DEFEND) ||
+				(cur->unitGroupType == UNIT_GROUP_TYPES::CST_UGT_LAND_EXPLORE)) {
+				curCount += cur->unitCount;
+			}
+			cur = cur->next;
+		}
+		if ((unitGroup->unitCount < unitGroup->desiredUnitCount) && (curCount < totalSoldiersCount)) {
+			// There are idle military units, and this group is incomplete
+			// "kill" current group to force a reorganization
+			// TODO Use a delay ? And also, improve the conditions if possible...
+			unitGroup->unitCount = 0;
+			return true;
+		}
+	}
+
 	// Restrict to supported tasks
 	if ((unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02) &&
 		(unitGroup->currentTask != UNIT_GROUP_TASK_IDS::CST_UGT_EXTERMINATE) &&

@@ -232,6 +232,7 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 
 	// Other
 	fprintf_s(f, "civilizations count:                       %ld\n", ROCKNROR::crInfo.configInfo.civCount);
+	fprintf_s(f, "Single player population limit:            %ld\n", ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation);
 
 	fprintf_s(f, "End of configuration.\n\n");
 	fclose(f);
