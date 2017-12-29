@@ -116,7 +116,7 @@ bool RnrScreenBase::CreateScreen(STRUCT_UI_EASY_PANEL *parentScreen) {
 	if (this->rorScreenStatus != NOT_CREATED) {
 		return false;
 	}
-	auto sys = GetUIPanelSystem(); // TEST
+	// Warning: windows dimensions are weird when trying to open fullscreen when current screen is windowed !
 	STRUCT_UI_EASY_PANEL *screenObject = AOE_METHODS::UI_BASE::CreateModalScreen(this->screenName.c_str(), parentScreen,
 		this->isFullscreen, this->screenPosX, this->screenPosY, this->screenSizeX, this->screenSizeY, true, this->backgroundSlpTheme, this->rorScreenType);
 	if (!screenObject) {

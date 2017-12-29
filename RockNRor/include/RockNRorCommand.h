@@ -59,8 +59,6 @@
 
 #pragma once
 
-#define CRCMD_TEXT_BUFFER_SIZE 256
-
 
 namespace ROCKNROR {
 
@@ -127,9 +125,8 @@ public:
 
 	// Execute a command from custom options window
 	// Returns true if the provided command is valid (and executed)
-	// After the call, output points to a char* string containing command's output, if any.
-	// Do NOT free output variable, it uses an internal buffer.
-	bool ExecuteCommand(char *command, char **output);
+	// After the call, output is a string containing command's output, if any.
+	bool ExecuteCommand(char *command, std::string &output);
 	void HandleChatCommand(char *command);
 
 

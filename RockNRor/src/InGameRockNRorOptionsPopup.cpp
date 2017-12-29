@@ -130,14 +130,17 @@ bool InGameRockNRorOptionsPopup::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCod
 	if (uiObj == this->customOptionFreeTextVar) {
 		if (keyCode == VK_RETURN) {
 			char *typedText = this->customOptionFreeTextVar->pTypedText;
-			char *answer;
+			std::string answer;
 			unsigned long int h = this->customOptionFreeTextAnswerVar->hWnd;
-			/*bool result =*/ ROCKNROR::crCommand.ExecuteCommand(typedText, &answer);
-			SendMessageA((HWND)h, WM_SETTEXT, 0, (LPARAM)answer);
+			/*bool result =*/ ROCKNROR::crCommand.ExecuteCommand(typedText, answer);
+			SendMessageA((HWND)h, WM_SETTEXT, 0, (LPARAM)answer.c_str());
 			SendMessageA((HWND)h, EM_SETREADONLY, 1, 0);
 			//SendMessageA((HWND)h, WM_SETFOCUS, 0, 0);
 			ShowWindow((HWND)h, SW_SHOW);
-			// No need to free answer, because it points to an internal buffer[...] and is re-used each time.
+			if (answer.substr(0, 5) == "Close") {
+				// dirty hack to close current popup, so that next popup will be based on normal screen (opening a fullscreen UI under a popup does not work very well)
+				this->CloseScreen(false);
+			}
 		}
 	}
 	return false;

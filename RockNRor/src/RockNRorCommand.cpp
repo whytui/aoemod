@@ -9,10 +9,6 @@ namespace ROCKNROR {
 RockNRorCommand ROCKNROR::crCommand;
 
 
-char outputBuffer[CRCMD_TEXT_BUFFER_SIZE];
-
-
-
 RockNRorCommand::RockNRorCommand() {
 }
 
@@ -348,12 +344,10 @@ const char *RockNRorCommand::GetCustomEmpiresDatRelativeFileName(AOE_STRUCTURES:
 
 // Execute a command from custom options window
 // Returns true if the provided command is valid (and executed)
-// After the call, output points to a char* string containing command's output, if any.
-// Do NOT free output variable, it uses an internal buffer.
-bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
+// After the call, output is a string containing command's output, if any.
+bool RockNRorCommand::ExecuteCommand(char *command, std::string &output) {
 	static const char *PREFIX_SET = "set ";
-	*output = outputBuffer;
-	outputBuffer[0] = 0;
+	output = "";
 
 	if (!*command) { return false; }
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
@@ -367,7 +361,8 @@ bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
 			if (newSeed) {
 				gameSettings->scenarioMapSeed = newSeed;
 				gameSettings->actualMapSeed = newSeed;
-				sprintf_s(outputBuffer, "Map seed=%d", newSeed);
+				output = "Map seed=";
+				output += std::to_string(newSeed);
 			}
 			return true;
 		}
@@ -376,7 +371,8 @@ bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
 			int newType = StrToInt(subCmd, -1);
 			if ((newType >= 0) && (newType < AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT)) {
 				gameSettings->mapTypeChoice = (AOE_CONST_FUNC::MAP_TYPE_INDEX) newType;
-				sprintf_s(outputBuffer, "Map type=%d", newType);
+				output = "Map type=";
+				output += std::to_string(newType);
 			}
 			return true;
 		}
@@ -386,7 +382,8 @@ bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
 			int newId = StrToInt(subCmd, -1);
 			if (((newId <= 0) && (newId < 9))) {
 				AOE_METHODS::PLAYER::ChangeControlledPlayer(newId, true);
-				sprintf_s(outputBuffer, "Controlled player#=%d", newId);
+				output = "Controlled player#=";
+				output += std::to_string(newId);
 			}
 			return true;
 		}
@@ -406,7 +403,8 @@ bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
 							}
 						}
 					}
-					sprintf_s(outputBuffer, "Max population=%d", newMaxPop);
+					output = "Max population=";
+					output += std::to_string(newMaxPop);
 				}
 			}
 			return true;
@@ -426,8 +424,7 @@ bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
 			if (unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
 				name = unit->unitDefinition->ptrUnitName;
 			}
-			std::string s = std::string("selected ") + std::string(name);
-			sprintf_s(outputBuffer, s.c_str());
+			output = std::string("selected ") + std::string(name);
 		}
 	}
 
@@ -443,7 +440,9 @@ bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
 		if (player && player->IsCheckSumValid() && unitDef && unitDef->IsCheckSumValidForAUnitClass() && gameSettings->rgeGameOptions.isSinglePlayer) {
 			gameSettings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_EDITOR_SET_UNIT_LOCATION;
 			gameSettings->editorUserSelectedUnitDefId = id;
-			sprintf_s(outputBuffer, "Add %s. Right-click to quit add mode.", unitDef->ptrUnitName);
+			output = "Add ";
+			output += unitDef->ptrUnitName;
+			output += ". Right-click to quit add mode.";
 		}
 	}
 
@@ -473,7 +472,7 @@ bool RockNRorCommand::ExecuteCommand(char *command, char **output) {
 			if (player && player->ptrAIStruct && player->ptrAIStruct->IsCheckSumValid()) {
 				std::string s = STRATEGY::ExportStrategyToText(&player->ptrAIStruct->structBuildAI, useStandardAIFormat);
 				traceMessageHandler.WriteMessage(s);
-				sprintf_s(outputBuffer, "Close this window to see strategy.");
+				output = "Close this window to see strategy.";
 			}
 			return true;
 		}
