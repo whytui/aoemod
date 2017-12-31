@@ -456,6 +456,12 @@ bool UnitGroupAI::TaskActiveUnitGroup(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROUP *u
 		traceMessageHandler.WriteMessage(msg);
 		return false;
 	}
+	if (commander->ptrStructPlayer != player) {
+		std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(".group#") +
+			std::to_string(unitGroup->unitGroupId) + std::string(" has an non-owned leader ID");
+		traceMessageHandler.WriteMessage(msg);
+		return false;
+	}
 	// Variables depending on unit group location
 	this->curGroupDistanceToMainUnit = -1;
 	this->curUnitGroupOrientationXFromMainUnit = 0; // -1 if group is "left" of main unit, 1 if on the "right" (X axis)

@@ -2472,7 +2472,7 @@ void StrategyBuilder::AddUserDefinedForcedResearches(short int oneResearchId) {
 	} else {
 		if (this->IsResearchInTechTree(oneResearchId)) {
 			resInfo = this->AddPotentialResearchInfoToList(oneResearchId, true);
-			if (resInfo) { resInfo->forcePutAsEarlyAsPossible = false; }
+			if (resInfo) { resInfo->forcePutAsEarlyAsPossible = true; }
 		}
 	}
 	if (!resInfo) {
