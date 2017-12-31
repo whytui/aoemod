@@ -144,7 +144,7 @@ namespace AOE_STRUCTURES {
 		// +50F4 is an array of 3 long int. Index 0=lengthenCombat, 1=?, 2=allTechs. Cf Getter in 0x5076A0 (getter is only used with index 2, beware direct accesses too).
 		long int enableLengthenCombatMode; // +50F4. A flag 0/1. If 1, lengthen combat mode is ON (most units get *3 HP, it is technology 0x64)
 		long int unusedGameMode_50F8; // +50F8. Supposedly another "game mode" option, unused (sure at 99%)
-		long int fullTechTree; // +50FC. Stored in savegame files, but always 0 (fixed by RockNRor) in RM/DM games. Initially supposed to indicate if scenario uses all techs. We extend this to all games in RockNRor.
+		long int fullTechTree; // +50FC. Stored in savegame files, but always 0 (fixed by RockNRor) in RM/DM games. Initially supposed to indicate if scenario uses all techs. We extend this to all games in RockNRor. Set to 1 when using "custom tech trees".
 		// 0x5100
 		long int playersStartingAge[0x10]; // 1=Tool, 4=post iron (SCENARIO_INFO_AGE_ID). Warning, this does not correspond to CST_AGE_TOOL, etc. Index is playerId-1. Not initialized in RM/DM games ! (fixed by RockNRor)
 		// 0x5140

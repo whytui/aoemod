@@ -34,8 +34,8 @@ public:
 	bool isActive; // True if player is active/valid for current game
 	std::set<ROCKNROR::STRATEGY::TTDetailedBuildingDef*>enabledBuildingsInfo;
 	std::set<ROCKNROR::STRATEGY::TTDetailedBuildingDef*>disabledBuildingsInfo; // techtree BuildingDef info for non-available buildings. Most commonly disabled buildings are walls, sometimes temple, academy, ballista tower... (+hero buildings)
-	std::set<ROCKNROR::STRATEGY::TTDetailedUnitDef*>enabledTrainableUnitInfos;
-	std::set<ROCKNROR::STRATEGY::TTDetailedUnitDef*>disabledTrainableUnitInfos; // All disabled trainable units, including "intermediate" upgrades
+	std::set<ROCKNROR::STRATEGY::TTDetailedTrainableUnitDef*>enabledTrainableUnitInfos;
+	std::set<ROCKNROR::STRATEGY::TTDetailedTrainableUnitDef*>disabledTrainableUnitInfos; // All disabled trainable units, including "intermediate" upgrades
 	std::set<ROCKNROR::STRATEGY::TTDetailedResearchDef*>enabledResearchesInfoAll; // All non-disabled (by tech tree) researches, including shadow researches
 	std::set<ROCKNROR::STRATEGY::TTDetailedResearchDef*>enabledResearchesInfo; // All non-disabled (by tech tree) researches, excluding shadow researches
 	std::set<ROCKNROR::STRATEGY::TTDetailedResearchDef*>disabledResearchesInfo;
@@ -56,6 +56,18 @@ public:
 
 	// Fill eligibleDisableXxx, disabledResearchIds, disabledUnitDefIds collections (etc) according to player's tech tree (myTechTreeId).
 	void CollectInfoFromExistingTechTree();
+
+	// Returns true if the living unit is disabled in player tech tree.
+	// Returns false if the unit is NOT a living unit (returns false for buildings !)
+	bool IsTrainableUnitDisabled(long int unitDefId) const;
+	// Returns true if the building is disabled in player tech tree.
+	// Returns false if the unit is NOT a building
+	bool IsBuildingUnitDisabled(long int unitDefId) const;
+	// Returns true if the unit (living unit or building) is disabled in player tech tree
+	bool IsUnitDisabled(long int unitDefId) const;
+
+	// Returns true if the research is disabled in player tech tree
+	bool IsResearchDisabled(long int resDefId) const;
 };
 
 

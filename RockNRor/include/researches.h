@@ -132,15 +132,6 @@ bool DoesTechDisableResearch(STRUCT_TECH_DEF *techDef, short int researchId);
 // In standard game, this can be trireme/ballista tower (slower projectile), jihad
 bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef);
 
-// Returns true if a unit (DATID) is disabled by player's tech tree
-// Do not use this when player tech tree IDs are custom ! (cf randomly-generated tech trees)
-bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId);
-
-// Returns true if a research (research ID) is disabled by player's tech tree
-// Do not use this when player tech tree IDs are custom ! (cf randomly-generated tech trees)
-bool IsResearchDisabledInTechTree(short int playerId, short int researchId);
-
-
 // Returns the age research id of research's required age, from direct dependencies or recursively, if necessary.
 // Returns -1 if there is no required age (always available)
 short int FindResearchRequiredAge(STRUCT_PLAYER *player, short int researchId);

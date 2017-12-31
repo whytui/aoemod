@@ -201,6 +201,9 @@ namespace AOE_CONST_FUNC {
 	};
 
 	// http://agecommunity.wikia.com/wiki/Attack_Data
+	// If an armor class isn't defined, its amount is always 0 
+	// If an attack class isn't defined, it won't have any effect (even if attacked unit has a negative amount) 
+	// Damage for an attack class is max(attack-armor, 0). attack&armor can be negative numbers !
 	// For both attack and armor types.
 	enum ATTACK_CLASS: short int {
 		CST_AC_NONE = -1,

@@ -33,8 +33,7 @@ namespace STRATEGY {
 			this->buildAI = NULL;
 			this->player = NULL;
 			this->global = NULL;
-			this->playerTechTreeInfo = NULL;
-			this->customPlayerInfo = customPlayerInfo;
+			this->playerTechTreeInfo = customPlayerInfo;
 			this->selectedLandUnitsCount = 0;
 			this->selectedWaterUnitsCount = 0;
 			for (int i = 0; i < 4; i++) { this->totalTrainUnitCosts[i] = 0; }
@@ -114,7 +113,6 @@ namespace STRATEGY {
 		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetAgeStrategyElement(short int researchId);
 
 	private:
-		ROCKNROR::STRATEGY::CustomPlayerInfo *customPlayerInfo;
 		std::string log;
 		static int randomPercentFactor;
 		AOE_STRUCTURES::STRUCT_PLAYER *player;
@@ -172,10 +170,12 @@ namespace STRATEGY {
 			if (this->crInfo && this->settings && (this->settings->rgeGameOptions.isSinglePlayer)) {
 				this->maxPopulation = this->crInfo->configInfo.singlePlayerMaxPopulation;
 			}
-			this->playerTechTreeInfo = new CustomPlayerInfo();
-			this->playerTechTreeInfo->ResetAndInit(player->playerId, player->civilizationId, player->techTreeId);
-			this->playerTechTreeInfo->isActive = true;
-			this->playerTechTreeInfo->CollectInfoFromExistingTechTree();
+			if (this->playerTechTreeInfo == NULL) { // NOT the case when a custom civ is being used
+				this->playerTechTreeInfo = new CustomPlayerInfo();
+				this->playerTechTreeInfo->ResetAndInit(player->playerId, player->civilizationId, player->techTreeId);
+				this->playerTechTreeInfo->isActive = true;
+				this->playerTechTreeInfo->CollectInfoFromExistingTechTree();
+			}
 		}
 
 		// Clears potential units list and free each underlying PotentialUnitInfo object.

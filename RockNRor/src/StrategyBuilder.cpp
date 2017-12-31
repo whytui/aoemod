@@ -73,6 +73,11 @@ int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
 int StrategyBuilder::AddResearchToStrategy(PotentialResearchInfo *resInfo, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint) {
 	assert(insertionPoint);
 	assert(resInfo->researchDef != NULL);
+#ifdef _DEBUG
+	if (!PLAYER::IsResearchEnabledForPlayer(this->player, resInfo->researchId)) {
+		ROCKNROR::SYSTEM::StopExecution(_T("STRATEGY builder: unavailable research"), true, true);
+	}
+#endif
 	if (resInfo->isInStrategy || !insertionPoint || !resInfo->researchDef) { return 0; }
 	int res = 0;
 	// TODO : use technology filter (tech tree/ages)
@@ -371,21 +376,7 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNIT
 
 // Returns true if a research is available in tech tree
 bool StrategyBuilder::IsResearchInTechTree(short int researchId) {
-	if ((this->player->techTreeId < 0) || (this->global->scenarioInformation && this->global->scenarioInformation->fullTechTree)
-		|| (this->settings->allTechs)) {
-		return (researchId >= 0);
-	}
-	if (ROCKNROR::crInfo.myGameObjects.currentGameHasAllTechs) {
-		assert(false && "incorrect scenarioInformation->fullTechTree value ?");
-		return (researchId >= 0);
-	}
-	AOE_STRUCTURES::STRUCT_TECH_DEF *techTreeDef = this->global->GetTechDef(this->player->techTreeId);
-	if (techTreeDef) {
-		if (DoesTechDisableResearch(techTreeDef, researchId)) {
-			return false; // not available because disabled by tech tree
-		}
-	}
-	return true; // Default
+	return !this->playerTechTreeInfo->IsResearchDisabled(researchId);
 }
 
 // Updates this->mustBeBeforeThisElem and this->mustBeAfterThisElem according to known dependencies on other unit/researches
@@ -555,11 +546,14 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 		if (unitDetailTrainable->possibleAncestorUnitIDs.size() > 0) { continue; }
 
 		// Is unit available in my tech tree ?
-		auto searchDisableUnit = std::find_if(this->playerTechTreeInfo->disabledTrainableUnitInfos.cbegin(),
+		if (this->playerTechTreeInfo->IsTrainableUnitDisabled(unitDefId)) {
+			continue;
+		}
+		/*auto searchDisableUnit = std::find_if(this->playerTechTreeInfo->disabledTrainableUnitInfos.cbegin(),
 			this->playerTechTreeInfo->disabledTrainableUnitInfos.cend(), [unitDef](TTDetailedUnitDef *curDtl){ return curDtl->unitDefId == unitDef->DAT_ID1; });
 		if (searchDisableUnit != this->playerTechTreeInfo->disabledTrainableUnitInfos.cend()) {
 			continue; // unit is disabled (unavailable in tech tree)
-		}
+		}*/
 
 		// Find best available upgrade
 		bool hasUnavailableUpgrade = false;
@@ -715,6 +709,12 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 			}
 		}
 		unitInfo->hasCivBonus = currentUnitHasTechTreeBonus;
+
+#ifdef _DEBUG
+		if ((unitInfo->enabledByResearchId >= 0) && (!PLAYER::IsResearchEnabledForPlayer(this->player, unitInfo->enabledByResearchId))) {
+			ROCKNROR::SYSTEM::StopExecution(_T("STRATEGY builder: unavailable research"), true, true);
+		}
+#endif
 
 		// Save unit infos in list
 		this->potentialUnitsList.push_back(unitInfo);
@@ -2462,6 +2462,10 @@ void StrategyBuilder::AddUserDefinedForcedResearches(short int oneResearchId) {
 		}
 	}
 
+	if (this->playerTechTreeInfo->IsResearchDisabled(oneResearchId)) {
+		return; // unavailable research: ignore (can't force add to strategy)
+	}
+
 	PotentialResearchInfo *resInfo = this->GetResearchInfo(oneResearchId);
 	if (resInfo) {
 		resInfo->markedForAdd = true;
@@ -3181,7 +3185,7 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 
 			//for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 			//{
-			if (resInfo && (resInfo->researchId == resId) && (!resInfo->isInStrategy) && (resInfo->markedForAdd) && resInfo->researchDef) {
+				if (resInfo && (resInfo->researchId == resId) && (!resInfo->isInStrategy) && (resInfo->markedForAdd) && resInfo->researchDef) {
 					resInfo->ComputeStratElemPositionConstraints(this->buildAI); // update dependencies on strategy elements
 					// Add to strategy at correct location
 					AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *insertionPoint = this->buildAI->fakeFirstStrategyElement.next;
@@ -3189,7 +3193,7 @@ void StrategyBuilder::CreateMilitaryRequiredResearchesStrategyElements() {
 						insertionPoint = resInfo->mustBeAfterThisElem->next;
 					}
 					int usefulness = resInfo->impactedUnitDefIds.size();
-					if (usefulness <= 1) {
+					if ((usefulness <= 1) && (resInfo->mustBeBeforeThisElem != NULL)) {
 						insertionPoint = resInfo->mustBeBeforeThisElem;
 					}
 					if ((usefulness >= 2) && (usefulness <= 3)) {
@@ -3220,7 +3224,7 @@ void StrategyBuilder::CreateOtherResearchesStrategyElements() {
 	// First add researches with a specific location (forcePlaceForFirstImpactedUnit)
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
-		if ((resInfo->forcePlaceForFirstImpactedUnit || resInfo->forcePutAsEarlyAsPossible) && !resInfo->isInStrategy) {
+		if (resInfo->markedForAdd && (resInfo->forcePlaceForFirstImpactedUnit || resInfo->forcePutAsEarlyAsPossible) && !resInfo->isInStrategy) {
 			// If research has already been placed, move it ? should not be necessary because ComputeStratElemPositionConstraints should have taken this into account ?
 			resInfo->ComputeStratElemPositionConstraints(this->buildAI);
 			if (resInfo->mustBeAfterThisElem != NULL) {
@@ -4007,9 +4011,11 @@ int StrategyBuilder::UpdateRequiredBuildingsFromValidatedResearches() {
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
 		if (resInfo->markedForAdd && resInfo->researchDef) {
+			short int resLocationId = resInfo->researchDef->researchLocation;
 			// Research's location
 			if ((resInfo->researchDef->researchLocation >= 0) &&
-				(!IsUnitDisabledInTechTree(this->player->playerId, resInfo->researchDef->researchLocation))) {
+				//(!IsUnitDisabledInTechTree(this->player->playerId, resInfo->researchDef->researchLocation))
+				!this->playerTechTreeInfo->IsBuildingUnitDisabled(resLocationId)) {
 				// This only adds if not already in list
 				if (this->AddPotentialBuildingInfoToList(resInfo->researchDef->researchLocation, true)) {
 					addedElements++;
@@ -4165,7 +4171,8 @@ void StrategyBuilder::AddMissingBuildings() {
 			while ((foundCount < requiredCount) && (missingBuildingsDef.size() > 0)) {
 				AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *bldDef = missingBuildingsDef.front();
 				missingBuildingsDef.pop_front();
-				if (!IsUnitDisabledInTechTree(this->player->playerId, bldDef->DAT_ID1)) {
+				if (!this->playerTechTreeInfo->IsBuildingUnitDisabled(bldDef->DAT_ID1)) {
+				//if (!IsUnitDisabledInTechTree(this->player->playerId, bldDef->DAT_ID1)) {
 					this->log.append("Added building #" + std::to_string(bldDef->DAT_ID1) + " (" + bldDef->ptrUnitName + ") to list due to missing requirements.\n");
 					this->AddPotentialBuildingInfoToList(bldDef, true);
 					foundCount++;

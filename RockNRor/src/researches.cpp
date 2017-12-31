@@ -806,48 +806,6 @@ bool HasTechNegativeSideEffect(STRUCT_TECH_DEF *techDef) {
 }
 
 
-// Returns true if a unit (DATID) is disabled by player's tech tree
-// Do not use this when player tech tree IDs are custom ! (cf randomly-generated tech trees)
-bool IsUnitDisabledInTechTree(short int playerId, short int unitDefId) {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	assert(settings != NULL);
-	if (!settings) { return false; }
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
-	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
-		return false;
-	}
-	AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
-	if (!player || !player->IsCheckSumValid()) { return false; }
-#pragma WARNING("Not compatible with custom civs !")
-	AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->GetTechDef(player->techTreeId);
-	if (!techDef) {
-		return false;
-	}
-	return DoesTechDisableUnit(techDef, unitDefId);
-}
-
-
-// Returns true if a research (research ID) is disabled by player's tech tree
-// Do not use this when player tech tree IDs are custom ! (cf randomly-generated tech trees)
-bool IsResearchDisabledInTechTree(short int playerId, short int researchId) {
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	assert(settings != NULL);
-	if (!settings) { return false; }
-	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = settings->ptrGlobalStruct;
-	if (!global || !global->IsCheckSumValid() || !global->researchDefInfo) {
-		return false;
-	}
-	AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
-	if (!player || !player->IsCheckSumValid()) { return false; }
-#pragma WARNING("Not compatible with custom civs !")
-	AOE_STRUCTURES::STRUCT_TECH_DEF *techDef = global->GetTechDef(player->techTreeId);
-	if (!techDef) {
-		return false;
-	}
-	return DoesTechDisableResearch(techDef, researchId);
-}
-
-
 // Returns the first (non disabled) research ID found that enables a unit. Returns -1 if not found.
 // startAtResearchId : -1=ignored (joker). If >=0, than the search will start at this index and ignore previous researches.
 short int FindResearchThatEnableUnit(STRUCT_PLAYER *player, short int unitDefId, short int startAtResearchId) {

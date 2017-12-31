@@ -124,6 +124,39 @@ void CustomPlayerInfo::CollectInfoFromExistingTechTree() {
 }
 
 
+// Returns true if the living unit is disabled in player tech tree.
+// Returns false if the unit is NOT a living unit (returns false for buildings !)
+bool CustomPlayerInfo::IsTrainableUnitDisabled(long int unitDefId) const {
+	auto search = std::find_if(this->disabledTrainableUnitInfos.cbegin(), this->disabledTrainableUnitInfos.cend(),
+		[unitDefId](TTDetailedUnitDef *curUnitInfo){ return curUnitInfo->unitDefId == unitDefId; }
+	);
+	return (search != this->disabledTrainableUnitInfos.cend());
+}
+
+// Returns true if the building is disabled in player tech tree.
+// Returns false if the unit is NOT a building
+bool CustomPlayerInfo::IsBuildingUnitDisabled(long int unitDefId) const {
+	auto search = std::find_if(this->disabledBuildingsInfo.cbegin(), this->disabledBuildingsInfo.cend(),
+		[unitDefId](TTDetailedBuildingDef *curUnitInfo){ return curUnitInfo->unitDefId == unitDefId; }
+	);
+	return (search != this->disabledBuildingsInfo.cend());
+}
+
+// Returns true if the unit (living unit or building) is disabled in player tech tree
+bool CustomPlayerInfo::IsUnitDisabled(long int unitDefId) const {
+	return this->IsTrainableUnitDisabled(unitDefId) ||
+		this->IsBuildingUnitDisabled(unitDefId);
+}
+
+// Returns true if the research is disabled in player tech tree
+bool CustomPlayerInfo::IsResearchDisabled(long int resDefId) const {
+	auto search = std::find_if(this->disabledResearchesInfo.cbegin(), this->disabledResearchesInfo.cend(),
+		[resDefId](TTDetailedResearchDef *curResInfo){ return curResInfo->GetResearchDefId() == resDefId; }
+	);
+	return (search != this->disabledResearchesInfo.cend());
+}
+
+
 // Returns the final "disable probability" for this research.
 // Returns <=0 if the unit must not be disable OR must not be disabled directly (handled by "unit line")
 double TTCreatorResearchInfo::GetDisableProbability() const {

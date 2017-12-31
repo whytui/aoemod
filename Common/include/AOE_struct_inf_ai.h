@@ -50,7 +50,7 @@ namespace AOE_STRUCTURES {
 
 
 	// "Lot". Size = 0x08. Used in InfAI+1F8 array.
-	// Elements are never reset when a building is destroyed ?
+	// Elements are never reset when a building is destroyed ? Probably because base game intends to use always the same place for re-building (which is terrible when under attack)
 	// Exact role ? When trying to build a deposit bld, it is used to check there is not another one of same kind in same zone.
 	// BUG ? status is not checked (and not up to date) when doing this !
 	// Methods: 0x4C3300: infAI.addOrUpdateBldHistory(unitDefId, posY, posX, status)
