@@ -97,8 +97,8 @@ namespace AOE_STRUCTURES {
 		// Returns NONE (-1) otherwise
 		AOE_CONST_FUNC::ATTACK_CLASS GetAttackOrArmorType() const {
 			if (!this->IsAttributeModifier()) { return AOE_CONST_FUNC::ATTACK_CLASS::CST_AC_NONE; }
-			if ((this->effectAttribute != TECH_UNIT_ATTRIBUTES::TUA_ARMOR) &&
-				(this->effectAttribute != TECH_UNIT_ATTRIBUTES::TUA_ATTACK)) {
+			if ((this->effectAttribute != (short int)TECH_UNIT_ATTRIBUTES::TUA_ARMOR) &&
+				(this->effectAttribute != (short int)TECH_UNIT_ATTRIBUTES::TUA_ATTACK)) {
 				return AOE_CONST_FUNC::ATTACK_CLASS::CST_AC_NONE;
 			}
 			AOE_CONST_FUNC::ATTACK_CLASS attackClass = (AOE_CONST_FUNC::ATTACK_CLASS)(((long int)this->effectValue) / 256);
