@@ -125,7 +125,7 @@ namespace AOE_STRUCTURES {
 		// builders/repairmen are NOT in this array?
 		AOE_STRUCTURES::STRUCT_VILLAGER_TASKS_ELEM gatherersTasks[0x32];
 		unsigned long int villagerTasksRelevantElemCount; // +9CC. Number of RELEVANT element count in villagerTasks array (array size is fixed, it's included in this structure !) "villager gatherers".
-		long int desiredGathererVillagersCount; // +9D0. Counts all villagers BUT explorers = "desired gatherers count".
+		long int desiredGathererVillagersCount; // +9D0. Counts all villagers BUT explorers = "desired gatherers count" (also includes repairmen, etc)
 		AOE_STRUCTURES::STRUCT_UNIT_GROUP fakeFirstUnitGroupElem; // +9D4. Organized as a circular list (each elem is a group) ? This one = "fake" elem (like in strategy)
 		unsigned long int seqUnitGroupId; // +D04. Is = next group's ID.
 		unsigned long int unitGroupsCount; // +D08. This does NOT count fakeFirstUnitGroupElem (so it CAN be 0).
@@ -159,13 +159,13 @@ namespace AOE_STRUCTURES {
 		STRUCT_MANAGED_ARRAY unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ? Unit that defend something ? Trade ships also? Used when tasking? Temp ?
 		unsigned long int gathererCount_actual[4]; // +D68. Index IS resource ID.
 		long int gathererCount_desired[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT]; // +D78. Villager count we want to assign to each type of resource (4). Index IS resource Type ID
-		long int NeededResourceTypesByPriority[4]; // +D88 First=most needed. Use extraResourceAmount with this index to get resource amount. <0 amount = I must collect
+		long int neededResourceTypesByPriority[4]; // +D88 First=most needed. Use extraResourceAmount with this index to get resource amount. <0 amount = I must collect
 		long int extraResourceAmount[4]; // +D98. Index is always the same (0=food, 1=food...) <0 amount = I need to collect some. "resDiff"
 		STRUCT_PLANNED_RESOURCE_NEEDS plannedResourceNeeds; // +DA8, size=0x70. Related to //SNMostNeededResourceLookAhead (number of stratElem to take into account). "NeededResourceAmount".
 		// 0xE18
 		long int attackEnabled; // +E18. Starts with 0, Once set to 1, AI can attack. Set in 0x4E15F0.
 		AOE_CONST_INTERNAL::AI_UPDATE_TYPES currentAIUpdateType; // +E1C. loop ID for TacAI treatments types.
-		long int unknown_E20; // +E20. A dword, a flag - related to villagers/gathering ?
+		long int neededResourcesAreInitialized; // +E20. Related to villagers/gathering. 0 initially, set to 1 once needed resources by priority have been computed once.
 		char unknown_E24[0xE44 - 0xE24];
 		long int myWonderBeingBuiltFlag; // +E44. true(1) or false(0) value.
 		long int myWonderIsBuiltFlag; // +E48. true(1) or false(0) value.

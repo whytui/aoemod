@@ -434,6 +434,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x4F909E:
 		this->ShouldNotApplyPalmyraTradingBonus(REG_values);
 		break;
+	case 0x4D1BBA:
+		this->TacAIHandleOneUpdateByType(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4429,6 +4432,60 @@ void RockNRorInstance::ShouldNotApplyPalmyraTradingBonus(REG_BACKUP *REG_values)
 	REG_values->EAX_val = applyPalmyraBonus ? 0 : 1;
 }
 
+
+void RockNRorInstance::TacAIHandleOneUpdateByType(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *) REG_values->ESI_val;
+	ror_api_assert(REG_values, tacAI && tacAI->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->EAX_val = tacAI->currentAIUpdateType;
+	}
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || (!ROCKNROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId))) {
+		return;
+	}
+	bool runStandardTreatments = true;
+
+	// Custom treatments : modify runStandardTreatments to execute or not ROR's standard procedure.
+
+	switch (tacAI->currentAIUpdateType) {
+	case AI_UPDATE_TYPES::CST_AUT_EVAL_CIVILIAN_DISTRIB:
+		// If needed resources have never been computed yet, let standard code execute. Next time the flag will be set.
+		if ((tacAI->neededResourcesAreInitialized != 0) && (tacAI->allVillagers.usedElements > 0)) {
+			runStandardTreatments = EconomyAI::CalcVillagerCountByTask(tacAI);
+		}
+		break;
+	/*case AI_UPDATE_TYPES::CST_AUT_SETUP_SOLDIER_GROUPS:
+	case AI_UPDATE_TYPES::CST_AUT_TASK_CIVILIAN:
+	case AI_UPDATE_TYPES::CST_AUT_SET_BOAT_GROUPS:
+	case AI_UPDATE_TYPES::CST_AUT_FILL_BOAT_GROUPS:
+	case AI_UPDATE_TYPES::CST_AUT_TASK_BOATS:
+	case AI_UPDATE_TYPES::CST_AUT_FILL_SOLDIER_GROUPS:
+	case AI_UPDATE_TYPES::CST_AUT_TASK_IDLE_SOLDIER:
+	case AI_UPDATE_TYPES::CST_AUT_TASK_ACTIVE_SOLDIER:
+	case AI_UPDATE_TYPES::CST_AUT_PLAYTASKING:
+	case AI_UPDATE_TYPES::CST_AUT_TASK_UNGRP_SOLDIER:
+	case AI_UPDATE_TYPES::CST_AUT_RESEARCH:
+	case AI_UPDATE_TYPES::CST_AUT_TRAIN:
+	case AI_UPDATE_TYPES::CST_AUT_BUILD_LIST:
+	case AI_UPDATE_TYPES::CST_AUT_HELP_BUILD:
+	case AI_UPDATE_TYPES::CST_AUT_REPAIR_BUILDING:
+	case AI_UPDATE_TYPES::CST_AUT_REPAIR_WALL:
+	case AI_UPDATE_TYPES::CST_AUT_BUILD:
+	case AI_UPDATE_TYPES::CST_AUT_OPEN_BUILDS:
+	case AI_UPDATE_TYPES::CST_AUT_OPEN_TASKS:
+	case AI_UPDATE_TYPES::CST_AUT_FOOD_DROPSITE:
+	case AI_UPDATE_TYPES::CST_AUT_BUILD_LIST_INSERTIONS:
+		break;*/
+	default:
+		break;
+	}
+
+	// DO NOT MODIFY BELOW
+	if (!runStandardTreatments) {
+		SetIntValueToRORStack(REG_values, 0x10, 1); // set "thisActionTypeIsCompleted" default value in ROR proc context, cf instruction in 0x4D1BBE.
+		ChangeReturnAddress(REG_values, 0x4D236C);
+	}
+}
 
 
 }

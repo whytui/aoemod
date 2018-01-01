@@ -233,4 +233,30 @@ bool EconomyAI::IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit
 }
 
 
+// Override the ROR method that calculates desired number of explorers, and then desired number of non-explorers (cf call to 0x4D9BE0)
+// Returns true if treatments have been run here and if ROR treatments MUST NOT be run (prevent ROR from calculating number of villagers by task)
+bool EconomyAI::CalcVillagerCountByTask(STRUCT_TAC_AI *tacAI) {
+	// Remark : tacAI.Update() in 0x4D1B70 calls alternately the various AI updates, including this one cf AI_UPDATE_TYPES::CST_AUT_EVAL_CIVILIAN_DISTRIB
+	assert(tacAI && tacAI->IsCheckSumValid());
+	bool result = true;
+	long int totalVillagerCount = tacAI->allVillagers.usedElements;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	if ((totalVillagerCount < 3) && global && (global->currentGameTime > 60000)) {
+		// This situation is not well handled by standard AI
+		// TODO: do I have a TC ? Do I have food ?
+		// player->ptrAIStruct->structTacAI.SNNumber[SNCapCivilianExplorers] = 0;
+		result = false;
+		tacAI->villagerExplorers.usedElements = 0;
+		tacAI->desiredGathererVillagersCount = totalVillagerCount;
+		unsigned long int addrCalcDesiredGathererCounts = 0x4D9BE0;
+		_asm {
+			MOV ECX, tacAI;
+			CALL addrCalcDesiredGathererCounts; // No parameter
+		}
+	}
+	return result;
+}
+
+
 }

@@ -505,6 +505,7 @@ long int PlayerTargeting::GetMostDislikedPlayer(STRUCT_PLAYER *player, STRUCT_DI
 
 // Compute AI dislike values, taking care of RockNRor config (dislike human, all relics/ruins, has wonder)
 // In standard game, dislike update is run when a unit is attacked (see 0x4D7B0F), which is disabled by "disable_dislike_human_player" change in AOE_binData.
+// With RockNRor, this method is called every "dislikeComputeInterval" (cf configuration). E.g. every 10 seconds
 void PlayerTargeting::ComputeDislikeValues() {
 	if ((ROCKNROR::crInfo.configInfo.dislike_allArtefacts <= 0) || (ROCKNROR::crInfo.configInfo.dislike_humanPlayer <= 0)) { return; }
 

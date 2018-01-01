@@ -99,7 +99,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 136
+#define COUNT_ROR_API_10c 137
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 
@@ -5496,6 +5496,15 @@ void AOE_binData::InitROR_API_10c() {
 		FM_ON
 		);
 
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		TacAIUpdateOneTask,
+		"Tactical AI: entry point for various TacAI update types",
+		0xD1BB1,
+		(0x57, 0x8B, 0x86, 0xF0, 0x00, 0x00, 0x00, 0x8B, 0x88, 0xF0, 0x00, 0x00, 0x00),
+		(0x57, 0xE8, 0x38, 0x68, 0xF4, 0xFF, 0x90, 0x8B, 0x88, 0xF0, 0x00, 0x00, 0x00),
+		FM_OFF,
+		FM_ON
+		);
 
 
 	//optional

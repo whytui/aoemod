@@ -165,6 +165,7 @@ namespace ROCKNROR {
 		void ActivityNearbyUnitDetectionDelayUpdate(REG_BACKUP *REG_values);
 		void OnAttackableUnitUpdateVisibility(REG_BACKUP *REG_values);
 		void ShouldNotApplyPalmyraTradingBonus(REG_BACKUP *REG_values);
+		void TacAIHandleOneUpdateByType(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

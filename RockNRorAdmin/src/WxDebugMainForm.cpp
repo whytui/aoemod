@@ -336,7 +336,7 @@ void WxDebugMainForm::ShowGatheringInfo() {
 		}
 		s += " resTypesOrder=";
 		for (int i = 0; i < 4; i++) {
-			s += std::to_string(ai->structTacAI.NeededResourceTypesByPriority[i]);
+			s += std::to_string(ai->structTacAI.neededResourceTypesByPriority[i]);
 			s += " ";
 		}
 		/*s += " +D58=";

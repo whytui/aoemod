@@ -397,7 +397,7 @@ namespace AOE_CONST_INTERNAL
 		CST_UGT_UNKNOWN_16 = 0x16 // Set in 0x4D4C5F
 	};
 
-	// See 0x4D0880, 0x4D1BB5
+	// See 0x4D0880 (tacAI.Update), 0x4D1BB5 (get name)
 	enum AI_UPDATE_TYPES : long int {
 		CST_AUT_SETUP_SOLDIER_GROUPS = 0, // "Setup SolGroups"
 		CST_AUT_EVAL_CIVILIAN_DISTRIB = 1, // "Eval CivDist". Compute desired count of villager activities.

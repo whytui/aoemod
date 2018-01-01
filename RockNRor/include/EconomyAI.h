@@ -49,6 +49,10 @@ namespace CUSTOM_AI {
 		// Original method= 0x4BE100, only depends on unit class.
 		// Game role = "is important object" at infAI level
 		static bool IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit);
+
+		// Override the ROR method that calculates desired number of explorers, and then desired number of non-explorers (cf call to 0x4D9BE0)
+		// Returns true if treatments have been run here and if ROR treatments MUST NOT be run (prevent ROR from calculating number of villagers by task)
+		static bool CalcVillagerCountByTask(STRUCT_TAC_AI *tacAI);
 	private:
 		// Remove farmers when more than 1 are assigned to the same farm.
 		void CheckForDuplicateFarmers(STRUCT_PLAYER *player);
