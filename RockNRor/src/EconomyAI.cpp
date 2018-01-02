@@ -233,20 +233,74 @@ bool EconomyAI::IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit
 }
 
 
+// Override the ROR method that executes current tacAI task update (cf AI_UPDATE_TYPES)
+// Returns true if some specific treatments have been executed here = do NOT execute ROR standard treatment for current task
+// Returns false otherwise (default) = let ROR execute normally its treatments for current task
+// Warning *** this is supposed to take care of processing time, be carful about performance ***
+bool EconomyAI::RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI) {
+	// Remark : tacAI.Update() in 0x4D1B70 calls alternately the various AI updates, including this one cf AI_UPDATE_TYPES::CST_AUT_EVAL_CIVILIAN_DISTRIB
+	assert(tacAI && tacAI->IsCheckSumValid() && tacAI->ptrMainAI);
+	if (!tacAI || !tacAI->ptrMainAI || !tacAI->ptrMainAI->ptrStructPlayer) { return false; }
+	bool doNotRunRorUpdate = false;
+
+	switch (tacAI->currentAIUpdateType) {
+	case AI_UPDATE_TYPES::CST_AUT_EVAL_CIVILIAN_DISTRIB:
+		// If needed resources have never been computed yet, let standard code execute. Next time the flag will be set.
+		if ((tacAI->neededResourcesAreInitialized != 0) && (tacAI->allVillagers.usedElements > 0)) {
+			doNotRunRorUpdate = EconomyAI::CalcVillagerCountByTask(tacAI);
+		}
+		break;
+		/*case AI_UPDATE_TYPES::CST_AUT_SETUP_SOLDIER_GROUPS:
+		case AI_UPDATE_TYPES::CST_AUT_TASK_CIVILIAN:
+		case AI_UPDATE_TYPES::CST_AUT_SET_BOAT_GROUPS:
+		case AI_UPDATE_TYPES::CST_AUT_FILL_BOAT_GROUPS:
+		case AI_UPDATE_TYPES::CST_AUT_TASK_BOATS:
+		case AI_UPDATE_TYPES::CST_AUT_FILL_SOLDIER_GROUPS:
+		case AI_UPDATE_TYPES::CST_AUT_TASK_IDLE_SOLDIER:
+		case AI_UPDATE_TYPES::CST_AUT_TASK_ACTIVE_SOLDIER:
+		case AI_UPDATE_TYPES::CST_AUT_PLAYTASKING:
+		case AI_UPDATE_TYPES::CST_AUT_TASK_UNGRP_SOLDIER:
+		case AI_UPDATE_TYPES::CST_AUT_RESEARCH:
+		case AI_UPDATE_TYPES::CST_AUT_TRAIN:
+		case AI_UPDATE_TYPES::CST_AUT_BUILD_LIST:
+		case AI_UPDATE_TYPES::CST_AUT_HELP_BUILD:
+		case AI_UPDATE_TYPES::CST_AUT_REPAIR_BUILDING:
+		case AI_UPDATE_TYPES::CST_AUT_REPAIR_WALL:
+		case AI_UPDATE_TYPES::CST_AUT_BUILD:
+		case AI_UPDATE_TYPES::CST_AUT_OPEN_BUILDS:
+		case AI_UPDATE_TYPES::CST_AUT_OPEN_TASKS:
+		case AI_UPDATE_TYPES::CST_AUT_FOOD_DROPSITE:
+		case AI_UPDATE_TYPES::CST_AUT_BUILD_LIST_INSERTIONS:
+		break;*/
+	default:
+		break;
+	}
+
+	return doNotRunRorUpdate;
+}
+
+
 // Override the ROR method that calculates desired number of explorers, and then desired number of non-explorers (cf call to 0x4D9BE0)
 // Returns true if treatments have been run here and if ROR treatments MUST NOT be run (prevent ROR from calculating number of villagers by task)
+// Returns false if nothing special has been done = default case (let ROR treatments happen)
+// Warning *** this is supposed to take care of processing time, be carful about performance ***
 bool EconomyAI::CalcVillagerCountByTask(STRUCT_TAC_AI *tacAI) {
 	// Remark : tacAI.Update() in 0x4D1B70 calls alternately the various AI updates, including this one cf AI_UPDATE_TYPES::CST_AUT_EVAL_CIVILIAN_DISTRIB
-	assert(tacAI && tacAI->IsCheckSumValid());
-	bool result = true;
+	assert(tacAI && tacAI->IsCheckSumValid() && tacAI->ptrMainAI);
+	if (!tacAI || !tacAI->ptrMainAI || !tacAI->ptrMainAI->ptrStructPlayer) { return false; }
+	bool doNotRunRorUpdate = false;
 	long int totalVillagerCount = tacAI->allVillagers.usedElements;
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(global && global->IsCheckSumValid());
-	if ((totalVillagerCount < 3) && global && (global->currentGameTime > 60000)) {
+	assert(settings && settings->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_PLAYER *player = tacAI->ptrMainAI->ptrStructPlayer;
+	bool diffHardOrHardest = (settings->rgeGameOptions.difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD);
+	if ((totalVillagerCount < 3) && diffHardOrHardest && global && (global->currentGameTime > 60000)) {
 		// This situation is not well handled by standard AI
 		// TODO: do I have a TC ? Do I have food ?
-		// player->ptrAIStruct->structTacAI.SNNumber[SNCapCivilianExplorers] = 0;
-		result = false;
+		// player->ptrAIStruct->structTacAI.SNNumber[SNCapCivilianExplorers]
+		doNotRunRorUpdate = true;
 		tacAI->villagerExplorers.usedElements = 0;
 		tacAI->desiredGathererVillagersCount = totalVillagerCount;
 		unsigned long int addrCalcDesiredGathererCounts = 0x4D9BE0;
@@ -255,7 +309,7 @@ bool EconomyAI::CalcVillagerCountByTask(STRUCT_TAC_AI *tacAI) {
 			CALL addrCalcDesiredGathererCounts; // No parameter
 		}
 	}
-	return result;
+	return doNotRunRorUpdate;
 }
 
 

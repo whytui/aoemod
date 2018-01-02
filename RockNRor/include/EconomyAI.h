@@ -50,8 +50,16 @@ namespace CUSTOM_AI {
 		// Game role = "is important object" at infAI level
 		static bool IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit);
 
+		// Override the ROR method that executes current tacAI task update (cf AI_UPDATE_TYPES)
+		// Returns true if some specific treatments have been executed here = do NOT execute ROR standard treatment for current task
+		// Returns false otherwise (default) = let ROR execute normally its treatments for current task
+		// Warning *** this is supposed to take care of processing time, be carful about performance ***
+		static bool RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI);
+
 		// Override the ROR method that calculates desired number of explorers, and then desired number of non-explorers (cf call to 0x4D9BE0)
 		// Returns true if treatments have been run here and if ROR treatments MUST NOT be run (prevent ROR from calculating number of villagers by task)
+		// Returns false if nothing special has been done = default case (let ROR treatments happen)
+		// Warning *** this is supposed to take care of processing time, be carful about performance ***
 		static bool CalcVillagerCountByTask(STRUCT_TAC_AI *tacAI);
 	private:
 		// Remove farmers when more than 1 are assigned to the same farm.
