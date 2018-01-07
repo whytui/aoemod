@@ -27,6 +27,9 @@ namespace STRATEGY {
 	// Class that handles the selection of military units for strategy creation.
 	class StrategyBuilder {
 	public:
+		// Configuration: if true, when SNAutoBuildFarms=1, then do not create farms in strategy and let AI updates handle this automatically during the game.
+		const bool RM_NO_STATIC_FARM_IF_SN_AUTO_BUILD_FARMS = true;
+
 		StrategyBuilder(RockNRorInfo *crInfo, AOE_STRUCTURES::STRUCT_PLAYER *player, ROCKNROR::STRATEGY::CustomPlayerInfo *customPlayerInfo) {
 			this->crInfo = crInfo;
 			this->ai = NULL;
@@ -53,6 +56,7 @@ namespace STRATEGY {
 			this->villagerCount_alwaysRetrain = 0;
 			this->villagerCount_limitedRetrains = 0;
 			this->SetPlayerInfo(player);
+			this->createFarms = true;
 		}
 		~StrategyBuilder() {
 			this->FreePotentialElementsList();
@@ -112,6 +116,9 @@ namespace STRATEGY {
 		// For other researches, returns NULL
 		AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *GetAgeStrategyElement(short int researchId);
 
+		// Safely get a SNNumber value. As game has not started yet, we should not use tacAI numbers ! They are not up to date yet.
+		long int GetSNNumberValue(AOE_CONST_FUNC::SN_NUMBERS snNumber);
+
 	private:
 		std::string log;
 		static int randomPercentFactor;
@@ -123,6 +130,7 @@ namespace STRATEGY {
 		ROCKNROR::STRATEGY::CustomPlayerInfo *playerTechTreeInfo; // contains tech tree information for current player
 		short int civId;
 		bool isWaterMap;
+		bool createFarms; // True: create strategy elements for farms. False: don't create them (make sure SNAutoBuildFarms is ON)
 		long int maxPopulation;
 		long int villagerCount_alwaysRetrain;
 		long int villagerCount_limitedRetrains;

@@ -437,11 +437,13 @@ bool ShouldChangeTarget(AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *activity, long int
 
 	// None is attacking me ?
 	if (!newTargetAttacksMe && !actionTargetAttacksMe) {
-		if (newTargetIsVillager && !actionTargetIsVillager) {
-			return false; // Current is NOT a villager, attack it (keep)
+		bool newTargetCanAttack = !newTargetIsVillager && UnitDefCanAttack(newTargetUnit->unitDefinition, false);
+		bool oldTargetCanAttack = !actionTargetIsVillager && UnitDefCanAttack(oldTargetUnit->unitDefinition, false);
+		if (newTargetIsVillager && !actionTargetIsVillager && oldTargetCanAttack) {
+			return false; // Current is NOT a villager AND is miltary, attack it (keep)
 		}
-		if (!newTargetIsVillager && actionTargetIsVillager) {
-			return true; // New is NOT a villager, attack it (change)
+		if (!newTargetIsVillager && actionTargetIsVillager && newTargetCanAttack) {
+			return true; // New is NOT a villager AND is miltary, attack it (change)
 		}
 	}
 

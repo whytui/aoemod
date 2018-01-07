@@ -40,13 +40,15 @@ namespace AOE_STRUCTURES {
 
 #define CHECKSUM_PLANNED_RESOURCE_NEEDS 0x00542C54
 	// Size = 0x70
-	// This struct is included in TacAI
+	// This struct is included in TacAI+0xDA8
+	// 0x40EC20 = plannedResourceNeeds.setResourceAmount(resourceId, amount)
+	// 0x4B8960 = buildAI.computeCostsForNextStratElem(ptrPlannedResourceNeeds, stratElemCount) for next strategy element not already done/not in progress
 	class STRUCT_PLANNED_RESOURCE_NEEDS {
 	public:
 		unsigned long int checksum; // 54 2C 54 00
 		unsigned long int unknown_04; // a dword
 		unsigned long int unknown_08; // a dword
-		long int resourceAmount[8]; // +0C. Only 4 are used, but there's room for 8 resource types. Index depends on unknown_2C?.
+		long int resourceAmount[8]; // +0C. Only 4 are used, but there's room for 8 resource types. Index=resourceTypeId(0-3, actually)
 		long int unknown_2C[8]; // Only 4 are used, but there's room for 8 resource types. Init to -1 (a resource type?)
 		long int unknown_4C[8]; // Only 4 are used, but there's room for 8 resource types. Init to -1 (a resource type?)
 		long int resourceTypesCount; // +0x6C ; is always 4
@@ -159,7 +161,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_MANAGED_ARRAY unknownUnits_D58; // TC + villagers ? + others? Builders ? explorers (can be villagers AND military) ? Unit that defend something ? Trade ships also? Used when tasking? Temp ?
 		unsigned long int gathererCount_actual[4]; // +D68. Index IS resource ID.
 		long int gathererCount_desired[AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT]; // +D78. Villager count we want to assign to each type of resource (4). Index IS resource Type ID
-		long int neededResourceTypesByPriority[4]; // +D88 First=most needed. Use extraResourceAmount with this index to get resource amount. <0 amount = I must collect
+		long int neededResourceTypesByPriority[4]; // +D88 First=most needed in extraResourceAmount. <0 amount = I must collect (needed). Eg 0x4D7760=tacAI.GetResourceNeedAmount(priorityRank)
 		long int extraResourceAmount[4]; // +D98. Index is always the same (0=food, 1=food...) <0 amount = I need to collect some. "resDiff"
 		STRUCT_PLANNED_RESOURCE_NEEDS plannedResourceNeeds; // +DA8, size=0x70. Related to //SNMostNeededResourceLookAhead (number of stratElem to take into account). "NeededResourceAmount".
 		// 0xE18

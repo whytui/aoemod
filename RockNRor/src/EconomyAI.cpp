@@ -366,8 +366,10 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *buildAiCurrentStratElem = NULL; // determined by buildAI->currentIDInStrategy
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *lastStandardBuilding = NULL; // last building in strategy, excluding wonder/farm/tower/house. Limitation to search no further than pop=LAST_BLD_NO_FURTHER_THAN_POPULATION
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *ironAge = NULL;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *latestActiveResearch = NULL; // last research that is "active" (done)
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *towerToReuse = NULL;
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *farmToReuse = NULL;
+	bool strategyContainsDock = false;
 	while (tmpElem && (tmpElem != &buildAI->fakeFirstStrategyElement)) {
 		if (tmpElem->elemId == currentStratElemId) {
 			buildAiCurrentStratElem = tmpElem;
@@ -375,6 +377,9 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 		if ((tmpElem->elementType == TAIUnitClass::AIUCCritical) || (tmpElem->elementType == TAIUnitClass::AIUCTech)) {
 			if (tmpElem->unitDAT_ID == CST_RSID_IRON_AGE) {
 				ironAge = tmpElem;
+			}
+			if (tmpElem->aliveCount > 0) {
+				latestActiveResearch = tmpElem;
 			}
 		}
 		if (tmpElem->elementType == TAIUnitClass::AIUCBuilding) {
@@ -404,17 +409,23 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 					lastStandardBuilding = tmpElem;
 				}
 			}
+			if (tmpElem->unitDAT_ID == CST_UNITID_DOCK) {
+				strategyContainsDock = true;
+			}
 		}
 		if ((tmpElem->elementType == TAIUnitClass::AIUCLivingUnit) && (tmpElem->retrains < 0)) {
 			currentEstimatedPopulation++;
 		}
 		tmpElem = tmpElem->next;
 	}
-	if (!lastStandardBuilding) {
+	if (lastStandardBuilding == NULL) {
 		lastStandardBuilding = buildAI->fakeFirstStrategyElement.next; // should never happen
 	}
-	if (!ironAge) {
+	if (ironAge == NULL) {
 		ironAge = lastStandardBuilding; // should never happen
+	}
+	if (latestActiveResearch == NULL) {
+		latestActiveResearch = buildAiCurrentStratElem;
 	}
 
 
@@ -444,20 +455,34 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 		// a "DM" case: much food, ok if all buildings have been built (no hurry to build farms)
 		bool deathmatchCaseOk = (food > 5000) && (lastStandardBuilding->aliveCount != 0);
 		bool needFoodCaseOk = (food <= 5000); // Not so much food: build farms, don't wait for all strategy elements to be built !
+		//if (strategyContainsDock) { // this also applies to non-water maps, actually
+			int i = 0;
+			bool foundWoodOrFood = false;
+			while ((i < 4) && !foundWoodOrFood) {
+				if (tacAI->neededResourceTypesByPriority[i] == CST_RES_ORDER_WOOD) {
+					foundWoodOrFood = true;
+					needFoodCaseOk = false; // At this point, wood is more needed than food.
+				}
+				if (tacAI->neededResourceTypesByPriority[i] == CST_RES_ORDER_FOOD) {
+					foundWoodOrFood = true;
+				}
+				i++;
+			}
+		//}
 
 		// Only add farms when there is an actual need for food. Take into account the fact I have berries near a granary in my town ?
 		if ((food < wood) && (deathmatchCaseOk || needFoodCaseOk)) {
 			if (farmToReuse) {
 				farmToReuse->totalCount = 0; // Reset it so that it can be built again
 			} else {
-				ROCKNROR::STRATEGY::AddUnitInStrategy_before(buildAI, ironAge, 1, -1, TAIUnitClass::AIUCBuilding, CST_UNITID_FARM, player, "Farm, added");
+				ROCKNROR::STRATEGY::AddUnitInStrategy_before(buildAI, latestActiveResearch, 1, -1, TAIUnitClass::AIUCBuilding, CST_UNITID_FARM, player, "Farm, added");
 			}
 		}
 	}
 
 	// We could handle auto build houses here too
 
-	return true;
+	return true; // Do not run standard treatments
 }
 
 

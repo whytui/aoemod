@@ -199,8 +199,8 @@ namespace AOE_CONST_FUNC {
 		SNUseByTypeMaxGathering = 203,
 		SNMinimumElephantHuntGroupSize = 204,
 		SNAutoBuildDropsites = 205, // If set, AI player will automatically add storage pits and granaries to its strategy (recommended in random games)
-		SNAutoBuildFarms = 206, // Warning, in RM, you still need to include farms in AI file. SNAutoBuildFarms only triggers farm construction in late game time (need to find out how this works)
-		SNAutoBuildTowers = 207,
+		SNAutoBuildFarms = 206, // Warning: SNAutoBuildFarms only triggers farm construction in very late game time (once all strategy buildings are constructed), which actually won't occur in RM games unless using RockNRor AI improvements
+		SNAutoBuildTowers = 207, // Cf EconomyAI::UpdateStrategyAutoBuildInsertions
 		SNAutoBuildDocks = 208,
 		SNAutoBuildFishingBoats = 209,
 		SNAutoBuildTransports = 210,

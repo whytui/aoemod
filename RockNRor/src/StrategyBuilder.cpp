@@ -52,6 +52,13 @@ AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *StrategyBuilder::GetAgeStrategyElement(
 }
 
 
+// Safely get a SNNumber value. As game has not started yet, we should not use tacAI numbers ! They are not up to date yet.
+long int StrategyBuilder::GetSNNumberValue(AOE_CONST_FUNC::SN_NUMBERS snNumber) {
+	if (!this->ai || (snNumber < 0) || (snNumber > SN_NUMBERS::SN_UNKNOWN225)) { return -1; }
+	return this->ai->structStrategyAI.SNNumber[snNumber];
+}
+
+
 // Add a unit to selection (actuallySelectedUnits) and updates some internal variables accordingly
 // Return total unit count in selection
 int StrategyBuilder::AddUnitIntoToSelection(PotentialUnitInfo *unitInfo) {
@@ -2597,9 +2604,19 @@ void StrategyBuilder::AddTowerResearches() {
 
 // Handle farm building/research info/desired count
 void StrategyBuilder::HandleFarmsInfo() {
+	bool dontAddFarms = false;
+	
+	if (!this->createFarms) {
+		this->log += "Do not add farms, count on SNAutoBuildFarms";
+		this->log += newline;
+		dontAddFarms = true;
+	}
 	if (this->settings->isDeathMatch) {
 		this->log += "Deathmatch: do not add farms";
 		this->log += newline;
+		dontAddFarms = true;
+	}
+	if (dontAddFarms) {
 		PotentialBuildingInfo *marketInfo = this->GetBuildingInfo(CST_UNITID_MARKET);
 		this->CollectResearchInfoForUnit(marketInfo, false, false); // Add market anyway
 		return;
@@ -2686,6 +2703,11 @@ void StrategyBuilder::CollectGlobalStrategyGenerationInfo(AOE_STRUCTURES::STRUCT
 		this->maxPopulation = settings->maxPopulation;
 	}
 	this->isWaterMap = IsDockRelevantForMap(settings->mapTypeChoice);
+	this->createFarms = true;
+	if (StrategyBuilder::RM_NO_STATIC_FARM_IF_SN_AUTO_BUILD_FARMS && player->ptrAIStruct && (this->GetSNNumberValue(SNAutoBuildFarms) == 1)) {
+		// When "auto build farms" is ON, do not include them in strategy. Let them be added automatically in-game
+		this->createFarms = false;
+	}
 
 	// *** Compute unit numbers ***
 	// Land maps: fixed villagers count around 14-20  ; retrains around 6-10  ; total 18-28
@@ -3473,6 +3495,7 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 void StrategyBuilder::CreateFarmStrategyElements() {
 	PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
 	if (!farmInfo || (farmInfo->desiredCount <= 0)) { return; }
+	assert(this->createFarms);
 
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *myAgeElem = this->GetAgeStrategyElement(farmInfo->enabledInAge);
 	if (myAgeElem == NULL) {
@@ -3672,7 +3695,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	if (!this->player || !this->player->IsCheckSumValid()) { return; }
 	if (!this->global || !this->global->IsCheckSumValid() || !this->settings) { return; }
 	// Clear previous strategy
-	ClearStrategy(this->buildAI);
+	ROCKNROR::STRATEGY::ClearStrategy(this->buildAI);
 	strcpy_s(this->buildAI->strategyFileName, 0x3F, "Dynamic RockNRor strategy");
 	this->log += "Start Strategy creation (2) for p#";
 	this->log += std::to_string(this->player->playerId);
