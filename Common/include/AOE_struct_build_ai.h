@@ -35,7 +35,7 @@ namespace AOE_STRUCTURES {
 		char lastBuildName[0x101]; // +2A5: text
 		char currentBuildName[0x101]; // +3A6: text (desired build unit name?)
 		char nextBuildName[0x101]; // +4A7: text (desired build unit name?)
-		long int currentIDInStrategy; // +5A8. Corresponds to stratelem.elemId, not "index". ID 2 might NOT be 3rd element due to inserted elems.
+		long int currentIDInStrategy; // +5A8. Corresponds to a stratelem.elemId, not "index". ID "2" might NOT be 3rd element due to inserted elems.
 		STRUCT_MANAGED_ARRAY autoInsertedBuildingDATIDs; // +5AC. Actually, IDs are DATID, not unit instance IDs. Automatically added buildings ?
 		STRUCT_AI *mainAI; // +5BC. Set in 0x4B76E0.
 		// 0x5C0: end

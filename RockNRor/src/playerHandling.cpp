@@ -389,6 +389,28 @@ bool IsResearchEnabledForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int
 }
 
 
+// Returns true if player resources are sufficient to pay the specified unit's cost (building or living unit)
+// This only checks the 4 basic resources food/wood/stone/gold. For example, this does not control population headroom, etc.
+bool CanUnitCostBePaid(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID) {
+	if (!player || !player->IsCheckSumValid()) { return false; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = player->GetUnitDefBase(DAT_ID);
+	if (!unitDefBase || !unitDefBase->DerivesFromTrainable()) {
+		return false;
+	}
+	AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDefBase;
+	assert(unitDef->IsCheckSumValidForAUnitClass());
+	for (int i = 0; i < 3; i++) {
+		if ((unitDef->costs[i].costPaid != 0) && (unitDef->costs[i].costType >= 0) &&
+			(unitDef->costs[i].costType < RESOURCE_TYPES::CST_RES_BASIC_RESOURCE_COUNT)) {
+			if ((unitDef->costs[i].costAmount > 0) && (unitDef->costs[i].costAmount > player->GetResourceValue(unitDef->costs[i].costType))) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+
 // Searches (at least) a unit with provided shortcut number for given player.
 // The first matching unit is returned (arbitrary), even if there are several.
 // Returns NULL if not found

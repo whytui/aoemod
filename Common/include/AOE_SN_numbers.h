@@ -169,8 +169,8 @@ namespace AOE_CONST_FUNC {
 		SNMinimumStone = 172,
 		SNMinimumGold = 173,
 		SNMaximumHousesBeforeDropsites = 174,
-		SNSpecificBuildItemToBuild = 175,
-		SNSpecificBuildItemTime = 176,
+		SNSpecificBuildItemToBuild = 175, // a building "unitDefId" to add to strategy at "SNSpecificBuildItemTime". Set to -1 once it has been taken into account (0x4D7691).
+		SNSpecificBuildItemTime = 176, // time in minutes when to add SNSpecificBuildItemToBuild to strategy
 		SNUnskippableItemType = 177,
 		SNAttackDiplomacyImpact = 178,
 		SNExplorationRequiredBeforeExplorerCountReduction = 179,

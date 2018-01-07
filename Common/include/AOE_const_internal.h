@@ -397,7 +397,7 @@ namespace AOE_CONST_INTERNAL
 		CST_UGT_UNKNOWN_16 = 0x16 // Set in 0x4D4C5F
 	};
 
-	// See 0x4D0880 (tacAI.Update), 0x4D1BB5 (get name)
+	// See 0x4D1BB5 (tacAI.Update), 0x4D0880 (get name)
 	enum AI_UPDATE_TYPES : long int {
 		CST_AUT_SETUP_SOLDIER_GROUPS = 0, // "Setup SolGroups"
 		CST_AUT_EVAL_CIVILIAN_DISTRIB = 1, // "Eval CivDist". Compute desired count of villager activities.
@@ -409,18 +409,19 @@ namespace AOE_CONST_INTERNAL
 		CST_AUT_TASK_IDLE_SOLDIER = 7, // "Task IdleSol"
 		CST_AUT_TASK_ACTIVE_SOLDIER = 8, // "Task ActSol"
 		CST_AUT_PLAYTASKING = 9, // "Playtasking" - WTF ??? special attacks?
-		CST_AUT_TASK_UNGRP_SOLDIER = 10, // "TaskUngrpSol"
+		//CST_AUT_TASK_UNGRP_SOLDIER = 10, // "TaskUngrpSol" Wrong label in ROR code ???
+		CST_AUT_ATTACK_ENEMY_TOWER_IN_MY_TOWN = 10,
 		CST_AUT_RESEARCH = 11, // "Research"
 		CST_AUT_TRAIN = 12, // "Train"
-		CST_AUT_BUILD_LIST = 13, // "BldLst"
+		CST_AUT_BUILD_LIST = 13, // "BldLst" = load other strategy file (never used in standard game)
 		CST_AUT_HELP_BUILD = 14, // "Help Build"
 		CST_AUT_REPAIR_BUILDING = 15, // "Repair Bldg"
 		CST_AUT_REPAIR_WALL = 16, // "Repair Wall"
-		CST_AUT_BUILD = 17, // "Build" (trigger new constructions)
-		CST_AUT_OPEN_BUILDS = 18, // "Open Builds"
-		CST_AUT_OPEN_TASKS = 19, // "Open Tasks"
+		CST_AUT_BUILD = 17, // "Build" = trigger new constructions, cf SNInitialExplorationRequired, SNCapCivilianBuilders... Prepare info in ConAI ?
+		CST_AUT_OPEN_BUILDS = 18, // "Open Builds". Actually starts constructions ?
+		CST_AUT_OPEN_TASKS = 19, // "Open Tasks". Various stuff like tributes, trade ships, "upgrade age ASAP"
 		CST_AUT_FOOD_DROPSITE = 20, // "Food Dropsite"
-		CST_AUT_BUILD_LIST_INSERTIONS = 21 // "BldLst Insertions" 0x15
+		CST_AUT_BUILD_LIST_INSERTIONS = 21 // "BldLst Insertions" 0x15 / 0x4D240C. Add the first SP/granary + add tower cf SNMaxTower + add farms if iron&all buildings finished & cf SNMaxFarms
 		// Other: "Invalid"
 	};
 

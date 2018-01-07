@@ -113,6 +113,10 @@ long unsigned int IsUnitAvailableForPlayer(short int DAT_ID, AOE_STRUCTURES::STR
 // False if the research is disabled (or invalid ID)
 bool IsResearchEnabledForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int researchId);
 
+// Returns true if player resources are sufficient to pay the specified unit's cost (building or living unit)
+// This only checks the 4 basic resources food/wood/stone/gold. For example, this does not control population headroom, etc.
+bool CanUnitCostBePaid(AOE_STRUCTURES::STRUCT_PLAYER *player, short int DAT_ID);
+
 // Searches (at least) a unit with provided shortcut number for given player.
 // The first matching unit is returned (arbitrary), even if there are several.
 AOE_STRUCTURES::STRUCT_UNIT_BASE *FindUnitWithShortcutNumberForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, char shortcutNumber);

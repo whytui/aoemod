@@ -186,7 +186,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_510[4];
 		unsigned long int unknown_520[4];
 		unsigned long int unknown_530[4];
-		long int bestForageDropSiteDistance; // +540. Best distance from forage/farm to storage (granary or TC)
+		long int bestForageDropSiteDistance; // +540. Best distance from forage/farm to storage (granary or TC). -1 when no berry is known, at startup ?
 		long int bestWoodDropSiteDistance; // +544. Best distance from tree to storage (SP or TC)
 		long int bestStoneDropSiteDistance; // +548. Best distance from stone mine to storage (SP or TC)
 		long int bestGoldDropSiteDistance; // +54C. Best distance from gold mine to storage (SP or TC)

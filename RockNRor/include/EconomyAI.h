@@ -7,6 +7,7 @@
 #include "AOEPrimitives_units.h"
 #include "unitHandling.h"
 #include "AOEPrimitives_UI_gameMain.h"
+#include "AOE_strategy.h"
 
 
 using namespace AOE_STRUCTURES;
@@ -61,6 +62,14 @@ namespace CUSTOM_AI {
 		// Returns false if nothing special has been done = default case (let ROR treatments happen)
 		// Warning *** this is supposed to take care of processing time, be carful about performance ***
 		static bool CalcVillagerCountByTask(STRUCT_TAC_AI *tacAI);
+
+		// Override the ROR method that handles insertions for first granary, first SP, auto build farms/towers, specific build item from SN numbers
+		// Returns true if ROR treatments must be skipped, false if ROR treatments must be executed normally
+		static bool UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI);
+
+		// Handles the specific build item from SN numbers (SNSpecificBuildItemToBuild)
+		static void HandleSNSpecificBuildItem(STRUCT_TAC_AI *tacAI);
+
 	private:
 		// Remove farmers when more than 1 are assigned to the same farm.
 		void CheckForDuplicateFarmers(STRUCT_PLAYER *player);

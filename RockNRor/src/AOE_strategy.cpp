@@ -52,6 +52,20 @@ long int FindElementInStrategy(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_CONST_
 }
 
 
+// Returns a strategy element based on its ID. Returns NULL if not found.
+AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *FindElementInStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, long int stratElemId) {
+	if (!buildAI) { return NULL; }
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *curElem = buildAI->fakeFirstStrategyElement.next;
+	while (curElem && (curElem != &buildAI->fakeFirstStrategyElement)) {
+		if (curElem->elemId == stratElemId) {
+			return curElem;
+		}
+		curElem = curElem->next;
+	}
+	return NULL;
+}
+
+
 // Returns the first element's ID that matches criteria AFTER searchFrom (not included in search). Will stop if an empty or start item is encountered
 // Returns NULL if no such element
 // WARNING: AIUCTech and AIUCCritical are 2 different filter values ! Searching for researches won't find tool age/bronze/etc !

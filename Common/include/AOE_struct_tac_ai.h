@@ -46,7 +46,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int checksum; // 54 2C 54 00
 		unsigned long int unknown_04; // a dword
 		unsigned long int unknown_08; // a dword
-		long int resourceAmount[8]; // +0C. Only 4 are used, but there's room for 8 resource types. Index is resourceId.
+		long int resourceAmount[8]; // +0C. Only 4 are used, but there's room for 8 resource types. Index depends on unknown_2C?.
 		long int unknown_2C[8]; // Only 4 are used, but there's room for 8 resource types. Init to -1 (a resource type?)
 		long int unknown_4C[8]; // Only 4 are used, but there's room for 8 resource types. Init to -1 (a resource type?)
 		long int resourceTypesCount; // +0x6C ; is always 4

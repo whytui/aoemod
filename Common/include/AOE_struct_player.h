@@ -96,7 +96,7 @@ namespace AOE_STRUCTURES {
 		char *myTilesVisibility; // size = totalTilesCount bytes. Initialized content to 0xFF. 1 if fog-visible, 0 if explored but not visible ?
 		long int mapSizeY;
 		long int mapSizeX;
-		long int unknown_1C_totalTilesCount; // +1C. Explored tiles count ?
+		long int exploredTilesCount; // +1C. Explored tiles count
 		// 0x20
 		long int totalTilesCount; // = mapSizeX * mapSizeY
 		STRUCT_MAP_VISIBILITY_MASK playerIdMask_low; // +24. Fog visibility mask ? (p0=1,p1=2,p2=4...). = (1 << playerID)

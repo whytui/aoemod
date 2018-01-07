@@ -244,14 +244,14 @@ bool EconomyAI::RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI) {
 	bool doNotRunRorUpdate = false;
 
 	switch (tacAI->currentAIUpdateType) {
+	//case AI_UPDATE_TYPES::CST_AUT_SETUP_SOLDIER_GROUPS:
 	case AI_UPDATE_TYPES::CST_AUT_EVAL_CIVILIAN_DISTRIB:
 		// If needed resources have never been computed yet, let standard code execute. Next time the flag will be set.
 		if ((tacAI->neededResourcesAreInitialized != 0) && (tacAI->allVillagers.usedElements > 0)) {
 			doNotRunRorUpdate = EconomyAI::CalcVillagerCountByTask(tacAI);
 		}
 		break;
-		/*case AI_UPDATE_TYPES::CST_AUT_SETUP_SOLDIER_GROUPS:
-		case AI_UPDATE_TYPES::CST_AUT_TASK_CIVILIAN:
+		/*case AI_UPDATE_TYPES::CST_AUT_TASK_CIVILIAN:
 		case AI_UPDATE_TYPES::CST_AUT_SET_BOAT_GROUPS:
 		case AI_UPDATE_TYPES::CST_AUT_FILL_BOAT_GROUPS:
 		case AI_UPDATE_TYPES::CST_AUT_TASK_BOATS:
@@ -259,7 +259,7 @@ bool EconomyAI::RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI) {
 		case AI_UPDATE_TYPES::CST_AUT_TASK_IDLE_SOLDIER:
 		case AI_UPDATE_TYPES::CST_AUT_TASK_ACTIVE_SOLDIER:
 		case AI_UPDATE_TYPES::CST_AUT_PLAYTASKING:
-		case AI_UPDATE_TYPES::CST_AUT_TASK_UNGRP_SOLDIER:
+		case AI_UPDATE_TYPES::CST_AUT_ATTACK_ENEMY_TOWER_IN_MY_TOWN:
 		case AI_UPDATE_TYPES::CST_AUT_RESEARCH:
 		case AI_UPDATE_TYPES::CST_AUT_TRAIN:
 		case AI_UPDATE_TYPES::CST_AUT_BUILD_LIST:
@@ -270,8 +270,10 @@ bool EconomyAI::RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI) {
 		case AI_UPDATE_TYPES::CST_AUT_OPEN_BUILDS:
 		case AI_UPDATE_TYPES::CST_AUT_OPEN_TASKS:
 		case AI_UPDATE_TYPES::CST_AUT_FOOD_DROPSITE:
-		case AI_UPDATE_TYPES::CST_AUT_BUILD_LIST_INSERTIONS:
 		break;*/
+	case AI_UPDATE_TYPES::CST_AUT_BUILD_LIST_INSERTIONS:
+		EconomyAI::UpdateStrategyAutoBuildInsertions(tacAI);
+		break;
 	default:
 		break;
 	}
@@ -311,6 +313,177 @@ bool EconomyAI::CalcVillagerCountByTask(STRUCT_TAC_AI *tacAI) {
 	}
 	return doNotRunRorUpdate;
 }
+
+
+// Override the ROR method that handles insertions for first granary, first SP, auto build farms/towers, specific build item from SN numbers
+// Returns true if ROR treatments must be skipped, false if ROR treatments must be executed normally
+bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
+	// Standard treatments: 
+	// Add the first storage pit in strategy when enough trees have been found (cf SNAutoBuildDropsites + SNMinimumForestTiles)
+	// Add the first granary cf SNAutoBuildDropsites if infAI.bestForageDropSiteDistance >= 0 (-1 while no berry is known?)
+	// Add the "specific item" cf SNSpecificBuildItemToBuild + SNSpecificBuildItemTime
+	// Add towers if available, if (planned) resources are OK, according to SNMaxTowers + SNAutoBuildTowers
+	// Add farms if iron age, according to SNMaxFarms + SNAutoBuildFarms
+	// TOWERS+FARMS: one more condition="all strategy buildings have been/are being constructed". This condition has a BUG if "limited retrains" buildings are not alive.
+	// It seems farms are only added when strategy file is "finished" (at least buildings),
+	// which is a bad criteria and explains why it seems so random/poorly handled in standard games
+
+	if (!tacAI || !tacAI->ptrMainAI) { return false; }
+	AOE_STRUCTURES::STRUCT_INF_AI *infAI = &tacAI->ptrMainAI->structInfAI;
+	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &tacAI->ptrMainAI->structBuildAI;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_PLAYER *player = tacAI->ptrMainAI->player;
+	assert(global && global->IsCheckSumValid() && player && player->IsCheckSumValid());
+	assert(infAI->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid() || !infAI->IsCheckSumValid() || !player || !player->IsCheckSumValid()) { return false; }
+	if (!tacAI->granaryAddedToStrategy || !tacAI->storagePitAddedToStrategy) {
+		// Game start: let ROR standard code handle this until first SP/granary are added to strategy
+		return false;
+	}
+
+	// SN numbers specific build item
+	EconomyAI::HandleSNSpecificBuildItem(tacAI);
+
+	int currentAge = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CURRENT_AGE); // 1=stone, 4=iron
+	bool canBuildTower = (AOE_STRUCTURES::PLAYER::IsUnitAvailableForPlayer(CST_UNITID_WATCH_TOWER, player) != 0);
+	bool canBuildFarm = (AOE_STRUCTURES::PLAYER::IsUnitAvailableForPlayer(CST_UNITID_FARM, player) != 0);
+	canBuildTower &= (tacAI->SNNumber[SNAutoBuildTowers] == 1);
+	canBuildFarm &= (tacAI->SNNumber[SNAutoBuildFarms] == 1);
+	long int maxTowers = tacAI->SNNumber[SNMaxTowers];
+	long int maxFarms = tacAI->SNNumber[SNMaxFarms];
+	int actualTowerCount = AOE_STRUCTURES::PLAYER::GetPlayerUnitCount(player, CST_UNITID_WATCH_TOWER, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2);
+	int actualFarmCount = AOE_STRUCTURES::PLAYER::GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2);
+	canBuildTower &= PLAYER::CanUnitCostBePaid(player, CST_UNITID_WATCH_TOWER);
+	canBuildFarm &= PLAYER::CanUnitCostBePaid(player, CST_UNITID_FARM);
+	long int currentStratElemId = buildAI->currentIDInStrategy;
+
+	// Retrieve all information from strategy in only one loop
+	int strategyTowerCount = 0;
+	int strategyFarmCount = 0;
+	int currentEstimatedPopulation = 0;
+	const int LAST_BLD_NO_FURTHER_THAN_POPULATION = 45;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *tmpElem = buildAI->fakeFirstStrategyElement.next;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *buildAiCurrentStratElem = NULL; // determined by buildAI->currentIDInStrategy
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *lastStandardBuilding = NULL; // last building in strategy, excluding wonder/farm/tower/house. Limitation to search no further than pop=LAST_BLD_NO_FURTHER_THAN_POPULATION
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *ironAge = NULL;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *towerToReuse = NULL;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *farmToReuse = NULL;
+	while (tmpElem && (tmpElem != &buildAI->fakeFirstStrategyElement)) {
+		if (tmpElem->elemId == currentStratElemId) {
+			buildAiCurrentStratElem = tmpElem;
+		}
+		if ((tmpElem->elementType == TAIUnitClass::AIUCCritical) || (tmpElem->elementType == TAIUnitClass::AIUCTech)) {
+			if (tmpElem->unitDAT_ID == CST_RSID_IRON_AGE) {
+				ironAge = tmpElem;
+			}
+		}
+		if (tmpElem->elementType == TAIUnitClass::AIUCBuilding) {
+			if (tmpElem->unitDAT_ID == CST_UNITID_WATCH_TOWER) {
+				if ((tmpElem->aliveCount > 0) || (tmpElem->inProgressCount > 0) || (tmpElem->retrains < 0) || (tmpElem->totalCount < tmpElem->retrains)) {
+					strategyTowerCount++;
+				}
+				if ((towerToReuse == NULL) && (tmpElem->aliveCount == 0) && (tmpElem->inProgressCount == 0) && (tmpElem->retrains >= 0) && (tmpElem->totalCount >= tmpElem->retrains)) {
+					towerToReuse = tmpElem;
+				}
+			}
+			if (tmpElem->unitDAT_ID == CST_UNITID_FARM) {
+				if ((tmpElem->aliveCount > 0) || (tmpElem->inProgressCount > 0) || (tmpElem->retrains < 0) || (tmpElem->totalCount < tmpElem->retrains)) {
+					strategyFarmCount++;
+				}
+				if ((farmToReuse == NULL) && (tmpElem->aliveCount == 0) && (tmpElem->inProgressCount == 0) && (tmpElem->retrains >= 0) && (tmpElem->totalCount >= tmpElem->retrains)) {
+					farmToReuse = tmpElem;
+				}
+			}
+			if ((tmpElem->unitDAT_ID != CST_UNITID_WATCH_TOWER) &&
+				(tmpElem->unitDAT_ID != CST_UNITID_FARM) &&
+				(tmpElem->unitDAT_ID != CST_UNITID_HOUSE) &&
+				(tmpElem->unitDAT_ID != CST_UNITID_WONDER) &&
+				(currentEstimatedPopulation < LAST_BLD_NO_FURTHER_THAN_POPULATION)) {
+				// Additional condition: take only building with unlimited retrains (except first time, to make sure we find a building)
+				if ((tmpElem->retrains < 0) || (lastStandardBuilding == NULL)) {
+					lastStandardBuilding = tmpElem;
+				}
+			}
+		}
+		if ((tmpElem->elementType == TAIUnitClass::AIUCLivingUnit) && (tmpElem->retrains < 0)) {
+			currentEstimatedPopulation++;
+		}
+		tmpElem = tmpElem->next;
+	}
+	if (!lastStandardBuilding) {
+		lastStandardBuilding = buildAI->fakeFirstStrategyElement.next; // should never happen
+	}
+	if (!ironAge) {
+		ironAge = lastStandardBuilding; // should never happen
+	}
+
+
+	// Force wait for a minimum exploration before adding towers. Especially when starting at iron age
+	const int MIN_EXPLORED_TILES_FOR_TOWERS = 2700; // note: a town with radius=20 represents 40*40=1600 tiles
+	// Test also RESOURCE_TYPES::CST_RES_ORDER_MAP_EXPLORATION for small maps ?
+	bool enoughExplorationForTowers = (player->myMapInfo->exploredTilesCount > MIN_EXPLORED_TILES_FOR_TOWERS);
+
+	// Auto build towers
+	if (canBuildTower && (actualTowerCount < maxTowers) && (strategyTowerCount < maxTowers) && enoughExplorationForTowers) {
+		const int MAX_TOWERS_BEFORE_IRON = 4;
+		// Allow to add towers in iron, allow to add *some* towers before (but no more than MAX_TOWERS_BEFORE_IRON)
+		if ((actualTowerCount < MAX_TOWERS_BEFORE_IRON) || (currentAge >= 4)) {
+			if (towerToReuse) {
+				towerToReuse->totalCount = 0; // Reset it so that it can be built again
+			} else {
+				ROCKNROR::STRATEGY::AddUnitInStrategy_before(buildAI, lastStandardBuilding->next, 1, -1, TAIUnitClass::AIUCBuilding, CST_UNITID_WATCH_TOWER, player, "Tower, added");
+			}
+		}
+	}
+
+	// Auto build farms
+	if (canBuildFarm && (actualFarmCount < maxFarms) && (strategyFarmCount < maxFarms)) {
+		int food = (int)player->GetResourceValue(CST_RES_ORDER_FOOD);
+		int wood = (int)player->GetResourceValue(CST_RES_ORDER_WOOD);
+
+		// a "DM" case: much food, ok if all buildings have been built (no hurry to build farms)
+		bool deathmatchCaseOk = (food > 5000) && (lastStandardBuilding->aliveCount != 0);
+		bool needFoodCaseOk = (food <= 5000); // Not so much food: build farms, don't wait for all strategy elements to be built !
+
+		// Only add farms when there is an actual need for food. Take into account the fact I have berries near a granary in my town ?
+		if ((food < wood) && (deathmatchCaseOk || needFoodCaseOk)) {
+			if (farmToReuse) {
+				farmToReuse->totalCount = 0; // Reset it so that it can be built again
+			} else {
+				ROCKNROR::STRATEGY::AddUnitInStrategy_before(buildAI, ironAge, 1, -1, TAIUnitClass::AIUCBuilding, CST_UNITID_FARM, player, "Farm, added");
+			}
+		}
+	}
+
+	// We could handle auto build houses here too
+
+	return true;
+}
+
+
+// Handles the specific build item from SN numbers (SNSpecificBuildItemToBuild)
+void EconomyAI::HandleSNSpecificBuildItem(STRUCT_TAC_AI *tacAI) {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI = &tacAI->ptrMainAI->structBuildAI;
+	long int specificItemId = tacAI->SNNumber[SNSpecificBuildItemToBuild];
+	if (specificItemId >= 0) {
+		int triggerTime = tacAI->SNNumber[SNSpecificBuildItemTime];
+		triggerTime = triggerTime * 60000; // milliseconds
+		if (triggerTime >= global->currentGameTime) {
+			tacAI->SNNumber[SNSpecificBuildItemToBuild] = -1; // unset / disable specific build item for the rest of the game
+			//ROCKNROR::STRATEGY::AddUnitInStrategy(buildAI, 0, 1, -1, TAIUnitClass::AIUCBuilding, specificItemId, tacAI->ptrMainAI->player);
+			unsigned long int addrAddElemInStrategy = 0x4B9050;
+			_asm {
+				PUSH 0; // position
+				PUSH 1; // retrains
+				PUSH specificItemId;
+				MOV ECX, buildAI;
+				CALL addrAddElemInStrategy; // buildAI.addElementInStrategy(DATID, retrains, position)
+			}
+		}
+	}
+}
+
 
 
 }
