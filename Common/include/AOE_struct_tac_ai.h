@@ -177,7 +177,7 @@ namespace AOE_STRUCTURES {
 		long int currentlyProcessedUnitGroupId; // +F84. Id of "next" group to process in active group tasking (just technical, to continue work when has not enough time to finish in 1 execution)
 		long int storagePitAddedToStrategy; // +F88. 1 when a SP has been inserted into strategy.
 		long int granaryAddedToStrategy; // +F8C. 1 when a granary has been inserted into strategy.
-		long int unknown_F90_someTimeValue; // +F90. 4D2245,4D242A...
+		long int lastConstructionStartOrAddToStrategyTime; // +F90. 4D2245,4D242A... Last game time when a construction was triggered or added to strategy ?
 		long int lastPanicModeStrategyUpdateTime; // +F94. In milliseconds. Updated with game time when "panic mode" units are added to strategy.
 		long int unknown_F98_timeAboutTributes; // +F98. Related to SNCoopDemandTributeInterval
 		unsigned long int unknown_F9C;

@@ -21,7 +21,7 @@
 // To be used a #pragma TODO("message")
 #define TODO(msg) ___PRAGMA_BLDMSG_INTERNAL("TODO - " msg)
 
-// To be used a #pragma TODO("message")
+// To be used a #pragma WARNING("message")
 #define WARNING(msg) ___PRAGMA_BLDMSG_INTERNAL("WARNING - " msg)
 
 // Used in other macros. Remove parentheses to use a macro parameter as is: typically, pass {a, b, c} as a parameter.

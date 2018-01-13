@@ -91,20 +91,20 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_INF_AI_ATTACK_HISTORY) == 0x18, "STRUCT_INF_AI_ATTACK_HISTORY size");
 
 
-	// Size=0x14. Used in InfAI structure.
+	// Size=0x14. Used in InfAI structure. Init in 0x4C49C0
 	class STRUCT_SPOTTED_RESOURCE_INFO {
 	public:
 		long int gatherableUnitId;
 		char posY;
 		char posX;
-		char unknown_06; // default=0 ?
-		char unknown_07;
+		char numberOfTimesTargetted; // +6. default=0. Incremented in 0x4BCBEB
+		char ununused_07; // unused
 		long int estimatedTotalTripWeight; // +8. round trip estimated (square) distance, including an arbitrary +10 value for detour (formula = distance*2 +10)
-		char valid; // +C. default=0. Set in 0x4C5560.
-		char unknown_0D; // default=0 ?
+		char skipTurns; // +C. default=0. Set in 0x4C5560, see 0x4BC867. If >0, decrement and ignore "this time".
+		char obsolete; // +D. default=0. Set to 1 when unit no longer exists (0x4BC8AC). Check this before doing anything else !
 		char distanceToStorageBuilding; // +E. Actual direct distance between resource unit and its closest storage building.
 		char resourceType; // +F. Always 0-3 (food wood stone gold).
-		long int storageBuildingUnitID; // +10. UnitID of the closest storage building.
+		long int storageBuildingUnitID; // +10. UnitID of the closest storage building. Updated when a dropsite is built (when construction starts). Not updated when the dropsite is destroyed. Updated with 0x4C4F30.
 	};
 	static_assert(sizeof(STRUCT_SPOTTED_RESOURCE_INFO) == 0x14, "STRUCT_SPOTTED_RESOURCE_INFO size");
 
@@ -179,8 +179,8 @@ namespace AOE_STRUCTURES {
 		long int *resourceTypesArraySizes; // +4CC. Pointer to struct size=0x10. Array of 4 dwords: index=resourceType0-3.
 		// 0x4D0 : spotted resource lists : insert in 0x4C49C0=infAI.addGatherableInUnitList(unit). Also update bestXxxUnitId/distance
 		STRUCT_SPOTTED_RESOURCE_INFO *spottedGatherableUnitsByResourceTypeArrays[4]; // +4D0. Stores explored resources, their position and (closest) storage building. Eg 0x4BC7B0. Add=0x4C49C0.
-		long int spottedGatherableUnitsCountByResourceType[4]; // +4E0. Number of elements in +4D0+i array ? (i=resource type). Related to +540, +550
-		long int spottedGatherableUnitsByResourceTypeArraySizes[4]; // +4F0. 4 Array sizes (allocated sizes ?)
+		long int spottedGatherableUnitsCountByResourceType[4]; // +4E0. Number of "used" elements in +4D0+i array ? (i=resource type). Related to bestXxxDistance/UnitId.
+		long int spottedGatherableUnitsByResourceTypeArraySizes[4]; // +4F0. 4 Array sizes (allocated sizes)
 		// 0x500
 		unsigned long int unknown_500[4];
 		unsigned long int unknown_510[4];

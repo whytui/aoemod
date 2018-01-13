@@ -233,7 +233,7 @@ bool EconomyAI::IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit
 }
 
 
-// Override the ROR method that executes current tacAI task update (cf AI_UPDATE_TYPES)
+// Override the ROR method (0x4D1BB5) that executes current tacAI task update (cf AI_UPDATE_TYPES)
 // Returns true if some specific treatments have been executed here = do NOT execute ROR standard treatment for current task
 // Returns false otherwise (default) = let ROR execute normally its treatments for current task
 // Warning *** this is supposed to take care of processing time, be carful about performance ***
@@ -263,16 +263,22 @@ bool EconomyAI::RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI) {
 		case AI_UPDATE_TYPES::CST_AUT_RESEARCH:
 		case AI_UPDATE_TYPES::CST_AUT_TRAIN:
 		case AI_UPDATE_TYPES::CST_AUT_BUILD_LIST:
-		case AI_UPDATE_TYPES::CST_AUT_HELP_BUILD:
-		case AI_UPDATE_TYPES::CST_AUT_REPAIR_BUILDING:
-		case AI_UPDATE_TYPES::CST_AUT_REPAIR_WALL:
+		case AI_UPDATE_TYPES::CST_AUT_HELP_BUILD:*/
+	case AI_UPDATE_TYPES::CST_AUT_REPAIR_BUILDING:
+		doNotRunRorUpdate = EconomyAI::HandleNewRepairmen(tacAI);
+		break;
+		/*case AI_UPDATE_TYPES::CST_AUT_REPAIR_WALL:
 		case AI_UPDATE_TYPES::CST_AUT_BUILD:
 		case AI_UPDATE_TYPES::CST_AUT_OPEN_BUILDS:
 		case AI_UPDATE_TYPES::CST_AUT_OPEN_TASKS:
-		case AI_UPDATE_TYPES::CST_AUT_FOOD_DROPSITE:
 		break;*/
+	case AI_UPDATE_TYPES::CST_AUT_FOOD_DROPSITE:
+	{
+		EconomyAI::AiUpdateFoodDropSite(tacAI);
+	}
+		break;
 	case AI_UPDATE_TYPES::CST_AUT_BUILD_LIST_INSERTIONS:
-		EconomyAI::UpdateStrategyAutoBuildInsertions(tacAI);
+		doNotRunRorUpdate = EconomyAI::UpdateStrategyAutoBuildInsertions(tacAI);
 		break;
 	default:
 		break;
@@ -450,7 +456,7 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 	// Auto build farms
 	if (canBuildFarm && (actualFarmCount < maxFarms) && (strategyFarmCount < maxFarms)) {
 		int food = (int)player->GetResourceValue(CST_RES_ORDER_FOOD);
-		int wood = (int)player->GetResourceValue(CST_RES_ORDER_WOOD);
+		//int wood = (int)player->GetResourceValue(CST_RES_ORDER_WOOD);
 
 		// a "DM" case: much food, ok if all buildings have been built (no hurry to build farms)
 		bool deathmatchCaseOk = (food > 5000) && (lastStandardBuilding->aliveCount != 0);
@@ -471,7 +477,7 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 		//}
 
 		// Only add farms when there is an actual need for food. Take into account the fact I have berries near a granary in my town ?
-		if ((food < wood) && (deathmatchCaseOk || needFoodCaseOk)) {
+		if ((deathmatchCaseOk || needFoodCaseOk)) {
 			if (farmToReuse) {
 				farmToReuse->totalCount = 0; // Reset it so that it can be built again
 			} else {
@@ -494,9 +500,10 @@ void EconomyAI::HandleSNSpecificBuildItem(STRUCT_TAC_AI *tacAI) {
 	if (specificItemId >= 0) {
 		int triggerTime = tacAI->SNNumber[SNSpecificBuildItemTime];
 		triggerTime = triggerTime * 60000; // milliseconds
-		if (triggerTime >= global->currentGameTime) {
+		if (triggerTime <= global->currentGameTime) {
 			tacAI->SNNumber[SNSpecificBuildItemToBuild] = -1; // unset / disable specific build item for the rest of the game
 			//ROCKNROR::STRATEGY::AddUnitInStrategy(buildAI, 0, 1, -1, TAIUnitClass::AIUCBuilding, specificItemId, tacAI->ptrMainAI->player);
+			// Note: buildAI.addElementInStrategy only handles standard units (and not all, slingers, camels, etc don't seem to be supported)
 			unsigned long int addrAddElemInStrategy = 0x4B9050;
 			_asm {
 				PUSH 0; // position
@@ -509,6 +516,61 @@ void EconomyAI::HandleSNSpecificBuildItem(STRUCT_TAC_AI *tacAI) {
 	}
 }
 
+
+// Checks if some repairations should be triggered
+// Returns true if ROR treatments must be skipped, false if ROR treatments must be executed normally
+bool EconomyAI::HandleNewRepairmen(STRUCT_TAC_AI *tacAI) {
+	if (!tacAI || !tacAI->ptrMainAI || !tacAI->ptrMainAI->player) { return false; }
+
+	bool noMoreWood = tacAI->ptrMainAI->player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_WOOD) < 0.1;
+	bool noMoreStone = tacAI->ptrMainAI->player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_STONE) < 0.1;
+
+	if (!noMoreStone && !noMoreWood) {
+		// Standard case: we have resources to repair anything. Let ROR code execute normally.
+		return false;
+	}
+	if (noMoreStone && noMoreWood) {
+		return true; // prevent ROR from trying to repair. Everything is depleted...
+	}
+
+	// Here either wood or stone is missing.
+
+	if (tacAI->myWonderBeingBuiltFlag) {
+		return true; // Do nothing. Don't repair other buildings when wonder is being built (~equivalent to original code)
+	}
+	
+#pragma WARNING("Unfinished. Continue using ROR code meanwhile. Need to test ROR code more: in theory, it checks we have the resources to repair !")
+	return false;
+
+	if (noMoreStone) {
+		// No stone
+		
+	} else {
+		// No wood
+		//STRUCT_UNIT_BASE *unitToRepair = AOE_STRUCTURES::PLAYER::GetPlayerMostDamagedUnit(tacAI->ptrMainAI, GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, CST_UNITID_WATCH_TOWER);
+
+	}
+
+	return false; // Default: let standard ROR treatments occur
+}
+
+
+// Returns true if ROR treatments must be skipped, false if ROR treatments must be executed normally
+bool EconomyAI::AiUpdateFoodDropSite(STRUCT_TAC_AI *tacAI) {
+	// Try to fix outdated dropsites (when destroyed) ?
+	// Find out why AI sometimes chooses gather targets so far
+	/*auto infAI = &tacAI->ptrMainAI->structInfAI;
+	auto woodInfo = infAI->spottedGatherableUnitsByResourceTypeArrays[1];
+	auto woodInfoSize = infAI->spottedGatherableUnitsByResourceTypeArraySizes[1];
+	auto woodInfoUsed = infAI->spottedGatherableUnitsCountByResourceType[1];
+	for (int i = 0; i < woodInfoSize; i++) {
+	auto xx = woodInfo[i];
+	if (woodInfo[i].gatherableUnitId == -1) {
+	bool foundUnused = true;
+	}
+	}*/
+	return false;
+}
 
 
 }

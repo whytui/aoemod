@@ -6,6 +6,7 @@
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_units.h>
 #include <AOE_struct_player.h>
+#include <AOE_struct_main_ai.h>
 #include "AOE_map.h"
 #include "AOE_memory.h"
 #include "traceMessage.h"
@@ -172,6 +173,11 @@ void SetPlayerSharedExploration_hard(long int playerId, bool enable);
 
 // Set "shared exploration" flag for a given player to true or false. This version should be compatible with MP games (uses ROR command system)
 void SetPlayerSharedExploration_safe(long int playerId);
+
+
+// Returns the most damaged unit, NULL if not found
+// unitDefIdFilter = -1 in most cases (joker). Otherwise, THE only unit def to take into account
+STRUCT_UNIT_BASE *GetPlayerMostDamagedUnit(STRUCT_AI *mainAI, GLOBAL_UNIT_AI_TYPES aiType, long int unitDefIdFilter);
 
 
 }

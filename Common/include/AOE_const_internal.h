@@ -401,7 +401,7 @@ namespace AOE_CONST_INTERNAL
 	enum AI_UPDATE_TYPES : long int {
 		CST_AUT_SETUP_SOLDIER_GROUPS = 0, // "Setup SolGroups"
 		CST_AUT_EVAL_CIVILIAN_DISTRIB = 1, // "Eval CivDist". Compute desired count of villager activities.
-		CST_AUT_TASK_CIVILIAN = 2, // "Task Civs". Assign activities to vilagers
+		CST_AUT_TASK_CIVILIAN = 2, // "Task Civs". Assign activities to villagers
 		CST_AUT_SET_BOAT_GROUPS = 3, // "Setup BoatGroups"
 		CST_AUT_FILL_BOAT_GROUPS = 4, // "Fill BoatGroups"
 		CST_AUT_TASK_BOATS = 5, // "Task Boats"

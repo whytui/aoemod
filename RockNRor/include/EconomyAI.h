@@ -51,7 +51,7 @@ namespace CUSTOM_AI {
 		// Game role = "is important object" at infAI level
 		static bool IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit);
 
-		// Override the ROR method that executes current tacAI task update (cf AI_UPDATE_TYPES)
+		// Override the ROR method (0x4D1BB5) that executes current tacAI task update (cf AI_UPDATE_TYPES)
 		// Returns true if some specific treatments have been executed here = do NOT execute ROR standard treatment for current task
 		// Returns false otherwise (default) = let ROR execute normally its treatments for current task
 		// Warning *** this is supposed to take care of processing time, be carful about performance ***
@@ -70,6 +70,12 @@ namespace CUSTOM_AI {
 		// Handles the specific build item from SN numbers (SNSpecificBuildItemToBuild)
 		static void HandleSNSpecificBuildItem(STRUCT_TAC_AI *tacAI);
 
+		// Checks if some repairations should be triggered
+		// Returns true if ROR treatments must be skipped, false if ROR treatments must be executed normally
+		static bool HandleNewRepairmen(STRUCT_TAC_AI *tacAI);
+
+		// Returns true if ROR treatments must be skipped, false if ROR treatments must be executed normally
+		static bool AiUpdateFoodDropSite(STRUCT_TAC_AI *tacAI);
 	private:
 		// Remove farmers when more than 1 are assigned to the same farm.
 		void CheckForDuplicateFarmers(STRUCT_PLAYER *player);

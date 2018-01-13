@@ -4433,9 +4433,16 @@ void RockNRorInstance::ShouldNotApplyPalmyraTradingBonus(REG_BACKUP *REG_values)
 }
 
 
+// From 0x4D1BB1 - tacAI.Update()
+// May change return address to 0x4D236C or 0x4D2474 (to skip ROR treatments for current task)
 void RockNRorInstance::TacAIHandleOneUpdateByType(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = (AOE_STRUCTURES::STRUCT_TAC_AI *) REG_values->ESI_val;
 	ror_api_assert(REG_values, tacAI && tacAI->IsCheckSumValid());
+	// safeguard
+	if (tacAI->currentAIUpdateType > AI_UPDATE_TYPES::CST_AUT_BUILD_LIST_INSERTIONS) {
+		tacAI->currentAIUpdateType = AI_UPDATE_TYPES::CST_AUT_BUILD_LIST_INSERTIONS;
+		assert(false && "Bad value for currentAIUpdateType");
+	}
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->EAX_val = tacAI->currentAIUpdateType;
@@ -4452,7 +4459,11 @@ void RockNRorInstance::TacAIHandleOneUpdateByType(REG_BACKUP *REG_values) {
 	// DO NOT MODIFY BELOW
 	if (!runStandardTreatments) {
 		SetIntValueToRORStack(REG_values, 0x10, 1); // set "thisActionTypeIsCompleted" default value in ROR proc context, cf instruction in 0x4D1BBE.
-		ChangeReturnAddress(REG_values, 0x4D236C);
+		if (tacAI->currentAIUpdateType == AI_UPDATE_TYPES::CST_AUT_BUILD_LIST_INSERTIONS) {
+			ChangeReturnAddress(REG_values, 0x4D2474); // Last ai update type has specific exiting code
+		} else {
+			ChangeReturnAddress(REG_values, 0x4D236C);
+		}
 	}
 }
 

@@ -824,5 +824,23 @@ void SetPlayerSharedExploration_safe(long int playerId) {
 	GAME_COMMANDS::CreateCmd_SetSharedExploration((short int)playerId);
 }
 
+
+// Returns the most damaged unit, NULL if not found
+// unitDefIdFilter = -1 in most cases (joker). Otherwise, THE only unit def to take into account
+STRUCT_UNIT_BASE *GetPlayerMostDamagedUnit(STRUCT_AI *mainAI, GLOBAL_UNIT_AI_TYPES aiType, long int unitDefIdFilter) {
+	if (!mainAI || !mainAI->IsCheckSumValid()) { return NULL; }
+	unsigned long int addr = 0x40BE70;
+	STRUCT_UNIT_BASE *res = NULL;
+	_asm {
+		MOV ECX, mainAI;
+		PUSH unitDefIdFilter;
+		PUSH aiType;
+		CALL addr;
+		MOV res, EAX;
+	}
+	return res;
+}
+
+
 }
 }
