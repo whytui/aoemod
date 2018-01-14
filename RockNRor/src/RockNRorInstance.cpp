@@ -437,6 +437,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x4D1BBA:
 		this->TacAIHandleOneUpdateByType(REG_values);
 		break;
+	case 0x4B1AF7:
+		this->ActionBuildUpdateFarmHack(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4450,20 +4453,72 @@ void RockNRorInstance::TacAIHandleOneUpdateByType(REG_BACKUP *REG_values) {
 	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || (!ROCKNROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId))) {
 		return;
 	}
+	long int allowedTime = REG_values->EDI_val;
+	long int startProcessingTime = REG_values->EBP_val;
 	bool runStandardTreatments = true;
+	bool currentTaskIsCompleted = true;
 
 	// Custom treatments : modify runStandardTreatments to execute or not ROR's standard procedure.
 
-	runStandardTreatments = !CUSTOM_AI::EconomyAI::RunOneTacAIUpdateTask(tacAI);
+	runStandardTreatments = !CUSTOM_AI::EconomyAI::RunOneTacAIUpdateTask(tacAI, startProcessingTime, allowedTime);
 
 	// DO NOT MODIFY BELOW
 	if (!runStandardTreatments) {
-		SetIntValueToRORStack(REG_values, 0x10, 1); // set "thisActionTypeIsCompleted" default value in ROR proc context, cf instruction in 0x4D1BBE.
+		if (currentTaskIsCompleted) {
+			SetIntValueToRORStack(REG_values, 0x10, 1); // set "thisActionTypeIsCompleted" default value in ROR proc context, cf instruction in 0x4D1BBE.
+		}
 		if (tacAI->currentAIUpdateType == AI_UPDATE_TYPES::CST_AUT_BUILD_LIST_INSERTIONS) {
 			ChangeReturnAddress(REG_values, 0x4D2474); // Last ai update type has specific exiting code
 		} else {
 			ChangeReturnAddress(REG_values, 0x4D236C);
 		}
+	}
+}
+
+
+// From 0x4B1AF0 = actionBuild.update()
+// This specifically overrides the hack when a farm construction finishes.
+// In standard game, the build action's "time" field is set to -1 (should remain 0 always).
+// In next actionBuild.update() execution, this flag (time==-1) is detected and builder operates a "right click" on farm to become a farmer
+// Note: as this hack messes with builder's action, the notification for build action being completed is not triggered, which is a shame.
+// Changes return address to...
+// - 0x4B19FD to search for nearby constructions to build (status 3=search) = default treatment for most cases
+// - 0x4B1B06 to set time=-1 to use farm hack (next call will simulate a "right click" to transform builder into a farmer
+// - 0x4B1B0D to return 0 (do not search, do nothing special = will stop) : not a standard case
+void RockNRorInstance::ActionBuildUpdateFarmHack(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *building = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EAX_val;
+	AOE_STRUCTURES::STRUCT_ACTION_BUILD *actionBuild = (AOE_STRUCTURES::STRUCT_ACTION_BUILD *)REG_values->ESI_val;
+	ror_api_assert(REG_values, building && building->IsCheckSumValidForAUnitClass() && building->unitDefinition);
+	ror_api_assert(REG_values, actionBuild && actionBuild->IsCheckSumValid());
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *builder = actionBuild->actor;
+	ror_api_assert(REG_values, builder && builder->IsCheckSumValidForAUnitClass() && builder->ptrStructPlayer);
+
+	// Setup
+	bool allowUseRorDirtyFarmHack = true; // Default behavior: allow using ROR's hack for farms
+	bool useRorSearchOtherBuildingToConstruct = true; // Default behavior: for other buildings, go to "search"
+	bool isFarm = building->unitDefinition && (building->unitDefinition->DAT_ID1 == CST_UNITID_FARM);
+
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	ChangeReturnAddress(REG_values, 0x4B19FD); // Set to default behavior (non-farm)
+	
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		// Custom treatments (if enabled)
+		allowUseRorDirtyFarmHack = false;
+		// If builder can turn into a farmer, then don't search for other constructions
+		// Remark: if several villagers were building this farm, CanBuilderSwitchToFarmer won't detect them if "gather" commands have not been handled yet (which generally is the case)
+		useRorSearchOtherBuildingToConstruct = !AOE_STRUCTURES::CanBuilderSwitchToFarmer(builder, building);
+	}
+
+
+	// DO NOT MODIFY BELOW
+	if (isFarm && allowUseRorDirtyFarmHack) {
+		// Set action time = -1, next call to update() will execute the hack code
+		ChangeReturnAddress(REG_values, 0x4B1B06);
+		return;
+	}
+	if (!useRorSearchOtherBuildingToConstruct) {
+		// Custom case: do nothing (do NOT "search" for other nearby constructions to build)
+		ChangeReturnAddress(REG_values, 0x4B1B0D);
 	}
 }
 

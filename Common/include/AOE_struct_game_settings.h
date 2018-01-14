@@ -347,7 +347,7 @@ namespace AOE_STRUCTURES {
 		// 0x9A0
 		long int isCampaign; // get in 41B720, set in 41BA50
 		long int isSavedGame; // +9A4. set in 41BA60
-		long int hasSteroidsCheatCode; // +9A8. set in 50CA2B, 4E90B6. Can be cancelled !!!
+		long int hasSteroidsCheatCode; // +9A8. set in 50CA2B, 4E90B6. Can be cancelled !!! Used in 0x4B1AA2 for construction.
 		long int has_CD; //see 4169D7
 		// 0x9B0
 		long int chosenPlayerIndex[9]; // index in 0-8 (playerId, including gaia)

@@ -1188,7 +1188,7 @@ void RockNRorCommand::OnGameStart() {
 		}
 	}
 
-	// Manage game settings customization for new random games
+	// Manage game settings customization for new random games (including start scenario game)
 	this->ApplyCustomizationOnRandomGameStart();
 
 	// Fix Initial resources in Scenario information (after applying customization, because it includes setting initial resource values.
@@ -1278,6 +1278,8 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameSettings() {
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
 	if (settings->isCampaign || settings->isSavedGame || settings->rgeGameOptions.isScenario) {
+		// Collect info about (standard) tech trees
+		this->customCivHandler.CreateInternalDataForGameWithStandardCivs(true);
 		return false;
 	}
 

@@ -112,7 +112,7 @@ namespace AOE_STRUCTURES {
 	// +0x84 = unit.setResourceValue(f_value, isAdd, checkResourceCapacity)
 	// +0x88 = unit.setHealAction(unitId, force)
 	// +0x8C = unsigned char RGE_Static_Object::heal(float) (heal ME)
-	// +0x98 = unit.executeRightClick(targetUnit, float posY, posX, posZ) (do_command)
+	// +0x98 = unit.executeRightClick(targetUnit, float posY, posX, posZ) (do_command) => Calls unit.work2.
 	// +0x9C = unit.createMoveToAction(targetUnitStruct, pos, pos, fposZ)
 	// +0xA0 = unit.work(targetUnit, float_posY, posX, posZ)
 	// +0xA4 = void unit.stop(). Warning: when calling this, you better update unitAI too...
@@ -182,7 +182,7 @@ namespace AOE_STRUCTURES {
 	// +0x1EC = unit.stopMoving() just set currentSpeed to 0 ? Don't use ?
 	// +0x1F0 = unsigned char RGE_Moving_Object::turn_towards(RGE_Static_Object *,float,float)
 	// +0x1F4 = unit.initialize(unitDef, player, fposY, fposX, fposZ) [Last for class30=Movable]
-	// +0x1F8 = unit.work2(targetUnit, (float)posY, posX, posZ, force?).
+	// +0x1F8 = unit.work2(targetUnit, (float)posY, posX, posZ, force?). last param="workFlag". This takes care of villager mode to find matching command.
 	// +0x1FC = unit.executeCommand(commandIndex) (set_task)
 	// +0x200 = void RGE_Action_Object::setTaskByTaskID(int) (executeCommand?)
 	// +0x204 = unit.setAction(action)
@@ -437,7 +437,7 @@ namespace AOE_STRUCTURES {
 		long int unknown_144; // =targetPositionsArrayUsedElements+0xF ?
 		char unknown_148[0x154 - 0x148];
 		char unknown_154_tempFlag_calculatingPath; // 1 while in treatment (computing a move path ?). If 1, use temp_AI_movementInfo instead of movementInfo ?
-		char isWaitingToMove; // Related to action, consistent with action+0xC ? (used when action+C=0 or no action?)
+		char isWaitingToMove; // +155. Related to action, consistent with action+0xC ? (used when action+C=0 or no action?)
 		short int unknown_156; // or 2 bytes ?
 		long int moveInitialPosY; // +158
 		long int moveInitialPosX; // +15C

@@ -91,4 +91,9 @@ long int GetTradeOutResourceId(STRUCT_UNIT_BASE *actor, STRUCT_UNIT_BASE *target
 // Returns false if killed unit should lose its owned resource when killed = for example, gazelle killed by a military unit.
 bool ShouldKeepOwnedResourceWhenKilledByClass(STRUCT_UNIT_BASE *killedUnit, GLOBAL_UNIT_AI_TYPES attackerClass);
 
+// Returns true if a builder can become farmer to gather the farm he just built
+// Returns false if he should not (because there already is a farmer, because he already carries a different resource)
+// This does not detect pending commands (if some villager has just been told to gather this farm)
+bool CanBuilderSwitchToFarmer(STRUCT_UNIT_BASE *builder, STRUCT_UNIT_BASE *farm);
+
 }

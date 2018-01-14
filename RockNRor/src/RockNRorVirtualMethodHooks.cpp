@@ -62,7 +62,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 
 	// Return value is an unknown enum. 2=ok, processed. (unitAI: EDX+0xCC call).
-	long int __stdcall ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2) {
+	long int __stdcall ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int uTime) {
 		unsigned long int originalCallAddr = activityProcessNotifyCheckSumAndOriginalAddress[activity->checksum];
 		assert(activity && activity->IsCheckSumValid() && notifyEvent);
 		RECORD_PERF_BEGIN(originalCallAddr);
@@ -75,13 +75,13 @@ namespace VIRTUAL_METHOD_HOOKS {
 		bool runStandardMethod = true;
 
 		// Custom treatments
-		int result = ROCKNROR::GAME_EVENTS::ActivityProcessNotify(activity, notifyEvent, arg2, runStandardMethod); // updates runStandardMethod
+		int result = ROCKNROR::GAME_EVENTS::ActivityProcessNotify(activity, notifyEvent, uTime, runStandardMethod); // updates runStandardMethod
 
 		if (runStandardMethod && (originalCallAddr != 0)) {
 			_asm {
 				MOV ECX, activity;
 				MOV EDX, DS:[ECX];
-				PUSH arg2;
+				PUSH uTime;
 				PUSH notifyEvent;
 				// DO NOT CALL DS:[EDX+0xCC] because we changed the pointer !
 				CALL originalCallAddr;

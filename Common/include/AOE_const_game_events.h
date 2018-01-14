@@ -139,7 +139,11 @@ namespace AOE_CONST_INTERNAL
 		// genericParam4=taskId that failed
 		EVENT_ACTION_FAILED = 0x1F9,
 
-		EVENT_ACTION_COMPLETED = 0x1FA, // Notify activity completed (normal completion). arg4=activityId
+		// Notify activity completed (normal completion).
+		// targetUnitId = actorUnitId = (actor)
+		// genericParam4=activityId
+		// genericParam5&6 unused ?
+		EVENT_ACTION_COMPLETED = 0x1FA,
 
 		// 0x410999. Notify 0x41401D
 		// genericParam4=taskId that failed
@@ -174,9 +178,14 @@ namespace AOE_CONST_INTERNAL
 		// Generic arg5/6 = 0 (unused)
 		EVENT_PLAYER_UNIT_ATTACKED = 0x201,
 
-		// target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
+		// Equivalent of EVENT_ACTION_COMPLETED, but here try to continue same action type automatically (eg search similar gather unit nearby)
+		// Seems used only for action status=3 (search)
+		// Villager construction action finished : raised by actionbuild.set_state(3) cf 0x4B1503, not by "construction progress=100%"
+		// ... non-AI players only, for AI players there is a hack to use EVENT_ACTION_COMPLETED instead to catch the event and transform villager to farmer if farm
+		// Movement finished, including "exploration basic move" ?
+		// Target gatherable unit is depleted (search another one)
 		// genericParam4=activityId(explore...)
-		EVENT_MOVEMENT_FINISHED_UNSURE = 0x202,
+		EVENT_ACTION_COMPLETED_SEARCH = 0x202,
 
 		// Source 0x403392, 0x4B38C1, 0x4B6A43
 		// Triggered when no drop site was found for a unit (with resource value to bring back)

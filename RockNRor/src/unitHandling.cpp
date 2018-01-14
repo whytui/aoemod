@@ -336,4 +336,46 @@ bool ShouldKeepOwnedResourceWhenKilledByClass(STRUCT_UNIT_BASE *killedUnit, GLOB
 }
 
 
+// Returns true if a builder can become farmer to gather the farm he just built
+// Returns false if he should not (because there already is a farmer, because he already carries a different resource)
+// This does not detect pending commands (if some villager has just been told to gather this farm)
+bool CanBuilderSwitchToFarmer(STRUCT_UNIT_BASE *builder, STRUCT_UNIT_BASE *farm) {
+	if (!builder || !builder->IsCheckSumValidForAUnitClass() || !farm || !farm->IsCheckSumValidForAUnitClass()) { return false; }
+	if (!builder->ptrStructPlayer || !builder->ptrStructPlayer->ptrCreatableUnitsListLink) { return false; }
+	if (farm->unitStatus != GAME_UNIT_STATUS::GUS_2_READY) { return false; }
+	if (!farm->unitDefinition || farm->unitDefinition->DAT_ID1 != CST_UNITID_FARM) {
+		return false;
+	}
+
+	if ((builder->resourceValue > 0) && (builder->resourceTypeId != CST_RES_ORDER_BERRY_STORAGE)) {
+		return false; // builder carries another resource type : first save it into a drop site.
+	}
+
+	// This does not detect pending commands !
+	STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *curElemVillager = builder->ptrStructPlayer->ptrCreatableUnitsListLink->lastListElement;
+	while (curElemVillager) {
+		if (curElemVillager->unit && curElemVillager->unit->IsCheckSumValidForAUnitClass()) {
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *curUnit = curElemVillager->unit; // a potential farmer on "our" farm
+			// Beware repairmen ! (AI bug: their unitDef remains farmers). Here we check action=gather to avoid this.
+			if ((curUnit != builder) &&
+				(curUnit->unitStatus == GAME_UNIT_STATUS::GUS_2_READY) && curUnit->unitDefinition &&
+				curUnit->unitDefinition->IsCheckSumValidForAUnitClass() && (curUnit->unitDefinition->DAT_ID1 == CST_UNITID_FARMER)) {
+				STRUCT_ACTION_BASE *action = AOE_STRUCTURES::GetUnitAction(curUnit);
+				STRUCT_ACTION_GATHER_WITHOUT_ATTACK *actionGather = NULL;
+				if (action && (action->actionTypeID == UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK)) {
+					actionGather = (STRUCT_ACTION_GATHER_WITHOUT_ATTACK *)action;
+				}
+				if (actionGather && (actionGather->targetUnitId == farm->unitInstanceId)) {
+					// We found a GATHERER on this farm (note: NOT a repairman or a builder)
+					return false; // The farm is already being gathered by someone else
+				}
+			}
+		}
+		curElemVillager = curElemVillager->previousElement;
+	}
+
+	return true; // Default = other cases
+}
+
+
 }

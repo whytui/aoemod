@@ -55,7 +55,7 @@ namespace CUSTOM_AI {
 		// Returns true if some specific treatments have been executed here = do NOT execute ROR standard treatment for current task
 		// Returns false otherwise (default) = let ROR execute normally its treatments for current task
 		// Warning *** this is supposed to take care of processing time, be carful about performance ***
-		static bool RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI);
+		static bool RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI, long int startProcessingTime, long int allowedProcessingTime);
 
 		// Override the ROR method that calculates desired number of explorers, and then desired number of non-explorers (cf call to 0x4D9BE0)
 		// Returns true if treatments have been run here and if ROR treatments MUST NOT be run (prevent ROR from calculating number of villagers by task)

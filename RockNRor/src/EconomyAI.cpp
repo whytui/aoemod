@@ -237,7 +237,7 @@ bool EconomyAI::IsArtefactOrTargetableResourceOrCreatable(STRUCT_UNIT_BASE *unit
 // Returns true if some specific treatments have been executed here = do NOT execute ROR standard treatment for current task
 // Returns false otherwise (default) = let ROR execute normally its treatments for current task
 // Warning *** this is supposed to take care of processing time, be carful about performance ***
-bool EconomyAI::RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI) {
+bool EconomyAI::RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI, long int startProcessingTime, long int allowedProcessingTime) {
 	// Remark : tacAI.Update() in 0x4D1B70 calls alternately the various AI updates, including this one cf AI_UPDATE_TYPES::CST_AUT_EVAL_CIVILIAN_DISTRIB
 	assert(tacAI && tacAI->IsCheckSumValid() && tacAI->ptrMainAI);
 	if (!tacAI || !tacAI->ptrMainAI || !tacAI->ptrMainAI->ptrStructPlayer) { return false; }
@@ -255,9 +255,11 @@ bool EconomyAI::RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI) {
 		case AI_UPDATE_TYPES::CST_AUT_SET_BOAT_GROUPS:
 		case AI_UPDATE_TYPES::CST_AUT_FILL_BOAT_GROUPS:
 		case AI_UPDATE_TYPES::CST_AUT_TASK_BOATS:
-		case AI_UPDATE_TYPES::CST_AUT_FILL_SOLDIER_GROUPS:
-		case AI_UPDATE_TYPES::CST_AUT_TASK_IDLE_SOLDIER:
-		case AI_UPDATE_TYPES::CST_AUT_TASK_ACTIVE_SOLDIER:
+		case AI_UPDATE_TYPES::CST_AUT_FILL_SOLDIER_GROUPS:*/
+		case AI_UPDATE_TYPES::CST_AUT_TASK_IDLE_SOLDIER: // Calls 0x4D3700 if I own land military units or boats or relics
+
+			break;
+		/*case AI_UPDATE_TYPES::CST_AUT_TASK_ACTIVE_SOLDIER:
 		case AI_UPDATE_TYPES::CST_AUT_PLAYTASKING:
 		case AI_UPDATE_TYPES::CST_AUT_ATTACK_ENEMY_TOWER_IN_MY_TOWN:
 		case AI_UPDATE_TYPES::CST_AUT_RESEARCH:

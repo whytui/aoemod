@@ -14,7 +14,7 @@ namespace AOE_CONST_INTERNAL
 		CST_ATI_NONE = -1, // Used a lot in game code
 		CST_ATI_TASK_ATTACK = 0x258, // Why does this value also appear in *notify* methods (as an event) ?
 		CST_ATI_TASK_DEFEND_OR_CAPTURE = 0x259, // primary role is defend (position or object), but it is used to capture relics
-		CST_ATI_TASK_BUILD = 0x25A,
+		CST_ATI_TASK_BUILD = 0x25A, // Note: a construction can finish in 0x4BAAE9 but events are not handled there. See also comments from ActionBuildUpdateFarmHack
 		CST_ATI_TASK_HEAL = 0x25B,
 		CST_ATI_TASK_CONVERT = 0x25C,
 		CST_ATI_TASK_EXPLORE = 0x25D,

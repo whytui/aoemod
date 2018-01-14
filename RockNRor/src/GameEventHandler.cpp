@@ -34,14 +34,14 @@ bool PlayerNotifyEvent(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT 
 
 // UnitActivity.ProcessNotify event for ALL activity classes (base+children)
 // outExecStandardCode is an output bool: if set to true, ROR standard code will be executed afterwards. If false, it will be skipped.
-ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2, bool &outExecStandardCode) {
+ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int uTime, bool &outExecStandardCode) {
 	outExecStandardCode = true;
 	if (!notifyEvent || !activity || !activity->IsCheckSumValid()) {
 		return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
 	}
 
 	if (activity->checksum == CHECKSUM_UNIT_ACTIVITY_CIVILIAN) {
-		return CivilianActivityProcessNotify(activity, notifyEvent, arg2, outExecStandardCode);
+		return CivilianActivityProcessNotify(activity, notifyEvent, uTime, outExecStandardCode);
 	}
 
 	if (notifyEvent->eventId == AOE_CONST_INTERNAL::EVENT_TOO_CLOSE_TO_SHOOT) {
@@ -98,7 +98,7 @@ ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activi
 	case GAME_EVENT_TYPE::EVENT_ACTION_COMPLETED:
 	case GAME_EVENT_TYPE::EVENT_ACTION_INVALIDATED:
 	case GAME_EVENT_TYPE::EVENT_SHOULD_MOVE_BACK_AFTER_SHOOTING: // 200
-	case GAME_EVENT_TYPE::EVENT_MOVEMENT_FINISHED_UNSURE: // target gatherable unit is depleted? Movement finished, including "exploration basic move" ?
+	case GAME_EVENT_TYPE::EVENT_ACTION_COMPLETED_SEARCH: // 202
 	case GAME_EVENT_TYPE::EVENT_SHOULD_ESCAPE_ATTACK: // 20f
 	case GAME_EVENT_TYPE::EVENT_TOO_CLOSE_TO_SHOOT: // 1FE
 	case GAME_EVENT_TYPE::EVENT_UNIT_CAPTURED: // 20B
@@ -129,7 +129,7 @@ ACTIVITY_EVENT_HANDLER_RESULT ActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activi
 
 // UnitActivity.ProcessNotify event for ALL activity classes (base+children)
 // outExecStandardCode is an output bool: if set to true, ROR standard code will be executed afterwards. If false, it will be skipped.
-ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int arg2, bool &outExecStandardCode) {
+ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY *activity, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT *notifyEvent, unsigned long int uTime, bool &outExecStandardCode) {
 	outExecStandardCode = true;
 	if (!notifyEvent || !activity || !activity->IsCheckSumValid()) {
 		return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
@@ -171,7 +171,9 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 			if (!villager->DerivesFromAttackable()) { return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION; }
 			STRUCT_ACTION_BASE *action = GetUnitAction(villager);
 			if (!action || !action->targetUnit || (action->targetUnit->unitDefinition == NULL) ||
-				(action->targetUnit->checksum != CHECKSUM_UNIT_BUILDING)) { return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION; }
+				(action->targetUnit->checksum != CHECKSUM_UNIT_BUILDING)) {
+				return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
+			}
 			STRUCT_UNITDEF_BUILDING *bldDef = (STRUCT_UNITDEF_BUILDING*)action->targetUnit->unitDefinition;
 			for (int i = 0; i < 3; i++) {
 				RESOURCE_TYPES reqResourceId = bldDef->costs[i].costType;
@@ -186,6 +188,25 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 							return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION; // Event has been processed with an action. We don't want to run ROR handler.
 						}
 					}
+				}
+			}
+		}
+	}
+	if ((notifyEvent->eventId == GAME_EVENT_TYPE::EVENT_ACTION_COMPLETED) || (notifyEvent->eventId == GAME_EVENT_TYPE::EVENT_ACTION_COMPLETED_SEARCH)) {
+		ACTIVITY_TASK_ID eventTaskId = (ACTIVITY_TASK_ID)notifyEvent->genericParam4;
+		if (eventTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_BUILD) {
+		//if (activity->currentTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_BUILD) {
+			STRUCT_UNIT_ATTACKABLE *villager = (STRUCT_UNIT_ATTACKABLE *)activity->ptrUnit;
+			long int buildingId = activity->targetUnitId;
+			STRUCT_UNIT_BASE *buildingUnit = GetUnitStruct(buildingId);
+			bool wasBuildingFarm = (buildingUnit && buildingUnit->IsCheckSumValidForAUnitClass() && buildingUnit->unitDefinition &&
+				(buildingUnit->unitDefinition->DAT_ID1 == CST_UNITID_FARM));
+			if (wasBuildingFarm) {
+				// Remark: if several villagers were building this farm, CanBuilderSwitchToFarmer won't detect them if "gather" commands have not been handled yet (which generally is the case)
+				if (AOE_STRUCTURES::CanBuilderSwitchToFarmer(villager, buildingUnit)) {
+					// This corresponds to the hack in 0x4B1A91
+					// Not really an issue here because it's always visible (cf builder), but technically CreateCmd_RightClick is not fully MP-compliant
+					GAME_COMMANDS::CreateCmd_RightClick(villager->unitInstanceId, buildingId, buildingUnit->positionX, buildingUnit->positionY);
 				}
 			}
 		}

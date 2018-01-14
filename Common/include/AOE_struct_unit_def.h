@@ -65,7 +65,7 @@ namespace AOE_STRUCTURES
 		short int resourceProductivityMultiplier;
 		short int resourceTypeOut;
 		short int resource;
-		float workRateMultiplier; // or quantity ? "work_val1"
+		float workRateMultiplier; // +1C. "work_val1" ? See 0x4B1AD1 that actually multiplies unit's work rate for construction.
 		// 0x20
 		float executionRadius; // "work_val2" ? Range alert ?
 		float extraRange; // "work_range"

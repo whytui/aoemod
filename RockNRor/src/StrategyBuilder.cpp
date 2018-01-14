@@ -3695,6 +3695,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	if (!this->buildAI || !this->buildAI->IsCheckSumValid() || !this->buildAI->mainAI || !this->buildAI->mainAI->IsCheckSumValid()) { return; }
 	if (!this->player || !this->player->IsCheckSumValid()) { return; }
 	if (!this->global || !this->global->IsCheckSumValid() || !this->settings) { return; }
+	assert(this->playerTechTreeInfo && this->playerTechTreeInfo->isActive);
 	// Clear previous strategy
 	ROCKNROR::STRATEGY::ClearStrategy(this->buildAI);
 	strcpy_s(this->buildAI->strategyFileName, 0x3F, "Dynamic RockNRor strategy");

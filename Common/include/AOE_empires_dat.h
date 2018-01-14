@@ -120,9 +120,9 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_CORPSE_DECAY_TIME_SECONDS = 12, // Number of seconds for decay, used for flare (unitDef 112). Always 0 for players, used at unit level only ?
 		CST_RES_ORDER_DISCOVERIES = 13, // Number of found discoveries (a player flag is set on such discoveries)
 		CST_RES_ORDER_RUINS = 14, // Number of owned ruins
-		CST_RES_ORDER_MEAT_STORAGE = 15, // TO CONFIRM. Remains 0 in game ?
-		CST_RES_ORDER_BERRY_STORAGE = 16, // TO CONFIRM
-		CST_RES_ORDER_FISH_STORAGE = 17, // TO CONFIRM
+		CST_RES_ORDER_MEAT_STORAGE = 15, // Animal food. Used at unit level to know if transported food is hunt-type (from animal) or berry/farm or fish
+		CST_RES_ORDER_BERRY_STORAGE = 16, // Berry OR farm food. Used at unit level to know if transported food is hunt-type (from animal) or berry/farm or fish
+		CST_RES_ORDER_FISH_STORAGE = 17, // Used at unit level to know if transported food is hunt-type (from animal) or berry/farm or fish
 		CST_RES_ORDER_TOTAL_UNITS_OWNED = 19, // Total number of (*all*) units, not decreased when a unit is lost
 		CST_RES_ORDER_KILLS = 20,
 		CST_RES_ORDER_TECHNOLOGIES = 21, // Number of researched technologies (as in score)

@@ -52,13 +52,16 @@ namespace AOE_STRUCTURES {
 		STRUCT_UNIT_BASE *targetUnit;
 		STRUCT_UNIT_BASE *targetUnit2; // +14. Secondary target pointer (used for missiles, trade,gather(=drop site))
 		long int targetUnitId; // +18
-		long int targetUnitId2; // +1C. A secondary target ? See 0x4073F0=action.setTargetUnit2(arg1). Used for missiles (only ?)
+		long int targetUnitId2; // +1C. A secondary target ? See 0x4073F0=action.setTargetUnit2(arg1). (used for missiles, trade, gather(=drop site))
 		// 0x20
 		float targetUnitPositionY;
 		float targetUnitPositionX;
 		float targetUnitPositionZ;
-		float timer; // +2C. For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
-		// 0x30
+
+		// +2C. For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
+		// For "build" action, it is generally 0, and set to -1 for farms when construction finishes. Then there is a hack that simulates a "right click" to for builder to gather the farm. 0x4B1B06 (set -1), 0x4B1A52(hack/rightclick)
+		float timer;
+
 		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set. Called "task".
 		STRUCT_UNIT_ACTION_INFO *requiredActionInfo; // +34. SubAction ? Link with unit/"actionLink"/action. Allows chaining actions ! This is NOT unit->actionInfo !
 		STRUCT_GRAPHICS *pGraphics; // +38. ptr to graphics structure. w_lumber, etc
