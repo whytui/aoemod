@@ -181,7 +181,7 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 					if (remainingRes < 0.1) {
 						// This resource is missing. Go find some ! (TODO: go gather the correct resource if possible)
 						// At least, stop trying to repair (AI villagers tend to get stuck). Seems not so bad for now (AI will give another task)
-#pragma WARNING("Does not always work: sometimes AI tries again and endlessly to repair")
+						// The tacAI.Update method must ensure not to retry if some resource is missing.
 						if (GAME_COMMANDS::CreateCmd_Stop(villager->unitInstanceId)) {
 							return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION; // Event has been processed with an action. We don't want to run ROR handler.
 						}

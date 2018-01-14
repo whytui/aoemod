@@ -2476,6 +2476,7 @@ void StrategyBuilder::AddUserDefinedForcedResearches(short int oneResearchId) {
 	PotentialResearchInfo *resInfo = this->GetResearchInfo(oneResearchId);
 	if (resInfo) {
 		resInfo->markedForAdd = true;
+		resInfo->forcePutAsEarlyAsPossible = true;
 	} else {
 		if (this->IsResearchInTechTree(oneResearchId)) {
 			resInfo = this->AddPotentialResearchInfoToList(oneResearchId, true);
