@@ -672,7 +672,6 @@ void CurrentTestMethod() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global || !global->IsCheckSumValid()) { return; }
 	//settings->outline = STRUCT_GAME_SETTINGS::GAME_UNITS_OUTLINE_MODE::OUTLINE_RECTANGLE;
-	
 #endif
 }
 

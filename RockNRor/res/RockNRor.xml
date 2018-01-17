@@ -68,6 +68,11 @@
 	<conversionResistance name="chariots" value="8"/><!-- game default=8 -->
 	<conversionResistance name="boats" value="2"/><!-- game default=2 -->
 
+	<!-- If enabled, fixes ROR limitation on tech effects "add" or "set" armor (or attack) value when the armor (attack) class is not initially defined
+	For example, priest does not have an armor (not even 0) for "pierce" attack class. A tech effect that adds 1 pierce armor to priest won't work in ROR.
+	If you enable this option, the example above WILL work. -->
+	<technologyEffects name="fixSetAddArmorAttack" enable="1"/>
+	
 	<!-- *** EMPIRES.DAT related -->
 	<!-- fixVillagerWorkRates : if enabled, automatically fix erroneous work rate values for villagers in empires.dat-loaded data -->
 	<fixVillagerWorkRates enable="1"/>

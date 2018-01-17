@@ -55,6 +55,8 @@ namespace VIRTUAL_METHOD_HOOKS {
 	std::map<unsigned long int, unsigned long int> playerProcessNotifyCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitTransformCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> unitDefApplyAddEffectCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> unitDefApplySetEffectCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> uiMenuOnKeyDownCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> uiGameEditorOnKeyDownCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> uiDialogsOnKeyDownCheckSumAndOriginalAddress;
@@ -232,6 +234,114 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 		RECORD_PERF_END(originalCallAddr);
 		return result;
+	}
+
+
+	// unitDef.applyAddEffect(f_value, attribute) for all unitDef classes. Method offset=+0C
+	// attribute_as_dword = attribute, only lower byte is relevant.
+	// Returns nothing.
+	void __stdcall UnitDefApplyAddEffect(STRUCT_UNITDEF_BASE *unitDef, float value, long int attribute_as_dword) {
+		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
+		unsigned long int originalCallAddr = unitDefApplyAddEffectCheckSumAndOriginalAddress[unitDef->checksum];
+		RECORD_PERF_BEGIN(originalCallAddr);
+		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
+			RECORD_PERF_END(originalCallAddr);
+			return;
+		}
+		bool runStandardMethod = true;
+		TECH_UNIT_ATTRIBUTES attribute = (TECH_UNIT_ATTRIBUTES)attribute_as_dword;
+
+		// Custom treatments
+		if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+			STRUCT_UNITDEF_ATTACKABLE *unitDefAttackable = nullptr;
+			if (unitDef->DerivesFromAttackable()) {
+				unitDefAttackable = (STRUCT_UNITDEF_ATTACKABLE *)unitDef;
+			}
+			// There is a limitation in tech effects in ROR for armors/attack updates:
+			// If updating armor/attack value for an armor/attack that does not exist yet, then it does nothing
+			// We fix this by adding the armor/attack in the list with default value (0)
+			// This limitation concerns for add/set/multiply effects
+			// Note: we only fix for add/set (multiply N/A or 0 has no effect, so it's useless)
+			switch (attribute) {
+			case TECH_UNIT_ATTRIBUTES::TUA_ARMOR:
+				if (unitDefAttackable) {
+					AOE_STRUCTURES::AddArmorIfMissing(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value), 0);
+				}
+				break;
+			case TECH_UNIT_ATTRIBUTES::TUA_ATTACK:
+				if (unitDefAttackable) {
+					AOE_STRUCTURES::AddAttackIfMissing(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value), 0);
+				}
+				break;
+			}
+			// Do not modify runStandardMethod (original code is always run here)
+		}
+
+		if (runStandardMethod) {
+			_asm {
+				MOV ECX, unitDef;
+				MOV EDX, DS:[ECX];
+				PUSH attribute_as_dword;
+				PUSH value;
+				// DO NOT CALL DS:[EDX+0x0C] because we changed the pointer !
+				CALL originalCallAddr;
+			}
+		}
+		RECORD_PERF_END(originalCallAddr);
+	}
+
+
+	// unitDef.applyAddEffect(f_value, attribute) for all unitDef classes. Method offset=+08
+	// attribute_as_dword = attribute, only lower byte is relevant.
+	// Returns nothing.
+	void __stdcall UnitDefApplySetEffect(STRUCT_UNITDEF_BASE *unitDef, float value, long int attribute_as_dword) {
+		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
+		unsigned long int originalCallAddr = unitDefApplyAddEffectCheckSumAndOriginalAddress[unitDef->checksum];
+		RECORD_PERF_BEGIN(originalCallAddr);
+		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
+			RECORD_PERF_END(originalCallAddr);
+			return;
+		}
+		bool runStandardMethod = true;
+		TECH_UNIT_ATTRIBUTES attribute = (TECH_UNIT_ATTRIBUTES)attribute_as_dword;
+
+		// Custom treatments
+		if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+			STRUCT_UNITDEF_ATTACKABLE *unitDefAttackable = nullptr;
+			if (unitDef->DerivesFromAttackable()) {
+				unitDefAttackable = (STRUCT_UNITDEF_ATTACKABLE *)unitDef;
+			}
+			// There is a limitation in tech effects in ROR for armors/attack updates:
+			// If updating armor/attack value for an armor/attack that does not exist yet, then it does nothing
+			// We fix this by adding the armor/attack in the list with default value (0)
+			// This limitation concerns for add/set/multiply effects
+			// Note: we only fix for add/set (multiply N/A or 0 has no effect, so it's useless)
+			switch (attribute) {
+			case TECH_UNIT_ATTRIBUTES::TUA_ARMOR:
+				if (unitDefAttackable) {
+					AOE_STRUCTURES::AddArmorIfMissing(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value), 0);
+				}
+				break;
+			case TECH_UNIT_ATTRIBUTES::TUA_ATTACK:
+				if (unitDefAttackable) {
+					AOE_STRUCTURES::AddAttackIfMissing(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value), 0);
+				}
+				break;
+			}
+			// Do not modify runStandardMethod (original code is always run here)
+		}
+
+		if (runStandardMethod) {
+			_asm {
+				MOV ECX, unitDef;
+				MOV EDX, DS:[ECX];
+				PUSH attribute_as_dword;
+				PUSH value;
+				// DO NOT CALL DS:[EDX+0x0C] because we changed the pointer !
+				CALL originalCallAddr;
+			}
+		}
+		RECORD_PERF_END(originalCallAddr);
 	}
 
 
@@ -419,6 +529,8 @@ namespace VIRTUAL_METHOD_HOOKS {
 	DECLARE_VIRTUAL_METHOD_HANDLER(PlayerProcessNotify)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitAddPositionToTargetPosArray)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitTransform)
+	DECLARE_VIRTUAL_METHOD_HANDLER(UnitDefApplyAddEffect)
+	DECLARE_VIRTUAL_METHOD_HANDLER(UnitDefApplySetEffect)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UIMenuOnKeyDown)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UIGameEditorOnKeyDown)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UIDialogOnKeyDown)
@@ -487,6 +599,30 @@ namespace VIRTUAL_METHOD_HOOKS {
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TREE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_TREE]);
 
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TRAINABLE, 0x54, UnitTransform, unitTransformCheckSumAndOriginalAddress[CHECKSUM_UNIT_TRAINABLE]); // unit->tranform only needs to be fixed for TRAINABLE class
+
+			// UnitDef
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_BASE, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_BASE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_BUILDING, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_BUILDING]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_ATTACKABLE, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_ATTACKABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_COMMANDABLE, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_COMMANDABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_DOPPLEGANGER, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_DOPPLEGANGER]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_FLAG, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_FLAG]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_MOVABLE, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_MOVABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_PROJECTILE, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_PROJECTILE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_TRAINABLE, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_TRAINABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_TREE, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_TREE]);
+
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_BASE, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_BASE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_BUILDING, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_BUILDING]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_ATTACKABLE, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_ATTACKABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_COMMANDABLE, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_COMMANDABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_DOPPLEGANGER, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_DOPPLEGANGER]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_FLAG, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_FLAG]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_MOVABLE, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_MOVABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_PROJECTILE, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_PROJECTILE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_TRAINABLE, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_TRAINABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_TREE, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_TREE]);
+
 
 			// ----- UI -----
 			// Key down in parent screen classes

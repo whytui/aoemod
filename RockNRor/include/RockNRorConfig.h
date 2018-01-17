@@ -149,6 +149,8 @@ public:
 	int unitResourceAmountStoneMine; // <=0 means use empires.dat default (do nothing, in fact)
 	int unitResourceAmountFish; // <=0 means use empires.dat default (do nothing, in fact)
 
+	bool fixTechEffectAddSetArmorAttack; // If set, fix the "armor/attack not existing" limitation when applying a tech effect. Default false.
+
 	// Conversion resistance
 	float conversionResistance_Macedonian;
 	float conversionResistance_Boats;

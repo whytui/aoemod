@@ -86,6 +86,45 @@ namespace AOE_STRUCTURES {
 	}
 
 
+	// Add armor (using provided value, default 0) to armor list if it does not already exists.
+	// This does nothing if the unitDef already has an armor for this attack class.
+	// Return true if the armor was added.
+	bool AddArmorIfMissing(STRUCT_UNITDEF_ATTACKABLE *unitDef, AOE_CONST_FUNC::ATTACK_CLASS armorClass, int value) {
+		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromAttackable());
+		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass() || !unitDef->DerivesFromAttackable()) { return false; }
+		assert(unitDef->armorsCount >= 0);
+		if (unitDef->armorsCount < 0) {
+			unitDef->armorsCount = 0;
+		}
+		for (int i = 0; i < unitDef->armorsCount; i++) {
+			if (unitDef->ptrArmorsList[i].classId == armorClass) {
+				return false;
+			}
+		}
+		// Not found: add it
+		return AddArmorToList(unitDef, armorClass, value);
+	}
+
+	// Add attack (using provided value, default 0) to attack list if it does not already exists.
+	// This does nothing if the unitDef already has an attack for this attack class.
+	// Return true if the attack was added.
+	bool AddAttackIfMissing(STRUCT_UNITDEF_ATTACKABLE *unitDef, AOE_CONST_FUNC::ATTACK_CLASS attackClass, int value) {
+		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromAttackable());
+		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass() || !unitDef->DerivesFromAttackable()) { return false; }
+		assert(unitDef->attacksCount >= 0);
+		if (unitDef->attacksCount < 0) {
+			unitDef->attacksCount = 0;
+		}
+		for (int i = 0; i < unitDef->attacksCount; i++) {
+			if (unitDef->ptrAttacksList[i].classId == attackClass) {
+				return false;
+			}
+		}
+		// Not found: add it
+		return AddArmorToList(unitDef, attackClass, value);
+	}
+
+
 	// Returns armor value for a specific armor class. Returns defaultValueIfMissing if armor class is not defined.
 	short int GetArmorFromList(STRUCT_UNITDEF_ATTACKABLE *unitDef, AOE_CONST_FUNC::ATTACK_CLASS armorClass, short int defaultValueIfMissing) {
 		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromAttackable());

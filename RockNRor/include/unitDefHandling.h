@@ -31,6 +31,16 @@ namespace AOE_STRUCTURES {
 	// If addIfMissing is set and attack class does not exist in list, then it is created
 	bool SetAttackInList(STRUCT_UNITDEF_ATTACKABLE *unitDef, AOE_CONST_FUNC::ATTACK_CLASS attackClass, int value, bool addIfMissing);
 
+	// Add armor (using provided value, default 0) to armor list if it does not already exists.
+	// This does nothing if the unitDef already has an armor for this attack class.
+	// Return true if the armor was added.
+	bool AddArmorIfMissing(STRUCT_UNITDEF_ATTACKABLE *unitDef, AOE_CONST_FUNC::ATTACK_CLASS armorClass, int value = 0);
+
+	// Add attack (using provided value, default 0) to attack list if it does not already exists.
+	// This does nothing if the unitDef already has an attack for this attack class.
+	// Return true if the attack was added.
+	bool AddAttackIfMissing(STRUCT_UNITDEF_ATTACKABLE *unitDef, AOE_CONST_FUNC::ATTACK_CLASS attackClass, int value = 0);
+
 	// Returns armor value for a specific armor class. Returns defaultValueIfMissing if armor class is not defined.
 	short int GetArmorFromList(STRUCT_UNITDEF_ATTACKABLE *unitDef, AOE_CONST_FUNC::ATTACK_CLASS armorClass, short int defaultValueIfMissing);
 

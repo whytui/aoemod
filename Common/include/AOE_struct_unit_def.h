@@ -120,6 +120,17 @@ namespace AOE_STRUCTURES
 	static_assert(sizeof(STRUCT_DAMAGE_GRAPHIC) == 0x8, "STRUCT_DAMAGE_GRAPHIC size");
 
 
+#define CHECKSUM_UNITDEF_BASE 0x00544534
+#define CHECKSUM_UNITDEF_FLAG 0x0054440C
+#define CHECKSUM_UNITDEF_DOPPLEGANGER 0x00544484
+#define CHECKSUM_UNITDEF_MOVABLE 0x005444FC // "dead fish"
+#define CHECKSUM_UNITDEF_COMMANDABLE 0x005443CC // "birds"
+#define CHECKSUM_UNITDEF_ATTACKABLE 0x00544444
+#define CHECKSUM_UNITDEF_PROJECTILE 0x005444C0
+#define CHECKSUM_UNITDEF_TRAINABLE 0x00549970
+#define CHECKSUM_UNITDEF_BUILDING 0x00549930
+#define CHECKSUM_UNITDEF_TREE 0x005499BC
+
 	// 34 45 54 00 = Eye candy (type10) - size=0xB8 - Constructor 0x441040, 0x441070, 0x440FF0
 	// +0x00 = unit.destructor(do_free)
 	// +0x04 = unitDef.copyObj(unitDef)?
@@ -226,19 +237,20 @@ namespace AOE_STRUCTURES
 		float selectionRadiusX;
 		float selectionRadiusZ; // +B4
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x00544534); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_BASE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_EYE_CANDY); }
+
 		bool IsCheckSumValidForAUnitClass() const {
-			return ((this->checksum == 0x00544534) || // eye candy - 10
-				(this->checksum == 0x0054440C) || // Flag - type 20
-				(this->checksum == 0x00544484) || // Doppleganger - 25
-				(this->checksum == 0x005444FC) || // Dead/fish - 30
-				(this->checksum == 0x005443CC) || // Birds - 40
-				(this->checksum == 0x00544444) || // - 50
-				(this->checksum == 0x005444C0) || // projectile - 60
-				(this->checksum == 0x00549970) || // living - 70
-				(this->checksum == 0x00549930) || // Building - 80
-				(this->checksum == 0x005499BC) // Tree - 90
+			return ((this->checksum == CHECKSUM_UNITDEF_BASE) || // eye candy - 10
+				(this->checksum == CHECKSUM_UNITDEF_FLAG) || // Flag - type 20
+				(this->checksum == CHECKSUM_UNITDEF_DOPPLEGANGER) || // Doppleganger - 25
+				(this->checksum == CHECKSUM_UNITDEF_MOVABLE) || // Dead/fish - 30
+				(this->checksum == CHECKSUM_UNITDEF_COMMANDABLE) || // Birds - 40
+				(this->checksum == CHECKSUM_UNITDEF_ATTACKABLE) || // - 50
+				(this->checksum == CHECKSUM_UNITDEF_PROJECTILE) || // projectile - 60
+				(this->checksum == CHECKSUM_UNITDEF_TRAINABLE) || // living - 70
+				(this->checksum == CHECKSUM_UNITDEF_BUILDING) || // Building - 80
+				(this->checksum == CHECKSUM_UNITDEF_TREE) // Tree - 90
 				);
 		}
 		// Returns true if the unit definition is a flag (20) or a child class (all but eye candy and trees). This does not control the checksum.
@@ -259,7 +271,7 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNITDEF_FLAG : public STRUCT_UNITDEF_BASE {
 	public:
 		float speed; // 0xB8. Unit movement speed.
-		bool IsCheckSumValid() const { return (this->checksum == 0x0054440C); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_FLAG); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_FLAGS); }
 		unsigned long int GetCopyConstructorAddress() const { return 0x43E930; } // Address of AOE method to create a copy.
 	};
@@ -271,7 +283,7 @@ namespace AOE_STRUCTURES
 	class STRUCT_UNITDEF_DOPPLEGANGER : public STRUCT_UNITDEF_FLAG {
 	public:
 		// 0xBC - no additional fields ?
-		bool IsCheckSumValid() const { return (this->checksum == 0x00544484); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_DOPPLEGANGER); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_DOPPLEGANGER); }
 		//unsigned long int GetCopyConstructorAddress() const { return 0x43EC40; } // Address of AOE method to create a copy.
 		unsigned long int GetCopyConstructorAddress() const { return 0x43E930; } // Address of AOE method to create a copy.
@@ -297,7 +309,7 @@ namespace AOE_STRUCTURES
 		char unknown_0D4; // unknown16 in AGE3
 		char unknown_0D5[3]; // unused ?
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x005444FC); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_MOVABLE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_MOVABLE); }
 		unsigned long int GetCopyConstructorAddress() const { return 0x440910; } // Address of AOE method to create a copy.
 	};
@@ -328,7 +340,7 @@ namespace AOE_STRUCTURES
 		char unknown_0FA;
 		char unknown_0FB;
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x005443CC); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_COMMANDABLE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_COMMANDABLE); }
 		unsigned long int GetCopyConstructorAddress() const { return 0x43E010; } // Address of AOE method to create a copy.
 	};
@@ -372,7 +384,7 @@ namespace AOE_STRUCTURES
 		float displayedRange; // +140. The number before the "+". See also maxRange(=total range)
 		float reloadTime2; // +144. Displayed reload (NOT actually displayed ! Other usage ?)
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x00544444); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_ATTACKABLE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_ATTACKABLE); }
 		inline unsigned long int GetCopyConstructorAddress() const { return 0x43ED90; } // Address of AOE method to create a copy, method arg1=pUnitDefToCopy, arg2=1 for "initial call" (0 for inherited sub-calls)
 		inline bool HasBlastDamage() const { return (this->blastRadius > 0) && (this->blastLevel < CST_BL_DAMAGE_TARGET_ONLY); }
@@ -392,7 +404,7 @@ namespace AOE_STRUCTURES
 		// 0x150: Projectile movement arc. <=0.1 for standard projectiles (including ballista bolts), 0.25 for slinger stones, >=0.5 for catapult stones (0.4. boat cats)
 		float projectileArc; // a 0+ value. Does NOT affect "time till impact". Only unit speed does. More than 10 may have the projectile go too high for screen (then come back though)
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x005444C0); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_PROJECTILE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_PROJECTILE); }
 		unsigned long int GetCopyConstructorAddress() { return 0x440350; } // Address of AOE method to create a copy. CopyFrom=0x4404C0
 	};
@@ -400,7 +412,7 @@ namespace AOE_STRUCTURES
 
 
 	// "TribeMasterCombatObject". 70 99 54 00 = Trainable (type70 - living in AGE3)
-	// Size=0x164. Constructor = 0x4ECA90. Max method=+0x38.
+	// Size=0x164. Constructor = 0x4ECA10, 0x4ECA90, 0x4ECB00. Max method=+0x38.
 	class STRUCT_UNITDEF_TRAINABLE : public STRUCT_UNITDEF_ATTACKABLE {
 	public:
 		STRUCT_COST costs[3]; // +148, 3*6 bytes (3 words each)
@@ -412,7 +424,7 @@ namespace AOE_STRUCTURES
 		short int displayedPierceArmor;
 		short int unknown_162;
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x00549970); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_TRAINABLE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TRAINABLE); }
 		unsigned long int GetCopyConstructorAddress() { return 0x4ECA10; } // Address of AOE method to create a copy.
 	};
@@ -436,7 +448,7 @@ namespace AOE_STRUCTURES
 		short int initiatesResearch; // +178. A research ID that is triggered when constructing (for the first time) this building.
 		short int unknown_17A; // unused ?
 
-		bool IsCheckSumValid() const { return (this->checksum == 0x00549930); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_BUILDING); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_BUILDING); }
 		unsigned long int GetCopyConstructorAddress() const { return 0x4EC100; } // Address of AOE method to create a copy.
 	};
@@ -445,7 +457,7 @@ namespace AOE_STRUCTURES
 	// BC 99 54 00 = tree (type90) - size=0xB8 - Constructor 0x4ED2C0
 	class STRUCT_UNITDEF_TREE : public STRUCT_UNITDEF_BASE {
 	public:
-		bool IsCheckSumValid() const { return (this->checksum == 0x005499BC); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_TREE); }
 		bool IsTypeValid() const { return this->IsCheckSumValid() && (this->unitType == (char)AOE_CONST_FUNC::GLOBAL_UNIT_TYPES::GUT_TREE); }
 		unsigned long int GetCopyConstructorAddress() const { return 0x4ED220; } // Address of AOE method to create a copy.
 	};

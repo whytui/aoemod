@@ -18,6 +18,7 @@ namespace AOE_STRUCTURES {
 
 
 	// Size=0x0C.
+	// See TECH_UNIT_ATTRIBUTES definition to get some comments/info about how attributes are updated
 	class STRUCT_TECH_DEF_EFFECT {
 	public:
 		TECH_DEF_EFFECTS effectType; // 1 byte.
@@ -101,14 +102,13 @@ namespace AOE_STRUCTURES {
 				(this->effectAttribute != (short int)TECH_UNIT_ATTRIBUTES::TUA_ATTACK)) {
 				return AOE_CONST_FUNC::ATTACK_CLASS::CST_AC_NONE;
 			}
-			AOE_CONST_FUNC::ATTACK_CLASS attackClass = (AOE_CONST_FUNC::ATTACK_CLASS)(((long int)this->effectValue) / 256);
-			return attackClass;
+			return GetAttackClassFromFloatValue(this->effectValue);
 		}
-		// Set armor/attack class and amount if effect is "attribute modifier" and attribute is armor or attack. Amount must be < 256
-		void SetAttackOrArmorTypeValue(AOE_CONST_FUNC::ATTACK_CLASS attackOrArmorType, long int value) {
+		// Set armor/attack class and amount if effect is "attribute modifier" and attribute is armor or attack. Amount must be 0<=x< 256
+		void SetAttackOrArmorTypeValue(AOE_CONST_FUNC::ATTACK_CLASS attackOrArmorType, unsigned char value) {
 			if (!this->IsAttributeModifier()) { return; }
 			this->effectValue = ((float)attackOrArmorType) * 256;
-			this->effectValue += value % 256; // amount must be < 256
+			this->effectValue += value; // amount must be between 0 and 255
 		}
 		// Set all fields for Attribute Modifier (multiply) effect. If attribute is armor or attack, please set "value" using SetAttackOrArmor afterwards
 		void SetAttributeMultiply(TECH_UNIT_ATTRIBUTES attribute, GLOBAL_UNIT_AI_TYPES unitClass, short int unitDefId, float multiplierValue) {
@@ -119,12 +119,12 @@ namespace AOE_STRUCTURES {
 			this->effectValue = multiplierValue;
 		}
 		// Set all fields for Attribute Modifier (add) effect. If attribute is armor or attack, please set "value" using SetAttackOrArmor afterwards
-		void SetAttributeAdd(TECH_UNIT_ATTRIBUTES attribute, GLOBAL_UNIT_AI_TYPES unitClass, short int unitDefId, float multiplierValue) {
+		void SetAttributeAdd(TECH_UNIT_ATTRIBUTES attribute, GLOBAL_UNIT_AI_TYPES unitClass, short int unitDefId, float addValue) {
 			this->effectType = TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD;
 			this->effectAttribute = attribute;
 			this->effectClass = unitClass;
 			this->effectUnit = unitDefId;
-			this->effectValue = multiplierValue;
+			this->effectValue = addValue;
 		}
 		// Set all fields for a Resource Multiply effect
 		void SetResourceMultiply(short int resourceId, float multiplierValue) {
@@ -133,6 +133,12 @@ namespace AOE_STRUCTURES {
 			this->effectClass = -1; // unused
 			this->effectUnit = resourceId;
 			this->effectValue = multiplierValue;
+		}
+
+		// Get the "attack class" information from an "attack or armor" float value.
+		static inline AOE_CONST_FUNC::ATTACK_CLASS GetAttackClassFromFloatValue(float value) {
+			AOE_CONST_FUNC::ATTACK_CLASS attackClass = (AOE_CONST_FUNC::ATTACK_CLASS)(((long int)value) / 256);
+			return attackClass;
 		}
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");

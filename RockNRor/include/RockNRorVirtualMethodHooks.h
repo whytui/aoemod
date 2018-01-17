@@ -50,6 +50,16 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// Returns 1 on success, 0 on failure
 	long int __stdcall UnitAddPositionToTargetPosArray(STRUCT_UNIT_BASE *unit, STRUCT_UNIT_TARGET_POS *targetPos, long int arg2);
 
+	// unitDef.applyAddEffect(f_value, attribute) for all unitDef classes. Method offset=+0C
+	// attribute_as_dword = attribute, only lower byte is relevant.
+	// Returns nothing.
+	void __stdcall UnitDefApplyAddEffect(STRUCT_UNITDEF_BASE *unitDef, float value, long int attribute_as_dword);
+
+	// unitDef.applyAddEffect(f_value, attribute) for all unitDef classes. Method offset=+08
+	// attribute_as_dword = attribute, only lower byte is relevant.
+	// Returns nothing.
+	void __stdcall UnitDefApplySetEffect(STRUCT_UNITDEF_BASE *unitDef, float value, long int attribute_as_dword);
+
 	// Transform a unit from its current "unit definition" to provided "unit definition" (EDX+0x54 call).
 	// Typically used to switch tasks (villagers) : in such case, newUnitDef is player's unitDefinition for the target unitDefId (repair_man, etc)
 	// Also used to assign a dedicated "unit definition" in conversion process: unit will have its own "unitDefinition" (with its own specs)

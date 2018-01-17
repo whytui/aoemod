@@ -933,7 +933,7 @@ double TechTreeCreator::CreateOneBonus() {
 	bool isMilitary = (isRanged || isMelee || isPriest);
 
 
-	std::map<TECH_UNIT_ATTRIBUTES, BonusGenProperties> propsByAttribute;
+	std::map<TECH_UNIT_ATTRIBUTES, BonusGenProperties> propsByAttribute; // BonusGenProperties=weight, proba
 	propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_HP, { 0.5, 1.1 }));
 
 	if (chosenClass != TribeAIGroupCivilian) {

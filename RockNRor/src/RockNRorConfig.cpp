@@ -47,6 +47,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->unitResourceAmountTree = 0; // 0 = ignore and use default
 	this->unitResourceAmountTreeForest = 0; // 0 = ignore and use default
 	this->unitResourceAmountFish = 0; // 0 = ignore and use default
+	this->fixTechEffectAddSetArmorAttack = false, // Game default
 	this->conversionResistance_Boats = 2; // Game default
 	this->conversionResistance_Chariots = 8; // Game default
 	this->conversionResistance_Macedonian = 4; // Game default
@@ -386,6 +387,13 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountTreeForest = intValue; }
 			callResult = elem->QueryIntAttribute("fish", &intValue);
 			if (callResult == TIXML_SUCCESS) { this->unitResourceAmountFish = intValue; }
+		}
+
+		if (elemName == "technologyEffects") {
+			categoryName = this->XML_GetAttributeValue(elem, "name");
+			if (categoryName == "fixSetAddArmorAttack") {
+				this->fixTechEffectAddSetArmorAttack = XML_GetBoolElement(elem, "enable");
+			}
 		}
 
 		// Random games settings

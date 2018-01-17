@@ -72,6 +72,7 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "fixInvisibleTree:                          %d\n", ROCKNROR::crInfo.configInfo.fixInvisibleTree);
 	fprintf_s(f, "fixHumanPlayer_specific_seeUnit:           %d\n", ROCKNROR::crInfo.configInfo.fixHumanPlayer_specificSeeUnit);
 	fprintf_s(f, "useImprovedButtonBar:                      %d\n", ROCKNROR::crInfo.configInfo.useImprovedButtonBar);
+	fprintf_s(f, "fixTechEffectAddSetArmorAttack:            %d\n", ROCKNROR::crInfo.configInfo.fixTechEffectAddSetArmorAttack);
 	fprintf_s(f, "allowMultiQueueing:                        %d\n", ROCKNROR::crInfo.configInfo.allowMultiQueueing);
 	// General - related to game
 	fprintf_s(f, "unit resource amounts: alligator=%d bush=%d elephant=%d\n"

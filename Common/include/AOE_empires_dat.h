@@ -200,11 +200,14 @@ namespace AOE_CONST_FUNC {
 		MWT_ALL_LAND_MAP = 4 // No water at all or just rivers, AI builds no dock/boats here.
 	};
 
-	// http://agecommunity.wikia.com/wiki/Attack_Data
+	// ATTACK_CLASS: for both attack and armor types.
+	// http://agecommunity.wikia.com/wiki/Attack_Data (not 100% correct)
 	// If an armor class isn't defined, its amount is always 0 
 	// If an attack class isn't defined, it won't have any effect (even if attacked unit has a negative amount) 
 	// Damage for an attack class is max(attack-armor, 0). attack&armor can be negative numbers !
-	// For both attack and armor types.
+	// ... so negative attack may only affect units with (more) negative armor.
+	// ... so negative armor is only used if attacking unit HAS an attack for that class.
+	// For living units (not buildings), minimum "total" damage is 1.
 	enum ATTACK_CLASS: short int {
 		CST_AC_NONE = -1,
 		CST_AC_BALLISTA_ON_BUILDINGS = 0, // Ballista, Helepolis on buildings
@@ -243,12 +246,16 @@ namespace AOE_CONST_FUNC {
 		TDE_RESEARCH_TIME_MODIFIER = 103 // Not supported by AOE/ROR
 	};
 
-	/* Attributes for technology effects
-	 * Methods to apply "Add attribute" effects on unitDef: [EDX+C] 0x442370(base), 0x43ED00(flag), 0x440EC0(deadfish), 0x43E7B0(bird), 0x43FA60(type50), 0x4ED010(living). Not for 7,17,18,19,...101?
-	 * Methods to apply "Add attribute" effects on unit: [EDX+4C] 0x4AA050(living) (only HP, LOS, other info are only in unitDef)
-	 * Methods to apply "Multiply attribute" effects on unitDef: [EDX+10] 0x442420(base) 0x43ED30(flag) 0x440EF0(deadfish) 0x43E7E0(bird) 0x43FC40(type50), 0x4ED060(living) => 0 1 2 3 4 5 6 A B C D E F 10 12 64 (8,9=nothing)
-	 * Methods to apply "Multiply attribute" effects on unit: [EDX+50] 0x4AA0E0(bld)
+	/* Attributes for technology effects. 1-byte (char), sometimes stored on 2 bytes (short int)
+	 * - 0x45D6A0 = player.applyAttributeModifierSet(unit, class, f_value, attribute)
+	 * - 0x45D7A0 = player.applyAttributeModifierAdd((word)unit,(word)class, (float)value, (byte)effectAttribute)
+	 * - 0x45D8A0 = player.applyAttributeModifierMult((word)unit,(word)class, (float)value, (byte)effectAttribute)
+	 * Methods to apply "Add attribute" effects on unitDef: [EDX+C] 0x442370(base), 0x43ED00(flag), 0x440EC0(deadfish), 0x43E7B0(bird), 0x43FA60(type50), 0x4ED010(living), 0x4EC5B0(bld). Not for 7,18,19,...101?
+	 * Methods to apply "Add attribute" effects on unit: [EDX+4C] 0x4AA050(living) -> only HP, LOS, other info are only in unitDef
+	 * Methods to apply "Multiply attribute" effects on unitDef: [EDX+10] 0x442420(base) 0x43ED30(flag) 0x440EF0(deadfish) 0x43E7E0(bird) 0x43FC40(type50), 0x4ED060(living), 0x4EC5E0(bld) => 0 1 2 3 4 5 6 A B C D E F 10 12 64 (8,9,17=nothing)
+	 * Methods to apply "Multiply attribute" effects on unit: [EDX+50] 0x4AA0E0(base) -> only HP, LOS, other info are only in unitDef
 	 * Methods to apply "Set attribute" effects on unitDef: [EDX+8] 0x4422D0(base) 0x43ECD0(flag) 0x440E90(deadfish) 0x43E780(bird) 0x43F920(type50) 0x4ECF20(living) 0x4EC580(bld) 1 2 3 4 5 6 8 9 A B C D E F 10 12 17 64 65
+	 * Methods to apply "Set attribute" effects on unit: [EDX+48] 0x4A9FD0(base) 0x4AE820(living) -> 0,1,101. Others=nothing to do at unit level
 	*/
 	enum TECH_UNIT_ATTRIBUTES : short int {
 		TUA_NONE = -1,
@@ -260,8 +267,15 @@ namespace AOE_CONST_FUNC {
 		TUA_SPEED = 5,
 		TUA_ROTATION_SPEED = 6,
 		TUA_UNKNOWN_07 = 7, // seems to be unused.
-		TUA_ARMOR = 8, // Warning: value contains 2 informations using a modulo 256
-		TUA_ATTACK = 9, // Warning: value contains 2 informations using a modulo 256
+
+		// Warning: value contains 2 informations using a modulo 256. First round the value, then use bitwise operators
+		// Warning: such effect only works if the unit already has the specified armor type (can be zero, but must exist)
+		TUA_ARMOR = 8,
+
+		// Warning: value contains 2 informations using a modulo 256. First round the value, then use bitwise operators
+		// Warning: such effect only works if the unit already has the specified armor type (can be zero, but must exist)
+		TUA_ATTACK = 9,
+
 		TUA_ATTACK_RELOAD_TIME = 10, // reload time 1
 		TUA_ACCURACY_PERCENT = 11,
 		TUA_RANGE = 12, // Updates maxRange
@@ -272,7 +286,7 @@ namespace AOE_CONST_FUNC {
 		TUA_ANGLE = 17, // icon or graphic angle (changes displayed standing graphic frame?). Always ADD ?
 		TUA_TERRAIN_RESTRICTION_FOR_DAMAGE = 18,
 		TUA_INTELLIGENT_PROJECTILE = 19, // Applies on PROJECTILES unitDef, not archers/towers/etc ! 0 = false, 1 = true (better... generally)
-		TUA_ADD_COST_AMOUNT = 100, // Add a value to unit cost. Impacts ALL "used" costs.
+		TUA_ADD_COST_AMOUNT = 100, // (wrong:Add) MULTIPLIES a value to unit cost. Impacts ALL "paid" costs.
 		TUA_POPULATION_COST = 101 // population a unit "counts". 1 for most units, (total)0.5 for infantry with logistics. Can only SET (no add/mult)
 	};
 
