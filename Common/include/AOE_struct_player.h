@@ -32,13 +32,14 @@ namespace AOE_STRUCTURES {
 	// Size = 0x0C. Constructor=0x4E9C60. "Tribe_Tech"
 	class STRUCT_RESEARCH_DEF_INFO {
 	private:
-		STRUCT_RESEARCH_DEF *researchDefArray;
+		STRUCT_RESEARCH_DEF *researchDefArray; // WARNING: ResearchDefs are shared by all players and even "empires.dat reference". DO NOT MODIFY IT !
 	public:
 		short int researchCount;
 		short int unknown_06; // unused ?
 		STRUCT_GAME_GLOBAL *ptrGlobalStruct;
 		
 		// Securely gets a pointer to a research definition from its ID. Returns NULL if invalid (does asserts on ID)
+		// WARNING: ResearchDefs are shared by all players and even "empires.dat reference". DO NOT MODIFY IT !
 		STRUCT_RESEARCH_DEF *GetResearchDef(short int researchId) const {
 			assert(researchId >= 0);
 			assert(researchId < this->researchCount);
@@ -344,6 +345,8 @@ namespace AOE_STRUCTURES {
 			if ((unitDefId < 0) || (unitDefId >= this->structDefUnitArraySize)) { return NULL; }
 			return (STRUCT_UNITDEF_BASE *)this->ptrStructDefUnitTable[unitDefId];
 		}
+		// Safely get a research definition from its ID.
+		// WARNING: ResearchDefs are shared by all players and even "empires.dat reference". DO NOT MODIFY IT !
 		STRUCT_RESEARCH_DEF *GetResearchDef(short int researchId) const {
 			if (!this->ptrResearchesStruct || !this->ptrResearchesStruct->ptrResearchDefInfo) { return NULL; }
 			if ((researchId < 0) || (researchId >= this->ptrResearchesStruct->researchCount)) { return NULL; }

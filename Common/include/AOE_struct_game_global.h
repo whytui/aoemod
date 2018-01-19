@@ -205,7 +205,7 @@ namespace AOE_STRUCTURES {
 		// +0x100
 		unsigned long int unknown_100_difficultyLevel; // NOT always diff. level. See in game settings struct.
 		// Base class ends here
-		STRUCT_RESEARCH_DEF_INFO *researchDefInfo; // +104.
+		STRUCT_RESEARCH_DEF_INFO *researchDefInfo; // +104. WARNING: ResearchDefs are shared by all players and even "empires.dat reference". DO NOT MODIFY IT !
 		GAME_GLOBAL_GENERAL_VICTORY_CONDITION generalVictoryCondition; // +108. 0=standard, 1=conquest...
 		long int relicsCount;
 		// +0x110

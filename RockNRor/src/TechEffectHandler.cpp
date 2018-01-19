@@ -116,6 +116,36 @@ void ApplyUnsupportedEffects(STRUCT_PLAYER *player, STRUCT_TECH_DEF_INFO *techDe
 			PlayerApplyMultiplyResourceEffect(player, techDef->ptrEffects[i].GetValue(), resType);
 		}
 			break;
+		case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESEARCH_COST_MODIFIER:
+		{
+			// This effect type is unimplemented in ROR
+			short int researchId = techDef->ptrEffects[i].effectUnit;
+			AOE_CONST_FUNC::RESOURCE_TYPES resType = (AOE_CONST_FUNC::RESOURCE_TYPES)techDef->ptrEffects[i].effectClass;
+			short int mode = techDef->ptrEffects[i].effectAttribute; // 0=set, 1=add
+			float value = techDef->ptrEffects[i].GetValue();
+			// WARNING: do not implement this because STRUCT_RESEARCH_DEF is common to all players = the "empires.dat reference".
+			// We must not modify it, it would impact all players and even other games !
+		}
+			break;
+		case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESEARCH_TIME_MODIFIER:
+		{
+			// This effect type is unimplemented in ROR
+			short int researchId = techDef->ptrEffects[i].effectUnit;
+			// effectClass is unused here
+			short int mode = techDef->ptrEffects[i].effectAttribute; // 0=set, 1=add
+			float value = techDef->ptrEffects[i].GetValue();
+			// WARNING: do not implement this because STRUCT_RESEARCH_DEF is common to all players = the "empires.dat reference".
+			// We must not modify it, it would impact all players and even other games !
+			/*STRUCT_RESEARCH_DEF *resDef = player->GetResearchDef(researchId);
+			if (resDef) {
+				if (mode) {
+					resDef->researchTime += (short int)value;
+				} else {
+					resDef->researchTime = (short int)value;
+				}
+			}*/
+		}
+			break;
 		default:
 			break;
 		}
