@@ -394,7 +394,7 @@ namespace AOE_STRUCTURES {
 		char unused_allowTrading; // +AD6. Set in 0x505520. Seems unused.
 		char lengthenCombat; // +AD7. Set in 505530.
 		char fixedPositions; // +AD8. Set in 505540. "RandomizePositions"
-		char allTechs; // +AD9. Set in 0x505550. Used for new games. For other games, refer to scenarioInfo structure (fullTechTree value is fixed by RockNRor). "Used" in 0x50B833 to apply techtree=0xD2=210. Set to 1 when using "custom tech trees".
+		char allTechs; // +AD9. Set in 0x505550. Used for new games (including restart). For other games, refer to scenarioInfo structure (fullTechTree value is fixed by RockNRor). "Used" in 0x50B833 to apply techtree=0xD2=210.
 		char unknown_ADA;
 		char unknown_ADB;
 		long int initialResourcesChoice; // +ADC. 0=default, 3=large. Set in 505560. "ResourceLevel".

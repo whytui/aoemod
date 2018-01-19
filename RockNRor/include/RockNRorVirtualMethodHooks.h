@@ -15,6 +15,7 @@
 //#include "RockNRorMainInterface.h"
 #include "RnrScreenBase.h"
 #include "RockNRorSettingsScreen.h"
+#include "TechEffectHandler.h"
 
 
 namespace ROCKNROR {

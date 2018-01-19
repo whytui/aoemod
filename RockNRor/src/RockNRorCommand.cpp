@@ -1134,7 +1134,7 @@ void RockNRorCommand::OnGameStart() {
 		// - Tech trees (and other options) have already been applied, so this has no impact on game init
 		// - This information will be saved and available in "load game", so that loaded games will know they must NOT apply hardcoded civ bonuses (macedonian conversion resistance, etc)
 		scInfo->fullTechTree = 1;
-		settings->allTechs = 1; // TO CONFIRM
+		//settings->allTechs = 1; // TO CONFIRM. impacts game if 'restart' (BUG) !!!
 		// We could also set player->techTreeId to -1 so it is consistent for "new games" and "loaded games".
 		// This is better as techTreeId is correct OR NOT depending on the situation (normal "all techs" game=incorrect, "generate tech tree/civ bonus"=correct for new game but not when saved)
 		for (int i = 0; i < global->playerTotalCount; i++) {

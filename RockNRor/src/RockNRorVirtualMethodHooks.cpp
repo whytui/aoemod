@@ -253,28 +253,9 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 		// Custom treatments
 		if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
-			STRUCT_UNITDEF_ATTACKABLE *unitDefAttackable = nullptr;
-			if (unitDef->DerivesFromAttackable()) {
-				unitDefAttackable = (STRUCT_UNITDEF_ATTACKABLE *)unitDef;
+			if (ROCKNROR::TECHEFFECT::UnitDefApplyAddEffect(unitDef, value, attribute)) {
+				runStandardMethod = false;
 			}
-			// There is a limitation in tech effects in ROR for armors/attack updates:
-			// If updating armor/attack value for an armor/attack that does not exist yet, then it does nothing
-			// We fix this by adding the armor/attack in the list with default value (0)
-			// This limitation concerns for add/set/multiply effects
-			// Note: we only fix for add/set (multiply N/A or 0 has no effect, so it's useless)
-			switch (attribute) {
-			case TECH_UNIT_ATTRIBUTES::TUA_ARMOR:
-				if (unitDefAttackable) {
-					AOE_STRUCTURES::AddArmorIfMissing(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value), 0);
-				}
-				break;
-			case TECH_UNIT_ATTRIBUTES::TUA_ATTACK:
-				if (unitDefAttackable) {
-					AOE_STRUCTURES::AddAttackIfMissing(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value), 0);
-				}
-				break;
-			}
-			// Do not modify runStandardMethod (original code is always run here)
 		}
 
 		if (runStandardMethod) {
@@ -296,7 +277,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// Returns nothing.
 	void __stdcall UnitDefApplySetEffect(STRUCT_UNITDEF_BASE *unitDef, float value, long int attribute_as_dword) {
 		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
-		unsigned long int originalCallAddr = unitDefApplyAddEffectCheckSumAndOriginalAddress[unitDef->checksum];
+		unsigned long int originalCallAddr = unitDefApplySetEffectCheckSumAndOriginalAddress[unitDef->checksum];
 		RECORD_PERF_BEGIN(originalCallAddr);
 		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
 			RECORD_PERF_END(originalCallAddr);
@@ -307,28 +288,9 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 		// Custom treatments
 		if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
-			STRUCT_UNITDEF_ATTACKABLE *unitDefAttackable = nullptr;
-			if (unitDef->DerivesFromAttackable()) {
-				unitDefAttackable = (STRUCT_UNITDEF_ATTACKABLE *)unitDef;
+			if (ROCKNROR::TECHEFFECT::UnitDefApplySetEffect(unitDef, value, attribute)) {
+				runStandardMethod = false;
 			}
-			// There is a limitation in tech effects in ROR for armors/attack updates:
-			// If updating armor/attack value for an armor/attack that does not exist yet, then it does nothing
-			// We fix this by adding the armor/attack in the list with default value (0)
-			// This limitation concerns for add/set/multiply effects
-			// Note: we only fix for add/set (multiply N/A or 0 has no effect, so it's useless)
-			switch (attribute) {
-			case TECH_UNIT_ATTRIBUTES::TUA_ARMOR:
-				if (unitDefAttackable) {
-					AOE_STRUCTURES::AddArmorIfMissing(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value), 0);
-				}
-				break;
-			case TECH_UNIT_ATTRIBUTES::TUA_ATTACK:
-				if (unitDefAttackable) {
-					AOE_STRUCTURES::AddAttackIfMissing(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value), 0);
-				}
-				break;
-			}
-			// Do not modify runStandardMethod (original code is always run here)
 		}
 
 		if (runStandardMethod) {
@@ -337,7 +299,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 				MOV EDX, DS:[ECX];
 				PUSH attribute_as_dword;
 				PUSH value;
-				// DO NOT CALL DS:[EDX+0x0C] because we changed the pointer !
+				// DO NOT CALL DS:[EDX+0x08] because we changed the pointer !
 				CALL originalCallAddr;
 			}
 		}

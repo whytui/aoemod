@@ -19,6 +19,7 @@ namespace AOE_STRUCTURES {
 
 	// Size=0x0C.
 	// See TECH_UNIT_ATTRIBUTES definition to get some comments/info about how attributes are updated
+	// See also 0x4EBB10=techDefInfo.applyTech((word)technologyId, playerStruct) : refer to "child" calls to find how effects are processed.
 	class STRUCT_TECH_DEF_EFFECT {
 	public:
 		TECH_DEF_EFFECTS effectType; // 1 byte.
