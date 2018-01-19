@@ -37,6 +37,9 @@ namespace TECHEFFECT {
 // - 0x43B940 = techDefInfo.ApplyTechOtherThanEnableDisable?(technoId, playerStruct) --- check that type6=res_mult is supported ?
 
 
+// Remark: see also entry point "FixPlayerNoTechTree_applyTech" at 0x4EBB16
+
+
 // Overload unitDef.applyAddEffect(...)
 // Returns true if the original ROR code must NOT be executed
 // Returns false (default) if original ROR code must be executed after this method.
@@ -53,6 +56,16 @@ bool UnitDefApplySetEffect(STRUCT_UNITDEF_BASE *unitDef, float value, AOE_CONST_
 // Returns true if the original ROR code must NOT be executed
 // Returns false (default) if original ROR code must be executed after this method.
 bool UnitDefApplyMultiplyEffect(STRUCT_UNITDEF_BASE *unitDef, float value, AOE_CONST_FUNC::TECH_UNIT_ATTRIBUTES attribute);
+
+
+// Handles "Resource Modifier (Multiply)" effect, that is natively UNSUPPORTED by ROR
+// Returns true if successful
+bool PlayerApplyMultiplyResourceEffect(STRUCT_PLAYER *player, float value, AOE_CONST_FUNC::RESOURCE_TYPES resourceType);
+
+
+// Apply unsupported technology effects to provided player.
+// Standard/supported effects are ignored here. Use other overloads if you need to customize/fix something in "standard" supported effects.
+void ApplyUnsupportedEffects(STRUCT_PLAYER *player, STRUCT_TECH_DEF_INFO *techDefInfo, short int techId);
 
 
 }

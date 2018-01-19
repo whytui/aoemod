@@ -3544,15 +3544,21 @@ void RockNRorInstance::ROR_GetButtonInternalIndexFromDatBtnId(REG_BACKUP *REG_va
 
 // From 0x4EBB10. add missing check on techId (check it is >=0)
 void RockNRorInstance::FixPlayerNoTechTree_applyTech(REG_BACKUP *REG_values) {
-	long int techId = GetIntValueFromRORStack(REG_values, 8); // Get arg1
-	techId = techId & 0xFFFF; // Because arg1 is a WORD ! (short int)
+	long int positiveTechId = GetIntValueFromRORStack(REG_values, 8); // Get arg1
+	positiveTechId = positiveTechId & 0xFFFF; // Because arg1 is a WORD ! (short int)
+	short int rawTechId = (short int)positiveTechId; // rawTechId can be -1
 	AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *tdi = (AOE_STRUCTURES::STRUCT_TECH_DEF_INFO *)REG_values->ECX_val;
 	ror_api_assert(REG_values, tdi && tdi->IsCheckSumValid());
-	if (techId < 0) {
-		techId = tdi->technologyCount; // this will force detection of invalid techid.
+	if (positiveTechId < 0) {
+		positiveTechId = tdi->technologyCount; // this will force detection of invalid techid.
 	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	REG_values->EAX_val = techId; // MOVSX EAX,WORD PTR SS:[ESP+8] in 0x4EBB11.
+	REG_values->EAX_val = positiveTechId; // MOVSX EAX,WORD PTR SS:[ESP+8] in 0x4EBB11.
+
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		STRUCT_PLAYER *player = (STRUCT_PLAYER *) GetIntValueFromRORStack(REG_values, 0x0C); // get arg2
+		ROCKNROR::TECHEFFECT::ApplyUnsupportedEffects(player, tdi, (short int)rawTechId);
+	}
 }
 
 

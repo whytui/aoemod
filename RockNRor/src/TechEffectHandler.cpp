@@ -83,6 +83,45 @@ bool UnitDefApplyMultiplyEffect(STRUCT_UNITDEF_BASE *unitDef, float value, AOE_C
 }
 
 
+// Handles "Resource Modifier (Multiply)" effect, that is natively UNSUPPORTED by ROR
+// Returns true if successful
+bool PlayerApplyMultiplyResourceEffect(STRUCT_PLAYER *player, float value, AOE_CONST_FUNC::RESOURCE_TYPES resourceType) {
+	assert(player && player->IsCheckSumValid());
+	if (!player || !player->IsCheckSumValid() || !player->ptrResourceValues) { return false; }
+	if (resourceType < 0) { return false; }
+
+	float v = player->GetResourceValue(resourceType);
+	v *= value;
+	player->SetResourceValue(resourceType, v);
+
+	return true;
+}
+
+
+// Apply unsupported technology effects to provided player.
+// Standard/supported effects are ignored here. Use other overloads if you need to customize/fix something in "standard" supported effects.
+void ApplyUnsupportedEffects(STRUCT_PLAYER *player, STRUCT_TECH_DEF_INFO *techDefInfo, short int techId) {
+	assert(player && player->IsCheckSumValid());
+	assert(techDefInfo && techDefInfo->IsCheckSumValid());
+	if (!player || !player->IsCheckSumValid()) { return; }
+	if (!techDefInfo || !techDefInfo->IsCheckSumValid()) { return; }
+	STRUCT_TECH_DEF *techDef = techDefInfo->GetTechDef(techId);
+	if (!techDef) { return; }
+	for (int i = 0; i < techDef->effectCount; i++) {
+		switch (techDef->ptrEffects[i].effectType) {
+		case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_MULT:
+		{
+			// This effect type is unimplemented in ROR !
+			AOE_CONST_FUNC::RESOURCE_TYPES resType = (AOE_CONST_FUNC::RESOURCE_TYPES)techDef->ptrEffects[i].effectUnit;
+			PlayerApplyMultiplyResourceEffect(player, techDef->ptrEffects[i].GetValue(), resType);
+		}
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 
 }
 }
