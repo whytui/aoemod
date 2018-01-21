@@ -60,6 +60,7 @@ namespace AOE_STRUCTURES {
 
 		// +2C. For some actions (attack), it is execution time? For farms, it is "remaining food" (to be added to unit.resValue).
 		// For "build" action, it is generally 0, and set to -1 for farms when construction finishes. Then there is a hack that simulates a "right click" to for builder to gather the farm. 0x4B1B06 (set -1), 0x4B1A52(hack/rightclick)
+		// For gatherers (when returning resource only?), "retry delay" ? 0 in most cases, set to -3 when stuck and then increased to 0.
 		float timer;
 
 		STRUCT_UNIT_COMMAND_DEF *command; // +30. Not always used, nullable. For gatherer, it is always set. Called "task".
@@ -111,7 +112,7 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_ACTION_EXPLORE 0x00542538
 	class STRUCT_ACTION_EXPLORE : public STRUCT_ACTION_BASE {
 	public:
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_EXPLORE; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_ACTION_EXPLORE; }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_EXPLORE; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_EXPLORE) == 0x40, "STRUCT_ACTION_EXPLORE size");
@@ -124,7 +125,7 @@ namespace AOE_STRUCTURES {
 	public:
 		short int targetUnitDefId; // +40. DATID1 of target.
 		short int unused_42;
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_GATHER_WITHOUT_ATTACK); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_ACTION_GATHER_WITHOUT_ATTACK); }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_GATHER_NO_ATTACK; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_GATHER_WITHOUT_ATTACK) == 0x44, "STRUCT_ACTION_GATHER_WITHOUT_ATTACK size");
@@ -136,7 +137,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_ACTION_PROJECTILE : public STRUCT_ACTION_BASE {
 	public:
 		char unknown_40[0x54 - 0x40];
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_PROJECTILE; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_ACTION_PROJECTILE; }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_MISSILE; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_PROJECTILE) == 0x54, "STRUCT_ACTION_PROJECTILE size");
@@ -171,7 +172,7 @@ namespace AOE_STRUCTURES {
 	// Constructor = 0x4020B0(fromFile)
 	class STRUCT_ACTION_FLY_BIRD : public STRUCT_ACTION_BASE {
 	public:
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_FLY_BIRD; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_ACTION_FLY_BIRD; }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_FLY; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_FLY_BIRD) == 0x40, "STRUCT_ACTION_FLY_BIRD size");
@@ -182,7 +183,7 @@ namespace AOE_STRUCTURES {
 	// Constructor = 0x4067A0, 0x4067D0
 	class STRUCT_ACTION_TRANSPORT : public STRUCT_ACTION_BASE {
 	public:
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_TRANSPORT; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_ACTION_TRANSPORT; }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_TRANSPORT; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_TRANSPORT) == 0x40, "STRUCT_ACTION_TRANSPORT size");
@@ -205,7 +206,7 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_ACTION_BUILD 0x005486BC
 	class STRUCT_ACTION_BUILD : public STRUCT_ACTION_BASE {
 	public:
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_BUILD; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_ACTION_BUILD; }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_BUILD; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_BUILD) == 0x40, "STRUCT_ACTION_BUILD size");
@@ -225,7 +226,7 @@ namespace AOE_STRUCTURES {
 		char unknown_04C;
 		char unknown_04D[3]; // unused ?
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_MAKE_OBJECT; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_ACTION_MAKE_OBJECT; }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_MAKE_OBJECT; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_MAKE_OBJECT) == 0x50, "STRUCT_ACTION_MAKE_OBJECT size");
@@ -241,7 +242,7 @@ namespace AOE_STRUCTURES {
 		short int unknown_42; // Unused... probably
 		long int strategyElementId; // +44
 
-		bool IsCheckSumValid() { return this->checksum == 0x00548990; }
+		bool IsCheckSumValid() const { return this->checksum == 0x00548990; }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_MAKE_TECH; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_MAKE_TECH) == 0x48, "STRUCT_ACTION_MAKE_TECH size");
@@ -256,7 +257,7 @@ namespace AOE_STRUCTURES {
 		// 0x40 = targetDATID (word) ?really unsure?
 		char unknown_040[0x48 - 0x40];
 
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_CONVERSION; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_ACTION_CONVERSION; }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_CONVERT; } // really unsure :(
 	};
 
@@ -265,7 +266,7 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_ACTION_HEAL 0x005487E8
 	class STRUCT_ACTION_HEAL : public STRUCT_ACTION_BASE {
 	public:
-		bool IsCheckSumValid() { return this->checksum == CHECKSUM_ACTION_HEAL; }
+		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_ACTION_HEAL; }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_HEAL; } // really unsure :(
 	};
 
@@ -276,7 +277,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_ACTION_REPAIR : public STRUCT_ACTION_BASE {
 	public:
 		unsigned long int unknown_40; // +40. Default 0
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_REPAIR); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_ACTION_REPAIR); }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_REPAIR; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_REPAIR) == 0x44, "STRUCT_ACTION_REPAIR size");
@@ -285,7 +286,7 @@ namespace AOE_STRUCTURES {
 	// [id 0x6B] Size = 0x40. constructor = 0x4B0DF0, 0x4B0E20, 0x4B0DC0. checksum=D8 29 54 00 (same structure as action base)
 	class STRUCT_ACTION_ARTEFACT_CAPTURE : public STRUCT_ACTION_BASE {
 	public:
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_BASE); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_ACTION_BASE); }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_ARTIFACT_CAPTURE; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_ARTEFACT_CAPTURE) == 0x40, "STRUCT_ACTION_ARTEFACT_CAPTURE size");
@@ -297,7 +298,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_ACTION_DISCOVERY_ARTEFACT : public STRUCT_ACTION_BASE {
 	public:
 		char *discoveredByPlayerTable; // +44. Pointer to array of n bytes (depending on total player count).
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_DISCOVERY_ARTEFACT); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_ACTION_DISCOVERY_ARTEFACT); }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_DISCOVERY_CAPTURE; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_DISCOVERY_ARTEFACT) == 0x44, "STRUCT_ACTION_DISCOVERY_ARTEFACT size");
@@ -311,7 +312,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_ACTION_GATHER_WITH_ATTACK : public STRUCT_ACTION_BASE {
 	public:
 		long int targetUnitDefId; // +40. Set as a dword in 4B3334
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_GATHER_WITH_ATTACK); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_ACTION_GATHER_WITH_ATTACK); }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_GATHER_WITH_ATTACK; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_GATHER_WITH_ATTACK) == 0x44, "STRUCT_ACTION_GATHER_WITH_ATTACK size");
@@ -324,7 +325,7 @@ namespace AOE_STRUCTURES {
 	public:
 		float tradePartnerPosY; // +40. Y position of "trade target" where current resource amount was obtained.
 		float tradePartnerPosX; // +44. X position of "trade target" where current resource amount was obtained. 
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_TRADE); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_ACTION_TRADE); }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_TRADE; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_TRADE) == 0x48, "STRUCT_ACTION_TRADE size");
@@ -337,7 +338,7 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_ACTION_GENERATE_WONDER_VICTORY 0x00548A68
 	class STRUCT_ACTION_GENERATE_WONDER_VICTORY : public STRUCT_ACTION_BASE {
 	public:
-		bool IsCheckSumValid() { return (this->checksum == CHECKSUM_ACTION_GENERATE_WONDER_VICTORY); }
+		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_ACTION_GENERATE_WONDER_VICTORY); }
 		AOE_CONST_FUNC::UNIT_ACTION_ID GetExpectedInternalActionId() { return AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_GENERATE_WONDER_VICTORY; }
 	};
 	static_assert(sizeof(STRUCT_ACTION_GENERATE_WONDER_VICTORY) == 0x40, "STRUCT_ACTION_GENERATE_WONDER_VICTORY size");

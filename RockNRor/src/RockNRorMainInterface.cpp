@@ -355,6 +355,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 		AOE_METHODS::SetGamePause(true);
 		ROCKNROR::UI::SimpleEditTextPopup *popup = new ROCKNROR::UI::SimpleEditTextPopup("Debug info", buffer, 0, NULL, true, false);
 		popup->SetBackgroundTheme((settings->ptrGameUIStruct != NULL) ? (AOE_CONST_DRS::AoeScreenTheme)settings->ptrGameUIStruct->themeSlpId : AOE_CONST_DRS::AoeScreenTheme::GameSettingsTheme);
+		popup->afterCloseGamePausePolicy = ROCKNROR::UI::RnrScreenBase::AfterClosePausePolicy::SET_PAUSE_OFF;
 		popup->CreateScreen(NULL);
 	}
 #endif

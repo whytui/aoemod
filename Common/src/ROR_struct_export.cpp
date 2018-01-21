@@ -257,6 +257,8 @@ namespace AOE_STRUCTURES {
 		res += GetHexStringAddress((unsigned long int)obj->actor);
 		res += ", target=";
 		res += std::to_string(obj->targetUnitId);
+		res += ", time=";
+		res += std::to_string(obj->timer);
 		if (obj->requiredActionInfo != NULL) {
 			res += " requiredActionInfo=";
 			res += ExportStruct(obj->requiredActionInfo);

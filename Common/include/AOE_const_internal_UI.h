@@ -13,7 +13,7 @@ namespace AOE_CONST_INTERNAL
 		GSUS_LOADING_MP = 3,
 		GSUS_PLAYING = 4, // For both MP / SP
 		GSUS_GAME_OVER_BUT_STILL_IN_GAME = 5, //004F8110, 004849FE: you win or in MP: resigned, defeated
-		GSUS_UNKNOWN_6 = 6, // ingame too ? In 50015B, treated as 4 (searches for play zone UI object)
+		GSUS_UNKNOWN_6 = 6, // ingame too ? In 50015B, treated as 4 (searches for play zone UI object). Used in 0x4850CE (if set, do commands before showing menu)
 		GSUS_IN_EDITOR = 7
 	};
 

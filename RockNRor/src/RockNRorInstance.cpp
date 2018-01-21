@@ -2611,6 +2611,10 @@ void RockNRorInstance::ManageOptionButtonClickInMenu(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (settings && settings->IsCheckSumValid() && settings->ptrGameUIStruct && settings->ptrGameUIStruct->IsCheckSumValid()) {
 		popup->SetBackgroundTheme((AOE_CONST_DRS::AoeScreenTheme)settings->ptrGameUIStruct->themeSlpId);
+		if (settings->previousPauseIsUserPause) { // we use this flag because we are currently in "game menu" context
+			// If game is already paused, then do not unpause when the popup is closed
+			popup->afterCloseGamePausePolicy = ROCKNROR::UI::RnrScreenBase::AfterClosePausePolicy::NONE;
+		}
 	}
 	popup->CreateScreen(AOE_METHODS::UI_BASE::GetCurrentScreen());
 }

@@ -374,7 +374,6 @@ bool InGameUnitPropertiesPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 bool InGameUnitPropertiesPopup::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
 	if (keyCode == VK_ESCAPE) {
 		this->CloseScreen(false);
-		AOE_METHODS::SetGamePause(false);
 		return true;
 	}
 	return false;
@@ -434,7 +433,6 @@ void InGameUnitPropertiesPopup::Validate() {
 		AutoAttackPolicy flagsToApply = { true, true, true, true, true }; // All flags are relevant in popup.
 		ROCKNROR::crInfo.ApplyAutoAttackPolicyToPlayerSelectedUnits(controlledPlayer, unitInfo->autoAttackPolicy, flagsToApply);
 	}
-	AOE_METHODS::SetGamePause(false);
 }
 
 

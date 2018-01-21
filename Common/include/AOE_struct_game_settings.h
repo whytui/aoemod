@@ -357,8 +357,8 @@ namespace AOE_STRUCTURES {
 		// to 9FC...
 		long int gameIsRunning; // +9FC. You can simply set it to 0 to pause game.
 		// 0xA00
-		long int unknown_A00; // +A00. 1 if timer is stopped ?
-		long int unknown_A04; // +A04. Related with timer status too ?
+		long int previousPauseIsUserPause; // +A00. Game was already paused when implicit pause was applied (eg open menu). See 0x419A60=setGameRunning
+		long int currentPauseIsNonUserPause; // +A04. Set to 1 only when a "pause" is applied implicitely (eg open menu). Set to 0 on unpause/explicit user pause (F3).
 		unsigned long int unknown_A08;
 		float gameSpeed; // +A0C. Get in 0x41C170.
 		AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL difficultyLevelChoice; // +A10. Get in 41C190. Copied into +993=rgeGameOptions.

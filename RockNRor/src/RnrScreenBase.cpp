@@ -16,6 +16,7 @@ RnrScreenBase::RnrScreenBase(const char *screenName) {
 	this->screenPosY = 0;
 	this->screenSizeX = 0;
 	this->screenSizeY = 0;
+	this->afterCloseGamePausePolicy = AfterClosePausePolicy::NONE;
 	ROCKNROR::crInfo.rnrUIHelper->NotifyNewRnrScreen(this);
 }
 
@@ -160,6 +161,14 @@ bool RnrScreenBase::CloseScreen(bool ignoreErrors) {
 		}
 		result = false;
 	}
+	switch (this->afterCloseGamePausePolicy) {
+	case AfterClosePausePolicy::SET_PAUSE_ON:
+		AOE_METHODS::SetGamePause(true);
+		break;
+	case AfterClosePausePolicy::SET_PAUSE_OFF:
+		AOE_METHODS::SetGamePause(false);
+		break;
+	}
 	return result;
 }
 
@@ -174,6 +183,7 @@ bool RnrScreenBase::OpenOtherScreenAndCloseThisOne(RnrScreenBase *otherScreen, b
 		return false;
 	}
 
+	AfterClosePausePolicy gamePausePolicyToUse = this->afterCloseGamePausePolicy;
 	STRUCT_UI_EASY_PANEL *myScreenObject = this->GetAoeScreenObject();
 	STRUCT_UI_EASY_PANEL *parentToUse = NULL;
 	if (myScreenObject && !nullParent) {
@@ -192,6 +202,11 @@ bool RnrScreenBase::OpenOtherScreenAndCloseThisOne(RnrScreenBase *otherScreen, b
 		// I don't understand how it works in original game. There is no such affectation ?
 		// What is sure is we must make sure previousPanel is a valid pointer... to a valid "previous" UI.
 		newScreenObject->previousPanel = myScreenObject->previousPanel;
+
+		// Transfer the "game pause policy to apply on close" to next popup.
+		this->afterCloseGamePausePolicy = AfterClosePausePolicy::NONE;
+		otherScreen->afterCloseGamePausePolicy = gamePausePolicyToUse;
+
 		this->CloseScreen(false);
 	}
 	return true;

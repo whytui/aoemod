@@ -26,11 +26,17 @@ using namespace AOE_STRUCTURES;
 class RnrScreenBase {
 public:
 	enum ScreenStatus { NOT_CREATED, CREATED, CLOSED };
+	// Policy to apply with "pause game" when popup is closed. Default = NONE (do nothing)
+	enum AfterClosePausePolicy { NONE, SET_PAUSE_ON, SET_PAUSE_OFF };
 	
 	// Constructor for a custom screen, that will be automatically added to custom UI helper.
 	RnrScreenBase(const char *screenName);
 	// Destructor. Being virtual is crucial to allow child classes to be deleted correctly even if calling "delete ptr_as_base_class"
 	virtual ~RnrScreenBase();
+
+	// Determines if game pause must be set/unset when popup is closed
+	AfterClosePausePolicy afterCloseGamePausePolicy;
+
 
 	// Set screen type. Only allowed when screen has not been opened yet.
 	bool SetScreenType(AOE_METHODS::UI_BASE::ScreenType newType);

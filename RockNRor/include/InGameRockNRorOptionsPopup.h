@@ -26,6 +26,7 @@ public:
 		this->SetCenteredForSize(600, 450); // May fail if game settings can't be retrieved
 		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::FullBlackTheme);
 		this->ResetClassPointers();
+		this->afterCloseGamePausePolicy = AfterClosePausePolicy::SET_PAUSE_OFF;
 	}
 
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
