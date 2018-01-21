@@ -2288,7 +2288,7 @@ void RockNRorInstance::ManageAttackActionChange(REG_BACKUP *REG_values) {
 	}
 
 	// Run algorithm to decide if unit should keep target or change
-	bool shouldChange = COMBAT::ShouldChangeTarget(actorUnit->currentActivity, targetUnit->unitInstanceId);
+	bool shouldChange = ROCKNROR::COMBAT::ShouldChangeTarget(actorUnit->currentActivity, targetUnit->unitInstanceId);
 	if (!shouldChange) { REG_values->EDI_val = (long)actionTargetUnit; REG_values->EAX_val = 2; }
 }
 #endif
@@ -2315,7 +2315,7 @@ void RockNRorInstance::ManageAttackActivityChange1(REG_BACKUP *REG_values) {
 	}
 
 	// Custom Treatments.
-	if ((*arg_targetUnitId != -1) && !COMBAT::ShouldChangeTarget(activity, *arg_targetUnitId)) {
+	if ((*arg_targetUnitId != -1) && !ROCKNROR::COMBAT::ShouldChangeTarget(activity, *arg_targetUnitId)) {
 		*arg_targetUnitId = activity->targetUnitId; // Force current target to keep it (do not change target).
 	}
 	if (*arg_targetUnitId == -1) {
@@ -2349,7 +2349,7 @@ void RockNRorInstance::ManageAttackActivityChange_convert(REG_BACKUP *REG_values
 	// Custom Treatments.
 	if (*arg_targetUnitId == -1) { return; } // Let normal code manage this...
 
-	if (!COMBAT::ShouldChangeTarget(activity, *arg_targetUnitId)) {
+	if (!ROCKNROR::COMBAT::ShouldChangeTarget(activity, *arg_targetUnitId)) {
 		*arg_targetUnitId = activity->targetUnitId; // Force current target to keep it (do not change target).
 	}
 }
@@ -2399,7 +2399,7 @@ void RockNRorInstance::ManageTowerPanicMode_militaryUnits(REG_BACKUP *REG_values
 			}
 		}
 		if (contextIsReactionToAttack) {
-			forceKeepCurrentActivity = !COMBAT::ShouldChangeTarget(activity, enemyUnit->unitInstanceId);
+			forceKeepCurrentActivity = !ROCKNROR::COMBAT::ShouldChangeTarget(activity, enemyUnit->unitInstanceId);
 		}
 	}
 
@@ -3422,7 +3422,7 @@ void RockNRorInstance::FixActivityTargetUnitIdBug_retreatAfterShooting(REG_BACKU
 		return;
 	}
 	// Custom treatments
-	if (!COMBAT::ShouldRetreatAfterShooting(activity)) {
+	if (!ROCKNROR::COMBAT::ShouldRetreatAfterShooting(activity)) {
 		REG_values->EAX_val = 0; // Unit not found
 		ChangeReturnAddress(REG_values, 0x4E64C7); // jump AFTER the call that get unit struct. The next test will see NULL value and exit method.
 	}
@@ -3617,7 +3617,7 @@ void RockNRorInstance::EntryPointAutoSearchTargetUnit(REG_BACKUP *REG_values) {
 			}
 		}
 	}
-	bool ignoreThisTarget = COMBAT::AutoSearchTargetShouldIgnoreUnit(activity, potentialTargetUnit);
+	bool ignoreThisTarget = ROCKNROR::COMBAT::AutoSearchTargetShouldIgnoreUnit(activity, potentialTargetUnit);
 
 
 	// Do not modify below.

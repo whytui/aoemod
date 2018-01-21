@@ -8,6 +8,7 @@
 #include "unitHandling.h"
 #include "AOEPrimitives_UI_gameMain.h"
 #include "AOE_strategy.h"
+#include "combatAI.h"
 
 
 using namespace AOE_STRUCTURES;

@@ -2131,7 +2131,7 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 // The improved algorithm is only used if ImproveAI config is ON.
 bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower) {
 	// Run various consistency checks
-	assert(COMBAT::COMBAT_CONST::distanceToConsiderVeryClose > 0);
+	assert(ROCKNROR::COMBAT::COMBAT_CONST::distanceToConsiderVeryClose > 0);
 	if (!actorUnit || !enemyTower || !actorUnit->ptrStructPlayer) { return true; }
 	if (!IsImproveAIEnabled(actorUnit->ptrStructPlayer->playerId)) { return true; } // improve AI is disabled. Return default value.
 	assert(actorUnit->currentActivity != NULL);
@@ -2194,7 +2194,7 @@ bool RockNRorCommand::ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_C
 
 	float distanceToTower = GetDistance(actorUnit->positionX, actorUnit->positionY, enemyTower->positionX, enemyTower->positionY);
 	float distanceToCurrentTarget = GetDistance(actorUnit->positionX, actorUnit->positionY, currentTarget->positionX, currentTarget->positionY);
-	float actorRange = actorUnitDef->maxRange + COMBAT::COMBAT_CONST::distanceToConsiderVeryClose;
+	float actorRange = actorUnitDef->maxRange + ROCKNROR::COMBAT::COMBAT_CONST::distanceToConsiderVeryClose;
 	assert(actorRange > 0);
 
 	// All unit types: if tower is at reach AND is has 1 HP, quickly destroy it at any cost ! Even if a priest is converting me

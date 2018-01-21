@@ -142,7 +142,7 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 
 	if (notifyEvent->eventId == GAME_EVENT_TYPE::EVENT_SHOULD_MOVE_BACK_AFTER_SHOOTING) {
 		// Retreat after shooting is not handled in ROR original code for civilians. It should (for hunters) !
-		if (COMBAT::HunterMoveBackAfterShooting(activity, notifyEvent)) {
+		if (ROCKNROR::COMBAT::HunterMoveBackAfterShooting(activity, notifyEvent)) {
 			outExecStandardCode = false; // Event has been processed with an action. We don't want to run ROR handler.
 			return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION;
 		} else {
@@ -251,7 +251,7 @@ bool PlayerNotifySeeUnit(STRUCT_PLAYER *player, long int myUnitId, long int seen
 		// Let standard code be executed...
 		// result = false;
 	}
-	COMBAT::OnSeeNearbyUnit(player, myUnit, seenUnit);
+	ROCKNROR::COMBAT::OnSeeNearbyUnit(player, myUnit, seenUnit);
 	return result;
 }
 

@@ -194,7 +194,7 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 					if (canChangeTarget) {
 						long int sqrdist = (long int)((curLeader->positionX - enemyUnit->positionX) * (curLeader->positionX - enemyUnit->positionX) +
 							(curLeader->positionY - enemyUnit->positionY) * (curLeader->positionY - enemyUnit->positionY));
-						if (sqrdist < COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack * COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack) {
+						if (sqrdist < ROCKNROR::COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack * ROCKNROR::COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack) {
 							// Do *not* task units (could conflict with other treatments, get units stuck, etc) but set group's target
 							this->unitGroupAI.SetUnitGroupTarget(curGrp, enemyUnit);
 

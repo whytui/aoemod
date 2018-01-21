@@ -242,6 +242,8 @@ bool EconomyAI::RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI, long int startProces
 	assert(tacAI && tacAI->IsCheckSumValid() && tacAI->ptrMainAI);
 	if (!tacAI || !tacAI->ptrMainAI || !tacAI->ptrMainAI->ptrStructPlayer) { return false; }
 	bool doNotRunRorUpdate = false;
+	bool isAIImproved = ROCKNROR::IsImproveAIEnabled(tacAI->commonAIObject.playerId);
+	if (!isAIImproved) { return false; }
 
 	switch (tacAI->currentAIUpdateType) {
 	//case AI_UPDATE_TYPES::CST_AUT_SETUP_SOLDIER_GROUPS:
@@ -257,7 +259,7 @@ bool EconomyAI::RunOneTacAIUpdateTask(STRUCT_TAC_AI *tacAI, long int startProces
 		case AI_UPDATE_TYPES::CST_AUT_TASK_BOATS:
 		case AI_UPDATE_TYPES::CST_AUT_FILL_SOLDIER_GROUPS:*/
 		case AI_UPDATE_TYPES::CST_AUT_TASK_IDLE_SOLDIER: // Calls 0x4D3700 if I own land military units or boats or relics
-
+			ROCKNROR::COMBAT::OnAIUpdateIdleSoldiers(tacAI,startProcessingTime, allowedProcessingTime);
 			break;
 		/*case AI_UPDATE_TYPES::CST_AUT_TASK_ACTIVE_SOLDIER:
 		case AI_UPDATE_TYPES::CST_AUT_PLAYTASKING:
@@ -368,6 +370,7 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 	// Retrieve all information from strategy in only one loop
 	int strategyTowerCount = 0;
 	int strategyFarmCount = 0;
+	int strategyPendingFarmCount = 0; // non-build/non in progress farm count
 	int currentEstimatedPopulation = 0;
 	const int LAST_BLD_NO_FURTHER_THAN_POPULATION = 45;
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *tmpElem = buildAI->fakeFirstStrategyElement.next;
@@ -402,6 +405,9 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 			if (tmpElem->unitDAT_ID == CST_UNITID_FARM) {
 				if ((tmpElem->aliveCount > 0) || (tmpElem->inProgressCount > 0) || (tmpElem->retrains < 0) || (tmpElem->totalCount < tmpElem->retrains)) {
 					strategyFarmCount++;
+					if ((tmpElem->aliveCount == 0) && (tmpElem->inProgressCount == 0)) {
+						strategyPendingFarmCount++;
+					}
 				}
 				if ((farmToReuse == NULL) && (tmpElem->aliveCount == 0) && (tmpElem->inProgressCount == 0) && (tmpElem->retrains >= 0) && (tmpElem->totalCount >= tmpElem->retrains)) {
 					farmToReuse = tmpElem;
@@ -456,7 +462,17 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 	}
 
 	// Auto build farms
-	if (canBuildFarm && (actualFarmCount < maxFarms) && (strategyFarmCount < maxFarms)) {
+	int spareFarms = strategyFarmCount - tacAI->gathererCount_desired[CST_RES_ORDER_FOOD];
+	if (spareFarms < 0) { spareFarms = 0; }
+	// Evaluate various conditions that prevent addition of farms to strategy. Those conditions are non exclusive, it's just a filter
+	bool doNotAddFarmToStrategy = (strategyFarmCount >= maxFarms) || (actualFarmCount >= maxFarms);
+	if (!canBuildFarm && ((spareFarms > 0) || (strategyPendingFarmCount > 0))) {
+		// not enough wood to build. Don't add farm unless there really is no available (spare) farm to gather (and none anticipated in strategy):
+		// in this case, we may add a farm so that its cost will be taken into account in gathering so we can actually build it
+		doNotAddFarmToStrategy = true;
+	}
+
+	if (!doNotAddFarmToStrategy) {
 		int food = (int)player->GetResourceValue(CST_RES_ORDER_FOOD);
 		//int wood = (int)player->GetResourceValue(CST_RES_ORDER_WOOD);
 

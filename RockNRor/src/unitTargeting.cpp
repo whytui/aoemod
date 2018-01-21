@@ -936,7 +936,7 @@ STRUCT_UNIT_MEMORY *FindGroupMainTarget(STRUCT_INF_AI *infAI, long int targetPla
 				continue;
 			}
 			// 0x4C0705 : begin calculations
-			float groupDamage = COMBAT::GetGroupDamageOnUnit(infAI, unitGroup, curUnit); // Damage per second, actually
+			float groupDamage = ROCKNROR::COMBAT::GetGroupDamageOnUnit(infAI, unitGroup, curUnit); // Damage per second, actually
 			if (groupDamage <= 0) { // ADDED. What happens in AOE code? e.g. group has only priests?
 				continue;
 			}
@@ -1380,7 +1380,7 @@ STRUCT_UNIT_MEMORY *LEGACY_FindGroupMainTarget(STRUCT_INF_AI *infAI, long int ta
 				continue;
 			}
 			// 0x4C0705 : begin calculations
-			float groupDamage = COMBAT::GetGroupDamageOnUnit(infAI, unitGroup, curUnit); // Damage per second, actually
+			float groupDamage = ROCKNROR::COMBAT::GetGroupDamageOnUnit(infAI, unitGroup, curUnit); // Damage per second, actually
 			if (groupDamage <= 0) { // ADDED. What happens in AOE code? e.g. group has only priests?
 				continue;
 			}

@@ -240,7 +240,6 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 
 	// TEST - F8 - show dialog
 	if (!isMenuOpen && (isInEditor || isInGame) && (pressedKey == VK_F8) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
-		std::string sTechTreeInfo = "";
 		int techToShowCount = 0;
 		static char buffer[1024] = "\0";
 		char *posInBuf = buffer;
@@ -311,7 +310,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 				assert(unitDefBase && unitDefBase->IsCheckSumValidForAUnitClass());
 				if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) { return false; }
 				if (unitActivity) {
-					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X DATID=%d/%d  posX=%f posY=%f  status=%d\nActivity=0x%08X - Activity+30=0x%X +28=0x%X\n" \
+					sprintf_s(posInBuf, 200, "unitId=%ld/0x%X DATID=%d/%d  posX=%f posY=%f  status=%d\nActivity=0x%08X - ActivityTask=0x%X order=0x%X\n" \
 						"target=%ld\nAction=%08X ActionTargetUnitId=%ld\n",
 						selectedUnit->unitInstanceId, selectedUnit->unitInstanceId, unitDefBase->DAT_ID1, unitDefBase->DAT_ID2, 
 						selectedUnit->positionX, selectedUnit->positionY, selectedUnit->unitStatus,
@@ -353,14 +352,10 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 			}
 		}
 		// display buffer
-		/*if (ROCKNROR::customPopupSystem.OpenCustomGamePopup<CustomPopupBase>(580, 460, false)) {
-			unsigned long int *unused;
-			AOE_METHODS::UI_BASE::AddLabel(, (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, buffer, 60, 20, 520, 160);
-			if (!sTechTreeInfo.empty() && (techToShowCount > 0)) {
-				AOE_METHODS::UI_BASE::AddLabel(, (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, "(future) Tech tree available items", 60, 180, 200, 20);
-				AOE_METHODS::UI_BASE::AddLabel(, (AOE_STRUCTURES::STRUCT_UI_LABEL**)&unused, (char*)sTechTreeInfo.c_str(), 60, 200, 240, 16 * (techToShowCount + 1));
-			}
-		}*/
+		AOE_METHODS::SetGamePause(true);
+		ROCKNROR::UI::SimpleEditTextPopup *popup = new ROCKNROR::UI::SimpleEditTextPopup("Debug info", buffer, 0, NULL, true, false);
+		popup->SetBackgroundTheme((settings->ptrGameUIStruct != NULL) ? (AOE_CONST_DRS::AoeScreenTheme)settings->ptrGameUIStruct->themeSlpId : AOE_CONST_DRS::AoeScreenTheme::GameSettingsTheme);
+		popup->CreateScreen(NULL);
 	}
 #endif
 

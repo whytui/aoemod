@@ -143,8 +143,39 @@ void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROU
 		unitGroup->currentTask = taskId;
 	}
 	bool rorResult = AOE_METHODS::UNIT_GROUP::ApplyTaskToUnitGroup(unitGroup, tacAI, taskId, resetOrg, force);
+
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (global && global->IsCheckSumValid()) {
+		// Check on order type / task type / target type. Do not "attack" a friend unit (would block the unit)
+		if (unitGroup->targetUnitId >= 0) {
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *target = global->GetUnitFromId(unitGroup->targetUnitId);
+			if (target == NULL) {
+				this->SetUnitGroupTarget(unitGroup, NULL);
+			} else {
+				assert(target->ptrStructPlayer && tacAI->ptrMainAI);
+				PLAYER_DIPLOMACY_VALUES targetDiplValue = tacAI->ptrMainAI->player->diplomacyVSPlayers[target->ptrStructPlayer->playerId];
+				bool alliedTarget = (targetDiplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY) || (targetDiplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_SELF);
+
+				switch (unitGroup->currentTask) {
+				case UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02:
+				case UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_15:
+				case UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_ROUNDUP_TARGET:
+				case UNIT_GROUP_TASK_IDS::CST_UGT_EXTERMINATE:
+					if (alliedTarget) {
+						ROCKNROR::SYSTEM::StopExecution(_T("SetUnitGroupCurrentTask: target dipl inconsistency"), true, true);
+						this->SetUnitGroupTarget(unitGroup, NULL);
+					}
+					break;
+				case UNIT_GROUP_TASK_IDS::CST_UGT_DEFEND_UNIT:
+					if (!alliedTarget) {
+						ROCKNROR::SYSTEM::StopExecution(_T("SetUnitGroupCurrentTask: target dipl inconsistency"), true, true);
+						this->SetUnitGroupTarget(unitGroup, NULL);
+					}
+					break;
+				}
+			}
+		}
+
 		unitGroup->lastUpdateTime_ms = global->currentGameTime;
 		if (unitGroup->currentTask == UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02) {
 			unitGroup->lastAttackTaskingTime_ms = global->currentGameTime;
@@ -205,7 +236,7 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 			result = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_ROUNDUP_TARGET; // units will avoid being distracted by other targets
 		} else {
 			if (global->currentGameTime - unitGroup->lastUpdateTime_ms < AI_CONST::minimumDelayBetweenBasicUnitGroupAttackTasking_ms) {
-				// Tasking "CST_UGT_ATTACK_02" many times in a row is dangerous if if sees other targets (unit constantly changes action and is stuck)
+				// Tasking "CST_UGT_ATTACK_02" many times in a row is dangerous if it sees other targets (unit constantly changes action and is stuck)
 				return UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 			}
 			result = UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_02; // units may change target (and very quickly) if they are challenged or see targets
@@ -581,7 +612,7 @@ void UnitGroupAI::OnUnitGroupAttacked(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_
 				if (canChangeTarget) {
 					long int sqrdist = (long int)((alliedUnit->positionX - enemyUnit->positionX) * (alliedUnit->positionX - enemyUnit->positionX) +
 						(alliedUnit->positionY - enemyUnit->positionY) * (alliedUnit->positionY - enemyUnit->positionY));
-					if (sqrdist < COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack * COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack) {
+					if (sqrdist < ROCKNROR::COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack * ROCKNROR::COMBAT::COMBAT_CONST::distanceAlwaysTaskIdleMilitaryUnitsOnAttack) {
 						GAME_COMMANDS::CreateCmd_RightClick(alliedUnit->unitInstanceId, enemyUnit->unitInstanceId,
 							enemyUnit->positionX, enemyUnit->positionY);
 						unitGroup->lastUpdateTime_ms = global->currentGameTime;

@@ -20,6 +20,7 @@ namespace AOE_METHODS {
 
 }
 
+namespace ROCKNROR {
 namespace COMBAT {
 
 	namespace COMBAT_CONST {
@@ -72,4 +73,8 @@ namespace COMBAT {
 	// Triggered when a priest sees another unit around (cf EVENT_PLAYER_SEE_UNIT), even if actor unit is not idle
 	void OnPriestSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, STRUCT_UNIT_BASE *seenUnit);
 
+	// Global update on idle soldiers for specifiedp player (tacAI)
+	void OnAIUpdateIdleSoldiers(STRUCT_TAC_AI *tacAI, long int startProcessingTime, long int allowedProcessingTime);
+
+}
 }

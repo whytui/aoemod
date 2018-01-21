@@ -25,6 +25,8 @@ namespace AOE_METHODS {
 }
 
 
+
+namespace ROCKNROR {
 namespace COMBAT {
 ;
 
@@ -772,4 +774,75 @@ void OnPriestSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, S
 }
 
 
+// Global update on idle soldiers for specifiedp player (tacAI)
+void OnAIUpdateIdleSoldiers(STRUCT_TAC_AI *tacAI, long int startProcessingTime, long int allowedProcessingTime) {
+	if (!tacAI || !tacAI->IsCheckSumValid() || !tacAI->ptrMainAI) { return; }
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	STRUCT_PLAYER *player = tacAI->ptrMainAI->player;
+	assert(player && player->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) { return; }
+	for (int i = 0; i < tacAI->landMilitaryUnits.usedElements; i++) {
+		long int curId = tacAI->landMilitaryUnits.unitIdArray[i];
+		STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curId);
+		if (curUnit || !curUnit->IsCheckSumValidForAUnitClass()) { continue; }
+		if (!curUnit->currentActivity) { continue; }
+		
+		// Run checks on current activity consistency
+		long int targetUnitId = curUnit->currentActivity->targetUnitId;
+		STRUCT_UNIT_BASE *targetUnit = global->GetUnitFromId(targetUnitId);
+		STRUCT_PLAYER *targetPlayer = NULL;
+		bool targetIsAllied = false;
+		if (targetUnit) {
+			targetPlayer = targetUnit->ptrStructPlayer;
+			PLAYER_DIPLOMACY_VALUES targetDiplValue = player->diplomacyVSPlayers[targetPlayer->playerId];
+			if (targetUnit && ((targetDiplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY) || (targetDiplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_SELF))) {
+				targetIsAllied = true;
+			}
+		}
+		
+		bool orderExpectsEnemy = false;
+		switch (curUnit->currentActivity->orderId) {
+		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_ATTACK:
+		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_CONVERT:
+		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_UNKNOWN_2D7_AI_PLAY:
+		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_UNKNOWN_2D9_POP_TARGET:
+			orderExpectsEnemy = true;
+			break;
+		}
+
+		bool taskExpectsEnemy = false;
+		switch (curUnit->currentActivity->currentTaskId) {
+		case ACTIVITY_TASK_ID::CST_ATI_TASK_ATTACK:
+		case ACTIVITY_TASK_ID::CST_ATI_TASK_CONVERT:
+		case ACTIVITY_TASK_ID::CST_ATI_TASK_SEEK_AND_DESTROY:
+		case ACTIVITY_TASK_ID::CST_ATI_TASK_EXPLORE_AND_DESTROY:
+			taskExpectsEnemy = true;
+		}
+
+		bool doStop = false;
+		if (orderExpectsEnemy && targetIsAllied) {
+			doStop = true;
+			ROCKNROR::SYSTEM::StopExecution(_T("OnAIUpdateIdleSoldiers: detected an error for unit order"), true, true);
+		}
+		if (taskExpectsEnemy && targetIsAllied) {
+			doStop = true;
+			ROCKNROR::SYSTEM::StopExecution(_T("OnAIUpdateIdleSoldiers: detected an error for unit order"), true, true);
+		}
+		if (!orderExpectsEnemy && !targetIsAllied) {
+			doStop = true;
+			ROCKNROR::SYSTEM::StopExecution(_T("OnAIUpdateIdleSoldiers: detected an error for unit order"), true, true);
+		}
+		if (!taskExpectsEnemy && !targetIsAllied) {
+			doStop = true;
+			ROCKNROR::SYSTEM::StopExecution(_T("OnAIUpdateIdleSoldiers: detected an error for unit order"), true, true);
+		}
+		if (doStop) {
+			GAME_COMMANDS::CreateCmd_Stop(curId);
+		}
+	}
+	
+}
+
+
+}
 }
