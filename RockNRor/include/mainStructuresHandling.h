@@ -52,6 +52,11 @@ AOE_STRUCTURES::STRUCT_CURSOR_SLP_INFO *GetCursorInfo();
 bool IsMultiplayer();
 
 // Returns true if the game is currently running
+// Warning: this returns true if game is "running" and paused !
 bool IsGameRunning();
+
+// Returns true if the game is currently in PAUSED mode.
+// Returns false if the game is runnning (not paused), if in editor, in menus, etc.
+bool IsGamePaused();
 
 }

@@ -109,6 +109,7 @@ bool IsMultiplayer() {
 
 
 // Returns true if the game is currently running
+// Warning: this returns true if game is "running" and paused !
 bool IsGameRunning() {
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
 	if (!settings || !settings->IsCheckSumValid()) {
@@ -123,6 +124,24 @@ bool IsGameRunning() {
 	}
 
 	return (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING);
+}
+
+// Returns true if the game is currently in PAUSED mode.
+// Returns false if the game is runnning (not paused), if in editor, in menus, etc.
+bool IsGamePaused() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = AOE_STRUCTURES::GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) {
+		return false;
+	}
+	// 0x4199C0
+	if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) { return false; }
+	STRUCT_MP_COMMUNICATION *comm = settings->MPCommunicationStruct;
+	// Cf 0x4239B0.
+	// Note: if not initialized (3), this returns false
+	if (comm->unknown_1558 == 4) {
+		return true;
+	}
+	return false;
 }
 
 }
