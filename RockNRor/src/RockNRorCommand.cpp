@@ -1881,22 +1881,6 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 	if (buildAI_actor == NULL) { return; }
 	STRATEGY::UpdateStrategyWithExistingUnit(buildAI_actor, targetUnit);
 
-	// Update all players' infAI.unitElemList because it would contain an erroneous playerId, and this would never be fixed/updated
-	// This leads to incorrect behaviours (unit groups stuck because they try to attack their own units...)
-	/*AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = actorPlayer->ptrGlobalStruct;
-	assert(global && global->IsCheckSumValid());
-	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
-		AOE_STRUCTURES::STRUCT_PLAYER *loopPlayer = GetPlayerStruct(loopPlayerId);
-		if (loopPlayer && loopPlayer->IsCheckSumValid() && loopPlayer->ptrAIStruct && loopPlayer->ptrAIStruct->IsCheckSumValid() &&
-			IsImproveAIEnabled(loopPlayerId)) {
-			AOE_STRUCTURES::STRUCT_INF_AI *loopInfAI = &loopPlayer->ptrAIStruct->structInfAI;
-			assert(loopInfAI->IsCheckSumValid());
-			// Fix (or remove) unit from list for each player. We MUST NOT let a bad playerId be stored in unit elem list.
-#pragma message("OnUnitChangeOwner_fixes: FIX THIS and use unitExtension instead !")
-			UpdateOrResetInfAIUnitListElem(loopInfAI, AOE_METHODS::LISTS::FindInfAIUnitElemInList(loopInfAI, targetUnit->unitInstanceId));
-		}
-	}*/
-
 	if (targetPlayer && IsImproveAIEnabled(targetPlayer->playerId) && targetPlayer->ptrAIStruct && targetPlayer->ptrAIStruct->IsCheckSumValid()) {
 		// Notify custom AI that a conversion occurred.
 		if (CUSTOM_AI::customAIHandler.IsAliveAI(targetPlayer->playerId) && IsImproveAIEnabled(targetPlayer->playerId)) {
@@ -1906,6 +1890,20 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 			} else {
 				CUSTOM_AI::customAIHandler.GetCustomPlayerAI(targetPlayer->playerId)->OnUnitConverted(targetUnit, actorPlayer);
 			}
+		}
+
+		// Fix back-reference (if any) in target unit's activity
+		long int convertedUnitId = targetUnit->unitInstanceId;
+		if (targetUnit->currentActivity) {
+			STRUCT_UNIT_BASE *targetTargetUnit = GetUnitStruct(targetUnit->currentActivity->targetUnitId);
+			if (targetTargetUnit && targetTargetUnit->IsCheckSumValidForAUnitClass()) {
+				targetTargetUnit->currentActivity->unitIDsThatAttackMe.Remove(convertedUnitId);
+			}
+		}
+		STRUCT_ACTION_BASE *unitAction = AOE_STRUCTURES::GetUnitAction(targetUnit);
+		if (unitAction && unitAction->targetUnit && unitAction->targetUnit->currentActivity) {
+			// Remove converted unit's ID from converted unit's target unit's activity information
+			unitAction->targetUnit->currentActivity->unitIDsThatAttackMe.Remove(convertedUnitId);
 		}
 	}
 }

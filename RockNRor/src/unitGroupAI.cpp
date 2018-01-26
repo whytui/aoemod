@@ -46,7 +46,9 @@ void UnitGroupAI::SetUnitGroupTarget(STRUCT_UNIT_GROUP *unitGroup, STRUCT_UNIT_B
 		}
 	}
 #endif
-	this->AddTaskingByUGAITrace(unitGroup->unitGroupId, -1, targetUnit->unitInstanceId, gameTime_ms);
+	if (targetUnit) {
+		this->AddTaskingByUGAITrace(unitGroup->unitGroupId, -1, targetUnit->unitInstanceId, gameTime_ms);
+	}
 }
 
 
@@ -970,7 +972,8 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 		// Is this group unit attacking some target ?
 		if ((unitIdToTarget == -1) && (curUnit->currentActivity->targetUnitId >= 0)) {
 			STRUCT_UNIT_BASE *curTarget = global->GetUnitFromId(curUnit->currentActivity->targetUnitId);
-			if (curTarget && curTarget->IsCheckSumValidForAUnitClass() && curTarget->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) {
+			if (curTarget && curTarget->IsCheckSumValidForAUnitClass() && (curTarget->unitStatus <= GAME_UNIT_STATUS::GUS_2_READY) &&
+				(player->ptrDiplomacyStances[curTarget->ptrStructPlayer->playerId] == PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY)) {
 				unitIdToTarget = curUnit->currentActivity->targetUnitId;
 			}
 		}
