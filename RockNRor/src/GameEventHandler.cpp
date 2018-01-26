@@ -185,6 +185,17 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 						// At least, stop trying to repair (AI villagers tend to get stuck). Seems not so bad for now (AI will give another task)
 						// The tacAI.Update method must ensure not to retry if some resource is missing.
 						if (GAME_COMMANDS::CreateCmd_Stop(villager->unitInstanceId)) {
+							if ((villager->unitDefinition->DAT_ID1 == CST_UNITID_REPAIRMAN) && (villager->resourceValue > 0)) {
+								// Transform repairman into gatherer
+								// because TacAI.Update() may execute a "right click" in 0x4D6ED2 to have him deposit the resources.
+								// However, if villager is currently a repairman, the right-click will trigger a repair, not a "deposit" action
+								// Fortunately, "casting" the unit as "villager" is sufficient whatever the resource type is :
+								// A villager with resource is transformed into the relevant gatherer (and NOT repairman) with a right-click when both actions are possible.
+								STRUCT_UNITDEF_BASE *unitDefVillBase = player->GetUnitDefBase(CST_UNITID_VILLAGER);
+								if (unitDefVillBase) {
+									AOE_METHODS::UNIT::UnitTransform(villager, unitDefVillBase);
+								}
+							}
 							return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_HANDLED_WITH_AN_ACTION; // Event has been processed with an action. We don't want to run ROR handler.
 						}
 					}

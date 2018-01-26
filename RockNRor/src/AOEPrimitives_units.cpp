@@ -601,6 +601,20 @@ AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTUR
 }
 
 
+// Execute unit.transform(unitDef*) method that consists in changing a unit's unit definition
+// Typically for villagers (task switching)
+void UnitTransform(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *newUnitDef) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !newUnitDef || !newUnitDef->IsCheckSumValidForAUnitClass()) { return; }
+	// For example 0x4AE8E0 for trainableUnit.transform(unitdef)
+	_asm{
+		MOV ECX, unit;
+		PUSH newUnitDef;
+		MOV EDX, [ECX];
+		CALL[EDX + 0x54];
+	}
+}
+
+
 }
 }
 

@@ -154,5 +154,9 @@ AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTUR
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *target, bool canSwitchForVillager);
 
 
+// Execute unit.transform(unitDef*) method that consists in changing a unit's unit definition
+// Typically for villagers (task switching)
+void UnitTransform(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *newUnitDef);
+
 }
 }

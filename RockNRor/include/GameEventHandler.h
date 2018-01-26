@@ -8,6 +8,7 @@
 #include "mainStructuresHandling.h"
 #include "RockNRorCommand.h"
 #include "AOEPrimitives_gameCommand.h"
+#include "AOEPrimitives_units.h"
 
 
 namespace ROCKNROR {
