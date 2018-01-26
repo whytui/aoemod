@@ -2,6 +2,7 @@
 #pragma once
 
 #include <assert.h>
+#include <set>
 #include <string>
 #include <mystrings.h>
 #include <AOE_offsets.h>
@@ -9,6 +10,7 @@
 #include <AOE_struct_player.h>
 #include <AOE_struct_main_ai.h>
 #include <AOE_struct_export.h>
+#include "traceMessage.h"
 #include "mainStructuresHandling.h"
 #include "basicFilesHandling.h"
 #include "BitmapExporter.h"

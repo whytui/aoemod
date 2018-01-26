@@ -583,7 +583,7 @@ bool AnalyzeEmpiresDatQuality() {
 	// Units
 #if 1
 	std::set<short int> badBlastLevelUnits;
-	std::set<pair<short int, short int>> unitDefCommandAlreadyReported;
+	std::set<std::pair<short int, short int>> unitDefCommandAlreadyReported;
 	for (int civId = 0; civId < global->civCount; civId++) {
 		for (int unitDefId = 0; unitDefId < global->civilizationDefinitions[civId]->civUnitDefCount; unitDefId++) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = global->civilizationDefinitions[civId]->GetUnitDef(unitDefId);

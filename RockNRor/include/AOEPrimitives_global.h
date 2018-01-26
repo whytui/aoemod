@@ -2,9 +2,12 @@
 #pragma once
 
 #include <assert.h>
+#include <string>
+#include <AOE_const_internal.h>
 #include <AOE_struct_game_settings.h>
 #include <UI\AOE_struct_ui_in_game_main.h>
 #include "mainStructuresHandling.h"
+#include "interruption.h"
 
 
 /* This file contains AOE primitives about game commands handling
@@ -14,6 +17,7 @@
 */
 
 using namespace AOE_STRUCTURES;
+using namespace AOE_CONST_INTERNAL;
 
 namespace AOE_METHODS {
 ;
@@ -42,4 +46,26 @@ bool ReadLanguageTextForCategory(INTERNAL_MAIN_CATEGORIES category, long int com
 // arg5 = posX (depends on event type...)
 void CallGameSettingsNotifyEvent(long int eventId, long int playerId, long int variant_arg3, long int variant_arg4, long int variant_arg5);
 
+
+// Save current game into a gmx savegame file. filenameNoPath is filename with extension, without path.
+// Returns true if successful
+// Does not display any specific UI, does not disable input, does not unpause, etc. Just save game !
+bool SaveCurrentGame(const char *filenameNoPath);
+
+
+// Automatically save current game to a file (hardcoded filename). Can be used in case of error, for example.
+bool AutoSaveCurrentGame();
+
+}
+
+
+namespace ROCKNROR {
+	namespace SYSTEM {
+		// allowEscToContinue = if true, the user can press ESCAPE to resume program execution
+		// tryConnectDebugger = if true, set a breakpoint (and resume execution) when a debugger is attached
+		// In RELEASE mode, we can wait for debugger, but we can't break execution (user needs to set a breakpoint manually)
+		// If in-game, it might be safer to call AOE_METHODS::SetGamePause(true) prior to this.
+		void SaveGameAndStopExecution(const wchar_t *message, bool allowEscToContinue, bool tryConnectDebugger);
+
+	}
 }

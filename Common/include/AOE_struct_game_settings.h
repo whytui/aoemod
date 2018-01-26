@@ -418,8 +418,8 @@ namespace AOE_STRUCTURES {
 		long int lastAccessedEventIndex; // +C54. -1=no "last event". Or a 0-4 value. To remember which index was used in last "home key" press.
 		// 0xC58
 		char unknown_C58[0xE64 - 0xC58];
-		char saveGameName[0x104]; // +E64.
-		char loadGameName[0x104]; // +F68.
+		char saveGameName[0x104]; // +E64. Last saved game's filename withOUT path and withOUT extension (withOUT dot '.').
+		char loadGameName[0x104]; // +F68. Last loaded game's filename withOUT path and withOUT extension (withOUT dot '.').
 		char debugString[0x1190 - 0x106C]; // +106C. Unknown size
 		// 0x1190
 		char isInitMPScreen; // +1190. Set in 0x5055B0. ??? to confirm. is MP game ? "quickStartGame"

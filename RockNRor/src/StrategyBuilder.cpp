@@ -538,7 +538,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 	if (!ROCKNROR::crInfo.techTreeAnalyzer.IsReady()) {
 		this->log += "ERROR: Tech tree analyzer is not ready !";
 		this->log += newline;
-		SYSTEM::StopExecution(_T("ERROR: Tech tree analyzer is not ready !"), true, true);
+		ROCKNROR::SYSTEM::StopExecution(_T("ERROR: Tech tree analyzer is not ready !"), true, true);
 		return;
 	}
 	
@@ -3817,7 +3817,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 			this->log += msg;
 			this->log += newline;
 #ifdef _DEBUG
-			SYSTEM::StopExecution(_T("Issue with requirements"), true, true); // temporary
+			ROCKNROR::SYSTEM::StopExecution(_T("Issue with requirements"), true, true); // temporary
 #endif
 		}
 	}
@@ -4225,7 +4225,7 @@ void StrategyBuilder::AddMissingBuildings() {
 						{
 							if (bldInfo->unitDefId == bldDef->DAT_ID1) {
 								if (!bldInfo->markedForAdd) {
-									SYSTEM::StopExecution(_T("Possible bug: building is known but not marked for add => considered as present in strategy !"), true, true);
+									CR_DEBUG::StopExecution(_T("Possible bug: building is known but not marked for add => considered as present in strategy !"), true, true);
 								}
 								found = true;
 							}

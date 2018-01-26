@@ -164,13 +164,13 @@ void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROU
 				case UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_ROUNDUP_TARGET:
 				case UNIT_GROUP_TASK_IDS::CST_UGT_EXTERMINATE:
 					if (alliedTarget) {
-						ROCKNROR::SYSTEM::StopExecution(_T("SetUnitGroupCurrentTask: target dipl inconsistency"), true, true);
+						ROCKNROR::SYSTEM::SaveGameAndStopExecution(_T("SetUnitGroupCurrentTask: target dipl inconsistency"), true, true);
 						this->SetUnitGroupTarget(unitGroup, NULL);
 					}
 					break;
 				case UNIT_GROUP_TASK_IDS::CST_UGT_DEFEND_UNIT:
 					if (!alliedTarget) {
-						ROCKNROR::SYSTEM::StopExecution(_T("SetUnitGroupCurrentTask: target dipl inconsistency"), true, true);
+						ROCKNROR::SYSTEM::SaveGameAndStopExecution(_T("SetUnitGroupCurrentTask: target dipl inconsistency"), true, true);
 						this->SetUnitGroupTarget(unitGroup, NULL);
 					}
 					break;

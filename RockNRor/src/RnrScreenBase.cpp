@@ -157,7 +157,7 @@ bool RnrScreenBase::CloseScreen(bool ignoreErrors) {
 		}
 	} else {
 		if (!ignoreErrors) {
-			SYSTEM::StopExecution(_T("Could not close ROR screen panel: not found or invalid"), true, true);
+			ROCKNROR::SYSTEM::SaveGameAndStopExecution(_T("Could not close ROR screen panel: not found or invalid"), true, true);
 		}
 		result = false;
 	}
@@ -192,7 +192,7 @@ bool RnrScreenBase::OpenOtherScreenAndCloseThisOne(RnrScreenBase *otherScreen, b
 	if (!myScreenObject) { return false; }
 #ifdef _DEBUG
 	if (parentToUse && !parentToUse->IsCheckSumValidForAChildClass()) {
-		SYSTEM::StopExecution(_T("Bad parent checksum in OpenOtherScreenAndCloseThisOne"), true, true);
+		ROCKNROR::SYSTEM::SaveGameAndStopExecution(_T("Bad parent checksum in OpenOtherScreenAndCloseThisOne"), true, true);
 	}
 #endif
 

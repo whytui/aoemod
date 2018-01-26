@@ -107,4 +107,65 @@ void CallGameSettingsNotifyEvent(long int eventId, long int playerId, long int v
 }
 
 
+// Save current game into a gmx savegame file. filenameNoPath is filename with extension, without path.
+// Returns true if successful
+// Does not display any specific UI, does not disable input, does not unpause, etc. Just save game !
+bool SaveCurrentGame(const char *filenameNoPath) {
+	// Refer to 0x501250=gameSettings.saveGameToFile(filename_nopath) to find whole treatment (including disable input...)
+	if (!filenameNoPath) { return false; } // Null pointer
+	if (filenameNoPath[0] == '\0') { return false; } // Empty string
+	STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) {
+		return false;
+	}
+	if (settings->currentUIStatus < GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) {
+		return false; // Statuses 4 5 6 7 are allowed cf 0x50125A.
+	}
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) {
+		return false;
+	}
+	long int asmResult = 0;
+	_asm{
+		MOV ECX, global;
+		MOV EDX, [ECX];
+		PUSH filenameNoPath;
+		CALL [EDX + 0xD8];
+		AND EAX, 0xFF; // Result is 1-byte. 1 on success.
+		MOV asmResult, EAX;
+	}
+	return (asmResult != 0);
+}
+
+
+// Automatically save current game to a file (hardcoded filename). Can be used in case of error, for example.
+bool AutoSaveCurrentGame() {
+	const char saveFilename[] = "_autosave-RockNRor.gmx";
+	bool res = AOE_METHODS::SaveCurrentGame(saveFilename);
+	std::string msg = "Save game to ";
+	msg += saveFilename;
+	msg += ": ";
+	msg += (res ? "success" : "failure");
+	//traceMessageHandler.WriteMessageNoNotification(msg);
+	return res;
+}
+
+
+}
+
+
+
+namespace ROCKNROR {
+	namespace SYSTEM {
+
+		// allowEscToContinue = if true, the user can press ESCAPE to resume program execution
+		// tryConnectDebugger = if true, set a breakpoint (and resume execution) when a debugger is attached
+		// In RELEASE mode, we can wait for debugger, but we can't break execution (user needs to set a breakpoint manually)
+		// If in-game, it might be safer to call AOE_METHODS::SetGamePause(true) prior to this.
+		void SaveGameAndStopExecution(const wchar_t *message, bool allowEscToContinue, bool tryConnectDebugger) {
+			AOE_METHODS::AutoSaveCurrentGame();
+			ROCKNROR::SYSTEM::StopExecution(message, allowEscToContinue, tryConnectDebugger);
+		}
+
+	}
 }
