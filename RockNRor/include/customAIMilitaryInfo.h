@@ -8,6 +8,8 @@
 #include <AOE_struct_inf_ai.h>
 #include "RockNRorInfo.h"
 #include "EnemyAttacksHistory.h"
+#include "unitHandling.h"
+#include "playerHandling.h"
 
 using namespace AOE_STRUCTURES;
 

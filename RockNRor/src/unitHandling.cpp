@@ -378,4 +378,41 @@ bool CanBuilderSwitchToFarmer(STRUCT_UNIT_BASE *builder, STRUCT_UNIT_BASE *farm)
 }
 
 
+// Returns the diplomacy stance regarding "unitOther", from unitMe's point of view.
+// Returns CST_PDS_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther) {
+	if (!unitMe) {
+		return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_UNKNOWN;
+	}
+	return GetDiplomacyStanceForUnit(unitMe->ptrStructPlayer, unitOther);
+}
+
+// Returns the diplomacy stance regarding "unitOther", from playerMe's point of view.
+// Returns CST_PDS_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForUnit(AOE_STRUCTURES::STRUCT_PLAYER *playerMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther) {
+	if (!unitOther) {
+		return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_UNKNOWN;
+	}
+	return AOE_STRUCTURES::PLAYER::GetDiplomacyStanceForPlayer(playerMe, unitOther->ptrStructPlayer);
+}
+
+// Returns the diplomacy value regarding "unitOther", from unitMe's point of view.
+// Returns CST_PDV_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther) {
+	if (!unitMe) {
+		return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES::CST_PDV_UNKNOWN;
+	}
+	return GetDiplomacyValueForUnit(unitMe->ptrStructPlayer, unitOther);
+}
+
+// Returns the diplomacy value regarding "unitOther", from playerMe's point of view.
+// Returns CST_PDV_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForUnit(AOE_STRUCTURES::STRUCT_PLAYER *playerMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther) {
+	if (!unitOther) {
+		return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES::CST_PDV_UNKNOWN;
+	}
+	return AOE_STRUCTURES::PLAYER::GetDiplomacyValueForPlayer(playerMe, unitOther->ptrStructPlayer);
+}
+
+
 }

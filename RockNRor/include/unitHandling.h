@@ -96,4 +96,22 @@ bool ShouldKeepOwnedResourceWhenKilledByClass(STRUCT_UNIT_BASE *killedUnit, GLOB
 // This does not detect pending commands (if some villager has just been told to gather this farm)
 bool CanBuilderSwitchToFarmer(STRUCT_UNIT_BASE *builder, STRUCT_UNIT_BASE *farm);
 
+
+// Returns the diplomacy stance regarding "unitOther", from unitMe's point of view.
+// Returns CST_PDS_ENEMY in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther);
+
+// Returns the diplomacy stance regarding "unitOther", from playerMe's point of view.
+// Returns CST_PDS_ENEMY in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForUnit(AOE_STRUCTURES::STRUCT_PLAYER *playerMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther);
+
+// Returns the diplomacy value regarding "unitOther", from unitMe's point of view.
+// Returns CST_PDV_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther);
+
+// Returns the diplomacy value regarding "unitOther", from playerMe's point of view.
+// Returns CST_PDV_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForUnit(AOE_STRUCTURES::STRUCT_PLAYER *playerMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther);
+
+
 }

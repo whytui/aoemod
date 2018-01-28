@@ -842,5 +842,52 @@ STRUCT_UNIT_BASE *GetPlayerMostDamagedUnit(STRUCT_AI *mainAI, GLOBAL_UNIT_AI_TYP
 }
 
 
+// Returns the diplomacy stance regarding "playerOther", from playerMe's point of view.
+// Returns CST_PDS_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForPlayer(STRUCT_PLAYER *playerMe, long int otherPlayerId) {
+	if (!playerMe) {
+		return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_UNKNOWN;
+	}
+	STRUCT_GAME_GLOBAL *global = playerMe->ptrGlobalStruct;
+	if (!global) { return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_UNKNOWN; }
+	if ((otherPlayerId < 0) || (otherPlayerId >= global->playerTotalCount)) {
+		return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_UNKNOWN;
+	}
+	return playerMe->ptrDiplomacyStances[otherPlayerId];
+}
+
+// Returns the diplomacy stance regarding "playerOther", from playerMe's point of view.
+// Returns CST_PDS_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForPlayer(STRUCT_PLAYER *playerMe, STRUCT_PLAYER *playerOther) {
+	if (!playerOther) {
+		return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_UNKNOWN;
+	}
+	return GetDiplomacyStanceForPlayer(playerMe, playerOther->playerId);
+}
+
+
+
+// Returns the diplomacy stance regarding "otherPlayerId", from playerMe's point of view.
+// Returns CST_PDV_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForPlayer(STRUCT_PLAYER *playerMe, long int otherPlayerId) {
+	if (!playerMe) {
+		return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES::CST_PDV_UNKNOWN;
+	}
+	if ((otherPlayerId < 0) || (otherPlayerId > 8)) { // diplomacyVSPlayers size is always 9.
+		return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES::CST_PDV_UNKNOWN;
+	}
+	return playerMe->diplomacyVSPlayers[otherPlayerId];
+}
+
+// Returns the diplomacy stance regarding "playerOther", from playerMe's point of view.
+// Returns CST_PDV_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForPlayer(STRUCT_PLAYER *playerMe, STRUCT_PLAYER *playerOther) {
+	if (!playerOther) {
+		return AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES::CST_PDV_UNKNOWN;
+	}
+	return GetDiplomacyValueForPlayer(playerMe, playerOther->playerId);
+}
+
+
 }
 }

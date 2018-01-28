@@ -269,6 +269,7 @@ namespace CUSTOM_AI {
 		if (startIndex < 0) { startIndex = 0; }
 		for (int i = startIndex; i < player->ptrAIStruct->structInfAI.unitMemoryListSize; i++) {
 			STRUCT_UNIT_MEMORY *curElem = &player->ptrAIStruct->structInfAI.unitMemoryList[i];
+			// Get "known" diplomacy. If curElem->playerId is not up to date because unit is not visible, we'll get issues. Cf RockNRorCommand::OnUnitChangeOwner_fixes
 			bool enemyOrNeutral = (player->diplomacyVSPlayers[curElem->playerId] > PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY);
 			enemyOrNeutral &= (curElem->unitId > -1);
 			STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curElem->unitId);

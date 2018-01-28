@@ -165,6 +165,7 @@ namespace AOE_STRUCTURES
 		// Unis IDs are added on "activity.processNotify" for being attacked.
 		// Unit IDs are removed on "updateActivity" (?), cf loop in 0x40F8E2: for each unit: if unit.activity.targetId != myUnitId then remove from list.
 		// Warning: Units that do NOT have an activity (tame lion...) are not well listed here (it's quite a bug in the game, units are supposed to all have an activity... I think)
+		// Warning: There can be "Allied/self" units, eg after conversion (including projectile unit hitting "me" afterwards)
 		STRUCT_MANAGED_ARRAY unitIDsThatAttackMe;
 		STRUCT_WAYPOINT waypointQueue[8]; // +70.
 		// 0xF0

@@ -1892,12 +1892,32 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 			}
 		}
 
-		// Fix back-reference (if any) in target unit's activity
 		long int convertedUnitId = targetUnit->unitInstanceId;
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+
+		// Fix unit memory items that refer to that unit, for both players + all their allied
+		for (int i = 1; (global != nullptr) && (i < global->playerTotalCount); i++) {
+			// Is current player allied with one of imapcted players ? Note : x<=CST_PDV_ALLY can be gaia, self or ally. Ignore gaia here as i>0.
+			// COMMENTED OUT: keeping invalid playerIds in infAI data is a pain and leads to issues. For now, "cheat" on this case (this does not really benefits to AI, but mostly avoid issues)
+			/*if ((AOE_STRUCTURES::PLAYER::GetDiplomacyValueForPlayer(targetPlayer, i) <= PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY) ||
+				(AOE_STRUCTURES::PLAYER::GetDiplomacyValueForPlayer(actorPlayer, i) <= PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY)
+			) {*/
+				// For all allied players, update owner id in "unit memory". Consider AI players "talk" to give this information. This avoids bugs trying to target allied/owned units...
+				STRUCT_UNIT_MEMORY *mem = ROCKNROR::unitExtensionHandler.GetInfAIUnitMemory(convertedUnitId, i);
+				if (mem) {
+					mem->playerId = (char)actorPlayer->playerId;
+				}
+			//}
+		}
+
+		// Fix back-reference (if any) in target unit's activity
 		if (targetUnit->currentActivity) {
 			STRUCT_UNIT_BASE *targetTargetUnit = GetUnitStruct(targetUnit->currentActivity->targetUnitId);
 			if (targetTargetUnit && targetTargetUnit->IsCheckSumValidForAUnitClass()) {
-				targetTargetUnit->currentActivity->unitIDsThatAttackMe.Remove(convertedUnitId);
+				// Only if target's target has an activity ! Here it could be a tree, a mine, etc (for example if targetUnit is a villager)
+				if (targetTargetUnit->currentActivity && targetTargetUnit->currentActivity->IsCheckSumValid()) {
+					targetTargetUnit->currentActivity->unitIDsThatAttackMe.Remove(convertedUnitId);
+				}
 			}
 		}
 		STRUCT_ACTION_BASE *unitAction = AOE_STRUCTURES::GetUnitAction(targetUnit);

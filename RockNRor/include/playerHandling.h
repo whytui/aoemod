@@ -180,5 +180,22 @@ void SetPlayerSharedExploration_safe(long int playerId);
 STRUCT_UNIT_BASE *GetPlayerMostDamagedUnit(STRUCT_AI *mainAI, GLOBAL_UNIT_AI_TYPES aiType, long int unitDefIdFilter);
 
 
+// Returns the diplomacy stance regarding "otherPlayerId", from playerMe's point of view.
+// Returns CST_PDS_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForPlayer(STRUCT_PLAYER *playerMe, long int otherPlayerId);
+
+// Returns the diplomacy stance regarding "playerOther", from playerMe's point of view.
+// Returns CST_PDS_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForPlayer(STRUCT_PLAYER *playerMe, STRUCT_PLAYER *playerOther);
+
+
+// Returns the diplomacy stance regarding "otherPlayerId", from playerMe's point of view.
+// Returns CST_PDV_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForPlayer(STRUCT_PLAYER *playerMe, long int otherPlayerId);
+
+// Returns the diplomacy stance regarding "playerOther", from playerMe's point of view.
+// Returns CST_PDV_UNKNOWN in error cases
+AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForPlayer(STRUCT_PLAYER *playerMe, STRUCT_PLAYER *playerOther);
+
 }
 }

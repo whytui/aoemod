@@ -671,8 +671,10 @@ bool UnitGroupAI::TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *
 		targetPosY = myMainCentralUnit->positionY + (mainUnitProtectionRadius * unitGroupOrientationYFromMainUnit);
 		}*/
 		STRUCT_UNIT_MEMORY *targetElem = this->GetUnitMemoryElemEnemyUnitCloserToPosition(player, (long int)targetPosX, (long int)targetPosY);
+		// Check that targetElem refers to an enemy unit
+		bool canAttackTargetElem = (targetElem != nullptr) && (AOE_STRUCTURES::PLAYER::GetDiplomacyValueForPlayer(player, targetElem->playerId) >= CST_PDV_NEUTRAL);
 		UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
-		if (targetElem) {
+		if (canAttackTargetElem) {
 			result = this->AttackOrRetreat(&player->ptrAIStruct->structTacAI, unitGroup, targetElem, targetPosX, targetPosY, true);
 		} else {
 			UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(&player->ptrAIStruct->structTacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIMemoryElem,
@@ -692,9 +694,12 @@ bool UnitGroupAI::TaskActiveAttackGroupCriticalWithVitalMainUnit(STRUCT_PLAYER *
 		// Unit group is already in (or near) town
 		if (global->currentGameTime - unitGroup->lastUpdateTime_ms > (1000 * tacAI->SNNumber[SNTacticalUpdateFrequency])) {
 			STRUCT_UNIT_MEMORY *targetElem = this->GetUnitMemoryElemEnemyUnitCloserToPosition(player, (long int)commander->positionX, (long int)commander->positionY);
+			// Check that targetElem refers to an enemy unit
+			bool canAttackTargetElem = (targetElem != nullptr) && (AOE_STRUCTURES::PLAYER::GetDiplomacyValueForPlayer(player, targetElem->playerId) >= CST_PDV_NEUTRAL);
+
 			UNIT_GROUP_TASK_IDS result = UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 			// Attack enemy if visible/if we know a recent location. Otherwise, do nothing (we don't set a retreat position in AttackOrRetreat call)
-			if (targetElem) {
+			if (canAttackTargetElem) {
 				result = this->AttackOrRetreat(tacAI, unitGroup, targetElem, -1, -1, true);
 			} else {
 				result = this->AttackOrRetreat(tacAI, unitGroup, this->activeGroupsTaskingTempInfo.enemyUnitNearMyMainUnitInfAIMemoryElem, -1, -1, false);
@@ -980,7 +985,8 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 		// If we found a target, assign it to other group units
 		if (unitIdToTarget >= 0) {
 			AOE_STRUCTURES::STRUCT_UNIT_MEMORY *elem = ROCKNROR::unitExtensionHandler.GetInfAIUnitMemory(unitIdToTarget, infAI);
-			if (elem) {
+			bool canAttackTargetElem = (elem != nullptr) && (AOE_STRUCTURES::PLAYER::GetDiplomacyValueForPlayer(player, elem->playerId) >= CST_PDV_NEUTRAL);
+			if (canAttackTargetElem) {
 				UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, elem, -1, -1, false);
 				if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
 #ifdef _DEBUG

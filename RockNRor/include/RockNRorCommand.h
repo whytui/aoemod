@@ -56,6 +56,7 @@
 #include "interruption.h"
 #include "CustomCiv.h"
 #include "TechTreeAnalyzer.h"
+#include "playerHandling.h"
 
 #pragma once
 
