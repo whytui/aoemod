@@ -372,6 +372,7 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 	int strategyFarmCount = 0;
 	int strategyPendingFarmCount = 0; // non-build/non in progress farm count
 	int currentEstimatedPopulation = 0;
+	int firstTownCenterStatus = -1; // -1=not found, 0=found&destroyed, 1=found&built or in progress
 	const int LAST_BLD_NO_FURTHER_THAN_POPULATION = 45;
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *tmpElem = buildAI->fakeFirstStrategyElement.next;
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *buildAiCurrentStratElem = NULL; // determined by buildAI->currentIDInStrategy
@@ -411,6 +412,14 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 				}
 				if ((farmToReuse == NULL) && (tmpElem->aliveCount == 0) && (tmpElem->inProgressCount == 0) && (tmpElem->retrains >= 0) && (tmpElem->totalCount >= tmpElem->retrains)) {
 					farmToReuse = tmpElem;
+				}
+			}
+			if ((firstTownCenterStatus == -1) && (tmpElem->unitDAT_ID == CST_UNITID_FORUM)) {
+				if ((tmpElem->aliveCount > 0) || (tmpElem->inProgressCount > 0) ||
+					((tmpElem->retrains >= 0) && (tmpElem->totalCount >= tmpElem->retrains))) {
+					firstTownCenterStatus = 1; // Alive or in progress
+				} else {
+					firstTownCenterStatus = 0; // Need to trigger build
 				}
 			}
 			if ((tmpElem->unitDAT_ID != CST_UNITID_WATCH_TOWER) &&
@@ -466,7 +475,9 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 	if (spareFarms < 0) { spareFarms = 0; }
 	// Evaluate various conditions that prevent addition of farms to strategy. Those conditions are non exclusive, it's just a filter
 	bool doNotAddFarmToStrategy = (strategyFarmCount >= maxFarms) || (actualFarmCount >= maxFarms);
-	if (!canBuildFarm && ((spareFarms > 0) || (strategyPendingFarmCount > 0))) {
+	if (spareFarms > 0) { doNotAddFarmToStrategy = true; } // Never build additional farms when I already have more than currently "desired"
+	if (firstTownCenterStatus == 0) { doNotAddFarmToStrategy = true; } // TC has top priority, do not build other stuff right now
+	if (!canBuildFarm && (strategyPendingFarmCount > 0)) {
 		// not enough wood to build. Don't add farm unless there really is no available (spare) farm to gather (and none anticipated in strategy):
 		// in this case, we may add a farm so that its cost will be taken into account in gathering so we can actually build it
 		doNotAddFarmToStrategy = true;
