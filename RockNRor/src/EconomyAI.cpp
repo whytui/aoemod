@@ -358,7 +358,7 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 
 	int currentAge = (int)player->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CURRENT_AGE); // 1=stone, 4=iron
 	bool canBuildTower = (AOE_STRUCTURES::PLAYER::IsUnitAvailableForPlayer(CST_UNITID_WATCH_TOWER, player) != 0);
-	bool canBuildFarm = (AOE_STRUCTURES::PLAYER::IsUnitAvailableForPlayer(CST_UNITID_FARM, player) != 0);
+	bool canBuildFarm = (AOE_STRUCTURES::PLAYER::IsUnitAvailableForPlayer(CST_UNITID_FARM, player) != 0); // True if unit is available and autobuildfarms is OK
 	canBuildTower &= (tacAI->SNNumber[SNAutoBuildTowers] == 1);
 	canBuildFarm &= (tacAI->SNNumber[SNAutoBuildFarms] == 1);
 	long int maxTowers = tacAI->SNNumber[SNMaxTowers];
@@ -366,7 +366,7 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 	int actualTowerCount = AOE_STRUCTURES::PLAYER::GetPlayerUnitCount(player, CST_UNITID_WATCH_TOWER, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2);
 	int actualFarmCount = AOE_STRUCTURES::PLAYER::GetPlayerUnitCount(player, CST_UNITID_FARM, GLOBAL_UNIT_AI_TYPES::TribeAINone, 0, 2);
 	canBuildTower &= PLAYER::CanUnitCostBePaid(player, CST_UNITID_WATCH_TOWER);
-	canBuildFarm &= PLAYER::CanUnitCostBePaid(player, CST_UNITID_FARM);
+	bool canPayFarm = PLAYER::CanUnitCostBePaid(player, CST_UNITID_FARM);
 	long int currentStratElemId = buildAI->currentIDInStrategy;
 
 	// Retrieve all information from strategy in only one loop
@@ -479,13 +479,13 @@ bool EconomyAI::UpdateStrategyAutoBuildInsertions(STRUCT_TAC_AI *tacAI) {
 	bool doNotAddFarmToStrategy = (strategyFarmCount >= maxFarms) || (actualFarmCount >= maxFarms);
 	if (spareFarms > 0) { doNotAddFarmToStrategy = true; } // Never build additional farms when I already have more than currently "desired"
 	if (firstTownCenterStatus == 0) { doNotAddFarmToStrategy = true; } // TC has top priority, do not build other stuff right now
-	if (!canBuildFarm && (strategyPendingFarmCount > 0)) {
+	if ((!canBuildFarm || !canPayFarm) && (strategyPendingFarmCount > 0)) {
 		// not enough wood to build. Don't add farm unless there really is no available (spare) farm to gather (and none anticipated in strategy):
 		// in this case, we may add a farm so that its cost will be taken into account in gathering so we can actually build it
 		doNotAddFarmToStrategy = true;
 	}
 
-	if (!doNotAddFarmToStrategy) {
+	if (!doNotAddFarmToStrategy && canBuildFarm) {
 		int food = (int)player->GetResourceValue(CST_RES_ORDER_FOOD);
 		//int wood = (int)player->GetResourceValue(CST_RES_ORDER_WOOD);
 
