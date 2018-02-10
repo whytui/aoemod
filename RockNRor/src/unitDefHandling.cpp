@@ -580,5 +580,27 @@ namespace AOE_STRUCTURES {
 	}
 
 
+	// Get a *possible* unitDefId ("DAT_ID") that corresponds to a civilian that gathers such type of resource
+	// E.g. returns 120 (forager) for "berry storage" type (16). Note that 259 (farmer) would also match
+	// Returns -1 if no type matches (non-default gatherable resource types)
+	short int GetCivilianUnitDefIdForResourceType_hardcoded(RESOURCE_TYPES resourceType) {
+		switch (resourceType) {
+		case RESOURCE_TYPES::CST_RES_ORDER_FOOD:
+		case RESOURCE_TYPES::CST_RES_ORDER_MEAT_STORAGE:
+			return CST_UNITID_HUNTER;
+		case RESOURCE_TYPES::CST_RES_ORDER_WOOD:
+			return CST_UNITID_LUMBERJACK;
+		case RESOURCE_TYPES::CST_RES_ORDER_STONE:
+			return CST_UNITID_MINERSTONE;
+		case RESOURCE_TYPES::CST_RES_ORDER_GOLD:
+			return CST_UNITID_MINERGOLD;
+		case RESOURCE_TYPES::CST_RES_ORDER_BERRY_STORAGE:
+			return CST_UNITID_FORAGER;
+		case RESOURCE_TYPES::CST_RES_ORDER_FISH_STORAGE:
+			return CST_UNITID_FISHERMAN;
+		}
+		return -1;
+	}
+
 }
 

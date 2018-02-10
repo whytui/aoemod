@@ -189,9 +189,13 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 								// Transform repairman into gatherer
 								// because TacAI.Update() may execute a "right click" in 0x4D6ED2 to have him deposit the resources.
 								// However, if villager is currently a repairman, the right-click will trigger a repair, not a "deposit" action
-								// Fortunately, "casting" the unit as "villager" is sufficient whatever the resource type is :
-								// A villager with resource is transformed into the relevant gatherer (and NOT repairman) with a right-click when both actions are possible.
-								STRUCT_UNITDEF_BASE *unitDefVillBase = player->GetUnitDefBase(CST_UNITID_VILLAGER);
+								// Transform the villager into the relevant gatherer (and NOT repairman) before trying the "right-click" when both actions are possible.
+								// For some reason, a right-click here does not *always* casts the villager into gatherer, sometimes the repairman "wins" :-/
+								short int unitDefIdToAssign = GetCivilianUnitDefIdForResourceType_hardcoded((RESOURCE_TYPES)villager->resourceTypeId);
+								if (unitDefIdToAssign < 0) {
+									unitDefIdToAssign = CST_UNITID_VILLAGER;
+								}
+								STRUCT_UNITDEF_BASE *unitDefVillBase = player->GetUnitDefBase(unitDefIdToAssign);
 								if (unitDefVillBase) {
 									AOE_METHODS::UNIT::UnitTransform(villager, unitDefVillBase);
 								}

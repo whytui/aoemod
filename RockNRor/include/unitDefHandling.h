@@ -179,4 +179,9 @@ namespace AOE_STRUCTURES {
 	// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
 	std::string GetUnitName(short int unitDefId);
 
+	// Get a *possible* unitDefId ("DAT_ID") that corresponds to a civilian that gathers such type of resource
+	// E.g. returns 120 (forager) for "berry storage" type (16). Note that 259 (farmer) would also match
+	// Returns -1 if no type matches (non-default gatherable resource types)
+	short int GetCivilianUnitDefIdForResourceType_hardcoded(RESOURCE_TYPES resourceType);
+
 }
