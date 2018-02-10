@@ -102,7 +102,8 @@ long int CallFindPathForUnit(long int allArgs[15 + 1]) {
 		// fix float arg
 		float *pf = (float*)(&allArgs[6]);
 		double f = (double)*pf;
-		std::string s5 = GetHexStringAddress(allArgs[5]);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *actor = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)allArgs[5]; // Actor unit - for debugging only
+		std::string s5 = GetHexStringAddress(allArgs[5]); // ptr actor unit
 		std::string s7 = GetHexStringAddress(allArgs[7]);
 		sprintf_s(buffer, 800, "%ld %ld %ld %ld %s %7.1f %s %d %d %d %d %d %d %d %d ; res=%d", allArgs[1], allArgs[2], allArgs[3], allArgs[4],
 			s5.c_str(), f, s7.c_str(),

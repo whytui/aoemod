@@ -32,7 +32,7 @@ namespace AOE_STRUCTURES {
 		long int resourceAmount; // +0C. Gathered amount at this point (compared to +08)
 		// 0x10
 		long int targetUnitId; // building to build, gazelle to hunt, etc
-		unsigned long int timeGetTimeValue; // Last evaluation system time in milliseconds. Task changes are evaluated if > 5 seconds ?
+		unsigned long int timeGetTimeValue; // Last evaluation system time in milliseconds. Task changes are evaluated if > 5 seconds (real time) cf 0x4DA38A
 
 		AOE_CONST_FUNC::RESOURCE_TYPES GetResourceType() const { return (AOE_CONST_FUNC::RESOURCE_TYPES)this->resourceType; };
 	};
@@ -129,7 +129,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int villagerTasksRelevantElemCount; // +9CC. Number of RELEVANT element count in villagerTasks array (array size is fixed, it's included in this structure !) "villager gatherers".
 		long int desiredGathererVillagersCount; // +9D0. Counts all villagers BUT explorers = "desired gatherers count" (also includes repairmen, etc)
 		AOE_STRUCTURES::STRUCT_UNIT_GROUP fakeFirstUnitGroupElem; // +9D4. Organized as a circular list (each elem is a group) ? This one = "fake" elem (like in strategy)
-		unsigned long int seqUnitGroupId; // +D04. Is = next group's ID.
+		unsigned long int seqUnitGroupId; // +D04. Id = next group's ID.
 		unsigned long int unitGroupsCount; // +D08. This does NOT count fakeFirstUnitGroupElem (so it CAN be 0).
 		unsigned long int lastAttackTime_ms; // +D0C. Last attack time (not response time, unlesse SNLockAttackAndAttackResponse=1). Set in 0x4D457B.
 		long int unknown_D10_ms; // +D10. A time value in ms. Last recomputation of unit groups ?

@@ -308,9 +308,11 @@ bool EconomyAI::CalcVillagerCountByTask(STRUCT_TAC_AI *tacAI) {
 	assert(settings && settings->IsCheckSumValid());
 	AOE_STRUCTURES::STRUCT_PLAYER *player = tacAI->ptrMainAI->ptrStructPlayer;
 	bool diffHardOrHardest = (settings->rgeGameOptions.difficultyLevel <= GAME_DIFFICULTY_LEVEL::GDL_HARD);
-	if ((totalVillagerCount < 3) && diffHardOrHardest && global && (global->currentGameTime > 60000)) {
+	long int minVillager = settings->isDeathMatch ? AI_CONST::minimumVillagersToAllowExplorersInLateGame_DM : AI_CONST::minimumVillagersToAllowExplorersInLateGame_RM;
+	if ((totalVillagerCount < minVillager) && diffHardOrHardest && global && 
+		(global->currentGameTime > AI_CONST::delayForExplorationLateGame_ms)) {
 		// This situation is not well handled by standard AI
-		// TODO: do I have a TC ? Do I have food ?
+		// TODO: do I have a TC ? Do I have food ? What is my desired number of villagers (beware DM) ?
 		// player->ptrAIStruct->structTacAI.SNNumber[SNCapCivilianExplorers]
 		doNotRunRorUpdate = true;
 		tacAI->villagerExplorers.usedElements = 0;
