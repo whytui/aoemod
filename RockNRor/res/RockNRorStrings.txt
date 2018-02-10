@@ -30,6 +30,10 @@ Welcome. RockNRor
 plugin is active.
 [42010] // AI is disabled for all players
 AI is disabled for all players
+[42011] // AI is disabled for all players but current one
+AI is disabled for all players but current one
+[42012] // Switched AI for current player
+Switched AI for current player
 
 [42085] // "Custom"
 Custom

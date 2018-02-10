@@ -330,7 +330,8 @@ namespace AOE_STRUCTURES {
 			}
 			return (this->AIControlMode == 3);
 		}
-		char GetCustomAIFlag() const { return this->unused_customAIFlag; } // please use IsAIActive instead unless you have a good reason.
+		// Please use IsAIActive instead unless you have a good reason.
+		char GetCustomAIFlag() const { return this->unused_customAIFlag; }
 		float GetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES resourceIndex) {
 			if ((resourceIndex < 0) || (resourceIndex > AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_ALL_RELICS)) { return -1; }
 			return this->ptrResourceValues[resourceIndex];

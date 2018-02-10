@@ -103,6 +103,9 @@ const static unsigned long int CRLANG_ID_BEING_TRAINED = 42025;
 
 const static unsigned long int CRLANG_ID_AI_FLAGS_RECOMPUTED = 42026;
 const static unsigned long int CRLANG_ID_AI_FLAGS_ALL_SET = 42027;
+const static unsigned long int CRLANG_ID_AI_FLAGS_NONE_SET = 42010;
+const static unsigned long int CRLANG_ID_AI_FLAGS_ONLY_CURRENT_SET = 42011;
+const static unsigned long int CRLANG_ID_AI_FLAG_SWITCH_CURRENT = 42012;
 const static unsigned long int CRLANG_ID_CANT_TRAIN = 42087;
 const static unsigned long int CRLANG_ID_CANT_RESEARCH = 42088;
 const static unsigned long int CRLANG_ID_BTN_DONT_ATTACK_VILLAGER = 42116;

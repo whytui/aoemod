@@ -558,7 +558,22 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 	}
 	if ((strcmp(command, "noai") == 0) || (strcmp(command, "NOAI") == 0)) {
 		AOE_METHODS::PLAYER::SetAllAIFlags(false);
-		AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(42010, "AI is disabled for all players"));
+		AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_NONE_SET, "AI is disabled for all players"));
+	}
+	if ((strcmp(command, "oneai") == 0) || (strcmp(command, "ONEAI") == 0)) {
+		AOE_METHODS::PLAYER::SetAllAIFlags(false);
+		STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (global) {
+			AOE_METHODS::PLAYER::SetAIFlag(global->humanPlayerId, 1);
+			AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAGS_ONLY_CURRENT_SET, "AI is disabled for all players but current one"));
+		}
+	}
+	if ((strcmp(command, "myai") == 0) || (strcmp(command, "MYAI") == 0)) {
+		STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (global) {
+			AOE_METHODS::PLAYER::SetAIFlag(global->humanPlayerId, -1);
+			AOE_METHODS::CallWriteText(localizationHandler.GetTranslation(CRLANG_ID_AI_FLAG_SWITCH_CURRENT, "Switched AI mode for current player"));
+		}
 	}
 	if (strcmp(command, "dump") == 0) {
 #ifdef _DEBUG

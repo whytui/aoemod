@@ -12,6 +12,7 @@
 #include "traceMessage.h"
 #include "mainStructuresHandling.h"
 #include "researches.h"
+#include "RockNRorInfo.h"
 #include "AOEPrimitives_gameCommand.h"
 
 #pragma once
@@ -56,6 +57,10 @@ void DisableAIFlagsForHuman();
 // Restore AI flags based on human-controlled playerID (to be used in SP games only)
 void RestoreAllAIFlags();
 void SetAllAIFlags(bool enable);
+
+// Set AI flag for specified player
+// enableMode : 0=disable AI, 1=enable AI, -1=switch
+void SetAIFlag(int playerId, int enableMode);
 
 // Changes destination player id screen position from srcPlayerId's
 bool CopyScreenPosition(const AOE_STRUCTURES::STRUCT_PLAYER *srcPlayer, AOE_STRUCTURES::STRUCT_PLAYER *destPlayer);

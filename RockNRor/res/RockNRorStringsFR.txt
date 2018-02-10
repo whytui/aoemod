@@ -37,6 +37,10 @@ Bienvenue, le plugin RockNRor
 est actif.
 [42010] // AI is disabled for all players
 L'IA a été désactivée pour tous les joueurs
+[42011] // AI is disabled for all players but current one
+L'IA a été désactivée pour tous les joueurs sauf le vôtre
+[42012] // Switched AI for current player
+Activation/Désactivation de l'IA pour le joueur courant
 
 [42085] // "Custom"
 Personnalisé
