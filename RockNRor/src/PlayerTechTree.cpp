@@ -856,10 +856,10 @@ double TechTreeCreator::CreateOneBonus() {
 	};
 	// propsByUnitClass.insert => Unit class, { weight, probabilityCoeff }
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, 0.35, 0.9);
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.2, 0.82);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.2, 0.81); // small proba because not many possible underlying bonuses here (cost, HP)
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, 0.55, 0.97);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, 0.4, 0.9);
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.2, 0.95);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.2, 1.05);
 	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, 0.1, 0.70);// is water map
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, 0.35, 1);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, 0.4, 0.98);
@@ -875,7 +875,7 @@ double TechTreeCreator::CreateOneBonus() {
 			_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, 0.65, 1.2); // we want a "not too high" proba, but don't forget this case is already filtered by "religion level=4"
 		} else {
 			// Temple bonus is likely to happen on very-good temple civs
-			_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, 0.65, 2); // Higher proba, to compensate the preliminary filter (only religion level=5 is allowed here)
+			_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest, 0.65, 2.1); // Higher proba, to compensate the preliminary filter (only religion level=5 is allowed here)
 		}
 	}
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon, 0.7, 1);
