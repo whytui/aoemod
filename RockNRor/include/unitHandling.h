@@ -98,10 +98,12 @@ bool CanBuilderSwitchToFarmer(STRUCT_UNIT_BASE *builder, STRUCT_UNIT_BASE *farm)
 
 
 // Returns the diplomacy stance regarding "unitOther", from unitMe's point of view.
+// ***WARNING*** this returns "neutral" for "self". You might prefer using GetDiplomacyValueForPlayer.
 // Returns CST_PDS_ENEMY in error cases
 AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unitMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther);
 
 // Returns the diplomacy stance regarding "unitOther", from playerMe's point of view.
+// ***WARNING*** this returns "neutral" for "self". You might prefer using GetDiplomacyValueForPlayer.
 // Returns CST_PDS_ENEMY in error cases
 AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForUnit(AOE_STRUCTURES::STRUCT_PLAYER *playerMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther);
 

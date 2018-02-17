@@ -167,6 +167,7 @@ namespace ROCKNROR {
 		void ShouldNotApplyPalmyraTradingBonus(REG_BACKUP *REG_values);
 		void TacAIHandleOneUpdateByType(REG_BACKUP *REG_values);
 		void ActionBuildUpdateFarmHack(REG_BACKUP *REG_values);
+		void OnAddInUnitMemoryList(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

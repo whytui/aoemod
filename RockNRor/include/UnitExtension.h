@@ -30,6 +30,10 @@ public:
 	// -1 if index is still unknown: unit may not be known in infAI elem list OR this index has not been retrieved yet
 	long int myIndexInOtherPlayerInfAIMemory[9];
 
+	// Indicates that the "unit memory" element does not exist in other players' infAI
+	// Default false (we don't know). Set to true when we fail searching for unit in a player's unit memory
+	bool wasNotFoundInOtherPlayerInfAIMemory[9];
+
 	// Flag to indicate when "this" unit has been added to other players infAI lists, so that this treatment is run only once.
 	bool hasBeenAddedToOtherPlayersInfAILists[9];
 

@@ -440,6 +440,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x4B1AF7:
 		this->ActionBuildUpdateFarmHack(REG_values);
 		break;
+	case 0x4BD7D6:
+		this->OnAddInUnitMemoryList(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4529,6 +4532,54 @@ void RockNRorInstance::ActionBuildUpdateFarmHack(REG_BACKUP *REG_values) {
 	if (!useRorSearchOtherBuildingToConstruct) {
 		// Custom case: do nothing (do NOT "search" for other nearby constructions to build)
 		ChangeReturnAddress(REG_values, 0x4B1B0D);
+	}
+}
+
+
+// From 0x4BD7CF : infAI.UpdateAddInUnitMEmory(unitStruct), call to infAI.UpdateAddInUnitMemory(unitID,(word)DATID, (word)unitClass, (int)posY, posX, posZ, playerId, HP, attackAttempts, arg10, float_attack?,float_reloadTime1, float_maxRange, unitStruct)
+// Be careful, this method is also called BY rocknror, take care of recursion issues
+void RockNRorInstance::OnAddInUnitMemoryList(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_INF_AI *infAI = (AOE_STRUCTURES::STRUCT_INF_AI *)REG_values->ECX_val;
+	ror_api_assert(REG_values, REG_values->EBX_val == REG_values->ECX_val);
+	ror_api_assert(REG_values, infAI && infAI->IsCheckSumValid());
+
+	long int unitId = GetIntValueFromRORStack(REG_values, 0);
+	unsigned long int callAddress = 0x4BD7E0;
+	unsigned long int callResult = 0;
+	AOE_STRUCTURES::STRUCT_UNIT_MEMORY *updatedEntry = NULL;
+	unsigned long int ptrArgs = REG_values->ESP_val;
+	long int test0 = ((long int*)ptrArgs)[0];
+	long int test13 = ((long int*)ptrArgs)[13];
+	// Perform original call
+	_asm {
+		MOV EAX, 14; // 14 parameters
+		MOV EDX, ptrArgs;
+beginLoop:
+		DEC EAX;
+		MOV EDI, [EDX + EAX * 4];
+		PUSH[EDX + EAX * 4];
+		CMP EAX, 0;
+		JG beginloop;
+		MOV ECX, infAI;
+		CALL callAddress;
+		MOV callResult, EAX;
+	}
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	REG_values->EAX_val = callResult;
+	updatedEntry = (AOE_STRUCTURES::STRUCT_UNIT_MEMORY *)callResult;
+
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || (updatedEntry == NULL)) {
+		return;
+	}
+	// Custom treatments
+	long int playerId = infAI->commonAIObject.playerId;
+#ifdef _DEBUG
+	ror_api_assert(REG_values, unitId == updatedEntry->unitId);
+	ror_api_assert(REG_values, (playerId >= 0) && (playerId < 9));
+#endif
+	if (ROCKNROR::IsImproveAIEnabled(playerId)) {
+		// Make sure unitExtensions are informed that a new unitMemory entry has been added for that player
+		ROCKNROR::unitExtensionHandler.UpdateUnitMemoryCacheForPlayer(updatedEntry, infAI);
 	}
 }
 

@@ -882,6 +882,7 @@ STRUCT_UNIT_BASE *GetPlayerMostDamagedUnit(STRUCT_AI *mainAI, GLOBAL_UNIT_AI_TYP
 
 
 // Returns the diplomacy stance regarding "playerOther", from playerMe's point of view.
+// ***WARNING*** this returns "neutral" for "self". You might prefer using GetDiplomacyValueForPlayer.
 // Returns CST_PDS_UNKNOWN in error cases
 AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForPlayer(STRUCT_PLAYER *playerMe, long int otherPlayerId) {
 	if (!playerMe) {
@@ -896,6 +897,7 @@ AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForPlayer(STRUCT_
 }
 
 // Returns the diplomacy stance regarding "playerOther", from playerMe's point of view.
+// ***WARNING*** this returns "neutral" for "self". You might prefer using GetDiplomacyValueForPlayer.
 // Returns CST_PDS_UNKNOWN in error cases
 AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES GetDiplomacyStanceForPlayer(STRUCT_PLAYER *playerMe, STRUCT_PLAYER *playerOther) {
 	if (!playerOther) {

@@ -323,6 +323,62 @@ bool EconomyAI::CalcVillagerCountByTask(STRUCT_TAC_AI *tacAI) {
 			CALL addrCalcDesiredGathererCounts; // No parameter
 		}
 	}
+
+	// Check for obsolete / inadequate villager task elements
+	// The goal is to reset tacAI's "gatherer task info" on non-essential resource types, because they can prevent 
+	// villager tasking method (eg tacAI.highLevelTaskGatherer in 0x4DA330) from gathering another (more useful) resource type
+	if (diffHardOrHardest && tacAI->neededResourcesAreInitialized) {
+		const int numberOfLowPriorityResTypeToPrevent = 1; // Number of lowest-priority resource types to forbid from being gathered more than desired (gatherer count)
+		int resTypePriority[4]; // value 0(low priority) to 3(high priority)
+		for (int i = 0; i < 4; i++) {
+			long int resType = tacAI->neededResourceTypesByPriority[i];
+			resTypePriority[resType] = 3 - i;
+		}
+
+		int maxDiff = 0;
+		int maxDiffScore = 0;
+		int maxDiffIndex = -1;
+		for (int i = 0; i < 4; i++) {
+			int diff = tacAI->gathererCount_actual[i] - tacAI->gathererCount_desired[i];
+			int diffScore = diff * 10 - resTypePriority[i];
+			if ((diffScore > maxDiffScore) && (resTypePriority[i] < numberOfLowPriorityResTypeToPrevent)) {
+				maxDiff = diff;
+				maxDiffScore = diffScore;
+				maxDiffIndex = i;
+			}
+		}
+
+		const int neededResourceComparisonValue = 10;  // Not zero, use a bit more, especially for wood/stone or even gold that may be needed for repairs
+		const int minOverdueGathererProportion = 20; // % above which extra gatherers may be forced to stop gathering their current non-priority resource.
+
+		int proportionPercent = (maxDiff * 100) / totalVillagerCount;
+		bool topPriorityResourceIsReallyNeeded = tacAI->extraResourceAmount[tacAI->neededResourceTypesByPriority[0]] < neededResourceComparisonValue;
+		bool maxDiffResourceIsReallyNeeded = tacAI->extraResourceAmount[maxDiffIndex] < neededResourceComparisonValue;
+		if (!topPriorityResourceIsReallyNeeded || maxDiffResourceIsReallyNeeded) {
+			// When all resources are needed, even lowest priority one (or when no resource is really needed = DM), let villagers work as they currently do.
+			maxDiffIndex = -1;
+		}
+
+		if ((maxDiffIndex >= 0) && (proportionPercent > minOverdueGathererProportion)) {
+			unsigned long int validEntriesFound = 0; // optim only / no functional role
+			for (int i = 0; i < 50; i++) {
+				if (tacAI->gatherersTasks[i].unitId >= 0) {
+					validEntriesFound++;
+					if ((tacAI->gatherersTasks[i].resourceType == maxDiffIndex) &&
+						(tacAI->gatherersTasks[i].resourceAmount < tacAI->gatherersTasks[i].maxResourceAmount)) {
+						// Mark task info as complete: that will allow the villager to be assigned another gathering task (on another resource type, probably)
+						tacAI->gatherersTasks[i].maxResourceAmount = 0;
+						break;
+					}
+					if (validEntriesFound >= tacAI->villagerTasksRelevantElemCount) {
+						break; // Found all valid tasks, no need to go further
+					}
+				}
+			}
+			
+		}
+	}
+
 	return doNotRunRorUpdate;
 }
 

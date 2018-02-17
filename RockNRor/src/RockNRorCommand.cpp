@@ -1896,6 +1896,9 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 	if (buildAI_actor == NULL) { return; }
 	STRATEGY::UpdateStrategyWithExistingUnit(buildAI_actor, targetUnit);
 
+	long int convertedUnitId = targetUnit->unitInstanceId;
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+
 	if (targetPlayer && IsImproveAIEnabled(targetPlayer->playerId) && targetPlayer->ptrAIStruct && targetPlayer->ptrAIStruct->IsCheckSumValid()) {
 		// Notify custom AI that a conversion occurred.
 		if (CUSTOM_AI::customAIHandler.IsAliveAI(targetPlayer->playerId) && IsImproveAIEnabled(targetPlayer->playerId)) {
@@ -1907,12 +1910,9 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 			}
 		}
 
-		long int convertedUnitId = targetUnit->unitInstanceId;
-		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-
 		// Fix unit memory items that refer to that unit, for both players + all their allied
 		for (int i = 1; (global != nullptr) && (i < global->playerTotalCount); i++) {
-			// Is current player allied with one of imapcted players ? Note : x<=CST_PDV_ALLY can be gaia, self or ally. Ignore gaia here as i>0.
+			// Is current player allied with one of impacted players ? Note : x<=CST_PDV_ALLY can be gaia, self or ally. Ignore gaia here as i>0.
 			// COMMENTED OUT: keeping invalid playerIds in infAI data is a pain and leads to issues. For now, "cheat" on this case (this does not really benefits to AI, but mostly avoid issues)
 			/*if ((AOE_STRUCTURES::PLAYER::GetDiplomacyValueForPlayer(targetPlayer, i) <= PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY) ||
 				(AOE_STRUCTURES::PLAYER::GetDiplomacyValueForPlayer(actorPlayer, i) <= PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY)

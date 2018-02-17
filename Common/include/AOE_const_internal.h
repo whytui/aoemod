@@ -15,8 +15,8 @@ namespace AOE_CONST_INTERNAL
 	// Avoid confusion with diplomacy values (PLAYER_DIPLOMACY_VALUES) !
 	enum PLAYER_DIPLOMACY_STANCES : char {
 		CST_PDS_UNKNOWN = -1, // For internal treatments only !
-		CST_PDS_ALLY = 0, // For both "me" and my allies
-		CST_PDS_NEUTRAL = 1,
+		CST_PDS_ALLY = 0, // For my allies
+		CST_PDS_NEUTRAL = 1, // Including "me" ?
 		CST_PDS_UNUSED_2 = 2,
 		CST_PDS_ENEMY = 3
 	};

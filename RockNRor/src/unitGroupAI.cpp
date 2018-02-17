@@ -218,6 +218,9 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 			targetInfo->posX = (unsigned char)targetUnit->positionX;
 			targetInfo->posY = (unsigned char)targetUnit->positionY;
 			targetInfo->HP = (short)targetUnit->remainingHitPoints;
+			if (targetUnit->ptrStructPlayer) { // should always be true !
+				targetInfo->playerId = (char) targetUnit->ptrStructPlayer->playerId;
+			}
 		} else {
 			// Use last known enemy's position as retreat position (
 			targetPosX = targetInfo->posX;
@@ -1093,10 +1096,16 @@ void UnitGroupAI::CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 					if (unitAttackable->currentActivity) {
 						// Handle the list of units attacking my group
 						for (int i = 0; i < unitAttackable->currentActivity->unitIDsThatAttackMe.usedElements; i++) {
-							outputInfos->unitsAttackingMyGroup.push_back(unitAttackable->currentActivity->unitIDsThatAttackMe.unitIdArray[i]);
-							if (curUnit->unitInstanceId == unitGroup->commanderUnitId) {
-								// TODO: There might be more than one of such units !
-								outputInfos->unitIdAttackingMyLeader = unitAttackable->currentActivity->unitIDsThatAttackMe.unitIdArray[i];
+							// Attacker might be allied/mine (typically just after a conversion).
+							long int theAttackerId = unitAttackable->currentActivity->unitIDsThatAttackMe.unitIdArray[i];
+							STRUCT_UNIT_BASE *theAttacker = global->GetUnitFromId(theAttackerId);
+							PLAYER_DIPLOMACY_VALUES dipl = AOE_STRUCTURES::GetDiplomacyValueForUnit(player, theAttacker);
+							if ((dipl >= PLAYER_DIPLOMACY_VALUES::CST_PDV_NEUTRAL) || (dipl == PLAYER_DIPLOMACY_VALUES::CST_PDV_GAIA_SPECIAL)) {
+								outputInfos->unitsAttackingMyGroup.push_back(theAttackerId);
+								if (curUnit->unitInstanceId == unitGroup->commanderUnitId) {
+									// TODO: There might be more than one of such units !
+									outputInfos->unitIdAttackingMyLeader = theAttackerId;
+								}
 							}
 						}
 

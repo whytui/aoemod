@@ -17,6 +17,7 @@ void UnitExtension::Reset() {
 	for (int i = 0; i < 9; i++) {
 		this->myIndexInOtherPlayerInfAIMemory[i] = -1;
 		this->hasBeenAddedToOtherPlayersInfAILists[i] = false;
+		this->wasNotFoundInOtherPlayerInfAIMemory[i] = false;
 	}
 }
 

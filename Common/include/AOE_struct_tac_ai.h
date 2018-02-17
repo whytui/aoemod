@@ -123,8 +123,9 @@ namespace AOE_STRUCTURES {
 		STRUCT_MANAGED_ARRAY relics; // +184. all my relics (only) ? What is sure is that it does NOT include ruins.
 		long int SNNumber[0xE2]; // +194. In game, we use this one (not strategyAI's). Total size=0x388 (4*0xE2). index from 0 to E1. (missing 1 SN?)
 		// 0x51C
-		// Here: a list of small structures size=0x18 (0x32 elems?) = gatherers and their tasks (excluding explorers).
-		// builders/repairmen are NOT in this array?
+		// Here: a list of small structures size=0x18 (0x32 elems) = gatherers and their tasks (excluding explorers).
+		// This is used to restore gathering activity after repairing something, for example.
+		// The array can have empty slots, used slots may not be consecutive. To search a specific unitId, you need to loop on all 50 entries. Eg 0x4E1870.
 		AOE_STRUCTURES::STRUCT_VILLAGER_TASKS_ELEM gatherersTasks[0x32];
 		unsigned long int villagerTasksRelevantElemCount; // +9CC. Number of RELEVANT element count in villagerTasks array (array size is fixed, it's included in this structure !) "villager gatherers".
 		long int desiredGathererVillagersCount; // +9D0. Counts all villagers BUT explorers = "desired gatherers count" (also includes repairmen, etc)
