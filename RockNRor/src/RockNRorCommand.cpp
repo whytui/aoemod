@@ -1911,6 +1911,7 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 		}
 
 		// Fix unit memory items that refer to that unit, for both players + all their allied
+		// Beware: in conversion process, "RockNRorInstance::ManageOnPlayerAddUnit" is called (0x4F2AAB), which will also update some unit memory items for that unit
 		for (int i = 1; (global != nullptr) && (i < global->playerTotalCount); i++) {
 			// Is current player allied with one of impacted players ? Note : x<=CST_PDV_ALLY can be gaia, self or ally. Ignore gaia here as i>0.
 			// COMMENTED OUT: keeping invalid playerIds in infAI data is a pain and leads to issues. For now, "cheat" on this case (this does not really benefits to AI, but mostly avoid issues)
@@ -1971,6 +1972,7 @@ bool RockNRorCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUn
 
 
 // Custom Fixes/features on player.addUnit calls.
+// player is the NEW owner (for conversion case) and unit->ptrStructPlayer is (still) the OLD owner (will be updated afterwards by ROR)
 // Note for conversion : unit is currently (temporarily) unavailable in global->GetUnitStruct(unitId) !
 void RockNRorCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable) {
 	if (!unit || !unit->IsCheckSumValidForAUnitClass()) { return; }
@@ -2008,7 +2010,7 @@ void RockNRorCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLA
 				CALL EAX;
 			}
 
-			unit->ptrStructPlayer = oldUnitPlayer; // Restore player (for conversion, it will be updated a bit later)
+			unit->ptrStructPlayer = oldUnitPlayer; // Restore "old" player (for conversion, it will be updated a bit later)
 		}
 	}
 
@@ -2020,6 +2022,11 @@ void RockNRorCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLA
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = player->ptrGlobalStruct;
 	if (!global || !global->IsCheckSumValid()) { return; }
 	long int playerTotalCount = global->playerTotalCount;
+
+	// Trick for conversion: again, temporarily set unit's player to "future" one so that our updates are correct
+	AOE_STRUCTURES::STRUCT_PLAYER *oldUnitPlayer = unit->ptrStructPlayer;
+	unit->ptrStructPlayer = player;
+
 	if ((global->gameRunStatus == 0) && (global->currentGameTime > 0) && (!isTempUnit && !isNotCreatable) &&
 		(settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING)) {
 		for (int curPlayerId = 1; curPlayerId < playerTotalCount; curPlayerId++) {
@@ -2030,6 +2037,8 @@ void RockNRorCommand::OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLA
 			}
 		}
 	}
+
+	unit->ptrStructPlayer = oldUnitPlayer; // Restore "old" player (for conversion, it will be updated a bit later)
 }
 
 

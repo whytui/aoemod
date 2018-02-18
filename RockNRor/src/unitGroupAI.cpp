@@ -164,6 +164,7 @@ void UnitGroupAI::SetUnitGroupCurrentTask(STRUCT_TAC_AI *tacAI, STRUCT_UNIT_GROU
 				case UNIT_GROUP_TASK_IDS::CST_UGT_ATTACK_ROUNDUP_TARGET:
 				case UNIT_GROUP_TASK_IDS::CST_UGT_EXTERMINATE:
 					if (alliedTarget) {
+						// A 'normal' case is when unit group's current target was just converted
 						ROCKNROR::SYSTEM::SaveGameAndStopExecution(_T("SetUnitGroupCurrentTask: target dipl inconsistency"), true, true);
 						this->SetUnitGroupTarget(unitGroup, NULL);
 					}
@@ -203,9 +204,6 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 		assert(false && "NULL tacAI->ptrMainAI->player");
 		return UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
 	}
-	if (targetInfo && (targetInfo->playerId > 0) && (tacAI->ptrMainAI->player->diplomacyVSPlayers[targetInfo->playerId] == PLAYER_DIPLOMACY_STANCES::CST_PDS_ALLY)) {
-		return UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
-	}
 
 	bool isVisible = targetUnit && PLAYER::IsFogVisibleForPlayer(tacAI->ptrMainAI->player, (long int)targetUnit->positionX, (long int)targetUnit->positionY);
 	float targetPosX = -1.f;
@@ -219,6 +217,7 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 			targetInfo->posY = (unsigned char)targetUnit->positionY;
 			targetInfo->HP = (short)targetUnit->remainingHitPoints;
 			if (targetUnit->ptrStructPlayer) { // should always be true !
+				assert(targetInfo->playerId == (char)targetUnit->ptrStructPlayer->playerId); // debug / we are supposed to always fix it after conversion
 				targetInfo->playerId = (char) targetUnit->ptrStructPlayer->playerId;
 			}
 		} else {
@@ -230,6 +229,13 @@ UNIT_GROUP_TASK_IDS UnitGroupAI::AttackOrRetreat(STRUCT_TAC_AI *tacAI, STRUCT_UN
 		targetPosX = defaultRetreatPosX;
 		targetPosY = defaultRetreatPosY;
 	}
+	
+	if (targetInfo && (targetInfo->playerId > 0) &&
+		AOE_STRUCTURES::PLAYER::GetDiplomacyValueForPlayer(tacAI->ptrMainAI->player, targetInfo->playerId) < CST_PDV_NEUTRAL) {
+		// Unexpected diplomacy
+		return UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET;
+	}
+
 	if ((targetPosX < 0) || (targetPosY < 0)) { return UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET; }
 	unitGroup->targetPosX = targetPosX;
 	unitGroup->targetPosY = targetPosY;

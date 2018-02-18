@@ -215,6 +215,8 @@ public:
 	bool ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, AOE_STRUCTURES::STRUCT_PLAYER *actorPlayer, AOE_CONST_INTERNAL::GAME_EVENT_TYPE notifyEvent = GAME_EVENT_TYPE::EVENT_INVALID);
 
 	// Custom Fixes/features on player.addUnit calls.
+	// player is the NEW owner (for conversion case) and unit->ptrStructPlayer is (still) the OLD owner (will be updated afterwards by ROR)
+	// Note for conversion : unit is currently (temporarily) unavailable in global->GetUnitStruct(unitId) !
 	void OnPlayerAddUnitCustomTreatments(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable);
 
 	// Custom Fixes/features on player.removeUnit calls.
