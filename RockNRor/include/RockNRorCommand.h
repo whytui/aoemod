@@ -344,8 +344,20 @@ public:
 	void SetNextInGameDebugInfoLevel();
 
 
-	// This is called on GameSettings.NotifyEvent game method call.
-	void EntryPoint_GameSettingsNotifyEvent(long int eventId, short int playerId, long int arg3, long int arg4, long int arg5);
+	/* This is called on GameSettings.NotifyEvent game method call (0x501980).
+	playerId is the event's player Id = Player that lost/gained ruins control, built a wonder, researched a tech, etc.
+	- arg3 depends on eventID, it can be a DAT_ID
+	- arg4 depends on eventID, it can be a Y position (long int)
+	- arg5 depends on eventID, it can be a X position (long int)
+	CST_GET_FARM_DEPLETED => arg3 = unitId (farm)
+	CST_GET_UNIT_SPAWNED => arg3=DAT_ID, arg4/5=position of building from where the unit spawns (NOT unit's exact location)
+	CST_GET_RESEARCH_COMPLETE => arg3=researchId, arg4/5=position of building from where the research has been done
+	CST_GET_BUILDING_COMPLETE => arg3=unitDATID, arg4/5=position of building
+	All wonder events (start/finish/destroyed = 0x6C 6D 6E) => arg3=posY, arg4=posX
+	Relics/ruins events => arg3/4/5 are unused ?
+	Returns true if the event should be ignored by ROR (skip original treatments). Default false (most cases)
+	*/
+	bool EntryPoint_GameSettingsNotifyEvent(AOE_CONST_INTERNAL::GAME_EVENT_TYPE eventId, short int playerId, long int arg3, long int arg4, long int arg5);
 
 
 };

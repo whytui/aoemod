@@ -3822,8 +3822,11 @@ CST_GET_RESEARCH_COMPLETE => arg3=researchId, arg4/5=position of building from w
 CST_GET_BUILDING_COMPLETE => arg3=unitDATID, arg4/5=position of building
 All wonder events (start/finish/destroyed = 0x6C 6D 6E) => arg3=posY, arg4=posX
 Relics/ruins events => arg3/4/5 are unused ?
+Returns true if the event should be ignored by ROR (skip original treatments). Default false (most cases)
 */
-void RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short int playerId, long int arg3, long int arg4, long int arg5) {
+bool RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(AOE_CONST_INTERNAL::GAME_EVENT_TYPE eventId, short int playerId, long int arg3, long int arg4, long int arg5) {
+	bool mustSkipOriginalTreatments = false;
+
 	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_RESEARCH_COMPLETE) {
 		long int research_id = arg3;
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
@@ -3850,8 +3853,21 @@ void RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(long int eventId, short
 		ROCKNROR::UNIT::OnFarmDepleted(farmUnitId);
 	}
 
+	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_SUCCESSFULLY_CONVERTED_UNIT) {
+		// For this event, arg2 is ACTOR player id, arg3 = VICTIM player id
+		long int victimPlayerId = arg3;
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (global && global->IsCheckSumValid() && (victimPlayerId != global->humanPlayerId) && (playerId != global->humanPlayerId)) {
+			// This event does not concern human player and must not trigger the adding of a new entry in "event locations history"
+			// Original code does a check... But only skips the alert sound, not the "add location in history" part.
+			mustSkipOriginalTreatments = true;
+		}
+	}
+
 	// Now manage triggers...
 	ROCKNROR::TRIGGER::ManageTriggersOnGameNotifyEvent(eventId, playerId, arg3, arg4, arg5);
+
+	return mustSkipOriginalTreatments;
 }
 
 

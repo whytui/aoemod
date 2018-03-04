@@ -2759,7 +2759,9 @@ void RockNRorInstance::OnLivingUnitCreation(REG_BACKUP *REG_values) {
 // From 0x501980
 // In game code, this method has treatments for events 7E(farm depleted) 7C(trainQueue) 7D(missing house) 64 (researchDone) 66,69 (spawn/build complete)
 // 68,6B,1-3(errors) 4-6 (player lost/disconnect...) 7 (tribute) 8 (dipl change) 6C 6D 6E(wonders) 72-75(relics/ruins events) 76-7B (convert events).
+// May change return address to 0x502816 to disable ROR treatments
 void RockNRorInstance::OnGameSettingsNotifyEvent(REG_BACKUP *REG_values) {
+	unsigned long int returnAddressDiableTreatments = 0x502816;
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = (AOE_STRUCTURES::STRUCT_GAME_SETTINGS *)REG_values->ECX_val;
 	ror_api_assert(REG_values, settings == GetGameSettingsPtr());
 	long int *myESP = (long int *)REG_values->ESP_val;
@@ -2778,8 +2780,13 @@ void RockNRorInstance::OnGameSettingsNotifyEvent(REG_BACKUP *REG_values) {
 		return;
 	}
 
+	AOE_CONST_INTERNAL::GAME_EVENT_TYPE eventType = (AOE_CONST_INTERNAL::GAME_EVENT_TYPE)eventId;
+
 	// Custom code
-	ROCKNROR::crCommand.EntryPoint_GameSettingsNotifyEvent(eventId, (short int)playerId, arg3, arg4, arg5);
+	if (ROCKNROR::crCommand.EntryPoint_GameSettingsNotifyEvent(eventType, (short int)playerId, arg3, arg4, arg5)) {
+		// The method returns true when original treatments must be skipped
+		ChangeReturnAddress(REG_values, returnAddressDiableTreatments);
+	}
 }
 
 
