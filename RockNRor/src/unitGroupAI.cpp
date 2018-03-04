@@ -1126,6 +1126,47 @@ void UnitGroupAI::CollectInfoAboutGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 						if (!hasAttackActivity && !actionIsAgressive) {
 							outputInfos->notAttackingUnitsCount++;
 						}
+						// Detect invalid targeting (after a conversion)
+						STRUCT_UNIT_BASE *myActionTarget = NULL;
+						if (unitAction) {
+							myActionTarget = unitAction->targetUnit;
+						}
+						if ((unitAction != NULL) && (myActionTarget == NULL)) {
+							myActionTarget = global->GetUnitFromId(unitAction->targetUnitId);
+						}
+						bool invalidTargetForceChange = false;
+						if (myActionTarget != NULL) {
+							PLAYER_DIPLOMACY_VALUES diplValue = GetDiplomacyValueForUnit(player, myActionTarget);
+							bool enemyTarget = (diplValue >= PLAYER_DIPLOMACY_VALUES::CST_PDV_NEUTRAL);
+							if (!enemyTarget && actionIsAgressive) {
+								// Attacking some allied unit !
+								invalidTargetForceChange = true;
+							}
+						}
+						STRUCT_UNIT_BASE *myActivityTarget = global->GetUnitFromId(unitAttackable->currentActivity->targetUnitId);
+						if (myActivityTarget) {
+							PLAYER_DIPLOMACY_VALUES diplValueActivityTgt = GetDiplomacyValueForUnit(player, myActivityTarget);
+							bool activityEnemyTarget = (diplValueActivityTgt >= PLAYER_DIPLOMACY_VALUES::CST_PDV_NEUTRAL);
+							if (!activityEnemyTarget && hasAttackActivity) {
+								// Attacking some allied unit !
+								invalidTargetForceChange = true;
+							}
+						}
+						if (invalidTargetForceChange) {
+#ifdef _DEBUG
+							/*AOE_METHODS::PLAYER::ChangeControlledPlayer(player->playerId, false);
+							player->screenPositionX = curUnit->positionX;
+							player->screenPositionY = curUnit->positionY;*/
+							std::string msg = "Force change invalid target for p#";
+							msg += std::to_string(player->playerId);
+							msg += " u#";
+							msg += std::to_string(curUnit->unitInstanceId);
+							msg += " ";
+							msg += unitDef->ptrUnitName;
+							AOE_METHODS::UI_BASE::CallWriteCenteredText(msg.c_str());
+#endif
+							AOE_STRUCTURES::ForceUnitChangeTarget(curUnit);
+						}
 					}
 				}
 			}
