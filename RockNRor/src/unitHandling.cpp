@@ -226,7 +226,7 @@ void ForceUnitChangeTarget(STRUCT_UNIT_BASE *unit) {
 	activity->targetUnitId = -1;
 	activity->targetUnitType = GLOBAL_UNIT_AI_TYPES::TribeAINone;
 	action->targetUnit = NULL;
-	action->targetUnitId = NULL;
+	action->targetUnitId = -1;
 	AOE_METHODS::UNIT::UnitActionSetStatus(action, ACTION_STATUS::CST_AS_03_SEARCH);
 }
 
