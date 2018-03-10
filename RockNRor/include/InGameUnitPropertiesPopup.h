@@ -23,7 +23,7 @@ public:
 		this->SetCenteredForSize(600, 500); // May fail if game settings can't be retrieved
 		this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::FullBlackTheme);
 		this->unitId = unitId;
-		this->afterCloseGamePausePolicy = AfterClosePausePolicy::SET_PAUSE_OFF;
+		this->afterCloseGamePausePolicy = AfterClosePausePolicy::NONE;
 	}
 
 

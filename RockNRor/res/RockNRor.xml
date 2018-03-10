@@ -34,7 +34,11 @@
 	<improvedButtonBar enable="1"/>
 	<!-- allowMultiQueue: Bool 0/1 to allow queueing different units in buildings -->
 	<allowMultiQueue enable="1"/>
-	
+
+	<!-- pauseBehaviour : allowInput=bool 0/1 to enable input while game is pause.
+	allowScrolling=0/1  to enable view scrolling with mouse position while in game pause -->
+	<pauseBehaviour allowInput="1" allowScrolling="0" />
+
 	<!-- Set collectRORDebugLogs=2 to collect all ROR debug logs, 1 to filter, 0 (default) not to collect them -->
 	<collectRORDebugLogs value="1"/>
 	<!-- If enabled (recommended), a popup will automatically show up when an error occurs, including trigger debug errors. 

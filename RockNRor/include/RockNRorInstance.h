@@ -168,6 +168,7 @@ namespace ROCKNROR {
 		void TacAIHandleOneUpdateByType(REG_BACKUP *REG_values);
 		void ActionBuildUpdateFarmHack(REG_BACKUP *REG_values);
 		void OnAddInUnitMemoryList(REG_BACKUP *REG_values);
+		void IsGamePaused(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

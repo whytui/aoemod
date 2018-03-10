@@ -117,6 +117,8 @@ public:
 	bool showRockNRorNotifications; // Use this to disable RockNRor message notifications (not recommended)
 	bool enableRPGModeInRandomGames; // Use "RPG" mode in DM/RM games
 	bool enableRPGModeInScenario; // Use "RPG" mode in scenario/campaign games
+	bool enableInputInPause; // If true, use can still use game UI while in pause. Default false.
+	bool enableScrollInPause; // If true, view scrolling is allowed while in pause. Default false.
 	std::list<DrsFileToLoad*> customDrsFilesList; // List of DRS files to load at startup.
 	std::list<std::string> customStringsFilesList; // List of files containing custom localized strings.
 	std::string customEmpiresDatRelativePath; // Relative path to empires.dat file to use

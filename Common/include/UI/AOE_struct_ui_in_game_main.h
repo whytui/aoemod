@@ -85,7 +85,7 @@ namespace AOE_STRUCTURES
 		STRUCT_UI_MESSAGE_PANEL *ingameChatTextZone[8]; // 0x55C ; check count !
 		STRUCT_ANY_UI *unknown_57C; // 50 5D 54 00
 		STRUCT_UI_LABEL *lblCurrentAge; // +580. The current age indication on top (centered).
-		STRUCT_ANY_UI *unknown_584;
+		STRUCT_UI_LABEL *lblPauseMessage; // +584. The big centered label used to show "Paused" when pressing F3. See 0x480640/0x480690. User command 0x17A2=pause?
 		STRUCT_UI_LABEL *lblF5debugInfo; // +588. The text zone displayed instead of resource indicators.
 		char unknown_58C[0x5B4 - 0x58C];
 		STRUCT_GAME_GLOBAL *gameGlobal; // +5B4.

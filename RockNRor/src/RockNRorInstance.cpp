@@ -443,6 +443,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x4BD7D6:
 		this->OnAddInUnitMemoryList(REG_values);
 		break;
+	case 0x4199C5:
+		this->IsGamePaused(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4587,6 +4590,70 @@ beginLoop:
 	if (ROCKNROR::IsImproveAIEnabled(playerId)) {
 		// Make sure unitExtensions are informed that a new unitMemory entry has been added for that player
 		ROCKNROR::unitExtensionHandler.UpdateUnitMemoryCacheForPlayer(updatedEntry, infAI);
+	}
+}
+
+
+// from 0x4199BF (gameSettings.isGamePaused())
+// May change return address to 0x4199CB (useful to force a "return true" statement).
+void RockNRorInstance::IsGamePaused(REG_BACKUP *REG_values) {
+	unsigned long int returnAdressToForceReturn = 0x4199CB;
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = (AOE_STRUCTURES::STRUCT_GAME_SETTINGS *)REG_values->ECX_val;
+	ror_api_assert(REG_values, settings && settings->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		// Set EAX == 1 if NOT in editor (analog to original CMP status, 7 statement + following JNZ)
+		if (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR) {
+			REG_values->EAX_val = 0;
+		} else {
+			REG_values->EAX_val = 1;
+		}
+	}
+
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		return;
+	}
+
+	// Custom code
+	bool forceReturnTrue = false;
+	bool forceReturnFalse = false;
+	bool forceUseDefaultBehaviour = false; // set this to true to prevent customization / let ROR code decide
+	bool isAutoScroll = false;
+	unsigned long int callerAddr = GetIntValueFromRORStack(REG_values, 0) - 5;
+	
+#ifdef GAMEVERSION_ROR10c
+	if ((callerAddr == 0x419A63) || // set game running
+		(callerAddr == 0x41AC57) || // handle activate
+		(callerAddr == 0x4801BD)) { // handle game update
+		forceUseDefaultBehaviour = true;
+	}
+	if (callerAddr == 0x51874B) {
+		isAutoScroll = true;
+	}
+	if ((callerAddr< ADDR_EXE_MIN) || (callerAddr > ADDR_EXE_MAX)) {
+		// This is a call from RockNRor - or some external DLL
+		// Actually, this case does not occur at this point
+		forceUseDefaultBehaviour = true;
+	}
+#endif;
+
+	if (!isAutoScroll && ROCKNROR::crInfo.configInfo.enableInputInPause) {
+		forceReturnTrue = true;
+	}
+	if (isAutoScroll && ROCKNROR::crInfo.configInfo.enableScrollInPause) {
+		forceReturnTrue = true;
+	}
+
+	// Do not modify below
+	if (forceUseDefaultBehaviour) {
+		return;
+	}
+	if (forceReturnTrue) {
+		REG_values->EAX_val = 0;
+	}
+	if (forceReturnFalse) {
+		REG_values->EAX_val = 1;
+		ChangeReturnAddress(REG_values, returnAdressToForceReturn);
 	}
 }
 

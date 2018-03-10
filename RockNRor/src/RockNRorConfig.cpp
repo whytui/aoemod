@@ -33,6 +33,8 @@ RockNRorConfig::RockNRorConfig() {
 	this->enableRPGModeInRandomGames = false; // Game default
 	this->enableRPGModeInScenario = false; // Game default
 	this->collectRORDebugLogs = 0; // Game default (sort of): do not intercept not-implemented debug log calls.
+	this->enableInputInPause = false; // Game default
+	this->enableScrollInPause = false; // Game default
 	this->improvedGameSpeedFactor = 1.25;
 	this->noDockInMostlyLandMaps = false; // Default: dock is always available.
 	this->fixVillagerWorkRates = false; // Default: keep empires.dat values
@@ -329,6 +331,10 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		if (elemName == "showRockNRorNotifications") {
 			this->showRockNRorNotifications = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "pauseBehaviour") {
+			this->enableInputInPause = XML_GetBoolElement(elem, "allowInput");
+			this->enableScrollInPause = XML_GetBoolElement(elem, "allowScrolling");
 		}
 		if (elemName == "generateRandomTechTree") {
 			this->randomTechTreeForRMGames = XML_GetBoolElement(elem, "enable");
