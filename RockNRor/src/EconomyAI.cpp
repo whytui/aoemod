@@ -103,17 +103,13 @@ void EconomyAI::FixStuckRepairmen(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 						}
 					}
 					if (!foundMoveAction && (actionStatus == ACTION_STATUS::CST_AS_0A_DELAY)) {
-						// Experimental: not sure the conditions match the case that causes problems in game ! But first tests seem ok !
-#ifdef _DEBUG
-						GetGameSettingsPtr()->AddEventInHistory((long int)unit->positionX, (long int)unit->positionY);
-						AOE_METHODS::CallWriteCenteredText("Unblocked a repairman", 2);
-#endif
 						GAME_COMMANDS::CreateCmd_Stop(unit->unitInstanceId);
 					}
 #ifdef _DEBUG
 					// TMP
 					else {
 						if (actionStatus == ACTION_STATUS::CST_AS_0A_DELAY) {
+							// Does not seem to ever happen
 							GetGameSettingsPtr()->AddEventInHistory((long int)unit->positionX, (long int)unit->positionY);
 							AOE_METHODS::CallWriteCenteredText("Found action status 0x0A (stuck unit?)", 2);
 						}
