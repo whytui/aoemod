@@ -23,7 +23,7 @@ namespace AOE_CONST_INTERNAL
 
 	// Avoid confusion with PLAYER_DIPLOMACY_STANCES !
 	enum PLAYER_DIPLOMACY_VALUES : long int {
-		CST_PDV_UNKNOWN, // For internal treatments only !
+		CST_PDV_UNKNOWN = -1, // For internal treatments only !
 		CST_PDV_GAIA_SPECIAL = 0, // Gaia has 0 vs all players
 		CST_PDV_SELF = 1,
 		CST_PDV_ALLY = 2,

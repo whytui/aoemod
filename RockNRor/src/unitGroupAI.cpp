@@ -911,6 +911,14 @@ bool UnitGroupAI::TaskActiveAttackGroup(STRUCT_PLAYER *player, STRUCT_UNIT_GROUP
 			if (!newTargetUnit) {
 				newTargetUnit = global->GetUnitFromId(commanderAction->targetUnitId);
 			}
+			AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES targetDipl = AOE_STRUCTURES::GetDiplomacyValueForUnit(player, newTargetUnit); // newTargetUnit may be null here
+			if (targetDipl < AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES::CST_PDV_NEUTRAL) {
+				// Target is invalid (null or mine or allied... or maybe gaia but should not happen)
+				if (newTargetUnit) {
+					AOE_STRUCTURES::ForceUnitChangeTarget(commanderUnit);
+				}
+				newTargetUnit = NULL;
+			}
 			bool newTargetIsVisible = newTargetUnit && PLAYER::IsFogVisibleForPlayer(player, (long int)newTargetUnit->positionX, (long int)newTargetUnit->positionY);
 			if (newTargetUnit && newTargetUnit->unitDefinition && newTargetUnit->ptrStructPlayer && newTargetIsVisible) {
 #ifdef _DEBUG
