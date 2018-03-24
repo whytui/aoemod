@@ -856,12 +856,12 @@ double TechTreeCreator::CreateOneBonus() {
 	};
 	// propsByUnitClass.insert => Unit class, { weight, probabilityCoeff }
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, 0.35, 0.9);
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.2, 0.81); // small proba because not many possible underlying bonuses here (cost, HP)
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.2, 0.95);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, 0.55, 0.97);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, 0.4, 0.9);
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.2, 1.05);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.2, 1.07);
 	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, 0.1, 0.70);// is water map
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, 0.35, 1);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, 0.35, 0.99);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, 0.4, 0.98);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier, 0.55, 1);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher, 0.7, 1);
@@ -879,14 +879,14 @@ double TechTreeCreator::CreateOneBonus() {
 		}
 	}
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSiegeWeapon, 0.7, 1);
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger, 0.2, 0.78);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupSlinger, 0.2, 0.77);
 	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWarBoat, 0.3, 1); // is water map ?
 	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall, 0.1, 1); // walls suck
 	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat, 0.05, 0.7);
 	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupTransportBoat, 0.05, 0.7);
-	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower, 0.45, 1); // do not use class as is. Use it to separate towers from other buildings (like babylon/choson, unlike rome) ?
+	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Tower, 0.2, 0.77); // would not work as units do not actually use this class
 	// TribeAIGroupUnusedHealer => just to improve medecine ?
-	// TribeAIGroupUnused_Farm => just to improve production ?
+	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupUnused_Farm, 0.15, 0.75); // would not work as units do not actually use this class
 
 
 	// TODO: modify probacoeff according to super unit availability ?
@@ -931,7 +931,7 @@ double TechTreeCreator::CreateOneBonus() {
 
 	bool isPriest = (chosenClass == TribeAIGroupPriest);
 	bool isMilitary = (isRanged || isMelee || isPriest);
-
+	
 
 	std::map<TECH_UNIT_ATTRIBUTES, BonusGenProperties> propsByAttribute; // BonusGenProperties=weight, proba
 	propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_HP, { 0.5, 1.1 }));
@@ -957,6 +957,14 @@ double TechTreeCreator::CreateOneBonus() {
 	if ((chosenClass == TribeAIGroupCivilian) || (chosenClass == TribeAIGroupFishingBoat)) {
 		// Remark: for civilians, TUA_RESOURCE_CAPACITY bonus applies also on work rate.
 		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, { 0.35, 4 })); // High probability... Because resource capacity regroups several possible bonus
+	}
+	if (chosenClass == TribeAIGroupBuilding) {
+		// Add specific cases for buildings (special bonus that will impact either farms or towers)
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_ARMOR, { 0.55, 0.88 })); // To test: but armor on towers could be a strong bonus in RM
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_ATTACK, { 0.5, 1 }));
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_ATTACK_RELOAD_TIME, { 0.5, 0.85 }));
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RANGE, { 0.5, 1 })); // + LOS
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, { 0.35, 0.92 }));
 	}
 
 	BonusGenAttrPPair *bestAttrElem = randomizer.PickRandomElementWithWeight_objectMap<TECH_UNIT_ATTRIBUTES, BonusGenProperties>(
@@ -1015,6 +1023,10 @@ double TechTreeCreator::CreateOneBonus() {
 			minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_BETTER;; // So that bonus is in [-15%, -25%]
 		}
 	}
+	if ((chosenAttr == TUA_RESOURCE_CAPACITY) && (chosenClass == TribeAIGroupBuilding)) {
+		minBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_FARM_FOOD_AMOUNT;
+		maxBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MAX_RATE_FARM_FOOD_AMOUNT;
+	}
 
 	if (maxBonusRate < 0) { maxBonusRate = 0; }
 	if (minBonusRate > maxBonusRate) { minBonusRate = maxBonusRate; }
@@ -1036,6 +1048,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		(bonusUnitClass == TribeAIGroupFootSoldier) || (bonusUnitClass == TribeAIGroupMountedSoldier) ||
 		(bonusUnitClass == TribeAIGroupPhalanx); // true if chosen class represents military melee units
 
+	// A float "random" multiplier, e.g. 1.25 for a +25% bonus
 	float rndMultiplier = 1 + (((float)randomizer.GetRandomValue_normal_moderate(minBonusRate, maxBonusRate)) / 100.0f);
 
 	// Create bonus
@@ -1079,14 +1092,24 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 
 	if (unitAttr == TUA_RANGE) { // Range and line of sight
 		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
+		if (bonusUnitClass == TribeAIGroupBuilding) {
+			applyToUnit = CST_UNITID_WATCH_TOWER;
+			applyToClass = AOE_CONST_FUNC::TribeAINone;
+			applyToNameString = "towers";
+		}
 		newEffect.SetAttributeAdd(TUA_RANGE, applyToClass, applyToUnit, 1.0f);
-		if ((bonusUnitClass == TribeAIGroupSiegeWeapon) || (bonusUnitClass == TribeAIGroupPriest)) {
+		if ((bonusUnitClass == TribeAIGroupSiegeWeapon) || (bonusUnitClass == TribeAIGroupPriest) || bonusUnitClass == TribeAIGroupBuilding) {
 			if (rndMultiplier > 1.175) {
 				newEffect.effectValue = 2;
 				resultAdditionalWeight += 0.1;
 			}
 		}
 		techTreeEffects.push_back(newEffect);
+
+		// Apply effect on children (upgrades)
+		if (applyToUnit >= 0) {
+			this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
+		}
 
 		this->bonusText += "+";
 		this->bonusText += std::to_string(((int)newEffect.effectValue));
@@ -1110,6 +1133,13 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		ATTACK_CLASS armorToImprove = ATTACK_CLASS::CST_AC_BASE_MELEE;
 		int tmpRnd = randomizer.GetRandomNonZeroPercentageValue();
 		std::string armorTypeText = "melee";
+		if (bonusUnitClass == TribeAIGroupBuilding) {
+			applyToClass = AOE_CONST_FUNC::TribeAINone;
+			applyToUnit = CST_UNITID_WATCH_TOWER;
+			applyToNameString = "towers";
+			// Remark: armor on tower should be ok (not too strong) because it is applied on enemy attack
+			// before dividing by 5 (cf buildings terrain defense bonus) (to confirm)
+		}
 		if (tmpRnd > 85) {
 			armorToImprove = ATTACK_CLASS::CST_AC_BASE_PIERCE;
 			armorTypeText = "pierce";
@@ -1120,6 +1150,12 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		assert(newEffect.GetAttackOrArmorType() == armorToImprove);
 		assert(newEffect.GetValue() == 1);
 		techTreeEffects.push_back(newEffect);
+
+		// Apply effect on children (upgrades)
+		if (applyToUnit >= 0) {
+			this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
+		}
+
 		this->bonusText += "+1 ";
 		this->bonusText += GetTechUnitAttributeName(unitAttr);
 		this->bonusText += " (";
@@ -1168,7 +1204,11 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 					}
 				}
 			} else {
-				if (!useMeleeAttack) {
+				if (bonusUnitClass == TribeAIGroupBuilding) {
+					applyToClass = AOE_CONST_FUNC::TribeAINone;
+					applyToUnit = CST_UNITID_WATCH_TOWER;
+					applyToNameString = "towers";
+				} else if (!useMeleeAttack) {
 					// TODO: add weight when improving attack for non-siege range unit
 				}
 			}
@@ -1188,8 +1228,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->techTreeEffects.push_back(newEffect);
 			// Apply effect on children (upgrades)
 			if (applyToUnit >= 0) {
-				TTDetailedUnitDef *rootUnitDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(applyToUnit);
-				this->AddSameEffectForUnitDefIDs(&newEffect, rootUnitDtl->possibleUpgradedUnitIDs);
+				this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
 			}
 
 			this->bonusText += "+";
@@ -1204,10 +1243,19 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 
 	if (unitAttr == TUA_ATTACK_RELOAD_TIME) {
 		if (!isPriest) {
+			if (bonusUnitClass == TribeAIGroupBuilding) {
+				applyToClass = AOE_CONST_FUNC::TribeAINone;
+				applyToUnit = CST_UNITID_WATCH_TOWER;
+				applyToNameString = "towers";
+			}
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 			float fixedMult = (2.f - rndMultiplier); // Is calculated bonus is 25% (1.25), then use (2-1.25)=0.75 factor on reload time (-25%)
 			newEffect.SetAttributeMultiply(unitAttr, applyToClass, applyToUnit, fixedMult); // Diminish reload time to improve attack efficiency
 			techTreeEffects.push_back(newEffect);
+			// Apply effect on children (upgrades)
+			if (applyToUnit >= 0) {
+				this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
+			}
 			this->bonusText += "Increase attack speed by ";
 			this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
 			this->bonusText += "% for ";
@@ -1226,7 +1274,8 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		}
 	}
 
-	if (unitAttr == TUA_RESOURCE_CAPACITY) { // fishing ships, villager (pick one only !)
+	if (unitAttr == TUA_RESOURCE_CAPACITY) { // fishing ships, villager (pick one only !), farms
+		bool bonusHasBeenHandled = false;
 		if (bonusUnitClass == TribeAIGroupTradeBoat) {
 			applyToClass = TribeAIGroupTradeBoat;
 		}
@@ -1236,6 +1285,22 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 
 		if (bonusUnitClass == TribeAIGroupFishingBoat) {
 			applyToClass = TribeAIGroupFishingBoat;
+		}
+		if (bonusUnitClass == TribeAIGroupBuilding) {
+			applyToClass = AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAINone;
+			//applyToUnit = CST_UNITID_FARM;
+			applyToUnit = -1;
+			float baseFoodAmount = 250.f;
+			// Compute as a "+" bonus to display/compute it like farm food amount techs (+75 for each tech in standard game)
+			int bonusAbsoluteAdd = (int)(baseFoodAmount * (rndMultiplier - 1.0f));
+			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
+			newEffect.SetResourceAdd(CST_RES_ORDER_FARM_FOOD_AMOUNT, (float)bonusAbsoluteAdd);
+			techTreeEffects.push_back(newEffect);
+			this->bonusText += "Increase farm food amount (+";
+			this->bonusText += std::to_string(bonusAbsoluteAdd);
+			this->bonusText += ")";
+			this->bonusText += NEWLINE;
+			bonusHasBeenHandled = true;
 		}
 		if (bonusUnitClass == TribeAIGroupCivilian) {
 			int villagerRnd = randomizer.GetRandomValue(1, 6);
@@ -1258,7 +1323,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			}
 		}
 
-		if ((applyToUnit >= 0) || (applyToClass >= 0)) {
+		if (!bonusHasBeenHandled && ((applyToUnit >= 0) || (applyToClass >= 0))) {
 			float tmpHalf = ((maxBonusRate - minBonusRate) / 2.f) + minBonusRate;
 			float carryCapacityAdd = 2;
 			if (rndMultiplier > tmpHalf) {
@@ -1272,6 +1337,11 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffectWR;
 			newEffectWR.SetAttributeMultiply(TUA_WORK_RATE, applyToClass, applyToUnit, rndMultiplier);
 			techTreeEffects.push_back(newEffectWR);
+
+			// Apply effect on children (upgrades)
+			if (applyToUnit >= 0) {
+				this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
+			}
 
 			this->bonusText += "+";
 			this->bonusText += std::to_string((int)carryCapacityAdd);
@@ -1614,6 +1684,23 @@ void TechTreeCreator::AddSameEffectForUnitDefIDs(AOE_STRUCTURES::STRUCT_TECH_DEF
 	{
 		curEffect.effectUnit = (short int) curUnitDefId; // The only thing that changes is unitDefId it applies to
 		this->techTreeEffects.push_back(curEffect);
+	}
+}
+
+
+// Add an effect into internal collection (techTreeEffects) for EACH unitDefId that belongs to same unit lineage
+// Useful to copy an effect from root unit to its upgrades
+// Unit can be either a "trainable" or a building
+void TechTreeCreator::AddSameEffectForUnitLineage(AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT *srcEffect, short int unitDefId) {
+	TTDetailedUnitDef *rootUnitDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(unitDefId);
+	if (rootUnitDtl != nullptr) {
+		this->AddSameEffectForUnitDefIDs(srcEffect, rootUnitDtl->possibleUpgradedUnitIDs);
+		return;
+	}
+	TTDetailedBuildingDef *rootBldDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(unitDefId);
+	if (rootBldDtl != nullptr) {
+		this->AddSameEffectForUnitDefIDs(srcEffect, rootBldDtl->possibleUpgradedUnitIDs);
+		return;
 	}
 }
 

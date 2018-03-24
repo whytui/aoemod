@@ -49,7 +49,7 @@ namespace AOE_CONST_FUNC {
 	// Unit (type) numbers - From rules.rps - corresponds to "class" in AGE3
 	enum GLOBAL_UNIT_AI_TYPES : short int {
 		TribeAINone = -1, // use as a joker in some methods
-		TribeAIGroupArcher = 0, // bowman + improved/composite
+		TribeAIGroupArcher = 0, // foot archers : bowman + improved/composite
 		TribeAIGroupBuilding = 3, // All buildings, including towers, wonders, farms, excluding walls.
 		TribeAIGroupCivilian = 4, // All villagers excluding boats !
 		TribeAIGroupFootSoldier = 6, // Barracks infantry, excluding slinger

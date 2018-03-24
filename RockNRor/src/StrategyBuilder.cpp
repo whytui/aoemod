@@ -1302,7 +1302,7 @@ void StrategyBuilder::ComputeGlobalScores() {
 			// Exclude tool age units like scouts
 			TTDetailedTrainableUnitDef *upgradeDtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(unitInfo->strongestUpgradeUnitDefId);
 			if (upgradeDtl && (upgradeDtl->requiredAge < AOE_CONST_FUNC::CST_RSID_BRONZE_AGE)) {
-				unitInfo->globalScore = 1;
+				unitInfo->globalScore = 0;
 			}
 		}
 

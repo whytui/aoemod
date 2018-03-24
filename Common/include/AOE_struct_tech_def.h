@@ -135,6 +135,14 @@ namespace AOE_STRUCTURES {
 			this->effectUnit = resourceId;
 			this->effectValue = multiplierValue;
 		}
+		// Set all fields for a Resource Multiply effect
+		void SetResourceAdd(short int resourceId, float addValue) {
+			this->effectType = TECH_DEF_EFFECTS::TDE_RESOURCE_MODIFIER_ADD_SET;
+			this->effectAttribute = -1;// unused
+			this->effectClass = 1; // mode 1=add
+			this->effectUnit = resourceId;
+			this->effectValue = addValue;
+		}
 
 		// Get the "attack class" information from an "attack or armor" float value.
 		static inline AOE_CONST_FUNC::ATTACK_CLASS GetAttackClassFromFloatValue(float value) {

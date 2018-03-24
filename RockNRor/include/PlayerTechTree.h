@@ -178,6 +178,8 @@ namespace TT_CONFIG {
 	static const int GEN_BONUS_MAX_RATE_BETTER = 30; // Max % improvement for bonus that needs a decent value to be useful: e.g. HP (buildings)
 	static const int GEN_BONUS_MIN_RATE_GOOD = 25; // Min % improvement for bonus that needs a decent value to be useful: e.g. speed, HP
 	static const int GEN_BONUS_MAX_RATE_GOOD = 40; // Max % improvement for bonus that needs a decent value to be useful: e.g. speed, HP
+	static const int GEN_BONUS_MIN_RATE_FARM_FOOD_AMOUNT = 30; // Min % improvement for farm food amount bonus
+	static const int GEN_BONUS_MAX_RATE_FARM_FOOD_AMOUNT = 80; // Max % improvement  for farm food amount bonus
 }
 
 
@@ -299,6 +301,11 @@ private:
 	// Add an effect into internal collection (techTreeEffects) for EACH unitDefId provided in the parameter collection
 	// Useful to copy an effect from root unit to its upgrades
 	void AddSameEffectForUnitDefIDs(AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT *srcEffect, const std::list<long int> &unitDefIDs);
+
+	// Add an effect into internal collection (techTreeEffects) for EACH unitDefId that belongs to same unit lineage
+	// Useful to copy an effect from root unit to its upgrades
+	// Unit can be either a "trainable" or a building
+	void AddSameEffectForUnitLineage(AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT *srcEffect, short int unitDefId);
 
 	// Randomly selects 1 non-disabled root unit in provided unit class. NULL if not found.
 	// Use minimumRequiredAgeResearchId to filter on units >= provided age. E.g. CST_RSID_TOOL_AGE
