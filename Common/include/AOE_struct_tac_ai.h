@@ -138,7 +138,7 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_D18; // +D18.
 		long int lastScalingUpdate; // +D1C. Value in milliseconds. See RockNRor config (tacticalAI/updateDelay) or SNScalingFrequency in standard game.
 		long int buildFrequencyCounter; // +D20. incremented until it reaches SNBuildFrequency
-		long int currentAttackSeparationTime_seconds; // +D24. Compared to SNAttackResponseSeparationTime,SNAttackSeparationTimeRandomness. See 4E0BC0,4E0C03.
+		long int currentAttackSeparationTime_seconds; // +D24. Compared to SNAttackResponseSeparationTime,SNAttackSeparationTimeRandomness. See 0x4E0BC0. Recomputed in 0x4E0C00.
 		
 		// +D28. "MostDislikedPlayers". Contains target player IDs, ordered by priority (?) SEEMS TO BE WHAT DEFINES WHO TO ATTACK?
 		// In practice, there is always only 1 (or 0 at startup) element (hardcoded in several places like 0x4D622C)

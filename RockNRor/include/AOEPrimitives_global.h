@@ -56,6 +56,9 @@ bool SaveCurrentGame(const char *filenameNoPath);
 // Automatically save current game to a file (hardcoded filename). Can be used in case of error, for example.
 bool AutoSaveCurrentGame();
 
+// Get a string representing game time in a human readable format
+std::string GetHumanTimeFromGameTime(unsigned long int gameTimeValue, bool withMilliSeconds);
+
 }
 
 

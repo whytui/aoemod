@@ -23,7 +23,7 @@ void SetGamePause(bool pauseOn) {
 	if (settings->currentUIStatus != AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) { return; } // Call should be robust enough, but we still check this
 	long int argPause = pauseOn ? 1 : 0;
 	_asm {
-		PUSH 0; // arg2 - what is this ?
+		PUSH 0; // arg2 = "nonUserPause"
 		PUSH argPause;
 		MOV EAX, 0x0419A60;
 		MOV ECX, settings;
@@ -150,6 +150,41 @@ bool AutoSaveCurrentGame() {
 	return res;
 }
 
+
+// Get a string representing game time in a human readable format
+std::string GetHumanTimeFromGameTime(unsigned long int gameTimeValue, bool withMilliSeconds) {
+	std::string result = "";
+	unsigned long int remaining = gameTimeValue / 1000; // Ignore milliseconds
+	unsigned long int hours = remaining / 3600;
+	remaining = remaining % 3600;
+	unsigned long int minutes = remaining / 60;
+	unsigned long int seconds = remaining % 60;
+	char bufTime[32] = "";
+	if (hours > 0) {
+		if (withMilliSeconds) {
+			sprintf_s(bufTime, "%02ld:%02ld:%02ld.%03ld", hours, minutes, seconds, gameTimeValue % 1000);
+		} else {
+			sprintf_s(bufTime, "%02ld:%02ld:%02ld", hours, minutes, seconds);
+		}
+		result = std::to_string(hours);
+		result += ":";
+	} else {
+		if (withMilliSeconds) {
+			sprintf_s(bufTime, "%02ld:%02ld.%03ld", minutes, seconds, gameTimeValue % 1000);
+		} else {
+			sprintf_s(bufTime, "%02ld:%02ld", minutes, seconds);
+		}
+	}
+	return std::string(bufTime);
+	result += std::to_string(minutes);
+	result += ":";
+	result += std::to_string(seconds);
+	if (withMilliSeconds) {
+		result += ".";
+		result += std::to_string(gameTimeValue % 1000);
+	}
+	return result;
+}
 
 }
 

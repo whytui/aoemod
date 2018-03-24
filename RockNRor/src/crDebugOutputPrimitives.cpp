@@ -351,23 +351,22 @@ bool HandleRockNRorInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *setti
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return false; }
 	std::string msg[9];
-	static bool showUnitGroups = true;
-	for (int i = 2; i <= 7; i++) {
-		if (!showUnitGroups) {
-			CUSTOM_AI::AIPlayerTargetingInfo *info = CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i);
-			if (!info) { msg[i] = ""; continue; }
-			int curTargetPlayerId = info->GetCurrentTacAITargetPlayerId(global->GetPlayerStruct(i));
-			msg[i] = std::string("p#") + std::to_string(i) + std::string(" targt=") + std::to_string(curTargetPlayerId) +
-				std::string(" ; subdslk vs");
-			for (int j = 1; j < global->playerTotalCount; j++) {
-				msg[i] += std::string(" p") + std::to_string(j) + std::string("=");
-				msg[i] += to_string(info->lastComputedDislikeSubScore[i]);
-			}
-		} else {
+	for (int i = 0; i < 9; i++) { msg[i] = ""; }
+	int usedLines = 0;
+	static int infoType = 0; // 0=unitGroups, 1=targeting(grp), 2=targeting(tac)
+	std::string title = "RockNRor Unit group tasking";
+	if (infoType >= 1) { "Player targeting"; }
+	
+	for (int i = 1; i <= 8; i++) {
+		//if (usedLines >= 6) { break; }
+		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(i);
+		if (!player || !player->isComputerControlled || !player->ptrAIStruct) { continue; }
+		usedLines++;
+		if (infoType == 0) {
 			if (CUSTOM_AI::customAIHandler.IsAliveAI(i)) {
 				int cnt = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i)->unitGroupAI.last5TaskingByUGAI.size();
 				if (cnt > UNITGROUP_AI_LAST_TASK_TRACE_COUNT) { cnt = UNITGROUP_AI_LAST_TASK_TRACE_COUNT; }
-				msg[i] = std::string("[p") + std::to_string(i) + std::string("] grpId,tsk,targ,time ");
+				msg[usedLines - 1] = std::string("[p") + std::to_string(i) + std::string("] grpId,tsk,targ,time ");
 				for (auto it = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i)->unitGroupAI.last5TaskingByUGAI.begin();
 					(it != CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i)->unitGroupAI.last5TaskingByUGAI.end()); it++) {
 					std::tuple<long int, long int, long int, long int> t = *it;
@@ -375,23 +374,45 @@ bool HandleRockNRorInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *setti
 					long int taskId = std::get<1>(t);
 					long int targetId = std::get<2>(t);
 					long int time_ms = std::get<3>(t);
-					msg[i] += std::string(" ") + std::to_string(unitGrpId) +
+					msg[usedLines - 1] += std::string(" ") + std::to_string(unitGrpId) +
 						std::string(",") + std::to_string(taskId) +
 						std::string(",") + std::to_string(targetId) +
 						std::string(",") + std::to_string(time_ms);
 				}
 			}
 		}
+		if (infoType == 1) {
+			CUSTOM_AI::AIPlayerTargetingInfo *info = CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i);
+			if (!info) { msg[usedLines-1] = ""; continue; }
+			int curTargetPlayerId = info->GetCurrentTacAITargetPlayerId(global->GetPlayerStruct(i));
+			msg[usedLines - 1] = std::string("p#") + std::to_string(i) + std::string(" targt=") + std::to_string(curTargetPlayerId) +
+				std::string(" ; subdslk vs");
+			for (int j = 1; j < global->playerTotalCount; j++) {
+				msg[usedLines - 1] += std::string(" p") + std::to_string(j) + std::string("=");
+				msg[usedLines - 1] += to_string(info->lastComputedDislikeSubScore[i]);
+			}
+		}
+		if (infoType == 2) {
+			CUSTOM_AI::AIPlayerTargetingInfo *info = CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i);
+			if (!info) { msg[usedLines - 1] = ""; continue; }
+			int curTargetPlayerId = info->GetCurrentTacAITargetPlayerId(global->GetPlayerStruct(i));
+			std::string tm = AOE_METHODS::GetHumanTimeFromGameTime(player->ptrAIStruct->structTacAI.lastAttackTime_ms, true);
+			msg[usedLines - 1] = std::string("p#") + std::to_string(i) + std::string(" respTime=") +
+				std::to_string(player->ptrAIStruct->structTacAI.currentAttackSeparationTime_seconds) +
+				std::string(" last=") + tm +
+				std::string(" targt=") + std::to_string(curTargetPlayerId);
+		}
 	}
-	AOE_METHODS::UI_BASE::GameMainUI_writeTextDebugLines(settings->ptrGameUIStruct, msg[2].c_str(),
+	AOE_METHODS::UI_BASE::GameMainUI_writeTextDebugLines(settings->ptrGameUIStruct, msg[0].c_str(),
+		msg[1].c_str(),
+		msg[2].c_str(),
 		msg[3].c_str(),
 		msg[4].c_str(),
-		msg[5].c_str(),
-		msg[6].c_str(),
-		msg[7].c_str()
+		msg[5].c_str()
 		);
+	if (infoType == 2) { title = msg[6]; }
 	if (ROCKNROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo) {
-		AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, showUnitGroups ? "RockNRor Unit group tasking" : "Player targeting");
+		AOE_METHODS::UI_BASE::GameMainUI_writeF5DebugInfo(settings->ptrGameUIStruct, title.c_str());
 	}
 	return true;
 }

@@ -34,7 +34,7 @@ namespace UI_BASE {
 
 // Set the text to show in "F5 debug info" zone.
 // Warning: if "debug info zone visibility" has not been set, this won't have any visible effect.
-static void GameMainUI_writeF5DebugInfo(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, char *text) {
+static void GameMainUI_writeF5DebugInfo(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, const char *text) {
 	if (!gameMainUI || !gameMainUI->IsCheckSumValid()) {
 		return;
 	}
