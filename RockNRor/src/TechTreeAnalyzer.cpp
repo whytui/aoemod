@@ -178,7 +178,7 @@ void TechTreeAnalyzer::FindResearchesThatEnableUnits() {
 					}
 					detailRes->upgradedUnitDefId.insert(std::pair<long int, long int>(parentUnitId, upgradedUnitId));
 
-					TTDetailedUnitDef *detailParent = this->GetDetailedTrainableUnitDef(parentUnitId);
+					TTDetailedUnitDef *detailParent = this->GetDetailedUnitDef(parentUnitId);
 					if ((detailParent != NULL) && (detailParent->GetUnitDef() != NULL)) {
 						if (std::find(detailParent->possibleUpgradedUnitIDs.cbegin(), detailParent->possibleUpgradedUnitIDs.cend(), upgradedUnitId) == detailParent->possibleUpgradedUnitIDs.cend()) {
 							detailParent->possibleUpgradedUnitIDs.push_back(upgradedUnitId);
