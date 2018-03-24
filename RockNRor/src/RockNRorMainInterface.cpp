@@ -106,6 +106,9 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 		}
 		if (popup->CreateScreen(GetCurrentScreen())) {
 			if (!IsMultiplayer()) {
+				if (!AOE_STRUCTURES::IsGamePaused()) {
+					popup->afterCloseGamePausePolicy = ROCKNROR::UI::RnrScreenBase::AfterClosePausePolicy::SET_PAUSE_OFF;
+				}
 				AOE_METHODS::SetGamePause(true);
 			}
 		}
