@@ -797,7 +797,9 @@ void TechTreeCreator::CalcRandomCivBonus() {
 	this->computedMeanWeight = weightMean;
 
 	// TODO fix and use weight evaluation
-	int bonusCount = randomizer.GetRandomValue_normal_moderate(2, 4);
+	int avgCount = ROCKNROR::crInfo.configInfo.randomTechTreeDesiredAvgBonusCount;
+	if (avgCount < 1) { avgCount = 1; }
+	int bonusCount = randomizer.GetRandomValue_normal_moderate(avgCount - 1, avgCount + 1);
 	this->bonusText.clear();
 	double bonusWeight = 0;
 	for (int i = 0; i < bonusCount; i++) {

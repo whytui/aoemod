@@ -194,6 +194,7 @@ public:
 	long int civCount; // Does NOT count gaia (index=0)
 	bool allowPickingCustomCivsInRandomInit;
 	bool randomTechTreeForRMGames; // Generate random civs for RM and DM new games
+	long int randomTechTreeDesiredAvgBonusCount; // (average) number of civ bonus in random civs
 	// Human interface
 	bool enableCallNearbyIdleMilitaryUnits;
 	long int distanceToCallNearbyIdleMilitaryUnits;
@@ -269,6 +270,8 @@ public:
 	const long int MAXVALUE_maxPopulation = AOE_CONST_INTERNAL::TECH_LIMIT_MAXIMUM_POPULATION;
 	const long int MINVALUE_unitAIDetectNearbyUnitsMinimumDelay = 300; // milliseconds
 	const long int MAXVALUE_unitAIDetectNearbyUnitsMinimumDelay = 20000; // milliseconds
+	const long int MINVALUE_randomTechTreeDesiredAvgBonusCount = 1;
+	const long int MAXVALUE_randomTechTreeDesiredAvgBonusCount = 200; // more than 10 is huge already ;)
 
 private:
 	CivilizationInfo *allCivInfo[CST_MAX_TOTAL_CIV_COUNT];

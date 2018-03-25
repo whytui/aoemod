@@ -74,6 +74,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->civCount = AOE_CONST_FUNC::CIVILIZATIONS::CST_CIVID_STANDARD_MAX;
 	this->allowPickingCustomCivsInRandomInit = false; // Game default
 	this->randomTechTreeForRMGames = false; // Game default
+	this->randomTechTreeDesiredAvgBonusCount = 3; // there is no game default here ; only used if randomTechTreeForRMGames=true
 	for (int i = 0; i < 256; i++) {
 		allCivInfo[i] = NULL;
 	}
@@ -337,7 +338,12 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			this->enableScrollInPause = XML_GetBoolElement(elem, "allowScrolling");
 		}
 		if (elemName == "generateRandomTechTree") {
-			this->randomTechTreeForRMGames = XML_GetBoolElement(elem, "enable");
+			const char *attr = elem->Attribute("enable");
+			if (attr) {
+				this->randomTechTreeForRMGames = XML_GetBoolElement(elem, "enable");
+			}
+			callResult = elem->QueryIntAttribute("avgBonusCount", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->randomTechTreeDesiredAvgBonusCount = intValue; }
 		}
 		if (elemName == "rpgMode") {
 			this->enableRPGModeInScenario = XML_GetBoolElement(elem, "scenario");
@@ -827,6 +833,8 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 	if (this->distanceToCallNearbyIdleMilitaryUnits > this->MAXVALUE_distanceToCallNearbyIdleMilitaryUnits) { this->distanceToCallNearbyIdleMilitaryUnits = this->MAXVALUE_distanceToCallNearbyIdleMilitaryUnits; }
 	if (this->singlePlayerMaxPopulation < this->MINVALUE_maxPopulation) { this->singlePlayerMaxPopulation = this->MINVALUE_maxPopulation; }
 	if (this->singlePlayerMaxPopulation > this->MAXVALUE_maxPopulation) { this->singlePlayerMaxPopulation = this->MAXVALUE_maxPopulation; }
+	if (this->randomTechTreeDesiredAvgBonusCount < this->MINVALUE_randomTechTreeDesiredAvgBonusCount) { this->randomTechTreeDesiredAvgBonusCount = this->MINVALUE_randomTechTreeDesiredAvgBonusCount; }
+	if (this->randomTechTreeDesiredAvgBonusCount > this->MAXVALUE_randomTechTreeDesiredAvgBonusCount) { this->randomTechTreeDesiredAvgBonusCount = this->MAXVALUE_randomTechTreeDesiredAvgBonusCount; }
 
 	return true;
 }
