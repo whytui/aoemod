@@ -774,7 +774,7 @@ void OnPriestSeeNearbyUnit(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *actorUnit, S
 }
 
 
-// Global update on idle soldiers for specifiedp player (tacAI)
+// Global update on idle soldiers for specified player (tacAI)
 void OnAIUpdateIdleSoldiers(STRUCT_TAC_AI *tacAI, long int startProcessingTime, long int allowedProcessingTime) {
 	if (!tacAI || !tacAI->IsCheckSumValid() || !tacAI->ptrMainAI) { return; }
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
@@ -784,7 +784,7 @@ void OnAIUpdateIdleSoldiers(STRUCT_TAC_AI *tacAI, long int startProcessingTime, 
 	for (int i = 0; i < tacAI->landMilitaryUnits.usedElements; i++) {
 		long int curId = tacAI->landMilitaryUnits.unitIdArray[i];
 		STRUCT_UNIT_BASE *curUnit = global->GetUnitFromId(curId);
-		if (curUnit || !curUnit->IsCheckSumValidForAUnitClass()) { continue; }
+		if (!curUnit || !curUnit->IsCheckSumValidForAUnitClass()) { continue; }
 		if (!curUnit->currentActivity) { continue; }
 		
 		// Run checks on current activity consistency
@@ -798,45 +798,71 @@ void OnAIUpdateIdleSoldiers(STRUCT_TAC_AI *tacAI, long int startProcessingTime, 
 			if (targetUnit && ((targetDiplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY) || (targetDiplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_SELF))) {
 				targetIsAllied = true;
 			}
+		} else {
+			curUnit->currentActivity->targetUnitId = -1;
 		}
 		
 		bool orderExpectsEnemy = false;
+		bool orderExpectsAlly = true;
 		switch (curUnit->currentActivity->orderId) {
 		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_ATTACK:
 		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_CONVERT:
 		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_UNKNOWN_2D7_AI_PLAY:
 		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_UNKNOWN_2D9_POP_TARGET:
 			orderExpectsEnemy = true;
+			orderExpectsAlly = false;
 			break;
+		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_NONE:
+		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_GATHER_ATTACK:
+		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_GATHER_NOATTACK:
+		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_HOLD_POSITION:
+		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_FOLLOW_OBJECT:
+			// Case NOT to take care of
+			orderExpectsAlly = false;
 		}
 
 		bool taskExpectsEnemy = false;
+		bool taskExpectsAlly = true;
 		switch (curUnit->currentActivity->currentTaskId) {
 		case ACTIVITY_TASK_ID::CST_ATI_TASK_ATTACK:
 		case ACTIVITY_TASK_ID::CST_ATI_TASK_CONVERT:
 		case ACTIVITY_TASK_ID::CST_ATI_TASK_SEEK_AND_DESTROY:
 		case ACTIVITY_TASK_ID::CST_ATI_TASK_EXPLORE_AND_DESTROY:
 			taskExpectsEnemy = true;
+			taskExpectsAlly = false;
+			break;
+		case ACTIVITY_TASK_ID::CST_ATI_NONE:
+			curUnit->currentActivity->targetUnitId = -1;
+			// no break here
+		case ACTIVITY_TASK_ID::CST_ATI_TASK_GATHER_ATTACK:
+		case ACTIVITY_TASK_ID::CST_ATI_TASK_GATHER_NOATTACK:
+		case ACTIVITY_TASK_ID::CST_ATI_TASK_FOLLOW_OBJECT:
+			// Case NOT to take care of
+			taskExpectsAlly = false;
 		}
 
 		bool doStop = false;
-		if (orderExpectsEnemy && targetIsAllied) {
-			doStop = true;
-			ROCKNROR::SYSTEM::StopExecution(_T("OnAIUpdateIdleSoldiers: detected an error for unit order"), true, true);
-		}
-		if (taskExpectsEnemy && targetIsAllied) {
-			doStop = true;
-			ROCKNROR::SYSTEM::StopExecution(_T("OnAIUpdateIdleSoldiers: detected an error for unit order"), true, true);
-		}
-		if (!orderExpectsEnemy && !targetIsAllied) {
-			doStop = true;
-			ROCKNROR::SYSTEM::StopExecution(_T("OnAIUpdateIdleSoldiers: detected an error for unit order"), true, true);
-		}
-		if (!taskExpectsEnemy && !targetIsAllied) {
-			doStop = true;
-			ROCKNROR::SYSTEM::StopExecution(_T("OnAIUpdateIdleSoldiers: detected an error for unit order"), true, true);
+		if (targetUnit) {
+			if (orderExpectsEnemy && targetIsAllied) {
+				doStop = true;
+				//ROCKNROR::SYSTEM::StopExecution(std::wstring(_T("OnAIUpdateIdleSoldiers: detected an error for unit order ; order expects enemy / #") + std::to_wstring(curId)).c_str(), true, true);
+			}
+			if (taskExpectsEnemy && targetIsAllied) {
+				doStop = true;
+				//ROCKNROR::SYSTEM::StopExecution(std::wstring(_T("OnAIUpdateIdleSoldiers: detected an error for unit order ; task expects enemy / #") + std::to_wstring(curId)).c_str(), true, true);
+			}
+			if (orderExpectsAlly && !targetIsAllied) {
+				doStop = true;
+				//ROCKNROR::SYSTEM::StopExecution(std::wstring(_T("OnAIUpdateIdleSoldiers: detected an error for unit order ; order expects ally / #") + std::to_wstring(curId)).c_str(), true, true);
+			}
+			if (taskExpectsAlly && !targetIsAllied) {
+				doStop = true;
+				//ROCKNROR::SYSTEM::StopExecution(std::wstring(_T("OnAIUpdateIdleSoldiers: detected an error for unit order ; task expects ally / #") + std::to_wstring(curId)).c_str(), true, true);
+			}
 		}
 		if (doStop) {
+			// Stop invalid actions : this still happens on some occasions, including priests (target killed or converted by another priest?),
+			// some remaining bugs/missing updates (given we can't update everything each time a unit dies/is converted/etc)
 			GAME_COMMANDS::CreateCmd_Stop(curId);
 		}
 	}
