@@ -58,9 +58,12 @@ private:
 	STRUCT_UI_BUTTON *btnChangeSPMaxPopulation;
 	STRUCT_UI_BUTTON *btnRelicsCount;
 	STRUCT_UI_BUTTON *btnRuinsCount;
+	STRUCT_UI_COMBOBOX *cbxMaxAgeInRandomGames;
 
 	void InitInputs();
 	void UpdateConfigFromCheckbox(STRUCT_UI_BUTTON *checkbox);
+	// Update configuration from current comboboxes selection
+	void UpdateConfigFromComboboxes();
 	void ChangeResolution(unsigned long int x, unsigned long int y);
 };
 

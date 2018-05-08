@@ -17,6 +17,10 @@ RnrScreenBase::RnrScreenBase(const char *screenName) {
 	this->screenSizeX = 0;
 	this->screenSizeY = 0;
 	this->afterCloseGamePausePolicy = AfterClosePausePolicy::NONE;
+	this->parentScreenFocusedComponent = NULL;
+	this->backupKeyboardOwner = NULL;
+	this->backupModalPanel = NULL;
+	this->backupPreviousFocusedObject = NULL;
 	ROCKNROR::crInfo.rnrUIHelper->NotifyNewRnrScreen(this);
 }
 
@@ -123,6 +127,19 @@ bool RnrScreenBase::CreateScreen(STRUCT_UI_EASY_PANEL *parentScreen) {
 	if (!screenObject) {
 		return false;
 	}
+
+	this->parentScreenFocusedComponent = NULL;
+	if (parentScreen) {
+		// Backup the original focused component in parent screen.
+		// If our dropdowns mess with that, we can still restore the correct pointer when closing our screen.
+		this->parentScreenFocusedComponent = parentScreen->focusedComponent;
+	}
+	// Collect backup pointers to fix combobox bugs (using dropdowns corrupts some panelSystem pointers, this is an issue in AOE code)
+	AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *uiMainInfo = GetUIMainInfoStruct();
+	this->backupModalPanel = uiMainInfo->modalPanel;
+	this->backupKeyboardOwner = uiMainInfo->keyboardOwner;
+	this->backupPreviousFocusedObject = uiMainInfo->previousFocusedObject;
+
 	// Adjust real size/position in internal variables
 	this->screenSizeX = screenObject->sizeX;
 	this->screenSizeY = screenObject->sizeY;
@@ -142,17 +159,50 @@ bool RnrScreenBase::CloseScreen(bool ignoreErrors) {
 	if (this->rorScreenStatus != CREATED) {
 		return false;
 	}
+
+	AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *uiMainInfo = GetUIMainInfoStruct();
+	bool keyboardOwnerChanged = (uiMainInfo->keyboardOwner != this->backupKeyboardOwner);
+	bool modalPanelChanged = (uiMainInfo->modalPanel != this->backupModalPanel);
+	bool previousFocusedObjectChanged = (uiMainInfo->previousFocusedObject != this->backupPreviousFocusedObject);
+	if (keyboardOwnerChanged) {
+		uiMainInfo->keyboardOwner = this->backupKeyboardOwner;
+	}
+	if (modalPanelChanged) {
+		uiMainInfo->modalPanel = this->backupModalPanel;
+	}
+	if (previousFocusedObjectChanged) {
+		uiMainInfo->previousFocusedObject = this->backupPreviousFocusedObject;
+	}
+
 	this->FreeComponents(); // Crucial to free components BEFORE closing the screen
 	bool result = false;
 	STRUCT_UI_EASY_PANEL *screen = this->GetAoeScreenObject();
 	if (screen && screen->IsCheckSumValidForAChildClass()) {
 		STRUCT_ANY_UI *previous = screen->previousPanel;
 		if (!previous) { previous = screen->ptrParentObject; }
+		if (previous && (previous->focusedComponent != this->parentScreenFocusedComponent)) {
+			// Restore the original (correct) focused component in parent screen.
+			// Dropdown buttons generally mess with that pointer because dropdowns do not work well in modal screens.
+			previous->focusedComponent = this->parentScreenFocusedComponent;
+		}
 		result = AOE_METHODS::UI_BASE::CloseScreenAndDestroy(this->screenName.c_str());
+
 		this->rorScreenStatus = CLOSED;
 		STRUCT_UI_EASY_PANEL *currentUI = GetCurrentScreen();
 		// Make sure a screen is set. If the one we closed was set (focused), then set its parent.
 		if ((currentUI == NULL) && (previous != NULL)) {
+			if (previous->focusedComponent && !isAValidRORChecksum(previous->focusedComponent->checksum)) {
+				// This case happens rarely and seems to be caused by dropdowns (in screens that can be closed by ESC ?)
+				// Previous panel's focus is on a no-longer-existing object => game crash
+				// We have chances to detect this with invalid checksum, however in unlucky cases the checksum is still there but other object data has been overwritten in memory...
+				// This is no more but a workaround that saves us from most crashes
+				// NOTE: this should not happen anymore thank to the hack above (save&restore previous focused component)
+				// TO REMOVE LATER after some testing
+				if (!ignoreErrors) {
+					SYSTEM::StopExecution(_T("An error occurred in CloseScreen method. Previous object has an invalid focused object."), true, true);
+				}
+				previous->focusedComponent = NULL;
+			}
 			AOE_METHODS::UI_BASE::SetCurrentPanel(previous->screenName, 0);
 		}
 	} else {

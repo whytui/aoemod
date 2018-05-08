@@ -105,7 +105,7 @@ void EditorEditUnitInfoPopup::CreateScreenComponents() {
 		AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *se = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_METHODS::GetScreenFromName(scenarioEditorScreenName);
 		long int totalPlayerCount = global->playerTotalCount;
 		if (se && se->IsCheckSumValid()) {
-			totalPlayerCount = se->pl_cbb_playerCount->GetSelectedIndex() + 2; // +2 because: add gaia AND index starts at 0, not 1.
+			totalPlayerCount = se->pl_cbb_playerCount->GetListSelectedIndex() + 2; // +2 because: add gaia AND index starts at 0, not 1.
 		}
 		assert(totalPlayerCount < 10);
 		if (totalPlayerCount >= 10) { totalPlayerCount = 9; }
@@ -181,7 +181,7 @@ void EditorEditUnitInfoPopup::Validate() {
 	}
 	// Change owner
 	if (this->cbxPlayerOwner) {
-		int newOwner = this->cbxPlayerOwner->GetSelectedIndex();
+		int newOwner = this->cbxPlayerOwner->GetListSelectedIndex();
 		if (newOwner != this->initialOwner) {
 			for each (auto curUnit in this->allSelectedUnits)
 			{

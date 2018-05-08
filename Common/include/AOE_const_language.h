@@ -26,6 +26,11 @@ const static unsigned long int LANG_ID_HINT_CLICK_TO_FISH_HERE = 3707;
 const static unsigned long int LANG_ID_HINT_CLICK_TO_GATHER_BUSH_HERE = 3823;
 const static unsigned long int LANG_ID_HINT_TRADE_WITH = 4116;
 
+const static unsigned long int LANG_ID_STONE_AGE = 4201;
+const static unsigned long int LANG_ID_TOOL_AGE = 4202;
+const static unsigned long int LANG_ID_BRONZE_AGE = 4203;
+const static unsigned long int LANG_ID_IRON_AGE = 4204;
+
 
 // *******************************************************
 // Custom strings
@@ -81,6 +86,7 @@ const static unsigned long int CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RELICS_COUNT_TIT
 const static unsigned long int CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RUINS_COUNT_TITLE = 42156;
 const static unsigned long int CRLANG_ID_RNR_STTGS_ENTER_VALUE_RANDOM_GAMES_RELICS_COUNT = 42157;
 const static unsigned long int CRLANG_ID_RNR_STTGS_ENTER_VALUE_RANDOM_GAMES_RUINS_COUNT = 42158;
+const static unsigned long int CRLANG_ID_RNR_STTGS_RANDOM_GAMES_MAX_AGE = 42159;
 
 // RockNRor options
 const static unsigned long int CRLANG_ID_ROCKNROR_OPTIONS_POPUP_TITLE = 42020;

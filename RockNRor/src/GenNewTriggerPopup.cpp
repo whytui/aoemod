@@ -117,8 +117,8 @@ bool GenNewTriggerPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 		return true;
 	}
 	if (sender == this->btnGenerate) {
-		CR_TRIGGERS::TRIGGER_EVENT_TYPES evtId = (CR_TRIGGERS::TRIGGER_EVENT_TYPES) this->cbxEventType->GetSelectedIndex();
-		CR_TRIGGERS::TRIGGER_ACTION_TYPES actId = (CR_TRIGGERS::TRIGGER_ACTION_TYPES) this->cbxActionType->GetSelectedIndex();
+		CR_TRIGGERS::TRIGGER_EVENT_TYPES evtId = (CR_TRIGGERS::TRIGGER_EVENT_TYPES) this->cbxEventType->GetListSelectedIndex();
+		CR_TRIGGERS::TRIGGER_ACTION_TYPES actId = (CR_TRIGGERS::TRIGGER_ACTION_TYPES) this->cbxActionType->GetListSelectedIndex();
 		if (evtId < 0) { evtId = CR_TRIGGERS::TRIGGER_EVENT_TYPES::EVENT_NONE; }
 		if (actId < 0) { actId = CR_TRIGGERS::TRIGGER_ACTION_TYPES::TYPE_NONE; }
 		std::string trgText = "TRIGGER\r\n";

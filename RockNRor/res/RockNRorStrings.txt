@@ -109,6 +109,8 @@ Ruins count
 Enter the desired number of relics for random games. Please note that the game may randomly choose NOT to place relics at all.
 [42158]
 Enter the desired number of ruins for random games. Please note that the game may randomly choose NOT to place ruins at all.
+[42159]
+Max. age in random games
 
 
 // *** RockNRor Options popup ***

@@ -154,7 +154,7 @@ public:
 
 
 	// Does all custom stuff on random maps / deathmatches before game start : changes on game settings (map type/size, etc)
-	// Does NOT apply to scenario/campaign/load saved game.
+	// This method is called but does no customization for scenario/campaign/load saved game.
 	// Warning: most game structures are not available yet ! It is recommended to only work with STRUCT_GAME_SETTINGS, nothing else.
 	// However GLOBAL structure (always) already exists and DAT file HAS (always) already been loaded into internal data.
 	// Return false if failed.

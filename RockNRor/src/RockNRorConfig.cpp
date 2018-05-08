@@ -116,6 +116,7 @@ RockNRorConfig::RockNRorConfig() {
 	//this->autoAttackOptionForBlastRangedUnits ; constructor is Game default
 	this->generateStrategyForRM = false; // Game default
 	this->generateStrategyForDM = false; // Game default
+	this->maxAgeRM_DM = -1;
 
 	// Map generation
 	this->randomMapRelicsCount = 5;
@@ -371,6 +372,17 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "populationLimit") {
 			callResult = elem->QueryIntAttribute("value", &intValue);
 			if (callResult == TIXML_SUCCESS) { this->singlePlayerMaxPopulation = intValue; }
+		}
+		if (elemName == "maxAgeInRandomGames") {
+			callResult = elem->QueryIntAttribute("value", &intValue);
+			if (callResult == TIXML_SUCCESS) {
+				if ((intValue > 0) && (intValue <= 3)) {
+					intValue = AOE_CONST_FUNC::CST_RSID_STONE_AGE + intValue;
+				} else {
+					intValue = -1;
+				}
+				this->maxAgeRM_DM = intValue;
+			}
 		}
 		if (elemName == "improvedButtonBar") {
 			this->useImprovedButtonBar = XML_GetBoolElement(elem, "enable");

@@ -44,6 +44,7 @@ void RockNRorSettingsScreen::ResetClassPointers() {
 	this->btnChangeSPMaxPopulation = NULL;
 	this->btnRelicsCount = NULL;
 	this->btnRuinsCount = NULL;
+	this->cbxMaxAgeInRandomGames = NULL;
 }
 
 
@@ -181,6 +182,24 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 		defaultMarginLeft + checkboxLabelSizeX / 2 + defaultSpaceHorizontal, currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
 
+	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_MAX_AGE, "Max. age in random games"),
+		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	this->AddComboBox(&this->cbxMaxAgeInRandomGames, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal, 
+		currentPosY, checkboxLabelSizeX, checkboxSizeY, checkboxLabelSizeX, checkboxSizeY);
+	this->cbxMaxAgeInRandomGames->Clear(); // because combobox has 1 empty line by default: remove it
+	AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, -1, "No limit (default)");
+	AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_STONE_AGE,
+		GetLanguageDllText(LANG_ID_STONE_AGE).c_str());
+	AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_TOOL_AGE,
+		GetLanguageDllText(LANG_ID_TOOL_AGE).c_str());
+	AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_BRONZE_AGE, 
+		GetLanguageDllText(LANG_ID_BRONZE_AGE).c_str());
+	AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_IRON_AGE, 
+		GetLanguageDllText(LANG_ID_IRON_AGE).c_str());
+
+	currentPosY += checkboxSizeY + defaultSpaceVertical;
+
 	// Section: RockNRor AI options
 	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RNR_AI_OPTIONS_SECTION, "RockNRor AI options"),
 		defaultMarginLeft, currentPosY, sectionTitleSizeX, sectionTitleSizeY,
@@ -239,6 +258,16 @@ void RockNRorSettingsScreen::InitInputs() {
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkImproveAI, ROCKNROR::crInfo.configInfo.improveAILevel > 0);
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkImproveCityPlan, ROCKNROR::crInfo.configInfo.cityPlanLikeValuesEnhancement);
 	AOE_METHODS::UI_BASE::CheckBox_SetChecked(this->chkFixLogisticsBug, ROCKNROR::crInfo.configInfo.fixLogisticsNoHouseBug);
+
+	int maxAgeSelectedIndex = 0;
+	switch (ROCKNROR::crInfo.configInfo.maxAgeRM_DM) {
+	case AOE_CONST_FUNC::CST_RSID_STONE_AGE:
+	case AOE_CONST_FUNC::CST_RSID_TOOL_AGE:
+	case AOE_CONST_FUNC::CST_RSID_BRONZE_AGE:
+	case AOE_CONST_FUNC::CST_RSID_IRON_AGE:
+		maxAgeSelectedIndex = ROCKNROR::crInfo.configInfo.maxAgeRM_DM - AOE_CONST_FUNC::CST_RSID_STONE_AGE + 1;
+	}
+	this->cbxMaxAgeInRandomGames->SetSelectedIndex(maxAgeSelectedIndex);
 }
 
 
@@ -298,6 +327,20 @@ void RockNRorSettingsScreen::UpdateConfigFromCheckbox(STRUCT_UI_BUTTON *checkbox
 }
 
 
+// Update configuration from current comboboxes selection
+void RockNRorSettingsScreen::UpdateConfigFromComboboxes() {
+	if (this->cbxMaxAgeInRandomGames) {
+		int result = this->cbxMaxAgeInRandomGames->selectedIndex; // Use combo's index, not list's (different if user has navigated to another entry and pressed ESC)
+		if (result > 0) {
+			result = AOE_CONST_FUNC::CST_RSID_STONE_AGE + result - 1;
+		} else {
+			result = -1;
+		}
+		ROCKNROR::crInfo.configInfo.maxAgeRM_DM = result;
+	}
+}
+
+
 void RockNRorSettingsScreen::ChangeResolution(unsigned long int x, unsigned long int y) {
 	if (AOE_METHODS::GetScreenFromName(gameScreenName) != NULL) {
 		// Unstable. If game screen is open, use standard options menu to change resolution
@@ -316,6 +359,7 @@ void RockNRorSettingsScreen::ChangeResolution(unsigned long int x, unsigned long
 		parent = (STRUCT_UI_EASY_PANEL*)myScreen->ptrParentObject;
 	}
 	AOE_METHODS::SetScreenResolution(x, y);
+	this->UpdateConfigFromComboboxes();
 	this->CloseScreen(false);
 	if (parent && parent->IsCheckSumValidForAChildClass()) {
 		_asm {
@@ -323,7 +367,7 @@ void RockNRorSettingsScreen::ChangeResolution(unsigned long int x, unsigned long
 			MOV EDX, [ECX];
 			PUSH y;
 			PUSH x;
-			CALL[EDX + 0x50]; // handle size. Does not seem sufficient to update parent screen :(
+			CALL[EDX + 0x50]; // handle size. Does not seem sufficient to update parent screen :( ... That's why standard game only proposes resolution change in game screen !
 		}
 	}
 }
@@ -332,6 +376,7 @@ void RockNRorSettingsScreen::ChangeResolution(unsigned long int x, unsigned long
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnOK) {
+		this->UpdateConfigFromComboboxes();
 		this->CloseScreen(false);
 		return true;
 	}
@@ -390,6 +435,7 @@ bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool RockNRorSettingsScreen::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
 	if (keyCode == VK_ESCAPE) {
+		this->UpdateConfigFromComboboxes();
 		this->CloseScreen(false);
 		return true;
 	}

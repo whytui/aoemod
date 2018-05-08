@@ -427,7 +427,7 @@ bool RockNRorMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return false; }
 	assert(scEditor->map_cbb_mapSize);
 	if (!scEditor->map_cbb_mapSize) { return false; }
-	long int mapSizeIndex = scEditor->map_cbb_mapSize->GetSelectedIndex();
+	long int mapSizeIndex = scEditor->map_cbb_mapSize->GetListSelectedIndex();
 	if (mapSizeIndex != 6) { return false; }
 	// Here: custom map size
 	if (!ROCKNROR::crInfo.configInfo.useCustomMapDimensions) { return false; }

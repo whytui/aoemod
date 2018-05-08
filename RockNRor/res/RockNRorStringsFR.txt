@@ -116,6 +116,8 @@ Nombre de ruines
 Entrez le nombre de reliques pour les cartes aléatoires/combats à mort. Notez que les cartes peuvent aussi ne pas avoir de reliques du tout.
 [42158]
 Entrez le nombre de ruines pour les cartes aléatoires/combats à mort. Notez que les cartes peuvent aussi ne pas avoir de ruines du tout.
+[42159]
+Âge maximum pour les cartes aléatoires/combats à mort
 
 
 

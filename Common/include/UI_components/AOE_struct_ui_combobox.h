@@ -18,9 +18,15 @@ namespace AOE_STRUCTURES
 {
 
 	// Size = 0x144 - 50 50 54 00. Direct parent is STRUCT_ANY_UI. "DropDownPanel"
-	// Constructor = 0x460A00. Comboboxes are not intended to be used in popups and don't work well in such case in native ROR code.
-	// 461D50 : setSelectedIndex
-	// 0x4542C0 set hint dll string(dllid, -1) ?
+	// Constructor = 0x460A00. 
+	// *** WARNING *** Comboboxes are not intended to be used in popups and don't work well in such case in *native* ROR code.
+	// Known issues are (all pointer issues can provoke game crash):
+	// - Clicking on the combobox button messes with current screen's parent screen's "focused object".
+	// - Opening the combobox/clicking outside to close it/reopening it/choosing an option corrupts panelSystem.previousFocusedObject.
+	// - Opening the combobox messes with panelSystem's keyboard owner.
+	// - Using the combobox (using ESC key while dropdown is opened ?) messes with panelSystem's modalPanel pointer.
+	// 0x461D50 = setSelectedIndex
+	// 0x4542C0 = set hint dll string(dllid, -1) ?
 	// 0x461DA0 = combobox.appendLine(text, index)
 #define CHECKSUM_UI_COMBOBOX 0x00545050
 	class STRUCT_UI_COMBOBOX : public STRUCT_ANY_UI {
@@ -50,8 +56,10 @@ namespace AOE_STRUCTURES
 		long int drawBorderAroundText; // +140. init=1. Set in 0x461180 (do not update directly)
 
 		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_COMBOBOX; }
-		// Returns index (0 to n-1) of selected entry
-		long int GetSelectedIndex() const {
+		// Returns index (0 to n-1) of selected entry in the list.
+		// Can differ from this->selectedIndex if the user navigated to another entry without clicking, and pressed ESC:
+		// In this case, GetListSelectedIndex returns list's highlighted entry, which is NOT selected one at combobox level.
+		long int GetListSelectedIndex() const {
 			if (!this->IsCheckSumValid()) { return -1; }
 			const unsigned long int addr = 0x461E50;
 			long int tmp = -1;

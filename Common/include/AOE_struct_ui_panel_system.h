@@ -29,8 +29,10 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_010;
 		long int openedScreensCount; // +14. "activePanels"
 		STRUCT_ANY_UI *previousFocusedObject; // +18. unsure
-		char unknown_01C[0x48 - 0x1C];
-		STRUCT_ANY_UI *scenarioEditor; // +48. TO CONFIRM
+		unsigned long int *palettePointers[10]; // +1C
+		char paletteNames[10][0x104]; // +44 : "PALETTE.PAL"
+		unsigned long int unknown_A6C; // +A6C
+
 
 		// +AC0 = IMEenabled
 		// +AC4 = isIMEOn

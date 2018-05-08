@@ -1285,7 +1285,7 @@ void RockNRorCommand::OnGameStart() {
 
 
 // Does all custom stuff on random maps / deathmatches before game start : changes on game settings (map type/size, etc)
-// Does NOT apply to scenario/campaign/load saved game.
+// This method is called but does no customization for scenario/campaign/load saved game.
 // Warning: most game structures are not available yet ! It is recommended to only work with STRUCT_GAME_SETTINGS, nothing else.
 // However GLOBAL structure (always) already exists and DAT file HAS (always) already been loaded into internal data.
 // Return false if failed.
@@ -1421,6 +1421,25 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 	// Custom civs
 	if (!this->customCivHandler.lastGenerationSummary.empty()) {
 		this->customCivHandler.WriteSummaryToScenarioInstructions();
+	}
+
+	// Apply maximum age to all players (note: do nothing if max age is iron)
+	if ((!settings->isCampaign && !settings->isSavedGame && !settings->rgeGameOptions.isScenario) &&
+		(ROCKNROR::crInfo.configInfo.maxAgeRM_DM >= AOE_CONST_FUNC::CST_RSID_STONE_AGE) &&
+		(ROCKNROR::crInfo.configInfo.maxAgeRM_DM < AOE_CONST_FUNC::CST_RSID_IRON_AGE)) {
+		for (short int ageToDisable = (short int)(ROCKNROR::crInfo.configInfo.maxAgeRM_DM + 1); ageToDisable <= AOE_CONST_FUNC::CST_RSID_IRON_AGE; ageToDisable++) {
+			for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
+				AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+				if (!player || !player->IsCheckSumValid()) {
+					continue;
+				}
+				STRUCT_PLAYER_RESEARCH_STATUS *s = player->GetResearchStatus(ageToDisable);
+				if ((s->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE) ||
+					(s->currentStatus == RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT)) {
+					s->currentStatus = RESEARCH_STATUSES::CST_RESEARCH_STATUS_DISABLED;
+				}
+			}
+		}
 	}
 
 	return true;
@@ -2665,12 +2684,12 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 	assert(sizeY > 0); assert(sizeY <= 0xFF);
 	if ((sizeX <= 0) || (sizeY <= 0) || (sizeX > 0xFF) || (sizeY > 0xFF)) { return false; }
 
-	long int mapType = scEditor->map_cbb_mapType->GetSelectedIndex();
+	long int mapType = scEditor->map_cbb_mapType->GetListSelectedIndex();
 	assert(scEditor && scEditor->map_edt_seed->IsCheckSumValid());
 	char *mapSeedText = AOE_METHODS::UI_BASE::GetEditText(scEditor->map_edt_seed);
 	long int terrainId = 0;
 	long int mapSeed = -1; // Default = -1 (= random)
-	long int playerCount = (scEditor->pl_cbb_playerCount->GetSelectedIndex()) + 1;
+	long int playerCount = (scEditor->pl_cbb_playerCount->GetListSelectedIndex()) + 1;
 
 	if ((scEditor->currentMapGenerationChoice < 1) || (scEditor->currentMapGenerationChoice > 3)) {
 		return false;
@@ -2687,7 +2706,7 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 	// Empty
 	if (scEditor->currentMapGenerationChoice == 1) {
 		assert(scEditor->map_cbb_defaultTerrain);
-		switch (scEditor->map_cbb_defaultTerrain->GetSelectedIndex()) {
+		switch (scEditor->map_cbb_defaultTerrain->GetListSelectedIndex()) {
 		case 0:
 			terrainId = 0; // grass
 			break;

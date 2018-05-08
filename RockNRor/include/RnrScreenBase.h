@@ -135,6 +135,10 @@ private:
 	std::string screenName; // Technical screen name, should be unique
 	bool isFullscreen;
 	unsigned long int screenPosX, screenPosY, screenSizeX, screenSizeY;
+	STRUCT_ANY_UI *parentScreenFocusedComponent; // backup of focused component in parent screen. Dropdowns tend to mess with this and corrupt parent's pointers (which result in random crash)
+	STRUCT_ANY_UI *backupKeyboardOwner;
+	STRUCT_UI_EASY_PANEL *backupModalPanel;
+	STRUCT_ANY_UI *backupPreviousFocusedObject;
 
 	// Please call this for every created component in this screen. This will automatically free the components when needed.
 	bool AddComponentToFreeList(STRUCT_ANY_UI *object) {
