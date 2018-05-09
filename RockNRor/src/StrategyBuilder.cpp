@@ -3690,11 +3690,42 @@ int StrategyBuilder::CreateSecondaryBuildingStrategyElements() {
 }
 
 
+// Returns true if the game is a scenario where we don't want to generate a dybnamic strategy
+bool StrategyBuilder::DoesScenarioExcludeStrategyGeneration() {
+	if (!this->settings || !this->global) {
+		return true;
+	}
+	if (this->settings->isCampaign || this->settings->rgeGameOptions.isScenario) {
+		// Campaign/Scenario (possible for players with no strategy)
+		// If the scenarios contains "disable researches/buildings", then abort and let standard behaviour occur
+		// We don't want to deal with weird cases where almost no tech/unit is available
+		if (this->global->scenarioInformation) {
+			int playerIndex = this->player->playerId - 1;
+
+			char *str = this->global->scenarioInformation->strategyFileNames[playerIndex];
+			if ((str[0] == 'N') && (str[1] == 'O') && (str[2] == 'N') && (str[3] == 'E')) {
+				// The scenario explicitly does NOT want a strategy for that player.
+				return true;
+			}
+
+			for (int j = 0; j < AOE_CONST_INTERNAL::SC_ED_DISABLE_TECHNOLOGY_INDICES::CST_DTI_COUNT; j++) {
+				if (!this->global->scenarioInformation->allowedTechnologyFlags[playerIndex][j]) {
+					// We found a research/building that is NOT allowed = limitation on available tech tree = don't mess with strategy
+					return true;
+				}
+			}
+		}
+	}
+	return false; // Standard case
+}
+
+
 // Create a brand new dynamic strategy for player.
-void StrategyBuilder::CreateStrategyFromScratch() {
-	if (!this->buildAI || !this->buildAI->IsCheckSumValid() || !this->buildAI->mainAI || !this->buildAI->mainAI->IsCheckSumValid()) { return; }
-	if (!this->player || !this->player->IsCheckSumValid()) { return; }
-	if (!this->global || !this->global->IsCheckSumValid() || !this->settings) { return; }
+// Returns true if a strategy was generated
+bool StrategyBuilder::CreateStrategyFromScratch() {
+	if (!this->buildAI || !this->buildAI->IsCheckSumValid() || !this->buildAI->mainAI || !this->buildAI->mainAI->IsCheckSumValid()) { return false; }
+	if (!this->player || !this->player->IsCheckSumValid()) { return false; }
+	if (!this->global || !this->global->IsCheckSumValid() || !this->settings) { return false; }
 	assert(this->playerTechTreeInfo && this->playerTechTreeInfo->isActive);
 	// Clear previous strategy
 	ROCKNROR::STRATEGY::ClearStrategy(this->buildAI);
@@ -3704,6 +3735,10 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 	this->log += " = ";
 	this->log += this->player->playerName_length16max;
 	this->log += newline;
+
+	if (this->DoesScenarioExcludeStrategyGeneration()) {
+		return false; // This is a scenario and we should not generate a strategy for current player
+	}
 
 	if (this->settings->isDeathMatch) {
 		StrategyBuilder::randomPercentFactor = 25;
@@ -3879,6 +3914,7 @@ void StrategyBuilder::CreateStrategyFromScratch() {
 			this->log += newline;
 		}
 	}
+	return true;
 }
 
 

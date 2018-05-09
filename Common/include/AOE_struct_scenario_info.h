@@ -140,7 +140,11 @@ namespace AOE_STRUCTURES {
 		long int artefactsRequireAll; // +4BE8. 0="at least one", 1="all". Applies to relics, ruins, discoveries ?
 		unsigned long int unknown_4BEC; // +4BEC0. Unused, it seems.
 		long int currentPlayerIdMinusOne; // +4BF0. PlayerId-1 being selected in scenario editor (player tab, etc).
-		long int disableTechnologyFlags[0x10][AOE_CONST_INTERNAL::SC_ED_DISABLE_TECHNOLOGY_INDICES::CST_DTI_COUNT]; // +4BF4. Total Size =0x500 bytes. Used in 0x507E50=scenarioInfo.applyDisabledResearches(player)
+
+		// +4BF4. Total Size =0x500 bytes. Used in 0x507E50=scenarioInfo.applyDisabledResearches(player). 0="disabled", 1="allowed" (standard case). Index=playerId-1
+		// Note: in early versions, this was not well initialized !? It is more prudent to check if values are non-zero rather than comparing to 1 !
+		long int allowedTechnologyFlags[0x10][AOE_CONST_INTERNAL::SC_ED_DISABLE_TECHNOLOGY_INDICES::CST_DTI_COUNT];
+
 		// +50F4 is an array of 3 long int. Index 0=lengthenCombat, 1=?, 2=allTechs. Cf Getter in 0x5076A0 (getter is only used with index 2, beware direct accesses too).
 		long int enableLengthenCombatMode; // +50F4. A flag 0/1. If 1, lengthen combat mode is ON (most units get *3 HP, it is technology 0x64)
 		long int unusedGameMode_50F8; // +50F8. Supposedly another "game mode" option, unused (sure at 99%)

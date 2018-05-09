@@ -54,7 +54,7 @@ static bool test_ror_structures() {
 	trs_assert(&scinfo, 0x1990, &scinfo.startingResources);
 	trs_assert(&scinfo, 0x1AA4, &scinfo.generalVictory_goldAmount);
 	trs_assert(&scinfo, 0x4BA8, &scinfo.hasAlliedVictory);
-	trs_assert(&scinfo, 0x4BF4, &scinfo.disableTechnologyFlags);
+	trs_assert(&scinfo, 0x4BF4, &scinfo.allowedTechnologyFlags);
 	trs_assert(&scinfo, 0x5148, &scinfo.generalVictory_timeAmount);
 	AOE_STRUCTURES::STRUCT_SCORE_ELEM scoreElem;
 	assert(sizeof(scoreElem) == 0x20);

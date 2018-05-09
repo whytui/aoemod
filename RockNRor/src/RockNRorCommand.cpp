@@ -1703,14 +1703,14 @@ void RockNRorCommand::OnGameTimer() {
 
 		// Timer trigger
 		CR_TRIGGERS::EVENT_INFO_FOR_TRIGGER evtInfo;
-		memset(&evtInfo, -1, sizeof(evtInfo));
+		::memset(&evtInfo, -1, sizeof(evtInfo));
 		evtInfo.currentGameTime_s = currentGameTime;
 		ROCKNROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_TIMER, evtInfo);
 
 		// "Passive" triggers (we need to test their criteria regulary)
 
 		// Trigger type: Reached some resource value...?
-		memset(&evtInfo, -1, sizeof(evtInfo)); // Reset event info
+		::memset(&evtInfo, -1, sizeof(evtInfo)); // Reset event info
 		for (int iPlayerId = 1; iPlayerId < global->playerTotalCount; iPlayerId++) {
 			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(iPlayerId);
 			if (player && player->IsCheckSumValid()) {
@@ -2444,8 +2444,8 @@ void RockNRorCommand::towerPanic_LoopOnVillagers(AOE_STRUCTURES::STRUCT_TAC_AI *
 
 	long int squareDistances[CRCOMMANDS_MAX_HANDLED_VILLAGER_COUNT];
 	long int orderedUnitIDs[CRCOMMANDS_MAX_HANDLED_VILLAGER_COUNT];
-	memset(squareDistances, -1, CRCOMMANDS_MAX_HANDLED_VILLAGER_COUNT * sizeof(long int));
-	memset(orderedUnitIDs, -1, CRCOMMANDS_MAX_HANDLED_VILLAGER_COUNT * sizeof(long int));
+	::memset(squareDistances, -1, CRCOMMANDS_MAX_HANDLED_VILLAGER_COUNT * sizeof(long int));
+	::memset(orderedUnitIDs, -1, CRCOMMANDS_MAX_HANDLED_VILLAGER_COUNT * sizeof(long int));
 	int arrayElemCount = 0;
 	assert(tacAI->allVillagers.usedElements <= CRCOMMANDS_MAX_HANDLED_VILLAGER_COUNT);
 	

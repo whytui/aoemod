@@ -79,7 +79,11 @@ namespace STRATEGY {
 		const std::string GetLog() const { return this->log; }
 
 		// Create a brand new dynamic strategy for player.
-		void CreateStrategyFromScratch();
+		// Returns true if a strategy was generated
+		bool CreateStrategyFromScratch();
+
+		// Returns true if the game is a scenario where we don't want to generate a dybnamic strategy
+		bool DoesScenarioExcludeStrategyGeneration();
 
 		// Searches researches that impact a specific living unit and add them to internal list of potential researches.
 		// Searches recursively required researches EXCEPT for "optional" requirements. No decision is made here.
