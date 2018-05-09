@@ -103,8 +103,8 @@
     <ResourceCompile Include="res\RockNRor.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\tinyxml\tinystr.h" />
-    <ClInclude Include="..\..\tinyxml\tinyxml.h" />
+    <ClInclude Include="..\tinyxml\tinystr.h" />
+    <ClInclude Include="..\tinyxml\tinyxml.h" />
     <ClInclude Include="include\AOEPrimitives_gameCommand.h" />
     <ClInclude Include="include\AOEPrimitives_global.h" />
     <ClInclude Include="include\AOEPrimitives_lists.h" />
@@ -204,10 +204,10 @@
     <ClInclude Include="include\RORVirtualMethodHelper.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\tinyxml\tinystr.cpp" />
-    <ClCompile Include="..\..\tinyxml\tinyxml.cpp" />
-    <ClCompile Include="..\..\tinyxml\tinyxmlerror.cpp" />
-    <ClCompile Include="..\..\tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="..\tinyxml\tinystr.cpp" />
+    <ClCompile Include="..\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="..\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="..\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="src\AOEPrimitives_gameCommand.cpp" />
     <ClCompile Include="src\AOEPrimitives_global.cpp" />
     <ClCompile Include="src\AOEPrimitives_lists.cpp" />

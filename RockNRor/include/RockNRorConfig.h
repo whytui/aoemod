@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "../../../tinyxml/tinyxml.h"
+#include "../../tinyxml/tinyxml.h"
 #include <string>
 #include <list>
 #include <algorithm>

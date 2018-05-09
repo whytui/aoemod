@@ -63,12 +63,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\tinyxml\tinystr.h">
-      <Filter>Fichiers d%27en-tête\TinyXML</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\tinyxml\tinyxml.h">
-      <Filter>Fichiers d%27en-tête\TinyXML</Filter>
-    </ClInclude>
     <ClInclude Include="include\unitShortcuts.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -360,20 +354,14 @@
     <ClInclude Include="include\TechEffectHandler.h">
       <Filter>Fichiers d%27en-tête\RockNRorFeatures</Filter>
     </ClInclude>
+    <ClInclude Include="..\tinyxml\tinystr.h">
+      <Filter>Fichiers d%27en-tête\TinyXML</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tinyxml\tinyxml.h">
+      <Filter>Fichiers d%27en-tête\TinyXML</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\tinyxml\tinystr.cpp">
-      <Filter>Fichiers sources\TinyXML</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\tinyxml\tinyxml.cpp">
-      <Filter>Fichiers sources\TinyXML</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\tinyxml\tinyxmlerror.cpp">
-      <Filter>Fichiers sources\TinyXML</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\tinyxml\tinyxmlparser.cpp">
-      <Filter>Fichiers sources\TinyXML</Filter>
-    </ClCompile>
     <ClCompile Include="src\StrategyBuilder.cpp">
       <Filter>Fichiers sources\Strategy</Filter>
     </ClCompile>
@@ -613,6 +601,18 @@
     </ClCompile>
     <ClCompile Include="src\TechEffectHandler.cpp">
       <Filter>Fichiers sources\RockNRorFeatures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tinyxml\tinystr.cpp">
+      <Filter>Fichiers sources\TinyXML</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tinyxml\tinyxml.cpp">
+      <Filter>Fichiers sources\TinyXML</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tinyxml\tinyxmlerror.cpp">
+      <Filter>Fichiers sources\TinyXML</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tinyxml\tinyxmlparser.cpp">
+      <Filter>Fichiers sources\TinyXML</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
