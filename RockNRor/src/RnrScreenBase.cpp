@@ -133,6 +133,10 @@ bool RnrScreenBase::CreateScreen(STRUCT_UI_EASY_PANEL *parentScreen) {
 		// Backup the original focused component in parent screen.
 		// If our dropdowns mess with that, we can still restore the correct pointer when closing our screen.
 		this->parentScreenFocusedComponent = parentScreen->focusedComponent;
+	} else {
+		if (screenObject->previousPanel) {
+			this->parentScreenFocusedComponent = screenObject->previousPanel->focusedComponent;
+		}
 	}
 	// Collect backup pointers to fix combobox bugs (using dropdowns corrupts some panelSystem pointers, this is an issue in AOE code)
 	AOE_STRUCTURES::STRUCT_UI_PANEL_SYSTEM *uiMainInfo = GetUIMainInfoStruct();
