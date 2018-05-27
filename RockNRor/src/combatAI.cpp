@@ -795,7 +795,8 @@ void OnAIUpdateIdleSoldiers(STRUCT_TAC_AI *tacAI, long int startProcessingTime, 
 		if (targetUnit) {
 			targetPlayer = targetUnit->ptrStructPlayer;
 			PLAYER_DIPLOMACY_VALUES targetDiplValue = player->diplomacyVSPlayers[targetPlayer->playerId];
-			if (targetUnit && ((targetDiplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY) || (targetDiplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_SELF))) {
+			if (targetUnit && ((targetDiplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_ALLY) || 
+				(targetDiplValue == PLAYER_DIPLOMACY_VALUES::CST_PDV_SELF))) {
 				targetIsAllied = true;
 			}
 		} else {
@@ -819,6 +820,8 @@ void OnAIUpdateIdleSoldiers(STRUCT_TAC_AI *tacAI, long int startProcessingTime, 
 		case AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_FOLLOW_OBJECT:
 			// Case NOT to take care of
 			orderExpectsAlly = false;
+			break;
+			// Others: default (expect ally)
 		}
 
 		bool taskExpectsEnemy = false;
@@ -860,6 +863,19 @@ void OnAIUpdateIdleSoldiers(STRUCT_TAC_AI *tacAI, long int startProcessingTime, 
 				//ROCKNROR::SYSTEM::StopExecution(std::wstring(_T("OnAIUpdateIdleSoldiers: detected an error for unit order ; task expects ally / #") + std::to_wstring(curId)).c_str(), true, true);
 			}
 		}
+
+		if (curUnit->currentActivity->orderId == AOE_CONST_INTERNAL::UNIT_AI_ORDER::CST_ORDER_DEFEND_UNIT) {
+			if (targetUnit) {
+				char d = ROCKNROR::crInfo.GetIntDistance((int)(targetUnit->positionX - curUnit->positionX), (int)(targetUnit->positionY - curUnit->positionY));
+				AOE_STRUCTURES::STRUCT_ACTION_BASE *action = GetUnitAction(curUnit);
+				if (!action && ((d < 0) || (d > 5))) {
+					doStop = true; // Defend a unit... that is far - and without following it (this case does happen, don't know why)
+				}
+			} else {
+				doStop = true; // Defend a no-longer existing unit ??
+			}
+		}
+
 		if (doStop) {
 			// Stop invalid actions : this still happens on some occasions, including priests (target killed or converted by another priest?),
 			// some remaining bugs/missing updates (given we can't update everything each time a unit dies/is converted/etc)
