@@ -54,6 +54,7 @@ namespace AOE_TECHNOLOGIES {
 			if (IsResourceModifier(techEffect) && (techEffect->effectUnit == RESOURCE_TYPES::CST_RES_ORDER_CURRENT_AGE)) {
 				return true;
 			}
+			return false;
 		}
 		bool IgnoreWholeTech(STRUCT_TECH_DEF_EFFECT *techEffect) const override {
 			if (__super::IgnoreWholeTech(techEffect)) { return true; }
@@ -63,6 +64,7 @@ namespace AOE_TECHNOLOGIES {
 			if (IsResourceModifier(techEffect) && (techEffect->effectUnit == RESOURCE_TYPES::CST_RES_ORDER_CURRENT_AGE)) {
 				return true;
 			}
+			return false;
 		}
 	};
 

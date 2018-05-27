@@ -196,6 +196,7 @@ public:
 	bool allowPickingCustomCivsInRandomInit;
 	bool randomTechTreeForRMGames; // Generate random civs for RM and DM new games
 	long int randomTechTreeDesiredAvgBonusCount; // (average) number of civ bonus in random civs
+	bool markUnitsWithCivBonus; // If true, add a marker (*) to unit names for unit with a civilization bonus
 	// Human interface
 	bool enableCallNearbyIdleMilitaryUnits;
 	long int distanceToCallNearbyIdleMilitaryUnits;

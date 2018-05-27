@@ -754,7 +754,7 @@ void TechTreeAnalyzer::UpdateResearchAffectingUnitsLinks() {
 }
 
 
-// Calculate additional statistics, one tech tree has been analysed
+// Calculate additional statistics, once tech tree has been analysed
 void TechTreeAnalyzer::CalculateStatistics() {
 	this->statistics.Reset();
 

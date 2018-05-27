@@ -68,6 +68,9 @@ public:
 
 	// Returns true if the research is disabled in player tech tree
 	bool IsResearchDisabled(long int resDefId) const;
+
+	// Adds an asterisk to unit names, for unit that benefit from a civ bonus
+	void MarkCivBonusUnitNames();
 };
 
 

@@ -293,7 +293,7 @@ private:
 	// Update links between researches and units that are affected by them
 	void UpdateResearchAffectingUnitsLinks();
 
-	// Calculate additional statistics, one tech tree has been analysed
+	// Calculate additional statistics, once tech tree has been analysed
 	void CalculateStatistics();
 
 };

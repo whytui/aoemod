@@ -78,6 +78,7 @@ RockNRorConfig::RockNRorConfig() {
 	for (int i = 0; i < 256; i++) {
 		allCivInfo[i] = NULL;
 	}
+	this->markUnitsWithCivBonus = false; // Game default
 	this->useImprovedButtonBar = false; // Game default
 	this->enableCallNearbyIdleMilitaryUnits = true;
 	this->distanceToCallNearbyIdleMilitaryUnits = 25;
@@ -349,6 +350,9 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "rpgMode") {
 			this->enableRPGModeInScenario = XML_GetBoolElement(elem, "scenario");
 			this->enableRPGModeInRandomGames = XML_GetBoolElement(elem, "randomGames");
+		}
+		if (elemName == "markUnitsWithCivBonus") {
+			this->markUnitsWithCivBonus = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "gameTimerSlowDownAutoFix") {
 			this->gameTimerSlowDownAutoFix = XML_GetBoolElement(elem, "enable");

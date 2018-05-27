@@ -169,6 +169,7 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackNonTowerBuildings,
 		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackVillagers,
 		ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastRangedUnits.attackWalls);
+	fprintf_s(f, "markUnitsWithCivBonus:                     %ld\n", ROCKNROR::crInfo.configInfo.markUnitsWithCivBonus);
 
 	// Conversion
 	fprintf_s(f, "conversionResistance_Boats:                %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Boats);

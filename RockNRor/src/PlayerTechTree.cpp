@@ -157,6 +157,40 @@ bool CustomPlayerInfo::IsResearchDisabled(long int resDefId) const {
 }
 
 
+// Adds an asterisk to unit names, for unit that benefit from a civ bonus
+void CustomPlayerInfo::MarkCivBonusUnitNames() {
+	if (this->myPlayerId < 1) { return; }
+	if (!ROCKNROR::crInfo.configInfo.markUnitsWithCivBonus) { return; }
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global) { return; }
+	STRUCT_TECH_DEF *techTreeDef = global->technologiesInfo->GetTechDef((short int)this->myTechTreeId);
+	if (!techTreeDef) { return; }
+	AOE_TECHNOLOGIES::TechnologyFilterBase *t = new AOE_TECHNOLOGIES::TechFilterNoTechTreeNoAge();
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(this->myPlayerId);
+	if (!player) { return; }
+
+	for (int unitDefId = 0; unitDefId < player->structDefUnitArraySize; unitDefId++) {
+		if (this->IsUnitDisabled(unitDefId)) { continue; }
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->GetUnitDefBase(unitDefId);
+		if (!unitDef) { continue; }
+		if (DoesTechAffectUnit(techTreeDef, unitDef, t)) {
+			std::string actualUnitName = GetLanguageDllText(unitDef->languageDLLID_Name);
+			if (!actualUnitName.empty()) {
+				int len = actualUnitName.length(); // text length (excluding ending \0)
+				if (actualUnitName[len - 1] != '*') {
+					AOEFree(unitDef->ptrUnitName);
+					unitDef->ptrUnitName = (char*)AOEAlloc(len + 2);
+					strncpy_s(unitDef->ptrUnitName, len + 2, actualUnitName.c_str(), len + 1);
+					unitDef->ptrUnitName[len] = '*';
+					unitDef->ptrUnitName[len + 1] = 0;
+					unitDef->languageDLLID_Name = 0;
+				}
+			}
+		}
+	}
+}
+
+
 // Returns the final "disable probability" for this research.
 // Returns <=0 if the unit must not be disable OR must not be disabled directly (handled by "unit line")
 double TTCreatorResearchInfo::GetDisableProbability() const {
@@ -861,7 +895,7 @@ double TechTreeCreator::CreateOneBonus() {
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.2, 0.95);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, 0.55, 0.97);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, 0.4, 0.9);
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.2, 1.07);
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.2, 1.08 );
 	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, 0.1, 0.70);// is water map
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, 0.35, 0.99);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, 0.4, 0.98);
@@ -958,7 +992,7 @@ double TechTreeCreator::CreateOneBonus() {
 	}
 	if ((chosenClass == TribeAIGroupCivilian) || (chosenClass == TribeAIGroupFishingBoat)) {
 		// Remark: for civilians, TUA_RESOURCE_CAPACITY bonus applies also on work rate.
-		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, { 0.35, 4 })); // High probability... Because resource capacity regroups several possible bonus
+		propsByAttribute.insert(BonusGenAttrPPair(TECH_UNIT_ATTRIBUTES::TUA_RESOURCE_CAPACITY, { 0.35, 6 })); // High probability... Because resource capacity regroups several possible bonus
 	}
 	if (chosenClass == TribeAIGroupBuilding) {
 		// Add specific cases for buildings (special bonus that will impact either farms or towers)
@@ -1315,6 +1349,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			case 6:applyToUnit = CST_UNITID_HUNTER; break;
 			}
 			if (applyToUnit >= 0) {
+				applyToClass = AOE_CONST_FUNC::TribeAINone;
 				applyToNameString = "unit ";
 				std::string name = GetUnitName(applyToUnit);
 				if (!name.empty()) {

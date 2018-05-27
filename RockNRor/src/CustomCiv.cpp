@@ -39,6 +39,7 @@ bool CustomCivHandler::CreateInternalDataForGameWithStandardCivs(bool resetInter
 		ROCKNROR::STRATEGY::CustomPlayerInfo *pi = this->GetCustomPlayerInfo(playerId);
 		if (pi) {
 			pi->CollectInfoFromExistingTechTree();
+			pi->MarkCivBonusUnitNames();
 		}
 	}
 	return true;
@@ -72,7 +73,8 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 		STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
 		if (!player || !player->IsCheckSumValid()) { continue; }
 		player->techTreeId = techTreeIndex; // used at game init to apply civilization bonus (malus), then not really used.
-		this->playersInfo[playerId].myTechTreeId = techTreeIndex;
+		assert(this->GetCustomPlayerInfo(playerId) != NULL);
+		this->GetCustomPlayerInfo(playerId)->myTechTreeId = techTreeIndex;
 
 		STRUCT_TECH_DEF *techDef = global->technologiesInfo->GetTechDef(techTreeIndex);
 		ROCKNROR::STRATEGY::TechTreeCreator ttc;
@@ -91,6 +93,8 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 		if ((global->humanPlayerId >= 0) && (global->humanPlayerId == playerId)) {
 			this->lastGenerationBonusLinesForHumanPlayer = ttc.GetHumanBonusTextLines();
 		}
+
+		this->GetCustomPlayerInfo(playerId)->MarkCivBonusUnitNames();
 	}
 	
 	return true;
