@@ -159,7 +159,7 @@ bool CustomPlayerInfo::IsResearchDisabled(long int resDefId) const {
 
 // Adds an asterisk to unit names, for unit that benefit from a civ bonus
 void CustomPlayerInfo::MarkCivBonusUnitNames() {
-	if (this->myPlayerId < 1) { return; }
+	if ((this->myPlayerId < 1) || (this->myTechTreeId < 0)) { return; }
 	if (!ROCKNROR::crInfo.configInfo.markUnitsWithCivBonus) { return; }
 	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
