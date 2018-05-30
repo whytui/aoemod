@@ -75,6 +75,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->allowPickingCustomCivsInRandomInit = false; // Game default
 	this->randomTechTreeForRMGames = false; // Game default
 	this->randomTechTreeDesiredAvgBonusCount = 3; // there is no game default here ; only used if randomTechTreeForRMGames=true
+	this->randomTechTreeSimulationCount = 10; // there is no game default here ; only used if randomTechTreeForRMGames=true
 	for (int i = 0; i < 256; i++) {
 		allCivInfo[i] = NULL;
 	}
@@ -346,6 +347,8 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			}
 			callResult = elem->QueryIntAttribute("avgBonusCount", &intValue);
 			if (callResult == TIXML_SUCCESS) { this->randomTechTreeDesiredAvgBonusCount = intValue; }
+			callResult = elem->QueryIntAttribute("simulationCount", &intValue);
+			if (callResult == TIXML_SUCCESS) { this->randomTechTreeSimulationCount = intValue; }
 		}
 		if (elemName == "rpgMode") {
 			this->enableRPGModeInScenario = XML_GetBoolElement(elem, "scenario");

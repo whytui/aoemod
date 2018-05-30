@@ -160,10 +160,11 @@ namespace TT_CONFIG {
 	static const double RES_PROBA_WHEEL = 0.015; // "disable probability" for Wheel research
 	static const double RES_WEIGHT_WHEEL = 0.9; // "disable weight" for Wheel research
 	static const double RES_PROBA_STANDARD_UNIT = 0.5; // "disable probability" for a standard unit
-	static const double RES_WEIGHT_STANDARD_UNIT = 0.1; // "disable weight" for a standard unit
+	static const double RES_WEIGHT_STANDARD_UNIT = 0.2; // "disable weight" for a standard unit
 	static const double RES_PROBA_SPECIALIZED_UNIT = 0.6; // "disable probability" for a unit which is slighly more rare than standard, like ballista (quite often disabled).
 	static const double RES_PROBA_VERY_RARE = 0.05; // Disable probability for unit that must be disabled on very rare occasions: priests, stone thrower, hoplite...
-	static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.8; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
+	static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.7; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
+	static const double RES_WEIGHT_CHARIOTS = 0.4; // "Disable weight" for chariots/chariot archer
 
 	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.9; // computed probability counts as much as xxx% vs random. 1=100%=apply probability normally. Do not set to 0.
 	static const int CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT = 40;
@@ -197,17 +198,22 @@ typedef std::pair<const TECH_UNIT_ATTRIBUTES, BonusGenProperties> BonusGenAttrPP
 // Class that allows creating dynamic tech tree, based on tech tree analyzer
 class TechTreeCreator {
 public:
-	TechTreeCreator() {
+	TechTreeCreator(bool simulationMode) {
 		this->Reset();
+		this->simulationMode = simulationMode;
+	}
+	TechTreeCreator(double expectedAverageDisableWeight) {
+		this->Reset();
+		this->expectedAverageDisableWeight = expectedAverageDisableWeight;
 	}
 	long int arrayUnitDefCount;
 	long int arrayResearchCount;
 	STRUCT_TECH_DEF *techDefForTechTree;
 	int religionLevel; // 0=low(high disable proba), 3=high(low disable temple research proba)
 	int economyLevel; // 0=low(high disable proba), 3=high(low disable economy techs proba)
-	double totalDisableWeight; // Evaluated "weight" of disabled units/researches
-	double relativeDisableWeight; // If >0 then civ is unlucky regarding disabled techs/units and better civ bonus would be welcome
-	double computedMeanWeight;
+	double totalDisableWeight; // Evaluated "weight" of disabled units/researches (sum of disabled elements weight)
+	double disabledWeightProportion; // "disabledWeight/average". If <1, my tech tree is quite rich. If >1, many techs are disabled
+	double bonusProportion; // "bonusWeight/average". If <1, I have few bonus. If <disabledWeightProportion, I have too few bonus to compensate the amount of disabled stuff in tech tree.
 	std::set<long int> eligibleDisableResearchIdBronze;
 	std::set<long int> eligibleDisableResearchIdIron;
 	std::set<long int> eligibleDisableUnitDefIdBronze;
@@ -219,6 +225,7 @@ public:
 	std::set<long int> trainLocationsWithBonus; // All buildings where at least 1 trainable unit benefits from some civ bonus
 
 	void Reset() {
+		this->simulationMode = false;
 		this->techDefForTechTree = NULL;
 		this->techTreeEffects.clear();
 		this->arrayResearchCount = 0;
@@ -232,9 +239,13 @@ public:
 		this->economyLevel = 0;
 		this->religionLevel = 0;
 		this->totalDisableWeight = 0;
-		this->computedMeanWeight = 0;
+		this->disabledWeightProportion = 0;
+		this->bonusProportion = 0;
 		this->bonusText = "";
 		this->classesWithBonus.clear();
+		this->lastAverageBonusWeight = 0;
+		this->expectedAverageDisableWeight = 0;
+		this->bonusCount = 0;
 	}
 
 	// Create a random tech tree (list of effects) on provided TechDef (should be initially empty).
@@ -250,6 +261,17 @@ public:
 
 private:
 	std::string bonusText;
+
+	// Actual number of bonus created for the civilization
+	int bonusCount;
+
+	// If true, do not actually create any bonus
+	bool simulationMode;
+
+	// Average bonus weight from last calculation
+	double lastAverageBonusWeight;
+	// Expected average value for "disable weight" (guessed from statistics)
+	double expectedAverageDisableWeight;
 
 	// Get a TTCreatorResearchInfo from this->allCreatorResearchInfo for given ID. NULL if not found
 	TTCreatorResearchInfo *GetCrResearchInfo(long int researchId) const;
@@ -276,6 +298,9 @@ private:
 	// Creates disable unit effects according to disable scores that have been computed (on root units)
 	// If a unit(line) is selected for being disabled, then this method chooses at which level (which upgrade) the unitline becomes unavailable.
 	void CreateDisableUnitsEffects();
+
+	// Calculates this->totalDisableWeight according to what has been disabled in tech tree (cf internal data)
+	void CalcTotalDisabledWeight();
 
 	// Creates random civ bonuses
 	void CalcRandomCivBonus();

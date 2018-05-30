@@ -66,6 +66,39 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 	AOE_STRUCTURES::ReallocTechDefArray(initialTechDefCount + 8);
 	ROCKNROR::crInfo.techTreeAnalyzer.RefreshTechDefPointers(); // Replace obsolete pointers by correct ones
 
+
+	// Run simulations and collect statistics for a better evaluation of tech tree/bonus weight => try to get fair tech trees/bonuses.
+	long int timeBegin = AOE_METHODS::TimeGetTime();
+	double cumulatedWeight = 0;
+	const int simulationsCount = ROCKNROR::crInfo.configInfo.randomTechTreeSimulationCount;
+	// Run a few "fake" civilization techtree/bonus generation to get statistics.
+	for (int i = 0; i < simulationsCount; i++) {
+		int playerId = 1;
+		int techTreeIndex = initialTechDefCount + playerId - 1;
+		CleanEffectsForTechDef(global->technologiesInfo->GetTechDef(techTreeIndex));
+
+		STRUCT_TECH_DEF *techDef = global->technologiesInfo->GetTechDef(techTreeIndex);
+		ROCKNROR::STRATEGY::TechTreeCreator ttc(true);
+		ttc.CreateRandomTechTree(techDef);
+		double calculatedWeight = ttc.totalDisableWeight;
+		cumulatedWeight += calculatedWeight;
+		// Cancel changes
+		CleanEffectsForTechDef(global->technologiesInfo->GetTechDef(techTreeIndex));
+		ttc.Reset();
+	}
+	double finalAverageDisableWeight = cumulatedWeight / simulationsCount;
+	long int timeEnd = AOE_METHODS::TimeGetTime();
+	long int timeSpent = timeEnd - timeBegin;
+#ifdef _DEBUG
+	this->lastGenerationSummary += "Simulations/stats: time taken=";
+	this->lastGenerationSummary += std::to_string(timeSpent);
+	this->lastGenerationSummary += " ms. ExpectedWeight=";
+	this->lastGenerationSummary += std::to_string(finalAverageDisableWeight);
+	this->lastGenerationSummary += "." NEWLINE;
+#endif
+	// End of simulations/statistics
+
+
 	for (int playerId = 1; playerId <= playerCount; playerId++) {
 		int techTreeIndex = initialTechDefCount + playerId - 1;
 		// Clean previous effects
@@ -77,7 +110,7 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 		this->GetCustomPlayerInfo(playerId)->myTechTreeId = techTreeIndex;
 
 		STRUCT_TECH_DEF *techDef = global->technologiesInfo->GetTechDef(techTreeIndex);
-		ROCKNROR::STRATEGY::TechTreeCreator ttc;
+		ROCKNROR::STRATEGY::TechTreeCreator ttc(finalAverageDisableWeight);
 		ttc.CreateRandomTechTree(techDef);
 		this->lastGenerationSummary += "Pl#";
 		this->lastGenerationSummary += std::to_string(playerId);

@@ -49,6 +49,7 @@
 	<!-- Use randomly-generated civ bonus/tech trees instead of empires.dat civilizations (for RM / DM games only). Default 0. -->
 	<generateRandomTechTree enable="0"/>
 	<generateRandomTechTree avgBonusCount="3"/><!-- Desired average number of random civ. bonus when generateRandomTechTree is enabled -->
+	<generateRandomTechTree simulationCount="15"/><!-- Number of simulations to run to estimate average "disabled weight". Put a lower value if computation is too long. -->
 
 	<!-- markUnitsWithCivBonus : bool 0/1 to add a star (*) to unit names when they benefit from a civilization bonus -->
 	<markUnitsWithCivBonus enable="0"/>

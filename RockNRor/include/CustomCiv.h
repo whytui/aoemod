@@ -12,6 +12,7 @@
 #include "unitDefHandling.h"
 #include "techDefHandling.h"
 #include "PlayerTechTree.h"
+#include "AOE_time.h"
 
 #pragma once
 

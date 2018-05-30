@@ -256,6 +256,12 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 	// DISABLE UNITS/upgrades (via research)
 	this->CreateDisableUnitsEffects();
 
+	this->CalcTotalDisabledWeight();
+
+	if (simulationMode) {
+		return;
+	}
+
 	// CIV BONUS
 	this->CalcRandomCivBonus();
 
@@ -626,7 +632,7 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 			if (this->religionLevel > 0) {
 				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableNever;
 				crUnitInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_MIN;
-				crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_UNIT;
+				crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_HIGH_IMPACT_UNIT;
 			} else {
 				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
 				crUnitInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_VERY_RARE;
@@ -634,6 +640,7 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 			}
 			continue;
 		}
+
 		// Special: iron age "root" boats (note: pre-iron war boats can't be disabled, cf CollectUnitInfo) => fire galley, cat.trireme
 		if ((crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupWarBoat) &&
 			(crUnitInfo->unitDetail->requiredAge == AOE_CONST_FUNC::CST_RSID_IRON_AGE)) {
@@ -646,36 +653,46 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 
 		// Special: stone thrower and siege
 		if (crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupSiegeWeapon) {
-			crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_HIGH_IMPACT_UNIT;
 			if (crUnitInfo->unitDefId == AOE_CONST_FUNC::CST_UNITID_STONE_THROWER) {
 				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
 				crUnitInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_STANDARD_UNIT; // Useful for other upgrades (catapults)
+				crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_HIGH_IMPACT_UNIT;
 			} else {
 				crUnitInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_SPECIALIZED_UNIT;
+				crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_UNIT;
 			}
 		}
 
+		// Special: chariots(melee+archers) availability has a strong impact on civ (no-gold, precious against priests...)
+		if ((crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupChariot) ||
+			(crUnitInfo->unitDetail->unitClass == AOE_CONST_FUNC::TribeAIGroupChariotArcher)) {
+			crUnitInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_STANDARD_UNIT;
+			crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_CHARIOTS;
+		}
+
 		// Special: unit that is only unit in given train location (may depend on mods, in standard game: hoplite)
-		TTDetailedBuildingDef *bld = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(crUnitInfo->trainLocation);
-		assert(bld && bld->IsValid());
-		if (bld && bld->IsValid()) {
-			long int uniqueRootId = -1;
-			bool uniqueRootUnitId = true;
-			for each (auto oneUnit in bld->unitsTrainedHere)
-			{
-				TTDetailedTrainableUnitDef *oneUnitDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(oneUnit->DAT_ID1);
-				if (uniqueRootId < 0) {
-					uniqueRootId = oneUnitDetail->baseUnitId;
-				} else {
-					uniqueRootUnitId &= (uniqueRootId == oneUnitDetail->baseUnitId);
+		if (crUnitInfo->rawDisableProbability < 0) { // exclude already handled units !
+			TTDetailedBuildingDef *bld = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedBuildingDef(crUnitInfo->trainLocation);
+			assert(bld && bld->IsValid());
+			if (bld && bld->IsValid()) {
+				long int uniqueRootId = -1;
+				bool uniqueRootUnitId = true;
+				for each (auto oneUnit in bld->unitsTrainedHere)
+				{
+					TTDetailedTrainableUnitDef *oneUnitDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(oneUnit->DAT_ID1);
+					if (uniqueRootId < 0) {
+						uniqueRootId = oneUnitDetail->baseUnitId;
+					} else {
+						uniqueRootUnitId &= (uniqueRootId == oneUnitDetail->baseUnitId);
+					}
 				}
-			}
-			// TODO: count "military" researches only ? Only those that apply to THE unit ? TODO EXCLUDE unit upgrades !
-			//int researchCountThere = bld->researchesDevelopedHere.size();
-			if (uniqueRootUnitId /*&& (researchCountThere == 0)*/) {
-				crUnitInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_SPECIALIZED_UNIT;
-				crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
-				crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_HIGH_IMPACT_UNIT;
+				// TODO: count "military" researches only ? Only those that apply to THE unit ? TODO EXCLUDE unit upgrades !
+				//int researchCountThere = bld->researchesDevelopedHere.size();
+				if (uniqueRootUnitId /*&& (researchCountThere == 0)*/) {
+					crUnitInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_SPECIALIZED_UNIT;
+					crUnitInfo->rootUnitDisablePolicy = TTCreatorBaseUnitDisableBehavior::TTBUDisableVeryRare;
+					crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_HIGH_IMPACT_UNIT;
+				}
 			}
 		}
 	}
@@ -800,46 +817,45 @@ void TechTreeCreator::CreateDisableUnitsEffects() {
 }
 
 
-// Creates random civ bonuses
-void TechTreeCreator::CalcRandomCivBonus() {
+// Calculates this->totalDisableWeight according to what has been disabled in tech tree (cf internal data)
+void TechTreeCreator::CalcTotalDisabledWeight() {
 	this->totalDisableWeight = 0;
-	double totalWeightAll = 0; // For ALL units and ALL researches, even not-disabled ones (ignore shadow and "fake" researches though)
 
 	for each (TTCreatorUnitInfo *curUnit in this->allCreatorUnitInfo)
 	{
-		totalWeightAll += curUnit->disableWeight;
 		if (curUnit->hasBeenDisabled) {
 			this->totalDisableWeight += curUnit->disableWeight;
 		}
 	}
-
 	for each (TTCreatorResearchInfo *curResearch in this->allCreatorResearchInfo)
 	{
 		if (curResearch->researchDetail->IsShadowResearch() || curResearch->isFakeForDisableUnit) { continue; }
-		totalWeightAll += curResearch->disableWeight;
 		if (curResearch->hasBeenDisabled) {
 			this->totalDisableWeight += curResearch->disableWeight;
 		}
 	}
+}
 
-	// What is the "median" weight ?
-	double disabledUnitMedian = ((double)TT_CONFIG::MAX_DISABLE_UNITLINE_COUNT) - ((double)TT_CONFIG::MIN_DISABLE_UNITLINE_COUNT);
-	double disabledResearchMedian = ((double)TT_CONFIG::MAX_DISABLE_RESEARCH_COUNT) - ((double)TT_CONFIG::MIN_DISABLE_RESEARCH_COUNT);
-	double weightMean = totalWeightAll / (disabledUnitMedian + disabledResearchMedian);
 
-	this->relativeDisableWeight = this->totalDisableWeight - weightMean;
-	this->computedMeanWeight = weightMean;
+// Creates random civ bonuses
+void TechTreeCreator::CalcRandomCivBonus() {
+	this->disabledWeightProportion = this->totalDisableWeight;
+	if (this->expectedAverageDisableWeight > 0) {
+		this->disabledWeightProportion = this->totalDisableWeight / this->expectedAverageDisableWeight;
+	}
 
-	// TODO fix and use weight evaluation
 	int avgCount = ROCKNROR::crInfo.configInfo.randomTechTreeDesiredAvgBonusCount;
 	if (avgCount < 1) { avgCount = 1; }
-	int bonusCount = randomizer.GetRandomValue_normal_moderate(avgCount - 1, avgCount + 1);
+	int maxBonusCount = avgCount + 2; // force to stop loop when that number of bonuses is reached
 	this->bonusText.clear();
 	double bonusWeight = 0;
-	for (int i = 0; i < bonusCount; i++) {
+	for (int i = 0; i < maxBonusCount; i++) {
 		bonusWeight += this->CreateOneBonus();
-		if (bonusWeight > this->totalDisableWeight) { 
-			break; // TEST
+		this->bonusCount++;
+		double estimatedDesiredTotalBonusWeight = this->lastAverageBonusWeight * avgCount;
+		this->bonusProportion = bonusWeight / estimatedDesiredTotalBonusWeight;
+		if (this->bonusProportion > this->disabledWeightProportion) {
+			break;
 		}
 	}
 }
@@ -847,6 +863,7 @@ void TechTreeCreator::CalcRandomCivBonus() {
 
 // Create one civ bonus
 double TechTreeCreator::CreateOneBonus() {
+	this->lastAverageBonusWeight = 0;
 	double result = 0;
 	std::map<GLOBAL_UNIT_AI_TYPES, int> unitLinesByUnitClass; // number of non-disabled unit for each class
 	for (int i = 0; i < GLOBAL_UNIT_AI_TYPES::TribeAIGroupStandardCount; i++) {
@@ -1067,9 +1084,24 @@ double TechTreeCreator::CreateOneBonus() {
 	if (maxBonusRate < 0) { maxBonusRate = 0; }
 	if (minBonusRate > maxBonusRate) { minBonusRate = maxBonusRate; }
 	
-	chosenWeight += this->CreateOneBonusEffect(chosenClass, chosenAttr, minBonusRate, maxBonusRate, unitLinesByUnitClass[chosenClass]);
+	// additionalWeight is 0 in most cases. Used for very specific cases where bonus has a higher impact than expected
+	double additionalWeight = this->CreateOneBonusEffect(chosenClass, chosenAttr, minBonusRate, maxBonusRate, unitLinesByUnitClass[chosenClass]);
+	result = (chosenWeight + chosenAttrWeight) / 2 + additionalWeight;
 
-	result = (chosenWeight + chosenWeight) / 2;
+	// Calculate the "average" weight so that caller can evaluate how strong the current set of bonuses is.
+
+	double totalPossibleWeight = 0;
+	double totalCount = 0;
+	for (auto iter = propsByUnitClass.begin(); iter != propsByUnitClass.end(); iter++) {
+		totalPossibleWeight += iter->second.weight;
+		totalCount++;
+	}
+	for (auto iter = propsByAttribute.begin(); iter != propsByAttribute.end(); iter++) {
+		totalPossibleWeight += iter->second.weight;
+		totalCount++;
+	}
+	this->lastAverageBonusWeight = totalPossibleWeight / totalCount;
+
 	return result;
 }
 
@@ -1873,12 +1905,14 @@ std::string TechTreeCreator::GetDisabledResearchesText() const {
 std::string TechTreeCreator::GetCivBonusText() const {
 	std::string result = "";
 #ifdef _DEBUG
-	result += "Tech tree Weight=";
+	result += "Tech tree totalDisableWeight=";
 	result += std::to_string(this->totalDisableWeight);
-	result += "   /   needForBonusWeight=";
-	result += std::to_string(this->relativeDisableWeight);
-	result += "   /   median=";
-	result += std::to_string(this->computedMeanWeight);
+	result += "   /   disabledWeightProportion=";
+	result += std::to_string(this->disabledWeightProportion);
+	result += "   /   bonusProportion=";
+	result += std::to_string(this->bonusProportion);
+	result += "   /   bonusCount=";
+	result += std::to_string(this->bonusCount);
 	result += NEWLINE;
 #endif
 	
