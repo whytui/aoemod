@@ -226,6 +226,9 @@ namespace STRATEGY {
 		bool AddPotentialBuildingInfoToList(short int unitDefId, bool markForAdd);
 		bool AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef, bool markForAdd);
 
+		// Returns a pointer to the PotentialUnitInfo for a unit
+		PotentialUnitInfo *GetUnitInfo(short int unitDefId) const;
+
 		// Returns true if a research is available in tech tree
 		bool IsResearchInTechTree(short int researchId);
 
@@ -263,7 +266,7 @@ namespace STRATEGY {
 		// Get the additional farm production amount for a technology (not recursive)
 		float GetFarmProductionBonusForTech(short int techId, float supposedCurrentProduction) const;
 
-		// Compute unitInstanceScoreForOptionalResearch for remaining (not selected) optional researches
+		// Update unitInstanceScoreForOptionalResearch for remaining (not selected) optional researches
 		void ComputeScoresForRemainingOptionalResearches();
 
 		// Make the selection of units to add to strategy based on a pre-selection list.

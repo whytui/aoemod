@@ -46,6 +46,7 @@ namespace STRATEGY {
 		std::set<short int> requiredResearchesForBaseUnit; // ALL required researches for same age, excluding "enabledByResearchId", for base unit. Includes researches initiated by required buildings !
 		std::set<short int> requiredResearchesForStrongestUpgrade; // Required researches for same age, excluding "strongestUpgradeUnitEnabledByResearchId", for best upgraded unit. Includes researches initiated by required buildings !
 		bool isBoat; // true for water units, false for land units
+		bool isNonTowerMilitary; // true for military units (excluding towers)
 		float speedBase;
 		float speedUpgraded;
 		float range; // Range for best upgrade

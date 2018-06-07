@@ -15,6 +15,8 @@ PotentialUnitInfo::PotentialUnitInfo() {
 	this->hasSpecificAttackBonus = false;
 	this->hitPoints = 0;
 	this->range = 0;
+	this->isBoat = false;
+	this->isNonTowerMilitary = false;
 	this->isMelee = false;
 	this->speedBase = 0;
 	this->speedUpgraded = 0;

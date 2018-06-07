@@ -29,7 +29,7 @@ void StrategyBuilder::FreePotentialElementsList() {
 	{
 		delete resInfo;
 	}
-	this->potentialBuildingsList.clear();
+	this->potentialResearchesList.clear();
 }
 
 
@@ -278,6 +278,20 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 			}
 		}
 	}
+	for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
+	{
+		TTDetailedUnitDef *unitDetails = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedUnitDef(bldInfo->unitDefId);
+		TTDetailedResearchDef *resDetails = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedResearchDef(resInfo->researchId);
+		if (!unitDetails || !unitDetails->IsValid() || !resDetails || !resDetails->active) { continue; }
+		auto it = std::find(unitDetails->affectedByResearches.begin(), unitDetails->affectedByResearches.end(), resDetails);
+		if (it != unitDetails->affectedByResearches.end()) {
+			TTDetailedResearchDef *r = *it;
+			if ((!settings->isDeathMatch && !r->CanExcludeInRandomMapAI()) ||
+				(settings->isDeathMatch && !r->CanExcludeInDeathMatchAI())) {
+				resInfo->impactedUnitDefIds.insert(bldInfo->unitDefId);
+			}
+		}
+	}
 	// Special treatments
 	if (resInfo->techDef) {
 		for (int i = 0; i < resInfo->techDef->effectCount; i++) {
@@ -378,6 +392,15 @@ bool StrategyBuilder::AddPotentialBuildingInfoToList(AOE_STRUCTURES::STRUCT_UNIT
 
 	// What if age comes from a recursive requirement ? TODO
 	return added;
+}
+
+
+// Returns a pointer to the PotentialUnitInfo for a unit
+PotentialUnitInfo *StrategyBuilder::GetUnitInfo(short int unitDefId) const {
+	for each (PotentialUnitInfo *curUnitInfo in this->potentialUnitsList) {
+		if (curUnitInfo->unitDefId == unitDefId) { return curUnitInfo; }
+	}
+	return NULL;
 }
 
 
@@ -547,7 +570,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 		if (!unitDetailTrainable || !unitDetailTrainable->IsValid() || unitDetailTrainable->IsHeroOrScenarioUnit()) { continue; }
 		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = unitDetailTrainable->GetUnitDef();
 		if (!unitDef || !unitDef->DerivesFromTrainable()) { continue; }
-		if (!IsNonTowerMilitaryUnit(unitDef->unitAIType)) { continue; } // Exclude villagers, towers...
+		if (unitDef->unitAIType == TribeAIGroupBuilding) { continue; } // Excludes towers and other buildings
 		
 		// Intentionally exclude "upgrades": we only get the list of "root" units
 		if (unitDetailTrainable->possibleAncestorUnitIDs.size() > 0) { continue; }
@@ -717,6 +740,8 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 		}
 		unitInfo->hasCivBonus = currentUnitHasTechTreeBonus;
 
+		unitInfo->isNonTowerMilitary = IsNonTowerMilitaryUnit(unitDef->unitAIType);
+
 #ifdef _DEBUG
 		if ((unitInfo->enabledByResearchId >= 0) && (!PLAYER::IsResearchEnabledForPlayer(this->player, unitInfo->enabledByResearchId))) {
 			ROCKNROR::SYSTEM::StopExecution(_T("STRATEGY builder: unavailable research"), true, true);
@@ -736,6 +761,9 @@ void StrategyBuilder::ComputeStrengthsForPotentialUnits() {
 		for (int i = 0; i < MC_COUNT; i++) {
 			unitInfo->strengthVs[i] = 0;
 			unitInfo->weaknessVs[i] = 0;
+		}
+		if (!unitInfo->isNonTowerMilitary) {
+			continue;
 		}
 
 		// availableRelatedResearchesProportion is a % value (0-100)
@@ -1225,6 +1253,9 @@ void StrategyBuilder::ComputeGlobalScores() {
 		}
 		unitInfo->globalScore = 0;
 		unitInfo->globalScoreEarlyAge = 0;
+		if (!unitInfo->isNonTowerMilitary) {
+			continue;
+		}
 		if (unitInfo->damageScore == 1) {
 			unitInfo->globalScoreEarlyAge = 20;
 		}
@@ -1455,7 +1486,7 @@ void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> s
 	// Bonus about costs repartition
 	for each (PotentialUnitInfo *unitInfo in selectedUnits)
 	{
-		if ((!unitInfo->isSelected) && (unitInfo->ageResearchId <= maxAgeResearchId)) {
+		if ((!unitInfo->isSelected) && unitInfo->isNonTowerMilitary && (unitInfo->ageResearchId <= maxAgeResearchId)) {
 			unitInfo->bonusForUsedResourceTypes = this->GetCostScoreRegardingCurrentSelection(unitInfo);
 		}
 	}
@@ -1465,7 +1496,7 @@ void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> s
 		bool hasRangedInTool = false;
 		for each (PotentialUnitInfo *unitInfo in selectedUnits)
 		{
-			if (unitInfo->isSelected && (unitInfo->ageResearchId <= CST_RSID_TOOL_AGE)) {
+			if (unitInfo->isSelected && unitInfo->isNonTowerMilitary && (unitInfo->ageResearchId <= CST_RSID_TOOL_AGE)) {
 				if (unitInfo->isMelee) {
 					hasMeleeInTool = true;
 				} else {
@@ -1475,7 +1506,7 @@ void StrategyBuilder::RecomputeComparisonBonuses(std::list<PotentialUnitInfo*> s
 		}
 		if (hasMeleeInTool || hasRangedInTool) {
 			for each (PotentialUnitInfo *unitInfo in selectedUnits) {
-				if ((!unitInfo->isSelected) && (unitInfo->ageResearchId <= maxAgeResearchId)) {
+				if (unitInfo->isNonTowerMilitary && !unitInfo->isSelected && (unitInfo->ageResearchId <= maxAgeResearchId)) {
 					if (hasMeleeInTool && unitInfo->isMelee) {
 						unitInfo->bonusForRareStrength = 0;
 						unitInfo->bonusForUsedResourceTypes = 0;
@@ -1528,20 +1559,26 @@ float StrategyBuilder::GetFarmProductionBonusForTech(short int techId, float sup
 	return 0;
 }
 
-// Compute unitInstanceScoreForOptionalResearch for remaining (not selected) optional researches
+// Update unitInstanceScoreForOptionalResearch for remaining (not selected) optional researches
 void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 	std::list<PotentialResearchInfo*> remainingResearches; // This list is a shortcut to all remaining optional researches (filtering other ones)
 	for each (PotentialResearchInfo *resInfo in this->potentialResearchesList)
 	{
-		resInfo->unitInstanceScoreForOptionalResearch = 0;
 		// Filter: exclude research already added/marked for add, shadow researches, etc
 		if (resInfo->researchDef && !resInfo->researchDef->IsShadowResearch() && !resInfo->isInStrategy && !resInfo->markedForAdd) {
 			for each (short int impactedUnitDefId in resInfo->impactedUnitDefIds) {
-				for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
+				for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits) // does not include civilians
 				{
 					if (unitInfo->unitDefId == impactedUnitDefId) {
 						resInfo->unitInstanceScoreForOptionalResearch += (int)unitInfo->addedCount;
 					}
+				}
+				PotentialUnitInfo *civilianInfo = this->GetUnitInfo(impactedUnitDefId);
+				if (civilianInfo && (civilianInfo->unitAIType == TribeAIGroupCivilian)) {
+#pragma TODO("Take into consideration desired units(needs mostly gold?food?) and a player personality (aggressive/economy?)")
+#pragma TODO("Have type of gather resource in detailed info to have a more relevant repartition than 25% each")
+					//vInfo->unitDefDetailedInfo->
+					resInfo->unitInstanceScoreForOptionalResearch += (this->villagerCount_alwaysRetrain * 25) / 100;
 				}
 				// Units that are not in "actuallySelectedUnits": villagers, farms...
 				if (impactedUnitDefId == CST_UNITID_VILLAGER) {
@@ -1550,12 +1587,17 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 				if (impactedUnitDefId == CST_UNITID_FARM) {
 					PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
 					if (farmInfo) {
-						resInfo->unitInstanceScoreForOptionalResearch += farmInfo->desiredCount;
+						if (this->createFarms) {
+							resInfo->unitInstanceScoreForOptionalResearch += farmInfo->desiredCount;
+						} else {
+							resInfo->unitInstanceScoreForOptionalResearch += this->GetSNNumberValue(SNMaxFarms);
+						}
 					}
 				}
 			}
 			// Transform into a % value
 			resInfo->unitInstanceScoreForOptionalResearch = (resInfo->unitInstanceScoreForOptionalResearch * 100) / this->maxPopulation;
+			resInfo->unitInstanceScoreForOptionalResearch *= 2; // To have more impact, btw a tech rarely affects more than half the population
 			if (resInfo->unitInstanceScoreForOptionalResearch > 100) {
 				resInfo->unitInstanceScoreForOptionalResearch = 100;
 			}
@@ -1660,6 +1702,9 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 						newScoreWithBonusFactor *= ((float)randomizer.GetRandomValue_normal_moderate(90, 100)) / 100;
 						resInfo->unitInstanceScoreForOptionalResearch = (int)newScoreWithBonusFactor;
 					}
+					if (techDef->ptrEffects[i].effectUnit == CST_RES_ORDER_GOLD_MINING_PODUCTIVITY) {
+						resInfo->unitInstanceScoreForOptionalResearch += 15; // A good boost for gold production !
+					}
 				}
 			}
 			// Costs...
@@ -1699,7 +1744,7 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 	}
 
 	// Take care of dependencies (loop on *filtered* list)
-	const int penaltyForDependency = 8;
+	// A requirement must have a least the same score as "child" research
 	for each (PotentialResearchInfo *currentResInfo in remainingResearches)
 	{
 		for each (PotentialResearchInfo *requiredResInfo in remainingResearches)
@@ -1707,8 +1752,8 @@ void StrategyBuilder::ComputeScoresForRemainingOptionalResearches() {
 			for each (short int researchId in currentResInfo->researchesThatMustBePutBeforeMe)
 			{
 				if (researchId == requiredResInfo->researchId) {
-					if (currentResInfo->unitInstanceScoreForOptionalResearch > requiredResInfo->unitInstanceScoreForOptionalResearch - penaltyForDependency) {
-						currentResInfo->unitInstanceScoreForOptionalResearch = requiredResInfo->unitInstanceScoreForOptionalResearch - penaltyForDependency;
+					if (currentResInfo->unitInstanceScoreForOptionalResearch > requiredResInfo->unitInstanceScoreForOptionalResearch) {
+						requiredResInfo->unitInstanceScoreForOptionalResearch = currentResInfo->unitInstanceScoreForOptionalResearch;
 					}
 				}
 			}
@@ -1930,6 +1975,9 @@ void StrategyBuilder::AddOptionalUnitAgainstWeakness(MILITARY_CATEGORY weaknessC
 
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
 	{
+		if (!unitInfo->isNonTowerMilitary) {
+			continue;
+		}
 		// Ignore already selected units (and those NOT matching the land/water parameter)
 		if (!unitInfo->isSelected && (unitInfo->isBoat == waterUnits)) {
 
@@ -2029,7 +2077,7 @@ void StrategyBuilder::SelectStrategyUnits() {
 		this->log += newline;
 	}
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
-		if (!unitInfo->isSelected) {
+		if (!unitInfo->isSelected && unitInfo->isNonTowerMilitary) {
 			std::string msg = "[Not selected] Unit id=";
 			AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unit = NULL;
 			if (unitInfo->isOptionalUnit) {
@@ -2071,7 +2119,7 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 	int countWithPerfectSimilarity = 0;
 	int unitDefIdWithPerfectSimilarity = -1;
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
-		if (!unitInfo->isSelected && !unitInfo->isBoat && (unitInfo->ageResearchId <= age)) {
+		if (!unitInfo->isSelected && !unitInfo->isBoat && unitInfo->isNonTowerMilitary && (unitInfo->ageResearchId <= age)) {
 			unitInfo->bonusForTechsSimilarity = 0; // reset
 			for each (AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES refAIType in selectedUnitsClassesAfterThisAge)
 			{
@@ -2129,7 +2177,7 @@ int StrategyBuilder::AddOneMilitaryUnitForEarlyAge(short int age, bool hasAlread
 
 	// Choose a unit that has both combination of: global score, similarity with main units
 	for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList) {
-		if (!unitInfo->isBoat && !unitInfo->isSelected && (unitInfo->ageResearchId <= age)) {
+		if (!unitInfo->isBoat && !unitInfo->isSelected && unitInfo->isNonTowerMilitary && (unitInfo->ageResearchId <= age)) {
 			if (countWithPerfectSimilarity == 1) {
 				// We found (only) one unit with upgrades that are already in strategy: select it and bypass other criteria.
 				unitInfo->scoreForEarlyAge = (unitInfo->unitDefId == unitDefIdWithPerfectSimilarity) ? 100.0f : 0.0f;
@@ -2227,7 +2275,7 @@ void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 		}
 		for each (PotentialUnitInfo *unitInfo in this->potentialUnitsList)
 		{
-			if (!unitInfo->isSelected && (unitInfo->ageResearchId <= currentAge)) {
+			if (!unitInfo->isSelected && unitInfo->isNonTowerMilitary && (unitInfo->ageResearchId <= currentAge)) {
 				this->log += "Early age not-selected unit: ";
 				this->log += unitInfo->GetBaseUnitName();
 				this->log += " earlyscore=";
@@ -2242,7 +2290,6 @@ void StrategyBuilder::AddMilitaryUnitsForEarlyAges() {
 // All villagers and military units must have already been added to strategy.
 // This method only updates flags, does not actually add anything to strategy
 void StrategyBuilder::ChooseOptionalResearches() {
-#pragma TODO("DM: force some researches ? Exclude others (all?)...") // add jihad if available & if temple ?
 	std::list<PotentialUnitInfo*> unitsThatNeedMoreAttack;
 	// Special: selected melee units with low attack (like scouts, clubmen)
 	for each (PotentialUnitInfo *unitInfo in this->actuallySelectedUnits)
@@ -2350,7 +2397,7 @@ void StrategyBuilder::ChooseOptionalResearches() {
 					}
 				}
 			}
-			this->log += "Optional research was selected: ";
+			this->log += "Optional research was selected(+): ";
 			this->log += GetResearchLocalizedName(resInfo->researchId);
 			this->log += " with score=";
 			this->log += std::to_string(resInfo->unitInstanceScoreForOptionalResearch);
@@ -2420,8 +2467,9 @@ void StrategyBuilder::AddResearchesForEconomy() {
 		if (unitDef && unitDef->IsCheckSumValidForAUnitClass() && unitDef->DerivesFromCommandable()) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *unitDefBird = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *)unitDef;
 			PotentialBuildingInfo *bldInfo = this->GetBuildingInfo(unitDefId);
+			PotentialUnitInfo *unitInfo = this->GetUnitInfo(unitDefId);
 			if (unitDefBird->unitDefinitionSwitchGroupId && (unitDefBird->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian)) {
-				this->CollectResearchInfoForUnit(bldInfo, true, false);
+				this->CollectResearchInfoForUnit(unitInfo, true, false);
 			}
 			if (unitDefId == CST_UNITID_FARM) {
 				this->CollectResearchInfoForUnit(bldInfo, true, false); // find all potential farm upgrades, but don't mark for add all of them ! Already done previously but withOUT all upgrades
@@ -2430,7 +2478,7 @@ void StrategyBuilder::AddResearchesForEconomy() {
 				if ((unitDefBird->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat) ||
 					(unitDefBird->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTransportBoat)) {
 					// Trade boat...
-					this->CollectResearchInfoForUnit(bldInfo, true, false);
+					this->CollectResearchInfoForUnit(unitInfo, true, false);
 				}
 			}
 		}
@@ -2618,6 +2666,7 @@ void StrategyBuilder::HandleFarmsInfo() {
 		dontAddFarms = true;
 	}
 	if (dontAddFarms) {
+		this->AddPotentialBuildingInfoToList(CST_UNITID_FARM, false); // do not mark for add in this case, but we need the building info to exist in the list
 		PotentialBuildingInfo *marketInfo = this->GetBuildingInfo(CST_UNITID_MARKET);
 		this->CollectResearchInfoForUnit(marketInfo, false, false); // Add market anyway
 		return;
@@ -3496,7 +3545,7 @@ int StrategyBuilder::CreateFirstBuildingsStrategyElements() {
 void StrategyBuilder::CreateFarmStrategyElements() {
 	PotentialBuildingInfo *farmInfo = this->GetBuildingInfo(CST_UNITID_FARM);
 	if (!farmInfo || (farmInfo->desiredCount <= 0)) { return; }
-	assert(this->createFarms);
+	if (!this->createFarms) { return; }
 
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *myAgeElem = this->GetAgeStrategyElement(farmInfo->enabledInAge);
 	if (myAgeElem == NULL) {
@@ -3900,6 +3949,9 @@ bool StrategyBuilder::CreateStrategyFromScratch() {
 	}
 	for each (PotentialBuildingInfo *bldInfo in this->potentialBuildingsList)
 	{
+		if ((bldInfo->unitDefId == CST_UNITID_FARM) && (!this->createFarms)) {
+			continue;
+		}
 		if (bldInfo->addedInStrategyCount == 0) {
 			this->log += "Warning: Not added: building=";
 			this->log += bldInfo->unitDef->ptrUnitName;
