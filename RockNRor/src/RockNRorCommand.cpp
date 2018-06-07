@@ -669,6 +669,46 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 			}
 		}
 	}
+	int goAge = 0;
+	if (strcmp(command, "gotool") == 0) {
+		goAge = 1;
+	}
+	if (strcmp(command, "gobronze") == 0) {
+		goAge = 2;
+	}
+	if (strcmp(command, "goiron") == 0) {
+		goAge = 3;
+	}
+	if (goAge > 0) {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		if (player && player->IsCheckSumValid()) {
+			auto x = GetResearchStatus(player, CST_RSID_TOOL_AGE);
+			if ((x == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) ||
+				(x == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE)) {
+				ApplyResearchForPlayer(player, CST_RSID_TOOL_AGE);
+			}
+		}
+	}
+	if (goAge > 1) {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		if (player && player->IsCheckSumValid()) {
+			auto x = GetResearchStatus(player, CST_RSID_BRONZE_AGE);
+			if ((x == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) ||
+				(x == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE)) {
+				ApplyResearchForPlayer(player, CST_RSID_BRONZE_AGE);
+			}
+		}
+	}
+	if (goAge > 2) {
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		if (player && player->IsCheckSumValid()) {
+			auto x = GetResearchStatus(player, CST_RSID_IRON_AGE);
+			if ((x == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_WAITING_REQUIREMENT) ||
+				(x == AOE_CONST_FUNC::RESEARCH_STATUSES::CST_RESEARCH_STATUS_AVAILABLE)) {
+				ApplyResearchForPlayer(player, CST_RSID_IRON_AGE);
+			}
+		}
+	}
 #endif
 
 #ifdef _DEBUG
