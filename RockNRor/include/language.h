@@ -20,10 +20,14 @@ static void AOE_LoadStringLanguage(long int stringID, char *buffer, long int buf
 // Uses ROR's method, which itself is overloaded by RockNRor (which is why "custom" strings are used in priority)
 static void GetLanguageDllText(long int stringID, char *buffer, long int bufferSize, char *defaultText) {
 	*buffer = 0;
-	if (stringID < 100) { return; } // First valid string is 101
-	AOE_LoadStringLanguage(stringID, buffer, bufferSize);
+	if (stringID > 100) {
+		// First valid string is 101
+		AOE_LoadStringLanguage(stringID, buffer, bufferSize);
+	}
 	if (*buffer == 0) {
-		strcpy_s(buffer, bufferSize, defaultText);
+		if (defaultText != NULL) {
+			strcpy_s(buffer, bufferSize - 1, defaultText);
+		}
 	}
 }
 
