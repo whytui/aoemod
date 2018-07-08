@@ -696,5 +696,72 @@ void CurrentTestMethod() {
 #endif
 }
 
+// A method to do dirty testing. Does nothing in RELEASE mode.
+void TestAddExtraPlayer() {
+#ifdef _DEBUG
+	// TEST extra player. Of course, very unstable
+	static bool init = false;
+	static AOE_STRUCTURES::STRUCT_PLAYER *extraPlayer = NULL;
+	if (init) {
+		// Next calls = update player
+		_asm {
+			MOV ECX, extraPlayer;
+			MOV EDX, [ECX];
+			CALL[EDX + 0x7C]; // update
+		}
+		return;
+	}
+	init = true;
+	STRUCT_POSITION_INFO mousePos = GetGameMousePositionInfo();
+	if ((mousePos.posX < 0) || (mousePos.posY < 0)) { return; }
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert((global != NULL) && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) { return; }
+	AOE_STRUCTURES::STRUCT_PLAYER *player = (AOE_STRUCTURES::STRUCT_PLAYER *)AOEAlloc(sizeof(AOE_STRUCTURES::STRUCT_PLAYER));
+	extraPlayer = player;
+	const char *tmpname = "extraplayer";
+	const unsigned long int addr = 0x4EFB00;
+	long int civId = CST_CIVID_HITTITE;
+	long int playerId = 5;
+	AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->GetCivDef((short int)civId);
+	_asm {
+		MOV ECX, player;
+		PUSH 0;
+		PUSH 0;
+		PUSH 0;
+		PUSH 1; // arg7
+		PUSH 1; // ai control
+		PUSH civId;
+		PUSH tmpname;
+		PUSH playerId; // arg3=numplayer
+		PUSH civDef;
+		PUSH global;
+		CALL addr; // ccor
+	}
+	// Tech tree is not applied cf 0x50B86F
+	STRUCT_TECH_DEF_INFO *techDefInfo = global->technologiesInfo;
+	if (techDefInfo && techDefInfo->IsCheckSumValid() && player->techTreeId >= 0) {
+		long int techTreeId = player->techTreeId;
+		_asm {
+			MOV ECX, techDefInfo;
+			MOV EDX, [ECX];
+			PUSH player;
+			PUSH techTreeId;
+			CALL[EDX + 0x08]; // techDefInfo.applyTech(tech tree)
+		}
+	}
+	// see 51d80b
+	// Not needed: 0x51D619 : call 4f2d80 = player.loadAIInfo(bL, cP, rS, mood, mapType) (ai/per/city plan...)
+	//player->ptrPlayerColorStruct
+
+	STRUCT_UNIT_BASE *unit = AOE_METHODS::UNIT::CreateUnitNoMapCheck(player, CST_UNITID_BOWMAN,
+		(float)mousePos.posY, (float)mousePos.posX, 0.f, AOE_CONST_INTERNAL::GAME_UNIT_STATUS::GUS_2_READY, 0.f);
+	assert(unit != NULL);
+	//player->playerId = 0; // TEST
+	// Of course unless we add all necessary treatments we'll have issues when units/players are destroyed, save game...
+	// Need to free player structure !
+#endif
+}
+
 }
 
