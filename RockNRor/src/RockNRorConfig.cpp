@@ -896,8 +896,8 @@ bool RockNRorConfig::ReadCivXMLConfigFile(char *fileName) {
 			int civId = 0;
 			callResult = elem->QueryIntAttribute("id", &intValue);
 			if (callResult == TIXML_SUCCESS) { civId = intValue; }
-			// if ((civId >= 0) && (civId < AOE_CONST_FUNC::CIVILIZATIONS::CST_CIVID_STANDARD_MAX)) {...} // if we want to allow changing AI files, etc for standard civs?
-			if ((civId > AOE_CONST_FUNC::CIVILIZATIONS::CST_CIVID_STANDARD_MAX) && (civId < 256)) {
+			if ((civId >= 0) && (civId < 256)) {
+				//bool isStandardCiv = civId <= AOE_CONST_FUNC::CIVILIZATIONS::CST_CIVID_STANDARD_MAX;
 				if (!this->allCivInfo[civId]) {
 					this->allCivInfo[civId] = new CivilizationInfo(civId);
 				}

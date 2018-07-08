@@ -731,21 +731,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return; }
 	}
 	if (strcmp(command, "a") == 0) {
-		long int playerId = 1;
-		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
-		if (!player || !player->ptrAIStruct) { return; }
 		
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)AOE_STRUCTURES::PLAYER::FindUnitWithShortcutNumberForPlayer(player, 1);
-		if (unitBase) {
-			unitBase->AOE_destructor(true);
-			return;
-		}
-		AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *type50 = (AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *)unitBase;
-		if (!unitBase || !unitBase->IsCheckSumValidForAUnitClass()) { return; }
-
-		AOE_STRUCTURES::STRUCT_AI *ai = player->ptrAIStruct;
-		AOE_STRUCTURES::STRUCT_TAC_AI *tacAI = &ai->structTacAI;
-		assert(tacAI->IsCheckSumValid());
 	}
 
 	// TEST strategy
@@ -1521,17 +1507,14 @@ void RockNRorCommand::FixGameStartAIInitForPlayers() {
 
 // Returns true if AI file selection was overriden (do NOT let normal code be executed), false to let normal code be executed
 bool RockNRorCommand::ManageAIFileSelectionForPlayer(char civilizationId, char *aiFileBuffer) {
-	// Standard civ: continue "player.chooseAIFileName" function normally
-	if ((civilizationId > 0) && (civilizationId <= CIVILIZATIONS::CST_CIVID_STANDARD_MAX)) {
-		return false;
-	}
+	bool isStandardCiv = (civilizationId > 0) && (civilizationId <= CIVILIZATIONS::CST_CIVID_STANDARD_MAX);
 	assert(aiFileBuffer != NULL);
 	if (!aiFileBuffer) { return false; }
 
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *gameSettings = GetGameSettingsPtr();
 	assert(gameSettings != NULL);
 	CivilizationInfo *civ = ROCKNROR::crInfo.configInfo.GetCivInfo(civilizationId);
-	std::string s;
+	std::string s = "";
 	int size = 0;
 	int randomChoice = 0;
 	if (gameSettings->isDeathMatch) {
@@ -1572,6 +1555,10 @@ bool RockNRorCommand::ManageAIFileSelectionForPlayer(char civilizationId, char *
 			}
 			strcpy_s(aiFileBuffer, 255, s.c_str());
 		}
+	}
+	if (s.empty() && isStandardCiv) {
+		// Using a standard civ, there is no "overload" in config: let standard code run and choose AI file.
+		return false; // continue "player.chooseAIFileName" function normally
 	}
 
 	// Crucial check: The game freezes if we choose an invalid file, because it will call this again and again.
