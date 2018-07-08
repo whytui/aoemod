@@ -134,7 +134,7 @@ public:
 	long int defaultPerNumbers_DM[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1];
 	bool defaultPerNumbers_DM_isSet[AOE_CONST_FUNC::CST_LAST_SN_NUMBER + 1]; // set to true to indicate when corresponding defaultPerNumbers_DM value is relevant
 	std::list<short int> rmAIForcedResearches; // (AI) Random map: researches to always develop if possible
-	std::list<short int> dmAIForcedResearches; // (AI) Random map: researches to always develop if possible
+	std::list<short int> dmAIForcedResearches; // (AI) Deathmatch map: researches to always develop if possible
 	long int maxAgeRM_DM; // Maximum allowed age for random maps and deathmatch games. Eg if CST_RSID_BRONZE_AGE, "iron age" upgrade will be disabled for all players. -1=ignore.
 
 	// Related to empires.dat loaded data
