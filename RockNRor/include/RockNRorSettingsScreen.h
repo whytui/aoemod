@@ -39,7 +39,10 @@ protected:
 
 private:
 	bool needToApplyChanges;
+	unsigned long int startYforNextPage;
 	STRUCT_UI_BUTTON *btnOK;
+	STRUCT_UI_BUTTON *btnPageDown;
+	STRUCT_UI_BUTTON *btnBackToTop;
 	STRUCT_UI_BUTTON *chkGenRandomTechTreeRMGames;
 	STRUCT_UI_BUTTON *chkRPGGameModeInRandomGames;
 	STRUCT_UI_BUTTON *chkRPGGameModeInScenario;
@@ -55,6 +58,7 @@ private:
 	STRUCT_UI_BUTTON *btnResolution1;
 	STRUCT_UI_BUTTON *btnResolution2;
 	STRUCT_UI_BUTTON *btnResolution3;
+	STRUCT_UI_BUTTON *btnChangeAvgCivBonusCount;
 	STRUCT_UI_BUTTON *btnChangeSPMaxPopulation;
 	STRUCT_UI_BUTTON *btnRelicsCount;
 	STRUCT_UI_BUTTON *btnRuinsCount;
@@ -65,6 +69,10 @@ private:
 	// Update configuration from current comboboxes selection
 	void UpdateConfigFromComboboxes();
 	void ChangeResolution(unsigned long int x, unsigned long int y);
+	// Returns true if y is beyond Y screen size and saves y value into this->startYforNextPage
+	bool CheckBottomOfScreen(unsigned long y, unsigned long initialSkippedY);
+	void ForceReloadPage();
+	void AddOkButton();
 };
 
 }

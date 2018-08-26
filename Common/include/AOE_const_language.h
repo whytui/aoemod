@@ -58,6 +58,8 @@ const static unsigned long int CRLANG_ID_ROCKNROR_SETTINGS_TITLE = 42127;
 const static unsigned long int CRLANG_ID_RNR_STTGS_INTRO_TEXT = 42128;
 const static unsigned long int CRLANG_ID_RNR_STTGS_MODS_SECTION = 42129;
 const static unsigned long int CRLANG_ID_RNR_STTGS_GEN_RANDOM_TECH_TREES_RM = 42130;
+const static unsigned long int CRLANG_ID_RNR_STTGS_GEN_RANDOM_TECH_TREES_BONUS_COUNT = 42160;
+const static unsigned long int CRLANG_ID_RNR_STTGS_GEN_RANDOM_TECH_TREES_BONUS_COUNT_DTL = 42161;
 const static unsigned long int CRLANG_ID_RNR_STTGS_RPG_MODE_RANDOM_GAMES = 42131;
 const static unsigned long int CRLANG_ID_RNR_STTGS_RPG_MODE_SCENARIO = 42132;
 const static unsigned long int CRLANG_ID_RNR_STTGS_GEN_STRATEGY_RM = 42133;
@@ -87,6 +89,8 @@ const static unsigned long int CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RUINS_COUNT_TITL
 const static unsigned long int CRLANG_ID_RNR_STTGS_ENTER_VALUE_RANDOM_GAMES_RELICS_COUNT = 42157;
 const static unsigned long int CRLANG_ID_RNR_STTGS_ENTER_VALUE_RANDOM_GAMES_RUINS_COUNT = 42158;
 const static unsigned long int CRLANG_ID_RNR_STTGS_RANDOM_GAMES_MAX_AGE = 42159;
+const static unsigned long int CRLANG_ID_RNR_STTGS_NEXT_PAGE = 42162;
+const static unsigned long int CRLANG_ID_RNR_STTGS_BACK_TO_TOP = 42163;
 
 // RockNRor options
 const static unsigned long int CRLANG_ID_ROCKNROR_OPTIONS_POPUP_TITLE = 42020;

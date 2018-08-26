@@ -60,6 +60,10 @@ Voir la liste complète des options dans RockNRor\RockNRor.xml. Il faut relancer 
 Modes de jeu RockNRor
 [42130]
 Générer des civilisations avec des bonus/technologies aléatoires  pour les cartes aléatoires/combat à mort
+[42160]
+Nombre moyen de bonus de civilisation
+[42161]
+Entrez le nombre moyen désiré de bonus de civilisation
 [42131]
 Activer le mode RPG (Age Of Might And Magic) dans les cartes aléatoires/combat à mort
 [42132]
@@ -118,7 +122,10 @@ Entrez le nombre de reliques pour les cartes aléatoires/combats à mort. Notez qu
 Entrez le nombre de ruines pour les cartes aléatoires/combats à mort. Notez que les cartes peuvent aussi ne pas avoir de ruines du tout.
 [42159]
 Âge maximum pour les cartes aléatoires/combats à mort
-
+[42162]
+Suite
+[42163]
+Haut de page
 
 
 // *** RockNRor Options popup ***

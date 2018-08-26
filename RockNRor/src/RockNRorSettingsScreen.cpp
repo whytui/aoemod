@@ -11,6 +11,8 @@ RockNRorSettingsScreen::RockNRorSettingsScreen() : RnrScreenBase("RockNRor setti
 	this->SetFullscreen();
 	this->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::GameSettingsTheme);
 	this->ResetClassPointers();
+	this->needToApplyChanges = false;
+	this->startYforNextPage = 0;
 }
 
 
@@ -24,8 +26,8 @@ RockNRorSettingsScreen::~RockNRorSettingsScreen() {
 // Reset various pointers for this class level (to override)
 void RockNRorSettingsScreen::ResetClassPointers() {
 	__super::ResetClassPointers();
-	this->needToApplyChanges = false;
 	this->btnOK = NULL;
+	this->btnPageDown = NULL;
 	this->chkGenRandomTechTreeRMGames = NULL;
 	this->chkRPGGameModeInRandomGames = NULL;
 	this->chkRPGGameModeInScenario = NULL;
@@ -42,6 +44,7 @@ void RockNRorSettingsScreen::ResetClassPointers() {
 	this->btnResolution2 = NULL;
 	this->btnResolution3 = NULL;
 	this->btnChangeSPMaxPopulation = NULL;
+	this->btnChangeAvgCivBonusCount = NULL;
 	this->btnRelicsCount = NULL;
 	this->btnRuinsCount = NULL;
 	this->cbxMaxAgeInRandomGames = NULL;
@@ -61,29 +64,57 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 	const unsigned long int checkboxSizeY = 24;
 	const unsigned long int checkboxLabelSizeX = 640;
 	const unsigned long int buttonSizeX = 100;
-	unsigned long int currentPosY = 20;
+	const unsigned long int ACTUAL_START_Y = 20;
+	unsigned long int currentPosY = ACTUAL_START_Y;
+	unsigned long int skippedY = 0;
+	unsigned long int initialSkippedY = this->startYforNextPage;
+	bool searchForStartYPos = (this->startYforNextPage > 0); // True if we're currently NOT creating objects until we reach correct vertical pos
 	STRUCT_UI_LABEL *fooLabel = NULL;
+	unsigned long int screenSizeX = this->GetScreenSizeX();
+	bool use2columns = (screenSizeX > 1600);
+	unsigned long int startOfColumn2 = defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal + 100;
 
 	// Title
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_ROCKNROR_SETTINGS_TITLE, "RockNRor settings"),
-		this->GetCenteredPositionX(titleSizeX), currentPosY, titleSizeX, titleSizeY,
-		AOE_FONTS::AOE_FONT_VERY_BIG_LABEL_1);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_ROCKNROR_SETTINGS_TITLE, "RockNRor settings"),
+			this->GetCenteredPositionX(titleSizeX), currentPosY, titleSizeX, titleSizeY,
+			AOE_FONTS::AOE_FONT_VERY_BIG_LABEL_1);
+	}
 	currentPosY += titleSizeY + defaultSpaceVertical;
 
 	// Change resolution
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_CHANGE_SCREEN_RESOLUTION, "Change screen resolution"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_CHANGE_SCREEN_RESOLUTION, "Change screen resolution"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
-	this->AddButton(&this->btnResolution1, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RESOLUTION_SMALL, "Small"),
-		defaultMarginLeft + defaultSpaceHorizontal,
-		currentPosY, buttonSizeX, checkboxSizeY);
-	this->AddButton(&this->btnResolution2, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RESOLUTION_MEDIUM, "Medium"),
-		defaultMarginLeft + defaultSpaceHorizontal * 2 + buttonSizeX,
-		currentPosY, buttonSizeX, checkboxSizeY);
-	this->AddButton(&this->btnResolution3, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RESOLUTION_HIGH, "High"),
-		defaultMarginLeft + defaultSpaceHorizontal * 3 + buttonSizeX * 2,
-		currentPosY, buttonSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddButton(&this->btnResolution1, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RESOLUTION_SMALL, "Small"),
+			defaultMarginLeft + defaultSpaceHorizontal,
+			currentPosY, buttonSizeX, checkboxSizeY);
+		this->AddButton(&this->btnResolution2, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RESOLUTION_MEDIUM, "Medium"),
+			defaultMarginLeft + defaultSpaceHorizontal * 2 + buttonSizeX,
+			currentPosY, buttonSizeX, checkboxSizeY);
+		this->AddButton(&this->btnResolution3, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RESOLUTION_HIGH, "High"),
+			defaultMarginLeft + defaultSpaceHorizontal * 3 + buttonSizeX * 2,
+			currentPosY, buttonSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
 
 	// Is the screen large enough ?
@@ -98,134 +129,332 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 	}
 
 	// Introduction
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_INTRO_TEXT, "Please find the full list of options in RockNRor\\RockNRor.xml file. You'll need to restart the game if you modify this file."),
-		defaultMarginLeft, currentPosY, this->GetScreenSizeX() - defaultMarginLeft * 2, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_INTRO_TEXT, "Please find the full list of options in RockNRor\\RockNRor.xml file. You'll need to restart the game if you modify this file."),
+			defaultMarginLeft, currentPosY, this->GetScreenSizeX() - defaultMarginLeft * 2, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
 	// Section: RockNRor mods
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_MODS_SECTION, "RockNRor mods"),
-		defaultMarginLeft, currentPosY, sectionTitleSizeX, sectionTitleSizeY,
-		AOE_FONTS::AOE_FONT_BIG_LABEL);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_MODS_SECTION, "RockNRor mods"),
+			defaultMarginLeft, currentPosY, sectionTitleSizeX, sectionTitleSizeY,
+			AOE_FONTS::AOE_FONT_BIG_LABEL);
+	}
 	currentPosY += sectionTitleSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_GEN_RANDOM_TECH_TREES_RM, "Generate random tech trees/bonuses in Random Map games"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkGenRandomTechTreeRMGames, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_GEN_RANDOM_TECH_TREES_RM, "Generate random tech trees/bonuses in Random Map games"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkGenRandomTechTreeRMGames, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
+	if (!use2columns) {
+		currentPosY += checkboxSizeY + defaultSpaceVertical;
+		if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+			return;
+		}
+	}
+
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddButton(&this->btnChangeAvgCivBonusCount, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_GEN_RANDOM_TECH_TREES_BONUS_COUNT, "Set average number of civ. bonus"),
+			use2columns ? startOfColumn2 : defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
-
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RPG_MODE_RANDOM_GAMES, "RPG mode - Age Of Might And Magic - in random games"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkRPGGameModeInRandomGames, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
+	
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RPG_MODE_RANDOM_GAMES, "RPG mode - Age Of Might And Magic - in random games"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkRPGGameModeInRandomGames, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RPG_MODE_SCENARIO, "RPG mode - Age Of Might And Magic - in scenario games"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkRPGGameModeInScenario, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RPG_MODE_SCENARIO, "RPG mode - Age Of Might And Magic - in scenario games"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkRPGGameModeInScenario, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_GEN_STRATEGY_RM, "Generate random strategies in Random Map games"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkGenStrategyInRM, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_GEN_STRATEGY_RM, "Generate random strategies in Random Map games"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkGenStrategyInRM, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_GEN_STRATEGY_DM, "Generate random strategies in Deathmatch Games"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkGenStrategyInDM, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_GEN_STRATEGY_DM, "Generate random strategies in Deathmatch Games"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkGenStrategyInDM, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_NO_WALLS_RANDOM_GAMES, "No walls in Random Games/Deathmatch games"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkNoWallsInRMDM, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_NO_WALLS_RANDOM_GAMES, "No walls in Random Games/Deathmatch games"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkNoWallsInRMDM, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_NO_NEUTRAL_DIPL_RANDOM_GAMES, "No neutral diplomacy in Random Maps/Deathmatch games"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkNoNeutralDiplomacy, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_NO_NEUTRAL_DIPL_RANDOM_GAMES, "No neutral diplomacy in Random Maps/Deathmatch games"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkNoNeutralDiplomacy, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_NO_WALL_RANDOM_GAMES, "No dock RM/DM on land maps where AI does not handle docks"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkNoDockInLandMaps, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_NO_WALL_RANDOM_GAMES, "No dock RM/DM on land maps where AI does not handle docks"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkNoDockInLandMaps, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_SHARE_ALLY_EXPLORATION_IN_RANDOM_GAMES, "Always share ally exploration in random games"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkAlwaysShareExplorationInRandomGames, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_SHARE_ALLY_EXPLORATION_IN_RANDOM_GAMES, "Always share ally exploration in random games"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkAlwaysShareExplorationInRandomGames, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddButton(&this->btnChangeSPMaxPopulation, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_SP_MAX_POP_LINK, "Single player games maximum population"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddButton(&this->btnChangeSPMaxPopulation, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_SP_MAX_POP_LINK, "Single player games maximum population"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY);
+	}
+	if (!use2columns) {
+		currentPosY += checkboxSizeY + defaultSpaceVertical;
+		if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+			return;
+		}
+	}
+
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddButton(&this->btnRelicsCount, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RELICS_COUNT_LINK, "Set relics count in random games"),
+			use2columns ? startOfColumn2 : defaultMarginLeft, currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
+		this->AddButton(&this->btnRuinsCount, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RUINS_COUNT_LINK, "Set ruins count in random games"),
+			(use2columns ? startOfColumn2 : defaultMarginLeft) + checkboxLabelSizeX / 2 + defaultSpaceHorizontal, currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddButton(&this->btnRelicsCount, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RELICS_COUNT_LINK, "Set relics count in random games"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
-	this->AddButton(&this->btnRuinsCount, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_RUINS_COUNT_LINK, "Set ruins count in random games"),
-		defaultMarginLeft + checkboxLabelSizeX / 2 + defaultSpaceHorizontal, currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_MAX_AGE, "Max. age in random games"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddComboBox(&this->cbxMaxAgeInRandomGames, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxLabelSizeX, checkboxSizeY, checkboxLabelSizeX, checkboxSizeY);
+		this->cbxMaxAgeInRandomGames->Clear(); // because combobox has 1 empty line by default: remove it
+		AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, -1, "No limit (default)");
+		AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_STONE_AGE,
+			GetLanguageDllText(LANG_ID_STONE_AGE).c_str());
+		AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_TOOL_AGE,
+			GetLanguageDllText(LANG_ID_TOOL_AGE).c_str());
+		AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_BRONZE_AGE,
+			GetLanguageDllText(LANG_ID_BRONZE_AGE).c_str());
+		AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_IRON_AGE,
+			GetLanguageDllText(LANG_ID_IRON_AGE).c_str());
+	}
+
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
-
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RANDOM_GAMES_MAX_AGE, "Max. age in random games"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddComboBox(&this->cbxMaxAgeInRandomGames, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal, 
-		currentPosY, checkboxLabelSizeX, checkboxSizeY, checkboxLabelSizeX, checkboxSizeY);
-	this->cbxMaxAgeInRandomGames->Clear(); // because combobox has 1 empty line by default: remove it
-	AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, -1, "No limit (default)");
-	AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_STONE_AGE,
-		GetLanguageDllText(LANG_ID_STONE_AGE).c_str());
-	AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_TOOL_AGE,
-		GetLanguageDllText(LANG_ID_TOOL_AGE).c_str());
-	AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_BRONZE_AGE, 
-		GetLanguageDllText(LANG_ID_BRONZE_AGE).c_str());
-	AOE_METHODS::UI_BASE::AddEntryInCombo(this->cbxMaxAgeInRandomGames, AOE_CONST_FUNC::CST_RSID_IRON_AGE, 
-		GetLanguageDllText(LANG_ID_IRON_AGE).c_str());
-
-	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
 	// Section: RockNRor AI options
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RNR_AI_OPTIONS_SECTION, "RockNRor AI options"),
-		defaultMarginLeft, currentPosY, sectionTitleSizeX, sectionTitleSizeY,
-		AOE_FONTS::AOE_FONT_BIG_LABEL);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_RNR_AI_OPTIONS_SECTION, "RockNRor AI options"),
+			defaultMarginLeft, currentPosY, sectionTitleSizeX, sectionTitleSizeY,
+			AOE_FONTS::AOE_FONT_BIG_LABEL);
+	}
 	currentPosY += sectionTitleSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_IMPROVE_AI, "Allow RockNRor to improve AI"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkImproveAI, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_IMPROVE_AI, "Allow RockNRor to improve AI"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkImproveAI, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_IMPROVE_CITY_PLAN_AI, "Allow RockNRor to improve AI city plan handling"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkImproveCityPlan, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_IMPROVE_CITY_PLAN_AI, "Allow RockNRor to improve AI city plan handling"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkImproveCityPlan, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
-	this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_FIX_LOGISTICS_BUG, "Fix logistics bug (AI no longer trains units without houses)"),
-		defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
-		AOE_FONTS::AOE_FONT_STANDARD_TEXT);
-	this->AddCheckBox(&this->chkFixLogisticsBug, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
-		currentPosY, checkboxSizeX, checkboxSizeY);
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddLabel(&fooLabel, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_FIX_LOGISTICS_BUG, "Fix logistics bug (AI no longer trains units without houses)"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX, checkboxSizeY,
+			AOE_FONTS::AOE_FONT_STANDARD_TEXT);
+		this->AddCheckBox(&this->chkFixLogisticsBug, defaultMarginLeft + checkboxLabelSizeX + defaultSpaceHorizontal,
+			currentPosY, checkboxSizeX, checkboxSizeY);
+	}
 	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
 
 #pragma TODO("AI dislike level")
 
@@ -237,8 +466,14 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 	// Scenario editor
 
 	// OK button
-	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(CRLANG_ID_CLOSE, "Close"), this->GetLeftCenteredPositionX(80),
-		this->GetScreenSizeY() - 30, 80, 22, 0);
+	this->AddOkButton();
+
+	// Back to top (if needed)
+	if (initialSkippedY > 0) {
+		// Add the "next page" button in bottom right corner
+		this->AddButton(&this->btnBackToTop, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_BACK_TO_TOP, "Back to top"),
+			this->GetScreenSizeX() - 200, this->GetScreenSizeY() - 30, 80, 22, 0);
+	}
 
 	this->InitInputs();
 }
@@ -373,11 +608,55 @@ void RockNRorSettingsScreen::ChangeResolution(unsigned long int x, unsigned long
 }
 
 
+// Returns true if y is beyond Y screen size and saves y value into this->startYforNextPage
+bool RockNRorSettingsScreen::CheckBottomOfScreen(unsigned long y, unsigned long initialSkippedY) {
+	if (y + 30 >= this->GetScreenSizeY()) {
+		this->startYforNextPage = initialSkippedY + y;
+
+		// Add the "next page" button in bottom right corner
+		this->AddButton(&this->btnPageDown, localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_NEXT_PAGE, "Next page"),
+			this->GetScreenSizeX() - 100, this->GetScreenSizeY() - 30, 80, 22, 0);
+
+		this->AddOkButton();
+
+		return true;
+	}
+	return false;
+}
+
+
+// Frees all UI component objects, and re-create page content
+void RockNRorSettingsScreen::ForceReloadPage() {
+	AOE_METHODS::UI_BASE::SetFocus(this->GetAoeScreenObject(), NULL); // may avoid issues with comboboxes
+	this->UpdateConfigFromComboboxes();
+	this->FreeComponents();
+	this->ResetClassPointers();
+	this->CreateScreenComponents();
+}
+
+
+void RockNRorSettingsScreen::AddOkButton() {
+	if (this->btnOK == NULL) {
+		this->AddButton(&this->btnOK, localizationHandler.GetTranslation(CRLANG_ID_CLOSE, "Close"), this->GetLeftCenteredPositionX(80),
+			this->GetScreenSizeY() - 30, 80, 22, 0);
+	}
+}
+
+
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnOK) {
 		this->UpdateConfigFromComboboxes();
 		this->CloseScreen(false);
+		return true;
+	}
+	if (sender == this->btnPageDown) {
+		this->ForceReloadPage();
+		return true;
+	}
+	if (sender == this->btnBackToTop) {
+		this->startYforNextPage = 0;
+		this->ForceReloadPage();
 		return true;
 	}
 	if (sender == this->btnResolution1) {
@@ -394,6 +673,17 @@ bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 		if (AOE_CONST_DRS::GetHighestResolutionValues(x, y)) {
 			this->ChangeResolution(x, y);
 		}
+		return true;
+	}
+	if (sender == this->btnChangeAvgCivBonusCount) {
+		ROCKNROR::UI::InputBox_int<long int> *maxPopulationPopup = new ROCKNROR::UI::InputBox_int<long int>(
+			localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_GEN_RANDOM_TECH_TREES_BONUS_COUNT, "Set average number of civ. bonus"),
+			localizationHandler.GetTranslation(CRLANG_ID_RNR_STTGS_GEN_RANDOM_TECH_TREES_BONUS_COUNT_DTL, "Set the desired average civilization bouns number for random games"),
+			ROCKNROR::crInfo.configInfo.randomTechTreeDesiredAvgBonusCount,
+			0, AOE_CONST_INTERNAL::TECH_LIMIT_MAXIMUM_POPULATION, &ROCKNROR::crInfo.configInfo.randomTechTreeDesiredAvgBonusCount, false);
+		maxPopulationPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		maxPopulationPopup->CreateScreen(this->GetAoeScreenObject());
+		this->needToApplyChanges = true;
 		return true;
 	}
 	if (sender == this->btnChangeSPMaxPopulation) {
@@ -438,6 +728,15 @@ bool RockNRorSettingsScreen::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, l
 		this->UpdateConfigFromComboboxes();
 		this->CloseScreen(false);
 		return true;
+	}
+	// VK_NEXT = page down
+	if ((keyCode == VK_NEXT) && (this->btnPageDown != NULL)) {
+		this->ForceReloadPage();
+	}
+	// VK_PRIOR = page up
+	if ((keyCode == VK_PRIOR) && (this->btnBackToTop != NULL)) {
+		this->startYforNextPage = 0;
+		this->ForceReloadPage();
 	}
 	return false;
 }

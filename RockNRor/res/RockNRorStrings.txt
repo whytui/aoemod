@@ -53,6 +53,10 @@ Please find the full list of options in RockNRor\RockNRor.xml file. You'll need 
 RockNRor mods
 [42130]
 Generate random tech trees/bonuses in Random Map games
+[42160]
+Set average number of civ. bonus
+[42161]
+Set the desired average civilization bouns number for random games
 [42131]
 RPG mode - Age Of Might And Magic - in random games
 [42132]
@@ -111,7 +115,10 @@ Enter the desired number of relics for random games. Please note that the game m
 Enter the desired number of ruins for random games. Please note that the game may randomly choose NOT to place ruins at all.
 [42159]
 Max. age in random games
-
+[42162]
+Next page
+[42163]
+Back to top
 
 // *** RockNRor Options popup ***
 [42020] // RockNRor options popup title
