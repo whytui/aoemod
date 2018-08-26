@@ -695,6 +695,14 @@ void TechTreeCreator::SetUnitBaseProbabilities() {
 				}
 			}
 		}
+
+		ROCKNROR::STRATEGY::TTDetailedTrainableUnitDef *unitDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(crUnitInfo->unitDefId);
+		if (unitDetail && unitDetail->isSuperUnit) {
+			crUnitInfo->disableWeight += TT_CONFIG::RES_ADDITIONTAL_WEIGHT_SUPER_UNIT;
+		}
+		if (crUnitInfo->disableWeight > TT_CONFIG::RES_WEIGHT_MAX) {
+			crUnitInfo->disableWeight = TT_CONFIG::RES_WEIGHT_MAX;
+		}
 	}
 
 	// Set probability for remaining units

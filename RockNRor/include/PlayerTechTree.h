@@ -165,6 +165,7 @@ namespace TT_CONFIG {
 	static const double RES_PROBA_VERY_RARE = 0.05; // Disable probability for unit that must be disabled on very rare occasions: priests, stone thrower, hoplite...
 	static const double RES_WEIGHT_HIGH_IMPACT_UNIT = 0.7; // "Disable weight" for unit whose absence has a strong impact on civilization: priest, stone thrower
 	static const double RES_WEIGHT_CHARIOTS = 0.4; // "Disable weight" for chariots/chariot archer
+	static const double RES_ADDITIONTAL_WEIGHT_SUPER_UNIT = 0.08; // Additional "Disable weight" for super units
 
 	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.9; // computed probability counts as much as xxx% vs random. 1=100%=apply probability normally. Do not set to 0.
 	static const int CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT = 40;
