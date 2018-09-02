@@ -207,6 +207,7 @@ public:
 	}
 
 
+#ifdef _DEBUG
 	std::string testRepartition() {
 		const int nrolls = 10000;  // number of experiments
 		const int nstars = 100;    // maximum number of stars to distribute
@@ -231,6 +232,8 @@ public:
 		}
 		return s;
 	}
+#undef _testsize
+#endif
 
 private:
 	std::default_random_engine *generator; // Needs to be constructed at execution (startup) to get random seed.
