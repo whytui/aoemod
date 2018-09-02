@@ -483,8 +483,18 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 
 		bool isStandardHardcodedDropSite = ((targetUnitDef->DAT_ID1 == CST_UNITID_FORUM) || (targetUnitDef->DAT_ID1 == CST_UNITID_STORAGE_PIT) ||
 			(targetUnitDef->DAT_ID1 == CST_UNITID_GRANARY));
-		bool letRorCodeHandleThis = (isStandardHardcodedDropSite && (mainSelectedUnit->resourceTypeId >= 0) &&
-			(mainSelectedUnit->resourceTypeId <= CST_RES_ORDER_GOLD));
+		bool letRorCodeHandleThis = false;
+		if (isStandardHardcodedDropSite) {
+			if ((mainSelectedUnit->resourceTypeId >= 0) && (mainSelectedUnit->resourceTypeId <= CST_RES_ORDER_GOLD)) {
+				letRorCodeHandleThis = true;
+			} else {
+				if ((mainSelectedUnit->resourceTypeId == CST_RES_ORDER_MEAT_STORAGE) ||
+					(mainSelectedUnit->resourceTypeId == CST_RES_ORDER_FISH_STORAGE) ||
+					(mainSelectedUnit->resourceTypeId == CST_RES_ORDER_BERRY_STORAGE)) {
+					letRorCodeHandleThis = true;
+				}
+			}
+		}
 		if ((mainSelectedUnit->unitDefinition->unitAIType == TribeAIGroupPriest) && (targetUnitDef->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 			letRorCodeHandleThis = true; // Special case for priest(resource=faith!)+right click on building
 		}
@@ -492,8 +502,9 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 
 		// TODO: exclude standard cases, already handled by ROR ? Filter on resource type cf unitDefCommand ?
 		// Check there is a unitDefCmd CST_IAI_GATHER_NO_ATTACK, trade or gather_attack ? Beware villager mode !
-		if (!letRorCodeHandleThis && (targetUnit->unitDefinition->DAT_ID1 == mainSelectedUnitDef->dropSite1) ||
-			(targetUnit->unitDefinition->DAT_ID1 == mainSelectedUnitDef->dropSite2)) {
+		if (!letRorCodeHandleThis && 
+			((targetUnit->unitDefinition->DAT_ID1 == mainSelectedUnitDef->dropSite1) ||
+			(targetUnit->unitDefinition->DAT_ID1 == mainSelectedUnitDef->dropSite2))) {
 			if (GAME_COMMANDS::CreateCmd_RightClick(mainSelectedUnit->unitInstanceId, targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY)) {
 				AOE_METHODS::UI_BASE::DisplayGreenBlinkingOnUnit(UIGameZone, targetUnit->unitInstanceId, 1000);
 				skipRORTreatments = true;
