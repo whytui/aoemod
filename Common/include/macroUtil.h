@@ -18,10 +18,10 @@
 // Please do not use. Internal usage.
 #define ___PRAGMA_BLDMSG_INTERNAL(strMsg) message(__FILE_LINE__ ": " strMsg)
 
-// To be used a #pragma TODO("message")
+// To be used as #pragma TODO("message")
 #define TODO(msg) ___PRAGMA_BLDMSG_INTERNAL("TODO - " msg)
 
-// To be used a #pragma WARNING("message")
+// To be used as #pragma WARNING("message")
 #define WARNING(msg) ___PRAGMA_BLDMSG_INTERNAL("WARNING - " msg)
 
 // Used in other macros. Remove parentheses to use a macro parameter as is: typically, pass {a, b, c} as a parameter.
