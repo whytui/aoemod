@@ -165,7 +165,8 @@ bool TellUnitsToInteractWithTarget(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **act
 	if (actorUnitsCount >= 255) { return false; } // This can't be normal
 	float posX = target->positionX;
 	float posY = target->positionY;
-	GAME_COMMANDS::CreateCmd_RightClick(actorUnitsList, actorUnitsCount, target->unitInstanceId, target->positionX, target->positionY);
+	GAME_COMMANDS::CreateCmd_RightClick((AOE_STRUCTURES::STRUCT_UNIT_BASE**)actorUnitsList,
+		actorUnitsCount, target->unitInstanceId, target->positionX, target->positionY);
 	return true;
 }
 

@@ -505,7 +505,8 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 		if (!letRorCodeHandleThis && 
 			((targetUnit->unitDefinition->DAT_ID1 == mainSelectedUnitDef->dropSite1) ||
 			(targetUnit->unitDefinition->DAT_ID1 == mainSelectedUnitDef->dropSite2))) {
-			if (GAME_COMMANDS::CreateCmd_RightClick(mainSelectedUnit->unitInstanceId, targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY)) {
+			if (GAME_COMMANDS::CreateCmd_RightClick(selectedUnits, unitCount, 
+				targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY)) {
 				AOE_METHODS::UI_BASE::DisplayGreenBlinkingOnUnit(UIGameZone, targetUnit->unitInstanceId, 1000);
 				skipRORTreatments = true;
 			}

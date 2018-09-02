@@ -37,14 +37,18 @@ namespace GAME_COMMANDS {
 // targetUnitId is optional. If -1 or non valid, then unit will just move to posX/posY.
 // This method is compatible with MP games (does NOT causes sync issue)
 bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY) {
-	AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *unit = (STRUCT_UNIT_COMMANDABLE*)GetUnitStruct(actorUnitId);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = GetUnitStruct(actorUnitId);
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->DerivesFromCommandable()) {
 		return false;
 	}
 	return CreateCmd_RightClick(&unit, 1, targetUnitId, posX, posY);
 }
 
-bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY) {
+// Create a "ROR" command struct (right-click). Returns false if failed.
+// MP support is unfinished !
+// Note: there might be "non-commandable" units in the array, it's not a problem.
+// The game will check if the command makes sense individually for each unit
+bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_BASE **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY) {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) {

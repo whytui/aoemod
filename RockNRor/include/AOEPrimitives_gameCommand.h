@@ -28,7 +28,11 @@ namespace AOE_METHODS {
 namespace GAME_COMMANDS {
 	// Create a "ROR" command struct (right-click). Returns false if failed.
 	bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY);
-	bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
+	// Create a "ROR" command struct (right-click). Returns false if failed.
+	// MP support is unfinished !
+	// Note: there might be "non-commandable" units in the array, it's not a problem.
+	// The game will check if the command makes sense individually for each unit
+	bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_BASE **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
 
 	// Create a "ROR" command struct (stop). Returns false if failed.
 	bool CreateCmd_Stop(long int actorUnitId);
