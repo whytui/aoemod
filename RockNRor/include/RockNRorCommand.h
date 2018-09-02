@@ -284,10 +284,6 @@ public:
 	// Disable all walls for current game.
 	void DisableWalls();
 
-	// Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
-	// *** OBSOLETE !!! ***
-	void OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_MEMORY *currentUnitListElem);
-
 	// Called at the end of showUnitCommandButtons
 	void AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI);
 

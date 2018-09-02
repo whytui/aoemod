@@ -3160,52 +3160,6 @@ void RockNRorCommand::DisableWalls() {
 }
 
 
-// Called on each loop in infAI.FindEnemyUnitIdWithinRange(ptrMyReferenceUnit, maxDistance, DATID, DATID, DATID, DATID)
-// This is called quite often (only if improve AI is enabled in RockNRor configuration)
-// *** OBSOLETE !!! ***
-void RockNRorCommand::OnFindEnemyUnitIdWithinRangeLoop(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AOE_STRUCTURES::STRUCT_UNIT_MEMORY *currentUnitListElem) {
-	/*if (!infAI || !infAI->IsCheckSumValid() || !currentUnitListElem || !infAI->ptrMainAI || !infAI->ptrMainAI->IsCheckSumValid()) { return; }
-	if (IsMultiplayer()) { return; }
-
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(currentUnitListElem->unitId);
-	bool elementWasReset = false;
-	// Custom treatment: clean obsolete units
-	// If element "memorized" position is visible...
-	if (AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, currentUnitListElem->posX, currentUnitListElem->posY)) {
-		// Clean entry if: (we are in the case when "unit list" position is visible, so we can update it without cheating !)
-		// - unit no longer exist
-		// - unit moved to a position which is NO LONGER visible to me
-		if (!unitBase || !unitBase->ptrStructPlayer ||
-			(!AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(infAI->ptrMainAI->player, (long int)unitBase->positionX, (long int)unitBase->positionY))) {
-			if (ROCKNROR::crInfo.configInfo.collectRORDebugLogs == 2) {
-				int noLongerExists = (unitBase == NULL) ? 1 : 0;
-				std::string s = "Removed unit #";
-				s += std::to_string(currentUnitListElem->unitId);
-				s += " from unitElemList (p#";
-				s += std::to_string(infAI->commonAIObject.playerId);
-				s += "), wasDead=";
-				s += std::to_string(noLongerExists);
-				traceMessageHandler.WriteMessageNoNotification(s.c_str());
-			}
-			elementWasReset = AOE_METHODS::LISTS::ResetInfAIUnitListElem(currentUnitListElem);
-		}
-	}
-	if (!elementWasReset && unitBase && unitBase->ptrStructPlayer && (unitBase->ptrStructPlayer->playerId != currentUnitListElem->playerId)) {
-		// If unit owner player does not match element's playerId (unit has been captured/converted) => important to fix, causes bad behaviors.
-		if (UpdateOrResetInfAIUnitListElem(infAI, currentUnitListElem)) {
-			if (ROCKNROR::crInfo.configInfo.collectRORDebugLogs >= 2) {
-				std::string s = "Updated unit #";
-				s += std::to_string(currentUnitListElem->unitId);
-				s += " owner from unitElemList (p#";
-				s += std::to_string(infAI->commonAIObject.playerId);
-				s += ")";
-				traceMessageHandler.WriteMessage(s.c_str());
-			}
-		}
-	}*/
-}
-
-
 // Called at the end of showUnitCommandButtons
 void RockNRorCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI) {
 	assert(gameMainUI && gameMainUI->IsCheckSumValid());
