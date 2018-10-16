@@ -1,6 +1,7 @@
 
 #pragma once
 #include <AOE_struct_color_def.h>
+#include <AOE_struct_tpicture.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -203,7 +204,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_108;
 		unsigned long int unknown_10C;
 		unsigned long int unknown_110;
-		unsigned long int *unknown_114; // +114: TPicture
+		STRUCT_TPICTURE *unknown_114; // +114: TPicture
 		unsigned long int *picture; // +118
 		
 		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_UI_PICTURE_PANEL; }

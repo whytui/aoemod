@@ -6,6 +6,7 @@
 #include <wchar.h>
 #include <stdlib.h>
 #include <memory.h>
+#include <AOE_struct_tpicture.h>
 
 namespace _BITMAP {
 
@@ -155,6 +156,11 @@ template<typename T> static bool ExportDataAsBitmapGreyShades(const char *filena
 	fclose(file);
 	return true;
 }
+
+
+// Saves a TPicture into a BMP file
+// As the exact list of possible stuff contained in TPictures is unknown, maybe this won't work for TPictures originated from non-BMP files
+static bool SaveTPictureToBmp(AOE_STRUCTURES::STRUCT_TPICTURE *pic, const char *outFilename);
 
 
 };

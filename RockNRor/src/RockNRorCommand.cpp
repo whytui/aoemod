@@ -612,6 +612,15 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		}
 	}
 
+	if (strcmp(command, "mapbmp") == 0) {
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (global && global->IsCheckSumValid() && global->scenarioInformation && global->scenarioInformation->IsCheckSumValid()) {
+			if (_BITMAP::BitmapExporter::SaveTPictureToBmp(global->scenarioInformation->scenarioMapPicture, "c:\\temp\\scnMap.bmp")) {
+				AOE_METHODS::UI_BASE::CallWriteText("Successfully saved scenario map");
+			}
+		}
+	}
+
 	if (strcmp(command, "empty farm") == 0) {
 		// Sometimes we need to have almost empty farms for testing...
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();

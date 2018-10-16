@@ -269,6 +269,14 @@ Get Strategy (read only)
 Get Personality (read only)
 [42075]
 Gold victory condition
+[42164]
+Extract map BMP
+[42165]
+BMP export
+[42166]
+The scenario map has been written to :
+[42167]
+An error occurred, map could not be extracted into a BMP file
 [42076]
 If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select "custom" in general victory conditions tab.
 [42077]

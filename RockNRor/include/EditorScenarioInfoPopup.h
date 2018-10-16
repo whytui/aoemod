@@ -3,6 +3,7 @@
 #include <string.h>
 #include <mystrings.h>
 #include <AOE_const_drs.h>
+#include "interface.h"
 #include "RnrScreenBase.h"
 #include "SimpleEditText.h"
 #include "InputBox.h"
@@ -35,6 +36,9 @@ public:
 	// Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 	bool OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) override;
 
+	// Returns output filename if successful (empty otherwise)
+	std::string ExtractMapBmpFile();
+
 protected:
 	// Reset various pointers for this class level (to override)
 	void ResetClassPointers() override;
@@ -51,6 +55,7 @@ private:
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnPER;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnTerrainEdit;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnVictoryCondition;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnExtractMapBmp;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAllowUnitOverlapping;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkDisableHillModeCheck;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkDisableTerrainRestrictions;

@@ -145,6 +145,7 @@
     <ClInclude Include="include\AOE_struct_civilization_def.h" />
     <ClInclude Include="include\AOE_struct_map_tile_values.h" />
     <ClInclude Include="include\AOE_struct_terrain_def.h" />
+    <ClInclude Include="include\AOE_struct_tpicture.h" />
     <ClInclude Include="include\AOE_struct_trade_ai.h" />
     <ClInclude Include="include\AOE_struct_ui_panel_system.h" />
     <ClInclude Include="include\AOE_struct_units.h" />

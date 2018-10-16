@@ -34,15 +34,17 @@ bool BitmapExporter::GenerateBitmap(FILE *file, long int pixelsX, long int pixel
 	long int bmpInfoSize = 0x36 - 0xE;
 	long int imgBytesSize = (bmpSizeX * bmpSizeY * bitsPerPixel) / 8;
 	long int fileSize = 0x36 + imgBytesSize;
+#pragma WARNING("And palette size ???")
 	unsigned char headerAndBmpInfo[0x36] = { 'B', 'M', /*2*/0, 0, 0, 0, /*6*/ 0, 0, /*8*/0, 0, /*A img offset*/ 0, 0, 0, 0,
 		/*E size*/00, 00, 00, 00, /*12 pxlx*/ 0, 00, 00, 00, /*pxly*/0, 00, 00, 00, /*1A*/ 1, 0,
-		/*1C bits/pixel*/(unsigned char)bitsPerPixel, 0, /*compression*/0, 0, 0, 0, /*22 imgsize*/0, 0, 0, 0, /*26*/0, 0, 0, 0, /*2A*/0, 0, 0, 0,
-		/*2E*/0, 0, 0, 0, /*32*/0, 0, 0, 0 };
+		/*1C bits/pixel*/(unsigned char)bitsPerPixel, 0, /*1E compression*/0, 0, 0, 0, /*22 imgsize*/0, 0, 0, 0,
+		/*26 hResolution pix/m */0, 0, 0, 0, /*2A vResolution pix/m*/0, 0, 0, 0,
+		/*2E nb of colors in palette */0, 0, 0, 0, /*32 nb of important colors*/0, 0, 0, 0 };
 	long int *p = (long int*)(headerAndBmpInfo + 0x12); // x pixel count
 	*p = pixelsX;
 	p = (long int*)(headerAndBmpInfo + 0x16); // y pixel count
 	*p = pixelsY;
-	p = (long int*)(headerAndBmpInfo + 0xE); // bmp info size (0x28)
+	p = (long int*)(headerAndBmpInfo + 0xE); // bmp info size (=0x28)
 	*p = bmpInfoSize;
 	p = (long int*)(headerAndBmpInfo + 0x2);
 	*p = fileSize;
@@ -50,6 +52,7 @@ bool BitmapExporter::GenerateBitmap(FILE *file, long int pixelsX, long int pixel
 	*p = 0x36 + filePaletteSize;
 	p = (long int*)(headerAndBmpInfo + 0x22);
 	*p = imgBytesSize;
+	// Note: 0x2E should be set to 2^(bitsPerPixel) ? But 0 has the same role
 	char *defaultPalette = NULL;
 	if (filePaletteSize > 0) {
 		defaultPalette = (char*)malloc(filePaletteSize);
@@ -95,5 +98,43 @@ bool BitmapExporter::GenerateBitmap(FILE *file, long int pixelsX, long int pixel
 	return true;
 }
 
+// Saves a TPicture into a BMP file
+// As the exact list of possible stuff contained in TPictures is unknown, maybe this won't work for TPictures originated from non-BMP files
+bool BitmapExporter::SaveTPictureToBmp(AOE_STRUCTURES::STRUCT_TPICTURE *pic, const char *outFilename) {
+	if ((pic == NULL) || (pic->pHeaderAndPalette == NULL) || (outFilename == NULL) || (outFilename[0] == 0)) {
+		return false;
+	}
+	FILE *file;
+	errno_t e = fopen_s(&file, outFilename, "wb+"); // overwrite
+	if (e) {
+		return false;
+	}
+
+	long int bitsPerPixel = 8;
+	long int imgBytesSize = pic->GetPixelsDataSize();
+	long int fileSize = 0x0E + 0x428 + imgBytesSize;
+
+	// File header
+	// Octets 6 to 9: reserved/unused
+	unsigned char headerAndBmpInfo[0x36] = { 'B', 'M', /*2 file size*/0, 0, 0, 0, /*6*/ 0, 0, /*8*/0, 0, /*A img offset*/ 0, 0, 0, 0 };
+
+	long int *p = (long int*)(headerAndBmpInfo + 0x2); // file (total) size
+	*p = fileSize;
+
+	p = (long int*)(headerAndBmpInfo + 0xA); // image offset
+	*p = 0x0E + 0x428; // "file" header + BMP header (0x28) + palette (0x400)
+
+	fwrite(headerAndBmpInfo, 0x0E, sizeof(unsigned char), file);
+
+	// BMP header and palette
+	fwrite(pic->pHeaderAndPalette, 0x428, sizeof(unsigned char), file);
+
+	// Pixels data
+	fwrite(pic->pixelsData, imgBytesSize, sizeof(unsigned char), file);
+
+	fclose(file);
+	return true;
 }
 
+
+}

@@ -393,6 +393,9 @@
     <ClInclude Include="include\AOE_struct_ui_panel_system.h">
       <Filter>Fichiers d%27en-tête\AOE_model\UI</Filter>
     </ClInclude>
+    <ClInclude Include="include\AOE_struct_tpicture.h">
+      <Filter>Fichiers d%27en-tête\AOE_model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\triggerDefinition.cpp">

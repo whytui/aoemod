@@ -19,6 +19,7 @@ void EditorScenarioInfoPopup::ResetClassPointers() {
 	this->btnTerrainEdit = NULL;
 	this->btnTriggers = NULL;
 	this->btnVictoryCondition = NULL;
+	this->btnExtractMapBmp = NULL;
 	this->edtPlayerId = NULL;
 	this->lblTitle = NULL;
 	this->chkAllowUnitOverlapping = NULL;
@@ -56,6 +57,8 @@ void EditorScenarioInfoPopup::CreateScreenComponents() {
 	this->AddButton(&this->btnTriggers, localizationHandler.GetTranslation(CRLANG_IDTRIGGERS, "Triggers"), btnhPos1, 160, btnSize, 30, 0);
 	this->AddButton(&this->btnTerrainEdit, localizationHandler.GetTranslation(CRLANG_IDTERRAIN_EDIT, "Terrain edit"), btnhPos1, 200, btnSize, 30, 0);
 	this->AddButton(&this->btnVictoryCondition, localizationHandler.GetTranslation(CRLANG_IDVICTORY_CONDITIONS, "Victory conditions"), btnhPos2, 80, btnSize, 30, 0);
+	this->AddButton(&this->btnExtractMapBmp, localizationHandler.GetTranslation(CRLANG_ID_EXPORT_MAP_TO_BMP_BUTTON, "Extract map BMP"), btnhPos2, 120, btnSize, 30, 0);
+
 	long int chkSize = 30;
 	long int hSpace = 15;
 	long int lblhSize = 160;
@@ -166,6 +169,26 @@ bool EditorScenarioInfoPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 		this->OpenOtherScreenAndCloseThisOne(inputPopup, false);
 		return true;
 	}
+	if (sender == this->btnExtractMapBmp) {
+		std::string exportedFilename = this->ExtractMapBmpFile();
+		std::string message;
+		if (exportedFilename.empty()) {
+			message = localizationHandler.GetTranslation(CRLANG_ID_EXPORT_MAP_FAILED_MESSAGE, "An error occurred, map could not be extracted into a BMP file");
+			message += "\r\nYou may press CTRL-F1 to check RockNRor logs (close this popup first).";
+		} else {
+			message = localizationHandler.GetTranslation(CRLANG_ID_EXPORT_MAP_OK_MESSAGE, "The scenario map has been written to :");
+			message += "\r\n";
+			message += exportedFilename;
+		}
+		SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup(localizationHandler.GetTranslation(CRLANG_ID_EXPORT_MAP_TO_BMP_POPUP_TITLE, "BMP export"),
+			message.c_str(),
+			message.length(), NULL, true, false);
+		nextPopup->SetCenteredForSize(600, 200);
+		nextPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+
+		this->OpenOtherScreenAndCloseThisOne(nextPopup, false);
+		return true;
+	}
 
 	if (sender == this->chkAllowUnitOverlapping) {
 		ROCKNROR::crInfo.configInfo.editor_allowUnitOverlapping = this->chkAllowUnitOverlapping->IsChecked();
@@ -208,6 +231,53 @@ bool EditorScenarioInfoPopup::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, 
 }
 
 
+// Returns output filename if successful (empty otherwise)
+std::string EditorScenarioInfoPopup::ExtractMapBmpFile() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid() || !settings || !settings->IsCheckSumValid()) {
+		traceMessageHandler.WriteMessageNoNotification("Error getting main structures");
+		return "";
+	}
+	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = global->scenarioInformation;
+	if (!scInfo || !scInfo->IsCheckSumValid()) {
+		traceMessageHandler.WriteMessageNoNotification("Error getting scenario information");
+		return "";
+	}
+	if (scInfo->scenarioMapPicture == NULL) {
+		traceMessageHandler.WriteMessageNoNotification("There is no scenario map to export.");
+		return "";
+	}
+	if (scInfo->scenarioMapPicture->pHeaderAndPalette == NULL) {
+		traceMessageHandler.WriteMessageNoNotification("Scenario map is missing or data is incomplete.");
+		return "";
+	}
+	std::string filename = settings->gameDirFullPath;
+	filename += "\\";
+	filename += CST_ROCKNROR_FOLDER;
+	if (!DirectoryExists(filename.c_str())) {
+		traceMessageHandler.WriteMessageNoNotification("Error getting game directory");
+		return "";
+	}
+	if (scInfo->scenarioBitmapFileName[0] != 0) {
+		filename += scInfo->scenarioBitmapFileName;
+		string lowerCase = filename;
+		tolower(lowerCase);
+		int len = lowerCase.length();
+		const char *tmp = lowerCase.c_str();
+		if ((tmp[len - 4] != '.') && (tmp[len - 3] != 'b') && (tmp[len - 2] != 'm') && (tmp[len - 1] != 'p')) {
+			filename += ".bmp";
+		}
+	} else {
+		filename += "scnMapNoname.bmp";
+	}
+	if (_BITMAP::BitmapExporter::SaveTPictureToBmp(scInfo->scenarioMapPicture, filename.c_str())) {
+		traceMessageHandler.WriteMessageNoNotification("Scenario bitmap information saved successfully to " + filename);
+		return filename;
+	}
+	traceMessageHandler.WriteMessageNoNotification("An error occurred while trying to save bitmap information.");
+	return "";
+}
 
 
 }

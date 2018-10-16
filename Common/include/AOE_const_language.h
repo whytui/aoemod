@@ -171,6 +171,10 @@ const static unsigned long int CRLANG_IDUNIT_OVERLAPPING = 42068;
 const static unsigned long int CRLANG_IDBUILD_ON_ELEVATION = 42069;
 const static unsigned long int CRLANG_IDDISABLE_TERRAIN_RESTRICTION = 42070;
 const static unsigned long int CRLANG_IDLENGTHEN_COMBAT_MODE = 42071;
+const static unsigned long int CRLANG_ID_EXPORT_MAP_TO_BMP_BUTTON = 42164;
+const static unsigned long int CRLANG_ID_EXPORT_MAP_TO_BMP_POPUP_TITLE = 42165;
+const static unsigned long int CRLANG_ID_EXPORT_MAP_OK_MESSAGE = 42166;
+const static unsigned long int CRLANG_ID_EXPORT_MAP_FAILED_MESSAGE = 42167;
 
 const static unsigned long int CRLANG_ID_EDIT_TRIGGERS = 42072;
 const static unsigned long int CRLANG_ID_GET_STRATEGY = 42073;

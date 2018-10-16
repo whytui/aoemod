@@ -278,6 +278,14 @@ Voir stratégie (lecture seule)
 Voir personnalité (lecture seule)
 [42075]
 Condition de victoire sur l'or
+[42164]
+Extraire carte en BMP
+[42165]
+Export BMP
+[42166]
+La carte a été sauvée dans le fichier :
+[42167]
+Erreur: la carte n'a pas pu être sauvée dans un fichier
 [42076]
 Pour activer une condition de victoire sur la quantité d'or, saisissez une valeur non nulle.\nVous devez aussi choisir "personnalisé" dans les conditions de victoire générale.
 [42077]

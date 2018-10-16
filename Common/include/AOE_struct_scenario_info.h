@@ -3,6 +3,7 @@
 
 #include <AOE_empires_dat.h>
 #include <AOE_const_internal.h>
+#include <AOE_struct_tpicture.h>
 
 /*
 * This file contains empiresX.exe structures definition
@@ -112,7 +113,7 @@ namespace AOE_STRUCTURES {
 		long int playerIsHumanPlayable[0x10]; // +18CC. 0 if computer player only (cannot be played as human). "Player type"
 		long int playerCivilizationId[0x10]; // +190C. Often referred to as +18CC+40.
 		long int playerIsActive[0x10]; // +194C. 1 if player is active. Often referred to as +18CC+80.
-		long int *unknown_198C; // +198C. ptr to struct size=0x20, constructor 45AF60. TO DO.
+		STRUCT_TPICTURE *scenarioMapPicture; // +198C. Scenario map picture
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_SCENARIO_INFO_BASE); }
 		bool IsCheckSumValidForAScenarioInfoClass() const { return (this->checksum == CHECKSUM_SCENARIO_INFO) || (this->checksum == CHECKSUM_SCENARIO_INFO_BASE); }
