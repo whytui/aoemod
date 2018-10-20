@@ -113,6 +113,7 @@ void DumpDebugInfoToFile() {
 
 
 // Export InfAI's exploration status map data to a bitmap using color codes
+// Grey=unexplored, Green=explored, Red=failed, Blue=to reexplore
 bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return false; }
 	long int mapSizeX = player->ptrAIStruct->structInfAI.XMapSize;

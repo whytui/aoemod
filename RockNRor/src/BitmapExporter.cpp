@@ -2,6 +2,9 @@
 
 namespace _BITMAP {
 
+const int BMP_FILE_INFO_SIZE = 0x0E; // Just BMP file "global" info
+const int HEADER_BMP_INFO_SIZE = 0x36; // BMP file "global" info + BMP header (img offset, etc)
+
 // Generates a BMP file using data (=pixel values) from dataArray
 // file must be opened/closed by caller : here it must be an actively opened file with write authorization.
 // bitsPerPixel can be 4, 8, 16, 24 (8 recommended = tested value)
@@ -31,11 +34,11 @@ bool BitmapExporter::GenerateBitmap(FILE *file, long int pixelsX, long int pixel
 		filePaletteSize = 0x400;
 		break;
 	}
-	long int bmpInfoSize = 0x36 - 0xE;
+	
+	long int bmpInfoSize = HEADER_BMP_INFO_SIZE - BMP_FILE_INFO_SIZE;
 	long int imgBytesSize = (bmpSizeX * bmpSizeY * bitsPerPixel) / 8;
-	long int fileSize = 0x36 + imgBytesSize;
-#pragma WARNING("And palette size ???")
-	unsigned char headerAndBmpInfo[0x36] = { 'B', 'M', /*2*/0, 0, 0, 0, /*6*/ 0, 0, /*8*/0, 0, /*A img offset*/ 0, 0, 0, 0,
+	long int fileSize = HEADER_BMP_INFO_SIZE + filePaletteSize + imgBytesSize;
+	unsigned char headerAndBmpInfo[HEADER_BMP_INFO_SIZE] = { 'B', 'M', /*2*/0, 0, 0, 0, /*6*/ 0, 0, /*8*/0, 0, /*A img offset*/ 0, 0, 0, 0,
 		/*E size*/00, 00, 00, 00, /*12 pxlx*/ 0, 00, 00, 00, /*pxly*/0, 00, 00, 00, /*1A*/ 1, 0,
 		/*1C bits/pixel*/(unsigned char)bitsPerPixel, 0, /*1E compression*/0, 0, 0, 0, /*22 imgsize*/0, 0, 0, 0,
 		/*26 hResolution pix/m */0, 0, 0, 0, /*2A vResolution pix/m*/0, 0, 0, 0,
@@ -44,12 +47,12 @@ bool BitmapExporter::GenerateBitmap(FILE *file, long int pixelsX, long int pixel
 	*p = pixelsX;
 	p = (long int*)(headerAndBmpInfo + 0x16); // y pixel count
 	*p = pixelsY;
-	p = (long int*)(headerAndBmpInfo + 0xE); // bmp info size (=0x28)
+	p = (long int*)(headerAndBmpInfo + BMP_FILE_INFO_SIZE); // bmp info size (=0x28)
 	*p = bmpInfoSize;
-	p = (long int*)(headerAndBmpInfo + 0x2);
+	p = (long int*)(headerAndBmpInfo + 0x2); // File size. Does not seem crucial...
 	*p = fileSize;
 	p = (long int*)(headerAndBmpInfo + 0xA); // image offset
-	*p = 0x36 + filePaletteSize;
+	*p = HEADER_BMP_INFO_SIZE + filePaletteSize;
 	p = (long int*)(headerAndBmpInfo + 0x22);
 	*p = imgBytesSize;
 	// Note: 0x2E should be set to 2^(bitsPerPixel) ? But 0 has the same role
@@ -71,13 +74,14 @@ bool BitmapExporter::GenerateBitmap(FILE *file, long int pixelsX, long int pixel
 			memcpy_s(defaultPalette, filePaletteSize, palette, paletteSizeInBytes);
 		}
 	}
-	fwrite(headerAndBmpInfo, 0x36, sizeof(unsigned char), file);
+	fwrite(headerAndBmpInfo, HEADER_BMP_INFO_SIZE, sizeof(unsigned char), file);
 	if (filePaletteSize > 0) {
 		assert(defaultPalette != NULL);
 		fwrite(defaultPalette, filePaletteSize, sizeof(unsigned char), file);
 	}
 	if (defaultPalette) {
 		free(defaultPalette);
+		defaultPalette = nullptr;
 	}
 	if (!needFinalBytesAfterEachRow) {
 		// Simple case: copy the image buffer as is, when x is a multiple of 4. The fastest case !
@@ -112,19 +116,19 @@ bool BitmapExporter::SaveTPictureToBmp(AOE_STRUCTURES::STRUCT_TPICTURE *pic, con
 
 	long int bitsPerPixel = 8;
 	long int imgBytesSize = pic->GetPixelsDataSize();
-	long int fileSize = 0x0E + 0x428 + imgBytesSize;
+	long int fileSize = BMP_FILE_INFO_SIZE + 0x428 + imgBytesSize;
 
 	// File header
 	// Octets 6 to 9: reserved/unused
-	unsigned char headerAndBmpInfo[0x36] = { 'B', 'M', /*2 file size*/0, 0, 0, 0, /*6*/ 0, 0, /*8*/0, 0, /*A img offset*/ 0, 0, 0, 0 };
+	unsigned char headerAndBmpInfo[HEADER_BMP_INFO_SIZE] = { 'B', 'M', /*2 file size*/0, 0, 0, 0, /*6*/ 0, 0, /*8*/0, 0, /*A img offset*/ 0, 0, 0, 0 };
 
 	long int *p = (long int*)(headerAndBmpInfo + 0x2); // file (total) size
 	*p = fileSize;
 
 	p = (long int*)(headerAndBmpInfo + 0xA); // image offset
-	*p = 0x0E + 0x428; // "file" header + BMP header (0x28) + palette (0x400)
+	*p = BMP_FILE_INFO_SIZE + 0x428; // "file" header + BMP header (0x28) + palette (0x400)
 
-	fwrite(headerAndBmpInfo, 0x0E, sizeof(unsigned char), file);
+	fwrite(headerAndBmpInfo, BMP_FILE_INFO_SIZE, sizeof(unsigned char), file);
 
 	// BMP header and palette
 	fwrite(pic->pHeaderAndPalette, 0x428, sizeof(unsigned char), file);

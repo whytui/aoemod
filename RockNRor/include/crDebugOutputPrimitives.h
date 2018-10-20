@@ -36,6 +36,7 @@ bool AppendTextToLogFile(const char *text, bool addNewLineAfterwards);
 void DumpDebugInfoToFile();
 
 // Export InfAI's exploration status map data to a bitmap using color codes
+// Grey=unexplored, Green=explored, Red=failed, Blue=to reexplore
 bool exportInfAIExplorationToBitmap(STRUCT_PLAYER *player);
 
 bool exportGameTerrainRestrictionValuesToBitmap();
