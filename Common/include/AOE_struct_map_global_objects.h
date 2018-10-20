@@ -102,8 +102,15 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_0CE61C;
 		// 0x4F620
 		unsigned long int unknown_0CE620; // +CE620.
-		// 458870: set "has unit" at position?
-		long int unitObstructionMap[0xFF * 0xFF]; // +CE624. index posY*4*0xFF+x. Its value is a bits mask ?? STRUCT_MAP_VISIBILITY_MASK? Array size 0xFE01, reset=0x458850.
+		// +CE624. Obstruction map.
+		// index (posY*4)*0xFF+x. Array size 0xFE01(DWORDS)=3F804 bytes, reset=0x458850.
+		// Bitwise values, indexing is based on "1/4 tile" (quarter-tile)
+		// - X axis = 0xFF bytes, split into 4 pairs of bits, which makes 0xFF*4 values between 0 and 3. One row takes 0xFF bytes in memory.
+		// - Y axis = Each array "row" is dedicated to a quarter-tile in vertical axis, so we have 4*sizeY rows.
+		// => SO in this array, horizontal index is X, vertical index is Y*4 (and multiply Y*4*0xFF to get memory offset)
+		// => Pathing system methods take "quarter-tile" coordinates instead of X/Y values ; eg 0x458870=incrementObstruction(qtx, qty)
+		//long int unitObstructionMap[0xFF * 0xFF];
+		unsigned char unitObstructionMap[0xFF * 0xFF * 4];
 		char unknown_010DE28_misc[0xFE00]; // +10DE28. Size=0xFE00. "Misc" ??? Access: y*0xFF+x
 		unsigned long int unknown_11DC28;
 		long int unknown_011DC2C_index; // an index to access +4F614 + index*8 (byte)?

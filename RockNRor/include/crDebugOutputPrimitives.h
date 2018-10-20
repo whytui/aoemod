@@ -46,6 +46,9 @@ bool exportGameTerrainRestrictionValuesToBitmap();
 // playerIdFilter : if -1, export for all players (value=mask), otherwise, export for supplied player only
 bool exportVisibilityToBitmap(bool fogVisibility, long int playerIdFilter);
 
+// Export obstruction map (from pathing system) to a bitmap
+bool exportPathingSystemObstruction(bool obstructionMapCode);
+
 // To customize for debug purpose...
 void DebugDumpAllUnits();
 

@@ -216,6 +216,42 @@ bool exportVisibilityToBitmap(bool fogVisibility, long int playerIdFilter) {
 }
 
 
+// Export obstruction map (from pathing system) to a bitmap
+bool exportPathingSystemObstruction(bool obstructionMapCode) {
+	AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *pathingSystem = (AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *) 0x583BC8; // code 0
+	if (obstructionMapCode) {
+		pathingSystem = (AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *) 0x6A1CC0; // corresponds to code 1 ; cf 0x4AB78B
+	}
+	if (!pathingSystem) { return false; }
+	unsigned char *map = (unsigned char *)malloc(0xFF * 4 * 0xFF * 4);
+	memset(map, 0, 0xFF * 4 * 0xFF * 4);
+	unsigned char *p = pathingSystem->unitObstructionMap;
+	assert(p != NULL);
+
+	for (int qy = 0; qy < 0xFF * 4; qy++) { // qy is a "quarter-tile" unit
+		for (int x = 0; x < 0xFF; x++) { // x is really a tile index
+			unsigned char raw = p[qy * 0xFF + x];
+			unsigned char v4 = raw;
+			unsigned char v3 = v4 >> 2;
+			unsigned char v2 = v3 >> 2;
+			unsigned char v1 = v2 >> 2;
+			v2 = v2 & 3;
+			v3 = v3 & 3;
+			v4 = v4 & 3;
+			assert(v1 <= 3);
+			// Note: tested: this is correct order regarding little endian stuff
+			map[qy * 0xFF * 4 + x * 4] = v4;
+			map[qy * 0xFF * 4 + x * 4 + 1] = v3;
+			map[qy * 0xFF * 4 + x * 4 + 2] = v2;
+			map[qy * 0xFF * 4 + x * 4 + 3] = v1;
+		}
+	}
+	const char* filename = obstructionMapCode ? "D:\\testObstr0.bmp" : "D:\\testObstr1.bmp";
+	_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades(filename, 0xFF * 4, 0xFF * 4, map, 0, 3, false);
+	free(map);
+	return true;
+}
+
 
 void DebugDumpAllUnits() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();

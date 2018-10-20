@@ -206,9 +206,10 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 #endif
 		AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *md1 = (AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *) 0x583BC8;
 		AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *md2 = (AOE_STRUCTURES::STRUCT_PATHING_SYSTEM *) 0x6A1CC0;
+		long int v = md1->unitObstructionMap[0];
 		char txt[1000];
 		memset(txt, 0, 900);
-		long int v = md1->unitObstructionMap[0];
+
 		for (int i = 0; i < 64; i++) {
 			int bit = v & (1 << i);
 			txt[i] = bit ? '1' : '0';
@@ -237,6 +238,8 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 		//CR_DEBUG::exportVisibilityToBitmap(true, -1);
 		//CR_DEBUG::exportVisibilityToBitmap(false, 2);
 		//CR_DEBUG::exportGameTerrainRestrictionValuesToBitmap();
+		//CR_DEBUG::exportPathingSystemObstruction(false);
+		//CR_DEBUG::exportPathingSystemObstruction(true);
 		/*_BITMAP::BitmapExporter::ExportDataAsBitmapGreyShades("D:\\test1.bmp", global->gameMapInfo->mapArraySizeX, 
 			global->gameMapInfo->mapArraySizeY, global->gameMapInfo->unknown_8DB0, 0, 255, false);*/
 	}
