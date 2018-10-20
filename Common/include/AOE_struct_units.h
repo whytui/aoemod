@@ -246,7 +246,7 @@ namespace AOE_STRUCTURES {
 		char unitCountThatAreTargetingMe; // +4F. Number of (other)units that have "me" as target (repairman, gatherer, attacker...). See 4AADB0. Warning: the count is not reliable: when moving to it, the other unit counts TWICE (and counts for 1 when actually doing the action) + also counts projectiles !
 		// 0x50
 		STRUCT_PER_TYPE_UNIT_LIST_ELEMENT *ptrElemInPlayerUnitList; // +50. Link to corresponding reference in player's creatable units list. Can be NULL in loaded games (if not "used" yet = used as a cache)
-		STRUCT_MANAGED_ARRAY pathingGroup; // +54 a ptr. about movement ? objectCollisionList ? Units in same Formation ? A list of unitID.
+		STRUCT_MANAGED_ARRAY pathingGroup; // +54 a ptr. about movement. Units in same Formation/movement group (A list of unitID).
 		STRUCT_MANAGED_ARRAY unitIDsInMyGroup; // +64. list of IDs of the units in same group as me. A limit to 25 in 0x4ABEC8 (beware stack overflow). If empty, then I belong to no group.
 		STRUCT_UNIT_ACTIVITY *currentActivity; // +74. Called "UnitAI" in ROR code. Warning: some unit don't have one (e.g. lion tame)
 		long int groupLeaderUnitId; // +78. Unit Id of my group's leader. -1 when unitIDsInMyGroup is empty.

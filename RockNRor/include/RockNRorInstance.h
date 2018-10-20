@@ -169,6 +169,7 @@ namespace ROCKNROR {
 		void ActionBuildUpdateFarmHack(REG_BACKUP *REG_values);
 		void OnAddInUnitMemoryList(REG_BACKUP *REG_values);
 		void IsGamePaused(REG_BACKUP *REG_values);
+		void ExecMoveCmdUsingFormation(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

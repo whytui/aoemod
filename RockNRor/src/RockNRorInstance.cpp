@@ -446,6 +446,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x4199C5:
 		this->IsGamePaused(REG_values);
 		break;
+	case 0x42A961:
+		this->ExecMoveCmdUsingFormation(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4654,6 +4657,90 @@ void RockNRorInstance::IsGamePaused(REG_BACKUP *REG_values) {
 	if (forceReturnFalse) {
 		REG_values->EAX_val = 1;
 		ChangeReturnAddress(REG_values, returnAdressToForceReturn);
+	}
+}
+
+
+// From 0x42A959 (cmdInfo.executeCommand_type3(pCmd) move)
+// This overloads the test on "deltaY > 8" that decides to use formation move, or basic move
+// This procedure MAY change return address:
+// Change return address to 0x42AB97 to use single destination mode (all units will go to exact same destination)
+// Change return address to 0x42ACC4 to exit ROR procedure with no action (disable ROR treatments)
+// Continue to use formation move (units will keep their relative positions)
+void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
+	unsigned long int returnAdressSingleDestinationMode = 0x42AB97;
+	unsigned long int returnAdressDisableRORTreatments = 0x42ACC4;
+	const float deltaYComparisonValue = 8.;
+
+	long int unitCount = REG_values->EDI_val;
+	AOE_STRUCTURES::COMMAND_MOVE *cmdMove = (AOE_STRUCTURES::COMMAND_MOVE*)REG_values->EBX_val;
+	ror_api_assert(REG_values, (cmdMove != NULL) && cmdMove->IsCmdIdValid());
+	// Get "local" variables
+	float minPosY = GetFloatValueFromRORStack(REG_values, 0x10);
+	float maxPosY = GetFloatValueFromRORStack(REG_values, 0x14);
+	//float sumPosY = GetFloatValueFromRORStack(REG_values, 0x1C);
+	//float sumPosX = GetFloatValueFromRORStack(REG_values, 0x20);
+	float minPosX = GetFloatValueFromRORStack(REG_values, 0x2C);
+	float maxPosX = GetFloatValueFromRORStack(REG_values, 0x28);
+
+	// Default behavior (set useFormationMove according to "deltaY" value)
+
+	bool disableRORTreatments = false;
+	bool useFormationMove = (maxPosY - minPosY) < deltaYComparisonValue; // Don't know if it's < or <=
+
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		// This corresponds to the JE... command we replaced
+		if (!useFormationMove) {
+			ChangeReturnAddress(REG_values, returnAdressSingleDestinationMode);
+		}
+		return;
+	}
+
+	// Custom code. To use "standard" behavior, you can just return.
+	if (cmdMove == NULL) { return; }
+
+#pragma TODO("Finish Movement formation interface")
+	// TEMPORARY (quick testing version) - TO FINISH
+	enum choice { standard, clever, singleDestination, formation };
+	static choice c = choice::clever;
+
+	switch (c) {
+	case standard:
+		// Do nothing more, choice was calculated before with standard check
+		break;
+	case clever:
+		{
+		// Click inside the "box" drawn by selected units = "regroup" = single target. Otherwise, use formation
+			float x = cmdMove->posX;
+			float y = cmdMove->posY;
+			if ((minPosX < x) && (x < maxPosX) && (minPosY < y) && (y < maxPosY)) {
+				useFormationMove = false;
+			} else {
+				useFormationMove = true;
+			}
+		}
+		break;
+	case singleDestination:
+		useFormationMove = false;
+		break;
+	case formation:
+		useFormationMove = true;
+		break;
+	default:
+		break;
+	}
+
+	// DO NOT MODIFY BELOW - set return value according to our flags
+	if (disableRORTreatments) {
+		ChangeReturnAddress(REG_values, returnAdressDisableRORTreatments);
+		return;
+	}
+	if (!useFormationMove) {
+		ChangeReturnAddress(REG_values, returnAdressSingleDestinationMode);
 	}
 }
 

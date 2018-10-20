@@ -83,6 +83,29 @@ namespace AOE_STRUCTURES
 		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_WORK; }
 	};
 
+	// Type 0x03 (move). Size = 0x1C + actorCount*4. Create = 0x42BA70. Execute=0x42A850
+	// Actual effect depends on unit def commands, target unit type...
+	struct COMMAND_MOVE {
+	public:
+		char cmdId;
+		char actorCount; // Elem count for actorIdList
+		char unused_02[2]; // +2
+		long int targetUnitId; // +4. Can be -1
+		float posY;
+		float posX; // +C.
+		// 0x10
+		char unknown_10; // +10. Unused?
+		char unknown_11; // +11. Unused?
+		char unknown_12; // +12. Unused?
+		char unknown_13; // +13. Unused?
+		unsigned long int unknown_14; // +14. Unused?
+		unsigned long int unknown_18; // +18. Unused?
+
+		long int actorIdList[1]; // +1C.
+		bool IsCmdIdValid() { return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_MOVE; }
+		long int MySizeInBytes() const { return 0x1C + 4 * this->actorCount; }
+	};
+	static_assert(sizeof(COMMAND_MOVE) >= 0x1C, "COMMAND_MOVE size");
 
 	// Type 0x04. Size = 0x14. Create=0x42BA90
 	// Create a fully-built construction (immediately ready), also works for any other unit (non building)
