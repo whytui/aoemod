@@ -95,6 +95,11 @@ namespace STRATEGY {
 StrategyUpdater strategyUpdater[9];
 
 
+void StrategyUpdater::ResetAllInfo() {
+	this->inProgressBuildingLastFailuresWithGameTime.clear();
+	this->nextMilitaryMaxCountBeforeForceResearch = 3;
+}
+
 
 // This is called from buildAI.resetStratElemForUnitId, when testing is "elem.alive" field.
 // The fixes in this method are "technical" and are always applied (even if improve AI is disabled)
@@ -122,6 +127,9 @@ void CheckStratElemAliveForReset(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_S
 
 
 // Analyze strategy and fixes what's necessary. Called every <crInfo.configInfo.tacticalAIUpdateDelay> seconds.
+// - Disable "limited retrains" units when iron age is reached (specifically when starting at iron !)
+// - Unblock "stuck" buildings (typically, destroyed during their construction phase)
+// - Add various useful researches like wheel, towers...
 void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	// Exit if AI improvement is not enabled.
 	if (!ROCKNROR::IsImproveAIEnabled(buildAI->commonAIObject.playerId)) { return; }
@@ -165,22 +173,29 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *goodDevelopmentPointElement = NULL; // Represents the location in strategy where we can assume player is strong enough to insert optional researches. Be careful, AI can skip a certain number of items (10 according to SN numbers)
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *stratElem_bronzeAge = NULL;
 	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *rockNRorMaxPopBegin = ROCKNROR::STRATEGY::GetRockNRorMaxPopulationBeginStratElem(buildAI);
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstResearchToDo = NULL;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstMilitaryAfterResearchToDo= NULL;
+	AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *firstCriticalElementToDo = NULL; // First "critical" research (typically ages... or a research we forced)
 	float *resources = (float *)player->ptrResourceValues;
 
 	// Do only 1 loop on strategy and collect all necessary information.
 	while (currentStratElem && currentStratElem != fakeFirstStratElem) {
 		assert(currentStratElem != NULL);
-		// Save some useful elements/information as we're passing on it
+		TTDetailedUnitDef *detUnitDef = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedUnitDef(currentStratElem->unitDAT_ID);
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *curUnitDef = (detUnitDef == NULL) ? NULL : detUnitDef->GetUnitDef();
+		// Save some useful elements/information while we are looping on all strategy elements
 		if (currentStratElem->unitDAT_ID == CST_UNITID_FORUM) {
 			townCentersCount++;
 			if (!elemMainTownCenter) {
 				elemMainTownCenter = currentStratElem;
 			}
 		}
+		bool isNonTowerMilitaryUnit = (curUnitDef != NULL) && IsNonTowerMilitaryUnit(curUnitDef->unitAIType);
 		if (currentStratElem->elemId == 1) { foundCounter_one = true; }
 		if ((currentStratElem->unitDAT_ID != CST_UNITID_WATCH_TOWER) || (currentStratElem->elementType != AIUCBuilding)) {
 			lastNonTowerElement = currentStratElem;
 		}
+		bool notAliveNorPending = (currentStratElem->aliveCount == 0) && (currentStratElem->inProgressCount == 0);
 		if ((currentStratElem->elementType == AIUCLivingUnit) && (currentStratElem->retrains == -1)) {
 			currentPopulation++;
 			// minPopulationBeforeBuildOptionalItems+1 : take next one and insert BEFORE (inserting BEFORE an given element preserves insert order consistency. After reverses all).
@@ -221,56 +236,66 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 		}
 
 		// Collect info on existing elements...
+		if ((firstCriticalElementToDo == NULL) && (currentStratElem->elementType == AIUCCritical) && notAliveNorPending) {
+			firstCriticalElementToDo = currentStratElem;
+		}
 		// True if current strategy element is a research (including "critical")
 		bool isTechOrCritical = (currentStratElem->elementType == AIUCTech) || (currentStratElem->elementType == AIUCCritical);
 
-		if ((currentStratElem->unitDAT_ID == CST_RSID_WHEEL) && isTechOrCritical) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_WHEEL)) {
 			foundWheel = true;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_ARCHITECTURE) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_ARCHITECTURE)) {
 			foundArchitecture = true;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_WOOD_WORKING) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_WOOD_WORKING)) {
 			foundWoodWorking = true;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_ARTISANSHIP) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_ARTISANSHIP)) {
 			foundArtisanShip = true;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_CRAFTMANSHIP) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_CRAFTMANSHIP)) {
 			foundCraftManShip = true;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_TOOL_WORKING) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_TOOL_WORKING)) {
 			foundToolWorking = true;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_DOMESTICATION) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_DOMESTICATION)) {
 			foundDomestication = true;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_WATCH_TOWER) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_WATCH_TOWER)) {
 			resWatchTower = currentStratElem;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_SENTRY_TOWER) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_SENTRY_TOWER)) {
 			resSentryTower = currentStratElem;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_GUARD_TOWER) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_GUARD_TOWER)) {
 			resGuardTower = currentStratElem;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_BALLISTA_TOWER) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_BALLISTA_TOWER)) {
 			resBallistaTower = currentStratElem;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_BALLISTICS) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_BALLISTICS)) {
 			foundBallistics = true;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_BRONZE_AGE) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_BRONZE_AGE)) {
 			stratElem_bronzeAge = currentStratElem;
 			canGoToBronzeAge = true;
 		}
-		if ((currentStratElem->unitDAT_ID == CST_RSID_IRON_AGE) && (isTechOrCritical)) {
+		if (isTechOrCritical && (currentStratElem->unitDAT_ID == CST_RSID_IRON_AGE)) {
 			canGoToIronAge = true;
 		}
 		if ((currentStratElem->unitDAT_ID == CST_UNITID_WONDER) && (
 			(currentStratElem->elementType == AIUCBuilding))
 			) {
 			wonder = currentStratElem;
+		}
+		if (isTechOrCritical && (firstResearchToDo == NULL) && notAliveNorPending) {
+			firstResearchToDo = currentStratElem;
+		}
+		if (isNonTowerMilitaryUnit && (firstResearchToDo != NULL) && (firstMilitaryAfterResearchToDo == NULL) &&
+			(currentStratElem->elementType == AIUCLivingUnit)) {
+			firstMilitaryAfterResearchToDo = currentStratElem; // Store "next" military unit after "first research to do".
 		}
 
 		currentStratElem = currentStratElem->next;
@@ -288,8 +313,16 @@ void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI) {
 		}
 	}
 
+	// Force research, when AI player makes no more progress in strategy because it's training (and losing) over and over the same units
+	// If there is already a "critical" research to do (especially ages), skip this.
+	if ((firstMilitaryAfterResearchToDo != NULL) && (firstCriticalElementToDo == NULL) &&
+		(firstMilitaryAfterResearchToDo->totalCount > strategyUpdater[player->playerId].nextMilitaryMaxCountBeforeForceResearch)) {
+		assert(firstResearchToDo != NULL);
+		firstResearchToDo->elementType = TAIUnitClass::AIUCCritical;
+	}
+
 	// Improve farms management (can be dynamically added: do not do it in initialization ! They will not exist yet)
-	// TO DO
+	// This is handled elsewhere, if SNAutoBuildFarms is ON.
 
 	// Add useful (available) researches when they are missing, under some conditions.
 	// Note: testing if the relevant age is researched is useful for performance (stored in a boolean variable, avoids some GetResearchStatus calls)

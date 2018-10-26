@@ -43,9 +43,7 @@ namespace STRATEGY {
 			this->ResetAllInfo();
 		}
 		
-		void ResetAllInfo() {
-			this->inProgressBuildingLastFailuresWithGameTime.clear();
-		}
+		void ResetAllInfo();
 
 		// Returns game time (milliseconds) when a building was last destroyed while "in progress" in strategy, referred by its elemId in strategy.
 		// Returns -1 if no information was found (building has not been destroyed while "in progress").
@@ -70,6 +68,10 @@ namespace STRATEGY {
 				[elemId](std::pair<long int, long int> info) {return info.first == elemId; });
 			this->inProgressBuildingLastFailuresWithGameTime.erase(it, this->inProgressBuildingLastFailuresWithGameTime.end());
 		}
+
+		// The number of "trained" military units before "previous" research is set to Critical (to force it being researched)
+		int nextMilitaryMaxCountBeforeForceResearch;
+
 	private:
 		std::list<std::pair<long int, long int>> inProgressBuildingLastFailuresWithGameTime; // first=stratElem.elemId, second=failureGameTime_ms
 
@@ -82,6 +84,9 @@ namespace STRATEGY {
 	void CheckStratElemAliveForReset(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI, AOE_STRUCTURES::STRUCT_STRATEGY_ELEMENT *currentElement);
 
 	// Analyze strategy and fixes what's necessary. Called every <crInfo.configInfo.tacticalAIUpdateDelay> seconds.
+	// - Disable "limited retrains" units when iron age is reached (specifically when starting at iron !)
+	// - Unblock "stuck" buildings (typically, destroyed during their construction phase)
+	// - Add various useful researches like wheel, towers...
 	void AnalyzeStrategy(AOE_STRUCTURES::STRUCT_BUILD_AI *buildAI);
 
 
