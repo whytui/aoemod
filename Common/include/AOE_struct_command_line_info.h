@@ -58,12 +58,15 @@ namespace AOE_STRUCTURES {
 		unsigned long int mouseButtonsStyle; // +8DC. 1 or 2 buttons.
 		long int screenSizeX; // +8E0
 		long int screenSizeY; // +8E4
-		// B12 : "savegame\"
-		// C17 : "scenario\"
-		// D1C : "campaign\"
-		// E21 : "sound\"
-		// 1130 : "avi\"
-		char unknown_8E8[0x143C - 0x8E8];
+		char unknown_8E8[0xB12 - 0x8E8];
+		char savegameFolder[0x105]; // +B12 = "savegame\"
+		char scenarioFolder[0x105]; // +C17 = "scenario\"
+		char campaignFolder[0x105]; // +D1C = "campaign\"
+		char soundFolder[0x105]; // +E21 = "sound\"
+		char unknown_F26_data2[0x105]; // +F26. "data2\" ?
+		char unknown_102B_data2[0x105]; // +102B. "data2\" ?
+		char aviFolder[0x105]; // +1130 = "avi\"
+		char unknown_1235[0x143C - 0x1235];
 	};
 	static_assert(sizeof(STRUCT_COMMAND_LINE_INFO) == 0x143C, "STRUCT_COMMAND_LINE_INFO size");
 

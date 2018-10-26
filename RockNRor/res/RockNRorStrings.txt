@@ -277,6 +277,8 @@ BMP export
 The scenario map has been written to :
 [42167]
 An error occurred, map could not be extracted into a BMP file
+[42168]
+Save as .scn
 [42076]
 If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select "custom" in general victory conditions tab.
 [42077]

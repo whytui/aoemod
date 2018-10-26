@@ -56,6 +56,12 @@ bool SaveCurrentGame(const char *filenameNoPath);
 // Automatically save current game to a file (hardcoded filename). Can be used in case of error, for example.
 bool AutoSaveCurrentGame();
 
+// Save current scenario into a scn or scx scenario file. filenameNoPath is filename with extension, without path.
+// Returns true if successful
+// If you call this from in-game, you won't have a crash, but the scenario file will be corrupted and opening it may crash.
+bool SaveScenario(const char *filenameNoPath);
+
+
 // Get a string representing game time in a human readable format
 std::string GetHumanTimeFromGameTime(unsigned long int gameTimeValue, bool withMilliSeconds);
 

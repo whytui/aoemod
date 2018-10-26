@@ -860,4 +860,35 @@ namespace AOE_CONST_FUNC {
 		}
 	}
 
+
+	// Returns true if unit def ID is a "Vanilla AOE" unit (not added by ROR or other extensions/mods)
+	static bool IsVanillaAoeUnit(short int unitDefId) {
+		if ((unitDefId < 0) || (unitDefId > 373)) {
+			// 373 is the last unitDefId in standard "AOE" empires.dat
+			// 374-399 are ROR units (mostly eye candies, cheat units, heroes...)
+			return false;
+		}
+		if (unitDefId <= 337) {
+			return true; // non ROR unit below ID 337 (to confirm)
+		}
+		// Above 337: Cherry-picking of "known units" from vanilla AOE data
+		// 338/339 = camel/scythe (ROR)
+		if ((unitDefId >= 340) && (unitDefId <= 344)) {
+			return true;
+		}
+		// 345 = armored ele ; 346=a ROR projectile
+		if ((unitDefId >= 348) && (unitDefId <= 359)) {
+			return true; // terrain_path_* (gaia units)
+		}
+		// 360=fire galley, 361-363=other various ROR units (364 unused in AOE/ROR)
+		if ((unitDefId >= 365) && (unitDefId <= 370)) {
+			return true; // 3 trees + 3 other units
+		}
+		// 371=unused
+		if ((unitDefId >= 372) && (unitDefId <= 373)) {
+			return true;
+		}
+		return false;
+	}
+
 }

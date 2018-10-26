@@ -115,5 +115,9 @@ AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForUnit(AOE_STRUCTU
 // Returns CST_PDV_UNKNOWN in error cases
 AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForUnit(AOE_STRUCTURES::STRUCT_PLAYER *playerMe, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitOther);
 
+// Delete all units whose "definition ID" is not a vanilla-AOE one.
+// To be used in scenario editor
+bool DeleteAllNonVanillaAoeUnits();
+
 
 }

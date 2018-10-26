@@ -80,7 +80,9 @@ namespace AOE_STRUCTURES {
 	// Eye candy (type10) / common (base) class for all units (unit instances). Name=RGE_Static_Object
 	// A8 7D 54 00. Size=0x88 (constructor 0x04A64B0)
 	// Methods:
-	// +0x08 = unit.ActualRemove?() called when Update() returns 1 (when status=8)
+	// +0x00 = unitBase.destructor(do_free)
+	// +0x04 = unitBase.recycle_into_game(unitDef, player, fy, fx, fz)
+	// +0x08 = unit.recycleOutOfGame() called when Update() returns 1 (when status=8). Removes a unit, but optionally keeps memory object for a future one
 	// +0x0C = unit.draw(pDrawArea, arg2, arg3, ptrColorForMap?)
 	// +0x10 = void RGE_Static_Object::shadow_draw(TDrawArea *,short,short,unsigned char)
 	// +0x14 = void RGE_Static_Object::normal_draw(TDrawArea *,short,short)

@@ -20,6 +20,7 @@ void EditorScenarioInfoPopup::ResetClassPointers() {
 	this->btnTriggers = NULL;
 	this->btnVictoryCondition = NULL;
 	this->btnExtractMapBmp = NULL;
+	this->btnSaveScenarioAsScn = NULL;
 	this->edtPlayerId = NULL;
 	this->lblTitle = NULL;
 	this->chkAllowUnitOverlapping = NULL;
@@ -58,6 +59,7 @@ void EditorScenarioInfoPopup::CreateScreenComponents() {
 	this->AddButton(&this->btnTerrainEdit, localizationHandler.GetTranslation(CRLANG_IDTERRAIN_EDIT, "Terrain edit"), btnhPos1, 200, btnSize, 30, 0);
 	this->AddButton(&this->btnVictoryCondition, localizationHandler.GetTranslation(CRLANG_IDVICTORY_CONDITIONS, "Victory conditions"), btnhPos2, 80, btnSize, 30, 0);
 	this->AddButton(&this->btnExtractMapBmp, localizationHandler.GetTranslation(CRLANG_ID_EXPORT_MAP_TO_BMP_BUTTON, "Extract map BMP"), btnhPos2, 120, btnSize, 30, 0);
+	this->AddButton(&this->btnSaveScenarioAsScn, localizationHandler.GetTranslation(CRLANG_ID_SAVE_AS_SCN_BTN, "Save as .scn"), btnhPos2, 160, btnSize, 30, 0);
 
 	long int chkSize = 30;
 	long int hSpace = 15;
@@ -190,6 +192,21 @@ bool EditorScenarioInfoPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 		return true;
 	}
 
+	if (sender == this->btnSaveScenarioAsScn) {
+		std::string resultFilename = this->SaveScenarioAsScn();
+		if (!resultFilename.empty()) {
+			resultFilename = std::string("Saved scenario as ") + resultFilename;
+			SimpleEditTextPopup *nextPopup = new SimpleEditTextPopup(localizationHandler.GetTranslation(CRLANG_ID_SAVE_AS_SCN_BTN, "Save as .scn"),
+				resultFilename.c_str(),
+				resultFilename.length(), NULL, true, false);
+			nextPopup->SetCenteredForSize(460, 120);
+			nextPopup->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::GreyDarkGreenTheme);
+
+			this->OpenOtherScreenAndCloseThisOne(nextPopup, false);
+		}
+		return true;
+	}
+
 	if (sender == this->chkAllowUnitOverlapping) {
 		ROCKNROR::crInfo.configInfo.editor_allowUnitOverlapping = this->chkAllowUnitOverlapping->IsChecked();
 		doCloseCustomPopup = false;
@@ -277,6 +294,49 @@ std::string EditorScenarioInfoPopup::ExtractMapBmpFile() {
 	}
 	traceMessageHandler.WriteMessageNoNotification("An error occurred while trying to save bitmap information.");
 	return "";
+}
+
+
+// Save current scenario as a .scn file (removes non-AOE compatible units)
+// Returns a non-empty string if successful (=filename)
+std::string EditorScenarioInfoPopup::SaveScenarioAsScn() {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) {
+		return "";
+	}
+	AOE_STRUCTURES::STRUCT_SCENARIO_INFO *scInfo = global->scenarioInformation;
+	if (!scInfo || !scInfo->IsCheckSumValid()) {
+		return "";
+	}
+	char *filename = scInfo->scenarioFileName; // includes extension, but no path
+	if (filename[0] == 0) {
+		filename = "rocknror_default.scn";
+	}
+	std::string workFilename = std::string(filename);
+	std::string ext = extractFileExtension(workFilename);
+	if (ext == "scx") {
+		workFilename = workFilename.substr(0, workFilename.length() - 1) + std::string("n");
+	} else if (ext != "scn") {
+		workFilename = workFilename + std::string(".scn");
+	}
+
+	// Clean units (only keep vanilla AOE ones)
+	AOE_METHODS::DeleteAllNonVanillaAoeUnits();
+
+	// Important: update scenario filename in scenario info object
+	if (scInfo->scenarioFileName) {
+		AOEFree(scInfo->scenarioFileName);
+	}
+	int finalLength = workFilename.length();
+	scInfo->scenarioFileName = (char *)AOEAlloc(finalLength + 1);
+	strcpy_s(scInfo->scenarioFileName, finalLength + 1, workFilename.c_str());
+
+	// Actually save the scenario
+	if (!AOE_METHODS::SaveScenario(workFilename.c_str())) {
+		return "";
+	}
+
+	return workFilename;
 }
 
 

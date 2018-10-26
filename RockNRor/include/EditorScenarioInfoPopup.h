@@ -39,6 +39,10 @@ public:
 	// Returns output filename if successful (empty otherwise)
 	std::string ExtractMapBmpFile();
 
+	// Save current scenario as a .scn file (removes non-AOE compatible units)
+	// Returns a non-empty string if successful (=filename)
+	std::string SaveScenarioAsScn();
+
 protected:
 	// Reset various pointers for this class level (to override)
 	void ResetClassPointers() override;
@@ -56,6 +60,7 @@ private:
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnTerrainEdit;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnVictoryCondition;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnExtractMapBmp;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnSaveScenarioAsScn;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAllowUnitOverlapping;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkDisableHillModeCheck;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkDisableTerrainRestrictions;

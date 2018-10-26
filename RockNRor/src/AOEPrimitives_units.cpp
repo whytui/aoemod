@@ -615,6 +615,22 @@ void UnitTransform(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, AOE_STRUCTURES::STRUC
 }
 
 
+// Delete a unit (destroys the object, removes references...)
+// This is a brutal deletion (not using async commands...), better use this in scenario editor only
+void CallUnitDestructor(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, boolean doFree) {
+	if (!unit || !unit->IsCheckSumValidForAUnitClass()) {
+		return;
+	}
+	long int doFreeArg = doFree ? 1 : 0;
+	_asm {
+		MOV ECX, unit;
+		MOV EDX, [ECX];
+		PUSH doFreeArg;
+		CALL [EDX];
+	}
+}
+
+
 }
 }
 

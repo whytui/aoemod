@@ -418,4 +418,23 @@ AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES GetDiplomacyValueForUnit(AOE_STRUCTU
 }
 
 
+// Delete all units whose "definition ID" is not a vanilla-AOE one.
+// To be used in scenario editor
+bool DeleteAllNonVanillaAoeUnits() {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) {
+		return false;
+	}
+	for (int i = 0; i < global->seqUnitId; i++) {
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = global->GetUnitFromId(i);
+		if (unit && unit->IsCheckSumValidForAUnitClass() && unit->unitDefinition) {
+			if (!AOE_CONST_FUNC::IsVanillaAoeUnit(unit->unitDefinition->DAT_ID1)) {
+				AOE_METHODS::UNIT::CallUnitDestructor(unit, true);
+			}
+		}
+	}
+	return true;
+}
+
+
 }

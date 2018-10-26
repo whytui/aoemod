@@ -158,5 +158,9 @@ AOE_STRUCTURES::STRUCT_UNIT_COMMAND_DEF *GetUnitDefCommandForTarget(AOE_STRUCTUR
 // Typically for villagers (task switching)
 void UnitTransform(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *newUnitDef);
 
+// Delete a unit (destroys the object, removes references...)
+// This is a brutal deletion (not using async commands...), better use this in scenario editor only
+void CallUnitDestructor(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, boolean doFree);
+
 }
 }

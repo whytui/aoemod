@@ -151,6 +151,26 @@ bool AutoSaveCurrentGame() {
 }
 
 
+
+// Save current scenario into a scn or scx scenario file. filenameNoPath is filename with extension, without path.
+// Returns true if successful
+// If you call this from in-game, you won't have a crash, but the scenario file will be corrupted and opening it may crash.
+bool SaveScenario(const char *filenameNoPath) {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return false; }
+	//assert(global->gameRunStatus == 2); // not ingame
+	char res = 0;
+	_asm {
+		MOV ECX, global;
+		MOV EDX, [ECX];
+		PUSH filenameNoPath;
+		CALL[EDX + 0xE4];
+		MOV res, AL;
+	}
+	return (res != 0);
+}
+
+
 // Get a string representing game time in a human readable format
 std::string GetHumanTimeFromGameTime(unsigned long int gameTimeValue, bool withMilliSeconds) {
 	std::string result = "";

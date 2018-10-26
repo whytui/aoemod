@@ -97,10 +97,14 @@ namespace AOE_STRUCTURES {
 	// +0x70 = void RGE_Game_World::scenario_make_map(int) => global.readMapInfo(internalFileId) ? (only terrain ?)
 	// +0x74 = unsigned char RGE_Game_World::load_scenario(struct RGE_Player_Info &)
 	// +0x78 = unsigned char RGE_Game_World::load_scenario(char *,struct RGE_Player_Info &)
-	// +0x7C = void RGE_Game_World::load_scenario1(int,struct RGE_Player_Info &)
-	// +0x80 = void RGE_Game_World::load_scenario2(int,struct RGE_Player_Info &)
-	// +0x84 = void RGE_Game_World::load_scenario3(int,struct RGE_Player_Info &)
-	// +0x98 = global.readScenarioFile?(internalFileId)
+	// +0x7C = global.readScenarioFile_1.01(internalFileId, RGE_Player_Info &)
+	// +0x80 = global.readScenarioFile_1.02(internalFileId, RGE_Player_Info &). 1.03 version uses this (but read something more first)
+	// +0x84 = global.readScenarioFile_1.04(internalFileId, RGE_Player_Info &)
+	// +0x88 = global.readScenarioFile_1.05(internalFileId, RGE_Player_Info &)
+	// +0x8C = global.readScenarioFile_1.06(internalFileId, RGE_Player_Info &)
+	// +0x90 = global.readScenarioFile_1.07(internalFileId, RGE_Player_Info &)
+	// +0x94 = global.readScenarioFile_1.08(internalFileId, RGE_Player_Info &)
+	// +0x98 = global.readScenarioFile_1.09_1.12(internalFileId, RGE_Player_Info &) Actually even .scn use this. Note: empires.exe knows up to 1.11. ROR writes 1.11 !
 	// +0xA0 = destructor(do_free).
 	// +0xA4, 0xA8 = set player colors?
 	// +0xAC = global.quickLoad(empiresDatRelativePath, tr_wrld.txt) = unsigned char RGE_Game_World::data_load(char *,char *)?
@@ -117,7 +121,7 @@ namespace AOE_STRUCTURES {
 	// +0xD8 = global.saveGameToFile(filename_nopath)
 	// +0xDC = void RGE_Game_World::base_save(char *)
 	// +0xE0 = void TRIBE_World::base_save(int)
-	// +0xE4 = global.saveScenario(filename)
+	// +0xE4 = bool global.saveScenario(filename) ; argument=filename no path, e.g. myscenario.scx. ROR saves in version 1.11.
 	// +0xE8 = RGE_Scenario * RGE_Game_World::get_scenario_info(char *) (returns NULL !)
 	// +0xEC = void RGE_Game_World::pause(unsigned char)
 	// +0xF0 = global.createScenarioInfo?(arg1)
