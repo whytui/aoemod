@@ -502,6 +502,9 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// Patches ROR process (.rdata section) to connect overloaded virtual methods
 	// Don't forget to declare RockNRor entry point methods as "__stdcall"
 	bool InstallVirtualMethodsPatches() {
+#ifndef GAMEVERSION_ROR10c
+		return true; // hooks are not supported in other versions (different offsets)
+#endif
 		if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 			return true;
 		}

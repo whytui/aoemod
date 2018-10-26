@@ -57,7 +57,7 @@ namespace AOE_OFFSETS
 	static const long int *AOE_CURRENT_OFFSET_IN_FILE_DESERIALIZATION = (long int *)0x7B9798; // Pointer to the variable that contains offset of current position in file
 	static const unsigned long int *AOE_AITYPE_INTERACTION_MASK = (unsigned long int *)0; // TODO
 	static const unsigned long int AOE_VAR_CURSORS_INFO = 0; // Pointer to structure about cursors
-	static const unsigned long int *AOE_LNK_TIMEGETTIME = 0;
+	static const unsigned long int *AOE_LNK_TIMEGETTIME = (unsigned long int *)0x53B3BC;
 	static const unsigned long int **ADDR_VAR_REGISTRY_OBJECT_DEFAULT_REG_PATH = (const unsigned long int **)0; // Contains a TRegistry object pointer.
 	static const unsigned long int **ADDR_VAR_TCHAT_OBJECT = (const unsigned long int **)0;
 	static unsigned long int *AOE_VAR_F5_DEBUG_INFO_TYPE = (unsigned long int *)0; // Variable =0/1 indicating current type of "F5 debug info".
