@@ -107,6 +107,9 @@ public:
 	// Initialization that only takes place once, at executable startup.
 	void OneShotInit();
 
+	// Returns true if game version matches this DLL's version (eg AOE 1.0b or ROR 1.0c...)
+	bool CheckGameVersion();
+
 	// Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 	void ReadIfCustomSelectedUnitsMemoryZoneIsUsed();
 	// Reads game executable to determine if player struct is extended to use custom memory zone to host selected units

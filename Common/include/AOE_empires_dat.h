@@ -862,6 +862,7 @@ namespace AOE_CONST_FUNC {
 
 
 	// Returns true if unit def ID is a "Vanilla AOE" unit (not added by ROR or other extensions/mods)
+	// This is a HARDCODED list !
 	static bool IsVanillaAoeUnit(short int unitDefId) {
 		if ((unitDefId < 0) || (unitDefId > 373)) {
 			// 373 is the last unitDefId in standard "AOE" empires.dat

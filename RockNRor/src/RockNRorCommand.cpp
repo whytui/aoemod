@@ -266,6 +266,15 @@ void RockNRorCommand::OneShotInit() {
 }
 
 
+// Returns true if game version matches this DLL's version (eg AOE 1.0b or ROR 1.0c...)
+bool RockNRorCommand::CheckGameVersion() {
+	// If wrong game version, binary sequence won't match, IsBinaryChangeOn returns false in this case.
+	// Remark: do not use "ROR_API_VarDataUpdate" for this test because it's in data memory section and may change in run-time.
+	// "ROR_API_DLL_initialization" is safer because in text memory (not supposed to change at all).
+	return IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "ROR_API_DLL_initialization");
+}
+
+
 // Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 void RockNRorCommand::ReadIfCustomSelectedUnitsMemoryZoneIsUsed() {
 	// TO DO: check all sequences ?

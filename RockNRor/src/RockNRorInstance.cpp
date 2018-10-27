@@ -8,10 +8,19 @@
 
 namespace ROCKNROR {
 
-RockNRorInstance::RockNRorInstance() {}
+RockNRorInstance::RockNRorInstance() {
+	this->gameVersionChecked = false;
+}
 
 
 void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
+	if (!this->gameVersionChecked) {
+		this->gameVersionChecked = true;
+		if (!ROCKNROR::crCommand.CheckGameVersion()) {
+			MessageBoxA(0, "Warning: game version does not match " MOD_NAME " version (" GAMEVERSION_TEXT 
+				"). The game will be highly unstable.", "ROR API", MB_ICONWARNING);
+		}
+	}
 #ifdef _DEBUG
 	assert(REG_values != NULL);
 	long int thisStartTime = AOE_METHODS::TimeGetTime();

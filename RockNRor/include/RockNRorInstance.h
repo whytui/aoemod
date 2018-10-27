@@ -200,6 +200,9 @@ namespace ROCKNROR {
 		void ScenarioEditorChangeSelectedTerrain(REG_BACKUP *REG_values);
 		void OnComboboxTransferCaptureToPreviousObject(REG_BACKUP *REG_values);
 		void DialogPanelDestructor(REG_BACKUP *REG_values);
+
+	private:
+		bool gameVersionChecked; // True if game version has been checked (matches this DLL's target version)
 	};
 
 	// Main object
