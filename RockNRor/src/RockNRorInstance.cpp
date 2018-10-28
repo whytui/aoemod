@@ -4709,7 +4709,7 @@ void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
 	unsigned long int returnAdressForceFormation = 0x42A97B;
 	unsigned long int returnAdressSingleDestinationMode = 0x42AB97;
 	unsigned long int returnAdressDisableRORTreatments = 0x42ACC4;
-	const float deltaYComparisonValue = 8.;
+	const float deltaComparisonValue = 8.;
 
 	long int unitCount = REG_values->EDI_val;
 	AOE_STRUCTURES::COMMAND_MOVE *cmdMove = (AOE_STRUCTURES::COMMAND_MOVE*)REG_values->EBX_val;
@@ -4725,7 +4725,8 @@ void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
 	// Default behavior (set useFormationMove according to "deltaY" value)
 
 	bool disableRORTreatments = false;
-	bool useFormationMove = (maxPosY - minPosY) < deltaYComparisonValue; // Don't know if it's < or <=
+	bool useFormationMove = (maxPosY - minPosY) < deltaComparisonValue; // Don't know if it's < or <=
+	useFormationMove &= (maxPosX - minPosX) < deltaComparisonValue;
 
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
@@ -4743,8 +4744,15 @@ void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
 	if (cmdMove == NULL) { return; }
 
 	ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE formationType = ROCKNROR::crInfo.configInfo.currentRightClickMoveFormation;
-	unsigned char customFlag = cmdMove->unknown_10;
-	if (customFlag == 1) {
+	ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE formationModifier = ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_UNKNOWN;
+	if (cmdMove->unknown_10 == 1) {
+		// CTRL key was pressed, use the modifier
+		formationModifier = ROCKNROR::crInfo.configInfo.currentCtrlRightClickMoveFormation;
+	}
+	if (formationModifier == ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_SINGLE_DESTINATION) {
+		formationType = ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_SINGLE_DESTINATION;
+	}
+	if (formationModifier == ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_FORMATION) {
 		formationType = ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_FORMATION;
 	}
 
@@ -4772,6 +4780,10 @@ void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
 		break;
 	default:
 		break;
+	}
+
+	if (formationModifier == ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_CTRL_INVERTS_FORMATION) {
+		useFormationMove = !useFormationMove;
 	}
 
 	// DO NOT MODIFY BELOW - set return value according to our flags

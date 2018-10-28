@@ -35,13 +35,17 @@
 	<improvedButtonBar enable="1"/>
 	<!-- allowMultiQueue: Bool 0/1 to allow queueing different units in buildings -->
 	<allowMultiQueue enable="1"/>
-	
+
 	<!-- Configuration for movement (right-click) and use of formations.
 	type can be "standard" (game default, tries to use formation for close units),
 	... "single_dest" = do not use formations (all units go to the same exact destination)
 	... "use_formation" = always use formations (units keep their relative positions)
-	... "improved" = a RockNRor-improved version of "standard" mode. If clicking away from (military) units that are close, use formation, otherwise, single destination.-->
-	<unitMovementFormations type="standard"/>
+	... "improved" = a RockNRor-improved version of "standard" mode. If clicking away from (military) units that are close, use formation, otherwise, single destination.
+	ctrl is the behavior to apply when you press CTRL key while right-clicking on a destination.
+	"ctrl" attribute value can be "single_dest", "use_formation",
+	... or "ctrl_inverts" (in this case, CTRL will use the opposite formation type of a "normal" right-click)
+	-->
+	<unitMovementFormations type="standard" ctrl="ctrl_inverts"/>
 
 	<!-- pauseBehaviour : allowInput=bool 0/1 to enable input while game is pause.
 	allowScrolling=0/1  to enable view scrolling with mouse position while in game pause -->

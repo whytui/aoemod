@@ -51,7 +51,9 @@ enum RIGHTCLICK_FORMATION_TYPE {
 	// Units will keep their relative positions
 	RCT_FORMATION,
 	// Improved automatic mode (RockNRor). Automatically detect when formation should be used (close military units, far destination)
-	RCT_ROCKNROR_IMPROVED
+	RCT_ROCKNROR_IMPROVED,
+	// To be used in "CTRL" configuration only: indicates that CTRL key produces the opposite behavior of "normal" click
+	RCT_CTRL_INVERTS_FORMATION
 };
 
 
@@ -232,6 +234,7 @@ public:
 	bool useF5LabelZoneForCustomDebugInfo; // If true, resource info bar can be replaced by debug text.
 	bool assassinMode; // If true, player can kill any unit with DEL key (not for MP games). Enabled via a cheat code only
 	RIGHTCLICK_FORMATION_TYPE currentRightClickMoveFormation;
+	RIGHTCLICK_FORMATION_TYPE currentCtrlRightClickMoveFormation;
 
 	// Methods
 	// Read RockNRor main configuration XML file

@@ -136,6 +136,7 @@ RockNRorConfig::RockNRorConfig() {
 #endif
 	this->assassinMode = false; // Game default
 	this->currentRightClickMoveFormation = CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_STANDARD; // Game default
+	this->currentCtrlRightClickMoveFormation = CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_CTRL_INVERTS_FORMATION; //RnR default
 }
 
 
@@ -247,6 +248,9 @@ RIGHTCLICK_FORMATION_TYPE RockNRorConfig::ReadRightClickFormationType(const char
 	if (strncmp("improved", value, 20) == 0) {
 		return RIGHTCLICK_FORMATION_TYPE::RCT_ROCKNROR_IMPROVED;
 	}
+	if (strncmp("ctrl_inverts", value, 20) == 0) {
+		return RIGHTCLICK_FORMATION_TYPE::RCT_CTRL_INVERTS_FORMATION;
+	}
 	return RIGHTCLICK_FORMATION_TYPE::RCT_UNKNOWN;
 }
 
@@ -260,6 +264,8 @@ const char *RockNRorConfig::GetFormationTypeText(RIGHTCLICK_FORMATION_TYPE t) {
 		return "use_formation";
 	case ROCKNROR::CONFIG::RCT_ROCKNROR_IMPROVED:
 		return "improved";
+	case ROCKNROR::CONFIG::RCT_CTRL_INVERTS_FORMATION:
+		return "ctrl_inverts";
 	default:
 		return "unknown";
 	}
@@ -375,8 +381,16 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		if (elemName == "unitMovementFormations") {
 			const char *typeValue = this->XML_GetAttributeValue(elem, "type");
 			RIGHTCLICK_FORMATION_TYPE v = RockNRorConfig::ReadRightClickFormationType(typeValue);
-			if (v != RIGHTCLICK_FORMATION_TYPE::RCT_UNKNOWN) {
+			if ((v != RIGHTCLICK_FORMATION_TYPE::RCT_UNKNOWN) && (v != RIGHTCLICK_FORMATION_TYPE::RCT_CTRL_INVERTS_FORMATION)) {
 				this->currentRightClickMoveFormation = v;
+			}
+			const char *ctrlValue = this->XML_GetAttributeValue(elem, "ctrl");
+			RIGHTCLICK_FORMATION_TYPE v2 = RockNRorConfig::ReadRightClickFormationType(ctrlValue);
+			// Only 3 values authorized for "CTRL" key behavior
+			if ((v2 == RIGHTCLICK_FORMATION_TYPE::RCT_CTRL_INVERTS_FORMATION) ||
+				(v2 == RIGHTCLICK_FORMATION_TYPE::RCT_FORMATION) ||
+				(v2 == RIGHTCLICK_FORMATION_TYPE::RCT_SINGLE_DESTINATION)) {
+				this->currentCtrlRightClickMoveFormation = v2;
 			}
 		}
 		if (elemName == "pauseBehaviour") {
