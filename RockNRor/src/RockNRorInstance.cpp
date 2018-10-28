@@ -4673,10 +4673,12 @@ void RockNRorInstance::IsGamePaused(REG_BACKUP *REG_values) {
 // From 0x42A959 (cmdInfo.executeCommand_type3(pCmd) move)
 // This overloads the test on "deltaY > 8" that decides to use formation move, or basic move
 // This procedure MAY change return address:
+// Change return address to 0x42AB97 to use 'forced' formation mode (units keep relative positions)
 // Change return address to 0x42AB97 to use single destination mode (all units will go to exact same destination)
 // Change return address to 0x42ACC4 to exit ROR procedure with no action (disable ROR treatments)
 // Continue to use formation move (units will keep their relative positions)
 void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
+	unsigned long int returnAdressForceFormation = 0x42A97B;
 	unsigned long int returnAdressSingleDestinationMode = 0x42AB97;
 	unsigned long int returnAdressDisableRORTreatments = 0x42ACC4;
 	const float deltaYComparisonValue = 8.;
@@ -4712,16 +4714,11 @@ void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
 	// Custom code. To use "standard" behavior, you can just return.
 	if (cmdMove == NULL) { return; }
 
-#pragma TODO("Finish Movement formation interface")
-	// TEMPORARY (quick testing version) - TO FINISH
-	enum choice { standard, clever, singleDestination, formation };
-	static choice c = choice::clever;
-
-	switch (c) {
-	case standard:
+	switch (ROCKNROR::crInfo.configInfo.currentRightClickMoveFormation) {
+	case ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_STANDARD:
 		// Do nothing more, choice was calculated before with standard check
 		break;
-	case clever:
+	case ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_ROCKNROR_IMPROVED:
 		{
 		// Click inside the "box" drawn by selected units = "regroup" = single target. Otherwise, use formation
 			float x = cmdMove->posX;
@@ -4733,10 +4730,10 @@ void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
 			}
 		}
 		break;
-	case singleDestination:
+	case ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_SINGLE_DESTINATION:
 		useFormationMove = false;
 		break;
-	case formation:
+	case ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_FORMATION:
 		useFormationMove = true;
 		break;
 	default:
@@ -4750,6 +4747,8 @@ void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
 	}
 	if (!useFormationMove) {
 		ChangeReturnAddress(REG_values, returnAdressSingleDestinationMode);
+	} else {
+		ChangeReturnAddress(REG_values, returnAdressForceFormation);
 	}
 }
 

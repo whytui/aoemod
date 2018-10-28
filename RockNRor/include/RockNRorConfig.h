@@ -40,6 +40,20 @@ enum INGAME_DEBUG_LEVEL {
 	IDL_COUNT
 };
 
+// The type of unit formation to use for "right-click" movement actions
+enum RIGHTCLICK_FORMATION_TYPE {
+	// For configuration, to detect unsupported values. Do not use as configuration value.
+	RCT_UNKNOWN,
+	// Game default : if units are close enough, they should keep formation, if not, fallback into single destination mode
+	RCT_STANDARD,
+	// All units are assigned the exact same destination and will concentrate in the same place
+	RCT_SINGLE_DESTINATION,
+	// Units will keep their relative positions
+	RCT_FORMATION,
+	// Improved automatic mode (RockNRor). Automatically detect when formation should be used (close military units, far destination)
+	RCT_ROCKNROR_IMPROVED
+};
+
 
 class UnitSpawnShortcutInfo {
 public:
@@ -217,6 +231,7 @@ public:
 	bool enableInGameDisplayDebugInfo; // If true, allows more "F5 debug levels" in game screen.
 	bool useF5LabelZoneForCustomDebugInfo; // If true, resource info bar can be replaced by debug text.
 	bool assassinMode; // If true, player can kill any unit with DEL key (not for MP games). Enabled via a cheat code only
+	RIGHTCLICK_FORMATION_TYPE currentRightClickMoveFormation;
 
 	// Methods
 	// Read RockNRor main configuration XML file
@@ -233,6 +248,11 @@ public:
 	ROCKNROR::ConfigGameType XML_ReadGameTypeAttribute(TiXmlElement *elem);
 
 	void SetAutoAttackPolicyFromAttributes(AutoAttackPolicy *aap, TiXmlElement *elem);
+
+	// Read a RIGHTCLICK_FORMATION_TYPE value from a text
+	static RIGHTCLICK_FORMATION_TYPE ReadRightClickFormationType(const char *value);
+	static const char *GetFormationTypeText(RIGHTCLICK_FORMATION_TYPE t);
+
 	// Read civilizations info XML file
 	bool ReadCivXMLConfigFile(char *fileName);
 	CivilizationInfo *GetCivInfo(int civId);

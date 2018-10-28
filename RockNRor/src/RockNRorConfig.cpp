@@ -135,6 +135,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->useF5LabelZoneForCustomDebugInfo = true;
 #endif
 	this->assassinMode = false; // Game default
+	this->currentRightClickMoveFormation = CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_STANDARD; // Game default
 }
 
 
@@ -228,6 +229,41 @@ void RockNRorConfig::SetAutoAttackPolicyFromAttributes(AutoAttackPolicy *aap, Ti
 	aap->attackWalls = (this->XML_GetBoolElement(elem, "walls"));
 }
 
+
+// Read a RIGHTCLICK_FORMATION_TYPE value from a text
+RIGHTCLICK_FORMATION_TYPE RockNRorConfig::ReadRightClickFormationType(const char *value) {
+	if (value == NULL) {
+		return RIGHTCLICK_FORMATION_TYPE::RCT_UNKNOWN;
+	}
+	if (strncmp("standard", value, 20) == 0) {
+		return RIGHTCLICK_FORMATION_TYPE::RCT_STANDARD;
+	}
+	if (strncmp("single_dest", value, 20) == 0) {
+		return RIGHTCLICK_FORMATION_TYPE::RCT_SINGLE_DESTINATION;
+	}
+	if (strncmp("use_formation", value, 20) == 0) {
+		return RIGHTCLICK_FORMATION_TYPE::RCT_FORMATION;
+	}
+	if (strncmp("improved", value, 20) == 0) {
+		return RIGHTCLICK_FORMATION_TYPE::RCT_ROCKNROR_IMPROVED;
+	}
+	return RIGHTCLICK_FORMATION_TYPE::RCT_UNKNOWN;
+}
+
+const char *RockNRorConfig::GetFormationTypeText(RIGHTCLICK_FORMATION_TYPE t) {
+	switch (t) {
+	case ROCKNROR::CONFIG::RCT_STANDARD:
+		return "standard";
+	case ROCKNROR::CONFIG::RCT_SINGLE_DESTINATION:
+		return "single_dest";
+	case ROCKNROR::CONFIG::RCT_FORMATION:
+		return "use_formation";
+	case ROCKNROR::CONFIG::RCT_ROCKNROR_IMPROVED:
+		return "improved";
+	default:
+		return "unknown";
+	}
+}
 
 
 // Get setup from XML file to this object variables.
@@ -335,6 +371,13 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		if (elemName == "showRockNRorNotifications") {
 			this->showRockNRorNotifications = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "unitMovementFormations") {
+			const char *typeValue = this->XML_GetAttributeValue(elem, "type");
+			RIGHTCLICK_FORMATION_TYPE v = RockNRorConfig::ReadRightClickFormationType(typeValue);
+			if (v != RIGHTCLICK_FORMATION_TYPE::RCT_UNKNOWN) {
+				this->currentRightClickMoveFormation = v;
+			}
 		}
 		if (elemName == "pauseBehaviour") {
 			this->enableInputInPause = XML_GetBoolElement(elem, "allowInput");
