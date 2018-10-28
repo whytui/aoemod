@@ -44,7 +44,7 @@ bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float pos
 	return CreateCmd_RightClick(&unit, 1, targetUnitId, posX, posY);
 }
 
-// Create a "ROR" command struct (right-click). Returns false if failed.
+// Create a "ROR" command struct (right-click/0). Returns false if failed.
 // MP support is unfinished !
 // Note: there might be "non-commandable" units in the array, it's not a problem.
 // The game will check if the command makes sense individually for each unit
@@ -73,6 +73,7 @@ bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_BASE **actorUnitsList, lon
 	cmd->posY = posY;
 	cmd->humanPlayerId = 0; // See below, overwritten if MP game.
 	cmd->targetVisibleInFog = 0; // default
+	*(short int *)(&cmd->unused_02)= 0; // Clear the 2 unused bytes
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(targetUnitId);
 	if (targetUnit && targetUnit->IsCheckSumValidForAUnitClass()) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *targetDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BASE *) targetUnit->unitDefinition;
@@ -96,7 +97,7 @@ bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_BASE **actorUnitsList, lon
 }
 
 
-// Create a "ROR" command struct (stop). Returns false if failed.
+// Create a "ROR" command struct (stop/1). Returns false if failed.
 bool CreateCmd_Stop(long int actorUnitId) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(actorUnitId);
 	if (!unit || !unit->IsCheckSumValidForAUnitClass() || !unit->ptrStructPlayer || !unit->ptrStructPlayer->IsCheckSumValid()) {
@@ -111,8 +112,45 @@ bool CreateCmd_Stop(long int actorUnitId) {
 	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
 }
 
+// Create a "ROR" command struct (move/3). Returns false if failed.
+// Note: there might be "non-commandable" units in the array, it's not a problem.
+// The game will check if the command makes sense individually for each unit
+bool CreateCmd_Move(AOE_STRUCTURES::STRUCT_UNIT_BASE **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, float posX, float posY, unsigned char customFlag) {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) {
+		return false;
+	}
+	assert(actorUnitsCount > 0);
+	if (actorUnitsCount <= 0) { return false; }
+	const long int structSize = 0x1C + (4 * actorUnitsCount);
+	AOE_STRUCTURES::COMMAND_MOVE *cmd = (AOE_STRUCTURES::COMMAND_MOVE *)AOEAllocZeroMemory(1, structSize);
+	cmd->cmdId = AOE_CONST_INTERNAL::INTERNAL_COMMAND_ID::CST_ICI_MOVE;
+	assert(cmd->IsCmdIdValid());
+	cmd->actorCount = (char)actorUnitsCount;
+	for (int i = 0; i < actorUnitsCount; i++) {
+		if (actorUnitsList[i]) {
+			cmd->actorIdList[i] = actorUnitsList[i]->unitInstanceId;
+		} else {
+			cmd->actorIdList[i] = -1;
+		}
+	}
+	if (targetUnit == NULL) {
+		cmd->targetUnitId = -1;
+	} else {
+		cmd->targetUnitId = targetUnit->unitInstanceId;
+	}
+	cmd->posX = posX;
+	cmd->posY = posY;
+	*(short int *)(&cmd->unused_02) = 0; // Clear the 2 unused bytes
+	cmd->unknown_10 = customFlag;
 
-// Create a "ROR" command struct (build). Returns false if failed.
+	// Our command is ready. Call API to add it in queue.
+	return AOE_METHODS::AddCommandToGameCmdQueue(cmd, structSize);
+}
+
+
+// Create a "ROR" command struct (build/0x66). Returns false if failed.
 // The building is created at construction step (status=0, HP=1)
 // ONLY for building (type 80)
 bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY) {

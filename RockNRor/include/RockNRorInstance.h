@@ -11,6 +11,7 @@
 #include <customResolution.h>
 #include <AOE_empires_dat.h>
 #include <AOE_struct_game_settings.h>
+#include <AOE_struct_player.h>
 #include <UI\AOE_struct_ui_in_game_options.h>
 
 #include <Windows.h> // for messagebox
@@ -203,6 +204,10 @@ namespace ROCKNROR {
 
 	private:
 		bool gameVersionChecked; // True if game version has been checked (matches this DLL's target version)
+		long int lastRightClickEventMouseX;
+		long int lastRightClickEventMouseY;
+		bool lastRightClickEventCTRL;
+		bool lastRightClickEventSHIFT;
 	};
 
 	// Main object

@@ -442,9 +442,9 @@ bool RockNRorMainInterface::ScenarioEditor_callMyGenerateMapIfRelevant() {
 
 
 // Manage right button release action on selected units for given player
-// Returns true if ROR code should be skipped -----WRONG if a red cross sign should be displayed (a relevant action occurred)
+// Returns true if ROR code should be skipped
 bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameZone,
-	AOE_STRUCTURES::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY) {
+	AOE_STRUCTURES::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY, bool CTRL, bool SHIFT) {
 	if (!UIGameZone || !UIGameZone->IsCheckSumValid()) { return false; }
 	assert(UIGameZone != NULL);
 	AOE_STRUCTURES::STRUCT_PLAYER *controlledPlayer = UIGameZone->controlledPlayer;
@@ -461,8 +461,9 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(controlledPlayer);
 
 	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO posInfos;
-	AOE_METHODS::GetGameInfoUnderMouse(4, mousePosX, mousePosY, &posInfos);
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = AOE_METHODS::GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false);
+	bool posInfoResult = AOE_METHODS::GetGameInfoUnderMouse(0, mousePosX, mousePosY, &posInfos);
+	//AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = AOE_METHODS::GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_LIVING_UNITS, false); // use the call below like in original code
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit = AOE_METHODS::GetBestTargetUnitAtMousePosition(mousePosX, mousePosY, NULL, (AOE_CONST_FUNC::UNIT_ACTION_ID) (-1));
 
 	// First loop to collect info on selected units. Not really necessary at this point.
 	bool hasSelectedBuildings = false;
@@ -508,8 +509,7 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 		if (!letRorCodeHandleThis && 
 			((targetUnit->unitDefinition->DAT_ID1 == mainSelectedUnitDef->dropSite1) ||
 			(targetUnit->unitDefinition->DAT_ID1 == mainSelectedUnitDef->dropSite2))) {
-			if (GAME_COMMANDS::CreateCmd_RightClick(selectedUnits, unitCount, 
-				targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY)) {
+			if (AOE_METHODS::PLAYER::CreateCommandMoveForSelectedUnits(player, targetUnit, targetUnit->positionX, targetUnit->positionY)) {
 				AOE_METHODS::UI_BASE::DisplayGreenBlinkingOnUnit(UIGameZone, targetUnit->unitInstanceId, 1000);
 				skipRORTreatments = true;
 			}
@@ -517,7 +517,10 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 	}
 
 	// TODO : move this
-	if (ROCKNROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation) {
+	// Handle auto-move for building's trained units
+	if (ROCKNROR::crInfo.configInfo.enableSpawnUnitsMoveToLocation &&
+		!hasSelectedLivings // Do not apply auto-move when both livings and buildings are selected (building selection is probably unintentional)
+		) {
 		for (long int index = 0; index < unitCount; index++) {
 			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = selectedUnits[index];
 			// Make sure unit is valid, from MY player
@@ -526,7 +529,6 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 					AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = unit->unitDefinition;
 					assert(unitDef != NULL);
 					if (unitDef && (unitDef->unitType == GUT_BUILDING) && (unit->unitStatus == 2) &&
-						(!hasSelectedLivings) && // Do not apply auto-move when both livings and buildings are selected (building selection is probably unintentional)
 						(DoesBuildingTrainUnits(unitDef->DAT_ID1))) {
 						// Our right-click treatments are limited to buildings that can train units (not towers, houses...)
 
@@ -571,11 +573,39 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 			}
 		}
 	}
+
+	// Check if we need to overload "standard movement" order
+	if (CTRL &&
+		posInfoResult && // cf 0x51A5AD
+		hasSelectedLivings && // Only relevant when living units are selected
+		!skipRORTreatments && // IF skipRORTreatments=true, we already overloaded some movement, so ignore this
+		(targetUnit == NULL)) { // For movement only (so NO target unit)
+		if (posInfos.posX < 0) { posInfos.posX = 0; }
+		if (posInfos.posY < 0) { posInfos.posY = 0; }
+		if (player->myMapInfo) {
+			float sizeX = (float)player->myMapInfo->mapSizeX;
+			float sizeY = (float)player->myMapInfo->mapSizeY;
+			if (posInfos.posX >= sizeX) { posInfos.posX = sizeX; }
+			if (posInfos.posY >= sizeY) { posInfos.posY = sizeY; }
+		}
+		if (AOE_METHODS::PLAYER::CreateCommandMoveForSelectedUnits(player, NULL, posInfos.posX, posInfos.posY, 1)) {
+			unsigned long int addrResetDisplayObjectSelection = 0x51B0F0;
+			_asm {
+				MOV ECX, UIGameZone;
+				PUSH 2;
+				CALL addrResetDisplayObjectSelection;
+			}
+			showRedCrossSign = true;
+			skipRORTreatments = true;
+		}
+	}
+
+	// End: handle "red cross" sign display, if desired.
 	if (showRedCrossSign) {
 		long int mx = UIGameZone->unknown_130_mousePosX + mousePosX;
 		long int my = UIGameZone->unknown_134_mousePosY + mousePosY;
 		AOE_STRUCTURES::STRUCT_SLP_INFO *slp = settings->ptrInfosSLP[AOE_CONST_DRS::AoeInGameFlagsIconId::IGF_MOVETO_RED_CROSS];
-		AOE_METHODS::UI_BASE::DisplayInGameSign(UIGameZone, slp, mousePosX, mousePosY, 2);
+		AOE_METHODS::UI_BASE::DisplayInGameSign(UIGameZone, slp, mousePosX, mousePosY, 2); // includes the required refresh on UIGameZone
 	}
 	return skipRORTreatments;
 }

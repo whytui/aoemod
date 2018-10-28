@@ -10,6 +10,10 @@ namespace ROCKNROR {
 
 RockNRorInstance::RockNRorInstance() {
 	this->gameVersionChecked = false;
+	this->lastRightClickEventCTRL = false;
+	this->lastRightClickEventSHIFT = false;
+	this->lastRightClickEventMouseX = -1;
+	this->lastRightClickEventMouseY = -1;
 }
 
 
@@ -1625,6 +1629,15 @@ void RockNRorInstance::GameAndEditor_ManageKeyPress(REG_BACKUP *REG_values) {
 // This is called in-game, when a right-click is performed.
 void RockNRorInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_values) {
 	MOUSE_ACTION_TYPES mouseActionType = (MOUSE_ACTION_TYPES)REG_values->EAX_val;
+	long int mousePosX = GetIntValueFromRORStack(REG_values, 0x28);
+	long int mousePosY = GetIntValueFromRORStack(REG_values, 0x2C);
+	long int CTRL = GetIntValueFromRORStack(REG_values, 0x30);
+	long int SHIFT = GetIntValueFromRORStack(REG_values, 0x34);
+	// Save context information for sub-calls (dirty...)
+	this->lastRightClickEventCTRL = CTRL != 0;
+	this->lastRightClickEventSHIFT = SHIFT != 0;
+	this->lastRightClickEventMouseX = mousePosX;
+	this->lastRightClickEventMouseY = mousePosY;
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
 	if (mouseActionType != MOUSE_ACTION_TYPES::CST_MAT_NORMAL) {
 		// Mouse action types other than NORMAL (0): use default behaviour.
@@ -1639,8 +1652,6 @@ void RockNRorInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_v
 	}
 
 	// If we choose to handle custom mouse action types here, then ChangeReturnAddress for mouseActionType<0 too (like original code)
-	long int mousePosX = GetIntValueFromRORStack(REG_values, 0x28);
-	long int mousePosY = GetIntValueFromRORStack(REG_values, 0x2C);
 	float posX, posY;
 	GetGamePositionUnderMouse(&posX, &posY);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitUnderMouse = AOE_METHODS::GetUnitAtMousePosition(mousePosX, mousePosY, INTERACTION_MODES::CST_IM_RESOURCES, false);
@@ -1650,6 +1661,7 @@ void RockNRorInstance::OnGameRightClickUpInGameCheckActionType(REG_BACKUP *REG_v
 
 // Plugged on 0x51A508's call
 // Triggered when player releases right click in game screen, for default mouse action type only.
+// Note: OnGameRightClickUpInGameCheckActionType is called just before, in ROR execution.
 void RockNRorInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 	unsigned long int myESP = REG_values->ESP_val;
 	const long int CST_OnGameRightClickUpEvent_IGNORE_CLICK = 0x0051A63D;
@@ -1689,6 +1701,24 @@ void RockNRorInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 		return;
 	}
 
+	long int mousePosX = GetIntValueFromRORStack(REG_values, 0x34);
+	long int mousePosY = GetIntValueFromRORStack(REG_values, 0x38);
+	long int arg3_workOnTile = GetIntValueFromRORStack(REG_values, 0x3C); // is it always 1 ?
+	long int arg4_mouseActionType = GetIntValueFromRORStack(REG_values, 0x40); // is it always -1 ?
+	bool CTRL = false;
+	bool SHIFT = false;
+
+	// Get event info from previous ROR_API call
+	if ((this->lastRightClickEventMouseX == mousePosX) && (this->lastRightClickEventMouseY == mousePosY)) {
+		CTRL = this->lastRightClickEventCTRL;
+		SHIFT = this->lastRightClickEventSHIFT;
+	} else {
+		// This should not happen ! We are supposed to have up-to-date event info thanks to OnGameRightClickUpInGameCheckActionType
+		assert(false && "invalid event data");
+		this->lastRightClickEventMouseX = -1;
+		this->lastRightClickEventMouseY = -1;
+	}
+
 	// Now manage custom treatments
 	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameMain = (AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *) REG_values->ESI_val;
 	if (!UIGameMain || !UIGameMain->IsCheckSumValid()) { return; }
@@ -1700,10 +1730,8 @@ void RockNRorInstance::OnGameRightClickUpEvent(REG_BACKUP *REG_values) {
 		return;
 	}
 
-
-	long int mousePosX = *(long int *)(myESP + 0x34);
-	long int mousePosY = *(long int *)(myESP + 0x38);
-	if (ROCKNROR::crMainInterface.ApplyRightClickReleaseOnSelectedUnits(UIGameMain, controlledPlayer, mousePosX, mousePosY)) {
+	AOE_CONST_FUNC::UNIT_ACTION_ID mouseActionType = (AOE_CONST_FUNC::UNIT_ACTION_ID)arg4_mouseActionType;
+	if (ROCKNROR::crMainInterface.ApplyRightClickReleaseOnSelectedUnits(UIGameMain, controlledPlayer, mousePosX, mousePosY, CTRL, SHIFT)) {
 		REG_values->EAX_val = CST_OnGameRightClickUpEvent_IGNORE_CLICK; // Force to ignore click in ROR code
 	}
 }
@@ -4714,7 +4742,13 @@ void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
 	// Custom code. To use "standard" behavior, you can just return.
 	if (cmdMove == NULL) { return; }
 
-	switch (ROCKNROR::crInfo.configInfo.currentRightClickMoveFormation) {
+	ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE formationType = ROCKNROR::crInfo.configInfo.currentRightClickMoveFormation;
+	unsigned char customFlag = cmdMove->unknown_10;
+	if (customFlag == 1) {
+		formationType = ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_FORMATION;
+	}
+
+	switch (formationType) {
 	case ROCKNROR::CONFIG::RIGHTCLICK_FORMATION_TYPE::RCT_STANDARD:
 		// Do nothing more, choice was calculated before with standard check
 		break;

@@ -296,6 +296,74 @@ void GlobalSetNextManagedAIPlayer() {
 }
 
 
+// Calls player.createGenericOrderCommandForSelectedUnits(targetUnit, f_posY, f_posX) (player+0xA0)
+// Will find the matching command depending on target unit (might be NULL), play the command sound, create the "game command".
+bool CreateCommandMoveForSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, float posX, float posY) {
+	if (!player || !player->IsCheckSumValid()) {
+		return false;
+	}
+	char res = 0;
+	_asm {
+		MOV ECX, player;
+		PUSH posX;
+		PUSH posY;
+		PUSH targetUnit;
+		MOV EDX, [ECX];
+		CALL[EDX + 0xA0];
+		MOV res, AL;
+	}
+	return (res != 0);
+}
+
+
+// Analog to player.createGenericOrderCommandForSelectedUnits(targetUnit, f_posY, f_posX) (player+0xA0)
+// Will find the matching command depending on target unit (might be NULL), play the command sound, create the "game command".
+// This overload does manually ROR's treatments, and create a "move" command including custom info
+bool CreateCommandMoveForSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, float posX, float posY, unsigned char customFlag) {
+	if (!player || !player->IsCheckSumValid()) {
+		return false;
+	}
+	const unsigned long int findSelectedUnitsToCommand = 0x45E0C0;
+	unsigned char callRes = 0;
+	long int outputListSize = 0;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **outputUnitsList = NULL;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE ***pOutputUnitsList = &outputUnitsList;
+	long int *pOutputListSize = &outputListSize;
+	_asm {
+		MOV ECX, player;
+		PUSH 0xFFFFFFFF;
+		PUSH 0xFFFFFFFF;
+		PUSH 0xFFFFFFFF;
+		PUSH 0xFFFFFFFF;
+		PUSH pOutputListSize;
+		PUSH pOutputUnitsList;
+		CALL findSelectedUnitsToCommand;
+		MOV callRes, AL;
+	}
+	if (callRes == 0) {
+		return false; // and do not free the list
+	}
+	assert(outputListSize > 0);
+	assert(outputUnitsList != NULL);
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *firstUnit = outputUnitsList[0];
+	assert(firstUnit && firstUnit->IsCheckSumValidForAUnitClass());
+	_asm {
+		MOV ECX, firstUnit;
+		MOV EDX, [ECX];
+		CALL[EDX + 0xB0]; // move command sound
+	}
+
+	// Create game command
+	GAME_COMMANDS::CreateCmd_Move(outputUnitsList, outputListSize, targetUnit, posX, posY, customFlag);
+
+	// Free temp list
+	AOEFree(outputUnitsList);
+
+	return true;
+}
+
+
+
 }
 }
 

@@ -5,6 +5,7 @@
 #include <UI\AOE_struct_ui_diplomacy_dialog.h>
 #include <UI\AOE_struct_ui_scenario_editor_menu.h>
 #include <UI\AOE_struct_ui_mp_setup_screen.h>
+#include <AOE_struct_player.h>
 #include <AOE_struct_unit_actions.h>
 #include <AOE_struct_units.h>
 #include "RockNRorInfo.h"
@@ -46,9 +47,9 @@ public:
 	bool ScenarioEditor_callMyGenerateMapIfRelevant();
 
 	// Manage right button release action on selected units for given player
-	// Returns true if a red cross sign should be displayed (a relevant action occurred)
+	// Returns true if ROR code should be skipped
 	bool ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameZone,
-		AOE_STRUCTURES::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY);
+		AOE_STRUCTURES::STRUCT_PLAYER *player, long int mousePosX, long int mousePosY, bool CTRL, bool SHIFT);
 
 	// Change ROR's window title to add our mod name.
 	bool ChangeWindowTitle();

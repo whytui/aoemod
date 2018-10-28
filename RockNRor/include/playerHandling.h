@@ -78,6 +78,15 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *AOE_MainAI_findUnit(AOE_STRUCTURES::STRUCT_AI 
 
 void GlobalSetNextManagedAIPlayer();
 
+// Calls player.createGenericOrderCommandForSelectedUnits(targetUnit, f_posY, f_posX) (player+0xA0)
+// Will find the matching command depending on target unit (might be NULL), play the command sound, create the "game command".
+bool CreateCommandMoveForSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, float posX, float posY);
+
+// Analog to player.createGenericOrderCommandForSelectedUnits(targetUnit, f_posY, f_posX) (player+0xA0)
+// Will find the matching command depending on target unit (might be NULL), play the command sound, create the "game command".
+// This overload does manually ROR's treatments, and create a "move" command including custom info
+bool CreateCommandMoveForSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, float posX, float posY, unsigned char customFlag);
+
 }
 }
 

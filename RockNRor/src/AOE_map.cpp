@@ -240,7 +240,7 @@ bool GetGameInfoUnderMouse(long int maxInteractionMode, long int mousePosX, long
 }
 
 
-// Get unit at (mouse) position, using AOE methods.
+// Get unit at (mouse) position, using AOE methods (0x5145A0).
 // Warning, this impacts the global variables in 0x7D1CF8
 AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, INTERACTION_MODES maxInteractionMode, bool allowTempUnits) {
 	if ((mousePosX < 0) || (mousePosY < 0)) { return NULL; }
@@ -266,6 +266,31 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitAtMousePosition(long int mousePosX, lon
 	long int *foundUnitId = (long int*)AOE_OFFSETS::AOE_VAR_FOUND_UNIT_ID_UNDER_MOUSE; // 0x7D1CF8 for ROR 1.0c
 	if ((*foundUnitId < 0) && (!i_allowTempUnits)) { return NULL; }
 	return GetUnitStruct(*foundUnitId);
+}
+
+// Get unit at (mouse) position, using AOE methods (0x51AA10).
+// pOutResult is a pointer to an output DWORD (values 0 or 1 ?). NULL is accepted.
+// mouseActionType is used as a 2-bytes value (WORD)
+STRUCT_UNIT_BASE *GetBestTargetUnitAtMousePosition(long int mousePosX, long int mousePosY, long int *pOutResult, AOE_CONST_FUNC::UNIT_ACTION_ID mouseActionType) {
+#ifndef GAMEVERSION_ROR10c
+	return NULL;
+#endif
+	if ((mousePosX < 0) || (mousePosY < 0)) { return NULL; }
+	AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *gameZone = GetGameZone();
+	if (!gameZone || !gameZone->IsCheckSumValid()) { return NULL; }
+	STRUCT_UNIT_BASE *result = NULL;
+	long int mouseActionTypeDword = mouseActionType;
+	_asm {
+		MOV ECX, gameZone;
+		PUSH mouseActionTypeDword; // arg4
+		PUSH pOutResult; // arg3 ; a list 0/1 values to know for each unit if target is "acceptable" for action ?
+		PUSH mousePosY;
+		PUSH mousePosX;
+		MOV EDX, 0x51AA10;
+		CALL EDX;
+		MOV result, EAX;
+	}
+	return result;
 }
 
 

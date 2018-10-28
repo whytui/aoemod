@@ -26,7 +26,7 @@ namespace AOE_METHODS {
 }
 
 namespace GAME_COMMANDS {
-	// Create a "ROR" command struct (right-click). Returns false if failed.
+	// Create a "ROR" command struct (right-click/0). Returns false if failed.
 	bool CreateCmd_RightClick(long int actorUnitId, long int targetUnitId, float posX, float posY);
 	// Create a "ROR" command struct (right-click). Returns false if failed.
 	// MP support is unfinished !
@@ -34,10 +34,15 @@ namespace GAME_COMMANDS {
 	// The game will check if the command makes sense individually for each unit
 	bool CreateCmd_RightClick(AOE_STRUCTURES::STRUCT_UNIT_BASE **actorUnitsList, long int actorUnitsCount, long int targetUnitId, float posX, float posY);
 
-	// Create a "ROR" command struct (stop). Returns false if failed.
+	// Create a "ROR" command struct (stop/1). Returns false if failed.
 	bool CreateCmd_Stop(long int actorUnitId);
 
-	// Create a "ROR" command struct (build). Returns false if failed.
+	// Create a "ROR" command struct (move/3). Returns false if failed.
+	// Note: there might be "non-commandable" units in the array, it's not a problem.
+	// The game will check if the command makes sense individually for each unit
+	bool CreateCmd_Move(AOE_STRUCTURES::STRUCT_UNIT_BASE **actorUnitsList, long int actorUnitsCount, AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUnit, float posX, float posY, unsigned char customFlag);
+
+	// Create a "ROR" command struct (build/0x66). Returns false if failed.
 	// The building is created at construction step (status=0, HP=1)
 	// ONLY for building (type 80)
 	bool CreateCmd_Build(long int actorUnitId, short int DATID, float posX, float posY);

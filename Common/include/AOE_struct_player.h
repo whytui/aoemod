@@ -178,9 +178,9 @@ namespace AOE_STRUCTURES {
 	// +0x88 = player.save_info?
 	// +0x90 = player.setInitialScreenPos???(arg1, arg2, global, arg4, arg5, arg6)
 	// +0x94 = Player.createUnit(DAT_ID, posY, posX, posZ, buildAllTheWay). Used to place initial units (cf objectPlacer), add unit in editor
-	// +0xA0 = player.CreateCmdMoveForSelectedUnits(arg1,posY,posX)
+	// +0xA0 = player.CreateCmdMoveForSelectedUnits(arg1,posY,posX) (eg 0x45E2C0)
 	// +0xA4 = unsigned char RGE_Player::command_make_work(RGE_Static_Object *,float,float)
-	// +0xA8 = player.createGenericOrderCommandForSelectedUnits(targetUnit, f_posY, f_posX)
+	// +0xA8 = player.createGenericOrderCommandForSelectedUnits(targetUnit, f_posY, f_posX). Includes playing the action sound.
 	// +0xAC = player.createCommandStop()
 	// +0xB0 = player.command_place_object(short,float,float,float)
 	// +0xB4 = player.addResourceAsCommand(resourceId, floatValue)

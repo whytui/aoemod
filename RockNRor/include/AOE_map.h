@@ -71,9 +71,14 @@ namespace AOE_METHODS {
 	bool GetGameInfoUnderMouse(long int maxInteractionMode, long int mousePosX, long int mousePosY, AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO *posInfo);
 
 
-	// Get unit at (mouse) position, using AOE methods.
+	// Get unit at (mouse) position, using AOE methods (0x5145A0).
 	// Warning, this impacts the global variables in 0x7D1CF8
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *GetUnitAtMousePosition(long int mousePosX, long int mousePosY, INTERACTION_MODES maxInteractionMode, bool allowTempUnits);
+
+	// Get unit at (mouse) position, using AOE methods (0x51AA10).
+	// pOutResult is a pointer to an output DWORD (values 0 or 1 ?). NULL is accepted.
+	// mouseActionType is used as a 2-bytes value (WORD)
+	STRUCT_UNIT_BASE *GetBestTargetUnitAtMousePosition(long int mousePosX, long int mousePosY, long int *pOutResult, AOE_CONST_FUNC::UNIT_ACTION_ID mouseActionType);
 
 }
 
