@@ -11,6 +11,7 @@
 #include "MapCopyPopup.h"
 #include "autoRebuildFarmConfig.h"
 #include "RnrScreenBase.h"
+#include "RockNRorSettingsScreen.h"
 
 
 
@@ -56,6 +57,7 @@ private:
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *customOptionFreeTextAnswerVar;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnTechTreeInfo;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnMapCopy;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnRnrGlobalOptions;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAutoRebuildFarms;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *lblAutoRebuildFarms;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *edtAutoRebuildFarmsMaxFood;

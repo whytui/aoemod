@@ -14,6 +14,7 @@ void InGameRockNRorOptionsPopup::ResetClassPointers() {
 	this->autoRebuildFarmConfig = NULL;
 	this->btnTechTreeInfo = NULL;
 	this->btnMapCopy = NULL;
+	this->btnRnrGlobalOptions = NULL;
 	this->customOptionButtonVar = NULL;
 	this->customOptionFreeTextAnswerVar = NULL;
 	this->customOptionFreeTextLabelVar = NULL;
@@ -78,8 +79,9 @@ void InGameRockNRorOptionsPopup::CreateScreenComponents() {
 	this->AddTextBox(&this->customOptionFreeTextVar, "", 100, 0x100, 0x120, 0xB0, 0x16, false, false);
 	this->AddTextBox(&this->customOptionFreeTextAnswerVar, "", 100, 0x1C0, 0x120, 0x80, 0x16, true, false);
 
-	this->AddButton(&this->btnTechTreeInfo, localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE, "Tech tree info"), 0x170, 0x34, 0xAC, 0x1E);
-	this->AddButton(&this->btnMapCopy, localizationHandler.GetTranslation(-1, "Map copy"), 0x170, 0x50, 0xAC, 0x1E);
+	this->AddButton(&this->btnRnrGlobalOptions, localizationHandler.GetTranslation(-1, "Global options"), 0x170, 0x34, 0xAC, 0x1E);
+	this->AddButton(&this->btnTechTreeInfo, localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE, "Tech tree info"), 0x170, 0x50, 0xAC, 0x1E);
+	this->AddButton(&this->btnMapCopy, localizationHandler.GetTranslation(-1, "Map copy"), 0x170, 0x64, 0xAC, 0x1E);
 	
 	// OK Cancel buttons
 	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(172),
@@ -106,6 +108,11 @@ bool InGameRockNRorOptionsPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 		MapCopyPopup *tmpNextPopup = new MapCopyPopup();
 		tmpNextPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
 		this->OpenOtherScreenAndCloseThisOne(tmpNextPopup, false);
+		return true;
+	}
+	if (sender == this->btnRnrGlobalOptions) {
+		ROCKNROR::UI::RockNRorSettingsScreen *tmpNextScreen = new ROCKNROR::UI::RockNRorSettingsScreen();
+		this->OpenOtherScreenAndCloseThisOne(tmpNextScreen, false);
 		return true;
 	}
 	if (sender == this->btnOK) {
