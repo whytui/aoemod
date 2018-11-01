@@ -1,6 +1,8 @@
 ﻿RockNRor is a plugin for Rise of Rome. It requires ROR_API.
 See also https://aoemodder.wixsite.com/rocknror
 
+Please refer to RockNRorDoc.doc for an up to date documentation !
+
 Installation
 - Extract all files to a directory of your choice (example C:\temp\RockNRor\): ROR_API.dll, ROR_API.conf, RockNRor subdirectory, etc.
 - Get latest CustomizeAOE version from http://aoe.heavengames.com/dl-php/showfile.php?fileid=2464
@@ -41,7 +43,7 @@ Strategy (AI):
  - Unblock "stuck buildings". It is necessary to wait a moment before doing this or the player will lose all his resources trying to build something that is "instant-killed" by the enemy.
  - Add some useful (available) researches if the player is rich, well developed (for example, wheel when it's not included in player's strategy).
  - TO DO - Disable useless building (governement center) if it is no longer useful (all underlying techs researched, iron age already researched).
- - TO DO - Improve farms management (lower their priority in AI list).
+ - Improve farms management
  - When switching player, AI is updated to take into account human-created units (avoid re-building/training duplicates).
  - Also detect dynamically-added units (houses, boats) in scenarios so that AI player does not create them twice.
  - Fix dynamically-added elements dependencies issues (trireme research before iron age...)
