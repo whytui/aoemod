@@ -47,6 +47,8 @@ file. data2\empires.dat will be used instead.
 Close
 [42127] // RockNRor settings title
 RockNRor Settings
+[42169] // RockNRor global settings
+Global Settings
 [42128] // RockNRor settings introduction text
 Please find the full list of options in RockNRor\RockNRor.xml file. You'll need to restart the game if you modify this file.
 [42129]

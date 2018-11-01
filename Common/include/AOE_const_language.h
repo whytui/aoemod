@@ -55,6 +55,7 @@ const static unsigned long int CRLANG_ID_NO = 42095;
 // RockNRor main settings
 const static unsigned long int CRLANG_ID_CLOSE = 42126;
 const static unsigned long int CRLANG_ID_ROCKNROR_SETTINGS_TITLE = 42127;
+const static unsigned long int CRLANG_ID_ROCKNROR_GLOBAL_SETTINGS = 42169;
 const static unsigned long int CRLANG_ID_RNR_STTGS_INTRO_TEXT = 42128;
 const static unsigned long int CRLANG_ID_RNR_STTGS_MODS_SECTION = 42129;
 const static unsigned long int CRLANG_ID_RNR_STTGS_GEN_RANDOM_TECH_TREES_RM = 42130;

@@ -54,6 +54,8 @@ ERROR : Impossible de trouver le fichier
 Fermer
 [42127] // RockNRor settings title
 Options de RockNRor
+[42169] // RockNRor global settings
+Options globales
 [42128] // RockNRor settings introduction text
 Voir la liste complète des options dans RockNRor\RockNRor.xml. Il faut relancer le jeu si vous modifiez ce fichier.
 [42129]

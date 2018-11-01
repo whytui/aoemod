@@ -79,9 +79,9 @@ void InGameRockNRorOptionsPopup::CreateScreenComponents() {
 	this->AddTextBox(&this->customOptionFreeTextVar, "", 100, 0x100, 0x120, 0xB0, 0x16, false, false);
 	this->AddTextBox(&this->customOptionFreeTextAnswerVar, "", 100, 0x1C0, 0x120, 0x80, 0x16, true, false);
 
-	this->AddButton(&this->btnRnrGlobalOptions, localizationHandler.GetTranslation(-1, "Global options"), 0x170, 0x34, 0xAC, 0x1E);
-	this->AddButton(&this->btnTechTreeInfo, localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE, "Tech tree info"), 0x170, 0x50, 0xAC, 0x1E);
-	this->AddButton(&this->btnMapCopy, localizationHandler.GetTranslation(-1, "Map copy"), 0x170, 0x64, 0xAC, 0x1E);
+	this->AddButton(&this->btnRnrGlobalOptions, localizationHandler.GetTranslation(CRLANG_ID_ROCKNROR_GLOBAL_SETTINGS, "Global options"), 0x170, 0x34, 0xAC, 0x1E);
+	this->AddButton(&this->btnTechTreeInfo, localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE, "Tech tree info"), 0x170, 0x56, 0xAC, 0x1E);
+	this->AddButton(&this->btnMapCopy, localizationHandler.GetTranslation(-1, "Map copy"), 0x170, 0x78, 0xAC, 0x1E);
 	
 	// OK Cancel buttons
 	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(172),
