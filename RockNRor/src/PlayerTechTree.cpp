@@ -1904,8 +1904,8 @@ std::string TechTreeCreator::GetDisabledResearchesText() const {
 #ifdef _DEBUG
 	result += NEWLINE "Religion level=";
 	result += std::to_string(this->religionLevel);
-	result += NEWLINE;
 #endif
+	result += NEWLINE;
 
 	return result;
 }
