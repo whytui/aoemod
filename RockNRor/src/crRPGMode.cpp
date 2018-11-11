@@ -117,8 +117,9 @@ namespace RPG_MODE {
 	}
 
 
-	// Increase unit's total HP by given percentage. Total HP is always increased by at least 1 (capped by maxHPIncrease)
+	// Increase unit's total HP by given percentage. Total HP is always increased by at least 1 (capped by maxIncreaseValue)
 	// percentage should be between 0 and 100 (in most cases !).
+	// Actual increase amount is also added to unit's current HP
 	bool IncreaseTotalHPByPercentage(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int percentage, int maxIncreaseValue) {
 		assert(percentage >= 0);
 		percentage += 100;
@@ -132,8 +133,10 @@ namespace RPG_MODE {
 			newTotalHP = currentTotalHP + 1;
 		}
 		if (newTotalHP > currentTotalHP + maxIncreaseValue) { newTotalHP = currentTotalHP + maxIncreaseValue; } // limit the increase.
+		int finalDiff = newTotalHP - currentTotalHP;
 
 		unit->unitDefinition->totalHitPoints = newTotalHP;
+		unit->remainingHitPoints += finalDiff;
 		return true;
 	}
 

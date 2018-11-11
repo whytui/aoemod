@@ -37,6 +37,7 @@ namespace RPG_MODE {
 
 	// Increase unit's total HP by given percentage. Total HP is always increased by at least 1 (capped by maxIncreaseValue)
 	// percentage should be between 0 and 100 (in most cases !).
+	// Actual increase amount is also added to unit's current HP
 	bool IncreaseTotalHPByPercentage(AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit, int percentage, int maxIncreaseValue);
 
 	// Increase unit's (main) attack by given percentage. Increase amount is always at least 1 (capped by maxIncreaseValue)
