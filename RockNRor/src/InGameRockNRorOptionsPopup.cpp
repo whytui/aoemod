@@ -117,11 +117,11 @@ bool InGameRockNRorOptionsPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	}
 	if (sender == this->btnOK) {
 		this->Validate();
-		this->CloseScreen(false);
+		this->ClosePopupAndHandlePausePolicy();
 		return true;
 	}
 	if (sender == this->btnCancel) {
-		this->CloseScreen(false);
+		this->ClosePopupAndHandlePausePolicy();
 		return true;
 	}
 	return false;
@@ -131,7 +131,7 @@ bool InGameRockNRorOptionsPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 // Returns true if the event is handled and we don't want to handle anymore (disable ROR's additional treatments)
 bool InGameRockNRorOptionsPopup::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCode, long int repeatCount, long int ALT, long int CTRL, long int SHIFT) {
 	if (keyCode == VK_ESCAPE) {
-		this->CloseScreen(false);
+		this->ClosePopupAndHandlePausePolicy();
 		return true;
 	}
 	if (uiObj == this->customOptionFreeTextVar) {
@@ -146,7 +146,7 @@ bool InGameRockNRorOptionsPopup::OnKeyDown(STRUCT_ANY_UI *uiObj, long int keyCod
 			ShowWindow((HWND)h, SW_SHOW);
 			if (answer.substr(0, 5) == "Close") {
 				// dirty hack to close current popup, so that next popup will be based on normal screen (opening a fullscreen UI under a popup does not work very well)
-				this->CloseScreen(false);
+				this->ClosePopupAndHandlePausePolicy();
 			}
 		}
 	}
@@ -193,6 +193,14 @@ void InGameRockNRorOptionsPopup::Validate() {
 	}
 }
 
+
+void InGameRockNRorOptionsPopup::ClosePopupAndHandlePausePolicy() {
+	if (traceMessageHandler.HasUnreadMessages()) {
+		// Make sure not to unpause if we are gonna show up logs window
+		this->afterCloseGamePausePolicy = AfterClosePausePolicy::NONE;
+	}
+	this->CloseScreen(false);
+}
 
 }
 }

@@ -70,6 +70,8 @@ private:
 	::ROCKNROR::CONFIG::AutoRebuildFarmConfig *autoRebuildFarmConfig;
 
 	void Validate();
+
+	void ClosePopupAndHandlePausePolicy();
 };
 
 }
