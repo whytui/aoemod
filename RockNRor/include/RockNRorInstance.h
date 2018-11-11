@@ -152,6 +152,7 @@ namespace ROCKNROR {
 		void EntryPointTacAIHandleActiveGroupsBeforeLoop(REG_BACKUP *REG_values);
 		void EntryPointTacAIHandleActiveGroups(REG_BACKUP *REG_values);
 		void EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_values);
+		void UnitGroupTask2HandleForceFlag(REG_BACKUP *REG_values);
 		void OverrideShowF5DebugInfo(REG_BACKUP *REG_values);
 		void UnitDefProvidesRenewableResource(REG_BACKUP *REG_values);
 		void EntryPointDisplayBuildingInfoResource(REG_BACKUP *REG_values);

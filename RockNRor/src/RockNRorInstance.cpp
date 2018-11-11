@@ -393,6 +393,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x004BFFCC:
 		this->EntryPointInfAIGroupFindMainTarget(REG_values);
 		break;
+	case 0x004CDE9C:
+		this->UnitGroupTask2HandleForceFlag(REG_values);
+		break;
 	case 0x004D3AC1:
 		this->EntryPointTacAIHandleActiveGroupsBeforeLoop(REG_values);
 		break;
@@ -4062,6 +4065,47 @@ void RockNRorInstance::EntryPointBeforeUnitCreateActivity(REG_BACKUP *REG_values
 }
 
 
+// From 0x4CDE95 in method unitGroup.task(tacAI, mainAI, unitGrpTaskId, resetOriginal, force), case unitGrpTaskId=2 (attack) and force=false
+// May change return address to 0x4CDEAA to "cancel" tasking of current unit (same as "force=false" when current task is 0x258)
+void RockNRorInstance::UnitGroupTask2HandleForceFlag(REG_BACKUP *REG_values) {
+	unsigned long int addrSkip = 0x4CDEAA;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->ECX_val;
+	ror_api_assert(REG_values, REG_values->ECX_val == REG_values->EBX_val);
+	ror_api_assert(REG_values, unit && unit->IsCheckSumValidForAUnitClass());
+	AOE_STRUCTURES::STRUCT_UNIT_GROUP *group = (AOE_STRUCTURES::STRUCT_UNIT_GROUP *)REG_values->ESI_val;
+	ror_api_assert(REG_values, group && group->IsCheckSumValid());
+
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->EAX_val = (unsigned long int)unit->currentActivity;
+	}
+
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		return;
+	}
+
+	// Custom treatments. Do not forget here we are in the case "taskId=2, force=false".
+	ror_api_assert(REG_values, unit->ptrStructPlayer != NULL);
+	short int playerId = -1;
+	if (unit->ptrStructPlayer) {
+		playerId = unit->ptrStructPlayer->playerId;
+	}
+	bool skipBecauseUnitIsBusy = false; // Default
+	
+	if (ROCKNROR::IsImproveAIEnabled(playerId)) {
+		// Converting: skip, just like military units with 0x258 (CST_ATI_TASK_ATTACK)
+		if (unit->currentActivity && unit->currentActivity->currentTaskId == AOE_CONST_INTERNAL::ACTIVITY_TASK_ID::CST_ATI_TASK_CONVERT) {
+			skipBecauseUnitIsBusy = true;
+		}
+	}
+
+	// Please do not modify below
+	if (skipBecauseUnitIsBusy) {
+		ChangeReturnAddress(REG_values, addrSkip);
+	}
+}
+
+
 // From 0x501640. In gameSettings.showTimings(). (show F5 debug info in game screen)
 // Does not change return address. It is possible to disable standard behaviour: just set ECX=NULL.
 void RockNRorInstance::OverrideShowF5DebugInfo(REG_BACKUP *REG_values) {
@@ -4297,7 +4341,7 @@ void RockNRorInstance::VillagerActivityProcessNotify(REG_BACKUP *REG_values) {
 		REG_values->EAX_val -= 0x1F4;
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
-	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes || (ROCKNROR::crInfo.configInfo.improveAILevel == 0)) {
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
 	AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *unitActivity = (AOE_STRUCTURES::STRUCT_UNIT_ACTIVITY *)REG_values->ECX_val;
@@ -4305,6 +4349,7 @@ void RockNRorInstance::VillagerActivityProcessNotify(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, notify && (notifyTaskId == notify->eventId));
 
 	// Custom treatments (removed : using virtual method hooks now)
+	// Check IsImproveAIEnabled first before doing anything about AI here.
 }
 
 
