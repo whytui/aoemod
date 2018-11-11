@@ -4083,6 +4083,9 @@ void RockNRorInstance::UnitGroupTask2HandleForceFlag(REG_BACKUP *REG_values) {
 	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		return;
 	}
+#ifndef GAMEVERSION_ROR10c
+	return;
+#endif
 
 	// Custom treatments. Do not forget here we are in the case "taskId=2, force=false".
 	ror_api_assert(REG_values, unit->ptrStructPlayer != NULL);
