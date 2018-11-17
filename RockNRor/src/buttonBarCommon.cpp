@@ -89,6 +89,8 @@ long int GuessIconIdFromUICommandId(AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID UIC
 		return AOE_CONST_DRS::AoeButtonBarCommonCommandsIconId::BBC_ICON_UNKNOWN_BLUE_FLAG;
 	case AOE_CONST_INTERNAL::CST_IUC_CROR_DEFEND_STOP:
 		return AOE_CONST_DRS::AoeButtonBarCommonCommandsIconId::BBC_ICON_HAND_STOP;
+	case AOE_CONST_INTERNAL::CST_IUC_CROR_GATE_OPEN_CLOSE:
+		return AOE_CONST_DRS::AoeButtonBarCommonCommandsIconId::BBC_ICON_MOVE;
 	default:
 		break;
 	}

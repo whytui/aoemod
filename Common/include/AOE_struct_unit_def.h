@@ -189,7 +189,7 @@ namespace AOE_STRUCTURES
 		short int placementBypassTerrain2; // +56. Side terrain id ? "tile_req2"
 		short int placementTerrain1; // +58 "center_tile_req1"
 		short int placementTerrain2; // +5A "center_tile_req2"
-		float editorRadiusY; // for Y axis "construction_radius". Used if placementTerrainId>=0, for example ?
+		float editorRadiusY; // for Y axis "construction_radius" (now "Clearance size"). Used if placementTerrainId>=0, for example ?
 		// 0x60
 		float editorRadiusX; // for X axis "construction_radius". Used if placementTerrainId>=0, for example ?
 		UNIT_HILL_PLACEMENT_MODE hillMode; //  +64. 0=no restriction, 2=flat land only. "elevation_flag"
@@ -232,9 +232,8 @@ namespace AOE_STRUCTURES
 		char editorSelectionColor; // +A9
 		char unknown_0AA; // Always 0 ?
 		char unknown_0AB; // Always 0 ?
-		float selectionRadiusY;
-		// 0xB0
-		float selectionRadiusX;
+		float selectionRadiusY; // +AC. Now 'selection outline size' in AGE3.
+		float selectionRadiusX; // +B0
 		float selectionRadiusZ; // +B4
 
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_UNITDEF_BASE); }

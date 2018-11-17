@@ -59,6 +59,7 @@ enum RockNRorIconId : long int {
 #define CST_CUSTOM_BUTTONID_AUTO_ATTACK_DISABLED 9
 #define CST_CUSTOM_BUTTONID_AUTO_ATTACK_SET_DEFAULT 10
 #define CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT 8
+#define CST_CUSTOM_BUTTONID_OPEN_CLOSE_GATE 0
 
 
 // Retrieve the highest resolution sizes (x/y)

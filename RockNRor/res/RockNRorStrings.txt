@@ -181,6 +181,10 @@ Stop defending current position/unit
 Right-click to define the unit or the position to protect
 [42125]
 Make main unit for keyboard shortcut selection
+[42170]
+Open/Close gate
+[42171] // Hotkey for "open/close gate"
+G
 
 // *** Unit properties ***
 [42036] // Unit properties: Initial

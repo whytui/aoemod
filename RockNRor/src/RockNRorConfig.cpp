@@ -39,6 +39,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->noDockInMostlyLandMaps = false; // Default: dock is always available.
 	this->fixVillagerWorkRates = false; // Default: keep empires.dat values
 	this->noWalls = false; // Default
+	this->useGatesFeature = false; // Default
 	this->unitResourceAmountAlligator = 0; // 0 = ignore and use default
 	this->unitResourceAmountBerryBush = 0; // 0 = ignore and use default
 	this->unitResourceAmountElephant = 0; // 0 = ignore and use default
@@ -490,6 +491,9 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		if (elemName == "noWalls") {
 			this->noWalls = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "useGatesFeature") {
+			this->useGatesFeature = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "initialResources") {
 			ROCKNROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);

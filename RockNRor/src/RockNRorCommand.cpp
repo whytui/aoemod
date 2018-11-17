@@ -3396,6 +3396,48 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 		BUTTONBAR::SetButtonBarForDefendUnitOrZone(gameMainUI, (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)panelUnitBase);
 	}
 
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_GATE_OPEN_CLOSE) {
+		if (panelUnitBase && panelUnitBase->IsCheckSumValidForAUnitClass() && panelUnitBase->unitDefinition &&
+			panelUnitBase->unitDefinition->IsCheckSumValidForAUnitClass()) {
+			AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)panelUnitBase->unitDefinition;
+			assert(unitDef->IsCheckSumValid());
+			char taskSwapGroupId = 0;
+			if (unitDef->IsCheckSumValid() && (unitDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall)) {
+				taskSwapGroupId = unitDef->unitDefinitionSwitchGroupId;
+			}
+			if (taskSwapGroupId > 0) {
+				for (int curUnitDefId = 0; curUnitDefId < player->structDefUnitArraySize; curUnitDefId++) {
+					AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *curUnitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)player->GetUnitDefBase(curUnitDefId);
+					if (!curUnitDef || !curUnitDef->IsCheckSumValidForAUnitClass() || !curUnitDef->DerivesFromCommandable()) {
+						continue;
+					}
+					if ((curUnitDefId != unitDef->DAT_ID1) && (taskSwapGroupId == curUnitDef->unitDefinitionSwitchGroupId)) {
+						bool compatible = false;
+						for (int cmdIndex = 0; cmdIndex < curUnitDef->ptrUnitCommandHeader->commandCount; cmdIndex++) {
+							if ((curUnitDef->ptrUnitCommandHeader->ptrCommandArray[cmdIndex]->commandType == AOE_CONST_FUNC::UNIT_ACTION_ID::CST_IAI_MAKE_OBJECT) &&
+								(curUnitDef->ptrUnitCommandHeader->ptrCommandArray[cmdIndex]->unitDefId == unitDef->DAT_ID1)) {
+								// Found a command "make object" on "source unitDefId", this means this is the matching gate object
+								// (this is a configuration rule we decided here, of course there is no such rule in original game)
+								// (this custom rule allows us to make sure gate objects go by pairs, even if we have unit upgrades with same "taskSwapGroupId")
+								compatible = true;
+								break;
+							}
+						}
+						if (compatible) {
+							// Is it possible to put "target" unitDef ?
+							// If a unit is under, it is not allowed to close the gate
+							AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION res = AOE_METHODS::GetErrorForUnitCreationAtLocation(player,
+								curUnitDef, panelUnitBase->positionY, panelUnitBase->positionX, false, false, false, false, true);
+							if (res == AOE_CONST_INTERNAL::ERROR_FOR_UNIT_CREATION::CST_EUC_OK) {
+								AOE_METHODS::UNIT::UnitTransform(panelUnitBase, player->GetUnitDefBase(curUnitDefId));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return false;
 }
 

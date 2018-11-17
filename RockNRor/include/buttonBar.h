@@ -42,6 +42,10 @@ void AddButtonsForLivingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit);
 
 
+// Add relevant buttons in command bar for "building" unit (type=80). Excludes all other unit types.
+void AddButtonsForWall(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit);
+
+
 // Update the whole button bar when user clicks "defend unit/zone"
 void SetButtonBarForDefendUnitOrZone(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *unit);
 

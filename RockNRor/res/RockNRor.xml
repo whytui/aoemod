@@ -259,6 +259,11 @@
 	<noNeutralDiplomacy enable="1"></noNeutralDiplomacy>
 	<!-- Set noWalls to enable=1 to disable all walls in DM /RM games -->
 	<noWalls enable="0"/>
+	<!-- Set useGatesFeature to enable=1 to allow using gates
+	If enabled, walls (class 27) that have a "task swap group" can be opened/closed like AOE2 gates.
+	Requires correct configuration in empires.dat (2 similar unit definitions with same Task Swap Group, one being traversible, not the other)
+	-->
+	<useGatesFeature enable="0"/>
 	<!-- initialResources defines the amount of available resource at game start
 	GameType=DM (deathmatch) or RM (random map), choice (for RM only) corresponds to the "resources" user choice in game settings
 	choice=0 corresponds to Default

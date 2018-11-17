@@ -190,6 +190,10 @@ Ne plus protéger la zone/l'unité actuelle
 Cliquez avec le bouton droit pour définir l'unité ou l'endroit à protéger
 [42125]
 Marquer comme unité principale pour sélection rapide (clavier)
+[42170]
+Ouvrir/fermer la porte
+[42171] // Hotkey for "open/close gate"
+P
 
 // *** Unit properties ***
 [42036] // Unit properties: Initial

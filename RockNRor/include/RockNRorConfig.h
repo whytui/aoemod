@@ -157,6 +157,7 @@ public:
 	bool fixVillagerWorkRates;
 	bool noWalls;
 	bool noDockInMostlyLandMaps;
+	bool useGatesFeature; // Set to false to disable GATES handling. If true, class=wall units with a task swap group can be opened/closed (swap unit definition)
 	int unitResourceAmountTree; // <=0 means use empires.dat default (do nothing, in fact)
 	int unitResourceAmountTreeForest; // <=0 means use empires.dat default (do nothing, in fact)
 	int unitResourceAmountBerryBush; // <=0 means use empires.dat default (do nothing, in fact)

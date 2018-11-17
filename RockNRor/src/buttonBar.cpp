@@ -154,6 +154,12 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 	AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING*)unit->unitDefinition;
 	if (!unitDef || !unitDef->IsCheckSumValid()) { return; } // MUST be building type
 
+	bool isWall = (unitDef->unitAIType == AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES::TribeAIGroupWall);
+	if (isWall) {
+		AddButtonsForWall(gameMainUI, unit);
+		return;
+	}
+
 	bool multiQueueing = ROCKNROR::crInfo.configInfo.allowMultiQueueing; // If true, a building can have >1 unit "def" in queue.
 	bool buttonIsVisible[12]; // Is button visible after standard buttons display.
 	bool forceRefresh[12]; // Used to force refresh of buttons : text or read-only status can be wrong when switching between 2 similar units that have different current actions.
@@ -512,6 +518,30 @@ void AddButtonsForBuildingUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainU
 	}
 }
 
+
+// Add relevant buttons in command bar for walls (type=80, class=27)
+void AddButtonsForWall(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI, AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit) {
+	if (!ROCKNROR::crInfo.configInfo.useGatesFeature) {
+		return;
+	}
+	if (!gameMainUI || !unit || !unit->IsCheckSumValidForAUnitClass() || !unit->unitDefinition) { return; }
+	AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)unit->unitDefinition;
+	assert(unitDef->IsCheckSumValid());
+	if (!unitDef->IsCheckSumValid()) { return; }
+	// Gate = wall with a "task swap group"
+	if (unitDef->unitDefinitionSwitchGroupId <= 0) { return; }
+
+	const char *gateHotkey = localizationHandler.GetTranslation(CRLANG_ID_BTN_OPEN_CLOSE_GATE_HOTKEY, "G");
+	std::string gateText = localizationHandler.GetTranslation(CRLANG_ID_BTN_OPEN_CLOSE_GATE, "Open/Close gate");
+	gateText += " (";
+	gateText += gateHotkey[0]; // gateHotkey can't be NULL. Worst case, protectHotkey[0] = \0, but this will not cause any error.
+	gateText += ")";
+
+	AddInGameCommandButton(CST_CUSTOM_BUTTONID_OPEN_CLOSE_GATE, AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_GATE_OPEN_CLOSE, 0,
+		false, gateText.c_str(), NULL, true);
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_OPEN_CLOSE_GATE]->hotkey = gateHotkey[0]; // shortcut key
+	gameMainUI->unitCommandButtons[CST_CUSTOM_BUTTONID_OPEN_CLOSE_GATE]->unknown_29C = 0;
+}
 
 
 // Update the whole button bar when user clicks "defend unit/zone"
