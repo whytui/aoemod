@@ -205,12 +205,23 @@ PotentialResearchInfo *StrategyBuilder::AddPotentialResearchInfoToList(short int
 	// Add research's own requirements !
 	if (!resDtl->hasOptionalRequirements && !resDtl->IsAgeResearch()) { // Don't handle age requirements like this, especially because of optional requirements !
 		for each(TTDetailedResearchDef *resDtlReqDtl in resDtl->allRequirementsExcludingAges) {
-			if (resDtlReqDtl && (this->GetResearchInfo(resDtlReqDtl->researchDef) == NULL)) {
+			if (resDtlReqDtl) {
+				PotentialResearchInfo *resDtlReqPotentialInfo = this->GetResearchInfo(resDtlReqDtl->researchDef);
 				if (resDtlReqDtl->hasOptionalRequirements || resDtlReqDtl->IsAgeResearch()) {
 					continue; // Don't handle age requirements like this, especially because of optional requirements !
 				}
-				// Need to add a requirement -> recursive call
-				this->AddPotentialResearchInfoToList((short int)resDtlReqDtl->GetResearchDefId(), markForAdd);
+				if (resDtlReqPotentialInfo == NULL) {
+					// Need to add a requirement -> recursive call
+					this->AddPotentialResearchInfoToList((short int)resDtlReqDtl->GetResearchDefId(), markForAdd);
+				} else {
+#ifdef _DEBUG
+					if (!resDtlReqPotentialInfo->markedForAdd) {
+#endif
+						resDtlReqPotentialInfo->markedForAdd = true;
+#ifdef _DEBUG
+					}
+#endif
+				}
 			}
 		}
 	}
