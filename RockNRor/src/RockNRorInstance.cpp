@@ -4610,9 +4610,9 @@ void RockNRorInstance::ActionBuildUpdateFarmHack(REG_BACKUP *REG_values) {
 	bool isFarm = building->unitDefinition && (building->unitDefinition->DAT_ID1 == CST_UNITID_FARM);
 
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
-	ChangeReturnAddress(REG_values, 0x4B19FD); // Set to default behavior (non-farm)
+	ChangeReturnAddress(REG_values, 0x4B19FD); // Set to default behavior (non-farm) = "search" for other constructions
 	
-	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes && !IsMultiplayer()) {
 		// Custom treatments (if enabled)
 		allowUseRorDirtyFarmHack = false;
 		// If builder can turn into a farmer, then don't search for other constructions

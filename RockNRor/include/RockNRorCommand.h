@@ -293,6 +293,7 @@ public:
 	// User interface command handler for 1 single unit.
 	// isPanelUnit = true if unitBase is the main selected unit (the one visible in bottom-left unit info zone)
 	// "Common" treatments (interface updates, etc) are only done when isPanelUnit = true
+	// This checks if the unit belongs to controlled player before running treatements
 	bool ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 		AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase, bool isPanelUnit);
 

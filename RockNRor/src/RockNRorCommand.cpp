@@ -3200,6 +3200,7 @@ void RockNRorCommand::AfterShowUnitCommandButtons(AOE_STRUCTURES::STRUCT_UI_IN_G
 // User interface command handler for 1 single unit.
 // isPanelUnit = true if unitBase is the main selected unit (the one visible in bottom-left unit info zone)
 // "Common" treatments (interface updates, etc) are only done when isPanelUnit = true
+// This checks if the unit belongs to controlled player before running treatements
 bool RockNRorCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMainUI,
 	AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID uiCommandId, long int infoValue, AOE_STRUCTURES::STRUCT_UNIT_BASE *unitBase,
 	bool isPanelUnit) {
@@ -3217,7 +3218,7 @@ bool RockNRorCommand::ApplyUserCommandForUnit(AOE_STRUCTURES::STRUCT_UI_IN_GAME_
 		}
 		return false; // Let ROR code execute normally here, we just ran "auxiliary" treatments.
 	}
-	if (uiCommandId == CST_IUC_CROR_DEFEND_STOP) {
+	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_DEFEND_STOP) {
 		if (unitIsMine && (settings->mouseActionType == MOUSE_ACTION_TYPES::CST_MAT_CR_PROTECT_UNIT_OR_ZONE)) {
 			UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(unitBase->unitInstanceId);
 			if (unitInfo) {
@@ -3259,6 +3260,7 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	assert(settings && settings->IsCheckSumValid());
 	if (!settings || !settings->IsCheckSumValid()) { return false; }
+	bool isMultiPlayer = (settings->rgeGameOptions.isMultiPlayer != 0);
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *panelUnitBase = NULL;
 	AOE_STRUCTURES::STRUCT_PLAYER *player = NULL;
 	if (gameMainUI->panelSelectedUnit && gameMainUI->panelSelectedUnit->IsCheckSumValidForAUnitClass()) {
@@ -3283,7 +3285,7 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 	}
 
 
-	// Handle next page. Note: in ROR, see 485140 (for villager build menu only)
+	// Handle next page. Note: in ROR, see 0x485140 (for villager build menu only)
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_NEXT_PAGE) {
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = panelUnitBase->unitDefinition;
 		if (!unitDefBase || !unitDefBase->IsCheckSumValidForAUnitClass()) {
@@ -3293,6 +3295,7 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 		if (IsVillager(unitDefBase->DAT_ID1)) {
 			return false;
 		}
+#ifdef GAMEVERSION_ROR10c
 		bool hasNextPage = (gameMainUI->unitCommandButtons[5]->buttonInfoValue[0] != 0); // this custom info is stored when button is added in AfterShowUnitCommandButtons
 		if (hasNextPage) { // has a next page: increment button offset by 10.
 			gameMainUI->panelButtonIdPageOffset += 10;
@@ -3305,6 +3308,9 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 			CALL addrShowUnitCommands;
 		}
 		return true; // Do not execute normal code for NEXT PAGE
+#else
+		return false;
+#endif
 	}
 
 	// Unit-specific treatments
@@ -3397,6 +3403,10 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 	}
 
 	if (uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CROR_GATE_OPEN_CLOSE) {
+		if (isMultiPlayer) {
+			// Transforming a unit is not MP-compliant
+			return true; // Event considered as taken care of
+		}
 		if (panelUnitBase && panelUnitBase->IsCheckSumValidForAUnitClass() && panelUnitBase->unitDefinition &&
 			panelUnitBase->unitDefinition->IsCheckSumValidForAUnitClass()) {
 			AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_BUILDING *)panelUnitBase->unitDefinition;
