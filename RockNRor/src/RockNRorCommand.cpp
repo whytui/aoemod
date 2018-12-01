@@ -602,6 +602,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		this->DisplayTimerStats();
 	}
 	if (strcmp(command, "dat check") == 0) {
+		AOE_METHODS::SetGamePause(true);
 		CR_DEBUG::AnalyzeEmpiresDatQuality();
 	}
 
