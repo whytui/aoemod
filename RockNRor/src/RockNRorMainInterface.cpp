@@ -604,8 +604,9 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 	if (showRedCrossSign) {
 		long int mx = UIGameZone->unknown_130_mousePosX + mousePosX;
 		long int my = UIGameZone->unknown_134_mousePosY + mousePosY;
+		long int drawInterval = 50; // use a custom value (faster) instead of AOE_CONST_DRS::DRAW_INTERVAL_MOVE_RED_CROSS
 		AOE_STRUCTURES::STRUCT_SLP_INFO *slp = settings->ptrInfosSLP[AOE_CONST_DRS::AoeInGameFlagsIconId::IGF_MOVETO_RED_CROSS];
-		AOE_METHODS::UI_BASE::DisplayInGameSign(UIGameZone, slp, mousePosX, mousePosY, 2); // includes the required refresh on UIGameZone
+		AOE_METHODS::UI_BASE::DisplayInGameSign(UIGameZone, slp, mousePosX, mousePosY, 2, drawInterval); // includes the required refresh on UIGameZone
 	}
 	return skipRORTreatments;
 }

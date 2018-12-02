@@ -105,11 +105,21 @@ namespace AOE_CONST_DRS {
 		RT_ICON_GOLD = 3,
 	};
 
+	// Icon IDs for in-game flag sprites
 	enum AoeInGameFlagsIconId : long int {
-		IGF_SHORTCUT_NUMBERS = 0,
-		IGF_MOVETO_INTERMEDIATE_STEP_FLAG = 1,
-		IGF_MOVETO_RED_CROSS = 2
+		IGF_SHORTCUT_NUMBERS = 0, // cf SLPID=50403
+		IGF_MOVETO_INTERMEDIATE_STEP_FLAG = 1, // cf SLPID=50404
+		IGF_MOVETO_RED_CROSS = 2 // cf SLPID=50405
 	};
+
+	// Constants linked to AoeInGameFlagsIconId
+	// Draw interval (milliseconds between 2 frames) for "moving" red cross sign
+	const long int DRAW_INTERVAL_MOVE_RED_CROSS = 90;
+	// Draw interval (milliseconds between 2 frames) for "attack zone" red cross sign
+	const long int DRAW_INTERVAL_ATTACK_ZONE_RED_CROSS = 125;
+	// Draw interval (milliseconds between 2 frames) for "move step" flag
+	const long int DRAW_INTERVAL_MOVE_STEP = 250;
+
 
 	// SLP 51000 = mouse cursors: see GAME_CURSOR in AOE_const_internal.
 
@@ -166,5 +176,6 @@ namespace AOE_CONST_DRS {
 		BLD_ICON_FORTIFICATION = 48,
 		BLD_ICON_BALLISTA_TOWER = 49
 	};
+
 }
 

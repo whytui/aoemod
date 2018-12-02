@@ -191,27 +191,35 @@ static void DisplayGreenBlinkingOnUnit(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *g
 
 
 // Show a in-game sign: movement red cross or step flag, or even other stuff !
-// displayMode: 0=no display? 1=loop (repeat), 2=show once and stop. Don't know how to stop a 'repeat' mode !
-static void DisplayInGameSign(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameZone, AOE_STRUCTURES::STRUCT_SLP_INFO *slp,
-	long int mousePosX, long int mousePosY, long int displayMode) {
+// displayMode: 0=no display? 1=loop (repeat), 2=show once and stop (recommended). Don't know how to stop a 'repeat' mode !
+// drawInterval: milliseconds between 2 SLP frames. 90 for moving red cross, 125 for attack zone red cross, 250 for move step...
+static AOE_STRUCTURES::STRUCT_UI_OVERLAY_SPRITE *DisplayInGameSign(AOE_STRUCTURES::STRUCT_UI_PLAYING_ZONE *UIGameZone,
+	AOE_STRUCTURES::STRUCT_SLP_INFO *slp, long int mousePosX, long int mousePosY, long int displayMode,
+	long int drawInterval) {
+	assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
+	assert((displayMode >= 0) && (displayMode <= 2));
+	assert(UIGameZone && UIGameZone->IsCheckSumValid());
 	const unsigned long int addr = 0x516050;
-	if (!UIGameZone || !UIGameZone->IsCheckSumValid() || !slp) { return; }
+	if (!UIGameZone || !UIGameZone->IsCheckSumValid() || !slp) { return NULL; }
 	long int mx = UIGameZone->unknown_130_mousePosX + mousePosX;
 	long int my = UIGameZone->unknown_134_mousePosY + mousePosY;
+	AOE_STRUCTURES::STRUCT_UI_OVERLAY_SPRITE *result = NULL;
 	_asm {
 		MOV ECX, UIGameZone;
-		PUSH 0x5A; // 5A=red cross, FA=move step 7D=red cross (attack zone)
-		PUSH 2; // arg8 = mode? 1=persist/replay, 2=play once
-		PUSH 0;
-		PUSH 0x0F;
-		PUSH 0;
+		PUSH drawInterval; // Display interval (ms between 2 SLP frames)
+		PUSH displayMode; // arg8 = mode? 1=persist/replay, 2=play once
+		PUSH 0; // color table
+		PUSH 0x0F; // drawLevel
+		PUSH 0; // flags
 		PUSH my;
 		PUSH mx;
-		PUSH 0;
+		PUSH 0; // facet
 		PUSH slp;
 		CALL addr;
+		MOV result, EAX;
 	}
 	AOE_METHODS::UI_BASE::RefreshUIObject(UIGameZone);
+	return result;
 }
 
 

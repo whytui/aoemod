@@ -13,6 +13,27 @@
 */
 namespace AOE_STRUCTURES
 {
+	class STRUCT_UI_RGE_VIEW;
+
+	// Cf 0x516050 = RGE_View::add_overlay_sprite(theShape,facet,x,y,flags,drawlevel,colorTable,dispFunc,DrawInterval)
+	// A currently active overlay sprite. Size=0x30
+	class STRUCT_UI_OVERLAY_SPRITE {
+	public:
+		STRUCT_UI_OVERLAY_SPRITE *previous; // +00.
+		STRUCT_UI_OVERLAY_SPRITE *next; // +04.
+		STRUCT_SLP_INFO *slp;
+		long int facet; // +0C
+		long int x; // +10
+		long int y; // +14
+		long int flags; // +18
+		long int drawLevel; // +1C
+		long int replayMode; // +20 (="dispFunc" ?)
+		long int lastTimeGetTimeUpdate; // +24. Unsure
+		long int drawInterval; // +28. Interval in milliseconds between 2 frames from SLP (impacts sprite display total time)
+		long int colorTable; // +2C
+	};
+	static_assert(sizeof(STRUCT_UI_OVERLAY_SPRITE) == 0x30, "STRUCT_UI_OVERLAY_SPRITE size");
+
 
 	// Information to display green highlight (blinking) under units, like after a right click.
 	// Size=0x14. no constructor (alloc in 0x50F1F2)
@@ -86,7 +107,7 @@ namespace AOE_STRUCTURES
 		unsigned long int unknown_344;
 		unsigned long int unknown_348;
 		unsigned long int unknown_34C;
-		unsigned long int *unknown_350; // +350. Something that handles displaying the red cross ? A list of those things ? (+0/+4=links?) See 0x516050. ElemSize=0x30.+8=slp +20=replaymode +24=lasttimegettime?
+		STRUCT_UI_OVERLAY_SPRITE *lastOverlaySprite; // +350. Can be NULL. Last element of a list of active overlay sprites (eg "move" red cross)
 		STRUCT_UNIT_GREEN_BLINKING_INFO *greenUnitBlinkingInfoArray; // +354. Never NULL (alloc in ccor). Pointer to array of info for green unit blinking.
 		long int numberOfBlinkingGreenUnitRectangles; // +358. Number of active "right-click" blinking unit indicators
 		long int blinkingGreenUnitRectanglesArraySize; // +35C. Array size for +354 (greenUnitBlinkingInfoArray). Hardcoded to 8 in 0x50F1E8.
