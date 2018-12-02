@@ -614,6 +614,9 @@
     <ClCompile Include="..\tinyxml\tinyxmlparser.cpp">
       <Filter>Fichiers sources\TinyXML</Filter>
     </ClCompile>
+    <ClCompile Include="src\AOEPrimitives_UI_gameMain.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="RockNRor_README.txt" />

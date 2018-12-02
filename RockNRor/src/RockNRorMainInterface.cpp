@@ -449,6 +449,7 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 	// Get relevant selected units array
 	bool skipRORTreatments = false;
 	bool showRedCrossSign = false;
+	long int targetUnitIdToHighlight = -1;
 	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(controlledPlayer);
 
 	AOE_STRUCTURES::STRUCT_TEMP_MAP_POSITION_INFO posInfos;
@@ -554,6 +555,7 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 							UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(unit->unitInstanceId);
 							if (unitInfo) {
 								unitInfo->spawnTargetUnitId = targetUnitId;
+								targetUnitIdToHighlight = targetUnitId;
 								unitInfo->spawnUnitMoveToPosX = posInfos.posX;
 								unitInfo->spawnUnitMoveToPosY = posInfos.posY;
 								showRedCrossSign = true;
@@ -593,11 +595,14 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 
 	// End: handle "red cross" sign display, if desired.
 	if (showRedCrossSign) {
-		long int mx = UIGameZone->unknown_130_mousePosX + mousePosX;
-		long int my = UIGameZone->unknown_134_mousePosY + mousePosY;
 		long int drawInterval = 50; // use a custom value (faster) instead of AOE_CONST_DRS::DRAW_INTERVAL_MOVE_RED_CROSS
 		AOE_STRUCTURES::STRUCT_SLP_INFO *slp = settings->ptrInfosSLP[AOE_CONST_DRS::AoeInGameFlagsIconId::IGF_MOVETO_RED_CROSS];
-		AOE_METHODS::UI_BASE::DisplayInGameSign(UIGameZone, slp, mousePosX, mousePosY, 2, drawInterval); // includes the required refresh on UIGameZone
+
+		if (targetUnitIdToHighlight < 0) {
+			AOE_METHODS::UI_BASE::DisplayInGameSign(UIGameZone, slp, mousePosX, mousePosY, 2, drawInterval); // includes the required refresh on UIGameZone
+		} else {
+			AOE_METHODS::UI_BASE::DisplayGreenBlinkingOnUnit(UIGameZone, targetUnitIdToHighlight, 500);
+		}
 	}
 	return skipRORTreatments;
 }

@@ -4870,13 +4870,18 @@ void RockNRorInstance::OnPlayerAddUnitToSelection(REG_BACKUP *REG_values) {
 	long int selectedUnitsCount = REG_values->ECX_val;
 	ror_api_assert(REG_values, (selectedUnitsCount >= 0));
 
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *unitToAdd = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetIntValueFromRORStack(REG_values, 0x0C);
+
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 		REG_values->ESI_val = (long int) selectedUnits[selectedUnitsCount];
 	}
 
+	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		return;
+	}
 	// Custom code
-
+	ROCKNROR::crCommand.OnPlayerAddUnitToSelection(player, unitToAdd);
 }
 
 

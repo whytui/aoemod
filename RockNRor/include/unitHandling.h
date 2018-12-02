@@ -42,7 +42,8 @@ STRUCT_UNIT_BASE *GetAttackTarget(STRUCT_UNIT_BASE *unit);
 std::pair<float, float> GetActionTargetPosition(STRUCT_ACTION_BASE *action);
 std::pair<float, float> GetActionTargetPosition(STRUCT_UNIT_BASE *unit);
 
-// Returns true if "player" knows where targetUnit is located: unit is visible OR its location is explored and its speed=0
+// Returns true if "player" knows where targetUnit is located:
+// unit is visible OR its location is explored and its speed=0 OR unit definition is 'visible in fog'
 bool IsUnitPositionKnown(STRUCT_PLAYER *player, STRUCT_UNIT_BASE *targetUnit);
 
 

@@ -225,6 +225,10 @@ public:
 	// Custom Fixes/features on player.removeUnit calls.
 	void OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool isTempUnit, bool isNotCreatable);
 
+	// Custom Fixes/features on player.addUnitToSelection.
+	// If no unit is selected yet and "this" unit is a building, then display a flag to show the rally point (if any)
+	void OnPlayerAddUnitToSelection(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit);
+
 	// Returns true if a unit should change target to new one, false if it should keep attacking current one.
 	// To be used when target unit is a tower in actor's town
 	bool ShouldAttackTower_towerPanic(AOE_STRUCTURES::STRUCT_UNIT_COMMANDABLE *actorUnit, AOE_STRUCTURES::STRUCT_UNIT_BASE *enemyTower);

@@ -71,7 +71,7 @@ namespace AOE_STRUCTURES
 		short int unknown_10A;
 		short int unknown_10C;
 		short int unknown_10E; // some value for X
-		unsigned long int unknown_110;
+		unsigned long int tileSizeZ; // +110. Fed from GameMapInfo.tileSizeZ in 0x50FF50.
 		short int unknown_114;
 		short int maxGameSizeY; // +116.
 		short int maxGameSizeX; // +118

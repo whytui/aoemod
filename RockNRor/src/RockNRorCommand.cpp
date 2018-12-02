@@ -1878,7 +1878,7 @@ void RockNRorCommand::OnLivingUnitCreation(AOE_CONST_INTERNAL::GAME_SETTINGS_UI_
 				AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *targetUnitDefFlag = (AOE_STRUCTURES::STRUCT_UNITDEF_FLAG *)targetUnitFlag->unitDefinition;
 				// For units that can move, check fog visibility
 				if (targetUnitDefFlag->speed > 0) {
-					canInteractWithTarget = canInteractWithTarget && AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(player, (long)target->positionX, (long)target->positionY);
+					canInteractWithTarget = canInteractWithTarget && IsUnitPositionKnown(player, target);
 				}
 			}
 		}
@@ -2231,6 +2231,61 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 		evtInfo.unitId = unit->unitInstanceId;
 		ROCKNROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_UNIT_LOSS, evtInfo);
 	}
+}
+
+
+// Custom Fixes/features on player.addUnitToSelection.
+// If no unit is selected yet and "this" unit is a building, then display a flag to show the rally point (if any)
+void RockNRorCommand::OnPlayerAddUnitToSelection(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
+	if (!player || !unit || !player->IsCheckSumValid() || !unit->IsCheckSumValidForAUnitClass()) { return; }
+	
+	if (!ROCKNROR::crInfo.configInfo.enableSpawnUnitsAutoTarget || player->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON)) {
+		return;
+	}
+
+	if (unit->ptrStructPlayer != player) { return; }
+	if (player != GetControlledPlayerStruct_Settings()) { return; }
+
+	if (player->selectedUnitCount > 0) {
+		return;
+	}
+
+	long int screenPosX = 0;
+	long int screenPosY = 0;
+	if (!AOE_METHODS::UI_BASE::GetScreenPosForUnit(unit, &screenPosX, &screenPosY)) {
+		return;
+	}
+
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	if (settings->currentUIStatus != GAME_SETTINGS_UI_STATUS::GSUS_PLAYING) { return; }
+
+	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *uiGameMain = settings->ptrGameUIStruct;
+	if (!uiGameMain) { return; }
+
+	UnitCustomInfo *customInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(unit->unitInstanceId);
+	if (customInfo) {
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *target = GetUnitStruct(customInfo->spawnTargetUnitId);
+		if (target && target->IsCheckSumValidForAUnitClass() && IsUnitPositionKnown(player, target)) {
+			if (!AOE_METHODS::UI_BASE::GetScreenPosForUnit(unit, &screenPosX, &screenPosY)) {
+				return;
+			}
+			AOE_METHODS::UI_BASE::DisplayGreenBlinkingOnUnit(uiGameMain->gamePlayUIZone, target->unitInstanceId, 1500);
+			return;
+		} else {
+			if (!AOE_METHODS::UI_BASE::GetScreenPosFromGamePos(customInfo->spawnUnitMoveToPosX, customInfo->spawnUnitMoveToPosY,
+				&screenPosX, &screenPosY)) {
+				return;
+			}
+		}
+	} else {
+		return;
+	}
+
+	long int drawInterval = 100; // use a custom value (faster) instead of AOE_CONST_DRS::DRAW_INTERVAL_MOVE_RED_CROSS
+	AOE_STRUCTURES::STRUCT_SLP_INFO *slp = settings->ptrInfosSLP[AOE_CONST_DRS::AoeInGameFlagsIconId::IGF_MOVETO_INTERMEDIATE_STEP_FLAG];
+	AOE_METHODS::UI_BASE::DisplayInGameSign(uiGameMain->gamePlayUIZone, slp, screenPosX, screenPosY, 2, drawInterval); // includes the required refresh on UIGameZone
 }
 
 

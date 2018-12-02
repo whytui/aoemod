@@ -224,15 +224,15 @@ namespace AOE_STRUCTURES {
 		STRUCT_GAME_MAP_TILE_INFO *myTile; // +1C. See TERRAIN_BYTE class. Can be NULL when unit is inside a transport.
 		STRUCT_UNIT_BASE *transporterUnit; // +20. Transport boat the unit is in
 		STRUCT_OBJECT_LIST *transportedUnits; // +24. List of units in the transport (if "this" is a transport)
-		short int unknown_028;
-		short int unknown_02A; // for graphics ?
+		short int screenPosOffsetX; // +28. X offset (UI coordinates, NOT game coordinates)
+		short int screenPosOffsetY; // +2A. Y offset (UI coordinates, NOT game coordinates)
 		short int unknown_02C; // for graphics ?
 		short int unknown_02E; // for graphics ?
 		// 0x30
 		float remainingHitPoints;
 		char currentGraphicsDamageIndex; // +34. According to remaining HP ? A percentage value (0-100)?
 		char orientationIndex; // +35. Also used as building step (<25%, <50%, <75%, >75%). For types 30+, step orientationAngle(+9C), not this. See 0x44BBD0(unit+[0xD4]).
-		char mouseSelectionStatus; // +36. 1=selected, 2=right-click-target. Is it a Mask, not an enum !
+		char mouseSelectionStatus; // +36. 1=selected, 2=right-click-target, 4=?(0x4A77AA). Is it a Mask, not an enum !
 		char shortcutNumber; // 0-10, 10+=regrouped units ; 0=none, 10=0x0A="0" key.
 		float positionY; // (+38) bottom-left to upper-right
 		float positionX; // (+3C) top-left to bottom-right

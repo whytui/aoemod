@@ -97,7 +97,6 @@ namespace AOE_STRUCTURES {
 		char unknown_0D;
 		char unknown_0E;
 		char unknown_0F;
-		// 0x10
 		// +10. Array of units occupying this tile. The list ends with a NULL pointer. NULL if no unit on this tile.
 		// Note: in the list, we find dopplegangers which correspond to enemy buildings under fog (represents the last explored view, maybe the real unit no longer exists)
 		STRUCT_UNIT_BASE_LIST *unitsOnThisTile;
