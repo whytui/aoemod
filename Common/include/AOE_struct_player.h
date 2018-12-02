@@ -281,7 +281,14 @@ namespace AOE_STRUCTURES {
 		// 0x130
 		short int unknown_130;
 		short int unknown_132;
-		STRUCT_UNIT_BASE *selectedStructUnitTable[26]; // +0x134 is first selected unit's ptr. Last=First?. Only relevant if "selected units" features is NOT installed. See GetRelevantSelectedUnitsPointer(...).
+		// +0x134 is "main" selected unit, the one displayed in bottom-left panel.
+		// DO NOT USE this field directly.
+		// Only relevant if "selected units" features is NOT installed. See GetRelevantMainSelectedUnitPointer(...).
+		STRUCT_UNIT_BASE *mainSelectedUnit; // +134
+		// +0x138 is array of selected units.
+		// DO NOT USE this field directly.
+		// Only relevant if "selected units" features is NOT installed. See GetRelevantSelectedUnitsPointer(...).
+		STRUCT_UNIT_BASE *selectedUnitsTable[25];
 		// +19C : a mask for interactions (depending on selected units). Bits: Refer to UNIT_INTERACTION_MASK_BIT.
 		unsigned long int currentInteractionMask;
 		// 0x1A0
@@ -313,9 +320,12 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_850; // +850. Gaia only. Default 0x1D.
 		unsigned long int unknown_854; // +854. Gaia only
 		unsigned long int unknown_858; // +858. Gaia only
+
 		// 0x85C - DO NOT access this unless you checked the "selected units" feature is installed ! On standard game structure stops here.
 		// See GetRelevantSelectedUnitsPointer(...)
-		STRUCT_UNIT_BASE *custom_selectedUnits[CST_RS_MAX_SUPPORTED_SELECTED_UNITS]; // ONLY USE THIS if "selected units" feature is installed or you will access bad memory. See GetRelevantSelectedUnitsPointer (in commands)
+		// ONLY USE THIS if "selected units" feature is installed or you will access bad memory.
+		STRUCT_UNIT_BASE *custom_mainSelectedUnit; // +0x85C. See GetRelevantMainSelectedUnitPointer (in RockNRorInfo)
+		STRUCT_UNIT_BASE *custom_selectedUnits[CST_RS_MAX_SUPPORTED_SELECTED_UNITS]; // +860. See GetRelevantSelectedUnitsPointer (in RockNRorInfo)
 
 		STRUCT_GAME_GLOBAL *GetGlobalStruct() const {
 			return (STRUCT_GAME_GLOBAL*) this->ptrGlobalStruct;

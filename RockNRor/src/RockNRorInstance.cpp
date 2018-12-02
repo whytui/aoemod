@@ -465,6 +465,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x42A961:
 		this->ExecMoveCmdUsingFormation(REG_values);
 		break;
+	case 0x45DC2D:
+		this->OnPlayerAddUnitToSelection(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4846,6 +4849,34 @@ void RockNRorInstance::ExecMoveCmdUsingFormation(REG_BACKUP *REG_values) {
 	} else {
 		ChangeReturnAddress(REG_values, returnAdressForceFormation);
 	}
+}
+
+
+// From 0x45DC25 (player.addOneUnitToSelection(ptrUnit, doPlaySound))
+// This is an entry point when a unit is added to player selection
+// - Unit visibility has already been checked, the game already checked there is still room for selecting one more unit
+// - This method is also used in scenario editor !
+// - There may already be units in current player 
+// - Selection may trigger selection of other units (in case unit belongs to a "group of units")
+// - To access selected units array, ***be careful to use the correct pointer***
+// This does not change return address
+void RockNRorInstance::OnPlayerAddUnitToSelection(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_PLAYER *player = (AOE_STRUCTURES::STRUCT_PLAYER *)REG_values->EAX_val;
+	ror_api_assert(REG_values, player && player->IsCheckSumValid());
+
+	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(player);
+	ror_api_assert(REG_values, (selectedUnits != NULL));
+
+	long int selectedUnitsCount = REG_values->ECX_val;
+	ror_api_assert(REG_values, (selectedUnitsCount >= 0));
+
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->ESI_val = (long int) selectedUnits[selectedUnitsCount];
+	}
+
+	// Custom code
+
 }
 
 

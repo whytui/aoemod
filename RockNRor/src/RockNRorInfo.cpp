@@ -225,22 +225,29 @@ bool RockNRorInfo::HasOpenedCustomGamePopup() {
 }
 
 
-// Get main (first) selected unit, or NULL if none is selected.
+// Get main selected unit, or NULL if none is selected.
 // Works in-game and in editor.
 // See SelectOneUnit (in playerHandling) for unit selection + AOE_selectUnit, AOE_clearSelectedUnits
 AOE_STRUCTURES::STRUCT_UNIT_BASE *RockNRorInfo::GetMainSelectedUnit(AOE_STRUCTURES::STRUCT_PLAYER *player) {
-	assert(player != NULL);
+	return this->GetRelevantMainSelectedUnitPointer(player);
+}
+
+
+// Get relevant "main selected unit" pointer according to game EXE status (using custom memory or not ?)
+AOE_STRUCTURES::STRUCT_UNIT_BASE *RockNRorInfo::GetRelevantMainSelectedUnitPointer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player) { return NULL; }
-	AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = this->GetRelevantSelectedUnitsPointer(player);
-	if (!selectedUnits) {
-		return NULL;
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit;
+	if (this->hasCustomSelectedUnitsMemory) {
+		selectedUnit = player->custom_mainSelectedUnit;
+	} else {
+		selectedUnit = player->mainSelectedUnit;
 	}
-	return *selectedUnits; // not sure it always corresponds to selected unit in bottom left panel ? But this works in editor too
+	return selectedUnit;
 }
 
 
 // Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
-// Please use this instead of playerStruct->selectedStructUnitTable
+// Please use this instead of playerStruct->selectedUnitsTable
 AOE_STRUCTURES::STRUCT_UNIT_BASE **RockNRorInfo::GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	assert(player != NULL);
 	if (!player) { return NULL; }
@@ -248,7 +255,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE **RockNRorInfo::GetRelevantSelectedUnitsPointer
 	if (this->hasCustomSelectedUnitsMemory) {
 		selectedUnits = player->custom_selectedUnits;
 	} else {
-		selectedUnits = player->selectedStructUnitTable;
+		selectedUnits = player->selectedUnitsTable;
 	}
 	assert(selectedUnits != NULL);
 	return selectedUnits;

@@ -119,12 +119,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 			AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 			AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 			assert((player != NULL) && player->IsCheckSumValid());
-			AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = NULL;
-			if (player && player->IsCheckSumValid()) {
-				unitArray = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(player);
-			}
-			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = NULL;
-			if (unitArray) { unit = unitArray[0]; }
+			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = ROCKNROR::crInfo.GetRelevantMainSelectedUnitPointer(player);
 			if (unit && unit->IsCheckSumValidForAUnitClass()) {
 				if (unit->DerivesFromTrainable() && (unit->unitStatus <= 2)) { // game command would crash for other types than trainable/buildings
 					GAME_COMMANDS::CreateCmd_KillUnit(unit->unitInstanceId);
@@ -250,11 +245,7 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 		static char buffer[1024] = "\0";
 		char *posInBuf = buffer;
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(global->humanPlayerId);
-		AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = NULL;
-		AOE_STRUCTURES::STRUCT_UNIT_BASE **unitArray = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(player);
-		if (unitArray) {
-			selectedUnit = unitArray[0];
-		}
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = ROCKNROR::crInfo.GetRelevantMainSelectedUnitPointer(player);
 		float x, y;
 		GetGamePositionUnderMouse(&x, &y);
 		bool expl = AOE_STRUCTURES::PLAYER::IsExploredForPlayer(player, (long)x, (long)y);
@@ -477,7 +468,7 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 	}
 
 	// Fix for right-clicking on deposit building (all hardcoded in ROR)
-	AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = selectedUnits[0];
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *mainSelectedUnit = ROCKNROR::crInfo.GetRelevantMainSelectedUnitPointer(controlledPlayer);
 	if (mainSelectedUnit && mainSelectedUnit->IsCheckSumValidForAUnitClass() && 
 		targetUnit && targetUnit->IsCheckSumValidForAUnitClass() &&
 		(mainSelectedUnit->resourceValue > 0) && mainSelectedUnit->DerivesFromCommandable() &&

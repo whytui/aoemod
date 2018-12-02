@@ -637,10 +637,10 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		// Sometimes we need to have almost empty farms for testing...
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 		if (!player) { return; }
-		AOE_STRUCTURES::STRUCT_UNIT_BASE **selectedUnits = ROCKNROR::crInfo.GetRelevantSelectedUnitsPointer(player);
-		if (selectedUnits && selectedUnits[0] && ((STRUCT_UNIT_BUILDING*)(selectedUnits[0]))->IsCheckSumValid() &&
-			(selectedUnits[0]->ptrStructPlayer == player)) {
-			SetFarmCurrentTotalFood((STRUCT_UNIT_BUILDING*)(selectedUnits[0]), 2);
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = ROCKNROR::crInfo.GetRelevantMainSelectedUnitPointer(player);
+		if (selectedUnit && ((STRUCT_UNIT_BUILDING*)(selectedUnit))->IsCheckSumValid() &&
+			(selectedUnit->ptrStructPlayer == player)) {
+			SetFarmCurrentTotalFood((STRUCT_UNIT_BUILDING*)(selectedUnit), 2);
 		}
 	}
 

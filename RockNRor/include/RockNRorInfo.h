@@ -145,6 +145,9 @@ public:
 	// See SelectOneUnit (in playerHandling) for unit selection + AOE_selectUnit, AOE_clearSelectedUnits
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *GetMainSelectedUnit(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
+	// Get relevant "main selected unit" pointer according to game EXE status (using custom memory or not ?)
+	AOE_STRUCTURES::STRUCT_UNIT_BASE *GetRelevantMainSelectedUnitPointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
+
 	// Get relevant "selected units" array pointer according to game EXE status (using custom memory or not ?)
 	AOE_STRUCTURES::STRUCT_UNIT_BASE **GetRelevantSelectedUnitsPointer(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
