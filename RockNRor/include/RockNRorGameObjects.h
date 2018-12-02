@@ -25,6 +25,7 @@ public:
 	float protectPosX;
 	float protectPosY;
 	long int protectUnitId;
+	long int myMainBuilderId; // unitId of "main" villager builder, that will have priority on others for next action (farming when farm is built...). -1=N/A (most cases).
 
 	// Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)
 	bool CanBeRemoved() const;

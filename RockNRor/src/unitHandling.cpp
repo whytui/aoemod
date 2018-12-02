@@ -375,7 +375,31 @@ bool CanBuilderSwitchToFarmer(STRUCT_UNIT_BASE *builder, STRUCT_UNIT_BASE *farm)
 		curElemVillager = curElemVillager->previousElement;
 	}
 
-	return true; // Default = other cases
+	UnitCustomInfo *farmInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(farm->unitInstanceId);
+	bool changeMainBuilder = true;
+	if (farmInfo && (farmInfo->myMainBuilderId != builder->unitInstanceId)) {
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *mainBuilder = GetUnitStruct(farmInfo->myMainBuilderId); // ID can be -1
+			
+		// Is main builder still alive, does he still belong to same player
+		if (mainBuilder && mainBuilder->unitDefinition && mainBuilder->unitDefinition->DerivesFromCommandable() && 
+			(mainBuilder->unitStatus == GAME_UNIT_STATUS::GUS_2_READY) && (mainBuilder->ptrStructPlayer == farm->ptrStructPlayer)
+			// Do not use "current target==farm" criterion, it sometimes fails because "main" builder has gone to "search" and started building something else...
+			) {
+			AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *mainBuilderDef = (AOE_STRUCTURES::STRUCT_UNITDEF_COMMANDABLE *) mainBuilder->unitDefinition;
+			changeMainBuilder = false;
+			// Check if main builder is still around
+			float searchRadius = mainBuilderDef->searchRadius;
+			float dist = GetDistance(mainBuilder->positionX, mainBuilder->positionY, farm->positionX, farm->positionY);
+			if (searchRadius < dist) {
+				changeMainBuilder = true; // main builder is further than "search radius"
+			}
+		}
+	}
+	if (changeMainBuilder) {
+		// "main" builder left, take his place !
+		farmInfo->myMainBuilderId = builder->unitInstanceId;
+	}
+	return changeMainBuilder; // Default = other cases
 }
 
 

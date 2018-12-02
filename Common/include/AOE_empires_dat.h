@@ -103,7 +103,7 @@ namespace AOE_CONST_FUNC {
 	static const short int MAX_RESOURCE_TYPE_ID = 57;
 	enum RESOURCE_TYPES : short int {
 		// Basic resources
-		CST_RES_ORDER_FOOD = 0,
+		CST_RES_ORDER_FOOD = 0, // See also CST_RES_ORDER_MEAT_STORAGE, CST_RES_ORDER_BERRY_STORAGE, CST_RES_ORDER_FISH_STORAGE
 		CST_RES_ORDER_WOOD = 1,
 		CST_RES_ORDER_STONE = 2,
 		CST_RES_ORDER_GOLD = 3,
@@ -137,7 +137,7 @@ namespace AOE_CONST_FUNC {
 		CST_RES_ORDER_POPULATION_LIMIT = 32, // offset +0x80
 		CST_RES_ORDER_FAITH = 34, // 0x22
 		CST_RES_ORDER_FAITH_RECHARGING_RATE = 35, // default 2 ?
-		CST_RES_ORDER_FARM_FOOD_AMOUNT = 36, // default 250 ?
+		CST_RES_ORDER_FARM_FOOD_AMOUNT = 36, // Farm initial food potential. Default 250 ?
 		CST_RES_ORDER_CIVILIAN_POPULATION = 37, // Current number of villagers. Counts TribeAIGroupCivilian, TribeAIGroupFishingBoat, TribeAIGroupTradeBoat
 		CST_RES_ORDER_UNKNOWN_38 = 38, // is this even used ?
 		CST_RES_ORDER_ALL_TECHNOLOGIES = 39, // Unused ???

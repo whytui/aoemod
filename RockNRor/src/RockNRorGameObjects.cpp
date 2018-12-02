@@ -8,6 +8,7 @@ UnitCustomInfo::UnitCustomInfo() {
 	this->autoAttackPolicyIsSet = false;
 	//autoAttackPolicy : default constructor will initialize it correctly.
 	this->ResetProtectInfo();
+	this->myMainBuilderId = -1;
 }
 
 // Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)

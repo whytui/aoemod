@@ -4596,6 +4596,8 @@ void RockNRorInstance::TacAIHandleOneUpdateByType(REG_BACKUP *REG_values) {
 // - 0x4B19FD to search for nearby constructions to build (status 3=search) = default treatment for most cases
 // - 0x4B1B06 to set time=-1 to use farm hack (next call will simulate a "right click" to transform builder into a farmer
 // - 0x4B1B0D to return 0 (do not search, do nothing special = will stop) : not a standard case
+// Additional notes:
+// - The builders that transform into repairmen when construction is damaged is handled in actionBuild.update() method, in 0x004B1914
 void RockNRorInstance::ActionBuildUpdateFarmHack(REG_BACKUP *REG_values) {
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *building = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EAX_val;
 	AOE_STRUCTURES::STRUCT_ACTION_BUILD *actionBuild = (AOE_STRUCTURES::STRUCT_ACTION_BUILD *)REG_values->ESI_val;
