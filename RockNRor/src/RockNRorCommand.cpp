@@ -1540,12 +1540,33 @@ bool RockNRorCommand::ManageAIFileSelectionForPlayer(char civilizationId, char *
 	int randomChoice = 0;
 	if (gameSettings->isDeathMatch) {
 		if (civ) {
-			size = civ->deathmatch_AI_file.size();
-			if (size > 0) {
-				randomChoice = randomizer.GetRandomValue(0, size - 1);
-				s = civ->deathmatch_AI_file.at(randomChoice);
-				strcpy_s(aiFileBuffer, 255, s.c_str());
+			switch (gameSettings->mapTypeChoice) {
+			case 0:
+			case 1:
+				// Much water
+				size = civ->deathmatch_water_AI_file.size();
+				if (size > 0) {
+					randomChoice = randomizer.GetRandomValue(0, size - 1);
+					s = std::string(civ->deathmatch_water_AI_file.at(randomChoice));
+				}
+				break;
+			case 4:
+			case 7:
+				size = civ->deathmatch_AI_file.size();
+				if (size > 0) {
+					randomChoice = randomizer.GetRandomValue(0, size - 1);
+					s = std::string(civ->deathmatch_AI_file.at(randomChoice));
+				}
+				break;
+			default:
+				// Some water
+				size = civ->deathmatch_water_AI_file.size();
+				if (size > 0) {
+					randomChoice = randomizer.GetRandomValue(0, size - 1);
+					s = std::string(civ->deathmatch_water_AI_file.at(randomChoice));
+				}
 			}
+			strcpy_s(aiFileBuffer, 255, s.c_str());
 		}
 	} else {
 		// RM or scenario (for players that don't have a strategy).
