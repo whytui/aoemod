@@ -145,8 +145,58 @@ void RockNRorInfo::FillResearchesToDisableFromString(long int playerId, const ch
 
 // Function to calculate conversion resistance for a giver unit from a given civ.
 // This replaces game's algorithm.
+// civId is only used if no conversion resistance is configured for unit, or if "improved conversion resistance mode" is disabled.
+float RockNRorInfo::GetConversionResistance(char civId, AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef) {
+	assert(unitDef != NULL);
+	if (unitDef == NULL) { return 1.f; }
+	if (this->configInfo.conversionResistanceAttackClassEnabled) {
+		// "Improved conversion resistance mode" is active : get it from empires.dat (entirely configurable)
+		if (!unitDef->DerivesFromAttackable()) {
+			return 1.f;
+		}
+		AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE * unitDefAtk = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE*)unitDef;
+		for (int i = 0; i < unitDefAtk->armorsCount; i++) {
+			if (unitDefAtk->ptrArmorsList[i].classId == this->configInfo.conversionResistanceAttackClass) {
+				// empires.dat contains a conversion resistance value for that unit.
+				// We store conversion resistance as a percentage (that can be more than 100), because armors are (short) ints
+				float value = ((float)(unitDefAtk->ptrArmorsList[i].amount)) / 100;
+				if (value < 0) { value = 0; } // 0 means immediate conversion
+				return value;
+			}
+		}
+		GLOBAL_UNIT_AI_TYPES unitClass = unitDefAtk->unitAIType;
+		// No conversion resistance value is configured for this unit. Apply GAME defaults ; start with special cases
+		if (civId == CST_CIVID_MACEDONIAN) {
+			return 4.f;
+		}
+		if (
+			(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat) || // TribeAIGroupFishingBoat
+			(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTradeBoat) || // trade boat
+			(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupTransportBoat) || // TribeAIGroupTransportBoat
+			(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupWarBoat)) // TribeAIGroupWarBoat including fire galley, juggernaught
+		{
+			return 2.f;
+		}
+		if (unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) { // TribeAIGroupPriest
+			return 2.f;
+		}
+		if (
+			(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot) || // Chariot
+			(unitClass == GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher) // Chariot archer
+			) {
+			return 8.f;
+		}
+		return 1.f; // No configuration and unit is a standard one = standard resistance
+	} else {
+		return this->GetConversionResistance_hardcodedWithConf(civId, unitDef->unitAIType);
+	}
+}
+
+
+// Function to calculate conversion resistance for a giver unit from a given civ.
+// This replaces game's algorithm.
 // Use civId=0 (same as "gaia" civ) to exclude any civ bonus/malus from calculation
-float RockNRorInfo::GetConversionResistance(char civId, short int unitClass) {
+float RockNRorInfo::GetConversionResistance_hardcodedWithConf(char civId, short int unitClass) {
 	// Standard resistances (original game)
 	// Macedonian
 	if (civId == CST_CIVID_MACEDONIAN) {

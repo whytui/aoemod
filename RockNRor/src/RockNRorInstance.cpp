@@ -714,7 +714,7 @@ void RockNRorInstance::ComputeConversionResistance(REG_BACKUP *REG_values) {
 	char civIdToUse = allTechs ? 0 : targetPlayer->civilizationId; // If all techs, do NOT apply hardcoded civ bonuses
 
 	// Compute resistance
-	float resistance = ROCKNROR::crInfo.GetConversionResistance(civIdToUse, targetUnitDef->unitAIType);
+	float resistance = ROCKNROR::crInfo.GetConversionResistance(civIdToUse, targetUnitDef);
 
 	// Save computed resistance to dedicated stack record
 	_asm {

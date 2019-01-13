@@ -149,6 +149,12 @@ namespace AOE_STRUCTURES {
 			AOE_CONST_FUNC::ATTACK_CLASS attackClass = (AOE_CONST_FUNC::ATTACK_CLASS)(((long int)value) / 256);
 			return attackClass;
 		}
+
+		// Get the "attack/armor value" information from an "attack or armor" float value.
+		static inline long int GetAttackOrArmorValueFromFloatValue(float value) {
+			long int v = (long int)value;
+			return v % 256;
+		}
 	};
 	static_assert(sizeof(STRUCT_TECH_DEF_EFFECT) == 0x0C, "STRUCT_TECH_DEF_EFFECT size");
 

@@ -52,22 +52,24 @@ bool UnitDefApplySetEffect(STRUCT_UNITDEF_BASE *unitDef, float value, AOE_CONST_
 	if (unitDef->DerivesFromAttackable()) {
 		unitDefAttackable = (STRUCT_UNITDEF_ATTACKABLE *)unitDef;
 	}
-	// There is a limitation in tech effects in ROR for armors/attack updates:
-	// If updating armor/attack value for an armor/attack that does not exist yet, then it does nothing
-	// We fix this by adding the armor/attack in the list with default value (0)
-	// This limitation concerns for add/set/multiply effects
-	// Note: we only fix for add/set (multiply N/A or 0 has no effect, so it's useless)
+
+	// The "apply set effect" method in ROR is completely bugged for attributes ARMOR/ATTACK.
+	// Not only it does not work when armor does not already exist in list (same limitation as "apply add effect"),
+	// But also it contains a confusion between "armor (or attack) index" and "armor (or attack) class" (this bug is NOT present for "apply add effect")
+	// So we completely override this case..
 	switch (attribute) {
 	case TECH_UNIT_ATTRIBUTES::TUA_ARMOR:
 		if (unitDefAttackable) {
-			AOE_STRUCTURES::AddArmorIfMissing(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value), 0);
+			AOE_STRUCTURES::SetArmorInList(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value),
+				STRUCT_TECH_DEF_EFFECT::GetAttackOrArmorValueFromFloatValue(value), true);
 		}
-		break;
+		return true; // Do not run ROR original code, we just overrode it.
 	case TECH_UNIT_ATTRIBUTES::TUA_ATTACK:
 		if (unitDefAttackable) {
-			AOE_STRUCTURES::AddAttackIfMissing(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value), 0);
+			AOE_STRUCTURES::SetAttackInList(unitDefAttackable, STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value),
+				STRUCT_TECH_DEF_EFFECT::GetAttackOrArmorValueFromFloatValue(value), true);
 		}
-		break;
+		return true; // Do not run ROR original code, we just overrode it.
 	}
 
 	return false;
@@ -113,7 +115,7 @@ void ApplyUnsupportedEffects(STRUCT_PLAYER *player, STRUCT_TECH_DEF_INFO *techDe
 		{
 			// This effect type is unimplemented in ROR !
 			AOE_CONST_FUNC::RESOURCE_TYPES resType = (AOE_CONST_FUNC::RESOURCE_TYPES)techDef->ptrEffects[i].effectUnit;
-			PlayerApplyMultiplyResourceEffect(player, techDef->ptrEffects[i].GetValue(), resType);
+			ROCKNROR::TECHEFFECT::PlayerApplyMultiplyResourceEffect(player, techDef->ptrEffects[i].GetValue(), resType);
 		}
 			break;
 		case AOE_CONST_FUNC::TECH_DEF_EFFECTS::TDE_RESEARCH_COST_MODIFIER:

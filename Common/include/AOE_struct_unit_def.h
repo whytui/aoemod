@@ -35,8 +35,8 @@ namespace AOE_STRUCTURES
 
 	// Size 4. Defines armor/attack amount for a specific class.
 	struct STRUCT_ARMOR_OR_ATTACK {
-		AOE_CONST_FUNC::ATTACK_CLASS classId; // "class" is reserved !
-		short int amount;
+		AOE_CONST_FUNC::ATTACK_CLASS classId; // "class" is reserved ! Signed(?) short int
+		short int amount; // +02
 	};
 	static_assert(sizeof(STRUCT_ARMOR_OR_ATTACK) == 4, "STRUCT_ARMOR_OR_ATTACK size");
 

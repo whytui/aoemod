@@ -1,4 +1,5 @@
 #include <AOE_empires_dat.h>
+#include <string>
 
 #pragma once
 
@@ -182,13 +183,26 @@ namespace AOE_CONST_FUNC {
 			"CatapultsVsBuildings", "PriestWeakness", "CavalryWeakness", "InfantryWeakness", "Siegecraft", "Atk11?", "AnimalAttack"
 	};
 
-	// Returns hardcoded attack class (or armor class) name, in english
+	// Returns hardcoded attack class (or armor class) name, in english.
+	// Custom classes are returned as "Invalid"
 	static const char *GetAttackOrArmorClassName(ATTACK_CLASS a) {
 		if (a < 0) { return "None"; }
-		if (a >= CST_AC_COUNT) { return "Invalid"; }
+		if (a >= CST_AC_COUNT) {
+			return "Invalid";
+		}
 		return ATTACK_CLASS_NAMES[a];
 	}
 
+	// Returns hardcoded attack class (or armor class) name, in english
+	// Custom classes are returned as "Custom_xxx" where xxx is class Id.
+	static const std::string GetAttackOrArmorClassNameString(ATTACK_CLASS a) {
+		if (a < 0) { return "None"; }
+		if (a >= CST_AC_COUNT) {
+			std::string tmp = std::string("Custom_") + std::to_string(a);
+			return tmp.c_str();
+		}
+		return ATTACK_CLASS_NAMES[a];
+	}
 
 	// Tech effects unit attribute names for RGE attribute types (<100)
 	static const char* RGE_TECH_UNIT_ATTRIBUTE_NAMES[] { "Hit Points",

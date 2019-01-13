@@ -266,7 +266,7 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 	if (isValidType50) {
 		for (int i = 0; i < unitDef50->attacksCount; i++) {
 			if (!IsStandardAttack(unitDef50->ptrAttacksList[i].classId) && (unitDef50->ptrAttacksList[i].amount >= 0)) {
-				const char *attackName = GetAttackOrArmorClassName(unitDef50->ptrAttacksList[i].classId);
+				const std::string attackName = GetAttackOrArmorClassNameString(unitDef50->ptrAttacksList[i].classId);
 				attackStrengths += attackName;
 				// Do not display "bonus" attack amounts, they generally are 0 (a malus is set on armors instead)
 				//attackStrengths += "=";
@@ -276,7 +276,7 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 		}
 		for (int i = 0; i < unitDef50->armorsCount; i++) {
 			if (!IsStandardAttack(unitDef50->ptrArmorsList[i].classId)) {
-				const char *attackName = GetAttackOrArmorClassName(unitDef50->ptrArmorsList[i].classId);
+				const std::string attackName = GetAttackOrArmorClassNameString(unitDef50->ptrArmorsList[i].classId);
 				armorWeaknesses += attackName;
 				armorWeaknesses += "=";
 				armorWeaknesses += std::to_string(unitDef50->ptrArmorsList[i].amount);
@@ -298,13 +298,13 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 		} else {
 			wholeText += armorWeaknesses;
 		}
-		this->AddTextBox(&this->edtStrengthWeakness, wholeText.c_str(), 0, 30, currentYPos, 450, 36, true, true, false, AOE_FONTS::AOE_FONT_SMALL_TEXT_10);
-		currentYPos += 40;
+		this->AddTextBox(&this->edtStrengthWeakness, wholeText.c_str(), 0, 30, currentYPos, 450, 56, true, true, false, AOE_FONTS::AOE_FONT_SMALL_TEXT_10);
+		currentYPos += 60;
 	}
 
 	// Conversion resistance : only for living/building (other units can't be converted)
 	if (unitBase->ptrStructPlayer && unitBase->ptrStructPlayer->IsCheckSumValid() && unitBase->DerivesFromTrainable()) {
-		float conversionResistance = ROCKNROR::crInfo.GetConversionResistance(unitBase->ptrStructPlayer->civilizationId, unitDefBase->unitAIType);
+		float conversionResistance = ROCKNROR::crInfo.GetConversionResistance(unitBase->ptrStructPlayer->civilizationId, unitDefBase);
 		std::string convResistText = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_CONVERSION_RESISTANCE, "Conversion resistance");
 		convResistText += "=";
 		convResistText += std::to_string(conversionResistance);

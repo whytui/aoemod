@@ -174,12 +174,16 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "markUnitsWithCivBonus:                     %ld\n", ROCKNROR::crInfo.configInfo.markUnitsWithCivBonus);
 
 	// Conversion
-	fprintf_s(f, "conversionResistance_Boats:                %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Boats);
-	fprintf_s(f, "conversionResistance_Chariots:             %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Chariots);
-	fprintf_s(f, "conversionResistance_Macedonian:           %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Macedonian);
-	fprintf_s(f, "conversionResistance_Priests:              %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Priests);
-	fprintf_s(f, "conversionResistance_WarElephants:         %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_WarElephants);
-	fprintf_s(f, "conversionResistance_WarElephants_Persian: %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_WarElephants_Persian);
+	if (ROCKNROR::crInfo.configInfo.conversionResistanceAttackClassEnabled) {
+		fprintf_s(f, "conversionResistance_armorClass:           %d\n", ROCKNROR::crInfo.configInfo.conversionResistanceAttackClass);
+	} else {
+		fprintf_s(f, "conversionResistance_Boats:                %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Boats);
+		fprintf_s(f, "conversionResistance_Chariots:             %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Chariots);
+		fprintf_s(f, "conversionResistance_Macedonian:           %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Macedonian);
+		fprintf_s(f, "conversionResistance_Priests:              %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_Priests);
+		fprintf_s(f, "conversionResistance_WarElephants:         %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_WarElephants);
+		fprintf_s(f, "conversionResistance_WarElephants_Persian: %f\n", ROCKNROR::crInfo.configInfo.conversionResistance_WarElephants_Persian);
+	}
 	// Various AI
 	fprintf_s(f, "improveAILevel:                            %ld\n", ROCKNROR::crInfo.configInfo.improveAILevel);
 	fprintf_s(f, "testCompareAI:                             %ld\n", ROCKNROR::crInfo.configInfo.enableTestCompareAI ? 1: 0);

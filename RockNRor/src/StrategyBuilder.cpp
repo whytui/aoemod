@@ -657,7 +657,7 @@ void StrategyBuilder::CollectPotentialUnitsInfo(AOE_STRUCTURES::STRUCT_PLAYER *p
 		unitInfo->unitAIType = unitDef->unitAIType;
 		unitInfo->unitName = bestUpgradedDetail->internalName.c_str();
 		unitInfo->langName = bestUpgradedDetail->langName;
-		unitInfo->conversionResistance = this->crInfo->GetConversionResistance(player->civilizationId, unitDef->unitAIType);
+		unitInfo->conversionResistance = this->crInfo->GetConversionResistance(player->civilizationId, unitDef);
 		unitInfo->hasUnavailableUpgrade = hasUnavailableUpgrade;
 		unitInfo->unavailableRelatedResearchDetail.clear();
 		unitInfo->availableRelatedResearchDetail.clear();
