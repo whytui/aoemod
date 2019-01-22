@@ -39,12 +39,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
-    <AOE_include>D:\Dév\CPP\AOE\Common\include</AOE_include>
-    <AOE_lib>D:\Dév\CPP\AOE\Common\lib</AOE_lib>
-    <AOE_res>D:\Dév\CPP\AOE\Common\res</AOE_res>
-    <wxw_include>D:\Dév\CPP\wxwidgets\include</wxw_include>
-    <wxw_include_msvc>D:\Dév\CPP\wxwidgets\include\msvc</wxw_include_msvc>
-    <wxw_lib>D:\Dév\CPP\wxwidgets\lib\vc_lib</wxw_lib>
+    <AOE_include>D:\Dev\CPP\AOE\Common\include</AOE_include>
+    <AOE_lib>D:\Dev\CPP\AOE\Common\lib</AOE_lib>
+    <AOE_res>D:\Dev\CPP\AOE\Common\res</AOE_res>
+    <wxw_include>D:\Dev\CPP\wxwidgets\include</wxw_include>
+    <wxw_include_msvc>D:\Dev\CPP\wxwidgets\include\msvc</wxw_include_msvc>
+    <wxw_lib>D:\Dev\CPP\wxwidgets\lib\vc_lib</wxw_lib>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(AOE_lib)\</OutDir>

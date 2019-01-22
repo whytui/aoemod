@@ -704,7 +704,7 @@ void WxEditFile::OnTreeSelChange(wxCommandEvent& event) {
 	this->ChangeNode();
 }
 
-// This is a hack to workaround one of numerous wsWidget bugs
+// This is a hack to workaround one of numerous wxWidget bugs
 // If we do some SetFocus() in OnTreeSelChange, it doesn't work (for mouse events) because tree re-gets focus afterwards. (but it works with keyboard arrows !!)
 void WxEditFile::OnTreeGetInfo(wxCommandEvent& event) {
 	if (objectToFocusAfterClickOnTree) {

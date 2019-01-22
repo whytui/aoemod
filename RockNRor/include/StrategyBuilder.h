@@ -61,7 +61,7 @@ namespace STRATEGY {
 		~StrategyBuilder() {
 			this->FreePotentialElementsList();
 #ifdef _DEBUG
-			std::string filename = "D:\\Dév\\CPP\\AOE\\Debug\\crstrategy";
+			std::string filename = "D:\\Dev\\CPP\\AOE\\Debug\\crstrategy";
 			if (this->player) {
 				filename += std::to_string(this->player->playerId);
 			}

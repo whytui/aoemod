@@ -90,7 +90,7 @@ public:
 	~TechTreeAnalyzer() {
 #ifdef _DEBUG
 		// Write log to local file
-		std::string filename = "D:\\Dév\\CPP\\AOE\\Debug\\TechTreeAnalyze.log";
+		std::string filename = "D:\\Dev\\CPP\\AOE\\Debug\\TechTreeAnalyze.log";
 		if (WriteToFile(this->myLog, filename, false)) {
 			traceMessageHandler.WriteMessageNoNotification(std::string("TechTreeAnalyze: find logs in ") + filename);
 		}
