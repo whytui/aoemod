@@ -233,6 +233,7 @@ public:
 	UnitSpawnShortcutInfo unitShortcutsInformation[CST_NUMBER_OF_UNIT_SHORTCUT_NUMBERS]; // index 0 is unused
 	bool enableAdditionalNumpadShortcuts; // If true, numpad 0-9 keys are additional unit shortcuts.
 	ROCKNROR::CONFIG::AutoRebuildFarmConfig autoRebuildFarmsConfig[ROCKNROR::CFG_GAME_TYPES_COUNT];
+	bool autoGatherAfterBuildDeposit;
 	bool useImprovedButtonBar;
 	bool allowMultiQueueing; // Allow queuing different unit types. Default is false.
 	bool useEnhancedRulesForAutoAttackTargetSelection;

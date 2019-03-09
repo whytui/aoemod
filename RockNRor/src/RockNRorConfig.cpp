@@ -119,6 +119,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->useEnhancedRulesForAutoAttackTargetSelection = false; // Game default
 	//this->autoAttackOptionForBlastMeleeUnits : constructor is Game default
 	//this->autoAttackOptionForBlastRangedUnits ; constructor is Game default
+	this->autoGatherAfterBuildDeposit = false; // Game default
 	this->generateStrategyForRM = false; // Game default
 	this->generateStrategyForDM = false; // Game default
 	this->maxAgeRM_DM = -1;
@@ -822,6 +823,10 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			}
 		}
 
+		if (elemName == "autoGatherAfterBuildDeposit") {
+			this->autoGatherAfterBuildDeposit = XML_GetBoolElement(elem, "enable");
+		}
+		
 		if (elemName == "unitSpawn") {
 			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "autoMoveToLocation") {

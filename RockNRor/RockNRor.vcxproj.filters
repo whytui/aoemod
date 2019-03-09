@@ -360,6 +360,9 @@
     <ClInclude Include="..\tinyxml\tinyxml.h">
       <Filter>Fichiers d%27en-tête\TinyXML</Filter>
     </ClInclude>
+    <ClInclude Include="include\MapUsageHandler.h">
+      <Filter>Fichiers d%27en-tête\Primitives</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\StrategyBuilder.cpp">
@@ -615,6 +618,9 @@
       <Filter>Fichiers sources\TinyXML</Filter>
     </ClCompile>
     <ClCompile Include="src\AOEPrimitives_UI_gameMain.cpp">
+      <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MapUsageHandler.cpp">
       <Filter>Fichiers sources\Primitives</Filter>
     </ClCompile>
   </ItemGroup>

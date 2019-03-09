@@ -220,6 +220,9 @@
 	<autoRebuildFarms gameType="RM" enable="1" maxFarms="9" minWood="200" maxFood="2000"></autoRebuildFarms>
 	<autoRebuildFarms gameType="DM" enable="1" maxFarms="3" minWood="2000" maxFood="20000"></autoRebuildFarms>
 	
+	<!-- Enable this to allow villager to automatically gather nearby resources after building a granary/SP -->
+	<autoGatherAfterBuildDeposit enable="false"/>
+	
 	<!-- AutoMoveToLocation: Right-click from a building to define where new units should walk. 0=disable, 1=enable. -->
 	<unitSpawn name="autoMoveToLocation" enable="1"></unitSpawn>
 	<!-- AutoMoveToLocation: Right-click from a building to define a target for new units. 0=disable, 1=enable. -->

@@ -126,6 +126,7 @@
     <ClInclude Include="include\combatAI.h" />
     <ClInclude Include="include\commonConfigEnums.h" />
     <ClInclude Include="include\CustomCiv.h" />
+    <ClInclude Include="include\MapUsageHandler.h" />
     <ClInclude Include="include\PlayerTechTree.h" />
     <ClInclude Include="include\RnrScreenBase.h" />
     <ClInclude Include="include\RockNRorSettingsScreen.h" />
@@ -224,6 +225,7 @@
     <ClCompile Include="src\civilizationInfo.cpp" />
     <ClCompile Include="src\combatAI.cpp" />
     <ClCompile Include="src\CustomCiv.cpp" />
+    <ClCompile Include="src\MapUsageHandler.cpp" />
     <ClCompile Include="src\PlayerTechTree.cpp" />
     <ClCompile Include="src\RnrScreenBase.cpp" />
     <ClCompile Include="src\RockNRorSettingsScreen.cpp" />

@@ -135,6 +135,7 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 		return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
 	}
 	// This is restricted to "AI improvements ON" configuration.
+	// Also return in "error cases" (invalid/missing actor unit...)
 	if (!activity || !activity->IsCheckSumValid() || !notifyEvent || !activity->ptrUnit ||
 		!activity->ptrUnit->ptrStructPlayer || !IsImproveAIEnabled(activity->ptrUnit->ptrStructPlayer->playerId)) {
 		return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
@@ -211,17 +212,36 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 		ACTIVITY_TASK_ID eventTaskId = (ACTIVITY_TASK_ID)notifyEvent->genericParam4;
 		if (eventTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_BUILD) {
 		//if (activity->currentTaskId == ACTIVITY_TASK_ID::CST_ATI_TASK_BUILD) {
-			STRUCT_UNIT_ATTACKABLE *villager = (STRUCT_UNIT_ATTACKABLE *)activity->ptrUnit;
+			STRUCT_UNIT_TRAINABLE *villager = (STRUCT_UNIT_TRAINABLE *)activity->ptrUnit;
+			assert(villager->DerivesFromTrainable());
+			if (!villager->DerivesFromTrainable()) {
+				return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
+			}
 			long int buildingId = activity->targetUnitId;
-			STRUCT_UNIT_BASE *buildingUnit = GetUnitStruct(buildingId);
-			bool wasBuildingFarm = (buildingUnit && buildingUnit->IsCheckSumValidForAUnitClass() && buildingUnit->unitDefinition &&
-				(buildingUnit->unitDefinition->DAT_ID1 == CST_UNITID_FARM));
+			STRUCT_UNIT_BASE *buildingUnitGeneric = GetUnitStruct(buildingId);
+			bool buildingValid = (buildingUnitGeneric && ((STRUCT_UNIT_BUILDING *)buildingUnitGeneric)->IsCheckSumValid() && buildingUnitGeneric->unitDefinition);
+			STRUCT_UNIT_BUILDING *buildingUnit = NULL;
+			if (buildingValid) {
+				buildingUnit = (STRUCT_UNIT_BUILDING *)buildingUnitGeneric;
+			}
+			bool wasBuildingFarm = (buildingValid && (buildingUnit->unitDefinition->DAT_ID1 == CST_UNITID_FARM));
 			if (wasBuildingFarm) {
 				// Remark: if several villagers were building this farm, CanBuilderSwitchToFarmer won't detect them if "gather" commands have not been handled yet (which generally is the case)
 				if (AOE_STRUCTURES::CanBuilderSwitchToFarmer(villager, buildingUnit)) {
 					// This corresponds to the hack in 0x4B1A91
 					// Not really an issue here because it's always visible (cf builder), but technically CreateCmd_RightClick is not fully MP-compliant
 					GAME_COMMANDS::CreateCmd_RightClick(villager->unitInstanceId, buildingId, buildingUnit->positionX, buildingUnit->positionY);
+				}
+			}
+			bool isHuman = !villager->ptrStructPlayer->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON);
+			if (isHuman && ROCKNROR::crInfo.configInfo.autoGatherAfterBuildDeposit) {
+				bool wasBuildingStoragePit = buildingValid && (buildingUnit->unitDefinition->DAT_ID1 == CST_UNITID_STORAGE_PIT);
+				bool wasBuildingGranary = buildingValid && (buildingUnit->unitDefinition->DAT_ID1 == CST_UNITID_GRANARY);
+				if (wasBuildingStoragePit || wasBuildingGranary) {
+					STRUCT_UNIT_BASE *target = ROCKNROR::MapUsageHandler::SearchAutoGatherTargetNearDeposit(villager, buildingUnit);
+					if (target) {
+						GAME_COMMANDS::CreateCmd_RightClick(villager->unitInstanceId, target->unitInstanceId, target->positionX, target->positionY);
+					}
 				}
 			}
 		}

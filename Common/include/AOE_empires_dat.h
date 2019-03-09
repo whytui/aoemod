@@ -451,6 +451,8 @@ namespace AOE_CONST_FUNC {
 	const short int CST_UNITID_ELEPHANT_KING = 90;
 	const short int CST_UNITID_LION = 126;
 	const short int CST_UNITID_LION_KING = 89;
+	const short int CST_UNITID_BERRY_BUSH = 59;
+	const short int CST_UNITID_FORAGE_FRUIT = 59; // synonym to CST_UNITID_BERRY_BUSH
 
 	// Research IDs from empires.dat
 	const short int CST_RSID_STONE_AGE = 100;

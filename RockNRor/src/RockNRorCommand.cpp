@@ -159,6 +159,7 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 		fprintf_s(f, "[%s] autoRebuildFarms_maxFood:        %ld\n", name, ROCKNROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_maxFood);
 		fprintf_s(f, "[%s] autoRebuildFarms_minWood:        %ld\n", name, ROCKNROR::crInfo.configInfo.autoRebuildFarmsConfig[i].autoRebuildFarms_minWood);
 	}
+	fprintf_s(f, "autoGatherAfterBuildDeposit:               %ld\n", ROCKNROR::crInfo.configInfo.autoGatherAfterBuildDeposit);
 	fprintf_s(f, "useEnhancedRulesForAutoAttack:             %ld\n", ROCKNROR::crInfo.configInfo.useEnhancedRulesForAutoAttackTargetSelection);
 	fprintf_s(f, "autoAttackPolicy vs towers/military/buildings/villagers/walls\n");
 	fprintf_s(f, "- For Melee Units:  %d/%d/%d/%d/%d\n", ROCKNROR::crInfo.configInfo.autoAttackOptionForBlastMeleeUnits.attackTowers,
