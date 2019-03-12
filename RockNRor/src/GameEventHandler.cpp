@@ -237,10 +237,25 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 			if (isHuman && ROCKNROR::crInfo.configInfo.autoGatherAfterBuildDeposit) {
 				bool wasBuildingStoragePit = buildingValid && (buildingUnit->unitDefinition->DAT_ID1 == CST_UNITID_STORAGE_PIT);
 				bool wasBuildingGranary = buildingValid && (buildingUnit->unitDefinition->DAT_ID1 == CST_UNITID_GRANARY);
-				if (wasBuildingStoragePit || wasBuildingGranary) {
-					STRUCT_UNIT_BASE *target = ROCKNROR::MapUsageHandler::SearchAutoGatherTargetNearDeposit(villager, buildingUnit);
-					if (target) {
-						GAME_COMMANDS::CreateCmd_RightClick(villager->unitInstanceId, target->unitInstanceId, target->positionX, target->positionY);
+				if (villager->resourceValue == 0) {
+					if (wasBuildingStoragePit || wasBuildingGranary) {
+						STRUCT_UNIT_BASE *target = ROCKNROR::MapUsageHandler::SearchAutoGatherTargetNearDeposit(villager, buildingUnit);
+						if (target) {
+							GAME_COMMANDS::CreateCmd_RightClick(villager->unitInstanceId, target->unitInstanceId, target->positionX, target->positionY);
+						}
+					}
+				} else {
+					if (wasBuildingGranary && (villager->resourceTypeId == CST_RES_ORDER_BERRY_STORAGE)) {
+						GAME_COMMANDS::CreateCmd_RightClick(villager->unitInstanceId, buildingId, buildingUnit->positionX, buildingUnit->positionY);
+					} else if (wasBuildingStoragePit && (
+						(villager->resourceTypeId == CST_RES_ORDER_FISH_STORAGE) ||
+						(villager->resourceTypeId == CST_RES_ORDER_MEAT_STORAGE) ||
+						(villager->resourceTypeId == CST_RES_ORDER_FOOD) ||
+						(villager->resourceTypeId == CST_RES_ORDER_WOOD) ||
+						(villager->resourceTypeId == CST_RES_ORDER_STONE) ||
+						(villager->resourceTypeId == CST_RES_ORDER_GOLD)
+						)) {
+						GAME_COMMANDS::CreateCmd_RightClick(villager->unitInstanceId, buildingId, buildingUnit->positionX, buildingUnit->positionY);
 					}
 				}
 			}

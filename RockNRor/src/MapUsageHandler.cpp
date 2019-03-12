@@ -130,19 +130,24 @@ STRUCT_UNIT_BASE *MapUsageHandler::SearchAutoGatherTargetNearDeposit(STRUCT_UNIT
 	int searchSizeGatherer = (int)gathererDef->searchRadius;
 	int searchSizeDeposit = (int)depositDef->searchRadius;
 
-	// Search around gatherer, going more and more far if necessary
-	STRUCT_UNIT_BASE *result = MapUsageHandler::SearchGatherableTarget(gathererPosX, gathererPosY, searchSizeGatherer, mapInfo, gaia, granary, storagePit);
-	if (result != NULL) {
-		return result;
+	const int maxSquareDiff = 3 * 3;
+	int squareDiff = (depositPosX - gathererPosX) *  (depositPosX - gathererPosX) + (depositPosY - gathererPosY) * (depositPosY - gathererPosY);
+	bool villagerIsNearDeposit = (squareDiff < maxSquareDiff);
+
+	STRUCT_UNIT_BASE *result = NULL;
+	// If the villager is far from deposit building, do NOT search a gatherable target near villager.
+	if (villagerIsNearDeposit) {
+		// Search around gatherer, going more and more far if necessary
+		result = MapUsageHandler::SearchGatherableTarget(gathererPosX, gathererPosY, searchSizeGatherer, mapInfo, gaia, granary, storagePit);
+		if (result != NULL) {
+			return result;
+		}
 	}
 
 	// Search around deposit building, going more and more far if necessary
 	result = MapUsageHandler::SearchGatherableTarget(depositPosX, depositPosY, searchSizeDeposit, mapInfo, gaia, granary, storagePit);
-	if (result != NULL) {
-		return result;
-	}
 
-	return NULL;
+	return result;
 }
 
 
