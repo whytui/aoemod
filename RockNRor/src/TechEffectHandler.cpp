@@ -92,16 +92,16 @@ bool UnitDefApplyMultiplyEffect(STRUCT_UNITDEF_BASE *unitDef, float value, AOE_C
 	switch (attribute) {
 	case TECH_UNIT_ATTRIBUTES::TUA_ARMOR:
 		if (unitDefAttackable) {
-			short int oldValue = AOE_STRUCTURES::GetArmorFromList(unitDefAttackable, armorOrAttackClass, 1);
-			short int newValue = (oldValue * STRUCT_TECH_DEF_EFFECT::GetAttackOrArmorValueFromFloatValue(value)) / 100;
-			AOE_STRUCTURES::SetArmorInList(unitDefAttackable, armorOrAttackClass, newValue, true);
+			int oldValue = AOE_STRUCTURES::GetArmorFromList(unitDefAttackable, armorOrAttackClass, 100);
+			int newValue = (oldValue * STRUCT_TECH_DEF_EFFECT::GetAttackOrArmorValueFromFloatValue(value)) / 100;
+			AOE_STRUCTURES::SetArmorInList(unitDefAttackable, armorOrAttackClass, (short int)newValue, true);
 		}
 		return true; // Do not run ROR original code, we just overrode it.
 	case TECH_UNIT_ATTRIBUTES::TUA_ATTACK:
 		if (unitDefAttackable) {
-			short int oldValue = AOE_STRUCTURES::GetAttackFromList(unitDefAttackable, armorOrAttackClass, 1);
-			short int newValue = (oldValue * STRUCT_TECH_DEF_EFFECT::GetAttackOrArmorValueFromFloatValue(value)) / 100;
-			AOE_STRUCTURES::SetAttackInList(unitDefAttackable, armorOrAttackClass, newValue, true);
+			int oldValue = AOE_STRUCTURES::GetAttackFromList(unitDefAttackable, armorOrAttackClass, 100);
+			int newValue = (oldValue * STRUCT_TECH_DEF_EFFECT::GetAttackOrArmorValueFromFloatValue(value)) / 100;
+			AOE_STRUCTURES::SetAttackInList(unitDefAttackable, armorOrAttackClass, (short int)newValue, true);
 		}
 		return true; // Do not run ROR original code, we just overrode it.
 	}
