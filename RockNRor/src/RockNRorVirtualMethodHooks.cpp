@@ -57,6 +57,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 	std::map<unsigned long int, unsigned long int> unitTransformCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitDefApplyAddEffectCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitDefApplySetEffectCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> unitDefApplyMultEffectCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> uiMenuOnKeyDownCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> uiGameEditorOnKeyDownCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> uiDialogsOnKeyDownCheckSumAndOriginalAddress;
@@ -265,6 +266,42 @@ namespace VIRTUAL_METHOD_HOOKS {
 				PUSH attribute_as_dword;
 				PUSH value;
 				// DO NOT CALL DS:[EDX+0x0C] because we changed the pointer !
+				CALL originalCallAddr;
+			}
+		}
+		RECORD_PERF_END(originalCallAddr);
+	}
+
+
+
+	// unitDef.applyMultEffect(f_value, attribute) for all unitDef classes. Method offset=+0C
+	// attribute_as_dword = attribute, only lower byte is relevant.
+	// Returns nothing.
+	void __stdcall UnitDefApplyMultEffect(STRUCT_UNITDEF_BASE *unitDef, float value, long int attribute_as_dword) {
+		assert(unitDef && unitDef->IsCheckSumValidForAUnitClass());
+		unsigned long int originalCallAddr = unitDefApplyMultEffectCheckSumAndOriginalAddress[unitDef->checksum];
+		RECORD_PERF_BEGIN(originalCallAddr);
+		if (!unitDef || !unitDef->IsCheckSumValidForAUnitClass()) {
+			RECORD_PERF_END(originalCallAddr);
+			return;
+		}
+		bool runStandardMethod = true;
+		TECH_UNIT_ATTRIBUTES attribute = (TECH_UNIT_ATTRIBUTES)attribute_as_dword;
+
+		// Custom treatments
+		if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+			if (ROCKNROR::TECHEFFECT::UnitDefApplyMultiplyEffect(unitDef, value, attribute)) {
+				runStandardMethod = false;
+			}
+		}
+
+		if (runStandardMethod) {
+			_asm {
+				MOV ECX, unitDef;
+				MOV EDX, DS:[ECX];
+				PUSH attribute_as_dword;
+				PUSH value;
+				// DO NOT CALL DS:[EDX+0x10] because we changed the pointer !
 				CALL originalCallAddr;
 			}
 		}
@@ -492,6 +529,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitAddPositionToTargetPosArray)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitTransform)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitDefApplyAddEffect)
+	DECLARE_VIRTUAL_METHOD_HANDLER(UnitDefApplyMultEffect)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitDefApplySetEffect)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UIMenuOnKeyDown)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UIGameEditorOnKeyDown)
@@ -587,6 +625,17 @@ namespace VIRTUAL_METHOD_HOOKS {
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_PROJECTILE, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_PROJECTILE]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_TRAINABLE, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_TRAINABLE]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_TREE, 0x0C, UnitDefApplyAddEffect, unitDefApplyAddEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_TREE]);
+
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_BASE, 0x10, UnitDefApplyMultEffect, unitDefApplyMultEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_BASE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_BUILDING, 0x10, UnitDefApplyMultEffect, unitDefApplyMultEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_BUILDING]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_ATTACKABLE, 0x10, UnitDefApplyMultEffect, unitDefApplyMultEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_ATTACKABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_COMMANDABLE, 0x10, UnitDefApplyMultEffect, unitDefApplyMultEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_COMMANDABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_DOPPLEGANGER, 0x10, UnitDefApplyMultEffect, unitDefApplyMultEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_DOPPLEGANGER]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_FLAG, 0x10, UnitDefApplyMultEffect, unitDefApplyMultEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_FLAG]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_MOVABLE, 0x10, UnitDefApplyMultEffect, unitDefApplyMultEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_MOVABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_PROJECTILE, 0x10, UnitDefApplyMultEffect, unitDefApplyMultEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_PROJECTILE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_TRAINABLE, 0x10, UnitDefApplyMultEffect, unitDefApplyMultEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_TRAINABLE]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_TREE, 0x10, UnitDefApplyMultEffect, unitDefApplyMultEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_TREE]);
 
 
 			// ----- UI -----

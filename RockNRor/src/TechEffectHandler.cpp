@@ -77,10 +77,35 @@ bool UnitDefApplySetEffect(STRUCT_UNITDEF_BASE *unitDef, float value, AOE_CONST_
 
 
 // Overload unitDef.applyMultEffect(...)
+// In particular, "multiply armor" and "multiply attack" are unsupported in standard game => implement these effects here.
 // Returns true if the original ROR code must NOT be executed
 // Returns false (default) if original ROR code must be executed after this method.
 bool UnitDefApplyMultiplyEffect(STRUCT_UNITDEF_BASE *unitDef, float value, AOE_CONST_FUNC::TECH_UNIT_ATTRIBUTES attribute) {
-	// Unused at this point (no specific treatments)
+	STRUCT_UNITDEF_ATTACKABLE *unitDefAttackable = nullptr;
+	if (unitDef->DerivesFromAttackable()) {
+		unitDefAttackable = (STRUCT_UNITDEF_ATTACKABLE *)unitDef;
+	}
+
+	ATTACK_CLASS armorOrAttackClass = STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value); // only relevant for attributes 8/9
+
+	// The "apply multiply effect" method in ROR is NOT IMPLEMENTED for attributes ARMOR/ATTACK.
+	switch (attribute) {
+	case TECH_UNIT_ATTRIBUTES::TUA_ARMOR:
+		if (unitDefAttackable) {
+			short int oldValue = AOE_STRUCTURES::GetArmorFromList(unitDefAttackable, armorOrAttackClass, 1);
+			short int newValue = (oldValue * STRUCT_TECH_DEF_EFFECT::GetAttackOrArmorValueFromFloatValue(value)) / 100;
+			AOE_STRUCTURES::SetArmorInList(unitDefAttackable, armorOrAttackClass, newValue, true);
+		}
+		return true; // Do not run ROR original code, we just overrode it.
+	case TECH_UNIT_ATTRIBUTES::TUA_ATTACK:
+		if (unitDefAttackable) {
+			short int oldValue = AOE_STRUCTURES::GetAttackFromList(unitDefAttackable, armorOrAttackClass, 1);
+			short int newValue = (oldValue * STRUCT_TECH_DEF_EFFECT::GetAttackOrArmorValueFromFloatValue(value)) / 100;
+			AOE_STRUCTURES::SetAttackInList(unitDefAttackable, armorOrAttackClass, newValue, true);
+		}
+		return true; // Do not run ROR original code, we just overrode it.
+	}
+
 	return false;
 }
 

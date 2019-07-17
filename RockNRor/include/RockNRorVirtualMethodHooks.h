@@ -56,6 +56,11 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// Returns nothing.
 	void __stdcall UnitDefApplyAddEffect(STRUCT_UNITDEF_BASE *unitDef, float value, long int attribute_as_dword);
 
+	// unitDef.applyMultEffect(f_value, attribute) for all unitDef classes. Method offset=+10
+	// attribute_as_dword = attribute, only lower byte is relevant.
+	// Returns nothing.
+	void __stdcall UnitDefApplyMultEffect(STRUCT_UNITDEF_BASE *unitDef, float value, long int attribute_as_dword);
+
 	// unitDef.applyAddEffect(f_value, attribute) for all unitDef classes. Method offset=+08
 	// attribute_as_dword = attribute, only lower byte is relevant.
 	// Returns nothing.

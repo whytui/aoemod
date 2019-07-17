@@ -269,11 +269,13 @@ namespace AOE_CONST_FUNC {
 		TUA_UNKNOWN_07 = 7, // seems to be unused.
 
 		// Warning: value contains 2 informations using a modulo 256. First round the value, then use bitwise operators
-		// Warning: such effect only works if the unit already has the specified armor type (can be zero, but must exist)
+		// Warning: in standard game, such effect only works if the unit already has the specified armor type
+		// (can be zero, but must exist). With RockNRor, such effects are supported.
 		TUA_ARMOR = 8,
 
 		// Warning: value contains 2 informations using a modulo 256. First round the value, then use bitwise operators
-		// Warning: such effect only works if the unit already has the specified armor type (can be zero, but must exist)
+		// Warning: in standard game, such effect only works if the unit already has the specified armor type
+		// (can be zero, but must exist). With RockNRor, such effects are supported.
 		TUA_ATTACK = 9,
 
 		TUA_ATTACK_RELOAD_TIME = 10, // reload time 1

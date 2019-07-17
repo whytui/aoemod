@@ -53,6 +53,7 @@ bool UnitDefApplySetEffect(STRUCT_UNITDEF_BASE *unitDef, float value, AOE_CONST_
 
 
 // Overload unitDef.applyMultEffect(...)
+// In particular, "multiply armor" and "multiply attack" are unsupported in standard game => implement these effects here.
 // Returns true if the original ROR code must NOT be executed
 // Returns false (default) if original ROR code must be executed after this method.
 bool UnitDefApplyMultiplyEffect(STRUCT_UNITDEF_BASE *unitDef, float value, AOE_CONST_FUNC::TECH_UNIT_ATTRIBUTES attribute);
