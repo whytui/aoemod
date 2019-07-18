@@ -109,6 +109,11 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 		assert(this->GetCustomPlayerInfo(playerId) != NULL);
 		this->GetCustomPlayerInfo(playerId)->myTechTreeId = techTreeIndex;
 
+		// Make sure Macedonian no longer receives conversion resistance !
+		if ((ROCKNROR::crInfo.configInfo.conversionResistanceAttackClassEnabled) && (player->civilizationId == CIVILIZATIONS::CST_CIVID_MACEDONIAN)) {
+			this->ForceDefaultConversionResistanceArmorValue(player);
+		}
+
 		STRUCT_TECH_DEF *techDef = global->technologiesInfo->GetTechDef(techTreeIndex);
 		ROCKNROR::STRATEGY::TechTreeCreator ttc(finalAverageDisableWeight);
 		ttc.CreateRandomTechTree(techDef);
@@ -154,6 +159,38 @@ void CustomCivHandler::WriteSummaryToScenarioInstructions() {
 		*ptrToUse = (char*)AOEAlloc(size);
 		(*ptrToUse)[size - 1] = 0;
 		strcpy_s(*ptrToUse, size, instructions.c_str());
+	}
+}
+
+
+// Force conversion resistance using armor class specified in configuration (if enabled),
+// For all units that do NOT already possess a value for that armor class
+// The conversion resistance value used is game default (priests=2, chariot=8, etc), ignoring Macedonian "rule"
+// The goal is to "force cancel" Macedonian hardcoded bonus.
+void CustomCivHandler::ForceDefaultConversionResistanceArmorValue(AOE_STRUCTURES::STRUCT_PLAYER *player) {
+	if (!player || !player->IsCheckSumValid()) { return; }
+	if (!ROCKNROR::crInfo.configInfo.conversionResistanceAttackClassEnabled) { return; }
+	int unitDefCount = player->structDefUnitArraySize;
+	if (ROCKNROR::crInfo.configInfo.conversionResistanceAttackClass < 0) { return; }
+	AOE_CONST_FUNC::ATTACK_CLASS armorClass = (AOE_CONST_FUNC::ATTACK_CLASS)ROCKNROR::crInfo.configInfo.conversionResistanceAttackClass;
+	if (armorClass < 0) { return; }
+
+	for (int unitDefId = 0; unitDefId < unitDefCount; unitDefId++) {
+		AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_ATTACKABLE *)player->GetUnitDefBase(unitDefId);
+		if ((unitDef == NULL) || (!unitDef->DerivesFromAttackable())) {
+			continue;
+		}
+
+		short int armorRawValue = GetArmorFromList(unitDef, armorClass, -1);
+		if (armorRawValue >= 0) {
+			// There already IS an armor defined for conversion resistance. Keep it as is.
+			continue;
+		}
+		// No armor value for conversion resistance. Set it using game default.
+		int fakeCivIdToGetDefault = -1; // NOT macedonian, so that we get game default for that unit.
+		float gameDefaultValue = ROCKNROR::crInfo.GetConversionResistance(fakeCivIdToGetDefault, unitDef);
+		armorRawValue = (short int)(gameDefaultValue * 100);
+		SetArmorInList(unitDef, armorClass, armorRawValue, true);
 	}
 }
 

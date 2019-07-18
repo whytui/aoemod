@@ -66,6 +66,12 @@ public:
 
 	void WriteSummaryToScenarioInstructions();
 
+	// Force conversion resistance using armor class specified in configuration (if enabled),
+	// For all units that do NOT already possess a value for that armor class
+	// The conversion resistance value used is game default (priests=2, chariot=8, etc), ignoring Macedonian "rule"
+	// The goal is to "force cancel" Macedonian hardcoded bonus.
+	void ForceDefaultConversionResistanceArmorValue(AOE_STRUCTURES::STRUCT_PLAYER *player);
+
 private:
 	ROCKNROR::STRATEGY::CustomPlayerInfo playersInfo[9];
 
