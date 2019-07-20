@@ -19,6 +19,7 @@ const static wchar_t *ROR_EXE_NAME = _T("EmpiresX.exe");
 const static wchar_t *AOE_REG_PATH_INSTALLDIR_32 = _T("SOFTWARE\\Microsoft\\Games\\Age of Empires\\1.00");
 const static wchar_t *AOE_REG_PATH_INSTALLDIR_64 = _T("SOFTWARE\\Wow6432Node\\Microsoft\\Games\\Age of Empires\\1.00");
 const static wchar_t *AOE_REG_KEY_INSTALLDIR = _T("InstallationDirectory");
+const static wchar_t *AOE_REG_KEY_SCREEN_SIZE = _T("Screen Size");
 const static wchar_t *DDRAW_COMPATIBILITY_REG_PATH = _T("SOFTWARE\\Microsoft\\DirectDraw\\Compatibility");
 
 // File sizes

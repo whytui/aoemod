@@ -77,3 +77,46 @@ static bool FixRegistryForDDrawColorBug(std::wstring EXE_fullPath) {
 
 	return (resKey == ERROR_SUCCESS);
 }
+
+// Returns 0 (ERROR_SUCCESS) if successful.
+static LONG ResetScreenSizeInRegistry() {
+	LONG res;
+	DWORD dwType = REG_DWORD;
+	DWORD value = 0;
+	DWORD dwBufferSize = sizeof(value);
+
+	HKEY hKey;
+	res = ERROR_FILE_NOT_FOUND;
+
+	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, AOE_REG_PATH_INSTALLDIR_32, 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS) {
+		res = RegQueryValueEx(hKey, AOE_REG_KEY_SCREEN_SIZE, NULL, &dwType, (LPBYTE)value, &dwBufferSize);
+	}
+	if (res != ERROR_SUCCESS) {
+		if (hKey) { RegCloseKey(hKey); }
+		if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, AOE_REG_PATH_INSTALLDIR_64, 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS) {
+			dwBufferSize = sizeof(value);
+			res = RegQueryValueEx(hKey, AOE_REG_KEY_SCREEN_SIZE, NULL, &dwType, (LPBYTE)value, &dwBufferSize);
+		}
+	}
+	if (res != ERROR_SUCCESS) {
+		if (hKey) { RegCloseKey(hKey); }
+		if (RegOpenKeyEx(HKEY_CURRENT_USER, AOE_REG_PATH_INSTALLDIR_32, 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS) {
+			dwBufferSize = sizeof(value);
+			res = RegQueryValueEx(hKey, AOE_REG_KEY_SCREEN_SIZE, NULL, &dwType, (LPBYTE)&value, &dwBufferSize);
+		}
+		if (res != ERROR_SUCCESS) {
+			if (hKey) { RegCloseKey(hKey); }
+			if (RegOpenKeyEx(HKEY_CURRENT_USER, AOE_REG_PATH_INSTALLDIR_64, 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS) {
+				dwBufferSize = sizeof(value);
+				res = RegQueryValueEx(hKey, AOE_REG_KEY_SCREEN_SIZE, NULL, &dwType, (LPBYTE)value, &dwBufferSize);
+			}
+		}
+	}
+
+	if (res == ERROR_SUCCESS) {
+		value = 800;
+		res = RegSetValueEx(hKey, AOE_REG_KEY_SCREEN_SIZE, 0, REG_DWORD, (LPBYTE)&value, sizeof(DWORD));
+	}
+	RegCloseKey(hKey);
+	return res;
+}

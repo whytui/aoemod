@@ -11,6 +11,7 @@ EVT_MENU(ID_InstallRockNRor, WxMainForm::OnInstallRockNRor)
 EVT_MENU(ID_InstallCustomResolution, WxMainForm::OnInstallCustomResolution)
 EVT_MENU(ID_InstallSuggestedOptions, WxMainForm::OnInstallSuggestedOptions)
 EVT_MENU(ID_FixDDrawColorBug, WxMainForm::OnFixDDrawColorBug)
+EVT_MENU(ID_ResetScreenSizeRegistry, WxMainForm::OnResetScreenSizeInRegistry)
 EVT_MENU(ID_ChangeInstallDirInRegistry, WxMainForm::OnChangeInstallDirInRegistry)
 EVT_MENU(ID_GenTriggerDoc, WxMainForm::OnExportTriggerHTMLDoc)
 EVT_MENU(ID_GenTriggerSample, WxMainForm::OnSampleTrigger)
@@ -51,7 +52,8 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 	menuFile->Append(ID_InstallCustomResolution, "Change game resolution...", "Update game and add custom files to handle custom resolutions.");
 	menuFile->Append(ID_InstallSuggestedOptions, "Install Suggested Options", "Automatically patch currently selected file with suggested options, including 1920*1200 resolution.");
 	menuFile->Append(ID_FixDDrawColorBug, "Fix DirectDraw color bug", "Updates regitry to fix DirectDraw color bug on currently selected file.");
-	menuFile->Append(ID_ChangeInstallDirInRegistry, "Change AOE install dir", "Updates regitry to set a new installation directory for AOE.");
+	menuFile->Append(ID_ResetScreenSizeRegistry, "Reset Screen resolution in registry", "Resets game screen resolution in registry to work around graphics error at game startup.");
+	menuFile->Append(ID_ChangeInstallDirInRegistry, "Change AOE install dir", "Updates registry to set a new installation directory for AOE.");
 	menuFile->AppendSeparator();
 	menuFile->Append(wxID_EXIT);
 	wxMenu *menuTriggers = new wxMenu;
@@ -281,6 +283,19 @@ void WxMainForm::ChangeInstallDirInRegistry() {
 		SetStatusText("Failed to change install dir in Windows registry (is this program run as admin?)");
 	}
 }
+
+
+void WxMainForm::ResetScreenSizeInRegistry() {
+	LONG res = ::ResetScreenSizeInRegistry();
+	if (res == ERROR_SUCCESS) {
+		wxMessageBox("Resetted screen size", "RockNRor Admin", wxOK | wxICON_INFORMATION);
+	}
+	else {
+		std::string s = std::string("Failed to reset screen size.Try to run this as Administrator. Error code ") + std::to_string(res);
+		wxMessageBox(s, "RockNRor Admin", wxOK | wxICON_ERROR);
+	}
+}
+
 
 // This automatically installs RockNRor : copies files from user-provided source dir and patches EXE file.
 void WxMainForm::InstallRockNRor() {
@@ -538,6 +553,9 @@ void WxMainForm::OnInstallCustomResolution(wxCommandEvent& event) {
 	this->ChooseCustomResolution();
 }
 
+void WxMainForm::OnResetScreenSizeInRegistry(wxCommandEvent& event) {
+	this->ResetScreenSizeInRegistry();
+}
 
 void WxMainForm::OnInstallSuggestedOptions(wxCommandEvent& event) {
 	this->InstallSuggestedOptions();
