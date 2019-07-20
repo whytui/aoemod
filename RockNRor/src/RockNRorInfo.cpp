@@ -166,7 +166,7 @@ float RockNRorInfo::GetConversionResistance(char civId, AOE_STRUCTURES::STRUCT_U
 		}
 		GLOBAL_UNIT_AI_TYPES unitClass = unitDefAtk->unitAIType;
 		// No conversion resistance value is configured for this unit. Apply GAME defaults ; start with special cases
-		if (civId == CST_CIVID_MACEDONIAN) {
+		if ((civId == CST_CIVID_MACEDONIAN) && !ROCKNROR::crInfo.configInfo.conversionResistanceIgnoreMacedonianBonus) {
 			return 4.f;
 		}
 		if (
@@ -199,7 +199,7 @@ float RockNRorInfo::GetConversionResistance(char civId, AOE_STRUCTURES::STRUCT_U
 float RockNRorInfo::GetConversionResistance_hardcodedWithConf(char civId, short int unitClass) {
 	// Standard resistances (original game)
 	// Macedonian
-	if (civId == CST_CIVID_MACEDONIAN) {
+	if ((civId == CST_CIVID_MACEDONIAN) && !ROCKNROR::crInfo.configInfo.conversionResistanceIgnoreMacedonianBonus) {
 		return this->configInfo.conversionResistance_Macedonian;
 	}
 	// Special unit classes

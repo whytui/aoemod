@@ -81,15 +81,21 @@
 	Warning : changing this value may affect greatly AI and performance ! Minimum value=300 -->
 	<baseDelayForDetectUnit value="1000"/>
 
-	<!-- Improved conversion resistance system : only used if useArmorClass=true
-	If useArmorClass=true, then <conversionResistance name="..." value="..."> tags are ignored
-	If useArmorClass=true, you can configure everything in empires.dat (and even have techs that modify conversion resistances):
+	<!-- Improved conversion resistance system
+	If enable=true, then <conversionResistance name="..." value="..."> tags are ignored
+	If enable=true, you can configure everything in empires.dat (and even have techs that modify conversion resistances):
 	- a unit's conversion resistance is (armor_value/100) where armor_value is armor for {what you set in armorClass attribute}
 	- if a unit does not have an armor set for {what you set in armorClass attribute}, then use game default.
 	- Game defaults are 2 for boats, priests ; 4 for macedonian, 8 for chariots/chariot archers ; 1 for all other units
-	- armorClass should be between 13 and 255. Negative values and range 255-32767 should work, but are not compatible with technology effects. -->
-	<conversionResistance armorClass="255" useArmorClass="false" />
-	<!-- Custom conversion resistance values (float). Standard units resistance is 1 -->
+	- armorClass should be between 13 and 255. Negative values and range 255-32767 should work, but are not compatible with technology effects.
+	ignoreMacedonianBonus: this flag is independent from "improvedConversionResistance" being enabled or not.
+	- If true, totally ignores Macedonian civ bonus about conversion resistance. Mac. units' conversin resistance will depend on configuration and empires.dat, just like other units.
+	... Use ignoreMacedonianBonus=true if your mod (empires.dat) modified Macedonian civ into a different civ, and if you don't want the "conversion resistance=4" bonus on ALL Macedonian units.
+	- If false (default), all Macedonian units' conversion resistance will be 4, without any exception (same as standard game)
+	- If false, <conversionResistance name="Macedonian".../> value is ignored. -->
+  <improvedConversionResistance enable="false" armorClass="255" ignoreMacedonianBonus="true" />
+
+  <!-- Custom conversion resistance values (float). Standard units resistance is 1 -->
 	<conversionResistance name="warElephants" value="1.25"/><!-- game default=1-->
 	<conversionResistance name="warElephants_Persian" value="1.15"/><!-- game default=1 -->
 	<conversionResistance name="Macedonian" value="4"/><!-- game default=4 -->

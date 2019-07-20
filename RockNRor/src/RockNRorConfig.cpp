@@ -51,8 +51,9 @@ RockNRorConfig::RockNRorConfig() {
 	this->unitResourceAmountTreeForest = 0; // 0 = ignore and use default
 	this->unitResourceAmountFish = 0; // 0 = ignore and use default
 	this->fixTechEffectAddSetArmorAttack = false; // Game default
-	this->conversionResistanceAttackClassEnabled = false;
+	this->conversionResistanceAttackClassEnabled = false; // Game default
 	this->conversionResistanceAttackClass = -1;
+	this->conversionResistanceIgnoreMacedonianBonus = false; // Game default
 	this->conversionResistance_Boats = 2; // Game default
 	this->conversionResistance_Chariots = 8; // Game default
 	this->conversionResistance_Macedonian = 4; // Game default
@@ -612,13 +613,17 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		}
 
 		// Conversion resistance values
-		if (elemName == "conversionResistance") {
+		if (elemName == "improvedConversionResistance") {
 			std::string armorClass = this->XML_GetAttributeValue(elem, "armorClass");
 			if (!armorClass.empty()) {
-				this->conversionResistanceAttackClassEnabled = this->XML_GetBoolElement(elem, "useArmorClass");
+				this->conversionResistanceAttackClassEnabled = this->XML_GetBoolElement(elem, "enable");
 				callResult = elem->QueryIntAttribute("armorClass", &intValue);
 				if (callResult == TIXML_SUCCESS) { this->conversionResistanceAttackClass = intValue; }
 			}
+			this->conversionResistanceIgnoreMacedonianBonus = this->XML_GetBoolElement(elem, "ignoreMacedonianBonus");
+		}
+
+		if (elemName == "conversionResistance") {
 			categoryName = this->XML_GetAttributeValue(elem, "name");
 			if (categoryName == "warElephants") {
 				callResult = elem->QueryFloatAttribute("value", &floatValue);

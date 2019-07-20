@@ -167,6 +167,7 @@ void CustomCivHandler::WriteSummaryToScenarioInstructions() {
 // For all units that do NOT already possess a value for that armor class
 // The conversion resistance value used is game default (priests=2, chariot=8, etc), ignoring Macedonian "rule"
 // The goal is to "force cancel" Macedonian hardcoded bonus.
+// This has a crucial important for saved games : at loading time, we wouldn't be able to know if this was a game with or withOUT Mace. bonus.
 void CustomCivHandler::ForceDefaultConversionResistanceArmorValue(AOE_STRUCTURES::STRUCT_PLAYER *player) {
 	if (!player || !player->IsCheckSumValid()) { return; }
 	if (!ROCKNROR::crInfo.configInfo.conversionResistanceAttackClassEnabled) { return; }

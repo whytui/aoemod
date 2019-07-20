@@ -173,14 +173,19 @@ public:
 
 	// Conversion resistance
 	bool conversionResistanceAttackClassEnabled; // If true, use conversionResistanceAttackClass to get conversion resistance values from empires.dat
-	// Attack class ID to use in unitDef.armors to retrieve conversion resistance values
+	// If true, totally ignores Macedonian civ bonus about conversion resistance. Mac. units' conversin resistance will depend on configuration and empires.dat, just like other units.
+	// If false (default), all Macedonian units' conversion resistance will be 4, without any exception (same as standard game)
+	// This flag is independent from "conversionResistanceAttackClassEnabled".
+	// If false, conversionResistance_Macedonian value is ignored.
+	bool conversionResistanceIgnoreMacedonianBonus;
+		// Attack class ID to use in unitDef.armors to retrieve conversion resistance values
 	// Only used if conversionResistanceAttackClass=true
 	// If a unitDef has a value for this armor class, then its conversion resistance is (value/100) ; value must be >0, but can be higher than 100.
 	// If a unitDef does not have an armor for this class, then conversion resistance is set to game default: 2 for priests/boats, 8 for chariots, 4 for macedonian, 1 for other units
 	// It is strongly recommended to use a classId in range [13;255] (unused class IDs)
 	// Negative values and range [256;32767] would work, but are NOT COMPATIBIBLE with technology effects (as allowed values are unsigned chars=0-255)
 	short int conversionResistanceAttackClass;
-	float conversionResistance_Macedonian;
+	float conversionResistance_Macedonian; // Ignored if conversionResistanceIgnoreMacedonianBonus=true
 	float conversionResistance_Boats;
 	float conversionResistance_Priests;
 	float conversionResistance_Chariots;
