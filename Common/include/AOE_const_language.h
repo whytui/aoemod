@@ -105,6 +105,8 @@ const static unsigned long int CRLANG_ID_AUTO_REBUILD_FARMS = 42032;
 const static unsigned long int CRLANG_ID_AUTO_REBUILD_FARMS_MAX_NUMBER = 42033;
 const static unsigned long int CRLANG_ID_AUTO_REBUILD_FARMS_MAX_FOOD = 42034;
 const static unsigned long int CRLANG_ID_AUTO_REBUILD_FARMS_MIN_WOOD = 42035;
+const static unsigned long int CRLANG_ID_MAP_COPY = 42172;
+const static unsigned long int CRLANG_ID_RESTART_NEW_SEED = 42173;
 
 const static unsigned long int CRLANG_ID_DEFAULT_CIV_NAME = 42023;
 

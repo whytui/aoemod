@@ -444,17 +444,18 @@ namespace AOE_STRUCTURES
 	};
 	static_assert(sizeof(COMMAND_SET_ALLY_VICTORY) == 0x10, "COMMAND_SET_ALLY_VICTORY size");
 
-	// Type 0x67, subtype 6. Change diplomacy. Create = 0x4E9840. Exec=0x50C570 ExecuteCheatCommand(playerId, subType)
+	// Type 0x67, subtype 6. Execute a cheat. Create = 0x4E9840. Exec=0x50C570 ExecuteCheatCommand(playerId, subType)
 	struct COMMAND_CHEAT : COMMAND_67_BASE {
 	public:
 		short int actorPlayerId; // +2
-		short int cheatInternalId; // +4. Identifies the cheat to apply.
+		AOE_CONST_INTERNAL::INTERNAL_CHEAT_ID cheatInternalId; // +4. Identifies the cheat to apply.
 		short int unused_6;
 		float unused_8;
 		short int unused_C; // +C
 		short int unused_E;
 		bool IsCmdIdValid() {
-			return this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING && this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_CHEAT;
+			return (this->cmdId == INTERNAL_COMMAND_ID::CST_ICI_CHANGE_SETTING) && 
+				(this->subTypeId == INTERNAL_COMMAND67_SUBTYPE::CST_IC67_CHEAT);
 		}
 	};
 	static_assert(sizeof(COMMAND_CHEAT) == 0x10, "COMMAND_CHEAT size");

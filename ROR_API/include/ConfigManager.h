@@ -43,7 +43,8 @@ public:
 	StringList *DLL_names_current;
 	int modulesCount;
 	HMODULE *hModules;
-	int currentCalls;
+	int currentCalls; // Counter to handle recurive calls, and keep track of stacked "Reg values" independently.
+	bool verboseDebug; // If true, show more debugging information through message boxes.
 
 	void Init();
 	int ReadConfigFromFile();

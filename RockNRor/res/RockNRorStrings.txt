@@ -145,6 +145,10 @@ Auto. rebuild farms max number
 Auto. rebuild farms max food
 [42035]
 Auto. rebuild farms min wood
+[42172] // Map copy title
+Map copy
+[42173] // Restart game with new random seed
+Restart (new seed)
 
 [42023] // Custom civilization without name in game settings combobox
 Custom civilization

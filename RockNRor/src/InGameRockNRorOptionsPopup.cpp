@@ -15,6 +15,7 @@ void InGameRockNRorOptionsPopup::ResetClassPointers() {
 	this->btnTechTreeInfo = NULL;
 	this->btnMapCopy = NULL;
 	this->btnRnrGlobalOptions = NULL;
+	this->btnRestartWithNewSeed = NULL;
 	this->customOptionButtonVar = NULL;
 	this->customOptionFreeTextAnswerVar = NULL;
 	this->customOptionFreeTextLabelVar = NULL;
@@ -81,7 +82,12 @@ void InGameRockNRorOptionsPopup::CreateScreenComponents() {
 
 	this->AddButton(&this->btnRnrGlobalOptions, localizationHandler.GetTranslation(CRLANG_ID_ROCKNROR_GLOBAL_SETTINGS, "Global options"), 0x170, 0x34, 0xAC, 0x1E);
 	this->AddButton(&this->btnTechTreeInfo, localizationHandler.GetTranslation(CRLANG_ID_TECH_TREE, "Tech tree info"), 0x170, 0x56, 0xAC, 0x1E);
-	this->AddButton(&this->btnMapCopy, localizationHandler.GetTranslation(-1, "Map copy"), 0x170, 0x78, 0xAC, 0x1E);
+	this->AddButton(&this->btnMapCopy, localizationHandler.GetTranslation(CRLANG_ID_MAP_COPY, "Map copy"), 0x170, 0x78, 0xAC, 0x1E);
+	
+	this->AddButton(&this->btnRestartWithNewSeed, localizationHandler.GetTranslation(CRLANG_ID_RESTART_NEW_SEED, "Restart (new seed)"), 0x170, 0x9A, 0xAC, 0x1E);
+	if (this->btnRestartWithNewSeed && settings->isSavedGame) {
+		this->btnRestartWithNewSeed->readOnly = 1;
+	}
 	
 	// OK Cancel buttons
 	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(172),
@@ -113,6 +119,10 @@ bool InGameRockNRorOptionsPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	if (sender == this->btnRnrGlobalOptions) {
 		ROCKNROR::UI::RockNRorSettingsScreen *tmpNextScreen = new ROCKNROR::UI::RockNRorSettingsScreen();
 		this->OpenOtherScreenAndCloseThisOne(tmpNextScreen, false);
+		return true;
+	}
+	if (sender == this->btnRestartWithNewSeed) {
+		this->RestartGame(true);
 		return true;
 	}
 	if (sender == this->btnOK) {
@@ -200,6 +210,44 @@ void InGameRockNRorOptionsPopup::ClosePopupAndHandlePausePolicy() {
 		this->afterCloseGamePausePolicy = AfterClosePausePolicy::NONE;
 	}
 	this->CloseScreen(false);
+}
+
+// Close this screen and triggers a game restart
+// If newSeed is true, a new seed is computed to get another random games with same parameters.
+// If newSeed is false, restarts exactly the same game
+void InGameRockNRorOptionsPopup::RestartGame(bool newSeed) {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return; }
+	if (settings->isSavedGame) { return; }
+
+	// Backup current game
+	const char saveFilename[] = "_autosave-restart-RockNRor.gmx";
+	bool res = AOE_METHODS::SaveCurrentGame(saveFilename);
+	std::string msg = "Save game (before restart) to ";
+	msg += saveFilename;
+	msg += ": ";
+	msg += (res ? "success" : "failure");
+	traceMessageHandler.WriteMessageNoNotification(msg);
+
+	// Get new seed
+	long int previousSeed = settings->actualMapSeed;
+	long int newSeedValue = AOE_METHODS::GetAndReCalcPseudoRandomValue();
+	settings->scenarioMapSeed = newSeedValue;
+	char buf[200];
+	sprintf_s(buf, "Changed game seed from %ld to %ld", previousSeed, newSeedValue);
+	traceMessageHandler.WriteMessageNoNotification(std::string(buf));
+
+	// Close popup
+	this->CloseScreen(false);
+
+	// Restart game (with new seed)
+#ifdef GAMEVERSION_ROR10c
+	const unsigned long int addrRestart = 0x00500FB0;
+	_asm {
+		MOV ECX, settings;
+		CALL addrRestart;
+	}
+#endif
 }
 
 }

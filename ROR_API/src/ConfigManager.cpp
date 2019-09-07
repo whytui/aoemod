@@ -13,6 +13,7 @@ ConfigManager::~ConfigManager() {
 		free(this->hModules);
 	}
 	this->hModules = NULL;
+	this->verboseDebug = false;
 }
 
 void ConfigManager::Init() {
@@ -26,10 +27,6 @@ void ConfigManager::Init() {
 
 // Returns 0 if OK
 int ConfigManager::ReadConfigFromFile() {
-#ifdef _DEBUG
-	MessageBox(0, L"Hi there ! You are using DEBUG version of RoR API.", L"RoR API", 0);
-#endif
-
 	if (!this->DLL_names_first) { return 1; }
 	char bufferRead[BUFFER_SIZE];
 	bufferRead[BUFFER_SIZE - 1] = 0; // Just a security
@@ -39,10 +36,15 @@ int ConfigManager::ReadConfigFromFile() {
 	try {
 		fseek(configFile, 0, SEEK_SET); // begin of file
 
+		// TODO: FIXME : fscanf gets separate strings at each whitespace... We need to join strings until a \n is found
 		while (fscanf_s(configFile, "%s\n", bufferRead, BUFFER_SIZE - 1) > 0) {
 			bool ignore_line;
 			int len;
 			for (len = 0; bufferRead[len] != 0; len++);
+			if (_strnicmp("DEBUG", bufferRead, len) == 0) {
+				this->verboseDebug = true;
+				continue; // ignore current line
+			}
 			if ((len >= 3) && (bufferRead[len - 3] == 'D')) { bufferRead[len - 3] = 'd'; }
 			if ((len >= 2) && (bufferRead[len - 2] == 'L')) { bufferRead[len - 2] = 'l'; }
 			if ((len >= 1) && (bufferRead[len - 1] == 'L')) { bufferRead[len - 1] = 'l'; }
@@ -56,9 +58,20 @@ int ConfigManager::ReadConfigFromFile() {
 	}
 	catch (...) {
 		fclose(configFile);
+#ifdef _DEBUG
+		if (this->verboseDebug) {
+			MessageBox(0, L"Hi there ! You are using DEBUG version of RoR API. Error reading conf.", L"RoR API", 0);
+		}
+#endif
+
 		return 2;
 	}
 	fclose(configFile);
+#ifdef _DEBUG
+	if (this->verboseDebug) {
+		MessageBox(0, L"Hi there ! You are using DEBUG version of RoR API.", L"RoR API", 0);
+	}
+#endif
 	return 0;
 }
 
@@ -78,7 +91,7 @@ void ConfigManager::LoadModules() {
 		if (cur->string) {
 			this->hModules[iModule] = LoadLibraryA(cur->string);
 #ifdef _DEBUG
-			if (this->hModules[iModule]) {
+			if (this->verboseDebug && this->hModules[iModule]) {
 				char s[300];
 				sprintf_s(s, "Loaded module: %s ; hModule=%d", cur->string, this->hModules[iModule]);
 				MessageBoxA(0, s, "ROR API", MB_ICONINFORMATION);

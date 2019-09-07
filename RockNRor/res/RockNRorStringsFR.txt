@@ -153,7 +153,10 @@ Nb max. de fermes simultanées
 Max. nourriture pour reconstruction des fermes
 [42035]
 Min de bois pour reconstruction des fermes
-
+[42172] // Map copy title
+Copie de carte
+[42173] // Restart game with new random seed
+Recommencer (nouv. carte)
 
 [42023] // Custom civilization without name in game settings combobox
 Autre civilisation

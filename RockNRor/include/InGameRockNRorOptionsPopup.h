@@ -47,6 +47,7 @@ private:
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnCancel;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *customOptionButtonVar; // "OK" button of RockNRor's options popup. NULL means popup does not exist. See HasOpenedCustomGamePopup.
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnRestartWithNewSeed;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *customOptionHumanPenaltyTextVar;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *customOptionHumanPenaltyLabelVar;
 	AOE_STRUCTURES::STRUCT_UI_TEXTBOX *customOptionGameSpeedTextVar;
@@ -72,6 +73,11 @@ private:
 	void Validate();
 
 	void ClosePopupAndHandlePausePolicy();
+
+	// Close this screen and triggers a game restart
+	// If newSeed is true, a new seed is computed to get another random games with same parameters.
+	// If newSeed is false, restarts exactly the same game
+	void RestartGame(bool newSeed);
 };
 
 }

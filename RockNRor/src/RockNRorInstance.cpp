@@ -2050,7 +2050,6 @@ void RockNRorInstance::ManageGetPlayerNameDLLStringIdOffset(REG_BACKUP *REG_valu
 	//long int playerIdMinus1 = REG_values->ESI_val;
 
 	*stackPtr = 0; // Cannot store the value we need in a byte (0<x<255). Returning NULL makes so it is called again in 0x00503865
-
 }
 
 
@@ -3710,8 +3709,11 @@ void RockNRorInstance::EntryPointOnBuildingAttackInfoDisplay(REG_BACKUP *REG_val
 
 
 // From 0x4FF530 = GetLanguageDllString(stringId, buffer, size)
+// Used to bypass DLL string resolution (language.dll, and languagex.dll if relevant) IF a custom localization string is available
+// Otherwise, let AOE code search in languagex.dll (if relevant) then in language.dll (if still not found)
 void RockNRorInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
-	unsigned long int *p = (unsigned long int *) ((ADDR_VAR_HINST_LANGUAGEX_DLL != 0) ? ADDR_VAR_HINST_LANGUAGEX_DLL : ADDR_VAR_HINST_LANGUAGE_DLL);
+	unsigned long int addrToUse = ((ADDR_VAR_HINST_LANGUAGEX_DLL != 0) ? ADDR_VAR_HINST_LANGUAGEX_DLL : ADDR_VAR_HINST_LANGUAGE_DLL);
+	unsigned long int *p = (unsigned long int *)addrToUse;
 #ifdef GAMEVERSION_AOE10b
 	unsigned long int returnAddress = 0x4E6D7D; // different code here (don't skip the 3 POP)
 #endif
