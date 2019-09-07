@@ -13,7 +13,6 @@ ConfigManager::~ConfigManager() {
 		free(this->hModules);
 	}
 	this->hModules = NULL;
-	this->verboseDebug = false;
 }
 
 void ConfigManager::Init() {
@@ -22,6 +21,7 @@ void ConfigManager::Init() {
 	this->DLL_names_current = this->DLL_names_first;
 	this->hModules = NULL;
 	this->modulesCount = 0;
+	this->verboseDebug = false;
 }
 
 
@@ -36,23 +36,45 @@ int ConfigManager::ReadConfigFromFile() {
 	try {
 		fseek(configFile, 0, SEEK_SET); // begin of file
 
-		// TODO: FIXME : fscanf gets separate strings at each whitespace... We need to join strings until a \n is found
-		while (fscanf_s(configFile, "%s\n", bufferRead, BUFFER_SIZE - 1) > 0) {
-			bool ignore_line;
-			int len;
-			for (len = 0; bufferRead[len] != 0; len++);
+		size_t posInFile = 0;
+		size_t readSize;		
+		while ((readSize = fread_s(bufferRead, BUFFER_SIZE, 1, BUFFER_SIZE, configFile)) > 0) {
+			bool ignoreLine = bufferRead[0] == '#';
+			size_t len = BUFFER_SIZE - 1;
+			for (len = 0; len < BUFFER_SIZE; len++) {
+				if ((bufferRead[len] == 0) || (bufferRead[len] == '\n') || (bufferRead[len] == '\r')) {
+					break;
+				}
+			}
+			posInFile += len;
+			int tmpPos = len;
+			while (tmpPos < BUFFER_SIZE) {
+				if ((bufferRead[tmpPos] == '\n') || (bufferRead[tmpPos] == '\r')) {
+					posInFile++;
+					tmpPos++;
+				}
+				else {
+					break;
+				}
+			}
+
 			if (_strnicmp("DEBUG", bufferRead, len) == 0) {
 				this->verboseDebug = true;
-				continue; // ignore current line
+				ignoreLine = true;
 			}
 			if ((len >= 3) && (bufferRead[len - 3] == 'D')) { bufferRead[len - 3] = 'd'; }
 			if ((len >= 2) && (bufferRead[len - 2] == 'L')) { bufferRead[len - 2] = 'l'; }
 			if ((len >= 1) && (bufferRead[len - 1] == 'L')) { bufferRead[len - 1] = 'l'; }
-			ignore_line = ((len < 4) || (bufferRead[0] == '#') || (bufferRead[len - 4] != '.') || (bufferRead[len - 3] != 'd') || (bufferRead[len - 2] != 'l') || (bufferRead[len - 1] != 'l'));
-			if (!ignore_line) {
+			ignoreLine |= ((len < 4) || (bufferRead[len - 4] != '.') || (bufferRead[len - 3] != 'd') || (bufferRead[len - 2] != 'l') || (bufferRead[len - 1] != 'l'));
+			if (!ignoreLine) {
 				// Add dll to list
 				this->DLL_names_current->AddAfter(bufferRead, len);
 				this->DLL_names_current = this->DLL_names_current->next;
+			}
+
+			int res = fseek(configFile, posInFile, SEEK_SET); // Set position just after the end of "current" line
+			if (res != 0) {
+				break;
 			}
 		}
 	}
@@ -101,3 +123,6 @@ void ConfigManager::LoadModules() {
 		}
 	}
 }
+
+
+#undef BUFFER_SIZE
