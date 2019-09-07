@@ -7,7 +7,9 @@ ConfigManager::ConfigManager() {
 }
 
 ConfigManager::~ConfigManager() {
-	free(this->DLL_names_first);
+	if (this->DLL_names_first) {
+		delete this->DLL_names_first;
+	}
 	this->DLL_names_first = NULL;
 	if (this->hModules) {
 		free(this->hModules);

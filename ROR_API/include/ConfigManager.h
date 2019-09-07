@@ -21,7 +21,7 @@ public:
 	~StringList() {
 		if (this->string) { free(this->string); }
 		this->string = NULL;
-		if (this->next) { free(this->next); }
+		if (this->next) { delete this->next; }
 		this->next = NULL;
 	};
 	int AddAfter(char *src_string, unsigned int string_size) {
