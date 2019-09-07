@@ -722,6 +722,116 @@ bool AnalyzeEmpiresDatQuality() {
 }
 
 
+bool AnalyzeMilitaryUnitsEfficency() {
+	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global || !global->IsCheckSumValid()) { return false; }
+	long int civId = CST_CIVID_GAIA;
+	AOE_STRUCTURES::STRUCT_CIVILIZATION_DEF *civDef = global->GetCivDef(0);
+	if (!civDef || !civDef->IsCheckSumValid()) {
+		traceMessageHandler.WriteMessage("ERROR: missing or invalid civDef structure");
+		return false;
+	}
+
+	bool confIncludeBoats = false;
+	bool confIncludeHeroes = false;
+
+	std::string output = "";
+	AppendTextToLogFile("Unit #id\tName\tDPS\tHP\tSpeed\tAtk\tBlstRad\tArmr\tPierceArm\tRange\tIsRanged\tFood\tWood\tStone\tGold\tWCost", true);
+
+	for (int unitDefId = 0; unitDefId < civDef->civUnitDefCount; unitDefId++) {
+		auto dtl = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedTrainableUnitDef(unitDefId);
+		AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDefBase = civDef->GetUnitDef(unitDefId);
+		if (!unitDefBase || !unitDefBase->DerivesFromTrainable() || !dtl) {
+			continue;
+		}
+		std::string name = GetUnitName(unitDefId);
+		AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *unitDef = (AOE_STRUCTURES::STRUCT_UNITDEF_TRAINABLE *)unitDefBase;
+		bool isNonTowerMilitary = AOE_CONST_FUNC::IsNonTowerMilitaryUnit(unitDef->unitAIType);
+		bool isTower = AOE_STRUCTURES::IsTower(unitDef);
+		bool isHero = dtl->IsHeroOrScenarioUnit();
+		if (!isTower && !isNonTowerMilitary) {
+			continue;
+		}
+		if (!confIncludeHeroes && (isHero || (unitDef->unitAIType == TribeAIGroupHero))) {
+			continue;
+		}
+		if (!confIncludeBoats && AOE_CONST_FUNC::IsWaterUnit(unitDef->unitAIType)) {
+			continue;
+		}
+
+		bool isRanged = IsRangedUnit(unitDef);
+		int displayAttack = unitDef->displayedAttack;
+		int pierceArmor = GetArmorFromList(unitDef, ATTACK_CLASS::CST_AC_BASE_PIERCE, 0);
+		int armor = unitDef->displayedArmor;
+		if (armor == 0) {
+			armor = unitDef->defaultArmor;
+		}
+		int range = (int)unitDef->displayedRange;
+		bool hasBlast = unitDef->HasBlastDamage();
+		float blastRadius = hasBlast ? unitDef->blastRadius : 0;
+		float reloadTime = unitDef->reloadTime1;
+		int hp = unitDef->totalHitPoints;
+		float speed = unitDef->speed;
+		int costFood = 0;
+		int costWood = 0;
+		int costStone = 0;
+		int costGold = 0;
+		for (int i = 0; i < 3; i++) {
+			if (unitDef->costs[i].costPaid == 0) { continue; }
+			if (unitDef->costs[i].costType == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD) { costFood = unitDef->costs[i].costAmount; }
+			if (unitDef->costs[i].costType == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_WOOD) { costWood = unitDef->costs[i].costAmount; }
+			if (unitDef->costs[i].costType == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_STONE) { costStone = unitDef->costs[i].costAmount; }
+			if (unitDef->costs[i].costType == AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_GOLD) { costGold = unitDef->costs[i].costAmount; }
+		}
+		int weightedCost = GetWeightedCostValue(costFood, RESOURCE_TYPES::CST_RES_ORDER_FOOD) +
+			GetWeightedCostValue(costWood, RESOURCE_TYPES::CST_RES_ORDER_WOOD) +
+			GetWeightedCostValue(costStone, RESOURCE_TYPES::CST_RES_ORDER_STONE) +
+			GetWeightedCostValue(costGold, RESOURCE_TYPES::CST_RES_ORDER_GOLD);
+		
+		if (reloadTime == 0) {
+			traceMessageHandler.WriteMessageNoNotification(std::string("ERROR: reload time is 0 for unit #") + std::to_string(unitDefId));
+			continue;
+		}
+		float dps = displayAttack / reloadTime;
+
+		output += std::to_string(unitDefId);
+		output += "\t";
+		output += name;
+		output += "\t";
+		output += to_string(dps);
+		output += "\t";
+		output += to_string(hp);
+		output += "\t";
+		output += to_string(speed);
+		output += "\t";
+		output += to_string(displayAttack);
+		output += "\t";
+		output += to_string(blastRadius);
+		output += "\t";
+		output += to_string(armor);
+		output += "\t";
+		output += to_string(pierceArmor);
+		output += "\t";
+		output += to_string(range);
+		output += "\t";
+		output += isRanged ? "1" : "0";
+		output += "\t";
+		output += to_string(costFood);
+		output += "\t";
+		output += to_string(costWood);
+		output += "\t";
+		output += to_string(costStone);
+		output += "\t";
+		output += to_string(costGold);
+		output += "\t";
+		output += to_string(weightedCost);
+		AppendTextToLogFile(output.c_str(), true);
+		output = "";
+	}
+	return true;
+}
+
+
 // A method to do various dirty testing. Does nothing in RELEASE mode.
 void CurrentTestMethod() {
 #ifdef _DEBUG

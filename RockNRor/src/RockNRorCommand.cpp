@@ -617,6 +617,10 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 	}
 
 #ifdef _DEBUG
+	if (strcmp(command, "unit analyze") == 0) {
+		AOE_METHODS::SetGamePause(true);
+		CR_DEBUG::AnalyzeMilitaryUnitsEfficency();
+	}
 	// p0 to p8: quick player change + set AI flags automatically
 	if ((*command == 'p') && (*(command + 1) >= '0') && (*(command + 1) < '9')) {
 		int playerId = *(command + 1) - '0';
@@ -762,7 +766,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		if (!global->gameMapInfo || !global->gameMapInfo->IsCheckSumValid()) { return; }
 	}
 	if (strcmp(command, "a") == 0) {
-		
+
 	}
 
 	// TEST strategy

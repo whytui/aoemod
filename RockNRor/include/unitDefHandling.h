@@ -176,7 +176,7 @@ namespace AOE_STRUCTURES {
 	const char *GetUnitInternalName(short int unitDefId);
 
 	// Get a unit name from empires.dat data (read from civ 0)
-	// Returns NULL if not found. This requires that empires.dat file has already been read to global structure.
+	// Returns "" if not found. This requires that empires.dat file has already been read to global structure.
 	std::string GetUnitName(short int unitDefId);
 
 	// Get a *possible* unitDefId ("DAT_ID") that corresponds to a civilian that gathers such type of resource
