@@ -87,21 +87,17 @@ void DisableAIFlagsForHuman() {
 
 	AOE_STRUCTURES::STRUCT_MP_COMMUNICATION *mpComm = *(AOE_STRUCTURES::STRUCT_MP_COMMUNICATION **)AOE_OFFSETS::ADDR_MP_COMM_STRUCT;
 	assert(mpComm != NULL);
-	int aValidAIPlayer = -1;
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
 		bool thisPlayerIsHuman = (isSinglePlayer && (loopPlayerId == global->humanPlayerId)) || // SP: use global struct's human playerId: it is always reliable even in loaded games
 			(!isSinglePlayer && (mpComm->playerTypes[loopPlayerId] == 2)); // MP: use initial setting from "common MP struct". This is not reliable for saved games but OK in MP games.
 		if (thisPlayerIsHuman) {
 			player->isComputerControlled = 0;
-			player->SetCustomAIFlag(0);
-		}
-		if ((!thisPlayerIsHuman) && (aValidAIPlayer == -1)) {
-			// Need to save one arbitrary AI player ID to set "currently managed AI player" or everything will be stuck
-			aValidAIPlayer = loopPlayerId;
+			player->SetCustomAIFlagSecure(0);
 		}
 	}
-	global->currentlyManagedAIPlayer = aValidAIPlayer; // Required to avoid stuck AI
+	
+	AOE_STRUCTURES::PLAYER::SetAValidCurrentAIPlayerId(); // Required to avoid stuck AI
 }
 
 
@@ -110,27 +106,24 @@ void RestoreAllAIFlags() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 	if (!global) { return; }
 
-	int aValidAIPlayer = -1;
 	for (int loopPlayerId = 1; loopPlayerId < global->playerTotalCount; loopPlayerId++) {
 		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStructPtrTable()[loopPlayerId];
 		if (loopPlayerId == global->humanPlayerId) {
 			player->isComputerControlled = 0;
-			player->SetCustomAIFlag(0);
+			player->SetCustomAIFlagSecure(0);
 		} else {
 			if (player->isComputerControlled == 0) {
 				// Player was NOT AI-controlled. We need to update its strategy with (potentially) human-created units
 				CheckAIWhenEnablingAIControl(player);
 			}
 			player->isComputerControlled = 1;
-			player->SetCustomAIFlag(1);
-			// Need to save an arbitrary AI player ID to set "currently managed AI player" or everything will be stuck
-			if (aValidAIPlayer == -1) {
-				aValidAIPlayer = loopPlayerId;
+			if (player->AIControlMode == 3) { // player NEEDS to have been created as an "AI" player
+				player->SetCustomAIFlagSecure(1);
 			}
 		}
-
 	}
-	global->currentlyManagedAIPlayer = aValidAIPlayer; // Required to avoid stuck AI
+	
+	AOE_STRUCTURES::PLAYER::SetAValidCurrentAIPlayerId(); // Required to avoid stuck AI
 }
 
 
@@ -149,8 +142,9 @@ void SetAllAIFlags(bool enable) {
 			}
 		}
 		player->isComputerControlled = enable ? 1 : 0;
-		player->SetCustomAIFlag(enable ? 1 : 0);
+		player->SetCustomAIFlagSecure(enable ? 1 : 0);
 	}
+	AOE_STRUCTURES::PLAYER::SetAValidCurrentAIPlayerId(); // Required to avoid stuck AI
 }
 
 
@@ -176,19 +170,10 @@ void SetAIFlag(int playerId, int enableMode) {
 		}
 	}
 	player->isComputerControlled = enable ? 1 : 0;
-	player->SetCustomAIFlag(enable ? 1 : 0);
+	player->SetCustomAIFlagSecure(enable);
 
 	// Check that a valid AI player is set as "currently managed AI player"
-	AOE_STRUCTURES::STRUCT_PLAYER *curManagedPlayer = global->GetPlayerStruct(global->currentlyManagedAIPlayer);
-	if (!curManagedPlayer || !curManagedPlayer->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON)) {
-		for (int i = 1; i < global->playerTotalCount; i++) {
-			AOE_STRUCTURES::STRUCT_PLAYER *loopPlayer = global->GetPlayerStruct(i);
-			if (loopPlayer && loopPlayer->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON)) {
-				global->currentlyManagedAIPlayer = i;
-				break;
-			}
-		}
-	}
+	AOE_STRUCTURES::PLAYER::SetAValidCurrentAIPlayerId();
 }
 
 
@@ -391,15 +376,17 @@ bool IsExploredForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int posX, l
 }
 
 
-// Call this to make sure "currently managed AI player" is valid, so that AI is not stuck.
+// Call this to make sure "currently managed AI player" is valid, so that game AI is not stuck.
+// Preserves "current" active AI, if valid
 void SetAValidCurrentAIPlayerId() {
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-	if (!global) { return; }
-	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct((short int)global->currentlyManagedAIPlayer);
-	if (player && (player->isComputerControlled)) { return; } // Currently manager playerId is OK (player is actually computer-controlled).
+	if (!global || !global->IsCheckSumValid()) { return; }
+	AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct((short int)global->currentlyManagedAIPlayer);
+	if (player && (player->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON))) { return; } // Currently manager playerId is OK (player is actually computer-controlled).
+
 	for (int playerId = 1; playerId < global->playerTotalCount; playerId++) {
-		player = GetPlayerStruct(playerId);
-		if (player && player->isComputerControlled) {
+		player = global->GetPlayerStruct(playerId);
+		if (player && player->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON)) {
 			global->currentlyManagedAIPlayer = playerId;
 			return; // Found (and set) one. Exit.
 		}
@@ -413,7 +400,7 @@ void RemoveAIFlagsForCurrentlyControlledPlayer() {
 	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 	if (!player) { return; }
 	player->isComputerControlled = 0;
-	player->SetCustomAIFlag(0);
+	player->SetCustomAIFlagSecure(0);
 	// Make sure to set current AI player to a valid player
 	SetAValidCurrentAIPlayerId();
 }

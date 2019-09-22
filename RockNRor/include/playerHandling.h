@@ -106,7 +106,8 @@ bool IsFogVisibleForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int posX,
 bool IsExploredForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int posX, long int posY);
 
 
-// Call this to make sure "currently managed AI player" is valid, so that AI is not stuck.
+// Call this to make sure "currently managed AI player" is valid, so that game AI is not stuck.
+// Preserves "current" active AI, if valid
 void SetAValidCurrentAIPlayerId();
 
 // Remove all AI-controlled flags for currently controlled player (cf game settings structure).

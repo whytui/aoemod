@@ -234,6 +234,7 @@ namespace AOE_STRUCTURES {
 	private:
 		// 0x4E - Unused in standard game. Used by "ManageAI" mod to enable(1)/disable(0) AI control.
 		// Check if "ManageAI" feature is installed before using this. => Use IsAIActive(...) instead of using this directly
+		// It is not recommended to enable (value 1) this flag if AIControlMode!=3 (player not compatible with AI handling)
 		char unused_customAIFlag;
 	public:
 		char unused_04F;
@@ -335,10 +336,13 @@ namespace AOE_STRUCTURES {
 		}
 		// Returns true if AI "economy" control is active for the player, depending on game EXE (is "ManageAI" feature installed ?)
 		bool IsAIActive(bool hasManageAIFeatureON) {
+			if (this->AIControlMode != 3) {
+				return false;
+			}
 			if (hasManageAIFeatureON) {
 				return (this->unused_customAIFlag != 0);
 			}
-			return (this->AIControlMode == 3);
+			return true;
 		}
 		// Please use IsAIActive instead unless you have a good reason.
 		char GetCustomAIFlag() const { return this->unused_customAIFlag; }
@@ -350,7 +354,16 @@ namespace AOE_STRUCTURES {
 			if ((resourceIndex < 0) || (resourceIndex >= AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_COUNT)) { return; }
 			this->ptrResourceValues[resourceIndex] = value;
 		}
-		void SetCustomAIFlag(char value) { this->unused_customAIFlag = value; } // Sets RockNRor's AI flag.
+		// Sets RockNRor's AI flag, without any consistency check.
+		void SetCustomAIFlag(char value) { this->unused_customAIFlag = value; }
+		// Sets RockNRor's AI flag with check on AI compatibility.
+		void SetCustomAIFlagSecure(char value) {
+			if (this->AIControlMode != 3) {
+				this->SetCustomAIFlag(0); // player is NOT compatible with AIControlMode. It has not been created as an AI player.
+				return;
+			}
+			this->SetCustomAIFlag(value);
+		}
 		// Securely gets a unit definition pointer. Returns NULL if not found/invalid.
 		STRUCT_UNITDEF_BASE *GetUnitDefBase(short int unitDefId) const {
 			if ((unitDefId < 0) || (unitDefId >= this->structDefUnitArraySize)) { return NULL; }
