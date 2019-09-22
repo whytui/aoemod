@@ -31,6 +31,10 @@ const static unsigned long int LANG_ID_TOOL_AGE = 4202;
 const static unsigned long int LANG_ID_BRONZE_AGE = 4203;
 const static unsigned long int LANG_ID_IRON_AGE = 4204;
 
+const static unsigned long int LANG_ID_RESEARCH_MONOTHEISM = 7018;
+const static unsigned long int LANG_ID_RESEARCH_MARTYRDOM = 7095;
+
+
 
 // *******************************************************
 // Custom strings
@@ -165,6 +169,9 @@ const static unsigned long int CRLANG_ID_UNITPROP_FUTURE_UNAVAILABLE_TECHS = 420
 const static unsigned long int CRLANG_ID_UNITPROP_ATTACK_BONUSES_FOR = 42083;
 const static unsigned long int CRLANG_ID_UNITPROP_ARMOR_WEAKNESSES = 42084;
 const static unsigned long int CRLANG_ID_UNITPROP_CONVERSION_RESISTANCE = 42086;
+const static unsigned long int CRLANG_ID_UNITPROP_CONVERSION_EFFICIENCY = 42174;
+const static unsigned long int CRLANG_ID_UNITPROP_CONVERSION_RECHARGING_RATE = 42175;
+const static unsigned long int CRLANG_ID_UNITPROP_HEALING_RATE_BONUS = 42176;
 
 // Scenario editor
 const static unsigned long int CRLANG_IDCUSTOM_EDITOR_MENU = 42063;

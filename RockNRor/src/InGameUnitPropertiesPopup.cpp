@@ -264,6 +264,7 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 	std::string attackStrengths = "";
 	std::string armorWeaknesses = "";
 	if (isValidType50) {
+		int linesCount = 0;
 		for (int i = 0; i < unitDef50->attacksCount; i++) {
 			if (!IsStandardAttack(unitDef50->ptrAttacksList[i].classId) && (unitDef50->ptrAttacksList[i].amount >= 0)) {
 				const std::string attackName = GetAttackOrArmorClassNameString(unitDef50->ptrAttacksList[i].classId);
@@ -283,6 +284,7 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 				armorWeaknesses += " ; ";
 			}
 		}
+		linesCount += 2; // attacks/armors
 		std::string wholeText = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_ATTACK_BONUSES_FOR, "Attack bonuses for");
 		wholeText += std::string(": ");
 		if (attackStrengths.empty()) {
@@ -298,13 +300,53 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 		} else {
 			wholeText += armorWeaknesses;
 		}
-		this->AddTextBox(&this->edtStrengthWeakness, wholeText.c_str(), 0, 30, currentYPos, 450, 56, true, true, false, AOE_FONTS::AOE_FONT_SMALL_TEXT_10);
-		currentYPos += 60;
+
+		// Priest characteristics
+		if (unitDefBase->unitAIType == GLOBAL_UNIT_AI_TYPES::TribeAIGroupPriest) {
+			bool hasMonotheism = (unitPlayer->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_CAN_CONVERT_PRIEST) != 0);
+			float rechargingRate = unitPlayer->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_FAITH_RECHARGING_RATE);
+			float healing = unitPlayer->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_HEALING);
+			bool hasMartyrdom = (unitPlayer->GetResourceValue(RESOURCE_TYPES::CST_RES_ORDER_PRIEST_SACRIFICE) != 0);
+			float conversionEfficiency = unitDef50->workRate;
+			std::string priestText = "\r\n";
+			priestText += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_CONVERSION_EFFICIENCY, "Conversion efficiency");
+			priestText += "=";
+			priestText += std::to_string(conversionEfficiency);
+			priestText += "\r\n";
+			priestText += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_CONVERSION_RECHARGING_RATE, "Recharging rate");
+			priestText += "=";
+			priestText += std::to_string(rechargingRate);
+			priestText += "\r\n";
+			priestText += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_HEALING_RATE_BONUS, "Healing rate bonus");
+			priestText += "=";
+			priestText += (healing > 0) ? localizationHandler.GetTranslation(CRLANG_ID_YES, "Yes") : localizationHandler.GetTranslation(CRLANG_ID_NO, "No");
+			priestText += "\r\n";
+			std::string tmpStr = GetLanguageDllText(LANG_ID_RESEARCH_MONOTHEISM);
+			if (tmpStr.empty()) {
+				tmpStr = "Monotheism";
+			}
+			priestText += tmpStr;
+			priestText += "=";
+			priestText += hasMonotheism ? localizationHandler.GetTranslation(CRLANG_ID_YES, "Yes") : localizationHandler.GetTranslation(CRLANG_ID_NO, "No");
+			priestText += "\r\n";
+			tmpStr = GetLanguageDllText(LANG_ID_RESEARCH_MARTYRDOM);
+			if (tmpStr.empty()) {
+				tmpStr = "Martyrdom";
+			}
+			priestText += tmpStr;
+			priestText += "=";
+			priestText += hasMartyrdom ? localizationHandler.GetTranslation(CRLANG_ID_YES, "Yes") : localizationHandler.GetTranslation(CRLANG_ID_NO, "No");
+			wholeText += priestText;
+			linesCount += 5;
+		}
+
+		this->AddTextBox(&this->edtStrengthWeakness, wholeText.c_str(), 0, 30, currentYPos, 450, 10 + linesCount * 14, true, true, false, AOE_FONTS::AOE_FONT_SMALL_TEXT_10);
+		currentYPos += 14 + linesCount * 14;
 	}
 
 	// Conversion resistance : only for living/building (other units can't be converted)
-	if (unitBase->ptrStructPlayer && unitBase->ptrStructPlayer->IsCheckSumValid() && unitBase->DerivesFromTrainable()) {
-		float conversionResistance = ROCKNROR::crInfo.GetConversionResistance(unitBase->ptrStructPlayer->civilizationId, unitDefBase);
+	if (unitBase->DerivesFromTrainable()) {
+		float conversionResistance = ROCKNROR::crInfo.GetConversionResistance(unitPlayer->civilizationId, unitDefBase);
 		std::string convResistText = localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_CONVERSION_RESISTANCE, "Conversion resistance");
 		convResistText += "=";
 		convResistText += std::to_string(conversionResistance);
@@ -320,7 +362,7 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 		currentYPos += 20 + techToShowCount * 14 + 20;
 	}
 
-	if (isMyUnit) {
+	if (isMyUnit && (unitDefBase->unitType == GLOBAL_UNIT_TYPES::GUT_BUILDING)) {
 		this->AddButton(&this->btnMakeMainUnitForShortcutSelection,
 			localizationHandler.GetTranslation(CRLANG_ID_BTN_UNIT_MAKE_MAIN_FOR_KEY_SHORTCUT_SELECTION, "Make main unit for keyboard shortcut selection"),
 			30, currentYPos, 400, 22);

@@ -251,6 +251,12 @@ Attack bonuses for
 Armor weaknesses
 [42086] // Unit properties: conversion resistance
 Conversion resistance
+[42174] // Unit properties: Conversion efficiency
+Conversion efficiency
+[42175] // Unit properties: Recharging rate
+Recharging rate
+[42176] // Unit properties: Healing rate bonus
+Healing rate bonus
 
 // *** Scenario editor ***
 [42063]

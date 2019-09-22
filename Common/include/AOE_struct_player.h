@@ -2,7 +2,6 @@
 #pragma once
 
 #include <assert.h>
-//#include <AOE_const_functional.h>
 #include <AOE_struct_research_def.h>
 #include <AOE_struct_unit_def.h>
 #include <AOE_struct_units.h>
@@ -344,11 +343,11 @@ namespace AOE_STRUCTURES {
 		// Please use IsAIActive instead unless you have a good reason.
 		char GetCustomAIFlag() const { return this->unused_customAIFlag; }
 		float GetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES resourceIndex) {
-			if ((resourceIndex < 0) || (resourceIndex > AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_ALL_RELICS)) { return -1; }
+			if ((resourceIndex < 0) || (resourceIndex >= AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_COUNT)) { return -1; }
 			return this->ptrResourceValues[resourceIndex];
 		}
 		void SetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES resourceIndex, float value) {
-			if ((resourceIndex < 0) || (resourceIndex > AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_ALL_RELICS)) { return; }
+			if ((resourceIndex < 0) || (resourceIndex >= AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_COUNT)) { return; }
 			this->ptrResourceValues[resourceIndex] = value;
 		}
 		void SetCustomAIFlag(char value) { this->unused_customAIFlag = value; } // Sets RockNRor's AI flag.

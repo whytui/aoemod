@@ -12,9 +12,9 @@ Travail des métaux
 RockNRor
 
 [42094]
-Yes
+Oui
 [42095]
-No
+Non
 
 // *** Technical ***
 [42001]
@@ -259,6 +259,12 @@ Bonus contre
 Malus contre
 [42086] // Unit properties: conversion resistance
 Resistance vs conversion
+[42174] // Unit properties: Conversion efficiency
+Efficacité conversion
+[42175] // Unit properties: Recharging rate
+Vitesse de rechargement
+[42176] // Unit properties: Healing rate bonus
+Bonus vitesse de soins
 
 // *** Scenario editor ***
 [42063]
@@ -376,4 +382,4 @@ Ne plus défendre la position/unité
 [42124]
 Cliquez avec le bouton droit pour définir l'unité ou l'emplacement à protéger
 [42125] // Make main unit for keyboard shortcut selection
-Cliquer pour que cette unité soit prioritaire lors de l'utilisation de raccourci clavier
+Rendre prioritaire pour le raccourci clavier
