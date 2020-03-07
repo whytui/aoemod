@@ -240,7 +240,7 @@ namespace AOE_CONST_FUNC {
 		TDE_UPGRADE_UNIT = 3, // "source" unit = effectUnit, "target" (upgraded) unit = effectClass
 		TDE_ATTRIBUTE_MODIFIER_ADD = 4, // add value
 		TDE_ATTRIBUTE_MODIFIER_MULT = 5, // multiply by a value
-		TDE_RESOURCE_MODIFIER_MULT = 6, // multiply by a value. Not supported by AOE/ROR !
+		TDE_RESOURCE_MODIFIER_MULT = 6, // multiply by a value. Not supported natively by AOE/ROR !
 		TDE_RESEARCH_COST_MODIFIER = 101, // Not supported by AOE/ROR. Don't implement it as ResearchDefs are common to all players and must NOT be modified (it would even impact other games)
 		TDE_DISABLE_RESEARCH = 102, // "value" contains researchId (as float), other fields unused.
 		TDE_RESEARCH_TIME_MODIFIER = 103 // Not supported by AOE/ROR. Don't implement it as ResearchDefs are common to all players and must NOT be modified (it would even impact other games)

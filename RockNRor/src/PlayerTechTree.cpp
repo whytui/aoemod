@@ -258,7 +258,7 @@ void TechTreeCreator::CreateRandomTechTree(STRUCT_TECH_DEF *techDef) {
 
 	this->CalcTotalDisabledWeight();
 
-	if (simulationMode) {
+	if (this->simulationMode) {
 		return;
 	}
 

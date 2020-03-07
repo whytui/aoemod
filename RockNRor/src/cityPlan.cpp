@@ -133,7 +133,7 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 
 	// 1) Loop on my buildings just to collect info
 	for (long int index = 0; index < infAI->buildingUnits.usedElements; index++) {
-		short int unitId = (short int)infAI->buildingUnits.unitIdArray[index];
+		long int unitId = infAI->buildingUnits.unitIdArray[index];
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = globalStruct->ptrUnitPointersList[unitId];
 		if (unit) {
 			assert(unit->IsCheckSumValidForAUnitClass());
@@ -157,7 +157,7 @@ void ManageCityPlanOtherBuildingsImpact(AOE_STRUCTURES::STRUCT_INF_AI *infAI, AO
 
 	// 2) Active loop on my buildings
 	for (long int index = 0; index < infAI->buildingUnits.usedElements; index++) {
-		short int unitId = (short int)infAI->buildingUnits.unitIdArray[index];
+		long int unitId = infAI->buildingUnits.unitIdArray[index];
 		AOE_STRUCTURES::STRUCT_UNIT_BUILDING *unit = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *)globalStruct->ptrUnitPointersList[unitId];
 		if (unit) {
 			assert(unit->IsCheckSumValid()); // IS a building (no other unit type)

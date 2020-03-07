@@ -231,6 +231,9 @@ bool GetScreenPosForUnit(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, long int *pOutS
 	if (!gameZone || !gameZone->IsCheckSumValid()) { return false; }
 
 	unsigned long int addr = 0x511790;
+	if (unit->myTile == NULL) { // May happen if in a transport ship !
+		return false;
+	}
 	int elevation = unit->myTile->terrainData.GetAltitude();
 	long int x = (long int)unit->positionX;
 	long int y = (long int)unit->positionY;

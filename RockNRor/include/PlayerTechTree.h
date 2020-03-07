@@ -184,7 +184,7 @@ namespace TT_CONFIG {
 	static const int GEN_BONUS_MIN_RATE_GOOD = 25; // Min % improvement for bonus that needs a decent value to be useful: e.g. speed, HP
 	static const int GEN_BONUS_MAX_RATE_GOOD = 40; // Max % improvement for bonus that needs a decent value to be useful: e.g. speed, HP
 	static const int GEN_BONUS_MIN_RATE_FARM_FOOD_AMOUNT = 30; // Min % improvement for farm food amount bonus
-	static const int GEN_BONUS_MAX_RATE_FARM_FOOD_AMOUNT = 80; // Max % improvement  for farm food amount bonus
+	static const int GEN_BONUS_MAX_RATE_FARM_FOOD_AMOUNT = 80; // Max % improvement for farm food amount bonus
 }
 
 
