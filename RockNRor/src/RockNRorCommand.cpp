@@ -3959,6 +3959,8 @@ void RockNRorCommand::SetNextInGameDebugInfoLevel() {
 		// Force additional states of debugging (custom debug levels).
 		(*AOE_VAR_F5_DEBUG_INFO_TYPE)++;
 		if (*AOE_VAR_F5_DEBUG_INFO_TYPE < ROCKNROR::CONFIG::IDL_COUNT) {
+			//std::string msg = std::string("Debug info : #") + std::to_string(*AOE_VAR_F5_DEBUG_INFO_TYPE);
+			//AOE_METHODS::CallWriteText(msg.c_str());
 			settings->showDebugTimings = 1;
 			// Restore debug label visibility instead of resources (optional: depends if we want to show stuff in there)
 			if (settings->ptrGameUIStruct && ROCKNROR::crInfo.configInfo.useF5LabelZoneForCustomDebugInfo &&
