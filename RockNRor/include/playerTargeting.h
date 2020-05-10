@@ -44,7 +44,7 @@ namespace CUSTOM_AI {
 		const long int dislikeSubScoreAttackedMyTown = 12;
 		const long int dislikeSubScoreMostSpottedUnitsMyTown = 3;
 		const long int dislikeSubScoreHasTowerInMyTown = 20;
-		const long int dislikeSubScorePlayerScoreFinalImpact = 50; // 0-100 impact of "player score" on global "dislike score" calculation. Note: attackWinningPlayerFactor percentage is alreday applied before (which reduces the impact)
+		const long int dislikeSubScorePlayerScoreFinalImpact = 50; // 0-100 impact of "player score" on global "dislike score" calculation. Note: attackWinningPlayerFactor percentage is already applied before (which reduces the impact)
 		const long int dislikeSubScorePriorityRulesFinalImpact = 75; // 0-100 impact of "priority rules" (winning conditions...) on global "dislike score" calculation
 		const long int dislikeSubScoreCustomRulesFinalImpact = 30; // 0-100 impact of "custom rules" on global "dislike score" calculation
 

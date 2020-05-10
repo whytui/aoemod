@@ -398,7 +398,7 @@ bool HandleRockNRorInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *setti
 	for (int i = 1; i <= 8; i++) {
 		//if (usedLines >= 6) { break; }
 		AOE_STRUCTURES::STRUCT_PLAYER *player = global->GetPlayerStruct(i);
-		if (!player || !player->isComputerControlled || !player->ptrAIStruct) { continue; }
+		if (!player || !player->isComputerControlled || !player->ptrAIStruct || (player->aliveStatus == 2)) { continue; }
 		if (usedLines >= 4) {
 			if (reuseSameLine) {
 				reuseSameLine = false;
@@ -438,12 +438,12 @@ bool HandleRockNRorInGameF5DebugInfo(AOE_STRUCTURES::STRUCT_GAME_SETTINGS *setti
 			if (!info) { msg[usedLines-1] = ""; continue; }
 			int curTargetPlayerId = info->GetCurrentTacAITargetPlayerId(global->GetPlayerStruct(i));
 			msg[usedLines - 1] += std::string("p#") + std::to_string(i) + std::string(" targt=") + std::to_string(curTargetPlayerId) +
-				std::string(" ; subdslk vs");
+				std::string(" ; dislike vs");
 			for (int j = 1; j < global->playerTotalCount; j++) {
 				int curDislike = player->ptrAIStruct->structDiplAI.dislikeTable[j];
 				msg[usedLines - 1] += std::string(" p") + std::to_string(j) + std::string("=");
-				msg[usedLines - 1] += to_string(info->lastComputedDislikeSubScore[i]);
-				msg[usedLines - 1] += std::string("|");
+				msg[usedLines - 1] += to_string(info->lastComputedDislikeSubScore[j]);
+				msg[usedLines - 1] += std::string("->");
 				msg[usedLines - 1] += to_string(curDislike);
 			}
 		}
