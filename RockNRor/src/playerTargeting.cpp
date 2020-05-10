@@ -66,6 +66,7 @@ bool AIPlayerTargetingInfo::RecomputeInfo(STRUCT_PLAYER *player) {
 		ignoreThisPlayer[i] = false;
 	}
 	ignoreThisPlayer[0] = true; // always ignore gaia
+	ignoreThisPlayer[player->playerId] = true;
 	long int totalAttacksDuringPeriod = 0;
 	int numberOfValidEnemyPlayers = 0;
 
