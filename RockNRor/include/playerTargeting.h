@@ -62,7 +62,8 @@ namespace CUSTOM_AI {
 		long int nextUpdateGameTime; // milliseconds
 		long int lastTargetPlayerChangeGameTime; // milliseconds
 		
-		// A Dislike score for each player, taking into account complex rules (players that attacked me, etc) + a random part.
+		// A Dislike score for each player, taking into account complex rules.
+		// Includes : recent attacks, enemy in my town, being previous "main target", random factor
 		// Expected values in 0-100.
 		long int lastComputedDislikeSubScore[9];
 
@@ -73,6 +74,8 @@ namespace CUSTOM_AI {
 
 		// Recompute Custom information (only) if refresh delay has been reached
 		// Returns true if information have been recomputed (false is not necessarily an error)
+		// Custom dislike 'subvalues' include : recent attacks by player, units/towers in my town,
+		// ... being main target previously, + a random factor
 		bool RecomputeInfo(STRUCT_PLAYER *player);
 
 		// Returns the current target player ID from TacAI information. Returns -1 if invalid/not set.
