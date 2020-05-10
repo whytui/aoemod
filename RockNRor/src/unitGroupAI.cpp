@@ -834,20 +834,22 @@ bool UnitGroupAI::TaskActiveAttackGroupWeakWithVitalMainUnit(STRUCT_PLAYER *play
 		}
 
 		// No specific target: just fall back in town
-		float retreatPosX = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationXFromMainUnit);
-		float retreatPosY = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationYFromMainUnit);
-		UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, NULL, retreatPosX, retreatPosY, false);
-		if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
+		if (groupIsAway) {
+			float retreatPosX = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionX + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationXFromMainUnit);
+			float retreatPosY = this->activeGroupsTaskingTempInfo.myMainCentralUnit->positionY + (this->activeGroupsTaskingTempInfo.mainUnitProtectionRadius * this->curUnitGroupOrientationYFromMainUnit);
+			UNIT_GROUP_TASK_IDS result = this->AttackOrRetreat(tacAI, unitGroup, NULL, retreatPosX, retreatPosY, false);
+			if (result != UNIT_GROUP_TASK_IDS::CST_UGT_NOT_SET) {
 #ifdef _DEBUG
-			std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
-				std::to_string(result) + std::string(" for idle grp, weak case, wkn=");
-			msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCntTwn=") + std::to_string(this->activeGroupsTaskingTempInfo.townLandAttackGroupCount + this->activeGroupsTaskingTempInfo.townLandDefendGroupCount + this->activeGroupsTaskingTempInfo.townLandExploreGroupCount);
-			//CallWriteText(msg.c_str());
-			this->lastDebugInfo += msg + std::string("\n");
+				std::string msg = std::string("p#") + std::to_string(player->playerId) + std::string(" Ordered taskId=") +
+					std::to_string(result) + std::string(" for idle grp, weak case, wkn=");
+				msg += std::to_string(this->activeGroupsTaskingTempInfo.myWeaknessScore) + std::string(" grpCntTwn=") + std::to_string(this->activeGroupsTaskingTempInfo.townLandAttackGroupCount + this->activeGroupsTaskingTempInfo.townLandDefendGroupCount + this->activeGroupsTaskingTempInfo.townLandExploreGroupCount);
+				//CallWriteText(msg.c_str());
+				this->lastDebugInfo += msg + std::string("\n");
 #endif
-			return true; // Unit group has been tasked
+				return true; // Unit group has been tasked
+			}
+			// Retreating failed ?
 		}
-		// Retreating failed ?
 	}
 	if (groupIsAway) {
 		return false; // Let ROR do something with this group. Being idle out of nowhere is no use !
