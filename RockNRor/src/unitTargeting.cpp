@@ -538,7 +538,7 @@ STRUCT_UNIT_MEMORY *UnitTargeting::TestFindGroupMainTarget(STRUCT_INF_AI *infAI,
 
 	PLAYER_DIPLOMACY_STANCES diplVsTarget = groupLeader->ptrStructPlayer->ptrDiplomacyStances[targetPlayerId];
 	if ((diplVsTarget != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_ENEMY) && (diplVsTarget != AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES::CST_PDS_NEUTRAL)) {
-		assert(false && "Trying to find a target for a non-enemy player");
+		// Trying to find a target for a non-enemy player. Might occur just after unit conversion
 		targetInfo->targetSearchInProgress = 0; return NULL;
 	}
 
