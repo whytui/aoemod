@@ -61,6 +61,9 @@ bool AutoSaveCurrentGame();
 // If you call this from in-game, you won't have a crash, but the scenario file will be corrupted and opening it may crash.
 bool SaveScenario(const char *filenameNoPath);
 
+// Restart current game, just like Restart button does
+bool RestartGame();
+
 
 // Get a string representing game time in a human readable format
 std::string GetHumanTimeFromGameTime(unsigned long int gameTimeValue, bool withMilliSeconds);

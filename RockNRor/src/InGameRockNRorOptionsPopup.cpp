@@ -241,13 +241,7 @@ void InGameRockNRorOptionsPopup::RestartGame(bool newSeed) {
 	this->CloseScreen(false);
 
 	// Restart game (with new seed)
-#ifdef GAMEVERSION_ROR10c
-	const unsigned long int addrRestart = 0x00500FB0;
-	_asm {
-		MOV ECX, settings;
-		CALL addrRestart;
-	}
-#endif
+	AOE_METHODS::RestartGame();
 }
 
 }

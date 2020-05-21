@@ -151,6 +151,21 @@ bool AutoSaveCurrentGame() {
 }
 
 
+// Restart current game, just like Restart button does
+bool RestartGame() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings || !settings->IsCheckSumValid()) { return false; }
+#ifdef GAMEVERSION_ROR10c
+	const unsigned long int addrRestart = 0x00500FB0;
+	_asm {
+		MOV ECX, settings;
+		CALL addrRestart;
+	}
+	return true;
+#endif
+	return false;
+}
+
 
 // Save current scenario into a scn or scx scenario file. filenameNoPath is filename with extension, without path.
 // Returns true if successful
