@@ -38,6 +38,12 @@ namespace CUSTOM_AI {
 		// Game start init
 		void Init(STRUCT_GAME_GLOBAL *global, long int playerId);
 
+		void Serialize() const; // TODO and change signature
+
+		// Quick and dirty way to backup info for game reload (must be same game at same game time)
+		CustomPlayerAI *GetBackupData() const;
+		void RestoreFromBackup(CustomPlayerAI *backup);
+
 		// Returns true if player is enabled, alive, has AI structure
 		bool IsValidAIPlayer();
 
@@ -81,9 +87,13 @@ namespace CUSTOM_AI {
 	class CustomAIHandler {
 	public:
 		CustomAIHandler();
+		~CustomAIHandler();
 
 		long int currentGameTotalPlayerCount;
 		CustomPlayerAI playerAITable[9];
+
+		// Dirty backup for reload game
+		CustomPlayerAI *customPlayerAIBackups[9];
 
 		// To be executed each time a game starts/is loaded
 		// This method is in charge of resetting all AI-related RockNRor structures

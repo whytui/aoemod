@@ -8,6 +8,7 @@ namespace CUSTOM_AI {
 CustomAIHandler customAIHandler;
 
 
+
 CustomPlayerAI::CustomPlayerAI() {
 	// Do not call reset on other objects from constructor
 	this->ResetOwnFields();
@@ -51,6 +52,62 @@ void CustomPlayerAI::Init(STRUCT_GAME_GLOBAL *global, long int playerId) {
 		this->isPlayerAlive = (myPlayer->aliveStatus == 0);
 	}
 	this->lastStrategyAnalysisTime = 0;
+}
+
+
+void CustomPlayerAI::Serialize() const {
+	return; // TODO
+}
+CustomPlayerAI *CustomPlayerAI::GetBackupData() const {
+	CustomPlayerAI *backup = new CustomPlayerAI();
+	backup->ResetOwnFields();
+	backup->myPlayerId = this->myPlayerId;
+	backup->lastStrategyAnalysisTime = this->lastStrategyAnalysisTime;
+
+	// Military AI
+	backup->militaryAIInfo.lastKnownMilitarySituation = this->militaryAIInfo.lastKnownMilitarySituation;
+	backup->militaryAIInfo.lastKnownMilitarySituationComputationGameTime = this->militaryAIInfo.lastKnownMilitarySituationComputationGameTime;
+	backup->militaryAIInfo.unitIdEnemyBuildingInMyTown = this->militaryAIInfo.unitIdEnemyBuildingInMyTown;
+	backup->militaryAIInfo.unitIdEnemyTowerInMyTown= this->militaryAIInfo.unitIdEnemyTowerInMyTown;
+	
+	for (int i = 0; i < 9; i++) {
+		backup->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosX = this->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosX;
+		backup->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosY = this->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosY;
+		backup->militaryAIInfo.recentAttacksByPlayer[i].CopyFrom(this->militaryAIInfo.recentAttacksByPlayer[i]);
+	}
+	//backup->militaryAIInfo.recentAttacksByPlayer[i]...
+
+	// Economy AI
+	backup->economyAI.lastVillagersFix_ms = this->economyAI.lastVillagersFix_ms;
+
+	// Unit group AI
+	// backup->unitGroupAI ... Nothing critical to save for now
+
+	return backup;
+}
+void CustomPlayerAI::RestoreFromBackup(CustomPlayerAI *backup) {
+	assert(backup != NULL);
+	if (backup == NULL) { return; }
+	assert(this->myPlayerId == backup->myPlayerId);
+	if (this->myPlayerId != backup->myPlayerId) { return; }
+	this->lastStrategyAnalysisTime = backup->lastStrategyAnalysisTime;
+
+	// Military AI
+	this->militaryAIInfo.lastKnownMilitarySituation = backup->militaryAIInfo.lastKnownMilitarySituation;
+	this->militaryAIInfo.lastKnownMilitarySituationComputationGameTime = backup->militaryAIInfo.lastKnownMilitarySituationComputationGameTime;
+	this->militaryAIInfo.unitIdEnemyBuildingInMyTown = backup->militaryAIInfo.unitIdEnemyBuildingInMyTown;
+	this->militaryAIInfo.unitIdEnemyTowerInMyTown = backup->militaryAIInfo.unitIdEnemyTowerInMyTown;
+	for (int i = 0; i < 9; i++) {
+		this->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosX = backup->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosX;
+		this->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosY = backup->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosY;
+		this->militaryAIInfo.recentAttacksByPlayer[i].CopyFrom(backup->militaryAIInfo.recentAttacksByPlayer[i]);
+	}
+
+	// Economy AI
+	this->economyAI.lastVillagersFix_ms = backup->economyAI.lastVillagersFix_ms;
+
+	// Unit group AI
+	// this->unitGroupAI ... Nothing critical to save for now
 }
 
 
@@ -226,6 +283,14 @@ CustomAIHandler::CustomAIHandler() {
 	this->ResetOwnFields();
 }
 
+CustomAIHandler::~CustomAIHandler() {
+	for (int i = 0; i < _countof(this->playerAITable); i++) {
+		if (this->customPlayerAIBackups[i] != NULL) {
+			delete this->customPlayerAIBackups[i];
+		}
+	}
+}
+
 void CustomAIHandler::ResetOwnFields() {
 	this->currentGameTotalPlayerCount = 0;
 }
@@ -254,6 +319,18 @@ void CustomAIHandler::GameStartInit() {
 		CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i)->militaryAIInfo = &this->playerAITable[i].militaryAIInfo;
 	}
 
+#pragma WARNING("DIRTY trick for reload game. TO remove ASAP :-/")
+	for (int i = 1; i < 9; i++) {
+		if (this->customPlayerAIBackups[i] != NULL) {
+			// Note : customPlayerAIBackups[i] can only be non-NULL after a "game reload", that's why we consider safe 
+			// to restore data from another game (we now it's exactly the same gamee at same game time)
+			// ... and keep in mind backup only contains IDs, time values, and such scalar values (no pointer, etc)
+			if (i < this->currentGameTotalPlayerCount) {
+				this->GetCustomPlayerAI(i)->RestoreFromBackup(this->customPlayerAIBackups[i]);
+			}
+			delete this->customPlayerAIBackups[i];
+		}
+	}
 }
 
 

@@ -63,6 +63,15 @@ namespace ROCKNROR {
 			this->InitFirstInterval(currentGameTime);
 		}
 
+		// Copy all data from source
+		void CopyFrom(const GameHistoryIntervalsBase<T> &source) {
+			this->indexOfMostRecentInterval = source.indexOfMostRecentInterval;
+			this->validIntervalCount = source.validIntervalCount;
+			for (int i = 0; i < AI_CONST::maxIntervalsInHistory; i++) {
+				this->attacksHistory[i] = source.attacksHistory[i];
+			}
+		}
+
 		// Get the most recent interval. This does NOT add any interval.
 		// Never returns NULL unless Init has NOT been called correctly
 		T *GetMostRecentInterval() {
