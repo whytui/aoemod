@@ -616,9 +616,13 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		CR_DEBUG::AnalyzeEmpiresDatQuality();
 	}
 	if (!strcmp(command, "reload game")) {
-		if (!AOE_METHODS::IsMultiplayer()) {
-			const char saveFilename[] = "_autosave-reload-RockNRor.gmx";
+		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		if (settings && settings->IsCheckSumValid() && !AOE_METHODS::IsMultiplayer()) {
+			const char saveFilename[] = "_autosave-reload-RockNRor";
 			bool res = AOE_METHODS::SaveCurrentGame(saveFilename);
+			settings->isSavedGame = true;
+			strcpy_s(settings->loadGameName, saveFilename);
+			strcpy_s(settings->saveGameName, saveFilename);
 			std::string msg = "Save game (before reload) to ";
 			msg += saveFilename;
 			msg += ": ";
@@ -630,13 +634,17 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 				if (CUSTOM_AI::customAIHandler.customPlayerAIBackups[i] != NULL) {
 					// Unexpected case... But anyway make sure to free previously-allocated objects
 					delete CUSTOM_AI::customAIHandler.customPlayerAIBackups[i];
+					CUSTOM_AI::customAIHandler.customPlayerAIBackups[i] = NULL;
 				}
 				if (p) {
 					CUSTOM_AI::CustomPlayerAI *backup = p->GetBackupData();
 					CUSTOM_AI::customAIHandler.customPlayerAIBackups[i] = backup;
 				}
 			}
-			AOE_METHODS::RestartGame();
+			res = AOE_METHODS::RestartGame();
+			if (!res) {
+				traceMessageHandler.WriteMessageNoNotification("Reload failed. Game was saved in _autosave-reload-RockNRor.gmx");
+			}
 		}
 	}
 

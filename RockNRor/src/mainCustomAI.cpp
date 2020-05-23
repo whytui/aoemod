@@ -329,6 +329,7 @@ void CustomAIHandler::GameStartInit() {
 				this->GetCustomPlayerAI(i)->RestoreFromBackup(this->customPlayerAIBackups[i]);
 			}
 			delete this->customPlayerAIBackups[i];
+			this->customPlayerAIBackups[i] = NULL;
 		}
 	}
 }
