@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "traceMessage.h"
+#include "serialize.h"
 
 
 namespace CUSTOM_AI {
@@ -19,7 +20,7 @@ namespace ROCKNROR {
 
 	// Represents a basic interval of game time (cf historyIntervalLength_ms)
 	// Can be derived to store specific information for time intervals.
-	class TimeIntervalRecordBase {
+	class TimeIntervalRecordBase : public ROCKNROR::SYSTEM::Serializable {
 	public:
 		TimeIntervalRecordBase() { this->ResetBaseInfo(); }
 		long int intervalStartGameTime; // Game time at beginning of interval
@@ -29,6 +30,20 @@ namespace ROCKNROR {
 		virtual void ResetAllInfo() {
 			ResetBaseInfo();
 		}
+
+		long int Serialize(FILE *outputFile) const override {
+			long int result = 0;
+			result += this->WriteBytes(outputFile, &this->intervalStartGameTime, sizeof(this->intervalStartGameTime));
+			result += this->WriteBytes(outputFile, &this->intervalEndGameTime, sizeof(this->intervalEndGameTime));
+
+			return result;
+		}
+		bool Deserialize(FILE *inputFile) override {
+			this->ReadBytes(inputFile, &this->intervalStartGameTime, sizeof(this->intervalStartGameTime));
+			this->ReadBytes(inputFile, &this->intervalEndGameTime, sizeof(this->intervalEndGameTime));
+			return true;
+		}
+
 	private:
 		// Reset all base class information
 		void ResetBaseInfo() {
@@ -40,8 +55,8 @@ namespace ROCKNROR {
 
 	// Represents a set of 'n' latest intervals (in game time).
 	// Can be derived to add specific information/usage.
-	template <typename T>
-	class GameHistoryIntervalsBase {
+	template <typename T >
+	class GameHistoryIntervalsBase : public ROCKNROR::SYSTEM::Serializable {
 	public:
 		// Restriction for compiler: T should derive from TimeIntervalRecordBase (to get explicit messages). Not sure this works?
 		static_assert(std::is_base_of<TimeIntervalRecordBase, T>::value, "GameHistoryIntervalsBase: T not derived from TimeIntervalRecordBase");
@@ -63,14 +78,29 @@ namespace ROCKNROR {
 			this->InitFirstInterval(currentGameTime);
 		}
 
-		// Copy all data from source
-		void CopyFrom(const GameHistoryIntervalsBase<T> &source) {
-			this->indexOfMostRecentInterval = source.indexOfMostRecentInterval;
-			this->validIntervalCount = source.validIntervalCount;
+		long int Serialize(FILE *outputFile) const override {
+			long int result = 0;
+
+			result += this->WriteBytes(outputFile, &this->indexOfMostRecentInterval, sizeof(this->indexOfMostRecentInterval));
+			result += this->WriteBytes(outputFile, &this->validIntervalCount, sizeof(this->validIntervalCount));
+
 			for (int i = 0; i < AI_CONST::maxIntervalsInHistory; i++) {
-				this->attacksHistory[i] = source.attacksHistory[i];
+				result += this->attacksHistory[i].Serialize(outputFile);
 			}
+			
+			return result;
 		}
+
+		bool Deserialize(FILE *inputFile) override {
+			this->ReadBytes(inputFile, &this->indexOfMostRecentInterval, sizeof(this->indexOfMostRecentInterval));
+			this->ReadBytes(inputFile, &this->validIntervalCount, sizeof(this->validIntervalCount));
+
+			for (int i = 0; i < AI_CONST::maxIntervalsInHistory; i++) {
+				this->attacksHistory[i].Deserialize(inputFile);
+			}
+			return true;
+		}
+
 
 		// Get the most recent interval. This does NOT add any interval.
 		// Never returns NULL unless Init has NOT been called correctly

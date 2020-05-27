@@ -8,6 +8,17 @@ void EconomyAI::ResetAllInfo() {
 }
 
 
+long int EconomyAI::Serialize(FILE *outputFile) const {
+	long int result = 0;
+	result += this->WriteBytes(outputFile, &this->lastVillagersFix_ms, sizeof(this->lastVillagersFix_ms));
+	return result;
+}
+
+bool EconomyAI::Deserialize(FILE *inputFile) {
+	this->ReadBytes(inputFile, &this->lastVillagersFix_ms, sizeof(this->lastVillagersFix_ms));
+	return true;
+}
+
 // Run various fixes on villager actions, provided that a sufficient delay has passed since last execution
 void EconomyAI::RunFixesOnVillagerActions(AOE_STRUCTURES::STRUCT_PLAYER *player, long int currentGameTime) {
 	if (!player || !player->IsCheckSumValid() || !player->ptrGlobalStruct || !player->ptrGlobalStruct->IsCheckSumValid()) {

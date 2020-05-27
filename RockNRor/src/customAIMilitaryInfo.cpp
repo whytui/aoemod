@@ -17,6 +17,41 @@ namespace CUSTOM_AI {
 	}
 
 
+	long int CustomAIMilitaryInfo::Serialize(FILE *outputFile) const {
+		long int result = 0;
+		result += this->WriteBytes(outputFile, &this->lastKnownMilitarySituation, sizeof(this->lastKnownMilitarySituation));
+		result += this->WriteBytes(outputFile, &this->lastKnownMilitarySituationComputationGameTime, sizeof(this->lastKnownMilitarySituationComputationGameTime));
+		result += this->WriteBytes(outputFile, &this->unitIdEnemyBuildingInMyTown, sizeof(this->unitIdEnemyBuildingInMyTown));
+		result += this->WriteBytes(outputFile, &this->unitIdEnemyTowerInMyTown, sizeof(this->unitIdEnemyTowerInMyTown));
+
+		const long int count = 9;
+		result += this->WriteBytes(outputFile, &count, sizeof(count));
+		for (int i = 0; i < count; i++) {
+			result += this->recentAttacksByPlayer[i].Serialize(outputFile);
+		}
+
+		return result;
+	}
+
+	bool CustomAIMilitaryInfo::Deserialize(FILE *inputFile) {
+		this->ReadBytes(inputFile, &this->lastKnownMilitarySituation, sizeof(this->lastKnownMilitarySituation));
+		this->ReadBytes(inputFile, &this->lastKnownMilitarySituationComputationGameTime, sizeof(this->lastKnownMilitarySituationComputationGameTime));
+		this->ReadBytes(inputFile, &this->unitIdEnemyBuildingInMyTown, sizeof(this->unitIdEnemyBuildingInMyTown));
+		this->ReadBytes(inputFile, &this->unitIdEnemyTowerInMyTown, sizeof(this->unitIdEnemyTowerInMyTown));
+
+		long int count = 0;
+		this->ReadBytes(inputFile, &count, sizeof(count));
+		if (count > 9) {
+			throw SerializeException("Invalid data in deserialize");
+		}
+		for (int i = 0; i < count; i++) {
+			this->recentAttacksByPlayer[i].Deserialize(inputFile);
+		}
+
+		return true;
+	}
+
+
 	// Securely get the attacks information for the player specified. Returns NULL if playerId is invalid.
 	TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> *CustomAIMilitaryInfo::GetAttackInfoForPlayer(long int attackerPlayerId) {
 		if ((attackerPlayerId < 0) || (attackerPlayerId > 8)) { return NULL; }

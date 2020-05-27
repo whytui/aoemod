@@ -10,8 +10,10 @@
 #include "EnemyAttacksHistory.h"
 #include "unitHandling.h"
 #include "playerHandling.h"
+#include "serialize.h"
 
 using namespace AOE_STRUCTURES;
+using namespace ROCKNROR::SYSTEM;
 
 namespace CUSTOM_AI {
 
@@ -38,7 +40,7 @@ namespace CUSTOM_AI {
 
 
 	// Stores information about military topics for custom AI (for a specific player)
-	class CustomAIMilitaryInfo {
+	class CustomAIMilitaryInfo : public Serializable {
 	public:
 		CustomAIMilitaryInfo() {
 			this->ResetAllInfo();
@@ -56,6 +58,9 @@ namespace CUSTOM_AI {
 		long int unitIdEnemyTowerInMyTown;
 
 		void ResetAllInfo();
+
+		long int Serialize(FILE *outputFile) const override;
+		bool Deserialize(FILE *inputFile) override;
 
 		// Securely get the attacks information for the player specified. Returns NULL if playerId is invalid.
 		TimeIntervalAttacksRecordForPlayer<TimeIntervalAttackRecord> *GetAttackInfoForPlayer(long int attackerPlayerId);

@@ -12,6 +12,7 @@
 #include "unitHandling.h"
 #include "combatAI.h"
 #include "UnitExtensionHandler.h"
+#include "serialize.h"
 
 
 using namespace AOE_STRUCTURES;
@@ -117,7 +118,7 @@ namespace CUSTOM_AI {
 
 
 	// A "static" (has "current game" life span) object to handle unit groups AI.
-	class UnitGroupAI {
+	class UnitGroupAI : public Serializable {
 	public:
 		UnitGroupAI();
 
@@ -129,6 +130,9 @@ namespace CUSTOM_AI {
 		std::list<std::tuple<long int, long int, long int, long int>> last5TaskingByUGAI;
 
 		void ResetAllInfo();
+
+		long int Serialize(FILE *outputFile) const override;
+		bool Deserialize(FILE *inputFile) override;
 
 		void AddTaskingByUGAITrace(long int unitGroupId, long int taskId, long int targetId, long int gameTime_ms);
 

@@ -23,6 +23,18 @@ void UnitGroupAI::ResetAllInfo() {
 }
 
 
+long int UnitGroupAI::Serialize(FILE *outputFile) const {
+	long int result = 0;
+
+	return result;
+}
+
+bool UnitGroupAI::Deserialize(FILE *inputFile) {
+
+	return true;
+}
+
+
 void UnitGroupAI::AddTaskingByUGAITrace(long int unitGroupId, long int taskId, long int targetId, long int gameTime_ms) {
 	if (this->last5TaskingByUGAI.size() >= UNITGROUP_AI_LAST_TASK_TRACE_COUNT) {
 		this->last5TaskingByUGAI.pop_front(); // Remove oldest

@@ -363,6 +363,9 @@
     <ClInclude Include="include\MapUsageHandler.h">
       <Filter>Fichiers d%27en-tête\Primitives</Filter>
     </ClInclude>
+    <ClInclude Include="include\serialize.h">
+      <Filter>Fichiers d%27en-tête\Technical</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\StrategyBuilder.cpp">

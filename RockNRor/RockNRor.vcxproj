@@ -131,6 +131,7 @@
     <ClInclude Include="include\RnrScreenBase.h" />
     <ClInclude Include="include\RockNRorSettingsScreen.h" />
     <ClInclude Include="include\RockNRorUIHelper.h" />
+    <ClInclude Include="include\serialize.h" />
     <ClInclude Include="include\TechEffectHandler.h" />
     <ClInclude Include="include\TTDetailedResearchDef.h" />
     <ClInclude Include="include\GameEventHandler.h" />

@@ -9,9 +9,11 @@
 #include "AOEPrimitives_UI_gameMain.h"
 #include "AOE_strategy.h"
 #include "combatAI.h"
+#include "serialize.h"
 
 
 using namespace AOE_STRUCTURES;
+using namespace ROCKNROR::SYSTEM;
 
 namespace CUSTOM_AI {
 
@@ -25,7 +27,7 @@ namespace CUSTOM_AI {
 
 
 	// Stores information about military topics for custom AI (for a specific player)
-	class EconomyAI {
+	class EconomyAI : public Serializable {
 	public:
 		EconomyAI() {
 			this->ResetAllInfo();
@@ -35,6 +37,9 @@ namespace CUSTOM_AI {
 
 
 		void ResetAllInfo();
+
+		long int Serialize(FILE *outputFile) const override;
+		bool Deserialize(FILE *inputFile) override;
 
 		// Run various fixes on villager actions, provided that a sufficient delay has passed since last execution
 		void RunFixesOnVillagerActions(STRUCT_PLAYER *player, long int currentGameTime);

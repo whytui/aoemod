@@ -12,13 +12,15 @@
 #include "unitTargeting.h"
 #include "playerTargeting.h"
 #include "AOEPrimitives_lists.h"
+#include "serialize.h"
 
 using namespace AOE_STRUCTURES;
+using namespace ROCKNROR::SYSTEM;
 
 namespace CUSTOM_AI {
 
 	// RockNRor's specific AI class for a player
-	class CustomPlayerAI {
+	class CustomPlayerAI : public Serializable {
 	public:
 		CustomPlayerAI();
 
@@ -38,7 +40,8 @@ namespace CUSTOM_AI {
 		// Game start init
 		void Init(STRUCT_GAME_GLOBAL *global, long int playerId);
 
-		void Serialize() const; // TODO and change signature
+		long int Serialize(FILE *outputFile) const override;
+		bool Deserialize(FILE *inputFile) override;
 
 		// Quick and dirty way to backup info for game reload (must be same game at same game time)
 		CustomPlayerAI *GetBackupData() const;
@@ -84,7 +87,7 @@ namespace CUSTOM_AI {
 
 
 	// Global object that handles all RockNRor-related AI structures and treatments
-	class CustomAIHandler {
+	class CustomAIHandler : public Serializable {
 	public:
 		CustomAIHandler();
 		~CustomAIHandler();
@@ -98,6 +101,9 @@ namespace CUSTOM_AI {
 		// To be executed each time a game starts/is loaded
 		// This method is in charge of resetting all AI-related RockNRor structures
 		void ResetAllInfo();
+
+		long int Serialize(FILE *outputFile) const override;
+		bool Deserialize(FILE *inputFile) override;
 
 		// To be executed at game start. Required for all other treatments to work.
 		void GameStartInit();

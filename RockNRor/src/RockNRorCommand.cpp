@@ -619,7 +619,9 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 		if (settings && settings->IsCheckSumValid() && !AOE_METHODS::IsMultiplayer()) {
 			const char saveFilename[] = "_autosave-reload-RockNRor";
-			bool res = AOE_METHODS::SaveCurrentGame(saveFilename);
+			const char saveFilenameExt[] = "_autosave-reload-RockNRor.gmx";
+			const char saveFilenameRnr[] = "_autosave-reload-RockNRor.gmx.rnr";
+			bool res = AOE_METHODS::SaveCurrentGame(saveFilenameExt);
 			settings->isSavedGame = true;
 			strcpy_s(settings->loadGameName, saveFilename);
 			strcpy_s(settings->saveGameName, saveFilename);
@@ -628,19 +630,9 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 			msg += ": ";
 			msg += (res ? "success" : "failure");
 			traceMessageHandler.WriteMessageNoNotification(msg);
-			// Backup custom data
-			for (int i = 1; i < 9; i++) {
-				CUSTOM_AI::CustomPlayerAI *p = CUSTOM_AI::customAIHandler.GetCustomPlayerAI(i);
-				if (CUSTOM_AI::customAIHandler.customPlayerAIBackups[i] != NULL) {
-					// Unexpected case... But anyway make sure to free previously-allocated objects
-					delete CUSTOM_AI::customAIHandler.customPlayerAIBackups[i];
-					CUSTOM_AI::customAIHandler.customPlayerAIBackups[i] = NULL;
-				}
-				if (p) {
-					CUSTOM_AI::CustomPlayerAI *backup = p->GetBackupData();
-					CUSTOM_AI::customAIHandler.customPlayerAIBackups[i] = backup;
-				}
-			}
+			// Backup custom data (create RNR save game)
+#pragma TODO("Should be part of 'standard' save game process ; with a rnr config flag to enable it")
+			CUSTOM_AI::customAIHandler.SerializeToFile(saveFilenameRnr);
 			res = AOE_METHODS::RestartGame();
 			if (!res) {
 				traceMessageHandler.WriteMessageNoNotification("Reload failed. Game was saved in _autosave-reload-RockNRor.gmx");

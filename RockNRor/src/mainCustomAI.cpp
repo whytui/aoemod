@@ -1,5 +1,5 @@
 #include "../include/mainCustomAI.h"
-
+#include "basicFilesHandling.h"
 
 namespace CUSTOM_AI {
 ;
@@ -55,59 +55,68 @@ void CustomPlayerAI::Init(STRUCT_GAME_GLOBAL *global, long int playerId) {
 }
 
 
-void CustomPlayerAI::Serialize() const {
-	return; // TODO
-}
-CustomPlayerAI *CustomPlayerAI::GetBackupData() const {
-	CustomPlayerAI *backup = new CustomPlayerAI();
-	backup->ResetOwnFields();
-	backup->myPlayerId = this->myPlayerId;
-	backup->lastStrategyAnalysisTime = this->lastStrategyAnalysisTime;
-
-	// Military AI
-	backup->militaryAIInfo.lastKnownMilitarySituation = this->militaryAIInfo.lastKnownMilitarySituation;
-	backup->militaryAIInfo.lastKnownMilitarySituationComputationGameTime = this->militaryAIInfo.lastKnownMilitarySituationComputationGameTime;
-	backup->militaryAIInfo.unitIdEnemyBuildingInMyTown = this->militaryAIInfo.unitIdEnemyBuildingInMyTown;
-	backup->militaryAIInfo.unitIdEnemyTowerInMyTown= this->militaryAIInfo.unitIdEnemyTowerInMyTown;
+long int CustomPlayerAI::Serialize(FILE *outputFile) const {
+	long int result = 0;
+	if (this->myPlayer == NULL) {
+		return result; // Do not serialize for gaia
+	}
 	
-	for (int i = 0; i < 9; i++) {
-		backup->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosX = this->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosX;
-		backup->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosY = this->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosY;
-		backup->militaryAIInfo.recentAttacksByPlayer[i].CopyFrom(this->militaryAIInfo.recentAttacksByPlayer[i]);
-	}
-	//backup->militaryAIInfo.recentAttacksByPlayer[i]...
-
-	// Economy AI
-	backup->economyAI.lastVillagersFix_ms = this->economyAI.lastVillagersFix_ms;
-
-	// Unit group AI
-	// backup->unitGroupAI ... Nothing critical to save for now
-
-	return backup;
-}
-void CustomPlayerAI::RestoreFromBackup(CustomPlayerAI *backup) {
-	assert(backup != NULL);
-	if (backup == NULL) { return; }
-	assert(this->myPlayerId == backup->myPlayerId);
-	if (this->myPlayerId != backup->myPlayerId) { return; }
-	this->lastStrategyAnalysisTime = backup->lastStrategyAnalysisTime;
+	unsigned char integrityCheck = 0xAB;
+	result += this->WriteBytes(outputFile, &integrityCheck, sizeof(integrityCheck));
+	result += this->WriteBytes(outputFile, &this->myPlayerId, sizeof(this->myPlayerId));
+	result += this->WriteBytes(outputFile, &this->lastStrategyAnalysisTime, sizeof(this->lastStrategyAnalysisTime));
 
 	// Military AI
-	this->militaryAIInfo.lastKnownMilitarySituation = backup->militaryAIInfo.lastKnownMilitarySituation;
-	this->militaryAIInfo.lastKnownMilitarySituationComputationGameTime = backup->militaryAIInfo.lastKnownMilitarySituationComputationGameTime;
-	this->militaryAIInfo.unitIdEnemyBuildingInMyTown = backup->militaryAIInfo.unitIdEnemyBuildingInMyTown;
-	this->militaryAIInfo.unitIdEnemyTowerInMyTown = backup->militaryAIInfo.unitIdEnemyTowerInMyTown;
-	for (int i = 0; i < 9; i++) {
-		this->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosX = backup->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosX;
-		this->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosY = backup->militaryAIInfo.recentAttacksByPlayer[i].lastAttackInMyTownPosY;
-		this->militaryAIInfo.recentAttacksByPlayer[i].CopyFrom(backup->militaryAIInfo.recentAttacksByPlayer[i]);
-	}
+	result += this->militaryAIInfo.Serialize(outputFile);
 
 	// Economy AI
-	this->economyAI.lastVillagersFix_ms = backup->economyAI.lastVillagersFix_ms;
+	result += this->economyAI.Serialize(outputFile);
 
 	// Unit group AI
-	// this->unitGroupAI ... Nothing critical to save for now
+	this->unitGroupAI.Serialize(outputFile);
+
+	return result;
+}
+
+
+bool CustomPlayerAI::Deserialize(FILE *inputFile) {
+	if (this->myPlayer == NULL) {
+		return true; // Do not serialize gaia
+	}
+
+	unsigned char integrityCheck = 0;
+	this->ReadBytes(inputFile, &integrityCheck, sizeof(integrityCheck));
+	if (integrityCheck != 0xAB) {
+		throw SerializeException("Inconsistent data in deserialize");
+	}
+
+	this->ReadBytes(inputFile, &this->myPlayerId, sizeof(this->myPlayerId));
+	if (this->myPlayerId != this->myPlayer->playerId) {
+		throw SerializeException("Inconsistent data in deserialize");
+	}
+	this->ReadBytes(inputFile, &this->lastStrategyAnalysisTime, sizeof(this->lastStrategyAnalysisTime));
+	
+	// Military AI
+	this->militaryAIInfo.Deserialize(inputFile);
+
+	// Economy AI
+	this->economyAI.Deserialize(inputFile);
+
+	// Unit group AI
+	this->unitGroupAI.Deserialize(inputFile);
+
+	// Integrity checks
+	assert(this->myPlayer->ptrGlobalStruct && this->myPlayer->ptrGlobalStruct->IsCheckSumValid());
+	if (!this->myPlayer->ptrGlobalStruct || !this->myPlayer->ptrGlobalStruct->IsCheckSumValid()) {
+		throw SerializeException("Game pointer error in deserialize");
+	}
+	long int gameTime = this->myPlayer->ptrGlobalStruct->currentGameTime;
+	if ((this->economyAI.lastVillagersFix_ms > gameTime) ||
+			((long int)this->militaryAIInfo.lastKnownMilitarySituationComputationGameTime > gameTime)) {
+		throw SerializeException("Inconsistent game time data in deserialize");
+	}
+
+	return true;
 }
 
 
@@ -307,6 +316,50 @@ void CustomAIHandler::ResetAllInfo() {
 }
 
 
+long int CustomAIHandler::Serialize(FILE *outputFile) const {
+	long int result = 0;
+
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid()) { return result; }
+
+	// Save current game time as it is a good integrity check at deserialize time
+	result += this->WriteBytes(outputFile, &global->currentGameTime, sizeof(global->currentGameTime));
+
+	// Player count is vital too
+	result += this->WriteBytes(outputFile, &this->currentGameTotalPlayerCount, sizeof(this->currentGameTotalPlayerCount));
+	
+	for (int i = 0; i < this->currentGameTotalPlayerCount; i++) {
+		result += this->playerAITable[i].Serialize(outputFile);
+	}
+
+	return result;
+}
+
+
+bool CustomAIHandler::Deserialize(FILE *inputFile) {
+	// Read saved "game time".
+	// This consistency check will almost always detect when deserializing data that does not match current game.
+	long int savedGameTime;
+	this->ReadBytes(inputFile, &savedGameTime, sizeof(savedGameTime));
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	assert(global && global->IsCheckSumValid());
+	if (!global || !global->IsCheckSumValid() || global->currentGameTime != savedGameTime) {
+		throw SerializeException("Inconsistent data in deserialize (game time)");
+	}
+	this->ReadBytes(inputFile, &this->currentGameTotalPlayerCount, sizeof(this->currentGameTotalPlayerCount));
+
+	if ((this->currentGameTotalPlayerCount < 1) || (this->currentGameTotalPlayerCount > 9)) {
+		throw SerializeException("Inconsistent data in deserialize");
+	}
+
+	for (int i = 0; i < this->currentGameTotalPlayerCount; i++) {
+		this->playerAITable[i].Deserialize(inputFile);
+	}
+	return true;
+}
+
+
 // To be executed at game start. Required for all other treatments to work.
 void CustomAIHandler::GameStartInit() {
 	assert(this->currentGameTotalPlayerCount == 0); // If not, ResetAllInfo has NOT been called at game init, which is bad.
@@ -319,17 +372,18 @@ void CustomAIHandler::GameStartInit() {
 		CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i)->militaryAIInfo = &this->playerAITable[i].militaryAIInfo;
 	}
 
-#pragma WARNING("DIRTY trick for reload game. TO remove ASAP :-/")
-	for (int i = 1; i < 9; i++) {
-		if (this->customPlayerAIBackups[i] != NULL) {
-			// Note : customPlayerAIBackups[i] can only be non-NULL after a "game reload", that's why we consider safe 
-			// to restore data from another game (we now it's exactly the same gamee at same game time)
-			// ... and keep in mind backup only contains IDs, time values, and such scalar values (no pointer, etc)
-			if (i < this->currentGameTotalPlayerCount) {
-				this->GetCustomPlayerAI(i)->RestoreFromBackup(this->customPlayerAIBackups[i]);
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (settings && settings->IsCheckSumValid() && !AOE_METHODS::IsMultiplayer() && settings->isSavedGame) {
+		std::string rnrFilePath = settings->loadGameName;
+		rnrFilePath += ".gmx.rnr";
+		if (CheckFileExistence(rnrFilePath.c_str())) {
+			if (this->DeserializeFromFile(rnrFilePath.c_str())) {
+				AOE_METHODS::CallWriteText("Successfully loaded RockNRor savegame information");
 			}
-			delete this->customPlayerAIBackups[i];
-			this->customPlayerAIBackups[i] = NULL;
+			else {
+				// The RNR savegame file exists, but deserializing failed, this is a real issue.
+				traceMessageHandler.WriteMessage("ERROR : failed to deserialize RockNRor savegame information");
+			}
 		}
 	}
 }
