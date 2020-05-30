@@ -64,14 +64,17 @@ static const inline AOE_FILE_VERSION GetBuildVersion() {
 #if GAMEVERSION == GAMEVERSIONID_AOE10a
 #define GAMEVERSION_TEXT "AOE 1.0a"
 #define GAMEVERSION_AOE10a
+#define GAME_IS_AOE true
 #endif
 #if GAMEVERSION == GAMEVERSIONID_AOE10b
 #define GAMEVERSION_TEXT "AOE 1.0b"
 #define GAMEVERSION_AOE10b
+#define GAME_IS_AOE true
 #endif
 #if GAMEVERSION == GAMEVERSIONID_AOE10c
 #define GAMEVERSION_TEXT "AOE 1.0c"
 #define GAMEVERSION_AOE10c
+#define GAME_IS_AOE true
 #endif
 #if GAMEVERSION == GAMEVERSIONID_ROR10b
 #define GAMEVERSION_TEXT "ROR 1.0b"
@@ -81,3 +84,6 @@ static const inline AOE_FILE_VERSION GetBuildVersion() {
 #define GAMEVERSION_TEXT "ROR 1.0c"
 #define GAMEVERSION_ROR10c
 #endif
+#ifndef GAME_IS_AOE
+#define GAME_IS_ROR true
+#endif // !GAME_IS_AOE
