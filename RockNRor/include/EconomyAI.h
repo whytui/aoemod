@@ -9,7 +9,7 @@
 #include "AOEPrimitives_UI_gameMain.h"
 #include "AOE_strategy.h"
 #include "combatAI.h"
-#include "serialize.h"
+#include "Serializable.h"
 
 
 using namespace AOE_STRUCTURES;

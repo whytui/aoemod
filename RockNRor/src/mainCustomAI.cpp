@@ -371,21 +371,6 @@ void CustomAIHandler::GameStartInit() {
 		this->playerAITable[i].Init(global, i);
 		CUSTOM_AI::playerTargetingHandler.GetPlayerInfo(i)->militaryAIInfo = &this->playerAITable[i].militaryAIInfo;
 	}
-
-	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-	if (settings && settings->IsCheckSumValid() && !AOE_METHODS::IsMultiplayer() && settings->isSavedGame) {
-		std::string rnrFilePath = std::string(settings->commandLineInfo->savegameFolder) + settings->loadGameName;
-		rnrFilePath += ".gmx.rnr";
-		if (CheckFileExistence(rnrFilePath.c_str())) {
-			if (this->DeserializeFromFile(rnrFilePath.c_str())) {
-				AOE_METHODS::CallWriteText("Successfully loaded RockNRor savegame information");
-			}
-			else {
-				// The RNR savegame file exists, but deserializing failed, this is a real issue.
-				traceMessageHandler.WriteMessage("ERROR : failed to deserialize RockNRor savegame information");
-			}
-		}
-	}
 }
 
 

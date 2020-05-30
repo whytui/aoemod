@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "traceMessage.h"
-#include "serialize.h"
+#include "Serializable.h"
 
 
 namespace CUSTOM_AI {

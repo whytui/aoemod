@@ -12,7 +12,7 @@
 #include "unitHandling.h"
 #include "combatAI.h"
 #include "UnitExtensionHandler.h"
-#include "serialize.h"
+#include "Serializable.h"
 
 
 using namespace AOE_STRUCTURES;

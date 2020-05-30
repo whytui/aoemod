@@ -12,7 +12,7 @@
 #include "unitTargeting.h"
 #include "playerTargeting.h"
 #include "AOEPrimitives_lists.h"
-#include "serialize.h"
+#include "Serializable.h"
 
 using namespace AOE_STRUCTURES;
 using namespace ROCKNROR::SYSTEM;

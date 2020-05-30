@@ -363,7 +363,10 @@
     <ClInclude Include="include\MapUsageHandler.h">
       <Filter>Fichiers d%27en-tête\Primitives</Filter>
     </ClInclude>
-    <ClInclude Include="include\serialize.h">
+    <ClInclude Include="include\Serializable.h">
+      <Filter>Fichiers d%27en-tête\Technical</Filter>
+    </ClInclude>
+    <ClInclude Include="include\saveRockNRorData.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
   </ItemGroup>
@@ -625,6 +628,9 @@
     </ClCompile>
     <ClCompile Include="src\MapUsageHandler.cpp">
       <Filter>Fichiers sources\Primitives</Filter>
+    </ClCompile>
+    <ClCompile Include="src\saveRockNRorData.cpp">
+      <Filter>Fichiers sources\Technical</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

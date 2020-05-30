@@ -619,9 +619,11 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 		if (settings && settings->IsCheckSumValid() && !AOE_METHODS::IsMultiplayer()) {
 			const char saveFilename[] = "_autosave-reload-RockNRor";
+#ifdef GAME_IS_ROR
 			const char saveFilenameExt[] = "_autosave-reload-RockNRor.gmx";
-			std::string stringSaveFilenameRnr = std::string(settings->commandLineInfo->savegameFolder) + saveFilenameExt + std::string(".rnr");
-			const char *saveFilenameRnr = stringSaveFilenameRnr.c_str();
+#else
+			const char saveFilenameExt[] = "_autosave-reload-RockNRor.gam";
+#endif
 			bool res = AOE_METHODS::SaveCurrentGame(saveFilenameExt);
 			settings->isSavedGame = true;
 			strcpy_s(settings->loadGameName, saveFilename);
@@ -632,8 +634,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 			msg += (res ? "success" : "failure");
 			traceMessageHandler.WriteMessageNoNotification(msg);
 			// Backup custom data (create RNR save game)
-#pragma TODO("Should be part of 'standard' save game process ; with a rnr config flag to enable it")
-			CUSTOM_AI::customAIHandler.SerializeToFile(saveFilenameRnr);
+			saveRockNRorGameData(saveFilenameExt);
 			res = AOE_METHODS::RestartGame();
 			if (!res) {
 				traceMessageHandler.WriteMessageNoNotification("Reload failed. Game was saved in _autosave-reload-RockNRor.gmx");
@@ -1309,8 +1310,13 @@ void RockNRorCommand::OnGameStart() {
 		}
 	}
 
-	// Initialize custom AI objects
+	// Initialize custom AI objects (technical init, before loading RockNRor savegame data)
 	CUSTOM_AI::customAIHandler.GameStartInit();
+
+	// Load RockNRor game data, if this is a saved game and if the rnr savegame file exists.
+	if (settings->isSavedGame) {
+		loadRockNRorGameDataNoExt(settings->loadGameName);
+	}
 
 	// Triggers
 	ROCKNROR::TRIGGER::ExecuteTriggersForEvent(CR_TRIGGERS::EVENT_GAME_START);

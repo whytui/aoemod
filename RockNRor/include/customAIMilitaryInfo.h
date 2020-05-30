@@ -10,7 +10,7 @@
 #include "EnemyAttacksHistory.h"
 #include "unitHandling.h"
 #include "playerHandling.h"
-#include "serialize.h"
+#include "Serializable.h"
 
 using namespace AOE_STRUCTURES;
 using namespace ROCKNROR::SYSTEM;

@@ -73,10 +73,10 @@ namespace SYSTEM {
 		}
 		// Read from input file, writes into outputBuffer, and returns the number of read BYTES
 		// Throws SerializeException if failed
-		long int ReadBytes(FILE *inputFile, void *outputBuffer, size_t size) {
-			size_t n = fread(outputBuffer, 1, size, inputFile);
+		long int ReadBytes(FILE *inputFile, void *inputBuffer, size_t size) {
+			size_t n = fread(inputBuffer, 1, size, inputFile);
 			if (n < size) {
-				throw SerializeException("Failed to write bytes to output file");
+				throw SerializeException("Failed to read bytes from input file");
 			}
 			return n;
 		}

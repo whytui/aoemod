@@ -57,6 +57,7 @@
 #include "CustomCiv.h"
 #include "TechTreeAnalyzer.h"
 #include "playerHandling.h"
+#include "saveRockNRorData.h"
 
 #pragma once
 

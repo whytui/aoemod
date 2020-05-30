@@ -2,7 +2,7 @@
 
 #include <assert.h>
 #include "GameHistoryIntervalsBase.h"
-#include "serialize.h"
+#include "Serializable.h"
 
 using namespace AOE_STRUCTURES;
 
