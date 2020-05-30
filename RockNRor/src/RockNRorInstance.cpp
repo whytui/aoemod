@@ -1135,12 +1135,13 @@ void RockNRorInstance::AfterAddDynamicStratElems(REG_BACKUP *REG_values) {
 
 
 // From 0051E0DC. Called just before starting to actually save a game to a gmx file.
+// Note : settings->saveGameName has NOT been set yet. File name without path is the argument (arg1) from AOE method in 0x51E0C0.
 void RockNRorInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->ECX_val = (long int)*ROR_gameSettings;
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
-	char *filename = (char*)REG_values->EAX_val;
+	char *filename = (char*)REG_values->EAX_val; // File name without path, with extension. DO NOT try to get it from "settings"
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = (AOE_STRUCTURES::STRUCT_GAME_GLOBAL *)REG_values->EDI_val;
 	ror_api_assert(REG_values, global != NULL);
 	ror_api_assert(REG_values, global->IsCheckSumValid());
@@ -1154,6 +1155,12 @@ void RockNRorInstance::EntryPoint_OnBeforeSaveGame(REG_BACKUP *REG_values) {
 	// Update triggers data before saving, 
 	// so that when loading game we will have relevant trigger information (which have already been executed, etc)
 	ROCKNROR::TRIGGER::WriteTriggersFromInternalToGameData(true);
+
+	if (ROCKNROR::crInfo.configInfo.saveRockNRorData) {
+		// Create RockNRor savegame file
+		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		saveRockNRorGameData(filename);
+	}
 }
 
 

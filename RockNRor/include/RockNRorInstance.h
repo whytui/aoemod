@@ -32,6 +32,7 @@
 #include "combatAI.h"
 #include "RockNRorMainInterface.h"
 #include "RockNRorVirtualMethodHooks.h"
+#include "saveRockNRorData.h"
 
 
 namespace ROCKNROR {

@@ -26,6 +26,7 @@
 	<!-- Use improved game speeds. Factor is a multiplicative factor (>1). -->
 	<improvedGameSpeeds name="enable" value="1"/>
 	<improvedGameSpeeds name="factor" value="1.25"/>
+  <saveRockNRorGameData enable="1"/><!-- Bool 0/1 to allow RockNRor to save its own data in .gmx.rnr savegame 'complement' files -->
 	<allyExplorationIsAlwaysShared enable="0"/><!-- NOT applied to scenario/campaigns -->
 	<populationLimit value="50"/><!-- Maximum population for single player games. -->
 	<maxAgeInRandomGames value="-1"/><!-- Maximum allowed age in RM/DM games. -1=no limit, 0=stone 1=tool 2=bronze 3=iron -->

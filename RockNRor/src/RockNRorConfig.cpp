@@ -36,6 +36,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->enableInputInPause = false; // Game default
 	this->enableScrollInPause = false; // Game default
 	this->improvedGameSpeedFactor = 1.25;
+	this->saveRockNRorData = false; // Game default
 	this->noDockInMostlyLandMaps = false; // Default: dock is always available.
 	this->fixVillagerWorkRates = false; // Default: keep empires.dat values
 	this->noWalls = false; // Default
@@ -368,6 +369,9 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 				callResult = elem->QueryFloatAttribute("value", &floatValue);
 				if (callResult == TIXML_SUCCESS) { improvedGameSpeedFactor = floatValue; }
 			}
+		}
+		if (elemName == "saveRockNRorGameData") {
+			this->saveRockNRorData = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "baseDelayForDetectUnit") {
 			callResult = elem->QueryIntAttribute("value", &intValue);

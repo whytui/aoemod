@@ -135,6 +135,7 @@ public:
 	bool enableRPGModeInScenario; // Use "RPG" mode in scenario/campaign games
 	bool enableInputInPause; // If true, use can still use game UI while in pause. Default false.
 	bool enableScrollInPause; // If true, view scrolling is allowed while in pause. Default false.
+	bool saveRockNRorData; // If true, saving a game also saves RockNRor data (custom AI data, ...). Uses separate files from .gmx files.
 	std::list<DrsFileToLoad*> customDrsFilesList; // List of DRS files to load at startup.
 	std::list<std::string> customStringsFilesList; // List of files containing custom localized strings.
 	std::string customEmpiresDatRelativePath; // Relative path to empires.dat file to use
