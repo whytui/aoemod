@@ -89,9 +89,9 @@ namespace CUSTOM_AI {
 		long int Serialize(FILE *outputFile) const override {
 			long int result = 0;
 
-			this->WriteBytes(outputFile, &this->lastAttackInMyTownPosX, sizeof(this->lastAttackInMyTownPosX));
-			this->WriteBytes(outputFile, &this->lastAttackInMyTownPosY, sizeof(this->lastAttackInMyTownPosY));
-			__super::Serialize(outputFile);
+			result += this->WriteBytes(outputFile, &this->lastAttackInMyTownPosX, sizeof(this->lastAttackInMyTownPosX));
+			result += this->WriteBytes(outputFile, &this->lastAttackInMyTownPosY, sizeof(this->lastAttackInMyTownPosY));
+			result += __super::Serialize(outputFile);
 
 			return result;
 		}

@@ -73,7 +73,7 @@ long int CustomPlayerAI::Serialize(FILE *outputFile) const {
 	result += this->economyAI.Serialize(outputFile);
 
 	// Unit group AI
-	this->unitGroupAI.Serialize(outputFile);
+	result += this->unitGroupAI.Serialize(outputFile);
 
 	return result;
 }
