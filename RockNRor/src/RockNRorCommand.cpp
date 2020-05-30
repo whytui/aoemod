@@ -620,7 +620,8 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		if (settings && settings->IsCheckSumValid() && !AOE_METHODS::IsMultiplayer()) {
 			const char saveFilename[] = "_autosave-reload-RockNRor";
 			const char saveFilenameExt[] = "_autosave-reload-RockNRor.gmx";
-			const char saveFilenameRnr[] = "_autosave-reload-RockNRor.gmx.rnr";
+			std::string stringSaveFilenameRnr = std::string(settings->commandLineInfo->savegameFolder) + saveFilenameExt + std::string(".rnr");
+			const char *saveFilenameRnr = stringSaveFilenameRnr.c_str();
 			bool res = AOE_METHODS::SaveCurrentGame(saveFilenameExt);
 			settings->isSavedGame = true;
 			strcpy_s(settings->loadGameName, saveFilename);

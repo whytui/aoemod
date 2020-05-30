@@ -374,7 +374,7 @@ void CustomAIHandler::GameStartInit() {
 
 	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
 	if (settings && settings->IsCheckSumValid() && !AOE_METHODS::IsMultiplayer() && settings->isSavedGame) {
-		std::string rnrFilePath = settings->loadGameName;
+		std::string rnrFilePath = std::string(settings->commandLineInfo->savegameFolder) + settings->loadGameName;
 		rnrFilePath += ".gmx.rnr";
 		if (CheckFileExistence(rnrFilePath.c_str())) {
 			if (this->DeserializeFromFile(rnrFilePath.c_str())) {
