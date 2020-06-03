@@ -2915,9 +2915,9 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 	AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
 	if (!mapInfo || !mapInfo->IsCheckSumValid()) { return false; }
 
-	//assert(sizeX > 0); assert(sizeX <= 0xFF);
-	//assert(sizeY > 0); assert(sizeY <= 0xFF);
-	//if ((sizeX <= 0) || (sizeY <= 0) || (sizeX > 0xFF) || (sizeY > 0xFF)) { return false; }
+	assert(sizeX > 0); assert(sizeX < AOE_MAX_ALLOWED_MAP_SIZE);
+	assert(sizeY > 0); assert(sizeY < AOE_MAX_ALLOWED_MAP_SIZE);
+	if ((sizeX <= 0) || (sizeY <= 0) || (sizeX >= AOE_MAX_ALLOWED_MAP_SIZE) || (sizeY >= AOE_MAX_ALLOWED_MAP_SIZE)) { return false; }
 
 	long int mapType = scEditor->map_cbb_mapType->GetListSelectedIndex();
 	assert(scEditor && scEditor->map_edt_seed->IsCheckSumValid());
