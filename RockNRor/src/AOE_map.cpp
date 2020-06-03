@@ -1,7 +1,7 @@
 #include "../include/AOE_map.h"
 
 // Maximum allowed map size in AOE/ROR methods/structures (default 256). Not a const, in case game is patched to support bigger maps.
-long int AOE_MAX_ALLOWED_MAP_SIZE;
+long int AOE_MAX_ALLOWED_MAP_SIZE = 256;
 
 namespace AOE_METHODS {
 
