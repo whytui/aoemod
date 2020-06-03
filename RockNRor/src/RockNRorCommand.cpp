@@ -15,6 +15,7 @@ RockNRorCommand::RockNRorCommand() {
 
 
 RockNRorCommand::~RockNRorCommand() {
+	this->FreeCustomVisibilityMap();
 }
 
 
@@ -269,6 +270,8 @@ void RockNRorCommand::OneShotInit() {
 	// Update "population limit getter" according to configuration
 	SetMaxPopulationGetterInSPGames(ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation);
 
+	this->InitCustomVisibilityMap();
+
 #ifdef _DEBUG
 	if (CR_DEBUG::debugSerialization) {
 		SetDeserializationDebugChange(true);
@@ -339,6 +342,68 @@ void RockNRorCommand::LoadCustomDrsFiles() {
 		// Initialize global variable so we can retrieve our button icons when needed
 		AOE_METHODS::InitSlpInfoFromDrs(&ROCKNROR::crInfo.rockNRorIcons, AOE_CONST_DRS::CST_ROCKNROR_CMD_ICONS_SLP_ID);
 		AOE_METHODS::InitSlpInfoFromDrs(&ROCKNROR::crInfo.rockNRorUnitShortcuts, AOE_CONST_DRS::CST_ROCKNROR_UNIT_SHORTCUTS_SLP_ID);
+	}
+}
+
+
+// Initialize custom visibility map to replace "0x7D205C" data array
+void RockNRorCommand::InitCustomVisibilityMap() {
+	long int maxSize = ROCKNROR::crInfo.configInfo.maximumMapSize;
+	if (maxSize <= ROCKNROR::crInfo.configInfo.MINVALUE_maxMapSize) {
+		return;
+	}
+	this->pCustomVisibilityMap = AOEAllocZeroMemory(maxSize * maxSize, sizeof(DWORD));
+	unsigned long int customMapAddr = (unsigned long int)this->pCustomVisibilityMap;
+
+	BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(GetBuildVersion(), BINSEQ_CATEGORIES::BC_LARGER_MAPS);
+	if (!seqDefSet) {
+		return;
+	}
+	std::string msg = "Patching game to allow map size up to ";
+	msg += to_string(maxSize);
+	msg += "*";
+	msg += to_string(maxSize);
+	traceMessageHandler.WriteMessageNoNotification(msg);
+
+	// Modify the pseudo-const used for map coordinates checks
+	AOE_MAX_ALLOWED_MAP_SIZE = maxSize;
+
+	int seqCount = seqDefSet->GetCount();
+	for (int i = 0; i < seqCount; i++) {
+		BinarySeqDefinition *seqDef = seqDefSet->GetBinSeqDefinition(i);
+		if ((seqDef->GetFuncMeaning(0) == FUNC_MEANING::FM_NO_CHOICE) && (seqDef->GetVarType(0) == SEQ_VAR_TYPES::SVT_INT_4B)) {
+			std::string seqName = narrow(seqDef->GetSeqName());
+			unsigned long int currentValue = GetBinaryChangeVarValue(BC_LARGER_MAPS, seqName, 0);
+			unsigned long int newValue = customMapAddr;
+			unsigned long diff = currentValue - ADDR_MAP_VISIBILITY_INFO;
+			// Dirty to use -4 as unsigned long, but it works anyway
+			switch (diff)
+			{
+				// This switch checks that we only encounter 7D2058/7D205C/7D2060 (for ROR10c offsets)
+			case -4:
+			case 0:
+			case 4:
+				newValue += diff;
+				SetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_LARGER_MAPS, seqName, 0, newValue);
+				break;
+			default:
+				// Should not occur
+				break;
+			}
+		}
+		else {
+			// TODO ON/OFF sequences if any
+		}
+
+	}
+}
+
+
+// Free Custom visibility map array, if any
+void RockNRorCommand::FreeCustomVisibilityMap() {
+	if (this->pCustomVisibilityMap) {
+		AOEFree(this->pCustomVisibilityMap);
+		this->pCustomVisibilityMap = NULL;
 	}
 }
 
@@ -2850,9 +2915,9 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 	AOE_STRUCTURES::STRUCT_GAME_MAP_INFO *mapInfo = global->gameMapInfo;
 	if (!mapInfo || !mapInfo->IsCheckSumValid()) { return false; }
 
-	assert(sizeX > 0); assert(sizeX <= 0xFF);
-	assert(sizeY > 0); assert(sizeY <= 0xFF);
-	if ((sizeX <= 0) || (sizeY <= 0) || (sizeX > 0xFF) || (sizeY > 0xFF)) { return false; }
+	//assert(sizeX > 0); assert(sizeX <= 0xFF);
+	//assert(sizeY > 0); assert(sizeY <= 0xFF);
+	//if ((sizeX <= 0) || (sizeY <= 0) || (sizeX > 0xFF) || (sizeY > 0xFF)) { return false; }
 
 	long int mapType = scEditor->map_cbb_mapType->GetListSelectedIndex();
 	assert(scEditor && scEditor->map_edt_seed->IsCheckSumValid());

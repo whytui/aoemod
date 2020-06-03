@@ -130,6 +130,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->randomMapRelicsCount = 5;
 	this->randomMapRuinsCount = 5;
 	this->useMapGenerationCustomElevationCalculation = false;
+	this->maximumMapSize = this->MINVALUE_maxMapSize;
 	for (int mapType = 0; mapType < AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT; mapType++) {
 		this->mapGenerationCustomElevationFactor[mapType] = 1; // Default factor: *1 does not change value.
 	}
@@ -657,6 +658,12 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		// Map options
 		if (elemName == "map") {
 			categoryName = this->XML_GetAttributeValue(elem, "name");
+			if (categoryName == "maximumMapSize") {
+				callResult = elem->QueryIntAttribute("value", &intValue);
+				if (callResult == TIXML_SUCCESS) {
+					this->maximumMapSize = intValue;
+				}
+			}
 			if (categoryName == "randomMapRelicsCount") {
 				callResult = elem->QueryIntAttribute("value", &intValue);
 				if (callResult == TIXML_SUCCESS) { this->randomMapRelicsCount = intValue; }
@@ -937,6 +944,7 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 	if (this->singlePlayerMaxPopulation > this->MAXVALUE_maxPopulation) { this->singlePlayerMaxPopulation = this->MAXVALUE_maxPopulation; }
 	if (this->randomTechTreeDesiredAvgBonusCount < this->MINVALUE_randomTechTreeDesiredAvgBonusCount) { this->randomTechTreeDesiredAvgBonusCount = this->MINVALUE_randomTechTreeDesiredAvgBonusCount; }
 	if (this->randomTechTreeDesiredAvgBonusCount > this->MAXVALUE_randomTechTreeDesiredAvgBonusCount) { this->randomTechTreeDesiredAvgBonusCount = this->MAXVALUE_randomTechTreeDesiredAvgBonusCount; }
+	if (this->maximumMapSize < this->MINVALUE_maxMapSize) { this->maximumMapSize = this->MINVALUE_maxMapSize; }
 
 	return true;
 }

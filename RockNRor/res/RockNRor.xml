@@ -118,6 +118,8 @@
 	<resourceAmounts goldMine="0" stoneMine="0" berryBush="0" gazelle="0" elephant="0" lion="0" alligator="0" tree="0" forestTree="0" fish="0"/>
 	
 	<!-- *** Map -->
+  <!-- map/maximumMapSize: set to 0 or 256 to use standard game behavior (recommended), higher values to allow larger maps (may be unstable) -->
+  <map name="maximumMapSize" value="256"/>
 	<map name="randomMapRelicsCount" value="5"/>
 	<map name="randomMapRuinsCount" value="5"/>
 	<!-- Set to 0 to disable all map generation elevation options -->

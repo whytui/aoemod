@@ -98,6 +98,9 @@ private:
 	// UpdatedValue: if <0, it is ignored
 	void UpdateTechAddWorkRateWithMessage(short int techId, short int unitDefId, float updatedValue);
 
+	// Pointer to RockNRor-allocated data array to replace Visibility map from ADDR_MAP_VISIBILITY_INFO (0x7D205C).
+	void *pCustomVisibilityMap = NULL;
+
 public:
 	// Empties RockNRor log file
 	void ResetLogFile();
@@ -124,6 +127,11 @@ public:
 
 	// Load custom DRS files
 	void LoadCustomDrsFiles();
+
+	// Initialize custom visibility map to replace "0x7D205C" data array
+	void InitCustomVisibilityMap();
+	// Free Custom visibility map array, if any
+	void FreeCustomVisibilityMap();
 
 	// Get custom empires.dat filename (with relative path)
 	const char *GetCustomEmpiresDatRelativeFileName(AOE_STRUCTURES::STRUCT_COMMAND_LINE_INFO *cmdLineInfo);

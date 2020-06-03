@@ -1,5 +1,8 @@
 #include "../include/AOE_map.h"
 
+// Maximum allowed map size in AOE/ROR methods/structures (default 256). Not a const, in case game is patched to support bigger maps.
+long int AOE_MAX_ALLOWED_MAP_SIZE;
+
 namespace AOE_METHODS {
 
 // pathFindingStruct can be 0x583BC8 or 0x6A1CC0 (for AI?).
@@ -327,9 +330,9 @@ bool IsFogVisibleForPlayerWithoutSharedExploration(long int playerId, long int p
 	assert(playerId < 9);
 	assert(posX >= 0);
 	assert(posY >= 0);
-	assert(posX < 256); // TO DO: get exact map size
-	assert(posY < 256); // TO DO: get exact map size
-	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255) || (playerId < 0) || (playerId > 8)) { return false; }
+	assert(posX < AOE_MAX_ALLOWED_MAP_SIZE); // TO DO: get exact map size
+	assert(posY < AOE_MAX_ALLOWED_MAP_SIZE); // TO DO: get exact map size
+	if ((posX < 0) || (posY < 0) || (posX >= AOE_MAX_ALLOWED_MAP_SIZE) || (posY >= AOE_MAX_ALLOWED_MAP_SIZE) || (playerId < 0) || (playerId > 8)) { return false; }
 	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
 	return v->isFogVisibleForPlayerWithoutSharedExploration(playerId);
 }
@@ -343,9 +346,9 @@ bool IsExploredForPlayerWithoutSharedExploration(long int playerId, long int pos
 	assert(playerId < 9);
 	assert(posX >= 0);
 	assert(posY >= 0);
-	assert(posX < 256); // TO DO: get exact map size
-	assert(posY < 256); // TO DO: get exact map size
-	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255) || (playerId < 0) || (playerId > 8)) { return false; }
+	assert(posX < AOE_MAX_ALLOWED_MAP_SIZE); // TO DO: get exact map size
+	assert(posY < AOE_MAX_ALLOWED_MAP_SIZE); // TO DO: get exact map size
+	if ((posX < 0) || (posY < 0) || (posX >= AOE_MAX_ALLOWED_MAP_SIZE) || (posY >= AOE_MAX_ALLOWED_MAP_SIZE) || (playerId < 0) || (playerId > 8)) { return false; }
 	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
 	return v->isExploredForPlayerWithoutSharedExploration(playerId);
 }
@@ -358,9 +361,9 @@ bool IsExploredForPlayerWithoutSharedExploration(long int playerId, long int pos
 bool IsFogVisibleForMask(STRUCT_MAP_VISIBILITY_MASK fogVisibilityMask, long int posX, long int posY) {
 	assert(posX >= 0);
 	assert(posY >= 0);
-	assert(posX < 256); // TO DO: get exact map size
-	assert(posY < 256); // TO DO: get exact map size
-	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255)) { return false; }
+	assert(posX < AOE_MAX_ALLOWED_MAP_SIZE); // TO DO: get exact map size
+	assert(posY < AOE_MAX_ALLOWED_MAP_SIZE); // TO DO: get exact map size
+	if ((posX < 0) || (posY < 0) || (posX >= AOE_MAX_ALLOWED_MAP_SIZE) || (posY >= AOE_MAX_ALLOWED_MAP_SIZE)) { return false; }
 	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
 	return v->isFogVisibleForMask(fogVisibilityMask);
 }
@@ -371,9 +374,9 @@ bool IsFogVisibleForMask(STRUCT_MAP_VISIBILITY_MASK fogVisibilityMask, long int 
 bool IsExploredForMask(STRUCT_MAP_VISIBILITY_MASK explorationVisibilityMask, long int posX, long int posY) {
 	assert(posX >= 0);
 	assert(posY >= 0);
-	assert(posX < 256); // TO DO: get exact map size
-	assert(posY < 256); // TO DO: get exact map size
-	if ((posX < 0) || (posY < 0) || (posX > 255) || (posY > 255)) { return false; }
+	assert(posX < AOE_MAX_ALLOWED_MAP_SIZE); // TO DO: get exact map size
+	assert(posY < AOE_MAX_ALLOWED_MAP_SIZE); // TO DO: get exact map size
+	if ((posX < 0) || (posY < 0) || (posX >= AOE_MAX_ALLOWED_MAP_SIZE) || (posY >= AOE_MAX_ALLOWED_MAP_SIZE)) { return false; }
 	AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO *v = (AOE_STRUCTURES::STRUCT_MAP_VISIBILITY_INFO*)GetMapVisibilityInfo(posX, posY);
 	return v->isExploredForMask(explorationVisibilityMask);
 }

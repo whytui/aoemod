@@ -217,6 +217,7 @@ public:
 	long int randomMapRuinsCount; // Default 5.
 	bool useMapGenerationCustomElevationCalculation;
 	float mapGenerationCustomElevationFactor[AOE_CONST_FUNC::MAP_TYPE_INDEX::MTI_MAP_TYPES_COUNT];
+	long int maximumMapSize; // Game default 256. Using larger maps will have side effects, possibly unstable.
 	// Scenario editor
 	bool showHiddenTerrainsInEditor;
 	long int showHiddenUnitsInEditor;
@@ -297,6 +298,7 @@ public:
 	const long int MINVALUE_dislike = 0;
 	const long int MAXVALUE_dislike = 99;
 	const float MINVALUE_conversionResistance = (float) 0.2;
+	const long int MINVALUE_maxMapSize = 256; // Default "max map size" is 256, do not allow less in RockNRor config.
 	const long int MINVALUE_artefactCount = 0;
 	const long int MAXVALUE_artefactCount = 200; // more than 10 is huge already ;)
 	const long int MINVALUE_civCount = 16;

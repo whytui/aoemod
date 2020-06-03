@@ -211,6 +211,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 			msg += ". @ret=";
 			msg += GetHexStringAddress(GetLastVirtualMethodCallReturnAddress());
 			traceMessageHandler.WriteMessageNoNotification(msg.c_str());
+#ifdef DEBUG
 			if (unit->ptrStructPlayer) {
 				AOE_STRUCTURES::STRUCT_PLAYER *player = AOE_METHODS::PLAYER::ChangeControlledPlayer(unit->ptrStructPlayer->playerId, false);
 				assert(player && player->IsCheckSumValid());
@@ -220,6 +221,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 			AOE_METHODS::SetGamePause(true); // seems better for stability.
 			ROCKNROR::SYSTEM::StopExecution(_T("An error occurred. *FIRST* close this message, then attach a debugger or press ESC to continue."), true, true);
 			// this seems to happen on priests whose MOVE action has NULL target and -1,-1 target pos. Need to find out why.
+#endif
 		}
 
 		if (runStandardMethod) {

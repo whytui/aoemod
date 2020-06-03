@@ -70,6 +70,7 @@ BinarySeqDefSet *AOE_binData::GetSeqDefSet(AOE_FILE_VERSION version, BINSEQ_CATE
 		case BC_AUDIO_VIDEO: return &this->audioVideo_10c;
 		case BC_OPTIONS: return &this->options_10c;
 		case BC_OBSOLETES: return &this->obsoletes_10c;
+		case BC_LARGER_MAPS: return &this->largerMaps_10c;
 		default: return NULL;
 		}
 	default: return NULL;
@@ -102,6 +103,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_10c 143
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
+#define COUNT_larger_maps_10c 38
 
 
 // Throws exceptions if configuration is not OK
@@ -130,7 +132,8 @@ void AOE_binData::InitData() {
 	//this->manageAI_10b.SetCount(0);
 	this->manageAI_10c.SetCount(COUNT_manageAI_10c);
 	this->audioVideo_10c.SetCount(COUNT_audio_video_10c);
-	
+	this->largerMaps_10c.SetCount(COUNT_larger_maps_10c);
+
 	this->InitResolution_b();
 	this->InitResolution_c();
 	this->InitWindowedMode_AOEb();
@@ -151,6 +154,7 @@ void AOE_binData::InitData() {
 	this->InitROR_API_10c();
 	this->InitManageAI();
 	this->InitAudioVideo_10c();
+	this->InitLargerMaps_10c();
 #ifdef _DEBUG
 	printf("**************************\n");
 #endif
@@ -6145,6 +6149,362 @@ void AOE_binData::InitObsoletes() {
 	}
 #ifdef _DEBUG
 	printf("obsoletes_10c=%d\n", i); // DEBUG
+#endif
+}
+
+
+void AOE_binData::InitLargerMaps_10c() {
+	int i = 0;
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		ActivityGetVisibilityInfo,
+		"Activity GetVisibilityInfo.",
+		0x12FD7,
+		(0x8B, 0x14, 0x85, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		UnitUpdate,
+		"Unit update.",
+		0x26C6E,
+		(0x8B, 0x14, 0x85, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		ExecuteCmd0,
+		"ExecuteCmd0.",
+		0x2A3B0,
+		(0x8B, 0x14, 0x9D, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		CreateCmdGenericOrder,
+		"CreateCmdGenericOrder.",
+		0x2B82E,
+		(0x8B, 0x0C, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		DiamondMapDrawTile,
+		"DiamondMapDrawTile.",
+		0x2D22A,
+		(0x8B, 0x04, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		DiamondMapDrawVisibleObject,
+		"DiamondMapDrawVisibleObject.",
+		0x2D977,
+		(0x8B, 0x0C, 0x8D, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		DoppleRecycle,
+		"DoppleRecycle.",
+		0x36442,
+		(0x8B, 0x0C, 0xAD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		DoppleSetup,
+		"DoppleSetup.",
+		0x364EC,
+		(0x8B, 0x14, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		DoppleSetup2,
+		"DoppleSetup2.",
+		0x3654B,
+		(0x8B, 0x14, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		RemoveVisibleResource,
+		"RemoveVisibleResource.",
+		0xAA3A2,
+		(0x8B, 0x0C, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		CreateDopple,
+		"CreateDopple.",
+		0xAA4B5,
+		(0x8B, 0x0C, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		CreateDopple2,
+		"CreateDopple2.",
+		0xAA534,
+		(0x8B, 0x0C, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		BldCCor,
+		"BldCCor.",
+		0xAC4CF,
+		(0x8B, 0x14, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		BldCCor2,
+		"BldCCor2.",
+		0xAC612,
+		(0x8B, 0x0C, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		BldCCor3,
+		"BldCCor3.",
+		0xAC70B,
+		(0x8B, 0x0C, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		ViewFunctionTerrain,
+		"ViewFunctionTerrain.",
+		0x1125F4,
+		(0x8B, 0x0C, 0x8D, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		_4GetTileMaskNum,
+		"[-4]GetTileMaskNum.",
+		0x113D69,
+		(0x8B, 0x1C, 0x95, 0x58, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		GetTileMaskNum,
+		"GetTileMaskNum.",
+		0x113D7A,
+		(0x8B, 0x3C, 0x95, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		4GetTileMaskNum,
+		"[+4]GetTileMaskNum.",
+		0x113D8A,
+		(0x8B, 0x14, 0x95, 0x60, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		GetTileMaskNum2,
+		"GetTileMaskNum2.",
+		0x113DCF,
+		(0x8B, 0x2C, 0x95, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		GetTileMaskNum3,
+		"GetTileMaskNum3.",
+		0x113DE8,
+		(0x8B, 0x3C, 0x95, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		_4GetTileMaskNum2,
+		"[-4]GetTileMaskNum2.",
+		0x113DFC,
+		(0x8B, 0x3C, 0x95, 0x58, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		4GetTileMaskNum2,
+		"[+4]GetTileMaskNum2.",
+		0x113E12,
+		(0x8B, 0x1C, 0x95, 0x60, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		_4GetTileMaskNum3,
+		"[-4]GetTileMaskNum3.",
+		0x113E29,
+		(0x8B, 0x1C, 0x95, 0x58, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		4GetTileMaskNum3,
+		"[+4]GetTileMaskNum3.",
+		0x113E3D,
+		(0x8B, 0x1C, 0x95, 0x60, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		_4GetTileMaskNum4,
+		"[-4]GetTileMaskNum4.",
+		0x113E55,
+		(0x8B, 0x1C, 0x95, 0x58, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		4GetTileMaskNum4,
+		"[+4]GetTileMaskNum4.",
+		0x113E6D,
+		(0x8B, 0x14, 0x95, 0x60, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		DrawTile,
+		"DrawTile.",
+		0x11407B,
+		(0x8B, 0x0C, 0x8D, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		PlayerCanSeeLocation,
+		"PlayerCanSeeLocation.",
+		0x117677,
+		(0x8B, 0x14, 0x85, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		VisibleMapSetAll,
+		"VisibleMapSetAll.",
+		0x1176FD,
+		(0xBE, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		1
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		VisibleMapSetAll2,
+		"VisibleMapSetAll2.",
+		0x11773A,
+		(0xBE, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		1
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		VisibleMapExploreAll,
+		"VisibleMapExploreAll.",
+		0x1177B8,
+		(0x8B, 0x83, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		2
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		PlayerAddVisibility,
+		"PlayerAddVisibility.",
+		0x117946,
+		(0x8B, 0x1C, 0x95, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		PlayerRemoveVisibility,
+		"PlayerRemoveVisibility.",
+		0x117ACC,
+		(0x8B, 0x1C, 0xBD, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		PlayerAddVisibilitySquare,
+		"PlayerAddVisibilitySquare.",
+		0x117C09,
+		(0x8B, 0x3C, 0x95, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		PlayerRemoveVisibilitySquare,
+		"PlayerRemoveVisibilitySquare.",
+		0x117D94,
+		(0x8B, 0x34, 0x9D, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		VisibleMapSetOffsets,
+		"VisibleMapSetOffsets.",
+		0x117FBB,
+		(0xBA, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		1
+	);
+
+	// 0x517FDD ? CMP EAX,100
+
+	NEXT_INITSEQ_1_VAR(this->largerMaps_10c.GetBinSeqDefinition(i),
+		VisibleMapSetOffsets2,
+		"VisibleMapSetOffsets2.",
+		0x117FE9,
+		(0x8D, 0x3C, 0x85, 0x5C, 0x20, 0x7D, 0x00),
+		SVT_INT_4B,
+		3
+	);
+
+	if (i != COUNT_larger_maps_10c) {
+		throw AOE_binDataSetupException("Binary setup error for larger_maps_10c. Bad element count.");
+	}
+#ifdef _DEBUG
+	printf("larger_maps_10c=%d\n", i); // DEBUG
 #endif
 }
 

@@ -7,7 +7,7 @@
 // Example: for (BINSEQ_CATEGORIES category = BINSEQ_CATEGORIES(BC_NONE + 1); category < BC_COUNT; category = BINSEQ_CATEGORIES(category + 1)) {...}
 // This enum is used to regroup binary sequence definitions by theme.
 enum BINSEQ_CATEGORIES { BC_NONE, BC_TECH_FIXES, BC_RESOLUTION, BC_WINDOWED_MODE, BC_VEG_WINDOWED_MODE, BC_SELECTED_UNITS, 
-	BC_ROR_API, BC_OPTIONS, BC_MANAGE_AI, BC_AUDIO_VIDEO, BC_OBSOLETES, BC_COUNT
+	BC_ROR_API, BC_OPTIONS, BC_MANAGE_AI, BC_AUDIO_VIDEO, BC_OBSOLETES, BC_LARGER_MAPS, BC_COUNT
 };
 
 
@@ -50,6 +50,7 @@ public:
 	BinarySeqDefSet manageAI_10b;
 	BinarySeqDefSet manageAI_10c;
 	BinarySeqDefSet audioVideo_10c;
+	BinarySeqDefSet largerMaps_10c;
 
 	AOE_FILE_VERSION GetCurrentVersion();
 	void SetCurrentVersion(AOE_FILE_VERSION value);
@@ -79,6 +80,7 @@ private:
 	void InitROR_API_10c();
 	void InitManageAI();
 	void InitAudioVideo_10c();
+	void InitLargerMaps_10c();
 };
 
 /*

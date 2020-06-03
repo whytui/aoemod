@@ -26,6 +26,10 @@ namespace AOE_STRUCTURES {
 }
 
 
+// Maximum allowed map size in AOE/ROR methods/structures (default 256). Not a const, in case game is patched to support bigger maps.
+extern long int AOE_MAX_ALLOWED_MAP_SIZE;
+
+
 namespace AOE_METHODS {
 	// pathFindingStruct can be 0x583BC8 or 0x6A1CC0. Don't know the specific roles yet :(
 	// updateUnitPathInfo = "do move". If false, this just checks if movement is possible.
