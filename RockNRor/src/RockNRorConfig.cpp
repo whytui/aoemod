@@ -945,6 +945,7 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 	if (this->randomTechTreeDesiredAvgBonusCount < this->MINVALUE_randomTechTreeDesiredAvgBonusCount) { this->randomTechTreeDesiredAvgBonusCount = this->MINVALUE_randomTechTreeDesiredAvgBonusCount; }
 	if (this->randomTechTreeDesiredAvgBonusCount > this->MAXVALUE_randomTechTreeDesiredAvgBonusCount) { this->randomTechTreeDesiredAvgBonusCount = this->MAXVALUE_randomTechTreeDesiredAvgBonusCount; }
 	if (this->maximumMapSize < this->MINVALUE_maxMapSize) { this->maximumMapSize = this->MINVALUE_maxMapSize; }
+	if (this->maximumMapSize > this->MAXVALUE_maxMapSize) { this->maximumMapSize = this->MAXVALUE_maxMapSize; }
 
 	return true;
 }

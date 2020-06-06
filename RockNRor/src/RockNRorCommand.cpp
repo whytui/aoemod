@@ -2906,9 +2906,6 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditor = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)AOE_METHODS::GetScreenFromName(scenarioEditorScreenName);
 	assert(scEditor && scEditor->IsCheckSumValid());
 	if (!scEditor || !scEditor->IsCheckSumValid()) { return false; }
-	AOE_STRUCTURES::STRUCT_PLAYER *gaia = GetPlayerStruct(0);
-	assert(gaia && gaia->IsCheckSumValid());
-	if (!gaia || !gaia->IsCheckSumValid()) { return false; }
 	AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = scEditor->global;
 	assert(global && global->IsCheckSumValid());
 	if (!global || !global->IsCheckSumValid()) { return false; }
@@ -2918,6 +2915,22 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 	assert(sizeX > 0); assert(sizeX < AOE_MAX_ALLOWED_MAP_SIZE);
 	assert(sizeY > 0); assert(sizeY < AOE_MAX_ALLOWED_MAP_SIZE);
 	if ((sizeX <= 0) || (sizeY <= 0) || (sizeX >= AOE_MAX_ALLOWED_MAP_SIZE) || (sizeY >= AOE_MAX_ALLOWED_MAP_SIZE)) { return false; }
+	bool isUnsupportedMapSize = (sizeX >= 256) || (sizeY >= 256);
+	if (isUnsupportedMapSize && (scEditor->currentMapGenerationChoice != 1)) {
+		traceMessageHandler.WriteMessage("For larger maps than 256*256, you can only create empty maps. Keep in mind that adding/moving units can be unstable.");
+		return false;
+	}
+	AOE_STRUCTURES::STRUCT_PLAYER *gaia = NULL;
+	if (isUnsupportedMapSize) {
+		// For standard map sizes (less than 256), get gaia player, which allows creation of random decorations on terrain
+		// The condition (keeping NULL gaia for larger maps) is a workaround to avoid game crash, 
+		// because decorations creation is NOT called when player is NULL. Fortunately, passing NULL player has no other side effects here.
+		// Adding decorations involves updating pathing sytem structures, which does not support larger maps.
+		// It seems to be the only incompatible treatment done in map creation [as long as we create an empty map]
+		gaia = GetPlayerStruct(0);
+		assert(gaia && gaia->IsCheckSumValid());
+		if (!gaia || !gaia->IsCheckSumValid()) { return false; }
+	}
 
 	long int mapType = scEditor->map_cbb_mapType->GetListSelectedIndex();
 	assert(scEditor && scEditor->map_edt_seed->IsCheckSumValid());
