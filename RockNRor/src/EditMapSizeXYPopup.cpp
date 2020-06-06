@@ -26,19 +26,21 @@ void EditMapSizeXYPopup::CreateScreenComponents() {
 		this->sizeX = global->gameMapInfo->mapArraySizeX;
 		this->sizeY = global->gameMapInfo->mapArraySizeY;
 	}
-	if (this->sizeX > 255) { this->sizeX = 255; }
-	if (this->sizeY > 255) { this->sizeY = 255; }
+	if (this->sizeX >= AOE_MAX_ALLOWED_MAP_SIZE) { this->sizeX = AOE_MAX_ALLOWED_MAP_SIZE - 1; }
+	if (this->sizeY >= AOE_MAX_ALLOWED_MAP_SIZE) { this->sizeY = AOE_MAX_ALLOWED_MAP_SIZE - 1; }
 
 	// Popup is open. Add components
 	long int btnhPos = (this->GetScreenSizeX() - 0xAC) / 2;
 	AOE_STRUCTURES::STRUCT_UI_LABEL *unused;
-	char bufX[5];
-	char bufY[5];
+	char bufX[6];
+	char bufY[6];
 	sprintf_s(bufX, "%ld", this->sizeX);
 	sprintf_s(bufY, "%ld", this->sizeY);
 	this->AddLabel(&unused, localizationHandler.GetTranslation(CRLANG_ID_TYPE_X_Y_MAP_SIZE, "Please type X and Y map size"), 30, 5, 280, 20, AOE_FONT_BIG_LABEL);
-	this->AddTextBox(&this->edtSizeX, bufX, 3, 120, 40, 80, 20, false, false, true);
-	this->AddTextBox(&this->edtSizeY, bufY, 3, 120, 60, 80, 20, false, false, true);
+	int maxTextLength = 3;
+	if (AOE_MAX_ALLOWED_MAP_SIZE >= 1000) { maxTextLength = 4; }
+	this->AddTextBox(&this->edtSizeX, bufX, maxTextLength, 120, 40, 80, 20, false, false, true);
+	this->AddTextBox(&this->edtSizeY, bufY, maxTextLength, 120, 60, 80, 20, false, false, true);
 
 	// OK button
 	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(80),
