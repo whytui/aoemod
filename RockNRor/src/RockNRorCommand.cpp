@@ -2921,7 +2921,7 @@ bool RockNRorCommand::ScenarioEditor_customGenerateMap(long int sizeX, long int 
 		return false;
 	}
 	AOE_STRUCTURES::STRUCT_PLAYER *gaia = NULL;
-	if (isUnsupportedMapSize) {
+	if (!isUnsupportedMapSize) {
 		// For standard map sizes (less than 256), get gaia player, which allows creation of random decorations on terrain
 		// The condition (keeping NULL gaia for larger maps) is a workaround to avoid game crash, 
 		// because decorations creation is NOT called when player is NULL. Fortunately, passing NULL player has no other side effects here.
