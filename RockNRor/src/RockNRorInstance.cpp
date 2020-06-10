@@ -468,6 +468,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x45DC2D:
 		this->OnPlayerAddUnitToSelection(REG_values);
 		break;
+	case 0x526261:
+		this->OnDeleteFile(REG_values);
+		break;
 	default:
 		break;
 	}
@@ -4891,6 +4894,46 @@ void RockNRorInstance::OnPlayerAddUnitToSelection(REG_BACKUP *REG_values) {
 	}
 	// Custom code
 	ROCKNROR::crCommand.OnPlayerAddUnitToSelection(player, unitToAdd);
+}
+
+
+// From 0x526258 (deleteFile)
+void RockNRorInstance::OnDeleteFile(REG_BACKUP *REG_values) {
+	long int arg1 = GetIntValueFromRORStack(REG_values, 0);
+	long int arg1s = GetIntValueFromRORStack(REG_values, -4);
+	char *filename = (char *)arg1;
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+
+	// Always run standard code
+	unsigned long int addr = 0x52622E;
+	_asm {
+		MOV EDX, arg1;
+		PUSH EDX;
+		CALL addr;
+		POP EDX;
+	}
+
+	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		// Custom treatments
+		std::string strFilename(filename);
+
+		// When deleting savegame files, also delete RockNror savegame complement file, if any
+		int dotIndex = strFilename.find_last_of('.');
+		if (dotIndex < 0) { return; }
+		if (_strnicmp(filename, "savegame\\", 9) != 0) {
+			return;
+		}
+		std::string ext = strFilename.substr(dotIndex);
+		const char *e = ext.c_str();
+		if ((_strnicmp(e, ".gam", 3) == 0) || (_strnicmp(e, ".gmx", 3) == 0)) {
+			std::string rnrFilename = strFilename + std::string(".rnr");
+			if (CheckFileExistence(rnrFilename.c_str())) {
+				int err = std::remove(rnrFilename.c_str()); // 0 = success
+			}
+		}
+	}
 }
 
 

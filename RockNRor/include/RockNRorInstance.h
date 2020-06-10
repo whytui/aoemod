@@ -174,6 +174,7 @@ namespace ROCKNROR {
 		void IsGamePaused(REG_BACKUP *REG_values);
 		void ExecMoveCmdUsingFormation(REG_BACKUP *REG_values);
 		void OnPlayerAddUnitToSelection(REG_BACKUP *REG_values);
+		void OnDeleteFile(REG_BACKUP *REG_values);
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);
