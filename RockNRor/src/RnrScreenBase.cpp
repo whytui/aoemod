@@ -201,10 +201,6 @@ bool RnrScreenBase::CloseScreen(bool ignoreErrors) {
 				// We have chances to detect this with invalid checksum, however in unlucky cases the checksum is still there but other object data has been overwritten in memory...
 				// This is no more but a workaround that saves us from most crashes
 				// NOTE: this should not happen anymore thank to the hack above (save&restore previous focused component)
-				// TO REMOVE LATER after some testing
-				if (!ignoreErrors) {
-					SYSTEM::StopExecution(_T("An error occurred in CloseScreen method. Previous object has an invalid focused object."), true, true);
-				}
 				previous->focusedComponent = NULL;
 			}
 			AOE_METHODS::UI_BASE::SetCurrentPanel(previous->screenName, 0);
