@@ -4906,6 +4906,7 @@ void RockNRorInstance::OnDeleteFile(REG_BACKUP *REG_values) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
 	}
 
+#ifdef GAMEVERSION_ROR10c
 	// Always run standard code
 	unsigned long int addr = 0x52622E;
 	_asm {
@@ -4914,6 +4915,7 @@ void RockNRorInstance::OnDeleteFile(REG_BACKUP *REG_values) {
 		CALL addr;
 		POP EDX;
 	}
+#endif
 
 	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		// Custom treatments
