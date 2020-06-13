@@ -19,12 +19,15 @@ namespace SYSTEM {
 		}
 		long int size = 0;
 		try {
-			if (ROCKNROR::crInfo.myGameObjects.Serialize(file) < 0) {
-				throw ROCKNROR::SYSTEM::SerializeException("serializeGameRockNRorData failed");
-			}
-			if (CUSTOM_AI::customAIHandler.Serialize(file) < 0) {
-				throw ROCKNROR::SYSTEM::SerializeException("serializeGameRockNRorData failed");
-			}
+			auto doSerialize = [file](const Serializable &f) {
+				if (f.Serialize(file) < 0) {
+					throw ROCKNROR::SYSTEM::SerializeException("serializeGameRockNRorData failed");
+				}
+			};
+
+			doSerialize(ROCKNROR::crInfo.myGameObjects);
+			doSerialize(CUSTOM_AI::customAIHandler);
+
 		}
 		catch (SerializeException) {
 			size = -1;
@@ -52,12 +55,14 @@ namespace SYSTEM {
 		}
 		bool res = true;
 		try {
-			if (!ROCKNROR::crInfo.myGameObjects.Deserialize(file)) {
-				throw ROCKNROR::SYSTEM::SerializeException("deserializeGameRockNRorData failed");
-			}
-			if (!CUSTOM_AI::customAIHandler.Deserialize(file)) {
-				throw ROCKNROR::SYSTEM::SerializeException("deserializeGameRockNRorData failed");
-			}
+			auto doDeserialize = [file](Serializable &f) {
+				if (!f.Deserialize(file)) {
+					throw ROCKNROR::SYSTEM::SerializeException("deserializeGameRockNRorData failed");
+				}
+			};
+
+			doDeserialize(ROCKNROR::crInfo.myGameObjects);
+			doDeserialize(CUSTOM_AI::customAIHandler);
 		}
 		catch (SerializeException) {
 			res = false;
