@@ -1,6 +1,7 @@
 #include "../include/RockNRorGameObjects.h"
 
 
+unsigned char integrityCheck = 0xAB;
 
 UnitCustomInfo::UnitCustomInfo() {
 	this->unitId = -1;
@@ -48,6 +49,39 @@ void UnitCustomInfo::ResetProtectInfo() {
 	this->protectPosY = -1;
 	this->protectUnitId = -1;
 }
+
+
+// Serialize object to output stream (file). May throw SerializeException
+long int UnitCustomInfo::Serialize(FILE *outputFile) const {
+	long int result = 0;
+	result += this->WriteBytes(outputFile, &this->autoAttackPolicy, sizeof(this->autoAttackPolicy)); // OK as the class only contains bools
+	result += this->WriteBytes(outputFile, &this->autoAttackPolicyIsSet, sizeof(this->autoAttackPolicyIsSet));
+	result += this->WriteBytes(outputFile, &this->myMainBuilderId, sizeof(this->myMainBuilderId));
+	result += this->WriteBytes(outputFile, &this->protectPosX, sizeof(this->protectPosX));
+	result += this->WriteBytes(outputFile, &this->protectPosY, sizeof(this->protectPosY));
+	result += this->WriteBytes(outputFile, &this->protectUnitId, sizeof(this->protectUnitId));
+	result += this->WriteBytes(outputFile, &this->spawnTargetUnitId, sizeof(this->spawnTargetUnitId));
+	result += this->WriteBytes(outputFile, &this->spawnUnitMoveToPosX, sizeof(this->spawnUnitMoveToPosX));
+	result += this->WriteBytes(outputFile, &this->spawnUnitMoveToPosY, sizeof(this->spawnUnitMoveToPosY));
+	result += this->WriteBytes(outputFile, &this->unitId, sizeof(this->unitId));
+	return result;
+}
+
+// Deserialize object from input stream (file). May throw SerializeException
+bool UnitCustomInfo::Deserialize(FILE *inputFile) {
+	this->ReadBytes(inputFile, &this->autoAttackPolicy, sizeof(this->autoAttackPolicy));
+	this->ReadBytes(inputFile, &this->autoAttackPolicyIsSet, sizeof(this->autoAttackPolicyIsSet));
+	this->ReadBytes(inputFile, &this->myMainBuilderId, sizeof(this->myMainBuilderId));
+	this->ReadBytes(inputFile, &this->protectPosX, sizeof(this->protectPosX));
+	this->ReadBytes(inputFile, &this->protectPosY, sizeof(this->protectPosY));
+	this->ReadBytes(inputFile, &this->protectUnitId, sizeof(this->protectUnitId));
+	this->ReadBytes(inputFile, &this->spawnTargetUnitId, sizeof(this->spawnTargetUnitId));
+	this->ReadBytes(inputFile, &this->spawnUnitMoveToPosX, sizeof(this->spawnUnitMoveToPosX));
+	this->ReadBytes(inputFile, &this->spawnUnitMoveToPosY, sizeof(this->spawnUnitMoveToPosY));
+	this->ReadBytes(inputFile, &this->unitId, sizeof(this->unitId));
+	return true;
+}
+
 
 
 FarmRebuildInfo::FarmRebuildInfo() {
@@ -225,5 +259,46 @@ bool RockNRorGameObjects::RemoveProtectedUnit(long int protectedUnitId) {
 		this->RemoveUnitCustomInfoIfEmpty(unitIdToCheck);
 	}
 	return result;
+}
+
+
+// Serialize object to output stream (file). May throw SerializeException
+long int RockNRorGameObjects::Serialize(FILE *outputFile) const {
+	long int result = 0;
+	result += this->WriteBytes(outputFile, &integrityCheck, sizeof(integrityCheck));
+	result += this->WriteBytes(outputFile, &this->currentGameHasAllTechs, sizeof(this->currentGameHasAllTechs));
+	result += this->WriteBytes(outputFile, &this->doNotApplyHardcodedCivBonus, sizeof(this->doNotApplyHardcodedCivBonus));
+
+	size_t size = this->unitCustomInfoList.size();
+	result += this->WriteBytes(outputFile, &size, sizeof(size));
+	for (auto it = this->unitCustomInfoList.cbegin(); it != this->unitCustomInfoList.cend(); it++) {
+		UnitCustomInfo *u = *it;
+		u->Serialize(outputFile);
+	}
+	// TODO farms info
+	return result;
+}
+
+// Deserialize object from input stream (file). May throw SerializeException
+bool RockNRorGameObjects::Deserialize(FILE *inputFile) {
+	unsigned char tmpCheck = 0;
+	this->ReadBytes(inputFile, &tmpCheck, sizeof(tmpCheck));
+	if (tmpCheck != integrityCheck) {
+		throw ROCKNROR::SYSTEM::SerializeException("Integrity check failed in deserialize (RockNRorGameObjects)");
+	}
+	this->ReadBytes(inputFile, &this->currentGameHasAllTechs, sizeof(this->currentGameHasAllTechs));
+	this->ReadBytes(inputFile, &this->doNotApplyHardcodedCivBonus, sizeof(this->doNotApplyHardcodedCivBonus));
+	
+	size_t size = 0;
+	this->ReadBytes(inputFile, &size, sizeof(size));
+	for (size_t i = 0; i < size; i++) {
+		UnitCustomInfo *newElem = new UnitCustomInfo(); // Inits all values to NULL / -1...
+		if (!newElem->Deserialize(inputFile)) {
+			throw ROCKNROR::SYSTEM::SerializeException("Inconsistent data in deserialize (RockNRorGameObjects/UnitCustomInfo)");
+		}
+		this->unitCustomInfoList.push_back(newElem);
+	}
+
+	return true;
 }
 

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <assert.h>
 #include "autoAttackPolicy.h"
+#include "Serializable.h"
 
 using namespace std;
 
@@ -12,14 +13,15 @@ using namespace std;
 #define REBUILD_FARMS_POSITION_THRESHOLD 0.25
 
 
-class UnitCustomInfo {
+// Stores specific information about a game unit, for RockNRor features
+class UnitCustomInfo : public ROCKNROR::SYSTEM::Serializable {
 public:
 	UnitCustomInfo();
 
 	long int unitId; // the unit custom informations are about
-	float spawnUnitMoveToPosX;
-	float spawnUnitMoveToPosY;
-	long int spawnTargetUnitId;
+	float spawnUnitMoveToPosX; // "rally point" X location
+	float spawnUnitMoveToPosY; // "rally point" X location
+	long int spawnTargetUnitId; // "rally point" target unit
 	AutoAttackPolicy autoAttackPolicy;
 	bool autoAttackPolicyIsSet;
 	float protectPosX;
@@ -33,10 +35,15 @@ public:
 	bool HasValidProtectInfo() const;
 	void ResetSpawnAutoTargetInfo();
 	void ResetProtectInfo();
+
+	// Serialize object to output stream (file). May throw SerializeException
+	long int Serialize(FILE *outputFile) const override;
+	// Deserialize object from input stream (file). May throw SerializeException
+	bool Deserialize(FILE *inputFile) override;
 };
 
 
-
+// Stores specific information about a farm, for RockNRor "auto-rebuild farms" feature
 class FarmRebuildInfo {
 public:
 	FarmRebuildInfo();
@@ -50,7 +57,8 @@ public:
 };
 
 
-class RockNRorGameObjects {
+// Handler class for RockNRor-specific objects dedicated to current game, such as auto-build farms info, rally points, etc.
+class RockNRorGameObjects : public ROCKNROR::SYSTEM::Serializable {
 public:
 	RockNRorGameObjects();
 	~RockNRorGameObjects();
@@ -92,6 +100,10 @@ public:
 	// Remove "protect" info from all "unit info" objects that tell to protect a specific unit id
 	bool RemoveProtectedUnit(long int protectedUnitId);
 
+	// Serialize object to output stream (file). May throw SerializeException
+	long int Serialize(FILE *outputFile) const override;
+	// Deserialize object from input stream (file). May throw SerializeException
+	bool Deserialize(FILE *inputFile) override;
 private:
 	vector<UnitCustomInfo*> unitCustomInfoList;
 	vector<FarmRebuildInfo*> farmRebuildInfoList;

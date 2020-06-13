@@ -12,8 +12,25 @@ namespace SYSTEM {
 	// Serialize all RockNRor data for current game
 	// rnrDataFilename is relative path with extension
 	bool serializeGameRockNRorData(const char *rnrDataFilename) {
-		// For now we only save customAI stuff
-		return CUSTOM_AI::customAIHandler.SerializeToFile(rnrDataFilename) > 0;
+		FILE *file = nullptr;
+		errno_t e = fopen_s(&file, rnrDataFilename, "w");
+		if ((e != 0) || !file) {
+			return -1;
+		}
+		long int size = 0;
+		try {
+			if (ROCKNROR::crInfo.myGameObjects.Serialize(file) < 0) {
+				throw ROCKNROR::SYSTEM::SerializeException("serializeGameRockNRorData failed");
+			}
+			if (CUSTOM_AI::customAIHandler.Serialize(file) < 0) {
+				throw ROCKNROR::SYSTEM::SerializeException("serializeGameRockNRorData failed");
+			}
+		}
+		catch (SerializeException) {
+			size = -1;
+		}
+		fclose(file);
+		return size >= 0;
 	}
 
 
@@ -26,8 +43,28 @@ namespace SYSTEM {
 			}
 			return false;
 		}
-		// For now we only save customAI stuff
-		bool res = CUSTOM_AI::customAIHandler.DeserializeFromFile(rnrDataFilename);
+
+		// Proceed with deserialization
+		FILE *file = nullptr;
+		errno_t e = fopen_s(&file, rnrDataFilename, "r");
+		if ((e != 0) || !file) {
+			return false;
+		}
+		bool res = true;
+		try {
+			if (!ROCKNROR::crInfo.myGameObjects.Deserialize(file)) {
+				throw ROCKNROR::SYSTEM::SerializeException("deserializeGameRockNRorData failed");
+			}
+			if (!CUSTOM_AI::customAIHandler.Deserialize(file)) {
+				throw ROCKNROR::SYSTEM::SerializeException("deserializeGameRockNRorData failed");
+			}
+		}
+		catch (SerializeException) {
+			res = false;
+		}
+		fclose(file);
+
+		// Write trace if requested
 		if (writeTrace) {
 			if (res) {
 				traceMessageHandler.WriteMessageNoNotification("Successfully loaded RockNRor savegame information");

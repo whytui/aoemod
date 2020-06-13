@@ -18,9 +18,9 @@ namespace SYSTEM {
 	class Serializable {
 	public:
 
-		// May throw SerializeException
+		// Serialize object to output stream (file). May throw SerializeException
 		virtual long int Serialize(FILE *outputFile) const { return 0; }
-		// May throw SerializeException
+		// Deserialize object from input stream (file). May throw SerializeException
 		virtual bool Deserialize(FILE *inputFile) { return true; }
 
 		// Serialize object to a file (path)
