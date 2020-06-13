@@ -2843,19 +2843,21 @@ void RockNRorCommand::DisplayTimerStats() {
 	long int curExecCount = 0;
 	long int highestTimeSpent = 0;
 	unsigned long int curHighest = 0;
-	for each (auto var in ROCKNROR::crInfo.longestTimes_ms)
+	for (auto it = ROCKNROR::crInfo.longestTimes_ms.cbegin(); it != ROCKNROR::crInfo.longestTimes_ms.cend(); it++)
 	{
-		if ((var.second > highestTimeSpent) && (var.first != AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS)) {
-			highestTimeSpent = var.second;
-			curHighest = var.first;
-			curExecCount = ROCKNROR::crInfo.executionCounts[var.first];
+		unsigned long int retAddr = it->first;
+		long int timeSpent = it->second;
+		if ((timeSpent > highestTimeSpent) && (retAddr != AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS)) {
+			highestTimeSpent = timeSpent;
+			curHighest = retAddr;
+			curExecCount = ROCKNROR::crInfo.executionCounts[retAddr];
 		}
 		std::string msg = "EntryPoint ";
-		msg += GetHexStringAddress(var.first);
+		msg += GetHexStringAddress(retAddr);
 		msg += "  exec_count=";
-		msg += std::to_string(ROCKNROR::crInfo.executionCounts[var.first]);
+		msg += std::to_string(ROCKNROR::crInfo.executionCounts[retAddr]);
 		msg += "  longest=";
-		msg += std::to_string(ROCKNROR::crInfo.longestTimes_ms[var.first]);
+		msg += std::to_string(ROCKNROR::crInfo.longestTimes_ms[retAddr]);
 		traceMessageHandler.WriteMessageNoNotification(msg);
 	}
 	if (curHighest > 0) {
