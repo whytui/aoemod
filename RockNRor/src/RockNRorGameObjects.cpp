@@ -95,6 +95,33 @@ FarmRebuildInfo::FarmRebuildInfo() {
 }
 
 
+// Serialize object to output stream (file). May throw SerializeException
+long int FarmRebuildInfo::Serialize(FILE *outputFile) const {
+	long int result = 0;
+	result += this->WriteBytes(outputFile, &this->forceNotRebuild, sizeof(this->forceNotRebuild));
+	result += this->WriteBytes(outputFile, &this->forceRebuild, sizeof(this->forceRebuild));
+	result += this->WriteBytes(outputFile, &this->gameTime, sizeof(this->gameTime));
+	result += this->WriteBytes(outputFile, &this->playerId, sizeof(this->playerId));
+	result += this->WriteBytes(outputFile, &this->posX, sizeof(this->posX));
+	result += this->WriteBytes(outputFile, &this->posY, sizeof(this->posY));
+	result += this->WriteBytes(outputFile, &this->villagerUnitId, sizeof(this->villagerUnitId));
+	return result;
+}
+
+// Deserialize object from input stream (file). May throw SerializeException
+bool FarmRebuildInfo::Deserialize(FILE *inputFile) {
+	this->ReadBytes(inputFile, &this->forceNotRebuild, sizeof(this->forceNotRebuild));
+	this->ReadBytes(inputFile, &this->forceRebuild, sizeof(this->forceRebuild));
+	this->ReadBytes(inputFile, &this->gameTime, sizeof(this->gameTime));
+	this->ReadBytes(inputFile, &this->playerId, sizeof(this->playerId));
+	this->ReadBytes(inputFile, &this->posX, sizeof(this->posX));
+	this->ReadBytes(inputFile, &this->posY, sizeof(this->posY));
+	this->ReadBytes(inputFile, &this->villagerUnitId, sizeof(this->villagerUnitId));
+	return true;
+}
+
+
+
 
 RockNRorGameObjects::RockNRorGameObjects() {
 
@@ -275,7 +302,14 @@ long int RockNRorGameObjects::Serialize(FILE *outputFile) const {
 		UnitCustomInfo *u = *it;
 		u->Serialize(outputFile);
 	}
-	// TODO farms info
+
+	size = this->farmRebuildInfoList.size();
+	result += this->WriteBytes(outputFile, &size, sizeof(size));
+	for (auto it = this->farmRebuildInfoList.cbegin(); it != this->farmRebuildInfoList.cend(); it++) {
+		FarmRebuildInfo *f = *it;
+		f->Serialize(outputFile);
+	}
+	
 	return result;
 }
 
@@ -297,6 +331,16 @@ bool RockNRorGameObjects::Deserialize(FILE *inputFile) {
 			throw ROCKNROR::SYSTEM::SerializeException("Inconsistent data in deserialize (RockNRorGameObjects/UnitCustomInfo)");
 		}
 		this->unitCustomInfoList.push_back(newElem);
+	}
+
+	size = 0;
+	this->ReadBytes(inputFile, &size, sizeof(size));
+	for (size_t i = 0; i < size; i++) {
+		FarmRebuildInfo *newElem = new FarmRebuildInfo();
+		if (!newElem->Deserialize(inputFile)) {
+			throw ROCKNROR::SYSTEM::SerializeException("Inconsistent data in deserialize (RockNRorGameObjects/FarmRebuildInfo)");
+		}
+		this->farmRebuildInfoList.push_back(newElem);
 	}
 
 	return true;

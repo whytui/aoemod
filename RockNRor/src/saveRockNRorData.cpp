@@ -15,7 +15,7 @@ namespace SYSTEM {
 		FILE *file = nullptr;
 		errno_t e = fopen_s(&file, rnrDataFilename, "w");
 		if ((e != 0) || !file) {
-			return -1;
+			return false;
 		}
 		long int size = 0;
 		try {

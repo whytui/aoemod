@@ -44,7 +44,7 @@ public:
 
 
 // Stores specific information about a farm, for RockNRor "auto-rebuild farms" feature
-class FarmRebuildInfo {
+class FarmRebuildInfo : public ROCKNROR::SYSTEM::Serializable {
 public:
 	FarmRebuildInfo();
 	long int playerId;
@@ -54,6 +54,11 @@ public:
 	long int gameTime; // Last update game time in ms
 	bool forceRebuild;
 	bool forceNotRebuild;
+
+	// Serialize object to output stream (file). May throw SerializeException
+	long int Serialize(FILE *outputFile) const override;
+	// Deserialize object from input stream (file). May throw SerializeException
+	bool Deserialize(FILE *inputFile) override;
 };
 
 
