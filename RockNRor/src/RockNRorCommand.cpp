@@ -692,7 +692,7 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 #else
 			const char saveFilenameExt[] = "_autosave-reload-RockNRor.gam";
 #endif
-			bool res = AOE_METHODS::SaveCurrentGame(saveFilenameExt);
+			bool res = AOE_METHODS::SaveCurrentGame(saveFilenameExt); // Will also save rnr data
 			settings->isSavedGame = true;
 			strcpy_s(settings->loadGameName, saveFilename);
 			strcpy_s(settings->saveGameName, saveFilename);
@@ -701,8 +701,6 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 			msg += ": ";
 			msg += (res ? "success" : "failure");
 			traceMessageHandler.WriteMessageNoNotification(msg);
-			// Backup custom data (create RNR save game)
-			saveRockNRorGameData(saveFilenameExt);
 			res = AOE_METHODS::RestartGame();
 			if (!res) {
 				traceMessageHandler.WriteMessageNoNotification("Reload failed. Game was saved in _autosave-reload-RockNRor.gmx");

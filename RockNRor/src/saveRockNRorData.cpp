@@ -19,10 +19,12 @@ namespace SYSTEM {
 		}
 		long int size = 0;
 		try {
-			auto doSerialize = [file](const Serializable &f) {
-				if (f.Serialize(file) < 0) {
+			auto doSerialize = [file, &size](const Serializable &f) {
+				int tmpSize = f.Serialize(file);
+				if (tmpSize < 0) {
 					throw ROCKNROR::SYSTEM::SerializeException("serializeGameRockNRorData failed");
 				}
+				size += tmpSize;
 			};
 
 			doSerialize(ROCKNROR::crInfo.myGameObjects);
