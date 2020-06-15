@@ -505,14 +505,17 @@ bool RockNRorCommand::ExecuteCommand(char *command, std::string &output) {
 		short int id = StrToInt(sUnitId, -1);
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)GetUnitStruct(id);
-		AOE_METHODS::PLAYER::ClearSelectedUnits(player);
 		if (unit && unit->IsCheckSumValidForAUnitClass()) {
+			AOE_METHODS::PLAYER::ClearSelectedUnits(player);
 			AOE_METHODS::PLAYER::SelectUnit(player, unit, true);
 			char *name = "?";
 			if (unit->unitDefinition && unit->unitDefinition->IsCheckSumValidForAUnitClass()) {
 				name = unit->unitDefinition->ptrUnitName;
 			}
 			output = std::string("selected ") + std::string(name);
+		}
+		else {
+			output = std::string("Unit not found");
 		}
 	}
 
