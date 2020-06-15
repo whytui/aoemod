@@ -300,14 +300,14 @@ long int RockNRorGameObjects::Serialize(FILE *outputFile) const {
 	result += this->WriteBytes(outputFile, &size, sizeof(size));
 	for (auto it = this->unitCustomInfoList.cbegin(); it != this->unitCustomInfoList.cend(); it++) {
 		UnitCustomInfo *u = *it;
-		u->Serialize(outputFile);
+		result += u->Serialize(outputFile);
 	}
 
 	size = this->farmRebuildInfoList.size();
 	result += this->WriteBytes(outputFile, &size, sizeof(size));
 	for (auto it = this->farmRebuildInfoList.cbegin(); it != this->farmRebuildInfoList.cend(); it++) {
 		FarmRebuildInfo *f = *it;
-		f->Serialize(outputFile);
+		result += f->Serialize(outputFile);
 	}
 	
 	return result;
