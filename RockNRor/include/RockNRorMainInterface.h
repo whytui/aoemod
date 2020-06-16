@@ -56,6 +56,27 @@ public:
 
 private:
 	bool windowTitleChanged;
+
+	// Returns true if event has been handled AND we don't want original code to try to handle it.
+	bool InGameKeyPressF2();
+
+	// Returns true if event has been handled AND we don't want original code to try to handle it.
+	bool InGameKeyPressDelete();
+
+	// Returns true if event has been handled AND we don't want original code to try to handle it.
+	bool EditorOnKeyPressF1(bool CTRL, bool SHIFT, bool ALT);
+
+	// Returns true if event has been handled AND we don't want original code to try to handle it.
+	bool EditorOnKeyPressF2();
+
+	// Returns true if event has been handled AND we don't want original code to try to handle it.
+	bool EditorOnKeyPressF3();
+
+	// Returns true if event has been handled AND we don't want original code to try to handle it.
+	bool EditorOnKeyPressF4();
+
+	// Returns true if event has been handled AND we don't want original code to try to handle it.
+	bool EditorOnKeyPressTab(bool CTRL, bool SHIFT, bool ALT);
 };
 
 

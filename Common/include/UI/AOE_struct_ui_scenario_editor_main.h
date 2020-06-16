@@ -21,18 +21,22 @@
 */
 namespace AOE_STRUCTURES
 {
+	enum SCENARIO_EDITOR_TABS : long int { SET_NONE = 0, // beware, first index is 1 (for first tab=map)
+		SET_MAP = 1, SET_TERRAIN, SET_PLAYERS, SET_UNITS, SET_DIPL,
+		SET_GLOBAL_VICTORY, SET_INDIVIDUAL_VICTORY, SET_OPTIONS, SET_MESSAGES, SET_ANIMATION };
 
 	// "Screen_sed". Size 0x948. Constructor 0x48FC40. Inherits from 9C 57 54 00, then screen_base
 	// This is the parent UI object of in-game screen.
 	class STRUCT_UI_SCENARIO_EDITOR_MAIN : public STRUCT_UI_EASY_PANEL { // 60 73 54 00
 	public:
-		char unknown_478[0x4A8 - 0x478];
+		char unknown_478[0x4A4 - 0x478];
+		SCENARIO_EDITOR_TABS selectedTabIndex; // +4A4. Index of currently selected tab (map, terrain, etc) from 1 (map) to 10 (animation)
 		long int currentMapGenerationChoice; // +4A8. 1=empty, 2=random, 3=from seed
 		long int unknown_04AC; // default 2
 		unsigned long int unknown_04B0;
 		unsigned long int unknown_04B4;
 		short int selectedPlayerId; // +4B8. Default 1
-		short int unkknown_04BA;
+		short int unknown_04BA;
 		unsigned long int unknown_04BC;
 		// 0x4C0
 		char needToSave; // default 0
@@ -93,7 +97,16 @@ namespace AOE_STRUCTURES
 		STRUCT_UI_LABEL *pl_lbl_playerCount;
 		STRUCT_UI_COMBOBOX *pl_cbb_selectedPlayer; // +5B4. In Players tab, current player selection.
 		STRUCT_UI_COMBOBOX *pl_cbb_playerCount; // +5B8. Number of players combobox.
-		STRUCT_ANY_UI *unknown_5BC[(0x640 - 0x5BC) / 4]; // TO DO
+		STRUCT_ANY_UI *unknown_5BC[(0x61C - 0x5BC) / 4]; // TO DO
+		STRUCT_UI_BUTTON *unitsTabBtnPlaceUnit; // +61C : "Create" unit button
+		STRUCT_UI_BUTTON *unitsTabBtnDeleteUnit; // +620 : "Delete" unit button
+		STRUCT_UI_BUTTON *unitsTabBtnMoveUnit; // +624 : "Move" unit button
+		STRUCT_UI_BUTTON *unitsTabBtnRotateUnit; // +628 : "Rotate" unit button
+		STRUCT_ANY_UI *unknown_62C;
+		STRUCT_ANY_UI *unknown_630;
+		STRUCT_ANY_UI *unknown_634;
+		STRUCT_ANY_UI *unknown_638;
+		STRUCT_UI_LISTBOX *unitsTabPlayerSelection; // +63C. "Units" tab player selection listbox
 		unsigned long int unknown_640; // +640 healthSlp ?
 		unsigned long int unknown_644; // +644 itemiconSLP ?
 		STRUCT_SLP_INFO *iconsForUnits; // +648.

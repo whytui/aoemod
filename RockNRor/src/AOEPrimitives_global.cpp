@@ -186,6 +186,22 @@ bool SaveScenario(const char *filenameNoPath) {
 }
 
 
+// Set mouse action type at game settings level : gameSettings.setMouseActionType(mouseactionTypeId, subTypeId)
+void SetMouseActionType(MOUSE_ACTION_TYPES mouseActionTypeId, long int subTypeId) {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	if (!settings) { return; }
+	unsigned long int addr = 0;
+	static_assert(sizeof(MOUSE_ACTION_TYPES) == 4, "MOUSE_ACTION_TYPES must be 4-bytes datatype");
+	_asm {
+		PUSH subTypeId;
+		PUSH mouseActionTypeId;
+		MOV ECX, settings;
+		MOV EAX, DS:[ECX];
+		CALL DS:[EAX + 0x10];
+	}
+}
+
+
 // Get a string representing game time in a human readable format
 std::string GetHumanTimeFromGameTime(unsigned long int gameTimeValue, bool withMilliSeconds) {
 	std::string result = "";

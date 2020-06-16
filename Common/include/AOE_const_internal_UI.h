@@ -37,7 +37,7 @@ namespace AOE_CONST_INTERNAL
 		CST_MAT_EDITOR_SET_UNIT_LOCATION = 8, // create units, including buildings (fully built !)
 		CST_MAT_SET_TERRAIN_TYPE = 9,
 		CST_MAT_SET_ALTITUDE = 0x0A,
-		CST_MAT_UNKNOWN_0E = 0x0E,
+		CST_MAT_EDITOR_DELETE_UNIT = 0x0E, // Delete unit in scenario editor
 		CST_MAT_EDITOR_MOVE_UNIT = 0x0F,
 		CST_MAT_EDITOR_SELECT_TARGET_UNIT = 0x10, // For victory conditions
 		// 0x10 : selects unit then restored to 0 ?

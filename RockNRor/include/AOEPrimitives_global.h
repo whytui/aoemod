@@ -64,6 +64,8 @@ bool SaveScenario(const char *filenameNoPath);
 // Restart current game, just like Restart button does
 bool RestartGame();
 
+// Set mouse action type at game settings level : gameSettings.setMouseActionType(mouseactionTypeId, subTypeId)
+void SetMouseActionType(MOUSE_ACTION_TYPES mouseActionTypeId, long int subTypeId);
 
 // Get a string representing game time in a human readable format
 std::string GetHumanTimeFromGameTime(unsigned long int gameTimeValue, bool withMilliSeconds);

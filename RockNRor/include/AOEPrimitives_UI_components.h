@@ -439,5 +439,21 @@ static void SetButtonTextColor(AOE_STRUCTURES::STRUCT_UI_BUTTON *btn, unsigned l
 	}
 }
 
+// Sets the provided radio button as selected one among its group.
+// The provided button must be of RADIO button type !
+static bool SetSelectedRadioButton(AOE_STRUCTURES::STRUCT_UI_BUTTON *btn) {
+	if (!btn || !btn->IsRadio()) {
+		return false;
+	}
+#if GAMEVERSION == GAMEVERSIONID_ROR10c
+	unsigned long int addr = 0x45F280;
+	_asm {
+		MOV ECX, btn;
+		CALL addr;
+	}
+#endif
+	return true;
+}
+
 }
 }

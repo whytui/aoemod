@@ -17,6 +17,7 @@ namespace AOE_STRUCTURES
 	// Size 0x2B8. Also for checkboxes.
 	// Can be created in 0x0456240
 	// 0x45EDC0 = button.setup(renderArea, parent, x, y, sizeX, sizeY, drawType, sound, notifyType, btnId)
+	// 0x45F280 = button.setRadioButton() : set this button as selected in radiobutton group. Must be a radio (BUTTON_TYPE=2)
 	// 0x45FCD0 = button.onButtonDown(mouseBtnId, mouseposX, mouseposY, CTRL, SHIFT)
 	// 0x4604C0 = button.doAction()
 #define CHECKSUM_UI_BUTTON_PANEL 0x00544E30 // parent button class
@@ -91,6 +92,9 @@ namespace AOE_STRUCTURES
 		}
 		bool IsACheckBox() const {
 			return this->buttonType == BUTTON_TYPE::BT_CHECKBOX;
+		}
+		bool IsRadio() const {
+			return this->buttonType == BUTTON_TYPE::BT_RADIO;
 		}
 		bool IsACheckBoxOrRadio() const {
 			return (this->buttonType == BUTTON_TYPE::BT_CHECKBOX) || (this->buttonType == BUTTON_TYPE::BT_RADIO);

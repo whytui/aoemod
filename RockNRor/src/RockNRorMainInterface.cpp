@@ -96,83 +96,24 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 
 	// F2 in game: unit properties
 	if ((isInGame) && (!isMenuOpen) && (pressedKey == VK_F2)) {
-		if (!settings || !settings->ptrGameUIStruct || !settings->ptrGameUIStruct->panelSelectedUnit) {
-			return false;
-		}
-		ROCKNROR::UI::InGameUnitPropertiesPopup *popup = new ROCKNROR::UI::InGameUnitPropertiesPopup(settings->ptrGameUIStruct->panelSelectedUnit->unitInstanceId);
-		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
-		if (settings && settings->IsCheckSumValid() && settings->ptrGameUIStruct && settings->ptrGameUIStruct->IsCheckSumValid()) {
-			popup->SetBackgroundTheme((AOE_CONST_DRS::AoeScreenTheme)settings->ptrGameUIStruct->themeSlpId);
-		}
-		if (popup->CreateScreen(GetCurrentScreen())) {
-			if (!IsMultiplayer()) {
-				if (!AOE_STRUCTURES::IsGamePaused()) {
-					popup->afterCloseGamePausePolicy = ROCKNROR::UI::RnrScreenBase::AfterClosePausePolicy::SET_PAUSE_OFF;
-				}
-				AOE_METHODS::SetGamePause(true);
-			}
-		}
+		this->InGameKeyPressF2();
 	}
 
 	if (isInGame && (pressedKey == VK_DELETE)) {
-		if (ROCKNROR::crInfo.configInfo.assassinMode) {
-			AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-			AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
-			assert((player != NULL) && player->IsCheckSumValid());
-			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = ROCKNROR::crInfo.GetRelevantMainSelectedUnitPointer(player);
-			if (unit && unit->IsCheckSumValidForAUnitClass()) {
-				if (unit->DerivesFromTrainable() && (unit->unitStatus <= 2)) { // game command would crash for other types than trainable/buildings
-					GAME_COMMANDS::CreateCmd_KillUnit(unit->unitInstanceId);
-				} else {
-					if (!settings->rgeGameOptions.isMultiPlayer) {
-						unit->remainingHitPoints = 0;
-						if ((unit->unitStatus > 2) && (unit->resourceValue > 0)) {
-							unit->resourceValue = 0; // To kill units like mines, gazelle with remaining food, etc
-						}
-						if (unit->checksum == CHECKSUM_UNIT_TREE) {
-							// Refresh unit in display
-							AOE_METHODS::UNIT::UpdateDisplay(unit);
-						}
-					}
-				}
-			}
-		}
+		this->InGameKeyPressDelete();
 	}
 
 	// F1 in editor : switch to unit selection
 	if (!isMenuOpen && (isInEditor) && !CTRL && (pressedKey == VK_F1) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
-		if (!SHIFT) {
-			settings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
-		} else {
-			STRUCT_POSITION_INFO mousePosInfo = GetMousePosition();
-			AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)AOE_METHODS::GetUnitAtMousePosition(mousePosInfo.posX, mousePosInfo.posY, INTERACTION_MODES::CST_IM_LIVING_UNITS, true);
-			AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
-			if (player && player->IsCheckSumValid() && unit && unit->IsCheckSumValidForAUnitClass()) {
-				SelectOneUnit(player, unit, false);
-			}
-		}
+		this->EditorOnKeyPressF1(CTRL, SHIFT, ALT);
 	}
 	// F2 in editor: edit selected unit or show game coordinates at mouse position
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F2) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
-		if (ROCKNROR::crInfo.GetMainSelectedUnit(GetControlledPlayerStruct_Settings()) == NULL) {
-			float posX, posY;
-			GetGamePositionUnderMouse(&posX, &posY);
-			if ((posX > 0) && (posY > 0)) {
-				char buffer[100];
-				const char *text = localizationHandler.GetTranslation(CRLANG_ID_MOUSE_POSITION, "Mouse position");
-				sprintf_s(buffer, "%.70s: X=%4.2f, y=%4.2f", text, posX, posY);
-				ROCKNROR::UI::SimpleEditTextPopup::OpenCustomTextEditPopup(text, buffer, 280, 110, sizeof(buffer), NULL, true, false);
-			}
-		} else {
-			ROCKNROR::UI::EditorEditUnitInfoPopup *popup = new ROCKNROR::UI::EditorEditUnitInfoPopup();
-			popup->CreateScreen(GetCurrentScreen());
-		}
+		this->EditorOnKeyPressF2();
 	}
 	// F3 in editor: scenario information
 	if (!isMenuOpen && (isInEditor) && (pressedKey == VK_F3) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
-		//EditorScenarioInfoPopup::OpenCustomEditorScenarioInfoPopup();
-		ROCKNROR::UI::EditorScenarioInfoPopup *popup = new ROCKNROR::UI::EditorScenarioInfoPopup();
-		popup->CreateScreen(GetCurrentScreen());
+		this->EditorOnKeyPressF3();
 	}
 
 	// CTRL-F1 : display messages
@@ -182,14 +123,15 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 
 	// F4 in editor: copy map
 	if (!isMenuOpen && isInEditor && !CTRL && !ALT && (pressedKey == VK_F4) && (!ROCKNROR::crInfo.HasOpenedCustomGamePopup())) {
-		ROCKNROR::UI::MapCopyPopup *popup = new ROCKNROR::UI::MapCopyPopup();
-		popup->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::ScenarioEditorTheme);
-		popup->CreateScreen(GetCurrentScreen());
+		this->EditorOnKeyPressF4();
 	}
 
 	// F5 in game: set debug info level
 	if (!isMenuOpen && isInGame && (pressedKey == VK_F5)) {
 		ROCKNROR::crCommand.SetNextInGameDebugInfoLevel();
+	}
+	if (!isMenuOpen && isInEditor && (pressedKey == VK_TAB)) {
+		this->EditorOnKeyPressTab(CTRL, SHIFT, ALT);
 	}
 
 #ifdef _DEBUG
@@ -605,6 +547,203 @@ bool RockNRorMainInterface::ApplyRightClickReleaseOnSelectedUnits(AOE_STRUCTURES
 		}
 	}
 	return skipRORTreatments;
+}
+
+
+// Returns true if event has been handled AND we don't want original code to try to handle it.
+bool RockNRorMainInterface::InGameKeyPressF2() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings != NULL);
+	if (!settings) { return false; }
+	if (!settings || !settings->ptrGameUIStruct || !settings->ptrGameUIStruct->panelSelectedUnit) {
+		return false;
+	}
+	ROCKNROR::UI::InGameUnitPropertiesPopup *popup = new ROCKNROR::UI::InGameUnitPropertiesPopup(settings->ptrGameUIStruct->panelSelectedUnit->unitInstanceId);
+	if (settings && settings->IsCheckSumValid() && settings->ptrGameUIStruct && settings->ptrGameUIStruct->IsCheckSumValid()) {
+		popup->SetBackgroundTheme((AOE_CONST_DRS::AoeScreenTheme)settings->ptrGameUIStruct->themeSlpId);
+	}
+	if (popup->CreateScreen(GetCurrentScreen())) {
+		if (!IsMultiplayer()) {
+			if (!AOE_STRUCTURES::IsGamePaused()) {
+				popup->afterCloseGamePausePolicy = ROCKNROR::UI::RnrScreenBase::AfterClosePausePolicy::SET_PAUSE_OFF;
+			}
+			AOE_METHODS::SetGamePause(true);
+		}
+	}
+	return true;
+}
+
+
+// Returns true if event has been handled AND we don't want original code to try to handle it.
+bool RockNRorMainInterface::InGameKeyPressDelete() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings != NULL);
+	if (!settings) { return false; }
+	if (ROCKNROR::crInfo.configInfo.assassinMode) {
+		AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		assert((player != NULL) && player->IsCheckSumValid());
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = ROCKNROR::crInfo.GetRelevantMainSelectedUnitPointer(player);
+		if (unit && unit->IsCheckSumValidForAUnitClass()) {
+			if (unit->DerivesFromTrainable() && (unit->unitStatus <= 2)) { // game command would crash for other types than trainable/buildings
+				GAME_COMMANDS::CreateCmd_KillUnit(unit->unitInstanceId);
+				return true;
+			}
+			else {
+				if (!settings->rgeGameOptions.isMultiPlayer) {
+					unit->remainingHitPoints = 0;
+					if ((unit->unitStatus > 2) && (unit->resourceValue > 0)) {
+						unit->resourceValue = 0; // To kill units like mines, gazelle with remaining food, etc
+					}
+					if (unit->checksum == CHECKSUM_UNIT_TREE) {
+						// Refresh unit in display
+						AOE_METHODS::UNIT::UpdateDisplay(unit);
+					}
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
+// Returns true if event has been handled AND we don't want original code to try to handle it.
+bool RockNRorMainInterface::EditorOnKeyPressF1(bool CTRL, bool SHIFT, bool ALT) {
+	if (!SHIFT) {
+		AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+		assert(settings != NULL);
+		if (!settings) { return false; }
+		settings->mouseActionType = AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES::CST_MAT_NORMAL;
+	}
+	else {
+		STRUCT_POSITION_INFO mousePosInfo = GetMousePosition();
+		AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)AOE_METHODS::GetUnitAtMousePosition(mousePosInfo.posX, mousePosInfo.posY, INTERACTION_MODES::CST_IM_LIVING_UNITS, true);
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+		if (player && player->IsCheckSumValid() && unit && unit->IsCheckSumValidForAUnitClass()) {
+			SelectOneUnit(player, unit, false);
+		}
+	}
+	return true;
+}
+
+
+// Returns true if event has been handled AND we don't want original code to try to handle it.
+bool RockNRorMainInterface::EditorOnKeyPressF2() {
+	if (ROCKNROR::crInfo.GetMainSelectedUnit(GetControlledPlayerStruct_Settings()) == NULL) {
+		float posX, posY;
+		GetGamePositionUnderMouse(&posX, &posY);
+		if ((posX > 0) && (posY > 0)) {
+			char buffer[100];
+			const char *text = localizationHandler.GetTranslation(CRLANG_ID_MOUSE_POSITION, "Mouse position");
+			sprintf_s(buffer, "%.70s: X=%4.2f, y=%4.2f", text, posX, posY);
+			ROCKNROR::UI::SimpleEditTextPopup::OpenCustomTextEditPopup(text, buffer, 280, 110, sizeof(buffer), NULL, true, false);
+		}
+	}
+	else {
+		ROCKNROR::UI::EditorEditUnitInfoPopup *popup = new ROCKNROR::UI::EditorEditUnitInfoPopup();
+		popup->CreateScreen(GetCurrentScreen());
+	}
+	return true;
+}
+
+
+// Returns true if event has been handled AND we don't want original code to try to handle it.
+bool RockNRorMainInterface::EditorOnKeyPressF3() {
+	ROCKNROR::UI::EditorScenarioInfoPopup *popup = new ROCKNROR::UI::EditorScenarioInfoPopup();
+	popup->CreateScreen(GetCurrentScreen());
+	return true;
+}
+
+
+// Returns true if event has been handled AND we don't want original code to try to handle it.
+bool RockNRorMainInterface::EditorOnKeyPressF4() {
+	ROCKNROR::UI::MapCopyPopup *popup = new ROCKNROR::UI::MapCopyPopup();
+	popup->SetBackgroundTheme(AOE_CONST_DRS::AoeScreenTheme::ScenarioEditorTheme);
+	popup->CreateScreen(GetCurrentScreen());
+	return true;
+}
+
+
+// Returns true if event has been handled AND we don't want original code to try to handle it.
+bool RockNRorMainInterface::EditorOnKeyPressTab(bool CTRL, bool SHIFT, bool ALT) {
+	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *currentUI = AOE_STRUCTURES::GetCurrentScreen();
+	assert(currentUI);
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings != NULL);
+	if (!settings) { return false; }
+	bool isInEditor = (settings->currentUIStatus == AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS::GSUS_IN_EDITOR);
+	assert(isInEditor);
+
+	AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *scEditorUI = (AOE_STRUCTURES::STRUCT_UI_SCENARIO_EDITOR_MAIN *)currentUI;
+	if (!scEditorUI->IsCheckSumValid()) {
+		return false;
+	}
+	if (scEditorUI->selectedTabIndex != SCENARIO_EDITOR_TABS::SET_UNITS) {
+		return false;
+	}
+
+	// Retrieve currently selected mode : settings->mouseActionType
+	int currentButtonIndex;
+	STRUCT_UI_BUTTON *buttonToSelect = NULL;
+	switch (settings->mouseActionType)
+	{
+	case MOUSE_ACTION_TYPES::CST_MAT_EDITOR_DELETE_UNIT:
+		currentButtonIndex = 1;
+		break;
+	case MOUSE_ACTION_TYPES::CST_MAT_EDITOR_MOVE_UNIT:
+		currentButtonIndex = 2;
+		break;
+	case MOUSE_ACTION_TYPES::CST_MAT_EDITOR_CHANGE_ORIENTATION:
+		currentButtonIndex = 3;
+		break;
+	case MOUSE_ACTION_TYPES::CST_MAT_EDITOR_SET_UNIT_LOCATION:
+	case MOUSE_ACTION_TYPES::CST_MAT_SET_WALLS:
+	default:
+		currentButtonIndex = 0; // Place units can be either "normal" place units or set walls (buildings with "multiple" flag ON)
+		break;
+	}
+
+	int newButtonIndex = SHIFT ? (currentButtonIndex - 1) : (currentButtonIndex + 1);
+	newButtonIndex = (4 + newButtonIndex) % 4;
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetControlledPlayerStruct_Settings();
+
+	switch (newButtonIndex)
+	{
+	case 0: // place
+		buttonToSelect = scEditorUI->unitsTabBtnPlaceUnit;
+#if GAMEVERSION == GAMEVERSIONID_ROR10c
+		_asm {
+			MOV EAX, 0x4920B0;
+			MOV ECX, scEditorUI;
+			CALL EAX;
+		}
+#endif
+		break;
+	case 1: // delete
+		buttonToSelect = scEditorUI->unitsTabBtnDeleteUnit;
+		if (player) {
+			AOE_METHODS::PLAYER::ClearSelectedUnits(player);
+		}
+		AOE_METHODS::SetMouseActionType(MOUSE_ACTION_TYPES::CST_MAT_EDITOR_DELETE_UNIT, 0);
+		break;
+	case 2: // move
+		buttonToSelect = scEditorUI->unitsTabBtnMoveUnit;
+		AOE_METHODS::SetMouseActionType(MOUSE_ACTION_TYPES::CST_MAT_EDITOR_MOVE_UNIT, 0);
+		break;
+	case 3: // rotate
+		buttonToSelect = scEditorUI->unitsTabBtnRotateUnit;
+		AOE_METHODS::SetMouseActionType(MOUSE_ACTION_TYPES::CST_MAT_EDITOR_CHANGE_ORIENTATION, 0);
+		break;
+	default:
+		break;
+	}
+
+	if (buttonToSelect && buttonToSelect->IsRadio()) {
+		AOE_METHODS::UI_BASE::SetSelectedRadioButton(buttonToSelect);
+	}
+
+	return true;
 }
 
 
