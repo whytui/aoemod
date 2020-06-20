@@ -96,7 +96,7 @@ namespace AOE_STRUCTURES
 		char dialogName[0x104]; // +FC. unknown size. "infoFile"
 		// 0x200
 		long int slpIdForPopupBackground1_200; // +200. "Info Id"
-		unsigned long int background; // +204.
+		STRUCT_SLP_INFO *background; // +204.
 		unsigned long int background2; // +208.
 		unsigned long int palette; // +20C
 		char unknownName_mcursors[0x104]; // +210.

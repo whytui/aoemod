@@ -9,6 +9,9 @@
 
 namespace AOE_METHODS {
 	// Frees all underlying info from a SLP INFO object, but does NOT free slpInfo itself.
+	// In practice, this calls SlpInfo's AOE destructor.
+	// Don't forget to AOE-Free the slpInfo itself
+	// Please see FreeSlpInfo method.
 	void FreeSlpInfoUnderlyingObjects(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo);
 
 
@@ -30,7 +33,8 @@ namespace AOE_METHODS {
 	// You need to alloc slpInfo first !
 	void InitSlpInfoFromDrs(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo, long int slpId, const char *shpName = "");
 
-	// Completely (properly) frees a slp info object
+	// Completely (properly) frees a slp info object : calls destructor AND frees slpInfo object itself
+	// Make sure NOT to use slpInfo pointer anymore afterwards (you better set it NULL)
 	void FreeSlpInfo(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo);
 
 }

@@ -1,10 +1,14 @@
 
 #include "../include/drsHandler.h"
+#include "../include/AOE_memory.h"
 
 
 namespace AOE_METHODS {
 
 	// Frees all underlying info from a SLP INFO object, but does NOT free slpInfo itself.
+	// In practice, this calls SlpInfo's AOE destructor.
+	// Don't forget to AOE-Free the slpInfo itself
+	// Please see FreeSlpInfo method.
 	void FreeSlpInfoUnderlyingObjects(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo) {
 		assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 		const unsigned long int callAddress = 0x49F840; // TODO : constant & other versions
@@ -99,17 +103,12 @@ namespace AOE_METHODS {
 	}
 
 
-	// Completely (properly) frees a slp info object
+	// Completely (properly) frees a slp info object : calls destructor AND frees slpInfo object itself
+	// Make sure NOT to use slpInfo pointer anymore afterwards (you better set it NULL)
 	void FreeSlpInfo(AOE_STRUCTURES::STRUCT_SLP_INFO *slpInfo) {
 		assert(GetBuildVersion() == AOE_FILE_VERSION::AOE_VERSION_ROR1_0C);
 		AOE_METHODS::FreeSlpInfoUnderlyingObjects(slpInfo);
-		const unsigned long int callHeapFree = 0x525FC2; // TODO : constant & other versions
-		_asm {
-			MOV ECX, slpInfo;
-			PUSH ECX;
-			CALL callHeapFree;
-			ADD ESP, 4;
-		}
+		AOEFree(slpInfo);
 	}
 
 }

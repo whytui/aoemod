@@ -1,4 +1,5 @@
 #include "../include/CustomTilesetInfo.h"
+#include "../include/drsHandler.h"
 
 namespace TILESET {
 
@@ -17,7 +18,8 @@ CustomTilesetInfo::CustomTilesetInfo() {
 
 CustomTilesetInfo::~CustomTilesetInfo() {
 	if (this->iconsForBuildings != NULL) {
-		AOEFree(this->iconsForBuildings);
+		AOE_METHODS::FreeSlpInfo(this->iconsForBuildings);
+		this->iconsForBuildings = NULL;
 	}
 }
 
