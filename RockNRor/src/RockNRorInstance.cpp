@@ -44,6 +44,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 		this->OneShotInit();
 		break;
 
+	case 0x004FE827:
+		this->OnInitGameSettingsAfterLoadDrs(REG_values);
+		break;
 	case 0x0041AEFA:
 		this->WMCloseMessageEntryPoint(REG_values);
 		break;
@@ -527,6 +530,32 @@ void RockNRorInstance::OneShotInit() {
 	
 	// Custom treatments for initialization
 	ROCKNROR::crCommand.OneShotInit();
+}
+
+
+// From 0x4FE820
+void RockNRorInstance::OnInitGameSettingsAfterLoadDrs(REG_BACKUP *REG_values) {
+	long int myESI= REG_values->ESI_val;
+	long int myEAX = 0;
+
+	// Before running more init treatments, detect DRS file resolution (X/Y screen sizes)
+	STRUCT_GAME_SETTINGS *settings = (STRUCT_GAME_SETTINGS *)myESI;
+	assert(settings && settings->IsCheckSumValid());
+	if (settings && settings->IsCheckSumValid()) {
+		ROCKNROR::crCommand.PatchExeForDrsScreenResolution(settings);
+	}
+
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		long int callAddr = 0x4166B0; // gameSettingsBase.setup()
+		_asm {
+			MOV ECX, myESI;
+			CALL callAddr;
+			MOV myEAX, EAX;
+		}
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+		REG_values->EAX_val = myEAX;
+	}
+
 }
 
 

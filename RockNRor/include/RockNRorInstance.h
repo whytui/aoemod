@@ -62,6 +62,7 @@ namespace ROCKNROR {
 		// Initializations done only once
 		void OneShotInit();
 
+		void OnInitGameSettingsAfterLoadDrs(REG_BACKUP *REG_values);
 		void WMCloseMessageEntryPoint(REG_BACKUP *REG_values);
 		void ReadTextFromChat(REG_BACKUP *REG_values);
 		void ActionOnGameStart(REG_BACKUP *REG_values);

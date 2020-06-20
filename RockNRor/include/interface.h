@@ -49,6 +49,7 @@ enum RockNRorIconId : long int {
 	CR_ICON_DEFEND_UNIT_OR_POSITION = 4
 };
 
+}
 
 // "DAT" button IDs (1-5 first row, 6-10 second row, etc)
 #define CST_FIRE_GALLEY_ORIGINAL_BUTTONDATID 5
@@ -61,12 +62,23 @@ enum RockNRorIconId : long int {
 #define CST_CUSTOM_BUTTONID_DEFEND_ZONE_OR_UNIT 8
 #define CST_CUSTOM_BUTTONID_OPEN_CLOSE_GATE 0
 
+namespace ROCKNROR {
+namespace PATCHER {
+;
 
 // Retrieve the highest resolution sizes (x/y)
 // Returns true if the variables were successfully updated
 bool GetHighestResolutionValues(long int &x, long int &y);
 
-// Manage Resolution
-void ChangeItfDRS_file(); // Change interfac.drs filename to manage custom resolutions
+// Returns true if game has been patched to use custom interfac.drs files (see CST_INTERFAC_DRS_CUSTOM_FILE_NAME)
+// This method makes necessary checks to know if it is relevant to modify interfac.drs filename to use our custom one
+// If the game uses a custom resolution and if they are available, makes so ROR will use custom interfac.drs files (see CST_INTERFAC_DRS_CUSTOM_FILE_NAME)
+bool ChangeItfDRS_file();
 
+// Patches ROR executable for a new (max) screen resolution
+// Returns true if successful
+bool ChangeExeResolution(long int sizeX, long int sizeY);
+
+
+}
 }

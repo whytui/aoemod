@@ -51,7 +51,7 @@ bool RockNRorCommand::CheckEnabledFeatures() {
 	fprintf_s(f, "\nThis detects if some features from this version of " MOD_NAME " will not work because you need to enable them with \"RockNRorAdmin\".\n");
 	
 	// Analyze EXE memory and check all necessary ROR_API calls are enabled.
-	bool RORAPIFullyInstalled = CheckRorApiSequencesAreInstalled(f, ROCKNROR::crInfo.configInfo.autoFixMissingFeatures);
+	bool RORAPIFullyInstalled = ROCKNROR::PATCHER::CheckRorApiSequencesAreInstalled(f, ROCKNROR::crInfo.configInfo.autoFixMissingFeatures);
 
 	fprintf_s(f, "\nEnd of checks.\n\nConfiguration:\n");
 	// General - not directly related to game
@@ -262,19 +262,19 @@ void RockNRorCommand::OneShotInit() {
 	this->LoadCustomLocalizationFiles();
 
 	// Manage interfac.drs file to use
-	AOE_CONST_DRS::ChangeItfDRS_file();
+	ROCKNROR::crInfo.usingCustomInterfaceDrsFile = ROCKNROR::PATCHER::ChangeItfDRS_file();
 
 	// Prepare custom DRS data
 	this->LoadCustomDrsFiles();
 
 	// Update "population limit getter" according to configuration
-	SetMaxPopulationGetterInSPGames(ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation);
+	ROCKNROR::PATCHER::SetMaxPopulationGetterInSPGames(ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation);
 
 	this->InitCustomVisibilityMap();
 
 #ifdef _DEBUG
 	if (CR_DEBUG::debugSerialization) {
-		SetDeserializationDebugChange(true);
+		ROCKNROR::PATCHER::SetDeserializationDebugChange(true);
 		WriteToFile("", CR_DEBUG::serializationLogFilename, false); // reset file content
 	}
 #endif
@@ -286,26 +286,26 @@ bool RockNRorCommand::CheckGameVersion() {
 	// If wrong game version, binary sequence won't match, IsBinaryChangeOn returns false in this case.
 	// Remark: do not use "ROR_API_VarDataUpdate" for this test because it's in data memory section and may change in run-time.
 	// "ROR_API_DLL_initialization" is safer because in text memory (not supposed to change at all).
-	return IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "ROR_API_DLL_initialization");
+	return ROCKNROR::PATCHER::IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "ROR_API_DLL_initialization");
 }
 
 
 // Reads game executable to determine if player struct is extended to use custom memory zone to host selected units
 void RockNRorCommand::ReadIfCustomSelectedUnitsMemoryZoneIsUsed() {
 	// TO DO: check all sequences ?
-	ROCKNROR::crInfo.hasCustomSelectedUnitsMemory = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_SELECTED_UNITS, "InitBuffer1");
+	ROCKNROR::crInfo.hasCustomSelectedUnitsMemory = ROCKNROR::PATCHER::IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_SELECTED_UNITS, "InitBuffer1");
 }
 
 // Reads game executable to determine if ManageAI is installed (does game use player->unused_customAIFlag ?)
 void RockNRorCommand::ReadIfManageAIIsOn() {
-	ROCKNROR::crInfo.hasManageAIFeatureON = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_MANAGE_AI, "Init_is_computer_for_AI_1");
+	ROCKNROR::crInfo.hasManageAIFeatureON = ROCKNROR::PATCHER::IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_MANAGE_AI, "Init_is_computer_for_AI_1");
 }
 
 
 // Reads game executable to determine if various sequences are installed or not
 void RockNRorCommand::ReadOtherSequencesStatus() {
-	ROCKNROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
-	ROCKNROR::crInfo.hasFixForBuildingStratElemUnitId = IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixUnitIdForInProgressBuilding");
+	ROCKNROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit = ROCKNROR::PATCHER::IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
+	ROCKNROR::crInfo.hasFixForBuildingStratElemUnitId = ROCKNROR::PATCHER::IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixUnitIdForInProgressBuilding");
 }
 
 // Load custom strings files
@@ -346,6 +346,31 @@ void RockNRorCommand::LoadCustomDrsFiles() {
 }
 
 
+// Automatically patch executable to adapt to DRS files screen resolution
+void RockNRorCommand::PatchExeForDrsScreenResolution(STRUCT_GAME_SETTINGS *settings) {
+	// Should we try to patch exe for resolution when using interfac.drs (standard) files ? why not, after all...
+	/*if (!ROCKNROR::crInfo.usingCustomInterfaceDrsFile) {
+		return;
+	}*/
+	if (!settings || !settings->IsCheckSumValid()) {
+		return;
+	}
+#pragma TODO("add setting to enable and choose slpid")
+	long int slpId = 50111; // We may use any SLP whose size is full screen size... 
+	// But it better be a SLP which is ALWAYS consistent with target screen size (some DRS may not be fully adapted to target resolution...)
+	STRUCT_SLP_INFO *screenSizedSlp = (STRUCT_SLP_INFO*)AOEAlloc(0x20);
+	AOE_METHODS::InitSlpInfoFromDrs(screenSizedSlp, slpId, "");
+	if (screenSizedSlp->slpFileData) {
+		long int drsScreenSizeX = screenSizedSlp->slpFileData->xSize;
+		long int drsScreenSizeY = screenSizedSlp->slpFileData->ySize;
+
+		ROCKNROR::PATCHER::ChangeExeResolution(drsScreenSizeX, drsScreenSizeY);
+	}
+	AOE_METHODS::FreeSlpInfo(screenSizedSlp);
+	screenSizedSlp = NULL;
+}
+
+
 // Initialize custom visibility map to replace "0x7D205C" data array
 void RockNRorCommand::InitCustomVisibilityMap() {
 	long int maxSize = ROCKNROR::crInfo.configInfo.maximumMapSize;
@@ -355,7 +380,7 @@ void RockNRorCommand::InitCustomVisibilityMap() {
 	this->pCustomVisibilityMap = AOEAllocZeroMemory(maxSize * maxSize, sizeof(DWORD));
 	unsigned long int customMapAddr = (unsigned long int)this->pCustomVisibilityMap;
 
-	BinarySeqDefSet *seqDefSet = aoeBinData.GetSeqDefSet(GetBuildVersion(), BINSEQ_CATEGORIES::BC_LARGER_MAPS);
+	BinarySeqDefSet *seqDefSet = ROCKNROR::PATCHER::aoeBinData.GetSeqDefSet(GetBuildVersion(), BINSEQ_CATEGORIES::BC_LARGER_MAPS);
 	if (!seqDefSet) {
 		return;
 	}
@@ -373,7 +398,7 @@ void RockNRorCommand::InitCustomVisibilityMap() {
 		BinarySeqDefinition *seqDef = seqDefSet->GetBinSeqDefinition(i);
 		if ((seqDef->GetFuncMeaning(0) == FUNC_MEANING::FM_NO_CHOICE) && (seqDef->GetVarType(0) == SEQ_VAR_TYPES::SVT_INT_4B)) {
 			std::string seqName = narrow(seqDef->GetSeqName());
-			unsigned long int currentValue = GetBinaryChangeVarValue(BC_LARGER_MAPS, seqName, 0);
+			unsigned long int currentValue = ROCKNROR::PATCHER::GetBinaryChangeVarValue(BC_LARGER_MAPS, seqName, 0);
 			unsigned long int newValue = customMapAddr;
 			unsigned long diff = currentValue - ADDR_MAP_VISIBILITY_INFO;
 			// Dirty to use -4 as unsigned long, but it works anyway
@@ -384,7 +409,7 @@ void RockNRorCommand::InitCustomVisibilityMap() {
 			case 0:
 			case 4:
 				newValue += diff;
-				SetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_LARGER_MAPS, seqName, 0, newValue);
+				ROCKNROR::PATCHER::SetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_LARGER_MAPS, seqName, 0, newValue);
 				break;
 			default:
 				// Should not occur
@@ -481,7 +506,7 @@ bool RockNRorCommand::ExecuteCommand(char *command, std::string &output) {
 			subCmd += 7;
 			int newMaxPop = atoi(subCmd);
 			if ((newMaxPop > 0) && (newMaxPop <= 255)) {
-				if (SetMaxPopulationGetterInSPGames(newMaxPop)) {
+				if (ROCKNROR::PATCHER::SetMaxPopulationGetterInSPGames(newMaxPop)) {
 					AOE_STRUCTURES::STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
 					if (global && global->IsCheckSumValid() && global->ptrPlayerStructPtrTable) {
 						for (int i = 0; i < global->playerTotalCount; i++) {

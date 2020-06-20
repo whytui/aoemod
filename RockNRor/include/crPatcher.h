@@ -13,6 +13,9 @@
 #include "RORProcessEditor.h"
 #include "traceMessage.h"
 
+namespace ROCKNROR {
+namespace PATCHER {
+
 static AOE_binData aoeBinData;
 
 // Returns false if sequences are not installed or if an error occurs.
@@ -32,3 +35,6 @@ bool SetBinaryChangeVarValue(BINSEQ_CATEGORIES binCategory, std::string sequence
 #ifdef _DEBUG
 bool SetDeserializationDebugChange(bool enable);
 #endif
+
+}
+}

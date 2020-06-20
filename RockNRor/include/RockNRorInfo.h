@@ -93,6 +93,7 @@ public:
 	// Own DRS objects
 	STRUCT_SLP_INFO rockNRorIcons; // RockNRor-specific icons
 	STRUCT_SLP_INFO rockNRorUnitShortcuts; // RockNRor-specific SLP for unit shortcuts (number displayed nearby unit selection white square)
+	bool usingCustomInterfaceDrsFile; // Set to true if game was patched to use custom files instead of interfac.drs (data and data2)
 
 	// Triggers
 	CR_TRIGGERS::crTriggerSet *triggerSet; // all information about custom triggers.

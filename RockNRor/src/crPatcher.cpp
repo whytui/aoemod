@@ -1,5 +1,8 @@
 #include "../include/crPatcher.h"
 
+namespace ROCKNROR {
+namespace PATCHER {
+
 bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 	try {
 		if (autoFix) {
@@ -217,3 +220,6 @@ bool SetDeserializationDebugChange(bool enable) {
 	}
 }
 #endif
+
+}
+}

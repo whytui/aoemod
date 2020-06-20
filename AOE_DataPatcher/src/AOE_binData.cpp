@@ -100,7 +100,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 144
+#define COUNT_ROR_API_10c 145
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 #define COUNT_larger_maps_10c 38
@@ -5576,6 +5576,16 @@ void AOE_binData::InitROR_API_10c() {
 		0x126258,
 		(0xFF, 0x74, 0x24, 0x04, 0xE8, 0xCD, 0xFF, 0xFF, 0xFF, 0x59),
 		(0xFF, 0x74, 0x24, 0x04, 0xE8, 0x13, 0x33, 0xEF, 0xFF, 0x59),
+		FM_OFF,
+		FM_ON
+	);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		InitGameSettingsAfterLoadDrs,
+		"Entry point when initializing game settings, after loading DRS files",
+		0xFE820,
+		(0x8B, 0xCE, 0xE8, 0x89, 0x7E, 0xF1, 0xFF, 0x85, 0xC0),
+		(0x8B, 0xCE, 0xE8, 0x4D, 0xAD, 0xF1, 0xFF, 0x85, 0xC0),
 		FM_OFF,
 		FM_ON
 	);

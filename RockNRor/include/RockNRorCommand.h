@@ -128,6 +128,9 @@ public:
 	// Load custom DRS files
 	void LoadCustomDrsFiles();
 
+	// Automatically patch executable to adapt to DRS files screen resolution
+	void PatchExeForDrsScreenResolution(STRUCT_GAME_SETTINGS *settings);
+
 	// Initialize custom visibility map to replace "0x7D205C" data array
 	void InitCustomVisibilityMap();
 	// Free Custom visibility map array, if any

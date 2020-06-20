@@ -18,7 +18,7 @@ RockNRorSettingsScreen::RockNRorSettingsScreen() : RnrScreenBase("RockNRor setti
 
 RockNRorSettingsScreen::~RockNRorSettingsScreen() {
 	if (needToApplyChanges) {
-		SetMaxPopulationGetterInSPGames(ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation);
+		ROCKNROR::PATCHER::SetMaxPopulationGetterInSPGames(ROCKNROR::crInfo.configInfo.singlePlayerMaxPopulation);
 	}
 }
 
@@ -670,7 +670,7 @@ bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	}
 	if (sender == this->btnResolution3) {
 		long int x, y;
-		if (AOE_CONST_DRS::GetHighestResolutionValues(x, y)) {
+		if (ROCKNROR::PATCHER::GetHighestResolutionValues(x, y)) {
 			this->ChangeResolution(x, y);
 		}
 		return true;

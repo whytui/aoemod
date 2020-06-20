@@ -17,6 +17,7 @@ RockNRorInfo::RockNRorInfo() {
 	this->hasRemovePlayerInitialAgeInScenarioInit = false;
 	this->ResetVariables();
 	this->rnrUIHelper = new ROCKNROR::UI::RnrUIHelper();
+	this->usingCustomInterfaceDrsFile = false;
 
 	// empires.dat variables are NOT game-dependent: do not initialize them in ResetVariables().
 	this->empiresDatCivCount = 0;
