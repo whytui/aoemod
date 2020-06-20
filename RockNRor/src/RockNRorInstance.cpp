@@ -541,7 +541,7 @@ void RockNRorInstance::OnInitGameSettingsAfterLoadDrs(REG_BACKUP *REG_values) {
 	// Before running more init treatments, detect DRS file resolution (X/Y screen sizes)
 	STRUCT_GAME_SETTINGS *settings = (STRUCT_GAME_SETTINGS *)myESI;
 	assert(settings && settings->IsCheckSumValid());
-	if (settings && settings->IsCheckSumValid()) {
+	if (settings && settings->IsCheckSumValid() && (ROCKNROR::crInfo.configInfo.autoDetectDrsScreenSizeSlpID > 0)) {
 		ROCKNROR::crCommand.PatchExeForDrsScreenResolution(settings);
 	}
 

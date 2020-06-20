@@ -28,25 +28,6 @@ bool ROCKNROR::PATCHER::ChangeItfDRS_file() {
 	logFileRes = fopen_s(&fileLog, MOD_NAME "\\" MOD_NAME ".log", "a+"); // appends (do not overwrite)
 	bool hasLog = (logFileRes == 0);
 
-	// Check if a custom resolution is enabled in game executable
-	DWORD processId = GetCurrentProcessId();
-	long int x, y = 0;
-	if (processId == 0) {
-		go_on = false;
-	} else {
-		x = ROCKNROR::PATCHER::GetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_RESOLUTION, "HSize1", 0);
-		y = ROCKNROR::PATCHER::GetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_RESOLUTION, "VSize1", 0);
-	}
-	if (!go_on && hasLog) {
-		fprintf_s(fileLog, "Could not check if game uses a custom resolution. Game will use interfac.drs file.\n");
-	}
-	if (go_on) {
-		/*go_on = ((x != 0x400) || (y != 0x300)); // 1024*768 is default (max) resolution
-		if (!go_on && hasLog) {
-			fprintf_s(fileLog, "The game is configured for standard resolution and will use interfac.drs file.\n");
-		}*/
-	}
-
 	// Check if custom DRS files are present
 	if (go_on) {
 		int res = fopen_s(&fileTest, "data\\" CST_INTERFAC_DRS_CUSTOM_FILE_NAME, "r"); // overwrite if already existing

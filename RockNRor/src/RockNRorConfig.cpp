@@ -19,6 +19,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->doNotUpdateVirtualMethods = false;
 	this->forceMPCompatibility = false;
 	this->autoFixMissingFeatures = false;
+	this->autoDetectDrsScreenSizeSlpID = 0; // Game default (disabled)
 	this->couldNotReadXMLConfig = false;
 	this->couldNotReadCivXMLConfig = false;
 	this->couldNotReadTilesetXMLConfig = false;
@@ -341,6 +342,19 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			}
 			if (!addedInList) {
 				delete drs;
+			}
+		}
+		if (elemName == "screenResolution") {
+			bool enable = XML_GetBoolElement(elem, "autodetect");
+			if (enable) {
+				callResult = elem->QueryIntAttribute("checkSlpId", &intValue);
+				if (callResult == TIXML_SUCCESS) { this->autoDetectDrsScreenSizeSlpID = intValue; }
+			}
+			else {
+				this->autoDetectDrsScreenSizeSlpID = 0;
+			}
+			if (this->autoDetectDrsScreenSizeSlpID < 0) {
+				this->autoDetectDrsScreenSizeSlpID = 0;
 			}
 		}
 		if (elemName == "languageTxtFile") {

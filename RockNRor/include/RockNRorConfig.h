@@ -139,6 +139,7 @@ public:
 	std::list<DrsFileToLoad*> customDrsFilesList; // List of DRS files to load at startup.
 	std::list<std::string> customStringsFilesList; // List of files containing custom localized strings.
 	std::string customEmpiresDatRelativePath; // Relative path to empires.dat file to use
+	long int autoDetectDrsScreenSizeSlpID; // SLP id to use to detect screen size from DRS interface file. Use 0 or negative to disable
 
 	// Random Games settings
 	bool noNeutralInitialDiplomacy; // If true, initial diplomacy for no-team players will be enemy, not neutral. AI won't become all allied against human.

@@ -11,7 +11,10 @@
 	<!-- *** Graphics -->
 	<!-- drsFile : you can add 0, 1 or n "drsFile" tags. folder=folder name under AOE root directory. filename=DRS file name.-->
 	<drsFile folder="RockNRor" filename="RockNRor.drs"/>
-	
+
+  <!-- screenResolution : set autodetect="true" to automatically set screen resolution according to DRS file graphics size -->
+  <screenResolution autodetect="true" checkSlpId="50111"/>
+  
 	<!-- *** Localization - language -->
 	<!-- languageTxtFile you can add 0, 1 or n tags. filename=relative path+filename of txt file containing localized strings to use in game 
 	String from such text files have priority on languagex.dll and language.dll files : you can add strings or modify existing ones.
