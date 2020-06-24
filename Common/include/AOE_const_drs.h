@@ -177,5 +177,12 @@ namespace AOE_CONST_DRS {
 		BLD_ICON_BALLISTA_TOWER = 49
 	};
 
+	// Interfac.drs shape IDs
+	enum AoeInterfaceShapeId : long int {
+		// "p" in a circle, used in welcome menu screen (bottom).
+		// This id (50406) is a shp in data/, but a slp in data2 (but both work)
+		ISI_SOUND_RECORDING_COPYRIGHT_SYMBOL = 50406
+	};
+
 }
 
