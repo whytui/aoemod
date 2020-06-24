@@ -29,11 +29,6 @@ void WxDrsEditor::ConstructorInit() {
 	this->filesButtonsArea = new wxBoxSizer(wxVERTICAL);
 	this->bottomArea = new wxBoxSizer(wxHORIZONTAL);
 
-	/*this->fileTypesGrid = new wxGrid(this, -1, wxPoint(), wxSize(500, 200));
-	this->fileTypesGrid->CreateGrid(5, 3, wxGrid::wxGridSelectCells);
-	this->fileTypesGrid->DisableDragRowSize(); // User can't resize rows
-	this->fileTypesGrid->SetColLabelValue(0, _T("File type"));*/
-
 	this->filesGrid = new wxGrid(this, -1, wxPoint(), wxSize(600, 480));
 	this->CreateFilesGrid();
 	// TODO: make read only by columns (for loop?)
@@ -59,7 +54,7 @@ void WxDrsEditor::ConstructorInit() {
 	Connect(ID_BtnSaveAsDrs, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnSaveAsDrs));
 	Connect(ID_BtnExitNoSave, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(WxDrsEditor::OnBtnExitNoSave));
 
-	this->filesGridArea->Add(this->filesGrid);
+	this->filesGridArea->Add(this->filesGrid, 1, wxEXPAND | wxALL);
 
 	this->filesButtonsArea->Add(this->btnAddFile);
 	this->filesButtonsArea->Add(this->btnModifyFileInfo);
@@ -70,14 +65,14 @@ void WxDrsEditor::ConstructorInit() {
 	this->filesButtonsArea->Add(this->btnMoveDown);
 	this->filesButtonsArea->Add(this->btnSortItemsById);
 
-	this->filesArea->Add(this->filesGridArea);
+	this->filesArea->Add(this->filesGridArea, 1, wxEXPAND | wxALL);
 	this->filesArea->Add(this->filesButtonsArea);
 
 	this->bottomArea->Add(this->btnSaveAsDrs);
 	this->bottomArea->Add(this->btnExitWithoutSaving);
 
 	this->MainArea->Add(this->TopArea);
-	this->MainArea->Add(this->filesArea);
+	this->MainArea->Add(this->filesArea, 1, wxALIGN_TOP | wxALIGN_LEFT | wxEXPAND);
 	this->MainArea->Add(this->bottomArea, 0, wxALIGN_CENTER);
 
 	this->SetSizer(this->MainArea);
