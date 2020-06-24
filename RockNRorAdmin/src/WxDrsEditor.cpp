@@ -16,6 +16,7 @@ WxDrsEditor::~WxDrsEditor() {
 
 
 void WxDrsEditor::ConstructorInit() {
+	this->SetIcon(wxICON(APPICON));
 	this->outputDrsFilename = "";
 	this->openDrsOutputError = "";
 	this->openDrsOutputInfo = "";

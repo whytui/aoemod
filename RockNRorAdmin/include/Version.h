@@ -16,3 +16,4 @@
 #define VER_PROGRAM_NAME  "RockNRor admin"
 #define VER_COPYRIGHT     "AOEModder"
 
+#define ROCKNRORADMIN_ICON_FILE "rnr_icon.ico"

@@ -41,6 +41,7 @@ WxMainForm::WxMainForm(const wxString& title, const wxPoint& pos, const wxSize& 
 		return;
 	}
 
+	this->SetIcon(wxICON(APPICON));
 	wxMenu *menuFile = new wxMenu;
 	menuFile->Append(ID_Select, "Select AOE/ROR file...\tCtrl-O", "Select Rise of Rome executable file");
 	menuFile->Append(ID_SelectFromReg, "Select AOE/ROR file from registry\tCtrl-R", "Automatically select file from registry information");
@@ -110,7 +111,7 @@ void WxMainForm::OnAbout(wxCommandEvent& event)
 	wxString txt;
 	txt = _T("RockNRor Admin ");
 	txt += VER_FILE_VERSION_STR;
-	txt += _T("\nThis program is free to use.\nIf you use this tool to develop your programs/mods, please clearly mention it and provide a link if possible.\nForum topic: http://aoe.heavengames.com/cgi-bin/aoecgi/display.cgi?action=ct&f=17,6454,,30");
+	txt += _T("\nThis program is free to use.\nIf you use this tool to develop your programs/mods, please clearly mention it and provide a link if possible.\nForum topic: http://aoe.heavengames.com/cgi-bin/aoecgi/display.cgi?action=ct&f=17,6454,,30\n\nRockNRor icon by Phatfish.");
 	wxMessageBox(txt, "About RockNRorAdmin", wxOK | wxICON_INFORMATION);
 }
 

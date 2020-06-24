@@ -2,7 +2,7 @@
 #include "../include/Version.h"
 
 // Icon for Task bar
-APPICON ICON "AoEX.ico"
+APPICON ICON ROCKNRORADMIN_ICON_FILE
 
 //
 // Version
