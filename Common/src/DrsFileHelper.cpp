@@ -436,6 +436,13 @@ bool DrsFileHelper::ReadDrsFile(string filename) {
 						this->infoLog += " shpCount=";
 						this->infoLog += to_string(shapeCount);
 
+						if (shapeCount > 100000) {
+							this->errorLog += "Too many shapes: ";
+							this->errorLog += to_string(shapeCount);
+							this->errorLog += "\r\n";
+							throw exception("Too many shapes");
+						}
+
 						// After header: frame header table
 						STRUCT_SLP_FRAME_HEADER *frameHeaderArray = (STRUCT_SLP_FRAME_HEADER *)malloc(sizeof(STRUCT_SLP_FRAME_HEADER) * shapeCount);
 						long int frHdrOffset = curObjOffset + sizeof(STRUCT_SLP_FILE_HEADER);
@@ -577,13 +584,13 @@ void DrsFileHelper::ExportToDrsFile(string filename) {
 
 
 		// Loop to fill drsTablesArray and drsTablesInfo (in memory)
-		long int drsTabIndex = 0;
+		long int drsTabIndex = 0; // index for "file type"
 		long int curFileIndexInGlobalArray = 0; // index, including ALL files from all types
 		long int curOffsetForFileRawData = offsetOfFirstFileData;
 		for (auto it_fs = this->currentDrsWorkingSet.begin(); it_fs != this->currentDrsWorkingSet.end(); it_fs++) {
 			DrsSetOfIncludedFiles *fileSet = *it_fs;
 			drsTablesArray[drsTabIndex].filesCount = fileSet->myFiles.size();
-			drsTablesArray[drsTabIndex].fileInfoOffsetInDrsFile = offsetOfFirstFileInfo + sizeof(STRUCT_DRS_TABLE_DATA)*drsTabIndex;
+			drsTablesArray[drsTabIndex].fileInfoOffsetInDrsFile = offsetOfFirstFileInfo + sizeof(STRUCT_DRS_TABLE_DATA)*curFileIndexInGlobalArray;
 			drsTablesArray[drsTabIndex].typeName = fileSet->fileType;
 
 			// Included files for current type...
