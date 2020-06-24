@@ -364,6 +364,9 @@ void RockNRorCommand::PatchExeForDrsScreenResolution(STRUCT_GAME_SETTINGS *setti
 		long int drsScreenSizeX = screenSizedSlp->slpFileData->xSize;
 		long int drsScreenSizeY = screenSizedSlp->slpFileData->ySize;
 
+		std::string msg = "Detected DRS screen resolution is ";
+		msg += std::to_string(drsScreenSizeX) + std::string(" * ") + std::to_string(drsScreenSizeY);
+		traceMessageHandler.WriteMessageNoNotification(msg);
 		ROCKNROR::PATCHER::ChangeExeResolution(drsScreenSizeX, drsScreenSizeY);
 	}
 	AOE_METHODS::FreeSlpInfo(screenSizedSlp);
