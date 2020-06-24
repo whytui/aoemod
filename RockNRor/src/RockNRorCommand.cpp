@@ -355,8 +355,8 @@ void RockNRorCommand::PatchExeForDrsScreenResolution(STRUCT_GAME_SETTINGS *setti
 	if (!settings || !settings->IsCheckSumValid()) {
 		return;
 	}
-#pragma TODO("add setting to enable and choose slpid")
-	long int slpId = ROCKNROR::crInfo.configInfo.autoDetectDrsScreenSizeSlpID; // We may use any SLP whose size is full screen size... 
+	long int slpId = ROCKNROR::crInfo.configInfo.autoDetectDrsScreenSizeSlpID;
+	// We may use any SLP whose size is full screen size... 
 	// But it better be a SLP which is ALWAYS consistent with target screen size (some DRS may not be fully adapted to target resolution...)
 	STRUCT_SLP_INFO *screenSizedSlp = (STRUCT_SLP_INFO*)AOEAlloc(0x20);
 	AOE_METHODS::InitSlpInfoFromDrs(screenSizedSlp, slpId, "");
