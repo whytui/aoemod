@@ -30,7 +30,7 @@ bool ROCKNROR::PATCHER::ChangeItfDRS_file() {
 
 	// Check if custom DRS files are present
 	if (go_on) {
-		int res = fopen_s(&fileTest, "data\\" CST_INTERFAC_DRS_CUSTOM_FILE_NAME, "r"); // overwrite if already existing
+		int res = fopen_s(&fileTest, "data\\" CST_INTERFAC_DRS_CUSTOM_FILE_NAME, "r");
 		if (res) {
 			// File does not exist (or is not readable by ROR process ?)
 			go_on = false;
@@ -41,8 +41,9 @@ bool ROCKNROR::PATCHER::ChangeItfDRS_file() {
 			fclose(fileTest);
 		}
 	}
-	if (go_on) {
-		int res = fopen_s(&fileTest, "data2\\" CST_INTERFAC_DRS_CUSTOM_FILE_NAME, "r"); // overwrite if already existing
+	bool requiresData2 = false; // true if we want data2/itf_custom.drs to be necessary
+	if (go_on && requiresData2) {
+		int res = fopen_s(&fileTest, "data2\\" CST_INTERFAC_DRS_CUSTOM_FILE_NAME, "r");
 		if (res) {
 			// File does not exist (or is not readable by ROR process ?)
 			go_on = false;
