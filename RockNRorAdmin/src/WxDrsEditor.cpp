@@ -1,5 +1,7 @@
 #include "WxDrsEditor.h"
 
+const wchar_t *WxDrsEditor::basicWindowTitle = _T("DRS editor");
+
 wxBEGIN_EVENT_TABLE(WxDrsEditor, wxFrame)
 wxEND_EVENT_TABLE()
 
@@ -131,6 +133,10 @@ void WxDrsEditor::SetGridCursorPosition(int rowIndex) {
 
 void WxDrsEditor::OpenDrsFile(string filename) {
 	if (filename.empty()) { return; }
+	std::wstring title = WxDrsEditor::basicWindowTitle;
+	title += _T(" - ");
+	title += widen(filename);
+	this->SetTitle(title);
 	bool res = this->drsFileHelper.ReadDrsFile(filename);
 	this->openDrsOutputInfo = this->drsFileHelper.GetLastInfos();
 	if (!res) {

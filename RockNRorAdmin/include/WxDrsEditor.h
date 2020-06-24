@@ -28,6 +28,8 @@ public:
 	//void SetMainUIObject(RockNRorAdmin_UI *value) { this->objAOE = value; }
 	//RockNRorAdmin_UI *GetMainUIObject() { return this->objAOE; }
 
+	static const wchar_t *basicWindowTitle;
+
 	void SetOutputDrsFilename(std::string filename);
 
 	std::string GetOpenDrsOutputInfo() const { return this->openDrsOutputInfo; }
