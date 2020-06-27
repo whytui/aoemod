@@ -13,7 +13,7 @@ namespace SYSTEM {
 	// rnrDataFilename is relative path with extension
 	bool serializeGameRockNRorData(const char *rnrDataFilename) {
 		FILE *file = nullptr;
-		errno_t e = fopen_s(&file, rnrDataFilename, "w");
+		errno_t e = fopen_s(&file, rnrDataFilename, "wb");
 		if ((e != 0) || !file) {
 			return false;
 		}
@@ -51,7 +51,7 @@ namespace SYSTEM {
 
 		// Proceed with deserialization
 		FILE *file = nullptr;
-		errno_t e = fopen_s(&file, rnrDataFilename, "r");
+		errno_t e = fopen_s(&file, rnrDataFilename, "rb");
 		if ((e != 0) || !file) {
 			return false;
 		}

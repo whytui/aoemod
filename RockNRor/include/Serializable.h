@@ -27,7 +27,7 @@ namespace SYSTEM {
 		// Returns written bytes, or -1 if failed
 		long int SerializeToFile(const char *outputFilePath) {
 			FILE *file = nullptr;
-			errno_t e = fopen_s(&file, outputFilePath, "w");
+			errno_t e = fopen_s(&file, outputFilePath, "wb");
 			if ((e != 0) || !file) {
 				return -1;
 			}
@@ -45,7 +45,7 @@ namespace SYSTEM {
 		// Returns true if successful
 		bool DeserializeFromFile(const char *inputFilePath) {
 			FILE *file = nullptr;
-			errno_t e = fopen_s(&file, inputFilePath, "r");
+			errno_t e = fopen_s(&file, inputFilePath, "rb");
 			if ((e != 0) || !file) {
 				return false;
 			}
