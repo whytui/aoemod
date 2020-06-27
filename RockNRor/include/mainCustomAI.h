@@ -43,10 +43,6 @@ namespace CUSTOM_AI {
 		long int Serialize(FILE *outputFile) const override;
 		bool Deserialize(FILE *inputFile) override;
 
-		// Quick and dirty way to backup info for game reload (must be same game at same game time)
-		CustomPlayerAI *GetBackupData() const;
-		void RestoreFromBackup(CustomPlayerAI *backup);
-
 		// Returns true if player is enabled, alive, has AI structure
 		bool IsValidAIPlayer();
 
