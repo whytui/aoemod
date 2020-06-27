@@ -338,7 +338,6 @@ long int CustomAIHandler::Serialize(FILE *outputFile) const {
 
 
 bool CustomAIHandler::Deserialize(FILE *inputFile) {
-	this->ResetAllInfo();
 	// Read saved "game time".
 	// This consistency check will almost always detect when deserializing data that does not match current game.
 	long int savedGameTime;
