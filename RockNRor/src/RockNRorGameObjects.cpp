@@ -20,13 +20,18 @@ bool UnitCustomInfo::CanBeRemoved() const {
 		return false;
 	}
 	// Is auto attack policy set to a custom value ?
-	if (!this->autoAttackPolicyIsSet) {
+	if (this->autoAttackPolicyIsSet) {
 		return false;
 	}
 	// Is "protect" policy set ?
 	if ((this->protectUnitId >= 0) || (this->protectPosX >= 0) || (this->protectPosY >= 0)) {
 		return false;
 	}
+	// Is a specific builder assigned ? (building in construction)
+	if (this->myMainBuilderId >= 0) {
+		return false;
+	}
+
 	// We checked all values, and none is set to a "useful" value.
 	return true;
 }
