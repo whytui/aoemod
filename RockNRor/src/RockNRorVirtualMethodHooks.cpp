@@ -633,6 +633,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TREE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_TREE]);
 
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_TRAINABLE, 0x54, UnitTransform, unitTransformCheckSumAndOriginalAddress[CHECKSUM_UNIT_TRAINABLE]); // unit->tranform only needs to be fixed for TRAINABLE class
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_BUILDING, 0x54, UnitTransform, unitTransformCheckSumAndOriginalAddress[CHECKSUM_UNIT_BUILDING]); // (building derives from trainable and needs the patch too)
 
 			// UnitDef
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNITDEF_BASE, 0x08, UnitDefApplySetEffect, unitDefApplySetEffectCheckSumAndOriginalAddress[CHECKSUM_UNITDEF_BASE]);
