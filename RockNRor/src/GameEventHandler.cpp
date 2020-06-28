@@ -315,5 +315,23 @@ bool PlayerNotifySeeUnit(STRUCT_PLAYER *player, long int myUnitId, long int seen
 }
 
 
+// Handler when a the construction of a building ends "successfully" (building is built)
+// Note : EntryPoint_GameSettingsNotifyEvent has been called just before with EVENT_BUILDING_COMPLETE
+void OnConstructionComplete(STRUCT_PLAYER *player, STRUCT_UNIT_BUILDING *building, long int stratElemCounter) {
+	assert(player && player->IsCheckSumValid());
+	assert(building && building->IsCheckSumValid()); // building : not any other unit class
+	if (!player || !player->IsCheckSumValid() || !building || !building->IsCheckSumValid()) {
+		return;
+	}
+	assert(building->unitDefinition && building->unitDefinition->IsCheckSumValidForAUnitClass());
+
+	short int bldDAT_ID = (short int)building->unitDefinition->DAT_ID1;
+	if (bldDAT_ID = CST_UNITID_MARKET) {
+		// Building a market (first one) enables farms. Triggers might want to disable this feature.
+		ROCKNROR::TRIGGER::ManageDisableUnitsForFarms(player);
+	}
+}
+
+
 }
 }

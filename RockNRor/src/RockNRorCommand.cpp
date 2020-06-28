@@ -4143,13 +4143,8 @@ bool RockNRorCommand::EntryPoint_GameSettingsNotifyEvent(AOE_CONST_INTERNAL::GAM
 	}
 
 	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_BUILDING_COMPLETE) {
-		short int bldDAT_ID = (short int)arg3;
-		if (bldDAT_ID = CST_UNITID_MARKET) {
-			// Building a market (first one) enables farms.
-			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
-			assert(player && player->IsCheckSumValid());
-			ROCKNROR::TRIGGER::ManageDisableUnitsForFarms(player);
-		}
+		// Remark : here we don't know unitId
+		// Using GameEventHandler's "OnConstructionComplete" method might be preferable for custom treatments.
 	}
 
 	if (eventId == AOE_CONST_INTERNAL::GAME_EVENT_TYPE::EVENT_FARM_DEPLETED) {

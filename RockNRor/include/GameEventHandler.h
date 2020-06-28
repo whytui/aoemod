@@ -44,5 +44,10 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 bool PlayerNotifySeeUnit(STRUCT_PLAYER *player, long int myUnitId, long int seenUnitId);
 
 
+// Handler when a the construction of a building ends "successfully" (building is built)
+// Note : EntryPoint_GameSettingsNotifyEvent has been called just before with EVENT_BUILDING_COMPLETE
+void OnConstructionComplete(STRUCT_PLAYER *player, STRUCT_UNIT_BUILDING *building, long int stratElemCounter);
+
+
 }
 }

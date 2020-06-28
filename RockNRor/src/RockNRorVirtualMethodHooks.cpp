@@ -55,6 +55,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 	std::map<unsigned long int, unsigned long int> playerProcessNotifyCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitTransformCheckSumAndOriginalAddress;
+	std::map<unsigned long int, unsigned long int> playerOnBuildCompleteCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitDefApplyAddEffectCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitDefApplySetEffectCheckSumAndOriginalAddress;
 	std::map<unsigned long int, unsigned long int> unitDefApplyMultEffectCheckSumAndOriginalAddress;
@@ -187,6 +188,29 @@ namespace VIRTUAL_METHOD_HOOKS {
 				CALL originalCallAddr;
 			}
 		}
+		RECORD_PERF_END(originalCallAddr);
+	}
+
+
+	// Event handler : a building construction just completed
+	// Note : EntryPoint_GameSettingsNotifyEvent has been called just before with EVENT_BUILDING_COMPLETE
+	void __stdcall PlayerOnBuildComplete(STRUCT_PLAYER *player, STRUCT_UNIT_BUILDING *building, long int stratElemCounter) {
+		unsigned long int originalCallAddr = playerOnBuildCompleteCheckSumAndOriginalAddress[player->checksum];
+		assert(player && player->IsCheckSumValid());
+		RECORD_PERF_BEGIN(originalCallAddr);
+		bool runStandardMethod = true;
+
+		ROCKNROR::GAME_EVENTS::OnConstructionComplete(player, building, stratElemCounter);
+
+		if (runStandardMethod && (originalCallAddr != 0)) {
+			_asm {
+				MOV ECX, player;
+				PUSH stratElemCounter;
+				PUSH building;
+				CALL originalCallAddr;
+			}
+		}
+
 		RECORD_PERF_END(originalCallAddr);
 	}
 
@@ -530,6 +554,7 @@ namespace VIRTUAL_METHOD_HOOKS {
 	DECLARE_VIRTUAL_METHOD_HANDLER(PlayerProcessNotify)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitAddPositionToTargetPosArray)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitTransform)
+	DECLARE_VIRTUAL_METHOD_HANDLER(PlayerOnBuildComplete)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitDefApplyAddEffect)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitDefApplyMultEffect)
 	DECLARE_VIRTUAL_METHOD_HANDLER(UnitDefApplySetEffect)
@@ -590,6 +615,10 @@ namespace VIRTUAL_METHOD_HOOKS {
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_PLAYER, 0xE8, PlayerProcessNotify, playerProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_PLAYER]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_RGE_PLAYER, 0xE8, PlayerProcessNotify, playerProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_RGE_PLAYER]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_GAIA_PLAYER, 0xE8, PlayerProcessNotify, playerProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_GAIA_PLAYER]);
+
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_PLAYER, 0x104, PlayerOnBuildComplete, playerOnBuildCompleteCheckSumAndOriginalAddress[CHECKSUM_PLAYER]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_RGE_PLAYER, 0x104, PlayerOnBuildComplete, playerOnBuildCompleteCheckSumAndOriginalAddress[CHECKSUM_RGE_PLAYER]);
+			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_GAIA_PLAYER, 0x104, PlayerOnBuildComplete, playerOnBuildCompleteCheckSumAndOriginalAddress[CHECKSUM_GAIA_PLAYER]);
 
 			// Unit
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_BASE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_BASE]);

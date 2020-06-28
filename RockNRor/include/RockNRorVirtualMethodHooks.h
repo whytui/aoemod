@@ -47,6 +47,10 @@ namespace VIRTUAL_METHOD_HOOKS {
 	// Returns void. This hook handles player's notifications (EDX+0xE8 call).
 	void __stdcall PlayerProcessNotify(STRUCT_PLAYER *player, STRUCT_UNIT_ACTIVITY_NOTIFY_EVENT notifyEvent);
 
+	// Event handler : a building construction just completed
+	// Note : EntryPoint_GameSettingsNotifyEvent has been called just before with EVENT_BUILDING_COMPLETE
+	void __stdcall PlayerOnBuildComplete(STRUCT_PLAYER *player, STRUCT_UNIT_BUILDING *building, long int stratElemCounter);
+
 	// unit.addPositionToTargetPosArray(pDword_posYXZ, arg2) for ALL unit classes (base+children). Method offset=+1BC.
 	// Returns 1 on success, 0 on failure
 	long int __stdcall UnitAddPositionToTargetPosArray(STRUCT_UNIT_BASE *unit, STRUCT_UNIT_TARGET_POS *targetPos, long int arg2);
