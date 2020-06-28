@@ -233,11 +233,15 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 			}
 			bool wasBuildingFarm = (buildingValid && (buildingUnit->unitDefinition->DAT_ID1 == CST_UNITID_FARM));
 			if (wasBuildingFarm) {
-				// Remark: if several villagers were building this farm, CanBuilderSwitchToFarmer won't detect them if "gather" commands have not been handled yet (which generally is the case)
+				// Remark: if several villagers were building this farm, we only want to transform one into a farmer.
+				// CanBuilderSwitchToFarmer uses UnitCustomInfo on the farm to promote ONE villager to become the farmer
+				// This is necessary because we have asynchronous behavior here ("gather" commands have generally not been handled yet)
 				if (AOE_STRUCTURES::CanBuilderSwitchToFarmer(villager, buildingUnit)) {
 					// This corresponds to the hack in 0x4B1A91
 					// Not really an issue here because it's always visible (cf builder), but technically CreateCmd_RightClick is not fully MP-compliant
 					GAME_COMMANDS::CreateCmd_RightClick(villager->unitInstanceId, buildingId, buildingUnit->positionX, buildingUnit->positionY);
+					// Too bad we CANNOT cleanup UnitCustomInfo.myMainBuilderId, because there might still be other builders to process (and to prevent from becoming farmers)
+					// The cleanup has to be done later, when all pending 'commands' and unit updates have been processed.
 				}
 			}
 			bool isHuman = !villager->ptrStructPlayer->IsAIActive(ROCKNROR::crInfo.hasManageAIFeatureON);
@@ -325,6 +329,7 @@ void OnConstructionComplete(STRUCT_PLAYER *player, STRUCT_UNIT_BUILDING *buildin
 	}
 	assert(building->unitDefinition && building->unitDefinition->IsCheckSumValidForAUnitClass());
 
+	// Unlocking farms... or not
 	short int bldDAT_ID = (short int)building->unitDefinition->DAT_ID1;
 	if (bldDAT_ID == CST_UNITID_MARKET) {
 		// Building a market (first one) enables farms. Triggers might want to disable this feature.
