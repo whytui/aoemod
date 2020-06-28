@@ -233,6 +233,19 @@ bool RockNRorGameObjects::RemoveUnitCustomInfoIfEmpty(long int unitId) {
 }
 
 
+// Remove all "empty" unit custom info objects
+void RockNRorGameObjects::RemoveAllEmptyUnitCustomInfos() {
+	for (auto it = this->unitCustomInfoList.begin(); it != this->unitCustomInfoList.end(); /*it++ inside the loop code*/) {
+		if ((*it)->CanBeRemoved()) {
+			it = this->unitCustomInfoList.erase(it);
+		}
+		else {
+			it++;
+		}
+	}
+}
+
+
 // Returns a FarmRebuildInfo pointer to matching element for given position
 // Returns NULL if not found.
 FarmRebuildInfo *RockNRorGameObjects::FindFarmRebuildInfo(float posX, float posY) {

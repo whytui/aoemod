@@ -93,6 +93,8 @@ public:
 	// Returns true if an element was removed
 	bool RemoveUnitCustomInfoIfEmpty(long int unitId);
 
+	void RemoveAllEmptyUnitCustomInfos();
+
 	// Returns a FarmRebuildInfo pointer to matching element for given position
 	// Returns NULL if not found.
 	FarmRebuildInfo *FindFarmRebuildInfo(float posX, float posY);
