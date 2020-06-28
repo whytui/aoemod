@@ -190,8 +190,8 @@ bool RockNRorMainInterface::GameAndEditor_OnKeyPress(long int pressedKey, bool C
 		AOE_STRUCTURES::STRUCT_UNIT_BASE *selectedUnit = ROCKNROR::crInfo.GetRelevantMainSelectedUnitPointer(player);
 		float x, y;
 		GetGamePositionUnderMouse(&x, &y);
-		bool expl = AOE_STRUCTURES::PLAYER::IsExploredForPlayer(player, (long)x, (long)y);
-		bool fogVis = AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(player, (long)x, (long)y);
+		bool expl = (x>=0) && (y>=0) && AOE_STRUCTURES::PLAYER::IsExploredForPlayer(player, (long)x, (long)y);
+		bool fogVis = (x >= 0) && (y >= 0) && AOE_STRUCTURES::PLAYER::IsFogVisibleForPlayer(player, (long)x, (long)y);
 
 		STRUCT_VISIBLE_UNITS_HELPER *m = *ROR_visibleUnitsHelper;
 		if (!m) { return false; }
