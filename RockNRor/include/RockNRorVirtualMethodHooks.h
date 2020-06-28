@@ -72,7 +72,6 @@ namespace VIRTUAL_METHOD_HOOKS {
 
 	// Transform a unit from its current "unit definition" to provided "unit definition" (EDX+0x54 call).
 	// Typically used to switch tasks (villagers) : in such case, newUnitDef is player's unitDefinition for the target unitDefId (repair_man, etc)
-	// Also used to assign a dedicated "unit definition" in conversion process: unit will have its own "unitDefinition" (with its own specs)
 	// This is only allowed if unit.status <= 2 (ready) because BASE method fails if status>2 (unit->unitDefinition is NOT updated).
 	void __stdcall UnitTransform(STRUCT_UNIT_BASE *unit, STRUCT_UNITDEF_BASE *newUnitDef);
 
