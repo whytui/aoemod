@@ -326,7 +326,7 @@ void OnConstructionComplete(STRUCT_PLAYER *player, STRUCT_UNIT_BUILDING *buildin
 	assert(building->unitDefinition && building->unitDefinition->IsCheckSumValidForAUnitClass());
 
 	short int bldDAT_ID = (short int)building->unitDefinition->DAT_ID1;
-	if (bldDAT_ID = CST_UNITID_MARKET) {
+	if (bldDAT_ID == CST_UNITID_MARKET) {
 		// Building a market (first one) enables farms. Triggers might want to disable this feature.
 		ROCKNROR::TRIGGER::ManageDisableUnitsForFarms(player);
 	}
