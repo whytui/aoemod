@@ -223,6 +223,13 @@ ACTIVITY_EVENT_HANDLER_RESULT CivilianActivityProcessNotify(STRUCT_UNIT_ACTIVITY
 			STRUCT_UNIT_BUILDING *buildingUnit = NULL;
 			if (buildingValid) {
 				buildingUnit = (STRUCT_UNIT_BUILDING *)buildingUnitGeneric;
+				if (buildingUnit->unitStatus == 0) {
+					// Construction is not finished yet. Maybe constructor was stuck on its way, 
+					// happens frequently when several villagers are assigned to a construction and arrive at the same spot to start building
+					// Leave original code perform a "retry"
+					outExecStandardCode = true;
+					return ACTIVITY_EVENT_HANDLER_RESULT::EVT_RES_EVENT_PROCESSED_NO_ACTION;
+				}
 			}
 			bool wasBuildingFarm = (buildingValid && (buildingUnit->unitDefinition->DAT_ID1 == CST_UNITID_FARM));
 			if (wasBuildingFarm) {
