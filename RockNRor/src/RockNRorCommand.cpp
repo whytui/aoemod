@@ -2383,6 +2383,9 @@ void RockNRorCommand::OnPlayerRemoveUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, 
 			}
 		}
 	}
+	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && unitIsDying) {
+		ROCKNROR::crInfo.myGameObjects.RemoveUnitCustomInfo(unit->unitInstanceId);
+	}
 
 	// Triggers
 	if (isInGame && unit && unit->IsCheckSumValidForAUnitClass() && !isTempUnit &&

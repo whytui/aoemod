@@ -97,9 +97,6 @@ namespace SYSTEM {
 			return false;
 		}
 
-		// Cleanup unit custom info
-		ROCKNROR::crInfo.myGameObjects.RemoveAllEmptyUnitCustomInfos();
-
 		std::string stringSaveFilenameRnr = std::string(settings->commandLineInfo->savegameFolder) + 
 			saveGameFileName + CONST_RNR_SAVEGAME_EXTENSION;
 		const char *saveFilenameRnr = stringSaveFilenameRnr.c_str();
