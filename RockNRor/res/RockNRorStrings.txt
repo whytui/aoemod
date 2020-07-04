@@ -375,5 +375,3 @@ Stop defending current position/unit
 Right-click to define the unit or the position to protect
 [42125]
 Make main unit for keyboard shortcut selection
-[42177] // (n) units
-units

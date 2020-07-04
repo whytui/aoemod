@@ -645,19 +645,17 @@ bool RockNRorMainInterface::EditorOnKeyPressF2() {
 				if (tile) {
 					int altitude = tile->terrainData.GetAltitude();
 					int terrainId = tile->terrainData.GetTerrainId();
-					sprintf_s(addInfoBuffer, "%.30s : %d\n%.20s : %d (%.13s)\n%d %.15s",
+					sprintf_s(addInfoBuffer, "%.30s : %d\n%.20s : %d (%.13s)",
 						localizationHandler.GetTranslation(CRLANG_ID_ELEVATION, "Elevation height"),
 						altitude, 
 						localizationHandler.GetTranslation(CRLANG_ID_TERRAINID, "Terrain ID"),
 						terrainId,
-						((terrainId >= 0) && (terrainId < mapInfo->terrainCount)) ? mapInfo->terrainDefinitions[terrainId].terrainName : "",
-						tile->unitsOnThisTileCount,
-						localizationHandler.GetTranslation(CRLANG_ID_UNITS, "units")
+						((terrainId >= 0) && (terrainId < mapInfo->terrainCount)) ? mapInfo->terrainDefinitions[terrainId].terrainName : ""
 					);
 				}
 			}
 			sprintf_s(buffer, "%.70s: X=%4.2f, y=%4.2f\n%.60s", mousePosText, posX, posY, addInfoBuffer);
-			ROCKNROR::UI::SimpleEditTextPopup::OpenCustomTextEditPopup(mousePosText, buffer, 300, 150, sizeof(buffer), NULL, true, false);
+			ROCKNROR::UI::SimpleEditTextPopup::OpenCustomTextEditPopup(mousePosText, buffer, 300, 130, sizeof(buffer), NULL, true, false);
 		}
 	}
 	else {
