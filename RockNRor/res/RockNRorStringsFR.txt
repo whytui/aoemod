@@ -383,3 +383,5 @@ Ne plus défendre la position/unité
 Cliquez avec le bouton droit pour définir l'unité ou l'emplacement à protéger
 [42125] // Make main unit for keyboard shortcut selection
 Rendre prioritaire pour le raccourci clavier
+[42177] // (n) units
+unités
