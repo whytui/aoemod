@@ -438,19 +438,21 @@ void WxMainForm::InstallRockNRor() {
 		if (userWantsDedicatedExe) {
 			std::string destShortcut = getDesktopDirectory();
 			if (!destShortcut.empty()) {
-				destShortcut += std::string("\\test.lnk");
+				destShortcut += std::string("\\Play RockNRor.lnk");
 				HRESULT hres = CreateWindowsShortcut(ROR_filename.c_str(), destShortcut.c_str(), _T("RockNRor mod for age of empires"));
 			}
 			std::wstring msg = _T("To run RockNRor mod, please run ");
 			msg += ROR_filename;
 			if (!destShortcut.empty()) {
 				msg += _T("\nA shortcut has been created on the desktop to run RockNRor.\n");
+				msg += _T("\nIf it does not work properly, try to run it in Compatibility Mode (e.g. Windows XP SP2).\n");
 			}
 			msg += _T("You can still run original game with the original EXE/shortcut.");
 			wxMessageBox(msg.c_str(), _T("RockNRor"));
 		}
 	}
 	SetStatusText(_T("End of RockNRor installation process"));
+	this->e_api->CloseEmpiresXFile();
 }
 
 
