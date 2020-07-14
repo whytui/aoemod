@@ -4,6 +4,7 @@
 #include <mystrings.h>
 #include <FileSelector.h>
 #include <customResolution.h>
+#include "basicFilesHandling.h"
 
 #pragma once
 

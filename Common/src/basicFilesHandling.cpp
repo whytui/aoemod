@@ -91,3 +91,14 @@ bool WriteToFile(const char *text, const char *filename, bool append) {
 	return true;
 }
 
+
+// Remove Readonly flag at filesystem level. Returns true if successful.
+bool RemoveReadOnlyFlag(const wchar_t *filename) {
+	DWORD dwAttrs = GetFileAttributes(filename);
+	if (dwAttrs == INVALID_FILE_ATTRIBUTES) {
+		return false;
+	}
+	dwAttrs = dwAttrs & (~FILE_ATTRIBUTE_READONLY); // Remove readonly flag, preserve the rest
+	return (SetFileAttributes(filename, dwAttrs) != 0); // SetFileAttributes succeeds <=> returns non-zero
+}
+

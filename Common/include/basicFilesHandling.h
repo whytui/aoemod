@@ -23,3 +23,6 @@ bool WriteToFile(const std::string &text, const std::string &filename, bool appe
 // Might be slower than overload with std::string becaues of strlen.
 // Returns true if successful
 bool WriteToFile(const char *text, const char *filename, bool append);
+
+// Remove Readonly flag at filesystem level. Returns true if successful.
+bool RemoveReadOnlyFlag(const wchar_t *filename);

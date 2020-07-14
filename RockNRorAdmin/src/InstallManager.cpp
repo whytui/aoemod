@@ -71,12 +71,18 @@ bool installRockNRorFiles(std::wstring sourceDirectory, std::wstring targetExeFu
 	std::wstring copyErrors = _T("");
 
 	// Copy ROR_API files
+	if (overwriteFiles) {
+		RemoveReadOnlyFlag(destRORAPI_DLL.c_str()); // CopyFile fails if target file exists and is readonly => remove the flag
+	}
 	singleCopySuccess = CopyFile(srcRORAPI_DLL.c_str(), destRORAPI_DLL.c_str(), !overwriteFiles);
 	if (!singleCopySuccess) {
 		copyFailed = copyFailed || (overwriteFiles || !hasDestRORAPI_DLL);
 	} else {
 		message = _T("Copied ") + destRORAPI_DLL + _T("\n");
 		logs += message;
+	}
+	if (overwriteFiles) {
+		RemoveReadOnlyFlag(destRORAPI_CONF.c_str()); // CopyFile fails if target file exists and is readonly => remove the flag
 	}
 	singleCopySuccess = CopyFile(srcRORAPI_CONF.c_str(), destRORAPI_CONF.c_str(), !overwriteFiles);
 	if (!singleCopySuccess) {
@@ -86,6 +92,9 @@ bool installRockNRorFiles(std::wstring sourceDirectory, std::wstring targetExeFu
 		logs += message;
 	}
 	// Copy wndmode dll file
+	if (overwriteFiles) {
+		RemoveReadOnlyFlag(destWNDMODE_DLL.c_str()); // CopyFile fails if target file exists and is readonly => remove the flag
+	}
 	singleCopySuccess = CopyFile(srcWNDMODE_DLL.c_str(), destWNDMODE_DLL.c_str(), !overwriteFiles);
 	if (!singleCopySuccess) {
 		copyFailed = copyFailed || (overwriteFiles || !hasDestWNDMODE_DLL);
@@ -108,6 +117,9 @@ bool installRockNRorFiles(std::wstring sourceDirectory, std::wstring targetExeFu
 		if (overwriteFiles || !CheckFileExistence(filename)) {
 			std::wstring sourceFile = srcRockNRor_dir + std::wstring(_T("\\")) + filename;
 			std::wstring targetFile = destRockNRor_dir + std::wstring(_T("\\")) + filename;
+			if (overwriteFiles) {
+				RemoveReadOnlyFlag(targetFile.c_str()); // CopyFile fails if target file exists and is readonly => remove the flag
+			}
 			singleCopySuccess = CopyFile(sourceFile.c_str(), targetFile.c_str(), !overwriteFiles);
 			if (!singleCopySuccess) {
 				copyFailed = true;
@@ -149,6 +161,9 @@ bool installResolutionFiles(std::wstring data_DRS_fullPath, std::wstring data2_D
 		singleCopySuccess = true;
 	} else {
 		// Warning for CopyFile: last param is failIfExists (opposite of overwrite). Return value = is_success (0=failed)
+		if (overWriteFiles) {
+			RemoveReadOnlyFlag(target.c_str()); // CopyFile fails if target file exists and is readonly => remove the flag
+		}
 		singleCopySuccess = CopyFile(data_DRS_fullPath.c_str(), target.c_str(), !overWriteFiles);
 	}
 	if (!singleCopySuccess) {
@@ -163,6 +178,9 @@ bool installResolutionFiles(std::wstring data_DRS_fullPath, std::wstring data2_D
 		logs += _T("Warning: source and target files are identical (data2).\n");
 		singleCopySuccess = true;
 	} else {
+		if (overWriteFiles) {
+			RemoveReadOnlyFlag(target.c_str()); // CopyFile fails if target file exists and is readonly => remove the flag
+		}
 		singleCopySuccess = CopyFile(data2_DRS_fullPath.c_str(), target.c_str(), !overWriteFiles);
 	}
 	if (!singleCopySuccess) {
