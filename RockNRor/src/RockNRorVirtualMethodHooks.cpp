@@ -616,8 +616,8 @@ namespace VIRTUAL_METHOD_HOOKS {
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_GAIA_PLAYER, 0xE8, PlayerProcessNotify, playerProcessNotifyCheckSumAndOriginalAddress[CHECKSUM_GAIA_PLAYER]);
 
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_PLAYER, 0x104, PlayerOnBuildComplete, playerOnBuildCompleteCheckSumAndOriginalAddress[CHECKSUM_PLAYER]);
-			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_RGE_PLAYER, 0x104, PlayerOnBuildComplete, playerOnBuildCompleteCheckSumAndOriginalAddress[CHECKSUM_RGE_PLAYER]);
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_GAIA_PLAYER, 0x104, PlayerOnBuildComplete, playerOnBuildCompleteCheckSumAndOriginalAddress[CHECKSUM_GAIA_PLAYER]);
+			// Do not install "PlayerOnBuildComplete" for CHECKSUM_RGE_PLAYER as this (base) class does NOT have this method
 
 			// Unit
 			INSTALL_VIRTUAL_METHOD_PATCH(CHECKSUM_UNIT_BASE, 0x1BC, UnitAddPositionToTargetPosArray, unitAddPositionToTargetPosArrayCheckSumAndOriginalAddress[CHECKSUM_UNIT_BASE]);

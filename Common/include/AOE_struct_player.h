@@ -157,7 +157,7 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_PLAYER 0x00549A44 // Normal player (non-gaia)
 #define CHECKSUM_GAIA_PLAYER 0x00549B80 // ccor=0x4F71C0
 	// PLAYER. Constructor=0x4EFB00 : ccor(globalStruct, civDef, numPlayer, playerName, civId, isComputer, arg7, arg8, arg9, arg10)
-	// RGE_Player ccor=0x45B410, 0x45B6A0
+	// RGE_Player ccor=0x45B410, 0x45B6A0, last virtual method=+0xF4
 	// Standard player struct sizes are 0x85C (gaia) or 0x84C (non-gaia).
 	// If selected units features is installed, size is increased to host selected unit pointers at the end of the structure.
 	// Size will depend on how many maximum selected units it has been set.
@@ -198,9 +198,10 @@ namespace AOE_STRUCTURES {
 	// +0xE8 = player.notifyEvent(unitId, arg2, eventId, arg4, arg5, arg6). Eg. 0x4F3350. Args: see NotifyEvent struct.
 	// +0xEC = player.pseudoScoreTxtInfo?
 	// +0xF0 = player.createScoreHeader? (from file?)
-	// +0xF4 = player.createScoreHeader?
+	// +0xF4 (last for RGE_Player) = player.createScoreHeader?
 	// +0xFC = player.startConstruction(villagerUnitId, DATID_bld, f_posY, f_posX, stratElemId)
-	// +0x128 = player.handleEventInAI(...)
+	// +0x104 = player.onBuildComplete(ptrBuilding, stratElemCounter)
+	// +0x128 (last for Player/Gaia_player) = player.handleEventInAI(...)
 	class STRUCT_PLAYER {
 	public:
 		unsigned long int checksum; // 0x00549B80 or 0x00549A44 (normal player) or 0x00544D18 (parent class RGE_player)
