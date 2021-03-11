@@ -40,6 +40,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->saveRockNRorData = false; // Game default
 	this->noDockInMostlyLandMaps = false; // Default: dock is always available.
 	this->fixVillagerWorkRates = false; // Default: keep empires.dat values
+	this->addMissingGaiaVillagerUnits = false; // Defaul: keep empires.dat configuration.
 	this->noWalls = false; // Default
 	this->useGatesFeature = false; // Default
 	this->unitResourceAmountAlligator = 0; // 0 = ignore and use default
@@ -477,6 +478,9 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		if (elemName == "fixVillagerWorkRates") {
 			this->fixVillagerWorkRates = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "addMissingGaiaVillagerUnits") {
+			this->addMissingGaiaVillagerUnits = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "resourceAmounts") {
 			callResult = elem->QueryIntAttribute("alligator", &intValue);

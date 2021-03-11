@@ -157,6 +157,7 @@ public:
 
 	// Related to empires.dat loaded data
 	bool fixVillagerWorkRates;
+	bool addMissingGaiaVillagerUnits;
 	bool noWalls;
 	bool noDockInMostlyLandMaps;
 	bool useGatesFeature; // Set to false to disable GATES handling. If true, class=wall units with a task swap group can be opened/closed (swap unit definition)

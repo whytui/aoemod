@@ -1404,6 +1404,33 @@ void RockNRorCommand::OnGameStart() {
 		}
 	}
 
+	// Create missing Gaia unit classes (copy from player1)
+	AOE_STRUCTURES::STRUCT_PLAYER *gaia = global->GetPlayerStruct(0);
+	AOE_STRUCTURES::STRUCT_PLAYER *player1 = global->GetPlayerStruct(1);
+	if (gaia && gaia->IsCheckSumValid() && ROCKNROR::crInfo.configInfo.addMissingGaiaVillagerUnits) {
+		short int unitDefIds[] = { AOE_CONST_FUNC::CST_UNITID_BUILDER, AOE_CONST_FUNC::CST_UNITID_EXPLORER,
+			AOE_CONST_FUNC::CST_UNITID_FARMER, AOE_CONST_FUNC::CST_UNITID_FISHERMAN,
+			AOE_CONST_FUNC::CST_UNITID_FORAGER, AOE_CONST_FUNC::CST_UNITID_HUNTER,
+			AOE_CONST_FUNC::CST_UNITID_LUMBERJACK, AOE_CONST_FUNC::CST_UNITID_MAN, AOE_CONST_FUNC::CST_UNITID_MAN2,
+			AOE_CONST_FUNC::CST_UNITID_MINERGOLD, AOE_CONST_FUNC::CST_UNITID_MINERSTONE,
+			AOE_CONST_FUNC::CST_UNITID_REPAIRMAN
+		};
+		for each (long int unitDefId in unitDefIds) {
+			// If the ID is in range and does not already exist, then create it
+			if ((unitDefId < gaia->structDefUnitArraySize) && (gaia->GetUnitDefBase(unitDefId) == NULL)) {
+				// Create a copy (new object with all necessary dependencies) of unit definition, 
+				// so when gaia player destructor runs, it will free it just fine, like other unit definitions
+				STRUCT_UNITDEF_BASE *newUnitDef = AOE_STRUCTURES::CopyUnitDefToNewUsingGoodClass(player1->GetUnitDefBase(unitDefId));
+				if (newUnitDef) {
+					std::string msg = "Added unit definition for gaia : unitDefId #";
+					msg += std::to_string(unitDefId);
+					traceMessageHandler.WriteMessageNoNotification(msg.c_str());
+					gaia->ptrStructDefUnitTable[unitDefId] = newUnitDef;
+				}
+			}
+		}
+	}
+
 	// Initialize custom AI objects (technical init, before loading RockNRor savegame data)
 	CUSTOM_AI::customAIHandler.GameStartInit();
 

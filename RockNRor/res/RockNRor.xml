@@ -115,8 +115,12 @@
 	<!-- *** EMPIRES.DAT related -->
 	<!-- fixVillagerWorkRates : if enabled, automatically fix erroneous work rate values for villagers in empires.dat-loaded data -->
 	<fixVillagerWorkRates enable="1"/>
-	
-	<!-- resourceAmounts : defines amount of resources in basic resource units (mines, etc). Use this to override empires.dat value
+
+  <!-- addMissingGaiaVillagerUnits : if enabled, automatically add the missing villager units to GAIA player
+  So it's possible to build, gather resources, etc when playing with GAIA player -->
+  <addMissingGaiaVillagerUnits enable="1"/>
+
+  <!-- resourceAmounts : defines amount of resources in basic resource units (mines, etc). Use this to override empires.dat value
 	0 (or negative) values are ignored (so that empires.dat values are used = default behaviour) -->
 	<resourceAmounts goldMine="0" stoneMine="0" berryBush="0" gazelle="0" elephant="0" lion="0" alligator="0" tree="0" forestTree="0" fish="0"/>
 	

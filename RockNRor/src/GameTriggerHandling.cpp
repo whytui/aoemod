@@ -61,8 +61,8 @@ void Trigger_JustDoAction(CR_TRIGGERS::crTrigger *trigger) {
 		// Not MP-compatible (to confirm)
 		actionPlayerId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_PLAYER_ID, -1);
 		long int actionResearchId = trigger->GetParameterValue(CR_TRIGGERS::KW_ACTION_RESEARCH_ID, -1);
-		// This feature is not available for invalid players, nor for gaia player.
-		if ((actionPlayerId <= 0) || (actionPlayerId >= global->playerTotalCount) || (actionResearchId < 0)) { return; }
+		// This feature is not available for invalid players.
+		if ((actionPlayerId < 0) || (actionPlayerId >= global->playerTotalCount) || (actionResearchId < 0)) { return; }
 		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(actionPlayerId);
 		if (player) {
 			AOE_STRUCTURES::STRUCT_PLAYER_RESEARCH_INFO *pr = player->ptrResearchesStruct;
