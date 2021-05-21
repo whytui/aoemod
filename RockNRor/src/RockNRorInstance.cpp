@@ -2048,10 +2048,8 @@ void RockNRorInstance::ManageRuinsCount(REG_BACKUP *REG_values) {
 
 
 void RockNRorInstance::ManageCivIdControlAfterGameSettingsSelection(REG_BACKUP *REG_values) {
-	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
-		return;
-	}
 	REG_values->fixesForGameEXECompatibilityAreDone = true;
+
 	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		ChangeReturnAddress(REG_values, 0x00503451);
 	}

@@ -1160,6 +1160,10 @@ bool ApplyTechnologyForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, long int te
 
 
 // Apply a research for a player (if possible).
+// Not allowed if research status is CST_RESEARCH_STATUS_DISABLED or CST_RESEARCH_STATUS_DONE_OR_INVALID
+// Works as expected (= like if player actually clicked the corresponding button...) if research status is CST_RESEARCH_STATUS_AVAILABLE
+// Works with side effects if research status is : CST_RESEARCH_STATUS_WAITING_REQUIREMENT : other researches might not become available,
+// ... tech tree might be somewhat stuck
 // Return true if successful
 bool ApplyResearchForPlayer(AOE_STRUCTURES::STRUCT_PLAYER *player, short int research_id) {
 	if (!player || !player->IsCheckSumValid() || (!player->ptrResearchesStruct)) { return false; }

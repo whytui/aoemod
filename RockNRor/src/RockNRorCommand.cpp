@@ -1415,7 +1415,7 @@ void RockNRorCommand::OnGameStart() {
 			AOE_CONST_FUNC::CST_UNITID_MINERGOLD, AOE_CONST_FUNC::CST_UNITID_MINERSTONE,
 			AOE_CONST_FUNC::CST_UNITID_REPAIRMAN
 		};
-		for each (long int unitDefId in unitDefIds) {
+		for each (short int unitDefId in unitDefIds) {
 			// If the ID is in range and does not already exist, then create it
 			if ((unitDefId < gaia->structDefUnitArraySize) && (gaia->GetUnitDefBase(unitDefId) == NULL)) {
 				// Create a copy (new object with all necessary dependencies) of unit definition, 

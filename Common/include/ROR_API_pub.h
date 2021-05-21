@@ -32,7 +32,7 @@ typedef struct{
 	// This is crucial to avoid doing twice original "replaced" code
 	// Those treatments depend on how the call to ROR_API has been done (sometimes it uses unused code (NOPs), 
 	//  sometimes it overwrites existing code, so mising code has to be done in a ROR_API plug-in instead (or the game will crash).
-	// It can consists in : change some "REG_BACKUP" fileds value, make an asm call to a ROR method, or even change return address according to conditions. , etc
+	// It can consists in : change some "REG_BACKUP" fields value, make an asm call to a ROR method, or even change return address according to conditions. , etc
 	// If you're not sure, don't set this.
 	bool fixesForGameEXECompatibilityAreDone;
 } REG_BACKUP;
