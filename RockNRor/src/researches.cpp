@@ -201,7 +201,7 @@ bool HasWoodWorkingAndImproveRangeEffects(STRUCT_TECH_DEF *techDef) {
 		}
 		if (techEffect->IsAttributeModifier() &&
 			(techEffect->effectAttribute == TECH_UNIT_ATTRIBUTES::TUA_LOS)) {
-			foundRangeEffectCount++;
+			foundLOSEffectCount++;
 		}
 	}
 	// True if improves lumberjack (at least work rate or capacity) and improves LOS/range for at least 2 units or 2 classes
