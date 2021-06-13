@@ -491,7 +491,13 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 			crResInfo->rawDisableProbability = religionProba;
 			crResInfo->disableWeight = weightForReligion;
 			if (crResInfo->researchDetail->requiredAge < AOE_CONST_FUNC::CST_RSID_IRON_AGE) {
-				crResInfo->disableWeight = crResInfo->disableWeight * religionBronzeFactor;
+				if (crResInfo->disableWeight < 0.5) {
+					crResInfo->disableWeight = crResInfo->disableWeight * religionBronzeFactor;
+				}
+				else {
+					// Adding 25% to a weight that is already high would give exaggerated results
+					crResInfo->disableWeight = crResInfo->disableWeight * (1 + ((religionBronzeFactor - 1) / 2));
+				}
 				crResInfo->rawDisableProbability = crResInfo->rawDisableProbability * (2 - religionBronzeFactor);
 			}
 			// Higher proba for jihad, martyrdom
@@ -528,17 +534,23 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 			if (crResInfo->researchDetail->IsWoodWorkingAndRange()) {
 				crResInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_COMMON_USEFUL_RESEARCH;
 				crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_COMMON_USEFUL_RESEARCH;
-				continue;
 			}
-
-			crResInfo->rawDisableProbability = randomProbaForEconomy;
-			crResInfo->disableWeight = weightForEconomy;
+			else {
+				crResInfo->rawDisableProbability = randomProbaForEconomy;
+				crResInfo->disableWeight = weightForEconomy;
+			}
 			if (crResInfo->researchDetail->requiredAge < AOE_CONST_FUNC::CST_RSID_IRON_AGE) {
-				crResInfo->disableWeight = crResInfo->disableWeight * economyBronzeFactor;
+				if (crResInfo->disableWeight < 0.5) {
+					crResInfo->disableWeight = crResInfo->disableWeight * economyBronzeFactor;
+				}
+				else {
+					// Adding 25% to a weight that is already high would give exaggerated results
+					crResInfo->disableWeight = crResInfo->disableWeight * (1 + ((economyBronzeFactor - 1) / 2));
+				}
 				crResInfo->rawDisableProbability = crResInfo->rawDisableProbability * (2 - economyBronzeFactor);
 			}
-			if (crResInfo->disableWeight > 1) { crResInfo->disableWeight = 1; }
-			if (crResInfo->rawDisableProbability > 1) { crResInfo->rawDisableProbability = 1; }
+			if (crResInfo->disableWeight > 0.9) { crResInfo->disableWeight = 0.9; }
+			if (crResInfo->rawDisableProbability > 0.9) { crResInfo->rawDisableProbability = 0.9; }
 		}
 	}
 
