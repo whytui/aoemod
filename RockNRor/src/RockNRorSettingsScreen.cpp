@@ -48,6 +48,10 @@ void RockNRorSettingsScreen::ResetClassPointers() {
 	this->btnRelicsCount = NULL;
 	this->btnRuinsCount = NULL;
 	this->cbxMaxAgeInRandomGames = NULL;
+	this->btnDisableUnitMinPercent = NULL;
+	this->btnDisableUnitMaxPercent = NULL;
+	this->btnDisableResearchMinPercent = NULL;
+	this->btnDisableResearchMaxPercent = NULL;
 }
 
 
@@ -160,6 +164,7 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 		return;
 	}
 
+	// Option : generate random civilizations...
 	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
 		skippedY = this->startYforNextPage + currentPosY;
 		searchForStartYPos = false;
@@ -192,7 +197,40 @@ void RockNRorSettingsScreen::CreateScreenComponents() {
 	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
 		return;
 	}
+
+#ifdef _DEBUG
+	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
+		skippedY = this->startYforNextPage + currentPosY;
+		searchForStartYPos = false;
+		currentPosY = ACTUAL_START_Y;
+	}
+	if (!searchForStartYPos) {
+		this->AddButton(&this->btnDisableUnitMinPercent, localizationHandler.GetTranslation(0, "Set min disable unitline %"),
+			defaultMarginLeft, currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
+		this->AddButton(&this->btnDisableUnitMaxPercent, localizationHandler.GetTranslation(0, "Set max disable unitline %"),
+			defaultMarginLeft + checkboxLabelSizeX / 2 + defaultSpaceHorizontal,
+			currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
+
+		if (!use2columns) {
+			currentPosY += checkboxSizeY + defaultSpaceVertical;
+			if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+				return;
+			}
+		}
+		this->AddButton(&this->btnDisableResearchMinPercent, localizationHandler.GetTranslation(0, "Set min disable research %"),
+			(use2columns ? startOfColumn2 : defaultMarginLeft),
+			currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
+		this->AddButton(&this->btnDisableResearchMaxPercent, localizationHandler.GetTranslation(0, "Set max disable research %"),
+			(use2columns ? startOfColumn2 : defaultMarginLeft) + checkboxLabelSizeX / 2 + defaultSpaceHorizontal,
+			currentPosY, checkboxLabelSizeX / 2, checkboxSizeY);
+	}
+	currentPosY += checkboxSizeY + defaultSpaceVertical;
+	if (!searchForStartYPos && this->CheckBottomOfScreen(currentPosY, initialSkippedY)) {
+		return;
+	}
+#endif
 	
+	// RPG mode options...
 	if (searchForStartYPos && (currentPosY >= startYforNextPage)) {
 		skippedY = this->startYforNextPage + currentPosY;
 		searchForStartYPos = false;
@@ -661,7 +699,6 @@ bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	}
 	if (sender == this->btnResolution1) {
 		this->ChangeResolution(640, 480);
-
 		return true;
 	}
 	if (sender == this->btnResolution2) {
@@ -715,6 +752,46 @@ bool RockNRorSettingsScreen::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 			0, 999, &ROCKNROR::crInfo.configInfo.randomMapRuinsCount, false);
 		maxPopulationPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
 		maxPopulationPopup->CreateScreen(this->GetAoeScreenObject());
+		return true;
+	}
+	if (sender == this->btnDisableUnitMinPercent) {
+		ROCKNROR::UI::InputBox_int<int> *valuePopup = new ROCKNROR::UI::InputBox_int<int>(
+			localizationHandler.GetTranslation(0, "Random civilization generation"),
+			localizationHandler.GetTranslation(0, "Minimum value for unit-line percentage to disable (1-99)"),
+			ROCKNROR::STRATEGY::TT_CONFIG::CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT,
+			1, 99, &ROCKNROR::STRATEGY::TT_CONFIG::CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT, false);
+		valuePopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		valuePopup->CreateScreen(this->GetAoeScreenObject());
+		return true;
+	}
+	if (sender == this->btnDisableUnitMaxPercent) {
+		ROCKNROR::UI::InputBox_int<int> *valuePopup = new ROCKNROR::UI::InputBox_int<int>(
+			localizationHandler.GetTranslation(0, "Random civilization generation"),
+			localizationHandler.GetTranslation(0, "Maximum value for unit-line percentage to disable (1-99)"),
+			ROCKNROR::STRATEGY::TT_CONFIG::CALC_MAX_DISABLE_UNITLINE_COUNT_PERCENT,
+			1, 99, &ROCKNROR::STRATEGY::TT_CONFIG::CALC_MAX_DISABLE_UNITLINE_COUNT_PERCENT, false);
+		valuePopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		valuePopup->CreateScreen(this->GetAoeScreenObject());
+		return true;
+	}
+	if (sender == this->btnDisableResearchMinPercent) {
+		ROCKNROR::UI::InputBox_int<int> *valuePopup = new ROCKNROR::UI::InputBox_int<int>(
+			localizationHandler.GetTranslation(0, "Random civilization generation"),
+			localizationHandler.GetTranslation(0, "Minimum value for researches percentage to disable (1-99)"),
+			ROCKNROR::STRATEGY::TT_CONFIG::CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT,
+			1, 99, &ROCKNROR::STRATEGY::TT_CONFIG::CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT, false);
+		valuePopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		valuePopup->CreateScreen(this->GetAoeScreenObject());
+		return true;
+	}
+	if (sender == this->btnDisableResearchMaxPercent) {
+		ROCKNROR::UI::InputBox_int<int> *valuePopup = new ROCKNROR::UI::InputBox_int<int>(
+			localizationHandler.GetTranslation(0, "Random civilization generation"),
+			localizationHandler.GetTranslation(0, "Maximum value for researches percentage to disable (1-99)"),
+			ROCKNROR::STRATEGY::TT_CONFIG::CALC_MAX_DISABLE_RESEARCH_COUNT_PERCENT,
+			1, 99, &ROCKNROR::STRATEGY::TT_CONFIG::CALC_MAX_DISABLE_RESEARCH_COUNT_PERCENT, false);
+		valuePopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		valuePopup->CreateScreen(this->GetAoeScreenObject());
 		return true;
 	}
 	this->UpdateConfigFromCheckbox(sender);

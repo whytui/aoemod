@@ -168,10 +168,10 @@ namespace TT_CONFIG {
 	static const double RES_ADDITIONTAL_WEIGHT_SUPER_UNIT = 0.08; // Additional "Disable weight" for super units
 
 	static const double RES_PROBA_IMPACT_ON_RANDOM = 0.9; // computed probability counts as much as xxx% vs random. 1=100%=apply probability normally. Do not set to 0.
-	static const int CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT = 40;
-	static const int CALC_MAX_DISABLE_UNITLINE_COUNT_PERCENT = 66;
-	static const int CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT = 20;
-	static const int CALC_MAX_DISABLE_RESEARCH_COUNT_PERCENT = 45;
+	static int CALC_MIN_DISABLE_UNITLINE_COUNT_PERCENT = 40;
+	static int CALC_MAX_DISABLE_UNITLINE_COUNT_PERCENT = 66;
+	static int CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT = 20;
+	static int CALC_MAX_DISABLE_RESEARCH_COUNT_PERCENT = 45;
 	static int MIN_DISABLE_UNITLINE_COUNT = 6; // default value, recomputed according to CALC_*
 	static int MAX_DISABLE_UNITLINE_COUNT = 12; // default value, recomputed according to CALC_*
 	static int MIN_DISABLE_RESEARCH_COUNT = 6; // default value, recomputed according to CALC_*

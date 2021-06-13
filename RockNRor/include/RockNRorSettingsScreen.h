@@ -62,6 +62,10 @@ private:
 	STRUCT_UI_BUTTON *btnChangeSPMaxPopulation;
 	STRUCT_UI_BUTTON *btnRelicsCount;
 	STRUCT_UI_BUTTON *btnRuinsCount;
+	STRUCT_UI_BUTTON *btnDisableUnitMinPercent;
+	STRUCT_UI_BUTTON *btnDisableUnitMaxPercent;
+	STRUCT_UI_BUTTON *btnDisableResearchMinPercent;
+	STRUCT_UI_BUTTON *btnDisableResearchMaxPercent;
 	STRUCT_UI_COMBOBOX *cbxMaxAgeInRandomGames;
 
 	void InitInputs();
