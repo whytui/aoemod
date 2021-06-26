@@ -71,6 +71,9 @@ public:
 
 	// Adds an asterisk to unit names, for unit that benefit from a civ bonus
 	void MarkCivBonusUnitNames();
+
+	// Adds custom description text to units that benefit from a civ bonus
+	void AddCivBonusUnitCustomText(const std::map<GLOBAL_UNIT_AI_TYPES, std::string> bonusTextByClass);
 };
 
 
@@ -260,8 +263,18 @@ public:
 
 	std::list<std::string> GetHumanBonusTextLines() const;
 
+	// Returns true if there is a "bonus text" for the unit class ID specified
+	inline bool UnitClassHasBonusText(GLOBAL_UNIT_AI_TYPES unitClassId) const {
+		return (this->bonusTextByClassId.find(unitClassId) != this->bonusTextByClassId.end());
+	}
+
+	const std::map<GLOBAL_UNIT_AI_TYPES, std::string> GetBonusTextByClassMap() const {
+		return this->bonusTextByClassId;
+	}
+
 private:
 	std::string bonusText;
+	std::map<GLOBAL_UNIT_AI_TYPES, std::string> bonusTextByClassId;
 
 	// Actual number of bonus created for the civilization
 	int bonusCount;

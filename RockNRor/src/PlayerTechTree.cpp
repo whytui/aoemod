@@ -191,6 +191,37 @@ void CustomPlayerInfo::MarkCivBonusUnitNames() {
 }
 
 
+// Adds custom description text to units that benefit from a civ bonus
+void CustomPlayerInfo::AddCivBonusUnitCustomText(const std::map<GLOBAL_UNIT_AI_TYPES, std::string> bonusTextByClass) {
+	if ((this->myPlayerId < 1) || (this->myTechTreeId < 0)) { return; }
+	if (!ROCKNROR::crInfo.configInfo.keepTextDescriptionOfUnitCivBonus) { return; }
+
+	for (auto elem = bonusTextByClass.cbegin(); elem != bonusTextByClass.cend(); elem++) {
+		GLOBAL_UNIT_AI_TYPES unitClass = elem->first;
+		std::string text = elem->second;
+		
+		unsigned long int textIndex = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.AppendNewText(text);
+		
+		STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (!global) { return; }
+		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(this->myPlayerId);
+		if (!player) { return; }
+
+		// Create link between (player)unitDefId's and textIndex
+		// Remark : work on "global"/player structures, because "this" (CustomPlayerInfo) may not be fully initialized yet
+		for (int unitDefId = 0; unitDefId < player->structDefUnitArraySize; unitDefId++) {
+			if (this->IsUnitDisabled(unitDefId)) { continue; }
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->GetUnitDefBase(unitDefId);
+			if (!unitDef) { continue; }
+			if (unitDef->unitAIType == unitClass) {
+				ROCKNROR::crInfo.myGameObjects.bonusInGameTextByPlayerAndUnitDefId[this->myPlayerId][unitDef->DAT_ID1] = textIndex;
+			}
+		}
+	}
+
+}
+
+
 // Returns the final "disable probability" for this research.
 // Returns <=0 if the unit must not be disable OR must not be disabled directly (handled by "unit line")
 double TTCreatorResearchInfo::GetDisableProbability() const {
@@ -868,7 +899,10 @@ void TechTreeCreator::CalcRandomCivBonus() {
 	if (avgCount < 1) { avgCount = 1; }
 	int maxBonusCount = avgCount + 2; // force to stop loop when that number of bonuses is reached
 	this->bonusText.clear();
+	this->bonusTextByClassId.clear();
 	double bonusWeight = 0;
+
+	// Generate a set of bonuses, until the "bonus weight" reaches the target
 	for (int i = 0; i < maxBonusCount; i++) {
 		bonusWeight += this->CreateOneBonus();
 		this->bonusCount++;
@@ -1143,6 +1177,16 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES applyToClass = bonusUnitClass; // dest tech effect class id
 	short int applyToUnit = -1; // dest tech effect unit id
 
+	// Collect the list of unitDefId's concerned by this bonus
+	list<short int> impactedUnitDefIds;
+	for (int i = 0; i < this->arrayUnitDefCount; i++) {
+		TTCreatorUnitInfo *info = this->GetCrUnitInfo(i);
+		if (info && (info->unitDetail->unitClass == bonusUnitClass)) {
+			impactedUnitDefIds.push_back(i);
+		}
+	}
+	std::string outputBonusDescription;
+
 	// Cases when we apply to restricted units
 	/*COMMENTED because unit upgrades would NOT get bonus !!! if (availableAffectedUnitLines == 1) {
 		// apply to unit specifically. Avoids having bonus on "cavalry" class when only available unit is scout !
@@ -1176,6 +1220,10 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		this->bonusText += "% for ";
 		this->bonusText += applyToNameString.c_str();
 		this->bonusText += NEWLINE;
+		outputBonusDescription = GetTechUnitAttributeName(unitAttr);
+		outputBonusDescription += " +";
+		outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
+		outputBonusDescription += "%";
 	}
 
 	if (unitAttr == TUA_RANGE) { // Range and line of sight
@@ -1206,6 +1254,9 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		this->bonusText += " for ";
 		this->bonusText += applyToNameString.c_str();
 		this->bonusText += NEWLINE;
+		outputBonusDescription = GetTechUnitAttributeName(TUA_RANGE);
+		outputBonusDescription += " +";
+		outputBonusDescription += std::to_string(((int)newEffect.effectValue));
 
 		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect2;
 		newEffect2.SetAttributeAdd(TUA_LOS, applyToClass, applyToUnit, 1);
@@ -1251,6 +1302,8 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		this->bonusText += ") for ";
 		this->bonusText += applyToNameString.c_str();
 		this->bonusText += NEWLINE;
+		outputBonusDescription = GetTechUnitAttributeName(unitAttr);
+		outputBonusDescription += " +1";
 	}
 
 	if (unitAttr == TUA_ATTACK) {
@@ -1263,6 +1316,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += "% for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
+			// outputBonusDescription : nothing to write, conversion efficiency applies to the PLAYER, not units
 		} else {
 			int attackValue = 1;
 			bool useMeleeAttack = isMelee;
@@ -1326,6 +1380,9 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += " for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
+			outputBonusDescription = GetTechUnitAttributeName(unitAttr);
+			outputBonusDescription += " +";
+			outputBonusDescription += std::to_string(attackValue);
 		}
 	}
 
@@ -1349,6 +1406,9 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += "% for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
+			outputBonusDescription += "speed +";
+			outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
+			outputBonusDescription += "%";
 		} else {
 			// Priest recharging rate is a player resource
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
@@ -1359,6 +1419,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += "% for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
+			// outputBonusDescription : nothing to write, priest recharging speed applies to the PLAYER, not units
 		}
 	}
 
@@ -1388,6 +1449,8 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += std::to_string(bonusAbsoluteAdd);
 			this->bonusText += ")";
 			this->bonusText += NEWLINE;
+			outputBonusDescription += "food +";
+			outputBonusDescription += std::to_string(bonusAbsoluteAdd);
 			bonusHasBeenHandled = true;
 		}
 		if (bonusUnitClass == TribeAIGroupCivilian) {
@@ -1437,6 +1500,8 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += " carry amount for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
+			outputBonusDescription += "carry amount +";
+			outputBonusDescription += std::to_string((int)carryCapacityAdd);
 		}
 	}
 
@@ -1450,7 +1515,13 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		this->bonusText += "% for class ";
 		this->bonusText += className;
 		this->bonusText += NEWLINE;
+		outputBonusDescription += "cost -";
+		outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
+		outputBonusDescription += "%";
 	}
+
+	this->bonusTextByClassId[bonusUnitClass] = outputBonusDescription; // save the bonus text for further use
+
 	return resultAdditionalWeight;
 }
 

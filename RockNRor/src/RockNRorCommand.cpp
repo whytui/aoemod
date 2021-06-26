@@ -2143,6 +2143,25 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 		}
 	}
 
+	// Handle internal structures
+	ROCKNROR::crInfo.myGameObjects.RemoveAllInfoForUnit(targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY, true);
+
+	// If the unit benefits from a civ bonus, make sure to save this information
+	if (targetUnit->DerivesFromTrainable()) {
+		STRUCT_UNIT_TRAINABLE *unitAsTrainable = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)targetUnit;
+		if (!unitAsTrainable->hasDedicatedUnitDef &&
+			ROCKNROR::crInfo.myGameObjects.HasUnitDefBonusTextInfo(targetPlayer->playerId, targetUnit->unitDefinition->DAT_ID1)) {
+			int bonusTextIndex = ROCKNROR::crInfo.myGameObjects.bonusInGameTextByPlayerAndUnitDefId[targetPlayer->playerId]
+				[targetUnit->unitDefinition->DAT_ID1];
+			if (bonusTextIndex >= 0) {
+				UnitCustomInfo *info = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(targetUnit->unitInstanceId);
+				if (info && (info->bonusTextIndex < 0)) { // Do not overwrite if there is already some text
+					info->bonusTextIndex = bonusTextIndex;
+				}
+			}
+		}
+	}
+
 	// Adapt strategy for "actor" player
 	AOE_STRUCTURES::STRUCT_AI *mainAI_actor = actorPlayer->ptrAIStruct;
 	if (mainAI_actor == NULL) { return; }
@@ -2211,12 +2230,10 @@ bool RockNRorCommand::ChangeUnitOwner(AOE_STRUCTURES::STRUCT_UNIT_BASE *targetUn
 	AOE_STRUCTURES::STRUCT_PLAYER *oldOwner = targetUnit->ptrStructPlayer;
 	this->OnUnitChangeOwner_fixes(targetUnit, actorPlayer);
 	AOE_METHODS::UNIT::ChangeUnitOwner(targetUnit, actorPlayer);
+
 	if ((notifyEvent == GAME_EVENT_TYPE::EVENT_INVALID) || (!oldOwner || !oldOwner->IsCheckSumValid())) {
 		return true; // No notification to handle
 	}
-
-	// Handle internal structures
-	ROCKNROR::crInfo.myGameObjects.RemoveAllInfoForUnit(targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY);
 
 	// Not handled: other events than conversion (is there any ?)
 

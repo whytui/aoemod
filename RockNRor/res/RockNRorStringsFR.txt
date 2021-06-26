@@ -265,6 +265,8 @@ Efficacité conversion
 Vitesse de rechargement
 [42176] // Unit properties: Healing rate bonus
 Bonus vitesse de soins
+[42177] // Unit properties: "Bonus" term
+Bonus
 
 // *** Scenario editor ***
 [42063]

@@ -132,7 +132,12 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 			this->lastGenerationBonusLinesForHumanPlayer = ttc.GetHumanBonusTextLines();
 		}
 
+		// Warning : GetCustomPlayerInfo(playerId) has NOT analyzed the tech tree yet
+
 		this->GetCustomPlayerInfo(playerId)->MarkCivBonusUnitNames();
+
+		const std::map<GLOBAL_UNIT_AI_TYPES, std::string> bonusTextByClass = ttc.GetBonusTextByClassMap();
+		this->GetCustomPlayerInfo(playerId)->AddCivBonusUnitCustomText(bonusTextByClass);
 	}
 	
 	return true;

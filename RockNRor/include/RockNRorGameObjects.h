@@ -1,10 +1,12 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include <algorithm>
 #include <assert.h>
 #include "autoAttackPolicy.h"
 #include "Serializable.h"
+#include "RockNRorInGameText.h"
 
 using namespace std;
 
@@ -28,6 +30,7 @@ public:
 	float protectPosY;
 	long int protectUnitId;
 	long int myMainBuilderId; // unitId of "main" villager builder, that will have priority on others for next action (farming when farm is built...). -1=N/A (most cases).
+	long int bonusTextIndex; // -1 means "not set" (empty). If >=0, determines the index in InGameTextHandler to retrieve the civ bonus info
 
 	// Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)
 	bool CanBeRemoved() const;
@@ -71,13 +74,19 @@ public:
 	bool currentGameHasAllTechs; // Indicates if current game has "all techs" option. Always set, even for saved games.
 	bool doNotApplyHardcodedCivBonus; // Indicates if "hardcoded civilization bonuses" should NOT be applied in current game, eg Macedonian conversion resistance. True if all techs, or if using "generated tech trees".
 
+	ROCKNROR::InGameTextHandler inGameTextHandler; // Handler for in-game custom strings
+
+	// Array index = player Id (1-8, ignore 0). Map key=unitDefId, map value=index for "inGameTextHandler" to retrieve unit civ bonus description
+	std::map<short int, unsigned long int> bonusInGameTextByPlayerAndUnitDefId[9];
+
 	void ResetObjects();
 	void FreeAllUnitCustomInfoList();
 	void FreeAllFarmRebuildInfoList();
 
 	// Remove all information concerning a specific unit
 	// Does not impact unitExtensions though
-	bool RemoveAllInfoForUnit(long int unitId, float posX, float posY);
+	// Does not remove the "civ bonus info", if any
+	bool RemoveAllInfoForUnit(long int unitId, float posX, float posY, bool keepUnitBonusInfo);
 
 	// Returns a UnitCustomInfo pointer to matching element for given unitId.
 	// Returns NULL if not found.
@@ -106,6 +115,12 @@ public:
 
 	// Remove "protect" info from all "unit info" objects that tell to protect a specific unit id
 	bool RemoveProtectedUnit(long int protectedUnitId);
+
+	// Returns true if there is a "civ bonus text information" for the playerId / unitDefId specified
+	bool HasUnitDefBonusTextInfo(long int playerId, short int unitDefId) const {
+		if ((playerId < 0) || (playerId > 8)) { return false; }
+		return this->bonusInGameTextByPlayerAndUnitDefId[playerId].find(unitDefId) != this->bonusInGameTextByPlayerAndUnitDefId[playerId].end();
+	}
 
 	// Serialize object to output stream (file). May throw SerializeException
 	long int Serialize(FILE *outputFile) const override;

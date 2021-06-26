@@ -232,6 +232,7 @@ public:
 	long int randomTechTreeDesiredAvgBonusCount; // (average) number of civ bonus in random civs
 	long int randomTechTreeSimulationCount; // Number of simulations to run to estimate average "disabled weight". Put a lower value if computation is long.
 	bool markUnitsWithCivBonus; // If true, add a marker (*) to unit names for unit with a civilization bonus
+	bool keepTextDescriptionOfUnitCivBonus; // If true, save description of civ bonuses that affect units (=> ability to show it in UI)
 	// Human interface
 	bool enableCallNearbyIdleMilitaryUnits;
 	long int distanceToCallNearbyIdleMilitaryUnits;

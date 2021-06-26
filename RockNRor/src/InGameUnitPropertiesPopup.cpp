@@ -96,6 +96,7 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 		mainInfos += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_PART_OF_GROUP, "part of a group");
 		mainInfos += "]";
 	}
+
 	// Automove infos
 	std::string autoMoveInfo = "";
 	UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(this->unitId);
@@ -338,6 +339,33 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 			priestText += hasMartyrdom ? localizationHandler.GetTranslation(CRLANG_ID_YES, "Yes") : localizationHandler.GetTranslation(CRLANG_ID_NO, "No");
 			wholeText += priestText;
 			linesCount += 5;
+		}
+
+		// Write civ bonus that applies to this unit, if any
+		if (unitBase->DerivesFromTrainable()) {
+			STRUCT_UNIT_TRAINABLE *unitTrainable = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)unitBase;
+			long int bonusTextIndex = -1;
+			if (unitTrainable->hasDedicatedUnitDef) {
+				UnitCustomInfo *info = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(unitTrainable->unitInstanceId);
+				if (info != NULL) { bonusTextIndex = info->bonusTextIndex; }
+			}
+			else {
+				if (ROCKNROR::crInfo.myGameObjects.HasUnitDefBonusTextInfo(unitPlayer->playerId, unitBase->unitDefinition->DAT_ID1)) {
+					// For a "native" unit (directly attached to the player's "standard" unitDefinition), get text from the player's unit definition !
+					bonusTextIndex = (long int)ROCKNROR::crInfo.myGameObjects.bonusInGameTextByPlayerAndUnitDefId[unitPlayer->playerId]
+						[unitBase->unitDefinition->DAT_ID1];
+				}
+			}
+			if (bonusTextIndex >= 0) {
+				std::string str = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.GetText(bonusTextIndex);
+				if (!str.empty()) {
+					wholeText += "\r\n";
+					wholeText += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_BONUS, "Bonus");
+					wholeText += ": ";
+					wholeText += str;
+					linesCount++;
+				}
+			}
 		}
 
 		this->AddTextBox(&this->edtStrengthWeakness, wholeText.c_str(), 0, 30, currentYPos, 450, 10 + linesCount * 14, true, true, false, AOE_FONTS::AOE_FONT_SMALL_TEXT_10);

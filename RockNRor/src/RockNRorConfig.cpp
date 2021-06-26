@@ -87,6 +87,7 @@ RockNRorConfig::RockNRorConfig() {
 		allCivInfo[i] = NULL;
 	}
 	this->markUnitsWithCivBonus = false; // Game default
+	this->keepTextDescriptionOfUnitCivBonus = false; // Game default
 	this->useImprovedButtonBar = false; // Game default
 	this->enableCallNearbyIdleMilitaryUnits = true;
 	this->distanceToCallNearbyIdleMilitaryUnits = 25;
@@ -438,6 +439,9 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 		}
 		if (elemName == "markUnitsWithCivBonus") {
 			this->markUnitsWithCivBonus = XML_GetBoolElement(elem, "enable");
+		}
+		if (elemName == "keepTextDescriptionOfUnitCivBonus") {
+			this->keepTextDescriptionOfUnitCivBonus = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "gameTimerSlowDownAutoFix") {
 			this->gameTimerSlowDownAutoFix = XML_GetBoolElement(elem, "enable");

@@ -129,6 +129,7 @@
     <ClInclude Include="include\MapUsageHandler.h" />
     <ClInclude Include="include\PlayerTechTree.h" />
     <ClInclude Include="include\RnrScreenBase.h" />
+    <ClInclude Include="include\RockNRorInGameText.h" />
     <ClInclude Include="include\RockNRorSettingsScreen.h" />
     <ClInclude Include="include\RockNRorUIHelper.h" />
     <ClInclude Include="include\saveRockNRorData.h" />
@@ -230,6 +231,7 @@
     <ClCompile Include="src\MapUsageHandler.cpp" />
     <ClCompile Include="src\PlayerTechTree.cpp" />
     <ClCompile Include="src\RnrScreenBase.cpp" />
+    <ClCompile Include="src\RockNRorInGameText.cpp" />
     <ClCompile Include="src\RockNRorSettingsScreen.cpp" />
     <ClCompile Include="src\RockNRorUIHelper.cpp" />
     <ClCompile Include="src\saveRockNRorData.cpp" />

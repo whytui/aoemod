@@ -248,7 +248,7 @@ void OnAttackableUnitKilled(AOE_STRUCTURES::STRUCT_UNIT_ATTACKABLE *killedUnit, 
 	}
 
 	// Handle internal objects
-	ROCKNROR::crInfo.myGameObjects.RemoveAllInfoForUnit(killedUnit->unitInstanceId, killedUnit->positionX, killedUnit->positionY);
+	ROCKNROR::crInfo.myGameObjects.RemoveAllInfoForUnit(killedUnit->unitInstanceId, killedUnit->positionX, killedUnit->positionY, false);
 	AOE_STRUCTURES::STRUCT_UNIT_BUILDING *killedUnitAsBld = (AOE_STRUCTURES::STRUCT_UNIT_BUILDING *) killedUnit;
 	if (killedUnitAsBld->IsCheckSumValid()) {
 		// When destroyed, buildings do not trigger "tacAI.reactToEvent" (they only do it when attacked, but still having HP left)

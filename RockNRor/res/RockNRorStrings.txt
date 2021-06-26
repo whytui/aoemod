@@ -257,6 +257,8 @@ Conversion efficiency
 Recharging rate
 [42176] // Unit properties: Healing rate bonus
 Healing rate bonus
+[42177] // Unit properties: "Bonus" term
+Bonus
 
 // *** Scenario editor ***
 [42063]

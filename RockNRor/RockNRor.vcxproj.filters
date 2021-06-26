@@ -369,6 +369,9 @@
     <ClInclude Include="include\saveRockNRorData.h">
       <Filter>Fichiers d%27en-tête\Technical</Filter>
     </ClInclude>
+    <ClInclude Include="include\RockNRorInGameText.h">
+      <Filter>Fichiers d%27en-tête\RockNRorBase</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\StrategyBuilder.cpp">
@@ -631,6 +634,9 @@
     </ClCompile>
     <ClCompile Include="src\saveRockNRorData.cpp">
       <Filter>Fichiers sources\Technical</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RockNRorInGameText.cpp">
+      <Filter>Fichiers sources\RockNRorBase</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

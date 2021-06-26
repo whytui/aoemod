@@ -10,6 +10,7 @@ UnitCustomInfo::UnitCustomInfo() {
 	//autoAttackPolicy : default constructor will initialize it correctly.
 	this->ResetProtectInfo();
 	this->myMainBuilderId = -1;
+	this->bonusTextIndex = -1;
 }
 
 // Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)
@@ -29,6 +30,11 @@ bool UnitCustomInfo::CanBeRemoved() const {
 	}
 	// Is a specific builder assigned ? (building in construction)
 	if (this->myMainBuilderId >= 0) {
+		return false;
+	}
+
+	// Has a "custom" civ bonus text description ?
+	if (this->bonusTextIndex >= 0) {
 		return false;
 	}
 
@@ -69,6 +75,7 @@ long int UnitCustomInfo::Serialize(FILE *outputFile) const {
 	result += this->WriteBytes(outputFile, &this->spawnUnitMoveToPosX, sizeof(this->spawnUnitMoveToPosX));
 	result += this->WriteBytes(outputFile, &this->spawnUnitMoveToPosY, sizeof(this->spawnUnitMoveToPosY));
 	result += this->WriteBytes(outputFile, &this->unitId, sizeof(this->unitId));
+	result += this->WriteBytes(outputFile, &this->bonusTextIndex, sizeof(this->bonusTextIndex));
 	return result;
 }
 
@@ -84,6 +91,7 @@ bool UnitCustomInfo::Deserialize(FILE *inputFile) {
 	this->ReadBytes(inputFile, &this->spawnUnitMoveToPosX, sizeof(this->spawnUnitMoveToPosX));
 	this->ReadBytes(inputFile, &this->spawnUnitMoveToPosY, sizeof(this->spawnUnitMoveToPosY));
 	this->ReadBytes(inputFile, &this->unitId, sizeof(this->unitId));
+	this->ReadBytes(inputFile, &this->bonusTextIndex, sizeof(this->bonusTextIndex));
 	return true;
 }
 
@@ -142,6 +150,10 @@ void RockNRorGameObjects::ResetObjects() {
 	this->FreeAllUnitCustomInfoList();
 	this->currentGameHasAllTechs = false;
 	this->doNotApplyHardcodedCivBonus = false;
+	this->inGameTextHandler.ClearAllText();
+	for (int i = 0; i < 9; i++) {
+		this->bonusInGameTextByPlayerAndUnitDefId[i].clear();
+	}
 }
 
 
@@ -163,13 +175,25 @@ void RockNRorGameObjects::FreeAllFarmRebuildInfoList() {
 
 // Remove all information concerning a specific unit
 // Does not impact unitExtensions though
-bool RockNRorGameObjects::RemoveAllInfoForUnit(long int unitId, float posX, float posY) {
+// Does not remove the "civ bonus info", if any
+bool RockNRorGameObjects::RemoveAllInfoForUnit(long int unitId, float posX, float posY, bool keepUnitBonusInfo) {
 	bool result = false;
 	if ((posX >= 0) && (posY >= 0)) {
 		result |= this->RemoveFarmRebuildInfo(posX, posX);
 	}
 	if (unitId != -1) {
+		long int savedBonusTextIndex = -1;
+		if (keepUnitBonusInfo) {
+			UnitCustomInfo * info = this->FindUnitCustomInfo(unitId);
+			if (info && (info->bonusTextIndex >= 0)) {
+				savedBonusTextIndex = info->bonusTextIndex;
+			}
+		}
 		result |= this->RemoveUnitCustomInfo(unitId);
+		if (savedBonusTextIndex >= 0) {
+			// This guarantees NOT to lose the "bonus text" attached to a unit
+			this->FindOrAddUnitCustomInfo(unitId)->bonusTextIndex = savedBonusTextIndex;
+		}
 		result |= this->RemoveProtectedUnit(unitId);
 	}
 	return result;
@@ -311,6 +335,7 @@ bool RockNRorGameObjects::RemoveProtectedUnit(long int protectedUnitId) {
 long int RockNRorGameObjects::Serialize(FILE *outputFile) const {
 	long int result = 0;
 	result += this->WriteBytes(outputFile, &integrityCheck, sizeof(integrityCheck));
+
 	result += this->WriteBytes(outputFile, &this->currentGameHasAllTechs, sizeof(this->currentGameHasAllTechs));
 	result += this->WriteBytes(outputFile, &this->doNotApplyHardcodedCivBonus, sizeof(this->doNotApplyHardcodedCivBonus));
 
@@ -327,6 +352,22 @@ long int RockNRorGameObjects::Serialize(FILE *outputFile) const {
 		FarmRebuildInfo *f = *it;
 		result += f->Serialize(outputFile);
 	}
+
+	// Serialize bonusInGameTextByPlayerAndUnitDefId. Note that "text indexes" are preserved in inGameTextHandler serialization
+	for (int playerId = 0; playerId < 9; playerId++) {
+		size_t elemCount = this->bonusInGameTextByPlayerAndUnitDefId[playerId].size();
+		result += this->WriteBytes(outputFile, &elemCount, sizeof(elemCount));
+		for (auto it = this->bonusInGameTextByPlayerAndUnitDefId[playerId].cbegin();
+			it != this->bonusInGameTextByPlayerAndUnitDefId[playerId].cend();
+			it++) {
+			short int unitDefId = it->first;
+			unsigned long int index = it->second;
+			result += this->WriteBytes(outputFile, &unitDefId, sizeof(unitDefId));
+			result += this->WriteBytes(outputFile, &index, sizeof(index));
+		}
+	}
+
+	result += this->inGameTextHandler.Serialize(outputFile);
 	
 	return result;
 }
@@ -360,6 +401,22 @@ bool RockNRorGameObjects::Deserialize(FILE *inputFile) {
 		}
 		this->farmRebuildInfoList.push_back(newElem);
 	}
+
+	// Deserialize bonusInGameTextByPlayerAndUnitDefId
+	for (int playerId = 0; playerId < 9; playerId++) {
+		size_t elemCount = 0;
+		this->ReadBytes(inputFile, &elemCount, sizeof(elemCount));
+
+		for (size_t i = 0; i < elemCount; i++) {
+			short int unitDefId = 0;
+			unsigned long int index = 0;
+			this->ReadBytes(inputFile, &unitDefId, sizeof(unitDefId));
+			this->ReadBytes(inputFile, &index, sizeof(index));
+			this->bonusInGameTextByPlayerAndUnitDefId[playerId][unitDefId] = index;
+		}
+	}
+
+	this->inGameTextHandler.Deserialize(inputFile);
 
 	return true;
 }
